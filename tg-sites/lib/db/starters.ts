@@ -29,6 +29,8 @@ import {
   type StarterFacts,
 } from '../content/starters';
 import { withTenant, type Tx } from './withTenant';
+import { importDesignedFonts } from '../content/designed-fonts';
+import { fillPagePhotos, type PhotoCache } from '../media/photo-fill';
 
 /** What happened, for the screen to say. */
 export interface StarterResult {
@@ -131,16 +133,27 @@ export async function applyStarter(
    * parsed and sanitised in memory first, so a starter that cannot build is a
    * throw with the connection still idle rather than a rollback halfway through
    * writing somebody's site.
+   *
+   * The photographs are fetched here too, for the same reason: two external
+   * calls per picture have no business inside a write transaction. One cache
+   * across the five pages, so the sections they share (every page ends on a
+   * call to action) share their pictures instead of importing five copies.
+   * The fill never throws; with no photo key the site is simply built with
+   * its frames empty, exactly as it was before photographs existed.
    */
-  const pages = starter.pages.map((page) => ({
-    spec: page,
-    content: ready(buildStarterPage(page, facts)),
-  }));
+  const photoCache: PhotoCache = new Map();
+  const pages = await Promise.all(
+    starter.pages.map(async (page) => {
+      const built = await buildStarterPage(page, facts);
+      await fillPagePhotos(tenantId, page, built.sections, photoCache);
+      return { spec: page, content: ready(built) };
+    }),
+  );
 
   const header = readyRegion(buildStarterRegion(starter.header, 'header', starter.pages, facts));
   const footer = readyRegion(buildStarterRegion(starter.footer, 'footer', starter.pages, facts));
 
-  return withTenant(tenantId, async (tx) => {
+  const result = await withTenant(tenantId, async (tx) => {
     if (!(await isEmpty(tx))) return null;
 
     let homePageId: string | null = null;
@@ -200,4 +213,18 @@ export async function applyStarter(
 
     return { pages: pages.length, homePageId };
   });
+
+  /*
+   * A DESIGNED STARTER CARRIES ITS OWN TYPEFACES. Its home is a frozen concept
+   * whose CSS names fonts like "Bodoni Moda"; loading them into this site's
+   * library is what makes the type exact rather than a fallback. Done AFTER the
+   * transaction, best effort: a font fetch is slow and external, and must never
+   * hold a write lock or roll a whole site back over a typeface. Only when a site
+   * was actually built (result is not null).
+   */
+  if (result && starterId.startsWith('design-')) {
+    await importDesignedFonts(tenantId, starterId.slice('design-'.length));
+  }
+
+  return result;
 }

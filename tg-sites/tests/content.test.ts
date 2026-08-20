@@ -1595,15 +1595,21 @@ describe('the widget blocks', () => {
   });
 
   /*
-   * The one that decides whether this can be a client feature at all. The Embed
-   * block is staff-only because it puts unchecked HTML on a page; neither of
-   * these does, so neither is gated.
+   * The one that decides whether this can be a client feature at all. Neither
+   * of these puts unchecked HTML on a page, so neither is gated.
+   *
+   * THE HTML BLOCK IS NO LONGER GATED EITHER, since 20 Aug 2026. It was, and
+   * the reason was never the block: it was that embed HTML went through a regex
+   * tokeniser. Andy needed it open to every client, so the parser-backed
+   * sanitiser was built first and the gate came off after (see
+   * lib/content/sanitise-embed.ts). What replaced the gate is narrower and
+   * better placed: only OUR scripts run, and any edit to the markup counts as
+   * structure, so a content-only member still cannot reach it.
    */
-  it('and neither is staff only, which is the whole point of the design', () => {
+  it('and none of the three is staff only, which is the whole point of the design', () => {
     expect(blockDefinition('widget')?.staffOnly).toBeFalsy();
     expect(blockDefinition('embed-widget')?.staffOnly).toBeFalsy();
-    // The old escape hatch is still gated, though.
-    expect(blockDefinition('embed')?.staffOnly).toBe(true);
+    expect(blockDefinition('embed')?.staffOnly).toBeFalsy();
   });
 
   it('the widget picker only offers widgets we have scripts for', () => {

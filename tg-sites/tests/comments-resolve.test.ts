@@ -8,8 +8,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { resolveThreads } from '../lib/comments/resolve';
-import type { Comment, CommentThread } from '../lib/db/comments';
+import { resolveSiteComments, resolveThreads } from '../lib/comments/resolve';
+import type { Comment, CommentThread, OpenComment } from '../lib/db/comments';
 
 const comment = (over: Partial<Comment> = {}): Comment => ({
   id: 'c1',
@@ -68,5 +68,43 @@ describe('resolveThreads', () => {
     const [thread] = resolveThreads([{ comment: comment(), replies: [] }], members);
     expect(thread.resolved).toBe(false);
     expect(thread.resolvedBy).toBeNull();
+  });
+});
+
+describe('resolveSiteComments', () => {
+  const open = (over: Partial<OpenComment> = {}): OpenComment => ({
+    comment: comment(),
+    page: { id: 'p1', title: 'Home', slug: '' },
+    replyCount: 0,
+    ...over,
+  });
+
+  it('names each author and carries the page and reply count through', () => {
+    const rows: OpenComment[] = [
+      open({
+        comment: comment({ id: 'c1', authorId: 'u1', anchor: 'blk_hero' }),
+        page: { id: 'p1', title: 'Home', slug: '' },
+        replyCount: 2,
+      }),
+      open({
+        comment: comment({ id: 'c2', authorId: 'u2' }),
+        page: { id: 'p2', title: 'About', slug: 'about' },
+        replyCount: 0,
+      }),
+    ];
+
+    const [first, second] = resolveSiteComments(rows, members);
+    expect(first.author).toBe('Jane Client');
+    expect(first.page.title).toBe('Home');
+    expect(first.anchor).toBe('blk_hero');
+    expect(first.replyCount).toBe(2);
+    // No name set on u2, so the email stands in, and the page carries through.
+    expect(second.author).toBe('staff@travelgenix.com');
+    expect(second.page.slug).toBe('about');
+  });
+
+  it('an id belonging to nobody in the site resolves to null, not a crash', () => {
+    const [row] = resolveSiteComments([open({ comment: comment({ authorId: 'ghost' }) })], members);
+    expect(row.author).toBeNull();
   });
 });

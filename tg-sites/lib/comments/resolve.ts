@@ -11,7 +11,7 @@
  * email, or null when the id belongs to nobody currently in the site.
  */
 
-import type { CommentThread } from '../db/comments';
+import type { CommentThread, OpenComment } from '../db/comments';
 
 export interface ResolvedReply {
   id: string;
@@ -43,6 +43,39 @@ interface NamedMember {
   userId: string;
   email: string;
   name: string | null;
+}
+
+/** One open thread in the whole-site review list: the root plus which page it is on. */
+export interface SiteComment {
+  id: string;
+  page: { id: string; title: string; slug: string };
+  author: string | null;
+  body: string;
+  createdAt: Date;
+  /** A pinned element's block id, or null for a page-level comment. */
+  anchor: string | null;
+  /** How many replies hang off it. */
+  replyCount: number;
+}
+
+/**
+ * The whole-site review list, authors named.
+ *
+ * The same id-to-name pass resolveThreads makes, over the open roots
+ * listOpenComments returns, carrying each one's page through so the panel can
+ * group by page and link to it. Pure, so a plain-Node test covers it.
+ */
+export function resolveSiteComments(open: OpenComment[], members: NamedMember[]): SiteComment[] {
+  const nameById = new Map(members.map((member) => [member.userId, member.name?.trim() || member.email]));
+  return open.map((item) => ({
+    id: item.comment.id,
+    page: item.page,
+    author: item.comment.authorId ? nameById.get(item.comment.authorId) ?? null : null,
+    body: item.comment.body,
+    createdAt: item.comment.createdAt,
+    anchor: item.comment.anchor,
+    replyCount: item.replyCount,
+  }));
 }
 
 export function resolveThreads(threads: CommentThread[], members: NamedMember[]): ResolvedThread[] {

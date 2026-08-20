@@ -32,6 +32,7 @@ import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
+import { hasInnerColumns } from './inner-columns';
 import { COLOUR_TOKENS, normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from './styles';
 
 // ---------------------------------------------------------------------------
@@ -224,6 +225,25 @@ export const BoxSchema = z.object({
   borderWidth: z.unknown().transform((v) => px(v, MAX_BORDER)),
   borderColour: z.unknown().transform(safeColour).optional(),
   shadow: Shadow.catch('none').default('none'),
+  /**
+   * A backdrop blur in pixels, for a glass bar floating over a picture. The
+   * background is a translucent colour and this frosts whatever shows through.
+   * 0 is none, and an absent value parses to 0 so an old box is unchanged.
+   */
+  blur: z.unknown().transform((v) => px(v, 40)),
+  /**
+   * A two-stop gradient fill, for the soft pastel bars. Each stop is a colour
+   * validated the same way as `background`, so nothing but a hex, an rgb(a) or
+   * a theme token can reach the style attribute, and the angle is pinned to
+   * 0..360. An invalid stop drops the gradient rather than emitting junk.
+   */
+  gradient: z
+    .object({
+      from: z.unknown().transform(safeColour),
+      to: z.unknown().transform(safeColour),
+      angle: z.unknown().transform((v) => px(v, 360)),
+    })
+    .optional(),
 });
 
 export type Box = z.infer<typeof BoxSchema>;
@@ -233,6 +253,7 @@ export const EMPTY_BOX: Box = {
   radius: 0,
   borderWidth: 0,
   shadow: 'none',
+  blur: 0,
 };
 
 /** True when a box would render nothing, so the UI can say "not set". */
@@ -240,7 +261,8 @@ export function boxIsEmpty(box: Box): boolean {
   const { padding: p } = box;
   return (
     p.top === 0 && p.right === 0 && p.bottom === 0 && p.left === 0 &&
-    !box.background && box.radius === 0 && box.borderWidth === 0 && box.shadow === 'none'
+    !box.background && box.radius === 0 && box.borderWidth === 0 && box.shadow === 'none' &&
+    box.blur === 0 && !box.gradient
   );
 }
 
@@ -434,6 +456,20 @@ export const ColumnSchema = z.object({
   flow: ColumnFlow.default('stacked'),
   /** The same shape a section has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
+  /**
+   * How many tracks this cell spans, when it is a cell of a GRID block rather
+   * than a column of a row. One by default, which is every column that is not
+   * in a grid, so nothing saved before grids existed changes shape.
+   *
+   * It lives on the column rather than in the grid's props because it belongs to
+   * the cell: reorder the cells and the featured one takes its width with it,
+   * where a parallel list of spans in props would quietly go out of step.
+   *
+   * Six is the ceiling because six is the widest a grid can be. The renderer
+   * clamps again to the grid's actual desktop count, which is the smaller number
+   * whenever the client has chosen fewer.
+   */
+  span: z.number().int().min(1).max(MAX_COLUMNS_PER_ROW).optional(),
   blocks: z.array(BlockSchema).default([]),
 });
 
@@ -1141,7 +1177,7 @@ function upgradeBlock(block: unknown): unknown {
    * turn. Inner blocks are leaves (no container in a container), so a single
    * descent is the whole of it.
    */
-  if (b.type === 'container') return upgradeContainer(b);
+  if (hasInnerColumns(b.type)) return upgradeContainer(b);
 
   if (b.type !== 'heading') return block;
 

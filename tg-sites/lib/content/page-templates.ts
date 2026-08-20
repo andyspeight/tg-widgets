@@ -34,9 +34,11 @@ import type { Section } from './schema';
 import {
   STARTERS,
   buildStarterPage,
+  designedHomeStarterPage,
   type StarterFacts,
   type StarterPage,
 } from './starters';
+import { DESIGNED_HOME_META } from './designed-homes-meta';
 
 const AGENCY = STARTERS.find((starter) => starter.id === 'agency');
 
@@ -62,7 +64,7 @@ function agencyPage(slug: string): StarterPage {
 // enforces all three, the same checks starters.test.ts runs on the site pages.
 // ---------------------------------------------------------------------------
 
-/** Services / what we offer: the range, then how it works, then a nudge. */
+/** Services / what we offer: the range, the detail, the proof, then a nudge. */
 const SERVICES_PAGE: StarterPage = {
   title: 'Services',
   slug: 'services',
@@ -71,8 +73,14 @@ const SERVICES_PAGE: StarterPage = {
     + 'first phone call to coming home. Tailor-made travel with a person on the end of it.',
   sections: [
     {
-      preset: 'text-intro',
+      preset: 'hero-page-banner',
+      photo: 'aeroplane wing above clouds sunset',
       heading: 'What we can arrange',
+      body: 'From a weekend away to the trip of a lifetime.',
+    },
+    {
+      preset: 'text-intro',
+      heading: 'The range, honestly',
       body:
         'A short paragraph on the range of what you do. Tailor-made trips, flights, '
         + 'cruises, groups, honeymoons, whatever it actually is. Saying what you do '
@@ -80,12 +88,15 @@ const SERVICES_PAGE: StarterPage = {
     },
     // A fuller list than the home page's three. This preset titles a row of six
     // points and has no paragraph, so a heading is set and no body.
-    { preset: 'features-six-points', heading: 'The things we look after' },
-    // "How it works" over its own numbered steps is already the right words, and
-    // there is no paragraph in it to write into, so nothing is overridden.
-    { preset: 'features-how-it-works' },
+    { preset: 'features-six-points', tone: 'subtle', heading: 'The things we look after' },
+    // The two things worth explaining properly, each beside its photograph. The
+    // preset's own words are prompts, so nothing is overridden.
+    { preset: 'features-two-rows-alternating' },
+    // Three steps and you are booked, on its own tinted band.
+    { preset: 'features-three-steps-across' },
     {
       preset: 'cta-split',
+      tone: 'light',
       heading: 'Not sure where to start?',
       body: 'Tell us roughly what you are after and we will point you the right way. No obligation.',
     },
@@ -101,8 +112,15 @@ const TEAM_PAGE: StarterPage = {
     + 'holiday through a person beats booking it through a website.',
   sections: [
     {
-      preset: 'text-intro',
+      // Scenery, not stock faces: the real faces are the client's to add below.
+      preset: 'hero-page-banner',
+      photo: 'sunlit harbour cafe morning',
       heading: 'The people behind the trips',
+      body: 'Booking through a person, not a website.',
+    },
+    {
+      preset: 'text-intro',
+      heading: 'Why a person matters',
       body:
         'A line or two on why it matters that a real person plans your holiday. '
         + 'This is the part a website cannot do.',
@@ -115,12 +133,13 @@ const TEAM_PAGE: StarterPage = {
     // A row of named quotes as proof about the people, not the trips. Titled, no
     // paragraph in it.
     { preset: 'testimonials-three', heading: 'What it is like to book with us' },
-    // The preset ends the page on a statement with no paragraph, so a heading only.
-    { preset: 'cta-statement', heading: 'Come and say hello' },
+    // The statement close, lifted onto the accent band so the page ends on a
+    // moment rather than trailing off in white.
+    { preset: 'cta-statement', tone: 'accent', heading: 'Come and say hello' },
   ],
 };
 
-/** Reviews: an invitation, the wall of quotes, a way to start their own. */
+/** Reviews: an invitation, the wall of quotes, trust, a way to start their own. */
 const REVIEWS_PAGE: StarterPage = {
   title: 'Reviews',
   slug: 'reviews',
@@ -129,13 +148,18 @@ const REVIEWS_PAGE: StarterPage = {
     + 'The reason the next person picks up the phone.',
   sections: [
     {
-      preset: 'text-centred-intro',
+      preset: 'hero-page-banner',
+      photo: 'sunset beach walk golden hour',
       heading: 'In their own words',
-      body: 'A short line inviting people to read on, or to add their own once they are home.',
+      body: 'What travellers say when they come home.',
     },
     // A wall of quotes with a couple of headline numbers. It ships its own, and
     // has neither a title heading nor a paragraph to write into.
     { preset: 'testimonials-with-stats' },
+    // More voices, on the tinted band so the two quote sections read as two.
+    { preset: 'testimonials-rail', heading: 'More from our travellers' },
+    // The trust strip, on the plain page between the tint and the accent close.
+    { preset: 'features-badges', tone: 'light', body: 'Your ATOL, ABTA or trust account details.' },
     {
       preset: 'cta-centred',
       heading: 'Start your own trip',
@@ -159,6 +183,22 @@ export interface PageTemplate {
  * the team, the questions), then Contact at the end. More pages are a data edit
  * here: name a slug the agency starter builds, or add a StarterPage above.
  */
+/**
+ * The ten designed homepages as add-a-page templates.
+ *
+ * The same designed homes the starter wizard offers as whole sites, offered
+ * here as a single page a client can add to a site they have already started.
+ * Each is a build page, so picking one seeds the concept's finished home
+ * sections; the id is looked up server side against this closed list exactly as
+ * every other template is.
+ */
+const DESIGNED_TEMPLATES: readonly PageTemplate[] = DESIGNED_HOME_META.map((meta) => ({
+  id: `design-${meta.id}`,
+  label: meta.label,
+  description: meta.description,
+  page: designedHomeStarterPage(meta),
+}));
+
 export const PAGE_TEMPLATES: readonly PageTemplate[] = [
   {
     id: 'blank',
@@ -214,6 +254,7 @@ export const PAGE_TEMPLATES: readonly PageTemplate[] = [
     description: 'A short enquiry prompt beside your details, and a map of where to find you.',
     page: agencyPage('contact'),
   },
+  ...DESIGNED_TEMPLATES,
 ];
 
 export function pageTemplateById(id: string): PageTemplate | undefined {
@@ -232,8 +273,20 @@ const BLANK_FACTS: StarterFacts = { company: '', town: '', about: '' };
  * nothing a caller sends becomes page content except by naming a template we
  * built.
  */
-export function pageTemplateSections(id: string): Section[] | null {
+export async function pageTemplateSections(id: string): Promise<Section[] | null> {
   const template = pageTemplateById(id);
   if (!template || !template.page) return null;
-  return buildStarterPage(template.page, BLANK_FACTS).sections;
+  return (await buildStarterPage(template.page, BLANK_FACTS)).sections;
+}
+
+/**
+ * The StarterPage behind a template id, for the photo fill.
+ *
+ * The fill (lib/media/photo-fill.ts) walks the SPEC beside the built sections
+ * to learn which photographs each one wants, so the action that adds a page
+ * needs the spec as well as the sections. Null for Blank and for an unknown
+ * id, exactly as pageTemplateSections is.
+ */
+export function pageTemplateSpec(id: string): StarterPage | null {
+  return pageTemplateById(id)?.page ?? null;
 }

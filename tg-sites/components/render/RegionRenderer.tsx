@@ -68,7 +68,17 @@ export function RegionRenderer({
     >
       {region.sections.map((section, index) => (
         <Fragment key={section.id}>
-          <SectionRenderer section={section} index={index} />
+          {/*
+            A header's bottom divider HANGS below the bar in the bar's own
+            colour: the MOKSHA wave. A region has no next section for the
+            ordinary neighbour-reaching-up treatment, and the silhouette is
+            what the design means here. See SectionRenderer.hangBottomDivider.
+          */}
+          <SectionRenderer
+            section={section}
+            index={index}
+            hangBottomDivider={region.region === 'header' && index === region.sections.length - 1}
+          />
         </Fragment>
       ))}
     </Tag>

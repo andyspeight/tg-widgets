@@ -260,6 +260,66 @@ export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTok
 }
 
 // ---------------------------------------------------------------------------
+// The dark palette, for a site that carries a Light / dark switch
+// ---------------------------------------------------------------------------
+
+/**
+ * A dark version of the six tokens that carry the SENSE of light or dark: the
+ * page, the panels, the body text, the captions and the two hairlines. Emitted
+ * as a parallel `--tgs-d-*` set that globals.css swaps in when the site is dark,
+ * so the same one theme object serves both looks.
+ *
+ * WHY ONLY SIX. The brand, the accent and the two coloured bands are the
+ * client's chosen colours and read the same in either mode: a gold button is
+ * gold at night. Flipping them would be inventing a second brand nobody picked.
+ * So a button, a dark-tone band and an accent link are untouched, and only the
+ * canvas around them turns over. The tone sections set their own text and border
+ * on themselves, so those keep winning for their own subtree (see the tone rules
+ * and the !important note in globals.css).
+ *
+ * BUILT LIKE THE LIGHT ONE, not inverted. A straight invert of a warm cream
+ * theme gives a cold blue-black that has nothing to do with the brand. Instead
+ * the page is a near-black warmed by a trace of the brand, and the text a
+ * near-white with the same trace, so the client's site still feels like theirs
+ * after dark. Contrast is guaranteed by anchoring to near-black and near-white
+ * and then measured back the same way the light tokens are, so a bright brand
+ * cannot produce an unreadable caption.
+ *
+ * OPT IN, ALWAYS. This is emitted only when a page actually holds a switch (see
+ * hasThemeToggle and page.tsx), so a site without one is never handed a dark
+ * palette and never responds to a visitor's system preference. That is the whole
+ * safety property: turning on system-wide dark mode must not silently restyle
+ * every existing client site.
+ */
+export function darkThemeTokens(theme: Theme): Record<string, string> {
+  const brand = theme.brand;
+
+  // A near-black page, warmed by a trace of the brand so it reads as the client's
+  // site after dark rather than a generic charcoal.
+  const surface = mix('#0d0f14', brand, 0.07);
+  // A panel lifted a touch off the page: cards, image frames, the menu drop-down.
+  const surfaceAlt = mix(surface, '#ffffff', 0.06);
+
+  // Near-white text with the same trace of brand, pushed back until it clears
+  // body contrast on the page. On a near-black it clears at once, so the nudge is
+  // the safety net it is in the light palette, not a routine correction.
+  const text = nudgeUntilReadable(mix('#f6f8fc', brand, 0.05), surface, BODY_CONTRAST).colour;
+  const textMuted = fadeButKeepReadable(text, surface, 0.34, BODY_CONTRAST);
+
+  const border = mix(surface, text, 0.16);
+  const borderStrong = mix(surface, text, 0.28);
+
+  return {
+    '--tgs-d-surface': surface,
+    '--tgs-d-surface-alt': surfaceAlt,
+    '--tgs-d-text': text,
+    '--tgs-d-text-muted': textMuted,
+    '--tgs-d-border': border,
+    '--tgs-d-border-strong': borderStrong,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Telling somebody their theme has a problem
 // ---------------------------------------------------------------------------
 

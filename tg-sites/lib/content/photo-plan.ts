@@ -1,0 +1,187 @@
+/**
+ * What photographs a built page wants, and where each one goes.
+ *
+ * PURE PLANNING, SPLIT FROM THE FETCHING. This walks a starter page spec and
+ * the sections built from it, and says "this section wants a background found
+ * by this query; that image block wants a picture found by that one". The
+ * server half (lib/media/photo-fill.ts) resolves the queries against the photo
+ * library and writes the URLs in; this half owns every decision about WHAT is
+ * wanted, so the decisions are testable without a network.
+ *
+ * Grown out of fillHeroPhotos in app/actions/designed.ts, which walked one
+ * hero at a time and only when it was added singly from the section drawer.
+ * That left every page built from a template or the starter wizard with all
+ * its frames empty, which is the single biggest reason a fresh site looked
+ * amateur (Andy, 19 Aug 2026). The drawer action now plans through here too,
+ * so the two doors cannot drift.
+ *
+ * WHAT GETS A PICTURE, AND WHAT NEVER DOES
+ *
+ *  - A section background: the spec's own `photo` override first, else the
+ *    preset's backgroundQuery. The banner every template page opens with works
+ *    this way, so an About banner and a Holidays banner get different pictures
+ *    from the same preset.
+ *  - An image block: its explicit `photo` query; on a HERO preset an image
+ *    with no query falls back to heroPhotoQuery by position, exactly as the
+ *    drawer has always behaved.
+ *  - A cards block with a `photo` SUFFIX: each card whose src is empty
+ *    searches as its own label plus the suffix, so the pictures match the
+ *    places the sample copy names.
+ *  - Everything else stays empty. In particular there is no fallback outside
+ *    heroes: a team grid or a testimonial must never grow a stock face, which
+ *    would be inventing people (see the pictures note in presets-page.ts).
+ */
+
+import { heroPhotoQuery, presetById } from './presets';
+import type { PresetBlock, SectionPreset } from './preset-types';
+import type { Section } from './schema';
+import type { StarterPage } from './starters';
+
+export interface PhotoTarget {
+  /** The search term, ready for the photo library. */
+  query: string;
+  /** Index into the built sections array. */
+  section: number;
+  /** Where the picture lands inside that section. */
+  place:
+    | { kind: 'background' }
+    | { kind: 'image'; row: number; column: number; block: number }
+    | { kind: 'card'; row: number; column: number; block: number; item: number };
+}
+
+/** The per-card queries for a cards block carrying a photo suffix. */
+function cardQueries(spec: PresetBlock): Array<string | null> {
+  const suffix = spec.photo?.trim();
+  if (!suffix) return [];
+  const items = Array.isArray(spec.props?.items) ? (spec.props.items as Array<Record<string, unknown>>) : [];
+  return items.map((item) => {
+    // Only a card still showing its empty frame. One somebody gave a picture
+    // in the preset itself (none today, but the contract should hold) is theirs.
+    if (typeof item.src === 'string' && item.src.trim()) return null;
+    const label = typeof item.label === 'string' && item.label.trim() ? item.label.trim() : '';
+    const title = typeof item.title === 'string' && item.title.trim() ? item.title.trim() : '';
+    const subject = label || title;
+    return subject ? `${subject} ${suffix}` : suffix;
+  });
+}
+
+/**
+ * The targets for ONE preset-built section.
+ *
+ * `backgroundOverride` is the starter spec's per-use photo, which wins over the
+ * preset's own backgroundQuery. The walk mirrors buildPresetSection exactly, so
+ * a row/column/block address computed here lands on the block the preset put
+ * there; the image index counts image, video and gallery blocks the same way
+ * the picker's preview does, so a hero's fallback pictures match its thumbnail.
+ */
+export function sectionPhotoTargets(
+  preset: SectionPreset,
+  sectionIndex: number,
+  backgroundOverride?: string,
+): PhotoTarget[] {
+  const targets: PhotoTarget[] = [];
+  const isHero = preset.category === 'hero';
+  let imageIndex = 0;
+
+  preset.rows.forEach((row, rowIndex) => {
+    row.columns.forEach((column, columnIndex) => {
+      column.forEach((block, blockIndex) => {
+        if (block.type === 'cards') {
+          cardQueries(block).forEach((query, itemIndex) => {
+            if (!query) return;
+            targets.push({
+              query,
+              section: sectionIndex,
+              place: { kind: 'card', row: rowIndex, column: columnIndex, block: blockIndex, item: itemIndex },
+            });
+          });
+          return;
+        }
+
+        const picture = block.type === 'image' || block.type === 'video' || block.type === 'gallery';
+        if (!picture) return;
+
+        const explicit = typeof block.photo === 'string' && block.photo.trim() ? block.photo.trim() : '';
+        const query = explicit || (isHero ? heroPhotoQuery(preset.id, imageIndex) : '');
+        imageIndex += 1;
+
+        // Only single images are filled. A gallery is several pictures at once
+        // and stays the client's to choose; the index still counted it so hero
+        // fallback queries line up with the preview.
+        if (block.type !== 'image' || !query) return;
+
+        targets.push({
+          query,
+          section: sectionIndex,
+          place: { kind: 'image', row: rowIndex, column: columnIndex, block: blockIndex },
+        });
+      });
+    });
+  });
+
+  const background = backgroundOverride?.trim() || preset.section?.backgroundQuery;
+  if (background) {
+    targets.push({ query: background, section: sectionIndex, place: { kind: 'background' } });
+  }
+
+  return targets;
+}
+
+/**
+ * The targets for a whole starter page.
+ *
+ * The spec's sections and the built ones are walked in lockstep the same way
+ * buildStarterPage builds them: a spec whose preset does not exist built
+ * nothing, so it advances no section index. A build page (a designed home)
+ * names no presets and gets no targets, which is right: its imagery is its own.
+ */
+export function pagePhotoPlan(spec: StarterPage, sections: readonly Section[]): PhotoTarget[] {
+  const targets: PhotoTarget[] = [];
+  let sectionIndex = 0;
+
+  for (const entry of spec.sections) {
+    const preset = presetById(entry.preset);
+    if (!preset) continue;
+    if (sectionIndex >= sections.length) break;
+    targets.push(...sectionPhotoTargets(preset, sectionIndex, entry.photo));
+    sectionIndex += 1;
+  }
+
+  return targets;
+}
+
+/**
+ * Write one resolved photograph into the built sections, in place.
+ *
+ * In place, like every starter mutation: the sections were just built and
+ * nothing else holds them. Address misses are ignored rather than thrown,
+ * because a plan is advisory and a page without one picture is still a page.
+ */
+export function applyPhoto(sections: Section[], target: PhotoTarget, url: string): void {
+  const section = sections[target.section];
+  if (!section) return;
+
+  if (target.place.kind === 'background') {
+    section.backgroundImage = url;
+    // A scrim, so light hero text stays readable over a bright photograph.
+    if ((section.overlay ?? 0) < 30) section.overlay = 45;
+    return;
+  }
+
+  const { row, column, block } = target.place;
+  const found = section.rows[row]?.columns[column]?.blocks[block];
+  if (!found) return;
+
+  if (target.place.kind === 'image') {
+    if (found.type !== 'image') return;
+    found.props = { ...found.props, src: url };
+    return;
+  }
+
+  if (found.type !== 'cards') return;
+  const items = Array.isArray(found.props.items) ? [...(found.props.items as Array<Record<string, unknown>>)] : [];
+  const item = items[target.place.item];
+  if (!item) return;
+  items[target.place.item] = { ...item, src: url };
+  found.props = { ...found.props, items };
+}

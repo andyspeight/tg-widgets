@@ -28,6 +28,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import type { Block, Page, Row } from '../../lib/content/schema';
+import { hasInnerColumns } from '../../lib/content/inner-columns';
 import { blockLabel, createRow } from '../../lib/content/factory';
 import {
   type Path,
@@ -475,7 +476,7 @@ function Band({
 
               {/* A container opens up: its inner columns and blocks are listed
                   under it, each one selectable so the outline reaches them. */}
-              {block.type === 'container' && (
+              {hasInnerColumns(block.type) && (
                 <ContainerBranch
                   block={block}
                   section={sectionIndex}
@@ -546,6 +547,16 @@ function ContainerBranch({
   if (!columns.length) return null;
   const multi = columns.length > 1;
 
+  /*
+   * "Left" and "Right" are true of a container and false of a grid. A container
+   * is one line of columns, so a position word is the clearest name there is. A
+   * grid's cells WRAP, so the third of nine is not on the right of anything, and
+   * naming it "Right" would send a client looking in the wrong place. Numbers
+   * are the only honest label for a cell.
+   */
+  const label = (inner: number) =>
+    block.type === 'grid' ? `Cell ${inner + 1}` : columnWord(inner, columns.length);
+
   return (
     <div className="ed-subtree">
       {columns.map((col, inner) => (
@@ -561,7 +572,7 @@ function ContainerBranch({
                 onSelect({ kind: 'inner-column', section, row, column, block: blockIndex, inner })
               }
             >
-              {columnWord(inner, columns.length)}
+              {label(inner)}
             </button>
           )}
 

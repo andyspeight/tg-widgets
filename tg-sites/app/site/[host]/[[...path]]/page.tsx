@@ -9,9 +9,13 @@ import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
+import { ThemeToggleScript } from '../../../../components/render/ThemeToggleScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
 import { listFontFaces } from '../../../../lib/db/fonts';
-import { getPublishedPage, listPublishedNavPages } from '../../../../lib/db/pages';
+import { getPublishedPage, listPublishedForSearch, listPublishedNavPages } from '../../../../lib/db/pages';
+import { searchDocs } from '../../../../lib/content/search';
+import { hasThemeToggle } from '../../../../lib/content/theme-toggle';
+import { SearchResults } from '../../../../components/render/SearchResults';
 import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import { getPublishedItem, listPublished, listPublishedByTag, MAX_LISTING_ITEMS } from '../../../../lib/db/collections';
@@ -25,7 +29,7 @@ import { resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
 import { jsonLdScript, pageJsonLd, profileLinks } from '../../../../lib/seo/jsonld';
 import { familiesFromFiles } from '../../../../lib/theme/fonts';
-import { themeTokens } from '../../../../lib/theme/tokens';
+import { darkThemeTokens, themeTokens } from '../../../../lib/theme/tokens';
 
 /**
  * A client's website, on their own hostname.
@@ -55,7 +59,21 @@ import { themeTokens } from '../../../../lib/theme/tokens';
 
 export const dynamic = 'force-dynamic';
 
-type Params = { params: Promise<{ host: string; path?: string[] }> };
+type Params = {
+  params: Promise<{ host: string; path?: string[] }>;
+  /*
+   * The query string, for /search. Every other address ignores it, but a page
+   * component that reads searchParams at all must declare it, and Next hands it
+   * in the same awaited shape as params.
+   */
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+/** Whether this address is the search results page rather than a real page. */
+function isSearchPath(path: string[] | undefined): boolean {
+  const segments = (path ?? []).filter(Boolean);
+  return segments.length === 1 && segments[0] === 'search';
+}
 
 async function load(host: string, path: string[] | undefined) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
@@ -182,7 +200,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   try {
     const found = await load(host, path);
-    if (!found) return { title: 'Not found', robots: { index: false, follow: false } };
+    if (!found) {
+      /*
+       * The search results page, when no real page sits at /search. noindex,
+       * for the same reason a tag archive is: a results view is a way to find
+       * pages, not a page to rank, and letting it compete with the pages it
+       * lists is the duplicate-content mistake. follow stays on, so an engine
+       * still walks through to the pages.
+       */
+      if (isSearchPath(path)) return { title: 'Search', robots: { index: false, follow: true } };
+      return { title: 'Not found', robots: { index: false, follow: false } };
+    }
 
     /*
      * A TAG ARCHIVE is noindex: it is a way to find posts, not a page to rank,
@@ -282,14 +310,44 @@ async function gone(host: string, path: string[] | undefined): Promise<never> {
   notFound();
 }
 
-export default async function SitePage({ params }: Params) {
+export default async function SitePage({ params, searchParams }: Params) {
   const { host, path } = await params;
 
   const found = await load(host, path);
-  if (!found) return gone(host, path);
+  if (!found) {
+    /*
+     * /search, but only when no real page lives there, so load has already had
+     * its say and a client's own "search" page wins. The query rides in ?q= (a
+     * GET form, see the Search block), and an empty or missing one renders the
+     * page with its prompt rather than a 404.
+     */
+    if (isSearchPath(path)) {
+      const query = await searchParams;
+      const q = typeof query.q === 'string' ? query.q : Array.isArray(query.q) ? query.q[0] ?? '' : '';
+      const data = await loadSearch(host, q);
+      if (data) return renderSearchPage(host, data);
+    }
+    return gone(host, path);
+  }
 
   const slug = decodeURIComponent(host);
-  const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
+
+  /*
+   * Dark mode is OPT IN: a page turns dark only when it actually carries a Light
+   * / dark switch, in the header, the footer or the page's own body. When it
+   * does, the dark palette rides on the same theme object (globals.css swaps it
+   * in) and the switch is wired at the top of the render below. When it does not,
+   * none of this is emitted and the page is byte for byte what it was, which is
+   * the whole safety property: a visitor's system dark mode must never restyle a
+   * site that did not ask for it. See hasThemeToggle and darkThemeTokens.
+   */
+  const scanTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
+  const dark =
+    hasThemeToggle(found.regions.header) ||
+    hasThemeToggle(scanTree) ||
+    hasThemeToggle(found.regions.footer);
+  const base = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
+  const theme = dark ? { ...base, ...darkThemeTokens(found.theme) } : base;
 
   /*
    * STRUCTURED DATA, which is the difference between an AI engine summarising
@@ -348,6 +406,13 @@ export default async function SitePage({ params }: Params) {
 
   return (
     <>
+      {/*
+        The Light / dark switch's flash guard and wiring, when the page carries a
+        switch. First in the tree, so the guard runs before the content below it
+        paints. Renders nothing at all otherwise, keeping the no-script promise.
+      */}
+      <ThemeToggleScript active={dark} />
+
       {/*
         Icons, the manifest link and the analytics snippets. React hoists link,
         meta and script into the head from here, so it sits with the content it
@@ -581,4 +646,61 @@ function formatDate(value: string): string {
   const name = MONTHS[Number(month) - 1];
   if (!name) return value;
   return `${Number(day)} ${name} ${year}`;
+}
+
+/**
+ * The search results page's own load, run ONLY when no real page lives at
+ * /search, so a client who makes a page called "search" keeps it. It reads the
+ * same shell a page reads (theme, fonts, header, footer, settings) plus every
+ * published page reduced to searchable text, and ranks them in memory. See
+ * lib/content/search.ts and listPublishedForSearch.
+ *
+ * Below the page render on purpose: the page is the primary render, and its
+ * widget and slideshow scans are the ones the tests read as "the public site".
+ */
+async function loadSearch(host: string, query: string) {
+  const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
+  if (!tenantId) return null;
+
+  const [theme, faces, settings, regions, navPages, docs] = await Promise.all([
+    getPublicTheme(tenantId),
+    listFontFaces(tenantId),
+    getPublicSettings(tenantId),
+    getPublishedRegions(tenantId),
+    listPublishedNavPages(tenantId),
+    listPublishedForSearch(tenantId),
+  ]);
+
+  return { theme, faces, settings, regions, navPages, query, hits: searchDocs(docs, query) };
+}
+
+function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typeof loadSearch>>>) {
+  const slug = decodeURIComponent(host);
+
+  // The results page wears the same header and footer a page does, so it opts
+  // into dark the same way: if either carries a switch, it turns dark too.
+  const dark = hasThemeToggle(data.regions.header) || hasThemeToggle(data.regions.footer);
+  const base = themeTokens(data.theme, familiesFromFiles(data.faces)).style;
+  const theme = dark ? { ...base, ...darkThemeTokens(data.theme) } : base;
+
+  return (
+    <>
+      <ThemeToggleScript active={dark} />
+      <SiteHead settings={data.settings} />
+      <FontHead tenantSlug={slug} files={data.faces} typography={data.theme.typography} />
+
+      {/* The header and footer are siblings of the results, each carrying the
+          theme itself, exactly as they are around a page. */}
+      <RegionRenderer region={fillNavRegion(data.regions.header, data.navPages)} theme={theme} />
+      <SearchResults query={data.query} hits={data.hits} theme={theme} />
+      <RegionRenderer region={fillNavRegion(data.regions.footer, data.navPages)} theme={theme} />
+
+      {/* The header and footer may still hold a widget or a slideshow, so the
+          two enhancers scan them here as they do on a page. A search results
+          page has no page-content tree of its own, so it is these two only. */}
+      <WidgetScripts trees={[data.regions.header, data.regions.footer]} />
+      <SlideshowScript trees={[data.regions.header, data.regions.footer]} />
+      <SiteBody settings={data.settings} />
+    </>
+  );
 }

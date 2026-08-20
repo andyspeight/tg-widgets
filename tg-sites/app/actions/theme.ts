@@ -12,7 +12,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { requireTenantId } from '../../lib/auth/session';
+import { isPermissionError, requireCapability } from '../../lib/auth/capabilities';
 import { saveTheme } from '../../lib/db/theme';
 import { parseTheme, type Theme } from '../../lib/theme/schema';
 
@@ -22,7 +22,7 @@ export type ThemeResult =
 
 export async function saveThemeAction(input: unknown): Promise<ThemeResult> {
   try {
-    const tenantId = await requireTenantId();
+    const tenantId = await requireCapability('theme');
     const saved = await saveTheme(tenantId, parseTheme(input));
 
     /*
@@ -37,6 +37,8 @@ export async function saveThemeAction(input: unknown): Promise<ThemeResult> {
 
     return { ok: true, data: saved };
   } catch (error) {
+    if (isPermissionError(error)) return { ok: false, error: error.message };
+
     const message = error instanceof Error ? error.message : String(error);
 
     if (message.startsWith('Your session has ended')) return { ok: false, error: message };

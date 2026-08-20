@@ -692,6 +692,38 @@ export function updateInnerColumn(
 }
 
 /**
+ * How many tracks one grid cell spans. A width for a cell, in the only unit a
+ * grid has: whole tracks. Clamped here as well as in the renderer, because this
+ * is where the stored value is written and the renderer only ever reads it.
+ *
+ * Setting it back to 1 REMOVES the key rather than storing the default. A grid
+ * of nine ordinary cells then stores nine cells and no spans, which is what it
+ * did before spans existed, so the change-scope comparison stays quiet on a page
+ * nobody has actually given a featured cell.
+ */
+export function setInnerColumnSpan(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  span: number,
+): Page {
+  const clamped = Math.min(MAX_COLUMNS_PER_ROW, Math.max(1, Math.round(span)));
+  return mapContainerColumns(page, section, row, column, block, (columns) =>
+    columns.map((col, i) => {
+      if (i !== inner) return col;
+      if (clamped <= 1) {
+        const { span: _drop, ...rest } = col as Column & { span?: number };
+        return rest as Column;
+      }
+      return { ...col, span: clamped };
+    }),
+  );
+}
+
+/**
  * Resize the boundary between a container's inner columns `index` and `index+1`.
  * The inner twin of resizeColumnBoundary, sharing its arithmetic.
  */
@@ -709,16 +741,25 @@ export function resizeInnerColumnBoundary(
   );
 }
 
-/** Add a column to a container, taking its width proportionally from the rest. */
+/**
+ * Add a column to a container, taking its width proportionally from the rest.
+ *
+ * `limit` exists for the grid. A row's columns share one line, so six is already
+ * generous and a seventh would be unreadable. A grid's cells WRAP, so its count
+ * is not a share of one line at all: nine tiles three across is three tidy rows,
+ * and capping that at six would be a limit with no reason behind it. The caller
+ * passes MAX_GRID_CELLS there and nothing at all everywhere else.
+ */
 export function addInnerColumn(
   page: Page,
   section: number,
   row: number,
   column: number,
   block: number,
+  limit: number = MAX_COLUMNS_PER_ROW,
 ): Page {
   return mapContainerColumns(page, section, row, column, block, (columns) => {
-    if (columns.length >= MAX_COLUMNS_PER_ROW) return columns;
+    if (columns.length >= limit) return columns;
     const share = 100 / (columns.length + 1);
     const widths = normaliseWidths([
       ...columns.map((col) => col.width * (1 - share / 100)),

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bucket &amp; Spade Holidays — Family holidays with the maths done for you</title>
+<meta name="description" content="ABTA & ATOL protected family holiday specialists since 2011. Free child places, kids clubs checked by age, transfers under 90 minutes and no 6am flights unless you ask.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#FAF5EC;
+    --sand-deep:#F1E7D6;
+    --ink:#322D26;
+    --ink-soft:#6B6357;
+    --coral:#C6472E;
+    --coral-bright:#E8604C;
+    --sea:#1D6A96;
+    --sea-deep:#155476;
+    --amber:#E9A13B;
+    --white:#FFFFFF;
+    --line:rgba(50,45,38,.14);
+    --r-s:8px;
+    --r-m:14px;
+    --shadow-soft:0 10px 30px -12px rgba(50,45,38,.22);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Nunito Sans',sans-serif;
+    font-size:16.5px;line-height:1.6;
+    color:var(--ink);background:var(--sand);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Baloo 2',sans-serif;line-height:1.12;font-weight:600}
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--sea);outline-offset:2px;border-radius:4px}
+  ::selection{background:var(--amber);color:var(--ink)}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  .kicker{
+    font-size:13px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--sea);display:flex;align-items:center;gap:10px;
+  }
+  .kicker::before{content:"";width:26px;height:3px;background:var(--amber);border-radius:2px}
+  /* one photographic treatment for the whole concept: warm grade */
+  .ph{filter:sepia(.18) saturate(1.12) contrast(.98)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-family:'Nunito Sans',sans-serif;font-weight:800;font-size:16px;
+    min-height:48px;padding:12px 26px;border-radius:var(--r-s);
+    border:2px solid transparent;cursor:pointer;text-decoration:none;
+    transition:transform .18s ease-out, background-color .18s ease-out, box-shadow .18s ease-out;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-coral{background:var(--coral);color:#fff}
+  .btn-coral:hover{background:#AD3A24;transform:translateY(-2px);box-shadow:0 8px 18px -8px rgba(198,71,46,.55)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+  .btn-ghost:hover{border-color:var(--ink);transform:translateY(-2px)}
+  .icon{width:22px;height:22px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  /* ---------- utility bar ---------- */
+  .utility{background:var(--ink);color:var(--sand);font-size:13.5px}
+  .utility .wrap{display:flex;justify-content:space-between;align-items:center;min-height:38px;gap:16px}
+  .utility a{color:var(--sand);text-decoration:none;font-weight:700}
+  .utility a:hover{text-decoration:underline}
+  .utility .hours{color:rgba(250,245,236,.75)}
+  .utility .protect{display:flex;gap:14px;align-items:center}
+  .utility .protect span{display:flex;align-items:center;gap:6px}
+  .utility .icon{width:15px;height:15px}
+
+  /* ---------- nav ---------- */
+  header.site{position:sticky;top:0;z-index:60;background:rgba(250,245,236,.94);border-bottom:1px solid var(--line);backdrop-filter:none}
+  .nav{display:flex;align-items:center;gap:34px;min-height:78px}
+  .logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);flex:none}
+  .logo-mark{width:42px;height:42px;flex:none}
+  .logo b{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:21px;line-height:1.05;display:block}
+  .logo small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .nav ul{display:flex;gap:4px;list-style:none;margin-left:auto}
+  .nav ul a{
+    text-decoration:none;font-weight:700;font-size:15.5px;padding:12px 14px;border-radius:var(--r-s);
+    display:inline-block;transition:background-color .15s ease-out;
+  }
+  .nav ul a:hover{background:var(--sand-deep)}
+  .nav .btn{flex:none}
+  .nav-toggle{
+    display:none;margin-left:auto;background:none;border:2px solid var(--line);border-radius:var(--r-s);
+    width:48px;height:48px;cursor:pointer;color:var(--ink);align-items:center;justify-content:center;
+  }
+  .mobile-menu{display:none;border-top:1px solid var(--line);background:var(--sand);padding:10px 32px 22px}
+  .mobile-menu a{display:block;padding:13px 6px;font-weight:700;text-decoration:none;border-bottom:1px solid var(--line)}
+  .mobile-menu.open{display:block}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 76px;overflow:hidden}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+  .hero h1{font-size:clamp(34px,4.2vw,54px);margin:18px 0 14px;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--coral)}
+  .hero .lede{font-size:18px;color:var(--ink-soft);max-width:52ch;margin-bottom:30px}
+  .hero .lede b{color:var(--ink)}
+
+  /* search panel */
+  .search-card{
+    background:var(--white);border-radius:var(--r-m);box-shadow:var(--shadow-soft);
+    border:1px solid var(--line);padding:22px;max-width:560px;
+  }
+  .search-card h2{font-size:18px;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+  .search-card h2 .icon{color:var(--sea)}
+  .sfields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .sfield{display:flex;flex-direction:column;gap:5px}
+  .sfield label{font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+  .sfield select,.sfield input{
+    font-family:inherit;font-size:15.5px;font-weight:600;color:var(--ink);
+    border:2px solid var(--line);border-radius:var(--r-s);padding:11px 12px;background:var(--sand);
+    min-height:48px;width:100%;transition:border-color .15s ease-out;
+  }
+  .sfield select:hover,.sfield input:hover{border-color:var(--ink-soft)}
+  .sfield select:focus,.sfield input:focus{border-color:var(--sea);outline:none;background:#fff}
+  .party-row{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ages{grid-column:1 / -1;display:none;gap:12px;grid-template-columns:repeat(4,1fr)}
+  .ages.show{display:grid}
+  .search-card .btn{width:100%;margin-top:14px;font-size:17px;min-height:54px}
+  .search-note{font-size:13.5px;color:var(--ink-soft);margin-top:11px;display:flex;align-items:center;gap:7px}
+  .search-note .icon{width:16px;height:16px;color:var(--sea)}
+
+  /* hero imagery */
+  .hero-pics{position:relative;min-height:520px}
+  .hero-pics .main{
+    width:88%;margin-left:auto;aspect-ratio:4/5;object-fit:cover;
+    border-radius:var(--r-m);box-shadow:var(--shadow-soft);
+  }
+  .hero-pics .small{
+    position:absolute;left:-4%;bottom:6%;width:46%;aspect-ratio:1/1;object-fit:cover;
+    border-radius:var(--r-m);border:6px solid var(--sand);box-shadow:var(--shadow-soft);
+  }
+  .sticker{
+    position:absolute;top:4%;left:2%;background:var(--amber);color:var(--ink);
+    font-weight:800;font-size:14.5px;line-height:1.3;padding:14px 18px;border-radius:var(--r-m);
+    max-width:210px;box-shadow:var(--shadow-soft);transform:rotate(-3deg);
+  }
+  .sticker b{font-family:'Baloo 2',sans-serif;font-size:24px;display:block;line-height:1}
+
+  /* ---------- school dates strip ---------- */
+  .dates{background:var(--sea);color:var(--sand);padding:40px 0 46px}
+  .dates .head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  .dates h2{font-size:26px}
+  .dates .head p{color:rgba(250,245,236,.8);font-size:15px}
+  .date-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .date-chip{
+    background:var(--sea-deep);border-radius:var(--r-s);padding:16px 18px;text-decoration:none;color:var(--sand);
+    display:flex;flex-direction:column;gap:2px;border:2px solid transparent;
+    transition:transform .18s ease-out,border-color .18s ease-out;
+  }
+  .date-chip:hover{transform:translateY(-3px);border-color:var(--amber)}
+  .date-chip .when{font-weight:800;font-size:16.5px}
+  .date-chip .dates-span{font-size:13.5px;color:rgba(250,245,236,.75)}
+  .date-chip .from{margin-top:8px;font-size:14px}
+  .date-chip .from b{font-family:'Baloo 2',sans-serif;font-size:21px;color:var(--amber)}
+
+  /* ---------- offers ---------- */
+  .offers{padding:84px 0}
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:34px}
+  .sec-head h2{font-size:clamp(27px,3vw,36px);margin-top:12px;max-width:22ch}
+  .sec-head .all-link{font-weight:800;color:var(--sea);text-decoration:none;display:flex;align-items:center;gap:7px;padding:8px 0}
+  .sec-head .all-link:hover{text-decoration:underline}
+  .offer-grid{display:grid;grid-template-columns:2fr 1fr;gap:44px;align-items:start}
+  .featured{background:var(--white);border-radius:var(--r-m);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow-soft)}
+  .featured img{width:100%;aspect-ratio:16/8.5;object-fit:cover}
+  .featured .body{padding:26px 28px 28px}
+  .featured .tag{display:inline-block;background:var(--amber);color:var(--ink);font-weight:800;font-size:13px;padding:5px 12px;border-radius:var(--r-s);margin-bottom:12px}
+  .featured h3{font-size:25px;margin-bottom:4px}
+  .featured .where{color:var(--ink-soft);font-weight:700;font-size:15px;margin-bottom:14px}
+  .featured .facts{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:20px}
+  .featured .facts li{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+  .featured .facts .icon{width:18px;height:18px;color:var(--sea)}
+  .featured .price-row{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:18px}
+  .featured .price small{display:block;font-size:13.5px;color:var(--ink-soft);font-weight:700}
+  .featured .price b{font-family:'Baloo 2',sans-serif;font-size:30px;color:var(--coral)}
+  .deal-list{list-style:none}
+  .deal-list li{border-top:1px solid var(--line)}
+  .deal-list li:last-child{border-bottom:1px solid var(--line)}
+  .deal-list a{
+    display:block;padding:18px 6px;text-decoration:none;
+    transition:background-color .15s ease-out,padding-left .18s ease-out;
+  }
+  .deal-list a:hover{background:var(--sand-deep);padding-left:14px}
+  .deal-list .top{display:flex;justify-content:space-between;gap:14px;align-items:baseline}
+  .deal-list h3{font-size:17.5px}
+  .deal-list .price{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:19px;color:var(--coral);white-space:nowrap}
+  .deal-list p{font-size:14px;color:var(--ink-soft);margin-top:2px}
+  .deal-list .flag{font-size:12.5px;font-weight:800;color:#8A5A10;margin-top:6px;display:inline-block}
+
+  /* ---------- ages ---------- */
+  .ages-sec{background:var(--sand-deep);padding:84px 0}
+  .ages-sec .wrap{display:grid;grid-template-columns:1fr 1.6fr;gap:64px;align-items:start}
+  .ages-sec .intro h2{font-size:clamp(27px,3vw,36px);margin:12px 0 14px}
+  .ages-sec .intro p{color:var(--ink-soft);max-width:38ch}
+  .ages-sec .intro .btn{margin-top:22px}
+  .age-rows{list-style:none}
+  .age-rows li{border-top:1px solid var(--line);padding:22px 0;display:grid;grid-template-columns:56px 1fr auto;gap:20px;align-items:center}
+  .age-rows li:last-child{border-bottom:1px solid var(--line)}
+  .age-ico{width:56px;height:56px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;color:var(--sea)}
+  .age-rows h3{font-size:19px}
+  .age-rows h3 span{color:var(--coral);font-size:15px;margin-left:8px;font-family:'Nunito Sans',sans-serif;font-weight:800}
+  .age-rows p{font-size:15px;color:var(--ink-soft)}
+  .age-rows .go{
+    width:48px;height:48px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+    color:var(--ink);text-decoration:none;transition:transform .18s ease-out,background-color .18s ease-out,border-color .18s ease-out;
+  }
+  .age-rows .go:hover{background:var(--coral);border-color:var(--coral);color:#fff;transform:translateX(4px)}
+
+  /* ---------- humans ---------- */
+  .humans{padding:88px 0}
+  .humans .wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
+  .humans figure{position:relative}
+  .humans figure img{aspect-ratio:4/4.6;object-fit:cover;border-radius:var(--r-m);width:86%}
+  .humans figcaption{
+    position:absolute;right:0;bottom:-18px;background:var(--white);border-radius:var(--r-m);
+    padding:16px 20px;box-shadow:var(--shadow-soft);max-width:270px;border-left:5px solid var(--amber);
+  }
+  .humans figcaption b{font-family:'Baloo 2',sans-serif;font-size:17px;display:block}
+  .humans figcaption span{font-size:13.5px;color:var(--ink-soft)}
+  .humans h2{font-size:clamp(27px,3vw,36px);margin:12px 0 14px}
+  .humans .quote{
+    font-size:18px;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--sea);
+    padding-left:18px;margin:0 0 26px;max-width:50ch;
+  }
+  .promises{list-style:none;display:grid;gap:14px;margin-bottom:30px}
+  .promises li{display:flex;gap:13px;align-items:flex-start;font-weight:600;font-size:15.5px}
+  .promises .icon{color:var(--coral);margin-top:2px;width:20px;height:20px}
+  .call-line{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .call-line .phone{font-family:'Baloo 2',sans-serif;font-weight:700;font-size:23px;text-decoration:none;color:var(--sea);display:flex;align-items:center;gap:9px}
+  .call-line .phone:hover{text-decoration:underline}
+  .call-line small{color:var(--ink-soft);font-weight:700}
+
+  /* ---------- reviews ---------- */
+  .reviews{background:var(--ink);color:var(--sand);padding:88px 0}
+  .reviews .wrap{display:grid;grid-template-columns:1.4fr 1fr;gap:70px;align-items:center}
+  .reviews .kicker{color:var(--amber)}
+  .reviews blockquote.big{
+    font-family:'Baloo 2',sans-serif;font-weight:500;font-size:clamp(23px,2.6vw,32px);line-height:1.35;margin:18px 0 22px;
+  }
+  .reviews cite{font-style:normal;font-weight:800;font-size:15.5px}
+  .reviews cite span{display:block;font-weight:600;color:rgba(250,245,236,.65);font-size:14px}
+  .score{display:flex;align-items:center;gap:14px;margin-top:30px;padding-top:24px;border-top:1px solid rgba(250,245,236,.18)}
+  .score b{font-family:'Baloo 2',sans-serif;font-size:34px;color:var(--amber)}
+  .score p{font-size:14.5px;color:rgba(250,245,236,.75);max-width:24ch}
+  .mini-reviews{display:grid;gap:0}
+  .mini-reviews article{padding:22px 0;border-top:1px solid rgba(250,245,236,.18)}
+  .mini-reviews article:first-child{border-top:none}
+  .mini-reviews p{font-size:15.5px;font-style:italic;color:rgba(250,245,236,.85);margin-bottom:8px}
+  .mini-reviews cite{font-size:14px}
+
+  /* ---------- final cta ---------- */
+  .final{padding:84px 0}
+  .final .box{
+    background:var(--sea);border-radius:var(--r-m);color:var(--sand);
+    padding:56px 60px;display:grid;grid-template-columns:1.5fr 1fr;gap:44px;align-items:center;
+    background-image:radial-gradient(circle at 88% 10%, rgba(233,161,59,.28), transparent 46%);
+  }
+  .final h2{font-size:clamp(26px,3vw,35px);margin-bottom:10px}
+  .final p{color:rgba(250,245,236,.85);max-width:48ch}
+  .final .actions{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+  .final .btn-coral{font-size:17px}
+  .final .btn-ghost{color:var(--sand);border-color:rgba(250,245,236,.4)}
+  .final .btn-ghost:hover{border-color:var(--sand)}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--ink);color:rgba(250,245,236,.8);padding:64px 0 34px;font-size:14.5px}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:44px;padding-bottom:44px;border-bottom:1px solid rgba(250,245,236,.15)}
+  footer h3{color:var(--sand);font-size:16px;margin-bottom:16px}
+  footer ul{list-style:none;display:grid;gap:9px}
+  footer a{color:rgba(250,245,236,.8);text-decoration:none}
+  footer a:hover{color:var(--sand);text-decoration:underline}
+  .foot-brand .logo b{color:var(--sand)}
+  .foot-brand .logo small{color:rgba(250,245,236,.6)}
+  .foot-brand p{margin-top:16px;max-width:34ch}
+  .foot-contact li{display:flex;gap:10px;align-items:flex-start}
+  .foot-contact .icon{width:17px;height:17px;margin-top:3px;color:var(--amber)}
+  .trust-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:34px}
+  .badge{
+    border:1.5px solid rgba(250,245,236,.35);border-radius:var(--r-s);padding:9px 15px;
+    font-weight:800;font-size:13px;letter-spacing:.04em;color:var(--sand);display:flex;align-items:center;gap:8px;
+  }
+  .badge .icon{width:16px;height:16px;color:var(--amber)}
+  .legal{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-top:26px;font-size:13px;color:rgba(250,245,236,.55)}
+
+  /* ---------- reveal motion ---------- */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .5s ease-out,transform .5s ease-out}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1080px){
+    .hero .wrap{grid-template-columns:1fr;gap:52px}
+    .hero-pics{min-height:0;max-width:560px}
+    .ages-sec .wrap,.humans .wrap,.reviews .wrap{grid-template-columns:1fr;gap:48px}
+    .offer-grid{grid-template-columns:1fr;gap:36px}
+    .humans figure{max-width:480px}
+    .date-row{grid-template-columns:repeat(2,1fr)}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:900px){
+    .nav ul,.nav .btn{display:none}
+    .nav-toggle{display:flex}
+    .utility .hours{display:none}
+  }
+  @media (max-width:620px){
+    .wrap{padding:0 20px}
+    .mobile-menu{padding:10px 20px 22px}
+    .hero{padding:44px 0 56px}
+    .sfields,.party-row{grid-template-columns:1fr}
+    .ages.show{grid-template-columns:repeat(2,1fr)}
+    .date-row{grid-template-columns:1fr}
+    .featured .body{padding:20px}
+    .age-rows li{grid-template-columns:44px 1fr;row-gap:8px}
+    .age-ico{width:44px;height:44px}
+    .age-rows .go{grid-column:2;justify-self:start}
+    .final .box{padding:36px 26px;grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr}
+    .utility .protect span:last-child{display:none}
+    .hero-pics .small{border-width:4px}
+  }
+</style>
+</head>
+<body>
+
+<!-- utility bar -->
+<div class="utility">
+  <div class="wrap">
+    <a href="tel:01204917344" aria-label="Call us on 01204 917344">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+      01204 917 344
+    </a>
+    <span class="hours">Open today until 7pm &middot; Sundays 10am&ndash;4pm</span>
+    <div class="protect">
+      <span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/></svg>ATOL 11486</span>
+      <span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>ABTA P7241</span>
+    </div>
+  </div>
+</div>
+
+<!-- nav -->
+<header class="site">
+  <div class="wrap nav">
+    <a class="logo" href="#" aria-label="Bucket and Spade Holidays home">
+      <svg class="logo-mark" viewBox="0 0 44 44" aria-hidden="true">
+        <path d="M8 18h28l-4 18a3 3 0 0 1-3 2.4H15A3 3 0 0 1 12 36z" fill="#C6472E"/>
+        <path d="M8 18h28" stroke="#322D26" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M30 16l6-11 3.5 2-6 10.4" fill="#E9A13B"/>
+        <circle cx="14" cy="10" r="3.4" fill="#1D6A96"/>
+      </svg>
+      <span><b>Bucket &amp; Spade</b><small>Family Holidays</small></span>
+    </a>
+    <ul>
+      <li><a href="#ages">Holidays by age</a></li>
+      <li><a href="#dates">School holiday deals</a></li>
+      <li><a href="#offers">This month's offers</a></li>
+      <li><a href="#team">Meet the team</a></li>
+    </ul>
+    <a class="btn btn-coral" href="#search">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      Search holidays
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu" aria-label="Mobile">
+    <a href="#ages">Holidays by age</a>
+    <a href="#dates">School holiday deals</a>
+    <a href="#offers">This month's offers</a>
+    <a href="#team">Meet the team</a>
+    <a href="#search"><strong style="color:var(--coral)">Search holidays &rarr;</strong></a>
+  </nav>
+</header>
+
+<main>
+  <!-- hero -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="wrap">
+      <div>
+        <p class="kicker">Family holiday specialists &middot; est. 2011</p>
+        <h1 id="heroTitle">The family holiday, <em>sorted properly.</em></h1>
+        <p class="lede">Free child places found, kids clubs checked by age, transfers under 90 minutes and <b>no 6am flights unless you ask for them</b>. We do the maths so you can just pack.</p>
+
+        <form class="search-card" id="search" aria-label="Search family holidays" action="#" method="get">
+          <h2><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Find your family's holiday</h2>
+          <div class="sfields">
+            <div class="sfield">
+              <label for="dest">Where to</label>
+              <select id="dest" name="dest">
+                <option>Anywhere warm</option>
+                <option>Majorca &amp; Menorca</option>
+                <option>Costa Blanca &amp; Costa del Sol</option>
+                <option>Algarve</option>
+                <option>Turkey &mdash; Dalaman coast</option>
+                <option>Greek islands</option>
+                <option>Canary Islands (winter sun)</option>
+                <option>Florida</option>
+              </select>
+            </div>
+            <div class="sfield">
+              <label for="when">When</label>
+              <select id="when" name="when">
+                <option>Summer holidays 2026</option>
+                <option>October half term 2026</option>
+                <option>Christmas &amp; New Year</option>
+                <option>February half term 2027</option>
+                <option>Easter 2027</option>
+                <option>May half term 2027</option>
+                <option>We're flexible</option>
+              </select>
+            </div>
+            <div class="party-row">
+              <div class="sfield">
+                <label for="adults">Adults</label>
+                <select id="adults" name="adults">
+                  <option>1 adult</option>
+                  <option selected>2 adults</option>
+                  <option>3 adults</option>
+                  <option>4 adults</option>
+                </select>
+              </div>
+              <div class="sfield">
+                <label for="children">Children</label>
+                <select id="children" name="children">
+                  <option value="0">No children</option>
+                  <option value="1">1 child</option>
+                  <option value="2" selected>2 children</option>
+                  <option value="3">3 children</option>
+                  <option value="4">4 children</option>
+                </select>
+              </div>
+            </div>
+            <div class="ages show" id="agesRow" aria-label="Children's ages"></div>
+          </div>
+          <button class="btn btn-coral" type="submit">Search 1,240 family holidays</button>
+          <p class="search-note">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/></svg>
+            Every price is the total for your whole party &mdash; flights, transfers and luggage in.
+          </p>
+        </form>
+      </div>
+
+      <div class="hero-pics">
+        <img class="main ph" src="https://images.unsplash.com/photo-1602088113235-229c19758e9f?w=620&h=775&fit=crop&q=80&auto=format" width="620" height="775" alt="Children jumping into a sunlit hotel pool while parents watch from loungers">
+        <img class="small ph" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=420&h=420&fit=crop&q=80&auto=format" width="420" height="420" alt="A sandcastle on the beach with a red bucket beside it">
+        <p class="sticker"><b>214</b> holidays with free child places this summer</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- school dates strip -->
+  <section class="dates" id="dates" aria-labelledby="datesTitle">
+    <div class="wrap">
+      <div class="head reveal">
+        <h2 id="datesTitle">School holiday dates, already priced</h2>
+        <p>Total prices for 2 adults + 2 children, incl. flights &amp; transfers</p>
+      </div>
+      <div class="date-row">
+        <a class="date-chip reveal" href="#">
+          <span class="when">Easter</span>
+          <span class="dates-span">27 Mar &ndash; 11 Apr 2027</span>
+          <span class="from">7 nights from <b>&pound;1,684</b></span>
+        </a>
+        <a class="date-chip reveal" href="#">
+          <span class="when">May half term</span>
+          <span class="dates-span">29 May &ndash; 6 Jun 2027</span>
+          <span class="from">7 nights from <b>&pound;1,893</b></span>
+        </a>
+        <a class="date-chip reveal" href="#">
+          <span class="when">Summer holidays</span>
+          <span class="dates-span">17 Jul &ndash; 31 Aug 2026</span>
+          <span class="from">7 nights from <b>&pound;2,236</b></span>
+        </a>
+        <a class="date-chip reveal" href="#">
+          <span class="when">October half term</span>
+          <span class="dates-span">24 Oct &ndash; 1 Nov 2026</span>
+          <span class="from">7 nights from <b>&pound;1,412</b></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- offers -->
+  <section class="offers" id="offers" aria-labelledby="offersTitle">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div>
+          <p class="kicker">Checked this week</p>
+          <h2 id="offersTitle">Offers our team would book for their own kids</h2>
+        </div>
+        <a class="all-link" href="#">See all 38 offers
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="offer-grid">
+        <article class="featured reveal">
+          <img class="ph" src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=980&h=520&fit=crop&q=80&auto=format" width="980" height="520" alt="Resort pool with a winding waterslide and palm trees">
+          <div class="body">
+            <span class="tag">2 free child places left</span>
+            <h3>Sunmill Bay Resort &amp; Splash Park</h3>
+            <p class="where">Sarigerme, Dalaman coast, Turkey &middot; All inclusive</p>
+            <ul class="facts">
+              <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19c2-2 4-2 6 0s4 2 6 0 4-2 4 0M4 13c2-2 4-2 6 0s4 2 6 0 4-2 4 0"/></svg>4 pools + splash park</li>
+              <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 3"/></svg>35-min transfer</li>
+              <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21V9a3 3 0 0 1 6 0v12M5 21h14"/></svg>Kids clubs 4&ndash;12</li>
+              <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20l9-15 9 15zM12 5v4"/></svg>10:40 daytime flight</li>
+            </ul>
+            <div class="price-row">
+              <p class="price"><small>7 nights &middot; 2 adults + 2 children &middot; Manchester</small><b>&pound;2,384 total</b></p>
+              <a class="btn btn-ghost" href="#">View this holiday</a>
+            </div>
+          </div>
+        </article>
+
+        <ul class="deal-list reveal">
+          <li><a href="#">
+            <span class="top"><h3>Alvor Praia Aparthotel</h3><span class="price">&pound;1,847</span></span>
+            <p>Algarve &middot; Half board &middot; 7 nights, family of 4</p>
+            <span class="flag">Free child place &middot; October half term</span>
+          </a></li>
+          <li><a href="#">
+            <span class="top"><h3>Cala Ferrera Beach Hotel</h3><span class="price">&pound;2,158</span></span>
+            <p>Majorca &middot; All inclusive &middot; 7 nights, family of 4</p>
+            <span class="flag">Kids club from age 3 &middot; cots free</span>
+          </a></li>
+          <li><a href="#">
+            <span class="top"><h3>Playa Dorada Family Suites</h3><span class="price">&pound;1,976</span></span>
+            <p>Lanzarote &middot; Half board &middot; 7 nights, family of 4</p>
+            <span class="flag">February half term winter sun</span>
+          </a></li>
+          <li><a href="#">
+            <span class="top"><h3>Porto Kalives Waterpark Hotel</h3><span class="price">&pound;2,463</span></span>
+            <p>Crete &middot; All inclusive &middot; 7 nights, family of 4</p>
+            <span class="flag">Teen zone &amp; 6 slides &middot; summer dates</span>
+          </a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ages -->
+  <section class="ages-sec" id="ages" aria-labelledby="agesTitle">
+    <div class="wrap">
+      <div class="intro reveal">
+        <p class="kicker">Holidays by age group</p>
+        <h2 id="agesTitle">A trip that fits the ages you've actually got</h2>
+        <p>A holiday that's brilliant with a baby is a bore for a 13-year-old. Tell us the ages and we'll only show you places that work.</p>
+        <a class="btn btn-ghost" href="#search">Start with your ages</a>
+      </div>
+      <ul class="age-rows">
+        <li class="reveal">
+          <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>
+          <div>
+            <h3>Babies &amp; tots <span>0&ndash;3</span></h3>
+            <p>Cots and bottle warmers confirmed before you book, short transfers, quiet pools, pram-friendly resorts.</p>
+          </div>
+          <a class="go" href="#" aria-label="See holidays for ages 0 to 3"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </li>
+        <li class="reveal">
+          <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.2 4.9L19 9l-3.5 3.6.8 5.4-4.3-2.5-4.3 2.5.8-5.4L5 9l4.8-1.1z"/></svg></span>
+          <div>
+            <h3>Little ones <span>4&ndash;7</span></h3>
+            <p>Kids clubs that genuinely take 4-year-olds, shallow splash zones, early teas, entertainment before bedtime.</p>
+          </div>
+          <a class="go" href="#" aria-label="See holidays for ages 4 to 7"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </li>
+        <li class="reveal">
+          <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c3-6 6-9 8-9s5 3 8 9M9 8l3-4 3 4"/></svg></span>
+          <div>
+            <h3>Big kids <span>8&ndash;12</span></h3>
+            <p>Waterparks and slides, sports academies, all-inclusive so the fourth ice cream isn't a negotiation.</p>
+          </div>
+          <a class="go" href="#" aria-label="See holidays for ages 8 to 12"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </li>
+        <li class="reveal">
+          <span class="age-ico"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></svg></span>
+          <div>
+            <h3>Teens <span>13+</span></h3>
+            <p>Proper wifi, teen hangouts away from the toddler disco, watersports, and enough going on that they leave their room.</p>
+          </div>
+          <a class="go" href="#" aria-label="See holidays for teenagers"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- humans -->
+  <section class="humans" id="team" aria-labelledby="teamTitle">
+    <div class="wrap">
+      <figure class="reveal">
+        <img class="ph" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=560&h=645&fit=crop&q=80&auto=format&crop=faces" width="560" height="645" alt="Claire from the Bucket and Spade team smiling at her desk">
+        <figcaption>
+          <b>Claire Ashworth</b>
+          <span>Senior travel adviser &middot; mum of three &middot; 14 years finding family holidays</span>
+        </figcaption>
+      </figure>
+      <div>
+        <p class="kicker">Real people, real opinions</p>
+        <h2 id="teamTitle">You'll speak to someone who's done the flight with a toddler</h2>
+        <blockquote class="quote">&ldquo;I won't sell you a hotel I wouldn't take my own kids to. If the kids club is really a cupboard with a telly, I'll tell you &mdash; and find you somewhere better.&rdquo;</blockquote>
+        <ul class="promises">
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>No 6am departures unless you ask for them</li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Transfers under 90 minutes &mdash; or we flag it before you book</li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Kids club ages re-checked with the hotel the week you travel</li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>One total price &mdash; luggage, transfers and seats together included</li>
+        </ul>
+        <p class="call-line">
+          <a class="phone" href="tel:01204917344">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+            01204 917 344
+          </a>
+          <small>Mon&ndash;Sat 9am&ndash;7pm &middot; Sun 10am&ndash;4pm</small>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- reviews -->
+  <section class="reviews" aria-labelledby="reviewsTitle">
+    <div class="wrap">
+      <div class="reveal">
+        <p class="kicker">From families like yours</p>
+        <h2 id="reviewsTitle" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Reviews</h2>
+        <blockquote class="big">&ldquo;Claire moved our flights so we didn't have to wake the kids at 3am, then rang the hotel to sort a cot and a fridge for milk. It's the first holiday where I actually relaxed on day one.&rdquo;</blockquote>
+        <cite>Gemma &amp; Rob Latham <span>Two kids (6 and 9) &middot; Wigan &middot; travelled August 2025</span></cite>
+        <div class="score">
+          <b>4.6/5</b>
+          <p>from 1,873 independent reviews collected after travel</p>
+        </div>
+      </div>
+      <div class="mini-reviews reveal">
+        <article>
+          <p>&ldquo;Told them our budget and the ages. Three options back the same afternoon, no upselling.&rdquo;</p>
+          <cite>Priya Chauhan, Leicester</cite>
+        </article>
+        <article>
+          <p>&ldquo;Our flight got cancelled and they'd rebooked us before I'd even found the email.&rdquo;</p>
+          <cite>Steve &amp; Donna Whitfield, Sunderland</cite>
+        </article>
+        <article>
+          <p>&ldquo;The kids club at the hotel was exactly as described. That never happens.&rdquo;</p>
+          <cite>Laura Beckett, Chesterfield</cite>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- final cta -->
+  <section class="final" aria-labelledby="finalTitle">
+    <div class="wrap">
+      <div class="box reveal">
+        <div>
+          <p class="kicker" style="color:var(--sand)">Ready when you are</p>
+          <h2 id="finalTitle">Tell us the ages. We'll do the rest.</h2>
+          <p>Search now, or send us the dates you're stuck with and the ages you're travelling with &mdash; we'll come back the same day with three holidays that actually work.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-coral" href="#search">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            Search family holidays
+          </a>
+          <a class="btn btn-ghost" href="tel:01204917344">Or call 01204 917 344</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- footer -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="logo" href="#" aria-label="Bucket and Spade Holidays home">
+          <svg class="logo-mark" viewBox="0 0 44 44" aria-hidden="true">
+            <path d="M8 18h28l-4 18a3 3 0 0 1-3 2.4H15A3 3 0 0 1 12 36z" fill="#C6472E"/>
+            <path d="M8 18h28" stroke="#FAF5EC" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M30 16l6-11 3.5 2-6 10.4" fill="#E9A13B"/>
+            <circle cx="14" cy="10" r="3.4" fill="#1D6A96"/>
+          </svg>
+          <span><b>Bucket &amp; Spade</b><small>Family Holidays</small></span>
+        </a>
+        <p>Independent family holiday specialists, booking from our Bolton office since 2011.</p>
+        <div class="trust-row">
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/></svg>ATOL 11486</span>
+          <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>ABTA P7241</span>
+        </div>
+      </div>
+      <nav aria-label="Holidays">
+        <h3>Holidays</h3>
+        <ul>
+          <li><a href="#dates">School holiday deals</a></li>
+          <li><a href="#ages">Holidays by age group</a></li>
+          <li><a href="#offers">This month's offers</a></li>
+          <li><a href="#">Free child places</a></li>
+          <li><a href="#">All-inclusive family resorts</a></li>
+          <li><a href="#">Winter sun with kids</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Help">
+        <h3>Help &amp; advice</h3>
+        <ul>
+          <li><a href="#">How our total pricing works</a></li>
+          <li><a href="#">Passports for children</a></li>
+          <li><a href="#">Flying with a baby</a></li>
+          <li><a href="#">Payment plans &amp; deposits</a></li>
+          <li><a href="#">Manage my booking</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h3>Talk to us</h3>
+        <ul class="foot-contact">
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><a href="tel:01204917344">01204 917 344</a></li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><a href="mailto:hello@bucketandspade.co.uk">hello@bucketandspade.co.uk</a></li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg><span>14 Chorley New Road,<br>Bolton BL1 4AP</span></li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 3"/></svg><span>Mon&ndash;Sat 9am&ndash;7pm<br>Sun 10am&ndash;4pm</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>&copy; <span id="year">2026</span> Bucket &amp; Spade Holidays Ltd. Registered in England No. 07641283.</span>
+      <span>Many of the flight-inclusive holidays on this website are financially protected by the ATOL scheme.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // mobile nav
+  var toggle = document.querySelector('.nav-toggle');
+  var menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', function () {
+    var open = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.closest('a')) { menu.classList.remove('open'); toggle.setAttribute('aria-expanded','false'); }
+  });
+
+  // children age selectors
+  var childrenSel = document.getElementById('children');
+  var agesRow = document.getElementById('agesRow');
+  function buildAges() {
+    var n = parseInt(childrenSel.value, 10);
+    agesRow.innerHTML = '';
+    if (!n) { agesRow.classList.remove('show'); return; }
+    agesRow.classList.add('show');
+    for (var i = 1; i <= n; i++) {
+      var wrap = document.createElement('div');
+      wrap.className = 'sfield';
+      var lab = document.createElement('label');
+      lab.setAttribute('for', 'childage' + i);
+      lab.textContent = 'Child ' + i + ' age';
+      var sel = document.createElement('select');
+      sel.id = 'childage' + i; sel.name = 'childage' + i;
+      for (var a = 0; a <= 17; a++) {
+        var opt = document.createElement('option');
+        opt.value = a; opt.textContent = a === 0 ? 'Under 1' : a;
+        if (a === (i === 1 ? 6 : 9)) opt.selected = true;
+        sel.appendChild(opt);
+      }
+      wrap.appendChild(lab); wrap.appendChild(sel);
+      agesRow.appendChild(wrap);
+    }
+  }
+  childrenSel.addEventListener('change', buildAges);
+  buildAges();
+
+  // staggered reveals (respects reduced motion)
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var siblings = Array.prototype.filter.call(el.parentNode.children, function (c) { return c.classList && c.classList.contains('reveal'); });
+          var idx = siblings.indexOf(el);
+          el.style.transitionDelay = (Math.max(idx, 0) * 60) + 'ms';
+          el.classList.add('in');
+          io.unobserve(el);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(function (el) { io.observe(el); });
+  }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

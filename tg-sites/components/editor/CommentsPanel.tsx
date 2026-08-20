@@ -28,15 +28,18 @@ import {
   reopenCommentAction,
   replyToCommentAction,
   resolveCommentAction,
+  siteCommentsAction,
 } from '../../app/actions/comments';
 import { relativeTime, absoluteDate } from '../../lib/activity/log';
-import type { ResolvedThread } from '../../lib/comments/resolve';
+import type { ResolvedThread, SiteComment } from '../../lib/comments/resolve';
 
 export function CommentsPanel({
   pageId,
   anchor = null,
   resolveAnchorLabel,
   onJump,
+  focusCommentId = null,
+  onCountChange,
 }: {
   pageId: string;
   /** The selected element a new comment can pin to, or null for page-level. */
@@ -45,7 +48,19 @@ export function CommentsPanel({
   resolveAnchorLabel?: (blockId: string) => string | null;
   /** Select the element a pinned thread is about. */
   onJump?: (blockId: string) => void;
+  /**
+   * A thread to reveal on open, arrived at by clicking it in the whole-site list
+   * on another page. The panel scrolls to it, marks it, and jumps to its element.
+   */
+  focusCommentId?: string | null;
+  /** The open count changed: the rail badge should re-read it. */
+  onCountChange?: () => void;
 }) {
+  // This page, or every page: the review of the page being edited, or the
+  // whole-site worklist of everything still open. Arriving at a specific thread
+  // forces the per-page view, because that thread lives on this page.
+  const [scope, setScope] = useState<'page' | 'site'>('page');
+
   const [threads, setThreads] = useState<ResolvedThread[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -59,8 +74,11 @@ export function CommentsPanel({
       } else {
         setError(result.error);
       }
+      // Whatever the panel just did, the site-wide open count may have moved, so
+      // let the rail badge re-read it. Harmless on a plain reload.
+      onCountChange?.();
     });
-  }, [pageId]);
+  }, [pageId, onCountChange]);
 
   // On mount and whenever the edited page changes: clear the old page's threads
   // so they cannot flash against the new page, then read the new ones.
@@ -68,6 +86,27 @@ export function CommentsPanel({
     setThreads(null);
     load();
   }, [load]);
+
+  // A focus target (a canvas pin, or a cross-page landing) is a specific thread
+  // on this page, so show the per-page view rather than the whole-site list.
+  useEffect(() => {
+    if (focusCommentId) setScope('page');
+  }, [focusCommentId]);
+
+  // Landing on a thread from the whole-site list: once this page's threads are
+  // in, scroll to it, mark it for a beat, and jump to the element it pins to.
+  // Kept to once per id with a ref so a later reload does not yank the view back.
+  const focusedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusCommentId || scope !== 'page' || !threads) return;
+    if (focusedRef.current === focusCommentId) return;
+    const found = threads.find((thread) => thread.id === focusCommentId);
+    if (!found) return;
+    focusedRef.current = focusCommentId;
+    const node = document.getElementById(`ed-comment-${focusCommentId}`);
+    node?.scrollIntoView({ block: 'center' });
+    if (found.anchor && onJump) onJump(found.anchor);
+  }, [focusCommentId, scope, threads, onJump]);
 
   // Open threads first, both newest first, so live feedback sits at the top and
   // finished threads settle beneath it.
@@ -83,48 +122,193 @@ export function CommentsPanel({
     <aside className="ed-outline ed-comments" aria-label="Comments">
       <div className="ed-comments__head">
         <span className="ed-comments__title">Comments</span>
-        {threads && threads.length > 0 && (
+        {scope === 'page' && threads && threads.length > 0 && (
           <span className="ed-comments__count">{openCount} open</span>
         )}
       </div>
 
-      <NewComment
-        anchor={anchor}
-        onSubmit={async (body, anchorId) => {
-          const result = await leaveCommentAction({ pageId, body, anchor: anchorId });
-          if (result.ok) load();
-          else setError(result.error);
-        }}
-      />
+      {/*
+        This page, or the whole site. The per-page view is where a comment is
+        left and a thread is read in context; the all-pages view is the team's
+        worklist of everything still open, wherever it was raised.
+      */}
+      <div className="ed-comments__scope" role="tablist" aria-label="Which comments">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={scope === 'page'}
+          className="ed-comments__scope-tab"
+          data-active={scope === 'page' ? '' : undefined}
+          onClick={() => setScope('page')}
+        >
+          This page
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={scope === 'site'}
+          className="ed-comments__scope-tab"
+          data-active={scope === 'site' ? '' : undefined}
+          onClick={() => setScope('site')}
+        >
+          All pages
+        </button>
+      </div>
 
-      {error && (
-        <p className="ed-comments__error" role="alert">
-          {error}
-        </p>
-      )}
-
-      {!threads ? (
-        <p className="ed-comments__note">Reading comments…</p>
-      ) : threads.length === 0 ? (
-        <p className="ed-comments__note">
-          No comments on this page yet. Leave one above and the Travelgenix team
-          will see it here.
-        </p>
+      {scope === 'site' ? (
+        <SiteComments currentPageId={pageId} />
       ) : (
-        <ol className="ed-comments__list">
-          {ordered.map((thread) => (
-            <Thread
-              key={thread.id}
-              thread={thread}
-              onChanged={load}
-              onError={setError}
-              resolveAnchorLabel={resolveAnchorLabel}
-              onJump={onJump}
-            />
-          ))}
-        </ol>
+        <>
+          <NewComment
+            anchor={anchor}
+            onSubmit={async (body, anchorId) => {
+              const result = await leaveCommentAction({ pageId, body, anchor: anchorId });
+              if (result.ok) load();
+              else setError(result.error);
+            }}
+          />
+
+          {error && (
+            <p className="ed-comments__error" role="alert">
+              {error}
+            </p>
+          )}
+
+          {!threads ? (
+            <p className="ed-comments__note">Reading comments…</p>
+          ) : threads.length === 0 ? (
+            <p className="ed-comments__note">
+              No comments on this page yet. Leave one above and the Travelgenix team
+              will see it here.
+            </p>
+          ) : (
+            <ol className="ed-comments__list">
+              {ordered.map((thread) => (
+                <Thread
+                  key={thread.id}
+                  thread={thread}
+                  focused={thread.id === focusCommentId}
+                  onChanged={load}
+                  onError={setError}
+                  resolveAnchorLabel={resolveAnchorLabel}
+                  onJump={onJump}
+                />
+              ))}
+            </ol>
+          )}
+        </>
       )}
     </aside>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The whole-site review: every open thread, grouped by the page it is on.
+ *
+ * Self-loading like the per-page view, but reaching across the site. Each thread
+ * is a link to its page with the comment carried in the address, so the editor
+ * opens there with the panel on that thread and its element selected. The page
+ * being edited is marked, so a reviewer can tell "here" from "elsewhere".
+ */
+function SiteComments({ currentPageId }: { currentPageId: string }) {
+  const [items, setItems] = useState<SiteComment[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    startTransition(async () => {
+      const result = await siteCommentsAction();
+      if (result.ok) {
+        setItems(result.data);
+        setError(null);
+      } else {
+        setError(result.error);
+      }
+    });
+  }, []);
+
+  if (error) {
+    return (
+      <p className="ed-comments__error" role="alert">
+        {error}
+      </p>
+    );
+  }
+  if (!items) return <p className="ed-comments__note">Reading comments…</p>;
+  if (items.length === 0) {
+    return (
+      <p className="ed-comments__note">
+        Nothing open across the site. Resolved threads stay on their own page.
+      </p>
+    );
+  }
+
+  // Keep the server's newest-first order, but gather each page's threads under one
+  // heading so the list reads page by page rather than jumping about.
+  const byPage: { page: SiteComment['page']; threads: SiteComment[] }[] = [];
+  const seen = new Map<string, number>();
+  for (const item of items) {
+    const at = seen.get(item.page.id);
+    if (at === undefined) {
+      seen.set(item.page.id, byPage.length);
+      byPage.push({ page: item.page, threads: [item] });
+    } else {
+      byPage[at].threads.push(item);
+    }
+  }
+
+  return (
+    <div className="ed-comments__site">
+      {byPage.map(({ page, threads }) => (
+        <section key={page.id} className="ed-comments__group">
+          <h3 className="ed-comments__group-head">
+            <span className="ed-comments__group-name">{page.title || 'Untitled'}</span>
+            {page.id === currentPageId && (
+              <span className="ed-comments__group-here">This page</span>
+            )}
+          </h3>
+          <ol className="ed-comments__site-list">
+            {threads.map((thread) => (
+              <li key={thread.id}>
+                <a
+                  className="ed-comments__site-row"
+                  href={`/editor?page=${encodeURIComponent(page.id)}&comment=${encodeURIComponent(thread.id)}`}
+                >
+                  <span className="ed-comments__site-meta">
+                    <span className="ed-comments__who">{thread.author ?? 'A former member'}</span>
+                    <span className="ed-comments__dot" aria-hidden="true">
+                      ·
+                    </span>
+                    <time dateTime={new Date(thread.createdAt).toISOString()}>
+                      {relativeTime(new Date(thread.createdAt))}
+                    </time>
+                  </span>
+                  <span className="ed-comments__site-body">{thread.body}</span>
+                  <span className="ed-comments__site-foot">
+                    {thread.anchor && (
+                      <span className="ed-comments__site-pin">
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z" />
+                          <circle cx="12" cy="10" r="2.2" />
+                        </svg>
+                        Pinned
+                      </span>
+                    )}
+                    {thread.replyCount > 0 && (
+                      <span className="ed-comments__site-replies">
+                        {thread.replyCount} {thread.replyCount === 1 ? 'reply' : 'replies'}
+                      </span>
+                    )}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -208,12 +392,15 @@ function NewComment({
 
 function Thread({
   thread,
+  focused = false,
   onChanged,
   onError,
   resolveAnchorLabel,
   onJump,
 }: {
   thread: ResolvedThread;
+  /** Arrived at from the whole-site list: mark it so the eye lands on it. */
+  focused?: boolean;
   onChanged: () => void;
   onError: (message: string) => void;
   resolveAnchorLabel?: (blockId: string) => string | null;
@@ -236,7 +423,12 @@ function Thread({
   const pinLabel = thread.anchor ? resolveAnchorLabel?.(thread.anchor) ?? null : null;
 
   return (
-    <li className="ed-comments__thread" data-resolved={thread.resolved ? 'true' : 'false'}>
+    <li
+      id={`ed-comment-${thread.id}`}
+      className="ed-comments__thread"
+      data-resolved={thread.resolved ? 'true' : 'false'}
+      data-focus={focused ? '' : undefined}
+    >
       {thread.anchor && (
         <button
           type="button"

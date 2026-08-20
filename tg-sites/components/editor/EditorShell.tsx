@@ -26,15 +26,18 @@ import {
 } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
 import { publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listPageCommentsAction, openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
 import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
+import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import { hasInnerColumns } from '../../lib/content/inner-columns';
 import { inlineEditableFields, richInlineField } from '../../lib/editor/inline-edit';
 import {
   DndContext,
@@ -95,7 +98,7 @@ const SAVE_DEBOUNCE_MS = 900;
  * one-level-deep rule is greppable. See the container block in
  * lib/content/blocks.ts and the matching refusal in addBlockAt.
  */
-const CONTAINER_ONLY: readonly string[] = ['container'];
+const CONTAINER_ONLY: readonly string[] = ['container', 'grid'];
 
 /**
  * Wrap what is selected in a span carrying one CSS declaration.
@@ -311,6 +314,16 @@ export interface ChromeRegion {
 
 interface EditorProps {
   isStaff?: boolean;
+  /**
+   * What this member may do, so the editor draws only the controls they can use.
+   * The server enforces the same set at every save (lib/auth/capabilities.ts), so
+   * this is a courtesy rather than the control: it keeps a content-only client
+   * from being shown an Add button or a design panel that would only refuse them.
+   *
+   * Optional and defaults to everything, so the standalone build and any caller
+   * that does not pass it get the full editor exactly as before.
+   */
+  caps?: readonly Capability[];
   pageId: string;
   initialPage: Page;
   initialStatus: 'draft' | 'published';
@@ -391,10 +404,18 @@ interface EditorProps {
    */
   chromeHeader?: ChromeRegion | null;
   chromeFooter?: ChromeRegion | null;
+  /**
+   * A comment thread to open on, arrived at from the whole-site review list on
+   * another page. Carried in the address (?comment=), it opens the Comments panel
+   * on that thread and jumps to the element it pins to. Only meaningful when
+   * editing a page.
+   */
+  focusComment?: string | null;
 }
 
 export function EditorShell({
   isStaff = true,
+  caps = ALL_CAPABILITIES,
   pageId,
   initialPage,
   initialStatus,
@@ -408,7 +429,18 @@ export function EditorShell({
   initialItemMeta,
   chromeHeader = null,
   chromeFooter = null,
+  focusComment = null,
 }: EditorProps) {
+  /*
+   * The two answers the editor's own drawing keys on. `structure` covers adding,
+   * moving and restyling: the rail's Add, the section and block pickers, and the
+   * design panels in the properties pane. `publish` covers putting changes live.
+   * Everything a content-only client is allowed, editing the words, swapping a
+   * photo, changing a link, stays on regardless. Staff and an unset owner have
+   * every capability, so for them these are both true and nothing changes.
+   */
+  const canStructure = caps.includes('structure');
+  const canPublish = caps.includes('publish');
   const [history, setHistory] = useState<History>({
     past: [],
     present: initialPage,
@@ -514,7 +546,45 @@ export function EditorShell({
    * same fold the top bar owns; this only says which of the two fills it when it
    * is open. Held here, not in the rail, because the shell draws the column.
    */
-  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments'>('layers');
+  // Arriving on a comment (from the whole-site list on another page) opens the
+  // Comments panel straight away rather than the outline.
+  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments'>(
+    focusComment ? 'comments' : 'layers',
+  );
+
+  /*
+   * The number behind the rail's Comments badge: how many threads are open across
+   * the whole site. Read once on mount, and again whenever the panel changes
+   * something (it calls back through onCountChange), so the badge follows a
+   * resolve or a new comment without a reload. Only pages carry comments, so the
+   * region and item screens never ask.
+   */
+  const [openComments, setOpenComments] = useState(0);
+  // The open threads pinned to an element on THIS page, so the canvas can mark
+  // each with a pin. Just the id and the block it is about; the panel holds the
+  // rest.
+  const [pageAnchors, setPageAnchors] = useState<{ threadId: string; blockId: string }[]>([]);
+  const refreshComments = useCallback(() => {
+    if (region || itemId) return;
+    void openCommentCountAction().then((result) => {
+      if (result.ok) setOpenComments(result.data);
+    });
+    void listPageCommentsAction({ pageId }).then((result) => {
+      if (!result.ok) return;
+      setPageAnchors(
+        result.data
+          .filter((thread) => !thread.resolved && thread.anchor)
+          .map((thread) => ({ threadId: thread.id, blockId: thread.anchor as string })),
+      );
+    });
+  }, [region, itemId, pageId]);
+  useEffect(() => {
+    refreshComments();
+  }, [refreshComments]);
+
+  // A thread to reveal in the panel, from the address (?comment=) or a click on a
+  // canvas pin. Seeded from the URL so a cross-page jump lands on it.
+  const [focusThread, setFocusThread] = useState<string | null>(focusComment);
 
   /*
    * The pages as the Menu block needs them, so a link that points at a folder
@@ -1114,6 +1184,34 @@ export function EditorShell({
   );
 
   /*
+   * The blocks on this page that carry an open comment, as canvas pins. Each
+   * anchor's stable block id is resolved to its current data-path here, where the
+   * page tree is in hand, and grouped so a block with two threads shows one pin
+   * with a count. A pin whose block has since been deleted resolves to nothing
+   * and simply does not appear.
+   */
+  const commentPins = useMemo(() => {
+    if (region || itemId) return [] as { path: string; threadId: string; count: number }[];
+    const byPath = new Map<string, { path: string; threadId: string; count: number }>();
+    for (const anchor of pageAnchors) {
+      const at = locateBlockById(page, anchor.blockId);
+      if (!at) continue;
+      const key = pathKey(at);
+      const existing = byPath.get(key);
+      if (existing) existing.count += 1;
+      else byPath.set(key, { path: key, threadId: anchor.threadId, count: 1 });
+    }
+    return [...byPath.values()];
+  }, [page, pageAnchors, region, itemId]);
+
+  // A canvas pin opens the Comments panel on its thread.
+  const openCommentThread = useCallback((threadId: string) => {
+    setRailPanel('comments');
+    setPanels((current) => ({ ...current, outline: true }));
+    setFocusThread(threadId);
+  }, []);
+
+  /*
    * PREVIEW MODE ON AND OFF.
    *
    * Entering clears everything that floats over the canvas: the selection and
@@ -1294,7 +1392,7 @@ export function EditorShell({
        * to style or edit them arrives in a later slice.
        */
       if (target.inner !== undefined && target.block !== undefined) {
-        if (type === 'container') return;
+        if (hasInnerColumns(type)) return;
         const container =
           page.sections[target.section]?.rows[target.row]?.columns[target.column]?.blocks[target.block];
         const inner = container ? containerColumns(container)[target.inner] : undefined;
@@ -1779,24 +1877,30 @@ export function EditorShell({
           Disabled once published with nothing new to say, rather than hidden.
           A button that vanishes leaves an agent wondering where it went; one
           that reads "Published" and sits still answers the question.
+
+          Hidden ENTIRELY, though, for a member without the publish capability:
+          there is no "disabled Publish" that helps them, and the server refuses
+          it anyway (slice 3). Staff and an unset owner keep it.
         */}
-        <button
-          type="button"
-          className="ed-btn ed-editing-only"
-          data-variant="primary"
-          onClick={publish}
-          disabled={publishing || (status === 'published' && !unpublished)}
-          title={
-            status === 'published' && !unpublished
-              ? `The live ${region ?? 'page'} already matches this draft`
-              : region
-                ? `Put this ${region} on every page of the site`
-                : 'Make this the version visitors see'
-          }
-        >
-          <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
-          {publishLabel}
-        </button>
+        {canPublish && (
+          <button
+            type="button"
+            className="ed-btn ed-editing-only"
+            data-variant="primary"
+            onClick={publish}
+            disabled={publishing || (status === 'published' && !unpublished)}
+            title={
+              status === 'published' && !unpublished
+                ? `The live ${region ?? 'page'} already matches this draft`
+                : region
+                  ? `Put this ${region} on every page of the site`
+                  : 'Make this the version visitors see'
+            }
+          >
+            <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
+            {publishLabel}
+          </button>
+        )}
 
         <Menu
           label="More actions"
@@ -1863,6 +1967,8 @@ export function EditorShell({
       */}
       <Rail
         active={panels.outline ? railPanel : null}
+        commentCount={openComments}
+        canAdd={canStructure}
         onToggle={(panel) => {
           if (panels.outline && railPanel === panel) {
             // The open panel's own icon: fold the column away.
@@ -1889,6 +1995,8 @@ export function EditorShell({
           anchor={commentAnchor}
           resolveAnchorLabel={resolveAnchorLabel}
           onJump={jumpToAnchor}
+          focusCommentId={focusThread}
+          onCountChange={refreshComments}
         />
       ) : (
         <Outline
@@ -1932,6 +2040,10 @@ export function EditorShell({
         onActivateRegion={activateTree}
         // So a Menu link to a folder shows its dropdown on the canvas too.
         navPages={navPages}
+        // A pin on every block that carries an open comment; clicking it opens
+        // the Comments panel on that thread.
+        commentPins={commentPins}
+        onOpenComment={openCommentThread}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never
@@ -1952,6 +2064,7 @@ export function EditorShell({
         page={page}
         selected={selected}
         isStaff={isStaff}
+        canStructure={canStructure}
         onSelect={select}
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}

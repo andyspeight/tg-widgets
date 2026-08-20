@@ -275,7 +275,9 @@ describe('what colour a divider is drawn in', () => {
   it('is set in the renderer, because no selector can reach the section next door', () => {
     const renderer = read('components', 'render', 'PageRenderer.tsx');
     expect(renderer).toContain('fill={sectionFill(above)}');
-    expect(renderer).toContain('fill={sectionFill(below)}');
+    // The hang branch (a header's own-colour wave) is the one exception; the
+    // ordinary bottom edge still borrows the neighbour below.
+    expect(renderer).toContain('fill={hangBottomDivider ? sectionFill(section) : sectionFill(below)}');
     expect(renderer).toContain('color: fill');
 
     // And the rule that did not work is gone, with the reason written down.

@@ -183,7 +183,7 @@ describe('turning a model answer into a plan', () => {
 // ---------------------------------------------------------------------------
 
 describe('the sections a plan builds', () => {
-  it('seeds a page the schema accepts and the sanitiser leaves alone', () => {
+  it('seeds a page the schema accepts and the sanitiser leaves alone', async () => {
     const result = planFromModel(
       JSON.stringify([
         { preset: HERO, heading: 'A real opener', body: 'A short line under it.' },
@@ -194,7 +194,7 @@ describe('the sections a plan builds', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    const sections = sectionsFromPlan(result.plan);
+    const sections = await sectionsFromPlan(result.plan);
     expect(sections.length).toBe(3);
 
     const parsed = seed(sections);
@@ -203,21 +203,21 @@ describe('the sections a plan builds', () => {
     expect(sanitisePage(parsed.page)).toEqual(parsed.page);
   });
 
-  it('writes the heading it was given into the opener', () => {
+  it('writes the heading it was given into the opener', async () => {
     const result = planFromModel(JSON.stringify([{ preset: HERO, heading: 'The words I asked for' }]));
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    const sections = sectionsFromPlan(result.plan);
+    const sections = await sectionsFromPlan(result.plan);
     const headings = blocks(sections).filter((block) => block.type === 'heading');
     expect(headings.some((block) => String(block.props.html) === 'The words I asked for')).toBe(true);
   });
 
-  it('mints fresh ids each build, so two pages never share a section', () => {
+  it('mints fresh ids each build, so two pages never share a section', async () => {
     const result = planFromModel(JSON.stringify([{ preset: HERO }]));
     if (!result.ok) throw new Error('plan did not build');
-    const a = sectionsFromPlan(result.plan);
-    const b = sectionsFromPlan(result.plan);
+    const a = await sectionsFromPlan(result.plan);
+    const b = await sectionsFromPlan(result.plan);
     expect(a[0].id).not.toBe(b[0].id);
   });
 
@@ -225,12 +225,12 @@ describe('the sections a plan builds', () => {
    * A SCRIPT TAG END TO END. The strongest claim: even if escaping were undone,
    * the built and sanitised page carries no live script or handler.
    */
-  it('carries no script or handler through to the built page', () => {
+  it('carries no script or handler through to the built page', async () => {
     const result = planFromModel(
       JSON.stringify([{ preset: HERO, heading: '<script>alert(1)</script>', body: '<b onmouseover=alert(1)>x</b>' }]),
     );
     if (!result.ok) throw new Error('plan did not build');
-    const parsed = seed(sectionsFromPlan(result.plan));
+    const parsed = seed(await sectionsFromPlan(result.plan));
     if (!parsed.ok) throw new Error('page did not parse');
     const json = JSON.stringify(sanitisePage(parsed.page));
     expect(json).not.toContain('<script');
@@ -250,26 +250,26 @@ describe('featuring an uploaded picture', () => {
     { preset: CTA, heading: 'Talk to us' },
   ];
 
-  it('places the picture behind the opening section and darkens it', () => {
-    const sections = featurePageImage(sectionsFromPlan(plan), BLOB);
+  it('places the picture behind the opening section and darkens it', async () => {
+    const sections = featurePageImage(await sectionsFromPlan(plan), BLOB);
     expect(sections[0].backgroundImage).toBe(BLOB);
     expect(sections[0].tone).toBe('dark');
     expect(Number(sections[0].overlay)).toBeGreaterThanOrEqual(45);
   });
 
-  it('touches only the first section', () => {
-    const featured = featurePageImage(sectionsFromPlan(plan), BLOB);
+  it('touches only the first section', async () => {
+    const featured = featurePageImage(await sectionsFromPlan(plan), BLOB);
     expect(featured[1].backgroundImage ?? '').not.toBe(BLOB);
   });
 
-  it('does nothing with no sections or no url', () => {
+  it('does nothing with no sections or no url', async () => {
     expect(featurePageImage([], BLOB)).toEqual([]);
-    const built = sectionsFromPlan(plan);
+    const built = await sectionsFromPlan(plan);
     expect(featurePageImage(built, '')).toBe(built);
   });
 
-  it('leaves a page the schema accepts and the sanitiser keeps, picture and all', () => {
-    const sections = featurePageImage(sectionsFromPlan(plan), BLOB);
+  it('leaves a page the schema accepts and the sanitiser keeps, picture and all', async () => {
+    const sections = featurePageImage(await sectionsFromPlan(plan), BLOB);
     const parsed = seed(sections);
     expect(parsed.ok, parsed.ok ? '' : parsed.errors.join('; ')).toBe(true);
     if (!parsed.ok) return;

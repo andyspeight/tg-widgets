@@ -80,13 +80,16 @@ describe('the list of templates', () => {
    * THE ONE THIS FILE EXISTS FOR. agencyPage() throws at module load on a slug
    * the starter no longer has, so merely importing the module above already
    * proves every designed template resolves. This states it as a claim: a
-   * designed template carries a real page with sections in it.
+   * designed template carries a real page that produces sections, either by
+   * naming presets (the site pages) or by a build hook (the designed homes).
    */
-  it('names starter pages that exist, each with sections', () => {
+  it('names starter pages that exist, each producing sections', () => {
     expect(DESIGNED.length).toBeGreaterThan(0);
     for (const template of DESIGNED) {
       expect(template.page, template.id).toBeTruthy();
-      expect(template.page!.sections.length, template.id).toBeGreaterThan(0);
+      const page = template.page!;
+      const produces = page.sections.length > 0 || typeof page.build === 'function';
+      expect(produces, `${template.id} names no preset and has no build hook`).toBe(true);
     }
   });
 
@@ -117,13 +120,13 @@ describe('the sections a template seeds', () => {
    * reads to take its old blank path untouched. An unknown id folding to Blank
    * is what stops a stale or hostile pick from blocking a create.
    */
-  it('is null for a blank page', () => {
-    expect(pageTemplateSections('blank')).toBeNull();
+  it('is null for a blank page', async () => {
+    expect(await pageTemplateSections('blank')).toBeNull();
   });
 
-  it('is null for an id it does not recognise', () => {
-    expect(pageTemplateSections('no-such-template')).toBeNull();
-    expect(pageTemplateSections('')).toBeNull();
+  it('is null for an id it does not recognise', async () => {
+    expect(await pageTemplateSections('no-such-template')).toBeNull();
+    expect(await pageTemplateSections('')).toBeNull();
   });
 
   /*
@@ -132,9 +135,9 @@ describe('the sections a template seeds', () => {
    * with an EMPTY profile, since that is the state of the brand new site doing
    * the adding.
    */
-  it('seeds a page the schema accepts and the sanitiser leaves alone', () => {
+  it('seeds a page the schema accepts and the sanitiser leaves alone', async () => {
     for (const template of DESIGNED) {
-      const sections = pageTemplateSections(template.id);
+      const sections = await pageTemplateSections(template.id);
       expect(sections, template.id).toBeTruthy();
 
       const parsed = seed(sections!);
@@ -150,10 +153,13 @@ describe('the sections a template seeds', () => {
    * travel agent's own new page is the most embarrassing thing this can do, and
    * an empty profile is exactly when it would happen.
    */
-  it('leaves no {{token}} behind on an empty profile', () => {
+  it('leaves no starter {{token}} behind on an empty profile', async () => {
     for (const template of DESIGNED) {
-      const sections = pageTemplateSections(template.id);
-      expect(JSON.stringify(sections), template.id).not.toContain('{{');
+      const sections = await pageTemplateSections(template.id);
+      // A frozen designed home carries {{tg:...}} import slots on purpose; strip
+      // them, then no starter token ({{company}} and friends) should remain.
+      const json = JSON.stringify(sections).replace(/\{\{tg:[^}]*\}\}/g, '');
+      expect(json, template.id).not.toMatch(/\{\{\s*(company|town|about)\b/);
     }
   });
 
@@ -161,9 +167,9 @@ describe('the sections a template seeds', () => {
    * A FRESH TREE EACH TIME. Two pages seeded from one template must not share a
    * section id, or the editor would edit the wrong one.
    */
-  it('mints new ids on every build', () => {
-    const a = pageTemplateSections('home');
-    const b = pageTemplateSections('home');
+  it('mints new ids on every build', async () => {
+    const a = await pageTemplateSections('home');
+    const b = await pageTemplateSections('home');
     expect(a?.[0]?.id).toBeTruthy();
     expect(a?.[0]?.id).not.toBe(b?.[0]?.id);
   });
@@ -272,7 +278,8 @@ describe('the id is the only thing that crosses from the browser', () => {
    * template we built.
    */
   it('builds the sections from the id, not from the request', () => {
-    expect(action).toContain('pageTemplateSections(String(input.template');
+    expect(action).toContain("const templateId = String(input.template ?? '')");
+    expect(action).toContain('pageTemplateSections(templateId)');
     // The action's input is a title, a slug, a parent and a template id. A
     // caller-supplied `sections` on the action would be the hole this closes.
     expect(action).not.toMatch(/input\.sections/);
@@ -310,5 +317,72 @@ describe('what reaches the database, read as source', () => {
     expect(create).toContain('let content = sanitisePage(base);');
     expect(create).toContain('if (input.sections && input.sections.length > 0)');
     expect(create).toContain('if (parsed.ok) content = sanitisePage(parsed.page);');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Proper styled pages
+// ---------------------------------------------------------------------------
+
+/*
+ * THE BAR ANDY SET ON 19 AUG 2026: a template page is a designed page, not a
+ * thin stack of white sections. This is supposed to replace Duda, and a Duda
+ * template's every page is designed. So every preset-named template page opens
+ * on a photographed hero, runs at least five sections, and changes band at
+ * least once. Held by test so the bar cannot quietly sag as pages are edited.
+ */
+describe('every template page is a proper styled page', () => {
+  // The preset-named site pages. The design-* templates are frozen designed
+  // homes with their own imagery and are governed by their own suite.
+  const SITE_PAGES = DESIGNED.filter((template) => !template.id.startsWith('design-'));
+
+  it('covers the pages a travel site actually needs', () => {
+    expect(SITE_PAGES.map((template) => template.id)).toEqual(
+      expect.arrayContaining(['home', 'about', 'services', 'holidays', 'reviews', 'team', 'faq', 'contact']),
+    );
+  });
+
+  it('opens every page on a photographed hero', () => {
+    for (const template of SITE_PAGES) {
+      const first = template.page!.sections[0];
+      const preset = presetById(first.preset);
+      expect(preset, `${template.id}: first preset exists`).toBeTruthy();
+      expect(preset!.category, `${template.id}: opens with a hero`).toBe('hero');
+      const photographed = Boolean(first.photo?.trim() || preset!.section?.backgroundQuery);
+      expect(photographed, `${template.id}: the opener has a photograph to fetch`).toBe(true);
+    }
+  });
+
+  it('runs at least five sections on every page', () => {
+    for (const template of SITE_PAGES) {
+      expect(
+        template.page!.sections.length,
+        `${template.id} is ${template.page!.sections.length} sections`,
+      ).toBeGreaterThanOrEqual(5);
+    }
+  });
+
+  it('changes band at least once on every page', async () => {
+    for (const template of SITE_PAGES) {
+      const sections = (await pageTemplateSections(template.id))!;
+      const tones = new Set(sections.map((section) => section.tone));
+      expect(tones.size, `${template.id} uses one flat tone`).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  /*
+   * A tone override in a spec lands on the built section, and only where the
+   * spec says: the mechanism the rhythm above is built with.
+   */
+  it('applies spec tone overrides to the built sections', async () => {
+    for (const template of SITE_PAGES) {
+      const spec = template.page!.sections;
+      const sections = (await pageTemplateSections(template.id))!;
+      expect(sections).toHaveLength(spec.length);
+      spec.forEach((entry, index) => {
+        if (!entry.tone) return;
+        expect(sections[index].tone, `${template.id}[${index}]`).toBe(entry.tone);
+      });
+    }
   });
 });

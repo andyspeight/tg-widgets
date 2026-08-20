@@ -1,0 +1,42 @@
+{
+  "projectRoots": ["designs/*"],
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [
+      "api/**",
+      "chrome-extension/**",
+      "extension/**",
+      "lib/**",
+      "public/**",
+      "scripts/**",
+      "test/**",
+      "tests/**",
+      "tg-slicer/**",
+      "public/widget-*.js",
+      "public/editor-*.html",
+      "tg-sites/components/editor/**",
+      "tg-sites/components/settings/**",
+      "tg-sites/components/sites/**",
+      "tg-sites/components/auth/**",
+      "tg-sites/components/collections/**",
+      "tg-sites/components/media/**",
+      "tg-sites/components/members/**",
+      "tg-sites/components/ui/**",
+      "tg-sites/app/editor/**",
+      "tg-sites/app/settings/**",
+      "tg-sites/app/sites/**",
+      "tg-sites/app/collections/**",
+      "tg-sites/app/members/**",
+      "tg-sites/app/signin/**",
+      "tg-sites/app/join/**",
+      "tg-sites/app/fonts/**",
+      "tg-sites/app/preview/**"
+    ],
+    "ignoreValues": [],
+    "designSystem": { "enabled": true }
+  },
+  "hook": {
+    "enabled": true,
+    "limits": { "maxFindings": 5, "maxChars": 8000 }
+  }
+}

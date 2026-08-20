@@ -62,6 +62,32 @@ function innerStack(block: Block): 'always' | 'tablet' | 'mobile' {
   return raw === 'always' || raw === 'tablet' ? raw : 'mobile';
 }
 
+/**
+ * A grid's column count per screen, clamped the same way innerGap clamps its
+ * number: props is a loose bag the schema never validates, so a value written by
+ * a newer build or a hand-edited tree has to reduce to something legal rather
+ * than reach the CSS raw. One to six; the defaults are the registry's.
+ */
+function gridAcross(block: Block): { desktop: number; tablet: number; phone: number } {
+  const props = block.props as Record<string, unknown>;
+  const count = (value: unknown, fallback: number): number => {
+    const n = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.min(6, Math.max(1, Math.round(n)));
+  };
+  return {
+    desktop: count(props.across, 3),
+    tablet: count(props.acrossTablet, 2),
+    phone: count(props.acrossPhone, 1),
+  };
+}
+
+/** How a grid's cells line up in their row. Stretch is the card-matching one. */
+function gridAlign(block: Block): 'top' | 'centre' | 'bottom' | 'stretch' {
+  const raw = (block.props as { align?: unknown }).align;
+  return raw === 'centre' || raw === 'bottom' || raw === 'stretch' ? raw : 'top';
+}
+
 interface Editable {
   editable?: boolean;
   /**
@@ -277,12 +303,21 @@ export function SectionRenderer({
   editorCanvas = false,
   above,
   below,
+  hangBottomDivider = false,
 }: {
   section: Section;
   index: number;
   /** The sections either side, for the shaped edges. See SectionDivider. */
   above?: Section;
   below?: Section;
+  /**
+   * Draw the bottom divider HANGING below the section in the section's OWN
+   * colour, rather than inside it in the neighbour's. A header region has no
+   * next section to borrow a colour from, and what its shaped edge means is
+   * different anyway: the bar's own silhouette dipping over the page (the
+   * MOKSHA wave), not a neighbour reaching up. Set by RegionRenderer.
+   */
+  hangBottomDivider?: boolean;
 } & Editable): ReactElement {
   const background = safeUrl(section.backgroundImage ?? '');
   const video = safeUrl(section.backgroundVideo ?? '');
@@ -504,7 +539,8 @@ export function SectionRenderer({
         edge="bottom"
         shape={section.dividerBottom}
         height={section.dividerHeight}
-        fill={sectionFill(below)}
+        fill={hangBottomDivider ? sectionFill(section) : sectionFill(below)}
+        hang={hangBottomDivider}
       />
 
       <div className="tgs-section__inner">
@@ -553,6 +589,15 @@ export function SectionRenderer({
  * Writing all of them at every level is what stops that.
  */
 function boxStyle(box: Box): CSSProperties {
+  // A gradient fill, only when both stops validated. It rides its own property
+  // rather than --tgs-bg, because --tgs-bg is used inside a linear-gradient() in
+  // the CSS (so a solid can be a colour), and a gradient inside a gradient is
+  // not a value. The CSS lets --tgs-bg-image win over the solid.
+  const gradient =
+    box.gradient && box.gradient.from && box.gradient.to
+      ? `linear-gradient(${box.gradient.angle}deg, ${box.gradient.from}, ${box.gradient.to})`
+      : undefined;
+
   return {
     '--tgs-pt': `${box.padding.top}px`,
     '--tgs-pr': `${box.padding.right}px`,
@@ -564,6 +609,10 @@ function boxStyle(box: Box): CSSProperties {
     // 'transparent' rather than 'inherit': a column with no background of its
     // own should show the section behind it, not repaint it.
     '--tgs-bg': box.background ?? 'transparent',
+    ...(gradient ? { '--tgs-bg-image': gradient } : {}),
+    // Backdrop blur for a glass bar. Only when set, so an ordinary box carries
+    // no backdrop-filter and pays nothing for it.
+    ...(box.blur > 0 ? { '--tgs-blur': `${box.blur}px` } : {}),
   } as CSSProperties;
 }
 
@@ -653,12 +702,15 @@ function SectionDivider({
   shape,
   height,
   fill,
+  hang = false,
 }: {
   edge: 'top' | 'bottom';
   shape: string | undefined;
   height: number | undefined;
   /** The colour of the section on the other side of this edge. */
   fill: string;
+  /** Hang below the section instead: see SectionRenderer.hangBottomDivider. */
+  hang?: boolean;
 }): ReactElement | null {
   const name = safeDivider(shape);
   if (name === 'none') return null;
@@ -694,6 +746,7 @@ function SectionDivider({
     <div
       className="tgs-section__divider"
       data-edge={edge}
+      data-hang={hang ? 'true' : undefined}
       aria-hidden="true"
       /*
        * THE COLOUR IS SET HERE RATHER THAN IN CSS, and it has to be. The value
@@ -874,7 +927,18 @@ function blockHost(
       style={styled ? style : undefined}
       {...pathAttr(editable, keyPath)}
     >
-      {block.type === 'container' ? (
+      {block.type === 'grid' ? (
+        <InnerGrid
+          cells={innerColumnsOf(block)}
+          across={gridAcross(block)}
+          gap={innerGap(block)}
+          align={gridAlign(block)}
+          keyPath={keyPath}
+          editable={editable}
+          editingPath={editingPath}
+          editorCanvas={editorCanvas}
+        />
+      ) : block.type === 'container' ? (
         <InnerColumns
           columns={innerColumnsOf(block)}
           gap={innerGap(block)}
@@ -901,6 +965,114 @@ function blockHost(
  * widths, the gap and the stacking come from the same CSS, only the data-path
  * carries the container's prefix so a click or a drop lands on the inner node.
  */
+/**
+ * A grid: cells that flow into a set number of tracks and wrap.
+ *
+ * WHY IT IS NOT InnerColumns WITH A FLAG. A container is one row whose columns
+ * each carry a width you drag, and it either sits side by side or stacks. A grid
+ * has no per-cell width at all: the tracks come from a count, the cells fall into
+ * them in order, and a tenth cell in a three-across grid starts a fourth row on
+ * its own. Two different layout models, so two components, and neither has to
+ * carry a branch for the other.
+ *
+ * THE COUNTS ARE CUSTOM PROPERTIES, NOT CLASSES, so a client may choose any of
+ * one to six per screen without the stylesheet carrying eighteen combinations.
+ * The container queries in globals.css swap which of the three is in force, and
+ * they key off .tgs-page, the same container the rest of the responsive work
+ * uses, so the editor's tablet and phone previews are honest rather than being
+ * a window-width guess.
+ *
+ * A CELL MAY SPAN more than one track, which is the thing a plain card grid
+ * cannot do: a featured tile twice the width of its neighbours, still in the
+ * grid. Clamped to the desktop count, because a cell spanning wider than the
+ * grid would silently create a track nothing else can reach.
+ */
+function InnerGrid({
+  cells,
+  across,
+  gap,
+  align,
+  keyPath,
+  editable = false,
+  editingPath = null,
+  editorCanvas = false,
+}: {
+  cells: Column[];
+  across: { desktop: number; tablet: number; phone: number };
+  gap: number;
+  align: 'top' | 'centre' | 'bottom' | 'stretch';
+  keyPath: string;
+} & Editable): ReactElement {
+  const style = {
+    '--tgs-grid-d': String(across.desktop),
+    '--tgs-grid-t': String(across.tablet),
+    '--tgs-grid-p': String(across.phone),
+    '--tgs-gap': `${gap}px`,
+  } as CSSProperties;
+
+  /*
+   * DEFENSIVE ABOUT THE CELL SHAPE, for the same reason InnerColumns is: an
+   * inner column lives in a block's loose props bag, so a box or a blocks array
+   * could arrive missing from a hand-authored tree in a way a section's column
+   * never could. A published page must never throw over a stray grid.
+   */
+  const spanOf = (cell: Column): number => {
+    const raw = (cell as { span?: unknown }).span;
+    const n = typeof raw === 'number' ? raw : Number(raw);
+    if (!Number.isFinite(n) || n <= 1) return 1;
+    return Math.min(across.desktop, Math.max(1, Math.round(n)));
+  };
+
+  return (
+    <div className="tgs-grid" style={style} data-align={align}>
+      {cells.map((cell, inner) => {
+        const cellPath = `${keyPath}k${inner}`;
+        const box = cell.box ?? EMPTY_BOX;
+        const blocks = Array.isArray(cell.blocks) ? cell.blocks : [];
+        const span = spanOf(cell);
+        return (
+          <div
+            key={cell.id ?? `cell-${inner}`}
+            className="tgs-col tgs-grid__cell"
+            data-shadow={box.shadow}
+            style={span > 1 ? { ...boxStyle(box), '--tgs-span': String(span) } as CSSProperties : boxStyle(box)}
+            {...pathAttr(editable, cellPath)}
+          >
+            {blocks.map((block, innerBlock) =>
+              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas),
+            )}
+
+            {editable && blocks.length === 0 && (
+              <div className="ed-empty-col">
+                <button
+                  type="button"
+                  className="ed-empty-col__add"
+                  data-add={cellPath}
+                  aria-label="Add content to this cell"
+                  title="Add content"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function InnerColumns({
   columns,
   gap,

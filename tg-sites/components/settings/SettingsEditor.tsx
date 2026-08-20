@@ -79,6 +79,19 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
    * fields would survive a per-key comparison today and not after the seventh is
    * added, and the failure mode is a change that says it saved and did not.
    */
+  /*
+   * Open on a specific tab when linked with ?tab=, so the visibility screen's
+   * "Fix in settings" lands on the exact panel rather than the first one. Read
+   * once from the URL on mount rather than through useSearchParams, which would
+   * pull this screen into a Suspense boundary it does not otherwise need, and
+   * would be a hydration mismatch if read in the initial state.
+   */
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('tab');
+    const valid: Tab[] = ['company', 'contact', 'analytics', 'branding', 'language', 'activity', 'domains', 'code'];
+    if (wanted && (valid as string[]).includes(wanted)) setTab(wanted as Tab);
+  }, []);
+
   const dirty = useMemo(
     () => JSON.stringify(settings) !== JSON.stringify(saved),
     [settings, saved],

@@ -19,6 +19,7 @@ import {
   EMPTY_BOX,
 } from './schema';
 import { blockDefinition, defaultPropsFor } from './blocks';
+import { hasInnerColumns } from './inner-columns';
 import { DEFAULT_LAYOUT, type Layout } from './layouts';
 
 let counter = 0;
@@ -44,8 +45,19 @@ export function createBlock(type: string): Block {
    * the defaults would be the same on every container ever added. So the two are
    * built fresh, the same way createRow builds a row's columns.
    */
-  if (type === 'container') {
-    block.props = { ...block.props, columns: [createColumn(50), createColumn(50)] };
+  if (hasInnerColumns(type)) {
+    /*
+     * A GRID STARTS WITH THREE CELLS, a container with two columns. Both are
+     * minted here rather than in the registry defaults, because each carries an
+     * id and an id baked into the defaults would be the same on every one ever
+     * added. The width is what a container resizes and a grid ignores: a grid's
+     * tracks come from its `across` count, so its cells are even by definition.
+     */
+    const cells = type === 'grid' ? 3 : 2;
+    block.props = {
+      ...block.props,
+      columns: Array.from({ length: cells }, () => createColumn(100 / cells)),
+    };
   }
   return block;
 }

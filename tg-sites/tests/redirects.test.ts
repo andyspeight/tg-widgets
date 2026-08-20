@@ -255,7 +255,11 @@ describe('sending somebody to the new address', () => {
    * request that was already going to be a 404.
    */
   it('is consulted only once the page and the collection have both said no', () => {
-    expect(route).toContain('if (!found) return gone(host, path);');
+    // A not-found falls through to gone(). Since 19 Aug 2026 the search results
+    // page may render between the two when the address is /search, but it is not
+    // a redirect, so the real guarantees are the two below: resolveRedirect
+    // appears exactly once, and only inside gone().
+    expect(route).toContain('return gone(host, path);');
 
     /*
      * EXACTLY ONCE, AND INSIDE gone(). Checking only that load() does not call

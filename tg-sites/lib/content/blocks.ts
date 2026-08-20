@@ -127,6 +127,20 @@ export interface BlockDefinition {
 // Shared option sets
 // ---------------------------------------------------------------------------
 
+/**
+ * How many columns a grid may be, per screen. Two to six: one is a stack, and
+ * past six a cell is too narrow to hold anything on any screen worth the name.
+ * Strings because a select's value is a string, and the renderer clamps anyway.
+ */
+const ACROSS_OPTIONS: SelectOption[] = [
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '4', label: '4' },
+  { value: '5', label: '5' },
+  { value: '6', label: '6' },
+];
+
 const ALIGN_OPTIONS: SelectOption[] = [
   { value: 'left', label: 'Left' },
   { value: 'centre', label: 'Centre' },
@@ -1361,6 +1375,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       size: 'm',
       align: 'left',
       newTab: false,
+      outline: false,
     },
     summarise: (props) => asString(props.label) || 'Button',
     fields: [
@@ -1388,6 +1403,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'colour', key: 'colour', label: 'Button colour', group: 'colours', help: 'Fills the button. Blank uses the style above.' },
       { kind: 'colour', key: 'textColour', label: 'Label colour', group: 'colours', help: 'The words on it. Blank follows the style.' },
+      { kind: 'toggle', key: 'outline', label: 'Outlined', group: 'colours', help: 'Draw the button colour as an outline round clear space, not a fill.' },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
       { kind: 'toggle', key: 'newTab', label: 'Open in a new tab' },
     ],
@@ -1450,6 +1466,81 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * SEARCH.
+     *
+     * A box that looks through the site's OWN pages, not the web. It belongs in
+     * Actions beside the menu and the buttons, because in practice it lives in a
+     * header next to them. It carries no results itself: it is a plain form that
+     * sends the visitor to /search, and the server builds the answer there with
+     * no JavaScript on the page. See SearchBlock and the search branch of the
+     * site route.
+     */
+    type: 'search',
+    label: 'Search',
+    group: 'Actions',
+    icon: 'search',
+    description: 'A box that searches your own pages.',
+    defaults: { placeholder: 'Search', display: 'box', align: 'left' },
+    summarise: () => 'Search',
+    fields: [
+      { kind: 'text', key: 'placeholder', label: 'Placeholder', max: 40, help: 'The faint words inside the empty box.' },
+      {
+        kind: 'select',
+        key: 'display',
+        label: 'Show as',
+        options: [
+          { value: 'box', label: 'A search box' },
+          { value: 'icon', label: 'Just the magnifier' },
+        ],
+        help: 'The magnifier on its own links to the search page, for a tidy header.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
+      { kind: 'colour', key: 'colour', label: 'Colour', group: 'colours', help: 'The magnifier tint, so it shows on a dark bar. Blank follows the header.' },
+    ],
+  },
+
+  {
+    /*
+     * LIGHT / DARK SWITCH.
+     *
+     * The one control on a published site that flips the whole page between a
+     * light and a dark version of the client's own colours. It belongs in
+     * Actions beside the menu and the search, because that is where it lives: in
+     * a header, to hand.
+     *
+     * Adding it is the OPT IN for dark mode. A site with a switch gets the dark
+     * palette and starts following a visitor's system preference; a site without
+     * one is never touched, whatever the visitor's system asks for. See
+     * hasThemeToggle, darkThemeTokens and the ThemeToggleScript: this block is
+     * also the ONLY thing on the whole platform that puts JavaScript on a
+     * published page, and it is progressive, so the automatic half still works
+     * with the script blocked.
+     */
+    type: 'theme-toggle',
+    label: 'Light / dark',
+    group: 'Actions',
+    icon: 'theme',
+    description: 'A switch that turns the whole site light or dark.',
+    defaults: { display: 'switch', align: 'left' },
+    summarise: () => 'Light / dark',
+    fields: [
+      {
+        kind: 'select',
+        key: 'display',
+        label: 'Show as',
+        options: [
+          { value: 'switch', label: 'A sliding switch' },
+          { value: 'icon', label: 'Just the moon' },
+        ],
+        help: 'The switch shows the sun and the moon; the moon on its own is tidier in a busy bar.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
+      { kind: 'colour', key: 'colour', label: 'Colour', group: 'colours', help: 'The switch tint, so it shows on a dark bar. Blank follows the header.' },
+    ],
+  },
+
+  {
+    /*
      * THE MENU.
      *
      * Added 31 Jul 2026 with the header and the footer, and it only makes sense
@@ -1472,6 +1563,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       align: 'left',
       gap: 'm',
       collapse: true,
+      uppercase: false,
       items: [
         { label: 'Home', href: '/', newTab: false },
         { label: 'Holidays', href: '/holidays', newTab: false },
@@ -1493,6 +1585,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         fields: [
           { kind: 'text', key: 'label', label: 'Label', max: 60 },
           { kind: 'url', key: 'href', label: 'Links to', placeholder: '/about or https://' },
+          {
+            kind: 'icon',
+            key: 'icon',
+            label: 'Icon',
+            help: 'Optional. A small icon beside the link, for the icon-led menus. Leave blank for words only.',
+          },
           { kind: 'toggle', key: 'newTab', label: 'New tab' },
         ],
       },
@@ -1548,6 +1646,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         ],
       },
       { kind: 'colour', key: 'linkColour', label: 'Link colour', help: 'The colour of the links. Blank follows the header.' },
+      { kind: 'toggle', key: 'uppercase', label: 'Uppercase links', help: 'Small capitals with a little letter-spacing, for the more formal headers.' },
     ],
   },
 
@@ -2048,6 +2147,97 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * THE GRID, asked for on 20 Aug 2026 alongside the rest of the Duda list.
+     *
+     * WHAT MAKES IT DIFFERENT FROM THE INNER CONTAINER, which is the question
+     * anybody looking at both in the picker will ask. A container is ONE ROW of
+     * columns you size by hand: two things side by side, and they stay side by
+     * side. A grid is a number of tracks that cells FLOW INTO and wrap out of,
+     * so nine cells in a three-across grid make three neat rows without anybody
+     * building three containers. It is the right tool the moment the count of
+     * things is not the count of columns.
+     *
+     * THREE COUNTS, ONE PER SCREEN, which is the "advanced" part and the thing a
+     * plain card grid cannot do: four across on a desktop, two on a tablet, one
+     * on a phone, each chosen rather than derived. A cell may also span more
+     * than one track, so a featured item can be twice the width of its
+     * neighbours without leaving the grid.
+     *
+     * The cells live in props.columns, the same shape a container uses, so the
+     * sanitiser, the outline, the schema upgrade and the drag rules all treat it
+     * the same way. See lib/content/inner-columns.ts, which is the one list that
+     * says which blocks are made this way.
+     */
+    type: 'grid',
+    label: 'Grid',
+    group: 'Layout',
+    icon: 'grid',
+    description: 'Cells that flow into a set number of columns and wrap.',
+    // The three starter cells are seeded by the factory with fresh ids, for the
+    // same reason a container's two are: a literal here would hand every grid
+    // the same cell ids.
+    defaults: {
+      columns: [],
+      across: '3',
+      acrossTablet: '2',
+      acrossPhone: '1',
+      gap: 16,
+      align: 'top',
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.columns) ? props.columns.length : 0;
+      return `Grid (${count} cell${count === 1 ? '' : 's'})`;
+    },
+    fields: [
+      {
+        kind: 'select',
+        key: 'across',
+        label: 'Columns on a desktop',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+      },
+      {
+        kind: 'select',
+        key: 'acrossTablet',
+        label: 'Columns on a tablet',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+      },
+      {
+        kind: 'select',
+        key: 'acrossPhone',
+        label: 'Columns on a phone',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+        help: 'One is usually right on a phone. Two suits small tiles like logos.',
+      },
+      {
+        kind: 'number',
+        key: 'gap',
+        label: 'Space between cells',
+        min: 0,
+        max: 96,
+        step: 2,
+        group: 'layout',
+        help: 'The gap between cells, in pixels. Applies both across and down.',
+      },
+      {
+        kind: 'select',
+        key: 'align',
+        label: 'Cells line up',
+        group: 'layout',
+        options: [
+          { value: 'top', label: 'At the top' },
+          { value: 'centre', label: 'In the middle' },
+          { value: 'bottom', label: 'At the bottom' },
+          { value: 'stretch', label: 'Same height' },
+        ],
+        help: 'Same height is what makes a row of cards match when their words differ in length.',
+      },
+    ],
+  },
+  {
     type: 'divider',
     label: 'Divider',
     group: 'Layout',
@@ -2188,14 +2378,29 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * HTML, OPEN TO EVERY CLIENT SINCE 20 AUG 2026.
+     *
+     * Andy: "HTML needs to be available for anyone as that is how some of our
+     * widgets get added." It was staff-only until then, and the reason was the
+     * sanitiser rather than the block: a regex walk over pasted markup is how
+     * mutation XSS gets in. Opening it meant building the parser-backed
+     * sanitiser first (lib/content/sanitise-embed.ts), not removing a flag.
+     *
+     * A pasted Travelgenix embed now WORKS, which it would not have before even
+     * with the gate off: the container's data-tg-* attributes survive and the
+     * script tag survives, because its src is on our own origin. Anybody else's
+     * script is still dropped. For a third-party widget the sealed iframe of
+     * `embed-widget` remains the right door, and for one of ours the `widget`
+     * block is still tidier than pasting code.
+     */
     type: 'embed',
-    label: 'Embed code',
+    label: 'HTML',
     group: 'Advanced',
     icon: 'code',
-    description: 'Raw HTML that runs in the page itself. Travelgenix staff only.',
-    staffOnly: true,
+    description: 'Paste an embed code or your own HTML.',
     defaults: { html: '' },
-    summarise: () => 'Embed code',
+    summarise: () => 'HTML',
     fields: [
       {
         kind: 'textarea',
@@ -2203,7 +2408,9 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'HTML',
         rows: 8,
         max: 20000,
-        help: 'Sanitised on save and again on render. Scripts and event handlers are stripped.',
+        help:
+          'Cleaned on save and again when the page draws. Travelgenix widget embed codes work as pasted. '
+          + 'Scripts from anywhere else are removed, so for another company\'s widget use Embedded widget instead.',
       },
     ],
   },

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-// Imported here as well as in the dashboard, for the same reason /collections
-// does it: the error paths below render .sv- classes without mounting the
-// dashboard, and a bare unstyled error explains a misconfiguration badly.
+// editor.css FIRST, because it defines the --ed- tokens the other two are
+// written in. Without it every var() on this screen resolves to nothing and the
+// page renders as unstyled text, which is exactly the bug this import fixes.
+import '../../components/editor/editor.css';
 import '../../components/sites/sites.css';
 import '../../components/seo/seo.css';
 import { SeoDashboard, type PageReport } from '../../components/seo/SeoDashboard';
@@ -38,12 +39,15 @@ export const dynamic = 'force-dynamic';
 
 function Problem({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
-    <main className="sv-wrap">
-      <div className="sv-error">
-        <h1 className="sv-title">{heading}</h1>
-        {children}
-      </div>
-    </main>
+    // The token root, so even the error path is styled rather than bare text.
+    <div className="sv-root" data-theme="light">
+      <main className="sv-wrap">
+        <div className="sv-error">
+          <h1 className="sv-title">{heading}</h1>
+          {children}
+        </div>
+      </main>
+    </div>
   );
 }
 
@@ -107,7 +111,9 @@ export default async function SeoPage() {
   }));
 
   return (
-    <main className="sv-wrap">
+    // The token root and the light default, matching the settings screen. The
+    // dashboard sets its own width, so no .sv-wrap to cap it at reading width.
+    <div className="sv-root" data-theme="light">
       <SeoDashboard
         siteName={settings.companyName || tenant?.name || 'this site'}
         siteUrl={url}
@@ -115,6 +121,6 @@ export default async function SeoPage() {
         redirects={redirects}
         pages={reports}
       />
-    </main>
+    </div>
   );
 }

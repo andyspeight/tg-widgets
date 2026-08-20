@@ -8,7 +8,7 @@ import '../../components/sites/sites.css';
 import { MembersScreen } from '../../components/members/MembersScreen';
 import { activeSite, currentUser } from '../../lib/auth/session';
 import { isStaffEmail } from '../../lib/auth/staff';
-import { listInvites, listMembers } from '../../lib/db/members';
+import { listInvites, listMembers, siteDefaultPermissions } from '../../lib/db/members';
 
 export const metadata: Metadata = {
   title: 'People · Travelgenix Sites',
@@ -68,9 +68,10 @@ export default async function MembersPage() {
     );
   }
 
-  const [members, invites] = await Promise.all([
+  const [members, invites, defaultPermissions] = await Promise.all([
     listMembers(site.tenantId),
     listInvites(site.tenantId),
+    siteDefaultPermissions(site.tenantId),
   ]);
 
   /*
@@ -93,6 +94,7 @@ export default async function MembersPage() {
         invites={invites}
         canManage={canManage}
         meId={user.id}
+        defaultPermissions={defaultPermissions}
       />
     </main>
   );

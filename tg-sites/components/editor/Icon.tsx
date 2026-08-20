@@ -21,6 +21,7 @@ export type IconName =
   // structure
   | 'section'
   | 'columns'
+  | 'grid'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -82,6 +83,7 @@ export type IconName =
   | 'check'
   | 'close'
   | 'search'
+  | 'theme'
   | 'warning'
   | 'edit'
   | 'eye'
@@ -102,6 +104,9 @@ export type IconName =
 const PATHS: Record<IconName, string> = {
   section: 'M3 5h18M3 12h18M3 19h18',
   columns: 'M4 4h6v16H4zM14 4h6v16h-6z',
+  // Four cells: what a grid is, and distinct from `columns` at a glance,
+  // which is two tall bars.
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 
@@ -222,6 +227,8 @@ const PATHS: Record<IconName, string> = {
   close: 'M6 6l12 12M18 6L6 18',
   blank: '',
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
+  // A moon crescent: the light / dark switch, night side out.
+  theme: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z',
 
   // A head and shoulders, same 24x24 box and 2px stroke as the rest.
   // Drawn open at the bottom so it reads as a person rather than a filled

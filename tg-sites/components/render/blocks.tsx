@@ -1607,12 +1607,29 @@ function renderButton(button: Props, key: number): ReactElement | null {
    */
   const fill = safeColour(button.colour);
   const textColour = safeColour(button.textColour);
+  const outline = bool(button, 'outline');
   const style: CSSProperties = {};
-  if (fill) {
-    style.background = fill;
-    style.borderColor = fill;
+  if (outline) {
+    /*
+     * Outlined: the chosen colour is the edge and, unless a label colour is set,
+     * the words too, and the fill stays clear. This is what the dark navbar
+     * references use for a quiet call to action, a hairline pill rather than a
+     * solid one, and it is why `colour` alone could not do it: that fills.
+     */
+    if (fill) {
+      style.background = 'transparent';
+      style.borderColor = fill;
+      style.color = textColour ?? fill;
+    } else if (textColour) {
+      style.color = textColour;
+    }
+  } else {
+    if (fill) {
+      style.background = fill;
+      style.borderColor = fill;
+    }
+    if (textColour) style.color = textColour;
   }
-  if (textColour) style.color = textColour;
 
   return (
     <a
@@ -1636,6 +1653,207 @@ export function ButtonBlock({ props }: { props: Props }): ReactElement {
 export function ButtonGroupBlock({ props }: { props: Props }): ReactElement {
   const buttons = list(props, 'buttons');
   return <div className="tgs-buttons">{buttons.map(renderButton)}</div>;
+}
+
+/**
+ * SEARCH, WITH NO JAVASCRIPT.
+ *
+ * A plain GET form pointed at /search. The browser navigates on submit, the
+ * server builds the results, and there is no bundle behind any of it, the same
+ * principle the menu keeps. On a client's own hostname middleware carries the
+ * ?q= through to the site route, where /search is a real address answered by
+ * the search branch. See middleware.ts and the site route.
+ *
+ * TWO SHAPES. A box, for the headers that show a search field, and just the
+ * magnifier, for the ones that show only an icon. The icon is a LINK to the
+ * search page rather than a submit with an empty query behind it, so it needs
+ * no script and always has somewhere to go: the page it lands on carries the
+ * box.
+ *
+ * ON THE CANVAS it is a div, not a form, and the field is read only, so typing a
+ * query into a preview cannot navigate the editor away. Same `editing` flag the
+ * map and the logos read.
+ */
+export function SearchBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement {
+  const placeholder = str(props, 'placeholder') || 'Search';
+  const display = oneOf(props, 'display', ['box', 'icon'] as const, 'box');
+  // Alignment rides on the block wrapper's data-align (see PageRenderer), which
+  // sets text-align on the parent; an inline-flex search follows it, so there is
+  // nothing to set here. Same as every other inline block.
+
+  // The magnifier and the box tint, so the icon shows on a dark bar where the
+  // inherited text would be dark. The glass strokes currentColor, so setting the
+  // container's colour is enough for the icon; the box keeps its own fill.
+  const colour = safeColour(props.colour);
+  const tint = colour ? ({ color: colour } as CSSProperties) : undefined;
+
+  const glass = (
+    <svg
+      className="tgs-search__glass"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+
+  if (display === 'icon') {
+    return (
+      <div className="tgs-search" data-display="icon" style={tint}>
+        <a className="tgs-search__link" href="/search" aria-label={placeholder}>
+          {glass}
+        </a>
+      </div>
+    );
+  }
+
+  const field = (
+    <>
+      <input
+        className="tgs-search__input"
+        type="search"
+        name="q"
+        placeholder={placeholder}
+        aria-label={placeholder}
+        {...(editing ? { readOnly: true, tabIndex: -1 } : {})}
+      />
+      <button
+        className="tgs-search__submit"
+        type="submit"
+        aria-label="Search"
+        {...(editing ? { tabIndex: -1 } : {})}
+      >
+        {glass}
+      </button>
+    </>
+  );
+
+  if (editing) {
+    return (
+      <div className="tgs-search" data-display="box" style={tint}>
+        {field}
+      </div>
+    );
+  }
+
+  return (
+    <form
+      className="tgs-search"
+      data-display="box"
+      role="search"
+      method="get"
+      action="/search"
+      style={tint}
+    >
+      {field}
+    </form>
+  );
+}
+
+/**
+ * The Light / dark switch.
+ *
+ * A plain button, and nothing more until the page loads. The published page
+ * wires it with /theme-toggle.js (see ThemeToggleScript), which flips
+ * `data-theme` on the document and remembers the choice; the CSS in globals.css
+ * does the rest, and the automatic half runs with no script at all. On the
+ * editor canvas there is no script, so the button is inert and shows the light
+ * look, which is exactly right for a preview: pressing it there must not restyle
+ * the canvas the agent is building on.
+ *
+ * `type="button"`, so a switch dropped next to a search box never submits the
+ * form around it. The label carries the meaning; the sun and the moon are
+ * decorative and hidden from a screen reader, and which one shows is decided by
+ * the current theme in CSS, not here, so this render is the same in both modes.
+ */
+export function ThemeToggleBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement {
+  const display = oneOf(props, 'display', ['switch', 'icon'] as const, 'switch');
+  const colour = safeColour(props.colour);
+  const style = colour ? ({ color: colour } as CSSProperties) : undefined;
+
+  const sun = (
+    <svg
+      className="tgs-toggle__sun"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8" />
+    </svg>
+  );
+  const moon = (
+    <svg
+      className="tgs-toggle__moon"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+    </svg>
+  );
+
+  const common = {
+    className: 'tgs-toggle',
+    type: 'button' as const,
+    'data-display': display,
+    // The hook the script binds to. Left off on the canvas so a stray click while
+    // editing does nothing.
+    ...(editing ? { tabIndex: -1 } : { 'data-tg-theme-toggle': 'true' }),
+    'aria-label': 'Switch between light and dark',
+    style,
+  };
+
+  if (display === 'icon') {
+    return (
+      <button {...common}>
+        {moon}
+        {sun}
+      </button>
+    );
+  }
+
+  return (
+    <button {...common}>
+      <span className="tgs-toggle__track" aria-hidden="true">
+        {sun}
+        {moon}
+      </span>
+      <span className="tgs-toggle__knob" aria-hidden="true" />
+    </button>
+  );
 }
 
 /**
@@ -1678,12 +1896,23 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
        */
       const children = list(item, 'children');
 
+      /*
+       * The optional icon beside the word, for the icon-led menus in the header
+       * kit. Same guard as the icon block (isIconName, not truthiness): a name
+       * draws its glyph, anything else is left off entirely rather than rendered
+       * as a broken box. A menu is words first, so an unknown icon is silence,
+       * not an empty square.
+       */
+      const icon = str(item, 'icon');
+      const drawable = isIconName(icon);
+
       const link = (
         <a
           className="tgs-nav__link"
           href={href}
           {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
+          {drawable && <ContentIcon name={icon} className="tgs-nav__icon" />}
           {label}
           {children.length > 0 && (
             <svg
@@ -1800,6 +2029,9 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
   // Default true, because a menu that does not collapse is the wrong default on
   // a phone and this block exists mostly to be a header.
   const collapse = bool(props, 'collapse', true);
+  // Small capitals for the formal and technical bars. A presentation choice, so
+  // the labels stay their real words and CSS does the casing.
+  const uppercase = bool(props, 'uppercase');
 
   // The links' own type, each following the header unless the block sets it.
   // Every value is checked against the whitelist the field offered, so only the
@@ -1826,6 +2058,7 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
       data-layout={layout}
       data-align={align}
       data-gap={gap}
+      data-uppercase={uppercase ? 'true' : undefined}
       style={hasNavStyle ? navStyle : undefined}
     >
       <ul className="tgs-nav__list" data-collapse={collapse ? 'true' : undefined}>

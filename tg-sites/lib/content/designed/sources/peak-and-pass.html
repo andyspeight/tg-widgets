@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hard Miles Expedition Co. — Small-group expeditions, graded honestly</title>
+<meta name="description" content="Small-group expeditions on foot, rope and water. Max 12 per departure, qualified leaders, honest difficulty grades. ATOL protected. Based in Sheffield since 2014.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --peat:#17150f;
+    --peat-2:#211e15;
+    --bone:#ece5d8;
+    --bone-2:#e2d9c7;
+    --stone:#9a9180;
+    --stone-dark:#5d5747;
+    --moss:#7a7a5c;
+    --signal:#e4591c;
+    --signal-deep:#c74a13;
+    --signal-ink:#a83c0d;
+    --rule:rgba(236,229,216,.16);
+    --rule-light:rgba(23,21,15,.16);
+    --max:1440px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    font-family:'Source Sans 3',system-ui,sans-serif;
+    font-size:17px;line-height:1.6;
+    background:var(--peat);color:var(--bone);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  .display{font-family:'Oswald',sans-serif;text-transform:uppercase}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 clamp(20px,4vw,64px)}
+
+  /* photographic grade — one treatment across the shoot */
+  .grade{filter:saturate(.82) contrast(1.06) brightness(.96)}
+
+  .kicker{
+    font-family:'Oswald',sans-serif;text-transform:uppercase;
+    font-size:13px;font-weight:500;letter-spacing:.22em;
+    color:var(--signal);
+  }
+  .kicker::before{
+    content:"";display:inline-block;width:26px;height:2px;
+    background:var(--signal);vertical-align:middle;margin-right:12px;
+  }
+
+  /* reveal on scroll */
+  .rv{opacity:0;transform:translateY(22px);transition:opacity .5s ease-out,transform .5s ease-out}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+  /* ============ NAV ============ */
+  header{
+    position:absolute;top:0;left:0;right:0;z-index:40;
+    border-bottom:1px solid rgba(236,229,216,.14);
+  }
+  .nav{
+    max-width:var(--max);margin:0 auto;
+    padding:0 clamp(20px,4vw,64px);
+    display:flex;align-items:stretch;justify-content:space-between;gap:24px;
+    min-height:76px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:12px;text-decoration:none;
+  }
+  .brand-mark{
+    width:34px;height:34px;flex:none;
+  }
+  .brand-name{
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:19px;
+    letter-spacing:.08em;text-transform:uppercase;line-height:1.1;
+  }
+  .brand-name small{
+    display:block;font-family:'Source Sans 3',sans-serif;font-weight:400;
+    font-size:10.5px;letter-spacing:.28em;color:var(--stone);text-transform:uppercase;
+  }
+  .nav-links{display:flex;align-items:center;gap:clamp(16px,2.5vw,36px);list-style:none}
+  .nav-links a{
+    font-family:'Oswald',sans-serif;font-size:13.5px;font-weight:500;
+    letter-spacing:.14em;text-transform:uppercase;text-decoration:none;
+    color:var(--bone);padding:12px 2px;border-bottom:2px solid transparent;
+    transition:color .2s ease-out,border-color .2s ease-out;
+  }
+  .nav-links a:hover{color:var(--signal);border-bottom-color:var(--signal)}
+  .nav-cta-zone{display:flex;align-items:center;gap:18px}
+  .nav-phone{
+    font-size:14px;color:var(--stone);text-decoration:none;white-space:nowrap;
+  }
+  .nav-phone:hover{color:var(--bone)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;
+    letter-spacing:.12em;text-transform:uppercase;text-decoration:none;
+    min-height:48px;padding:0 26px;cursor:pointer;border:0;
+    transition:background .18s ease-out,transform .12s ease-out,color .18s ease-out;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-signal{background:var(--signal-deep);color:#fff}
+  .btn-signal:hover{background:var(--signal-ink)}
+  .btn-ghost{background:transparent;color:var(--bone);box-shadow:inset 0 0 0 2px var(--rule)}
+  .btn-ghost:hover{box-shadow:inset 0 0 0 2px var(--bone)}
+  .btn-dark{background:var(--peat);color:var(--bone)}
+  .btn-dark:hover{background:#000}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--signal);outline-offset:3px}
+  .menu-toggle{display:none;background:none;border:0;color:var(--bone);cursor:pointer;padding:10px;min-width:48px;min-height:48px}
+
+  /* ============ HERO ============ */
+  .hero{position:relative;isolation:isolate}
+  .hero-photo{
+    position:relative;height:clamp(540px,86vh,820px);overflow:hidden;
+  }
+  .hero-photo img{
+    width:100%;height:100%;object-fit:cover;object-position:center 38%;
+  }
+  .hero-photo::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(12deg,rgba(23,21,15,.82) 0%,rgba(23,21,15,.28) 42%,rgba(23,21,15,.05) 70%);
+  }
+  .hero-inner{
+    position:absolute;inset:0;z-index:2;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    max-width:var(--max);margin:0 auto;
+    padding:0 clamp(20px,4vw,64px) 0;
+  }
+  .hero-topline{
+    display:flex;gap:14px;align-items:center;margin-bottom:18px;
+    font-size:14.5px;color:var(--bone-2);
+  }
+  .hero-topline strong{color:#fff;font-weight:600}
+  .hero h1{
+    font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:clamp(64px,12.5vw,176px);
+    line-height:.88;letter-spacing:-.012em;
+    color:#fff;
+    margin-left:-0.045em;              /* crop the type off the column edge */
+    margin-bottom:-0.28em;             /* let it break over the image edge into the stats strip */
+    position:relative;z-index:5;
+    text-wrap:balance;
+  }
+  .hero h1 .ln2{color:var(--signal)}
+  .hero-sub{
+    max-width:560px;font-size:clamp(16px,1.4vw,19px);line-height:1.55;
+    color:var(--bone-2);margin-bottom:26px;
+  }
+  .hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:clamp(48px,7vh,80px)}
+
+  /* stats strip — the hero's second half */
+  .stats-strip{
+    background:var(--peat-2);border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+  }
+  .stats-grid{
+    max-width:var(--max);margin:0 auto;
+    padding:clamp(56px,7vw,84px) clamp(20px,4vw,64px) clamp(30px,3vw,40px);
+    display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,48px);
+  }
+  .stat{border-left:2px solid var(--signal);padding-left:clamp(14px,1.6vw,24px)}
+  .stat b{
+    display:block;font-family:'Oswald',sans-serif;font-weight:600;
+    font-size:clamp(30px,3.4vw,46px);line-height:1.05;letter-spacing:.01em;color:#fff;
+  }
+  .stat span{font-size:14.5px;color:var(--stone);letter-spacing:.02em}
+
+  /* ============ EXPEDITION LEDGER ============ */
+  .section-head{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    flex-wrap:wrap;margin-bottom:clamp(28px,4vw,52px);
+  }
+  .section-head h2{
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    font-size:clamp(30px,4vw,52px);line-height:1.02;letter-spacing:.005em;
+    max-width:14ch;
+  }
+  .section-head p{max-width:44ch;color:var(--stone);font-size:16px}
+
+  .ledger{padding:clamp(72px,9vw,128px) 0 clamp(56px,7vw,96px)}
+  .exp-row{
+    display:grid;gap:clamp(20px,3vw,48px);
+    grid-template-columns:minmax(0,7fr) minmax(0,5fr);
+    align-items:center;
+    border-top:1px solid var(--rule);
+    padding:clamp(26px,3.4vw,44px) 0;
+  }
+  .exp-row:nth-child(even){grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+  .exp-row:nth-child(even) .exp-media{order:2}
+  .exp-media{position:relative;overflow:hidden}
+  .exp-media img{
+    width:100%;aspect-ratio:16/10;object-fit:cover;
+    transition:transform .5s ease-out;
+  }
+  .exp-row:hover .exp-media img{transform:scale(1.035)}
+  .exp-index{
+    position:absolute;top:0;left:0;background:var(--peat);color:var(--bone);
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:.16em;
+    padding:8px 14px;
+  }
+  .exp-body h3{
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    font-size:clamp(24px,2.5vw,36px);line-height:1.08;margin:10px 0 6px;
+  }
+  .exp-body h3 a{text-decoration:none}
+  .exp-body h3 a:hover{color:var(--signal)}
+  .exp-where{font-size:15px;color:var(--stone);margin-bottom:16px}
+  .exp-desc{max-width:52ch;color:var(--bone-2);margin-bottom:20px;font-size:16px}
+  .exp-meta{
+    display:flex;flex-wrap:wrap;gap:0 28px;row-gap:10px;
+    padding:14px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    margin-bottom:20px;font-size:14.5px;
+  }
+  .exp-meta div b{
+    display:block;font-family:'Oswald',sans-serif;font-weight:500;font-size:17px;
+    letter-spacing:.02em;color:#fff;
+  }
+  .exp-meta div span{color:var(--stone);font-size:12.5px;text-transform:uppercase;letter-spacing:.12em}
+  .grade-pips{display:inline-flex;gap:4px;vertical-align:middle;margin-right:8px}
+  .grade-pips i{width:14px;height:8px;background:var(--rule);display:block}
+  .grade-pips i.on{background:var(--signal)}
+  .exp-foot{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
+  .exp-price{font-size:15px;color:var(--stone)}
+  .exp-price b{
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:24px;color:#fff;
+    letter-spacing:.01em;margin-right:4px;
+  }
+  .ledger-all{border-top:1px solid var(--rule);padding-top:28px;text-align:right}
+  .ledger-all a{
+    font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.14em;
+    font-size:14px;font-weight:600;text-decoration:none;color:var(--signal);
+    display:inline-flex;align-items:center;gap:10px;padding:12px 0;
+  }
+  .ledger-all a:hover{color:#fff}
+
+  /* ============ ITINERARY — bone chapter ============ */
+  .itin{background:var(--bone);color:var(--peat)}
+  .itin-grid{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);
+    gap:clamp(28px,4vw,72px);
+    padding:clamp(72px,9vw,128px) 0;
+  }
+  .itin .kicker{color:var(--signal-ink)}
+  .itin .kicker::before{background:var(--signal-ink)}
+  .itin-left{position:relative}
+  .itin-left .sticky{position:sticky;top:32px}
+  .itin-left h2{
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    font-size:clamp(30px,3.6vw,48px);line-height:1.02;margin:12px 0 10px;
+  }
+  .itin-where{color:var(--stone-dark);font-size:15px;margin-bottom:20px}
+  .itin-left img{width:100%;aspect-ratio:4/3.4;object-fit:cover;margin-bottom:18px}
+  .itin-quickstats{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    border:1px solid var(--rule-light);
+  }
+  .itin-quickstats div{padding:12px 14px;border-right:1px solid var(--rule-light)}
+  .itin-quickstats div:last-child{border-right:0}
+  .itin-quickstats b{
+    display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:20px;line-height:1.1;
+  }
+  .itin-quickstats span{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--stone-dark)}
+  .day{
+    display:grid;grid-template-columns:74px minmax(0,1fr) auto;
+    gap:18px;padding:20px 0;border-top:1px solid var(--rule-light);
+    align-items:baseline;
+  }
+  .day:last-of-type{border-bottom:1px solid var(--rule-light)}
+  .day-n{
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;
+    letter-spacing:.03em;color:var(--signal-deep);
+  }
+  .day h3{font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;font-size:17.5px;letter-spacing:.03em;margin-bottom:4px}
+  .day p{font-size:15.5px;color:#3d392e;max-width:58ch}
+  .day-stat{
+    font-family:'Oswald',sans-serif;font-weight:500;font-size:14px;letter-spacing:.06em;
+    color:var(--stone-dark);white-space:nowrap;text-align:right;
+  }
+  .day-stat b{display:block;color:var(--peat);font-size:16px}
+  .itin-note{
+    margin-top:26px;padding:18px 22px;
+    border-left:3px solid var(--signal-deep);background:rgba(228,89,28,.07);
+    font-size:15.5px;max-width:62ch;
+  }
+  .itin-note b{font-weight:700}
+  .itin-actions{margin-top:26px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .itin-actions .from{font-size:15px;color:var(--stone-dark)}
+  .itin-actions .from b{font-family:'Oswald',sans-serif;font-size:22px;color:var(--peat);font-weight:600}
+
+  /* ============ GRADING ============ */
+  .grading{background:var(--bone-2);color:var(--peat);border-top:1px solid var(--rule-light)}
+  .grading-inner{padding:clamp(72px,9vw,120px) 0}
+  .grading .kicker{color:var(--signal-ink)}
+  .grading .kicker::before{background:var(--signal-ink)}
+  .grade-row{
+    display:grid;
+    grid-template-columns:150px minmax(0,1.5fr) minmax(0,1fr);
+    gap:clamp(16px,3vw,48px);
+    padding:22px 0;border-top:1px solid var(--rule-light);
+    align-items:baseline;
+  }
+  .grade-row:last-of-type{border-bottom:1px solid var(--rule-light)}
+  .grade-row.hot{background:rgba(228,89,28,.06)}
+  .grade-id{display:flex;align-items:center;gap:12px}
+  .grade-id b{
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:30px;color:var(--signal-deep);
+  }
+  .grade-id span{
+    font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;
+    letter-spacing:.1em;font-size:15px;
+  }
+  .grade-row p{font-size:15.5px;color:#3d392e;max-width:52ch}
+  .grade-eg{font-size:14px;color:var(--stone-dark)}
+  .grade-eg b{display:block;font-weight:700;color:var(--peat);font-size:14.5px}
+  .grading-foot{margin-top:30px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-size:15px;color:var(--stone-dark);max-width:70ch}
+
+  /* ============ FIELD NOTES ============ */
+  .notes{background:var(--peat)}
+  .notes-grid{
+    display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);
+    gap:clamp(28px,4vw,72px);align-items:center;
+    padding:clamp(72px,9vw,128px) 0;
+  }
+  .notes blockquote{
+    font-family:'Oswald',sans-serif;font-weight:500;
+    font-size:clamp(24px,2.8vw,40px);line-height:1.22;text-transform:none;
+    margin:18px 0 22px;max-width:24ch;color:#fff;
+  }
+  .notes blockquote em{font-style:normal;color:var(--signal)}
+  .notes figcaption{font-size:15px;color:var(--stone)}
+  .notes figcaption b{color:var(--bone);font-weight:600}
+  .notes-score{
+    margin-top:30px;padding-top:22px;border-top:1px solid var(--rule);
+    display:flex;gap:34px;flex-wrap:wrap;
+  }
+  .notes-score div b{
+    display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:26px;color:#fff;
+  }
+  .notes-score div span{font-size:13.5px;color:var(--stone)}
+  .notes-media{position:relative}
+  .notes-media img{width:100%;aspect-ratio:4/4.6;object-fit:cover}
+  .notes-media figcaption{
+    position:absolute;left:0;bottom:0;background:var(--peat);
+    padding:10px 16px 10px 0;font-size:13px;color:var(--stone);max-width:85%;
+  }
+
+  /* ============ GUIDES BAND ============ */
+  .guides{border-top:1px solid var(--rule)}
+  .guides-inner{
+    padding:clamp(56px,7vw,88px) 0;
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,64px);
+  }
+  .guides h2{
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    font-size:clamp(26px,3vw,40px);line-height:1.05;margin-top:10px;max-width:12ch;
+  }
+  .guide-line{
+    display:flex;justify-content:space-between;gap:18px;align-items:baseline;
+    padding:16px 0;border-top:1px solid var(--rule);font-size:16px;
+  }
+  .guide-line:last-child{border-bottom:1px solid var(--rule)}
+  .guide-line b{font-weight:600;color:#fff}
+  .guide-line span{color:var(--stone);font-size:14.5px;text-align:right}
+  .guides p.blurb{color:var(--bone-2);max-width:52ch;margin-top:14px;font-size:16px}
+
+  /* ============ CTA BAND ============ */
+  .cta-band{background:var(--signal-deep);color:#fff}
+  .cta-inner{
+    padding:clamp(48px,6vw,72px) 0;
+    display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;
+  }
+  .cta-inner h2{
+    font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:clamp(28px,3.6vw,50px);line-height:1;
+  }
+  .cta-inner p{margin-top:8px;font-size:16.5px;color:rgba(255,255,255,.88);max-width:46ch}
+
+  /* ============ FOOTER ============ */
+  footer{background:#100e0a;border-top:1px solid var(--rule)}
+  .foot-grid{
+    padding:clamp(56px,6vw,80px) 0 28px;
+    display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:clamp(24px,3vw,48px);
+  }
+  .foot-brand p{color:var(--stone);font-size:15px;max-width:34ch;margin-top:14px}
+  footer h4{
+    font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;
+    letter-spacing:.16em;font-size:13px;color:var(--stone);margin-bottom:16px;
+  }
+  footer ul{list-style:none}
+  footer ul li{margin-bottom:10px}
+  footer ul a{text-decoration:none;font-size:15px;color:var(--bone-2);padding:2px 0;display:inline-block}
+  footer ul a:hover{color:var(--signal)}
+  .foot-contact p{font-size:15px;color:var(--bone-2);margin-bottom:10px}
+  .foot-contact a{text-decoration:none}
+  .foot-contact a:hover{color:var(--signal)}
+  .foot-contact .tel{font-family:'Oswald',sans-serif;font-size:22px;font-weight:600;color:#fff;letter-spacing:.02em}
+  .foot-legal{
+    border-top:1px solid var(--rule);padding:22px 0 34px;
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    font-size:13px;color:var(--stone);
+  }
+  .foot-badges{display:flex;gap:14px;align-items:center}
+  .foot-badges span{
+    border:1px solid var(--rule);padding:6px 12px;
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--stone);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:1060px){
+    .nav-phone{display:none}
+    .guides-inner{grid-template-columns:1fr}
+  }
+  @media (max-width:900px){
+    .nav-links{display:none}
+    .menu-toggle{display:inline-flex;align-items:center;justify-content:center}
+    .nav-links.open{
+      display:flex;position:absolute;top:76px;left:0;right:0;
+      flex-direction:column;align-items:flex-start;gap:0;
+      background:var(--peat);border-bottom:1px solid var(--rule);
+      padding:10px clamp(20px,4vw,64px) 20px;z-index:60;
+    }
+    .nav-links.open li{width:100%}
+    .nav-links.open a{display:block;padding:14px 0;border-bottom:1px solid var(--rule)}
+    .exp-row,.exp-row:nth-child(even){grid-template-columns:1fr}
+    .exp-row:nth-child(even) .exp-media{order:0}
+    .itin-grid,.notes-grid{grid-template-columns:1fr}
+    .itin-left .sticky{position:static}
+    .grade-row{grid-template-columns:120px minmax(0,1fr)}
+    .grade-eg{grid-column:2}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:560px){
+    .stats-grid{grid-template-columns:1fr;gap:18px;padding-top:64px}
+    .day{grid-template-columns:54px minmax(0,1fr)}
+    .day-stat{grid-column:2;text-align:left;display:flex;gap:14px}
+    .day-stat b{display:inline}
+    .foot-grid{grid-template-columns:1fr}
+    .hero h1{margin-bottom:-0.22em}
+    .exp-meta{gap:0 20px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="#top" aria-label="Hard Miles Expedition Co. — home">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <path d="M2 26 L13 8 L20 19 L25 12 L32 26 Z" stroke="#e4591c" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M2 30 H32" stroke="#ece5d8" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">Hard Miles<small>Expedition Co.</small></span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#expeditions">Expeditions</a></li>
+      <li><a href="#itinerary">Sample itinerary</a></li>
+      <li><a href="#grading">Grading</a></li>
+      <li><a href="#guides">Leaders</a></li>
+    </ul>
+    <div class="nav-cta-zone">
+      <a class="nav-phone" href="tel:01142832190">0114 283 2190</a>
+      <a class="btn btn-signal" href="#expeditions">View dates &amp; availability</a>
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M3 7h20M3 13h20M3 19h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- HERO -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-photo">
+      <img class="grade" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&h=1100&fit=crop&q=80&auto=format" alt="Alpenglow on a mountain ridge rising above a sea of cloud at dawn" width="2000" height="1100" fetchpriority="high">
+    </div>
+    <div class="hero-inner">
+      <p class="hero-topline"><strong>Small-group expeditions</strong> on foot, rope and water · max 12 per departure</p>
+      <p class="hero-sub">Proper distances, honest grades, qualified leaders. We plan the logistics; you carry your own pack. Based in Sheffield, walking since 2014.</p>
+      <div class="hero-actions">
+        <a class="btn btn-signal" href="#expeditions">View dates &amp; availability</a>
+        <a class="btn btn-ghost" href="#grading">How we grade a trip</a>
+      </div>
+      <h1><span class="ln1">Earn</span> <span class="ln2">the&nbsp;view</span></h1>
+    </div>
+  </section>
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip" role="group" aria-label="Company statistics">
+    <div class="stats-grid">
+      <div class="stat rv"><b>312,000 km</b><span>walked, climbed and paddled with clients since 2014</span></div>
+      <div class="stat rv"><b>6,476 m</b><span>highest camp we lead — Mera Peak, Nepal</span></div>
+      <div class="stat rv"><b>4–16 days</b><span>trip lengths, from long weekends to full traverses</span></div>
+    </div>
+  </div>
+
+  <!-- EXPEDITION LEDGER -->
+  <section class="ledger" id="expeditions">
+    <div class="wrap">
+      <div class="section-head rv">
+        <div>
+          <p class="kicker">The book — 2026/27</p>
+          <h2>Forty-one expeditions. No filler.</h2>
+        </div>
+        <p>Every departure below runs with a qualified leader, a stated grade and a hard cap on group size. If a trip is hard, the page says so.</p>
+      </div>
+
+      <article class="exp-row rv">
+        <div class="exp-media">
+          <span class="exp-index">Nº 07</span>
+          <img class="grade" src="https://images.unsplash.com/photo-1551632811-561732d1e306?w=1200&h=750&fit=crop&q=80&auto=format" alt="Two trekkers with large packs on a rocky trail beneath glaciated peaks" width="1200" height="750" loading="lazy">
+        </div>
+        <div class="exp-body">
+          <p class="kicker">Trek · Alps</p>
+          <h3><a href="#itinerary">Walker's Haute Route</a></h3>
+          <p class="exp-where">Chamonix to Zermatt · France &amp; Switzerland</p>
+          <p class="exp-desc">Twelve days between the two great mountaineering towns of the Alps, crossing eleven cols above 2,700m. You carry what you need; the huts do the rest.</p>
+          <div class="exp-meta">
+            <div><b><span class="grade-pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>4 — Hard</b><span>Grade</span></div>
+            <div><b>180 km</b><span>Distance</span></div>
+            <div><b>12 days</b><span>Duration</span></div>
+            <div><b>Max 10</b><span>Group size</span></div>
+          </div>
+          <div class="exp-foot">
+            <p class="exp-price"><b>£2,340</b>pp excl. flights</p>
+            <a class="btn btn-ghost" href="#book">View dates &amp; availability</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="exp-row rv">
+        <div class="exp-media">
+          <span class="exp-index">Nº 12</span>
+          <img class="grade" src="https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=1200&h=750&fit=crop&q=80&auto=format" alt="A trekker standing beside a stone cairn facing high Himalayan peaks" width="1200" height="750" loading="lazy">
+        </div>
+        <div class="exp-body">
+          <p class="kicker">Trek · Himalaya</p>
+          <h3><a href="#book">Annapurna Sanctuary</a></h3>
+          <p class="exp-where">Pokhara return · Nepal</p>
+          <p class="exp-desc">Fourteen days to the glacial basin at 4,130m, through rhododendron forest and Gurung villages. Teahouse nights, long staircases, big mornings.</p>
+          <div class="exp-meta">
+            <div><b><span class="grade-pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>3 — Tough</b><span>Grade</span></div>
+            <div><b>4,130 m</b><span>High point</span></div>
+            <div><b>14 days</b><span>Duration</span></div>
+            <div><b>Max 12</b><span>Group size</span></div>
+          </div>
+          <div class="exp-foot">
+            <p class="exp-price"><b>£2,865</b>pp incl. internal transfers</p>
+            <a class="btn btn-ghost" href="#book">View dates &amp; availability</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="exp-row rv">
+        <div class="exp-media">
+          <span class="exp-index">Nº 23</span>
+          <img class="grade" src="https://images.unsplash.com/photo-1522163182402-834f871fd851?w=1200&h=750&fit=crop&q=80&auto=format" alt="A climber on a steep overhanging limestone cliff above the sea" width="1200" height="750" loading="lazy">
+        </div>
+        <div class="exp-body">
+          <p class="kicker">Climb · Southeast Asia</p>
+          <h3><a href="#book">Railay Climbing Week</a></h3>
+          <p class="exp-where">Krabi province · Thailand</p>
+          <p class="exp-desc">Eight days on Railay's limestone with a 1:4 instructor ratio. Leading by day three if you want it; deep-water solo day for those who really want it.</p>
+          <div class="exp-meta">
+            <div><b><span class="grade-pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>2 — Solid</b><span>Grade</span></div>
+            <div><b>F4–6b</b><span>Climbing range</span></div>
+            <div><b>8 days</b><span>Duration</span></div>
+            <div><b>Max 8</b><span>Group size</span></div>
+          </div>
+          <div class="exp-foot">
+            <p class="exp-price"><b>£1,690</b>pp incl. all gear</p>
+            <a class="btn btn-ghost" href="#book">View dates &amp; availability</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="exp-row rv">
+        <div class="exp-media">
+          <span class="exp-index">Nº 31</span>
+          <img class="grade" src="https://images.unsplash.com/photo-1544198365-f5d60b6d8190?w=1200&h=750&fit=crop&q=80&auto=format" alt="First light striking the granite towers of Torres del Paine" width="1200" height="750" loading="lazy">
+        </div>
+        <div class="exp-body">
+          <p class="kicker">Trek · Patagonia</p>
+          <h3><a href="#book">Torres del Paine — the O Circuit</a></h3>
+          <p class="exp-where">Magallanes · Chile</p>
+          <p class="exp-desc">The full circuit, not the shortcut: eleven days around the massif including the John Gardner Pass in whatever weather Patagonia decides to send.</p>
+          <div class="exp-meta">
+            <div><b><span class="grade-pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>4 — Hard</b><span>Grade</span></div>
+            <div><b>130 km</b><span>Distance</span></div>
+            <div><b>11 days</b><span>Duration</span></div>
+            <div><b>Max 12</b><span>Group size</span></div>
+          </div>
+          <div class="exp-foot">
+            <p class="exp-price"><b>£3,480</b>pp excl. flights</p>
+            <a class="btn btn-ghost" href="#book">View dates &amp; availability</a>
+          </div>
+        </div>
+      </article>
+
+      <div class="ledger-all rv">
+        <a href="#book">See all 41 expeditions
+          <svg width="20" height="12" viewBox="0 0 20 12" fill="none" aria-hidden="true"><path d="M1 6h17m0 0-5-5m5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ITINERARY MODULE -->
+  <section class="itin" id="itinerary">
+    <div class="wrap">
+      <div class="itin-grid">
+        <div class="itin-left rv">
+          <div class="sticky">
+            <p class="kicker">Day by day — sample</p>
+            <h2>Jotunheimen Traverse</h2>
+            <p class="itin-where">Gjendesheim to Turtagrø · Norway · hut to hut</p>
+            <img class="grade" src="https://images.unsplash.com/photo-1501554728187-ce583db33af7?w=1000&h=850&fit=crop&q=80&auto=format" alt="Two hikers with packs following a trail through a green mountain valley" width="1000" height="850" loading="lazy">
+            <div class="itin-quickstats">
+              <div><b>92 km</b><span>Distance</span></div>
+              <div><b>2,469 m</b><span>High point</span></div>
+              <div><b>6 days</b><span>Duration</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="itin-right">
+          <ol style="list-style:none">
+            <li class="day rv"><span class="day-n" aria-label="Day 1">D1</span><div><h3>Gjendesheim &amp; the Besseggen ridge</h3><p>Straight onto the traverse's most famous line — the arête between green Gjende and blue Bessvatnet. Hands out of pockets for twenty minutes of easy scrambling.</p></div><span class="day-stat"><b>14 km</b>6–7 hrs</span></li>
+            <li class="day rv"><span class="day-n" aria-label="Day 2">D2</span><div><h3>Memurubu to Gjendebu</h3><p>High shoulder above the lake then a long descent through birch. Shorter day; your legs will thank you by dinner.</p></div><span class="day-stat"><b>10 km</b>4–5 hrs</span></li>
+            <li class="day rv"><span class="day-n" aria-label="Day 3">D3</span><div><h3>Into the Svartdalen valley</h3><p>The quiet heart of the range — a stone valley between glaciers, usually shared with nobody but reindeer.</p></div><span class="day-stat"><b>16 km</b>7 hrs</span></li>
+            <li class="day rv"><span class="day-n" aria-label="Day 4">D4</span><div><h3>Leirvassbu &amp; Kyrkja</h3><p>Optional afternoon ascent of Kyrkja, the "church" — an honest 2,032m pyramid with a scrambly top. Skippable without shame.</p></div><span class="day-stat"><b>12 km</b>5–8 hrs</span></li>
+            <li class="day rv"><span class="day-n" aria-label="Day 5">D5</span><div><h3>Over the high col</h3><p>The traverse's crux day: 2,469m, snow patches into July, and weather that changes its mind hourly. We set off early and carry storm kit.</p></div><span class="day-stat"><b>19 km</b>8–9 hrs</span></li>
+            <li class="day rv"><span class="day-n" aria-label="Day 6">D6</span><div><h3>Descent to Turtagrø</h3><p>Down past the Skagastølstindane wall to the old climbers' hotel. Showers, a long table, and the traverse behind you.</p></div><span class="day-stat"><b>21 km</b>7 hrs</span></li>
+          </ol>
+          <p class="itin-note rv"><b>Straight talk:</b> this is a Grade 3 — Tough. You need to be comfortable walking 6–8 hours on rough ground, several days running, carrying 10–12kg. If that sounds like a stretch, ring us — we'll point you at the right trip instead of selling you the wrong one.</p>
+          <div class="itin-actions rv">
+            <p class="from">From <b>£1,845</b>pp · 8 departures, Jun–Sep 2026</p>
+            <a class="btn btn-dark" href="#book">View dates &amp; availability</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GRADING -->
+  <section class="grading" id="grading">
+    <div class="wrap grading-inner">
+      <div class="section-head rv">
+        <div>
+          <p class="kicker">The grading system</p>
+          <h2 style="color:var(--peat)">How hard is hard?</h2>
+        </div>
+        <p style="color:var(--stone-dark)">Five grades, applied honestly. We'd rather lose a booking than watch you have a miserable week at altitude.</p>
+      </div>
+      <div class="grade-row rv"><div class="grade-id"><b>1</b><span>Steady</span></div><p>Full days out, good paths, no exposure. Fit enough to enjoy a long hilly weekend and you're fine.</p><p class="grade-eg"><b>e.g. Slovenia's Julian Foothills</b>7 days · from £1,240</p></div>
+      <div class="grade-row rv"><div class="grade-id"><b>2</b><span>Solid</span></div><p>Bigger days or new skills — a rope, a paddle, a heavier pack. Regular hill walkers and gym-fit beginners do well here.</p><p class="grade-eg"><b>e.g. Railay Climbing Week</b>8 days · from £1,690</p></div>
+      <div class="grade-row rv"><div class="grade-id"><b>3</b><span>Tough</span></div><p>6–8 hour days on rough ground, back to back, sometimes at altitude. Train for it and it'll be the best week of your year.</p><p class="grade-eg"><b>e.g. Annapurna Sanctuary</b>14 days · from £2,865</p></div>
+      <div class="grade-row hot rv"><div class="grade-id"><b>4</b><span>Hard</span></div><p>Long days, real weather, cumulative fatigue. You'll dig in at least once. This is the grade most of our regulars come back for.</p><p class="grade-eg"><b>e.g. Walker's Haute Route</b>12 days · from £2,340</p></div>
+      <div class="grade-row rv"><div class="grade-id"><b>5</b><span>Savage</span></div><p>Expedition conditions: glacier travel, nights above 5,000m, summit days that start at 1am. We interview before we confirm your place.</p><p class="grade-eg"><b>e.g. Mera Peak, 6,476m</b>16 days · from £3,940</p></div>
+      <p class="grading-foot rv">Every booking includes a 15-minute call with your trip leader before you commit to a Grade 4 or 5. We move roughly one in eight enquirers to a different grade — in both directions.</p>
+    </div>
+  </section>
+
+  <!-- FIELD NOTES -->
+  <section class="notes" aria-label="Field notes and reviews">
+    <div class="wrap">
+      <div class="notes-grid">
+        <figure class="rv">
+          <p class="kicker">Field notes</p>
+          <blockquote>&ldquo;Day five broke me a little, and I&rsquo;d book it again <em>tomorrow</em>.&rdquo;</blockquote>
+          <figcaption><b>Rachel Openshaw, Leeds</b> — Torres del Paine O Circuit, November 2025</figcaption>
+          <div class="notes-score">
+            <div><b>4.8 / 5</b><span>from 1,214 post-trip surveys</span></div>
+            <div><b>62%</b><span>of clients have travelled with us before</span></div>
+            <div><b>1:6</b><span>typical leader-to-client ratio</span></div>
+          </div>
+        </figure>
+        <div class="notes-media rv">
+          <img class="grade" src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=1000&h=1150&fit=crop&q=80&auto=format" alt="View out of an orange tent door onto forest and mountainside at first light" width="1000" height="1150" loading="lazy">
+          <figcaption>Wild camp, morning two — Jotunheimen, by trip leader Cal Berrington</figcaption>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDES -->
+  <section class="guides" id="guides">
+    <div class="wrap guides-inner">
+      <div class="rv">
+        <p class="kicker">Who leads</p>
+        <h2>Qualified. Every trip. No exceptions.</h2>
+        <p class="blurb">Eleven staff leaders, most of them ten-plus years in. Their tickets are listed on every trip page, because you're trusting them with your week and occasionally your neck.</p>
+      </div>
+      <div class="rv">
+        <div class="guide-line"><b>Cal Berrington</b><span>MIC · 14 winter seasons · Jotunheimen, Skye</span></div>
+        <div class="guide-line"><b>Priya Halder</b><span>IML · UIMLA · Haute Route, Annapurna</span></div>
+        <div class="guide-line"><b>Dan Struthers</b><span>MCI · Rock Climbing Development Instructor · Railay</span></div>
+        <div class="guide-line"><b>Eilidh Macrae</b><span>Summer ML · Sea Kayak Leader · Lofoten, Hebrides</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="cta-band" id="book">
+    <div class="wrap cta-inner">
+      <div class="rv">
+        <h2>Pick your grade. We'll hold the map.</h2>
+        <p>Departure lists for 2026/27 are live. Most Grade 4 trips fill four to six months out.</p>
+      </div>
+      <div class="rv" style="display:flex;gap:14px;flex-wrap:wrap">
+        <a class="btn btn-dark" href="#expeditions">View dates &amp; availability</a>
+        <a class="btn" style="box-shadow:inset 0 0 0 2px rgba(255,255,255,.6);color:#fff" href="tel:01142832190">Call 0114 283 2190</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top" aria-label="Hard Miles Expedition Co. — home">
+          <svg class="brand-mark" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+            <path d="M2 26 L13 8 L20 19 L25 12 L32 26 Z" stroke="#e4591c" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M2 30 H32" stroke="#ece5d8" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          <span class="brand-name">Hard Miles<small>Expedition Co.</small></span>
+        </a>
+        <p>Small-group expeditions on foot, rope and water. Founded in a Sheffield kitchen in 2014; still answering our own phones.</p>
+      </div>
+      <nav aria-label="Expeditions">
+        <h4>Expeditions</h4>
+        <ul>
+          <li><a href="#expeditions">Trekking</a></li>
+          <li><a href="#expeditions">Climbing</a></li>
+          <li><a href="#expeditions">Sea kayak</a></li>
+          <li><a href="#expeditions">Winter skills</a></li>
+          <li><a href="#grading">Grading explained</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Company">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#guides">Our leaders</a></li>
+          <li><a href="#book">Booking &amp; deposits</a></li>
+          <li><a href="#book">Kit lists</a></li>
+          <li><a href="#book">Journal</a></li>
+        </ul>
+      </nav>
+      <div class="foot-contact">
+        <h4>Talk to a human</h4>
+        <p><a class="tel" href="tel:01142832190">0114 283 2190</a></p>
+        <p>Mon–Fri 9–6, Sat 10–2</p>
+        <p><a href="mailto:office@hardmiles.co.uk">office@hardmiles.co.uk</a></p>
+        <p>Unit 4, Kelham Works, Alma Street,<br>Sheffield S3 8SA</p>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>© 2026 Hard Miles Expedition Co. Ltd · Registered in England 09214467 · Est. 2014</p>
+      <div class="foot-badges" aria-label="Protections and memberships">
+        <span>ATOL 11482</span><span>ABTA Y6529</span><span>BMC member</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // mobile menu
+  var t=document.getElementById('menuToggle'),n=document.getElementById('navLinks');
+  t.addEventListener('click',function(){
+    var open=n.classList.toggle('open');
+    t.setAttribute('aria-expanded',open?'true':'false');
+    t.setAttribute('aria-label',open?'Close menu':'Open menu');
+  });
+  n.addEventListener('click',function(e){if(e.target.tagName==='A'){n.classList.remove('open');t.setAttribute('aria-expanded','false');}});
+
+  // scroll reveals (transform/opacity only, honours reduced motion)
+  var rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=document.querySelectorAll('.rv');
+  if(rm||!('IntersectionObserver' in window)){
+    els.forEach(function(el){el.classList.add('in');});
+  }else{
+    var seen=0;
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          var el=en.target;
+          el.style.transitionDelay=Math.min((seen++%4)*60,180)+'ms';
+          el.classList.add('in');
+          io.unobserve(el);
+        }
+      });
+    },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+    els.forEach(function(el){io.observe(el);});
+  }
+</script>
+</body>
+</html>

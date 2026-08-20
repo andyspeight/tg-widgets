@@ -22,7 +22,15 @@
 import { revalidatePath } from 'next/cache';
 
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
-import { REGIONS, type RegionName } from '../../lib/content/schema';
+import {
+  currentCapabilities,
+  isPermissionError,
+  PermissionError,
+  requireCapability,
+} from '../../lib/auth/capabilities';
+import { parseRegion, REGIONS, type RegionName } from '../../lib/content/schema';
+import { regionChangeScope } from '../../lib/content/change-scope';
+import { sanitiseRegion } from '../../lib/content/sanitise-page';
 import {
   getRegion,
   publishRegion,
@@ -40,6 +48,8 @@ async function attempt<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
 }
 
 function explain(error: unknown): string {
+  if (isPermissionError(error)) return error.message;
+
   const message = error instanceof Error ? error.message : String(error);
 
   // Worth showing as written: one needs an invitation, one needs signing in
@@ -84,14 +94,26 @@ export async function saveRegionAction(
   region: string,
   content: unknown,
 ): Promise<ActionResult<RegionRecord>> {
-  return attempt(async () =>
-    saveRegionDraft(
-      await requireTenantId(),
-      asRegionName(region),
-      content,
-      (await currentUserId()) ?? undefined,
-    ),
-  );
+  return attempt(async () => {
+    const name = asRegionName(region);
+    const { tenantId, userId, caps } = await currentCapabilities();
+    if (!caps.has('content')) throw new PermissionError('content');
+
+    // A member without full structure rights may still edit the words and links
+    // in a header or footer, but not restructure it. Compared against what is
+    // stored, the same way a page save is, before anything is written.
+    if (!caps.has('structure')) {
+      const parsed = parseRegion(content, name);
+      if (!parsed.ok) {
+        throw new Error(`Refusing to save a malformed header or footer: ${parsed.errors.join('; ')}`);
+      }
+      const current = await getRegion(tenantId, name);
+      const scope = regionChangeScope(sanitiseRegion(current.region), sanitiseRegion(parsed.region));
+      if (scope.structure) throw new PermissionError('structure');
+    }
+
+    return saveRegionDraft(tenantId, name, content, userId || undefined);
+  });
 }
 
 /**
@@ -104,7 +126,7 @@ export async function saveRegionAction(
 export async function publishRegionAction(region: string): Promise<ActionResult<RegionRecord>> {
   const result = await attempt(async () =>
     publishRegion(
-      await requireTenantId(),
+      await requireCapability('publish'),
       asRegionName(region),
       (await currentUserId()) ?? undefined,
     ),

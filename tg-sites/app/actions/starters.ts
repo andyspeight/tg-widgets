@@ -25,6 +25,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
+import { requireCapability } from '../../lib/auth/capabilities';
 import { STARTERS, type StarterFacts } from '../../lib/content/starters';
 import { getSettings, saveSettings } from '../../lib/db/settings';
 import { applyStarter, siteIsEmpty, type StarterResult } from '../../lib/db/starters';
@@ -65,7 +66,11 @@ export async function applyStarterAction(
   profile: unknown,
 ): Promise<StarterActionResult> {
   try {
-    const tenantId = await requireTenantId();
+    // Building a whole site from a starter is the most structural act there is:
+    // pages, sections and a header all at once. It no-ops on a site that already
+    // has content, so this only ever fires on first setup, which is the owner's
+    // or staff's to do, never a content-only client's.
+    const tenantId = await requireCapability('structure');
     const userId = (await currentUserId()) ?? undefined;
 
     const id = String(starterId ?? '');

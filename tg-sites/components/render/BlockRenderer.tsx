@@ -31,6 +31,7 @@ import {
   MapBlock,
   NavBlock,
   QuoteBlock,
+  SearchBlock,
   SliderBlock,
   SocialBlock,
   SpacerBlock,
@@ -40,6 +41,7 @@ import {
   TabsBlock,
   TestimonialsBlock,
   TextBlock,
+  ThemeToggleBlock,
   VideoBlock,
   WidgetBlock,
 } from './blocks';
@@ -119,6 +121,15 @@ export function BlockRenderer({
         return <ButtonGroupBlock props={props} />;
       case 'nav':
         return <NavBlock props={props} />;
+      /*
+       * `editable` tells the search box to render as a div with a read-only
+       * field rather than a live form, so typing a query on the canvas cannot
+       * navigate the editor away. Same reason the map and the logos take it.
+       */
+      case 'search':
+        return <SearchBlock props={props} editing={editable} />;
+      case 'theme-toggle':
+        return <ThemeToggleBlock props={props} editing={editable} />;
       case 'social':
         return <SocialBlock props={props} />;
       case 'table':

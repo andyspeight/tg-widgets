@@ -132,6 +132,13 @@ export function buildPresetSection(preset: SectionPreset): Section {
     // The scrim strength over a background. 60 is what it was fixed at.
     overlay: 60,
     box: { ...EMPTY_BOX },
+    // A shaped bottom edge, for the one header whose wave IS the design.
+    ...(preset.section?.dividerBottom
+      ? {
+          dividerBottom: preset.section.dividerBottom,
+          dividerHeight: preset.section.dividerHeight,
+        }
+      : {}),
     rows: preset.rows.map(buildRow),
   };
 }
@@ -157,7 +164,12 @@ function buildRow(row: PresetRow): Row {
        * logo beside it.
        */
       const aligned = row.align ? { ...column, align: row.align } : column;
-      return box ? { ...aligned, box: { ...aligned.box, ...box } } : aligned;
+      // How the blocks inside this column sit. The floating header bars set it to
+      // 'row' so the logo, menu and button ride side by side inside the one pill.
+      const flowed = row.columnFlow?.[index]
+        ? { ...aligned, flow: row.columnFlow[index]! }
+        : aligned;
+      return box ? { ...flowed, box: { ...flowed.box, ...box } } : flowed;
     }),
     gap: row.gap ?? DEFAULT_GAP,
     stackBelow: row.stackBelow ?? 'mobile',
@@ -167,7 +179,14 @@ function buildRow(row: PresetRow): Row {
 
 function buildBlock(spec: PresetBlock): Block {
   const block = createBlock(spec.type);
-  return { ...block, props: { ...block.props, ...spec.props } };
+  return {
+    ...block,
+    props: { ...block.props, ...spec.props },
+    // The block's own frame, for the circle chips and inner pills the designed
+    // bars are made of. Merged over the empty box exactly as columnBox is; the
+    // cast is sound because the spread starts from the block's complete box.
+    ...(spec.box ? { box: { ...block.box, ...spec.box } as Block['box'] } : {}),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -338,6 +357,18 @@ export function presetBars(preset: SectionPreset, gap = 0.05): ThumbBar[] {
   return presetThumb(preset, gap).bars;
 }
 
+/**
+ * The preview picture for a cards block carrying a photo suffix: the first
+ * card's own subject, exactly as the fill will search it (photo-plan.ts), so
+ * the tile shows the photograph the insert delivers.
+ */
+function cardPreviewQuery(spec: PresetBlock, suffix: string): string {
+  const items = Array.isArray(spec.props?.items) ? (spec.props.items as Array<Record<string, unknown>>) : [];
+  const first = items[0];
+  const label = typeof first?.label === 'string' && first.label.trim() ? first.label.trim() : '';
+  return label ? `${label} ${suffix}` : suffix;
+}
+
 export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
   const bars: ThumbBar[] = [];
   const panels: ThumbPanel[] = [];
@@ -392,18 +423,21 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
         const right = spec.props?.align === 'right';
 
         /*
-         * A HERO PICTURE CARRIES ITS SEARCH TERM ONTO THE BAR, so the preview
-         * can draw a photograph in it. The block's own `photo` wins; otherwise
-         * one is taken from the palette by the picture's position. Counted per
-         * picture rather than per bar, because a gallery is several bars of one
-         * picture idea and they should share a subject.
+         * A PICTURE WITH A SEARCH TERM CARRIES IT ONTO THE BAR, so the preview
+         * can draw a photograph in it. An explicit `photo` on the block wins
+         * anywhere, because the insert will fetch exactly that picture and the
+         * preview is the promise the insert keeps; a hero picture with none is
+         * handed one from the palette by position. Anything else stays a grey
+         * frame, which keeps the picker's photo-library calls to the presets
+         * that opted in. Counted per picture rather than per bar, because a
+         * gallery is several bars of one picture idea sharing a subject.
          */
         const picture = spec.type === 'image' || spec.type === 'video' || spec.type === 'gallery';
-        const query =
-          isHero && picture
-            ? typeof spec.photo === 'string' && spec.photo.trim()
-              ? spec.photo.trim()
-              : heroPhotoQuery(preset.id, imageIndex)
+        const explicit = typeof spec.photo === 'string' && spec.photo.trim() ? spec.photo.trim() : '';
+        const query = picture
+          ? explicit || (isHero ? heroPhotoQuery(preset.id, imageIndex) : undefined)
+          : spec.type === 'cards' && explicit
+            ? cardPreviewQuery(spec, explicit)
             : undefined;
         if (picture) imageIndex += 1;
 

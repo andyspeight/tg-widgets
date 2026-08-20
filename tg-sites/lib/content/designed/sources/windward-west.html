@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windward &amp; West — UK Caribbean Specialists | Barbados, St Lucia, Jamaica, Antigua, Grenada</title>
+<meta name="description" content="Caribbean-only travel specialists since 2004. We match you to the right island — Barbados, St Lucia, Jamaica, Antigua, Grenada and beyond. Direct flights from LGW, LHR &amp; MAN. ABTA &amp; ATOL protected.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   WINDWARD & WEST — bright-tropical world
+   sun-lit white · turquoise sea · hibiscus coral · flat sun yellow
+   ============================================================ */
+:root{
+  --paper:#FFFDF9;          /* sun-lit white */
+  --ink:#0F3237;            /* deep sea ink — text */
+  --sea:#12A5A0;            /* turquoise — blocks, accents (ink text on top) */
+  --sea-deep:#0B7672;       /* text-safe turquoise on white */
+  --sea-ink:#07333A;        /* darkest sea — footer, season band */
+  --coral:#F2594F;          /* hibiscus — flat blocks (dark text on top) */
+  --coral-btn:#D9382D;      /* button coral — passes AA with white */
+  --coral-btn-h:#BE2B21;
+  --ink-on-coral:#3A130E;   /* body text on hibiscus blocks */
+  --sun:#FFC63F;            /* flat sun yellow — always ink text */
+  --line:rgba(15,50,55,.14);
+  --shadow:0 12px 34px rgba(7,51,58,.14);
+  --r-lg:18px; --r-md:14px; --r-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+body{
+  font-family:'Hanken Grotesk','Segoe UI',sans-serif;font-weight:400;
+  font-size:16.5px;line-height:1.62;color:var(--ink);background:var(--paper);
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3,.serif{font-family:'Young Serif',Georgia,serif;font-weight:400;line-height:1.1;letter-spacing:-.005em}
+.kicker{
+  font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--sea-deep);
+}
+.wrap{max-width:1280px;margin:0 auto;padding:0 36px}
+@media(max-width:640px){.wrap{padding:0 20px}}
+
+/* ---------- one sun-drenched grade for every photo ---------- */
+.ph{position:relative;overflow:hidden;background:#E7F4F2}
+.ph img{width:100%;height:100%;object-fit:cover;filter:saturate(1.22) contrast(1.05) brightness(1.03)}
+.ph::after{content:"";position:absolute;inset:0;background:rgba(255,176,64,.06);mix-blend-mode:multiply;pointer-events:none}
+
+/* ---------- reveals ---------- */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .55s ease-out,transform .55s ease-out}
+.rv.on{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.rv{opacity:1;transform:none}}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-block;font-family:'Hanken Grotesk',sans-serif;font-weight:700;font-size:15.5px;
+  padding:14px 26px;border-radius:999px;text-decoration:none;border:0;cursor:pointer;
+  transition:transform .16s ease-out,background .16s ease-out,box-shadow .16s ease-out;
+}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-coral{background:var(--coral-btn);color:#FFFDF9}
+.btn-coral:hover{background:var(--coral-btn-h);transform:translateY(-2px);box-shadow:0 8px 20px rgba(190,43,33,.28)}
+.btn-white-line{background:transparent;color:#FFFDF9;border:2px solid rgba(255,253,249,.85);padding:12px 24px}
+.btn-white-line:hover{background:rgba(255,253,249,.14)}
+.btn-ink{background:var(--sea-ink);color:#FFFDF9}
+.btn-ink:hover{background:#0A454E;transform:translateY(-2px)}
+.btn-ink-line{background:transparent;color:var(--ink);border:2px solid var(--ink);padding:12px 24px}
+.btn-ink-line:hover{background:var(--ink);color:var(--paper)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--coral-btn);outline-offset:3px;border-radius:6px}
+
+/* ---------- nav ---------- */
+header.site{
+  position:sticky;top:0;z-index:60;background:rgba(255,253,249,.95);
+  border-bottom:1px solid var(--line);backdrop-filter:blur(6px);
+}
+.navbar{display:flex;align-items:center;gap:30px;padding:15px 0}
+.brand{text-decoration:none;line-height:1;display:flex;align-items:center;gap:11px}
+.brand .sundot{width:30px;height:30px;border-radius:50%;background:var(--sun);position:relative;flex:none}
+.brand .sundot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:var(--sea);border-radius:0 0 15px 15px}
+.brand .bn{font-family:'Young Serif',serif;font-size:22px;color:var(--ink)}
+.brand .bt{display:block;font-size:10.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sea-deep);margin-top:3px;font-family:'Hanken Grotesk',sans-serif}
+nav.main{display:flex;gap:26px;margin-left:auto}
+nav.main a{
+  text-decoration:none;font-size:15px;font-weight:600;padding:10px 2px;position:relative;
+}
+nav.main a::after{content:"";position:absolute;left:0;bottom:5px;height:3px;width:0;background:var(--sun);border-radius:2px;transition:width .22s ease-out}
+nav.main a:hover::after,nav.main a:focus-visible::after{width:100%}
+.nav-phone{text-align:right;line-height:1.25;display:block;text-decoration:none;margin-left:8px}
+.nav-phone strong{font-size:16px}
+.nav-phone span{display:block;font-size:11.5px;color:var(--sea-deep);font-weight:600}
+.nav-cta{padding:12px 22px;font-size:14.5px}
+@media(max-width:1020px){
+  nav.main{display:none}
+  .navbar{justify-content:space-between}
+}
+@media(max-width:560px){
+  .nav-phone{display:none}
+  .nav-cta{padding:11px 16px;font-size:13.5px;white-space:nowrap}
+  .brand .bn{font-size:19px}
+}
+
+/* ---------- hero : the sea, huge ---------- */
+.hero{position:relative;min-height:min(92vh,820px);display:flex;align-items:flex-end}
+.hero .ph{position:absolute;inset:0}
+.hero .ph img{position:absolute;inset:0;width:100%;height:100%}
+.hero-scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(7,42,48,.74) 0%,rgba(7,42,48,.5) 30%,rgba(7,42,48,.28) 52%,rgba(7,42,48,.1) 72%,rgba(7,42,48,0) 88%);
+}
+.hero-inner{position:relative;z-index:2;width:100%;padding-bottom:150px}
+.hero-eyebrow{
+  display:inline-block;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--sun);margin-bottom:20px;background:rgba(7,51,58,.6);
+  padding:9px 16px;border-radius:999px;
+}
+.hero h1{
+  color:#FFFDF9;font-size:clamp(42px,5.8vw,82px);max-width:13ch;
+  text-shadow:0 2px 26px rgba(7,42,48,.35);
+}
+.hero-sub{
+  color:rgba(255,253,249,.94);font-size:clamp(16.5px,1.4vw,19.5px);max-width:56ch;
+  margin-top:20px;text-shadow:0 1px 14px rgba(7,42,48,.4);
+}
+.hero-sub b{color:var(--sun);font-weight:700}
+.hero-ctas{display:flex;flex-wrap:wrap;gap:16px;margin-top:32px;align-items:center}
+.hero-cap{
+  position:absolute;right:36px;bottom:150px;z-index:2;color:rgba(255,253,249,.9);
+  font-size:13px;font-style:italic;text-shadow:0 1px 10px rgba(7,42,48,.5);
+}
+.sea-pill{
+  position:absolute;right:36px;top:28px;z-index:2;background:var(--sun);color:var(--ink);
+  font-size:12.5px;font-weight:700;letter-spacing:.06em;padding:10px 18px;border-radius:999px;
+  box-shadow:0 6px 18px rgba(7,42,48,.22);
+}
+.sea-pill b{font-family:'Young Serif',serif;font-size:15px;letter-spacing:0}
+@media(max-width:760px){
+  .hero{min-height:78vh}
+  .hero-inner{padding-bottom:130px}
+  .hero-cap{display:none}
+  .sea-pill{right:20px;top:18px}
+}
+
+/* ---------- island rail : photo chips floating over the hero edge ---------- */
+.rail-zone{position:relative;z-index:5;margin-top:-104px;padding-bottom:26px}
+.rail{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.chip{
+  background:#FFFFFF;border-radius:var(--r-lg);padding:10px 10px 16px;text-decoration:none;
+  box-shadow:var(--shadow);display:block;
+  transition:transform .22s ease-out,box-shadow .22s ease-out;
+}
+.rail .chip:nth-child(even){transform:translateY(20px)}
+.chip:hover,.chip:focus-visible{transform:translateY(-8px);box-shadow:0 20px 44px rgba(7,51,58,.2)}
+.rail .chip:nth-child(even):hover,.rail .chip:nth-child(even):focus-visible{transform:translateY(12px)}
+.chip .ph{aspect-ratio:5/4;border-radius:var(--r-sm)}
+.chip .cn{font-family:'Young Serif',serif;font-size:18.5px;margin:13px 6px 3px}
+.chip .cl{font-size:13.5px;line-height:1.4;color:var(--sea-deep);font-weight:600;margin:0 6px}
+@media(max-width:1060px){
+  .rail{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:24px 4px 18px;gap:14px;-webkit-overflow-scrolling:touch}
+  .rail .chip{flex:0 0 208px;scroll-snap-align:start}
+  .rail .chip:nth-child(even){transform:none}
+  .rail .chip:nth-child(even):hover{transform:translateY(-8px)}
+}
+@media(max-width:760px){.rail-zone{margin-top:-92px}}
+
+/* ---------- why the caribbean : turquoise block ---------- */
+.why{background:var(--sea);color:var(--sea-ink);position:relative;padding:96px 0 150px;margin-top:64px}
+.why .kicker{color:var(--sea-ink)}
+.why-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:64px;align-items:center}
+.why h2{font-size:clamp(32px,3.4vw,48px);max-width:16ch;margin-top:14px}
+.stat-big{margin-top:38px}
+.stat-big .num{font-family:'Young Serif',serif;font-size:clamp(78px,9vw,140px);line-height:.95;display:block}
+.stat-big .num sup{font-size:.38em;vertical-align:super}
+.stat-big .cap{display:block;font-size:17px;font-weight:600;max-width:40ch;margin-top:10px}
+.stat-big .cap u{text-decoration:none;box-shadow:inset 0 -10px 0 var(--sun)}
+.stat-pair{display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-top:44px;max-width:640px}
+.stat-pair .num{font-family:'Young Serif',serif;font-size:clamp(34px,3vw,46px);display:block}
+.stat-pair .cap{display:block;font-size:14.5px;font-weight:600;margin-top:6px;line-height:1.5}
+.why-photo .ph{aspect-ratio:4/5;border-radius:var(--r-lg);box-shadow:0 18px 44px rgba(4,38,40,.28)}
+.why-photo figcaption{font-size:13px;font-style:italic;margin-top:12px;font-weight:500}
+.why-wave{position:absolute;left:0;right:0;bottom:-1px;line-height:0}
+.why-wave svg{width:100%;height:64px;display:block}
+@media(max-width:960px){
+  .why-grid{grid-template-columns:1fr;gap:44px}
+  .why-photo{max-width:440px}
+}
+
+/* ---------- island spotlights ---------- */
+.spots{padding:96px 0 40px}
+.spots-head{max-width:680px;margin-bottom:64px}
+.spots-head h2{font-size:clamp(32px,3.4vw,48px);margin-top:14px}
+.spots-head p{margin-top:14px;font-size:17px;color:#3C5A60}
+.spot{display:grid;grid-template-columns:7fr 5fr;align-items:center;margin-bottom:88px}
+.spot-photo{position:relative}
+.spot-photo .ph{aspect-ratio:11/9;border-radius:var(--r-lg)}
+.spot-photo .ph-mini{
+  position:absolute;left:-28px;bottom:-42px;width:42%;aspect-ratio:5/4;z-index:3;
+  border-radius:var(--r-md);border:6px solid var(--paper);box-shadow:var(--shadow);
+}
+.spot-panel{
+  position:relative;z-index:2;border-radius:var(--r-lg);padding:46px 48px;margin-left:-72px;
+  box-shadow:var(--shadow);
+}
+.spot.flip .spot-photo{order:2}
+.spot.flip .spot-panel{margin-left:0;margin-right:-72px}
+.spot-panel .no{font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;display:block}
+.spot-panel h3{font-size:clamp(28px,2.6vw,38px);margin:10px 0 4px}
+.spot-panel .isl{font-family:'Young Serif',serif;font-size:19px;opacity:.85;margin-bottom:16px}
+.spot-panel p.body{font-size:15.5px;line-height:1.65;margin-bottom:20px}
+.spot-facts{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:13.5px;margin-bottom:20px}
+.spot-facts span{font-weight:700}
+.spot-facts b{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.72}
+.panel-coral .spot-facts b,.panel-coral .no{opacity:1}
+.spot-price{font-family:'Young Serif',serif;font-size:24px;margin-bottom:18px}
+.spot-price small{font-family:'Hanken Grotesk',sans-serif;font-size:13px;font-weight:600;opacity:.75}
+.spot-ask{
+  display:inline-block;font-weight:700;font-size:15.5px;text-decoration:none;
+  border-bottom:3px solid currentColor;padding-bottom:2px;
+  transition:opacity .15s ease-out;
+}
+.spot-ask:hover{opacity:.7}
+.panel-sun{background:var(--sun);color:var(--ink)}
+.panel-coral{background:var(--coral);color:var(--ink-on-coral)}
+.panel-coral h3,.panel-coral .spot-price{color:#FFFDF9}
+.panel-sea{background:var(--sea);color:var(--sea-ink)}
+@media(max-width:960px){
+  .spot{grid-template-columns:1fr;margin-bottom:96px}
+  .spot-panel{margin:-46px 18px 0!important;padding:34px 30px}
+  .spot.flip .spot-photo{order:0}
+  .spot-photo .ph-mini{display:none}
+}
+
+/* ---------- the rest of the islands ---------- */
+.rest{padding:24px 0 96px}
+.rest h2{font-size:clamp(28px,3vw,40px);margin-top:14px;max-width:20ch}
+.rest-grid{display:grid;grid-template-columns:1.18fr 1fr 1fr 1.18fr;gap:20px;margin-top:44px}
+.rtile{text-decoration:none;display:block;border-radius:var(--r-md);transition:transform .2s ease-out}
+.rtile:hover{transform:translateY(-6px)}
+.rtile .ph{aspect-ratio:4/3;border-radius:var(--r-md)}
+.rtile .rn{font-family:'Young Serif',serif;font-size:19px;margin:14px 0 3px}
+.rtile .rl{font-size:14px;color:var(--sea-deep);font-weight:600;line-height:1.45}
+@media(max-width:960px){.rest-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.rest-grid{grid-template-columns:1fr}}
+
+/* ---------- flights ---------- */
+.flights{padding:0 0 100px}
+.flights-band{border-top:5px solid var(--sun);padding-top:72px}
+.flights h2{font-size:clamp(30px,3.2vw,44px);margin-top:14px;max-width:18ch}
+.flights-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:64px;align-items:start;margin-top:44px}
+.flights table{width:100%;border-collapse:collapse;font-size:15px}
+.flights th{
+  text-align:left;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--sea-deep);padding:0 14px 12px 0;border-bottom:3px solid var(--sea);
+}
+.flights td{padding:15px 14px 15px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+.flights td.route{font-weight:700}
+.flights td.route span{display:block;font-weight:500;font-size:12.5px;color:#48666C}
+.flights td.dur{font-family:'Young Serif',serif;font-size:19px;white-space:nowrap}
+.flights tr.fastest td{background:rgba(255,198,63,.22)}
+.flights tr.fastest td:first-child{border-radius:8px 0 0 8px;padding-left:12px}
+.flights tr.fastest td:last-child{border-radius:0 8px 8px 0}
+.tag-fast{
+  display:inline-block;background:var(--sun);font-size:10.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:2px;
+}
+.flights .note{margin-top:22px;font-size:14.5px;color:#3C5A60;max-width:66ch}
+.flights .note strong{color:var(--coral-btn)}
+.flights-side .ph{aspect-ratio:9/7;border-radius:var(--r-lg)}
+.flights-side h3{font-size:22px;margin:26px 0 8px}
+.flights-side p{font-size:15px;color:#3C5A60;margin-bottom:16px}
+@media(max-width:960px){
+  .flights-grid{grid-template-columns:1fr}
+  .flights td:nth-child(3),.flights th:nth-child(3){display:none}
+}
+
+/* ---------- season honesty : dark trust band ---------- */
+.season{background:var(--sea-ink);color:#F2FBFA;padding:96px 0}
+.season .kicker{color:var(--sun)}
+.season h2{font-size:clamp(30px,3.2vw,44px);margin:14px 0 22px;max-width:22ch;color:#FFFDF9}
+.season-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.season-copy p{margin-bottom:16px;color:rgba(242,251,250,.86);font-size:15.5px}
+.season-copy p b{color:#FFFDF9}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin:6px 0 12px}
+.months div{
+  text-align:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+  padding:14px 0 12px;border-radius:8px;
+}
+.m-prime{background:var(--sea);color:var(--sea-ink)}
+.m-green{background:var(--sun);color:var(--sea-ink)}
+.m-watch{background:var(--coral-btn);color:#FFFDF9}
+.m-key{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:rgba(242,251,250,.8);margin-bottom:26px}
+.m-key i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:7px;vertical-align:-1px;font-style:normal}
+.season-photo .ph{aspect-ratio:16/10;border-radius:var(--r-md)}
+.season-promise{
+  border:2px dashed rgba(255,198,63,.65);border-radius:var(--r-md);padding:22px 26px;
+  font-size:15px;color:rgba(242,251,250,.92);margin-top:26px;
+}
+.season-promise b{color:var(--sun)}
+@media(max-width:960px){.season-grid{grid-template-columns:1fr;gap:40px}}
+@media(max-width:640px){.months{grid-template-columns:repeat(6,1fr)}}
+
+/* ---------- specialists ---------- */
+.people{padding:100px 0}
+.people h2{font-size:clamp(30px,3.2vw,44px);margin-top:14px;max-width:22ch}
+.people-sub{margin-top:14px;font-size:17px;color:#3C5A60;max-width:58ch}
+.people-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:44px;margin-top:56px}
+.person{position:relative;padding-top:26px}
+.person::before{content:"";position:absolute;top:0;left:0;height:6px;border-radius:3px}
+.person.p1::before{width:88px;background:var(--coral)}
+.person.p2::before{width:56px;background:var(--sea)}
+.person.p3::before{width:72px;background:var(--sun)}
+.person .visits{font-family:'Young Serif',serif;font-size:clamp(48px,4.4vw,64px);line-height:1}
+.person.p1 .visits{color:var(--coral-btn)}
+.person.p2 .visits{color:var(--sea-deep)}
+.person.p3 .visits{color:#B8860B}
+.person .visits-cap{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#48666C;margin:2px 0 18px}
+.person h3{font-size:24px}
+.person .cred{font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--sea-deep);margin:5px 0 12px}
+.person p.bio{font-size:15px;color:#33535A}
+.person .ask{
+  display:inline-block;margin-top:14px;font-weight:700;font-size:15px;text-decoration:none;
+  border-bottom:3px solid var(--sun);padding-bottom:2px;
+}
+.person .ask:hover{opacity:.7}
+.people-foot{
+  margin-top:60px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;
+  background:#FFF;border-radius:var(--r-lg);box-shadow:var(--shadow);padding:28px 34px;
+}
+.people-foot .rating strong{font-family:'Young Serif',serif;font-size:32px}
+.people-foot .rating span{display:block;font-size:13.5px;color:#48666C;font-weight:600}
+@media(max-width:900px){.people-row{grid-template-columns:1fr;gap:36px}}
+
+/* ---------- enquiry CTA : coral block ---------- */
+.plan{background:var(--coral);padding:96px 0}
+.plan-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:center}
+.plan .kicker{color:var(--ink-on-coral)}
+.plan h2{color:#FFFDF9;font-size:clamp(32px,3.6vw,52px);margin-top:14px;max-width:14ch}
+.plan-copy p{color:var(--ink-on-coral);font-size:16.5px;font-weight:500;margin-top:18px;max-width:46ch}
+.plan-copy .alt{margin-top:26px;font-size:15px}
+.plan-copy .alt a{font-weight:700;color:#FFFDF9;text-decoration:underline;text-underline-offset:3px}
+.plan-form{
+  background:#FFFFFF;border-radius:var(--r-lg);box-shadow:0 20px 48px rgba(122,20,12,.28);
+  padding:38px 40px;
+}
+.plan-form h3{font-size:22px;margin-bottom:20px}
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pf-field{display:flex;flex-direction:column;gap:6px}
+.pf-field.full{grid-column:1 / -1}
+.pf-field label{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea-deep)}
+.pf-field input,.pf-field select{
+  font-family:'Hanken Grotesk',sans-serif;font-size:15.5px;color:var(--ink);
+  border:2px solid var(--line);border-radius:10px;padding:12px 14px;background:#FFFDF9;min-height:48px;
+  transition:border-color .15s ease-out;
+}
+.pf-field input:hover,.pf-field select:hover{border-color:var(--sea)}
+.pf-field input:focus,.pf-field select:focus{border-color:var(--sea-deep);outline:none;box-shadow:0 0 0 3px rgba(18,165,160,.22)}
+.plan-form .btn{margin-top:22px;width:100%;text-align:center}
+.pf-done{display:none;font-size:16px;font-weight:600;background:rgba(18,165,160,.14);border:2px solid var(--sea);border-radius:10px;padding:16px 18px;margin-top:20px}
+.pf-done b{color:var(--sea-deep)}
+@media(max-width:960px){
+  .plan-grid{grid-template-columns:1fr;gap:44px}
+  .pf-grid{grid-template-columns:1fr}
+  .plan-form{padding:30px 24px}
+}
+
+/* ---------- footer ---------- */
+footer{background:var(--sea-ink);color:rgba(242,251,250,.85);font-size:14.5px}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:44px;padding:72px 0 44px}
+.foot-grid h4{font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sun);margin-bottom:18px}
+.foot-grid ul{list-style:none}
+.foot-grid li{margin-bottom:10px}
+.foot-grid a{text-decoration:none}
+.foot-grid a:hover{color:#FFF;text-decoration:underline}
+.foot-brand .bn{font-family:'Young Serif',serif;font-size:26px;color:#FFFDF9}
+.foot-brand p{margin-top:14px;max-width:34ch;line-height:1.6}
+.foot-trust{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.badge{
+  border:2px solid rgba(242,251,250,.35);border-radius:8px;padding:7px 13px;
+  font-size:11.5px;font-weight:700;letter-spacing:.08em;
+}
+.foot-bottom{border-top:1px solid rgba(242,251,250,.16);padding:24px 0;display:flex;flex-wrap:wrap;gap:12px 30px;justify-content:space-between;font-size:12.5px;color:rgba(242,251,250,.55)}
+@media(max-width:960px){.foot-grid{grid-template-columns:1fr 1fr;gap:34px}}
+@media(max-width:560px){.foot-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap navbar">
+    <a class="brand" href="#top" aria-label="Windward and West — home">
+      <span class="sundot" aria-hidden="true"></span>
+      <span>
+        <span class="bn">Windward &amp; West</span>
+        <span class="bt">Caribbean only &middot; est. 2004</span>
+      </span>
+    </a>
+    <nav class="main" aria-label="Primary">
+      <a href="#islands">The islands</a>
+      <a href="#why">Why the Caribbean</a>
+      <a href="#flights">Flights</a>
+      <a href="#season">When to go</a>
+      <a href="#people">Our specialists</a>
+    </nav>
+    <a class="nav-phone" href="tel:+441273749118">
+      <strong>01273 749 118</strong>
+      <span>Mon–Sat, 9am–7pm</span>
+    </a>
+    <a class="btn btn-coral nav-cta" href="#plan">Find my island</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO : the sea, edge to edge ============ -->
+  <section class="hero" aria-label="Turquoise sea off Antigua">
+    <div class="ph">
+      <img src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=2200&h=1400&fit=crop&q=80&auto=format"
+           alt="Small boats floating on vivid turquoise water beside a white-sand cove, photographed from above"
+           width="2200" height="1400" fetchpriority="high">
+    </div>
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <p class="sea-pill">Sea temp today &middot; <b>28.4&deg;C</b></p>
+    <div class="wrap hero-inner">
+      <p class="hero-eyebrow">Windward &amp; West &middot; Caribbean specialists since 2004</p>
+      <h1>The water really is this colour.</h1>
+      <p class="hero-sub">And in February it's <b>28 degrees</b> — warmer than your bath, eight and a half hours from Gatwick, direct. Twenty-one islands, all different, all ours. Tell us who you are and we'll tell you which one is yours.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-coral" href="#plan">Find my island</a>
+        <a class="btn btn-white-line" href="tel:+441273749118">Or ring 01273 749 118</a>
+      </div>
+    </div>
+    <p class="hero-cap">That's Antigua. In February.</p>
+  </section>
+
+  <!-- ============ ISLAND RAIL : photo chips over the hero edge ============ -->
+  <div class="rail-zone" id="islands">
+    <div class="wrap">
+      <div class="rail" role="list" aria-label="Pick your island">
+        <a class="chip" role="listitem" href="#isl-barbados">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=520&h=416&fit=crop&q=80&auto=format" alt="A gentle wave washing over pale sand at golden hour in Barbados light" width="520" height="416" loading="lazy"></div>
+          <p class="cn">Barbados</p>
+          <p class="cl">the reliable one</p>
+        </a>
+        <a class="chip" role="listitem" href="#isl-stlucia">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=520&h=416&fit=crop&q=80&auto=format" alt="A palm and thatched parasol on white sand with green peaks rising behind, St Lucia style" width="520" height="416" loading="lazy"></div>
+          <p class="cn">St Lucia</p>
+          <p class="cl">the dramatic one</p>
+        </a>
+        <a class="chip" role="listitem" href="#rest">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1468413253725-0d5181091126?w=520&h=416&fit=crop&q=80&auto=format" alt="Lush palms leaning over a golden beach and clear shallows in Jamaica" width="520" height="416" loading="lazy"></div>
+          <p class="cn">Jamaica</p>
+          <p class="cl">the one with the soundtrack</p>
+        </a>
+        <a class="chip" role="listitem" href="#rest">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=520&h=416&fit=crop&q=80&auto=format" alt="A palm leaning over white sand and a thatched umbrella beside calm Antiguan sea" width="520" height="416" loading="lazy"></div>
+          <p class="cn">Antigua</p>
+          <p class="cl">a beach for every day</p>
+        </a>
+        <a class="chip" role="listitem" href="#isl-grenada">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1615880484746-a134be9a6ecf?w=520&h=416&fit=crop&q=80&auto=format" alt="A wooden veranda looking over deep green Grenadian hills at dusk" width="520" height="416" loading="lazy"></div>
+          <p class="cn">Grenada</p>
+          <p class="cl">the one that smells of nutmeg</p>
+        </a>
+        <a class="chip" role="listitem" href="#rest">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1520454974749-611b7248ffdb?w=520&h=416&fit=crop&q=80&auto=format" alt="Coconut palms swaying against a bright blue sky above a quiet beach" width="520" height="416" loading="lazy"></div>
+          <p class="cn">The quiet ones</p>
+          <p class="cl">Bequia &middot; Nevis &middot; Tobago</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ WHY THE CARIBBEAN : sensory turquoise block ============ -->
+  <section class="why" id="why">
+    <div class="wrap">
+      <div class="why-grid">
+        <div class="rv">
+          <p class="kicker">Why the Caribbean</p>
+          <h2>Because from November to April, this is where summer goes.</h2>
+          <div class="stat-big">
+            <span class="num">28<sup>&deg;C</sup></span>
+            <span class="cap">The sea off Grenada in <u>January</u>. Bath-warm, snorkel-clear, and precisely as blue as the photograph above — we checked.</span>
+          </div>
+          <div class="stat-pair">
+            <div>
+              <span class="num">8h 40m</span>
+              <span class="cap">Gatwick to Barbados, direct. Porridge at home, rum punch by sunset — no Miami, no changing planes.</span>
+            </div>
+            <div>
+              <span class="num">4 hrs back</span>
+              <span class="cap">The time difference works in your favour: you land mid-afternoon and jet lag barely gets a vote.</span>
+            </div>
+          </div>
+        </div>
+        <figure class="why-photo rv">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=820&h=1024&fit=crop&q=80&auto=format" alt="White surf folding into vivid turquoise sea beside pale sand, seen from directly above" width="820" height="1024" loading="lazy"></div>
+          <figcaption>The exact moment the Atlantic turns Caribbean.</figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="why-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 64" preserveAspectRatio="none"><path d="M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z" fill="#FFFDF9"/></svg>
+    </div>
+  </section>
+
+  <!-- ============ FEATURED ISLAND SPOTLIGHTS ============ -->
+  <section class="spots" aria-label="Featured islands">
+    <div class="wrap">
+      <div class="spots-head rv">
+        <p class="kicker">The island matters more than the hotel</p>
+        <h2>Marrying the wrong island is expensive. Meet three of ours.</h2>
+        <p>Every island has a personality — the party one, the quiet one, the one that shows off. We've stayed on all of them, so you don't have to guess.</p>
+      </div>
+
+      <!-- Barbados -->
+      <article class="spot rv" id="isl-barbados">
+        <div class="spot-photo">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1476673160081-cf065607f449?w=1200&h=980&fit=crop&q=80&auto=format" alt="Golden evening light over a calm Barbados beach as a small wave rolls in" width="1200" height="980" loading="lazy"></div>
+        </div>
+        <div class="spot-panel panel-sun">
+          <span class="no">N&ordm; 01 &middot; Barbados</span>
+          <h3>The reliable one.</h3>
+          <p class="isl">West coast flat as a millpond by four o'clock.</p>
+          <p class="body">Rum shops with dominoes clacking, flying-fish cutters at Oistins on a Friday, cricket on the radio all afternoon. Barbados doesn't show off — it just works, every single time, which is why half our clients never try anywhere else.</p>
+          <div class="spot-facts">
+            <div><b>Direct</b><span>BA &amp; Virgin, daily, 8h 40m</span></div>
+            <div><b>Best months</b><span>December – April</span></div>
+          </div>
+          <p class="spot-price">7 nights from &pound;1,289pp <small>incl. flights &amp; transfers</small></p>
+          <a class="spot-ask" href="#plan">Ask Marcia about Barbados &rarr;</a>
+        </div>
+      </article>
+
+      <!-- St Lucia -->
+      <article class="spot flip rv" id="isl-stlucia">
+        <div class="spot-photo">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&h=980&fit=crop&q=80&auto=format" alt="A hillside resort pool ringed by palms looking straight out over the deep blue sea in St Lucia" width="1200" height="980" loading="lazy"></div>
+        </div>
+        <div class="spot-panel panel-coral">
+          <span class="no">N&ordm; 02 &middot; St Lucia</span>
+          <h3>The dramatic one.</h3>
+          <p class="isl">The Pitons fill your bedroom window here.</p>
+          <p class="body">Volcanic peaks straight out of the sea, rainforest down to the beach, sulphur springs you can actually sit in. St Lucia is the island that shows off — and for honeymoons with a pulse, nowhere else comes close.</p>
+          <div class="spot-facts">
+            <div><b>Direct</b><span>BA (LGW) &amp; Virgin (LHR), 8h 50m</span></div>
+            <div><b>Best months</b><span>December – April</span></div>
+          </div>
+          <p class="spot-price">7 nights from &pound;1,462pp <small>incl. flights &amp; transfers</small></p>
+          <a class="spot-ask" href="#plan">Ask Tom about St Lucia &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Grenada -->
+      <article class="spot rv" id="isl-grenada">
+        <div class="spot-photo">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=1200&h=980&fit=crop&q=80&auto=format" alt="Nutmeg, mace, turmeric and island spices laid out across a Grenadian market table" width="1200" height="980" loading="lazy"></div>
+          <div class="ph ph-mini"><img src="https://images.unsplash.com/photo-1509233725247-49e657c54213?w=560&h=448&fit=crop&q=80&auto=format" alt="A single palm arcing over bright turquoise water on Grand Anse beach" width="560" height="448" loading="lazy"></div>
+        </div>
+        <div class="spot-panel panel-sea">
+          <span class="no">N&ordm; 03 &middot; Grenada</span>
+          <h3>The one that smells of nutmeg.</h3>
+          <p class="isl">You'll notice it before the plane door opens.</p>
+          <p class="body">Spice drying on roadsides, chocolate estates in the hills, waterfalls twenty minutes from Grand Anse's two miles of sand — and nobody rushing you anywhere. The connoisseur's island, sitting comfortably south of the worst of the weather.</p>
+          <div class="spot-facts">
+            <div><b>Direct</b><span>BA (LGW), 2x weekly, 9h 10m</span></div>
+            <div><b>Best months</b><span>December – May</span></div>
+          </div>
+          <p class="spot-price">7 nights from &pound;1,394pp <small>incl. flights &amp; transfers</small></p>
+          <a class="spot-ask" href="#plan">Ask Marcia about Grenada &rarr;</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ THE REST ============ -->
+  <section class="rest" id="rest">
+    <div class="wrap">
+      <div class="rv">
+        <p class="kicker">Eighteen more where those came from</p>
+        <h2>The rest of the crew</h2>
+      </div>
+      <div class="rest-grid">
+        <a class="rtile rv" href="#plan">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=640&h=480&fit=crop&q=80&auto=format" alt="Three rum cocktails lined up on a wooden bar counter" width="640" height="480" loading="lazy"></div>
+          <p class="rn">Jamaica</p>
+          <p class="rl">Jerk smoke, river swims, a bassline from somewhere you can't see. The Caribbean at full volume.</p>
+        </a>
+        <a class="rtile rv" href="#plan">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1526761122248-c31c93f8b2b9?w=640&h=480&fit=crop&q=80&auto=format" alt="A sailing boat's deck heading into a golden Caribbean sunset" width="640" height="480" loading="lazy"></div>
+          <p class="rn">Antigua</p>
+          <p class="rl">365 beaches and a sailing habit. You'll have found your beach by Wednesday.</p>
+        </a>
+        <a class="rtile rv" href="#plan">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=640&h=480&fit=crop&q=80&auto=format" alt="Bright orange reef fish swimming over living coral in clear shallow water" width="640" height="480" loading="lazy"></div>
+          <p class="rn">Tobago &amp; the quiet ones</p>
+          <p class="rl">Reefs you wade to, no headlines, no crowds. Bequia and Nevis for people who whisper about them.</p>
+        </a>
+        <a class="rtile rv" href="#plan">
+          <div class="ph"><img src="https://images.unsplash.com/photo-1500759285222-a95626b934cb?w=640&h=480&fit=crop&q=80&auto=format" alt="A pink vintage car parked on a sunlit, brightly painted Caribbean street" width="640" height="480" loading="lazy"></div>
+          <p class="rn">And everywhere&hellip;</p>
+          <p class="rl">Streets that dress like this. Twenty-one islands, one obsession — ask us about any of them.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FLIGHTS ============ -->
+  <section class="flights" id="flights">
+    <div class="wrap">
+      <div class="flights-band">
+        <div class="rv">
+          <p class="kicker">The practical bit</p>
+          <h2>Direct from three UK airports. No Miami.</h2>
+        </div>
+        <div class="flights-grid">
+          <div class="rv">
+            <table>
+              <caption style="position:absolute;left:-9999px">Direct UK to Caribbean flight routes</caption>
+              <thead>
+                <tr><th scope="col">Route</th><th scope="col">Airline</th><th scope="col">Frequency</th><th scope="col">Time</th></tr>
+              </thead>
+              <tbody>
+                <tr class="fastest"><td class="route">Gatwick &rarr; Antigua<span>V.C. Bird Intl</span><span class="tag-fast">Fastest</span></td><td>British Airways</td><td>Daily</td><td class="dur">8h 30m</td></tr>
+                <tr><td class="route">Gatwick &rarr; Barbados<span>Grantley Adams Intl</span></td><td>British Airways</td><td>Daily</td><td class="dur">8h 40m</td></tr>
+                <tr><td class="route">Heathrow &rarr; Barbados<span>Grantley Adams Intl</span></td><td>Virgin Atlantic</td><td>Daily</td><td class="dur">8h 45m</td></tr>
+                <tr><td class="route">Gatwick &rarr; St Lucia<span>Hewanorra Intl</span></td><td>British Airways</td><td>5x weekly</td><td class="dur">8h 50m</td></tr>
+                <tr><td class="route">Heathrow &rarr; St Lucia<span>Hewanorra Intl</span></td><td>Virgin Atlantic</td><td>3x weekly</td><td class="dur">8h 55m</td></tr>
+                <tr><td class="route">Manchester &rarr; Barbados<span>Grantley Adams Intl</span></td><td>TUI Airways</td><td>2x weekly</td><td class="dur">8h 55m</td></tr>
+                <tr><td class="route">Gatwick &rarr; Grenada<span>Maurice Bishop Intl</span></td><td>British Airways</td><td>2x weekly</td><td class="dur">9h 10m</td></tr>
+                <tr><td class="route">Heathrow &rarr; Jamaica<span>Montego Bay, Sangster Intl</span></td><td>Virgin Atlantic</td><td>3x weekly</td><td class="dur">9h 40m</td></tr>
+              </tbody>
+            </table>
+            <p class="note"><strong>Schedules shift by season.</strong> Ring us and we'll route you properly — regional departures, cabin upgrades that are actually worth it, and island-hopper connections for two-island trips.</p>
+          </div>
+          <aside class="flights-side rv">
+            <div class="ph"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&h=700&fit=crop&q=80&auto=format" alt="An aircraft wing above golden sunlit clouds en route across the Atlantic" width="900" height="700" loading="lazy"></div>
+            <h3>Two islands, one trip</h3>
+            <p>St Lucia + Grenada. Antigua + Barbuda. Barbados + the Grenadines by boat. Twin-centres are our favourite thing to build — ask.</p>
+            <a class="btn btn-ink-line" href="tel:+441273749118">Call 01273 749 118</a>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEASON HONESTY ============ -->
+  <section class="season" id="season">
+    <div class="wrap">
+      <div class="season-grid">
+        <div class="season-copy rv">
+          <p class="kicker">When to go — the honest version</p>
+          <h2>June to November is hurricane season. There — we said it.</h2>
+          <p>Most agents whisper it. We'd rather you knew: <b>the season is real, and most weeks inside it are still glorious.</b> Storms are tracked days out, direct hits on any single island are rare, and the green season means fuller waterfalls, quieter beaches and prices 25–40% lower.</p>
+          <p>Two more things the brochures skip: <b>Barbados, Grenada and Tobago sit at the very southern edge of the belt</b> and are struck far less often. And if you travel with us in season, we book flexible rates and you're fully ATOL-protected either way.</p>
+          <div class="season-promise">
+            <b>Our promise:</b> if we wouldn't take our own family that week, we'll tell you — and move you. Twice in twenty years we've rung clients and said "not this fortnight". Both still book with us.
+          </div>
+        </div>
+        <div class="rv">
+          <div class="months" role="img" aria-label="Month-by-month guide: December to April prime dry season, May green season value, June to November hurricane season with lower prices">
+            <div class="m-prime">J</div><div class="m-prime">F</div><div class="m-prime">M</div><div class="m-prime">A</div>
+            <div class="m-green">M</div>
+            <div class="m-watch">J</div><div class="m-watch">J</div><div class="m-watch">A</div><div class="m-watch">S</div><div class="m-watch">O</div><div class="m-watch">N</div>
+            <div class="m-prime">D</div>
+          </div>
+          <p class="m-key">
+            <span><i class="m-prime"></i>Prime &amp; dry</span>
+            <span><i class="m-green"></i>Green-season value</span>
+            <span><i class="m-watch"></i>Hurricane season — ask us first</span>
+          </p>
+          <figure class="season-photo">
+            <div class="ph"><img src="https://images.unsplash.com/photo-1471922694854-ff1b63b20054?w=900&h=564&fit=crop&q=80&auto=format" alt="Early morning sun over a calm sea with birds crossing a soft golden sky" width="900" height="564" loading="lazy"></div>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPECIALISTS ============ -->
+  <section class="people" id="people">
+    <div class="wrap">
+      <div class="rv">
+        <p class="kicker">Talk to someone who's been</p>
+        <h2>Not a call centre. Three people who argue about islands.</h2>
+        <p class="people-sub">Everyone here has slept on the islands they sell — hotel by hotel, in some cases bar by bar. Ring up and name your month; we'll do the rest.</p>
+      </div>
+      <div class="people-row">
+        <article class="person p1 rv">
+          <span class="visits">41</span>
+          <p class="visits-cap">island visits</p>
+          <h3>Marcia Benn</h3>
+          <p class="cred">Founder &middot; Barbados &amp; Grenada</p>
+          <p class="bio">Bajan grandmother, Brighton office. Marcia will tell you within four minutes whether you're a Barbados person or an Antigua person, and she hasn't been wrong since 2011.</p>
+          <a class="ask" href="#plan">Ask Marcia about Treasure Beach</a>
+        </article>
+        <article class="person p2 rv">
+          <span class="visits">27</span>
+          <p class="visits-cap">island visits</p>
+          <h3>Tom Ashworth</h3>
+          <p class="cred">Honeymoons &amp; twin-centres</p>
+          <p class="bio">Got married in St Lucia, went back eight times "for research". Knows which suites actually face the Pitons and which just say they do.</p>
+          <a class="ask" href="#plan">Ask Tom which suites face the Pitons</a>
+        </article>
+        <article class="person p3 rv">
+          <span class="visits">19</span>
+          <p class="visits-cap">island visits</p>
+          <h3>Priya Nandra</h3>
+          <p class="cred">Jamaica &middot; villas for groups</p>
+          <p class="bio">Will defend Jamaica against all comers, with maps. Villa specialist — cooks, pools, the lot — and the person to call if you're eight people with four opinions.</p>
+          <a class="ask" href="#plan">Ask Priya about villas with cooks</a>
+        </article>
+      </div>
+      <div class="people-foot rv">
+        <div class="rating">
+          <strong>4.8 / 5</strong>
+          <span>from 1,743 verified reviews</span>
+        </div>
+        <a class="btn btn-coral" href="#plan">Start the island match</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENQUIRY : coral block ============ -->
+  <section class="plan" id="plan">
+    <div class="wrap">
+      <div class="plan-grid">
+        <div class="plan-copy rv">
+          <p class="kicker">The island match</p>
+          <h2>Tell us who you are. We'll tell you where you land.</h2>
+          <p>Two minutes of your time, one phone call back from someone who's been — and the right island, first time. No brochures posted, no mailing lists, no nonsense.</p>
+          <p class="alt">Prefer a human straight away? <a href="tel:+441273749118">01273 749 118</a> — Mon–Sat, 9am–7pm. Ask for whoever's defending Jamaica that day.</p>
+        </div>
+        <form class="plan-form rv" id="matchform" novalidate>
+          <h3>Start the match</h3>
+          <div class="pf-grid">
+            <div class="pf-field">
+              <label for="pf-name">Your name</label>
+              <input type="text" id="pf-name" name="name" autocomplete="name" required>
+            </div>
+            <div class="pf-field">
+              <label for="pf-email">Email</label>
+              <input type="email" id="pf-email" name="email" autocomplete="email" required>
+            </div>
+            <div class="pf-field">
+              <label for="pf-when">Roughly when</label>
+              <select id="pf-when" name="when">
+                <option>This winter — get me out</option>
+                <option>Spring</option>
+                <option>Summer / green season</option>
+                <option>Honeymoon — date is set</option>
+                <option>Flexible if the price is right</option>
+              </select>
+            </div>
+            <div class="pf-field">
+              <label for="pf-island">Island you're leaning towards</label>
+              <select id="pf-island" name="island">
+                <option>No idea — that's your job</option>
+                <option>Barbados</option>
+                <option>St Lucia</option>
+                <option>Jamaica</option>
+                <option>Antigua</option>
+                <option>Grenada</option>
+                <option>One of the quiet ones</option>
+                <option>Two islands, one trip</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-ink" type="submit">Match me to my island</button>
+          <p class="pf-done" id="pf-done" role="status"><b>Got it.</b> One of the three of us will ring you within a working day — usually the one who'll fight hardest for your kind of trip.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <p class="bn">Windward &amp; West</p>
+        <p>Caribbean-only travel specialists since 2004. If you ask us about the Med, we will politely change the subject.</p>
+        <div class="foot-trust">
+          <span class="badge">ABTA P7194</span>
+          <span class="badge">ATOL 11428</span>
+          <span class="badge">EST. 2004</span>
+        </div>
+      </div>
+      <div>
+        <h4>The islands</h4>
+        <ul>
+          <li><a href="#isl-barbados">Barbados</a></li>
+          <li><a href="#isl-stlucia">St Lucia</a></li>
+          <li><a href="#rest">Jamaica</a></li>
+          <li><a href="#rest">Antigua &amp; Barbuda</a></li>
+          <li><a href="#isl-grenada">Grenada</a></li>
+          <li><a href="#rest">Tobago, Nevis &amp; the quiet ones</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Ways to go</h4>
+        <ul>
+          <li><a href="#plan">Honeymoons</a></li>
+          <li><a href="#plan">Winter sun escapes</a></li>
+          <li><a href="#flights">Twin-centre trips</a></li>
+          <li><a href="#plan">Villas for groups</a></li>
+          <li><a href="#season">Green-season value</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Windward &amp; West</h4>
+        <ul>
+          <li><a href="tel:+441273749118">01273 749 118</a></li>
+          <li><a href="mailto:hello@windwardandwest.co.uk">hello@windwardandwest.co.uk</a></li>
+          <li>42 Ship Street, Brighton BN1 1AD</li>
+          <li>Mon–Sat, 9am–7pm</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 Windward &amp; West Travel Ltd. All flight-inclusive holidays are ATOL protected.</span>
+      <span>Prices per person, based on two sharing, incl. flights &amp; transfers.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* ---- staggered scroll reveals ---- */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var rvs = document.querySelectorAll('.rv');
+  if(reduce || !('IntersectionObserver' in window)){
+    rvs.forEach(function(el){el.classList.add('on');});
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e,i){
+        if(e.isIntersecting){
+          setTimeout(function(){e.target.classList.add('on');}, (i%4)*70);
+          io.unobserve(e.target);
+        }
+      });
+    },{rootMargin:'0px 0px -8% 0px'});
+    rvs.forEach(function(el){io.observe(el);});
+  }
+
+  /* ---- enquiry form ---- */
+  var form = document.getElementById('matchform');
+  if(form){
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var name = document.getElementById('pf-name');
+      var email = document.getElementById('pf-email');
+      var ok = true;
+      [name,email].forEach(function(f){
+        if(!f.value.trim()){ f.style.borderColor = '#D9382D'; ok = false; }
+        else { f.style.borderColor = ''; }
+      });
+      if(!ok){ (name.value.trim()?email:name).focus(); return; }
+      document.getElementById('pf-done').style.display = 'block';
+      form.querySelector('button[type=submit]').disabled = true;
+      form.querySelector('button[type=submit]').style.opacity = '.55';
+    });
+  }
+})();
+</script>
+</body>
+</html>

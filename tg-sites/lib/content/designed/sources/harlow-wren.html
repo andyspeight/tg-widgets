@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Harlow &amp; Wren — Bespoke Travel, Composed by Hand</title>
+<meta name="description" content="Harlow &amp; Wren compose a small number of private journeys each year, one designer to one traveller. Considered, unhurried, and entirely your own. ABTA &amp; ATOL protected.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400;1,6..96,500&family=Jost:wght@300;400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lacquer:#1B1510;        /* warm amber-brown ground, never charcoal */
+    --lacquer-deep:#14100B;   /* footer, deepest inset, input fill */
+    --lacquer-raised:#241C13; /* the one floating panel */
+    --lacquer-hover:#2C2318;
+    --champagne:#C8A96C;      /* the single thread: spine, rules, one word, one CTA */
+    --champagne-bright:#DDC291;
+    --brass:#9A7E4A;          /* icon strokes, heavier borders */
+    --ivory:#F4EDDF;          /* display + headlines, warm white */
+    --text:#E7DFCF;           /* body, ~12:1 on lacquer */
+    --text-muted:#B7A98D;     /* captions, meta, placeholders, ~6:1 */
+    --text-faint:#8E826A;     /* decorative sub-labels only */
+    --ink:#1B1510;            /* text on a champagne fill */
+    --gold-hair:rgba(200,169,108,.24);
+    --gold-hair-strong:rgba(200,169,108,.6);
+    --rule:rgba(244,237,223,.1);
+    --pad:clamp(22px,6vw,120px);
+    --measure:66ch;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    font-family:'Jost',system-ui,sans-serif;
+    font-weight:400;font-size:17px;line-height:1.75;
+    color:var(--text);background:var(--lacquer);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  h1,h2,h3,.serif{font-family:'Bodoni Moda',Didot,'Times New Roman',serif;font-weight:500}
+  img{display:block;max-width:100%;height:auto}
+  a{color:inherit}
+  /* browser surfaces, themed from the palette */
+  ::selection{background:rgba(200,169,108,.28);color:var(--ivory)}
+  html{caret-color:var(--champagne)}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
+    outline:2px solid var(--gold-hair-strong);outline-offset:3px;border-radius:1px;
+  }
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-track{background:var(--lacquer-deep)}
+  ::-webkit-scrollbar-thumb{background:var(--brass);border:3px solid var(--lacquer-deep);border-radius:99px}
+  *{scrollbar-width:thin;scrollbar-color:var(--brass) var(--lacquer-deep)}
+
+  .skip{position:absolute;left:-9999px;top:0;background:var(--champagne);color:var(--ink);padding:10px 18px;z-index:80;font-weight:500}
+  .skip:focus{left:12px;top:12px}
+
+  /* the one motion moment: fade-rise, exponential ease-out, from an already-visible default */
+  .rise{opacity:0;transform:translateY(18px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+  .rise.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rise{opacity:1;transform:none}}
+
+  /* ---------- the field ledger : a champagne spine down the outer margin ---------- */
+  .spine{
+    position:fixed;top:0;bottom:0;left:0;width:var(--pad);z-index:40;pointer-events:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .spine::before{content:"";position:absolute;top:0;bottom:0;left:calc(var(--pad) - 1px);width:1px;background:var(--gold-hair)}
+  .spine span{
+    writing-mode:vertical-rl;transform:rotate(180deg);
+    font-size:11px;font-weight:500;letter-spacing:.42em;text-transform:uppercase;
+    color:var(--text-muted);white-space:nowrap;
+  }
+  .spine b{color:var(--champagne);font-weight:500}
+  @media (max-width:1080px){.spine{display:none}}
+
+  /* ---------- top strip + nav ---------- */
+  .strip{
+    display:flex;justify-content:space-between;gap:16px;
+    padding:11px var(--pad);border-bottom:1px solid var(--rule);
+    font-size:12px;letter-spacing:.08em;color:var(--text-muted);
+  }
+  .strip b{color:var(--text);font-weight:500}
+  header.nav{
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+    padding:24px var(--pad);border-bottom:1px solid var(--rule);
+    position:relative;z-index:30;background:var(--lacquer);
+  }
+  .wordmark{text-decoration:none;white-space:nowrap;line-height:1}
+  .wordmark b{font-family:'Bodoni Moda',serif;font-weight:500;font-size:23px;letter-spacing:.16em;color:var(--ivory);display:block}
+  .wordmark small{display:block;font-size:9.5px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:var(--champagne);margin-top:5px}
+  nav.primary ul{display:flex;gap:clamp(18px,3vw,42px);list-style:none;align-items:center}
+  nav.primary a{text-decoration:none;font-size:14px;font-weight:400;letter-spacing:.04em;color:var(--text);padding:12px 2px;position:relative}
+  nav.primary a::after{content:"";position:absolute;left:0;right:100%;bottom:6px;height:1px;background:var(--champagne);transition:right .3s cubic-bezier(.16,1,.3,1)}
+  nav.primary a:hover::after,nav.primary a:focus-visible::after{right:0}
+  .nav-end{display:flex;align-items:center;gap:22px}
+  .nav-phone{font-size:14px;text-decoration:none;white-space:nowrap;padding:12px 0;color:var(--text)}
+  .nav-phone b{font-weight:500;color:var(--ivory)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+    font-family:'Jost',sans-serif;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+    min-height:44px;padding:0 26px;background:var(--champagne);color:var(--ink);border:1px solid var(--champagne);
+    cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .1s ease;white-space:nowrap;
+  }
+  .btn:hover{background:var(--champagne-bright);border-color:var(--champagne-bright)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;color:var(--champagne);border-color:var(--gold-hair-strong)}
+  .btn.ghost:hover{background:transparent;border-color:var(--champagne);color:var(--champagne-bright)}
+  .menu-toggle{display:none;background:none;border:1px solid var(--gold-hair);color:var(--ivory);min-height:44px;padding:0 16px;font-family:'Jost',sans-serif;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+
+  /* ---------- hero : full-bleed plate, static, editorial masthead ---------- */
+  .hero{position:relative;min-height:clamp(560px,86vh,920px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+  .hero-plate{position:absolute;inset:0}
+  .hero-plate img{width:100%;height:100%;object-fit:cover;filter:saturate(.8) contrast(.98) sepia(.06) brightness(.9)}
+  .hero-veil{position:absolute;inset:0;background:
+    linear-gradient(to top, rgba(20,16,11,.92) 0%, rgba(20,16,11,.5) 34%, rgba(20,16,11,.12) 66%, rgba(20,16,11,.34) 100%),
+    linear-gradient(to right, rgba(20,16,11,.6) 0%, rgba(20,16,11,0) 52%);}
+  .hero-inner{position:relative;z-index:5;padding:clamp(40px,7vw,96px) var(--pad) clamp(40px,6vw,76px);max-width:1160px}
+  .hero h1{font-size:clamp(44px,8vw,104px);line-height:.98;letter-spacing:-.035em;color:var(--ivory);font-weight:500;max-width:15ch;text-wrap:balance}
+  .hero h1 em{font-style:italic;font-weight:400}
+  .hero-sub{margin:clamp(20px,3vw,32px) 0 clamp(28px,4vw,40px);font-size:clamp(16px,1.4vw,19px);color:var(--text);max-width:46ch;line-height:1.7}
+  .hero-actions{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+  .quiet-link{font-size:14px;text-decoration:none;color:var(--ivory);border-bottom:1px solid var(--gold-hair-strong);padding:12px 2px;text-underline-offset:.22em;transition:color .2s ease,border-color .2s ease}
+  .quiet-link:hover{color:var(--champagne);border-color:var(--champagne)}
+  .hero-foot{position:relative;z-index:5;display:flex;gap:clamp(24px,5vw,72px);flex-wrap:wrap;padding:20px var(--pad) 26px;border-top:1px solid var(--gold-hair);font-size:13px;letter-spacing:.04em;color:var(--text-muted)}
+  .hero-foot b{color:var(--ivory);font-weight:500}
+
+  /* ---------- the stated line ---------- */
+  .stated{padding:clamp(84px,13vw,190px) var(--pad)}
+  .stated p{font-family:'Bodoni Moda',serif;font-weight:400;font-size:clamp(28px,4.6vw,60px);line-height:1.16;letter-spacing:-.02em;color:var(--ivory);max-width:20ch}
+  .stated p em{color:var(--champagne);font-style:italic}
+  .stated .by{display:block;margin-top:28px;font-family:'Jost',sans-serif;font-size:12px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:var(--text-muted)}
+
+  /* ---------- journeys : stepped asymmetric movements ---------- */
+  .movements{padding:0 var(--pad) clamp(72px,10vw,150px)}
+  .mv-head{border-top:1px solid var(--gold-hair);padding-top:24px;margin-bottom:clamp(48px,6vw,84px);display:flex;justify-content:space-between;align-items:baseline;gap:24px;flex-wrap:wrap}
+  .mv-head h2{font-size:clamp(26px,3vw,40px);font-weight:500;color:var(--ivory);letter-spacing:-.01em}
+  .mv-head span{font-size:13px;color:var(--text-muted);letter-spacing:.04em;max-width:40ch}
+  .movement{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(28px,4vw,72px);align-items:center;margin-bottom:clamp(64px,9vw,140px)}
+  .movement:nth-child(even){grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+  .movement:nth-child(even) .mv-fig{order:2}
+  .movement:nth-child(even) .mv-txt{order:1}
+  .mv-txt{max-width:44ch}
+  .mv-txt h3{font-size:clamp(26px,3vw,42px);line-height:1.08;letter-spacing:-.02em;color:var(--ivory);margin-bottom:20px;text-wrap:balance}
+  .mv-txt p{font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:18px;line-height:1.7;color:var(--text)}
+  .mv-txt .price{display:block;margin-top:22px;font-size:13px;letter-spacing:.04em;color:var(--text-muted)}
+  .mv-txt .go{display:inline-block;margin-top:22px;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;color:var(--champagne);border-bottom:1px solid var(--gold-hair-strong);padding:10px 0 8px;text-underline-offset:.2em}
+  .mv-txt .go:hover{color:var(--champagne-bright);border-color:var(--champagne)}
+  .mv-fig img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:saturate(.8) contrast(.98) sepia(.06) brightness(.92)}
+  .movement:nth-child(even) .mv-fig img{aspect-ratio:5/4}
+  .mv-fig figcaption{margin-top:14px;display:flex;justify-content:space-between;gap:12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+  .mv-foot{border-top:1px solid var(--gold-hair);padding-top:26px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+  .mv-foot p{font-family:'Newsreader',Georgia,serif;font-weight:300;font-style:italic;font-size:18px;color:var(--text-muted);max-width:52ch}
+
+  /* ---------- how we work : numbered, editorial ---------- */
+  .how{padding:clamp(80px,11vw,170px) var(--pad);border-top:1px solid var(--rule)}
+  .how-intro{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(28px,5vw,80px);margin-bottom:clamp(56px,7vw,96px);align-items:end}
+  .how-intro h2{font-size:clamp(28px,3.6vw,52px);font-weight:500;line-height:1.08;color:var(--ivory);letter-spacing:-.02em;text-wrap:balance}
+  .how-intro h2 em{color:var(--champagne);font-style:italic}
+  .how-intro p{font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:19px;line-height:1.7;color:var(--text);max-width:48ch}
+  .steps{list-style:none;border-top:1px solid var(--gold-hair)}
+  .steps li{display:grid;grid-template-columns:minmax(56px,1fr) minmax(0,4fr) minmax(0,7fr);gap:clamp(18px,3vw,56px);padding:clamp(30px,4vw,48px) 0;border-bottom:1px solid var(--gold-hair)}
+  .steps .n{font-family:'Bodoni Moda',serif;font-size:clamp(22px,2vw,28px);color:var(--champagne);font-weight:400}
+  .steps h3{font-size:clamp(21px,2vw,27px);font-weight:500;color:var(--ivory);letter-spacing:-.01em}
+  .steps p{font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:18px;line-height:1.68;color:var(--text);max-width:58ch}
+  .steps b{color:var(--ivory);font-weight:400;font-style:italic}
+
+  /* ---------- the designer ---------- */
+  .studio{padding:clamp(76px,10vw,150px) var(--pad);border-top:1px solid var(--rule)}
+  .studio-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(32px,5vw,80px);align-items:center}
+  .studio-fig img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:saturate(.8) contrast(.98) sepia(.06) brightness(.92)}
+  .studio-fig figcaption{margin-top:14px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+  .studio-txt h2{font-size:clamp(26px,3.2vw,44px);font-weight:500;color:var(--ivory);letter-spacing:-.02em;margin-bottom:22px;text-wrap:balance}
+  .studio-txt p{font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:19px;line-height:1.72;color:var(--text);max-width:52ch;margin-bottom:18px}
+  .studio-txt .named{font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.04em;color:var(--text-muted);margin-top:24px}
+  .studio-txt .named b{color:var(--ivory);font-weight:500;font-family:'Bodoni Moda',serif}
+
+  /* ---------- consultation ---------- */
+  .consult{padding:clamp(80px,11vw,170px) var(--pad);border-top:1px solid var(--rule)}
+  .consult-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(36px,5vw,90px);align-items:start}
+  .consult h2{font-size:clamp(30px,4vw,56px);font-weight:500;line-height:1.04;color:var(--ivory);letter-spacing:-.03em;margin-bottom:24px;text-wrap:balance}
+  .consult .lead{font-family:'Newsreader',Georgia,serif;font-weight:300;font-size:19px;line-height:1.7;color:var(--text);max-width:42ch;margin-bottom:34px}
+  .consult-meta{border-top:1px solid var(--gold-hair);padding-top:26px;font-size:15px;line-height:2.1;color:var(--text-muted)}
+  .consult-meta a{color:var(--ivory);text-decoration:none;border-bottom:1px solid var(--gold-hair)}
+  .consult-meta a:hover{color:var(--champagne);border-color:var(--champagne)}
+  form.enquiry{display:grid;gap:26px;background:var(--lacquer-raised);border:1px solid var(--gold-hair);padding:clamp(24px,3.4vw,44px)}
+  .field label{display:block;font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--champagne);margin-bottom:9px}
+  .field input,.field textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--gold-hair);color:var(--ivory);font-family:'Jost',sans-serif;font-size:16px;padding:12px 2px 14px;min-height:44px;transition:border-color .2s ease}
+  .field textarea{resize:vertical;min-height:82px;line-height:1.6}
+  .field input::placeholder,.field textarea::placeholder{color:var(--text-muted)}
+  .field input:focus,.field textarea:focus{border-bottom-color:var(--champagne);outline:none}
+  .form-foot{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  .form-note{font-size:13px;color:var(--text-faint);max-width:34ch;line-height:1.5}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--lacquer-deep);border-top:1px solid var(--gold-hair)}
+  .foot-main{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,3fr) minmax(0,4fr);gap:clamp(32px,4vw,64px);padding:clamp(52px,6vw,84px) var(--pad)}
+  .foot-main .wordmark b{font-size:21px}
+  .foot-addr{font-style:normal;font-size:14px;line-height:2;color:var(--text-muted);margin-top:18px}
+  .foot-addr a{color:inherit;text-decoration:none}
+  .foot-addr a:hover{color:var(--champagne)}
+  footer nav ul{list-style:none;font-size:14px;line-height:2.5}
+  footer nav a{color:var(--text-muted);text-decoration:none}
+  footer nav a:hover{color:var(--champagne)}
+  .foot-trust{font-size:13px;line-height:2;color:var(--text-faint)}
+  .foot-trust b{color:var(--text-muted);font-weight:400}
+  .foot-legal{border-top:1px solid var(--rule);padding:20px var(--pad);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-faint);letter-spacing:.04em}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    nav.primary{position:absolute;top:100%;left:0;right:0;background:var(--lacquer);border-bottom:1px solid var(--gold-hair);display:none;padding:8px var(--pad) 22px}
+    nav.primary.open{display:block}
+    nav.primary ul{flex-direction:column;gap:2px;align-items:stretch}
+    nav.primary a{display:block;padding:14px 0;font-size:16px}
+    .menu-toggle{display:inline-flex;align-items:center;order:-1}
+    .nav-end .nav-phone,.nav-end .btn{display:none}
+    .movement,.movement:nth-child(even){grid-template-columns:1fr}
+    .movement .mv-fig,.movement:nth-child(even) .mv-fig{order:0}
+    .movement .mv-txt,.movement:nth-child(even) .mv-txt{order:0}
+    .mv-fig img,.movement:nth-child(even) .mv-fig img{aspect-ratio:16/10}
+    .how-intro,.studio-grid,.consult-grid{grid-template-columns:1fr}
+    .studio-fig{max-width:460px}
+    .steps li{grid-template-columns:44px 1fr;grid-template-rows:auto auto}
+    .steps p{grid-column:2}
+    .foot-main{grid-template-columns:1fr 1fr}
+    .foot-trust{grid-column:1 / -1}
+  }
+  @media (max-width:540px){
+    .foot-main{grid-template-columns:1fr}
+    .steps li{grid-template-columns:1fr;gap:8px}
+    .steps p{grid-column:1}
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="spine" aria-hidden="true"><span>Harlow &amp; Wren &nbsp;&middot;&nbsp; Private Travel &nbsp;&middot;&nbsp; <b>Folio MMXXVI</b></span></div>
+
+<div class="strip">
+  <span>Est. 2014 &middot; Fitzrovia, London</span>
+  <span><b>ATOL 11529</b> &middot; ABTA Y6690 &middot; A member of the Travel Designers' Guild</span>
+</div>
+
+<header class="nav">
+  <a class="wordmark" href="#top" aria-label="Harlow and Wren — home"><b>HARLOW &amp; WREN</b><small>Private Travel</small></a>
+  <button class="menu-toggle" aria-expanded="false" aria-controls="primary-nav">Menu</button>
+  <nav class="primary" id="primary-nav" aria-label="Primary">
+    <ul>
+      <li><a href="#journeys">Journeys</a></li>
+      <li><a href="#how">How we work</a></li>
+      <li><a href="#studio">The studio</a></li>
+      <li><a href="#consult">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="nav-end">
+    <a class="nav-phone" href="tel:+442036704180"><b>020 3670 4180</b></a>
+    <a class="btn" href="#consult">Arrange a call</a>
+  </div>
+</header>
+
+<main id="main">
+<div id="top"></div>
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-plate" aria-hidden="true">
+      <img src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1800&h=1500&fit=crop&q=80&auto=format" width="1800" height="1500" alt="Low morning sun raking across empty desert dunes, a light aircraft's shadow crossing the sand">
+    </div>
+    <div class="hero-veil" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <h1 class="rise in">A few journeys a year. <em>Each one entirely yours.</em></h1>
+      <p class="hero-sub rise in">Harlow &amp; Wren compose private travel by hand, one designer to one traveller. No brochure, no shortlist, no two the same.</p>
+      <div class="hero-actions rise in">
+        <a class="btn" href="#consult">Request a consultation</a>
+        <a class="quiet-link" href="#journeys">Read three journeys from this year</a>
+      </div>
+    </div>
+    <div class="hero-foot">
+      <span><b>One designer</b>, one traveller</span>
+      <span><b>Around forty</b> journeys a year, no more</span>
+      <span><b>A direct line</b>, day and night, while you travel</span>
+    </div>
+  </section>
+
+  <!-- STATED LINE -->
+  <section class="stated" aria-label="What we believe">
+    <p class="rise">The corner room on the third floor, <em>because the second loses the light after four.</em></p>
+    <span class="by rise">The level at which we work</span>
+  </section>
+
+  <!-- JOURNEYS -->
+  <section class="movements" id="journeys" aria-label="Journeys">
+    <div class="mv-head rise">
+      <h2>Three from this year's book</h2>
+      <span>Shown as they were composed. Every journey begins on a blank page.</span>
+    </div>
+
+    <article class="movement">
+      <figure class="mv-fig rise">
+        <img src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1100&h=1375&fit=crop&q=80&auto=format" width="1100" height="1375" alt="First light across a stone loggia and cypress garden at a private Tuscan villa">
+        <figcaption><span>Val d'Orcia, Tuscany</span><span>June, first light</span></figcaption>
+      </figure>
+      <div class="mv-txt rise">
+        <h3>A private villa above the Val d'Orcia</h3>
+        <p>Ten nights in a farmhouse taken in full, with a cook three evenings a week and a car whenever it is wanted. Truffles dug before breakfast near San Giovanni; the Brunello cellars opened by name, not by tour.</p>
+        <span class="price">From £18,400 for two, ten nights, October dates held</span>
+        <a class="go" href="#consult">Discuss this journey</a>
+      </div>
+    </article>
+
+    <article class="movement">
+      <figure class="mv-fig rise">
+        <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=1200&h=960&fit=crop&q=80&auto=format" width="1200" height="960" alt="The Grand Canal seen from the Rialto in Venice, quiet in soft evening light">
+        <figcaption><span>The Grand Canal, Venice</span><span>February, out of season</span></figcaption>
+      </figure>
+      <div class="mv-txt rise">
+        <h3>A Venetian winter, the city returned to itself</h3>
+        <p>Six nights on the quiet side of the water, the Accademia to yourself before it opens, Torcello by private launch at eight, and a first-floor window held on the Piazza in mask season, in it but not of it.</p>
+        <span class="price">From £11,900 for two, six nights</span>
+        <a class="go" href="#consult">Discuss this journey</a>
+      </div>
+    </article>
+
+    <article class="movement">
+      <figure class="mv-fig rise">
+        <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1100&h=1375&fit=crop&q=80&auto=format" width="1100" height="1375" alt="A lane in the Higashiyama district of Kyoto leading up to the Yasaka pagoda at dusk">
+        <figcaption><span>Higashiyama, Kyoto</span><span>November, dusk</span></figcaption>
+      </figure>
+      <div class="mv-txt rise">
+        <h3>Kyoto in the last of the maples</h3>
+        <p>Twelve nights between a townhouse in the old weavers' quarter and a ryokan on the Inland Sea, the moss garden at Saihoji reserved months ahead, and tea taken where it is made, with the maker.</p>
+        <span class="price">From £24,600 for two, twelve nights</span>
+        <a class="go" href="#consult">Discuss this journey</a>
+      </div>
+    </article>
+
+    <div class="mv-foot rise">
+      <p>These are not products. Around forty journeys leave the studio in a year, and no two have yet been the same.</p>
+      <a class="quiet-link" href="#consult">Tell us where you are in the world</a>
+    </div>
+  </section>
+
+  <!-- HOW WE WORK -->
+  <section class="how" id="how" aria-label="How we work">
+    <div class="how-intro">
+      <h2 class="rise">The itinerary is the <em>last</em> thing we make.</h2>
+      <p class="rise">Most of the work happens before anything is booked, in conversation and in the years of notes our designers keep on the houses, the rooms and the people they know by name.</p>
+    </div>
+    <ol class="steps">
+      <li class="rise">
+        <span class="n" aria-hidden="true">I</span>
+        <h3>A conversation, not a form</h3>
+        <p>An hour with your designer, by telephone or at the studio. How you like to travel, what you never want to do again, who is coming, and what the journey is <b>for</b>. Nothing is booked, nothing is sold.</p>
+      </li>
+      <li class="rise">
+        <span class="n" aria-hidden="true">II</span>
+        <h3>One proposal, fully priced</h3>
+        <p>Within a week, a single considered journey, not three padded for choice, with every cost written down to the transfers. We revise it with you until it is right, however many rounds that takes.</p>
+      </li>
+      <li class="rise">
+        <span class="n" aria-hidden="true">III</span>
+        <h3>A hand on it while you travel</h3>
+        <p>Your designer, reachable on a direct line day and night. When fog closed Florence last November, our travellers were driven to Bologna and away on the fast train <b>before the airport had finished apologising</b>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- THE STUDIO -->
+  <section class="studio" id="studio" aria-label="The studio">
+    <div class="studio-grid">
+      <figure class="studio-fig rise">
+        <img src="https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=1000&h=1250&fit=crop&q=80&auto=format" width="1000" height="1250" alt="Grand stone architecture at first light, minarets and domes against a pale early sky">
+        <figcaption>The studio travels the regions it composes, every year</figcaption>
+      </figure>
+      <div class="studio-txt">
+        <h2 class="rise">You deal with one person, start to finish.</h2>
+        <p class="rise">Harlow &amp; Wren is nine designers above a bookbinder's in Fitzrovia. Each takes a small book of travellers, keeps to the regions they know in their bones, and answers their own telephone. The person who plans your journey is the person who picks up when you call from the road.</p>
+        <p class="named rise">This month your first conversation is likely to be with <b>Cordelia Wren</b>, who has spent nineteen Septembers driving the back roads of Tuscany and Umbria, checking rooms.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSULTATION -->
+  <section class="consult" id="consult" aria-label="Request a consultation">
+    <div class="consult-grid">
+      <div>
+        <h2 class="rise">Start with a conversation.</h2>
+        <p class="lead rise">Tell us a little about the journey you have in mind, or the one you cannot quite picture yet, and the right designer will call you back within one working day. The first conversation costs nothing.</p>
+        <div class="consult-meta rise">
+          <p><a href="tel:+442036704180">020 3670 4180</a> &mdash; a designer answers, never a call centre</p>
+          <p>Weekdays 9&ndash;6, Saturdays by appointment</p>
+          <p>The studio: 14 Colville Place, Fitzrovia, London W1T 2BG</p>
+        </div>
+      </div>
+      <form class="enquiry rise" action="#" method="post" novalidate>
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label for="f-contact">Email or telephone</label>
+          <input id="f-contact" name="contact" type="text" autocomplete="email" placeholder="However you prefer to be reached">
+        </div>
+        <div class="field">
+          <label for="f-where">Where are you in the world?</label>
+          <textarea id="f-where" name="where" rows="3" placeholder="A place, a month, an occasion — anything is enough to begin"></textarea>
+        </div>
+        <div class="form-foot">
+          <button class="btn" type="submit">Request a call back</button>
+          <p class="form-note">No newsletters follow. One designer will be in touch, once.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="foot-main">
+    <div>
+      <a class="wordmark" href="#top" aria-label="Harlow and Wren — home"><b>HARLOW &amp; WREN</b><small>Private Travel</small></a>
+      <address class="foot-addr">
+        14 Colville Place, Fitzrovia, London W1T 2BG<br>
+        <a href="tel:+442036704180">020 3670 4180</a> &middot; <a href="mailto:studio@harlowandwren.co.uk">studio@harlowandwren.co.uk</a>
+      </address>
+    </div>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="#journeys">Journeys</a></li>
+        <li><a href="#how">How we work</a></li>
+        <li><a href="#studio">The studio</a></li>
+        <li><a href="#consult">Request a consultation</a></li>
+      </ul>
+    </nav>
+    <div class="foot-trust">
+      <p><b>Your money is protected.</b> Flight-inclusive journeys are ATOL protected (ATOL 11529). Harlow &amp; Wren Ltd is a member of ABTA (Y6690).</p>
+      <p style="margin-top:14px">Registered in England &amp; Wales No. 08946 217. Est. 2014.</p>
+    </div>
+  </div>
+  <div class="foot-legal">
+    <span>&copy; 2026 Harlow &amp; Wren Ltd</span>
+    <span>Privacy &middot; Booking conditions &middot; Modern Slavery Statement</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // mobile nav
+  var btn=document.querySelector('.menu-toggle');
+  var nav=document.getElementById('primary-nav');
+  if(btn&&nav){
+    btn.addEventListener('click',function(){
+      var open=nav.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+    });
+    nav.addEventListener('click',function(e){
+      if(e.target.tagName==='A'){nav.classList.remove('open');btn.setAttribute('aria-expanded','false');}
+    });
+  }
+  // the one motion moment: fade-rise on entry, staggered gently, honouring reduced motion
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=document.querySelectorAll('.rise:not(.in)');
+  if(reduced||!('IntersectionObserver' in window)){
+    els.forEach(function(el){el.classList.add('in');});
+    return;
+  }
+  var seen=0;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var el=entry.target;
+        el.style.transitionDelay=Math.min((seen++%3)*80,160)+'ms';
+        el.classList.add('in');
+        io.unobserve(el);
+      }
+    });
+  },{threshold:.12,rootMargin:'0px 0px -48px 0px'});
+  els.forEach(function(el){io.observe(el);});
+})();
+</script>
+</body>
+</html>

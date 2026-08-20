@@ -8,3 +8,6 @@ playwright-report/
 
 # OS noise
 .DS_Store
+
+# Impeccable: per-developer detector overrides (config.json is shared and committed)
+.impeccable/config.local.json

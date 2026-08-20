@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenwick &amp; Hale — Small-Group Cultural Tours, Led by Scholars. The 2027 Collection</title>
+<meta name="description" content="Small-group cultural tours led by historians, archaeologists and writers. Groups of 22 at most, unhurried itineraries, solo travellers welcome. Order the 2027 prospectus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@500;600;700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400;1,7..72,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --plum: #3B2537;
+    --plum-deep: #2C1B29;
+    --dove: #E8E4E1;
+    --dove-light: #F2F0EE;
+    --dove-deep: #DED8D4;
+    --graphite: #2A272B;
+    --muted: #5C5560;
+    --gold: #C9A45C;      /* on plum only, and as rules */
+    --gold-ink: #7A5F28;  /* gold as text on dove */
+    --rule: rgba(42, 39, 43, .24);
+    --rule-strong: rgba(42, 39, 43, .55);
+    --rule-light: rgba(232, 228, 225, .28);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  body {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.62;
+    color: var(--graphite);
+    background: var(--dove);
+  }
+
+  h1, h2, h3, .sans { font-family: 'Albert Sans', 'Helvetica Neue', sans-serif; }
+
+  a { color: var(--plum); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--plum-deep); }
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--plum);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+  @media (max-width: 720px) { .wrap { padding: 0 22px; } }
+
+  .eyebrow {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-ink);
+  }
+
+  /* section numbering — the prospectus spine */
+  .sec-head {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 34px;
+    align-items: start;
+    border-top: 3px solid var(--plum);
+    padding-top: 26px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .sec-head::after {
+    content: ""; position: absolute; top: 5px; left: 0; right: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .sec-num {
+    font-family: 'Literata', serif;
+    font-size: 52px; font-weight: 400; line-height: 1;
+    color: var(--gold-ink);
+    font-variant-numeric: lining-nums;
+  }
+  .sec-num small {
+    display: block;
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .sec-head h2 {
+    font-size: clamp(25px, 2.8vw, 34px); font-weight: 700;
+    line-height: 1.16; letter-spacing: -.01em; color: var(--plum);
+    margin-bottom: 10px;
+  }
+  .sec-head .note { color: var(--muted); font-size: 17px; max-width: 62ch; }
+  @media (max-width: 720px) {
+    .sec-head { grid-template-columns: 1fr; gap: 14px; }
+    .sec-num { font-size: 38px; }
+  }
+
+  /* ---------- top strip ---------- */
+  .topstrip {
+    background: var(--plum-deep);
+    color: var(--dove);
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 13.5px;
+  }
+  .topstrip .wrap {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 9px; padding-bottom: 9px; gap: 16px;
+  }
+  .topstrip a { color: var(--dove); text-decoration: none; }
+  .topstrip a:hover { text-decoration: underline; }
+  .topstrip a:focus-visible { outline-color: var(--gold); }
+  .topstrip .phone { font-weight: 700; letter-spacing: .02em; }
+  @media (max-width: 720px) { .topstrip .protect { display: none; } }
+
+  /* ---------- masthead ---------- */
+  header.site { background: var(--dove); }
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 26px; padding-bottom: 22px; gap: 24px; flex-wrap: wrap;
+  }
+  .wordmark { text-decoration: none; color: var(--graphite); }
+  .wordmark .name {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 27px; font-weight: 700; letter-spacing: .045em;
+    color: var(--plum);
+  }
+  .wordmark .name em { font-style: normal; color: var(--gold-ink); }
+  .wordmark .tag {
+    font-family: 'Literata', serif; font-style: italic;
+    font-size: 14px; color: var(--muted); margin-top: 1px;
+  }
+  nav.primary ul {
+    list-style: none; display: flex; gap: 30px; align-items: center; flex-wrap: wrap;
+  }
+  nav.primary a {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 15.5px; font-weight: 600; color: var(--graphite);
+    text-decoration: none; padding: 10px 0; display: inline-block;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s ease-out, color .2s ease-out;
+  }
+  nav.primary a:hover { color: var(--plum); border-bottom-color: var(--gold); }
+  .btn {
+    display: inline-block;
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 15.5px; font-weight: 600;
+    background: var(--plum); color: var(--dove-light);
+    padding: 13px 26px; text-decoration: none;
+    border: 1px solid var(--plum); border-radius: 2px;
+    transition: background-color .2s ease-out;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--plum-deep); color: var(--dove-light); }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost {
+    background: transparent; color: var(--plum);
+    border: 1px solid var(--plum);
+  }
+  .btn.ghost:hover { background: rgba(59, 37, 55, .08); }
+
+  /* the issue bar — double rule + prospectus line */
+  .issuebar {
+    border-top: 3px solid var(--plum);
+    position: relative;
+  }
+  .issuebar::before {
+    content: ""; position: absolute; top: 5px; left: 0; right: 0;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .issuebar .wrap {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 12px 28px; flex-wrap: wrap;
+    padding-top: 14px; padding-bottom: 14px;
+  }
+  .issuebar span {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .issuebar .issue-title { color: var(--plum); font-size: 13px; }
+  .issuebar em { font-family: 'Literata', serif; font-style: italic; text-transform: none; letter-spacing: .02em; font-weight: 500; font-size: 14px; }
+  @media (max-width: 720px) { .issuebar .hide-s { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 72px 0 64px; }
+  .hero .wrap {
+    display: grid; grid-template-columns: 7fr 5fr; gap: 72px; align-items: center;
+  }
+  .hero h1 {
+    font-size: clamp(33px, 3.8vw, 50px);
+    font-weight: 700; line-height: 1.12; letter-spacing: -.012em;
+    color: var(--plum); margin: 16px 0 24px; max-width: 16ch;
+  }
+  .hero .lede {
+    font-size: 19px; line-height: 1.68; color: var(--graphite);
+    max-width: 54ch; margin-bottom: 32px;
+  }
+  .hero .ctas { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; margin-bottom: 34px; }
+  .hero .quiet-link {
+    font-family: 'Albert Sans', sans-serif; font-size: 15.5px; font-weight: 600;
+    padding: 10px 0;
+  }
+  .hero .facts {
+    border-top: 1px solid var(--rule); padding-top: 18px;
+    font-size: 15.5px; font-style: italic; color: var(--muted);
+    max-width: 58ch;
+  }
+  .hero .facts b { font-style: normal; font-weight: 600; color: var(--graphite); }
+
+  /* framed plate treatment — every photograph on the page */
+  figure.plate {
+    background: var(--dove-light);
+    border: 1px solid var(--rule);
+    padding: 13px;
+    box-shadow: 0 1px 0 rgba(42,39,43,.12);
+  }
+  figure.plate img {
+    display: block; width: 100%; height: auto;
+    filter: saturate(.8) contrast(1.05) sepia(.07) brightness(.99);
+  }
+  figure.plate figcaption {
+    font-style: italic; font-size: 13.5px; color: var(--muted);
+    padding: 11px 4px 2px; line-height: 1.5;
+  }
+  figure.plate .plate-no {
+    display: block; font-style: normal;
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--gold-ink);
+    margin-bottom: 3px;
+  }
+
+  @media (max-width: 980px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 48px; }
+    .hero { padding: 52px 0 56px; }
+    .hero .plate { max-width: 460px; }
+  }
+
+  /* contents strip — prospectus table of contents */
+  .contents {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--dove-light);
+  }
+  .contents .wrap {
+    display: flex; flex-wrap: wrap; align-items: stretch;
+  }
+  .contents a {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; text-decoration: none; color: var(--graphite);
+    padding: 15px 26px 15px 0; margin-right: 26px;
+    border-right: 1px solid var(--rule);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .contents a:last-child { border-right: 0; margin-right: 0; }
+  .contents a b { color: var(--gold-ink); font-family: 'Literata', serif; font-weight: 500; font-size: 14px; }
+  .contents a:hover { color: var(--plum); }
+  @media (max-width: 860px) {
+    .contents a { border-right: 0; padding: 14px 0; margin-right: 30px; }
+  }
+
+  /* ---------- section scaffolding ---------- */
+  section { padding: 78px 0; }
+
+  /* ---------- collection table ---------- */
+  .coltable { width: 100%; border-collapse: collapse; }
+  .coltable caption {
+    text-align: left;
+    font-style: italic; font-size: 15px; color: var(--muted);
+    padding-bottom: 16px;
+  }
+  .coltable thead th {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 11.5px; font-weight: 700; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--muted);
+    text-align: left; padding: 0 18px 12px 0;
+    border-bottom: 2px solid var(--plum);
+  }
+  .coltable thead th.num { width: 52px; }
+  .coltable thead th.price, .coltable td.price { text-align: right; padding-right: 0; }
+  .coltable tbody th.region {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--plum);
+    text-align: left; padding: 28px 0 10px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .coltable td {
+    padding: 18px 18px 18px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    font-size: 16px;
+  }
+  .coltable tbody tr:hover td { background: var(--dove-light); }
+  .coltable td.num {
+    font-family: 'Literata', serif; font-size: 15px; color: var(--gold-ink);
+    font-variant-numeric: lining-nums; white-space: nowrap;
+  }
+  .coltable .tour a {
+    font-family: 'Albert Sans', sans-serif; font-weight: 700; font-size: 16.5px;
+    color: var(--plum); text-decoration: none; line-height: 1.3;
+  }
+  .coltable .tour a:hover { text-decoration: underline; }
+  .coltable .tour .guide {
+    display: block; font-style: italic; font-size: 14.5px; color: var(--muted); margin-top: 3px;
+  }
+  .coltable td.dates, .coltable td.days, .coltable td.party {
+    font-family: 'Albert Sans', sans-serif; font-size: 14.5px; font-weight: 600;
+    color: var(--graphite); white-space: nowrap;
+  }
+  .coltable td.days, .coltable td.party { font-variant-numeric: tabular-nums; }
+  .coltable td.price {
+    font-family: 'Albert Sans', sans-serif; font-weight: 700; font-size: 16.5px;
+    color: var(--plum); white-space: nowrap;
+  }
+  .coltable td.price .incl { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
+  .coltable .solo-flag {
+    display: inline-block; margin-top: 8px;
+    font-family: 'Literata', serif; font-style: italic; font-size: 13px;
+    color: var(--gold-ink);
+    border: 1px solid rgba(122,95,40,.45); border-radius: 2px;
+    padding: 2px 9px;
+  }
+  .tours-foot {
+    padding-top: 30px; display: flex; gap: 26px; align-items: baseline; flex-wrap: wrap;
+    font-style: italic; color: var(--muted); font-size: 16px;
+  }
+
+  /* stacked table below 860px */
+  @media (max-width: 860px) {
+    .coltable thead { position: absolute; left: -9999px; }
+    .coltable, .coltable tbody, .coltable tr, .coltable td, .coltable tbody th, .coltable caption { display: block; }
+    .coltable tbody th.region { padding: 26px 0 8px; }
+    .coltable tr.tour-line { border-bottom: 1px solid var(--rule); padding: 16px 0; }
+    .coltable td { border: 0; padding: 3px 0; }
+    .coltable td.num { display: none; }
+    .coltable td.price { text-align: left; }
+    .coltable td.dates::before, .coltable td.days::before, .coltable td.party::before, .coltable td.price::before {
+      content: attr(data-label) "  ";
+      font-family: 'Albert Sans', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+      display: inline-block; min-width: 92px;
+    }
+    .coltable tbody tr:hover td { background: transparent; }
+  }
+
+  /* ---------- plates strip ---------- */
+  #plates { padding-top: 0; }
+  .plates-grid {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: 40px;
+    align-items: start;
+  }
+  .plates-grid figure.plate:nth-child(1) { grid-column: span 7; }
+  .plates-grid figure.plate:nth-child(2) { grid-column: span 5; margin-top: 44px; }
+  .plates-grid figure.plate:nth-child(3) { grid-column: span 5; margin-top: 8px; }
+  .plates-grid figure.plate:nth-child(4) { grid-column: span 7; margin-top: 40px; }
+  @media (max-width: 980px) {
+    .plates-grid { grid-template-columns: 1fr 1fr; }
+    .plates-grid figure.plate:nth-child(n) { grid-column: auto; margin-top: 0; }
+  }
+  @media (max-width: 600px) {
+    .plates-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- lecturers band ---------- */
+  #lecturers { background: var(--plum); color: var(--dove); }
+  #lecturers .sec-head { border-top-color: var(--gold); }
+  #lecturers .sec-head::after { border-top-color: var(--rule-light); }
+  #lecturers .sec-num { color: var(--gold); }
+  #lecturers .sec-num small { color: rgba(232,228,225,.75); }
+  #lecturers .sec-head h2 { color: var(--dove-light); }
+  #lecturers .sec-head .note { color: rgba(232,228,225,.8); }
+  .lecturer-rows { border-top: 1px solid var(--rule-light); }
+  .lecturer-row {
+    display: grid; grid-template-columns: 280px 1fr 220px; gap: 40px;
+    padding: 26px 0; border-bottom: 1px solid var(--rule-light);
+  }
+  .lecturer-row h3 { font-size: 19px; font-weight: 700; color: var(--dove-light); margin-bottom: 3px; }
+  .lecturer-row .cred { font-style: italic; font-size: 14.5px; color: var(--gold); }
+  .lecturer-row .bio { font-size: 15.5px; line-height: 1.65; color: rgba(232,228,225,.9); max-width: 62ch; }
+  .lecturer-row .leads {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: rgba(232,228,225,.85);
+    line-height: 1.9; text-align: right;
+  }
+  .lecturer-row .leads small {
+    display: block; font-size: 10.5px; color: var(--gold); letter-spacing: .18em; margin-bottom: 4px;
+  }
+  #lecturers .band-foot {
+    margin-top: 40px;
+    font-style: italic; font-size: 16.5px; color: rgba(232,228,225,.88);
+    max-width: 66ch;
+  }
+  #lecturers .band-foot a { color: var(--dove-light); }
+  #lecturers a:focus-visible { outline-color: var(--gold); }
+  @media (max-width: 980px) {
+    .lecturer-row { grid-template-columns: 220px 1fr; }
+    .lecturer-row .leads { grid-column: 1 / -1; text-align: left; }
+  }
+  @media (max-width: 600px) {
+    .lecturer-row { grid-template-columns: 1fr; gap: 10px; padding: 22px 0; }
+  }
+
+  /* ---------- itinerary spread ---------- */
+  #itinerary .spread {
+    display: grid; grid-template-columns: 7fr 5fr; gap: 64px; align-items: start;
+  }
+  .daygrid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  .daygrid .day {
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 18px 20px 20px;
+  }
+  .daygrid .n {
+    font-family: 'Literata', serif; font-size: 26px; font-weight: 500;
+    color: var(--gold-ink); line-height: 1; margin-bottom: 8px;
+    font-variant-numeric: lining-nums;
+  }
+  .daygrid .n small {
+    font-family: 'Albert Sans', sans-serif; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+    display: inline-block; margin-right: 6px; vertical-align: 4px;
+  }
+  .daygrid h3 { font-size: 15.5px; font-weight: 700; color: var(--plum); margin-bottom: 5px; line-height: 1.3; }
+  .daygrid p { font-size: 14.5px; line-height: 1.55; color: var(--graphite); }
+  .itinerary-note {
+    margin-top: 28px; padding: 20px 24px;
+    background: var(--dove-light); border: 1px solid var(--rule);
+    font-style: italic; font-size: 15.5px; color: var(--muted);
+  }
+  .itinerary-note a { font-style: normal; font-family: 'Albert Sans', sans-serif; font-size: 15px; font-weight: 600; }
+  #itinerary aside .plate { margin-bottom: 30px; }
+  .pace { border-top: 3px solid var(--plum); padding-top: 20px; }
+  .pace h3 { font-size: 16.5px; font-weight: 700; color: var(--plum); margin-bottom: 10px; }
+  .pace p { font-size: 15.5px; color: var(--graphite); margin-bottom: 12px; }
+  @media (max-width: 980px) {
+    #itinerary .spread { grid-template-columns: 1fr; gap: 44px; }
+    #itinerary aside .plate { max-width: 460px; }
+  }
+  @media (max-width: 600px) {
+    .daygrid { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- terms of travel ---------- */
+  #terms { background: var(--dove-deep); }
+  .terms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+  .terms-list { list-style: none; }
+  .terms-list li {
+    padding: 18px 0; border-top: 1px solid var(--rule);
+    display: grid; grid-template-columns: 180px 1fr; gap: 20px;
+  }
+  .terms-list li:first-child { border-top: 0; padding-top: 0; }
+  .terms-list .k {
+    font-family: 'Albert Sans', sans-serif; font-size: 13.5px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--plum); padding-top: 3px;
+  }
+  .terms-list .v { font-size: 16px; }
+  .solo-panel {
+    background: var(--dove-light); border: 1px solid var(--rule);
+    border-top: 3px solid var(--plum);
+    padding: 32px 34px;
+  }
+  .solo-panel h3 { font-size: 20px; font-weight: 700; color: var(--plum); margin-bottom: 12px; }
+  .solo-panel p { font-size: 16px; margin-bottom: 14px; }
+  blockquote.quiet {
+    margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--rule);
+    font-style: italic; font-size: 16.5px; line-height: 1.65; color: var(--graphite);
+  }
+  blockquote.quiet footer {
+    margin-top: 10px; font-style: normal;
+    font-family: 'Albert Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--muted);
+  }
+  @media (max-width: 980px) { .terms-grid { grid-template-columns: 1fr; gap: 44px; } }
+  @media (max-width: 600px) { .terms-list li { grid-template-columns: 1fr; gap: 4px; } }
+
+  /* ---------- brochure / order form band ---------- */
+  #brochure { background: var(--plum); color: var(--dove-light); }
+  #brochure .sec-head { border-top-color: var(--gold); }
+  #brochure .sec-head::after { border-top-color: var(--rule-light); }
+  #brochure .sec-num { color: var(--gold); }
+  #brochure .sec-num small { color: rgba(232,228,225,.75); }
+  #brochure .sec-head h2 { color: var(--dove-light); }
+  #brochure .sec-head .note { color: rgba(232,228,225,.85); }
+  #brochure .grid { display: grid; grid-template-columns: 5fr 4fr 3fr; gap: 56px; align-items: start; }
+  .order-form {
+    background: var(--dove-light); color: var(--graphite);
+    border: 1px solid rgba(232,228,225,.5);
+    padding: 30px 32px 26px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.25);
+  }
+  .order-form .form-title {
+    font-family: 'Albert Sans', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink);
+    border-bottom: 2px solid var(--plum); padding-bottom: 10px; margin-bottom: 22px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  }
+  .order-form .form-title em { font-family: 'Literata', serif; font-style: italic; text-transform: none; letter-spacing: .02em; font-weight: 400; font-size: 13px; color: var(--muted); }
+  .order-form .field { margin-bottom: 18px; }
+  .order-form label {
+    display: block;
+    font-family: 'Albert Sans', sans-serif; font-size: 12.5px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--plum);
+    margin-bottom: 6px;
+  }
+  .order-form input[type="text"], .order-form input[type="email"] {
+    font-family: 'Literata', serif; font-size: 16px;
+    padding: 11px 14px; width: 100%;
+    border: 1px solid var(--rule-strong); border-radius: 2px;
+    background: #FFFFFF; color: var(--graphite);
+  }
+  .order-form .btn { width: 100%; text-align: center; margin-top: 4px; }
+  .order-form .post-note { font-style: italic; font-size: 13.5px; color: var(--muted); margin-top: 14px; line-height: 1.55; }
+  #brochure figure.plate { border-color: rgba(232,228,225,.4); background: rgba(232,228,225,.12); }
+  #brochure figure.plate figcaption { color: rgba(232,228,225,.85); }
+  #brochure figure.plate .plate-no { color: var(--gold); }
+  .call-card { border-left: 1px solid rgba(232,228,225,.35); padding-left: 36px; }
+  .call-card .label {
+    font-family: 'Albert Sans', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .call-card .number {
+    font-family: 'Albert Sans', sans-serif; font-size: 28px; font-weight: 700;
+    color: var(--dove-light); text-decoration: none; display: inline-block; padding: 4px 0;
+  }
+  .call-card .number:hover { text-decoration: underline; }
+  .call-card .hours { font-size: 14.5px; font-style: italic; color: rgba(232,228,225,.85); margin-top: 8px; line-height: 1.6; }
+  #brochure a:focus-visible, #brochure button:focus-visible, #brochure input:focus-visible { outline-color: var(--gold); }
+  @media (max-width: 980px) {
+    #brochure .grid { grid-template-columns: 1fr 1fr; }
+    .call-card { border-left: 0; padding-left: 0; }
+    #brochure figure.plate { max-width: 420px; }
+  }
+  @media (max-width: 720px) {
+    #brochure .grid { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  /* ---------- footer ---------- */
+  footer.site {
+    background: var(--plum-deep); color: rgba(232,228,225,.85);
+    font-size: 15px; padding: 60px 0 38px;
+  }
+  footer.site .cols {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 44px;
+  }
+  footer.site h3 {
+    font-size: 12.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 16px;
+  }
+  footer.site ul { list-style: none; }
+  footer.site li { margin-bottom: 9px; }
+  footer.site a { color: rgba(232,228,225,.85); text-decoration: none; }
+  footer.site a:hover { color: var(--dove-light); text-decoration: underline; }
+  footer.site a:focus-visible { outline-color: var(--gold); }
+  footer.site .word { font-family: 'Albert Sans', sans-serif; font-size: 21px; font-weight: 700; color: var(--dove-light); letter-spacing: .045em; margin-bottom: 12px; }
+  footer.site address { font-style: normal; line-height: 1.7; }
+  footer.site .legal {
+    border-top: 1px solid var(--rule-light); padding-top: 24px;
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    font-size: 13.5px; color: rgba(232,228,225,.75);
+  }
+  @media (max-width: 980px) { footer.site .cols { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { footer.site .cols { grid-template-columns: 1fr; } }
+
+  /* single, restrained entrance on the hero only */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero .wrap > * { animation: rise .7s ease-out both; }
+    .hero .wrap > *:nth-child(2) { animation-delay: .12s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: none; }
+    }
+  }
+
+  .skip {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--plum); color: var(--dove-light);
+    padding: 10px 18px; z-index: 50; font-family: 'Albert Sans', sans-serif;
+  }
+  .skip:focus { left: 12px; top: 12px; }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="topstrip">
+  <div class="wrap">
+    <span class="protect">Fully protected — ABTA No. Y6248 &amp; ATOL 9417 · Est. 1989</span>
+    <span>Speak to us today: <a class="phone" href="tel:+441285641205">01285 641 205</a> &nbsp;·&nbsp; Mon–Fri 9am–6pm, Sat 9am–1pm</span>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap masthead">
+    <a class="wordmark" href="#" aria-label="Fenwick and Hale Cultural Tours — home">
+      <div class="name">FENWICK <em>&amp;</em> HALE</div>
+      <div class="tag">Cultural tours in the company of scholars · est. 1989</div>
+    </a>
+    <nav class="primary" aria-label="Main navigation">
+      <ul>
+        <li><a href="#tours">The Collection</a></li>
+        <li><a href="#lecturers">Our Lecturers</a></li>
+        <li><a href="#terms">How We Travel</a></li>
+        <li><a href="#brochure" class="btn ghost">Order the Brochure</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="issuebar">
+    <div class="wrap">
+      <span class="issue-title">Prospectus of Cultural Tours &nbsp;·&nbsp; <em>The 2027 Collection</em></span>
+      <span class="hide-s">No. 38 in an annual series</span>
+      <span class="hide-s">Forty-three tours · Five continents</span>
+      <span>Published Cirencester, August 2026</span>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ======================= HERO ======================= -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Small-group cultural touring · thirty-eight years</p>
+        <h1 id="hero-h">Travel with people who can read the stones.</h1>
+        <p class="lede">Every Fenwick &amp; Hale tour is planned and led by a historian, archaeologist or writer who has spent a working life on the subject — and paced so there is time to look, to ask, and to sit down with a coffee afterwards and talk about it.</p>
+        <div class="ctas">
+          <a class="btn" href="#brochure">Order the 2027 brochure</a>
+          <a class="quiet-link" href="#tours">See the collection table&nbsp;&rarr;</a>
+        </div>
+        <p class="facts"><b>Groups of 22 at most.</b> Two-night minimum stays, luggage handled throughout, and <b>solo travellers warmly welcome</b> — around a third of our guests travel alone.</p>
+      </div>
+      <figure class="plate">
+        <img src="https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=880&h=1050&fit=crop&q=80&auto=format" width="880" height="1050" alt="A quiet cobbled street in Rothenburg ob der Tauber, half-timbered houses in mid-morning light">
+        <figcaption><span class="plate-no">Frontispiece</span>Rothenburg ob der Tauber, before the day-trippers arrive — day four of <em>Franconia &amp; the Romantic Road</em>.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ======================= CONTENTS STRIP ======================= -->
+  <nav class="contents" aria-label="In this prospectus">
+    <div class="wrap">
+      <a href="#tours"><b>01</b> The Collection</a>
+      <a href="#lecturers"><b>02</b> Our Lecturers</a>
+      <a href="#itinerary"><b>03</b> A Tour in Detail</a>
+      <a href="#terms"><b>04</b> Terms of Travel</a>
+      <a href="#brochure"><b>05</b> Order the Brochure</a>
+    </div>
+  </nav>
+
+  <!-- ======================= 01 · THE COLLECTION ======================= -->
+  <section id="tours" aria-labelledby="tours-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num"><small>Section</small>01</p>
+        <div>
+          <h2 id="tours-h">The 2027 Collection</h2>
+          <p class="note">Eight of the forty-three, tabled as they appear in the brochure. Every tour is listed there in full — day-by-day itinerary, hotels named, what is included and what is not, and an honest note on how much walking to expect.</p>
+        </div>
+      </div>
+
+      <table class="coltable">
+        <caption>Prices are per person, including return flights from London; regional connections arranged on request.</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="num" aria-label="Tour number">No.</th>
+            <th scope="col">Tour &amp; lecturer</th>
+            <th scope="col">Departures 2027</th>
+            <th scope="col">Nights</th>
+            <th scope="col">Party</th>
+            <th scope="col" class="price">From</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="rowgroup" colspan="6" class="region">The Mediterranean &amp; Aegean</th></tr>
+          <tr class="tour-line">
+            <td class="num">04</td>
+            <td class="tour"><a href="#brochure">Constantinople: The Byzantine City</a><span class="guide">Dr Eleanor Vasey, Byzantine historian</span><span class="solo-flag">No single supplement in October</span></td>
+            <td class="dates" data-label="Departures">13–21 Apr · 5–13 Oct</td>
+            <td class="days" data-label="Nights">8</td>
+            <td class="party" data-label="Party">18</td>
+            <td class="price" data-label="From">£3,485<span class="incl">incl. flights</span></td>
+          </tr>
+          <tr class="tour-line">
+            <td class="num">07</td>
+            <td class="tour"><a href="#brochure">Attica &amp; the Peloponnese: The Classical World</a><span class="guide">Dr Robert Hensley, field archaeologist — thirty seasons at Mycenae</span><span class="solo-flag">Solo places held on every date</span></td>
+            <td class="dates" data-label="Departures">20–30 Apr · 21 Sep – 1 Oct</td>
+            <td class="days" data-label="Nights">10</td>
+            <td class="party" data-label="Party">20</td>
+            <td class="price" data-label="From">£3,120<span class="incl">incl. flights</span></td>
+          </tr>
+          <tr class="tour-line">
+            <td class="num">11</td>
+            <td class="tour"><a href="#brochure">Sicily: Greeks, Normans &amp; the Baroque</a><span class="guide">Dr Marianne Kestrel, historian of the medieval Mediterranean</span></td>
+            <td class="dates" data-label="Departures">4–13 May · 28 Sep – 7 Oct</td>
+            <td class="days" data-label="Nights">9</td>
+            <td class="party" data-label="Party">20</td>
+            <td class="price" data-label="From">£3,240<span class="incl">incl. flights</span></td>
+          </tr>
+          <tr class="tour-line">
+            <td class="num">14</td>
+            <td class="tour"><a href="#brochure">A Venetian Winter</a><span class="guide">Dr Paolo Marchetti, historian of the Venetian Republic</span></td>
+            <td class="dates" data-label="Departures">19–29 Jan · 9–19 Feb</td>
+            <td class="days" data-label="Nights">10</td>
+            <td class="party" data-label="Party">16</td>
+            <td class="price" data-label="From">£3,650<span class="incl">incl. flights</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr><th scope="rowgroup" colspan="6" class="region">The Atlantic Edge</th></tr>
+          <tr class="tour-line">
+            <td class="num">19</td>
+            <td class="tour"><a href="#brochure">The Douro: Wine, Baroque &amp; the Slow River</a><span class="guide">Alice Crowther MW, wine writer</span></td>
+            <td class="dates" data-label="Departures">18–25 May · 14–21 Sep</td>
+            <td class="days" data-label="Nights">7</td>
+            <td class="party" data-label="Party">16</td>
+            <td class="price" data-label="From">£2,940<span class="incl">incl. flights</span></td>
+          </tr>
+          <tr class="tour-line">
+            <td class="num">21</td>
+            <td class="tour"><a href="#brochure">Rioja &amp; Ribera: Old Vines, Old Stones</a><span class="guide">Alice Crowther MW, wine writer</span><span class="solo-flag">No single supplement in June</span></td>
+            <td class="dates" data-label="Departures">8–15 Jun · 12–19 Oct</td>
+            <td class="days" data-label="Nights">7</td>
+            <td class="party" data-label="Party">16</td>
+            <td class="price" data-label="From">£2,860<span class="incl">incl. flights</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr><th scope="rowgroup" colspan="6" class="region">The Further World</th></tr>
+          <tr class="tour-line">
+            <td class="num">36</td>
+            <td class="tour"><a href="#brochure">Kyoto &amp; Nara in Autumn</a><span class="guide">Dr Frances Oda, historian of Japanese art</span></td>
+            <td class="dates" data-label="Departures">8–20 Nov (one departure)</td>
+            <td class="days" data-label="Nights">12</td>
+            <td class="party" data-label="Party">14</td>
+            <td class="price" data-label="From">£6,240<span class="incl">incl. flights</span></td>
+          </tr>
+          <tr class="tour-line">
+            <td class="num">41</td>
+            <td class="tour"><a href="#brochure">The Silk Road: Samarkand to Khiva</a><span class="guide">Prof. David Bruntwood, historian of Central Asia</span></td>
+            <td class="dates" data-label="Departures">27 Apr – 8 May · 7–18 Sep</td>
+            <td class="days" data-label="Nights">11</td>
+            <td class="party" data-label="Party">18</td>
+            <td class="price" data-label="From">£4,180<span class="incl">incl. flights</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="tours-foot">The remaining thirty-five are in the brochure. <a href="#brochure">Order your copy</a>, or telephone <a href="tel:+441285641205">01285 641 205</a> and ask Rosemary to post one today.</p>
+    </div>
+  </section>
+
+  <!-- ======================= PLATES ======================= -->
+  <section id="plates" aria-label="Photographic plates from the 2027 collection">
+    <div class="wrap plates-grid">
+      <figure class="plate">
+        <img src="https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=760&h=570&fit=crop&q=80&auto=format" width="760" height="570" alt="The Blue Mosque in Istanbul at first light, its minarets against a pale sky">
+        <figcaption><span class="plate-no">Plate I</span>The Sultan Ahmed Mosque at first light — tour No. 04, <em>Constantinople</em>.</figcaption>
+      </figure>
+      <figure class="plate">
+        <img src="https://images.unsplash.com/photo-1555993539-1732b0258235?w=620&h=760&fit=crop&q=80&auto=format" width="620" height="760" alt="The Parthenon on the Acropolis in Athens, columns lit by late sun">
+        <figcaption><span class="plate-no">Plate II</span>The Parthenon in late sun — tour No. 07, <em>Attica &amp; the Peloponnese</em>.</figcaption>
+      </figure>
+      <figure class="plate">
+        <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=680&h=620&fit=crop&q=80&auto=format" width="680" height="620" alt="A lane in the Higashiyama district of Kyoto leading to the Yasaka Pagoda at dusk">
+        <figcaption><span class="plate-no">Plate III</span>The Yasaka Pagoda from Higashiyama, at dusk — tour No. 36, <em>Kyoto &amp; Nara in Autumn</em>.</figcaption>
+      </figure>
+      <figure class="plate">
+        <img src="https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=900&h=580&fit=crop&q=80&auto=format" width="900" height="580" alt="The Ribeira waterfront in Porto, tiled houses above a wooden rabelo boat on the Douro">
+        <figcaption><span class="plate-no">Plate IV</span>The Ribeira at Porto, rabelo boats below — tour No. 19, <em>The Douro</em>.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ======================= 02 · LECTURERS ======================= -->
+  <section id="lecturers" aria-labelledby="lect-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num"><small>Section</small>02</p>
+        <div>
+          <h2 id="lect-h">Led by scholars, not reps.</h2>
+          <p class="note">Twenty-eight lecturers travel with us. They are chosen for two things: depth of knowledge, and the rarer gift of wearing it lightly.</p>
+        </div>
+      </div>
+      <div class="lecturer-rows">
+        <div class="lecturer-row">
+          <div>
+            <h3>Dr Eleanor Vasey</h3>
+            <p class="cred">Byzantine historian · University of Birmingham (em.)</p>
+          </div>
+          <p class="bio">Author of <em>The City and the Sea: Constantinople 330–1453</em>. Eleanor has led our Byzantine tours since 2009 and maintains that the best lecture theatre in the world is the gallery of Hagia Sophia at eight in the morning.</p>
+          <p class="leads"><small>Leads</small>Constantinople<br>Ravenna &amp; Venice</p>
+        </div>
+        <div class="lecturer-row">
+          <div>
+            <h3>Dr Robert Hensley</h3>
+            <p class="cred">Field archaeologist · thirty excavation seasons in the Argolid</p>
+          </div>
+          <p class="bio">Robert dug at Mycenae under three different directors and can tell you which trench he was in when each theory fell apart. Guests describe his site walks as the reason they came back a second year.</p>
+          <p class="leads"><small>Leads</small>Attica &amp; the Peloponnese<br>Crete</p>
+        </div>
+        <div class="lecturer-row">
+          <div>
+            <h3>Alice Crowther MW</h3>
+            <p class="cred">Master of Wine · columnist, twenty years in the trade</p>
+          </div>
+          <p class="bio">Alice believes a wine region is best understood at the lunch table, with the winemaker present and the second bottle open. Her Douro and Rioja tours are planned around exactly that conviction.</p>
+          <p class="leads"><small>Leads</small>The Douro<br>Rioja &amp; Ribera</p>
+        </div>
+        <div class="lecturer-row">
+          <div>
+            <h3>Dr Frances Oda</h3>
+            <p class="cred">Historian of Japanese art · formerly of the Ashmolean</p>
+          </div>
+          <p class="bio">Frances caps her Kyoto tour at fourteen because the moss garden at Saihō-ji does not admit crowds, and neither should we. Her evening talks on the tea ceremony are given, properly, over tea.</p>
+          <p class="leads"><small>Leads</small>Kyoto &amp; Nara<br>The Inland Sea</p>
+        </div>
+      </div>
+      <p class="band-foot">Every 2027 tour page in the brochure carries its lecturer's full biography — because who is standing next to you in the ruins matters more than the ruins. <a href="#brochure">Meet all twenty-eight in print.</a></p>
+    </div>
+  </section>
+
+  <!-- ======================= 03 · A TOUR IN DETAIL ======================= -->
+  <section id="itinerary" aria-labelledby="itin-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num"><small>Section</small>03</p>
+        <div>
+          <h2 id="itin-h">A tour in detail: <em style="font-style:italic;">A Venetian Winter</em></h2>
+          <p class="note">Tour No. 14, ten nights, exactly as the brochure prints it. Itineraries are published in full before you book — nothing is a surprise, including the free afternoons.</p>
+        </div>
+      </div>
+      <div class="spread">
+        <div>
+          <div class="daygrid">
+            <div class="day">
+              <p class="n"><small>Day</small>1</p>
+              <h3>Arrive by water</h3>
+              <p>Afternoon flight, launch to the hotel, and a first walk to the Salute before dinner together.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>2</p>
+              <h3>Torcello, before the boats fill</h3>
+              <p>Private launch at 8.40am to the cathedral's Last Judgement. Lunch at a locanda; Burano optional.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>3</p>
+              <h3>The Accademia, slowly</h3>
+              <p>A full morning with the Bellinis — one gallery, properly, rather than three at a trot.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>4</p>
+              <h3>San Giorgio &amp; a free evening</h3>
+              <p>The Palladian church and the Cini cloisters; the concierge holds concert tickets for those who want them.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>5</p>
+              <h3>The Doge's Venice</h3>
+              <p>Palazzo Ducale by the quiet entrance, then Dr Marchetti's talk, <em>Venice and the Sea</em>, before dinner.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>6</p>
+              <h3>A day that is yours</h3>
+              <p>Unplanned by design. Suggestions in writing for three walks, two churches and one very good bacaro.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>7</p>
+              <h3>Ravenna, by coach</h3>
+              <p>The sixth-century mosaics of San Vitale and Galla Placidia — under two hours each way, lunch included.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>8</p>
+              <h3>The Ghetto &amp; Cannaregio</h3>
+              <p>Five hundred years of the Ghetto Nuovo, then Madonna dell'Orto and Tintoretto's parish.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>9</p>
+              <h3>Carnival, at arm's length</h3>
+              <p>The Piazza in mask season from a first-floor window, with coffee — in it, but not of it.</p>
+            </div>
+            <div class="day">
+              <p class="n"><small>Day</small>10</p>
+              <h3>A last morning, unhurried</h3>
+              <p>Nothing before eleven. Cases travel ahead; a farewell lunch near the Rialto, then the launch out.</p>
+            </div>
+          </div>
+          <p class="itinerary-note">The printed itinerary runs to four pages, including both hotels by name, every included meal, and a walking note for each day. <a href="#brochure">Request it by post&nbsp;&rarr;</a></p>
+        </div>
+        <aside>
+          <figure class="plate">
+            <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=760&h=560&fit=crop&q=80&auto=format" width="760" height="560" alt="The Rialto Bridge over the Grand Canal in Venice in soft evening light">
+            <figcaption><span class="plate-no">Plate V</span>The Grand Canal from the Rialto — <em>A Venetian Winter</em>, January &amp; February 2027.</figcaption>
+          </figure>
+          <div class="pace">
+            <h3>On pace</h3>
+            <p>No hotel is kept for fewer than two nights. Cases travel door to door without you lifting them. Mornings start civilly, coach stages stay short, and every day contains at least one hour that belongs entirely to you.</p>
+            <p>Where a site involves steep ground or long standing, the itinerary says so in plain terms — and offers an alternative.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 04 · TERMS OF TRAVEL ======================= -->
+  <section id="terms" aria-labelledby="terms-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num"><small>Section</small>04</p>
+        <div>
+          <h2 id="terms-h">Included means included.</h2>
+        </div>
+      </div>
+      <div class="terms-grid">
+        <ul class="terms-list">
+          <li><span class="k">Always included</span><span class="v">Return flights from London (regional connections arranged), all excursions and entries, most meals with wine, tips, and the lecturer's company throughout.</span></li>
+          <li><span class="k">Never included</span><span class="v">Nothing hidden — the only regular extras are travel insurance and the meals we deliberately leave free, listed on each tour page.</span></li>
+          <li><span class="k">Hotels</span><span class="v">Quiet, central, and chosen on foot by our own staff — usually four-star, always the sort of place you would pick yourself. Named in the brochure, every one.</span></li>
+          <li><span class="k">The group</span><span class="v">Between 10 and 22 guests, most of them travelling with us for the third time or more. A tour manager accompanies every departure alongside the lecturer.</span></li>
+        </ul>
+        <div class="solo-panel">
+          <h3>Travelling on your own?</h3>
+          <p>You will be in good company — around a third of our guests do. Dinner is at shared tables from the first evening, rooms are proper doubles for sole use, and a growing number of departures carry no single supplement at all.</p>
+          <blockquote class="quiet">
+            <p>&ldquo;I booked the Peloponnese tour alone with some trepidation. By Nafplio I had a table of friends, and by Olympia we were planning next year's tour together.&rdquo;</p>
+            <footer>Margaret Holloway, Ludlow — three tours since 2023</footer>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 05 · ORDER THE BROCHURE ======================= -->
+  <section id="brochure" aria-labelledby="broch-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num"><small>Section</small>05</p>
+        <div>
+          <h2 id="broch-h">156 pages. Proper paper. In the post tonight.</h2>
+          <p class="note">All forty-three tours with full itineraries, hotel names, honest walking notes and every departure date — the kind of brochure you read with a pencil.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <form class="order-form" action="#" method="post">
+          <p class="form-title">Brochure order form <em>No obligation</em></p>
+          <div class="field">
+            <label for="ord-name">Name</label>
+            <input type="text" id="ord-name" name="name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="ord-email">Email address</label>
+            <input type="email" id="ord-email" name="email" autocomplete="email" required>
+          </div>
+          <button class="btn" type="submit">Order the 2027 brochure</button>
+          <p class="post-note">Posted first class, usually with you within three working days. We will never pass your details to anyone else.</p>
+        </form>
+        <figure class="plate">
+          <img src="https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=680&h=520&fit=crop&q=80&auto=format" width="680" height="520" alt="A glass of red wine on a stone ledge overlooking rows of vines">
+          <figcaption><span class="plate-no">This year's cover</span>The terraces above Pinhão, photographed on tour by a guest.</figcaption>
+        </figure>
+        <div class="call-card">
+          <p class="label">Rather talk it through?</p>
+          <a class="number" href="tel:+441285641205">01285 641 205</a>
+          <p class="hours">Monday to Friday 9am–6pm,<br>Saturday 9am–1pm.<br>You will reach a person, not a menu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <p class="word">FENWICK &amp; HALE</p>
+        <address>
+          7 Dollar Street, Cirencester,<br>
+          Gloucestershire GL7 2AS<br>
+          <a href="tel:+441285641205">01285 641 205</a><br>
+          <a href="mailto:enquiries@fenwickandhale.co.uk">enquiries@fenwickandhale.co.uk</a>
+        </address>
+      </div>
+      <div>
+        <h3>Tours</h3>
+        <ul>
+          <li><a href="#tours">The 2027 Collection</a></li>
+          <li><a href="#itinerary">A tour in detail</a></li>
+          <li><a href="#terms">Solo travellers</a></li>
+          <li><a href="#brochure">Order the brochure</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>The company</h3>
+        <ul>
+          <li><a href="#lecturers">Our lecturers</a></li>
+          <li><a href="#terms">How we travel</a></li>
+          <li><a href="#">Booking conditions</a></li>
+          <li><a href="#">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Protection</h3>
+        <ul>
+          <li>ABTA No. Y6248</li>
+          <li>ATOL 9417</li>
+          <li>Est. 1989 — independently<br>owned ever since</li>
+        </ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>© 2026 Fenwick &amp; Hale Cultural Tours Ltd. Registered in England No. 2387941.</span>
+      <span>All photography from our own tours.</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

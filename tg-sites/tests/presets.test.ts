@@ -75,14 +75,26 @@ describe('every preset is built from blocks that exist', () => {
    * a key the block does not have is simply carried along: it reaches the
    * renderer, the renderer ignores it, and the preset quietly does not do the
    * thing it says it does. `slideWidth` on a cards block is the shape of it.
+   *
+   * A prop the block UNDERSTANDS is one that is either in its defaults or one of
+   * its fields. The colour fields are the reason the two are not the same set: a
+   * button's `colour`, a menu's `linkColour`, a heading's `textColour` are real
+   * fields left out of the defaults so a block starts by following its section,
+   * and the designed navbars set them on purpose. Fields and defaults together,
+   * so those pass while `slideWidth` on a cards block still does not.
    */
   it('sets no prop the block does not have', () => {
     const strays = everyBlock().flatMap(({ preset, spec }) => {
       const definition = blockDefinition(spec.type);
       if (!definition) return [];
 
+      const known = new Set([
+        ...Object.keys(definition.defaults),
+        ...definition.fields.map((field) => field.key),
+      ]);
+
       return Object.keys(spec.props ?? {})
-        .filter((key) => !(key in definition.defaults))
+        .filter((key) => !known.has(key))
         .map((key) => `${preset.id}: ${spec.type} has no "${key}"`);
     });
 

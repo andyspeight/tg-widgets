@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { EditorShell } from '../../components/editor/EditorShell';
 import { activeSite, currentUserId } from '../../lib/auth/session';
+import { currentCapabilities } from '../../lib/auth/capabilities';
 import { getPage, listPages } from '../../lib/db/pages';
 import { getRegion } from '../../lib/db/regions';
 import { getItem } from '../../lib/db/collections';
@@ -43,9 +44,9 @@ export const dynamic = 'force-dynamic';
 export default async function EditorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; region?: string; item?: string }>;
+  searchParams: Promise<{ page?: string; region?: string; item?: string; comment?: string }>;
 }) {
-  const { page: pageId, region: regionParam, item: itemId } = await searchParams;
+  const { page: pageId, region: regionParam, item: itemId, comment: focusComment } = await searchParams;
 
   /*
    * The guard comes first, before the page id is even looked at.
@@ -97,8 +98,16 @@ export default async function EditorPage({
   // Staff tools are for Travelgenix people, not for a client's agent. Owner is
   // the closest thing the membership table has to that today; it becomes a real
   // staff flag on the user when there is one to read.
+  // What this member may actually do, resolved once here and handed to the shell
+  // so the editor draws only the controls their permissions allow. The server
+  // actions ask the same question again for themselves (slice 3); this is the
+  // courtesy that stops a content-only client being shown a control that would
+  // only refuse them. Staff and an unset owner resolve to everything.
+  const { caps } = await currentCapabilities();
+
   const shared = {
     isStaff: site.role === 'owner',
+    caps: [...caps],
     siteTheme: themeTokens(theme, familiesFromFiles(faces)).style,
     // Cosmetic only: version history marks the entries this person published.
     // Nothing is gated on it.
@@ -196,6 +205,7 @@ export default async function EditorPage({
         initialPage={page.content}
         initialStatus={page.status}
         initialHasUnpublishedChanges={page.hasUnpublishedChanges}
+        focusComment={focusComment ?? null}
         chromeHeader={{
           content: regionAsPage(headerRecord.region),
           sticky: headerRecord.region.sticky,

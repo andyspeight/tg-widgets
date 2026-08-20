@@ -36,6 +36,7 @@ import {
   requireSite,
   requireTenantId,
 } from '../../lib/auth/session';
+import { isPermissionError, requireCapability } from '../../lib/auth/capabilities';
 import { isStaffEmail } from '../../lib/auth/staff';
 import {
   getSettings,
@@ -60,7 +61,10 @@ export async function saveSettingsAction(
   input: unknown,
 ): Promise<SettingsResult<SiteSettings>> {
   try {
-    const tenantId = await requireTenantId();
+    // The company name, contact details, icons and analytics are the `settings`
+    // capability's to change. Custom code below is a stronger gate again, owner
+    // or staff, since it runs script on every page.
+    const tenantId = await requireCapability('settings');
 
     /*
      * Parsed before it goes anywhere near the database.
@@ -190,6 +194,8 @@ export async function loadSettingsAction(): Promise<
 }
 
 function explain(error: unknown, generic: string): string {
+  if (isPermissionError(error)) return error.message;
+
   const message = error instanceof Error ? error.message : String(error);
 
   if (isSignInRequired(error)) return message;

@@ -14,7 +14,7 @@
 
 import type { CommentResult } from '../app/actions/comments';
 import type { Comment } from '../lib/db/comments';
-import type { ResolvedThread } from '../lib/comments/resolve';
+import type { ResolvedThread, SiteComment } from '../lib/comments/resolve';
 
 interface Stored {
   id: string;
@@ -171,6 +171,35 @@ export async function reopenCommentAction(input: {
   return { ok: true, data: stub({ id: row.id }) };
 }
 
+/** The whole-site list: the open roots in the store, given a demo page name. */
+export async function siteCommentsAction(): Promise<CommentResult<SiteComment[]>> {
+  const open = store.filter((row) => row.parentId === null && row.resolvedAt === null);
+  return {
+    ok: true,
+    data: open.map((root) => ({
+      id: root.id,
+      page: {
+        id: root.pageId,
+        title: root.pageId === 'demo' ? 'Home' : root.pageId,
+        slug: root.pageId === 'demo' ? '' : root.pageId,
+      },
+      author: root.author,
+      body: root.body,
+      createdAt: root.createdAt,
+      anchor: root.anchor,
+      replyCount: store.filter((row) => row.parentId === root.id).length,
+    })),
+  };
+}
+
+/** How many roots are open, for the rail badge. */
+export async function openCommentCountAction(): Promise<CommentResult<number>> {
+  return {
+    ok: true,
+    data: store.filter((row) => row.parentId === null && row.resolvedAt === null).length,
+  };
+}
+
 // Compile-time proof that the doubles still match the real thing. If a real
 // action gains an argument or changes its return type, this stops building.
 import type * as real from '../app/actions/comments';
@@ -180,8 +209,12 @@ const _leave = leaveCommentAction satisfies typeof real.leaveCommentAction;
 const _reply = replyToCommentAction satisfies typeof real.replyToCommentAction;
 const _resolve = resolveCommentAction satisfies typeof real.resolveCommentAction;
 const _reopen = reopenCommentAction satisfies typeof real.reopenCommentAction;
+const _site = siteCommentsAction satisfies typeof real.siteCommentsAction;
+const _count = openCommentCountAction satisfies typeof real.openCommentCountAction;
 void _list;
 void _leave;
 void _reply;
 void _resolve;
 void _reopen;
+void _site;
+void _count;

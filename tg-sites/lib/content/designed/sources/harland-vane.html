@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harland &amp; Vane — Private Travel, Privately Arranged</title>
+<meta name="description" content="Harland &amp; Vane is a private travel studio of eleven designers in Marylebone. We plan very few trips each year. Yours would be one of them.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C1917;
+    --ink-soft:#2B2620;
+    --ivory:#F6F1E8;
+    --ivory-deep:#EFE8DA;
+    --bronze:#7A5A2C;      /* accent safe for small text on ivory */
+    --champagne:#C2A671;   /* accent for hairlines + text on dark only */
+    --stone:#6E675C;       /* captions on ivory, 4.5:1+ */
+    --hairline:rgba(28,25,23,.18);
+    --hairline-dark:rgba(194,166,113,.35);
+    --measure:66ch;
+    --pad:clamp(20px, 5vw, 84px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    font-family:'Archivo',system-ui,sans-serif;
+    font-size:16px;line-height:1.65;
+    color:var(--ink);
+    background:var(--ivory);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:clip;
+  }
+  img{display:block;max-width:100%;height:auto;
+    filter:saturate(.72) contrast(.96) sepia(.09) brightness(1.01);}
+  a{color:inherit}
+  ::selection{background:var(--champagne);color:var(--ink)}
+
+  h1,h2,h3,.serif{font-family:'Fraunces',Georgia,serif;font-weight:400;letter-spacing:-0.01em}
+
+  .kicker{
+    font-family:'Archivo',sans-serif;font-size:12px;font-weight:600;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--bronze);
+  }
+  .dark .kicker{color:var(--champagne)}
+
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+    outline:2px solid var(--bronze);outline-offset:3px;border-radius:1px;
+  }
+  .dark a:focus-visible,.dark button:focus-visible,.dark input:focus-visible,.dark textarea:focus-visible{
+    outline-color:var(--champagne);
+  }
+
+  /* ---------- reveal (transform/opacity only) ---------- */
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .4s ease-out,transform .4s ease-out}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion: reduce){.rv{opacity:1;transform:none}}
+
+  /* ---------- top strip + nav ---------- */
+  .topstrip{
+    border-bottom:1px solid var(--hairline);
+    padding:9px var(--pad);
+    display:flex;justify-content:space-between;gap:16px;
+    font-size:12px;letter-spacing:.06em;color:var(--stone);
+  }
+  .topstrip span b{font-weight:600;color:var(--ink)}
+  header.nav{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:24px;padding:22px var(--pad);
+    border-bottom:1px solid var(--hairline);
+    position:relative;z-index:5;background:var(--ivory);
+  }
+  .wordmark{
+    font-family:'Fraunces',serif;font-size:22px;font-weight:500;
+    text-decoration:none;letter-spacing:.01em;white-space:nowrap;
+    padding:8px 0;
+  }
+  .wordmark small{
+    display:block;font-family:'Archivo',sans-serif;font-size:10px;font-weight:600;
+    letter-spacing:.28em;text-transform:uppercase;color:var(--bronze);margin-top:2px;
+  }
+  nav.primary ul{display:flex;gap:clamp(16px,3vw,40px);list-style:none}
+  nav.primary a{
+    text-decoration:none;font-size:14px;font-weight:500;letter-spacing:.04em;
+    padding:12px 2px;position:relative;
+  }
+  nav.primary a::after{
+    content:"";position:absolute;left:0;right:100%;bottom:6px;height:1px;
+    background:var(--bronze);transition:right .25s ease-out;
+  }
+  nav.primary a:hover::after,nav.primary a:focus-visible::after{right:0}
+  .nav-cta{display:flex;align-items:center;gap:22px}
+  .nav-phone{font-size:14px;text-decoration:none;white-space:nowrap;padding:12px 0}
+  .nav-phone b{font-weight:600}
+  .btn{
+    display:inline-block;text-decoration:none;font-family:'Archivo',sans-serif;
+    font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    padding:15px 28px;border:1px solid var(--ink);color:var(--ink);background:transparent;
+    cursor:pointer;transition:background .2s ease-out,color .2s ease-out,transform .1s ease-out;
+    min-height:44px;white-space:nowrap;
+  }
+  .btn:hover{background:var(--ink);color:var(--ivory)}
+  .btn:active{transform:translateY(1px)}
+  .btn.solid{background:var(--ink);color:var(--ivory)}
+  .btn.solid:hover{background:var(--ink-soft)}
+  .dark .btn{border-color:var(--champagne);color:var(--champagne)}
+  .dark .btn:hover{background:var(--champagne);color:var(--ink)}
+  .menu-toggle{display:none}
+
+  /* ---------- hero : split editorial masthead ---------- */
+  .hero{
+    display:grid;
+    grid-template-columns:minmax(0,7fr) minmax(0,5fr);
+    gap:0 clamp(24px,4vw,64px);
+    padding:clamp(48px,7vw,110px) var(--pad) 0;
+    align-items:start;
+  }
+  .hero-copy{padding-top:clamp(8px,2vw,40px);max-width:640px}
+  .hero h1{
+    font-size:clamp(38px,5.2vw,72px);
+    line-height:1.06;font-weight:300;
+    margin:26px 0 30px;
+    /* deliberately overlaps the image column at desktop */
+    width:calc(100% + clamp(0px,8vw,150px));
+    position:relative;z-index:2;
+  }
+  .hero h1 em{font-style:italic;font-weight:400}
+  .hero-sub{max-width:46ch;font-size:17px;color:var(--ink-soft);margin-bottom:38px}
+  .hero-actions{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .quiet-link{
+    font-size:14px;font-weight:500;text-decoration:none;
+    border-bottom:1px solid var(--hairline);padding:12px 2px;
+  }
+  .quiet-link:hover{border-color:var(--bronze);color:var(--bronze)}
+  .hero-fig{position:relative;z-index:1;margin-top:clamp(0px,4vw,72px)}
+  .hero-fig img{width:100%;aspect-ratio:4/5;object-fit:cover}
+  .hero-fig figcaption{
+    margin-top:12px;font-size:12px;letter-spacing:.08em;color:var(--stone);
+    display:flex;justify-content:space-between;gap:12px;
+  }
+  .hero-foot{
+    grid-column:1 / -1;
+    display:flex;gap:clamp(24px,6vw,90px);flex-wrap:wrap;
+    border-top:1px solid var(--hairline);
+    margin-top:clamp(48px,6vw,88px);
+    padding:22px 0 26px;
+    font-size:13px;color:var(--stone);letter-spacing:.04em;
+  }
+  .hero-foot b{color:var(--ink);font-weight:600}
+
+  /* ---------- statement ---------- */
+  .statement{
+    padding:clamp(72px,10vw,150px) var(--pad);
+    display:grid;grid-template-columns:1fr minmax(0,9fr) minmax(0,2fr);gap:24px;
+  }
+  .statement .rule{border-top:1px solid var(--hairline);margin-top:.9em}
+  .statement blockquote{max-width:24ch}
+  .statement p.big{
+    font-family:'Fraunces',serif;font-weight:300;
+    font-size:clamp(26px,3.4vw,46px);line-height:1.25;max-width:26ch;
+  }
+  .statement p.big strong{font-weight:500;font-style:italic}
+  .statement .aside{
+    grid-column:2;max-width:52ch;margin-top:34px;color:var(--ink-soft);font-size:16px;
+  }
+
+  /* ---------- journeys : asymmetric editorial spread ---------- */
+  .journeys{padding:0 var(--pad) clamp(72px,9vw,140px)}
+  .sect-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+    border-top:1px solid var(--hairline);padding-top:22px;margin-bottom:clamp(40px,5vw,72px);
+    flex-wrap:wrap;
+  }
+  .sect-head h2{font-size:clamp(28px,3vw,42px);font-weight:400}
+  .sect-head .count{font-size:13px;color:var(--stone);letter-spacing:.08em}
+  .feature{
+    display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);
+    gap:clamp(24px,4vw,64px);align-items:end;margin-bottom:clamp(56px,7vw,100px);
+  }
+  .feature img{width:100%;aspect-ratio:16/9;object-fit:cover}
+  .feature-txt h3{font-size:clamp(24px,2.4vw,34px);line-height:1.2;margin:14px 0 14px}
+  .feature-txt p{color:var(--ink-soft);max-width:38ch}
+  .price{
+    display:block;margin-top:18px;font-size:13px;color:var(--stone);letter-spacing:.05em;
+  }
+  .j-link{
+    display:inline-block;margin-top:16px;font-size:13px;font-weight:600;
+    letter-spacing:.14em;text-transform:uppercase;text-decoration:none;
+    border-bottom:1px solid var(--bronze);padding:10px 0 6px;color:var(--bronze);
+  }
+  .j-link:hover{color:var(--ink);border-color:var(--ink)}
+  .pair{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,1fr) minmax(0,4fr);
+    gap:clamp(24px,3vw,48px);
+  }
+  .pair article:nth-child(2){grid-column:3;margin-top:clamp(40px,6vw,110px)}
+  .pair img{width:100%;object-fit:cover}
+  .pair article:first-child img{aspect-ratio:3/4}
+  .pair article:last-child img{aspect-ratio:1/1}
+  .pair h3{font-size:clamp(20px,2vw,27px);margin:14px 0 10px}
+  .pair p{color:var(--ink-soft);font-size:15px;max-width:40ch}
+  .journeys-foot{
+    border-top:1px solid var(--hairline);margin-top:clamp(56px,7vw,96px);
+    padding-top:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+  }
+  .journeys-foot p{font-size:14px;color:var(--stone);max-width:52ch}
+
+  /* ---------- how we work : dark chapter ---------- */
+  .dark{background:var(--ink);color:var(--ivory)}
+  .how{padding:clamp(80px,10vw,150px) var(--pad)}
+  .how .intro{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,72px);
+    margin-bottom:clamp(56px,7vw,96px);
+  }
+  .how h2{font-size:clamp(30px,3.4vw,48px);font-weight:300;line-height:1.15}
+  .how .intro p{color:#CFC7B8;max-width:48ch;font-size:16px;align-self:end}
+  .steps{list-style:none}
+  .steps li{
+    display:grid;grid-template-columns:minmax(60px,1fr) minmax(0,4fr) minmax(0,7fr);
+    gap:clamp(16px,3vw,56px);
+    border-top:1px solid var(--hairline-dark);
+    padding:clamp(28px,4vw,44px) 0;
+  }
+  .steps .num{
+    font-family:'Fraunces',serif;font-size:clamp(20px,2vw,26px);color:var(--champagne);font-weight:300;
+  }
+  .steps h3{font-size:clamp(20px,2vw,27px);font-weight:400}
+  .steps p{color:#CFC7B8;font-size:16px;max-width:56ch}
+  .steps b{color:var(--ivory);font-weight:600}
+
+  /* ---------- designers ---------- */
+  .designers{padding:clamp(72px,9vw,140px) var(--pad)}
+  .designers .sect-head{margin-bottom:clamp(48px,6vw,80px)}
+  .d-grid{
+    display:grid;grid-template-columns:minmax(0,4fr) minmax(0,3fr) minmax(0,4fr);
+    gap:clamp(24px,4vw,64px);
+  }
+  .d-grid figure:nth-child(2){margin-top:clamp(32px,5vw,88px)}
+  .d-grid figure:nth-child(3){margin-top:clamp(16px,2.5vw,44px)}
+  .d-grid img{width:100%;aspect-ratio:3/4;object-fit:cover}
+  .d-grid figcaption{margin-top:14px}
+  .d-name{font-family:'Fraunces',serif;font-size:20px}
+  .d-role{font-size:13px;color:var(--stone);letter-spacing:.06em;margin-top:2px}
+  .d-note{font-size:14px;color:var(--ink-soft);margin-top:10px;max-width:34ch}
+
+  /* ---------- word from a client ---------- */
+  .quote{
+    padding:clamp(72px,9vw,130px) var(--pad);
+    background:var(--ivory-deep);
+  }
+  .quote-inner{max-width:880px;margin-left:clamp(0px,10vw,180px)}
+  .quote blockquote p{
+    font-family:'Fraunces',serif;font-weight:300;font-style:italic;
+    font-size:clamp(22px,2.8vw,36px);line-height:1.35;
+  }
+  .quote cite{
+    display:block;margin-top:26px;font-style:normal;font-size:14px;color:var(--stone);letter-spacing:.05em;
+  }
+  .quote cite b{color:var(--ink);font-weight:600}
+
+  /* ---------- consultation ---------- */
+  .consult{padding:clamp(80px,10vw,150px) var(--pad)}
+  .consult-grid{
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,1fr) minmax(0,6fr);
+    gap:clamp(28px,3vw,48px);
+  }
+  .consult h2{font-size:clamp(30px,3.6vw,52px);font-weight:300;line-height:1.12;margin:20px 0 26px}
+  .consult .lead{color:#CFC7B8;max-width:44ch;font-size:16px}
+  .consult-meta{margin-top:38px;border-top:1px solid var(--hairline-dark);padding-top:24px;font-size:15px;line-height:2;color:#CFC7B8}
+  .consult-meta a{color:var(--ivory);text-decoration:none;border-bottom:1px solid var(--hairline-dark);padding-bottom:1px}
+  .consult-meta a:hover{border-color:var(--champagne);color:var(--champagne)}
+  form.enquiry{grid-column:3;display:grid;gap:26px;align-content:start}
+  .field label{
+    display:block;font-size:12px;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--champagne);margin-bottom:8px;
+  }
+  .field input,.field textarea{
+    width:100%;background:transparent;border:0;border-bottom:1px solid var(--hairline-dark);
+    color:var(--ivory);font-family:'Archivo',sans-serif;font-size:16px;
+    padding:12px 2px 14px;min-height:44px;transition:border-color .2s ease-out;
+  }
+  .field textarea{resize:vertical;min-height:76px}
+  .field input::placeholder,.field textarea::placeholder{color:#8A8378}
+  .field input:focus,.field textarea:focus{border-bottom-color:var(--champagne)}
+  .form-foot{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:6px}
+  .form-note{font-size:13px;color:#8A8378;max-width:34ch}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--hairline-dark)}
+  .foot-main{
+    padding:clamp(48px,6vw,80px) var(--pad);
+    display:grid;grid-template-columns:minmax(0,5fr) minmax(0,3fr) minmax(0,4fr);
+    gap:clamp(32px,4vw,64px);
+  }
+  .foot-main .wordmark{color:var(--ivory)}
+  .foot-main .wordmark small{color:var(--champagne)}
+  .foot-addr{font-style:normal;font-size:14px;line-height:2;color:#CFC7B8;margin-top:18px}
+  footer nav ul{list-style:none;font-size:14px;line-height:2.4}
+  footer nav a{color:#CFC7B8;text-decoration:none;padding:4px 0}
+  footer nav a:hover{color:var(--champagne)}
+  .foot-trust{font-size:13px;line-height:2.1;color:#8A8378}
+  .foot-trust b{color:#CFC7B8;font-weight:600}
+  .foot-legal{
+    border-top:1px solid var(--hairline-dark);
+    padding:20px var(--pad);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-size:12px;color:#8A8378;letter-spacing:.04em;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:960px){
+    .hero{grid-template-columns:1fr}
+    .hero h1{width:100%}
+    .hero-fig{margin-top:40px}
+    .statement{grid-template-columns:1fr}
+    .statement .rule{display:none}
+    .statement .aside{grid-column:1}
+    .feature{grid-template-columns:1fr;align-items:start}
+    .pair{grid-template-columns:1fr}
+    .pair article:nth-child(2){grid-column:1;margin-top:44px}
+    .how .intro{grid-template-columns:1fr}
+    .steps li{grid-template-columns:48px 1fr;grid-template-rows:auto auto}
+    .steps p{grid-column:2}
+    .d-grid{grid-template-columns:1fr 1fr;gap:28px}
+    .d-grid figure:nth-child(3){grid-column:1 / -1;max-width:420px;margin-top:8px}
+    .consult-grid{grid-template-columns:1fr}
+    form.enquiry{grid-column:1;margin-top:24px}
+    .foot-main{grid-template-columns:1fr 1fr}
+    .foot-trust{grid-column:1 / -1}
+    .quote-inner{margin-left:0}
+  }
+  @media (max-width:760px){
+    nav.primary{
+      position:absolute;top:100%;left:0;right:0;background:var(--ivory);
+      border-bottom:1px solid var(--hairline);display:none;padding:8px var(--pad) 20px;
+    }
+    nav.primary.open{display:block}
+    nav.primary ul{flex-direction:column;gap:2px}
+    nav.primary a{display:block;padding:12px 0;font-size:16px}
+    .menu-toggle{
+      display:inline-flex;align-items:center;gap:10px;background:none;border:1px solid var(--hairline);
+      font-family:'Archivo',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;
+      text-transform:uppercase;color:var(--ink);padding:12px 16px;cursor:pointer;min-height:44px;
+    }
+    .nav-phone span.lbl{display:none}
+    .topstrip .right{display:none}
+  }
+  @media (max-width:560px){
+    .d-grid{grid-template-columns:1fr}
+    .d-grid figure:nth-child(2){margin-top:0}
+    .foot-main{grid-template-columns:1fr}
+    .nav-cta .btn{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topstrip">
+  <span>Est. 2011 &middot; Marylebone, London</span>
+  <span class="right"><b>ATOL 11284</b> &middot; ABTA Y6427 &middot; Virtuoso member agency</span>
+</div>
+
+<header class="nav">
+  <a class="wordmark" href="#top" aria-label="Harland and Vane — home">Harland &amp; Vane
+    <small>Private Travel</small>
+  </a>
+  <button class="menu-toggle" aria-expanded="false" aria-controls="primary-nav">Menu</button>
+  <nav class="primary" id="primary-nav" aria-label="Primary">
+    <ul>
+      <li><a href="#journeys">Journeys</a></li>
+      <li><a href="#how">How we work</a></li>
+      <li><a href="#designers">The designers</a></li>
+      <li><a href="#consult">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="nav-cta">
+    <a class="nav-phone" href="tel:+442071834460"><span class="lbl">Speak to a designer&ensp;</span><b>020 7183 4460</b></a>
+    <a class="btn" href="#consult">Arrange a call</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-copy rv">
+      <p class="kicker">Private travel, privately arranged</p>
+      <h1>We plan very few trips each year. <em>Yours would be one of them.</em></h1>
+      <p class="hero-sub">Harland &amp; Vane is a studio of eleven travel designers. Each takes on a small number of clients, travels their own regions every year, and answers their own phone.</p>
+      <div class="hero-actions">
+        <a class="btn solid" href="#consult">Request a consultation</a>
+        <a class="quiet-link" href="#journeys">Or read three of this year&rsquo;s journeys</a>
+      </div>
+    </div>
+    <figure class="hero-fig rv">
+      <img src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=900&h=1125&fit=crop&q=80&auto=format" width="900" height="1125" alt="Morning light across a stone loggia and cypress garden at a Tuscan villa">
+      <figcaption><span>Villa Cetinale, Tuscany</span><span>June, first light</span></figcaption>
+    </figure>
+    <div class="hero-foot rv">
+      <span><b>Eleven</b> designers, one per client</span>
+      <span><b>96%</b> of clients travel with us again</span>
+      <span><b>24-hour</b> line while you are away</span>
+    </div>
+  </section>
+
+  <!-- STATEMENT -->
+  <section class="statement" aria-label="What we believe">
+    <div class="rule" aria-hidden="true"></div>
+    <div>
+      <p class="big rv">A corner suite on the third floor of the Splendido &mdash; <strong>because the second floor loses the light after four.</strong></p>
+      <p class="aside rv">That is the level at which we work. Not a shortlist of hotels, but the right room in the right week, a driver who knows which pass is closed, a table held at the place that says it is full. Judgement, applied to the details that decide whether a trip is good or remarkable.</p>
+    </div>
+  </section>
+
+  <!-- JOURNEYS -->
+  <section class="journeys" id="journeys" aria-label="Journeys">
+    <div class="sect-head rv">
+      <h2>Three journeys from this year&rsquo;s book</h2>
+      <p class="count">Shown as planned &mdash; every itinerary is built from a blank page</p>
+    </div>
+
+    <article class="feature rv">
+      <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1400&h=788&fit=crop&q=80&auto=format" width="1400" height="788" alt="The wake of a motor yacht crossing calm water between two volcanic islands at dusk">
+      <div class="feature-txt">
+        <p class="kicker">Italy &middot; September</p>
+        <h3>The Aeolian Islands by private motor-yacht</h3>
+        <p>Seven nights between Salina and Stromboli aboard a crewed 24-metre yacht, with two nights ashore at the Capofaro estate among the malvasia vines. Lipari&rsquo;s market before the day boats arrive; the crater climb timed for the evening eruptions.</p>
+        <span class="price">From £21,400 for two, seven nights, October dates held</span>
+        <a class="j-link" href="#consult">Discuss this journey</a>
+      </div>
+    </article>
+
+    <div class="pair">
+      <article class="rv">
+        <img src="https://images.unsplash.com/photo-1477587458883-47145ed94245?w=900&h=1200&fit=crop&q=80&auto=format" width="900" height="1200" alt="A blue-washed stairway in the old city of Jodhpur, empty in early morning">
+        <p class="kicker" style="margin-top:18px">India &middot; January to March</p>
+        <h3>Rajasthan in the cool season</h3>
+        <p>Twelve nights, Jodhpur to Jaipur by road with your own car and driver, staying in former private residences &mdash; including two nights as the only guests at a 17th-century fort in the Aravalli hills.</p>
+        <span class="price">From £13,850 for two, twelve nights</span>
+        <a class="j-link" href="#consult">Discuss this journey</a>
+      </article>
+      <article class="rv">
+        <img src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1000&h=1000&fit=crop&q=80&auto=format" width="1000" height="1000" alt="A light aircraft's shadow crossing dunes where the Namib desert meets the Atlantic">
+        <p class="kicker" style="margin-top:18px">Namibia &middot; May to October</p>
+        <h3>The Skeleton Coast by light aircraft</h3>
+        <p>Ten nights flying camp to camp with a private pilot-guide: the seal colonies at Cape Frio, the desert lions of the Hoanib, and the quietest dunes in southern Africa &mdash; often without another vehicle in sight all day.</p>
+        <span class="price">From £26,200 for two, ten nights</span>
+        <a class="j-link" href="#consult">Discuss this journey</a>
+      </article>
+    </div>
+
+    <div class="journeys-foot rv">
+      <p>These are illustrations, not products. Around 140 journeys leave our studio in a year; no two have yet been the same.</p>
+      <a class="quiet-link" href="#consult">Tell us where you are in the world</a>
+    </div>
+  </section>
+
+  <!-- HOW WE WORK -->
+  <section class="dark how" id="how" aria-label="How we work">
+    <div class="intro">
+      <h2 class="rv">The itinerary is the <em style="font-style:italic">last</em> thing we produce.</h2>
+      <p class="rv">Most of the work happens before anything is booked &mdash; in conversation, and in the twenty years of notes, room numbers and named contacts our designers keep on the places they cover.</p>
+    </div>
+    <ol class="steps">
+      <li class="rv">
+        <span class="num" aria-hidden="true">01</span>
+        <h3>A conversation, not a form</h3>
+        <p>An hour with your designer, by phone or at the studio. How you like to travel, what you never want to do again, who is coming, what the trip is <b>for</b>. Nothing is booked, nothing is sold.</p>
+      </li>
+      <li class="rv">
+        <span class="num" aria-hidden="true">02</span>
+        <h3>One proposal, fully priced</h3>
+        <p>Within a week: a single considered itinerary &mdash; not three options padded for choice &mdash; with every cost stated, down to the transfers. We revise it with you until it is right, however many rounds that takes.</p>
+      </li>
+      <li class="rv">
+        <span class="num" aria-hidden="true">03</span>
+        <h3>While you travel</h3>
+        <p>Your designer, reachable on a direct line, day and night. When the fog closed Venice&rsquo;s airport last November, our clients were re-routed through Verona with a car waiting <b>before their gondola reached the hotel</b>.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- DESIGNERS -->
+  <section class="designers" id="designers" aria-label="The designers">
+    <div class="sect-head rv">
+      <h2>You deal with one person</h2>
+      <p class="count">Three of the eleven</p>
+    </div>
+    <div class="d-grid">
+      <figure class="rv">
+        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=720&h=960&fit=crop&q=80&auto=format&crop=faces" width="720" height="960" alt="Portrait of travel designer Eleanor Whitby">
+        <figcaption>
+          <p class="d-name">Eleanor Whitby</p>
+          <p class="d-role">Italy &amp; the Adriatic &middot; 19 years</p>
+          <p class="d-note">Spends every June driving the back roads between Puglia and the Marche, checking rooms.</p>
+        </figcaption>
+      </figure>
+      <figure class="rv">
+        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=720&h=960&fit=crop&q=80&auto=format&crop=faces" width="720" height="960" alt="Portrait of travel designer James Osei">
+        <figcaption>
+          <p class="d-name">James Osei</p>
+          <p class="d-role">Southern &amp; East Africa &middot; 14 years</p>
+          <p class="d-note">Former camp manager in the Okavango; still knows every pilot on the Maun airstrip by name.</p>
+        </figcaption>
+      </figure>
+      <figure class="rv">
+        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=720&h=960&fit=crop&q=80&auto=format&crop=faces" width="720" height="960" alt="Portrait of travel designer Marianne Faulks">
+        <figcaption>
+          <p class="d-name">Marianne Faulks</p>
+          <p class="d-role">India &amp; the Subcontinent &middot; 22 years</p>
+          <p class="d-note">Has slept in more Rajasthani forts than she can list, and keeps notes on all of them.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- CLIENT WORD -->
+  <section class="quote" aria-label="From a client">
+    <div class="quote-inner rv">
+      <blockquote>
+        <p>&ldquo;They moved our flights twice, re-booked the riad when the roof terrace flooded, and never once made any of it feel like our problem. We found out most of it had even happened after we got home.&rdquo;</p>
+        <cite><b>Alice &amp; Peter Rowan, Harrogate</b> &mdash; Morocco, October 2025 &middot; their third journey with Eleanor</cite>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- CONSULTATION -->
+  <section class="dark consult" id="consult" aria-label="Request a consultation">
+    <div class="consult-grid">
+      <div>
+        <p class="kicker rv">Begin</p>
+        <h2 class="rv">Start with a conversation</h2>
+        <p class="lead rv">Tell us a little about the trip you have in mind &mdash; or the one you can&rsquo;t quite picture yet &mdash; and the right designer will call you back within one working day.</p>
+        <div class="consult-meta rv">
+          <p><a href="tel:+442071834460">020 7183 4460</a> &mdash; a designer answers, not a call centre</p>
+          <p>Weekdays 9&ndash;6, Saturdays 10&ndash;2</p>
+          <p>Or by appointment at the studio: 61 Marylebone Lane, London W1U 2NX</p>
+        </div>
+      </div>
+      <div aria-hidden="true"></div>
+      <form class="enquiry" action="#" method="post" novalidate>
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label for="f-contact">Email or telephone</label>
+          <input id="f-contact" name="contact" type="text" autocomplete="email" placeholder="However you prefer to be reached">
+        </div>
+        <div class="field">
+          <label for="f-trip">Where are you in the world?</label>
+          <textarea id="f-trip" name="trip" rows="3" placeholder="A place, a month, an occasion — anything is enough to start"></textarea>
+        </div>
+        <div class="form-foot">
+          <button class="btn" type="submit">Request a call back</button>
+          <p class="form-note">No newsletters follow. One designer will be in touch, once.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="dark">
+  <div class="foot-main">
+    <div>
+      <p class="wordmark">Harland &amp; Vane<small>Private Travel</small></p>
+      <address class="foot-addr">
+        61 Marylebone Lane, London W1U 2NX<br>
+        <a href="tel:+442071834460" style="color:inherit;text-decoration:none">020 7183 4460</a> &middot; <a href="mailto:studio@harlandandvane.co.uk" style="color:inherit;text-decoration:none">studio@harlandandvane.co.uk</a>
+      </address>
+    </div>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="#journeys">Journeys</a></li>
+        <li><a href="#how">How we work</a></li>
+        <li><a href="#designers">The designers</a></li>
+        <li><a href="#consult">Request a consultation</a></li>
+      </ul>
+    </nav>
+    <div class="foot-trust">
+      <p><b>Your money is protected.</b> Flight-inclusive journeys are ATOL protected (ATOL 11284). We are a member of ABTA (Y6427) and a Virtuoso member agency.</p>
+      <p style="margin-top:14px">Harland &amp; Vane Ltd, registered in England &amp; Wales No. 07581 442. Est. 2011.</p>
+    </div>
+  </div>
+  <div class="foot-legal">
+    <span>&copy; 2026 Harland &amp; Vane Ltd</span>
+    <span>Privacy &middot; Booking conditions &middot; Modern Slavery Statement</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // Mobile nav
+  var btn=document.querySelector('.menu-toggle');
+  var nav=document.getElementById('primary-nav');
+  if(btn&&nav){
+    btn.addEventListener('click',function(){
+      var open=nav.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+    });
+    nav.addEventListener('click',function(e){
+      if(e.target.tagName==='A'){nav.classList.remove('open');btn.setAttribute('aria-expanded','false');}
+    });
+  }
+  // Reveal on scroll — opacity/transform only, disabled for reduced motion
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=document.querySelectorAll('.rv');
+  if(reduced||!('IntersectionObserver' in window)){
+    els.forEach(function(el){el.classList.add('in');});
+    return;
+  }
+  var seen=0;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var el=entry.target;
+        var delay=Math.min((seen++%3)*70,140);
+        el.style.transitionDelay=delay+'ms';
+        el.classList.add('in');
+        io.unobserve(el);
+      }
+    });
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(function(el){io.observe(el);});
+})();
+</script>
+</body>
+</html>

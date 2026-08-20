@@ -1,171 +1,284 @@
 /*
- * The search and AI visibility report.
+ * Getting found: the search and AI visibility dashboard.
  *
- * Every value here is an --ed- token, like media.css, which is what makes it
- * work in dark mode with no dark-mode rules of its own: the tokens already flip.
- * There is no --ed-7 in the spacing scale (it runs 1 2 3 4 5 6 8) and no bare
- * --ed-r, and a var() that resolves to nothing drops the whole declaration
- * silently, so gap: var(--ed-7) becomes no gap at all.
- *
- * THE SEVERITY COLOURS ARE THE ONLY REAL DESIGN DECISION HERE, and they are
- * carried by a dot AND by the words, never by colour alone. Somebody who cannot
- * tell the red dot from the amber one still reads "2 to fix" and "worth doing",
- * which is the difference between a report and a traffic light nobody can use.
+ * Built on the editor's --ed- tokens, like every tool screen, which is what
+ * carries dark mode with almost no dark rules of its own: the surfaces and text
+ * flip when .sv-root is dark. The only colours this screen owns are the three
+ * severity tones (a red, an amber, a green), because the tool palette has a
+ * danger token but no warning or success one, and those DO need a light and a
+ * dark value each. They are always carried by an icon AND by words, never by
+ * colour alone, so somebody who cannot tell the red from the amber still reads
+ * "2 to fix" and "quick win".
  */
 
-.seo-root {
+.seo2 {
+  --seo2-bad: #dc2626;
+  --seo2-bad-wash: #fef2f2;
+  --seo2-warn: #b45309;
+  --seo2-warn-wash: #fffbeb;
+  --seo2-good: #047857;
+  --seo2-good-wash: #ecfdf5;
+
   display: flex;
   flex-direction: column;
-  gap: var(--ed-5);
-  max-width: 880px;
+  gap: var(--ed-6);
+  max-width: 1120px;
   margin: 0 auto;
-  padding: var(--ed-6) 0;
+  padding: var(--ed-8) var(--ed-6) var(--ed-8);
 }
 
-.seo-head { display: flex; flex-direction: column; gap: var(--ed-2); }
-
-.seo-lede {
-  margin: 0;
-  max-width: 62ch;
-  color: var(--ed-ink-2);
-  line-height: 1.55;
+.sv-root[data-theme='dark'] .seo2 {
+  --seo2-bad: #f87171;
+  --seo2-bad-wash: rgba(248, 113, 113, 0.12);
+  --seo2-warn: #fbbf24;
+  --seo2-warn-wash: rgba(251, 191, 36, 0.12);
+  --seo2-good: #34d399;
+  --seo2-good-wash: rgba(52, 211, 153, 0.12);
+}
+@media (prefers-color-scheme: dark) {
+  .sv-root[data-theme='system'] .seo2 {
+    --seo2-bad: #f87171;
+    --seo2-bad-wash: rgba(248, 113, 113, 0.12);
+    --seo2-warn: #fbbf24;
+    --seo2-warn-wash: rgba(251, 191, 36, 0.12);
+    --seo2-good: #34d399;
+    --seo2-good-wash: rgba(52, 211, 153, 0.12);
+  }
 }
 
-.seo-panel {
+/* --- Header ---------------------------------------------------------------- */
+
+.seo2-head { display: flex; flex-direction: column; gap: var(--ed-2); }
+.seo2-title { margin: 0; font-size: var(--ed-text-xl); font-weight: 700; letter-spacing: -0.01em; color: var(--ed-ink); }
+.seo2-lede { margin: 0; max-width: 64ch; color: var(--ed-ink-2); font-size: var(--ed-text-base); line-height: 1.55; }
+
+/* --- The headline band: score + tiles -------------------------------------- */
+
+.seo2-hero {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.1fr) 1.6fr;
+  gap: var(--ed-4);
+}
+
+.seo2-score {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-5);
+  padding: var(--ed-6);
+  background: var(--ed-panel);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-xl);
+  box-shadow: 0 18px 40px -24px rgba(27, 43, 91, 0.22);
+}
+
+.seo2-score__ring { position: relative; flex: none; width: 128px; height: 128px; }
+.seo2-score__ring svg { transform: rotate(-90deg); }
+.seo2-score__track { stroke: var(--ed-line); }
+.seo2-score__value { stroke: var(--seo2-good); animation: seo2-draw 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.seo2-score__ring[data-tone='warn'] .seo2-score__value { stroke: var(--seo2-warn); }
+.seo2-score__ring[data-tone='bad'] .seo2-score__value { stroke: var(--seo2-bad); }
+
+@keyframes seo2-draw {
+  from { stroke-dashoffset: var(--seo2-circ); }
+  to { stroke-dashoffset: var(--seo2-dash); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seo2-score__value { animation: none; }
+}
+
+.seo2-score__num {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--ed-3);
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.seo2-score__num strong { font-size: 34px; font-weight: 700; color: var(--ed-ink); font-variant-numeric: tabular-nums; }
+.seo2-score__num span { margin-top: 3px; font-size: var(--ed-text-xs); color: var(--ed-ink-3); }
+
+.seo2-score__side { display: flex; flex-direction: column; gap: var(--ed-1); }
+.seo2-score__label { margin: 0; font-size: var(--ed-text-sm); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ed-ink-3); }
+.seo2-score__verdict { margin: 0; font-size: var(--ed-text-md); line-height: 1.4; color: var(--ed-ink); }
+
+.seo2-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--ed-4);
+}
+
+.seo2-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
   padding: var(--ed-5);
+  background: var(--ed-panel);
   border: 1px solid var(--ed-line);
   border-radius: var(--ed-r-lg);
-  background: var(--ed-panel);
 }
+.seo2-tile__icon { display: inline-flex; color: var(--ed-ink-3); }
+.seo2-tile__value { font-size: 26px; font-weight: 700; color: var(--ed-ink); font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: var(--ed-1); }
+.seo2-tile__label { font-size: var(--ed-text-sm); color: var(--ed-ink-2); }
+.seo2-tile[data-tone='bad'] .seo2-tile__icon,
+.seo2-tile[data-tone='bad'] .seo2-tile__value { color: var(--seo2-bad); }
+.seo2-tile[data-tone='warn'] .seo2-tile__icon,
+.seo2-tile[data-tone='warn'] .seo2-tile__value { color: var(--seo2-warn); }
+.seo2-tile[data-tone='good'] .seo2-tile__icon,
+.seo2-tile[data-tone='good'] .seo2-tile__value { color: var(--seo2-good); }
 
-.seo-panel__title {
-  margin: 0;
-  font-size: var(--ed-text-lg);
-  font-weight: 600;
-}
+/* --- Panels ---------------------------------------------------------------- */
 
-.seo-links { margin: 0; font-size: var(--ed-text-sm); color: var(--ed-ink-3); }
-
-/* --- The counts ---------------------------------------------------- */
-
-.seo-counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ed-2);
-  margin: 0;
-}
-
-.seo-count {
-  padding: 2px var(--ed-2);
-  border-radius: var(--ed-r-full);
-  font-size: var(--ed-text-xs);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.seo-count[data-severity='problem'] { background: color-mix(in srgb, var(--ed-danger) 14%, transparent); color: var(--ed-danger); }
-.seo-count[data-severity='warning'] { background: var(--ed-well); color: var(--ed-ink-2); }
-.seo-count[data-severity='good']    { background: var(--ed-select-wash); color: var(--ed-select); }
-
-/* --- The findings -------------------------------------------------- */
-
-.seo-findings {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ed-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.seo-finding {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--ed-2);
-  align-items: start;
-}
-
-.seo-finding__dot {
-  width: 8px;
-  height: 8px;
-  margin-top: 7px;
-  border-radius: var(--ed-r-full);
-  background: var(--ed-ink-3);
-}
-
-.seo-finding[data-severity='problem'] .seo-finding__dot { background: var(--ed-danger); }
-.seo-finding[data-severity='good'] .seo-finding__dot { background: var(--ed-select); }
-
-.seo-finding__title { margin: 0; }
-.seo-finding__fix {
-  margin: 2px 0 0;
-  font-size: var(--ed-text-sm);
-  color: var(--ed-ink-2);
-  line-height: 1.5;
-}
-
-/*
- * A finding that is already fine is quieter than one that is not. Somebody is
- * here to find what is wrong, and the good ones are there to say "checked"
- * rather than to be read.
- */
-.seo-finding[data-severity='good'] .seo-finding__title {
-  font-size: var(--ed-text-sm);
-  color: var(--ed-ink-3);
-}
-
-/* --- The page list ------------------------------------------------- */
-
-.seo-pages {
+.seo2-panel {
   display: flex;
   flex-direction: column;
   gap: var(--ed-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  padding: var(--ed-6);
+  background: var(--ed-panel);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-xl);
+  box-shadow: 0 18px 40px -24px rgba(27, 43, 91, 0.14);
 }
+.seo2-panel__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ed-3); }
+.seo2-panel__title { margin: 0; font-size: var(--ed-text-lg); font-weight: 700; color: var(--ed-ink); }
+.seo2-panel__count { font-size: var(--ed-text-sm); font-weight: 500; color: var(--ed-ink-3); font-variant-numeric: tabular-nums; }
 
-.seo-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ed-3);
-  padding-top: var(--ed-4);
+/* --- Issues, divided rows rather than nested cards ------------------------- */
+
+.seo2-issues { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.seo2-issue {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--ed-4);
+  padding: var(--ed-4) 0;
   border-top: 1px solid var(--ed-line-soft);
 }
+.seo2-issue:first-child { border-top: 0; }
 
-.seo-page:first-child { padding-top: 0; border-top: 0; }
+.seo2-issue__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ed-r-full);
+  flex: none;
+}
+.seo2-issue[data-severity='problem'] .seo2-issue__icon { color: var(--seo2-bad); background: var(--seo2-bad-wash); }
+.seo2-issue[data-severity='warning'] .seo2-issue__icon { color: var(--seo2-warn); background: var(--seo2-warn-wash); }
 
-.seo-page__head {
+.seo2-issue__body { min-width: 0; }
+.seo2-issue__title {
+  margin: 0;
+  font-size: var(--ed-text-base);
+  font-weight: 600;
+  color: var(--ed-ink);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ed-3);
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--ed-2);
 }
-
-.seo-page__right {
-  display: flex;
-  gap: var(--ed-3);
-  align-items: center;
-}
-
-.seo-page__title { margin: 0; font-size: var(--ed-text-md); font-weight: 600; }
-
-.seo-page__path {
-  margin: 2px 0 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+.seo2-issue__where {
   font-size: var(--ed-text-xs);
+  font-weight: 500;
   color: var(--ed-ink-3);
+  background: var(--ed-well);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  padding: 2px 8px;
 }
+.seo2-issue__fix { margin: 3px 0 0; font-size: var(--ed-text-sm); color: var(--ed-ink-2); line-height: 1.5; max-width: 68ch; }
+.seo2-issue__btn { flex: none; white-space: nowrap; }
+.seo2-btn__arrow { width: 15px; height: 15px; margin-left: 2px; }
 
-/* Not published, so listed rather than judged. */
-.seo-pages--quiet .seo-page { gap: 0; }
+/* --- All clear ------------------------------------------------------------- */
 
-@media (max-width: 720px) {
-  .seo-root { padding: var(--ed-4) var(--ed-3); }
-  .seo-panel { padding: var(--ed-4); }
-  .seo-page__head { flex-direction: column; }
+.seo2-clear {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--ed-2);
+  padding: var(--ed-8) var(--ed-4);
+}
+.seo2-clear__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--ed-r-full);
+  color: var(--seo2-good);
+  background: var(--seo2-good-wash);
+  margin-bottom: var(--ed-1);
+}
+.seo2-clear__mark svg { width: 26px; height: 26px; }
+.seo2-clear__title { margin: 0; font-size: var(--ed-text-lg); font-weight: 700; color: var(--ed-ink); }
+.seo2-clear__note { margin: 0; max-width: 46ch; font-size: var(--ed-text-sm); color: var(--ed-ink-2); line-height: 1.55; }
+
+/* --- Working well ---------------------------------------------------------- */
+
+.seo2-wins { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ed-3); }
+.seo2-win { display: flex; align-items: flex-start; gap: var(--ed-3); font-size: var(--ed-text-base); color: var(--ed-ink); line-height: 1.5; }
+.seo2-win__mark { flex: none; display: inline-flex; color: var(--seo2-good); margin-top: 1px; }
+.seo2-win__mark svg { width: 18px; height: 18px; }
+
+.seo2-links { display: flex; flex-wrap: wrap; gap: var(--ed-4); margin: var(--ed-1) 0 0; }
+.seo2-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  color: var(--ed-accent-dark, var(--ed-accent));
+  text-decoration: none;
+}
+.seo2-links a:hover { text-decoration: underline; }
+.seo2-links__ext { width: 14px; height: 14px; }
+
+/* --- Per page -------------------------------------------------------------- */
+
+.seo2-pages { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.seo2-page {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  padding: var(--ed-3) 0;
+  border-top: 1px solid var(--ed-line-soft);
+}
+.seo2-page:first-child { border-top: 0; }
+.seo2-page__main { display: flex; align-items: center; gap: var(--ed-3); min-width: 0; }
+.seo2-page__icon { display: inline-flex; color: var(--ed-ink-3); flex: none; }
+.seo2-page__title { margin: 0; font-size: var(--ed-text-base); font-weight: 600; color: var(--ed-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seo2-page__path { margin: 0; font-size: var(--ed-text-xs); color: var(--ed-ink-3); font-family: var(--ed-font-mono, ui-monospace, monospace); }
+.seo2-page__meta { display: flex; align-items: center; gap: var(--ed-3); flex: none; }
+
+.seo2-chip {
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--ed-r-full);
+  white-space: nowrap;
+}
+.seo2-chip[data-severity='problem'] { color: var(--seo2-bad); background: var(--seo2-bad-wash); }
+.seo2-chip[data-severity='warning'] { color: var(--seo2-warn); background: var(--seo2-warn-wash); }
+.seo2-chip[data-severity='good'] { color: var(--seo2-good); background: var(--seo2-good-wash); }
+
+.seo2-draftnote { margin: var(--ed-2) 0 0; padding-top: var(--ed-4); border-top: 1px solid var(--ed-line-soft); font-size: var(--ed-text-sm); color: var(--ed-ink-2); line-height: 1.5; }
+
+.seo2-empty { margin: 0; font-size: var(--ed-text-base); color: var(--ed-ink-2); }
+
+/* --- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 860px) {
+  .seo2-hero { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .seo2 { padding: var(--ed-5) var(--ed-4); }
+  .seo2-tiles { grid-template-columns: 1fr 1fr; }
+  .seo2-issue { grid-template-columns: auto 1fr; }
+  .seo2-issue__btn { grid-column: 2; justify-self: start; margin-top: var(--ed-1); }
+  .seo2-score { flex-direction: column; text-align: center; }
 }

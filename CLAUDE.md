@@ -153,3 +153,71 @@ block per public script file (copy the `/widget-hours.js` block).
   see the slicer handover for setup).
 - When you add a capability, add a test that exercises it and re-run the
   whole suite. Regressions show up immediately.
+
+## tg-sites: client-site design with Impeccable (18 Aug 2026)
+
+This section governs the CMS at `tg-sites/` only, not the widget suite. It was
+added when Impeccable (github.com/pbakaus/impeccable) was adopted to raise the
+design quality of the CLIENT sites the CMS emits. The Travelgenix design and
+taste skills still own the Travelgenix-branded surfaces (the editor, dashboard
+and admin UI); Impeccable owns the client-site output. The full boundary lives in
+`PRODUCT.md` at the repo root: read it before any tg-sites UI work.
+
+**Two design systems, one boundary.** Operate surfaces (the tool: editor,
+dashboard, settings, members, domains, account bar) are Travelgenix-branded and
+governed by travelgenix-design and travelgenix-taste. Persuade surfaces (the
+published client site: `tg-sites/components/render`, `tg-sites/lib/content`,
+`tg-sites/app/site`) are client-branded and governed by Impeccable and the
+client's own DESIGN.md. Where they meet, travelgenix-design wins, and Impeccable's
+brand-level rules (a distinct display face, a brand palette) never touch the
+tool's own UI. The design detector is scoped to match, in `.impeccable/config.json`.
+
+**The unit of design is the tenant.** Impeccable keeps one DESIGN.md per project;
+our design world is per client site. So each client lives in
+`designs/<tenant-slug>/DESIGN.md`, the committed home of that client's palette,
+type, spacing, motion and anti-references.
+
+**Before ANY client-site design work:**
+1. Identify the tenant whose site you are building or restyling, and its slug.
+2. Read `designs/<slug>/DESIGN.md`. Run
+   `node .claude/skills/impeccable/scripts/context.mjs --target designs/<slug>/`
+   once at the start of the session to load it, PRODUCT.md and the surface brief.
+3. If that file does NOT exist, do not invent a world. Run the init conversation
+   with Andy to agree the client's world first, then write the DESIGN.md, then
+   design. A luxury house and a family-budget operator must not be the same site
+   reskinned, and that only holds if each has its own committed world.
+
+**Refinement preserves, redesign replaces, never split the difference.** Refining
+a client site keeps its committed identity, copy and everything outside the scope
+you were asked to change. A redesign treats the old look as evidence and
+anti-reference, chooses a new world, and REPLACES the DESIGN.md. Do not polish the
+discarded look, and do not blend the old and the new into a compromise neither
+chose.
+
+**The craft floor for every client site**, whatever its world (from Impeccable's
+craft-floor, not optional and not the client's to waive):
+- Theme the browser surfaces from the client palette: text selection, the caret,
+  custom scrollbars, focus rings, link underline offset. This is the cheapest tell
+  that a page was built rather than assembled, and the one most often skipped.
+- One authored motion moment per page, not the same entrance bolted onto every
+  section. Exponential ease-out from an already-visible default, and it honours
+  prefers-reduced-motion.
+- No kicker or eyebrow label above a heading. This is a ban, not a default: the
+  heading carries its own weight.
+- No hero-metric template (big number, small label, supporting stats, accent).
+- No section numbers (01 / 02 / 03) unless the sequence itself carries information
+  the reader needs.
+- Contrast at least 4.5:1 for body and placeholder text; tint secondary text from
+  the palette hue, never flat gray.
+- Real states on everything: hover, focus, disabled, loading, error, empty. Plus
+  real content, working controls and keyboard focus.
+
+**Scope and running the detector.** Impeccable is installed at the repo root
+`.claude/` and its post-edit hook is scoped in `.impeccable/config.json` to the
+client-site output (`components/render`, `lib/content`, `app/site`, theme and
+seo), away from the widget suite and the Travelgenix tool chrome. Run a manual
+scan with `npx impeccable detect <path>`; a finding on a scoped-out Operate or
+widget file is governed by travelgenix-design and is discarded, not acted on.
+
+**Storing DESIGN.md on the tenant row is a proposed next step, not built.** See
+the note in the Impeccable install PR description.

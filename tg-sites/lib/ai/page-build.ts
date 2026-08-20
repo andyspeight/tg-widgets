@@ -218,8 +218,8 @@ export function planFromModel(answer: unknown): PlanResult {
  * pick costs that wording, not the build. The page's own title and address are set
  * by the action from what the client named it, so blanks here are fine.
  */
-export function sectionsFromPlan(plan: StarterSection[]): Section[] {
-  return buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS).sections;
+export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[]> {
+  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)).sections;
 }
 
 /**

@@ -109,14 +109,27 @@ export interface PresetBlock {
   props?: Record<string, unknown>;
   role?: SlotRole;
   /**
-   * A search term for the picture that goes here, for image and gallery blocks.
+   * Style on the block itself, merged over the empty box exactly as columnBox
+   * is on a column. What it is FOR: the little framed things inside a designed
+   * bar. The reference headers put the wordmark's letter in a white or lavender
+   * circle, wrap the menu in its own frosted inner pill and set a burger icon
+   * on a lime disc, and every one of those is a block with a background, a
+   * radius and some padding, which the block's box already supports. This is
+   * how a preset says so.
+   */
+  box?: Partial<Column['box']>;
+  /**
+   * A search term for the picture that goes here, for image and cards blocks.
    *
-   * OPTIONAL, and only used by hero presets so far. It drives two things that
-   * have to agree: the photograph the picker preview shows, and the one that is
-   * fetched into the client's own media when the hero is added. Left off, a hero
-   * image gets a fitting travel query chosen from a small palette by its
-   * position, so the previews carry photographs without every preset having to
-   * spell one out. Set it when a particular section wants a particular subject.
+   * OPTIONAL. It drives two things that have to agree: the photograph the
+   * picker preview shows, and the one that is fetched into the client's own
+   * media when the section is added (see lib/content/photo-plan.ts). On a hero,
+   * an image left without one gets a fitting travel query chosen from a small
+   * palette by its position; everywhere else the query is explicit or the frame
+   * stays empty, which is what keeps stock faces out of the team and
+   * testimonial presets. On a CARDS block the term is a suffix: each card
+   * searches as its own label plus these words, so the pictures match the
+   * places the sample copy names.
    *
    * It is a QUERY, not a URL. A frozen stock URL in a preset is the thing the
    * "pictures start empty" rule at the top of presets-page.ts exists to prevent;
@@ -138,6 +151,17 @@ export interface PresetRow {
    * per column, and a gap in the array leaves that column plain.
    */
   columnBox?: ReadonlyArray<Partial<Column['box']> | undefined>;
+  /**
+   * How the blocks INSIDE a column sit: stacked, or in a row. One entry per
+   * column, a gap leaving that column its stacked default.
+   *
+   * The floating header bars use it: a logo, a menu and a button ride side by
+   * side inside one rounded column so the whole bar is a single pill rather than
+   * three cells across the open width. The column already carries `flow` (see
+   * ColumnFlow in schema.ts); this is how a preset sets it, the same way
+   * columnBox sets the box. It stacks on a phone like every flow-row column does.
+   */
+  columnFlow?: ReadonlyArray<Column['flow'] | undefined>;
   /** Space between the columns, when the default is not right for a card grid. */
   gap?: number;
   /**
@@ -171,6 +195,14 @@ export interface SectionPreset {
     paddingY?: number;
     width?: Section['width'];
     tone?: Section['tone'];
+    /**
+     * A shaped bottom edge, by divider id (lib/content/dividers.ts), with an
+     * optional depth. The MOKSHA header's wavy underline is the reason this
+     * exists: the wave IS the design, and it is the section divider the library
+     * already draws, so a preset only needs a way to ask for it.
+     */
+    dividerBottom?: string;
+    dividerHeight?: number;
     /**
      * A search term for a photograph behind the whole section, for the heroes
      * whose picture IS the background rather than a block. Same contract as a
