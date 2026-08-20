@@ -2301,6 +2301,95 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * THE COPYRIGHT LINE, WITH A YEAR THAT KEEPS ITSELF, asked for on 20 Aug
+     * 2026 from the Duda list.
+     *
+     * WHY IT IS NOT JUST A TEXT BLOCK, which is a fair question and has one
+     * answer: the year. A copyright typed into a paragraph is correct on the day
+     * somebody types it and wrong every January after. Across a few hundred
+     * client sites that is a few hundred footers quietly saying 2024, and not one
+     * client will notice their own. The year here is worked out when the page is
+     * drawn, so it is right on 1 January with nobody touching anything.
+     *
+     * NO JAVASCRIPT DOES IT. A published page is server-rendered on every
+     * request (force-dynamic), so the server knows the date and the browser is
+     * handed a finished line. The usual scripted version writes the year in on
+     * load, which means a visitor with no JavaScript sees a gap and a crawler
+     * indexes one.
+     *
+     * A START YEAR IS OPTIONAL and gives a range, "2016 to 2026", which is what
+     * an established agency usually wants. Left blank it is the current year on
+     * its own. A start year in the future, or after this year, is ignored rather
+     * than drawn backwards.
+     */
+    type: 'copyright',
+    label: 'Copyright',
+    group: 'Text',
+    icon: 'copyright',
+    description: 'A copyright line whose year looks after itself.',
+    defaults: {
+      owner: '',
+      startYear: 0,
+      symbol: 'symbol',
+      suffix: 'All rights reserved.',
+      size: 's',
+      align: 'left',
+    },
+    summarise: (props) => {
+      const owner = asString(props.owner);
+      return owner ? `Copyright: ${owner}` : 'Copyright';
+    },
+    fields: [
+      {
+        kind: 'text',
+        key: 'owner',
+        label: 'Who owns it',
+        max: 120,
+        help: 'Your company name, as it appears on your paperwork.',
+      },
+      {
+        kind: 'number',
+        key: 'startYear',
+        label: 'First year',
+        min: 0,
+        max: 2200,
+        step: 1,
+        help: 'Optional. Set it and the line reads as a range, like 2016 to 2026. Leave it at zero for this year alone.',
+      },
+      {
+        kind: 'select',
+        key: 'symbol',
+        label: 'Symbol',
+        options: [
+          { value: 'symbol', label: '\u00A9' },
+          { value: 'word', label: 'Copyright' },
+          { value: 'both', label: '\u00A9 Copyright' },
+          { value: 'none', label: 'No symbol' },
+        ],
+      },
+      {
+        kind: 'text',
+        key: 'suffix',
+        label: 'After the name',
+        max: 160,
+        help: 'The rest of the line. Company number and registered office go here if you show them.',
+      },
+      {
+        kind: 'select',
+        key: 'size',
+        label: 'Size',
+        group: 'layout',
+        options: [
+          { value: 's', label: 'Small' },
+          { value: 'm', label: 'Normal' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
      * LONG TEXT, FOLDED, asked for on 20 Aug 2026 from the Duda list.
      *
      * THE WHOLE TEXT IS ALWAYS IN THE HTML, and only its DISPLAY is clamped.

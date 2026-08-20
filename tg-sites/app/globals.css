@@ -4027,6 +4027,26 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
 
 /* ------------------------------------------------------------------ */
+/* The Copyright line                                                  */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Quiet by default, because a copyright is legal furniture rather than something
+ * anybody came to read. It still clears the contrast line: --tgs-text-muted is
+ * tinted from the palette hue and measured against the surfaces, not a flat grey
+ * picked to look soft.
+ */
+.tgs-copyright {
+  margin: 0;
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+}
+
+.tgs-copyright[data-size='m'] { font-size: var(--tgs-text-m); }
+.tgs-copyright[data-align='centre'] { text-align: center; }
+.tgs-copyright[data-align='right'] { text-align: right; }
+
+/* ------------------------------------------------------------------ */
 /* The Read more block                                                 */
 /* ------------------------------------------------------------------ */
 

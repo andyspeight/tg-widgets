@@ -25,6 +25,7 @@ export type IconName =
   | 'crumbs'
   | 'file'
   | 'read-more'
+  | 'copyright'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -119,6 +120,9 @@ const PATHS: Record<IconName, string> = {
   // Three full lines, a short one, and a chevron down: text that carries on
   // below. Deliberately not `text`, which is four equal rules.
   'read-more': 'M4 5h16M4 10h16M4 15h9M9 19l3 3 3-3',
+  // A circle with a c in it, drawn rather than set as a character: an icon set
+  // of stroked paths with one glyph in it would sit at a different weight.
+  copyright: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M14.6 9.6a3.4 3.4 0 1 0 0 4.8',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 

@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { copyrightLine } from '../../lib/content/copyright';
 import { safeColour } from '../../lib/content/schema';
 import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
@@ -2514,6 +2515,48 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
   const style = oneOf(props, 'style', ['line', 'dashed', 'dots'] as const, 'line');
   const spacing = str(props, 'spacing', 'm');
   return <hr className="tgs-divider" data-style={style} data-spacing={spacing} />;
+}
+
+/**
+ * The copyright line.
+ *
+ * THE YEAR IS READ WHEN THE PAGE IS DRAWN, never stored. A published page is
+ * server-rendered on every request, so the server knows the date and hands the
+ * browser a finished line — no script, which the page could not run anyway, and
+ * nothing for a visitor with JavaScript off or a crawler to miss.
+ *
+ * ONE `new Date()` IN THE WHOLE RENDER TREE, and it is here. The assembly is a
+ * pure function in lib/content/copyright.ts that takes the year as an argument,
+ * so the awkward cases — a range, a start year in the future, an owner whose
+ * name already ends in a full stop — are tested against whichever year a test
+ * cares about rather than whichever day it is run on.
+ *
+ * TEXT, NOT MARKUP. The line is built from parts we control and rendered as a
+ * text node, so nothing here needs a sanitiser and nothing a client types can
+ * become an element. It is the one block that is prose without being rich text,
+ * and that is on purpose: a copyright with a bulleted list in it is not a thing.
+ */
+export function CopyrightBlock({ props }: { props: Props }): ReactElement {
+  const line = copyrightLine(
+    {
+      owner: str(props, 'owner'),
+      startYear: clamp(props.startYear, 0, 2200, 0),
+      symbol: oneOf(props, 'symbol', ['symbol', 'word', 'both', 'none'] as const, 'symbol'),
+      suffix: str(props, 'suffix'),
+    },
+    // UTC, which is what the server's clock reports. See the note in
+    // lib/content/copyright.ts on why that is the right wrong answer.
+    new Date().getUTCFullYear(),
+  );
+
+  const size = oneOf(props, 'size', ['s', 'm'] as const, 's');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+
+  return (
+    <p className="tgs-copyright" data-size={size} data-align={align}>
+      {line}
+    </p>
+  );
 }
 
 /**

@@ -161,7 +161,14 @@ export const REGION_LAYOUTS: readonly SectionPreset[] = [
           [
             { type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } },
             { type: 'nav', props: { items: LINKS, collapse: false, ...CENTRED } },
-            { type: 'text', props: { html: '<p>Your company name. ATOL protected. All rights reserved.</p>', size: 's', ...CENTRED } },
+            /*
+              THE COPYRIGHT BLOCK, not a paragraph with a year typed into it
+              (20 Aug 2026). Its year is worked out when the page is drawn, so a
+              footer added today still reads correctly next January with nobody
+              touching it. A typed one is right for four months and wrong for
+              eight, on every site that ever used this preset.
+            */
+            { type: 'copyright', props: { owner: 'Your company name', suffix: 'ATOL protected. All rights reserved.', symbol: 'symbol', size: 's', align: 'centre' } },
           ],
         ],
       },
@@ -846,7 +853,8 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
           { type: 'nav', props: { items: LINKS, collapse: false, ...CENTRED } },
           { type: 'social', props: { align: 'centre' } },
           { type: 'divider' },
-          { type: 'text', props: { html: '<p>Your company name. ATOL protected. All rights reserved.</p>', size: 's', ...CENTRED } },
+          /* Same reasoning as the simple footer above: the year looks after itself. */
+          { type: 'copyright', props: { owner: 'Your company name', suffix: 'ATOL protected. All rights reserved.', symbol: 'symbol', size: 's', align: 'centre' } },
         ]],
       },
     ],
