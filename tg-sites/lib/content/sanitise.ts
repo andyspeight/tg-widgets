@@ -271,7 +271,7 @@ function filterAttributes(
     if (!permitted.includes(name)) continue;
 
     if (name === 'href' || name === 'src' || name === 'srcset') {
-      const safe = safeUrl(value, { allowMailto: name === 'href' });
+      const safe = safeUrl(value, { allowContact: name === 'href' });
       if (!safe) {
         // A dead iframe or image is worse than none. Drop the element.
         if (tag === 'iframe' || tag === 'img' || tag === 'source') return null;
@@ -335,7 +335,7 @@ function filterAttributes(
  * Validate a URL. Returns the URL to emit, or null to reject.
  * Allows same-site relative URLs, https, http, mailto and tel.
  */
-export function safeUrl(value: unknown, options: { allowMailto?: boolean } = {}): string | null {
+export function safeUrl(value: unknown, options: { allowContact?: boolean } = {}): string | null {
   if (typeof value !== 'string') return null;
 
   // Control characters are how javascript&#58; style bypasses are smuggled in.
@@ -360,8 +360,18 @@ export function safeUrl(value: unknown, options: { allowMailto?: boolean } = {})
 
   const protocol = scheme[1].toLowerCase();
   if (protocol === 'https' || protocol === 'http') return trimmed;
-  if (protocol === 'mailto' && options.allowMailto) return trimmed;
-  if (protocol === 'tel' && options.allowMailto) return trimmed;
+  /*
+   * mailto: and tel: TOGETHER, under one option, because they are one decision:
+   * "may this link reach a person rather than a page". Neither can execute
+   * anything — a browser hands them to a mail client or a dialler — so the only
+   * question is whether the caller is somewhere a contact link makes sense.
+   *
+   * The option was called allowMailto until 20 Aug 2026 and gated tel: as well,
+   * which is how seven of the eight block renderers came to omit it: it reads
+   * like an email-only flag, so nobody adding a link field thought it applied to
+   * a phone number. Renamed for what it does.
+   */
+  if ((protocol === 'mailto' || protocol === 'tel') && options.allowContact) return trimmed;
 
   return null;
 }

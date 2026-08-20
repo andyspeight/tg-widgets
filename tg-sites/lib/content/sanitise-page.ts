@@ -59,7 +59,7 @@ function cleanValue(
       // An empty string rather than null: the field is optional and the
       // renderer already treats empty as "no link". Null would be a new
       // shape for every consumer to handle.
-      return typeof value === 'string' && value ? (safeUrl(value, { allowMailto: true }) ?? '') : value;
+      return typeof value === 'string' && value ? (safeUrl(value, { allowContact: true }) ?? '') : value;
 
     case 'image':
       return typeof value === 'string' && value ? (safeUrl(value) ?? '') : value;

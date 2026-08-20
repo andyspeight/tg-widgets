@@ -36,6 +36,24 @@ type Props = Record<string, unknown>;
 // Prop accessors
 // ---------------------------------------------------------------------------
 
+/**
+ * EVERY LINK A CLIENT CAN TYPE MAY BE A CONTACT LINK.
+ *
+ * Passed to safeUrl at every href in this file, and it is a shared constant
+ * rather than an option object written out eight times so the next link field
+ * cannot quietly forget it. That is exactly how this went wrong: the save path
+ * allowed tel: and mailto: on any url field, and seven of the eight renderers
+ * here called safeUrl WITHOUT the option, so a client could type a phone number
+ * into a Button, save it happily, and publish a button whose href was "#". Only
+ * the social row got it right, and only because an email link there was obvious.
+ *
+ * Nothing is loosened by it. safeUrl still refuses every other scheme; a browser
+ * hands mailto: to a mail client and tel: to a dialler, and neither can run
+ * anything. Found on 20 Aug 2026 while checking whether the Duda list's "Click To
+ * Call" and "Click to Email" were already built. They nearly were.
+ */
+const CONTACT_OK = { allowContact: true } as const;
+
 function str(props: Props, key: string, fallback = ''): string {
   const value = props[key];
   return typeof value === 'string' ? value : fallback;
@@ -488,7 +506,7 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
   const fit = oneOf(props, 'fit', ['cover', 'contain'] as const, 'cover');
   const radius = oneOf(props, 'radius', RADII, 'md');
   const caption = str(props, 'caption');
-  const href = safeUrl(str(props, 'href'));
+  const href = safeUrl(str(props, 'href'), CONTACT_OK);
 
   if (!src) {
     return <div className="tgs-placeholder">Choose an image</div>;
@@ -1211,7 +1229,7 @@ function renderCard(
   const body = str(card, 'body');
   const label = str(card, 'label');
   const src = safeUrl(str(card, 'src'));
-  const href = safeUrl(str(card, 'linkHref'));
+  const href = safeUrl(str(card, 'linkHref'), CONTACT_OK);
   const linkLabel = str(card, 'linkLabel');
   // The post's tags, on a collection-filled card (see itemAsCard). Plain labels
   // rendered as text by React, and only strings survive, so a manual card with a
@@ -1593,7 +1611,7 @@ function renderButton(button: Props, key: number): ReactElement | null {
   const label = str(button, 'label');
   if (!label) return null;
 
-  const href = safeUrl(str(button, 'href')) || '#';
+  const href = safeUrl(str(button, 'href'), CONTACT_OK) || '#';
   const variant = oneOf(button, 'variant', ['primary', 'secondary', 'ghost'] as const, 'primary');
   const size = oneOf(button, 'size', ['s', 'm', 'l'] as const, 'm');
   const newTab = bool(button, 'newTab');
@@ -1889,7 +1907,7 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
       const label = str(item, 'label');
       if (!label) return null;
 
-      const href = safeUrl(str(item, 'href')) || '#';
+      const href = safeUrl(str(item, 'href'), CONTACT_OK) || '#';
       const newTab = bool(item, 'newTab');
       /*
        * The pages inside a folder, injected by fillNavFolders (lib/content/nav.ts)
@@ -1977,7 +1995,7 @@ function navSubmenu(children: Props[], keyPrefix: string): ReactElement {
         .map((child, index) => {
           const label = str(child, 'label');
           if (!label) return null;
-          const href = safeUrl(str(child, 'href')) || '#';
+          const href = safeUrl(str(child, 'href'), CONTACT_OK) || '#';
           const grandchildren = list(child, 'children');
           return (
             <li
@@ -2292,7 +2310,7 @@ export function LogosBlock({ props, editing = false }: { props: Props; editing?:
     .map((item) => ({
       src: safeUrl(str(item, 'src')) ?? '',
       alt: str(item, 'alt'),
-      href: safeUrl(str(item, 'href')) ?? '',
+      href: safeUrl(str(item, 'href'), CONTACT_OK) ?? '',
     }))
     .filter((item) => item.src !== '');
 
@@ -2398,7 +2416,7 @@ export function SocialBlock({ props }: { props: Props }): ReactElement | null {
 
       // mailto and tel are refused by default and asked for here, for this
       // block only. See lib/content/social.ts.
-      const href = safeUrl(str(item, 'href'), { allowMailto: true });
+      const href = safeUrl(str(item, 'href'), { allowContact: true });
       if (!href) return null;
 
       const external = /^https?:/i.test(href);
@@ -2539,7 +2557,7 @@ export function IconBlock({ props }: { props: Props }): ReactElement {
   const size = clamp(props.size, 12, 200, 40);
   const colour = safeColour(props.colour);
   const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
-  const href = safeUrl(str(props, 'href'));
+  const href = safeUrl(str(props, 'href'), CONTACT_OK);
   const label = str(props, 'label').trim();
 
   /*

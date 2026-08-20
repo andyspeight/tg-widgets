@@ -220,8 +220,15 @@ describe('what the renderer does with what it is given', () => {
     expect(body).toContain('if (!network) return null;');
   });
 
-  it('runs the address through safeUrl, with mailto asked for explicitly', () => {
-    expect(body).toContain("safeUrl(str(item, 'href'), { allowMailto: true })");
+  /*
+   * Renamed from allowMailto on 20 Aug 2026. The option always gated tel: as
+   * well, and reading like an email-only flag is how seven of the eight block
+   * renderers came to omit it entirely: a client could type a phone number into
+   * a Button, save it, and publish a link to "#". The social row was the only
+   * one that got it right.
+   */
+  it('runs the address through safeUrl, with contact schemes asked for explicitly', () => {
+    expect(body).toContain("safeUrl(str(item, 'href'), { allowContact: true })");
     expect(body).toContain('if (!href) return null;');
   });
 
