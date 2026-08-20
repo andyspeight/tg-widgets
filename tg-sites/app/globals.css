@@ -3838,6 +3838,128 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Screen carousel: pictures playing on a device                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 20 Aug 2026, from Duda's Screen Carousel.
+ *
+ * THE DEVICE IS DRAWN HERE, not shipped as a picture of one. Four boxes and a
+ * dot: a bezel, a glass, a camera and a base. That stays sharp at any size,
+ * follows the client's silver or graphite choice, weighs nothing, and puts no
+ * photograph of somebody else's hardware on a client's homepage.
+ *
+ * THE SCREEN'S SHAPE IS THE REAL ONE. 16/10 for a laptop and 9/19.5 for a
+ * phone, because a 16/9 "laptop" reads as a television and everybody can tell
+ * without knowing why.
+ */
+.tgs-screen {
+  --tgs-scr-bezel: #c9ced6;
+  --tgs-scr-edge: #aeb5bf;
+  --tgs-scr-glass: #0b0e13;
+  display: flex;
+  justify-content: center;
+}
+.tgs-screen[data-frame='dark'] {
+  --tgs-scr-bezel: #3a3f47;
+  --tgs-scr-edge: #23262b;
+}
+
+.tgs-screen__device { width: 100%; max-width: 56rem; }
+.tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 17rem; }
+
+.tgs-screen__bezel {
+  position: relative;
+  background: var(--tgs-scr-bezel);
+  border: 1px solid var(--tgs-scr-edge);
+  border-radius: 14px;
+  padding: 14px 14px 16px;
+  box-shadow: 0 20px 45px rgb(0 0 0 / 18%);
+}
+.tgs-screen[data-device='phone'] .tgs-screen__bezel {
+  border-radius: 34px;
+  padding: 12px;
+}
+
+/* The camera. A dot on a laptop, a notch on a phone. */
+.tgs-screen__cam {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tgs-scr-edge);
+}
+.tgs-screen[data-device='phone'] .tgs-screen__cam {
+  top: 12px;
+  width: 42%;
+  height: 18px;
+  border-radius: 0 0 12px 12px;
+  background: var(--tgs-scr-bezel);
+  z-index: 3;
+}
+
+.tgs-screen__glass {
+  position: relative;
+  overflow: hidden;
+  background: var(--tgs-scr-glass);
+  border-radius: 4px;
+  aspect-ratio: 16 / 10;
+}
+.tgs-screen[data-device='phone'] .tgs-screen__glass {
+  border-radius: 24px;
+  aspect-ratio: 9 / 19.5;
+}
+
+/* The lid stands on something. A phone does not, so the base is hidden rather
+   than the markup branching for it. */
+.tgs-screen__base {
+  display: block;
+  width: 118%;
+  height: 12px;
+  margin: 0 auto;
+  transform: translateX(-7.6%);
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(var(--tgs-scr-bezel), var(--tgs-scr-edge));
+  box-shadow: 0 10px 20px rgb(0 0 0 / 14%);
+  /* The notch a lid is lifted by. */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 56% 100%, 54% 62%, 46% 62%, 44% 100%, 0 100%);
+}
+.tgs-screen[data-device='phone'] .tgs-screen__base { display: none; }
+
+/* The pictures fill the glass, and so does the slideshow inside it. */
+.tgs-screen__shot,
+.tgs-screen__glass .tgs-slideshow__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* The shared viewport rules set their own aspect ratio; in here the glass owns
+   the shape, so the viewport simply fills it. */
+.tgs-screen__viewport { aspect-ratio: auto; height: 100%; }
+.tgs-screen__glass .tgs-slideshow { height: 100%; }
+
+.tgs-screen__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255 255 255 / 70%);
+  font-size: 0.95rem;
+}
+
+@container tgs-page (max-width: 767px) {
+  /* A laptop bezel scaled to a phone screen leaves a stamp-sized picture, so
+     the frame thins out rather than the picture shrinking further. */
+  .tgs-screen__bezel { padding: 8px 8px 10px; border-radius: 10px; }
+  .tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 13rem; }
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 

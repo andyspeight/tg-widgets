@@ -963,6 +963,85 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * PICTURES PLAYING ON A SCREEN (Andy, 20 Aug 2026, from Duda's Travelgenix
+     * Screen Carousel).
+     *
+     * THE FRAME IS DRAWN IN CSS, not a PNG of a laptop. A picture of a device
+     * would be one fixed size, one fixed colour, and a file to ship; a few
+     * rounded boxes cost nothing, stay sharp on any screen, and can follow the
+     * client's own light or dark choice. It also means there is no photograph of
+     * somebody else's hardware on a client's homepage.
+     *
+     * IT BORROWS THE SLIDESHOW WHOLE, exactly as Half overlay does: the same
+     * `.tgs-slideshow` wrapper, so it cycles in pure CSS and public/slideshow.js
+     * gives it arrows, dots and a pause button with nothing added to that file.
+     * One picture is not a carousel and renders as a still screen.
+     */
+    type: 'screen-carousel',
+    label: 'Screen carousel',
+    group: 'Media',
+    icon: 'slider',
+    description: 'Your pictures playing on a laptop or phone screen.',
+    defaults: {
+      device: 'laptop',
+      frame: 'light',
+      transition: 'fade',
+      interval: 5,
+      arrows: true,
+      dots: true,
+      items: [{ src: '', alt: '' }, { src: '', alt: '' }, { src: '', alt: '' }],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return count > 1 ? `Screen carousel (${count})` : 'Screen';
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Pictures',
+        itemLabel: 'Picture',
+        max: 20,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Description', max: 200, help: 'What the picture shows, for a screen reader.' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'device',
+        label: 'Device',
+        options: [
+          { value: 'laptop', label: 'Laptop' },
+          { value: 'phone', label: 'Phone' },
+        ],
+        help: 'The shape of the screen your pictures play on.',
+      },
+      {
+        kind: 'select',
+        key: 'frame',
+        label: 'Frame',
+        options: [
+          { value: 'light', label: 'Silver' },
+          { value: 'dark', label: 'Graphite' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'transition',
+        label: 'Transition',
+        options: [
+          { value: 'fade', label: 'Fade' },
+          { value: 'slide', label: 'Slide' },
+        ],
+      },
+      { kind: 'number', key: 'interval', label: 'Seconds per picture', min: 2, max: 15, step: 1 },
+      { kind: 'toggle', key: 'arrows', label: 'Arrows to move between pictures' },
+      { kind: 'toggle', key: 'dots', label: 'Dots showing which picture is up' },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',

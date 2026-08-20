@@ -13,6 +13,9 @@
  *   - `half-overlay`, when its `items` hold more than one slide with anything in
  *     them. One slide is a static panel, and the renderer draws it without the
  *     slideshow wrapper at all.
+ *   - `screen-carousel`, when more than one of its pictures has a real address.
+ *     One picture is a still screen, drawn without the wrapper for the same
+ *     reason.
  *
  * The rules match the renderers' exactly, which is the point: a page that gets
  * the script tag without a slideshow on it is a wasted request, and a page with
@@ -67,6 +70,26 @@ function halfOverlayIsSlideshow(props: Record<string, unknown> | undefined): boo
 }
 
 /**
+ * A screen carousel that has grown into one.
+ *
+ * Counts pictures with a real address, matching ScreenCarouselBlock's own
+ * filter: a repeater row whose picture was never chosen is not a slide, and
+ * asking for the script on account of two blank rows would be a wasted request.
+ */
+function screenIsSlideshow(props: Record<string, unknown> | undefined): boolean {
+  const items = props?.items;
+  if (!Array.isArray(items)) return false;
+
+  let real = 0;
+  for (const raw of items) {
+    if (!raw || typeof raw !== 'object') continue;
+    if (isRealSrc((raw as Record<string, unknown>).src)) real += 1;
+    if (real > 1) return true;
+  }
+  return false;
+}
+
+/**
  * Every block in a list, including the ones inside a container's or a grid's own
  * columns.
  *
@@ -106,6 +129,7 @@ export function hasSlideshow(tree: Tree | null | undefined): boolean {
         for (const block of blocksInColumn(column.blocks)) {
           if (block.type === 'image' && imageIsSlideshow(block.props)) return true;
           if (block.type === 'half-overlay' && halfOverlayIsSlideshow(block.props)) return true;
+          if (block.type === 'screen-carousel' && screenIsSlideshow(block.props)) return true;
         }
       }
     }

@@ -35,6 +35,7 @@ import {
 
   ExpandingCardsBlock,
   HalfOverlayBlock,
+  ScreenCarouselBlock,
   SliderBlock,
   SocialBlock,
   BreadcrumbsBlock,
@@ -131,6 +132,8 @@ export function BlockRenderer({
         return <HalfOverlayBlock props={props} />;
       case 'expanding-cards':
         return <ExpandingCardsBlock props={props} blockId={block.id} />;
+      case 'screen-carousel':
+        return <ScreenCarouselBlock props={props} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':

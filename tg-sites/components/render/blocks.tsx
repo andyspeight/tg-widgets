@@ -2018,6 +2018,119 @@ export function ExpandingCardsBlock({
   );
 }
 
+/**
+ * PICTURES PLAYING ON A SCREEN.
+ *
+ * Andy, 20 Aug 2026, from Duda's Screen Carousel.
+ *
+ * THE DEVICE IS DRAWN IN CSS. A photograph of a laptop would be one size, one
+ * colour and a file to ship; a few rounded boxes stay sharp at any size, follow
+ * the client's own light or dark choice, and put nobody else's hardware on a
+ * client's homepage. Every part of it is aria-hidden, because a bezel and a
+ * camera dot are scenery: what a screen reader should find here is the pictures.
+ *
+ * IT BORROWS THE SLIDESHOW WHOLE, the same `.tgs-slideshow` wrapper the Image
+ * block and Half overlay emit, so it cycles in pure CSS and public/slideshow.js
+ * gives it arrows, dots and a pause button with nothing added to that file.
+ */
+function screenPictures(items: Props[]): Array<{ src: string; alt: string }> {
+  return items
+    .map((item) => ({ src: safeUrl(str(item, 'src')) || '', alt: str(item, 'alt') }))
+    .filter((picture) => picture.src !== '');
+}
+
+export function ScreenCarouselBlock({ props }: { props: Props }): ReactElement {
+  const pictures = screenPictures(list(props, 'items'));
+  const device = oneOf(props, 'device', ['laptop', 'phone'] as const, 'laptop');
+  const frame = oneOf(props, 'frame', ['light', 'dark'] as const, 'light');
+
+  /*
+   * THE EMPTY STATE IS STILL THE DEVICE, not a grey box saying "choose an
+   * image". A client who has just dropped this in wants to see the thing they
+   * chose; an empty screen inside a real frame shows them exactly what they are
+   * about to fill, and the editor's own field tells them how.
+   */
+  const shell = (inner: ReactElement | null) => (
+    <div className="tgs-screen" data-device={device} data-frame={frame}>
+      <div className="tgs-screen__device">
+        <div className="tgs-screen__bezel">
+          <span className="tgs-screen__cam" aria-hidden="true" />
+          <div className="tgs-screen__glass">{inner}</div>
+        </div>
+        {/* A laptop stands on something. A phone does not: the stylesheet hides
+            this for the phone rather than the markup branching for it. */}
+        <span className="tgs-screen__base" aria-hidden="true" />
+      </div>
+    </div>
+  );
+
+  if (pictures.length === 0) {
+    return shell(<span className="tgs-screen__empty">Choose your pictures</span>);
+  }
+
+  // One picture is not a carousel, so it gets no wrapper, no dots and no cycle.
+  if (pictures.length === 1) {
+    return shell(
+      <img
+        className="tgs-screen__shot"
+        src={pictures[0].src}
+        alt={pictures[0].alt}
+        loading="lazy"
+        decoding="async"
+      />,
+    );
+  }
+
+  const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
+  const interval = clamp(props.interval, 2, 15, 5);
+  const count = pictures.length;
+  const showArrows = bool(props, 'arrows', true);
+  const showDots = bool(props, 'dots', true);
+
+  return shell(
+    <div
+      className="tgs-slideshow"
+      data-transition={transition}
+      data-count={count}
+      data-interval={interval}
+      data-dots={showDots ? 'true' : undefined}
+      data-arrows={showArrows ? 'true' : undefined}
+      style={{ '--tgs-ss-cycle': `${count * interval}s` } as CSSProperties}
+      aria-roledescription="carousel"
+      aria-label="Pictures"
+    >
+      <div className="tgs-slideshow__viewport tgs-screen__viewport">
+        {pictures.map((picture, index) => (
+          <div
+            className="tgs-slideshow__slide"
+            key={index}
+            style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+          >
+            <img
+              src={picture.src}
+              alt={picture.alt}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+          </div>
+        ))}
+      </div>
+
+      {showDots && (
+        <div className="tgs-slideshow__dots" aria-hidden="true">
+          {pictures.map((_, index) => (
+            <span
+              className="tgs-slideshow__dot"
+              key={index}
+              style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+            />
+          ))}
+        </div>
+      )}
+    </div>,
+  );
+}
+
 export function ButtonBlock({ props }: { props: Props }): ReactElement {
   return <div className="tgs-buttons">{renderButton(props, 0)}</div>;
 }
