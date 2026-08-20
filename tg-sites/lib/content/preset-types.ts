@@ -109,6 +109,16 @@ export interface PresetBlock {
   props?: Record<string, unknown>;
   role?: SlotRole;
   /**
+   * Style on the block itself, merged over the empty box exactly as columnBox
+   * is on a column. What it is FOR: the little framed things inside a designed
+   * bar. The reference headers put the wordmark's letter in a white or lavender
+   * circle, wrap the menu in its own frosted inner pill and set a burger icon
+   * on a lime disc, and every one of those is a block with a background, a
+   * radius and some padding, which the block's box already supports. This is
+   * how a preset says so.
+   */
+  box?: Partial<Column['box']>;
+  /**
    * A search term for the picture that goes here, for image and cards blocks.
    *
    * OPTIONAL. It drives two things that have to agree: the photograph the
@@ -185,6 +195,14 @@ export interface SectionPreset {
     paddingY?: number;
     width?: Section['width'];
     tone?: Section['tone'];
+    /**
+     * A shaped bottom edge, by divider id (lib/content/dividers.ts), with an
+     * optional depth. The MOKSHA header's wavy underline is the reason this
+     * exists: the wave IS the design, and it is the section divider the library
+     * already draws, so a preset only needs a way to ask for it.
+     */
+    dividerBottom?: string;
+    dividerHeight?: number;
     /**
      * A search term for a photograph behind the whole section, for the heroes
      * whose picture IS the background rather than a block. Same contract as a

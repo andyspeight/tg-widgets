@@ -226,11 +226,13 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     id: 'header-lumiere',
     category: 'header',
     label: 'Lumière',
-    description: 'A dark, quietly luxe bar floating on the page, with a soft lavender button. For a brand that wants to feel considered.',
+    description: 'A dark, quietly luxe bar with a violet glow rising from one end and a soft lavender button. For a brand that wants to feel considered.',
     rows: [
       {
         ...BAR_ROW,
-        columnBox: [{ background: '#12101f', radius: 36, padding: BAR_PAD, shadow: 'medium' }],
+        // The reference bar is not flat: a violet aura sits in its left end and
+        // fades into the near-black. The box gradient carries it.
+        columnBox: [{ gradient: { from: '#43306b', to: '#12101f', angle: 105 }, radius: 36, padding: BAR_PAD, shadow: 'medium' }],
         columns: [[
           wordmark('✦ Lumière', '#f4f3fb'),
           barNav('#c3c2d6'),
@@ -252,7 +254,13 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         columns: [[
           wordmark('❋ NATURA', '#2c2a22'),
           barNav('#54503f'),
-          { type: 'search', props: { display: 'icon', placeholder: 'Search' } },
+          // The olive disc from the reference, carrying the magnifier: the one
+          // round filled control that gives the cream bar its focal point.
+          {
+            type: 'search',
+            props: { display: 'icon', placeholder: 'Search', colour: '#fbfaf4' },
+            box: { background: '#8b9153', radius: 64, padding: { top: 2, right: 2, bottom: 2, left: 2 } },
+          },
         ]],
       },
     ],
@@ -271,6 +279,31 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
           wordmark('◈ NEXORA', '#eef3ee'),
           barNav('#9aa79a', LINKS, true),
           { type: 'button', props: { label: 'Get started', href: '/contact', variant: 'secondary', outline: true, colour: '#a3e635', textColour: '#a3e635' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 20, width: 'wide' },
+  },
+  {
+    /*
+     * The reference sheet carries TWO Nexora bars, and they are different
+     * designs, not a recolour: this one is indigo with a star mark, plain-case
+     * links and a solid violet button, where the other is black, uppercase and
+     * outlined lime. Missing until Andy re-shared the screenshots on 20 Aug
+     * 2026 and the count came up one short.
+     */
+    id: 'header-nexora-violet',
+    category: 'header',
+    label: 'Nexora, violet',
+    description: 'The indigo Nexora: a star mark, a violet glow in the bar and a solid violet button. Softer than its black sibling.',
+    rows: [
+      {
+        ...BAR_ROW,
+        columnBox: [{ gradient: { from: '#2b2050', to: '#0e0c1a', angle: 75 }, radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#262043', shadow: 'medium' }],
+        columns: [[
+          wordmark('✦ NEXORA', '#f0eefc'),
+          barNav('#b9b3d9'),
+          { type: 'button', props: { label: "Let's talk  →", href: '/contact', variant: 'primary', colour: '#7c5cf0', textColour: '#ffffff' } },
         ]],
       },
     ],
@@ -302,11 +335,13 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     rows: [
       {
         ...BAR_ROW,
-        columnBox: [{ background: '#f6f2ea', radius: 36, padding: BAR_PAD, borderWidth: 1, borderColour: '#e7e0d0' }],
+        // The cream warms towards peach along the bar, exactly as the
+        // reference does: a wash, not a stripe.
+        columnBox: [{ gradient: { from: '#f7f3eb', to: '#f1ddc3', angle: 100 }, radius: 36, padding: BAR_PAD, borderWidth: 1, borderColour: '#e7e0d0' }],
         columns: [[
           wordmark('❋ SOLUNA', '#2b2820'),
           barNav('#565043'),
-          { type: 'search', props: { display: 'box', placeholder: 'Search' } },
+          { type: 'search', props: { display: 'icon', placeholder: 'Search', colour: '#565043' } },
         ]],
       },
     ],
@@ -324,6 +359,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         columns: [[
           wordmark('✦ VELORA', '#dcc389'),
           barNav('#b6ac98', LINKS, true),
+          { type: 'search', props: { display: 'icon', placeholder: 'Search', colour: '#b6ac98' } },
           { type: 'button', props: { label: 'Start a project  →', href: '/contact', variant: 'primary', colour: '#e6d6a8', textColour: '#221a0b' } },
         ]],
       },
@@ -334,7 +370,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     id: 'header-aurea',
     category: 'header',
     label: 'Aurea',
-    description: 'The same gold luxe in a cooler dark, with the button drawn as a fine gold outline. Understated and sure of itself.',
+    description: 'The same gold luxe in a cooler dark, closed with a solid gold button. Understated and sure of itself.',
     rows: [
       {
         ...BAR_ROW,
@@ -342,7 +378,9 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         columns: [[
           wordmark('◈ AUREA', '#e3c77a'),
           barNav('#a9a2b0', LINKS, true),
-          { type: 'button', props: { label: 'Start a project  →', href: '/contact', variant: 'secondary', outline: true, colour: '#e3c77a', textColour: '#e3c77a' } },
+          // Filled gold, as the reference draws it: the outlined gold twin is
+          // Nexora's move, and the two must not blur into one.
+          { type: 'button', props: { label: 'Start a project', href: '/contact', variant: 'primary', colour: '#e3c77a', textColour: '#221c07' } },
         ]],
       },
     ],
@@ -352,7 +390,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     id: 'header-elevate',
     category: 'header',
     label: 'Elevate',
-    description: 'A black bar with a bright lime button and the search to hand. Sharp and modern, for a studio or an agency.',
+    description: 'A black bar that ends on one bright lime disc. Sharp and modern, for a studio or an agency.',
     rows: [
       {
         ...BAR_ROW,
@@ -360,8 +398,17 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         columns: [[
           wordmark('ELEVATE', '#f6f6f6'),
           barNav('#e9e9e9', LINKS, true),
-          { type: 'search', props: { display: 'icon', placeholder: 'Search', colour: '#e9e9e9' } },
-          { type: 'button', props: { label: 'Get started', href: '/contact', variant: 'primary', colour: '#c8f647', textColour: '#141400' } },
+          /*
+           * The lime disc IS the design: the reference bar has no text button,
+           * just one bright circle at the end. The reference's disc holds its
+           * menu; ours holds the search, because the menu is already in the
+           * bar and a control that does nothing would be worse than faithful.
+           */
+          {
+            type: 'search',
+            props: { display: 'icon', placeholder: 'Search', colour: '#0a0a0a' },
+            box: { background: '#c8f647', radius: 64, padding: { top: 2, right: 2, bottom: 2, left: 2 } },
+          },
         ]],
       },
     ],
@@ -389,16 +436,32 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     id: 'header-prisma',
     category: 'header',
     label: 'Prisma',
-    description: 'A clean white bar with one bold purple button. Bright and confident, for a portfolio or a launch.',
+    description: 'A clean white bar whose right end is capped in solid purple. Bright and confident, for a portfolio or a launch.',
     rows: [
       {
-        ...BAR_ROW,
-        columnBox: [{ background: '#ffffff', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#e6e6ef', shadow: 'soft' }],
-        columns: [[
-          wordmark('◇ PRISMA', '#191826'),
-          barNav('#3f3d54', LINKS, true),
-          { type: 'button', props: { label: 'Hire me  ↗', href: '/contact', variant: 'primary', colour: '#7c3aed', textColour: '#ffffff' } },
-        ]],
+        /*
+         * TWO PILLS, NOT ONE: the reference bar's right end is a purple shape
+         * holding the button, not a purple button on a white bar. A white
+         * flow-row column beside a purple one, tight gap, draws exactly that
+         * split-cap silhouette, and each half stays an ordinary column.
+         */
+        widths: [26, 6],
+        gap: 4,
+        align: 'centre',
+        columnFlow: ['row', 'row'],
+        columnBox: [
+          { background: '#ffffff', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#e6e6ef', shadow: 'soft' },
+          { background: '#6d28d9', radius: 30, padding: { top: 8, right: 10, bottom: 8, left: 10 }, shadow: 'soft' },
+        ],
+        columns: [
+          [
+            wordmark('◇ PRISMA', '#191826'),
+            barNav('#3f3d54', LINKS, true),
+          ],
+          [
+            { type: 'button', props: { label: 'Hire me  ↗', href: '/contact', variant: 'ghost', size: 's', textColour: '#ffffff', align: 'centre' } },
+          ],
+        ],
       },
     ],
     section: { paddingY: 20, width: 'wide' },
@@ -406,16 +469,22 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
   {
     id: 'header-halo',
     category: 'header',
-    label: 'Halo',
-    description: 'A soft pastel bar with a gentle gradient wash. Light and creative, for a boutique stay or a wellness retreat.',
+    label: 'H.',
+    description: 'A soft pastel bar washing from pink to blue, the initial in a white disc and a clean white button. Light and creative.',
     rows: [
       {
         ...BAR_ROW,
-        columnBox: [{ gradient: { from: '#efe3fb', to: '#e1ecfc', angle: 100 }, radius: 34, padding: BAR_PAD, borderWidth: 1, borderColour: '#ffffff' }],
+        // Pink into pale blue, as the reference washes, with the initial set
+        // in its own white disc: the wordmark is one letter and a full stop,
+        // and the disc is what makes it a mark rather than a typo.
+        columnBox: [{ gradient: { from: '#f6e2f1', to: '#dfe9fb', angle: 100 }, radius: 34, padding: BAR_PAD, borderWidth: 1, borderColour: '#ffffff' }],
         columns: [[
-          wordmark('Halo', '#2c2740'),
+          {
+            ...wordmark('H.', '#2c2740'),
+            box: { background: '#ffffff', radius: 64, padding: { top: 6, right: 13, bottom: 6, left: 13 }, shadow: 'soft' },
+          },
           barNav('#4a4560'),
-          { type: 'button', props: { label: 'Hire me  ↗', href: '/contact', variant: 'ghost', textColour: '#2c2740' } },
+          { type: 'button', props: { label: 'Hire me  ↗', href: '/contact', variant: 'primary', colour: '#ffffff', textColour: '#332e49' } },
         ]],
       },
     ],
@@ -450,7 +519,12 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         columnBox: [{ background: 'rgba(18,22,38,0.30)', blur: 16, radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: 'rgba(255,255,255,0.16)', shadow: 'medium' }],
         columns: [[
           wordmark('◆ LUMINA', '#f2f6ff'),
-          barNav('#e6ebfa', ICON_LINKS),
+          // The links ride inside their OWN lighter glass pill, a frame within
+          // the frame: the reference's most distinctive move.
+          {
+            ...barNav('#e6ebfa', ICON_LINKS),
+            box: { background: 'rgba(255,255,255,0.10)', radius: 64, padding: { top: 7, right: 20, bottom: 7, left: 20 }, borderWidth: 1, borderColour: 'rgba(255,255,255,0.14)' },
+          },
         ]],
       },
     ],
@@ -469,14 +543,19 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     id: 'header-m',
     category: 'header',
     label: 'm.',
-    description: 'A soft pastel bar with a sun and moon switch. Minimal and current, for a studio or a personal site. Turns the whole site light or dark.',
+    description: 'A clean white bar, the initial on a violet disc, an icon beside every link and a sun and moon switch. Turns the whole site light or dark.',
     rows: [
       {
         ...BAR_ROW,
-        columnBox: [{ gradient: { from: '#eef1f7', to: '#e8ecf4', angle: 90 }, radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#ffffff' }],
+        // White, as the reference is: the colour lives in the violet disc the
+        // initial sits on, not in the bar.
+        columnBox: [{ background: '#ffffff', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#ececf2', shadow: 'soft' }],
         columns: [[
-          wordmark('m.', '#1b2130'),
-          barNav('#3b4152', ICON_LINKS),
+          {
+            ...wordmark('m.', '#ffffff'),
+            box: { background: '#8b5cf6', radius: 64, padding: { top: 6, right: 13, bottom: 6, left: 13 } },
+          },
+          barNav('#565c6b', ICON_LINKS),
           { type: 'theme-toggle', props: { display: 'switch', colour: '#1b2130' } },
         ]],
       },
@@ -487,20 +566,26 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
     id: 'header-moksha',
     category: 'header',
     label: 'MOKSHA',
-    description: 'A clean white bar with a moon switch and one dark call to action. Calm and modern, for a retreat or a wellness brand. Turns the whole site light or dark.',
+    description: 'A white bar whose bottom edge is a soft wave, with a moon switch and one dark call to action. Calm and modern. Turns the whole site light or dark.',
     rows: [
       {
+        /*
+         * NOT A FLOATING PILL: the wavy bottom edge is the design, and it
+         * belongs to the bar itself, so this one is a full-width white bar
+         * whose section carries the wave divider. The divider hangs below in
+         * the bar's own colour (see hangBottomDivider in the renderer), which
+         * is exactly the reference's silhouette.
+         */
         ...BAR_ROW,
-        columnBox: [{ background: '#ffffff', radius: 30, padding: BAR_PAD, borderWidth: 1, borderColour: '#ececec', shadow: 'soft' }],
         columns: [[
-          wordmark('MOKSHA', '#141414'),
+          wordmark('◗ MOKSHA', '#141414'),
           barNav('#3a3a3a', LINKS, true),
           { type: 'theme-toggle', props: { display: 'icon', colour: '#141414' } },
           { type: 'button', props: { label: 'Get the App', href: '/contact', variant: 'primary', colour: '#141414', textColour: '#ffffff' } },
         ]],
       },
     ],
-    section: { paddingY: 20, width: 'wide' },
+    section: { paddingY: 14, width: 'wide', dividerBottom: 'wave', dividerHeight: 18 },
   },
 
   /*

@@ -277,12 +277,21 @@ export function SectionRenderer({
   editorCanvas = false,
   above,
   below,
+  hangBottomDivider = false,
 }: {
   section: Section;
   index: number;
   /** The sections either side, for the shaped edges. See SectionDivider. */
   above?: Section;
   below?: Section;
+  /**
+   * Draw the bottom divider HANGING below the section in the section's OWN
+   * colour, rather than inside it in the neighbour's. A header region has no
+   * next section to borrow a colour from, and what its shaped edge means is
+   * different anyway: the bar's own silhouette dipping over the page (the
+   * MOKSHA wave), not a neighbour reaching up. Set by RegionRenderer.
+   */
+  hangBottomDivider?: boolean;
 } & Editable): ReactElement {
   const background = safeUrl(section.backgroundImage ?? '');
   const video = safeUrl(section.backgroundVideo ?? '');
@@ -504,7 +513,8 @@ export function SectionRenderer({
         edge="bottom"
         shape={section.dividerBottom}
         height={section.dividerHeight}
-        fill={sectionFill(below)}
+        fill={hangBottomDivider ? sectionFill(section) : sectionFill(below)}
+        hang={hangBottomDivider}
       />
 
       <div className="tgs-section__inner">
@@ -666,12 +676,15 @@ function SectionDivider({
   shape,
   height,
   fill,
+  hang = false,
 }: {
   edge: 'top' | 'bottom';
   shape: string | undefined;
   height: number | undefined;
   /** The colour of the section on the other side of this edge. */
   fill: string;
+  /** Hang below the section instead: see SectionRenderer.hangBottomDivider. */
+  hang?: boolean;
 }): ReactElement | null {
   const name = safeDivider(shape);
   if (name === 'none') return null;
@@ -707,6 +720,7 @@ function SectionDivider({
     <div
       className="tgs-section__divider"
       data-edge={edge}
+      data-hang={hang ? 'true' : undefined}
       aria-hidden="true"
       /*
        * THE COLOUR IS SET HERE RATHER THAN IN CSS, and it has to be. The value

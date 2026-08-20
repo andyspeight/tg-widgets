@@ -132,6 +132,13 @@ export function buildPresetSection(preset: SectionPreset): Section {
     // The scrim strength over a background. 60 is what it was fixed at.
     overlay: 60,
     box: { ...EMPTY_BOX },
+    // A shaped bottom edge, for the one header whose wave IS the design.
+    ...(preset.section?.dividerBottom
+      ? {
+          dividerBottom: preset.section.dividerBottom,
+          dividerHeight: preset.section.dividerHeight,
+        }
+      : {}),
     rows: preset.rows.map(buildRow),
   };
 }
@@ -172,7 +179,14 @@ function buildRow(row: PresetRow): Row {
 
 function buildBlock(spec: PresetBlock): Block {
   const block = createBlock(spec.type);
-  return { ...block, props: { ...block.props, ...spec.props } };
+  return {
+    ...block,
+    props: { ...block.props, ...spec.props },
+    // The block's own frame, for the circle chips and inner pills the designed
+    // bars are made of. Merged over the empty box exactly as columnBox is; the
+    // cast is sound because the spread starts from the block's complete box.
+    ...(spec.box ? { box: { ...block.box, ...spec.box } as Block['box'] } : {}),
+  };
 }
 
 // ---------------------------------------------------------------------------

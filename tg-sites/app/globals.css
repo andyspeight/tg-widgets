@@ -3246,6 +3246,20 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-section__divider[data-edge='bottom'] { bottom: 0; }
 
 /*
+ * A HANGING bottom edge: the section's own colour dipping down OVER whatever
+ * follows, rather than a neighbour reaching up inside it. The header regions
+ * use it (the MOKSHA wave), where there is no next section to borrow from.
+ * top:100% hangs the band just below the box; the flip points the crests down.
+ * The region already carries position:relative and z-index 2, so the shape
+ * paints over the page beneath it.
+ */
+.tgs-section__divider[data-edge='bottom'][data-hang='true'] {
+  top: 100%;
+  bottom: auto;
+  transform: scaleY(-1);
+}
+
+/*
  * BLEND draws a gradient rather than a shape, and the renderer sets its
  * direction per edge, so it must not take the vertical flip the SVG shapes use
  * to serve both edges from one path. The colour arrives inline: the section next
