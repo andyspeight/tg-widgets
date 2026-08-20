@@ -27,6 +27,12 @@
           "default": "A new heading"
         },
         {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
           "name": "level",
           "type": "enum",
           "role": "config",
@@ -64,12 +70,52 @@
             "right"
           ],
           "default": "left"
+        },
+        {
+          "name": "shadow",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "soft",
+            "strong"
+          ],
+          "default": "none"
+        },
+        {
+          "name": "gradient",
+          "type": "boolean",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "gradientFrom",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "gradientTo",
+          "type": "colour",
+          "role": "config",
+          "required": false
         }
       ],
       "classNames": [
         "tgs-heading"
       ],
       "tokensUsed": [
+        "colour.accent",
+        "colour.fs",
+        "colour.fs-base",
+        "colour.fs-r",
+        "colour.grad-a",
+        "colour.grad-b",
+        "colour.lh",
+        "colour.lh-base",
+        "colour.lh-r",
+        "colour.primary",
         "type.h1-font",
         "type.h1-leading",
         "type.h1-size",
@@ -102,11 +148,14 @@
         "type.h6-weight"
       ],
       "hardcoded": {
-        "colours": [],
+        "colours": [
+          ".tgs-heading[data-shadow='soft']: rgba(15, 23, 42, 0.35)",
+          ".tgs-heading[data-shadow='strong']: rgba(15, 23, 42, 0.55)"
+        ],
         "spacing": []
       },
-      "cssRules": 7,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:92",
+      "cssRules": 12,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:148",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -138,6 +187,12 @@
           "default": "m"
         },
         {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
           "name": "align",
           "type": "enum",
           "role": "config",
@@ -148,6 +203,18 @@
             "right"
           ],
           "default": "left"
+        },
+        {
+          "name": "shadow",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "soft",
+            "strong"
+          ],
+          "default": "none"
         }
       ],
       "classNames": [
@@ -155,6 +222,12 @@
       ],
       "tokensUsed": [
         "colour.accent",
+        "colour.fs",
+        "colour.fs-base",
+        "colour.fs-r",
+        "colour.lh",
+        "colour.lh-base",
+        "colour.lh-r",
         "colour.on-dark-accent",
         "colour.on-primary-accent",
         "colour.primary",
@@ -174,15 +247,18 @@
         "type.text-muted"
       ],
       "hardcoded": {
-        "colours": [],
+        "colours": [
+          ".tgs-heading[data-shadow='soft']: rgba(15, 23, 42, 0.35)",
+          ".tgs-heading[data-shadow='strong']: rgba(15, 23, 42, 0.55)"
+        ],
         "spacing": [
           ".tgs-text ul: 1.25em",
           ".tgs-text code: 0.1em",
           ".tgs-text code: 0.35em"
         ]
       },
-      "cssRules": 16,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:171",
+      "cssRules": 25,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:233",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -214,6 +290,12 @@
           "role": "content",
           "required": false,
           "default": ""
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
         }
       ],
       "classNames": [
@@ -225,7 +307,7 @@
         "spacing": []
       },
       "cssRules": 1,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:210",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:286",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -254,6 +336,12 @@
           "default": "bullet"
         },
         {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
           "name": "items",
           "type": "list",
           "role": "content",
@@ -270,7 +358,6 @@
         "tgs-list"
       ],
       "tokensUsed": [
-        "colour.accent",
         "space.s"
       ],
       "hardcoded": {
@@ -280,8 +367,8 @@
           ".tgs-list[data-style='tick'] li: 1.75em"
         ]
       },
-      "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:229",
+      "cssRules": 4,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:332",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -325,6 +412,18 @@
             "right"
           ],
           "default": "left"
+        },
+        {
+          "name": "iconColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
         }
       ],
       "classNames": [
@@ -338,7 +437,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:243",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:392",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -397,6 +496,13 @@
           "role": "config",
           "required": false,
           "default": false
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
         }
       ],
       "classNames": [
@@ -421,7 +527,7 @@
         "spacing": []
       },
       "cssRules": 10,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:741",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1411",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -478,6 +584,13 @@
             "right"
           ],
           "default": "left"
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
         }
       ],
       "classNames": [
@@ -502,7 +615,7 @@
         "spacing": []
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:804",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1475",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -568,6 +681,38 @@
           "default": "md"
         },
         {
+          "name": "corners",
+          "type": "corners",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "borderWidth",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 0
+        },
+        {
+          "name": "borderStyle",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "solid",
+            "dashed",
+            "dotted"
+          ],
+          "default": "solid"
+        },
+        {
+          "name": "borderColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
           "name": "caption",
           "type": "text",
           "role": "content",
@@ -580,11 +725,63 @@
           "role": "content",
           "required": false,
           "default": ""
+        },
+        {
+          "name": "slides",
+          "type": "list",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "slides[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "slides[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "transition",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "fade",
+            "slide"
+          ],
+          "default": "fade"
+        },
+        {
+          "name": "interval",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 5
+        },
+        {
+          "name": "arrows",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "dots",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
         }
       ],
       "classNames": [
         "tgs-image",
-        "tgs-placeholder"
+        "tgs-placeholder",
+        "tgs-slideshow",
+        "tgs-ss-cycle"
       ],
       "tokensUsed": [
         "colour.border-strong",
@@ -599,8 +796,183 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:308",
+      "cssRules": 42,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:505",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "half-overlay",
+      "name": "Half overlay",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A picture beside a tinted panel carrying your message. Add more than one and it becomes a slider.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].panelSrc",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].panelAlt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].side",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "right"
+          ]
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].primaryLabel",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].primaryHref",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].secondaryLabel",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].secondaryHref",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "tint",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": "#2f5bd8"
+        },
+        {
+          "name": "tintOpacity",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 78
+        },
+        {
+          "name": "height",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "short",
+            "medium",
+            "tall"
+          ],
+          "default": "medium"
+        },
+        {
+          "name": "buttonColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "transition",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "fade",
+            "slide"
+          ],
+          "default": "fade"
+        },
+        {
+          "name": "interval",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 6
+        },
+        {
+          "name": "arrows",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "dots",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-halfover",
+        "tgs-halfover-wrap",
+        "tgs-placeholder",
+        "tgs-slideshow",
+        "tgs-ss-cycle"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.ho-h",
+        "colour.radius",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 47,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1804",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -673,7 +1045,173 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:507",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:923",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "map",
+      "name": "Map",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "An office or destination map, from just an address.",
+      "variants": [],
+      "props": [
+        {
+          "name": "address",
+          "type": "place",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "zoom",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 14
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 360
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "caption",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-image",
+        "tgs-map",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 5,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:970",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "before-after",
+      "name": "Before & After",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Two photos with a divider you drag to compare them.",
+      "variants": [],
+      "props": [
+        {
+          "name": "before",
+          "type": "image",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "beforeAlt",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "after",
+          "type": "image",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "afterAlt",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "beforeLabel",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Before"
+        },
+        {
+          "name": "afterLabel",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "After"
+        },
+        {
+          "name": "start",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 50
+        },
+        {
+          "name": "ratio",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "16/9",
+            "4/3",
+            "1/1",
+            "3/4"
+          ],
+          "default": "16/9"
+        }
+      ],
+      "classNames": [
+        "tgs-ba",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 2,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1029",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -766,8 +1304,8 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 17,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:539",
+      "cssRules": 31,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1166",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -953,6 +1491,13 @@
           "role": "config",
           "required": false,
           "default": true
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
         }
       ],
       "classNames": [
@@ -985,8 +1530,8 @@
         ],
         "spacing": []
       },
-      "cssRules": 36,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:630",
+      "cssRules": 50,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1298",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1169,8 +1714,156 @@
         ],
         "spacing": []
       },
-      "cssRules": 50,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:896",
+      "cssRules": 64,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1568",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "testimonials",
+      "name": "Testimonial slider",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "What your clients said, on a rail: a rating, a quote, a name and a photo.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].quote",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].name",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].detail",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].rating",
+          "type": "number",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "items[].photo",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "cardColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-tsl",
+        "tgs-tsl-card"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "colour.text",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 2,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1087",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "audio",
+      "name": "Audio",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A sound clip in the browser player, from a link.",
+      "variants": [],
+      "props": [
+        {
+          "name": "src",
+          "type": "url",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "caption",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-audio",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "colour.text",
+        "radius.md",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 2,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1145",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1225,6 +1918,25 @@
           "default": "m"
         },
         {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "outline",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        },
+        {
           "name": "align",
           "type": "enum",
           "role": "config",
@@ -1254,8 +1966,8 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:964",
+      "cssRules": 9,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1883",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1309,6 +2021,29 @@
           ]
         },
         {
+          "name": "buttons[].size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m",
+            "l"
+          ]
+        },
+        {
+          "name": "buttons[].colour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "buttons[].textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
           "name": "buttons[].newTab",
           "type": "boolean",
           "role": "config",
@@ -1325,8 +2060,130 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:968",
+      "cssRules": 9,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1887",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "search",
+      "name": "Search",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A box that searches your own pages.",
+      "variants": [],
+      "props": [
+        {
+          "name": "placeholder",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "Search"
+        },
+        {
+          "name": "display",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "box",
+            "icon"
+          ],
+          "default": "box"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        }
+      ],
+      "classNames": [
+        "tgs-search"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface",
+        "colour.text"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-search[data-display='box']: rgba(0, 0, 0, 0.24)",
+          ".tgs-search[data-display='box']: #fff",
+          ".tgs-search[data-display='box']: #14181f"
+        ],
+        "spacing": [
+          ".tgs-search[data-display='box']: 4px",
+          ".tgs-search[data-display='box']: 16px"
+        ]
+      },
+      "cssRules": 2,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1911",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "theme-toggle",
+      "name": "Light / dark",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A switch that turns the whole site light or dark.",
+      "variants": [],
+      "props": [
+        {
+          "name": "display",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "switch",
+            "icon"
+          ],
+          "default": "switch"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        }
+      ],
+      "classNames": [
+        "tgs-toggle"
+      ],
+      "tokensUsed": [],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-toggle[data-display='switch']: 8px"
+        ]
+      },
+      "cssRules": 11,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2017",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1356,6 +2213,12 @@
         {
           "name": "items[].href",
           "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].icon",
+          "type": "icon",
           "role": "content",
           "required": false
         },
@@ -1405,19 +2268,95 @@
         },
         {
           "name": "collapse",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "never",
+            "phone",
+            "always"
+          ],
+          "default": "phone"
+        },
+        {
+          "name": "linkFont",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "",
+            "var(--tgs-font-body)",
+            "var(--tgs-font-display)"
+          ]
+        },
+        {
+          "name": "linkSize",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "",
+            "var(--tgs-p-size)",
+            "var(--tgs-h1-size)",
+            "var(--tgs-h2-size)",
+            "var(--tgs-h3-size)",
+            "var(--tgs-h4-size)",
+            "var(--tgs-h5-size)",
+            "var(--tgs-h6-size)",
+            "0.75rem",
+            "0.875rem",
+            "1rem",
+            "1.25rem",
+            "1.5rem",
+            "2rem",
+            "2.5rem"
+          ]
+        },
+        {
+          "name": "linkWeight",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "",
+            "400",
+            "500",
+            "600",
+            "700"
+          ]
+        },
+        {
+          "name": "linkColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "uppercase",
           "type": "boolean",
           "role": "config",
           "required": false,
-          "default": true
+          "default": false
         }
       ],
       "classNames": [
         "tgs-nav",
+        "tgs-nav-colour",
+        "tgs-nav-font",
+        "tgs-nav-size",
+        "tgs-nav-weight",
         "tgs-placeholder"
       ],
       "tokensUsed": [
+        "colour.border",
         "colour.border-strong",
+        "colour.pad",
+        "colour.pad-r",
+        "colour.pb",
+        "colour.radius",
+        "colour.surface",
         "colour.surface-alt",
+        "colour.text",
         "radius.md",
         "space.l",
         "space.m",
@@ -1428,11 +2367,13 @@
         "type.text-s"
       ],
       "hardcoded": {
-        "colours": [],
+        "colours": [
+          ".tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked: rgb(0 0 0 / 12%)"
+        ],
         "spacing": []
       },
-      "cssRules": 13,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1022",
+      "cssRules": 21,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2258",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1494,6 +2435,18 @@
           "role": "config",
           "required": false,
           "default": true
+        },
+        {
+          "name": "markerColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
         }
       ],
       "classNames": [
@@ -1519,7 +2472,7 @@
         ]
       },
       "cssRules": 18,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1086",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2379",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1609,9 +2562,28 @@
           "role": "config",
           "required": false,
           "default": false
+        },
+        {
+          "name": "figureColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "countUp",
+          "type": "boolean",
+          "role": "config",
+          "required": false
         }
       ],
       "classNames": [
+        "tgs-count-to",
         "tgs-placeholder",
         "tgs-stats"
       ],
@@ -1632,7 +2604,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1152",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2459",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1718,10 +2690,18 @@
             "right"
           ],
           "default": "centre"
+        },
+        {
+          "name": "scroll",
+          "type": "boolean",
+          "role": "config",
+          "required": false
         }
       ],
       "classNames": [
         "tgs-logos",
+        "tgs-logos--track",
+        "tgs-logos-marquee",
         "tgs-placeholder"
       ],
       "tokensUsed": [
@@ -1740,8 +2720,8 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 17,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1216",
+      "cssRules": 35,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2548",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1856,7 +2836,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1289",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2649",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1913,6 +2893,13 @@
           "role": "content",
           "required": false,
           "default": ""
+        },
+        {
+          "name": "textColour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
         }
       ],
       "classNames": [
@@ -1923,7 +2910,6 @@
         "colour.border",
         "colour.border-strong",
         "colour.surface-alt",
-        "colour.text",
         "radius.md",
         "space.m",
         "space.s",
@@ -1935,7 +2921,143 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1357",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2717",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "container",
+      "name": "Inner container",
+      "category": "layout",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Columns inside a column, for content side by side.",
+      "variants": [],
+      "props": [
+        {
+          "name": "gap",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 16
+        },
+        {
+          "name": "stack",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "mobile",
+            "tablet",
+            "always"
+          ],
+          "default": "mobile"
+        }
+      ],
+      "classNames": [
+        "tgs-container"
+      ],
+      "tokensUsed": [],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 0,
+      "sourcePath": "tg-sites/components/render/blocks.tsx",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "grid",
+      "name": "Grid",
+      "category": "layout",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Cells that flow into a set number of columns and wrap.",
+      "variants": [],
+      "props": [
+        {
+          "name": "across",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "3"
+        },
+        {
+          "name": "acrossTablet",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "2"
+        },
+        {
+          "name": "acrossPhone",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "1"
+        },
+        {
+          "name": "gap",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 16
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "top",
+            "centre",
+            "bottom",
+            "stretch"
+          ],
+          "default": "top"
+        }
+      ],
+      "classNames": [
+        "tgs-grid"
+      ],
+      "tokensUsed": [
+        "colour.gap",
+        "colour.grid-across",
+        "colour.grid-d",
+        "colour.grid-p",
+        "colour.grid-t"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-grid: 16px"
+        ]
+      },
+      "cssRules": 6,
+      "sourcePath": "tg-sites/components/render/blocks.tsx",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1995,7 +3117,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1417",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2778",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2037,7 +3159,830 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1423",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3462",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "copyright",
+      "name": "Copyright",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A copyright line whose year looks after itself.",
+      "variants": [],
+      "props": [
+        {
+          "name": "owner",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "startYear",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 0
+        },
+        {
+          "name": "symbol",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "symbol",
+            "word",
+            "both",
+            "none"
+          ],
+          "default": "symbol"
+        },
+        {
+          "name": "suffix",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "All rights reserved."
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m"
+          ],
+          "default": "s"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-copyright"
+      ],
+      "tokensUsed": [
+        "type.text-m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 4,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3145",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "read-more",
+      "name": "Read more",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Long text folded to a few lines, with a control to open it.",
+      "variants": [],
+      "props": [
+        {
+          "name": "html",
+          "type": "richtext",
+          "role": "content",
+          "required": true,
+          "default": "<p>Write the long version here. Only the first few lines show until somebody opens it, and the rest is still in the page for search engines and screen readers.</p>"
+        },
+        {
+          "name": "lines",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 4
+        },
+        {
+          "name": "moreLabel",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Read more"
+        },
+        {
+          "name": "lessLabel",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Show less"
+        },
+        {
+          "name": "fade",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-readmore",
+        "tgs-rm-",
+        "tgs-rm-lines",
+        "tgs-sr-only",
+        "tgs-text"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "colour.border-strong",
+        "colour.fs",
+        "colour.fs-base",
+        "colour.fs-r",
+        "colour.lh",
+        "colour.lh-base",
+        "colour.lh-r",
+        "colour.on-dark-accent",
+        "colour.on-primary-accent",
+        "colour.primary",
+        "colour.surface-alt",
+        "radius.md",
+        "radius.sm",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xs",
+        "type.font-display",
+        "type.leading-tight",
+        "type.p-font",
+        "type.p-leading",
+        "type.p-size",
+        "type.p-tracking",
+        "type.p-weight",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-heading[data-shadow='soft']: rgba(15, 23, 42, 0.35)",
+          ".tgs-heading[data-shadow='strong']: rgba(15, 23, 42, 0.55)",
+          ".tgs-readmore[data-fade='true'] .tgs-readmore__body: #000"
+        ],
+        "spacing": [
+          ".tgs-text ul: 1.25em",
+          ".tgs-text code: 0.1em",
+          ".tgs-text code: 0.35em"
+        ]
+      },
+      "cssRules": 30,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3192",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A click-to-chat button, with the first message already written.",
+      "variants": [],
+      "props": [
+        {
+          "name": "phone",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Hello, I am looking at your website and would like to ask about"
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Chat on WhatsApp"
+        },
+        {
+          "name": "look",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "button",
+            "floating"
+          ],
+          "default": "button"
+        },
+        {
+          "name": "corner",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "right",
+            "left"
+          ],
+          "default": "right"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-whatsapp"
+      ],
+      "tokensUsed": [
+        "space.l",
+        "space.m"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble: #25d366",
+          ".tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble: #ffffff",
+          ".tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble: rgb(0 0 0 / 22%)"
+        ],
+        "spacing": []
+      },
+      "cssRules": 11,
+      "sourcePath": "tg-sites/components/render/blocks.tsx",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "coupon",
+      "name": "Coupon",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A discount code, with the small print and a date it ends.",
+      "variants": [],
+      "props": [
+        {
+          "name": "headline",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "10% off your first booking"
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "WELCOME10"
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Quote this code when you enquire and we will take it off your balance."
+        },
+        {
+          "name": "expires",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "hideExpired",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "terms",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "One code per booking. Not valid with any other offer."
+        },
+        {
+          "name": "buttonLabel",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "buttonHref",
+          "type": "url",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-button",
+        "tgs-coupon",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.on-dark-accent",
+        "colour.on-primary",
+        "colour.on-primary-accent",
+        "colour.primary",
+        "colour.primary-light",
+        "colour.surface",
+        "colour.surface-alt",
+        "colour.text",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "type.text-l",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-section[data-hover-lift] .tgs-card:hover: rgba(15, 23, 42, 0.14)"
+        ],
+        "spacing": []
+      },
+      "cssRules": 22,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2878",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "locations",
+      "name": "Multi Location",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Your branches, each with its address, phone and directions.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].name",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].address",
+          "type": "place",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "items[].phone",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].email",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].hours",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "across",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "2"
+        },
+        {
+          "name": "showDirections",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-loc-across",
+        "tgs-locations",
+        "tgs-placeholder",
+        "tgs-sr-only"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.loc-across",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 4,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2960",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "icon",
+      "name": "Icon",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A single icon from the library, sized and coloured.",
+      "variants": [],
+      "props": [
+        {
+          "name": "icon",
+          "type": "icon",
+          "role": "content",
+          "required": true,
+          "default": "sparkles"
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 40
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "href",
+          "type": "url",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-icon",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 4,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3043",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "shape",
+      "name": "Shape",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A circle, ring, square or blob, for decoration behind your content.",
+      "variants": [
+        "circle",
+        "ring",
+        "square",
+        "rounded",
+        "triangle",
+        "blob"
+      ],
+      "props": [
+        {
+          "name": "shape",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "circle",
+            "ring",
+            "square",
+            "rounded",
+            "triangle",
+            "blob"
+          ],
+          "default": "circle"
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 120
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 100
+        },
+        {
+          "name": "rotate",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 0
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-shape",
+        "tgs-shape-colour",
+        "tgs-shape-opacity",
+        "tgs-shape-rotate",
+        "tgs-shape-size"
+      ],
+      "tokensUsed": [],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 2,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3095",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "file",
+      "name": "File",
+      "category": "actions",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A brochure, terms or a price list, for a visitor to download.",
+      "variants": [],
+      "props": [
+        {
+          "name": "url",
+          "type": "file",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "look",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "card",
+            "button"
+          ],
+          "default": "card"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "newTab",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-button",
+        "tgs-file",
+        "tgs-placeholder"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.on-dark-accent",
+        "colour.on-primary",
+        "colour.on-primary-accent",
+        "colour.primary",
+        "colour.primary-light",
+        "colour.surface",
+        "colour.surface-alt",
+        "colour.text",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "type.text-l",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-section[data-hover-lift] .tgs-card:hover: rgba(15, 23, 42, 0.14)"
+        ],
+        "spacing": []
+      },
+      "cssRules": 19,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3277",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "breadcrumbs",
+      "name": "Breadcrumbs",
+      "category": "layout",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "The trail back up to the home page. Moves the automatic one here.",
+      "variants": [],
+      "props": [
+        {
+          "name": "separator",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "slash",
+            "chevron",
+            "arrow",
+            "dot",
+            "bullet"
+          ],
+          "default": "slash"
+        },
+        {
+          "name": "showHome",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "xs",
+            "s",
+            "m"
+          ],
+          "default": "s"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        }
+      ],
+      "classNames": [
+        "tgs-crumb-colour",
+        "tgs-crumbs",
+        "tgs-crumbs--block"
+      ],
+      "tokensUsed": [
+        "colour.crumb-colour",
+        "colour.primary",
+        "colour.text",
+        "space.s",
+        "space.xs",
+        "type.text-m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 21,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3391",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2055,6 +4000,7 @@
           "role": "config",
           "required": false,
           "options": [
+            "",
             "offers",
             "offers-grid",
             "spotlight",
@@ -2062,6 +4008,7 @@
             "attraction",
             "carousel",
             "travel-results-ai",
+            "trips",
             "worldmap",
             "flighttime",
             "weather",
@@ -2093,7 +4040,7 @@
             "share",
             "quote-pdf"
           ],
-          "default": "hours"
+          "default": ""
         },
         {
           "name": "widgetId",
@@ -2106,10 +4053,12 @@
       "classNames": [
         "tgs-placeholder",
         "tgs-widget",
-        "tgs-widget-ghost"
+        "tgs-widget-frame"
       ],
       "tokensUsed": [
+        "colour.border",
         "colour.border-strong",
+        "colour.surface",
         "colour.surface-alt",
         "radius.md",
         "space.m",
@@ -2118,12 +4067,10 @@
       ],
       "hardcoded": {
         "colours": [],
-        "spacing": [
-          ".tgs-widget-ghost: 4px"
-        ]
+        "spacing": []
       },
-      "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:388",
+      "cssRules": 4,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:759",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2159,8 +4106,7 @@
       ],
       "classNames": [
         "tgs-embed-widget",
-        "tgs-placeholder",
-        "tgs-widget-ghost"
+        "tgs-placeholder"
       ],
       "tokensUsed": [
         "colour.border-strong",
@@ -2172,21 +4118,19 @@
       ],
       "hardcoded": {
         "colours": [],
-        "spacing": [
-          ".tgs-widget-ghost: 4px"
-        ]
+        "spacing": []
       },
-      "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:464",
+      "cssRules": 3,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:886",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
       "id": "embed",
-      "name": "Embed code",
+      "name": "HTML",
       "category": "advanced",
       "travelSpecific": false,
-      "staffOnly": true,
-      "description": "Raw HTML that runs in the page itself. Travelgenix staff only.",
+      "staffOnly": false,
+      "description": "Paste an embed code or your own HTML.",
       "variants": [],
       "props": [
         {
@@ -2214,7 +4158,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1432",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3471",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2257,7 +4201,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1479",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3518",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]
