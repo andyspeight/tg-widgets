@@ -231,9 +231,18 @@ describe('what makes it readable to a screen reader', () => {
    */
   it('a reversed stacked row still holds its columns to its own width', () => {
     const css = source('app', 'globals.css');
-    const phone = /@container tgs-page \(max-width: 767px\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? '';
+    /*
+     * EVERY phone block, not the first one. The stylesheet has more than one
+     * @container rule at this width and the order is nobody's promise: the Grid
+     * block added one above this on 20 Aug and the "first match" reading of this
+     * test failed on a change that had nothing to do with rows. So find the
+     * block that actually carries the rule, which is the thing being claimed.
+     */
+    const phone = [...css.matchAll(/@container tgs-page \(max-width: 767px\) \{([\s\S]*?)\n\}/g)]
+      .map((m) => m[1])
+      .find((body) => body.includes(".tgs-row[data-reverse='true'] {")) ?? '';
 
-    expect(phone, 'the phone block has moved').not.toBe('');
+    expect(phone, 'no phone block sets the reversed row up as a flex column').not.toBe('');
     expect(phone).toContain('align-items: stretch;');
     // The row's own align-items is not enough: a centred column overrides it
     // with align-self, and that has to be answered too.

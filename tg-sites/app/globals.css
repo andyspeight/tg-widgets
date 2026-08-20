@@ -1099,6 +1099,58 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 .tgs-block[data-align='centre'] { text-align: center; }
 .tgs-block[data-align='right']  { text-align: right; }
 
+/* ------------------------------------------------------------------ */
+/* The Grid block                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * CELLS THAT FLOW AND WRAP, which is the whole difference from .tgs-row above.
+ * A row's tracks are a list of widths, one per column, so its column count IS
+ * its content count. A grid's tracks are a repeat() of a number, so the cells
+ * fall into them in order and a tenth cell in a three-across grid starts a
+ * fourth row by itself.
+ *
+ * THE COUNT IS A CUSTOM PROPERTY, not a class per count. A client may pick any
+ * of one to six on each of three screens, and eighteen classes to cover that
+ * would be a stylesheet nobody could hold in their head. The container queries
+ * below swap which of the three properties is in force, and they key off
+ * .tgs-page, the same container every other responsive rule here uses, so the
+ * editor's tablet and phone previews narrow honestly rather than reading the
+ * real window.
+ */
+.tgs-grid {
+  display: grid;
+  gap: var(--tgs-gap, 16px);
+  grid-template-columns: repeat(var(--tgs-grid-across, var(--tgs-grid-d, 3)), minmax(0, 1fr));
+  align-items: start;
+}
+
+/*
+ * How the cells sit in their row. `stretch` is the one that earns its keep: it
+ * is what makes a row of cards match height when their words differ in length,
+ * which is the commonest reason a grid of tiles looks wrong.
+ */
+.tgs-grid[data-align='centre'] { align-items: center; }
+.tgs-grid[data-align='bottom'] { align-items: end; }
+.tgs-grid[data-align='stretch'] { align-items: stretch; }
+
+/* A featured cell, wider than its neighbours and still in the grid. The span is
+   clamped to the desktop count by the renderer, so it can never invent a track
+   nothing else reaches. `min()` is the belt to that braces: even a stored value
+   that outran the clamp cannot exceed the tracks actually there. */
+.tgs-grid__cell {
+  grid-column: span min(var(--tgs-span, 1), var(--tgs-grid-across, var(--tgs-grid-d, 3)));
+}
+
+@container tgs-page (max-width: 1023px) {
+  .tgs-grid { --tgs-grid-across: var(--tgs-grid-t, 2); }
+}
+
+@container tgs-page (max-width: 767px) {
+  .tgs-grid { --tgs-grid-across: var(--tgs-grid-p, 1); }
+}
+
+
 /* Heading */
 /*
  * A heading takes all five of its type properties from its STYLE, not from its

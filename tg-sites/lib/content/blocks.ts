@@ -127,6 +127,20 @@ export interface BlockDefinition {
 // Shared option sets
 // ---------------------------------------------------------------------------
 
+/**
+ * How many columns a grid may be, per screen. Two to six: one is a stack, and
+ * past six a cell is too narrow to hold anything on any screen worth the name.
+ * Strings because a select's value is a string, and the renderer clamps anyway.
+ */
+const ACROSS_OPTIONS: SelectOption[] = [
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '4', label: '4' },
+  { value: '5', label: '5' },
+  { value: '6', label: '6' },
+];
+
 const ALIGN_OPTIONS: SelectOption[] = [
   { value: 'left', label: 'Left' },
   { value: 'centre', label: 'Centre' },
@@ -2129,6 +2143,97 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'always', label: 'Always' },
         ],
         help: 'When the inner columns fall one above the other. Always suits a label beside its value.',
+      },
+    ],
+  },
+  {
+    /*
+     * THE GRID, asked for on 20 Aug 2026 alongside the rest of the Duda list.
+     *
+     * WHAT MAKES IT DIFFERENT FROM THE INNER CONTAINER, which is the question
+     * anybody looking at both in the picker will ask. A container is ONE ROW of
+     * columns you size by hand: two things side by side, and they stay side by
+     * side. A grid is a number of tracks that cells FLOW INTO and wrap out of,
+     * so nine cells in a three-across grid make three neat rows without anybody
+     * building three containers. It is the right tool the moment the count of
+     * things is not the count of columns.
+     *
+     * THREE COUNTS, ONE PER SCREEN, which is the "advanced" part and the thing a
+     * plain card grid cannot do: four across on a desktop, two on a tablet, one
+     * on a phone, each chosen rather than derived. A cell may also span more
+     * than one track, so a featured item can be twice the width of its
+     * neighbours without leaving the grid.
+     *
+     * The cells live in props.columns, the same shape a container uses, so the
+     * sanitiser, the outline, the schema upgrade and the drag rules all treat it
+     * the same way. See lib/content/inner-columns.ts, which is the one list that
+     * says which blocks are made this way.
+     */
+    type: 'grid',
+    label: 'Grid',
+    group: 'Layout',
+    icon: 'grid',
+    description: 'Cells that flow into a set number of columns and wrap.',
+    // The three starter cells are seeded by the factory with fresh ids, for the
+    // same reason a container's two are: a literal here would hand every grid
+    // the same cell ids.
+    defaults: {
+      columns: [],
+      across: '3',
+      acrossTablet: '2',
+      acrossPhone: '1',
+      gap: 16,
+      align: 'top',
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.columns) ? props.columns.length : 0;
+      return `Grid (${count} cell${count === 1 ? '' : 's'})`;
+    },
+    fields: [
+      {
+        kind: 'select',
+        key: 'across',
+        label: 'Columns on a desktop',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+      },
+      {
+        kind: 'select',
+        key: 'acrossTablet',
+        label: 'Columns on a tablet',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+      },
+      {
+        kind: 'select',
+        key: 'acrossPhone',
+        label: 'Columns on a phone',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+        help: 'One is usually right on a phone. Two suits small tiles like logos.',
+      },
+      {
+        kind: 'number',
+        key: 'gap',
+        label: 'Space between cells',
+        min: 0,
+        max: 96,
+        step: 2,
+        group: 'layout',
+        help: 'The gap between cells, in pixels. Applies both across and down.',
+      },
+      {
+        kind: 'select',
+        key: 'align',
+        label: 'Cells line up',
+        group: 'layout',
+        options: [
+          { value: 'top', label: 'At the top' },
+          { value: 'centre', label: 'In the middle' },
+          { value: 'bottom', label: 'At the bottom' },
+          { value: 'stretch', label: 'Same height' },
+        ],
+        help: 'Same height is what makes a row of cards match when their words differ in length.',
       },
     ],
   },

@@ -32,6 +32,7 @@ import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
+import { hasInnerColumns } from './inner-columns';
 import { COLOUR_TOKENS, normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from './styles';
 
 // ---------------------------------------------------------------------------
@@ -455,6 +456,20 @@ export const ColumnSchema = z.object({
   flow: ColumnFlow.default('stacked'),
   /** The same shape a section has. See BoxSchema. */
   box: BoxSchema.default(EMPTY_BOX),
+  /**
+   * How many tracks this cell spans, when it is a cell of a GRID block rather
+   * than a column of a row. One by default, which is every column that is not
+   * in a grid, so nothing saved before grids existed changes shape.
+   *
+   * It lives on the column rather than in the grid's props because it belongs to
+   * the cell: reorder the cells and the featured one takes its width with it,
+   * where a parallel list of spans in props would quietly go out of step.
+   *
+   * Six is the ceiling because six is the widest a grid can be. The renderer
+   * clamps again to the grid's actual desktop count, which is the smaller number
+   * whenever the client has chosen fewer.
+   */
+  span: z.number().int().min(1).max(MAX_COLUMNS_PER_ROW).optional(),
   blocks: z.array(BlockSchema).default([]),
 });
 
@@ -1162,7 +1177,7 @@ function upgradeBlock(block: unknown): unknown {
    * turn. Inner blocks are leaves (no container in a container), so a single
    * descent is the whole of it.
    */
-  if (b.type === 'container') return upgradeContainer(b);
+  if (hasInnerColumns(b.type)) return upgradeContainer(b);
 
   if (b.type !== 'heading') return block;
 

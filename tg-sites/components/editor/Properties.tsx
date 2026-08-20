@@ -77,7 +77,9 @@ import {
   updateBlockHideOnAtPath,
   updateInnerColumn,
   containerColumns,
+  setInnerColumnSpan,
 } from '../../lib/content/tree';
+import { hasInnerColumns, MAX_GRID_CELLS } from '../../lib/content/inner-columns';
 import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
@@ -2133,6 +2135,95 @@ function ContainerColumnsControl({
 }
 
 /**
+ * A grid's cells: how many there are, and how wide each one is in tracks.
+ *
+ * NOT ContainerColumnsControl WITH A FLAG, for the same reason InnerGrid is not
+ * InnerColumns with one. Every control in that one is about width as a
+ * percentage: three sliders that must sum to 100, and an Even button to put them
+ * back. A grid has no such thing. Its tracks come from the across count in the
+ * Layout panel above, the cells drop into them in order, and the only width
+ * question left is whether one cell should take more than one track.
+ *
+ * The span picker only appears when there is more than one track to span, since
+ * "spans 1 of 1" is a control with one option.
+ */
+function GridCellsControl({
+  block,
+  path,
+  onCommit,
+}: {
+  block: Block;
+  path: Extract<Path, { kind: 'block' }>;
+  onCommit: Props['onCommit'];
+}) {
+  const cells = containerColumns(block);
+  if (!cells.length) return null;
+  const { section: s, row: r, column: c, block: b } = path;
+
+  // The desktop count, read the same way the renderer reads it, so the span
+  // options offered are exactly the tracks that exist.
+  const across = Math.min(6, Math.max(1, Math.round(Number(block.props.across) || 3)));
+
+  return (
+    <div className="ed-field">
+      <label className="ed-label">Cells</label>
+
+      {across > 1 && (
+        <div className="ed-widths">
+          {cells.map((cell, index) => (
+            <div className="ed-width-row" key={cell.id}>
+              <span>Cell {index + 1}</span>
+              <select
+                className="ed-select"
+                aria-label={`Cell ${index + 1} width`}
+                value={String(Math.min(across, cell.span ?? 1))}
+                onChange={(event) =>
+                  onCommit(
+                    (current) => setInnerColumnSpan(current, s, r, c, b, index, Number(event.target.value)),
+                    `gc:${b}:${index}:span`,
+                  )
+                }
+              >
+                {Array.from({ length: across }, (_, i) => i + 1).map((span) => (
+                  <option key={span} value={span}>
+                    {span === 1 ? '1 column' : `${span} columns`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+        <button
+          type="button"
+          className="ed-btn"
+          style={{ flex: 1 }}
+          disabled={cells.length >= MAX_GRID_CELLS}
+          onClick={() => onCommit((current) => addInnerColumn(current, s, r, c, b, MAX_GRID_CELLS))}
+        >
+          + Cell
+        </button>
+        <button
+          type="button"
+          className="ed-btn"
+          style={{ flex: 1 }}
+          disabled={cells.length <= 1}
+          onClick={() => onCommit((current) => removeInnerColumn(current, s, r, c, b, cells.length - 1))}
+        >
+          − Cell
+        </button>
+      </div>
+      <p className="ed-help">
+        Cells fill the grid in order and wrap onto a new line when they run out of
+        room. Removing one moves its blocks into the cell beside it.
+      </p>
+    </div>
+  );
+}
+
+/**
  * The Text size dropdown, per screen. Offers the site's own sizes and the fixed
  * scale, the very list the toolbar offers a phrase, plus one empty option: on
  * desktop it means "no size of my own, use the block's style", and on a smaller
@@ -2627,10 +2718,17 @@ function BlockFields({
       {canStructure && block.type === 'imported' && path.kind === 'block' && (
         <RebuildImportButton block={block} section={path.section} onCommit={onCommit} onSelect={onSelect} />
       )}
-      {/* The container's own columns: widths, add, remove, even. A container is
-          only ever a top-level block, so the path is a 'block' one here. Also
-          structural, so it is hidden from a content-only member. */}
-      {canStructure && block.type === 'container' && path.kind === 'block' && (
+      {/* The columns inside a container, or the cells inside a grid. Two
+          controls rather than one with a flag, because the two layouts have
+          nothing in common to control: a container's columns have widths you
+          drag, a grid's cells have no width at all, only how many tracks each
+          one spans. Both are structural, so both are hidden from a content-only
+          member, and both are only ever top-level blocks so the path is a
+          'block' one here. */}
+      {canStructure && path.kind === 'block' && block.type === 'grid' && (
+        <GridCellsControl block={block} path={path} onCommit={onCommit} />
+      )}
+      {canStructure && path.kind === 'block' && block.type !== 'grid' && hasInnerColumns(block.type) && (
         <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
       )}
       {ordered.map((group, index) => (

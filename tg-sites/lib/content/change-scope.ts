@@ -30,6 +30,7 @@
  */
 
 import { blockDefinition, type Field } from './blocks';
+import { hasInnerColumns } from './inner-columns';
 import type { Page, Region } from './schema';
 
 export interface ChangeScope {
@@ -162,7 +163,7 @@ function propsStructural(
   if (deepEqual(before, after)) return false;
 
   // The two blocks whose real content is not their own fields.
-  if (type === 'container') return containerStructural(before, after);
+  if (hasInnerColumns(type)) return containerStructural(before, after);
   if (type === 'imported') return importedStructural(before, after);
 
   /*

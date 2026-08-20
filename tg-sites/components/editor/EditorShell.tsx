@@ -37,6 +37,7 @@ import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
+import { hasInnerColumns } from '../../lib/content/inner-columns';
 import { inlineEditableFields, richInlineField } from '../../lib/editor/inline-edit';
 import {
   DndContext,
@@ -97,7 +98,7 @@ const SAVE_DEBOUNCE_MS = 900;
  * one-level-deep rule is greppable. See the container block in
  * lib/content/blocks.ts and the matching refusal in addBlockAt.
  */
-const CONTAINER_ONLY: readonly string[] = ['container'];
+const CONTAINER_ONLY: readonly string[] = ['container', 'grid'];
 
 /**
  * Wrap what is selected in a span carrying one CSS declaration.
@@ -1391,7 +1392,7 @@ export function EditorShell({
        * to style or edit them arrives in a later slice.
        */
       if (target.inner !== undefined && target.block !== undefined) {
-        if (type === 'container') return;
+        if (hasInnerColumns(type)) return;
         const container =
           page.sections[target.section]?.rows[target.row]?.columns[target.column]?.blocks[target.block];
         const inner = container ? containerColumns(container)[target.inner] : undefined;

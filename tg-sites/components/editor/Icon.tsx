@@ -21,6 +21,7 @@ export type IconName =
   // structure
   | 'section'
   | 'columns'
+  | 'grid'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -103,6 +104,9 @@ export type IconName =
 const PATHS: Record<IconName, string> = {
   section: 'M3 5h18M3 12h18M3 19h18',
   columns: 'M4 4h6v16H4zM14 4h6v16h-6z',
+  // Four cells: what a grid is, and distinct from `columns` at a glance,
+  // which is two tall bars.
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 

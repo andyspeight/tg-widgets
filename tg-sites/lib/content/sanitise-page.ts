@@ -13,6 +13,7 @@
  */
 
 import { blockDefinition, type Field } from './blocks';
+import { hasInnerColumns } from './inner-columns';
 import { importContent, importFields } from './imported';
 import { cleanImportHtml } from '../import/html';
 import { importScopeClass, scopeImportCss } from '../import/css';
@@ -225,7 +226,7 @@ export function sanitiseBlock(block: Block): Block {
     return { ...block, props: cleanImportedProps(block.id, block.props) };
   }
 
-  if (block.type === 'container') {
+  if (hasInnerColumns(block.type)) {
     return sanitiseContainer(block);
   }
 
@@ -249,8 +250,11 @@ export function sanitiseBlock(block: Block): Block {
  * on the way in.
  */
 function sanitiseContainer(block: Block): Block {
-  const definition = blockDefinition('container');
-  const props = definition ? cleanProps('container', definition.fields, block.props) : { ...block.props };
+  // Reads the block's OWN definition rather than the container's, so a grid is
+  // cleaned against a grid's fields. Both keep their content the same way: in
+  // props.columns, where the field-driven pass never looks.
+  const definition = blockDefinition(block.type);
+  const props = definition ? cleanProps(block.type, definition.fields, block.props) : { ...block.props };
   const columns = props.columns;
   if (!Array.isArray(columns)) return { ...block, props };
 
