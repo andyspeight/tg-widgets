@@ -36,7 +36,9 @@ import {
   SocialBlock,
   BreadcrumbsBlock,
   CopyrightBlock,
+  CouponBlock,
   IconBlock,
+  LocationsBlock,
   ShapeBlock,
   FileBlock,
   ReadMoreBlock,
@@ -156,6 +158,12 @@ export function BlockRenderer({
        * and the client. `editable` makes that checkbox inert, so clicking a
        * preview to select the block does not fold the text under the pointer.
        */
+      /* `editable` keeps an expired coupon on the canvas, so a client can see
+         and fix the thing they are editing. On a live page it goes. */
+      case 'coupon':
+        return <CouponBlock props={props} editing={editable} />;
+      case 'locations':
+        return <LocationsBlock props={props} />;
       case 'icon':
         return <IconBlock props={props} />;
       case 'shape':

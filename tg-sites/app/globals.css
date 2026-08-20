@@ -4027,6 +4027,134 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
 
 /* ------------------------------------------------------------------ */
+/* The Coupon                                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A TICKET, drawn with a dashed edge because that is what a coupon has looked
+ * like since they were torn out of newspapers, and a visitor recognises it
+ * before reading a word of it.
+ */
+.tgs-coupon {
+  padding: var(--tgs-space-l);
+  border: 2px dashed var(--tgs-border-strong);
+  border-radius: var(--tgs-radius-md);
+  background: var(--tgs-surface-alt);
+}
+
+.tgs-coupon[data-align='centre'] { text-align: center; }
+.tgs-coupon[data-align='right'] { text-align: right; }
+
+.tgs-coupon__headline {
+  margin: 0;
+  font-family: var(--tgs-h3-font);
+  font-size: var(--tgs-h4-size);
+  font-weight: var(--tgs-h3-weight);
+  line-height: 1.25;
+}
+
+.tgs-coupon__code { margin: var(--tgs-space-m) 0 0; }
+
+/*
+ * ONE CLICK SELECTS THE WHOLE CODE. `user-select: all` is the entire reason
+ * this block needs no JavaScript: a tap or a click selects every character,
+ * ready to copy, where a copy BUTTON would need a script and would fail
+ * silently on a browser that refuses clipboard permission.
+ */
+.tgs-coupon__value {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 1px solid var(--tgs-border-strong);
+  border-radius: var(--tgs-radius-sm);
+  background: var(--tgs-surface);
+  color: var(--tgs-primary);
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: var(--tgs-text-l);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  user-select: all;
+  cursor: text;
+}
+
+.tgs-coupon__body { margin: var(--tgs-space-m) 0 0; }
+.tgs-coupon__action { margin: var(--tgs-space-m) 0 0; }
+
+.tgs-coupon__ends {
+  margin: var(--tgs-space-m) 0 0;
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+  font-weight: 600;
+}
+
+.tgs-coupon__terms {
+  margin: var(--tgs-space-s) 0 0;
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+}
+
+/* Only ever seen in the editor: a live page has already dropped it. Faded and
+   ruled off, so a client can tell at a glance which of their coupons has run
+   out without reading every date. */
+.tgs-coupon[data-expired='true'] {
+  opacity: 0.6;
+  border-style: solid;
+}
+.tgs-coupon[data-expired='true'] .tgs-coupon__value { text-decoration: line-through; }
+
+/* ------------------------------------------------------------------ */
+/* Multi Location                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Branches as cards. The count is a custom property for the same reason the
+ * Grid block's is: a client may pick any of one to six and eighteen classes to
+ * cover that would be a stylesheet nobody could hold in their head.
+ *
+ * They stack on a phone whatever the setting says, because two branch cards
+ * sharing 390px is two cards nobody can read.
+ */
+.tgs-locations {
+  display: grid;
+  gap: var(--tgs-space-m);
+  grid-template-columns: repeat(var(--tgs-loc-across, 2), minmax(0, 1fr));
+}
+
+@container tgs-page (max-width: 767px) {
+  .tgs-locations { grid-template-columns: 1fr; }
+}
+
+.tgs-locations__card {
+  padding: var(--tgs-space-m);
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-md);
+  background: var(--tgs-surface);
+}
+
+.tgs-locations__name {
+  margin: 0 0 var(--tgs-space-s);
+  font-weight: 700;
+}
+
+/* An <address> is italic by default in every browser, which is a convention
+   from print that reads as an aside rather than as the branch's address. */
+.tgs-locations__address {
+  margin: 0;
+  font-style: normal;
+  color: var(--tgs-text-muted);
+}
+
+.tgs-locations__hours {
+  margin: var(--tgs-space-s) 0 0;
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+}
+
+.tgs-locations__line { margin: var(--tgs-space-s) 0 0; }
+.tgs-locations__line a { color: var(--tgs-primary); }
+
+.tgs-locations__directions { font-weight: 600; }
+
+/* ------------------------------------------------------------------ */
 /* The Icon block                                                      */
 /* ------------------------------------------------------------------ */
 

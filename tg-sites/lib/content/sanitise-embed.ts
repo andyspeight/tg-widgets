@@ -74,13 +74,29 @@ const WIDGET_HOSTS: ReadonlySet<string> = new Set(
     .filter(Boolean),
 );
 
-/** Hosts an iframe may point at. The same list the tokeniser allowed. */
+/**
+ * Hosts an iframe may point at.
+ *
+ * A CLOSED LIST, AND SHORT ON PURPOSE. An iframe is somebody else's page running
+ * inside a client's, so each entry is a party we have decided to trust with that,
+ * not a convenience. Anything not here is dropped along with the element, which
+ * the client is told about rather than left with an empty box.
+ *
+ * calendar.google.com was added on 20 Aug 2026, at Andy's word, so a client can
+ * show their own Google Calendar of departures or events. Same reasoning as the
+ * two Google map hosts already here: a calendar embed is a read-only view served
+ * by Google, and the client supplies nothing but the address.
+ *
+ * IF A CONTENT SECURITY POLICY EVER LANDS (see the note in lib/content/map.ts),
+ * every host here needs a frame-src entry or the embed goes blank on a live page.
+ */
 const IFRAME_HOSTS: ReadonlySet<string> = new Set([
   'www.youtube.com',
   'www.youtube-nocookie.com',
   'player.vimeo.com',
   'www.google.com',
   'maps.google.com',
+  'calendar.google.com',
 ]);
 
 /**

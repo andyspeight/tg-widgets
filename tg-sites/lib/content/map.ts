@@ -43,3 +43,23 @@ export function mapEmbedSrc(address: unknown, zoom: unknown): string | null {
 
   return `${MAP_EMBED_HOST}?q=${encodeURIComponent(text)}&z=${clamped}&output=embed`;
 }
+
+/**
+ * A link to directions, for a location card.
+ *
+ * WHY A LINK RATHER THAN A FRAME. The Location block frames a map, which is
+ * right for one address: a visitor sees where it is without leaving the page.
+ * The Multi Location block lists several, and framing six maps means six
+ * third-party page loads before a visitor has decided which branch they want.
+ * A link costs nothing until it is clicked, and clicking it opens the maps app
+ * on a phone, which is what somebody looking for a branch actually wants.
+ *
+ * Same safety as the embed above and for the same reason: the host is a literal
+ * here and the address is percent-encoded, so nothing a client types can become
+ * a different origin or a second parameter.
+ */
+export function mapDirectionsUrl(address: unknown): string | null {
+  const text = (typeof address === 'string' ? address : '').trim().slice(0, MAP_ADDRESS_MAX);
+  if (!text) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(text)}`;
+}

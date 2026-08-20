@@ -204,6 +204,24 @@ describe('what a client legitimately needs still works', () => {
 
   it('keeps an allowlisted frame and drops the rest of the web', () => {
     expect(sanitiseEmbedHtml('<iframe src="https://www.youtube.com/embed/abc"></iframe>')).toContain('iframe');
+    // Added 20 Aug 2026 so a client can show their own calendar of departures.
+    expect(
+      sanitiseEmbedHtml('<iframe src="https://calendar.google.com/calendar/embed?src=x"></iframe>'),
+    ).toContain('iframe');
+
+    /*
+     * A LOOKALIKE HOST IS NOT THE HOST. The check is on the parsed host, not on
+     * whether the address contains the words, so none of these gets in on the
+     * strength of looking familiar.
+     */
+    for (const impostor of [
+      'https://calendar.google.com.evil.test/x',
+      'https://evil.test/?calendar.google.com',
+      'https://notcalendar.google.com/x',
+      'http://calendar.google.com/calendar/embed',
+    ]) {
+      expect(cleanEmbedHtml(`<iframe src="${impostor}"></iframe>`).html, impostor).toBe('');
+    }
 
     const bad = cleanEmbedHtml('<iframe src="https://evil.test/x"></iframe>');
     // The whole element goes, not just its address: an empty frame is a visible

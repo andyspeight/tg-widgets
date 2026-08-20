@@ -2477,6 +2477,163 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * A DISCOUNT CODE, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * NO COPY BUTTON, AND THAT IS NOT A SHORTFALL. Copying to the clipboard
+     * needs a script, and a published page here ships none. What it does instead
+     * is better than it sounds: the code sits in a box with `user-select: all`,
+     * so ONE click or tap selects the whole code, ready to copy. A copy button
+     * saves a keystroke; this needs no JavaScript, works with none, and cannot
+     * fail silently the way a clipboard call does when a browser refuses it.
+     *
+     * THE EXPIRY LOOKS AFTER ITSELF, the same reasoning as the Copyright block.
+     * An offer that ended in March and is still on the page in July is a
+     * customer ringing up to argue about it, and the client will not notice
+     * because they never visit their own offers page. So the date is compared
+     * when the page is drawn, and by default the whole thing stops showing once
+     * it has passed. That is on by default because the failure it prevents is
+     * expensive and the one it causes, a coupon vanishing early because somebody
+     * typed the wrong date, is visible immediately in the editor.
+     *
+     * ON THE CANVAS IT ALWAYS SHOWS, expired or not. A client editing last
+     * season's coupon has to be able to see the thing they are editing.
+     */
+    type: 'coupon',
+    label: 'Coupon',
+    group: 'Actions',
+    icon: 'coupon',
+    description: 'A discount code, with the small print and a date it ends.',
+    defaults: {
+      headline: '10% off your first booking',
+      code: 'WELCOME10',
+      body: 'Quote this code when you enquire and we will take it off your balance.',
+      expires: '',
+      hideExpired: true,
+      terms: 'One code per booking. Not valid with any other offer.',
+      buttonLabel: '',
+      buttonHref: '',
+      align: 'left',
+    },
+    summarise: (props) => {
+      const code = asString(props.code).trim();
+      return code ? `Coupon: ${code}` : 'Coupon';
+    },
+    fields: [
+      { kind: 'text', key: 'headline', label: 'The offer', max: 120 },
+      {
+        kind: 'text',
+        key: 'code',
+        label: 'Code',
+        max: 40,
+        help: 'What a customer quotes. One click selects the whole thing on the page.',
+      },
+      { kind: 'textarea', key: 'body', label: 'How to use it', max: 300 },
+      {
+        kind: 'text',
+        key: 'expires',
+        label: 'Ends on',
+        max: 10,
+        placeholder: '2026-09-30',
+        help: 'Year, month, day. Leave it blank for an offer with no end date.',
+      },
+      {
+        kind: 'toggle',
+        key: 'hideExpired',
+        label: 'Stop showing it once it has ended',
+        help: 'On by default. An offer that ended in March and is still on the page in July is an argument with a customer.',
+      },
+      { kind: 'text', key: 'terms', label: 'Small print', max: 300 },
+      { kind: 'text', key: 'buttonLabel', label: 'Button', max: 40, group: 'layout' },
+      { kind: 'url', key: 'buttonHref', label: 'Button link', group: 'layout' },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
+     * SEVERAL BRANCHES, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * WHY IT IS NOT THE LOCATION BLOCK REPEATED. That block FRAMES a map, which
+     * is right for one address: a visitor sees where it is without leaving the
+     * page. Six of them means six third-party page loads before a visitor has
+     * even decided which branch they want, and six maps of six different towns
+     * is not a picture anybody reads.
+     *
+     * So this lists the branches as cards, each with a directions LINK rather
+     * than a frame. A link costs nothing until it is clicked, and clicking it
+     * opens the maps app on a phone, which is what somebody hunting for their
+     * nearest branch actually wants. See mapDirectionsUrl in lib/content/map.ts.
+     *
+     * THE PHONE AND EMAIL ARE REAL LINKS, tel: and mailto:, so a tap rings the
+     * branch. That is what "Click To Call" means on the list this came from, and
+     * it works here because the render path stopped throwing contact links away
+     * earlier today.
+     */
+    type: 'locations',
+    label: 'Multi Location',
+    group: 'Actions',
+    icon: 'map',
+    description: 'Your branches, each with its address, phone and directions.',
+    defaults: {
+      across: '2',
+      showDirections: true,
+      items: [
+        {
+          name: 'Bolton',
+          address: '',
+          phone: '',
+          email: '',
+          hours: 'Mon to Sat, 9am to 5.30pm',
+        },
+        { name: 'Manchester', address: '', phone: '', email: '', hours: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Locations (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Branches',
+        itemLabel: 'Branch',
+        max: 24,
+        fields: [
+          { kind: 'text', key: 'name', label: 'Name', max: 80 },
+          {
+            kind: 'place',
+            key: 'address',
+            label: 'Address',
+            max: 200,
+            placeholder: 'Start typing an address',
+            help: 'Pick it from the list so the directions link lands in the right place.',
+          },
+          { kind: 'text', key: 'phone', label: 'Phone', max: 40, placeholder: '01204 123456' },
+          { kind: 'text', key: 'email', label: 'Email', max: 120, placeholder: 'bolton@example.com' },
+          { kind: 'text', key: 'hours', label: 'Opening hours', max: 120 },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'across',
+        label: 'Columns',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+        help: 'How many branches sit side by side. They stack on a phone whatever this says.',
+      },
+      {
+        kind: 'toggle',
+        key: 'showDirections',
+        label: 'Show a directions link',
+        group: 'layout',
+        help: 'Opens the maps app on a phone. Only appears on a branch that has an address.',
+      },
+    ],
+  },
+
+  {
+    /*
      * ONE ICON ON ITS OWN, asked for on 20 Aug 2026 from the Duda list.
      *
      * WHAT IT IS NOT. "Icon and text" already existed and is the right block

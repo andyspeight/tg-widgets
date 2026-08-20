@@ -14,6 +14,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { copyrightLine } from '../../lib/content/copyright';
+import { couponEndsLabel, couponExpired, todayUtc } from '../../lib/content/coupon';
 import { safeColour } from '../../lib/content/schema';
 import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
@@ -23,7 +24,7 @@ import { importScopeClass, scopeImportCss } from '../../lib/import/css';
 import { applyImportContent } from '../../lib/import/tokenise';
 import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
-import { mapEmbedSrc } from '../../lib/content/map';
+import { mapDirectionsUrl, mapEmbedSrc } from '../../lib/content/map';
 import { socialNetwork } from '../../lib/content/social';
 import { safeWidgetId, widgetKind, WIDGET_ORIGIN, type WidgetKind } from '../../lib/content/widgets';
 import { SocialIcon } from './social-icons';
@@ -2533,6 +2534,172 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
   const style = oneOf(props, 'style', ['line', 'dashed', 'dots'] as const, 'line');
   const spacing = str(props, 'spacing', 'm');
   return <hr className="tgs-divider" data-style={style} data-spacing={spacing} />;
+}
+
+/**
+ * A discount code.
+ *
+ * NO COPY BUTTON, AND THAT IS DELIBERATE. Copying to the clipboard needs a
+ * script and a published page ships none. The code sits in a box with
+ * `user-select: all`, so one click or tap selects the whole of it ready to copy
+ * — which needs no JavaScript, works when there is none, and cannot fail
+ * silently the way a clipboard call does when a browser refuses permission.
+ *
+ * IT STOPS SHOWING WHEN IT HAS RUN OUT. An offer that ended in March and is
+ * still on the page in July is a customer ringing up to argue, and the client
+ * will not notice because they never visit their own offers page. The date is
+ * compared when the page is drawn, so it needs nobody to remember.
+ *
+ * ON THE CANVAS IT ALWAYS SHOWS. A client editing last season's coupon has to be
+ * able to see the thing they are editing, so `editing` overrides the hiding and
+ * the block says out loud that it has ended.
+ */
+export function CouponBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement | null {
+  const code = str(props, 'code').trim();
+  const headline = str(props, 'headline').trim();
+  if (!code && !headline) return <div className="tgs-placeholder">Add an offer and a code</div>;
+
+  const expires = str(props, 'expires');
+  const expired = couponExpired(expires, todayUtc(new Date()));
+  const hideExpired = bool(props, 'hideExpired', true);
+
+  // Gone from a live page, still drawn in the editor. See the note above.
+  if (expired && hideExpired && !editing) return null;
+
+  const body = str(props, 'body').trim();
+  const terms = str(props, 'terms').trim();
+  const ends = couponEndsLabel(expires);
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const buttonLabel = str(props, 'buttonLabel').trim();
+  const buttonHref = safeUrl(str(props, 'buttonHref'), CONTACT_OK);
+
+  return (
+    <div className="tgs-coupon" data-align={align} data-expired={expired ? 'true' : undefined}>
+      {headline && <p className="tgs-coupon__headline">{headline}</p>}
+
+      {code && (
+        <p className="tgs-coupon__code">
+          {/*
+            The code is the one piece a visitor has to carry away, so it is its
+            own element with its own selection behaviour rather than a run of
+            bold text inside a sentence.
+          */}
+          <span className="tgs-coupon__value">{code}</span>
+        </p>
+      )}
+
+      {body && <p className="tgs-coupon__body">{body}</p>}
+
+      {buttonLabel && buttonHref && (
+        <p className="tgs-coupon__action">
+          <a className="tgs-button" data-variant="primary" data-size="m" href={buttonHref}>
+            {buttonLabel}
+          </a>
+        </p>
+      )}
+
+      {ends && (
+        <p className="tgs-coupon__ends">
+          {/*
+            In the editor an expired coupon says so, because otherwise a client
+            looking at a page that is missing its coupon has no way to work out
+            why. On a live page this line is just the end date.
+          */}
+          {editing && expired ? `${ends} — this has ended` : ends}
+        </p>
+      )}
+
+      {terms && <p className="tgs-coupon__terms">{terms}</p>}
+    </div>
+  );
+}
+
+/**
+ * Several branches, each with its address, phone and directions.
+ *
+ * NOT THE LOCATION BLOCK REPEATED. That one FRAMES a map, which is right for a
+ * single address. Six frames means six third-party page loads before a visitor
+ * has decided which branch they want, and six maps of six towns is not a picture
+ * anybody reads. So each branch gets a directions LINK instead, which costs
+ * nothing until it is clicked and opens the maps app on a phone.
+ *
+ * THE PHONE AND EMAIL ARE REAL LINKS. A tap rings the branch. That is what
+ * "Click To Call" means, and it works because CONTACT_OK is passed here the same
+ * as everywhere else in this file.
+ *
+ * ADDRESS IN AN <address> ELEMENT, which is what it is for: a contact address
+ * for the nearest ancestor, which here is the branch card.
+ */
+export function LocationsBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items').filter(
+    (item) => str(item, 'name').trim() || str(item, 'address').trim(),
+  );
+  if (items.length === 0) return <div className="tgs-placeholder">Add a branch</div>;
+
+  const across = clamp(props.across, 1, 6, 2);
+  const showDirections = bool(props, 'showDirections', true);
+
+  return (
+    <div className="tgs-locations" style={{ '--tgs-loc-across': String(across) } as CSSProperties}>
+      {items.map((item, index) => {
+        const name = str(item, 'name').trim();
+        const address = str(item, 'address').trim();
+        const phone = str(item, 'phone').trim();
+        const email = str(item, 'email').trim();
+        const hours = str(item, 'hours').trim();
+        const directions = showDirections ? mapDirectionsUrl(address) : null;
+
+        return (
+          <div className="tgs-locations__card" key={index}>
+            {name && <p className="tgs-locations__name">{name}</p>}
+
+            {address && <address className="tgs-locations__address">{address}</address>}
+
+            {hours && <p className="tgs-locations__hours">{hours}</p>}
+
+            {/*
+              Built from the digits rather than from what was typed, so "01204
+              123 456" dials correctly. The visible text stays as the client
+              wrote it, because that is the form somebody recognises.
+            */}
+            {phone && (
+              <p className="tgs-locations__line">
+                <a href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>
+              </p>
+            )}
+
+            {email && (
+              <p className="tgs-locations__line">
+                <a href={`mailto:${email}`}>{email}</a>
+              </p>
+            )}
+
+            {directions && (
+              <p className="tgs-locations__line">
+                <a
+                  className="tgs-locations__directions"
+                  href={directions}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {/* Named for the branch, so a page of six does not give a
+                      screen reader six links all called "Directions". */}
+                  Directions
+                  {name && <span className="tgs-sr-only"> to {name}</span>}
+                </a>
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 /**

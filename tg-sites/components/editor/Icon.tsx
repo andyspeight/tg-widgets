@@ -27,6 +27,7 @@ export type IconName =
   | 'read-more'
   | 'copyright'
   | 'shape'
+  | 'coupon'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -127,6 +128,9 @@ const PATHS: Record<IconName, string> = {
   // A circle and a square, overlapping: the two shapes that are the block,
   // rather than one of them standing for all six.
   shape: 'M9 4.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9M11 11h9v9h-9z',
+  // A ticket with a notch out of each side, which is what a coupon looks like
+  // everywhere it has ever been printed.
+  coupon: 'M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 8 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-8M10 9v6',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 
