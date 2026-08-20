@@ -1606,7 +1606,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       layout: 'row',
       align: 'left',
       gap: 'm',
-      collapse: true,
+      collapse: 'phone',
       uppercase: false,
       items: [
         { label: 'Home', href: '/', newTab: false },
@@ -1650,11 +1650,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
       { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
+      /*
+       * THE BURGER, AND WHEN IT APPEARS (Andy, 20 Aug 2026, from the Duda list).
+       *
+       * This was a toggle until that date, which could say "on phones" or "not
+       * at all" and had no way to say the third thing: a burger at every width,
+       * on purpose. That is a real design, not a fallback — several of the
+       * luxury and editorial headers put everything behind one button and let
+       * the logo have the bar to itself — and a toggle could not express it.
+       *
+       * lib/content/burger.ts reads both this and the old boolean, so a menu
+       * saved before today keeps working and keeps its old answer.
+       */
       {
-        kind: 'toggle',
+        kind: 'select',
         key: 'collapse',
-        label: 'Menu button on phones',
-        help: 'Seven links across a phone do not fit. This tucks them behind a button.',
+        label: 'Menu button',
+        options: [
+          { value: 'never', label: 'Never' },
+          { value: 'phone', label: 'On phones' },
+          { value: 'always', label: 'Always' },
+        ],
+        help:
+          'On phones tucks the links behind a button where they will not fit. '
+          + 'Always keeps them behind it at every width, which suits a header that is mostly logo.',
       },
       /*
        * The type of the links, so a header menu can match the brand rather than

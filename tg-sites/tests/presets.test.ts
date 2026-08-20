@@ -25,6 +25,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { burgerMode } from '../lib/content/burger';
 import { blockDefinition, isKnownBlock } from '../lib/content/blocks';
 import { isIconName } from '../lib/content/icons';
 import { MAX_BORDER, MAX_RADIUS, safeColour } from '../lib/content/schema';
@@ -510,11 +511,19 @@ describe('the footer presets', () => {
    * behind a button they have to think about.
    */
   it('never lets a footer menu turn into a burger', () => {
+    /*
+     * ASKED THROUGH burgerMode RATHER THAN COMPARED TO false, which is what this
+     * did until 20 Aug 2026. On that day `collapse` became a choice of three so a
+     * header could ask for a burger at every width, the presets moved to the new
+     * spelling, and a test hard-coding `!== false` reported every footer as
+     * broken while every footer was fine. The question was never "is this the
+     * boolean false", it was "does this menu collapse", and now it asks that.
+     */
     const collapsing = footers.flatMap((preset) =>
       preset.rows.flatMap((row) =>
         row.columns.flatMap((column) =>
           column
-            .filter((spec) => spec.type === 'nav' && spec.props?.collapse !== false)
+            .filter((spec) => spec.type === 'nav' && burgerMode(spec.props?.collapse) !== 'never')
             .map(() => preset.id),
         ),
       ),

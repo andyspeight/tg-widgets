@@ -319,7 +319,10 @@ describe('the menu block', () => {
   });
 
   it('collapses to a menu button by default, because a phone is the common case', () => {
-    expect(defaultPropsFor('nav').collapse).toBe(true);
+    // 'phone' since 20 Aug 2026, when the toggle became a three-way choice so a
+    // header could ask for a burger at every width. The DEFAULT did not change,
+    // only how it is spelled: burgerMode reads the old `true` as this.
+    expect(defaultPropsFor('nav').collapse).toBe('phone');
   });
 
   it('offers font controls for the links, drawn from the site whitelists', () => {

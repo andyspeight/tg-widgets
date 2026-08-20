@@ -3128,6 +3128,136 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-nav__list--stacked .tgs-nav__link { display: block; padding: var(--tgs-space-s) 0; }
 
 /*
+ * THE BUTTON BECOMES A CROSS WHILE THE MENU IS OPEN.
+ *
+ * Both icons are in the markup and one is hidden, because swapping a path with
+ * CSS alone is not possible and swapping it with script is not on offer. It
+ * applies to the phone menu as well as the always-on one: a burger that stays a
+ * burger while its menu is open is the state every visitor has learned means
+ * "not open yet", and the cost of fixing that is one hidden `svg`.
+ */
+.tgs-nav__burger-close { display: none; }
+.tgs-nav__disclosure[open] .tgs-nav__burger-open { display: none; }
+.tgs-nav__disclosure[open] .tgs-nav__burger-close { display: block; }
+
+/*
+ * ---------------------------------------------------------------------------
+ * THE ALWAYS-ON BURGER (Andy, 20 Aug 2026, from Duda's Hamburger Menu element)
+ * ---------------------------------------------------------------------------
+ *
+ * A burger at EVERY width, by choice rather than for want of room, which is how
+ * the luxury and editorial headers give the bar to the logo. The links never
+ * appear as a row, so the row is not rendered at all (see NavBlock) rather than
+ * hidden here.
+ *
+ * WHY A PANEL UNDER THE HEADER AND NOT A FULL-SCREEN OVERLAY.
+ *
+ * A full-screen overlay wants `position: fixed`, and fixed does not reach the
+ * viewport from in here. `.tgs-page` carries `container-type: inline-size` for
+ * the whole responsive engine, and container-type brings LAYOUT CONTAINMENT with
+ * it, which makes that element a containing block for fixed and absolute
+ * descendants alike. The header element carries `.tgs-page` itself (see
+ * RegionRenderer), so `position: fixed; inset: 0` inside it covers the header
+ * and nothing else. Getting a true overlay would mean either giving up the
+ * container queries or shipping script, and neither is worth it for a menu.
+ *
+ * AND THE PANEL IS THE BETTER ANSWER ANYWAY, which is the part worth writing
+ * down rather than treating as a consolation. A published page ships no
+ * JavaScript, so there is nothing to trap focus inside an overlay: tab past the
+ * last link of a full-screen menu and focus lands on content the visitor cannot
+ * see. A panel that covers only the top of the page has no such state. The page
+ * behind stays visible and reachable, which is what makes tabbing out of it
+ * ordinary rather than a fault.
+ *
+ * WHAT IT IS ACTUALLY ANCHORED TO, measured in a browser rather than assumed.
+ * The nearest positioned ancestor is `.tgs-section__inner`, the width-constrained
+ * content wrapper, NOT `.tgs-section`. The first version of this rule anchored to
+ * the section in its head and came out 48px too high, overlapping the bottom of
+ * the bar, because `__inner` ends where the content ends and the section carries
+ * padding below it.
+ *
+ * So the panel takes `__inner`'s width, which puts its edge under the logo's
+ * rather than at the edge of the screen, and clears the section's bottom padding
+ * with the SAME expression the section pads itself by. Not a measured constant:
+ * a client who changes the header's padding moves both together.
+ */
+.tgs-nav[data-burger='always'] .tgs-nav__disclosure { display: block; }
+
+/*
+ * THE HEADER HAS TO RISE WHILE THE PANEL IS OPEN, and this rule is the whole
+ * reason the first version of this feature looked broken in a browser and
+ * measured perfectly in the numbers.
+ *
+ * The header is `position: relative; z-index: 2`, which makes it a STACKING
+ * CONTEXT. Everything inside it, the panel's own z-index: 30 included, is
+ * therefore sealed inside a box whose value is 2. The page below the header is a
+ * sibling, and its own `.tgs-section__inner` is also `position: relative;
+ * z-index: 2` — an equal value, LATER in the document, so it wins. The panel
+ * laid out in exactly the right place at exactly the right size and the page
+ * painted straight over the bottom two thirds of it.
+ *
+ * Raising the header only while the panel is open, with :has(), rather than
+ * raising it always: a header that permanently outranked the page would change
+ * how every overlapping hero and sticky bar stacks, for one menu's sake.
+ * Container queries and :has() are already load-bearing here, so this asks for
+ * nothing the rest of the file does not.
+ */
+.tgs-region[data-region='header']:has(.tgs-nav[data-burger='always'] .tgs-nav__disclosure[open]) {
+  z-index: 40;
+}
+
+.tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  position: absolute;
+  /* Exactly the header's bottom edge. See the note above. */
+  top: calc(100% + var(--tgs-pad-r, var(--tgs-pad, 48px)) + var(--tgs-pb, 0px));
+  left: 0;
+  right: 0;
+  z-index: 30;
+  /* `__inner`'s own inline padding, MINUS this panel's 1px border, so a link in
+     the panel sits directly under the logo above it. Without the subtraction it
+     lands one pixel out, which nobody sees and which makes the sentence above a
+     lie. Measured in a browser, not reasoned about. */
+  padding: var(--tgs-space-l) calc(var(--tgs-space-m) - 1px);
+  background: var(--tgs-surface);
+  color: var(--tgs-text);
+  /* A panel rather than a full-bleed bar, so it needs an edge all the way round
+     and something to lift it off the page beneath. */
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius, 10px);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 12%);
+  /* A twelve-link menu scrolls inside the panel rather than running off the
+     bottom of the screen. */
+  max-height: min(70vh, 32rem);
+  overflow-y: auto;
+}
+
+/* The links are the whole content of the panel now, so they carry themselves
+   rather than sitting at nav-bar size in a large empty space. */
+.tgs-nav[data-burger='always'] .tgs-nav__list--stacked .tgs-nav__link {
+  font-size: 1.2em;
+  padding: var(--tgs-space-s) 0;
+}
+
+/* A panel follows the alignment its menu was given, so a centred bar opens a
+   centred menu rather than a left-aligned one under a centred button. */
+.tgs-nav[data-burger='always'][data-align='centre'] .tgs-nav__list--stacked { text-align: center; }
+.tgs-nav[data-burger='always'][data-align='right'] .tgs-nav__list--stacked { text-align: right; }
+
+/*
+ * The one authored motion moment this element gets: the panel arrives rather
+ * than appearing. Exponential ease-out from a small offset, and the global
+ * reduced-motion rule at the bottom of this file clamps it to nothing for
+ * anybody who has asked for that.
+ */
+@keyframes tgs-nav-panel-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  animation: tgs-nav-panel-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
  * FOLDERS FILL DROPDOWNS, WITH NO JAVASCRIPT (Andy, 15 Aug 2026).
  *
  * A Menu link that points at a folder keeps being a real link to that page, and

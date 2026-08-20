@@ -53,7 +53,7 @@ const LINKS = [
 ];
 
 /** A footer menu: a list of links rather than a nav bar, and never a burger. */
-const FOOTER_MENU = { layout: 'column', collapse: false } as const;
+const FOOTER_MENU = { layout: 'column', collapse: 'never' } as const;
 
 // ---------------------------------------------------------------------------
 // The floating navbars, reproduced from Andy's references (19 Aug 2026)
@@ -95,7 +95,7 @@ function barNav(
 ): PresetBlock {
   return {
     type: 'nav',
-    props: { items, layout: 'row', collapse: true, gap: 'm', linkColour: colour, uppercase: upper },
+    props: { items, layout: 'row', collapse: 'phone', gap: 'm', linkColour: colour, uppercase: upper },
   };
 }
 
@@ -160,7 +160,7 @@ export const REGION_LAYOUTS: readonly SectionPreset[] = [
         columns: [
           [
             { type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } },
-            { type: 'nav', props: { items: LINKS, collapse: false, ...CENTRED } },
+            { type: 'nav', props: { items: LINKS, collapse: 'never', ...CENTRED } },
             /*
               THE COPYRIGHT BLOCK, not a paragraph with a year typed into it
               (20 Aug 2026). Its year is worked out when the page is drawn, so a
@@ -850,7 +850,7 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         widths: [1],
         columns: [[
           { type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } },
-          { type: 'nav', props: { items: LINKS, collapse: false, ...CENTRED } },
+          { type: 'nav', props: { items: LINKS, collapse: 'never', ...CENTRED } },
           { type: 'social', props: { align: 'centre' } },
           { type: 'divider' },
           /* Same reasoning as the simple footer above: the year looks after itself. */

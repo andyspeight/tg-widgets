@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { burgerMode, hasBurger, showsRow } from '../../lib/content/burger';
 import { copyrightLine } from '../../lib/content/copyright';
 import { couponEndsLabel, couponExpired, todayUtc } from '../../lib/content/coupon';
 import { whatsappHref } from '../../lib/content/whatsapp';
@@ -2048,9 +2049,14 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
   const layout = oneOf(props, 'layout', ['row', 'column'] as const, 'row');
   const align = oneOf(props, 'align', ALIGNS, 'left');
   const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
-  // Default true, because a menu that does not collapse is the wrong default on
-  // a phone and this block exists mostly to be a header.
-  const collapse = bool(props, 'collapse', true);
+  /*
+   * WHEN THE LINKS GO BEHIND A BUTTON: never, on phones, or at every width.
+   *
+   * Read through burgerMode rather than inline, because the stored value has two
+   * shapes: a menu saved before 20 Aug 2026 holds the old boolean. See
+   * lib/content/burger.ts for why that is read rather than migrated.
+   */
+  const burger = burgerMode(props.collapse);
   // Small capitals for the formal and technical bars. A presentation choice, so
   // the labels stay their real words and CSS does the casing.
   const uppercase = bool(props, 'uppercase');
@@ -2081,21 +2087,35 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
       data-align={align}
       data-gap={gap}
       data-uppercase={uppercase ? 'true' : undefined}
+      /* The mode, so the stylesheet can tell an always-burger from a phone one
+         without a second class per state. */
+      data-burger={burger}
       style={hasNavStyle ? navStyle : undefined}
     >
-      <ul className="tgs-nav__list" data-collapse={collapse ? 'true' : undefined}>
-        {navLinks(items, 'wide')}
-      </ul>
+      {showsRow(burger) && (
+        <ul className="tgs-nav__list" data-collapse={burger === 'phone' ? 'true' : undefined}>
+          {navLinks(items, 'wide')}
+        </ul>
+      )}
 
-      {collapse && (
+      {hasBurger(burger) && (
         <details className="tgs-nav__disclosure">
           {/*
             The label is on the summary rather than on an inner span, so a screen
             reader announces "Menu, disclosure triangle, collapsed" from the one
             element the browser already treats as the control.
+
+            TWO ICONS, ONE SHOWN AT A TIME by `details[open]` in the stylesheet.
+            The cross is not decoration: an always-on burger opens a panel over
+            the page, and a panel with no visible way out is a trap. The browser
+            gives Escape to a dialog, not to a `details`, so the control that
+            opened it has to be the control that closes it, and it has to LOOK
+            like one. Both are aria-hidden because the summary already carries
+            the label and its own expanded state.
           */}
           <summary className="tgs-nav__burger" aria-label="Menu">
             <svg
+              className="tgs-nav__burger-open"
               viewBox="0 0 24 24"
               width="22"
               height="22"
@@ -2106,6 +2126,19 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
               aria-hidden="true"
             >
               <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+            <svg
+              className="tgs-nav__burger-close"
+              viewBox="0 0 24 24"
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </summary>
           <ul className="tgs-nav__list tgs-nav__list--stacked">{navLinks(items, 'narrow')}</ul>
