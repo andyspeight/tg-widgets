@@ -163,7 +163,18 @@ export function pageStats(page: Page): PageStats {
   return stats;
 }
 
-function sectionsOf(page: Page): readonly Section[] {
+/**
+ * Anything made of sections: a page, a header or footer region, or a blog post.
+ *
+ * STRUCTURAL RATHER THAN `Page`, because a collection item is section-shaped
+ * without being a page (no slug, no SEO, no place in the tree — see
+ * lib/content/collection.ts) and pageText below has to be able to read one. The
+ * walk only ever touches `sections`, so asking for a whole Page was asking for
+ * more than the job needs.
+ */
+type SectionTree = { sections?: readonly Section[] };
+
+function sectionsOf(page: SectionTree): readonly Section[] {
   return Array.isArray(page.sections) ? page.sections : [];
 }
 
@@ -184,7 +195,7 @@ function sectionsOf(page: Page): readonly Section[] {
  * client can paste an entire brochure into one page. 6000 characters is several
  * screens, far more than is needed to say what a page is for.
  */
-export function pageText(page: Page, max = 6000): string {
+export function pageText(page: SectionTree, max = 6000): string {
   const parts: string[] = [];
 
   const take = (props: Record<string, unknown>) => {

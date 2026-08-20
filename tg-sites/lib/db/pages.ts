@@ -403,6 +403,13 @@ export async function listPublishedPaths(tenantId: string): Promise<PublishedPat
  * A NOINDEXED PAGE IS LEFT OUT, the same page the sitemap leaves out: a client
  * who asked for a page to stay out of every index means the site's own search
  * too, not only Google's.
+ *
+ * PAGES ONLY, AND THAT IS NOT THE WHOLE CORPUS. Blog posts live in
+ * public.collection_items and are read by listPublishedItemsForSearch in
+ * lib/db/collections.ts; the search route asks for both and ranks them together.
+ * If you are adding a new kind of published thing, it needs a read of its own
+ * here or next door, or it will be invisible to search while being perfectly
+ * visible on the site.
  */
 export async function listPublishedForSearch(tenantId: string): Promise<SearchDoc[]> {
   return withPublicTenant(tenantId, async (tx) => {

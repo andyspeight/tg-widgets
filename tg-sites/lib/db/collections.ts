@@ -25,6 +25,8 @@
 
 import { parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../content/collection';
 import { sanitiseItem } from '../content/sanitise-page';
+import type { SearchDoc } from '../content/search';
+import { pageText } from '../seo/audit';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
 /** How many items a listing block will ever ask for. A guard, not a limit. */
@@ -538,6 +540,92 @@ export async function listAllPublishedEntries(
       return {
         path: `${String(row.key)}/${String(row.slug)}`,
         updatedAt: row.changed_at ? new Date(String(row.changed_at)).toISOString() : null,
+      };
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Items, for the site's own search
+// ---------------------------------------------------------------------------
+
+/**
+ * How many posts a search reads.
+ *
+ * A CAP, AND AN HONEST ONE. lib/content/search.ts reads the whole corpus on the
+ * request and scores it in memory, which is the right trade for a travel site of
+ * tens of pages. A blog is the one part of a site that is not tens of anything:
+ * one post a week for five years is 260, and every one of them is read WITH ITS
+ * BODY, which the sitemap's query next door is not. So there is a ceiling, it is
+ * newest-first, and past it the oldest posts are not searchable.
+ *
+ * 500 was chosen as the number a real client will not reach: at 500 posts a
+ * search that reads them all is roughly the size of a large photograph, still
+ * comfortably inside a request, and a client past it has a blog big enough to
+ * deserve a proper index rather than a bigger number here.
+ */
+export const MAX_SEARCH_ITEMS = 500;
+
+/**
+ * Every published post, reduced to the two things a search reads.
+ *
+ * WHY THIS EXISTS. Site search read `public.pages` and nothing else, so a
+ * visitor searching a travel site for "Crete" was not shown the post about
+ * Crete. Found on 20 Aug 2026 while checking the Duda list's "Search Posts"
+ * against what we already had, and it is the same shape of fault as a link that
+ * saves and never renders: the feature looks present, answers, and quietly
+ * leaves half the site out of the answer.
+ *
+ * SAME LIVE RULE AS THE POST'S OWN PAGE, FOR FREE. No status filter and no
+ * published_at filter, exactly as listPublished above: the renderer policy
+ * (0004, tightened by 0020) hides a draft AND a post scheduled for next Tuesday
+ * from this connection. So a search cannot surface a post a visitor could not
+ * open, and nobody had to remember to make that true.
+ *
+ * THE PATH IS collectionKey/slug, with no leading slash, which is the SearchDoc
+ * convention and exactly the address the published route resolves.
+ *
+ * NO noindex CHECK, unlike the pages read. A page has SEO of its own and can be
+ * marked noindex; an item has none (see lib/content/collection.ts — the columns
+ * hold what a page keeps in its tree). Nothing to honour, so nothing pretended.
+ */
+export async function listPublishedItemsForSearch(tenantId: string): Promise<SearchDoc[]> {
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select c.key, i.slug, i.data
+      from public.collection_items i
+      join public.collections c on c.id = i.collection_id
+      order by i.published_at desc nulls last, i.id desc
+      limit ${MAX_SEARCH_ITEMS}
+    `;
+
+    return (rows as Array<Record<string, unknown>>).map((row) => {
+      const key = String(row.key);
+      const slug = String(row.slug);
+      const item = hydrate(row.data, `${key}/${slug}`);
+
+      /*
+       * The summary leads, then the article, then the byline and the tags.
+       *
+       * That order is about the snippet, not the score. searchDocs cuts its
+       * snippet around the FIRST match, so putting the prose first means a
+       * result almost always shows a readable sentence; a post found only by its
+       * tag still ranks, it just shows the end of the text. The summary going
+       * before the body is the schema's own intent: it calls it "the line under
+       * the title in a listing, and the search description".
+       *
+       * Tags and author are in there because a reader searching "Crete" should
+       * find a post filed under Crete even if the words never appear in it, and
+       * because "posts by Sarah" is a search people actually do.
+       */
+      const body = pageText(item, 8000);
+      const extras = [item.author, ...item.tags].filter(Boolean).join(' ');
+      const text = [item.summary, body, extras].filter(Boolean).join('\n');
+
+      return {
+        path: `${key}/${slug}`,
+        title: item.title,
+        text,
       };
     });
   });

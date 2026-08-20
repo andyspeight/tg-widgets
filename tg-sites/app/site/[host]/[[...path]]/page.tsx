@@ -19,7 +19,13 @@ import { hasThemeToggle } from '../../../../lib/content/theme-toggle';
 import { SearchResults } from '../../../../components/render/SearchResults';
 import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
-import { getPublishedItem, listPublished, listPublishedByTag, MAX_LISTING_ITEMS } from '../../../../lib/db/collections';
+import {
+  getPublishedItem,
+  listPublished,
+  listPublishedByTag,
+  listPublishedItemsForSearch,
+  MAX_LISTING_ITEMS,
+} from '../../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { readingTime } from '../../../../lib/content/reading-time';
@@ -687,9 +693,10 @@ function formatDate(value: string): string {
 /**
  * The search results page's own load, run ONLY when no real page lives at
  * /search, so a client who makes a page called "search" keeps it. It reads the
- * same shell a page reads (theme, fonts, header, footer, settings) plus every
- * published page reduced to searchable text, and ranks them in memory. See
- * lib/content/search.ts and listPublishedForSearch.
+ * same shell a page reads (theme, fonts, header, footer, settings) plus the
+ * whole searchable corpus — every published page AND every published blog post —
+ * reduced to text and ranked in memory. See lib/content/search.ts,
+ * listPublishedForSearch and listPublishedItemsForSearch.
  *
  * Below the page render on purpose: the page is the primary render, and its
  * widget and slideshow scans are the ones the tests read as "the public site".
@@ -698,16 +705,24 @@ async function loadSearch(host: string, query: string) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
   if (!tenantId) return null;
 
-  const [theme, faces, settings, regions, navPages, docs] = await Promise.all([
+  const [theme, faces, settings, regions, navPages, pageDocs, postDocs] = await Promise.all([
     getPublicTheme(tenantId),
     listFontFaces(tenantId),
     getPublicSettings(tenantId),
     getPublishedRegions(tenantId),
     listPublishedNavPages(tenantId),
     listPublishedForSearch(tenantId),
+    listPublishedItemsForSearch(tenantId),
   ]);
 
-  return { theme, faces, settings, regions, navPages, query, hits: searchDocs(docs, query) };
+  /*
+   * PAGES AND POSTS IN ONE CORPUS, ranked together with no thumb on the scale
+   * for either. A post about Crete and a page about Crete are both answers to
+   * "Crete", and which one is the better answer is a question the score is
+   * already asking. Sorting posts below pages would be asserting that a page is
+   * always more relevant, which on a travel site is often the opposite of true.
+   */
+  return { theme, faces, settings, regions, navPages, query, hits: searchDocs([...pageDocs, ...postDocs], query) };
 }
 
 function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typeof loadSearch>>>) {
