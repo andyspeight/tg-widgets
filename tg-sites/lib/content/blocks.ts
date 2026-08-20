@@ -2301,6 +2301,71 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * LONG TEXT, FOLDED, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * THE WHOLE TEXT IS ALWAYS IN THE HTML, and only its DISPLAY is clamped.
+     * That is the difference between this and the usual scripted read-more,
+     * which fetches or reveals the rest on click: those hide the text from a
+     * search engine, from a screen reader and from anybody with JavaScript off,
+     * and on a page whose whole point is being found, hiding half the words is
+     * an odd thing to do to yourself.
+     *
+     * NO JAVASCRIPT, which the published page could not run anyway. A hidden
+     * checkbox and a label, the same shape the Tabs block uses for its panels:
+     * the label toggles the input, and `:checked ~` in the stylesheet drops the
+     * line clamp. The label is a real control, so it takes focus, works on Enter
+     * and Space, and announces its own state.
+     *
+     * WHY NOT <details>. A closed <details> hides every child that is not the
+     * summary, so there is no way to show the first four lines of a paragraph
+     * inside one. Putting the text INSIDE the summary works visually and then
+     * announces the entire paragraph as the button's name, which is worse than
+     * the problem it solves.
+     */
+    type: 'read-more',
+    label: 'Read more',
+    group: 'Text',
+    icon: 'read-more',
+    description: 'Long text folded to a few lines, with a control to open it.',
+    defaults: {
+      html: '<p>Write the long version here. Only the first few lines show until somebody opens it, and the rest is still in the page for search engines and screen readers.</p>',
+      lines: 4,
+      moreLabel: 'Read more',
+      lessLabel: 'Show less',
+      fade: true,
+      align: 'left',
+    },
+    summarise: (props) => {
+      const words = asString(props.html).replace(/<[^>]*>/g, ' ').trim();
+      return words ? `Read more: ${words.slice(0, 40)}` : 'Read more';
+    },
+    fields: [
+      { kind: 'richtext', key: 'html', label: 'Text' },
+      {
+        kind: 'number',
+        key: 'lines',
+        label: 'Lines before folding',
+        min: 1,
+        max: 20,
+        step: 1,
+        group: 'layout',
+        help: 'How much shows before somebody opens it. Three or four is usually right. Set it higher than the text you have written and there is nothing left to open.',
+      },
+      { kind: 'text', key: 'moreLabel', label: 'Open label', max: 40 },
+      { kind: 'text', key: 'lessLabel', label: 'Close label', max: 40 },
+      {
+        kind: 'toggle',
+        key: 'fade',
+        label: 'Fade the last line',
+        group: 'effects',
+        help: 'Softens the cut, so it reads as folded rather than as text that stopped.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
      * A FILE TO DOWNLOAD, asked for on 20 Aug 2026 from the Duda list.
      *
      * WHAT IT REPLACES. Until now the only way to put a brochure on a page was to

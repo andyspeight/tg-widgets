@@ -36,6 +36,7 @@ import {
   SocialBlock,
   BreadcrumbsBlock,
   FileBlock,
+  ReadMoreBlock,
   SpacerBlock,
   StatsBlock,
   StepsBlock,
@@ -146,6 +147,14 @@ export function BlockRenderer({
        * shows a worked example there rather than drawing nothing while a client
        * tries to position it.
        */
+      /*
+       * Takes the block's own id, the same as accordion and tabs, because the
+       * label has to name a checkbox and the two must agree between the server
+       * and the client. `editable` makes that checkbox inert, so clicking a
+       * preview to select the block does not fold the text under the pointer.
+       */
+      case 'read-more':
+        return <ReadMoreBlock props={props} blockId={block.id} editing={editable} />;
       case 'file':
         return <FileBlock props={props} />;
       case 'breadcrumbs':

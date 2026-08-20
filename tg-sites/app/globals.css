@@ -4027,6 +4027,102 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
 
 /* ------------------------------------------------------------------ */
+/* The Read more block                                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A LINE CLAMP, NOT A HEIGHT. -webkit-line-clamp cuts on a line boundary
+ * whatever the type size is, so a client who changes the font or reads on a
+ * phone still gets four whole lines rather than four-and-a-bit. It has the
+ * -webkit- prefix and always will: it was never unprefixed, and every current
+ * browser implements the prefixed name, so this is the standard spelling rather
+ * than a legacy one.
+ *
+ * The whole text is in the DOM either way. This hides nothing from a search
+ * engine, a screen reader or a reader with no JavaScript. See ReadMoreBlock.
+ */
+.tgs-readmore[data-align='centre'] { text-align: center; }
+.tgs-readmore[data-align='right'] { text-align: right; }
+
+.tgs-readmore__body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--tgs-rm-lines, 4);
+  overflow: hidden;
+}
+
+/*
+ * A SOFT EDGE ON THE LAST VISIBLE LINE, so the cut reads as folded rather than
+ * as text that stopped mid-thought. Drawn with a mask rather than a gradient
+ * overlay, because an overlay has to know the background colour behind it and
+ * this block sits on four section tones and over photographs.
+ *
+ * MEASURED FROM THE BOTTOM OF THE BOX, and the alternative was tried and
+ * rejected on 20 Aug 2026. Anchoring the stops to the fold itself
+ * (`calc(lines * 1lh)`) has one real advantage — a passage SHORTER than the fold
+ * gets no fade at all, because both stops fall below the box — and one fault
+ * that outweighs it: `lh` counts line boxes and knows nothing about the margins
+ * between paragraphs, so on any text with more than one paragraph the stops land
+ * part-way up the last line and take half of it with them. Multiple paragraphs
+ * is the ordinary case for this block; a fold set larger than the text is not.
+ *
+ * WHAT THAT COSTS, stated plainly: if a client sets the fold to more lines than
+ * they have written, the last line is softened and the control opens something
+ * already open. There is no way to detect "did this actually overflow" in CSS,
+ * and the answer is not a script — a published page ships none, on purpose. The
+ * editor canvas draws the block exactly as folded, so an author sees it at once.
+ */
+.tgs-readmore[data-fade='true'] .tgs-readmore__body {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 1.1em), transparent 100%);
+}
+
+/* Open: the clamp goes and the fade with it. */
+.tgs-readmore__toggle:checked ~ .tgs-readmore__body {
+  -webkit-line-clamp: unset;
+  mask-image: none;
+}
+
+/*
+ * The control. A label rather than a button, because a label is what toggles a
+ * checkbox with no script, and it is given a tabindex-free route to the keyboard
+ * by the input itself: the input is focusable, and the focus ring below is drawn
+ * on the label so the ring appears where a person is looking.
+ */
+.tgs-readmore__control {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: var(--tgs-space-s);
+  color: var(--tgs-primary);
+  font-size: var(--tgs-text-s);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tgs-readmore__control:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* The ring belongs to the input, which is the thing that actually takes focus,
+   but it is drawn around the label, which is the thing a person can see. */
+.tgs-readmore__toggle:focus-visible ~ .tgs-readmore__control {
+  outline: 2px solid var(--tgs-primary);
+  outline-offset: 3px;
+  border-radius: var(--tgs-radius-sm);
+}
+
+/* Two labels, one shown at a time. Swapping the words in one element would take
+   a script; two spans and a rule is the same result for nothing. */
+.tgs-readmore__less { display: none; }
+.tgs-readmore__toggle:checked ~ .tgs-readmore__control .tgs-readmore__more { display: none; }
+.tgs-readmore__toggle:checked ~ .tgs-readmore__control .tgs-readmore__less { display: inline; }
+
+.tgs-readmore__chev { transition: transform 0.18s ease; }
+.tgs-readmore__toggle:checked ~ .tgs-readmore__control .tgs-readmore__chev { transform: rotate(180deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-readmore__chev { transition: none; }
+}
+
+/* ------------------------------------------------------------------ */
 /* The File block                                                      */
 /* ------------------------------------------------------------------ */
 

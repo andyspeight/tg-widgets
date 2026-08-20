@@ -24,6 +24,7 @@ export type IconName =
   | 'grid'
   | 'crumbs'
   | 'file'
+  | 'read-more'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -115,6 +116,9 @@ const PATHS: Record<IconName, string> = {
   // A sheet with a folded corner. Deliberately not a download arrow, which is
   // the action; this is the thing.
   file: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5',
+  // Three full lines, a short one, and a chevron down: text that carries on
+  // below. Deliberately not `text`, which is four equal rules.
+  'read-more': 'M4 5h16M4 10h16M4 15h9M9 19l3 3 3-3',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 

@@ -2517,6 +2517,90 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
 }
 
 /**
+ * Long text, folded to a few lines, with a control to open it.
+ *
+ * NO JAVASCRIPT, and the published page could not run any if there were. A
+ * hidden checkbox and a label, the same shape TabsBlock uses for its panels: the
+ * label toggles the input and `:checked ~` in the stylesheet drops the line
+ * clamp on the body that follows it. The general sibling combinator only looks
+ * FORWARD, which is why the input comes first in the markup.
+ *
+ * THE WHOLE TEXT IS ALWAYS HERE. Only its display is clamped, so a search engine
+ * indexes every word, a screen reader reads every word, and somebody with
+ * JavaScript off sees a page that simply has no fold in it. The usual scripted
+ * read-more reveals or fetches the rest on click, which hides half a page's
+ * words from the three audiences that matter most.
+ *
+ * TWO LABELS IN ONE CONTROL, one shown at a time by the stylesheet. Writing
+ * "Read more" and "Show less" into the same element and swapping the text would
+ * take a script; two spans and a CSS rule is the same result for nothing.
+ *
+ * ON THE CANVAS the checkbox is inert. `editing` makes it disabled, so clicking
+ * a preview to select the block does not also fold the text the agent is
+ * looking at. The clamp still shows, because the point of the block is what it
+ * looks like folded.
+ */
+export function ReadMoreBlock({
+  props,
+  blockId,
+  editing = false,
+}: {
+  props: Props;
+  /** Ties the label to its checkbox. Unique in a page tree, which is all it
+   *  needs to be: two blocks sharing an id would toggle each other. */
+  blockId: string;
+  editing?: boolean;
+}): ReactElement {
+  // Sanitised again here even though it was sanitised on save. Stored HTML is
+  // never trusted, and this is the last gate before the browser.
+  const html = sanitiseHtml(props.html, 'richtext');
+  if (!html) return <div className="tgs-placeholder">Write the long version</div>;
+
+  const lines = clamp(props.lines, 1, 20, 4);
+  const moreLabel = str(props, 'moreLabel') || 'Read more';
+  const lessLabel = str(props, 'lessLabel') || 'Show less';
+  const fade = bool(props, 'fade', true);
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const id = `tgs-rm-${blockId}`;
+
+  return (
+    <div
+      className="tgs-readmore"
+      data-align={align}
+      data-fade={fade ? 'true' : undefined}
+      style={{ '--tgs-rm-lines': String(lines) } as CSSProperties}
+    >
+      <input className="tgs-readmore__toggle tgs-sr-only" type="checkbox" id={id} disabled={editing} />
+
+      {/*
+        The body comes AFTER the input and BEFORE the label, because the
+        stylesheet reaches both with `:checked ~`, which only looks forward.
+      */}
+      <div className="tgs-readmore__body tgs-text" dangerouslySetInnerHTML={{ __html: html }} />
+
+      <label className="tgs-readmore__control" htmlFor={id}>
+        <span className="tgs-readmore__more">{moreLabel}</span>
+        <span className="tgs-readmore__less">{lessLabel}</span>
+        <svg
+          className="tgs-readmore__chev"
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </label>
+    </div>
+  );
+}
+
+/**
  * A file to download.
  *
  * A PLAIN LINK, and everything else follows from that. Not a button with a click
