@@ -30,6 +30,8 @@ import {
   isAllowedMime,
   MAX_IMAGE_EDGE,
   MEDIA_MIME,
+  isDocumentMime,
+  isImageMime,
   mimeFromFilename,
   REENCODE_QUALITY,
   type MediaMime,
@@ -68,6 +70,33 @@ const RECOMPRESS_ABOVE_BYTES = 1_200_000;
  */
 export async function prepareImageForUpload(file: File): Promise<PreparedImage> {
   const declared = isAllowedMime(file.type) ? file.type : mimeFromFilename(file.name);
+
+  /*
+   * A DOCUMENT GOES STRAIGHT THROUGH, untouched and unmeasured.
+   *
+   * Everything below this line is about pixels: createImageBitmap, a canvas, a
+   * re-encode. Handed a PDF, createImageBitmap throws and the catch returns the
+   * original, so a document would have survived by accident even without this
+   * line. Relying on that would be relying on a failure path, and the day
+   * somebody widens the catch a brochure would be quietly re-encoded as a JPEG.
+   *
+   * It also means the mime fallback below is honest. 'image/jpeg' is the right
+   * guess for a picture whose type the browser did not report; it would be a lie
+   * for a document, and the store would refuse the upload with a type mismatch
+   * nobody could read.
+   */
+  if (declared && isDocumentMime(declared)) {
+    return {
+      body: file,
+      mime: declared,
+      filename: cleanFilename(file.name, 'file'),
+      // No pixels. The column is nullable precisely for these rows.
+      width: null,
+      height: null,
+      resized: false,
+    };
+  }
+
   const original: PreparedImage = {
     body: file,
     // A browser that reports nothing usable still gets a guess from the name, and
@@ -138,7 +167,13 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
      */
     const encoded = await toBlob(canvas, 'image/webp', REENCODE_QUALITY);
 
-    if (!encoded || !isAllowedMime(encoded.type)) {
+    /*
+     * isImageMime, NOT isAllowedMime. This is checking what a CANVAS produced, and
+     * a canvas produces pictures. Since 20 Aug the wider list also admits PDFs and
+     * spreadsheets, so the broader check would now wave through a type this branch
+     * could never legitimately see.
+     */
+    if (!encoded || !isImageMime(encoded.type)) {
       return { ...original, width, height };
     }
 

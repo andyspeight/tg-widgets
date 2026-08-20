@@ -36,6 +36,8 @@ import {
   assertPathnameForTenant,
   cleanFilename,
   MAX_UPLOAD_BYTES,
+  type MediaKind,
+  mediaKind,
   MEDIA_MIME,
   pixelDimension,
   plainText as text,
@@ -85,10 +87,21 @@ export interface MediaPage {
  * dialog can draw itself or threading two booleans down through the whole editor
  * from a server component.
  */
-export async function loadMediaAction(offset = 0): Promise<MediaResult<MediaPage>> {
+export async function loadMediaAction(
+  offset = 0,
+  /*
+   * Which half of the library to show. Undefined is everything, which is what
+   * the settings screens and the duplicate path want; the picker passes 'image'
+   * or 'file' so a client choosing a brochure is not scrolling past four hundred
+   * photographs to find it. Narrowed to the two known words here rather than
+   * passed through, because this argument crosses the wire from a browser.
+   */
+  kind?: MediaKind,
+): Promise<MediaResult<MediaPage>> {
   try {
     const tenantId = await requireTenantId();
-    const { items, hasMore } = await listMedia(tenantId, { offset });
+    const wanted = kind === 'image' || kind === 'file' ? kind : undefined;
+    const { items, hasMore } = await listMedia(tenantId, { offset, kind: wanted });
     return {
       ok: true,
       data: {
@@ -100,7 +113,10 @@ export async function loadMediaAction(offset = 0): Promise<MediaResult<MediaPage
       },
     };
   } catch (error) {
-    return { ok: false, error: explain(error, 'Could not open your images.') };
+    return {
+      ok: false,
+      error: explain(error, kind === 'file' ? 'Could not open your files.' : 'Could not open your images.'),
+    };
   }
 }
 
@@ -164,31 +180,48 @@ export async function recordUploadAction(input: RecordUpload): Promise<MediaResu
 
     const url = String(input?.url ?? '');
     if (!BLOB_URL.test(url)) {
-      return { ok: false, error: 'That is not an uploaded image.' };
+      return { ok: false, error: 'That is not an uploaded file.' };
     }
 
     const stored = await describeBlob(url);
     if (!stored) {
       return {
         ok: false,
-        error: 'That upload did not arrive. Try again, and if it keeps failing the file may not be an image.',
+        error:
+          'That upload did not arrive. Try again, and if it keeps failing the file may not be a type we can serve.',
       };
     }
 
     // Throws if the object is not under this tenant's prefix.
     assertPathnameForTenant(stored.pathname, tenantId);
 
+    /*
+     * The kind is worked out from what the STORE says it holds, never from what
+     * the browser claimed. It only decides wording and a filename fallback here,
+     * but reading it off the browser's word would be the habit that eventually
+     * decides something that matters.
+     */
+    const kind = mediaKind(stored.contentType);
+
     if (stored.size > MAX_UPLOAD_BYTES) {
       // The object is in the store and is too big to keep, so it goes. Leaving it
       // would be an orphan nothing can reach and nothing will tidy.
       await removeBlob(url);
-      return { ok: false, error: 'That image is larger than 15MB.' };
+      return {
+        ok: false,
+        // A document is not downscaled on its way past, so 15MB is a real wall
+        // rather than one a photograph would have been shrunk under. Say so.
+        error:
+          kind === 'file'
+            ? 'That file is larger than 15MB. Try a smaller export.'
+            : 'That image is larger than 15MB.',
+      };
     }
 
     const item = await insertMedia(tenantId, {
       storageKey: stored.pathname,
       url,
-      filename: cleanFilename(input?.filename, `image.${MEDIA_MIME[stored.contentType]}`),
+      filename: cleanFilename(input?.filename, `${kind}.${MEDIA_MIME[stored.contentType]}`),
       mime: stored.contentType,
       bytes: stored.size,
       width: pixelDimension(input?.width),
@@ -201,7 +234,7 @@ export async function recordUploadAction(input: RecordUpload): Promise<MediaResu
     revalidatePath('/', 'layout');
     return { ok: true, data: item };
   } catch (error) {
-    return { ok: false, error: explain(error, 'Could not save that image.') };
+    return { ok: false, error: explain(error, 'Could not save that upload.') };
   }
 }
 

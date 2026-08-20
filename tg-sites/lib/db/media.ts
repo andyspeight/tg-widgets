@@ -14,7 +14,13 @@
 
 import 'server-only';
 
-import { isAllowedMime, type MediaMime } from '../media/limits';
+import {
+  ALLOWED_DOCUMENT_MIME,
+  ALLOWED_IMAGE_MIME,
+  isAllowedMime,
+  type MediaKind,
+  type MediaMime,
+} from '../media/limits';
 import type { MediaCredit, MediaItem, MediaSource } from '../media/types';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
@@ -93,19 +99,45 @@ function toItem(row: Record<string, unknown>): MediaItem {
  */
 export async function listMedia(
   tenantId: string,
-  options: { limit?: number; offset?: number } = {},
+  options: { limit?: number; offset?: number; kind?: MediaKind } = {},
 ): Promise<{ items: MediaItem[]; hasMore: boolean }> {
   const limit = Math.min(120, Math.max(1, Math.round(options.limit ?? 48)));
   const offset = Math.max(0, Math.round(options.offset ?? 0));
 
+  /*
+   * FILTERED IN SQL, not after the read, and that is not a micro-optimisation.
+   * The paging is `limit + 1` to work out hasMore; filtering the page after it
+   * came back would give a page of four items claiming there are more, and a
+   * "Load more" that returns the same four.
+   *
+   * The list of types is ours, from lib/media/limits.ts, never anything a
+   * caller typed. There is no kind COLUMN because the mime already says which a
+   * row is, and a column would be a second copy that can disagree with it.
+   */
+  const mimes: string[] | null =
+    options.kind === 'image'
+      ? [...ALLOWED_IMAGE_MIME]
+      : options.kind === 'file'
+        ? [...ALLOWED_DOCUMENT_MIME]
+        : null;
+
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx`
-      select id, url, storage_key, filename, mime, bytes,
-             width, height, alt, source, credit, created_at
-      from public.media
-      order by created_at desc, id desc
-      limit ${limit + 1} offset ${offset}
-    `;
+    const rows = mimes
+      ? await tx`
+          select id, url, storage_key, filename, mime, bytes,
+                 width, height, alt, source, credit, created_at
+          from public.media
+          where mime = any(${mimes})
+          order by created_at desc, id desc
+          limit ${limit + 1} offset ${offset}
+        `
+      : await tx`
+          select id, url, storage_key, filename, mime, bytes,
+                 width, height, alt, source, credit, created_at
+          from public.media
+          order by created_at desc, id desc
+          limit ${limit + 1} offset ${offset}
+        `;
 
     const items = rows.slice(0, limit).map((row) => toItem(row as Record<string, unknown>));
     return { items, hasMore: rows.length > limit };

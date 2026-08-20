@@ -35,6 +35,7 @@ import {
   SliderBlock,
   SocialBlock,
   BreadcrumbsBlock,
+  FileBlock,
   SpacerBlock,
   StatsBlock,
   StepsBlock,
@@ -145,6 +146,8 @@ export function BlockRenderer({
        * shows a worked example there rather than drawing nothing while a client
        * tries to position it.
        */
+      case 'file':
+        return <FileBlock props={props} />;
       case 'breadcrumbs':
         return <BreadcrumbsBlock props={props} editing={editable} />;
       case 'embed':

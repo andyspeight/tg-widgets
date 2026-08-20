@@ -21,6 +21,7 @@ import type { Field } from '../../lib/content/blocks';
 import type { PlaceMatch } from '../../lib/content/geocode';
 import { COLOUR_SWATCHES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
+import { FileField } from '../media/FileField';
 import { ImageField } from '../media/ImageField';
 import { CornerBox, type Corners } from './BoxControls';
 import { IconField } from './IconField';
@@ -163,6 +164,52 @@ export function FieldRenderer({
                   }
                 : undefined
             }
+          />
+        </Wrapper>
+      );
+
+    case 'file':
+      /*
+       * A FILE FIELD CANNOT WORK WITHOUT onPatch, so it says so rather than
+       * half-working. It writes four props at once — address, name, size, format
+       * — and a caller that can only take one would give the page a download with
+       * no name and no size on it, which looks like a bug on a live site rather
+       * than a missing prop in an editor.
+       *
+       * Both callers today pass one; this is here so the next one finds out at a
+       * glance instead of by looking at a published page.
+       */
+      if (!onPatch) {
+        return (
+          <Wrapper field={field} labelId={id} group>
+            <p className="ed-help">This field needs a container that can save several values at once.</p>
+          </Wrapper>
+        );
+      }
+      return (
+        <Wrapper field={field} labelId={id} group>
+          {/*
+            FOUR PROPS IN ONE PATCH: the address, the original filename, the size
+            and the format. They are written at the moment of choosing rather than
+            looked up at render time, for the same reason the picture field copies
+            a photograph's dimensions — the block stores a URL and the rest lives
+            on the media row, so reading them while rendering would be a database
+            query per file per visitor.
+
+            One patch, so a single undo takes the whole choice back.
+          */}
+          <FileField
+            value={asString(value)}
+            onPatch={onPatch}
+            urlKey={field.key}
+            nameKey={field.nameKey}
+            sizeKey={field.sizeKey}
+            formatKey={field.formatKey}
+            current={{
+              name: asString(siblings?.[field.nameKey]),
+              size: numFrom(siblings?.[field.sizeKey], 0),
+              format: asString(siblings?.[field.formatKey]),
+            }}
           />
         </Wrapper>
       );

@@ -25,12 +25,17 @@ import { describe, expect, it } from 'vitest';
 import {
   ALLOWED_MIME,
   assertPathnameForTenant,
+  ALLOWED_IMAGE_MIME,
   byteCount,
   cleanFilename,
   filenameStem,
+  formatLabel,
   humanBytes,
   isAllowedMime,
+  isDocumentMime,
+  isImageMime,
   MAX_UPLOAD_BYTES,
+  mediaKind,
   MEDIA_MIME,
   mimeFromFilename,
   pixelDimension,
@@ -211,15 +216,75 @@ describe('plainText', () => {
 // ---------------------------------------------------------------------------
 
 describe('the mime whitelist', () => {
-  it('has exactly the five types and no SVG', () => {
-    expect(ALLOWED_MIME.sort()).toEqual([
+  /*
+   * UPDATED 20 Aug 2026, when the File element put documents in the library.
+   * The five PICTURE types are still exactly five, which is what this test was
+   * always protecting; the wider list is checked separately below, and SVG is
+   * still refused by both.
+   */
+  it('has exactly the five picture types and no SVG', () => {
+    expect([...ALLOWED_IMAGE_MIME].sort()).toEqual([
       'image/avif',
       'image/gif',
       'image/jpeg',
       'image/png',
       'image/webp',
     ]);
+    expect(isImageMime('image/svg+xml')).toBe(false);
     expect(isAllowedMime('image/svg+xml')).toBe(false);
+  });
+
+  /*
+   * THE DOCUMENTS ARE DOCUMENTS, not "everything that is not an image". This is
+   * the test that fails if somebody widens the list on a busy afternoon: markup,
+   * script and vector formats each get their own line, because each of them is a
+   * way to run code from a URL we served.
+   */
+  it('admits documents and still refuses anything that can execute', () => {
+    expect(isDocumentMime('application/pdf')).toBe(true);
+    expect(isDocumentMime('application/zip')).toBe(true);
+    expect(
+      isDocumentMime('application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+    ).toBe(true);
+
+    for (const dangerous of [
+      'image/svg+xml',
+      'text/html',
+      'application/xhtml+xml',
+      'text/javascript',
+      'application/javascript',
+      'application/x-msdownload',
+      'application/x-sh',
+      'application/xml',
+    ]) {
+      expect(isDocumentMime(dangerous), dangerous).toBe(false);
+      expect(isAllowedMime(dangerous), dangerous).toBe(false);
+    }
+  });
+
+  /*
+   * A DOCUMENT MUST NEVER READ AS A PICTURE. Everything that crops, resizes,
+   * takes a focus point or goes through the browser's downscaling step asks
+   * isImageMime, and a PDF answering yes would end up in a canvas and come out
+   * as a blank image on a live page rather than as an error anybody sees.
+   */
+  it('keeps the two questions apart', () => {
+    expect(isImageMime('application/pdf')).toBe(false);
+    expect(isDocumentMime('image/png')).toBe(false);
+    expect(mediaKind('image/png')).toBe('image');
+    expect(mediaKind('application/pdf')).toBe('file');
+    // Unknown reads as a file, never as an image: offered as a download rather
+    // than pushed down an image path that would fail quietly.
+    expect(mediaKind('application/made-up')).toBe('file');
+  });
+
+  it('names a format the way a visitor would', () => {
+    expect(formatLabel('application/pdf')).toBe('PDF');
+    expect(
+      formatLabel('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+    ).toBe('Excel');
+    // A picture on a page does not announce its format.
+    expect(formatLabel('image/png')).toBe('');
   });
 
   it('narrows rather than just answering', () => {
@@ -236,6 +301,13 @@ describe('the mime whitelist', () => {
     expect(mimeFromFilename('a.svg')).toBe(null);
     expect(mimeFromFilename('noextension')).toBe(null);
     expect(mimeFromFilename(null)).toBe(null);
+    // Documents resolve the same way, off the one combined table.
+    expect(mimeFromFilename('brochure.pdf')).toBe('application/pdf');
+    expect(mimeFromFilename('terms.DOCX')).toBe(
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    expect(mimeFromFilename('script.js')).toBe(null);
+    expect(mimeFromFilename('page.html')).toBe(null);
   });
 });
 
@@ -292,6 +364,17 @@ describe('the application and the database agree', () => {
   );
 
   /*
+   * THE MIME CONSTRAINT MOVED on 20 Aug 2026. 0011 created it with the five
+   * picture types; 0024 drops and recreates it with the documents added, so 0024
+   * is the one in force and the one this suite must read. 0011 is still read
+   * here for the size ceiling and for the SVG check, both of which it still owns.
+   */
+  const mimeMigration = readFileSync(
+    join(__dirname, '..', 'db', 'migrations', '0024_media_documents.sql'),
+    'utf8',
+  );
+
+  /*
    * The drift here fails in the worse direction. If the application's ceiling is
    * higher than the database's, the upload succeeds, the row is refused, and the
    * result is an object in the store that nothing points at and nobody can see.
@@ -300,8 +383,14 @@ describe('the application and the database agree', () => {
     expect(migration).toContain(String(MAX_UPLOAD_BYTES));
   });
 
-  it('allows the same image types the check constraint does', () => {
-    const constraint = migration.match(/mime in \(([^)]+)\)/);
+  /*
+   * THE LIST EXISTS TWICE AND MUST MATCH. The store enforces the types named in
+   * the upload token, and the database enforces this constraint behind it. If
+   * they disagree the upload succeeds and the row is refused, which leaves an
+   * object in the store that nothing points at and nobody can see.
+   */
+  it('allows the same types the check constraint does', () => {
+    const constraint = mimeMigration.match(/mime in \(([\s\S]*?)\)\s*\)/);
     expect(constraint, 'the mime check constraint moved or was renamed').toBeTruthy();
 
     const inSql = [...constraint![1].matchAll(/'([^']+)'/g)].map((m) => m[1]).sort();
@@ -309,6 +398,8 @@ describe('the application and the database agree', () => {
   });
 
   it('never lets SVG into either one', () => {
+    // Both migrations, since either could be the one somebody edits in a hurry.
+    expect(mimeMigration).not.toContain("'image/svg");
     expect(migration).not.toContain('svg');
     expect(Object.keys(MEDIA_MIME)).not.toContain('image/svg+xml');
   });

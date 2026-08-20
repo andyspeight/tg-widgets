@@ -1,5 +1,5 @@
 /**
- * What counts as an image here, how big it may be, and where it is filed.
+ * What counts as a file here, how big it may be, and where it is filed.
  *
  * Pure, and deliberately so. Everything in this file is a decision about a
  * string or a number, with no network and no database, which is what lets the
@@ -19,7 +19,12 @@
 // ---------------------------------------------------------------------------
 
 /**
- * The five types allowed, and the extension each one gets.
+ * The five PICTURE types allowed, and the extension each one gets.
+ *
+ * Kept apart from the documents below because most of the product means this
+ * narrower list: everything that crops, resizes, takes a focus point or asks for
+ * alt text is asking about a picture, and a PDF reaching one of those paths
+ * fails as a blank image on a live page rather than as an error.
  *
  * SVG IS NOT HERE AND MUST NOT BE ADDED. An SVG is an XML document that can
  * carry script and fetch external references, so serving one from an origin that
@@ -33,7 +38,7 @@
  * re-encodes, and refusing the output of our own downscaling step would be an
  * odd way to fail.
  */
-export const MEDIA_MIME = {
+export const IMAGE_MIME = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
@@ -41,13 +46,99 @@ export const MEDIA_MIME = {
   'image/gif': 'gif',
 } as const;
 
+/**
+ * Documents, added 20 Aug 2026 for the File element, and the reasoning is in
+ * db/migrations/0024_media_documents.sql where the database enforces the same
+ * list. The short version: these are things somebody READS or OPENS IN ANOTHER
+ * PROGRAM. It is not "anything that is not an image", and that distinction is
+ * the whole security argument.
+ *
+ * Still no SVG, no text/html, nothing ending in javascript, no executables. The
+ * SVG note above applies unchanged and adding one here would undo it.
+ *
+ * The label is what a visitor sees on the download, so it is the word for the
+ * format rather than the extension: "PDF", not "pdf", and "Word" rather than
+ * "docx", because a client's customer knows what Word is.
+ */
+export const DOCUMENT_MIME = {
+  'application/pdf': { ext: 'pdf', label: 'PDF' },
+  'application/msword': { ext: 'doc', label: 'Word' },
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
+    ext: 'docx',
+    label: 'Word',
+  },
+  'application/vnd.ms-excel': { ext: 'xls', label: 'Excel' },
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+    ext: 'xlsx',
+    label: 'Excel',
+  },
+  'application/vnd.ms-powerpoint': { ext: 'ppt', label: 'PowerPoint' },
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': {
+    ext: 'pptx',
+    label: 'PowerPoint',
+  },
+  'text/csv': { ext: 'csv', label: 'CSV' },
+  'text/plain': { ext: 'txt', label: 'Text' },
+  'application/zip': { ext: 'zip', label: 'Zip' },
+} as const;
+
+/** Every type the store, the database and this application accept, to its extension. */
+export const MEDIA_MIME = {
+  ...IMAGE_MIME,
+  ...(Object.fromEntries(
+    Object.entries(DOCUMENT_MIME).map(([mime, meta]) => [mime, meta.ext]),
+  ) as { [K in keyof typeof DOCUMENT_MIME]: (typeof DOCUMENT_MIME)[K]['ext'] }),
+} as const;
+
 export type MediaMime = keyof typeof MEDIA_MIME;
+export type ImageMime = keyof typeof IMAGE_MIME;
+export type DocumentMime = keyof typeof DOCUMENT_MIME;
+
+/** What a row IS, worked out from its mime rather than stored beside it. */
+export type MediaKind = 'image' | 'file';
 
 export const ALLOWED_MIME = Object.keys(MEDIA_MIME) as MediaMime[];
+export const ALLOWED_IMAGE_MIME = Object.keys(IMAGE_MIME) as ImageMime[];
+export const ALLOWED_DOCUMENT_MIME = Object.keys(DOCUMENT_MIME) as DocumentMime[];
 
-/** Whether a value is one of the five, narrowing as it goes. */
+/** Whether a value is a type we accept at all, narrowing as it goes. */
 export function isAllowedMime(value: unknown): value is MediaMime {
   return typeof value === 'string' && value in MEDIA_MIME;
+}
+
+/**
+ * Whether a value is a PICTURE, which is a narrower question and the one most
+ * callers actually want.
+ *
+ * Everything that resizes, crops, sets a focus point, asks for alt text or goes
+ * through the browser's downscaling step means this one. Reaching for
+ * isAllowedMime there would put a PDF into a canvas, and the failure would be a
+ * blank image on a live page rather than an error anybody sees.
+ */
+export function isImageMime(value: unknown): value is ImageMime {
+  return typeof value === 'string' && value in IMAGE_MIME;
+}
+
+/** Whether a value is a document: something to download, not to draw. */
+export function isDocumentMime(value: unknown): value is DocumentMime {
+  return typeof value === 'string' && value in DOCUMENT_MIME;
+}
+
+/** Which of the two a mime is. Unknown types read as a file, never as an image,
+ *  so a type this build does not recognise is offered as a download rather than
+ *  put through an image path that would fail silently. */
+export function mediaKind(value: unknown): MediaKind {
+  return isImageMime(value) ? 'image' : 'file';
+}
+
+/**
+ * The word for a format, as a visitor sees it on a download link.
+ *
+ * "PDF" and "Word", not "application/pdf" and "docx". An empty string for an
+ * image, because a picture on a page does not announce its format.
+ */
+export function formatLabel(value: unknown): string {
+  return isDocumentMime(value) ? DOCUMENT_MIME[value].label : '';
 }
 
 /**
@@ -61,6 +152,11 @@ export function mimeFromFilename(filename: unknown): MediaMime | null {
   const ext = filename.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
   if (!ext) return null;
   if (ext === 'jpeg' || ext === 'jpg') return 'image/jpeg';
+  /*
+   * FIRST MATCH WINS, and the order of MEDIA_MIME decides it. Two document
+   * types share no extension, so there is no ambiguity to resolve; the loop is
+   * over the combined table so a .pdf resolves as readily as a .png.
+   */
   for (const [mime, extension] of Object.entries(MEDIA_MIME)) {
     if (extension === ext) return mime as MediaMime;
   }
@@ -78,6 +174,12 @@ export function mimeFromFilename(filename: unknown): MediaMime | null {
  * before uploading, so an ordinary photograph arrives at a few hundred kilobytes
  * and this ceiling is only met by something that skipped that path. It exists to
  * stop the store filling up, not to police quality.
+ *
+ * FOR A DOCUMENT IT IS THE REAL LIMIT. Nothing downscales a PDF on its way past,
+ * so a brochure of 20MB is refused where a photograph of 20MB would have been
+ * shrunk and accepted. 15MB is roomy for a brochure; the answer above it is a
+ * smaller export, not a bigger ceiling, because the ceiling is also the
+ * database's.
  *
  * tests/media.test.ts reads the migration and asserts this number still matches
  * it. Two copies of a limit drift, and the failure mode is the worse direction:

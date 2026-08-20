@@ -62,6 +62,28 @@ export type Field = { group?: FieldGroup } & (
    */
   | { kind: 'image'; key: string; label: string; help?: string; focus?: boolean; crop?: boolean }
   /*
+   * A DOCUMENT the client has uploaded, chosen from the file half of the media
+   * library. Its own kind rather than an image field with a flag, because what
+   * it writes is different: a picture field writes an address and pixel
+   * dimensions, this one writes an address, the original filename, the size in
+   * bytes and the format's name, so the block can say "Brochure.pdf, PDF, 2.4MB"
+   * without a database read per visitor.
+   *
+   * The three companion keys are named here rather than assumed by convention.
+   * The alt convention in the image field above fails softly, which is fine for
+   * a description; a file whose size landed in the wrong prop would show the
+   * wrong number on a live page, which is not.
+   */
+  | {
+      kind: 'file';
+      key: string;
+      label: string;
+      help?: string;
+      nameKey: string;
+      sizeKey: string;
+      formatKey: string;
+    }
+  /*
    * Four corner radii in pixels, linked or each on its own, the way the padding
    * box does the four sides. Its value is a { tl, tr, br, bl } object. The image
    * block uses it to override the named Corners preset with exact per-corner
@@ -2273,6 +2295,99 @@ export const BLOCKS: readonly BlockDefinition[] = [
         key: 'height',
         label: 'Height',
         options: SPACING_OPTIONS.filter((option) => option.value !== 'none'),
+      },
+    ],
+  },
+
+  {
+    /*
+     * A FILE TO DOWNLOAD, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * WHAT IT REPLACES. Until now the only way to put a brochure on a page was to
+     * host it somewhere else and paste the address into a Button, which meant a
+     * live page depending on a Dropbox link nobody was watching. The file lives
+     * in the client's own media library now, so it cannot vanish from under the
+     * page.
+     *
+     * FOUR PROPS FOR ONE CHOICE, written together when the file is picked: the
+     * address, the original filename, the size and the format's name. The last
+     * three are on the block rather than looked up while rendering, because the
+     * alternative is a database read per file per visitor for the sake of
+     * printing "2.4MB".
+     *
+     * TWO LOOKS, and they are not a style choice so much as two different jobs. A
+     * CARD is a row with the format, the name, a line of explanation and the size,
+     * which is what a page of downloads wants. A BUTTON is a single control, which
+     * is what a hero or the end of a paragraph wants. The card is the default
+     * because a lone download with no context is the commoner mistake.
+     *
+     * THE DOWNLOAD ATTRIBUTE IS A REQUEST, NOT A GUARANTEE. It only holds for a
+     * same-origin file, and ours are on the blob store, so a browser may well
+     * open a PDF in its own viewer instead. That is fine, and often what a visitor
+     * wanted; what matters is that the link is a link, so it works with a
+     * right-click, on a phone, and with JavaScript off.
+     */
+    type: 'file',
+    label: 'File',
+    group: 'Actions',
+    icon: 'file',
+    description: 'A brochure, terms or a price list, for a visitor to download.',
+    defaults: {
+      url: '',
+      name: '',
+      size: 0,
+      format: '',
+      title: '',
+      description: '',
+      look: 'card',
+      align: 'left',
+      newTab: true,
+    },
+    summarise: (props) => {
+      const label = asString(props.title) || asString(props.name);
+      return label ? `File: ${label}` : 'File';
+    },
+    fields: [
+      {
+        kind: 'file',
+        key: 'url',
+        label: 'File',
+        nameKey: 'name',
+        sizeKey: 'size',
+        formatKey: 'format',
+        help: 'PDF, Word, Excel, PowerPoint, CSV, text or a zip, up to 15MB.',
+      },
+      {
+        kind: 'text',
+        key: 'title',
+        label: 'Title',
+        max: 120,
+        help: 'What a visitor sees. Leave it blank to show the file name.',
+      },
+      {
+        kind: 'textarea',
+        key: 'description',
+        label: 'Description',
+        max: 240,
+        help: 'One line under the title, on the card look. Say what is in it and who it is for.',
+      },
+      {
+        kind: 'select',
+        key: 'look',
+        label: 'Look',
+        group: 'layout',
+        options: [
+          { value: 'card', label: 'Card' },
+          { value: 'button', label: 'Button' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+      {
+        kind: 'toggle',
+        key: 'newTab',
+        label: 'Open in a new tab',
+        group: 'layout',
+        help: 'On by default, so a visitor reading the file does not lose the page they were on.',
       },
     ],
   },

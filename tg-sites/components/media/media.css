@@ -98,6 +98,62 @@
 
 .mp-tile__pick:hover { border-color: var(--ed-select); }
 
+/*
+ * A DOCUMENT TILE. Where a photograph gets a thumbnail, a PDF gets its format's
+ * own name, because there is nothing to preview: an <img> pointed at a PDF draws
+ * a broken-image glyph, which a client reads as a failed upload rather than as a
+ * brochure. Same tile shape as a picture, so a mixed grid stays a grid.
+ */
+.mp-tile__doc {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  color: var(--ed-ink-3);
+}
+
+/*
+ * The chosen file, in the properties pane. The picture version beside it is a
+ * thumbnail and its actions; a document has no thumbnail, so the row carries the
+ * name, the format and the size instead, which is the same information a client
+ * would have squinted at a preview to confirm.
+ */
+.mp-chosen--file { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+.mp-chosen__doc {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-sunken);
+  color: var(--ed-ink-3);
+}
+
+.mp-chosen__file { display: flex; flex-direction: column; min-width: 0; flex: 1 1 8rem; }
+
+.mp-chosen__name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-chosen__detail { color: var(--ed-ink-3); font-size: var(--ed-text-sm); }
+
+.mp-tile__format {
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .mp-tile__pick:focus-visible {
   outline: 2px solid var(--ed-select);
   outline-offset: 2px;

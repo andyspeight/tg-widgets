@@ -4027,6 +4027,111 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
 
 /* ------------------------------------------------------------------ */
+/* The File block                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A DOWNLOAD IS A LINK, so everything here styles an anchor. No script, no
+ * button element, no click handler: a published page ships none, and a plain
+ * link is also what makes right-click, "save as", a phone's share sheet and a
+ * screen reader all work without being asked to.
+ */
+.tgs-file[data-align='centre'] { text-align: center; }
+.tgs-file[data-align='right'] { text-align: right; }
+
+/* The button look is the Button block's own control, so a download and a call to
+   action are the same object on a page. Only the alignment is ours. */
+.tgs-file[data-look='button'] .tgs-button { display: inline-flex; }
+.tgs-file__detail { opacity: 0.75; font-weight: 400; }
+
+/*
+ * THE CARD. A row rather than a stack, because the three things a visitor wants
+ * are the format, the name and the size, and side by side they read in one
+ * glance. Inline-flex so a short card does not stretch to the column width and
+ * read as an empty box with words in the corner.
+ */
+.tgs-file__card {
+  /*
+   * FULL WIDTH UP TO A LIMIT, not shrink-to-fit.
+   *
+   * Inline-flex was the first attempt and it looked wrong for the case that
+   * matters: a page of three or four downloads gave every card a different
+   * width, so the arrows sat at four different places and the badges lined up
+   * against nothing. A fixed maximum keeps a lone card from stretching across a
+   * wide column while letting a column of them agree with each other.
+   */
+  display: flex;
+  gap: var(--tgs-space-m);
+  align-items: center;
+  width: 100%;
+  max-width: 32rem;
+  padding: var(--tgs-space-m);
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-md);
+  background: var(--tgs-surface);
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tgs-file__card:hover {
+  border-color: var(--tgs-primary);
+  /* The same small lift the cards and buttons use, so hover means one thing
+     across the page. It honours prefers-reduced-motion through the rule at the
+     end of this block. */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 8%);
+}
+
+.tgs-file__card:focus-visible {
+  outline: 2px solid var(--tgs-primary);
+  outline-offset: 3px;
+}
+
+/* The extension, as a badge. A FIXED width, not a minimum: every badge the same
+   size is what makes the titles beside them line up down a page of downloads,
+   which is the whole reason the badge shows the extension rather than the
+   format's friendly name. See the note in FileBlock. */
+.tgs-file__badge {
+  flex: 0 0 auto;
+  width: 3.5rem;
+  padding: 6px 8px;
+  border-radius: var(--tgs-radius-sm);
+  background: var(--tgs-surface-alt);
+  color: var(--tgs-primary);
+  /* 13px. Below the 15px body-text floor on purpose and allowably: this is a
+     three-letter format label in a badge, not prose, and at 700 weight with the
+     palette's own primary on the tinted surface it clears 4.5:1 comfortably. */
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tgs-file__body { display: flex; flex: 1 1 auto; flex-direction: column; gap: 2px; min-width: 0; }
+.tgs-file__title { font-weight: 600; }
+
+/*
+ * Tinted from the palette hue rather than a flat grey, and kept above the 4.5:1
+ * line for body text. A download whose size nobody can read is a download with
+ * no size on it.
+ */
+.tgs-file__desc,
+.tgs-file__meta {
+  color: var(--tgs-text-muted);
+  font-size: var(--tgs-text-s);
+}
+
+.tgs-file__go { flex: 0 0 auto; color: var(--tgs-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-file__card { transition: none; }
+  .tgs-file__card:hover { transform: none; }
+}
+
+/* ------------------------------------------------------------------ */
 /* The Breadcrumbs BLOCK                                               */
 /* ------------------------------------------------------------------ */
 
@@ -4042,7 +4147,10 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  */
 .tgs-crumbs--block { padding: 0; color: var(--tgs-crumb-colour, var(--tgs-text-muted)); }
 
-.tgs-crumbs--block[data-size='xs'] { font-size: var(--tgs-text-xs); }
+/* 13px. Under the 15px body floor deliberately: a trail is navigation furniture
+   rather than prose, and this is the size somebody picks when it sits tight
+   under a page title. The two larger options are the real text sizes. */
+.tgs-crumbs--block[data-size='xs'] { font-size: 0.8125rem; }
 .tgs-crumbs--block[data-size='s']  { font-size: var(--tgs-text-s); }
 .tgs-crumbs--block[data-size='m']  { font-size: var(--tgs-text-m); }
 

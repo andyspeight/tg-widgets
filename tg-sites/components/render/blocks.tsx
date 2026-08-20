@@ -14,6 +14,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { safeColour } from '../../lib/content/schema';
+import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { cleanImportHtml } from '../../lib/import/html';
@@ -2513,6 +2514,122 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
   const style = oneOf(props, 'style', ['line', 'dashed', 'dots'] as const, 'line');
   const spacing = str(props, 'spacing', 'm');
   return <hr className="tgs-divider" data-style={style} data-spacing={spacing} />;
+}
+
+/**
+ * A file to download.
+ *
+ * A PLAIN LINK, and everything else follows from that. Not a button with a click
+ * handler, not a fetch, not a blob: an anchor with an href, so it works with a
+ * right-click, with "save link as", on a phone's share sheet, in a screen reader,
+ * and with JavaScript off. A published page ships no JavaScript at all, so
+ * anything cleverer here would simply not run.
+ *
+ * `download` IS A REQUEST, NOT A GUARANTEE. Browsers honour it only for a
+ * same-origin file, and ours are served from the blob store, which is a different
+ * origin. So a PDF will often open in the browser's own viewer instead. That is
+ * usually what a visitor wanted, and the alternative — proxying every download
+ * through our own origin to force the attachment header — would put a serverless
+ * function in front of every brochure for the sake of a preference. The attribute
+ * is set anyway, because when it does hold it holds for free.
+ *
+ * THE NAME, THE FORMAT AND THE SIZE come off the block's own props, written there
+ * when the file was chosen. Reading them from the media row at render time would
+ * be a database query per file per visitor to print "2.4MB".
+ *
+ * SIZE AND FORMAT ARE NOT DECORATION. "PDF, 2.4MB" is what tells somebody on a
+ * train whether to tap it, and what stops a click being a surprise.
+ */
+export function FileBlock({ props }: { props: Props }): ReactElement {
+  const url = safeUrl(str(props, 'url'));
+  if (!url) return <div className="tgs-placeholder">Choose a file to offer</div>;
+
+  const name = str(props, 'name');
+  // The title is what a visitor reads. Falling back to the stored filename means
+  // a client who picked a file and typed nothing still gets something meaningful
+  // rather than the word "Download" on its own.
+  const title = str(props, 'title') || name || 'Download';
+  const description = str(props, 'description');
+  const format = str(props, 'format');
+  const size = clamp(props.size, 0, 200 * 1024 * 1024, 0);
+  const look = oneOf(props, 'look', ['card', 'button'] as const, 'card');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const newTab = bool(props, 'newTab', true);
+
+  // "PDF · 2.4MB", each half only when it is there.
+  const detail = [format, size > 0 ? humanBytes(size) : ''].filter(Boolean).join(' · ');
+
+  /*
+   * THE BADGE IS THE EXTENSION, THE DETAIL LINE IS THE NAME, and the split is
+   * deliberate. "PowerPoint" in a badge is nine characters wider than "PDF", so a
+   * page of mixed downloads gets badges of four different widths and titles that
+   * start at four different places. An extension is never more than four
+   * characters, so every badge is the same size and the titles line up.
+   *
+   * Taken off the stored filename rather than a fifth prop: the extension is
+   * already in the name, and a prop that could disagree with it would be a prop
+   * that eventually does. The friendly word survives where it reads best, in the
+   * line underneath.
+   */
+  const badge = (name.toLowerCase().match(/\.([a-z0-9]{1,4})$/)?.[1] ?? format ?? '').slice(0, 4);
+
+  /*
+   * rel="noopener noreferrer" whenever the link opens a tab. Standard practice
+   * and cheap: without it the opened page gets a handle on the opener through
+   * window.opener, and a client's own file is not the only thing that could ever
+   * end up behind one of these addresses.
+   */
+  const target = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+
+  if (look === 'button') {
+    return (
+      <div className="tgs-file" data-look="button" data-align={align}>
+        {/* The SAME class and data-attributes the Button block uses, so a
+            download button and a call to action are the same object on a page
+            rather than two things that nearly match. */}
+        <a
+          className="tgs-button"
+          data-variant="primary"
+          data-size="m"
+          href={url}
+          download={name || undefined}
+          {...target}
+        >
+          {title}
+          {/* The space is a real character rather than CSS margin, because this
+              is one line of prose and a margin would not survive the line
+              wrapping in the middle of it. */}
+          {detail && <span className="tgs-file__detail">{'\u00A0'}({detail})</span>}
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tgs-file" data-look="card" data-align={align}>
+      <a className="tgs-file__card" href={url} download={name || undefined} {...target}>
+        {/*
+          The format sits in its own badge rather than being read out as part of
+          the title. aria-hidden because the same words are in the detail line
+          below, and a screen reader announcing "PDF PDF 2.4 megabytes" is worse
+          than one that says it once.
+        */}
+        <span className="tgs-file__badge" aria-hidden="true">
+          {badge || 'File'}
+        </span>
+        <span className="tgs-file__body">
+          <span className="tgs-file__title">{title}</span>
+          {description && <span className="tgs-file__desc">{description}</span>}
+          {detail && <span className="tgs-file__meta">{detail}</span>}
+        </span>
+        <span className="tgs-file__go" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" />
+          </svg>
+        </span>
+      </a>
+    </div>
+  );
 }
 
 /**

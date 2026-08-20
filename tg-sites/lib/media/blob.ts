@@ -103,7 +103,7 @@ export async function describeBlob(url: string): Promise<{
 }
 
 /**
- * Copy an image from somewhere else into our own store.
+ * Copy a file from somewhere else into our own store.
  *
  * This is what a Pexels import does, and copying rather than linking is a
  * deliberate choice. A hotlinked photograph is a client's hero image that
@@ -124,7 +124,16 @@ export async function copyIntoStore(
   const response = await fetch(sourceUrl, {
     // No credentials, no cookies, no redirect chain to somewhere unexpected.
     redirect: 'follow',
-    headers: { accept: 'image/*' },
+    /*
+     * Was `image/*` until 20 Aug 2026, when the media library gained documents.
+     * The two callers are a Pexels import, which only ever asks for photographs,
+     * and site duplication, which copies whatever a client already had — and
+     * since that now includes a brochure, an image-only accept header would have
+     * made a duplicated site lose its files. What is actually SERVED is decided
+     * by the content-type check below, which reads the response rather than
+     * asking politely, so widening the request narrows nothing.
+     */
+    headers: { accept: '*/*' },
   });
 
   if (!response.ok) {
@@ -138,7 +147,7 @@ export async function copyIntoStore(
 
   const contentType = (response.headers.get('content-type') || '').split(';')[0].trim();
   if (!isAllowedMime(contentType)) {
-    throw new Error('That is not an image type this product can serve.');
+    throw new Error('That is not a file type this product can serve.');
   }
 
   const bytes = Buffer.from(await response.arrayBuffer());

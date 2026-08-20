@@ -1,13 +1,22 @@
 'use client';
 
 /**
- * Choosing a picture.
+ * Choosing a picture, or a file.
  *
  * Three tabs, in the order somebody actually reaches for them: the images they
  * already have, then adding their own, then the photo library. Your images first
  * matters more than it sounds. Most placements are a picture the client already
  * uploaded, and opening on an upload box asks them to find a file they do not need
  * to find.
+ *
+ * TWO MODES, ONE DIALOG, added 20 Aug 2026 with the File element. `kind` picks
+ * which half of the library is on show: pictures, or documents. It is one
+ * component rather than two because everything that is hard here — the tenant
+ * upload prefix, the direct-to-store transfer, the delete confirmation, the
+ * paging — is identical for both, and the parts that genuinely differ are small
+ * and named at each branch. In file mode the photo library tab is gone (there is
+ * no stock brochure), the tiles are cards rather than thumbnails, and nothing
+ * asks for alt text, because a download has a name rather than a description.
  *
  * Built on the shared Modal, so focus trapping, Escape, the scrim and the header
  * are not reimplemented here. The one rule this file has to keep on its own is the
@@ -30,9 +39,13 @@ import { describeImageAction } from '../../app/actions/ai';
 import { MAX_ALT } from '../../lib/ai/prompt';
 import { prepareImageForUpload } from '../../lib/media/downscale';
 import {
+  ALLOWED_DOCUMENT_MIME,
   filenameStem,
+  formatLabel,
   humanBytes,
   MAX_UPLOAD_BYTES,
+  mediaKind,
+  type MediaKind,
   MEDIA_MIME,
 } from '../../lib/media/limits';
 import type { MediaItem, StockPhoto } from '../../lib/media/types';
@@ -42,14 +55,17 @@ import { ConfirmDialog, Modal } from '../ui/Modal';
 type Tab = 'bank' | 'upload' | 'stock';
 
 interface Props {
-  /** Called with the chosen image. The caller decides what to do with it. */
+  /** Called with the chosen item. The caller decides what to do with it. */
   onChoose: (item: MediaItem) => void;
   onClose: () => void;
   /** Highlighted in the grid, so "which one is on this block" is answerable. */
   currentUrl?: string;
+  /** Pictures or documents. Defaults to pictures, which every existing caller wants. */
+  kind?: MediaKind;
 }
 
-export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
+export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: Props) {
+  const files = kind === 'file';
   const [tab, setTab] = useState<Tab>('bank');
 
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -67,25 +83,28 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
 
   const [pendingDelete, setPendingDelete] = useState<MediaItem | null>(null);
 
-  const load = useCallback(async (offset: number) => {
-    setBusy(true);
-    setError(null);
-    const result = await loadMediaAction(offset);
-    setBusy(false);
+  const load = useCallback(
+    async (offset: number) => {
+      setBusy(true);
+      setError(null);
+      const result = await loadMediaAction(offset, kind);
+      setBusy(false);
 
-    if (!result.ok) {
-      setError(result.error);
+      if (!result.ok) {
+        setError(result.error);
+        setLoaded(true);
+        return;
+      }
+
+      setItems((current) => (offset === 0 ? result.data.items : [...current, ...result.data.items]));
+      setHasMore(result.data.hasMore);
+      setCanUpload(result.data.canUpload);
+      setCanSearchStock(result.data.canSearchStock);
+      setUploadPrefix(result.data.uploadPrefix);
       setLoaded(true);
-      return;
-    }
-
-    setItems((current) => (offset === 0 ? result.data.items : [...current, ...result.data.items]));
-    setHasMore(result.data.hasMore);
-    setCanUpload(result.data.canUpload);
-    setCanSearchStock(result.data.canSearchStock);
-    setUploadPrefix(result.data.uploadPrefix);
-    setLoaded(true);
-  }, []);
+    },
+    [kind],
+  );
 
   useEffect(() => {
     void load(0);
@@ -124,16 +143,35 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
   return (
     <>
       <Modal
-        title="Images"
-        description="Your own pictures, and a photo library for when you need one."
+        title={files ? 'Files' : 'Images'}
+        description={
+          files
+            ? 'Brochures, terms, price lists. Anything you add stays here for every page on this site.'
+            : 'Your own pictures, and a photo library for when you need one.'
+        }
         size="large"
         onClose={onClose}
       >
         <div className="mp-root">
-          <div className="mp-tabs" role="tablist" aria-label="Where to get an image">
-            <TabButton id="bank" current={tab} onSelect={setTab} label="Your images" icon="gallery" />
+          <div
+            className="mp-tabs"
+            role="tablist"
+            aria-label={files ? 'Where to get a file' : 'Where to get an image'}
+          >
+            <TabButton
+              id="bank"
+              current={tab}
+              onSelect={setTab}
+              label={files ? 'Your files' : 'Your images'}
+              icon={files ? 'file' : 'gallery'}
+            />
             <TabButton id="upload" current={tab} onSelect={setTab} label="Upload" icon="upload" />
-            <TabButton id="stock" current={tab} onSelect={setTab} label="Photo library" icon="search" />
+            {/* No stock tab in file mode. There is no library of other people's
+                brochures, and a tab that could only disappoint is worse than no
+                tab at all. */}
+            {!files && (
+              <TabButton id="stock" current={tab} onSelect={setTab} label="Photo library" icon="search" />
+            )}
           </div>
 
           {error && (
@@ -145,6 +183,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
 
           {tab === 'bank' && (
             <Bank
+              kind={kind}
               items={items}
               hasMore={hasMore}
               loaded={loaded}
@@ -160,6 +199,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
 
           {tab === 'upload' && (
             <UploadPanel
+              kind={kind}
               canUpload={canUpload}
               uploadPrefix={uploadPrefix}
               onAdded={added}
@@ -167,7 +207,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl }: Props) {
             />
           )}
 
-          {tab === 'stock' && (
+          {tab === 'stock' && !files && (
             <StockPanel canSearch={canSearchStock} onAdded={added} onError={setError} />
           )}
         </div>
@@ -198,7 +238,7 @@ function TabButton({
   current: Tab;
   onSelect: (tab: Tab) => void;
   label: string;
-  icon: 'gallery' | 'upload' | 'search';
+  icon: 'gallery' | 'upload' | 'search' | 'file';
 }) {
   return (
     <button
@@ -336,6 +376,7 @@ function AltEditor({
 }
 
 function Bank({
+  kind,
   items,
   hasMore,
   loaded,
@@ -347,6 +388,7 @@ function Bank({
   onMore,
   onUploadInstead,
 }: {
+  kind: MediaKind;
   items: MediaItem[];
   hasMore: boolean;
   loaded: boolean;
@@ -358,19 +400,22 @@ function Bank({
   onMore: () => void;
   onUploadInstead: () => void;
 }) {
-  if (!loaded) return <p className="mp-quiet">Opening your images…</p>;
+  const files = kind === 'file';
+
+  if (!loaded) return <p className="mp-quiet">Opening your {files ? 'files' : 'images'}…</p>;
 
   if (items.length === 0) {
     return (
       <div className="mp-empty">
-        <Icon name="gallery" size={28} />
-        <h3>No images yet</h3>
+        <Icon name={files ? 'file' : 'gallery'} size={28} />
+        <h3>{files ? 'No files yet' : 'No images yet'}</h3>
         <p>
-          Add your own photographs, or find one in the library. Anything you add
-          stays here for every page on this site.
+          {files
+            ? 'Add a brochure, your booking conditions, a price list. Anything you add stays here for every page on this site.'
+            : 'Add your own photographs, or find one in the library. Anything you add stays here for every page on this site.'}
         </p>
         <button type="button" className="tg-btn" data-variant="primary" onClick={onUploadInstead}>
-          Add an image
+          {files ? 'Add a file' : 'Add an image'}
         </button>
       </div>
     );
@@ -378,7 +423,7 @@ function Bank({
 
   return (
     <>
-      <div className="mp-grid">
+      <div className="mp-grid" data-kind={kind}>
         {items.map((item) => (
           <figure className="mp-tile" key={item.id} data-current={item.url === currentUrl}>
             {/*
@@ -392,8 +437,21 @@ function Bank({
               onClick={() => onChoose(item)}
               title={`Use ${item.filename}`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.url} alt={item.alt || item.filename} loading="lazy" decoding="async" />
+              {/*
+                A DOCUMENT HAS NO THUMBNAIL. Rendering one into an <img> gives a
+                broken-image glyph, which reads as a failed upload rather than a
+                PDF. The format's own name is the honest preview, and it is also
+                the thing somebody is scanning the grid for.
+              */}
+              {mediaKind(item.mime) === 'file' ? (
+                <span className="mp-tile__doc">
+                  <Icon name="file" size={26} />
+                  <span className="mp-tile__format">{formatLabel(item.mime) || 'File'}</span>
+                </span>
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={item.url} alt={item.alt || item.filename} loading="lazy" decoding="async" />
+              )}
               {item.url === currentUrl && (
                 <span className="mp-tile__badge">
                   <Icon name="check" size={13} /> In use
@@ -413,8 +471,12 @@ function Bank({
                 No alt text is worth saying out loud here, not hiding. This grid is
                 the one screen where somebody can see all their images at once and
                 fix the ones nobody described.
+
+                NOT ON A DOCUMENT. Alt text describes a picture to somebody who
+                cannot see it; a download link is already words, and asking for a
+                description of a PDF would be asking a question with no answer.
               */}
-              <AltEditor item={item} onSaved={onAltSaved} />
+              {mediaKind(item.mime) === 'image' && <AltEditor item={item} onSaved={onAltSaved} />}
               {item.source === 'pexels' && item.credit.photographer && (
                 <span className="mp-tile__credit">{item.credit.photographer} · Pexels</span>
               )}
@@ -449,16 +511,19 @@ function Bank({
 // ---------------------------------------------------------------------------
 
 function UploadPanel({
+  kind,
   canUpload,
   uploadPrefix,
   onAdded,
   onError,
 }: {
+  kind: MediaKind;
   canUpload: boolean;
   uploadPrefix: string;
   onAdded: (item: MediaItem) => void;
   onError: (message: string) => void;
 }) {
+  const files = kind === 'file';
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -471,7 +536,7 @@ function UploadPanel({
      */
     return (
       <div className="mp-error mp-error--panel">
-        <h3>Image storage is not connected yet</h3>
+        <h3>File storage is not connected yet</h3>
         <p>
           Uploads go to a Vercel Blob store, and this project does not have one
           attached. In Vercel, open this project, go to Storage, and connect a Blob
@@ -494,7 +559,21 @@ function UploadPanel({
     for (const [index, file] of chosen.entries()) {
       const label = chosen.length > 1 ? ` (${index + 1} of ${chosen.length})` : '';
 
-      if (file.size > MAX_UPLOAD_BYTES * 4) {
+      /*
+       * A DOCUMENT IS MEASURED AGAINST THE REAL CEILING, not four times it.
+       *
+       * The generous first pass below exists because an image is about to be
+       * SHRUNK: a 40MB photograph becomes a 400KB WebP, so refusing it up front
+       * would refuse a file that was going to be fine. Nothing shrinks a PDF, so
+       * for a document the limit is the limit, and saying so here saves a client
+       * watching a 30MB brochure upload before being told no.
+       */
+      if (files && file.size > MAX_UPLOAD_BYTES) {
+        onError(`${file.name} is larger than 15MB. Try a smaller export.`);
+        continue;
+      }
+
+      if (!files && file.size > MAX_UPLOAD_BYTES * 4) {
         // Refused before the browser tries to decode it. A 200MB file will not
         // fit in a canvas and there is no point finding that out slowly.
         onError(`${file.name} is far too large. Images need to be under 15MB.`);
@@ -579,19 +658,26 @@ function UploadPanel({
       }}
     >
       <Icon name="upload" size={26} />
-      <h3>Drop images here</h3>
+      <h3>{files ? 'Drop files here' : 'Drop images here'}</h3>
       <p>
-        JPEG, PNG, WebP, AVIF or GIF, up to 15MB each. Large photographs are shrunk
-        to 2400px before uploading, which keeps your pages fast without you having
-        to think about it.
+        {files
+          ? 'PDF, Word, Excel, PowerPoint, CSV, plain text or a zip, up to 15MB each. Nothing is changed on the way in, so what a visitor downloads is exactly what you uploaded.'
+          : 'JPEG, PNG, WebP, AVIF or GIF, up to 15MB each. Large photographs are shrunk to 2400px before uploading, which keeps your pages fast without you having to think about it.'}
       </p>
 
+      {/*
+        `accept` is a CONVENIENCE, never the check. It tidies the operating
+        system's file chooser and nothing more: a person can always pick "all
+        files", and a drag-and-drop ignores it completely. What actually decides
+        is the type list named in the upload token, which the STORE enforces, and
+        the check constraint on public.media behind that.
+      */}
       <input
         ref={input}
         type="file"
         className="mp-drop__input"
         id="mp-file"
-        accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+        accept={files ? ALLOWED_DOCUMENT_MIME.join(',') : 'image/jpeg,image/png,image/webp,image/avif,image/gif'}
         multiple
         onChange={(event) => void handleFiles(event.target.files)}
       />

@@ -23,6 +23,7 @@ export type IconName =
   | 'columns'
   | 'grid'
   | 'crumbs'
+  | 'file'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -111,6 +112,9 @@ const PATHS: Record<IconName, string> = {
   // A short run, a chevron, a longer run: a trail. Deliberately not `nav`,
   // which is three equal dashes, and not a plain chevron.
   crumbs: 'M3 12h4M9.5 9l2.5 3-2.5 3M15 12h6',
+  // A sheet with a folded corner. Deliberately not a download arrow, which is
+  // the action; this is the thing.
+  file: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 
