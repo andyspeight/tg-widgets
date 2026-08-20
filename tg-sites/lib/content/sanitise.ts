@@ -2,23 +2,28 @@
  * HTML sanitisation.
  *
  * Two things in this CMS carry HTML: the `text` block's rich text, and the
- * staff-only `embed` block. Both are sanitised here.
+ * `embed` block. This module is the door both go through.
  *
  * The rule from the security skill is sanitise on save AND again on render,
- * because stored HTML is never trusted. This module is the single place both
- * of those calls land, so there is one allowlist to audit rather than two.
+ * because stored HTML is never trusted. Every one of those calls lands here, so
+ * there is one place to audit rather than two.
  *
  * DESIGN NOTE
- * This is a conservative allowlist tokeniser, not a full HTML parser. It errs
- * towards dropping things it does not understand. That is the right trade for
- * a CMS where we also control the editor producing the markup.
+ * The tag walk below is a conservative allowlist tokeniser, not a full HTML
+ * parser. It errs towards dropping what it does not understand, which is the
+ * right trade for RICH TEXT, because we also control the editor producing it
+ * and the allowlist is twenty tags wide.
  *
- * Before real client content ships, swap the tag walk for a parser-backed
- * sanitiser (DOMPurify under jsdom on the server). The interface here is
- * deliberately narrow so that swap is a one-file change. Until then, the
- * embed block stays staff-only.
+ * It is NOT the right trade for markup a stranger pasted, and this file used to
+ * say so, ending "until then, the embed block stays staff-only". On 20 Aug 2026
+ * Andy needed that block open to every client, because pasting an embed code is
+ * how some of our widgets get added. So the prerequisite was built rather than
+ * waived: embed mode is handed to lib/content/sanitise-embed.ts, which parses
+ * with parse5 and rebuilds the markup from values it has checked itself. The
+ * interface here did not change, which is what that old note was buying.
  */
 
+import { sanitiseEmbedHtml } from './sanitise-embed';
 import { sanitiseStyle } from './styles';
 
 /**
@@ -148,6 +153,22 @@ const ALLOWED_BY_MODE: Record<SanitiseMode, Record<string, readonly string[]>> =
  */
 export function sanitiseHtml(input: unknown, mode: SanitiseMode = 'richtext'): string {
   if (typeof input !== 'string' || input.length === 0) return '';
+
+  /*
+   * EMBED IS PARSER-BACKED AND LIVES ELSEWHERE, since 20 Aug 2026.
+   *
+   * The header above used to end "until then, the embed block stays staff-only",
+   * because a regex walk over HTML a stranger pasted is how mutation XSS gets
+   * in. Andy needed the block open to every client, so the prerequisite was
+   * built rather than skipped: lib/content/sanitise-embed.ts parses with parse5
+   * and rebuilds the markup from values it checked itself.
+   *
+   * The two are still one call for every caller, so the save path and the
+   * renderer did not have to learn anything new. The tag walk below now guards
+   * only the rich text our own toolbar produces, which is the job it is
+   * actually sound for.
+   */
+  if (mode === 'embed') return sanitiseEmbedHtml(input);
 
   /*
    * A map rather than a chain of ternaries, so a fourth mode is one line here

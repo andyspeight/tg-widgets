@@ -165,6 +165,22 @@ function propsStructural(
   if (type === 'container') return containerStructural(before, after);
   if (type === 'imported') return importedStructural(before, after);
 
+  /*
+   * RAW HTML IS STRUCTURE, WHATEVER ITS FIELD SAYS IT IS.
+   *
+   * The embed block holds its markup in a `textarea`, and textarea is a content
+   * kind, so without this line a change to it would read as an ordinary content
+   * edit. That was harmless while the block was staff-only, because the flag
+   * below caught it first. It stopped being harmless on 20 Aug 2026 when the
+   * block was opened to every client.
+   *
+   * A content-only member is somebody deliberately restricted to words and
+   * pictures. Markup is neither: it carries layout, styling, and since the same
+   * change, a widget script. So this is pinned to the BLOCK rather than left to
+   * its field kind, and it no longer depends on a flag that has gone.
+   */
+  if (type === 'embed') return true;
+
   const definition = blockDefinition(type);
   // An unknown block, or a staff-only one, is not a content-only member's to
   // touch. Both fail closed.

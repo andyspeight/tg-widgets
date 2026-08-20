@@ -2273,14 +2273,29 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * HTML, OPEN TO EVERY CLIENT SINCE 20 AUG 2026.
+     *
+     * Andy: "HTML needs to be available for anyone as that is how some of our
+     * widgets get added." It was staff-only until then, and the reason was the
+     * sanitiser rather than the block: a regex walk over pasted markup is how
+     * mutation XSS gets in. Opening it meant building the parser-backed
+     * sanitiser first (lib/content/sanitise-embed.ts), not removing a flag.
+     *
+     * A pasted Travelgenix embed now WORKS, which it would not have before even
+     * with the gate off: the container's data-tg-* attributes survive and the
+     * script tag survives, because its src is on our own origin. Anybody else's
+     * script is still dropped. For a third-party widget the sealed iframe of
+     * `embed-widget` remains the right door, and for one of ours the `widget`
+     * block is still tidier than pasting code.
+     */
     type: 'embed',
-    label: 'Embed code',
+    label: 'HTML',
     group: 'Advanced',
     icon: 'code',
-    description: 'Raw HTML that runs in the page itself. Travelgenix staff only.',
-    staffOnly: true,
+    description: 'Paste an embed code or your own HTML.',
     defaults: { html: '' },
-    summarise: () => 'Embed code',
+    summarise: () => 'HTML',
     fields: [
       {
         kind: 'textarea',
@@ -2288,7 +2303,9 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'HTML',
         rows: 8,
         max: 20000,
-        help: 'Sanitised on save and again on render. Scripts and event handlers are stripped.',
+        help:
+          'Cleaned on save and again when the page draws. Travelgenix widget embed codes work as pasted. '
+          + 'Scripts from anywhere else are removed, so for another company\'s widget use Embedded widget instead.',
       },
     ],
   },
