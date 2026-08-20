@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.2';
+  const VERSION = '0.4.3';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -69,7 +69,7 @@
       resort: 'Resort', destination: 'Destination', departsFrom: 'Departs from',
       airline: 'Airline', boardBasis: 'Board basis', travelPeriod: 'Travel period',
       bookByLabel: 'Book by', offerReference: 'Offer reference',
-      aboutHoliday: 'About this holiday', whatsIncluded: "What's included",
+      aboutHoliday: 'About this holiday', whatsIncluded: "What's included", whatsNotIncluded: "What's not included",
       photos: 'Photos', takeALook: 'Take a look', whereYoullBe: "Where you'll be",
       theDetail: 'The detail',
       // Cruise template
@@ -110,7 +110,7 @@
       resort: 'Station', destination: 'Destination', departsFrom: 'Départ de',
       airline: 'Compagnie aérienne', boardBasis: 'Type de pension', travelPeriod: 'Période de voyage',
       bookByLabel: 'Réserver avant le', offerReference: 'Référence de l’offre',
-      aboutHoliday: 'À propos de ce séjour', whatsIncluded: 'Ce qui est inclus',
+      aboutHoliday: 'À propos de ce séjour', whatsIncluded: 'Ce qui est inclus', whatsNotIncluded: "Ce qui n'est pas inclus",
       photos: 'Photos', takeALook: 'Jetez un œil', whereYoullBe: 'Où vous serez',
       theDetail: 'Les détails',
       enquireNow: 'Faire une demande', enquireAbout: 'Renseignez-vous sur cette offre',
@@ -146,7 +146,7 @@
       resort: 'Ferienort', destination: 'Reiseziel', departsFrom: 'Abflug ab',
       airline: 'Fluggesellschaft', boardBasis: 'Verpflegung', travelPeriod: 'Reisezeitraum',
       bookByLabel: 'Buchen bis', offerReference: 'Angebotsreferenz',
-      aboutHoliday: 'Über diesen Urlaub', whatsIncluded: 'Was ist inbegriffen',
+      aboutHoliday: 'Über diesen Urlaub', whatsIncluded: 'Was ist inbegriffen', whatsNotIncluded: 'Was ist nicht inbegriffen',
       photos: 'Fotos', takeALook: 'Werfen Sie einen Blick', whereYoullBe: 'Wo Sie sein werden',
       theDetail: 'Die Details',
       enquireNow: 'Jetzt anfragen', enquireAbout: 'Zu diesem Angebot anfragen',
@@ -182,7 +182,7 @@
       resort: 'Complejo', destination: 'Destino', departsFrom: 'Sale de',
       airline: 'Aerolínea', boardBasis: 'Régimen', travelPeriod: 'Periodo de viaje',
       bookByLabel: 'Reserva antes del', offerReference: 'Referencia de la oferta',
-      aboutHoliday: 'Sobre estas vacaciones', whatsIncluded: 'Qué incluye',
+      aboutHoliday: 'Sobre estas vacaciones', whatsIncluded: 'Qué incluye', whatsNotIncluded: 'Qué no incluye',
       photos: 'Fotos', takeALook: 'Echa un vistazo', whereYoullBe: 'Dónde estarás',
       theDetail: 'Los detalles',
       enquireNow: 'Consultar ahora', enquireAbout: 'Consulta sobre esta oferta',
@@ -218,7 +218,7 @@
       resort: 'Località', destination: 'Destinazione', departsFrom: 'Partenza da',
       airline: 'Compagnia aerea', boardBasis: 'Trattamento', travelPeriod: 'Periodo di viaggio',
       bookByLabel: 'Prenota entro il', offerReference: 'Riferimento offerta',
-      aboutHoliday: 'Su questa vacanza', whatsIncluded: 'Cosa è incluso',
+      aboutHoliday: 'Su questa vacanza', whatsIncluded: 'Cosa è incluso', whatsNotIncluded: 'Cosa non è incluso',
       photos: 'Foto', takeALook: 'Dai un’occhiata', whereYoullBe: 'Dove sarai',
       theDetail: 'I dettagli',
       enquireNow: 'Richiedi ora', enquireAbout: 'Richiedi informazioni su questa offerta',
@@ -254,7 +254,7 @@
       resort: 'Stațiune', destination: 'Destinație', departsFrom: 'Pleacă din',
       airline: 'Companie aeriană', boardBasis: 'Tip de masă', travelPeriod: 'Perioada de călătorie',
       bookByLabel: 'Rezervă până la', offerReference: 'Referință ofertă',
-      aboutHoliday: 'Despre acest sejur', whatsIncluded: 'Ce este inclus',
+      aboutHoliday: 'Despre acest sejur', whatsIncluded: 'Ce este inclus', whatsNotIncluded: 'Ce nu este inclus',
       photos: 'Fotografii', takeALook: 'Aruncă o privire', whereYoullBe: 'Unde vei fi',
       theDetail: 'Detaliile',
       enquireNow: 'Solicită acum', enquireAbout: 'Întreabă despre această ofertă',
@@ -525,6 +525,7 @@
     }
     .tgop-badge svg { width: 13px; height: 13px; }
     .tgop-badge.save { background: linear-gradient(120deg, #F97316, #E8893A); box-shadow: 0 6px 18px rgba(232,137,58,0.45); }
+    .tgop-badge.promo { background: var(--tgo-success, #10B981); box-shadow: 0 6px 18px rgba(16,185,129,0.35); }
     .tgop-badge.glass { background: rgba(255,255,255,0.16); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25); }
     .tgop-eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,0.85); margin-bottom: 8px; }
     .tgop-h1 {
@@ -570,6 +571,12 @@
       color: var(--tgo-success); display: flex; align-items: center; justify-content: center;
     }
     .tgop-incl .tick svg { width: 14px; height: 14px; }
+    /* What's not included — same grid, muted, with a cross marker */
+    .tgop-excl li { color: var(--tgo-sub); }
+    .tgop-incl .cross {
+      flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--tgo-alt, #F1F5F9);
+      color: var(--tgo-strike, #94A3B8); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+    }
 
     /* Gallery */
     .tgop-gallery { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; gap: 10px; }
@@ -871,6 +878,8 @@
 
       // Replace the includes / tags arrays only when a non-empty translation exists.
       if (Array.isArray(tr.includes) && tr.includes.length) out.includes = tr.includes;
+      if (Array.isArray(tr.excludes) && tr.excludes.length) out.excludes = tr.excludes;
+      if (Array.isArray(tr.promos) && tr.promos.length) out.promos = tr.promos;
       if (Array.isArray(tr.tags) && tr.tags.length) out.tags = tr.tags;
 
       return out;
@@ -959,6 +968,8 @@
         atol: /atol|both/i.test(protection),
         abta: /abta|both/i.test(protection),
         includes: Array.isArray(o.includes) ? o.includes : [],
+        excludes: Array.isArray(o.excludes) ? o.excludes : [],   // what's NOT included
+        promos: Array.isArray(o.promos) ? o.promos : [],         // extra promo flashes
         tags: Array.isArray(o.tags) ? o.tags : [],
         enquiryEmail: this._f('enquiryEmail') || this.cfg.offer.enquiryEmail || '',
         enquiryPhone: this._f('enquiryPhone'),
@@ -974,6 +985,8 @@
       if (d.save) out.push('<span class="tgop-badge save">' + esc(this.t('save')) + ' ' + esc(d.save) + (d.savePct ? ' (' + d.savePct + '%)' : '') + '</span>');
       else if (d.badge === 'Custom text') { if (d.badgeText) out.push('<span class="tgop-badge save">' + esc(d.badgeText) + '</span>'); }
       else if (d.badge && d.badge !== 'No badge') out.push('<span class="tgop-badge save">' + esc(d.badge) + '</span>');
+      // Extra promos ride in the same badge row as their own coloured flashes.
+      (d.promos || []).forEach(function (p) { if (p && String(p).trim()) out.push('<span class="tgop-badge promo">' + esc(p) + '</span>'); });
       if (d.atol) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ATOL protected</span>');
       else if (d.abta) out.push('<span class="tgop-badge ' + glass + '">' + I.shield + ' ABTA member</span>');
       return out.length ? '<div class="tgop-badges">' + out.join('') + '</div>' : '';
@@ -1282,6 +1295,15 @@
           + '</ul></div>'
         : '';
 
+      // What's NOT included — mirrors the included list with a cross marker and
+      // muted styling, so the price's limits are spelled out (flights,
+      // gratuities, transfers, insurance…).
+      const fExcludes = d.excludes.length
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('whatsNotIncluded')) + '</h2><ul class="tgop-incl tgop-excl">'
+          + d.excludes.map(function (x) { return '<li><span class="cross">✕</span>' + esc(x) + '</li>'; }).join('')
+          + '</ul></div>'
+        : '';
+
       const fGallery = d.images.length > 1
         ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('photos')) + '</h2><div class="tgop-gallery" data-gallery>'
           + d.images.slice(0, 5).map(function (src, i) { return '<button type="button" class="g" data-idx="' + i + '" style="background-image:url(' + esc(src) + ')" aria-label="' + esc(t('openPhoto', { n: i + 1 })) + '"></button>'; }).join('')
@@ -1375,13 +1397,13 @@
         + '<button type="button" class="tgop-lb-btn next" data-lb-next aria-label="' + esc(t('nextPhoto')) + '">' + I.chevDown + '</button></div>';
 
       // Main column content order (shared by classic + immersive)
-      const mainCol = fAbout + fContent + fIncludes + fVideo + fGallery + fMap + fDetail;
+      const mainCol = fAbout + fContent + fIncludes + fExcludes + fVideo + fGallery + fMap + fDetail;
 
       // ── Assemble by template ──
       let html;
       if (cfg.template === 'editorial') {
         html = fBar + fHero + fFacts
-          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fContent + fIncludes + fGallery + fVideo + fMap + fDetail + '</div>'
+          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fContent + fIncludes + fExcludes + fGallery + fVideo + fMap + fDetail + '</div>'
           + '<div class="tgop-enqband"><div class="tgop-wrap tgop-enqband-inner">'
             + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">' + esc(t('likeTheLook')) + '</h2><p>' + esc(t('enqBandCopy')) + '</p></div>'
             + '<div class="tgop-enqband-card">' + this._bookCard(d) + '</div>'
@@ -1409,7 +1431,7 @@
           : '';
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap tgop-cruise-top">'
-            + '<div class="tgop-cruise-main">' + fAbout + fIncludes + fDetail + '</div>'
+            + '<div class="tgop-cruise-main">' + fAbout + fIncludes + fExcludes + fDetail + '</div>'
             + '<aside class="tgop-cruise-aside">' + this._cruiseBook(d) + '</aside>'
           + '</div>'
           + this._cruiseStory(d)
