@@ -2477,6 +2477,92 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * CLICK TO CHAT ON WHATSAPP, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * WHATSAPP WAS ALREADY ONE ICON in the Social links row, which is right for
+     * a footer of five icons and wrong for the thing a travel agency actually
+     * wants: a button that opens a chat with a message already typed, so the
+     * enquiry arrives with the page it came from attached.
+     *
+     * NO JAVASCRIPT. wa.me is a plain link, so this works the same as every
+     * other block here.
+     *
+     * WHAT IT ADDS OVER A BUTTON WITH A wa.me ADDRESS PASTED IN: the number.
+     * wa.me wants digits and nothing else, with the country code and no leading
+     * zero, and every form a client will actually type breaks one of those. The
+     * failure is invisible from our side — the link builds, the page publishes,
+     * and the visitor gets "phone number shared via url is invalid". See
+     * lib/content/whatsapp.ts, where the normalising is done and tested.
+     *
+     * A LEADING ZERO IS REFUSED, NOT REPAIRED. "01204 123456" needs the country
+     * code, and we cannot know a client is in the UK. Dropping the zero would
+     * make a link that looks right and reaches nobody.
+     *
+     * THE FLOATING LOOK IS A REAL OPTION rather than a gimmick: a bubble pinned
+     * to the corner is how most people meet this button, and it costs nothing
+     * because position: fixed needs no script.
+     */
+    type: 'whatsapp',
+    label: 'WhatsApp',
+    group: 'Actions',
+    icon: 'whatsapp',
+    description: 'A click-to-chat button, with the first message already written.',
+    defaults: {
+      phone: '',
+      message: 'Hello, I am looking at your website and would like to ask about',
+      label: 'Chat on WhatsApp',
+      look: 'button',
+      corner: 'right',
+      align: 'left',
+    },
+    summarise: (props) => {
+      const phone = asString(props.phone).trim();
+      return phone ? `WhatsApp: ${phone}` : 'WhatsApp';
+    },
+    fields: [
+      {
+        kind: 'text',
+        key: 'phone',
+        label: 'Number',
+        max: 24,
+        placeholder: '+44 1204 123456',
+        help: 'With the country code. A number starting with 0 will not work, because WhatsApp needs the international form.',
+      },
+      {
+        kind: 'textarea',
+        key: 'message',
+        label: 'First message',
+        max: 300,
+        help: 'Already typed in for them when the chat opens. Leave it blank to open an empty chat.',
+      },
+      { kind: 'text', key: 'label', label: 'Button text', max: 40 },
+      {
+        kind: 'select',
+        key: 'look',
+        label: 'Look',
+        group: 'layout',
+        options: [
+          { value: 'button', label: 'A button on the page' },
+          { value: 'floating', label: 'A bubble in the corner' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'corner',
+        label: 'Which corner',
+        group: 'layout',
+        options: [
+          { value: 'right', label: 'Bottom right' },
+          { value: 'left', label: 'Bottom left' },
+        ],
+        help: 'Only used by the bubble. Put it on the opposite side to anything else that floats.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
      * A DISCOUNT CODE, asked for on 20 Aug 2026 from the Duda list.
      *
      * NO COPY BUTTON, AND THAT IS NOT A SHORTFALL. Copying to the clipboard

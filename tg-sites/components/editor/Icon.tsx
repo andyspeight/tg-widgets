@@ -28,6 +28,7 @@ export type IconName =
   | 'copyright'
   | 'shape'
   | 'coupon'
+  | 'whatsapp'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -131,6 +132,11 @@ const PATHS: Record<IconName, string> = {
   // A ticket with a notch out of each side, which is what a coupon looks like
   // everywhere it has ever been printed.
   coupon: 'M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 8 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-8M10 9v6',
+  // A speech bubble with a tail at the bottom left, which is the shape
+  // WhatsApp uses. Drawn in the set's own 2px stroke rather than lifted from
+  // the brand mark: a filled green logo among 67 outlined icons reads as a
+  // sticker somebody pasted on.
+  whatsapp: 'M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.4A8.5 8.5 0 1 1 21 11.5M9 9.5c0 3 2.5 5.5 5.5 5.5',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 

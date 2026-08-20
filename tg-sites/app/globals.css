@@ -4027,6 +4027,83 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
 
 /* ------------------------------------------------------------------ */
+/* WhatsApp click to chat                                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * WhatsApp's own green, and it is the one place in this stylesheet a brand
+ * colour is hardcoded rather than taken from the theme. That is deliberate: a
+ * WhatsApp button in a client's navy is a button nobody recognises at a glance,
+ * and recognition is the entire reason somebody presses it. #25D366 is the
+ * brand's own value, and white on it clears the contrast line comfortably.
+ */
+.tgs-whatsapp[data-align='centre'] { text-align: center; }
+.tgs-whatsapp[data-align='right'] { text-align: right; }
+
+.tgs-whatsapp__button {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+.tgs-whatsapp__button:hover { filter: brightness(0.94); transform: translateY(-1px); }
+
+.tgs-whatsapp__button:focus-visible,
+.tgs-whatsapp__bubble:focus-visible {
+  outline: 3px solid var(--tgs-primary);
+  outline-offset: 3px;
+}
+
+/*
+ * THE BUBBLE IS position: fixed AND NOTHING ELSE. No script, no scroll
+ * listener, no timed entrance. It sits above the page's own content and below
+ * anything modal, which is what the z-index is picked against.
+ */
+.tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble {
+  position: fixed;
+  bottom: var(--tgs-space-l);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #ffffff;
+  font-size: 24px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
+  transition: transform 0.18s ease;
+}
+
+.tgs-whatsapp[data-look='floating'][data-corner='right'] .tgs-whatsapp__bubble { right: var(--tgs-space-l); }
+.tgs-whatsapp[data-look='floating'][data-corner='left'] .tgs-whatsapp__bubble { left: var(--tgs-space-l); }
+
+.tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble:hover { transform: scale(1.06); }
+
+/* Closer to the edge on a phone, where 32px of margin around a 56px bubble eats
+   a fifth of the width. */
+@container tgs-page (max-width: 767px) {
+  .tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble { bottom: var(--tgs-space-m); }
+  .tgs-whatsapp[data-look='floating'][data-corner='right'] .tgs-whatsapp__bubble { right: var(--tgs-space-m); }
+  .tgs-whatsapp[data-look='floating'][data-corner='left'] .tgs-whatsapp__bubble { left: var(--tgs-space-m); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-whatsapp__button,
+  .tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble { transition: none; }
+  .tgs-whatsapp__button:hover,
+  .tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble:hover { transform: none; }
+}
+
+/* ------------------------------------------------------------------ */
 /* The Coupon                                                          */
 /* ------------------------------------------------------------------ */
 

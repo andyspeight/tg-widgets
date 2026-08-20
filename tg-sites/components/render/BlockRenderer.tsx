@@ -37,6 +37,7 @@ import {
   BreadcrumbsBlock,
   CopyrightBlock,
   CouponBlock,
+  WhatsAppBlock,
   IconBlock,
   LocationsBlock,
   ShapeBlock,
@@ -160,6 +161,8 @@ export function BlockRenderer({
        */
       /* `editable` keeps an expired coupon on the canvas, so a client can see
          and fix the thing they are editing. On a live page it goes. */
+      case 'whatsapp':
+        return <WhatsAppBlock props={props} />;
       case 'coupon':
         return <CouponBlock props={props} editing={editable} />;
       case 'locations':

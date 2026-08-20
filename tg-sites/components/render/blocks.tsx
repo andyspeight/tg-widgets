@@ -15,6 +15,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
 import { copyrightLine } from '../../lib/content/copyright';
 import { couponEndsLabel, couponExpired, todayUtc } from '../../lib/content/coupon';
+import { whatsappHref } from '../../lib/content/whatsapp';
 import { safeColour } from '../../lib/content/schema';
 import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
@@ -2534,6 +2535,82 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
   const style = oneOf(props, 'style', ['line', 'dashed', 'dots'] as const, 'line');
   const spacing = str(props, 'spacing', 'm');
   return <hr className="tgs-divider" data-style={style} data-spacing={spacing} />;
+}
+
+/**
+ * Click to chat on WhatsApp.
+ *
+ * A PLAIN LINK. wa.me needs no script, so this works like everything else here.
+ *
+ * THE NUMBER IS THE WHOLE JOB. wa.me wants digits, the country code, and no
+ * leading zero, and every form a client types breaks one of those. When it
+ * cannot be made usable this draws its empty state rather than a link, because
+ * a link that builds and reaches nobody is the worst of the three outcomes: the
+ * page publishes, nothing looks wrong, and the visitor gets an error from
+ * WhatsApp that the client never sees. See lib/content/whatsapp.ts.
+ *
+ * THE BUBBLE IS position: fixed AND NOTHING ELSE. No script, no scroll listener,
+ * no delay before it appears. It is drawn last in its column and pinned to a
+ * corner by the stylesheet.
+ */
+export function WhatsAppBlock({ props }: { props: Props }): ReactElement {
+  const href = whatsappHref(str(props, 'phone'), str(props, 'message'));
+  if (!href) {
+    return (
+      <div className="tgs-placeholder">
+        Add a WhatsApp number, with its country code
+      </div>
+    );
+  }
+
+  const label = str(props, 'label').trim() || 'Chat on WhatsApp';
+  const look = oneOf(props, 'look', ['button', 'floating'] as const, 'button');
+  const corner = oneOf(props, 'corner', ['right', 'left'] as const, 'right');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+
+  /*
+   * The mark, drawn rather than loaded, so there is no request for it and it
+   * takes the button's own colour. aria-hidden because the button already says
+   * WhatsApp in words beside it; a bubble has no words, so its accessible name
+   * comes from aria-label on the link instead.
+   */
+  const mark = (
+    <svg
+      className="tgs-whatsapp__mark"
+      viewBox="0 0 24 24"
+      width="1.15em"
+      height="1.15em"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m5.8 14.16c-.25.69-1.45 1.32-2 1.36-.51.04-1 .22-3.4-.71-2.87-1.13-4.68-4.06-4.82-4.25-.14-.19-1.15-1.53-1.15-2.92s.73-2.07 1-2.36c.26-.29.57-.36.76-.36s.38 0 .55.01c.18.01.41-.07.64.49.25.6.83 2.07.9 2.22.08.15.13.32.02.51-.1.19-.16.31-.31.48-.15.17-.32.38-.46.51-.15.15-.31.31-.13.61.17.29.77 1.28 1.66 2.07 1.14 1.02 2.1 1.33 2.4 1.48.29.15.46.13.63-.08.17-.2.73-.85.92-1.14.19-.29.39-.24.65-.15.26.1 1.65.78 1.94.92.28.15.47.22.54.34.07.13.07.72-.18 1.41" />
+    </svg>
+  );
+
+  if (look === 'floating') {
+    return (
+      <div className="tgs-whatsapp" data-look="floating" data-corner={corner}>
+        {/*
+          A bubble has no visible words, so the name has to come from somewhere.
+          It names the ACTION rather than the network, because "WhatsApp" alone
+          tells somebody what it is and not what pressing it does.
+        */}
+        <a className="tgs-whatsapp__bubble" href={href} aria-label={label} target="_blank" rel="noopener noreferrer">
+          {mark}
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="tgs-whatsapp" data-look="button" data-align={align}>
+      <a className="tgs-whatsapp__button" href={href} target="_blank" rel="noopener noreferrer">
+        {mark}
+        {label}
+      </a>
+    </div>
+  );
 }
 
 /**
