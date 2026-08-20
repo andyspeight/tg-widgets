@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.3';
+  const VERSION = '0.3.4';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -125,6 +125,16 @@
   const DEFAULT_TAGS = [
     'Family friendly', 'Adults only', 'Beachfront', 'Honeymoon', 'Last minute',
     'Early bird', 'Spa', 'Kids club', 'Swim-up rooms'
+  ];
+  // What a price does NOT cover — one-tap suggestions for the "not included" list.
+  const DEFAULT_EXCLUDES = [
+    'Flights', 'Airport transfers', 'Gratuities', 'Travel insurance',
+    'Checked baggage', 'Resort fees', 'Excursions', 'Drinks package', 'Visa fees'
+  ];
+  // Extra promo flashes shown alongside the badge — one-tap suggestions.
+  const DEFAULT_PROMOS = [
+    'Free drinks package', 'Kids sail free', 'Onboard credit', 'Free room upgrade',
+    'Low deposit', 'Free parking', 'No single supplement'
   ];
 
   // ── Long-text content sections ────────────────────────────────────────────
@@ -481,6 +491,8 @@
     .ob-incl input { width: auto; }
 
     /* Free-text include pills */
+    .ob-sublabel { display: block; font-size: 13px; font-weight: 700; color: var(--tgo-ink); margin: 0 0 6px; }
+    .ob-pillgroup { margin-bottom: 6px; }
     .ob-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; min-height: 4px; }
     .ob-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; border-radius: 999px;
       background: var(--tgo-success-soft); border: 1px solid var(--tgo-success); color: var(--tgo-ink); font-size: 13.5px; font-weight: 500; }
@@ -678,6 +690,8 @@
         // Editable option lists
         offerTypes: Array.isArray(c.offerTypes) && c.offerTypes.length ? c.offerTypes : OFFER_TYPES,
         includeOptions: Array.isArray(c.includeOptions) && c.includeOptions.length ? c.includeOptions : DEFAULT_INCLUDES,
+        excludeOptions: Array.isArray(c.excludeOptions) && c.excludeOptions.length ? c.excludeOptions : DEFAULT_EXCLUDES,
+        promoOptions: Array.isArray(c.promoOptions) && c.promoOptions.length ? c.promoOptions : DEFAULT_PROMOS,
         tagOptions: Array.isArray(c.tagOptions) && c.tagOptions.length ? c.tagOptions : DEFAULT_TAGS,
 
         // Enquiry routing defaults
@@ -709,8 +723,10 @@
       // Long-text sections live in a store; _renderContent draws the right set.
       this._contentVals = {};
       Object.keys(CONTENT_SECTIONS).forEach((k) => { if (fields[k] != null && fields[k] !== '') this._contentVals[k] = fields[k]; });
-      // Includes are free-text pills now.
+      // Includes, not-included and promos are all free-text pills now.
       this._includes = Array.isArray(offer.includes) ? offer.includes.slice() : [];
+      this._excludes = Array.isArray(offer.excludes) ? offer.excludes.slice() : [];
+      this._promos = Array.isArray(offer.promos) ? offer.promos.slice() : [];
       const tags = Array.isArray(offer.tags) ? offer.tags : [];
       this.root.querySelectorAll('.ob-toggle').forEach((c) => {
         if (tags.indexOf(c.dataset.tag) !== -1) c.classList.add('on');
@@ -804,23 +820,40 @@
       }
 
       if (cfg.showIncludes) {
-        html += '<div class="ob-fs"><h4>5 · What\'s included</h4><p class="hint">Type what the price covers and press Enter. Tap a suggestion to add it. Add anything you like.</p>'
-          + '<div class="ob-pills" data-pills></div>'
-          + '<div class="ob-pill-add"><input type="text" class="ob-pill-input" placeholder="e.g. Return flights, free room upgrade, kids stay free" /><button type="button" class="ob-btn ob-pill-go">Add</button></div>'
-          + '<div class="ob-pill-suggest">'
-          + cfg.includeOptions.map(function (i) { return '<button type="button" class="ob-chip-suggest" data-suggest="' + esc(i) + '">+ ' + esc(i) + '</button>'; }).join('')
+        var suggest = function (opts) { return '<div class="ob-pill-suggest">' + opts.map(function (i) { return '<button type="button" class="ob-chip-suggest" data-suggest="' + esc(i) + '">+ ' + esc(i) + '</button>'; }).join('') + '</div>'; };
+        html += '<div class="ob-fs"><h4>5 · What\'s included &amp; not included</h4>'
+          + '<label class="ob-sublabel">What\'s included</label>'
+          + '<p class="hint">Type what the price covers and press Enter. Tap a suggestion to add it.</p>'
+          + '<div class="ob-pillgroup" data-list="includes">'
+          +   '<div class="ob-pills" data-pills="includes"></div>'
+          +   '<div class="ob-pill-add"><input type="text" class="ob-pill-input" placeholder="e.g. Return flights, free room upgrade, kids stay free" /><button type="button" class="ob-btn ob-pill-go">Add</button></div>'
+          +   suggest(cfg.includeOptions)
+          + '</div>'
+          + '<label class="ob-sublabel" style="margin-top:16px">What\'s not included</label>'
+          + '<p class="hint">Be clear about what the price does not cover, so nobody is caught out — flights, gratuities, transfers, travel insurance.</p>'
+          + '<div class="ob-pillgroup" data-list="excludes">'
+          +   '<div class="ob-pills" data-pills="excludes"></div>'
+          +   '<div class="ob-pill-add"><input type="text" class="ob-pill-input" placeholder="e.g. Flights, gratuities, transfers, travel insurance" /><button type="button" class="ob-btn ob-pill-go">Add</button></div>'
+          +   suggest(cfg.excludeOptions)
           + '</div></div>';
       }
 
       if (cfg.showTags) {
-        html += '<div class="ob-fs"><h4>6 · Tags &amp; promo badge</h4><p class="hint">Tags help people filter. The badge is the coloured flash on the card.</p>'
+        html += '<div class="ob-fs"><h4>6 · Tags &amp; promos</h4><p class="hint">Tags help people filter. The badge and promos are the coloured flashes on the card.</p>'
           + '<div class="ob-field" style="margin-bottom:14px"><label>Tags</label><div class="ob-chips">'
           + cfg.tagOptions.map(function (t) { return '<button type="button" class="ob-toggle" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; }).join('')
           + '</div></div><div class="ob-grid">'
-          + field('badge', 'Promo badge', select('badge', BADGES, BADGES[0]))
+          + field('badge', 'Lead badge', select('badge', BADGES, BADGES[0]))
           + field('badgeAmount', 'Badge amount', money('badgeAmount', '400'), '(for "Save")')
           + field('badgeText', 'Custom badge text', input('badgeText', 'e.g. €90 onboard spend per cabin'), '(for "Custom text")', true)
           + field('urgency', 'Urgency pill', input('urgency', 'Only 4 left at this price'), '(green flash)')
+          + '</div>'
+          + '<label class="ob-sublabel" style="margin-top:16px">More promos</label>'
+          + '<p class="hint">Extra promo flashes shown alongside the badge. Add as many as you like — e.g. Free drinks package, Kids sail free, £90 onboard credit.</p>'
+          + '<div class="ob-pillgroup" data-list="promos">'
+          +   '<div class="ob-pills" data-pills="promos"></div>'
+          +   '<div class="ob-pill-add"><input type="text" class="ob-pill-input" placeholder="e.g. Free drinks package" /><button type="button" class="ob-btn ob-pill-go">Add</button></div>'
+          +   '<div class="ob-pill-suggest">' + cfg.promoOptions.map(function (i) { return '<button type="button" class="ob-chip-suggest" data-suggest="' + esc(i) + '">+ ' + esc(i) + '</button>'; }).join('') + '</div>'
           + '</div></div>';
       }
 
@@ -891,6 +924,8 @@
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(this.root);
       if (!Array.isArray(this._includes)) this._includes = [];
+      if (!Array.isArray(this._excludes)) this._excludes = [];
+      if (!Array.isArray(this._promos)) this._promos = [];
       if (!this._contentVals || typeof this._contentVals !== 'object') this._contentVals = {};
       if (!this._fieldVals || typeof this._fieldVals !== 'object') this._fieldVals = {};
 
@@ -900,7 +935,9 @@
       if (this.cfg.offer) this._prefillOffer(this.cfg.offer);
       this._renderFields();   // type-aware structured fields (sections 2 & 3)
       this._renderContent();  // type-aware long-text sections
-      this._renderPills();    // free-text includes
+      this._renderPills('includes');   // free-text: what's included
+      this._renderPills('excludes');   // free-text: what's not included
+      this._renderPills('promos');     // free-text: extra promo flashes
       this._renderThumbs();
     }
 
@@ -918,14 +955,18 @@
       root.querySelectorAll('.ob-toggle').forEach((c) =>
         c.addEventListener('click', () => c.classList.toggle('on')));
 
-      // Includes — free-text pills plus one-tap suggestions
-      const pillInput = root.querySelector('.ob-pill-input');
-      const pillGo = root.querySelector('.ob-pill-go');
-      const addFromInput = () => { if (pillInput) { this._addPill(pillInput.value); pillInput.value = ''; pillInput.focus(); } };
-      if (pillInput) pillInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addFromInput(); } });
-      if (pillGo) pillGo.addEventListener('click', addFromInput);
-      root.querySelectorAll('.ob-chip-suggest').forEach((b) =>
-        b.addEventListener('click', () => this._addPill(b.dataset.suggest)));
+      // Included / not-included / promos — each a free-text pill list plus
+      // one-tap suggestions. Scoped per group so the three lists stay separate.
+      root.querySelectorAll('.ob-pillgroup').forEach((group) => {
+        const key = group.dataset.list || 'includes';
+        const input = group.querySelector('.ob-pill-input');
+        const go = group.querySelector('.ob-pill-go');
+        const addFromInput = () => { if (input) { this._addPill(key, input.value); input.value = ''; input.focus(); } };
+        if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addFromInput(); } });
+        if (go) go.addEventListener('click', addFromInput);
+        group.querySelectorAll('.ob-chip-suggest').forEach((b) =>
+          b.addEventListener('click', () => this._addPill(key, b.dataset.suggest)));
+      });
 
       // Structured fields and content sections swap to suit the chosen type.
       const typeSel = root.querySelector('[data-key="type"]');
@@ -940,7 +981,8 @@
         // A cleared form has no source content, so its translations no longer
         // apply — drop them too rather than leaving orphaned overlays.
         this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
-        this._includes = []; this._contentVals = {}; this._fieldVals = {};
+        this._includes = []; this._excludes = []; this._promos = [];
+        this._contentVals = {}; this._fieldVals = {};
         this._render();
       });
 
@@ -1032,23 +1074,33 @@
       });
     }
 
-    _renderPills() {
-      const wrap = this.root && this.root.querySelector('[data-pills]');
+    // The three free-text lists share one machinery, keyed by list name:
+    // 'includes' (this._includes), 'excludes' (this._excludes), 'promos'
+    // (this._promos). Each renders into its own [data-pills="<key>"] holder.
+    _listFor(key) {
+      const prop = key === 'promos' ? '_promos' : key === 'excludes' ? '_excludes' : '_includes';
+      if (!Array.isArray(this[prop])) this[prop] = [];
+      return this[prop];
+    }
+    _renderPills(key) {
+      key = key || 'includes';
+      const wrap = this.root && this.root.querySelector('[data-pills="' + key + '"]');
       if (!wrap) return;
-      const list = this._includes || [];
+      const list = this._listFor(key);
       wrap.innerHTML = list.length
         ? list.map((v, i) => '<span class="ob-pill">' + esc(v) + '<button type="button" data-rm="' + i + '" aria-label="Remove">×</button></span>').join('')
         : '<span class="ob-pill-empty">Nothing added yet.</span>';
       wrap.querySelectorAll('[data-rm]').forEach((b) => {
-        b.addEventListener('click', () => { this._includes.splice(parseInt(b.dataset.rm, 10), 1); this._renderPills(); });
+        b.addEventListener('click', () => { list.splice(parseInt(b.dataset.rm, 10), 1); this._renderPills(key); });
       });
     }
-    _addPill(v) {
+    _addPill(key, v) {
+      key = key || 'includes';
       v = (v || '').trim();
       if (!v) return;
-      if (!this._includes) this._includes = [];
-      if (this._includes.indexOf(v) === -1) this._includes.push(v.slice(0, 80));
-      this._renderPills();
+      const list = this._listFor(key);
+      if (list.indexOf(v) === -1) list.push(v.slice(0, 80));
+      this._renderPills(key);
     }
 
     async _writeSection(key, btn) {
@@ -1564,6 +1616,10 @@
         if (v) offer.fields[el.dataset.key] = v;
       });
       offer.includes = (this._includes || []).slice();
+      const excludes = (this._excludes || []).slice();
+      if (excludes.length) offer.excludes = excludes;
+      const promos = (this._promos || []).slice();
+      if (promos.length) offer.promos = promos;
       root.querySelectorAll('.ob-toggle.on').forEach((c) => offer.tags.push(c.dataset.tag));
       const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
       if (imgs.length) offer.images = imgs;

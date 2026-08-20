@@ -164,6 +164,12 @@ function cleanOffer(raw) {
     currency: cap(s.currency, 8),
     fields: fields,
     includes: strArr(s.includes, 40, 200),
+    // What's NOT included (flights, gratuities, transfers, insurance…) — mirrors
+    // includes. And promos = extra promo flashes beyond the single lead badge
+    // (e.g. "Free drinks package", "Kids sail free"), capped shorter as they are
+    // badge-sized. Both whitelisted here or they would be scrubbed on save.
+    excludes: strArr(s.excludes, 40, 200),
+    promos: strArr(s.promos, 20, 80),
     tags: strArr(s.tags, 30, 60),
     images: strArr(s.images, 20, 1000)
   };

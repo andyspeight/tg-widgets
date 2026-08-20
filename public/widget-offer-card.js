@@ -35,7 +35,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.6';
+  const VERSION = '0.2.7';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -63,12 +63,12 @@
   // prices, dates, board/type labels, ATOL/ABTA wording — is author content and
   // is never translated here. English is the source + fallback.
   const MESSAGES = {
-    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer', from: 'From', viewHolidayDetails: 'View holiday details' },
-    fr: { viewDeal: "Voir l'offre", save: 'Économisez', nights: 'nuits', untitled: 'Offre sans titre' },
-    de: { viewDeal: 'Angebot ansehen', save: 'Sparen', nights: 'Nächte', untitled: 'Angebot ohne Titel' },
-    es: { viewDeal: 'Ver oferta', save: 'Ahorra', nights: 'noches', untitled: 'Oferta sin título' },
-    it: { viewDeal: 'Vedi offerta', save: 'Risparmia', nights: 'notti', untitled: 'Offerta senza titolo' },
-    ro: { viewDeal: 'Vezi oferta', save: 'Economisește', nights: 'nopți', untitled: 'Ofertă fără titlu' },
+    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer', from: 'From', viewHolidayDetails: 'View holiday details', notIncluded: 'Not included' },
+    fr: { viewDeal: "Voir l'offre", save: 'Économisez', nights: 'nuits', untitled: 'Offre sans titre', notIncluded: 'Non inclus' },
+    de: { viewDeal: 'Angebot ansehen', save: 'Sparen', nights: 'Nächte', untitled: 'Angebot ohne Titel', notIncluded: 'Nicht inbegriffen' },
+    es: { viewDeal: 'Ver oferta', save: 'Ahorra', nights: 'noches', untitled: 'Oferta sin título', notIncluded: 'No incluido' },
+    it: { viewDeal: 'Vedi offerta', save: 'Risparmia', nights: 'notti', untitled: 'Offerta senza titolo', notIncluded: 'Non incluso' },
+    ro: { viewDeal: 'Vezi oferta', save: 'Economisește', nights: 'nopți', untitled: 'Ofertă fără titlu', notIncluded: 'Neinclus' },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
   // resolver keeps the widget self-contained.
@@ -274,6 +274,18 @@
     .tgoc-include { font-size: 12px; color: var(--tgo-sub); line-height: 1.4; padding-left: 16px; position: relative; }
     .tgoc-include::before { content: '✓'; position: absolute; left: 0; color: var(--tgo-success); font-weight: 700; }
 
+    /* What's NOT included — muted list with a cross marker + a small label */
+    .tgoc-nots { margin: 6px 0 0; }
+    .tgoc-nots-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--tgo-muted); margin-bottom: 2px; }
+    .tgoc-excludes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+    .tgoc-exclude { font-size: 12px; color: var(--tgo-muted); line-height: 1.4; padding-left: 16px; position: relative; }
+    .tgoc-exclude::before { content: '✕'; position: absolute; left: 0; color: var(--tgo-strike); font-weight: 700; }
+
+    /* Extra promo flashes — a wrap row of small coloured pills */
+    .tgoc-promos { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; }
+    .tgoc-promo { font-size: 10px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; color: #fff;
+      background: var(--tgo-accent); padding: 3px 9px; border-radius: 999px; line-height: 1.35; }
+
     /* Price block + CTA */
     .tgoc-price-block { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
     .tgoc-was { font-size: 12px; color: var(--tgo-strike); text-decoration: line-through; }
@@ -402,6 +414,7 @@
     .tgoc-ribbon--featured { background: var(--tgo-accent, #E11D2A); }
     .tgoc-ribbon--type { background: #1E88C7; }
     .tgoc-ribbon--luxury { background: linear-gradient(180deg, #CBA43C, #B6891D); }
+    .tgoc-ribbon--promo { background: var(--tgo-success, #10B981); }
     .tgoc-cbody { padding: 22px 22px 6px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
     .tgoc-c-title { margin: 0; font-size: clamp(19px, 2vw, 22px); font-weight: 800; line-height: 1.22; letter-spacing: -0.3px; }
     .tgoc-c-ship { margin: -8px 0 0; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--tgo-accent); min-width: 0; }
@@ -521,6 +534,8 @@
       }
 
       if (Array.isArray(tr.includes) && tr.includes.length) out.includes = tr.includes;
+      if (Array.isArray(tr.excludes) && tr.excludes.length) out.excludes = tr.excludes;
+      if (Array.isArray(tr.promos) && tr.promos.length) out.promos = tr.promos;
       if (Array.isArray(tr.tags) && tr.tags.length) out.tags = tr.tags;
 
       return out;
@@ -564,7 +579,10 @@
       }
 
       const tags = Array.isArray(o.tags) ? o.tags.slice(0, 3) : [];
-      const includes = Array.isArray(o.includes) ? o.includes.filter(function (x) { return typeof x === 'string' && x.trim(); }) : [];
+      const strList = function (a) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === 'string' && x.trim(); }) : []; };
+      const includes = strList(o.includes);
+      const excludes = strList(o.excludes);              // what's NOT included
+      const promos = strList(o.promos).slice(0, 6);      // extra promo flashes (capped)
 
       return {
         sym: sym,
@@ -575,6 +593,8 @@
         teaser: this._f('teaser'),
         tags: tags,
         includes: includes,
+        excludes: excludes,
+        promos: promos,
         price: money(sym, this._f('price')),
         was: money(sym, this._f('was')),
         priceSub: priceSub,
@@ -612,10 +632,19 @@
       const tags = d.tags.length
         ? '<div class="tgoc-tags">' + d.tags.map(function (t) { return '<span class="tgoc-tag">' + esc(t) + '</span>'; }).join('') + '</div>'
         : '';
-      const includes = this._includesBlock(d);
       return '<div class="tgoc-body">' + eyebrow
         + '<h3 class="tgoc-title">' + esc(d.title) + '</h3>'
-        + loc + teaser + includes + tags + '</div>';
+        + loc + this._promosBlock(d) + teaser
+        + this._includesBlock(d) + this._excludesBlock(d) + tags + '</div>';
+    }
+
+    // Extra promo flashes (beyond the single lead badge) — a row of small
+    // coloured pills. Only rendered when the offer carries promos.
+    _promosBlock(d) {
+      if (!d.promos || !d.promos.length) return '';
+      return '<div class="tgoc-promos">'
+        + d.promos.map(function (p) { return '<span class="tgoc-promo">' + esc(p) + '</span>'; }).join('')
+        + '</div>';
     }
 
     // What's included list. Only rendered when the offer carries includes, so
@@ -625,6 +654,17 @@
       return '<ul class="tgoc-includes">'
         + d.includes.map(function (t) { return '<li class="tgoc-include">' + esc(t) + '</li>'; }).join('')
         + '</ul>';
+    }
+
+    // What's NOT included — a muted list with a cross marker and a small label,
+    // so a visitor knows what the price leaves out (flights, gratuities, etc.).
+    // Only rendered when the offer carries excludes.
+    _excludesBlock(d) {
+      if (!d.excludes || !d.excludes.length) return '';
+      return '<div class="tgoc-nots"><span class="tgoc-nots-label">' + esc(this.t('notIncluded')) + '</span>'
+        + '<ul class="tgoc-excludes">'
+        + d.excludes.map(function (t) { return '<li class="tgoc-exclude">' + esc(t) + '</li>'; }).join('')
+        + '</ul></div>';
     }
 
     _priceBlock(d) {
@@ -682,7 +722,8 @@
         + '<div class="tgoc-sbody">' + eyebrow
           + '<h3 class="tgoc-s-title">' + esc(d.title) + '</h3>'
           + '<div class="tgoc-s-meta">' + loc + stars + '</div>'
-          + teaser + this._includesBlock(d) + tags
+          + this._promosBlock(d)
+          + teaser + this._includesBlock(d) + this._excludesBlock(d) + tags
           + '<div class="tgoc-sfoot">' + this._priceBlock(d) + this._cta() + '</div>'
         + '</div>';
     }
@@ -700,6 +741,11 @@
       if (d.badgeText) ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--featured">' + ICO.star + esc(d.badgeText) + '</span>');
       if (type) ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--type">' + ICO.ship + esc(type) + '</span>');
       if (style) ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--luxury">' + ICO.gem + esc(style) + '</span>');
+      // Extra promos ride as more ribbons under the badge (capped so they don't
+      // run past the image).
+      (d.promos || []).slice(0, 3).forEach(function (p) {
+        ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--promo">' + ICO.star + esc(p) + '</span>');
+      });
       const ribbonWrap = ribbons.length ? '<div class="tgoc-ribbons">' + ribbons.join('') + '</div>' : '';
 
       const cssUrl = safeCssUrl(d.image);
@@ -740,7 +786,7 @@
         + '<div class="tgoc-cbody">'
           + '<h3 class="tgoc-c-title">' + esc(d.title) + '</h3>'
           + shipLine
-          + headline + featList
+          + headline + featList + this._excludesBlock(d)
         + '</div>'
         + cta;
     }

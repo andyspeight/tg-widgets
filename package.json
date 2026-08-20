@@ -124,7 +124,8 @@
     "test:offers-grid-embed": "node test/offers-grid-embed-smoke.mjs",
     "test:offer-card-image-grid": "node test/offer-card-image-grid-smoke.mjs",
     "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs",
-    "test:dashboard-required-tier": "node test/dashboard-required-tier-smoke.mjs"
+    "test:dashboard-required-tier": "node test/dashboard-required-tier-smoke.mjs",
+    "test:offer-promos-excludes": "node test/offer-promos-excludes-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
