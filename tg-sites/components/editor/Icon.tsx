@@ -22,6 +22,7 @@ export type IconName =
   | 'section'
   | 'columns'
   | 'grid'
+  | 'crumbs'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -107,6 +108,9 @@ const PATHS: Record<IconName, string> = {
   // Four cells: what a grid is, and distinct from `columns` at a glance,
   // which is two tall bars.
   grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  // A short run, a chevron, a longer run: a trail. Deliberately not `nav`,
+  // which is three equal dashes, and not a plain chevron.
+  crumbs: 'M3 12h4M9.5 9l2.5 3-2.5 3M15 12h6',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 

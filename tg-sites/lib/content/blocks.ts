@@ -2277,6 +2277,80 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+  {
+    /*
+     * THE TRAIL, WHERE THE CLIENT WANTS IT.
+     *
+     * READ THIS BEFORE CHANGING ANYTHING HERE. The trail is NOT opt-in. Every
+     * nested published page already draws one automatically, between the header
+     * and the content (components/render/Breadcrumb.tsx), because we emit
+     * BreadcrumbList structured data for those pages and Google's guidance is
+     * that markup must represent content a visitor can see. A page whose markup
+     * claims a trail that is not on the page is a mismatch, and a mismatch is
+     * what gets structured data ignored.
+     *
+     * This block does not turn the trail on. It MOVES it. A page carrying one
+     * does not also get the automatic version (lib/content/breadcrumbs.ts,
+     * hasBreadcrumbsBlock, asked by the published route), so a client can put the
+     * trail inside a hero or under a banner without ever ending up with two of
+     * them, or with none.
+     *
+     * THE CRUMBS ARE NOT STORED. They are filled in at render time from the
+     * page's own address, so moving or renaming a page moves its trail with it. A
+     * stored trail would be a second copy of the site's shape, quietly wrong the
+     * first time anything moved.
+     */
+    type: 'breadcrumbs',
+    label: 'Breadcrumbs',
+    group: 'Layout',
+    icon: 'crumbs',
+    description: 'The trail back up to the home page. Moves the automatic one here.',
+    // Blank colour means "follow the section", which is right nearly everywhere.
+    defaults: { separator: 'slash', showHome: true, size: 's', align: 'left', colour: '' },
+    summarise: () => 'Breadcrumbs',
+    fields: [
+      {
+        kind: 'select',
+        key: 'separator',
+        label: 'Separator',
+        group: 'layout',
+        options: [
+          { value: 'slash', label: 'Slash' },
+          { value: 'chevron', label: 'Chevron' },
+          { value: 'arrow', label: 'Arrow' },
+          { value: 'dot', label: 'Dot' },
+          { value: 'bullet', label: 'Bullet' },
+        ],
+      },
+      {
+        kind: 'toggle',
+        key: 'showHome',
+        label: 'Start at Home',
+        group: 'layout',
+        help: 'Off drops the first crumb, for a trail that already sits under a page title.',
+      },
+      {
+        kind: 'select',
+        key: 'size',
+        label: 'Size',
+        group: 'layout',
+        options: [
+          { value: 'xs', label: 'Small' },
+          { value: 's', label: 'Normal' },
+          { value: 'm', label: 'Large' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+      {
+        kind: 'colour',
+        key: 'colour',
+        label: 'Text colour',
+        group: 'colours',
+        help: 'Leave blank to follow the section. Set it for a trail over a photograph.',
+      },
+    ],
+  },
+
   // --- Advanced ---------------------------------------------------------
   {
     /*

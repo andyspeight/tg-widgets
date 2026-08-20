@@ -2515,6 +2515,99 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
   return <hr className="tgs-divider" data-style={style} data-spacing={spacing} />;
 }
 
+/**
+ * The trail, as a block the client has placed.
+ *
+ * WHAT IS AND IS NOT STORED. The crumbs are NOT in props when a client saves;
+ * they are written in at render time by lib/content/breadcrumbs.ts from the
+ * page's own address, so moving or renaming a page moves the trail with it. The
+ * separator, the size and the alignment ARE stored, because those are choices.
+ *
+ * ON THE CANVAS THERE IS NO ADDRESS TO READ, since the editor is drawing a page
+ * that has not been requested at a URL. So an unfilled block draws a worked
+ * example rather than nothing, which is the only way a client can see what they
+ * are positioning while they position it. `data-sample` marks it, so it is
+ * obvious in the DOM that those words are not the real ones.
+ *
+ * SEPARATORS ARE CSS, not characters in the markup. A separator in the text is a
+ * separator a screen reader reads aloud between every step ("Home slash Greece
+ * slash Crete"), and it is one a visitor copying the trail takes with them. The
+ * ::before rules in globals.css draw it instead.
+ *
+ * THE LAST CRUMB IS NOT A LINK. It is the page somebody is already on, and
+ * aria-current says which one it is.
+ */
+export function BreadcrumbsBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  editing?: boolean;
+}): ReactElement | null {
+  const filled = list(props, 'crumbs')
+    .map((crumb) => ({
+      name: str(crumb, 'name'),
+      href: typeof crumb.href === 'string' ? safeUrl(crumb.href) : '',
+    }))
+    .filter((crumb) => crumb.name !== '');
+
+  /*
+   * A page with nothing to show. On the live site that is the home page, where a
+   * trail of one is not a trail, so it draws nothing at all rather than an empty
+   * strip of padding. On the canvas it is every page, because there is no
+   * address, hence the sample.
+   */
+  const sample = filled.length === 0;
+  if (sample && !editing) return null;
+
+  const crumbs = sample
+    ? [
+        { name: 'Home', href: '/' },
+        { name: 'Destinations', href: '/destinations' },
+        { name: 'This page', href: '' },
+      ]
+    : filled;
+
+  const separator = oneOf(
+    props,
+    'separator',
+    ['slash', 'chevron', 'arrow', 'dot', 'bullet'] as const,
+    'slash',
+  );
+  const size = oneOf(props, 'size', ['xs', 's', 'm'] as const, 's');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const colour = safeColour(props.colour);
+
+  // Home is the first crumb, so dropping it is dropping the first one. Never the
+  // last, which is the page itself and the only crumb a one-deep page has.
+  const shown = bool(props, 'showHome', true) ? crumbs : crumbs.slice(1);
+  if (shown.length === 0) return null;
+
+  return (
+    <nav
+      className="tgs-crumbs tgs-crumbs--block"
+      aria-label="Breadcrumb"
+      data-separator={separator}
+      data-size={size}
+      data-align={align}
+      data-sample={sample ? 'true' : undefined}
+      style={colour ? ({ '--tgs-crumb-colour': colour } as CSSProperties) : undefined}
+    >
+      <ol>
+        {shown.map((crumb, index) => (
+          <li key={index}>
+            {crumb.href && index < shown.length - 1 ? (
+              <a href={crumb.href}>{crumb.name}</a>
+            ) : (
+              <span aria-current="page">{crumb.name}</span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 export function SpacerBlock({ props }: { props: Props }): ReactElement {
   const height = oneOf(props, 'height', ['xs', 's', 'm', 'l', 'xl'] as const, 'm');
   return <div className="tgs-spacer" data-height={height} aria-hidden="true" />;

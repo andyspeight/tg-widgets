@@ -230,6 +230,26 @@ export function sanitiseBlock(block: Block): Block {
     return sanitiseContainer(block);
   }
 
+  /*
+   * A BREADCRUMBS BLOCK NEVER STORES ITS CRUMBS.
+   *
+   * They are written in at render time from the page's own address (see
+   * lib/content/breadcrumbs.ts), so a stored copy would be a second description
+   * of the site's shape: right on the day it was written, wrong the first time
+   * anybody moved or renamed a page, and disagreeing with the BreadcrumbList
+   * structured data the same page emits. Dropped here rather than trusted not to
+   * arrive, because an imported page or a hand-edited JSON payload can carry any
+   * key it likes.
+   */
+  if (block.type === 'breadcrumbs') {
+    const props = cleanProps(block.type, definition.fields, block.props);
+    if ('crumbs' in props) {
+      const { crumbs: _derived, ...rest } = props;
+      return { ...block, props: rest };
+    }
+    return { ...block, props };
+  }
+
   return { ...block, props: cleanProps(block.type, definition.fields, block.props) };
 }
 

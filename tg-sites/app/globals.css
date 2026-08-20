@@ -4025,3 +4025,46 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 
 /* The page somebody is already on. Not a link, and said so. */
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
+
+/* ------------------------------------------------------------------ */
+/* The Breadcrumbs BLOCK                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The same trail, where a client has put it. It shares .tgs-crumbs with the
+ * automatic one on purpose: one appearance, whichever route drew it, so moving
+ * the trail into a hero does not also restyle it. What the block adds is the
+ * three choices the automatic one has no way to offer.
+ *
+ * A page never has both. lib/content/breadcrumbs.ts is what the published route
+ * asks, and a page carrying this block does not get the automatic one, so these
+ * rules can never stack with the ones above on the same trail.
+ */
+.tgs-crumbs--block { padding: 0; color: var(--tgs-crumb-colour, var(--tgs-text-muted)); }
+
+.tgs-crumbs--block[data-size='xs'] { font-size: var(--tgs-text-xs); }
+.tgs-crumbs--block[data-size='s']  { font-size: var(--tgs-text-s); }
+.tgs-crumbs--block[data-size='m']  { font-size: var(--tgs-text-m); }
+
+.tgs-crumbs--block[data-align='centre'] ol { justify-content: center; }
+.tgs-crumbs--block[data-align='right'] ol  { justify-content: flex-end; }
+
+/*
+ * SEPARATORS ARE DRAWN, NOT WRITTEN. A separator character in the markup is one
+ * a screen reader says out loud between every step, and one a visitor copying
+ * the trail carries away with them. Generated content is neither.
+ */
+.tgs-crumbs--block[data-separator='chevron'] li + li::before { content: '\203A'; }
+.tgs-crumbs--block[data-separator='arrow'] li + li::before { content: '\2192'; }
+.tgs-crumbs--block[data-separator='dot'] li + li::before { content: '\00B7'; }
+.tgs-crumbs--block[data-separator='bullet'] li + li::before { content: '\2022'; }
+
+/* The current page, tinted from whatever colour the trail is using, so a trail
+   set to white over a photograph does not put its last crumb back to dark. */
+.tgs-crumbs--block [aria-current='page'] { color: var(--tgs-crumb-colour, var(--tgs-text)); }
+.tgs-crumbs--block a { color: inherit; opacity: 0.78; }
+.tgs-crumbs--block a:hover { opacity: 1; color: inherit; }
+
+/* The worked example the editor canvas shows, because there is no address to
+   build a real trail from while a page is being designed. */
+.tgs-crumbs--block[data-sample='true'] { opacity: 0.75; }

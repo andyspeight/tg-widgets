@@ -13,6 +13,7 @@ import { getPublishedRegions } from '../../../lib/db/regions';
 import { listPublished } from '../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../lib/content/listings';
 import { fillNavFolders, fillNavRegion } from '../../../lib/content/nav';
+import { fillBreadcrumbs } from '../../../lib/content/breadcrumbs';
 import { getPublicTheme } from '../../../lib/db/theme';
 import { familiesFromFiles } from '../../../lib/theme/fonts';
 import { themeTokens } from '../../../lib/theme/tokens';
@@ -200,7 +201,18 @@ export default async function PublishedPage({ params }: Params) {
         overlapped={(found.page.content.sections[0]?.pullUp ?? 0) > 0}
       />
 
-      <PageRenderer page={fillNavFolders(found.page.content, found.navPages)} theme={theme} />
+      {/* The trail is filled here too, so a client positioning a Breadcrumbs
+          block sees the real crumbs in preview rather than the canvas's worked
+          example. The preview answers at the page's real address, so there is a
+          genuine trail to build. */}
+      <PageRenderer
+        page={fillBreadcrumbs(
+          fillNavFolders(found.page.content, found.navPages),
+          (path ?? []).join('/'),
+          found.page.title,
+        )}
+        theme={theme}
+      />
 
       <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
 

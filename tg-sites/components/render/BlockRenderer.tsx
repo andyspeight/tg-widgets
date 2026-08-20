@@ -34,6 +34,7 @@ import {
   SearchBlock,
   SliderBlock,
   SocialBlock,
+  BreadcrumbsBlock,
   SpacerBlock,
   StatsBlock,
   StepsBlock,
@@ -138,6 +139,14 @@ export function BlockRenderer({
         return <DividerBlock props={props} />;
       case 'spacer':
         return <SpacerBlock props={props} />;
+      /*
+       * `editable` because the canvas has no address to build a trail from: the
+       * editor is drawing a page nobody has requested at a URL, so the block
+       * shows a worked example there rather than drawing nothing while a client
+       * tries to position it.
+       */
+      case 'breadcrumbs':
+        return <BreadcrumbsBlock props={props} editing={editable} />;
       case 'embed':
         return <EmbedBlock props={props} />;
       /*

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
+import { fillBreadcrumbs, hasBreadcrumbsBlock } from '../../../../lib/content/breadcrumbs';
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
 import { safeUrl } from '../../../../lib/content/sanitise';
@@ -375,6 +376,14 @@ export default async function SitePage({ params, searchParams }: Params) {
   // the slideshow enhancer without any of them having to know it exists.
   const contentTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
 
+  /*
+   * Has the client PUT a trail on this page? If so the automatic one stands
+   * down, so the page has exactly one either way. Read off the tree rather than
+   * a flag on the row, because the block is content and a flag would be a second
+   * copy that goes stale the moment somebody deletes it.
+   */
+  const placedCrumbs = hasBreadcrumbsBlock(contentTree);
+
   const nodes = pageJsonLd({
     origin,
     url: `${origin}/${currentPath}`.replace(/\/$/, ''),
@@ -492,13 +501,40 @@ export default async function SitePage({ params, searchParams }: Params) {
         it draws nothing on the home page.
       */}
       {/* Not on a tag archive: that is a filter view, not a place in the site's
-          own tree, so there is no trail to draw to it. */}
-      {!found.archive && <Breadcrumb path={currentPath} pageTitle={pageTitle} />}
+          own tree, so there is no trail to draw to it.
+
+          AND NOT WHEN THE PAGE CARRIES A BREADCRUMBS BLOCK. That block does not
+          turn the trail on, it MOVES it: a client who wants the trail inside
+          their hero puts one there, and this stops the page having two. Which is
+          also why the block cannot be the only way to get a trail — a page
+          nobody remembered would then have structured data claiming a breadcrumb
+          that is not on the page, and that mismatch is what gets structured data
+          ignored. See lib/content/breadcrumbs.ts. */}
+      {!found.archive && !placedCrumbs && (
+        <Breadcrumb path={currentPath} pageTitle={pageTitle} />
+      )}
 
       {found.page ? (
-        <PageRenderer page={fillNavFolders(found.page.content, found.navPages)} theme={theme} />
+        <PageRenderer
+          page={fillBreadcrumbs(
+            fillNavFolders(found.page.content, found.navPages),
+            currentPath,
+            pageTitle,
+          )}
+          theme={theme}
+        />
       ) : found.entry ? (
-        <EntryRenderer entry={found.entry} theme={theme} />
+        /* A post's own sections get the same fill. Without it a blog post
+           carrying the block would stand the automatic trail down and then draw
+           nothing, which is the one way this feature could lose a page its
+           trail rather than move it. */
+        <EntryRenderer
+          entry={{
+            ...found.entry,
+            item: fillBreadcrumbs(found.entry.item, currentPath, pageTitle),
+          }}
+          theme={theme}
+        />
       ) : (
         <ArchiveRenderer archive={found.archive!} theme={theme} />
       )}
