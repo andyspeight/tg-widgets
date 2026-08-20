@@ -1669,6 +1669,217 @@ function renderButton(button: Props, key: number): ReactElement | null {
   );
 }
 
+/**
+ * A PICTURE BESIDE A TINTED PANEL, AND MORE THAN ONE OF THEM IS A SLIDER.
+ *
+ * Andy, 20 Aug 2026, from Duda's Half Overlay Slider. It exists as a block
+ * because a COLUMN CANNOT CARRY A PHOTOGRAPH — a Box has a colour, a gradient, a
+ * radius, a border and a blur, and no picture — so the tinted half has nowhere
+ * to live in an ordinary two-column row.
+ *
+ * IT BORROWS THE SLIDESHOW WHOLE. The wrapper is the same `.tgs-slideshow` the
+ * Image block emits, carrying the same data attributes, so it cycles in pure CSS
+ * by itself and public/slideshow.js gives it arrows, dots and a pause button
+ * without one line of that file changing. That script queries `.tgs-slideshow`
+ * and `.tgs-slideshow__slide` and asks nothing about what is inside them, which
+ * is what makes this free.
+ *
+ * ONE SLIDE IS NOT A SLIDESHOW, and it renders as a plain panel with no wrapper,
+ * no dots and no cycle — the same rule the Image block follows for one picture.
+ * That matters beyond tidiness: an auto-moving thing with a single frame would
+ * still ask for a pause button nobody needs.
+ */
+function halfOverlaySlide(
+  slide: Props,
+  look: { tint: string; tintOpacity: number; buttonColour: string | undefined; solo: boolean },
+): ReactElement {
+  const src = safeUrl(str(slide, 'src'));
+  const panelSrc = safeUrl(str(slide, 'panelSrc'));
+  const side = oneOf(slide, 'side', ['left', 'right'] as const, 'left');
+  const title = str(slide, 'title');
+  const body = str(slide, 'body');
+
+  const primary = str(slide, 'primaryLabel');
+  const secondary = str(slide, 'secondaryLabel');
+
+  /*
+   * THE TITLE IS A HEADING ONLY WHEN THERE IS ONE SLIDE.
+   *
+   * A slider of twelve slides would otherwise put twelve headings into the
+   * document outline with eleven of them invisible at any moment, which is worse
+   * for a screen reader than no heading at all: the outline would promise
+   * sections of the page that cannot be reached in order. A single panel is an
+   * ordinary feature block and its title is a real heading.
+   */
+  const Title = look.solo ? 'h2' : 'p';
+
+  return (
+    <div className="tgs-halfover" data-side={side}>
+      <div className="tgs-halfover__pic">
+        {src ? (
+          <img src={src} alt={str(slide, 'alt')} loading="lazy" decoding="async" />
+        ) : (
+          <div className="tgs-halfover__empty" aria-hidden="true" />
+        )}
+      </div>
+
+      <div className="tgs-halfover__panel">
+        {/* The picture under the wash. Optional: without it the panel is the
+            colour on its own, which is a legitimate quieter design. */}
+        {panelSrc && (
+          <img
+            className="tgs-halfover__panelpic"
+            src={panelSrc}
+            alt={str(slide, 'panelAlt')}
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+        {/*
+          The wash is its own element rather than a background on the panel,
+          because it has to sit BETWEEN the picture and the words. aria-hidden
+          because it is paint: it says nothing and must not be announced.
+        */}
+        <div
+          className="tgs-halfover__tint"
+          style={{ background: look.tint, opacity: look.tintOpacity / 100 }}
+          aria-hidden="true"
+        />
+        <div className="tgs-halfover__body">
+          {title && <Title className="tgs-halfover__title">{title}</Title>}
+          {body && <p className="tgs-halfover__text">{body}</p>}
+          {(primary || secondary) && (
+            <div className="tgs-halfover__actions">
+              {primary &&
+                renderButton(
+                  {
+                    label: primary,
+                    href: str(slide, 'primaryHref'),
+                    variant: 'primary',
+                    /*
+                     * WHITE, NOT THE THEME'S PRIMARY, WHEN NOBODY HAS CHOSEN.
+                     *
+                     * The theme's button colour is picked to work on the site's
+                     * own background, and this panel is never that: it is a wash
+                     * of at least 40% of a colour the client chose for this block.
+                     * The default navy came out as a dark button on a mid blue,
+                     * which is legible and looks like a mistake. White on a strong
+                     * colour is the treatment that works over ANY tint, and it is
+                     * what the reference does in spirit — a bright button that
+                     * separates from the panel rather than sinking into it.
+                     *
+                     * The label is a fixed dark rather than a theme token, because
+                     * --tgs-text goes light in dark mode and would vanish here.
+                     */
+                    colour: look.buttonColour || '#ffffff',
+                    textColour: look.buttonColour ? undefined : '#111418',
+                  },
+                  0,
+                )}
+              {secondary &&
+                renderButton(
+                  {
+                    label: secondary,
+                    href: str(slide, 'secondaryHref'),
+                    variant: 'secondary',
+                    outline: true,
+                    /*
+                     * The same colour as the filled one, outlined, which is what
+                     * the help text promises. White when no colour is chosen,
+                     * because this always sits on a wash of at least 40% and a
+                     * theme-coloured hairline can disappear into it.
+                     */
+                    colour: look.buttonColour || '#ffffff',
+                  },
+                  1,
+                )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function HalfOverlayBlock({ props }: { props: Props }): ReactElement {
+  /*
+   * A SLIDE WITH NOTHING IN IT IS NOT A SLIDE. An empty row left in the repeater
+   * would otherwise become a blank panel the visitor waits through, and would
+   * count towards the cycle length. Judged on whether it has anything to say or
+   * show rather than on one required field, so a picture-only slide is kept.
+   */
+  const items = list(props, 'items').filter(
+    (slide) => str(slide, 'title') || str(slide, 'body') || str(slide, 'src') || str(slide, 'panelSrc'),
+  );
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add a slide</div>;
+  }
+
+  const look = {
+    tint: safeColour(props.tint) ?? '#2f5bd8',
+    // Floored at 40: below that the white words stop being readable over a
+    // photograph, and the field will not go there either.
+    tintOpacity: clamp(props.tintOpacity, 40, 100, 78),
+    buttonColour: safeColour(props.buttonColour) ?? undefined,
+    solo: items.length === 1,
+  };
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+
+  if (look.solo) {
+    return (
+      <div className="tgs-halfover-wrap" data-height={height}>
+        {halfOverlaySlide(items[0], look)}
+      </div>
+    );
+  }
+
+  const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
+  const interval = clamp(props.interval, 2, 15, 6);
+  const count = items.length;
+  const showArrows = bool(props, 'arrows', true);
+  const showDots = bool(props, 'dots', true);
+
+  return (
+    <div className="tgs-halfover-wrap" data-height={height}>
+      <div
+        className="tgs-slideshow"
+        data-transition={transition}
+        data-count={count}
+        data-interval={interval}
+        data-dots={showDots ? 'true' : undefined}
+        data-arrows={showArrows ? 'true' : undefined}
+        style={{ '--tgs-ss-cycle': `${count * interval}s` } as CSSProperties}
+        aria-roledescription="carousel"
+        aria-label="Featured trips"
+      >
+        <div className="tgs-slideshow__viewport tgs-halfover__viewport">
+          {items.map((slide, index) => (
+            <div
+              className="tgs-slideshow__slide"
+              key={index}
+              style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+            >
+              {halfOverlaySlide(slide, look)}
+            </div>
+          ))}
+        </div>
+
+        {showDots && (
+          <div className="tgs-slideshow__dots" aria-hidden="true">
+            {items.map((_, index) => (
+              <span
+                className="tgs-slideshow__dot"
+                key={index}
+                style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function ButtonBlock({ props }: { props: Props }): ReactElement {
   return <div className="tgs-buttons">{renderButton(props, 0)}</div>;
 }

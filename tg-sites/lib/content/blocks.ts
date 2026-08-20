@@ -752,6 +752,134 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * A PICTURE BESIDE A TINTED PANEL, AND MORE THAN ONE OF THEM IS A SLIDER.
+     *
+     * Andy, 20 Aug 2026, from Duda's Half Overlay Slider. Worth being clear why
+     * this is a block of its own rather than something a client assembles: a
+     * COLUMN CANNOT CARRY A PHOTOGRAPH. A Box has a background colour, a
+     * gradient, a radius, a border and a blur, and no picture, so the tinted half
+     * — a photo with a colour scrim over it and words on top — has nowhere to
+     * live in a two-column row. Section backgrounds can do it, but a section is
+     * the whole width, not half of it.
+     *
+     * IT REUSES THE SLIDESHOW RATHER THAN INVENTING A SECOND ONE. The markup is
+     * the same `.tgs-slideshow` wrapper the Image block emits, so it cycles in
+     * pure CSS on its own AND public/slideshow.js gives it arrows, dots and a
+     * pause button without a line of that file changing. One slide draws a plain
+     * static panel with no slideshow chrome, exactly as one picture in an Image
+     * block is just a picture.
+     */
+    type: 'half-overlay',
+    label: 'Half overlay',
+    group: 'Media',
+    icon: 'slider',
+    description: 'A picture beside a tinted panel carrying your message. Add more than one and it becomes a slider.',
+    defaults: {
+      tint: '#2f5bd8',
+      tintOpacity: 78,
+      height: 'medium',
+      transition: 'fade',
+      interval: 6,
+      arrows: true,
+      dots: true,
+      items: [
+        {
+          src: '', alt: '', panelSrc: '', panelAlt: '', side: 'left',
+          title: 'Greece, island by island',
+          body: 'Seven nights across three islands, with every ferry booked for you and someone to call if the weather turns.',
+          primaryLabel: 'See the trip', primaryHref: '',
+          secondaryLabel: 'Talk to us', secondaryHref: '',
+        },
+        {
+          src: '', alt: '', panelSrc: '', panelAlt: '', side: 'right',
+          title: 'The Amalfi coast, slowly',
+          body: 'A week between Positano and Ravello, with a driver for the coast road so nobody has to think about the hairpins.',
+          primaryLabel: 'See the trip', primaryHref: '',
+          secondaryLabel: 'Talk to us', secondaryHref: '',
+        },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return count > 1 ? `Half overlay (${count} slides)` : 'Half overlay';
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Slides',
+        itemLabel: 'Slide',
+        max: 12,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Picture description', max: 200, help: 'What the picture shows, for a screen reader.' },
+          {
+            kind: 'image',
+            key: 'panelSrc',
+            label: 'Picture under the panel',
+            help: 'Optional. The tint sits over this. Leave it blank for a plain colour panel.',
+          },
+          { kind: 'text', key: 'panelAlt', label: 'Panel picture description', max: 200 },
+          {
+            kind: 'select',
+            key: 'side',
+            label: 'Picture on the',
+            options: [
+              { value: 'left', label: 'Left' },
+              { value: 'right', label: 'Right' },
+            ],
+            help: 'Alternating them down a page reads well.',
+          },
+          { kind: 'text', key: 'title', label: 'Title', max: 120 },
+          { kind: 'textarea', key: 'body', label: 'Paragraph', rows: 4, max: 600 },
+          { kind: 'text', key: 'primaryLabel', label: 'First button', max: 40 },
+          { kind: 'url', key: 'primaryHref', label: 'First button links to', placeholder: '/holidays or https://' },
+          { kind: 'text', key: 'secondaryLabel', label: 'Second button', max: 40 },
+          { kind: 'url', key: 'secondaryHref', label: 'Second button links to', placeholder: '/contact or https://' },
+        ],
+      },
+      {
+        kind: 'colour',
+        key: 'tint',
+        label: 'Panel colour',
+        help: 'The wash over the panel picture. Set once here so every slide matches.',
+      },
+      {
+        kind: 'number',
+        key: 'tintOpacity',
+        label: 'Panel strength',
+        min: 40,
+        max: 100,
+        step: 1,
+        help: 'How much of the picture shows through. Below 40 the words stop being readable, so it does not go there.',
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+      { kind: 'colour', key: 'buttonColour', label: 'Button colour', help: 'The filled button. The second one is an outline of the same colour. Blank uses your theme.' },
+      {
+        kind: 'select',
+        key: 'transition',
+        label: 'Transition',
+        options: [
+          { value: 'fade', label: 'Fade' },
+          { value: 'slide', label: 'Slide' },
+        ],
+      },
+      { kind: 'number', key: 'interval', label: 'Seconds per slide', min: 2, max: 15, step: 1 },
+      { kind: 'toggle', key: 'arrows', label: 'Arrows to move between slides' },
+      { kind: 'toggle', key: 'dots', label: 'Dots showing which slide is up' },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',

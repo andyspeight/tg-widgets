@@ -3386,6 +3386,131 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Half overlay: a picture beside a tinted panel                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 20 Aug 2026, from Duda's Half Overlay Slider.
+ *
+ * TWO HALVES, and on a phone they stack picture over panel rather than shrinking
+ * to two thin columns. A half-width photograph on a 390px screen is 195px of
+ * nothing recognisable, and the words beside it wrap to one or two syllables a
+ * line.
+ *
+ * THE HEIGHT IS THE BLOCK'S, NOT THE PICTURE'S. Both halves are told how tall to
+ * be and the picture fills its half with object-fit, because the two must be the
+ * same height or the design falls apart the moment one slide has a longer
+ * paragraph than another. On a phone the picture takes a fixed slice and the
+ * panel takes whatever its words need.
+ */
+.tgs-halfover-wrap { --tgs-ho-h: 30rem; }
+.tgs-halfover-wrap[data-height='short']  { --tgs-ho-h: 22rem; }
+.tgs-halfover-wrap[data-height='medium'] { --tgs-ho-h: 30rem; }
+.tgs-halfover-wrap[data-height='tall']   { --tgs-ho-h: 40rem; }
+
+.tgs-halfover {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: var(--tgs-ho-h);
+  overflow: hidden;
+  border-radius: var(--tgs-radius, 0px);
+}
+
+/* The picture half. `order` rather than a second set of column rules, so the
+   side is one property and the markup order never changes — which keeps the
+   reading order the same for a screen reader whichever way it is drawn. */
+.tgs-halfover[data-side='right'] .tgs-halfover__pic { order: 2; }
+
+.tgs-halfover__pic { position: relative; min-height: 0; }
+.tgs-halfover__pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* A slide with no picture chosen yet. Quiet, and not a broken image icon. */
+.tgs-halfover__empty { width: 100%; height: 100%; background: var(--tgs-surface-alt); }
+
+.tgs-halfover__panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  /* The words sit on a wash of at least 40%, so they are light whatever the
+     theme is doing. Set here rather than inherited, because this panel is the
+     one place on the page whose background is a client's chosen colour. */
+  color: #fff;
+}
+
+.tgs-halfover__panelpic,
+.tgs-halfover__tint {
+  position: absolute;
+  inset: 0;
+}
+.tgs-halfover__panelpic { width: 100%; height: 100%; object-fit: cover; }
+
+.tgs-halfover__body {
+  position: relative; /* above the wash */
+  padding: var(--tgs-space-xl) var(--tgs-space-xl);
+  max-width: 34rem;
+}
+
+/*
+ * The title is an h2 on a single panel and a p in a slider (see the renderer for
+ * why), so it is styled by CLASS rather than by tag. Without that, the same
+ * design would come out at two different sizes depending on how many slides
+ * somebody happened to add.
+ */
+.tgs-halfover__title {
+  margin: 0;
+  font-family: var(--tgs-h-font, inherit);
+  font-size: clamp(1.9rem, 1.1rem + 2.4vw, 3.2rem);
+  line-height: 1.1;
+  font-weight: 600;
+  color: inherit;
+}
+
+.tgs-halfover__text {
+  margin: var(--tgs-space-m) 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  /* Not pure white: a solid block of #fff body text on a colour is harsh to
+     read. Still far above 4.5:1 against a wash of 40% or more. */
+  color: rgb(255 255 255 / 92%);
+  /* The paragraph is a textarea, so the client's own line breaks are theirs. */
+  white-space: pre-line;
+}
+
+.tgs-halfover__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-s);
+  margin-top: var(--tgs-space-l);
+}
+
+/* The slideshow viewport has to be told a height here: its slides are absolutely
+   positioned by the shared slideshow rules, so nothing inside would give it
+   one. */
+.tgs-halfover__viewport { aspect-ratio: auto; min-height: var(--tgs-ho-h); }
+
+@container tgs-page (max-width: 767px) {
+  .tgs-halfover {
+    grid-template-columns: 1fr;
+    /* A slice of picture, then the words. Not 50/50: half a phone screen of
+       photograph pushes the message below the fold on every slide. */
+    grid-template-rows: 14rem auto;
+    min-height: 0;
+  }
+  /* Picture first whichever side it was told to take. Below the fold is not a
+     side. */
+  .tgs-halfover[data-side='right'] .tgs-halfover__pic { order: 0; }
+
+  .tgs-halfover__body { padding: var(--tgs-space-l) var(--tgs-space-m); max-width: none; }
+  .tgs-halfover__viewport { min-height: 0; }
+  .tgs-halfover-wrap { --tgs-ho-h: auto; }
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 

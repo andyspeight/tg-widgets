@@ -5,10 +5,20 @@
  * does: it is a plain walk over a page shape, testable without a DOM or a JSX
  * transform, and the SlideshowScript component only maps its answer to a tag.
  *
- * The rule matches the renderer's exactly. An image block turns into a slideshow
- * when it carries more than one usable picture, so the extra `slides` must hold
- * at least one entry with a real address. A block whose only extra slides are
- * blank stays a single image and needs no script.
+ * WHAT COUNTS. Two blocks turn into a slideshow, and each does so only when it
+ * has more than one thing to show:
+ *
+ *   - `image`, when its extra `slides` hold at least one real address. A block
+ *     whose only extra slides are blank stays a single picture.
+ *   - `half-overlay`, when its `items` hold more than one slide with anything in
+ *     them. One slide is a static panel, and the renderer draws it without the
+ *     slideshow wrapper at all.
+ *
+ * The rules match the renderers' exactly, which is the point: a page that gets
+ * the script tag without a slideshow on it is a wasted request, and a page with
+ * a slideshow and no tag silently loses its arrows, dots and PAUSE BUTTON. That
+ * last one is not cosmetic — auto-moving content needs a way to stop it
+ * (WCAG 2.2.2), and hover-to-pause is not reachable from a keyboard.
  */
 
 import type { widgetTagsIn } from './widgets';
@@ -16,25 +26,86 @@ import type { widgetTagsIn } from './widgets';
 /** Anything with sections: a Page, a header, a footer. */
 export type Tree = Parameters<typeof widgetTagsIn>[0];
 
+/** A block-shaped thing, as it arrives from stored JSON. */
+type LooseBlock = { type?: unknown; props?: Record<string, unknown> };
+
+function isRealSrc(value: unknown): boolean {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+/** An image block that has grown into a slideshow. */
+function imageIsSlideshow(props: Record<string, unknown> | undefined): boolean {
+  const slides = props?.slides;
+  return (
+    Array.isArray(slides) &&
+    slides.some((slide) => !!slide && isRealSrc((slide as { src?: unknown }).src))
+  );
+}
+
+/**
+ * A half-overlay block that has grown into a slider.
+ *
+ * The count has to match HalfOverlayBlock's own filter, which drops a slide with
+ * nothing in it so an empty row left in the repeater is not a blank panel the
+ * visitor waits through. Counting raw rows here would ask for the script on a
+ * block that renders one static panel.
+ */
+function halfOverlayIsSlideshow(props: Record<string, unknown> | undefined): boolean {
+  const items = props?.items;
+  if (!Array.isArray(items)) return false;
+
+  let real = 0;
+  for (const raw of items) {
+    if (!raw || typeof raw !== 'object') continue;
+    const item = raw as Record<string, unknown>;
+    const said =
+      isRealSrc(item.title) || isRealSrc(item.body) || isRealSrc(item.src) || isRealSrc(item.panelSrc);
+    if (said) real += 1;
+    if (real > 1) return true;
+  }
+  return false;
+}
+
+/**
+ * Every block in a list, including the ones inside a container's or a grid's own
+ * columns.
+ *
+ * THE RECURSION IS A FIX, NOT A FLOURISH. This walk read only the outer columns
+ * until 20 Aug 2026, so a slideshow dropped inside a Container or an Advanced
+ * Grid rendered, moved, and quietly had no arrows, no dots and no pause button,
+ * because the page never asked for the script. Nothing announced it: the
+ * slideshow works without the script by design, so the failure looked like a
+ * styling choice. Reading props.columns directly rather than importing the block
+ * registry keeps this module a leaf, which is what lets the published route call
+ * it cheaply.
+ */
+function blocksInColumn(blocks: unknown): LooseBlock[] {
+  if (!Array.isArray(blocks)) return [];
+
+  const out: LooseBlock[] = [];
+  for (const raw of blocks) {
+    if (!raw || typeof raw !== 'object') continue;
+    const block = raw as LooseBlock;
+    out.push(block);
+
+    const inner = block.props?.columns;
+    if (!Array.isArray(inner)) continue;
+    for (const column of inner) {
+      out.push(...blocksInColumn((column as { blocks?: unknown })?.blocks));
+    }
+  }
+  return out;
+}
+
 export function hasSlideshow(tree: Tree | null | undefined): boolean {
   if (!tree) return false;
+
   for (const section of tree.sections) {
     for (const row of section.rows) {
       for (const column of row.columns) {
-        for (const block of column.blocks) {
-          if (block.type !== 'image') continue;
-          const slides = block.props?.slides;
-          if (
-            Array.isArray(slides) &&
-            slides.some(
-              (slide) =>
-                !!slide &&
-                typeof (slide as { src?: unknown }).src === 'string' &&
-                (slide as { src: string }).src.trim() !== '',
-            )
-          ) {
-            return true;
-          }
+        for (const block of blocksInColumn(column.blocks)) {
+          if (block.type === 'image' && imageIsSlideshow(block.props)) return true;
+          if (block.type === 'half-overlay' && halfOverlayIsSlideshow(block.props)) return true;
         }
       }
     }

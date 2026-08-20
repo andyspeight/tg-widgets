@@ -32,6 +32,8 @@ import {
   NavBlock,
   QuoteBlock,
   SearchBlock,
+
+  HalfOverlayBlock,
   SliderBlock,
   SocialBlock,
   BreadcrumbsBlock,
@@ -124,6 +126,8 @@ export function BlockRenderer({
         return <CardsBlock props={props} editing={editable} />;
       case 'slider':
         return <SliderBlock props={props} />;
+      case 'half-overlay':
+        return <HalfOverlayBlock props={props} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':
