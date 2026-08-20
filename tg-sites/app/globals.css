@@ -3008,6 +3008,129 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   border-radius: 999px;
 }
 
+/*
+ * ---------------------------------------------------------------------------
+ * TWO ROWS ON ONE RAIL (Andy, 20 Aug 2026, from Duda's Double Row Carousel)
+ * ---------------------------------------------------------------------------
+ *
+ * NOT TWO SLIDERS STACKED. Two explicit rows plus the column auto-flow the rail
+ * already has means the cards fill DOWNWARDS and then across, so card one sits
+ * above card two and the pair travels together under one swipe. Two separate
+ * rails would drift apart the moment anybody touched one of them.
+ *
+ * `align-items: start` is what makes it a mosaic rather than a grid. Without it
+ * every card in a row stretches to the tallest, and a short card grows a band of
+ * empty space under its text. With it each card is its own height and the ROW is
+ * as tall as it needs to be, which is how pictures of different shapes sit
+ * together without being cropped to match.
+ */
+.tgs-slider[data-rows='2'] {
+  grid-template-rows: auto auto;
+  align-items: start;
+  /* The gap already set by data-gap applies both ways, which is what the pairs
+     want: the same air between the two rows as between the columns. */
+}
+
+/*
+ * THE MOSAIC, which is what makes two rows worth having.
+ *
+ * A card frame is built around a fixed aspect ratio: the picture inside is
+ * height: 100% of a box the ratio holds open. On the Original setting there IS
+ * no ratio, so the box has no height and the picture collapses to nothing —
+ * which is exactly why Original used to be filtered off the rail's list. Giving
+ * the picture its own height back turns that failure into the feature: every
+ * card is as tall as its own photograph, the row is as tall as its tallest, and
+ * pictures of different shapes sit together without being cropped to match.
+ *
+ * Scoped to the rail. The Cards grid still wants every card the same height, or
+ * a row of them goes ragged for no reason.
+ */
+.tgs-slider[data-ratio='auto'] .tgs-card__frame img { height: auto; }
+
+/*
+ * ---------------------------------------------------------------------------
+ * THE BOLD SCROLL BAR (Andy, 20 Aug 2026, from Duda's Scrollbar Carousel)
+ * ---------------------------------------------------------------------------
+ *
+ * STILL THE BROWSER'S OWN SCROLLBAR, only louder. A div drawn to look like one
+ * would have to be moved by script, would not drag, would not take a keyboard,
+ * and would have to be kept in step with the real scroll position by hand. This
+ * is the real thing with a track you can see at rest, which is the whole point:
+ * the thin default only appears once somebody has already scrolled, which is too
+ * late to be a hint that there is more.
+ */
+.tgs-slider[data-scrollbar='bar'] {
+  padding-bottom: var(--tgs-space-m);
+  scrollbar-width: auto;
+  scrollbar-color: var(--tgs-text) var(--tgs-surface-alt);
+}
+.tgs-slider[data-scrollbar='bar']::-webkit-scrollbar { height: 6px; }
+.tgs-slider[data-scrollbar='bar']::-webkit-scrollbar-track {
+  background: var(--tgs-surface-alt);
+  border-radius: 999px;
+}
+.tgs-slider[data-scrollbar='bar']::-webkit-scrollbar-thumb {
+  background: var(--tgs-text);
+  border-radius: 999px;
+}
+
+/*
+ * THE EDGE FADE, AND IT FOLLOWS THE SCROLL RATHER THAN SITTING STILL.
+ *
+ * A fixed fade on the right is a lie the moment you reach the end: the last card
+ * stays half-faded with nothing beyond it. A fixed fade on the left is a lie
+ * before you start. So the two ends are driven by `animation-timeline: scroll()`
+ * — the same scroll-driven CSS the reveals and the count-up already use — and
+ * the mask hands over as the rail moves. No script, and it cannot fall out of
+ * step with the scroll position because it IS the scroll position.
+ *
+ * The two lengths are registered with @property, exactly as --tgs-count is next
+ * to the key numbers. Unregistered custom properties do not interpolate: they
+ * would jump at the halfway mark rather than sliding, which looks like a bug.
+ *
+ * INSIDE @supports, so a browser without scroll timelines gets NO fade rather
+ * than a fade that animates on a timer, which is what an unguarded
+ * `animation-timeline` degrades to and would be far worse than nothing.
+ */
+@property --tgs-rail-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tgs-rail-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@supports (animation-timeline: scroll()) {
+  .tgs-slider[data-scrollbar='bar'] {
+    --tgs-rail-l: 0px;
+    --tgs-rail-r: 3rem;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--tgs-rail-l),
+      #000 calc(100% - var(--tgs-rail-r)),
+      transparent 100%
+    );
+    animation: tgs-rail-fade linear both;
+    /* The rail scrolls itself, sideways. */
+    animation-timeline: scroll(self inline);
+  }
+
+  /*
+   * A rail with nothing to scroll never starts its timeline, so the `from`
+   * frame is what it wears: no fade at either end. That is the right answer for
+   * three cards that already fit, and it comes out of the mechanism rather than
+   * needing a rule of its own.
+   */
+  @keyframes tgs-rail-fade {
+    from { --tgs-rail-l: 0px;   --tgs-rail-r: 3rem; }
+    to   { --tgs-rail-l: 3rem;  --tgs-rail-r: 0px; }
+  }
+}
+
 @container tgs-page (max-width: 767px) {
   /*
    * The grid collapses to one column on a phone. A RAIL MUST NOT: sideways is

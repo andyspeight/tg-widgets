@@ -1574,6 +1574,13 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
   const radius = oneOf(props, 'radius', RADII, 'md');
   const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
   const whole = bool(props, 'wholeCardLinks', true);
+  /*
+   * One rail, one or two rows deep, and how loudly it says "this moves".
+   * Both read through oneOf, so a value written by a later release cannot ask
+   * for a third row or a scrollbar style the stylesheet has no rule for.
+   */
+  const rows = oneOf(props, 'rows', ['1', '2'] as const, '1');
+  const scrollbar = oneOf(props, 'scrollbar', ['thin', 'bar'] as const, 'thin');
 
   const slides = items
     .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius }))
@@ -1596,6 +1603,12 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
       data-style={style}
       data-radius={radius}
       data-align={align}
+      /* The picture shape, so the stylesheet can give a frame back its height
+         when the shape is Original and there is no aspect ratio to hold it up. */
+      data-ratio={ratio}
+      /* Only when it is two, so a one-row rail stays plain markup. */
+      data-rows={rows === '2' ? '2' : undefined}
+      data-scrollbar={scrollbar}
       data-whole={whole ? 'true' : undefined}
       role="group"
       aria-label="Slides. Scroll sideways to see more."

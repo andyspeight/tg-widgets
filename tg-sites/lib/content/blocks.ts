@@ -1289,6 +1289,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       ratio: '4/3',
       radius: 'md',
       align: 'left',
+      rows: '1',
+      scrollbar: 'thin',
       wholeCardLinks: true,
       items: [
         {
@@ -1379,11 +1381,21 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'tinted', label: 'Tinted' },
         ],
       },
+      /*
+       * ORIGINAL IS BACK ON THE LIST, and only on the rail (Andy, 20 Aug 2026).
+       * It was filtered out because a card frame with no shape has no height to
+       * give its picture and collapses. On a two-row rail it is the whole point:
+       * "a mosaic, so the images can be of different heights in the same
+       * carousel" was how Andy described the Duda one. The stylesheet gives the
+       * frame back its height for this one setting; see the note beside
+       * .tgs-slider[data-ratio='auto'].
+       */
       {
         kind: 'select',
         key: 'ratio',
         label: 'Picture shape',
-        options: RATIO_OPTIONS.filter((option) => option.value !== 'auto'),
+        options: RATIO_OPTIONS,
+        help: 'Original lets every picture keep its own shape, which is what makes two rows read as a mosaic rather than a grid.',
       },
       { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
       {
@@ -1391,6 +1403,39 @@ export const BLOCKS: readonly BlockDefinition[] = [
         key: 'align',
         label: 'Alignment',
         options: ALIGN_OPTIONS.filter((option) => option.value !== 'right'),
+      },
+      /*
+       * TWO ROWS ON ONE RAIL (Andy, 20 Aug 2026, from Duda's Double Row
+       * Carousel). Not two sliders stacked: one rail, filling downwards then
+       * across, so a swipe moves both rows together and the pair stays a pair.
+       * Twice the trips in the same height of page, which is what a homepage
+       * with a lot to show actually needs.
+       */
+      {
+        kind: 'select',
+        key: 'rows',
+        label: 'Rows',
+        options: [
+          { value: '1', label: 'One' },
+          { value: '2', label: 'Two' },
+        ],
+        help: 'Two stacks the cards in pairs and moves them together. Each row is as tall as it needs to be, so pictures of different shapes still line up.',
+      },
+      /*
+       * HOW THE RAIL SAYS "THIS MOVES" (Andy, 20 Aug 2026, from Duda's Scrollbar
+       * Carousel). Both are the browser's own scrollbar rather than anything
+       * drawn: it stays draggable, keyboard reachable and honest about how far
+       * along you are, which a div pretending to be a scrollbar is not.
+       */
+      {
+        kind: 'select',
+        key: 'scrollbar',
+        label: 'Scroll bar',
+        options: [
+          { value: 'thin', label: 'Thin' },
+          { value: 'bar', label: 'Bold' },
+        ],
+        help: 'Bold gives the wide track under the cards, and fades the rail at whichever end has more to show.',
       },
       {
         kind: 'toggle',
