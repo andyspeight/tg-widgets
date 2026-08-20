@@ -15,6 +15,8 @@ import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import {
   boxIsEmpty,
   EMPTY_BOX,
+  MOTION_BACKGROUND_RECIPES,
+  MOTION_LIVE_RECIPES,
   safeAnchor,
   safeColour,
   type Block,
@@ -337,6 +339,38 @@ export function SectionRenderer({
     ...bgExtra,
   ].slice(0, 8);
   const bgShow = !video && bgImages.length > 1;
+
+  /*
+   * THE SECTION'S MOTION RECIPE, and the one rule that keeps it from fighting what
+   * is already here.
+   *
+   * Only a LIVE recipe reaches the attribute. The rest of the enum parses and stores
+   * so a save round trips, but emitting data-motion for a recipe with no CSS behind
+   * it would put a promise in the DOM the stylesheet does not keep.
+   *
+   * Off while editing, the same gate as the reveal and the hover above: the canvas
+   * re-renders on every keystroke and a picture drifting under the pointer would
+   * fight selecting it.
+   *
+   * A recipe that drives the BACKGROUND needs a still background picture, exactly
+   * the guard Ken Burns and the parallax already use: never the cycling background
+   * and never a video.
+   */
+  const recipe = section.motion && !editable ? section.motion.recipe : undefined;
+  const stillBackground = Boolean(background) && !bgShow && !video;
+  const motion =
+    recipe && MOTION_LIVE_RECIPES.has(recipe)
+      && (MOTION_BACKGROUND_RECIPES.has(recipe) ? stillBackground : true)
+      ? recipe
+      : undefined;
+  /*
+   * The recipe WINS the background. Parallax and Ken Burns have moved that one
+   * picture since 11 and 13 Aug 2026 and globals.css has always said only one of
+   * them may. A background recipe is a third claimant, so rather than leaving three
+   * animations on one element the recipe takes it and the two booleans stand down.
+   * A5 is not a background recipe, so it composes with them rather than replacing.
+   */
+  const motionOwnsBackground = Boolean(motion && MOTION_BACKGROUND_RECIPES.has(motion));
   const bgTransition = section.backgroundTransition === 'slide' ? 'slide' : 'fade';
   const bgInterval = section.backgroundInterval ?? 5;
   /*
@@ -400,7 +434,7 @@ export function SectionRenderer({
        * so it never fights the canvas. The drift itself is pure CSS in globals.css.
        */
       data-parallax={
-        section.parallax && Boolean(background) && !bgShow && !video && !editable ? '' : undefined
+        section.parallax && stillBackground && !motionOwnsBackground && !editable ? '' : undefined
       }
       /*
        * Ken Burns: the same still background picture drifts and zooms slowly on its
@@ -411,10 +445,19 @@ export function SectionRenderer({
        * in globals.css.
        */
       data-ken-burns={
-        section.kenBurns && Boolean(background) && !bgShow && !video && !section.parallax && !editable
+        section.kenBurns && stillBackground && !motionOwnsBackground && !section.parallax && !editable
           ? ''
           : undefined
       }
+      /*
+       * The motion recipe, and how much of it. Both are decided above, where the
+       * background guards and the resolution rule against parallax and Ken Burns
+       * live. Intensity is a band from 1 to 3 rather than an on and off switch, so
+       * the gentlest setting still moves; globals.css reads it as custom properties
+       * and the recipes themselves are pure CSS.
+       */
+      data-motion={motion}
+      data-motion-intensity={motion ? String(section.motion?.intensity ?? 2) : undefined}
       /*
        * Slide this section up under the one above it. Structural, not decorative,
        * so it is NOT gated on `editable` the way the reveal and the hover are: an

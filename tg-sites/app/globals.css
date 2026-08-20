@@ -979,6 +979,124 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * MOTION RECIPES (Andy, 20 Aug 2026). A section carrying data-motion runs one recipe
+ * from the catalogue in the travelgenix-taste skill. Two are built, both tier 0 and
+ * pure CSS, so a page using them still ships no JavaScript.
+ *
+ * data-motion-intensity is 1, 2 or 3 and it is a BAND, not an on and off switch: it
+ * moves the amplitude and the duration together, so the gentlest setting is still
+ * motion. The bands are custom properties on the section, inherited by the pictures,
+ * which is what lets one keyframe serve all three.
+ *
+ * PACED BY TIME, NEVER BY FRAMES. Both are CSS animations with a duration, so a weak
+ * GPU runs them at the same speed as a fast one. Lesson 3 in the catalogue is a frame
+ * counter drifting visibly on a slow machine, and CSS simply cannot make that mistake.
+ *
+ * Everything here is behind prefers-reduced-motion, so a visitor who asked for less
+ * gets the pictures sitting still. Reduced motion is a second designed page, not a
+ * broken one: nothing here hides content or leaves a picture part-way through a move.
+ */
+
+/*
+ * A5 slow-frame, TIER 0. Each picture in the section drifts and scales very slowly,
+ * with DELIBERATELY DESYNCHRONISED durations across the set: 26s, 31s and 36s cycling
+ * through the items, and every second one running backwards. Identical durations
+ * across a grid is the tell that gives an animated page away, so the desync is the
+ * recipe rather than a detail of it.
+ *
+ * It moves the pictures INSIDE the section, never the background, so it composes with
+ * parallax and Ken Burns instead of fighting them. The frames already clip (the same
+ * ones the hover zoom leans on), and clip is restated here so a drifting picture can
+ * never reach its neighbours even if a frame's overflow changes.
+ */
+.tgs-section[data-motion='A5'] {
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.09;
+}
+.tgs-section[data-motion='A5'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.01;
+  --tgs-motion-to: 1.05;
+}
+.tgs-section[data-motion='A5'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.14;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) { overflow: clip; }
+  .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) img {
+    animation: tgs-motion-slow-frame 26s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+
+  /* The desync. The item is the card in a card grid and the frame itself in a
+     gallery, which is why both are listed: in each case the picture sits inside it. */
+  .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n + 2) img {
+    animation-duration: 31s;
+  }
+  .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n) img {
+    animation-duration: 36s;
+  }
+  .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(even) img {
+    animation-direction: alternate-reverse;
+  }
+}
+
+@keyframes tgs-motion-slow-frame {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(var(--tgs-motion-to)) translate(-1.5%, -1%);
+  }
+}
+
+/*
+ * A6 ambient-drift, TIER 0. The section's single background picture drifts and scales
+ * continuously on its own. Its meaning in the catalogue is ARRIVAL, so it belongs at
+ * the foot of a page, under the closing statement and the call to action.
+ *
+ * Same mechanism as Ken Burns above and deliberately so, but it is a recipe rather
+ * than a switch: it carries intensity bands and it is the thing an editor picks by
+ * name. The render never sets both, because both move the one picture. Ken Burns is
+ * left exactly as it was, so nothing already published changes.
+ */
+.tgs-section[data-motion='A6'] {
+  --tgs-motion-from: 1.04;
+  --tgs-motion-to: 1.14;
+  --tgs-motion-duration: 26s;
+}
+.tgs-section[data-motion='A6'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.08;
+  --tgs-motion-duration: 34s;
+}
+.tgs-section[data-motion='A6'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.05;
+  --tgs-motion-to: 1.2;
+  --tgs-motion-duration: 20s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* clip, not hidden, for the reason given on .tgs-page: hidden would make this a
+     scroll container and freeze any view() timeline inside it. */
+  .tgs-section[data-motion='A6'] { overflow: clip; }
+  .tgs-section[data-motion='A6'] .tgs-section__bg {
+    animation: tgs-motion-ambient-drift var(--tgs-motion-duration) ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+}
+
+@keyframes tgs-motion-ambient-drift {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(var(--tgs-motion-to)) translate(-2%, -1.5%);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

@@ -270,6 +270,79 @@ export function boxIsEmpty(box: Box): boolean {
 // Shared enums
 // ---------------------------------------------------------------------------
 
+/* ---------------------------------------------------------------------------
+ * MOTION RECIPES
+ * ------------------------------------------------------------------------- */
+
+/**
+ * The recipe vocabulary, from the catalogue in the travelgenix-taste skill.
+ *
+ * A CLOSED LIST, like REVEAL_STYLES, so the value the render puts in data-motion
+ * can only ever be one of these and anything unknown falls back to no motion.
+ * A1 ambient-terrain is deliberately absent: it is WebGL and belongs to the
+ * hero-cinematic block rather than to any section.
+ */
+export const MOTION_RECIPES = [
+  'none', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+] as const;
+export type MotionRecipe = (typeof MOTION_RECIPES)[number];
+
+/**
+ * What each recipe costs, from the catalogue. 0 is CSS only and free, 1 is a small
+ * script, 2 is a WebGL canvas and is capped at one per page.
+ *
+ * S5 scrub-scale is tier 0 HERE though the catalogue says 0/1, because this codebase
+ * already does scroll-linked animation in pure CSS with `animation-timeline: view()`
+ * (see the parallax) rather than with a scroll listener.
+ */
+export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
+  none: 0, A2: 1, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 1, S3: 0, S5: 0,
+};
+
+/**
+ * The recipes that drive the section's BACKGROUND picture.
+ *
+ * This is the resolution rule for the collision the motion layer would otherwise
+ * create. Parallax and Ken Burns already move that one picture and globals.css has
+ * said since 13 Aug 2026 that only one of them may: "the render never sets this
+ * alongside data-parallax, since both move the one picture". A recipe in this set is
+ * a third claimant, so when one is set it WINS and the two booleans are ignored.
+ * A5 is not in here: it moves the pictures inside the section, not the background,
+ * so it composes with parallax and Ken Burns rather than fighting them.
+ */
+export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
+  'A2', 'A4', 'A6', 'A7', 'S5',
+]);
+
+/**
+ * The recipes with a render behind them TODAY. Everything else in MOTION_RECIPES
+ * parses and stores but draws nothing yet, so the render must not emit it.
+ * Guarded by tests/motion.test.ts, which checks each of these has CSS and a
+ * reduced-motion path in globals.css.
+ */
+export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A5', 'A6']);
+
+/** How much the recipe moves. Bands, never on and off: 2 is the default middle. */
+export type MotionIntensity = 1 | 2 | 3;
+
+export type Motion = { recipe: MotionRecipe; intensity: MotionIntensity };
+
+/**
+ * Reads a stored motion value, refusing anything that is not in the closed list.
+ *
+ * Returns undefined for absent, malformed or 'none', the same shape `pullUp` uses
+ * for zero, so a section without motion round trips through a save unchanged.
+ */
+function normaliseMotion(v: unknown): Motion | undefined {
+  if (!v || typeof v !== 'object') return undefined;
+  const raw = v as { recipe?: unknown; intensity?: unknown };
+  const recipe = MOTION_RECIPES.find((r) => r === raw.recipe);
+  if (!recipe || recipe === 'none') return undefined;
+  const n = typeof raw.intensity === 'number' ? raw.intensity : Number(raw.intensity);
+  const intensity = (Number.isFinite(n) ? Math.min(3, Math.max(1, Math.round(n))) : 2) as MotionIntensity;
+  return { recipe, intensity };
+}
+
 export const Tone = z.enum(['light', 'subtle', 'dark', 'accent']);
 export const SectionWidth = z.enum(['narrow', 'contained', 'wide', 'full']);
 export const Spacing = z.enum(['none', 'xs', 's', 'm', 'l', 'xl']);
@@ -675,6 +748,25 @@ export const SectionSchema = z.object({
    * turns Ken Burns on when parallax is not, and only for a still background picture.
    */
   kenBurns: z.boolean().optional(),
+  /**
+   * The section's MOTION RECIPE, from the catalogue in the travelgenix-taste skill
+   * (`references/motion-recipes.md`). Andy's call, 20 Aug 2026: motion is available
+   * to every tenant rather than gated to a tier, because it is a large part of why
+   * an agency leaves Duda for us.
+   *
+   * A PROP, NOT FOURTEEN BLOCKS. The registry has 44 block types already. A recipe
+   * describes how a section MOVES, not what it contains, so it rides on the section
+   * the way reveal, parallax and Ken Burns do rather than doubling the block library.
+   *
+   * WHAT IS ACTUALLY BUILT. MOTION_LIVE_RECIPES is the honest answer and today it is
+   * A5 and A6, both tier 0 and pure CSS. The rest of the enum is the agreed contract
+   * so stored data does not need a migration when they land, and the render only ever
+   * emits data-motion for a live one, so the attribute in the DOM always means
+   * something is really moving.
+   *
+   * Optional and absent when 'none', so no stored section changes shape.
+   */
+  motion: z.unknown().transform(normaliseMotion).optional(),
   /**
    * An animated gradient behind the section, in place of a solid tone or picture.
    *
