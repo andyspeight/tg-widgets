@@ -880,6 +880,89 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * CARDS THAT OPEN WHEN YOU CLICK THEM (Andy, 20 Aug 2026, from Duda's
+     * Travelgenix Expanding Cards).
+     *
+     * A row of narrow panels, one of them open. Clicking a closed one opens it
+     * and closes the other, which is RADIO BUTTON BEHAVIOUR exactly — one of a
+     * set, never none — so that is what it is built from. Same trick Tabs uses,
+     * and it means a published page still ships no JavaScript for this: the
+     * browser does the choosing, the arrow keys work between the cards on their
+     * own, and each card is a real form control a screen reader announces.
+     */
+    type: 'expanding-cards',
+    label: 'Expanding cards',
+    group: 'Media',
+    icon: 'slider',
+    description: 'A row of pictures where the one you click opens to show its story.',
+    defaults: {
+      height: 'medium',
+      radius: 'md',
+      scrim: '#0d1420',
+      scrimStrength: 55,
+      items: [
+        { src: '', alt: '', title: 'Greece', body: 'Seven nights across three islands, with every ferry booked for you.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Italy', body: 'A week on the Amalfi coast, with a driver for the coast road.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Portugal', body: 'Three nights in Lisbon, then four with your feet up in the Algarve.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Croatia', body: 'Split, Hvar and Dubrovnik, with the ferry times worked out.', linkLabel: 'See the trip', linkHref: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Expanding cards (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Cards',
+        itemLabel: 'Card',
+        /*
+         * SIX, and the number is a design limit rather than a technical one.
+         * Every card that is not open is a strip a few centimetres wide with a
+         * word down it; past six there is not enough room left for the open one
+         * to be worth opening.
+         */
+        max: 6,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Picture description', max: 200, help: 'What the picture shows, for a screen reader.' },
+          { kind: 'text', key: 'title', label: 'Title', max: 60, help: 'Shown down the side of a closed card, so keep it short.' },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 3, max: 400 },
+          { kind: 'text', key: 'linkLabel', label: 'Button', max: 40 },
+          { kind: 'url', key: 'linkHref', label: 'Button links to', placeholder: '/greece or https://' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      {
+        kind: 'colour',
+        key: 'scrim',
+        label: 'Shading',
+        help: 'The wash over each picture. Without it, words over a photograph are a lottery.',
+      },
+      {
+        kind: 'number',
+        key: 'scrimStrength',
+        label: 'Shading strength',
+        min: 25,
+        max: 90,
+        step: 1,
+      },
+      { kind: 'colour', key: 'buttonColour', label: 'Button colour', help: 'Blank uses your theme.' },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',

@@ -3634,6 +3634,210 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Expanding cards                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 20 Aug 2026, from Duda's Expanding Cards. A row of pictures, one open.
+ *
+ * NO JAVASCRIPT: the open one is whichever radio is checked, and the browser
+ * does that. See ExpandingCardsBlock for why radios rather than buttons — one
+ * of a set and never none is what a radio group IS, and it brings arrow-key
+ * movement and a real announced state with it for free.
+ *
+ * The pairings below are written out one per position, six of them, for the
+ * same reason the Tabs rules are: `:nth-of-type` counts by ELEMENT type and
+ * would pair the wrong card with the wrong radio the moment the markup grows
+ * another kind of child. The count matches MAX_EXPANDING_CARDS.
+ */
+.tgs-expand { --tgs-exp-h: 26rem; }
+.tgs-expand[data-height='short']  { --tgs-exp-h: 18rem; }
+.tgs-expand[data-height='medium'] { --tgs-exp-h: 26rem; }
+.tgs-expand[data-height='tall']   { --tgs-exp-h: 34rem; }
+
+.tgs-expand__rail {
+  display: flex;
+  gap: var(--tgs-space-s);
+  height: var(--tgs-exp-h);
+}
+
+.tgs-expand__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--tgs-radius, 12px);
+  /* Closed by default. The checked rule below grows one of them. */
+  flex: 1 1 0;
+  min-width: 0;
+  /* Exponential ease-out from an already-visible default: the card is there
+     the whole time, it only changes how much room it takes. */
+  transition: flex-grow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tgs-expand[data-radius='none'] .tgs-expand__card { border-radius: 0; }
+.tgs-expand[data-radius='sm'] .tgs-expand__card { border-radius: var(--tgs-radius-sm, 6px); }
+.tgs-expand[data-radius='lg'] .tgs-expand__card { border-radius: 20px; }
+.tgs-expand[data-radius='full'] .tgs-expand__card { border-radius: 28px; }
+
+.tgs-expand__pic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tgs-expand__pic--none { background: var(--tgs-surface-alt); }
+.tgs-expand__scrim { position: absolute; inset: 0; }
+
+/*
+ * THE CLOSED CARD IS ITSELF THE CONTROL, so the label covers the whole of it
+ * rather than being a small target on it. A narrow strip with a small button
+ * somewhere on it is a card most people would not think to click.
+ */
+.tgs-expand__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--tgs-space-m);
+  cursor: pointer;
+  color: #fff;
+}
+
+/*
+ * THE TITLE READS UP THE STRIP RATHER THAN BEING CUT IN HALF ACROSS IT.
+ *
+ * A closed card is a few centimetres wide. Centre a horizontal title in that and
+ * "Greek island hopping" becomes "k island ho", which tells a visitor nothing
+ * and looks broken rather than deliberate. Turned on its side the whole title
+ * fits and the strip reads as a spine, which is the point of the pattern.
+ */
+.tgs-expand__spine {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+
+.tgs-expand__body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--tgs-space-s);
+  padding: var(--tgs-space-l);
+  color: #fff;
+  /*
+   * HIDDEN RATHER THAN TRANSPARENT while the card is closed. `visibility:
+   * hidden` takes the button out of the tab order and out of the accessibility
+   * tree; opacity alone would leave a keyboard landing on a button nobody can
+   * see, inside a card that is not even open.
+   */
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.1s, visibility 0s linear 0.4s;
+}
+
+.tgs-expand__title {
+  margin: 0;
+  font-family: var(--tgs-h-font, inherit);
+  font-size: clamp(1.5rem, 1rem + 1.6vw, 2.2rem);
+  line-height: 1.15;
+  font-weight: 600;
+}
+.tgs-expand__text {
+  margin: 0;
+  max-width: 34rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 92%);
+  white-space: pre-line;
+}
+.tgs-expand__body .tgs-button { align-self: flex-start; }
+
+/* The open one. */
+.tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'],
+.tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'],
+.tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'],
+.tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'],
+.tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'],
+.tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] {
+  flex-grow: 4;
+}
+
+.tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'] .tgs-expand__body,
+.tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'] .tgs-expand__body,
+.tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'] .tgs-expand__body,
+.tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'] .tgs-expand__body,
+.tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'] .tgs-expand__body,
+.tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] .tgs-expand__body {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.35s ease 0.15s, visibility 0s;
+}
+
+/* Its label steps aside, or it would sit over the button and eat the click. */
+.tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] .tgs-expand__hit {
+  pointer-events: none;
+  opacity: 0;
+}
+
+/*
+ * THE FOCUS RING GOES ON THE CARD, because the thing that actually has focus is
+ * a radio nobody can see. Without this, tabbing into the row moves focus with no
+ * visible sign of where it went and the arrow keys start working for no
+ * apparent reason. Same reasoning as the Tabs rule above.
+ */
+.tgs-expand__radio[data-index='0']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='0'],
+.tgs-expand__radio[data-index='1']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='1'],
+.tgs-expand__radio[data-index='2']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='2'],
+.tgs-expand__radio[data-index='3']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='3'],
+.tgs-expand__radio[data-index='4']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='4'],
+.tgs-expand__radio[data-index='5']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-expand__card { transition: none; }
+  .tgs-expand__body { transition: none; }
+}
+
+@container tgs-page (max-width: 767px) {
+  /*
+   * DOWN THE PAGE ON A PHONE. Six strips across 390px is 60px each, which is not
+   * a card, it is a fence. Stacked, the closed ones are readable bands and the
+   * open one has the width to actually say something, so the title turns back
+   * the right way up.
+   */
+  .tgs-expand__rail { flex-direction: column; height: auto; }
+  .tgs-expand__card { flex: none; height: 4.5rem; transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+  .tgs-expand__hit { align-items: center; justify-content: flex-start; }
+  .tgs-expand__spine { writing-mode: horizontal-tb; transform: none; }
+
+
+  .tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'],
+  .tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'],
+  .tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'],
+  .tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'],
+  .tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'],
+  .tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] {
+    height: var(--tgs-exp-h);
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 

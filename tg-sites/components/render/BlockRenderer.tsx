@@ -33,6 +33,7 @@ import {
   QuoteBlock,
   SearchBlock,
 
+  ExpandingCardsBlock,
   HalfOverlayBlock,
   SliderBlock,
   SocialBlock,
@@ -128,6 +129,8 @@ export function BlockRenderer({
         return <SliderBlock props={props} />;
       case 'half-overlay':
         return <HalfOverlayBlock props={props} />;
+      case 'expanding-cards':
+        return <ExpandingCardsBlock props={props} blockId={block.id} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':
