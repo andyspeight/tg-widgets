@@ -2455,6 +2455,159 @@ export const BLOCKS: readonly BlockDefinition[] = [
 
   {
     /*
+     * ONE ICON ON ITS OWN, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * WHAT IT IS NOT. "Icon and text" already existed and is the right block
+     * nine times out of ten, but it is an icon WITH a title and a line of copy,
+     * and the way to get a bare icon out of it was to delete both and leave two
+     * empty hosts behind. That is the sort of workaround a client finds and then
+     * tells other clients about.
+     *
+     * IT IS A PICTURE, NOT A CHARACTER. Drawn from the Lucide set that
+     * lib/content/icons.ts holds, parsed into real elements rather than put
+     * through innerHTML, so an injected script is structurally impossible. Only
+     * the ~300 bytes of the ONE chosen icon reaches a published page.
+     *
+     * SIZED IN PIXELS rather than from the type scale, because this is a picture
+     * and a client placing one wants it a certain size on the page, not a
+     * certain size relative to a paragraph that is not there.
+     *
+     * A LINK IS OPTIONAL, and when there is one the icon needs a name a screen
+     * reader can read: an anchor whose only content is a decorative SVG is an
+     * anchor that announces nothing. So the label field is required by the
+     * renderer whenever a link is set, and ignored when there is not one, where
+     * the icon really is decoration.
+     */
+    type: 'icon',
+    label: 'Icon',
+    group: 'Media',
+    icon: 'sparkle',
+    description: 'A single icon from the library, sized and coloured.',
+    defaults: { icon: 'sparkles', size: 40, colour: '', href: '', label: '', align: 'left' },
+    summarise: (props) => `Icon: ${asString(props.icon) || 'none'}`,
+    fields: [
+      { kind: 'icon', key: 'icon', label: 'Icon' },
+      {
+        kind: 'number',
+        key: 'size',
+        label: 'Size',
+        min: 12,
+        max: 200,
+        step: 2,
+        group: 'layout',
+        help: 'In pixels, across and down.',
+      },
+      {
+        kind: 'colour',
+        key: 'colour',
+        label: 'Colour',
+        group: 'colours',
+        help: 'Leave blank to follow the text around it.',
+      },
+      { kind: 'url', key: 'href', label: 'Link', placeholder: 'https://' },
+      {
+        kind: 'text',
+        key: 'label',
+        label: 'What the link is for',
+        max: 80,
+        help: 'Needed only when there is a link. A screen reader reads this, because an icon on its own says nothing.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
+     * A DECORATIVE SHAPE, asked for on 20 Aug 2026 from the Duda list.
+     *
+     * PURE DECORATION, AND SAID SO IN THE MARKUP. It carries aria-hidden, so a
+     * screen reader walks straight past it. That is not a limitation to work
+     * around later: a coloured circle behind a heading is not information, and
+     * announcing it would be noise between the words that are.
+     *
+     * NOT THE SAME THING AS A SHAPE DIVIDER. A divider is the shaped EDGE
+     * between two sections and belongs to the section (see
+     * lib/content/dividers.ts). This is an object you place in a column, to sit
+     * behind or beside something, which is what the reference sites use them for.
+     *
+     * DRAWN WITH CSS, not an SVG file and not a picture. A circle is a border
+     * radius, a ring is a border, a square is a box: all of them scale to any
+     * size with no file to load and no blur, and all of them take the client's
+     * own colour rather than needing one baked in. The two that CSS cannot do
+     * honestly, a triangle and a blob, are drawn with clip-path, which is the
+     * same idea and still no file.
+     */
+    type: 'shape',
+    label: 'Shape',
+    group: 'Media',
+    icon: 'shape',
+    description: 'A circle, ring, square or blob, for decoration behind your content.',
+    defaults: {
+      shape: 'circle',
+      size: 120,
+      colour: '',
+      opacity: 100,
+      rotate: 0,
+      align: 'left',
+    },
+    summarise: (props) => `Shape: ${asString(props.shape) || 'circle'}`,
+    fields: [
+      {
+        kind: 'select',
+        key: 'shape',
+        label: 'Shape',
+        options: [
+          { value: 'circle', label: 'Circle' },
+          { value: 'ring', label: 'Ring' },
+          { value: 'square', label: 'Square' },
+          { value: 'rounded', label: 'Rounded square' },
+          { value: 'triangle', label: 'Triangle' },
+          { value: 'blob', label: 'Blob' },
+        ],
+      },
+      {
+        kind: 'number',
+        key: 'size',
+        label: 'Size',
+        min: 16,
+        max: 600,
+        step: 4,
+        group: 'layout',
+        help: 'In pixels. It never grows past the column it is in.',
+      },
+      {
+        kind: 'colour',
+        key: 'colour',
+        label: 'Colour',
+        group: 'colours',
+        help: 'Leave blank for your brand colour.',
+      },
+      {
+        kind: 'number',
+        key: 'opacity',
+        label: 'Opacity',
+        min: 5,
+        max: 100,
+        step: 5,
+        group: 'effects',
+        help: 'Below about 20 it reads as a wash behind your words rather than an object.',
+      },
+      {
+        kind: 'number',
+        key: 'rotate',
+        label: 'Rotation',
+        min: 0,
+        max: 359,
+        step: 5,
+        group: 'effects',
+        help: 'In degrees. Does nothing to a circle or a ring.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
+
+  {
+    /*
      * A FILE TO DOWNLOAD, asked for on 20 Aug 2026 from the Duda list.
      *
      * WHAT IT REPLACES. Until now the only way to put a brochure on a page was to

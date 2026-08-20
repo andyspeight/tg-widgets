@@ -4027,6 +4027,76 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-crumbs [aria-current='page'] { color: var(--tgs-text); }
 
 /* ------------------------------------------------------------------ */
+/* The Icon block                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The size arrives as a FONT SIZE on the wrapper, because ContentIcon draws
+ * itself 1em square. One number controls both dimensions and the two cannot get
+ * out of step.
+ */
+.tgs-icon { line-height: 0; }
+.tgs-icon[data-align='centre'] { text-align: center; }
+.tgs-icon[data-align='right'] { text-align: right; }
+
+.tgs-icon__glyph { display: inline-block; vertical-align: middle; }
+
+/* A linked icon is a control, so it gets a hover and a visible focus ring. An
+   icon that is only decoration gets neither, because neither would be true. */
+.tgs-icon__link {
+  display: inline-block;
+  color: inherit;
+  transition: opacity 0.18s ease;
+}
+.tgs-icon__link:hover { opacity: 0.7; }
+.tgs-icon__link:focus-visible {
+  outline: 2px solid var(--tgs-primary);
+  outline-offset: 4px;
+  border-radius: var(--tgs-radius-sm);
+}
+
+/* ------------------------------------------------------------------ */
+/* The Shape block                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * DRAWN IN CSS, so there is no file to load, nothing to blur at any size, and
+ * the colour is the client's rather than baked into an asset.
+ *
+ * max-width is the load-bearing line. The size is a request, and without this a
+ * 600px shape on a 320px phone pushes the page sideways — the one thing a
+ * decorative object must never do.
+ */
+.tgs-shape[data-align='centre'] { text-align: center; }
+.tgs-shape[data-align='right'] { text-align: right; }
+
+.tgs-shape__form {
+  display: inline-block;
+  width: var(--tgs-shape-size, 120px);
+  max-width: 100%;
+  aspect-ratio: 1;
+  background: var(--tgs-shape-colour, var(--tgs-primary));
+  opacity: var(--tgs-shape-opacity, 1);
+  rotate: var(--tgs-shape-rotate, 0deg);
+}
+
+.tgs-shape__form[data-shape='circle'] { border-radius: 50%; }
+.tgs-shape__form[data-shape='rounded'] { border-radius: var(--tgs-radius-lg); }
+
+/* A ring is an outline with nothing in it, so the colour moves to the border and
+   the fill goes. The width scales with the shape rather than being fixed, or a
+   400px ring would be drawn with the same hairline as a 40px one. */
+.tgs-shape__form[data-shape='ring'] {
+  border: calc(var(--tgs-shape-size, 120px) / 10) solid var(--tgs-shape-colour, var(--tgs-primary));
+  border-radius: 50%;
+  background: none;
+}
+
+/* The two CSS cannot draw with a radius. Same idea, still no file. */
+.tgs-shape__form[data-shape='triangle'] { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.tgs-shape__form[data-shape='blob'] { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
+
+/* ------------------------------------------------------------------ */
 /* The Copyright line                                                  */
 /* ------------------------------------------------------------------ */
 

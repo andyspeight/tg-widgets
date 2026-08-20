@@ -36,6 +36,8 @@ import {
   SocialBlock,
   BreadcrumbsBlock,
   CopyrightBlock,
+  IconBlock,
+  ShapeBlock,
   FileBlock,
   ReadMoreBlock,
   SpacerBlock,
@@ -154,6 +156,10 @@ export function BlockRenderer({
        * and the client. `editable` makes that checkbox inert, so clicking a
        * preview to select the block does not fold the text under the pointer.
        */
+      case 'icon':
+        return <IconBlock props={props} />;
+      case 'shape':
+        return <ShapeBlock props={props} />;
       case 'copyright':
         return <CopyrightBlock props={props} />;
       case 'read-more':

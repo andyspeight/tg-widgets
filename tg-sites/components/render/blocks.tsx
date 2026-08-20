@@ -2518,6 +2518,106 @@ export function DividerBlock({ props }: { props: Props }): ReactElement {
 }
 
 /**
+ * One icon on its own.
+ *
+ * A PICTURE, NOT A CHARACTER, drawn from the Lucide set through ContentIcon,
+ * which parses the shapes into real elements rather than putting a string
+ * through innerHTML. Only the one chosen icon reaches the page.
+ *
+ * SIZED IN PIXELS, set as a font size on the wrapper because ContentIcon draws
+ * itself at 1em square. One number then controls both dimensions and cannot get
+ * out of step with itself.
+ *
+ * A LINKED ICON NEEDS A NAME. An anchor whose only content is an aria-hidden SVG
+ * is an anchor a screen reader announces as nothing at all, and a keyboard user
+ * tabs onto a control with no idea what it does. So a link is only drawn when
+ * there is a label to go with it; without one the icon stays decoration, which
+ * is honest rather than broken.
+ */
+export function IconBlock({ props }: { props: Props }): ReactElement {
+  const name = str(props, 'icon', 'sparkles');
+  const size = clamp(props.size, 12, 200, 40);
+  const colour = safeColour(props.colour);
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const href = safeUrl(str(props, 'href'));
+  const label = str(props, 'label').trim();
+
+  /*
+   * ASKED BEFORE DRAWING, not after. `<ContentIcon />` is a JSX element whether
+   * or not the component returns null from it, so testing the element for
+   * truthiness would always pass and an unknown icon name would render an empty
+   * box with no explanation. isIconName is the real question.
+   */
+  if (!isIconName(name)) return <div className="tgs-placeholder">Choose an icon</div>;
+  const glyph = <ContentIcon name={name} className="tgs-icon__glyph" />;
+
+  const style = {
+    fontSize: `${size}px`,
+    ...(colour ? { color: colour } : {}),
+  } as CSSProperties;
+
+  return (
+    <div className="tgs-icon" data-align={align} style={style}>
+      {href && label ? (
+        <a className="tgs-icon__link" href={href} aria-label={label}>
+          {glyph}
+        </a>
+      ) : (
+        glyph
+      )}
+    </div>
+  );
+}
+
+/**
+ * A decorative shape.
+ *
+ * aria-hidden, AND THAT IS THE DESIGN RATHER THAN AN OVERSIGHT. A coloured
+ * circle behind a heading is not information; announcing it would put noise
+ * between the words that are.
+ *
+ * CSS, NOT A FILE. A circle is a border radius, a ring is a border, a square is
+ * a box. They scale to any size with nothing to download and nothing to blur,
+ * and they take the client's own colour rather than needing one baked into an
+ * asset. The two shapes CSS cannot draw honestly, the triangle and the blob, use
+ * clip-path, which is the same idea and still no file.
+ *
+ * IT NEVER OUTGROWS ITS COLUMN. The size is a request; `max-width: 100%` on the
+ * element is what stops a 600px shape pushing a 320px phone sideways, which is
+ * the one thing a decorative object must never do.
+ */
+export function ShapeBlock({ props }: { props: Props }): ReactElement {
+  const shape = oneOf(
+    props,
+    'shape',
+    ['circle', 'ring', 'square', 'rounded', 'triangle', 'blob'] as const,
+    'circle',
+  );
+  const size = clamp(props.size, 16, 600, 120);
+  const colour = safeColour(props.colour);
+  const opacity = clamp(props.opacity, 5, 100, 100);
+  const rotate = clamp(props.rotate, 0, 359, 0);
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+
+  const style = {
+    '--tgs-shape-size': `${size}px`,
+    '--tgs-shape-opacity': String(opacity / 100),
+    // A circle and a ring look identical at every angle, so the transform is
+    // simply not written for them rather than written and wasted.
+    ...(rotate && shape !== 'circle' && shape !== 'ring'
+      ? { '--tgs-shape-rotate': `${rotate}deg` }
+      : {}),
+    ...(colour ? { '--tgs-shape-colour': colour } : {}),
+  } as CSSProperties;
+
+  return (
+    <div className="tgs-shape" data-align={align}>
+      <div className="tgs-shape__form" data-shape={shape} style={style} aria-hidden="true" />
+    </div>
+  );
+}
+
+/**
  * The copyright line.
  *
  * THE YEAR IS READ WHEN THE PAGE IS DRAWN, never stored. A published page is

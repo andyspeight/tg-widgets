@@ -26,6 +26,7 @@ export type IconName =
   | 'file'
   | 'read-more'
   | 'copyright'
+  | 'shape'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -123,6 +124,9 @@ const PATHS: Record<IconName, string> = {
   // A circle with a c in it, drawn rather than set as a character: an icon set
   // of stroked paths with one glyph in it would sit at a different weight.
   copyright: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M14.6 9.6a3.4 3.4 0 1 0 0 4.8',
+  // A circle and a square, overlapping: the two shapes that are the block,
+  // rather than one of them standing for all six.
+  shape: 'M9 4.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9M11 11h9v9h-9z',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 
