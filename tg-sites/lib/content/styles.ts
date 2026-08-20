@@ -443,6 +443,40 @@ export function hasInlineTextSizing(html: unknown): boolean {
  * A closed list, which is what keeps data-reveal safe: the attribute can only ever
  * be one of these, never anything a client typed.
  */
+/**
+ * The motion recipes an editor can actually pick, in plain words.
+ *
+ * NAMED FOR WHAT THEY DO, not for their catalogue code. A travel agent choosing how
+ * their page moves should not have to know that A6 is ambient-drift; the codes stay
+ * in the model, in the stylesheet and in the catalogue, and never reach a label.
+ *
+ * ONLY LIVE RECIPES BELONG HERE. This list is the picker, so a recipe with no CSS
+ * behind it must not appear in it, however agreed its name is. tests/motion.test.ts
+ * holds this against MOTION_LIVE_RECIPES.
+ *
+ * LIMITING THE PICKER BY THE TENANT'S ASSIGNED PRIMARY IS STILL TO COME. The segment
+ * lock in the taste skill gives each travel segment its own primary ambient recipe so
+ * two client sites never move the same way, and with every tenant self-serving that
+ * assignment has to live on the tenant rather than in a picker. It waits on the
+ * DESIGN.md and design_brief canonicalisation question, which is Andy's to settle.
+ */
+export const MOTION_CHOICES = [
+  { value: 'none', label: 'None' },
+  { value: 'A5', label: 'Pictures breathe' },
+  { value: 'A6', label: 'Background drifts' },
+] as const;
+
+/**
+ * How much it moves. A BAND, never an on and off switch: the gentlest setting still
+ * moves, because a recipe that can be turned down to nothing is a checkbox wearing a
+ * slider's clothes.
+ */
+export const MOTION_INTENSITIES = [
+  { value: 1, label: 'Gentle' },
+  { value: 2, label: 'Medium' },
+  { value: 3, label: 'Strong' },
+] as const;
+
 export const REVEAL_STYLES = [
   { value: 'rise', label: 'Rise up' },
   { value: 'fade', label: 'Fade in' },

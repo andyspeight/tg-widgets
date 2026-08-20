@@ -76,6 +76,24 @@ export interface StarterSection {
    * frozen URL, and best effort (see lib/content/photo-plan.ts).
    */
   photo?: string;
+  /**
+   * How this section MOVES, when the page wants it to.
+   *
+   * Here rather than on the preset for the same reason `tone` is here: a recipe's
+   * meaning is positional. A preset that always drifted would drift halfway down a
+   * page that wanted it still, and the page is the one place the sequence is
+   * visible, so the page gets to say.
+   *
+   * Andy, 20 Aug 2026: a new site MOVES out of the box, because most clients ship
+   * whatever the default is and the default should be the good answer. Both recipes
+   * used below are tier 0, so a starter site still ships no JavaScript, and the
+   * Movement control in the section pane turns either of them off.
+   *
+   * The ten DESIGNED homes are deliberately left alone. Their sections come from
+   * frozen markup in designed-homes.ts and each is a committed look; a default that
+   * reached in and moved one would be overruling a design somebody chose.
+   */
+  motion?: Section['motion'];
 }
 
 export interface StarterPage {
@@ -238,6 +256,9 @@ function buildSection(spec: StarterSection, facts: StarterFacts): Section | null
 
   // The page's say over the band this section sits on. See StarterSection.tone.
   if (spec.tone) section.tone = spec.tone;
+
+  // And over how it moves, for the same reason. See StarterSection.motion.
+  if (spec.motion) section.motion = spec.motion;
 
   return section;
 }
@@ -469,6 +490,9 @@ const BASE_STARTERS: readonly Starter[] = [
              */
             preset: 'hero-background',
             photo: 'tropical beach turquoise aerial',
+            // The page's one full-bleed picture, so it drifts rather than sitting
+            // there. Pure CSS, and still for anyone who prefers less motion.
+            motion: { recipe: 'A6', intensity: 2 },
             heading: 'Holidays worth the time off',
             body:
               '{{about|Say in two sentences what you arrange and who for. '
@@ -483,6 +507,7 @@ const BASE_STARTERS: readonly Starter[] = [
           },
           {
             preset: 'features-picture-beside-points',
+            motion: { recipe: 'A5', intensity: 2 },
             heading: 'Why people book with {{company|us}}',
             body:
               'The reasons a person picks a person over a website. Replace these '
@@ -541,6 +566,7 @@ const BASE_STARTERS: readonly Starter[] = [
           {
             preset: 'features-cards-with-pictures',
             tone: 'subtle',
+            motion: { recipe: 'A5', intensity: 2 },
             heading: 'Places we know well',
             body: 'Three destinations, with a picture and a line each.',
           },
@@ -634,6 +660,9 @@ const BASE_STARTERS: readonly Starter[] = [
             // has one chance to look designed, and it is this section.
             preset: 'hero-background',
             photo: 'tropical beach turquoise aerial',
+            // The page's one full-bleed picture, so it drifts rather than sitting
+            // there. Pure CSS, and still for anyone who prefers less motion.
+            motion: { recipe: 'A6', intensity: 2 },
             heading: 'Holidays worth the time off',
             body:
               '{{about|Say in two sentences what you arrange and who for. '
@@ -646,6 +675,7 @@ const BASE_STARTERS: readonly Starter[] = [
           },
           {
             preset: 'blank-image-and-words',
+            motion: { recipe: 'A5', intensity: 2 },
             heading: 'Who we are',
             // NOT the profile again: the opener at the top of this same page
             // already carries it word for word.

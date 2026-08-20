@@ -25,6 +25,9 @@ import {
   parsePage,
   type MotionRecipe,
 } from '../lib/content/schema';
+import { MOTION_CHOICES, MOTION_INTENSITIES } from '../lib/content/styles';
+import { presetById } from '../lib/content/presets';
+import { buildStarterPage, STARTERS, type StarterFacts } from '../lib/content/starters';
 
 function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
@@ -316,6 +319,156 @@ describe('the rule the whole page still keeps', () => {
     expect(blocks).toContain('STILL DECIDED AGAINST: LOTTIE');
     for (const library of ['gsap', 'lenis', 'three.js']) {
       expect(blocks.toLowerCase()).toContain(library);
+    }
+  });
+});
+
+describe('the client can change what the default gave them', () => {
+  const properties = read('components', 'editor', 'Properties.tsx');
+
+  it('offers every live recipe and nothing that does not render', () => {
+    // A picker offering A2 would be promising motion the stylesheet does not have.
+    const offered = MOTION_CHOICES.map((c) => c.value).filter((v) => v !== 'none');
+    expect([...offered].sort()).toEqual([...MOTION_LIVE_RECIPES].sort());
+  });
+
+  it('offers all three intensity bands, and none of them is off', () => {
+    expect(MOTION_INTENSITIES.map((b) => b.value)).toEqual([1, 2, 3]);
+    for (const band of MOTION_INTENSITIES) {
+      expect(band.label.toLowerCase()).not.toBe('none');
+      expect(band.label.toLowerCase()).not.toBe('off');
+    }
+  });
+
+  it('names recipes in plain words, never by their catalogue code', () => {
+    // A travel agent should not have to know that A6 is ambient-drift.
+    for (const choice of MOTION_CHOICES) {
+      expect(choice.label).not.toMatch(/^[AS]\d$/);
+      expect(choice.label).not.toContain('A5');
+      expect(choice.label).not.toContain('A6');
+    }
+  });
+
+  it('lets a recipe be cleared back to nothing', () => {
+    expect(properties).toContain("if (!recipe || recipe === 'none')");
+    expect(properties).toContain('set({ motion: undefined }');
+  });
+
+  it('clears parallax and Ken Burns when a background recipe is picked', () => {
+    // The editor's state has to agree with the render's resolution rule, or a client
+    // sees two background motions ticked and only one of them doing anything.
+    expect(properties).toContain('MOTION_BACKGROUND_RECIPES.has(recipe satisfies MotionRecipe)');
+    expect(properties).toContain('owns ? { parallax: undefined, kenBurns: undefined } : {}');
+  });
+
+  it('narrows the picked value against its own list rather than casting it', () => {
+    expect(properties).toContain("MOTION_CHOICES.find((c) => c.value === event.target.value)?.value");
+    expect(properties).toContain(
+      'MOTION_INTENSITIES.find((b) => String(b.value) === event.target.value)?.value',
+    );
+  });
+});
+
+describe('a new site moves out of the box', () => {
+  const EMPTY: StarterFacts = { company: '', town: '', about: '' };
+
+  /** Every section of every page a starter builds, with its recipe if it has one. */
+  async function sectionsOf(starterId: string) {
+    const starter = STARTERS.find((s) => s.id === starterId);
+    expect(starter, `no starter ${starterId}`).toBeTruthy();
+    const pages = await Promise.all((starter?.pages ?? []).map((p) => buildStarterPage(p, EMPTY)));
+    return pages.flatMap((page) => page.sections);
+  }
+
+  it.each(['agency', 'onepage'])('starter %s builds a site that moves', async (id) => {
+    const moving = (await sectionsOf(id)).filter((s) => s.motion);
+    expect(moving.length, 'a starter site that never moves is the old default').toBeGreaterThan(0);
+  });
+
+  it('only ever defaults a background recipe onto a section that gets a picture', () => {
+    /*
+     * A6 drives the section background, so on a section with no picture it is inert.
+     * The URL is not there to check at this point on purpose: a starter names a photo
+     * QUERY and photo-plan.ts resolves it into the client's own media in a later pass,
+     * so the guarantee worth holding is that the section will be given one, which is
+     * the preset's backgroundQuery or the starter's own photo override.
+     */
+    for (const starter of STARTERS) {
+      for (const page of starter.pages) {
+        for (const spec of page.sections) {
+          if (!spec.motion || !MOTION_BACKGROUND_RECIPES.has(spec.motion.recipe)) continue;
+          const preset = presetById(spec.preset);
+          const getsAPicture = Boolean(spec.photo?.trim() || preset?.section?.backgroundQuery);
+          expect(
+            getsAPicture,
+            `${starter.id}/${page.slug || 'home'} puts ${spec.motion.recipe} on `
+            + `${spec.preset}, which never gets a background picture, so nothing would move`,
+          ).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('opens both base starters on a drifting hero', () => {
+    for (const id of ['agency', 'onepage']) {
+      const starter = STARTERS.find((s) => s.id === id);
+      const home = starter?.pages.find((p) => p.slug === '');
+      const hero = home?.sections[0];
+      expect(hero?.motion?.recipe, `${id} does not open on a drifting picture`).toBe('A6');
+    }
+  });
+
+  it('never defaults a recipe that has no render behind it', async () => {
+    for (const id of ['agency', 'onepage']) {
+      for (const section of await sectionsOf(id)) {
+        if (!section.motion) continue;
+        expect(
+          MOTION_LIVE_RECIPES.has(section.motion.recipe),
+          `${id} defaults ${section.motion.recipe}, which draws nothing`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it('keeps every default at tier 0, so a starter site still ships no script', async () => {
+    for (const id of ['agency', 'onepage']) {
+      for (const section of await sectionsOf(id)) {
+        if (!section.motion) continue;
+        expect(MOTION_TIERS[section.motion.recipe]).toBe(0);
+      }
+    }
+  });
+
+  it('never puts two background recipes on one page, or a recipe beside Ken Burns', async () => {
+    for (const starter of STARTERS) {
+      for (const spec of starter.pages) {
+        const page = await buildStarterPage(spec, EMPTY);
+        const backgrounds = page.sections.filter(
+          (s) => s.motion && MOTION_BACKGROUND_RECIPES.has(s.motion.recipe),
+        );
+        expect(
+          backgrounds.length,
+          `${starter.id}/${spec.slug || 'home'} has ${backgrounds.length} background recipes`,
+        ).toBeLessThanOrEqual(1);
+
+        for (const section of page.sections) {
+          if (!section.motion || !MOTION_BACKGROUND_RECIPES.has(section.motion.recipe)) continue;
+          expect(section.parallax, 'a recipe and parallax both claim the background').toBeFalsy();
+          expect(section.kenBurns, 'a recipe and Ken Burns both claim the background').toBeFalsy();
+        }
+      }
+    }
+  });
+
+  it('leaves the designed homes alone, because each is a look somebody chose', async () => {
+    const designed = STARTERS.filter((s) => s.id.startsWith('design-'));
+    expect(designed.length).toBeGreaterThan(0);
+    for (const starter of designed) {
+      const home = starter.pages.find((p) => p.slug === '');
+      expect(home, `${starter.id} has no home`).toBeTruthy();
+      const page = await buildStarterPage(home!, EMPTY);
+      const moved = page.sections.filter((s) => s.motion);
+      expect(moved, `${starter.id}'s designed home was given motion it did not ask for`).toEqual([]);
     }
   });
 });
