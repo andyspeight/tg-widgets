@@ -16,6 +16,28 @@
  *   3. A case in the switch in components/render/BlockRenderer.tsx.
  *
  * Add a test alongside if the block has non-trivial props.
+ *
+ * ---------------------------------------------------------------------------
+ * THE RULE EVERY BLOCK HERE KEEPS: A PUBLISHED PAGE SHIPS NO JAVASCRIPT
+ * ---------------------------------------------------------------------------
+ *
+ * Not a preference. It is why these pages are fast, why they work with
+ * JavaScript off, and why a crawler sees the same page a visitor does. Every
+ * interactive block in this file is built to it: Tabs and Read more use a hidden
+ * input and `:checked ~`, Accordion uses <details>, the Slider is scroll-snap,
+ * Search is a plain GET form, Copyright is computed on the server. The single
+ * deliberate exception in the whole product is the light and dark toggle, which
+ * needs to remember a choice, and it is one small file.
+ *
+ * DECIDED AGAINST: LOTTIE (Andy, 20 Aug 2026). A Lottie is a JSON animation plus
+ * a ~250KB JavaScript player, so it cannot be done without breaking the rule
+ * above. It was raised from the Duda element list with three ways forward — load
+ * the player only on pages using one, do not do it, or ship it everywhere — and
+ * Andy chose not to do it. A client who wants that animation exports it as a
+ * looping MP4, which the Video block already plays.
+ *
+ * This is written down so it is not re-opened by accident. If it ever is
+ * re-opened it should be on purpose, with the cost named out loud.
  */
 import type { IconName } from '../../components/editor/Icon';
 import { summariseImported } from './imported';
