@@ -104,6 +104,30 @@ right for a family-budget operator and the reverse.
 5. Every element earns its place, on both sides. Restraint is the default; commit
    the page to the one thing it is for.
 
+## What a published page ships
+
+The client site the CMS emits is server-rendered HTML first. Three properties are
+promised and are not negotiable: the page is fast, it works with JavaScript off or
+blocked, and a crawler sees the same page a visitor does.
+
+Until 20 Aug 2026 that promise was kept by banning JavaScript from a published
+page outright. The ban also ruled out the motion layer, and motion on a client
+homepage is a large part of why an agency leaves Duda for us, so Andy replaced the
+ban with the thing it stood for. The four clauses live in the header of
+`tg-sites/lib/content/blocks.ts`, which is the canonical statement:
+
+1. A page that asks for nothing ships nothing. Zero stays the default and every
+   script is conditional on the page using the feature.
+2. The content never depends on a script. Words, pictures, links and form actions
+   are in the HTML. A script adds motion, controls or polish on top, never the
+   content itself.
+3. Ours, hand-written, no libraries. No GSAP, no Lenis, no Three.js, no Lottie
+   player.
+4. A named cost and a page budget, enforced by a test rather than remembered.
+
+Reduced motion is a second designed version of the page, never an animation
+switched off.
+
 ## Accessibility & Inclusion
 
 Baseline WCAG 2.1 AA on the tool AND on every published client site.
