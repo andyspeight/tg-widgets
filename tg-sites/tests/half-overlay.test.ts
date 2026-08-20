@@ -266,3 +266,94 @@ describe('the layout', () => {
     expect(css).toContain('object-fit: cover;');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Restored coverage
+//
+// These assertions existed, were lost when this file was rewritten on the same
+// day, and are back because each one pins a real decision rather than restating
+// the shape of the markup. Kept together with this note so the next person to
+// tidy this file can see they were deliberate.
+// ---------------------------------------------------------------------------
+
+describe('the fields, in full', () => {
+  it('offers both pictures, the side, and two buttons per slide', () => {
+    const repeater = blockDefinition('half-overlay')!.fields.find((f) => f.key === 'items') as
+      { kind: string; fields: Array<{ key: string }> };
+
+    expect(repeater.kind).toBe('repeater');
+    expect(repeater.fields.map((f) => f.key)).toEqual(
+      expect.arrayContaining([
+        'src', 'alt', 'panelSrc', 'panelAlt', 'side',
+        'title', 'body',
+        'primaryLabel', 'primaryHref', 'secondaryLabel', 'secondaryHref',
+      ]),
+    );
+  });
+
+  it('and its default wash is already above its own floor', () => {
+    // A default the field itself would reject is the sort of thing nobody
+    // notices until a client drags the slider and cannot get back.
+    expect(defaultPropsFor('half-overlay').tintOpacity as number).toBeGreaterThanOrEqual(40);
+  });
+});
+
+describe('the buttons on the panel', () => {
+  /*
+   * WHITE, NOT THE THEME'S PRIMARY, when nobody has chosen a colour. The theme's
+   * button colour is picked to work on the site's own background, and this panel
+   * is never that: it is a wash of at least 40% of a colour chosen for this
+   * block. The default navy came out as a dark button on a mid blue — legible,
+   * and looking like a mistake.
+   */
+  it('default to white on the tint rather than to the theme colour', () => {
+    const slide = render.slice(
+      render.indexOf('function halfOverlaySlide'),
+      render.indexOf('export function HalfOverlayBlock'),
+    );
+    expect(slide).toContain("colour: look.buttonColour || '#ffffff'");
+  });
+
+  it('and their label is a fixed dark, not a theme token', () => {
+    // --tgs-text goes light in dark mode, which would leave a white button with
+    // white words on it.
+    const slide = render.slice(
+      render.indexOf('function halfOverlaySlide'),
+      render.indexOf('export function HalfOverlayBlock'),
+    );
+    expect(slide).toContain("textColour: look.buttonColour ? undefined : '#111418'");
+  });
+});
+
+describe('the panel styling', () => {
+  it('keeps the words light, whatever the theme is doing', () => {
+    const panel = css.slice(css.indexOf('.tgs-halfover__panel {'));
+    expect(panel.slice(0, panel.indexOf('}'))).toContain('color: #fff');
+  });
+
+  it('honours the line breaks a client typed into the paragraph', () => {
+    // The paragraph is a textarea, so the breaks are theirs and not ours to
+    // collapse.
+    const text = css.slice(css.indexOf('.tgs-halfover__text {'));
+    expect(text.slice(0, text.indexOf('}'))).toContain('white-space: pre-line');
+  });
+});
+
+describe('the walk, at its edges', () => {
+  it('finds a slideshow nested two containers deep', () => {
+    const twoDeep = tree([
+      { type: 'container', props: { columns: [{ blocks: [
+        { type: 'container', props: { columns: [{ blocks: [
+          { type: 'half-overlay', props: { items: [slide(), slide()] } },
+        ] }] } },
+      ] }] } },
+    ]);
+    expect(hasSlideshow(twoDeep)).toBe(true);
+  });
+
+  it('does not mistake another block that happens to have items', () => {
+    // Cards carries an `items` array too. Keying off the array rather than the
+    // type would put a script tag on most pages in the product.
+    expect(hasSlideshow(tree([{ type: 'cards', props: { items: [slide(), slide()] } }]))).toBe(false);
+  });
+});
