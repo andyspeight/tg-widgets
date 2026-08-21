@@ -1,878 +1,100 @@
 {
-  "_comment": "Hand-verified anchors for venues the geocoder mismatched or cannot know. City-level accuracy is the bar: the anchor feeds a rad=20 search, so being inside the right metro is what matters. Each entry names the ground truth used.",
+  "_comment": "Final-say anchors applied over the supplier feed's coordinates by scripts/build-venue-geo-from-feed.mjs. Only for venues where the feed's fine-grained point is factually wrong (verified against the ground). The geocoder-era override list (174 entries, 21 Aug 2026) is in git history.",
   "venues": {
-    "arenadabaixada": {
-      "lat": -25.4483,
-      "lng": -49.2767,
-      "why": "Ligga Arena (Arena da Baixada), Curitiba, Brazil - geocoder matched a street in Bahia named after it"
-    },
-    "americanfamilyfield": {
-      "lat": 43.028,
-      "lng": -87.9712,
-      "why": "American Family Field, Milwaukee - geocoder matched the Phoenix spring-training fields"
-    },
-    "avayastadium": {
-      "lat": 37.3513,
-      "lng": -121.9258,
-      "why": "PayPal Park (ex Avaya Stadium), San Jose"
-    },
-    "bbvacompassstadium": {
-      "lat": 29.7522,
-      "lng": -95.3524,
-      "why": "Shell Energy Stadium (ex BBVA Compass), Houston - geocoder matched a bank branch"
-    },
-    "bmofield": {
-      "lat": 43.6332,
-      "lng": -79.4186,
-      "why": "BMO Field, Toronto - US-only expectation had rejected it"
-    },
-    "canadalifecentre": {
-      "lat": 49.8927,
-      "lng": -97.1435,
-      "why": "Canada Life Centre, Winnipeg"
-    },
-    "centrecourt": {
-      "lat": 51.434,
-      "lng": -0.2143,
-      "why": "Centre Court, All England Club, Wimbledon - geocoder matched courts in Oxford"
-    },
-    "bursaataturkstadium": {
-      "lat": 40.1885,
-      "lng": 29.061,
-      "why": "Bursa city centre - geocoder matched Istanbul's Ataturk Olympic Stadium 150km away"
-    },
-    "biaystokcitystadium": {
-      "lat": 53.1325,
-      "lng": 23.1688,
-      "why": "Bialystok city centre - geocoder matched a generic City Stadium in Chelm"
-    },
-    "circuitodemadring": {
-      "lat": 40.4168,
-      "lng": -3.7038,
-      "why": "Madrid city centre - the new Madring F1 circuit is not in OSM yet; geocoder matched Jerez 500km away"
-    },
-    "arenadiverona": {
-      "lat": 45.439,
-      "lng": 10.9945,
-      "why": "Verona Arena - geocoder preferred a street in Taranto named after it"
-    },
-    "bernardusgolfcountryclub": {
-      "lat": 51.647,
-      "lng": 5.228,
-      "why": "Bernardus Golf, Cromvoirt, Netherlands (KLM Open) - geocoder matched a Toronto club"
-    },
-    "capetownstadium": {
-      "lat": -33.9035,
-      "lng": 18.4113,
-      "why": "DHL Stadium (Cape Town Stadium), Green Point"
-    },
-    "childrensmercypark": {
-      "lat": 39.1219,
-      "lng": -94.8237,
-      "why": "Children's Mercy Park, Kansas City, Kansas - geocoder matched the hospital"
-    },
-    "belavistapark": {
-      "lat": 38.7436,
-      "lng": -9.1152,
-      "why": "Parque da Bela Vista, Lisbon (Rock in Rio site)"
-    },
-    "avangardomskarena": {
-      "lat": 54.9885,
-      "lng": 73.3242,
-      "why": "Omsk city centre, G-Drive Arena"
-    },
-    "attstadium": {
-      "lat": 32.7473,
-      "lng": -97.0945,
-      "why": "AT&T Stadium, Arlington TX - geocoder matched the Cotton Bowl in Dallas 30km east"
-    },
-    "allianzarena": {
-      "lat": 48.2188,
-      "lng": 11.6247,
-      "why": "Allianz Arena, Munich - geocoder matched the Legoland Gunzburg model of it"
-    },
-    "amexstadium": {
-      "lat": 50.8616,
-      "lng": -0.0837,
-      "why": "Amex / Falmer Stadium, Brighton"
-    },
-    "canadiantirecentre": {
-      "lat": 45.2969,
-      "lng": -75.9269,
-      "why": "Canadian Tire Centre, Ottawa - geocoder matched a tire garage in Saguenay"
-    },
-    "deltacenter": {
-      "lat": 40.7683,
-      "lng": -111.9011,
-      "why": "Delta Center, Salt Lake City - geocoder matched a nature centre in Alabama"
-    },
-    "denspark": {
-      "lat": 56.4747,
-      "lng": -2.956,
-      "why": "Dens Park, Dundee - geocoder matched a park in Aberdeen"
-    },
-    "dteenergymusictheatre": {
-      "lat": 42.7434,
-      "lng": -83.3666,
-      "why": "Pine Knob (DTE Energy) Music Theatre, Clarkston MI - city fallback matched Detroit, Alabama"
-    },
-    "giantcenter": {
-      "lat": 40.2851,
-      "lng": -76.657,
-      "why": "Giant Center, Hershey PA - geocoder matched a flea market in California"
-    },
-    "grandstandstadium": {
-      "lat": 40.7488,
-      "lng": -73.8477,
-      "why": "Grandstand Stadium, USTA Flushing Meadows - geocoder matched a grandstand in Delaware"
-    },
-    "marlinspark": {
-      "lat": 25.7781,
-      "lng": -80.2197,
-      "why": "loanDepot park (Marlins Park), Miami - geocoder matched an RV park in California"
-    },
-    "mcdiarmidpark": {
-      "lat": 56.4095,
-      "lng": -3.4767,
-      "why": "McDiarmid Park, Perth, Scotland - geocoder matched a namesake park near Glasgow"
-    },
-    "mercedesbenzsuperdome": {
-      "lat": 29.9511,
-      "lng": -90.0812,
-      "why": "Caesars Superdome, New Orleans - city fallback matched a namesake in Alaska"
-    },
-    "oraclepark": {
-      "lat": 37.7786,
-      "lng": -122.3893,
-      "why": "Oracle Park, San Francisco - geocoder matched a namesake in Arizona"
-    },
-    "mestskystadion": {
-      "lat": 49.216,
-      "lng": 16.5939,
-      "why": "Mestsky fotbalovy stadion Srbska, Brno (FC Brno home per the feed) - geocoder matched Usti nad Labem's namesake"
-    },
-    "nustadium": {
-      "lat": 26.1934,
-      "lng": -80.1606,
-      "why": "Chase Stadium, Fort Lauderdale (Inter Miami per the feed) - Miami-proper match was 45km south"
-    },
-    "gradskistadion": {
-      "lat": 46.1639,
-      "lng": 16.8336,
-      "why": "Gradski stadion, Koprivnica (Slaven Belupo). CAUTION: the feed merges Sutjeska Niksic's Montenegro ground under the same key - venue-alias defect noted in the report"
-    },
-    "providencepark": {
-      "lat": 45.5215,
-      "lng": -122.6919,
-      "why": "Providence Park, Portland OR - geocoder matched an Alabama namesake"
-    },
-    "q2stadium": {
-      "lat": 30.3884,
-      "lng": -97.7194,
-      "why": "Q2 Stadium, Austin - geocoder fell back to Jordan-Hare on the shared 'stadium' token"
-    },
-    "shorelineamphitheatre": {
-      "lat": 37.4267,
-      "lng": -122.0806,
-      "why": "Shoreline Amphitheatre, Mountain View CA - geocoder matched a San Francisco amphitheatre 35km north"
-    },
-    "smartfinancialcentre": {
-      "lat": 29.5866,
-      "lng": -95.628,
-      "why": "Smart Financial Centre, Sugar Land TX - city fallback matched Houston, Alabama"
-    },
-    "stadionmiejski": {
-      "lat": 52.3969,
-      "lng": 16.8583,
-      "why": "Stadion Miejski, Poznan (Lech Poznan per the feed) - geocoder matched Legia Warsaw's namesake"
-    },
-    "tehelnepole": {
-      "lat": 48.1637,
-      "lng": 17.1406,
-      "why": "Tehelne pole, Bratislava (Slovan) - geocoder matched an eastern Slovakia namesake"
-    },
-    "thebelfry": {
-      "lat": 52.5537,
-      "lng": -1.783,
-      "why": "The Belfry golf resort, Sutton Coldfield - geocoder matched a Surrey shopping centre"
-    },
-    "theden": {
-      "lat": 51.4859,
-      "lng": -0.0509,
-      "why": "The Den, Millwall, London - geocoder matched a south-coast namesake"
-    },
-    "thecooperboxarena": {
-      "lat": 51.5447,
-      "lng": -0.0231,
-      "why": "Copper Box Arena, London Olympic Park - geocoder matched Rochester NY's arena"
-    },
-    "theoval": {
-      "lat": 51.4816,
-      "lng": -0.1149,
-      "why": "The Kia Oval, Kennington, London (cricket) - geocoder matched Dunedin NZ"
-    },
-    "therecreationground": {
-      "lat": 51.383,
-      "lng": -2.355,
-      "why": "The Recreation Ground, Bath (rugby) - geocoder matched an Essex rec"
-    },
-    "usbankarena": {
-      "lat": 39.097,
-      "lng": -84.506,
-      "why": "Heritage Bank Center (ex US Bank Arena), Cincinnati OH - city fallback matched Cincinnati, Arkansas"
-    },
-    "vicarageroad": {
-      "lat": 51.6498,
-      "lng": -0.4015,
-      "why": "Vicarage Road, Watford - geocoder matched Birmingham allotments"
-    },
-    "redbullarena": null,
-    "elestadiosantiagobernabeu": {
-      "lat": 40.4531,
-      "lng": -3.6883,
-      "why": "Estadio Santiago Bernabeu, Madrid (La Liga plus the Madrid NFL game)"
-    },
-    "estadiodomaracana": {
-      "lat": -22.9121,
-      "lng": -43.2302,
-      "why": "Maracana, Rio de Janeiro"
-    },
-    "sanmamesstadium": {
-      "lat": 43.2641,
-      "lng": -2.9494,
-      "why": "San Mames, Bilbao"
-    },
-    "stadioolimpico": {
-      "lat": 41.9339,
-      "lng": 12.4547,
-      "why": "Stadio Olimpico, Rome"
-    },
-    "teliaparken": {
-      "lat": 55.7026,
-      "lng": 12.5723,
-      "why": "Parken Stadium, Copenhagen"
-    },
-    "interlagoscircuit": {
-      "lat": -23.7036,
-      "lng": -46.6997,
-      "why": "Interlagos, Sao Paulo"
-    },
-    "marinabaystreetcircuit": {
-      "lat": 1.2914,
-      "lng": 103.8644,
-      "why": "Marina Bay Street Circuit, Singapore"
-    },
-    "melbournecricketground": {
-      "lat": -37.82,
-      "lng": 144.9834,
-      "why": "MCG, Melbourne (hosting the NFL game)"
-    },
-    "mexicocityarena": {
-      "lat": 19.4906,
-      "lng": -99.1725,
-      "why": "Arena Ciudad de Mexico"
-    },
-    "scotiabanksaddledome": {
-      "lat": 51.0374,
-      "lng": -114.0519,
-      "why": "Saddledome, Calgary"
-    },
-    "guaranteedratefield": {
-      "lat": 41.83,
-      "lng": -87.6339,
-      "why": "Rate Field, Chicago"
-    },
-    "buschstadium": {
-      "lat": 38.6226,
-      "lng": -90.1928,
-      "why": "Busch Stadium, St Louis"
-    },
-    "number1court": {
-      "lat": 51.4347,
-      "lng": -0.2136,
-      "why": "No.1 Court, Wimbledon"
-    },
-    "foroitalicocentralcourt": {
-      "lat": 41.928,
-      "lng": 12.457,
-      "why": "Foro Italico, Rome"
-    },
-    "indianwellstennisgardenstadium1": {
-      "lat": 33.7239,
-      "lng": -116.3053,
-      "why": "Indian Wells Tennis Garden"
-    },
-    "parcolympiquelyonnais": {
-      "lat": 45.7653,
-      "lng": 4.9822,
-      "why": "Groupama Stadium, Lyon"
-    },
-    "stadiodibergamo": {
-      "lat": 45.7089,
-      "lng": 9.6808,
-      "why": "Gewiss Stadium, Bergamo"
-    },
-    "estadicornellaelprat": {
-      "lat": 41.3475,
-      "lng": 2.075,
-      "why": "RCDE Stadium, Cornella-El Prat"
-    },
-    "fenerbahcesukrusaracoglustadyumu": {
-      "lat": 40.9877,
-      "lng": 29.0368,
-      "why": "Sukru Saracoglu, Istanbul (Fenerbahce)"
-    },
-    "tynecastlestadium": {
-      "lat": 55.9392,
-      "lng": -3.2359,
-      "why": "Tynecastle, Edinburgh"
-    },
-    "universityofboltonstadium": {
-      "lat": 53.5805,
-      "lng": -2.5354,
-      "why": "Toughsheet Stadium, Bolton"
-    },
-    "stadedesuisse": {
-      "lat": 46.9633,
-      "lng": 7.4646,
-      "why": "Wankdorf, Bern"
-    },
-    "merkurarena": {
-      "lat": 47.0464,
-      "lng": 15.4547,
-      "why": "Merkur Arena, Graz"
-    },
-    "wortherseestadion": {
-      "lat": 46.6142,
-      "lng": 14.2647,
-      "why": "Worthersee Stadion, Klagenfurt"
-    },
-    "opaparena": {
-      "lat": 38.0363,
-      "lng": 23.7867,
-      "why": "OPAP Arena, Athens (AEK)"
-    },
-    "palaalpitour": {
-      "lat": 45.0421,
-      "lng": 7.6505,
-      "why": "Inalpi Arena (Pala Alpitour), Turin"
-    },
-    "estadiomanuelmartinezvalero": {
-      "lat": 38.2669,
-      "lng": -0.6598,
-      "why": "Martinez Valero, Elche"
-    },
-    "estadiomunicipaldebutarque": {
-      "lat": 40.3259,
-      "lng": -3.7607,
-      "why": "Butarque, Leganes"
-    },
-    "ludogoretsarena": {
-      "lat": 43.5259,
-      "lng": 26.534,
-      "why": "Ludogorets Arena, Razgrad"
-    },
-    "nagyerdeisportcentrum": {
-      "lat": 47.5548,
-      "lng": 21.6297,
-      "why": "Nagyerdei, Debrecen"
-    },
-    "stadioneto": {
-      "lat": 47.656,
-      "lng": 17.6435,
-      "why": "ETO Stadion, Gyor"
-    },
-    "haladassportkomplexum": {
-      "lat": 47.2246,
-      "lng": 16.6421,
-      "why": "Haladas, Szombathely"
-    },
-    "mestskystadionmladaboleslav": {
-      "lat": 50.4093,
-      "lng": 14.913,
-      "why": "Mlada Boleslav"
-    },
-    "nastinadlech": {
-      "lat": 50.6435,
-      "lng": 13.8246,
-      "why": "Na Stinadlech, Teplice"
-    },
-    "hetkuipje": {
-      "lat": 51.087,
-      "lng": 4.993,
-      "why": "Het Kuipje, Westerlo"
-    },
-    "euroborgstadion": {
-      "lat": 53.2064,
-      "lng": 6.5915,
-      "why": "Euroborg, Groningen"
-    },
-    "brondbystadion": {
-      "lat": 55.6489,
-      "lng": 12.4193,
-      "why": "Brondby Stadion, Copenhagen"
-    },
-    "estadiodeindependientedelvallebancoguayaquil": {
-      "lat": -0.334,
-      "lng": -78.448,
-      "why": "IDV, Sangolqui, Quito"
-    },
-    "estadiodeligadeportivauniversitaria": {
-      "lat": -0.115,
-      "lng": -78.4877,
-      "why": "Casa Blanca, Quito"
-    },
-    "estadiosancarlosdeapoquindo": {
-      "lat": -33.403,
-      "lng": -70.514,
-      "why": "San Carlos de Apoquindo, Santiago"
-    },
-    "circuitgillesvilleneuve": {
-      "lat": 45.5017,
-      "lng": -73.5228,
-      "why": "Circuit Gilles Villeneuve, Montreal"
-    },
-    "autodromohermanosrodriguez": {
-      "lat": 19.4042,
-      "lng": -99.0907,
-      "why": "Hermanos Rodriguez, Mexico City"
-    },
-    "autodromointernacionaldoalgarve": {
-      "lat": 37.232,
-      "lng": -8.6267,
-      "why": "Portimao"
-    },
-    "ciudaddelmotordearagon": {
-      "lat": 41.0797,
-      "lng": -0.2078,
-      "why": "Motorland Aragon, Alcaniz"
-    },
-    "madring": {
-      "lat": 40.4168,
-      "lng": -3.7038,
-      "why": "Madring, Madrid (new circuit, not in OSM yet - city anchor)"
-    },
-    "newhampshireinternationalseedway": {
-      "lat": 43.3626,
-      "lng": -71.4606,
-      "why": "New Hampshire Motor Speedway, Loudon"
-    },
-    "iowaspeedway": {
-      "lat": 41.6743,
-      "lng": -93.0158,
-      "why": "Iowa Speedway, Newton"
-    },
-    "borispaichadze": {
-      "lat": 41.73,
-      "lng": 44.789,
-      "why": "Boris Paichadze Dinamo Arena, Tbilisi"
-    },
-    "torsvollurstadium": {
-      "lat": 62.0158,
-      "lng": -6.7742,
-      "why": "Torsvollur, Torshavn"
-    },
-    "hlioarendi": {
-      "lat": 64.123,
-      "lng": -21.885,
-      "why": "Hlidarendi, Reykjavik (Valur)"
-    },
-    "unibetarenasakusuurhalltallinnas": {
-      "lat": 59.427,
-      "lng": 24.654,
-      "why": "Saku Suurhall, Tallinn"
-    },
-    "wienerstadthallecentrecourt": {
-      "lat": 48.2022,
-      "lng": 16.333,
-      "why": "Wiener Stadthalle, Vienna"
-    },
-    "reichshofstadionsunminimealarena": {
-      "lat": 47.426,
-      "lng": 9.658,
-      "why": "Reichshofstadion, Lustenau"
-    },
-    "violaparkgeneraliarena": {
-      "lat": 48.1622,
-      "lng": 16.388,
-      "why": "Generali Arena, Vienna (Austria Wien)"
-    },
-    "senolgunesstadium": {
-      "lat": 41.0405,
-      "lng": 39.778,
-      "why": "Senol Gunes Stadium, Trabzon"
-    },
-    "stadevarteks": {
-      "lat": 46.306,
-      "lng": 16.338,
-      "why": "Stadion Varteks, Varazdin"
-    },
-    "stadechabandelmas": {
-      "lat": 44.829,
-      "lng": -0.599,
-      "why": "Chaban-Delmas, Bordeaux"
-    },
-    "sergiolanfranchi": {
-      "lat": 44.809,
-      "lng": 10.322,
-      "why": "Lanfranchi, Parma (rugby)"
-    },
-    "outsuranceoval": {
-      "lat": -29.117,
-      "lng": 26.208,
-      "why": "OUTsurance Oval, Bloemfontein"
-    },
-    "emiratesairlinepark": {
-      "lat": -26.197,
-      "lng": 28.061,
-      "why": "Ellis Park, Johannesburg"
-    },
-    "dexcomstadium": {
-      "lat": 53.28,
-      "lng": -9.033,
-      "why": "Dexcom Stadium, Galway"
-    },
-    "corpacq": {
-      "lat": 53.47,
-      "lng": -2.376,
-      "why": "Salford Community Stadium (ex AJ Bell)"
-    },
-    "grandstandcourtatlindnerfamilytenniscenter": {
-      "lat": 39.349,
-      "lng": -84.276,
-      "why": "Lindner Family Tennis Center, Mason OH"
-    },
-    "supertennisarenabolognafiere": {
-      "lat": 44.5075,
-      "lng": 11.361,
-      "why": "BolognaFiere"
-    },
-    "hakametsanjaahalli": {
-      "lat": 61.492,
-      "lng": 23.81,
-      "why": "Hakametsa, Tampere"
-    },
-    "heristoarenaexgerrywebersportpark": {
-      "lat": 52.062,
-      "lng": 8.356,
-      "why": "Heristo Arena (Gerry Weber), Halle"
-    },
-    "zenithdauvergne": {
-      "lat": 45.746,
-      "lng": 3.197,
-      "why": "Zenith d'Auvergne, Cournon"
-    },
-    "zurcherhauptbahnhof": {
-      "lat": 47.3779,
-      "lng": 8.5403,
-      "why": "Zurich Hauptbahnhof"
-    },
-    "michelobultraarena": {
-      "lat": 36.0929,
-      "lng": -115.178,
-      "why": "Michelob Ultra Arena, Mandalay Bay, Las Vegas"
-    },
-    "citypark": {
-      "lat": 38.631,
-      "lng": -90.211,
-      "why": "Energizer Park (CityPark), St Louis"
-    },
-    "stifeltheatre": {
-      "lat": 38.627,
-      "lng": -90.1994,
-      "why": "Stifel Theatre, St Louis"
-    },
-    "thedomeatamericascenter": {
-      "lat": 38.6328,
-      "lng": -90.1885,
-      "why": "The Dome at America's Center, St Louis"
-    },
-    "theradyshellatjacobspark": {
-      "lat": 32.7076,
-      "lng": -117.161,
-      "why": "Rady Shell, San Diego"
-    },
-    "btarenasalapolivalentaclujnapoca": {
-      "lat": 46.769,
-      "lng": 23.57,
-      "why": "BT Arena, Cluj-Napoca"
-    },
-    "bwtxupperaustrianarena": {
-      "lat": 48.2119,
-      "lng": 13.493,
-      "why": "Innviertel Arena, Ried im Innkreis"
-    },
-    "arenapetrolzdezelestadium": {
-      "lat": 46.236,
-      "lng": 15.262,
-      "why": "Arena Petrol, Celje"
-    },
-    "bancofcaliforniastadium": {
-      "lat": 34.013,
-      "lng": -118.284,
-      "why": "BMO Stadium (ex Banc of California), Los Angeles"
-    },
-    "beachtennisaruba": {
-      "lat": 12.545,
-      "lng": -70.06,
-      "why": "Eagle Beach, Aruba (city-level)"
-    },
-    "3arena": null,
-    "clevelandbrownsstadium": {
-      "lat": 41.5061,
-      "lng": -81.6995,
-      "why": "Huntington Bank Field, Cleveland OH - city fallback hit Cleveland, Arkansas"
-    },
-    "estadiodomorumbi": {
-      "lat": -23.6,
-      "lng": -46.7194,
-      "why": "Morumbi (MorumBIS), Sao Paulo - city fallback hit interior Sao Paulo state"
-    },
-    "hardrocklive": {
-      "lat": 26.0512,
-      "lng": -80.2131,
-      "why": "Hard Rock Live, Hollywood FL - city fallback hit Hollywood, Alabama"
-    },
-    "heinzfield": {
-      "lat": 40.4468,
-      "lng": -80.0158,
-      "why": "Acrisure Stadium (Heinz Field), Pittsburgh - city fallback hit Alaska"
+    "geodispark": {
+      "lat": 36.13,
+      "lng": -86.7659,
+      "why": "GEODIS Park, Nashville - feed points 119km southeast"
+    },
+    "stadejeanbouin": {
+      "lat": 48.8433,
+      "lng": 2.253,
+      "why": "Stade Jean Bouin, Paris (Paris FC) - feed points at Angers' namesake"
+    },
+    "stadefrancislebasser": {
+      "lat": 48.0822,
+      "lng": -0.7548,
+      "why": "Francis Le Basser, Laval - feed points at Angers"
+    },
+    "zenithsud": {
+      "lat": 43.6131,
+      "lng": 3.9309,
+      "why": "Zenith Sud, Montpellier - feed points 63km north"
     },
     "intuitdome": {
       "lat": 33.945,
       "lng": -118.3417,
-      "why": "Intuit Dome, Inglewood CA - the feed's 'Ingelwood' typo sent it to Georgia"
+      "why": "Intuit Dome, Inglewood - feed's median sits 146km southeast"
     },
-    "northwellhealthatjonesbeachtheater": {
-      "lat": 40.5989,
-      "lng": -73.5079,
-      "why": "Jones Beach Theater, Wantagh NY - city fallback hit Carlsbad, California"
+    "darlingtonraceway": {
+      "lat": 34.2949,
+      "lng": -79.9056,
+      "why": "Darlington Raceway, SC - feed points at Concord NC"
     },
-    "thunderridgenaturearena": {
-      "lat": 36.514,
-      "lng": -93.2635,
-      "why": "Thunder Ridge Nature Arena, Ridgedale MO - city fallback hit Alabama"
+    "martinsvillespeedway": {
+      "lat": 36.6354,
+      "lng": -79.8464,
+      "why": "Martinsville Speedway, VA - feed points at Winston-Salem"
     },
-    "xcelenergycenter": {
-      "lat": 44.9448,
-      "lng": -93.1011,
-      "why": "Grand Casino Arena (Xcel), St Paul MN - city fallback hit Alabama"
+    "ciudaddelmotordearagon": {
+      "lat": 41.0797,
+      "lng": -0.2078,
+      "why": "Motorland Aragon, Alcaniz - feed points at Zaragoza city"
     },
-    "xlcenter": {
-      "lat": 41.7663,
-      "lng": -72.6734,
-      "why": "XL Center, Hartford CT - city fallback hit Hartford, Alabama"
-    },
-    "ubsarena": {
-      "lat": 40.7128,
-      "lng": -73.7272,
-      "why": "UBS Arena, Elmont NY - city fallback hit Arizona"
-    },
-    "etihadarena": {
-      "lat": 24.4595,
-      "lng": 54.6055,
-      "why": "Etihad Arena, Yas Island - city node was the emirate centroid 45km out"
-    },
-    "cravencottage": {
-      "lat": 51.4749,
-      "lng": -0.2216,
-      "why": "Craven Cottage, Fulham, London - geocoder matched a Yorkshire Dales placename"
-    },
-    "stamfordbridge": {
-      "lat": 51.4817,
-      "lng": -0.191,
-      "why": "Stamford Bridge, Chelsea, London - geocoder matched the Yorkshire village"
+    "legolfnational": {
+      "lat": 48.7541,
+      "lng": 2.0752,
+      "why": "Le Golf National, Guyancourt - feed points at central Paris, previous table at Minnesota"
     },
     "stjamespark": {
       "lat": 54.9756,
       "lng": -1.6217,
-      "why": "St James' Park, Newcastle - geocoder matched the royal park in London"
+      "why": "St James' Park, Newcastle (all 20 events are Newcastle United) - feed carries Exeter's namesake coordinates"
     },
-    "villapark": {
-      "lat": 52.5092,
-      "lng": -1.8848,
-      "why": "Villa Park, Birmingham - geocoder matched a Hertfordshire namesake"
+    "gradskistadion": {
+      "lat": 46.1639,
+      "lng": 16.8336,
+      "why": "Gradski stadion, Koprivnica (all events Slaven Belupo) - feed points at Split"
     },
-    "deepdale": {
-      "lat": 53.7726,
-      "lng": -2.6884,
-      "why": "Deepdale, Preston - geocoder matched the Dales valley"
+    "cocacolaarena": {
+      "lat": 25.201,
+      "lng": 55.2626,
+      "why": "Coca-Cola Arena, City Walk, Dubai - feed carries coarse coordinates"
     },
-    "standrews": {
-      "lat": 52.4756,
-      "lng": -1.8681,
-      "why": "St Andrew's, Birmingham City - geocoder matched Bristol"
+    "veszpremarena": {
+      "lat": 47.093,
+      "lng": 17.9093,
+      "why": "Veszprem Arena, Hungary (handball)"
     },
-    "sansiro": {
-      "lat": 45.4781,
-      "lng": 9.124,
-      "why": "San Siro, Milan - geocoder matched the Lake Como district"
+    "halalegionow": {
+      "lat": 50.885,
+      "lng": 20.64,
+      "why": "Hala Legionow, Kielce (handball)"
     },
-    "stadioartemiofranchi": {
-      "lat": 43.7808,
-      "lng": 11.2823,
-      "why": "Artemio Franchi, Florence - geocoder matched Siena's stadium of the same name"
+    "newpickarenaszeged": {
+      "lat": 46.253,
+      "lng": 20.1414,
+      "why": "Pick Arena, Szeged (handball)"
     },
-    "stadioatletiazzurriditalia": {
-      "lat": 45.7089,
-      "lng": 9.6808,
-      "why": "Atleti Azzurri d'Italia (Gewiss), Bergamo - geocoder matched near Varese"
+    "salapolivalentadinamo": {
+      "lat": 44.452,
+      "lng": 26.103,
+      "why": "Sala Dinamo, Bucharest (handball)"
     },
-    "waldstadionanderkaiserlinde": {
-      "lat": 49.3175,
-      "lng": 7.113,
-      "why": "Waldstadion Kaiserlinde, Spiesen-Elversberg - geocoder matched near Bonn"
+    "laktasisportshall": {
+      "lat": 44.908,
+      "lng": 17.302,
+      "why": "Laktasi sports hall, Bosnia - town-level"
     },
-    "stadelouisii": {
-      "lat": 43.7276,
-      "lng": 7.4154,
-      "why": "Stade Louis II, Monaco - geocoder matched Nantes"
+    "gudmehallerne": {
+      "lat": 55.152,
+      "lng": 10.718,
+      "why": "Gudme-Hallerne, Denmark (handball) - town-level"
     },
-    "staderaymondkopa": {
-      "lat": 47.4604,
-      "lng": -0.5311,
-      "why": "Raymond Kopa, Angers - geocoder matched near Reims"
-    },
-    "stadevelodrome": {
-      "lat": 43.2696,
-      "lng": 5.3959,
-      "why": "Velodrome, Marseille - geocoder matched Brittany"
-    },
-    "stadiummunicipal": {
-      "lat": 43.5833,
-      "lng": 1.434,
-      "why": "Stadium de Toulouse (home club Toulouse FC per the feed) - geocoder matched Albi's Stadium Municipal"
-    },
-    "firpark": {
-      "lat": 55.7803,
-      "lng": -3.98,
-      "why": "Fir Park, Motherwell - geocoder matched Angus"
-    },
-    "rugbypark": {
-      "lat": 55.6046,
-      "lng": -4.5085,
-      "why": "Rugby Park, Kilmarnock - geocoder matched Glasgow"
-    },
-    "guldensporenstadion": {
-      "lat": 50.8242,
-      "lng": 3.2506,
-      "why": "Guldensporen Stadion, Kortrijk - geocoder matched near Antwerp"
-    },
-    "afasstadion": null,
-    "elmonumental": {
-      "lat": -34.5453,
-      "lng": -58.4497,
-      "why": "El Monumental, Nunez, Buenos Aires (River Plate) - geocoder matched Cordoba province"
-    },
-    "labombonera": {
-      "lat": -34.6356,
-      "lng": -58.3647,
-      "why": "La Bombonera, Buenos Aires (Boca) - geocoder matched Catamarca"
-    },
-    "estadiodrlisandrodelatorre": {
-      "lat": -32.9038,
-      "lng": -60.6789,
-      "why": "Gigante de Arroyito, Rosario (Rosario Central) - geocoder matched Buenos Aires"
-    },
-    "corinthiansarena": {
-      "lat": -23.5453,
-      "lng": -46.4742,
-      "why": "Neo Quimica Arena, Sao Paulo (Corinthians) - geocoder matched Ceara"
-    },
-    "estadiosaojanuario": {
-      "lat": -22.8905,
-      "lng": -43.229,
-      "why": "Sao Januario, Rio (Vasco) - geocoder matched Rio Grande do Norte"
-    },
-    "parken": {
-      "lat": 55.7026,
-      "lng": 12.5723,
-      "why": "Parken, Copenhagen - geocoder matched Esbjerg"
-    },
-    "levadiastadium": {
-      "lat": 38.436,
-      "lng": 22.875,
-      "why": "Livadeia (Levadiakos) - geocoder matched Athens"
-    },
-    "riotintostadium": {
-      "lat": 40.583,
-      "lng": -111.8933,
-      "why": "America First Field (Rio Tinto), Sandy UT - geocoder matched San Francisco"
-    },
-    "subarupark": {
-      "lat": 39.8322,
-      "lng": -75.3789,
-      "why": "Subaru Park, Chester PA (Union) - geocoder matched South Carolina"
-    },
-    "cracoviastadium": {
-      "lat": 50.0575,
-      "lng": 19.9188,
-      "why": "Cracovia, Krakow - geocoder matched Warsaw"
-    },
-    "estadidelafaf": {
-      "lat": 42.5323,
-      "lng": 1.5836,
-      "why": "Estadi de la FAF, Encamp, Andorra - geocoder matched Catalonia"
-    },
-    "estadiomunicipaldeipurua": {
-      "lat": 43.1817,
-      "lng": -2.4757,
-      "why": "Ipurua, Eibar - geocoder took Anoeta's coordinates"
-    },
-    "rheinparkstadion": {
-      "lat": 47.1478,
-      "lng": 9.51,
-      "why": "Rheinpark, Vaduz - geocoder matched Zurich"
-    },
-    "nogometnistadionbonifika": {
-      "lat": 45.546,
-      "lng": 13.7263,
-      "why": "Bonifika, Koper, Slovenia - geocoder matched Bosnia"
-    },
-    "parkhall": {
-      "lat": 52.862,
-      "lng": -3.053,
-      "why": "Park Hall, Oswestry (The New Saints) - geocoder matched Maryland"
-    },
-    "europapointstadium": {
-      "lat": 36.109,
-      "lng": -5.3462,
-      "why": "Europa Point, Gibraltar - geocoder matched Pennsylvania"
-    },
-    "hampdenpark": {
-      "lat": 55.8256,
-      "lng": -4.252,
-      "why": "Hampden Park, Glasgow - geocoder matched the Eastbourne namesake"
-    },
-    "republicanstadium": {
-      "lat": 40.1596,
-      "lng": 44.4967,
-      "why": "Republican Stadium, Yerevan (Armenia per the feed) - geocoder matched Chisinau"
-    },
-    "windsorpark": {
-      "lat": 54.5827,
-      "lng": -5.9552,
-      "why": "Windsor Park, Belfast - geocoder matched Edmonton, Canada"
-    },
-    "zimbro": {
-      "lat": 46.993,
-      "lng": 28.8567,
-      "why": "Zimbru, Chisinau, Moldova - geocoder matched Portugal"
-    },
-    "stozicestadium": {
-      "lat": 46.0814,
-      "lng": 14.5215,
-      "why": "Stozice, Ljubljana (Slovenia) - geocoder matched Sofia"
-    },
-    "miejskistadionpikarskirakow": {
-      "lat": 50.8118,
-      "lng": 19.1203,
-      "why": "Rakow's Miejski, Czestochowa - geocoder matched near Warsaw"
-    },
-    "neapolistadium": {
-      "lat": 38.0736,
-      "lng": 23.8103,
-      "why": "Kifisia, Athens (city-level) - geocoder matched Crete's Neapoli"
+    "harena": {
+      "lat": 47.215,
+      "lng": -1.592,
+      "why": "H Arena, Nantes (handball)"
     }
   }
 }

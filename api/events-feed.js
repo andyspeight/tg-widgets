@@ -78,19 +78,28 @@ let SNAP_ERROR = null;
  * no entry gets no booking link, which the widgets render as no button.
  */
 let GEO = null;
+let EVENT_GEO = null;
 
-function venueGeo() {
-  if (GEO) return GEO;
+function loadGeo() {
+  if (GEO) return;
   GEO = new Map();
+  EVENT_GEO = new Map();
   try {
     const url = new URL('./_data/venue-geo.json', import.meta.url);
     const raw = JSON.parse(readFileSync(url, 'utf8'));
     for (const [key, lat, lng] of raw.venues || []) GEO.set(key, { lat, lng });
+    // Per-event anchors, from the supplier's own row coordinates: a venue key
+    // that merges more than one real ground (Red Bull Arena is Leipzig,
+    // Salzburg AND Harrison NJ) has no honest single point, but each event
+    // still knows exactly where it is.
+    for (const [id, lat, lng] of raw.events || []) EVENT_GEO.set(id, { lat, lng });
   } catch (err) {
     console.error('[api/events-feed] venue-geo load failed (links will be withheld):', err && err.message);
   }
-  return GEO;
 }
+
+function venueGeo() { loadGeo(); return GEO; }
+function eventGeo() { loadGeo(); return EVENT_GEO; }
 
 function snapshot() {
   if (SNAP || SNAP_ERROR) return SNAP;
@@ -230,7 +239,7 @@ function expand(snap, ev, appId, currency, adults, bookingKinds) {
     sources,
   };
 
-  const target = { sources, startDate: ev.dt, title, geo: venueGeo().get(ev.vk) || null };
+  const target = { sources, startDate: ev.dt, title, geo: eventGeo().get(ev.i) || venueGeo().get(ev.vk) || null };
   const link = buildEventDeeplink(target, { appId, currency, adults });
   out.booking = {
     url: link.url,
