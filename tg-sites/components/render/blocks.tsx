@@ -1163,8 +1163,16 @@ export function AudioBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
-export function GalleryBlock({ props }: { props: Props }): ReactElement {
+export function GalleryBlock({
+  props,
+  blockId,
+}: {
+  props: Props;
+  blockId: string;
+}): ReactElement {
   const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
+  const layout = oneOf(props, 'layout', ['grid', 'scroll'] as const, 'grid');
+  const lightbox = bool(props, 'lightbox', true);
   const gap = str(props, 'gap', 'm');
   const radius = oneOf(props, 'radius', RADII, 'md');
   const images = list(props, 'images')
@@ -1184,19 +1192,106 @@ export function GalleryBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Add some images</div>;
   }
 
+  const name = `tgs-lb-${blockId}`;
+
+  const tile = (image: { src: string; alt: string; style: CSSProperties }, index: number) => (
+    <img
+      src={image.src}
+      alt={image.alt}
+      loading="lazy"
+      decoding="async"
+      style={image.style}
+      key={`i${index}`}
+    />
+  );
+
+  /*
+   * THE RAIL DUPLICATES ITS PICTURES, and the copy is aria-hidden. A marquee
+   * that scrolls to the end and jumps back is the giveaway that it is a trick;
+   * two copies translated by half the width loop seamlessly. The copy is the
+   * same pictures, so a screen reader must not read the gallery twice. Same
+   * device the logo strip uses, and the reduced-motion rule below drops the
+   * copy entirely rather than leaving a silent duplicate on the page.
+   */
+  const strip = (copy: boolean) =>
+    images.map((image, index) => (
+      <div
+        key={`${copy ? 'b' : 'a'}${index}`}
+        className="tgs-gallery__cell"
+        data-radius={radius}
+        {...(copy ? { 'aria-hidden': true as const } : {})}
+      >
+        {lightbox && !copy ? (
+          <>
+            <input
+              className="tgs-gallery__cb tgs-sr-only"
+              type="checkbox"
+              id={`${name}-${index}`}
+              /*
+               * Uncontrolled, like Tabs and Expanding cards: which picture is
+               * open is the browser's business, and a controlled value would
+               * make the editor canvas slam it shut on every keystroke.
+               */
+            />
+            <label className="tgs-gallery__open" htmlFor={`${name}-${index}`}>
+              {tile(image, index)}
+              <span className="tgs-sr-only">See this picture larger</span>
+            </label>
+
+            {/*
+              THE OVERLAY IS A REAL ONE, position: fixed to the viewport. That is
+              worth saying because an earlier note in this repo claimed it was
+              impossible from inside `.tgs-page`; measured on 21 Aug 2026, a
+              container-type element does NOT contain a fixed descendant.
+
+              WHAT IS STILL NOT POSSIBLE without a script is trapping focus, so
+              this is built to need no trap: closed, it is `visibility: hidden`
+              and nothing inside it is tabbable, and open, the close button is
+              the very next thing after the thumbnail that opened it. Clicking
+              anywhere off the picture closes it too.
+            */}
+            <div className="tgs-gallery__lightbox">
+              <label
+                className="tgs-gallery__backdrop"
+                htmlFor={`${name}-${index}`}
+                aria-label="Close the picture"
+              />
+              <figure className="tgs-gallery__big">
+                <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
+                {image.alt && <figcaption>{image.alt}</figcaption>}
+              </figure>
+              <label
+                className="tgs-gallery__close"
+                htmlFor={`${name}-${index}`}
+                aria-label="Close the picture"
+              >
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                     strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </label>
+            </div>
+          </>
+        ) : (
+          tile(image, index)
+        )}
+      </div>
+    ));
+
+  if (layout === 'scroll') {
+    return (
+      <div className="tgs-gallery-marquee" data-gap={gap}>
+        <div className="tgs-gallery tgs-gallery--rail" data-gap={gap}>
+          {strip(false)}
+          {strip(true)}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="tgs-gallery" data-columns={columns} data-gap={gap}>
-      {images.map((image, index) => (
-        <div key={index} className="tgs-image__frame" data-radius={radius}>
-          <img
-            src={image.src}
-            alt={image.alt}
-            loading="lazy"
-            decoding="async"
-            style={image.style}
-          />
-        </div>
-      ))}
+      {strip(false)}
     </div>
   );
 }
@@ -1574,6 +1669,7 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
   const radius = oneOf(props, 'radius', RADII, 'md');
   const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
   const whole = bool(props, 'wholeCardLinks', true);
+  const tilt = oneOf(props, 'tilt', ['none', 'gentle', 'strong'] as const, 'none');
   /*
    * One rail, one or two rows deep, and how loudly it says "this moves".
    * Both read through oneOf, so a value written by a later release cannot ask
@@ -1610,6 +1706,7 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
       data-rows={rows === '2' ? '2' : undefined}
       data-scrollbar={scrollbar}
       data-whole={whole ? 'true' : undefined}
+      data-tilt={tilt === 'none' ? undefined : tilt}
       role="group"
       aria-label="Slides. Scroll sideways to see more."
       tabIndex={0}
@@ -2128,6 +2225,121 @@ export function ScreenCarouselBlock({ props }: { props: Props }): ReactElement {
         </div>
       )}
     </div>,
+  );
+}
+
+/**
+ * CARDS WITH A BACK, THAT TURN OVER.
+ *
+ * Andy, 21 Aug 2026, from Duda's Flipping Boxes.
+ *
+ * BOTH A HOVER AND A CLICK, and that is the part worth defending. The usual
+ * build of this is hover only, which means it does not exist on any phone and
+ * cannot be reached from a keyboard — between them, most of the people a travel
+ * site is for. So the state is a checkbox a tap or the Enter key toggles, and
+ * the stylesheet ALSO turns the card on :hover for the mouse. Neither knows
+ * about the other; they just both set the same transform.
+ *
+ * THE BACK IS NOT TABBABLE WHILE IT IS HIDDEN. Its button is behind the front
+ * face, so a keyboard reaching it would be focusing something nobody can see.
+ * The stylesheet hides it with `visibility` rather than with the 3D transform
+ * alone, and reveals it for both the flipped and the hovered card, so the mouse
+ * can click the button it can see and the keyboard cannot reach the one it
+ * cannot.
+ */
+export function FlipCardsBlock({
+  props,
+  blockId,
+}: {
+  props: Props;
+  blockId: string;
+}): ReactElement {
+  const items = list(props, 'items').filter(
+    (item) => str(item, 'title') || str(item, 'src') || str(item, 'body'),
+  );
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some boxes</div>;
+  }
+
+  const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
+  const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+  const radius = oneOf(props, 'radius', RADII, 'md');
+  const frontTone = safeColour(props.frontTone) ?? '#12233d';
+  const backTone = safeColour(props.backTone) ?? '#0f766e';
+
+  const name = `tgs-flip-${blockId}`;
+
+  return (
+    <div className="tgs-flips" data-columns={columns} data-gap={gap} data-height={height}>
+      {items.map((item, index) => {
+        const src = safeUrl(str(item, 'src'));
+        const title = str(item, 'title');
+        const body = str(item, 'body');
+        const linkLabel = str(item, 'linkLabel');
+
+        return (
+          <div className="tgs-flip" key={index} data-radius={radius}>
+            <input
+              className="tgs-flip__cb tgs-sr-only"
+              type="checkbox"
+              id={`${name}-${index}`}
+              /* Uncontrolled, so the editor canvas does not slam every card
+                 back over on each keystroke. */
+            />
+
+            <div className="tgs-flip__inner">
+              <div className="tgs-flip__face tgs-flip__front">
+                {src ? (
+                  <img src={src} alt={str(item, 'alt')} loading="lazy" decoding="async" />
+                ) : (
+                  <span className="tgs-flip__nopic" aria-hidden="true" />
+                )}
+                <span
+                  className="tgs-flip__wash"
+                  style={{ background: frontTone }}
+                  aria-hidden="true"
+                />
+                {/*
+                  THE WHOLE FRONT IS THE CONTROL, so the label covers it. A small
+                  "flip" button in a corner is a control most people never find.
+                  The label carries the title, which is what the front shows.
+                */}
+                <label className="tgs-flip__hit" htmlFor={`${name}-${index}`}>
+                  {title && <span className="tgs-flip__title">{title}</span>}
+                  <span className="tgs-sr-only">Turn this over to read more</span>
+                </label>
+              </div>
+
+              <div className="tgs-flip__face tgs-flip__back" style={{ background: backTone }}>
+                <div className="tgs-flip__backinner">
+                  {title && <p className="tgs-flip__backtitle">{title}</p>}
+                  {body && <p className="tgs-flip__text">{body}</p>}
+                  {linkLabel &&
+                    renderButton(
+                      {
+                        label: linkLabel,
+                        href: str(item, 'linkHref'),
+                        variant: 'secondary',
+                        outline: true,
+                        colour: '#ffffff',
+                      },
+                      index,
+                    )}
+                </div>
+                {/* Turning it back is the same control, sitting behind the
+                    content so the button on top of it still takes its click. */}
+                <label
+                  className="tgs-flip__hit tgs-flip__hit--back"
+                  htmlFor={`${name}-${index}`}
+                  aria-label="Turn this back over"
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

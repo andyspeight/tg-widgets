@@ -30,9 +30,16 @@ import { hasSlideshow } from '../lib/content/slideshow';
 
 const css = readFileSync(join(__dirname, '..', 'app', 'globals.css'), 'utf8');
 const render = readFileSync(join(__dirname, '..', 'components', 'render', 'blocks.tsx'), 'utf8');
+/*
+ * Sliced to the NEXT exported function, not to a named one. An earlier version
+ * ended this slice at ButtonBlock and silently grew to include a whole other
+ * block the day one was inserted between them, which made the empty-state
+ * assertion below read the wrong component.
+ */
+const start = render.indexOf('export function ScreenCarouselBlock');
 const block = render.slice(
-  render.indexOf('export function ScreenCarouselBlock'),
-  render.indexOf('export function ButtonBlock'),
+  start,
+  render.indexOf('\nexport function ', start + 1),
 );
 
 /** A page tree holding one block, for the hasSlideshow checks. */

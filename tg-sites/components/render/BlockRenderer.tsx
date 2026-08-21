@@ -34,6 +34,7 @@ import {
   SearchBlock,
 
   ExpandingCardsBlock,
+  FlipCardsBlock,
   HalfOverlayBlock,
   ScreenCarouselBlock,
   SliderBlock,
@@ -108,7 +109,7 @@ export function BlockRenderer({
       case 'video':
         return <VideoBlock props={props} />;
       case 'gallery':
-        return <GalleryBlock props={props} />;
+        return <GalleryBlock props={props} blockId={block.id} />;
       case 'before-after':
         return <BeforeAfterBlock props={props} />;
       case 'testimonials':
@@ -134,6 +135,8 @@ export function BlockRenderer({
         return <ExpandingCardsBlock props={props} blockId={block.id} />;
       case 'screen-carousel':
         return <ScreenCarouselBlock props={props} />;
+      case 'flip-cards':
+        return <FlipCardsBlock props={props} blockId={block.id} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':

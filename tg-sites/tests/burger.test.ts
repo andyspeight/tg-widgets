@@ -245,10 +245,13 @@ describe('the always-on burger', () => {
 
   /*
    * NOT position: fixed, and this is the assertion that stops somebody
-   * "improving" it into a full-screen overlay six months from now. It cannot
-   * work: .tgs-page carries container-type, which brings layout containment,
-   * which makes the header itself the containing block for a fixed child. The
-   * reasoning is in the stylesheet; this keeps it honest.
+   * "improving" it into a full-screen overlay six months from now.
+   *
+   * THE REASON IS FOCUS, not layout. Without a script nothing traps focus inside
+   * an overlay, so tabbing past the last link lands on content the visitor
+   * cannot see. An earlier version of this comment claimed fixed could not reach
+   * the viewport from inside a container-type element; that was measured on
+   * 21 Aug 2026 and is false. The assertion stands, the reasoning is corrected.
    */
   it('never tries to escape to the viewport with position: fixed', () => {
     const panel = css.slice(

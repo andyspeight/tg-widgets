@@ -1078,6 +1078,84 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * CARDS WITH A BACK (Andy, 21 Aug 2026, from Duda's Flipping Boxes).
+     *
+     * A picture and a title on the front, the detail and a button on the back,
+     * and the card turns over to show it.
+     *
+     * BOTH A HOVER AND A CLICK, on purpose. Hover alone is the usual way this is
+     * built and it is unreachable on every phone and from every keyboard, which
+     * is most of the visitors a travel site gets. So the flip is a checkbox that
+     * a tap or the Enter key toggles, AND a :hover for the mouse. See the
+     * stylesheet for how the two share one state without fighting.
+     */
+    type: 'flip-cards',
+    label: 'Flipping boxes',
+    group: 'Media',
+    icon: 'gallery',
+    description: 'Cards that turn over to show more. Tap, or hover with a mouse.',
+    defaults: {
+      columns: '3',
+      gap: 'm',
+      radius: 'md',
+      height: 'medium',
+      frontTone: '#12233d',
+      backTone: '#0f766e',
+      items: [
+        { src: '', alt: '', title: 'Greece', body: 'Seven nights across three islands, with every ferry booked for you.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Italy', body: 'A week on the Amalfi coast, with a driver for the coast road.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Portugal', body: 'Three nights in Lisbon, then four with your feet up in the Algarve.', linkLabel: 'See the trip', linkHref: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Flipping boxes (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Boxes',
+        itemLabel: 'Box',
+        max: 12,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Picture description', max: 200, help: 'What the picture shows, for a screen reader.' },
+          { kind: 'text', key: 'title', label: 'Front title', max: 80 },
+          { kind: 'textarea', key: 'body', label: 'What is on the back', rows: 3, max: 400 },
+          { kind: 'text', key: 'linkLabel', label: 'Button', max: 40 },
+          { kind: 'url', key: 'linkHref', label: 'Button links to', placeholder: '/greece or https://' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'columns',
+        label: 'Across',
+        options: [
+          { value: '2', label: 'Two' },
+          { value: '3', label: 'Three' },
+          { value: '4', label: 'Four' },
+        ],
+      },
+      { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+        help: 'Every box is the same height, because they turn over in place and a box that changed size would shove the row about.',
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      { kind: 'colour', key: 'frontTone', label: 'Front shading', help: 'The wash over the picture, so the title reads whatever the photograph is doing.' },
+      { kind: 'colour', key: 'backTone', label: 'Back colour' },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',
@@ -1218,8 +1296,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
     label: 'Gallery',
     group: 'Media',
     icon: 'gallery',
-    description: 'A grid of images.',
-    defaults: { columns: '3', gap: 'm', radius: 'md', images: [] },
+    description: 'A grid of images, or a rail that scrolls itself. Click to see one big.',
+    defaults: { columns: '3', gap: 'm', radius: 'md', layout: 'grid', lightbox: true, images: [] },
     summarise: (props) => {
       const count = Array.isArray(props.images) ? props.images.length : 0;
       return `Gallery (${count} image${count === 1 ? '' : 's'})`;
@@ -1237,6 +1315,29 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'select', key: 'gap', label: 'Gap', options: SPACING_OPTIONS },
       { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      /*
+       * TWO SHAPES, ONE ELEMENT (Andy, 21 Aug 2026, from Duda's Scrolling
+       * Gallery and Popup Gallery). Duda ships those as two more elements on top
+       * of its plain gallery. Ours are a setting each, because a picker with
+       * three galleries in it makes a client choose before they know what they
+       * want, and all three would share every other field anyway.
+       */
+      {
+        kind: 'select',
+        key: 'layout',
+        label: 'Show as',
+        options: [
+          { value: 'grid', label: 'A grid' },
+          { value: 'scroll', label: 'A rail that scrolls itself' },
+        ],
+        help: 'The rail drifts along on its own and stops while somebody is looking at it.',
+      },
+      {
+        kind: 'toggle',
+        key: 'lightbox',
+        label: 'Click to see a picture big',
+        help: 'Opens the full picture over the page. Turn it off if the pictures are decoration rather than something to look at.',
+      },
       {
         kind: 'repeater',
         key: 'images',
@@ -1482,6 +1583,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     description: 'Cards on a rail. Swipe or scroll sideways through them.',
     defaults: {
       slideWidth: 'medium',
+      tilt: 'none',
       gap: 'm',
       style: 'bordered',
       ratio: '4/3',
@@ -1625,6 +1727,23 @@ export const BLOCKS: readonly BlockDefinition[] = [
        * drawn: it stays draggable, keyboard reachable and honest about how far
        * along you are, which a div pretending to be a scrollbar is not.
        */
+      /*
+       * THE TILT (Andy, 21 Aug 2026, from Duda's Tilted Carousel). A setting on
+       * the Slider rather than a fourth carousel element: it changes how the
+       * cards are drawn and nothing else, and the picker already carries three
+       * things that scroll sideways.
+       */
+      {
+        kind: 'select',
+        key: 'tilt',
+        label: 'Tilt',
+        options: [
+          { value: 'none', label: 'Flat' },
+          { value: 'gentle', label: 'Gentle' },
+          { value: 'strong', label: 'Strong' },
+        ],
+        help: 'Cards turn towards you as they reach the middle. Needs a browser that follows scrolling in CSS; elsewhere the rail stays flat.',
+      },
       {
         kind: 'select',
         key: 'scrollbar',

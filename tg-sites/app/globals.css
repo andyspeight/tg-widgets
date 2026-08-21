@@ -3249,6 +3249,56 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   }
 }
 
+/*
+ * THE TILT (Andy, 21 Aug 2026, from Duda's Tilted Carousel).
+ *
+ * Cards turn towards the reader as they cross the middle of the rail, which
+ * needs each card to know WHERE IT IS in the scrollport. That is normally a
+ * scroll listener; here it is `animation-timeline: view()`, the same scroll
+ * driven CSS the reveals and the parallax already use, with `view(x)` reading
+ * the horizontal axis of the rail rather than the page's vertical one.
+ *
+ * SO IT DEGRADES TO A FLAT RAIL, and that is the right failure. Where the
+ * timeline is not supported the keyframes never run, the cards keep their
+ * untransformed state, and the carousel is exactly what it was before the
+ * setting existed. The field says so rather than promising something a browser
+ * may not do.
+ *
+ * `perspective` sits on the rail, not the card, or every card would have its own
+ * vanishing point and the row would splay instead of turning.
+ */
+.tgs-slider[data-tilt] {
+  perspective: 1400px;
+  perspective-origin: center;
+  /* The cards lean out of their box as they turn, and a rail that clipped them
+     would cut the corner off the one nearest the edge. */
+  padding-block: var(--tgs-space-m);
+}
+
+.tgs-slider[data-tilt] > .tgs-card {
+  transform-style: preserve-3d;
+  animation: tgs-slider-tilt linear both;
+  animation-timeline: view(x);
+  /* Turning starts as a card enters and finishes as it leaves, so the middle of
+     the range is the middle of the rail. */
+  animation-range: entry 0% exit 100%;
+}
+
+.tgs-slider[data-tilt='gentle'] > .tgs-card { --tgs-tilt: 14deg; }
+.tgs-slider[data-tilt='strong'] > .tgs-card { --tgs-tilt: 30deg; }
+
+@keyframes tgs-slider-tilt {
+  from { transform: rotateY(var(--tgs-tilt, 14deg)) scale(0.94); }
+  50%  { transform: rotateY(0deg) scale(1); }
+  to   { transform: rotateY(calc(-1 * var(--tgs-tilt, 14deg))) scale(0.94); }
+}
+
+/* Somebody who asked for less motion gets the flat rail, which is the whole
+   design minus the turning. */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-slider[data-tilt] > .tgs-card { animation: none; transform: none; }
+}
+
 @container tgs-page (max-width: 767px) {
   /*
    * The grid collapses to one column on a phone. A RAIL MUST NOT: sideways is
@@ -3393,22 +3443,23 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  *
  * WHY A PANEL UNDER THE HEADER AND NOT A FULL-SCREEN OVERLAY.
  *
- * A full-screen overlay wants `position: fixed`, and fixed does not reach the
- * viewport from in here. `.tgs-page` carries `container-type: inline-size` for
- * the whole responsive engine, and container-type brings LAYOUT CONTAINMENT with
- * it, which makes that element a containing block for fixed and absolute
- * descendants alike. The header element carries `.tgs-page` itself (see
- * RegionRenderer), so `position: fixed; inset: 0` inside it covers the header
- * and nothing else. Getting a true overlay would mean either giving up the
- * container queries or shipping script, and neither is worth it for a menu.
+ * BECAUSE OF FOCUS, AND ONLY BECAUSE OF FOCUS. Without a script there is nothing
+ * to trap focus inside an overlay: tab past the last link of a full-screen menu
+ * and focus lands on content the visitor cannot see, with no way back but
+ * shift-tabbing blind. A panel that covers only the top of the page has no such
+ * state. The page behind stays visible and reachable, which is what makes
+ * tabbing out of it ordinary rather than a fault.
  *
- * AND THE PANEL IS THE BETTER ANSWER ANYWAY, which is the part worth writing
- * down rather than treating as a consolation. A published page ships no
- * JavaScript, so there is nothing to trap focus inside an overlay: tab past the
- * last link of a full-screen menu and focus lands on content the visitor cannot
- * see. A panel that covers only the top of the page has no such state. The page
- * behind stays visible and reachable, which is what makes tabbing out of it
- * ordinary rather than a fault.
+ * AN EARLIER VERSION OF THIS NOTE GAVE A SECOND REASON AND IT WAS WRONG, so it
+ * is corrected here rather than quietly deleted. It claimed `position: fixed`
+ * could not reach the viewport from inside `.tgs-page` because container-type
+ * brings layout containment. Measured in Chromium on 21 Aug 2026:
+ * `container-type: inline-size` does NOT contain a fixed descendant, which
+ * escapes to the viewport exactly as it would anywhere else. Explicit
+ * `contain: layout` does contain it, and so does a transform, but we set
+ * neither. So a full-screen overlay was always available here and was not
+ * chosen; the Gallery's lightbox uses one, for content where a real overlay is
+ * worth the focus trade.
  *
  * WHAT IT IS ACTUALLY ANCHORED TO, measured in a browser rather than assumed.
  * The nearest positioned ancestor is `.tgs-section__inner`, the width-constrained
@@ -4075,6 +4126,298 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
      the frame thins out rather than the picture shrinking further. */
   .tgs-screen__bezel { padding: 8px 8px 10px; border-radius: 10px; }
   .tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 13rem; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Gallery: the rail, and the lightbox                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 21 Aug 2026, from Duda's Scrolling Gallery and Popup Gallery. Both are
+ * settings on the one Gallery rather than two more elements: a picker with three
+ * galleries in it makes a client choose before they know what they want.
+ */
+
+.tgs-gallery__cell { position: relative; }
+.tgs-gallery__cell > img,
+.tgs-gallery__open > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The cell carries the corners the frame used to, so the picture and the click
+   target share one rounded box. */
+.tgs-gallery__cell { overflow: hidden; border-radius: var(--tgs-radius, 10px); }
+.tgs-gallery__cell[data-radius='none'] { border-radius: 0; }
+.tgs-gallery__cell[data-radius='sm']   { border-radius: var(--tgs-radius-sm, 6px); }
+.tgs-gallery__cell[data-radius='lg']   { border-radius: 20px; }
+.tgs-gallery__cell[data-radius='full'] { border-radius: 999px; }
+
+.tgs-gallery__open { display: block; cursor: zoom-in; height: 100%; }
+
+/* ---- The rail ---- */
+
+/*
+ * A MARQUEE, THE SAME DEVICE THE LOGO STRIP USES. Two copies of the pictures
+ * translated by half the width loop seamlessly; one copy scrolled to its end and
+ * jumping back is the tell that it is a trick. The second copy is aria-hidden in
+ * the markup so the gallery is not read out twice.
+ */
+.tgs-gallery-marquee { overflow: hidden; }
+.tgs-gallery--rail {
+  display: flex;
+  width: max-content;
+  align-items: stretch;
+}
+.tgs-gallery--rail .tgs-gallery__cell {
+  flex: none;
+  width: clamp(200px, 26vw, 340px);
+  aspect-ratio: 4 / 3;
+  margin-inline-end: var(--tgs-space-m);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-gallery--rail { animation: tgs-gallery-scroll 60s linear infinite; }
+  /* It stops while somebody is looking at it, and while a keyboard is anywhere
+     inside it, or a picture would slide out from under the tab stop. */
+  .tgs-gallery-marquee:hover .tgs-gallery--rail,
+  .tgs-gallery-marquee:focus-within .tgs-gallery--rail { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Not a slower marquee: a plain wrapped grid, with the duplicate gone rather
+     than sitting there silently. */
+  .tgs-gallery--rail { flex-wrap: wrap; width: auto; animation: none; }
+  .tgs-gallery--rail > [aria-hidden='true'] { display: none; }
+}
+@keyframes tgs-gallery-scroll {
+  to { transform: translateX(-50%); }
+}
+
+/* ---- The lightbox ---- */
+
+/*
+ * A REAL VIEWPORT OVERLAY. `position: fixed` reaches the viewport from in here,
+ * measured 21 Aug 2026 — `container-type` on `.tgs-page` does not contain a
+ * fixed descendant, whatever an earlier note in this file claimed.
+ *
+ * NO FOCUS TRAP, because that needs a script, so it is built not to need one.
+ * Closed it is `visibility: hidden`, which takes the close button out of the tab
+ * order AND out of the accessibility tree, so a keyboard cannot land inside a
+ * lightbox that is not open. Open, the close button is the next thing after the
+ * thumbnail that opened it, so tab goes straight to it. Clicking anywhere off
+ * the picture closes it as well.
+ */
+.tgs-gallery__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tgs-space-l);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.tgs-gallery__cb:checked ~ .tgs-gallery__lightbox {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.2s ease, visibility 0s;
+}
+
+/* The dark ground, and the whole of it closes. */
+.tgs-gallery__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(8 10 14 / 88%);
+  cursor: zoom-out;
+}
+
+.tgs-gallery__big {
+  position: relative;
+  margin: 0;
+  max-width: min(92vw, 1400px);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-s);
+}
+.tgs-gallery__big img {
+  display: block;
+  max-width: 100%;
+  /* Room for the caption under it, so a tall picture does not push the words
+     off the bottom of the screen. */
+  max-height: 78vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--tgs-radius-sm, 6px);
+}
+.tgs-gallery__big figcaption {
+  color: rgb(255 255 255 / 88%);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.tgs-gallery__close {
+  position: absolute;
+  top: var(--tgs-space-m);
+  right: var(--tgs-space-m);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #fff;
+  background: rgb(255 255 255 / 12%);
+}
+.tgs-gallery__close:hover { background: rgb(255 255 255 / 22%); }
+
+/* The focus ring goes on the visible control, since the checkbox is hidden. */
+.tgs-gallery__cb:focus-visible ~ .tgs-gallery__open {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-gallery__lightbox { transition: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Flipping boxes                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 21 Aug 2026, from Duda's Flipping Boxes.
+ *
+ * A HOVER AND A CLICK, SHARING ONE STATE. The usual build of this is hover only,
+ * which does not exist on a phone and cannot be reached from a keyboard. So the
+ * checkbox is the real state and :hover is a second, independent way to set the
+ * same transform. Neither knows about the other.
+ *
+ * THE BACK IS HIDDEN WITH `visibility`, NOT ONLY BY BEING TURNED AWAY.
+ * backface-visibility stops you SEEING the back, and does nothing about the
+ * button on it being in the tab order. Without the visibility rules a keyboard
+ * tabs into a button on the far side of a card nobody has turned over.
+ */
+.tgs-flips {
+  display: grid;
+  gap: var(--tgs-gap, 16px);
+  grid-template-columns: repeat(var(--tgs-flip-across, 3), minmax(0, 1fr));
+  --tgs-flip-h: 20rem;
+}
+.tgs-flips[data-columns='2'] { --tgs-flip-across: 2; }
+.tgs-flips[data-columns='3'] { --tgs-flip-across: 3; }
+.tgs-flips[data-columns='4'] { --tgs-flip-across: 4; }
+.tgs-flips[data-height='short']  { --tgs-flip-h: 15rem; }
+.tgs-flips[data-height='medium'] { --tgs-flip-h: 20rem; }
+.tgs-flips[data-height='tall']   { --tgs-flip-h: 26rem; }
+
+.tgs-flip { perspective: 1200px; height: var(--tgs-flip-h); }
+
+.tgs-flip__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The two ways to turn it. */
+.tgs-flip__cb:checked ~ .tgs-flip__inner,
+.tgs-flip:hover .tgs-flip__inner { transform: rotateY(180deg); }
+
+.tgs-flip__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--tgs-radius, 12px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.tgs-flip[data-radius='none'] .tgs-flip__face { border-radius: 0; }
+.tgs-flip[data-radius='sm']   .tgs-flip__face { border-radius: var(--tgs-radius-sm, 6px); }
+.tgs-flip[data-radius='lg']   .tgs-flip__face { border-radius: 20px; }
+.tgs-flip[data-radius='full'] .tgs-flip__face { border-radius: 28px; }
+
+.tgs-flip__front img,
+.tgs-flip__nopic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tgs-flip__nopic { background: var(--tgs-surface-alt); }
+
+/* The wash, between the picture and the title. Half strength, because the front
+   only carries a few words and a photograph people came to see. */
+.tgs-flip__wash { position: absolute; inset: 0; opacity: 0.45; }
+
+.tgs-flip__hit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--tgs-space-l);
+  cursor: pointer;
+  color: #fff;
+}
+/* On the back it sits UNDER the words, so the button on top still takes its
+   click while the rest of the card turns it back. */
+.tgs-flip__hit--back { z-index: 0; align-items: stretch; }
+
+.tgs-flip__title {
+  font-family: var(--tgs-h-font, inherit);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 40%);
+}
+
+.tgs-flip__back { transform: rotateY(180deg); color: #fff; }
+.tgs-flip__backinner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--tgs-space-s);
+  padding: var(--tgs-space-l);
+  /* A long paragraph scrolls inside the card rather than spilling out of a box
+     whose height every sibling shares. */
+  overflow-y: auto;
+  /* Not tabbable until the card is turned. See the note at the top. */
+  visibility: hidden;
+}
+.tgs-flip__cb:checked ~ .tgs-flip__inner .tgs-flip__backinner,
+.tgs-flip:hover .tgs-flip__inner .tgs-flip__backinner { visibility: visible; }
+
+.tgs-flip__backtitle { margin: 0; font-family: var(--tgs-h-font, inherit); font-size: 1.25rem; font-weight: 600; }
+.tgs-flip__text { margin: 0; line-height: 1.55; color: rgb(255 255 255 / 92%); white-space: pre-line; }
+.tgs-flip__backinner .tgs-button { align-self: flex-start; margin-top: var(--tgs-space-xs); }
+
+/* The focus ring goes on the card, since the checkbox is hidden. */
+.tgs-flip__cb:focus-visible ~ .tgs-flip__inner {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 4px;
+  border-radius: var(--tgs-radius, 12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* It still turns over, it just does it at once. Removing the flip entirely
+     would leave the back unreachable. */
+  .tgs-flip__inner { transition: none; }
+}
+
+@container tgs-page (max-width: 1023px) {
+  .tgs-flips[data-columns='4'] { --tgs-flip-across: 2; }
+}
+@container tgs-page (max-width: 767px) {
+  .tgs-flips { --tgs-flip-across: 1; }
+  /* No hover on a phone, so the tap is the only way in and the card must be
+     tall enough to read the back without scrolling inside it. */
+  .tgs-flips { --tgs-flip-h: 17rem; }
 }
 
 /* ------------------------------------------------------------------ */

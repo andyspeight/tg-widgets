@@ -127,8 +127,17 @@ found by opening the page:
 - A panel measured perfectly and was invisible from halfway down, because the
   header is a stacking context at `z-index: 2` and the page below is a sibling
   at the same value, later in the document.
-- `position: fixed` cannot reach the viewport from inside a region, because
-  `.tgs-page` carries `container-type` and that brings layout containment.
+- A panel that measured perfectly and was invisible from halfway down, because
+  the header is a stacking context the panel could not rise out of.
+
+And a claim from that same work that was WRONG, corrected 21 Aug: that
+`container-type` stops `position: fixed` reaching the viewport. Measured in
+Chromium, it does not — only an explicit `contain: layout`, or a transform,
+does, and `.tgs-page` sets neither. The burger still uses a panel rather than an
+overlay, but for the reason that always mattered: with no script nothing traps
+focus inside an overlay. **Reasoning from a spec is not measuring**, and the
+same session that wrote the rule about verifying in a browser then reasoned its
+way to a false conclusion in the next paragraph.
 
 ### A flaky test, finally explained
 
