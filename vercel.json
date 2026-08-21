@@ -675,6 +675,14 @@
     {
       "source": "/editor-clubpicker",
       "destination": "/editor-clubpicker.html"
+    },
+    {
+      "source": "/demo-ticketsearch",
+      "destination": "/demo-ticketsearch.html"
+    },
+    {
+      "source": "/editor-ticketsearch",
+      "destination": "/editor-ticketsearch.html"
     }
   ],
   "headers": [
@@ -1829,6 +1837,23 @@
     },
     {
       "source": "/widget-clubpicker.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-ticketsearch.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

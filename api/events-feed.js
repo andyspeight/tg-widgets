@@ -415,7 +415,21 @@ export default function handler(req, res) {
         return ax - bx || (b.events || 0) - (a.events || 0);
       });
 
-      const rows = snap.events.filter((e) => hit(e.t)
+      // A client can pin the whole search to one category or competition, so a
+      // ski specialist's box never returns baseball. It has to narrow BEFORE
+      // the page limit: filtering the returned page client-side would empty the
+      // list whenever the first N matches happen to be the wrong category, even
+      // though matching events exist further down.
+      const scopeCat = str(q.category, 40).toLowerCase();
+      const scopeComp = str(q.competition, 80).toLowerCase();
+      let pool = snap.events;
+      if (KEY_RE.test(scopeCat)) pool = pool.filter((e) => e.c === scopeCat);
+      if (KEY_RE.test(scopeComp)) pool = pool.filter((e) => e.o === scopeComp);
+      const from = str(q.from, 10);
+      const to = str(q.to, 10);
+      pool = windowRows(pool, from, to);
+
+      const rows = pool.filter((e) => hit(e.t)
         || hit(teamName(snap, e.hk))
         || hit(teamName(snap, e.ak))
         || hit(e.pk && (snap.performerByKey.get(e.pk) || {}).name)

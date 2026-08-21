@@ -914,6 +914,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'ticketsearch',
+    name: 'Ticket Search',
+    airtableType: 'Ticket Search',  // matches Airtable WidgetType singleSelect option
+    description: 'One search box over the whole ticket feed. Typing Wembley returns the ground, the football at it and the concerts at it; Arsenal returns the club and every game home and away. Results grouped, each with a booking link.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>'},
+    color: '#0EA5E9',
+    editorUrl: '/editor-ticketsearch',
+    demoUrl: '/demo-ticketsearch',
+    widgetTag: 'ticketsearch',
+    scriptFile: 'widget-ticketsearch.js',
+    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'offers',
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
@@ -3151,6 +3166,10 @@ function loadMiniPreview(w) {
     new window.TGClubPickerWidget(el, { gridOf: 'team', competition: 'english-premier-league', heading: '', prompt: '', maxEntities: 8, columns: 4, showCounts: false, showHomeVenue: false, accent: w.color, theme: 'light', appId: '250' });
   }
 
+  if (w.id === 'ticketsearch' && window.TGTicketSearchWidget) {
+    new window.TGTicketSearchWidget(el, { heading: '', subheading: '', placeholder: 'Search a club, a ground, an act…', initialQuery: 'wembley', suggestions: [], showGroups: false, eventLimit: 2, accent: w.color, theme: 'light', appId: '250' });
+  }
+
   if (w.id === 'tickets' && window.TGTicketsWidget) {
     new window.TGTicketsWidget(el, {
       sourceType: 'competition', sourceValue: 'english-premier-league',
@@ -4421,6 +4440,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
 <script src="/widget-tickets.js"></script>
+<script src="/widget-ticketsearch.js"></script>
 <script src="/widget-clubpicker.js"></script>
 <script src="/widget-nextevent.js"></script>
 <script src="/widget-share.js"></script>
