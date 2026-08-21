@@ -509,12 +509,16 @@ await check('block picker opens from a section', async () => {
  * this check agree with whatever the registry says and stop it catching a block that
  * silently stops rendering its card, which is the one thing it is for.
  *
+ * 49 within hours of that, when Shifting images and Stacked cards landed. That is
+ * the tripwire working rather than a nuisance: two blocks arrived and it made
+ * somebody look at the picker, which is the entire point of writing the number down.
+ *
  * The harness runs as staff, so the staff-only Embed block is counted here too:
- * 47 is the whole library, one fewer than that for a client.
+ * 49 is the whole library, one fewer than that for a client.
  */
 await check('block picker offers the full library', async () => {
   const count = await page.locator('.ed-block-card').count();
-  return count === 47 ? true : `${count} blocks in the picker, expected 47`;
+  return count === 49 ? true : `${count} blocks in the picker, expected 49`;
 });
 
 await check('including both ways to put a widget on a page', async () => {
@@ -5071,9 +5075,9 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 47 the page picker offers a staff user. See the note on that check for
+  // The same 49 the page picker offers a staff user. See the note on that check for
   // why the number is written down rather than read from the registry.
-  return count === 47 ? true : `${count} blocks in the header picker`;
+  return count === 49 ? true : `${count} blocks in the header picker, expected 49`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
