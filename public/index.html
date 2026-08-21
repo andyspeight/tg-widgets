@@ -47,6 +47,11 @@ a{text-decoration:none;color:inherit}
 .stats.show{display:block}
 .stats-inner{display:flex;gap:12px}
 .stat-card{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.stat-card--btn{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.stat-card--btn:hover{border-color:#F59E0B66}
+.stat-card--btn:focus-visible{outline:2px solid #F59E0B;outline-offset:2px}
+.stat-card--btn.is-active{border-color:#F59E0B;box-shadow:0 0 0 3px #F59E0B22}
+.stat-card--btn.is-active .stat-label::after{content:' · showing only these';color:#B45309;font-weight:600}
 .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stat-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .stat-num{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1}.stat-label{font-size:12px;color:var(--mt);font-weight:500}
@@ -1174,6 +1179,10 @@ const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
 let signedIn = false;
 let userEmail = '';
 let activeFilter = 'All';
+// The Coming Soon stat card doubles as a filter: click to see only the
+// widgets marked coming-soon, click again to clear. Uses the same predicate
+// as the count on the card, so the number and the grid always agree.
+let soonFilter = false;
 let searchQuery = '';
 let myWidgetData = [];
 
@@ -1215,7 +1224,9 @@ function renderStats() {
     <div class="stat-card"><div class="stat-icon" style="background:${WIDGETS[0].color}15"><svg style="stroke:${WIDGETS[0].color}" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div><div class="stat-num">${total}</div><div class="stat-label">My widgets</div></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#8B5CF615"><svg style="stroke:#8B5CF6" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="stat-num">${views.toLocaleString()}</div><div class="stat-label">Total views</div></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#10B98115"><svg style="stroke:#10B981" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>(catalogueStatus[w.id]||w.status)==='live').length}</div><div class="stat-label">Widgets available</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>(catalogueStatus[w.id]||w.status)==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
+    <div class="stat-card stat-card--btn${soonFilter ? ' is-active' : ''}" role="button" tabindex="0" aria-pressed="${soonFilter}"
+      title="${soonFilter ? 'Show every widget' : 'Show only the widgets marked coming soon'}"
+      onclick="toggleSoonFilter()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSoonFilter();}"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>(catalogueStatus[w.id]||w.status)==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
 }
 
 async function renderMyWidgets(opts = {}) {
@@ -1642,6 +1653,7 @@ function renderFilters() {
 function renderCatalogue() {
   const q = searchQuery.trim().toLowerCase();
   let filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
+  if (soonFilter) filtered = filtered.filter(w => (catalogueStatus[w.id] || w.status) === 'coming-soon');
   if (q) filtered = filtered.filter(w => (w.name || '').toLowerCase().includes(q));
   // Alphabetical by name — easy to scan now the catalogue is large.
   filtered = filtered.slice().sort((a, b) => a.name.localeCompare(b.name));
@@ -1768,13 +1780,27 @@ function renderCatalogue() {
       </div>
     </div>`;
   }).join('');
-  grid.innerHTML = cardsHtml || `<div class="cat-empty">No widgets match your search. Try a different name.</div>`;
+  grid.innerHTML = cardsHtml || `<div class="cat-empty">${soonFilter
+    ? 'Nothing is marked coming soon right now.'
+    : 'No widgets match your search. Try a different name.'}</div>`;
 
   // Load live mini-previews — for every built widget (live or preview-soon),
   // since preview-soon keeps its working preview.
   setTimeout(() => {
     filtered.filter(w => w.status === 'live').forEach(w => loadMiniPreview(w));
   }, 200);
+}
+
+function toggleSoonFilter() {
+  soonFilter = !soonFilter;
+  renderStats();
+  renderCatalogue();
+  // Filtering from the stats bar with the grid off-screen would look like a
+  // dead click, so the grid comes to you — but only when switching ON.
+  if (soonFilter) {
+    const cat = document.getElementById('catalogue');
+    if (cat) cat.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function onSearchInput(v) {

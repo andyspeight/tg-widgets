@@ -179,6 +179,8 @@
       + 'border-radius:calc(var(--tgtm-radius) - 4px);background:var(--tgtm-bg);'
       + 'display:flex;flex-direction:column;gap:3px;text-align:left;font:inherit;color:inherit;}'
       + '.tgtm-cell.is-blank{border-color:transparent;background:transparent;}'
+      + '.tgtm-cell.is-past{background:transparent;}'
+      + '.tgtm-cell.is-past .tgtm-num{color:var(--tgtm-mute);opacity:.45;}'
       + '.tgtm-cell.has-events{cursor:pointer;}'
       + '.tgtm-cell.has-events:hover{border-color:var(--tgtm-accent);}'
       + '.tgtm-cell[aria-pressed="true"]{border-color:var(--tgtm-accent);'
@@ -393,8 +395,12 @@
     for (var d = 1; d <= last; d++) {
       var list = this.byDay[d] || [];
       var isToday = (y === this.today.y && m === this.today.m && d === this.today.d);
+      // Days already gone. The feed no longer returns their events (nothing in
+      // the past is bookable), so all they can do is read as what they are.
+      var isPast = y === this.today.y && m === this.today.m && d < this.today.d;
       var open = this.openDay === d;
-      var cls = 'tgtm-cell' + (list.length ? ' has-events' : '') + (isToday ? ' is-today' : '');
+      var cls = 'tgtm-cell' + (list.length ? ' has-events' : '') + (isToday ? ' is-today' : '')
+        + (isPast ? ' is-past' : '');
       var inner = '<span class="tgtm-num">' + d + '</span>';
 
       if (list.length) {
