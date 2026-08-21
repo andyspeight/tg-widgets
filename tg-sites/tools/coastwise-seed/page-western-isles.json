@@ -1,0 +1,668 @@
+{
+ "version": 1,
+ "id": "pg_32owec09",
+ "title": "Western Isles",
+ "slug": "western-isles",
+ "seo": {
+  "title": "Western Isles voyage — Coastwise",
+  "description": "Seven nights, Oban to Stornoway, aboard MV Freya. Coll, Canna, Iona and Staffa, and dinner on deck if it holds.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_27e1cofa",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_26ub9256",
+     "columns": [
+      {
+       "id": "col_253v20pz",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_22pl6cud",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_23qoja2g",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Western Isles",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_24wzdge8",
+         "type": "text",
+         "props": {
+          "html": "<p>Oban to Stornoway through the Small Isles, aboard MV Freya. The one to book if you want weather with your scenery.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_2hcooy81",
+   "name": "The voyage",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_2dtzm19p",
+     "columns": [
+      {
+       "id": "col_29l6p1ti",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_285g406c",
+         "type": "text",
+         "props": {
+          "html": "<p>The west of Scotland is a sequence of harbours nobody dredged for anything bigger than a fishing fleet, which is exactly why it suits us. Freya draws 3.8 metres, so she lies alongside at Tobermory and Rodel while the big ships sit off Oban landing tenders.</p><p>The week is built round landings, not passages. Coll for the white strand, Staffa at slack water for Fingal’s Cave, Canna because eleven residents and one post box is a kind of perfection. When a blow comes through, the master swaps the days rather than cancelling one.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_2cmygiex",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2arkhffl",
+         "type": "rating",
+         "props": {
+          "rating": 4.9,
+          "showValue": true,
+          "count": "from 212 guest reviews",
+          "size": "m",
+          "colour": "",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_2bon21fm",
+         "type": "tags",
+         "props": {
+          "style": "pills",
+          "size": "m",
+          "colour": "",
+          "align": "left",
+          "items": [
+           {
+            "label": "Landings daily",
+            "href": ""
+           },
+           {
+            "label": "Full board",
+            "href": ""
+           },
+           {
+            "label": "Sea swimming",
+            "href": ""
+           },
+           {
+            "label": "Single cabins",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_2gnabxf4",
+     "columns": [
+      {
+       "id": "col_2fos75nb",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2e41vdia",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "left",
+          "divided": true,
+          "items": [
+           {
+            "value": "7",
+            "suffix": "",
+            "label": "Nights",
+            "detail": ""
+           },
+           {
+            "value": "Apr–Sep",
+            "suffix": "",
+            "label": "Season",
+            "detail": ""
+           },
+           {
+            "value": "MV Freya",
+            "suffix": "",
+            "label": "Ship",
+            "detail": ""
+           },
+           {
+            "value": "£2,340",
+            "suffix": "",
+            "label": "From, per person",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_2m4gdy2b",
+   "name": "Day by day",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_2l29hgn2",
+     "columns": [
+      {
+       "id": "col_2k2revrd",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2ii4r6g7",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Seven days, day by day",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_2jo06h30",
+         "type": "slider",
+         "props": {
+          "slideWidth": "medium",
+          "tilt": "none",
+          "gap": "m",
+          "style": "plain",
+          "ratio": "4/5",
+          "radius": "md",
+          "rows": "1",
+          "scrollbar": "bar",
+          "align": "left",
+          "wholeCardLinks": false,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
+            "alt": "Oban from the water",
+            "label": "Day 01 · Oban",
+            "title": "Board at four, sail at six",
+            "body": "Kippers smoking on the quay as we clear the Sound of Kerrera.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+            "alt": "Teak deck detail",
+            "label": "Day 02 · Tobermory",
+            "title": "Alongside by nine",
+            "body": "The distillery does a tasting for us before it opens to the road.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+            "alt": "The white strand on Coll",
+            "label": "Day 03 · Coll",
+            "title": "Nobody else lands today",
+            "body": "Anchor off the strand, tenders ashore all afternoon.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "The ship between islands",
+            "label": "Day 04 · Iona and Staffa",
+            "title": "Fingal’s Cave at slack water",
+            "body": "When you can hear the columns rather than the swell.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "Open water and low sun",
+            "label": "Day 05 · Canna",
+            "title": "The best anchorage in the Small Isles",
+            "body": "Dinner on deck if it holds. It usually holds.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "Still water at dawn",
+            "label": "Day 06 · Harris",
+            "title": "Ashore at Rodel",
+            "body": "A weaver in Drinishader works the loom while we stand in her shed.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+            "alt": "The saloon at dusk",
+            "label": "Day 07 · Stornoway",
+            "title": "In at seven, ashore by nine",
+            "body": "Breakfast aboard. Cars and the ferry are both a short walk.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_2s4hw320",
+   "name": "The isles",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_2rp80pty",
+     "columns": [
+      {
+       "id": "col_2qqymv36",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2n0p1g7l",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The isles, one by one",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_2o44s8oq",
+         "type": "text",
+         "props": {
+          "html": "<p>Open one. The photograph is the argument.</p>"
+         }
+        },
+        {
+         "id": "b_2ps628nb",
+         "type": "expanding-cards",
+         "props": {
+          "height": "medium",
+          "radius": "md",
+          "scrim": "#1b333d",
+          "scrimStrength": 55,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+            "alt": "The strand on Coll",
+            "title": "Coll",
+            "body": "A white strand with nobody on it, and machair behind.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "Staffa from the air",
+            "title": "Staffa",
+            "body": "Fingal’s Cave, entered by tender at slack water.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "The Small Isles in low sun",
+            "title": "Canna",
+            "body": "Eleven residents, one post box, the best anchorage in the Small Isles.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "Loch at first light",
+            "title": "Harris",
+            "body": "Rodel church, a weaver at her loom, and Luskentyre if the tide serves.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_2wszq5xr",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_2vi1wxbg",
+     "columns": [
+      {
+       "id": "col_2u7w9fio",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2t4rst1a",
+         "type": "quote",
+         "props": {
+          "text": "We were alongside in Canna before I had finished my coffee. On the last cruise we took, that was a coach transfer.",
+          "attribution": "Margaret Ellwood, Hexham",
+          "role": "MV Freya, June 2026, fourth voyage"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_319ik4e6",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_30ek4skj",
+     "columns": [
+      {
+       "id": "col_2zgtkh62",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2xpjwx9f",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "April sails first. September sails calmest.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_2y7pjacb",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

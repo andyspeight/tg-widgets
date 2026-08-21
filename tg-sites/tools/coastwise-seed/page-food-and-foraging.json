@@ -1,0 +1,363 @@
+{
+ "version": 1,
+ "id": "pg_8v8pw0il",
+ "title": "Food and foraging",
+ "slug": "food-and-foraging",
+ "seo": {
+  "title": "Food and foraging — Coastwise",
+  "description": "Dinner is whatever came aboard that morning. How the galley works a coast, quay by quay.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_8e4g764w",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/food-quay.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_8d29ekh8",
+     "columns": [
+      {
+       "id": "col_8cueah7p",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_89olv5of",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_8a7lpw1w",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Food and foraging",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_8bnk9yss",
+         "type": "text",
+         "props": {
+          "html": "<p>There is no menu cycle. There is a chef, a coast, and whatever came over the rail that morning.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8ku78rn9",
+   "name": "How dinner happens",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8j3m80cw",
+     "columns": [
+      {
+       "id": "col_8gj2aoce",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8fan4gvk",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "The quay, early",
+            "body": "The chef is first down the gangway in every harbour. Langoustines at Tobermory, octopus at Vis, a cheese in Norway nobody can pronounce and everybody reorders."
+           },
+           {
+            "title": "The galley, all day",
+            "body": "One chef, one helper, eight tables. Bread proves while we sail. You will smell the day’s decision by eleven."
+           },
+           {
+            "title": "The table, at eight",
+            "body": "One sitting, no seating plan, the day’s catch and the day’s story. The wine list is short and right."
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_8i8f0kuc",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8h5qx7n5",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+          "alt": "The dining saloon at dusk",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8pivm2zm",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8ofieo8j",
+     "columns": [
+      {
+       "id": "col_8n1yk16y",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8lun49vl",
+         "type": "quote",
+         "props": {
+          "text": "The chef bought a box of chanterelles off two children in Geiranger and rewrote dinner on the spot. Best thing I ate all year.",
+          "attribution": "Priya Nair, London",
+          "role": "Norwegian Narrows, August 2025"
+         }
+        },
+        {
+         "id": "b_8mmgtw04",
+         "type": "tags",
+         "props": {
+          "style": "bullets",
+          "size": "m",
+          "colour": "",
+          "align": "left",
+          "items": [
+           {
+            "label": "One sitting",
+            "href": ""
+           },
+           {
+            "label": "Short wine list",
+            "href": ""
+           },
+           {
+            "label": "Dietary needs fed properly",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8u75644z",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8tgn44cg",
+     "columns": [
+      {
+       "id": "col_8se7z1sf",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8qf8nb2r",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Come hungry. Leave with a recipe you will never quite replicate.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_8r39xwe9",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

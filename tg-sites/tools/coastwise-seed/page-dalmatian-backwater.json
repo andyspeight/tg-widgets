@@ -1,0 +1,521 @@
+{
+ "version": 1,
+ "id": "pg_4tv03m60",
+ "title": "Dalmatian Backwater",
+ "slug": "dalmatian-backwater",
+ "seo": {
+  "title": "Dalmatian Backwater voyage — Coastwise",
+  "description": "Six nights, Split to Dubrovnik aboard MV Nyren, by way of Vis, Lastovo and Šipan.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_435ny4k4",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_42o1zwul",
+     "columns": [
+      {
+       "id": "col_41poq8od",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3yv1q8l1",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_3zk6ilds",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Dalmatian Backwater",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_40wcrcax",
+         "type": "text",
+         "props": {
+          "html": "<p>Split to Dubrovnik by way of the islands the ferries call at twice a week, aboard MV Nyren. Warm water, cold wine.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4di1dhov",
+   "name": "The voyage",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_495kwx9p",
+     "columns": [
+      {
+       "id": "col_456xz6hu",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_44dvmqi2",
+         "type": "text",
+         "props": {
+          "html": "<p>The Dalmatian coast has a front, which is crowded, and a back, which is not. Nyren works the back: Vis, which was a closed military island until 1989 and still cooks like it never heard of tourism; Lastovo, a dark-sky reserve with one town and forty church towers; Šipan, where the Dubrovnik nobility built summer houses and then, usefully, left.</p><p>The swimming ladder goes down before breakfast and comes up after dinner. In between there are stone harbours, konoba lunches and one very good market on the Riva at Split.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_48ap5vfw",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_46ywi1eb",
+         "type": "rating",
+         "props": {
+          "rating": 4.7,
+          "showValue": true,
+          "count": "from 189 guest reviews",
+          "size": "m",
+          "colour": "",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_47ilf2yw",
+         "type": "tags",
+         "props": {
+          "style": "pills",
+          "size": "m",
+          "colour": "",
+          "align": "left",
+          "items": [
+           {
+            "label": "Swim stops daily",
+            "href": ""
+           },
+           {
+            "label": "Konoba dinners",
+            "href": ""
+           },
+           {
+            "label": "Warm sea",
+            "href": ""
+           },
+           {
+            "label": "Six nights",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_4ce7jxak",
+     "columns": [
+      {
+       "id": "col_4bjw6kuw",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_4ad34sb7",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "left",
+          "divided": true,
+          "items": [
+           {
+            "value": "6",
+            "suffix": "",
+            "label": "Nights",
+            "detail": ""
+           },
+           {
+            "value": "Jun–Oct",
+            "suffix": "",
+            "label": "Season",
+            "detail": ""
+           },
+           {
+            "value": "MV Nyren",
+            "suffix": "",
+            "label": "Ship",
+            "detail": ""
+           },
+           {
+            "value": "£1,895",
+            "suffix": "",
+            "label": "From, per person",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4jky0czp",
+   "name": "The islands",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_4iuw1hrp",
+     "columns": [
+      {
+       "id": "col_4he6u28v",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_4eq1e6hj",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Three islands, front and back",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_4f7pudcd",
+         "type": "text",
+         "props": {
+          "html": "<p>Turn a card over for the part the brochure leaves out.</p>"
+         }
+        },
+        {
+         "id": "b_4gwzc4fy",
+         "type": "flip-cards",
+         "props": {
+          "columns": "3",
+          "gap": "m",
+          "radius": "md",
+          "height": "medium",
+          "frontTone": "#1b333d",
+          "backTone": "#c8452c",
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+            "alt": "Vis harbour",
+            "title": "Vis",
+            "body": "Closed to outsiders until 1989. The fish is grilled the way the navy taught them, which is perfectly.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "A channel between islands",
+            "title": "Lastovo",
+            "body": "A dark-sky reserve. After dinner the crew kill the deck lights and the Milky Way does the rest.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+            "alt": "An anchorage at dusk",
+            "title": "Šipan",
+            "body": "The nobility’s summer island. Their olive presses still work, and so does their wine.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4n4uqcvx",
+   "name": "Guest words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_4mlycabm",
+     "columns": [
+      {
+       "id": "col_4lv9vndq",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_4k18g2fa",
+         "type": "quote",
+         "props": {
+          "text": "I swam before breakfast every day for six days. The chef bought octopus off a boy on the quay at Vis and that was dinner.",
+          "attribution": "Sarah and Tom Whittle, York",
+          "role": "MV Nyren, September 2025"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4s2bpwdx",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_4rf38jj4",
+     "columns": [
+      {
+       "id": "col_4qggkiee",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_4o4ohc76",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "June for the swimming. October for the harvest.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_4paezizi",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

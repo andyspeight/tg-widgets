@@ -1,0 +1,296 @@
+{
+ "version": 1,
+ "id": "pg_6rszm218",
+ "title": "Holidays",
+ "slug": "holidays",
+ "seo": {
+  "title": "Ways to travel — Coastwise",
+  "description": "Island hopping, wildlife at sea, food and foraging, walking ashore and private charter, all by small ship.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_6hvieq5d",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_6gwe4fr0",
+     "columns": [
+      {
+       "id": "col_6fs28bd9",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6c2jnu7u",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6dg7odpn",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Ways to travel",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6eue0l3k",
+         "type": "text",
+         "props": {
+          "html": "<p>The same three ships, five different reasons to be aboard. Pick the one that sounds like your kind of week.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6lgpsown",
+   "name": "The five",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "revealStagger": true,
+   "hoverLift": true,
+   "hoverZoom": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6k6u9hsy",
+     "columns": [
+      {
+       "id": "col_6jfxsobx",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6if0yd0h",
+         "type": "cards",
+         "props": {
+          "source": "typed",
+          "columns": "3",
+          "gap": "m",
+          "style": "bordered",
+          "imagePosition": "top",
+          "lead": "image",
+          "ratio": "4/3",
+          "radius": "md",
+          "align": "left",
+          "wholeCardLinks": true,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "icon": "",
+            "alt": "The ship between islands",
+            "label": "The classic",
+            "title": "Island hopping",
+            "body": "A new harbour most days, and the sea in between.",
+            "linkLabel": "How it works",
+            "linkHref": "/holidays/island-hopping"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/wildlife.jpg",
+            "icon": "",
+            "alt": "Seabirds over the water",
+            "label": "Eyes up",
+            "title": "Wildlife at sea",
+            "body": "Whales, sea eagles and a million seabirds, from deck height.",
+            "linkLabel": "What you might see",
+            "linkHref": "/holidays/wildlife-at-sea"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/food-quay.jpg",
+            "icon": "",
+            "alt": "Produce handed aboard at a quay",
+            "label": "The galley",
+            "title": "Food and foraging",
+            "body": "Dinner is whatever came aboard that morning.",
+            "linkLabel": "How dinner happens",
+            "linkHref": "/holidays/food-and-foraging"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
+            "icon": "",
+            "alt": "Walkers on a shore path",
+            "label": "Boots on",
+            "title": "Walking ashore",
+            "body": "Proper walks from the water line, and a ship to come home to.",
+            "linkLabel": "The walks",
+            "linkHref": "/holidays/walking-ashore"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+            "icon": "",
+            "alt": "The ship at anchor at dusk",
+            "label": "The whole ship",
+            "title": "Private charter",
+            "body": "Twenty-six to forty-four of your own people, one ship, your plan.",
+            "linkLabel": "Take the ship",
+            "linkHref": "/holidays/private-charter"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6qulef44",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6ptbcxjs",
+     "columns": [
+      {
+       "id": "col_6ov6wu3p",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6muzobj9",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Not sure which? Say roughly who is coming, and we will say which week.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_6njr3d97",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

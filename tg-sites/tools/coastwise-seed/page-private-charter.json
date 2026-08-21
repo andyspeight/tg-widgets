@@ -1,0 +1,279 @@
+{
+ "version": 1,
+ "id": "pg_9w9i39s4",
+ "title": "Private charter",
+ "slug": "private-charter",
+ "seo": {
+  "title": "Private charter — Coastwise",
+  "description": "Take the whole ship: twenty-six to forty-four of your own people, one crew, your plan.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_9jcpsuca",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_9id373b1",
+     "columns": [
+      {
+       "id": "col_9hseseqx",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_9ecaj65f",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_9ffjzhkd",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Private charter",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_9g6ie68l",
+         "type": "text",
+         "props": {
+          "html": "<p>Twenty-six to forty-four of your own people, one ship, one crew, and a plan drawn round you.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_9q73zr0w",
+   "name": "The ships",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_9pb1d22k",
+     "columns": [
+      {
+       "id": "col_9oc12a3t",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_9k1w5bf5",
+         "type": "text",
+         "props": {
+          "html": "<p>A charter is not a cruise with your name on it. The route is drawn with you, the galley plans round your table, and the only fixed points are where we start, where we finish and how the tide runs. Families take Freya. Societies take Skua for the birds. Weddings, so far without exception, take Nyren.</p>"
+         }
+        },
+        {
+         "id": "b_9llfoyd8",
+         "type": "tabs",
+         "props": {
+          "style": "underline",
+          "align": "left",
+          "textColour": "",
+          "items": [
+           {
+            "title": "MV Freya · 38",
+            "body": "The Scottish ship. Nineteen cabins, the snug library, and the only hull of the three strengthened for the Faroes run. From £41,000 for seven nights, whole ship, full board."
+           },
+           {
+            "title": "MV Skua · 26",
+            "body": "The small one, and the quiet one. Thirteen cabins, a saloon that becomes one long table, and the shallowest draught in the fleet. From £34,000 for seven nights."
+           },
+           {
+            "title": "MV Nyren · 44",
+            "body": "The warm-water ship. Twenty-two cabins, the stern platform and awning, and a galley built for long dinners. From £46,000 for seven nights."
+           }
+          ]
+         }
+        },
+        {
+         "id": "b_9m21sqe7",
+         "type": "read-more",
+         "props": {
+          "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis, or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
+          "lines": 3,
+          "moreLabel": "The fine print",
+          "lessLabel": "Enough",
+          "fade": true,
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_9n7tww7g",
+         "type": "button",
+         "props": {
+          "label": "Start a charter conversation",
+          "href": "mailto:charter@coastwise.example",
+          "variant": "primary",
+          "size": "m",
+          "align": "left",
+          "newTab": false
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_9vhnwm1c",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_9ukh4qx3",
+     "columns": [
+      {
+       "id": "col_9tgxq3rm",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_9r60kou9",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "One ship, your people, and a coast to yourselves.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_9sr1otfr",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,426 @@
+{
+ "version": 1,
+ "id": "pg_885j9wk9",
+ "title": "Wildlife at sea",
+ "slug": "wildlife-at-sea",
+ "seo": {
+  "title": "Wildlife at sea — Coastwise",
+  "description": "Whales, sea eagles and a million seabirds from deck height, with a naturalist aboard on every northern voyage.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_7l73owtp",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/wildlife.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_7kmyvsof",
+     "columns": [
+      {
+       "id": "col_7jssii8p",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7gv676w8",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7hxibd1c",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Wildlife at sea",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7ikawn44",
+         "type": "text",
+         "props": {
+          "html": "<p>A ship this size does not scatter what it approaches. You watch from deck height, engine at dead slow, kettle on.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7tqq8w6t",
+   "name": "The case",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7spqbhl8",
+     "columns": [
+      {
+       "id": "col_7n1z4sqd",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7mz7emor",
+         "type": "text",
+         "props": {
+          "html": "<p>Wildlife boats give you ninety minutes and a wet coat. A small ship gives you the whole week: the minke that surfaces beside the hull at breakfast, the sea eagle that works the same headland every evening, the hour at Enniberg when the air is more bird than sky.</p><p>A naturalist sails on every northern departure. Not a lecturer with a projector: a person with binoculars who knows which ledge, which tide, which month.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_7r75u9m9",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7oivdt5w",
+         "type": "icon-item",
+         "props": {
+          "icon": "eye",
+          "title": "Deck-height viewing",
+          "body": "Four metres off the water, not forty. You see the eye, not the back.",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7pry58z1",
+         "type": "icon-item",
+         "props": {
+          "icon": "compass",
+          "title": "The master diverts",
+          "body": "A blow on the horizon outranks the timetable. It is that kind of ship.",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7qbvo3yb",
+         "type": "icon-item",
+         "props": {
+          "icon": "sparkle",
+          "title": "A naturalist aboard",
+          "body": "On every Scottish, Faroese and Norwegian departure.",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7ykfrojw",
+   "name": "By season",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7x69eeb1",
+     "columns": [
+      {
+       "id": "col_7wyrh2nq",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7uoz6ypz",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "What you might see, and when",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7vxwmyn1",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": false,
+          "openFirst": true,
+          "textColour": "",
+          "items": [
+           {
+            "title": "April and May",
+            "body": "The cliffs fill. Puffins back on the ledges, gannets diving off Shetland, porpoise in every sound. The Hebrides at their busiest above the waterline."
+           },
+           {
+            "title": "June and July",
+            "body": "Whale months. Minke reliably, humpback increasingly, orca if the herring run inshore. Mykines at full strength, all million of it."
+           },
+           {
+            "title": "August and September",
+            "body": "Sea eagles teaching their young along the Norwegian arms, dolphins riding the bow most passages, and the first big rafts of shearwaters heading south."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_82git1iw",
+   "name": "Guest words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_817357tf",
+     "columns": [
+      {
+       "id": "col_804vfd0j",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7z9aczqt",
+         "type": "quote",
+         "props": {
+          "text": "An orca surfaced between us and the cliffs and the master just took the engine out of gear. Twenty minutes. Nobody spoke.",
+          "attribution": "Ruth Calder, Edinburgh",
+          "role": "Faroe and Shetland, June 2026"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_87duyap5",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8652d9kt",
+     "columns": [
+      {
+       "id": "col_85kzy662",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_83ri0hmu",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Bring binoculars. We carry spares, but bring yours.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_84pvfeht",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

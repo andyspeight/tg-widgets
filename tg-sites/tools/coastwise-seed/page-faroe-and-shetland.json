@@ -1,0 +1,444 @@
+{
+ "version": 1,
+ "id": "pg_5k4fftp5",
+ "title": "Faroe and Shetland",
+ "slug": "faroe-and-shetland",
+ "seo": {
+  "title": "Faroe and Shetland voyage — Coastwise",
+  "description": "Eight nights, Lerwick to Tórshavn aboard MV Freya, across the bird cliffs of the north.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_4zn76lih",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/faroe-cliffs.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_4yslrcp0",
+     "columns": [
+      {
+       "id": "col_4xxa6n14",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_4uf8ehjh",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_4vkgw7d6",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Faroe and Shetland",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_4wg9cqqm",
+         "type": "text",
+         "props": {
+          "html": "<p>Lerwick to Tórshavn across the top of the Atlantic, aboard MV Freya. The serious one, and the one the crew fight to work.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_59ml4y22",
+   "name": "The voyage",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_55367gpq",
+     "columns": [
+      {
+       "id": "col_51jxmvc9",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_50x19mou",
+         "type": "text",
+         "props": {
+          "html": "<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and eleven human residents. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p><p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_5495adsd",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_52ij00co",
+         "type": "rating",
+         "props": {
+          "rating": 4.9,
+          "showValue": true,
+          "count": "from 96 guest reviews",
+          "size": "m",
+          "colour": "",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_53j89dlo",
+         "type": "tags",
+         "props": {
+          "style": "pills",
+          "size": "m",
+          "colour": "",
+          "align": "left",
+          "items": [
+           {
+            "label": "Bird cliffs",
+            "href": ""
+           },
+           {
+            "label": "Whale watch",
+            "href": ""
+           },
+           {
+            "label": "Hard weather",
+            "href": ""
+           },
+           {
+            "label": "Eight nights",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_58jhzkek",
+     "columns": [
+      {
+       "id": "col_57fzdnfm",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_56jhaxvz",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "left",
+          "divided": true,
+          "items": [
+           {
+            "value": "8",
+            "suffix": "",
+            "label": "Nights",
+            "detail": ""
+           },
+           {
+            "value": "May–Jul",
+            "suffix": "",
+            "label": "Season",
+            "detail": ""
+           },
+           {
+            "value": "MV Freya",
+            "suffix": "",
+            "label": "Ship",
+            "detail": ""
+           },
+           {
+            "value": "£2,890",
+            "suffix": "",
+            "label": "From, per person",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_5ea93bku",
+   "name": "Practical",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_5dlyzl8j",
+     "columns": [
+      {
+       "id": "col_5cxwmp0q",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_5anumosc",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The questions everyone asks",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_5bo5tg5x",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": true,
+          "openFirst": true,
+          "textColour": "",
+          "items": [
+           {
+            "title": "How rough does it get?",
+            "body": "Between the islands, sheltered. The two open crossings are chosen by forecast, not by calendar, and the master will sit one out in harbour rather than take a bad one. Bring the tablets and you will probably not need them."
+           },
+           {
+            "title": "What do I pack?",
+            "body": "Layers, a real waterproof, boots you can wade a tender landing in. The ship carries spares of everything anyone has ever forgotten."
+           },
+           {
+            "title": "Will we land on Mykines?",
+            "body": "On about four voyages in five. It needs a settled swell, which is why the plan holds two spare days. When it comes off, it is the best landing of the season."
+           },
+           {
+            "title": "Is there daylight?",
+            "body": "In June, functionally all of it. The saloon has blackout blinds and the bar stays open until the last guest concedes."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_5jf1wp7m",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_5i936bfc",
+     "columns": [
+      {
+       "id": "col_5hcoau3l",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_5f534igu",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Book the whole eight nights. The weather needs room to be generous.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_5gxy0wzq",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

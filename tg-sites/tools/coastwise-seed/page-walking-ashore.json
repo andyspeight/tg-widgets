@@ -1,0 +1,254 @@
+{
+ "version": 1,
+ "id": "pg_9d4qihhn",
+ "title": "Walking ashore",
+ "slug": "walking-ashore",
+ "seo": {
+  "title": "Walking ashore — Coastwise",
+  "description": "Proper walks from the waterline, graded honestly, with a ship to come home to.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_91s26kog",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_90nf7bdc",
+     "columns": [
+      {
+       "id": "col_8z7djcaa",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8wi09dag",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_8x8ot9pv",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Walking ashore",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_8yqhbutr",
+         "type": "text",
+         "props": {
+          "html": "<p>The ship does the miles at sea so your boots can do the ones that matter ashore.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_97i52xoi",
+   "name": "The walks",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_96vg745w",
+     "columns": [
+      {
+       "id": "col_954438zo",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_92q9c473",
+         "type": "text",
+         "props": {
+          "html": "<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way.</p>"
+         }
+        },
+        {
+         "id": "b_93qi5euy",
+         "type": "table",
+         "props": {
+          "headerRow": true,
+          "firstColumnHeader": true,
+          "style": "lined",
+          "caption": "A sample week of walks, Western Isles voyage.",
+          "textColour": "",
+          "data": "Walk\tGrade\tDistance\tThe reward\nTobermory lighthouse path\tEasy\t3 km\tThe town, the bay, and a dram at the end\nColl strand and machair\tEasy\t5 km\tA mile of white sand with nobody on it\nStaffa clifftop circuit\tModerate\t4 km\tThe cave from above, puffins in June\nCanna to Compass Hill\tModerate\t7 km\tThe Small Isles laid out like a chart\nHarris, Rodel to Drinishader\tStrong\t12 km\tThe weaving sheds, and the east coast bays"
+         }
+        },
+        {
+         "id": "b_948jxsyv",
+         "type": "tooltip",
+         "props": {
+          "text": "How we grade",
+          "tip": "Easy is under two hours on made paths. Moderate has climbs and rough ground. Strong is a full walking day and needs boots that have already been walked in.",
+          "position": "above",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_9c10stjb",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_9b3ydwwy",
+     "columns": [
+      {
+       "id": "col_9an0211o",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_98p4kl80",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Boots in the hold, dram in the saloon.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_99bo5l11",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,152 @@
+{
+ "version": 1,
+ "id": "pg_cfg0te27",
+ "title": "Booking terms",
+ "slug": "terms",
+ "seo": {
+  "title": "Booking terms — Coastwise",
+  "description": "The terms of carriage, in plain English first and full clauses second.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_ce8rgbxs",
+   "name": "Terms",
+   "tone": "light",
+   "width": "narrow",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_cdvg0t89",
+     "columns": [
+      {
+       "id": "col_ccrxmm0f",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_c6g82h0t",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_c7yxt1rs",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Booking terms",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_c83rxytr",
+         "type": "text",
+         "props": {
+          "html": "<p>The plain version first: you pay a fifth to book and the rest ten weeks out. If we cancel, you get everything back. If the weather rewrites the route, that is the nature of a coast and not a fault. Your money is protected the whole way: <b>ABTA Y2841</b>, <b>ATOL 11627</b>.</p>"
+         }
+        },
+        {
+         "id": "b_c9283xhe",
+         "type": "tooltip",
+         "props": {
+          "text": "What ATOL covers",
+          "tip": "If we stop trading, the Civil Aviation Authority’s scheme refunds package bookings that include a flight, or brings you home if you are already away.",
+          "position": "above",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ca23ob8l",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": true,
+          "openFirst": true,
+          "textColour": "",
+          "items": [
+           {
+            "title": "1. Booking and payment",
+            "body": "A booking exists when we confirm it in writing and the deposit of 20 per cent has arrived. The balance is due 70 days before sailing. Book inside 70 days and the whole fare is due at once. A held cabin, uncommitted, lapses quietly after seven days."
+           },
+           {
+            "title": "2. If you cancel",
+            "body": "More than 70 days out you lose the deposit. Between 70 and 29 days, half the fare. Inside 28 days, the whole fare, because a small ship cannot resell a cabin the way an aeroplane resells a seat. Travel insurance exists for exactly this, and we will decline to confirm any booking that does not have it."
+           },
+           {
+            "title": "3. If we cancel",
+            "body": "If we cancel a voyage for any reason other than your non-payment, you choose: everything back, or any other sailing with a berth free, with any difference in fare refunded or waived. We do not cancel for weather. We re-route for weather, which is different, and covered next."
+           },
+           {
+            "title": "4. Weather and the route",
+            "body": "The itinerary is a plan, not a promise. The master may change the route, the order, the anchorages and the landings at any time for weather, tide or safety, and that judgement is final. No refund arises from a route changed at sea. In fifteen seasons no voyage has ever failed to sail; several have become better stories than the plan."
+           },
+           {
+            "title": "5. Aboard",
+            "body": "The master’s word is law on safety matters, the bridge is open at the master’s pleasure, and a guest whose conduct endangers the ship or wrecks the peace of it can be landed at the next port, fare forfeit. It has happened twice in fifteen years. Both times everyone else applauded."
+           },
+           {
+            "title": "6. Your protection",
+            "body": "Sea-only fares are protected by ABTA bond Y2841. Packages that include flights are protected under ATOL 11627. Deposits sit in a client trust account until the voyage sails. The contract is with Coastwise Voyages Ltd, registered in Scotland, and Scots law applies."
+           },
+           {
+            "title": "7. The demonstration note",
+            "body": "This is a Travelgenix demonstration site. Coastwise is a concept brand: the ships, fares, reviews and these terms are illustrative, written to show how a real operator’s site can carry real terms plainly."
+           }
+          ]
+         }
+        },
+        {
+         "id": "b_cbi4lmmj",
+         "type": "button",
+         "props": {
+          "label": "Ask about a clause",
+          "href": "/contact",
+          "variant": "secondary",
+          "size": "m",
+          "align": "left",
+          "newTab": false
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

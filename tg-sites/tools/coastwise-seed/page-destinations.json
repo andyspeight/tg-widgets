@@ -1,0 +1,296 @@
+{
+ "version": 1,
+ "id": "pg_215urjti",
+ "title": "Voyages",
+ "slug": "destinations",
+ "seo": {
+  "title": "Voyages — Coastwise",
+  "description": "Five coasts, three small ships. Scotland, Norway, the Faroes, Dalmatia and the Lycian shore.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_1rd0zccs",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_1qwfj3lo",
+     "columns": [
+      {
+       "id": "col_1pkmg0vu",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1m0qq7lw",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_1n8k5d61",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Five coasts. Three small ships.",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_1oiya3gh",
+         "type": "text",
+         "props": {
+          "html": "<p>Every voyage below runs on a ship that draws under four metres and carries fewer than forty-five guests. Pick by weather, not by brochure.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_1vjs6rxr",
+   "name": "The voyages",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "revealStagger": true,
+   "hoverLift": true,
+   "hoverZoom": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_1ujpcvvl",
+     "columns": [
+      {
+       "id": "col_1tk53wvn",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1s3gk6ef",
+         "type": "cards",
+         "props": {
+          "source": "typed",
+          "columns": "3",
+          "gap": "m",
+          "style": "bordered",
+          "imagePosition": "top",
+          "lead": "image",
+          "ratio": "4/3",
+          "radius": "md",
+          "align": "left",
+          "wholeCardLinks": true,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+            "icon": "",
+            "alt": "Hebridean shoreline",
+            "label": "Scotland · 7 nights",
+            "title": "Western Isles",
+            "body": "Oban to Stornoway through the Small Isles. Weather with your scenery.",
+            "linkLabel": "From £2,340",
+            "linkHref": "/destinations/western-isles"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "icon": "",
+            "alt": "A fjord at first light",
+            "label": "Norway · 9 nights",
+            "title": "Norwegian Narrows",
+            "body": "Bergen to Ålesund up the arms the express boats skip.",
+            "linkLabel": "From £3,180",
+            "linkHref": "/destinations/norwegian-narrows"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+            "icon": "",
+            "alt": "A limestone island harbour",
+            "label": "Croatia · 6 nights",
+            "title": "Dalmatian Backwater",
+            "body": "Split to Dubrovnik by way of Vis, Lastovo and Šipan.",
+            "linkLabel": "From £1,895",
+            "linkHref": "/destinations/dalmatian-backwater"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/faroe-cliffs.jpg",
+            "icon": "",
+            "alt": "Sea cliffs in north light",
+            "label": "North Atlantic · 8 nights",
+            "title": "Faroe and Shetland",
+            "body": "Lerwick to Tórshavn across the bird cliffs of the north.",
+            "linkLabel": "From £2,890",
+            "linkHref": "/destinations/faroe-and-shetland"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/lycian-coast.jpg",
+            "icon": "",
+            "alt": "A pine-backed anchorage on the Lycian coast",
+            "label": "Türkiye · 7 nights",
+            "title": "The Lycian Shore",
+            "body": "Fethiye to Kaş, swimming off the stern before breakfast.",
+            "linkLabel": "From £1,760",
+            "linkHref": "/destinations/lycian-shore"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_207saof0",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_1zoh2awa",
+     "columns": [
+      {
+       "id": "col_1ywcm3s2",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1wkmuajo",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The right coast depends on the weather you want.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_1xbl49z2",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

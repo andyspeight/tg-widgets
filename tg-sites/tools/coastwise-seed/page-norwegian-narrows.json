@@ -1,0 +1,518 @@
+{
+ "version": 1,
+ "id": "pg_3x9bkqpe",
+ "title": "Norwegian Narrows",
+ "slug": "norwegian-narrows",
+ "seo": {
+  "title": "Norwegian Narrows voyage — Coastwise",
+  "description": "Nine nights, Bergen to Ålesund aboard MV Skua, up the fjord arms the express boats skip.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_38yi3ov4",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_37kii0or",
+     "columns": [
+      {
+       "id": "col_36cmvggt",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_33y4hzqe",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_349apc1p",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Norwegian Narrows",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_35s7q67l",
+         "type": "text",
+         "props": {
+          "html": "<p>Bergen to Ålesund the slow way, aboard MV Skua. Nine nights, four of them at anchor under something vertical.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_3ioqdwx1",
+   "name": "The voyage",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_3e1d720u",
+     "columns": [
+      {
+       "id": "col_3agaqimf",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_39cu8hig",
+         "type": "text",
+         "props": {
+          "html": "<p>The express boats do Bergen to Ålesund in a day. We take nine, because the point of a fjord is not the far end of it. Skua turns up the arms with no ferry service and anchors where the chart says there is room for exactly one ship, which there is, because she is the one ship.</p><p>Four nights at anchor means four evenings when the engine stops and the water goes to glass and the only thing moving is the waterfall a mile up. Bring a book you have been meaning to read for years.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_3dby2knn",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3bjwie9u",
+         "type": "rating",
+         "props": {
+          "rating": 4.8,
+          "showValue": true,
+          "count": "from 147 guest reviews",
+          "size": "m",
+          "colour": "",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_3ctm9003",
+         "type": "tags",
+         "props": {
+          "style": "pills",
+          "size": "m",
+          "colour": "",
+          "align": "left",
+          "items": [
+           {
+            "label": "Nights at anchor",
+            "href": ""
+           },
+           {
+            "label": "Midnight light",
+            "href": ""
+           },
+           {
+            "label": "Bridge open",
+            "href": ""
+           },
+           {
+            "label": "Full board",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_3hyl4w5m",
+     "columns": [
+      {
+       "id": "col_3gaa6flh",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3f85vx29",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "left",
+          "divided": true,
+          "items": [
+           {
+            "value": "9",
+            "suffix": "",
+            "label": "Nights",
+            "detail": ""
+           },
+           {
+            "value": "May–Aug",
+            "suffix": "",
+            "label": "Season",
+            "detail": ""
+           },
+           {
+            "value": "MV Skua",
+            "suffix": "",
+            "label": "Ship",
+            "detail": ""
+           },
+           {
+            "value": "£3,180",
+            "suffix": "",
+            "label": "From, per person",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_3ngmwtvh",
+   "name": "The arms",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_3m16guy8",
+     "columns": [
+      {
+       "id": "col_3lco8pmc",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3jca61xu",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Three arms the timetables skip",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_3k3vr221",
+         "type": "half-overlay",
+         "props": {
+          "tint": "#1b333d",
+          "tintOpacity": 72,
+          "height": "medium",
+          "transition": "fade",
+          "interval": 7,
+          "arrows": true,
+          "dots": true,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "A narrow fjord at dawn",
+            "panelSrc": "",
+            "panelAlt": "",
+            "side": "left",
+            "title": "Hjørundfjord",
+            "body": "The quiet one. Farms on ledges, a church by the water, and no road along most of it."
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "Open water between headlands",
+            "panelSrc": "",
+            "panelAlt": "",
+            "side": "left",
+            "title": "Nordfjord",
+            "body": "Out to the skerries and back in one tide, with the glacier above the whole way."
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "The ship threading a channel",
+            "panelSrc": "",
+            "panelAlt": "",
+            "side": "left",
+            "title": "The inner leads",
+            "body": "The sheltered thread between islands the coastal steamers used before anyone built roads."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_3rfsob2i",
+   "name": "Guest words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_3qi5ymak",
+     "columns": [
+      {
+       "id": "col_3pwx4c50",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3ok26202",
+         "type": "quote",
+         "props": {
+          "text": "The master turned us round in the night to miss a blow, and we woke up somewhere better. Nobody announced it. It was just done.",
+          "attribution": "David Okafor, Bristol",
+          "role": "MV Skua, July 2026"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_3waa886i",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_3vwiowvo",
+     "columns": [
+      {
+       "id": "col_3unmh00c",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3sm4cgq5",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "June is the light. August is the warmth.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_3th684so",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

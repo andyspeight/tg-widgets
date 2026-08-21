@@ -1,0 +1,399 @@
+{
+ "version": 1,
+ "id": "pg_7flu66pi",
+ "title": "Island hopping",
+ "slug": "island-hopping",
+ "seo": {
+  "title": "Island hopping by small ship — Coastwise",
+  "description": "A new harbour most days. How a Coastwise week actually runs, hour by hour.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_6x6hxdyf",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_6wvc3l41",
+     "columns": [
+      {
+       "id": "col_6vwlcb1s",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6sbp5w2w",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6ts1hgv3",
+         "type": "heading",
+         "props": {
+          "level": "h1",
+          "html": "Island hopping",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6ul5pm7t",
+         "type": "text",
+         "props": {
+          "html": "<p>A new harbour most days, the sea in between, and never once packing your bag mid-week.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_741p88zw",
+   "name": "How a week runs",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_73r970dv",
+     "columns": [
+      {
+       "id": "col_70uhb6s6",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6yms5vpy",
+         "type": "text",
+         "props": {
+          "html": "<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch.</p>"
+         }
+        },
+        {
+         "id": "b_6zgh9izi",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "Morning",
+            "body": "Sail early or lie in. The galley does both sittings without being asked."
+           },
+           {
+            "title": "Midday",
+            "body": "Alongside or at anchor somewhere new. Ashore by gangway or tender."
+           },
+           {
+            "title": "Afternoon",
+            "body": "The island. A walk, a distillery, a beach with nobody on it."
+           },
+           {
+            "title": "Evening",
+            "body": "Back aboard for dinner, or a konoba ashore. The bar runs on trust either way."
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_72ozq02p",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_71sd472n",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
+          "alt": "A harbour town from the water",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_79d9iez2",
+   "name": "Where it works best",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "hoverTint": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_78pm3t4e",
+     "columns": [
+      {
+       "id": "col_7707czj8",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_756b3gwx",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Three coasts built for it",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_76y3aml3",
+         "type": "cards",
+         "props": {
+          "source": "typed",
+          "columns": "3",
+          "gap": "m",
+          "style": "tinted",
+          "imagePosition": "top",
+          "lead": "image",
+          "ratio": "4/3",
+          "radius": "md",
+          "align": "left",
+          "wholeCardLinks": true,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+            "icon": "",
+            "alt": "Hebridean shore",
+            "label": "7 nights",
+            "title": "Western Isles",
+            "body": "Five islands, four landings, one distillery.",
+            "linkLabel": "From £2,340",
+            "linkHref": "/destinations/western-isles"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+            "icon": "",
+            "alt": "Dalmatian harbour",
+            "label": "6 nights",
+            "title": "Dalmatian Backwater",
+            "body": "Three islands and two city rivas, warm the whole way.",
+            "linkLabel": "From £1,895",
+            "linkHref": "/destinations/dalmatian-backwater"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/lycian-coast.jpg",
+            "icon": "",
+            "alt": "Lycian anchorage",
+            "label": "7 nights",
+            "title": "The Lycian Shore",
+            "body": "Anchorages and ancient harbours, swimming in between.",
+            "linkLabel": "From £1,760",
+            "linkHref": "/destinations/lycian-shore"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7ezqyici",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7dtwd2u8",
+     "columns": [
+      {
+       "id": "col_7czbc2uu",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7a60e0gc",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "One bag, unpacked once.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_7bd7lmmq",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}
