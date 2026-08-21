@@ -24,6 +24,12 @@
  */
 
 import { normaliseTeamName, slugify, isPlaceholderTeam } from './supplier-normalise.js';
+import { COMPETITIONS } from './supplier-taxonomy.js';
+
+/** slug -> country, for the "Premier League - England" style menu labels. */
+const COUNTRY_BY_COMPETITION = new Map(
+  COMPETITIONS.filter((c) => c.country).map((c) => [c.slug, c.country]),
+);
 
 /** Most-used spelling wins, longest breaks the tie. */
 function pickDisplayName(counts) {
@@ -215,6 +221,7 @@ export function buildEventIndexes(events) {
     .map((c) => ({
       slug: c.slug,
       label: c.label,
+      country: COUNTRY_BY_COMPETITION.get(c.slug) || null,
       category: c.category,
       categoryLabel: c.categoryLabel,
       events: c.events,

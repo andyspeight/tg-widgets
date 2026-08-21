@@ -647,6 +647,10 @@
     {
       "source": "/events-browse",
       "destination": "/events-browse.html"
+    },
+    {
+      "source": "/events-search",
+      "destination": "/events-search.html"
     }
   ],
   "headers": [
@@ -1749,6 +1753,19 @@
         {
           "key": "Content-Type",
           "value": "text/css; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/events-search.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
         }
       ]
     }

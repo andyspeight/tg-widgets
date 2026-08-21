@@ -12,6 +12,7 @@
   var T = window.TGEvents;
   var main = document.getElementById('main');
   T.mountChrome('events.html');
+  T.mountSidebar({ page: 'events.html' });
 
   var SURFACES = [
     {
@@ -46,6 +47,7 @@
 
   function render() {
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     main.appendChild(T.el('h1', { text: 'Events Explorer' }));
     main.appendChild(T.el('p', {
       class: 'ev-lede',
@@ -57,7 +59,7 @@
     main.appendChild(host);
     T.showSkeleton(host, 3);
 
-    T.fetchFeed({}).then(function (data) {
+    T.index().then(function (data) {
       T.clear(host);
 
       var c = data.meta.counts;
@@ -83,7 +85,7 @@
           T.el('span', { class: 'ev-mark' }, [T.icon(s.icon)]),
           T.el('div', { class: 'ev-tile-body' }, [
             T.el('div', { class: 'ev-tile-name', style: 'font-size:18px', text: s.title }),
-            T.el('div', { class: 'ev-tile-meta', style: 'line-height:1.5', text: s.body }),
+            T.el('div', { class: 'ev-tile-desc', text: s.body }),
           ]),
           T.el('span', { class: 'ev-chip', text: s.cta }),
         ]));

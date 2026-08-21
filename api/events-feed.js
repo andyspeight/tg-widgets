@@ -9,6 +9,7 @@
  *   GET /api/events-feed?view=browse&from=2026-09-01&to=2026-09-30&category=football&q=arsenal
  *   GET /api/events-feed?view=venues&q=arena     venue directory, searchable
  *   GET /api/events-feed?view=performers
+ *   GET /api/events-feed?view=search&q=wembley  everything matching, grouped
  *   GET /api/events-feed?view=diagnostics        what the normalisation pass found
  *
  * Optional on any view that returns events: &appId=<TravelifyAppID> to get
@@ -35,7 +36,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+import { setCors, applyRateLimit } from './_auth.js';
 import { buildEventDeeplink, DEEPLINK_STATUS_TEXT, SPEC_VERIFIED } from './_lib/events/event-deeplink.js';
 
 // The published Travelgenix demo Travelify application. Travelify document it
@@ -44,6 +45,18 @@ import { buildEventDeeplink, DEEPLINK_STATUS_TEXT, SPEC_VERIFIED } from './_lib/
 const DEMO_APP_ID = '250';
 
 const PUBLIC_CACHE = 'public, max-age=300, s-maxage=3600, stale-while-revalidate=604800';
+
+/**
+ * This endpoint's own bucket, wider than the shared widgetRead one.
+ *
+ * A browsing UI is chattier than a widget boot: each page is an index call plus
+ * a view call, and the search box fires one per debounced burst of typing. The
+ * shared 120-per-15-minutes limit is a browse-and-search session, not an abuse
+ * signal. 300 per 15 minutes is 20 a minute sustained, still well under the
+ * 60-a-minute the widget-config routes allow, and responses are CDN-cached for
+ * an hour so in production most requests never reach the function at all.
+ */
+const FEED_RATE_LIMIT = { max: 300, windowMs: 15 * 60 * 1000 };
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 50;
 const APPID_RE = /^[A-Za-z0-9_-]{1,32}$/;
@@ -212,7 +225,7 @@ export default function handler(req, res) {
     return;
   }
 
-  const limited = applyRateLimit(res, `eventsfeed:${getClientIp(req)}`, RATE_LIMITS.widgetRead);
+  const limited = applyRateLimit(res, `eventsfeed:${getClientIp(req)}`, FEED_RATE_LIMIT);
   if (!limited) return;
 
   try {
@@ -330,6 +343,68 @@ export default function handler(req, res) {
       }
       const size = intIn(q.limit, 1, 500, 200);
       res.status(200).json({ meta, total: out.length, limit: size, items: out.slice(0, size) });
+      return;
+    }
+
+    // ── search ───────────────────────────────────────────────────────────────
+    // One box over everything. "Wembley" should return the ground, the football
+    // at it and the concerts at it; "Arsenal" should return the club and every
+    // game home and away. So the same term is run against four registries AND
+    // the events, and the caller gets them grouped rather than interleaved.
+    //
+    // Entities are matched on their canonical name and every alias, so "Arsenal
+    // FC" finds the club the feed also writes as "Arsenal". Events are matched
+    // on the REHYDRATED names for the same reason.
+    if (view === 'search') {
+      const term = str(q.q, 60);
+      if (!term) {
+        res.status(200).json({
+          meta, query: '', competitions: [], teams: [], venues: [], performers: [],
+          total: 0, offset: 0, limit: 0, events: [],
+        });
+        return;
+      }
+      const hit = matcher(term);
+      const named = (x) => hit(x.name) || (x.aliases || []).some(hit);
+      const ENTITY_CAP = 8;
+
+      const competitions = snap.competitions
+        .filter((c) => hit(c.label) || hit(c.country) || hit(c.categoryLabel));
+      const teams = snap.teams.filter(named);
+      const venues = snap.venues.filter(named);
+      const performers = snap.performers.filter(named);
+
+      // An exact-ish name match should outrank a substring buried in a longer
+      // name, so "Arsenal" leads with Arsenal rather than a club that merely
+      // contains it.
+      const exact = matcher(term);
+      const rank = (list) => list.slice().sort((a, b) => {
+        const ax = exact(a.name) && a.name.length <= term.length + 4 ? 0 : 1;
+        const bx = exact(b.name) && b.name.length <= term.length + 4 ? 0 : 1;
+        return ax - bx || (b.events || 0) - (a.events || 0);
+      });
+
+      const rows = snap.events.filter((e) => hit(e.t)
+        || hit(teamName(snap, e.hk))
+        || hit(teamName(snap, e.ak))
+        || hit(e.pk && (snap.performerByKey.get(e.pk) || {}).name)
+        || hit((snap.venueByKey.get(e.vk) || {}).name)
+        || hit(e.lo)
+        || hit(e.o && (snap.competitionBySlug.get(e.o) || {}).label));
+
+      res.status(200).json({
+        meta,
+        query: term,
+        competitions: competitions.slice(0, ENTITY_CAP),
+        competitionsTotal: competitions.length,
+        teams: rank(teams).slice(0, ENTITY_CAP),
+        teamsTotal: teams.length,
+        venues: rank(venues).slice(0, ENTITY_CAP),
+        venuesTotal: venues.length,
+        performers: rank(performers).slice(0, ENTITY_CAP),
+        performersTotal: performers.length,
+        ...page(snap, rows, q, appId, linkOpts),
+      });
       return;
     }
 

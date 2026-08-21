@@ -15,6 +15,7 @@
   var T = window.TGEvents;
   var main = document.getElementById('main');
   T.mountChrome('events-browse.html');
+  T.mountSidebar({ page: 'events-browse.html' });
 
   var PAGE = 50;
   var indexData = null;
@@ -35,6 +36,7 @@
   function shell() {
     document.title = "What's on — Events Explorer — Travelgenix";
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     main.appendChild(T.el('h1', { text: "What's on" }));
     main.appendChild(T.el('p', {
       class: 'ev-lede',
@@ -82,7 +84,7 @@
     // consistent rather than offering a combination with no results.
     catSelect.addEventListener('change', function () { fillCompetitions(compSelect, catSelect.value, ''); });
 
-    T.fetchFeed({}).then(function (data) {
+    T.index().then(function (data) {
       indexData = data;
       data.categories.forEach(function (c) {
         catSelect.appendChild(T.el('option', { value: c.slug, text: c.label + ' (' + c.events + ')' }));

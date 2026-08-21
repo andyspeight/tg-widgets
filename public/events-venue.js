@@ -14,6 +14,7 @@
   var T = window.TGEvents;
   var main = document.getElementById('main');
   T.mountChrome('events-venue.html');
+  T.mountSidebar({ page: 'events-venue.html' });
 
   function render() {
     var key = T.param('key');
@@ -23,6 +24,7 @@
   function renderDirectory() {
     document.title = 'Venues — Events Explorer — Travelgenix';
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     main.appendChild(T.el('h1', { text: 'Venues' }));
     main.appendChild(T.el('p', {
       class: 'ev-lede',

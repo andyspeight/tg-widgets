@@ -100,16 +100,59 @@ carries both id spaces plus every spelling seen.
 
 ## Surfacing it: the Events Explorer
 
-Five pages on `tg-widgets`, all reading `/api/events-feed`, all deep-linkable.
+Six pages on `tg-widgets`, all reading `/api/events-feed`, all deep-linkable.
 Prototypes, so no editor, no registry entry and no Airtable WidgetType.
 
 | Route | What it is |
 |---|---|
-| `/events` | Hub: counts, the four surfaces, and the diagnostics below |
+| `/events` | Hub: counts, the surfaces, and the diagnostics below |
 | `/events-league` | Competitions, then a club grid, then that club's fixtures |
 | `/events-venue` | Venue directory and what is on at one ground |
 | `/events-artist` | Artist directory and tour dates grouped by month |
 | `/events-browse` | The whole feed with date, category, competition and text filters |
+| `/events-search` | One box over everything, results grouped by kind |
+
+### The side menu
+
+Every page carries a competition menu down the left: one row per competition,
+the country after the name ("Premier League - England"), a count, and a chevron.
+Grouped by sport with football first, busiest competition first inside each
+sport. The current competition is highlighted, and the league page moves that
+highlight without rebuilding the menu, so a search you have half-typed survives
+changing league.
+
+At 1024px and up it is a sticky column beside the content. Below that it is an
+off-canvas drawer behind a "Browse competitions" button, because 89 rows down
+the side of a phone would bury the page they are meant to be navigating.
+Escape closes it and focus returns to the button that opened it.
+
+The country comes from `supplier-taxonomy.js`, which now carries one per
+competition where there is a sensible answer — 48 of 89. It is the country a
+customer would look under rather than a strict list: MLS and the NHL both have
+Canadian clubs and are still filed under USA. International competitions have
+none and show their label alone.
+
+### Search
+
+`?view=search&q=` runs one term against the four registries AND the events, and
+returns them grouped rather than interleaved:
+
+```
+wembley  -> 2 venues, 17 events (the football AND the concerts)
+arsenal  -> 1 club, 41 events (home and away)
+madrid   -> 2 clubs, 3 venues, 136 events
+olivia   -> 1 artist, 88 dates
+```
+
+Entities are matched on their canonical name and every alias, so "Arsenal FC"
+finds the club the feed also writes as "Arsenal", and events are matched on the
+rehydrated names for the same reason. A near-exact name outranks a substring
+buried in a longer one, so "Arsenal" leads with Arsenal.
+
+The sidebar box shows suggestions as you type (debounced, arrow keys, Enter);
+Enter with nothing highlighted goes to `/events-search` for the full grouped
+list. Grouping is the point: the useful answer to "Madrid" is "which Madrid did
+you mean", not 136 rows.
 
 `/events-league?competition=english-premier-league` lists the 20 clubs as
 badges, a badge opens that club's fixtures, and every fixture has a Book button.
@@ -135,13 +178,17 @@ is the honest shape for it.
 /api/events-feed?view=venue&key=wembleystadium
 /api/events-feed?view=performer&key=olivia-rodrigo
 /api/events-feed?view=browse&from=&to=&category=&competition=&q=
+/api/events-feed?view=search&q=wembley
 /api/events-feed?view=venues|performers|teams&q=
 /api/events-feed?view=diagnostics
 ```
 
 Add `&appId=` for a client's own Travelify application, `&currency=` and
-`&adults=` to change the booking link. Read-only, rate limited on the shared
-widgetRead bucket, every parameter validated and page size capped at 100.
+`&adults=` to change the booking link. Read-only, every parameter validated,
+page size capped at 100, and rate limited on its own 300-per-15-minutes bucket
+rather than the shared widgetRead one: a browsing UI with a typeahead is
+chattier than a widget boot, and responses are CDN-cached for an hour so in
+production most requests never reach the function.
 
 The snapshot drops anything the registries already hold and the API rehydrates
 it from the entity key on the way out. That is what gives every page one

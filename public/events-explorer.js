@@ -64,6 +64,9 @@
     moon: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z',
     back: 'M19 12H5 M12 19l-7-7 7-7',
     users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
+    chevron: 'M9 18l6-6-6-6',
+    menu: 'M3 12h18 M3 6h18 M3 18h18',
+    close: 'M18 6 6 18 M6 6l12 12',
   };
 
   function icon(name, extraClass) {
@@ -135,6 +138,19 @@
       }
       return r.json();
     });
+  }
+
+  /**
+   * The index is wanted by both the page and the side menu on every load.
+   * Memoised so that is one request, not two. A failure is not cached, so a
+   * retry can actually retry.
+   */
+  var indexPromise = null;
+  function index() {
+    if (!indexPromise) {
+      indexPromise = fetchFeed({}).catch(function (err) { indexPromise = null; throw err; });
+    }
+    return indexPromise;
   }
 
   // ── State renderers ──────────────────────────────────────────────────────
@@ -271,6 +287,7 @@
     { href: 'events-venue.html', label: 'Venues', icon: 'pin' },
     { href: 'events-artist.html', label: 'Artists', icon: 'music' },
     { href: 'events-browse.html', label: "What's on", icon: 'calendar' },
+    { href: 'events-search.html', label: 'Search', icon: 'search' },
   ];
 
   function mountChrome(current) {
@@ -304,6 +321,327 @@
     top.appendChild(el('div', { style: 'display:flex;align-items:center;gap:8px;flex-wrap:wrap' }, [nav, toggle]));
   }
 
+
+  // ── Side menu ────────────────────────────────────────────────────────────
+
+  /**
+   * The competition menu, on every page.
+   *
+   * Modelled on the way a travel site lists its football trips: one row per
+   * competition, the country after the name, a chevron to say it goes
+   * somewhere. Grouped by sport with football first, because football is 58% of
+   * the feed and burying the Premier League under Athletics would be perverse.
+   *
+   * A drawer below 1024px. Escape closes it, focus returns to the button that
+   * opened it, and the backdrop is a real button so it is reachable without a
+   * mouse.
+   */
+  var sidebarMounted = false;
+
+  /**
+   * Move the highlight without rebuilding. The league page changes competition
+   * without a page load, and re-mounting would throw away whatever the visitor
+   * had typed in the search box and re-request the index.
+   */
+  function setSidebarActive(competitionSlug) {
+    var links = document.querySelectorAll('.ev-side-scroll .ev-side-link');
+    for (var i = 0; i < links.length; i++) {
+      var slug = links[i].getAttribute('data-competition') || '';
+      if (slug && slug === competitionSlug) links[i].setAttribute('aria-current', 'page');
+      else links[i].removeAttribute('aria-current');
+    }
+  }
+
+  function mountSidebar(options) {
+    var opts = options || {};
+    var side = document.getElementById('ev-side');
+    if (!side) return;
+    if (sidebarMounted) { setSidebarActive(opts.competition || ''); return; }
+    sidebarMounted = true;
+
+    clear(side);
+
+    var searchHost = el('div', { class: 'ev-search' });
+    var head = el('div', { class: 'ev-side-head' }, [
+      el('h2', { text: 'Browse' }),
+      el('button', {
+        class: 'ev-side-close',
+        type: 'button',
+        'aria-label': 'Close menu',
+        onclick: closeSidebar,
+      }, [icon('close')]),
+    ]);
+    var scroll = el('div', { class: 'ev-side-scroll' });
+
+    side.appendChild(head);
+    side.appendChild(searchHost);
+    side.appendChild(scroll);
+    mountSearch(searchHost);
+
+    // Backdrop and toggle live outside the aside so the drawer can slide over
+    // the page rather than pushing it.
+    if (!document.querySelector('.ev-side-backdrop')) {
+      document.body.appendChild(el('button', {
+        class: 'ev-side-backdrop',
+        type: 'button',
+        tabindex: '-1',
+        'aria-label': 'Close menu',
+        onclick: closeSidebar,
+      }));
+    }
+
+    scroll.appendChild(el('a', {
+      class: 'ev-side-link ev-side-all',
+      href: 'events-league.html',
+      'aria-current': opts.competition || opts.page !== 'events-league.html' ? null : 'page',
+    }, [
+      el('span', { class: 'ev-side-label', text: 'All competitions' }),
+      icon('chevron', 'ev-side-chev'),
+    ]));
+
+    index().then(function (data) {
+      var byCategory = {};
+      data.competitions.forEach(function (c) {
+        (byCategory[c.category] = byCategory[c.category] || []).push(c);
+      });
+      data.categories.forEach(function (cat) {
+        var list = byCategory[cat.slug];
+        if (!list || !list.length) return;
+        // Busiest first inside a sport: that is the order someone scans for.
+        list = list.slice().sort(function (a, b) { return b.events - a.events; });
+        scroll.appendChild(el('div', { class: 'ev-side-group', text: cat.label }));
+        list.forEach(function (c) {
+          scroll.appendChild(el('a', {
+            class: 'ev-side-link',
+            'data-competition': c.slug,
+            href: 'events-league.html?competition=' + encodeURIComponent(c.slug),
+            'aria-current': c.slug === opts.competition ? 'page' : null,
+            title: c.label + (c.country ? ' - ' + c.country : '') + ' · ' + plural(c.events, 'event'),
+          }, [
+            el('span', { class: 'ev-side-label' }, [
+              c.label,
+              c.country ? el('span', { class: 'ev-side-country', text: ' - ' + c.country }) : null,
+            ]),
+            el('span', { class: 'ev-side-count', text: String(c.events) }),
+            icon('chevron', 'ev-side-chev'),
+          ]));
+        });
+      });
+    }).catch(function (err) {
+      scroll.appendChild(el('div', { class: 'ev-suggest-empty', text: 'Menu did not load: ' + err.message }));
+    });
+  }
+
+  var sidebarOpener = null;
+
+  function openSidebar(fromButton) {
+    sidebarOpener = fromButton || null;
+    document.body.setAttribute('data-side', 'open');
+    if (fromButton) fromButton.setAttribute('aria-expanded', 'true');
+    var first = document.querySelector('.ev-side .ev-side-close');
+    if (first) first.focus();
+  }
+
+  function closeSidebar() {
+    document.body.removeAttribute('data-side');
+    var toggle = document.querySelector('.ev-side-toggle');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    if (sidebarOpener) { sidebarOpener.focus(); sidebarOpener = null; }
+  }
+
+  /** The button that opens the drawer. Rendered above the page content. */
+  function sidebarToggle() {
+    var btn = el('button', {
+      class: 'ev-side-toggle',
+      type: 'button',
+      'aria-expanded': 'false',
+      'aria-controls': 'ev-side',
+    }, [icon('menu'), 'Browse competitions']);
+    btn.addEventListener('click', function () {
+      if (document.body.getAttribute('data-side') === 'open') closeSidebar();
+      else openSidebar(btn);
+    });
+    return btn;
+  }
+
+  // ── Search ───────────────────────────────────────────────────────────────
+
+  /**
+   * One box over everything.
+   *
+   * Typing "Wembley" should surface the ground and both the football and the
+   * concerts at it; "Arsenal" should surface the club and its games home and
+   * away. The suggestions show the entities, Enter goes to the full results.
+   *
+   * Built as a combobox: aria-expanded on the input, a listbox of options, and
+   * arrow keys that move an aria-activedescendant rather than the focus, so the
+   * typed text stays where it is.
+   */
+  function mountSearch(host, initialValue) {
+    var input = el('input', {
+      type: 'search',
+      id: 'ev-q',
+      placeholder: 'Search teams, venues, artists…',
+      autocomplete: 'off',
+      role: 'combobox',
+      'aria-expanded': 'false',
+      'aria-controls': 'ev-suggest',
+      'aria-autocomplete': 'list',
+      'aria-label': 'Search everything',
+      value: initialValue || '',
+    });
+    var panel = el('div', { class: 'ev-suggest', id: 'ev-suggest', role: 'listbox', 'aria-label': 'Search suggestions', hidden: true });
+
+    host.appendChild(el('div', { class: 'ev-search-field' }, [icon('search'), input]));
+    host.appendChild(panel);
+
+    var options = [];
+    var activeIndex = -1;
+
+    function close() {
+      panel.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      activeIndex = -1;
+    }
+
+    function setActive(i) {
+      if (!options.length) return;
+      if (activeIndex >= 0 && options[activeIndex]) options[activeIndex].classList.remove('is-active');
+      activeIndex = (i + options.length) % options.length;
+      var node = options[activeIndex];
+      node.classList.add('is-active');
+      input.setAttribute('aria-activedescendant', node.id);
+      node.scrollIntoView({ block: 'nearest' });
+    }
+
+    function goToResults() {
+      var term = input.value.trim();
+      if (term) global.location.href = 'events-search.html?q=' + encodeURIComponent(term);
+    }
+
+    function group(label) { return el('div', { class: 'ev-suggest-group', text: label }); }
+
+    function option(entity, href, meta, i) {
+      var node = el('a', {
+        class: 'ev-suggest-item',
+        id: 'ev-sug-' + i,
+        role: 'option',
+        href: href,
+        'aria-selected': 'false',
+      }, [
+        badge(entity),
+        el('span', { class: 'ev-suggest-name', text: entity.name }),
+        el('span', { class: 'ev-suggest-meta', text: meta }),
+      ]);
+      options.push(node);
+      return node;
+    }
+
+    var run = debounce(function () {
+      var term = input.value.trim();
+      if (term.length < 2) { close(); return; }
+      fetchFeed({ view: 'search', q: term, limit: 1 }).then(function (data) {
+        if (input.value.trim() !== term) return;   // a later keystroke won
+        clear(panel);
+        options = [];
+        activeIndex = -1;
+        var i = 0;
+
+        function section(label, items, hrefFor, metaFor) {
+          if (!items || !items.length) return;
+          panel.appendChild(group(label));
+          items.slice(0, 4).forEach(function (x) {
+            panel.appendChild(option(x, hrefFor(x), metaFor(x), i++));
+          });
+        }
+
+        section('Competitions', data.competitions.map(function (c) {
+          return { name: c.label + (c.country ? ' - ' + c.country : ''), initials: initialsOf(c.label), hue: hashHue(c.slug), slug: c.slug };
+        }), function (c) { return 'events-league.html?competition=' + encodeURIComponent(c.slug); },
+        function () { return 'League'; });
+
+        // A club page needs a competition alongside the team, because that is
+        // the tab it opens on. A club with none (an event whose competition the
+        // feed never gave) falls back to the full results rather than a link
+        // that would quietly land on the competition index.
+        section('Clubs', data.teams, function (t) {
+          if (!t.competitions || !t.competitions.length) return 'events-search.html?q=' + encodeURIComponent(t.name);
+          return 'events-league.html?competition=' + encodeURIComponent(t.competitions[0])
+            + '&team=' + encodeURIComponent(t.key);
+        }, function (t) { return plural(t.events, 'game'); });
+
+        section('Venues', data.venues, function (v) {
+          return 'events-venue.html?key=' + encodeURIComponent(v.key);
+        }, function (v) { return plural(v.events, 'event'); });
+
+        section('Artists', data.performers, function (p) {
+          return 'events-artist.html?key=' + encodeURIComponent(p.key);
+        }, function (p) { return plural(p.events, 'date'); });
+
+        if (!options.length && !data.total) {
+          panel.appendChild(el('div', { class: 'ev-suggest-empty', text: 'Nothing matches “' + term + '”' }));
+        } else {
+          var all = el('a', {
+            class: 'ev-suggest-item ev-suggest-all',
+            id: 'ev-sug-' + i,
+            role: 'option',
+            href: 'events-search.html?q=' + encodeURIComponent(term),
+            'aria-selected': 'false',
+          }, [
+            el('span', { class: 'ev-suggest-name', text: 'See all results for “' + term + '”' }),
+            el('span', { class: 'ev-suggest-meta', text: plural(data.total, 'event') }),
+          ]);
+          options.push(all);
+          panel.appendChild(all);
+        }
+
+        panel.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      }).catch(function () { close(); });
+    }, 250);
+
+    input.addEventListener('input', run);
+    input.addEventListener('focus', function () { if (input.value.trim().length >= 2 && options.length) { panel.hidden = false; input.setAttribute('aria-expanded', 'true'); } });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (panel.hidden) run(); else setActive(activeIndex + 1); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIndex - 1); return; }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (activeIndex >= 0 && options[activeIndex]) options[activeIndex].click();
+        else goToResults();
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!host.contains(e.target)) close();
+    });
+
+    return input;
+  }
+
+  // Competitions have no stored badge, so the menu and the suggestions derive
+  // one the same way the registries do. Same hash, same colour everywhere.
+  function initialsOf(name) {
+    var words = String(name || '').split(/[\s.]+/).filter(function (w) {
+      return w && !/^(the|of|and|de|cup|league)$/i.test(w);
+    });
+    if (!words.length) return '??';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  function hashHue(key) {
+    var h = 0x811c9dc5;
+    var s = String(key);
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h % 360;
+  }
+
   var THEME_KEY = 'tgev_theme';
 
   function applyTheme(theme) {
@@ -323,6 +661,10 @@
     applyTheme(next);
     try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* private mode */ }
   }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.body.getAttribute('data-side') === 'open') closeSidebar();
+  });
 
   function initTheme() {
     var stored = null;
@@ -388,10 +730,17 @@
     eventCard: eventCard,
     entityTile: entityTile,
     fetchFeed: fetchFeed,
+    index: index,
     showSkeleton: showSkeleton,
     showEmpty: showEmpty,
     showError: showError,
     mountChrome: mountChrome,
+    mountSidebar: mountSidebar,
+    setSidebarActive: setSidebarActive,
+    mountSearch: mountSearch,
+    sidebarToggle: sidebarToggle,
+    initialsOf: initialsOf,
+    hashHue: hashHue,
     initTheme: initTheme,
     crumbs: crumbs,
     deeplinkNotice: deeplinkNotice,

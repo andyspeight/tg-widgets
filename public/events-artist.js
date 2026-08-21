@@ -15,6 +15,7 @@
   var T = window.TGEvents;
   var main = document.getElementById('main');
   T.mountChrome('events-artist.html');
+  T.mountSidebar({ page: 'events-artist.html' });
 
   function render() {
     var key = T.param('key');
@@ -24,6 +25,7 @@
   function renderDirectory() {
     document.title = 'Artists — Events Explorer — Travelgenix';
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     main.appendChild(T.el('h1', { text: 'Artists' }));
     main.appendChild(T.el('p', {
       class: 'ev-lede',

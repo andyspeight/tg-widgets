@@ -18,7 +18,11 @@
   var main = document.getElementById('main');
   T.mountChrome('events-league.html');
 
+  T.mountSidebar({ page: 'events-league.html', competition: T.param('competition') });
+  function syncSidebar() { T.setSidebarActive(T.param('competition')); }
+
   function render() {
+    syncSidebar();
     var competition = T.param('competition');
     var team = T.param('team');
     if (team && competition) return renderTeam(competition, team);
@@ -31,6 +35,7 @@
   function renderIndex() {
     document.title = 'Competitions — Events Explorer — Travelgenix';
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     main.appendChild(T.el('h1', { text: 'Competitions' }));
     main.appendChild(T.el('p', {
       class: 'ev-lede',
@@ -41,7 +46,7 @@
     main.appendChild(host);
     T.showSkeleton(host, 6);
 
-    T.fetchFeed({}).then(function (data) {
+    T.index().then(function (data) {
       T.clear(host);
       var notice = T.deeplinkNotice(data.meta);
       if (notice) host.appendChild(notice);
@@ -90,6 +95,7 @@
 
   function renderCompetition(slug) {
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     var host = T.el('div', {});
     main.appendChild(host);
     T.showSkeleton(host, 5);
@@ -176,6 +182,7 @@
 
   function renderTeam(competition, teamKey) {
     T.clear(main);
+    main.appendChild(T.sidebarToggle());
     var host = T.el('div', {});
     main.appendChild(host);
     T.showSkeleton(host, 5);
