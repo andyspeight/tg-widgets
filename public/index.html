@@ -884,6 +884,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'nextevent',
+    name: 'Next Event',
+    airtableType: 'Next Event',  // matches Airtable WidgetType singleSelect option
+    description: 'A single card showing the next fixture, gig or race for a club, venue or artist — with a live countdown and a booking link. The smallest embed in the ticket set and the easiest to find room for.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'},
+    color: '#6366F1',
+    editorUrl: '/editor-nextevent',
+    demoUrl: '/demo-nextevent',
+    widgetTag: 'nextevent',
+    scriptFile: 'widget-nextevent.js',
+    access: { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'offers',
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
@@ -3113,6 +3128,10 @@ function loadMiniPreview(w) {
     });
   }
 
+  if (w.id === 'nextevent' && window.TGNextEventWidget) {
+    new window.TGNextEventWidget(el, { sourceType: 'team', sourceValue: 'arsenal', side: 'home', layout: 'card', label: 'Next up', showCountdown: true, accent: w.color, theme: 'light', appId: '250' });
+  }
+
   if (w.id === 'tickets' && window.TGTicketsWidget) {
     new window.TGTicketsWidget(el, {
       sourceType: 'competition', sourceValue: 'english-premier-league',
@@ -4383,6 +4402,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
 <script src="/widget-tickets.js"></script>
+<script src="/widget-nextevent.js"></script>
 <script src="/widget-share.js"></script>
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>

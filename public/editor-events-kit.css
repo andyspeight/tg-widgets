@@ -1,0 +1,153 @@
+/**
+ * Editor kit — shared controls for the ticket widget family.
+ *
+ * Used by editor-tickets, editor-nextevent, editor-clubpicker,
+ * editor-ticketsearch, editor-ticketmonth and editor-eventmenu.
+ *
+ * These are the inner controls the unified shell deliberately does NOT provide:
+ * inputs, switches, sliders, segmented buttons, the source picker and the
+ * booking-option list. The shell owns the chrome (sidebar, tabs, sections,
+ * save, preview); everything here lives inside a .tgse-section-body.
+ *
+ * Everything derives from --tgse-* tokens. Nothing here redeclares them.
+ */
+
+.input, .select, .textarea {
+  width: 100%; min-height: 38px; padding: 8px 10px;
+  font: inherit; font-size: 13px; color: var(--tgse-ink);
+  background: var(--tgse-panel); border: 1px solid var(--tgse-border);
+  border-radius: var(--tgse-radius-md);
+}
+.textarea { min-height: 68px; resize: vertical; }
+.input:focus, .select:focus, .textarea:focus {
+  outline: none; border-color: var(--tgse-brand);
+  box-shadow: 0 0 0 3px var(--tgse-brand-tint);
+}
+.field-help { font-size: 11.5px; color: var(--tgse-ink-3); margin-top: 5px; line-height: 1.45; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Segmented control, for small mutually-exclusive choices. */
+.seg { display: flex; gap: 4px; background: var(--tgse-panel-3); padding: 3px; border-radius: var(--tgse-radius-md); }
+.seg button {
+  flex: 1; min-height: 32px; padding: 0 8px; border: 0; border-radius: var(--tgse-radius-sm);
+  background: transparent; color: var(--tgse-ink-2);
+  font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.seg button:hover { color: var(--tgse-ink); }
+.seg button[aria-pressed="true"] { background: var(--tgse-panel); color: var(--tgse-ink); font-weight: 600; box-shadow: var(--tgse-shadow-sm); }
+.seg button:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: 1px; }
+
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--tgse-border);
+}
+.toggle-row:last-child { border-bottom: 0; }
+.toggle-label { font-size: 13px; color: var(--tgse-ink); }
+.toggle-sub { font-size: 11.5px; color: var(--tgse-ink-3); margin-top: 2px; }
+.switch {
+  flex: none; width: 40px; height: 23px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--tgse-border-strong); position: relative; transition: background .16s ease-out;
+}
+.switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 19px; height: 19px;
+  border-radius: 50%; background: #fff; transition: transform .16s ease-out;
+  box-shadow: var(--tgse-shadow-sm);
+}
+.switch.is-on { background: var(--tgse-brand); }
+.switch.is-on::after { transform: translateX(17px); }
+.switch:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: 2px; }
+
+.colour-row { display: flex; align-items: center; gap: 8px; }
+.colour-row input[type="color"] {
+  width: 38px; height: 38px; padding: 2px; border: 1px solid var(--tgse-border);
+  border-radius: var(--tgse-radius-md); background: var(--tgse-panel); cursor: pointer;
+}
+.colour-row .input { flex: 1; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+.slider-wrap { display: flex; align-items: center; gap: 10px; }
+.slider-wrap input[type="range"] { flex: 1; accent-color: var(--tgse-brand); }
+.slider-val {
+  min-width: 46px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums;
+  color: var(--tgse-ink-2);
+}
+
+/* ── Source picker ────────────────────────────────────────────────────────
+   The most important control in this family. Nobody should have to know that
+   Arsenal's key is "arsenal", so the value is chosen from a live search of the
+   feed rather than typed. */
+.picked {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border: 1px solid var(--tgse-brand);
+  background: var(--tgse-brand-tint); border-radius: var(--tgse-radius-md);
+}
+.picked-body { flex: 1; min-width: 0; }
+.picked-name { font-size: 13px; font-weight: 600; color: var(--tgse-ink); }
+.picked-meta { font-size: 11.5px; color: var(--tgse-ink-3); }
+.picked button {
+  flex: none; border: 0; background: none; cursor: pointer; padding: 4px;
+  color: var(--tgse-ink-3); font: inherit; font-size: 12px; text-decoration: underline;
+}
+.picked button:hover { color: var(--tgse-ink); }
+
+.results {
+  margin-top: 6px; max-height: 220px; overflow-y: auto;
+  border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md);
+  background: var(--tgse-panel);
+}
+.results:empty { display: none; }
+.result {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 8px 11px; border: 0; border-bottom: 1px solid var(--tgse-border);
+  background: none; text-align: left; font: inherit; cursor: pointer; color: var(--tgse-ink);
+}
+.result:last-child { border-bottom: 0; }
+.result:hover { background: var(--tgse-hover); }
+.result:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: -2px; }
+.result-badge {
+  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; letter-spacing: .02em;
+}
+.result-body { min-width: 0; flex: 1; }
+.result-name { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-meta { font-size: 11px; color: var(--tgse-ink-3); }
+.results-note { padding: 10px 11px; font-size: 12px; color: var(--tgse-ink-3); }
+
+/* ── Booking options ─────────────────────────────────────────────────────
+   Three combinations, two of them awaiting their Travelify spec. They are
+   listed and disabled rather than hidden, so the agent can see what is coming. */
+.book-opt {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--tgse-border);
+}
+.book-opt:last-child { border-bottom: 0; }
+.book-opt.is-pending { opacity: .62; }
+.book-opt input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--tgse-brand); }
+.book-opt-body { flex: 1; min-width: 0; }
+.book-opt-name { font-size: 13px; color: var(--tgse-ink); font-weight: 500; }
+.book-opt-note { font-size: 11.5px; color: var(--tgse-ink-3); margin-top: 2px; }
+.pending-pill {
+  display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--tgse-warning) 16%, transparent);
+  color: var(--tgse-warning); font-size: 10.5px; font-weight: 600;
+}
+
+.tpl-list { display: flex; flex-direction: column; gap: 8px; }
+.tpl-card {
+  display: block; width: 100%; text-align: left; padding: 12px 14px;
+  border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md);
+  background: var(--tgse-panel); cursor: pointer; font: inherit;
+}
+.tpl-card:hover { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+.tpl-name { font-size: 13.5px; font-weight: 600; color: var(--tgse-ink); }
+.tpl-desc { font-size: 12px; color: var(--tgse-ink-3); margin-top: 2px; }
+
+/* A widget flows full width, but a real page never gives it the whole
+   viewport. The stage reflects where it would actually sit. */
+.pv-stage { width: 100%; max-width: 760px; margin: 0 auto; padding: 24px; }
+.pv-stage--narrow { max-width: 380px; }
+.pv-stage--wide { max-width: 980px; }
+
+/* The shell already ships this, but a per-editor stylesheet can out-specify
+   it, and [hidden] losing to a class is a bug that hides nothing. */
+[hidden] { display: none !important; }
