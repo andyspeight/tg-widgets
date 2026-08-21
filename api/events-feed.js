@@ -37,7 +37,7 @@
 
 import { readFileSync } from 'node:fs';
 import { setCors, applyRateLimit } from './_auth.js';
-import { buildEventDeeplink, DEEPLINK_STATUS_TEXT, SPEC_VERIFIED } from './_lib/events/event-deeplink.js';
+import { buildEventDeeplink, buildBookingOptions, readyBookingKinds, BOOKING_KINDS, DEEPLINK_STATUS_TEXT, SPEC_VERIFIED } from './_lib/events/event-deeplink.js';
 
 // The published Travelgenix demo Travelify application. Travelify document it
 // themselves, so it is safe to ship as the prototype default. A real embed
@@ -116,7 +116,7 @@ function teamName(snap, key) {
  * Expand a short snapshot row into a full event, filling in every display name
  * from the registries and attaching a booking deeplink.
  */
-function expand(snap, ev, appId, currency, adults) {
+function expand(snap, ev, appId, currency, adults, bookingKinds) {
   const home = teamName(snap, ev.hk);
   const away = teamName(snap, ev.ak);
   const performer = ev.pk ? (snap.performerByKey.get(ev.pk) || {}).name || null : null;
@@ -163,7 +163,8 @@ function expand(snap, ev, appId, currency, adults) {
     sources,
   };
 
-  const link = buildEventDeeplink({ sources, startDate: ev.dt, title }, { appId, currency, adults });
+  const target = { sources, startDate: ev.dt, title };
+  const link = buildEventDeeplink(target, { appId, currency, adults });
   out.booking = {
     url: link.url,
     status: link.status,
@@ -172,6 +173,10 @@ function expand(snap, ev, appId, currency, adults) {
     reference: link.reference,
     note: DEEPLINK_STATUS_TEXT[link.status] || null,
   };
+  // Every way this event can be bought, in the order the caller asked for.
+  // A ticket sold with a hotel is worth more to an agent than a ticket, so the
+  // surfaces need all of them rather than one Book button.
+  out.bookingOptions = buildBookingOptions(target, { appId, currency, adults, kinds: bookingKinds });
   return out;
 }
 
@@ -195,6 +200,18 @@ function chronological(a, b) {
   return a.d < b.d ? -1 : a.d > b.d ? 1 : a.i < b.i ? -1 : 1;
 }
 
+/**
+ * Narrow a set of rows to a date window. Applied to the entity views as well as
+ * browse, because a club widget on a client's site wants "the next six games",
+ * not every game in the snapshot.
+ */
+function windowRows(rows, from, to) {
+  let out = rows;
+  if (DATE_RE.test(from)) out = out.filter((e) => e.dt >= from);
+  if (DATE_RE.test(to)) out = out.filter((e) => e.dt <= to);
+  return out;
+}
+
 /** Page a sorted list and expand only the slice being returned. */
 function page(snap, rows, q, appId, opts = {}) {
   const size = intIn(q.limit, 1, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE);
@@ -204,7 +221,7 @@ function page(snap, rows, q, appId, opts = {}) {
     total: sorted.length,
     offset,
     limit: size,
-    events: sorted.slice(offset, offset + size).map((e) => expand(snap, e, appId, opts.currency, opts.adults)),
+    events: sorted.slice(offset, offset + size).map((e) => expand(snap, e, appId, opts.currency, opts.adults, opts.bookingKinds)),
   };
 }
 
@@ -244,12 +261,20 @@ export default function handler(req, res) {
     // the right prices without a rebuild. Both revalidated in the builder.
     const currency = /^[A-Za-z]{3}$/.test(str(q.currency, 3)) ? str(q.currency, 3).toUpperCase() : undefined;
     const adults = q.adults !== undefined ? intIn(q.adults, 1, 20, undefined) : undefined;
-    const linkOpts = { currency, adults };
+    // Which booking combinations to build per event. Unknown names are dropped
+    // by the builder, and anything without a verified spec yields no url, so a
+    // caller can ask for all three today and get more back later for free.
+    const kindsRaw = str(q.booking, 120);
+    const bookingKinds = kindsRaw
+      ? kindsRaw.split(',').map((k) => k.trim()).filter(Boolean).slice(0, 6)
+      : readyBookingKinds();
+    const linkOpts = { currency, adults, bookingKinds };
 
     const meta = {
       generatedAt: snap.generatedAt,
       counts: snap.counts,
       deeplinkVerified: SPEC_VERIFIED,
+      bookingKinds: BOOKING_KINDS.map((k) => ({ kind: k.kind, label: k.label, short: k.short, ready: k.ready })),
     };
 
     res.setHeader('Cache-Control', PUBLIC_CACHE);
@@ -280,7 +305,7 @@ export default function handler(req, res) {
       if (!KEY_RE.test(slug)) { res.status(400).json({ error: 'Invalid competition' }); return; }
       const comp = snap.competitionBySlug.get(slug);
       if (!comp) { res.status(404).json({ error: 'Unknown competition' }); return; }
-      const rows = snap.byCompetition.get(slug) || [];
+      const rows = windowRows(snap.byCompetition.get(slug) || [], str(q.from, 10), str(q.to, 10));
       const teams = snap.teams
         .filter((t) => t.competitions.includes(slug))
         .sort((a, b) => (a.name < b.name ? -1 : 1));
@@ -297,6 +322,12 @@ export default function handler(req, res) {
       let rows = snap.byTeam.get(key) || [];
       const compFilter = str(q.competition, 80).toLowerCase();
       if (KEY_RE.test(compFilter)) rows = rows.filter((e) => e.o === compFilter);
+      // Home or away. A club widget on the club's own site usually wants home
+      // games only, because those are the ones its customers travel to.
+      const side = str(q.side, 8).toLowerCase();
+      if (side === 'home') rows = rows.filter((e) => e.hk === key);
+      else if (side === 'away') rows = rows.filter((e) => e.ak === key);
+      rows = windowRows(rows, str(q.from, 10), str(q.to, 10));
       res.status(200).json({
         meta,
         team,
@@ -314,7 +345,7 @@ export default function handler(req, res) {
       if (!KEY_RE.test(key)) { res.status(400).json({ error: 'Invalid venue' }); return; }
       const venue = snap.venueByKey.get(key);
       if (!venue) { res.status(404).json({ error: 'Unknown venue' }); return; }
-      res.status(200).json({ meta, venue, ...page(snap, snap.byVenue.get(key) || [], q, appId, linkOpts) });
+      res.status(200).json({ meta, venue, ...page(snap, windowRows(snap.byVenue.get(key) || [], str(q.from, 10), str(q.to, 10)), q, appId, linkOpts) });
       return;
     }
 
@@ -324,7 +355,7 @@ export default function handler(req, res) {
       if (!KEY_RE.test(key)) { res.status(400).json({ error: 'Invalid performer' }); return; }
       const performer = snap.performerByKey.get(key);
       if (!performer) { res.status(404).json({ error: 'Unknown performer' }); return; }
-      res.status(200).json({ meta, performer, ...page(snap, snap.byPerformer.get(key) || [], q, appId, linkOpts) });
+      res.status(200).json({ meta, performer, ...page(snap, windowRows(snap.byPerformer.get(key) || [], str(q.from, 10), str(q.to, 10)), q, appId, linkOpts) });
       return;
     }
 

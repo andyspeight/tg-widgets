@@ -421,6 +421,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Email Signature',
   'Group Trips',
   'Escorted Tour',
+  'Event Tickets',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -430,6 +431,9 @@ const ALLOWED_WIDGET_TYPES = [
 // KEEP IN SYNC with the WIDGETS array in public/index.html. If these drift,
 // the dashboard will show one limit while the API enforces another.
 const PLAN_WIDGET_LIMITS = {
+  // Ticket inventory is premium, revenue-bearing content, so it is gated
+  // harder than the average widget. Boost and up.
+  'Event Tickets':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
   'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Google Reviews':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
@@ -812,7 +816,9 @@ export default async function handler(req, res) {
         // client's AppID (the demo-account deeplinks in the shared cache are
         // rewritten to the client's own AppID). It does NOT call Travelify
         // directly, so it never needs the API key — inject the AppID alone.
-        if ((widgetType === 'Travel Offers' || widgetType === 'World Map') && clientEmail) {
+        // Event Tickets is the same case: it builds ticket deeplinks against
+        // the client's own application and never calls Travelify itself.
+        if ((widgetType === 'Travel Offers' || widgetType === 'World Map' || widgetType === 'Event Tickets') && clientEmail) {
           try {
             const creds = await lookupClientCredentialsByEmail(clientEmail);
             if (creds) {

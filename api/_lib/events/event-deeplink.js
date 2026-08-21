@@ -164,6 +164,110 @@ export function buildEventDeeplink(event, options = {}) {
   };
 }
 
+// ── Booking options: ticket, ticket + hotel, ticket + flight + hotel ────────
+//
+// A Book button is the wrong shape for this product. An agent earns far more on
+// a ticket sold with a hotel than on a ticket alone, so every event needs to be
+// bookable three ways and the widget needs to offer all three.
+//
+// Only the ticket-only link is built here, because it is the only one of the
+// three we have a verified example of. The other two are declared with
+// `ready: false` and return a null url with status 'spec-needed', so:
+//
+//   - a surface can render exactly the options that work and silently omit the
+//     rest, rather than showing a button that dead-ends
+//   - an editor can list all three and mark the unavailable ones
+//   - when the two remaining Travelify examples arrive, filling in `build` on
+//     each entry below lights them up everywhere at once, with no change to any
+//     widget, editor or API
+//
+// That last point is the whole reason this is a table rather than an if-else.
+
+export const BOOKING_KINDS = [
+  {
+    kind: 'ticket',
+    label: 'Ticket only',
+    short: 'Ticket',
+    ready: true,
+    build: buildEventDeeplink,
+  },
+  {
+    kind: 'ticket-hotel',
+    label: 'Ticket + hotel',
+    short: '+ Hotel',
+    ready: false,
+    // Awaiting a live example. Expect an accommodation search type plus nights
+    // and a destination alongside the same supp/refe pin.
+    build: null,
+  },
+  {
+    kind: 'ticket-flight-hotel',
+    label: 'Ticket, flight + hotel',
+    short: '+ Flight & hotel',
+    ready: false,
+    // Awaiting a live example. Expect a packaging search type plus an origin
+    // airport, which no other option needs and the feed does not carry — it
+    // will have to come from widget config.
+    build: null,
+  },
+];
+
+const KIND_BY_NAME = new Map(BOOKING_KINDS.map((k) => [k.kind, k]));
+
+/**
+ * Build every booking option a surface asked for.
+ *
+ * @param {object} event A normalised event with `sources` and `startDate`.
+ * @param {object} [options] Passed through to each builder. Adds:
+ *   @param {string[]} [options.kinds] Which options to build, in order.
+ *     Defaults to ticket only.
+ *   @param {boolean} [options.includeUnavailable] Return entries for options
+ *     that cannot be built yet. A widget wants false, an editor wants true.
+ * @returns {Array<{kind, label, short, url, status, reason}>}
+ */
+export function buildBookingOptions(event, options = {}) {
+  const { kinds = ['ticket'], includeUnavailable = false } = options;
+  const out = [];
+
+  for (const name of kinds) {
+    const def = KIND_BY_NAME.get(name);
+    if (!def) continue;
+
+    if (!def.ready || typeof def.build !== 'function') {
+      if (includeUnavailable) {
+        out.push({
+          kind: def.kind,
+          label: def.label,
+          short: def.short,
+          url: null,
+          status: 'spec-needed',
+          reason: 'Awaiting the Travelify deeplink spec for this combination',
+        });
+      }
+      continue;
+    }
+
+    const link = def.build(event, options);
+    if (!link.url && !includeUnavailable) continue;
+    out.push({
+      kind: def.kind,
+      label: def.label,
+      short: def.short,
+      url: link.url,
+      status: link.status,
+      reason: link.reason,
+      supplier: link.supplier,
+    });
+  }
+
+  return out;
+}
+
+/** Kinds a surface can actually offer today. */
+export function readyBookingKinds() {
+  return BOOKING_KINDS.filter((k) => k.ready && typeof k.build === 'function').map((k) => k.kind);
+}
+
 /**
  * What a surface should tell the user about a link's state. Kept here so the
  * pages, and any future widget, say the same thing.

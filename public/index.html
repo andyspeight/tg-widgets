@@ -869,6 +869,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'tickets',
+    name: 'Event Tickets',
+    airtableType: 'Event Tickets',  // matches Airtable WidgetType singleSelect option
+    description: 'Upcoming bookable events with a Book button — football fixtures, concerts, tour dates. Point one embed at a competition, a club, a venue, an artist or a search term. Booking deeplinks open the client\u2019s own Travelify application.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-tickets',
+    demoUrl: '/demo-tickets',
+    widgetTag: 'tickets',
+    scriptFile: 'widget-tickets.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'offers',
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
@@ -3098,6 +3113,15 @@ function loadMiniPreview(w) {
     });
   }
 
+  if (w.id === 'tickets' && window.TGTicketsWidget) {
+    new window.TGTicketsWidget(el, {
+      sourceType: 'competition', sourceValue: 'english-premier-league',
+      heading: '', limit: 3, layout: 'list',
+      showCompetition: false, showVenue: true, showTime: true,
+      accent: w.color, radius: 12, theme: 'light', appId: '250',
+    });
+  }
+
   if (w.id === 'offers') {
     container.innerHTML = `
       <div style="
@@ -4358,6 +4382,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-events.js"></script>
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
+<script src="/widget-tickets.js"></script>
 <script src="/widget-share.js"></script>
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>
