@@ -78,39 +78,101 @@ function plan() {
 }
 
 async function photon(q) {
-  const r = await fetch(PHOTON + '?q=' + encodeURIComponent(q) + '&limit=1&lang=en', {
+  const r = await fetch(PHOTON + '?q=' + encodeURIComponent(q) + '&limit=5&lang=en', {
     headers: { 'User-Agent': UA },
     signal: AbortSignal.timeout(8000),
   });
-  if (!r.ok) return null;
+  if (!r.ok) return [];
   const d = await r.json();
-  const f = d && d.features && d.features[0];
-  if (!f || !f.geometry) return null;
-  return {
+  return ((d && d.features) || []).filter((f) => f && f.geometry).map((f) => ({
     lng: +f.geometry.coordinates[0].toFixed(5),
     lat: +f.geometry.coordinates[1].toFixed(5),
-    cc: (f.properties && f.properties.countrycode || '').toUpperCase(),
+    cc: ((f.properties && f.properties.countrycode) || '').toUpperCase(),
     label: (f.properties && f.properties.name) || '',
-  };
+    osm: (f.properties && f.properties.osm_value) || '',
+  }));
 }
+
+// "Angel Stadium" must never mean a business library in Alabama just because
+// both are in the US. The first run proved top-1-plus-country is not enough:
+// same-country wrong-city hits sail through. So every candidate is scored
+// against the venue name, and a coordinate with no name evidence is accepted
+// only when independent queries agree on the same spot.
+const norm = (t) => String(t || '').toLowerCase().normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]+/g, ' ')
+  .split(/\s+/).filter(Boolean);
+
+function nameScore(venueName, label) {
+  const a = norm(venueName);
+  const b = norm(label);
+  if (!a.length || !b.length) return 0;
+  const bs = new Set(b);
+  let hit = 0;
+  for (const t of new Set(a)) if (bs.has(t)) hit++;
+  let score = hit / new Set(a).size;
+  const aj = a.join(' ');
+  const bj = b.join(' ');
+  if (aj === bj) score += 0.4;
+  else if (bj.includes(aj) || aj.includes(bj)) score += 0.25;
+  return score;
+}
+
+const SPORTY = new Set(['stadium', 'sports_centre', 'sports_hall', 'pitch', 'arena',
+  'racetrack', 'raceway', 'golf_course', 'events_centre', 'theatre', 'attraction']);
+
+const kmApart = (p, q) => {
+  const dLat = (p.lat - q.lat) * 111;
+  const dLng = (p.lng - q.lng) * 111 * Math.cos((p.lat * Math.PI) / 180);
+  return Math.sqrt(dLat * dLat + dLng * dLng);
+};
 
 async function resolve(v) {
   const expect = ISO[(v.cityCountry || '').toLowerCase()] || ISO[(v.compCountry || '').toLowerCase()] || null;
-  const ladder = [];
-  if (v.city) ladder.push([v.name + ', ' + v.city, 'venue']);
-  if (v.compCountry) ladder.push([v.name + ', ' + v.compCountry, 'venue']);
-  ladder.push([v.name, 'venue']);
-  if (v.city && v.cityCountry) ladder.push([v.city + ', ' + v.cityCountry, 'city']);
+  const queries = [];
+  if (v.city) queries.push(v.name + ', ' + v.city);
+  if (v.compCountry) queries.push(v.name + ', ' + v.compCountry);
+  queries.push(v.name);
 
-  for (const [q, src] of ladder) {
-    let hit = null;
-    try { hit = await photon(q); } catch (e) { hit = null; }
-    if (!hit) continue;
-    // A wrong country is worse than no answer: it would anchor a hotel search
-    // in Manchester, New Hampshire. Unverifiable results are accepted but
-    // flagged, so the report shows exactly what rests on trust.
-    if (expect && hit.cc && hit.cc !== expect) continue;
-    return { key: v.key, lat: hit.lat, lng: hit.lng, src, flag: expect ? '' : 'unverified', label: hit.label };
+  const pool = [];
+  for (const q of queries) {
+    let hits = [];
+    try { hits = await photon(q); } catch (e) { hits = []; }
+    for (const h of hits) {
+      if (expect && h.cc && h.cc !== expect) continue;
+      h.q = q;
+      h.score = nameScore(v.name, h.label) + (SPORTY.has(h.osm) ? 0.15 : 0);
+      pool.push(h);
+    }
+    // A confident name match ends the ladder early: no point burning requests.
+    const best = pool.slice().sort((a, b) => b.score - a.score)[0];
+    if (best && best.score >= 0.85) break;
+  }
+
+  const flag = expect ? '' : 'unverified';
+  const best = pool.slice().sort((a, b) => b.score - a.score)[0];
+  if (best && best.score >= 0.6) {
+    return { key: v.key, lat: best.lat, lng: best.lng, src: 'venue', flag, label: best.label };
+  }
+
+  // No name evidence: only agreement between DIFFERENT queries on the same
+  // 25km spot counts. One ranking fluke cannot agree with itself.
+  for (const c of pool) {
+    const backers = new Set(pool.filter((o) => kmApart(o, c) < 25).map((o) => o.q));
+    if (backers.size >= 2) {
+      return { key: v.key, lat: c.lat, lng: c.lng, src: 'consensus', flag, label: c.label };
+    }
+  }
+
+  // Last resort: the city its concerts say it is in. rad=20 covers a metro,
+  // which is exactly the anchor the working example used.
+  if (v.city && v.cityCountry) {
+    let hits = [];
+    try { hits = await photon(v.city + ', ' + v.cityCountry); } catch (e) { hits = []; }
+    const cityHit = hits.filter((h) => !expect || !h.cc || h.cc === expect)
+      .sort((a, b) => nameScore(v.city, b.label) - nameScore(v.city, a.label))[0];
+    if (cityHit && nameScore(v.city, cityHit.label) >= 0.6) {
+      return { key: v.key, lat: cityHit.lat, lng: cityHit.lng, src: 'city', flag, label: cityHit.label };
+    }
   }
   return { key: v.key, fail: (v.name + ' | city=' + (v.city || '-') + ' | country=' + (v.compCountry || v.cityCountry || '-')) };
 }
