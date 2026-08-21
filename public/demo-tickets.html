@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Tickets Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v14"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Sport</span><span>Concerts</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Event Tickets</h1>
+  <p class="lede">
+    One widget, pointed at whatever the page is about. Every event carries a booking link into the
+    client's own Travelify application. Switch the source and the layout to see the same embed do
+    four different jobs.
+  </p>
+
+  <div class="controls">
+    <strong>Source</strong>
+    <button type="button" data-src="competition" aria-pressed="true">Premier League</button>
+    <button type="button" data-src="team">Arsenal, home only</button>
+    <button type="button" data-src="venue">Wembley Stadium</button>
+    <button type="button" data-src="performer">Olivia Rodrigo</button>
+    <button type="button" data-src="category">All concerts</button>
+  </div>
+
+  <div class="controls">
+    <strong>Layout</strong>
+    <button type="button" data-layout="list" aria-pressed="true">List</button>
+    <button type="button" data-layout="cards">Cards</button>
+    <button type="button" data-layout="compact">Compact</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page">
+    <div data-tg-widget="tickets" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>Demo account 250.</b> Booking links open the Travelgenix demo Travelify application. On a real
+    client embed the AppID is injected server-side from that client's own credentials, so Book goes to
+    their booking engine and the credential never reaches the browser.
+  </p>
+
+</div>
+
+<script src="/widget-tickets.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  var SOURCES = {
+    competition: {
+      sourceType: 'competition', sourceValue: 'english-premier-league',
+      heading: 'Premier League fixtures', subheading: 'Every upcoming game, with tickets.',
+    },
+    team: {
+      sourceType: 'team', sourceValue: 'arsenal', side: 'home',
+      competition: 'english-premier-league',
+      heading: 'Arsenal at the Emirates', subheading: 'Home fixtures this season.',
+    },
+    venue: {
+      sourceType: 'venue', sourceValue: 'wembleystadium',
+      heading: "What's on at Wembley", subheading: 'Football and live music under the arch.',
+    },
+    performer: {
+      sourceType: 'performer', sourceValue: 'olivia-rodrigo',
+      heading: 'Olivia Rodrigo tour dates', subheading: 'Every date we can get you into.',
+    },
+    category: {
+      sourceType: 'category', sourceValue: 'entertainment',
+      heading: 'Live music', subheading: 'Concerts, festivals and shows.',
+    },
+  };
+
+  var state = { src: 'competition', layout: 'list', theme: 'light' };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return Object.assign({}, SOURCES[state.src], {
+      layout: state.layout,
+      theme: state.theme,
+      limit: state.layout === 'cards' ? 6 : 5,
+      appId: '250',
+      accent: '#00B4D8',
+      // Ask for all three. The widget renders the ones the API could build, so
+      // ticket + hotel appears here automatically once its spec lands.
+      bookingKinds: ['ticket', 'ticket-hotel', 'ticket-flight-hotel'],
+    });
+  }
+
+  function snippet() {
+    var c = config();
+    var shown = {
+      sourceType: c.sourceType, sourceValue: c.sourceValue,
+      layout: c.layout, limit: c.limit, heading: c.heading,
+    };
+    if (c.side) shown.side = c.side;
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="tickets"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-tickets.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGTicketsWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGTicketsWidget(mount, config());
+    group('src', 'src');
+    group('layout', 'layout');
+    group('theme', 'theme');
+    snippet();
+  }
+
+  boot();
+}());
+</script>
+</body>
+</html>

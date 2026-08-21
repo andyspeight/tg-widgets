@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club Picker Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v14"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Sport</span><span>Concerts</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Club Picker</h1>
+  <p class="lede">
+    A grid of badges. Click one and their fixtures open underneath, in the same embed. The grid can
+    be clubs in a league, artists, or venues — a grid of things you pick from is the same shape
+    whatever the things are.
+  </p>
+
+  <div class="controls">
+    <strong>Grid of</strong>
+    <button type="button" data-src="pl" aria-pressed="true">Premier League clubs</button>
+    <button type="button" data-src="laliga">La Liga clubs</button>
+    <button type="button" data-src="nfl">NFL teams</button>
+    <button type="button" data-src="artists">Artists</button>
+    <button type="button" data-src="venues">Venues</button>
+  </div>
+
+  <div class="controls">
+    <strong>Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page">
+    <div data-tg-widget="clubpicker" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>Badges are generated monograms, not crests.</b> Real club badges are licensed artwork the feed
+    does not carry. The colour is hashed from the club's key, so a club looks the same in every widget
+    and on every page. Swapping in real assets later is one function.
+  </p>
+
+</div>
+
+<script src="/widget-clubpicker.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  var SOURCES = {
+    pl:      { gridOf: 'team', competition: 'english-premier-league',
+               heading: 'Premier League', subheading: 'Every club, every fixture, tickets included.' },
+    laliga:  { gridOf: 'team', competition: 'spanish-la-liga',
+               heading: 'La Liga', subheading: 'A weekend in Spain, around a game.' },
+    nfl:     { gridOf: 'team', competition: 'nfl',
+               heading: 'NFL', subheading: 'Pick a team and we will get you there.' },
+    artists: { gridOf: 'performer', competition: '', category: '',
+               heading: 'Live music', subheading: 'Pick an act to see their tour dates.' },
+    venues:  { gridOf: 'venue', competition: '', category: '',
+               heading: 'Great venues', subheading: 'Pick a ground to see what is on.' },
+  };
+
+  var state = { src: 'pl', theme: 'light' };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return Object.assign({}, SOURCES[state.src], {
+      theme: state.theme,
+      appId: '250',
+      accent: '#00B4D8',
+      maxEntities: 24,
+      eventLimit: 6,
+      bookingKinds: ['ticket', 'ticket-hotel', 'ticket-flight-hotel'],
+    });
+  }
+
+  function snippet() {
+    var c = config();
+    var shown = { gridOf: c.gridOf, heading: c.heading };
+    if (c.competition) shown.competition = c.competition;
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="clubpicker"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-clubpicker.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGClubPickerWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGClubPickerWidget(mount, config());
+    group('src', 'src'); group('theme', 'theme');
+    snippet();
+  }
+
+  boot();
+}());
+</script>
+</body>
+</html>

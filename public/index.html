@@ -98,7 +98,7 @@ a{text-decoration:none;color:inherit}
 .w-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;overflow:hidden;transition:all .3s}
 .w-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D1D5DB;transform:translateY(-3px)}
 .w-card-preview{height:200px;background:var(--bg);border-bottom:1px solid var(--bd);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px}
+.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px;flex:none}
 .w-card-body{padding:18px 20px 20px}
 .w-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
 .w-card-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -867,6 +867,96 @@ const WIDGETS = [
     widgetTag: 'events',
     scriptFile: 'widget-events.js',
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'tickets',
+    name: 'Event Tickets',
+    airtableType: 'Event Tickets',  // matches Airtable WidgetType singleSelect option
+    description: 'Upcoming bookable events with a Book button — football fixtures, concerts, tour dates. Point one embed at a competition, a club, a venue, an artist or a search term. Booking deeplinks open the client\u2019s own Travelify application.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-tickets',
+    demoUrl: '/demo-tickets',
+    widgetTag: 'tickets',
+    scriptFile: 'widget-tickets.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'nextevent',
+    name: 'Next Event',
+    airtableType: 'Next Event',  // matches Airtable WidgetType singleSelect option
+    description: 'A single card showing the next fixture, gig or race for a club, venue or artist — with a live countdown and a booking link. The smallest embed in the ticket set and the easiest to find room for.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'},
+    color: '#6366F1',
+    editorUrl: '/editor-nextevent',
+    demoUrl: '/demo-nextevent',
+    widgetTag: 'nextevent',
+    scriptFile: 'widget-nextevent.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'clubpicker',
+    name: 'Club Picker',
+    airtableType: 'Club Picker',  // matches Airtable WidgetType singleSelect option
+    description: 'A grid of club badges, artists or venues. Click one and their fixtures or dates open underneath in the same embed, each with a booking link. A league page as a single line of HTML.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'},
+    color: '#8B5CF6',
+    editorUrl: '/editor-clubpicker',
+    demoUrl: '/demo-clubpicker',
+    widgetTag: 'clubpicker',
+    scriptFile: 'widget-clubpicker.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'ticketsearch',
+    name: 'Ticket Search',
+    airtableType: 'Ticket Search',  // matches Airtable WidgetType singleSelect option
+    description: 'One search box over the whole ticket feed. Typing Wembley returns the ground, the football at it and the concerts at it; Arsenal returns the club and every game home and away. Results grouped, each with a booking link.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>'},
+    color: '#0EA5E9',
+    editorUrl: '/editor-ticketsearch',
+    demoUrl: '/demo-ticketsearch',
+    widgetTag: 'ticketsearch',
+    scriptFile: 'widget-ticketsearch.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'ticketmonth',
+    name: 'Ticket Month',
+    airtableType: 'Ticket Month',  // matches Airtable WidgetType singleSelect option
+    description: 'A month calendar of everything on, with a day panel and booking buttons.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z'},
+    color: '#7C5CFF',
+    editorUrl: '/editor-ticketmonth',
+    demoUrl: '/demo-ticketmonth',
+    widgetTag: 'ticketmonth',
+    scriptFile: 'widget-ticketmonth.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'eventmenu',
+    name: 'Event Menu',
+    airtableType: 'Event Menu',  // matches Airtable WidgetType singleSelect option
+    description: 'A sidebar or drawer menu of every competition, club, venue and artist, linking into your own pages.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M4 6h16M4 12h16M4 18h16'},
+    color: '#12B886',
+    editorUrl: '/editor-eventmenu',
+    demoUrl: '/demo-eventmenu',
+    widgetTag: 'eventmenu',
+    scriptFile: 'widget-eventmenu.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'offers',
@@ -3098,6 +3188,48 @@ function loadMiniPreview(w) {
     });
   }
 
+  if (w.id === 'nextevent' && window.TGNextEventWidget) {
+    new window.TGNextEventWidget(el, { sourceType: 'team', sourceValue: 'arsenal', side: 'home', layout: 'card', label: 'Next up', showCountdown: true, accent: w.color, theme: 'light', appId: '250' });
+  }
+
+  if (w.id === 'clubpicker' && window.TGClubPickerWidget) {
+    new window.TGClubPickerWidget(el, { gridOf: 'team', competition: 'english-premier-league', heading: '', prompt: '', maxEntities: 8, columns: 4, showCounts: false, showHomeVenue: false, accent: w.color, theme: 'light', appId: '250' });
+  }
+
+  if (w.id === 'ticketsearch' && window.TGTicketSearchWidget) {
+    new window.TGTicketSearchWidget(el, { heading: '', subheading: '', placeholder: 'Search a club, a ground, an act…', initialQuery: 'wembley', suggestions: [], showGroups: false, eventLimit: 2, accent: w.color, theme: 'light', appId: '250' });
+  }
+
+  if (w.id === 'ticketmonth' && window.TGTicketMonthWidget) {
+    // A six-week month is taller than the 200px card, and the card centres what
+    // it holds, so the month name, the one thing that says what this widget is,
+    // was the part being cut off. Anchor it to the top and let the last week go
+    // instead. 620px keeps the mount just above the widget's own 560px
+    // container breakpoint, so the cells stay tall enough to carry a fixture
+    // name: the dots are 6px, which is right on a phone and invisible here.
+    container.style.alignSelf = 'flex-start';
+    container.style.transformOrigin = 'center top';
+    el.style.maxWidth = '620px';
+    el.style.margin = '0 auto';
+    new window.TGTicketMonthWidget(el, { sourceType:'competition', sourceValue:'english-premier-league', heading:'', showDayTitles:true, maxPerCell:1, dayLimit:4, radius:10, accent:'#7C5CFF' });
+  }
+
+  if (w.id === 'eventmenu' && window.TGEventMenuWidget) {
+    // The card is 200px and centres what it holds, so a menu with eighteen
+    // collapsed sports underneath it shows its middle rather than its top.
+    // One sport, flat, three rows: about 300px scaled to 165px, which fits.
+    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'none', onlyCategories:['football'], sections:['competitions'], maxPerGroup:3, showSearch:true, radius:10, accent:'#12B886' });
+  }
+
+  if (w.id === 'tickets' && window.TGTicketsWidget) {
+    new window.TGTicketsWidget(el, {
+      sourceType: 'competition', sourceValue: 'english-premier-league',
+      heading: '', limit: 3, layout: 'list',
+      showCompetition: false, showVenue: true, showTime: true,
+      accent: w.color, radius: 12, theme: 'light', appId: '250',
+    });
+  }
+
   if (w.id === 'offers') {
     container.innerHTML = `
       <div style="
@@ -4358,6 +4490,12 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-events.js"></script>
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
+<script src="/widget-tickets.js"></script>
+<script src="/widget-eventmenu.js"></script>
+<script src="/widget-ticketmonth.js"></script>
+<script src="/widget-ticketsearch.js"></script>
+<script src="/widget-clubpicker.js"></script>
+<script src="/widget-nextevent.js"></script>
 <script src="/widget-share.js"></script>
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>
