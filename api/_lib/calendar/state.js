@@ -71,8 +71,12 @@ export async function resolveWidget(widgetId) {
     // scheduler the widget renders.
     config = ensureAvailability(config);
     return {
+      // The widget row's own Airtable record id — the key the unified lead
+      // router uses (source.widgetId must be a rec… id, not the public tgw_…).
+      recordId: rec.id || '',
       clientRecordId: rec.fields.ClientRecordId || (Array.isArray(rec.fields.Client) ? rec.fields.Client[0] : '') || '',
       clientEmail: (rec.fields.ClientEmail || '').toLowerCase().trim(),
+      clientName: rec.fields.ClientName || '',
       widgetType: rec.fields.WidgetType || '',
       name: rec.fields.Name || '',
       config,

@@ -14,6 +14,7 @@ function view(b) {
     widgetId: b.widgetId || '', eventId: b.eventId || '',
     name: v.name || '', email: v.email || '', phone: v.phone || '',
     answers: v.answers || {}, calendarLink: b.calendarLink || '', meetingUrl: b.meetingUrl || '', createdAt: b.createdAt,
+    sourceUrl: b.sourceUrl || '',
   };
 }
 

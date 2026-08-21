@@ -73,6 +73,7 @@ export function generateSlots(config, ev, opts) {
   const toMs = opts.to ? Date.parse(opts.to) : Infinity;
   const blackout = new Set(Array.isArray(config.blackoutDates) ? config.blackoutDates : []);
   const av = config.availability || {};
+  const overrides = (config.dateOverrides && typeof config.dateOverrides === 'object' && !Array.isArray(config.dateOverrides)) ? config.dateOverrides : {};
 
   const out = [];
   const t = todayYmdInTz(hostTz);
@@ -83,7 +84,10 @@ export function generateSlots(config, ev, opts) {
     const key = dateKey(y, m0, d);
     cur.setUTCDate(cur.getUTCDate() + 1);
     if (blackout.has(key)) continue;
-    const ranges = av[wd] || av[String(wd)] || [];
+    // A date-specific override replaces the weekly hours for that one date.
+    // Mirrors the widget's _computeSlots exactly (as this whole file must).
+    const ov = Object.prototype.hasOwnProperty.call(overrides, key) ? overrides[key] : null;
+    const ranges = Array.isArray(ov) ? ov : (av[wd] || av[String(wd)] || []);
     if (!ranges.length) continue;
     ranges.forEach(r => {
       const a = parseHM(r[0]), b = parseHM(r[1]);

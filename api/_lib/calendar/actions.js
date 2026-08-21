@@ -88,6 +88,11 @@ export async function rescheduleBooking(booking, newStart, opts) {
   booking.startISO = newStart;
   booking.endISO = endISO;
   booking.rescheduledAt = new Date().toISOString();
+  // A moved booking earns fresh reminders for its new time (previously a
+  // rescheduled booking never got another reminder at all).
+  booking.remindersSent = [];
+  booking.reminded = false;
+  delete booking.remindedAt;
   await saveBooking(booking);
   if (booking.dayCounted && newDay !== oldDay) { await decDayCount(booking.clientRecordId, oldDay); await incDayCount(booking.clientRecordId, newDay); }
 
