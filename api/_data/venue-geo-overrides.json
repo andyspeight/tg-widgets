@@ -672,6 +672,207 @@
       "lat": 24.4595,
       "lng": 54.6055,
       "why": "Etihad Arena, Yas Island - city node was the emirate centroid 45km out"
+    },
+    "cravencottage": {
+      "lat": 51.4749,
+      "lng": -0.2216,
+      "why": "Craven Cottage, Fulham, London - geocoder matched a Yorkshire Dales placename"
+    },
+    "stamfordbridge": {
+      "lat": 51.4817,
+      "lng": -0.191,
+      "why": "Stamford Bridge, Chelsea, London - geocoder matched the Yorkshire village"
+    },
+    "stjamespark": {
+      "lat": 54.9756,
+      "lng": -1.6217,
+      "why": "St James' Park, Newcastle - geocoder matched the royal park in London"
+    },
+    "villapark": {
+      "lat": 52.5092,
+      "lng": -1.8848,
+      "why": "Villa Park, Birmingham - geocoder matched a Hertfordshire namesake"
+    },
+    "deepdale": {
+      "lat": 53.7726,
+      "lng": -2.6884,
+      "why": "Deepdale, Preston - geocoder matched the Dales valley"
+    },
+    "standrews": {
+      "lat": 52.4756,
+      "lng": -1.8681,
+      "why": "St Andrew's, Birmingham City - geocoder matched Bristol"
+    },
+    "sansiro": {
+      "lat": 45.4781,
+      "lng": 9.124,
+      "why": "San Siro, Milan - geocoder matched the Lake Como district"
+    },
+    "stadioartemiofranchi": {
+      "lat": 43.7808,
+      "lng": 11.2823,
+      "why": "Artemio Franchi, Florence - geocoder matched Siena's stadium of the same name"
+    },
+    "stadioatletiazzurriditalia": {
+      "lat": 45.7089,
+      "lng": 9.6808,
+      "why": "Atleti Azzurri d'Italia (Gewiss), Bergamo - geocoder matched near Varese"
+    },
+    "waldstadionanderkaiserlinde": {
+      "lat": 49.3175,
+      "lng": 7.113,
+      "why": "Waldstadion Kaiserlinde, Spiesen-Elversberg - geocoder matched near Bonn"
+    },
+    "stadelouisii": {
+      "lat": 43.7276,
+      "lng": 7.4154,
+      "why": "Stade Louis II, Monaco - geocoder matched Nantes"
+    },
+    "staderaymondkopa": {
+      "lat": 47.4604,
+      "lng": -0.5311,
+      "why": "Raymond Kopa, Angers - geocoder matched near Reims"
+    },
+    "stadevelodrome": {
+      "lat": 43.2696,
+      "lng": 5.3959,
+      "why": "Velodrome, Marseille - geocoder matched Brittany"
+    },
+    "stadiummunicipal": {
+      "lat": 43.5833,
+      "lng": 1.434,
+      "why": "Stadium de Toulouse (home club Toulouse FC per the feed) - geocoder matched Albi's Stadium Municipal"
+    },
+    "firpark": {
+      "lat": 55.7803,
+      "lng": -3.98,
+      "why": "Fir Park, Motherwell - geocoder matched Angus"
+    },
+    "rugbypark": {
+      "lat": 55.6046,
+      "lng": -4.5085,
+      "why": "Rugby Park, Kilmarnock - geocoder matched Glasgow"
+    },
+    "guldensporenstadion": {
+      "lat": 50.8242,
+      "lng": 3.2506,
+      "why": "Guldensporen Stadion, Kortrijk - geocoder matched near Antwerp"
+    },
+    "afasstadion": null,
+    "elmonumental": {
+      "lat": -34.5453,
+      "lng": -58.4497,
+      "why": "El Monumental, Nunez, Buenos Aires (River Plate) - geocoder matched Cordoba province"
+    },
+    "labombonera": {
+      "lat": -34.6356,
+      "lng": -58.3647,
+      "why": "La Bombonera, Buenos Aires (Boca) - geocoder matched Catamarca"
+    },
+    "estadiodrlisandrodelatorre": {
+      "lat": -32.9038,
+      "lng": -60.6789,
+      "why": "Gigante de Arroyito, Rosario (Rosario Central) - geocoder matched Buenos Aires"
+    },
+    "corinthiansarena": {
+      "lat": -23.5453,
+      "lng": -46.4742,
+      "why": "Neo Quimica Arena, Sao Paulo (Corinthians) - geocoder matched Ceara"
+    },
+    "estadiosaojanuario": {
+      "lat": -22.8905,
+      "lng": -43.229,
+      "why": "Sao Januario, Rio (Vasco) - geocoder matched Rio Grande do Norte"
+    },
+    "parken": {
+      "lat": 55.7026,
+      "lng": 12.5723,
+      "why": "Parken, Copenhagen - geocoder matched Esbjerg"
+    },
+    "levadiastadium": {
+      "lat": 38.436,
+      "lng": 22.875,
+      "why": "Livadeia (Levadiakos) - geocoder matched Athens"
+    },
+    "riotintostadium": {
+      "lat": 40.583,
+      "lng": -111.8933,
+      "why": "America First Field (Rio Tinto), Sandy UT - geocoder matched San Francisco"
+    },
+    "subarupark": {
+      "lat": 39.8322,
+      "lng": -75.3789,
+      "why": "Subaru Park, Chester PA (Union) - geocoder matched South Carolina"
+    },
+    "cracoviastadium": {
+      "lat": 50.0575,
+      "lng": 19.9188,
+      "why": "Cracovia, Krakow - geocoder matched Warsaw"
+    },
+    "estadidelafaf": {
+      "lat": 42.5323,
+      "lng": 1.5836,
+      "why": "Estadi de la FAF, Encamp, Andorra - geocoder matched Catalonia"
+    },
+    "estadiomunicipaldeipurua": {
+      "lat": 43.1817,
+      "lng": -2.4757,
+      "why": "Ipurua, Eibar - geocoder took Anoeta's coordinates"
+    },
+    "rheinparkstadion": {
+      "lat": 47.1478,
+      "lng": 9.51,
+      "why": "Rheinpark, Vaduz - geocoder matched Zurich"
+    },
+    "nogometnistadionbonifika": {
+      "lat": 45.546,
+      "lng": 13.7263,
+      "why": "Bonifika, Koper, Slovenia - geocoder matched Bosnia"
+    },
+    "parkhall": {
+      "lat": 52.862,
+      "lng": -3.053,
+      "why": "Park Hall, Oswestry (The New Saints) - geocoder matched Maryland"
+    },
+    "europapointstadium": {
+      "lat": 36.109,
+      "lng": -5.3462,
+      "why": "Europa Point, Gibraltar - geocoder matched Pennsylvania"
+    },
+    "hampdenpark": {
+      "lat": 55.8256,
+      "lng": -4.252,
+      "why": "Hampden Park, Glasgow - geocoder matched the Eastbourne namesake"
+    },
+    "republicanstadium": {
+      "lat": 40.1596,
+      "lng": 44.4967,
+      "why": "Republican Stadium, Yerevan (Armenia per the feed) - geocoder matched Chisinau"
+    },
+    "windsorpark": {
+      "lat": 54.5827,
+      "lng": -5.9552,
+      "why": "Windsor Park, Belfast - geocoder matched Edmonton, Canada"
+    },
+    "zimbro": {
+      "lat": 46.993,
+      "lng": 28.8567,
+      "why": "Zimbru, Chisinau, Moldova - geocoder matched Portugal"
+    },
+    "stozicestadium": {
+      "lat": 46.0814,
+      "lng": 14.5215,
+      "why": "Stozice, Ljubljana (Slovenia) - geocoder matched Sofia"
+    },
+    "miejskistadionpikarskirakow": {
+      "lat": 50.8118,
+      "lng": 19.1203,
+      "why": "Rakow's Miejski, Czestochowa - geocoder matched near Warsaw"
+    },
+    "neapolistadium": {
+      "lat": 38.0736,
+      "lng": 23.8103,
+      "why": "Kifisia, Athens (city-level) - geocoder matched Crete's Neapoli"
     }
   }
 }
