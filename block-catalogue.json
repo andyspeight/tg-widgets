@@ -796,7 +796,7 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 42,
+      "cssRules": 43,
       "sourcePath": "tg-sites/components/render/blocks.tsx:505",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -971,8 +971,235 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 47,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1804",
+      "cssRules": 48,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1817",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "expanding-cards",
+      "name": "Expanding cards",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A row of pictures where the one you click opens to show its story.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].title",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].body",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].linkLabel",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].linkHref",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "short",
+            "medium",
+            "tall"
+          ],
+          "default": "medium"
+        },
+        {
+          "name": "radius",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "sm",
+            "md",
+            "lg",
+            "full"
+          ],
+          "default": "md"
+        },
+        {
+          "name": "scrim",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": "#0d1420"
+        },
+        {
+          "name": "scrimStrength",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 55
+        },
+        {
+          "name": "buttonColour",
+          "type": "colour",
+          "role": "config",
+          "required": false
+        }
+      ],
+      "classNames": [
+        "tgs-expand",
+        "tgs-expand-",
+        "tgs-placeholder",
+        "tgs-sr-only"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "radius.sm",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 10,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1917",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "screen-carousel",
+      "name": "Screen carousel",
+      "category": "media",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Your pictures playing on a laptop or phone screen.",
+      "variants": [],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].src",
+          "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].alt",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "device",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "laptop",
+            "phone"
+          ],
+          "default": "laptop"
+        },
+        {
+          "name": "frame",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "light",
+            "dark"
+          ],
+          "default": "light"
+        },
+        {
+          "name": "transition",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "fade",
+            "slide"
+          ],
+          "default": "fade"
+        },
+        {
+          "name": "interval",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 5
+        },
+        {
+          "name": "arrows",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "dots",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-screen",
+        "tgs-slideshow",
+        "tgs-ss-cycle"
+      ],
+      "tokensUsed": [
+        "colour.scr-bezel"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-screen: #c9ced6",
+          ".tgs-screen: #aeb5bf",
+          ".tgs-screen: #0b0e13",
+          ".tgs-screen[data-frame='dark']: #3a3f47",
+          ".tgs-screen[data-frame='dark']: #23262b"
+        ],
+        "spacing": [
+          ".tgs-screen[data-device='phone'] .tgs-screen__bezel: 12px"
+        ]
+      },
+      "cssRules": 46,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2042",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1642,6 +1869,7 @@
           "role": "config",
           "required": false,
           "options": [
+            "auto",
             "16/9",
             "4/3",
             "1/1",
@@ -1675,6 +1903,28 @@
           "default": "left"
         },
         {
+          "name": "rows",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2"
+          ],
+          "default": "1"
+        },
+        {
+          "name": "scrollbar",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "thin",
+            "bar"
+          ],
+          "default": "thin"
+        },
+        {
           "name": "wholeCardLinks",
           "type": "boolean",
           "role": "config",
@@ -1691,9 +1941,12 @@
         "colour.accent",
         "colour.border",
         "colour.border-strong",
+        "colour.rail-l",
+        "colour.rail-r",
         "colour.slide",
         "colour.surface",
         "colour.surface-alt",
+        "colour.text",
         "radius.lg",
         "radius.md",
         "radius.sm",
@@ -1710,11 +1963,12 @@
           ".tgs-cards[data-style='raised']   .tgs-card: rgba(15, 23, 42, 0.06)",
           ".tgs-cards[data-style='raised']   .tgs-card: rgba(15, 23, 42, 0.08)",
           ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.08)",
-          ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.12)"
+          ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.12)",
+          ".tgs-slider[data-scrollbar='bar']: #000"
         ],
         "spacing": []
       },
-      "cssRules": 64,
+      "cssRules": 71,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1568",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -1967,7 +2221,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1883",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2134",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2061,7 +2315,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1887",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2138",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2130,7 +2384,7 @@
         ]
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1911",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2162",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2183,7 +2437,7 @@
         ]
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2017",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2268",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2373,7 +2627,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2258",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2509",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2472,7 +2726,7 @@
         ]
       },
       "cssRules": 18,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2379",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2630",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2604,7 +2858,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2459",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2710",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2721,7 +2975,7 @@
         "spacing": []
       },
       "cssRules": 35,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2548",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2799",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2836,7 +3090,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2649",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2900",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2921,7 +3175,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2717",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2968",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3117,7 +3371,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2778",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3029",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3159,7 +3413,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3462",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3713",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3242,7 +3496,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3145",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3396",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3352,7 +3606,7 @@
         ]
       },
       "cssRules": 30,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3192",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3443",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3546,8 +3800,8 @@
         ],
         "spacing": []
       },
-      "cssRules": 22,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2878",
+      "cssRules": 23,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3129",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3638,7 +3892,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2960",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3211",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3715,7 +3969,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3043",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3294",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3803,7 +4057,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3095",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3346",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3896,8 +4150,8 @@
         ],
         "spacing": []
       },
-      "cssRules": 19,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3277",
+      "cssRules": 20,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3528",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3982,7 +4236,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3391",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3642",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4158,7 +4412,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3471",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3722",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4201,7 +4455,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3518",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3769",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]
