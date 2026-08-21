@@ -42,8 +42,8 @@ node scripts/normalise-supplier-events.mjs feed.csv --out events.json --venues v
 npm run test:supplier-events
 ```
 
-Against the 28 Jul export: 11,045 rows in, 10,263 events out, 783 duplicates
-folded away, 961 venues, nothing rejected, about 0.4 seconds.
+Against the 28 Jul export: 11,045 rows in, 10,087 events out, 959 duplicates
+folded away, 958 venues, nothing rejected, about 0.5 seconds.
 
 ## The four things it exists for
 
@@ -72,12 +72,21 @@ SportsEvents365 also carries "Brazilian Serie A", and "Bundesliga" is Germany
 while "Bundesliga AT" is Austria. Aliases are resolved inside a category and
 both pairs are mapped explicitly so they can never collide.
 
-**3. Duplicate inventory.** 624 events are sold by both suppliers and another
-157 are listed twice by one supplier under different event ids. They merge on an
+**3. Duplicate inventory.** 800 events are sold by both suppliers and the rest
+are listed twice by one supplier under different event ids, 959 rows folded
+away in total. They merge on an
 identity key of category, date and normalised team names, with the sides sorted
 so a reversed listing still matches. Only club-type tokens come off a team name
-(FC, AFC, CF and friends), never anything that separates two real clubs, so
-Manchester United and Manchester City stay apart.
+(FC, AFC, CF and friends) plus connector words like "de", never anything that
+separates two real clubs, so Manchester United and Manchester City stay apart.
+
+Club aliases go one step further where the competition proves them. A league
+does not contain both "Ipswich" and "Ipswich Town", so inside one competition
+two keys differing only by a mergeable suffix are folded: six pairs, including
+Coventry, Atalanta and Real Betis. "united" is excluded from that rule because
+the Scottish Premiership carries Dundee FC and Dundee United, which are two
+clubs. Another 17 pairs sit in the same shape but cannot be decided by
+machine, so they are reported in `teamAliasCandidates` rather than merged.
 
 Time then splits a day's fixtures back apart, so an MLB doubleheader stays two
 events. Placeholder sides never merge: four different volleyball quarter-finals
@@ -89,7 +98,88 @@ to the other. Venues are keyed on a compacted form of the name, so
 "Jan Breydel Stadion" and "Jan Breydelstadion" land together, and the registry
 carries both id spaces plus every spelling seen.
 
-## Two things it deliberately does not do
+## Surfacing it: the Events Explorer
+
+Five pages on `tg-widgets`, all reading `/api/events-feed`, all deep-linkable.
+Prototypes, so no editor, no registry entry and no Airtable WidgetType.
+
+| Route | What it is |
+|---|---|
+| `/events` | Hub: counts, the four surfaces, and the diagnostics below |
+| `/events-league` | Competitions, then a club grid, then that club's fixtures |
+| `/events-venue` | Venue directory and what is on at one ground |
+| `/events-artist` | Artist directory and tour dates grouped by month |
+| `/events-browse` | The whole feed with date, category, competition and text filters |
+
+`/events-league?competition=english-premier-league` lists the 20 clubs as
+badges, a badge opens that club's fixtures, and every fixture has a Book button.
+Badges are generated monograms on a hue hashed from the club key, not crests:
+real crests are licensed artwork the feed does not carry.
+
+Shared assets are `public/events-explorer.css` and `public/events-explorer.js`.
+Nothing off the network reaches `innerHTML`, there are no inline handlers, and
+every list has a loading, empty and error state.
+
+### The API
+
+`api/events-feed.js` serves slices of a snapshot built by
+`scripts/build-events-snapshot.mjs` and committed at
+`api/_data/events-snapshot.json` (3.8MB, loaded once per cold start, about 70ms).
+The feed is a periodic spreadsheet export rather than a live API, so a snapshot
+is the honest shape for it.
+
+```
+/api/events-feed                                    index
+/api/events-feed?view=competition&slug=english-premier-league
+/api/events-feed?view=team&key=arsenal
+/api/events-feed?view=venue&key=wembleystadium
+/api/events-feed?view=performer&key=olivia-rodrigo
+/api/events-feed?view=browse&from=&to=&category=&competition=&q=
+/api/events-feed?view=venues|performers|teams&q=
+/api/events-feed?view=diagnostics
+```
+
+Add `&appId=` for a client's own Travelify application, `&currency=` and
+`&adults=` to change the booking link. Read-only, rate limited on the shared
+widgetRead bucket, every parameter validated and page size capped at 100.
+
+The snapshot drops anything the registries already hold and the API rehydrates
+it from the entity key on the way out. That is what gives every page one
+spelling per club: the feed writes "Arsenal" on one row and "Arsenal FC" on the
+next, and only the canonical name is ever shown.
+
+Rebuild after a new export:
+
+```
+node scripts/build-events-snapshot.mjs feed.csv
+npm run test:supplier-events
+```
+
+## Booking deeplinks
+
+Built in one place, `api/_lib/events/event-deeplink.js`, to the live Travelify
+ticket link Andy supplied on 21 Aug 2026. The feed's two id columns are the two
+halves of the pin and the link wants them apart:
+
+```
+"Event ID For Searchbox"  144:168e50...  ->  supp=144  +  refe=168e50...
+"Event ID For Filters"    168e50...      ->  refe
+```
+
+`loc` is the raw feed event name plus ": DD-Mon-YYYY", brackets included
+("Italian Grand Prix (Formula 1): 04-Sep-2026"), which is why each source keeps
+its own `rawName` through a pass that strips the taxonomy off the title.
+
+Regenerating Andy's example from the feed reproduces it parameter for
+parameter, with one exception: **`lat`, `lng` and `rad` are omitted**. Those
+anchor the search geographically and the feed has no coordinates for its 958
+venues. `refe` pins the exact event so a link without them should still land. If
+Travelify turns out to need the anchor, the fix is a venue geocode table, not a
+guess.
+
+Ticket-plus-hotel and ticket-plus-flight-plus-hotel are not built yet.
+
+## One thing it deliberately does not do
 
 **It does not convert times.** The two feeds do not share a timezone convention
 and the gaps are not noise, they land on the hour. XS2Event runs 60 minutes

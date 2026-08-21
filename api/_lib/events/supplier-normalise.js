@@ -356,10 +356,25 @@ export function venueKeyFor(name) {
  * keys as crvena-zvezda.
  */
 export function normaliseTeamName(raw) {
-  const base = safeText(raw, 120).replace(/\([^)]*\)/g, ' ');
+  // Periods go before slugging, not after. "A.F.C. Bournemouth" slugs to
+  // a-f-c-bournemouth, whose leading tokens are three single letters that no
+  // club-token list will ever match, so it never collapses onto "AFC
+  // Bournemouth". Dropping the dots first turns it into afc-bournemouth and the
+  // normal rule takes it from there. 15 keys in the feed have this shape,
+  // including Olympiacos F.C., Lommel S.K. and A.C. Monza.
+  const base = safeText(raw, 120).replace(/\([^)]*\)/g, ' ').replace(/\./g, '');
   let tokens = slugify(base, 120).split('-').filter(Boolean);
-  while (tokens.length > 1 && CLUB_TOKENS.has(tokens[0])) tokens = tokens.slice(1);
-  while (tokens.length > 1 && CLUB_TOKENS.has(tokens[tokens.length - 1])) tokens = tokens.slice(0, -1);
+  // "Saint Mirren FC" and "St Mirren" are one club. No two different clubs
+  // differ only by which way that word is written.
+  tokens = tokens.map((t) => (t === 'saint' ? 'st' : t));
+  // Connector words carry no identity: "Standard de Liege" is "Standard Liege"
+  // and "Racing de Santander" is "Racing Santander".
+  tokens = tokens.filter((t) => !CONNECTOR_TOKENS.has(t));
+  // Club-type tokens come off wherever they sit, not just at the ends, so
+  // "Athletic Club Bilbao" meets "Athletic Bilbao". Never all of them: a name
+  // made only of club words keeps itself.
+  const stripped = tokens.filter((t) => !CLUB_TOKENS.has(t));
+  if (stripped.length) tokens = stripped;
   return tokens.join('-');
 }
 
@@ -376,6 +391,98 @@ const PLACEHOLDER_TEAM_RE = /^(to be (decided|confirmed|announced)|tb[acd]|winne
 
 export function isPlaceholderTeam(raw) {
   return PLACEHOLDER_TEAM_RE.test(safeText(raw, 60));
+}
+
+/**
+ * Suffix words that can be dropped when one club name is a prefix of another
+ * IN THE SAME COMPETITION. "Coventry" and "Coventry City" are one club, so a
+ * league page must not list both.
+ *
+ * "united" is deliberately absent, and this is not caution for its own sake:
+ * the Scottish Premiership carries Dundee FC and Dundee United, which are two
+ * different clubs whose keys sit in exactly this prefix relationship. Including
+ * "united" would merge them. Same reasoning excludes rovers, wanderers,
+ * athletic, county and rangers.
+ */
+const CONNECTOR_TOKENS = new Set(['de', 'du', 'di', 'del', 'of', 'the']);
+
+const MERGEABLE_SUFFIXES = new Set([
+  'city', 'town', 'fc', 'afc', 'cf', 'bc', 'hc', 'sk', 'vv', 'club',
+  'calcio', 'balompie', '1907',
+]);
+
+/**
+ * Collapse club aliases the feed spells two ways, using the competition as the
+ * evidence. A league does not contain both "Ipswich" and "Ipswich Town", so
+ * when two keys in one competition differ only by a mergeable suffix they are
+ * the same club and the shorter key wins.
+ *
+ * Restricting it to a shared competition is what makes this safe. Across the
+ * whole feed the same test would be a guess; inside one league it is a fact.
+ * Against the 28 Jul 2026 export it finds six pairs and no false ones.
+ */
+function resolveTeamAliases(events) {
+  const perCompetition = new Map();
+  for (const e of events) {
+    if (!e.competition) continue;
+    let bucket = perCompetition.get(e.competition);
+    if (!bucket) { bucket = new Set(); perCompetition.set(e.competition, bucket); }
+    if (e.homeTeamKey) bucket.add(e.homeTeamKey);
+    if (e.awayTeamKey) bucket.add(e.awayTeamKey);
+  }
+
+  const alias = new Map(); // long key -> short key
+  for (const keys of perCompetition.values()) {
+    const list = [...keys];
+    for (const shorter of list) {
+      for (const longer of list) {
+        if (shorter === longer || !longer.startsWith(`${shorter}-`)) continue;
+        const rest = longer.slice(shorter.length + 1).split('-');
+        if (rest.every((w) => MERGEABLE_SUFFIXES.has(w))) alias.set(longer, shorter);
+      }
+    }
+  }
+
+  // Follow chains so a-b-c lands on a, not on a-b. Bounded by the map size.
+  const canonical = (k) => {
+    let cur = k;
+    for (let i = 0; i < 8 && alias.has(cur); i++) cur = alias.get(cur);
+    return cur;
+  };
+
+  const applied = new Map();
+  for (const e of events) {
+    for (const field of ['homeTeamKey', 'awayTeamKey']) {
+      const key = e[field];
+      if (!key) continue;
+      const c = canonical(key);
+      if (c !== key) { e[field] = c; applied.set(key, c); }
+    }
+  }
+
+  // Whatever is still in a prefix relationship inside one competition but was
+  // NOT safe to merge. Some are aliases the rules cannot reach (Genoa / Genoa
+  // CFC), some are real rivals (Dundee FC / Dundee United), and telling them
+  // apart needs a person. Reported, never applied.
+  const candidates = [];
+  const seen = new Set();
+  for (const keys of perCompetition.values()) {
+    const list = [...keys].map(canonical);
+    for (const a of list) {
+      for (const b of list) {
+        if (a === b || !b.startsWith(`${a}-`)) continue;
+        const id = `${a}|${b}`;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        candidates.push({ shorter: a, longer: b });
+      }
+    }
+  }
+
+  return {
+    applied: [...applied.entries()].map(([from, to]) => ({ from, to })).sort((a, b) => (a.from < b.from ? -1 : 1)),
+    candidates: candidates.sort((a, b) => (a.shorter < b.shorter ? -1 : 1)),
+  };
 }
 
 // ── Taxonomy resolution ──────────────────────────────────────────────────────
@@ -472,6 +579,10 @@ function normaliseRow(row, index) {
     title: rest,
     phase,
     truncated,
+    // The name exactly as the feed wrote it, taxonomy bracket and all. The
+    // Travelify ticket deeplink puts it in `loc` verbatim, so it has to survive
+    // the pass that strips it off the title.
+    rawName: safeText(nameRaw, LIMITS.maxNameLen),
 
     // Taxonomy — filled in by applyTaxonomy() once the batch has been seen
     category: null,
@@ -490,6 +601,11 @@ function normaliseRow(row, index) {
     hasPlaceholderTeams: Boolean(
       fixture && (isPlaceholderTeam(fixture.home) || isPlaceholderTeam(fixture.away)),
     ),
+    // Entity keys live on the row from here on. resolveTeamAliases() rewrites
+    // them to canonical clubs before anything merges or indexes on them.
+    homeTeamKey: null,
+    awayTeamKey: null,
+    performerKey: null,
     performer: null,
     locationText: null,
 
@@ -593,7 +709,13 @@ function applyTaxonomy(events) {
       const { performer, location } = splitPerformance(e._subject);
       e.performer = performer || null;
       e.locationText = location;
+      e.performerKey = performer ? slugify(performer) || null : null;
       if (performer) e.title = performer;
+    }
+
+    if (e.kind === 'fixture' && !e.hasPlaceholderTeams) {
+      e.homeTeamKey = normaliseTeamName(e.homeTeam) || null;
+      e.awayTeamKey = normaliseTeamName(e.awayTeam) || null;
     }
   }
 
@@ -618,15 +740,19 @@ export function identityKeyFor(event) {
   if (event.hasPlaceholderTeams) return `x|${event.uid}`;
 
   if (event.kind === 'fixture') {
-    const a = normaliseTeamName(event.homeTeam);
-    const b = normaliseTeamName(event.awayTeam);
+    // The resolved keys when the pass set them, so an alias collapsed by
+    // resolveTeamAliases() merges too: the feed lists one Arsenal friendly as
+    // "Arsenal vs Como" and again as "Arsenal vs Como 1907".
+    const a = event.homeTeamKey || normaliseTeamName(event.homeTeam);
+    const b = event.awayTeamKey || normaliseTeamName(event.awayTeam);
     if (a && b) {
       const [x, y] = a < b ? [a, b] : [b, a];
       return `f|${event.category || '?'}|${event.startDate}|${x}|${y}`;
     }
   }
   if (event.kind === 'performance' && event.performer) {
-    return `p|${slugify(event.performer)}|${event.startDate}|${event.venue.key}`;
+    const p = event.performerKey || slugify(event.performer);
+    return `p|${p}|${event.startDate}|${event.venue.key}`;
   }
   return `o|${event.category || '?'}|${event.startDate}|${event.venue.key}|${slugify(event._subject, 60)}`;
 }
@@ -664,6 +790,7 @@ function sourceOf(event) {
     supplierLabel: event.supplierLabel,
     searchboxId: event.searchboxId,
     filterId: event.filterId,
+    rawName: event.rawName,
     startsAtLocal: event.startsAtLocal,
     startTime: event.startTime,
     timeKnown: event.timeKnown,
@@ -784,9 +911,12 @@ function mergeCluster(rows, priority) {
     competition: primary.competition,
     competitionLabel: primary.competitionLabel,
     homeTeam: primary.homeTeam,
+    homeTeamKey: primary.homeTeamKey,
     awayTeam: primary.awayTeam,
+    awayTeamKey: primary.awayTeamKey,
     hasPlaceholderTeams: primary.hasPlaceholderTeams,
     performer: primary.performer,
+    performerKey: primary.performerKey,
     locationText: primary.locationText,
 
     startDate: withTime.startDate,
@@ -882,6 +1012,7 @@ export function normaliseSupplierEvents(rows, options = {}) {
   }
 
   const taxonomyStats = applyTaxonomy(parsed);
+  const { applied: teamAliases, candidates: teamAliasCandidates } = resolveTeamAliases(parsed);
 
   const cutoff = typeof notBefore === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(notBefore) ? notBefore : null;
   const kept = cutoff ? parsed.filter((e) => e.startDate >= cutoff) : parsed;
@@ -955,6 +1086,8 @@ export function normaliseSupplierEvents(rows, options = {}) {
       placeholderTeams: parsed.filter((e) => e.hasPlaceholderTeams).length,
       timeOffsets,
       venueAliasCandidates,
+      teamAliases,
+      teamAliasCandidates,
       ...taxonomyStats,
       bySupplier,
       byCategory,
