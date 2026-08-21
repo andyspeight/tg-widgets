@@ -195,12 +195,17 @@ it from the entity key on the way out. That is what gives every page one
 spelling per club: the feed writes "Arsenal" on one row and "Arsenal FC" on the
 next, and only the canonical name is ever shown.
 
-Rebuild after a new export:
+Rebuild after a new export (last done 21 Aug 2026, when the sheet gained its
+Latitude/Longitude columns and ~400 fresh rows):
 
 ```
 node scripts/build-events-snapshot.mjs feed.csv
+node scripts/build-venue-geo-from-feed.mjs feed.csv --ref api/_data/venue-geo.json
 npm run test:supplier-events
 ```
+
+The second step rebuilds the booking anchors from the sheet's coordinate
+columns, using the current table as the cross-check reference.
 
 ## Booking deeplinks
 
@@ -226,18 +231,27 @@ link 400s bare and 302s to the results page with the anchor added, and even
 Andy's own working example dies with its anchor removed. The wording of `loc`
 is irrelevant to the matcher.
 
-The coordinates live in `api/_data/venue-geo.json`, keyed by venue key, built
-from the venue registry via the Photon geocoder with three safeguards learned
-from three failed drafts: a venue with a known city (its concerts say where it
-is) must geocode INTO that city whatever its sponsor calls it now; a fixtures
-venue must resolve to a sports-typed place, never a street or a bank branch
-that shares its name; and the North American leagues expect {US, CA}, not US
-alone, or Toronto's grounds vanish. A hand-verified overrides list covers what
-no geocoder ranking gets right (the Legoland scale model of the Allianz Arena
-outranks Munich's). An event whose venue has no entry gets NO booking link and
-`status: 'no-anchor'` — the widgets show no button, which is honest, rather
-than a button that errors. `rad` is 20, kept verbatim from the working
-example.
+The coordinates live in `api/_data/venue-geo.json`, built by
+`scripts/build-venue-geo-from-feed.mjs` from the sheet's own **Latitude and
+Longitude columns**, which Andy had added on 21 Aug 2026. Supplier coordinates
+are authoritative for the supplier's own inventory, with two defects the
+builder repairs: some venues are truncated to whole degrees (Ceres Park at
+literally 10,10), which a real coordinate never is, so integer-integer pairs
+are rejected; and some rows drop the minus sign off a western longitude
+(Chicago at +87.6 is in China), repaired when the flipped point rejoins its
+venue's median or the previous verified table. Each venue takes the median of
+its rows; a row more than 50km from its venue's median becomes a per-EVENT
+anchor instead, which is exactly right for the venue keys that merge more than
+one real ground. `api/_data/venue-geo-overrides.json` has the final say for
+the handful of venues whose feed coordinates are fine-grained but factually
+wrong (the feed puts St James' Park in Exeter on rows that are all Newcastle
+United). An event with no anchor at either level gets NO url and
+`status: 'no-anchor'` — a missing button is honest and a dead one is not.
+`rad` is 20, kept verbatim from the working example.
+
+Before the sheet carried coordinates this table was built by geocoding (21 Aug
+2026, one afternoon, three failed drafts and 174 hand checks); that build and
+its lessons live in git history and in scripts/geocode-venues-via-vercel.mjs.
 
 `BOOKING_KINDS` in that file declares all three combinations. Two of them have
 `ready: false` and no builder, so `buildBookingOptions` returns them with a null
@@ -357,7 +371,7 @@ list, then add the confirmed pairs to a venue alias table.
   before any regex touches it. Data-derived lookups use `Map`, so a feed value
   of `__proto__` cannot reach `Object.prototype`.
 
-## Known residue in the 28 Jul export
+## Known residue in the source exports
 
 - 12 rows have no taxonomy bracket at all, mostly NFL season-ticket bundles and
   two EuroLeague multi-team packages. Their titles are kept whole and they come
@@ -381,12 +395,13 @@ buildings, sometimes on different continents:
 - `gradskistadion` - Slaven Belupo's Koprivnica ground and Sutjeska Niksic's in
   Montenegro ("gradski stadion" just means city stadium)
 
-The first two are deliberately UNANCHORED in venue-geo.json (their events get
-no booking link), because a link that books a hotel on the wrong continent is
-worse than no link; the third is anchored to Koprivnica as the majority. The
-real fix is in `venueKeyFor`: the key needs a disambiguator (country, or the
-supplier venue id) when the same name resolves under different competitions'
-countries. Until then, any new snapshot should re-check these three.
+Since the sheet gained per-row coordinates these keys are handled by
+per-EVENT anchors: each event books against its own row's location, so a
+Salzburg fixture and a Harrison NJ fixture at "Red Bull Arena" both link
+correctly (afasstadion joined the list — it is AZ Alkmaar's ground AND KV
+Mechelen's). The venue keys are still merged for browsing, so a Red Bull
+Arena venue page interleaves three cities' fixtures; the real fix for THAT
+remains a disambiguator in `venueKeyFor`, but bookings no longer wait on it.
 
 ## Adding a supplier
 
