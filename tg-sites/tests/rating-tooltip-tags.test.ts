@@ -149,6 +149,22 @@ describe('the tags', () => {
   it('lets a tag be a link, through the same sanitiser as every other href', () => {
     expect(source('TagsBlock')).toContain("safeUrl(str(item, 'href'), CONTACT_OK)");
   });
+
+  /*
+   * Andy confirmed on 21 Aug that the truncated "Coloured Delimited..." is the
+   * pair to "Bullet Delimited". Both readings of that name are covered by one
+   * colour field: it tints the PILL, and it also tints the BULLET, so a client
+   * who wants a coloured separator rather than coloured chips gets one without a
+   * second element. The bullet's colour is the half that looks like a detail and
+   * would be the half quietly flattened to grey.
+   */
+  it('colours the delimiter as well as the pill, from the one colour field', () => {
+    expect(source('TagsBlock')).toContain("{ '--tgs-tag': colour }");
+    const bullet = css.slice(css.indexOf(".tgs-tags[data-style='bullets'] .tgs-tags__item + .tgs-tags__item::before"));
+    expect(bullet.slice(0, bullet.indexOf('}'))).toContain('color: var(--tgs-tag);');
+    const pill = css.slice(css.indexOf(".tgs-tags[data-style='pills'] .tgs-tags__item"));
+    expect(pill.slice(0, pill.indexOf('}'))).toContain('var(--tgs-tag)');
+  });
 });
 
 describe('the icon pulse', () => {

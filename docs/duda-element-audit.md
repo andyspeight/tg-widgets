@@ -99,9 +99,14 @@ than the feature, because somebody relying on it is the bad outcome.
   mosaic and we already have Advanced Grid, the two-row mosaic slider and the
   gallery. A screenshot decides whether it is a fourth thing or a setting on one
   of those three.
-- **Two truncated names** from the 21 Aug screenshot that Andy has not yet
-  finished: "Coloured Delimited..." (assumed to be the pills style of Tags,
-  built on that assumption) and "Custom Offer/Tour...".
+- **One truncated name** from the 21 Aug screenshot that Andy has not yet
+  finished: "Custom Offer/Tour...". Read as the widget block plus cards bound to
+  a collection, both of which exist, so nothing is blocked on it.
+
+  ("Coloured Delimited..." was the other, and Andy confirmed on 21 Aug that it is
+  the pair to Bullet Delimited. Both are the Tags element. The one colour field
+  tints the bullet as well as the pill, so a client wanting a coloured separator
+  rather than coloured chips is covered without a second element.)
 - **Re-cutting the element categories.** Andy noted Duda categorises its
   elements and "we should do the same". The offer on the table is one pass over
   our five groups (Text, Media, Actions, Layout, Advanced) once the full list is
