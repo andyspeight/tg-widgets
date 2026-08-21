@@ -64,8 +64,13 @@ setting on the Icon we already had rather than a fourth icon element.
 
 **Later the same day**, from the same list plus one follow-up: **Tags gained a
 third style** ("a different colour each"), and **Fancy Grid** turned out to be
-our Cards block plus a hover tint, so the tint is a section setting beside hover
-lift and image zoom rather than a second grid element.
+our Cards block plus TWO things it did not have. The hover tint is a section
+setting beside hover lift and image zoom. The second was missed on the first
+read and caught by looking at the screenshot again: every card in it leads with
+an ICON, and Cards only ever led with a photograph, so Cards gained a lead
+setting. The icon-and-text block does have an icon, but it is a single item with
+no link and no grid, so reaching that screenshot through it meant hand-building
+a grid and giving up the link.
 
 Already built when that list arrived, so nothing to do: **Page anchor links**
 (a section already takes an anchor id, and `safeUrl` passes both `#suites` and
