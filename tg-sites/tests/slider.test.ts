@@ -79,8 +79,30 @@ describe('the Slider block', () => {
     expect(definition.fields.some((field) => field.key === 'columns')).toBe(false);
   });
 
-  it('refuses an original picture shape, for the same reason the grid does', () => {
+  /*
+   * ORIGINAL WAS REFUSED HERE UNTIL 20 AUG 2026, for a good reason: a card frame
+   * is built around a fixed aspect ratio, so with no ratio the box has no height
+   * and the picture inside collapses to nothing.
+   *
+   * It is offered now because that failure, fixed, IS the mosaic: Andy described
+   * Duda's double row carousel as "a mosaic, so the images can be of different
+   * heights in the same carousel". The fix is one rule giving the picture its own
+   * height back, scoped to the rail, and it is asserted below rather than left to
+   * trust — without it this option is a way for a client to make every picture
+   * vanish.
+   */
+  it('offers an original picture shape, which is what makes two rows a mosaic', () => {
     const ratio = definition.fields.find((field) => field.key === 'ratio');
+    expect(ratio?.kind === 'select' && ratio.options.map((o) => o.value)).toContain('auto');
+  });
+
+  it('and the stylesheet gives that frame its height back, or the picture vanishes', () => {
+    const css = readFileSync(join(__dirname, '..', 'app', 'globals.css'), 'utf8');
+    expect(css).toContain(".tgs-slider[data-ratio='auto'] .tgs-card__frame img { height: auto; }");
+  });
+
+  it('but the Cards grid still refuses it, because a ragged row helps nobody', () => {
+    const ratio = blockDefinition('cards')!.fields.find((field) => field.key === 'ratio');
     expect(ratio?.kind === 'select' && ratio.options.map((o) => o.value)).not.toContain('auto');
   });
 
@@ -215,5 +237,123 @@ describe('the rail', () => {
     // scrollbar that appears after the first scroll is too late to be a hint.
     expect(css).toContain('scrollbar-width: thin');
     expect(css).toContain('.tgs-slider::-webkit-scrollbar { height: 8px; }');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Two rows, and how loudly the rail says "this moves"
+//
+// Andy, 20 Aug 2026, from Duda's Double Row Carousel and Scrollbar Carousel.
+// Both are settings on this one block rather than two more blocks: four
+// near-identical carousels in the picker is how a library becomes hard to
+// choose from, and it would be four things to keep working.
+// ---------------------------------------------------------------------------
+
+const sliderCss = readFileSync(join(__dirname, '..', 'app', 'globals.css'), 'utf8');
+
+describe('two rows on one rail', () => {
+  it('is a setting, not a second block', () => {
+    expect(isKnownBlock('double-row-carousel')).toBe(false);
+    const rows = blockDefinition('slider')!.fields.find((f) => f.key === 'rows');
+    expect(rows?.kind).toBe('select');
+    expect(rows?.kind === 'select' && rows.options.map((o) => o.value)).toEqual(['1', '2']);
+  });
+
+  it('defaults to one, so no existing slider changes shape', () => {
+    expect(defaultPropsFor('slider').rows).toBe('1');
+  });
+
+  it('fills downwards then across, so a pair travels together', () => {
+    /*
+     * Two explicit rows plus the column auto-flow the rail already has is what
+     * puts card one above card two. Two separate rails would drift apart the
+     * moment anybody touched one of them.
+     */
+    const rule = sliderCss.slice(sliderCss.indexOf(".tgs-slider[data-rows='2'] {"));
+    expect(rule.slice(0, rule.indexOf('}'))).toContain('grid-template-rows: auto auto;');
+  });
+
+  it('lets each card be its own height, which is what makes it a mosaic', () => {
+    // Without this every card in a row stretches to the tallest and a short one
+    // grows a band of empty space under its text.
+    const rule = sliderCss.slice(sliderCss.indexOf(".tgs-slider[data-rows='2'] {"));
+    expect(rule.slice(0, rule.indexOf('}'))).toContain('align-items: start;');
+  });
+});
+
+describe('the bold scroll bar', () => {
+  it('is a setting on the same block, with the thin one still the default', () => {
+    const bar = blockDefinition('slider')!.fields.find((f) => f.key === 'scrollbar');
+    expect(bar?.kind === 'select' && bar.options.map((o) => o.value)).toEqual(['thin', 'bar']);
+    expect(defaultPropsFor('slider').scrollbar).toBe('thin');
+  });
+
+  /*
+   * STILL THE BROWSER'S OWN SCROLLBAR. A div drawn to look like one would need a
+   * script to move it, would not drag, would not take a keyboard, and would have
+   * to be kept in step with the real scroll position by hand.
+   */
+  it('styles the real scrollbar rather than drawing a fake one', () => {
+    expect(sliderCss).toContain(".tgs-slider[data-scrollbar='bar']::-webkit-scrollbar {");
+    expect(sliderCss).toContain(".tgs-slider[data-scrollbar='bar']::-webkit-scrollbar-thumb {");
+    // Firefox has no pseudo-elements for this, so the two-value shorthand is the
+    // only way it hears about the colours at all.
+    const base = sliderCss.slice(sliderCss.indexOf(".tgs-slider[data-scrollbar='bar'] {"));
+    expect(base.slice(0, base.indexOf('}'))).toContain('scrollbar-color:');
+  });
+});
+
+describe('the edge fade', () => {
+  /*
+   * A FIXED FADE WOULD BE A LIE AT BOTH ENDS: on the right it stays once you
+   * have reached the end, on the left it is there before you have started. So
+   * the two ends are driven by the scroll position itself.
+   */
+  it('follows the scroll rather than sitting still', () => {
+    expect(sliderCss).toContain('animation-timeline: scroll(self inline);');
+    expect(sliderCss).toContain('@keyframes tgs-rail-fade');
+  });
+
+  it('registers its two lengths, or they would jump instead of sliding', () => {
+    // An unregistered custom property does not interpolate: it flips at the
+    // halfway mark, which reads as a bug rather than a fade.
+    expect(sliderCss).toContain('@property --tgs-rail-l');
+    expect(sliderCss).toContain('@property --tgs-rail-r');
+    const prop = sliderCss.slice(sliderCss.indexOf('@property --tgs-rail-l'));
+    expect(prop.slice(0, prop.indexOf('}'))).toContain("syntax: '<length>'");
+  });
+
+  /*
+   * THE GUARD IS THE POINT OF THIS ONE. An unguarded `animation-timeline` in a
+   * browser without scroll timelines does not fall back to nothing: it falls
+   * back to a TIME-BASED animation, so the fade would slide from one edge to the
+   * other on a loop while the rail sat still. Far worse than no fade.
+   */
+  it('is inside @supports, so an older browser gets no fade rather than a timed one', () => {
+    const guard = sliderCss.indexOf('@supports (animation-timeline: scroll())');
+    expect(guard).toBeGreaterThan(-1);
+
+    const fade = sliderCss.indexOf('animation-timeline: scroll(self inline);');
+    expect(fade).toBeGreaterThan(guard);
+    // And inside the same block, not merely after it.
+    expect(sliderCss.slice(guard, fade)).not.toContain('\n}\n');
+  });
+});
+
+describe('the mosaic needs the frame to have a height', () => {
+  it('gives the picture its own height back on the Original shape', () => {
+    // A card frame is built around a fixed aspect ratio. With no ratio the box
+    // has no height and the picture collapses to nothing, which is why Original
+    // used to be refused here. One rule turns that failure into the feature.
+    expect(sliderCss).toContain(".tgs-slider[data-ratio='auto'] .tgs-card__frame img { height: auto; }");
+  });
+
+  it('and the renderer names the shape so that rule can find it', () => {
+    const render = readFileSync(join(__dirname, '..', 'components', 'render', 'blocks.tsx'), 'utf8');
+    // The whole function, not up to the first </div>: that one belongs to the
+    // empty-state placeholder and closes long before the rail is written.
+    const from = render.indexOf('export function SliderBlock');
+    const slider = render.slice(from, render.indexOf('export function ', from + 10));
+    expect(slider).toContain('data-ratio={ratio}');
   });
 });

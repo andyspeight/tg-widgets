@@ -3126,6 +3126,129 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   border-radius: 999px;
 }
 
+/*
+ * ---------------------------------------------------------------------------
+ * TWO ROWS ON ONE RAIL (Andy, 20 Aug 2026, from Duda's Double Row Carousel)
+ * ---------------------------------------------------------------------------
+ *
+ * NOT TWO SLIDERS STACKED. Two explicit rows plus the column auto-flow the rail
+ * already has means the cards fill DOWNWARDS and then across, so card one sits
+ * above card two and the pair travels together under one swipe. Two separate
+ * rails would drift apart the moment anybody touched one of them.
+ *
+ * `align-items: start` is what makes it a mosaic rather than a grid. Without it
+ * every card in a row stretches to the tallest, and a short card grows a band of
+ * empty space under its text. With it each card is its own height and the ROW is
+ * as tall as it needs to be, which is how pictures of different shapes sit
+ * together without being cropped to match.
+ */
+.tgs-slider[data-rows='2'] {
+  grid-template-rows: auto auto;
+  align-items: start;
+  /* The gap already set by data-gap applies both ways, which is what the pairs
+     want: the same air between the two rows as between the columns. */
+}
+
+/*
+ * THE MOSAIC, which is what makes two rows worth having.
+ *
+ * A card frame is built around a fixed aspect ratio: the picture inside is
+ * height: 100% of a box the ratio holds open. On the Original setting there IS
+ * no ratio, so the box has no height and the picture collapses to nothing —
+ * which is exactly why Original used to be filtered off the rail's list. Giving
+ * the picture its own height back turns that failure into the feature: every
+ * card is as tall as its own photograph, the row is as tall as its tallest, and
+ * pictures of different shapes sit together without being cropped to match.
+ *
+ * Scoped to the rail. The Cards grid still wants every card the same height, or
+ * a row of them goes ragged for no reason.
+ */
+.tgs-slider[data-ratio='auto'] .tgs-card__frame img { height: auto; }
+
+/*
+ * ---------------------------------------------------------------------------
+ * THE BOLD SCROLL BAR (Andy, 20 Aug 2026, from Duda's Scrollbar Carousel)
+ * ---------------------------------------------------------------------------
+ *
+ * STILL THE BROWSER'S OWN SCROLLBAR, only louder. A div drawn to look like one
+ * would have to be moved by script, would not drag, would not take a keyboard,
+ * and would have to be kept in step with the real scroll position by hand. This
+ * is the real thing with a track you can see at rest, which is the whole point:
+ * the thin default only appears once somebody has already scrolled, which is too
+ * late to be a hint that there is more.
+ */
+.tgs-slider[data-scrollbar='bar'] {
+  padding-bottom: var(--tgs-space-m);
+  scrollbar-width: auto;
+  scrollbar-color: var(--tgs-text) var(--tgs-surface-alt);
+}
+.tgs-slider[data-scrollbar='bar']::-webkit-scrollbar { height: 6px; }
+.tgs-slider[data-scrollbar='bar']::-webkit-scrollbar-track {
+  background: var(--tgs-surface-alt);
+  border-radius: 999px;
+}
+.tgs-slider[data-scrollbar='bar']::-webkit-scrollbar-thumb {
+  background: var(--tgs-text);
+  border-radius: 999px;
+}
+
+/*
+ * THE EDGE FADE, AND IT FOLLOWS THE SCROLL RATHER THAN SITTING STILL.
+ *
+ * A fixed fade on the right is a lie the moment you reach the end: the last card
+ * stays half-faded with nothing beyond it. A fixed fade on the left is a lie
+ * before you start. So the two ends are driven by `animation-timeline: scroll()`
+ * — the same scroll-driven CSS the reveals and the count-up already use — and
+ * the mask hands over as the rail moves. No script, and it cannot fall out of
+ * step with the scroll position because it IS the scroll position.
+ *
+ * The two lengths are registered with @property, exactly as --tgs-count is next
+ * to the key numbers. Unregistered custom properties do not interpolate: they
+ * would jump at the halfway mark rather than sliding, which looks like a bug.
+ *
+ * INSIDE @supports, so a browser without scroll timelines gets NO fade rather
+ * than a fade that animates on a timer, which is what an unguarded
+ * `animation-timeline` degrades to and would be far worse than nothing.
+ */
+@property --tgs-rail-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tgs-rail-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@supports (animation-timeline: scroll()) {
+  .tgs-slider[data-scrollbar='bar'] {
+    --tgs-rail-l: 0px;
+    --tgs-rail-r: 3rem;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--tgs-rail-l),
+      #000 calc(100% - var(--tgs-rail-r)),
+      transparent 100%
+    );
+    animation: tgs-rail-fade linear both;
+    /* The rail scrolls itself, sideways. */
+    animation-timeline: scroll(self inline);
+  }
+
+  /*
+   * A rail with nothing to scroll never starts its timeline, so the `from`
+   * frame is what it wears: no fade at either end. That is the right answer for
+   * three cards that already fit, and it comes out of the mechanism rather than
+   * needing a rule of its own.
+   */
+  @keyframes tgs-rail-fade {
+    from { --tgs-rail-l: 0px;   --tgs-rail-r: 3rem; }
+    to   { --tgs-rail-l: 3rem;  --tgs-rail-r: 0px; }
+  }
+}
+
 @container tgs-page (max-width: 767px) {
   /*
    * The grid collapses to one column on a phone. A RAIL MUST NOT: sideways is
@@ -3626,6 +3749,332 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   .tgs-halfover__body { padding: var(--tgs-space-l) var(--tgs-space-m); max-width: none; }
   .tgs-halfover__viewport { min-height: 0; }
   .tgs-halfover-wrap { --tgs-ho-h: auto; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Expanding cards                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 20 Aug 2026, from Duda's Expanding Cards. A row of pictures, one open.
+ *
+ * NO JAVASCRIPT: the open one is whichever radio is checked, and the browser
+ * does that. See ExpandingCardsBlock for why radios rather than buttons — one
+ * of a set and never none is what a radio group IS, and it brings arrow-key
+ * movement and a real announced state with it for free.
+ *
+ * The pairings below are written out one per position, six of them, for the
+ * same reason the Tabs rules are: `:nth-of-type` counts by ELEMENT type and
+ * would pair the wrong card with the wrong radio the moment the markup grows
+ * another kind of child. The count matches MAX_EXPANDING_CARDS.
+ */
+.tgs-expand { --tgs-exp-h: 26rem; }
+.tgs-expand[data-height='short']  { --tgs-exp-h: 18rem; }
+.tgs-expand[data-height='medium'] { --tgs-exp-h: 26rem; }
+.tgs-expand[data-height='tall']   { --tgs-exp-h: 34rem; }
+
+.tgs-expand__rail {
+  display: flex;
+  gap: var(--tgs-space-s);
+  height: var(--tgs-exp-h);
+}
+
+.tgs-expand__card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--tgs-radius, 12px);
+  /* Closed by default. The checked rule below grows one of them. */
+  flex: 1 1 0;
+  min-width: 0;
+  /* Exponential ease-out from an already-visible default: the card is there
+     the whole time, it only changes how much room it takes. */
+  transition: flex-grow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tgs-expand[data-radius='none'] .tgs-expand__card { border-radius: 0; }
+.tgs-expand[data-radius='sm'] .tgs-expand__card { border-radius: var(--tgs-radius-sm, 6px); }
+.tgs-expand[data-radius='lg'] .tgs-expand__card { border-radius: 20px; }
+.tgs-expand[data-radius='full'] .tgs-expand__card { border-radius: 28px; }
+
+.tgs-expand__pic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tgs-expand__pic--none { background: var(--tgs-surface-alt); }
+.tgs-expand__scrim { position: absolute; inset: 0; }
+
+/*
+ * THE CLOSED CARD IS ITSELF THE CONTROL, so the label covers the whole of it
+ * rather than being a small target on it. A narrow strip with a small button
+ * somewhere on it is a card most people would not think to click.
+ */
+.tgs-expand__hit {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--tgs-space-m);
+  cursor: pointer;
+  color: #fff;
+}
+
+/*
+ * THE TITLE READS UP THE STRIP RATHER THAN BEING CUT IN HALF ACROSS IT.
+ *
+ * A closed card is a few centimetres wide. Centre a horizontal title in that and
+ * "Greek island hopping" becomes "k island ho", which tells a visitor nothing
+ * and looks broken rather than deliberate. Turned on its side the whole title
+ * fits and the strip reads as a spine, which is the point of the pattern.
+ */
+.tgs-expand__spine {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+
+.tgs-expand__body {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--tgs-space-s);
+  padding: var(--tgs-space-l);
+  color: #fff;
+  /*
+   * HIDDEN RATHER THAN TRANSPARENT while the card is closed. `visibility:
+   * hidden` takes the button out of the tab order and out of the accessibility
+   * tree; opacity alone would leave a keyboard landing on a button nobody can
+   * see, inside a card that is not even open.
+   */
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.1s, visibility 0s linear 0.4s;
+}
+
+.tgs-expand__title {
+  margin: 0;
+  font-family: var(--tgs-h-font, inherit);
+  font-size: clamp(1.5rem, 1rem + 1.6vw, 2.2rem);
+  line-height: 1.15;
+  font-weight: 600;
+}
+.tgs-expand__text {
+  margin: 0;
+  max-width: 34rem;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 92%);
+  white-space: pre-line;
+}
+.tgs-expand__body .tgs-button { align-self: flex-start; }
+
+/* The open one. */
+.tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'],
+.tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'],
+.tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'],
+.tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'],
+.tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'],
+.tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] {
+  flex-grow: 4;
+}
+
+.tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'] .tgs-expand__body,
+.tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'] .tgs-expand__body,
+.tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'] .tgs-expand__body,
+.tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'] .tgs-expand__body,
+.tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'] .tgs-expand__body,
+.tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] .tgs-expand__body {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.35s ease 0.15s, visibility 0s;
+}
+
+/* Its label steps aside, or it would sit over the button and eat the click. */
+.tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'] .tgs-expand__hit,
+.tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] .tgs-expand__hit {
+  pointer-events: none;
+  opacity: 0;
+}
+
+/*
+ * THE FOCUS RING GOES ON THE CARD, because the thing that actually has focus is
+ * a radio nobody can see. Without this, tabbing into the row moves focus with no
+ * visible sign of where it went and the arrow keys start working for no
+ * apparent reason. Same reasoning as the Tabs rule above.
+ */
+.tgs-expand__radio[data-index='0']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='0'],
+.tgs-expand__radio[data-index='1']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='1'],
+.tgs-expand__radio[data-index='2']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='2'],
+.tgs-expand__radio[data-index='3']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='3'],
+.tgs-expand__radio[data-index='4']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='4'],
+.tgs-expand__radio[data-index='5']:focus-visible ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] {
+  outline: 3px solid var(--tgs-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tgs-expand__card { transition: none; }
+  .tgs-expand__body { transition: none; }
+}
+
+@container tgs-page (max-width: 767px) {
+  /*
+   * DOWN THE PAGE ON A PHONE. Six strips across 390px is 60px each, which is not
+   * a card, it is a fence. Stacked, the closed ones are readable bands and the
+   * open one has the width to actually say something, so the title turns back
+   * the right way up.
+   */
+  .tgs-expand__rail { flex-direction: column; height: auto; }
+  .tgs-expand__card { flex: none; height: 4.5rem; transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+  .tgs-expand__hit { align-items: center; justify-content: flex-start; }
+  .tgs-expand__spine { writing-mode: horizontal-tb; transform: none; }
+
+
+  .tgs-expand__radio[data-index='0']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='0'],
+  .tgs-expand__radio[data-index='1']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='1'],
+  .tgs-expand__radio[data-index='2']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='2'],
+  .tgs-expand__radio[data-index='3']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='3'],
+  .tgs-expand__radio[data-index='4']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='4'],
+  .tgs-expand__radio[data-index='5']:checked ~ .tgs-expand__rail .tgs-expand__card[data-index='5'] {
+    height: var(--tgs-exp-h);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Screen carousel: pictures playing on a device                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 20 Aug 2026, from Duda's Screen Carousel.
+ *
+ * THE DEVICE IS DRAWN HERE, not shipped as a picture of one. Four boxes and a
+ * dot: a bezel, a glass, a camera and a base. That stays sharp at any size,
+ * follows the client's silver or graphite choice, weighs nothing, and puts no
+ * photograph of somebody else's hardware on a client's homepage.
+ *
+ * THE SCREEN'S SHAPE IS THE REAL ONE. 16/10 for a laptop and 9/19.5 for a
+ * phone, because a 16/9 "laptop" reads as a television and everybody can tell
+ * without knowing why.
+ */
+.tgs-screen {
+  --tgs-scr-bezel: #c9ced6;
+  --tgs-scr-edge: #aeb5bf;
+  --tgs-scr-glass: #0b0e13;
+  display: flex;
+  justify-content: center;
+}
+.tgs-screen[data-frame='dark'] {
+  --tgs-scr-bezel: #3a3f47;
+  --tgs-scr-edge: #23262b;
+}
+
+.tgs-screen__device { width: 100%; max-width: 56rem; }
+.tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 17rem; }
+
+.tgs-screen__bezel {
+  position: relative;
+  background: var(--tgs-scr-bezel);
+  border: 1px solid var(--tgs-scr-edge);
+  border-radius: 14px;
+  padding: 14px 14px 16px;
+  box-shadow: 0 20px 45px rgb(0 0 0 / 18%);
+}
+.tgs-screen[data-device='phone'] .tgs-screen__bezel {
+  border-radius: 34px;
+  padding: 12px;
+}
+
+/* The camera. A dot on a laptop, a notch on a phone. */
+.tgs-screen__cam {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tgs-scr-edge);
+}
+.tgs-screen[data-device='phone'] .tgs-screen__cam {
+  top: 12px;
+  width: 42%;
+  height: 18px;
+  border-radius: 0 0 12px 12px;
+  background: var(--tgs-scr-bezel);
+  z-index: 3;
+}
+
+.tgs-screen__glass {
+  position: relative;
+  overflow: hidden;
+  background: var(--tgs-scr-glass);
+  border-radius: 4px;
+  aspect-ratio: 16 / 10;
+}
+.tgs-screen[data-device='phone'] .tgs-screen__glass {
+  border-radius: 24px;
+  aspect-ratio: 9 / 19.5;
+}
+
+/* The lid stands on something. A phone does not, so the base is hidden rather
+   than the markup branching for it. */
+.tgs-screen__base {
+  display: block;
+  width: 118%;
+  height: 12px;
+  margin: 0 auto;
+  transform: translateX(-7.6%);
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(var(--tgs-scr-bezel), var(--tgs-scr-edge));
+  box-shadow: 0 10px 20px rgb(0 0 0 / 14%);
+  /* The notch a lid is lifted by. */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 56% 100%, 54% 62%, 46% 62%, 44% 100%, 0 100%);
+}
+.tgs-screen[data-device='phone'] .tgs-screen__base { display: none; }
+
+/* The pictures fill the glass, and so does the slideshow inside it. */
+.tgs-screen__shot,
+.tgs-screen__glass .tgs-slideshow__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* The shared viewport rules set their own aspect ratio; in here the glass owns
+   the shape, so the viewport simply fills it. */
+.tgs-screen__viewport { aspect-ratio: auto; height: 100%; }
+.tgs-screen__glass .tgs-slideshow { height: 100%; }
+
+.tgs-screen__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255 255 255 / 70%);
+  font-size: 0.95rem;
+}
+
+@container tgs-page (max-width: 767px) {
+  /* A laptop bezel scaled to a phone screen leaves a stamp-sized picture, so
+     the frame thins out rather than the picture shrinking further. */
+  .tgs-screen__bezel { padding: 8px 8px 10px; border-radius: 10px; }
+  .tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 13rem; }
 }
 
 /* ------------------------------------------------------------------ */

@@ -1574,6 +1574,13 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
   const radius = oneOf(props, 'radius', RADII, 'md');
   const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
   const whole = bool(props, 'wholeCardLinks', true);
+  /*
+   * One rail, one or two rows deep, and how loudly it says "this moves".
+   * Both read through oneOf, so a value written by a later release cannot ask
+   * for a third row or a scrollbar style the stylesheet has no rule for.
+   */
+  const rows = oneOf(props, 'rows', ['1', '2'] as const, '1');
+  const scrollbar = oneOf(props, 'scrollbar', ['thin', 'bar'] as const, 'thin');
 
   const slides = items
     .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius }))
@@ -1596,6 +1603,12 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
       data-style={style}
       data-radius={radius}
       data-align={align}
+      /* The picture shape, so the stylesheet can give a frame back its height
+         when the shape is Original and there is no aspect ratio to hold it up. */
+      data-ratio={ratio}
+      /* Only when it is two, so a one-row rail stays plain markup. */
+      data-rows={rows === '2' ? '2' : undefined}
+      data-scrollbar={scrollbar}
       data-whole={whole ? 'true' : undefined}
       role="group"
       aria-label="Slides. Scroll sideways to see more."
@@ -1877,6 +1890,244 @@ export function HalfOverlayBlock({ props }: { props: Props }): ReactElement {
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * CARDS THAT OPEN WHEN YOU CLICK THEM, WITH NO JAVASCRIPT.
+ *
+ * Andy, 20 Aug 2026, from Duda's Expanding Cards. A row of narrow panels with
+ * one open; clicking a closed one opens it and closes the other. That is RADIO
+ * BUTTON BEHAVIOUR exactly — one of a set, and never none — so it is built from
+ * radios, the same way Tabs is. What that buys, beyond shipping no script:
+ *
+ *   - the arrow keys move between the cards without anybody writing a handler
+ *   - each card is a real form control, so a screen reader says what it is and
+ *     which one is chosen
+ *   - the browser remembers the choice through a back button
+ *
+ * THE MARKUP ORDER IS LOAD BEARING, exactly as it is in Tabs: the radios come
+ * first and are SIBLINGS of the rail, because `:checked ~` only looks forward.
+ * And the position is written down as `data-index` rather than inferred with
+ * `:nth-of-type`, which counts by element type and pairs the wrong card with the
+ * wrong radio the moment the markup gains another kind of child.
+ */
+export const MAX_EXPANDING_CARDS = 6;
+
+export function ExpandingCardsBlock({
+  props,
+  blockId,
+}: {
+  props: Props;
+  blockId: string;
+}): ReactElement {
+  const items = list(props, 'items')
+    .filter((item) => str(item, 'title') || str(item, 'src'))
+    .slice(0, MAX_EXPANDING_CARDS);
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some cards</div>;
+  }
+
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+  const radius = oneOf(props, 'radius', RADII, 'md');
+  const scrim = safeColour(props.scrim) ?? '#0d1420';
+  // Floored at 25: below that a pale photograph takes the white words with it.
+  const strength = clamp(props.scrimStrength, 25, 90, 55);
+  const buttonColour = safeColour(props.buttonColour) ?? undefined;
+
+  const name = `tgs-expand-${blockId}`;
+
+  return (
+    <div className="tgs-expand" data-height={height} data-radius={radius}>
+      {items.map((_, index) => (
+        <input
+          key={`r${index}`}
+          className="tgs-expand__radio tgs-sr-only"
+          type="radio"
+          name={name}
+          id={`${name}-${index}`}
+          data-index={index}
+          /*
+           * defaultChecked, not checked. Which card is open is the browser's
+           * business, and a controlled value would mean the editor canvas
+           * snapping back to the first card on every keystroke.
+           */
+          defaultChecked={index === 0}
+        />
+      ))}
+
+      <div className="tgs-expand__rail">
+        {items.map((item, index) => {
+          const src = safeUrl(str(item, 'src'));
+          const title = str(item, 'title');
+          const body = str(item, 'body');
+          const linkLabel = str(item, 'linkLabel');
+
+          return (
+            <div className="tgs-expand__card" key={`c${index}`} data-index={index}>
+              {src ? (
+                <img
+                  className="tgs-expand__pic"
+                  src={src}
+                  alt={str(item, 'alt')}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <span className="tgs-expand__pic tgs-expand__pic--none" aria-hidden="true" />
+              )}
+
+              {/* Paint, between the picture and the words. */}
+              <span
+                className="tgs-expand__scrim"
+                style={{ background: scrim, opacity: strength / 100 }}
+                aria-hidden="true"
+              />
+
+              {/*
+                THE WHOLE CLOSED CARD IS THE CONTROL, so the label covers it
+                rather than being a small target somewhere on it. It carries the
+                title, which is what a closed card shows. Once the card is open
+                the stylesheet takes the label's pointer events away, or it would
+                sit over the button and swallow the click.
+              */}
+              <label className="tgs-expand__hit" htmlFor={`${name}-${index}`}>
+                <span className="tgs-expand__spine">{title}</span>
+              </label>
+
+              <div className="tgs-expand__body">
+                {title && <p className="tgs-expand__title">{title}</p>}
+                {body && <p className="tgs-expand__text">{body}</p>}
+                {linkLabel &&
+                  renderButton(
+                    {
+                      label: linkLabel,
+                      href: str(item, 'linkHref'),
+                      variant: 'primary',
+                      colour: buttonColour,
+                    },
+                    index,
+                  )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PICTURES PLAYING ON A SCREEN.
+ *
+ * Andy, 20 Aug 2026, from Duda's Screen Carousel.
+ *
+ * THE DEVICE IS DRAWN IN CSS. A photograph of a laptop would be one size, one
+ * colour and a file to ship; a few rounded boxes stay sharp at any size, follow
+ * the client's own light or dark choice, and put nobody else's hardware on a
+ * client's homepage. Every part of it is aria-hidden, because a bezel and a
+ * camera dot are scenery: what a screen reader should find here is the pictures.
+ *
+ * IT BORROWS THE SLIDESHOW WHOLE, the same `.tgs-slideshow` wrapper the Image
+ * block and Half overlay emit, so it cycles in pure CSS and public/slideshow.js
+ * gives it arrows, dots and a pause button with nothing added to that file.
+ */
+function screenPictures(items: Props[]): Array<{ src: string; alt: string }> {
+  return items
+    .map((item) => ({ src: safeUrl(str(item, 'src')) || '', alt: str(item, 'alt') }))
+    .filter((picture) => picture.src !== '');
+}
+
+export function ScreenCarouselBlock({ props }: { props: Props }): ReactElement {
+  const pictures = screenPictures(list(props, 'items'));
+  const device = oneOf(props, 'device', ['laptop', 'phone'] as const, 'laptop');
+  const frame = oneOf(props, 'frame', ['light', 'dark'] as const, 'light');
+
+  /*
+   * THE EMPTY STATE IS STILL THE DEVICE, not a grey box saying "choose an
+   * image". A client who has just dropped this in wants to see the thing they
+   * chose; an empty screen inside a real frame shows them exactly what they are
+   * about to fill, and the editor's own field tells them how.
+   */
+  const shell = (inner: ReactElement | null) => (
+    <div className="tgs-screen" data-device={device} data-frame={frame}>
+      <div className="tgs-screen__device">
+        <div className="tgs-screen__bezel">
+          <span className="tgs-screen__cam" aria-hidden="true" />
+          <div className="tgs-screen__glass">{inner}</div>
+        </div>
+        {/* A laptop stands on something. A phone does not: the stylesheet hides
+            this for the phone rather than the markup branching for it. */}
+        <span className="tgs-screen__base" aria-hidden="true" />
+      </div>
+    </div>
+  );
+
+  if (pictures.length === 0) {
+    return shell(<span className="tgs-screen__empty">Choose your pictures</span>);
+  }
+
+  // One picture is not a carousel, so it gets no wrapper, no dots and no cycle.
+  if (pictures.length === 1) {
+    return shell(
+      <img
+        className="tgs-screen__shot"
+        src={pictures[0].src}
+        alt={pictures[0].alt}
+        loading="lazy"
+        decoding="async"
+      />,
+    );
+  }
+
+  const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
+  const interval = clamp(props.interval, 2, 15, 5);
+  const count = pictures.length;
+  const showArrows = bool(props, 'arrows', true);
+  const showDots = bool(props, 'dots', true);
+
+  return shell(
+    <div
+      className="tgs-slideshow"
+      data-transition={transition}
+      data-count={count}
+      data-interval={interval}
+      data-dots={showDots ? 'true' : undefined}
+      data-arrows={showArrows ? 'true' : undefined}
+      style={{ '--tgs-ss-cycle': `${count * interval}s` } as CSSProperties}
+      aria-roledescription="carousel"
+      aria-label="Pictures"
+    >
+      <div className="tgs-slideshow__viewport tgs-screen__viewport">
+        {pictures.map((picture, index) => (
+          <div
+            className="tgs-slideshow__slide"
+            key={index}
+            style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+          >
+            <img
+              src={picture.src}
+              alt={picture.alt}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+          </div>
+        ))}
+      </div>
+
+      {showDots && (
+        <div className="tgs-slideshow__dots" aria-hidden="true">
+          {pictures.map((_, index) => (
+            <span
+              className="tgs-slideshow__dot"
+              key={index}
+              style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
+            />
+          ))}
+        </div>
+      )}
+    </div>,
   );
 }
 

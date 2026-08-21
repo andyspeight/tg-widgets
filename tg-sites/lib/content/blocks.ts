@@ -916,6 +916,168 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * CARDS THAT OPEN WHEN YOU CLICK THEM (Andy, 20 Aug 2026, from Duda's
+     * Travelgenix Expanding Cards).
+     *
+     * A row of narrow panels, one of them open. Clicking a closed one opens it
+     * and closes the other, which is RADIO BUTTON BEHAVIOUR exactly — one of a
+     * set, never none — so that is what it is built from. Same trick Tabs uses,
+     * and it means a published page still ships no JavaScript for this: the
+     * browser does the choosing, the arrow keys work between the cards on their
+     * own, and each card is a real form control a screen reader announces.
+     */
+    type: 'expanding-cards',
+    label: 'Expanding cards',
+    group: 'Media',
+    icon: 'slider',
+    description: 'A row of pictures where the one you click opens to show its story.',
+    defaults: {
+      height: 'medium',
+      radius: 'md',
+      scrim: '#0d1420',
+      scrimStrength: 55,
+      items: [
+        { src: '', alt: '', title: 'Greece', body: 'Seven nights across three islands, with every ferry booked for you.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Italy', body: 'A week on the Amalfi coast, with a driver for the coast road.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Portugal', body: 'Three nights in Lisbon, then four with your feet up in the Algarve.', linkLabel: 'See the trip', linkHref: '' },
+        { src: '', alt: '', title: 'Croatia', body: 'Split, Hvar and Dubrovnik, with the ferry times worked out.', linkLabel: 'See the trip', linkHref: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Expanding cards (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Cards',
+        itemLabel: 'Card',
+        /*
+         * SIX, and the number is a design limit rather than a technical one.
+         * Every card that is not open is a strip a few centimetres wide with a
+         * word down it; past six there is not enough room left for the open one
+         * to be worth opening.
+         */
+        max: 6,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Picture description', max: 200, help: 'What the picture shows, for a screen reader.' },
+          { kind: 'text', key: 'title', label: 'Title', max: 60, help: 'Shown down the side of a closed card, so keep it short.' },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 3, max: 400 },
+          { kind: 'text', key: 'linkLabel', label: 'Button', max: 40 },
+          { kind: 'url', key: 'linkHref', label: 'Button links to', placeholder: '/greece or https://' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      {
+        kind: 'colour',
+        key: 'scrim',
+        label: 'Shading',
+        help: 'The wash over each picture. Without it, words over a photograph are a lottery.',
+      },
+      {
+        kind: 'number',
+        key: 'scrimStrength',
+        label: 'Shading strength',
+        min: 25,
+        max: 90,
+        step: 1,
+      },
+      { kind: 'colour', key: 'buttonColour', label: 'Button colour', help: 'Blank uses your theme.' },
+    ],
+  },
+  {
+    /*
+     * PICTURES PLAYING ON A SCREEN (Andy, 20 Aug 2026, from Duda's Travelgenix
+     * Screen Carousel).
+     *
+     * THE FRAME IS DRAWN IN CSS, not a PNG of a laptop. A picture of a device
+     * would be one fixed size, one fixed colour, and a file to ship; a few
+     * rounded boxes cost nothing, stay sharp on any screen, and can follow the
+     * client's own light or dark choice. It also means there is no photograph of
+     * somebody else's hardware on a client's homepage.
+     *
+     * IT BORROWS THE SLIDESHOW WHOLE, exactly as Half overlay does: the same
+     * `.tgs-slideshow` wrapper, so it cycles in pure CSS and public/slideshow.js
+     * gives it arrows, dots and a pause button with nothing added to that file.
+     * One picture is not a carousel and renders as a still screen.
+     */
+    type: 'screen-carousel',
+    label: 'Screen carousel',
+    group: 'Media',
+    icon: 'slider',
+    description: 'Your pictures playing on a laptop or phone screen.',
+    defaults: {
+      device: 'laptop',
+      frame: 'light',
+      transition: 'fade',
+      interval: 5,
+      arrows: true,
+      dots: true,
+      items: [{ src: '', alt: '' }, { src: '', alt: '' }, { src: '', alt: '' }],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return count > 1 ? `Screen carousel (${count})` : 'Screen';
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Pictures',
+        itemLabel: 'Picture',
+        max: 20,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Description', max: 200, help: 'What the picture shows, for a screen reader.' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'device',
+        label: 'Device',
+        options: [
+          { value: 'laptop', label: 'Laptop' },
+          { value: 'phone', label: 'Phone' },
+        ],
+        help: 'The shape of the screen your pictures play on.',
+      },
+      {
+        kind: 'select',
+        key: 'frame',
+        label: 'Frame',
+        options: [
+          { value: 'light', label: 'Silver' },
+          { value: 'dark', label: 'Graphite' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'transition',
+        label: 'Transition',
+        options: [
+          { value: 'fade', label: 'Fade' },
+          { value: 'slide', label: 'Slide' },
+        ],
+      },
+      { kind: 'number', key: 'interval', label: 'Seconds per picture', min: 2, max: 15, step: 1 },
+      { kind: 'toggle', key: 'arrows', label: 'Arrows to move between pictures' },
+      { kind: 'toggle', key: 'dots', label: 'Dots showing which picture is up' },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',
@@ -1325,6 +1487,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       ratio: '4/3',
       radius: 'md',
       align: 'left',
+      rows: '1',
+      scrollbar: 'thin',
       wholeCardLinks: true,
       items: [
         {
@@ -1415,11 +1579,21 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'tinted', label: 'Tinted' },
         ],
       },
+      /*
+       * ORIGINAL IS BACK ON THE LIST, and only on the rail (Andy, 20 Aug 2026).
+       * It was filtered out because a card frame with no shape has no height to
+       * give its picture and collapses. On a two-row rail it is the whole point:
+       * "a mosaic, so the images can be of different heights in the same
+       * carousel" was how Andy described the Duda one. The stylesheet gives the
+       * frame back its height for this one setting; see the note beside
+       * .tgs-slider[data-ratio='auto'].
+       */
       {
         kind: 'select',
         key: 'ratio',
         label: 'Picture shape',
-        options: RATIO_OPTIONS.filter((option) => option.value !== 'auto'),
+        options: RATIO_OPTIONS,
+        help: 'Original lets every picture keep its own shape, which is what makes two rows read as a mosaic rather than a grid.',
       },
       { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
       {
@@ -1427,6 +1601,39 @@ export const BLOCKS: readonly BlockDefinition[] = [
         key: 'align',
         label: 'Alignment',
         options: ALIGN_OPTIONS.filter((option) => option.value !== 'right'),
+      },
+      /*
+       * TWO ROWS ON ONE RAIL (Andy, 20 Aug 2026, from Duda's Double Row
+       * Carousel). Not two sliders stacked: one rail, filling downwards then
+       * across, so a swipe moves both rows together and the pair stays a pair.
+       * Twice the trips in the same height of page, which is what a homepage
+       * with a lot to show actually needs.
+       */
+      {
+        kind: 'select',
+        key: 'rows',
+        label: 'Rows',
+        options: [
+          { value: '1', label: 'One' },
+          { value: '2', label: 'Two' },
+        ],
+        help: 'Two stacks the cards in pairs and moves them together. Each row is as tall as it needs to be, so pictures of different shapes still line up.',
+      },
+      /*
+       * HOW THE RAIL SAYS "THIS MOVES" (Andy, 20 Aug 2026, from Duda's Scrollbar
+       * Carousel). Both are the browser's own scrollbar rather than anything
+       * drawn: it stays draggable, keyboard reachable and honest about how far
+       * along you are, which a div pretending to be a scrollbar is not.
+       */
+      {
+        kind: 'select',
+        key: 'scrollbar',
+        label: 'Scroll bar',
+        options: [
+          { value: 'thin', label: 'Thin' },
+          { value: 'bar', label: 'Bold' },
+        ],
+        help: 'Bold gives the wide track under the cards, and fades the rail at whichever end has more to show.',
       },
       {
         kind: 'toggle',
