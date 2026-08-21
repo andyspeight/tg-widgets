@@ -3379,8 +3379,8 @@ export function ShapeBlock({ props }: { props: Props }): ReactElement {
  *
  * THE YEAR IS READ WHEN THE PAGE IS DRAWN, never stored. A published page is
  * server-rendered on every request, so the server knows the date and hands the
- * browser a finished line — no script, which the page could not run anyway, and
- * nothing for a visitor with JavaScript off or a crawler to miss.
+ * browser a finished line. No script, and nothing for a visitor with JavaScript
+ * off or a crawler to miss.
  *
  * ONE `new Date()` IN THE WHOLE RENDER TREE, and it is here. The assembly is a
  * pure function in lib/content/copyright.ts that takes the year as an argument,
@@ -3419,7 +3419,7 @@ export function CopyrightBlock({ props }: { props: Props }): ReactElement {
 /**
  * Long text, folded to a few lines, with a control to open it.
  *
- * NO JAVASCRIPT, and the published page could not run any if there were. A
+ * NO JAVASCRIPT, because this block does not need any. A
  * hidden checkbox and a label, the same shape TabsBlock uses for its panels: the
  * label toggles the input and `:checked ~` in the stylesheet drops the line
  * clamp on the body that follows it. The general sibling combinator only looks
@@ -3506,8 +3506,9 @@ export function ReadMoreBlock({
  * A PLAIN LINK, and everything else follows from that. Not a button with a click
  * handler, not a fetch, not a blob: an anchor with an href, so it works with a
  * right-click, with "save link as", on a phone's share sheet, in a screen reader,
- * and with JavaScript off. A published page ships no JavaScript at all, so
- * anything cleverer here would simply not run.
+ * and with JavaScript off. Anything cleverer here would be worse in every one
+ * of those places, and would break clause 2 of the rule in lib/content/blocks.ts:
+ * the content never depends on a script.
  *
  * `download` IS A REQUEST, NOT A GUARANTEE. Browsers honour it only for a
  * same-origin file, and ours are served from the blob store, which is a different

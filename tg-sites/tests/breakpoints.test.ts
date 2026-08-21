@@ -1047,8 +1047,11 @@ describe('parallax drifts a sections background picture as the page scrolls', ()
 
   it('emits data-parallax only for a still background, never a slideshow, a video or editing', () => {
     expect(render).toContain('data-parallax={');
+    // The three background guards were given a name on 20 Aug 2026, when the motion
+    // recipes arrived and a third thing wanted the same picture. Same conditions.
+    expect(render).toContain('const stillBackground = Boolean(background) && !bgShow && !video;');
     expect(render).toContain(
-      'section.parallax && Boolean(background) && !bgShow && !video && !editable',
+      'section.parallax && stillBackground && !motionOwnsBackground && !editable',
     );
   });
 
@@ -1110,7 +1113,7 @@ describe('Ken Burns drifts and zooms a sections background picture on its own', 
   it('emits data-ken-burns only for a still background, never alongside parallax, a slideshow, a video or editing', () => {
     expect(render).toContain('data-ken-burns={');
     expect(render).toContain(
-      'section.kenBurns && Boolean(background) && !bgShow && !video && !section.parallax && !editable',
+      'section.kenBurns && stillBackground && !motionOwnsBackground && !section.parallax && !editable',
     );
   });
 

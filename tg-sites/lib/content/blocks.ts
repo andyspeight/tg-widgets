@@ -18,23 +18,59 @@
  * Add a test alongside if the block has non-trivial props.
  *
  * ---------------------------------------------------------------------------
- * THE RULE EVERY BLOCK HERE KEEPS: A PUBLISHED PAGE SHIPS NO JAVASCRIPT
+ * THE RULE EVERY BLOCK HERE KEEPS: THE PAGE WORKS BEFORE ANY SCRIPT RUNS
  * ---------------------------------------------------------------------------
  *
- * Not a preference. It is why these pages are fast, why they work with
- * JavaScript off, and why a crawler sees the same page a visitor does. Every
- * interactive block in this file is built to it: Tabs and Read more use a hidden
- * input and `:checked ~`, Accordion uses <details>, the Slider is scroll-snap,
- * Search is a plain GET form, Copyright is computed on the server. The single
- * deliberate exception in the whole product is the light and dark toggle, which
- * needs to remember a choice, and it is one small file.
+ * This replaced an absolute ban on 20 Aug 2026 (Andy). The old rule was "a
+ * published page ships no JavaScript" and it was the right rule for the year
+ * that built these blocks. It is set out here with what changed and why,
+ * because a rule this load-bearing must not quietly become a different one.
  *
- * DECIDED AGAINST: LOTTIE (Andy, 20 Aug 2026). A Lottie is a JSON animation plus
- * a ~250KB JavaScript player, so it cannot be done without breaking the rule
- * above. It was raised from the Duda element list with three ways forward — load
- * the player only on pages using one, do not do it, or ship it everywhere — and
- * Andy chose not to do it. A client who wants that animation exports it as a
- * looping MP4, which the Video block already plays.
+ * WHAT THE OLD RULE WAS PROTECTING, and still is. Three things: these pages are
+ * fast, they work with JavaScript off or blocked, and a crawler sees the same
+ * page a visitor does. A blanket ban was the cheapest way to guarantee all
+ * three. It also ruled out the motion layer, and motion on a client homepage is
+ * a large part of why an agency leaves Duda for us. So the ban is replaced by
+ * the thing it was standing in for, in four clauses.
+ *
+ * 1. A PAGE THAT ASKS FOR NOTHING SHIPS NOTHING. Zero is still the default and
+ *    most pages stay there. Every script is conditional on the page actually
+ *    using the feature, the way ThemeToggleScript, SlideshowScript and
+ *    WidgetScripts already are. A page with no motion, no slideshow, no widget
+ *    and no light and dark switch renders exactly the bytes it does today.
+ *
+ * 2. THE CONTENT NEVER DEPENDS ON A SCRIPT. Every word, picture, link and form
+ *    action is in the server-rendered HTML and usable with JavaScript off. A
+ *    script may add motion, controls or polish on top of that. It may never be
+ *    how the content arrives. This clause is what actually protected the three
+ *    properties above, and it is the one to check a new block against.
+ *
+ * 3. OURS, HAND-WRITTEN, NO LIBRARIES. Not GSAP, not Lenis, not Three.js, not a
+ *    Lottie player. Every script we ship is in this repo and reviewable, and it
+ *    is why the motion recipes are all vanilla.
+ *
+ * 4. A NAMED COST AND A PAGE BUDGET. Tier 0 is CSS only and free. Tier 1 is a
+ *    few KB and two or three per page is fine. Tier 2 is WebGL, one per page,
+ *    maximum. A budget nobody enforces is a wish, so it belongs in a test.
+ *
+ * Everything already built still keeps the strictest reading, and should: Tabs
+ * and Read more use a hidden input and `:checked ~`, Accordion uses <details>,
+ * the Slider is scroll-snap, Search is a plain GET form, Copyright is computed
+ * on the server. Reach for a script when a block genuinely cannot be done
+ * without one, not when it is the first thing that comes to mind.
+ *
+ * STILL DECIDED AGAINST: LOTTIE (Andy, 20 Aug 2026), and the new rule does not
+ * reopen it. A Lottie is a JSON animation plus a ~250KB third-party player, so
+ * it fails clause 3 on its own and its weight fails clause 4. It was raised
+ * from the Duda element list with three ways forward, load the player only on
+ * pages using one, do not do it, or ship it everywhere, and Andy chose not to
+ * do it. A client who wants that animation exports it as a looping MP4, which
+ * the Video block already plays.
+ *
+ * REDUCED MOTION IS A SECOND DESIGNED PAGE, never a switch turned off. Ambient
+ * loops never start, pinned sections become ordinary stacked ones, rails become
+ * swipeable carousels, reveals resolve to their finished state. Every animation
+ * in globals.css is already built this way and anything new must be too.
  *
  * This is written down so it is not re-opened by accident. If it ever is
  * re-opened it should be on purpose, with the cost named out loud.

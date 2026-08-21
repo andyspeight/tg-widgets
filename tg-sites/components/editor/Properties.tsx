@@ -30,8 +30,10 @@ import {
   MAX_PULL_UP,
   MAX_RADIUS,
   MIN_COLUMN_WIDTH,
+  MOTION_BACKGROUND_RECIPES,
   normaliseSectionPadding,
   PADDING_PRESETS,
+  type MotionRecipe,
 } from '../../lib/content/schema';
 import {
   resolveAt,
@@ -48,6 +50,8 @@ import {
   FONT_SIZE_GROUPS,
   hasInlineTextSizing,
   LINE_HEIGHTS,
+  MOTION_CHOICES,
+  MOTION_INTENSITIES,
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
@@ -1106,6 +1110,78 @@ function SectionFields({
       </Group>
 
       <Group title="Motion" defaultOpen={false}>
+        {/*
+          THE MOTION RECIPE, first in the group because it is the headline choice: it
+          says how the whole section moves, where the switches below it are finer
+          adjustments. Picking a recipe that drives the background clears parallax and
+          Ken Burns, exactly as those two clear each other, because all three move the
+          one picture and the render lets the recipe win.
+        */}
+        <div className="ed-field">
+          <label className="ed-label" htmlFor={`ed-motion-${index}`}>
+            Movement
+          </label>
+          <select
+            id={`ed-motion-${index}`}
+            className="ed-select"
+            value={section.motion?.recipe ?? 'none'}
+            onChange={(event) => {
+              // Narrowed against the picker's own list rather than cast, so a value
+              // that is not on offer cannot reach the model even from a crafted event.
+              const recipe = MOTION_CHOICES.find((c) => c.value === event.target.value)?.value;
+              if (!recipe || recipe === 'none') {
+                set({ motion: undefined }, `sec:${index}:motion`);
+                return;
+              }
+              const owns = MOTION_BACKGROUND_RECIPES.has(recipe satisfies MotionRecipe);
+              set(
+                {
+                  motion: { recipe, intensity: section.motion?.intensity ?? 2 },
+                  ...(owns ? { parallax: undefined, kenBurns: undefined } : {}),
+                },
+                `sec:${index}:motion`,
+              );
+            }}
+          >
+            {MOTION_CHOICES.map((choice) => (
+              <option key={choice.value} value={choice.value}>
+                {choice.label}
+              </option>
+            ))}
+          </select>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            How this section moves on its own. Pictures breathe drifts each picture in the
+            section very slowly, each at its own pace. Background drifts moves the section&apos;s
+            background picture instead, which suits a closing section at the foot of a page.
+            Both stop for anyone who prefers less motion.
+          </p>
+        </div>
+        {section.motion && (
+          <div className="ed-field">
+            <label className="ed-label" htmlFor={`ed-motion-intensity-${index}`}>
+              How much
+            </label>
+            <select
+              id={`ed-motion-intensity-${index}`}
+              className="ed-select"
+              value={String(section.motion.intensity)}
+              onChange={(event) => {
+                const band =
+                  MOTION_INTENSITIES.find((b) => String(b.value) === event.target.value)?.value ?? 2;
+                set(
+                  { motion: { recipe: section.motion?.recipe ?? 'A5', intensity: band } },
+                  `sec:${index}:motionIntensity`,
+                );
+              }}
+            >
+              {MOTION_INTENSITIES.map((band) => (
+                <option key={band.value} value={String(band.value)}>
+                  {band.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="ed-field">
           <label className="ed-toggle">
             <input
