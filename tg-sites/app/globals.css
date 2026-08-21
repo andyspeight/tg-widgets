@@ -957,10 +957,19 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   height: 1em;
   display: block;
 }
-/* Centred cards centre their icon too, which is the arrangement in the
-   reference and the one the icon-and-text block already follows. */
-.tgs-cards[data-align='centre'] .tgs-card__icon { margin-inline: auto; }
-.tgs-cards[data-align='centre'] .tgs-card__svg { margin-inline: auto; }
+/*
+ * The icon aligns on its OWN, not with the words. Andy's reference centres the
+ * shield over left-aligned text, which is a real arrangement neither a left card
+ * nor a centred one can draw, so it gets its own attribute rather than following
+ * the card's. A centred CARD still centres its icon, because the icon defaults
+ * to sitting with the words and the words are centred.
+ */
+.tgs-card__icon[data-align='centre'] .tgs-card__svg { margin-inline: auto; }
+.tgs-card__icon[data-align='centre'] { text-align: center; }
+.tgs-cards[data-align='centre'] .tgs-card__icon[data-align='left'] { text-align: center; }
+.tgs-cards[data-align='centre'] .tgs-card__icon[data-align='left'] .tgs-card__svg {
+  margin-inline: auto;
+}
 
 /*
  * HOVER TINT (Andy, 21 Aug 2026, from Duda's "Fancy Grid"). A section marked

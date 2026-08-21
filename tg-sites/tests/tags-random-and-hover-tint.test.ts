@@ -222,6 +222,25 @@ describe('a card that leads with an icon', () => {
     expect(code(render)).toContain("{ showImage: true, ratio, radius, lead: 'image' }");
   });
 
+  /*
+   * Andy's reference centres the shield over LEFT-ALIGNED words. Neither a fully
+   * left card nor a fully centred one draws that, so the icon aligns on its own
+   * rather than the whole card being centred to get the icon centred.
+   */
+  it('aligns on its own, so a centred icon can sit over left-aligned words', () => {
+    const align = blockDefinition('cards')!.fields.find((f) => f.key === 'iconAlign') as
+      { options: Array<{ value: string }> };
+    expect(align.options.map((o) => o.value)).toEqual(['left', 'centre']);
+    expect(defaultPropsFor('cards').iconAlign).toBe('left');
+    expect(code(render)).toContain("data-align={options.iconAlign ?? 'left'}");
+    expect(css).toContain(".tgs-card__icon[data-align='centre'] { text-align: center; }");
+  });
+
+  it('still follows a centred card when it was left to its default', () => {
+    // Otherwise centring a whole card would leave its icon stranded on the left.
+    expect(css).toContain(".tgs-cards[data-align='centre'] .tgs-card__icon[data-align='left'] { text-align: center; }");
+  });
+
   it('colours every icon in the grid together, not one at a time', () => {
     // Andy's reference has six identical shields. A per-card colour would invite
     // a client to make each one different, which is the look nobody asked for.

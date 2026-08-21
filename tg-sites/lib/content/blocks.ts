@@ -1743,6 +1743,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       imagePosition: 'top',
       lead: 'image',
       iconColour: '',
+      iconAlign: 'left',
       ratio: '4/3',
       radius: 'md',
       align: 'left',
@@ -1872,6 +1873,22 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'image', label: 'A picture' },
           { value: 'icon', label: 'An icon' },
         ],
+      },
+      {
+        /*
+         * THE ICON ALIGNS ON ITS OWN, and that is not a fussy extra: Andy's
+         * Fancy Grid reference centres the shield over left-aligned words, which
+         * neither a fully left nor a fully centred card can draw. One field
+         * rather than making the whole card centre to get the icon centred.
+         */
+        kind: 'select',
+        key: 'iconAlign',
+        label: 'Icon sits',
+        options: [
+          { value: 'left', label: 'With the words' },
+          { value: 'centre', label: 'Centred' },
+        ],
+        help: 'Only used when the cards lead with an icon.',
       },
       {
         kind: 'colour',

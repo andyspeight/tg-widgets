@@ -1380,6 +1380,7 @@ function renderCard(
      */
     lead: 'image' | 'icon';
     iconColour?: string;
+    iconAlign?: 'left' | 'centre';
   },
 ): ReactElement | null {
   const title = str(card, 'title');
@@ -1421,6 +1422,7 @@ function renderCard(
          */
         <span
           className="tgs-card__icon"
+          data-align={options.iconAlign ?? 'left'}
           data-kind={isIconName(icon) ? 'icon' : 'character'}
           aria-hidden="true"
           style={options.iconColour ? { color: options.iconColour } : undefined}
@@ -1500,6 +1502,7 @@ export function CardsBlock({
    * make each one different, which is the look nobody asked for.
    */
   const iconColour = safeColour(props.iconColour);
+  const iconAlign = oneOf(props, 'iconAlign', ['left', 'centre'] as const, 'left');
 
   const cards = items
     .map((card, index) =>
@@ -1509,6 +1512,7 @@ export function CardsBlock({
         radius,
         lead,
         iconColour,
+        iconAlign,
       }),
     )
     .filter((card): card is ReactElement => card !== null);
