@@ -20,6 +20,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MOTION_ARRIVAL_RECIPES,
   MOTION_SCRIPT_RECIPES,
+  MOTION_VIDEO_RECIPES,
   MOTION_BACKGROUND_RECIPES,
   MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
@@ -118,6 +119,27 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
    * a finished page rather than a broken one.
    */
   it.each([...MOTION_LIVE_RECIPES])('recipe %s only moves behind prefers-reduced-motion', (recipe) => {
+    /*
+     * A VIDEO RECIPE'S MOVEMENT IS THE FILM, so it has neither a keyframe nor a
+     * script to guard, and no rule of its own in the stylesheet either: it works
+     * through the render and the generic background-video rule. Two things have to
+     * hold for it instead. The stylesheet hides it, and the render never even
+     * fetches it. Hidden is not the same as not fetched, and the second is the one
+     * worth having.
+     */
+    if (MOTION_VIDEO_RECIPES.has(recipe)) {
+      expect(
+        css.includes('.tgs-section__bg--video { display: none; }'),
+        `${recipe} plays a film that reduced motion does not hide`,
+      ).toBe(true);
+      expect(
+        render.includes('media="(prefers-reduced-motion: no-preference)"'),
+        `${recipe} still downloads its film for a visitor who asked for less motion`,
+      ).toBe(true);
+      return;
+    }
+
+    /* Everything else styles itself, so it must have a rule keyed on the recipe. */
     const selector = `[data-motion='${recipe}']`;
     expect(css).toContain(selector);
 
@@ -175,6 +197,11 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
       const rules = css.split('}').filter((r) => r.includes(`[data-motion='${recipe}']`));
       const animation = rules.find((r) => /\banimation:/.test(r)) ?? '';
       const sticky = rules.some((r) => /position:\s*sticky/.test(r));
+
+      if (MOTION_VIDEO_RECIPES.has(recipe)) {
+        // Paced by the file. There is no counter here to drift.
+        continue;
+      }
 
       if (MOTION_SCRIPT_RECIPES.has(recipe)) {
         // The script's own pacing. A phase read from the frame timestamp cannot drift
@@ -781,5 +808,39 @@ describe('the rail works before the script does', () => {
     // and ignored. Without it the rail would read its own drift as somebody steering
     // and stop itself on the first frame.
     expect(motionScript).toContain('selfScrollUntil');
+  });
+});
+
+describe('the video hero is not downloaded by people who will not see it', () => {
+  it('gates the film on a media query rather than only hiding it', () => {
+    /*
+     * Measured in a real browser both ways: a plain src fetches the file even when
+     * the stylesheet has set display: none on it, and a <source> whose media query
+     * does not match is never selected so nothing is requested. One request against
+     * none, for a visitor who asked for less motion and would never see a frame.
+     *
+     * This is also the cheapest available answer to what a video hero costs in
+     * egress, which is an open question on the project.
+     */
+    expect(render).toContain('media="(prefers-reduced-motion: no-preference)"');
+    expect(render).toContain("src={motion === 'A7' ? undefined : video}");
+  });
+
+  it('leaves every video already published exactly as it was', () => {
+    // The conditional is on the recipe, so a section that never asked for A7 keeps
+    // the src it has and behaves identically.
+    expect(render).toContain("motion === 'A7' ? (");
+  });
+
+  it('needs a film before it will do anything, as A2 needs a sequence', () => {
+    expect(MOTION_VIDEO_RECIPES.has('A7')).toBe(true);
+    expect(render).toContain('if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);');
+  });
+
+  it('costs no script, so a video hero keeps the no-script promise', () => {
+    for (const recipe of MOTION_VIDEO_RECIPES) {
+      expect(MOTION_SCRIPT_RECIPES.has(recipe), `${recipe} should not need a script`).toBe(false);
+      expect(MOTION_TIERS[recipe]).toBe(0);
+    }
   });
 });

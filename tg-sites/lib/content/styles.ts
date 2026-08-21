@@ -466,6 +466,7 @@ export const MOTION_CHOICES = [
   { value: 'A6', label: 'Background drifts' },
   { value: 'A2', label: 'Scenes change' },
   { value: 'A4', label: 'Layers drift apart' },
+  { value: 'A7', label: 'Film behind the words' },
   { value: 'S5', label: 'Background settles' },
   { value: 'S1', label: 'Words rise like a tide' },
   { value: 'S3', label: 'Cards stack up' },

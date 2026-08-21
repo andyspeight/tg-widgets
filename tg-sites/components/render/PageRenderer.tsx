@@ -19,6 +19,7 @@ import {
   MOTION_BACKGROUND_RECIPES,
   MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
+  MOTION_VIDEO_RECIPES,
   safeAnchor,
   safeColour,
   type Block,
@@ -367,6 +368,7 @@ export function SectionRenderer({
    */
   const motionHasWhatItNeeds = (r: typeof recipe): boolean => {
     if (!r) return false;
+    if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);
     if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;
     if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;
     return true;
@@ -572,7 +574,24 @@ export function SectionRenderer({
       {video && !editable && (
         <video
           className="tgs-section__bg tgs-section__bg--video"
-          src={video}
+          /*
+           * A7 puts the address on a <source> with a media query instead of on the
+           * element, and that one move is the whole recipe.
+           *
+           * A background video has always been HIDDEN under reduced motion, by one
+           * CSS rule, with the poster showing through. Hidden is not the same as not
+           * fetched: measured in a real browser, the plain src downloads the film for
+           * a visitor who asked for less motion and will never see a frame of it. A
+           * <source> whose media query does not match is never selected, so nothing
+           * is requested at all. Measured both ways, one request against none.
+           *
+           * That costs the visitor nothing and saves them the whole download, and it
+           * is the cheapest answer there is to what a video hero costs in egress.
+           *
+           * Only for a section that asked for A7. Every video already published keeps
+           * the src it has and behaves exactly as it did.
+           */
+          src={motion === 'A7' ? undefined : video}
           poster={bgImages[0]?.src || undefined}
           autoPlay
           muted
@@ -582,7 +601,11 @@ export function SectionRenderer({
           // inside the section, never to the film.
           aria-hidden="true"
           tabIndex={-1}
-        />
+        >
+          {motion === 'A7' ? (
+            <source src={video} media="(prefers-reduced-motion: no-preference)" />
+          ) : null}
+        </video>
       )}
 
       {(bgImages.length > 0 || video) && <div className="tgs-section__scrim" aria-hidden="true" />}

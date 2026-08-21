@@ -345,13 +345,23 @@ export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<Moti
 export const MOTION_CYCLING_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A2']);
 
 /**
+ * The background recipes that want a VIDEO rather than a picture.
+ *
+ * A7 video-hero is footage or it is nothing, so like A2 it asks a different question
+ * of the section than A6 and S5 do. The catalogue is blunt about why it belongs in
+ * the set at all: for travel the subject is usually already moving, so film beats a
+ * shader on both quality and budget, and the discipline is in the footage.
+ */
+export const MOTION_VIDEO_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A7']);
+
+/**
  * The recipes with a render behind them TODAY. Everything else in MOTION_RECIPES
  * parses and stores but draws nothing yet, so the render must not emit it.
  * Guarded by tests/motion.test.ts, which checks each of these has CSS and a
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A3', 'A4', 'A5', 'A6', 'S1', 'S3', 'S5',
+  'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
 ]);
 
 /**
