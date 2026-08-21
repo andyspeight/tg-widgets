@@ -1,18 +1,21 @@
 /**
- * TEMPORARY venue geocoder — 21 Aug 2026, deleted once venue-geo.json exists.
+ * Venue geocoder — rebuilds api/_data/venue-geo.json from the venue registry.
  *
- * Travelify deeplinks require a lat/lng/rad anchor (proved by probe: the same
- * link 400s without one and 302s with one) and the supplier feed carries no
- * coordinates at all. This endpoint geocodes the venue registry via Photon,
- * OpenStreetMap's public geocoder, because the build sandbox cannot reach any
- * geocoder directly. It runs from here, its results are committed as a static
- * file, and then this file goes.
+ * HOW THIS RUNS: not from a build machine. The build sandbox cannot reach any
+ * geocoder, so on 21 Aug 2026 this ran as a TEMPORARY Vercel function
+ * (api/dev-geo-probe.js, since deleted): deploy it on a branch, page through
+ * /api/dev-geo-probe?offset=N&count=70, then merge the pages with
+ * api/_data/venue-geo-overrides.json (hand-verified fixes, do not lose them)
+ * and commit the result. It needs vercel.json functions.maxDuration 60 while
+ * deployed. To rerun after a snapshot refresh: restore this file to
+ * api/dev-geo-probe.js, repeat, delete it again.
  *
- * Query context, best first: the city its concerts say it is in, then the
- * country of a competition it hosts, then the bare name. A match only counts
- * when the returned country agrees with the expected one where we have an
- * expectation; a venue that fails validation falls back to CITY coordinates,
- * which with rad=20 is exactly the anchor Andy's working example used.
+ * WHY IT IS SHAPED THIS WAY (three failed drafts taught this):
+ * text similarity alone cannot tell Audi Field from an Office of Field Audit.
+ * A venue with a known city must geocode INTO that city; a fixtures venue must
+ * resolve to a sports-typed place; NA leagues expect {US, CA}. City fallbacks
+ * must keep the STATE ("Hartford, CT, USA", never "Hartford, USA") or they
+ * land in Alabama - eleven did, all fixed in the overrides file.
  */
 import { readFileSync } from 'node:fs';
 

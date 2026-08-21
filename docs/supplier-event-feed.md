@@ -367,6 +367,27 @@ list, then add the confirmed pairs to a venue alias table.
   ("Championship Race"), so they stay outside the competition taxonomy. They are
   still categorised as motorsport.
 
+## Venue keys that merge different real venues
+
+The compact venue key exists to land "Jan Breydel Stadion" and "Jan
+Breydelstadion" together, and mostly it does. Geocoding every venue on 21 Aug
+2026 exposed three keys where the SAME compacted name belongs to different
+buildings, sometimes on different continents:
+
+- `redbullarena` - Leipzig, Salzburg AND Harrison NJ (New York Red Bulls), 40
+  events across three countries under one key
+- `3arena` - Dublin's arena and Stockholm's (Tele2 Arena was renamed 3Arena in
+  2024), so Djurgarden home games sit under a Dublin venue
+- `gradskistadion` - Slaven Belupo's Koprivnica ground and Sutjeska Niksic's in
+  Montenegro ("gradski stadion" just means city stadium)
+
+The first two are deliberately UNANCHORED in venue-geo.json (their events get
+no booking link), because a link that books a hotel on the wrong continent is
+worse than no link; the third is anchored to Koprivnica as the majority. The
+real fix is in `venueKeyFor`: the key needs a disambiguator (country, or the
+supplier venue id) when the same name resolves under different competitions'
+countries. Until then, any new snapshot should re-check these three.
+
 ## Adding a supplier
 
 Add its category and competition spellings to `supplier-taxonomy.js` and its
