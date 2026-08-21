@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_88snjjqn",
+ "id": "pg_b1zia6g4",
  "title": "Wildlife at sea",
  "slug": "wildlife-at-sea",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_7lwzo5iy",
+   "id": "sec_9lr3oxtm",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_7kronvh8",
+     "id": "row_9kq974ku",
      "columns": [
       {
-       "id": "col_7jfw50in",
+       "id": "col_9jecd6ax",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_7g89xj0u",
+         "id": "b_9gzg20lo",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_7hwl2cx6",
+         "id": "b_9hwin6eb",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_7ikiag1f",
+         "id": "b_9i3cp3fp",
          "type": "text",
          "props": {
           "html": "<p>A ship this size does not scatter what it approaches. You watch from deck height, engine at dead slow, kettle on.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_7tphxt08",
+   "id": "sec_9t536wsh",
    "name": "The case",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7s9ann6y",
+     "id": "row_9s44rf3w",
      "columns": [
       {
-       "id": "col_7nqya3dl",
+       "id": "col_9nyb91jc",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_7m4q5l4s",
+         "id": "b_9mlkjo2s",
          "type": "text",
          "props": {
           "html": "<p>Wildlife boats give you ninety minutes and a wet coat. A small ship gives you the whole week: the minke that surfaces beside the hull at breakfast, the sea eagle that works the same headland every evening, the hour at Enniberg when the air is more bird than sky.</p><p>A naturalist sails on every northern departure. Not a lecturer with a projector: a person with binoculars who knows which ledge, which tide, which month.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_7rtqw675",
+       "id": "col_9r66hxpb",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_7oq8ua4o",
+         "id": "b_9o90lspx",
          "type": "icon-item",
          "props": {
           "icon": "eye",
@@ -169,7 +169,7 @@
          }
         },
         {
-         "id": "b_7pdosbsr",
+         "id": "b_9p1gkjzr",
          "type": "icon-item",
          "props": {
           "icon": "compass",
@@ -179,7 +179,7 @@
          }
         },
         {
-         "id": "b_7qitf7vq",
+         "id": "b_9qh99656",
          "type": "icon-item",
          "props": {
           "icon": "sparkle",
@@ -198,7 +198,7 @@
    ]
   },
   {
-   "id": "sec_7yio4ci5",
+   "id": "sec_9ybc4fl1",
    "name": "By season",
    "tone": "subtle",
    "width": "contained",
@@ -219,10 +219,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7xk9cvh2",
+     "id": "row_9x72rc9u",
      "columns": [
       {
-       "id": "col_7w6q78la",
+       "id": "col_9whfmy6w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -240,7 +240,7 @@
        },
        "blocks": [
         {
-         "id": "b_7ulpgy6l",
+         "id": "b_9ul4jify",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -249,7 +249,7 @@
          }
         },
         {
-         "id": "b_7vhqkhoe",
+         "id": "b_9v5b8yh0",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -282,7 +282,294 @@
    ]
   },
   {
-   "id": "sec_82tzdrd0",
+   "id": "sec_amcr4tqj",
+   "name": "The field list",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "revealStagger": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_alrq07pt",
+     "columns": [
+      {
+       "id": "col_akl5fcjh",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_9z1etgyq",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The regulars",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_a08d2kcz",
+         "type": "text",
+         "props": {
+          "html": "<p>Six you have a fair chance of meeting, and how the crew announce each one.</p>"
+         }
+        },
+        {
+         "id": "b_ajud6d1d",
+         "type": "grid",
+         "props": {
+          "across": "3",
+          "acrossTablet": "2",
+          "acrossPhone": "1",
+          "gap": 24,
+          "align": "stretch",
+          "columns": [
+           {
+            "id": "col_a35ss613",
+            "width": 16.65,
+            "blocks": [
+             {
+              "id": "b_a1cvjb8x",
+              "type": "heading",
+              "props": {
+               "level": "h4",
+               "html": "Minke whale",
+               "align": "left"
+              }
+             },
+             {
+              "id": "b_a2azepte",
+              "type": "text",
+              "props": {
+               "html": "<p>The reliable one. Announced with a bearing and a kettle count: two minutes to the rail, tea survives.</p>"
+              }
+             }
+            ]
+           },
+           {
+            "id": "col_a6r7dawh",
+            "width": 16.67,
+            "blocks": [
+             {
+              "id": "b_a433fqku",
+              "type": "heading",
+              "props": {
+               "level": "h4",
+               "html": "Orca",
+               "align": "left"
+              }
+             },
+             {
+              "id": "b_a5fzzhe9",
+              "type": "text",
+              "props": {
+               "html": "<p>The stop-everything one. The engine comes out of gear and the announcement is one word, quietly.</p>"
+              }
+             }
+            ]
+           },
+           {
+            "id": "col_a9npfbyp",
+            "width": 16.67,
+            "blocks": [
+             {
+              "id": "b_a7dkbwrq",
+              "type": "heading",
+              "props": {
+               "level": "h4",
+               "html": "White-tailed eagle",
+               "align": "left"
+              }
+             },
+             {
+              "id": "b_a8njijn3",
+              "type": "text",
+              "props": {
+               "html": "<p>A door on wings. Works the same headlands every evening, which the naturalist knows by name.</p>"
+              }
+             }
+            ]
+           },
+           {
+            "id": "col_acqo60rk",
+            "width": 16.67,
+            "blocks": [
+             {
+              "id": "b_aa0s3rot",
+              "type": "heading",
+              "props": {
+               "level": "h4",
+               "html": "Puffin",
+               "align": "left"
+              }
+             },
+             {
+              "id": "b_abyrd5mk",
+              "type": "text",
+              "props": {
+               "html": "<p>April to early August, then gone to sea for the year. The only bird guests applaud.</p>"
+              }
+             }
+            ]
+           },
+           {
+            "id": "col_afp73d50",
+            "width": 16.67,
+            "blocks": [
+             {
+              "id": "b_adn5kxnm",
+              "type": "heading",
+              "props": {
+               "level": "h4",
+               "html": "Gannet",
+               "align": "left"
+              }
+             },
+             {
+              "id": "b_ae0o391b",
+              "type": "text",
+              "props": {
+               "html": "<p>Hits the water at sixty miles an hour off Shetland. The naturalist has opinions about their manners.</p>"
+              }
+             }
+            ]
+           },
+           {
+            "id": "col_aiys69if",
+            "width": 16.67,
+            "blocks": [
+             {
+              "id": "b_agj3a420",
+              "type": "heading",
+              "props": {
+               "level": "h4",
+               "html": "Common dolphin",
+               "align": "left"
+              }
+             },
+             {
+              "id": "b_ahojrljp",
+              "type": "text",
+              "props": {
+               "html": "<p>Rides the bow most warm-water passages. Nobody has ever gone below while they are there.</p>"
+              }
+             }
+            ]
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_arq8a1yx",
+   "name": "The log",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_aqvun286",
+     "columns": [
+      {
+       "id": "col_ap6b3jwu",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_an9bjcu6",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "From this season’s log",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ao7g5wm8",
+         "type": "table",
+         "props": {
+          "headerRow": true,
+          "firstColumnHeader": false,
+          "style": "lined",
+          "caption": "Entries as the bridge wrote them. The log does not do adjectives.",
+          "textColour": "",
+          "data": "Date\tPosition\tEntry\n14 Jun\tOff Mykines\tOrca, pod of five, twenty minutes. Engine out of gear.\n02 Jul\tSound of Canna\tMinke surfaced alongside at breakfast. Porridge abandoned.\n19 Jul\tHjørundfjord\tSea eagle took a fish at fifty metres. Guest wept. Understandable.\n08 Aug\tOff Vis\tCommon dolphin on the bow, forty minutes, both watches.\n21 Aug\tEnniberg\tAir more bird than sky. Log keeper gave up counting."
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_avvcqp14",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -303,10 +590,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_81igh4jn",
+     "id": "row_aueslzfe",
      "columns": [
       {
-       "id": "col_80o2wk1p",
+       "id": "col_at4ofe4l",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -324,7 +611,7 @@
        },
        "blocks": [
         {
-         "id": "b_7zgwrbq4",
+         "id": "b_as765ruc",
          "type": "quote",
          "props": {
           "text": "An orca surfaced between us and the cliffs and the master just took the engine out of gear. Twenty minutes. Nobody spoke.",
@@ -342,7 +629,7 @@
    ]
   },
   {
-   "id": "sec_87no3ifw",
+   "id": "sec_b05tz9wc",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -363,10 +650,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_86wcttmh",
+     "id": "row_azfmsefo",
      "columns": [
       {
-       "id": "col_85rz90iu",
+       "id": "col_ayl2enwr",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -384,7 +671,7 @@
        },
        "blocks": [
         {
-         "id": "b_83tnnqxj",
+         "id": "b_aw0l4x8i",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -393,7 +680,7 @@
          }
         },
         {
-         "id": "b_84xpqmc7",
+         "id": "b_ax22yqjl",
          "type": "button-group",
          "props": {
           "align": "centre",

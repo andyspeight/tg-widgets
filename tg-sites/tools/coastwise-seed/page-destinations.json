@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_21tpbcy6",
+ "id": "pg_25di33vw",
  "title": "Voyages",
  "slug": "destinations",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_1ra04p70",
+   "id": "sec_1r0ejf57",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_1qawovza",
+     "id": "row_1qbljjw9",
      "columns": [
       {
-       "id": "col_1pvsu7lp",
+       "id": "col_1p591rxv",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_1m4q2gn1",
+         "id": "b_1mdhmkv3",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_1ncpkv3g",
+         "id": "b_1nm9ohb9",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_1og9tibd",
+         "id": "b_1opwnyzy",
          "type": "text",
          "props": {
           "html": "<p>Every voyage below runs on a ship that draws under four metres and carries fewer than forty-five guests. Pick by weather, not by brochure.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_1v56vhj8",
+   "id": "sec_1vvvz4q5",
    "name": "The voyages",
    "tone": "light",
    "width": "contained",
@@ -114,10 +114,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1ufh9sr5",
+     "id": "row_1uoyuri2",
      "columns": [
       {
-       "id": "col_1tl0pmf1",
+       "id": "col_1t6q847m",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -135,7 +135,7 @@
        },
        "blocks": [
         {
-         "id": "b_1sfhyc1z",
+         "id": "b_1s0sgg29",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -212,7 +212,95 @@
    ]
   },
   {
-   "id": "sec_20b9nnzm",
+   "id": "sec_1z1qud3b",
+   "name": "The fleet in numbers",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_1yngqujz",
+     "columns": [
+      {
+       "id": "col_1xij3u8p",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1wxyw6v6",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "centre",
+          "divided": true,
+          "items": [
+           {
+            "value": "5",
+            "suffix": "",
+            "label": "Coasts worked",
+            "detail": ""
+           },
+           {
+            "value": "3",
+            "suffix": "",
+            "label": "Ships, none big",
+            "detail": ""
+           },
+           {
+            "value": "44",
+            "suffix": "",
+            "label": "Guests at the very most",
+            "detail": ""
+           },
+           {
+            "value": "15",
+            "suffix": "",
+            "label": "Seasons without a missed sailing",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_24sha1y0",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -233,10 +321,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1z0bb818",
+     "id": "row_23ek8q89",
      "columns": [
       {
-       "id": "col_1ygpg8kw",
+       "id": "col_22zqqrgl",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -254,7 +342,7 @@
        },
        "blocks": [
         {
-         "id": "b_1wdp3e7c",
+         "id": "b_207somen",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -263,7 +351,7 @@
          }
         },
         {
-         "id": "b_1x1lp4ee",
+         "id": "b_218k9elm",
          "type": "button-group",
          "props": {
           "align": "centre",

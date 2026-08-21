@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_32lg0txd",
+ "id": "pg_3fmimwqt",
  "title": "Western Isles",
  "slug": "western-isles",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_27nzva5g",
+   "id": "sec_2bw0s3n5",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_26dyzt68",
+     "id": "row_2apxgkcj",
      "columns": [
       {
-       "id": "col_25rtapk8",
+       "id": "col_29oop893",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_220s6sb4",
+         "id": "b_26xmucs0",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_23e4rwmp",
+         "id": "b_27rhejwe",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_2422aqov",
+         "id": "b_28hn6mxh",
          "type": "text",
          "props": {
           "html": "<p>Oban to Stornoway through the Small Isles, aboard MV Freya. The one to book if you want weather with your scenery.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_2hnyrueo",
+   "id": "sec_2lzhwjqx",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2d8631yo",
+     "id": "row_2h9rvv8e",
      "columns": [
       {
-       "id": "col_29i4w7zb",
+       "id": "col_2dlqyydj",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_281lnsmx",
+         "id": "b_2c32z12n",
          "type": "text",
          "props": {
           "html": "<p>The west of Scotland is a sequence of harbours nobody dredged for anything bigger than a fishing fleet, which is exactly why it suits us. Freya draws 3.8 metres, so she lies alongside at Tobermory and Rodel while the big ships sit off Oban landing tenders.</p><p>The week is built round landings, not passages. Coll for the white strand, Staffa at slack water for Fingal’s Cave, Canna because eleven residents and one post box is a kind of perfection. When a blow comes through, the master swaps the days rather than cancelling one.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_2c5a7bpg",
+       "id": "col_2gfhc2yf",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_2a5haibm",
+         "id": "b_2eg6wvuw",
          "type": "rating",
          "props": {
           "rating": 4.9,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_2bf3gcjj",
+         "id": "b_2fgr2zgt",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_2gxygd81",
+     "id": "row_2kinn30f",
      "columns": [
       {
-       "id": "col_2f1vg49u",
+       "id": "col_2jj0ulrq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_2ed5wory",
+         "id": "b_2i9s4q7f",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_2mwmbut1",
+   "id": "sec_2q7ux2lg",
    "name": "Day by day",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2lstjx9s",
+     "id": "row_2pe2p8d0",
      "columns": [
       {
-       "id": "col_2kdyzowu",
+       "id": "col_2oevq42l",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_2ix7qfdq",
+         "id": "b_2m19n9m0",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_2jxm49sp",
+         "id": "b_2nk4p3el",
          "type": "slider",
          "props": {
           "slideWidth": "medium",
@@ -413,7 +413,7 @@
    ]
   },
   {
-   "id": "sec_2sj76z4c",
+   "id": "sec_2w3cg1pb",
    "name": "The isles",
    "tone": "light",
    "width": "contained",
@@ -434,10 +434,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2rbt59mh",
+     "id": "row_2vl4oljn",
      "columns": [
       {
-       "id": "col_2q6zsgka",
+       "id": "col_2uq4gjkj",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -455,7 +455,7 @@
        },
        "blocks": [
         {
-         "id": "b_2na2dbkk",
+         "id": "b_2ry9mnk0",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -464,14 +464,14 @@
          }
         },
         {
-         "id": "b_2o4lgc5d",
+         "id": "b_2sw0zvec",
          "type": "text",
          "props": {
           "html": "<p>Open one. The photograph is the argument.</p>"
          }
         },
         {
-         "id": "b_2pii5z4r",
+         "id": "b_2t0py9r1",
          "type": "expanding-cards",
          "props": {
           "height": "medium",
@@ -524,7 +524,7 @@
    ]
   },
   {
-   "id": "sec_2wrma3ry",
+   "id": "sec_30gat4vs",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -545,10 +545,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2vyfafxe",
+     "id": "row_2zrhm50q",
      "columns": [
       {
-       "id": "col_2u86ayo3",
+       "id": "col_2y2jn6ny",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -566,7 +566,7 @@
        },
        "blocks": [
         {
-         "id": "b_2ttsv3uc",
+         "id": "b_2xjx6vjq",
          "type": "quote",
          "props": {
           "text": "We were alongside in Canna before I had finished my coffee. On the last cruise we took, that was a coach transfer.",
@@ -584,7 +584,146 @@
    ]
   },
   {
-   "id": "sec_31sy0bry",
+   "id": "sec_39lmqvwm",
+   "name": "What the fare covers",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_388jvug3",
+     "columns": [
+      {
+       "id": "col_3365y0xb",
+       "width": 50,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_316g4sfs",
+         "type": "heading",
+         "props": {
+          "level": "h3",
+          "html": "In the fare",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_32il5rat",
+         "type": "list",
+         "props": {
+          "style": "tick",
+          "items": [
+           {
+            "text": "Every meal aboard, from the first dinner to the last breakfast"
+           },
+           {
+            "text": "All landings, tenders and graded walks with a guide"
+           },
+           {
+            "text": "The Tobermory tasting and the Drinishader weaving shed"
+           },
+           {
+            "text": "Tea, coffee and the four o’clock cake, which is an institution"
+           },
+           {
+            "text": "Wellies, waterproofs and binoculars from the ship’s store"
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_37cbgjf8",
+       "width": 50,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_34uf7bds",
+         "type": "heading",
+         "props": {
+          "level": "h3",
+          "html": "Paid locally",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_358v1piq",
+         "type": "list",
+         "props": {
+          "style": "bullet",
+          "items": [
+           {
+            "text": "The bar, run on an honesty book and settled on the last night"
+           },
+           {
+            "text": "Dinner ashore on the one night the galley rests"
+           },
+           {
+            "text": "Anything you buy from a weaver, a distillery or a post box on Canna"
+           }
+          ]
+         }
+        },
+        {
+         "id": "b_36fmi7c4",
+         "type": "text",
+         "props": {
+          "html": "<p>No service charge, no fuel surcharge, no envelope on the last night. The fare is the price.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_3enb22nz",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -605,10 +744,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_30ek9fcv",
+     "id": "row_3d3aihms",
      "columns": [
       {
-       "id": "col_2zlylpfg",
+       "id": "col_3c9zhq4p",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -626,7 +765,7 @@
        },
        "blocks": [
         {
-         "id": "b_2xnnsg7e",
+         "id": "b_3anz8sn2",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -635,7 +774,7 @@
          }
         },
         {
-         "id": "b_2yvacbqu",
+         "id": "b_3bofw0ol",
          "type": "button-group",
          "props": {
           "align": "centre",

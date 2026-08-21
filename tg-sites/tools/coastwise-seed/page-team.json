@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_bfs2uqh2",
+ "id": "pg_fsxeqltw",
  "title": "Our people",
  "slug": "team",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_axtqu2yj",
+   "id": "sec_f5zwzfu7",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_aw0r28t7",
+     "id": "row_f4cezup1",
      "columns": [
       {
-       "id": "col_avnd2aej",
+       "id": "col_f3lvxx9w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_asa5q1ie",
+         "id": "b_f0gmsdvi",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_atqm1a58",
+         "id": "b_f19pqzeu",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_auwja7wv",
+         "id": "b_f2a7zxt6",
          "type": "text",
          "props": {
           "html": "<p>Twelve crew to a ship, and a shed on Oban harbour. These are the ones you will meet first.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_b1xuzr56",
+   "id": "sec_f9lx4j7e",
    "name": "The crew",
    "tone": "light",
    "width": "contained",
@@ -113,10 +113,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_b0qi2ju6",
+     "id": "row_f8uyijkn",
      "columns": [
       {
-       "id": "col_azrtozgy",
+       "id": "col_f7thb912",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -134,7 +134,7 @@
        },
        "blocks": [
         {
-         "id": "b_ay9h46qi",
+         "id": "b_f6aokhiq",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -221,7 +221,7 @@
    ]
   },
   {
-   "id": "sec_b9kqxtm7",
+   "id": "sec_fhprktqh",
    "name": "How we work",
    "tone": "subtle",
    "width": "contained",
@@ -242,10 +242,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_b8fvun6d",
+     "id": "row_fgz5i0zi",
      "columns": [
       {
-       "id": "col_b3ai65y8",
+       "id": "col_fbwf7n68",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -263,7 +263,7 @@
        },
        "blocks": [
         {
-         "id": "b_b2fbsulx",
+         "id": "b_facz46m9",
          "type": "icon-item",
          "props": {
           "icon": "compass",
@@ -275,7 +275,7 @@
        ]
       },
       {
-       "id": "col_b51zzr72",
+       "id": "col_fd68p2gr",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -293,7 +293,7 @@
        },
        "blocks": [
         {
-         "id": "b_b4jgb1lc",
+         "id": "b_fctac51d",
          "type": "icon-item",
          "props": {
           "icon": "heart",
@@ -305,7 +305,7 @@
        ]
       },
       {
-       "id": "col_b73ukpz0",
+       "id": "col_ff3fjx04",
        "width": 34,
        "align": "top",
        "flow": "stacked",
@@ -323,7 +323,7 @@
        },
        "blocks": [
         {
-         "id": "b_b60td4f9",
+         "id": "b_fe7pz12v",
          "type": "icon-item",
          "props": {
           "icon": "phone",
@@ -342,7 +342,92 @@
    ]
   },
   {
-   "id": "sec_betii99y",
+   "id": "sec_fmu2ms1k",
+   "name": "Asked on deck",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_flm0fwtp",
+     "columns": [
+      {
+       "id": "col_fkxes261",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_fis7nf3y",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Questions the crew actually get",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_fj0ehzai",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": true,
+          "openFirst": false,
+          "textColour": "",
+          "items": [
+           {
+            "title": "Can I have a go at steering?",
+            "body": "Yes, in open water, with the master beside you and the autopilot quietly disagreeing. You get a certificate. Adults ask for this more than children do, and take it more seriously."
+           },
+           {
+            "title": "Do the crew ever get off?",
+            "body": "Every crew member walks one landing a week as a guest, by rota. Marta uses hers to raid whichever market the ship is nearest. This is not a coincidence."
+           },
+           {
+            "title": "Who names the ships?",
+            "body": "Freya kept her Norwegian name because repainting a name is bad luck and worse paperwork. Skua is named for the bird that steals from gannets, which the crew insist is a compliment. Nyren is a family name from her Danish first owner, kept for the same reason as Freya’s."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_fr71ojk2",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -363,10 +448,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_bdfy6nfz",
+     "id": "row_fq3y2gq9",
      "columns": [
       {
-       "id": "col_bc9xupiw",
+       "id": "col_fpl3zzw3",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -384,7 +469,7 @@
        },
        "blocks": [
         {
-         "id": "b_baxtd7vi",
+         "id": "b_fnogxzhc",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -393,7 +478,7 @@
          }
         },
         {
-         "id": "b_bbia8tya",
+         "id": "b_fouw1ou3",
          "type": "button-group",
          "props": {
           "align": "centre",

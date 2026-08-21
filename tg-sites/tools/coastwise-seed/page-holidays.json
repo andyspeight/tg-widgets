@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_6rf5s4ht",
+ "id": "pg_8i0g62cy",
  "title": "Holidays",
  "slug": "holidays",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_6hdvf0y8",
+   "id": "sec_8457yhlb",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_6g2v9emr",
+     "id": "row_83yg80iu",
      "columns": [
       {
-       "id": "col_6fs2xm6w",
+       "id": "col_82x6rfct",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_6c1p427h",
+         "id": "b_7z2oi12q",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_6d0usmaj",
+         "id": "b_800j616m",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_6encs4q8",
+         "id": "b_81dcx61c",
          "type": "text",
          "props": {
           "html": "<p>The same three ships, five different reasons to be aboard. Pick the one that sounds like your kind of week.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_6lv3371b",
+   "id": "sec_88ay8hw9",
    "name": "The five",
    "tone": "light",
    "width": "contained",
@@ -114,10 +114,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6kyl8rjo",
+     "id": "row_87g5d6h3",
      "columns": [
       {
-       "id": "col_6j05dt3l",
+       "id": "col_863jqvko",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -135,7 +135,7 @@
        },
        "blocks": [
         {
-         "id": "b_6i9pe15i",
+         "id": "b_851m2ouy",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -212,7 +212,68 @@
    ]
   },
   {
-   "id": "sec_6qduz469",
+   "id": "sec_8cldzrq6",
+   "name": "One voice",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8bm18koi",
+     "columns": [
+      {
+       "id": "col_8a0hzrjm",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_89gn1cor",
+         "type": "quote",
+         "props": {
+          "text": "We have done the wildlife week, the walking week and the food week. It is the same ship being brilliant at three different things.",
+          "attribution": "Cath and Bill Ormerod, Lancaster",
+          "role": "Seven voyages and counting"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8hkf8hki",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -233,10 +294,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6pj1ap6m",
+     "id": "row_8g77hi4o",
      "columns": [
       {
-       "id": "col_6oxbcpsu",
+       "id": "col_8fw46qjr",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -254,7 +315,7 @@
        },
        "blocks": [
         {
-         "id": "b_6mje1xov",
+         "id": "b_8djugvv7",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -263,7 +324,7 @@
          }
         },
         {
-         "id": "b_6n7x9uvl",
+         "id": "b_8ezzlhe6",
          "type": "button-group",
          "props": {
           "align": "centre",

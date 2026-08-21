@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_4teym7qb",
+ "id": "pg_5smmkmi0",
  "title": "Dalmatian Backwater",
  "slug": "dalmatian-backwater",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_43aid1jk",
+   "id": "sec_4s36q71c",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_42ihpzj3",
+     "id": "row_4r447bsg",
      "columns": [
       {
-       "id": "col_41oqgj26",
+       "id": "col_4qn7m7dv",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_3yv62uzo",
+         "id": "b_4nltwgpa",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_3zw10kzh",
+         "id": "b_4odlfmmh",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_401tww6r",
+         "id": "b_4pg0itfe",
          "type": "text",
          "props": {
           "html": "<p>Split to Dubrovnik by way of the islands the ferries call at twice a week, aboard MV Nyren. Warm water, cold wine.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_4dpbas6l",
+   "id": "sec_5277r5gw",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4957y1zm",
+     "id": "row_4y4o9cjb",
      "columns": [
       {
-       "id": "col_45k6uxbk",
+       "id": "col_4ulvx44v",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_44it5e2h",
+         "id": "b_4ti3yypo",
          "type": "text",
          "props": {
           "html": "<p>The Dalmatian coast has a front, which is crowded, and a back, which is not. Nyren works the back: Vis, which was a closed military island until 1989 and still cooks like it never heard of tourism; Lastovo, a dark-sky reserve with one town and forty church towers; Šipan, where the Dubrovnik nobility built summer houses and then, usefully, left.</p><p>The swimming ladder goes down before breakfast and comes up after dinner. In between there are stone harbours, konoba lunches and one very good market on the Riva at Split.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_48g4rg9a",
+       "id": "col_4xvfpvei",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_46r1yq12",
+         "id": "b_4vhs709p",
          "type": "rating",
          "props": {
           "rating": 4.7,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_470uwsfv",
+         "id": "b_4w2ii0h7",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_4chc002o",
+     "id": "row_5184xanx",
      "columns": [
       {
-       "id": "col_4b95sz06",
+       "id": "col_50xq0i1h",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_4azm3et2",
+         "id": "b_4znhsv03",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_4j8ixyim",
+   "id": "sec_58ushmgt",
    "name": "The islands",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4ibpmnn6",
+     "id": "row_57xofhx6",
      "columns": [
       {
-       "id": "col_4hbbi7j9",
+       "id": "col_56zmdeyg",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_4e1ag9us",
+         "id": "b_530af6u9",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,14 +323,14 @@
          }
         },
         {
-         "id": "b_4fmoapfd",
+         "id": "b_54xq59ix",
          "type": "text",
          "props": {
           "html": "<p>Turn a card over for the part the brochure leaves out.</p>"
          }
         },
         {
-         "id": "b_4godtyk1",
+         "id": "b_55fvnmbu",
          "type": "flip-cards",
          "props": {
           "columns": "3",
@@ -377,7 +377,178 @@
    ]
   },
   {
-   "id": "sec_4npnesnj",
+   "id": "sec_5df3l186",
+   "name": "The week in pictures",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_5ciloea0",
+     "columns": [
+      {
+       "id": "col_5b2serl4",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_59dvok2f",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The week, in pictures",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_5adzac1g",
+         "type": "gallery",
+         "props": {
+          "columns": "3",
+          "gap": "m",
+          "radius": "md",
+          "layout": "scroll",
+          "lightbox": true,
+          "images": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+            "alt": "A limestone harbour on a Dalmatian island"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+            "alt": "The ship at anchor at dusk, lights on"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/food-quay.jpg",
+            "alt": "Produce handed aboard at a stone quay"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+            "alt": "The saloon laid for dinner"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "Open water in the late afternoon"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+            "alt": "Teak and brass in the morning sun"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_5iwfmy3k",
+   "name": "The water",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_5h3aitdu",
+     "columns": [
+      {
+       "id": "col_5gc8sbay",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_5e908pmx",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "How warm, honestly",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_5fxnrp8b",
+         "type": "table",
+         "props": {
+          "headerRow": true,
+          "firstColumnHeader": true,
+          "style": "lined",
+          "caption": "Average sea temperature at the swimming ladder, taken by the crew, not the tourist board.",
+          "textColour": "",
+          "data": "Month\tSea\tThe verdict\nJune\t22°C\tIn without ceremony\nJuly\t25°C\tIn before the ladder is fully down\nAugust\t26°C\tSome guests simply stay in\nSeptember\t24°C\tThe connoisseur’s month\nOctober\t21°C\tBrisk on entry, smug on exit"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_5m8u1nc2",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -398,10 +569,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4ml7b5po",
+     "id": "row_5l32lq2l",
      "columns": [
       {
-       "id": "col_4l9i4fki",
+       "id": "col_5k3sejlf",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -419,7 +590,7 @@
        },
        "blocks": [
         {
-         "id": "b_4k3vcr6t",
+         "id": "b_5jxv6qbk",
          "type": "quote",
          "props": {
           "text": "I swam before breakfast every day for six days. The chef bought octopus off a boy on the quay at Vis and that was dinner.",
@@ -437,7 +608,7 @@
    ]
   },
   {
-   "id": "sec_4son4g0o",
+   "id": "sec_5rdqobj6",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -458,10 +629,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4rv621v3",
+     "id": "row_5qu1j0xo",
      "columns": [
       {
-       "id": "col_4q4e31ww",
+       "id": "col_5pykgaui",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -479,7 +650,7 @@
        },
        "blocks": [
         {
-         "id": "b_4oeqttl0",
+         "id": "b_5n0frxah",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -488,7 +659,7 @@
          }
         },
         {
-         "id": "b_4pcew1jc",
+         "id": "b_5o1syo73",
          "type": "button-group",
          "props": {
           "align": "centre",

@@ -95,7 +95,11 @@ export const IMG = {
   crewEngineer: `${IMG_BASE}/crew-engineer.jpg`,
   crewGuide: `${IMG_BASE}/crew-guide.jpg`,
   crewMate: `${IMG_BASE}/crew-mate.jpg`,
+  chart: `${IMG_BASE}/chart-narrows.jpg`,
 } as const;
+
+/** The one sound on the site: the skipper's welcome, on The ships page. */
+export const AUDIO_WELCOME = `${IMG_BASE}/skipper-welcome.wav`;
 
 /* ------------------------------------------------------------ the regions */
 
@@ -651,6 +655,23 @@ export function destinationsIndex(): Page {
           }),
         ]),
       }),
+      sec({
+        name: 'The fleet in numbers',
+        tone: 'subtle',
+        paddingY: 'l',
+        reveal: true,
+        rows: stack([
+          block('stats', {
+            columns: '4', size: 'm', align: 'centre', divided: true,
+            items: [
+              { value: '5', suffix: '', label: 'Coasts worked', detail: '' },
+              { value: '3', suffix: '', label: 'Ships, none big', detail: '' },
+              { value: '44', suffix: '', label: 'Guests at the very most', detail: '' },
+              { value: '15', suffix: '', label: 'Seasons without a missed sailing', detail: '' },
+            ],
+          }),
+        ]),
+      }),
       closing('The right coast depends on the weather you want.'),
     ],
   );
@@ -767,6 +788,42 @@ export function westernIsles(): Page {
           }),
         ]),
       }),
+      sec({
+        name: 'What the fare covers',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(50, [
+              block('heading', { level: 'h3', html: 'In the fare', align: 'left' }),
+              block('list', {
+                style: 'tick',
+                items: [
+                  { text: 'Every meal aboard, from the first dinner to the last breakfast' },
+                  { text: 'All landings, tenders and graded walks with a guide' },
+                  { text: 'The Tobermory tasting and the Drinishader weaving shed' },
+                  { text: 'Tea, coffee and the four o’clock cake, which is an institution' },
+                  { text: 'Wellies, waterproofs and binoculars from the ship’s store' },
+                ],
+              }),
+            ]),
+            col(50, [
+              block('heading', { level: 'h3', html: 'Paid locally', align: 'left' }),
+              block('list', {
+                style: 'bullet',
+                items: [
+                  { text: 'The bar, run on an honesty book and settled on the last night' },
+                  { text: 'Dinner ashore on the one night the galley rests' },
+                  { text: 'Anything you buy from a weaver, a distillery or a post box on Canna' },
+                ],
+              }),
+              block('text', {
+                html: '<p>No service charge, no fuel surcharge, no envelope on the last night. The fare is the price.</p>',
+              }),
+            ]),
+          ], 'xl'),
+        ],
+      }),
       closing('April sails first. September sails calmest.'),
     ],
   );
@@ -829,6 +886,53 @@ export function norwegianNarrows(): Page {
               { src: IMG.fjordDawn, alt: 'A narrow fjord at dawn', panelSrc: '', panelAlt: '', side: 'left', title: 'Hjørundfjord', body: 'The quiet one. Farms on ledges, a church by the water, and no road along most of it.' },
               { src: IMG.openSea, alt: 'Open water between headlands', panelSrc: '', panelAlt: '', side: 'left', title: 'Nordfjord', body: 'Out to the skerries and back in one tide, with the glacier above the whole way.' },
               { src: IMG.aerial, alt: 'The ship threading a channel', panelSrc: '', panelAlt: '', side: 'left', title: 'The inner leads', body: 'The sheltered thread between islands the coastal steamers used before anyone built roads.' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'The chart and the water',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(40, [
+              block('heading', { level: 'h2', html: 'The chart and the water', align: 'left' }),
+              block('text', {
+                html:
+                  '<p>Every arm we enter is planned on paper first, the old way, because the old way makes you look at every sounding. Drag the handle and see what a morning of pilotage looks like from the wheelhouse instead.</p>' +
+                  '<p>The dashed line on the chart is the leading line. The gap in the islands is where you will be standing when we thread it.</p>',
+              }),
+            ]),
+            col(60, [
+              block('before-after', {
+                before: IMG.chart,
+                beforeAlt: 'The chart of the channel, soundings and leading line',
+                after: IMG.aerial,
+                afterAlt: 'The same channel from above, the ship threading it',
+                beforeLabel: 'The chart',
+                afterLabel: 'The water',
+                start: 55,
+                ratio: '16/9',
+              }),
+            ]),
+          ], 'xl'),
+        ],
+      }),
+      sec({
+        name: 'An evening at anchor',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'An evening at anchor, hour by hour', align: 'left' }),
+          block('steps', {
+            layout: 'down', marker: 'number', connector: true,
+            items: [
+              { title: 'Six', body: 'The cable runs out somewhere with no road to it. The engine stops, and the silence arrives like a change in pressure.' },
+              { title: 'Seven', body: 'The water goes to glass. Somebody swims. Somebody else says they will tomorrow, and means it.' },
+              { title: 'Eight', body: 'Dinner, one sitting, with the waterfall a mile up doing the talking. The chef names the cheese. Nobody can repeat it.' },
+              { title: 'Eleven', body: 'Still light, this far north in June. The bridge is open, the kettle is on, and the anchor watch has the best office in Norway.' },
             ],
           }),
         ]),
@@ -912,6 +1016,46 @@ export function dalmatianBackwater(): Page {
         ]),
       }),
       sec({
+        name: 'The week in pictures',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'The week, in pictures', align: 'left' }),
+          block('gallery', {
+            columns: '3', gap: 'm', radius: 'md', layout: 'scroll', lightbox: true,
+            images: [
+              { src: IMG.dalmatia, alt: 'A limestone harbour on a Dalmatian island' },
+              { src: IMG.charter, alt: 'The ship at anchor at dusk, lights on' },
+              { src: IMG.food, alt: 'Produce handed aboard at a stone quay' },
+              { src: IMG.saloon, alt: 'The saloon laid for dinner' },
+              { src: IMG.openSea, alt: 'Open water in the late afternoon' },
+              { src: IMG.deck, alt: 'Teak and brass in the morning sun' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'The water',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'How warm, honestly', align: 'left' }),
+          block('table', {
+            headerRow: true, firstColumnHeader: true, style: 'lined',
+            caption: 'Average sea temperature at the swimming ladder, taken by the crew, not the tourist board.',
+            textColour: '',
+            data:
+              'Month\tSea\tThe verdict\n' +
+              'June\t22°C\tIn without ceremony\n' +
+              'July\t25°C\tIn before the ladder is fully down\n' +
+              'August\t26°C\tSome guests simply stay in\n' +
+              'September\t24°C\tThe connoisseur’s month\n' +
+              'October\t21°C\tBrisk on entry, smug on exit',
+          }),
+        ]),
+      }),
+      sec({
         name: 'Guest words',
         paddingY: 'l',
         rows: stack([
@@ -989,6 +1133,51 @@ export function faroeShetland(): Page {
           }),
         ]),
       }),
+      sec({
+        name: 'The numbers up north',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('stats', {
+            columns: '4', size: 'l', align: 'centre', divided: true,
+            items: [
+              { value: '750', suffix: 'm', label: 'Enniberg, sea to summit', detail: '' },
+              { value: '1', suffix: 'M', label: 'Seabirds on Mykines', detail: '' },
+              { value: '11', suffix: '', label: 'People on Mykines', detail: '' },
+              { value: '2', suffix: '', label: 'Spare days in the plan', detail: '' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'The north in pictures',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'What hard light does', align: 'left' }),
+          block('gallery', {
+            columns: '4', gap: 'm', radius: 'md', layout: 'grid', lightbox: true,
+            images: [
+              { src: IMG.faroe, alt: 'Sea cliffs and birds in hard northern light' },
+              { src: IMG.wildlife, alt: 'Seabirds working the water beside the ship' },
+              { src: IMG.openSea, alt: 'The open crossing in a long swell' },
+              { src: IMG.aerial, alt: 'Threading the sounds between islands' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'Guest words',
+        paddingY: 'l',
+        rows: stack([
+          block('quote', {
+            text: 'I have birded for forty years and I made three lifers before lunch on the second day. Then the master idled under Enniberg and I stopped counting.',
+            attribution: 'Gordon Shaw, Aberdeen',
+            role: 'MV Freya, June 2026',
+          }),
+        ]),
+      }),
       closing('Book the whole eight nights. The weather needs room to be generous.'),
     ],
   );
@@ -1024,7 +1213,7 @@ export function lycianShore(): Page {
               }),
             ]),
             col(40, [
-              block('rating', { rating: 4.8, showValue: true, count: 'from town town reviews', size: 'm', colour: '', align: 'left' }),
+              block('rating', { rating: 4.8, showValue: true, count: 'from 163 guest reviews', size: 'm', colour: '', align: 'left' }),
               block('tags', {
                 style: 'pills', size: 'm', colour: '', align: 'left',
                 items: [
@@ -1052,6 +1241,43 @@ export function lycianShore(): Page {
               { title: 'The route', body: 'Fethiye, Gemiler Island and its Byzantine chapels, the long beach at Patara by tender, sunken Kekova where the harbour walls of a drowned town slide under the hull, then Kaş. Two nights at anchor, the rest alongside.' },
               { title: 'The food', body: 'A Turkish chef joins for the season. Mezze at lunch, one fish a day bought over the rail, and a farewell dinner in a chandlery-turned-restaurant in Kaş that we will not name here because it seats twenty.' },
             ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'A day, hour by hour',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(55, [
+              block('heading', { level: 'h2', html: 'A day, hour by hour', align: 'left' }),
+              block('steps', {
+                layout: 'down', marker: 'number', connector: true,
+                items: [
+                  { title: 'Eight', body: 'Sail with coffee on the rail. An hour of coast slides past before anyone is properly awake, which is the correct way to see it.' },
+                  { title: 'Ten', body: 'Anchor in a bay with pine down to the water. The ladder goes down. The first swimmer sets the tone for the day.' },
+                  { title: 'One', body: 'Mezze under the awning. The chef counts the plates back like a customs officer.' },
+                  { title: 'Five', body: 'The ruin, when the stone goes gold and the coach parties have gone. A drowned harbour wall slides under the hull on the way.' },
+                  { title: 'Eight', body: 'Dinner on deck or ashore. The sea is still warm. Somebody swims again and pretends it was for science.' },
+                ],
+              }),
+            ]),
+            col(45, [
+              block('image', { src: IMG.lycian, alt: 'A pine-backed anchorage in the late sun', ratio: '4/5', fit: 'cover', radius: 'md' }),
+            ]),
+          ], 'xl'),
+        ],
+      }),
+      sec({
+        name: 'Guest words',
+        tone: 'subtle',
+        paddingY: 'l',
+        rows: stack([
+          block('quote', {
+            text: 'We floated over the drowned town at Kekova in a flat calm and I could see window openings under the boat. I think about it weekly.',
+            attribution: 'Helen Marsh, Cardiff',
+            role: 'MV Nyren, October 2025',
           }),
         ]),
       }),
@@ -1104,6 +1330,19 @@ export function holidaysIndex(): Page {
               { src: IMG.ashore, icon: '', alt: 'Walkers on a shore path', label: 'Boots on', title: 'Walking ashore', body: 'Proper walks from the water line, and a ship to come home to.', linkLabel: 'The walks', linkHref: '/holidays/walking-ashore' },
               { src: IMG.charter, icon: '', alt: 'The ship at anchor at dusk', label: 'The whole ship', title: 'Private charter', body: 'Twenty-six to forty-four of your own people, one ship, your plan.', linkLabel: 'Take the ship', linkHref: '/holidays/private-charter' },
             ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'One voice',
+        tone: 'subtle',
+        paddingY: 'l',
+        reveal: true,
+        rows: stack([
+          block('quote', {
+            text: 'We have done the wildlife week, the walking week and the food week. It is the same ship being brilliant at three different things.',
+            attribution: 'Cath and Bill Ormerod, Lancaster',
+            role: 'Seven voyages and counting',
           }),
         ]),
       }),
@@ -1173,6 +1412,40 @@ export function islandHopping(): Page {
           }),
         ]),
       }),
+      sec({
+        name: 'The numbers',
+        paddingY: 'l',
+        reveal: true,
+        rows: stack([
+          block('stats', {
+            columns: '4', size: 'm', align: 'centre', divided: true,
+            items: [
+              { value: '6', suffix: '', label: 'Harbours in a typical week', detail: '' },
+              { value: '1', suffix: '', label: 'Bag, unpacked once', detail: '' },
+              { value: '0', suffix: '', label: 'Coach transfers, ever', detail: '' },
+              { value: '4', suffix: 'pm', label: 'Cake, daily, an institution', detail: '' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'Asked before booking',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'Asked before booking', align: 'left' }),
+          block('accordion', {
+            style: 'separated', single: true, openFirst: false, textColour: '',
+            items: [
+              { title: 'Do I need sea legs?', body: 'Mostly no. Island hopping keeps to sheltered water by design, and the longer crossings happen at lunch, when a full table is the best stabiliser yet invented. If a passage looks lumpy the master will say so at breakfast and route round the worst of it.' },
+              { title: 'How much time is ashore?', body: 'Most days, four to six hours. The point of a small ship is that the gangway goes down where the town is, so an hour ashore is an hour ashore, not forty minutes of tender queue.' },
+              { title: 'What about luggage?', body: 'No limit worth printing. If you can carry it up a gangway, it sails. Kilts, cellos and one memorable spinning wheel have all made the trip.' },
+              { title: 'Is there wifi?', body: 'In the saloon, when the mast can see a shore it likes. It is honest wifi: good enough for photographs home, poor enough to save you from your inbox.' },
+            ],
+          }),
+        ]),
+      }),
       closing('One bag, unpacked once.'),
     ],
   );
@@ -1228,6 +1501,66 @@ export function wildlifeAtSea(): Page {
               { title: 'June and July', body: 'Whale months. Minke reliably, humpback increasingly, orca if the herring run inshore. Mykines at full strength, all million of it.' },
               { title: 'August and September', body: 'Sea eagles teaching their young along the Norwegian arms, dolphins riding the bow most passages, and the first big rafts of shearwaters heading south.' },
             ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'The field list',
+        paddingY: 'xl',
+        reveal: true,
+        revealStagger: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'The regulars', align: 'left' }),
+          block('text', { html: '<p>Six you have a fair chance of meeting, and how the crew announce each one.</p>' }),
+          block('grid', {
+            across: '3', acrossTablet: '2', acrossPhone: '1', gap: 24, align: 'stretch',
+            columns: [
+              col(100, [
+                block('heading', { level: 'h4', html: 'Minke whale', align: 'left' }),
+                block('text', { html: '<p>The reliable one. Announced with a bearing and a kettle count: two minutes to the rail, tea survives.</p>' }),
+              ]),
+              col(100, [
+                block('heading', { level: 'h4', html: 'Orca', align: 'left' }),
+                block('text', { html: '<p>The stop-everything one. The engine comes out of gear and the announcement is one word, quietly.</p>' }),
+              ]),
+              col(100, [
+                block('heading', { level: 'h4', html: 'White-tailed eagle', align: 'left' }),
+                block('text', { html: '<p>A door on wings. Works the same headlands every evening, which the naturalist knows by name.</p>' }),
+              ]),
+              col(100, [
+                block('heading', { level: 'h4', html: 'Puffin', align: 'left' }),
+                block('text', { html: '<p>April to early August, then gone to sea for the year. The only bird guests applaud.</p>' }),
+              ]),
+              col(100, [
+                block('heading', { level: 'h4', html: 'Gannet', align: 'left' }),
+                block('text', { html: '<p>Hits the water at sixty miles an hour off Shetland. The naturalist has opinions about their manners.</p>' }),
+              ]),
+              col(100, [
+                block('heading', { level: 'h4', html: 'Common dolphin', align: 'left' }),
+                block('text', { html: '<p>Rides the bow most warm-water passages. Nobody has ever gone below while they are there.</p>' }),
+              ]),
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'The log',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'From this season’s log', align: 'left' }),
+          block('table', {
+            headerRow: true, firstColumnHeader: false, style: 'lined',
+            caption: 'Entries as the bridge wrote them. The log does not do adjectives.',
+            textColour: '',
+            data:
+              'Date\tPosition\tEntry\n' +
+              '14 Jun\tOff Mykines\tOrca, pod of five, twenty minutes. Engine out of gear.\n' +
+              '02 Jul\tSound of Canna\tMinke surfaced alongside at breakfast. Porridge abandoned.\n' +
+              '19 Jul\tHjørundfjord\tSea eagle took a fish at fifty metres. Guest wept. Understandable.\n' +
+              '08 Aug\tOff Vis\tCommon dolphin on the bow, forty minutes, both watches.\n' +
+              '21 Aug\tEnniberg\tAir more bird than sky. Log keeper gave up counting.',
           }),
         ]),
       }),
@@ -1305,6 +1638,45 @@ export function foodAndForaging(): Page {
           }),
         ]),
       }),
+      sec({
+        name: 'A week of dinners',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'One week, as it actually fell', align: 'left' }),
+          block('table', {
+            headerRow: true, firstColumnHeader: true, style: 'lined',
+            caption: 'Western Isles, second week of June. Reconstructed from the galley board, which Marta photographs nightly.',
+            textColour: '',
+            data:
+              'Day\tCame aboard\tBecame\n' +
+              'Oban\tLangoustines, a whole morning’s worth\tSplit and grilled, lemon, brown bread\n' +
+              'Tobermory\tSmoked trout from the smokehouse\tA pâté that has caused correspondence\n' +
+              'Coll\tNothing. Coll is a beach\tThe lamb we were saving, slow, with machair herbs\n' +
+              'Iona\tCrab from the one boat that works the sound\tLinguine, chilli, done in eleven minutes flat\n' +
+              'Canna\tEggs, honesty-box honey\tA tarte the French would annex\n' +
+              'Harris\tScallops, dived that morning\tSeared, black pudding, the last of the honey',
+          }),
+        ]),
+      }),
+      sec({
+        name: 'Feeding you properly',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'The questions the galley gets', align: 'left' }),
+          block('accordion', {
+            style: 'separated', single: true, openFirst: false, textColour: '',
+            items: [
+              { title: 'I have a dietary requirement. Is that a nuisance?', body: 'No, it is a Tuesday. Tell us at booking and the chef plans round it from the first market, not with a sad substitute on the night. Coeliac, vegan, kosher-style and a nut allergy have all sailed the same week and all ate well.' },
+              { title: 'Can I get into the galley?', body: 'One guest a day, by rota, aprons provided. You will be given a real job. The bread run is the coveted shift.' },
+              { title: 'What is the wine situation?', body: 'A short list chosen to the coast: west of Scotland drinks white and island malts, Dalmatia drinks what the konoba up the hill grows. Bottles are honest prices because the view is doing the mark-up.' },
+              { title: 'Is there a menu I can see?', body: 'No, and that is the product. There is a chef, a coast and a morning market. The one fixed point is the four o’clock cake.' },
+            ],
+          }),
+        ]),
+      }),
       closing('Come hungry. Leave with a recipe you will never quite replicate.'),
     ],
   );
@@ -1350,6 +1722,61 @@ export function walkingAshore(): Page {
             tip: 'Easy is under two hours on made paths. Moderate has climbs and rough ground. Strong is a full walking day and needs boots that have already been walked in.',
             position: 'above',
             align: 'left',
+          }),
+        ]),
+      }),
+      sec({
+        name: 'How a landing works',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(55, [
+              block('heading', { level: 'h2', html: 'How a landing works', align: 'left' }),
+              block('steps', {
+                layout: 'down', marker: 'number', connector: true,
+                items: [
+                  { title: 'The brief', body: 'Ten minutes after breakfast: the route, the grade, the weather and where the ship will be when you come off the hill.' },
+                  { title: 'The tender', body: 'Boots on aboard, dry landing where the coast allows, a wet one announced honestly where it does not.' },
+                  { title: 'The walk', body: 'A guide in front on every graded walk, and no forced marching. The group moves at the pace of the person enjoying it most slowly.' },
+                  { title: 'The pick-up', body: 'The ship has moved round to meet you. Tea on the rail as you come alongside, and the dram is poured when the boots come off.' },
+                ],
+              }),
+            ]),
+            col(45, [
+              block('image', { src: IMG.ashore, alt: 'Walkers descending to the anchorage', ratio: '4/5', fit: 'cover', radius: 'md' }),
+            ]),
+          ], 'xl'),
+        ],
+      }),
+      sec({
+        name: 'Kit',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(33, [
+              block('icon-item', { icon: 'check', title: 'Bring boots, worn in', body: 'The one thing we cannot lend convincingly. Everything else, the ship’s store covers.', align: 'left' }),
+            ]),
+            col(33, [
+              block('icon-item', { icon: 'cloud', title: 'Weather is scenery', body: 'A graded walk goes in drizzle and is usually better for it. It does not go in a gale, and the master decides which is which.', align: 'left' }),
+            ]),
+            col(34, [
+              block('icon-item', { icon: 'map', title: 'Maps at the brief', body: 'A printed route card per walker, marked with the pick-up. Nobody navigates by phone on our watch.', align: 'left' }),
+            ]),
+          ], 'l'),
+        ],
+      }),
+      sec({
+        name: 'Guest words',
+        tone: 'subtle',
+        paddingY: 'l',
+        rows: stack([
+          block('quote', {
+            text: 'Twelve kilometres over Harris, then a hot shower, then a dram, then dinner I did not cook. I have walked all my life. This is the format.',
+            attribution: 'Jim Crowther, Sheffield',
+            role: 'Western Isles, May 2026',
           }),
         ]),
       }),
@@ -1401,6 +1828,35 @@ export function privateCharter(): Page {
             align: 'left',
           }),
           block('button', { label: 'Start a charter conversation', href: 'mailto:charter@coastwise.example', variant: 'primary', size: 'm', align: 'left', newTab: false }),
+        ]),
+      }),
+      sec({
+        name: 'How a charter comes together',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'From first call to first cast-off', align: 'left' }),
+          block('steps', {
+            layout: 'down', marker: 'number', connector: true,
+            items: [
+              { title: 'The conversation', body: 'Half an hour with Fiona or one of the masters. Who is coming, what the week is for, and which coast fits the month you have in mind.' },
+              { title: 'The sketch', body: 'A route drawn on a real chart and photographed for you, with a price that is the price. Two revisions is normal. Seven is the record, and they were lovely about it.' },
+              { title: 'The hold', body: 'A provisional date holds for fourteen days with no card while you gather your people. The deposit is a fifth and sits in trust.' },
+              { title: 'The sail', body: 'The crew know every name before the gangway goes down. After that the plan belongs to you and the weather, in that order most days.' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
+        name: 'Charter words',
+        paddingY: 'l',
+        rows: stack([
+          block('quote', {
+            text: 'We married on Šipan with thirty-one people and a ship. The crew rigged the awning as a chuppah and the chef cried more than my mother.',
+            attribution: 'Dan and Elena Brooks',
+            role: 'MV Nyren, whole-ship charter, September 2025',
+          }),
         ]),
       }),
       closing('One ship, your people, and a coast to yourselves.'),
@@ -1479,6 +1935,50 @@ export function about(): Page {
         ]),
       }),
       sec({
+        name: 'The fleet, side by side',
+        tone: 'subtle',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'The fleet, side by side', align: 'left' }),
+          block('table', {
+            headerRow: true, firstColumnHeader: true, style: 'lined',
+            caption: 'Draughts are why we get in where others anchor off.',
+            textColour: '',
+            data:
+              'Ship\tGuests\tCabins\tDraught\tBuilt\tRefit\tHer coast\n' +
+              'MV Freya\t38\t19\t3.8 m\t1978, Norway\t2011, Leith\tScotland and the Faroes\n' +
+              'MV Skua\t26\t13\t2.9 m\t1985, Norway\t2014, Leith\tThe Norwegian arms\n' +
+              'MV Nyren\t44\t22\t3.4 m\t1992, Denmark\t2019, Split\tDalmatia and Lycia',
+          }),
+        ]),
+      }),
+      sec({
+        name: 'The skipper’s welcome',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(55, [
+              block('heading', { level: 'h2', html: 'Thirty seconds of Ewan', align: 'left' }),
+              block('text', {
+                html:
+                  '<p>Every voyage opens the same way: the master on the saloon steps, no microphone, saying roughly this. We recorded it so you know the register of the thing you are booking.</p>',
+              }),
+              block('audio', {
+                src: AUDIO_WELCOME,
+                title: 'The welcome, as said on the saloon steps',
+                caption: 'Ewan MacAskill, master of MV Freya. The bit about the blue jerseys is true.',
+                textColour: '',
+              }),
+            ]),
+            col(45, [
+              block('image', { src: IMG.crewMaster, alt: 'Ewan MacAskill at the bridge window', ratio: '4/5', fit: 'cover', radius: 'md' }),
+            ]),
+          ], 'xl'),
+        ],
+      }),
+      sec({
         name: 'Guest words',
         tone: 'subtle',
         paddingY: 'l',
@@ -1551,6 +2051,22 @@ export function team(): Page {
             ]),
           ], 'l'),
         ],
+      }),
+      sec({
+        name: 'Asked on deck',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'Questions the crew actually get', align: 'left' }),
+          block('accordion', {
+            style: 'separated', single: true, openFirst: false, textColour: '',
+            items: [
+              { title: 'Can I have a go at steering?', body: 'Yes, in open water, with the master beside you and the autopilot quietly disagreeing. You get a certificate. Adults ask for this more than children do, and take it more seriously.' },
+              { title: 'Do the crew ever get off?', body: 'Every crew member walks one landing a week as a guest, by rota. Marta uses hers to raid whichever market the ship is nearest. This is not a coincidence.' },
+              { title: 'Who names the ships?', body: 'Freya kept her Norwegian name because repainting a name is bad luck and worse paperwork. Skua is named for the bird that steals from gannets, which the crew insist is a compliment. Nyren is a family name from her Danish first owner, kept for the same reason as Freya’s.' },
+            ],
+          }),
+        ]),
       }),
       closing('Come and meet the rest aboard.'),
     ],
@@ -1626,6 +2142,40 @@ export function contact(): Page {
             ],
           }),
         ]),
+      }),
+      sec({
+        name: 'When the shed answers',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', html: 'When the shed answers', align: 'left' }),
+          block('table', {
+            headerRow: true, firstColumnHeader: true, style: 'lined',
+            caption: 'Ship’s hours follow the season, not the clock change.',
+            textColour: '',
+            data:
+              'When\tHours\tWho you get\n' +
+              'April to October\t08:00 to 18:00, seven days\tFiona, or whoever is nearest the kettle\n' +
+              'November to March\t09:00 to 17:00, Monday to Friday\tThe refit crew, between coats of varnish\n' +
+              'A ship at sea\tAny hour\tThe duty office, for anything that cannot wait',
+          }),
+        ]),
+      }),
+      sec({
+        name: 'Looking for something',
+        tone: 'subtle',
+        paddingY: 'l',
+        rows: [
+          row([
+            col(55, [
+              block('heading', { level: 'h3', html: 'Looking for something particular?', align: 'left' }),
+              block('text', { html: '<p>Every page on this site, searched at once. Fares, ships, months, islands.</p>' }),
+            ]),
+            col(45, [
+              block('search', { placeholder: 'Try “Canna” or “single cabin”', display: 'box', align: 'left' }),
+            ]),
+          ], 'l'),
+        ],
       }),
       closing('Or just ring. It is usually quicker.'),
     ],

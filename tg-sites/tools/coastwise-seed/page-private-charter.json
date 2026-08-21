@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_9wma3qh7",
+ "id": "pg_dr3soxev",
  "title": "Private charter",
  "slug": "private-charter",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_9j439igm",
+   "id": "sec_d5o2ayjv",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_9iu6nbgi",
+     "id": "row_d4ju1cux",
      "columns": [
       {
-       "id": "col_9hsfmf9o",
+       "id": "col_d3ecqlfq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_9eij1co6",
+         "id": "b_d0y59jer",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_9fq6v98y",
+         "id": "b_d1obhdc4",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_9ghiwzok",
+         "id": "b_d2axcc6b",
          "type": "text",
          "props": {
           "html": "<p>Twenty-six to forty-four of your own people, one ship, one crew, and a plan drawn round you.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_9q082ju8",
+   "id": "sec_dckz1yp6",
    "name": "The ships",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9pdlz6z5",
+     "id": "row_dbay76eo",
      "columns": [
       {
-       "id": "col_9ocbcbwi",
+       "id": "col_dasepa0w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +132,14 @@
        },
        "blocks": [
         {
-         "id": "b_9kq70q4m",
+         "id": "b_d6oqds07",
          "type": "text",
          "props": {
           "html": "<p>A charter is not a cruise with your name on it. The route is drawn with you, the galley plans round your table, and the only fixed points are where we start, where we finish and how the tide runs. Families take Freya. Societies take Skua for the birds. Weddings, so far without exception, take Nyren.</p>"
          }
         },
         {
-         "id": "b_9lpwd8aj",
+         "id": "b_d7rg2oni",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -162,7 +162,7 @@
          }
         },
         {
-         "id": "b_9mwli3bk",
+         "id": "b_d87z2s3f",
          "type": "read-more",
          "props": {
           "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis, or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
@@ -174,7 +174,7 @@
          }
         },
         {
-         "id": "b_9nyyi84i",
+         "id": "b_d9hp568h",
          "type": "button",
          "props": {
           "label": "Start a charter conversation",
@@ -195,7 +195,155 @@
    ]
   },
   {
-   "id": "sec_9vw4dpy4",
+   "id": "sec_dhtevjqm",
+   "name": "How a charter comes together",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_dgueen95",
+     "columns": [
+      {
+       "id": "col_dfs9tvaz",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ddxj4gbv",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "From first call to first cast-off",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_depjet3a",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "The conversation",
+            "body": "Half an hour with Fiona or one of the masters. Who is coming, what the week is for, and which coast fits the month you have in mind."
+           },
+           {
+            "title": "The sketch",
+            "body": "A route drawn on a real chart and photographed for you, with a price that is the price. Two revisions is normal. Seven is the record, and they were lovely about it."
+           },
+           {
+            "title": "The hold",
+            "body": "A provisional date holds for fourteen days with no card while you gather your people. The deposit is a fifth and sits in trust."
+           },
+           {
+            "title": "The sail",
+            "body": "The crew know every name before the gangway goes down. After that the plan belongs to you and the weather, in that order most days."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_dlh63py2",
+   "name": "Charter words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_dkadly0n",
+     "columns": [
+      {
+       "id": "col_dj257dh2",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_dirt3hw4",
+         "type": "quote",
+         "props": {
+          "text": "We married on Šipan with thirty-one people and a ship. The crew rigged the awning as a chuppah and the chef cried more than my mother.",
+          "attribution": "Dan and Elena Brooks",
+          "role": "MV Nyren, whole-ship charter, September 2025"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_dqarsli8",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -216,10 +364,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9ue1ypuh",
+     "id": "row_dpbd77x4",
      "columns": [
       {
-       "id": "col_9toibuyf",
+       "id": "col_dobvbmal",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -237,7 +385,7 @@
        },
        "blocks": [
         {
-         "id": "b_9r33rxvn",
+         "id": "b_dmw4jkpy",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -246,7 +394,7 @@
          }
         },
         {
-         "id": "b_9smdi1bw",
+         "id": "b_dnvutxgb",
          "type": "button-group",
          "props": {
           "align": "centre",

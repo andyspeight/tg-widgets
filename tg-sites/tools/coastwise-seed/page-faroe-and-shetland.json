@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_5ky87cvs",
+ "id": "pg_6w8eviig",
  "title": "Faroe and Shetland",
  "slug": "faroe-and-shetland",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_4zqva50a",
+   "id": "sec_5yjpb7ha",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_4yxw78y6",
+     "id": "row_5xeb5cva",
      "columns": [
       {
-       "id": "col_4xs4t3gr",
+       "id": "col_5wnacchy",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_4uwcgpyi",
+         "id": "b_5tifgugm",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_4vcm2fov",
+         "id": "b_5ugal3ox",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_4widrfka",
+         "id": "b_5vjzk9pd",
          "type": "text",
          "props": {
           "html": "<p>Lerwick to Tórshavn across the top of the Atlantic, aboard MV Freya. The serious one, and the one the crew fight to work.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_598e46nx",
+   "id": "sec_68nlgx66",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_55nbia5e",
+     "id": "row_64lae88a",
      "columns": [
       {
-       "id": "col_51t442b5",
+       "id": "col_60zuu8ar",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_507dpb2x",
+         "id": "b_5za07wh9",
          "type": "text",
          "props": {
           "html": "<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and eleven human residents. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p><p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_54k3dd8r",
+       "id": "col_637j7hl2",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_52wojnls",
+         "id": "b_61ifgg8m",
          "type": "rating",
          "props": {
           "rating": 4.9,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_538nyetd",
+         "id": "b_62ggvb7z",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_58liowm7",
+     "id": "row_67i8lf4c",
      "columns": [
       {
-       "id": "col_57vn5j5o",
+       "id": "col_669kz5fp",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_56cu4jl9",
+         "id": "b_651tmo9o",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_5et1h28b",
+   "id": "sec_6d6ehvoq",
    "name": "Practical",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5d9sasml",
+     "id": "row_6cnsl29s",
      "columns": [
       {
-       "id": "col_5c583l32",
+       "id": "col_6bc0dpf9",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_5apsthp5",
+         "id": "b_69aif9fr",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_5b8sdnee",
+         "id": "b_6a4asb1n",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -360,7 +360,245 @@
    ]
   },
   {
-   "id": "sec_5jsd630u",
+   "id": "sec_6h2ug40p",
+   "name": "The numbers up north",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6gkcx4sl",
+     "columns": [
+      {
+       "id": "col_6fuy6r83",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6e430zu1",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "l",
+          "align": "centre",
+          "divided": true,
+          "items": [
+           {
+            "value": "750",
+            "suffix": "m",
+            "label": "Enniberg, sea to summit",
+            "detail": ""
+           },
+           {
+            "value": "1",
+            "suffix": "M",
+            "label": "Seabirds on Mykines",
+            "detail": ""
+           },
+           {
+            "value": "11",
+            "suffix": "",
+            "label": "People on Mykines",
+            "detail": ""
+           },
+           {
+            "value": "2",
+            "suffix": "",
+            "label": "Spare days in the plan",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6mtzanw9",
+   "name": "The north in pictures",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6l06wrlw",
+     "columns": [
+      {
+       "id": "col_6kmezmfj",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6imtn08r",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "What hard light does",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6j2u3rry",
+         "type": "gallery",
+         "props": {
+          "columns": "4",
+          "gap": "m",
+          "radius": "md",
+          "layout": "grid",
+          "lightbox": true,
+          "images": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/faroe-cliffs.jpg",
+            "alt": "Sea cliffs and birds in hard northern light"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/wildlife.jpg",
+            "alt": "Seabirds working the water beside the ship"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "The open crossing in a long swell"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "Threading the sounds between islands"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6q50a41h",
+   "name": "Guest words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6p1j94bh",
+     "columns": [
+      {
+       "id": "col_6op01ung",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6nhq26ej",
+         "type": "quote",
+         "props": {
+          "text": "I have birded for forty years and I made three lifers before lunch on the second day. Then the master idled under Enniberg and I stopped counting.",
+          "attribution": "Gordon Shaw, Aberdeen",
+          "role": "MV Freya, June 2026"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6vl9pbd9",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -381,10 +619,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5ilcqq5u",
+     "id": "row_6ucm89sp",
      "columns": [
       {
-       "id": "col_5hlyl0et",
+       "id": "col_6tcly31z",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -402,7 +640,7 @@
        },
        "blocks": [
         {
-         "id": "b_5f84dmpu",
+         "id": "b_6rzpvcrd",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -411,7 +649,7 @@
          }
         },
         {
-         "id": "b_5gbm9pq5",
+         "id": "b_6s6njv5b",
          "type": "button-group",
          "props": {
           "align": "centre",

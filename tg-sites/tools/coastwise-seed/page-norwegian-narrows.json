@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_3xsp65b0",
+ "id": "pg_4mznvtyq",
  "title": "Norwegian Narrows",
  "slug": "norwegian-narrows",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_38x9t6y6",
+   "id": "sec_3l9u0pzt",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_379gsbqd",
+     "id": "row_3kz0ik9d",
      "columns": [
       {
-       "id": "col_36t83f3n",
+       "id": "col_3jw1c29o",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_33km2to7",
+         "id": "b_3gitgnd6",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_34n7rm02",
+         "id": "b_3hcpbm6i",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_35gl0w51",
+         "id": "b_3iqrxoos",
          "type": "text",
          "props": {
           "html": "<p>Bergen to Ålesund the slow way, aboard MV Skua. Nine nights, four of them at anchor under something vertical.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_3is173it",
+   "id": "sec_3viwvhq7",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3ex3gvxz",
+     "id": "row_3rs59n23",
      "columns": [
       {
-       "id": "col_3a1wb1zl",
+       "id": "col_3n2oe1l0",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_39btdfry",
+         "id": "b_3m818i4b",
          "type": "text",
          "props": {
           "html": "<p>The express boats do Bergen to Ålesund in a day. We take nine, because the point of a fjord is not the far end of it. Skua turns up the arms with no ferry service and anchors where the chart says there is room for exactly one ship, which there is, because she is the one ship.</p><p>Four nights at anchor means four evenings when the engine stops and the water goes to glass and the only thing moving is the waterfall a mile up. Bring a book you have been meaning to read for years.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_3dwirtvv",
+       "id": "col_3qwuae7c",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_3by675ck",
+         "id": "b_3ohsoz6p",
          "type": "rating",
          "props": {
           "rating": 4.8,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_3cqtx2re",
+         "id": "b_3pk8fexv",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_3h4fcsgr",
+     "id": "row_3u4efmtf",
      "columns": [
       {
-       "id": "col_3g3h2xpg",
+       "id": "col_3ts3mxxf",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_3foppr1s",
+         "id": "b_3szllipx",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_3n3p66k4",
+   "id": "sec_40rxnrtw",
    "name": "The arms",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3m8xxn4v",
+     "id": "row_3zb4wbb5",
      "columns": [
       {
-       "id": "col_3lcdsg95",
+       "id": "col_3ynyrwlq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_3je4arji",
+         "id": "b_3wjhtram",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_3k6p9bkc",
+         "id": "b_3xfdvpp6",
          "type": "half-overlay",
          "props": {
           "tint": "#1b333d",
@@ -374,7 +374,197 @@
    ]
   },
   {
-   "id": "sec_3r939yas",
+   "id": "sec_472593a0",
+   "name": "The chart and the water",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_46kdn5ec",
+     "columns": [
+      {
+       "id": "col_43lv583x",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_413vj7vh",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The chart and the water",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_422z7n9s",
+         "type": "text",
+         "props": {
+          "html": "<p>Every arm we enter is planned on paper first, the old way, because the old way makes you look at every sounding. Drag the handle and see what a morning of pilotage looks like from the wheelhouse instead.</p><p>The dashed line on the chart is the leading line. The gap in the islands is where you will be standing when we thread it.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_45chvteu",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_44rvsc4c",
+         "type": "before-after",
+         "props": {
+          "before": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/chart-narrows.jpg",
+          "beforeAlt": "The chart of the channel, soundings and leading line",
+          "after": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+          "afterAlt": "The same channel from above, the ship threading it",
+          "beforeLabel": "The chart",
+          "afterLabel": "The water",
+          "start": 55,
+          "ratio": "16/9"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4cuqchfx",
+   "name": "An evening at anchor",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_4btpbt8z",
+     "columns": [
+      {
+       "id": "col_4achczu3",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_48squj4r",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "An evening at anchor, hour by hour",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_49dv7d87",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "Six",
+            "body": "The cable runs out somewhere with no road to it. The engine stops, and the silence arrives like a change in pressure."
+           },
+           {
+            "title": "Seven",
+            "body": "The water goes to glass. Somebody swims. Somebody else says they will tomorrow, and means it."
+           },
+           {
+            "title": "Eight",
+            "body": "Dinner, one sitting, with the waterfall a mile up doing the talking. The chef names the cheese. Nobody can repeat it."
+           },
+           {
+            "title": "Eleven",
+            "body": "Still light, this far north in June. The bridge is open, the kettle is on, and the anchor watch has the best office in Norway."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4gl5vtk9",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -395,10 +585,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3qp9om2b",
+     "id": "row_4fw2wtu5",
      "columns": [
       {
-       "id": "col_3phqejgh",
+       "id": "col_4e15g2nw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -416,7 +606,7 @@
        },
        "blocks": [
         {
-         "id": "b_3o15betv",
+         "id": "b_4dpjazx6",
          "type": "quote",
          "props": {
           "text": "The master turned us round in the night to miss a blow, and we woke up somewhere better. Nobody announced it. It was just done.",
@@ -434,7 +624,7 @@
    ]
   },
   {
-   "id": "sec_3w0anmcd",
+   "id": "sec_4lrqi9oe",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -455,10 +645,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3vq6zsu4",
+     "id": "row_4kej93r4",
      "columns": [
       {
-       "id": "col_3ufepxht",
+       "id": "col_4j0tknll",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -476,7 +666,7 @@
        },
        "blocks": [
         {
-         "id": "b_3sookmxa",
+         "id": "b_4h8pi4pw",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -485,7 +675,7 @@
          }
         },
         {
-         "id": "b_3tzcojbw",
+         "id": "b_4ivv2gcx",
          "type": "button-group",
          "props": {
           "align": "centre",

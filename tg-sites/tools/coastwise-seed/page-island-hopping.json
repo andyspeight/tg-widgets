@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_7fshgldy",
+ "id": "pg_9f6vze19",
  "title": "Island hopping",
  "slug": "island-hopping",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_6xa4q1rd",
+   "id": "sec_8o1uepyv",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_6wjun5y3",
+     "id": "row_8niytmja",
      "columns": [
       {
-       "id": "col_6vxpt7pz",
+       "id": "col_8myudxg1",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_6stg5b7s",
+         "id": "b_8jbpmf1r",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_6tfm45fd",
+         "id": "b_8kxzqmau",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_6usohap4",
+         "id": "b_8lcr0cxw",
          "type": "text",
          "props": {
           "html": "<p>A new harbour most days, the sea in between, and never once packing your bag mid-week.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_74mu7vm0",
+   "id": "sec_8vf9kd0i",
    "name": "How a week runs",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_73v07izj",
+     "id": "row_8uww08vr",
      "columns": [
       {
-       "id": "col_70hhho2n",
+       "id": "col_8r2s92qr",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +132,14 @@
        },
        "blocks": [
         {
-         "id": "b_6yo3z10y",
+         "id": "b_8pchvuz3",
          "type": "text",
          "props": {
           "html": "<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch.</p>"
          }
         },
         {
-         "id": "b_6zgaz7ij",
+         "id": "b_8qa5hngy",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -168,7 +168,7 @@
        ]
       },
       {
-       "id": "col_72qut2vl",
+       "id": "col_8tzbm5dh",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -186,7 +186,7 @@
        },
        "blocks": [
         {
-         "id": "b_71ky6t52",
+         "id": "b_8szx2s20",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
@@ -206,7 +206,7 @@
    ]
   },
   {
-   "id": "sec_79xuoyft",
+   "id": "sec_90rzpbr7",
    "name": "Where it works best",
    "tone": "subtle",
    "width": "contained",
@@ -228,10 +228,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_784kg73g",
+     "id": "row_8z4ia4z9",
      "columns": [
       {
-       "id": "col_77w4o8un",
+       "id": "col_8y6wcp0h",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -249,7 +249,7 @@
        },
        "blocks": [
         {
-         "id": "b_757yp3zf",
+         "id": "b_8w98y2tx",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -258,7 +258,7 @@
          }
         },
         {
-         "id": "b_76cbbv5k",
+         "id": "b_8xrvkr0a",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -315,7 +315,184 @@
    ]
   },
   {
-   "id": "sec_7ebzrle8",
+   "id": "sec_947hkcfk",
+   "name": "The numbers",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_93acxr7w",
+     "columns": [
+      {
+       "id": "col_92hl5h9v",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_91ckutwg",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "centre",
+          "divided": true,
+          "items": [
+           {
+            "value": "6",
+            "suffix": "",
+            "label": "Harbours in a typical week",
+            "detail": ""
+           },
+           {
+            "value": "1",
+            "suffix": "",
+            "label": "Bag, unpacked once",
+            "detail": ""
+           },
+           {
+            "value": "0",
+            "suffix": "",
+            "label": "Coach transfers, ever",
+            "detail": ""
+           },
+           {
+            "value": "4",
+            "suffix": "pm",
+            "label": "Cake, daily, an institution",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_99ay72zg",
+   "name": "Asked before booking",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_98wz5o4i",
+     "columns": [
+      {
+       "id": "col_979y8rho",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_95upvlf8",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Asked before booking",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_96p2x1w6",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": true,
+          "openFirst": false,
+          "textColour": "",
+          "items": [
+           {
+            "title": "Do I need sea legs?",
+            "body": "Mostly no. Island hopping keeps to sheltered water by design, and the longer crossings happen at lunch, when a full table is the best stabiliser yet invented. If a passage looks lumpy the master will say so at breakfast and route round the worst of it."
+           },
+           {
+            "title": "How much time is ashore?",
+            "body": "Most days, four to six hours. The point of a small ship is that the gangway goes down where the town is, so an hour ashore is an hour ashore, not forty minutes of tender queue."
+           },
+           {
+            "title": "What about luggage?",
+            "body": "No limit worth printing. If you can carry it up a gangway, it sails. Kilts, cellos and one memorable spinning wheel have all made the trip."
+           },
+           {
+            "title": "Is there wifi?",
+            "body": "In the saloon, when the mast can see a shore it likes. It is honest wifi: good enough for photographs home, poor enough to save you from your inbox."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_9e1fta3p",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -336,10 +513,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7dnvar7g",
+     "id": "row_9dzciz1i",
      "columns": [
       {
-       "id": "col_7cn8vxcq",
+       "id": "col_9c5bqqxm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -357,7 +534,7 @@
        },
        "blocks": [
         {
-         "id": "b_7abel62i",
+         "id": "b_9agjqvdu",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -366,7 +543,7 @@
          }
         },
         {
-         "id": "b_7bpo2sro",
+         "id": "b_9b3rla83",
          "type": "button-group",
          "props": {
           "align": "centre",

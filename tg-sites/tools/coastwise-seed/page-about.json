@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_ar8j19s5",
+ "id": "pg_ezxk3tbo",
  "title": "The ships",
  "slug": "about",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_a24bii8f",
+   "id": "sec_dxljncwu",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_a1fcvs2m",
+     "id": "row_dw9f5ggg",
      "columns": [
       {
-       "id": "col_a0vlb47s",
+       "id": "col_dv9m91ig",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_9xgag1mr",
+         "id": "b_ds1sa58e",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_9y05phj0",
+         "id": "b_dt8rzpiz",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_9z0zliq5",
+         "id": "b_dujg8kpa",
          "type": "text",
          "props": {
           "html": "<p>Coastwise exists because two ferry officers kept a list of every harbour their employer was too big to enter. In 2011 they bought a ship that fitted.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_a8iy6jr3",
+   "id": "sec_e3roqmh4",
    "name": "The story",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_a77hjhbb",
+     "id": "row_e2b7mgpo",
      "columns": [
       {
-       "id": "col_a47la0n9",
+       "id": "col_dz7el89a",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_a3ut71vh",
+         "id": "b_dyatnlos",
          "type": "text",
          "props": {
           "html": "<p>The first Freya was a Norwegian fjord ferry with thirty years of service and a hull like a bank vault. We spent a winter refitting her in Leith: nineteen cabins where the car deck was, a saloon where the cafeteria was, and the bridge left exactly as we found it, because it worked.</p><p>The idea has not changed since. Buy sound working ships, refit them warm rather than grand, and keep them small enough that the plan can bend. Skua joined in 2014 for the narrow water. Nyren joined in 2019 for the warm.</p><p>We are still run from a shed on Oban harbour, on purpose. The people who answer the phone can see the weather you are asking about.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_a69hz5so",
+       "id": "col_e13q4suf",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_a5xkgruk",
+         "id": "b_e0sfjd9v",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
@@ -179,7 +179,7 @@
    ]
   },
   {
-   "id": "sec_adsftbti",
+   "id": "sec_e823crms",
    "name": "The years",
    "tone": "subtle",
    "width": "contained",
@@ -200,10 +200,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_ac0j3lpm",
+     "id": "row_e7w7d4lz",
      "columns": [
       {
-       "id": "col_abojdiv0",
+       "id": "col_e6j24ye8",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -221,7 +221,7 @@
        },
        "blocks": [
         {
-         "id": "b_a9y2146b",
+         "id": "b_e4g80g27",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -230,7 +230,7 @@
          }
         },
         {
-         "id": "b_aacvj06s",
+         "id": "b_e5saapdf",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -266,7 +266,7 @@
    ]
   },
   {
-   "id": "sec_ah8t8npv",
+   "id": "sec_ecz5jcm8",
    "name": "The numbers",
    "tone": "light",
    "width": "contained",
@@ -287,10 +287,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_agfddcli",
+     "id": "row_ebpsmjyn",
      "columns": [
       {
-       "id": "col_afobs4sx",
+       "id": "col_eayfytm3",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -308,7 +308,7 @@
        },
        "blocks": [
         {
-         "id": "b_aecdossf",
+         "id": "b_e9krwqoo",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -353,7 +353,189 @@
    ]
   },
   {
-   "id": "sec_alxy2mcx",
+   "id": "sec_ehgarvd4",
+   "name": "The fleet, side by side",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_egas3u9y",
+     "columns": [
+      {
+       "id": "col_efgaibfe",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ed3tkpyq",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "The fleet, side by side",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_eewgtxx1",
+         "type": "table",
+         "props": {
+          "headerRow": true,
+          "firstColumnHeader": true,
+          "style": "lined",
+          "caption": "Draughts are why we get in where others anchor off.",
+          "textColour": "",
+          "data": "Ship\tGuests\tCabins\tDraught\tBuilt\tRefit\tHer coast\nMV Freya\t38\t19\t3.8 m\t1978, Norway\t2011, Leith\tScotland and the Faroes\nMV Skua\t26\t13\t2.9 m\t1985, Norway\t2014, Leith\tThe Norwegian arms\nMV Nyren\t44\t22\t3.4 m\t1992, Denmark\t2019, Split\tDalmatia and Lycia"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_epukdiq7",
+   "name": "The skipper’s welcome",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_eoa9euoi",
+     "columns": [
+      {
+       "id": "col_elzvcfg6",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_eilih0ed",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "Thirty seconds of Ewan",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ej06apdy",
+         "type": "text",
+         "props": {
+          "html": "<p>Every voyage opens the same way: the master on the saloon steps, no microphone, saying roughly this. We recorded it so you know the register of the thing you are booking.</p>"
+         }
+        },
+        {
+         "id": "b_ekqa5v26",
+         "type": "audio",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/skipper-welcome.wav",
+          "title": "The welcome, as said on the saloon steps",
+          "caption": "Ewan MacAskill, master of MV Freya. The bit about the blue jerseys is true.",
+          "textColour": ""
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_eny457rq",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_emrs06mw",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-master.jpg",
+          "alt": "Ewan MacAskill at the bridge window",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_et9t0tqv",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -374,10 +556,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_akczuu27",
+     "id": "row_eser4had",
      "columns": [
       {
-       "id": "col_ajptq1pm",
+       "id": "col_erovz032",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -395,7 +577,7 @@
        },
        "blocks": [
         {
-         "id": "b_ai0bi52u",
+         "id": "b_eqhgp7rw",
          "type": "quote",
          "props": {
           "text": "It is the only holiday we take where the owner might carry your bag up the gangway and the master might pour your nightcap.",
@@ -413,7 +595,7 @@
    ]
   },
   {
-   "id": "sec_aqwrsbax",
+   "id": "sec_eykxr3je",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -434,10 +616,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_ap6r26wh",
+     "id": "row_exhe575t",
      "columns": [
       {
-       "id": "col_aospi86f",
+       "id": "col_ew5l5uyw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -455,7 +637,7 @@
        },
        "blocks": [
         {
-         "id": "b_amwuxjz8",
+         "id": "b_eufq6ugu",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -464,7 +646,7 @@
          }
         },
         {
-         "id": "b_angxqijm",
+         "id": "b_evuad5ey",
          "type": "button-group",
          "props": {
           "align": "centre",

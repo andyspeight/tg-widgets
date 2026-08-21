@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_9d2gz2td",
+ "id": "pg_cz9uodx9",
  "title": "Walking ashore",
  "slug": "walking-ashore",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_91vfrgtn",
+   "id": "sec_c4mfjnno",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_90ctvas1",
+     "id": "row_c30zg205",
      "columns": [
       {
-       "id": "col_8zzimqcr",
+       "id": "col_c2mpwwkp",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_8wmuzzss",
+         "id": "b_bzt345cq",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_8xopbqy1",
+         "id": "b_c0z82sji",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_8ywb0sts",
+         "id": "b_c1bocc3v",
          "type": "text",
          "props": {
           "html": "<p>The ship does the miles at sea so your boots can do the ones that matter ashore.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_97n6zmqg",
+   "id": "sec_cah2pq6z",
    "name": "The walks",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_965xf4ol",
+     "id": "row_c9vukkyi",
      "columns": [
       {
-       "id": "col_95iz18u8",
+       "id": "col_c8ne7cpc",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +132,14 @@
        },
        "blocks": [
         {
-         "id": "b_92ezrrs9",
+         "id": "b_c5afgg6i",
          "type": "text",
          "props": {
           "html": "<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way.</p>"
          }
         },
         {
-         "id": "b_93kzlxiq",
+         "id": "b_c667lju2",
          "type": "table",
          "props": {
           "headerRow": true,
@@ -151,7 +151,7 @@
          }
         },
         {
-         "id": "b_947oaf0m",
+         "id": "b_c7oavj6t",
          "type": "tooltip",
          "props": {
           "text": "How we grade",
@@ -170,7 +170,308 @@
    ]
   },
   {
-   "id": "sec_9cn9v38d",
+   "id": "sec_chhpl2ym",
+   "name": "How a landing works",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_cg0ttdro",
+     "columns": [
+      {
+       "id": "col_cdgbq6hn",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_cb91eh0q",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "How a landing works",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ccrau2fm",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "The brief",
+            "body": "Ten minutes after breakfast: the route, the grade, the weather and where the ship will be when you come off the hill."
+           },
+           {
+            "title": "The tender",
+            "body": "Boots on aboard, dry landing where the coast allows, a wet one announced honestly where it does not."
+           },
+           {
+            "title": "The walk",
+            "body": "A guide in front on every graded walk, and no forced marching. The group moves at the pace of the person enjoying it most slowly."
+           },
+           {
+            "title": "The pick-up",
+            "body": "The ship has moved round to meet you. Tea on the rail as you come alongside, and the dram is poured when the boots come off."
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_cfi6bhrc",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ceeuq4zy",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
+          "alt": "Walkers descending to the anchorage",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_cpw9ghut",
+   "name": "Kit",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_cot8wdtz",
+     "columns": [
+      {
+       "id": "col_cj4jiksm",
+       "width": 33,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_cipzzsx8",
+         "type": "icon-item",
+         "props": {
+          "icon": "check",
+          "title": "Bring boots, worn in",
+          "body": "The one thing we cannot lend convincingly. Everything else, the ship’s store covers.",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_clpxd27q",
+       "width": 33,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ckxgpsgj",
+         "type": "icon-item",
+         "props": {
+          "icon": "cloud",
+          "title": "Weather is scenery",
+          "body": "A graded walk goes in drizzle and is usually better for it. It does not go in a gale, and the master decides which is which.",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_cnp23a4k",
+       "width": 34,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_cmldxoea",
+         "type": "icon-item",
+         "props": {
+          "icon": "map",
+          "title": "Maps at the brief",
+          "body": "A printed route card per walker, marked with the pick-up. Nobody navigates by phone on our watch.",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_ct44a0rj",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_csyxb3wm",
+     "columns": [
+      {
+       "id": "col_crz4n1mi",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_cqb10nt8",
+         "type": "quote",
+         "props": {
+          "text": "Twelve kilometres over Harris, then a hot shower, then a dram, then dinner I did not cook. I have walked all my life. This is the format.",
+          "attribution": "Jim Crowther, Sheffield",
+          "role": "Western Isles, May 2026"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_cyhqjc1f",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -191,10 +492,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9bhzpgy5",
+     "id": "row_cxbbw7xm",
      "columns": [
       {
-       "id": "col_9ad8ku0u",
+       "id": "col_cwg5enu5",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -212,7 +513,7 @@
        },
        "blocks": [
         {
-         "id": "b_98ej13pl",
+         "id": "b_cu7ml8qo",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -221,7 +522,7 @@
          }
         },
         {
-         "id": "b_99r12qz5",
+         "id": "b_cvmm0dyz",
          "type": "button-group",
          "props": {
           "align": "centre",

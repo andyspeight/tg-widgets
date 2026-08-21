@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_6bfll8h7",
+ "id": "pg_7yrtx7cu",
  "title": "The Lycian Shore",
  "slug": "lycian-shore",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_5qgdi671",
+   "id": "sec_72u5ttk0",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_5peww6ew",
+     "id": "row_715fhuw4",
      "columns": [
       {
-       "id": "col_5odo7aak",
+       "id": "col_705sff3d",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_5lfmygra",
+         "id": "b_6x3ahabz",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_5mbrfgwg",
+         "id": "b_6yn4fiht",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_5n2ie9db",
+         "id": "b_6zntx99s",
          "type": "text",
          "props": {
           "html": "<p>Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our one warm-water winter escape.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_60pmnjlv",
+   "id": "sec_7ck2n1fg",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5w738l94",
+     "id": "row_789bor1c",
      "columns": [
       {
-       "id": "col_5sjcbz7l",
+       "id": "col_74tiyoys",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_5r78j99l",
+         "id": "b_730tyulh",
          "type": "text",
          "props": {
           "html": "<p>Lycia buried its dead in cliff tombs facing the sea, which tells you the sea was the road. It still is: half the ruins on this coast have no land access worth the name, so a shallow-draught ship is not a luxury here, it is the only ticket.</p><p>The pattern is simple. Sail early, anchor by ten, swim, lunch under the awning, ruin in the late afternoon when the stone goes gold, dinner ashore or on deck. Repeat until improved.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_5vxqjqi0",
+       "id": "col_77falbmz",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,19 +159,19 @@
        },
        "blocks": [
         {
-         "id": "b_5t6k3cf3",
+         "id": "b_75lqxo81",
          "type": "rating",
          "props": {
           "rating": 4.8,
           "showValue": true,
-          "count": "from town town reviews",
+          "count": "from 163 guest reviews",
           "size": "m",
           "colour": "",
           "align": "left"
          }
         },
         {
-         "id": "b_5u1p55ia",
+         "id": "b_76wxxxs2",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_5zmliikk",
+     "id": "row_7b8fv6sd",
      "columns": [
       {
-       "id": "col_5ynesna7",
+       "id": "col_7a2t43vs",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_5x6d34nf",
+         "id": "b_7981ulp8",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_65bot450",
+   "id": "sec_7h8onlz7",
    "name": "The detail",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_64hrms5p",
+     "id": "row_7g91a4v1",
      "columns": [
       {
-       "id": "col_631j0ng5",
+       "id": "col_7fp0tdj4",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_61okiva0",
+         "id": "b_7dcw4r0l",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_62iwx5uf",
+         "id": "b_7e0i0ahn",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -355,7 +355,190 @@
    ]
   },
   {
-   "id": "sec_6a08ltmy",
+   "id": "sec_7oxhssu8",
+   "name": "A day, hour by hour",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7ngn23l5",
+     "columns": [
+      {
+       "id": "col_7kzghdpf",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7i45qo5l",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "html": "A day, hour by hour",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7jsrfopl",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "Eight",
+            "body": "Sail with coffee on the rail. An hour of coast slides past before anyone is properly awake, which is the correct way to see it."
+           },
+           {
+            "title": "Ten",
+            "body": "Anchor in a bay with pine down to the water. The ladder goes down. The first swimmer sets the tone for the day."
+           },
+           {
+            "title": "One",
+            "body": "Mezze under the awning. The chef counts the plates back like a customs officer."
+           },
+           {
+            "title": "Five",
+            "body": "The ruin, when the stone goes gold and the coach parties have gone. A drowned harbour wall slides under the hull on the way."
+           },
+           {
+            "title": "Eight",
+            "body": "Dinner on deck or ashore. The sea is still warm. Somebody swims again and pretends it was for science."
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_7mwmn38k",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7l8j9b4y",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/lycian-coast.jpg",
+          "alt": "A pine-backed anchorage in the late sun",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7sru1awh",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7rwv6506",
+     "columns": [
+      {
+       "id": "col_7qtbwak5",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7pmbfrev",
+         "type": "quote",
+         "props": {
+          "text": "We floated over the drowned town at Kekova in a flat calm and I could see window openings under the boat. I think about it weekly.",
+          "attribution": "Helen Marsh, Cardiff",
+          "role": "MV Nyren, October 2025"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7xr0or7t",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -376,10 +559,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_69idkwzf",
+     "id": "row_7w2joey2",
      "columns": [
       {
-       "id": "col_68sjjz1f",
+       "id": "col_7vv6ccmb",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -397,7 +580,7 @@
        },
        "blocks": [
         {
-         "id": "b_66012jee",
+         "id": "b_7twwlmio",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -406,7 +589,7 @@
          }
         },
         {
-         "id": "b_67vrxbuj",
+         "id": "b_7uhyuol5",
          "type": "button-group",
          "props": {
           "align": "centre",
