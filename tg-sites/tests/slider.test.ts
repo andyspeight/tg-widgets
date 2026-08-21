@@ -70,8 +70,16 @@ describe('the Slider block', () => {
     expect(card?.kind).toBe('repeater');
     if (slide?.kind !== 'repeater' || card?.kind !== 'repeater') return;
 
-    expect(slide.fields.map((field) => field.key).sort())
-      .toEqual(card.fields.map((field) => field.key).sort());
+    /*
+     * ONE DELIBERATE DIFFERENCE, from 21 Aug 2026: a card may lead with an ICON
+     * instead of a photograph (Duda's Fancy Grid), and a slide may not. A slide
+     * is a photograph, and the slider hard-codes lead:'image' where it reuses
+     * renderCard. Everything else still has to match, which is what this guards.
+     */
+    const CARD_ONLY = ['icon'];
+    expect(slide.fields.map((field) => field.key).sort()).toEqual(
+      card.fields.map((field) => field.key).filter((key) => !CARD_ONLY.includes(key)).sort(),
+    );
   });
 
   it('offers a slide width instead of a column count, which is the real difference', () => {

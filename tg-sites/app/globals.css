@@ -934,6 +934,35 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
+ * A CARD THAT LEADS WITH AN ICON (Andy, 21 Aug 2026, the other half of Duda's
+ * "Fancy Grid"). It sits where the picture frame would, and takes the card's own
+ * padding rather than the frame's full bleed, because an icon is content and a
+ * photograph is a lid.
+ *
+ * Sized in em so it follows the card's type rather than being pinned to a pixel
+ * count, and it inherits colour, so left blank in the editor it takes the
+ * section's tone and needs no rule of its own.
+ */
+.tgs-card__icon {
+  display: block;
+  padding: var(--tgs-space-l) var(--tgs-space-l) 0;
+  line-height: 1;
+}
+.tgs-card__icon[data-kind='icon'] { font-size: 2.5em; }
+/* A character somebody typed before the icon library existed. Left at its own
+   size, the way the icon-and-text block leaves it. */
+.tgs-card__icon[data-kind='character'] { font-size: 2em; }
+.tgs-card__svg {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+/* Centred cards centre their icon too, which is the arrangement in the
+   reference and the one the icon-and-text block already follows. */
+.tgs-cards[data-align='centre'] .tgs-card__icon { margin-inline: auto; }
+.tgs-cards[data-align='centre'] .tgs-card__svg { margin-inline: auto; }
+
+/*
  * HOVER TINT (Andy, 21 Aug 2026, from Duda's "Fancy Grid"). A section marked
  * data-hover-tint washes a card in the brand colour as a visitor points at it.
  *

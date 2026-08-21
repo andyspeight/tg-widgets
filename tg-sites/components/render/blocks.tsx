@@ -1369,12 +1369,24 @@ function renderCard(
     showImage: boolean;
     ratio: string;
     radius: (typeof RADII)[number];
+    /*
+     * WHAT THE CARD LEADS WITH (Andy, 21 Aug 2026, from Duda's "Fancy Grid").
+     * That screenshot is this block already except for two things: a tint on
+     * hover, and an ICON at the top of each card instead of a photograph. Cards
+     * only ever led with a picture, and the icon-and-text block that does have
+     * an icon is a single item with no link and no grid, so a client wanting
+     * Andy's screenshot would have had to hand-build a grid and give up the
+     * link. Hence a lead of 'icon' here rather than a fifth grid block.
+     */
+    lead: 'image' | 'icon';
+    iconColour?: string;
   },
 ): ReactElement | null {
   const title = str(card, 'title');
   const body = str(card, 'body');
   const label = str(card, 'label');
   const src = safeUrl(str(card, 'src'));
+  const icon = str(card, 'icon');
   const href = safeUrl(str(card, 'linkHref'), CONTACT_OK);
   const linkLabel = str(card, 'linkLabel');
   // The post's tags, on a collection-filled card (see itemAsCard). Plain labels
@@ -1396,11 +1408,28 @@ function renderCard(
   // A card with nothing to say is not drawn at all rather than drawn empty. An
   // agent who added one and has not filled it in yet still sees it in the
   // properties pane, which is where they are working.
-  if (!title && !body && !label && !src) return null;
+  if (!title && !body && !label && !src && !icon) return null;
 
   return (
     <article className="tgs-card" key={index}>
-      {options.showImage && (
+      {options.showImage && options.lead === 'icon' && icon && (
+        /*
+         * Decorative, like the icon-and-text block's: the title carries the
+         * meaning, so a screen reader is not made to read "shield" before every
+         * heading in the grid. Same name-or-character rule as that block, so a
+         * page built before the icon library still draws whatever was typed.
+         */
+        <span
+          className="tgs-card__icon"
+          data-kind={isIconName(icon) ? 'icon' : 'character'}
+          aria-hidden="true"
+          style={options.iconColour ? { color: options.iconColour } : undefined}
+        >
+          {isIconName(icon) ? <ContentIcon name={icon} className="tgs-card__svg" /> : icon}
+        </span>
+      )}
+
+      {options.showImage && options.lead === 'image' && (
         <div className="tgs-card__frame" data-radius={options.radius} style={ratioStyle(options.ratio)}>
           {src ? (
             <img src={src} alt={str(card, 'alt')} loading="lazy" decoding="async" />
@@ -1464,10 +1493,23 @@ export function CardsBlock({
   const align = oneOf(props, 'align', ['left', 'centre'] as const, 'left');
   const whole = bool(props, 'wholeCardLinks', true);
   const textColour = safeColour(props.textColour);
+  const lead = oneOf(props, 'lead', ['image', 'icon'] as const, 'image');
+  /*
+   * One colour for every icon in the grid, not one per card. Andy's reference
+   * has six identical shields, and a per-card colour would invite a client to
+   * make each one different, which is the look nobody asked for.
+   */
+  const iconColour = safeColour(props.iconColour);
 
   const cards = items
     .map((card, index) =>
-      renderCard(card, index, { showImage: imagePosition !== 'none', ratio, radius }),
+      renderCard(card, index, {
+        showImage: imagePosition !== 'none',
+        ratio,
+        radius,
+        lead,
+        iconColour,
+      }),
     )
     .filter((card): card is ReactElement => card !== null);
 
@@ -1727,7 +1769,7 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
   const scrollbar = oneOf(props, 'scrollbar', ['thin', 'bar'] as const, 'thin');
 
   const slides = items
-    .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius }))
+    .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius, lead: 'image' }))
     .filter((card): card is ReactElement => card !== null);
 
   if (slides.length === 0) {

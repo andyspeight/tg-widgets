@@ -172,7 +172,7 @@ describe('one link per card, never two', () => {
   });
 
   it('a card with nothing in it is not drawn', () => {
-    expect(card).toContain('if (!title && !body && !label && !src) return null;');
+    expect(card).toContain('if (!title && !body && !label && !src && !icon) return null;');
   });
 });
 

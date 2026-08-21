@@ -20,7 +20,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { blockDefinition } from '../lib/content/blocks';
+import { blockDefinition, defaultPropsFor } from '../lib/content/blocks';
 import { SectionSchema } from '../lib/content/schema';
 
 const css = readFileSync(join(__dirname, '..', 'app', 'globals.css'), 'utf8');
@@ -163,5 +163,72 @@ describe('the hover tint (Duda\'s Fancy Grid)', () => {
   it('is reachable from the editor, or a client can never turn it on', () => {
     expect(props).toContain('checked={section.hoverTint === true}');
     expect(props).toContain('hoverTint: event.target.checked || undefined');
+  });
+});
+
+describe('a card that leads with an icon', () => {
+  /*
+   * THE TINT WAS NOT THE ONLY GAP. Andy's Fancy Grid screenshot leads each card
+   * with an ICON, and Cards only ever led with a photograph. The icon-and-text
+   * block that does have an icon is a single item with no link and no grid, so
+   * reaching that screenshot through it meant hand-building a grid and giving up
+   * the Learn More link. Hence a lead setting here, still not a new block.
+   */
+  it('is a setting on Cards, not a fifth grid block', () => {
+    const lead = blockDefinition('cards')!.fields.find((f) => f.key === 'lead') as
+      { options: Array<{ value: string }> };
+    expect(lead.options.map((o) => o.value)).toEqual(['image', 'icon']);
+    expect(defaultPropsFor('cards').lead).toBe('image');
+    expect(blockDefinition('icon-cards')).toBeUndefined();
+  });
+
+  it('draws the icon INSTEAD of the picture, not above an empty frame', () => {
+    const card = code(render).slice(code(render).indexOf('function renderCard'));
+    expect(card).toContain("options.lead === 'icon' && icon");
+    expect(card).toContain("options.lead === 'image' && (");
+  });
+
+  /*
+   * The title carries the meaning, so a screen reader is not made to read
+   * "shield" before every heading in a six-card grid.
+   */
+  it('is decorative', () => {
+    const card = code(render).slice(code(render).indexOf('function renderCard'));
+    const icon = card.slice(card.indexOf('tgs-card__icon'));
+    expect(icon.slice(0, icon.indexOf('</span>'))).toContain('aria-hidden="true"');
+  });
+
+  /*
+   * Same name-or-character rule as the icon-and-text block. Every icon on a page
+   * built before the icon library is a character somebody typed, and those pages
+   * have to keep drawing what they drew.
+   */
+  it('keeps the name-or-character rule, so no page needs migrating', () => {
+    const card = code(render).slice(code(render).indexOf('function renderCard'));
+    expect(card).toContain("data-kind={isIconName(icon) ? 'icon' : 'character'}");
+    expect(card).toContain('isIconName(icon) ? <ContentIcon name={icon}');
+  });
+
+  /*
+   * renderCard drops a card with nothing to say. Before the icon was counted,
+   * an icon-only card was silently dropped from the grid.
+   */
+  it('counts as something to say', () => {
+    expect(code(render)).toContain('if (!title && !body && !label && !src && !icon) return null;');
+  });
+
+  it('leaves the slider leading with its picture', () => {
+    // The slider reuses renderCard. A slide is a photograph, not an icon.
+    expect(code(render)).toContain("{ showImage: true, ratio, radius, lead: 'image' }");
+  });
+
+  it('colours every icon in the grid together, not one at a time', () => {
+    // Andy's reference has six identical shields. A per-card colour would invite
+    // a client to make each one different, which is the look nobody asked for.
+    expect(blockDefinition('cards')!.fields.some((f) => f.key === 'iconColour')).toBe(true);
+    const items = blockDefinition('cards')!.fields.find((f) => f.key === 'items') as
+      { fields: Array<{ key: string }> };
+    expect(items.fields.map((f) => f.key)).toContain('icon');
+    expect(items.fields.map((f) => f.key)).not.toContain('iconColour');
   });
 });

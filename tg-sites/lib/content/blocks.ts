@@ -1741,6 +1741,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       gap: 'm',
       style: 'bordered',
       imagePosition: 'top',
+      lead: 'image',
+      iconColour: '',
       ratio: '4/3',
       radius: 'md',
       align: 'left',
@@ -1749,6 +1751,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       items: [
         {
           src: '',
+          icon: '',
           alt: '',
           label: 'Greece',
           title: 'Island hopping, planned properly',
@@ -1758,6 +1761,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         },
         {
           src: '',
+          icon: '',
           alt: '',
           label: 'Italy',
           title: 'The Amalfi coast, slowly',
@@ -1767,6 +1771,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         },
         {
           src: '',
+          icon: '',
           alt: '',
           label: 'Portugal',
           title: 'Lisbon and the Algarve',
@@ -1825,6 +1830,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         fields: [
           { kind: 'image', key: 'src', label: 'Image' },
           {
+            kind: 'icon',
+            key: 'icon',
+            label: 'Icon',
+            help: 'Used instead of the picture when the cards lead with an icon.',
+          },
+          {
             kind: 'text',
             key: 'alt',
             label: 'Alt text',
@@ -1843,6 +1854,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { kind: 'text', key: 'linkLabel', label: 'Link text', max: 60 },
           { kind: 'url', key: 'linkHref', label: 'Links to', placeholder: '/greece or https://' },
         ],
+      },
+      {
+        /*
+         * Duda's "Fancy Grid" (Andy, 21 Aug 2026) is this block leading with an
+         * ICON rather than a photograph, plus a tint on hover. Both became
+         * settings. A second grid block would have made a client choose between
+         * two identical grids before knowing which one tinted, and the
+         * icon-and-text block that already had an icon is a single item with no
+         * link and no grid, so reaching Andy's screenshot through that one meant
+         * hand-building a grid and giving up the link.
+         */
+        kind: 'select',
+        key: 'lead',
+        label: 'Each card leads with',
+        options: [
+          { value: 'image', label: 'A picture' },
+          { value: 'icon', label: 'An icon' },
+        ],
+      },
+      {
+        kind: 'colour',
+        key: 'iconColour',
+        label: 'Icon colour',
+        help: 'Left blank the icons follow the section. Only used when the cards lead with an icon.',
       },
       {
         kind: 'select',
