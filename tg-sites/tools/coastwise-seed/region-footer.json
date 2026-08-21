@@ -1,7 +1,7 @@
 {
  "sections": [
   {
-   "id": "sec_d1r43pnw",
+   "id": "sec_d1n1tmlt",
    "name": "Footer",
    "tone": "dark",
    "width": "wide",
@@ -22,10 +22,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cwdzphi1",
+     "id": "row_cwkp5zpg",
      "columns": [
       {
-       "id": "col_cp7exegc",
+       "id": "col_cpl8p0pz",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -43,7 +43,7 @@
        },
        "blocks": [
         {
-         "id": "b_cmsk13r0",
+         "id": "b_cme55fm3",
          "type": "heading",
          "props": {
           "level": "h4",
@@ -52,14 +52,14 @@
          }
         },
         {
-         "id": "b_cnpdlche",
+         "id": "b_cnm0pqnb",
          "type": "text",
          "props": {
           "html": "<p>Small ship voyages on the Scottish, Norwegian, Faroese and Dalmatian coasts, and one warm one. Sailing since 2011.</p>"
          }
         },
         {
-         "id": "b_cow723js",
+         "id": "b_cop0pdfy",
          "type": "social",
          "props": {
           "align": "left",
@@ -79,7 +79,7 @@
        ]
       },
       {
-       "id": "col_csgv5s2f",
+       "id": "col_csjmb7vb",
        "width": 30,
        "align": "top",
        "flow": "stacked",
@@ -97,7 +97,7 @@
        },
        "blocks": [
         {
-         "id": "b_cqutfni1",
+         "id": "b_cq7bxkm1",
          "type": "heading",
          "props": {
           "level": "h5",
@@ -106,7 +106,7 @@
          }
         },
         {
-         "id": "b_crhniza5",
+         "id": "b_crktbqyd",
          "type": "nav",
          "props": {
           "layout": "column",
@@ -145,7 +145,7 @@
        ]
       },
       {
-       "id": "col_cver1k1u",
+       "id": "col_cv4dbm8u",
        "width": 30,
        "align": "top",
        "flow": "stacked",
@@ -163,7 +163,7 @@
        },
        "blocks": [
         {
-         "id": "b_cth6yi1b",
+         "id": "b_ctlhzegj",
          "type": "heading",
          "props": {
           "level": "h5",
@@ -172,7 +172,7 @@
          }
         },
         {
-         "id": "b_cu49tmgn",
+         "id": "b_cuxg74t5",
          "type": "nav",
          "props": {
           "layout": "column",
@@ -211,10 +211,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_d0s04fe0",
+     "id": "row_d0f3lubm",
      "columns": [
       {
-       "id": "col_czbntzta",
+       "id": "col_czxkxtrz",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -232,7 +232,7 @@
        },
        "blocks": [
         {
-         "id": "b_cxi2i9dg",
+         "id": "b_cxtp8fsy",
          "type": "divider",
          "props": {
           "style": "line",
@@ -240,7 +240,7 @@
          }
         },
         {
-         "id": "b_cyh61n4u",
+         "id": "b_cy2stxnj",
          "type": "copyright",
          "props": {
           "owner": "Coastwise Voyages Ltd",

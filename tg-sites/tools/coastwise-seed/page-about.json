@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_araj0tny",
+ "id": "pg_ar8j19s5",
  "title": "The ships",
  "slug": "about",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_a26mc5u6",
+   "id": "sec_a24bii8f",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_a1i6ltce",
+     "id": "row_a1fcvs2m",
      "columns": [
       {
-       "id": "col_a0wyjk7g",
+       "id": "col_a0vlb47s",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_9xt02jqh",
+         "id": "b_9xgag1mr",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_9yydi7e4",
+         "id": "b_9y05phj0",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_9z3oth64",
+         "id": "b_9z0zliq5",
          "type": "text",
          "props": {
           "html": "<p>Coastwise exists because two ferry officers kept a list of every harbour their employer was too big to enter. In 2011 they bought a ship that fitted.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_a81768gh",
+   "id": "sec_a8iy6jr3",
    "name": "The story",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_a7lrdxnz",
+     "id": "row_a77hjhbb",
      "columns": [
       {
-       "id": "col_a4m4ajgc",
+       "id": "col_a47la0n9",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_a3r9elfo",
+         "id": "b_a3ut71vh",
          "type": "text",
          "props": {
           "html": "<p>The first Freya was a Norwegian fjord ferry with thirty years of service and a hull like a bank vault. We spent a winter refitting her in Leith: nineteen cabins where the car deck was, a saloon where the cafeteria was, and the bridge left exactly as we found it, because it worked.</p><p>The idea has not changed since. Buy sound working ships, refit them warm rather than grand, and keep them small enough that the plan can bend. Skua joined in 2014 for the narrow water. Nyren joined in 2019 for the warm.</p><p>We are still run from a shed on Oban harbour, on purpose. The people who answer the phone can see the weather you are asking about.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_a6bkvyqo",
+       "id": "col_a69hz5so",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_a54c7t75",
+         "id": "b_a5xkgruk",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
@@ -179,7 +179,7 @@
    ]
   },
   {
-   "id": "sec_adzzizsp",
+   "id": "sec_adsftbti",
    "name": "The years",
    "tone": "subtle",
    "width": "contained",
@@ -200,10 +200,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_ac4djf92",
+     "id": "row_ac0j3lpm",
      "columns": [
       {
-       "id": "col_abkblqz0",
+       "id": "col_abojdiv0",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -221,7 +221,7 @@
        },
        "blocks": [
         {
-         "id": "b_a93dbmug",
+         "id": "b_a9y2146b",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -230,7 +230,7 @@
          }
         },
         {
-         "id": "b_aabrof5u",
+         "id": "b_aacvj06s",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -266,7 +266,7 @@
    ]
   },
   {
-   "id": "sec_ahkn7fiz",
+   "id": "sec_ah8t8npv",
    "name": "The numbers",
    "tone": "light",
    "width": "contained",
@@ -287,10 +287,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_agxzl1mz",
+     "id": "row_agfddcli",
      "columns": [
       {
-       "id": "col_afo97uaz",
+       "id": "col_afobs4sx",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -308,7 +308,7 @@
        },
        "blocks": [
         {
-         "id": "b_ae6juqwy",
+         "id": "b_aecdossf",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -353,7 +353,7 @@
    ]
   },
   {
-   "id": "sec_alf93b32",
+   "id": "sec_alxy2mcx",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -374,10 +374,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_ak7bg0li",
+     "id": "row_akczuu27",
      "columns": [
       {
-       "id": "col_aj39rpkv",
+       "id": "col_ajptq1pm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -395,7 +395,7 @@
        },
        "blocks": [
         {
-         "id": "b_aioac9t7",
+         "id": "b_ai0bi52u",
          "type": "quote",
          "props": {
           "text": "It is the only holiday we take where the owner might carry your bag up the gangway and the master might pour your nightcap.",
@@ -413,7 +413,7 @@
    ]
   },
   {
-   "id": "sec_aqtzqw8p",
+   "id": "sec_aqwrsbax",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -434,10 +434,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_apori34o",
+     "id": "row_ap6r26wh",
      "columns": [
       {
-       "id": "col_aot8ctdu",
+       "id": "col_aospi86f",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -455,7 +455,7 @@
        },
        "blocks": [
         {
-         "id": "b_am9blx6t",
+         "id": "b_amwuxjz8",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -464,7 +464,7 @@
          }
         },
         {
-         "id": "b_an6ebj2g",
+         "id": "b_angxqijm",
          "type": "button-group",
          "props": {
           "align": "centre",

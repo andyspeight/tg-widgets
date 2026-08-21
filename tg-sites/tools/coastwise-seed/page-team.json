@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_bf38ybwi",
+ "id": "pg_bfs2uqh2",
  "title": "Our people",
  "slug": "team",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_axxmu7bh",
+   "id": "sec_axtqu2yj",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_awhdo9ag",
+     "id": "row_aw0r28t7",
      "columns": [
       {
-       "id": "col_avl2gtzi",
+       "id": "col_avnd2aej",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_as87wro4",
+         "id": "b_asa5q1ie",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_atant3vb",
+         "id": "b_atqm1a58",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_auaznf6l",
+         "id": "b_auwja7wv",
          "type": "text",
          "props": {
           "html": "<p>Twelve crew to a ship, and a shed on Oban harbour. These are the ones you will meet first.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_b1hjdspu",
+   "id": "sec_b1xuzr56",
    "name": "The crew",
    "tone": "light",
    "width": "contained",
@@ -113,10 +113,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_b0kihk87",
+     "id": "row_b0qi2ju6",
      "columns": [
       {
-       "id": "col_azwbn29n",
+       "id": "col_azrtozgy",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -134,7 +134,7 @@
        },
        "blocks": [
         {
-         "id": "b_ayqz1vg4",
+         "id": "b_ay9h46qi",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -221,7 +221,7 @@
    ]
   },
   {
-   "id": "sec_b9db5my2",
+   "id": "sec_b9kqxtm7",
    "name": "How we work",
    "tone": "subtle",
    "width": "contained",
@@ -242,10 +242,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_b8sis2wi",
+     "id": "row_b8fvun6d",
      "columns": [
       {
-       "id": "col_b3rrtccg",
+       "id": "col_b3ai65y8",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -263,7 +263,7 @@
        },
        "blocks": [
         {
-         "id": "b_b2s8egby",
+         "id": "b_b2fbsulx",
          "type": "icon-item",
          "props": {
           "icon": "compass",
@@ -275,7 +275,7 @@
        ]
       },
       {
-       "id": "col_b501twd3",
+       "id": "col_b51zzr72",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -293,7 +293,7 @@
        },
        "blocks": [
         {
-         "id": "b_b4pc8pe7",
+         "id": "b_b4jgb1lc",
          "type": "icon-item",
          "props": {
           "icon": "heart",
@@ -305,7 +305,7 @@
        ]
       },
       {
-       "id": "col_b762hzkn",
+       "id": "col_b73ukpz0",
        "width": 34,
        "align": "top",
        "flow": "stacked",
@@ -323,7 +323,7 @@
        },
        "blocks": [
         {
-         "id": "b_b6rm6wq5",
+         "id": "b_b60td4f9",
          "type": "icon-item",
          "props": {
           "icon": "phone",
@@ -342,7 +342,7 @@
    ]
   },
   {
-   "id": "sec_bevx536e",
+   "id": "sec_betii99y",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -363,10 +363,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_bdalmg86",
+     "id": "row_bdfy6nfz",
      "columns": [
       {
-       "id": "col_bckqslt5",
+       "id": "col_bc9xupiw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -384,7 +384,7 @@
        },
        "blocks": [
         {
-         "id": "b_bab2bt0n",
+         "id": "b_baxtd7vi",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -393,7 +393,7 @@
          }
         },
         {
-         "id": "b_bb4xop62",
+         "id": "b_bbia8tya",
          "type": "button-group",
          "props": {
           "align": "centre",

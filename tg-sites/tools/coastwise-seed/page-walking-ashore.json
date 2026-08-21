@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_9d4qihhn",
+ "id": "pg_9d2gz2td",
  "title": "Walking ashore",
  "slug": "walking-ashore",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_91s26kog",
+   "id": "sec_91vfrgtn",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_90nf7bdc",
+     "id": "row_90ctvas1",
      "columns": [
       {
-       "id": "col_8z7djcaa",
+       "id": "col_8zzimqcr",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_8wi09dag",
+         "id": "b_8wmuzzss",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_8x8ot9pv",
+         "id": "b_8xopbqy1",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_8yqhbutr",
+         "id": "b_8ywb0sts",
          "type": "text",
          "props": {
           "html": "<p>The ship does the miles at sea so your boots can do the ones that matter ashore.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_97i52xoi",
+   "id": "sec_97n6zmqg",
    "name": "The walks",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_96vg745w",
+     "id": "row_965xf4ol",
      "columns": [
       {
-       "id": "col_954438zo",
+       "id": "col_95iz18u8",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +132,14 @@
        },
        "blocks": [
         {
-         "id": "b_92q9c473",
+         "id": "b_92ezrrs9",
          "type": "text",
          "props": {
           "html": "<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way.</p>"
          }
         },
         {
-         "id": "b_93qi5euy",
+         "id": "b_93kzlxiq",
          "type": "table",
          "props": {
           "headerRow": true,
@@ -151,7 +151,7 @@
          }
         },
         {
-         "id": "b_948jxsyv",
+         "id": "b_947oaf0m",
          "type": "tooltip",
          "props": {
           "text": "How we grade",
@@ -170,7 +170,7 @@
    ]
   },
   {
-   "id": "sec_9c10stjb",
+   "id": "sec_9cn9v38d",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -191,10 +191,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9b3ydwwy",
+     "id": "row_9bhzpgy5",
      "columns": [
       {
-       "id": "col_9an0211o",
+       "id": "col_9ad8ku0u",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -212,7 +212,7 @@
        },
        "blocks": [
         {
-         "id": "b_98p4kl80",
+         "id": "b_98ej13pl",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -221,7 +221,7 @@
          }
         },
         {
-         "id": "b_99bo5l11",
+         "id": "b_99r12qz5",
          "type": "button-group",
          "props": {
           "align": "centre",

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_6bsy17ia",
+ "id": "pg_6bfll8h7",
  "title": "The Lycian Shore",
  "slug": "lycian-shore",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_5qnocark",
+   "id": "sec_5qgdi671",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_5pn0dia1",
+     "id": "row_5peww6ew",
      "columns": [
       {
-       "id": "col_5obyi5pv",
+       "id": "col_5odo7aak",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_5la4ifgq",
+         "id": "b_5lfmygra",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_5mjkxwls",
+         "id": "b_5mbrfgwg",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_5nxiapwy",
+         "id": "b_5n2ie9db",
          "type": "text",
          "props": {
           "html": "<p>Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our one warm-water winter escape.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_60vlcztk",
+   "id": "sec_60pmnjlv",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5w8i1koy",
+     "id": "row_5w738l94",
      "columns": [
       {
-       "id": "col_5s6mt1x0",
+       "id": "col_5sjcbz7l",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_5rqpos9p",
+         "id": "b_5r78j99l",
          "type": "text",
          "props": {
           "html": "<p>Lycia buried its dead in cliff tombs facing the sea, which tells you the sea was the road. It still is: half the ruins on this coast have no land access worth the name, so a shallow-draught ship is not a luxury here, it is the only ticket.</p><p>The pattern is simple. Sail early, anchor by ten, swim, lunch under the awning, ruin in the late afternoon when the stone goes gold, dinner ashore or on deck. Repeat until improved.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_5vqp4omv",
+       "id": "col_5vxqjqi0",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_5t3apgf6",
+         "id": "b_5t6k3cf3",
          "type": "rating",
          "props": {
           "rating": 4.8,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_5u7jnew1",
+         "id": "b_5u1p55ia",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_5zbog019",
+     "id": "row_5zmliikk",
      "columns": [
       {
-       "id": "col_5y8135sm",
+       "id": "col_5ynesna7",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_5x5cegki",
+         "id": "b_5x6d34nf",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_65pdn57t",
+   "id": "sec_65bot450",
    "name": "The detail",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_64v66005",
+     "id": "row_64hrms5p",
      "columns": [
       {
-       "id": "col_63xytzgu",
+       "id": "col_631j0ng5",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_61a6i6iz",
+         "id": "b_61okiva0",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_62oh43jy",
+         "id": "b_62iwx5uf",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -355,7 +355,7 @@
    ]
   },
   {
-   "id": "sec_6aymsqca",
+   "id": "sec_6a08ltmy",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -376,10 +376,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_69ji7p7g",
+     "id": "row_69idkwzf",
      "columns": [
       {
-       "id": "col_68747rpv",
+       "id": "col_68sjjz1f",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -397,7 +397,7 @@
        },
        "blocks": [
         {
-         "id": "b_669mjgzf",
+         "id": "b_66012jee",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -406,7 +406,7 @@
          }
         },
         {
-         "id": "b_67gm38js",
+         "id": "b_67vrxbuj",
          "type": "button-group",
          "props": {
           "align": "centre",

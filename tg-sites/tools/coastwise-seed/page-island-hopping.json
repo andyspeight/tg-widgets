@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_7flu66pi",
+ "id": "pg_7fshgldy",
  "title": "Island hopping",
  "slug": "island-hopping",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_6x6hxdyf",
+   "id": "sec_6xa4q1rd",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_6wvc3l41",
+     "id": "row_6wjun5y3",
      "columns": [
       {
-       "id": "col_6vwlcb1s",
+       "id": "col_6vxpt7pz",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_6sbp5w2w",
+         "id": "b_6stg5b7s",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_6ts1hgv3",
+         "id": "b_6tfm45fd",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_6ul5pm7t",
+         "id": "b_6usohap4",
          "type": "text",
          "props": {
           "html": "<p>A new harbour most days, the sea in between, and never once packing your bag mid-week.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_741p88zw",
+   "id": "sec_74mu7vm0",
    "name": "How a week runs",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_73r970dv",
+     "id": "row_73v07izj",
      "columns": [
       {
-       "id": "col_70uhb6s6",
+       "id": "col_70hhho2n",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +132,14 @@
        },
        "blocks": [
         {
-         "id": "b_6yms5vpy",
+         "id": "b_6yo3z10y",
          "type": "text",
          "props": {
           "html": "<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch.</p>"
          }
         },
         {
-         "id": "b_6zgh9izi",
+         "id": "b_6zgaz7ij",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -168,7 +168,7 @@
        ]
       },
       {
-       "id": "col_72ozq02p",
+       "id": "col_72qut2vl",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -186,7 +186,7 @@
        },
        "blocks": [
         {
-         "id": "b_71sd472n",
+         "id": "b_71ky6t52",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
@@ -206,7 +206,7 @@
    ]
   },
   {
-   "id": "sec_79d9iez2",
+   "id": "sec_79xuoyft",
    "name": "Where it works best",
    "tone": "subtle",
    "width": "contained",
@@ -228,10 +228,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_78pm3t4e",
+     "id": "row_784kg73g",
      "columns": [
       {
-       "id": "col_7707czj8",
+       "id": "col_77w4o8un",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -249,7 +249,7 @@
        },
        "blocks": [
         {
-         "id": "b_756b3gwx",
+         "id": "b_757yp3zf",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -258,7 +258,7 @@
          }
         },
         {
-         "id": "b_76y3aml3",
+         "id": "b_76cbbv5k",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -315,7 +315,7 @@
    ]
   },
   {
-   "id": "sec_7ezqyici",
+   "id": "sec_7ebzrle8",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -336,10 +336,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7dtwd2u8",
+     "id": "row_7dnvar7g",
      "columns": [
       {
-       "id": "col_7czbc2uu",
+       "id": "col_7cn8vxcq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -357,7 +357,7 @@
        },
        "blocks": [
         {
-         "id": "b_7a60e0gc",
+         "id": "b_7abel62i",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -366,7 +366,7 @@
          }
         },
         {
-         "id": "b_7bd7lmmq",
+         "id": "b_7bpo2sro",
          "type": "button-group",
          "props": {
           "align": "centre",

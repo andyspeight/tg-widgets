@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_4tv03m60",
+ "id": "pg_4teym7qb",
  "title": "Dalmatian Backwater",
  "slug": "dalmatian-backwater",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_435ny4k4",
+   "id": "sec_43aid1jk",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_42o1zwul",
+     "id": "row_42ihpzj3",
      "columns": [
       {
-       "id": "col_41poq8od",
+       "id": "col_41oqgj26",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_3yv1q8l1",
+         "id": "b_3yv62uzo",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_3zk6ilds",
+         "id": "b_3zw10kzh",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_40wcrcax",
+         "id": "b_401tww6r",
          "type": "text",
          "props": {
           "html": "<p>Split to Dubrovnik by way of the islands the ferries call at twice a week, aboard MV Nyren. Warm water, cold wine.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_4di1dhov",
+   "id": "sec_4dpbas6l",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_495kwx9p",
+     "id": "row_4957y1zm",
      "columns": [
       {
-       "id": "col_456xz6hu",
+       "id": "col_45k6uxbk",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_44dvmqi2",
+         "id": "b_44it5e2h",
          "type": "text",
          "props": {
           "html": "<p>The Dalmatian coast has a front, which is crowded, and a back, which is not. Nyren works the back: Vis, which was a closed military island until 1989 and still cooks like it never heard of tourism; Lastovo, a dark-sky reserve with one town and forty church towers; Šipan, where the Dubrovnik nobility built summer houses and then, usefully, left.</p><p>The swimming ladder goes down before breakfast and comes up after dinner. In between there are stone harbours, konoba lunches and one very good market on the Riva at Split.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_48ap5vfw",
+       "id": "col_48g4rg9a",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_46ywi1eb",
+         "id": "b_46r1yq12",
          "type": "rating",
          "props": {
           "rating": 4.7,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_47ilf2yw",
+         "id": "b_470uwsfv",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_4ce7jxak",
+     "id": "row_4chc002o",
      "columns": [
       {
-       "id": "col_4bjw6kuw",
+       "id": "col_4b95sz06",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_4ad34sb7",
+         "id": "b_4azm3et2",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_4jky0czp",
+   "id": "sec_4j8ixyim",
    "name": "The islands",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4iuw1hrp",
+     "id": "row_4ibpmnn6",
      "columns": [
       {
-       "id": "col_4he6u28v",
+       "id": "col_4hbbi7j9",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_4eq1e6hj",
+         "id": "b_4e1ag9us",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,14 +323,14 @@
          }
         },
         {
-         "id": "b_4f7pudcd",
+         "id": "b_4fmoapfd",
          "type": "text",
          "props": {
           "html": "<p>Turn a card over for the part the brochure leaves out.</p>"
          }
         },
         {
-         "id": "b_4gwzc4fy",
+         "id": "b_4godtyk1",
          "type": "flip-cards",
          "props": {
           "columns": "3",
@@ -377,7 +377,7 @@
    ]
   },
   {
-   "id": "sec_4n4uqcvx",
+   "id": "sec_4npnesnj",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -398,10 +398,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4mlycabm",
+     "id": "row_4ml7b5po",
      "columns": [
       {
-       "id": "col_4lv9vndq",
+       "id": "col_4l9i4fki",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -419,7 +419,7 @@
        },
        "blocks": [
         {
-         "id": "b_4k18g2fa",
+         "id": "b_4k3vcr6t",
          "type": "quote",
          "props": {
           "text": "I swam before breakfast every day for six days. The chef bought octopus off a boy on the quay at Vis and that was dinner.",
@@ -437,7 +437,7 @@
    ]
   },
   {
-   "id": "sec_4s2bpwdx",
+   "id": "sec_4son4g0o",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -458,10 +458,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4rf38jj4",
+     "id": "row_4rv621v3",
      "columns": [
       {
-       "id": "col_4qggkiee",
+       "id": "col_4q4e31ww",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -479,7 +479,7 @@
        },
        "blocks": [
         {
-         "id": "b_4o4ohc76",
+         "id": "b_4oeqttl0",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -488,7 +488,7 @@
          }
         },
         {
-         "id": "b_4paezizi",
+         "id": "b_4pcew1jc",
          "type": "button-group",
          "props": {
           "align": "centre",

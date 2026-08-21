@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_8v8pw0il",
+ "id": "pg_8vo1a3et",
  "title": "Food and foraging",
  "slug": "food-and-foraging",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_8e4g764w",
+   "id": "sec_8e711zf2",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_8d29ekh8",
+     "id": "row_8dpa8kf2",
      "columns": [
       {
-       "id": "col_8cueah7p",
+       "id": "col_8c3ij681",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_89olv5of",
+         "id": "b_891zad37",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_8a7lpw1w",
+         "id": "b_8algn09e",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_8bnk9yss",
+         "id": "b_8bu48eaz",
          "type": "text",
          "props": {
           "html": "<p>There is no menu cycle. There is a chef, a coast, and whatever came over the rail that morning.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_8ku78rn9",
+   "id": "sec_8k65bjf6",
    "name": "How dinner happens",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8j3m80cw",
+     "id": "row_8j7ky3mq",
      "columns": [
       {
-       "id": "col_8gj2aoce",
+       "id": "col_8g2e77p7",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_8fan4gvk",
+         "id": "b_8fd8yaqw",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -157,7 +157,7 @@
        ]
       },
       {
-       "id": "col_8i8f0kuc",
+       "id": "col_8ikd95i5",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -175,7 +175,7 @@
        },
        "blocks": [
         {
-         "id": "b_8h5qx7n5",
+         "id": "b_8hx7azqm",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
@@ -195,7 +195,7 @@
    ]
   },
   {
-   "id": "sec_8pivm2zm",
+   "id": "sec_8p5sw0ma",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -216,10 +216,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8ofieo8j",
+     "id": "row_8o968az7",
      "columns": [
       {
-       "id": "col_8n1yk16y",
+       "id": "col_8n21ed3n",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -237,7 +237,7 @@
        },
        "blocks": [
         {
-         "id": "b_8lun49vl",
+         "id": "b_8l3b2eg8",
          "type": "quote",
          "props": {
           "text": "The chef bought a box of chanterelles off two children in Geiranger and rewrote dinner on the spot. Best thing I ate all year.",
@@ -246,7 +246,7 @@
          }
         },
         {
-         "id": "b_8mmgtw04",
+         "id": "b_8m360ehi",
          "type": "tags",
          "props": {
           "style": "bullets",
@@ -279,7 +279,7 @@
    ]
   },
   {
-   "id": "sec_8u75644z",
+   "id": "sec_8uyffd0x",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -300,10 +300,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8tgn44cg",
+     "id": "row_8tc6h5cj",
      "columns": [
       {
-       "id": "col_8se7z1sf",
+       "id": "col_8s7vo99s",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -321,7 +321,7 @@
        },
        "blocks": [
         {
-         "id": "b_8qf8nb2r",
+         "id": "b_8qbo5tlw",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -330,7 +330,7 @@
          }
         },
         {
-         "id": "b_8r39xwe9",
+         "id": "b_8rhh7l53",
          "type": "button-group",
          "props": {
           "align": "centre",

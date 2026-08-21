@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_cfg0te27",
+ "id": "pg_cf37efuy",
  "title": "Booking terms",
  "slug": "terms",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_ce8rgbxs",
+   "id": "sec_ce3f97hj",
    "name": "Terms",
    "tone": "light",
    "width": "narrow",
@@ -31,10 +31,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cdvg0t89",
+     "id": "row_cdxjjxc8",
      "columns": [
       {
-       "id": "col_ccrxmm0f",
+       "id": "col_ccffzecb",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -52,7 +52,7 @@
        },
        "blocks": [
         {
-         "id": "b_c6g82h0t",
+         "id": "b_c68c442n",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -62,7 +62,7 @@
          }
         },
         {
-         "id": "b_c7yxt1rs",
+         "id": "b_c769xxh0",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -71,14 +71,14 @@
          }
         },
         {
-         "id": "b_c83rxytr",
+         "id": "b_c8gik3rc",
          "type": "text",
          "props": {
           "html": "<p>The plain version first: you pay a fifth to book and the rest ten weeks out. If we cancel, you get everything back. If the weather rewrites the route, that is the nature of a coast and not a fault. Your money is protected the whole way: <b>ABTA Y2841</b>, <b>ATOL 11627</b>.</p>"
          }
         },
         {
-         "id": "b_c9283xhe",
+         "id": "b_c93887yf",
          "type": "tooltip",
          "props": {
           "text": "What ATOL covers",
@@ -88,7 +88,7 @@
          }
         },
         {
-         "id": "b_ca23ob8l",
+         "id": "b_caslsc01",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -128,7 +128,7 @@
          }
         },
         {
-         "id": "b_cbi4lmmj",
+         "id": "b_cbm1t86s",
          "type": "button",
          "props": {
           "label": "Ask about a clause",

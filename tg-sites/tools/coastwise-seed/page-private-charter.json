@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_9w9i39s4",
+ "id": "pg_9wma3qh7",
  "title": "Private charter",
  "slug": "private-charter",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_9jcpsuca",
+   "id": "sec_9j439igm",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_9id373b1",
+     "id": "row_9iu6nbgi",
      "columns": [
       {
-       "id": "col_9hseseqx",
+       "id": "col_9hsfmf9o",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_9ecaj65f",
+         "id": "b_9eij1co6",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_9ffjzhkd",
+         "id": "b_9fq6v98y",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_9g6ie68l",
+         "id": "b_9ghiwzok",
          "type": "text",
          "props": {
           "html": "<p>Twenty-six to forty-four of your own people, one ship, one crew, and a plan drawn round you.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_9q73zr0w",
+   "id": "sec_9q082ju8",
    "name": "The ships",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9pb1d22k",
+     "id": "row_9pdlz6z5",
      "columns": [
       {
-       "id": "col_9oc12a3t",
+       "id": "col_9ocbcbwi",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +132,14 @@
        },
        "blocks": [
         {
-         "id": "b_9k1w5bf5",
+         "id": "b_9kq70q4m",
          "type": "text",
          "props": {
           "html": "<p>A charter is not a cruise with your name on it. The route is drawn with you, the galley plans round your table, and the only fixed points are where we start, where we finish and how the tide runs. Families take Freya. Societies take Skua for the birds. Weddings, so far without exception, take Nyren.</p>"
          }
         },
         {
-         "id": "b_9llfoyd8",
+         "id": "b_9lpwd8aj",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -162,7 +162,7 @@
          }
         },
         {
-         "id": "b_9m21sqe7",
+         "id": "b_9mwli3bk",
          "type": "read-more",
          "props": {
           "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis, or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
@@ -174,7 +174,7 @@
          }
         },
         {
-         "id": "b_9n7tww7g",
+         "id": "b_9nyyi84i",
          "type": "button",
          "props": {
           "label": "Start a charter conversation",
@@ -195,7 +195,7 @@
    ]
   },
   {
-   "id": "sec_9vhnwm1c",
+   "id": "sec_9vw4dpy4",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -216,10 +216,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9ukh4qx3",
+     "id": "row_9ue1ypuh",
      "columns": [
       {
-       "id": "col_9tgxq3rm",
+       "id": "col_9toibuyf",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -237,7 +237,7 @@
        },
        "blocks": [
         {
-         "id": "b_9r60kou9",
+         "id": "b_9r33rxvn",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -246,7 +246,7 @@
          }
         },
         {
-         "id": "b_9sr1otfr",
+         "id": "b_9smdi1bw",
          "type": "button-group",
          "props": {
           "align": "centre",

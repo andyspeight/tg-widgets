@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_5k4fftp5",
+ "id": "pg_5ky87cvs",
  "title": "Faroe and Shetland",
  "slug": "faroe-and-shetland",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_4zn76lih",
+   "id": "sec_4zqva50a",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_4yslrcp0",
+     "id": "row_4yxw78y6",
      "columns": [
       {
-       "id": "col_4xxa6n14",
+       "id": "col_4xs4t3gr",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_4uf8ehjh",
+         "id": "b_4uwcgpyi",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_4vkgw7d6",
+         "id": "b_4vcm2fov",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_4wg9cqqm",
+         "id": "b_4widrfka",
          "type": "text",
          "props": {
           "html": "<p>Lerwick to Tórshavn across the top of the Atlantic, aboard MV Freya. The serious one, and the one the crew fight to work.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_59ml4y22",
+   "id": "sec_598e46nx",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_55367gpq",
+     "id": "row_55nbia5e",
      "columns": [
       {
-       "id": "col_51jxmvc9",
+       "id": "col_51t442b5",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_50x19mou",
+         "id": "b_507dpb2x",
          "type": "text",
          "props": {
           "html": "<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and eleven human residents. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p><p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_5495adsd",
+       "id": "col_54k3dd8r",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_52ij00co",
+         "id": "b_52wojnls",
          "type": "rating",
          "props": {
           "rating": 4.9,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_53j89dlo",
+         "id": "b_538nyetd",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_58jhzkek",
+     "id": "row_58liowm7",
      "columns": [
       {
-       "id": "col_57fzdnfm",
+       "id": "col_57vn5j5o",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_56jhaxvz",
+         "id": "b_56cu4jl9",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_5ea93bku",
+   "id": "sec_5et1h28b",
    "name": "Practical",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5dlyzl8j",
+     "id": "row_5d9sasml",
      "columns": [
       {
-       "id": "col_5cxwmp0q",
+       "id": "col_5c583l32",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_5anumosc",
+         "id": "b_5apsthp5",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_5bo5tg5x",
+         "id": "b_5b8sdnee",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -360,7 +360,7 @@
    ]
   },
   {
-   "id": "sec_5jf1wp7m",
+   "id": "sec_5jsd630u",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -381,10 +381,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5i936bfc",
+     "id": "row_5ilcqq5u",
      "columns": [
       {
-       "id": "col_5hcoau3l",
+       "id": "col_5hlyl0et",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -402,7 +402,7 @@
        },
        "blocks": [
         {
-         "id": "b_5f534igu",
+         "id": "b_5f84dmpu",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -411,7 +411,7 @@
          }
         },
         {
-         "id": "b_5gxy0wzq",
+         "id": "b_5gbm9pq5",
          "type": "button-group",
          "props": {
           "align": "centre",

@@ -393,7 +393,7 @@ export function home(): Page {
               linkLabel: '', linkHref: '',
             },
             {
-              src: '', icon: 'steps', alt: '', label: '',
+              src: '', icon: 'compass', alt: '', label: '',
               title: 'Plans that bend',
               body: 'When the weather turns, the master changes the plan rather than the arrival time. A schedule is not the point of a coast.',
               linkLabel: '', linkHref: '',

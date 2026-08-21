@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_3x9bkqpe",
+ "id": "pg_3xsp65b0",
  "title": "Norwegian Narrows",
  "slug": "norwegian-narrows",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_38yi3ov4",
+   "id": "sec_38x9t6y6",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_37kii0or",
+     "id": "row_379gsbqd",
      "columns": [
       {
-       "id": "col_36cmvggt",
+       "id": "col_36t83f3n",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_33y4hzqe",
+         "id": "b_33km2to7",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_349apc1p",
+         "id": "b_34n7rm02",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_35s7q67l",
+         "id": "b_35gl0w51",
          "type": "text",
          "props": {
           "html": "<p>Bergen to Ålesund the slow way, aboard MV Skua. Nine nights, four of them at anchor under something vertical.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_3ioqdwx1",
+   "id": "sec_3is173it",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3e1d720u",
+     "id": "row_3ex3gvxz",
      "columns": [
       {
-       "id": "col_3agaqimf",
+       "id": "col_3a1wb1zl",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_39cu8hig",
+         "id": "b_39btdfry",
          "type": "text",
          "props": {
           "html": "<p>The express boats do Bergen to Ålesund in a day. We take nine, because the point of a fjord is not the far end of it. Skua turns up the arms with no ferry service and anchors where the chart says there is room for exactly one ship, which there is, because she is the one ship.</p><p>Four nights at anchor means four evenings when the engine stops and the water goes to glass and the only thing moving is the waterfall a mile up. Bring a book you have been meaning to read for years.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_3dby2knn",
+       "id": "col_3dwirtvv",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_3bjwie9u",
+         "id": "b_3by675ck",
          "type": "rating",
          "props": {
           "rating": 4.8,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_3ctm9003",
+         "id": "b_3cqtx2re",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_3hyl4w5m",
+     "id": "row_3h4fcsgr",
      "columns": [
       {
-       "id": "col_3gaa6flh",
+       "id": "col_3g3h2xpg",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_3f85vx29",
+         "id": "b_3foppr1s",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_3ngmwtvh",
+   "id": "sec_3n3p66k4",
    "name": "The arms",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3m16guy8",
+     "id": "row_3m8xxn4v",
      "columns": [
       {
-       "id": "col_3lco8pmc",
+       "id": "col_3lcdsg95",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_3jca61xu",
+         "id": "b_3je4arji",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_3k3vr221",
+         "id": "b_3k6p9bkc",
          "type": "half-overlay",
          "props": {
           "tint": "#1b333d",
@@ -374,7 +374,7 @@
    ]
   },
   {
-   "id": "sec_3rfsob2i",
+   "id": "sec_3r939yas",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -395,10 +395,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3qi5ymak",
+     "id": "row_3qp9om2b",
      "columns": [
       {
-       "id": "col_3pwx4c50",
+       "id": "col_3phqejgh",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -416,7 +416,7 @@
        },
        "blocks": [
         {
-         "id": "b_3ok26202",
+         "id": "b_3o15betv",
          "type": "quote",
          "props": {
           "text": "The master turned us round in the night to miss a blow, and we woke up somewhere better. Nobody announced it. It was just done.",
@@ -434,7 +434,7 @@
    ]
   },
   {
-   "id": "sec_3waa886i",
+   "id": "sec_3w0anmcd",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -455,10 +455,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3vwiowvo",
+     "id": "row_3vq6zsu4",
      "columns": [
       {
-       "id": "col_3unmh00c",
+       "id": "col_3ufepxht",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -476,7 +476,7 @@
        },
        "blocks": [
         {
-         "id": "b_3sm4cgq5",
+         "id": "b_3sookmxa",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -485,7 +485,7 @@
          }
         },
         {
-         "id": "b_3th684so",
+         "id": "b_3tzcojbw",
          "type": "button-group",
          "props": {
           "align": "centre",

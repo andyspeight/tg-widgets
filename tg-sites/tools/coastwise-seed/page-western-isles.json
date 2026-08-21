@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_32owec09",
+ "id": "pg_32lg0txd",
  "title": "Western Isles",
  "slug": "western-isles",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_27e1cofa",
+   "id": "sec_27nzva5g",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_26ub9256",
+     "id": "row_26dyzt68",
      "columns": [
       {
-       "id": "col_253v20pz",
+       "id": "col_25rtapk8",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_22pl6cud",
+         "id": "b_220s6sb4",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_23qoja2g",
+         "id": "b_23e4rwmp",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_24wzdge8",
+         "id": "b_2422aqov",
          "type": "text",
          "props": {
           "html": "<p>Oban to Stornoway through the Small Isles, aboard MV Freya. The one to book if you want weather with your scenery.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_2hcooy81",
+   "id": "sec_2hnyrueo",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +111,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2dtzm19p",
+     "id": "row_2d8631yo",
      "columns": [
       {
-       "id": "col_29l6p1ti",
+       "id": "col_29i4w7zb",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +132,7 @@
        },
        "blocks": [
         {
-         "id": "b_285g406c",
+         "id": "b_281lnsmx",
          "type": "text",
          "props": {
           "html": "<p>The west of Scotland is a sequence of harbours nobody dredged for anything bigger than a fishing fleet, which is exactly why it suits us. Freya draws 3.8 metres, so she lies alongside at Tobermory and Rodel while the big ships sit off Oban landing tenders.</p><p>The week is built round landings, not passages. Coll for the white strand, Staffa at slack water for Fingal’s Cave, Canna because eleven residents and one post box is a kind of perfection. When a blow comes through, the master swaps the days rather than cancelling one.</p>"
@@ -141,7 +141,7 @@
        ]
       },
       {
-       "id": "col_2cmygiex",
+       "id": "col_2c5a7bpg",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,7 +159,7 @@
        },
        "blocks": [
         {
-         "id": "b_2arkhffl",
+         "id": "b_2a5haibm",
          "type": "rating",
          "props": {
           "rating": 4.9,
@@ -171,7 +171,7 @@
          }
         },
         {
-         "id": "b_2bon21fm",
+         "id": "b_2bf3gcjj",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -206,10 +206,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_2gnabxf4",
+     "id": "row_2gxygd81",
      "columns": [
       {
-       "id": "col_2fos75nb",
+       "id": "col_2f1vg49u",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +227,7 @@
        },
        "blocks": [
         {
-         "id": "b_2e41vdia",
+         "id": "b_2ed5wory",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -272,7 +272,7 @@
    ]
   },
   {
-   "id": "sec_2m4gdy2b",
+   "id": "sec_2mwmbut1",
    "name": "Day by day",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +293,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2l29hgn2",
+     "id": "row_2lstjx9s",
      "columns": [
       {
-       "id": "col_2k2revrd",
+       "id": "col_2kdyzowu",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,7 +314,7 @@
        },
        "blocks": [
         {
-         "id": "b_2ii4r6g7",
+         "id": "b_2ix7qfdq",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -323,7 +323,7 @@
          }
         },
         {
-         "id": "b_2jo06h30",
+         "id": "b_2jxm49sp",
          "type": "slider",
          "props": {
           "slideWidth": "medium",
@@ -413,7 +413,7 @@
    ]
   },
   {
-   "id": "sec_2s4hw320",
+   "id": "sec_2sj76z4c",
    "name": "The isles",
    "tone": "light",
    "width": "contained",
@@ -434,10 +434,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2rp80pty",
+     "id": "row_2rbt59mh",
      "columns": [
       {
-       "id": "col_2qqymv36",
+       "id": "col_2q6zsgka",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -455,7 +455,7 @@
        },
        "blocks": [
         {
-         "id": "b_2n0p1g7l",
+         "id": "b_2na2dbkk",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -464,14 +464,14 @@
          }
         },
         {
-         "id": "b_2o44s8oq",
+         "id": "b_2o4lgc5d",
          "type": "text",
          "props": {
           "html": "<p>Open one. The photograph is the argument.</p>"
          }
         },
         {
-         "id": "b_2ps628nb",
+         "id": "b_2pii5z4r",
          "type": "expanding-cards",
          "props": {
           "height": "medium",
@@ -524,7 +524,7 @@
    ]
   },
   {
-   "id": "sec_2wszq5xr",
+   "id": "sec_2wrma3ry",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -545,10 +545,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2vi1wxbg",
+     "id": "row_2vyfafxe",
      "columns": [
       {
-       "id": "col_2u7w9fio",
+       "id": "col_2u86ayo3",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -566,7 +566,7 @@
        },
        "blocks": [
         {
-         "id": "b_2t4rst1a",
+         "id": "b_2ttsv3uc",
          "type": "quote",
          "props": {
           "text": "We were alongside in Canna before I had finished my coffee. On the last cruise we took, that was a coach transfer.",
@@ -584,7 +584,7 @@
    ]
   },
   {
-   "id": "sec_319ik4e6",
+   "id": "sec_31sy0bry",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -605,10 +605,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_30ek4skj",
+     "id": "row_30ek9fcv",
      "columns": [
       {
-       "id": "col_2zgtkh62",
+       "id": "col_2zlylpfg",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -626,7 +626,7 @@
        },
        "blocks": [
         {
-         "id": "b_2xpjwx9f",
+         "id": "b_2xnnsg7e",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -635,7 +635,7 @@
          }
         },
         {
-         "id": "b_2y7pjacb",
+         "id": "b_2yvacbqu",
          "type": "button-group",
          "props": {
           "align": "centre",

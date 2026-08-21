@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_6rszm218",
+ "id": "pg_6rf5s4ht",
  "title": "Holidays",
  "slug": "holidays",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_6hvieq5d",
+   "id": "sec_6hdvf0y8",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_6gwe4fr0",
+     "id": "row_6g2v9emr",
      "columns": [
       {
-       "id": "col_6fs28bd9",
+       "id": "col_6fs2xm6w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_6c2jnu7u",
+         "id": "b_6c1p427h",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_6dg7odpn",
+         "id": "b_6d0usmaj",
          "type": "heading",
          "props": {
           "level": "h1",
@@ -73,7 +73,7 @@
          }
         },
         {
-         "id": "b_6eue0l3k",
+         "id": "b_6encs4q8",
          "type": "text",
          "props": {
           "html": "<p>The same three ships, five different reasons to be aboard. Pick the one that sounds like your kind of week.</p>"
@@ -89,7 +89,7 @@
    ]
   },
   {
-   "id": "sec_6lgpsown",
+   "id": "sec_6lv3371b",
    "name": "The five",
    "tone": "light",
    "width": "contained",
@@ -114,10 +114,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6k6u9hsy",
+     "id": "row_6kyl8rjo",
      "columns": [
       {
-       "id": "col_6jfxsobx",
+       "id": "col_6j05dt3l",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -135,7 +135,7 @@
        },
        "blocks": [
         {
-         "id": "b_6if0yd0h",
+         "id": "b_6i9pe15i",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -212,7 +212,7 @@
    ]
   },
   {
-   "id": "sec_6qulef44",
+   "id": "sec_6qduz469",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -233,10 +233,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6ptbcxjs",
+     "id": "row_6pj1ap6m",
      "columns": [
       {
-       "id": "col_6ov6wu3p",
+       "id": "col_6oxbcpsu",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -254,7 +254,7 @@
        },
        "blocks": [
         {
-         "id": "b_6muzobj9",
+         "id": "b_6mje1xov",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -263,7 +263,7 @@
          }
         },
         {
-         "id": "b_6njr3d97",
+         "id": "b_6n7x9uvl",
          "type": "button-group",
          "props": {
           "align": "centre",
