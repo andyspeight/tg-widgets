@@ -23,7 +23,8 @@ await build({
       import { themeTokens } from ${JSON.stringify(join(here, '../lib/theme/tokens.ts'))};
       import { parseTheme } from ${JSON.stringify(join(here, '../lib/theme/schema.ts'))};
       import { parsePage } from ${JSON.stringify(join(here, '../lib/content/schema.ts'))};
-      export { renderToStaticMarkup, h, PageRenderer, RegionRenderer, themeTokens, parseTheme, parsePage };
+      import { fillNavRegion } from ${JSON.stringify(join(here, '../lib/content/nav.ts'))};
+      export { renderToStaticMarkup, h, PageRenderer, RegionRenderer, themeTokens, parseTheme, parsePage, fillNavRegion };
     `,
     resolveDir: here,
   },
@@ -35,7 +36,7 @@ await build({
   jsx: 'automatic',
   loader: { '.css': 'empty' },
 })
-const { renderToStaticMarkup, h, PageRenderer, RegionRenderer, themeTokens, parseTheme, parsePage } =
+const { renderToStaticMarkup, h, PageRenderer, RegionRenderer, themeTokens, parseTheme, parsePage, fillNavRegion } =
   await import(pathToFileURL(entry).href);
 
 // The Coastwise theme, exactly as it will be stored on the tenant row.
@@ -67,8 +68,33 @@ mkdirSync(outDir, { recursive: true });
 
 const seedDir = join(here, 'coastwise-seed');
 const { readdirSync } = await import('node:fs');
-const header = JSON.parse(readFileSync(join(seedDir, 'region-header.json'), 'utf8'));
+const headerJson = JSON.parse(readFileSync(join(seedDir, 'region-header.json'), 'utf8'));
 const footer = JSON.parse(readFileSync(join(seedDir, 'region-footer.json'), 'utf8'));
+
+/*
+ * Fill the menu's folder dropdowns the way the live routes do, so the preview
+ * exercises the dropdown markup and its colours rather than a flat menu. The
+ * nav pages are reconstructed from the seed files plus the FOLDERS map, which
+ * is exactly the parent shape the edge function seeds into the database.
+ */
+const { FOLDERS } = await import(pathToFileURL(join(here, 'coastwise-seed/.folders.mjs')).href)
+  .catch(() => ({ FOLDERS: { destinations: [], holidays: [] } }));
+const seedPages = readdirSync(seedDir)
+  .filter((f) => f.startsWith('page-'))
+  .map((f) => JSON.parse(readFileSync(join(seedDir, f), 'utf8')));
+const parentOf = new Map();
+for (const [folder, slugs] of Object.entries(FOLDERS)) {
+  const folderPage = seedPages.find((p) => p.slug === folder);
+  if (folderPage) for (const slug of slugs) parentOf.set(slug, folderPage.id);
+}
+const navPages = seedPages.map((p) => ({
+  id: p.id,
+  title: p.title,
+  slug: p.slug,
+  parentId: parentOf.get(p.slug) ?? null,
+  published: true,
+}));
+const header = fillNavRegion({ sections: headerJson.sections }, navPages);
 
 for (const file of readdirSync(seedDir).filter((f) => f.startsWith('page-'))) {
   const pageJson = JSON.parse(readFileSync(join(seedDir, file), 'utf8'));

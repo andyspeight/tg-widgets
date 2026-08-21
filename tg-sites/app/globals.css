@@ -4034,9 +4034,15 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  * gains a dropdown of the pages inside it. The browser reveals the dropdown on
  * hover AND on keyboard focus, through :focus-within, so it is reachable with a
  * mouse, a finger and the Tab key without a line of script, the same principle
- * as the phone menu above. The dropdown is its own surface, so its links take the
- * surface's text colour rather than the header's, which would vanish on a header
- * that set white link text.
+ * as the phone menu above.
+ *
+ * COLOUR: the panel matches the band it hangs from. An earlier version gave it
+ * the light surface unconditionally and thought `color: var(--tgs-text)` meant
+ * "the surface's text colour". It does not: a dark or accent section re-scopes
+ * --tgs-text to its own inverted colour, and custom properties inherit, so the
+ * panel came out light with light text in it, unreadable (Coastwise, 21 Aug
+ * 2026). The tone overrides further down keep panel and text measured against
+ * the same band instead of fighting the inheritance.
  */
 .tgs-nav__item { position: relative; }
 
@@ -4076,6 +4082,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   transform: translateY(0);
   transition: opacity 0.14s ease, transform 0.14s ease;
 }
+
+/*
+ * THE HEADER HAS TO RISE WHILE A DROPDOWN IS OPEN, for exactly the reason the
+ * always-on burger's panel documents above: the header is a z-index: 2 stacking
+ * context, and the page's own `.tgs-section__inner` is an equal z-index LATER
+ * in the document, so it paints straight over the open dropdown. The panel's
+ * own z-index: 30 cannot escape the header's box. Same cure, same scope: raise
+ * the header only while a folder item is hovered or holds focus, not always,
+ * so no permanent stacking change leaks onto heroes and sticky bars. Seen on
+ * Coastwise (21 Aug 2026): the home page's copy printing through the menu.
+ */
+.tgs-region[data-region='header']:has(.tgs-nav__item--folder:hover),
+.tgs-region[data-region='header']:has(.tgs-nav__item--folder:focus-within) {
+  z-index: 40;
+}
 .tgs-nav__item--folder:hover > .tgs-nav__link .tgs-nav__chev,
 .tgs-nav__item--folder:focus-within > .tgs-nav__link .tgs-nav__chev {
   transform: rotate(180deg);
@@ -4093,6 +4114,42 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   white-space: nowrap;
 }
 .tgs-nav__sublink:hover { background: var(--tgs-bg); color: var(--tgs-primary); }
+
+/*
+ * THE DETACHED MENU SURFACES FOLLOW THEIR BAND (21 Aug 2026).
+ *
+ * Two pieces of the menu float free of the header bar: the dropdown under a
+ * folder link and the always-on burger's panel. Inside a dark or accent
+ * section the bar's tone rule has already re-scoped --tgs-text, --tgs-text-muted
+ * and --tgs-border to the pairing measured against that band, and those
+ * inherit into the panel whether it likes it or not. So the panel takes the
+ * band's own background too, and every colour inside it is a measured pair
+ * again. Only the background and the hover wash need stating: the text is
+ * already right the moment the ground matches it.
+ *
+ * The hover wash reuses the band's border mix rather than the page --tgs-bg,
+ * which is a light colour that would flash a bright pill on a dark panel.
+ */
+.tgs-section[data-tone='dark'] .tgs-nav__submenu {
+  background: var(--tgs-surface-dark);
+}
+.tgs-section[data-tone='accent'] .tgs-nav__submenu {
+  background: var(--tgs-primary);
+}
+.tgs-section[data-tone='dark'] .tgs-nav__sublink:hover {
+  background: var(--tgs-on-dark-border);
+  color: var(--tgs-text);
+}
+.tgs-section[data-tone='accent'] .tgs-nav__sublink:hover {
+  background: var(--tgs-on-primary-border);
+  color: var(--tgs-text);
+}
+.tgs-section[data-tone='dark'] .tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  background: var(--tgs-surface-dark);
+}
+.tgs-section[data-tone='accent'] .tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  background: var(--tgs-primary);
+}
 
 /*
  * Inside the phone menu there is no hover to open a dropdown, so the pages inside

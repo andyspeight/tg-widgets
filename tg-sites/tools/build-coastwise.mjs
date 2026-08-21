@@ -124,5 +124,12 @@ for (const [name, region] of Object.entries(site.regions())) {
   writeFileSync(join(outDir, `region-${name}.json`), JSON.stringify({ sections: clean.sections }, null, 1));
 }
 
+// The folder map, for the preview renderer to fill the menu's dropdowns the
+// way the live routes do. The edge function carries its own copy of this shape.
+writeFileSync(
+  join(outDir, '.folders.mjs'),
+  `export const FOLDERS = ${JSON.stringify(site.FOLDERS, null, 1)};\n`,
+);
+
 if (failed) process.exit(1);
 console.log('\nseed written to tools/coastwise-seed/');
