@@ -133,7 +133,7 @@ const sameCity = (a, b) => {
 
 const SPORTY = new Set(['stadium', 'sports_centre', 'sports_hall', 'pitch', 'arena',
   'racetrack', 'raceway', 'track', 'golf_course', 'ice_rink', 'horse_racing',
-  'events_centre', 'exhibition_centre', 'attraction']);
+  'events_centre', 'exhibition_centre']);
 const NEVER = new Set(['bank', 'library', 'office', 'company', 'residential', 'school', 'university']);
 
 // Two-country leagues: a US expectation must not reject Toronto and Winnipeg.
@@ -174,7 +174,7 @@ async function resolve(v) {
       // name on a non-sports place is accepted but never a partial one.
       if (!v.city) {
         const sporty = SPORTY.has(h.osm);
-        if (sporty && score >= 0.35 && (!bestSporty || score > bestSporty.score)) {
+        if (sporty && score >= 0.3 && (!bestSporty || score > bestSporty.score)) {
           bestSporty = { h, score };
         }
         if (!sporty && score >= 0.95) {
@@ -226,5 +226,7 @@ export default async function handler(req, res) {
   await Promise.all([worker(), worker(), worker(), worker(), worker()]);
 
   res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ total: all.length, offset, count: slice.length, rows, fails });
+  const pad = Math.min(120000, Math.max(0, parseInt(req.query.pad, 10) || 0));
+  res.status(200).json({ total: all.length, offset, count: slice.length, rows, fails,
+    pad: pad ? ' '.repeat(pad) : undefined });
 }
