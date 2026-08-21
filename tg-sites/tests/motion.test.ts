@@ -18,6 +18,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
+  MOTION_ARRIVAL_RECIPES,
   MOTION_BACKGROUND_RECIPES,
   MOTION_LIVE_RECIPES,
   MOTION_RECIPES,
@@ -33,7 +34,19 @@ function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
 }
 
-const css = read('app', 'globals.css');
+/*
+ * The stylesheet with its COMMENTS STRIPPED, and that is not tidiness.
+ *
+ * "A source-text assertion must strip comments first, or it reads the prose
+ * explaining a bug as the bug" is already written down in this project's decisions,
+ * and it caught this file on 20 Aug 2026: the guard below looked for `position:
+ * sticky` and found it in the paragraph EXPLAINING that S3 uses position sticky,
+ * then reported the comment as an unguarded rule. Brace matching has the same
+ * problem, since a comment is free to contain a brace and throw the depth count.
+ *
+ * So every structural check reads this, and only the prose-free version.
+ */
+const css = read('app', 'globals.css').replace(/\/\*[\s\S]*?\*\//g, '');
 const render = read('components', 'render', 'PageRenderer.tsx');
 const schema = read('lib', 'content', 'schema.ts');
 const blocks = read('lib', 'content', 'blocks.ts');
@@ -100,34 +113,63 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
    * who asks for less then gets the picture sitting still and full-bleed, which is
    * a finished page rather than a broken one.
    */
-  it.each([...MOTION_LIVE_RECIPES])('recipe %s only animates behind prefers-reduced-motion', (recipe) => {
+  it.each([...MOTION_LIVE_RECIPES])('recipe %s only moves behind prefers-reduced-motion', (recipe) => {
     const selector = `[data-motion='${recipe}']`;
     expect(css).toContain(selector);
 
-    // Every rule that actually starts an animation for this recipe must be guarded.
-    const animating = css
+    /*
+     * MOVEMENT IS NOT ALWAYS AN ANIMATION. This test only looked for `animation:`
+     * until S3 sticky-stack arrived, which moves nothing and animates nothing: it
+     * pins cards with `position: sticky` and lets the scroll do the work. A guard
+     * that only knows about keyframes would have waved it straight through with no
+     * reduced-motion path at all, so it asks about every way this stylesheet has of
+     * making a section move.
+     */
+    const moving = css
       .split('}')
-      .filter((rule) => rule.includes(selector) && /\banimation:/.test(rule));
-    expect(animating.length).toBeGreaterThan(0);
-    for (const rule of animating) {
+      .filter((rule) => rule.includes(selector) && /\banimation:|position:\s*sticky/.test(rule));
+    expect(moving.length, `${recipe} has no rule that makes anything move`).toBeGreaterThan(0);
+    for (const rule of moving) {
       const head = rule.slice(rule.indexOf(selector));
-      expect(guarded, `${recipe} animates outside the reduced-motion guard: ${head.slice(0, 80)}`)
+      expect(guarded, `${recipe} moves outside the reduced-motion guard: ${head.slice(0, 80)}`)
         .toContain(head.slice(0, 40));
     }
   });
 
-  it('every live recipe is paced by time, never by a frame counter', () => {
-    // Lesson 3 in the catalogue: anything advanced by a fixed step per frame runs
-    // slow on a weak GPU and the timing drifts visibly. A CSS duration cannot.
+  it('no live recipe is paced by a frame counter', () => {
+    /*
+     * Lesson 3 in the catalogue: anything advanced by a fixed step per frame runs slow
+     * on a weak GPU and the timing drifts visibly where you can see it.
+     *
+     * There are three honest ways to pace a recipe here and none of them can drift: a
+     * CSS duration in seconds, a view() timeline driven by scroll position, or nothing
+     * at all because the recipe is `position: sticky` and the browser is doing the
+     * work. What this rules out is a fourth way, a script counting frames, which is
+     * why it also checks no live recipe has brought a script with it.
+     */
     for (const recipe of MOTION_LIVE_RECIPES) {
       const rules = css.split('}').filter((r) => r.includes(`[data-motion='${recipe}']`));
       const animation = rules.find((r) => /\banimation:/.test(r)) ?? '';
-      expect(animation, `${recipe} has no animation at all`).not.toBe('');
+      const sticky = rules.some((r) => /position:\s*sticky/.test(r));
 
-      // The duration may be written inline or come from an intensity band, since a
+      if (!animation) {
+        expect(sticky, `${recipe} neither animates nor sticks, so nothing moves`).toBe(true);
+        continue;
+      }
+
+      // Scroll-steered: paced by where the section sits, so it needs no duration.
+      if (rules.some((r) => /animation-timeline:\s*view\(\)/.test(r))) {
+        expect(
+          rules.some((r) => /animation-range:/.test(r)),
+          `${recipe} rides a view() timeline with no range, so it plays over the whole scroll`,
+        ).toBe(true);
+        continue;
+      }
+
+      // Time-based: the duration may be inline or come from an intensity band, since a
       // band moves amplitude and duration together. Either way it must RESOLVE to a
-      // time: an animation whose duration variable is never declared has no duration
-      // and simply never runs, which is a stopped page that still looks correct here.
+      // time. An animation whose duration variable is never declared computes to 0s
+      // and simply never runs, which is a stopped page that still looks right here.
       const inline = /animation:[^;]*?\d+m?s/.test(animation);
       const fromVar = animation.match(/animation:[^;]*?var\((--[\w-]+)/);
       if (!inline) {
@@ -358,7 +400,10 @@ describe('the client can change what the default gave them', () => {
     // The editor's state has to agree with the render's resolution rule, or a client
     // sees two background motions ticked and only one of them doing anything.
     expect(properties).toContain('MOTION_BACKGROUND_RECIPES.has(recipe satisfies MotionRecipe)');
-    expect(properties).toContain('owns ? { parallax: undefined, kenBurns: undefined } : {}');
+    expect(properties).toContain('ownsBackground ? { parallax: undefined, kenBurns: undefined } : {}');
+    // And the same for the blocks arriving, which S1 takes over from the reveal.
+    expect(properties).toContain('MOTION_ARRIVAL_RECIPES.has(recipe satisfies MotionRecipe)');
+    expect(properties).toContain('ownsArrival ? { reveal: undefined, revealStagger: undefined } : {}');
   });
 
   it('narrows the picked value against its own list rather than casting it', () => {
@@ -469,6 +514,77 @@ describe('a new site moves out of the box', () => {
       const page = await buildStarterPage(home!, EMPTY);
       const moved = page.sections.filter((s) => s.motion);
       expect(moved, `${starter.id}'s designed home was given motion it did not ask for`).toEqual([]);
+    }
+  });
+});
+
+describe('one thing animates the blocks arriving, never two', () => {
+  /*
+   * The second resolution rule. The reveal has animated blocks into view since
+   * 11 Aug 2026 and S1 tide-reveal wants the same elements, so the recipe takes them
+   * and the reveal stands down. Exactly the shape of the background rule, because it
+   * is exactly the same kind of collision.
+   */
+  it('names S1 as an arrival recipe and keeps the background ones out of it', () => {
+    expect(MOTION_ARRIVAL_RECIPES.has('S1')).toBe(true);
+    for (const recipe of MOTION_ARRIVAL_RECIPES) {
+      expect(
+        MOTION_BACKGROUND_RECIPES.has(recipe),
+        `${recipe} claims both the background and the blocks, so the two rules disagree`,
+      ).toBe(false);
+    }
+  });
+
+  it('stands the reveal and its stagger down when a recipe owns the arrival', () => {
+    expect(render).toContain(
+      'const motionOwnsArrival = Boolean(motion && MOTION_ARRIVAL_RECIPES.has(motion));',
+    );
+    expect(render).toContain('section.reveal && !motionOwnsArrival && !editable');
+    expect(render).toContain('section.revealStagger && !motionOwnsArrival && !editable');
+  });
+
+  it('every arrival recipe is a live one, so the reveal is never stood down for nothing', () => {
+    // Standing the reveal down for a recipe that draws nothing would leave the
+    // section with no arrival at all, which is worse than either option.
+    for (const recipe of MOTION_ARRIVAL_RECIPES) {
+      expect(MOTION_LIVE_RECIPES.has(recipe), `${recipe} owns arrival but renders nothing`).toBe(true);
+    }
+  });
+});
+
+describe('the scroll-steered recipes are cheaper here than the catalogue expects', () => {
+  it('rates S1 and S5 tier 0, because this stylesheet steers on scroll in pure CSS', () => {
+    expect(MOTION_TIERS.S1).toBe(0);
+    expect(MOTION_TIERS.S5).toBe(0);
+    expect(MOTION_TIERS.S3).toBe(0);
+  });
+
+  it('drives them from a view() timeline rather than a scroll listener', () => {
+    for (const recipe of ['S1', 'S5'] as const) {
+      const rules = css.split('}').filter((r) => r.includes(`[data-motion='${recipe}']`));
+      expect(
+        rules.some((r) => /animation-timeline:\s*view\(\)/.test(r)),
+        `${recipe} is rated tier 0 but does not use a view() timeline`,
+      ).toBe(true);
+    }
+  });
+
+  it('pads S1 against the descender trap and takes the padding back out of the layout', () => {
+    // Lesson 2 in the catalogue: a mask plus tight display type eats the tails of
+    // g, q and y. Verified for real in tools/verify-motion-recipes.mjs; this holds
+    // the shape of the fix so it cannot be tidied away.
+    const rules = css.split('}').filter((r) => r.includes("[data-motion='S1']"));
+    const padded = rules.find((r) => /padding-bottom:/.test(r)) ?? '';
+    expect(padded, 'S1 has no descender padding').not.toBe('');
+    expect(padded).toMatch(/margin-bottom:\s*-/);
+  });
+
+  it('keeps S3 free of any clip, since a clipped ancestor stops sticky working', () => {
+    const rules = css.split('}').filter((r) => r.includes("[data-motion='S3']"));
+    for (const rule of rules) {
+      expect(rule, 'S3 clips something, which would break the pinning').not.toMatch(
+        /overflow:\s*(hidden|clip|auto|scroll)/,
+      );
     }
   });
 });

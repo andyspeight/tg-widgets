@@ -291,12 +291,21 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * What each recipe costs, from the catalogue. 0 is CSS only and free, 1 is a small
  * script, 2 is a WebGL canvas and is capped at one per page.
  *
- * S5 scrub-scale is tier 0 HERE though the catalogue says 0/1, because this codebase
- * already does scroll-linked animation in pure CSS with `animation-timeline: view()`
- * (see the parallax) rather than with a scroll listener.
+ * TWO ARE CHEAPER HERE THAN IN THE CATALOGUE, and it is the same reason both times:
+ * this codebase already does scroll-linked animation in pure CSS with
+ * `animation-timeline: view()` (see the parallax and the reveal) rather than with a
+ * scroll listener. So S5 scrub-scale is 0 though the catalogue says 0/1, and S1
+ * tide-reveal is 0 though the catalogue says 1.
+ *
+ * S1 is the interesting one. Its catalogue entry carries a warning that `clip-path`
+ * silently breaks IntersectionObserver, so a clipped element reports a zero
+ * intersection ratio, the observer never fires and nothing ever reveals. That trap
+ * cannot bite here, because nothing in this stylesheet observes anything: a view()
+ * timeline is resolved from layout, not from an intersection callback. The recipe
+ * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A2: 1, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 1, S3: 0, S5: 0,
+  none: 0, A2: 1, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -320,7 +329,20 @@ export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<Moti
  * Guarded by tests/motion.test.ts, which checks each of these has CSS and a
  * reduced-motion path in globals.css.
  */
-export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A5', 'A6']);
+export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
+  'A5', 'A6', 'S1', 'S3', 'S5',
+]);
+
+/**
+ * The recipes that animate the section's BLOCKS ARRIVING.
+ *
+ * The second resolution rule, and the same shape as the background one above. The
+ * reveal has animated blocks into view since 11 Aug 2026 and S1 tide-reveal wants
+ * the same elements, so rather than leaving two animations on one block the recipe
+ * takes it and `reveal` stands down. A section can still carry both settings; only
+ * one of them draws, and it is the one the client chose most recently by name.
+ */
+export const MOTION_ARRIVAL_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['S1']);
 
 /** How much the recipe moves. Bands, never on and off: 2 is the default middle. */
 export type MotionIntensity = 1 | 2 | 3;

@@ -15,6 +15,7 @@ import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import {
   boxIsEmpty,
   EMPTY_BOX,
+  MOTION_ARRIVAL_RECIPES,
   MOTION_BACKGROUND_RECIPES,
   MOTION_LIVE_RECIPES,
   safeAnchor,
@@ -371,6 +372,14 @@ export function SectionRenderer({
    * A5 is not a background recipe, so it composes with them rather than replacing.
    */
   const motionOwnsBackground = Boolean(motion && MOTION_BACKGROUND_RECIPES.has(motion));
+  /*
+   * The same rule again, for the other thing two features can both claim. The reveal
+   * has animated blocks into view since 11 Aug 2026 and S1 tide-reveal wants those
+   * same blocks, so rather than leaving two animations on one element the recipe
+   * takes it and the reveal stands down. A section may still carry both settings;
+   * only one of them draws.
+   */
+  const motionOwnsArrival = Boolean(motion && MOTION_ARRIVAL_RECIPES.has(motion));
   const bgTransition = section.backgroundTransition === 'slide' ? 'slide' : 'fade';
   const bgInterval = section.backgroundInterval ?? 5;
   /*
@@ -409,14 +418,20 @@ export function SectionRenderer({
        * to the closed list so a stored string can never put anything but a known
        * style on the attribute. globals.css keys each keyframe off it.
        */
-      data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}
+      data-reveal={
+        section.reveal && !motionOwnsArrival && !editable
+          ? normaliseRevealStyle(section.revealStyle)
+          : undefined
+      }
       /*
        * Stagger rides alongside reveal: it means nothing without it, so it is only
        * emitted when reveal is on. It turns the reveal from block-by-block into
        * item-by-item, the columns or the cards arriving one after another. Same
        * `editable` gate, and the cascade itself is pure CSS in globals.css.
        */
-      data-reveal-stagger={section.reveal && section.revealStagger && !editable ? '' : undefined}
+      data-reveal-stagger={
+        section.reveal && section.revealStagger && !motionOwnsArrival && !editable ? '' : undefined
+      }
       /*
        * Cards and buttons lift under the pointer on the published page and in preview,
        * not while editing, where the small movement would fight selecting them. Same
