@@ -436,14 +436,16 @@ const ALLOWED_WIDGET_TYPES = [
 // KEEP IN SYNC with the WIDGETS array in public/index.html. If these drift,
 // the dashboard will show one limit while the API enforces another.
 const PLAN_WIDGET_LIMITS = {
-  // Ticket inventory is premium, revenue-bearing content, so it is gated
-  // harder than the average widget. Boost and up.
-  'Event Tickets':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Event Menu':              { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
-  'Ticket Month':            { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Ticket Search':           { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
-  'Club Picker':             { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
-  'Next Event':              { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
+  // The ticket family is IGNITE ONLY (Andy, 21 Aug 2026). Ticket inventory is
+  // premium revenue-bearing content and is not sold on Spark or Boost, so all
+  // six carry Boost: 0 rather than a count. Keep in step with the Package
+  // Catalogue in Control, where each one is linked to Ignite alone.
+  'Event Tickets':         { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Event Menu':              { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Ticket Month':            { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Ticket Search':           { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Club Picker':             { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Next Event':              { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
   'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Google Reviews':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
