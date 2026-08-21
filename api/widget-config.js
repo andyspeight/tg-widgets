@@ -426,6 +426,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Club Picker',
   'Ticket Search',
   'Ticket Month',
+  'Event Menu',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -438,6 +439,7 @@ const PLAN_WIDGET_LIMITS = {
   // Ticket inventory is premium, revenue-bearing content, so it is gated
   // harder than the average widget. Boost and up.
   'Event Tickets':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Event Menu':              { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   'Ticket Month':            { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Ticket Search':           { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   'Club Picker':             { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },

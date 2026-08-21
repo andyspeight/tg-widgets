@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Menu Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+<style>
+  .cols { display: grid; grid-template-columns: 290px 1fr; gap: 22px; align-items: start; }
+  .cols.stack { grid-template-columns: 1fr; }
+  /* A fixed 290px column plus a gap does not fit a phone, and the page mock
+     next to it was pushing the whole demo sideways by 107px. */
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .cols > * { min-width: 0; }
+  .fake { border: 1px solid #e3e8ee; border-radius: 14px; padding: 22px 24px; background: #fff; }
+  .page.dark .fake { background: #12171d; border-color: #28313b; color: #eef2f6; }
+  .fake h3 { margin: 0 0 6px; font-size: 19px; }
+  .fake p { margin: 0 0 18px; color: #5b6875; font-size: 14px; line-height: 1.6; }
+  .page.dark .fake p { color: #9aa7b4; }
+  .fake .band { height: 132px; border-radius: 10px; background: linear-gradient(135deg,#dbe6f0,#eef2f6); margin-bottom: 16px; }
+  .page.dark .fake .band { background: linear-gradient(135deg,#1e252e,#171d24); }
+  .fake .lines span { display: block; height: 11px; border-radius: 5px; background: #eef1f5; margin: 9px 0; }
+  .page.dark .fake .lines span { background: #1e252e; }
+  .picked { margin-top: 18px; padding: 12px 14px; border-radius: 10px; font-size: 13.5px;
+    background: #eef7fa; border: 1px solid #cbe8f1; color: #12495a; }
+  .picked code { font-size: 12.5px; }
+  .picked small { display: block; margin-top: 4px; opacity: .75; }
+</style>
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Sport</span><span>Concerts</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Event Menu</h1>
+  <p class="lede">
+    The navigation for a whole ticket section. Categories, competitions, clubs, grounds and artists,
+    as a sidebar on a desktop and a drawer on a phone. It links into the client's own pages, not ours,
+    using one pattern they set once.
+  </p>
+
+  <div class="controls">
+    <strong>Layout</strong>
+    <button type="button" data-layout="sidebar" aria-pressed="true">Sidebar</button>
+    <button type="button" data-layout="drawer">Drawer</button>
+    <strong style="margin-left:12px">Group by</strong>
+    <button type="button" data-group="category" aria-pressed="true">Sport</button>
+    <button type="button" data-group="country">Country</button>
+    <button type="button" data-group="none">Flat list</button>
+  </div>
+
+  <div class="controls">
+    <strong>Include</strong>
+    <button type="button" data-sec="competitions" aria-pressed="true">Competitions</button>
+    <button type="button" data-sec="teams" aria-pressed="false">Clubs</button>
+    <button type="button" data-sec="venues" aria-pressed="false">Venues</button>
+    <button type="button" data-sec="performers" aria-pressed="false">Artists</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page">
+    <div class="cols" id="cols">
+      <div data-tg-widget="eventmenu" id="mount"></div>
+      <div class="fake">
+        <div class="band"></div>
+        <h3>Football tickets</h3>
+        <p>
+          A stand-in for one of the client's own pages. The menu beside it is the widget. Choose
+          anything in it and the address the client would have been sent to is shown below.
+        </p>
+        <div class="lines"><span style="width:96%"></span><span style="width:88%"></span>
+          <span style="width:92%"></span><span style="width:64%"></span></div>
+        <div class="picked" id="picked">Nothing chosen yet. Pick something from the menu.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>The menu never leaves the client's site.</b> Every row is built from their own link pattern,
+    <code>/tickets/{type}/{slug}</code> by default, and the row for the page you are already on is
+    marked. Where a client has no pages yet, each row fires a
+    <code>tg:eventmenu:select</code> event instead, which is what this demo is listening to.
+  </p>
+
+</div>
+
+<script src="/widget-eventmenu.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var state = {
+    layout: 'sidebar', group: 'category', theme: 'light',
+    sections: { competitions: true, teams: false, venues: false, performers: false },
+  };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+  var cols = document.getElementById('cols');
+
+  function sections() {
+    return ['competitions', 'teams', 'venues', 'performers'].filter(function (k) { return state.sections[k]; });
+  }
+
+  function config() {
+    return {
+      heading: 'Browse events',
+      layout: state.layout,
+      groupBy: state.group,
+      sections: sections(),
+      linkPattern: '/tickets/{type}/{slug}',
+      theme: state.theme,
+      accent: '#00B4D8',
+      maxPerGroup: 8,
+      showCounts: true,
+      showSearch: true,
+    };
+  }
+
+  function snippet() {
+    var c = config();
+    var shown = { layout: c.layout, groupBy: c.groupBy, sections: c.sections, linkPattern: c.linkPattern };
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="eventmenu"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-eventmenu.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    cols.className = 'cols' + (state.layout === 'drawer' ? ' stack' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function toggles() {
+    var nodes = document.querySelectorAll('[data-sec]');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var k = btn.getAttribute('data-sec');
+          // Never let every list be switched off at once. An empty menu is not
+          // a state anyone is asking to see.
+          if (state.sections[k] && sections().length === 1) return;
+          state.sections[k] = !state.sections[k];
+          btn.setAttribute('aria-pressed', String(state.sections[k]));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  // The demo has no /tickets pages, so it intercepts. A real client would let
+  // the link through and this handler would not exist.
+  mount.addEventListener('tg:eventmenu:select', function (e) {
+    e.preventDefault();
+    var d = e.detail;
+    var box = document.getElementById('picked');
+    box.textContent = 'Would have gone to ';
+    var code = document.createElement('code');
+    code.textContent = d.href || '(no pattern set)';
+    var small = document.createElement('small');
+    small.textContent = d.type + ' · ' + d.name;
+    box.appendChild(code);
+    box.appendChild(small);
+  });
+
+  function boot() {
+    if (!window.TGEventMenuWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGEventMenuWidget(mount, config());
+    group('layout', 'layout'); group('group', 'group'); group('theme', 'theme');
+    toggles();
+    apply();
+  }
+  boot();
+}());
+</script>
+</body>
+</html>

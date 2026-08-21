@@ -944,6 +944,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'eventmenu',
+    name: 'Event Menu',
+    airtableType: 'Event Menu',  // matches Airtable WidgetType singleSelect option
+    description: 'A sidebar or drawer menu of every competition, club, venue and artist, linking into your own pages.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M4 6h16M4 12h16M4 18h16'},
+    color: '#12B886',
+    editorUrl: '/editor-eventmenu',
+    demoUrl: '/demo-eventmenu',
+    widgetTag: 'eventmenu',
+    scriptFile: 'widget-eventmenu.js',
+    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'offers',
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
@@ -3189,6 +3204,10 @@ function loadMiniPreview(w) {
     new window.TGTicketMonthWidget(el, { sourceType:'competition', sourceValue:'english-premier-league', heading:'', showDayTitles:false, dayLimit:4, radius:10, accent:'#7C5CFF' });
   }
 
+  if (w.id === 'eventmenu' && window.TGEventMenuWidget) {
+    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'category', sections:['competitions'], maxPerGroup:4, showSearch:false, radius:10, accent:'#12B886' });
+  }
+
   if (w.id === 'tickets' && window.TGTicketsWidget) {
     new window.TGTicketsWidget(el, {
       sourceType: 'competition', sourceValue: 'english-premier-league',
@@ -4459,6 +4478,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
 <script src="/widget-tickets.js"></script>
+<script src="/widget-eventmenu.js"></script>
 <script src="/widget-ticketmonth.js"></script>
 <script src="/widget-ticketsearch.js"></script>
 <script src="/widget-clubpicker.js"></script>

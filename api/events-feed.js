@@ -372,6 +372,15 @@ export default function handler(req, res) {
       if (view === 'teams' && KEY_RE.test(compFilter)) {
         out = out.filter((t) => t.competitions.includes(compFilter));
       }
+      // Narrow a directory to one or more sports. Without this the only "top
+      // clubs" list available is the global one, which is all baseball and ice
+      // hockey because those sides play 82 and 162 games a season, so a
+      // football-only menu asking for popular clubs got nothing back.
+      const cats = str(q.category, 200).toLowerCase().split(',')
+        .map((x) => x.trim()).filter((x) => KEY_RE.test(x));
+      if (cats.length) {
+        out = out.filter((x) => (x.categories || []).some((c) => cats.includes(c)));
+      }
       const size = intIn(q.limit, 1, 500, 200);
       res.status(200).json({ meta, total: out.length, limit: size, items: out.slice(0, size) });
       return;
