@@ -281,6 +281,45 @@ for (const intensity of [1, 2, 3]) {
   }
 }
 
+/*
+ * A4 floating-layers: the near pictures must drift on periods that are NOT multiples
+ * of each other, or the set visibly comes back into phase and the depth dies. The
+ * catalogue is explicit about this being the whole craft of the recipe.
+ */
+{
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  await page.setContent(html('A4', 2), { waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  const periods = await page.evaluate(() =>
+    [...document.querySelectorAll('.tgs-cards > .tgs-card')].map(
+      (c) => getComputedStyle(c.querySelector('img')).animationDuration));
+  const far = await page.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector('.tgs-section__bg'));
+    return { name: cs.animationName, timeline: cs.animationTimeline };
+  });
+  await page.close();
+
+  lines.push(`  A4 near layers: ${periods.join(', ')}   far layer: ${far.name} on ${far.timeline}`);
+  const secs = periods.map((p) => parseFloat(p));
+  if (new Set(secs).size !== secs.length) {
+    problems.push(`A4 runs the same period on more than one layer (${periods.join(', ')})`);
+  }
+  for (let i = 0; i < secs.length; i += 1) {
+    for (let j = i + 1; j < secs.length; j += 1) {
+      const [lo, hi] = secs[i] < secs[j] ? [secs[i], secs[j]] : [secs[j], secs[i]];
+      if (lo > 0 && Math.abs(hi / lo - Math.round(hi / lo)) < 0.01) {
+        problems.push(
+          `A4 layers at ${lo}s and ${hi}s are simple multiples, so they will sync up `
+          + 'and the depth dies',
+        );
+      }
+    }
+  }
+  if (far.name === 'none') {
+    problems.push('A4 gave its far layer no scroll offset, so there are no layers to separate');
+  }
+}
+
 /* S3 sticky-stack: the cards pin, and each pins a little lower than the last. */
 {
   const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });

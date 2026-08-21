@@ -297,6 +297,9 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * scroll listener. So S5 scrub-scale is 0 though the catalogue says 0/1, and S1
  * tide-reveal is 0 though the catalogue says 1.
  *
+ * A4 floating-layers is 0 because its near layers drift on a CSS clock and its far
+ * layer is offset by a view() timeline, so nothing in it needs a script either.
+ *
  * A2 ambient-frames is 0 rather than 1 for a different reason: the cross-fading
  * photo sequence it is built on has existed since the section background slideshow
  * landed, in pure CSS, so the recipe only has to add the drift over the top.
@@ -309,7 +312,7 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A2: 0, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
+  none: 0, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -344,7 +347,7 @@ export const MOTION_CYCLING_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionR
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A5', 'A6', 'S1', 'S3', 'S5',
+  'A2', 'A4', 'A5', 'A6', 'S1', 'S3', 'S5',
 ]);
 
 /**

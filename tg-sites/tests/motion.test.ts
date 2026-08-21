@@ -158,12 +158,22 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
         continue;
       }
 
-      // Scroll-steered: paced by where the section sits, so it needs no duration.
+      /*
+       * Scroll-steered: paced by where the section sits, so it needs no duration and
+       * must not pretend to have one. A seconds value on a view() timeline is simply
+       * ignored, so leaving one in the shorthand tells the next reader the animation
+       * lasts a time it does not.
+       *
+       * It is NOT required to name a range. The default is the section's whole travel
+       * across the viewport, which is right for a continuous offset and is exactly
+       * what the parallax has done since 11 Aug 2026. An earlier version of this test
+       * demanded a range and failed A4 for matching the house pattern.
+       */
       if (rules.some((r) => /animation-timeline:\s*view\(\)/.test(r))) {
         expect(
-          rules.some((r) => /animation-range:/.test(r)),
-          `${recipe} rides a view() timeline with no range, so it plays over the whole scroll`,
-        ).toBe(true);
+          /animation:[^;]*?\d+m?s/.test(animation),
+          `${recipe} is scroll-steered but carries a duration, which is ignored and misleads`,
+        ).toBe(false);
         continue;
       }
 

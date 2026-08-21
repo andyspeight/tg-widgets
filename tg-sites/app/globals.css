@@ -1313,6 +1313,87 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * A4 floating-layers, TIER 0 HERE. Two or three pictures drifting against each other
+ * on different periods, with the background offset by scroll on top. Its meaning in
+ * the catalogue is DEPTH OF PLACE: inside against outside, the room and the view from
+ * it, foreground detail against the landscape it sits in.
+ *
+ * THE LAYERS ARE DRIVEN BY DIFFERENT THINGS ON PURPOSE, and that is what makes this
+ * one rule rather than a fight. The catalogue's own A6 note says a scroll-driven
+ * transform and a CSS animation on the SAME element fight each other and you must
+ * pick one. So the background takes the scroll and the pictures inside take the
+ * clock: nothing has two drivers, and because one moves with the page while the
+ * others move on their own, the layers separate exactly as the recipe wants.
+ *
+ * NON-HARMONIC PERIODS, which is the whole craft of it. The catalogue is blunt: give
+ * each layer a period that is not a simple multiple of the others or they visibly
+ * sync up and the effect dies. 23s, 31s and 41s are primes, so the set does not come
+ * back into phase in any time anybody will sit there.
+ */
+.tgs-section[data-motion='A4'] {
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.08;
+  --tgs-motion-shift: 6%;
+}
+.tgs-section[data-motion='A4'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.05;
+  --tgs-motion-shift: 3.5%;
+}
+.tgs-section[data-motion='A4'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.04;
+  --tgs-motion-to: 1.12;
+  --tgs-motion-shift: 9%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-motion='A4'] { overflow: clip; }
+
+  /* The far layer, steered by the page. Grown first so the offset can never drag an
+     edge into view at either end of its travel. */
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-motion='A4'] .tgs-section__bg {
+      top: -10%;
+      bottom: auto;
+      height: 120%;
+      animation: tgs-motion-layer-drift linear both;
+      animation-timeline: view();
+    }
+  }
+
+  /* The near layers, each on its own clock and none a multiple of another. */
+  .tgs-section[data-motion='A4'] :is(.tgs-card__frame, .tgs-image__frame) { overflow: clip; }
+  .tgs-section[data-motion='A4'] :is(.tgs-card__frame, .tgs-image__frame) img {
+    animation: tgs-motion-layer-breathe 23s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+  .tgs-section[data-motion='A4'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n + 2) img {
+    animation-duration: 31s;
+  }
+  .tgs-section[data-motion='A4'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n) img {
+    animation-duration: 41s;
+  }
+}
+
+@keyframes tgs-motion-layer-drift {
+  from {
+    transform: translateY(calc(var(--tgs-motion-shift) * -1));
+  }
+  to {
+    transform: translateY(var(--tgs-motion-shift));
+  }
+}
+
+@keyframes tgs-motion-layer-breathe {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(var(--tgs-motion-to)) translate(1.5%, -1%);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }
