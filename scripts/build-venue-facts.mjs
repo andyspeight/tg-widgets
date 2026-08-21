@@ -51,7 +51,12 @@ let researched = 0;
 for (const f of readdirSync(dir).filter((f) => /^factpage-.*\.json$/.test(f)).sort()) {
   const d = JSON.parse(readFileSync(dir + '/' + f, 'utf8'));
   for (const r of d.rows) {
-    if (r.qid) { wd.set(r.key, r); researched++; }
+    if (!r.qid) continue;
+    // The coordinate gate can pass the METRO STATION named after the ground
+    // (Vasil Levski Stadium station sits at Vasil Levski Stadium). A station's
+    // facts on a stadium sheet are worse than none.
+    if (/_station|Metro_Station|railway/i.test(r.wiki || '')) continue;
+    wd.set(r.key, r); researched++;
   }
 }
 

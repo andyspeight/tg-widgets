@@ -964,6 +964,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'venueguide',
+    name: 'Venue Guide',
+    airtableType: 'Venue Guide',  // matches Airtable WidgetType singleSelect option
+    description: 'A visitor guide to one venue: map, photo, capacity, nearest airports, what is on and Book buttons.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z'},
+    color: '#E8590C',
+    editorUrl: '/editor-venueguide',
+    demoUrl: '/demo-venueguide',
+    widgetTag: 'venueguide',
+    scriptFile: 'widget-venueguide.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'offers',
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
@@ -3247,6 +3262,10 @@ function loadMiniPreview(w) {
     new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'none', onlyCategories:['football'], sections:['competitions'], maxPerGroup:3, showSearch:true, radius:10, accent:'#12B886' });
   }
 
+  if (w.id === 'venueguide' && window.TGVenueGuideWidget) {
+    new window.TGVenueGuideWidget(el, { venue:'wembleystadium', showPhoto:false, showMap:true, showFacts:true, showEvents:true, eventLimit:2, mapZoom:13, radius:12, accent:'#E8590C', appId:'250' });
+  }
+
   if (w.id === 'tickets' && window.TGTicketsWidget) {
     new window.TGTicketsWidget(el, {
       sourceType: 'competition', sourceValue: 'english-premier-league',
@@ -4517,6 +4536,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
 <script src="/widget-tickets.js"></script>
+<script src="/widget-venueguide.js"></script>
 <script src="/widget-eventmenu.js"></script>
 <script src="/widget-ticketmonth.js"></script>
 <script src="/widget-ticketsearch.js"></script>

@@ -1,17 +1,18 @@
 /**
- * TEMPORARY venue research endpoint — deleted once venue-facts.json exists.
+ * Venue researcher — rebuilds the Wikidata side of api/_data/venue-facts.json.
  *
- * Researches each venue against Wikidata, matched by COORDINATES rather than
- * trusting a name search: a candidate found by name only counts if its own
- * coordinate sits within 2km of ours, which is what stops "Windsor Park" in
- * Belfast matching a park in Windsor. Runs server-side because the build
- * sandbox cannot reach Wikimedia. Same paging pattern as the geocoder probe.
+ * HOW THIS RUNS: as a TEMPORARY Vercel function (api/dev-venue-facts-probe.js,
+ * since deleted), because the build sandbox cannot reach Wikimedia. Restore
+ * this file to that path, add vercel.json functions.maxDuration 60, deploy a
+ * branch, page through ?offset=N&count=40 (TWICE - Wikimedia throttles bursts
+ * and a second pass recovers different venues; union all pages), then run
+ * scripts/build-venue-facts.mjs over the page files and delete the endpoint.
  *
- * Per venue: entity search on the name (then aliases), coordinate-gated pick,
- * then capacity (P1083), opening (P1619, falling back to inception P571),
- * official website (P856), image (P18) with its Commons author and licence,
- * and the English Wikipedia link. Missing facts stay missing — the fact sheet
- * omits them rather than inventing.
+ * Matching is coordinate-gated: a name-search candidate only counts if its own
+ * coordinate sits within 2km of our supplier anchor, which is what stops
+ * "Windsor Park" matching a park in Windsor. The assembler additionally drops
+ * matches whose Wikipedia link is a railway or metro station named after the
+ * ground. Missing facts stay missing.
  */
 import { readFileSync } from 'node:fs';
 

@@ -101,6 +101,27 @@ function loadGeo() {
 function venueGeo() { loadGeo(); return GEO; }
 function eventGeo() { loadGeo(); return EVENT_GEO; }
 
+/**
+ * Venue fact sheets: city, country, timezone, capacity, opened, photo with
+ * its Commons credit, official site, Wikipedia, nearest airports. Built by
+ * scripts/build-venue-facts.mjs from the feed itself plus Wikidata matched by
+ * coordinates. A missing file just means no facts, never an error.
+ */
+let FACTS = null;
+
+function venueFacts() {
+  if (FACTS) return FACTS;
+  FACTS = new Map();
+  try {
+    const url = new URL('./_data/venue-facts.json', import.meta.url);
+    const raw = JSON.parse(readFileSync(url, 'utf8'));
+    for (const [key, f] of Object.entries(raw.venues || {})) FACTS.set(key, f);
+  } catch (err) {
+    console.error('[api/events-feed] venue-facts load failed (sheets omitted):', err && err.message);
+  }
+  return FACTS;
+}
+
 function snapshot() {
   if (SNAP || SNAP_ERROR) return SNAP;
   try {
@@ -433,7 +454,8 @@ export default function handler(req, res) {
       if (!KEY_RE.test(key)) { res.status(400).json({ error: 'Invalid venue' }); return; }
       const venue = snap.venueByKey.get(key);
       if (!venue) { res.status(404).json({ error: 'Unknown venue' }); return; }
-      res.status(200).json({ meta, venue, ...page(snap, windowRows(snap.byVenue.get(key) || [], str(q.from, 10), str(q.to, 10)), q, appId, linkOpts) });
+      const enriched = { ...venue, geo: venueGeo().get(key) || null, facts: venueFacts().get(key) || null };
+      res.status(200).json({ meta, venue: enriched, ...page(snap, windowRows(snap.byVenue.get(key) || [], str(q.from, 10), str(q.to, 10)), q, appId, linkOpts) });
       return;
     }
 
