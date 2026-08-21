@@ -96,6 +96,49 @@ function snapshot() {
       push(raw.byTeam, ev.hk, ev);
       if (ev.ak && ev.ak !== ev.hk) push(raw.byTeam, ev.ak, ev);
     }
+
+    // Registry counts are recomputed against the load date, because the ones
+    // baked into the snapshot count the whole export and its leading edge has
+    // always passed by the time anyone reads it. windowRows keeps past events
+    // out of every list; this keeps them out of every NUMBER, so a menu never
+    // says "Championship - 483" when 40 of those have been played. A warm
+    // lambda's counts can drift by however long it stays warm, which is hours
+    // against the three and a half weeks the baked counts were already out.
+    const today = new Date().toISOString().slice(0, 10);
+    const live = (arr) => {
+      let n = 0;
+      for (const ev of arr || []) if (ev.dt >= today) n++;
+      return n;
+    };
+    for (const c of raw.competitions) c.events = live(raw.byCompetition.get(c.slug));
+    for (const v of raw.venues) v.events = live(raw.byVenue.get(v.key));
+    for (const pf of raw.performers) pf.events = live(raw.byPerformer.get(pf.key));
+    for (const t of raw.teams) {
+      let home = 0;
+      let away = 0;
+      for (const ev of raw.byTeam.get(t.key) || []) {
+        if (ev.dt < today) continue;
+        if (ev.hk === t.key) home++;
+        else away++;
+      }
+      t.home = home;
+      t.away = away;
+      t.events = home + away;
+    }
+    for (const cat of raw.categories) {
+      let n = 0;
+      for (const ev of raw.events) if (ev.c === cat.slug && ev.dt >= today) n++;
+      cat.events = n;
+    }
+    // The "top" lists are the head of these arrays, so they re-rank on the
+    // fresh numbers rather than on how busy August was.
+    const byEvents = (a, b) => b.events - a.events;
+    raw.teams.sort(byEvents);
+    raw.venues.sort(byEvents);
+    raw.performers.sort(byEvents);
+    raw.categories.sort(byEvents);
+    if (raw.counts) raw.counts.events = live(raw.events);
+
     SNAP = raw;
     return SNAP;
   } catch (err) {
@@ -206,8 +249,20 @@ function chronological(a, b) {
  * not every game in the snapshot.
  */
 function windowRows(rows, from, to) {
-  let out = rows;
-  if (DATE_RE.test(from)) out = out.filter((e) => e.dt >= from);
+  // Nothing in the past is bookable, so nothing in the past leaves this API.
+  // The snapshot is a point-in-time export (28 Jul) and its leading edge is
+  // always behind us by the time anyone reads it: the first demo Andy opened
+  // was advertising a Bruno Mars date three weeks gone, because search passed
+  // no from at all and Ticket Month deliberately asks for the whole current
+  // month. Clamping HERE, rather than in six widgets, means no surface can
+  // make that mistake again. from = max(requested, today); default today.
+  //
+  // Today is the server's UTC date while event dates are naive local, so the
+  // boundary can be a few hours out either way at the day edge. That skew
+  // keeps today's fixtures visible everywhere; it never resurrects last month.
+  const today = new Date().toISOString().slice(0, 10);
+  const lower = DATE_RE.test(from) && from > today ? from : today;
+  let out = rows.filter((e) => e.dt >= lower);
   if (DATE_RE.test(to)) out = out.filter((e) => e.dt <= to);
   return out;
 }
@@ -467,9 +522,8 @@ export default function handler(req, res) {
       let rows = snap.events;
 
       const from = str(q.from, 10);
-      if (DATE_RE.test(from)) rows = rows.filter((e) => e.dt >= from);
       const to = str(q.to, 10);
-      if (DATE_RE.test(to)) rows = rows.filter((e) => e.dt <= to);
+      rows = windowRows(rows, from, to);
 
       const category = str(q.category, 40).toLowerCase();
       if (KEY_RE.test(category)) rows = rows.filter((e) => e.c === category);
