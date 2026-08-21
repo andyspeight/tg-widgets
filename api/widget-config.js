@@ -435,6 +435,7 @@ const PLAN_WIDGET_LIMITS = {
   // Ticket inventory is premium, revenue-bearing content, so it is gated
   // harder than the average widget. Boost and up.
   'Event Tickets':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Club Picker':             { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   'Next Event':              { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
   'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
   'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },

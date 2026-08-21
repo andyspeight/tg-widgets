@@ -667,6 +667,14 @@
     {
       "source": "/editor-nextevent",
       "destination": "/editor-nextevent.html"
+    },
+    {
+      "source": "/demo-clubpicker",
+      "destination": "/demo-clubpicker.html"
+    },
+    {
+      "source": "/editor-clubpicker",
+      "destination": "/editor-clubpicker.html"
     }
   ],
   "headers": [
@@ -1804,6 +1812,23 @@
     },
     {
       "source": "/widget-nextevent.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-clubpicker.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
