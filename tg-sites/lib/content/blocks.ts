@@ -761,7 +761,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       {
         kind: 'repeater',
         key: 'slides',
-        label: 'More images (turns it into a slideshow)',
+        label: 'More slides (turns it into a slideshow)',
         itemLabel: 'Slide',
         max: 7,
         fields: [
@@ -770,6 +770,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
           // gallery's tiles. No crop: a slideshow covers its frame, so a crop
           // rectangle has nothing to act on.
           { kind: 'image', key: 'src', label: 'Image', focus: true },
+          /*
+           * A SLIDE CAN BE A FILM INSTEAD (Andy, 21 Aug 2026: Duda's Media
+           * Slider offers video as well as image).
+           *
+           * A DIRECT FILE, NOT A YOUTUBE LINK. A YouTube or Vimeo slide is an
+           * iframe, and an iframe cannot be muted, looped and trimmed to the
+           * slide's length without loading their player and asking it politely.
+           * A file can, with four attributes and no script. The Video element is
+           * still the right home for a YouTube link somebody wants to watch.
+           *
+           * MUTED AND LOOPING, Andy's call the same day. The clip is trimmed by
+           * the slide's own interval rather than the slideshow waiting for it:
+           * a slider that pauses unpredictably on one slide reads as broken.
+           * So use short clips, and the help text says so.
+           */
+          {
+            kind: 'url',
+            key: 'video',
+            label: 'Or a video file',
+            placeholder: 'https://…/clip.mp4',
+            help:
+              'An .mp4 or .webm address. It plays silently and loops, and it is cut off when the slide moves on, '
+              + 'so keep clips shorter than the seconds per slide below. A YouTube link belongs in the Video element instead.',
+          },
           { kind: 'text', key: 'alt', label: 'Alt text', max: 200 },
         ],
       },
@@ -1153,6 +1177,166 @@ export const BLOCKS: readonly BlockDefinition[] = [
       { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
       { kind: 'colour', key: 'frontTone', label: 'Front shading', help: 'The wash over the picture, so the title reads whatever the photograph is doing.' },
       { kind: 'colour', key: 'backTone', label: 'Back colour' },
+    ],
+  },
+  {
+    /*
+     * CARDS THAT STACK AS YOU SCROLL (Andy, 21 Aug 2026, from Duda's Travelgenix
+     * Stacked Cards). Up to six, each sticking a little below the last, so by the
+     * bottom of the section they have collected into one deck.
+     *
+     * THIS IS RECIPE S3 FROM THE MOTION CATALOGUE, sticky-stack, tier 0 and
+     * marked proven. It was already decided and named before this element
+     * existed, which is worth knowing for two reasons. Its travel meaning is
+     * COMPARISON — three ships, four room grades, five tour styles — and the
+     * catalogue's own note is that it "replaces the three-equal-cards row, which
+     * is the single most common AI tell". So this is the element to reach for
+     * when somebody asks for three cards in a row.
+     *
+     * The catalogue also intends S3 as a SECTION motion recipe, which would let
+     * any section's contents stack. That is a separate job owned by the motion
+     * work and is not done here; this element packages the same mechanism with a
+     * content shape, so a client gets it in one drop rather than assembling six
+     * containers.
+     *
+     * NO JAVASCRIPT. `position: sticky` and an increasing offset, which is the
+     * whole trick. The scrollbar stays real and the browser stays in charge,
+     * which is the catalogue's rule for every pinned recipe: never scroll-jack.
+     */
+    type: 'stacked-cards',
+    label: 'Stacked cards',
+    group: 'Media',
+    icon: 'slider',
+    description: 'Cards that gather into a deck as you scroll past them. Good for comparing a few options.',
+    defaults: {
+      side: 'right',
+      height: 'medium',
+      radius: 'lg',
+      cardColour: '#ffffff',
+      items: [
+        { src: '', alt: '', title: 'Ocean view', body: 'A window on the sea, and the quietest deck on the ship.', linkLabel: 'See this grade', linkHref: '' },
+        { src: '', alt: '', title: 'Balcony', body: 'Your own square of morning, with room for two chairs and a coffee.', linkLabel: 'See this grade', linkHref: '' },
+        { src: '', alt: '', title: 'Suite', body: 'The one with the bath by the window, and dinner wherever you like it.', linkLabel: 'See this grade', linkHref: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Stacked cards (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Cards',
+        itemLabel: 'Card',
+        /*
+         * SIX. Each card holds the screen on its own as it sticks, so a stack of
+         * ten is a section somebody scrolls through for a very long time
+         * wondering when it ends. The catalogue's own examples are three to five.
+         */
+        max: 6,
+        fields: [
+          { kind: 'text', key: 'title', label: 'Title', max: 120 },
+          { kind: 'textarea', key: 'body', label: 'Text', rows: 3, max: 400 },
+          { kind: 'text', key: 'linkLabel', label: 'Button', max: 40 },
+          { kind: 'url', key: 'linkHref', label: 'Button links to', placeholder: '/suites or https://' },
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Picture description', max: 200, help: 'What the picture shows, for a screen reader.' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'side',
+        label: 'Picture on the',
+        options: [
+          { value: 'right', label: 'Right' },
+          { value: 'left', label: 'Left' },
+          { value: 'alternate', label: 'Alternating' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Card height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+      { kind: 'colour', key: 'cardColour', label: 'Card colour' },
+      { kind: 'colour', key: 'buttonColour', label: 'Button colour', help: 'Blank uses your theme.' },
+    ],
+  },
+  {
+    /*
+     * THREE PICTURES THAT TRADE PLACES (Andy, 21 Aug 2026, from Duda's
+     * Travelgenix Image Shifting). They sit as an overlapping collage, and every
+     * few seconds each one moves to the next place in the arrangement, so the
+     * one at the front goes to the back and the next comes forward. The places
+     * carry the sizes, not the pictures: a picture is big because of where it is
+     * standing, which is what makes the rotation read as movement rather than as
+     * three pictures resizing.
+     *
+     * PURE CSS, and it borrows nothing from the slideshow because it is not one:
+     * every picture is visible the whole time, so there is nothing to show and
+     * hide and no pause button to argue about. It is one animation per picture,
+     * offset by its share of the cycle, which is the same device the slideshow
+     * uses for its stagger.
+     */
+    type: 'shifting-images',
+    label: 'Shifting images',
+    group: 'Media',
+    icon: 'gallery',
+    description: 'Three pictures in a collage that trade places as you watch.',
+    defaults: {
+      interval: 4,
+      height: 'medium',
+      radius: 'lg',
+      items: [{ src: '', alt: '' }, { src: '', alt: '' }, { src: '', alt: '' }],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Shifting images (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Pictures',
+        itemLabel: 'Picture',
+        /*
+         * THREE PLACES, SO AT MOST THREE PICTURES. A fourth would have nowhere
+         * to stand, and adding a fourth place makes the collage a mess rather
+         * than a composition. Two work too and trade places between them.
+         */
+        max: 3,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Description', max: 200, help: 'What the picture shows, for a screen reader.' },
+        ],
+      },
+      {
+        kind: 'number',
+        key: 'interval',
+        label: 'Seconds in each place',
+        min: 2,
+        max: 12,
+        step: 1,
+        help: 'How long a picture holds its place before moving to the next one.',
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
     ],
   },
   {

@@ -373,6 +373,29 @@ export const SiteSettingsSchema = z.object({
   touchIconUrl: imageUrl,
 
   /**
+   * STOP RIGHT CLICK ON THE PUBLISHED SITE. Andy's call, 21 Aug 2026, from
+   * Duda's Disable Right Click. It was argued against and asked for again, so it
+   * is built, and the argument is recorded here rather than repeated at him.
+   *
+   * WHAT IT DOES NOT DO. It does not protect a picture. The file is still in the
+   * page source, still in the browser cache, still one screenshot away, and
+   * still whatever `curl` asks for. Anybody who wanted the photograph will have
+   * it. What it does is raise the effort above idle.
+   *
+   * A SITE SETTING, NOT AN ELEMENT, even though Duda offers it as one. Right
+   * click disabled on the home page and working on the gallery page is not a
+   * policy, it is a gap, and a client who placed the element once would believe
+   * they were covered.
+   *
+   * TEXT FIELDS KEEP THEIR MENU, and that is a deliberate exception rather than
+   * an oversight. Right-clicking to paste into a form is how a lot of people
+   * fill in an email address, and the enquiry form is what the whole site is
+   * for. Blocking the context menu there would cost bookings to protect a
+   * photograph.
+   */
+  noRightClick: z.unknown().transform((v) => v === true).catch(false),
+
+  /**
    * The site's language.
    *
    * Falls back rather than failing, because an unknown code is far more likely to
@@ -406,6 +429,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   faviconUrl: null,
   socialImageUrl: null,
   touchIconUrl: null,
+  noRightClick: false,
   locale: DEFAULT_LOCALE,
 };
 

@@ -29,9 +29,11 @@ screenshots for anything unclear — ask rather than guess. Guessing at
 | BUSINESS | Done |
 | SOCIAL | Done — except Facebook Feed, see below |
 | BLOG | Done |
-| Travelgenix customs (built for Duda) | Done — except Stacked Collection, ignored |
+| Travelgenix customs (built for Duda) | **Done.** Stacked Collection and Expand & Focus ignored on Andy's word |
 
-**More Travelgenix elements are coming on 21 Aug 2026.** That is the next job.
+**The audit is complete as of 21 Aug 2026.** Every category and every
+Travelgenix custom element has been checked, and everything not explicitly
+skipped is built and tested.
 
 ---
 
@@ -41,7 +43,16 @@ Advanced Grid · File element (+ documents in the media library) · Breadcrumbs 
 a placeable element · Read more · Copyright · Icon · Shape · Coupon · Multi
 Location · Google Calendar embeds · WhatsApp click to chat · always-on hamburger
 · Half overlay · Slider two-row / bold scroll bar / mosaic · Expanding cards ·
-Screen carousel.
+Screen carousel · scrolling gallery · popup gallery (lightbox) · tilted carousel
+· Flipping boxes · stop right click (a site setting) · video slides in the
+slideshow · Stacked cards · Shifting images.
+
+**Three of Duda's became settings rather than elements**, because the library
+already had something that cycled or something that showed pictures: the
+scrolling and popup galleries are `layout` and `lightbox` on the Gallery, the
+tilted carousel is `tilt` on the Slider, and video slides are a field on the
+Image slideshow. A picker holding three galleries makes a client choose before
+they know what they want.
 
 Two fixes found while auditing rather than asked for:
 
@@ -56,7 +67,12 @@ Two fixes found while auditing rather than asked for:
 ## Skipped, on Andy's word
 
 HTML Attribute Select · Lottie · Booking · OpenTable · PayPal · Restaurant Menu
-· Yelp Reviews · Twin Showcase · Stacked Collection.
+· Yelp Reviews · Twin Showcase · Stacked Collection · Expand & Focus.
+
+**Stop right click was argued against and asked for again**, so it is built. The
+case against it is recorded in `lib/settings/schema.ts` and the settings screen
+says plainly that it is a deterrent rather than protection — which matters more
+than the feature, because somebody relying on it is the bad outcome.
 
 ## Waiting on Andy
 
@@ -97,6 +113,37 @@ attributes and a new block gets arrows, dots and pause **with no change to that
 file**. Half overlay and Screen carousel both do this. If you add a third, add
 it to `hasSlideshow` in `lib/content/slideshow.ts` too, or the page never asks
 for the script and the element silently loses its pause button.
+
+### Check the motion catalogue before building anything that moves
+
+Stacked cards was already in it: **S3, sticky-stack, tier 0, marked proven**,
+with its purpose recorded as comparison and the note that it "replaces the
+three-equal-cards row, which is the single most common AI tell". Reading it
+first was the difference between one element and two implementations of one
+idea, and it supplied the design rationale for free.
+
+The catalogue lives at `references/motion-recipes.md` in the travelgenix-taste
+skill. The vocabulary is in `MOTION_RECIPES` in `lib/content/schema.ts`; only
+the recipes in `MOTION_LIVE_RECIPES` have CSS behind them.
+
+### Sticky has a runway, and two obvious ways to give it are wrong
+
+For the last sticky card in a stack to reach its resting place there must be
+scroll length after it. `padding-bottom` on the container **shrinks the content
+box that sticky is constrained to**, so it squeezes the whole deck flat and
+adding more makes it worse. `margin-bottom` on the last card is respected as
+part of *that card's* margin box, so the card overshoots its own stop. The
+answer is a separate empty element after the cards. All three were measured.
+
+### A source assertion must strip comments first, every time
+
+This repo already had the rule written down, and this audit walked into it
+**twice**: a CSP check grepped a script for `innerHTML` and found the header
+promising not to use it, and a no-scroll-jacking check grepped a component for
+`scroll` and found the comment saying there is no scroll handler.
+
+Both test files now build a `code` constant with comments stripped and assert
+against that. Do the same in any new test that greps source.
 
 ### Re-run the block catalogue after adding a block
 

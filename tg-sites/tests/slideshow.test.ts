@@ -38,7 +38,12 @@ describe('more than one image turns the block into a slideshow', () => {
     expect(slides?.kind).toBe('repeater');
     if (slides && slides.kind === 'repeater') {
       expect(slides.max).toBe(7);
-      expect(slides.fields.map((f) => f.key)).toEqual(['src', 'alt']);
+      /*
+       * `video` joined these on 21 Aug 2026: a slide can be a film instead of a
+       * picture (Duda's Media Slider). Spelled out rather than loosened to a
+       * `contains`, so a field added to a slide is a deliberate edit here.
+       */
+      expect(slides.fields.map((f) => f.key)).toEqual(['src', 'video', 'alt']);
       // The slide picture carries focus, which is what gives each slide its own
       // Edit button and its own focus point, the same as a gallery tile.
       const slideSrc = slides.fields.find((f) => f.key === 'src');
@@ -91,9 +96,15 @@ describe('the slideshow renders as stacked, staggered, pure-CSS slides', () => {
 
   it('becomes a slideshow only when there is more than one picture', () => {
     expect(body).toContain('if (slideSrcs.length > 0)');
-    // The block's own picture is the first slide, capped so the count stays in
-    // the range the keyframes cover. It keeps its own focus and adjustments.
-    expect(body).toContain('[{ src, alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8)');
+    /*
+     * The block's own picture is the first slide, capped so the count stays in
+     * the range the keyframes cover. It keeps its own focus and adjustments, and
+     * carries an empty `video` so it has the same shape as every other slide —
+     * the block's own picture is a picture, never a film.
+     */
+    expect(body).toContain(
+      "[{ src, video: '', alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8)",
+    );
   });
 
   it('gives every slide its own focus point, not just the first', () => {

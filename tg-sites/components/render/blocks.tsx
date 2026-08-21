@@ -502,7 +502,15 @@ export function IconItemBlock({
 // Media
 // ---------------------------------------------------------------------------
 
-export function ImageBlock({ props }: { props: Props }): ReactElement {
+export function ImageBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  /* Only a film slide reads this: it must not autoplay on the canvas, where the
+     editor re-renders on every keystroke and moving pictures fight the pointer. */
+  editing?: boolean;
+}): ReactElement {
   const src = safeUrl(str(props, 'src'));
   const alt = str(props, 'alt');
   const ratio = str(props, 'ratio', 'auto');
@@ -590,15 +598,27 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
     // part of each in frame rather than centring them all.
     .map((slide) => ({
       src: safeUrl(str(slide, 'src')),
+      // A slide can be a film instead. See the field's own note for why it is a
+      // file address rather than a YouTube link.
+      video: safeUrl(str(slide, 'video')),
       alt: str(slide, 'alt'),
       style: pictureAdjustStyle(slide),
     }))
-    .filter((slide): slide is { src: string; alt: string; style: CSSProperties } => !!slide.src);
+    /*
+     * A SLIDE NEEDS ONE OR THE OTHER, not both. A row with neither is an empty
+     * frame the visitor waits through and a slot in the cycle; a row with a film
+     * and no picture is a perfectly good slide, which is why this is not still
+     * testing `src` alone.
+     */
+    .filter(
+      (slide): slide is { src: string; video: string; alt: string; style: CSSProperties } =>
+        !!slide.src || !!slide.video,
+    );
 
   if (slideSrcs.length > 0) {
     // The block's own picture is the first slide, and it keeps its focus and
     // adjustments too, which the earlier slideshow dropped by centring every one.
-    const slides = [{ src, alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8);
+    const slides = [{ src, video: '', alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8);
     const count = slides.length;
     const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
     const interval = clamp(props.interval, 2, 15, 5);
@@ -630,13 +650,41 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
                   key={index}
                   style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
                 >
-                  <img
-                    src={slide.src}
-                    alt={slide.alt}
-                    style={slide.style}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                  />
+                  {slide.video ? (
+                    /*
+                      A FILM SLIDE. Muted, looping and playing by itself, which is
+                      also the only way a browser will autoplay anything: an
+                      unmuted autoplay is blocked, and rightly.
+
+                      NOT AUTOPLAYING ON THE CANVAS. The editor re-renders on
+                      every keystroke and a film moving under the pointer fights
+                      the person trying to select it, the same reason the section
+                      background video does not play there either. Paused it
+                      still shows its first frame, so the slide is not a hole.
+
+                      `alt` becomes the accessible name rather than being lost:
+                      a video element takes no alt attribute.
+                    */
+                    <video
+                      src={slide.video}
+                      poster={slide.src || undefined}
+                      style={slide.style}
+                      autoPlay={!editing}
+                      muted
+                      loop
+                      playsInline
+                      preload={index === 0 ? 'auto' : 'metadata'}
+                      aria-label={slide.alt || undefined}
+                    />
+                  ) : (
+                    <img
+                      src={slide.src}
+                      alt={slide.alt}
+                      style={slide.style}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -2011,6 +2059,15 @@ export function HalfOverlayBlock({ props }: { props: Props }): ReactElement {
  */
 export const MAX_EXPANDING_CARDS = 6;
 
+/** Each card holds the screen on its own as it sticks, so ten is a very long
+ *  section to scroll. The motion catalogue's own examples are three to five. */
+export const MAX_STACKED_CARDS = 6;
+
+/** Three places in the collage, so three pictures. A fourth would have
+ *  nowhere to stand, and a fourth place makes it a mess rather than a
+ *  composition. */
+export const MAX_SHIFTING_IMAGES = 3;
+
 export function ExpandingCardsBlock({
   props,
   blockId,
@@ -2339,6 +2396,171 @@ export function FlipCardsBlock({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * CARDS THAT GATHER INTO A DECK AS YOU SCROLL.
+ *
+ * Andy, 21 Aug 2026, from Duda's Stacked Cards, and it is recipe S3 from the
+ * motion catalogue (sticky-stack, tier 0, proven). Its stated purpose there is
+ * COMPARISON — three ships, four room grades, five tour styles — and its note is
+ * that it "replaces the three-equal-cards row, which is the single most common
+ * AI tell". So this is what to reach for when somebody asks for three cards in a
+ * row.
+ *
+ * NO JAVASCRIPT, AND NO SCROLL-JACKING. `position: sticky` with an offset that
+ * grows by card, so each one comes to rest a little below the last and the ones
+ * behind stay just visible as a stack. The scrollbar stays real and the browser
+ * stays in charge, which is the catalogue's rule for every pinned recipe.
+ *
+ * THE INDEX IS THE ONLY THING THE STYLESHEET NEEDS, and it comes down as a
+ * custom property rather than as six written-out rules. Unlike Tabs and
+ * Expanding cards nothing here has to PAIR one element with another: a card only
+ * needs to know how far down the pile it is.
+ */
+export function StackedCardsBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items')
+    .filter((item) => str(item, 'title') || str(item, 'body') || str(item, 'src'))
+    .slice(0, MAX_STACKED_CARDS);
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some cards</div>;
+  }
+
+  const side = oneOf(props, 'side', ['right', 'left', 'alternate'] as const, 'right');
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+  const radius = oneOf(props, 'radius', RADII, 'lg');
+  const cardColour = safeColour(props.cardColour) ?? '#ffffff';
+  const buttonColour = safeColour(props.buttonColour) ?? undefined;
+
+  return (
+    <div className="tgs-stack" data-height={height} data-radius={radius}>
+      {items.map((item, index) => {
+        const src = safeUrl(str(item, 'src'));
+        const title = str(item, 'title');
+        const body = str(item, 'body');
+        const linkLabel = str(item, 'linkLabel');
+        // Alternating reads better down a long stack than six cards the same way
+        // round, and it is the one case where the side is not a single setting.
+        const picture = side === 'alternate' ? (index % 2 === 0 ? 'right' : 'left') : side;
+
+        return (
+          <article
+            className="tgs-stack__card"
+            key={index}
+            data-side={picture}
+            style={{ '--tgs-stack-i': index, background: cardColour } as CSSProperties}
+          >
+            <div className="tgs-stack__body">
+              {title && <p className="tgs-stack__title">{title}</p>}
+              {body && <p className="tgs-stack__text">{body}</p>}
+              {linkLabel &&
+                renderButton(
+                  {
+                    label: linkLabel,
+                    href: str(item, 'linkHref'),
+                    variant: 'primary',
+                    colour: buttonColour,
+                  },
+                  index,
+                )}
+            </div>
+
+            <div className="tgs-stack__pic">
+              {src ? (
+                <img src={src} alt={str(item, 'alt')} loading="lazy" decoding="async" />
+              ) : (
+                <span className="tgs-stack__nopic" aria-hidden="true" />
+              )}
+            </div>
+          </article>
+        );
+      })}
+
+      {/*
+        THE RUNWAY. Empty on purpose: it is scroll length, so the last card has
+        somewhere to travel and lands on the deck instead of stopping wherever
+        the page happens to end. See the stylesheet for the two wrong ways to do
+        this that were tried first.
+      */}
+      <div className="tgs-stack__runway" aria-hidden="true" />
+    </div>
+  );
+}
+
+/**
+ * THREE PICTURES THAT TRADE PLACES.
+ *
+ * Andy, 21 Aug 2026, from Duda's Image Shifting. They sit as an overlapping
+ * collage and every few seconds each moves on to the next place, so the one at
+ * the front goes to the back and the next comes forward.
+ *
+ * THE PLACES CARRY THE SIZES, NOT THE PICTURES. A picture is big because of
+ * where it is standing, not because of what it is, which is what makes the
+ * rotation read as movement rather than as three pictures resizing on the spot.
+ * So the stylesheet owns three sets of position and scale, and each picture
+ * walks through them offset by its share of the cycle — the same device the
+ * slideshow uses for its stagger.
+ *
+ * NOT A SLIDESHOW, and it deliberately borrows none of that machinery. Every
+ * picture is on screen the whole time, so there is nothing to show and hide, no
+ * current slide, and no pause button to argue about: a visitor is never waiting
+ * to see something.
+ */
+export function ShiftingImagesBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  /* The canvas re-renders on every keystroke, and pictures sliding under the
+     pointer fight the person trying to select one. Still and arranged there. */
+  editing?: boolean;
+}): ReactElement {
+  const pictures = list(props, 'items')
+    .map((item) => ({ src: safeUrl(str(item, 'src')) || '', alt: str(item, 'alt') }))
+    .filter((picture) => picture.src !== '')
+    .slice(0, MAX_SHIFTING_IMAGES);
+
+  if (pictures.length === 0) {
+    return <div className="tgs-placeholder">Choose three pictures</div>;
+  }
+
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+  const radius = oneOf(props, 'radius', RADII, 'lg');
+  const interval = clamp(props.interval, 2, 12, 4);
+  const count = pictures.length;
+
+  return (
+    <div
+      className="tgs-shift"
+      data-height={height}
+      data-radius={radius}
+      data-count={count}
+      data-still={editing || count < 2 ? 'true' : undefined}
+      style={{ '--tgs-shift-cycle': `${count * interval}s` } as CSSProperties}
+    >
+      {pictures.map((picture, index) => (
+        <img
+          className="tgs-shift__pic"
+          key={index}
+          src={picture.src}
+          alt={picture.alt}
+          loading={index === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+          /*
+           * Where this picture starts in the rotation, and how far into the
+           * cycle it is. One picture per place, so a negative delay drops each
+           * one straight into its own position rather than making the first two
+           * wait a turn before the collage looks right.
+           */
+          style={{
+            '--tgs-shift-i': index,
+            animationDelay: `calc(-1 * ${index} * var(--tgs-shift-cycle) / ${count})`,
+          } as CSSProperties}
+        />
+      ))}
     </div>
   );
 }
