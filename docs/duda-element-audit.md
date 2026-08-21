@@ -82,7 +82,8 @@ Two fixes found while auditing rather than asked for:
 HTML Attribute Select · Lottie · Booking · OpenTable · PayPal · Restaurant Menu
 · Yelp Reviews · Twin Showcase · Stacked Collection · Expand & Focus · Gradient
 Text (already built as a heading effect) · Advanced Divider (the shape dividers
-already cover it).
+already cover it) · Zoom Banner (Ken Burns and the S5 scrub-scale recipe already
+cover it, and Andy ignored it on 21 Aug when that was put to him).
 
 **Stop right click was argued against and asked for again**, so it is built. The
 case against it is recorded in `lib/settings/schema.ts` and the settings screen
@@ -98,9 +99,6 @@ than the feature, because somebody relying on it is the bad outcome.
   mosaic and we already have Advanced Grid, the two-row mosaic slider and the
   gallery. A screenshot decides whether it is a fourth thing or a setting on one
   of those three.
-- **Zoom Banner.** Not built, because the library already has Ken Burns (a
-  background that drifts and zooms on its own) and the S5 scrub-scale section
-  recipe. A third zooming thing needs to be visibly different from both.
 - **Two truncated names** from the 21 Aug screenshot that Andy has not yet
   finished: "Coloured Delimited..." (assumed to be the pills style of Tags,
   built on that assumption) and "Custom Offer/Tour...".
