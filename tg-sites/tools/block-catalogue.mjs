@@ -33,6 +33,23 @@ import { join } from 'node:path';
 const ROOT = new URL('..', import.meta.url).pathname;
 const OUT = join(ROOT, '..', 'block-catalogue.json');
 
+/*
+ * --check REPORTS DRIFT INSTEAD OF WRITING, which is the whole reason this flag
+ * exists.
+ *
+ * The committed catalogue went stale three times in two days in August 2026, at 26
+ * blocks against a registry of 44, then 44 against 46, then 47 against 49. Nothing
+ * ever failed when it drifted, so it was only ever noticed by somebody happening to
+ * look, which is not a system.
+ *
+ * The check REGENERATES and compares rather than re-deriving the answer a second
+ * way. role, required and tokensUsed are computed from the registry and globals.css
+ * by the code below; a test that worked them out again would be a second
+ * implementation free to disagree with this one, and then the two of them would need
+ * a tie-breaker. Running the real generator cannot drift from the real generator.
+ */
+const CHECK_ONLY = process.argv.includes('--check');
+
 // ---------------------------------------------------------------------------
 // The registry
 // ---------------------------------------------------------------------------
@@ -454,26 +471,77 @@ for (const block of BLOCKS) {
   }
 }
 
-writeFileSync(
-  OUT,
-  `${JSON.stringify(
-    {
-      generatedFrom: 'tg-sites/lib/content/blocks.ts',
-      generatedBy: 'tg-sites/tools/block-catalogue.mjs',
-      note:
-        'role, required and tokensUsed are DERIVED, not recorded in the registry. ' +
-        'See the header of the generator for how.',
-      blocks: catalogue,
-    },
-    null,
-    2,
-  )}\n`,
-);
+const rendered = `${JSON.stringify(
+  {
+    generatedFrom: 'tg-sites/lib/content/blocks.ts',
+    generatedBy: 'tg-sites/tools/block-catalogue.mjs',
+    note:
+      'role, required and tokensUsed are DERIVED, not recorded in the registry. ' +
+      'See the header of the generator for how.',
+    blocks: catalogue,
+  },
+  null,
+  2,
+)}\n`;
+
+if (CHECK_ONLY) {
+  const committed = (() => {
+    try {
+      return readFileSync(OUT, 'utf8');
+    } catch {
+      return null;
+    }
+  })();
+
+  if (committed === rendered) {
+    console.log(`  PASS  block-catalogue.json is up to date (${catalogue.length} blocks)`);
+    process.exit(0);
+  }
+
+  console.error('\n  block-catalogue.json is out of date.\n');
+
+  if (committed === null) {
+    console.error('    It is missing entirely. Run: node tools/block-catalogue.mjs');
+    process.exit(1);
+  }
+
+  /*
+   * Say WHAT drifted, not just that something did. A bare "the file differs" sends
+   * the next person to a 3,000 line diff to find out that one block was added.
+   */
+  const before = JSON.parse(committed).blocks ?? [];
+  const beforeIds = new Set(before.map((entry) => entry.id));
+  const afterIds = new Set(catalogue.map((entry) => entry.id));
+
+  const added = catalogue.filter((entry) => !beforeIds.has(entry.id)).map((entry) => entry.id);
+  const removed = before.filter((entry) => !afterIds.has(entry.id)).map((entry) => entry.id);
+
+  const changed = catalogue
+    .filter((entry) => beforeIds.has(entry.id))
+    .filter((entry) => {
+      const was = before.find((other) => other.id === entry.id);
+      return JSON.stringify(was) !== JSON.stringify(entry);
+    })
+    .map((entry) => entry.id);
+
+  console.error(`    committed ${before.length} blocks, the registry has ${catalogue.length}`);
+  if (added.length) console.error(`    added:   ${added.join(', ')}`);
+  if (removed.length) console.error(`    removed: ${removed.join(', ')}`);
+  if (changed.length) console.error(`    changed: ${changed.join(', ')}`);
+  if (!added.length && !removed.length && !changed.length) {
+    console.error('    the blocks match, so the difference is in the header or the formatting');
+  }
+  console.error('\n    Fix it by regenerating: node tools/block-catalogue.mjs\n');
+  process.exit(1);
+}
+
+writeFileSync(OUT, rendered);
 
 // ---------------------------------------------------------------------------
 // The report
 // ---------------------------------------------------------------------------
 
+/* The report below is about a file just written, so --check never reaches it. */
 const travel = catalogue.filter((entry) => entry.travelSpecific);
 const noTokens = catalogue.filter((entry) => entry.tokensUsed.length === 0);
 const noRules = catalogue.filter((entry) => entry.cssRules === 0);
