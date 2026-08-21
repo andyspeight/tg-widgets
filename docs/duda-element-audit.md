@@ -30,12 +30,12 @@ screenshots for anything unclear — ask rather than guess. Guessing at
 | SOCIAL | Done — except Facebook Feed, see below |
 | BLOG | Done |
 | Travelgenix customs (built for Duda) | **Done.** Stacked Collection and Expand & Focus ignored on Andy's word |
-| Travelgenix customs, second list (21 Aug) | Audited. Four built, two skipped, three waiting on Andy |
+| Travelgenix customs, second list (21 Aug) | Done. Six built, three skipped |
 
-**Every category and every Travelgenix custom element has been checked as of 21
-Aug 2026**, and everything not explicitly skipped or waiting on Andy is built
-and tested. Two more lists arrived on 21 Aug after the categories were finished,
-so treat "complete" as "complete up to the last list Andy sent".
+**THE AUDIT IS CLOSED.** Andy said "that's all of them for now" on 21 Aug 2026.
+Every Duda category and both Travelgenix custom lists have been checked, and
+everything not explicitly skipped is built and tested. If a new list arrives,
+add a row above rather than reopening the old ones.
 
 ---
 
@@ -61,6 +61,11 @@ its own rather than a field on a card, which Andy confirmed unprompted) ·
 Tooltip · Tags, covering BOTH of Duda's delimited-tag elements as two styles of
 one thing because bullets and pills differ by a border radius · Icon pulse, a
 setting on the Icon we already had rather than a fourth icon element.
+
+**Later the same day**, from the same list plus one follow-up: **Tags gained a
+third style** ("a different colour each"), and **Fancy Grid** turned out to be
+our Cards block plus a hover tint, so the tint is a section setting beside hover
+lift and image zoom rather than a second grid element.
 
 Already built when that list arrived, so nothing to do: **Page anchor links**
 (a section already takes an anchor id, and `safeUrl` passes both `#suites` and
@@ -95,10 +100,6 @@ than the feature, because somebody relying on it is the bad outcome.
 - **Facebook Feed.** Possible as a one-line allowlist addition, no script. Not
   built because a Facebook iframe sets cookies and tracks visitors on a
   client's page, and that is his call to make, not ours.
-- **Fancy Grid.** Not built, because "fancy" could mean masonry, bento or
-  mosaic and we already have Advanced Grid, the two-row mosaic slider and the
-  gallery. A screenshot decides whether it is a fourth thing or a setting on one
-  of those three.
 - **One truncated name** from the 21 Aug screenshot that Andy has not yet
   finished: "Custom Offer/Tour...". Read as the widget block plus cards bound to
   a collection, both of which exist, so nothing is blocked on it.
@@ -115,6 +116,21 @@ than the feature, because somebody relying on it is the bad outcome.
 ---
 
 ## What this audit taught, that the conventions did not already say
+
+**Measure the thing you actually ship, not a proxy for it.** The tag pills were
+checked against a plain white page and passed. Against their OWN tinted
+background, which is what a visitor sees, the same text was most of a point
+worse and failed. A second sweep in the same hour produced confident contrast
+figures from misparsed values, reading OKLCH channels as if they were RGB; the
+tell was that the numbers did not move when the input moved. Convert through a
+canvas and read real pixels.
+
+**A custom property set on the element beats one inherited from an ancestor, and
+`!important` does not change that.** The tag lightness bounds sat on `.tgs-tags`
+while the dark-mode swap set them on `.tgs-page`, so dark mode silently kept the
+light values. Anything the theme needs to override must be declared where the
+theme declares it. The tell was a dark measurement identical to the light one.
+
 
 ### The no-JavaScript rule changed the same day, in a parallel session
 
