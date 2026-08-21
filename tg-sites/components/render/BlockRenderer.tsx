@@ -37,7 +37,10 @@ import {
   FlipCardsBlock,
   HalfOverlayBlock,
   ScreenCarouselBlock,
+  RatingBlock,
   ShiftingImagesBlock,
+  TagsBlock,
+  TooltipBlock,
   StackedCardsBlock,
   SliderBlock,
   SocialBlock,
@@ -143,6 +146,12 @@ export function BlockRenderer({
         return <StackedCardsBlock props={props} />;
       case 'shifting-images':
         return <ShiftingImagesBlock props={props} editing={editable} />;
+      case 'rating':
+        return <RatingBlock props={props} />;
+      case 'tooltip':
+        return <TooltipBlock props={props} blockId={block.id} />;
+      case 'tags':
+        return <TagsBlock props={props} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':

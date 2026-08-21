@@ -1340,6 +1340,173 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * A STAR RATING ON ITS OWN (Andy, 21 Aug 2026, from Duda's Travelgenix
+     * Rating, and he was explicit that it is standalone rather than attached to
+     * a card). The Testimonial slider has had stars inside it since June; this
+     * is the one a client drops beside a headline to say "4.8 on Trustpilot".
+     *
+     * HALF STARS, WHICH THE TESTIMONIAL ONE DOES NOT HAVE. Real ratings are 4.5
+     * and 4.7, and a standalone rating that could only say 4 or 5 would be a
+     * control a client has to lie to. The testimonial version is left exactly as
+     * it was: it is somebody's own score out of five and whole stars are honest
+     * there.
+     *
+     * IT IS INFORMATION, NOT DECORATION, so it carries its value in words for a
+     * screen reader whether or not the client shows the number.
+     */
+    type: 'rating',
+    label: 'Rating',
+    group: 'Text',
+    icon: 'testimonial',
+    description: 'A star rating, on its own. Halves allowed.',
+    defaults: { rating: 4.5, showValue: true, count: '', size: 'm', colour: '', align: 'left' },
+    summarise: (props) => `Rating (${asString(props.rating) || '0'} out of 5)`,
+    fields: [
+      {
+        kind: 'number',
+        key: 'rating',
+        label: 'Out of five',
+        min: 0,
+        max: 5,
+        step: 0.5,
+        help: 'Halves are allowed, so 4.5 is a rating and not a rounding.',
+      },
+      { kind: 'toggle', key: 'showValue', label: 'Show the number beside the stars' },
+      {
+        kind: 'text',
+        key: 'count',
+        label: 'What it is based on',
+        max: 80,
+        placeholder: 'from 312 reviews',
+        help: 'Optional. A score with nothing behind it is worth less than one that says where it came from.',
+      },
+      {
+        kind: 'select',
+        key: 'size',
+        label: 'Size',
+        options: [
+          { value: 's', label: 'Small' },
+          { value: 'm', label: 'Normal' },
+          { value: 'l', label: 'Large' },
+        ],
+      },
+      { kind: 'colour', key: 'colour', label: 'Star colour', help: 'Blank uses your theme.' },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+    ],
+  },
+  {
+    /*
+     * A WORD WITH A NOTE BEHIND IT (Andy, 21 Aug 2026, from Duda's Travelgenix
+     * Tooltip).
+     *
+     * A BUTTON, NOT A SPAN WITH A HOVER, and that is the whole design. A tooltip
+     * shown only on hover does not exist on a phone and cannot be reached from a
+     * keyboard, which between them is most of the people a travel site is for. A
+     * real button is focusable, so the same CSS that shows the note on hover
+     * shows it on focus — and a tap focuses, so a tap opens it. One rule,
+     * three input methods, no script.
+     *
+     * `aria-describedby` ties the note to the button, so a screen reader reads it
+     * as the button's description whether or not it is visible. That is the part
+     * a purely visual tooltip always misses.
+     */
+    type: 'tooltip',
+    label: 'Tooltip',
+    group: 'Text',
+    icon: 'eye',
+    description: 'A word or phrase with a note that appears when somebody hovers, taps or tabs to it.',
+    defaults: { text: 'ATOL protected', tip: 'Your money is protected by the Civil Aviation Authority if we stop trading.', position: 'above', align: 'left' },
+    summarise: (props) => asString(props.text) || 'Tooltip',
+    fields: [
+      { kind: 'text', key: 'text', label: 'The words on the page', max: 80 },
+      {
+        kind: 'textarea',
+        key: 'tip',
+        label: 'The note',
+        rows: 3,
+        max: 300,
+        help: 'Keep it short. A tooltip nobody can read at a glance is a paragraph in the wrong place.',
+      },
+      {
+        kind: 'select',
+        key: 'position',
+        label: 'The note appears',
+        options: [
+          { value: 'above', label: 'Above' },
+          { value: 'below', label: 'Below' },
+        ],
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+    ],
+  },
+  {
+    /*
+     * A ROW OF TAGS (Andy, 21 Aug 2026, from Duda's Travelgenix Bullet Delimited
+     * Tags — and almost certainly its Coloured Delimited one too, which is the
+     * same list wearing pills instead of bullets. One element, two styles,
+     * rather than two elements that differ by a border-radius.)
+     *
+     * A LIST, NOT A PARAGRAPH OF WORDS WITH DOTS BETWEEN THEM. The bullets are
+     * drawn by CSS between the items, so a screen reader hears four tags and not
+     * one sentence full of punctuation, and a tag can be a link without the
+     * separator becoming part of it.
+     */
+    type: 'tags',
+    label: 'Tags',
+    group: 'Text',
+    icon: 'list',
+    description: 'A row of short labels, separated by bullets or drawn as coloured pills.',
+    defaults: {
+      style: 'bullets',
+      size: 'm',
+      colour: '',
+      align: 'left',
+      items: [
+        { label: 'Beach', href: '' },
+        { label: 'Family', href: '' },
+        { label: 'All inclusive', href: '' },
+      ],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Tags (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Tags',
+        itemLabel: 'Tag',
+        max: 12,
+        fields: [
+          { kind: 'text', key: 'label', label: 'Label', max: 40 },
+          { kind: 'url', key: 'href', label: 'Links to', placeholder: 'Optional' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Show as',
+        options: [
+          { value: 'bullets', label: 'Separated by bullets' },
+          { value: 'pills', label: 'Coloured pills' },
+        ],
+      },
+      {
+        kind: 'select',
+        key: 'size',
+        label: 'Size',
+        options: [
+          { value: 's', label: 'Small' },
+          { value: 'm', label: 'Normal' },
+        ],
+      },
+      { kind: 'colour', key: 'colour', label: 'Colour', help: 'The pills, or the words and bullets. Blank uses your theme.' },
+      { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',
@@ -3441,7 +3608,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     group: 'Media',
     icon: 'sparkle',
     description: 'A single icon from the library, sized and coloured.',
-    defaults: { icon: 'sparkles', size: 40, colour: '', href: '', label: '', align: 'left' },
+    defaults: { icon: 'sparkles', size: 40, colour: '', pulse: 'none', href: '', label: '', align: 'left' },
     summarise: (props) => `Icon: ${asString(props.icon) || 'none'}`,
     fields: [
       { kind: 'icon', key: 'icon', label: 'Icon' },
@@ -3461,6 +3628,23 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Colour',
         group: 'colours',
         help: 'Leave blank to follow the text around it.',
+      },
+      /*
+       * ICON PULSE (Andy, 21 Aug 2026, from Duda's Travelgenix Icon Pulse). A
+       * setting on the Icon rather than a second icon element: it changes how
+       * the icon is drawn and nothing else, and two icons in the picker that
+       * differ only by whether they move is a choice nobody can make well.
+       */
+      {
+        kind: 'select',
+        key: 'pulse',
+        label: 'Pulse',
+        options: [
+          { value: 'none', label: 'Still' },
+          { value: 'ring', label: 'A ring going out' },
+          { value: 'glow', label: 'A soft glow' },
+        ],
+        help: 'A quiet, endless movement to draw the eye. It stops for anybody who has asked for less motion.',
       },
       { kind: 'url', key: 'href', label: 'Link', placeholder: 'https://' },
       {

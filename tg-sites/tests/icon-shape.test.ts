@@ -69,8 +69,23 @@ describe('the Icon block', () => {
    * icon rather than as an anchor nobody can identify.
    */
   it('only draws a link when there is a name to go with it', () => {
-    expect(renderer).toContain('{href && label ? (');
+    // The condition moved into a `drawn` constant on 21 Aug 2026 when the icon
+    // gained a pulse wrapper. Same rule, one line further up.
+    expect(renderer).toContain('const drawn = href && label ? (');
     expect(renderer).toContain('aria-label={label}');
+  });
+
+  /*
+   * THE PULSE GETS ITS OWN WRAPPER, and this is the assertion that keeps it
+   * there. `.tgs-icon` is the ALIGNMENT box; turning it into an inline-flex to
+   * hang a ring off would break centring and right alignment for every icon on
+   * every site. No pulse, no extra element.
+   */
+  it('wraps the pulse rather than putting it on the alignment box', () => {
+    expect(renderer).toContain("pulse === 'none' ? (");
+    expect(renderer).toContain('className="tgs-icon__pulse"');
+    const css = readFileSync(join(__dirname, '..', 'app', 'globals.css'), 'utf8');
+    expect(css).not.toContain('.tgs-icon[data-pulse');
   });
 
   /*
@@ -85,7 +100,9 @@ describe('the Icon block', () => {
   /* One number for both dimensions: ContentIcon draws itself 1em square, so the
      size arrives as a font size and the two cannot get out of step. */
   it('sizes with one number rather than a width and a height', () => {
-    expect(renderer).toMatch(/IconBlock[\s\S]{0,900}fontSize: `\$\{size\}px`/);
+    // Widened from 900 characters: the pulse wrapper and its note sit between
+    // the two, and the rule being checked has not changed.
+    expect(renderer).toMatch(/IconBlock[\s\S]{0,1400}fontSize: `\$\{size\}px`/);
   });
 });
 

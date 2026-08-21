@@ -31,10 +31,15 @@ import { blockDefinition, defaultPropsFor, isKnownBlock } from '../lib/content/b
 
 const css = readFileSync(join(__dirname, '..', 'app', 'globals.css'), 'utf8');
 const render = readFileSync(join(__dirname, '..', 'components', 'render', 'blocks.tsx'), 'utf8');
-const block = render.slice(
-  render.indexOf('export function ExpandingCardsBlock'),
-  render.indexOf('export function ButtonBlock'),
-);
+/*
+ * Sliced to the NEXT exported function, not to a named one. This ended at
+ * ButtonBlock until 21 Aug 2026 and silently widened the day three components
+ * were inserted between them, so the no-buttons check below started reading the
+ * Tooltip's button and failing. Third time this shape of bug has appeared;
+ * screen-carousel and stacked-cards were the other two.
+ */
+const start = render.indexOf('export function ExpandingCardsBlock');
+const block = render.slice(start, render.indexOf('\nexport function ', start + 1));
 
 /** The cap the renderer applies, read from the source so the two cannot drift. */
 const MAX = Number(/MAX_EXPANDING_CARDS = (\d+)/.exec(render)?.[1]);

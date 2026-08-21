@@ -1570,6 +1570,253 @@
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
+      "id": "rating",
+      "name": "Rating",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A star rating, on its own. Halves allowed.",
+      "variants": [],
+      "props": [
+        {
+          "name": "rating",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 4.5
+        },
+        {
+          "name": "showValue",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "count",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m",
+            "l"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-rating",
+        "tgs-star"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "space.s"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-rating: #f0a13c"
+        ],
+        "spacing": []
+      },
+      "cssRules": 7,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2585",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "tooltip",
+      "name": "Tooltip",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A word or phrase with a note that appears when somebody hovers, taps or tabs to it.",
+      "variants": [],
+      "props": [
+        {
+          "name": "text",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "ATOL protected"
+        },
+        {
+          "name": "tip",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Your money is protected by the Civil Aviation Authority if we stop trading."
+        },
+        {
+          "name": "position",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "above",
+            "below"
+          ],
+          "default": "above"
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-tip",
+        "tgs-tip-"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.surface-alt",
+        "radius.md",
+        "space.m",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 8,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2668",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "tags",
+      "name": "Tags",
+      "category": "text",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "A row of short labels, separated by bullets or drawn as coloured pills.",
+      "variants": [
+        "bullets",
+        "pills"
+      ],
+      "props": [
+        {
+          "name": "items",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "items[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "items[].href",
+          "type": "url",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "bullets",
+            "pills"
+          ],
+          "default": "bullets"
+        },
+        {
+          "name": "size",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "s",
+            "m"
+          ],
+          "default": "m"
+        },
+        {
+          "name": "colour",
+          "type": "colour",
+          "role": "config",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-placeholder",
+        "tgs-tag",
+        "tgs-tags"
+      ],
+      "tokensUsed": [
+        "colour.accent",
+        "colour.border-strong",
+        "colour.surface-alt",
+        "colour.tag",
+        "radius.md",
+        "space.m",
+        "space.s",
+        "type.text-muted",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": [
+          ".tgs-tags[data-style='pills'] .tgs-tags__item: 0.35em",
+          ".tgs-tags[data-style='pills'] .tgs-tags__item: 0.85em"
+        ]
+      },
+      "cssRules": 8,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2717",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
       "id": "video",
       "name": "Video",
       "category": "media",
@@ -2626,7 +2873,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2568",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2755",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2720,7 +2967,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2572",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2759",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2789,7 +3036,7 @@
         ]
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2596",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2783",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2842,7 +3089,7 @@
         ]
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2702",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2889",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3032,7 +3279,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2943",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3130",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3131,7 +3378,7 @@
         ]
       },
       "cssRules": 18,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3064",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3251",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3263,7 +3510,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3144",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3331",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3380,7 +3627,7 @@
         "spacing": []
       },
       "cssRules": 35,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3233",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3420",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3495,7 +3742,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3334",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3521",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3580,7 +3827,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3402",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3589",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3776,7 +4023,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3463",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3650",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3818,7 +4065,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4147",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4349",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3901,7 +4148,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3830",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4032",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4011,7 +4258,7 @@
         ]
       },
       "cssRules": 30,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3877",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4079",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4207,7 +4454,7 @@
         "spacing": []
       },
       "cssRules": 25,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3563",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3750",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4298,7 +4545,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3645",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3832",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4330,6 +4577,18 @@
           "role": "config",
           "required": false,
           "default": ""
+        },
+        {
+          "name": "pulse",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "none",
+            "ring",
+            "glow"
+          ],
+          "default": "none"
         },
         {
           "name": "href",
@@ -4375,7 +4634,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3728",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3915",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4463,7 +4722,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3780",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3982",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4558,7 +4817,7 @@
         "spacing": []
       },
       "cssRules": 22,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3962",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4164",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4643,7 +4902,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4076",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4278",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4819,7 +5078,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4156",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4358",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4862,7 +5121,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4203",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4405",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]

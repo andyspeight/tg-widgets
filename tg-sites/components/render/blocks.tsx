@@ -2565,6 +2565,193 @@ export function ShiftingImagesBlock({
   );
 }
 
+/**
+ * A STAR RATING ON ITS OWN.
+ *
+ * Andy, 21 Aug 2026, and he was explicit that it is standalone rather than
+ * attached to a card. The Testimonial slider has had stars inside it since June;
+ * this is the one a client drops beside a headline to say "4.8 on Trustpilot".
+ *
+ * HALF STARS, WHICH THE TESTIMONIAL ONE DOES NOT HAVE. Real ratings are 4.5 and
+ * 4.7, and a standalone rating that could only say 4 or 5 would be a control a
+ * client has to lie to. A half is drawn by clipping one star's fill to 50% width
+ * rather than by a second half-star path, so it works at any size and in any
+ * colour.
+ *
+ * IT IS INFORMATION, NOT DECORATION. `role="img"` with the value in words, so a
+ * screen reader hears "4.5 out of 5" rather than five identical star shapes,
+ * whether or not the client chose to show the number.
+ */
+export function RatingBlock({ props }: { props: Props }): ReactElement {
+  /*
+   * CLAMPED AND SNAPPED TO HALVES HERE, AND NOT THROUGH `clamp`.
+   *
+   * The shared `clamp` helper rounds to a whole number, which is right for every
+   * other caller — sizes, counts, seconds, percentages — and fatal for this one:
+   * it turned 4.5 into 5, so the element built specifically to allow halves
+   * could not draw one. Caught in a browser, and it would have shipped looking
+   * like an element that simply ignored the field.
+   *
+   * The clamping still has to happen: `min` and `max` on a number input are
+   * advisory, so a stored 7 would otherwise draw seven stars.
+   */
+  const asNumber = Number(props.rating);
+  const bounded = Number.isFinite(asNumber) ? Math.min(5, Math.max(0, asNumber)) : 0;
+  const rating = Math.round(bounded * 2) / 2;
+
+  const size = oneOf(props, 'size', ['s', 'm', 'l'] as const, 'm');
+  const align = oneOf(props, 'align', ALIGNS, 'left');
+  const colour = safeColour(props.colour);
+  const count = str(props, 'count');
+  const showValue = bool(props, 'showValue', true);
+
+  /* "4.5 out of 5" reads as a rating; "4.5 out of 5 from 312 reviews" reads as
+     one somebody can weigh. The words are the same ones a sighted visitor sees. */
+  const spoken = count ? `${rating} out of 5, ${count}` : `${rating} out of 5`;
+
+  return (
+    <div
+      className="tgs-rating"
+      data-size={size}
+      data-align={align}
+      style={colour ? ({ '--tgs-star': colour } as CSSProperties) : undefined}
+    >
+      <span className="tgs-rating__stars" role="img" aria-label={spoken}>
+        {[1, 2, 3, 4, 5].map((n) => {
+          // Whole, half, or empty. The half is the one worth having.
+          const fill = rating >= n ? 'full' : rating >= n - 0.5 ? 'half' : 'none';
+          return (
+            <span className="tgs-rating__star" key={n} data-fill={fill} aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="1em" height="1em">
+                <path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.1l5.8-.8z" />
+              </svg>
+            </span>
+          );
+        })}
+      </span>
+
+      {/* Marked aria-hidden because the stars already carry the whole sentence:
+          without this a screen reader says the value twice. */}
+      {showValue && (
+        <span className="tgs-rating__value" aria-hidden="true">
+          {rating}
+        </span>
+      )}
+      {count && (
+        <span className="tgs-rating__count" aria-hidden="true">
+          {count}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * A WORD WITH A NOTE BEHIND IT.
+ *
+ * Andy, 21 Aug 2026, from Duda's Tooltip.
+ *
+ * A BUTTON, NOT A SPAN WITH A HOVER, and that is the whole design. A tooltip
+ * shown only on hover does not exist on a phone and cannot be reached from a
+ * keyboard, which between them is most of the people a travel site is for. A
+ * real button is focusable, so the same CSS that shows the note on hover shows
+ * it on focus, and a tap focuses — one rule, three input methods, no script.
+ *
+ * `aria-describedby` ties the note to the button, so a screen reader reads it as
+ * the button's description whether or not it is visible. That is the part a
+ * purely visual tooltip always misses.
+ *
+ * `type="button"` because this sits inside a form on plenty of pages and the
+ * default is submit, which would post an enquiry every time somebody asked what
+ * ATOL means.
+ */
+export function TooltipBlock({
+  props,
+  blockId,
+}: {
+  props: Props;
+  blockId: string;
+}): ReactElement {
+  const text = str(props, 'text');
+  const tip = str(props, 'tip');
+  const position = oneOf(props, 'position', ['above', 'below'] as const, 'above');
+  const align = oneOf(props, 'align', ALIGNS, 'left');
+
+  if (!text) {
+    return <div className="tgs-placeholder">Add the words for the tooltip</div>;
+  }
+
+  const tipId = `tgs-tip-${blockId}`;
+
+  return (
+    <div className="tgs-tip" data-align={align} data-position={position}>
+      <button
+        className="tgs-tip__word"
+        type="button"
+        aria-describedby={tip ? tipId : undefined}
+      >
+        {text}
+      </button>
+      {tip && (
+        <span className="tgs-tip__note" id={tipId} role="tooltip">
+          {tip}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * A ROW OF TAGS.
+ *
+ * Andy, 21 Aug 2026, from Duda's Bullet Delimited Tags — and almost certainly
+ * its Coloured Delimited one too, which is the same list wearing pills instead
+ * of bullets. One element, two styles, rather than two that differ by a
+ * border-radius.
+ *
+ * A LIST, NOT A PARAGRAPH WITH DOTS IN IT. The bullets are drawn by CSS between
+ * the items, so a screen reader hears four tags rather than one sentence full of
+ * punctuation, and a tag can be a link without the separator becoming part of
+ * the link text.
+ */
+export function TagsBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items').filter((item) => str(item, 'label'));
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some tags</div>;
+  }
+
+  const style = oneOf(props, 'style', ['bullets', 'pills'] as const, 'bullets');
+  const size = oneOf(props, 'size', ['s', 'm'] as const, 'm');
+  const align = oneOf(props, 'align', ALIGNS, 'left');
+  const colour = safeColour(props.colour);
+
+  return (
+    <ul
+      className="tgs-tags"
+      data-style={style}
+      data-size={size}
+      data-align={align}
+      style={colour ? ({ '--tgs-tag': colour } as CSSProperties) : undefined}
+    >
+      {items.map((item, index) => {
+        const label = str(item, 'label');
+        const href = safeUrl(str(item, 'href'), CONTACT_OK);
+        return (
+          <li className="tgs-tags__item" key={index}>
+            {href ? (
+              <a className="tgs-tags__link" href={href}>
+                {label}
+              </a>
+            ) : (
+              <span className="tgs-tags__label">{label}</span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export function ButtonBlock({ props }: { props: Props }): ReactElement {
   return <div className="tgs-buttons">{renderButton(props, 0)}</div>;
 }
@@ -3732,6 +3919,7 @@ export function IconBlock({ props }: { props: Props }): ReactElement {
   const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
   const href = safeUrl(str(props, 'href'), CONTACT_OK);
   const label = str(props, 'label').trim();
+  const pulse = oneOf(props, 'pulse', ['none', 'ring', 'glow'] as const, 'none');
 
   /*
    * ASKED BEFORE DRAWING, not after. `<ContentIcon />` is a JSX element whether
@@ -3747,14 +3935,28 @@ export function IconBlock({ props }: { props: Props }): ReactElement {
     ...(colour ? { color: colour } : {}),
   } as CSSProperties;
 
+  const drawn = href && label ? (
+    <a className="tgs-icon__link" href={href} aria-label={label}>
+      {glyph}
+    </a>
+  ) : (
+    glyph
+  );
+
   return (
     <div className="tgs-icon" data-align={align} style={style}>
-      {href && label ? (
-        <a className="tgs-icon__link" href={href} aria-label={label}>
-          {glyph}
-        </a>
+      {/*
+        THE PULSE GETS ITS OWN WRAPPER rather than going on `.tgs-icon`, which is
+        the alignment box: turning that into an inline-flex to hang a ring off it
+        would break centring and right alignment for every icon on every site.
+        No pulse, no extra element.
+      */}
+      {pulse === 'none' ? (
+        drawn
       ) : (
-        glyph
+        <span className="tgs-icon__pulse" data-pulse={pulse}>
+          {drawn}
+        </span>
       )}
     </div>
   );

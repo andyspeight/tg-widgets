@@ -5082,6 +5082,207 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Rating, tooltip, tags, and the icon pulse                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * A STAR RATING ON ITS OWN. Andy, 21 Aug 2026.
+ *
+ * THE HALF IS DRAWN BY CLIPPING, not by a second half-star path: the same star
+ * is laid over an empty one and its width clipped to 50%. That works at any
+ * size, in any colour, and needs no second shape to keep in step with the first.
+ */
+.tgs-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--tgs-space-s);
+  --tgs-star: var(--tgs-accent, #f0a13c);
+}
+.tgs-rating[data-align='centre'] { justify-content: center; }
+.tgs-rating[data-align='right']  { justify-content: flex-end; }
+
+.tgs-rating__stars { display: inline-flex; gap: 0.12em; line-height: 1; }
+.tgs-rating[data-size='s'] .tgs-rating__stars { font-size: 1rem; }
+.tgs-rating[data-size='m'] .tgs-rating__stars { font-size: 1.5rem; }
+.tgs-rating[data-size='l'] .tgs-rating__stars { font-size: 2.25rem; }
+
+.tgs-rating__star { position: relative; display: inline-block; width: 1em; height: 1em; }
+.tgs-rating__star svg { display: block; fill: var(--tgs-border); }
+
+/* The filled star sits over the empty one. A half clips it down the middle. */
+.tgs-rating__star[data-fill='full'] svg,
+.tgs-rating__star[data-fill='half']::after { fill: var(--tgs-star); }
+.tgs-rating__star[data-fill='half']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 50%;
+  overflow: hidden;
+  background: var(--tgs-star);
+  /* The star shape itself, so the clipped half is a half STAR rather than a
+     rectangle of colour over one. */
+  -webkit-mask: var(--tgs-star-shape) left center / 1em 1em no-repeat;
+  mask: var(--tgs-star-shape) left center / 1em 1em no-repeat;
+}
+.tgs-rating {
+  --tgs-star-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.6 9.1l5.8-.8z'/%3E%3C/svg%3E");
+}
+
+.tgs-rating__value { font-weight: 600; }
+.tgs-rating__count { color: var(--tgs-text-soft); font-size: 0.95em; }
+
+/*
+ * A WORD WITH A NOTE BEHIND IT.
+ *
+ * THE CONTROL IS A BUTTON, so one rule covers three input methods: `:hover` for
+ * a mouse, `:focus-visible` for a keyboard, and `:focus` for a tap, because
+ * tapping a button focuses it. No script, and nothing that only works with a
+ * pointer.
+ *
+ * The note is `visibility: hidden` rather than transparent, so it is out of the
+ * accessibility tree when closed. `aria-describedby` on the button is what
+ * carries it to a screen reader either way.
+ */
+.tgs-tip { position: relative; display: inline-block; max-width: 100%; }
+.tgs-tip[data-align='centre'] { display: block; text-align: center; }
+.tgs-tip[data-align='right']  { display: block; text-align: right; }
+
+.tgs-tip__word {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: help;
+  /* A dotted underline is the one convention people already read as "there is
+     more here", and it survives any theme. */
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 3px;
+}
+.tgs-tip__word:focus-visible { outline: 3px solid var(--tgs-accent); outline-offset: 3px; border-radius: 3px; }
+
+/*
+ * THE NOTE HANGS OFF THE SIDE THE BLOCK IS ALIGNED TO, not always centred on the
+ * word. A note centred on a left-aligned word runs off the left edge of the
+ * page, which is what it did on the first pass and what a screenshot showed
+ * immediately. Without a script there is no collision detection to fall back on,
+ * so the alignment the client already chose is used to pick a safe side: the
+ * common cases cannot overflow, and a centred block gets the centred note it
+ * expects.
+ */
+.tgs-tip__note {
+  position: absolute;
+  left: 0;
+  z-index: 40;
+  width: max-content;
+  max-width: min(20rem, 80vw);
+  padding: var(--tgs-space-s) var(--tgs-space-m);
+  border-radius: var(--tgs-radius-sm, 8px);
+  background: #1b2431;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: left;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 22%);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.14s ease, visibility 0s linear 0.14s;
+}
+.tgs-tip[data-position='above'] .tgs-tip__note { bottom: calc(100% + 8px); }
+.tgs-tip[data-position='below'] .tgs-tip__note { top: calc(100% + 8px); }
+
+.tgs-tip[data-align='centre'] .tgs-tip__note { left: 50%; transform: translateX(-50%); }
+.tgs-tip[data-align='right']  .tgs-tip__note { left: auto; right: 0; }
+
+.tgs-tip__word:hover ~ .tgs-tip__note,
+.tgs-tip__word:focus ~ .tgs-tip__note {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.14s ease, visibility 0s;
+}
+
+/*
+ * A ROW OF TAGS, in two styles.
+ *
+ * THE BULLET IS DRAWN BY CSS BETWEEN THE ITEMS rather than typed into the
+ * words, so a screen reader hears four tags and not one sentence full of
+ * punctuation, and a tag can be a link without the dot becoming part of it.
+ */
+.tgs-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tgs-space-s);
+  --tgs-tag: var(--tgs-accent);
+}
+.tgs-tags[data-align='centre'] { justify-content: center; }
+.tgs-tags[data-align='right']  { justify-content: flex-end; }
+.tgs-tags[data-size='s'] { font-size: 0.85rem; }
+
+.tgs-tags__link { color: inherit; text-decoration: none; }
+.tgs-tags__link:hover { text-decoration: underline; }
+
+/* Bullets: a dot before every item except the first. aria-hidden by being
+   generated content, which is never in the accessibility tree. */
+.tgs-tags[data-style='bullets'] .tgs-tags__item + .tgs-tags__item::before {
+  content: '•';
+  margin-inline-end: var(--tgs-space-s);
+  color: var(--tgs-tag);
+}
+.tgs-tags[data-style='bullets'] .tgs-tags__item { display: flex; align-items: center; }
+
+.tgs-tags[data-style='pills'] .tgs-tags__item {
+  padding: 0.35em 0.85em;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tgs-tag) 14%, transparent);
+  color: var(--tgs-tag);
+  font-weight: 500;
+}
+
+/*
+ * THE ICON PULSE. A quiet, endless movement to draw the eye, as a setting on the
+ * Icon rather than a second icon element.
+ *
+ * The ring is a pseudo-element behind the glyph rather than a shadow on it, so
+ * the icon itself never moves: an icon that grew and shrank would shove the text
+ * beside it about four seconds at a time.
+ */
+.tgs-icon__pulse[data-pulse] { position: relative; display: inline-flex; }
+.tgs-icon__pulse[data-pulse]::before {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  z-index: -1;
+}
+.tgs-icon__pulse[data-pulse='ring']::before {
+  border: 2px solid currentColor;
+  animation: tgs-icon-ring 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+.tgs-icon__pulse[data-pulse='glow']::before {
+  background: currentColor;
+  animation: tgs-icon-glow 2.8s ease-in-out infinite;
+}
+@keyframes tgs-icon-ring {
+  0%   { transform: scale(0.85); opacity: 0.55; }
+  70%  { transform: scale(1.6);  opacity: 0; }
+  100% { transform: scale(1.6);  opacity: 0; }
+}
+@keyframes tgs-icon-glow {
+  0%, 100% { transform: scale(0.9); opacity: 0.12; }
+  50%      { transform: scale(1.25); opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The icon keeps its shape and simply stops moving. */
+  .tgs-icon__pulse[data-pulse]::before { animation: none; opacity: 0; }
+  .tgs-tip__note { transition: none; }
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 
