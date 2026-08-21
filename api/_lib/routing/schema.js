@@ -30,6 +30,10 @@ export const KNOWN_WIDGETS = [
   // Group Trips enquiry — a traveller asking about a group trip. Party size
   // maps to travel.adults; the trip title + free-text message ride in custom.
   'trips',
+  // Appointment Scheduler booking — a confirmed calendar booking, not just a
+  // form fill. The meeting details (ref, type, start/end, timezones, join
+  // link) ride in lead.custom; the travel.* block stays empty.
+  'appointment',
 ];
 
 export const KNOWN_DESTINATIONS = [

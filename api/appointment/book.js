@@ -18,6 +18,7 @@ import { getProvider } from '../_lib/calendar/providers.js';
 import { createMeeting as zoomCreateMeeting } from '../_lib/calendar/zoom.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
 import { normaliseReminders } from '../_lib/calendar/reminders.js';
+import { dispatchLead } from '../_lib/routing/router.js';
 import { checkRateLimit } from '../_lib/auth/ratelimit.js';
 import { getRequestIp } from '../_lib/auth/http.js';
 
@@ -46,6 +47,59 @@ export function cleanAnswers(raw) {
     n++;
   }
   return out;
+}
+
+/**
+ * Map a saved booking to a partial canonical lead for the unified router, so
+ * bookings land in Submissions and fan out to whatever destinations the
+ * client has configured (Sheets, webhooks, CRMs), exactly like Popup leads.
+ * The meeting details ride in lead.custom; booking fields win a key clash
+ * with a visitor answer. Pure and exported for the smoke test.
+ */
+export function bookingToLead(booking, widget, extras) {
+  extras = extras || {};
+  const v = booking.invitee || {};
+  const nameParts = String(v.name || '').trim().split(/\s+/);
+  return {
+    source: {
+      widget: 'appointment',
+      widgetId: widget.recordId || '',
+      clientName: widget.clientName || '',
+      clientEmail: widget.clientEmail || 'unknown@travelgenix.io',
+      sourceUrl: booking.sourceUrl || '',
+      ipAddress: extras.ip || '',
+      userAgent: extras.userAgent || '',
+    },
+    contact: {
+      email: v.email || '',
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' '),
+      fullName: v.name || '',
+      phone: v.phone || '',
+    },
+    consent: {
+      // Booking an appointment is a service request: contact consent is
+      // inherent (and the widget's consent tick enforced it when required).
+      // Marketing consent is never implied by a booking.
+      contact: true,
+      marketing: false,
+      capturedAt: booking.createdAt || new Date().toISOString(),
+      capturedIp: extras.ip || '',
+    },
+    custom: Object.assign({}, v.answers || {}, {
+      booking_ref: booking.ref,
+      booking_status: booking.status,
+      meeting: booking.eventLabel || '',
+      meeting_mode: booking.mode || '',
+      duration_mins: booking.durationMins,
+      start_iso: booking.startISO,
+      end_iso: booking.endISO,
+      host_timezone: booking.hostTimezone || '',
+      visitor_timezone: booking.visitorTimezone || '',
+      meeting_url: booking.meetingUrl || '',
+    }),
+    tags: ['appointment', 'booking'],
+  };
 }
 
 export default async function handler(req, res) {
@@ -189,8 +243,10 @@ export default async function handler(req, res) {
     company: String(config.company || '').slice(0, 80),
     accent: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(config.accent || '')) ? config.accent : '',
     // The reminder plan travels with the booking too, so the cron can decide
-    // due-ness without re-reading widget config.
+    // due-ness without re-reading widget config. smsReminder is the widget's
+    // opt-in; the cron additionally requires platform Twilio config + a phone.
     reminders: normaliseReminders(config.reminders), remindersSent: [],
+    smsReminder: !!config.smsReminders,
     dayCounted: cap > 0,
     sourceUrl: clean(body.sourceUrl).slice(0, 300), createdAt: new Date().toISOString(),
   };
@@ -206,6 +262,17 @@ export default async function handler(req, res) {
   // Confirmation to the visitor (with .ics + manage link) and the agency note.
   booking.location = config.location || '';
   await sendNewBooking(booking, { manageUrl });
+
+  // Fan the booking out through the unified lead router: a Submissions record
+  // plus any destinations the client configured (Sheets, webhooks, CRMs).
+  // Best-effort — the booking is already saved, emailed and in the calendar,
+  // so a routing failure must never fail the response. dispatchLead isolates
+  // destination failures itself; this catch covers everything above it.
+  try {
+    if (w.recordId) await dispatchLead(bookingToLead(booking, w, { ip, userAgent: String(req.headers['user-agent'] || '').slice(0, 500) }));
+  } catch (e) {
+    console.error('[book] lead routing failed:', e.message);
+  }
 
   return res.status(200).json({ ok: true, ref, manageUrl: manageUrl || undefined, calendarLink, connected, meetingUrl: meetingUrl || undefined });
 }

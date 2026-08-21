@@ -158,3 +158,24 @@ These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
 - **Bookings admin**: `/bookings` gained search, a status filter, CSV export
   (formula-injection safe) and the source page each booking came from
   (`sourceUrl` now returned by `GET /api/appointment/list`).
+
+## Added 21 Aug 2026, round 2
+
+- **Lead routing**: every booking now also dispatches through the unified
+  lead router (`bookingToLead` in `api/appointment/book.js`) — a Submissions
+  record plus whatever destinations the client configured, exactly like
+  Popup leads. Best-effort: routing can never fail a booking. `'appointment'`
+  joined `KNOWN_WIDGETS`; `resolveWidget` now returns the widget row's own
+  `recordId` (the router's key) and `clientName`.
+- **AI builder + Templates**: live in the editor. `APPOINTMENT` is a
+  passthrough type on `/api/widget-ai` (the editor owns the instruction and
+  schema and clamps the result onto the config); four templates patch copy,
+  meeting types and questions while leaving colours, font, availability and
+  the calendar connection alone.
+- **SMS reminders (dark-launched)**: `api/_lib/calendar/sms.js` sends via the
+  Twilio REST API once `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and
+  `TWILIO_FROM` exist in Vercel env. Per-widget opt-in `config.smsReminders`
+  (editor: Reminder emails → "Also send a text reminder"; the hint reflects
+  `/api/calendar/status`'s new `sms` flag). Texts ride the email reminder
+  cadence, UK numbers are normalised to E.164 and anything ambiguous is
+  skipped rather than guessed. Until the env vars exist everything no-ops.

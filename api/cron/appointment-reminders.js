@@ -18,6 +18,7 @@
 import { listAllBookings, saveBooking, storageReady } from '../_lib/calendar/store.js';
 import { sendReminder } from '../_lib/calendar/mail.js';
 import { dueReminders } from '../_lib/calendar/reminders.js';
+import { smsConfigured, sendSms, reminderSmsBody } from '../_lib/calendar/sms.js';
 
 export default async function handler(req, res) {
   const auth = req.headers['authorization'] || '';
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
   const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
   const origin = (process.env.APP_BASE_URL || (proto + '://' + req.headers.host)).replace(/\/$/, '');
 
-  let scanned = 0, sent = 0;
+  let scanned = 0, sent = 0, texted = 0;
   try {
     const bookings = await listAllBookings(now, windowEnd);
     for (const b of bookings) {
@@ -43,6 +44,12 @@ export default async function handler(req, res) {
       if (!due.length) continue;
       const manageUrl = b.manageToken ? (origin + '/manage-booking?token=' + b.manageToken) : '';
       const ok = await sendReminder(b, { manageUrl });
+      // Text reminder rides the same cadence, best-effort, only when the
+      // widget opted in AND the platform has Twilio configured. An SMS
+      // failure never blocks the email being marked sent.
+      if (ok && b.smsReminder && smsConfigured() && b.invitee && b.invitee.phone) {
+        if (await sendSms(b.invitee.phone, reminderSmsBody(b, { manageUrl }))) texted++;
+      }
       if (ok) {
         b.remindersSent = [...new Set([...(Array.isArray(b.remindersSent) ? b.remindersSent : []), ...due])].sort((a, c) => a - c);
         b.reminded = true;
@@ -55,5 +62,5 @@ export default async function handler(req, res) {
     console.error('[reminders] failed:', e.message);
     return res.status(500).json({ ok: false, error: 'reminder run failed', scanned, sent });
   }
-  return res.status(200).json({ ok: true, scanned, sent, windowHours: hours });
+  return res.status(200).json({ ok: true, scanned, sent, texted, windowHours: hours });
 }

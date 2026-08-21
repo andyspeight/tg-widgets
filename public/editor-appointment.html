@@ -77,6 +77,31 @@
   /* Contain the widget's position:fixed overlay/bubble (popup and bubble
      display modes) inside the preview frame instead of the editor viewport. */
   .tgse-frame { transform: translateZ(0); }
+
+  /* AI + Templates modals (shell-token styled) */
+  .apt-modal { position:fixed; inset:0; background:rgba(15,23,42,.5); display:flex; align-items:center; justify-content:center; z-index:900; padding:20px; }
+  .apt-modal[hidden] { display:none !important; }
+  .apt-modal-card { background:var(--tgse-panel); border-radius:14px; max-width:520px; width:100%; max-height:82vh; overflow:auto; box-shadow:var(--tgse-shadow-lg); }
+  .apt-modal-head { padding:14px 18px; border-bottom:1px solid var(--tgse-border); display:flex; align-items:center; justify-content:space-between; }
+  .apt-modal-head h2 { font-size:15px; font-weight:700; margin:0; color:var(--tgse-ink); }
+  .apt-modal-x { appearance:none; border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:4px; border-radius:6px; }
+  .apt-modal-x:hover { background:var(--tgse-hover); color:var(--tgse-ink); }
+  .apt-modal-x svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+  .apt-modal-body { padding:18px; }
+  .apt-modal-foot { padding:12px 18px; border-top:1px solid var(--tgse-border); display:flex; justify-content:flex-end; gap:8px; }
+  .apt-mbtn { appearance:none; border:1px solid var(--tgse-border); background:var(--tgse-panel); color:var(--tgse-ink); font:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .apt-mbtn:hover { background:var(--tgse-hover); }
+  .apt-mbtn.is-primary { background:var(--tgse-brand); border-color:var(--tgse-brand); color:#fff; }
+  .apt-mbtn.is-primary:hover { background:var(--tgse-brand-dark); }
+  .apt-mbtn:disabled { opacity:.55; cursor:not-allowed; }
+  .tpl-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tpl-card { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel); padding:12px; border-radius:10px; cursor:pointer; text-align:left; font:inherit; transition:border-color .15s ease, transform .15s ease; }
+  .tpl-card:hover { border-color:var(--tgse-brand); transform:translateY(-1px); }
+  .tpl-name { font-size:13px; font-weight:700; color:var(--tgse-ink); margin-bottom:3px; }
+  .tpl-desc { font-size:11.5px; color:var(--tgse-ink-3); line-height:1.4; }
+  .apt-spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:aptspin .7s linear infinite; vertical-align:-2px; margin-right:6px; }
+  @keyframes aptspin { to { transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .tpl-card, .tpl-card:hover { transition:none; transform:none; } }
 </style>
 </head>
 <body>
@@ -329,6 +354,7 @@
               <div><span class="mini-label">Second reminder</span><select class="select" id="rem-2"></select></div>
             </div>
             <span class="field-hint">Reminder emails go to the visitor and to you, sent on the hour. They apply to bookings made after you save.</span>
+            <div class="field" style="margin-top:12px"><div class="switch-row"><span class="switch-row-label">Also send a text reminder</span><button type="button" class="switch" id="sms-toggle" aria-pressed="false"></button></div><span class="field-hint" id="sms-hint">Texts go to the visitor's phone at the same times as the email reminders.</span></div>
           </div>
         </div>
 
@@ -387,6 +413,41 @@
 
 </div>
 
+<!-- ===== AI BUILDER MODAL ===== -->
+<div class="apt-modal" id="ai-modal" hidden>
+  <div class="apt-modal-card" role="dialog" aria-modal="true" aria-label="AI scheduler builder">
+    <div class="apt-modal-head">
+      <h2>AI scheduler builder</h2>
+      <button type="button" class="apt-modal-x" data-close-modal="ai-modal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="apt-modal-body">
+      <div class="field">
+        <label class="field-label" for="ai-prompt">Tell us about your business</label>
+        <textarea class="input" id="ai-prompt" style="min-height:96px" placeholder="e.g. We're a Chester travel agency specialising in tailor-made honeymoons and luxury long-haul. Most clients start with a phone chat, then a longer video call to plan properly."></textarea>
+        <span class="field-hint">The AI writes your heading and intro, suggests meeting types with sensible lengths, and drafts the questions to ask when someone books. You can edit everything afterwards.</span>
+      </div>
+    </div>
+    <div class="apt-modal-foot">
+      <button type="button" class="apt-mbtn" data-close-modal="ai-modal">Cancel</button>
+      <button type="button" class="apt-mbtn is-primary" id="ai-generate">Build my scheduler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TEMPLATES MODAL ===== -->
+<div class="apt-modal" id="template-modal" hidden>
+  <div class="apt-modal-card" role="dialog" aria-modal="true" aria-label="Templates">
+    <div class="apt-modal-head">
+      <h2>Templates</h2>
+      <button type="button" class="apt-modal-x" data-close-modal="template-modal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="apt-modal-body">
+      <div class="tpl-grid" id="template-grid"></div>
+      <span class="field-hint" style="margin-top:10px">Templates replace your copy, meeting types and questions. Your colours, font, calendar connection and availability stay as they are.</span>
+    </div>
+  </div>
+</div>
+
 <script src="/editor-shell.js"></script>
 <script src="/widget-appointment.js"></script>
 <script src="/editor-tour.js"></script>
@@ -433,6 +494,7 @@
     bufferAfter: 0,
     dailyCap: 0,
     reminders: [24],
+    smsReminders: false,
     timeFormat: '12',
     displayMode: 'inline',
     launcherLabel: '',
@@ -464,8 +526,8 @@
     setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
     fontPickerEl: '#fontPickerMount',
     onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
-    onAIBuild: () => tgse.toast('AI builder coming soon for the Scheduler', 'ok'),
-    onTemplates: () => tgse.toast('Templates coming soon for the Scheduler', 'ok'),
+    onAIBuild: () => openAptModal('ai-modal'),
+    onTemplates: () => { renderTemplatesGrid(); openAptModal('template-modal'); },
     onLoginSuccess: () => { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); },
   });
 
@@ -629,6 +691,7 @@
     document.getElementById('ink-col').value = hexOk(C.textColor)?C.textColor:'#0F172A'; document.getElementById('ink-hex').value = (C.textColor||'#0F172A').toUpperCase();
     document.querySelectorAll('#fmt-seg [data-fmt]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-fmt') === C.timeFormat));
     toggleSwitch('add-cal', C.addToCalendar);
+    toggleSwitch('sms-toggle', C.smsReminders);
     toggleSwitch('ask-phone', C.askPhone); document.getElementById('phone-req-field').classList.toggle('is-hidden', !C.askPhone);
     toggleSwitch('phone-req', C.phoneRequired);
     toggleSwitch('req-consent', C.requireConsent); document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent);
@@ -893,9 +956,186 @@
   // ── Switches ──
   function wireSwitch(id, key, after) { document.getElementById(id).addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
   wireSwitch('add-cal','addToCalendar');
+  wireSwitch('sms-toggle','smsReminders');
   wireSwitch('ask-phone','askPhone', () => document.getElementById('phone-req-field').classList.toggle('is-hidden', !C.askPhone));
   wireSwitch('phone-req','phoneRequired');
   wireSwitch('req-consent','requireConsent', () => document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent));
+
+  // ── AI builder + Templates modals ──
+  function openAptModal(id) { const m = document.getElementById(id); if (m) m.hidden = false; }
+  function closeAptModal(id) { const m = document.getElementById(id); if (m) m.hidden = true; }
+  document.addEventListener('click', (e) => {
+    const closer = e.target.closest('[data-close-modal]');
+    if (closer) { closeAptModal(closer.getAttribute('data-close-modal')); return; }
+    if (e.target.classList && e.target.classList.contains('apt-modal')) e.target.hidden = true;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    ['ai-modal', 'template-modal'].forEach(closeAptModal);
+  });
+
+  const AI_MODES = ['callback', 'phone', 'video', 'inperson'];
+  const AI_MINS = [15, 20, 30, 45, 60, 90];
+  const AI_QTYPES = ['text', 'textarea', 'select'];
+  const snapMins = (m) => { const n = parseInt(m, 10); if (AI_MINS.includes(n)) return n; if (!Number.isFinite(n)) return 30; return AI_MINS.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a); };
+
+  // Clamp whatever the model returned onto our config shape. Everything is
+  // re-escaped at render time, so this only enforces shape and bounds.
+  function applyAiResult(r) {
+    if (!r || typeof r !== 'object') return false;
+    let touched = false;
+    if (typeof r.heading === 'string' && r.heading.trim()) { C.heading = r.heading.trim().slice(0, 80); touched = true; }
+    if (typeof r.subheading === 'string' && r.subheading.trim()) { C.subheading = r.subheading.trim().slice(0, 180); touched = true; }
+    if (typeof r.company === 'string' && r.company.trim()) { C.company = r.company.trim().slice(0, 60); touched = true; }
+    if (Array.isArray(r.eventTypes) && r.eventTypes.length) {
+      const evs = r.eventTypes.slice(0, 4).map((e, i) => ({
+        id: 'ev' + Date.now().toString(36) + i,
+        label: String((e && e.label) || '').trim().slice(0, 60),
+        mins: snapMins(e && e.mins),
+        mode: AI_MODES.includes(e && e.mode) ? e.mode : 'callback',
+        description: String((e && e.description) || '').trim().slice(0, 120),
+      })).filter((e) => e.label);
+      if (evs.length) { C.eventTypes = evs; touched = true; }
+    }
+    if (Array.isArray(r.questions)) {
+      C.questions = r.questions.slice(0, 4).map((q, i) => {
+        const out = {
+          id: 'q' + Date.now().toString(36) + i,
+          label: String((q && q.label) || '').trim().slice(0, 120),
+          type: AI_QTYPES.includes(q && q.type) ? q.type : 'text',
+          required: !!(q && q.required),
+        };
+        if (out.type === 'select') out.options = (q && Array.isArray(q.options) ? q.options : []).slice(0, 8).map((o) => String(o).trim().slice(0, 60)).filter(Boolean);
+        return out;
+      }).filter((q) => q.label && (q.type !== 'select' || (q.options && q.options.length)));
+      touched = true;
+    }
+    return touched;
+  }
+
+  document.getElementById('ai-generate').addEventListener('click', async () => {
+    const desc = document.getElementById('ai-prompt').value.trim();
+    if (!desc) { tgse.toast('Tell us a little about your business first', 'err'); return; }
+    const btn = document.getElementById('ai-generate');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="apt-spin"></span>Building…';
+    const reset = () => { btn.disabled = false; btn.textContent = 'Build my scheduler'; };
+    try {
+      const instruction = 'You are helping a UK travel business set up an appointment scheduler widget. From the business description below, write the scheduler copy and suggest meeting types. Return ONE JSON object with exactly these fields: heading (string, max 80 characters, a warm invitation to book), subheading (string, max 180), company (string, max 60, the business name as it should appear on the scheduler), eventTypes (array of 1-4 objects: { label: string max 60, mins: one of 15|20|30|45|60|90, mode: one of "callback"|"phone"|"video"|"inperson", description: string max 120 }), questions (array of 0-4 objects: { label: string max 120, type: one of "text"|"textarea"|"select", required: boolean, options: array of short strings, select type only }). Plain warm UK English, no exclamation marks, no emojis. Business description: ' + desc;
+      const res = await fetch('/api/widget-ai', {
+        method: 'POST',
+        headers: tgse.authHeaders(),
+        body: JSON.stringify({
+          widgetType: 'Appointment',
+          prompt: instruction,
+          responseFormat: 'json',
+          schema: {
+            heading: 'string', subheading: 'string', company: 'string',
+            eventTypes: 'array of { label, mins, mode, description }',
+            questions: 'array of { label, type, required, options }',
+          },
+        }),
+      });
+      if (res.status === 401) { tgse.showLogin(); reset(); return; }
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data) { tgse.toast((data && data.error) || 'The AI could not build that. Try again.', 'err'); reset(); return; }
+      const result = (data.result && typeof data.result === 'object') ? data.result : data;
+      if (!applyAiResult(result)) { tgse.toast('The AI returned nothing usable. Try a fuller description.', 'err'); reset(); return; }
+      shell.markDirty(); syncUIFromState(); render();
+      closeAptModal('ai-modal');
+      tgse.toast('Scheduler drafted. Look it over and tweak anything.', 'ok');
+    } catch (e) {
+      tgse.toast('Network error. Please try again.', 'err');
+    }
+    reset();
+  });
+
+  // ── Templates ──
+  // Each template patches copy, meeting types, questions and a few settings.
+  // Colours, font, timezone, availability, calendar connection and date
+  // overrides are deliberately left alone.
+  const APT_TEMPLATES = [
+    {
+      name: 'Travel consultation',
+      desc: 'A friendly callback plus a longer video planning session.',
+      patch: {
+        heading: 'Book a free travel consultation',
+        subheading: 'Pick a time that suits you and one of our travel experts will be in touch.',
+        eventTypes: [
+          { id: 'tpl-chat', label: 'Quick travel chat', mins: 30, mode: 'callback', description: 'A friendly chat about where you fancy going.' },
+          { id: 'tpl-plan', label: 'Trip planning session', mins: 60, mode: 'video', description: 'A proper sit-down to plan your trip end to end.' },
+        ],
+        questions: [
+          { id: 'tpl-topic', label: 'What is it about?', type: 'select', required: false, options: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'] },
+          { id: 'tpl-notes', label: 'Anything we should know? (optional)', type: 'textarea', required: false },
+        ],
+        askPhone: true, phoneRequired: false, displayMode: 'inline', reminders: [24],
+      },
+    },
+    {
+      name: 'Video appointments',
+      desc: 'Two video meeting lengths, built for Zoom or Meet.',
+      patch: {
+        heading: 'Book a video appointment',
+        subheading: 'Face to face planning from wherever you are. We will send the video link with your confirmation.',
+        eventTypes: [
+          { id: 'tpl-disc', label: 'Discovery call', mins: 30, mode: 'video', description: 'Tell us what you have in mind and we will map the options.' },
+          { id: 'tpl-full', label: 'Full planning session', mins: 60, mode: 'video', description: 'Flights, stays and the little details, all in one call.' },
+        ],
+        questions: [
+          { id: 'tpl-dest', label: 'Where are you thinking of going?', type: 'text', required: false },
+          { id: 'tpl-when', label: 'Roughly when would you like to travel?', type: 'text', required: false },
+        ],
+        askPhone: true, phoneRequired: false, displayMode: 'inline', reminders: [24, 2],
+      },
+    },
+    {
+      name: 'In-office visits',
+      desc: 'Face to face appointments at your branch.',
+      patch: {
+        heading: 'Book a visit to our travel shop',
+        subheading: 'Come in for a brew and let us plan your next trip properly.',
+        location: 'Our office. We will confirm the address with your booking.',
+        eventTypes: [
+          { id: 'tpl-visit', label: 'In-store appointment', mins: 45, mode: 'inperson', description: 'A relaxed face to face with one of the team.' },
+        ],
+        questions: [
+          { id: 'tpl-topic', label: 'What would you like help with?', type: 'select', required: false, options: ['New booking', 'Existing booking', 'Group trip', 'Something else'] },
+        ],
+        askPhone: true, phoneRequired: true, displayMode: 'inline', reminders: [24, 2],
+      },
+    },
+    {
+      name: 'Quick callback',
+      desc: 'A 15 minute callback behind a popup button.',
+      patch: {
+        heading: 'Request a callback',
+        subheading: 'Leave us a time and a number and we will ring you back.',
+        eventTypes: [
+          { id: 'tpl-cb', label: 'Callback', mins: 15, mode: 'callback', description: '' },
+        ],
+        questions: [],
+        askPhone: true, phoneRequired: true,
+        displayMode: 'popup', launcherLabel: 'Request a callback', reminders: [2],
+      },
+    },
+  ];
+  function renderTemplatesGrid() {
+    document.getElementById('template-grid').innerHTML = APT_TEMPLATES.map((t, i) => `
+      <button type="button" class="tpl-card" data-template-idx="${i}">
+        <div class="tpl-name">${esc(t.name)}</div>
+        <div class="tpl-desc">${esc(t.desc)}</div>
+      </button>`).join('');
+  }
+  document.getElementById('template-grid').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-template-idx]'); if (!b) return;
+    const t = APT_TEMPLATES[parseInt(b.getAttribute('data-template-idx'), 10)];
+    if (!t) return;
+    Object.keys(t.patch).forEach((k) => { C[k] = JSON.parse(JSON.stringify(t.patch[k])); });
+    shell.markDirty(); syncUIFromState(); render();
+    closeAptModal('template-modal');
+    tgse.toast('Template applied. Your colours and availability are untouched.', 'ok');
+  });
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
@@ -905,6 +1145,14 @@
     const el = document.getElementById('cal-status'); if (!el) return;
     const hint = document.getElementById('cal-hint');
     if (hint) hint.style.display = (s && s.connected) ? 'none' : '';
+    // The SMS toggle is honest about platform state: the setting always saves,
+    // but texts only go out once Twilio is configured server-side.
+    const smsHint = document.getElementById('sms-hint');
+    if (smsHint && s) {
+      smsHint.textContent = s.sms
+        ? "Texts go to the visitor's phone at the same times as the email reminders."
+        : 'Saved and ready: texts start going out automatically once SMS is switched on for the platform.';
+    }
     const note = (txt) => '<div style="font-size:12.5px;color:var(--tgse-ink-3);background:var(--tgse-hover);border:1px solid var(--tgse-border);border-radius:10px;padding:11px 13px;line-height:1.5">' + txt + '</div>';
     if (!s) { el.innerHTML = note('Could not check calendar status. Try reloading the page.'); return; }
     if (!s.configured) { el.innerHTML = note('Calendar connecting is not switched on for this account yet. The scheduler still works without it.'); return; }
