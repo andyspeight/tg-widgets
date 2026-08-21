@@ -513,12 +513,20 @@ await check('block picker opens from a section', async () => {
  * the tripwire working rather than a nuisance: two blocks arrived and it made
  * somebody look at the picker, which is the entire point of writing the number down.
  *
+ * 52 on 21 Aug 2026, when the Duda element audit closed: Rating, Tooltip and Tags
+ * landed together and this caught all three on the way to main. Checked rather than
+ * assumed: all 52 draw a card, so nothing has quietly stopped rendering. The same
+ * day's other three additions were deliberately NOT blocks and so are not counted
+ * here, which is worth saying because it looks like an off-by-three otherwise: the
+ * hover tint is a section setting, and the icon lead and its alignment are settings
+ * on Cards.
+ *
  * The harness runs as staff, so the staff-only Embed block is counted here too:
- * 49 is the whole library, one fewer than that for a client.
+ * 52 is the whole library, one fewer than that for a client.
  */
 await check('block picker offers the full library', async () => {
   const count = await page.locator('.ed-block-card').count();
-  return count === 49 ? true : `${count} blocks in the picker, expected 49`;
+  return count === 52 ? true : `${count} blocks in the picker, expected 52`;
 });
 
 await check('including both ways to put a widget on a page', async () => {
@@ -5075,9 +5083,9 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 49 the page picker offers a staff user. See the note on that check for
+  // The same 52 the page picker offers a staff user. See the note on that check for
   // why the number is written down rather than read from the registry.
-  return count === 49 ? true : `${count} blocks in the header picker, expected 49`;
+  return count === 52 ? true : `${count} blocks in the header picker, expected 52`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
