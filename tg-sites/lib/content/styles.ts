@@ -464,6 +464,7 @@ export const MOTION_CHOICES = [
   { value: 'none', label: 'None' },
   { value: 'A5', label: 'Pictures breathe' },
   { value: 'A6', label: 'Background drifts' },
+  { value: 'A2', label: 'Scenes change' },
   { value: 'S5', label: 'Background settles' },
   { value: 'S1', label: 'Words rise like a tide' },
   { value: 'S3', label: 'Cards stack up' },

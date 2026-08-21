@@ -1256,6 +1256,63 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * A2 ambient-frames, TIER 0 HERE. A sequence of photographs cross-fading behind the
+ * words, the whole scene drifting slowly as they change. Its meaning in the catalogue
+ * is CONDITIONS CHANGING, so it belongs where the subject genuinely varies: expedition
+ * weather, a resort through a day, a route's four countries.
+ *
+ * MOST OF IT ALREADY EXISTED. The cross-fade is the section background slideshow,
+ * pure CSS since it landed, with its own per-count keyframes, per-slide delays, hover
+ * pause and reduced-motion stop. The recipe adds the drift and nothing else, which is
+ * why it is tier 0 rather than the catalogue's 1.
+ *
+ * THE DRIFT IS ON THE STACK, NOT ON EACH FRAME, and that is a deliberate trade. Each
+ * slide's animation-name is already bound per transition and per count (see the
+ * binder above), so giving every frame its own drift would mean overriding all of
+ * those pairs and would break the moment somebody adds a seventh picture. Drifting
+ * the container composes with the cross-fade instead of fighting it, costs one rule,
+ * and reads the same from the sofa: the scene is alive and the weather is turning.
+ *
+ * The render only sets this where there is actually a cycling background, since a
+ * recipe about frames changing has nothing to do on one still picture.
+ */
+.tgs-section[data-motion='A2'] {
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.1;
+  --tgs-motion-duration: 30s;
+}
+.tgs-section[data-motion='A2'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.06;
+  --tgs-motion-duration: 38s;
+}
+.tgs-section[data-motion='A2'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.04;
+  --tgs-motion-to: 1.16;
+  --tgs-motion-duration: 22s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-motion='A2'] { overflow: clip; }
+  .tgs-section[data-motion='A2'] .tgs-section__bgshow {
+    animation: tgs-motion-ambient-frames var(--tgs-motion-duration) ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+  /* Stop the drift while a visitor is looking, exactly as the cross-fade under it
+     already stops, or the two would disagree about whether the section is paused. */
+  .tgs-section[data-motion='A2'] .tgs-section__bgshow:hover { animation-play-state: paused; }
+}
+
+@keyframes tgs-motion-ambient-frames {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(var(--tgs-motion-to)) translate(-1.5%, -1%);
+  }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

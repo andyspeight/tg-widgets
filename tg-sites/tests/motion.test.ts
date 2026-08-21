@@ -20,6 +20,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MOTION_ARRIVAL_RECIPES,
   MOTION_BACKGROUND_RECIPES,
+  MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
   MOTION_RECIPES,
   MOTION_TIERS,
@@ -274,7 +275,23 @@ describe('one thing moves the background picture, never three', () => {
 
   it('requires a still background picture for a background recipe, as the others do', () => {
     expect(render).toContain('const stillBackground = Boolean(background) && !bgShow && !video;');
-    expect(render).toContain('MOTION_BACKGROUND_RECIPES.has(recipe) ? stillBackground : true');
+    expect(render).toContain('if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;');
+  });
+
+  it('asks the opposite of A2, which is a sequence and is inert on one picture', () => {
+    // Same shape of guard, opposite condition: A6 and S5 drive the one still
+    // picture, A2 IS the cycling set and has nothing to do without it.
+    expect(MOTION_CYCLING_RECIPES.has('A2')).toBe(true);
+    expect(render).toContain('if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;');
+  });
+
+  it('keeps every cycling recipe inside the background set, so the two rules agree', () => {
+    for (const recipe of MOTION_CYCLING_RECIPES) {
+      expect(
+        MOTION_BACKGROUND_RECIPES.has(recipe),
+        `${recipe} wants the cycling background but is not a background recipe`,
+      ).toBe(true);
+    }
   });
 
   it('leaves the Ken Burns rules exactly as they were, so nothing published changes', () => {

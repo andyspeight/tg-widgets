@@ -17,6 +17,7 @@ import {
   EMPTY_BOX,
   MOTION_ARRIVAL_RECIPES,
   MOTION_BACKGROUND_RECIPES,
+  MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
   safeAnchor,
   safeColour,
@@ -359,11 +360,19 @@ export function SectionRenderer({
    */
   const recipe = section.motion && !editable ? section.motion.recipe : undefined;
   const stillBackground = Boolean(background) && !bgShow && !video;
+  /*
+   * What this recipe needs before it can do anything. A2 is a photo SEQUENCE, so it
+   * wants the cycling background and is inert on one still picture; A6 and S5 drive
+   * that one still picture and are inert without it. Everything else needs neither.
+   */
+  const motionHasWhatItNeeds = (r: typeof recipe): boolean => {
+    if (!r) return false;
+    if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;
+    if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;
+    return true;
+  };
   const motion =
-    recipe && MOTION_LIVE_RECIPES.has(recipe)
-      && (MOTION_BACKGROUND_RECIPES.has(recipe) ? stillBackground : true)
-      ? recipe
-      : undefined;
+    recipe && MOTION_LIVE_RECIPES.has(recipe) && motionHasWhatItNeeds(recipe) ? recipe : undefined;
   /*
    * The recipe WINS the background. Parallax and Ken Burns have moved that one
    * picture since 11 and 13 Aug 2026 and globals.css has always said only one of

@@ -53,6 +53,12 @@ function html(recipe, intensity) {
              data-motion-intensity="${intensity}" style="position:relative;min-height:320px">
       <img class="tgs-section__bg" alt="" src="${swatch('888888')}"
            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <div class="tgs-section__bgshow" aria-hidden="true" data-transition="fade" data-count="3"
+           style="--tgs-ss-cycle:24s">
+        <img class="tgs-section__bgslide" alt="" src="${swatch('777777')}" style="animation-delay:0s">
+        <img class="tgs-section__bgslide" alt="" src="${swatch('999999')}" style="animation-delay:8s">
+        <img class="tgs-section__bgslide" alt="" src="${swatch('aaaaaa')}" style="animation-delay:16s">
+      </div>
       <div class="tgs-section__inner">
         <div class="tgs-block"><h2 style="font-size:44px;line-height:0.92;margin:0">Gorgeous Gy quay</h2></div>
         <div class="tgs-block"><p style="margin:0">Second block, for the stagger.</p></div>
@@ -103,6 +109,7 @@ const lines = [];
 for (const [recipe, selector] of [
   ['A6', '.tgs-section__bg'],
   ['A5', '.tgs-card:nth-child(1) .tgs-card__frame img'],
+  ['A2', '.tgs-section__bgshow'],
 ]) {
   for (const intensity of [1, 2, 3]) {
     const r = await probe({ recipe, intensity, selector, reduced: false });
@@ -151,6 +158,7 @@ if (new Set(durations).size !== durations.length) {
 for (const [recipe, selector] of [
   ['A6', '.tgs-section__bg'],
   ['A5', '.tgs-card:nth-child(1) .tgs-card__frame img'],
+  ['A2', '.tgs-section__bgshow'],
 ]) {
   const r = await probe({ recipe, intensity: 2, selector, reduced: true });
   lines.push(`  ${recipe} reduced motion: ${r.first.transform} (${r.first.name})`);

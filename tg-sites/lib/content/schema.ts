@@ -297,6 +297,10 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * scroll listener. So S5 scrub-scale is 0 though the catalogue says 0/1, and S1
  * tide-reveal is 0 though the catalogue says 1.
  *
+ * A2 ambient-frames is 0 rather than 1 for a different reason: the cross-fading
+ * photo sequence it is built on has existed since the section background slideshow
+ * landed, in pure CSS, so the recipe only has to add the drift over the top.
+ *
  * S1 is the interesting one. Its catalogue entry carries a warning that `clip-path`
  * silently breaks IntersectionObserver, so a clipped element reports a zero
  * intersection ratio, the observer never fires and nothing ever reveals. That trap
@@ -305,7 +309,7 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A2: 1, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
+  none: 0, A2: 0, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -324,13 +328,23 @@ export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<Moti
 ]);
 
 /**
+ * The background recipes that want the CYCLING background rather than the still one.
+ *
+ * A2 ambient-frames IS a photo sequence, so where A6 and S5 need one still picture
+ * and refuse to run without it, A2 needs several and refuses without them. Same
+ * shape of guard, opposite condition, which is why it cannot just be a boolean on
+ * the set above.
+ */
+export const MOTION_CYCLING_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A2']);
+
+/**
  * The recipes with a render behind them TODAY. Everything else in MOTION_RECIPES
  * parses and stores but draws nothing yet, so the render must not emit it.
  * Guarded by tests/motion.test.ts, which checks each of these has CSS and a
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A5', 'A6', 'S1', 'S3', 'S5',
+  'A2', 'A5', 'A6', 'S1', 'S3', 'S5',
 ]);
 
 /**
