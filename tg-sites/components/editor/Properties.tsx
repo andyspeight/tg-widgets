@@ -30,6 +30,7 @@ import {
   MAX_PULL_UP,
   MAX_RADIUS,
   MIN_COLUMN_WIDTH,
+  MOTION_ARRIVAL_RECIPES,
   MOTION_BACKGROUND_RECIPES,
   normaliseSectionPadding,
   PADDING_PRESETS,
@@ -1133,11 +1134,15 @@ function SectionFields({
                 set({ motion: undefined }, `sec:${index}:motion`);
                 return;
               }
-              const owns = MOTION_BACKGROUND_RECIPES.has(recipe satisfies MotionRecipe);
+              const ownsBackground = MOTION_BACKGROUND_RECIPES.has(recipe satisfies MotionRecipe);
+              const ownsArrival = MOTION_ARRIVAL_RECIPES.has(recipe satisfies MotionRecipe);
               set(
                 {
                   motion: { recipe, intensity: section.motion?.intensity ?? 2 },
-                  ...(owns ? { parallax: undefined, kenBurns: undefined } : {}),
+                  // Clear whatever this recipe takes over, so the pane never shows a
+                  // switch ticked that the published page has stood down.
+                  ...(ownsBackground ? { parallax: undefined, kenBurns: undefined } : {}),
+                  ...(ownsArrival ? { reveal: undefined, revealStagger: undefined } : {}),
                 },
                 `sec:${index}:motion`,
               );

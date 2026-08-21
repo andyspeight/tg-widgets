@@ -291,12 +291,32 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * What each recipe costs, from the catalogue. 0 is CSS only and free, 1 is a small
  * script, 2 is a WebGL canvas and is capped at one per page.
  *
- * S5 scrub-scale is tier 0 HERE though the catalogue says 0/1, because this codebase
- * already does scroll-linked animation in pure CSS with `animation-timeline: view()`
- * (see the parallax) rather than with a scroll listener.
+ * TWO ARE CHEAPER HERE THAN IN THE CATALOGUE, and it is the same reason both times:
+ * this codebase already does scroll-linked animation in pure CSS with
+ * `animation-timeline: view()` (see the parallax and the reveal) rather than with a
+ * scroll listener. So S5 scrub-scale is 0 though the catalogue says 0/1, and S1
+ * tide-reveal is 0 though the catalogue says 1.
+ *
+ * A3 drifting-rail is the one that really is tier 1, and the only recipe so far that
+ * puts a script on a page. Its whole idea is a continuous drift that scroll ADDS to
+ * rather than replaces, and CSS can express either source alone and never the sum.
+ *
+ * A4 floating-layers is 0 because its near layers drift on a CSS clock and its far
+ * layer is offset by a view() timeline, so nothing in it needs a script either.
+ *
+ * A2 ambient-frames is 0 rather than 1 for a different reason: the cross-fading
+ * photo sequence it is built on has existed since the section background slideshow
+ * landed, in pure CSS, so the recipe only has to add the drift over the top.
+ *
+ * S1 is the interesting one. Its catalogue entry carries a warning that `clip-path`
+ * silently breaks IntersectionObserver, so a clipped element reports a zero
+ * intersection ratio, the observer never fires and nothing ever reveals. That trap
+ * cannot bite here, because nothing in this stylesheet observes anything: a view()
+ * timeline is resolved from layout, not from an intersection callback. The recipe
+ * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A2: 1, A3: 1, A4: 1, A5: 0, A6: 0, A7: 0, S1: 1, S3: 0, S5: 0,
+  none: 0, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -315,12 +335,60 @@ export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<Moti
 ]);
 
 /**
+ * The background recipes that want the CYCLING background rather than the still one.
+ *
+ * A2 ambient-frames IS a photo sequence, so where A6 and S5 need one still picture
+ * and refuse to run without it, A2 needs several and refuses without them. Same
+ * shape of guard, opposite condition, which is why it cannot just be a boolean on
+ * the set above.
+ */
+export const MOTION_CYCLING_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A2']);
+
+/**
+ * The background recipes that want a VIDEO rather than a picture.
+ *
+ * A7 video-hero is footage or it is nothing, so like A2 it asks a different question
+ * of the section than A6 and S5 do. The catalogue is blunt about why it belongs in
+ * the set at all: for travel the subject is usually already moving, so film beats a
+ * shader on both quality and budget, and the discipline is in the footage.
+ */
+export const MOTION_VIDEO_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A7']);
+
+/**
  * The recipes with a render behind them TODAY. Everything else in MOTION_RECIPES
  * parses and stores but draws nothing yet, so the render must not emit it.
  * Guarded by tests/motion.test.ts, which checks each of these has CSS and a
  * reduced-motion path in globals.css.
  */
-export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A5', 'A6']);
+export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
+  'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+]);
+
+/**
+ * The recipes that need public/tg-motion.js. Keep this list SHORT.
+ *
+ * Clause 1 of the rule in lib/content/blocks.ts is that a page which asks for nothing
+ * ships nothing, and this set is where that promise is kept or broken: everything in
+ * here puts a script tag on any page carrying it, and everything outside it stays
+ * free. A3 is the only member because a track that drifts on its own AND is added to
+ * by scroll is the one thing CSS cannot express; every other recipe built so far is
+ * a stylesheet and must stay one.
+ *
+ * Before adding to this, check the recipe really cannot be done with a CSS animation
+ * or a view() timeline. Four recipes were expected to need a script and did not.
+ */
+export const MOTION_SCRIPT_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A3']);
+
+/**
+ * The recipes that animate the section's BLOCKS ARRIVING.
+ *
+ * The second resolution rule, and the same shape as the background one above. The
+ * reveal has animated blocks into view since 11 Aug 2026 and S1 tide-reveal wants
+ * the same elements, so rather than leaving two animations on one block the recipe
+ * takes it and `reveal` stands down. A section can still carry both settings; only
+ * one of them draws, and it is the one the client chose most recently by name.
+ */
+export const MOTION_ARRIVAL_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['S1']);
 
 /** How much the recipe moves. Bands, never on and off: 2 is the default middle. */
 export type MotionIntensity = 1 | 2 | 3;

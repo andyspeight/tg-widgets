@@ -48,14 +48,25 @@ function html(recipe, intensity) {
 
   return `<!doctype html><html><head><style>${css}</style></head><body>
   <div class="tgs-page">
+    <div style="height:1400px">spacer, so the section starts below the fold</div>
     <section class="tgs-section" data-tone="light" data-motion="${recipe}"
              data-motion-intensity="${intensity}" style="position:relative;min-height:320px">
       <img class="tgs-section__bg" alt="" src="${swatch('888888')}"
            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <div class="tgs-section__bgshow" aria-hidden="true" data-transition="fade" data-count="3"
+           style="--tgs-ss-cycle:24s">
+        <img class="tgs-section__bgslide" alt="" src="${swatch('777777')}" style="animation-delay:0s">
+        <img class="tgs-section__bgslide" alt="" src="${swatch('999999')}" style="animation-delay:8s">
+        <img class="tgs-section__bgslide" alt="" src="${swatch('aaaaaa')}" style="animation-delay:16s">
+      </div>
       <div class="tgs-section__inner">
+        <div class="tgs-block"><h2 style="font-size:44px;line-height:0.92;margin:0">Gorgeous Gy quay</h2></div>
+        <div class="tgs-block"><p style="margin:0">Second block, for the stagger.</p></div>
+        <div class="tgs-block"><p style="margin:0">Third block, for the stagger.</p></div>
         <div class="tgs-cards">${card('444444')}${card('555555')}${card('666666')}</div>
       </div>
     </section>
+    <div style="height:1600px">tail, so there is room to scroll the section up</div>
   </div></body></html>`;
 }
 
@@ -98,6 +109,7 @@ const lines = [];
 for (const [recipe, selector] of [
   ['A6', '.tgs-section__bg'],
   ['A5', '.tgs-card:nth-child(1) .tgs-card__frame img'],
+  ['A2', '.tgs-section__bgshow'],
 ]) {
   for (const intensity of [1, 2, 3]) {
     const r = await probe({ recipe, intensity, selector, reduced: false });
@@ -146,6 +158,7 @@ if (new Set(durations).size !== durations.length) {
 for (const [recipe, selector] of [
   ['A6', '.tgs-section__bg'],
   ['A5', '.tgs-card:nth-child(1) .tgs-card__frame img'],
+  ['A2', '.tgs-section__bgshow'],
 ]) {
   const r = await probe({ recipe, intensity: 2, selector, reduced: true });
   lines.push(`  ${recipe} reduced motion: ${r.first.transform} (${r.first.name})`);
@@ -160,6 +173,209 @@ for (const [recipe, selector] of [
       `${recipe} under reduced motion sits at ${r.first.transform} rather than untouched, `
       + 'so the visitor gets a picture frozen part-way through a move',
     );
+  }
+}
+
+/*
+ * THE SCROLL-STEERED RECIPES need the page moved, not just time passed. This opens
+ * the same harness, samples with the section below the fold, scrolls it up, and
+ * samples again. A recipe that reports the same value at both ends is not steering.
+ */
+async function probeScrolled({ recipe, intensity, selector, reduced, read }) {
+  const page = await browser.newPage({
+    viewport: { width: 1200, height: 900 },
+    reducedMotion: reduced ? 'reduce' : 'no-preference',
+  });
+  await page.setContent(html(recipe, intensity), { waitUntil: 'load' });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(200);
+  const before = await page.evaluate(read, selector);
+
+  await page.evaluate(() => {
+    const section = document.querySelector('.tgs-section');
+    window.scrollTo(0, section.offsetTop - window.innerHeight * 0.15);
+  });
+  await page.waitForTimeout(300);
+  const after = await page.evaluate(read, selector);
+  await page.close();
+  return { before, after };
+}
+
+const readClip = (s) => {
+  const el = document.querySelector(s);
+  const cs = getComputedStyle(el);
+  return {
+    clip: cs.clipPath,
+    name: cs.animationName,
+    padBottom: cs.paddingBottom,
+    marginBottom: cs.marginBottom,
+  };
+};
+const readScale = (s) => {
+  const cs = getComputedStyle(document.querySelector(s));
+  return { transform: cs.transform, name: cs.animationName, timeline: cs.animationTimeline };
+};
+
+/* S1 tide-reveal: clipped to nothing below the fold, fully open once scrolled to. */
+for (const intensity of [1, 2, 3]) {
+  const r = await probeScrolled({
+    recipe: 'S1', intensity, reduced: false,
+    selector: '.tgs-block:nth-child(1)', read: readClip,
+  });
+  lines.push(`  S1 intensity ${intensity}: ${r.before.clip}  ->  ${r.after.clip}`);
+  if (r.before.clip === r.after.clip) {
+    problems.push(
+      `S1 at intensity ${intensity} reported the same clip-path before and after scrolling `
+      + `(${r.before.clip}), so the wipe is not steering off the scroll`,
+    );
+  }
+  if (!/100%/.test(r.before.clip)) {
+    problems.push(
+      `S1 at intensity ${intensity} was already open below the fold (${r.before.clip}), `
+      + 'so nothing is being held back to wipe',
+    );
+  }
+}
+
+/*
+ * THE DESCENDER TRAP, lesson 2 in the catalogue: a mask plus tight display type eats
+ * the tails of g, q and y. The fix is padding the clipped box and taking the same
+ * amount back in negative margin, so this checks the two actually cancel (the layout
+ * is where it was) and that the end state opens the padded box rather than the bare
+ * text box.
+ */
+{
+  const r = await probeScrolled({
+    recipe: 'S1', intensity: 2, reduced: false,
+    selector: '.tgs-block:nth-child(1)', read: readClip,
+  });
+  const pad = parseFloat(r.after.padBottom);
+  const margin = parseFloat(r.after.marginBottom);
+  lines.push(`  S1 descender room: padding-bottom ${r.after.padBottom}, margin-bottom ${r.after.marginBottom}`);
+  if (!(pad > 0)) {
+    problems.push('S1 has no padding under the clipped box, so a tight heading will lose its descenders');
+  }
+  if (Math.abs(pad + margin) > 0.5) {
+    problems.push(
+      `S1's descender padding (${r.after.padBottom}) is not cancelled by its margin `
+      + `(${r.after.marginBottom}), so it has shifted the layout`,
+    );
+  }
+}
+
+/* S5 scrub-scale: over-scaled below the fold, settled to rest once scrolled to. */
+for (const intensity of [1, 2, 3]) {
+  const r = await probeScrolled({
+    recipe: 'S5', intensity, reduced: false,
+    selector: '.tgs-section__bg', read: readScale,
+  });
+  lines.push(`  S5 intensity ${intensity}: ${r.before.transform} -> ${r.after.transform}`);
+  if (r.before.transform === r.after.transform) {
+    problems.push(
+      `S5 at intensity ${intensity} did not change on scroll (${r.before.transform}), `
+      + 'so it is not settling',
+    );
+  }
+  if (r.before.transform === 'none') {
+    problems.push(`S5 at intensity ${intensity} had no over-scale to settle from`);
+  }
+}
+
+/*
+ * A4 floating-layers: the near pictures must drift on periods that are NOT multiples
+ * of each other, or the set visibly comes back into phase and the depth dies. The
+ * catalogue is explicit about this being the whole craft of the recipe.
+ */
+{
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  await page.setContent(html('A4', 2), { waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  const periods = await page.evaluate(() =>
+    [...document.querySelectorAll('.tgs-cards > .tgs-card')].map(
+      (c) => getComputedStyle(c.querySelector('img')).animationDuration));
+  const far = await page.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector('.tgs-section__bg'));
+    return { name: cs.animationName, timeline: cs.animationTimeline };
+  });
+  await page.close();
+
+  lines.push(`  A4 near layers: ${periods.join(', ')}   far layer: ${far.name} on ${far.timeline}`);
+  const secs = periods.map((p) => parseFloat(p));
+  if (new Set(secs).size !== secs.length) {
+    problems.push(`A4 runs the same period on more than one layer (${periods.join(', ')})`);
+  }
+  for (let i = 0; i < secs.length; i += 1) {
+    for (let j = i + 1; j < secs.length; j += 1) {
+      const [lo, hi] = secs[i] < secs[j] ? [secs[i], secs[j]] : [secs[j], secs[i]];
+      if (lo > 0 && Math.abs(hi / lo - Math.round(hi / lo)) < 0.01) {
+        problems.push(
+          `A4 layers at ${lo}s and ${hi}s are simple multiples, so they will sync up `
+          + 'and the depth dies',
+        );
+      }
+    }
+  }
+  if (far.name === 'none') {
+    problems.push('A4 gave its far layer no scroll offset, so there are no layers to separate');
+  }
+}
+
+/* S3 sticky-stack: the cards pin, and each pins a little lower than the last. */
+{
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
+  await page.setContent(html('S3', 2), { waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  const stack = await page.evaluate(() =>
+    [...document.querySelectorAll('.tgs-cards > .tgs-card')].map((c) => {
+      const cs = getComputedStyle(c);
+      return { position: cs.position, top: cs.top };
+    }));
+  await page.close();
+
+  lines.push(`  S3 cards: ${stack.map((c) => `${c.position}@${c.top}`).join(', ')}`);
+  if (!stack.every((c) => c.position === 'sticky')) {
+    problems.push(
+      `S3 did not make the cards sticky (${stack.map((c) => c.position).join(', ')}). `
+      + 'An overflow:hidden ancestor is the usual cause, since it becomes the scroll container.',
+    );
+  }
+  const tops = stack.map((c) => parseFloat(c.top));
+  if (!tops.every((t, i) => i === 0 || t > tops[i - 1])) {
+    problems.push(
+      `S3's cards all pin at the same height (${stack.map((c) => c.top).join(', ')}), `
+      + 'so they land on top of each other instead of stacking',
+    );
+  }
+}
+
+/* Reduced motion, for all three: still, and structurally back to normal. */
+for (const [recipe, selector, read, key] of [
+  ['S1', '.tgs-block:nth-child(1)', readClip, 'clip'],
+  ['S5', '.tgs-section__bg', readScale, 'transform'],
+]) {
+  const r = await probeScrolled({ recipe, intensity: 2, selector, read, reduced: true });
+  lines.push(`  ${recipe} reduced motion: ${r.before[key]} (${r.before.name})`);
+  if (r.before.name !== 'none' || r.before[key] !== r.after[key]) {
+    problems.push(`${recipe} still moves under prefers-reduced-motion (${r.before.name})`);
+  }
+  if (key === 'clip' && r.before.clip !== 'none') {
+    problems.push(
+      `${recipe} under reduced motion leaves the text clipped at ${r.before.clip}, `
+      + 'so the words are hidden from the visitor who asked for less movement',
+    );
+  }
+}
+
+{
+  const page = await browser.newPage({ viewport: { width: 1200, height: 900 }, reducedMotion: 'reduce' });
+  await page.setContent(html('S3', 2), { waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  const positions = await page.evaluate(() =>
+    [...document.querySelectorAll('.tgs-cards > .tgs-card')].map((c) => getComputedStyle(c).position));
+  await page.close();
+  lines.push(`  S3 reduced motion: ${positions.join(', ')}`);
+  if (positions.some((p) => p === 'sticky')) {
+    problems.push('S3 still pins its cards under prefers-reduced-motion, which is the one guard nothing may skip');
   }
 }
 

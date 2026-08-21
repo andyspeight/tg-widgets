@@ -15,8 +15,11 @@ import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import {
   boxIsEmpty,
   EMPTY_BOX,
+  MOTION_ARRIVAL_RECIPES,
   MOTION_BACKGROUND_RECIPES,
+  MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
+  MOTION_VIDEO_RECIPES,
   safeAnchor,
   safeColour,
   type Block,
@@ -358,11 +361,20 @@ export function SectionRenderer({
    */
   const recipe = section.motion && !editable ? section.motion.recipe : undefined;
   const stillBackground = Boolean(background) && !bgShow && !video;
+  /*
+   * What this recipe needs before it can do anything. A2 is a photo SEQUENCE, so it
+   * wants the cycling background and is inert on one still picture; A6 and S5 drive
+   * that one still picture and are inert without it. Everything else needs neither.
+   */
+  const motionHasWhatItNeeds = (r: typeof recipe): boolean => {
+    if (!r) return false;
+    if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);
+    if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;
+    if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;
+    return true;
+  };
   const motion =
-    recipe && MOTION_LIVE_RECIPES.has(recipe)
-      && (MOTION_BACKGROUND_RECIPES.has(recipe) ? stillBackground : true)
-      ? recipe
-      : undefined;
+    recipe && MOTION_LIVE_RECIPES.has(recipe) && motionHasWhatItNeeds(recipe) ? recipe : undefined;
   /*
    * The recipe WINS the background. Parallax and Ken Burns have moved that one
    * picture since 11 and 13 Aug 2026 and globals.css has always said only one of
@@ -371,6 +383,14 @@ export function SectionRenderer({
    * A5 is not a background recipe, so it composes with them rather than replacing.
    */
   const motionOwnsBackground = Boolean(motion && MOTION_BACKGROUND_RECIPES.has(motion));
+  /*
+   * The same rule again, for the other thing two features can both claim. The reveal
+   * has animated blocks into view since 11 Aug 2026 and S1 tide-reveal wants those
+   * same blocks, so rather than leaving two animations on one element the recipe
+   * takes it and the reveal stands down. A section may still carry both settings;
+   * only one of them draws.
+   */
+  const motionOwnsArrival = Boolean(motion && MOTION_ARRIVAL_RECIPES.has(motion));
   const bgTransition = section.backgroundTransition === 'slide' ? 'slide' : 'fade';
   const bgInterval = section.backgroundInterval ?? 5;
   /*
@@ -409,14 +429,20 @@ export function SectionRenderer({
        * to the closed list so a stored string can never put anything but a known
        * style on the attribute. globals.css keys each keyframe off it.
        */
-      data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}
+      data-reveal={
+        section.reveal && !motionOwnsArrival && !editable
+          ? normaliseRevealStyle(section.revealStyle)
+          : undefined
+      }
       /*
        * Stagger rides alongside reveal: it means nothing without it, so it is only
        * emitted when reveal is on. It turns the reveal from block-by-block into
        * item-by-item, the columns or the cards arriving one after another. Same
        * `editable` gate, and the cascade itself is pure CSS in globals.css.
        */
-      data-reveal-stagger={section.reveal && section.revealStagger && !editable ? '' : undefined}
+      data-reveal-stagger={
+        section.reveal && section.revealStagger && !motionOwnsArrival && !editable ? '' : undefined
+      }
       /*
        * Cards and buttons lift under the pointer on the published page and in preview,
        * not while editing, where the small movement would fight selecting them. Same
@@ -548,7 +574,24 @@ export function SectionRenderer({
       {video && !editable && (
         <video
           className="tgs-section__bg tgs-section__bg--video"
-          src={video}
+          /*
+           * A7 puts the address on a <source> with a media query instead of on the
+           * element, and that one move is the whole recipe.
+           *
+           * A background video has always been HIDDEN under reduced motion, by one
+           * CSS rule, with the poster showing through. Hidden is not the same as not
+           * fetched: measured in a real browser, the plain src downloads the film for
+           * a visitor who asked for less motion and will never see a frame of it. A
+           * <source> whose media query does not match is never selected, so nothing
+           * is requested at all. Measured both ways, one request against none.
+           *
+           * That costs the visitor nothing and saves them the whole download, and it
+           * is the cheapest answer there is to what a video hero costs in egress.
+           *
+           * Only for a section that asked for A7. Every video already published keeps
+           * the src it has and behaves exactly as it did.
+           */
+          src={motion === 'A7' ? undefined : video}
           poster={bgImages[0]?.src || undefined}
           autoPlay
           muted
@@ -558,7 +601,11 @@ export function SectionRenderer({
           // inside the section, never to the film.
           aria-hidden="true"
           tabIndex={-1}
-        />
+        >
+          {motion === 'A7' ? (
+            <source src={video} media="(prefers-reduced-motion: no-preference)" />
+          ) : null}
+        </video>
       )}
 
       {(bgImages.length > 0 || video) && <div className="tgs-section__scrim" aria-hidden="true" />}

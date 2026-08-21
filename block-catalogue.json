@@ -1922,7 +1922,7 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 35,
+      "cssRules": 37,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1214",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2126,6 +2126,7 @@
         "colour.accent",
         "colour.border",
         "colour.border-strong",
+        "colour.motion-stick",
         "colour.surface",
         "colour.surface-alt",
         "radius.lg",
@@ -2148,7 +2149,7 @@
         ],
         "spacing": []
       },
-      "cssRules": 50,
+      "cssRules": 63,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1441",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2344,6 +2345,7 @@
         "colour.accent",
         "colour.border",
         "colour.border-strong",
+        "colour.motion-stick",
         "colour.rail-l",
         "colour.rail-r",
         "colour.slide",
@@ -2371,7 +2373,7 @@
         ],
         "spacing": []
       },
-      "cssRules": 76,
+      "cssRules": 89,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1711",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },

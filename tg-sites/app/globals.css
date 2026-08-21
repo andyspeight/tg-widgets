@@ -1097,6 +1097,370 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * S1 tide-reveal, TIER 0 HERE. Copy and headings wipe upward from their own baseline
+ * as the section is scrolled to, staggered down the section. Its meaning in the
+ * catalogue is a tide line or a horizon rising up the type, which is why it wipes
+ * rather than fades: a fade could sit on any page, a rising water line could not.
+ *
+ * THE TRAP THAT CANNOT BITE HERE. The catalogue warns that `clip-path` silently
+ * breaks IntersectionObserver, because a clipped element reports a zero intersection
+ * ratio, so the observer never fires and nothing ever reveals. Nothing here observes
+ * anything: a view() timeline resolves from layout. The recipe that costs an hour
+ * elsewhere is free in this stylesheet.
+ *
+ * THE TRAP THAT DOES. Lesson 2 in the catalogue: a mask plus tight display type
+ * clips the descenders, and the tails of g, q and y vanish. The clip ends flush with
+ * the border box, so a line whose leading is tighter than its own descender depth
+ * would lose them. Fixed the way the catalogue prescribes, by padding the clipped box
+ * and pulling the same amount back in negative margin, which leaves the layout where
+ * it was and gives the tails somewhere to live.
+ *
+ * It owns the blocks arriving, so the render never sets it alongside data-reveal.
+ */
+.tgs-section[data-motion='S1'] {
+  --tgs-motion-lift: 18px;
+}
+.tgs-section[data-motion='S1'][data-motion-intensity='1'] {
+  --tgs-motion-lift: 10px;
+}
+.tgs-section[data-motion='S1'][data-motion-intensity='3'] {
+  --tgs-motion-lift: 28px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-motion='S1'] .tgs-block {
+      /* Room for the descenders, taken straight back out of the layout. */
+      padding-bottom: 0.3em;
+      margin-bottom: -0.3em;
+      animation: tgs-motion-tide-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 25% cover 25%;
+    }
+
+    /* The stagger down the section, so the tide reaches each line in turn rather
+       than every block wiping at once. Same cascade the reveal stagger uses. */
+    .tgs-section[data-motion='S1'] .tgs-block:nth-child(2) { animation-range: entry 31% cover 27%; }
+    .tgs-section[data-motion='S1'] .tgs-block:nth-child(3) { animation-range: entry 37% cover 29%; }
+    .tgs-section[data-motion='S1'] .tgs-block:nth-child(n + 4) { animation-range: entry 43% cover 31%; }
+  }
+}
+
+@keyframes tgs-motion-tide-reveal {
+  from {
+    /* Clipped to nothing at the baseline, then the visible band grows upward. */
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(var(--tgs-motion-lift));
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+/*
+ * S3 sticky-stack, TIER 0. The section's cards stop being a row and become a stack:
+ * each one sticks a little lower than the last, so the next slides up over it as the
+ * page scrolls. Its meaning is COMPARISON, three ships or four room grades, and the
+ * catalogue keeps it for one blunt reason: it replaces the row of three equal cards,
+ * which is the single most common tell that a page was generated rather than made.
+ *
+ * NO SCROLL JACKING, and no script. `position: sticky` only, so the scrollbar stays
+ * real and the browser stays in charge, which is also what lets the block survive
+ * inside the editor canvas.
+ *
+ * STICKY NEEDS AN UNCLIPPED ANCESTOR. `overflow: hidden` on anything above would make
+ * that box a scroll container and the cards would stick to it instead of the page,
+ * which looks like sticky simply not working. The page wrapper uses `clip` rather
+ * than `hidden` for a related reason already written up on .tgs-page, and nothing
+ * here adds a clip of its own.
+ *
+ * Under reduced motion it is an ordinary stacked list of cards, which is a finished
+ * comparison rather than a broken one.
+ */
+.tgs-section[data-motion='S3'] {
+  --tgs-motion-stick: 10vh;
+}
+.tgs-section[data-motion='S3'][data-motion-intensity='1'] {
+  --tgs-motion-stick: 14vh;
+}
+.tgs-section[data-motion='S3'][data-motion-intensity='3'] {
+  --tgs-motion-stick: 6vh;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (position: sticky) {
+    /* One column, because a stack is the whole point. */
+    .tgs-section[data-motion='S3'] .tgs-cards { grid-template-columns: 1fr; }
+
+    .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card {
+      position: sticky;
+      top: var(--tgs-motion-stick);
+      /* Opaque, or the card underneath shows through the one on top of it. */
+      background: var(--tgs-surface);
+    }
+    /* Each card sits a little lower than the one before, so the edge of every card
+       below stays visible and the stack reads as a stack rather than one card. */
+    .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(2) { top: calc(var(--tgs-motion-stick) + 2.2rem); }
+    .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(3) { top: calc(var(--tgs-motion-stick) + 4.4rem); }
+    .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(4) { top: calc(var(--tgs-motion-stick) + 6.6rem); }
+    .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(n + 5) { top: calc(var(--tgs-motion-stick) + 8.8rem); }
+  }
+}
+
+/*
+ * S5 scrub-scale, TIER 0 HERE. The section's full-bleed picture settles out of an
+ * over-scale as the section is reached, so it arrives rather than simply being there.
+ * Scroll-steered, which is why it is an S: it is driven by where the section sits on
+ * screen, not by a clock.
+ *
+ * Tier 0 rather than the catalogue's 0/1 because it is a view() timeline in CSS, the
+ * same mechanism the parallax has used since 11 Aug 2026, not a scroll listener.
+ *
+ * It drives the background, so the render never sets it alongside parallax or Ken
+ * Burns, and it needs a still background picture exactly as they do.
+ */
+.tgs-section[data-motion='S5'] {
+  --tgs-motion-from: 1.14;
+}
+.tgs-section[data-motion='S5'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.07;
+}
+.tgs-section[data-motion='S5'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.22;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* clip, not hidden, for the reason given on .tgs-page: hidden would make this a
+       scroll container and freeze the very timeline it is meant to be driven by. */
+    .tgs-section[data-motion='S5'] { overflow: clip; }
+    .tgs-section[data-motion='S5'] .tgs-section__bg {
+      animation: tgs-motion-scrub-scale linear both;
+      animation-timeline: view();
+      /* Settled by the time the section is properly on screen, so the picture is
+         still while it is being read rather than moving under the words. */
+      animation-range: entry 0% cover 35%;
+      transform-origin: center;
+    }
+  }
+}
+
+@keyframes tgs-motion-scrub-scale {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/*
+ * A2 ambient-frames, TIER 0 HERE. A sequence of photographs cross-fading behind the
+ * words, the whole scene drifting slowly as they change. Its meaning in the catalogue
+ * is CONDITIONS CHANGING, so it belongs where the subject genuinely varies: expedition
+ * weather, a resort through a day, a route's four countries.
+ *
+ * MOST OF IT ALREADY EXISTED. The cross-fade is the section background slideshow,
+ * pure CSS since it landed, with its own per-count keyframes, per-slide delays, hover
+ * pause and reduced-motion stop. The recipe adds the drift and nothing else, which is
+ * why it is tier 0 rather than the catalogue's 1.
+ *
+ * THE DRIFT IS ON THE STACK, NOT ON EACH FRAME, and that is a deliberate trade. Each
+ * slide's animation-name is already bound per transition and per count (see the
+ * binder above), so giving every frame its own drift would mean overriding all of
+ * those pairs and would break the moment somebody adds a seventh picture. Drifting
+ * the container composes with the cross-fade instead of fighting it, costs one rule,
+ * and reads the same from the sofa: the scene is alive and the weather is turning.
+ *
+ * The render only sets this where there is actually a cycling background, since a
+ * recipe about frames changing has nothing to do on one still picture.
+ */
+.tgs-section[data-motion='A2'] {
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.1;
+  --tgs-motion-duration: 30s;
+}
+.tgs-section[data-motion='A2'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.06;
+  --tgs-motion-duration: 38s;
+}
+.tgs-section[data-motion='A2'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.04;
+  --tgs-motion-to: 1.16;
+  --tgs-motion-duration: 22s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-motion='A2'] { overflow: clip; }
+  .tgs-section[data-motion='A2'] .tgs-section__bgshow {
+    animation: tgs-motion-ambient-frames var(--tgs-motion-duration) ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+  /* Stop the drift while a visitor is looking, exactly as the cross-fade under it
+     already stops, or the two would disagree about whether the section is paused. */
+  .tgs-section[data-motion='A2'] .tgs-section__bgshow:hover { animation-play-state: paused; }
+}
+
+@keyframes tgs-motion-ambient-frames {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(var(--tgs-motion-to)) translate(-1.5%, -1%);
+  }
+}
+
+/*
+ * A4 floating-layers, TIER 0 HERE. Two or three pictures drifting against each other
+ * on different periods, with the background offset by scroll on top. Its meaning in
+ * the catalogue is DEPTH OF PLACE: inside against outside, the room and the view from
+ * it, foreground detail against the landscape it sits in.
+ *
+ * THE LAYERS ARE DRIVEN BY DIFFERENT THINGS ON PURPOSE, and that is what makes this
+ * one rule rather than a fight. The catalogue's own A6 note says a scroll-driven
+ * transform and a CSS animation on the SAME element fight each other and you must
+ * pick one. So the background takes the scroll and the pictures inside take the
+ * clock: nothing has two drivers, and because one moves with the page while the
+ * others move on their own, the layers separate exactly as the recipe wants.
+ *
+ * NON-HARMONIC PERIODS, which is the whole craft of it. The catalogue is blunt: give
+ * each layer a period that is not a simple multiple of the others or they visibly
+ * sync up and the effect dies. 23s, 31s and 41s are primes, so the set does not come
+ * back into phase in any time anybody will sit there.
+ */
+.tgs-section[data-motion='A4'] {
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.08;
+  --tgs-motion-shift: 6%;
+}
+.tgs-section[data-motion='A4'][data-motion-intensity='1'] {
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.05;
+  --tgs-motion-shift: 3.5%;
+}
+.tgs-section[data-motion='A4'][data-motion-intensity='3'] {
+  --tgs-motion-from: 1.04;
+  --tgs-motion-to: 1.12;
+  --tgs-motion-shift: 9%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-motion='A4'] { overflow: clip; }
+
+  /* The far layer, steered by the page. Grown first so the offset can never drag an
+     edge into view at either end of its travel. */
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-motion='A4'] .tgs-section__bg {
+      top: -10%;
+      bottom: auto;
+      height: 120%;
+      animation: tgs-motion-layer-drift linear both;
+      animation-timeline: view();
+    }
+  }
+
+  /* The near layers, each on its own clock and none a multiple of another. */
+  .tgs-section[data-motion='A4'] :is(.tgs-card__frame, .tgs-image__frame) { overflow: clip; }
+  .tgs-section[data-motion='A4'] :is(.tgs-card__frame, .tgs-image__frame) img {
+    animation: tgs-motion-layer-breathe 23s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+  .tgs-section[data-motion='A4'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n + 2) img {
+    animation-duration: 31s;
+  }
+  .tgs-section[data-motion='A4'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n) img {
+    animation-duration: 41s;
+  }
+}
+
+@keyframes tgs-motion-layer-drift {
+  from {
+    transform: translateY(calc(var(--tgs-motion-shift) * -1));
+  }
+  to {
+    transform: translateY(var(--tgs-motion-shift));
+  }
+}
+
+@keyframes tgs-motion-layer-breathe {
+  from {
+    transform: scale(var(--tgs-motion-from));
+  }
+  to {
+    transform: scale(var(--tgs-motion-to)) translate(1.5%, -1%);
+  }
+}
+
+/*
+ * A3 drifting-rail, TIER 1, and the only recipe so far that puts a script on a page.
+ * The section's cards stop being a grid and become a horizontal track. Its meaning in
+ * the catalogue is THE ROUTE MOVING PAST: itinerary days, a season's fixtures, a
+ * multi-centre tour's legs.
+ *
+ * WHAT IS HERE AND WHAT IS IN THE SCRIPT. Everything below is the rail itself, and it
+ * is a complete, working, native scroll-snap carousel on its own: swipeable, snapping,
+ * keyboard reachable, every card readable, no script involved. public/tg-motion.js
+ * adds an ambient drift on top by nudging the real scroll position. Blocked or slow
+ * and the visitor loses the drift and nothing else, which is clause 2 of the rule in
+ * lib/content/blocks.ts: the content never depends on a script.
+ *
+ * SO THERE IS NO SEPARATE REDUCED-MOTION STATE TO WRITE. The rail IS the reduced
+ * version, and the script simply never starts. That is the catalogue's requirement
+ * for this family exactly: under reduced motion a horizontal rail becomes a swipeable
+ * snapping carousel.
+ *
+ * NOT A MARQUEE, per the catalogue: a wrapping track needs its content duplicated or
+ * a seven-card rail wraps to a visible gap. The script oscillates within the track's
+ * real travel instead, so an end can never be exposed.
+ */
+.tgs-section[data-motion='A3'] .tgs-cards {
+  /* Out of the grid and into a track. */
+  grid-template-columns: none;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  /* Room for a focus ring on the first and last card, and for the snap to settle
+     somewhere that does not look accidental. */
+  scroll-padding-inline: var(--tgs-space-s);
+  /* The scrollbar is left alone on purpose. It is the visitor's clearest signal that
+     there is more to the right, and the one control that needs no explaining. */
+}
+
+.tgs-section[data-motion='A3'] .tgs-cards > .tgs-card {
+  scroll-snap-align: start;
+  /* A card wide enough to read and narrow enough that the next one shows, which is
+     what tells a visitor the rail continues. */
+  flex: 0 0 clamp(240px, 30%, 340px);
+}
+
+/*
+ * SNAPPING AND DRIFTING CANNOT BOTH OWN THE SCROLL POSITION, and snapping wins every
+ * time: a snap container drags any small programmatic scroll straight back to the
+ * nearest card, so the drift computed a new position every frame and the rail sat at
+ * zero. Measured, not guessed: setting scrollLeft to 17.7 read back as 0 with snapping
+ * on and as 18 with it off.
+ *
+ * So they take turns, the same handover slideshow.js makes with is-live. While
+ * tg-motion.js is driving, snapping is off and the drift owns the position. The moment
+ * the visitor touches the rail the script marks it as theirs, snapping comes straight
+ * back, and their swipe lands on a card exactly as it does with no script at all.
+ * Nothing is taken away from them; it is only ever off while nobody is steering.
+ */
+.tgs-section[data-motion='A3'] .tgs-cards[data-motion-live='1'] { scroll-snap-type: none; }
+.tgs-section[data-motion='A3'] .tgs-cards[data-motion-live='1'][data-motion-steer='1'] {
+  scroll-snap-type: x proximity;
+}
+
+/* The drift only ever runs where movement is welcome. The rail itself is untouched
+   by this: it stays a working carousel either way. */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-section[data-motion='A3'] .tgs-cards { scroll-behavior: auto; }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

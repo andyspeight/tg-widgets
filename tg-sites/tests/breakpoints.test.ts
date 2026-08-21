@@ -761,7 +761,7 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
 
   it('emits data-reveal on the published section but never while editing', () => {
     expect(render).toContain(
-      'data-reveal={section.reveal && !editable ? normaliseRevealStyle(section.revealStyle) : undefined}',
+      'section.reveal && !motionOwnsArrival && !editable',
     );
   });
 
@@ -851,7 +851,7 @@ describe('reveal on scroll animates a sections content in, degrading gracefully'
 
   it('emits data-reveal-stagger only alongside reveal, and never while editing', () => {
     expect(render).toContain(
-      "data-reveal-stagger={section.reveal && section.revealStagger && !editable ? '' : undefined}",
+      "section.reveal && section.revealStagger && !motionOwnsArrival && !editable ? '' : undefined",
     );
   });
 
