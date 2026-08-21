@@ -224,7 +224,79 @@ venues. `refe` pins the exact event so a link without them should still land. If
 Travelify turns out to need the anchor, the fix is a venue geocode table, not a
 guess.
 
-Ticket-plus-hotel and ticket-plus-flight-plus-hotel are not built yet.
+`BOOKING_KINDS` in that file declares all three combinations. Two of them have
+`ready: false` and no builder, so `buildBookingOptions` returns them with a null
+url and `status: 'spec-needed'`. Every surface reads that list rather than
+hard-coding a Book button, so the editors show "Ticket + hotel" and
+"Ticket, flight + hotel" greyed out with an "Awaiting spec" pill instead of
+pretending they do not exist. Filling in `build` on those two entries lights
+them up everywhere at once, with no change to any widget.
+
+Ticket-plus-flight-plus-hotel will also need a **departure airport**, which the
+feed does not carry and cannot derive. That has to come from widget config, so
+it is a field on the editor as well as a link builder.
+
+
+## The widget family
+
+Six embeddable widgets read the same feed. Each is a container div plus one
+script, per the standard embed contract, and each has an editor on the shared
+shell and a demo on the 250 account.
+
+| Tag | Widget | What it answers |
+|---|---|---|
+| `tickets` | Event Tickets | "What is coming up?" A list, cards or a compact strip, from a competition, club, venue, artist, category or search term. |
+| `nextevent` | Next Event | "When is the next one?" One event, with a countdown that ticks per minute and refetches once kick-off passes. |
+| `clubpicker` | Club Picker | "Pick your team." A badge grid of clubs, grounds or artists that opens their fixtures. |
+| `ticketsearch` | Ticket Search | "I know what I want." One box over everything: Wembley returns the ground, the football and the concerts; Arsenal returns home and away. |
+| `ticketmonth` | Ticket Month | "I am free that weekend." A month grid with events on their dates and a day panel underneath. |
+| `eventmenu` | Event Menu | Navigation for a whole ticket section: a sidebar on a desktop, a drawer on a phone. |
+
+Five of them build Travelify deeplinks, so `api/widget-config.js` injects the
+client's AppID into their saved config server-side (`NEEDS_APP_ID`). Event Menu
+does not: it links into the client's own pages and has no business holding an
+AppID.
+
+### What the editors share
+
+`public/editor-events-kit.js` carries the parts all six editors need and the
+shell has no opinion about: one memoised call to the feed index, the source
+picker that searches the live feed, the booking-option list built from what the
+API declares, control binders, and a modal that remembers `.is-open`. It cut
+each editor from roughly 880 lines to 250. It is not a second shell and
+duplicates nothing `editor-shell.js` already does.
+
+### Event Menu links into the client's site
+
+The menu takes one pattern, `/tickets/{type}/{slug}` by default, with `{type}`,
+`{slug}` and `{name}` as tokens, and marks the row matching the address the
+visitor is on. The pattern is validated before it reaches an href: site
+relative, hash or absolute http(s) only, so a `javascript:` pattern turns the
+row into a plain button rather than a link. Where a client has no pages yet
+every row fires `tg:eventmenu:select` on the container carrying type, key, name
+and href, and `preventDefault()` stops the navigation, so the same menu can
+drive an in-page view.
+
+### Breakpoints are container queries, not media queries
+
+Every layout breakpoint in these widgets is `@container`, with
+`container-type: inline-size` on the widget root. A widget does not live in the
+viewport, it lives in whatever column the client gives it, and `@media` cannot
+see that the column is 240px wide on a 1500px screen. That is not theoretical:
+the Club Picker was writing "Manchester United" one letter per line on the
+dashboard card, because four columns were being forced into a container the
+widget believed was full width.
+
+### Two things the surfaces surfaced
+
+- The feed's directory views (`view=teams|venues|performers`) take a `category`
+  filter. Without it the only "top clubs" list available was the global one,
+  which is all baseball and ice hockey because those sides play 162 and 82
+  games a season, so a football-only menu asking for popular clubs got nothing
+  back.
+- `view=search` narrows by category server-side, before the page limit. Doing it
+  in the client after the limit meant "wembley" scoped to football returned
+  nothing, because Wembley's next eight events are all concerts.
 
 ## One thing it deliberately does not do
 
