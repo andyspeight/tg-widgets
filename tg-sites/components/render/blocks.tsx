@@ -502,7 +502,15 @@ export function IconItemBlock({
 // Media
 // ---------------------------------------------------------------------------
 
-export function ImageBlock({ props }: { props: Props }): ReactElement {
+export function ImageBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  /* Only a film slide reads this: it must not autoplay on the canvas, where the
+     editor re-renders on every keystroke and moving pictures fight the pointer. */
+  editing?: boolean;
+}): ReactElement {
   const src = safeUrl(str(props, 'src'));
   const alt = str(props, 'alt');
   const ratio = str(props, 'ratio', 'auto');
@@ -590,15 +598,27 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
     // part of each in frame rather than centring them all.
     .map((slide) => ({
       src: safeUrl(str(slide, 'src')),
+      // A slide can be a film instead. See the field's own note for why it is a
+      // file address rather than a YouTube link.
+      video: safeUrl(str(slide, 'video')),
       alt: str(slide, 'alt'),
       style: pictureAdjustStyle(slide),
     }))
-    .filter((slide): slide is { src: string; alt: string; style: CSSProperties } => !!slide.src);
+    /*
+     * A SLIDE NEEDS ONE OR THE OTHER, not both. A row with neither is an empty
+     * frame the visitor waits through and a slot in the cycle; a row with a film
+     * and no picture is a perfectly good slide, which is why this is not still
+     * testing `src` alone.
+     */
+    .filter(
+      (slide): slide is { src: string; video: string; alt: string; style: CSSProperties } =>
+        !!slide.src || !!slide.video,
+    );
 
   if (slideSrcs.length > 0) {
     // The block's own picture is the first slide, and it keeps its focus and
     // adjustments too, which the earlier slideshow dropped by centring every one.
-    const slides = [{ src, alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8);
+    const slides = [{ src, video: '', alt, style: pictureAdjustStyle(props) }, ...slideSrcs].slice(0, 8);
     const count = slides.length;
     const transition = oneOf(props, 'transition', ['fade', 'slide'] as const, 'fade');
     const interval = clamp(props.interval, 2, 15, 5);
@@ -630,13 +650,41 @@ export function ImageBlock({ props }: { props: Props }): ReactElement {
                   key={index}
                   style={{ animationDelay: `calc(${index} * var(--tgs-ss-cycle) / ${count})` }}
                 >
-                  <img
-                    src={slide.src}
-                    alt={slide.alt}
-                    style={slide.style}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                  />
+                  {slide.video ? (
+                    /*
+                      A FILM SLIDE. Muted, looping and playing by itself, which is
+                      also the only way a browser will autoplay anything: an
+                      unmuted autoplay is blocked, and rightly.
+
+                      NOT AUTOPLAYING ON THE CANVAS. The editor re-renders on
+                      every keystroke and a film moving under the pointer fights
+                      the person trying to select it, the same reason the section
+                      background video does not play there either. Paused it
+                      still shows its first frame, so the slide is not a hole.
+
+                      `alt` becomes the accessible name rather than being lost:
+                      a video element takes no alt attribute.
+                    */
+                    <video
+                      src={slide.video}
+                      poster={slide.src || undefined}
+                      style={slide.style}
+                      autoPlay={!editing}
+                      muted
+                      loop
+                      playsInline
+                      preload={index === 0 ? 'auto' : 'metadata'}
+                      aria-label={slide.alt || undefined}
+                    />
+                  ) : (
+                    <img
+                      src={slide.src}
+                      alt={slide.alt}
+                      style={slide.style}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                  )}
                 </div>
               ))}
             </div>

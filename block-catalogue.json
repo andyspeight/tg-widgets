@@ -527,7 +527,7 @@
         "spacing": []
       },
       "cssRules": 10,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1506",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1554",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -615,7 +615,7 @@
         "spacing": []
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1570",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1618",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -735,6 +735,12 @@
         {
           "name": "slides[].src",
           "type": "image",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "slides[].video",
+          "type": "url",
           "role": "content",
           "required": false
         },
@@ -972,7 +978,7 @@
         "spacing": []
       },
       "cssRules": 48,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1914",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1962",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1093,7 +1099,7 @@
         "spacing": []
       },
       "cssRules": 10,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2014",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2062",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1199,7 +1205,7 @@
         ]
       },
       "cssRules": 46,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2139",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2187",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1347,7 +1353,7 @@
         ]
       },
       "cssRules": 19,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2250",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2298",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1420,7 +1426,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:923",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:971",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1494,7 +1500,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:970",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1018",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1586,7 +1592,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1029",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1077",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1704,7 +1710,7 @@
         "spacing": []
       },
       "cssRules": 35,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1166",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1214",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1930,7 +1936,7 @@
         "spacing": []
       },
       "cssRules": 50,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1393",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1441",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2153,7 +2159,7 @@
         "spacing": []
       },
       "cssRules": 76,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1663",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1711",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2241,7 +2247,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1087",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1135",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2301,7 +2307,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1145",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1193",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2405,7 +2411,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2346",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2394",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2499,7 +2505,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2350",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2398",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2568,7 +2574,7 @@
         ]
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2374",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2422",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2621,7 +2627,7 @@
         ]
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2480",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2528",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2811,7 +2817,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2721",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2769",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2910,7 +2916,7 @@
         ]
       },
       "cssRules": 18,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2842",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2890",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3042,7 +3048,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2922",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2970",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3159,7 +3165,7 @@
         "spacing": []
       },
       "cssRules": 35,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3011",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3059",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3274,7 +3280,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3112",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3160",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3359,7 +3365,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3180",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3228",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3555,7 +3561,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3241",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3289",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3597,7 +3603,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3925",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3973",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3680,7 +3686,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3608",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3656",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3790,7 +3796,7 @@
         ]
       },
       "cssRules": 30,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3655",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3703",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3986,7 +3992,7 @@
         "spacing": []
       },
       "cssRules": 24,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3341",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3389",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4077,7 +4083,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3423",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3471",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4154,7 +4160,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3506",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3554",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4242,7 +4248,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3558",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3606",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4337,7 +4343,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3740",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3788",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4422,7 +4428,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3854",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3902",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4510,7 +4516,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:759",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:807",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4561,7 +4567,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:886",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:934",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4598,7 +4604,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3934",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3982",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4641,7 +4647,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3981",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4029",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]

@@ -36,13 +36,22 @@ function isRealSrc(value: unknown): boolean {
   return typeof value === 'string' && value.trim() !== '';
 }
 
-/** An image block that has grown into a slideshow. */
+/**
+ * An image block that has grown into a slideshow.
+ *
+ * A SLIDE CAN BE A FILM INSTEAD OF A PICTURE since 21 Aug 2026, so a slide with
+ * a `video` and no `src` counts. Testing `src` alone was the rule for a month
+ * and would now quietly leave a picture-and-film slideshow without its arrows,
+ * dots and pause button.
+ */
 function imageIsSlideshow(props: Record<string, unknown> | undefined): boolean {
   const slides = props?.slides;
-  return (
-    Array.isArray(slides) &&
-    slides.some((slide) => !!slide && isRealSrc((slide as { src?: unknown }).src))
-  );
+  if (!Array.isArray(slides)) return false;
+  return slides.some((raw) => {
+    if (!raw) return false;
+    const slide = raw as { src?: unknown; video?: unknown };
+    return isRealSrc(slide.src) || isRealSrc(slide.video);
+  });
 }
 
 /**

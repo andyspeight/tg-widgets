@@ -105,7 +105,7 @@ export function BlockRenderer({
       case 'tabs':
         return <TabsBlock props={props} blockId={block.id} />;
       case 'image':
-        return <ImageBlock props={props} />;
+        return <ImageBlock props={props} editing={editable} />;
       case 'video':
         return <VideoBlock props={props} />;
       case 'gallery':

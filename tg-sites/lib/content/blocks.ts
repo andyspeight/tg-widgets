@@ -761,7 +761,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       {
         kind: 'repeater',
         key: 'slides',
-        label: 'More images (turns it into a slideshow)',
+        label: 'More slides (turns it into a slideshow)',
         itemLabel: 'Slide',
         max: 7,
         fields: [
@@ -770,6 +770,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
           // gallery's tiles. No crop: a slideshow covers its frame, so a crop
           // rectangle has nothing to act on.
           { kind: 'image', key: 'src', label: 'Image', focus: true },
+          /*
+           * A SLIDE CAN BE A FILM INSTEAD (Andy, 21 Aug 2026: Duda's Media
+           * Slider offers video as well as image).
+           *
+           * A DIRECT FILE, NOT A YOUTUBE LINK. A YouTube or Vimeo slide is an
+           * iframe, and an iframe cannot be muted, looped and trimmed to the
+           * slide's length without loading their player and asking it politely.
+           * A file can, with four attributes and no script. The Video element is
+           * still the right home for a YouTube link somebody wants to watch.
+           *
+           * MUTED AND LOOPING, Andy's call the same day. The clip is trimmed by
+           * the slide's own interval rather than the slideshow waiting for it:
+           * a slider that pauses unpredictably on one slide reads as broken.
+           * So use short clips, and the help text says so.
+           */
+          {
+            kind: 'url',
+            key: 'video',
+            label: 'Or a video file',
+            placeholder: 'https://…/clip.mp4',
+            help:
+              'An .mp4 or .webm address. It plays silently and loops, and it is cut off when the slide moves on, '
+              + 'so keep clips shorter than the seconds per slide below. A YouTube link belongs in the Video element instead.',
+          },
           { kind: 'text', key: 'alt', label: 'Alt text', max: 200 },
         ],
       },

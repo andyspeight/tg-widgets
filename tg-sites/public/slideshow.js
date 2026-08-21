@@ -67,6 +67,11 @@
     var holdMs = interval * 1000;
 
     root.classList.add('is-live');
+
+    /* The takeover moment. Until now the CSS cycle was showing slide 0 and every
+       film was running; from here the script owns which one shows, so the films
+       have to be brought into line or four of them keep playing unseen. */
+    for (var f = 0; f < slides.length; f += 1) films(slides[f], f === 0);
     root.setAttribute('data-dir', 'next');
 
     var current = 0;
@@ -137,6 +142,31 @@
       toggle.setAttribute('data-state', paused ? 'paused' : 'playing');
     }
 
+    /**
+     * Only the slide on show keeps its film running.
+     *
+     * A SLIDE CAN BE A FILM since 21 Aug 2026, and the slides are stacked with
+     * opacity rather than display, so a browser will happily decode five clips at
+     * once while four of them are invisible. That is four videos' worth of work
+     * and battery for nothing. Pausing the rest costs a loop.
+     *
+     * PURELY AN ENHANCEMENT, like the arrows and the dots: without this script
+     * every clip plays, muted and looping, which is correct and merely wasteful.
+     * The `play()` promise is swallowed because a browser is allowed to refuse
+     * it, and a refusal here is not an error worth anybody's console.
+     */
+    function films(slide, playing) {
+      var found = slide.getElementsByTagName('video');
+      for (var v = 0; v < found.length; v += 1) {
+        if (playing) {
+          var started = found[v].play();
+          if (started && started.catch) started.catch(function () {});
+        } else {
+          found[v].pause();
+        }
+      }
+    }
+
     /** Show slide `to`, sliding `dir`. Wraps at either end. */
     function go(to, dir) {
       to = (to % count + count) % count;
@@ -147,6 +177,7 @@
         s.classList.toggle('is-leaving', i === current);
         s.classList.toggle('is-current', i === to);
         s.setAttribute('aria-hidden', i === to ? 'false' : 'true');
+        films(s, i === to);
       }
       for (var d = 0; d < dots.length; d += 1) {
         dots[d].setAttribute('aria-current', d === to ? 'true' : 'false');
