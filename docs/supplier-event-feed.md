@@ -218,11 +218,26 @@ halves of the pin and the link wants them apart:
 its own `rawName` through a pass that strips the taxonomy off the title.
 
 Regenerating Andy's example from the feed reproduces it parameter for
-parameter, with one exception: **`lat`, `lng` and `rad` are omitted**. Those
-anchor the search geographically and the feed has no coordinates for its 958
-venues. `refe` pins the exact event so a link without them should still land. If
-Travelify turns out to need the anchor, the fix is a venue geocode table, not a
-guess.
+parameter, **including `lat`, `lng` and `rad`, which are mandatory**. That was
+learned the hard way on 21 Aug 2026: the first shipped links omitted them on
+the assumption that `refe` pins the event, and every Book button returned
+"Unable to match location". A probe settled it in four requests: the identical
+link 400s bare and 302s to the results page with the anchor added, and even
+Andy's own working example dies with its anchor removed. The wording of `loc`
+is irrelevant to the matcher.
+
+The coordinates live in `api/_data/venue-geo.json`, keyed by venue key, built
+from the venue registry via the Photon geocoder with three safeguards learned
+from three failed drafts: a venue with a known city (its concerts say where it
+is) must geocode INTO that city whatever its sponsor calls it now; a fixtures
+venue must resolve to a sports-typed place, never a street or a bank branch
+that shares its name; and the North American leagues expect {US, CA}, not US
+alone, or Toronto's grounds vanish. A hand-verified overrides list covers what
+no geocoder ranking gets right (the Legoland scale model of the Allianz Arena
+outranks Munich's). An event whose venue has no entry gets NO booking link and
+`status: 'no-anchor'` — the widgets show no button, which is honest, rather
+than a button that errors. `rad` is 20, kept verbatim from the working
+example.
 
 `BOOKING_KINDS` in that file declares all three combinations. Two of them have
 `ready: false` and no builder, so `buildBookingOptions` returns them with a null
