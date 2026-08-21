@@ -30,10 +30,12 @@ screenshots for anything unclear — ask rather than guess. Guessing at
 | SOCIAL | Done — except Facebook Feed, see below |
 | BLOG | Done |
 | Travelgenix customs (built for Duda) | **Done.** Stacked Collection and Expand & Focus ignored on Andy's word |
+| Travelgenix customs, second list (21 Aug) | Audited. Four built, two skipped, three waiting on Andy |
 
-**The audit is complete as of 21 Aug 2026.** Every category and every
-Travelgenix custom element has been checked, and everything not explicitly
-skipped is built and tested.
+**Every category and every Travelgenix custom element has been checked as of 21
+Aug 2026**, and everything not explicitly skipped or waiting on Andy is built
+and tested. Two more lists arrived on 21 Aug after the categories were finished,
+so treat "complete" as "complete up to the last list Andy sent".
 
 ---
 
@@ -54,6 +56,17 @@ tilted carousel is `tilt` on the Slider, and video slides are a field on the
 Image slideshow. A picker holding three galleries makes a client choose before
 they know what they want.
 
+**21 Aug, second custom list:** Rating (standalone 1 to 5 stars with halves, on
+its own rather than a field on a card, which Andy confirmed unprompted) ·
+Tooltip · Tags, covering BOTH of Duda's delimited-tag elements as two styles of
+one thing because bullets and pills differ by a border radius · Icon pulse, a
+setting on the Icon we already had rather than a fourth icon element.
+
+Already built when that list arrived, so nothing to do: **Page anchor links**
+(a section already takes an anchor id, and `safeUrl` passes both `#suites` and
+`/holidays#suites`) and **Custom Offer / Tour cards**, which is the widget block
+plus the cards bound to a collection.
+
 Two fixes found while auditing rather than asked for:
 
 - **`tel:` and `mailto:` links were saved and thrown away at render.** Seven of
@@ -67,7 +80,9 @@ Two fixes found while auditing rather than asked for:
 ## Skipped, on Andy's word
 
 HTML Attribute Select · Lottie · Booking · OpenTable · PayPal · Restaurant Menu
-· Yelp Reviews · Twin Showcase · Stacked Collection · Expand & Focus.
+· Yelp Reviews · Twin Showcase · Stacked Collection · Expand & Focus · Gradient
+Text (already built as a heading effect) · Advanced Divider (the shape dividers
+already cover it).
 
 **Stop right click was argued against and asked for again**, so it is built. The
 case against it is recorded in `lib/settings/schema.ts` and the settings screen
@@ -79,6 +94,16 @@ than the feature, because somebody relying on it is the bad outcome.
 - **Facebook Feed.** Possible as a one-line allowlist addition, no script. Not
   built because a Facebook iframe sets cookies and tracks visitors on a
   client's page, and that is his call to make, not ours.
+- **Fancy Grid.** Not built, because "fancy" could mean masonry, bento or
+  mosaic and we already have Advanced Grid, the two-row mosaic slider and the
+  gallery. A screenshot decides whether it is a fourth thing or a setting on one
+  of those three.
+- **Zoom Banner.** Not built, because the library already has Ken Burns (a
+  background that drifts and zooms on its own) and the S5 scrub-scale section
+  recipe. A third zooming thing needs to be visibly different from both.
+- **Two truncated names** from the 21 Aug screenshot that Andy has not yet
+  finished: "Coloured Delimited..." (assumed to be the pills style of Tags,
+  built on that assumption) and "Custom Offer/Tour...".
 - **Re-cutting the element categories.** Andy noted Duda categorises its
   elements and "we should do the same". The offer on the table is one pass over
   our five groups (Text, Media, Actions, Layout, Advanced) once the full list is
