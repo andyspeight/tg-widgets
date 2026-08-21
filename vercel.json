@@ -699,6 +699,14 @@
     {
       "source": "/editor-eventmenu",
       "destination": "/editor-eventmenu.html"
+    },
+    {
+      "source": "/demo-venueguide",
+      "destination": "/demo-venueguide.html"
+    },
+    {
+      "source": "/editor-venueguide",
+      "destination": "/editor-venueguide.html"
     }
   ],
   "headers": [
@@ -1904,6 +1912,23 @@
     },
     {
       "source": "/widget-eventmenu.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-venueguide.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

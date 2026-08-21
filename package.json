@@ -139,6 +139,8 @@
     "puppeteer-core": "24.10.2"
   },
   "devDependencies": {
-    "jsdom": "^29.1.1"
+    "jsdom": "^29.1.1",
+    "playwright": "^1.62.1",
+    "tz-lookup": "^6.1.25"
   }
 }

@@ -427,6 +427,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Ticket Search',
   'Ticket Month',
   'Event Menu',
+  'Venue Guide',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -441,6 +442,7 @@ const PLAN_WIDGET_LIMITS = {
   // six carry Boost: 0 rather than a count. Keep in step with the Package
   // Catalogue in Control, where each one is linked to Ignite alone.
   'Event Tickets':         { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Venue Guide':             { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Event Menu':              { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Ticket Month':            { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Ticket Search':           { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
@@ -830,7 +832,7 @@ export default async function handler(req, res) {
         // directly, so it never needs the API key — inject the AppID alone.
         // Event Tickets is the same case: it builds ticket deeplinks against
         // the client's own application and never calls Travelify itself.
-        const NEEDS_APP_ID = ['Travel Offers', 'World Map', 'Event Tickets',
+        const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'World Map', 'Event Tickets',
           'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month'];
         if (NEEDS_APP_ID.includes(widgetType) && clientEmail) {
           try {

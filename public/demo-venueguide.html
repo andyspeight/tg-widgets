@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Venue Guide Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Sport</span><span>Concerts</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Venue Guide</h1>
+  <p class="lede">
+    One venue, presented for someone actually going: a map with the ground pinned, a photo, the
+    facts that matter on the day, what is on there next with a Book button, and the official links.
+    Every fact is sourced and anything the sources do not carry is left off, never guessed.
+  </p>
+
+  <div class="controls">
+    <strong>Venue</strong>
+    <button type="button" data-src="wembley" aria-pressed="true">Wembley</button>
+    <button type="button" data-src="anfield">Anfield</button>
+    <button type="button" data-src="bernabeu">Bernab&eacute;u</button>
+    <button type="button" data-src="accor">Accor Arena</button>
+    <button type="button" data-src="msg">Madison Sq Garden</button>
+  </div>
+
+  <div class="controls">
+    <strong>Show</strong>
+    <button type="button" data-part="photo" aria-pressed="true">Photo</button>
+    <button type="button" data-part="map" aria-pressed="true">Map</button>
+    <button type="button" data-part="facts" aria-pressed="true">Facts</button>
+    <button type="button" data-part="events" aria-pressed="true">Events</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page" style="max-width:640px">
+    <div data-tg-widget="venueguide" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>Nothing on the sheet is guessed.</b> The map and coordinates come from the supplier feed,
+    the capacity, opening year, photo and links from Wikidata matched against those coordinates,
+    and the airports from the suite's own list with straight-line distances. A venue the sources
+    do not cover simply shows fewer rows.
+  </p>
+
+</div>
+
+<script src="/widget-venueguide.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var VENUES = {
+    wembley: 'wembleystadium',
+    anfield: 'anfield',
+    bernabeu: 'estadiosantiagobernabeu',
+    accor: 'accorarena',
+    msg: 'madisonsquaregarden',
+  };
+  var state = { src: 'wembley', theme: 'light',
+    parts: { photo: true, map: true, facts: true, events: true } };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return {
+      venue: VENUES[state.src],
+      showPhoto: state.parts.photo,
+      showMap: state.parts.map,
+      showFacts: state.parts.facts,
+      showEvents: state.parts.events,
+      eventLimit: 4,
+      theme: state.theme,
+      accent: '#00B4D8',
+      appId: '250',
+      bookingKinds: ['ticket'],
+    };
+  }
+
+  function snippet() {
+    var c = config();
+    var shown = { venue: c.venue, showPhoto: c.showPhoto, showMap: c.showMap, eventLimit: c.eventLimit };
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="venueguide"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-venueguide.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function toggles() {
+    var nodes = document.querySelectorAll('[data-part]');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var k = btn.getAttribute('data-part');
+          state.parts[k] = !state.parts[k];
+          btn.setAttribute('aria-pressed', String(state.parts[k]));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGVenueGuideWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGVenueGuideWidget(mount, config());
+    group('src', 'src'); group('theme', 'theme');
+    toggles();
+    snippet();
+  }
+  boot();
+}());
+</script>
+</body>
+</html>
