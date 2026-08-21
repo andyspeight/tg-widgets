@@ -17,6 +17,7 @@ import { getAccessToken, getZoomAccessToken, saveBooking, placeHold, releaseHold
 import { getProvider } from '../_lib/calendar/providers.js';
 import { createMeeting as zoomCreateMeeting } from '../_lib/calendar/zoom.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
+import { normaliseReminders } from '../_lib/calendar/reminders.js';
 import { checkRateLimit } from '../_lib/auth/ratelimit.js';
 import { getRequestIp } from '../_lib/auth/http.js';
 
@@ -187,6 +188,9 @@ export default async function handler(req, res) {
     // the widget config.
     company: String(config.company || '').slice(0, 80),
     accent: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(config.accent || '')) ? config.accent : '',
+    // The reminder plan travels with the booking too, so the cron can decide
+    // due-ness without re-reading widget config.
+    reminders: normaliseReminders(config.reminders), remindersSent: [],
     dayCounted: cap > 0,
     sourceUrl: clean(body.sourceUrl).slice(0, 300), createdAt: new Date().toISOString(),
   };

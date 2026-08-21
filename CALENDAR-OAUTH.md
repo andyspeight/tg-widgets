@@ -121,9 +121,13 @@ caller's own client and `admin-action` ownership-checked.
 - **Daily booking cap**: max bookings per day, enforced in availability and
   at book time, decremented on cancel and moved on reschedule.
 - **Reminders cron**: `/api/cron/appointment-reminders` (hourly in
-  `vercel.json`) emails a reminder ~24h before each booking, once. Needs
-  `CRON_SECRET` set (same secret the map cron uses). Optional `APP_BASE_URL`
-  for the manage link in reminder emails (otherwise derived from the host).
+  `vercel.json`) emails reminders per the widget's configurable plan
+  (`config.reminders`, up to three offsets 1–72h before; default one at 24h;
+  editor: Settings → Reminder emails). The plan is stamped onto each booking
+  at create time (`_lib/calendar/reminders.js`); a reschedule re-arms it for
+  the new time. Needs `CRON_SECRET` set (same secret the map cron uses).
+  Optional `APP_BASE_URL` for the manage link in reminder emails (otherwise
+  derived from the host).
 - **Agency view + actions**: `/bookings` page and `GET /api/appointment/list`
   (auth) show the client's upcoming and recent bookings, and let the agency
   cancel or reschedule one (`POST /api/appointment/admin-action`, ownership
@@ -138,4 +142,19 @@ These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
   registry in `api/_lib/calendar/providers.js`). A client connects one
   calendar; the connection records which provider.
 - One availability schedule per client (the widget config), not per calendar.
-- Reminders use the calendar's own defaults; no separate reminder emails yet.
+
+## Added 21 Aug 2026 (Calendly gap, Tier 1)
+
+- **Configurable reminders**: up to two editor-set offsets (config supports
+  three), stamped per booking, re-armed on reschedule. See the cron note above.
+- **Display modes**: `config.displayMode` `inline` (default) / `popup`
+  (launcher button) / `bubble` (floating corner button). Popup and bubble open
+  the scheduler in an accessible overlay (Escape, backdrop click, focus trap);
+  same embed code for all three.
+- **Date-specific hours**: `config.dateOverrides` maps `YYYY-MM-DD` to time
+  ranges that REPLACE the weekly hours on that date (blackouts still close a
+  day outright). Implemented identically in `slots.js` and the widget.
+- **Slot interval + half-hour boundaries** now exposed in the editor.
+- **Bookings admin**: `/bookings` gained search, a status filter, CSV export
+  (formula-injection safe) and the source page each booking came from
+  (`sourceUrl` now returned by `GET /api/appointment/list`).

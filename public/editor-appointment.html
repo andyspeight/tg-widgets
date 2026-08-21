@@ -74,6 +74,9 @@
 
   .is-hidden { display:none !important; }
   [hidden] { display:none !important; }
+  /* Contain the widget's position:fixed overlay/bubble (popup and bubble
+     display modes) inside the preview frame instead of the editor viewport. */
+  .tgse-frame { transform: translateZ(0); }
 </style>
 </head>
 <body>
@@ -138,6 +141,30 @@
             <div class="field"><label class="field-label">Accent</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div><input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9"></div></div>
             <div class="field"><label class="field-label">Card background</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#FFFFFF"></div><input class="input colour-hex" id="bg-hex" value="#FFFFFF" maxlength="9"></div></div>
             <div class="field"><label class="field-label">Text</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="ink-col" value="#0F172A"></div><input class="input colour-hex" id="ink-hex" value="#0F172A" maxlength="9"></div></div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+            <span class="tgse-section-label">Display</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">How it appears on the page</label>
+              <select class="select" id="display-mode">
+                <option value="inline">Inline — embedded in the page</option>
+                <option value="popup">Popup — a button opens it</option>
+                <option value="bubble">Floating bubble — bottom corner</option>
+              </select>
+            </div>
+            <div class="field is-hidden" id="launcher-label-field"><label class="field-label">Button label</label><input type="text" class="input" id="launcher-label" maxlength="60" placeholder="Book a time"></div>
+            <div class="field is-hidden" id="bubble-pos-field">
+              <label class="field-label">Bubble corner</label>
+              <div class="seg" id="bubble-pos-seg"><button type="button" data-pos="right">Bottom right</button><button type="button" data-pos="left">Bottom left</button></div>
+            </div>
+            <span class="field-hint">Same embed code whichever you pick. Popup and bubble open the scheduler in an overlay when clicked — handy on busy pages.</span>
           </div>
         </div>
 
@@ -262,6 +289,17 @@
               <span class="field-hint">Keeps a gap clear around each booking. Applies when your calendar is connected.</span>
             </div>
             <div class="field">
+              <label class="field-label">Start times every</label>
+              <select class="select" id="slot-interval">
+                <option value="0">Match meeting length</option>
+                <option value="15">15 minutes</option>
+                <option value="20">20 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+              <span class="field-hint">A 30 minute meeting offered every 15 minutes gives 9:00, 9:15, 9:30 and so on.</span>
+            </div>
+            <div class="field">
               <label class="field-label">Maximum bookings per day</label>
               <div class="slider-row"><input type="range" id="cap-input" min="0" max="20" step="1" value="0"><span class="slider-val" id="cap-val">Off</span></div>
             </div>
@@ -270,6 +308,27 @@
               <div class="row-2"><input type="date" class="input" id="blackout-date"><button type="button" class="le-add" id="add-blackout" style="border-style:solid">Add date</button></div>
               <div id="blackout-list" style="margin-top:8px"></div>
             </div>
+            <div class="field">
+              <label class="field-label">Date-specific hours</label>
+              <div class="row-2"><input type="date" class="input" id="override-date"><button type="button" class="le-add" id="add-override" style="border-style:solid">Set hours</button></div>
+              <div id="override-list" style="margin-top:8px"></div>
+              <span class="field-hint">Replace your weekly hours on a single date — a late Thursday or a Saturday opening. Use blackout dates to close a day entirely.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section" id="reminders-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="tgse-section-label">Reminder emails</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="row-2">
+              <div><span class="mini-label">First reminder</span><select class="select" id="rem-1"></select></div>
+              <div><span class="mini-label">Second reminder</span><select class="select" id="rem-2"></select></div>
+            </div>
+            <span class="field-hint">Reminder emails go to the visitor and to you, sent on the hour. They apply to bookings made after you save.</span>
           </div>
         </div>
 
@@ -344,7 +403,19 @@
     ['Australia · Sydney','Australia/Sydney'],['US Eastern · New York','America/New_York'],['US Central · Chicago','America/Chicago'],
     ['US Mountain · Denver','America/Denver'],['US Pacific · Los Angeles','America/Los_Angeles'],['Brazil · São Paulo','America/Sao_Paulo'],['UTC','UTC'],
   ];
-  function hourOpts(sel) { let o=''; for (let h=0; h<=23; h++){ const v=String(h).padStart(2,'0')+':00'; o+=`<option value="${v}"${v===sel?' selected':''}>${v}</option>`; } return o; }
+  // Half-hour boundaries (the config format always supported HH:MM; the editor
+  // used to offer whole hours only). 23:59 covers legacy "until midnight" rows.
+  function hourOpts(sel) {
+    let o = '';
+    for (let h = 0; h <= 23; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        o += `<option value="${v}"${v === sel ? ' selected' : ''}>${v}</option>`;
+      }
+    }
+    o += `<option value="23:59"${sel === '23:59' ? ' selected' : ''}>23:59</option>`;
+    return o;
+  }
 
   let C = {
     heading: 'Book a free consultation',
@@ -354,12 +425,18 @@
     timezone: 'Europe/London',
     availability: { 1:[['09:00','17:00']],2:[['09:00','17:00']],3:[['09:00','17:00']],4:[['09:00','17:00']],5:[['09:00','17:00']] },
     blackoutDates: [],
+    dateOverrides: {},
     dateRangeDays: 30,
     minNoticeHours: 4,
+    slotInterval: 0,
     bufferBefore: 0,
     bufferAfter: 0,
     dailyCap: 0,
+    reminders: [24],
     timeFormat: '12',
+    displayMode: 'inline',
+    launcherLabel: '',
+    bubblePosition: 'right',
     askPhone: true,
     phoneRequired: false,
     questions: [
@@ -401,7 +478,9 @@
     if (!host) return;
     requestAnimationFrame(() => {
       if (window.TGAppointmentWidget) {
-        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, JSON.parse(JSON.stringify(C)), { font: C.fontFamily, previewMode: true })); }
+        // previewOpen: in popup/bubble modes the overlay starts open so the
+        // panel stays visible (and live-editable) without a click per re-render.
+        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, JSON.parse(JSON.stringify(C)), { font: C.fontFamily, previewMode: true, previewOpen: C.displayMode === 'popup' || C.displayMode === 'bubble' })); }
         catch (e) { console.error(e); }
       }
     });
@@ -492,6 +571,25 @@
     const wrap = document.getElementById('blackout-list');
     wrap.innerHTML = (C.blackoutDates||[]).map((d, i) => `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--tgse-hover);border:1px solid var(--tgse-border);border-radius:999px;padding:3px 6px 3px 10px;font-size:12px;margin:0 6px 6px 0;">${esc(d)}<button type="button" class="le-del" data-del-bo="${i}" aria-label="Remove" style="padding:0"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></span>`).join('') || '<span class="field-hint">None. Add holidays or days off above.</span>';
   }
+  function renderOverrides() {
+    const wrap = document.getElementById('override-list');
+    const dates = Object.keys(C.dateOverrides || {}).sort();
+    wrap.innerHTML = dates.map((d) => {
+      const ranges = C.dateOverrides[d] || [];
+      const rows = ranges.map((r, ri) => `<span class="av-times" data-range="${ri}">
+        <select data-ov-f="start">${hourOpts(r[0])}</select> to <select data-ov-f="end">${hourOpts(r[1])}</select>
+        ${ranges.length > 1 ? `<button type="button" class="le-del" data-del-ov-range="${ri}" aria-label="Remove hours"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+      </span>`).join('');
+      return `<div data-ov-date="${esc(d)}" style="padding:7px 0;border-bottom:1px solid var(--tgse-border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span class="av-day" style="flex:1">${esc(d)}</span>
+          <button type="button" data-ov-add-range style="background:none;border:0;color:var(--tgse-brand);font:inherit;font-size:12px;font-weight:600;cursor:pointer">+ hours</button>
+          <button type="button" class="le-del" data-del-ov aria-label="Remove date"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;padding-left:2px">${rows}</div>
+      </div>`;
+    }).join('') || '<span class="field-hint">None. Weekly hours apply every week.</span>';
+  }
   function renderAvailability() {
     const wrap = document.getElementById('avail-list');
     wrap.innerHTML = WD.map(([k, label]) => {
@@ -537,15 +635,35 @@
     document.getElementById('tz-input').value = C.timezone;
     document.getElementById('buf-before').value = String(C.bufferBefore || 0);
     document.getElementById('buf-after').value = String(C.bufferAfter || 0);
-    renderEvents(); renderQuestions(); renderAvailability(); renderBlackouts();
+    document.getElementById('slot-interval').value = String(C.slotInterval || 0);
+    const plan = Array.isArray(C.reminders) ? C.reminders : [24];
+    document.getElementById('rem-1').value = String(plan[0] || 0);
+    document.getElementById('rem-2').value = String(plan[1] || 0);
+    syncDisplayFields();
+    renderEvents(); renderQuestions(); renderAvailability(); renderBlackouts(); renderOverrides();
   }
 
-  // Fill timezone + buffer selects once
+  function syncDisplayFields() {
+    const m = (C.displayMode === 'popup' || C.displayMode === 'bubble') ? C.displayMode : 'inline';
+    document.getElementById('display-mode').value = m;
+    document.getElementById('launcher-label-field').classList.toggle('is-hidden', m === 'inline');
+    document.getElementById('bubble-pos-field').classList.toggle('is-hidden', m !== 'bubble');
+    document.getElementById('launcher-label').value = C.launcherLabel || '';
+    document.querySelectorAll('#bubble-pos-seg [data-pos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-pos') === (C.bubblePosition === 'left' ? 'left' : 'right')));
+  }
+
+  // Fill timezone + buffer + reminder selects once
   document.getElementById('tz-input').innerHTML = TZ_LIST.map(z => `<option value="${z[1]}">${esc(z[0])}</option>`).join('');
   (function fillBuffers() {
     const html = [[0, 'None'], [5, '5 min'], [10, '10 min'], [15, '15 min'], [20, '20 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']].map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
     document.getElementById('buf-before').innerHTML = html;
     document.getElementById('buf-after').innerHTML = html;
+  })();
+  (function fillReminders() {
+    const opts = [[0, 'Off'], [1, '1 hour before'], [2, '2 hours before'], [3, '3 hours before'], [6, '6 hours before'], [12, '12 hours before'], [24, '24 hours before'], [48, '48 hours before'], [72, '72 hours before']];
+    const html = opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
+    document.getElementById('rem-1').innerHTML = html;
+    document.getElementById('rem-2').innerHTML = html;
   })();
 
   // ── Text inputs ──
@@ -684,6 +802,70 @@
   document.getElementById('blackout-list').addEventListener('click', (e) => {
     const del = e.target.closest('[data-del-bo]'); if (!del) return;
     C.blackoutDates.splice(+del.getAttribute('data-del-bo'), 1); renderBlackouts(); shell.markDirty(); render();
+  });
+
+  // ── Date-specific hours (override the weekly pattern on one date) ──
+  document.getElementById('add-override').addEventListener('click', () => {
+    const v = document.getElementById('override-date').value;
+    if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+    C.dateOverrides = C.dateOverrides || {};
+    if (!C.dateOverrides[v] && Object.keys(C.dateOverrides).length >= 40) { tgse.toast('That is plenty of date overrides — tidy some old ones first', 'err'); return; }
+    if (!C.dateOverrides[v]) C.dateOverrides[v] = [['09:00', '17:00']];
+    renderOverrides(); shell.markDirty(); render();
+  });
+  document.getElementById('override-list').addEventListener('change', (e) => {
+    const block = e.target.closest('[data-ov-date]'); if (!block || !e.target.getAttribute('data-ov-f')) return;
+    const d = block.getAttribute('data-ov-date');
+    C.dateOverrides[d] = readDayRanges(block);
+    shell.markDirty(); render();
+  });
+  document.getElementById('override-list').addEventListener('click', (e) => {
+    const block = e.target.closest('[data-ov-date]'); if (!block) return;
+    const d = block.getAttribute('data-ov-date');
+    if (e.target.closest('[data-ov-add-range]')) {
+      C.dateOverrides[d] = (C.dateOverrides[d] || []).concat([['13:00', '17:00']]);
+      renderOverrides(); shell.markDirty(); render(); return;
+    }
+    const delRange = e.target.closest('[data-del-ov-range]');
+    if (delRange) {
+      const cur = (C.dateOverrides[d] || []).slice();
+      cur.splice(+delRange.getAttribute('data-del-ov-range'), 1);
+      if (cur.length) C.dateOverrides[d] = cur; else delete C.dateOverrides[d];
+      renderOverrides(); shell.markDirty(); render(); return;
+    }
+    if (e.target.closest('[data-del-ov]')) {
+      delete C.dateOverrides[d];
+      renderOverrides(); shell.markDirty(); render();
+    }
+  });
+
+  // ── Start-time interval ──
+  document.getElementById('slot-interval').addEventListener('change', (e) => {
+    C.slotInterval = parseInt(e.target.value, 10) || 0; shell.markDirty(); render();
+  });
+
+  // ── Reminder plan (stored furthest-first; 0 = off) ──
+  function updateReminders() {
+    const picks = [parseInt(document.getElementById('rem-1').value, 10) || 0, parseInt(document.getElementById('rem-2').value, 10) || 0].filter(Boolean);
+    C.reminders = [...new Set(picks)].sort((a, b) => b - a);
+    shell.markDirty();
+  }
+  document.getElementById('rem-1').addEventListener('change', updateReminders);
+  document.getElementById('rem-2').addEventListener('change', updateReminders);
+
+  // ── Display mode (inline / popup / bubble) ──
+  document.getElementById('display-mode').addEventListener('change', (e) => {
+    const v = e.target.value;
+    C.displayMode = (v === 'popup' || v === 'bubble') ? v : 'inline';
+    syncDisplayFields(); shell.markDirty(); render();
+  });
+  document.getElementById('launcher-label').addEventListener('input', (e) => {
+    C.launcherLabel = e.target.value; shell.markDirty(); render();
+  });
+  document.getElementById('bubble-pos-seg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pos]'); if (!b) return;
+    C.bubblePosition = b.getAttribute('data-pos') === 'left' ? 'left' : 'right';
+    syncDisplayFields(); shell.markDirty(); render();
   });
 
   // ── Format ──
