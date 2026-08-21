@@ -133,7 +133,12 @@
       + "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
     return ':host{all:initial;display:block;}'
-      + '.tgts-root{font-family:' + stack + ';'
+      // container-type makes the breakpoint below a @container query rather than
+      // @media. A widget sits in whatever column the client gives it, and a
+      // viewport query cannot see that the column is 240px wide on a 1500px
+      // screen: that is how the club grid ended up writing names one letter per
+      // line on the dashboard card.
+      + '.tgts-root{container-type:inline-size;font-family:' + stack + ';'
       + '--tgts-accent:' + accent + ';--tgts-radius:' + radius + 'px;'
       + '--tgts-bg:#FFFFFF;--tgts-bg2:#F8FAFC;--tgts-bg3:#F1F5F9;--tgts-border:#E2E8F0;'
       + '--tgts-text:#0F172A;--tgts-sub:#475569;--tgts-mute:#64748B;--tgts-on-accent:#04212B;'
@@ -227,7 +232,7 @@
       + 'background-size:200% 100%;animation:tgts-sh 1.4s ease-in-out infinite;}'
       + '@keyframes tgts-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}'
 
-      + '@media (max-width:520px){'
+      + '@container (max-width:520px){'
       + '.tgts-cards{grid-template-columns:minmax(0,1fr);}'
       + '.tgts-row{grid-template-columns:48px minmax(0,1fr);row-gap:9px;}'
       + '.tgts-actions{grid-column:1/-1;}.tgts-btn{flex:1 1 auto;}}'

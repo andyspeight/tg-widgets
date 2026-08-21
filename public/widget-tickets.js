@@ -177,7 +177,12 @@
       + "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
     return ':host{all:initial;display:block;}'
-      + '.tgtk-root{'
+      // container-type makes the breakpoint below a @container query rather than
+      // @media. A widget sits in whatever column the client gives it, and a
+      // viewport query cannot see that the column is 240px wide on a 1500px
+      // screen: that is how the club grid ended up writing names one letter per
+      // line on the dashboard card.
+      + '.tgtk-root{container-type:inline-size;'
       + 'font-family:' + stack + ';'
       + '--tgtk-accent:' + accent + ';'
       + '--tgtk-radius:' + radius + 'px;'
@@ -253,7 +258,7 @@
       + '.tgtk-more{display:block;margin:14px auto 0;background:none;border:0;padding:8px 12px;'
       + 'font:inherit;font-size:13px;font-weight:600;color:var(--tgtk-accent);cursor:pointer;}'
 
-      + '@media (max-width:520px){'
+      + '@container (max-width:520px){'
       + '.tgtk-card{grid-template-columns:56px minmax(0,1fr);row-gap:10px;}'
       + '.tgtk-actions{grid-column:1/-1;}'
       + '.tgtk-btn{flex:1 1 auto;}'

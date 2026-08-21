@@ -11,3 +11,7 @@ playwright-report/
 
 # Impeccable: per-developer detector overrides (config.json is shared and committed)
 .impeccable/config.local.json
+
+# Ad hoc browser-check screenshots, written to the repo root by the widget
+# harness. Never part of a change.
+/shot-*.png

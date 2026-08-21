@@ -143,7 +143,12 @@
       + "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
     return ':host{all:initial;display:block;}'
-      + '.tgtm-root{font-family:' + stack + ';'
+      // container-type makes the breakpoint below a @container query rather than
+      // @media. A widget sits in whatever column the client gives it, and a
+      // viewport query cannot see that the column is 240px wide on a 1500px
+      // screen: that is how the club grid ended up writing names one letter per
+      // line on the dashboard card.
+      + '.tgtm-root{container-type:inline-size;font-family:' + stack + ';'
       + '--tgtm-accent:' + accent + ';--tgtm-radius:' + radius + 'px;'
       + '--tgtm-bg:#FFFFFF;--tgtm-bg2:#F8FAFC;--tgtm-bg3:#F1F5F9;--tgtm-border:#E2E8F0;'
       + '--tgtm-text:#0F172A;--tgtm-sub:#475569;--tgtm-mute:#64748B;--tgtm-on-accent:#04212B;'
@@ -225,7 +230,7 @@
       // Below 560 the cells cannot hold a title, so they fall back to dots and
       // the day panel does the reading. A seven-column grid is kept, because a
       // calendar that stops being a calendar is not a smaller calendar.
-      + '@media (max-width:560px){'
+      + '@container (max-width:560px){'
       + '.tgtm-cell{min-height:52px;padding:4px;}'
       + '.tgtm-pip{display:none;}'
       + '.tgtm-more{display:none;}'

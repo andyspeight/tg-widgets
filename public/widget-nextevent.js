@@ -151,7 +151,12 @@
       + "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
     return ':host{all:initial;display:block;}'
-      + '.tgne-root{font-family:' + stack + ';'
+      // container-type makes the breakpoint below a @container query rather than
+      // @media. A widget sits in whatever column the client gives it, and a
+      // viewport query cannot see that the column is 240px wide on a 1500px
+      // screen: that is how the club grid ended up writing names one letter per
+      // line on the dashboard card.
+      + '.tgne-root{container-type:inline-size;font-family:' + stack + ';'
       + '--tgne-accent:' + accent + ';--tgne-radius:' + radius + 'px;'
       + '--tgne-bg:#FFFFFF;--tgne-bg2:#F8FAFC;--tgne-bg3:#F1F5F9;--tgne-border:#E2E8F0;'
       + '--tgne-text:#0F172A;--tgne-sub:#475569;--tgne-mute:#64748B;--tgne-on-accent:#04212B;'
@@ -220,7 +225,7 @@
       + 'background-size:200% 100%;animation:tgne-sh 1.4s ease-in-out infinite;}'
       + '@keyframes tgne-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}'
 
-      + '@media (max-width:480px){.tgne-banner .tgne-card{flex-direction:column;align-items:stretch;}'
+      + '@container (max-width:480px){.tgne-banner .tgne-card{flex-direction:column;align-items:stretch;}'
       + '.tgne-banner .tgne-btn{flex:1 1 auto;}}'
       + '@media (prefers-reduced-motion:reduce){.tgne-root *{animation-duration:.01ms !important;'
       + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}';

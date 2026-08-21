@@ -98,7 +98,7 @@ a{text-decoration:none;color:inherit}
 .w-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;overflow:hidden;transition:all .3s}
 .w-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D1D5DB;transform:translateY(-3px)}
 .w-card-preview{height:200px;background:var(--bg);border-bottom:1px solid var(--bd);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px}
+.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px;flex:none}
 .w-card-body{padding:18px 20px 20px}
 .w-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
 .w-card-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -3201,11 +3201,24 @@ function loadMiniPreview(w) {
   }
 
   if (w.id === 'ticketmonth' && window.TGTicketMonthWidget) {
-    new window.TGTicketMonthWidget(el, { sourceType:'competition', sourceValue:'english-premier-league', heading:'', showDayTitles:false, dayLimit:4, radius:10, accent:'#7C5CFF' });
+    // A six-week month is taller than the 200px card, and the card centres what
+    // it holds, so the month name, the one thing that says what this widget is,
+    // was the part being cut off. Anchor it to the top and let the last week go
+    // instead. 620px keeps the mount just above the widget's own 560px
+    // container breakpoint, so the cells stay tall enough to carry a fixture
+    // name: the dots are 6px, which is right on a phone and invisible here.
+    container.style.alignSelf = 'flex-start';
+    container.style.transformOrigin = 'center top';
+    el.style.maxWidth = '620px';
+    el.style.margin = '0 auto';
+    new window.TGTicketMonthWidget(el, { sourceType:'competition', sourceValue:'english-premier-league', heading:'', showDayTitles:true, maxPerCell:1, dayLimit:4, radius:10, accent:'#7C5CFF' });
   }
 
   if (w.id === 'eventmenu' && window.TGEventMenuWidget) {
-    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'category', sections:['competitions'], maxPerGroup:4, showSearch:false, radius:10, accent:'#12B886' });
+    // The card is 200px and centres what it holds, so a menu with eighteen
+    // collapsed sports underneath it shows its middle rather than its top.
+    // One sport, flat, three rows: about 300px scaled to 165px, which fits.
+    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'none', onlyCategories:['football'], sections:['competitions'], maxPerGroup:3, showSearch:true, radius:10, accent:'#12B886' });
   }
 
   if (w.id === 'tickets' && window.TGTicketsWidget) {

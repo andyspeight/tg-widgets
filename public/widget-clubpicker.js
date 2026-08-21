@@ -146,7 +146,12 @@
       : 'repeat(auto-fill,minmax(190px,1fr))';
 
     return ':host{all:initial;display:block;}'
-      + '.tgcp-root{font-family:' + stack + ';'
+      // container-type makes the breakpoint below a @container query rather than
+      // @media. A widget sits in whatever column the client gives it, and a
+      // viewport query cannot see that the column is 240px wide on a 1500px
+      // screen: that is how the club grid ended up writing names one letter per
+      // line on the dashboard card.
+      + '.tgcp-root{container-type:inline-size;font-family:' + stack + ';'
       + '--tgcp-accent:' + accent + ';--tgcp-radius:' + radius + 'px;'
       + '--tgcp-bg:#FFFFFF;--tgcp-bg2:#F8FAFC;--tgcp-bg3:#F1F5F9;--tgcp-border:#E2E8F0;'
       + '--tgcp-text:#0F172A;--tgcp-sub:#475569;--tgcp-mute:#64748B;--tgcp-on-accent:#04212B;'
@@ -238,7 +243,7 @@
       + 'background-size:200% 100%;animation:tgcp-sh 1.4s ease-in-out infinite;}'
       + '@keyframes tgcp-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}'
 
-      + '@media (max-width:520px){'
+      + '@container (max-width:520px){'
       + '.tgcp-grid{grid-template-columns:minmax(0,1fr);}'
       + '.tgcp-row{grid-template-columns:48px minmax(0,1fr);row-gap:9px;}'
       + '.tgcp-actions{grid-column:1/-1;}.tgcp-btn{flex:1 1 auto;}}'
