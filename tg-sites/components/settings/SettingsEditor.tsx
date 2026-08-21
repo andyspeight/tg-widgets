@@ -542,6 +542,34 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
                 corners.
               </p>
             </div>
+
+            {/*
+              STOP RIGHT CLICK. Andy's call, 21 Aug 2026, from Duda's Disable
+              Right Click. It lives on this tab because this is where the site's
+              own pictures already are, and it is a client-facing choice rather
+              than a technical one, so it is not behind the owner-only gate.
+
+              THE HELP TEXT SAYS WHAT IT CANNOT DO. A setting that quietly
+              implies the photographs are protected would be the worse outcome
+              than not having it: somebody would rely on it.
+            */}
+            <div className="tv-field">
+              <label className="tv-check">
+                <input
+                  type="checkbox"
+                  checked={settings.noRightClick}
+                  onChange={(event) => set('noRightClick', event.target.checked)}
+                />
+                <span>Stop right click on the published site</span>
+              </label>
+              <p className="tv-field__help">
+                Makes it harder to save a picture by right-clicking or dragging it
+                off the page. It is a deterrent, not protection: the pictures are
+                still in the page and still one screenshot away. Typing fields keep
+                their menu, so somebody can still paste an email address into your
+                enquiry form.
+              </p>
+            </div>
           </section>
         )}
 

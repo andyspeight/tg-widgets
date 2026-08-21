@@ -313,9 +313,10 @@ describe('staff settings are a different shape entirely', () => {
     /*
      * THE WHOLE LIST, spelled out, so adding a client-editable field is a
      * deliberate edit here rather than something that happens quietly. The four
-     * brand profile fields were added on 31 Jul 2026 and the seven contact ones
-     * on 1 Aug 2026, and both times this is where it had to be acknowledged,
-     * which is the check working rather than the check being in the way.
+     * brand profile fields were added on 31 Jul 2026, the seven contact ones on
+     * 1 Aug 2026 and noRightClick on 21 Aug 2026, and every time this is where it
+     * had to be acknowledged, which is the check working rather than the check
+     * being in the way.
      */
     expect(Object.keys(parsed).sort()).toEqual([
       'addressCountry',
@@ -328,6 +329,7 @@ describe('staff settings are a different shape entirely', () => {
       'ga4Id',
       'gtmId',
       'locale',
+      'noRightClick',
       'openingHours',
       'postalCode',
       'socialImageUrl',

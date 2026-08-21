@@ -4421,6 +4421,32 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Right click stopped                                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The class is added by public/no-right-click.js, not by the render, because the
+ * whole feature needs that script anyway: a page without it should not carry the
+ * styling either.
+ *
+ * THE TWO THINGS CSS CAN DO HERE that the script cannot. `-webkit-touch-callout`
+ * is the long press menu on iOS, which is a touch gesture rather than a
+ * contextmenu event. And `-webkit-user-drag` stops a picture being dragged to the
+ * desktop in Safari, where the dragstart handler alone does not always hold.
+ *
+ * TEXT STAYS SELECTABLE. `user-select: none` across the page is the version of
+ * this that people hate, because it stops somebody copying an address, a
+ * reference number or a phone number out of a page they are trying to act on.
+ * Only pictures are made unselectable, and only for the drag.
+ */
+.tg-noright img,
+.tg-noright video {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 

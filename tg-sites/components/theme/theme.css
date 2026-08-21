@@ -165,6 +165,20 @@
   color: var(--ed-ink);
 }
 
+/*
+ * A checkbox with its label beside it. The whole row is the label, so the words
+ * are part of the target rather than a 13px square being the only way in.
+ */
+.tv-check {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  cursor: pointer;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+}
+.tv-check input { width: 16px; height: 16px; accent-color: var(--ed-primary); cursor: pointer; }
+
 .tv-field__help {
   margin: var(--ed-2) 0 0;
   font-size: var(--ed-text-xs);

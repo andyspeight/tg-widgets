@@ -9,6 +9,7 @@ import { safeUrl } from '../../../../lib/content/sanitise';
 import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
+import { NoRightClickScript } from '../../../../components/render/NoRightClickScript';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
 import { ThemeToggleScript } from '../../../../components/render/ThemeToggleScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
@@ -568,6 +569,7 @@ export default async function SitePage({ params, searchParams }: Params) {
 
       {/* The tag manager noscript fallback, and any custom body HTML. Last, so
           nothing here delays the content above it. */}
+      <NoRightClickScript settings={found.settings} />
       <SiteBody settings={found.settings} />
     </>
   );
@@ -751,6 +753,7 @@ function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typ
           page has no page-content tree of its own, so it is these two only. */}
       <WidgetScripts trees={[data.regions.header, data.regions.footer]} />
       <SlideshowScript trees={[data.regions.header, data.regions.footer]} />
+      <NoRightClickScript settings={data.settings} />
       <SiteBody settings={data.settings} />
     </>
   );
