@@ -1270,6 +1270,76 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
   {
+    /*
+     * THREE PICTURES THAT TRADE PLACES (Andy, 21 Aug 2026, from Duda's
+     * Travelgenix Image Shifting). They sit as an overlapping collage, and every
+     * few seconds each one moves to the next place in the arrangement, so the
+     * one at the front goes to the back and the next comes forward. The places
+     * carry the sizes, not the pictures: a picture is big because of where it is
+     * standing, which is what makes the rotation read as movement rather than as
+     * three pictures resizing.
+     *
+     * PURE CSS, and it borrows nothing from the slideshow because it is not one:
+     * every picture is visible the whole time, so there is nothing to show and
+     * hide and no pause button to argue about. It is one animation per picture,
+     * offset by its share of the cycle, which is the same device the slideshow
+     * uses for its stagger.
+     */
+    type: 'shifting-images',
+    label: 'Shifting images',
+    group: 'Media',
+    icon: 'gallery',
+    description: 'Three pictures in a collage that trade places as you watch.',
+    defaults: {
+      interval: 4,
+      height: 'medium',
+      radius: 'lg',
+      items: [{ src: '', alt: '' }, { src: '', alt: '' }, { src: '', alt: '' }],
+    },
+    summarise: (props) => {
+      const count = Array.isArray(props.items) ? props.items.length : 0;
+      return `Shifting images (${count})`;
+    },
+    fields: [
+      {
+        kind: 'repeater',
+        key: 'items',
+        label: 'Pictures',
+        itemLabel: 'Picture',
+        /*
+         * THREE PLACES, SO AT MOST THREE PICTURES. A fourth would have nowhere
+         * to stand, and adding a fourth place makes the collage a mess rather
+         * than a composition. Two work too and trade places between them.
+         */
+        max: 3,
+        fields: [
+          { kind: 'image', key: 'src', label: 'Picture' },
+          { kind: 'text', key: 'alt', label: 'Description', max: 200, help: 'What the picture shows, for a screen reader.' },
+        ],
+      },
+      {
+        kind: 'number',
+        key: 'interval',
+        label: 'Seconds in each place',
+        min: 2,
+        max: 12,
+        step: 1,
+        help: 'How long a picture holds its place before moving to the next one.',
+      },
+      {
+        kind: 'select',
+        key: 'height',
+        label: 'Height',
+        options: [
+          { value: 'short', label: 'Short' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'tall', label: 'Tall' },
+        ],
+      },
+      { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
+    ],
+  },
+  {
     type: 'video',
     label: 'Video',
     group: 'Media',

@@ -4604,6 +4604,120 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Shifting images: a collage that trades places                       */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 21 Aug 2026, from Duda's Image Shifting.
+ *
+ * THREE PLACES, AND THE PLACES CARRY THE SIZES. Each keyframe stop below is a
+ * place in the collage — where a picture stands, how big it is, and who it sits
+ * in front of. A picture is large because of where it is, not because of what it
+ * is, which is what makes this read as three pictures moving rather than three
+ * pictures resizing on the spot.
+ *
+ * ONE ANIMATION PER PICTURE, offset by its share of the cycle, so they are
+ * always one place apart and never collide. The offset is a NEGATIVE delay in
+ * the render: a positive one would leave the second and third pictures sitting
+ * in the first place until their turn came round, and the collage would be wrong
+ * for the first few seconds every time somebody loaded the page.
+ *
+ * z-index steps rather than eases, which is correct and is what you want: a
+ * picture should change who it is in front of at the moment it arrives, not
+ * fade through the one it is passing.
+ */
+.tgs-shift {
+  position: relative;
+  width: 100%;
+  height: var(--tgs-shift-h, 26rem);
+  overflow: hidden;
+}
+.tgs-shift[data-height='short']  { --tgs-shift-h: 19rem; }
+.tgs-shift[data-height='medium'] { --tgs-shift-h: 26rem; }
+.tgs-shift[data-height='tall']   { --tgs-shift-h: 34rem; }
+
+.tgs-shift__pic {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* One size in the markup; the places scale it. Percentages of the block, so
+     the collage keeps its proportions at any width. */
+  width: 58%;
+  height: 74%;
+  object-fit: cover;
+  border-radius: var(--tgs-radius, 20px);
+  box-shadow: 0 14px 34px rgb(0 0 0 / 18%);
+  /* The white edge is what separates one picture from the one behind it when
+     both are photographs of the same beach. */
+  outline: 4px solid var(--tgs-surface);
+  outline-offset: -1px;
+  animation: tgs-shift-3 var(--tgs-shift-cycle, 12s) infinite;
+  /* Each place is a position, not a journey through one: the picture eases from
+     where it was to where it is going and then holds. */
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.tgs-shift[data-radius='none'] .tgs-shift__pic { border-radius: 0; }
+.tgs-shift[data-radius='sm']   .tgs-shift__pic { border-radius: var(--tgs-radius-sm, 6px); }
+.tgs-shift[data-radius='md']   .tgs-shift__pic { border-radius: var(--tgs-radius, 12px); }
+.tgs-shift[data-radius='lg']   .tgs-shift__pic { border-radius: 22px; }
+.tgs-shift[data-radius='full'] .tgs-shift__pic { border-radius: 40px; }
+
+/*
+ * THE THREE PLACES. Big and behind at the back left, middle and in front of it
+ * to the right, small and in front of everything at the lower left. Each stop is
+ * held for most of its third and moves in the last of it, so the collage is
+ * still while a visitor is reading it.
+ */
+@keyframes tgs-shift-3 {
+  0%,   28% { transform: translate(2%, 4%) scale(1);      z-index: 1; }
+  33%,  61% { transform: translate(70%, 16%) scale(0.78); z-index: 2; }
+  66%,  94% { transform: translate(14%, 40%) scale(0.58); z-index: 3; }
+  100%      { transform: translate(2%, 4%) scale(1);      z-index: 1; }
+}
+
+/* Two pictures simply trade the two front places. */
+.tgs-shift[data-count='2'] .tgs-shift__pic { animation-name: tgs-shift-2; }
+@keyframes tgs-shift-2 {
+  0%,  44% { transform: translate(2%, 4%) scale(1);      z-index: 1; }
+  50%, 94% { transform: translate(52%, 26%) scale(0.72); z-index: 2; }
+  100%     { transform: translate(2%, 4%) scale(1);      z-index: 1; }
+}
+
+/*
+ * STILL, ARRANGED, AND STILL A COLLAGE. Used on the editor canvas and for a
+ * single picture. The animation is off but each picture keeps the place its
+ * index gives it, so what a client sees while building is the arrangement they
+ * are going to get rather than three pictures piled on the origin.
+ */
+.tgs-shift[data-still='true'] .tgs-shift__pic { animation: none; }
+.tgs-shift[data-still='true'] .tgs-shift__pic:nth-child(1) { transform: translate(2%, 4%) scale(1); z-index: 1; }
+.tgs-shift[data-still='true'] .tgs-shift__pic:nth-child(2) { transform: translate(70%, 16%) scale(0.78); z-index: 2; }
+.tgs-shift[data-still='true'] .tgs-shift__pic:nth-child(3) { transform: translate(14%, 40%) scale(0.58); z-index: 3; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* The same arrangement, holding. Somebody who asked for less motion still gets
+     the composition, which is most of the design; only the trading stops. */
+  .tgs-shift__pic { animation: none; }
+  .tgs-shift .tgs-shift__pic:nth-child(1) { transform: translate(2%, 4%) scale(1); z-index: 1; }
+  .tgs-shift .tgs-shift__pic:nth-child(2) { transform: translate(70%, 16%) scale(0.78); z-index: 2; }
+  .tgs-shift .tgs-shift__pic:nth-child(3) { transform: translate(14%, 40%) scale(0.58); z-index: 3; }
+}
+
+@container tgs-page (max-width: 767px) {
+  /* The places pull in, because at 390px the right-hand one would hang off the
+     edge and the collage would read as a picture and two slivers. */
+  .tgs-shift { --tgs-shift-h: 20rem; }
+  .tgs-shift__pic { width: 66%; height: 68%; outline-width: 3px; }
+  @keyframes tgs-shift-3 {
+    0%,   28% { transform: translate(0%, 2%) scale(1);      z-index: 1; }
+    33%,  61% { transform: translate(48%, 18%) scale(0.74); z-index: 2; }
+    66%,  94% { transform: translate(8%, 42%) scale(0.56);  z-index: 3; }
+    100%      { transform: translate(0%, 2%) scale(1);      z-index: 1; }
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 

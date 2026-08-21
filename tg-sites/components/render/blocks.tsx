@@ -2063,6 +2063,11 @@ export const MAX_EXPANDING_CARDS = 6;
  *  section to scroll. The motion catalogue's own examples are three to five. */
 export const MAX_STACKED_CARDS = 6;
 
+/** Three places in the collage, so three pictures. A fourth would have
+ *  nowhere to stand, and a fourth place makes it a mess rather than a
+ *  composition. */
+export const MAX_SHIFTING_IMAGES = 3;
+
 export function ExpandingCardsBlock({
   props,
   blockId,
@@ -2481,6 +2486,81 @@ export function StackedCardsBlock({ props }: { props: Props }): ReactElement {
         this that were tried first.
       */}
       <div className="tgs-stack__runway" aria-hidden="true" />
+    </div>
+  );
+}
+
+/**
+ * THREE PICTURES THAT TRADE PLACES.
+ *
+ * Andy, 21 Aug 2026, from Duda's Image Shifting. They sit as an overlapping
+ * collage and every few seconds each moves on to the next place, so the one at
+ * the front goes to the back and the next comes forward.
+ *
+ * THE PLACES CARRY THE SIZES, NOT THE PICTURES. A picture is big because of
+ * where it is standing, not because of what it is, which is what makes the
+ * rotation read as movement rather than as three pictures resizing on the spot.
+ * So the stylesheet owns three sets of position and scale, and each picture
+ * walks through them offset by its share of the cycle — the same device the
+ * slideshow uses for its stagger.
+ *
+ * NOT A SLIDESHOW, and it deliberately borrows none of that machinery. Every
+ * picture is on screen the whole time, so there is nothing to show and hide, no
+ * current slide, and no pause button to argue about: a visitor is never waiting
+ * to see something.
+ */
+export function ShiftingImagesBlock({
+  props,
+  editing = false,
+}: {
+  props: Props;
+  /* The canvas re-renders on every keystroke, and pictures sliding under the
+     pointer fight the person trying to select one. Still and arranged there. */
+  editing?: boolean;
+}): ReactElement {
+  const pictures = list(props, 'items')
+    .map((item) => ({ src: safeUrl(str(item, 'src')) || '', alt: str(item, 'alt') }))
+    .filter((picture) => picture.src !== '')
+    .slice(0, MAX_SHIFTING_IMAGES);
+
+  if (pictures.length === 0) {
+    return <div className="tgs-placeholder">Choose three pictures</div>;
+  }
+
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+  const radius = oneOf(props, 'radius', RADII, 'lg');
+  const interval = clamp(props.interval, 2, 12, 4);
+  const count = pictures.length;
+
+  return (
+    <div
+      className="tgs-shift"
+      data-height={height}
+      data-radius={radius}
+      data-count={count}
+      data-still={editing || count < 2 ? 'true' : undefined}
+      style={{ '--tgs-shift-cycle': `${count * interval}s` } as CSSProperties}
+    >
+      {pictures.map((picture, index) => (
+        <img
+          className="tgs-shift__pic"
+          key={index}
+          src={picture.src}
+          alt={picture.alt}
+          loading={index === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+          /*
+           * Where this picture starts in the rotation, and how far into the
+           * cycle it is. One picture per place, so a negative delay drops each
+           * one straight into its own position rather than making the first two
+           * wait a turn before the collage looks right.
+           */
+          style={{
+            '--tgs-shift-i': index,
+            animationDelay: `calc(-1 * ${index} * var(--tgs-shift-cycle) / ${count})`,
+          } as CSSProperties}
+        />
+      ))}
     </div>
   );
 }
