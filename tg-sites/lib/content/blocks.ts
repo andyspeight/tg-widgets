@@ -1491,6 +1491,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
         options: [
           { value: 'bullets', label: 'Separated by bullets' },
           { value: 'pills', label: 'Coloured pills' },
+          { value: 'random', label: 'Coloured pills, a different colour each' },
         ],
       },
       {

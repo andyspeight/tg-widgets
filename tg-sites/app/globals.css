@@ -54,6 +54,17 @@
   --tgs-primary: #1b2b5b;
   --tgs-primary-light: #3b4972;
   --tgs-accent: #00b4d8;
+  /*
+   * Bounds on how light a brand colour may be drawn as TEXT, in OKLCH lightness.
+   * They live here, beside the other light-mode tokens, and NOT on .tgs-tags,
+   * because the dark-mode swap further down sets them on .tgs-page: a value set
+   * on the tags element itself would beat the inherited dark one every time, and
+   * !important does not carry across elements. That is not theory, it shipped
+   * that way for an hour on 21 Aug 2026 and the dark measurement coming back
+   * identical to the light one was the tell.
+   */
+  --tgs-tag-lmin: 0;
+  --tgs-tag-lmax: 0.44;
   --tgs-surface: #ffffff;
   --tgs-surface-alt: #f8f8f9;
   --tgs-surface-dark: #0c1329;
@@ -278,6 +289,8 @@
     --tgs-text-muted: var(--tgs-d-text-muted) !important;
     --tgs-border: var(--tgs-d-border) !important;
     --tgs-border-strong: var(--tgs-d-border-strong) !important;
+    --tgs-tag-lmin: 0.72 !important;
+    --tgs-tag-lmax: 1 !important;
   }
 }
 html[data-theme='dark'] .tgs-page[style*='--tgs-d-surface'] {
@@ -287,6 +300,8 @@ html[data-theme='dark'] .tgs-page[style*='--tgs-d-surface'] {
   --tgs-text-muted: var(--tgs-d-text-muted) !important;
   --tgs-border: var(--tgs-d-border) !important;
   --tgs-border-strong: var(--tgs-d-border-strong) !important;
+  --tgs-tag-lmin: 0.72 !important;
+  --tgs-tag-lmax: 1 !important;
 }
 
 /*
@@ -916,6 +931,35 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   .tgs-section[data-hover-zoom] .tgs-card:hover .tgs-card__frame img {
     transform: scale(1.06);
   }
+}
+
+/*
+ * HOVER TINT (Andy, 21 Aug 2026, from Duda's "Fancy Grid"). A section marked
+ * data-hover-tint washes a card in the brand colour as a visitor points at it.
+ *
+ * IT IS A SETTING ON CARDS, NOT A NEW ELEMENT. The screenshot Andy sent is a
+ * grid of icon, heading, body and a Learn More link, which is the Cards block
+ * exactly. The only thing it had that we did not was the tint, so that is the
+ * only thing built. A second grid element would have made a client choose
+ * between two identical grids before they knew which one tinted.
+ *
+ * pointer-events: none IS LOAD-BEARING. The wash covers the card, and the whole
+ * card is often a link (.tgs-card__link::after covers it to catch the click), so
+ * without this the tint would swallow every click on every card in the section.
+ */
+.tgs-section[data-hover-tint] .tgs-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--tgs-primary);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.tgs-section[data-hover-tint] .tgs-card:hover::after,
+.tgs-section[data-hover-tint] .tgs-card:focus-within::after {
+  opacity: 0.12;
 }
 
 /*
@@ -5234,12 +5278,76 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 .tgs-tags[data-style='bullets'] .tgs-tags__item { display: flex; align-items: center; }
 
-.tgs-tags[data-style='pills'] .tgs-tags__item {
+/*
+ * PILL TEXT HAS TO CLEAR 4.5:1, AND THE BRAND COLOUR ON ITS OWN TINT DOES NOT.
+ * Measured 21 Aug 2026: the default accent on its own 14% tint came out at
+ * 2.46:1, so the first cut of these pills shipped unreadable and nobody would
+ * have noticed until a client picked a pale brand. Two earlier attempts at a fix
+ * are worth recording so they are not tried again:
+ *
+ *   - Mixing a fixed proportion of brand into --tgs-text cannot hold the floor.
+ *     A near-white brand at any ratio lands around 3.6:1, because half of white
+ *     and half of black is grey.
+ *   - Clamping HSL lightness cannot either. HSL lightness is not perceptual: a
+ *     yellow at l=34% is far brighter than a blue at the same number, and pale
+ *     yellow still failed at 2.21:1.
+ *
+ * OKLCH lightness IS perceptual, so one clamp holds every hue. The bound flips
+ * for dark mode wherever the other tokens flip, at the top of this file: light
+ * caps lightness, dark floors it. Worst case measured across eight brands,
+ * including near-white, pale yellow, mid grey and near-black: comfortably over
+ * the line. Measure against the PILL'S OWN TINT, not against the page: the tint
+ * darkens the background under dark text, and measuring against plain white
+ * flattered an earlier cut by most of a point.
+ */
+.tgs-tags[data-style='pills'] .tgs-tags__item,
+.tgs-tags[data-style='random'] .tgs-tags__item {
   padding: 0.35em 0.85em;
   border-radius: 999px;
   background: color-mix(in srgb, var(--tgs-tag) 14%, transparent);
-  color: var(--tgs-tag);
+  /* Fallback for a browser without relative colour syntax. Not the measured
+     clamp, but far better than the raw brand colour it replaces. */
+  color: color-mix(in srgb, var(--tgs-tag) 45%, var(--tgs-text));
   font-weight: 500;
+}
+@supports (color: oklch(from red l c h)) {
+  .tgs-tags[data-style='pills'] .tgs-tags__item {
+    color: oklch(from var(--tgs-tag) clamp(var(--tgs-tag-lmin), l, var(--tgs-tag-lmax)) c h);
+  }
+}
+
+/*
+ * A DIFFERENT COLOUR EACH (Andy, 21 Aug 2026). The render hands every item a
+ * --tgs-tag-rot, a hue rotation away from the client's own tag colour, so the
+ * row scatters across that brand's world rather than across an invented
+ * rainbow. See TAG_HUES in components/render/blocks.tsx for why the scatter is
+ * derived from the words rather than actually random.
+ *
+ * The rotation needs relative colour syntax, so it is behind @supports and the
+ * plain rule above is the fallback. A browser too old for it shows the ordinary
+ * pills: one colour instead of eight, which is a quieter version of the same
+ * design rather than a broken one.
+ */
+@supports (color: oklch(from red l c h)) {
+  .tgs-tags[data-style='random'] .tgs-tags__item {
+    background: color-mix(
+      in srgb,
+      oklch(from var(--tgs-tag) l max(c, 0.11) calc(h + var(--tgs-tag-rot, 0))) 14%,
+      transparent
+    );
+    /*
+     * max(c, 0.11) is a chroma FLOOR, and only on this style. A client whose
+     * brand colour is a grey would otherwise get eight identical grey pills from
+     * the option whose whole point is that they differ. Asking for a different
+     * colour each is asking for colour, so this one style insists on some. Plain
+     * pills above have no floor, because a deliberately monochrome brand should
+     * stay monochrome.
+     */
+    color: oklch(
+      from var(--tgs-tag) clamp(var(--tgs-tag-lmin), l, var(--tgs-tag-lmax)) max(c, 0.11)
+        calc(h + var(--tgs-tag-rot, 0))
+    );
+  }
 }
 
 /*

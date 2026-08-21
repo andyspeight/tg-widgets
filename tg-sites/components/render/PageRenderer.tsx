@@ -455,6 +455,11 @@ export function SectionRenderer({
        */
       data-hover-zoom={section.hoverZoom && !editable ? '' : undefined}
       /*
+       * Cards wash in the brand colour under the pointer (Duda's "Fancy Grid").
+       * Same `editable` gate as the two above, so it never fights the canvas.
+       */
+      data-hover-tint={section.hoverTint && !editable ? '' : undefined}
+      /*
        * Parallax drifts a still background picture on scroll. Only when there is one
        * still picture (not the cycling background, not a video) and not while editing,
        * so it never fights the canvas. The drift itself is pure CSS in globals.css.

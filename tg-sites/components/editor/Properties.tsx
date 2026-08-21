@@ -1287,6 +1287,22 @@ function SectionFields({
           <label className="ed-toggle">
             <input
               type="checkbox"
+              checked={section.hoverTint === true}
+              onChange={(event) =>
+                set({ hoverTint: event.target.checked || undefined }, `sec:${index}:hoverTint`)
+              }
+            />
+            <span>Hover tint</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Cards in this section wash in your brand colour as a visitor points at one. There is
+            no movement in it, so it stays for everyone.
+          </p>
+        </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
               checked={section.gradient === true}
               onChange={(event) =>
                 set({ gradient: event.target.checked || undefined }, `sec:${index}:gradient`)

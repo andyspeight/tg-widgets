@@ -126,11 +126,15 @@ describe('the tooltip', () => {
 });
 
 describe('the tags', () => {
-  it('covers both of Duda\'s, as two styles of one element', () => {
-    // Bullet Delimited and Coloured Delimited differ by a border-radius.
+  it('covers both of Duda\'s as styles of one element', () => {
+    /* Bullet Delimited and Coloured Delimited differ by a border-radius, so they
+       are two styles rather than two elements. Andy added a third later the same
+       day ("random"); the point being held here is that the Duda pair never
+       became separate elements. */
     const style = blockDefinition('tags')!.fields.find((f) => f.key === 'style') as
       { options: Array<{ value: string }> };
-    expect(style.options.map((o) => o.value)).toEqual(['bullets', 'pills']);
+    const values = style.options.map((o) => o.value);
+    expect(values.slice(0, 2)).toEqual(['bullets', 'pills']);
   });
 
   it('is a list, and the bullet is drawn between rather than typed in', () => {
@@ -141,7 +145,9 @@ describe('the tags', () => {
      */
     const block = source('TagsBlock');
     expect(block).toContain('<ul');
-    expect(block).toContain('<li className="tgs-tags__item"');
+    // Matched loosely: the <li> gained a style attribute and wrapped onto
+    // several lines when the random hues arrived.
+    expect(block).toMatch(/<li\s+className="tgs-tags__item"/);
     expect(block).not.toContain("'•'");
     expect(css).toContain(".tgs-tags[data-style='bullets'] .tgs-tags__item + .tgs-tags__item::before");
   });

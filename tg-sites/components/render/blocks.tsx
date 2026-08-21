@@ -2701,6 +2701,49 @@ export function TooltipBlock({
   );
 }
 
+/*
+ * "RANDOM" TAG COLOURS, WHICH MUST NOT ACTUALLY BE RANDOM (Andy, 21 Aug 2026).
+ *
+ * Math.random() here would be a bug wearing the right name. These pages are
+ * rendered on the server, so the colours would change on every load, and the
+ * editor calls a block's render on EVERY KEYSTROKE, so they would strobe while
+ * a client typed a tag. What is wanted is variety, not churn: colours that look
+ * scattered and never move. So the colour is derived from the tag's own words,
+ * which means "Luxury" is the same colour on every page of the site.
+ *
+ * AND THEY ARE THE CLIENT'S OWN COLOURS, not a rainbow. Each entry is a hue
+ * rotation away from whatever the client set as the tag colour, so a luxury
+ * house gets variations of its own world and a family operator gets variations
+ * of its own. A fixed palette of arbitrary brights would fight every brand on
+ * the platform and look like a children's party on half of them.
+ */
+const TAG_HUES = [0, 150, 60, -100, 200, 35, -55, 110];
+
+/*
+ * Hash the label to a starting point, then walk forward past any hue already
+ * used in this row. Hashing alone would let two neighbours collide, which reads
+ * as a bug rather than a scatter, and Andy asked for each one to be different.
+ * The walk gives label-stability in the common case AND no repeats within a row.
+ */
+function tagHues(labels: string[]): number[] {
+  const used = new Set<number>();
+  return labels.map((label) => {
+    let hash = 0;
+    for (let i = 0; i < label.length; i += 1) hash = (hash * 31 + label.charCodeAt(i)) >>> 0;
+    // More tags than hues: start the cycle again rather than pile them all on one.
+    if (used.size >= TAG_HUES.length) used.clear();
+    const start = hash % TAG_HUES.length;
+    for (let step = 0; step < TAG_HUES.length; step += 1) {
+      const at = (start + step) % TAG_HUES.length;
+      if (!used.has(at)) {
+        used.add(at);
+        return TAG_HUES[at];
+      }
+    }
+    return TAG_HUES[start];
+  });
+}
+
 /**
  * A ROW OF TAGS.
  *
@@ -2720,10 +2763,11 @@ export function TagsBlock({ props }: { props: Props }): ReactElement {
     return <div className="tgs-placeholder">Add some tags</div>;
   }
 
-  const style = oneOf(props, 'style', ['bullets', 'pills'] as const, 'bullets');
+  const style = oneOf(props, 'style', ['bullets', 'pills', 'random'] as const, 'bullets');
   const size = oneOf(props, 'size', ['s', 'm'] as const, 'm');
   const align = oneOf(props, 'align', ALIGNS, 'left');
   const colour = safeColour(props.colour);
+  const hues = style === 'random' ? tagHues(items.map((item) => str(item, 'label'))) : null;
 
   return (
     <ul
@@ -2737,7 +2781,11 @@ export function TagsBlock({ props }: { props: Props }): ReactElement {
         const label = str(item, 'label');
         const href = safeUrl(str(item, 'href'), CONTACT_OK);
         return (
-          <li className="tgs-tags__item" key={index}>
+          <li
+            className="tgs-tags__item"
+            key={index}
+            style={hues ? ({ '--tgs-tag-rot': hues[index] } as CSSProperties) : undefined}
+          >
             {href ? (
               <a className="tgs-tags__link" href={href}>
                 {label}

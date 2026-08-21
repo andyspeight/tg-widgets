@@ -801,6 +801,15 @@ export const SectionSchema = z.object({
    */
   hoverZoom: z.boolean().optional(),
   /**
+   * Wash a section's cards in the brand colour as a visitor points at one. Off by
+   * default and optional, so no stored section changes shape. This is Duda's
+   * "Fancy Grid" (Andy, 21 Aug 2026): the grid in that screenshot is our Cards
+   * block already, and the tint was the only part we did not have. Pure CSS in
+   * globals.css, with no motion in it, so nothing to hold back under
+   * prefers-reduced-motion.
+   */
+  hoverTint: z.boolean().optional(),
+  /**
    * Drift this section's single background picture slower than the content as it
    * scrolls, for depth. Off by default and optional, so no stored section changes
    * shape. Pure CSS in globals.css, and the render only turns it on for a still
