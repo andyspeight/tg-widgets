@@ -96,9 +96,9 @@ describe('when a coupon has run out', () => {
 describe('the Coupon block', () => {
   const definition = blockDefinition('coupon')!;
 
-  it('is in the library, under Actions, and belongs to the client', () => {
+  it('is in the library, under Actions and contact, and belongs to the client', () => {
     expect(isKnownBlock('coupon')).toBe(true);
-    expect(definition.group).toBe('Actions');
+    expect(definition.group).toBe('Actions and contact');
     expect(definition.staffOnly).toBeUndefined();
   });
 
@@ -141,9 +141,9 @@ describe('the Coupon block', () => {
 describe('the Multi Location block', () => {
   const definition = blockDefinition('locations')!;
 
-  it('is in the library, under Actions, and belongs to the client', () => {
+  it('is in the library, under Actions and contact, and belongs to the client', () => {
     expect(isKnownBlock('locations')).toBe(true);
-    expect(definition.group).toBe('Actions');
+    expect(definition.group).toBe('Actions and contact');
     expect(definition.staffOnly).toBeUndefined();
   });
 

@@ -12,16 +12,16 @@ import { describe, expect, it } from 'vitest';
 import { blockDefinition, blocksByGroup, isKnownBlock } from '../lib/content/blocks';
 
 describe('the testimonial slider is a registered block', () => {
-  it('is known, sits in Media, and has its icon', () => {
+  it('is known, sits in Cards and lists, and has its icon', () => {
     expect(isKnownBlock('testimonials')).toBe(true);
     const def = blockDefinition('testimonials');
-    expect(def?.group).toBe('Media');
+    expect(def?.group).toBe('Cards and lists');
     expect(def?.label).toBe('Testimonial slider');
     expect(def?.icon).toBe('testimonial');
   });
 
-  it('appears in the picker, in the Media group', () => {
-    const media = blocksByGroup(true).find((group) => group.group === 'Media');
+  it('appears in the picker, in the Cards and lists group', () => {
+    const media = blocksByGroup(true).find((group) => group.group === 'Cards and lists');
     expect(media?.blocks.some((block) => block.type === 'testimonials')).toBe(true);
   });
 

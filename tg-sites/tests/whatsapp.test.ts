@@ -109,9 +109,9 @@ describe('the link', () => {
 describe('the block', () => {
   const definition = blockDefinition('whatsapp')!;
 
-  it('is in the library, under Actions, and belongs to the client', () => {
+  it('is in the library, under Actions and contact, and belongs to the client', () => {
     expect(isKnownBlock('whatsapp')).toBe(true);
-    expect(definition.group).toBe('Actions');
+    expect(definition.group).toBe('Actions and contact');
     expect(definition.staffOnly).toBeUndefined();
   });
 

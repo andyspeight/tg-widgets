@@ -45,9 +45,9 @@ const block = render.slice(start, render.indexOf('\nexport function ', start + 1
 const MAX = Number(/MAX_EXPANDING_CARDS = (\d+)/.exec(render)?.[1]);
 
 describe('the block', () => {
-  it('is registered, in Media', () => {
+  it('is registered, in Showcase', () => {
     expect(isKnownBlock('expanding-cards')).toBe(true);
-    expect(blockDefinition('expanding-cards')!.group).toBe('Media');
+    expect(blockDefinition('expanding-cards')!.group).toBe('Showcase');
   });
 
   it('arrives with four cards, so a client can see what it does', () => {

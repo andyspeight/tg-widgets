@@ -43,9 +43,9 @@ const code = block.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const MAX = Number(/MAX_STACKED_CARDS = (\d+)/.exec(render)?.[1]);
 
 describe('the block', () => {
-  it('is registered, in Media', () => {
+  it('is registered, in Showcase', () => {
     expect(isKnownBlock('stacked-cards')).toBe(true);
-    expect(blockDefinition('stacked-cards')!.group).toBe('Media');
+    expect(blockDefinition('stacked-cards')!.group).toBe('Showcase');
   });
 
   it('caps at six, as Andy asked and the catalogue suggests', () => {

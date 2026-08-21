@@ -19,7 +19,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 
-import { blocksByGroup, type BlockDefinition } from '../../lib/content/blocks';
+import { blockMatches, blocksByGroup, type BlockDefinition } from '../../lib/content/blocks';
 import { Icon } from './Icon';
 
 export function ElementsPalette({
@@ -36,12 +36,7 @@ export function ElementsPalette({
   const groups = blocksByGroup(isStaff)
     .map((group) => ({
       ...group,
-      blocks: group.blocks.filter(
-        (definition) =>
-          !needle ||
-          definition.label.toLowerCase().includes(needle) ||
-          definition.description.toLowerCase().includes(needle),
-      ),
+      blocks: group.blocks.filter((definition) => blockMatches(definition, needle)),
     }))
     .filter((group) => group.blocks.length > 0);
 

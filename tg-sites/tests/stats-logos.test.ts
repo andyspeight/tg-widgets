@@ -81,7 +81,7 @@ function saved(type: string, props: Record<string, unknown>): Record<string, unk
 describe('the key numbers block', () => {
   it('is in the registry, in with the text', () => {
     expect(isKnownBlock('stats')).toBe(true);
-    expect(blockDefinition('stats')?.group).toBe('Text');
+    expect(blockDefinition('stats')?.group).toBe('Cards and lists');
   });
 
   it('arrives with a few numbers in it, so it looks like what it is', () => {
@@ -180,7 +180,7 @@ describe('what the key numbers renderer does', () => {
 describe('the logo strip block', () => {
   it('is in the registry, in with the media', () => {
     expect(isKnownBlock('logos')).toBe(true);
-    expect(blockDefinition('logos')?.group).toBe('Media');
+    expect(blockDefinition('logos')?.group).toBe('Cards and lists');
   });
 
   /*

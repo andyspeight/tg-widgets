@@ -36,9 +36,9 @@ const blocks0 = (page: Page) => page.sections[0].rows[0].columns[0].blocks;
 describe('the block', () => {
   const definition = blockDefinition('breadcrumbs')!;
 
-  it('is in the library, under Layout, and belongs to the client', () => {
+  it('is in the library, under Navigation, and belongs to the client', () => {
     expect(isKnownBlock('breadcrumbs')).toBe(true);
-    expect(definition.group).toBe('Layout');
+    expect(definition.group).toBe('Navigation');
     expect(definition.staffOnly).toBeUndefined();
   });
 

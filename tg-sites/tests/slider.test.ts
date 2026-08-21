@@ -39,9 +39,9 @@ const css = source('app', 'globals.css');
 describe('the Slider block', () => {
   const definition = blockDefinition('slider')!;
 
-  it('is in the library, under Media, and belongs to the client', () => {
+  it('is in the library, under Showcase, and belongs to the client', () => {
     expect(isKnownBlock('slider')).toBe(true);
-    expect(definition.group).toBe('Media');
+    expect(definition.group).toBe('Showcase');
     expect(definition.staffOnly).toBeUndefined();
   });
 

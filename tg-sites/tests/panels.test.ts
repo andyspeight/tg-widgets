@@ -57,7 +57,7 @@ describe('both blocks', () => {
     it(`${type} is in the library, under Text, and belongs to the client`, () => {
       expect(isKnownBlock(type)).toBe(true);
       const definition = blockDefinition(type)!;
-      expect(definition.group).toBe('Text');
+      expect(definition.group).toBe('Show and hide');
       expect(definition.staffOnly).toBeUndefined();
     });
 

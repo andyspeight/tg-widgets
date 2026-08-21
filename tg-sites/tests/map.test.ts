@@ -62,16 +62,16 @@ describe('the map embed URL', () => {
 });
 
 describe('the map is a registered block', () => {
-  it('is known, sits in Media, and has its icon', () => {
+  it('is known, sits in Actions and contact, and has its icon', () => {
     expect(isKnownBlock('map')).toBe(true);
     const def = blockDefinition('map');
-    expect(def?.group).toBe('Media');
+    expect(def?.group).toBe('Actions and contact');
     expect(def?.label).toBe('Map');
     expect(def?.icon).toBe('map');
   });
 
-  it('appears in the picker, in the Media group', () => {
-    const media = blocksByGroup(true).find((group) => group.group === 'Media');
+  it('appears in the picker, in the Actions and contact group', () => {
+    const media = blocksByGroup(true).find((group) => group.group === 'Actions and contact');
     expect(media?.blocks.some((block) => block.type === 'map')).toBe(true);
   });
 });

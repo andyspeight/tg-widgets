@@ -374,7 +374,7 @@
     {
       "id": "icon-item",
       "name": "Icon and text",
-      "category": "text",
+      "category": "cards and lists",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "An icon with a short title and a line of copy.",
@@ -443,7 +443,7 @@
     {
       "id": "accordion",
       "name": "Accordion",
-      "category": "text",
+      "category": "show and hide",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Headings that open to show what is under them.",
@@ -533,7 +533,7 @@
     {
       "id": "tabs",
       "name": "Tabs",
-      "category": "text",
+      "category": "show and hide",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A few panels of text with a row of headings to pick between them.",
@@ -809,7 +809,7 @@
     {
       "id": "half-overlay",
       "name": "Half overlay",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A picture beside a tinted panel carrying your message. Add more than one and it becomes a slider.",
@@ -984,7 +984,7 @@
     {
       "id": "expanding-cards",
       "name": "Expanding cards",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A row of pictures where the one you click opens to show its story.",
@@ -1105,7 +1105,7 @@
     {
       "id": "screen-carousel",
       "name": "Screen carousel",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Your pictures playing on a laptop or phone screen.",
@@ -1211,7 +1211,7 @@
     {
       "id": "flip-cards",
       "name": "Flipping boxes",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Cards that turn over to show more. Tap, or hover with a mouse.",
@@ -1359,7 +1359,7 @@
     {
       "id": "stacked-cards",
       "name": "Stacked cards",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Cards that gather into a deck as you scroll past them. Good for comparing a few options.",
@@ -1486,7 +1486,7 @@
     {
       "id": "shifting-images",
       "name": "Shifting images",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Three pictures in a collage that trade places as you watch.",
@@ -1652,7 +1652,7 @@
     {
       "id": "tooltip",
       "name": "Tooltip",
-      "category": "text",
+      "category": "show and hide",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A word or phrase with a note that appears when somebody hovers, taps or tabs to it.",
@@ -1899,7 +1899,7 @@
     {
       "id": "map",
       "name": "Map",
-      "category": "media",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "An office or destination map, from just an address.",
@@ -2183,7 +2183,7 @@
     {
       "id": "cards",
       "name": "Cards",
-      "category": "media",
+      "category": "cards and lists",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A grid of the same shape repeated: destinations, offers, the team.",
@@ -2445,7 +2445,7 @@
     {
       "id": "slider",
       "name": "Slider",
-      "category": "media",
+      "category": "showcase",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Cards on a rail. Swipe or scroll sideways through them.",
@@ -2669,7 +2669,7 @@
     {
       "id": "testimonials",
       "name": "Testimonial slider",
-      "category": "media",
+      "category": "cards and lists",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "What your clients said, on a rail: a rating, a quote, a name and a photo.",
@@ -2817,7 +2817,7 @@
     {
       "id": "button",
       "name": "Button",
-      "category": "actions",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A call to action.",
@@ -2921,7 +2921,7 @@
     {
       "id": "button-group",
       "name": "Button group",
-      "category": "actions",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Two or more buttons side by side.",
@@ -3015,7 +3015,7 @@
     {
       "id": "search",
       "name": "Search",
-      "category": "actions",
+      "category": "navigation",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A box that searches your own pages.",
@@ -3084,7 +3084,7 @@
     {
       "id": "theme-toggle",
       "name": "Light / dark",
-      "category": "actions",
+      "category": "navigation",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A switch that turns the whole site light or dark.",
@@ -3137,7 +3137,7 @@
     {
       "id": "nav",
       "name": "Menu",
-      "category": "actions",
+      "category": "navigation",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "The links across your header, or down your footer.",
@@ -3327,7 +3327,7 @@
     {
       "id": "steps",
       "name": "Steps",
-      "category": "text",
+      "category": "cards and lists",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Numbered steps or a day by day timeline, joined up in order.",
@@ -3426,7 +3426,7 @@
     {
       "id": "stats",
       "name": "Key numbers",
-      "category": "text",
+      "category": "cards and lists",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Big figures with a word under each: years, reviews, holidays booked.",
@@ -3558,7 +3558,7 @@
     {
       "id": "logos",
       "name": "Logo strip",
-      "category": "media",
+      "category": "cards and lists",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A row of badges or partner logos, all on a common height.",
@@ -3675,7 +3675,7 @@
     {
       "id": "social",
       "name": "Social links",
-      "category": "actions",
+      "category": "navigation",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A row of icons linking to your accounts.",
@@ -4196,7 +4196,7 @@
     {
       "id": "read-more",
       "name": "Read more",
-      "category": "text",
+      "category": "show and hide",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Long text folded to a few lines, with a control to open it.",
@@ -4306,7 +4306,7 @@
     {
       "id": "whatsapp",
       "name": "WhatsApp",
-      "category": "actions",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A click-to-chat button, with the first message already written.",
@@ -4390,7 +4390,7 @@
     {
       "id": "coupon",
       "name": "Coupon",
-      "category": "actions",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A discount code, with the small print and a date it ends.",
@@ -4502,7 +4502,7 @@
     {
       "id": "locations",
       "name": "Multi Location",
-      "category": "actions",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Your branches, each with its address, phone and directions.",
@@ -4682,7 +4682,7 @@
     {
       "id": "shape",
       "name": "Shape",
-      "category": "media",
+      "category": "layout",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A circle, ring, square or blob, for decoration behind your content.",
@@ -4770,7 +4770,7 @@
     {
       "id": "file",
       "name": "File",
-      "category": "actions",
+      "category": "actions and contact",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "A brochure, terms or a price list, for a visitor to download.",
@@ -4865,7 +4865,7 @@
     {
       "id": "breadcrumbs",
       "name": "Breadcrumbs",
-      "category": "layout",
+      "category": "navigation",
       "travelSpecific": false,
       "staffOnly": false,
       "description": "The trail back up to the home page. Moves the automatic one here.",

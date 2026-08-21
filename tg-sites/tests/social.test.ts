@@ -90,7 +90,7 @@ describe('the networks a client can pick', () => {
 describe('the block definition', () => {
   it('is in the registry, in with the other links', () => {
     expect(isKnownBlock('social')).toBe(true);
-    expect(blockDefinition('social')?.group).toBe('Actions');
+    expect(blockDefinition('social')?.group).toBe('Navigation');
   });
 
   it('arrives with a few accounts in it, so it looks like what it is', () => {

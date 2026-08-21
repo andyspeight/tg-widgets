@@ -40,9 +40,9 @@ function source(...parts: string[]): string {
 describe('the Cards block', () => {
   const definition = blockDefinition('cards')!;
 
-  it('is in the library, under Media, and belongs to the client', () => {
+  it('is in the library, under Cards and lists, and belongs to the client', () => {
     expect(isKnownBlock('cards')).toBe(true);
-    expect(definition.group).toBe('Media');
+    expect(definition.group).toBe('Cards and lists');
     // Nothing an agent types here becomes code, so there is nothing to gate.
     expect(definition.staffOnly).toBeUndefined();
   });

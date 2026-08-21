@@ -60,7 +60,7 @@ function slide(over: Record<string, unknown> = {}) {
 describe('the block', () => {
   it('is registered and lives with the other media', () => {
     expect(isKnownBlock('half-overlay')).toBe(true);
-    expect(blockDefinition('half-overlay')!.group).toBe('Media');
+    expect(blockDefinition('half-overlay')!.group).toBe('Showcase');
   });
 
   it('arrives with two slides, so the client sees what it is', () => {

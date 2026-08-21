@@ -9,7 +9,7 @@
 
 import { useRef, useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { blocksByGroup, type BlockDefinition } from '../../lib/content/blocks';
+import { blockMatches, blocksByGroup, type BlockDefinition } from '../../lib/content/blocks';
 import { Icon } from './Icon';
 import { Modal } from '../ui/Modal';
 
@@ -47,10 +47,7 @@ export function BlockPicker({
       ...group,
       blocks: group.blocks.filter(
         (definition) =>
-          !exclude?.includes(definition.type) &&
-          (!needle ||
-            definition.label.toLowerCase().includes(needle) ||
-            definition.description.toLowerCase().includes(needle)),
+          !exclude?.includes(definition.type) && blockMatches(definition, needle),
       ),
     }))
     .filter((group) => group.blocks.length > 0);

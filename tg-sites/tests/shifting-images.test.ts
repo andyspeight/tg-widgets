@@ -34,9 +34,9 @@ const code = block.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const MAX = Number(/MAX_SHIFTING_IMAGES = (\d+)/.exec(render)?.[1]);
 
 describe('the block', () => {
-  it('is registered, in Media', () => {
+  it('is registered, in Showcase', () => {
     expect(isKnownBlock('shifting-images')).toBe(true);
-    expect(blockDefinition('shifting-images')!.group).toBe('Media');
+    expect(blockDefinition('shifting-images')!.group).toBe('Showcase');
   });
 
   it('takes three pictures, because there are three places', () => {

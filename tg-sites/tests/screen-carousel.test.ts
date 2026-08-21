@@ -52,9 +52,9 @@ function treeWith(type: string, props: Record<string, unknown>) {
 }
 
 describe('the block', () => {
-  it('is registered, in Media', () => {
+  it('is registered, in Showcase', () => {
     expect(isKnownBlock('screen-carousel')).toBe(true);
-    expect(blockDefinition('screen-carousel')!.group).toBe('Media');
+    expect(blockDefinition('screen-carousel')!.group).toBe('Showcase');
   });
 
   it('offers a laptop and a phone', () => {

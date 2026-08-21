@@ -111,9 +111,9 @@ describe('the Icon block', () => {
 describe('the Shape block', () => {
   const definition = blockDefinition('shape')!;
 
-  it('is in the library, under Media, and belongs to the client', () => {
+  it('is in the library, under Layout, and belongs to the client', () => {
     expect(isKnownBlock('shape')).toBe(true);
-    expect(definition.group).toBe('Media');
+    expect(definition.group).toBe('Layout');
     expect(definition.staffOnly).toBeUndefined();
   });
 

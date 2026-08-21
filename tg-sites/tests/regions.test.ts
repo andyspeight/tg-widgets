@@ -293,10 +293,10 @@ describe('sanitising a region', () => {
 // ---------------------------------------------------------------------------
 
 describe('the menu block', () => {
-  it('is in the library, in Actions, and is not staff only', () => {
+  it('is in the library, in Navigation, and is not staff only', () => {
     expect(isKnownBlock('nav')).toBe(true);
     const definition = blockDefinition('nav')!;
-    expect(definition.group).toBe('Actions');
+    expect(definition.group).toBe('Navigation');
     // Navigation is the client's own. Nothing they type here becomes code.
     expect(definition.staffOnly).toBeUndefined();
   });

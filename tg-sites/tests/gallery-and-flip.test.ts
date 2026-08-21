@@ -167,9 +167,9 @@ describe('the tilted carousel', () => {
 // ---------------------------------------------------------------------------
 
 describe('flipping boxes', () => {
-  it('is registered, in Media', () => {
+  it('is registered, in Showcase', () => {
     expect(isKnownBlock('flip-cards')).toBe(true);
-    expect(blockDefinition('flip-cards')!.group).toBe('Media');
+    expect(blockDefinition('flip-cards')!.group).toBe('Showcase');
   });
 
   /*

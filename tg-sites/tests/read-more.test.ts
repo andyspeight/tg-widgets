@@ -58,9 +58,9 @@ const props0 = (page: Page) => page.sections[0].rows[0].columns[0].blocks[0].pro
 describe('the block', () => {
   const definition = blockDefinition('read-more')!;
 
-  it('is in the library, under Text, and belongs to the client', () => {
+  it('is in the library, under Show and hide, and belongs to the client', () => {
     expect(isKnownBlock('read-more')).toBe(true);
-    expect(definition.group).toBe('Text');
+    expect(definition.group).toBe('Show and hide');
     expect(definition.staffOnly).toBeUndefined();
   });
 

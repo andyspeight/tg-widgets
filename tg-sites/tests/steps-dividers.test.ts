@@ -42,7 +42,7 @@ function read(...parts: string[]): string {
 describe('the Steps block', () => {
   it('is in the registry, in with the other text', () => {
     expect(isKnownBlock('steps')).toBe(true);
-    expect(blockDefinition('steps')?.group).toBe('Text');
+    expect(blockDefinition('steps')?.group).toBe('Cards and lists');
   });
 
   it('arrives with steps already written, so it looks like what it is', () => {

@@ -182,12 +182,46 @@ export type Field = { group?: FieldGroup } & (
   | { kind: 'imported'; key: string; label: string; help?: string }
 );
 
-export type BlockGroup = 'Text' | 'Media' | 'Actions' | 'Layout' | 'Advanced';
+/*
+ * NINE GROUPS, RE-CUT 21 AUG 2026 (Andy asked for something sensible once the
+ * Duda element audit closed and the library reached 52).
+ *
+ * The five it replaces had stopped describing anything. "Media" held eighteen
+ * blocks including the icon and the shape divider, which are not media; "Text"
+ * held tabs and an accordion, which are not text; and every picture-cycling
+ * thing in the library was filed under the same word as a plain photograph.
+ *
+ * These are cut by WHAT A CLIENT IS TRYING TO DO, not by what the block is made
+ * of. Showcase is the one worth explaining: a slider, a flip card and a stacked
+ * deck have nothing in common technically, and everything in common in a
+ * client's head, which is "show several things off with some movement".
+ *
+ * The order is the reading order of the panel, so it runs from the most-reached
+ * for to the least.
+ */
+export type BlockGroup =
+  | 'Text'
+  | 'Show and hide'
+  | 'Media'
+  | 'Showcase'
+  | 'Cards and lists'
+  | 'Navigation'
+  | 'Actions and contact'
+  | 'Layout'
+  | 'Advanced';
 
 export interface BlockDefinition {
   type: string;
   label: string;
   group: BlockGroup;
+  /**
+   * The words a client would actually TYPE to find this, which are rarely the
+   * words we named it. Somebody looking for the Slider types "carousel"; for the
+   * Accordion, "faq"; for the Nav, "menu" or "hamburger". Matched by the search
+   * in both element pickers alongside the label and the description, so the
+   * synonyms live beside the block rather than in a lookup table that drifts.
+   */
+  keywords: string;
   /** Icon shown in the block picker and the outline. */
   icon: IconName;
   description: string;
@@ -276,6 +310,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'heading',
     label: 'Heading',
     group: 'Text',
+    keywords: 'title h1 h2 h3 headline',
     icon: 'heading',
     description: 'A section or sub-section title.',
     /*
@@ -383,6 +418,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'text',
     label: 'Text',
     group: 'Text',
+    keywords: 'paragraph copy body words wysiwyg rich',
     icon: 'text',
     description: 'A paragraph or a few. Bold, italics, links and lists.',
     defaults: {
@@ -426,6 +462,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'quote',
     label: 'Quote',
     group: 'Text',
+    keywords: 'pull quote blockquote testimonial saying',
     icon: 'quote',
     description: 'A pulled-out quotation with an attribution.',
     defaults: { text: 'Something worth repeating.', attribution: '', role: '' },
@@ -441,6 +478,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'list',
     label: 'List',
     group: 'Text',
+    keywords: 'bullets numbered ticks checklist points',
     icon: 'list',
     description: 'Bulleted, numbered or ticked points.',
     defaults: {
@@ -481,7 +519,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
   {
     type: 'icon-item',
     label: 'Icon and text',
-    group: 'Text',
+    group: 'Cards and lists',
+    keywords: 'feature benefit icon and text point',
     icon: 'sparkle',
     description: 'An icon with a short title and a line of copy.',
     /*
@@ -548,7 +587,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'accordion',
     label: 'Accordion',
-    group: 'Text',
+    group: 'Show and hide',
+    keywords: 'faq collapse expand toggle questions drop down',
     icon: 'accordion',
     description: 'Headings that open to show what is under them.',
     defaults: {
@@ -621,7 +661,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'tabs',
     label: 'Tabs',
-    group: 'Text',
+    group: 'Show and hide',
+    keywords: 'tabbed panels switcher sections',
     icon: 'tabs',
     description: 'A few panels of text with a row of headings to pick between them.',
     defaults: {
@@ -678,6 +719,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'image',
     label: 'Image',
     group: 'Media',
+    keywords: 'picture photo slideshow banner slides',
     icon: 'image',
     description: 'A picture, with the alt text search engines and screen readers need.',
     /*
@@ -832,7 +874,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'half-overlay',
     label: 'Half overlay',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'carousel split overlap hero slider',
     icon: 'slider',
     description: 'A picture beside a tinted panel carrying your message. Add more than one and it becomes a slider.',
     defaults: {
@@ -953,7 +996,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'expanding-cards',
     label: 'Expanding cards',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'accordion cards expand focus click grow',
     icon: 'slider',
     description: 'A row of pictures where the one you click opens to show its story.',
     defaults: {
@@ -1040,7 +1084,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'screen-carousel',
     label: 'Screen carousel',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'laptop phone mockup device screenshot scroller',
     icon: 'slider',
     description: 'Your pictures playing on a laptop or phone screen.',
     defaults: {
@@ -1116,7 +1161,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'flip-cards',
     label: 'Flipping boxes',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'flipping boxes turn reveal back front',
     icon: 'gallery',
     description: 'Cards that turn over to show more. Tap, or hover with a mouse.',
     defaults: {
@@ -1205,7 +1251,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'stacked-cards',
     label: 'Stacked cards',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'stack scroll collapse pile sticky',
     icon: 'slider',
     description: 'Cards that gather into a deck as you scroll past them. Good for comparing a few options.',
     defaults: {
@@ -1287,7 +1334,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'shifting-images',
     label: 'Shifting images',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'rotate promote shuffle three images',
     icon: 'gallery',
     description: 'Three pictures in a collage that trade places as you watch.',
     defaults: {
@@ -1358,6 +1406,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'rating',
     label: 'Rating',
     group: 'Text',
+    keywords: 'stars score review out of five',
     icon: 'testimonial',
     description: 'A star rating, on its own. Halves allowed.',
     defaults: { rating: 4.5, showValue: true, count: '', size: 'm', colour: '', align: 'left' },
@@ -1413,7 +1462,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'tooltip',
     label: 'Tooltip',
-    group: 'Text',
+    group: 'Show and hide',
+    keywords: 'hint popover explain hover note glossary',
     icon: 'eye',
     description: 'A word or phrase with a note that appears when somebody hovers, taps or tabs to it.',
     defaults: { text: 'ATOL protected', tip: 'Your money is protected by the Civil Aviation Authority if we stop trading.', position: 'above', align: 'left' },
@@ -1455,6 +1505,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'tags',
     label: 'Tags',
     group: 'Text',
+    keywords: 'labels chips pills keywords delimited categories',
     icon: 'list',
     description: 'A row of short labels, separated by bullets or drawn as coloured pills.',
     defaults: {
@@ -1511,6 +1562,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'video',
     label: 'Video',
     group: 'Media',
+    keywords: 'film youtube vimeo mp4 clip movie',
     icon: 'video',
     description: 'A YouTube or Vimeo video, or a hosted file.',
     defaults: { url: '', ratio: '16/9', radius: 'md', caption: '' },
@@ -1546,7 +1598,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'map',
     label: 'Map',
-    group: 'Media',
+    group: 'Actions and contact',
+    keywords: 'location google address directions where',
     icon: 'map',
     description: 'An office or destination map, from just an address.',
     defaults: { address: '', zoom: 14, height: 360, radius: 'md', caption: '' },
@@ -1592,6 +1645,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'before-after',
     label: 'Before & After',
     group: 'Media',
+    keywords: 'compare slider drag two photos twin',
     icon: 'compare',
     description: 'Two photos with a divider you drag to compare them.',
     defaults: {
@@ -1647,6 +1701,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'gallery',
     label: 'Gallery',
     group: 'Media',
+    keywords: 'photos grid lightbox popup masonry album pictures',
     icon: 'gallery',
     description: 'A grid of images, or a rail that scrolls itself. Click to see one big.',
     defaults: { columns: '3', gap: 'm', radius: 'md', layout: 'grid', lightbox: true, images: [] },
@@ -1730,7 +1785,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'cards',
     label: 'Cards',
-    group: 'Media',
+    group: 'Cards and lists',
+    keywords: 'grid tiles fancy blog posts collection destinations boxes',
     icon: 'cards',
     description: 'A grid of the same shape repeated: destinations, offers, the team.',
     defaults: {
@@ -1982,7 +2038,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'slider',
     label: 'Slider',
-    group: 'Media',
+    group: 'Showcase',
+    keywords: 'carousel rail scroller tilted mosaic double row swipe',
     icon: 'slider',
     description: 'Cards on a rail. Swipe or scroll sideways through them.',
     defaults: {
@@ -2179,7 +2236,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'testimonials',
     label: 'Testimonial slider',
-    group: 'Media',
+    group: 'Cards and lists',
+    keywords: 'reviews quotes customers slider what they say',
     icon: 'testimonial',
     description: 'What your clients said, on a rail: a rating, a quote, a name and a photo.',
     defaults: {
@@ -2273,6 +2331,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'audio',
     label: 'Audio',
     group: 'Media',
+    keywords: 'sound podcast music player mp3',
     icon: 'audio',
     description: 'A sound clip in the browser player, from a link.',
     defaults: { src: '', title: '', caption: '', textColour: '' },
@@ -2303,7 +2362,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
   {
     type: 'button',
     label: 'Button',
-    group: 'Actions',
+    group: 'Actions and contact',
+    keywords: 'link cta call to action click',
     icon: 'button',
     description: 'A call to action.',
     defaults: {
@@ -2349,7 +2409,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
   {
     type: 'button-group',
     label: 'Button group',
-    group: 'Actions',
+    group: 'Actions and contact',
+    keywords: 'buttons row pair cta links',
     icon: 'buttons',
     description: 'Two or more buttons side by side.',
     defaults: {
@@ -2415,7 +2476,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'search',
     label: 'Search',
-    group: 'Actions',
+    group: 'Navigation',
+    keywords: 'find lookup magnifier site search',
     icon: 'search',
     description: 'A box that searches your own pages.',
     defaults: { placeholder: 'Search', display: 'box', align: 'left' },
@@ -2456,7 +2518,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'theme-toggle',
     label: 'Light / dark',
-    group: 'Actions',
+    group: 'Navigation',
+    keywords: 'dark light mode switch night',
     icon: 'theme',
     description: 'A switch that turns the whole site light or dark.',
     defaults: { display: 'switch', align: 'left' },
@@ -2493,7 +2556,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'nav',
     label: 'Menu',
-    group: 'Actions',
+    group: 'Navigation',
+    keywords: 'menu links hamburger burger navigation header',
     icon: 'nav',
     description: 'The links across your header, or down your footer.',
     defaults: {
@@ -2624,7 +2688,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'steps',
     label: 'Steps',
-    group: 'Text',
+    group: 'Cards and lists',
+    keywords: 'timeline process how it works numbered journey',
     icon: 'steps',
     description: 'Numbered steps or a day by day timeline, joined up in order.',
     defaults: {
@@ -2709,7 +2774,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'stats',
     label: 'Key numbers',
-    group: 'Text',
+    group: 'Cards and lists',
+    keywords: 'numbers figures counters key metrics count up',
     icon: 'stats',
     description: 'Big figures with a word under each: years, reviews, holidays booked.',
     defaults: {
@@ -2808,7 +2874,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'logos',
     label: 'Logo strip',
-    group: 'Media',
+    group: 'Cards and lists',
+    keywords: 'partners badges trust brands strip marquee',
     icon: 'logos',
     description: 'A row of badges or partner logos, all on a common height.',
     defaults: { height: 'm', gap: 'l', tone: 'colour', align: 'centre', items: [] },
@@ -2888,7 +2955,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'social',
     label: 'Social links',
-    group: 'Actions',
+    group: 'Navigation',
+    keywords: 'facebook instagram twitter x links follow icons',
     icon: 'social',
     description: 'A row of icons linking to your accounts.',
     defaults: {
@@ -2976,6 +3044,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'table',
     label: 'Table',
     group: 'Layout',
+    keywords: 'rows columns data prices spreadsheet',
     icon: 'table',
     description: 'A grid of figures or facts. Paste it straight from a spreadsheet.',
     defaults: {
@@ -3068,6 +3137,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'container',
     label: 'Inner container',
     group: 'Layout',
+    keywords: 'inner columns nest box wrapper group',
     icon: 'columns',
     description: 'Columns inside a column, for content side by side.',
     // The two starter columns are seeded by the factory with fresh ids, not
@@ -3129,6 +3199,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'grid',
     label: 'Grid',
     group: 'Layout',
+    keywords: 'columns rows advanced cells wrap',
     icon: 'grid',
     description: 'Cells that flow into a set number of columns and wrap.',
     // The three starter cells are seeded by the factory with fresh ids, for the
@@ -3198,6 +3269,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'divider',
     label: 'Divider',
     group: 'Layout',
+    keywords: 'rule line separator hr break',
     icon: 'divider',
     description: 'A horizontal rule.',
     defaults: { style: 'line', spacing: 'm' },
@@ -3220,6 +3292,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'spacer',
     label: 'Spacer',
     group: 'Layout',
+    keywords: 'gap space blank padding air',
     icon: 'spacer',
     description: 'Empty vertical space.',
     defaults: { height: 'm' },
@@ -3260,6 +3333,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'copyright',
     label: 'Copyright',
     group: 'Text',
+    keywords: 'legal footer year small print',
     icon: 'copyright',
     description: 'A copyright line whose year looks after itself.',
     defaults: {
@@ -3348,7 +3422,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'read-more',
     label: 'Read more',
-    group: 'Text',
+    group: 'Show and hide',
+    keywords: 'truncate collapse expand show more less',
     icon: 'read-more',
     description: 'Long text folded to a few lines, with a control to open it.',
     defaults: {
@@ -3417,7 +3492,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'whatsapp',
     label: 'WhatsApp',
-    group: 'Actions',
+    group: 'Actions and contact',
+    keywords: 'chat message click to chat contact',
     icon: 'whatsapp',
     description: 'A click-to-chat button, with the first message already written.',
     defaults: {
@@ -3499,7 +3575,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'coupon',
     label: 'Coupon',
-    group: 'Actions',
+    group: 'Actions and contact',
+    keywords: 'voucher discount promo code offer',
     icon: 'coupon',
     description: 'A discount code, with the small print and a date it ends.',
     defaults: {
@@ -3570,7 +3647,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'locations',
     label: 'Multi Location',
-    group: 'Actions',
+    group: 'Actions and contact',
+    keywords: 'branches offices shops multi location addresses',
     icon: 'map',
     description: 'Your branches, each with its address, phone and directions.',
     defaults: {
@@ -3659,6 +3737,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'icon',
     label: 'Icon',
     group: 'Media',
+    keywords: 'symbol glyph pictogram svg',
     icon: 'sparkle',
     description: 'A single icon from the library, sized and coloured.',
     defaults: { icon: 'sparkles', size: 40, colour: '', pulse: 'none', href: '', label: '', align: 'left' },
@@ -3734,7 +3813,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'shape',
     label: 'Shape',
-    group: 'Media',
+    group: 'Layout',
+    keywords: 'divider wave curve angle section edge',
     icon: 'shape',
     description: 'A circle, ring, square or blob, for decoration behind your content.',
     defaults: {
@@ -3831,7 +3911,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'file',
     label: 'File',
-    group: 'Actions',
+    group: 'Actions and contact',
+    keywords: 'download document pdf brochure attachment',
     icon: 'file',
     description: 'A brochure, terms or a price list, for a visitor to download.',
     defaults: {
@@ -3919,7 +4000,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
      */
     type: 'breadcrumbs',
     label: 'Breadcrumbs',
-    group: 'Layout',
+    group: 'Navigation',
+    keywords: 'trail crumbs path where am i',
     icon: 'crumbs',
     description: 'The trail back up to the home page. Moves the automatic one here.',
     // Blank colour means "follow the section", which is right nearly everywhere.
@@ -3986,6 +4068,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'widget',
     label: 'Travelgenix widget',
     group: 'Advanced',
+    keywords: 'travelgenix offers search booking our widgets',
     icon: 'sparkle',
     description: 'One of your own widgets: offers, reviews, an enquiry form.',
     // No default kind: it used to open on Opening Hours, so entering an ID
@@ -4036,6 +4119,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'embed-widget',
     label: 'Embedded widget',
     group: 'Advanced',
+    keywords: 'third party iframe external embed',
     icon: 'code',
     description: "Code from somewhere else, run in a sealed box that cannot reach your page.",
     defaults: { html: '', height: 420, title: '' },
@@ -4088,6 +4172,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'embed',
     label: 'HTML',
     group: 'Advanced',
+    keywords: 'html code script custom paste',
     icon: 'code',
     description: 'Paste an embed code or your own HTML.',
     defaults: { html: '' },
@@ -4109,6 +4194,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     type: 'imported',
     label: 'Imported design',
     group: 'Advanced',
+    keywords: 'import slicer captured section',
     icon: 'code',
     /*
      * NOT staffOnly, and that is the point of the whole import pipeline.
@@ -4163,13 +4249,48 @@ export function defaultPropsFor(type: string): Record<string, unknown> {
 
 export const BLOCK_GROUPS: readonly BlockGroup[] = [
   'Text',
+  'Show and hide',
   'Media',
-  'Actions',
+  'Showcase',
+  'Cards and lists',
+  'Navigation',
+  'Actions and contact',
   'Layout',
   'Advanced',
 ];
 
 /** Blocks grouped for the picker, staff-only ones filtered when not staff. */
+/*
+ * FREE-TEXT ELEMENT SEARCH (Andy, 21 Aug 2026).
+ *
+ * There was already a box in both pickers, and it matched the label and the
+ * description only, so it found nothing for the words people actually use:
+ * "carousel" missed the Slider, "faq" missed the Accordion, "menu" missed the
+ * Nav. The box was never the gap. The words were.
+ *
+ * Every term has to match SOMETHING, but each may match a different field, so
+ * "flip card" and "card flip" both find the flipping boxes and "video slider"
+ * finds the one that takes both. Substring rather than fuzzy: a client typing
+ * three letters wants a short list they can trust, not a ranked guess, and a
+ * wrong-but-confident match is worse here than no match at all.
+ */
+export function blockMatches(definition: BlockDefinition, query: string): boolean {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
+  const haystack = [
+    definition.label,
+    definition.description,
+    definition.keywords,
+    definition.group,
+    // The type, so "read-more" and "half-overlay" find themselves, and so an
+    // agent who knows the internal name can still reach for it.
+    definition.type.replace(/-/g, ' '),
+  ]
+    .join(' ')
+    .toLowerCase();
+  return terms.every((term) => haystack.includes(term));
+}
+
 export function blocksByGroup(isStaff: boolean): Array<{ group: BlockGroup; blocks: BlockDefinition[] }> {
   return BLOCK_GROUPS.map((group) => ({
     group,
