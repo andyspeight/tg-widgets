@@ -72,7 +72,7 @@ function plan() {
         const c = countryBySlug.get(slug);
         if (c) { compCountry = c; break; }
       }
-      return { key: v.key, name: v.name, city, cityCountry, compCountry };
+      return { key: v.key, name: v.name, city, cityCountry, compCountry, comps: v.competitions || [] };
     });
   return PLAN;
 }
@@ -89,15 +89,23 @@ async function photon(q) {
     lat: +f.geometry.coordinates[1].toFixed(5),
     cc: ((f.properties && f.properties.countrycode) || '').toUpperCase(),
     label: (f.properties && f.properties.name) || '',
+    city: (f.properties && (f.properties.city || f.properties.county || f.properties.state)) || '',
+    okey: (f.properties && f.properties.osm_key) || '',
     osm: (f.properties && f.properties.osm_value) || '',
   }));
 }
 
-// "Angel Stadium" must never mean a business library in Alabama just because
-// both are in the US. The first run proved top-1-plus-country is not enough:
-// same-country wrong-city hits sail through. So every candidate is scored
-// against the venue name, and a coordinate with no name evidence is accepted
-// only when independent queries agree on the same spot.
+// Text similarity alone cannot tell the Arena da Baixada from a street in
+// Bahia named after it, or Audi Field from an Office of Field Audit. Two
+// failed passes proved it, so acceptance now leans on the geocoder's own
+// metadata instead of name overlap:
+//   - a venue with a known city (its concerts say where it is) must come back
+//     IN that city, whatever it is called this season
+//   - a fixtures venue, where no city is known, must at least BE a sports
+//     place; a street or a bank branch is never a stadium however well the
+//     name matches
+//   - the North American leagues span two countries, so their expectation is
+//     {US, CA}, which is what kept BMO Field and the Canada Life Centre out.
 const norm = (t) => String(t || '').toLowerCase().normalize('NFD')
   .replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]+/g, ' ')
   .split(/\s+/).filter(Boolean);
@@ -113,62 +121,80 @@ function nameScore(venueName, label) {
   const aj = a.join(' ');
   const bj = b.join(' ');
   if (aj === bj) score += 0.4;
-  else if (bj.includes(aj) || aj.includes(bj)) score += 0.25;
+  else if (bj.includes(aj) || aj.includes(bj)) score += 0.2;
   return score;
 }
 
-const SPORTY = new Set(['stadium', 'sports_centre', 'sports_hall', 'pitch', 'arena',
-  'racetrack', 'raceway', 'golf_course', 'events_centre', 'theatre', 'attraction']);
-
-const kmApart = (p, q) => {
-  const dLat = (p.lat - q.lat) * 111;
-  const dLng = (p.lng - q.lng) * 111 * Math.cos((p.lat * Math.PI) / 180);
-  return Math.sqrt(dLat * dLat + dLng * dLng);
+const sameCity = (a, b) => {
+  const x = norm(a).join(' ');
+  const y = norm(b).join(' ');
+  return !!x && !!y && (x === y || x.includes(y) || y.includes(x));
 };
 
+const SPORTY = new Set(['stadium', 'sports_centre', 'sports_hall', 'pitch', 'arena',
+  'racetrack', 'raceway', 'track', 'golf_course', 'ice_rink', 'horse_racing',
+  'events_centre', 'exhibition_centre', 'attraction']);
+const NEVER = new Set(['bank', 'library', 'office', 'company', 'residential', 'school', 'university']);
+
+// Two-country leagues: a US expectation must not reject Toronto and Winnipeg.
+const NA_LEAGUES = new Set(['mlb', 'nhl', 'nba', 'nfl', 'mls']);
+
 async function resolve(v) {
-  const expect = ISO[(v.cityCountry || '').toLowerCase()] || ISO[(v.compCountry || '').toLowerCase()] || null;
+  let expectSet = null;
+  const named = ISO[(v.cityCountry || '').toLowerCase()] || null;
+  if (named) expectSet = new Set([named]);
+  else {
+    const compIso = ISO[(v.compCountry || '').toLowerCase()] || null;
+    if (compIso === 'US' && (v.comps || []).some((c) => NA_LEAGUES.has(c))) expectSet = new Set(['US', 'CA']);
+    else if (compIso) expectSet = new Set([compIso]);
+  }
+
   const queries = [];
   if (v.city) queries.push(v.name + ', ' + v.city);
   if (v.compCountry) queries.push(v.name + ', ' + v.compCountry);
   queries.push(v.name);
 
-  const pool = [];
+  const flag = expectSet ? '' : 'unverified';
+  let bestSporty = null;
+
   for (const q of queries) {
     let hits = [];
     try { hits = await photon(q); } catch (e) { hits = []; }
     for (const h of hits) {
-      if (expect && h.cc && h.cc !== expect) continue;
-      h.q = q;
-      h.score = nameScore(v.name, h.label) + (SPORTY.has(h.osm) ? 0.15 : 0);
-      pool.push(h);
+      if (expectSet && h.cc && !expectSet.has(h.cc)) continue;
+      if (h.okey === 'highway' || NEVER.has(h.osm)) continue;
+      const score = nameScore(v.name, h.label);
+
+      // City truth beats everything: the right city plus any name evidence is
+      // the venue, whatever its sponsor calls it now.
+      if (v.city && sameCity(h.city, v.city) && score >= 0.3) {
+        return { key: v.key, lat: h.lat, lng: h.lng, src: 'venue', flag, label: h.label };
+      }
+      // No known city: only a sports place can carry a weak name, and an exact
+      // name on a non-sports place is accepted but never a partial one.
+      if (!v.city) {
+        const sporty = SPORTY.has(h.osm);
+        if (sporty && score >= 0.35 && (!bestSporty || score > bestSporty.score)) {
+          bestSporty = { h, score };
+        }
+        if (!sporty && score >= 0.95) {
+          return { key: v.key, lat: h.lat, lng: h.lng, src: 'venue', flag, label: h.label };
+        }
+      }
     }
-    // A confident name match ends the ladder early: no point burning requests.
-    const best = pool.slice().sort((a, b) => b.score - a.score)[0];
-    if (best && best.score >= 0.85) break;
+    if (bestSporty && bestSporty.score >= 0.85) break;
+  }
+  if (bestSporty) {
+    const h = bestSporty.h;
+    return { key: v.key, lat: h.lat, lng: h.lng, src: 'venue', flag, label: h.label };
   }
 
-  const flag = expect ? '' : 'unverified';
-  const best = pool.slice().sort((a, b) => b.score - a.score)[0];
-  if (best && best.score >= 0.6) {
-    return { key: v.key, lat: best.lat, lng: best.lng, src: 'venue', flag, label: best.label };
-  }
-
-  // No name evidence: only agreement between DIFFERENT queries on the same
-  // 25km spot counts. One ranking fluke cannot agree with itself.
-  for (const c of pool) {
-    const backers = new Set(pool.filter((o) => kmApart(o, c) < 25).map((o) => o.q));
-    if (backers.size >= 2) {
-      return { key: v.key, lat: c.lat, lng: c.lng, src: 'consensus', flag, label: c.label };
-    }
-  }
-
-  // Last resort: the city its concerts say it is in. rad=20 covers a metro,
+  // Last resort for concert venues: the city itself. rad=20 covers a metro,
   // which is exactly the anchor the working example used.
   if (v.city && v.cityCountry) {
     let hits = [];
     try { hits = await photon(v.city + ', ' + v.cityCountry); } catch (e) { hits = []; }
-    const cityHit = hits.filter((h) => !expect || !h.cc || h.cc === expect)
+    const cityHit = hits.filter((h) => !expectSet || !h.cc || expectSet.has(h.cc))
       .sort((a, b) => nameScore(v.city, b.label) - nameScore(v.city, a.label))[0];
     if (cityHit && nameScore(v.city, cityHit.label) >= 0.6) {
       return { key: v.key, lat: cityHit.lat, lng: cityHit.lng, src: 'city', flag, label: cityHit.label };
