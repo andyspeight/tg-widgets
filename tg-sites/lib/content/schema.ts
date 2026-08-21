@@ -297,6 +297,10 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * scroll listener. So S5 scrub-scale is 0 though the catalogue says 0/1, and S1
  * tide-reveal is 0 though the catalogue says 1.
  *
+ * A3 drifting-rail is the one that really is tier 1, and the only recipe so far that
+ * puts a script on a page. Its whole idea is a continuous drift that scroll ADDS to
+ * rather than replaces, and CSS can express either source alone and never the sum.
+ *
  * A4 floating-layers is 0 because its near layers drift on a CSS clock and its far
  * layer is offset by a view() timeline, so nothing in it needs a script either.
  *
@@ -347,8 +351,23 @@ export const MOTION_CYCLING_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionR
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A4', 'A5', 'A6', 'S1', 'S3', 'S5',
+  'A2', 'A3', 'A4', 'A5', 'A6', 'S1', 'S3', 'S5',
 ]);
+
+/**
+ * The recipes that need public/tg-motion.js. Keep this list SHORT.
+ *
+ * Clause 1 of the rule in lib/content/blocks.ts is that a page which asks for nothing
+ * ships nothing, and this set is where that promise is kept or broken: everything in
+ * here puts a script tag on any page carrying it, and everything outside it stays
+ * free. A3 is the only member because a track that drifts on its own AND is added to
+ * by scroll is the one thing CSS cannot express; every other recipe built so far is
+ * a stylesheet and must stay one.
+ *
+ * Before adding to this, check the recipe really cannot be done with a CSS animation
+ * or a view() timeline. Four recipes were expected to need a script and did not.
+ */
+export const MOTION_SCRIPT_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A3']);
 
 /**
  * The recipes that animate the section's BLOCKS ARRIVING.

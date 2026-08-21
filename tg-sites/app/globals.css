@@ -1394,6 +1394,73 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * A3 drifting-rail, TIER 1, and the only recipe so far that puts a script on a page.
+ * The section's cards stop being a grid and become a horizontal track. Its meaning in
+ * the catalogue is THE ROUTE MOVING PAST: itinerary days, a season's fixtures, a
+ * multi-centre tour's legs.
+ *
+ * WHAT IS HERE AND WHAT IS IN THE SCRIPT. Everything below is the rail itself, and it
+ * is a complete, working, native scroll-snap carousel on its own: swipeable, snapping,
+ * keyboard reachable, every card readable, no script involved. public/tg-motion.js
+ * adds an ambient drift on top by nudging the real scroll position. Blocked or slow
+ * and the visitor loses the drift and nothing else, which is clause 2 of the rule in
+ * lib/content/blocks.ts: the content never depends on a script.
+ *
+ * SO THERE IS NO SEPARATE REDUCED-MOTION STATE TO WRITE. The rail IS the reduced
+ * version, and the script simply never starts. That is the catalogue's requirement
+ * for this family exactly: under reduced motion a horizontal rail becomes a swipeable
+ * snapping carousel.
+ *
+ * NOT A MARQUEE, per the catalogue: a wrapping track needs its content duplicated or
+ * a seven-card rail wraps to a visible gap. The script oscillates within the track's
+ * real travel instead, so an end can never be exposed.
+ */
+.tgs-section[data-motion='A3'] .tgs-cards {
+  /* Out of the grid and into a track. */
+  grid-template-columns: none;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  /* Room for a focus ring on the first and last card, and for the snap to settle
+     somewhere that does not look accidental. */
+  scroll-padding-inline: var(--tgs-space-s);
+  /* The scrollbar is left alone on purpose. It is the visitor's clearest signal that
+     there is more to the right, and the one control that needs no explaining. */
+}
+
+.tgs-section[data-motion='A3'] .tgs-cards > .tgs-card {
+  scroll-snap-align: start;
+  /* A card wide enough to read and narrow enough that the next one shows, which is
+     what tells a visitor the rail continues. */
+  flex: 0 0 clamp(240px, 30%, 340px);
+}
+
+/*
+ * SNAPPING AND DRIFTING CANNOT BOTH OWN THE SCROLL POSITION, and snapping wins every
+ * time: a snap container drags any small programmatic scroll straight back to the
+ * nearest card, so the drift computed a new position every frame and the rail sat at
+ * zero. Measured, not guessed: setting scrollLeft to 17.7 read back as 0 with snapping
+ * on and as 18 with it off.
+ *
+ * So they take turns, the same handover slideshow.js makes with is-live. While
+ * tg-motion.js is driving, snapping is off and the drift owns the position. The moment
+ * the visitor touches the rail the script marks it as theirs, snapping comes straight
+ * back, and their swipe lands on a card exactly as it does with no script at all.
+ * Nothing is taken away from them; it is only ever off while nobody is steering.
+ */
+.tgs-section[data-motion='A3'] .tgs-cards[data-motion-live='1'] { scroll-snap-type: none; }
+.tgs-section[data-motion='A3'] .tgs-cards[data-motion-live='1'][data-motion-steer='1'] {
+  scroll-snap-type: x proximity;
+}
+
+/* The drift only ever runs where movement is welcome. The rail itself is untouched
+   by this: it stays a working carousel either way. */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-section[data-motion='A3'] .tgs-cards { scroll-behavior: auto; }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-row[data-stack='tablet'] { grid-template-columns: 1fr; }
   .tgs-row[data-stack='tablet'][data-reverse='true'] { direction: rtl; }

@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   MOTION_ARRIVAL_RECIPES,
+  MOTION_SCRIPT_RECIPES,
   MOTION_BACKGROUND_RECIPES,
   MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
@@ -28,6 +29,7 @@ import {
   type MotionRecipe,
 } from '../lib/content/schema';
 import { MOTION_CHOICES, MOTION_INTENSITIES } from '../lib/content/styles';
+import { needsMotionScript } from '../lib/content/motion';
 import { presetById } from '../lib/content/presets';
 import { buildStarterPage, STARTERS, type StarterFacts } from '../lib/content/starters';
 
@@ -51,6 +53,7 @@ const css = read('app', 'globals.css').replace(/\/\*[\s\S]*?\*\//g, '');
 const render = read('components', 'render', 'PageRenderer.tsx');
 const schema = read('lib', 'content', 'schema.ts');
 const blocks = read('lib', 'content', 'blocks.ts');
+const motionScript = read('public', 'tg-motion.js');
 
 /**
  * The bodies of every `@media (prefers-reduced-motion: no-preference)` block in the
@@ -129,6 +132,26 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
     const moving = css
       .split('}')
       .filter((rule) => rule.includes(selector) && /\banimation:|position:\s*sticky/.test(rule));
+
+    /*
+     * A SCRIPT-DRIVEN RECIPE KEEPS ITS GUARD IN THE SCRIPT. A3 moves nothing from the
+     * stylesheet at all: its CSS is a plain scroll-snap carousel that is welcome under
+     * reduced motion, and the drift that is not welcome lives in tg-motion.js, which
+     * has to refuse to start. Looking only in the stylesheet would have passed it
+     * while the drift ran for everybody.
+     */
+    if (MOTION_SCRIPT_RECIPES.has(recipe)) {
+      expect(
+        /prefers-reduced-motion:\s*reduce/.test(motionScript),
+        `${recipe} is script-driven but tg-motion.js never asks about reduced motion`,
+      ).toBe(true);
+      expect(
+        /matches\)\s*return/.test(motionScript),
+        `${recipe}'s script checks reduced motion but does not bail on it`,
+      ).toBe(true);
+      return;
+    }
+
     expect(moving.length, `${recipe} has no rule that makes anything move`).toBeGreaterThan(0);
     for (const rule of moving) {
       const head = rule.slice(rule.indexOf(selector));
@@ -152,6 +175,20 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
       const rules = css.split('}').filter((r) => r.includes(`[data-motion='${recipe}']`));
       const animation = rules.find((r) => /\banimation:/.test(r)) ?? '';
       const sticky = rules.some((r) => /position:\s*sticky/.test(r));
+
+      if (MOTION_SCRIPT_RECIPES.has(recipe)) {
+        // The script's own pacing. A phase read from the frame timestamp cannot drift
+        // on a slow machine; one advanced by a fixed step per frame is lesson 3.
+        expect(
+          /requestAnimationFrame/.test(motionScript),
+          `${recipe} is script-driven but runs no frame loop`,
+        ).toBe(true);
+        expect(
+          /now - start/.test(motionScript),
+          `${recipe}'s script does not derive its phase from elapsed time`,
+        ).toBe(true);
+        continue;
+      }
 
       if (!animation) {
         expect(sticky, `${recipe} neither animates nor sticks, so nothing moves`).toBe(true);
@@ -336,14 +373,32 @@ describe('the cost of a recipe is declared, so a page budget can be held', () =>
     expect(MOTION_RECIPES).not.toContain('A1' as MotionRecipe);
   });
 
-  it('keeps every live recipe at tier 0, so a page using one still ships no script', () => {
-    // Clause 1 of the rule in lib/content/blocks.ts: a page that asks for nothing
-    // ships nothing. Both built recipes are pure CSS, so today that stays true of
-    // every page, whether it moves or not.
+  it('only a recipe that really needs a script is rated above tier 0', () => {
+    /*
+     * Clause 1 of the rule in lib/content/blocks.ts: a page that asks for nothing
+     * ships nothing. This is where that promise is kept or quietly lost, so the two
+     * lists have to agree exactly. A recipe rated tier 1 that is not in the script set
+     * would be paying a cost nothing collects; one in the script set rated tier 0
+     * would be putting a script on a page while claiming to be free.
+     */
     for (const recipe of MOTION_LIVE_RECIPES) {
-      expect(MOTION_TIERS[recipe], `${recipe} is live but is not tier 0`).toBe(0);
+      const needsScript = MOTION_SCRIPT_RECIPES.has(recipe);
+      expect(
+        MOTION_TIERS[recipe] > 0,
+        needsScript
+          ? `${recipe} ships a script but is rated tier 0`
+          : `${recipe} is rated above tier 0 but needs no script`,
+      ).toBe(needsScript);
     }
-    expect(render).not.toContain('tg-motion.js');
+  });
+
+  it('keeps the script set as small as it can be', () => {
+    // Four recipes were expected to need a script and turned out not to. The list is
+    // meant to stay short, so this notices if it starts growing.
+    expect(MOTION_SCRIPT_RECIPES.size).toBeLessThanOrEqual(2);
+    for (const recipe of MOTION_SCRIPT_RECIPES) {
+      expect(MOTION_LIVE_RECIPES.has(recipe), `${recipe} needs a script but renders nothing`).toBe(true);
+    }
   });
 });
 
@@ -613,5 +668,118 @@ describe('the scroll-steered recipes are cheaper here than the catalogue expects
         /overflow:\s*(hidden|clip|auto|scroll)/,
       );
     }
+  });
+});
+
+describe('the script only reaches a page that actually needs it', () => {
+  const emitter = read('components', 'render', 'MotionScript.tsx');
+
+  /** A one-section page carrying a recipe, in the shape the routes hand the walker. */
+  const pageWith = (recipe: string) => ({
+    sections: [{ id: 'a', motion: { recipe, intensity: 2 } }],
+  });
+
+  it('asks for the script for a script-driven recipe', () => {
+    for (const recipe of MOTION_SCRIPT_RECIPES) {
+      expect(needsMotionScript(pageWith(recipe)), `${recipe} needs a script but asks for none`).toBe(true);
+    }
+  });
+
+  it('asks for nothing for every CSS recipe, which is most of them', () => {
+    // The whole no-script promise for the common case. A drifting background, a
+    // breathing picture, a wiping heading and a stacking card all ship zero bytes.
+    for (const recipe of MOTION_LIVE_RECIPES) {
+      if (MOTION_SCRIPT_RECIPES.has(recipe)) continue;
+      expect(
+        needsMotionScript(pageWith(recipe)),
+        `${recipe} is pure CSS but drags tg-motion.js onto the page`,
+      ).toBe(false);
+    }
+  });
+
+  it('asks for nothing for a page with no motion at all', () => {
+    expect(needsMotionScript({ sections: [{ id: 'a' }] })).toBe(false);
+    expect(needsMotionScript({ sections: [] })).toBe(false);
+    expect(needsMotionScript(null)).toBe(false);
+    expect(needsMotionScript(undefined)).toBe(false);
+    // Stored JSON is not always the shape we hope for.
+    expect(needsMotionScript({ sections: 'nonsense' as unknown as [] })).toBe(false);
+    expect(needsMotionScript({ sections: [null, 7, { motion: 'A3' }] as unknown as [] })).toBe(false);
+  });
+
+  it('renders nothing at all rather than an empty tag when no tree needs it', () => {
+    expect(emitter).toContain('if (!anyNeedsMotionScript(trees)) return null;');
+  });
+
+  it('is emitted once per document, from the routes that assemble one', () => {
+    // Same reason as the widgets and the slideshow: three trees each emitting their
+    // own tag would fetch the one file three times.
+    const site = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
+    const preview = read('app', 'preview', '[[...path]]', 'page.tsx');
+    expect(site).toContain('<MotionScript');
+    expect(preview).toContain('<MotionScript');
+  });
+
+  it('never reaches the editor canvas, which runs no page script', () => {
+    const editorCanvas = read('components', 'editor', 'Canvas.tsx');
+    expect(editorCanvas).not.toContain('MotionScript');
+  });
+});
+
+describe('the rail works before the script does', () => {
+  it('is a native scroll-snap carousel in CSS, so a blocked script costs only the drift', () => {
+    // Clause 2: the content never depends on a script. A track that needed
+    // tg-motion.js to be reachable would hide cards from anyone it failed for.
+    const rules = css.split('}').filter((r) => r.includes("[data-motion='A3']"));
+    const track = rules.find((r) => /overflow-x:\s*auto/.test(r)) ?? '';
+    expect(track, 'the A3 rail is not scrollable on its own').not.toBe('');
+    expect(rules.some((r) => /scroll-snap-type/.test(r))).toBe(true);
+    expect(rules.some((r) => /scroll-snap-align/.test(r))).toBe(true);
+  });
+
+  it('drives the real scroll position rather than transforming the track away', () => {
+    // A transform would slide the cards under a viewport nobody can steer, so the
+    // script would have to reimplement dragging, snapping and keyboard access.
+    expect(motionScript).toContain('scrollLeft');
+    expect(motionScript).not.toMatch(/style\.transform\s*=/);
+  });
+
+  it('stops for a pointer, for focus, and for a hidden tab', () => {
+    // Auto-moving content needs a way to stop it (WCAG 2.2.2), and hovering is not
+    // reachable from a keyboard, which is why focus counts.
+    expect(motionScript).toContain('pointerenter');
+    expect(motionScript).toContain('focusin');
+    expect(motionScript).toContain('document.hidden');
+  });
+
+  it('oscillates inside the track rather than wrapping like a marquee', () => {
+    // The catalogue: a wrapping track needs duplicated content or a seven-card rail
+    // wraps to a visible gap. Clamped to the real travel, an end cannot be exposed.
+    expect(motionScript).toContain('scrollWidth - track.clientWidth');
+    expect(motionScript).toMatch(/clamp\(/);
+  });
+
+  it('carries a double-init guard, like every other script here', () => {
+    expect(motionScript).toContain('data-motion-live');
+  });
+
+  it('hands snapping back the moment the visitor steers', () => {
+    /*
+     * Snapping and drifting cannot both own the scroll position, and snapping wins:
+     * a snap container drags any small programmatic scroll back to the nearest card,
+     * which held the rail at zero until this handover existed. Measured in
+     * tools/verify-motion-rail.mjs; this holds the shape so it cannot be undone.
+     */
+    expect(css).toContain(".tgs-cards[data-motion-live='1'] { scroll-snap-type: none; }");
+    expect(css).toContain("[data-motion-live='1'][data-motion-steer='1']");
+    expect(motionScript).toContain("track.setAttribute('data-motion-steer', '1')");
+    expect(motionScript).toContain("track.removeAttribute('data-motion-steer')");
+  });
+
+  it('tells its own scrolling apart from the visitors', () => {
+    // Every nudge stamps a window first, so the scroll event it causes is recognised
+    // and ignored. Without it the rail would read its own drift as somebody steering
+    // and stop itself on the first frame.
+    expect(motionScript).toContain('selfScrollUntil');
   });
 });

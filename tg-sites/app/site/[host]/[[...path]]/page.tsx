@@ -9,6 +9,7 @@ import { safeUrl } from '../../../../lib/content/sanitise';
 import { RegionRenderer } from '../../../../components/render/RegionRenderer';
 import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
+import { MotionScript } from '../../../../components/render/MotionScript';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
 import { ThemeToggleScript } from '../../../../components/render/ThemeToggleScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
@@ -566,6 +567,16 @@ export default async function SitePage({ params, searchParams }: Params) {
         ]}
       />
 
+      {/* And the motion drift, on the rare page that carries a recipe needing one.
+          Seven of the eight recipes are pure CSS and never reach this. */}
+      <MotionScript
+        trees={[
+          found.regions.header,
+          contentTree,
+          found.regions.footer,
+        ]}
+      />
+
       {/* The tag manager noscript fallback, and any custom body HTML. Last, so
           nothing here delays the content above it. */}
       <SiteBody settings={found.settings} />
@@ -751,6 +762,7 @@ function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typ
           page has no page-content tree of its own, so it is these two only. */}
       <WidgetScripts trees={[data.regions.header, data.regions.footer]} />
       <SlideshowScript trees={[data.regions.header, data.regions.footer]} />
+      <MotionScript trees={[data.regions.header, data.regions.footer]} />
       <SiteBody settings={data.settings} />
     </>
   );
