@@ -497,11 +497,29 @@ await check('block picker opens from a section', async () => {
  * the picker, and a block that silently stops rendering its card is exactly what
  * this catches.
  *
+ * 31 held from 7 Aug 2026 to 21 Aug, and then jumped to 47 in one go: WhatsApp,
+ * Coupon, Locations, the Google Calendar embed, half overlay, the burger, Read more,
+ * File, Breadcrumbs, Icon, Shape, Copyright, Search, the Light / dark switch,
+ * Expanding cards and the Screen carousel had all landed without anybody updating
+ * this. Sixteen blocks is a long time for a tripwire to be lying on the floor, and
+ * the reason nobody tripped over it is that verify:browser had been dying at
+ * build-theme-harness before this check ever ran (fixed 21 Aug 2026).
+ *
+ * The number stays hardcoded on purpose. Deriving it from the registry would make
+ * this check agree with whatever the registry says and stop it catching a block that
+ * silently stops rendering its card, which is the one thing it is for.
+ *
+ * 49 within hours of that, when Shifting images and Stacked cards landed. That is
+ * the tripwire working rather than a nuisance: two blocks arrived and it made
+ * somebody look at the picker, which is the entire point of writing the number down.
+ *
  * The harness runs as staff, so the staff-only Embed block is counted here too:
- * 31 is the whole library, one fewer than that for a client.
+ * 49 is the whole library, one fewer than that for a client.
  */
-await check('block picker offers the full library', async () =>
-  (await page.locator(".ed-block-card").count()) === 31);
+await check('block picker offers the full library', async () => {
+  const count = await page.locator('.ed-block-card').count();
+  return count === 49 ? true : `${count} blocks in the picker, expected 49`;
+});
 
 await check('including both ways to put a widget on a page', async () => {
   const cards = (await page.locator('.ed-block-card').allInnerTexts()).join(' | ');
@@ -5057,8 +5075,9 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 31 the page picker offers a staff user, the three new media included.
-  return count === 31 ? true : `${count} blocks in the header picker`;
+  // The same 49 the page picker offers a staff user. See the note on that check for
+  // why the number is written down rather than read from the registry.
+  return count === 49 ? true : `${count} blocks in the header picker, expected 49`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -9803,6 +9822,9 @@ await check('the Add page composer offers a ready-made page to start from', asyn
   // A real radio group, so it announces itself and moves on the arrow keys.
   const groupThere = await page.locator('.ed-pages__templates[role="radiogroup"]').count();
   const radioCount = await page.locator('.ed-pages__template input[type="radio"]').count();
+  /* Counted here, with the composer still open. Asking after it is cancelled reads
+     zero, which is how this check first reported "plus 0 designed" against 20. */
+  const designed = await page.locator('.ed-pages__template input[value^="design-"]').count();
 
   // The choices, in order, are the set Andy confirmed, blank first.
   const labels = (await page.locator('.ed-pages__template-label').allInnerTexts()).map((t) => t.trim());
@@ -9825,10 +9847,23 @@ await check('the Add page composer offers a ready-made page to start from', asyn
   await page.locator('.ed-rail__btn').filter({ hasText: 'Layers' }).first().click();
   await page.waitForTimeout(150);
 
+  /*
+   * The core set Andy confirmed, in order, LEADING the list. The ten designed
+   * homepage concepts are offered after them (78ff283) and more may follow, so this
+   * pins the head of the list and lets the tail grow.
+   *
+   * It used to pin the whole list to exactly ten, and went stale the day the
+   * concepts were wired in. Nobody saw it for days because the harness build ahead
+   * of it in verify:browser was failing first and this check never ran.
+   */
   const expected = ['Describe it with AI', 'Blank page', 'Home', 'About us', 'Services', 'Holidays', 'Reviews', 'Meet the team', 'FAQ', 'Contact'];
   if (!groupThere) return 'the composer had no template chooser';
-  if (radioCount !== expected.length) return `expected ${expected.length} template choices, saw ${radioCount}`;
-  if (labels.join('|') !== expected.join('|')) return `the choices read "${labels.join(', ')}"`;
+  if (radioCount !== expected.length + designed) {
+    return `expected ${expected.length} named choices plus ${designed} designed ones, saw ${radioCount}`;
+  }
+  if (labels.slice(0, expected.length).join('|') !== expected.join('|')) {
+    return `the choices read "${labels.slice(0, expected.length).join(', ')}"`;
+  }
   if (!blankFirst) return 'Blank was not the default choice';
   if (!homeChecked) return 'picking Home did not select it';
   if (blankAfter) return 'Blank stayed selected after Home was picked';

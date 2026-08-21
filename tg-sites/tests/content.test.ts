@@ -7,6 +7,7 @@
  * sanitiser hole looks fine until someone finds it.
  */
 
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -1690,5 +1691,53 @@ describe('the widget blocks', () => {
     });
     expect(props.html).not.toContain('script');
     expect(props.html).toContain('hi');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The block catalogue, checked against the registry it is generated from.
+ *
+ * /block-catalogue.json is GENERATED from lib/content/blocks.ts by
+ * tools/block-catalogue.mjs, and a generated file committed to a repo drifts the
+ * moment somebody adds a block and does not rerun the generator. That is not a
+ * hypothetical: it went stale three times in two days in August 2026, sitting at 26
+ * blocks against a registry of 44, then 44 against 46, then 47 against 49.
+ *
+ * NOTHING FAILED ANY OF THOSE TIMES, which is the actual problem. It was only ever
+ * caught by somebody happening to look at it, and the gaps between those looks were
+ * measured in weeks. So the same reasoning as the widget catalogue above applies:
+ * this is the check that turns "I remembered to regenerate" into a claim.
+ *
+ * IT RUNS THE REAL GENERATOR rather than working the answer out again. role,
+ * required and tokensUsed are DERIVED from the registry and globals.css, so a test
+ * that re-derived them would be a second implementation free to disagree with the
+ * first, and then the two would need a tie-breaker. Running the generator cannot
+ * drift from the generator.
+ */
+describe('the CMS block catalogue', () => {
+  const root = join(__dirname, '..');
+
+  it('is up to date with lib/content/blocks.ts', () => {
+    let output = '';
+    try {
+      output = execFileSync('node', ['tools/block-catalogue.mjs', '--check'], {
+        cwd: root,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    } catch (error) {
+      const failure = error as { stdout?: string; stderr?: string };
+      /*
+       * The generator names what drifted: which blocks were added, removed or
+       * changed, and the command that fixes it. Passing that straight through means
+       * the test failure IS the instruction, rather than sending somebody to a three
+       * thousand line diff to work out that one block was added.
+       */
+      throw new Error(failure.stderr || failure.stdout || 'the catalogue check gave no output');
+    }
+
+    expect(output).toContain('up to date');
   });
 });

@@ -10,10 +10,17 @@
  * the client editor, so it must not import React or touch the DOM. The
  * components live in components/render/blocks/.
  *
- * Adding a block type means three things:
+ * Adding a block type means four things:
  *   1. An entry in BLOCKS below.
  *   2. A component in components/render/blocks.tsx.
  *   3. A case in the switch in components/render/BlockRenderer.tsx.
+ *   4. `npm run catalogue`, to regenerate /block-catalogue.json.
+ *
+ * The fourth one used to be missing from this list, which is most of why the
+ * catalogue went stale three times in two days in August 2026. It is now checked:
+ * tests/content.test.ts runs the generator in --check mode and fails with the
+ * blocks that drifted and the command that fixes them, so forgetting it is a red
+ * test rather than a file quietly going out of date for a fortnight.
  *
  * Add a test alongside if the block has non-trivial props.
  *
