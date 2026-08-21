@@ -2059,6 +2059,10 @@ export function HalfOverlayBlock({ props }: { props: Props }): ReactElement {
  */
 export const MAX_EXPANDING_CARDS = 6;
 
+/** Each card holds the screen on its own as it sticks, so ten is a very long
+ *  section to scroll. The motion catalogue's own examples are three to five. */
+export const MAX_STACKED_CARDS = 6;
+
 export function ExpandingCardsBlock({
   props,
   blockId,
@@ -2387,6 +2391,96 @@ export function FlipCardsBlock({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * CARDS THAT GATHER INTO A DECK AS YOU SCROLL.
+ *
+ * Andy, 21 Aug 2026, from Duda's Stacked Cards, and it is recipe S3 from the
+ * motion catalogue (sticky-stack, tier 0, proven). Its stated purpose there is
+ * COMPARISON — three ships, four room grades, five tour styles — and its note is
+ * that it "replaces the three-equal-cards row, which is the single most common
+ * AI tell". So this is what to reach for when somebody asks for three cards in a
+ * row.
+ *
+ * NO JAVASCRIPT, AND NO SCROLL-JACKING. `position: sticky` with an offset that
+ * grows by card, so each one comes to rest a little below the last and the ones
+ * behind stay just visible as a stack. The scrollbar stays real and the browser
+ * stays in charge, which is the catalogue's rule for every pinned recipe.
+ *
+ * THE INDEX IS THE ONLY THING THE STYLESHEET NEEDS, and it comes down as a
+ * custom property rather than as six written-out rules. Unlike Tabs and
+ * Expanding cards nothing here has to PAIR one element with another: a card only
+ * needs to know how far down the pile it is.
+ */
+export function StackedCardsBlock({ props }: { props: Props }): ReactElement {
+  const items = list(props, 'items')
+    .filter((item) => str(item, 'title') || str(item, 'body') || str(item, 'src'))
+    .slice(0, MAX_STACKED_CARDS);
+
+  if (items.length === 0) {
+    return <div className="tgs-placeholder">Add some cards</div>;
+  }
+
+  const side = oneOf(props, 'side', ['right', 'left', 'alternate'] as const, 'right');
+  const height = oneOf(props, 'height', ['short', 'medium', 'tall'] as const, 'medium');
+  const radius = oneOf(props, 'radius', RADII, 'lg');
+  const cardColour = safeColour(props.cardColour) ?? '#ffffff';
+  const buttonColour = safeColour(props.buttonColour) ?? undefined;
+
+  return (
+    <div className="tgs-stack" data-height={height} data-radius={radius}>
+      {items.map((item, index) => {
+        const src = safeUrl(str(item, 'src'));
+        const title = str(item, 'title');
+        const body = str(item, 'body');
+        const linkLabel = str(item, 'linkLabel');
+        // Alternating reads better down a long stack than six cards the same way
+        // round, and it is the one case where the side is not a single setting.
+        const picture = side === 'alternate' ? (index % 2 === 0 ? 'right' : 'left') : side;
+
+        return (
+          <article
+            className="tgs-stack__card"
+            key={index}
+            data-side={picture}
+            style={{ '--tgs-stack-i': index, background: cardColour } as CSSProperties}
+          >
+            <div className="tgs-stack__body">
+              {title && <p className="tgs-stack__title">{title}</p>}
+              {body && <p className="tgs-stack__text">{body}</p>}
+              {linkLabel &&
+                renderButton(
+                  {
+                    label: linkLabel,
+                    href: str(item, 'linkHref'),
+                    variant: 'primary',
+                    colour: buttonColour,
+                  },
+                  index,
+                )}
+            </div>
+
+            <div className="tgs-stack__pic">
+              {src ? (
+                <img src={src} alt={str(item, 'alt')} loading="lazy" decoding="async" />
+              ) : (
+                <span className="tgs-stack__nopic" aria-hidden="true" />
+              )}
+            </div>
+          </article>
+        );
+      })}
+
+      {/*
+        THE RUNWAY. Empty on purpose: it is scroll length, so the last card has
+        somewhere to travel and lands on the deck instead of stopping wherever
+        the page happens to end. See the stylesheet for the two wrong ways to do
+        this that were tried first.
+      */}
+      <div className="tgs-stack__runway" aria-hidden="true" />
     </div>
   );
 }

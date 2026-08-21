@@ -98,6 +98,16 @@ file**. Half overlay and Screen carousel both do this. If you add a third, add
 it to `hasSlideshow` in `lib/content/slideshow.ts` too, or the page never asks
 for the script and the element silently loses its pause button.
 
+### A source assertion must strip comments first, every time
+
+This repo already had the rule written down, and this audit walked into it
+**twice**: a CSP check grepped a script for `innerHTML` and found the header
+promising not to use it, and a no-scroll-jacking check grepped a component for
+`scroll` and found the comment saying there is no scroll handler.
+
+Both test files now build a `code` constant with comments stripped and assert
+against that. Do the same in any new test that greps source.
+
 ### Re-run the block catalogue after adding a block
 
 `tg-sites/tools/block-catalogue.mjs` generates `/block-catalogue.json` from the

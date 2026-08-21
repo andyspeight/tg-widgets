@@ -4447,6 +4447,163 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* Stacked cards: recipe S3, sticky-stack                              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 21 Aug 2026, from Duda's Stacked Cards. Recipe S3 in the motion
+ * catalogue: tier 0, proven, and its note is that it "replaces the
+ * three-equal-cards row, which is the single most common AI tell".
+ *
+ * THE WHOLE TRICK IS ONE PROPERTY. Every card is `position: sticky` with a top
+ * offset that grows by its index, so card one comes to rest, card two comes to
+ * rest a little below it, and each new one slides over the last. By the bottom
+ * of the section they have collected into a deck with only the top card fully in
+ * view and a few millimetres of each one behind it.
+ *
+ * NO SCROLL-JACKING, which is the catalogue's rule for every pinned recipe: the
+ * scrollbar stays real, the browser stays in charge, and nothing has to run.
+ *
+ * WHAT BREAKS STICKY, and the reason this was measured rather than assumed: an
+ * ancestor with `overflow` other than visible becomes the scroll container, and
+ * a sticky child then sticks to a box that never scrolls, which looks exactly
+ * like sticky not working. `.tgs-page` carries `overflow-x: clip`, and clip is
+ * the one value that does NOT create a scroll container — which is why it was
+ * chosen in the first place, for the scroll-driven animations. Checked in a
+ * browser on 21 Aug 2026 rather than reasoned about.
+ */
+.tgs-stack {
+  --tgs-stack-top: 5rem;
+  /* How far each card sits below the one before. Small on purpose: the deck
+     should read as one card with a hint of the others, not as a staircase. */
+  --tgs-stack-step: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-l);
+}
+
+/*
+ * THE RUNWAY, and it is a MARGIN ON THE LAST CARD rather than padding on the
+ * stack. That distinction cost an hour on 21 Aug 2026 and is the whole reason
+ * this comment exists.
+ *
+ * A sticky card only travels while there is page left below it. The last card
+ * has nothing after it, so without a runway it stops wherever the page happens
+ * to end and never rises over the deck: measured with six cards, the last one
+ * halted 89px short and the section finished showing a deck AND a stray card.
+ *
+ * THE OBVIOUS FIX MAKES IT WORSE. `padding-bottom` on the stack adds scroll
+ * length but SHRINKS THE CONTENT BOX, and a sticky element is constrained to its
+ * containing block's content box, never the padding box. So every card was
+ * squeezed up together into a flat pile at 93px instead of the stepped deck, and
+ * increasing the padding changed nothing because it was the cause.
+ *
+ * A MARGIN ON THE LAST CARD IS ALSO WRONG, and was the second attempt. It does
+ * extend the container, but sticky keeps an element's MARGIN BOX inside the
+ * containing block, so the last card was pushed up by exactly its own margin and
+ * sailed straight past its stop instead of landing on the deck.
+ *
+ * So the runway is its own empty element after the cards. It extends the
+ * container's content box, gives the page more to scroll, and belongs to no
+ * card, which is what lets the last one land where it should.
+ */
+.tgs-stack__runway {
+  flex: none;
+  height: var(--tgs-stack-h, 24rem);
+}
+
+.tgs-stack__card {
+  position: sticky;
+  top: calc(var(--tgs-stack-top) + var(--tgs-stack-i, 0) * var(--tgs-stack-step));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  min-height: var(--tgs-stack-h, 24rem);
+  overflow: hidden;
+  border-radius: var(--tgs-radius, 20px);
+  /* Each card has to be opaque or the one beneath shows through the moment they
+     overlap, which is the whole point of the deck. The colour comes from the
+     block, inline, so a client can set it. */
+  box-shadow: 0 -6px 24px rgb(0 0 0 / 8%);
+}
+
+.tgs-stack[data-height='short']  { --tgs-stack-h: 18rem; }
+.tgs-stack[data-height='medium'] { --tgs-stack-h: 24rem; }
+.tgs-stack[data-height='tall']   { --tgs-stack-h: 32rem; }
+
+.tgs-stack[data-radius='none'] .tgs-stack__card { border-radius: 0; }
+.tgs-stack[data-radius='sm']   .tgs-stack__card { border-radius: var(--tgs-radius-sm, 6px); }
+.tgs-stack[data-radius='md']   .tgs-stack__card { border-radius: var(--tgs-radius, 12px); }
+.tgs-stack[data-radius='lg']   .tgs-stack__card { border-radius: 24px; }
+.tgs-stack[data-radius='full'] .tgs-stack__card { border-radius: 32px; }
+
+/* `order` rather than a second set of column rules, so the side is one property
+   and the markup order never changes — the words are read before the picture
+   whichever way round it is drawn. */
+.tgs-stack__card[data-side='left'] .tgs-stack__pic { order: -1; }
+
+.tgs-stack__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--tgs-space-m);
+  padding: var(--tgs-space-xl);
+  min-width: 0;
+}
+.tgs-stack__title {
+  margin: 0;
+  font-family: var(--tgs-h-font, inherit);
+  font-size: clamp(1.6rem, 1.1rem + 1.8vw, 2.6rem);
+  line-height: 1.15;
+  font-weight: 600;
+}
+.tgs-stack__text {
+  margin: 0;
+  max-width: 34rem;
+  line-height: 1.6;
+  color: var(--tgs-text-soft);
+  white-space: pre-line;
+}
+.tgs-stack__body .tgs-button { align-self: flex-start; }
+
+.tgs-stack__pic { position: relative; min-width: 0; }
+.tgs-stack__pic img,
+.tgs-stack__nopic {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.tgs-stack__nopic { background: var(--tgs-surface-alt); }
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * NOT sticky, and the catalogue says so for every pinned recipe: a pinned
+   * section becomes an ordinary one. Somebody who asked for less motion gets the
+   * same cards, in order, down the page, which is the design minus the gathering.
+   */
+  .tgs-stack__card { position: static; }
+}
+
+@container tgs-page (max-width: 767px) {
+  /*
+   * ONE COLUMN, PICTURE FIRST. Half a phone screen of photograph beside two
+   * words is neither. The stack itself stays, because the gathering is the
+   * point of the element and it works just as well vertically.
+   */
+  .tgs-stack__card {
+    grid-template-columns: 1fr;
+    grid-template-rows: 12rem auto;
+    min-height: 0;
+  }
+  .tgs-stack__card[data-side='left'] .tgs-stack__pic { order: 0; }
+  .tgs-stack__body { padding: var(--tgs-space-l) var(--tgs-space-m); }
+  .tgs-stack { --tgs-stack-top: 3.5rem; --tgs-stack-step: 10px; }
+}
+
+/* ------------------------------------------------------------------ */
 /* Shaped section edges                                                */
 /* ------------------------------------------------------------------ */
 

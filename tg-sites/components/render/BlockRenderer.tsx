@@ -37,6 +37,7 @@ import {
   FlipCardsBlock,
   HalfOverlayBlock,
   ScreenCarouselBlock,
+  StackedCardsBlock,
   SliderBlock,
   SocialBlock,
   BreadcrumbsBlock,
@@ -137,6 +138,8 @@ export function BlockRenderer({
         return <ScreenCarouselBlock props={props} />;
       case 'flip-cards':
         return <FlipCardsBlock props={props} blockId={block.id} />;
+      case 'stacked-cards':
+        return <StackedCardsBlock props={props} />;
       case 'button':
         return <ButtonBlock props={props} />;
       case 'button-group':
