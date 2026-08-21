@@ -68,6 +68,30 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 let SNAP = null;
 let SNAP_ERROR = null;
 
+/**
+ * Venue anchor coordinates, keyed by venue key.
+ *
+ * Travelify's deeplink endpoint requires lat/lng/rad and refuses the link
+ * without them (probed 21 Aug 2026: identical link 400s bare, 302s anchored).
+ * The supplier feed carries no coordinates, so this table is built separately
+ * from the venue registry and committed alongside the snapshot. A venue with
+ * no entry gets no booking link, which the widgets render as no button.
+ */
+let GEO = null;
+
+function venueGeo() {
+  if (GEO) return GEO;
+  GEO = new Map();
+  try {
+    const url = new URL('./_data/venue-geo.json', import.meta.url);
+    const raw = JSON.parse(readFileSync(url, 'utf8'));
+    for (const [key, lat, lng] of raw.venues || []) GEO.set(key, { lat, lng });
+  } catch (err) {
+    console.error('[api/events-feed] venue-geo load failed (links will be withheld):', err && err.message);
+  }
+  return GEO;
+}
+
 function snapshot() {
   if (SNAP || SNAP_ERROR) return SNAP;
   try {
@@ -206,7 +230,7 @@ function expand(snap, ev, appId, currency, adults, bookingKinds) {
     sources,
   };
 
-  const target = { sources, startDate: ev.dt, title };
+  const target = { sources, startDate: ev.dt, title, geo: venueGeo().get(ev.vk) || null };
   const link = buildEventDeeplink(target, { appId, currency, adults });
   out.booking = {
     url: link.url,

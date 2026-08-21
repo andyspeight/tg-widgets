@@ -151,7 +151,7 @@ async function resolve(v) {
 
   const queries = [];
   if (v.city) queries.push(v.name + ', ' + v.city);
-  if (v.compCountry) queries.push(v.name + ', ' + v.compCountry);
+  else if (v.compCountry) queries.push(v.name + ', ' + v.compCountry);
   queries.push(v.name);
 
   const flag = expectSet ? '' : 'unverified';
@@ -220,10 +220,10 @@ export default async function handler(req, res) {
       const out = await resolve(v);
       if (out.fail) fails.push([out.key, out.fail]);
       else rows.push([out.key, out.lat, out.lng, out.src, out.flag, out.label]);
-      await new Promise((ok) => setTimeout(ok, 200));
+      await new Promise((ok) => setTimeout(ok, 350));
     }
   };
-  await Promise.all([worker(), worker(), worker(), worker(), worker()]);
+  await Promise.all([worker(), worker(), worker()]);
 
   res.setHeader('Cache-Control', 'no-store');
   const pad = Math.min(120000, Math.max(0, parseInt(req.query.pad, 10) || 0));

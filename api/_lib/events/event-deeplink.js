@@ -31,12 +31,16 @@
  * normalisation pass strips the taxonomy off it, which is why each source keeps
  * its own rawName.
  *
- * WHAT WE CANNOT SEND
- * `lat`, `lng` and `rad` anchor the search geographically. The feed has no
- * coordinates for its 958 venues, and inventing them would be worse than
- * leaving them out, so all three are omitted. `refe` pins the exact event, so a
- * link without them should still land. If Travelify turns out to need the
- * anchor, the fix is a venue geocode table, not a guess here.
+ * THE ANCHOR IS MANDATORY
+ * `lat`, `lng` and `rad` anchor the search geographically, and Travelify
+ * refuses the link without them: "Unable to match location". Proved by probe
+ * on 21 Aug 2026 — the identical link 400s bare and 302s to the results page
+ * with the anchor added, and even Andy's own working example dies with its
+ * anchor removed, so `refe` alone pins nothing. The feed carries no
+ * coordinates, so they come from api/_data/venue-geo.json (built by
+ * scripts/build-venue-geo notes in the handover), passed in as `event.geo`.
+ * An event whose venue has no entry gets NO url and status 'no-anchor',
+ * because a missing button is honest and a dead one is not.
  *
  * Other deeplink shapes exist for ticket-plus-hotel and
  * ticket-plus-flight-plus-hotel. They are not built here yet.
@@ -51,7 +55,7 @@ export const SEARCH_TYPE = 'TicketsAttractions';
 /** Built against a real link rather than a guess. */
 export const SPEC_VERIFIED = true;
 
-export const DEFAULTS = { currency: 'GBP', adults: 2, children: 0, infants: 0 };
+export const DEFAULTS = { currency: 'GBP', adults: 2, children: 0, infants: 0, radiusKm: 20 };
 
 const APPID_RE = /^[A-Za-z0-9_-]{1,32}$/;
 const REF_RE = /^[A-Za-z0-9_-]{1,120}$/;
@@ -128,6 +132,17 @@ export function buildEventDeeplink(event, options = {}) {
   const date = DATE_RE.test(String(event.startDate || '')) ? event.startDate : '';
   if (!date) return none('no-date');
 
+  // Travelify requires the geographic anchor (see header). No coordinates for
+  // this venue means no link at all, surfaced as its own status so the report
+  // and the widgets can tell "venue not located yet" from a broken event.
+  const geo = event.geo && Number.isFinite(event.geo.lat) && Number.isFinite(event.geo.lng)
+    ? event.geo
+    : null;
+  if (!geo) {
+    return { url: null, status: 'no-anchor', reason: 'venue-not-geocoded',
+      supplier: source.supplier || null, supplierId: supp || null, reference: refe };
+  }
+
   const curr = CURRENCY_RE.test(String(currency)) ? currency : DEFAULTS.currency;
   const clamp = (n, max) => {
     const v = Number.parseInt(n, 10);
@@ -142,11 +157,14 @@ export function buildEventDeeplink(event, options = {}) {
   // A single-day event, so the window is the same date on both sides.
   params.set('fr', date);
   params.set('to', date);
+  // In the working example the anchor sits between the dates and the pax
+  // counts, and it is reproduced in that exact position.
+  params.set('lat', String(geo.lat));
+  params.set('lng', String(geo.lng));
+  params.set('rad', String(DEFAULTS.radiusKm));
   params.set('adt', String(Math.max(1, clamp(adults, 20) || DEFAULTS.adults)));
   params.set('chd', String(clamp(children, 20)));
   params.set('inf', String(clamp(infants, 20)));
-
-  // lat/lng/rad deliberately absent — see the header. refe is the real pin.
 
   const rawName = String((source && source.rawName) || event.rawName || event.title || '').trim();
   if (rawName) {
@@ -275,4 +293,5 @@ export function readyBookingKinds() {
 export const DEEPLINK_STATUS_TEXT = {
   ready: null,
   unavailable: 'No booking link for this event',
+  'no-anchor': 'Booking opens once this venue\u2019s location is confirmed',
 };
