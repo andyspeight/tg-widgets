@@ -683,6 +683,14 @@
     {
       "source": "/editor-ticketsearch",
       "destination": "/editor-ticketsearch.html"
+    },
+    {
+      "source": "/demo-ticketmonth",
+      "destination": "/demo-ticketmonth.html"
+    },
+    {
+      "source": "/editor-ticketmonth",
+      "destination": "/editor-ticketmonth.html"
     }
   ],
   "headers": [
@@ -1854,6 +1862,23 @@
     },
     {
       "source": "/widget-ticketsearch.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-ticketmonth.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

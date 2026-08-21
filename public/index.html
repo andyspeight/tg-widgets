@@ -929,6 +929,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'ticketmonth',
+    name: 'Ticket Month',
+    airtableType: 'Ticket Month',  // matches Airtable WidgetType singleSelect option
+    description: 'A month calendar of everything on, with a day panel and booking buttons.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z'},
+    color: '#7C5CFF',
+    editorUrl: '/editor-ticketmonth',
+    demoUrl: '/demo-ticketmonth',
+    widgetTag: 'ticketmonth',
+    scriptFile: 'widget-ticketmonth.js',
+    access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'offers',
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
@@ -3170,6 +3185,10 @@ function loadMiniPreview(w) {
     new window.TGTicketSearchWidget(el, { heading: '', subheading: '', placeholder: 'Search a club, a ground, an act…', initialQuery: 'wembley', suggestions: [], showGroups: false, eventLimit: 2, accent: w.color, theme: 'light', appId: '250' });
   }
 
+  if (w.id === 'ticketmonth' && window.TGTicketMonthWidget) {
+    new window.TGTicketMonthWidget(el, { sourceType:'competition', sourceValue:'english-premier-league', heading:'', showDayTitles:false, dayLimit:4, radius:10, accent:'#7C5CFF' });
+  }
+
   if (w.id === 'tickets' && window.TGTicketsWidget) {
     new window.TGTicketsWidget(el, {
       sourceType: 'competition', sourceValue: 'english-premier-league',
@@ -4440,6 +4459,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
 <script src="/widget-tickets.js"></script>
+<script src="/widget-ticketmonth.js"></script>
 <script src="/widget-ticketsearch.js"></script>
 <script src="/widget-clubpicker.js"></script>
 <script src="/widget-nextevent.js"></script>
