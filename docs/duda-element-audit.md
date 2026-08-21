@@ -72,19 +72,22 @@ HTML Attribute Select · Lottie · Booking · OpenTable · PayPal · Restaurant 
 
 ## What this audit taught, that the conventions did not already say
 
-### "A published page ships no JavaScript" has THREE exceptions, not one
+### The no-JavaScript rule changed the same day, in a parallel session
 
-`CLAUDE.md` names the light/dark toggle. There are two more, both deliberate and
-both progressive enhancement:
+While this audit ran, the motion-layer session replaced the blanket ban with
+**four clauses**, on Andy's call: a page that asks for nothing ships nothing;
+the content never depends on a script; ours, hand-written, no libraries; and a
+named cost against a page budget.
 
-- **`/slideshow.js`** — every slideshow auto-plays and pauses on hover in pure
-  CSS on its own. The script only adds clickable arrows, dots and a **pause
-  button**, and that last one is not a nicety: auto-moving content needs a way
-  to stop it (WCAG 2.2.2) and hover-to-pause is not reachable from a keyboard.
-- **Widget scripts** — third-party embeds a client pasted in.
+**The canonical statement is the header of `lib/content/blocks.ts`. Read it
+there, not here** — an earlier draft of this doc restated the rule as "three
+exceptions" and was already out of date within a day, which is the exact trap
+these conventions warn about everywhere else.
 
-The rule that actually holds is: *the page works with no script, and a script
-may only add to it*. Every interactive element built in this audit meets it.
+What it means for element work is unchanged in practice: every block built in
+this audit meets the strictest reading, using a hidden input and `:checked ~`,
+`<details>`, scroll-snap or a server computation rather than a script. Clause 2
+is the one to check a new block against.
 
 ### New moving elements should borrow the slideshow, not grow their own
 
@@ -94,6 +97,13 @@ attributes and a new block gets arrows, dots and pause **with no change to that
 file**. Half overlay and Screen carousel both do this. If you add a third, add
 it to `hasSlideshow` in `lib/content/slideshow.ts` too, or the page never asks
 for the script and the element silently loses its pause button.
+
+### Re-run the block catalogue after adding a block
+
+`tg-sites/tools/block-catalogue.mjs` generates `/block-catalogue.json` from the
+registry. This audit added thirteen blocks and never ran it, so the catalogue
+fell eighteen blocks behind and another session had to regenerate it twice to
+catch up. It is one command and it belongs in the same commit as the block.
 
 ### Click-to-choose-one is a radio group
 
