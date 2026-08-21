@@ -1260,6 +1260,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  *
  * Under reduced motion it is an ordinary stacked list of cards, which is a finished
  * comparison rather than a broken one.
+ *
+ * The Stacked cards ELEMENT (search ".tgs-stack") is this same trick as a
+ * designed block with its own markup. Compared 21 Aug 2026: each had a fix the
+ * other lacked, so if you fix one, look at the other.
  */
 .tgs-section[data-motion='S3'] {
   --tgs-motion-stick: 10vh;
@@ -1288,6 +1292,34 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(3) { top: calc(var(--tgs-motion-stick) + 4.4rem); }
     .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(4) { top: calc(var(--tgs-motion-stick) + 6.6rem); }
     .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(n + 5) { top: calc(var(--tgs-motion-stick) + 8.8rem); }
+
+    /*
+     * THE RUNWAY, added 21 Aug 2026, and without it this recipe did nothing at
+     * all. Measured with four cards: card three stopped 156px short of its stop
+     * and card four 303px short, so the section drew an ordinary one-column list
+     * and no deck ever collected. A tier 0 PROVEN recipe whose whole stated job
+     * is to replace the three-equal-cards row was quietly drawing a plain list.
+     *
+     * A sticky card only travels while there is page left below it, and the last
+     * card has nothing after it. The Stacked cards ELEMENT hit this same wall the
+     * same day and its comment records the two fixes that look right and are not:
+     * padding-bottom SHRINKS the content box a sticky child is constrained to, and
+     * a margin on the last card is kept inside the containing block so that card
+     * overshoots its stop. The runway has to be a sibling that belongs to no card.
+     *
+     * Here the markup is an ordinary Cards block, so there is no element to add.
+     * ::after on the grid is one: a grid item, in the single column, sticky to
+     * nothing, that simply gives the container length below the last card.
+     */
+    .tgs-section[data-motion='S3'] .tgs-cards::after {
+      content: '';
+      display: block;
+      /* Enough for the last card to reach its stop and hold there. Viewport
+         relative because the stops are (--tgs-motion-stick is in vh), and because
+         these cards are content-sized rather than a fixed height like the
+         element's. Measured at 70vh: every card lands. */
+      height: 70vh;
+    }
   }
 }
 
@@ -4952,6 +4984,15 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  * So the runway is its own empty element after the cards. It extends the
  * container's content box, gives the page more to scroll, and belongs to no
  * card, which is what lets the last one land where it should.
+ *
+ * TWO STICKY-STACKS LIVE IN THIS FILE, deliberately. The S3 section recipe
+ * (search "S3 sticky-stack") turns an ordinary Cards grid into a deck as a
+ * motion setting; this element is a designed two-pane deck a client fills in.
+ * They stay separate because they own different markup, but the physics is the
+ * same, and when they were compared on 21 Aug 2026 each had a fix the other
+ * lacked: S3 was missing this runway (its deck never collected at all) and this
+ * element was missing the reduced-motion stand-down. If you fix one, look at
+ * the other.
  */
 .tgs-stack__runway {
   flex: none;
@@ -4982,6 +5023,29 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-stack[data-radius='md']   .tgs-stack__card { border-radius: var(--tgs-radius, 12px); }
 .tgs-stack[data-radius='lg']   .tgs-stack__card { border-radius: 24px; }
 .tgs-stack[data-radius='full'] .tgs-stack__card { border-radius: 32px; }
+
+/*
+ * STANDS DOWN FOR ANYBODY WHO ASKED FOR LESS MOTION, added 21 Aug 2026 when the
+ * two sticky-stack implementations were compared side by side.
+ *
+ * The S3 section recipe has always done this and this element never did, which
+ * is the sort of disagreement that only shows up when somebody puts them next to
+ * each other. S3's note has the reasoning and it is right: cards sliding over one
+ * another as the page moves is exactly what the preference is for, even though
+ * nothing is animating and sticky never runs a frame of its own.
+ *
+ * Expressed as an override rather than by wrapping the rules above in
+ * no-preference, deliberately: this CSS is live, and an override cannot change
+ * what anybody already sees except for the people who asked it to.
+ *
+ * What is left is an ordinary list of cards, which is a finished comparison
+ * rather than a broken one. The runway goes with it, or the section would end
+ * with a screen of nothing.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-stack__card { position: static; }
+  .tgs-stack__runway { display: none; }
+}
 
 /* `order` rather than a second set of column rules, so the side is one property
    and the markup order never changes — the words are read before the picture

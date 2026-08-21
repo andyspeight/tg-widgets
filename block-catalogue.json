@@ -2438,7 +2438,7 @@
         ],
         "spacing": []
       },
-      "cssRules": 65,
+      "cssRules": 66,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1472",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2662,7 +2662,7 @@
         ],
         "spacing": []
       },
-      "cssRules": 91,
+      "cssRules": 92,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1757",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
