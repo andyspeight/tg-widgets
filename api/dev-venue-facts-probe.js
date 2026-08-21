@@ -40,11 +40,18 @@ const km = (a, b) => {
   return Math.hypot(dLat, dLng);
 };
 
+// Wikimedia throttles bursts from cloud IPs, and a throttled request must not
+// silently become "no such venue": back off and retry once before giving up.
 async function api(base, params) {
   const url = base + '?' + new URLSearchParams({ format: 'json', ...params }).toString();
-  const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(9000) });
-  if (!r.ok) return null;
-  return r.json();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(9000) });
+      if (r.ok) return r.json();
+    } catch (e) { /* fall through to the backoff */ }
+    await new Promise((ok) => setTimeout(ok, 1800));
+  }
+  return null;
 }
 
 const claim = (e, p) => {
@@ -134,7 +141,7 @@ export default async function handler(req, res) {
     return;
   }
   const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
-  const count = Math.min(120, Math.max(1, parseInt(req.query.count, 10) || 80));
+  const count = Math.min(60, Math.max(1, parseInt(req.query.count, 10) || 40));
   const slice = all.slice(offset, offset + count);
 
   const rows = [];
@@ -144,10 +151,10 @@ export default async function handler(req, res) {
       const v = slice[i++];
       try { rows.push(await research(v)); }
       catch (e) { rows.push({ key: v.key, err: String(e && e.message).slice(0, 60) }); }
-      await new Promise((ok) => setTimeout(ok, 250));
+      await new Promise((ok) => setTimeout(ok, 400));
     }
   };
-  await Promise.all([worker(), worker(), worker()]);
+  await Promise.all([worker(), worker()]);
 
   res.setHeader('Cache-Control', 'no-store');
   const pad = Math.min(120000, Math.max(0, parseInt(req.query.pad, 10) || 0));
