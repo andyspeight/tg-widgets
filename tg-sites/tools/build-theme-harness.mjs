@@ -57,6 +57,21 @@ const HARNESSES = [
        * rather than as a bundler problem.
        */
       [/(^|\/)app\/actions\/ai$/, 'standalone/demo-ai-actions.ts'],
+      /*
+       * And the domains and activity actions, since 21 Aug 2026. Both panels landed
+       * on 17 Aug (2787689 and a5e7f4c) and neither brought a swap with it, so from
+       * that day `npm run verify:browser` died here: SettingsEditor imports both
+       * panels, DomainsPanel reaches lib/db/tenants and ActivityPanel reaches
+       * lib/auth/session and lib/db/activity, which drag in Postgres, node:crypto
+       * and node:async_hooks.
+       *
+       * That is the failure this file's own note above describes, and it went
+       * unnoticed for four days because nothing except this build reads it. Adding a
+       * tab to the settings screen means adding its swap here, and the check in
+       * tests/settings.test.ts now fails if a new action arrives without one.
+       */
+      [/(^|\/)app\/actions\/domains$/, 'standalone/demo-domains-actions.ts'],
+      [/(^|\/)app\/actions\/activity$/, 'standalone/demo-activity-actions.ts'],
     ],
   },
 ];

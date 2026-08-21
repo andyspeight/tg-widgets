@@ -945,3 +945,62 @@ describe('the writing prompt', () => {
     expect(isAiIntent('write')).toBe(true);
   });
 });
+
+describe('the settings harness can still be built', () => {
+  /*
+   * THE BUG THIS EXISTS TO STOP HAPPENING AGAIN.
+   *
+   * The settings screen is bundled for a browser by tools/build-theme-harness.mjs,
+   * which swaps each server action for an in-memory double. A server action that is
+   * NOT swapped drags Postgres, node:crypto and node:async_hooks into a browser
+   * bundle and esbuild refuses to build it, which is the right way round.
+   *
+   * It happened on 17 Aug 2026. DomainsPanel (2787689) and ActivityPanel (a5e7f4c)
+   * both added an action import and neither added its swap, so `npm run
+   * verify:browser` died at that build for four days. Nothing noticed, because the
+   * only thing that reads that file is the build it was breaking, and every check
+   * downstream of it never ran.
+   *
+   * So the rule is checked here instead, where it costs a millisecond and fails
+   * loudly: every server action the settings screen reaches must have a swap.
+   */
+  const harness = readFileSync(join(__dirname, '..', 'tools', 'build-theme-harness.mjs'), 'utf8');
+
+  /** Every `app/actions/<name>` the settings components import. */
+  function actionsImportedBySettings(): string[] {
+    const dir = join(__dirname, '..', 'components', 'settings');
+    const names = new Set<string>();
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith('.tsx') && !file.endsWith('.ts')) continue;
+      const source = readFileSync(join(dir, file), 'utf8');
+      for (const match of source.matchAll(/actions\/([a-z-]+)'/g)) names.add(match[1]);
+    }
+    return [...names].sort();
+  }
+
+  it('finds the action imports, so the check below is not passing over an empty list', () => {
+    const actions = actionsImportedBySettings();
+    expect(actions.length).toBeGreaterThan(1);
+    expect(actions).toContain('settings');
+  });
+
+  it.each(actionsImportedBySettings())(
+    'app/actions/%s is swapped for a double in the harness build',
+    (action) => {
+      expect(
+        harness.includes(`app\\/actions\\/${action}$`),
+        `components/settings imports app/actions/${action} and tools/build-theme-harness.mjs `
+        + 'has no swap for it, so the settings harness will not build and npm run '
+        + 'verify:browser will die before any check downstream of it runs',
+      ).toBe(true);
+    },
+  );
+
+  it('points every swap at a double that exists', () => {
+    // A swap naming a file that was renamed away fails the build just as loudly.
+    for (const match of harness.matchAll(/'(standalone\/demo-[a-z-]+\.ts)'/g)) {
+      const double = join(__dirname, '..', match[1]);
+      expect(statSync(double).isFile(), `${match[1]} is swapped in but does not exist`).toBe(true);
+    }
+  });
+});

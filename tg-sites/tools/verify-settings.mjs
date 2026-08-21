@@ -135,6 +135,10 @@ async function openTab(page, label) {
 }
 
 /** The tabs everybody gets, in order. Custom code is a sixth, for an owner. */
+/*
+ * The five tabs a client EDITS. Kept to exactly those, because the save-bar check
+ * below walks this list and Activity is a read-only log with no bar to find.
+ */
 const CLIENT_TABS = [
   'Your company',
   'Contact details',
@@ -143,8 +147,26 @@ const CLIENT_TABS = [
   'Language',
 ];
 
+/*
+ * Everything somebody without the code permission actually SEES, which is the five
+ * above plus Activity.
+ *
+ * Activity is deliberately ungated: seeing what happened to a site you belong to is
+ * not a privilege, and the action it reads is scoped to the caller's own tenant (see
+ * the note in SettingsEditor). It arrived on 17 Aug 2026 and this file was not
+ * updated, which went unseen because verify:browser was dying at build-theme-harness
+ * before these checks ever ran (fixed 21 Aug 2026).
+ */
+const PLAIN_TABS = [...CLIENT_TABS, 'Activity'];
+
+/*
+ * And the owner's two more. Domains and Custom code share one gate, owner or staff,
+ * so they arrive together and sit last.
+ */
+const OWNER_TABS = [...PLAIN_TABS, 'Domains', 'Custom code'];
+
 // ---------------------------------------------------------------------------
-// Without permission: four tabs, and no way in
+// Without permission: the ungated tabs, and no way in
 // ---------------------------------------------------------------------------
 
 const plain = await open({ canEditCode: false });
@@ -154,9 +176,9 @@ await check('the settings screen mounts', async () => {
   return tabs.length > 0 ? true : 'no tabs';
 });
 
-await check('somebody without permission gets five tabs and no custom code', async () => {
+await check('somebody without permission gets the ungated tabs and no custom code', async () => {
   const tabs = (await plain.locator('.tv-tab').allInnerTexts()).map((t) => t.trim());
-  return JSON.stringify(tabs) === JSON.stringify(CLIENT_TABS) ? true : JSON.stringify(tabs);
+  return JSON.stringify(tabs) === JSON.stringify(PLAIN_TABS) ? true : JSON.stringify(tabs);
 });
 
 await check('and no code field is anywhere in their page', async () => {
@@ -174,11 +196,9 @@ await plain.close();
 
 const page = await open({ canEditCode: true });
 
-await check('an owner gets one more tab, called Custom code, and it is last', async () => {
+await check('an owner gets Domains and Custom code as well, and Custom code is last', async () => {
   const tabs = (await page.locator('.tv-tab').allInnerTexts()).map((t) => t.trim());
-  return JSON.stringify(tabs) === JSON.stringify([...CLIENT_TABS, 'Custom code'])
-    ? true
-    : JSON.stringify(tabs);
+  return JSON.stringify(tabs) === JSON.stringify(OWNER_TABS) ? true : JSON.stringify(tabs);
 });
 
 /*
