@@ -111,6 +111,28 @@ async function research(v) {
 
 export default async function handler(req, res) {
   const all = plan();
+
+  // ?debug=<key>: show the raw search candidates and their distances for one
+  // venue, because guessing why a match fails wastes deploy cycles.
+  if (req.query.debug) {
+    const v = all.find((x) => x.key === req.query.debug);
+    if (!v) { res.status(404).json({ error: 'unknown key' }); return; }
+    const names = [v.name, ...v.aliases].map((n) => n.replace(/\s*\([^)]*\)\s*/g, ' ').trim()).filter(Boolean);
+    const out = { venue: v, tried: [] };
+    for (const name of names.slice(0, 3)) {
+      const s = await api(WD, { action: 'wbsearchentities', search: name, language: 'en', type: 'item', limit: 7 });
+      const ids = ((s && s.search) || []).map((x) => ({ id: x.id, label: x.label, desc: x.description }));
+      const g = ids.length ? await api(WD, { action: 'wbgetentities', ids: ids.map((x) => x.id).join('|'), props: 'claims' }) : null;
+      for (const c of ids) {
+        const e = g && g.entities && g.entities[c.id];
+        const coord = e ? claim(e, 'P625') : null;
+        c.km = coord ? +km({ lat: coord.latitude, lng: coord.longitude }, v.geo).toFixed(2) : null;
+      }
+      out.tried.push({ name, searchOk: !!s, candidates: ids });
+    }
+    res.status(200).json(out);
+    return;
+  }
   const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
   const count = Math.min(120, Math.max(1, parseInt(req.query.count, 10) || 80));
   const slice = all.slice(offset, offset + count);
