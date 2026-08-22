@@ -1,5 +1,23 @@
 /**
- * TEMPORARY fact verifier — deleted once venue-facts.json is double-verified.
+ * Venue fact verifier — the crawl half of double verification. PRESERVED
+ * here for the next rebuild; it ran as a temporary Vercel endpoint on
+ * 22 Aug 2026 and was then removed from api/.
+ *
+ * To run it again (after rebuilding venue-facts.json):
+ *   1. Copy this file to api/dev-venue-verify-probe.js on a work branch.
+ *   2. Add to vercel.json "functions": { "api/dev-venue-verify-probe.js":
+ *      { "maxDuration": 60 } } and push the branch (Vercel deploys a preview).
+ *   3. Page through the plan from the preview URL:
+ *      /api/dev-venue-verify-probe?offset=0&count=45&pad=110000
+ *      (offset 0, 45, 90, ... until total is covered; count above 60 risks
+ *      the 60s budget; pad pads the response so remote tooling persists it).
+ *      Wikimedia throttles cloud-IP bursts: the endpoint retries once with
+ *      backoff, but rerun any page with fetched:false rows and UNION the
+ *      passes — a throttled fetch must never read as a refutation.
+ *   4. Save each response body as verifypage-<offset>.json in one directory,
+ *      then run: node scripts/verify-venue-facts.mjs <that-directory>
+ *      which prunes api/_data/venue-facts.json to the confirmed facts.
+ *   5. Delete the api/ copy and the vercel.json entry again.
  *
  * Policy (Andy, 22 Aug 2026): no made-up data, double verification on
  * everything. Each editorial fact on a venue sheet must be confirmed by TWO

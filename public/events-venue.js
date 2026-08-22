@@ -196,7 +196,7 @@
         links.appendChild(T.el('a', { class: 'ev-btn-ghost', href: 'https://www.openstreetmap.org/?mlat=' + geo.lat + '&mlon=' + geo.lng + '#map=16/' + geo.lat + '/' + geo.lng, target: '_blank', rel: 'noopener noreferrer', text: 'OpenStreetMap' }));
         sheet.appendChild(links);
         sheet.appendChild(T.el('p', { class: 'ev-visit-note',
-          text: 'Airport distances are straight-line. Facts from Wikidata; map \u00a9 MapTiler \u00a9 OpenStreetMap contributors.' }));
+          text: 'Airport distances are straight-line. Venue facts are shown only when two independent sources agree; map \u00a9 MapTiler \u00a9 OpenStreetMap contributors.' }));
 
         visit.appendChild(sheet);
         host.appendChild(visit);

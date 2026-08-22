@@ -400,7 +400,7 @@
     }
 
     if ((c.showFacts && facts.air && facts.air.length) || (c.showMap && geo)) {
-      out += '<div class="tgvg-note">Airport distances are straight-line. Facts from Wikidata.</div>';
+      out += '<div class="tgvg-note">Airport distances are straight-line. Venue facts are shown only when two independent sources agree.</div>';
     }
 
     return out;

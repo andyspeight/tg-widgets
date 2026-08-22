@@ -406,6 +406,37 @@ assembler drops any match whose Wikipedia page is a railway or metro station
 named after the ground. A fact the sources do not carry is omitted from the
 sheet, never guessed.
 
+### Double verification (Andy's rule, 22 Aug 2026: no made-up data)
+
+The sheet is then PRUNED to facts two independently maintained sources
+agree on. `scripts/verify-venue-facts-crawl.js` (a temporary Vercel
+endpoint while it runs; instructions in its header) fetches every matched
+venue's live Wikipedia article and returns verdicts: does the infobox
+corroborate the Wikidata capacity within 1%, the opening year, the official
+site's domain, the feed's city; and does the article title or bolded lead
+share a real name token with the venue. `scripts/verify-venue-facts.mjs`
+then rewrites `venue-facts.json` keeping only the corroborated facts;
+country must instead agree with the country the anchor's timezone implies.
+Unconfirmed means REMOVED, not flagged.
+
+The first run (all 667 article-bearing venues, no fetch failures) kept
+capacity on 364 sheets and dropped 231, kept opened on 576, website on 299,
+city on 199, country on 694, photo and Wikipedia link on 661. Two traps the
+run taught us, both encoded in the pruner:
+
+- sponsor renames and translations fail the title check while being the
+  same building (Oracle Arena is now Oakland Arena, Stadion Slaski is
+  Silesian Stadium). 25 were reviewed by hand and whitelisted, each pinned
+  to its exact article title so a rebuild lapses the review.
+- the SAME-SITE PREDECESSOR: coordinates cannot tell a venue from the
+  demolished venue it replaced, and the old article corroborates the old
+  item perfectly. Wembley matched "Wembley Stadium (1923)" - capacity
+  82,000, opened 1923, all "confirmed", all about the wrong building. Five
+  keys (wembleystadium, sanmamesstadium, stadelouisii,
+  hidegkutinandorstadion, sergiolanfranchi) plus theo2 (Millennium Dome)
+  are purged of all Wikidata facts until someone rematches them to the
+  current articles and re-verifies.
+
 ## Venue keys that merge different real venues
 
 The compact venue key exists to land "Jan Breydel Stadion" and "Jan
