@@ -3301,9 +3301,11 @@
         "colour.pad",
         "colour.pad-r",
         "colour.pb",
+        "colour.primary",
         "colour.radius",
         "colour.surface",
         "colour.surface-alt",
+        "colour.surface-dark",
         "colour.text",
         "radius.md",
         "space.l",
@@ -3320,7 +3322,7 @@
         ],
         "spacing": []
       },
-      "cssRules": 21,
+      "cssRules": 23,
       "sourcePath": "tg-sites/components/render/blocks.tsx:3224",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -4107,7 +4109,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4443",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4608",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4190,7 +4192,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4126",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4291",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4300,7 +4302,7 @@
         ]
       },
       "cssRules": 30,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4173",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4338",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4385,6 +4387,138 @@
       },
       "cssRules": 11,
       "sourcePath": "tg-sites/components/render/blocks.tsx",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
+      "id": "form",
+      "name": "Form",
+      "category": "actions and contact",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Fields a visitor fills in. Submissions land in Enquiries.",
+      "variants": [],
+      "props": [
+        {
+          "name": "name",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": "Enquiry"
+        },
+        {
+          "name": "fields",
+          "type": "list",
+          "role": "content",
+          "required": true
+        },
+        {
+          "name": "fields[].kind",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "text",
+            "email",
+            "phone",
+            "textarea",
+            "select",
+            "checkbox"
+          ]
+        },
+        {
+          "name": "fields[].label",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "fields[].required",
+          "type": "boolean",
+          "role": "config",
+          "required": false
+        },
+        {
+          "name": "fields[].placeholder",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "fields[].options",
+          "type": "text",
+          "role": "content",
+          "required": false
+        },
+        {
+          "name": "submitLabel",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Send"
+        },
+        {
+          "name": "successTitle",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "Thank you"
+        },
+        {
+          "name": "successBody",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": "We have your message and will reply within one working day."
+        },
+        {
+          "name": "notifyEmail",
+          "type": "text",
+          "role": "content",
+          "required": false,
+          "default": ""
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "left",
+            "centre",
+            "right"
+          ],
+          "default": "left"
+        }
+      ],
+      "classNames": [
+        "tgs-button",
+        "tgs-form"
+      ],
+      "tokensUsed": [
+        "colour.border-strong",
+        "colour.on-dark-accent",
+        "colour.on-primary",
+        "colour.on-primary-accent",
+        "colour.primary",
+        "colour.primary-light",
+        "colour.surface",
+        "colour.text",
+        "radius.md",
+        "space.l",
+        "space.m",
+        "space.s",
+        "space.xs",
+        "type.text-l",
+        "type.text-s"
+      ],
+      "hardcoded": {
+        "colours": [
+          ".tgs-section[data-hover-lift] .tgs-card:hover: rgba(15, 23, 42, 0.14)"
+        ],
+        "spacing": []
+      },
+      "cssRules": 23,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3869",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4496,7 +4630,7 @@
         "spacing": []
       },
       "cssRules": 25,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3844",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4009",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4587,7 +4721,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3926",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4091",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4676,7 +4810,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4009",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4174",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4764,7 +4898,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4076",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4241",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4859,7 +4993,7 @@
         "spacing": []
       },
       "cssRules": 22,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4258",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4423",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4944,7 +5078,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4372",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4537",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5120,7 +5254,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4452",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4617",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5163,7 +5297,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4499",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4664",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]
