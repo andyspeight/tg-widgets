@@ -3841,6 +3841,171 @@ export function WhatsAppBlock({ props }: { props: Props }): ReactElement {
  * able to see the thing they are editing, so `editing` overrides the hiding and
  * the block says out loud that it has ended.
  */
+/**
+ * A form a visitor fills in, and the first block that LISTENS instead of shows.
+ *
+ * NO JAVASCRIPT, the same bar the search page and the burger menu hold: a plain
+ * POST to /_form on the site's own host (the slug rules cannot mint that path,
+ * so it can never shadow a page). The route validates against the PUBLISHED
+ * page's own copy of this block, stores the answers, and returns the visitor to
+ * this page with a fragment; CSS :target does the rest. `#<id>-done` reveals the
+ * thank-you and hides the form, `#<id>-err` reveals the error line. State
+ * machine by URL fragment, nothing to hydrate.
+ *
+ * Field controls are named q_0, q_1... by INDEX, never by the label a client
+ * typed: the route re-reads the labels from the published content, so nothing a
+ * visitor posts ever becomes a stored key, and nothing a client typed ever
+ * becomes a control name.
+ *
+ * Two traps a bot walks into and a person cannot: a visually hidden extra field
+ * (a person never sees it, so never fills it) and the render timestamp (a
+ * person cannot read and answer a form in under a few seconds). Both are
+ * checked by the route; the page carries no defence logic of its own.
+ *
+ * In the editor the form is a picture of itself: no action, submit disabled,
+ * and the stylesheet turns off pointer events on the controls so a click lands
+ * on the block and selects it.
+ */
+export function FormBlock({
+  props,
+  blockId,
+  editing = false,
+}: {
+  props: Props;
+  blockId: string;
+  editing?: boolean;
+}): ReactElement {
+  const name = str(props, 'name');
+  const submitLabel = str(props, 'submitLabel') || 'Send';
+  const successTitle = str(props, 'successTitle') || 'Thank you';
+  const successBody = str(props, 'successBody');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const fields = list(props, 'fields');
+  const fid = `f-${blockId}`;
+
+  return (
+    <div className="tgs-form" data-align={align} data-editing={editing ? '' : undefined}>
+      <div className="tgs-form__done" id={`${fid}-done`} role="status" tabIndex={-1}>
+        <p className="tgs-form__done-title">{successTitle}</p>
+        {successBody ? <p className="tgs-form__done-body">{successBody}</p> : null}
+      </div>
+      <form
+        className="tgs-form__form"
+        method="post"
+        {...(editing ? {} : { action: '/_form' })}
+      >
+        <p className="tgs-form__error" id={`${fid}-err`} role="alert" tabIndex={-1}>
+          Something was not right. Please check the fields and send again.
+        </p>
+        <input type="hidden" name="_block" value={blockId} />
+        <input type="hidden" name="_form" value={name} />
+        <input type="hidden" name="_at" value={editing ? 0 : Date.now()} />
+        {/* The trap field. Hidden from eyes and from the tab order, named like
+            something an autofilling bot wants to complete. */}
+        <div className="tgs-form__hp" aria-hidden="true">
+          <label>
+            Leave this field empty
+            <input type="text" name="_website" tabIndex={-1} autoComplete="off" />
+          </label>
+        </div>
+        {fields.map((field, index) => {
+          const kind = oneOf(field, 'kind', ['text', 'email', 'phone', 'textarea', 'select', 'checkbox'] as const, 'text');
+          const label = str(field, 'label') || `Field ${index + 1}`;
+          const required = bool(field, 'required');
+          const placeholder = str(field, 'placeholder');
+          const controlId = `${fid}-q${index}`;
+          const controlName = `q_${index}`;
+
+          if (kind === 'checkbox') {
+            return (
+              <div key={index} className="tgs-form__field tgs-form__field--tick">
+                <label className="tgs-form__tick" htmlFor={controlId}>
+                  <input
+                    id={controlId}
+                    type="checkbox"
+                    name={controlName}
+                    value="Yes"
+                    required={required}
+                  />
+                  <span>{label}{required ? <em className="tgs-form__req" aria-hidden="true"> *</em> : null}</span>
+                </label>
+              </div>
+            );
+          }
+
+          const labelEl = (
+            <label className="tgs-form__label" htmlFor={controlId}>
+              {label}
+              {required ? <em className="tgs-form__req" aria-hidden="true"> *</em> : null}
+            </label>
+          );
+
+          if (kind === 'textarea') {
+            return (
+              <div key={index} className="tgs-form__field">
+                {labelEl}
+                <textarea
+                  id={controlId}
+                  className="tgs-form__control"
+                  name={controlName}
+                  rows={5}
+                  required={required}
+                  placeholder={placeholder || undefined}
+                  maxLength={4000}
+                />
+              </div>
+            );
+          }
+
+          if (kind === 'select') {
+            const options = str(field, 'options')
+              .split(',')
+              .map((option) => option.trim())
+              .filter(Boolean)
+              .slice(0, 24);
+            return (
+              <div key={index} className="tgs-form__field">
+                {labelEl}
+                <select id={controlId} className="tgs-form__control" name={controlName} required={required} defaultValue="">
+                  <option value="" disabled={required}>
+                    {placeholder || 'Choose'}
+                  </option>
+                  {options.map((option, optionIndex) => (
+                    <option key={optionIndex} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          }
+
+          const type = kind === 'email' ? 'email' : kind === 'phone' ? 'tel' : 'text';
+          const autoComplete = kind === 'email' ? 'email' : kind === 'phone' ? 'tel' : undefined;
+          return (
+            <div key={index} className="tgs-form__field">
+              {labelEl}
+              <input
+                id={controlId}
+                className="tgs-form__control"
+                type={type}
+                name={controlName}
+                required={required}
+                placeholder={placeholder || undefined}
+                autoComplete={autoComplete}
+                maxLength={500}
+              />
+            </div>
+          );
+        })}
+        <button className="tgs-button" data-variant="primary" data-size="m" type="submit" disabled={editing}>
+          {submitLabel}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export function CouponBlock({
   props,
   editing = false,

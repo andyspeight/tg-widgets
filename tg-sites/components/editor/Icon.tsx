@@ -29,6 +29,7 @@ export type IconName =
   | 'shape'
   | 'coupon'
   | 'whatsapp'
+  | 'form'
   | 'chevron-right'
   | 'chevron-down'
   // blocks
@@ -137,6 +138,8 @@ const PATHS: Record<IconName, string> = {
   // the brand mark: a filled green logo among 67 outlined icons reads as a
   // sticker somebody pasted on.
   whatsapp: 'M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.4A8.5 8.5 0 1 1 21 11.5M9 9.5c0 3 2.5 5.5 5.5 5.5',
+  // A card of fields with a tick beside the last: something to fill in and send.
+  form: 'M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1M7 9h10M7 13h10M7 17h5M15.5 16.5l1.2 1.2 2.3-2.4',
   'chevron-right': 'M9 6l6 6-6 6',
   'chevron-down': 'M6 9l6 6 6-6',
 

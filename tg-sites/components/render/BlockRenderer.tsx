@@ -52,6 +52,7 @@ import {
   LocationsBlock,
   ShapeBlock,
   FileBlock,
+  FormBlock,
   ReadMoreBlock,
   SpacerBlock,
   StatsBlock,
@@ -191,6 +192,13 @@ export function BlockRenderer({
          and fix the thing they are editing. On a live page it goes. */
       case 'whatsapp':
         return <WhatsAppBlock props={props} />;
+      /*
+       * The form takes the block id (its :target ids and control ids hang off
+       * it) and whether this tree is the editor, where it must be a picture of
+       * a form rather than a working one: no action, submit disabled.
+       */
+      case 'form':
+        return <FormBlock props={props} blockId={block.id} editing={editorCanvas} />;
       case 'coupon':
         return <CouponBlock props={props} editing={editable} />;
       case 'locations':

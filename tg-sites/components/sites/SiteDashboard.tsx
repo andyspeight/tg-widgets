@@ -221,6 +221,12 @@ export function SiteDashboard({
               Being found
             </a>
 
+            {/* What visitors sent through the site's forms. */}
+            <a className="sv-btn" href="/enquiries">
+              <Icon name="form" size={16} />
+              Enquiries
+            </a>
+
             {/*
               Everybody gets this link, not only an owner. Seeing who your
               colleagues are is not a privilege, and a viewer who cannot tell

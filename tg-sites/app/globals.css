@@ -6406,6 +6406,109 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* The Form                                                            */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The controls hold NO SURFACE OF THEIR OWN: transparent fields, `color:
+ * inherit`, a border from the tone-scoped --tgs-border. That is the search
+ * input's arrangement, and it is what lets one form sit on bone, on the dark
+ * band and on an accent band without a single tone-specific rule — the exact
+ * trap the nav dropdown fell into by owning a light surface under inherited
+ * light text (21 Aug 2026). Inherit and you cannot mismatch.
+ */
+.tgs-form { max-width: 34rem; }
+.tgs-form[data-align='centre'] { margin-inline: auto; }
+.tgs-form[data-align='right'] { margin-inline-start: auto; }
+
+.tgs-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-m);
+  align-items: flex-start;
+}
+.tgs-form__field { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.tgs-form__label { font-weight: 600; font-size: 0.95em; }
+.tgs-form__req { font-style: normal; color: var(--tgs-accent, currentColor); }
+
+.tgs-form__control {
+  width: 100%;
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-sm, 6px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 10px 12px;
+}
+.tgs-form__control::placeholder { color: var(--tgs-text-muted); opacity: 1; }
+.tgs-form__control:focus-visible {
+  outline: 2px solid var(--tgs-accent, currentColor);
+  outline-offset: 1px;
+}
+textarea.tgs-form__control { resize: vertical; min-height: 7rem; }
+/* A transparent select keeps the page's colours in its closed state; its
+   dropped-down list is the browser's own and styles itself per platform. */
+select.tgs-form__control option { color: initial; }
+
+.tgs-form__field--tick { flex-direction: row; }
+.tgs-form__tick {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  cursor: pointer;
+}
+.tgs-form__tick input { accent-color: var(--tgs-accent, currentColor); }
+
+/*
+ * THE STATE MACHINE IS THE URL FRAGMENT. The submit route sends the visitor
+ * back to #<id>-done or #<id>-err, and :target does what a script would have:
+ * done hides the form and shows the thank-you; err reveals the error line
+ * above the fields. Load the page with no fragment and none of this matches,
+ * which is the blank slate. No script, nothing to hydrate, works printed.
+ */
+.tgs-form__done {
+  display: none;
+  border: 1px solid var(--tgs-border);
+  border-left: 3px solid var(--tgs-accent, currentColor);
+  border-radius: var(--tgs-radius-sm, 6px);
+  padding: var(--tgs-space-m) var(--tgs-space-l);
+}
+.tgs-form__done-title { margin: 0; font-weight: 700; }
+.tgs-form__done-body { margin: 6px 0 0; color: var(--tgs-text-muted); }
+.tgs-form__done:target { display: block; }
+.tgs-form__done:target + .tgs-form__form { display: none; }
+
+.tgs-form__error {
+  display: none;
+  margin: 0;
+  font-weight: 600;
+  color: var(--tgs-accent, currentColor);
+}
+.tgs-form__error:target { display: block; }
+
+/*
+ * The honeypot is removed from sight and from the accessibility tree, but NOT
+ * display:none: some spam scripts skip fields they can see are not rendered,
+ * and an off-screen field is the classic compromise. aria-hidden and
+ * tabindex=-1 keep it out of every human path.
+ */
+.tgs-form__hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* In the editor the form is a picture: clicks fall through to select the
+   block rather than focusing a control that goes nowhere. */
+.tgs-form[data-editing] input,
+.tgs-form[data-editing] textarea,
+.tgs-form[data-editing] select,
+.tgs-form[data-editing] button { pointer-events: none; }
+
+/* ------------------------------------------------------------------ */
 /* The Coupon                                                          */
 /* ------------------------------------------------------------------ */
 

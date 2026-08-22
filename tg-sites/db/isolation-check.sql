@@ -1477,6 +1477,80 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
+-- Form submissions
+-- ---------------------------------------------------------------------------
+--
+-- The first table the PUBLIC side may write. The doctrine holds by
+-- construction: the renderer role has NO privilege on the table, only EXECUTE
+-- on public.submit_form, which takes its tenant from the transaction setting
+-- and refuses when none is set. So the checks are: the app role is fenced to
+-- its tenant as usual and cannot delete; the renderer cannot SELECT the table
+-- at all; the function stores for the tenant that is set and refuses with none.
+do $$
+declare
+  own int := -1; other int := -1;
+  planted boolean := true; removed boolean := true;
+  renderer_read boolean := true;
+  stored boolean := false; unset_stored boolean := true;
+begin
+  set local role tg_sites_app;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  -- One legitimate enquiry, filed by the app role for its own tenant.
+  insert into public.form_submissions (tenant_id, form_block_id, form_name, data)
+  values ('11111111-1111-1111-1111-111111111111', 'b_iso', 'Iso', '{"Name":"Ann"}'::jsonb);
+
+  select count(*) into own   from public.form_submissions;
+  select count(*) into other from public.form_submissions
+    where tenant_id = '22222222-2222-2222-2222-222222222222';
+
+  -- Filing one against another site. The WITH CHECK half refuses it.
+  begin
+    insert into public.form_submissions (tenant_id, form_block_id, form_name, data)
+    values ('22222222-2222-2222-2222-222222222222', 'b_iso', 'Iso', '{"Name":"sneaky"}'::jsonb);
+  exception when others then planted := false; end;
+
+  -- Erasing one. There is deliberately no DELETE grant.
+  begin
+    delete from public.form_submissions;
+  exception when others then removed := false; end;
+
+  reset role;
+
+  set local role tg_sites_renderer;
+  perform set_config('app.current_tenant_id', '11111111-1111-1111-1111-111111111111', true);
+
+  -- The public role reading enquiries back. No grant, so no.
+  begin
+    perform count(*) from public.form_submissions;
+  exception when others then renderer_read := false; end;
+
+  -- The one write door, for the tenant that is set.
+  select public.submit_form(null, 'b_iso', 'Iso', '{"Name":"Visitor"}'::jsonb, '{}'::jsonb)
+    into stored;
+
+  -- And with no tenant set, the door is shut. Cleared by name: trap 2 above.
+  perform set_config('app.current_tenant_id', '', true);
+  select public.submit_form(null, 'b_iso', 'Iso', '{"Name":"ghost"}'::jsonb, '{}'::jsonb)
+    into unset_stored;
+
+  reset role;
+  insert into checks (name, passed, detail) values
+    ('a tenant sees its own enquiries', own = 1, 'saw ' || own || ' of 1'),
+    ('and none of another tenants enquiries', other = 0, 'leaked ' || other),
+    ('a tenant cannot file an enquiry against another site',
+     not planted, case when planted then 'IT PLANTED ONE' else 'the policy refused it' end),
+    ('an enquiry cannot be deleted',
+     not removed, case when removed then 'AN ENQUIRY WAS DELETED' else 'no DELETE grant' end),
+    ('the renderer cannot read enquiries',
+     not renderer_read, case when renderer_read then 'THE PUBLIC ROLE READ THE TABLE' else 'no SELECT grant' end),
+    ('the renderer can file one through submit_form',
+     stored, case when stored then 'the definer function stored it' else 'IT COULD NOT STORE' end),
+    ('submit_form refuses with no tenant set',
+     not unset_stored, case when unset_stored then 'IT STORED WITHOUT A TENANT' else 'refused' end);
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- Clear up, then report
 -- ---------------------------------------------------------------------------
 
@@ -1489,6 +1563,7 @@ delete from public.pages where id in (
   'aaaaaaaa-0000-0000-0000-00000000a002',
   'bbbbbbbb-0000-0000-0000-00000000b001'
 );
+delete from public.form_submissions where form_block_id = 'b_iso';
 delete from public.tenants where id in (
   '11111111-1111-1111-1111-111111111111',
   '22222222-2222-2222-2222-222222222222',

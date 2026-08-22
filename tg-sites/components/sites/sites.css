@@ -1162,3 +1162,78 @@
 }
 
 .sw-note svg { flex: none; margin-top: 2px; color: var(--ed-select); }
+
+/* ------------------------------------------------------------------ */
+/* Enquiries                                                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The list is read newest first and mostly skimmed, so each enquiry is one
+ * calm card: what form, where, when, then the answers as label/value pairs.
+ * Unread state is a dot and a slightly firmer edge, not a colour wash: the
+ * words are the content and they stay quiet.
+ */
+.enq-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-6);
+}
+.enq-sub { margin: var(--ed-1) 0 0; color: var(--ed-ink-2); font-size: var(--ed-text-sm); }
+
+.enq-empty {
+  border: 1px dashed var(--ed-line);
+  border-radius: 10px;
+  padding: var(--ed-6);
+  color: var(--ed-ink-2);
+  max-width: 40rem;
+}
+.enq-empty p { margin: 0; line-height: 1.55; }
+
+.enq-list { display: flex; flex-direction: column; gap: var(--ed-4); max-width: 46rem; }
+
+.enq {
+  border: 1px solid var(--ed-line);
+  border-radius: 10px;
+  padding: var(--ed-4) var(--ed-5);
+  background: var(--ed-panel, transparent);
+}
+.enq--unread { border-color: var(--ed-select); }
+
+.enq__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  flex-wrap: wrap;
+}
+.enq__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin: 0;
+  font-size: var(--ed-text-base);
+  font-weight: 600;
+}
+.enq__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ed-select);
+}
+.enq__meta { color: var(--ed-ink-2); font-size: var(--ed-text-sm); margin-right: auto; }
+
+.enq__answers { margin: var(--ed-3) 0 0; }
+.enq__answer {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) 1fr;
+  gap: var(--ed-2) var(--ed-4);
+  padding: var(--ed-2) 0;
+  border-top: 1px solid var(--ed-line);
+}
+.enq__answer dt { font-weight: 600; font-size: var(--ed-text-sm); color: var(--ed-ink-2); }
+.enq__answer dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .enq__answer { grid-template-columns: 1fr; gap: 2px; }
+}
