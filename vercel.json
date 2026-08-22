@@ -83,6 +83,9 @@
       "memory": 1024,
       "maxDuration": 15,
       "includeFiles": "api/_data/events-snapshot.json"
+    },
+    "api/dev-venue-verify-probe.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
