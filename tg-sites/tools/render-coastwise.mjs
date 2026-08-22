@@ -46,6 +46,12 @@ export const COASTWISE_THEME = {
   pageBackground: '#f2efe9',
   text: '#14181c',
   corners: 'soft',
+  // The claimed colours and the data typeface, exactly as the tenant row now
+  // holds them, so the preview realises the same world the live site will.
+  surfaceDark: '#1b333d',
+  surfaceAlt: '#e7e2d8',
+  textMuted: '#4e5960',
+  dataFamily: 'ibm-plex-mono',
   typography: {
     h1: { family: 'archivo', size: 56, weight: 700, tracking: -2, lineHeight: 1.05 },
     h2: { family: 'archivo', size: 38, weight: 650, tracking: -2, lineHeight: 1.1 },

@@ -227,7 +227,7 @@ describe('parsing a theme', () => {
   it('turns nothing into the defaults', () => {
     // Compared field by field rather than against DEFAULT_THEME whole, because
     // DEFAULT_THEME holds the scalars and typography has its own defaults.
-    expect(parseTheme({})).toEqual({ ...DEFAULT_THEME, typography: DEFAULT_TYPOGRAPHY });
+    expect(parseTheme({})).toEqual({ ...DEFAULT_THEME, surfaceDark: '', surfaceAlt: '', textMuted: '', dataFamily: '', typography: DEFAULT_TYPOGRAPHY });
     expect(themeIsDefault(parseTheme({}))).toBe(true);
   });
 
@@ -249,7 +249,7 @@ describe('parsing a theme', () => {
     ['an array', ['#fff']],
     ['a double encoded blob', '{"brand":"#ff0000"}'],
   ])('turns %s into the defaults rather than throwing', (_label, input) => {
-    expect(parseTheme(input)).toEqual({ ...DEFAULT_THEME, typography: DEFAULT_TYPOGRAPHY });
+    expect(parseTheme(input)).toEqual({ ...DEFAULT_THEME, surfaceDark: '', surfaceAlt: '', textMuted: '', dataFamily: '', typography: DEFAULT_TYPOGRAPHY });
   });
 
   it('keeps the fields it understands and defaults the rest', () => {

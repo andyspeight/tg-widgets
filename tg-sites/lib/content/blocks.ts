@@ -341,7 +341,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
      * off. Only the block default, so it reaches a heading a client adds, not the
      * headings already stored in a page.
      */
-    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none', fluid: true },
+    defaults: { html: 'A new heading', level: 'h2', style: 'h2', align: 'left', shadow: 'none', fluid: true },
     summarise: (props) =>
       firstWords(stripTags(asString(props.html)), 6) || asString(props.text) || 'Heading',
     fields: [

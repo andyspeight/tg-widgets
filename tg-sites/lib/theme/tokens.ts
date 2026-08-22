@@ -35,7 +35,7 @@ import {
   nudgeUntilReadable,
   readableOn,
 } from './colour';
-import { typographyTokens, type LibraryFont } from './fonts';
+import { resolveStack, typographyTokens, type LibraryFont } from './fonts';
 import { CORNERS, type Theme } from './schema';
 
 /**
@@ -140,7 +140,16 @@ export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTok
    * caption that looks slightly too dark is a design opinion, one nobody can
    * read is a defect.
    */
-  const textMuted = fadeButKeepReadable(text, page, NUDGE.muted, BODY_CONTRAST);
+  /*
+   * The override, when set, replaces the STARTING POINT, never the guard: a
+   * muted colour the client chose is still nudged until it reads on the page,
+   * and a derived one behaves exactly as before. Same shape for the two band
+   * overrides below. The opt-in dark palette (darkThemeTokens) keeps deriving
+   * from first principles: these overrides describe the light world.
+   */
+  const textMuted = theme.textMuted
+    ? nudgeUntilReadable(theme.textMuted, page, BODY_CONTRAST).colour
+    : fadeButKeepReadable(text, page, NUDGE.muted, BODY_CONTRAST);
 
   const brandLight = mix(theme.brand, '#ffffff', NUDGE.brandLight);
 
@@ -154,14 +163,17 @@ export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTok
    * nothing on a brand that was already dark, because the loop exits at once.
    */
   const brandDark = deepenUntilTextFits(
-    mix(theme.brand, '#000000', NUDGE.brandDark),
+    theme.surfaceDark || mix(theme.brand, '#000000', NUDGE.brandDark),
     BAND_CONTRAST,
   );
 
   const onBrand = readableOn(theme.brand);
   const onAccent = readableOn(theme.accent);
 
-  const surfaceAlt = mix(page, text, NUDGE.surfaceAlt);
+  const surfaceAlt =
+    theme.surfaceAlt && contrastRatio(text, theme.surfaceAlt) >= BODY_CONTRAST
+      ? theme.surfaceAlt
+      : mix(page, text, NUDGE.surfaceAlt);
   const border = mix(page, text, NUDGE.border);
   const borderStrong = mix(page, text, NUDGE.borderStrong);
 
@@ -251,6 +263,16 @@ export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTok
      * page the right colours in the wrong typeface.
      */
     ...typographyTokens(theme.typography, library),
+    /*
+     * The data typeface, only when the theme names one. Consumers say
+     * `font-family: var(--tgs-font-data, inherit)`, so a site with no data
+     * font renders byte for byte as before, and one with it (a plotting-room
+     * mono, a tabular grotesk) gets it exactly where data lives: key numbers
+     * and card labels today, more slots as they earn it.
+     */
+    ...(theme.dataFamily
+      ? { '--tgs-font-data': resolveStack(theme.dataFamily, library, theme.typography.p.family) }
+      : {}),
   } as CSSProperties;
 
   return {

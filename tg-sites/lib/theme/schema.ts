@@ -153,6 +153,14 @@ export const DEFAULT_THEME = {
  * Anything invalid still cannot reach the CSS: it is replaced by the default,
  * which is a value from this file.
  */
+/** An optional colour: a valid hex, or empty for "derive it". */
+function optionalColour() {
+  return z
+    .unknown()
+    .transform((value) => normaliseHex(value) ?? '')
+    .catch('');
+}
+
 function colour(fallback: string) {
   return z
     .unknown()
@@ -171,6 +179,36 @@ export const ThemeSchema = z.object({
   text: colour(DEFAULT_THEME.text),
 
   corners: CornerEnum.catch(DEFAULT_THEME.corners),
+
+  /*
+   * OPTIONAL OVERRIDES for three colours the theme otherwise derives: the dark
+   * band, the alternating band and muted text. Empty means "derive as always",
+   * which is every theme saved before these existed. They exist because the
+   * derivation, correct as arithmetic, drifts from a committed design world:
+   * Coastwise's deep #1B333D became a near-black band and its warm bone-2 a
+   * cool grey (the 21 Aug review). An override is a hint, not a licence: the
+   * token layer still passes each one through the same contrast guards the
+   * derived value gets, so a careless override cannot ship unreadable text.
+   */
+  surfaceDark: optionalColour(),
+  surfaceAlt: optionalColour(),
+  textMuted: optionalColour(),
+
+  /*
+   * The DATA typeface: day numbers, fares, key figures, card labels. A slug
+   * from the site's own font library, resolved exactly as a text style's
+   * family is; empty means data inherits its surroundings, which is every
+   * existing site unchanged. This is the slot that lets a world like
+   * Coastwise's ("plotting-room mono for data only") actually happen.
+   */
+  dataFamily: z
+    .unknown()
+    .transform((value) =>
+      typeof value === 'string'
+        ? value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80)
+        : '',
+    )
+    .catch(''),
 
   /**
    * The seven text styles. See lib/theme/typography.ts.

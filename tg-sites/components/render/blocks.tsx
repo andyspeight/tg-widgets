@@ -3695,7 +3695,16 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
   const body = headerRow ? rows.slice(1) : rows;
   const textColour = safeColour(props.textColour);
 
-  return (
+  /*
+   * THE CAPTION LIVES OUTSIDE THE SCROLL REGION. It used to be a <caption>
+   * inside the table, which meant it scrolled sideways WITH the table on a
+   * phone and its first line was cut mid-word at the viewport edge (the
+   * 21 Aug review: "...where others ancho"), quietly breaking the site's
+   * text-never-touches-the-edge promise. As a <figcaption> on a wrapping
+   * <figure> it wraps at the viewport like any paragraph, while the table
+   * keeps its name for assistive tech through aria-label on the region.
+   */
+  const table = (
     <div
       className="tgs-table__scroll"
       role="region"
@@ -3703,8 +3712,6 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
       tabIndex={0}
     >
       <table className="tgs-table" data-style={style} style={textColour ? { color: textColour } : undefined}>
-        {caption && <caption className="tgs-table__caption">{caption}</caption>}
-
         {head && (
           <thead>
             <tr>
@@ -3734,6 +3741,14 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
         </tbody>
       </table>
     </div>
+  );
+
+  if (!caption) return table;
+  return (
+    <figure className="tgs-table__figure">
+      {table}
+      <figcaption className="tgs-table__caption">{caption}</figcaption>
+    </figure>
   );
 }
 

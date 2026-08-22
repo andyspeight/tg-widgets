@@ -2412,7 +2412,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 .tgs-tsl__stars { display: inline-flex; gap: 2px; }
 .tgs-tsl__star { fill: var(--tgs-border-strong); }
-.tgs-tsl__star[data-on='true'] { fill: #f5a623; }
+/* The same star token the rating element uses: one gold across the site,
+   themed by the accent, rather than a second hard-coded amber (a mismatch
+   the 21 Aug review caught: two star colours on one page). */
+.tgs-tsl__star[data-on='true'] { fill: var(--tgs-star, var(--tgs-accent, #f0a13c)); }
 .tgs-tsl__quote {
   margin: 0;
   font-size: var(--tgs-text-l);
@@ -3202,6 +3205,9 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--tgs-primary);
+  /* Card labels are data ("Day 01 · Oban", "Scotland · 7 nights"): the
+     theme's data typeface when one is named, the surroundings otherwise. */
+  font-family: var(--tgs-font-data, inherit);
 }
 /*
  * The client's own H4, all five properties of it, exactly as
@@ -3539,8 +3545,14 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-table[data-style='boxed'] th,
 .tgs-table[data-style='boxed'] td { border: 1px solid var(--tgs-border); }
 
+/*
+ * A <figcaption> below the scroll region, not a <caption> inside the table:
+ * inside, it scrolled sideways with the table on a phone and was cut at the
+ * viewport edge mid-word. Out here it wraps like any paragraph.
+ */
+.tgs-table__figure { margin: 0; }
 .tgs-table__caption {
-  caption-side: bottom;
+  display: block;
   padding-top: var(--tgs-space-s);
   font-size: var(--tgs-text-s);
   color: var(--tgs-text-muted);
@@ -3574,9 +3586,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   overscroll-behavior-x: contain;
 }
 
-.tgs-slider[data-slide='narrow'] { --tgs-slide: 260px; }
-.tgs-slider[data-slide='medium'] { --tgs-slide: 340px; }
-.tgs-slider[data-slide='wide']   { --tgs-slide: 440px; }
+/*
+ * THE NEXT CARD ALWAYS PEEKS. A fixed slide width divides some container
+ * widths exactly: at Coastwise's contained width, three medium slides plus
+ * their gaps came to the rail's width to the pixel, so the fourth card
+ * started at the very edge, the edge fade fell on card padding, and days
+ * four to seven were undiscoverable (the 21 Aug review found it; the fade
+ * and the bold bar were both working and both had nothing to show). The cap
+ * keeps each preset's width until the container is tight, and the calc
+ * guarantees the next card shows by at least a finger's width at every
+ * width in between. A visible sliver of card is the one affordance that
+ * needs no scrollbar, no motion and no luck.
+ */
+.tgs-slider[data-slide='narrow'] { --tgs-slide: min(260px, calc((100% - 5.5rem) / 4)); }
+.tgs-slider[data-slide='medium'] { --tgs-slide: min(340px, calc((100% - 5.5rem) / 3)); }
+.tgs-slider[data-slide='wide']   { --tgs-slide: min(440px, calc((100% - 5.5rem) / 2)); }
 
 /* Each card comes to rest at the left edge of the rail. */
 .tgs-slider > .tgs-card { scroll-snap-align: start; }
@@ -5955,6 +5979,10 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-stats__value {
   display: inline-block;
   text-align: center;
+  /* The theme's data typeface, when it names one; inherit otherwise, so
+     every site without one is untouched. Key numbers ARE data. */
+  font-family: var(--tgs-font-data, inherit);
+  font-variant-numeric: tabular-nums;
 }
 @property --tgs-count {
   syntax: '<integer>';
