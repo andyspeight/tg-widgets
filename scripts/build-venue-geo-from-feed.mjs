@@ -156,8 +156,13 @@ for (const v of snap.venues) {
     report.fromRef++;
   }
   if (off.length) {
-    // The far rows still anchor their own events, sign-repaired against the
-    // venue median where that explains them.
+    // A far row is one of two things. When MANY far rows agree on one spot,
+    // that is a second real ground sharing the venue key (Mechelen's sixteen
+    // rows under afasstadion), and each event should anchor to its own row.
+    // When one or two rows sit alone somewhere odd, that is supplier noise
+    // (Bon Jovi at Wembley with two rows in rural Oxfordshire), and the
+    // venue's own point is the truth. Three agreeing rows is the line.
+    const clustered = (p) => off.filter((o) => km(o, p) < 25).length >= 3;
     for (const ev of snap.events) {
       if (ev.vk !== v.key) continue;
       const pts = (eventPts.get(ev.i) || []).filter(valid);
@@ -167,6 +172,7 @@ for (const v of snap.venues) {
       if (vg && km(p, vg) < 50) continue; // the venue point already covers it
       const fixed = vg ? repair(p, vg) : null;
       if (fixed) { report.signFixed++; continue; }
+      if (vg && !clustered(p)) continue;  // noise: the venue point wins
       eventGeo.set(ev.i, { lat: +p.lat.toFixed(5), lng: +p.lng.toFixed(5) });
       report.eventLevel++;
     }

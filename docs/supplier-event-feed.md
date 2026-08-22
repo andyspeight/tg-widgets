@@ -381,6 +381,31 @@ list, then add the confirmed pairs to a venue alias table.
   ("Championship Race"), so they stay outside the competition taxonomy. They are
   still categorised as motorsport.
 
+## Venue fact sheets
+
+`api/_data/venue-facts.json` carries a researched fact sheet for every venue,
+surfaced on the Events Explorer venue page ("Plan your visit") and by the
+Venue Guide widget. Three sources, nothing invented:
+
+- the feed itself: the city its concerts say it is in, the country, what is
+  on and who plays there
+- Wikidata, matched by COORDINATES rather than a trusted name search (a
+  candidate only counts if its own coordinate sits within 2km of our supplier
+  anchor): capacity, opening year, official site, Wikipedia, and a photo kept
+  WITH its Wikimedia Commons author and licence
+- maths on repo data: IANA timezone from the anchor (tz-lookup at build time)
+  and the nearest major airports from the Flight Time widget's bundled list,
+  straight-line distance, within 150km only
+
+881 of 982 venues matched on Wikidata. Rebuild with
+`scripts/research-venues-via-vercel.mjs` (it runs as a temporary Vercel
+function because the build sandbox cannot reach Wikimedia; page every offset
+TWICE - Wikimedia throttles bursts and the second pass recovers different
+venues) then `scripts/build-venue-facts.mjs` over the page files. The
+assembler drops any match whose Wikipedia page is a railway or metro station
+named after the ground. A fact the sources do not carry is omitted from the
+sheet, never guessed.
+
 ## Venue keys that merge different real venues
 
 The compact venue key exists to land "Jan Breydel Stadion" and "Jan
