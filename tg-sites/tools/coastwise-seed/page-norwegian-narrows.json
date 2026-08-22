@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_4uhl2mi9",
+ "id": "pg_4uozf5dz",
  "title": "Norwegian Narrows",
  "slug": "norwegian-narrows",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_3k7rpk1d",
+   "id": "sec_3k4is3a0",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_3jfiu3a9",
+     "id": "row_3jcmik74",
      "columns": [
       {
-       "id": "col_3iqlhkba",
+       "id": "col_3iu3ivw5",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_3f8e3imp",
+         "id": "b_3f90utgb",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_3gud4gkq",
+         "id": "b_3g4adu51",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_3hsjwg55",
+         "id": "b_3hl5xpat",
          "type": "text",
          "props": {
           "html": "<p>Bergen to Ålesund the slow way, aboard MV Skua. Nine nights, four of them at anchor under something vertical.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_3x45ff3d",
+   "id": "sec_3x2x2lfj",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -112,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3qq826je",
+     "id": "row_3qav1m2z",
      "columns": [
       {
-       "id": "col_3m2lfn15",
+       "id": "col_3m67sp9q",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -133,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_3lslfzgu",
+         "id": "b_3lvoc9rb",
          "type": "text",
          "props": {
           "html": "<p>The express boats do Bergen to Ålesund in a day. We take nine, because the point of a fjord is not the far end of it. Skua turns up the arms with no ferry service and anchors where the chart says there is room for exactly one ship, which there is, because she is the one ship.</p><p>Four nights at anchor means four evenings when the engine stops and the water goes to glass and the only thing moving is the waterfall a mile up. Bring a book you have been meaning to read for years.</p>"
@@ -142,7 +142,7 @@
        ]
       },
       {
-       "id": "col_3pd30e6s",
+       "id": "col_3prp96ms",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -160,7 +160,7 @@
        },
        "blocks": [
         {
-         "id": "b_3n4yc6h6",
+         "id": "b_3np9idk1",
          "type": "rating",
          "props": {
           "rating": 4.8,
@@ -172,7 +172,7 @@
          }
         },
         {
-         "id": "b_3o0jex0n",
+         "id": "b_3ovol8j5",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -207,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_3trwnqmt",
+     "id": "row_3tpbvsie",
      "columns": [
       {
-       "id": "col_3slh30fw",
+       "id": "col_3sdsznhd",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -228,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_3r5ejfpr",
+         "id": "b_3r7wjb1x",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -271,10 +271,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_3w0hdcyw",
+     "id": "row_3wfrzf6r",
      "columns": [
       {
-       "id": "col_3v9o5rjn",
+       "id": "col_3vd7auuw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -292,7 +292,7 @@
        },
        "blocks": [
         {
-         "id": "b_3un4e7qb",
+         "id": "b_3ukji9t8",
          "type": "text",
          "props": {
           "html": "<p>The practical bit: join at Bergen from two, sail at five. The airport bus stops a short walk from the berth, and we book the flights where wanted, under the ATOL. Skua is a ship of stairs, and ashore is mostly by gangway in the arms. Travel insurance is a condition of booking.</p>"
@@ -308,7 +308,7 @@
    ]
   },
   {
-   "id": "sec_42hpuaux",
+   "id": "sec_42wbvk3y",
    "name": "The arms",
    "tone": "subtle",
    "width": "contained",
@@ -329,10 +329,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_41adrsnc",
+     "id": "row_4137pszn",
      "columns": [
       {
-       "id": "col_40qqwobv",
+       "id": "col_40rc7sqw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -350,7 +350,7 @@
        },
        "blocks": [
         {
-         "id": "b_3y5u87jf",
+         "id": "b_3ybli247",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -360,7 +360,7 @@
          }
         },
         {
-         "id": "b_3zjx6qoe",
+         "id": "b_3zvxb8wu",
          "type": "half-overlay",
          "props": {
           "tint": "#1b333d",
@@ -411,7 +411,7 @@
    ]
   },
   {
-   "id": "sec_48g9gvn8",
+   "id": "sec_48gdaxei",
    "name": "Day by day",
    "tone": "light",
    "width": "contained",
@@ -433,10 +433,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_47x1vpq7",
+     "id": "row_47uf9sxf",
      "columns": [
       {
-       "id": "col_46nfciwb",
+       "id": "col_46odu9pm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -454,7 +454,7 @@
        },
        "blocks": [
         {
-         "id": "b_43oy0by6",
+         "id": "b_43d62hp3",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -464,14 +464,14 @@
          }
         },
         {
-         "id": "b_442t2y4m",
+         "id": "b_44tx4ejm",
          "type": "text",
          "props": {
           "html": "<p>The order bends with the weather, which is a feature. What does not change: four nights at anchor, five alongside, and the bridge open the whole way.</p>"
          }
         },
         {
-         "id": "b_45gue0cc",
+         "id": "b_45ru5ty5",
          "type": "slider",
          "props": {
           "slideWidth": "medium",
@@ -561,7 +561,7 @@
    ]
   },
   {
-   "id": "sec_4fkjra7h",
+   "id": "sec_4f47gf2g",
    "name": "The chart and the water",
    "tone": "light",
    "width": "contained",
@@ -583,10 +583,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4eai96f2",
+     "id": "row_4e9fli2m",
      "columns": [
       {
-       "id": "col_4bcusf4k",
+       "id": "col_4buxef85",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -604,7 +604,7 @@
        },
        "blocks": [
         {
-         "id": "b_49spzn2t",
+         "id": "b_49kkxjou",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -614,7 +614,7 @@
          }
         },
         {
-         "id": "b_4atmr0du",
+         "id": "b_4awfnssx",
          "type": "text",
          "props": {
           "html": "<p>Every arm we enter is planned on paper first, the old way, because the old way makes you look at every sounding. Drag the handle and see what a morning of pilotage looks like from the wheelhouse instead.</p><p>The dashed line on the chart is the leading line. The gap in the islands is where you will be standing when we thread it.</p>"
@@ -623,7 +623,7 @@
        ]
       },
       {
-       "id": "col_4dowueo0",
+       "id": "col_4d7w3c0r",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -641,7 +641,7 @@
        },
        "blocks": [
         {
-         "id": "b_4cgckdis",
+         "id": "b_4c59wxtn",
          "type": "before-after",
          "props": {
           "before": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/chart-narrows.jpg",
@@ -664,7 +664,7 @@
    ]
   },
   {
-   "id": "sec_4k32k6h7",
+   "id": "sec_4kgdg94l",
    "name": "An evening at anchor",
    "tone": "subtle",
    "width": "contained",
@@ -686,10 +686,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4js3esfb",
+     "id": "row_4jxzpld9",
      "columns": [
       {
-       "id": "col_4iiqmt8w",
+       "id": "col_4i1dn2iu",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -707,7 +707,7 @@
        },
        "blocks": [
         {
-         "id": "b_4g9uak7b",
+         "id": "b_4g2r35hz",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -717,7 +717,7 @@
          }
         },
         {
-         "id": "b_4hbxpqmn",
+         "id": "b_4hu0ej0z",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -753,7 +753,7 @@
    ]
   },
   {
-   "id": "sec_4ottwqk9",
+   "id": "sec_4o1rtoxn",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -774,10 +774,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4nixydnw",
+     "id": "row_4njodizw",
      "columns": [
       {
-       "id": "col_4mofa87r",
+       "id": "col_4mpeu5wd",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -795,7 +795,7 @@
        },
        "blocks": [
         {
-         "id": "b_4l1sgu0a",
+         "id": "b_4livszoy",
          "type": "quote",
          "props": {
           "text": "The master turned us round in the night to miss a blow, and we woke up somewhere better. Nobody announced it. It was just done.",
@@ -813,7 +813,7 @@
    ]
   },
   {
-   "id": "sec_4twufkz1",
+   "id": "sec_4trm48ej",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -834,10 +834,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4s7hcr4p",
+     "id": "row_4s2s8d8f",
      "columns": [
       {
-       "id": "col_4r8xn7db",
+       "id": "col_4rjbz8me",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -855,7 +855,7 @@
        },
        "blocks": [
         {
-         "id": "b_4p6gt6t0",
+         "id": "b_4pzfluvz",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -865,7 +865,7 @@
          }
         },
         {
-         "id": "b_4q0h5xhh",
+         "id": "b_4q0a121w",
          "type": "button-group",
          "props": {
           "align": "centre",

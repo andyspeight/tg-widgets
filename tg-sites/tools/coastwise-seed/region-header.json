@@ -1,7 +1,7 @@
 {
  "sections": [
   {
-   "id": "sec_i7eb08j8",
+   "id": "sec_ieoc9q6x",
    "name": "Header",
    "tone": "dark",
    "width": "wide",
@@ -22,10 +22,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_i6k0cirb",
+     "id": "row_idjx4k5y",
      "columns": [
       {
-       "id": "col_i3rzj306",
+       "id": "col_ia6ykzmy",
        "width": 30,
        "align": "centre",
        "flow": "stacked",
@@ -43,7 +43,7 @@
        },
        "blocks": [
         {
-         "id": "b_i2h3laxl",
+         "id": "b_i9an9v2x",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -55,7 +55,7 @@
        ]
       },
       {
-       "id": "col_i5a1kzsp",
+       "id": "col_icqsqelx",
        "width": 70,
        "align": "centre",
        "flow": "stacked",
@@ -73,7 +73,7 @@
        },
        "blocks": [
         {
-         "id": "b_i4t05ccl",
+         "id": "b_ibnohev4",
          "type": "nav",
          "props": {
           "layout": "row",

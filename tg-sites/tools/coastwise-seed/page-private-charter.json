@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_egubjexi",
+ "id": "pg_eg84fhsu",
  "title": "Private charter",
  "slug": "private-charter",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_duaiyd4j",
+   "id": "sec_du5jbv5h",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_dtobijyl",
+     "id": "row_dts61f12",
      "columns": [
       {
-       "id": "col_ds3sxyah",
+       "id": "col_ds01mshw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_dpazgksn",
+         "id": "b_dpsajamh",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_dqr2v5uf",
+         "id": "b_dqmn6dph",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_drayoanr",
+         "id": "b_dr6f821g",
          "type": "text",
          "props": {
           "html": "<p>Twenty-six to forty-four of your own people, one ship, one crew, and a plan drawn round you.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_e155h1tw",
+   "id": "sec_e14bsaqy",
    "name": "The ships",
    "tone": "light",
    "width": "contained",
@@ -112,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_e0r6zzq8",
+     "id": "row_e06ivf0a",
      "columns": [
       {
-       "id": "col_dzg3y64z",
+       "id": "col_dz3m33j5",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -133,14 +133,14 @@
        },
        "blocks": [
         {
-         "id": "b_dvt7qml9",
+         "id": "b_dvkybfpa",
          "type": "text",
          "props": {
           "html": "<p>A charter is not a cruise with your name on it. The route is drawn with you, the galley plans round your table, and the only fixed points are where we start, where we finish and how the tide runs. Families take Freya. Societies take Skua for the birds. Weddings, so far without exception, take Nyren.</p>"
          }
         },
         {
-         "id": "b_dwhu3ydx",
+         "id": "b_dwmv1426",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -163,7 +163,7 @@
          }
         },
         {
-         "id": "b_dxpu9req",
+         "id": "b_dxplpqsq",
          "type": "read-more",
          "props": {
           "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
@@ -175,15 +175,52 @@
          }
         },
         {
-         "id": "b_dys5rg8v",
-         "type": "button",
+         "id": "b_dya0f9i9",
+         "type": "form",
          "props": {
-          "label": "Start a charter conversation",
-          "href": "mailto:charter@coastwise.example",
-          "variant": "primary",
-          "size": "m",
-          "align": "left",
-          "newTab": false
+          "name": "Charter enquiry",
+          "fields": [
+           {
+            "kind": "text",
+            "label": "Name",
+            "required": true,
+            "placeholder": "",
+            "options": ""
+           },
+           {
+            "kind": "email",
+            "label": "Email",
+            "required": true,
+            "placeholder": "",
+            "options": ""
+           },
+           {
+            "kind": "select",
+            "label": "Roughly how many of you",
+            "required": true,
+            "placeholder": "Pick the nearest",
+            "options": "Up to 26, Up to 38, Up to 44"
+           },
+           {
+            "kind": "text",
+            "label": "When, roughly",
+            "required": false,
+            "placeholder": "A month is plenty",
+            "options": ""
+           },
+           {
+            "kind": "textarea",
+            "label": "What is the week for?",
+            "required": true,
+            "placeholder": "A wedding, a society, a big birthday, a family",
+            "options": ""
+           }
+          ],
+          "submitLabel": "Start the conversation",
+          "successTitle": "The conversation has started",
+          "successBody": "Fiona or one of the masters will come back within one working day with first thoughts and a rough route.",
+          "notifyEmail": "",
+          "align": "left"
          }
         }
        ]
@@ -196,7 +233,7 @@
    ]
   },
   {
-   "id": "sec_e6pcrkj8",
+   "id": "sec_e6tmgi5e",
    "name": "How a charter comes together",
    "tone": "subtle",
    "width": "contained",
@@ -218,10 +255,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_e5gthlvl",
+     "id": "row_e5p56m87",
      "columns": [
       {
-       "id": "col_e4bwqth2",
+       "id": "col_e40hgz6w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -239,7 +276,7 @@
        },
        "blocks": [
         {
-         "id": "b_e2p2nzx6",
+         "id": "b_e2j6rd8x",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -249,7 +286,7 @@
          }
         },
         {
-         "id": "b_e37i9pse",
+         "id": "b_e3s8o0yr",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -285,7 +322,7 @@
    ]
   },
   {
-   "id": "sec_eaoaue2g",
+   "id": "sec_eadlvlxq",
    "name": "Charter words",
    "tone": "light",
    "width": "contained",
@@ -306,10 +343,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_e9ph0aze",
+     "id": "row_e9lh4bdd",
      "columns": [
       {
-       "id": "col_e8tbhckm",
+       "id": "col_e8v43rlb",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -327,7 +364,7 @@
        },
        "blocks": [
         {
-         "id": "b_e7v2vyj8",
+         "id": "b_e7jnmgxs",
          "type": "quote",
          "props": {
           "text": "We married on Šipan with thirty-one people and a ship. The crew rigged the awning as a chuppah and the chef cried more than my mother.",
@@ -345,7 +382,7 @@
    ]
   },
   {
-   "id": "sec_ef315tzi",
+   "id": "sec_efe3iq0t",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -366,10 +403,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_ee84g83v",
+     "id": "row_eevrxy6h",
      "columns": [
       {
-       "id": "col_ed7sf3in",
+       "id": "col_edbi9w21",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -387,7 +424,7 @@
        },
        "blocks": [
         {
-         "id": "b_eb8ge8km",
+         "id": "b_ebnc3tvp",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -397,7 +434,7 @@
          }
         },
         {
-         "id": "b_ec2grn97",
+         "id": "b_ecjkmou7",
          "type": "button-group",
          "props": {
           "align": "centre",

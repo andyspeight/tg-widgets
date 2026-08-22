@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_cnyakri8",
+ "id": "pg_cnor56pl",
  "title": "Food and foraging",
  "slug": "food-and-foraging",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_bv6ek5ea",
+   "id": "sec_bv3q0nb2",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_buk422n6",
+     "id": "row_bufi4u9f",
      "columns": [
       {
-       "id": "col_bt9qnh9n",
+       "id": "col_bth0b6ss",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_bqj2xpnr",
+         "id": "b_bqnarufm",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_brbx8c3v",
+         "id": "b_brmu77b8",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_bsm3jrxs",
+         "id": "b_bs1sb77p",
          "type": "text",
          "props": {
           "html": "<p>There is no menu cycle. There is a chef, a coast, and whatever came over the rail that morning.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_c28tksac",
+   "id": "sec_c2pty8nt",
    "name": "How dinner happens",
    "tone": "light",
    "width": "contained",
@@ -112,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_c1uu56ug",
+     "id": "row_c1wybhic",
      "columns": [
       {
-       "id": "col_bywnb3lo",
+       "id": "col_by2i22su",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -133,14 +133,14 @@
        },
        "blocks": [
         {
-         "id": "b_bwqn1yi2",
+         "id": "b_bwzq3q1i",
          "type": "text",
          "props": {
           "html": "<p>There are no gourmet departures and no ordinary ones. This is how every sailing eats.</p>"
          }
         },
         {
-         "id": "b_bxb88w2n",
+         "id": "b_bx4pg6ud",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -165,7 +165,7 @@
        ]
       },
       {
-       "id": "col_c0ipo08x",
+       "id": "col_c0zlh3j5",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -183,7 +183,7 @@
        },
        "blocks": [
         {
-         "id": "b_bzsnpe5o",
+         "id": "b_bz8p8gh3",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
@@ -203,7 +203,7 @@
    ]
   },
   {
-   "id": "sec_c7d388t7",
+   "id": "sec_c7chxn89",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -224,10 +224,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_c66tnsdu",
+     "id": "row_c6m3tvkv",
      "columns": [
       {
-       "id": "col_c5fkikbz",
+       "id": "col_c5gzwvzk",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -245,7 +245,7 @@
        },
        "blocks": [
         {
-         "id": "b_c3a2wllg",
+         "id": "b_c39qfbn9",
          "type": "quote",
          "props": {
           "text": "The chef bought a box of chanterelles off two children in Geiranger and rewrote dinner on the spot. Best thing I ate all year.",
@@ -254,7 +254,7 @@
          }
         },
         {
-         "id": "b_c45l98gf",
+         "id": "b_c4kpkswp",
          "type": "tags",
          "props": {
           "style": "bullets",
@@ -287,7 +287,7 @@
    ]
   },
   {
-   "id": "sec_ccw6xku1",
+   "id": "sec_ccamw0u0",
    "name": "A week of dinners",
    "tone": "light",
    "width": "contained",
@@ -309,10 +309,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cbzwuvyh",
+     "id": "row_cbjrij83",
      "columns": [
       {
-       "id": "col_cawsd73t",
+       "id": "col_ca0igqil",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -330,7 +330,7 @@
        },
        "blocks": [
         {
-         "id": "b_c8lh9ti8",
+         "id": "b_c8s17as5",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -340,7 +340,7 @@
          }
         },
         {
-         "id": "b_c9u7zi5l",
+         "id": "b_c9e9xl84",
          "type": "table",
          "props": {
           "headerRow": true,
@@ -361,7 +361,7 @@
    ]
   },
   {
-   "id": "sec_ch3vd2bf",
+   "id": "sec_chi036oo",
    "name": "Feeding you properly",
    "tone": "subtle",
    "width": "contained",
@@ -383,10 +383,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cggr7mhb",
+     "id": "row_cgit8sj9",
      "columns": [
       {
-       "id": "col_cfrkfgxm",
+       "id": "col_cfsfs7af",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -404,7 +404,7 @@
        },
        "blocks": [
         {
-         "id": "b_cdkmo639",
+         "id": "b_cdk34lvh",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -414,7 +414,7 @@
          }
         },
         {
-         "id": "b_ce1qak5g",
+         "id": "b_ceqyloup",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -451,7 +451,7 @@
    ]
   },
   {
-   "id": "sec_cm6bdegv",
+   "id": "sec_cm5b8i2l",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -472,10 +472,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_clo2efkk",
+     "id": "row_cl2x72zo",
      "columns": [
       {
-       "id": "col_ck15yqvy",
+       "id": "col_ckm86maj",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -493,7 +493,7 @@
        },
        "blocks": [
         {
-         "id": "b_cipiu27w",
+         "id": "b_ci8dvzh2",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -503,7 +503,7 @@
          }
         },
         {
-         "id": "b_cj13efix",
+         "id": "b_cjkeqf0i",
          "type": "button-group",
          "props": {
           "align": "centre",

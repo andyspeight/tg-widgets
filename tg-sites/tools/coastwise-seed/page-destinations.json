@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_212n523m",
+ "id": "pg_217j4lpy",
  "title": "Voyages",
  "slug": "destinations",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_1r0nzj5h",
+   "id": "sec_1r7plxmp",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_1qpmubzh",
+     "id": "row_1qhidfcf",
      "columns": [
       {
-       "id": "col_1pr8x0ks",
+       "id": "col_1phtdhnl",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_1ml4ua6v",
+         "id": "b_1mnjl2qx",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_1n7ah0dt",
+         "id": "b_1n97nakz",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_1o9p4lb0",
+         "id": "b_1ojr5b6r",
          "type": "text",
          "props": {
           "html": "<p>Every voyage below runs on a ship that draws under four metres and carries fewer than forty-five guests. Pick by weather, not by brochure.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_1vt9jfyi",
+   "id": "sec_1vs8pwzz",
    "name": "The voyages",
    "tone": "light",
    "width": "contained",
@@ -115,10 +115,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1u93gn0z",
+     "id": "row_1uyi43r1",
      "columns": [
       {
-       "id": "col_1ta4ndiq",
+       "id": "col_1t323d6n",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -136,7 +136,7 @@
        },
        "blocks": [
         {
-         "id": "b_1so8pcoh",
+         "id": "b_1sthmmqf",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -213,7 +213,7 @@
    ]
   },
   {
-   "id": "sec_202d0o1u",
+   "id": "sec_20j3anom",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -234,10 +234,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1z5xtucw",
+     "id": "row_1zpeohr4",
      "columns": [
       {
-       "id": "col_1yufshtt",
+       "id": "col_1y1knu32",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -255,7 +255,7 @@
        },
        "blocks": [
         {
-         "id": "b_1wou7iij",
+         "id": "b_1wa8ac0z",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -265,7 +265,7 @@
          }
         },
         {
-         "id": "b_1x1px2e5",
+         "id": "b_1x1wxi9o",
          "type": "button-group",
          "props": {
           "align": "centre",

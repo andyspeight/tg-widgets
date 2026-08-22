@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_fww5my4c",
+ "id": "pg_fwbpc7ph",
  "title": "The ships",
  "slug": "about",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_empwrc8u",
+   "id": "sec_emceg16g",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_elv0ot07",
+     "id": "row_elki575b",
      "columns": [
       {
-       "id": "col_ekdva8vl",
+       "id": "col_ek7iacvp",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_eh7gcng7",
+         "id": "b_ehdn0ze9",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_ei3vr7og",
+         "id": "b_eii7ptg6",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_ej75ujbq",
+         "id": "b_ej9fsqf3",
          "type": "text",
          "props": {
           "html": "<p>Coastwise exists because two ferry officers kept a list of every harbour their employer was too big to enter. In 2011 they bought a ship that fitted.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_es2y2zr0",
+   "id": "sec_esyqimu2",
    "name": "The story",
    "tone": "light",
    "width": "contained",
@@ -112,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_er757735",
+     "id": "row_er76degz",
      "columns": [
       {
-       "id": "col_eom34663",
+       "id": "col_eou8eos4",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -133,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_eniktyfc",
+         "id": "b_enkfxde7",
          "type": "text",
          "props": {
           "html": "<p>Freya began as a Norwegian fjord ferry with thirty-three years of service and a hull like a bank vault. We spent a winter refitting her in Leith: nineteen cabins where the car deck was, a saloon where the cafeteria was, and the bridge left exactly as we found it, because it worked.</p><p>The idea has not changed since. Buy sound working ships, refit them warm rather than grand, and keep them small enough that the plan can bend. Skua joined in 2014 for the narrow water. Nyren joined in 2019 for the warm.</p><p>We are still run from a shed on Oban harbour, on purpose. The people who answer the phone can see the weather you are asking about.</p>"
@@ -142,7 +142,7 @@
        ]
       },
       {
-       "id": "col_eqanl1pb",
+       "id": "col_eqbogtsc",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -160,7 +160,7 @@
        },
        "blocks": [
         {
-         "id": "b_epvaaui3",
+         "id": "b_epdqzerf",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
@@ -180,7 +180,7 @@
    ]
   },
   {
-   "id": "sec_ex8gboba",
+   "id": "sec_exyltgev",
    "name": "The years",
    "tone": "subtle",
    "width": "contained",
@@ -201,10 +201,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_ewjndkjl",
+     "id": "row_ew8fjsr4",
      "columns": [
       {
-       "id": "col_evwpl8ln",
+       "id": "col_ev4ay4jr",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -222,7 +222,7 @@
        },
        "blocks": [
         {
-         "id": "b_et5d8yvl",
+         "id": "b_eta8zovi",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -232,7 +232,7 @@
          }
         },
         {
-         "id": "b_eumtmjpg",
+         "id": "b_eu4cyf5i",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -268,7 +268,7 @@
    ]
   },
   {
-   "id": "sec_f11eqg69",
+   "id": "sec_f14vpdl6",
    "name": "The numbers",
    "tone": "light",
    "width": "contained",
@@ -289,10 +289,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_f0km3zij",
+     "id": "row_f0nqpsb7",
      "columns": [
       {
-       "id": "col_ezjbxg5a",
+       "id": "col_ezas48p8",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -310,7 +310,7 @@
        },
        "blocks": [
         {
-         "id": "b_eyuqzgzw",
+         "id": "b_eyciwh7n",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -355,7 +355,7 @@
    ]
   },
   {
-   "id": "sec_f6ej1fsz",
+   "id": "sec_f6xf60kc",
    "name": "The fleet, side by side",
    "tone": "subtle",
    "width": "contained",
@@ -377,10 +377,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_f56yqpqz",
+     "id": "row_f5mqxebl",
      "columns": [
       {
-       "id": "col_f43jkzeg",
+       "id": "col_f40downc",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -398,7 +398,7 @@
        },
        "blocks": [
         {
-         "id": "b_f2la3vgb",
+         "id": "b_f2tf75qd",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -408,7 +408,7 @@
          }
         },
         {
-         "id": "b_f30djvj8",
+         "id": "b_f3zygjcv",
          "type": "table",
          "props": {
           "headerRow": true,
@@ -429,7 +429,7 @@
    ]
   },
   {
-   "id": "sec_feycvkzr",
+   "id": "sec_fe3kfy5b",
    "name": "The cabins",
    "tone": "light",
    "width": "contained",
@@ -451,10 +451,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_fdevtiac",
+     "id": "row_fdev7rxl",
      "columns": [
       {
-       "id": "col_f9m5m6wx",
+       "id": "col_f90fuier",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -472,7 +472,7 @@
        },
        "blocks": [
         {
-         "id": "b_f778x4o9",
+         "id": "b_f7zu4zrs",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -482,7 +482,7 @@
          }
         },
         {
-         "id": "b_f8q8ekg6",
+         "id": "b_f8rl0pw6",
          "type": "text",
          "props": {
           "html": "<p>Every cabin aboard is a twin or a double, which is what the arithmetic in the table above means: nobody sleeps in a bunk over a stranger. The grades are plain. A lower-deck twin is what the from fare buys, snug and nearest the engine&rsquo;s hum. An upper-deck double adds about a fifth of the fare and a bigger window. Nyren adds two step-free cabins beside her lift.</p><p>You book a grade, not a numbered door. Fiona assigns cabins a month out, solo travellers first, and sailing alone takes a double at a modest supplement, never a doubled fare.</p>"
@@ -491,7 +491,7 @@
        ]
       },
       {
-       "id": "col_fck4ctla",
+       "id": "col_fck2u6bo",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -509,7 +509,7 @@
        },
        "blocks": [
         {
-         "id": "b_favgnu1e",
+         "id": "b_fa82aq4v",
          "type": "heading",
          "props": {
           "level": "h3",
@@ -519,7 +519,7 @@
          }
         },
         {
-         "id": "b_fbpk6lg9",
+         "id": "b_fb2b2sgw",
          "type": "list",
          "props": {
           "style": "tick",
@@ -552,7 +552,7 @@
    ]
   },
   {
-   "id": "sec_fm16c1tz",
+   "id": "sec_fmbyk4bh",
    "name": "The skipper’s welcome",
    "tone": "light",
    "width": "contained",
@@ -574,10 +574,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_flqd9ppb",
+     "id": "row_flq3o0ov",
      "columns": [
       {
-       "id": "col_fivizkxs",
+       "id": "col_fibio0du",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -595,7 +595,7 @@
        },
        "blocks": [
         {
-         "id": "b_fffq27tf",
+         "id": "b_ffhq7tif",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -605,14 +605,14 @@
          }
         },
         {
-         "id": "b_fglojmcg",
+         "id": "b_fgs82hcr",
          "type": "text",
          "props": {
           "html": "<p>Every voyage opens the same way: the master on the saloon steps, no microphone, saying roughly this. We recorded it so you know the register of the thing you are booking.</p>"
          }
         },
         {
-         "id": "b_fh0do1z0",
+         "id": "b_fhuyyj91",
          "type": "audio",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/skipper-welcome.wav",
@@ -624,7 +624,7 @@
        ]
       },
       {
-       "id": "col_fkg3yhxu",
+       "id": "col_fk5hu3ez",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -642,7 +642,7 @@
        },
        "blocks": [
         {
-         "id": "b_fjf727rl",
+         "id": "b_fjd5gomy",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-master.jpg",
@@ -662,7 +662,7 @@
    ]
   },
   {
-   "id": "sec_fqd9fkg4",
+   "id": "sec_fqhsbjgn",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -683,10 +683,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_fpmqsetk",
+     "id": "row_fpg84xv8",
      "columns": [
       {
-       "id": "col_fo55koya",
+       "id": "col_fohois25",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -704,7 +704,7 @@
        },
        "blocks": [
         {
-         "id": "b_fnco0cy1",
+         "id": "b_fn3fv0n5",
          "type": "quote",
          "props": {
           "text": "It is the only holiday we take where the owner might carry your bag up the gangway and the master might pour your nightcap.",
@@ -722,7 +722,7 @@
    ]
   },
   {
-   "id": "sec_fvxl6z6t",
+   "id": "sec_fv5gjdgy",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -743,10 +743,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_futo1q4n",
+     "id": "row_fuezqovr",
      "columns": [
       {
-       "id": "col_ftd78icp",
+       "id": "col_ftmpu217",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -764,7 +764,7 @@
        },
        "blocks": [
         {
-         "id": "b_fr3b9nx3",
+         "id": "b_fr6pxh29",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -774,7 +774,7 @@
          }
         },
         {
-         "id": "b_fs52z5jp",
+         "id": "b_fseugbvb",
          "type": "button-group",
          "props": {
           "align": "centre",

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_gp52wcsm",
+ "id": "pg_gpz0mf3t",
  "title": "Our people",
  "slug": "team",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_g21pkkch",
+   "id": "sec_g2lrwxzg",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_g1ds9xlp",
+     "id": "row_g1su6q8p",
      "columns": [
       {
-       "id": "col_g0143y7z",
+       "id": "col_g09f2kwp",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_fxkj7onc",
+         "id": "b_fxjzvu9s",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_fywaav31",
+         "id": "b_fy569993",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_fz2tm6m2",
+         "id": "b_fz0r0o8b",
          "type": "text",
          "props": {
           "html": "<p>Twelve crew to a ship, and a shed on Oban harbour. These are the ones you will meet first.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_g66t7991",
+   "id": "sec_g6klgstk",
    "name": "The crew",
    "tone": "light",
    "width": "contained",
@@ -114,10 +114,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_g5csaldu",
+     "id": "row_g5918tgb",
      "columns": [
       {
-       "id": "col_g493r67j",
+       "id": "col_g467rbgo",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -135,7 +135,7 @@
        },
        "blocks": [
         {
-         "id": "b_g3u3w2p4",
+         "id": "b_g3a0g4hn",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -222,7 +222,7 @@
    ]
   },
   {
-   "id": "sec_ge9lcc1d",
+   "id": "sec_ge2442ly",
    "name": "How we work",
    "tone": "subtle",
    "width": "contained",
@@ -243,10 +243,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_gd25vs9f",
+     "id": "row_gd0t404k",
      "columns": [
       {
-       "id": "col_g8uen7vi",
+       "id": "col_g8worept",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -264,7 +264,7 @@
        },
        "blocks": [
         {
-         "id": "b_g7wxyc8r",
+         "id": "b_g7gigl2j",
          "type": "icon-item",
          "props": {
           "icon": "compass",
@@ -276,7 +276,7 @@
        ]
       },
       {
-       "id": "col_ga1z44oh",
+       "id": "col_gahwv94t",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -294,7 +294,7 @@
        },
        "blocks": [
         {
-         "id": "b_g9gb3pfp",
+         "id": "b_g93mwau8",
          "type": "icon-item",
          "props": {
           "icon": "heart",
@@ -306,7 +306,7 @@
        ]
       },
       {
-       "id": "col_gchvitvg",
+       "id": "col_gct36yub",
        "width": 34,
        "align": "top",
        "flow": "stacked",
@@ -324,7 +324,7 @@
        },
        "blocks": [
         {
-         "id": "b_gbelg6a8",
+         "id": "b_gb2utxeg",
          "type": "icon-item",
          "props": {
           "icon": "phone",
@@ -343,7 +343,7 @@
    ]
   },
   {
-   "id": "sec_gjvvpimk",
+   "id": "sec_gj5k59pl",
    "name": "Asked on deck",
    "tone": "light",
    "width": "contained",
@@ -365,10 +365,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_gi72qysv",
+     "id": "row_giqo99v6",
      "columns": [
       {
-       "id": "col_gh4qkryu",
+       "id": "col_ghcvltfa",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -386,7 +386,7 @@
        },
        "blocks": [
         {
-         "id": "b_gf7rg1dc",
+         "id": "b_gfb9jbnl",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -396,7 +396,7 @@
          }
         },
         {
-         "id": "b_gg6rlg4f",
+         "id": "b_ggr2sx80",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -429,7 +429,7 @@
    ]
   },
   {
-   "id": "sec_go0wq936",
+   "id": "sec_gog7ndey",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -450,10 +450,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_gn497akb",
+     "id": "row_gnm4huo0",
      "columns": [
       {
-       "id": "col_gm51bbao",
+       "id": "col_gmjk9hoz",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -471,7 +471,7 @@
        },
        "blocks": [
         {
-         "id": "b_gkbmj9vx",
+         "id": "b_gkua1ptb",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -481,7 +481,7 @@
          }
         },
         {
-         "id": "b_gl51sau5",
+         "id": "b_gl481m19",
          "type": "button-group",
          "props": {
           "align": "centre",

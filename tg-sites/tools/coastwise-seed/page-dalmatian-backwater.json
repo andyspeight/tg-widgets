@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_681utjck",
+ "id": "pg_68mpfki0",
  "title": "Dalmatian Backwater",
  "slug": "dalmatian-backwater",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_50qius1k",
+   "id": "sec_5026dgd3",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_4zdd3ayy",
+     "id": "row_4zsh6zmy",
      "columns": [
       {
-       "id": "col_4yeb0gol",
+       "id": "col_4yrv5ma8",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_4vwzhbvg",
+         "id": "b_4vjs60zn",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_4wq85f4l",
+         "id": "b_4w2z6bw5",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_4xi4916c",
+         "id": "b_4xebd6it",
          "type": "text",
          "props": {
           "html": "<p>Split to Dubrovnik by way of the islands the ferries call at twice a week, aboard MV Nyren. Warm water, cold wine.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_5dpdqojf",
+   "id": "sec_5ddo2w1v",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -112,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_56nv7qch",
+     "id": "row_56axkan4",
      "columns": [
       {
-       "id": "col_525aihdm",
+       "id": "col_52nbp80s",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -133,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_51wg94h1",
+         "id": "b_51mlnjtj",
          "type": "text",
          "props": {
           "html": "<p>The Dalmatian coast has a front, which is crowded, and a back, which is not. Nyren works the back: Vis, which was a closed military island until 1989 and still cooks like it never heard of tourism; Lastovo, a dark-sky reserve with one town and forty church towers; Šipan, where the Dubrovnik nobility built summer houses and then, usefully, left.</p><p>The swimming ladder goes down before breakfast and comes up after dinner. In between there are stone harbours, konoba lunches and one very good market on the Riva at Split.</p>"
@@ -142,7 +142,7 @@
        ]
       },
       {
-       "id": "col_55cnr6vh",
+       "id": "col_55n59uc1",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -160,7 +160,7 @@
        },
        "blocks": [
         {
-         "id": "b_53s7et2c",
+         "id": "b_5330cdkx",
          "type": "rating",
          "props": {
           "rating": 4.7,
@@ -172,7 +172,7 @@
          }
         },
         {
-         "id": "b_54z2287h",
+         "id": "b_544tcip9",
          "type": "tags",
          "props": {
           "style": "pills",
@@ -207,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_59zy5qge",
+     "id": "row_59gxked1",
      "columns": [
       {
-       "id": "col_58ht218h",
+       "id": "col_58ln80pn",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -228,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_578eg11r",
+         "id": "b_57c0nndg",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -271,10 +271,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_5cv3vsj3",
+     "id": "row_5cgvadai",
      "columns": [
       {
-       "id": "col_5b3ccuis",
+       "id": "col_5b5nbnew",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -292,7 +292,7 @@
        },
        "blocks": [
         {
-         "id": "b_5a4crsol",
+         "id": "b_5ad4vn62",
          "type": "text",
          "props": {
           "html": "<p>The practical bit: join at Split from three, sail at six. The airport is twenty minutes round the bay and we book the flights where wanted. Nyren carries a lift and two step-free cabins, and most harbours here take the gangway. Travel insurance is a condition of booking.</p>"
@@ -308,7 +308,7 @@
    ]
   },
   {
-   "id": "sec_5jran8rx",
+   "id": "sec_5jdjoz2y",
    "name": "The islands",
    "tone": "subtle",
    "width": "contained",
@@ -329,10 +329,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5i8gcpmq",
+     "id": "row_5ig6ocv0",
      "columns": [
       {
-       "id": "col_5hxbj7qm",
+       "id": "col_5h2wc530",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -350,7 +350,7 @@
        },
        "blocks": [
         {
-         "id": "b_5eusa6ds",
+         "id": "b_5evda6zw",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -360,14 +360,14 @@
          }
         },
         {
-         "id": "b_5f7x8x80",
+         "id": "b_5f2ni9jh",
          "type": "text",
          "props": {
           "html": "<p>Turn a card over for the part the brochure leaves out.</p>"
          }
         },
         {
-         "id": "b_5gfoeq4g",
+         "id": "b_5gv2nez5",
          "type": "flip-cards",
          "props": {
           "columns": "3",
@@ -414,7 +414,7 @@
    ]
   },
   {
-   "id": "sec_5owh6pr5",
+   "id": "sec_5o93yttf",
    "name": "Day by day",
    "tone": "light",
    "width": "contained",
@@ -436,10 +436,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5nxwds0h",
+     "id": "row_5nl1flfz",
      "columns": [
       {
-       "id": "col_5mjuby9t",
+       "id": "col_5mrihg0f",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -457,7 +457,7 @@
        },
        "blocks": [
         {
-         "id": "b_5kumr05h",
+         "id": "b_5k1j6joi",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -467,7 +467,7 @@
          }
         },
         {
-         "id": "b_5lrtf5dm",
+         "id": "b_5l8w4wth",
          "type": "slider",
          "props": {
           "slideWidth": "medium",
@@ -548,7 +548,7 @@
    ]
   },
   {
-   "id": "sec_5tl3s6ma",
+   "id": "sec_5t2qetvp",
    "name": "The week in pictures",
    "tone": "light",
    "width": "contained",
@@ -570,10 +570,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5scd7psg",
+     "id": "row_5sh87i2m",
      "columns": [
       {
-       "id": "col_5rv35m28",
+       "id": "col_5raq2ma6",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -591,7 +591,7 @@
        },
        "blocks": [
         {
-         "id": "b_5pkdg27d",
+         "id": "b_5pqyurlx",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -601,7 +601,7 @@
          }
         },
         {
-         "id": "b_5qi4uuox",
+         "id": "b_5qauclxb",
          "type": "gallery",
          "props": {
           "columns": "3",
@@ -647,7 +647,7 @@
    ]
   },
   {
-   "id": "sec_5y3pam90",
+   "id": "sec_5yqh2wlv",
    "name": "The water",
    "tone": "subtle",
    "width": "contained",
@@ -669,10 +669,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5xnxqofk",
+     "id": "row_5x4dteqv",
      "columns": [
       {
-       "id": "col_5wqfyuep",
+       "id": "col_5wxbr0m5",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -690,7 +690,7 @@
        },
        "blocks": [
         {
-         "id": "b_5uujx5sz",
+         "id": "b_5utyrd79",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -700,7 +700,7 @@
          }
         },
         {
-         "id": "b_5v3c0n3p",
+         "id": "b_5vqqnnfq",
          "type": "table",
          "props": {
           "headerRow": true,
@@ -721,7 +721,7 @@
    ]
   },
   {
-   "id": "sec_62moo37j",
+   "id": "sec_622oceh1",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -742,10 +742,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_61ihw0l6",
+     "id": "row_61fwz9y5",
      "columns": [
       {
-       "id": "col_60fbbz8a",
+       "id": "col_60co4wat",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -763,7 +763,7 @@
        },
        "blocks": [
         {
-         "id": "b_5zv8cxsl",
+         "id": "b_5z4wuglo",
          "type": "quote",
          "props": {
           "text": "I swam before breakfast every day for six days. The chef bought octopus off a boy on the quay at Vis and that was dinner.",
@@ -781,7 +781,7 @@
    ]
   },
   {
-   "id": "sec_67iqjkfe",
+   "id": "sec_67qbdtqu",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -802,10 +802,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_66wt1abd",
+     "id": "row_667f8yio",
      "columns": [
       {
-       "id": "col_65b6ud2v",
+       "id": "col_656asumf",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -823,7 +823,7 @@
        },
        "blocks": [
         {
-         "id": "b_6327co0y",
+         "id": "b_63wmxej7",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -833,7 +833,7 @@
          }
         },
         {
-         "id": "b_64erml91",
+         "id": "b_649tairl",
          "type": "button-group",
          "props": {
           "align": "centre",

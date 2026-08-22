@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_a34d18ev",
+ "id": "pg_a3jqh6wp",
  "title": "Island hopping",
  "slug": "island-hopping",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_9cbhqlg9",
+   "id": "sec_9cinm42p",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_9be9ctxt",
+     "id": "row_9bsi7sx7",
      "columns": [
       {
-       "id": "col_9ac93c8j",
+       "id": "col_9aj32pua",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_9722jnn6",
+         "id": "b_97pjmcd7",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,7 +64,7 @@
          }
         },
         {
-         "id": "b_98rcv6zo",
+         "id": "b_981m8wdd",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -74,7 +74,7 @@
          }
         },
         {
-         "id": "b_99xt8l4a",
+         "id": "b_992inamz",
          "type": "text",
          "props": {
           "html": "<p>A new harbour most days, the sea in between, and never once packing your bag mid-week.</p>"
@@ -90,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_9j73e5nn",
+   "id": "sec_9jvtffj8",
    "name": "How a week runs",
    "tone": "light",
    "width": "contained",
@@ -112,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9ifh397x",
+     "id": "row_9i04pd8m",
      "columns": [
       {
-       "id": "col_9fitpvd2",
+       "id": "col_9focu7y1",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -133,14 +133,14 @@
        },
        "blocks": [
         {
-         "id": "b_9dsu5x3y",
+         "id": "b_9di9jo47",
          "type": "text",
          "props": {
           "html": "<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch. Every Coastwise sailing works this way. This page is simply what that means in practice.</p>"
          }
         },
         {
-         "id": "b_9ettzsqt",
+         "id": "b_9e2u4l3g",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -169,7 +169,7 @@
        ]
       },
       {
-       "id": "col_9hwpxu43",
+       "id": "col_9hrwv5c6",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -187,7 +187,7 @@
        },
        "blocks": [
         {
-         "id": "b_9g01b3z5",
+         "id": "b_9g36b3mh",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
@@ -207,7 +207,7 @@
    ]
   },
   {
-   "id": "sec_9oy5njxs",
+   "id": "sec_9o6sl37i",
    "name": "Where it works best",
    "tone": "subtle",
    "width": "contained",
@@ -229,10 +229,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9nmzan4h",
+     "id": "row_9n56vnxx",
      "columns": [
       {
-       "id": "col_9mrz7vih",
+       "id": "col_9mej5qkq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -250,7 +250,7 @@
        },
        "blocks": [
         {
-         "id": "b_9kqw6nlm",
+         "id": "b_9kj7imhr",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -260,7 +260,7 @@
          }
         },
         {
-         "id": "b_9lbouyk1",
+         "id": "b_9ln13poi",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -317,7 +317,7 @@
    ]
   },
   {
-   "id": "sec_9ssae7cx",
+   "id": "sec_9s64bhf9",
    "name": "The numbers",
    "tone": "light",
    "width": "contained",
@@ -339,10 +339,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9riz1r9j",
+     "id": "row_9r37x67n",
      "columns": [
       {
-       "id": "col_9qz2h8oa",
+       "id": "col_9qv9fl9m",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -360,7 +360,7 @@
        },
        "blocks": [
         {
-         "id": "b_9pc27v42",
+         "id": "b_9p44a4r6",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -405,7 +405,7 @@
    ]
   },
   {
-   "id": "sec_9x05ehqh",
+   "id": "sec_9xveotyh",
    "name": "Asked before booking",
    "tone": "subtle",
    "width": "contained",
@@ -427,10 +427,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9we1s7jq",
+     "id": "row_9wvhwzdj",
      "columns": [
       {
-       "id": "col_9vbj4mn0",
+       "id": "col_9vzix0fy",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -448,7 +448,7 @@
        },
        "blocks": [
         {
-         "id": "b_9tfiij0t",
+         "id": "b_9tpadlfp",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -458,7 +458,7 @@
          }
         },
         {
-         "id": "b_9u3c0ndd",
+         "id": "b_9ud4cizy",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -495,7 +495,7 @@
    ]
   },
   {
-   "id": "sec_a2m8ujky",
+   "id": "sec_a2pvisbq",
    "name": "Closing",
    "tone": "subtle",
    "width": "contained",
@@ -516,10 +516,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_a1upkj23",
+     "id": "row_a1vcq338",
      "columns": [
       {
-       "id": "col_a0k6m4ey",
+       "id": "col_a04ba6sg",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -537,7 +537,7 @@
        },
        "blocks": [
         {
-         "id": "b_9yah0wc8",
+         "id": "b_9yty8vvb",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -547,7 +547,7 @@
          }
         },
         {
-         "id": "b_9z9zodk5",
+         "id": "b_9zr6g4s7",
          "type": "button-group",
          "props": {
           "align": "centre",

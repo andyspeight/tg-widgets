@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_1l8i6vpa",
+ "id": "pg_1lvm88wv",
  "title": "Home",
  "slug": "",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_6zt8gky",
+   "id": "sec_65b5tyf",
    "name": "Hero",
    "tone": "dark",
    "width": "contained",
@@ -44,10 +44,10 @@
    "backgroundInterval": 6,
    "rows": [
     {
-     "id": "row_59sdhzp",
+     "id": "row_5usomsa",
      "columns": [
       {
-       "id": "col_4vqotw1",
+       "id": "col_4cqiirq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -65,7 +65,7 @@
        },
        "blocks": [
         {
-         "id": "b_1ja54t6",
+         "id": "b_1w0u8uy",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -75,14 +75,14 @@
          }
         },
         {
-         "id": "b_25fx6i4",
+         "id": "b_2kznvn4",
          "type": "text",
          "props": {
           "html": "<p>Seven nights along a coast a large ship cannot reach. We tie up in the village, not the terminal.</p>"
          }
         },
         {
-         "id": "b_37uvhls",
+         "id": "b_3ga3dwx",
          "type": "button-group",
          "props": {
           "align": "left",
@@ -112,7 +112,7 @@
    ]
   },
   {
-   "id": "sec_eesl202",
+   "id": "sec_epw45ku",
    "name": "Booking search — drop the Travelify widget here",
    "tone": "dark",
    "width": "contained",
@@ -134,10 +134,10 @@
    "anchor": "book",
    "rows": [
     {
-     "id": "row_dbqvgik",
+     "id": "row_dtpo3zo",
      "columns": [
       {
-       "id": "col_9ujhnhu",
+       "id": "col_92pciz8",
        "width": 45,
        "align": "centre",
        "flow": "stacked",
@@ -155,7 +155,7 @@
        },
        "blocks": [
         {
-         "id": "b_7y8be62",
+         "id": "b_7gtdxtg",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -165,7 +165,7 @@
          }
         },
         {
-         "id": "b_8lgdepr",
+         "id": "b_81y7wps",
          "type": "text",
          "props": {
           "html": "<p>Pick a coast, a week and a cabin. The 2027 season is open.</p>"
@@ -174,7 +174,7 @@
        ]
       },
       {
-       "id": "col_cpb85ba",
+       "id": "col_c1vn2ag",
        "width": 55,
        "align": "centre",
        "flow": "stacked",
@@ -192,14 +192,14 @@
        },
        "blocks": [
         {
-         "id": "b_a4gop5i",
+         "id": "b_aurix1y",
          "type": "spacer",
          "props": {
           "height": "xl"
          }
         },
         {
-         "id": "b_b2gmw4o",
+         "id": "b_br79i0v",
          "type": "button-group",
          "props": {
           "align": "left",
@@ -223,7 +223,7 @@
    ]
   },
   {
-   "id": "sec_nma2ydd",
+   "id": "sec_nx039lv",
    "name": "What we do",
    "tone": "light",
    "width": "contained",
@@ -245,10 +245,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_hz8crdm",
+     "id": "row_h3a91jy",
      "columns": [
       {
-       "id": "col_g85hzoz",
+       "id": "col_gknbi5y",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -266,7 +266,7 @@
        },
        "blocks": [
         {
-         "id": "b_f730pkr",
+         "id": "b_f08tm6h",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -283,10 +283,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_mii8gwo",
+     "id": "row_mxfqpab",
      "columns": [
       {
-       "id": "col_jaktrax",
+       "id": "col_jyfrwfc",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -304,7 +304,7 @@
        },
        "blocks": [
         {
-         "id": "b_ii0aha0",
+         "id": "b_ixa29bo",
          "type": "text",
          "props": {
           "html": "<p>Coastwise runs three ships and nothing else. Each carries between twenty-six and forty-four guests, draws under four metres, and can lie alongside a stone quay that a 3,000-berth ship has to admire from six miles out.</p><p>There is no theatre, no atrium, no photographer waiting at the gangway. There is a saloon with eight tables, a bar that runs on trust, and a bridge you are welcome on whenever the master says so. Dinner is whatever came aboard that morning at the last port.</p><p>Our masters have sailed these waters an average of nineteen seasons. When the weather turns, they change the plan rather than the arrival time. That is the whole reason to travel this way.</p>"
@@ -313,7 +313,7 @@
        ]
       },
       {
-       "id": "col_lnlcj84",
+       "id": "col_lp3d47j",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -331,7 +331,7 @@
        },
        "blocks": [
         {
-         "id": "b_kejwe4t",
+         "id": "b_kwphc59",
          "type": "stats",
          "props": {
           "columns": "2",
@@ -369,7 +369,7 @@
    ]
   },
   {
-   "id": "sec_sjsrulg",
+   "id": "sec_s76wxoo",
    "name": "Why a small ship",
    "tone": "subtle",
    "width": "contained",
@@ -393,10 +393,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_r8ith2s",
+     "id": "row_r59wuks",
      "columns": [
       {
-       "id": "col_q4x4mjv",
+       "id": "col_q1gxd0w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -414,7 +414,7 @@
        },
        "blocks": [
         {
-         "id": "b_oz25t45",
+         "id": "b_ojj1lyy",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -424,7 +424,7 @@
          }
         },
         {
-         "id": "b_px233ox",
+         "id": "b_psw8iof",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -482,7 +482,7 @@
    ]
   },
   {
-   "id": "sec_yzl0kaf",
+   "id": "sec_yao3f0u",
    "name": "A week, day by day",
    "tone": "light",
    "width": "contained",
@@ -503,10 +503,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_xluz2sa",
+     "id": "row_xhwfqh0",
      "columns": [
       {
-       "id": "col_wk9jl3t",
+       "id": "col_wtslove",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -524,7 +524,7 @@
        },
        "blocks": [
         {
-         "id": "b_tt60fqc",
+         "id": "b_t8e4w9x",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -534,14 +534,14 @@
          }
         },
         {
-         "id": "b_u4nlw2o",
+         "id": "b_u1zcwif",
          "type": "text",
          "props": {
           "html": "<p>One week of the Western Isles voyage, day by day. Every voyage page shows its own week.</p>"
          }
         },
         {
-         "id": "b_v8htds8",
+         "id": "b_vsgirkl",
          "type": "slider",
          "props": {
           "slideWidth": "medium",
@@ -631,7 +631,7 @@
    ]
   },
   {
-   "id": "sec_16sgjvt4",
+   "id": "sec_167o6flu",
    "name": "Aboard",
    "tone": "dark",
    "width": "contained",
@@ -653,10 +653,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_15r0yg0g",
+     "id": "row_15kzanli",
      "columns": [
       {
-       "id": "col_12eqzgsp",
+       "id": "col_12yr6lga",
        "width": 45,
        "align": "centre",
        "flow": "stacked",
@@ -674,7 +674,7 @@
        },
        "blocks": [
         {
-         "id": "b_zplrzcm",
+         "id": "b_z9br7vk",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -684,14 +684,14 @@
          }
         },
         {
-         "id": "b_100j091f",
+         "id": "b_10i98xfa",
          "type": "text",
          "props": {
           "html": "<p>Cabins are plain and warm: oak, wool, a window that opens. Nobody dresses for dinner, and there is no fixed seating. The saloon does the introductions.</p>"
          }
         },
         {
-         "id": "b_11d919vp",
+         "id": "b_11ngcow5",
          "type": "tags",
          "props": {
           "style": "bullets",
@@ -717,7 +717,7 @@
        ]
       },
       {
-       "id": "col_14zzspne",
+       "id": "col_145q9fmw",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -735,7 +735,7 @@
        },
        "blocks": [
         {
-         "id": "b_136fqk5p",
+         "id": "b_13furvjj",
          "type": "shifting-images",
          "props": {
           "interval": 5,
@@ -767,7 +767,7 @@
    ]
   },
   {
-   "id": "sec_1bsxr7k7",
+   "id": "sec_1biafpfi",
    "name": "The voyages",
    "tone": "light",
    "width": "contained",
@@ -788,10 +788,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1a2b5t15",
+     "id": "row_1a8mt7u8",
      "columns": [
       {
-       "id": "col_194r9qt8",
+       "id": "col_19dcd4jv",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -809,7 +809,7 @@
        },
        "blocks": [
         {
-         "id": "b_17076ki9",
+         "id": "b_17cksgni",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -819,7 +819,7 @@
          }
         },
         {
-         "id": "b_18fe7cmj",
+         "id": "b_18yksdnv",
          "type": "stacked-cards",
          "props": {
           "side": "right",
@@ -864,7 +864,7 @@
    ]
   },
   {
-   "id": "sec_1fkryvpq",
+   "id": "sec_1fepr7rq",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -885,10 +885,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1e9k3jd7",
+     "id": "row_1ee9c4ow",
      "columns": [
       {
-       "id": "col_1d8zy4mf",
+       "id": "col_1d00c2y9",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -906,7 +906,7 @@
        },
        "blocks": [
         {
-         "id": "b_1cjtvijz",
+         "id": "b_1cspmjrr",
          "type": "testimonials",
          "props": {
           "items": [
@@ -941,7 +941,7 @@
    ]
   },
   {
-   "id": "sec_1kl825cx",
+   "id": "sec_1kauvzwm",
    "name": "Closing",
    "tone": "dark",
    "width": "contained",
@@ -964,10 +964,10 @@
    "overlay": 50,
    "rows": [
     {
-     "id": "row_1j06ag5n",
+     "id": "row_1j0t69tl",
      "columns": [
       {
-       "id": "col_1i3j8t16",
+       "id": "col_1ivngh0v",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -985,7 +985,7 @@
        },
        "blocks": [
         {
-         "id": "b_1gzjpgf3",
+         "id": "b_1gv2u8sx",
          "type": "heading",
          "props": {
           "level": "h2",
@@ -995,7 +995,7 @@
          }
         },
         {
-         "id": "b_1hs4ztur",
+         "id": "b_1h13hjnq",
          "type": "button-group",
          "props": {
           "align": "centre",

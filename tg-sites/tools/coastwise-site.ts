@@ -1886,7 +1886,21 @@ export function privateCharter(): Page {
             fade: true,
             align: 'left',
           }),
-          block('button', { label: 'Start a charter conversation', href: 'mailto:charter@coastwise.example', variant: 'primary', size: 'm', align: 'left', newTab: false }),
+          block('form', {
+            name: 'Charter enquiry',
+            fields: [
+              { kind: 'text', label: 'Name', required: true, placeholder: '', options: '' },
+              { kind: 'email', label: 'Email', required: true, placeholder: '', options: '' },
+              { kind: 'select', label: 'Roughly how many of you', required: true, placeholder: 'Pick the nearest', options: 'Up to 26, Up to 38, Up to 44' },
+              { kind: 'text', label: 'When, roughly', required: false, placeholder: 'A month is plenty', options: '' },
+              { kind: 'textarea', label: 'What is the week for?', required: true, placeholder: 'A wedding, a society, a big birthday, a family', options: '' },
+            ],
+            submitLabel: 'Start the conversation',
+            successTitle: 'The conversation has started',
+            successBody: 'Fiona or one of the masters will come back within one working day with first thoughts and a rough route.',
+            notifyEmail: '',
+            align: 'left',
+          }),
         ]),
       }),
       sec({
@@ -2225,6 +2239,32 @@ export function contact(): Page {
             ]),
             col(55, [
               block('map', { address: 'North Pier, Oban PA34 5QD, Scotland', zoom: 15, height: 380, radius: 'md', caption: 'The shed is the one with the ensign.' }),
+            ]),
+          ], 'xl'),
+          row([
+            col(55, [
+              block('heading', { level: 'h3', style: 'h3', html: 'Or write it down', align: 'left' }),
+              block('form', {
+                name: 'Enquiry',
+                fields: [
+                  { kind: 'text', label: 'Name', required: true, placeholder: '', options: '' },
+                  { kind: 'email', label: 'Email', required: true, placeholder: '', options: '' },
+                  { kind: 'select', label: 'Which coast, roughly', required: false, placeholder: 'Still deciding', options: 'Scotland, Norway, Faroe and Shetland, Dalmatia, The Lycian shore' },
+                  { kind: 'textarea', label: 'What would you like to know?', required: true, placeholder: 'Roughly when, roughly how many of you', options: '' },
+                ],
+                submitLabel: 'Send to the shed',
+                successTitle: 'Got it',
+                successBody: 'Fiona reads these between calls. You will hear back within one working day, usually sooner.',
+                notifyEmail: '',
+                align: 'left',
+              }),
+            ]),
+            col(45, [
+              block('heading', { level: 'h3', style: 'h3', html: 'What happens next', align: 'left' }),
+              block('text', {
+                html:
+                  '<p>Your note lands with Fiona in the shed, not in a ticket queue. If a voyage fits, she will say which one and why; if none does, she will say that too. Nothing you send here commits you to anything, and nobody adds you to a mailing list for asking.</p>',
+              }),
             ]),
           ], 'xl'),
         ],
