@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_4mznvtyq",
+ "id": "pg_4uhl2mi9",
  "title": "Norwegian Narrows",
  "slug": "norwegian-narrows",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_3l9u0pzt",
+   "id": "sec_3k7rpk1d",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_3kz0ik9d",
+     "id": "row_3jfiu3a9",
      "columns": [
       {
-       "id": "col_3jw1c29o",
+       "id": "col_3iqlhkba",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_3gitgnd6",
+         "id": "b_3f8e3imp",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_3hcpbm6i",
+         "id": "b_3gud4gkq",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Norwegian Narrows",
           "align": "left"
          }
         },
         {
-         "id": "b_3iqrxoos",
+         "id": "b_3hsjwg55",
          "type": "text",
          "props": {
           "html": "<p>Bergen to Ålesund the slow way, aboard MV Skua. Nine nights, four of them at anchor under something vertical.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_3viwvhq7",
+   "id": "sec_3x45ff3d",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3rs59n23",
+     "id": "row_3qq826je",
      "columns": [
       {
-       "id": "col_3n2oe1l0",
+       "id": "col_3m2lfn15",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_3m818i4b",
+         "id": "b_3lslfzgu",
          "type": "text",
          "props": {
           "html": "<p>The express boats do Bergen to Ålesund in a day. We take nine, because the point of a fjord is not the far end of it. Skua turns up the arms with no ferry service and anchors where the chart says there is room for exactly one ship, which there is, because she is the one ship.</p><p>Four nights at anchor means four evenings when the engine stops and the water goes to glass and the only thing moving is the waterfall a mile up. Bring a book you have been meaning to read for years.</p>"
@@ -141,7 +142,7 @@
        ]
       },
       {
-       "id": "col_3qwuae7c",
+       "id": "col_3pd30e6s",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,24 +160,24 @@
        },
        "blocks": [
         {
-         "id": "b_3ohsoz6p",
+         "id": "b_3n4yc6h6",
          "type": "rating",
          "props": {
           "rating": 4.8,
           "showValue": true,
-          "count": "from 147 guest reviews",
+          "count": "from 147 post-voyage questionnaires",
           "size": "m",
           "colour": "",
           "align": "left"
          }
         },
         {
-         "id": "b_3pk8fexv",
+         "id": "b_3o0jex0n",
          "type": "tags",
          "props": {
           "style": "pills",
           "size": "m",
-          "colour": "",
+          "colour": "#1b333d",
           "align": "left",
           "items": [
            {
@@ -206,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_3u4efmtf",
+     "id": "row_3trwnqmt",
      "columns": [
       {
-       "id": "col_3ts3mxxf",
+       "id": "col_3slh30fw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_3szllipx",
+         "id": "b_3r5ejfpr",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -268,11 +269,46 @@
      "gap": 32,
      "stackBelow": "mobile",
      "reverseOnStack": false
+    },
+    {
+     "id": "row_3w0hdcyw",
+     "columns": [
+      {
+       "id": "col_3v9o5rjn",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_3un4e7qb",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: join at Bergen from two, sail at five. The airport bus stops a short walk from the berth, and we book the flights where wanted, under the ATOL. Skua is a ship of stairs, and ashore is mostly by gangway in the arms. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
     }
    ]
   },
   {
-   "id": "sec_40rxnrtw",
+   "id": "sec_42hpuaux",
    "name": "The arms",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +329,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3zb4wbb5",
+     "id": "row_41adrsnc",
      "columns": [
       {
-       "id": "col_3ynyrwlq",
+       "id": "col_40qqwobv",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,16 +350,17 @@
        },
        "blocks": [
         {
-         "id": "b_3wjhtram",
+         "id": "b_3y5u87jf",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Three arms the timetables skip",
           "align": "left"
          }
         },
         {
-         "id": "b_3xfdvpp6",
+         "id": "b_3zjx6qoe",
          "type": "half-overlay",
          "props": {
           "tint": "#1b333d",
@@ -374,7 +411,157 @@
    ]
   },
   {
-   "id": "sec_472593a0",
+   "id": "sec_48g9gvn8",
+   "name": "Day by day",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_47x1vpq7",
+     "columns": [
+      {
+       "id": "col_46nfciwb",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_43oy0by6",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Nine nights, the shape of them",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_442t2y4m",
+         "type": "text",
+         "props": {
+          "html": "<p>The order bends with the weather, which is a feature. What does not change: four nights at anchor, five alongside, and the bridge open the whole way.</p>"
+         }
+        },
+        {
+         "id": "b_45gue0cc",
+         "type": "slider",
+         "props": {
+          "slideWidth": "medium",
+          "tilt": "none",
+          "gap": "m",
+          "style": "plain",
+          "ratio": "4/5",
+          "radius": "md",
+          "rows": "1",
+          "scrollbar": "bar",
+          "align": "left",
+          "wholeCardLinks": false,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
+            "alt": "Leaving the city astern",
+            "label": "Day 01 · Bergen",
+            "title": "Join at two, sail at five",
+            "body": "Out past the skerries with the fish market still on the starboard quarter.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "Open water between headlands",
+            "label": "Day 02 · Nordfjord",
+            "title": "To the skerries and back on one tide",
+            "body": "The glacier above the whole way out and the whole way home.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "Still water under high walls",
+            "label": "Days 03–04 · At anchor",
+            "title": "The cable runs out",
+            "body": "Two nights somewhere with no road to it. The waterfall does the talking.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "The ship small under the walls",
+            "label": "Day 05 · Geiranger",
+            "title": "The famous one, taken sideways",
+            "body": "In before the big ships wake, out before they berth. The chanterelle story started here.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+            "alt": "Dinner laid as the light holds",
+            "label": "Day 06 · Hjørundfjord",
+            "title": "The quiet one",
+            "body": "Farms on ledges, a church by the water, dinner at anchor under both.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+            "alt": "Teak and brass in low sun",
+            "label": "Days 07–08 · The inner leads",
+            "title": "The sheltered thread",
+            "body": "The old steamer route between the islands, bridge open all day.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+            "alt": "Lights on in the evening",
+            "label": "Day 09 · Ålesund",
+            "title": "In by nine",
+            "body": "Art nouveau over breakfast. Fly home, or stay on. We book either.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_4fkjra7h",
    "name": "The chart and the water",
    "tone": "light",
    "width": "contained",
@@ -396,10 +583,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_46kdn5ec",
+     "id": "row_4eai96f2",
      "columns": [
       {
-       "id": "col_43lv583x",
+       "id": "col_4bcusf4k",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -417,16 +604,17 @@
        },
        "blocks": [
         {
-         "id": "b_413vj7vh",
+         "id": "b_49spzn2t",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The chart and the water",
           "align": "left"
          }
         },
         {
-         "id": "b_422z7n9s",
+         "id": "b_4atmr0du",
          "type": "text",
          "props": {
           "html": "<p>Every arm we enter is planned on paper first, the old way, because the old way makes you look at every sounding. Drag the handle and see what a morning of pilotage looks like from the wheelhouse instead.</p><p>The dashed line on the chart is the leading line. The gap in the islands is where you will be standing when we thread it.</p>"
@@ -435,7 +623,7 @@
        ]
       },
       {
-       "id": "col_45chvteu",
+       "id": "col_4dowueo0",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -453,7 +641,7 @@
        },
        "blocks": [
         {
-         "id": "b_44rvsc4c",
+         "id": "b_4cgckdis",
          "type": "before-after",
          "props": {
           "before": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/chart-narrows.jpg",
@@ -476,7 +664,7 @@
    ]
   },
   {
-   "id": "sec_4cuqchfx",
+   "id": "sec_4k32k6h7",
    "name": "An evening at anchor",
    "tone": "subtle",
    "width": "contained",
@@ -498,10 +686,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4btpbt8z",
+     "id": "row_4js3esfb",
      "columns": [
       {
-       "id": "col_4achczu3",
+       "id": "col_4iiqmt8w",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -519,20 +707,21 @@
        },
        "blocks": [
         {
-         "id": "b_48squj4r",
+         "id": "b_4g9uak7b",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "An evening at anchor, hour by hour",
           "align": "left"
          }
         },
         {
-         "id": "b_49dv7d87",
+         "id": "b_4hbxpqmn",
          "type": "steps",
          "props": {
           "layout": "down",
-          "marker": "number",
+          "marker": "dot",
           "connector": true,
           "items": [
            {
@@ -564,7 +753,7 @@
    ]
   },
   {
-   "id": "sec_4gl5vtk9",
+   "id": "sec_4ottwqk9",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -585,10 +774,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4fw2wtu5",
+     "id": "row_4nixydnw",
      "columns": [
       {
-       "id": "col_4e15g2nw",
+       "id": "col_4mofa87r",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -606,7 +795,7 @@
        },
        "blocks": [
         {
-         "id": "b_4dpjazx6",
+         "id": "b_4l1sgu0a",
          "type": "quote",
          "props": {
           "text": "The master turned us round in the night to miss a blow, and we woke up somewhere better. Nobody announced it. It was just done.",
@@ -624,9 +813,9 @@
    ]
   },
   {
-   "id": "sec_4lrqi9oe",
+   "id": "sec_4twufkz1",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -645,10 +834,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4kej93r4",
+     "id": "row_4s7hcr4p",
      "columns": [
       {
-       "id": "col_4j0tknll",
+       "id": "col_4r8xn7db",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -666,16 +855,17 @@
        },
        "blocks": [
         {
-         "id": "b_4h8pi4pw",
+         "id": "b_4p6gt6t0",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "June is the light. August is the warmth.",
           "align": "centre"
          }
         },
         {
-         "id": "b_4ivv2gcx",
+         "id": "b_4q0h5xhh",
          "type": "button-group",
          "props": {
           "align": "centre",

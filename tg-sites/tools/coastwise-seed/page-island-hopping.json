@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_9f6vze19",
+ "id": "pg_a34d18ev",
  "title": "Island hopping",
  "slug": "island-hopping",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_8o1uepyv",
+   "id": "sec_9cbhqlg9",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_8niytmja",
+     "id": "row_9be9ctxt",
      "columns": [
       {
-       "id": "col_8myudxg1",
+       "id": "col_9ac93c8j",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_8jbpmf1r",
+         "id": "b_9722jnn6",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_8kxzqmau",
+         "id": "b_98rcv6zo",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Island hopping",
           "align": "left"
          }
         },
         {
-         "id": "b_8lcr0cxw",
+         "id": "b_99xt8l4a",
          "type": "text",
          "props": {
           "html": "<p>A new harbour most days, the sea in between, and never once packing your bag mid-week.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_8vf9kd0i",
+   "id": "sec_9j73e5nn",
    "name": "How a week runs",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8uww08vr",
+     "id": "row_9ifh397x",
      "columns": [
       {
-       "id": "col_8r2s92qr",
+       "id": "col_9fitpvd2",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,18 +133,18 @@
        },
        "blocks": [
         {
-         "id": "b_8pchvuz3",
+         "id": "b_9dsu5x3y",
          "type": "text",
          "props": {
-          "html": "<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch.</p>"
+          "html": "<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch. Every Coastwise sailing works this way. This page is simply what that means in practice.</p>"
          }
         },
         {
-         "id": "b_8qa5hngy",
+         "id": "b_9ettzsqt",
          "type": "steps",
          "props": {
           "layout": "down",
-          "marker": "number",
+          "marker": "dot",
           "connector": true,
           "items": [
            {
@@ -168,7 +169,7 @@
        ]
       },
       {
-       "id": "col_8tzbm5dh",
+       "id": "col_9hwpxu43",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -186,7 +187,7 @@
        },
        "blocks": [
         {
-         "id": "b_8szx2s20",
+         "id": "b_9g01b3z5",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
@@ -206,7 +207,7 @@
    ]
   },
   {
-   "id": "sec_90rzpbr7",
+   "id": "sec_9oy5njxs",
    "name": "Where it works best",
    "tone": "subtle",
    "width": "contained",
@@ -228,10 +229,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8z4ia4z9",
+     "id": "row_9nmzan4h",
      "columns": [
       {
-       "id": "col_8y6wcp0h",
+       "id": "col_9mrz7vih",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -249,16 +250,17 @@
        },
        "blocks": [
         {
-         "id": "b_8w98y2tx",
+         "id": "b_9kqw6nlm",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Three coasts built for it",
           "align": "left"
          }
         },
         {
-         "id": "b_8xrvkr0a",
+         "id": "b_9lbouyk1",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -315,7 +317,7 @@
    ]
   },
   {
-   "id": "sec_947hkcfk",
+   "id": "sec_9ssae7cx",
    "name": "The numbers",
    "tone": "light",
    "width": "contained",
@@ -337,10 +339,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_93acxr7w",
+     "id": "row_9riz1r9j",
      "columns": [
       {
-       "id": "col_92hl5h9v",
+       "id": "col_9qz2h8oa",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -358,7 +360,7 @@
        },
        "blocks": [
         {
-         "id": "b_91ckutwg",
+         "id": "b_9pc27v42",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -403,7 +405,7 @@
    ]
   },
   {
-   "id": "sec_99ay72zg",
+   "id": "sec_9x05ehqh",
    "name": "Asked before booking",
    "tone": "subtle",
    "width": "contained",
@@ -425,10 +427,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_98wz5o4i",
+     "id": "row_9we1s7jq",
      "columns": [
       {
-       "id": "col_979y8rho",
+       "id": "col_9vbj4mn0",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -446,16 +448,17 @@
        },
        "blocks": [
         {
-         "id": "b_95upvlf8",
+         "id": "b_9tfiij0t",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Asked before booking",
           "align": "left"
          }
         },
         {
-         "id": "b_96p2x1w6",
+         "id": "b_9u3c0ndd",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -492,9 +495,9 @@
    ]
   },
   {
-   "id": "sec_9e1fta3p",
+   "id": "sec_a2m8ujky",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -513,10 +516,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_9dzciz1i",
+     "id": "row_a1upkj23",
      "columns": [
       {
-       "id": "col_9c5bqqxm",
+       "id": "col_a0k6m4ey",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -534,16 +537,17 @@
        },
        "blocks": [
         {
-         "id": "b_9agjqvdu",
+         "id": "b_9yah0wc8",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "One bag, unpacked once.",
           "align": "centre"
          }
         },
         {
-         "id": "b_9b3rla83",
+         "id": "b_9z9zodk5",
          "type": "button-group",
          "props": {
           "align": "centre",

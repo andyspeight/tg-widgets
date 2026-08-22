@@ -104,6 +104,9 @@ for (const file of readdirSync(seedDir).filter((f) => f.startsWith('page-'))) {
   const body = renderToStaticMarkup(
     h('div', { className: 'tgs-page', style: tokens },
       h(RegionRenderer, { region: { region: 'header', sections: header.sections } }),
+      // The live route's screen-reader page title, so the previews carry the
+      // same outline the published site does.
+      h('h1', { className: 'tgs-sr-only' }, pageJson.title),
       h(PageRenderer, { page: parsed.page }),
       h(RegionRenderer, { region: { region: 'footer', sections: footer.sections } }),
     ),

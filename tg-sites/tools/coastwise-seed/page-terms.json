@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_h4fnfscw",
+ "id": "pg_i1wjzlt8",
  "title": "Booking terms",
  "slug": "terms",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_h3dsfd7j",
+   "id": "sec_i03hsuh7",
    "name": "Terms",
    "tone": "light",
    "width": "narrow",
@@ -31,10 +31,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_h2vhbop6",
+     "id": "row_hzl5y934",
      "columns": [
       {
-       "id": "col_h1f1mla8",
+       "id": "col_hyhnugyq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -52,7 +52,7 @@
        },
        "blocks": [
         {
-         "id": "b_gvueulnn",
+         "id": "b_hsg4z6kl",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -62,23 +62,24 @@
          }
         },
         {
-         "id": "b_gwrh0flw",
+         "id": "b_ht04to2q",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Booking terms",
           "align": "left"
          }
         },
         {
-         "id": "b_gx3j15ac",
+         "id": "b_hu5qkeam",
          "type": "text",
          "props": {
           "html": "<p>The plain version first: you pay a fifth to book and the rest ten weeks out. If we cancel, you get everything back. If the weather rewrites the route, that is the nature of a coast and not a fault. Your money is protected the whole way: <b>ABTA Y2841</b>, <b>ATOL 11627</b>.</p>"
          }
         },
         {
-         "id": "b_gy3ab63i",
+         "id": "b_hvc67i8o",
          "type": "tooltip",
          "props": {
           "text": "What ATOL covers",
@@ -88,7 +89,7 @@
          }
         },
         {
-         "id": "b_gzfaxhzk",
+         "id": "b_hwnyry3z",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -114,7 +115,7 @@
            },
            {
             "title": "5. Aboard",
-            "body": "The master’s word is law on safety matters, the bridge is open at the master’s pleasure, and a guest whose conduct endangers the ship or wrecks the peace of it can be landed at the next port, fare forfeit. It has happened twice in fifteen years. Both times everyone else applauded."
+            "body": "The master’s word is law on safety matters, the bridge is open at the master’s pleasure, and a guest whose conduct endangers the ship or wrecks the peace of it can be landed at the next port, fare forfeit. It has happened twice in fifteen years."
            },
            {
             "title": "6. Your protection",
@@ -128,7 +129,7 @@
          }
         },
         {
-         "id": "b_h0uow069",
+         "id": "b_hxfy6klx",
          "type": "button",
          "props": {
           "label": "Ask about a clause",

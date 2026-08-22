@@ -1,7 +1,7 @@
 {
  "sections": [
   {
-   "id": "sec_ha9fx3n0",
+   "id": "sec_i7eb08j8",
    "name": "Header",
    "tone": "dark",
    "width": "wide",
@@ -22,10 +22,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_h9t4pqmh",
+     "id": "row_i6k0cirb",
      "columns": [
       {
-       "id": "col_h63klq7i",
+       "id": "col_i3rzj306",
        "width": 30,
        "align": "centre",
        "flow": "stacked",
@@ -43,10 +43,11 @@
        },
        "blocks": [
         {
-         "id": "b_h5c3oab4",
+         "id": "b_i2h3laxl",
          "type": "heading",
          "props": {
-          "level": "h4",
+          "level": "h2",
+          "style": "h4",
           "html": "COASTWISE",
           "align": "left"
          }
@@ -54,7 +55,7 @@
        ]
       },
       {
-       "id": "col_h8bx5k1c",
+       "id": "col_i5a1kzsp",
        "width": 70,
        "align": "centre",
        "flow": "stacked",
@@ -72,7 +73,7 @@
        },
        "blocks": [
         {
-         "id": "b_h7x357gh",
+         "id": "b_i4t05ccl",
          "type": "nav",
          "props": {
           "layout": "row",

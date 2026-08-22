@@ -85,4 +85,14 @@ describe('they stay two implementations, knowingly', () => {
     expect(css).toContain('If you fix one, look at\n * the other.');
     expect(css).toContain('if you fix one, look at the other.');
   });
+
+  it('phone layout puts the picture first for BOTH sides, so the body row grows', () => {
+    // The 12rem-then-auto rows assume the picture occupies the first row. For
+    // the default side (right) the body is first in markup, and without an
+    // explicit order it was clipped inside the 12rem picture row while the
+    // picture collapsed to nothing (Coastwise home deck, 21 Aug 2026).
+    const phone = el.slice(el.indexOf('@container tgs-page (max-width: 767px)'));
+    expect(phone).toContain(".tgs-stack__card .tgs-stack__pic { order: -1; }");
+    expect(phone).not.toContain("[data-side='left'] .tgs-stack__pic { order: 0; }");
+  });
 });

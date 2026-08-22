@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_6w8eviig",
+ "id": "pg_7hc0cyty",
  "title": "Faroe and Shetland",
  "slug": "faroe-and-shetland",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_5yjpb7ha",
+   "id": "sec_6etdbyr4",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_5xeb5cva",
+     "id": "row_6d929tly",
      "columns": [
       {
-       "id": "col_5wnacchy",
+       "id": "col_6cjf14o6",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_5tifgugm",
+         "id": "b_69n5aeh6",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_5ugal3ox",
+         "id": "b_6absryax",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Faroe and Shetland",
           "align": "left"
          }
         },
         {
-         "id": "b_5vjzk9pd",
+         "id": "b_6bqam9yk",
          "type": "text",
          "props": {
           "html": "<p>Lerwick to Tórshavn across the top of the Atlantic, aboard MV Freya. The serious one, and the one the crew fight to work.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_68nlgx66",
+   "id": "sec_6r3vbh10",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_64lae88a",
+     "id": "row_6kd9xdtp",
      "columns": [
       {
-       "id": "col_60zuu8ar",
+       "id": "col_6gporrhc",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,16 +133,16 @@
        },
        "blocks": [
         {
-         "id": "b_5za07wh9",
+         "id": "b_6fxsw7uf",
          "type": "text",
          "props": {
-          "html": "<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and eleven human residents. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p><p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p>"
+          "html": "<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and ten households. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p><p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p><p>In high summer Freya alternates these weeks with her Hebridean ones, which is why the northern season is short and books first.</p>"
          }
         }
        ]
       },
       {
-       "id": "col_637j7hl2",
+       "id": "col_6j51na4y",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,24 +160,24 @@
        },
        "blocks": [
         {
-         "id": "b_61ifgg8m",
+         "id": "b_6hehka7k",
          "type": "rating",
          "props": {
           "rating": 4.9,
           "showValue": true,
-          "count": "from 96 guest reviews",
+          "count": "from 96 post-voyage questionnaires",
           "size": "m",
           "colour": "",
           "align": "left"
          }
         },
         {
-         "id": "b_62ggvb7z",
+         "id": "b_6id68gif",
          "type": "tags",
          "props": {
           "style": "pills",
           "size": "m",
-          "colour": "",
+          "colour": "#1b333d",
           "align": "left",
           "items": [
            {
@@ -206,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_67i8lf4c",
+     "id": "row_6n3geofs",
      "columns": [
       {
-       "id": "col_669kz5fp",
+       "id": "col_6mpoo4yj",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_651tmo9o",
+         "id": "b_6ldaib2r",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -268,11 +269,146 @@
      "gap": 32,
      "stackBelow": "mobile",
      "reverseOnStack": false
+    },
+    {
+     "id": "row_6qh3wpgb",
+     "columns": [
+      {
+       "id": "col_6pjiogv5",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6o4zdg3t",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: join at Lerwick by noon and fly home from Tórshavn; we book both legs where wanted, under the ATOL. Landings are by tender and some are wet, announced honestly at the morning brief. Freya is a ship of stairs, and this is her sternest coast. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
     }
    ]
   },
   {
-   "id": "sec_6d6ehvoq",
+   "id": "sec_6x8w828w",
+   "name": "The shape of the week",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6w5dj6k2",
+     "columns": [
+      {
+       "id": "col_6vsora53",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6sw0nrrz",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Eight nights, held loosely",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6ttkulr6",
+         "type": "text",
+         "props": {
+          "html": "<p>This voyage refuses a fixed itinerary on principle, so here is its shape instead. Treat the order as the weather&rsquo;s to decide.</p>"
+         }
+        },
+        {
+         "id": "b_6uq2avul",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "Lerwick",
+            "body": "Board by noon, and the bird cliffs of Noss the same afternoon. The season starts loudly."
+           },
+           {
+            "title": "The crossing",
+            "body": "One open sea day, picked by forecast, not calendar. The galley answers with a famous stew."
+           },
+           {
+            "title": "The Faroes, four days",
+            "body": "Tórshavn, the sounds and the sea lochs, with two spare days folded in so the weather has room to be generous."
+           },
+           {
+            "title": "Mykines",
+            "body": "When the swell settles, which is four voyages in five. The best landing of the season."
+           },
+           {
+            "title": "Enniberg, then home",
+            "body": "Dead slow under 750 metres of cliff, then Tórshavn, and the flight home booked by us."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_72sbabzg",
    "name": "Practical",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +429,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6cnsl29s",
+     "id": "row_71p16smr",
      "columns": [
       {
-       "id": "col_6bc0dpf9",
+       "id": "col_70616y4k",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,16 +450,17 @@
        },
        "blocks": [
         {
-         "id": "b_69aif9fr",
+         "id": "b_6y9233bg",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The questions everyone asks",
           "align": "left"
          }
         },
         {
-         "id": "b_6a4asb1n",
+         "id": "b_6z5zrg1w",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -360,95 +497,7 @@
    ]
   },
   {
-   "id": "sec_6h2ug40p",
-   "name": "The numbers up north",
-   "tone": "light",
-   "width": "contained",
-   "paddingY": 64,
-   "minHeight": 0,
-   "reveal": true,
-   "box": {
-    "padding": {
-     "top": 0,
-     "right": 0,
-     "bottom": 0,
-     "left": 0
-    },
-    "radius": 0,
-    "borderWidth": 0,
-    "shadow": "none",
-    "blur": 0
-   },
-   "overlay": 60,
-   "rows": [
-    {
-     "id": "row_6gkcx4sl",
-     "columns": [
-      {
-       "id": "col_6fuy6r83",
-       "width": 100,
-       "align": "top",
-       "flow": "stacked",
-       "box": {
-        "padding": {
-         "top": 0,
-         "right": 0,
-         "bottom": 0,
-         "left": 0
-        },
-        "radius": 0,
-        "borderWidth": 0,
-        "shadow": "none",
-        "blur": 0
-       },
-       "blocks": [
-        {
-         "id": "b_6e430zu1",
-         "type": "stats",
-         "props": {
-          "columns": "4",
-          "size": "l",
-          "align": "centre",
-          "divided": true,
-          "items": [
-           {
-            "value": "750",
-            "suffix": "m",
-            "label": "Enniberg, sea to summit",
-            "detail": ""
-           },
-           {
-            "value": "1",
-            "suffix": "M",
-            "label": "Seabirds on Mykines",
-            "detail": ""
-           },
-           {
-            "value": "11",
-            "suffix": "",
-            "label": "People on Mykines",
-            "detail": ""
-           },
-           {
-            "value": "2",
-            "suffix": "",
-            "label": "Spare days in the plan",
-            "detail": ""
-           }
-          ]
-         }
-        }
-       ]
-      }
-     ],
-     "gap": 32,
-     "stackBelow": "mobile",
-     "reverseOnStack": false
-    }
-   ]
-  },
-  {
-   "id": "sec_6mtzanw9",
+   "id": "sec_77rrw291",
    "name": "The north in pictures",
    "tone": "subtle",
    "width": "contained",
@@ -470,10 +519,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6l06wrlw",
+     "id": "row_76aucpc5",
      "columns": [
       {
-       "id": "col_6kmezmfj",
+       "id": "col_75vvpo3s",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -491,16 +540,17 @@
        },
        "blocks": [
         {
-         "id": "b_6imtn08r",
+         "id": "b_73tz5ld9",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "What hard light does",
           "align": "left"
          }
         },
         {
-         "id": "b_6j2u3rry",
+         "id": "b_74mc3xah",
          "type": "gallery",
          "props": {
           "columns": "4",
@@ -538,7 +588,7 @@
    ]
   },
   {
-   "id": "sec_6q50a41h",
+   "id": "sec_7bwe34o8",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -559,10 +609,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6p1j94bh",
+     "id": "row_7aipc25t",
      "columns": [
       {
-       "id": "col_6op01ung",
+       "id": "col_79q1lwpi",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -580,7 +630,7 @@
        },
        "blocks": [
         {
-         "id": "b_6nhq26ej",
+         "id": "b_78ll16tp",
          "type": "quote",
          "props": {
           "text": "I have birded for forty years and I made three lifers before lunch on the second day. Then the master idled under Enniberg and I stopped counting.",
@@ -598,9 +648,9 @@
    ]
   },
   {
-   "id": "sec_6vl9pbd9",
+   "id": "sec_7gwmknn7",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -619,10 +669,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_6ucm89sp",
+     "id": "row_7fjt4k33",
      "columns": [
       {
-       "id": "col_6tcly31z",
+       "id": "col_7esnn4uu",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -640,16 +690,17 @@
        },
        "blocks": [
         {
-         "id": "b_6rzpvcrd",
+         "id": "b_7cm54pl5",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Book the whole eight nights. The weather needs room to be generous.",
           "align": "centre"
          }
         },
         {
-         "id": "b_6s6njv5b",
+         "id": "b_7d7n1aos",
          "type": "button-group",
          "props": {
           "align": "centre",

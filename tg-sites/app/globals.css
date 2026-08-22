@@ -5159,13 +5159,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
    * ONE COLUMN, PICTURE FIRST. Half a phone screen of photograph beside two
    * words is neither. The stack itself stays, because the gathering is the
    * point of the element and it works just as well vertically.
+   *
+   * The picture must be ORDERED first for BOTH sides, not assumed first: the
+   * rows are 12rem-then-auto, and for the default side (right) the body is
+   * first in the markup, so without this it landed in the 12rem picture row,
+   * was clipped by the card's overflow, and the picture collapsed into the
+   * auto row at zero height (Coastwise home deck, 21 Aug 2026: titles and
+   * buttons cut mid-pill on phones). One order rule covers both sides and the
+   * body's auto row grows to its content.
    */
   .tgs-stack__card {
     grid-template-columns: 1fr;
     grid-template-rows: 12rem auto;
     min-height: 0;
   }
-  .tgs-stack__card[data-side='left'] .tgs-stack__pic { order: 0; }
+  .tgs-stack__card .tgs-stack__pic { order: -1; }
   .tgs-stack__body { padding: var(--tgs-space-l) var(--tgs-space-m); }
   .tgs-stack { --tgs-stack-top: 3.5rem; --tgs-stack-step: 10px; }
 }

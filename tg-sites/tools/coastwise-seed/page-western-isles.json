@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_3fmimwqt",
+ "id": "pg_3eatdnev",
  "title": "Western Isles",
  "slug": "western-isles",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_2bw0s3n5",
+   "id": "sec_27dqi5gd",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_2apxgkcj",
+     "id": "row_267eyf9p",
      "columns": [
       {
-       "id": "col_29oop893",
+       "id": "col_25anvgve",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_26xmucs0",
+         "id": "b_22xz7y7g",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_27rhejwe",
+         "id": "b_23pi7emu",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Western Isles",
           "align": "left"
          }
         },
         {
-         "id": "b_28hn6mxh",
+         "id": "b_248nydad",
          "type": "text",
          "props": {
           "html": "<p>Oban to Stornoway through the Small Isles, aboard MV Freya. The one to book if you want weather with your scenery.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_2lzhwjqx",
+   "id": "sec_2kgyo3vp",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2h9rvv8e",
+     "id": "row_2d9e3c3k",
      "columns": [
       {
-       "id": "col_2dlqyydj",
+       "id": "col_29jc4o92",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_2c32z12n",
+         "id": "b_28lagb3j",
          "type": "text",
          "props": {
           "html": "<p>The west of Scotland is a sequence of harbours nobody dredged for anything bigger than a fishing fleet, which is exactly why it suits us. Freya draws 3.8 metres, so she lies alongside at Tobermory and Rodel while the big ships sit off Oban landing tenders.</p><p>The week is built round landings, not passages. Coll for the white strand, Staffa at slack water for Fingal’s Cave, Canna because eleven residents and one post box is a kind of perfection. When a blow comes through, the master swaps the days rather than cancelling one.</p>"
@@ -141,7 +142,7 @@
        ]
       },
       {
-       "id": "col_2gfhc2yf",
+       "id": "col_2crvh9bn",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,24 +160,24 @@
        },
        "blocks": [
         {
-         "id": "b_2eg6wvuw",
+         "id": "b_2aowbtbq",
          "type": "rating",
          "props": {
           "rating": 4.9,
           "showValue": true,
-          "count": "from 212 guest reviews",
+          "count": "from 212 post-voyage questionnaires",
           "size": "m",
           "colour": "",
           "align": "left"
          }
         },
         {
-         "id": "b_2fgr2zgt",
+         "id": "b_2bzcx5f1",
          "type": "tags",
          "props": {
           "style": "pills",
           "size": "m",
-          "colour": "",
+          "colour": "#1b333d",
           "align": "left",
           "items": [
            {
@@ -192,7 +193,7 @@
             "href": ""
            },
            {
-            "label": "Single cabins",
+            "label": "Solo friendly",
             "href": ""
            }
           ]
@@ -206,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_2kinn30f",
+     "id": "row_2g2lmxg3",
      "columns": [
       {
-       "id": "col_2jj0ulrq",
+       "id": "col_2fk9h0mm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_2i9s4q7f",
+         "id": "b_2eduzvz7",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -268,11 +269,46 @@
      "gap": 32,
      "stackBelow": "mobile",
      "reverseOnStack": false
+    },
+    {
+     "id": "row_2j32cbjw",
+     "columns": [
+      {
+       "id": "col_2ibhjcjq",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_2h2vmjl9",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: board at Oban from four, sail at six. Trains from Glasgow arrive across the road and the long-stay car park takes a ticket for the week. Ashore is by gangway where the quay allows and by tender where it does not, announced honestly; Freya is a ship of stairs. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
     }
    ]
   },
   {
-   "id": "sec_2q7ux2lg",
+   "id": "sec_2pnvg3w1",
    "name": "Day by day",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +329,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2pe2p8d0",
+     "id": "row_2orfk2mq",
      "columns": [
       {
-       "id": "col_2oevq42l",
+       "id": "col_2ne4y1pw",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,16 +350,17 @@
        },
        "blocks": [
         {
-         "id": "b_2m19n9m0",
+         "id": "b_2lc31sd9",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Seven days, day by day",
           "align": "left"
          }
         },
         {
-         "id": "b_2nk4p3el",
+         "id": "b_2mtvhknz",
          "type": "slider",
          "props": {
           "slideWidth": "medium",
@@ -413,7 +450,7 @@
    ]
   },
   {
-   "id": "sec_2w3cg1pb",
+   "id": "sec_2vbam5if",
    "name": "The isles",
    "tone": "light",
    "width": "contained",
@@ -434,10 +471,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2vl4oljn",
+     "id": "row_2uljljwz",
      "columns": [
       {
-       "id": "col_2uq4gjkj",
+       "id": "col_2t169t1c",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -455,23 +492,24 @@
        },
        "blocks": [
         {
-         "id": "b_2ry9mnk0",
+         "id": "b_2qi6s0w4",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The isles, one by one",
           "align": "left"
          }
         },
         {
-         "id": "b_2sw0zvec",
+         "id": "b_2rmy7p7j",
          "type": "text",
          "props": {
           "html": "<p>Open one. The photograph is the argument.</p>"
          }
         },
         {
-         "id": "b_2t0py9r1",
+         "id": "b_2skcbt05",
          "type": "expanding-cards",
          "props": {
           "height": "medium",
@@ -524,7 +562,7 @@
    ]
   },
   {
-   "id": "sec_30gat4vs",
+   "id": "sec_2z3gyys3",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -545,10 +583,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_2zrhm50q",
+     "id": "row_2yvkrx7y",
      "columns": [
       {
-       "id": "col_2y2jn6ny",
+       "id": "col_2xftmlpv",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -566,7 +604,7 @@
        },
        "blocks": [
         {
-         "id": "b_2xjx6vjq",
+         "id": "b_2w9az95o",
          "type": "quote",
          "props": {
           "text": "We were alongside in Canna before I had finished my coffee. On the last cruise we took, that was a coach transfer.",
@@ -584,7 +622,7 @@
    ]
   },
   {
-   "id": "sec_39lmqvwm",
+   "id": "sec_38uh10aq",
    "name": "What the fare covers",
    "tone": "light",
    "width": "contained",
@@ -606,10 +644,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_388jvug3",
+     "id": "row_37zjgsxz",
      "columns": [
       {
-       "id": "col_3365y0xb",
+       "id": "col_325x6pi8",
        "width": 50,
        "align": "top",
        "flow": "stacked",
@@ -627,16 +665,17 @@
        },
        "blocks": [
         {
-         "id": "b_316g4sfs",
+         "id": "b_30vbts7h",
          "type": "heading",
          "props": {
           "level": "h3",
+          "style": "h3",
           "html": "In the fare",
           "align": "left"
          }
         },
         {
-         "id": "b_32il5rat",
+         "id": "b_31lktzlc",
          "type": "list",
          "props": {
           "style": "tick",
@@ -662,7 +701,7 @@
        ]
       },
       {
-       "id": "col_37cbgjf8",
+       "id": "col_36kdkb1t",
        "width": 50,
        "align": "top",
        "flow": "stacked",
@@ -680,16 +719,17 @@
        },
        "blocks": [
         {
-         "id": "b_34uf7bds",
+         "id": "b_33z8pd5q",
          "type": "heading",
          "props": {
           "level": "h3",
+          "style": "h3",
           "html": "Paid locally",
           "align": "left"
          }
         },
         {
-         "id": "b_358v1piq",
+         "id": "b_34ktj126",
          "type": "list",
          "props": {
           "style": "bullet",
@@ -707,7 +747,7 @@
          }
         },
         {
-         "id": "b_36fmi7c4",
+         "id": "b_35vqjosz",
          "type": "text",
          "props": {
           "html": "<p>No service charge, no fuel surcharge, no envelope on the last night. The fare is the price.</p>"
@@ -723,9 +763,9 @@
    ]
   },
   {
-   "id": "sec_3enb22nz",
+   "id": "sec_3dawvr3h",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -744,10 +784,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_3d3aihms",
+     "id": "row_3c86822s",
      "columns": [
       {
-       "id": "col_3c9zhq4p",
+       "id": "col_3bh8oeot",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -765,16 +805,17 @@
        },
        "blocks": [
         {
-         "id": "b_3anz8sn2",
+         "id": "b_393topb4",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "April sails first. September sails calmest.",
           "align": "centre"
          }
         },
         {
-         "id": "b_3bofw0ol",
+         "id": "b_3a9jfbam",
          "type": "button-group",
          "props": {
           "align": "centre",

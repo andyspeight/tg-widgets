@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_8i0g62cy",
+ "id": "pg_965icguf",
  "title": "Holidays",
  "slug": "holidays",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_8457yhlb",
+   "id": "sec_8stkyvw5",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_83yg80iu",
+     "id": "row_8r54hzi8",
      "columns": [
       {
-       "id": "col_82x6rfct",
+       "id": "col_8q1j4atb",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_7z2oi12q",
+         "id": "b_8nnpfz9n",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_800j616m",
+         "id": "b_8o1iafjl",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Ways to travel",
           "align": "left"
          }
         },
         {
-         "id": "b_81dcx61c",
+         "id": "b_8p84sgwh",
          "type": "text",
          "props": {
           "html": "<p>The same three ships, five different reasons to be aboard. Pick the one that sounds like your kind of week.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_88ay8hw9",
+   "id": "sec_8wk1ng78",
    "name": "The five",
    "tone": "light",
    "width": "contained",
@@ -114,10 +115,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_87g5d6h3",
+     "id": "row_8va05pg5",
      "columns": [
       {
-       "id": "col_863jqvko",
+       "id": "col_8uhzeb7d",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -135,7 +136,7 @@
        },
        "blocks": [
         {
-         "id": "b_851m2ouy",
+         "id": "b_8tr08cs4",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -153,7 +154,7 @@
             "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
             "icon": "",
             "alt": "The ship between islands",
-            "label": "The classic",
+            "label": "",
             "title": "Island hopping",
             "body": "A new harbour most days, and the sea in between.",
             "linkLabel": "How it works",
@@ -163,7 +164,7 @@
             "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/wildlife.jpg",
             "icon": "",
             "alt": "Seabirds over the water",
-            "label": "Eyes up",
+            "label": "",
             "title": "Wildlife at sea",
             "body": "Whales, sea eagles and a million seabirds, from deck height.",
             "linkLabel": "What you might see",
@@ -173,7 +174,7 @@
             "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/food-quay.jpg",
             "icon": "",
             "alt": "Produce handed aboard at a quay",
-            "label": "The galley",
+            "label": "",
             "title": "Food and foraging",
             "body": "Dinner is whatever came aboard that morning.",
             "linkLabel": "How dinner happens",
@@ -183,7 +184,7 @@
             "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
             "icon": "",
             "alt": "Walkers on a shore path",
-            "label": "Boots on",
+            "label": "",
             "title": "Walking ashore",
             "body": "Proper walks from the water line, and a ship to come home to.",
             "linkLabel": "The walks",
@@ -193,7 +194,7 @@
             "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
             "icon": "",
             "alt": "The ship at anchor at dusk",
-            "label": "The whole ship",
+            "label": "",
             "title": "Private charter",
             "body": "Twenty-six to forty-four of your own people, one ship, your plan.",
             "linkLabel": "Take the ship",
@@ -212,7 +213,7 @@
    ]
   },
   {
-   "id": "sec_8cldzrq6",
+   "id": "sec_90fvkyr2",
    "name": "One voice",
    "tone": "subtle",
    "width": "contained",
@@ -234,10 +235,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8bm18koi",
+     "id": "row_8zwpipp5",
      "columns": [
       {
-       "id": "col_8a0hzrjm",
+       "id": "col_8yuxwr83",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -255,7 +256,7 @@
        },
        "blocks": [
         {
-         "id": "b_89gn1cor",
+         "id": "b_8xdeid30",
          "type": "quote",
          "props": {
           "text": "We have done the wildlife week, the walking week and the food week. It is the same ship being brilliant at three different things.",
@@ -273,9 +274,9 @@
    ]
   },
   {
-   "id": "sec_8hkf8hki",
+   "id": "sec_95ainrsn",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -294,10 +295,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_8g77hi4o",
+     "id": "row_94yvlfmj",
      "columns": [
       {
-       "id": "col_8fw46qjr",
+       "id": "col_93t80cnd",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -315,16 +316,17 @@
        },
        "blocks": [
         {
-         "id": "b_8djugvv7",
+         "id": "b_91xbcqmc",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Not sure which? Say roughly who is coming, and we will say which week.",
           "align": "centre"
          }
         },
         {
-         "id": "b_8ezzlhe6",
+         "id": "b_92chgwk0",
          "type": "button-group",
          "props": {
           "align": "centre",

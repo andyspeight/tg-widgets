@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_25di33vw",
+ "id": "pg_212n523m",
  "title": "Voyages",
  "slug": "destinations",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_1r0ejf57",
+   "id": "sec_1r0nzj5h",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_1qbljjw9",
+     "id": "row_1qpmubzh",
      "columns": [
       {
-       "id": "col_1p591rxv",
+       "id": "col_1pr8x0ks",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_1mdhmkv3",
+         "id": "b_1ml4ua6v",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_1nm9ohb9",
+         "id": "b_1n7ah0dt",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Five coasts. Three small ships.",
           "align": "left"
          }
         },
         {
-         "id": "b_1opwnyzy",
+         "id": "b_1o9p4lb0",
          "type": "text",
          "props": {
           "html": "<p>Every voyage below runs on a ship that draws under four metres and carries fewer than forty-five guests. Pick by weather, not by brochure.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_1vvvz4q5",
+   "id": "sec_1vt9jfyi",
    "name": "The voyages",
    "tone": "light",
    "width": "contained",
@@ -114,10 +115,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_1uoyuri2",
+     "id": "row_1u93gn0z",
      "columns": [
       {
-       "id": "col_1t6q847m",
+       "id": "col_1ta4ndiq",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -135,7 +136,7 @@
        },
        "blocks": [
         {
-         "id": "b_1s0sgg29",
+         "id": "b_1so8pcoh",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -212,97 +213,9 @@
    ]
   },
   {
-   "id": "sec_1z1qud3b",
-   "name": "The fleet in numbers",
-   "tone": "subtle",
-   "width": "contained",
-   "paddingY": 48,
-   "minHeight": 0,
-   "reveal": true,
-   "box": {
-    "padding": {
-     "top": 0,
-     "right": 0,
-     "bottom": 0,
-     "left": 0
-    },
-    "radius": 0,
-    "borderWidth": 0,
-    "shadow": "none",
-    "blur": 0
-   },
-   "overlay": 60,
-   "rows": [
-    {
-     "id": "row_1yngqujz",
-     "columns": [
-      {
-       "id": "col_1xij3u8p",
-       "width": 100,
-       "align": "top",
-       "flow": "stacked",
-       "box": {
-        "padding": {
-         "top": 0,
-         "right": 0,
-         "bottom": 0,
-         "left": 0
-        },
-        "radius": 0,
-        "borderWidth": 0,
-        "shadow": "none",
-        "blur": 0
-       },
-       "blocks": [
-        {
-         "id": "b_1wxyw6v6",
-         "type": "stats",
-         "props": {
-          "columns": "4",
-          "size": "m",
-          "align": "centre",
-          "divided": true,
-          "items": [
-           {
-            "value": "5",
-            "suffix": "",
-            "label": "Coasts worked",
-            "detail": ""
-           },
-           {
-            "value": "3",
-            "suffix": "",
-            "label": "Ships, none big",
-            "detail": ""
-           },
-           {
-            "value": "44",
-            "suffix": "",
-            "label": "Guests at the very most",
-            "detail": ""
-           },
-           {
-            "value": "15",
-            "suffix": "",
-            "label": "Seasons without a missed sailing",
-            "detail": ""
-           }
-          ]
-         }
-        }
-       ]
-      }
-     ],
-     "gap": 32,
-     "stackBelow": "mobile",
-     "reverseOnStack": false
-    }
-   ]
-  },
-  {
-   "id": "sec_24sha1y0",
+   "id": "sec_202d0o1u",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -321,10 +234,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_23ek8q89",
+     "id": "row_1z5xtucw",
      "columns": [
       {
-       "id": "col_22zqqrgl",
+       "id": "col_1yufshtt",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -342,16 +255,17 @@
        },
        "blocks": [
         {
-         "id": "b_207somen",
+         "id": "b_1wou7iij",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The right coast depends on the weather you want.",
           "align": "centre"
          }
         },
         {
-         "id": "b_218k9elm",
+         "id": "b_1x1px2e5",
          "type": "button-group",
          "props": {
           "align": "centre",

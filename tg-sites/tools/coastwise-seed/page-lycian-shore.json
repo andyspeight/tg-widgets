@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_7yrtx7cu",
+ "id": "pg_8may2oe5",
  "title": "The Lycian Shore",
  "slug": "lycian-shore",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_72u5ttk0",
+   "id": "sec_7nda1jrb",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_715fhuw4",
+     "id": "row_7mbx0ljd",
      "columns": [
       {
-       "id": "col_705sff3d",
+       "id": "col_7lywuiuv",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_6x3ahabz",
+         "id": "b_7iddurx1",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,19 +64,20 @@
          }
         },
         {
-         "id": "b_6yn4fiht",
+         "id": "b_7j1vz3rl",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "The Lycian Shore",
           "align": "left"
          }
         },
         {
-         "id": "b_6zntx99s",
+         "id": "b_7kipo1vy",
          "type": "text",
          "props": {
-          "html": "<p>Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our one warm-water winter escape.</p>"
+          "html": "<p>Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our warm-water escape at either end of the season.</p>"
          }
         }
        ]
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_7ck2n1fg",
+   "id": "sec_804jq0o8",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_789bor1c",
+     "id": "row_7twt4i1l",
      "columns": [
       {
-       "id": "col_74tiyoys",
+       "id": "col_7pt8kxbk",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_730tyulh",
+         "id": "b_7o89mlhl",
          "type": "text",
          "props": {
           "html": "<p>Lycia buried its dead in cliff tombs facing the sea, which tells you the sea was the road. It still is: half the ruins on this coast have no land access worth the name, so a shallow-draught ship is not a luxury here, it is the only ticket.</p><p>The pattern is simple. Sail early, anchor by ten, swim, lunch under the awning, ruin in the late afternoon when the stone goes gold, dinner ashore or on deck. Repeat until improved.</p>"
@@ -141,7 +142,7 @@
        ]
       },
       {
-       "id": "col_77falbmz",
+       "id": "col_7s9q5nct",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,24 +160,24 @@
        },
        "blocks": [
         {
-         "id": "b_75lqxo81",
+         "id": "b_7qqxjgnv",
          "type": "rating",
          "props": {
           "rating": 4.8,
           "showValue": true,
-          "count": "from 163 guest reviews",
+          "count": "from 163 post-voyage questionnaires",
           "size": "m",
           "colour": "",
           "align": "left"
          }
         },
         {
-         "id": "b_76wxxxs2",
+         "id": "b_7rdo9us8",
          "type": "tags",
          "props": {
           "style": "pills",
           "size": "m",
-          "colour": "",
+          "colour": "#1b333d",
           "align": "left",
           "items": [
            {
@@ -206,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_7b8fv6sd",
+     "id": "row_7w1qlqwd",
      "columns": [
       {
-       "id": "col_7a2t43vs",
+       "id": "col_7vpeomu3",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_7981ulp8",
+         "id": "b_7uab931r",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -242,7 +243,7 @@
             "detail": ""
            },
            {
-            "value": "Apr–May · Oct",
+            "value": "Apr, May, Oct",
             "suffix": "",
             "label": "Season",
             "detail": ""
@@ -268,11 +269,46 @@
      "gap": 32,
      "stackBelow": "mobile",
      "reverseOnStack": false
+    },
+    {
+     "id": "row_7z2luys0",
+     "columns": [
+      {
+       "id": "col_7yyc890x",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7x033zov",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: join at Fethiye from three. Dalaman airport is forty minutes over the hill and we book the flights where wanted. Nyren carries a lift and two step-free cabins, and the swimming ladder is the busiest gangway aboard. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
     }
    ]
   },
   {
-   "id": "sec_7h8onlz7",
+   "id": "sec_85lsdyhg",
    "name": "The detail",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +329,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7g91a4v1",
+     "id": "row_843cr2nr",
      "columns": [
       {
-       "id": "col_7fp0tdj4",
+       "id": "col_832p0sya",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,16 +350,17 @@
        },
        "blocks": [
         {
-         "id": "b_7dcw4r0l",
+         "id": "b_81h8oapq",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The ship, the route, the food",
           "align": "left"
          }
         },
         {
-         "id": "b_7e0i0ahn",
+         "id": "b_82r3enat",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -355,7 +392,7 @@
    ]
   },
   {
-   "id": "sec_7oxhssu8",
+   "id": "sec_8cwgutmk",
    "name": "A day, hour by hour",
    "tone": "light",
    "width": "contained",
@@ -377,10 +414,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7ngn23l5",
+     "id": "row_8b2m6nwx",
      "columns": [
       {
-       "id": "col_7kzghdpf",
+       "id": "col_88lbs1sf",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -398,20 +435,21 @@
        },
        "blocks": [
         {
-         "id": "b_7i45qo5l",
+         "id": "b_86t57qx3",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "A day, hour by hour",
           "align": "left"
          }
         },
         {
-         "id": "b_7jsrfopl",
+         "id": "b_87vbic7y",
          "type": "steps",
          "props": {
           "layout": "down",
-          "marker": "number",
+          "marker": "dot",
           "connector": true,
           "items": [
            {
@@ -428,7 +466,7 @@
            },
            {
             "title": "Five",
-            "body": "The ruin, when the stone goes gold and the coach parties have gone. A drowned harbour wall slides under the hull on the way."
+            "body": "The ruin, in the late light after the coach parties have gone. A drowned harbour wall slides under the hull on the way."
            },
            {
             "title": "Eight",
@@ -440,7 +478,7 @@
        ]
       },
       {
-       "id": "col_7mwmn38k",
+       "id": "col_8al5rl18",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -458,7 +496,7 @@
        },
        "blocks": [
         {
-         "id": "b_7l8j9b4y",
+         "id": "b_89os7wks",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/lycian-coast.jpg",
@@ -478,7 +516,7 @@
    ]
   },
   {
-   "id": "sec_7sru1awh",
+   "id": "sec_8gkz19y6",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -499,10 +537,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7rwv6506",
+     "id": "row_8fpi6low",
      "columns": [
       {
-       "id": "col_7qtbwak5",
+       "id": "col_8ec7xre2",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -520,7 +558,7 @@
        },
        "blocks": [
         {
-         "id": "b_7pmbfrev",
+         "id": "b_8d63p7il",
          "type": "quote",
          "props": {
           "text": "We floated over the drowned town at Kekova in a flat calm and I could see window openings under the boat. I think about it weekly.",
@@ -538,9 +576,9 @@
    ]
   },
   {
-   "id": "sec_7xr0or7t",
+   "id": "sec_8l7ln7jm",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -559,10 +597,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_7w2joey2",
+     "id": "row_8knzik4r",
      "columns": [
       {
-       "id": "col_7vv6ccmb",
+       "id": "col_8jcyemr8",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -580,16 +618,17 @@
        },
        "blocks": [
         {
-         "id": "b_7twwlmio",
+         "id": "b_8hvbwxwk",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "October. Everyone says October.",
           "align": "centre"
          }
         },
         {
-         "id": "b_7uhyuol5",
+         "id": "b_8ihs5rdr",
          "type": "button-group",
          "props": {
           "align": "centre",

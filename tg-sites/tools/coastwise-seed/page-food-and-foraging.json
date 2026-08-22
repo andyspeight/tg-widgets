@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_byznmszz",
+ "id": "pg_cnyakri8",
  "title": "Food and foraging",
  "slug": "food-and-foraging",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_b7wb9bgi",
+   "id": "sec_bv6ek5ea",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_b6mudp88",
+     "id": "row_buk422n6",
      "columns": [
       {
-       "id": "col_b57brz86",
+       "id": "col_bt9qnh9n",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_b2z0x5cx",
+         "id": "b_bqj2xpnr",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_b39f9v6j",
+         "id": "b_brbx8c3v",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Food and foraging",
           "align": "left"
          }
         },
         {
-         "id": "b_b48x09bv",
+         "id": "b_bsm3jrxs",
          "type": "text",
          "props": {
           "html": "<p>There is no menu cycle. There is a chef, a coast, and whatever came over the rail that morning.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_bd30jrgw",
+   "id": "sec_c28tksac",
    "name": "How dinner happens",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_bc8b8y23",
+     "id": "row_c1uu56ug",
      "columns": [
       {
-       "id": "col_b9wvvlp5",
+       "id": "col_bywnb3lo",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +133,14 @@
        },
        "blocks": [
         {
-         "id": "b_b8zz9m2m",
+         "id": "b_bwqn1yi2",
+         "type": "text",
+         "props": {
+          "html": "<p>There are no gourmet departures and no ordinary ones. This is how every sailing eats.</p>"
+         }
+        },
+        {
+         "id": "b_bxb88w2n",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -157,7 +165,7 @@
        ]
       },
       {
-       "id": "col_bb6jp6pg",
+       "id": "col_c0ipo08x",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -175,7 +183,7 @@
        },
        "blocks": [
         {
-         "id": "b_ba54wibf",
+         "id": "b_bzsnpe5o",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
@@ -195,7 +203,7 @@
    ]
   },
   {
-   "id": "sec_bik5ii2c",
+   "id": "sec_c7d388t7",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -216,10 +224,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_bh0hh3yq",
+     "id": "row_c66tnsdu",
      "columns": [
       {
-       "id": "col_bg994lat",
+       "id": "col_c5fkikbz",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -237,7 +245,7 @@
        },
        "blocks": [
         {
-         "id": "b_betq85dl",
+         "id": "b_c3a2wllg",
          "type": "quote",
          "props": {
           "text": "The chef bought a box of chanterelles off two children in Geiranger and rewrote dinner on the spot. Best thing I ate all year.",
@@ -246,7 +254,7 @@
          }
         },
         {
-         "id": "b_bfcecpdb",
+         "id": "b_c45l98gf",
          "type": "tags",
          "props": {
           "style": "bullets",
@@ -279,7 +287,7 @@
    ]
   },
   {
-   "id": "sec_bn84557v",
+   "id": "sec_ccw6xku1",
    "name": "A week of dinners",
    "tone": "light",
    "width": "contained",
@@ -301,10 +309,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_bmi909u0",
+     "id": "row_cbzwuvyh",
      "columns": [
       {
-       "id": "col_blbzba2a",
+       "id": "col_cawsd73t",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -322,22 +330,23 @@
        },
        "blocks": [
         {
-         "id": "b_bju7tskv",
+         "id": "b_c8lh9ti8",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "One week, as it actually fell",
           "align": "left"
          }
         },
         {
-         "id": "b_bkiek922",
+         "id": "b_c9u7zi5l",
          "type": "table",
          "props": {
           "headerRow": true,
           "firstColumnHeader": true,
           "style": "lined",
-          "caption": "Western Isles, second week of June. Reconstructed from the galley board, which Marta photographs nightly.",
+          "caption": "From the galley board, second week of June.",
           "textColour": "",
           "data": "Day\tCame aboard\tBecame\nOban\tLangoustines, a whole morning’s worth\tSplit and grilled, lemon, brown bread\nTobermory\tSmoked trout from the smokehouse\tA pâté that has caused correspondence\nColl\tNothing. Coll is a beach\tThe lamb we were saving, slow, with machair herbs\nIona\tCrab from the one boat that works the sound\tLinguine, chilli, done in eleven minutes flat\nCanna\tEggs, honesty-box honey\tA tarte the French would annex\nHarris\tScallops, dived that morning\tSeared, black pudding, the last of the honey"
          }
@@ -352,7 +361,7 @@
    ]
   },
   {
-   "id": "sec_bspk0cmj",
+   "id": "sec_ch3vd2bf",
    "name": "Feeding you properly",
    "tone": "subtle",
    "width": "contained",
@@ -374,10 +383,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_br79vkx6",
+     "id": "row_cggr7mhb",
      "columns": [
       {
-       "id": "col_bqm7n7dg",
+       "id": "col_cfrkfgxm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -395,16 +404,17 @@
        },
        "blocks": [
         {
-         "id": "b_bo3pklkm",
+         "id": "b_cdkmo639",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The questions the galley gets",
           "align": "left"
          }
         },
         {
-         "id": "b_bp1epzdg",
+         "id": "b_ce1qak5g",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -441,9 +451,9 @@
    ]
   },
   {
-   "id": "sec_bxyf6fgi",
+   "id": "sec_cm6bdegv",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -462,10 +472,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_bweniovo",
+     "id": "row_clo2efkk",
      "columns": [
       {
-       "id": "col_bv16jgno",
+       "id": "col_ck15yqvy",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -483,16 +493,17 @@
        },
        "blocks": [
         {
-         "id": "b_btrm28p8",
+         "id": "b_cipiu27w",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Come hungry. Leave with a recipe you will never quite replicate.",
           "align": "centre"
          }
         },
         {
-         "id": "b_bukt0efd",
+         "id": "b_cj13efix",
          "type": "button-group",
          "props": {
           "align": "centre",

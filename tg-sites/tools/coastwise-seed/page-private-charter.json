@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_dr3soxev",
+ "id": "pg_egubjexi",
  "title": "Private charter",
  "slug": "private-charter",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_d5o2ayjv",
+   "id": "sec_duaiyd4j",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_d4ju1cux",
+     "id": "row_dtobijyl",
      "columns": [
       {
-       "id": "col_d3ecqlfq",
+       "id": "col_ds3sxyah",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_d0y59jer",
+         "id": "b_dpazgksn",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_d1obhdc4",
+         "id": "b_dqr2v5uf",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Private charter",
           "align": "left"
          }
         },
         {
-         "id": "b_d2axcc6b",
+         "id": "b_drayoanr",
          "type": "text",
          "props": {
           "html": "<p>Twenty-six to forty-four of your own people, one ship, one crew, and a plan drawn round you.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_dckz1yp6",
+   "id": "sec_e155h1tw",
    "name": "The ships",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_dbay76eo",
+     "id": "row_e0r6zzq8",
      "columns": [
       {
-       "id": "col_dasepa0w",
+       "id": "col_dzg3y64z",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -132,14 +133,14 @@
        },
        "blocks": [
         {
-         "id": "b_d6oqds07",
+         "id": "b_dvt7qml9",
          "type": "text",
          "props": {
           "html": "<p>A charter is not a cruise with your name on it. The route is drawn with you, the galley plans round your table, and the only fixed points are where we start, where we finish and how the tide runs. Families take Freya. Societies take Skua for the birds. Weddings, so far without exception, take Nyren.</p>"
          }
         },
         {
-         "id": "b_d7rg2oni",
+         "id": "b_dwhu3ydx",
          "type": "tabs",
          "props": {
           "style": "underline",
@@ -148,24 +149,24 @@
           "items": [
            {
             "title": "MV Freya · 38",
-            "body": "The Scottish ship. Nineteen cabins, the snug library, and the only hull of the three strengthened for the Faroes run. From £41,000 for seven nights, whole ship, full board."
+            "body": "The Scottish ship. Nineteen cabins, the snug library, and the only hull of the three strengthened for the Faroes run. From £84,000 for seven nights, whole ship, full board."
            },
            {
             "title": "MV Skua · 26",
-            "body": "The small one, and the quiet one. Thirteen cabins, a saloon that becomes one long table, and the shallowest draught in the fleet. From £34,000 for seven nights."
+            "body": "The small one, and the quiet one. Thirteen cabins, a saloon that becomes one long table, and the shallowest draught in the fleet. From £76,000 for seven nights."
            },
            {
             "title": "MV Nyren · 44",
-            "body": "The warm-water ship. Twenty-two cabins, the stern platform and awning, and a galley built for long dinners. From £46,000 for seven nights."
+            "body": "The warm-water ship. Twenty-two cabins, the stern platform and awning, and a galley built for long dinners. From £79,000 for seven nights."
            }
           ]
          }
         },
         {
-         "id": "b_d87z2s3f",
+         "id": "b_dxpu9req",
          "type": "read-more",
          "props": {
-          "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis, or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
+          "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
           "lines": 3,
           "moreLabel": "The fine print",
           "lessLabel": "Enough",
@@ -174,7 +175,7 @@
          }
         },
         {
-         "id": "b_d9hp568h",
+         "id": "b_dys5rg8v",
          "type": "button",
          "props": {
           "label": "Start a charter conversation",
@@ -195,7 +196,7 @@
    ]
   },
   {
-   "id": "sec_dhtevjqm",
+   "id": "sec_e6pcrkj8",
    "name": "How a charter comes together",
    "tone": "subtle",
    "width": "contained",
@@ -217,10 +218,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_dgueen95",
+     "id": "row_e5gthlvl",
      "columns": [
       {
-       "id": "col_dfs9tvaz",
+       "id": "col_e4bwqth2",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -238,16 +239,17 @@
        },
        "blocks": [
         {
-         "id": "b_ddxj4gbv",
+         "id": "b_e2p2nzx6",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "From first call to first cast-off",
           "align": "left"
          }
         },
         {
-         "id": "b_depjet3a",
+         "id": "b_e37i9pse",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -283,7 +285,7 @@
    ]
   },
   {
-   "id": "sec_dlh63py2",
+   "id": "sec_eaoaue2g",
    "name": "Charter words",
    "tone": "light",
    "width": "contained",
@@ -304,10 +306,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_dkadly0n",
+     "id": "row_e9ph0aze",
      "columns": [
       {
-       "id": "col_dj257dh2",
+       "id": "col_e8tbhckm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -325,7 +327,7 @@
        },
        "blocks": [
         {
-         "id": "b_dirt3hw4",
+         "id": "b_e7v2vyj8",
          "type": "quote",
          "props": {
           "text": "We married on Šipan with thirty-one people and a ship. The crew rigged the awning as a chuppah and the chef cried more than my mother.",
@@ -343,9 +345,9 @@
    ]
   },
   {
-   "id": "sec_dqarsli8",
+   "id": "sec_ef315tzi",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -364,10 +366,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_dpbd77x4",
+     "id": "row_ee84g83v",
      "columns": [
       {
-       "id": "col_dobvbmal",
+       "id": "col_ed7sf3in",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -385,29 +387,30 @@
        },
        "blocks": [
         {
-         "id": "b_dmw4jkpy",
+         "id": "b_eb8ge8km",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "One ship, your people, and a coast to yourselves.",
           "align": "centre"
          }
         },
         {
-         "id": "b_dnvutxgb",
+         "id": "b_ec2grn97",
          "type": "button-group",
          "props": {
           "align": "centre",
           "buttons": [
            {
-            "label": "Check dates and cabins",
-            "href": "/#book",
+            "label": "Start a charter conversation",
+            "href": "mailto:charter@coastwise.example",
             "variant": "primary",
             "newTab": false
            },
            {
-            "label": "Talk to us",
-            "href": "/contact",
+            "label": "Meet the ships",
+            "href": "/about",
             "variant": "secondary",
             "newTab": false
            }

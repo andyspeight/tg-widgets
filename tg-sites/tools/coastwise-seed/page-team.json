@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_fsxeqltw",
+ "id": "pg_gp52wcsm",
  "title": "Our people",
  "slug": "team",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_f5zwzfu7",
+   "id": "sec_g21pkkch",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_f4cezup1",
+     "id": "row_g1ds9xlp",
      "columns": [
       {
-       "id": "col_f3lvxx9w",
+       "id": "col_g0143y7z",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_f0gmsdvi",
+         "id": "b_fxkj7onc",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_f19pqzeu",
+         "id": "b_fywaav31",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "The people the ships run on",
           "align": "left"
          }
         },
         {
-         "id": "b_f2a7zxt6",
+         "id": "b_fz2tm6m2",
          "type": "text",
          "props": {
           "html": "<p>Twelve crew to a ship, and a shed on Oban harbour. These are the ones you will meet first.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_f9lx4j7e",
+   "id": "sec_g66t7991",
    "name": "The crew",
    "tone": "light",
    "width": "contained",
@@ -113,10 +114,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_f8uyijkn",
+     "id": "row_g5csaldu",
      "columns": [
       {
-       "id": "col_f7thb912",
+       "id": "col_g493r67j",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -134,7 +135,7 @@
        },
        "blocks": [
         {
-         "id": "b_f6aokhiq",
+         "id": "b_g3u3w2p4",
          "type": "cards",
          "props": {
           "source": "typed",
@@ -194,7 +195,7 @@
             "alt": "Tom Ellery with binoculars",
             "label": "Naturalist",
             "title": "Tom Ellery",
-            "body": "Sails every northern departure. Can tell a minke from a swell at a mile, and will wake you for it if you asked.",
+            "body": "Leads the naturalists, and keeps the Faroes weeks for himself. Can tell a minke from a swell at a mile, and will wake you for it if you asked.",
             "linkLabel": "",
             "linkHref": ""
            },
@@ -221,7 +222,7 @@
    ]
   },
   {
-   "id": "sec_fhprktqh",
+   "id": "sec_ge9lcc1d",
    "name": "How we work",
    "tone": "subtle",
    "width": "contained",
@@ -242,10 +243,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_fgz5i0zi",
+     "id": "row_gd25vs9f",
      "columns": [
       {
-       "id": "col_fbwf7n68",
+       "id": "col_g8uen7vi",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -263,7 +264,7 @@
        },
        "blocks": [
         {
-         "id": "b_facz46m9",
+         "id": "b_g7wxyc8r",
          "type": "icon-item",
          "props": {
           "icon": "compass",
@@ -275,7 +276,7 @@
        ]
       },
       {
-       "id": "col_fd68p2gr",
+       "id": "col_ga1z44oh",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -293,7 +294,7 @@
        },
        "blocks": [
         {
-         "id": "b_fctac51d",
+         "id": "b_g9gb3pfp",
          "type": "icon-item",
          "props": {
           "icon": "heart",
@@ -305,7 +306,7 @@
        ]
       },
       {
-       "id": "col_ff3fjx04",
+       "id": "col_gchvitvg",
        "width": 34,
        "align": "top",
        "flow": "stacked",
@@ -323,7 +324,7 @@
        },
        "blocks": [
         {
-         "id": "b_fe7pz12v",
+         "id": "b_gbelg6a8",
          "type": "icon-item",
          "props": {
           "icon": "phone",
@@ -342,7 +343,7 @@
    ]
   },
   {
-   "id": "sec_fmu2ms1k",
+   "id": "sec_gjvvpimk",
    "name": "Asked on deck",
    "tone": "light",
    "width": "contained",
@@ -364,10 +365,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_flm0fwtp",
+     "id": "row_gi72qysv",
      "columns": [
       {
-       "id": "col_fkxes261",
+       "id": "col_gh4qkryu",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -385,16 +386,17 @@
        },
        "blocks": [
         {
-         "id": "b_fis7nf3y",
+         "id": "b_gf7rg1dc",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Questions the crew actually get",
           "align": "left"
          }
         },
         {
-         "id": "b_fj0ehzai",
+         "id": "b_gg6rlg4f",
          "type": "accordion",
          "props": {
           "style": "separated",
@@ -427,9 +429,9 @@
    ]
   },
   {
-   "id": "sec_fr71ojk2",
+   "id": "sec_go0wq936",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -448,10 +450,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_fq3y2gq9",
+     "id": "row_gn497akb",
      "columns": [
       {
-       "id": "col_fpl3zzw3",
+       "id": "col_gm51bbao",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -469,16 +471,17 @@
        },
        "blocks": [
         {
-         "id": "b_fnogxzhc",
+         "id": "b_gkbmj9vx",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Come and meet the rest aboard.",
           "align": "centre"
          }
         },
         {
-         "id": "b_fouw1ou3",
+         "id": "b_gl51sau5",
          "type": "button-group",
          "props": {
           "align": "centre",

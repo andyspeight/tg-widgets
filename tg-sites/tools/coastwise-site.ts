@@ -115,7 +115,7 @@ export function header(): { sections: Section[] } {
           row(
             [
               col(30, [
-                block('heading', { level: 'h4', html: 'COASTWISE', align: 'left' }),
+                block('heading', { level: 'h2', style: 'h4', html: 'COASTWISE', align: 'left' }),
               ], { align: 'centre' }),
               col(70, [
                 block('nav', {
@@ -154,7 +154,7 @@ export function footer(): { sections: Section[] } {
           row(
             [
               col(40, [
-                block('heading', { level: 'h4', html: 'COASTWISE', align: 'left' }),
+                block('heading', { level: 'h2', style: 'h4', html: 'COASTWISE', align: 'left' }),
                 block('text', {
                   html:
                     '<p>Small ship voyages on the Scottish, Norwegian, Faroese and Dalmatian coasts, and one warm one. Sailing since 2011.</p>',
@@ -169,7 +169,7 @@ export function footer(): { sections: Section[] } {
                 }),
               ]),
               col(30, [
-                block('heading', { level: 'h5', html: 'Voyages', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h5', html: 'Voyages', align: 'left' }),
                 block('nav', {
                   layout: 'column',
                   align: 'left',
@@ -185,7 +185,7 @@ export function footer(): { sections: Section[] } {
                 }),
               ]),
               col(30, [
-                block('heading', { level: 'h5', html: 'Practical', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h5', html: 'Practical', align: 'left' }),
                 block('nav', {
                   layout: 'column',
                   align: 'left',
@@ -240,7 +240,7 @@ function bookingSlot(): Section {
     rows: [
       row([
         col(45, [
-          block('heading', { level: 'h2', html: 'Check dates and cabins', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Check dates and cabins', align: 'left' }),
           block('text', {
             html: '<p>Pick a coast, a week and a cabin. The 2027 season is open.</p>',
           }),
@@ -274,7 +274,7 @@ function banner(title: string, line: string, image: string, alt: string): Sectio
     kenBurns: true,
     rows: stack([
       block('breadcrumbs', { separator: 'slash', showHome: true, size: 's', align: 'left' }),
-      block('heading', { level: 'h1', html: title, align: 'left' }),
+      block('heading', { level: 'h2', style: 'h1', html: title, align: 'left' }),
       block('text', { html: `<p>${line}</p>` }),
     ]),
   });
@@ -301,7 +301,8 @@ export function home(): Page {
       revealStyle: 'rise',
       rows: stack([
         block('heading', {
-          level: 'h1',
+          level: 'h2',
+                style: 'h1',
           html: 'Thirty-eight guests. No queue for anything.',
           align: 'left',
         }),
@@ -312,7 +313,7 @@ export function home(): Page {
         block('button-group', {
           align: 'left',
           buttons: [
-            { label: 'Three coasts, three ships', href: '/destinations', variant: 'primary', newTab: false },
+            { label: 'Five coasts, three ships', href: '/destinations', variant: 'primary', newTab: false },
             { label: 'Check dates', href: '#book', variant: 'secondary', newTab: false },
           ],
         }),
@@ -332,6 +333,7 @@ export function home(): Page {
           col(100, [
             block('heading', {
               level: 'h2',
+              style: 'h2',
               html: 'A coast is a sequence of small places. We go at the speed of the small places.',
               align: 'left',
             }),
@@ -376,7 +378,7 @@ export function home(): Page {
       reveal: true,
       revealStagger: true,
       rows: stack([
-        block('heading', { level: 'h2', html: 'What thirty-eight guests changes', align: 'left' }),
+        block('heading', { level: 'h2', style: 'h2', html: 'What thirty-eight guests changes', align: 'left' }),
         block('cards', {
           source: 'typed',
           columns: '3',
@@ -393,7 +395,7 @@ export function home(): Page {
             {
               src: '', icon: 'map', alt: '', label: '',
               title: 'The village, not the terminal',
-              body: 'Under four metres of draught means the stone quay in the middle of town, kippers smoking fifty yards from the gangway.',
+              body: 'Under four metres of draught means the stone quay in the middle of town, not a tender queue in the bay.',
               linkLabel: '', linkHref: '',
             },
             {
@@ -418,9 +420,9 @@ export function home(): Page {
       name: 'A week, day by day',
       paddingY: 'xl',
       rows: stack([
-        block('heading', { level: 'h2', html: 'Seven nights, Oban to Stornoway', align: 'left' }),
+        block('heading', { level: 'h2', style: 'h2', html: 'Seven nights, Oban to Stornoway', align: 'left' }),
         block('text', {
-          html: '<p>One week of the Western Isles voyage, day by day. Every voyage page has its own.</p>',
+          html: '<p>One week of the Western Isles voyage, day by day. Every voyage page shows its own week.</p>',
         }),
         block('slider', {
           slideWidth: 'medium',
@@ -436,7 +438,7 @@ export function home(): Page {
           items: [
             { src: IMG.harbour, alt: 'Oban harbour from the water', label: 'Day 01 · Oban', title: 'Board at four, sail at six', body: 'Kippers smoking on the quay as we clear the Sound of Kerrera.', linkLabel: '', linkHref: '' },
             { src: IMG.deck, alt: 'Teak deck and brass cleat', label: 'Day 02 · Tobermory', title: 'Alongside by nine', body: 'The distillery does a tasting for us before it opens to the road.', linkLabel: '', linkHref: '' },
-            { src: IMG.hebrides, alt: 'White strand on Coll', label: 'Day 03 · At sea', title: 'Coll and the Cairns', body: 'Anchor off the white strand. Tenders ashore all afternoon; nobody else lands that day.', linkLabel: '', linkHref: '' },
+            { src: IMG.hebrides, alt: 'White strand on Coll', label: 'Day 03 · Coll', title: 'Coll and the Cairns', body: 'Anchor off the white strand. Tenders ashore all afternoon; nobody else lands that day.', linkLabel: '', linkHref: '' },
             { src: IMG.aerial, alt: 'The ship threading between islands', label: 'Day 04 · Iona and Staffa', title: 'Fingal’s Cave at slack water', body: 'When you can hear the columns rather than the swell.', linkLabel: '', linkHref: '' },
             { src: IMG.openSea, alt: 'Open sea and low sun', label: 'Day 05 · Canna', title: 'Eleven residents, one post box', body: 'The best anchorage in the Small Isles. Dinner on deck if it holds.', linkLabel: '', linkHref: '' },
             { src: IMG.fjordDawn, alt: 'Still water at first light', label: 'Day 06 · Harris', title: 'Ashore at Rodel', body: 'A weaver in Drinishader works the loom while we stand in her shed.', linkLabel: '', linkHref: '' },
@@ -456,10 +458,10 @@ export function home(): Page {
         row(
           [
             col(45, [
-              block('heading', { level: 'h2', html: 'Two decks, one table, and a door onto the water.', align: 'left' }),
+              block('heading', { level: 'h2', style: 'h2', html: 'Two decks, one table, and a door onto the water.', align: 'left' }),
               block('text', {
                 html:
-                  '<p>Cabins are plain and warm: oak, wool, a window that opens. Nobody dresses for dinner, and there is no fixed seating, so by Wednesday you have eaten with everyone aboard whether you meant to or not.</p>',
+                  '<p>Cabins are plain and warm: oak, wool, a window that opens. Nobody dresses for dinner, and there is no fixed seating. The saloon does the introductions.</p>',
               }),
               block('tags', {
                 style: 'bullets',
@@ -491,22 +493,24 @@ export function home(): Page {
       ],
     }),
 
-    // Three ships, three coasts: the stacked deck.
+    // Three ships, five coasts: the stacked deck. Freya and Nyren each carry
+    // their second coast in the card, so all five voyages are priced on the
+    // home page without opening a menu.
     sec({
       name: 'The voyages',
       paddingY: 'xl',
       rows: stack([
-        block('heading', { level: 'h2', html: 'Three ships. Five coasts.', align: 'left' }),
+        block('heading', { level: 'h2', style: 'h2', html: 'Three ships. Five coasts.', align: 'left' }),
         block('stacked-cards', {
           side: 'right',
-          height: 'medium',
+          height: 'tall',
           radius: 'md',
           cardColour: '#f2efe9',
           items: [
             {
               src: IMG.hebrides, alt: 'Hebridean shoreline of black rock and clear water',
               title: 'Western Isles · MV Freya, 38 guests',
-              body: 'Oban to Stornoway through the Small Isles, with landings on Coll, Canna and Staffa. The one to book if you want weather with your scenery. Seven nights, April to September, from £2,340.',
+              body: 'Oban to Stornoway through the Small Isles, with landings on Coll, Canna and Staffa. Seven nights, April to September, from £2,340. In early summer Freya alternates these weeks with the Faroe and Shetland run, eight nights from £2,890.',
               linkLabel: 'See the voyage', linkHref: '/destinations/western-isles',
             },
             {
@@ -518,7 +522,7 @@ export function home(): Page {
             {
               src: IMG.dalmatia, alt: 'A limestone harbour on a Dalmatian island',
               title: 'Dalmatian Backwater · MV Nyren, 44 guests',
-              body: 'Split to Dubrovnik by way of Vis, Lastovo and Šipan. Warm water, cold wine, and six nights of swimming off the stern before breakfast. June to October, from £1,895.',
+              body: 'Split to Dubrovnik by way of Vis, Lastovo and Šipan. Six nights of warm water and cold wine, June to September, from £1,895. At the season\u2019s edges Nyren slips east to the Lycian Shore, seven nights from £1,760.',
               linkLabel: 'See the voyage', linkHref: '/destinations/dalmatian-backwater',
             },
           ],
@@ -561,7 +565,7 @@ export function home(): Page {
       overlay: 50,
       kenBurns: true,
       rows: stack([
-        block('heading', { level: 'h2', html: 'Pick a coast. We will do the rest.', align: 'centre' }),
+        block('heading', { level: 'h2', style: 'h2', html: 'Pick a coast. We will do the rest.', align: 'centre' }),
         block('button-group', {
           align: 'centre',
           buttons: [
@@ -579,7 +583,7 @@ export function home(): Page {
     {
       title: 'Coastwise — Small Ship Voyages',
       description:
-        'Seven-night coastal voyages for thirty-eight guests. The Western Isles, the Norwegian narrows and the Dalmatian backwater, aboard ships small enough to tie up in the village.',
+        'Small-ship voyages for thirty-eight guests: the Western Isles, the Norwegian narrows and the Dalmatian backwater, by ships that tie up in the village.',
       noindex: false,
     },
     sections,
@@ -593,10 +597,10 @@ export function home(): Page {
 function closing(line: string): Section {
   return sec({
     name: 'Closing',
-    tone: 'dark',
+    tone: 'subtle',
     paddingY: 'xl',
     rows: stack([
-      block('heading', { level: 'h2', html: line, align: 'centre' }),
+      block('heading', { level: 'h2', style: 'h2', html: line, align: 'centre' }),
       block('button-group', {
         align: 'centre',
         buttons: [
@@ -655,23 +659,6 @@ export function destinationsIndex(): Page {
           }),
         ]),
       }),
-      sec({
-        name: 'The fleet in numbers',
-        tone: 'subtle',
-        paddingY: 'l',
-        reveal: true,
-        rows: stack([
-          block('stats', {
-            columns: '4', size: 'm', align: 'centre', divided: true,
-            items: [
-              { value: '5', suffix: '', label: 'Coasts worked', detail: '' },
-              { value: '3', suffix: '', label: 'Ships, none big', detail: '' },
-              { value: '44', suffix: '', label: 'Guests at the very most', detail: '' },
-              { value: '15', suffix: '', label: 'Seasons without a missed sailing', detail: '' },
-            ],
-          }),
-        ]),
-      }),
       closing('The right coast depends on the weather you want.'),
     ],
   );
@@ -723,19 +710,23 @@ export function westernIsles(): Page {
               }),
             ]),
             col(40, [
-              block('rating', { rating: 4.9, showValue: true, count: 'from 212 guest reviews', size: 'm', colour: '', align: 'left' }),
+              block('rating', { rating: 4.9, showValue: true, count: 'from 212 post-voyage questionnaires', size: 'm', colour: '', align: 'left' }),
               block('tags', {
-                style: 'pills', size: 'm', colour: '', align: 'left',
+                style: 'pills', size: 'm', colour: '#1b333d', align: 'left',
                 items: [
                   { label: 'Landings daily', href: '' },
                   { label: 'Full board', href: '' },
                   { label: 'Sea swimming', href: '' },
-                  { label: 'Single cabins', href: '' },
+                  { label: 'Solo friendly', href: '' },
                 ],
               }),
             ]),
           ], 'xl'),
           row([col(100, [voyageFacts('7', 'Apr–Sep', 'MV Freya', '£2,340')])]),
+          row([col(100, [block('text', {
+            html:
+              '<p>The practical bit: board at Oban from four, sail at six. Trains from Glasgow arrive across the road and the long-stay car park takes a ticket for the week. Ashore is by gangway where the quay allows and by tender where it does not, announced honestly; Freya is a ship of stairs. Travel insurance is a condition of booking.</p>',
+          })])]),
         ],
       }),
       sec({
@@ -743,7 +734,7 @@ export function westernIsles(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'Seven days, day by day', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Seven days, day by day', align: 'left' }),
           block('slider', {
             slideWidth: 'medium', tilt: 'none', gap: 'm', style: 'plain', ratio: '4/5', radius: 'md',
             rows: '1', scrollbar: 'bar', align: 'left', wholeCardLinks: false,
@@ -763,7 +754,7 @@ export function westernIsles(): Page {
         name: 'The isles',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'The isles, one by one', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The isles, one by one', align: 'left' }),
           block('text', { html: '<p>Open one. The photograph is the argument.</p>' }),
           block('expanding-cards', {
             height: 'medium', radius: 'md', scrim: '#1b333d', scrimStrength: 55,
@@ -795,7 +786,7 @@ export function westernIsles(): Page {
         rows: [
           row([
             col(50, [
-              block('heading', { level: 'h3', html: 'In the fare', align: 'left' }),
+              block('heading', { level: 'h3', style: 'h3', html: 'In the fare', align: 'left' }),
               block('list', {
                 style: 'tick',
                 items: [
@@ -808,7 +799,7 @@ export function westernIsles(): Page {
               }),
             ]),
             col(50, [
-              block('heading', { level: 'h3', html: 'Paid locally', align: 'left' }),
+              block('heading', { level: 'h3', style: 'h3', html: 'Paid locally', align: 'left' }),
               block('list', {
                 style: 'bullet',
                 items: [
@@ -859,9 +850,9 @@ export function norwegianNarrows(): Page {
               }),
             ]),
             col(40, [
-              block('rating', { rating: 4.8, showValue: true, count: 'from 147 guest reviews', size: 'm', colour: '', align: 'left' }),
+              block('rating', { rating: 4.8, showValue: true, count: 'from 147 post-voyage questionnaires', size: 'm', colour: '', align: 'left' }),
               block('tags', {
-                style: 'pills', size: 'm', colour: '', align: 'left',
+                style: 'pills', size: 'm', colour: '#1b333d', align: 'left',
                 items: [
                   { label: 'Nights at anchor', href: '' },
                   { label: 'Midnight light', href: '' },
@@ -872,6 +863,10 @@ export function norwegianNarrows(): Page {
             ]),
           ], 'xl'),
           row([col(100, [voyageFacts('9', 'May–Aug', 'MV Skua', '£3,180')])]),
+          row([col(100, [block('text', {
+            html:
+              '<p>The practical bit: join at Bergen from two, sail at five. The airport bus stops a short walk from the berth, and we book the flights where wanted, under the ATOL. Skua is a ship of stairs, and ashore is mostly by gangway in the arms. Travel insurance is a condition of booking.</p>',
+          })])]),
         ],
       }),
       sec({
@@ -879,7 +874,7 @@ export function norwegianNarrows(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'Three arms the timetables skip', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Three arms the timetables skip', align: 'left' }),
           block('half-overlay', {
             tint: '#1b333d', tintOpacity: 72, height: 'medium', transition: 'fade', interval: 7, arrows: true, dots: true,
             items: [
@@ -891,13 +886,37 @@ export function norwegianNarrows(): Page {
         ]),
       }),
       sec({
+        name: 'Day by day',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', style: 'h2', html: 'Nine nights, the shape of them', align: 'left' }),
+          block('text', {
+            html: '<p>The order bends with the weather, which is a feature. What does not change: four nights at anchor, five alongside, and the bridge open the whole way.</p>',
+          }),
+          block('slider', {
+            slideWidth: 'medium', tilt: 'none', gap: 'm', style: 'plain', ratio: '4/5', radius: 'md',
+            rows: '1', scrollbar: 'bar', align: 'left', wholeCardLinks: false,
+            items: [
+              { src: IMG.harbour, alt: 'Leaving the city astern', label: 'Day 01 · Bergen', title: 'Join at two, sail at five', body: 'Out past the skerries with the fish market still on the starboard quarter.', linkLabel: '', linkHref: '' },
+              { src: IMG.openSea, alt: 'Open water between headlands', label: 'Day 02 · Nordfjord', title: 'To the skerries and back on one tide', body: 'The glacier above the whole way out and the whole way home.', linkLabel: '', linkHref: '' },
+              { src: IMG.fjordDawn, alt: 'Still water under high walls', label: 'Days 03–04 · At anchor', title: 'The cable runs out', body: 'Two nights somewhere with no road to it. The waterfall does the talking.', linkLabel: '', linkHref: '' },
+              { src: IMG.aerial, alt: 'The ship small under the walls', label: 'Day 05 · Geiranger', title: 'The famous one, taken sideways', body: 'In before the big ships wake, out before they berth. The chanterelle story started here.', linkLabel: '', linkHref: '' },
+              { src: IMG.saloon, alt: 'Dinner laid as the light holds', label: 'Day 06 · Hjørundfjord', title: 'The quiet one', body: 'Farms on ledges, a church by the water, dinner at anchor under both.', linkLabel: '', linkHref: '' },
+              { src: IMG.deck, alt: 'Teak and brass in low sun', label: 'Days 07–08 · The inner leads', title: 'The sheltered thread', body: 'The old steamer route between the islands, bridge open all day.', linkLabel: '', linkHref: '' },
+              { src: IMG.charter, alt: 'Lights on in the evening', label: 'Day 09 · Ålesund', title: 'In by nine', body: 'Art nouveau over breakfast. Fly home, or stay on. We book either.', linkLabel: '', linkHref: '' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
         name: 'The chart and the water',
         paddingY: 'xl',
         reveal: true,
         rows: [
           row([
             col(40, [
-              block('heading', { level: 'h2', html: 'The chart and the water', align: 'left' }),
+              block('heading', { level: 'h2', style: 'h2', html: 'The chart and the water', align: 'left' }),
               block('text', {
                 html:
                   '<p>Every arm we enter is planned on paper first, the old way, because the old way makes you look at every sounding. Drag the handle and see what a morning of pilotage looks like from the wheelhouse instead.</p>' +
@@ -925,9 +944,9 @@ export function norwegianNarrows(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'An evening at anchor, hour by hour', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'An evening at anchor, hour by hour', align: 'left' }),
           block('steps', {
-            layout: 'down', marker: 'number', connector: true,
+            layout: 'down', marker: 'dot', connector: true,
             items: [
               { title: 'Six', body: 'The cable runs out somewhere with no road to it. The engine stops, and the silence arrives like a change in pressure.' },
               { title: 'Seven', body: 'The water goes to glass. Somebody swims. Somebody else says they will tomorrow, and means it.' },
@@ -983,9 +1002,9 @@ export function dalmatianBackwater(): Page {
               }),
             ]),
             col(40, [
-              block('rating', { rating: 4.7, showValue: true, count: 'from 189 guest reviews', size: 'm', colour: '', align: 'left' }),
+              block('rating', { rating: 4.7, showValue: true, count: 'from 189 post-voyage questionnaires', size: 'm', colour: '', align: 'left' }),
               block('tags', {
-                style: 'pills', size: 'm', colour: '', align: 'left',
+                style: 'pills', size: 'm', colour: '#1b333d', align: 'left',
                 items: [
                   { label: 'Swim stops daily', href: '' },
                   { label: 'Konoba dinners', href: '' },
@@ -995,7 +1014,11 @@ export function dalmatianBackwater(): Page {
               }),
             ]),
           ], 'xl'),
-          row([col(100, [voyageFacts('6', 'Jun–Oct', 'MV Nyren', '£1,895')])]),
+          row([col(100, [voyageFacts('6', 'Jun–Sep', 'MV Nyren', '£1,895')])]),
+          row([col(100, [block('text', {
+            html:
+              '<p>The practical bit: join at Split from three, sail at six. The airport is twenty minutes round the bay and we book the flights where wanted. Nyren carries a lift and two step-free cabins, and most harbours here take the gangway. Travel insurance is a condition of booking.</p>',
+          })])]),
         ],
       }),
       sec({
@@ -1003,7 +1026,7 @@ export function dalmatianBackwater(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'Three islands, front and back', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Three islands, front and back', align: 'left' }),
           block('text', { html: '<p>Turn a card over for the part the brochure leaves out.</p>' }),
           block('flip-cards', {
             columns: '3', gap: 'm', radius: 'md', height: 'medium', frontTone: '#1b333d', backTone: '#c8452c',
@@ -1016,11 +1039,31 @@ export function dalmatianBackwater(): Page {
         ]),
       }),
       sec({
+        name: 'Day by day',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', style: 'h2', html: 'Six nights, quay by quay', align: 'left' }),
+          block('slider', {
+            slideWidth: 'medium', tilt: 'none', gap: 'm', style: 'plain', ratio: '4/5', radius: 'md',
+            rows: '1', scrollbar: 'bar', align: 'left', wholeCardLinks: false,
+            items: [
+              { src: IMG.food, alt: 'The market on the Riva', label: 'Day 01 · Split', title: 'Join at three, market first', body: 'The Riva does the provisioning. We do the leaving.', linkLabel: '', linkHref: '' },
+              { src: IMG.dalmatia, alt: 'Vis harbour in the evening', label: 'Day 02 · Vis', title: 'The closed island', body: 'Grilled fish the navy way, and the fort walk before dinner.', linkLabel: '', linkHref: '' },
+              { src: IMG.charter, alt: 'The ship dark under the stars', label: 'Day 03 · Lastovo', title: 'The dark-sky night', body: 'Deck lights off after dinner. The Milky Way does the rest.', linkLabel: '', linkHref: '' },
+              { src: IMG.openSea, alt: 'Flat water and heat haze', label: 'Day 04 · At sea, slowly', title: 'Swim stops on demand', body: 'The ladder stays down. Lunch is whatever Vis sold us.', linkLabel: '', linkHref: '' },
+              { src: IMG.saloon, alt: 'A long dinner beginning', label: 'Day 05 · Šipan', title: 'The nobility’s island', body: 'Olive presses that still work, wine that never left.', linkLabel: '', linkHref: '' },
+              { src: IMG.harbour, alt: 'Walls above the water', label: 'Day 06 · Dubrovnik', title: 'In by eight', body: 'The walls before the crowds. Then home, or stay on. We book either.', linkLabel: '', linkHref: '' },
+            ],
+          }),
+        ]),
+      }),
+      sec({
         name: 'The week in pictures',
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'The week, in pictures', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The week, in pictures', align: 'left' }),
           block('gallery', {
             columns: '3', gap: 'm', radius: 'md', layout: 'scroll', lightbox: true,
             images: [
@@ -1040,18 +1083,17 @@ export function dalmatianBackwater(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'How warm, honestly', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'How warm, honestly', align: 'left' }),
           block('table', {
             headerRow: true, firstColumnHeader: true, style: 'lined',
-            caption: 'Average sea temperature at the swimming ladder, taken by the crew, not the tourist board.',
+            caption: 'Taken at the swimming ladder by the crew.',
             textColour: '',
             data:
               'Month\tSea\tThe verdict\n' +
               'June\t22°C\tIn without ceremony\n' +
               'July\t25°C\tIn before the ladder is fully down\n' +
               'August\t26°C\tSome guests simply stay in\n' +
-              'September\t24°C\tThe connoisseur’s month\n' +
-              'October\t21°C\tBrisk on entry, smug on exit',
+              'September\t24°C\tThe connoisseur’s month, and the last of the season',
           }),
         ]),
       }),
@@ -1066,7 +1108,7 @@ export function dalmatianBackwater(): Page {
           }),
         ]),
       }),
-      closing('June for the swimming. October for the harvest.'),
+      closing('June for the swimming. September for the harvest.'),
     ],
   );
 }
@@ -1096,14 +1138,15 @@ export function faroeShetland(): Page {
             col(60, [
               block('text', {
                 html:
-                  '<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and eleven human residents. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p>' +
-                  '<p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p>',
+                  '<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and ten households. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p>' +
+                  '<p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p>' +
+                  '<p>In high summer Freya alternates these weeks with her Hebridean ones, which is why the northern season is short and books first.</p>',
               }),
             ]),
             col(40, [
-              block('rating', { rating: 4.9, showValue: true, count: 'from 96 guest reviews', size: 'm', colour: '', align: 'left' }),
+              block('rating', { rating: 4.9, showValue: true, count: 'from 96 post-voyage questionnaires', size: 'm', colour: '', align: 'left' }),
               block('tags', {
-                style: 'pills', size: 'm', colour: '', align: 'left',
+                style: 'pills', size: 'm', colour: '#1b333d', align: 'left',
                 items: [
                   { label: 'Bird cliffs', href: '' },
                   { label: 'Whale watch', href: '' },
@@ -1114,14 +1157,39 @@ export function faroeShetland(): Page {
             ]),
           ], 'xl'),
           row([col(100, [voyageFacts('8', 'May–Jul', 'MV Freya', '£2,890')])]),
+          row([col(100, [block('text', {
+            html:
+              '<p>The practical bit: join at Lerwick by noon and fly home from Tórshavn; we book both legs where wanted, under the ATOL. Landings are by tender and some are wet, announced honestly at the morning brief. Freya is a ship of stairs, and this is her sternest coast. Travel insurance is a condition of booking.</p>',
+          })])]),
         ],
+      }),
+      sec({
+        name: 'The shape of the week',
+        paddingY: 'xl',
+        reveal: true,
+        rows: stack([
+          block('heading', { level: 'h2', style: 'h2', html: 'Eight nights, held loosely', align: 'left' }),
+          block('text', {
+            html: '<p>This voyage refuses a fixed itinerary on principle, so here is its shape instead. Treat the order as the weather&rsquo;s to decide.</p>',
+          }),
+          block('steps', {
+            layout: 'down', marker: 'number', connector: true,
+            items: [
+              { title: 'Lerwick', body: 'Board by noon, and the bird cliffs of Noss the same afternoon. The season starts loudly.' },
+              { title: 'The crossing', body: 'One open sea day, picked by forecast, not calendar. The galley answers with a famous stew.' },
+              { title: 'The Faroes, four days', body: 'Tórshavn, the sounds and the sea lochs, with two spare days folded in so the weather has room to be generous.' },
+              { title: 'Mykines', body: 'When the swell settles, which is four voyages in five. The best landing of the season.' },
+              { title: 'Enniberg, then home', body: 'Dead slow under 750 metres of cliff, then Tórshavn, and the flight home booked by us.' },
+            ],
+          }),
+        ]),
       }),
       sec({
         name: 'Practical',
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'The questions everyone asks', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The questions everyone asks', align: 'left' }),
           block('accordion', {
             style: 'separated', single: true, openFirst: true, textColour: '',
             items: [
@@ -1134,28 +1202,12 @@ export function faroeShetland(): Page {
         ]),
       }),
       sec({
-        name: 'The numbers up north',
-        paddingY: 'xl',
-        reveal: true,
-        rows: stack([
-          block('stats', {
-            columns: '4', size: 'l', align: 'centre', divided: true,
-            items: [
-              { value: '750', suffix: 'm', label: 'Enniberg, sea to summit', detail: '' },
-              { value: '1', suffix: 'M', label: 'Seabirds on Mykines', detail: '' },
-              { value: '11', suffix: '', label: 'People on Mykines', detail: '' },
-              { value: '2', suffix: '', label: 'Spare days in the plan', detail: '' },
-            ],
-          }),
-        ]),
-      }),
-      sec({
         name: 'The north in pictures',
         tone: 'subtle',
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'What hard light does', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'What hard light does', align: 'left' }),
           block('gallery', {
             columns: '4', gap: 'm', radius: 'md', layout: 'grid', lightbox: true,
             images: [
@@ -1195,7 +1247,7 @@ export function lycianShore(): Page {
     [
       banner(
         'The Lycian Shore',
-        'Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our one warm-water winter escape.',
+        'Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our warm-water escape at either end of the season.',
         IMG.lycian,
         'A pine-backed anchorage on the Lycian coast',
       ),
@@ -1213,9 +1265,9 @@ export function lycianShore(): Page {
               }),
             ]),
             col(40, [
-              block('rating', { rating: 4.8, showValue: true, count: 'from 163 guest reviews', size: 'm', colour: '', align: 'left' }),
+              block('rating', { rating: 4.8, showValue: true, count: 'from 163 post-voyage questionnaires', size: 'm', colour: '', align: 'left' }),
               block('tags', {
-                style: 'pills', size: 'm', colour: '', align: 'left',
+                style: 'pills', size: 'm', colour: '#1b333d', align: 'left',
                 items: [
                   { label: 'Ruins by sea', href: '' },
                   { label: 'October warmth', href: '' },
@@ -1225,7 +1277,11 @@ export function lycianShore(): Page {
               }),
             ]),
           ], 'xl'),
-          row([col(100, [voyageFacts('7', 'Apr–May · Oct', 'MV Nyren', '£1,760')])]),
+          row([col(100, [voyageFacts('7', 'Apr, May, Oct', 'MV Nyren', '£1,760')])]),
+          row([col(100, [block('text', {
+            html:
+              '<p>The practical bit: join at Fethiye from three. Dalaman airport is forty minutes over the hill and we book the flights where wanted. Nyren carries a lift and two step-free cabins, and the swimming ladder is the busiest gangway aboard. Travel insurance is a condition of booking.</p>',
+          })])]),
         ],
       }),
       sec({
@@ -1233,7 +1289,7 @@ export function lycianShore(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'The ship, the route, the food', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The ship, the route, the food', align: 'left' }),
           block('tabs', {
             style: 'underline', align: 'left', textColour: '',
             items: [
@@ -1251,14 +1307,14 @@ export function lycianShore(): Page {
         rows: [
           row([
             col(55, [
-              block('heading', { level: 'h2', html: 'A day, hour by hour', align: 'left' }),
+              block('heading', { level: 'h2', style: 'h2', html: 'A day, hour by hour', align: 'left' }),
               block('steps', {
-                layout: 'down', marker: 'number', connector: true,
+                layout: 'down', marker: 'dot', connector: true,
                 items: [
                   { title: 'Eight', body: 'Sail with coffee on the rail. An hour of coast slides past before anyone is properly awake, which is the correct way to see it.' },
                   { title: 'Ten', body: 'Anchor in a bay with pine down to the water. The ladder goes down. The first swimmer sets the tone for the day.' },
                   { title: 'One', body: 'Mezze under the awning. The chef counts the plates back like a customs officer.' },
-                  { title: 'Five', body: 'The ruin, when the stone goes gold and the coach parties have gone. A drowned harbour wall slides under the hull on the way.' },
+                  { title: 'Five', body: 'The ruin, in the late light after the coach parties have gone. A drowned harbour wall slides under the hull on the way.' },
                   { title: 'Eight', body: 'Dinner on deck or ashore. The sea is still warm. Somebody swims again and pretends it was for science.' },
                 ],
               }),
@@ -1324,11 +1380,11 @@ export function holidaysIndex(): Page {
             align: 'left',
             wholeCardLinks: true,
             items: [
-              { src: IMG.aerial, icon: '', alt: 'The ship between islands', label: 'The classic', title: 'Island hopping', body: 'A new harbour most days, and the sea in between.', linkLabel: 'How it works', linkHref: '/holidays/island-hopping' },
-              { src: IMG.wildlife, icon: '', alt: 'Seabirds over the water', label: 'Eyes up', title: 'Wildlife at sea', body: 'Whales, sea eagles and a million seabirds, from deck height.', linkLabel: 'What you might see', linkHref: '/holidays/wildlife-at-sea' },
-              { src: IMG.food, icon: '', alt: 'Produce handed aboard at a quay', label: 'The galley', title: 'Food and foraging', body: 'Dinner is whatever came aboard that morning.', linkLabel: 'How dinner happens', linkHref: '/holidays/food-and-foraging' },
-              { src: IMG.ashore, icon: '', alt: 'Walkers on a shore path', label: 'Boots on', title: 'Walking ashore', body: 'Proper walks from the water line, and a ship to come home to.', linkLabel: 'The walks', linkHref: '/holidays/walking-ashore' },
-              { src: IMG.charter, icon: '', alt: 'The ship at anchor at dusk', label: 'The whole ship', title: 'Private charter', body: 'Twenty-six to forty-four of your own people, one ship, your plan.', linkLabel: 'Take the ship', linkHref: '/holidays/private-charter' },
+              { src: IMG.aerial, icon: '', alt: 'The ship between islands', label: '', title: 'Island hopping', body: 'A new harbour most days, and the sea in between.', linkLabel: 'How it works', linkHref: '/holidays/island-hopping' },
+              { src: IMG.wildlife, icon: '', alt: 'Seabirds over the water', label: '', title: 'Wildlife at sea', body: 'Whales, sea eagles and a million seabirds, from deck height.', linkLabel: 'What you might see', linkHref: '/holidays/wildlife-at-sea' },
+              { src: IMG.food, icon: '', alt: 'Produce handed aboard at a quay', label: '', title: 'Food and foraging', body: 'Dinner is whatever came aboard that morning.', linkLabel: 'How dinner happens', linkHref: '/holidays/food-and-foraging' },
+              { src: IMG.ashore, icon: '', alt: 'Walkers on a shore path', label: '', title: 'Walking ashore', body: 'Proper walks from the water line, and a ship to come home to.', linkLabel: 'The walks', linkHref: '/holidays/walking-ashore' },
+              { src: IMG.charter, icon: '', alt: 'The ship at anchor at dusk', label: '', title: 'Private charter', body: 'Twenty-six to forty-four of your own people, one ship, your plan.', linkLabel: 'Take the ship', linkHref: '/holidays/private-charter' },
             ],
           }),
         ]),
@@ -1376,10 +1432,10 @@ export function islandHopping(): Page {
             col(55, [
               block('text', {
                 html:
-                  '<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch.</p>',
+                  '<p>Island hopping by ferry is a logistics hobby. Island hopping by small ship is the same coastline with the logistics deleted: your hotel comes with you, dinner is aboard or ashore as the harbour deserves, and the crossing happens while you are at lunch. Every Coastwise sailing works this way. This page is simply what that means in practice.</p>',
               }),
               block('steps', {
-                layout: 'down', marker: 'number', connector: true,
+                layout: 'down', marker: 'dot', connector: true,
                 items: [
                   { title: 'Morning', body: 'Sail early or lie in. The galley does both sittings without being asked.' },
                   { title: 'Midday', body: 'Alongside or at anchor somewhere new. Ashore by gangway or tender.' },
@@ -1400,7 +1456,7 @@ export function islandHopping(): Page {
         paddingY: 'xl',
         hoverTint: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'Three coasts built for it', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Three coasts built for it', align: 'left' }),
           block('cards', {
             source: 'typed', columns: '3', gap: 'm', style: 'tinted', imagePosition: 'top', lead: 'image',
             ratio: '4/3', radius: 'md', align: 'left', wholeCardLinks: true,
@@ -1434,7 +1490,7 @@ export function islandHopping(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'Asked before booking', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Asked before booking', align: 'left' }),
           block('accordion', {
             style: 'separated', single: true, openFirst: false, textColour: '',
             items: [
@@ -1477,7 +1533,7 @@ export function wildlifeAtSea(): Page {
               block('text', {
                 html:
                   '<p>Wildlife boats give you ninety minutes and a wet coat. A small ship gives you the whole week: the minke that surfaces beside the hull at breakfast, the sea eagle that works the same headland every evening, the hour at Enniberg when the air is more bird than sky.</p>' +
-                  '<p>A naturalist sails on every northern departure. Not a lecturer with a projector: a person with binoculars who knows which ledge, which tide, which month.</p>',
+                  '<p>A naturalist sails on every northern departure. Not a lecturer with a projector: a person with binoculars who knows which ledge, which tide, which month. There is no separate wildlife week to wait for. The naturalist and the diverting master come with the ship.</p>',
               }),
             ]),
             col(40, [
@@ -1493,13 +1549,13 @@ export function wildlifeAtSea(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'What you might see, and when', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'What you might see, and when', align: 'left' }),
           block('accordion', {
             style: 'separated', single: false, openFirst: true, textColour: '',
             items: [
               { title: 'April and May', body: 'The cliffs fill. Puffins back on the ledges, gannets diving off Shetland, porpoise in every sound. The Hebrides at their busiest above the waterline.' },
               { title: 'June and July', body: 'Whale months. Minke reliably, humpback increasingly, orca if the herring run inshore. Mykines at full strength, all million of it.' },
-              { title: 'August and September', body: 'Sea eagles teaching their young along the Norwegian arms, dolphins riding the bow most passages, and the first big rafts of shearwaters heading south.' },
+              { title: 'August', body: 'Sea eagles teaching their young along the Norwegian arms, dolphins riding the bow most passages, and the first big rafts of shearwaters gathering to head south.' },
             ],
           }),
         ]),
@@ -1510,33 +1566,33 @@ export function wildlifeAtSea(): Page {
         reveal: true,
         revealStagger: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'The regulars', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The regulars', align: 'left' }),
           block('text', { html: '<p>Six you have a fair chance of meeting, and how the crew announce each one.</p>' }),
           block('grid', {
             across: '3', acrossTablet: '2', acrossPhone: '1', gap: 24, align: 'stretch',
             columns: [
               col(100, [
-                block('heading', { level: 'h4', html: 'Minke whale', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h4', html: 'Minke whale', align: 'left' }),
                 block('text', { html: '<p>The reliable one. Announced with a bearing and a kettle count: two minutes to the rail, tea survives.</p>' }),
               ]),
               col(100, [
-                block('heading', { level: 'h4', html: 'Orca', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h4', html: 'Orca', align: 'left' }),
                 block('text', { html: '<p>The stop-everything one. The engine comes out of gear and the announcement is one word, quietly.</p>' }),
               ]),
               col(100, [
-                block('heading', { level: 'h4', html: 'White-tailed eagle', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h4', html: 'White-tailed eagle', align: 'left' }),
                 block('text', { html: '<p>A door on wings. Works the same headlands every evening, which the naturalist knows by name.</p>' }),
               ]),
               col(100, [
-                block('heading', { level: 'h4', html: 'Puffin', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h4', html: 'Puffin', align: 'left' }),
                 block('text', { html: '<p>April to early August, then gone to sea for the year. The only bird guests applaud.</p>' }),
               ]),
               col(100, [
-                block('heading', { level: 'h4', html: 'Gannet', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h4', html: 'Gannet', align: 'left' }),
                 block('text', { html: '<p>Hits the water at sixty miles an hour off Shetland. The naturalist has opinions about their manners.</p>' }),
               ]),
               col(100, [
-                block('heading', { level: 'h4', html: 'Common dolphin', align: 'left' }),
+                block('heading', { level: 'h3', style: 'h4', html: 'Common dolphin', align: 'left' }),
                 block('text', { html: '<p>Rides the bow most warm-water passages. Nobody has ever gone below while they are there.</p>' }),
               ]),
             ],
@@ -1549,10 +1605,10 @@ export function wildlifeAtSea(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'From this season’s log', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'From this season’s log', align: 'left' }),
           block('table', {
             headerRow: true, firstColumnHeader: false, style: 'lined',
-            caption: 'Entries as the bridge wrote them. The log does not do adjectives.',
+            caption: 'As the bridge wrote them. The log does not do adjectives.',
             textColour: '',
             data:
               'Date\tPosition\tEntry\n' +
@@ -1560,7 +1616,7 @@ export function wildlifeAtSea(): Page {
               '02 Jul\tSound of Canna\tMinke surfaced alongside at breakfast. Porridge abandoned.\n' +
               '19 Jul\tHjørundfjord\tSea eagle took a fish at fifty metres. Guest wept. Understandable.\n' +
               '08 Aug\tOff Vis\tCommon dolphin on the bow, forty minutes, both watches.\n' +
-              '21 Aug\tEnniberg\tAir more bird than sky. Log keeper gave up counting.',
+              '12 Jul\tEnniberg\tAir more bird than sky. Log keeper gave up counting.',
           }),
         ]),
       }),
@@ -1603,6 +1659,9 @@ export function foodAndForaging(): Page {
         rows: [
           row([
             col(55, [
+              block('text', {
+                html: '<p>There are no gourmet departures and no ordinary ones. This is how every sailing eats.</p>',
+              }),
               block('steps', {
                 layout: 'down', marker: 'number', connector: true,
                 items: [
@@ -1643,10 +1702,10 @@ export function foodAndForaging(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'One week, as it actually fell', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'One week, as it actually fell', align: 'left' }),
           block('table', {
             headerRow: true, firstColumnHeader: true, style: 'lined',
-            caption: 'Western Isles, second week of June. Reconstructed from the galley board, which Marta photographs nightly.',
+            caption: 'From the galley board, second week of June.',
             textColour: '',
             data:
               'Day\tCame aboard\tBecame\n' +
@@ -1665,7 +1724,7 @@ export function foodAndForaging(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'The questions the galley gets', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The questions the galley gets', align: 'left' }),
           block('accordion', {
             style: 'separated', single: true, openFirst: false, textColour: '',
             items: [
@@ -1705,10 +1764,10 @@ export function walkingAshore(): Page {
         rows: stack([
           block('text', {
             html:
-              '<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way.</p>',
+              '<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way. The walks run on every sailing. Pick the coast, not a special week.</p>',
           }),
           block('table', {
-            headerRow: true, firstColumnHeader: true, style: 'lined', caption: 'A sample week of walks, Western Isles voyage.', textColour: '',
+            headerRow: true, firstColumnHeader: true, style: 'lined', caption: 'A sample week, Western Isles voyage.', textColour: '',
             data:
               'Walk\tGrade\tDistance\tThe reward\n' +
               'Tobermory lighthouse path\tEasy\t3 km\tThe town, the bay, and a dram at the end\n' +
@@ -1733,7 +1792,7 @@ export function walkingAshore(): Page {
         rows: [
           row([
             col(55, [
-              block('heading', { level: 'h2', html: 'How a landing works', align: 'left' }),
+              block('heading', { level: 'h2', style: 'h2', html: 'How a landing works', align: 'left' }),
               block('steps', {
                 layout: 'down', marker: 'number', connector: true,
                 items: [
@@ -1813,14 +1872,14 @@ export function privateCharter(): Page {
           block('tabs', {
             style: 'underline', align: 'left', textColour: '',
             items: [
-              { title: 'MV Freya · 38', body: 'The Scottish ship. Nineteen cabins, the snug library, and the only hull of the three strengthened for the Faroes run. From £41,000 for seven nights, whole ship, full board.' },
-              { title: 'MV Skua · 26', body: 'The small one, and the quiet one. Thirteen cabins, a saloon that becomes one long table, and the shallowest draught in the fleet. From £34,000 for seven nights.' },
-              { title: 'MV Nyren · 44', body: 'The warm-water ship. Twenty-two cabins, the stern platform and awning, and a galley built for long dinners. From £46,000 for seven nights.' },
+              { title: 'MV Freya · 38', body: 'The Scottish ship. Nineteen cabins, the snug library, and the only hull of the three strengthened for the Faroes run. From £84,000 for seven nights, whole ship, full board.' },
+              { title: 'MV Skua · 26', body: 'The small one, and the quiet one. Thirteen cabins, a saloon that becomes one long table, and the shallowest draught in the fleet. From £76,000 for seven nights.' },
+              { title: 'MV Nyren · 44', body: 'The warm-water ship. Twenty-two cabins, the stern platform and awning, and a galley built for long dinners. From £79,000 for seven nights.' },
             ],
           }),
           block('read-more', {
             html:
-              '<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis, or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>',
+              '<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>',
             lines: 3,
             moreLabel: 'The fine print',
             lessLabel: 'Enough',
@@ -1836,7 +1895,7 @@ export function privateCharter(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'From first call to first cast-off', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'From first call to first cast-off', align: 'left' }),
           block('steps', {
             layout: 'down', marker: 'number', connector: true,
             items: [
@@ -1859,7 +1918,21 @@ export function privateCharter(): Page {
           }),
         ]),
       }),
-      closing('One ship, your people, and a coast to yourselves.'),
+      sec({
+        name: 'Closing',
+        tone: 'subtle',
+        paddingY: 'xl',
+        rows: stack([
+          block('heading', { level: 'h2', style: 'h2', html: 'One ship, your people, and a coast to yourselves.', align: 'centre' }),
+          block('button-group', {
+            align: 'centre',
+            buttons: [
+              { label: 'Start a charter conversation', href: 'mailto:charter@coastwise.example', variant: 'primary', newTab: false },
+              { label: 'Meet the ships', href: '/about', variant: 'secondary', newTab: false },
+            ],
+          }),
+        ]),
+      }),
     ],
   );
 }
@@ -1891,7 +1964,7 @@ export function about(): Page {
             col(55, [
               block('text', {
                 html:
-                  '<p>The first Freya was a Norwegian fjord ferry with thirty years of service and a hull like a bank vault. We spent a winter refitting her in Leith: nineteen cabins where the car deck was, a saloon where the cafeteria was, and the bridge left exactly as we found it, because it worked.</p>' +
+                  '<p>Freya began as a Norwegian fjord ferry with thirty-three years of service and a hull like a bank vault. We spent a winter refitting her in Leith: nineteen cabins where the car deck was, a saloon where the cafeteria was, and the bridge left exactly as we found it, because it worked.</p>' +
                   '<p>The idea has not changed since. Buy sound working ships, refit them warm rather than grand, and keep them small enough that the plan can bend. Skua joined in 2014 for the narrow water. Nyren joined in 2019 for the warm.</p>' +
                   '<p>We are still run from a shed on Oban harbour, on purpose. The people who answer the phone can see the weather you are asking about.</p>',
               }),
@@ -1907,14 +1980,14 @@ export function about(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'Fifteen years, four decisions', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Fifteen years, four decisions', align: 'left' }),
           block('steps', {
-            layout: 'down', marker: 'number', connector: true,
+            layout: 'down', marker: 'dot', connector: true,
             items: [
-              { title: '2011 — Freya', body: 'The first ship, and the winter in Leith that set the pattern: warm, not grand.' },
-              { title: '2014 — Skua', body: 'Twenty-six berths for the water Freya could not reach. The Norwegian arms became a voyage.' },
-              { title: '2019 — Nyren', body: 'The warm-water ship. Dalmatia first, then the Lycian shore. The awning was her refit’s biggest single expense, and worth it.' },
-              { title: '2024 — The refusal', body: 'We were offered a fourth ship, larger, at a good price. We said no. Thirty-eight guests is not a stage we are at. It is the idea.' },
+              { title: '2011 · Freya', body: 'The first ship, and the winter in Leith that set the pattern: warm, not grand.' },
+              { title: '2014 · Skua', body: 'Twenty-six berths for the water Freya could not reach. The Norwegian arms became a voyage.' },
+              { title: '2019 · Nyren', body: 'The warm-water ship. Dalmatia first, then the Lycian shore. The awning was her refit’s biggest single expense, and worth it.' },
+              { title: '2024 · The refusal', body: 'We were offered a fourth ship, larger, at a good price. We said no. Thirty-eight guests is not a stage we are at. It is the idea.' },
             ],
           }),
         ]),
@@ -1940,18 +2013,48 @@ export function about(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'The fleet, side by side', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'The fleet, side by side', align: 'left' }),
           block('table', {
             headerRow: true, firstColumnHeader: true, style: 'lined',
-            caption: 'Draughts are why we get in where others anchor off.',
+            caption: 'Draughts are why we get in close.',
             textColour: '',
             data:
-              'Ship\tGuests\tCabins\tDraught\tBuilt\tRefit\tHer coast\n' +
-              'MV Freya\t38\t19\t3.8 m\t1978, Norway\t2011, Leith\tScotland and the Faroes\n' +
-              'MV Skua\t26\t13\t2.9 m\t1985, Norway\t2014, Leith\tThe Norwegian arms\n' +
-              'MV Nyren\t44\t22\t3.4 m\t1992, Denmark\t2019, Split\tDalmatia and Lycia',
+              'Ship\tGuests\tCabins\tDraught\tBuilt and refit\tHer coast\n' +
+              'MV Freya\t38\t19\t3.8 m\t1978 · Leith 2011\tScotland and the Faroes\n' +
+              'MV Skua\t26\t13\t2.9 m\t1985 · Leith 2014\tThe Norwegian arms\n' +
+              'MV Nyren\t44\t22\t3.4 m\t1992 · Split 2019\tDalmatia and Lycia',
           }),
         ]),
+      }),
+      sec({
+        name: 'The cabins',
+        paddingY: 'xl',
+        reveal: true,
+        rows: [
+          row([
+            col(55, [
+              block('heading', { level: 'h2', style: 'h2', html: 'The cabins, plainly', align: 'left' }),
+              block('text', {
+                html:
+                  '<p>Every cabin aboard is a twin or a double, which is what the arithmetic in the table above means: nobody sleeps in a bunk over a stranger. The grades are plain. A lower-deck twin is what the from fare buys, snug and nearest the engine&rsquo;s hum. An upper-deck double adds about a fifth of the fare and a bigger window. Nyren adds two step-free cabins beside her lift.</p>' +
+                  '<p>You book a grade, not a numbered door. Fiona assigns cabins a month out, solo travellers first, and sailing alone takes a double at a modest supplement, never a doubled fare.</p>',
+              }),
+            ]),
+            col(45, [
+              block('heading', { level: 'h3', style: 'h3', html: 'In every grade', align: 'left' }),
+              block('list', {
+                style: 'tick',
+                items: [
+                  { text: 'Oak, wool and a window that opens' },
+                  { text: 'Proper duvets and no ceremony' },
+                  { text: 'A shower that behaves in a swell' },
+                  { text: 'Blackout blinds for the northern light' },
+                  { text: 'A kettle on request, which half the ship requests' },
+                ],
+              }),
+            ]),
+          ], 'xl'),
+        ],
       }),
       sec({
         name: 'The skipper’s welcome',
@@ -1960,7 +2063,7 @@ export function about(): Page {
         rows: [
           row([
             col(55, [
-              block('heading', { level: 'h2', html: 'Thirty seconds of Ewan', align: 'left' }),
+              block('heading', { level: 'h2', style: 'h2', html: 'Thirty seconds of Ewan', align: 'left' }),
               block('text', {
                 html:
                   '<p>Every voyage opens the same way: the master on the saloon steps, no microphone, saying roughly this. We recorded it so you know the register of the thing you are booking.</p>',
@@ -2028,7 +2131,7 @@ export function team(): Page {
               { src: IMG.crewMate, icon: '', alt: 'Ingrid Solheim on deck', label: 'Master, MV Skua', title: 'Ingrid Solheim', body: 'Grew up piloting her father’s fjord ferry. Knows which arms hold their glass at dusk, and anchors there.', linkLabel: '', linkHref: '' },
               { src: IMG.crewEngineer, icon: '', alt: 'Ante Kovačić in the engine room doorway', label: 'Master, MV Nyren', title: 'Ante Kovačić', body: 'Split-born, navy-trained. Swears the Adriatic has two hundred anchorages and has personally slept in ninety of them.', linkLabel: '', linkHref: '' },
               { src: IMG.crewChef, icon: '', alt: 'Marta Reid in the galley', label: 'Head of galley', title: 'Marta Reid', body: 'Cooked in two starred kitchens and left both for a galley with a view. First down the gangway in every harbour.', linkLabel: '', linkHref: '' },
-              { src: IMG.crewGuide, icon: '', alt: 'Tom Ellery with binoculars', label: 'Naturalist', title: 'Tom Ellery', body: 'Sails every northern departure. Can tell a minke from a swell at a mile, and will wake you for it if you asked.', linkLabel: '', linkHref: '' },
+              { src: IMG.crewGuide, icon: '', alt: 'Tom Ellery with binoculars', label: 'Naturalist', title: 'Tom Ellery', body: 'Leads the naturalists, and keeps the Faroes weeks for himself. Can tell a minke from a swell at a mile, and will wake you for it if you asked.', linkLabel: '', linkHref: '' },
               { src: IMG.crewPurser, icon: '', alt: 'Fiona Bell at the shed door', label: 'The shed, Oban', title: 'Fiona Bell', body: 'Answers the phone, holds the plan, and has re-routed more holidays around more weather than anyone afloat.', linkLabel: '', linkHref: '' },
             ],
           }),
@@ -2057,7 +2160,7 @@ export function team(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'Questions the crew actually get', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Questions the crew actually get', align: 'left' }),
           block('accordion', {
             style: 'separated', single: true, openFirst: false, textColour: '',
             items: [
@@ -2098,7 +2201,7 @@ export function contact(): Page {
         rows: [
           row([
             col(45, [
-              block('heading', { level: 'h3', html: 'The shed', align: 'left' }),
+              block('heading', { level: 'h3', style: 'h3', html: 'The shed', align: 'left' }),
               block('text', {
                 html:
                   '<p>Coastwise Voyages Ltd<br />The Shed, North Pier<br />Oban PA34 5QD<br />Scotland</p>' +
@@ -2131,12 +2234,12 @@ export function contact(): Page {
         tone: 'subtle',
         paddingY: 'xl',
         rows: stack([
-          block('heading', { level: 'h2', html: 'Asked often', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'Asked often', align: 'left' }),
           block('accordion', {
             style: 'separated', single: true, openFirst: false, textColour: '',
             items: [
               { title: 'Can I hold a cabin while we decide?', body: 'Yes. A named cabin holds for seven days, no card required. Ring or WhatsApp and Fiona will do it while you are on the line.' },
-              { title: 'Do you take solo travellers?', body: 'Gladly. Freya and Skua both carry true single cabins at a modest supplement, not a doubled fare. About a fifth of any sailing is travelling solo.' },
+              { title: 'Do you take solo travellers?', body: 'Gladly. Sail solo on Freya or Skua and a double cabin is yours at a modest supplement, not a doubled fare. About a fifth of any sailing is travelling solo.' },
               { title: 'What about reduced mobility?', body: 'Honestly, ship by ship: Nyren has a lift and two step-free cabins; Freya and Skua are ships of stairs. Tell us what you need and we will tell you plainly which ship fits.' },
               { title: 'Is my money protected?', body: 'Yes. ABTA Y2841 for the sea, ATOL 11627 where we sell you the flight too. The deposit sits in trust until you sail.' },
             ],
@@ -2148,10 +2251,10 @@ export function contact(): Page {
         paddingY: 'xl',
         reveal: true,
         rows: stack([
-          block('heading', { level: 'h2', html: 'When the shed answers', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h2', html: 'When the shed answers', align: 'left' }),
           block('table', {
             headerRow: true, firstColumnHeader: true, style: 'lined',
-            caption: 'Ship’s hours follow the season, not the clock change.',
+            caption: 'Ship’s hours follow the season.',
             textColour: '',
             data:
               'When\tHours\tWho you get\n' +
@@ -2168,16 +2271,30 @@ export function contact(): Page {
         rows: [
           row([
             col(55, [
-              block('heading', { level: 'h3', html: 'Looking for something particular?', align: 'left' }),
+              block('heading', { level: 'h3', style: 'h3', html: 'Looking for something particular?', align: 'left' }),
               block('text', { html: '<p>Every page on this site, searched at once. Fares, ships, months, islands.</p>' }),
             ]),
             col(45, [
-              block('search', { placeholder: 'Try “Canna” or “single cabin”', display: 'box', align: 'left' }),
+              block('search', { placeholder: 'Try “Canna”', display: 'box', align: 'left' }),
             ]),
           ], 'l'),
         ],
       }),
-      closing('Or just ring. It is usually quicker.'),
+      sec({
+        name: 'Closing',
+        tone: 'subtle',
+        paddingY: 'xl',
+        rows: stack([
+          block('heading', { level: 'h2', style: 'h2', html: 'Or just ring. It is usually quicker.', align: 'centre' }),
+          block('button-group', {
+            align: 'centre',
+            buttons: [
+              { label: 'Check dates and cabins', href: '/#book', variant: 'primary', newTab: false },
+              { label: 'See the voyages', href: '/destinations', variant: 'secondary', newTab: false },
+            ],
+          }),
+        ]),
+      }),
     ],
   );
 }
@@ -2200,7 +2317,7 @@ export function terms(): Page {
         paddingY: 'xl',
         rows: stack([
           block('breadcrumbs', { separator: 'slash', showHome: true, size: 's', align: 'left' }),
-          block('heading', { level: 'h1', html: 'Booking terms', align: 'left' }),
+          block('heading', { level: 'h2', style: 'h1', html: 'Booking terms', align: 'left' }),
           block('text', {
             html:
               '<p>The plain version first: you pay a fifth to book and the rest ten weeks out. If we cancel, you get everything back. If the weather rewrites the route, that is the nature of a coast and not a fault. Your money is protected the whole way: <b>ABTA Y2841</b>, <b>ATOL 11627</b>.</p>',
@@ -2232,7 +2349,7 @@ export function terms(): Page {
               },
               {
                 title: '5. Aboard',
-                body: 'The master’s word is law on safety matters, the bridge is open at the master’s pleasure, and a guest whose conduct endangers the ship or wrecks the peace of it can be landed at the next port, fare forfeit. It has happened twice in fifteen years. Both times everyone else applauded.',
+                body: 'The master’s word is law on safety matters, the bridge is open at the master’s pleasure, and a guest whose conduct endangers the ship or wrecks the peace of it can be landed at the next port, fare forfeit. It has happened twice in fifteen years.',
               },
               {
                 title: '6. Your protection',

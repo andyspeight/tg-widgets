@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_cz9uodx9",
+ "id": "pg_dorxm4ii",
  "title": "Walking ashore",
  "slug": "walking-ashore",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_c4mfjnno",
+   "id": "sec_ctwighsc",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_c30zg205",
+     "id": "row_cs355h6s",
      "columns": [
       {
-       "id": "col_c2mpwwkp",
+       "id": "col_crj7yung",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_bzt345cq",
+         "id": "b_cogpsfdv",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_c0z82sji",
+         "id": "b_cp1ofjg2",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Walking ashore",
           "align": "left"
          }
         },
         {
-         "id": "b_c1bocc3v",
+         "id": "b_cqeyk5uh",
          "type": "text",
          "props": {
           "html": "<p>The ship does the miles at sea so your boots can do the ones that matter ashore.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_cah2pq6z",
+   "id": "sec_czlexbn7",
    "name": "The walks",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_c9vukkyi",
+     "id": "row_cy5i27bm",
      "columns": [
       {
-       "id": "col_c8ne7cpc",
+       "id": "col_cxg3pggt",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -132,26 +133,26 @@
        },
        "blocks": [
         {
-         "id": "b_c5afgg6i",
+         "id": "b_cua84p92",
          "type": "text",
          "props": {
-          "html": "<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way.</p>"
+          "html": "<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way. The walks run on every sailing. Pick the coast, not a special week.</p>"
          }
         },
         {
-         "id": "b_c667lju2",
+         "id": "b_cvdd6b4v",
          "type": "table",
          "props": {
           "headerRow": true,
           "firstColumnHeader": true,
           "style": "lined",
-          "caption": "A sample week of walks, Western Isles voyage.",
+          "caption": "A sample week, Western Isles voyage.",
           "textColour": "",
           "data": "Walk\tGrade\tDistance\tThe reward\nTobermory lighthouse path\tEasy\t3 km\tThe town, the bay, and a dram at the end\nColl strand and machair\tEasy\t5 km\tA mile of white sand with nobody on it\nStaffa clifftop circuit\tModerate\t4 km\tThe cave from above, puffins in June\nCanna to Compass Hill\tModerate\t7 km\tThe Small Isles laid out like a chart\nHarris, Rodel to Drinishader\tStrong\t12 km\tThe weaving sheds, and the east coast bays"
          }
         },
         {
-         "id": "b_c7oavj6t",
+         "id": "b_cwcstcuh",
          "type": "tooltip",
          "props": {
           "text": "How we grade",
@@ -170,7 +171,7 @@
    ]
   },
   {
-   "id": "sec_chhpl2ym",
+   "id": "sec_d6wvmtj2",
    "name": "How a landing works",
    "tone": "subtle",
    "width": "contained",
@@ -192,10 +193,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cg0ttdro",
+     "id": "row_d5pnt5c4",
      "columns": [
       {
-       "id": "col_cdgbq6hn",
+       "id": "col_d2e3fk1j",
        "width": 55,
        "align": "top",
        "flow": "stacked",
@@ -213,16 +214,17 @@
        },
        "blocks": [
         {
-         "id": "b_cb91eh0q",
+         "id": "b_d04xbfif",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "How a landing works",
           "align": "left"
          }
         },
         {
-         "id": "b_ccrau2fm",
+         "id": "b_d1u1hbpv",
          "type": "steps",
          "props": {
           "layout": "down",
@@ -251,7 +253,7 @@
        ]
       },
       {
-       "id": "col_cfi6bhrc",
+       "id": "col_d4qb5xjg",
        "width": 45,
        "align": "top",
        "flow": "stacked",
@@ -269,7 +271,7 @@
        },
        "blocks": [
         {
-         "id": "b_ceeuq4zy",
+         "id": "b_d3wtcsaf",
          "type": "image",
          "props": {
           "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
@@ -289,7 +291,7 @@
    ]
   },
   {
-   "id": "sec_cpw9ghut",
+   "id": "sec_debamqki",
    "name": "Kit",
    "tone": "light",
    "width": "contained",
@@ -311,10 +313,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cot8wdtz",
+     "id": "row_dd44v16x",
      "columns": [
       {
-       "id": "col_cj4jiksm",
+       "id": "col_d8k46xaw",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -332,7 +334,7 @@
        },
        "blocks": [
         {
-         "id": "b_cipzzsx8",
+         "id": "b_d7r0erq2",
          "type": "icon-item",
          "props": {
           "icon": "check",
@@ -344,7 +346,7 @@
        ]
       },
       {
-       "id": "col_clpxd27q",
+       "id": "col_daz07hsy",
        "width": 33,
        "align": "top",
        "flow": "stacked",
@@ -362,7 +364,7 @@
        },
        "blocks": [
         {
-         "id": "b_ckxgpsgj",
+         "id": "b_d9x3a499",
          "type": "icon-item",
          "props": {
           "icon": "cloud",
@@ -374,7 +376,7 @@
        ]
       },
       {
-       "id": "col_cnp23a4k",
+       "id": "col_dcmpjous",
        "width": 34,
        "align": "top",
        "flow": "stacked",
@@ -392,7 +394,7 @@
        },
        "blocks": [
         {
-         "id": "b_cmldxoea",
+         "id": "b_dba38b0d",
          "type": "icon-item",
          "props": {
           "icon": "map",
@@ -411,7 +413,7 @@
    ]
   },
   {
-   "id": "sec_ct44a0rj",
+   "id": "sec_digitsiq",
    "name": "Guest words",
    "tone": "subtle",
    "width": "contained",
@@ -432,10 +434,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_csyxb3wm",
+     "id": "row_dh2nxvjd",
      "columns": [
       {
-       "id": "col_crz4n1mi",
+       "id": "col_dgderjir",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -453,7 +455,7 @@
        },
        "blocks": [
         {
-         "id": "b_cqb10nt8",
+         "id": "b_df6se0j1",
          "type": "quote",
          "props": {
           "text": "Twelve kilometres over Harris, then a hot shower, then a dram, then dinner I did not cook. I have walked all my life. This is the format.",
@@ -471,9 +473,9 @@
    ]
   },
   {
-   "id": "sec_cyhqjc1f",
+   "id": "sec_dn8f40wc",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -492,10 +494,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_cxbbw7xm",
+     "id": "row_dm3g0azm",
      "columns": [
       {
-       "id": "col_cwg5enu5",
+       "id": "col_dl0ma4n7",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -513,16 +515,17 @@
        },
        "blocks": [
         {
-         "id": "b_cu7ml8qo",
+         "id": "b_djwaxfdy",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Boots in the hold, dram in the saloon.",
           "align": "centre"
          }
         },
         {
-         "id": "b_cvmm0dyz",
+         "id": "b_dki5ue5n",
          "type": "button-group",
          "props": {
           "align": "centre",

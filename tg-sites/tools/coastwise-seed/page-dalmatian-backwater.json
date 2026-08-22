@@ -1,6 +1,6 @@
 {
  "version": 1,
- "id": "pg_5smmkmi0",
+ "id": "pg_681utjck",
  "title": "Dalmatian Backwater",
  "slug": "dalmatian-backwater",
  "seo": {
@@ -10,7 +10,7 @@
  },
  "sections": [
   {
-   "id": "sec_4s36q71c",
+   "id": "sec_50qius1k",
    "name": "Banner",
    "tone": "dark",
    "width": "contained",
@@ -33,10 +33,10 @@
    "overlay": 45,
    "rows": [
     {
-     "id": "row_4r447bsg",
+     "id": "row_4zdd3ayy",
      "columns": [
       {
-       "id": "col_4qn7m7dv",
+       "id": "col_4yeb0gol",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -54,7 +54,7 @@
        },
        "blocks": [
         {
-         "id": "b_4nltwgpa",
+         "id": "b_4vwzhbvg",
          "type": "breadcrumbs",
          "props": {
           "separator": "slash",
@@ -64,16 +64,17 @@
          }
         },
         {
-         "id": "b_4odlfmmh",
+         "id": "b_4wq85f4l",
          "type": "heading",
          "props": {
-          "level": "h1",
+          "level": "h2",
+          "style": "h1",
           "html": "Dalmatian Backwater",
           "align": "left"
          }
         },
         {
-         "id": "b_4pg0itfe",
+         "id": "b_4xi4916c",
          "type": "text",
          "props": {
           "html": "<p>Split to Dubrovnik by way of the islands the ferries call at twice a week, aboard MV Nyren. Warm water, cold wine.</p>"
@@ -89,7 +90,7 @@
    ]
   },
   {
-   "id": "sec_5277r5gw",
+   "id": "sec_5dpdqojf",
    "name": "The voyage",
    "tone": "light",
    "width": "contained",
@@ -111,10 +112,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_4y4o9cjb",
+     "id": "row_56nv7qch",
      "columns": [
       {
-       "id": "col_4ulvx44v",
+       "id": "col_525aihdm",
        "width": 60,
        "align": "top",
        "flow": "stacked",
@@ -132,7 +133,7 @@
        },
        "blocks": [
         {
-         "id": "b_4ti3yypo",
+         "id": "b_51wg94h1",
          "type": "text",
          "props": {
           "html": "<p>The Dalmatian coast has a front, which is crowded, and a back, which is not. Nyren works the back: Vis, which was a closed military island until 1989 and still cooks like it never heard of tourism; Lastovo, a dark-sky reserve with one town and forty church towers; Šipan, where the Dubrovnik nobility built summer houses and then, usefully, left.</p><p>The swimming ladder goes down before breakfast and comes up after dinner. In between there are stone harbours, konoba lunches and one very good market on the Riva at Split.</p>"
@@ -141,7 +142,7 @@
        ]
       },
       {
-       "id": "col_4xvfpvei",
+       "id": "col_55cnr6vh",
        "width": 40,
        "align": "top",
        "flow": "stacked",
@@ -159,24 +160,24 @@
        },
        "blocks": [
         {
-         "id": "b_4vhs709p",
+         "id": "b_53s7et2c",
          "type": "rating",
          "props": {
           "rating": 4.7,
           "showValue": true,
-          "count": "from 189 guest reviews",
+          "count": "from 189 post-voyage questionnaires",
           "size": "m",
           "colour": "",
           "align": "left"
          }
         },
         {
-         "id": "b_4w2ii0h7",
+         "id": "b_54z2287h",
          "type": "tags",
          "props": {
           "style": "pills",
           "size": "m",
-          "colour": "",
+          "colour": "#1b333d",
           "align": "left",
           "items": [
            {
@@ -206,10 +207,10 @@
      "reverseOnStack": false
     },
     {
-     "id": "row_5184xanx",
+     "id": "row_59zy5qge",
      "columns": [
       {
-       "id": "col_50xq0i1h",
+       "id": "col_58ht218h",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -227,7 +228,7 @@
        },
        "blocks": [
         {
-         "id": "b_4znhsv03",
+         "id": "b_578eg11r",
          "type": "stats",
          "props": {
           "columns": "4",
@@ -242,7 +243,7 @@
             "detail": ""
            },
            {
-            "value": "Jun–Oct",
+            "value": "Jun–Sep",
             "suffix": "",
             "label": "Season",
             "detail": ""
@@ -268,11 +269,46 @@
      "gap": 32,
      "stackBelow": "mobile",
      "reverseOnStack": false
+    },
+    {
+     "id": "row_5cv3vsj3",
+     "columns": [
+      {
+       "id": "col_5b3ccuis",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_5a4crsol",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: join at Split from three, sail at six. The airport is twenty minutes round the bay and we book the flights where wanted. Nyren carries a lift and two step-free cabins, and most harbours here take the gangway. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
     }
    ]
   },
   {
-   "id": "sec_58ushmgt",
+   "id": "sec_5jran8rx",
    "name": "The islands",
    "tone": "subtle",
    "width": "contained",
@@ -293,10 +329,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_57xofhx6",
+     "id": "row_5i8gcpmq",
      "columns": [
       {
-       "id": "col_56zmdeyg",
+       "id": "col_5hxbj7qm",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -314,23 +350,24 @@
        },
        "blocks": [
         {
-         "id": "b_530af6u9",
+         "id": "b_5eusa6ds",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "Three islands, front and back",
           "align": "left"
          }
         },
         {
-         "id": "b_54xq59ix",
+         "id": "b_5f7x8x80",
          "type": "text",
          "props": {
           "html": "<p>Turn a card over for the part the brochure leaves out.</p>"
          }
         },
         {
-         "id": "b_55fvnmbu",
+         "id": "b_5gfoeq4g",
          "type": "flip-cards",
          "props": {
           "columns": "3",
@@ -377,7 +414,141 @@
    ]
   },
   {
-   "id": "sec_5df3l186",
+   "id": "sec_5owh6pr5",
+   "name": "Day by day",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_5nxwds0h",
+     "columns": [
+      {
+       "id": "col_5mjuby9t",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_5kumr05h",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Six nights, quay by quay",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_5lrtf5dm",
+         "type": "slider",
+         "props": {
+          "slideWidth": "medium",
+          "tilt": "none",
+          "gap": "m",
+          "style": "plain",
+          "ratio": "4/5",
+          "radius": "md",
+          "rows": "1",
+          "scrollbar": "bar",
+          "align": "left",
+          "wholeCardLinks": false,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/food-quay.jpg",
+            "alt": "The market on the Riva",
+            "label": "Day 01 · Split",
+            "title": "Join at three, market first",
+            "body": "The Riva does the provisioning. We do the leaving.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+            "alt": "Vis harbour in the evening",
+            "label": "Day 02 · Vis",
+            "title": "The closed island",
+            "body": "Grilled fish the navy way, and the fort walk before dinner.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+            "alt": "The ship dark under the stars",
+            "label": "Day 03 · Lastovo",
+            "title": "The dark-sky night",
+            "body": "Deck lights off after dinner. The Milky Way does the rest.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "Flat water and heat haze",
+            "label": "Day 04 · At sea, slowly",
+            "title": "Swim stops on demand",
+            "body": "The ladder stays down. Lunch is whatever Vis sold us.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+            "alt": "A long dinner beginning",
+            "label": "Day 05 · Šipan",
+            "title": "The nobility’s island",
+            "body": "Olive presses that still work, wine that never left.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
+            "alt": "Walls above the water",
+            "label": "Day 06 · Dubrovnik",
+            "title": "In by eight",
+            "body": "The walls before the crowds. Then home, or stay on. We book either.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_5tl3s6ma",
    "name": "The week in pictures",
    "tone": "light",
    "width": "contained",
@@ -399,10 +570,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5ciloea0",
+     "id": "row_5scd7psg",
      "columns": [
       {
-       "id": "col_5b2serl4",
+       "id": "col_5rv35m28",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -420,16 +591,17 @@
        },
        "blocks": [
         {
-         "id": "b_59dvok2f",
+         "id": "b_5pkdg27d",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "The week, in pictures",
           "align": "left"
          }
         },
         {
-         "id": "b_5adzac1g",
+         "id": "b_5qi4uuox",
          "type": "gallery",
          "props": {
           "columns": "3",
@@ -475,7 +647,7 @@
    ]
   },
   {
-   "id": "sec_5iwfmy3k",
+   "id": "sec_5y3pam90",
    "name": "The water",
    "tone": "subtle",
    "width": "contained",
@@ -497,10 +669,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5h3aitdu",
+     "id": "row_5xnxqofk",
      "columns": [
       {
-       "id": "col_5gc8sbay",
+       "id": "col_5wqfyuep",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -518,24 +690,25 @@
        },
        "blocks": [
         {
-         "id": "b_5e908pmx",
+         "id": "b_5uujx5sz",
          "type": "heading",
          "props": {
           "level": "h2",
+          "style": "h2",
           "html": "How warm, honestly",
           "align": "left"
          }
         },
         {
-         "id": "b_5fxnrp8b",
+         "id": "b_5v3c0n3p",
          "type": "table",
          "props": {
           "headerRow": true,
           "firstColumnHeader": true,
           "style": "lined",
-          "caption": "Average sea temperature at the swimming ladder, taken by the crew, not the tourist board.",
+          "caption": "Taken at the swimming ladder by the crew.",
           "textColour": "",
-          "data": "Month\tSea\tThe verdict\nJune\t22°C\tIn without ceremony\nJuly\t25°C\tIn before the ladder is fully down\nAugust\t26°C\tSome guests simply stay in\nSeptember\t24°C\tThe connoisseur’s month\nOctober\t21°C\tBrisk on entry, smug on exit"
+          "data": "Month\tSea\tThe verdict\nJune\t22°C\tIn without ceremony\nJuly\t25°C\tIn before the ladder is fully down\nAugust\t26°C\tSome guests simply stay in\nSeptember\t24°C\tThe connoisseur’s month, and the last of the season"
          }
         }
        ]
@@ -548,7 +721,7 @@
    ]
   },
   {
-   "id": "sec_5m8u1nc2",
+   "id": "sec_62moo37j",
    "name": "Guest words",
    "tone": "light",
    "width": "contained",
@@ -569,10 +742,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5l32lq2l",
+     "id": "row_61ihw0l6",
      "columns": [
       {
-       "id": "col_5k3sejlf",
+       "id": "col_60fbbz8a",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -590,7 +763,7 @@
        },
        "blocks": [
         {
-         "id": "b_5jxv6qbk",
+         "id": "b_5zv8cxsl",
          "type": "quote",
          "props": {
           "text": "I swam before breakfast every day for six days. The chef bought octopus off a boy on the quay at Vis and that was dinner.",
@@ -608,9 +781,9 @@
    ]
   },
   {
-   "id": "sec_5rdqobj6",
+   "id": "sec_67iqjkfe",
    "name": "Closing",
-   "tone": "dark",
+   "tone": "subtle",
    "width": "contained",
    "paddingY": 64,
    "minHeight": 0,
@@ -629,10 +802,10 @@
    "overlay": 60,
    "rows": [
     {
-     "id": "row_5qu1j0xo",
+     "id": "row_66wt1abd",
      "columns": [
       {
-       "id": "col_5pykgaui",
+       "id": "col_65b6ud2v",
        "width": 100,
        "align": "top",
        "flow": "stacked",
@@ -650,16 +823,17 @@
        },
        "blocks": [
         {
-         "id": "b_5n0frxah",
+         "id": "b_6327co0y",
          "type": "heading",
          "props": {
           "level": "h2",
-          "html": "June for the swimming. October for the harvest.",
+          "style": "h2",
+          "html": "June for the swimming. September for the harvest.",
           "align": "centre"
          }
         },
         {
-         "id": "b_5o1syo73",
+         "id": "b_64erml91",
          "type": "button-group",
          "props": {
           "align": "centre",
