@@ -30,6 +30,12 @@
     "test:worldmap-resilience": "node test/worldmap-offers-resilience-smoke.mjs",
     "test:airport-content-widgetid": "node test/airport-content-widgetid-smoke.mjs",
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
+    "test:appointment-cadence": "node test/appointment-reminder-cadence-smoke.mjs",
+    "test:appointment-overrides": "node test/appointment-overrides-smoke.mjs",
+    "test:appointment-display": "node test/appointment-display-smoke.mjs",
+    "test:appointment-sms": "node test/appointment-sms-smoke.mjs",
+    "test:appointment-lead": "node test/appointment-lead-smoke.mjs",
+    "test:appointment": "node test/appointment-smoke.mjs && node test/appointment-reminder-smoke.mjs && node test/appointment-share-smoke.mjs && node test/appointment-time-format-smoke.mjs && node test/appointment-reminder-cadence-smoke.mjs && node test/appointment-overrides-smoke.mjs && node test/appointment-display-smoke.mjs && node test/appointment-sms-smoke.mjs && node test/appointment-lead-smoke.mjs",
     "test:offers-resilience": "node test/offers-resilience-smoke.mjs",
     "test:offers-cache-namematch": "node test/offers-cache-namematch-smoke.mjs",
     "test:offers-cache-only": "node test/offers-cache-only-smoke.mjs",
@@ -125,7 +131,9 @@
     "test:offer-card-image-grid": "node test/offer-card-image-grid-smoke.mjs",
     "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs",
     "test:dashboard-required-tier": "node test/dashboard-required-tier-smoke.mjs",
-    "test:offer-promos-excludes": "node test/offer-promos-excludes-smoke.mjs"
+    "test:offer-promos-excludes": "node test/offer-promos-excludes-smoke.mjs",
+    "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
+    "build:events-snapshot": "node scripts/build-events-snapshot.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
@@ -137,6 +145,8 @@
     "puppeteer-core": "24.10.2"
   },
   "devDependencies": {
-    "jsdom": "^29.1.1"
+    "jsdom": "^29.1.1",
+    "playwright": "^1.62.1",
+    "tz-lookup": "^6.1.25"
   }
 }

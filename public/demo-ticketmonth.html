@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Month Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v14"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Sport</span><span>Concerts</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Ticket Month</h1>
+  <p class="lede">
+    A month grid with events on their dates, and a day panel underneath. The view for a customer who
+    knows when they can travel but not what they want to see — the opposite question to every other
+    widget in the set.
+  </p>
+
+  <div class="controls">
+    <strong>Source</strong>
+    <button type="button" data-src="pl" aria-pressed="true">Premier League</button>
+    <button type="button" data-src="arsenal">Arsenal</button>
+    <button type="button" data-src="wembley">Wembley</button>
+    <button type="button" data-src="concerts">All concerts</button>
+  </div>
+
+  <div class="controls">
+    <strong>Cells</strong>
+    <button type="button" data-cells="titles" aria-pressed="true">Event names</button>
+    <button type="button" data-cells="dots">Dots only</button>
+    <strong style="margin-left:12px">Week starts</strong>
+    <button type="button" data-week="1" aria-pressed="true">Monday</button>
+    <button type="button" data-week="0">Sunday</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page">
+    <div data-tg-widget="ticketmonth" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>It will not navigate into the past.</b> The feed holds a rolling year forward, so the back
+    arrow stops at this month rather than letting a visitor wander into an empty 2019.
+  </p>
+
+</div>
+
+<script src="/widget-ticketmonth.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var SOURCES = {
+    pl:       { sourceType: 'competition', sourceValue: 'english-premier-league',
+                heading: "What's on this month", subheading: 'Premier League fixtures.' },
+    arsenal:  { sourceType: 'team', sourceValue: 'arsenal', side: 'both',
+                heading: 'Arsenal', subheading: 'Every game, home and away.' },
+    wembley:  { sourceType: 'venue', sourceValue: 'wembleystadium',
+                heading: 'Wembley Stadium', subheading: 'Football and live music.' },
+    concerts: { sourceType: 'category', sourceValue: 'entertainment',
+                heading: 'Live music', subheading: 'Every gig we can get you into.' },
+  };
+  var state = { src: 'pl', cells: 'titles', week: '1', theme: 'light' };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return Object.assign({}, SOURCES[state.src], {
+      showDayTitles: state.cells === 'titles',
+      weekStart: parseInt(state.week, 10),
+      theme: state.theme,
+      maxPerCell: 2,
+      appId: '250',
+      accent: '#00B4D8',
+      bookingKinds: ['ticket', 'ticket-hotel', 'ticket-flight-hotel'],
+    });
+  }
+
+  function snippet() {
+    var c = config();
+    var shown = { sourceType: c.sourceType, sourceValue: c.sourceValue,
+                  heading: c.heading, showDayTitles: c.showDayTitles, weekStart: c.weekStart };
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="ticketmonth"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-ticketmonth.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGTicketMonthWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGTicketMonthWidget(mount, config());
+    group('src', 'src'); group('cells', 'cells'); group('week', 'week'); group('theme', 'theme');
+    snippet();
+  }
+  boot();
+}());
+</script>
+</body>
+</html>

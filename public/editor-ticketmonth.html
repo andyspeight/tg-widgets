@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticket Month Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<link rel="stylesheet" href="/editor-events-kit.css">
+</head>
+<body>
+
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Ticket Month</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <div class="tgse-panel is-active" data-tab="content">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+            <span class="tgse-section-label">What to show</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-sourcetype">Source</label>
+              <select class="select" id="f-sourcetype">
+                <option value="competition">A competition</option>
+                <option value="team">A club</option>
+                <option value="venue">A venue</option>
+                <option value="performer">An artist</option>
+                <option value="category">A whole category</option>
+                <option value="all">Everything</option>
+              </select>
+            </div>
+            <div class="tgse-field" id="wrap-picker">
+              <label class="tgse-field-label" for="f-search">Which one</label>
+              <div id="picked-host"></div>
+              <input class="input" type="search" id="f-search" placeholder="Start typing…" autocomplete="off">
+              <div class="results" id="results"></div>
+            </div>
+            <div class="tgse-field" id="wrap-category" hidden>
+              <label class="tgse-field-label" for="f-category">Category</label>
+              <select class="select" id="f-category"></select>
+            </div>
+            <div class="tgse-field" id="wrap-side" hidden>
+              <label class="tgse-field-label">Home or away</label>
+              <div class="seg" id="f-side" role="group" aria-label="Home or away">
+                <button type="button" data-v="both" aria-pressed="true">Both</button>
+                <button type="button" data-v="home">Home only</button>
+                <button type="button" data-v="away">Away only</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Wording</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-heading">Title</label>
+              <input class="input" type="text" id="f-heading" maxlength="90" placeholder="Leave blank for no heading">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-subheading">Subtitle</label>
+              <input class="input" type="text" id="f-subheading" maxlength="140" placeholder="Optional">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-empty">When a month is empty</label>
+              <input class="input" type="text" id="f-empty" maxlength="140" placeholder="Nothing on this month. Try the next one.">
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">When a day opens</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-daylimit">Events listed</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-daylimit" min="1" max="30" step="1">
+                <span class="slider-val" id="v-daylimit">12</span>
+              </div>
+              <div class="field-help">A whole month always loads. This caps the day panel only.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tgse-panel" data-tab="design">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
+            <span class="tgse-section-label">Calendar</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Week starts on</label>
+              <div class="seg" id="f-week" role="group" aria-label="Week starts on">
+                <button type="button" data-v="1" aria-pressed="true">Monday</button>
+                <button type="button" data-v="0">Sunday</button>
+              </div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Event names in the cells</div>
+                <div class="toggle-sub">Off shows dots. Cells fall back to dots on a phone either way.</div></div>
+              <button class="switch is-on" id="t-titles" type="button" role="switch" aria-checked="true" aria-label="Show event names in cells"></button>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-percell">Names per cell</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-percell" min="1" max="4" step="1">
+                <span class="slider-val" id="v-percell">2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-accent">Accent colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-accent-swatch" aria-label="Pick accent colour">
+                <input class="input" type="text" id="f-accent" maxlength="7" spellcheck="false">
+              </div>
+              <div class="field-help">Tints the event pips and marks today.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Shape</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-radius">Corner radius</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-radius" min="0" max="24" step="1">
+                <span class="slider-val" id="v-radius">12px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/></svg>
+            <span class="tgse-section-label">Booking</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">What customers can book</label>
+              <div id="book-opts"></div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-booklabel">Button label</label>
+              <input class="input" type="text" id="f-booklabel" maxlength="24" placeholder="Book">
+            </div>
+            <div class="row">
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="f-currency">Currency</label>
+                <select class="select" id="f-currency">
+                  <option value="GBP">GBP</option><option value="EUR">EUR</option>
+                  <option value="USD">USD</option><option value="AUD">AUD</option>
+                </select>
+              </div>
+              <div class="tgse-field">
+                <label class="tgse-field-label" for="f-adults">Adults</label>
+                <select class="select" id="f-adults">
+                  <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="tgse-section-label">What each event shows</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="toggle-row"><div><div class="toggle-label">Start time</div></div>
+              <button class="switch is-on" id="t-time" type="button" role="switch" aria-checked="true" aria-label="Show start time"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Venue</div></div>
+              <button class="switch is-on" id="t-venue" type="button" role="switch" aria-checked="true" aria-label="Show venue"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Competition</div></div>
+              <button class="switch is-on" id="t-comp" type="button" role="switch" aria-checked="true" aria-label="Show competition"></button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/></svg>
+        </button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="pv-stage"><div id="widget-mount"></div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/editor-events-kit.js"></script>
+<script src="/widget-ticketmonth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var K = window.TGEditorKit;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var C = {
+    sourceType: 'competition',
+    sourceValue: 'english-premier-league',
+    sourceLabel: 'Premier League',
+    side: 'both',
+    competition: '',
+    heading: "What's on this month",
+    subheading: '',
+    emptyText: '',
+    weekStart: 1,
+    showDayTitles: true,
+    maxPerCell: 2,
+    dayLimit: 12,
+    showVenue: true,
+    showTime: true,
+    showCompetition: true,
+    bookLabel: 'Book',
+    bookingKinds: ['ticket'],
+    currency: 'GBP',
+    adults: 2,
+    theme: 'light',
+    accent: '#00B4D8',
+    radius: 12,
+    fontFamily: 'Inter',
+    appId: '250',
+  };
+
+  var widget = null;
+  var picker = null;
+
+  var shell = tgse.init({
+    widgetType: 'Ticket Month',
+    widgetTag: 'ticketmonth',
+    scriptFile: 'widget-ticketmonth.js',
+    getConfig: function () { return C; },
+    setConfig: function (c) { C = Object.assign({}, C, c); syncForm(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: function (f) { C.fontFamily = f; changed(); },
+    onAIBuild: function () { tgse.toast('AI builder is not wired for this widget yet — use Templates', 'ok'); },
+    onTemplates: function () {
+      K.templates(TEMPLATES, function (cfg) {
+        C = Object.assign({}, C, cfg); syncForm(); changed(); tgse.toast('Template applied', 'ok');
+      });
+    },
+    onThemeToggle: function (isDark) { C.theme = isDark ? 'dark' : 'light'; changed(); },
+    onLoginSuccess: function () { K.loadSaved(C, function () { syncForm(); render(); }); },
+  });
+
+  function changed() { shell.markDirty(); render(); }
+
+  function render() {
+    var host = $('widget-mount');
+    if (!host) return;
+    if (widget) { widget.update(C); return; }
+    if (!window.TGTicketMonthWidget) { setTimeout(render, 50); return; }
+    widget = new window.TGTicketMonthWidget(host, C);
+  }
+
+  var TEMPLATES = [
+    { name: 'League calendar', desc: 'A whole competition, month by month.',
+      cfg: { sourceType: 'competition', sourceValue: 'english-premier-league', sourceLabel: 'Premier League',
+             heading: "What's on this month", showDayTitles: true, maxPerCell: 2, weekStart: 1 } },
+    { name: 'Our club', desc: 'One club, home and away.',
+      cfg: { sourceType: 'team', sourceValue: 'arsenal', sourceLabel: 'Arsenal', side: 'both',
+             heading: 'Arsenal fixtures', showDayTitles: true, maxPerCell: 1 } },
+    { name: 'At the ground', desc: 'One venue, football and music together.',
+      cfg: { sourceType: 'venue', sourceValue: 'wembleystadium', sourceLabel: 'Wembley Stadium',
+             heading: "What's on at Wembley", showDayTitles: true, maxPerCell: 2 } },
+    { name: 'Busy month, dots only', desc: 'For a category with something on most days.',
+      cfg: { sourceType: 'category', sourceValue: 'entertainment', sourceLabel: 'Entertainment',
+             heading: 'Live music', showDayTitles: false, dayLimit: 20 } },
+  ];
+
+  function syncSourceUi() {
+    $('wrap-picker').hidden = !K.needsPicker(C.sourceType);
+    $('wrap-category').hidden = C.sourceType !== 'category';
+    $('wrap-side').hidden = C.sourceType !== 'team';
+    if (picker) picker.sync();
+  }
+
+  function wire() {
+    var c = K.controls(C, changed);
+
+    picker = K.sourcePicker({
+      getType: function () { return C.sourceType; },
+      getValue: function () { return C.sourceValue; },
+      getLabel: function () { return C.sourceLabel; },
+      onPick: function (v, l) {
+        C.sourceValue = v;
+        C.sourceLabel = l;
+        if (!C.heading || C.heading === "What's on this month") { C.heading = l; $('f-heading').value = l; }
+        changed();
+      },
+      onClear: function () { C.sourceValue = ''; C.sourceLabel = ''; changed(); },
+      pickedId: 'picked-host', searchId: 'f-search', resultsId: 'results',
+    });
+
+    $('f-sourcetype').addEventListener('change', function () {
+      C.sourceType = $('f-sourcetype').value;
+      C.sourceValue = '';
+      C.sourceLabel = '';
+      if (C.sourceType === 'category') C.sourceValue = $('f-category').value || 'football';
+      syncSourceUi();
+      changed();
+    });
+
+    c.select('f-category', 'sourceValue', function () {
+      var o = $('f-category').selectedOptions[0];
+      C.sourceLabel = o ? o.textContent : '';
+    });
+
+    c.seg('f-side', 'side');
+    // weekStart is a number in the config and a string on the button, so it is
+    // converted here rather than leaving "1" to fail a === 1 test in the widget.
+    c.seg('f-week', 'weekStart', function (v) { C.weekStart = parseInt(v, 10); });
+
+    c.text('f-heading', 'heading');
+    c.text('f-subheading', 'subheading');
+    c.text('f-empty', 'emptyText');
+    c.text('f-booklabel', 'bookLabel');
+
+    c.slider('f-percell', 'v-percell', 'maxPerCell');
+    c.slider('f-daylimit', 'v-daylimit', 'dayLimit');
+    c.slider('f-radius', 'v-radius', 'radius', function (v) { return v + 'px'; });
+    c.colour('f-accent-swatch', 'f-accent', 'accent');
+
+    c.select('f-currency', 'currency');
+    c.number('f-adults', 'adults');
+
+    c.toggle('t-titles', 'showDayTitles');
+    c.toggle('t-time', 'showTime');
+    c.toggle('t-venue', 'showVenue');
+    c.toggle('t-comp', 'showCompetition');
+
+    K.bookingOptions('book-opts', function () { return C.bookingKinds; },
+      function (kinds) { C.bookingKinds = kinds; changed(); });
+
+    $('name-input').addEventListener('input', function () { shell.markDirty(); });
+  }
+
+  function syncForm() {
+    var c = K.controls(C, function () {});
+    $('f-sourcetype').value = C.sourceType;
+    if ($('f-category').options.length) $('f-category').value = C.sourceValue || 'football';
+    c.segSync('f-side', C.side);
+    c.segSync('f-week', String(C.weekStart));
+    $('f-heading').value = C.heading || '';
+    $('f-subheading').value = C.subheading || '';
+    $('f-empty').value = C.emptyText || '';
+    $('f-booklabel').value = C.bookLabel || '';
+    c.sliderSync('f-percell', 'v-percell', C.maxPerCell);
+    c.sliderSync('f-daylimit', 'v-daylimit', C.dayLimit);
+    c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
+    c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    $('f-currency').value = C.currency;
+    $('f-adults').value = String(C.adults);
+    c.toggleSync('t-titles', C.showDayTitles);
+    c.toggleSync('t-time', C.showTime);
+    c.toggleSync('t-venue', C.showVenue);
+    c.toggleSync('t-comp', C.showCompetition);
+    syncSourceUi();
+  }
+
+  K.boot({
+    wire: wire,
+    prefetch: function () {
+      return K.index().then(function (d) {
+        var sel = $('f-category');
+        sel.textContent = '';
+        (d.categories || []).forEach(function (cat) {
+          var o = document.createElement('option');
+          o.value = cat.slug;
+          o.textContent = cat.label + ' (' + cat.events + ')';
+          sel.appendChild(o);
+        });
+      });
+    },
+    load: function () { K.loadSaved(C, function () { syncForm(); render(); }); },
+    ready: function () { syncForm(); render(); },
+  });
+}());
+</script>
+
+</body>
+</html>

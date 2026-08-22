@@ -8,6 +8,7 @@ import { requireAuth } from '../_lib/auth/middleware.js';
 import { configuredProviders } from '../_lib/calendar/providers.js';
 import * as zoomProvider from '../_lib/calendar/zoom.js';
 import { getConnection, getZoomConnection, storageReady } from '../_lib/calendar/store.js';
+import { smsConfigured } from '../_lib/calendar/sms.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
@@ -35,5 +36,6 @@ export default async function handler(req, res) {
     providers,                       // which can be connected
     configured: providers.length > 0,
     storage: storageReady(),
+    sms: smsConfigured(),            // platform-level SMS reminders (Twilio)
   });
 }

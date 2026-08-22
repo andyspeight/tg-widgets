@@ -32,6 +32,9 @@ Owner: Andy Speight, CEO, Travelgenix.
   `recCKQZ4ucnuef2Ii`).
 - **Email Signature**: `docs/email-signature-handover.md` (Airtable record
   `recYKgvuON4dFQWfa`).
+- **Event Tickets widget family** (the supplier event feed and the six ticket
+  widgets built on it): `docs/supplier-event-feed.md` (Airtable record
+  `recdVmyNz4nCXltMc`).
 - **The Duda element audit (tg-sites)**: `docs/duda-element-audit.md`. Read it
   the moment a session mentions Duda, "the next list", or elements. It carries
   what has been checked, what was built, what Andy has asked to skip, and the

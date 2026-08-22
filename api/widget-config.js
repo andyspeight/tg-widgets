@@ -421,6 +421,13 @@ const ALLOWED_WIDGET_TYPES = [
   'Email Signature',
   'Group Trips',
   'Escorted Tour',
+  'Event Tickets',
+  'Next Event',
+  'Club Picker',
+  'Ticket Search',
+  'Ticket Month',
+  'Event Menu',
+  'Venue Guide',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -430,6 +437,17 @@ const ALLOWED_WIDGET_TYPES = [
 // KEEP IN SYNC with the WIDGETS array in public/index.html. If these drift,
 // the dashboard will show one limit while the API enforces another.
 const PLAN_WIDGET_LIMITS = {
+  // The ticket family is IGNITE ONLY (Andy, 21 Aug 2026). Ticket inventory is
+  // premium revenue-bearing content and is not sold on Spark or Boost, so all
+  // six carry Boost: 0 rather than a count. Keep in step with the Package
+  // Catalogue in Control, where each one is linked to Ignite alone.
+  'Event Tickets':         { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Venue Guide':             { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Event Menu':              { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Ticket Month':            { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Ticket Search':           { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Club Picker':             { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'Next Event':              { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
   'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Google Reviews':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
@@ -812,7 +830,11 @@ export default async function handler(req, res) {
         // client's AppID (the demo-account deeplinks in the shared cache are
         // rewritten to the client's own AppID). It does NOT call Travelify
         // directly, so it never needs the API key — inject the AppID alone.
-        if ((widgetType === 'Travel Offers' || widgetType === 'World Map') && clientEmail) {
+        // Event Tickets is the same case: it builds ticket deeplinks against
+        // the client's own application and never calls Travelify itself.
+        const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'World Map', 'Event Tickets',
+          'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month'];
+        if (NEEDS_APP_ID.includes(widgetType) && clientEmail) {
           try {
             const creds = await lookupClientCredentialsByEmail(clientEmail);
             if (creds) {

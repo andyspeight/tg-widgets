@@ -23,9 +23,15 @@
   .pill.cancel{background:rgba(220,38,38,.12);color:#B91C1C}
   .empty,.gate{padding:40px;text-align:center;color:#64748B}
   .gate a{color:#0891B2;font-weight:600}
-  .filters{display:flex;gap:8px;margin-bottom:16px}
+  .filters{display:flex;gap:8px;margin-bottom:12px}
   .filters button{appearance:none;border:1px solid #E2E8F0;background:#fff;color:#475569;font:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:999px;cursor:pointer}
   .filters button.on{background:#0F172A;color:#fff;border-color:#0F172A}
+  .toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+  .toolbar input[type="search"]{flex:1;min-width:200px;font:inherit;font-size:13px;padding:8px 12px;border:1px solid #E2E8F0;border-radius:9px;background:#fff;color:#0F172A}
+  .toolbar input[type="search"]:focus,.toolbar select:focus{outline:none;border-color:#0891B2;box-shadow:0 0 0 3px rgba(8,145,178,.15)}
+  .toolbar select{font:inherit;font-size:13px;padding:8px 10px;border:1px solid #E2E8F0;border-radius:9px;background:#fff;color:#0F172A;cursor:pointer}
+  .toolbar .export{appearance:none;border:1px solid #E2E8F0;background:#fff;color:#475569;font:inherit;font-size:13px;font-weight:600;padding:8px 13px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .toolbar .export:hover{background:#F1F5F9}
   .cancel-btn{appearance:none;border:1px solid rgba(220,38,38,.4);background:transparent;color:#B91C1C;font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer}
   .cancel-btn:hover:not(:disabled){background:rgba(220,38,38,.08)}
   .cancel-btn:disabled{opacity:.5;cursor:not-allowed}
@@ -47,6 +53,15 @@
       <button data-range="upcoming" class="on">Upcoming</button>
       <button data-range="past">Recent past</button>
     </div>
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search name, email, phone or meeting" aria-label="Search bookings">
+      <select id="status-filter" aria-label="Filter by status">
+        <option value="">All statuses</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button type="button" class="export" id="btn-export" title="Download the bookings you can see as a CSV file"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+    </div>
     <div class="card"><div id="list"><div class="empty">Loading…</div></div></div>
   </div>
 
@@ -62,6 +77,9 @@
     var listEl = document.getElementById('list');
     var range = 'upcoming';
     var shareWidgets = [];
+    var allBookings = [];
+    var searchTerm = '';
+    var statusFilter = '';
 
     // "Send time options" — open the share pop-out for the agency's scheduler(s).
     document.getElementById('btn-share').addEventListener('click', function () {
@@ -72,22 +90,81 @@
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
     function whenText(b){try{var d=new Date(b.startISO);var ds=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,weekday:'short',day:'numeric',month:'short'}).format(d);var ts=new Intl.DateTimeFormat('en-GB',{timeZone:b.timezone,hour:'numeric',minute:'2-digit',hourCycle:'h12'}).format(d).replace(/[ \s]/g,'').toLowerCase();return ds+' · '+ts;}catch(e){return b.startISO;}}
 
+    function srcHost(u){ try { return u ? new URL(u).hostname.replace(/^www\./,'') : ''; } catch(e){ return ''; } }
+
+    // The share button and the export work from EVERYTHING loaded; the table
+    // shows the filtered view.
+    function setData(bookings){
+      allBookings = bookings || [];
+      allBookings.sort(function(a,b){return a.startISO<b.startISO?-1:1;});
+      var seen={}; shareWidgets=[]; allBookings.forEach(function(b){ if(b.widgetId && !seen[b.widgetId]){ seen[b.widgetId]=1; shareWidgets.push(b.widgetId); } });
+      applyFilters();
+    }
+    function filtered(){
+      var q = searchTerm.trim().toLowerCase();
+      return allBookings.filter(function(b){
+        if (statusFilter && b.status !== statusFilter) return false;
+        if (!q) return true;
+        var hay = [b.name, b.email, b.phone, b.eventLabel, b.ref, srcHost(b.sourceUrl)].join(' ').toLowerCase();
+        return hay.indexOf(q) !== -1;
+      });
+    }
+    function applyFilters(){ render(filtered()); }
+
     function render(bookings){
-      var seen={}; shareWidgets=[]; bookings.forEach(function(b){ if(b.widgetId && !seen[b.widgetId]){ seen[b.widgetId]=1; shareWidgets.push(b.widgetId); } });
-      if(!bookings.length){ listEl.innerHTML='<div class="empty">No bookings in this window.</div>'; return; }
-      bookings.sort(function(a,b){return a.startISO<b.startISO?-1:1;});
+      if(!bookings.length){
+        listEl.innerHTML='<div class="empty">'+((searchTerm||statusFilter)&&allBookings.length?'No bookings match your search.':'No bookings in this window.')+'</div>';
+        return;
+      }
       var rows = bookings.map(function(b){
         var cancelled = b.status==='cancelled';
         var acts = cancelled ? '' : ((b.widgetId?'<button class="resched-btn" data-resched>Reschedule</button>':'')+'<button class="cancel-btn" data-cancel>Cancel</button>');
+        var host = srcHost(b.sourceUrl);
         return '<tr data-ref="'+esc(b.ref)+'" data-widget="'+esc(b.widgetId||'')+'" data-event="'+esc(b.eventId||'')+'">'+
           '<td><div class="who">'+esc(whenText(b))+'</div><div class="meta">'+esc(b.eventLabel||'')+' · '+esc(b.durationMins)+' min</div></td>'+
-          '<td><div class="who">'+esc(b.name)+'</div><div class="meta">'+esc(b.email)+(b.phone?(' · '+esc(b.phone)):'')+'</div></td>'+
+          '<td><div class="who">'+esc(b.name)+'</div><div class="meta">'+esc(b.email)+(b.phone?(' · '+esc(b.phone)):'')+'</div>'+
+            (host?('<div class="meta" title="'+esc(b.sourceUrl)+'">via '+esc(host)+'</div>'):'')+'</td>'+
           '<td class="status-cell"><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span></td>'+
           '<td class="act-cell">'+acts+'</td>'+
         '</tr>';
       }).join('');
       listEl.innerHTML='<table><thead><tr><th>When</th><th>Who</th><th>Status</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
     }
+
+    // ── Search, status filter, CSV export ──
+    var searchTimer = null;
+    document.getElementById('search').addEventListener('input', function(e){
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function(){ searchTerm = e.target.value || ''; applyFilters(); }, 200);
+    });
+    document.getElementById('status-filter').addEventListener('change', function(e){
+      statusFilter = e.target.value || ''; applyFilters();
+    });
+    // Quote CSV cells and neutralise spreadsheet formula injection (a visitor
+    // controls their own name/answers, and "=HYPERLINK(...)" in a cell would
+    // execute when the agent opens the export in Excel).
+    function csvCell(v){
+      var s = String(v==null?'':v).replace(/[\u0000-\u001F\u007F]/g,' ');
+      if (/^[=+\-@]/.test(s)) s = "'" + s;
+      if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g,'""') + '"';
+      return s;
+    }
+    document.getElementById('btn-export').addEventListener('click', function(){
+      var rows = filtered();
+      if(!rows.length){ alert('Nothing to export in the current view.'); return; }
+      var head = ['Reference','Status','Start (ISO)','When','Timezone','Meeting','Minutes','Name','Email','Phone','Answers','Booked from','Created'];
+      var lines = [head.join(',')].concat(rows.map(function(b){
+        var a = b.answers || {};
+        var answers = Object.keys(a).map(function(k){ return k+': '+a[k]; }).join('; ');
+        return [b.ref,b.status,b.startISO,whenText(b),b.timezone||'',b.eventLabel||'',b.durationMins,b.name,b.email,b.phone||'',answers,b.sourceUrl||'',b.createdAt||''].map(csvCell).join(',');
+      }));
+      var blob = new Blob(['﻿'+lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url; link.download = 'bookings-'+new Date().toISOString().slice(0,10)+'.csv';
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    });
 
     // ── Reschedule (agency, in a modal) ──
     var modal = document.getElementById('modal'), modalMount = document.getElementById('modal-mount');
@@ -136,7 +213,7 @@
       var qs = range==='past' ? ('from='+encodeURIComponent(new Date(Date.now()-60*86400000).toISOString())+'&to='+encodeURIComponent(new Date().toISOString())) : 'days=60';
       fetch('/api/appointment/list?'+qs,{credentials:'include'})
         .then(function(r){ if(r.status===401){ throw 'auth'; } return r.json(); })
-        .then(function(d){ if(d&&d.storage===false){ listEl.innerHTML='<div class="empty">Booking storage is not set up yet.</div>'; return; } render((d&&d.bookings)||[]); })
+        .then(function(d){ if(d&&d.storage===false){ listEl.innerHTML='<div class="empty">Booking storage is not set up yet.</div>'; return; } setData((d&&d.bookings)||[]); })
         .catch(function(e){ if(e==='auth'){ listEl.innerHTML='<div class="gate">Please <a href="/signin.html?next=/bookings">sign in</a> to see your bookings.</div>'; } else { listEl.innerHTML='<div class="empty">Could not load bookings.</div>'; } });
     }
     document.getElementById('filters').addEventListener('click', function(e){

@@ -5,7 +5,8 @@
  * ─── Request body ───────────────────────────────────────────────────
  *   {
  *     widgetType: 'FAQ' | 'PRICING' | 'SPOTLIGHT' | 'WEATHER' | 'COUNTDOWN TIMER'
- *               | 'SMART SECTION' | 'TRAVEL OFFERS' | 'LOGO SHOWCASE' | 'TEXT FX',  // required
+ *               | 'SMART SECTION' | 'TRAVEL OFFERS'
+ *               | 'LOGO SHOWCASE' | 'TEXT FX' | 'APPOINTMENT',   // required (last three are passthrough)
  *     prompt: string,                              // 5-1000 chars (4000 for passthrough types)
  *     schema?: object,                             // passthrough types only — the JSON shape to return
  *     currentConfig?: object,                      // TRAVEL OFFERS only — the widget's current config
@@ -161,7 +162,7 @@ const REWRITE_FIELD_MAX = 60;
 // displaying ATOL/ABTA is unlawful, and hallucinated logo URLs are broken).
 // Kept separate so the business-description quality floor and FAQ options
 // parsing do not apply to them.
-const PASSTHROUGH_WIDGET_TYPES = ['LOGO SHOWCASE', 'TEXT FX'];
+const PASSTHROUGH_WIDGET_TYPES = ['LOGO SHOWCASE', 'TEXT FX', 'APPOINTMENT'];
 const ALLOWED_WIDGET_TYPES = ['FAQ', 'PRICING', 'SPOTLIGHT', 'WEATHER', 'COUNTDOWN TIMER', 'SMART SECTION', 'TRAVEL OFFERS', ...PASSTHROUGH_WIDGET_TYPES];
 const ALLOWED_TONES        = ['warm', 'professional', 'casual'];
 
@@ -518,7 +519,7 @@ function parseBody(body) {
   // widgetType — strict enum
   const widgetType = String(body.widgetType || '').toUpperCase();
   if (!ALLOWED_WIDGET_TYPES.includes(widgetType)) {
-    return { error: 'Invalid widgetType. Must be FAQ, PRICING, SPOTLIGHT, WEATHER, COUNTDOWN TIMER, SMART SECTION, TRAVEL OFFERS, LOGO SHOWCASE or TEXT FX.' };
+    return { error: 'Invalid widgetType. Must be FAQ, PRICING, SPOTLIGHT, WEATHER, COUNTDOWN TIMER, SMART SECTION, TRAVEL OFFERS, LOGO SHOWCASE, TEXT FX or APPOINTMENT.' };
   }
   const passthrough = PASSTHROUGH_WIDGET_TYPES.includes(widgetType);
 

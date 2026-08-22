@@ -1,15 +1,16 @@
 /**
- * Travelgenix Appointment / Callback Scheduler Widget v2.0.0
+ * Travelgenix Appointment / Callback Scheduler Widget v2.1.0
  * A Calendly-style booking widget: month-view calendar, timezone detection and
- * switching, 12/24h times, multiple event types, per-day availability, blackout
- * dates, custom questions and Add to Calendar. Self-contained, zero
+ * switching, 12/24h times, multiple event types, per-day availability with
+ * date-specific overrides, blackout dates, custom questions, inline / popup /
+ * floating-bubble display modes and Add to Calendar. Self-contained, zero
  * dependencies, Shadow DOM, accessible, CSP-clean (no inline handlers).
  *
- * Availability is defined in the host timezone; slots are real instants that are
- * displayed in the visitor's chosen timezone. This is a scheduling REQUEST form:
- * it captures a preferred slot and hands it to a human. Live free/busy sync and
- * persistent reschedule/cancel are a backend follow-up; the request payload
- * already carries everything those need.
+ * Availability is defined in the host timezone; slots are real instants that
+ * are displayed in the visitor's chosen timezone. With a saved widget id the
+ * widget books for real: server-checked free/busy against the connected
+ * calendar, a persisted booking with reschedule/cancel manage links, and
+ * lifecycle emails. Without one it falls back to an email request form.
  *
  * Usage (remote config):
  *   <div data-tg-widget="appointment" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -24,7 +25,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '2.0.4';
+  const VERSION = '2.1.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (step labels, field labels, buttons, validation and
@@ -60,6 +61,7 @@
       bookingMovedBody: 'We have updated your appointment to the new time.',
       couldNotMove: 'Could not move the booking.',
       modeCallback: 'Phone callback', modePhone: 'Phone call', modeVideo: 'Video call', modeInperson: 'In person',
+      bookTime: 'Book a time', close: 'Close',
     },
     fr: {
       chooseMeeting: 'Choisissez un rendez-vous', meetings: 'Rendez-vous',
@@ -88,6 +90,7 @@
       bookingMovedBody: 'Nous avons mis à jour votre rendez-vous à ce nouvel horaire.',
       couldNotMove: 'Impossible de déplacer la réservation.',
       modeCallback: 'Rappel téléphonique', modePhone: 'Appel téléphonique', modeVideo: 'Appel vidéo', modeInperson: 'En personne',
+      bookTime: 'Réserver un créneau', close: 'Fermer',
     },
     de: {
       chooseMeeting: 'Termin wählen', meetings: 'Termine',
@@ -116,6 +119,7 @@
       bookingMovedBody: 'Wir haben Ihren Termin auf die neue Uhrzeit aktualisiert.',
       couldNotMove: 'Buchung konnte nicht verschoben werden.',
       modeCallback: 'Telefonischer Rückruf', modePhone: 'Telefonanruf', modeVideo: 'Videoanruf', modeInperson: 'Persönlich',
+      bookTime: 'Termin buchen', close: 'Schließen',
     },
     es: {
       chooseMeeting: 'Elige una cita', meetings: 'Citas',
@@ -144,6 +148,7 @@
       bookingMovedBody: 'Hemos actualizado tu cita a la nueva hora.',
       couldNotMove: 'No se pudo mover la reserva.',
       modeCallback: 'Devolución de llamada', modePhone: 'Llamada telefónica', modeVideo: 'Videollamada', modeInperson: 'En persona',
+      bookTime: 'Reservar una hora', close: 'Cerrar',
     },
     it: {
       chooseMeeting: 'Scegli un appuntamento', meetings: 'Appuntamenti',
@@ -172,6 +177,7 @@
       bookingMovedBody: 'Abbiamo aggiornato il tuo appuntamento al nuovo orario.',
       couldNotMove: 'Impossibile spostare la prenotazione.',
       modeCallback: 'Richiamata telefonica', modePhone: 'Chiamata telefonica', modeVideo: 'Videochiamata', modeInperson: 'Di persona',
+      bookTime: 'Prenota un orario', close: 'Chiudi',
     },
     ro: {
       chooseMeeting: 'Alege o întâlnire', meetings: 'Întâlniri',
@@ -200,6 +206,7 @@
       bookingMovedBody: 'Am actualizat programarea la noua oră.',
       couldNotMove: 'Rezervarea nu a putut fi mutată.',
       modeCallback: 'Apel de revenire', modePhone: 'Apel telefonic', modeVideo: 'Apel video', modeInperson: 'În persoană',
+      bookTime: 'Rezervă o oră', close: 'Închide',
     },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
@@ -240,6 +247,18 @@
   }
   const SCRIPT_ORIGIN = resolveOrigin();
   const API_BASE = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || (SCRIPT_ORIGIN + '/api/widget-config');
+  // Origin for the appointment endpoints (availability, book, manage). When a
+  // host page overrides the config endpoint via window.__TG_WIDGET_API__ (tag
+  // managers, proxied installs), booking calls must follow it to the same
+  // host — previously they fell back to the host page's own origin and 404'd.
+  const API_ORIGIN = (function () {
+    try {
+      if (typeof window !== 'undefined' && window.__TG_WIDGET_API__) {
+        return new URL(String(window.__TG_WIDGET_API__), window.location.href).origin;
+      }
+    } catch (e) { /* noop */ }
+    return SCRIPT_ORIGIN;
+  })();
 
   // ─── Helpers ────────────────────────────────────────────────
   function esc(s) {
@@ -402,6 +421,10 @@
     addToCalendar: true,
     company: 'our travel team',
     location: '',               // 'Phone call' / video link / address
+    // Display
+    displayMode: 'inline',      // 'inline' | 'popup' (launcher button) | 'bubble' (floating)
+    launcherLabel: '',          // '' = localised default ('Book a time' in en)
+    bubblePosition: 'right',    // 'right' | 'left' — bubble mode only
     // Style
     accent: '#0891B2',
     bg: '#FFFFFF',
@@ -567,11 +590,44 @@
       .tga-change { margin-top: 16px; }
       .tga-change button { background: transparent; border: 0; color: var(--tga-accent, #0891B2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; }
 
+      /* Popup / bubble display modes */
+      .tga-launch { appearance: none; display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 12px 20px;
+        border: 0; border-radius: 12px; background: var(--tga-accent, #0891B2); color: var(--tga-accent-ink, #fff);
+        font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+        box-shadow: 0 2px 8px rgba(15,23,42,.16); transition: filter .16s ease, transform .16s ease; }
+      .tga-launch:hover { filter: brightness(1.05); transform: translateY(-1px); }
+      .tga-launch svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .tga-bubble { position: fixed; bottom: 20px; z-index: 2147483000; width: 56px; height: 56px; border: 0; border-radius: 999px;
+        background: var(--tga-accent, #0891B2); color: var(--tga-accent-ink, #fff); cursor: pointer;
+        display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 32px rgba(15,23,42,.28); transition: transform .16s ease; }
+      .tga-bubble:hover { transform: scale(1.06); }
+      .tga-bubble svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .tga-bubble.pos-right { right: 20px; } .tga-bubble.pos-left { left: 20px; }
+      .tga-launch:focus-visible, .tga-bubble:focus-visible, .tga-close:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--tga-accent, #0891B2) 55%, transparent); outline-offset: 2px; }
+      .tga-overlay { position: fixed; inset: 0; z-index: 2147483600; display: flex; align-items: center; justify-content: center;
+        padding: 18px; background: rgba(15,23,42,.55); }
+      .tga-overlay[hidden] { display: none !important; }
+      .tga-panel { position: relative; width: min(840px, 100%); max-height: 100%; animation: tga-pop .22s ease-out; }
+      .tga-panel .tga { width: 100%; max-width: none; max-height: calc(100vh - 36px); overflow: auto; }
+      .tga-close { position: absolute; top: 10px; right: 10px; z-index: 2; width: 34px; height: 34px; border-radius: 999px; cursor: pointer;
+        border: 1px solid color-mix(in srgb, var(--tga-ink, #0F172A) 14%, transparent); background: var(--tga-bg, #fff); color: var(--tga-ink, #0F172A);
+        display: inline-flex; align-items: center; justify-content: center; }
+      .tga-close:hover { background: color-mix(in srgb, var(--tga-ink, #0F172A) 6%, var(--tga-bg, #fff)); }
+      .tga-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+      @keyframes tga-pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
+      @media (prefers-reduced-motion: reduce) {
+        .tga-panel { animation: none; }
+        .tga-launch, .tga-launch:hover, .tga-bubble, .tga-bubble:hover, .tga-submit, .tga-submit:hover { transition: none; transform: none; }
+      }
+
       .tga-hidden { display: none !important; }
       @media (max-width: 620px) {
         .tga-grid { grid-template-columns: 1fr; }
         .tga-aside { border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--tga-ink,#0F172A) 10%, transparent); }
         .tga-fields { grid-template-columns: 1fr; }
+        .tga-overlay { padding: 10px; }
+        .tga-panel .tga { max-height: calc(100vh - 20px); }
       }
     `;
   }
@@ -594,6 +650,9 @@
       this.viewMonth = null;          // {y, m0}
       this.selectedKey = null;        // host date key 'YYYY-MM-DD'
       this.selectedSlot = null;       // { inst:Date }
+      // Popup/bubble modes start closed; editor previews pass previewOpen so
+      // the panel is visible (and live-editable) without a click per re-render.
+      this._open = !!this.cfg.previewOpen;
       this._build();
     }
 
@@ -617,7 +676,7 @@
         const ev = this._event();
         const from = new Date().toISOString();
         const to = new Date(Date.now() + clampNum(this.cfg.dateRangeDays, 1, 120, 30) * 86400000).toISOString();
-        const url = (SCRIPT_ORIGIN || '') + '/api/appointment/availability?widgetId=' + encodeURIComponent(this.widgetId) +
+        const url = (API_ORIGIN || '') + '/api/appointment/availability?widgetId=' + encodeURIComponent(this.widgetId) +
           '&eventId=' + encodeURIComponent(ev.id || '') + '&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
         const r = await fetch(url, { credentials: 'omit' });
         if (!r.ok) return false;
@@ -646,6 +705,7 @@
       const earliest = Date.now() + notice * 3600 * 1000;
       const blackout = new Set(Array.isArray(c.blackoutDates) ? c.blackoutDates : []);
       const av = c.availability || {};
+      const overrides = (c.dateOverrides && typeof c.dateOverrides === 'object' && !Array.isArray(c.dateOverrides)) ? c.dateOverrides : {};
 
       const map = {};
       const t = todayYmdInTz(hostTz);
@@ -656,7 +716,9 @@
         const key = dateKey(y, m0, d);
         cur.setUTCDate(cur.getUTCDate() + 1);
         if (blackout.has(key)) continue;
-        const ranges = av[wd] || av[String(wd)] || [];
+        // A date-specific override replaces the weekly hours for that one date.
+        const ov = Object.prototype.hasOwnProperty.call(overrides, key) ? overrides[key] : null;
+        const ranges = Array.isArray(ov) ? ov : (av[wd] || av[String(wd)] || []);
         if (!ranges.length) continue;
         const slots = [];
         ranges.forEach(r => {
@@ -686,14 +748,94 @@
         `font-family:'${safeFont(c.font || c.fontFamily)}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`,
       ].join(';');
 
-      this.shadow.innerHTML = `<style>${styles()}</style>
-        <section class="tga" style="${vars}" role="region" aria-label="${esc(c.heading)}">
+      const mode = (c.displayMode === 'popup' || c.displayMode === 'bubble') ? c.displayMode : 'inline';
+      this.displayMode = mode;
+      if (mode === 'inline' && this._open) { this._open = false; this._lockScroll(false); }
+      const card = `<section class="tga" style="${vars}" role="region" aria-label="${esc(c.heading)}">
           <div id="tga-root"></div>
         </section>`;
+      if (mode === 'inline') {
+        this.shadow.innerHTML = `<style>${styles()}</style>` + card;
+      } else {
+        const label = (typeof c.launcherLabel === 'string' && c.launcherLabel.trim()) ? c.launcherLabel.trim().slice(0, 60) : this.t('bookTime');
+        const calIco = '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>';
+        const launcher = mode === 'popup'
+          ? `<button type="button" class="tga-launch" id="tga-open" style="${vars}"><svg viewBox="0 0 24 24" aria-hidden="true">${calIco}</svg> ${esc(label)}</button>`
+          : `<button type="button" class="tga-bubble ${c.bubblePosition === 'left' ? 'pos-left' : 'pos-right'}" id="tga-open" style="${vars}" aria-label="${esc(label)}" title="${esc(label)}"><svg viewBox="0 0 24 24" aria-hidden="true">${calIco}</svg></button>`;
+        this.shadow.innerHTML = `<style>${styles()}</style>${launcher}
+          <div class="tga-overlay" id="tga-overlay" role="dialog" aria-modal="true" aria-label="${esc(c.heading)}"${this._open ? '' : ' hidden'}>
+            <div class="tga-panel" style="${vars}">
+              <button type="button" class="tga-close" id="tga-close" aria-label="${esc(this.t('close'))}"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              ${card}
+            </div>
+          </div>`;
+        this._wireOverlay();
+        if (this._open) this._lockScroll(true);
+      }
       this.root = this.shadow.getElementById('tga-root');
 
       if (this.eventIdx < 0) this._renderEventPicker();
       else { this._computeSlots(); this._renderScheduler(); }
+    }
+
+    // ── Popup / bubble display modes ──
+    // The launcher (inline button or floating bubble) opens the scheduler in a
+    // fixed overlay. Focus and page scroll are touched only on the real open
+    // and close clicks, never as part of drawing, so editor previews and
+    // passive re-renders can never steal the cursor or yank the host page.
+    _wireOverlay() {
+      const sh = this.shadow;
+      const opener = sh.getElementById('tga-open');
+      const ov = sh.getElementById('tga-overlay');
+      if (opener) opener.addEventListener('click', () => this._openOverlay());
+      if (!ov) return;
+      sh.getElementById('tga-close').addEventListener('click', () => this._closeOverlay());
+      ov.addEventListener('mousedown', (e) => { if (e.target === ov) this._closeOverlay(); });
+      ov.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.stopPropagation(); this._closeOverlay(); return; }
+        if (e.key !== 'Tab') return;
+        // Light focus trap: keep Tab cycling inside the dialog.
+        const items = Array.prototype.slice.call(ov.querySelectorAll('button, [href], input, select, textarea'))
+          .filter((x) => !x.disabled && x.getClientRects().length);
+        if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        const active = sh.activeElement;
+        if (e.shiftKey && active === first) { e.preventDefault(); last.focus({ preventScroll: true }); }
+        else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus({ preventScroll: true }); }
+      });
+    }
+    _openOverlay() {
+      this._open = true;
+      this._interacted = true;
+      const ov = this.shadow.getElementById('tga-overlay');
+      if (ov) ov.hidden = false;
+      this._lockScroll(true);
+      this._moveFocus('tga-close');
+    }
+    _closeOverlay() {
+      this._open = false;
+      const ov = this.shadow.getElementById('tga-overlay');
+      if (ov) ov.hidden = true;
+      this._lockScroll(false);
+      const opener = this.shadow.getElementById('tga-open');
+      if (opener) { try { opener.focus({ preventScroll: true }); } catch (e) { /* noop */ } }
+    }
+    // Stop the host page scrolling behind the overlay. Skipped in editor
+    // previews, where the overlay is contained inside the preview frame.
+    _lockScroll(on) {
+      try {
+        if (this.cfg.previewMode || typeof document === 'undefined') return;
+        const de = document.documentElement;
+        if (on) {
+          if (this._scrollLocked) return;
+          this._scrollLocked = true;
+          this._prevOverflow = de.style.overflow;
+          de.style.overflow = 'hidden';
+        } else if (this._scrollLocked) {
+          this._scrollLocked = false;
+          de.style.overflow = this._prevOverflow || '';
+        }
+      } catch (e) { /* noop */ }
     }
 
     _asideHtml(showMeta) {
@@ -1006,7 +1148,7 @@
       if (this.cfg.previewMode) { this._showSuccess(when, startMs, startMs + this._event().mins * 60000); return; }
       btn.disabled = true; const orig = btn.textContent; btn.textContent = this.t('moving');
       const admin = !!this.adminRescheduleRef;
-      const url = (SCRIPT_ORIGIN || '') + (admin ? '/api/appointment/admin-action' : '/api/appointment/manage');
+      const url = (API_ORIGIN || '') + (admin ? '/api/appointment/admin-action' : '/api/appointment/manage');
       const payload = admin
         ? { ref: this.adminRescheduleRef, action: 'reschedule', startISO: this.selectedSlot.inst.toISOString() }
         : { token: this.rescheduleToken, action: 'reschedule', startISO: this.selectedSlot.inst.toISOString() };
@@ -1140,8 +1282,8 @@
       // Backend mode posts to the booking endpoint (real calendar, manage link);
       // otherwise it falls back to the generic contact endpoint.
       const backend = this.backend;
-      const url = backend ? (SCRIPT_ORIGIN + '/api/appointment/book')
-        : ((c.submitUrl && /^https?:\/\//i.test(c.submitUrl)) ? c.submitUrl : (SCRIPT_ORIGIN + '/api/contact'));
+      const url = backend ? ((API_ORIGIN || '') + '/api/appointment/book')
+        : ((c.submitUrl && /^https?:\/\//i.test(c.submitUrl)) ? c.submitUrl : ((API_ORIGIN || '') + '/api/contact'));
       if (backend) { payload.eventId = ev.id; payload.startISO = new Date(startMs).toISOString(); payload.visitorTimezone = this.viewTz; }
 
       fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -1182,7 +1324,13 @@
         c.location ? 'LOCATION:' + String(c.location).replace(/[,;\\]/g, ' ') : '',
         'END:VEVENT', 'END:VCALENDAR',
       ].filter(Boolean).join('\r\n');
-      try { return URL.createObjectURL(new Blob([ics], { type: 'text/calendar' })); }
+      try {
+        // Revoke the previous booking's blob before minting a new one — object
+        // URLs live until the document unloads, so re-bookings leaked them.
+        if (this._icsBlobUrl) { try { URL.revokeObjectURL(this._icsBlobUrl); } catch (e2) { /* noop */ } }
+        this._icsBlobUrl = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+        return this._icsBlobUrl;
+      }
       catch (e) { return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); }
     }
 
@@ -1231,11 +1379,18 @@
       this.eventIdx = this._initialEventIdx();
       this._serverLoaded = false;
       this._interacted = false;
+      // Keep an open popup/bubble overlay open across passive re-renders (the
+      // editor preview updates on every keystroke); previewOpen can force it.
+      if (this.cfg.previewOpen) this._open = true;
       this.viewMonth = null; this.selectedKey = null; this.selectedSlot = null;
       this._build();
     }
 
-    destroy(keepShadow) { if (!keepShadow && this.shadow) this.shadow.innerHTML = ''; }
+    destroy(keepShadow) {
+      this._lockScroll(false);
+      if (this._icsBlobUrl) { try { URL.revokeObjectURL(this._icsBlobUrl); } catch (e) { /* noop */ } this._icsBlobUrl = ''; }
+      if (!keepShadow && this.shadow) this.shadow.innerHTML = '';
+    }
   }
 
   // ─── Boot ───────────────────────────────────────────────────

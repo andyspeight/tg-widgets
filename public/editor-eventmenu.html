@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Menu Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<link rel="stylesheet" href="/editor-events-kit.css">
+<style>
+  /* The menu is a narrow column by nature, so the preview stage gives it one
+     rather than letting it stretch to the full width of the canvas and look
+     like something it will never look like on the client's own page. */
+  .pv-stage .menu-col { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+  .pv-stage .menu-col > * { min-width: 0; }
+  .pv-stage .menu-col.is-drawer { grid-template-columns: 1fr; }
+  .pv-mock { border: 1px solid var(--tgse-border, #e3e8ee); border-radius: 14px; padding: 20px; background: #fff; }
+  .pv-mock .band { height: 120px; border-radius: 10px; margin-bottom: 14px;
+    background: linear-gradient(135deg, #dbe6f0, #eef2f6); }
+  .pv-mock .ln { display: block; height: 11px; border-radius: 5px; background: #eef1f5; margin: 9px 0; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .cat-grid label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; cursor: pointer; }
+  .cat-grid input { flex: none; }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Event Menu</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Templates <span class="tgse-kbd">T</span>
+      </button>
+      <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/></svg>
+        AI builder <span class="tgse-kbd">A</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            <span class="tgse-section-label">Where the menu links to</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-pattern">Your page address</label>
+              <input class="input" type="text" id="f-pattern" spellcheck="false" maxlength="200"
+                     placeholder="/tickets/{type}/{slug}">
+              <div class="field-help">
+                Use <code>{type}</code> for competition, team, venue or performer,
+                <code>{slug}</code> for the key and <code>{name}</code> for the readable name.
+                Leave it blank and each row fires a <code>tg:eventmenu:select</code> event
+                on the container instead, for a developer to handle.
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Example</label>
+              <div class="field-help" id="pattern-eg" style="font-family:'JetBrains Mono',monospace"></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Open in a new tab</div></div>
+              <button class="switch" id="t-newtab" type="button" role="switch" aria-checked="false" aria-label="Open links in a new tab"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            <span class="tgse-section-label">What is in it</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Lists</label>
+              <div id="sec-opts"></div>
+              <div class="field-help">Clubs, venues and artists show the busiest two dozen. Search finds the rest.</div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Group competitions by</label>
+              <div class="seg" id="f-groupby" role="group" aria-label="Group competitions by">
+                <button type="button" data-v="category" aria-pressed="true">Sport</button>
+                <button type="button" data-v="country">Country</button>
+                <button type="button" data-v="none">Flat list</button>
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Limit to these sports</label>
+              <div class="cat-grid" id="cat-opts"></div>
+              <div class="field-help">Tick none to include everything.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Wording</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-heading">Menu title</label>
+              <input class="input" type="text" id="f-heading" maxlength="60" placeholder="Browse events">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-trigger">Drawer button label</label>
+              <input class="input" type="text" id="f-trigger" maxlength="40" placeholder="Browse events">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tgse-panel" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">How it sits on the page</label>
+              <div class="seg" id="f-layout" role="group" aria-label="Layout">
+                <button type="button" data-v="auto" aria-pressed="true">Automatic</button>
+                <button type="button" data-v="sidebar">Always sidebar</button>
+                <button type="button" data-v="drawer">Always drawer</button>
+              </div>
+              <div class="field-help">Automatic means a sidebar on a desktop and a button that opens a drawer on a phone.</div>
+            </div>
+            <div class="tgse-field" id="wrap-below">
+              <label class="tgse-field-label" for="f-below">Switch to a drawer below</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-below" min="480" max="1280" step="20">
+                <span class="slider-val" id="v-below">900px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="tgse-section-label">What each row shows</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="toggle-row"><div><div class="toggle-label">Search box</div>
+              <div class="toggle-sub">Filters the menu, and finds clubs and venues beyond it.</div></div>
+              <button class="switch is-on" id="t-search" type="button" role="switch" aria-checked="true" aria-label="Show the search box"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Event counts</div></div>
+              <button class="switch is-on" id="t-counts" type="button" role="switch" aria-checked="true" aria-label="Show event counts"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Country under each competition</div></div>
+              <button class="switch is-on" id="t-countries" type="button" role="switch" aria-checked="true" aria-label="Show the country"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Open the first group</div>
+              <div class="toggle-sub">Or the group holding the page you are on.</div></div>
+              <button class="switch is-on" id="t-openfirst" type="button" role="switch" aria-checked="true" aria-label="Open the first group"></button></div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-pergroup">Rows before "Show more"</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-pergroup" min="3" max="40" step="1">
+                <span class="slider-val" id="v-pergroup">8</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-accent">Accent colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-accent-swatch" aria-label="Pick accent colour">
+                <input class="input" type="text" id="f-accent" maxlength="7" spellcheck="false">
+              </div>
+              <div class="field-help">Marks the page you are on, and fills the drawer button.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span class="tgse-section-label">Shape</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-radius">Corner radius</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-radius" min="0" max="24" step="1">
+                <span class="slider-val" id="v-radius">12px</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tgse-panel" data-tab="settings">
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span class="tgse-section-label">Marking the current page</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-active">Force the highlighted row</label>
+              <input class="input" type="text" id="f-active" spellcheck="false" maxlength="200"
+                     placeholder="Leave blank to use the page address">
+              <div class="field-help">
+                The menu normally marks the row matching the address the visitor is on. Set a path
+                here only if your pages are rendered somewhere the address does not reflect.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span class="tgse-section-label">For your developer</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <div class="field-help">
+                Every row fires <code>tg:eventmenu:select</code> on the container, carrying
+                <code>type</code>, <code>key</code>, <code>name</code> and <code>href</code>.
+                Calling <code>preventDefault()</code> stops the navigation, so the menu can drive an
+                in-page view instead of a page load. The instance also exposes
+                <code>open()</code>, <code>close()</code> and <code>update(config)</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp" role="group" aria-label="Viewport">
+        <button class="is-on" data-vp="desktop" title="Desktop" aria-label="Desktop view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile view">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/></svg>
+        </button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        Theme
+      </button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Get embed code
+      </button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="pv-stage">
+          <div class="menu-col" id="menu-col">
+            <div id="widget-mount"></div>
+            <div class="pv-mock" aria-hidden="true">
+              <div class="band"></div>
+              <span class="ln" style="width:58%"></span>
+              <span class="ln" style="width:94%"></span>
+              <span class="ln" style="width:88%"></span>
+              <span class="ln" style="width:91%"></span>
+              <span class="ln" style="width:63%"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/editor-events-kit.js"></script>
+<script src="/widget-eventmenu.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var K = window.TGEditorKit;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var C = {
+    heading: 'Browse events',
+    layout: 'auto',
+    drawerBelow: 900,
+    triggerLabel: 'Browse events',
+    groupBy: 'category',
+    sections: ['competitions'],
+    linkPattern: '/tickets/{type}/{slug}',
+    newTab: false,
+    showSearch: true,
+    showCounts: true,
+    showCountries: true,
+    maxPerGroup: 8,
+    openFirstGroup: true,
+    onlyCategories: [],
+    activePath: '',
+    theme: 'light',
+    accent: '#00B4D8',
+    radius: 12,
+    fontFamily: 'Inter',
+  };
+
+  var SECTIONS = [
+    { id: 'competitions', label: 'Competitions and leagues' },
+    { id: 'teams', label: 'Popular clubs' },
+    { id: 'venues', label: 'Popular venues' },
+    { id: 'performers', label: 'Popular artists' },
+  ];
+
+  var widget = null;
+
+  var shell = tgse.init({
+    widgetType: 'Event Menu',
+    widgetTag: 'eventmenu',
+    scriptFile: 'widget-eventmenu.js',
+    getConfig: function () { return C; },
+    setConfig: function (c) { C = Object.assign({}, C, c); syncForm(); render(); },
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: function (f) { C.fontFamily = f; changed(); },
+    onAIBuild: function () { tgse.toast('AI builder is not wired for this widget yet — use Templates', 'ok'); },
+    onTemplates: function () {
+      K.templates(TEMPLATES, function (cfg) {
+        C = Object.assign({}, C, cfg); syncForm(); changed(); tgse.toast('Template applied', 'ok');
+      });
+    },
+    onThemeToggle: function (isDark) { C.theme = isDark ? 'dark' : 'light'; changed(); },
+    onLoginSuccess: function () { K.loadSaved(C, function () { syncForm(); render(); }); },
+  });
+
+  function changed() { shell.markDirty(); render(); }
+
+  function render() {
+    var host = $('widget-mount');
+    if (!host) return;
+    // The preview stage drops its second column when the menu is a drawer,
+    // because a drawer button beside a page mock reads as a stray button.
+    $('menu-col').classList.toggle('is-drawer', C.layout === 'drawer');
+    $('wrap-below').hidden = C.layout !== 'auto';
+    example();
+    if (widget) { widget.update(C); return; }
+    if (!window.TGEventMenuWidget) { setTimeout(render, 50); return; }
+    widget = new window.TGEventMenuWidget(host, C);
+  }
+
+  /** Show the agent what one of their own addresses will actually look like. */
+  function example() {
+    var pat = (C.linkPattern || '').trim();
+    var out = pat
+      ? pat.replace(/\{type\}/g, 'competition')
+           .replace(/\{slug\}/g, 'english-premier-league')
+           .replace(/\{name\}/g, 'premier-league')
+      : 'No link. Each row fires tg:eventmenu:select instead.';
+    $('pattern-eg').textContent = out;
+  }
+
+  var TEMPLATES = [
+    { name: 'Sport sidebar', desc: 'Competitions grouped by sport, beside your ticket pages.',
+      cfg: { layout: 'auto', groupBy: 'category', sections: ['competitions'],
+             heading: 'Browse events', showSearch: true, maxPerGroup: 8, onlyCategories: [] } },
+    { name: 'Football only', desc: 'Leagues by country, with the big clubs underneath.',
+      cfg: { layout: 'auto', groupBy: 'country', sections: ['competitions', 'teams'],
+             heading: 'Football tickets', onlyCategories: ['football'], maxPerGroup: 10 } },
+    { name: 'Music', desc: 'Artists and the venues they play.',
+      cfg: { layout: 'auto', groupBy: 'none', sections: ['performers', 'venues'],
+             heading: 'Live music', onlyCategories: ['entertainment'], maxPerGroup: 12 } },
+    { name: 'Mobile drawer', desc: 'A single button everywhere, for a narrow template.',
+      cfg: { layout: 'drawer', triggerLabel: 'Browse events', groupBy: 'category',
+             sections: ['competitions', 'teams'], showSearch: true } },
+  ];
+
+  function sectionOpts() {
+    var host = $('sec-opts');
+    host.textContent = '';
+    SECTIONS.forEach(function (s) {
+      var row = document.createElement('label');
+      row.className = 'book-opt';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = C.sections.indexOf(s.id) !== -1;
+      cb.addEventListener('change', function () {
+        var set = C.sections.filter(function (x) { return x !== s.id; });
+        if (cb.checked) set.push(s.id);
+        if (!set.length) { cb.checked = true; tgse.toast('Keep at least one list', 'err'); return; }
+        // Held in the declared order so the menu never reshuffles itself.
+        C.sections = SECTIONS.filter(function (d) { return set.indexOf(d.id) !== -1; })
+          .map(function (d) { return d.id; });
+        changed();
+      });
+      var body = document.createElement('div');
+      body.className = 'book-opt-body';
+      var n = document.createElement('div');
+      n.className = 'book-opt-name';
+      n.textContent = s.label;
+      body.appendChild(n);
+      row.appendChild(cb); row.appendChild(body);
+      host.appendChild(row);
+    });
+  }
+
+  function categoryOpts(cats) {
+    var host = $('cat-opts');
+    host.textContent = '';
+    cats.forEach(function (cat) {
+      var row = document.createElement('label');
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = C.onlyCategories.indexOf(cat.slug) !== -1;
+      cb.addEventListener('change', function () {
+        var set = C.onlyCategories.filter(function (x) { return x !== cat.slug; });
+        if (cb.checked) set.push(cat.slug);
+        C.onlyCategories = set;
+        changed();
+      });
+      var t = document.createElement('span');
+      t.textContent = cat.label;
+      row.appendChild(cb); row.appendChild(t);
+      host.appendChild(row);
+    });
+  }
+
+  function wire() {
+    var c = K.controls(C, changed);
+
+    c.seg('f-layout', 'layout');
+    c.seg('f-groupby', 'groupBy');
+
+    c.text('f-heading', 'heading');
+    c.text('f-trigger', 'triggerLabel');
+    c.text('f-pattern', 'linkPattern', example);
+    c.text('f-active', 'activePath');
+
+    c.slider('f-below', 'v-below', 'drawerBelow', function (v) { return v + 'px'; });
+    c.slider('f-pergroup', 'v-pergroup', 'maxPerGroup');
+    c.slider('f-radius', 'v-radius', 'radius', function (v) { return v + 'px'; });
+    c.colour('f-accent-swatch', 'f-accent', 'accent');
+
+    c.toggle('t-newtab', 'newTab');
+    c.toggle('t-search', 'showSearch');
+    c.toggle('t-counts', 'showCounts');
+    c.toggle('t-countries', 'showCountries');
+    c.toggle('t-openfirst', 'openFirstGroup');
+
+    $('name-input').addEventListener('input', function () { shell.markDirty(); });
+  }
+
+  function syncForm() {
+    var c = K.controls(C, function () {});
+    c.segSync('f-layout', C.layout);
+    c.segSync('f-groupby', C.groupBy);
+    $('f-heading').value = C.heading || '';
+    $('f-trigger').value = C.triggerLabel || '';
+    $('f-pattern').value = C.linkPattern || '';
+    $('f-active').value = C.activePath || '';
+    c.sliderSync('f-below', 'v-below', C.drawerBelow, function (v) { return v + 'px'; });
+    c.sliderSync('f-pergroup', 'v-pergroup', C.maxPerGroup);
+    c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
+    c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    c.toggleSync('t-newtab', C.newTab);
+    c.toggleSync('t-search', C.showSearch);
+    c.toggleSync('t-counts', C.showCounts);
+    c.toggleSync('t-countries', C.showCountries);
+    c.toggleSync('t-openfirst', C.openFirstGroup);
+    sectionOpts();
+    if (window.__tgCats) categoryOpts(window.__tgCats);
+    example();
+  }
+
+  K.boot({
+    wire: wire,
+    prefetch: function () {
+      return K.index().then(function (d) {
+        window.__tgCats = (d.categories || []).filter(function (x) { return x.slug !== 'unclassified'; });
+        categoryOpts(window.__tgCats);
+      });
+    },
+    load: function () { K.loadSaved(C, function () { syncForm(); render(); }); },
+    ready: function () { syncForm(); render(); },
+  });
+}());
+</script>
+
+</body>
+</html>

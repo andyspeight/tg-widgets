@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Search Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+          <path d="M13 5v14"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Sport</span><span>Concerts</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Ticket Search</h1>
+  <p class="lede">
+    One box over everything. Results come back grouped, because the useful answer to "Madrid" is
+    "which Madrid did you mean", not 136 rows in date order. The only widget in the set that works
+    on a page with no subject of its own.
+  </p>
+
+  <div class="controls">
+    <strong>Try</strong>
+    <button type="button" data-q="wembley" aria-pressed="true">Wembley</button>
+    <button type="button" data-q="arsenal">Arsenal</button>
+    <button type="button" data-q="madrid">Madrid</button>
+    <button type="button" data-q="olivia">Olivia</button>
+    <button type="button" data-q="">Empty</button>
+  </div>
+
+  <div class="controls">
+    <strong>Scope</strong>
+    <button type="button" data-scope="all" aria-pressed="true">Everything</button>
+    <button type="button" data-scope="football">Football only</button>
+    <button type="button" data-scope="entertainment">Concerts only</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page">
+    <div data-tg-widget="ticketsearch" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>Scope it to what the client sells.</b> A ski specialist can pin the whole box to one category
+    or one competition, so a search never returns baseball. Leave it open on a homepage.
+  </p>
+
+</div>
+
+<script src="/widget-ticketsearch.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var state = { q: 'wembley', scope: 'all', theme: 'light' };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return {
+      heading: 'Find tickets',
+      subheading: 'Any club, any ground, any act.',
+      placeholder: 'Search a club, a ground, an act…',
+      initialQuery: state.q,
+      suggestions: ['Arsenal', 'Wembley', 'Premier League', 'Olivia Rodrigo'],
+      category: state.scope === 'all' ? '' : state.scope,
+      theme: state.theme,
+      eventLimit: 6,
+      appId: '250',
+      accent: '#00B4D8',
+      bookingKinds: ['ticket', 'ticket-hotel', 'ticket-flight-hotel'],
+    };
+  }
+
+  function snippet() {
+    var c = config();
+    var shown = { heading: c.heading, placeholder: c.placeholder, eventLimit: c.eventLimit };
+    if (c.category) shown.category = c.category;
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="ticketsearch"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-ticketsearch.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGTicketSearchWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGTicketSearchWidget(mount, config());
+    group('q', 'q'); group('scope', 'scope'); group('theme', 'theme');
+    snippet();
+  }
+  boot();
+}());
+</script>
+</body>
+</html>

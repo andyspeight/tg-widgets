@@ -16,3 +16,7 @@ playwright-report/
 tg-sites/tools/coastwise-preview/
 tg-sites/tools/coastwise-seed/fonts.sql
 tg-sites/tools/coastwise-seed/font-stmts/
+
+# Ad hoc browser-check screenshots, written to the repo root by the widget
+# harness. Never part of a change.
+/shot-*.png

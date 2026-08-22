@@ -74,6 +74,34 @@
 
   .is-hidden { display:none !important; }
   [hidden] { display:none !important; }
+  /* Contain the widget's position:fixed overlay/bubble (popup and bubble
+     display modes) inside the preview frame instead of the editor viewport. */
+  .tgse-frame { transform: translateZ(0); }
+
+  /* AI + Templates modals (shell-token styled) */
+  .apt-modal { position:fixed; inset:0; background:rgba(15,23,42,.5); display:flex; align-items:center; justify-content:center; z-index:900; padding:20px; }
+  .apt-modal[hidden] { display:none !important; }
+  .apt-modal-card { background:var(--tgse-panel); border-radius:14px; max-width:520px; width:100%; max-height:82vh; overflow:auto; box-shadow:var(--tgse-shadow-lg); }
+  .apt-modal-head { padding:14px 18px; border-bottom:1px solid var(--tgse-border); display:flex; align-items:center; justify-content:space-between; }
+  .apt-modal-head h2 { font-size:15px; font-weight:700; margin:0; color:var(--tgse-ink); }
+  .apt-modal-x { appearance:none; border:0; background:transparent; color:var(--tgse-ink-3); cursor:pointer; padding:4px; border-radius:6px; }
+  .apt-modal-x:hover { background:var(--tgse-hover); color:var(--tgse-ink); }
+  .apt-modal-x svg { width:16px; height:16px; display:block; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+  .apt-modal-body { padding:18px; }
+  .apt-modal-foot { padding:12px 18px; border-top:1px solid var(--tgse-border); display:flex; justify-content:flex-end; gap:8px; }
+  .apt-mbtn { appearance:none; border:1px solid var(--tgse-border); background:var(--tgse-panel); color:var(--tgse-ink); font:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .apt-mbtn:hover { background:var(--tgse-hover); }
+  .apt-mbtn.is-primary { background:var(--tgse-brand); border-color:var(--tgse-brand); color:#fff; }
+  .apt-mbtn.is-primary:hover { background:var(--tgse-brand-dark); }
+  .apt-mbtn:disabled { opacity:.55; cursor:not-allowed; }
+  .tpl-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tpl-card { appearance:none; border:1.5px solid var(--tgse-border); background:var(--tgse-panel); padding:12px; border-radius:10px; cursor:pointer; text-align:left; font:inherit; transition:border-color .15s ease, transform .15s ease; }
+  .tpl-card:hover { border-color:var(--tgse-brand); transform:translateY(-1px); }
+  .tpl-name { font-size:13px; font-weight:700; color:var(--tgse-ink); margin-bottom:3px; }
+  .tpl-desc { font-size:11.5px; color:var(--tgse-ink-3); line-height:1.4; }
+  .apt-spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:aptspin .7s linear infinite; vertical-align:-2px; margin-right:6px; }
+  @keyframes aptspin { to { transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .tpl-card, .tpl-card:hover { transition:none; transform:none; } }
 </style>
 </head>
 <body>
@@ -138,6 +166,30 @@
             <div class="field"><label class="field-label">Accent</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="accent-col" value="#0891B2"></div><input class="input colour-hex" id="accent-hex" value="#0891B2" maxlength="9"></div></div>
             <div class="field"><label class="field-label">Card background</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="bg-col" value="#FFFFFF"></div><input class="input colour-hex" id="bg-hex" value="#FFFFFF" maxlength="9"></div></div>
             <div class="field"><label class="field-label">Text</label><div class="colour-row"><div class="colour-swatch-wrap"><input type="color" id="ink-col" value="#0F172A"></div><input class="input colour-hex" id="ink-hex" value="#0F172A" maxlength="9"></div></div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+            <span class="tgse-section-label">Display</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field">
+              <label class="field-label">How it appears on the page</label>
+              <select class="select" id="display-mode">
+                <option value="inline">Inline — embedded in the page</option>
+                <option value="popup">Popup — a button opens it</option>
+                <option value="bubble">Floating bubble — bottom corner</option>
+              </select>
+            </div>
+            <div class="field is-hidden" id="launcher-label-field"><label class="field-label">Button label</label><input type="text" class="input" id="launcher-label" maxlength="60" placeholder="Book a time"></div>
+            <div class="field is-hidden" id="bubble-pos-field">
+              <label class="field-label">Bubble corner</label>
+              <div class="seg" id="bubble-pos-seg"><button type="button" data-pos="right">Bottom right</button><button type="button" data-pos="left">Bottom left</button></div>
+            </div>
+            <span class="field-hint">Same embed code whichever you pick. Popup and bubble open the scheduler in an overlay when clicked — handy on busy pages.</span>
           </div>
         </div>
 
@@ -262,6 +314,17 @@
               <span class="field-hint">Keeps a gap clear around each booking. Applies when your calendar is connected.</span>
             </div>
             <div class="field">
+              <label class="field-label">Start times every</label>
+              <select class="select" id="slot-interval">
+                <option value="0">Match meeting length</option>
+                <option value="15">15 minutes</option>
+                <option value="20">20 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+              </select>
+              <span class="field-hint">A 30 minute meeting offered every 15 minutes gives 9:00, 9:15, 9:30 and so on.</span>
+            </div>
+            <div class="field">
               <label class="field-label">Maximum bookings per day</label>
               <div class="slider-row"><input type="range" id="cap-input" min="0" max="20" step="1" value="0"><span class="slider-val" id="cap-val">Off</span></div>
             </div>
@@ -270,6 +333,28 @@
               <div class="row-2"><input type="date" class="input" id="blackout-date"><button type="button" class="le-add" id="add-blackout" style="border-style:solid">Add date</button></div>
               <div id="blackout-list" style="margin-top:8px"></div>
             </div>
+            <div class="field">
+              <label class="field-label">Date-specific hours</label>
+              <div class="row-2"><input type="date" class="input" id="override-date"><button type="button" class="le-add" id="add-override" style="border-style:solid">Set hours</button></div>
+              <div id="override-list" style="margin-top:8px"></div>
+              <span class="field-hint">Replace your weekly hours on a single date — a late Thursday or a Saturday opening. Use blackout dates to close a day entirely.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section" id="reminders-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="tgse-section-label">Reminder emails</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="row-2">
+              <div><span class="mini-label">First reminder</span><select class="select" id="rem-1"></select></div>
+              <div><span class="mini-label">Second reminder</span><select class="select" id="rem-2"></select></div>
+            </div>
+            <span class="field-hint">Reminder emails go to the visitor and to you, sent on the hour. They apply to bookings made after you save.</span>
+            <div class="field" style="margin-top:12px"><div class="switch-row"><span class="switch-row-label">Also send a text reminder</span><button type="button" class="switch" id="sms-toggle" aria-pressed="false"></button></div><span class="field-hint" id="sms-hint">Texts go to the visitor's phone at the same times as the email reminders.</span></div>
           </div>
         </div>
 
@@ -328,6 +413,41 @@
 
 </div>
 
+<!-- ===== AI BUILDER MODAL ===== -->
+<div class="apt-modal" id="ai-modal" hidden>
+  <div class="apt-modal-card" role="dialog" aria-modal="true" aria-label="AI scheduler builder">
+    <div class="apt-modal-head">
+      <h2>AI scheduler builder</h2>
+      <button type="button" class="apt-modal-x" data-close-modal="ai-modal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="apt-modal-body">
+      <div class="field">
+        <label class="field-label" for="ai-prompt">Tell us about your business</label>
+        <textarea class="input" id="ai-prompt" style="min-height:96px" placeholder="e.g. We're a Chester travel agency specialising in tailor-made honeymoons and luxury long-haul. Most clients start with a phone chat, then a longer video call to plan properly."></textarea>
+        <span class="field-hint">The AI writes your heading and intro, suggests meeting types with sensible lengths, and drafts the questions to ask when someone books. You can edit everything afterwards.</span>
+      </div>
+    </div>
+    <div class="apt-modal-foot">
+      <button type="button" class="apt-mbtn" data-close-modal="ai-modal">Cancel</button>
+      <button type="button" class="apt-mbtn is-primary" id="ai-generate">Build my scheduler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TEMPLATES MODAL ===== -->
+<div class="apt-modal" id="template-modal" hidden>
+  <div class="apt-modal-card" role="dialog" aria-modal="true" aria-label="Templates">
+    <div class="apt-modal-head">
+      <h2>Templates</h2>
+      <button type="button" class="apt-modal-x" data-close-modal="template-modal" aria-label="Close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="apt-modal-body">
+      <div class="tpl-grid" id="template-grid"></div>
+      <span class="field-hint" style="margin-top:10px">Templates replace your copy, meeting types and questions. Your colours, font, calendar connection and availability stay as they are.</span>
+    </div>
+  </div>
+</div>
+
 <script src="/editor-shell.js"></script>
 <script src="/widget-appointment.js"></script>
 <script src="/editor-tour.js"></script>
@@ -344,7 +464,19 @@
     ['Australia · Sydney','Australia/Sydney'],['US Eastern · New York','America/New_York'],['US Central · Chicago','America/Chicago'],
     ['US Mountain · Denver','America/Denver'],['US Pacific · Los Angeles','America/Los_Angeles'],['Brazil · São Paulo','America/Sao_Paulo'],['UTC','UTC'],
   ];
-  function hourOpts(sel) { let o=''; for (let h=0; h<=23; h++){ const v=String(h).padStart(2,'0')+':00'; o+=`<option value="${v}"${v===sel?' selected':''}>${v}</option>`; } return o; }
+  // Half-hour boundaries (the config format always supported HH:MM; the editor
+  // used to offer whole hours only). 23:59 covers legacy "until midnight" rows.
+  function hourOpts(sel) {
+    let o = '';
+    for (let h = 0; h <= 23; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const v = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        o += `<option value="${v}"${v === sel ? ' selected' : ''}>${v}</option>`;
+      }
+    }
+    o += `<option value="23:59"${sel === '23:59' ? ' selected' : ''}>23:59</option>`;
+    return o;
+  }
 
   let C = {
     heading: 'Book a free consultation',
@@ -354,12 +486,19 @@
     timezone: 'Europe/London',
     availability: { 1:[['09:00','17:00']],2:[['09:00','17:00']],3:[['09:00','17:00']],4:[['09:00','17:00']],5:[['09:00','17:00']] },
     blackoutDates: [],
+    dateOverrides: {},
     dateRangeDays: 30,
     minNoticeHours: 4,
+    slotInterval: 0,
     bufferBefore: 0,
     bufferAfter: 0,
     dailyCap: 0,
+    reminders: [24],
+    smsReminders: false,
     timeFormat: '12',
+    displayMode: 'inline',
+    launcherLabel: '',
+    bubblePosition: 'right',
     askPhone: true,
     phoneRequired: false,
     questions: [
@@ -387,8 +526,8 @@
     setConfig: (c) => { C = Object.assign({}, C, c); syncUIFromState(); render(); },
     fontPickerEl: '#fontPickerMount',
     onFontChange: (f) => { C.fontFamily = f; shell.markDirty(); render(); },
-    onAIBuild: () => tgse.toast('AI builder coming soon for the Scheduler', 'ok'),
-    onTemplates: () => tgse.toast('Templates coming soon for the Scheduler', 'ok'),
+    onAIBuild: () => openAptModal('ai-modal'),
+    onTemplates: () => { renderTemplatesGrid(); openAptModal('template-modal'); },
     onLoginSuccess: () => { loadFromUrl(); if (typeof window.initAppointmentTour === 'function') window.initAppointmentTour(); },
   });
 
@@ -401,7 +540,9 @@
     if (!host) return;
     requestAnimationFrame(() => {
       if (window.TGAppointmentWidget) {
-        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, JSON.parse(JSON.stringify(C)), { font: C.fontFamily, previewMode: true })); }
+        // previewOpen: in popup/bubble modes the overlay starts open so the
+        // panel stays visible (and live-editable) without a click per re-render.
+        try { widgetInst = new window.TGAppointmentWidget(host, Object.assign({}, JSON.parse(JSON.stringify(C)), { font: C.fontFamily, previewMode: true, previewOpen: C.displayMode === 'popup' || C.displayMode === 'bubble' })); }
         catch (e) { console.error(e); }
       }
     });
@@ -492,6 +633,25 @@
     const wrap = document.getElementById('blackout-list');
     wrap.innerHTML = (C.blackoutDates||[]).map((d, i) => `<span style="display:inline-flex;align-items:center;gap:6px;background:var(--tgse-hover);border:1px solid var(--tgse-border);border-radius:999px;padding:3px 6px 3px 10px;font-size:12px;margin:0 6px 6px 0;">${esc(d)}<button type="button" class="le-del" data-del-bo="${i}" aria-label="Remove" style="padding:0"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></span>`).join('') || '<span class="field-hint">None. Add holidays or days off above.</span>';
   }
+  function renderOverrides() {
+    const wrap = document.getElementById('override-list');
+    const dates = Object.keys(C.dateOverrides || {}).sort();
+    wrap.innerHTML = dates.map((d) => {
+      const ranges = C.dateOverrides[d] || [];
+      const rows = ranges.map((r, ri) => `<span class="av-times" data-range="${ri}">
+        <select data-ov-f="start">${hourOpts(r[0])}</select> to <select data-ov-f="end">${hourOpts(r[1])}</select>
+        ${ranges.length > 1 ? `<button type="button" class="le-del" data-del-ov-range="${ri}" aria-label="Remove hours"><svg viewBox="0 0 24 24" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>` : ''}
+      </span>`).join('');
+      return `<div data-ov-date="${esc(d)}" style="padding:7px 0;border-bottom:1px solid var(--tgse-border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span class="av-day" style="flex:1">${esc(d)}</span>
+          <button type="button" data-ov-add-range style="background:none;border:0;color:var(--tgse-brand);font:inherit;font-size:12px;font-weight:600;cursor:pointer">+ hours</button>
+          <button type="button" class="le-del" data-del-ov aria-label="Remove date"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;padding-left:2px">${rows}</div>
+      </div>`;
+    }).join('') || '<span class="field-hint">None. Weekly hours apply every week.</span>';
+  }
   function renderAvailability() {
     const wrap = document.getElementById('avail-list');
     wrap.innerHTML = WD.map(([k, label]) => {
@@ -531,21 +691,42 @@
     document.getElementById('ink-col').value = hexOk(C.textColor)?C.textColor:'#0F172A'; document.getElementById('ink-hex').value = (C.textColor||'#0F172A').toUpperCase();
     document.querySelectorAll('#fmt-seg [data-fmt]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-fmt') === C.timeFormat));
     toggleSwitch('add-cal', C.addToCalendar);
+    toggleSwitch('sms-toggle', C.smsReminders);
     toggleSwitch('ask-phone', C.askPhone); document.getElementById('phone-req-field').classList.toggle('is-hidden', !C.askPhone);
     toggleSwitch('phone-req', C.phoneRequired);
     toggleSwitch('req-consent', C.requireConsent); document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent);
     document.getElementById('tz-input').value = C.timezone;
     document.getElementById('buf-before').value = String(C.bufferBefore || 0);
     document.getElementById('buf-after').value = String(C.bufferAfter || 0);
-    renderEvents(); renderQuestions(); renderAvailability(); renderBlackouts();
+    document.getElementById('slot-interval').value = String(C.slotInterval || 0);
+    const plan = Array.isArray(C.reminders) ? C.reminders : [24];
+    document.getElementById('rem-1').value = String(plan[0] || 0);
+    document.getElementById('rem-2').value = String(plan[1] || 0);
+    syncDisplayFields();
+    renderEvents(); renderQuestions(); renderAvailability(); renderBlackouts(); renderOverrides();
   }
 
-  // Fill timezone + buffer selects once
+  function syncDisplayFields() {
+    const m = (C.displayMode === 'popup' || C.displayMode === 'bubble') ? C.displayMode : 'inline';
+    document.getElementById('display-mode').value = m;
+    document.getElementById('launcher-label-field').classList.toggle('is-hidden', m === 'inline');
+    document.getElementById('bubble-pos-field').classList.toggle('is-hidden', m !== 'bubble');
+    document.getElementById('launcher-label').value = C.launcherLabel || '';
+    document.querySelectorAll('#bubble-pos-seg [data-pos]').forEach(b => b.classList.toggle('is-on', b.getAttribute('data-pos') === (C.bubblePosition === 'left' ? 'left' : 'right')));
+  }
+
+  // Fill timezone + buffer + reminder selects once
   document.getElementById('tz-input').innerHTML = TZ_LIST.map(z => `<option value="${z[1]}">${esc(z[0])}</option>`).join('');
   (function fillBuffers() {
     const html = [[0, 'None'], [5, '5 min'], [10, '10 min'], [15, '15 min'], [20, '20 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']].map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
     document.getElementById('buf-before').innerHTML = html;
     document.getElementById('buf-after').innerHTML = html;
+  })();
+  (function fillReminders() {
+    const opts = [[0, 'Off'], [1, '1 hour before'], [2, '2 hours before'], [3, '3 hours before'], [6, '6 hours before'], [12, '12 hours before'], [24, '24 hours before'], [48, '48 hours before'], [72, '72 hours before']];
+    const html = opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('');
+    document.getElementById('rem-1').innerHTML = html;
+    document.getElementById('rem-2').innerHTML = html;
   })();
 
   // ── Text inputs ──
@@ -686,6 +867,70 @@
     C.blackoutDates.splice(+del.getAttribute('data-del-bo'), 1); renderBlackouts(); shell.markDirty(); render();
   });
 
+  // ── Date-specific hours (override the weekly pattern on one date) ──
+  document.getElementById('add-override').addEventListener('click', () => {
+    const v = document.getElementById('override-date').value;
+    if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+    C.dateOverrides = C.dateOverrides || {};
+    if (!C.dateOverrides[v] && Object.keys(C.dateOverrides).length >= 40) { tgse.toast('That is plenty of date overrides — tidy some old ones first', 'err'); return; }
+    if (!C.dateOverrides[v]) C.dateOverrides[v] = [['09:00', '17:00']];
+    renderOverrides(); shell.markDirty(); render();
+  });
+  document.getElementById('override-list').addEventListener('change', (e) => {
+    const block = e.target.closest('[data-ov-date]'); if (!block || !e.target.getAttribute('data-ov-f')) return;
+    const d = block.getAttribute('data-ov-date');
+    C.dateOverrides[d] = readDayRanges(block);
+    shell.markDirty(); render();
+  });
+  document.getElementById('override-list').addEventListener('click', (e) => {
+    const block = e.target.closest('[data-ov-date]'); if (!block) return;
+    const d = block.getAttribute('data-ov-date');
+    if (e.target.closest('[data-ov-add-range]')) {
+      C.dateOverrides[d] = (C.dateOverrides[d] || []).concat([['13:00', '17:00']]);
+      renderOverrides(); shell.markDirty(); render(); return;
+    }
+    const delRange = e.target.closest('[data-del-ov-range]');
+    if (delRange) {
+      const cur = (C.dateOverrides[d] || []).slice();
+      cur.splice(+delRange.getAttribute('data-del-ov-range'), 1);
+      if (cur.length) C.dateOverrides[d] = cur; else delete C.dateOverrides[d];
+      renderOverrides(); shell.markDirty(); render(); return;
+    }
+    if (e.target.closest('[data-del-ov]')) {
+      delete C.dateOverrides[d];
+      renderOverrides(); shell.markDirty(); render();
+    }
+  });
+
+  // ── Start-time interval ──
+  document.getElementById('slot-interval').addEventListener('change', (e) => {
+    C.slotInterval = parseInt(e.target.value, 10) || 0; shell.markDirty(); render();
+  });
+
+  // ── Reminder plan (stored furthest-first; 0 = off) ──
+  function updateReminders() {
+    const picks = [parseInt(document.getElementById('rem-1').value, 10) || 0, parseInt(document.getElementById('rem-2').value, 10) || 0].filter(Boolean);
+    C.reminders = [...new Set(picks)].sort((a, b) => b - a);
+    shell.markDirty();
+  }
+  document.getElementById('rem-1').addEventListener('change', updateReminders);
+  document.getElementById('rem-2').addEventListener('change', updateReminders);
+
+  // ── Display mode (inline / popup / bubble) ──
+  document.getElementById('display-mode').addEventListener('change', (e) => {
+    const v = e.target.value;
+    C.displayMode = (v === 'popup' || v === 'bubble') ? v : 'inline';
+    syncDisplayFields(); shell.markDirty(); render();
+  });
+  document.getElementById('launcher-label').addEventListener('input', (e) => {
+    C.launcherLabel = e.target.value; shell.markDirty(); render();
+  });
+  document.getElementById('bubble-pos-seg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pos]'); if (!b) return;
+    C.bubblePosition = b.getAttribute('data-pos') === 'left' ? 'left' : 'right';
+    syncDisplayFields(); shell.markDirty(); render();
+  });
+
   // ── Format ──
   document.getElementById('fmt-seg').addEventListener('click', (e) => {
     const b = e.target.closest('[data-fmt]'); if (!b) return;
@@ -711,9 +956,186 @@
   // ── Switches ──
   function wireSwitch(id, key, after) { document.getElementById(id).addEventListener('click', () => { C[key] = !C[key]; toggleSwitch(id, C[key]); if (after) after(); shell.markDirty(); render(); }); }
   wireSwitch('add-cal','addToCalendar');
+  wireSwitch('sms-toggle','smsReminders');
   wireSwitch('ask-phone','askPhone', () => document.getElementById('phone-req-field').classList.toggle('is-hidden', !C.askPhone));
   wireSwitch('phone-req','phoneRequired');
   wireSwitch('req-consent','requireConsent', () => document.getElementById('consent-text-field').classList.toggle('is-hidden', !C.requireConsent));
+
+  // ── AI builder + Templates modals ──
+  function openAptModal(id) { const m = document.getElementById(id); if (m) m.hidden = false; }
+  function closeAptModal(id) { const m = document.getElementById(id); if (m) m.hidden = true; }
+  document.addEventListener('click', (e) => {
+    const closer = e.target.closest('[data-close-modal]');
+    if (closer) { closeAptModal(closer.getAttribute('data-close-modal')); return; }
+    if (e.target.classList && e.target.classList.contains('apt-modal')) e.target.hidden = true;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    ['ai-modal', 'template-modal'].forEach(closeAptModal);
+  });
+
+  const AI_MODES = ['callback', 'phone', 'video', 'inperson'];
+  const AI_MINS = [15, 20, 30, 45, 60, 90];
+  const AI_QTYPES = ['text', 'textarea', 'select'];
+  const snapMins = (m) => { const n = parseInt(m, 10); if (AI_MINS.includes(n)) return n; if (!Number.isFinite(n)) return 30; return AI_MINS.reduce((a, b) => Math.abs(b - n) < Math.abs(a - n) ? b : a); };
+
+  // Clamp whatever the model returned onto our config shape. Everything is
+  // re-escaped at render time, so this only enforces shape and bounds.
+  function applyAiResult(r) {
+    if (!r || typeof r !== 'object') return false;
+    let touched = false;
+    if (typeof r.heading === 'string' && r.heading.trim()) { C.heading = r.heading.trim().slice(0, 80); touched = true; }
+    if (typeof r.subheading === 'string' && r.subheading.trim()) { C.subheading = r.subheading.trim().slice(0, 180); touched = true; }
+    if (typeof r.company === 'string' && r.company.trim()) { C.company = r.company.trim().slice(0, 60); touched = true; }
+    if (Array.isArray(r.eventTypes) && r.eventTypes.length) {
+      const evs = r.eventTypes.slice(0, 4).map((e, i) => ({
+        id: 'ev' + Date.now().toString(36) + i,
+        label: String((e && e.label) || '').trim().slice(0, 60),
+        mins: snapMins(e && e.mins),
+        mode: AI_MODES.includes(e && e.mode) ? e.mode : 'callback',
+        description: String((e && e.description) || '').trim().slice(0, 120),
+      })).filter((e) => e.label);
+      if (evs.length) { C.eventTypes = evs; touched = true; }
+    }
+    if (Array.isArray(r.questions)) {
+      C.questions = r.questions.slice(0, 4).map((q, i) => {
+        const out = {
+          id: 'q' + Date.now().toString(36) + i,
+          label: String((q && q.label) || '').trim().slice(0, 120),
+          type: AI_QTYPES.includes(q && q.type) ? q.type : 'text',
+          required: !!(q && q.required),
+        };
+        if (out.type === 'select') out.options = (q && Array.isArray(q.options) ? q.options : []).slice(0, 8).map((o) => String(o).trim().slice(0, 60)).filter(Boolean);
+        return out;
+      }).filter((q) => q.label && (q.type !== 'select' || (q.options && q.options.length)));
+      touched = true;
+    }
+    return touched;
+  }
+
+  document.getElementById('ai-generate').addEventListener('click', async () => {
+    const desc = document.getElementById('ai-prompt').value.trim();
+    if (!desc) { tgse.toast('Tell us a little about your business first', 'err'); return; }
+    const btn = document.getElementById('ai-generate');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="apt-spin"></span>Building…';
+    const reset = () => { btn.disabled = false; btn.textContent = 'Build my scheduler'; };
+    try {
+      const instruction = 'You are helping a UK travel business set up an appointment scheduler widget. From the business description below, write the scheduler copy and suggest meeting types. Return ONE JSON object with exactly these fields: heading (string, max 80 characters, a warm invitation to book), subheading (string, max 180), company (string, max 60, the business name as it should appear on the scheduler), eventTypes (array of 1-4 objects: { label: string max 60, mins: one of 15|20|30|45|60|90, mode: one of "callback"|"phone"|"video"|"inperson", description: string max 120 }), questions (array of 0-4 objects: { label: string max 120, type: one of "text"|"textarea"|"select", required: boolean, options: array of short strings, select type only }). Plain warm UK English, no exclamation marks, no emojis. Business description: ' + desc;
+      const res = await fetch('/api/widget-ai', {
+        method: 'POST',
+        headers: tgse.authHeaders(),
+        body: JSON.stringify({
+          widgetType: 'Appointment',
+          prompt: instruction,
+          responseFormat: 'json',
+          schema: {
+            heading: 'string', subheading: 'string', company: 'string',
+            eventTypes: 'array of { label, mins, mode, description }',
+            questions: 'array of { label, type, required, options }',
+          },
+        }),
+      });
+      if (res.status === 401) { tgse.showLogin(); reset(); return; }
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data) { tgse.toast((data && data.error) || 'The AI could not build that. Try again.', 'err'); reset(); return; }
+      const result = (data.result && typeof data.result === 'object') ? data.result : data;
+      if (!applyAiResult(result)) { tgse.toast('The AI returned nothing usable. Try a fuller description.', 'err'); reset(); return; }
+      shell.markDirty(); syncUIFromState(); render();
+      closeAptModal('ai-modal');
+      tgse.toast('Scheduler drafted. Look it over and tweak anything.', 'ok');
+    } catch (e) {
+      tgse.toast('Network error. Please try again.', 'err');
+    }
+    reset();
+  });
+
+  // ── Templates ──
+  // Each template patches copy, meeting types, questions and a few settings.
+  // Colours, font, timezone, availability, calendar connection and date
+  // overrides are deliberately left alone.
+  const APT_TEMPLATES = [
+    {
+      name: 'Travel consultation',
+      desc: 'A friendly callback plus a longer video planning session.',
+      patch: {
+        heading: 'Book a free travel consultation',
+        subheading: 'Pick a time that suits you and one of our travel experts will be in touch.',
+        eventTypes: [
+          { id: 'tpl-chat', label: 'Quick travel chat', mins: 30, mode: 'callback', description: 'A friendly chat about where you fancy going.' },
+          { id: 'tpl-plan', label: 'Trip planning session', mins: 60, mode: 'video', description: 'A proper sit-down to plan your trip end to end.' },
+        ],
+        questions: [
+          { id: 'tpl-topic', label: 'What is it about?', type: 'select', required: false, options: ['Tailor-made holiday', 'Cruise', 'Honeymoon', 'Family holiday', 'Something else'] },
+          { id: 'tpl-notes', label: 'Anything we should know? (optional)', type: 'textarea', required: false },
+        ],
+        askPhone: true, phoneRequired: false, displayMode: 'inline', reminders: [24],
+      },
+    },
+    {
+      name: 'Video appointments',
+      desc: 'Two video meeting lengths, built for Zoom or Meet.',
+      patch: {
+        heading: 'Book a video appointment',
+        subheading: 'Face to face planning from wherever you are. We will send the video link with your confirmation.',
+        eventTypes: [
+          { id: 'tpl-disc', label: 'Discovery call', mins: 30, mode: 'video', description: 'Tell us what you have in mind and we will map the options.' },
+          { id: 'tpl-full', label: 'Full planning session', mins: 60, mode: 'video', description: 'Flights, stays and the little details, all in one call.' },
+        ],
+        questions: [
+          { id: 'tpl-dest', label: 'Where are you thinking of going?', type: 'text', required: false },
+          { id: 'tpl-when', label: 'Roughly when would you like to travel?', type: 'text', required: false },
+        ],
+        askPhone: true, phoneRequired: false, displayMode: 'inline', reminders: [24, 2],
+      },
+    },
+    {
+      name: 'In-office visits',
+      desc: 'Face to face appointments at your branch.',
+      patch: {
+        heading: 'Book a visit to our travel shop',
+        subheading: 'Come in for a brew and let us plan your next trip properly.',
+        location: 'Our office. We will confirm the address with your booking.',
+        eventTypes: [
+          { id: 'tpl-visit', label: 'In-store appointment', mins: 45, mode: 'inperson', description: 'A relaxed face to face with one of the team.' },
+        ],
+        questions: [
+          { id: 'tpl-topic', label: 'What would you like help with?', type: 'select', required: false, options: ['New booking', 'Existing booking', 'Group trip', 'Something else'] },
+        ],
+        askPhone: true, phoneRequired: true, displayMode: 'inline', reminders: [24, 2],
+      },
+    },
+    {
+      name: 'Quick callback',
+      desc: 'A 15 minute callback behind a popup button.',
+      patch: {
+        heading: 'Request a callback',
+        subheading: 'Leave us a time and a number and we will ring you back.',
+        eventTypes: [
+          { id: 'tpl-cb', label: 'Callback', mins: 15, mode: 'callback', description: '' },
+        ],
+        questions: [],
+        askPhone: true, phoneRequired: true,
+        displayMode: 'popup', launcherLabel: 'Request a callback', reminders: [2],
+      },
+    },
+  ];
+  function renderTemplatesGrid() {
+    document.getElementById('template-grid').innerHTML = APT_TEMPLATES.map((t, i) => `
+      <button type="button" class="tpl-card" data-template-idx="${i}">
+        <div class="tpl-name">${esc(t.name)}</div>
+        <div class="tpl-desc">${esc(t.desc)}</div>
+      </button>`).join('');
+  }
+  document.getElementById('template-grid').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-template-idx]'); if (!b) return;
+    const t = APT_TEMPLATES[parseInt(b.getAttribute('data-template-idx'), 10)];
+    if (!t) return;
+    Object.keys(t.patch).forEach((k) => { C[k] = JSON.parse(JSON.stringify(t.patch[k])); });
+    shell.markDirty(); syncUIFromState(); render();
+    closeAptModal('template-modal');
+    tgse.toast('Template applied. Your colours and availability are untouched.', 'ok');
+  });
 
   document.getElementById('name-input').addEventListener('input', () => shell.markDirty());
 
@@ -723,6 +1145,14 @@
     const el = document.getElementById('cal-status'); if (!el) return;
     const hint = document.getElementById('cal-hint');
     if (hint) hint.style.display = (s && s.connected) ? 'none' : '';
+    // The SMS toggle is honest about platform state: the setting always saves,
+    // but texts only go out once Twilio is configured server-side.
+    const smsHint = document.getElementById('sms-hint');
+    if (smsHint && s) {
+      smsHint.textContent = s.sms
+        ? "Texts go to the visitor's phone at the same times as the email reminders."
+        : 'Saved and ready: texts start going out automatically once SMS is switched on for the platform.';
+    }
     const note = (txt) => '<div style="font-size:12.5px;color:var(--tgse-ink-3);background:var(--tgse-hover);border:1px solid var(--tgse-border);border-radius:10px;padding:11px 13px;line-height:1.5">' + txt + '</div>';
     if (!s) { el.innerHTML = note('Could not check calendar status. Try reloading the page.'); return; }
     if (!s.configured) { el.innerHTML = note('Calendar connecting is not switched on for this account yet. The scheduler still works without it.'); return; }

@@ -47,6 +47,11 @@ a{text-decoration:none;color:inherit}
 .stats.show{display:block}
 .stats-inner{display:flex;gap:12px}
 .stat-card{flex:1;background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.stat-card--btn{cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.stat-card--btn:hover{border-color:#F59E0B66}
+.stat-card--btn:focus-visible{outline:2px solid #F59E0B;outline-offset:2px}
+.stat-card--btn.is-active{border-color:#F59E0B;box-shadow:0 0 0 3px #F59E0B22}
+.stat-card--btn.is-active .stat-label::after{content:' · showing only these';color:#B45309;font-weight:600}
 .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .stat-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .stat-num{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1}.stat-label{font-size:12px;color:var(--mt);font-weight:500}
@@ -98,7 +103,7 @@ a{text-decoration:none;color:inherit}
 .w-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;overflow:hidden;transition:all .3s}
 .w-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.07);border-color:#D1D5DB;transform:translateY(-3px)}
 .w-card-preview{height:200px;background:var(--bg);border-bottom:1px solid var(--bd);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
-.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px}
+.w-card-preview-inner{transform:scale(.55);transform-origin:center center;pointer-events:none;width:700px;min-height:340px;flex:none}
 .w-card-body{padding:18px 20px 20px}
 .w-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
 .w-card-logo{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -677,7 +682,7 @@ const WIDGETS = [
     id: 'appointment',
     name: 'Appointment Scheduler',
     airtableType: 'Appointment',  // matches Airtable WidgetType singleSelect option
-    description: 'A Calendly-style booking widget. Month-view calendar, automatic timezone detection with a switcher, 12/24h times, multiple meeting types, per-day availability and blackout dates, custom questions and Add to Calendar. Visitors pick a slot and the request lands with your team. Fully rebrandable.',
+    description: 'A Calendly-style booking widget that books for real. Month-view calendar with live free/busy from your connected Google or Outlook calendar, per-booking Zoom / Meet / Teams links, automatic timezone detection, multiple meeting types, date-specific hours, reminder emails, reschedule and cancel links, and inline, popup or floating-bubble display. Fully rebrandable.',
     category: 'Lead Gen',
     status: 'live',
     icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/>'},
@@ -867,6 +872,111 @@ const WIDGETS = [
     widgetTag: 'events',
     scriptFile: 'widget-events.js',
     access: { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'tickets',
+    name: 'Event Tickets',
+    airtableType: 'Event Tickets',  // matches Airtable WidgetType singleSelect option
+    description: 'Upcoming bookable events with a Book button — football fixtures, concerts, tour dates. Point one embed at a competition, a club, a venue, an artist or a search term. Booking deeplinks open the client\u2019s own Travelify application.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-tickets',
+    demoUrl: '/demo-tickets',
+    widgetTag: 'tickets',
+    scriptFile: 'widget-tickets.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'nextevent',
+    name: 'Next Event',
+    airtableType: 'Next Event',  // matches Airtable WidgetType singleSelect option
+    description: 'A single card showing the next fixture, gig or race for a club, venue or artist — with a live countdown and a booking link. The smallest embed in the ticket set and the easiest to find room for.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'},
+    color: '#6366F1',
+    editorUrl: '/editor-nextevent',
+    demoUrl: '/demo-nextevent',
+    widgetTag: 'nextevent',
+    scriptFile: 'widget-nextevent.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'clubpicker',
+    name: 'Club Picker',
+    airtableType: 'Club Picker',  // matches Airtable WidgetType singleSelect option
+    description: 'A grid of club badges, artists or venues. Click one and their fixtures or dates open underneath in the same embed, each with a booking link. A league page as a single line of HTML.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'},
+    color: '#8B5CF6',
+    editorUrl: '/editor-clubpicker',
+    demoUrl: '/demo-clubpicker',
+    widgetTag: 'clubpicker',
+    scriptFile: 'widget-clubpicker.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'ticketsearch',
+    name: 'Ticket Search',
+    airtableType: 'Ticket Search',  // matches Airtable WidgetType singleSelect option
+    description: 'One search box over the whole ticket feed. Typing Wembley returns the ground, the football at it and the concerts at it; Arsenal returns the club and every game home and away. Results grouped, each with a booking link.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/>'},
+    color: '#0EA5E9',
+    editorUrl: '/editor-ticketsearch',
+    demoUrl: '/demo-ticketsearch',
+    widgetTag: 'ticketsearch',
+    scriptFile: 'widget-ticketsearch.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'ticketmonth',
+    name: 'Ticket Month',
+    airtableType: 'Ticket Month',  // matches Airtable WidgetType singleSelect option
+    description: 'A month calendar of everything on, with a day panel and booking buttons.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z'},
+    color: '#7C5CFF',
+    editorUrl: '/editor-ticketmonth',
+    demoUrl: '/demo-ticketmonth',
+    widgetTag: 'ticketmonth',
+    scriptFile: 'widget-ticketmonth.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'eventmenu',
+    name: 'Event Menu',
+    airtableType: 'Event Menu',  // matches Airtable WidgetType singleSelect option
+    description: 'A sidebar or drawer menu of every competition, club, venue and artist, linking into your own pages.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M4 6h16M4 12h16M4 18h16'},
+    color: '#12B886',
+    editorUrl: '/editor-eventmenu',
+    demoUrl: '/demo-eventmenu',
+    widgetTag: 'eventmenu',
+    scriptFile: 'widget-eventmenu.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  },
+  {
+    id: 'venueguide',
+    name: 'Venue Guide',
+    airtableType: 'Venue Guide',  // matches Airtable WidgetType singleSelect option
+    description: 'A visitor guide to one venue: map, photo, capacity, nearest airports, what is on and Book buttons.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z'},
+    color: '#E8590C',
+    editorUrl: '/editor-venueguide',
+    demoUrl: '/demo-venueguide',
+    widgetTag: 'venueguide',
+    scriptFile: 'widget-venueguide.js',
+    access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
     id: 'offers',
@@ -1084,6 +1194,10 @@ const CATEGORIES = ['All', ...new Set(WIDGETS.map(w => w.category))];
 let signedIn = false;
 let userEmail = '';
 let activeFilter = 'All';
+// The Coming Soon stat card doubles as a filter: click to see only the
+// widgets marked coming-soon, click again to clear. Uses the same predicate
+// as the count on the card, so the number and the grid always agree.
+let soonFilter = false;
 let searchQuery = '';
 let myWidgetData = [];
 
@@ -1125,7 +1239,9 @@ function renderStats() {
     <div class="stat-card"><div class="stat-icon" style="background:${WIDGETS[0].color}15"><svg style="stroke:${WIDGETS[0].color}" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div><div><div class="stat-num">${total}</div><div class="stat-label">My widgets</div></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#8B5CF615"><svg style="stroke:#8B5CF6" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="stat-num">${views.toLocaleString()}</div><div class="stat-label">Total views</div></div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#10B98115"><svg style="stroke:#10B981" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>(catalogueStatus[w.id]||w.status)==='live').length}</div><div class="stat-label">Widgets available</div></div></div>
-    <div class="stat-card"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>(catalogueStatus[w.id]||w.status)==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
+    <div class="stat-card stat-card--btn${soonFilter ? ' is-active' : ''}" role="button" tabindex="0" aria-pressed="${soonFilter}"
+      title="${soonFilter ? 'Show every widget' : 'Show only the widgets marked coming soon'}"
+      onclick="toggleSoonFilter()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSoonFilter();}"><div class="stat-icon" style="background:#F59E0B15"><svg style="stroke:#F59E0B" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-num">${WIDGETS.filter(w=>(catalogueStatus[w.id]||w.status)==='coming-soon').length}</div><div class="stat-label">Coming soon</div></div></div>`;
 }
 
 async function renderMyWidgets(opts = {}) {
@@ -1552,6 +1668,7 @@ function renderFilters() {
 function renderCatalogue() {
   const q = searchQuery.trim().toLowerCase();
   let filtered = activeFilter === 'All' ? WIDGETS : WIDGETS.filter(w => w.category === activeFilter);
+  if (soonFilter) filtered = filtered.filter(w => (catalogueStatus[w.id] || w.status) === 'coming-soon');
   if (q) filtered = filtered.filter(w => (w.name || '').toLowerCase().includes(q));
   // Alphabetical by name — easy to scan now the catalogue is large.
   filtered = filtered.slice().sort((a, b) => a.name.localeCompare(b.name));
@@ -1678,13 +1795,27 @@ function renderCatalogue() {
       </div>
     </div>`;
   }).join('');
-  grid.innerHTML = cardsHtml || `<div class="cat-empty">No widgets match your search. Try a different name.</div>`;
+  grid.innerHTML = cardsHtml || `<div class="cat-empty">${soonFilter
+    ? 'Nothing is marked coming soon right now.'
+    : 'No widgets match your search. Try a different name.'}</div>`;
 
   // Load live mini-previews — for every built widget (live or preview-soon),
   // since preview-soon keeps its working preview.
   setTimeout(() => {
     filtered.filter(w => w.status === 'live').forEach(w => loadMiniPreview(w));
   }, 200);
+}
+
+function toggleSoonFilter() {
+  soonFilter = !soonFilter;
+  renderStats();
+  renderCatalogue();
+  // Filtering from the stats bar with the grid off-screen would look like a
+  // dead click, so the grid comes to you — but only when switching ON.
+  if (soonFilter) {
+    const cat = document.getElementById('catalogue');
+    if (cat) cat.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function onSearchInput(v) {
@@ -3098,6 +3229,52 @@ function loadMiniPreview(w) {
     });
   }
 
+  if (w.id === 'nextevent' && window.TGNextEventWidget) {
+    new window.TGNextEventWidget(el, { sourceType: 'team', sourceValue: 'arsenal', side: 'home', layout: 'card', label: 'Next up', showCountdown: true, accent: w.color, theme: 'light', appId: '250' });
+  }
+
+  if (w.id === 'clubpicker' && window.TGClubPickerWidget) {
+    new window.TGClubPickerWidget(el, { gridOf: 'team', competition: 'english-premier-league', heading: '', prompt: '', maxEntities: 8, columns: 4, showCounts: false, showHomeVenue: false, accent: w.color, theme: 'light', appId: '250' });
+  }
+
+  if (w.id === 'ticketsearch' && window.TGTicketSearchWidget) {
+    new window.TGTicketSearchWidget(el, { heading: '', subheading: '', placeholder: 'Search a club, a ground, an act…', initialQuery: 'wembley', suggestions: [], showGroups: false, eventLimit: 2, accent: w.color, theme: 'light', appId: '250' });
+  }
+
+  if (w.id === 'ticketmonth' && window.TGTicketMonthWidget) {
+    // A six-week month is taller than the 200px card, and the card centres what
+    // it holds, so the month name, the one thing that says what this widget is,
+    // was the part being cut off. Anchor it to the top and let the last week go
+    // instead. 620px keeps the mount just above the widget's own 560px
+    // container breakpoint, so the cells stay tall enough to carry a fixture
+    // name: the dots are 6px, which is right on a phone and invisible here.
+    container.style.alignSelf = 'flex-start';
+    container.style.transformOrigin = 'center top';
+    el.style.maxWidth = '620px';
+    el.style.margin = '0 auto';
+    new window.TGTicketMonthWidget(el, { sourceType:'competition', sourceValue:'english-premier-league', heading:'', showDayTitles:true, maxPerCell:1, dayLimit:4, radius:10, accent:'#7C5CFF' });
+  }
+
+  if (w.id === 'eventmenu' && window.TGEventMenuWidget) {
+    // The card is 200px and centres what it holds, so a menu with eighteen
+    // collapsed sports underneath it shows its middle rather than its top.
+    // One sport, flat, three rows: about 300px scaled to 165px, which fits.
+    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'none', onlyCategories:['football'], sections:['competitions'], maxPerGroup:3, showSearch:true, radius:10, accent:'#12B886' });
+  }
+
+  if (w.id === 'venueguide' && window.TGVenueGuideWidget) {
+    new window.TGVenueGuideWidget(el, { venue:'wembleystadium', showPhoto:false, showMap:true, showFacts:true, showEvents:true, eventLimit:2, mapZoom:13, radius:12, accent:'#E8590C', appId:'250' });
+  }
+
+  if (w.id === 'tickets' && window.TGTicketsWidget) {
+    new window.TGTicketsWidget(el, {
+      sourceType: 'competition', sourceValue: 'english-premier-league',
+      heading: '', limit: 3, layout: 'list',
+      showCompetition: false, showVenue: true, showTime: true,
+      accent: w.color, radius: 12, theme: 'light', appId: '250',
+    });
+  }
+
   if (w.id === 'offers') {
     container.innerHTML = `
       <div style="
@@ -4358,6 +4535,13 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-events.js"></script>
 <script src="/widget-offers.js"></script>
 <script src="/widget-worldmap.js"></script>
+<script src="/widget-tickets.js"></script>
+<script src="/widget-venueguide.js"></script>
+<script src="/widget-eventmenu.js"></script>
+<script src="/widget-ticketmonth.js"></script>
+<script src="/widget-ticketsearch.js"></script>
+<script src="/widget-clubpicker.js"></script>
+<script src="/widget-nextevent.js"></script>
 <script src="/widget-share.js"></script>
 <script src="/widget-whatsapp.js"></script>
 <script src="/widget-hours.js"></script>

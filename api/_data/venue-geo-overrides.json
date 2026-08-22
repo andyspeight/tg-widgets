@@ -1,0 +1,100 @@
+{
+  "_comment": "Final-say anchors applied over the supplier feed's coordinates by scripts/build-venue-geo-from-feed.mjs. Only for venues where the feed's fine-grained point is factually wrong (verified against the ground). The geocoder-era override list (174 entries, 21 Aug 2026) is in git history.",
+  "venues": {
+    "geodispark": {
+      "lat": 36.13,
+      "lng": -86.7659,
+      "why": "GEODIS Park, Nashville - feed points 119km southeast"
+    },
+    "stadejeanbouin": {
+      "lat": 48.8433,
+      "lng": 2.253,
+      "why": "Stade Jean Bouin, Paris (Paris FC) - feed points at Angers' namesake"
+    },
+    "stadefrancislebasser": {
+      "lat": 48.0822,
+      "lng": -0.7548,
+      "why": "Francis Le Basser, Laval - feed points at Angers"
+    },
+    "zenithsud": {
+      "lat": 43.6131,
+      "lng": 3.9309,
+      "why": "Zenith Sud, Montpellier - feed points 63km north"
+    },
+    "intuitdome": {
+      "lat": 33.945,
+      "lng": -118.3417,
+      "why": "Intuit Dome, Inglewood - feed's median sits 146km southeast"
+    },
+    "darlingtonraceway": {
+      "lat": 34.2949,
+      "lng": -79.9056,
+      "why": "Darlington Raceway, SC - feed points at Concord NC"
+    },
+    "martinsvillespeedway": {
+      "lat": 36.6354,
+      "lng": -79.8464,
+      "why": "Martinsville Speedway, VA - feed points at Winston-Salem"
+    },
+    "ciudaddelmotordearagon": {
+      "lat": 41.0797,
+      "lng": -0.2078,
+      "why": "Motorland Aragon, Alcaniz - feed points at Zaragoza city"
+    },
+    "legolfnational": {
+      "lat": 48.7541,
+      "lng": 2.0752,
+      "why": "Le Golf National, Guyancourt - feed points at central Paris, previous table at Minnesota"
+    },
+    "stjamespark": {
+      "lat": 54.9756,
+      "lng": -1.6217,
+      "why": "St James' Park, Newcastle (all 20 events are Newcastle United) - feed carries Exeter's namesake coordinates"
+    },
+    "gradskistadion": {
+      "lat": 46.1639,
+      "lng": 16.8336,
+      "why": "Gradski stadion, Koprivnica (all events Slaven Belupo) - feed points at Split"
+    },
+    "cocacolaarena": {
+      "lat": 25.201,
+      "lng": 55.2626,
+      "why": "Coca-Cola Arena, City Walk, Dubai - feed carries coarse coordinates"
+    },
+    "veszpremarena": {
+      "lat": 47.093,
+      "lng": 17.9093,
+      "why": "Veszprem Arena, Hungary (handball)"
+    },
+    "halalegionow": {
+      "lat": 50.885,
+      "lng": 20.64,
+      "why": "Hala Legionow, Kielce (handball)"
+    },
+    "newpickarenaszeged": {
+      "lat": 46.253,
+      "lng": 20.1414,
+      "why": "Pick Arena, Szeged (handball)"
+    },
+    "salapolivalentadinamo": {
+      "lat": 44.452,
+      "lng": 26.103,
+      "why": "Sala Dinamo, Bucharest (handball)"
+    },
+    "laktasisportshall": {
+      "lat": 44.908,
+      "lng": 17.302,
+      "why": "Laktasi sports hall, Bosnia - town-level"
+    },
+    "gudmehallerne": {
+      "lat": 55.152,
+      "lng": 10.718,
+      "why": "Gudme-Hallerne, Denmark (handball) - town-level"
+    },
+    "harena": {
+      "lat": 47.215,
+      "lng": -1.592,
+      "why": "H Arena, Nantes (handball)"
+    }
+  }
+}
