@@ -469,6 +469,24 @@ export interface PublishedItem {
 }
 
 /**
+ * A listing, and the schema its entries were written against.
+ *
+ * THE DEFINITIONS COME BACK WITH THE ITEMS, from the join that was already
+ * there, so a card that shows a price and a number of nights still costs one
+ * read per collection. Fetching them separately would have been a second round
+ * trip per listing block, which is the exact thing lib/content/listings.ts
+ * exists to avoid.
+ *
+ * Empty when the collection declares none, and empty when nothing is published,
+ * because the fields ride on the same rows the items do. Neither case has a
+ * card to put a fact on.
+ */
+export interface PublishedListing {
+  fields: FieldDef[];
+  items: PublishedItem[];
+}
+
+/**
  * Published items in a collection, newest first, for a listing block.
  *
  * THE READ-ONLY ROLE, AND NO STATUS FILTER. The renderer policy written in
@@ -482,12 +500,12 @@ export async function listPublished(
   tenantId: string,
   collectionKey: string,
   limit: number,
-): Promise<PublishedItem[]> {
+): Promise<PublishedListing> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
 
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select i.slug, i.data, i.published_at
+      select i.slug, i.data, i.published_at, c.fields
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       where c.key = ${collectionKey}
@@ -495,7 +513,7 @@ export async function listPublished(
       limit ${capped}
     `;
 
-    return rows.map((raw) => {
+    const items = rows.map((raw) => {
       const row = raw as Record<string, unknown>;
       return {
         slug: String(row.slug),
@@ -503,6 +521,10 @@ export async function listPublished(
         publishedAt: row.published_at ? new Date(row.published_at as string) : null,
       };
     });
+
+    // Every row carries the same collection, so the first one has the schema.
+    const fields = parseFieldDefs(asObject((rows[0] as Record<string, unknown>)?.fields));
+    return { fields, items };
   });
 }
 
@@ -526,18 +548,22 @@ export async function listPublishedByTag(
   collectionKey: string,
   tagSlug: string,
   limit: number,
-): Promise<{ label: string; items: PublishedItem[] } | null> {
+): Promise<{ label: string; fields: FieldDef[]; items: PublishedItem[] } | null> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
 
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select i.slug, i.data, i.published_at
+      select i.slug, i.data, i.published_at, c.fields
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       where c.key = ${collectionKey}
       order by i.published_at desc nulls last, i.id desc
     `;
 
+    // The same schema listPublished returns, so an archive's cards carry the
+    // same facts the listing they came from does rather than losing them on
+    // the way to a tag page.
+    const fields = parseFieldDefs(asObject((rows[0] as Record<string, unknown>)?.fields));
     let label = '';
     const items: PublishedItem[] = [];
     for (const raw of rows) {
@@ -555,7 +581,7 @@ export async function listPublishedByTag(
       if (items.length >= capped) break;
     }
 
-    return label ? { label, items } : null;
+    return label ? { label, fields, items } : null;
   });
 }
 

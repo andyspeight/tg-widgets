@@ -549,7 +549,8 @@ describe('which blocks want a collection', () => {
 
   it('reads the collection and how many were asked for', () => {
     expect(listingIn(listingBlock({ source: 'collection', collection: 'blog', count: 3 })))
-      .toEqual({ collection: 'blog', count: 3 });
+      // Two facts unless the block says otherwise: see DEFAULT_FACTS.
+      .toEqual({ collection: 'blog', count: 3, facts: 2 });
   });
 
   /*
@@ -601,7 +602,7 @@ describe('what a whole set of trees wants', () => {
 
   it('survives a site with no header or footer published', () => {
     expect(listingsIn([null, tree([listingBlock({ source: 'collection', collection: 'blog' })]), undefined]))
-      .toEqual([{ collection: 'blog', count: 6 }]);
+      .toEqual([{ collection: 'blog', count: 6, facts: 2 }]);
   });
 
   /*
@@ -618,7 +619,7 @@ describe('what a whole set of trees wants', () => {
       ]),
     ]);
 
-    expect(wanted).toEqual([{ collection: 'blog', count: 9 }]);
+    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2 }]);
   });
 });
 
@@ -971,9 +972,9 @@ describe('reading published entries', () => {
       },
     ]);
 
-    const [found] = await listPublished(ALPHA, 'blog', 6);
-    expect(found.item.title).toBe('Ten things');
-    expect(found.slug).toBe('ten-things');
+    const { items } = await listPublished(ALPHA, 'blog', 6);
+    expect(items[0].item.title).toBe('Ten things');
+    expect(items[0].slug).toBe('ten-things');
   });
 
   it('answers with nothing for an entry that is not there', async () => {
@@ -1380,7 +1381,7 @@ describe('writing entries', () => {
 
     const write = log.find((s) => s.sql.includes('update public.collections set fields'))!;
     expect(writtenJson(write)).toEqual([
-      { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [] },
+      { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [], prefix: '', suffix: '' },
     ]);
   });
 

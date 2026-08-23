@@ -1371,3 +1371,13 @@
   .sv-field textarea,
   .sv-choice { transition: none; }
 }
+
+/* Before and after a number, side by side: two short boxes, not two rows. */
+.sv-fieldrow__affixes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ed-3);
+  margin-top: var(--ed-3);
+}
+.sv-fieldrow__affixes .sv-field { margin: 0; }
+.sv-fieldrow__affixes .sv-fieldrow__hint { grid-column: 1 / -1; margin-top: 0; }

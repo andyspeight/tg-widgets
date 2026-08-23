@@ -138,7 +138,8 @@ async function load(host: string, path: string[] | undefined) {
         archive: {
           collectionKey: segments[0],
           tag: tagged.label,
-          cards: tagged.items.map((row) => itemAsCard(row.item, segments[0], row.slug)),
+          cards: tagged.items.map((row) =>
+            itemAsCard(row.item, segments[0], row.slug, tagged.fields)),
         },
         theme,
         faces,
@@ -180,13 +181,15 @@ async function load(host: string, path: string[] | undefined) {
     const results = await Promise.all(
       wanted.map(async (request) => ({
         request,
-        items: await listPublished(tenantId, request.collection, request.count),
+        listing: await listPublished(tenantId, request.collection, request.count),
       })),
     );
-    for (const { request, items } of results) {
+    for (const { request, listing } of results) {
       listings.set(
         request.collection,
-        items.map((row) => itemAsCard(row.item, request.collection, row.slug)),
+        // The collection's own field definitions came back with its items, so
+        // a card can carry a price and a number of nights without a second read.
+        listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
       );
     }
   }

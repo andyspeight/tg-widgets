@@ -214,7 +214,9 @@ describe('a card that leads with an icon', () => {
    * an icon-only card was silently dropped from the grid.
    */
   it('counts as something to say', () => {
-    expect(code(render)).toContain('if (!title && !body && !label && !src && !icon) return null;');
+    expect(code(render)).toContain(
+      'if (!title && !body && !label && !src && !icon && facts.length === 0) return null;',
+    );
   });
 
   it('leaves the slider leading with its picture', () => {

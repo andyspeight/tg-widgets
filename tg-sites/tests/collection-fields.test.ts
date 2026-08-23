@@ -15,10 +15,15 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { emptyItem, parseItem, safeFieldBag, MAX_FIELDS } from '../lib/content/collection';
+import { fillListings, itemAsCard, listingIn } from '../lib/content/listings';
+import { createSection } from '../lib/content/factory';
+import { defaultPropsFor } from '../lib/content/blocks';
 import {
   cleanFieldValues,
   FIELD_KINDS,
   FIELD_PRESETS,
+  fieldFacts,
+  formatFieldValue,
   missingRequired,
   mintFieldKey,
   parseFieldDefs,
@@ -27,7 +32,16 @@ import {
 } from '../lib/content/collection-fields';
 
 function def(over: Partial<FieldDef> = {}): FieldDef {
-  return { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [], ...over };
+  return {
+    key: 'nights',
+    label: 'Nights',
+    kind: 'number',
+    required: false,
+    choices: [],
+    prefix: '',
+    suffix: '',
+    ...over,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -280,6 +294,99 @@ describe('the starters', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Showing a value: what actually lands on a card
+// ---------------------------------------------------------------------------
+
+describe('formatFieldValue', () => {
+  it('groups a number so a price reads as money', () => {
+    const price = def({ key: 'price', label: 'Price', kind: 'price', prefix: '£' });
+    expect(formatFieldValue(price, 1299)).toBe('£1,299');
+  });
+
+  it('shows the pence when there are pence, and not when there are none', () => {
+    const price = def({ key: 'price', label: 'Price', kind: 'price', prefix: '£' });
+    expect(formatFieldValue(price, 1299.5)).toBe('£1,299.50');
+    expect(formatFieldValue(price, 1299)).toBe('£1,299');
+  });
+
+  it('but a plain number keeps the precision it was given', () => {
+    // 4.5 is 4.5. Padding it to 4.50 would invent a decimal place nobody typed.
+    expect(formatFieldValue(def({ kind: 'number' }), 4.5)).toBe('4.5');
+    expect(formatFieldValue(def({ kind: 'number' }), 4)).toBe('4');
+  });
+
+  /*
+   * The separator is the formatter's, not the stored affix's: the parser trims
+   * every affix, so a suffix typed as " nights" would have arrived as "nights"
+   * and rendered as 7nights. A word stands off the number, a symbol hugs it.
+   */
+  it('spaces a word off the number and keeps a symbol against it', () => {
+    expect(formatFieldValue(def({ suffix: 'nights' }), 7)).toBe('7 nights');
+    expect(formatFieldValue(def({ suffix: '%' }), 20)).toBe('20%');
+    expect(formatFieldValue(def({ prefix: '£' }), 1299)).toBe('£1,299');
+    expect(formatFieldValue(def({ prefix: 'from' }), 1299)).toBe('from 1,299');
+  });
+
+  it('shows a date as a day, never resolved through an instant', () => {
+    // safeDate stores what a person typed precisely so the 14th is the 14th
+    // everywhere; formatting it back through new Date is the bug that undoes it.
+    const departs = def({ key: 'departs', label: 'Departs', kind: 'date' });
+    expect(formatFieldValue(departs, '2026-09-14')).toBe('14 Sep 2026');
+    expect(formatFieldValue(departs, 'not a date')).toBe('');
+  });
+
+  it('a yes is worth the space and a no is not', () => {
+    const escorted = def({ key: 'escorted', label: 'Escorted', kind: 'toggle' });
+    expect(formatFieldValue(escorted, true)).toBe('Escorted');
+    expect(formatFieldValue(escorted, false)).toBe('');
+  });
+
+  it('is nothing at all for an unanswered field', () => {
+    expect(formatFieldValue(def(), undefined)).toBe('');
+    expect(formatFieldValue(def({ kind: 'text' }), '')).toBe('');
+  });
+
+  it('gives a picture no words, because a picture is not words', () => {
+    expect(formatFieldValue(def({ kind: 'image' }), 'media-1')).toBe('');
+  });
+});
+
+describe('fieldFacts', () => {
+  const defs = [
+    def({ key: 'price', label: 'Price from', kind: 'price', prefix: '£' }),
+    def({ key: 'nights', label: 'Nights', suffix: 'nights' }),
+    def({ key: 'board', label: 'Board', kind: 'choice', choices: ['Half board'] }),
+  ];
+  const values = { price: 1299, nights: 7, board: 'Half board' };
+
+  it('keeps the collections order, because that order is the choice', () => {
+    expect(fieldFacts(defs, values).map((fact) => fact.value)).toEqual([
+      '£1,299',
+      '7 nights',
+      'Half board',
+    ]);
+  });
+
+  it('takes the first few when a block asks for fewer', () => {
+    expect(fieldFacts(defs, values, 2).map((fact) => fact.key)).toEqual(['price', 'nights']);
+    expect(fieldFacts(defs, values, 0)).toEqual([]);
+  });
+
+  it('skips a field with no answer rather than leaving a gap on the card', () => {
+    expect(fieldFacts(defs, { nights: 7 }).map((fact) => fact.key)).toEqual(['nights']);
+  });
+
+  it('leaves out what a card cannot show in a line', () => {
+    const wide = [
+      def({ key: 'map', label: 'Map', kind: 'image' }),
+      def({ key: 'notes', label: 'Notes', kind: 'longtext' }),
+      def({ key: 'nights', label: 'Nights' }),
+    ];
+    expect(fieldFacts(wide, { map: 'media-1', notes: 'A paragraph', nights: 7 })).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // The seam with the item itself
 // ---------------------------------------------------------------------------
 
@@ -310,6 +417,122 @@ describe('an item carries its answers', () => {
 function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
 }
+
+// ---------------------------------------------------------------------------
+// The card: what a listing block actually shows
+// ---------------------------------------------------------------------------
+
+describe('a collections facts on its cards', () => {
+  const defs = [
+    def({ key: 'price', label: 'Price from', kind: 'price', prefix: '£' }),
+    def({ key: 'nights', label: 'Nights', suffix: 'nights' }),
+    def({ key: 'board', label: 'Board', kind: 'choice', choices: ['Half board'] }),
+  ];
+
+  const tour = () => ({
+    ...emptyItem(),
+    title: 'The Western Isles',
+    fields: { price: 1299, nights: 7, board: 'Half board' },
+  });
+
+  it('a blog card is exactly what it always was', () => {
+    // No declared fields, so no facts, and nothing else about the card moves.
+    const card = itemAsCard({ ...emptyItem(), title: 'A post' }, 'blog', 'a-post');
+    expect(card.facts).toEqual([]);
+    expect(card.title).toBe('A post');
+    expect(card.linkHref).toBe('/blog/a-post');
+  });
+
+  it('a tour card carries its facts, formatted and in order', () => {
+    const card = itemAsCard(tour(), 'tours', 'western-isles', defs);
+    expect(card.facts).toEqual([
+      { key: 'price', label: 'Price from', value: '£1,299', kind: 'price' },
+      { key: 'nights', label: 'Nights', value: '7 nights', kind: 'number' },
+      { key: 'board', label: 'Board', value: 'Half board', kind: 'choice' },
+    ]);
+  });
+
+  /*
+   * The whole list travels on the card and each block trims it, so a page with
+   * a four-fact grid and a two-fact one is still ONE read of the collection.
+   * That is the promise at the top of lib/content/listings.ts, and this is the
+   * part of it a facts count could quietly have broken.
+   */
+  it('each block trims to its own count from one shared read', () => {
+    const grid = (facts: number) => ({
+      ...createSection('one'),
+      rows: [
+        {
+          ...createSection('one').rows[0],
+          columns: [
+            {
+              ...createSection('one').rows[0].columns[0],
+              blocks: [
+                {
+                  id: `b-${facts}`,
+                  type: 'cards',
+                  props: {
+                    ...defaultPropsFor('cards'),
+                    source: 'collection',
+                    collection: 'tours',
+                    count: 6,
+                    facts,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const tree = { sections: [grid(1), grid(3)] };
+    const card = itemAsCard(tour(), 'tours', 'western-isles', defs);
+    const filled = fillListings(tree, new Map([['tours', [card]]]));
+
+    const factsOn = (index: number) => {
+      const props = filled.sections[index].rows[0].columns[0].blocks[0].props as Record<string, unknown>;
+      const items = props.items as Array<Record<string, unknown>>;
+      return items[0].facts as unknown[];
+    };
+
+    expect(factsOn(0)).toHaveLength(1);
+    expect(factsOn(1)).toHaveLength(3);
+  });
+
+  it('asks the database for the most facts any block on the page wanted', () => {
+    const request = listingIn({
+      type: 'cards',
+      props: { source: 'collection', collection: 'tours', count: 6, facts: 9 },
+    });
+    // Clamped: past four a card is a spec sheet.
+    expect(request?.facts).toBe(4);
+    expect(listingIn({ type: 'cards', props: { source: 'collection', collection: 'tours' } })?.facts)
+      .toBe(2);
+  });
+
+  it('renders the facts as a definition list, label and value', () => {
+    const blocks = read('components', 'render', 'blocks.tsx');
+    expect(blocks).toContain('<dl className="tgs-card__facts">');
+    expect(blocks).toContain('<dt>{fact.label}</dt>');
+    expect(blocks).toContain('<dd>{fact.value}</dd>');
+  });
+
+  it('a typed-in card cannot put anything but strings on the page', () => {
+    const blocks = read('components', 'render', 'blocks.tsx');
+    // Same defensive read the tags prop gets: both halves must be strings.
+    expect(blocks).toContain("typeof (fact as { value?: unknown }).value === 'string'");
+    expect(blocks).toContain("typeof (fact as { label?: unknown }).label === 'string'");
+  });
+
+  it('sets the value in the data typeface, with figures that line up', () => {
+    const css = read('app', 'globals.css');
+    const rule = css.slice(css.indexOf('.tgs-card__fact dd {'));
+    expect(rule.slice(0, 300)).toContain('font-family: var(--tgs-font-data, inherit)');
+    expect(rule.slice(0, 300)).toContain('font-variant-numeric: tabular-nums');
+  });
+});
+
 
 describe('the fields editor on the collections screen', () => {
   const dash = read('components', 'collections', 'CollectionsDashboard.tsx');

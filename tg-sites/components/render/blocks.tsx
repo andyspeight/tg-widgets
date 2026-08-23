@@ -1400,6 +1400,23 @@ function renderCard(
   // The byline and the reading time, joined into one line, each part only when
   // it is there: "By Jane Doe" · "4 min read". Both are rendered as text.
   const author = str(card, 'author');
+  /*
+   * The collection's declared facts, already formatted into words by
+   * itemAsCard: "From £1,299", "7 nights". Read defensively for the same reason
+   * tags are: a typed-in card with a stray facts prop must not be able to put
+   * anything but strings on the page, and both halves are rendered as text.
+   */
+  const rawFacts = (card as Record<string, unknown>).facts;
+  const facts = Array.isArray(rawFacts)
+    ? rawFacts
+        .filter((fact): fact is { label: string; value: string } =>
+          !!fact
+          && typeof fact === 'object'
+          && typeof (fact as { value?: unknown }).value === 'string'
+          && ((fact as { value: string }).value.length > 0)
+          && typeof (fact as { label?: unknown }).label === 'string')
+        .slice(0, 4)
+    : [];
   const rawMinutes = (card as Record<string, unknown>).readingMinutes;
   const readingMinutes = typeof rawMinutes === 'number' && rawMinutes > 0 ? rawMinutes : 0;
   const meta = [author, readingMinutes > 0 ? `${readingMinutes} min read` : '']
@@ -1409,7 +1426,7 @@ function renderCard(
   // A card with nothing to say is not drawn at all rather than drawn empty. An
   // agent who added one and has not filled it in yet still sees it in the
   // properties pane, which is where they are working.
-  if (!title && !body && !label && !src && !icon) return null;
+  if (!title && !body && !label && !src && !icon && facts.length === 0) return null;
 
   return (
     <article className="tgs-card" key={index}>
@@ -1446,6 +1463,23 @@ function renderCard(
       <div className="tgs-card__body">
         {label && <p className="tgs-card__label">{label}</p>}
         {title && <h3 className="tgs-card__title">{title}</h3>}
+
+        {facts.length > 0 && (
+          /*
+           * A definition list, because that is what these are: a label and its
+           * value. It reads as "Price from, per person: £1,299" to a screen
+           * reader, where a row of divs would read as two loose numbers.
+           */
+          <dl className="tgs-card__facts">
+            {facts.map((fact, factIndex) => (
+              <div className="tgs-card__fact" key={factIndex}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         {meta && <p className="tgs-card__meta">{meta}</p>}
         {body && <p className="tgs-card__text">{body}</p>}
 

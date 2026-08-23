@@ -1800,6 +1800,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       source: 'typed',
       collection: '',
       count: 6,
+      facts: 2,
       columns: '3',
       gap: 'm',
       style: 'bordered',
@@ -1884,6 +1885,25 @@ export const BLOCKS: readonly BlockDefinition[] = [
         max: 60,
         step: 1,
         help: 'The newest this many. Only used when the cards come from a collection.',
+      },
+      {
+        /*
+         * HOW MANY FACTS, NOT WHICH ONES.
+         *
+         * A collection can declare fields of its own (a price, a number of
+         * nights), and a card shows the first few. Which few is decided by the
+         * ORDER on the Collections screen, where the arrows are, rather than by
+         * a picker here: this pane has no server on the other side of it, so a
+         * picker would have to guess at the collection's schema or fetch it on
+         * every keystroke.
+         */
+        kind: 'number',
+        key: 'facts',
+        label: 'Facts on each card',
+        min: 0,
+        max: 4,
+        step: 1,
+        help: 'The first few fields the collection declares, in the order they are listed there. Only used when the cards come from a collection.',
       },
       {
         kind: 'repeater',

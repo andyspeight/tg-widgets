@@ -75,9 +75,32 @@ export interface FieldDef {
   required: boolean;
   /** Only a choice field reads these. Display labels, stored as chosen. */
   choices: string[];
+  /**
+   * What sits either side of a number when it is shown.
+   *
+   * A price of 1299 has to read as £1,299 and seven nights as "7 nights", or a
+   * card's facts line is a row of bare digits. The alternative was a site-wide
+   * currency setting, which is a bigger thing than this needs: a client with
+   * one euro-priced collection and one sterling one would be stuck with it,
+   * and every other unit (nights, hours, kg) would still have nowhere to live.
+   */
+  prefix: string;
+  suffix: string;
 }
 
 const MAX_CHOICES = 24;
+
+/**
+ * A prefix or a suffix: a currency symbol, a unit, a short word.
+ *
+ * Short on purpose. Anything longer than this is a sentence, and a sentence
+ * belongs in the label rather than wrapped round every number on every card.
+ */
+function affix() {
+  return z
+    .unknown()
+    .transform((value) => (typeof value === 'string' ? value.trim().slice(0, 8) : ''));
+}
 
 const FieldDefSchema = z.object({
   key: z
@@ -92,6 +115,8 @@ const FieldDefSchema = z.object({
     .pipe(z.string().min(1)),
   kind: z.enum(FIELD_KINDS).catch('text'),
   required: z.unknown().transform((value) => value === true),
+  prefix: affix(),
+  suffix: affix(),
   choices: z.unknown().transform((value) => {
     if (!Array.isArray(value)) return [] as string[];
     const out: string[] = [];
@@ -254,8 +279,17 @@ function def(
   kind: FieldKind,
   required = false,
   choices: string[] = [],
+  affixes: { prefix?: string; suffix?: string } = {},
 ): FieldDef {
-  return { key, label, kind, required, choices };
+  return {
+    key,
+    label,
+    kind,
+    required,
+    choices,
+    prefix: affixes.prefix ?? '',
+    suffix: affixes.suffix ?? '',
+  };
 }
 
 export const FIELD_PRESETS: FieldPreset[] = [
@@ -265,7 +299,14 @@ export const FIELD_PRESETS: FieldPreset[] = [
     collectionName: 'Tours',
     blurb: 'Price, nights, departures and board. The facts a card has to carry.',
     fields: [
-      def('price-from', 'Price from, per person', 'price', true),
+      /*
+       * A suffix earns its place only where the LABEL does not already name the
+       * unit. "Price from / £1,299 pp" needs the pp; "Nights / 7 nights" says
+       * nights twice, so nights carries none. Sterling because Travelgenix
+       * sells in it, and it is the client's to change the day they sell in
+       * euros.
+       */
+      def('price-from', 'Price from', 'price', true, [], { prefix: '£', suffix: 'pp' }),
       def('nights', 'Nights', 'number', true),
       def('departs', 'Departs from', 'text'),
       def('next-departure', 'Next departure', 'date'),
@@ -286,7 +327,7 @@ export const FIELD_PRESETS: FieldPreset[] = [
     blurb: 'Country, flying time, best months. A guide page that answers first.',
     fields: [
       def('country', 'Country', 'text', true),
-      def('flying-time', 'Flying time, hours', 'number'),
+      def('flying-time', 'Flying time', 'number', false, [], { suffix: 'hrs' }),
       def('best-months', 'Best months', 'text'),
       def('currency', 'Currency', 'text'),
       def('visa', 'Visa needed', 'toggle'),
@@ -305,4 +346,133 @@ export const FIELD_PRESETS: FieldPreset[] = [
 /** The Tours starter on its own, which is the one a travel business wants. */
 export function toursPresetFields(): FieldDef[] {
   return FIELD_PRESETS.find((preset) => preset.id === 'tours')?.fields ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// Showing a value
+// ---------------------------------------------------------------------------
+
+/**
+ * One stored value as the words that go on a card or a page.
+ *
+ * EMPTY STRING MEANS SHOW NOTHING, and every caller treats it that way, so an
+ * unanswered field costs a card no space at all rather than leaving "Nights:"
+ * hanging with a gap after it.
+ *
+ * A NUMBER IS GROUPED, so 1299 reads as 1,299. Grouped with en-GB rather than
+ * the visitor's locale on purpose: this runs on the server, once, into HTML
+ * that is cached and served to everybody, so picking a locale per visitor would
+ * mean a cache entry per locale and a number that changes when it is shared.
+ * The site's own language is the honest choice, and a client selling in euros
+ * writes the symbol into the prefix.
+ *
+ * A DATE IS SHOWN AS A DAY, never a time: safeDate stores what a person typed
+ * (2026-09-14) precisely so it means the same day everywhere, and formatting it
+ * back through an instant is the bug that would undo that. Split and mapped by
+ * hand for the same reason.
+ */
+const MONTHS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/*
+ * THE SPACE IS THE FORMATTER'S, NOT THE STORED VALUE'S.
+ *
+ * A suffix of " nights" with its space typed in would not survive the parser,
+ * which trims every affix so a stray space in a prefix cannot leak onto a page.
+ * Storing the separator was the wrong place for it anyway: it is presentation,
+ * and the right amount of it depends on the affix. A symbol hugs its number
+ * (£1,299, 20%) and a word stands off it (7 nights, £1,299 pp), which is the
+ * rule below: a letter takes a space, a symbol does not.
+ */
+function joinBefore(prefix: string): string {
+  if (!prefix) return '';
+  return /[a-z0-9]$/i.test(prefix) ? `${prefix} ` : prefix;
+}
+
+function joinAfter(suffix: string): string {
+  if (!suffix) return '';
+  return /^[a-z0-9]/i.test(suffix) ? ` ${suffix}` : suffix;
+}
+
+export function formatFieldValue(def: FieldDef, value: FieldValue | undefined): string {
+  if (value === undefined || value === '') return '';
+
+  switch (def.kind) {
+    case 'toggle':
+      // Only a yes is worth the space. "Escorted: No" on a card is a fact
+      // nobody scanning a grid of tours is looking for.
+      return value === true ? def.label : '';
+
+    case 'number':
+    case 'price': {
+      const n = typeof value === 'number' ? value : Number(value);
+      if (!Number.isFinite(n)) return '';
+      /*
+       * MONEY ROUNDS DIFFERENTLY FROM A NUMBER, and this is where that lives.
+       *
+       * A price with pence in it shows both of them: £1,299.50, never £1,299.5,
+       * which reads as a typo on a card. A price with no pence shows none, so a
+       * headline number is not dressed up as an invoice line. A plain number is
+       * left as it is, because a rating of 4.5 is 4.5 and padding it to 4.50
+       * would be inventing a precision nobody typed.
+       */
+      const pence = def.kind === 'price' && !Number.isInteger(n);
+      const shown = new Intl.NumberFormat('en-GB', {
+        minimumFractionDigits: pence ? 2 : 0,
+        maximumFractionDigits: Number.isInteger(n) ? 0 : 2,
+      }).format(n);
+      return `${joinBefore(def.prefix)}${shown}${joinAfter(def.suffix)}`;
+    }
+
+    case 'date': {
+      const parts = String(value).split('-');
+      if (parts.length !== 3) return '';
+      const month = MONTHS[Number(parts[1]) - 1];
+      if (!month) return '';
+      return `${Number(parts[2])} ${month} ${parts[0]}`;
+    }
+
+    case 'image':
+      // A picture is not words. Callers that can draw one read the raw value.
+      return '';
+
+    default:
+      return String(value);
+  }
+}
+
+/** A label and its value, for a facts row. Only fields with something to say. */
+export interface FieldFact {
+  key: string;
+  label: string;
+  value: string;
+  kind: FieldKind;
+}
+
+/**
+ * The facts an entry can show, in the order the collection declares them.
+ *
+ * THE ORDER ON THE COLLECTIONS SCREEN IS THE CHOICE. A card shows the first few
+ * of these, so moving a field up with the arrows on that screen is how a client
+ * decides what leads. That is a control they already have and understand, and it
+ * saved building a key-picker into the block: the editor has no server on the
+ * other side of it, so a picker would have had to guess at the collection's
+ * schema or fetch it on every keystroke.
+ */
+export function fieldFacts(
+  defs: readonly FieldDef[],
+  values: Record<string, FieldValue>,
+  limit = Number.POSITIVE_INFINITY,
+): FieldFact[] {
+  const out: FieldFact[] = [];
+  for (const def of defs) {
+    if (out.length >= limit) break;
+    if (def.kind === 'image' || def.kind === 'longtext') continue;
+    const value = formatFieldValue(def, values[def.key]);
+    if (!value) continue;
+    out.push({ key: def.key, label: def.label, value, kind: def.kind });
+  }
+  return out;
 }

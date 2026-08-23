@@ -917,7 +917,7 @@ function FieldsDialog({
   const add = () =>
     setRows((current) => [
       ...current,
-      { key: '', label: '', kind: 'text', required: false, choices: [] },
+      { key: '', label: '', kind: 'text', required: false, choices: [], prefix: '', suffix: '' },
     ]);
 
   async function submit() {
@@ -1057,6 +1057,41 @@ function FieldsDialog({
               </div>
 
               <p className="sv-fieldrow__hint">{FIELD_KIND_HINT[row.kind]}</p>
+
+              {(row.kind === 'number' || row.kind === 'price') && (
+                /*
+                 * What sits round the number when it is shown. Only here, and
+                 * only for the two kinds that are numbers, because a bare 1299
+                 * on a card is not a price and a bare 7 is not a week.
+                 */
+                <div className="sv-fieldrow__affixes">
+                  <div className="sv-field">
+                    <label htmlFor={`field-prefix-${index}`}>Before it</label>
+                    <input
+                      id={`field-prefix-${index}`}
+                      value={row.prefix}
+                      maxLength={8}
+                      placeholder={row.kind === 'price' ? '£' : ''}
+                      onChange={(event) => patch(index, { prefix: event.target.value })}
+                    />
+                  </div>
+                  <div className="sv-field">
+                    <label htmlFor={`field-suffix-${index}`}>After it</label>
+                    <input
+                      id={`field-suffix-${index}`}
+                      value={row.suffix}
+                      maxLength={8}
+                      placeholder={row.kind === 'price' ? 'pp' : 'nights'}
+                      onChange={(event) => patch(index, { suffix: event.target.value })}
+                    />
+                  </div>
+                  <p className="sv-fieldrow__hint">
+                    Shown either side of the number, on cards and on the entry. A
+                    word gets a space of its own, a symbol sits against the
+                    number: £1,299 and 7 nights.
+                  </p>
+                </div>
+              )}
 
               {row.kind === 'choice' && (
                 <div className="sv-field">

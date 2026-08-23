@@ -3199,6 +3199,49 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 
 .tgs-cards[data-align='centre'] .tgs-card__body { text-align: center; align-items: center; }
 
+/*
+ * THE FACTS A COLLECTION DECLARES, on the card.
+ *
+ * A price and a number of nights, straight under the title, where a reader
+ * scanning a grid of tours is already looking. Laid out as pairs that wrap, so
+ * two fit on one line on a wide card and stack on a phone without either one
+ * being cut off.
+ *
+ * The VALUE takes the data typeface and tabular figures; the label stays in the
+ * body face. That contrast is the point: a column of prices in a proportional
+ * face does not line up, and lining up is most of what makes a set of numbers
+ * comparable at a glance.
+ */
+.tgs-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--tgs-space-m);
+  margin: var(--tgs-space-s) 0 0;
+}
+.tgs-card__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.tgs-card__fact dt {
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted, inherit);
+  line-height: 1.3;
+  /* A fact's label is a caption, not a heading: it must never out-shout the
+     number it belongs to. */
+  font-weight: 400;
+}
+.tgs-card__fact dd {
+  margin: 0;
+  font-size: var(--tgs-text-m);
+  font-weight: 650;
+  line-height: 1.25;
+  font-family: var(--tgs-font-data, inherit);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
 .tgs-card__label {
   margin: 0;
   font-size: var(--tgs-text-s);
