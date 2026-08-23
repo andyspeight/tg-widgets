@@ -87,6 +87,22 @@ describe('words on the picture', () => {
     expect(body).toContain('--tgs-text-muted: var(--tgs-on-dark-muted)');
   });
 
+  /*
+   * ANDY FOUND THIS ONE on the first screenshot: the words sat flush against
+   * the edge of the photograph.
+   *
+   * A plain card has its side padding zeroed a few rules up, and that is right
+   * for a plain card, which has no box to be indented from. This design breaks
+   * the assumption: the finish draws no box, but the PICTURE is one.
+   */
+  it('insets the words from the edge of the picture, whatever the finish says', () => {
+    const from = css.indexOf(".tgs-cards[data-design='overlay'] .tgs-card__body {");
+    const body = css.slice(from, css.indexOf('\n}', from));
+    expect(body).toMatch(/^\s*padding: var\(--tgs-space-l\);/m);
+    // And it has to come after the rule that zeroes it, or it never applies.
+    expect(from).toBeGreaterThan(css.indexOf(".tgs-cards[data-style='plain'] .tgs-card__body"));
+  });
+
   it('keeps a long summary from eating the photograph', () => {
     expect(css).toContain(".tgs-cards[data-design='overlay'] .tgs-card__text");
     expect(css).toContain('-webkit-line-clamp: 2');

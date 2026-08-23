@@ -3453,6 +3453,20 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   z-index: 1;
   isolation: isolate;
   /*
+   * THE PADDING COMES BACK, whatever the finish says.
+   *
+   * A plain card has its side padding zeroed a few rules up, and that is right
+   * for a plain card: there is no box, so an indent would be an indent from
+   * nothing. This design breaks that assumption. The finish draws no box, but
+   * the PICTURE is one, and words flush against the edge of a photograph read
+   * as broken rather than as flush. Andy caught this on the first screenshot.
+   *
+   * Restated here rather than by excluding overlay from the plain rule, because
+   * the plain rule is about the finish and this is about the design: the two
+   * are separate questions and the exception belongs with the one that has it.
+   */
+  padding: var(--tgs-space-l);
+  /*
    * NO min-height AND NO flex-grow. The body is exactly as tall as its words,
    * which is what keeps the scrim off the picture: give the body the card's
    * height and the scrim that tracks it covers the photograph completely, which
