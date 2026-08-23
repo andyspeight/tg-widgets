@@ -1381,3 +1381,44 @@
 }
 .sv-fieldrow__affixes .sv-field { margin: 0; }
 .sv-fieldrow__affixes .sv-fieldrow__hint { grid-column: 1 / -1; margin-top: 0; }
+
+/*
+ * A segmented control: a small set of always-visible choices where a dropdown
+ * would hide two of three behind a click. Used for how a collection lays its
+ * entries out.
+ */
+.sv-seg {
+  display: inline-flex;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  overflow: hidden;
+}
+.sv-seg__btn {
+  appearance: none;
+  border: 0;
+  border-inline-start: 1px solid var(--ed-line);
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  padding: var(--ed-2) var(--ed-3);
+  min-height: 36px;
+  cursor: pointer;
+  transition: background 120ms ease-out, color 120ms ease-out;
+}
+.sv-seg__btn:first-child { border-inline-start: 0; }
+.sv-seg__btn:hover:not([aria-pressed='true']):not(:disabled) { background: var(--ed-sunken); color: var(--ed-ink); }
+.sv-seg__btn[aria-pressed='true'] {
+  background: var(--ed-select-wash);
+  color: var(--ed-ink);
+  font-weight: 600;
+}
+.sv-seg__btn:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: -2px;
+}
+.sv-seg__btn:disabled { opacity: 0.55; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-seg__btn { transition: none; }
+}

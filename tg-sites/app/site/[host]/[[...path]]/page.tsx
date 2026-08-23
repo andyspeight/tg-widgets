@@ -612,6 +612,8 @@ function EntryRenderer({
     /** What that collection declares, which is what turns its answers into
      *  a labelled row of facts. Empty for a blog. */
     fields: import('../../../../lib/content/collection-fields').FieldDef[];
+    /** How the collection lays its entries out. See collection-layout.ts. */
+    layout: import('../../../../lib/content/collection-layout').EntryLayout;
   };
   theme: React.CSSProperties;
 }) {
@@ -634,7 +636,16 @@ function EntryRenderer({
     .join(' · ');
 
   return (
-    <article className="tgs-page tgs-entry" style={theme}>
+    /*
+     * ONE ATTRIBUTE, AND THE STYLESHEET BUILDS THE REST.
+     *
+     * The three layouts draw the same markup in the same order, which is what
+     * keeps one entry component honest about what an entry contains. A second
+     * component per layout is how two of them drift apart the first time
+     * somebody adds a field, and it would have put the picture in two places in
+     * the document for the sake of moving it on the screen.
+     */
+    <article className="tgs-page tgs-entry" data-layout={entry.layout} style={theme}>
       <header className="tgs-entry__head">
         {item.date && (
           <p className="tgs-entry__date">

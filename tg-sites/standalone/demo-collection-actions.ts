@@ -22,6 +22,7 @@ import type { ActionResult } from '../app/actions/pages';
 import type { Collection, ItemSummary, ItemWithContent } from '../lib/db/collections';
 import { emptyItem, parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../lib/content/collection';
 import { cleanFieldValues, parseFieldDefs } from '../lib/content/collection-fields';
+import { parseEntryLayout } from '../lib/content/collection-layout';
 import { sanitiseItem } from '../lib/content/sanitise-page';
 
 interface Row {
@@ -33,7 +34,9 @@ interface Row {
 // The demo blog declares no fields, which is what a blog does. The save below
 // still runs the cleaning, so a double of a collection that DID declare some
 // would behave like the real one rather than waving its values through.
-const collections: Collection[] = [{ id: 'demo-blog', key: 'blog', name: 'Blog', fields: [] }];
+const collections: Collection[] = [
+  { id: 'demo-blog', key: 'blog', name: 'Blog', fields: [], layout: 'standard' },
+];
 const rows = new Map<string, Row>();
 
 let nextId = 1;
@@ -87,6 +90,7 @@ export async function createCollectionAction(input: {
     key: safeSlug(input.key || name) || 'list',
     name,
     fields: parseFieldDefs(input.fields),
+    layout: 'standard' as const,
   };
   collections.push(made);
   return { ok: true, data: made };
@@ -100,6 +104,17 @@ export async function updateCollectionFieldsAction(
   if (at === -1) return { ok: true, data: null };
 
   collections[at] = { ...collections[at], fields: parseFieldDefs(fields) };
+  return { ok: true, data: collections[at] };
+}
+
+export async function updateCollectionLayoutAction(
+  collectionId: string,
+  layout: string,
+): Promise<ActionResult<Collection | null>> {
+  const at = collections.findIndex((entry) => entry.id === collectionId);
+  if (at === -1) return { ok: true, data: null };
+
+  collections[at] = { ...collections[at], layout: parseEntryLayout(layout) };
   return { ok: true, data: collections[at] };
 }
 
@@ -204,6 +219,7 @@ const _items = listItemsAction satisfies typeof real.listItemsAction;
 const _get = getItemAction satisfies typeof real.getItemAction;
 const _newCollection = createCollectionAction satisfies typeof real.createCollectionAction;
 const _collectionFields = updateCollectionFieldsAction satisfies typeof real.updateCollectionFieldsAction;
+const _collectionLayout = updateCollectionLayoutAction satisfies typeof real.updateCollectionLayoutAction;
 const _dropCollection = deleteCollectionAction satisfies typeof real.deleteCollectionAction;
 const _newItem = createItemAction satisfies typeof real.createItemAction;
 const _save = saveItemAction satisfies typeof real.saveItemAction;
@@ -216,6 +232,7 @@ void _items;
 void _get;
 void _newCollection;
 void _collectionFields;
+void _collectionLayout;
 void _dropCollection;
 void _newItem;
 void _save;

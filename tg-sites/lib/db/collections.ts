@@ -30,6 +30,7 @@ import {
   parseFieldDefs,
   type FieldDef,
 } from '../content/collection-fields';
+import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -48,6 +49,8 @@ export interface Collection {
    * and empty for every collection made before this existed.
    */
   fields: FieldDef[];
+  /** How its published entries are laid out. See lib/content/collection-layout.ts. */
+  layout: EntryLayout;
 }
 
 export interface ItemSummary {
@@ -151,12 +154,13 @@ function toCollection(row: Record<string, unknown>): Collection {
     // asObject because the driver hands jsonb back as a value or as text
     // depending on the column, exactly as it does for `data` below.
     fields: parseFieldDefs(asObject(row.fields)),
+    layout: parseEntryLayout(row.layout),
   };
 }
 
 export async function listCollections(tenantId: string): Promise<Collection[]> {
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx`select id, key, name, fields from public.collections order by name`;
+    const rows = await tx`select id, key, name, fields, layout from public.collections order by name`;
     return rows.map((row) => toCollection(row as Record<string, unknown>));
   });
 }
@@ -184,7 +188,7 @@ export async function createCollection(
     const rows = await tx`
       insert into public.collections (tenant_id, key, name, fields)
       values (${tenantId}::uuid, ${key}, ${name}, ${json(tx, fields)})
-      returning id, key, name, fields
+      returning id, key, name, fields, layout
     `;
     return toCollection(rows[0] as Record<string, unknown>);
   });
@@ -214,7 +218,7 @@ export async function updateCollectionFields(
     const rows = await tx`
       update public.collections set fields = ${json(tx, clean)}
       where id = ${collectionId}::uuid
-      returning id, key, name, fields
+      returning id, key, name, fields, layout
     `;
     return rows.length ? toCollection(rows[0] as Record<string, unknown>) : null;
   });
@@ -601,10 +605,15 @@ export async function getPublishedItem(
   tenantId: string,
   collectionKey: string,
   slug: string,
-): Promise<{ item: CollectionItem; fields: FieldDef[]; publishedAt: Date | null } | null> {
+): Promise<{
+  item: CollectionItem;
+  fields: FieldDef[];
+  layout: EntryLayout;
+  publishedAt: Date | null;
+} | null> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select i.data, i.published_at, c.fields
+      select i.data, i.published_at, c.fields, c.layout
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       where c.key = ${collectionKey} and i.slug = ${slug}
@@ -618,6 +627,7 @@ export async function getPublishedItem(
       // From the join that was already here, so an entry's own page shows its
       // facts without a second read, exactly as a listing's cards do.
       fields: parseFieldDefs(asObject(row.fields)),
+      layout: parseEntryLayout(row.layout),
       publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     };
   });
@@ -774,5 +784,31 @@ export async function listPublishedItemsForSearch(tenantId: string): Promise<Sea
         text,
       };
     });
+  });
+}
+
+/**
+ * Change how a collection's entries are laid out.
+ *
+ * Its own writer rather than a second argument on updateCollectionFields,
+ * because the two are edited in different places and at different moments: the
+ * schema in a dialog a client opens deliberately, this from a control beside
+ * the collection's name. Bundling them would make either save able to blank the
+ * other by omission.
+ */
+export async function updateCollectionLayout(
+  tenantId: string,
+  collectionId: string,
+  layout: unknown,
+): Promise<Collection | null> {
+  const clean = parseEntryLayout(layout);
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.collections set layout = ${clean}
+      where id = ${collectionId}::uuid
+      returning id, key, name, fields, layout
+    `;
+    return rows.length ? toCollection(rows[0] as Record<string, unknown>) : null;
   });
 }

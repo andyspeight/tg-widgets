@@ -3599,6 +3599,150 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* The three entry layouts                                             */
+/* ------------------------------------------------------------------ */
+
+/*
+ * ONE MARKUP, THREE LAYOUTS. Standard is every rule below this block and needs
+ * no selector of its own: a collection that has never chosen gets it, which is
+ * why the column defaults to empty and nothing had to be backfilled.
+ *
+ * The other two are CSS only, on the same elements in the same order, so an
+ * entry's document order never changes with its look. That matters past tidiness:
+ * a screen reader and a crawler read the order, and moving a picture up the page
+ * visually must not move it up the article.
+ */
+
+/*
+ * CENTRED. A narrower measure and a centred opening, for something somebody sits
+ * down to read.
+ *
+ * The measure is capped in CHARACTERS rather than pixels, because the thing that
+ * makes a line hard to read is how many words are on it, and a client who set a
+ * larger body size would otherwise get a longer line as well as a bigger one.
+ * 68ch sits inside the 65 to 75 the craft floor asks for.
+ */
+.tgs-entry[data-layout='centred'] .tgs-entry__head {
+  max-width: 68ch;
+  margin-inline: auto;
+  text-align: center;
+}
+.tgs-entry[data-layout='centred'] .tgs-entry__tags,
+.tgs-entry[data-layout='centred'] .tgs-entry__facts {
+  justify-content: center;
+}
+/* The picture is the one thing that does NOT narrow: a centred article still
+   wants its photograph at the width of the page. */
+.tgs-entry[data-layout='centred'] .tgs-entry__image {
+  max-width: none;
+  margin-inline: 0;
+}
+/* The words of the article itself narrow with the header, or the opening would
+   be a column and the body a slab. */
+.tgs-entry[data-layout='centred'] > .tgs-section .tgs-row {
+  max-width: 68ch;
+  margin-inline: auto;
+}
+
+/*
+ * PICTURE FIRST. The photograph leads at full width with the title on it, which
+ * is what a tour or a destination wants and what an article does not.
+ *
+ * THE PICTURE MOVES WITHOUT MOVING IN THE MARKUP. It is the last child of the
+ * header and stays there; `order` lifts it visually. The header becomes a flex
+ * column for exactly that reason.
+ */
+.tgs-entry[data-layout='hero'] .tgs-entry__head {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  min-height: min(60vh, 32rem);
+  justify-content: flex-end;
+  padding: var(--tgs-space-l);
+}
+/*
+ * THE TITLE OPENS THE HEADER, and the date follows it.
+ *
+ * Two reasons, and they agree. A date above a heading is the eyebrow the craft
+ * floor bans outright: the standard layout has carried one since the blog
+ * shipped and ripping it off every published site is not this change's business,
+ * but a layout being designed now does not get to reproduce it. And measured
+ * over a photograph the top of the header is where the scrim is lightest, so
+ * the date sat at 3.16:1 up there and clears comfortably once it moves down.
+ *
+ * Order rather than markup, exactly as the picture below: the document keeps
+ * the order a reader and a crawler get.
+ */
+.tgs-entry[data-layout='hero'] .tgs-entry__title { order: 0; }
+.tgs-entry[data-layout='hero'] .tgs-entry__date { order: 1; margin: var(--tgs-space-s) 0 0; }
+.tgs-entry[data-layout='hero'] .tgs-entry__byline { order: 2; }
+.tgs-entry[data-layout='hero'] .tgs-entry__summary { order: 3; }
+.tgs-entry[data-layout='hero'] .tgs-entry__facts { order: 4; }
+.tgs-entry[data-layout='hero'] .tgs-entry__tags { order: 5; }
+
+.tgs-entry[data-layout='hero'] .tgs-entry__image {
+  order: -1;
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  max-width: none;
+  z-index: -2;
+}
+.tgs-entry[data-layout='hero'] .tgs-entry__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+/*
+ * The same scrim decision the overlay card made, and for the same reason: the
+ * words have to clear 4.5:1 over a photograph nobody has seen. It sits on the
+ * header, which is exactly as tall as the words plus the room above them, and
+ * is heaviest at the foot where every line actually is.
+ */
+.tgs-entry[data-layout='hero'] .tgs-entry__head::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 18%, transparent) 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 52%, transparent) 45%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 88%, transparent) 100%
+  );
+}
+.tgs-entry[data-layout='hero'] .tgs-entry__head {
+  color: var(--tgs-text-invert);
+  --tgs-text: var(--tgs-text-invert);
+  --tgs-text-muted: var(--tgs-on-dark-muted);
+  --tgs-border: var(--tgs-on-dark-border);
+  /*
+   * --tgs-primary TOO, and it is the one that is easy to miss. The date takes
+   * the brand colour, and a brand is usually dark: leaving it alone put a navy
+   * date on a dark photograph, which the render showed and the first contrast
+   * probe did not. Anything brand-coloured in this header is on the picture.
+   */
+  --tgs-primary: var(--tgs-text-invert);
+}
+/* An entry with no picture keeps the shape without pretending to have one: the
+   scrim alone would be a grey slab, so the header falls back to a plain band. */
+.tgs-entry[data-layout='hero'] .tgs-entry__head:not(:has(.tgs-entry__image)) {
+  background: var(--tgs-surface-dark);
+  min-height: 0;
+}
+
+@container tgs-page (max-width: 700px) {
+  /* A 60vh hero on a phone is the whole screen before a word is read. */
+  .tgs-entry[data-layout='hero'] .tgs-entry__head {
+    min-height: min(48vh, 22rem);
+    padding: var(--tgs-space-m);
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* An entry in a collection, rendered as an article                    */
 /* ------------------------------------------------------------------ */
 

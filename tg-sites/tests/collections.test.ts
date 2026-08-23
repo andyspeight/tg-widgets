@@ -1328,7 +1328,7 @@ describe('writing entries', () => {
   it('reads a collection back with its declared fields', async () => {
     const { listCollections } = await import('../lib/db/collections');
 
-    respond('select id, key, name, fields from public.collections', [
+    respond('select id, key, name, fields, layout from public.collections', [
       {
         id: 'c1',
         key: 'tours',

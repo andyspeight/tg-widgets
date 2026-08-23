@@ -29,6 +29,7 @@ import {
   scheduleItemAction,
   unpublishItemAction,
   updateCollectionFieldsAction,
+  updateCollectionLayoutAction,
 } from '../../app/actions/collections';
 import { safeSlug } from '../../lib/content/collection';
 import {
@@ -40,6 +41,12 @@ import {
   type FieldDef,
   type FieldKind,
 } from '../../lib/content/collection-fields';
+import {
+  ENTRY_LAYOUT_HINT,
+  ENTRY_LAYOUT_LABEL,
+  ENTRY_LAYOUTS,
+  type EntryLayout,
+} from '../../lib/content/collection-layout';
 import type { Collection, ItemSummary } from '../../lib/db/collections';
 import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
@@ -104,6 +111,10 @@ export function CollectionsDashboard({
    */
   const [fields, setFields] = useState<FieldDef[]>(open?.fields ?? []);
   useEffect(() => setFields(open?.fields ?? []), [open]);
+
+  /** How the open collection lays its entries out, same arrangement as above. */
+  const [layout, setLayout] = useState<EntryLayout>(open?.layout ?? 'standard');
+  useEffect(() => setLayout(open?.layout ?? 'standard'), [open]);
 
   /*
    * The entries come from the server on every navigation, and switching
@@ -185,6 +196,26 @@ export function CollectionsDashboard({
         });
       }),
     [router],
+  );
+
+  const chooseLayout = useCallback(
+    (collectionId: string, next: EntryLayout) => {
+      setError(null);
+      // Optimistic, because this is a segmented control and a control that
+      // waits for a round trip before it moves reads as broken.
+      setLayout(next);
+      startTransition(async () => {
+        const result = await updateCollectionLayoutAction(collectionId, next);
+        if (!result.ok) {
+          setError(result.error);
+          setLayout(open?.layout ?? 'standard');
+          return;
+        }
+        if (result.data) setLayout(result.data.layout);
+        router.refresh();
+      });
+    },
+    [open, router],
   );
 
   const [deletingItem, setDeletingItem] = useState<ItemSummary | null>(null);
@@ -353,6 +384,29 @@ export function CollectionsDashboard({
                       ? 'Add fields'
                       : `${fields.length} ${fields.length === 1 ? 'field' : 'fields'}`}
                   </button>
+
+                  {/*
+                    HOW THE ENTRIES LOOK, beside the address they live at,
+                    because both are facts about the collection rather than
+                    about any one entry. A segmented control rather than a
+                    dropdown: there are three, they are always the same three,
+                    and a client should see the choice without opening anything.
+                  */}
+                  <div className="sv-seg" role="group" aria-label="How entries are laid out">
+                    {ENTRY_LAYOUTS.map((option) => (
+                      <button
+                        type="button"
+                        key={option}
+                        className="sv-seg__btn"
+                        aria-pressed={option === layout}
+                        disabled={busy}
+                        title={ENTRY_LAYOUT_HINT[option]}
+                        onClick={() => chooseLayout(open.id, option)}
+                      >
+                        {ENTRY_LAYOUT_LABEL[option]}
+                      </button>
+                    ))}
+                  </div>
 
                   <button
                     type="button"

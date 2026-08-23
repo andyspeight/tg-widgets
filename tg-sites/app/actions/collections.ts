@@ -27,6 +27,7 @@ import {
   scheduleItem,
   unpublishItem,
   updateCollectionFields,
+  updateCollectionLayout,
   type Collection,
   type ItemSummary,
   type ItemWithContent,
@@ -103,6 +104,31 @@ export async function createCollectionAction(input: {
     }),
   );
   if (result.ok) revalidatePath('/collections');
+  return result;
+}
+
+/**
+ * Change how a collection's entries are laid out.
+ *
+ * The same revalidation the schema edit makes: the layout changes every
+ * published entry in the collection at once, and none of those pages was
+ * edited, so nothing else would know to refresh them.
+ */
+export async function updateCollectionLayoutAction(
+  collectionId: string,
+  layout: string,
+): Promise<ActionResult<Collection | null>> {
+  const result = await attempt(async () =>
+    updateCollectionLayout(
+      await requireEitherCapability('collections', 'blog'),
+      collectionId,
+      String(layout ?? ''),
+    ),
+  );
+  if (result.ok) {
+    revalidatePath('/collections');
+    revalidatePath('/preview', 'layout');
+  }
   return result;
 }
 
