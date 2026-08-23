@@ -689,6 +689,16 @@ export interface PublishedEntryPath {
   /** collectionKey/slug, which is exactly how a visitor reaches it. */
   path: string;
   updatedAt: string | null;
+  /**
+   * The collection it belongs to, and what the entry is called.
+   *
+   * The sitemap wants neither: an address and a date are all a crawler needs.
+   * llms.txt is a readable map, so it groups entries under their collection and
+   * names each one. Both come out of the row the query already reads, so this
+   * costs nothing but the two fields. See lib/seo/llms.ts.
+   */
+  collection: string;
+  title: string;
 }
 
 /**
@@ -710,7 +720,11 @@ export async function listAllPublishedEntries(
 ): Promise<PublishedEntryPath[]> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select c.key, i.slug, coalesce(i.updated_at, i.published_at) as changed_at
+      select
+        c.key,
+        i.slug,
+        i.data->>'title' as title,
+        coalesce(i.updated_at, i.published_at) as changed_at
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       order by changed_at desc nulls last
@@ -721,6 +735,10 @@ export async function listAllPublishedEntries(
       return {
         path: `${String(row.key)}/${String(row.slug)}`,
         updatedAt: row.changed_at ? new Date(String(row.changed_at)).toISOString() : null,
+        collection: String(row.key ?? ''),
+        // ->> answers null for a row whose data has no title, which String()
+        // would turn into the word "null" on a page somebody reads.
+        title: row.title == null ? '' : String(row.title),
       };
     });
   });
