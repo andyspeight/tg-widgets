@@ -30,6 +30,7 @@ import {
 } from '../../../../lib/db/collections';
 import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
+import { fieldFacts } from '../../../../lib/content/collection-fields';
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
@@ -608,11 +609,23 @@ function EntryRenderer({
     item: import('../../../../lib/content/collection').CollectionItem;
     /** The collection the post is in, so its tags can link to their archives. */
     collectionKey: string;
+    /** What that collection declares, which is what turns its answers into
+     *  a labelled row of facts. Empty for a blog. */
+    fields: import('../../../../lib/content/collection-fields').FieldDef[];
   };
   theme: React.CSSProperties;
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
+  /*
+   * The facts this entry's collection declares, formatted into words.
+   *
+   * ALL OF THEM, unlike a card, which shows the first few. A card is a glance
+   * inside a grid and has a fixed height to keep; this is the page somebody
+   * opened to find these out, so holding any of them back would be answering
+   * less than was asked.
+   */
+  const facts = fieldFacts(entry.fields, item.fields);
   // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
   // worked out from the body, never stored: see lib/content/reading-time.ts.
   const minutes = readingTime(item.sections);
@@ -631,6 +644,25 @@ function EntryRenderer({
         <h1 className="tgs-entry__title">{item.title}</h1>
         {byline && <p className="tgs-entry__byline">{byline}</p>}
         {item.summary && <p className="tgs-entry__summary">{item.summary}</p>}
+
+        {facts.length > 0 && (
+          /*
+           * ABOVE THE PICTURE, not below the article. Somebody who has opened a
+           * tour is deciding, and the price and the length are the decision;
+           * putting them under a thousand words would be making them scroll for
+           * the answer they came for. A definition list for the same reason the
+           * card uses one: these are labelled values, not loose numbers.
+           */
+          <dl className="tgs-entry__facts">
+            {facts.map((fact) => (
+              <div className="tgs-entry__fact" key={fact.key}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">
             {item.tags.map((tag) => (

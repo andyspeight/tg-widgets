@@ -401,9 +401,16 @@ export function formatFieldValue(def: FieldDef, value: FieldValue | undefined): 
 
   switch (def.kind) {
     case 'toggle':
-      // Only a yes is worth the space. "Escorted: No" on a card is a fact
-      // nobody scanning a grid of tours is looking for.
-      return value === true ? def.label : '';
+      /*
+       * "Yes", and nothing at all for a no.
+       *
+       * Nothing for a no because "Escorted: No" is not a fact anybody scanning
+       * a grid of tours is looking for, and a row of denials is a poor use of
+       * the space. "Yes" rather than the label because every place this is
+       * shown puts the LABEL beside the value, so returning the label made a
+       * fact read "Escorted throughout: Escorted throughout".
+       */
+      return value === true ? 'Yes' : '';
 
     case 'number':
     case 'price': {

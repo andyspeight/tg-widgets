@@ -337,7 +337,9 @@ describe('formatFieldValue', () => {
 
   it('a yes is worth the space and a no is not', () => {
     const escorted = def({ key: 'escorted', label: 'Escorted', kind: 'toggle' });
-    expect(formatFieldValue(escorted, true)).toBe('Escorted');
+    // "Yes", not the label: every place a fact is shown puts the label beside
+    // the value, so the label as a value read "Escorted: Escorted".
+    expect(formatFieldValue(escorted, true)).toBe('Yes');
     expect(formatFieldValue(escorted, false)).toBe('');
   });
 
@@ -417,6 +419,77 @@ describe('an item carries its answers', () => {
 function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
 }
+
+// ---------------------------------------------------------------------------
+// The entry's own page, and the site search
+// ---------------------------------------------------------------------------
+
+describe('an entry shows its own facts', () => {
+  const route = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
+
+  it('reads the schema back with the entry, from the join already there', () => {
+    const db = read('lib', 'db', 'collections.ts');
+    const fn = db.slice(db.indexOf('export async function getPublishedItem'));
+    expect(fn.slice(0, 900)).toContain('select i.data, i.published_at, c.fields');
+    expect(fn.slice(0, 900)).toContain('fields: parseFieldDefs(asObject(row.fields))');
+  });
+
+  it('shows ALL of them, unlike a card, which shows the first few', () => {
+    // No limit argument: a card is a glance, this is the page somebody opened
+    // to find these out.
+    expect(route).toContain('const facts = fieldFacts(entry.fields, item.fields);');
+  });
+
+  it('puts them above the picture, where the decision is made', () => {
+    const head = route.slice(route.indexOf('tgs-entry__summary'), route.indexOf('tgs-entry__image'));
+    expect(head).toContain('tgs-entry__facts');
+    expect(head.indexOf('tgs-entry__facts')).toBeLessThan(head.indexOf('tgs-entry__tags'));
+  });
+
+  it('as a definition list, the same as the card', () => {
+    expect(route).toContain('<dl className="tgs-entry__facts">');
+    expect(route).toContain('<dt>{fact.label}</dt>');
+    expect(route).toContain('<dd>{fact.value}</dd>');
+  });
+
+  it('ruled off, in the data typeface, following the dark palette', () => {
+    const css = read('app', 'globals.css');
+    const rule = css.slice(css.indexOf('.tgs-entry__facts {'), css.indexOf('.tgs-entry__fact dt'));
+    // The theme's own border token rather than a hard-coded grey, so the rule
+    // is visible on a dark site as well as a light one.
+    expect(rule).toContain('border-top: 1px solid var(--tgs-border)');
+    const value = css.slice(css.indexOf('.tgs-entry__fact dd {'));
+    expect(value.slice(0, 400)).toContain('font-family: var(--tgs-font-data, inherit)');
+    expect(value.slice(0, 400)).toContain('font-variant-numeric: tabular-nums');
+  });
+});
+
+describe('the site search can find an entry by its facts', () => {
+  const db = read('lib', 'db', 'collections.ts');
+  const fn = db.slice(db.indexOf('export async function listPublishedItemsForSearch'));
+
+  it('indexes both the label and the value', () => {
+    // People search either way: "half board" is the value, "board basis" is
+    // close to the label, and one should find a tour that answers the other.
+    expect(fn).toContain('`${fact.label} ${fact.value}`');
+  });
+
+  it('parses each collections schema once, not once per entry', () => {
+    // Five hundred rows share a handful of schemas. Parsing per row would be
+    // the same work five hundred times.
+    expect(fn).toContain('const schemas = new Map<string, FieldDef[]>()');
+    expect(fn).toContain('if (!schemas.has(key)) schemas.set(key, parseFieldDefs(asObject(row.fields)))');
+  });
+
+  it('puts them after the prose, so a result still shows a sentence', () => {
+    expect(fn).toContain('const extras = [item.author, ...item.tags, declared]');
+  });
+
+  it('still has no status filter, because the policy is what hides a draft', () => {
+    expect(fn).not.toContain("status = 'published'");
+    expect(fn).toContain('withPublicTenant');
+  });
+});
 
 // ---------------------------------------------------------------------------
 // The card: what a listing block actually shows

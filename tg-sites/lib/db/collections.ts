@@ -24,7 +24,12 @@
  */
 
 import { parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../content/collection';
-import { cleanFieldValues, parseFieldDefs, type FieldDef } from '../content/collection-fields';
+import {
+  cleanFieldValues,
+  fieldFacts,
+  parseFieldDefs,
+  type FieldDef,
+} from '../content/collection-fields';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -596,10 +601,10 @@ export async function getPublishedItem(
   tenantId: string,
   collectionKey: string,
   slug: string,
-): Promise<{ item: CollectionItem; publishedAt: Date | null } | null> {
+): Promise<{ item: CollectionItem; fields: FieldDef[]; publishedAt: Date | null } | null> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select i.data, i.published_at
+      select i.data, i.published_at, c.fields
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       where c.key = ${collectionKey} and i.slug = ${slug}
@@ -610,6 +615,9 @@ export async function getPublishedItem(
     const row = rows[0] as Record<string, unknown>;
     return {
       item: hydrate(row.data, `${collectionKey}/${slug}`),
+      // From the join that was already here, so an entry's own page shows its
+      // facts without a second read, exactly as a listing's cards do.
+      fields: parseFieldDefs(asObject(row.fields)),
       publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     };
   });
@@ -704,17 +712,27 @@ export const MAX_SEARCH_ITEMS = 500;
 export async function listPublishedItemsForSearch(tenantId: string): Promise<SearchDoc[]> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select c.key, i.slug, i.data
+      select c.key, i.slug, i.data, c.fields
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       order by i.published_at desc nulls last, i.id desc
       limit ${MAX_SEARCH_ITEMS}
     `;
 
+    /*
+     * One schema per collection, worked out once rather than per row.
+     *
+     * Every entry in a collection shares its definitions, so parsing them for
+     * all five hundred rows would be the same work five hundred times. Keyed by
+     * the collection key, which is what each row already carries.
+     */
+    const schemas = new Map<string, FieldDef[]>();
+
     return (rows as Array<Record<string, unknown>>).map((row) => {
       const key = String(row.key);
       const slug = String(row.slug);
       const item = hydrate(row.data, `${key}/${slug}`);
+      if (!schemas.has(key)) schemas.set(key, parseFieldDefs(asObject(row.fields)));
 
       /*
        * The summary leads, then the article, then the byline and the tags.
@@ -731,7 +749,23 @@ export async function listPublishedItemsForSearch(tenantId: string): Promise<Sea
        * because "posts by Sarah" is a search people actually do.
        */
       const body = pageText(item, 8000);
-      const extras = [item.author, ...item.tags].filter(Boolean).join(' ');
+      /*
+       * The declared facts go in as "Board Half board", label and value both.
+       *
+       * BOTH HALVES, because people search either way: "half board" is the
+       * value and "board basis" is close to the label, and a tour that answers
+       * one should be found by the other. Formatted rather than raw, so a
+       * price is searchable as £1,299 the way it is shown, and an unanswered
+       * field contributes nothing at all.
+       *
+       * LAST, after the prose, for the same reason the tags are: searchDocs
+       * cuts its snippet around the first match, so a result almost always
+       * shows a readable sentence rather than a row of numbers.
+       */
+      const declared = fieldFacts(schemas.get(key) ?? [], item.fields)
+        .map((fact) => `${fact.label} ${fact.value}`)
+        .join(' ');
+      const extras = [item.author, ...item.tags, declared].filter(Boolean).join(' ');
       const text = [item.summary, body, extras].filter(Boolean).join('\n');
 
       return {
