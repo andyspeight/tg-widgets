@@ -91,6 +91,7 @@ import { hasInnerColumns, MAX_GRID_CELLS } from '../../lib/content/inner-columns
 import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
+import { ListingFilterFields } from './ListingFilterFields';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
 import { writeSeoAction } from '../../app/actions/ai';
 import { rebuildImportAction } from '../../app/actions/import';
@@ -2745,6 +2746,27 @@ function BlockFields({
     list.push(node);
     groups.set(group, list);
   };
+
+  /*
+   * NARROWING A COLLECTION GRID. Only for a Cards block actually drawing from a
+   * collection: a grid somebody typed into has nothing to narrow, and showing
+   * the controls there would be a promise the block cannot keep. Its options are
+   * whatever the named collection declares, which is why this is not a registry
+   * field like everything else on this pane. See ListingFilterFields.
+   */
+  if (block.type === 'cards' && block.props.source === 'collection') {
+    add(
+      'content',
+      <ListingFilterFields
+        key="listing-filter"
+        collectionKey={typeof block.props.collection === 'string' ? block.props.collection : ''}
+        props={block.props}
+        onChange={(patch) =>
+          onCommit((c) => updateBlockPropsAtPath(c, path, patch), `blk:${block.id}:listing-filter`)
+        }
+      />,
+    );
+  }
 
   definition.fields.forEach((field) => {
     // Text and heading get ONE tier-aware Alignment control below (the block's own

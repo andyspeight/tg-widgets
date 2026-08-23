@@ -29,7 +29,7 @@ import {
   listPublishedItemsForSearch,
   MAX_LISTING_ITEMS,
 } from '../../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
+import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
 import { readingTime } from '../../../../lib/content/reading-time';
@@ -183,12 +183,17 @@ async function load(host: string, path: string[] | undefined) {
     const results = await Promise.all(
       wanted.map(async (request) => ({
         request,
-        listing: await listPublished(tenantId, request.collection, request.count),
+        listing: await listPublished(tenantId, request.collection, request.count, {
+          filter: request.filter,
+          sort: request.sort,
+        }),
       })),
     );
     for (const { request, listing } of results) {
       listings.set(
-        request.collection,
+        // Keyed by the whole request, not the collection: two blocks narrowing
+        // the same collection differently are two answers. See listingKey.
+        listingKey(request),
         // The collection's own field definitions came back with its items, so
         // a card can carry a price and a number of nights without a second read.
         listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),

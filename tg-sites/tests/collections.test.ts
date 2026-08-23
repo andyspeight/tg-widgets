@@ -44,6 +44,7 @@ import {
   itemAsCard,
   listingIn,
   listingsIn,
+  listingKey,
 } from '../lib/content/listings';
 import { defaultPropsFor } from '../lib/content/blocks';
 import { createSection } from '../lib/content/factory';
@@ -550,7 +551,7 @@ describe('which blocks want a collection', () => {
   it('reads the collection and how many were asked for', () => {
     expect(listingIn(listingBlock({ source: 'collection', collection: 'blog', count: 3 })))
       // Two facts unless the block says otherwise: see DEFAULT_FACTS.
-      .toEqual({ collection: 'blog', count: 3, facts: 2 });
+      .toEqual({ collection: 'blog', count: 3, facts: 2, filter: null, sort: null });
   });
 
   /*
@@ -602,7 +603,7 @@ describe('what a whole set of trees wants', () => {
 
   it('survives a site with no header or footer published', () => {
     expect(listingsIn([null, tree([listingBlock({ source: 'collection', collection: 'blog' })]), undefined]))
-      .toEqual([{ collection: 'blog', count: 6, facts: 2 }]);
+      .toEqual([{ collection: 'blog', count: 6, facts: 2, filter: null, sort: null }]);
   });
 
   /*
@@ -619,7 +620,7 @@ describe('what a whole set of trees wants', () => {
       ]),
     ]);
 
-    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2 }]);
+    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2, filter: null, sort: null }]);
   });
 });
 
@@ -674,8 +675,16 @@ describe('an item as a card', () => {
 });
 
 describe('filling the listings in', () => {
+  /*
+   * KEYED BY THE WHOLE REQUEST, not by the collection's name. Two blocks
+   * narrowing one collection differently are two different answers, so the key
+   * carries the filter and the sort as well (#238, listingKey).
+   */
+  const plain = (collection: string) =>
+    listingKey({ collection, count: 0, facts: 0, filter: null, sort: null });
+
   const data = new Map([
-    ['blog', [{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]],
+    [plain('blog'), [{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]],
   ]);
 
   it('hands back the very same tree when there is nothing to fill', () => {
@@ -745,7 +754,7 @@ describe('filling the listings in', () => {
     const tree = {
       sections: [section([listingBlock({ source: 'collection', collection: 'blog' })])],
     };
-    const filled = fillListings(tree, new Map([['blog', []]]));
+    const filled = fillListings(tree, new Map([[plain('blog'), []]]));
 
     expect((filled.sections[0].rows[0].columns[0].blocks[0].props as Record<string, unknown>).items)
       .toEqual([]);
@@ -975,6 +984,95 @@ describe('reading published entries', () => {
     const { items } = await listPublished(ALPHA, 'blog', 6);
     expect(items[0].item.title).toBe('Ten things');
     expect(items[0].slug).toBe('ten-things');
+  });
+
+  /*
+   * NARROWING A LISTING (#238). The engine is proved in
+   * tests/collection-filter.test.ts; these prove the query layer actually asks
+   * it, and that the cost control holds.
+   */
+  const TOURS = [
+    { key: 'board', label: 'Board basis', kind: 'choice', choices: ['Half board', 'Full board'] },
+    { key: 'price', label: 'Price from', kind: 'price' },
+  ];
+
+  const tourRow = (slug: string, title: string, fields: Record<string, unknown>) => ({
+    slug,
+    data: { version: 1, title, fields },
+    published_at: '2026-08-03T09:00:00Z',
+    fields: TOURS,
+  });
+
+  it('narrows a listing to the items that answer the filter', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      tourRow('a', 'Half board tour', { board: 'Half board', price: 1299 }),
+      tourRow('b', 'Full board tour', { board: 'Full board', price: 1899 }),
+      tourRow('c', 'Another half', { board: 'Half board', price: 999 }),
+    ]);
+
+    const { items } = await listPublished(ALPHA, 'tours', 6, {
+      filter: { field: 'board', op: 'is', value: 'Half board' },
+    });
+
+    expect(items.map((row) => row.slug)).toEqual(['a', 'c']);
+  });
+
+  it('orders a listing by a declared field', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      tourRow('a', 'Dearest', { price: 1899 }),
+      tourRow('b', 'Cheapest', { price: 999 }),
+      tourRow('c', 'Middle', { price: 1299 }),
+    ]);
+
+    const { items } = await listPublished(ALPHA, 'tours', 6, {
+      sort: { field: 'price', dir: 'asc' },
+    });
+
+    expect(items.map((row) => row.slug)).toEqual(['b', 'c', 'a']);
+  });
+
+  it('reads a filter naming a field the collection dropped as NO filter', async () => {
+    /*
+     * What a rename leaves behind. A page showing everything is a far better
+     * failure than a page showing nothing with no clue why.
+     */
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      tourRow('a', 'One', { board: 'Half board' }),
+      tourRow('b', 'Two', { board: 'Full board' }),
+    ]);
+
+    const { items } = await listPublished(ALPHA, 'tours', 6, {
+      filter: { field: 'gone', op: 'is', value: 'x' },
+    });
+
+    expect(items).toHaveLength(2);
+  });
+
+  it('keeps its LIMIT when nothing is narrowed, and drops it only when something is', async () => {
+    /*
+     * THE COST CONTROL. Narrowing must happen before the cap or the answer is
+     * wrong, so a narrowed listing reads the collection. A plain one must not:
+     * the overwhelming majority of listings are plain, and this is what stops
+     * every blog grid on every site turning into a full table read.
+     */
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [tourRow('a', 'One', {})]);
+    await listPublished(ALPHA, 'tours', 6);
+    expect(itemQuery().sql).toContain('limit');
+
+    log = [];
+    respond('from public.collection_items', [tourRow('a', 'One', { board: 'Half board' })]);
+    await listPublished(ALPHA, 'tours', 6, {
+      filter: { field: 'board', op: 'is', value: 'Half board' },
+    });
+    expect(itemQuery().sql).not.toContain('limit');
   });
 
   it('answers with nothing for an entry that is not there', async () => {

@@ -13,7 +13,7 @@ import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage, listPublishedNavPages } from '../../../lib/db/pages';
 import { getPublishedRegions } from '../../../lib/db/regions';
 import { listPublished } from '../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingsIn } from '../../../lib/content/listings';
+import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../lib/content/listings';
 import { fillNavFolders, fillNavRegion } from '../../../lib/content/nav';
 import { fillBreadcrumbs } from '../../../lib/content/breadcrumbs';
 import { getPublicTheme } from '../../../lib/db/theme';
@@ -99,7 +99,9 @@ async function load(path: string[] | undefined) {
     );
     for (const { request, listing } of results) {
       listings.set(
-        request.collection,
+        // Keyed by the whole request, not the collection: two blocks narrowing
+        // the same collection differently are two answers. See listingKey.
+        listingKey(request),
         // The collection's own field definitions came back with its items, so
         // a card can carry a price and a number of nights without a second read.
         listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),

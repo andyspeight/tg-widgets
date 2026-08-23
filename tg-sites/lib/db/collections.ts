@@ -30,6 +30,12 @@ import {
   parseFieldDefs,
   type FieldDef,
 } from '../content/collection-fields';
+import {
+  compareByField,
+  matchesFilter,
+  parseFilter,
+  parseSort,
+} from '../content/collection-filter';
 import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
@@ -509,20 +515,49 @@ export async function listPublished(
   tenantId: string,
   collectionKey: string,
   limit: number,
+  narrow: { filter?: unknown; sort?: unknown } = {},
 ): Promise<PublishedListing> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
+  const asked = Boolean(narrow.filter) || Boolean(narrow.sort);
 
   return withPublicTenant(tenantId, async (tx) => {
-    const rows = await tx`
-      select i.slug, i.data, i.published_at, c.fields
-      from public.collection_items i
-      join public.collections c on c.id = i.collection_id
-      where c.key = ${collectionKey}
-      order by i.published_at desc nulls last, i.id desc
-      limit ${capped}
-    `;
+    /*
+     * THE LIMIT COMES OFF ONLY WHEN SOMETHING IS ASKED FOR, and that condition
+     * is the whole cost control. Narrowing has to happen before the cap or the
+     * answer is wrong: filtering the newest twelve to the half board ones gives
+     * whatever of those twelve happen to qualify, not the twelve half board
+     * tours the page asked for. So a narrowed listing reads the collection and a
+     * plain one does not, and the overwhelming majority are plain.
+     *
+     * WHY THE NARROWING IS NOT IN THE SQL. The values live in data->fields->key
+     * as jsonb, which the database does not constrain: one item holding a string
+     * where a number is expected fails the cast and takes the whole query down
+     * with it. In JS they have been through the item parse and are typed. The
+     * tag archive below already reads and decides in JS for its own reason, so
+     * this is the established shape here rather than a new one.
+     *
+     * The bargain is worth naming: this reads a collection to answer about it.
+     * Fine at the sizes these are, which is a travel agent's tours rather than a
+     * catalogue, and the cap still bounds what is built and sent.
+     */
+    const rows = asked
+      ? await tx`
+          select i.slug, i.data, i.published_at, c.fields
+          from public.collection_items i
+          join public.collections c on c.id = i.collection_id
+          where c.key = ${collectionKey}
+          order by i.published_at desc nulls last, i.id desc
+        `
+      : await tx`
+          select i.slug, i.data, i.published_at, c.fields
+          from public.collection_items i
+          join public.collections c on c.id = i.collection_id
+          where c.key = ${collectionKey}
+          order by i.published_at desc nulls last, i.id desc
+          limit ${capped}
+        `;
 
-    const items = rows.map((raw) => {
+    let items = rows.map((raw) => {
       const row = raw as Record<string, unknown>;
       return {
         slug: String(row.slug),
@@ -533,6 +568,22 @@ export async function listPublished(
 
     // Every row carries the same collection, so the first one has the schema.
     const fields = parseFieldDefs(asObject((rows[0] as Record<string, unknown>)?.fields));
+
+    if (asked) {
+      // Read against the schema that just came back, so a filter naming a field
+      // this collection no longer declares reads as no filter rather than as an
+      // empty page. See lib/content/collection-filter.ts.
+      const filter = parseFilter(fields, narrow.filter);
+      if (filter) items = items.filter((row) => matchesFilter(fields, row.item.fields, filter));
+
+      const sort = parseSort(fields, narrow.sort);
+      if (sort) {
+        items = [...items].sort((a, b) => compareByField(fields, sort, a.item.fields, b.item.fields));
+      }
+
+      items = items.slice(0, capped);
+    }
+
     return { fields, items };
   });
 }

@@ -39,6 +39,52 @@ export interface ListingRequest {
    * it would have had to guess, or fetch on every keystroke.
    */
   facts: number;
+  /**
+   * Narrowing, as the block stored it. SHAPE-CHECKED HERE AND SCHEMA-CHECKED
+   * LATER: whether the named field exists, and whether that operator belongs to
+   * its kind, can only be answered next to the collection's definitions, and
+   * those come back with the query. So this carries what was asked for and
+   * lib/content/collection-filter.ts decides what it means. Null is the common
+   * case and costs nothing: the query keeps its LIMIT and reads no more rows
+   * than it ever did.
+   */
+  filter: RawFilter | null;
+  sort: RawSort | null;
+}
+
+/** A filter as stored on the block, before the schema has had a look at it. */
+export interface RawFilter {
+  field: string;
+  op: string;
+  value: string;
+}
+
+/** A sort as stored on the block. */
+export interface RawSort {
+  field: string;
+  dir: 'asc' | 'desc';
+}
+
+/**
+ * What makes two blocks' listings the SAME read.
+ *
+ * It used to be the collection's name alone, because that was all a listing was:
+ * the newest N of a collection, so two blocks naming one collection wanted the
+ * same rows and shared a query. Narrowing breaks that. "The half board tours"
+ * and "the tours under a thousand pounds" are both the tours collection and are
+ * not the same answer, so the key has to carry everything that changes the
+ * answer or one block would quietly be handed the other's rows.
+ *
+ * The count and the facts are deliberately NOT in it: those trim a shared
+ * answer rather than change it, so two blocks wanting six and twelve of the same
+ * filtered tours still share one read of twelve.
+ */
+export function listingKey(request: ListingRequest): string {
+  const filter = request.filter
+    ? `${request.filter.field}\u0000${request.filter.op}\u0000${request.filter.value}`
+    : '';
+  const sort = request.sort ? `${request.sort.field}\u0000${request.sort.dir}` : '';
+  return `${request.collection}\u0001${filter}\u0001${sort}`;
 }
 
 const MIN_COUNT = 1;
@@ -85,12 +131,33 @@ export function listingIn(block: { type: string; props?: Record<string, unknown>
     ? Math.min(MAX_FACTS, Math.max(0, Math.round(rawFacts)))
     : DEFAULT_FACTS;
 
-  return { collection, count, facts };
+  return { collection, count, facts, filter: filterIn(props), sort: sortIn(props) };
+}
+
+/**
+ * The filter a block stored, or null.
+ *
+ * Null for anything incomplete, which is the state the pane leaves while a
+ * client is halfway through choosing one: a field picked and no value yet must
+ * show the whole listing rather than an empty grid.
+ */
+function filterIn(props: Record<string, unknown>): RawFilter | null {
+  const field = asString(props.filterField).trim();
+  const op = asString(props.filterOp).trim();
+  const value = asString(props.filterValue).trim();
+  return field && op && value ? { field, op, value } : null;
+}
+
+/** The sort a block stored, or null for newest first, which is the default. */
+function sortIn(props: Record<string, unknown>): RawSort | null {
+  const field = asString(props.sortField).trim();
+  if (!field) return null;
+  return { field, dir: asString(props.sortDir) === 'desc' ? 'desc' : 'asc' };
 }
 
 /** Every distinct collection a tree wants, and the most any block asked for. */
 export function listingsIn(trees: ReadonlyArray<{ sections: Section[] } | null | undefined>): ListingRequest[] {
-  const wanted = new Map<string, { count: number; facts: number }>();
+  const wanted = new Map<string, ListingRequest>();
 
   for (const tree of trees) {
     if (!tree) continue;
@@ -100,10 +167,14 @@ export function listingsIn(trees: ReadonlyArray<{ sections: Section[] } | null |
           for (const block of column.blocks) {
             const listing = listingIn(block);
             if (!listing) continue;
-            // One read per collection, for the largest count anybody wanted.
-            // Two blocks showing the same posts is one query, not two.
-            const so_far = wanted.get(listing.collection);
-            wanted.set(listing.collection, {
+            // One read per distinct REQUEST, for the largest count anybody
+            // wanted. Two blocks showing the same posts is one query, not two;
+            // two blocks showing differently narrowed posts is two, because
+            // they are not the same rows. See listingKey.
+            const key = listingKey(listing);
+            const so_far = wanted.get(key);
+            wanted.set(key, {
+              ...listing,
               count: Math.max(so_far?.count ?? 0, listing.count),
               // The most facts any block asked for. Each block still shows its
               // own number: fillListings trims the list per block, so a page
@@ -116,7 +187,7 @@ export function listingsIn(trees: ReadonlyArray<{ sections: Section[] } | null |
     }
   }
 
-  return [...wanted].map(([collection, { count, facts }]) => ({ collection, count, facts }));
+  return [...wanted.values()];
 }
 
 /**
@@ -205,7 +276,7 @@ export function fillListings<T extends { sections: Section[] }>(tree: T, data: L
           const listing = listingIn(block);
           if (!listing) return block;
 
-          const items = data.get(listing.collection);
+          const items = data.get(listingKey(listing));
           if (!items) return block;
 
           touched = true;

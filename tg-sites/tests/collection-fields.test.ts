@@ -15,7 +15,9 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { emptyItem, parseItem, safeFieldBag, MAX_FIELDS } from '../lib/content/collection';
-import { fillListings, itemAsCard, listingIn } from '../lib/content/listings';
+import { fillListings, itemAsCard, listingIn,
+  listingKey,
+} from '../lib/content/listings';
 import { createSection } from '../lib/content/factory';
 import { defaultPropsFor } from '../lib/content/blocks';
 import {
@@ -561,7 +563,10 @@ describe('a collections facts on its cards', () => {
 
     const tree = { sections: [grid(1), grid(3)] };
     const card = itemAsCard(tour(), 'tours', 'western-isles', defs);
-    const filled = fillListings(tree, new Map([['tours', [card]]]));
+    // Keyed by the whole request now, not by the collection's name, because two
+    // blocks narrowing one collection differently are two answers (#238).
+    const key = listingKey({ collection: 'tours', count: 0, facts: 0, filter: null, sort: null });
+    const filled = fillListings(tree, new Map([[key, [card]]]));
 
     const factsOn = (index: number) => {
       const props = filled.sections[index].rows[0].columns[0].blocks[0].props as Record<string, unknown>;
