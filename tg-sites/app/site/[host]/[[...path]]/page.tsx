@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
@@ -86,7 +87,27 @@ function isSearchPath(path: string[] | undefined): boolean {
   return segments.length === 1 && segments[0] === 'search';
 }
 
-async function load(host: string, path: string[] | undefined) {
+/**
+ * Everything a published address needs, fetched once per request.
+ *
+ * WRAPPED IN cache() AND THAT IS NOT A MICRO-OPTIMISATION. Next calls
+ * generateMetadata and the page component in the SAME request, and both of them
+ * call this. Without memoisation that is two tenant resolutions and two sets of
+ * the six reads below, and each read is its own transaction that opens with a
+ * begin, writes a set_config to name the tenant for RLS, runs its query and
+ * commits. Twelve transactions to eu-west-2 where six would do, on every single
+ * page view, before a byte of HTML leaves the server.
+ *
+ * It was measured rather than assumed: neither this file nor lib/db had a
+ * cache() anywhere, and the one in lib/db/client.ts is a CONNECTION POOL, which
+ * is a different thing that is easy to mistake for this at a glance.
+ *
+ * React's cache() memoises for the lifetime of one request and no longer, which
+ * is exactly the scope wanted here. It must NOT become a longer-lived cache: a
+ * published page has to reflect a publish immediately, and two visitors must
+ * never share a tenant's data. Request scope is the whole safety argument.
+ */
+const load = cache(async function load(host: string, path: string[] | undefined) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
   if (!tenantId) return null;
 
@@ -212,7 +233,7 @@ async function load(host: string, path: string[] | undefined) {
     navPages,
     tenantId,
   };
-}
+});
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { host, path } = await params;
