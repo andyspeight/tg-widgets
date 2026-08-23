@@ -5046,7 +5046,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   --tgs-scr-edge: #23262b;
 }
 
-.tgs-screen__device { width: 100%; max-width: 56rem; }
+/*
+ * THE LID IS NARROWED SO THE BASE FITS.
+ *
+ * A laptop's base is wider than its lid and the mockup says so: .tgs-screen__base
+ * below is 118% and offset to sit under the screen. Nothing accounted for that
+ * extra 18% though, so at any width where the lid filled its column the base
+ * hung 32px past it on each side, in every layout including full width. It was
+ * the only thing on the page that stuck out of its own column at 390px.
+ *
+ * 1 / 1.18 is 84.7%, so lid plus base is exactly the space available and the
+ * drawing is unchanged in proportion, only in size.
+ */
+.tgs-screen__device { width: 84.7%; max-width: 56rem; }
+/* A phone has no base, so it keeps the full width it always had. */
+.tgs-screen[data-device='phone'] .tgs-screen__device { width: 100%; }
 .tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 17rem; }
 
 .tgs-screen__bezel {
@@ -6381,9 +6395,30 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   list-style: none;
 }
 
-.tgs-stats[data-columns='2'] { grid-template-columns: repeat(2, 1fr); }
-.tgs-stats[data-columns='3'] { grid-template-columns: repeat(3, 1fr); }
-.tgs-stats[data-columns='4'] { grid-template-columns: repeat(4, 1fr); }
+/*
+ * THE TRACKS HAVE TO BE ALLOWED TO SHRINK, AND TO REFLOW.
+ *
+ * `repeat(4, 1fr)` looks like four equal quarters and is not: a 1fr track's
+ * minimum is `auto`, so it will not go below its content's min-content width.
+ * A key number is large type that does not wrap, so four of them in a narrow
+ * column simply pushed out of it: measured 192px past a 255px column inside a
+ * four-column section, 101px inside a three, 41px inside a two. It scaled with
+ * the count, which is the signature.
+ *
+ * It never showed on a phone, because there the section's own columns stack and
+ * every column is full width. That is why this survived: the page is wide, so
+ * nothing about the PAGE looks narrow, and the container query below keys off
+ * the page rather than off the column the numbers actually sit in.
+ *
+ * minmax(0, 1fr) lets a track shrink. auto-fit with a floor lets the row reflow
+ * to fewer columns when the COLUMN is narrow, whatever the page is doing, which
+ * is the part a page-level container query cannot do. The client's choice is
+ * still the maximum: they never get more columns than they asked for.
+ */
+.tgs-stats[data-columns='2'] { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+.tgs-stats[data-columns='3'] { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+.tgs-stats[data-columns='4'] { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+
 
 .tgs-stats[data-align='centre'] { text-align: center; }
 .tgs-stats[data-align='right']  { text-align: right; }
@@ -6402,8 +6437,24 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   font-variant-numeric: tabular-nums lining-nums;
 }
 
-.tgs-stats[data-size='m'] .tgs-stats__figure  { font-size: var(--tgs-h-l); }
-.tgs-stats[data-size='l'] .tgs-stats__figure  { font-size: var(--tgs-h-xl); }
+/*
+ * A KEY NUMBER HAS TO FIT THE TRACK IT IS IN.
+ *
+ * These were flat sizes, and a flat size in a track whose width depends on the
+ * section layout is the second half of the overflow bug. Letting the tracks
+ * shrink (above) stopped the LIST pushing out of its column and moved the
+ * problem one level down: "12,000+" at a fixed 36px is about 205px of text in a
+ * 154px track, so the number itself spilled, and the little "+" was measured 51
+ * px outside the column with its own box entirely inside it.
+ *
+ * min() keeps the client's chosen size as the CEILING on a roomy track and lets
+ * a narrow one scale the number down instead of spilling it. cqi is a share of
+ * the item's own width, so it answers to the column the numbers are in rather
+ * than to the page, which is the distinction this whole bug turned on.
+ */
+.tgs-stats__item { container-type: inline-size; }
+.tgs-stats[data-size='m'] .tgs-stats__figure  { font-size: min(var(--tgs-h-l), 19cqi); }
+.tgs-stats[data-size='l'] .tgs-stats__figure  { font-size: min(var(--tgs-h-xl), 22cqi); }
 .tgs-stats[data-size='xl'] .tgs-stats__figure { font-size: calc(var(--tgs-h-xl) * 1.4); }
 
 /*

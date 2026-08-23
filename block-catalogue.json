@@ -1204,7 +1204,7 @@
           ".tgs-screen[data-device='phone'] .tgs-screen__bezel: 12px"
         ]
       },
-      "cssRules": 46,
+      "cssRules": 47,
       "sourcePath": "tg-sites/components/render/blocks.tsx:2304",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
