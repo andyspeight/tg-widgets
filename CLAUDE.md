@@ -38,7 +38,10 @@ Owner: Andy Speight, CEO, Travelgenix.
 - **The Duda element audit (tg-sites)**: `docs/duda-element-audit.md`. Read it
   the moment a session mentions Duda, "the next list", or elements. It carries
   what has been checked, what was built, what Andy has asked to skip, and the
-  conventions the audit turned up that are not written anywhere else.
+  conventions the audit turned up that are not written anywhere else. Its
+  companion is `docs/duda-gap-analysis.md`, the PLATFORM-level comparison (23 Aug
+  2026): the element axis is closed, so a new "how do we compare to Duda"
+  question belongs there rather than in a fresh element sweep.
 
 Living project state lives in Airtable: base `appj9tksreHOwkhYg`, table
 `tblpyhPNhiQg3XkkT` (Projects). Read the record at the start of a session that
