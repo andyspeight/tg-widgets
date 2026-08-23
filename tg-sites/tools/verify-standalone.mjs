@@ -10591,6 +10591,57 @@ await check('a blog post offers an author byline that takes a name and persists'
 await page.evaluate(() => window.__TG_SET_ITEM__(null));
 await page.waitForTimeout(300);
 
+/*
+ * THE OUTLINE PANE REORDERS BY DRAG, ON THE SAME SYSTEM THE CANVAS USES.
+ *
+ * Task #137. The pane used to use native HTML5 drag and drop, which meant two
+ * drag systems in one editor and no keyboard story at all for one of them. It is
+ * dnd-kit now, and it also gained the thing native drag never had here: a block
+ * can move to a DIFFERENT column, not just up and down inside its own.
+ *
+ * DRIVEN AS A REAL DRAG rather than by calling the handler, because everything in
+ * this slice happens between the pointer and the commit: the 5px activation
+ * distance, the collision filter that stops a block resolving to the section box
+ * around it, and the shell reading the target off the row it landed on. A unit
+ * test reaches none of that, and the resolver it would exercise is already proved
+ * in tests/outline-move.test.ts.
+ */
+await check('a block dragged onto another row in the outline changes the order', async () => {
+  await page.locator('.ed-lefttab', { hasText: 'Outline' }).click();
+  await page.waitForTimeout(300);
+
+  // Open the sections until at least two block rows are showing.
+  const toggles = page.locator('.ed-sec-toggle');
+  const sections = await toggles.count();
+  for (let i = 0; i < sections; i += 1) {
+    if ((await page.locator('.ed-item-main').count()) >= 2) break;
+    await toggles.nth(i).click();
+    await page.waitForTimeout(200);
+  }
+
+  const rows = page.locator('.ed-item-main');
+  if ((await rows.count()) < 2) return `only ${await rows.count()} block rows in the outline`;
+
+  const before = await rows.allInnerTexts();
+  const from = await rows.nth(1).boundingBox();
+  const to = await rows.nth(0).boundingBox();
+  if (!from || !to) return 'the outline rows had no box to drag between';
+
+  // Past the 5px activation distance first, then onto the target row.
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2 - 12, { steps: 4 });
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+  await page.waitForTimeout(400);
+
+  const after = await page.locator('.ed-item-main').allInnerTexts();
+  return JSON.stringify(after) !== JSON.stringify(before)
+    ? true
+    : `the outline order did not change: ${JSON.stringify(before.slice(0, 3))}`;
+});
+
 await browser.close();
 
 let failed = false;

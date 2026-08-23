@@ -56,6 +56,8 @@ import { Rail } from './Rail';
 import { CommentsPanel } from './CommentsPanel';
 import { PagesPanel, type PageLink } from './PagesPanel';
 import { Canvas, type DropTarget } from './Canvas';
+import { outlineCollision } from './outline-collision';
+import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
 import type { PreparedMap } from '../../lib/content/prepared';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
@@ -1592,6 +1594,15 @@ export function EditorShell({
     [moveSectionAt],
   );
 
+  /*
+   * An outline drag in flight, if one is. The canvas drags resolve their target
+   * from the document under the pointer; an outline drag does not, so this flag
+   * is what keeps the two apart: while it is set, the canvas drop hooks are left
+   * alone entirely and no boundary line is drawn on a canvas nobody is dragging
+   * over. See components/editor/outline-move.ts.
+   */
+  const outlineDragRef = useRef<OutlineDragItem | null>(null);
+
   const paletteDrop = usePaletteDrop(dropOnCanvas);
   const sectionDrop = useSectionDrop(dropSectionOnCanvas);
   const dndSensors = useSensors(
@@ -1601,6 +1612,13 @@ export function EditorShell({
   return (
     <DndContext
       sensors={dndSensors}
+      /*
+       * The outline's rows are the only droppables in this context: the canvas
+       * registers none and reads no `over`. So this filter answers for the
+       * outline and answers nothing for everything else, which is both correct
+       * and cheaper than ranking rows a canvas drag would ignore.
+       */
+      collisionDetection={outlineCollision}
       /*
        * autoScroll off, on purpose. dnd-kit would otherwise nudge the canvas
        * while you hover near its edge and fire extra move events as it goes; our
@@ -1616,6 +1634,15 @@ export function EditorShell({
         // One discriminator per source: a palette card carries paletteType, a
         // block handle carries moveFrom, a section handle carries moveSection.
         const data = event.active.data.current;
+
+        // An outline row. It resolves its target from dnd-kit's own droppables
+        // rather than from the canvas, so it takes neither of the drop hooks.
+        if (data?.outlineDrag) {
+          outlineDragRef.current = data.outlineDrag as OutlineDragItem;
+          document.body.dataset.tgDragging = 'outline';
+          return;
+        }
+
         let drag: ActiveDrag | null = null;
         if (typeof data?.paletteType === 'string') {
           drag = { kind: 'add', type: data.paletteType };
@@ -1641,6 +1668,9 @@ export function EditorShell({
         document.body.dataset.tgDragging = 'block';
       }}
       onDragMove={(event: DragMoveEvent) => {
+        // dnd-kit keeps the outline's highlight itself, through isOver on each
+        // row, so there is nothing for this to draw.
+        if (outlineDragRef.current) return;
         const drag = activeDragRef.current;
         if (!drag) return;
         // dnd-kit hands us the pointer as the pointerdown plus how far it moved;
@@ -1652,7 +1682,25 @@ export function EditorShell({
         if (drag.kind === 'move-section') sectionDrop.update(x, y);
         else paletteDrop.update(x, y);
       }}
-      onDragEnd={() => {
+      onDragEnd={(event) => {
+        /*
+         * An outline drop. The row it ended on names its own target, so the
+         * whole move is decided from the event: no geometry, no second guess at
+         * which column was meant. resolveOutlineMove answers null for a drag that
+         * changes nothing, and skipping the commit then is deliberate, because an
+         * undo step that undoes nothing is worse than no step at all.
+         */
+        const outline = outlineDragRef.current;
+        if (outline) {
+          const target = event.over?.data.current?.outlineDrop as OutlineDragItem | undefined;
+          if (target) {
+            commit((current) => resolveOutlineMove(current, outline, target) ?? current);
+          }
+          outlineDragRef.current = null;
+          delete document.body.dataset.tgDragging;
+          return;
+        }
+
         const drag = activeDragRef.current;
         if (drag?.kind === 'move-section') sectionDrop.end();
         else if (drag) paletteDrop.end();
@@ -1661,6 +1709,7 @@ export function EditorShell({
         delete document.body.dataset.tgDragging;
       }}
       onDragCancel={() => {
+        outlineDragRef.current = null;
         paletteDrop.hide();
         sectionDrop.hide();
         activeDragRef.current = null;
