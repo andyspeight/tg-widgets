@@ -1,0 +1,37 @@
+[
+  {
+    "profile": "designed",
+    "fcp": 1616,
+    "lcp": 3004,
+    "cls": 0,
+    "lcpElement": "img.main",
+    "lcpUrl": "/img/hero.jpg",
+    "requests": 3,
+    "transferByType": {
+      "document": 10774,
+      "stylesheet": 82833,
+      "image": 460978
+    },
+    "transferTotal": 554585,
+    "cssTotalBytes": 309302,
+    "cssUsedBytes": 9842,
+    "cssUnusedPct": 96.8
+  },
+  {
+    "profile": "native",
+    "fcp": 872,
+    "lcp": 872,
+    "cls": 0,
+    "lcpElement": "p",
+    "lcpUrl": null,
+    "requests": 2,
+    "transferByType": {
+      "document": 1795,
+      "stylesheet": 82833
+    },
+    "transferTotal": 84628,
+    "cssTotalBytes": 309302,
+    "cssUsedBytes": 15793,
+    "cssUnusedPct": 94.9
+  }
+]
