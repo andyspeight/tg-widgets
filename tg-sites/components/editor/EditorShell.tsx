@@ -56,6 +56,7 @@ import { Rail } from './Rail';
 import { CommentsPanel } from './CommentsPanel';
 import { PagesPanel, type PageLink } from './PagesPanel';
 import { Canvas, type DropTarget } from './Canvas';
+import type { PreparedMap } from '../../lib/content/prepared';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -411,6 +412,13 @@ interface EditorProps {
    * one of these on its own, and drawing a header around a header is a hall of
    * mirrors.
    */
+  /**
+   * Markup the server cleaned for every tree this shell opened with, by block id.
+   * The canvas cannot clean it itself and asks for anything made afterwards; this
+   * is only so an existing page draws on the first paint rather than flashing its
+   * placeholders. See lib/content/prepared.ts.
+   */
+  preparedSeed?: PreparedMap;
   chromeHeader?: ChromeRegion | null;
   chromeFooter?: ChromeRegion | null;
   /**
@@ -437,6 +445,7 @@ export function EditorShell({
   itemId = null,
   initialItemMeta,
   itemFields,
+  preparedSeed,
   chromeHeader = null,
   chromeFooter = null,
   focusComment = null,
@@ -2033,6 +2042,7 @@ export function EditorShell({
       )}
 
       <Canvas
+        preparedSeed={preparedSeed}
         onInsertSection={setInsertAt}
         editingPath={editingPath}
         page={page}

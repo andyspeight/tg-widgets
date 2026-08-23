@@ -4,6 +4,7 @@ import Link from 'next/link';
 import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
 import { RegionRenderer } from '../../../components/render/RegionRenderer';
+import { mergePrepared, prepareSections } from '../../../lib/content/prepare-markup';
 import { WidgetScripts } from '../../../components/render/WidgetScripts';
 import { MotionScript } from '../../../components/render/MotionScript';
 import { SlideshowScript } from '../../../components/render/SlideshowScript';
@@ -176,6 +177,29 @@ export default async function PublishedPage({ params }: Params) {
 
   const theme = themeTokens(found.theme, familiesFromFiles(found.faces)).style;
 
+
+  /*
+
+   * The server's pass over borrowed markup, once for all three trees. The same
+
+   * call the published route makes, and for the same reason: the imported
+
+   * design and the embed block are cleaned here so the renderer never needs a
+
+   * parser. See lib/content/prepared.ts and task #94.
+
+   */
+
+  const prepared = mergePrepared(
+
+    prepareSections(found.regions.header?.sections),
+
+    prepareSections(found.page.content.sections),
+
+    prepareSections(found.regions.footer?.sections),
+
+  );
+
   return (
     <>
       {/* The page's only h1. Section headings start at h2, which the heading
@@ -202,6 +226,7 @@ export default async function PublishedPage({ params }: Params) {
         // See-through when the page opens with a section pulled up under it, so
         // the preview shows the picture behind the header the way the site will.
         overlapped={(found.page.content.sections[0]?.pullUp ?? 0) > 0}
+        prepared={prepared}
       />
 
       {/* The trail is filled here too, so a client positioning a Breadcrumbs
@@ -215,9 +240,14 @@ export default async function PublishedPage({ params }: Params) {
           found.page.title,
         )}
         theme={theme}
+        prepared={prepared}
       />
 
-      <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
+      <RegionRenderer
+        region={fillNavRegion(found.regions.footer, found.navPages)}
+        theme={theme}
+        prepared={prepared}
+      />
 
       <WidgetScripts
         trees={[found.regions.header, found.page.content, found.regions.footer]}

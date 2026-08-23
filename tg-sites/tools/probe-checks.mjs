@@ -717,6 +717,24 @@ const MUTATIONS = [
     to: `  { property: 'lineHeight', varBase: '--tgs-lh', toCss: () => null },`,
   },
   {
+    tag: 'editor',
+    check: 'HTML pasted into an embed is cleaned by the server and drawn',
+    /*
+     * The channel itself. With the lookup always answering null the server's work
+     * still happens and still arrives, and the renderer simply never reads it, so
+     * every embed and imported design falls to its placeholder. That is the exact
+     * silent shape this check exists for: nothing errors, nothing is unsafe, and
+     * the client's markup just never appears.
+     */
+    why: 'Make the prepared lookup always answer null, so cleaned markup never reaches a block.',
+    file: 'lib/content/prepared.ts',
+    from: `  const entry = map[blockId];
+  if (!entry || typeof entry !== 'object') return null;`,
+    to: `  const entry = map[blockId];
+  if (entry) return null;
+  if (!entry || typeof entry !== 'object') return null;`,
+  },
+  {
     tag: 'breakpoints',
     check: 'a block letter spacing set on Phone widens phone, not desktop',
     /*

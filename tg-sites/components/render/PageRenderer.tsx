@@ -39,6 +39,7 @@ import {
 } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
+import type { PreparedMap } from '../../lib/content/prepared';
 
 /**
  * A container block's own columns.
@@ -126,6 +127,12 @@ interface Editable {
    * pressed Preview, because `editable` alone flipped it to the empty container.)
    */
   editorCanvas?: boolean;
+  /**
+   * Markup the server has already cleaned, by block id (lib/content/prepared.ts).
+   * Threaded rather than hung on the blocks' own props, because props come out of
+   * the database and a side channel cannot be forged by a stored row.
+   */
+  prepared?: PreparedMap;
 }
 
 /**
@@ -179,6 +186,7 @@ export function PageRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
   emptyNote = 'This page is empty. Add a section to get started.',
   theme,
   region = null,
@@ -248,6 +256,7 @@ export function PageRenderer({
             editable={editable}
             editingPath={editingPath}
             editorCanvas={editorCanvas}
+            prepared={prepared}
             /*
               A shaped edge is the BOUNDARY between two sections, so drawing one
               needs the colour on the other side of it. Only this component
@@ -317,6 +326,7 @@ export function SectionRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
   above,
   below,
   hangBottomDivider = false,
@@ -659,6 +669,7 @@ export function SectionRenderer({
             editable={editable}
             editingPath={editingPath}
             editorCanvas={editorCanvas}
+            prepared={prepared}
           />
         ))}
         {editable && section.rows.length === 0 && (
@@ -882,6 +893,7 @@ export function RowRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
@@ -930,6 +942,7 @@ export function RowRenderer({
           editable={editable}
           editingPath={editingPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       ))}
     </div>
@@ -953,6 +966,7 @@ function blockHost(
   editable: boolean,
   editingPath: string | null,
   editorCanvas: boolean,
+  prepared: PreparedMap | undefined,
 ): ReactElement {
   const box = block.box ?? EMPTY_BOX;
   const boxed = !boxIsEmpty(box);
@@ -1046,6 +1060,7 @@ function blockHost(
           editable={editable}
           editingPath={editingPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       ) : block.type === 'container' ? (
         <InnerColumns
@@ -1056,6 +1071,7 @@ function blockHost(
           editable={editable}
           editingPath={editingPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       ) : (
         <BlockRenderer
@@ -1063,6 +1079,7 @@ function blockHost(
           editable={editable}
           editingHost={editable && editingPath === keyPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       )}
     </div>
@@ -1105,6 +1122,7 @@ function InnerGrid({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: {
   cells: Column[];
   across: { desktop: number; tablet: number; phone: number };
@@ -1148,7 +1166,7 @@ function InnerGrid({
             {...pathAttr(editable, cellPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas),
+              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1190,6 +1208,7 @@ function InnerColumns({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: {
   columns: Column[];
   gap: number;
@@ -1228,7 +1247,7 @@ function InnerColumns({
             {...pathAttr(editable, colPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas),
+              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1293,6 +1312,7 @@ export function ColumnRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: {
   column: Column;
   sectionIndex: number;
@@ -1314,7 +1334,7 @@ export function ColumnRenderer({
       {...pathAttr(editable, path)}
     >
       {column.blocks.map((block, blockIndex) =>
-        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas),
+        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas, prepared),
       )}
 
       {/*

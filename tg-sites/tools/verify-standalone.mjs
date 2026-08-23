@@ -8283,6 +8283,55 @@ await check('a block letter spacing set on Phone widens phone, not desktop', asy
 });
 
 /*
+ * BORROWED MARKUP IS CLEANED ON THE SERVER, and the canvas draws what comes back.
+ *
+ * Since 23 Aug 2026 (task #94) the renderer carries no sanitiser: parse5 and
+ * postcss are server side, and a block holding somebody else's HTML draws from a
+ * map the server fills. A block the CLIENT makes is not in that map yet, so the
+ * canvas asks for it. This is that round trip, driven through the block a client
+ * actually pastes into.
+ *
+ * IT IS ALSO THE ONE THING A UNIT TEST CANNOT REACH. Everything about this
+ * arrangement type-checks and passes its unit tests whether or not the answer
+ * ever gets back to the canvas, and the failure mode is silent: the block draws
+ * its placeholder and nothing errors. The first version of the hook failed
+ * exactly here, marking the block as asked about while it was still empty and
+ * never asking again, so the pasted HTML never appeared.
+ */
+await check('HTML pasted into an embed is cleaned by the server and drawn', async () => {
+  await addBlock('HTML');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+
+  // Empty to begin with, which is the state the first version got stuck in.
+  const before = await host.innerText();
+  if (!before.includes('Paste embed code')) return `a new HTML block did not start empty: "${before}"`;
+
+  const field = page.locator('.ed-props textarea').first();
+  if ((await field.count()) === 0) return 'the HTML block offered no field to paste into';
+  await field.fill('<p class="tg-probe">hello from an embed</p><script>window.__tgBad = 1;</script>');
+  // The paste settles, then one round trip. Generous, since this is the one
+  // check that is allowed to wait for a server answer.
+  await page.waitForTimeout(1500);
+
+  const after = await host.evaluate((el) => ({
+    text: el.innerText,
+    hasEmbed: !!el.querySelector('.tgs-embed'),
+    hasProbe: !!el.querySelector('.tg-probe'),
+    hasScript: !!el.querySelector('script'),
+    bad: typeof window.__tgBad !== 'undefined',
+  }));
+
+  if (!after.hasEmbed || !after.hasProbe) {
+    return `the cleaned markup never reached the canvas: "${after.text.slice(0, 80)}"`;
+  }
+  // The server cleaned it, so the script went and never ran.
+  if (after.hasScript || after.bad) return 'a script survived the clean';
+
+  return true;
+});
+
+/*
  * Andy, 13 Aug 2026: a client should not have to know to turn auto-resize on for a
  * hero heading to fit a phone, so a NEW heading starts on it. The block default
  * carries fluid: true, so the toggle is already ticked the moment a heading is

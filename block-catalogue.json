@@ -5300,7 +5300,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4694",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4707",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5343,7 +5343,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4741",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4763",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]

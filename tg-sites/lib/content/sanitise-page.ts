@@ -18,6 +18,7 @@ import { importContent, importFields } from './imported';
 import { cleanImportHtml } from '../import/html';
 import { importScopeClass, scopeImportCss } from '../import/css';
 import { safeUrl, sanitiseHtml, type SanitiseMode } from './sanitise';
+import { sanitiseEmbedHtml } from './sanitise-embed';
 import { safeIconName } from './icons';
 import type { CollectionItem } from './collection';
 import { safeColour } from './schema';
@@ -88,7 +89,7 @@ function cleanValue(
           : '';
       }
       return EMBED_MODE_PROPS[blockType]?.includes(field.key)
-        ? sanitiseHtml(value, 'embed')
+        ? sanitiseEmbedHtml(value)
         : value;
 
     case 'repeater': {

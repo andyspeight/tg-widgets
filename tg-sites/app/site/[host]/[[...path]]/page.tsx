@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
 import { fillBreadcrumbs, hasBreadcrumbsBlock } from '../../../../lib/content/breadcrumbs';
+import { mergePrepared, prepareSections } from '../../../../lib/content/prepare-markup';
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
 import { safeUrl } from '../../../../lib/content/sanitise';
@@ -389,6 +390,24 @@ export default async function SitePage({ params, searchParams }: Params) {
   const contentTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
 
   /*
+   * THE SERVER'S PASS OVER BORROWED MARKUP, once for all three trees.
+   *
+   * The imported design and the embed block hold somebody else's HTML, and the
+   * cleaners that make it safe run here rather than in the components, so the
+   * editor canvas can draw the same blocks without a parser in the browser (see
+   * lib/content/prepared.ts, task #94). One map across the header, the content
+   * and the footer because they share the block-id space and each of the three
+   * renderers wants the same answer. Re-cleaned on every render, exactly as it
+   * was when the components did it, so a restored snapshot or a hand-edited row
+   * still lands on today's rules rather than the rules of the day it was saved.
+   */
+  const prepared = mergePrepared(
+    prepareSections(found.regions.header?.sections),
+    prepareSections(contentTree?.sections),
+    prepareSections(found.regions.footer?.sections),
+  );
+
+  /*
    * Has the client PUT a trail on this page? If so the automatic one stands
    * down, so the page has exactly one either way. Read off the tree rather than
    * a flag on the row, because the block is content and a flag would be a second
@@ -534,6 +553,7 @@ export default async function SitePage({ params, searchParams }: Params) {
             pageTitle,
           )}
           theme={theme}
+          prepared={prepared}
         />
       ) : found.entry ? (
         /* A post's own sections get the same fill. Without it a blog post
@@ -546,12 +566,17 @@ export default async function SitePage({ params, searchParams }: Params) {
             item: fillBreadcrumbs(found.entry.item, currentPath, pageTitle),
           }}
           theme={theme}
+          prepared={prepared}
         />
       ) : (
         <ArchiveRenderer archive={found.archive!} theme={theme} />
       )}
 
-      <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
+      <RegionRenderer
+        region={fillNavRegion(found.regions.footer, found.navPages)}
+        theme={theme}
+        prepared={prepared}
+      />
 
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}
@@ -604,6 +629,7 @@ export default async function SitePage({ params, searchParams }: Params) {
 function EntryRenderer({
   entry,
   theme,
+  prepared,
 }: {
   entry: {
     item: import('../../../../lib/content/collection').CollectionItem;
@@ -616,6 +642,8 @@ function EntryRenderer({
     layout: import('../../../../lib/content/collection-layout').EntryLayout;
   };
   theme: React.CSSProperties;
+  /** Markup the server has already cleaned. See lib/content/prepared.ts. */
+  prepared?: import('../../../../lib/content/prepared').PreparedMap;
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
@@ -696,7 +724,7 @@ function EntryRenderer({
       </header>
 
       {item.sections.map((section, index) => (
-        <SectionRenderer key={section.id} section={section} index={index} />
+        <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} />
       ))}
     </article>
   );

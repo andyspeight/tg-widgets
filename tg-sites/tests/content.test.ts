@@ -59,6 +59,7 @@ import {
 } from '../lib/content/tree';
 import { createBlock } from '../lib/content/factory';
 import { sanitiseHtml, safeUrl } from '../lib/content/sanitise';
+import { sanitiseEmbedHtml } from '../lib/content/sanitise-embed';
 import { sanitiseStyle } from '../lib/content/styles';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { resolveVideo } from '../lib/content/video';
@@ -667,10 +668,10 @@ describe('sanitiseHtml', () => {
   });
 
   it('allows an iframe in an embed only from an allowlisted host', () => {
-    const good = sanitiseHtml('<iframe src="https://www.youtube.com/embed/abc"></iframe>', 'embed');
+    const good = sanitiseEmbedHtml('<iframe src="https://www.youtube.com/embed/abc"></iframe>');
     expect(good).toContain('iframe');
 
-    const bad = sanitiseHtml('<iframe src="https://evil.example.com/x"></iframe>', 'embed');
+    const bad = sanitiseEmbedHtml('<iframe src="https://evil.example.com/x"></iframe>');
     expect(bad).not.toContain('iframe');
   });
 
@@ -843,10 +844,7 @@ describe('styling through the whole sanitiser', () => {
   });
 
   it('still refuses a style on an image or an iframe in an embed', () => {
-    const out = sanitiseHtml(
-      '<img src="https://x.test/a.png" style="position: fixed" alt="">',
-      'embed',
-    );
+    const out = sanitiseEmbedHtml('<img src="https://x.test/a.png" style="position: fixed" alt="">');
     expect(out).not.toContain('style');
   });
 });

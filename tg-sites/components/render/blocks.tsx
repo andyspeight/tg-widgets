@@ -21,9 +21,9 @@ import { safeColour } from '../../lib/content/schema';
 import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
-import { cleanImportHtml } from '../../lib/import/html';
-import { importScopeClass, scopeImportCss } from '../../lib/import/css';
-import { applyImportContent } from '../../lib/import/tokenise';
+import { preparedFor, type PreparedMap } from '../../lib/content/prepared';
+import { importScopeClass } from '../../lib/import/scope';
+import { applyImportContent } from '../../lib/import/slots';
 import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
 import { mapDirectionsUrl, mapEmbedSrc } from '../../lib/content/map';
@@ -4691,10 +4691,32 @@ export function SpacerBlock({ props }: { props: Props }): ReactElement {
 // Advanced
 // ---------------------------------------------------------------------------
 
-export function EmbedBlock({ props }: { props: Props }): ReactElement {
-  const html = sanitiseHtml(props.html, 'embed');
-  if (!html) return <div className="tgs-placeholder">Paste embed code</div>;
-  return <div className="tgs-embed" dangerouslySetInnerHTML={{ __html: html }} />;
+/**
+ * A pasted embed.
+ *
+ * READS THE MARKUP THE SERVER CLEANED rather than cleaning it here. The parser
+ * behind sanitiseHtml('embed') is parse5, and this component renders on the
+ * editor canvas, so calling it here put the parser in the browser. See
+ * lib/content/prepared.ts for the arrangement and task #94 for the measurements.
+ *
+ * NO ENTRY MEANS THE PLACEHOLDER, never the stored string. That is stricter than
+ * the old behaviour rather than looser: there is no sanitiser in the browser any
+ * more, so nothing here CAN render markup the server has not been through, even
+ * if a stored row asks it to.
+ */
+export function EmbedBlock({
+  props,
+  blockId,
+  prepared,
+}: {
+  props: Props;
+  blockId: string;
+  prepared?: PreparedMap;
+}): ReactElement {
+  void props;
+  const ready = preparedFor(prepared, blockId);
+  if (!ready?.html) return <div className="tgs-placeholder">Paste embed code</div>;
+  return <div className="tgs-embed" dangerouslySetInnerHTML={{ __html: ready.html }} />;
 }
 
 /**
@@ -4738,13 +4760,21 @@ export function EmbedBlock({ props }: { props: Props }): ReactElement {
  * CSS depending on it have to agree and a mismatch is an unstyled section with
  * no error anywhere.
  */
-export function ImportedBlock({ props, blockId }: { props: Props; blockId: string }): ReactElement {
+export function ImportedBlock({
+  props,
+  blockId,
+  prepared,
+}: {
+  props: Props;
+  blockId: string;
+  prepared?: PreparedMap;
+}): ReactElement {
   const scope = importScopeClass(blockId);
   const fields = importFields(props);
 
-  const cleaned = cleanImportHtml(str(props, 'html'));
-  const html = applyImportContent(cleaned.html, importContent(props), fields);
-  const { css } = scopeImportCss(str(props, 'css'), { scope: `.${scope}` });
+  const ready = preparedFor(prepared, blockId);
+  const html = applyImportContent(ready?.html ?? '', importContent(props), fields);
+  const css = ready?.css ?? '';
 
   if (!html.trim()) {
     return <div className="tgs-placeholder">This imported design has nothing in it</div>;
