@@ -51,9 +51,11 @@ import {
   FONT_SIZES,
   FONT_SIZE_GROUPS,
   hasInlineTextSizing,
+  LETTER_SPACINGS,
   LINE_HEIGHTS,
   MOTION_CHOICES,
   MOTION_INTENSITIES,
+  normaliseLetterSpacing,
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
@@ -2568,6 +2570,40 @@ function LineSpacingField({
   );
 }
 
+function LetterSpacingField({
+  tier,
+  value,
+  onChange,
+}: {
+  tier: Tier;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
+}) {
+  const id = `ed-letter-spacing-${tier}`;
+  const autoLabel =
+    tier === 'desktop' ? 'Auto (the block style)' : `Same as ${TIER_LABEL[INHERITS_FROM[tier]]}`;
+  return (
+    <div className="ed-field">
+      <label className="ed-label" htmlFor={id}>
+        Letter spacing
+      </label>
+      <select
+        id={id}
+        className="ed-select"
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
+        <option value="">{autoLabel}</option>
+        {LETTER_SPACINGS.map((choice) => (
+          <option key={choice.value} value={choice.value}>
+            {choice.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function FluidField({ value, onChange }: { value: boolean; onChange: (value: boolean) => void }) {
   return (
     <div className="ed-field">
@@ -2791,6 +2827,41 @@ function BlockFields({
         }}
       >
         <LineSpacingField tier={tier} value={currentLh} onChange={setLineHeight} />
+      </ScreenScope>,
+    );
+
+    // LETTER SPACING, PER SCREEN. The third of the same engine, beside the size
+    // and the line spacing. On desktop it sets the block's own base tracking, on
+    // tablet or phone that screen's override. In em, so it follows whatever size
+    // the text lands at rather than holding a gap measured for the bigger one,
+    // which is what makes it safe to sit next to a per-screen size at all.
+    const baseLs = normaliseLetterSpacing(block.props.letterSpacing);
+    const currentLs = resolveAt<string | undefined>(baseLs, block.responsive, 'letterSpacing', tier);
+    const setLetterSpacing = (value: string | undefined) => {
+      if (tier === 'desktop') {
+        onCommit((c) => updateBlockPropsAtPath(c, path, { letterSpacing: value }), `blk:${block.id}:letterSpacing`);
+      } else {
+        const next = value
+          ? withOverride(block.responsive, 'letterSpacing', tier, value)
+          : clearOverride(block.responsive, 'letterSpacing', tier);
+        onCommit((c) => updateBlockResponsiveAtPath(c, path, next), `blk:${block.id}:letterSpacing:${tier}`);
+      }
+    };
+    add(
+      'content',
+      <ScreenScope
+        key="letter-spacing"
+        tier={tier}
+        overridden={isOverridden(block.responsive, 'letterSpacing', tier)}
+        onReset={() => {
+          if (tier === 'desktop') return;
+          onCommit(
+            (c) => updateBlockResponsiveAtPath(c, path, clearOverride(block.responsive, 'letterSpacing', tier)),
+            `blk:${block.id}:letterSpacing:${tier}:reset`,
+          );
+        }}
+      >
+        <LetterSpacingField tier={tier} value={currentLs} onChange={setLetterSpacing} />
       </ScreenScope>,
     );
 

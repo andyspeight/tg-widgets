@@ -718,6 +718,24 @@ const MUTATIONS = [
   },
   {
     tag: 'breakpoints',
+    check: 'a block letter spacing set on Phone widens phone, not desktop',
+    /*
+     * The letter-spacing half of the same mechanism, keyed on its own map entry so
+     * it breaks tracking alone and the size and line-spacing checks stay green.
+     * With toCss always null the --tgs-ls-phone twin never emits, so the phone
+     * override is stored but never renders and the heading keeps its own tracking.
+     */
+    why: 'Stop the block emitting its per-screen letter-spacing twins, so a phone override never renders.',
+    file: 'components/render/PageRenderer.tsx',
+    from: `  {
+    property: 'letterSpacing',
+    varBase: '--tgs-ls',
+    toCss: (value: unknown) => normaliseLetterSpacing(value) ?? null,
+  },`,
+    to: `  { property: 'letterSpacing', varBase: '--tgs-ls', toCss: () => null },`,
+  },
+  {
+    tag: 'breakpoints',
     check: 'auto-resize brings a heading down on a phone, not on desktop',
     /*
      * The flag is the whole mechanism: without data-fluid the clamp rule matches

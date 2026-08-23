@@ -8225,6 +8225,64 @@ await check('a block line spacing set on Phone tightens phone, not desktop', asy
 });
 
 /*
+ * Letter spacing per screen, the third rider on the same engine. The block carries
+ * --tgs-ls-phone, the container queries fold it into --tgs-ls-r, and .tgs-heading
+ * reads that ahead of the tracking its own style carries. In em, so it follows the
+ * size rather than holding a gap measured for the desktop one. Add a heading,
+ * switch to Phone, open the tracking out, and prove the phone letter-spacing widens
+ * while the desktop one holds.
+ */
+await check('a block letter spacing set on Phone widens phone, not desktop', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  // getComputedStyle answers in px, and 'normal' where there is no tracking at
+  // all, which is zero rather than nothing to compare against.
+  const info = await host.evaluate((el) => {
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const raw = text ? getComputedStyle(text).letterSpacing : null;
+    return { path: el.getAttribute('data-path'), deskLs: raw === 'normal' ? 0 : parseFloat(raw) };
+  });
+  if (!info || !Number.isFinite(info.deskLs)) return 'the heading did not render its text';
+
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+
+  // Targeted by id, to keep it apart from the size and line-spacing selects beside it.
+  const select = page.locator('.ed-props select[id^="ed-letter-spacing"]').first();
+  if ((await select.count()) === 0) return 'the letter spacing control was not scoped to the screen';
+  await select.selectOption('0.2em'); // Widest, well past any heading's own tracking.
+  await page.waitForTimeout(200);
+
+  const after = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const style = el.getAttribute('style') || '';
+    const m = style.match(/--tgs-ls-phone:\s*([^;]+)/);
+    const raw = getComputedStyle(text).letterSpacing;
+    return { phoneVar: m ? m[1].trim() : null, phoneLs: raw === 'normal' ? 0 : parseFloat(raw) };
+  }, info.path);
+  if (after.phoneVar !== '0.2em') return `the phone override was not stored: ${after.phoneVar}`;
+  if (!(after.phoneLs > info.deskLs + 2)) {
+    return `phone letter spacing did not widen: phone ${after.phoneLs}, desktop ${info.deskLs}`;
+  }
+
+  // Back to Desktop: the heading's own tracking returns, untouched by the phone edit.
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const deskAgain = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const raw = getComputedStyle(text).letterSpacing;
+    return raw === 'normal' ? 0 : parseFloat(raw);
+  }, info.path);
+  await showPanels();
+  return Math.abs(deskAgain - info.deskLs) < 0.5
+    ? true
+    : `the desktop letter spacing changed under a phone edit: ${info.deskLs} -> ${deskAgain}`;
+});
+
+/*
  * Andy, 13 Aug 2026: a client should not have to know to turn auto-resize on for a
  * hero heading to fit a phone, so a NEW heading starts on it. The block default
  * carries fluid: true, so the toggle is already ticked the moment a heading is

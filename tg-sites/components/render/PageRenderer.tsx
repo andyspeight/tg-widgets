@@ -31,7 +31,12 @@ import {
 } from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
-import { normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from '../../lib/content/styles';
+import {
+  normaliseLetterSpacing,
+  normaliseLineHeight,
+  normaliseRevealStyle,
+  normaliseTextSize,
+} from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 
@@ -152,11 +157,17 @@ const SECTION_RESPONSIVE = [
  * string from the toolbar's own list (see normaliseTextSize), so an override
  * cannot say anything an inline size could not; a stray one drops rather than
  * rendering broken. The twins fold into --tgs-fs-r, which .tgs-text/.tgs-heading
- * read ahead of their own size (globals.css).
+ * read ahead of their own size (globals.css). Line spacing and letter spacing
+ * ride the same engine, into --tgs-lh-r and --tgs-ls-r.
  */
 const BLOCK_RESPONSIVE = [
   { property: 'fontSize', varBase: '--tgs-fs', toCss: (value: unknown) => normaliseTextSize(value) ?? null },
   { property: 'lineHeight', varBase: '--tgs-lh', toCss: (value: unknown) => normaliseLineHeight(value) ?? null },
+  {
+    property: 'letterSpacing',
+    varBase: '--tgs-ls',
+    toCss: (value: unknown) => normaliseLetterSpacing(value) ?? null,
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -947,13 +958,14 @@ function blockHost(
   const boxed = !boxIsEmpty(box);
   const props = block.props as Record<string, unknown>;
   const textColour = safeColour(props?.textColour);
-  // Text size and line spacing: the block's own base (desktop), plus its
-  // per-screen twins. Each is an inline custom property the text element reads
-  // ahead of its natural value; absent when unset, so a plain block renders
-  // exactly as before. The twins for BOTH come from sizeVars, since
-  // BLOCK_RESPONSIVE now maps fontSize and lineHeight together.
+  // Text size, line spacing and letter spacing: the block's own base (desktop),
+  // plus its per-screen twins. Each is an inline custom property the text element
+  // reads ahead of its natural value; absent when unset, so a plain block renders
+  // exactly as before. The twins for ALL THREE come from sizeVars, since
+  // BLOCK_RESPONSIVE maps fontSize, lineHeight and letterSpacing together.
   const baseSize = normaliseTextSize(props?.fontSize);
   const baseLineHeight = normaliseLineHeight(props?.lineHeight);
+  const baseLetterSpacing = normaliseLetterSpacing(props?.letterSpacing);
   const sizeVars = responsiveVars(block.responsive, BLOCK_RESPONSIVE);
   // Animated gradient heading: the letters filled with a moving gradient
   // (globals.css, background-clip: text). Heading only, and only on the published
@@ -970,6 +982,7 @@ function blockHost(
     ...(textColour ? { color: textColour } : {}),
     ...(baseSize ? { '--tgs-fs': baseSize } : {}),
     ...(baseLineHeight ? { '--tgs-lh': baseLineHeight } : {}),
+    ...(baseLetterSpacing ? { '--tgs-ls': baseLetterSpacing } : {}),
     ...(gradFrom ? { '--tgs-grad-a': gradFrom } : {}),
     ...(gradTo ? { '--tgs-grad-b': gradTo } : {}),
     ...sizeVars,
@@ -978,6 +991,7 @@ function blockHost(
     boxed ||
     Boolean(textColour) ||
     Boolean(baseLineHeight) ||
+    Boolean(baseLetterSpacing) ||
     Boolean(baseSize) ||
     Boolean(gradFrom) ||
     Boolean(gradTo) ||
