@@ -3458,6 +3458,36 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
  * a toast, because it is not an event that happened, it is a state the page
  * is still in.
  */
+/*
+ * WHAT WE WROTE INTO THE SEARCH LISTING (#239).
+ *
+ * Beside the save failure rather than in a toast, and for the same reason that
+ * one is: it is telling somebody something about their own page that they did
+ * not do themselves, and a message that fades is a message they may never read.
+ * Calm rather than alarming, because nothing has gone wrong: this is the tool
+ * doing the job, and the colour should say so.
+ */
+.ed-seofill {
+  margin: 0;
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font-size: var(--ed-text-xs);
+  max-width: 44rem;
+}
+.ed-seofill__lead { margin: 0 0 var(--ed-2); font-weight: 600; }
+.ed-seofill__list {
+  margin: 0 0 var(--ed-2);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ed-1) var(--ed-2);
+}
+.ed-seofill__list dt { color: var(--ed-ink-2); white-space: nowrap; }
+.ed-seofill__list dd { margin: 0; }
+.ed-seofill__note { margin: 0 0 var(--ed-2); color: var(--ed-ink-2); }
+
 .ed-savefail {
   margin: 0;
   padding: var(--ed-1) var(--ed-3);

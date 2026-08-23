@@ -56,6 +56,7 @@ import { Rail } from './Rail';
 import { CommentsPanel } from './CommentsPanel';
 import { PagesPanel, type PageLink } from './PagesPanel';
 import { Canvas, type DropTarget } from './Canvas';
+import { wasFilled, type SeoFilled } from '../../lib/seo/autofill';
 import { outlineCollision } from './outline-collision';
 import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
 import type { PreparedMap } from '../../lib/content/prepared';
@@ -562,6 +563,14 @@ export function EditorShell({
     },
   );
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
+  /*
+   * WHAT THE LAST PUBLISH WROTE FOR THEM, or null. A page published with no
+   * search title or description gets one written from its own words (#239), and
+   * this is what the panel afterwards shows. Never silent: a client should not
+   * find out that AI-written words are representing them in Google by reading
+   * Google.
+   */
+  const [seoFilled, setSeoFilled] = useState<SeoFilled | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
   /**
@@ -982,13 +991,28 @@ export function EditorShell({
         ? await publishItemAction(itemId)
         : await publishPageAction(pageId);
 
-    if (result.ok && result.data) {
+    /*
+     * A PAGE PUBLISH NOW ANSWERS WITH TWO THINGS: the summary, and anything the
+     * search listing was filled in with on the way (#239). A region and an item
+     * still answer with the summary alone, so this unwraps only the page's.
+     */
+    const outcome =
+      result.ok && result.data && 'summary' in result.data
+        ? (result.data as { summary: unknown; filled: SeoFilled })
+        : null;
+    if (outcome) setSeoFilled(wasFilled(outcome.filled) ? outcome.filled : null);
+
+    const record = (outcome ? outcome.summary : result.ok ? result.data : null) as
+      | { status: 'draft' | 'published'; hasUnpublishedChanges: boolean }
+      | null;
+
+    if (result.ok && record) {
       // A region has no status column: publishing one makes it live and there
       // is no way to withdraw it short of emptying it. So it is published from
       // here on, and only "are there newer changes" varies. A page and an item
       // both have one, and it is the answer.
-      setStatus(region ? 'published' : (result.data as { status: 'draft' | 'published' }).status);
-      setUnpublished(result.data.hasUnpublishedChanges);
+      setStatus(region ? 'published' : record.status);
+      setUnpublished(record.hasUnpublishedChanges);
     } else if (!result.ok) {
       setSaveError(result.error);
     }
@@ -1785,6 +1809,42 @@ export function EditorShell({
           <p className="ed-savefail" role="alert">
             {saveError}
           </p>
+        )}
+
+        {/*
+          WHAT WE WROTE FOR THEM, SAID OUT LOUD (#239).
+          A page published with no search title or description gets one written
+          from its own words. Telling the client is not politeness: those two
+          lines are what appears under their name in Google, and finding out by
+          reading Google is the wrong way round. It states what was written and
+          where to change it, and goes when they close it.
+        */}
+        {seoFilled && (
+          <div className="ed-seofill" role="status">
+            <p className="ed-seofill__lead">
+              Published. This page had no search listing, so we wrote one from the page itself.
+            </p>
+            <dl className="ed-seofill__list">
+              {seoFilled.title && (
+                <>
+                  <dt>Search title</dt>
+                  <dd>{seoFilled.title}</dd>
+                </>
+              )}
+              {seoFilled.description && (
+                <>
+                  <dt>Search description</dt>
+                  <dd>{seoFilled.description}</dd>
+                </>
+              )}
+            </dl>
+            <p className="ed-seofill__note">
+              Change either of them any time in this page&rsquo;s settings.
+            </p>
+            <button type="button" className="ed-btn ed-btn--quiet" onClick={() => setSeoFilled(null)}>
+              Close
+            </button>
+          </div>
         )}
 
         {/*

@@ -41,6 +41,16 @@ import { fillPagePhotos } from '../../lib/media/photo-fill';
 import { importDesignedFonts } from '../../lib/content/designed-fonts';
 import { parsePage } from '../../lib/content/schema';
 import { sanitisePage } from '../../lib/content/sanitise-page';
+import { getSettings } from '../../lib/db/settings';
+import { pageText } from '../../lib/seo/audit';
+import {
+  applySeoFill,
+  hasGap,
+  seoGaps,
+  wasFilled,
+  type SeoFilled,
+} from '../../lib/seo/autofill';
+import { writeSeo } from '../../lib/ai/seo';
 import { changeScope } from '../../lib/content/change-scope';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
 import {
@@ -279,16 +289,74 @@ export async function saveDraftAction(
   });
 }
 
+/** What a publish did, including anything it wrote for the client. */
+export interface PublishOutcome {
+  summary: PageSummary | null;
+  /** The search title and description we filled in, if any. Shown, never silent. */
+  filled: SeoFilled;
+}
+
+/**
+ * Fill a page's search listing before it is published.
+ *
+ * BEFORE, because publishPage copies the draft to the live copy: writing this
+ * afterwards would leave the published page carrying the blanks until the next
+ * publish, which is exactly the page anybody looking would see.
+ *
+ * NEVER THROWS, AND NEVER BLOCKS. Publishing is the client's action. If the
+ * read, the model or the save fails, the page still publishes and its blanks
+ * stay blank, which is precisely the state it was in a moment ago. The /seo
+ * screen will report them as it always did. That is why every step here is
+ * inside one try and the catch answers with an empty result rather than
+ * rethrowing.
+ */
+async function fillSeoBeforePublish(
+  tenantId: string,
+  pageId: string,
+  userId: string | undefined,
+): Promise<SeoFilled> {
+  try {
+    const record = await getPage(tenantId, pageId);
+    if (!record) return {};
+
+    const gaps = seoGaps(record.content);
+    if (!hasGap(gaps)) return {};
+
+    const settings = await getSettings(tenantId);
+    const written = await writeSeo(
+      gaps,
+      record.content.title,
+      settings.companyName,
+      pageText(record.content),
+    );
+
+    const { page, filled } = applySeoFill(record.content, written);
+    if (!wasFilled(filled)) return {};
+
+    // Through saveDraft rather than a bespoke update, so what we wrote goes
+    // through the same parse and sanitise a client's own save does.
+    await saveDraft(tenantId, pageId, page, userId);
+    return filled;
+  } catch (error) {
+    console.error('[tg-sites] could not write the search listing before publishing', error);
+    return {};
+  }
+}
+
 export async function publishPageAction(
   pageId: string,
-): Promise<ActionResult<PageSummary | null>> {
-  const result = await attempt(async () =>
-    publishPage(await requireCapability('publish'), pageId, (await currentUserId()) ?? undefined),
-  );
+): Promise<ActionResult<PublishOutcome>> {
+  const tenantId = await requireCapability('publish');
+  const userId = (await currentUserId()) ?? undefined;
+
+  const filled = await fillSeoBeforePublish(tenantId, pageId, userId);
+
+  const result = await attempt(async () => publishPage(tenantId, pageId, userId));
 
   if (result.ok) {
     revalidatePath('/sites');
     revalidatePath('/preview');
+    return { ok: true, data: { summary: result.data, filled } };
   }
   return result;
 }

@@ -106,7 +106,12 @@ export function SiteDashboard({
         const action = page.status === 'published' ? unpublishPageAction : publishPageAction;
         const result = await action(page.id);
         if (!result.ok) setError(result.error);
-        else if (result.data) patch(page.id, result.data);
+        // A publish answers with the summary AND anything it wrote into the
+        // search listing (#239); an unpublish answers with the summary alone.
+        else if (result.data) {
+          const summary = 'summary' in result.data ? result.data.summary : result.data;
+          if (summary) patch(page.id, summary);
+        }
       });
     },
     [patch],

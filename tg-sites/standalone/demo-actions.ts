@@ -92,13 +92,23 @@ export async function saveDraftAction(
   return { ok: true, data: { ...state } };
 }
 
+/**
+ * Publishing, which since #239 also answers with anything the search listing was
+ * filled in with on the way.
+ *
+ * THE DOUBLE FILLS NOTHING. The real one reads the page, asks a model and saves,
+ * none of which this build has, and inventing a plausible title here would mean
+ * the harness testing a panel the live editor might never show. An empty `filled`
+ * is the honest answer and is also the commonest real one: a page whose client
+ * wrote their own title and description has nothing to fill.
+ */
 export async function publishPageAction(
   _pageId: string,
-): Promise<ActionResult<PageSummary | null>> {
+): Promise<ActionResult<PublishOutcome>> {
   state.status = 'published';
   state.hasUnpublishedChanges = false;
   state.publishedAt = new Date();
-  return { ok: true, data: { ...state } };
+  return { ok: true, data: { summary: { ...state }, filled: {} } };
 }
 
 /*
@@ -171,6 +181,7 @@ export async function restorePublishAction(
 
 // Compile-time proof that the doubles still match the real thing. If a real
 // action gains an argument or changes its return type, this stops building.
+import type { PublishOutcome } from '../app/actions/pages';
 import type * as real from '../app/actions/pages';
 
 const _createMatches = createPageAction satisfies typeof real.createPageAction;
