@@ -6024,14 +6024,44 @@ await check('the rail can be reached by a keyboard, and shows that it has been',
     : `focused ${focused.isFocused}, focus-visible ${focused.visible}, outline ${focused.outline}`;
 });
 
+/*
+ * PARKED AT A KNOWN PLACE FIRST, and that line is the whole check.
+ *
+ * This read as a failure for two days and the block was never at fault. The
+ * "rail scrolls sideways" check above sets scrollLeft to 400 to prove the rail
+ * scrolls; the browser clamps that to the maximum, which for this rail is 286
+ * (838 wide inside 552). So this check inherited a rail parked hard against its
+ * right end, pressed ArrowRight, and reported that nothing moved. Nothing COULD
+ * move. Measured at the time: scrollLeft 286, maxScroll 286, and ArrowLeft from
+ * there moved it to 171, so the keyboard scrolling was working the whole time.
+ *
+ * The lesson is about the check rather than the block: one that reads a global
+ * the check before it wrote is not testing what it says it is. Both directions
+ * are asserted now, from a known start, so this cannot depend on what ran first.
+ */
 await check('and arrow keys then move it, which is why there are no arrow buttons', async () => {
   const rail = added().locator('.tgs-slider');
-  const before = await rail.evaluate((el) => el.scrollLeft);
+  await rail.evaluate((el) => {
+    el.scrollLeft = 0;
+  });
+  await page.waitForTimeout(200);
+
+  const start = await rail.evaluate((el) => el.scrollLeft);
+  if (start !== 0) return `the rail would not go back to the start, sitting at ${start}`;
+
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(400);
-  const after = await rail.evaluate((el) => el.scrollLeft);
-  return after !== before ? true : `scrollLeft stayed at ${before}`;
+  const right = await rail.evaluate((el) => el.scrollLeft);
+  if (!(right > start)) return `ArrowRight did not move it: ${start} -> ${right}`;
+
+  // And back, so this proves a keyboard can reach both ends rather than only
+  // that something nudged the rail once.
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(400);
+  const left = await rail.evaluate((el) => el.scrollLeft);
+  return left < right ? true : `ArrowLeft did not bring it back: ${right} -> ${left}`;
 });
 
 /*
