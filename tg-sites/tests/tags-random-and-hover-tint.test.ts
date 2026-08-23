@@ -220,8 +220,9 @@ describe('a card that leads with an icon', () => {
   });
 
   it('leaves the slider leading with its picture', () => {
-    // The slider reuses renderCard. A slide is a photograph, not an icon.
-    expect(code(render)).toContain("{ showImage: true, ratio, radius, lead: 'image' }");
+    // The slider reuses renderCard. A slide is a photograph, not an icon, and
+    // a slide is always the stacked shape: the card designs are the grid's.
+    expect(code(render)).toContain("{ showImage: true, ratio, radius, lead: 'image', design: 'stacked' }");
   });
 
   /*

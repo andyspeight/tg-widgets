@@ -1368,6 +1368,9 @@ function renderCard(
   options: {
     showImage: boolean;
     ratio: string;
+    /** The grid's card design, because the frame is built differently for one
+     *  of them. See the frame below. */
+    design: 'stacked' | 'overlay' | 'index';
     radius: (typeof RADII)[number];
     /*
      * WHAT THE CARD LEADS WITH (Andy, 21 Aug 2026, from Duda's "Fancy Grid").
@@ -1449,7 +1452,18 @@ function renderCard(
       )}
 
       {options.showImage && options.lead === 'image' && (
-        <div className="tgs-card__frame" data-radius={options.radius} style={ratioStyle(options.ratio)}>
+        <div
+          className="tgs-card__frame"
+          data-radius={options.radius}
+          /*
+           * NO RATIO WHEN THE WORDS SIT ON THE PICTURE. The frame is stretched
+           * over the whole card there, so a shape of its own is not just
+           * unused: it is an INLINE style, it therefore beats the stylesheet,
+           * and the picture would stop short of the words and drop them onto
+           * the page below it.
+           */
+          style={options.design === 'overlay' ? undefined : ratioStyle(options.ratio)}
+        >
           {src ? (
             <img src={src} alt={str(card, 'alt')} loading="lazy" decoding="async" />
           ) : (
@@ -1523,6 +1537,17 @@ export function CardsBlock({
   const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
   const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
   const style = oneOf(props, 'style', ['plain', 'bordered', 'raised', 'tinted'] as const, 'bordered');
+  /*
+   * The card's SILHOUETTE, which the stylesheet builds from the same markup.
+   *
+   * All three designs draw the identical DOM and differ only in CSS, which is
+   * not a shortcut: it is what keeps one card component honest about what a
+   * card contains. An overlay is the body laid over the frame, and an index is
+   * the body turned into two columns with the date in the first. Neither needed
+   * a second component, and a second component is how two of them would have
+   * drifted apart the first time somebody added a field.
+   */
+  const design = oneOf(props, 'design', ['stacked', 'overlay', 'index'] as const, 'stacked');
   const imagePosition = oneOf(props, 'imagePosition', ['top', 'left', 'none'] as const, 'top');
   const ratio = str(props, 'ratio', '4/3');
   const radius = oneOf(props, 'radius', RADII, 'md');
@@ -1543,6 +1568,7 @@ export function CardsBlock({
       renderCard(card, index, {
         showImage: imagePosition !== 'none',
         ratio,
+        design,
         radius,
         lead,
         iconColour,
@@ -1584,6 +1610,7 @@ export function CardsBlock({
       data-columns={columns}
       data-gap={gap}
       data-style={style}
+      data-design={design}
       data-image={imagePosition}
       data-radius={radius}
       data-align={align}
@@ -1807,7 +1834,8 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
   const scrollbar = oneOf(props, 'scrollbar', ['thin', 'bar'] as const, 'thin');
 
   const slides = items
-    .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius, lead: 'image' }))
+    .map((card, index) =>
+      renderCard(card, index, { showImage: true, ratio, radius, lead: 'image', design: 'stacked' }))
     .filter((card): card is ReactElement => card !== null);
 
   if (slides.length === 0) {

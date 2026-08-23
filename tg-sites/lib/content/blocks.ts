@@ -1801,6 +1801,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       collection: '',
       count: 6,
       facts: 2,
+      design: 'stacked',
       columns: '3',
       gap: 'm',
       style: 'bordered',
@@ -1992,6 +1993,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
       {
+        /*
+         * THE SHAPE OF A CARD, which is a different question from its finish.
+         *
+         * `style` below is the finish: a border, a tint, a shadow. Those are the
+         * same card wearing something. This is the card's SILHOUETTE, and the
+         * reason it exists is Principle 3 in PRODUCT.md: if two client sites
+         * feel interchangeable the design failed, and until now every client's
+         * blog had the one card.
+         *
+         * Three, because three are genuinely different shapes rather than three
+         * paddings. Stacked is what every published site already has and stays
+         * the default, so nothing anybody has live moves.
+         */
+        kind: 'select',
+        key: 'design',
+        label: 'Card design',
+        options: [
+          { value: 'stacked', label: 'Picture, then words' },
+          { value: 'overlay', label: 'Words on the picture' },
+          { value: 'index', label: 'A list, date beside the words' },
+        ],
+        help: 'The shape of each card. The style below is its finish.',
+      },
+      {
         kind: 'select',
         key: 'style',
         label: 'Card style',
@@ -2001,6 +2026,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'raised', label: 'Raised' },
           { value: 'tinted', label: 'Tinted' },
         ],
+        help: 'The finish on the box. Words on the picture have no box, so this does nothing there.',
       },
       {
         kind: 'select',

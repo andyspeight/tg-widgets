@@ -3370,6 +3370,209 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   aspect-ratio: auto;
 }
 
+/* ------------------------------------------------------------------ */
+/* Card designs: the silhouette, as distinct from the finish           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * WORDS ON THE PICTURE.
+ *
+ * The editorial blog card, and the one shape no combination of the older
+ * controls could make: the picture IS the card and the words sit in it. Same
+ * markup as every other card, so this is the body laid over the frame.
+ *
+ * THE SCRIM IS NOT DECORATION, it is how the text clears 4.5:1 over a
+ * photograph nobody has seen yet. Same reasoning as .tgs-section__scrim, and
+ * deliberately stronger at the foot than the head: the words live at the
+ * bottom, and a gradient that is heaviest where the text is buys contrast
+ * without flattening the whole picture into grey. A card with no picture still
+ * gets it, so the words never sit on bare tint with no contrast promise.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 22rem;
+  /*
+   * The card is already a flex column, so this drops the words to the foot and
+   * leaves the picture the whole space above them. It matters more than it
+   * looks: the body then hugs its own text, and the scrim below only has the
+   * text to cover rather than the entire card.
+   */
+  justify-content: flex-end;
+}
+.tgs-cards[data-design='overlay'] .tgs-card__frame {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  border-radius: inherit;
+}
+/*
+ * A light wash over the whole picture, for mood and so a blown-out sky is not
+ * the brightest thing on the page. It is NOT what carries the contrast.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 6%, transparent) 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 26%, transparent) 100%
+  );
+}
+
+/*
+ * THE SCRIM THAT CARRIES THE CONTRAST SITS ON THE BODY, NOT ON THE CARD.
+ *
+ * A gradient measured down the card only works if you know where the words
+ * ended up, and you do not: a two-line title and a four-line summary put the
+ * text in different places, and the first cut of this failed exactly there,
+ * with the title landing on 3.66:1 over a bright sky while the lines below it
+ * passed comfortably.
+ *
+ * The body hugs its own text, so a scrim on the body tracks every line whatever
+ * the card holds. It reaches above the body's top edge and fades out there, so
+ * the picture is not cut off by a hard horizontal line.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card__body::before {
+  content: '';
+  position: absolute;
+  inset: -3.5rem 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 55%, transparent) 3.5rem,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 82%, transparent) 60%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 90%, transparent) 100%
+  );
+}
+.tgs-cards[data-design='overlay'] .tgs-card__body {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  /*
+   * NO min-height AND NO flex-grow. The body is exactly as tall as its words,
+   * which is what keeps the scrim off the picture: give the body the card's
+   * height and the scrim that tracks it covers the photograph completely, which
+   * is the first version of this and the reason the picture had gone.
+   */
+  flex: none;
+  /*
+   * The measured on-dark tokens rather than a flat white, so a muted line and a
+   * rule inside the card are the same values a dark section uses and were
+   * checked against the same ground.
+   */
+  color: var(--tgs-text-invert);
+  --tgs-text: var(--tgs-text-invert);
+  --tgs-text-muted: var(--tgs-on-dark-muted);
+  --tgs-border: var(--tgs-on-dark-border);
+  --tgs-primary: var(--tgs-text-invert);
+}
+/* No box, so no finish. The border, tint and shadow have nothing to sit on. */
+.tgs-cards[data-design='overlay'] .tgs-card {
+  border: 0;
+  background: var(--tgs-surface-alt);
+  box-shadow: none;
+}
+.tgs-cards[data-design='overlay'] .tgs-card__noimage { background: var(--tgs-surface-alt); }
+/*
+ * The summary is capped at two lines HERE ONLY. Nothing is thrown away: the
+ * words are in the HTML and the entry's own page shows all of them. But this
+ * design spends the card on a photograph, and one client's four-line summary
+ * would otherwise grow the scrim until there was no photograph left to see.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+/* The picture is the card, so where it "sits" is not a question here. */
+.tgs-cards[data-design='overlay'][data-image='left'] .tgs-card { flex-direction: column; }
+
+/*
+ * A LIST, WITH THE DATE BESIDE THE WORDS.
+ *
+ * One column of rows rather than a grid of tiles: the archive index a blog
+ * wants once it has more than a screenful, where a reader scans titles and the
+ * dates line up down the left.
+ *
+ * IT ALSO FIXES AN EYEBROW. A stacked card puts the date above the title, which
+ * is the label-above-a-heading pattern the craft floor bans outright. Here the
+ * same element becomes the first column, so the date is beside the heading
+ * rather than stacked on top of it, and the heading opens the row.
+ */
+.tgs-cards[data-design='index'] {
+  display: block;
+  border-top: 1px solid var(--tgs-border);
+}
+.tgs-cards[data-design='index'] .tgs-card {
+  flex-direction: row;
+  align-items: start;
+  border: 0;
+  border-bottom: 1px solid var(--tgs-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.tgs-cards[data-design='index'] .tgs-card__body {
+  display: grid;
+  /* The date column is wide enough for "14 September 2026" and no wider. */
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--tgs-space-xs) var(--tgs-space-l);
+  padding-inline: 0;
+  padding-block: var(--tgs-space-l);
+}
+.tgs-cards[data-design='index'] .tgs-card__body > * { grid-column: 2; }
+.tgs-cards[data-design='index'] .tgs-card__label {
+  grid-column: 1;
+  grid-row: 1 / span 6;
+  align-self: start;
+  padding-top: 0.15em;
+}
+/* A title leading its own row wants the weight a section heading has, not the
+   size a tile's title needs. */
+.tgs-cards[data-design='index'] .tgs-card__title { font-size: var(--tgs-h-s); }
+/* The picture becomes a thumbnail at the end of the row, and only if there is
+   one to show: a text index should not carry a column of empty grey boxes. */
+.tgs-cards[data-design='index'] .tgs-card__frame {
+  order: 1;
+  flex: 0 0 clamp(6rem, 14vw, 11rem);
+  align-self: center;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--tgs-radius-sm);
+  margin-inline-start: var(--tgs-space-l);
+}
+.tgs-cards[data-design='index'] .tgs-card:has(.tgs-card__noimage) .tgs-card__frame { display: none; }
+
+@container tgs-page (max-width: 700px) {
+  /*
+   * On a phone the whole ROW folds, not just the body inside it. Folding only
+   * the body was the first version and it left the picture beside the words for
+   * the row's full height, squeezing three-word lines down a narrow column: the
+   * thumbnail took a third of a 390px screen and the title paid for it.
+   *
+   * Same fold the beside-the-words layout already does, so the two agree.
+   */
+  .tgs-cards[data-design='index'] .tgs-card { flex-direction: column; }
+  .tgs-cards[data-design='index'] .tgs-card__body {
+    display: flex;
+    padding-block: var(--tgs-space-m);
+  }
+  .tgs-cards[data-design='index'] .tgs-card__frame {
+    order: -1;
+    flex: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-inline-start: 0;
+    margin-block-end: var(--tgs-space-m);
+  }
+  .tgs-cards[data-design='overlay'] .tgs-card { min-height: 17rem; }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-cards[data-columns='4'] { grid-template-columns: repeat(2, 1fr); }
 }
