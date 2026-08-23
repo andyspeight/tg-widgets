@@ -18,7 +18,8 @@ import {
   MAX_DIVIDER_HEIGHT,
   MIN_DIVIDER_HEIGHT,
 } from '../../lib/content/dividers';
-import { safeSlug, safeTags } from '../../lib/content/collection';
+import { safeSlug, safeTags, type FieldValue } from '../../lib/content/collection';
+import { missingRequired, type FieldDef } from '../../lib/content/collection-fields';
 import type { ItemMeta } from '../../lib/content/collection-page';
 import {
   anchorInput,
@@ -141,6 +142,12 @@ interface Props {
   isItem?: boolean;
   itemMeta?: ItemMeta;
   onItemMeta?: (next: ItemMeta) => void;
+  /**
+   * What this entry's own collection declares its entries have, in the order
+   * the collections screen put them in. Empty for a blog, and empty for every
+   * collection made before collections had a schema of their own.
+   */
+  itemFields?: FieldDef[];
   /**
    * True while the on-canvas options popover is open for this same item.
    *
@@ -293,6 +300,7 @@ export function Properties({
   isItem = false,
   itemMeta,
   onItemMeta,
+  itemFields,
   editingOnCanvas = false,
   viewport = 'desktop',
 }: Props) {
@@ -347,6 +355,7 @@ export function Properties({
             isItem={isItem}
             itemMeta={itemMeta}
             onItemMeta={onItemMeta}
+            itemFields={itemFields}
             tier={viewport}
           />
         )}
@@ -377,6 +386,7 @@ export function ItemOptions({
   isItem = false,
   itemMeta,
   onItemMeta,
+  itemFields,
   tier = 'desktop',
 }: {
   page: Page;
@@ -407,6 +417,7 @@ export function ItemOptions({
   isItem?: boolean;
   itemMeta?: Props['itemMeta'];
   onItemMeta?: Props['onItemMeta'];
+  itemFields?: Props['itemFields'];
 }) {
   return (
     <>
@@ -419,8 +430,21 @@ export function ItemOptions({
           />
         ) : isItem ? (
           <ItemFields
-            meta={itemMeta ?? { title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], slug: '' }}
+            meta={
+              itemMeta ?? {
+                title: '',
+                summary: '',
+                image: '',
+                alt: '',
+                author: '',
+                date: '',
+                tags: [],
+                fields: {},
+                slug: '',
+              }
+            }
             onChange={onItemMeta}
+            defs={itemFields ?? []}
           />
         ) : (
           <PageFields page={page} onCommit={onCommit} />
@@ -645,9 +669,11 @@ function RegionFields({
 function ItemFields({
   meta,
   onChange,
+  defs,
 }: {
   meta: ItemMeta;
   onChange?: (next: ItemMeta) => void;
+  defs: FieldDef[];
 }) {
   const set = (patch: Partial<ItemMeta>) => onChange?.({ ...meta, ...patch });
 
@@ -732,6 +758,149 @@ function ItemFields({
         />
         <p className="ed-help">Describe the picture for anyone who cannot see it.</p>
       </div>
+
+      <DeclaredFields
+        defs={defs}
+        values={meta.fields}
+        onChange={(fields) => set({ fields })}
+      />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The fields this entry's own collection declares, as a form.
+ *
+ * THE FORM GENERATOR the collections table has been waiting for since migration
+ * 0004. One control per definition, in the order the collections screen put them
+ * in, keyed by the definition's key. Nothing here is a special case for a
+ * particular collection: a Tours collection and a Destinations one draw the same
+ * way from their own lists.
+ *
+ * NOTHING SHOWS FOR A COLLECTION THAT DECLARES NOTHING, which is a blog, and is
+ * why this is the last thing in the panel rather than the first: the six fixed
+ * fields above are what every entry has, and these are the extra a client asked
+ * for.
+ *
+ * REQUIRED IS A PROMPT, NOT A LOCK. An empty required field says so under the
+ * control and nothing else happens: a draft is allowed to be half written, and
+ * a save that refused would lose the rest of it. The list of what is still
+ * missing is what the publish button will eventually read.
+ */
+function DeclaredFields({
+  defs,
+  values,
+  onChange,
+}: {
+  defs: FieldDef[];
+  values: Record<string, FieldValue>;
+  onChange: (next: Record<string, FieldValue>) => void;
+}) {
+  if (defs.length === 0) return null;
+
+  const set = (key: string, value: FieldValue | undefined) => {
+    const next = { ...values };
+    if (value === undefined || value === '') delete next[key];
+    else next[key] = value;
+    onChange(next);
+  };
+
+  const missing = missingRequired(defs, values);
+
+  return (
+    <>
+      {defs.map((def) => {
+        const value = values[def.key];
+        const empty = missing.some((field) => field.key === def.key);
+        const id = `item-field-${def.key}`;
+
+        return (
+          <div className="ed-field" key={def.key}>
+            <label className="ed-label" htmlFor={id}>
+              {def.label}
+            </label>
+
+            {def.kind === 'longtext' && (
+              <textarea
+                id={id}
+                className="ed-textarea"
+                rows={3}
+                maxLength={2000}
+                value={typeof value === 'string' ? value : ''}
+                onChange={(event) => set(def.key, event.target.value)}
+              />
+            )}
+
+            {def.kind === 'choice' && (
+              <select
+                id={id}
+                className="ed-select"
+                value={typeof value === 'string' ? value : ''}
+                onChange={(event) => set(def.key, event.target.value)}
+              >
+                <option value="">Not set</option>
+                {def.choices.map((choice) => (
+                  <option value={choice} key={choice}>
+                    {choice}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {def.kind === 'toggle' && (
+              <label className="ed-toggle">
+                <input
+                  id={id}
+                  type="checkbox"
+                  checked={value === true}
+                  onChange={(event) => set(def.key, event.target.checked)}
+                />
+                <span>{value === true ? 'Yes' : 'No'}</span>
+              </label>
+            )}
+
+            {def.kind === 'image' && (
+              <ImageField
+                value={typeof value === 'string' ? value : ''}
+                onChange={(url) => set(def.key, url)}
+              />
+            )}
+
+            {(def.kind === 'text' || def.kind === 'number' || def.kind === 'price'
+              || def.kind === 'date') && (
+              <input
+                id={id}
+                className="ed-input"
+                /*
+                 * A price is typed as a number, not as text with a currency in
+                 * it: the site's own money formatting puts the symbol on at
+                 * render, so storing "£1,299" would print it twice.
+                 */
+                type={def.kind === 'date' ? 'date' : def.kind === 'text' ? 'text' : 'number'}
+                inputMode={def.kind === 'price' ? 'decimal' : undefined}
+                step={def.kind === 'price' ? '0.01' : undefined}
+                maxLength={def.kind === 'text' ? 200 : undefined}
+                value={value === undefined ? '' : String(value)}
+                onChange={(event) => {
+                  const raw = event.target.value;
+                  if (def.kind === 'number' || def.kind === 'price') {
+                    // Held as typed while the box has focus, so a half-typed
+                    // "12." is not snapped to 12 under the caret. The save is
+                    // what turns it into a number, through cleanFieldValues.
+                    set(def.key, raw);
+                    return;
+                  }
+                  set(def.key, raw);
+                }}
+              />
+            )}
+
+            {empty && <p className="ed-help" data-tone="warn">Asked for before publishing.</p>}
+          </div>
+        );
+      })}
     </>
   );
 }

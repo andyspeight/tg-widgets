@@ -26,6 +26,7 @@ import {
   saveItem,
   scheduleItem,
   unpublishItem,
+  updateCollectionFields,
   type Collection,
   type ItemSummary,
   type ItemWithContent,
@@ -91,14 +92,43 @@ export async function getItemAction(
 export async function createCollectionAction(input: {
   name: string;
   key?: string;
+  /** A starter preset's fields, if one was picked. Parsed in the db layer. */
+  fields?: unknown;
 }): Promise<ActionResult<Collection>> {
   const result = await attempt(async () =>
     createCollection(await requireEitherCapability('collections', 'blog'), {
       name: String(input.name ?? '').slice(0, 120),
       key: input.key,
+      fields: input.fields,
     }),
   );
   if (result.ok) revalidatePath('/collections');
+  return result;
+}
+
+/**
+ * Change what fields a collection declares.
+ *
+ * REVALIDATES THE PREVIEW TREE as well as this screen, because a field
+ * definition is not only a form: a card fed from this collection may show a
+ * price or a number of nights, so adding or removing one changes pages nobody
+ * edited. The same call publishing makes, and for the same reason.
+ */
+export async function updateCollectionFieldsAction(
+  collectionId: string,
+  fields: unknown,
+): Promise<ActionResult<Collection | null>> {
+  const result = await attempt(async () =>
+    updateCollectionFields(
+      await requireEitherCapability('collections', 'blog'),
+      collectionId,
+      fields,
+    ),
+  );
+  if (result.ok) {
+    revalidatePath('/collections');
+    revalidatePath('/preview', 'layout');
+  }
   return result;
 }
 

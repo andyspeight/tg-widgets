@@ -24,6 +24,7 @@
  */
 
 import { parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../content/collection';
+import { cleanFieldValues, parseFieldDefs, type FieldDef } from '../content/collection-fields';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -36,6 +37,12 @@ export interface Collection {
   id: string;
   key: string;
   name: string;
+  /**
+   * The fields this collection declares its entries have, from the `fields`
+   * column that has been sitting there since migration 0004. Empty for a blog,
+   * and empty for every collection made before this existed.
+   */
+  fields: FieldDef[];
 }
 
 export interface ItemSummary {
@@ -57,6 +64,12 @@ export interface ItemWithContent extends ItemSummary {
   item: CollectionItem;
   /** The collection it belongs to, so a caller can build its address. */
   collectionKey: string;
+  /**
+   * What its collection declares its entries have. The editor needs these to
+   * draw the form: an item's `fields` is a bag of keys, and these are what turn
+   * a key into a label, an input and a place in the order.
+   */
+  collectionFields: FieldDef[];
 }
 
 function json(tx: Tx, value: unknown) {
@@ -125,14 +138,21 @@ function summary(tx: Tx) {
 // Collections
 // ---------------------------------------------------------------------------
 
+function toCollection(row: Record<string, unknown>): Collection {
+  return {
+    id: String(row.id),
+    key: String(row.key),
+    name: String(row.name),
+    // asObject because the driver hands jsonb back as a value or as text
+    // depending on the column, exactly as it does for `data` below.
+    fields: parseFieldDefs(asObject(row.fields)),
+  };
+}
+
 export async function listCollections(tenantId: string): Promise<Collection[]> {
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx`select id, key, name from public.collections order by name`;
-    return rows.map((row) => ({
-      id: String(row.id),
-      key: String(row.key),
-      name: String(row.name),
-    }));
+    const rows = await tx`select id, key, name, fields from public.collections order by name`;
+    return rows.map((row) => toCollection(row as Record<string, unknown>));
   });
 }
 
@@ -142,22 +162,56 @@ export async function listCollections(tenantId: string): Promise<Collection[]> {
  * The key is not made unique here on purpose, the same call pages.ts makes about
  * slugs: a unique index already enforces it, and letting the database refuse
  * means two requests racing cannot both win.
+ *
+ * The field definitions arrive from a starter preset the client picked, and go
+ * through parseFieldDefs on the way in exactly as they will on the way out: the
+ * screen sending them is a browser, so it is a guess like any other.
  */
 export async function createCollection(
   tenantId: string,
-  input: { name: string; key?: string },
+  input: { name: string; key?: string; fields?: unknown },
 ): Promise<Collection> {
   const name = input.name.trim() || 'Untitled';
   const key = safeSlug(input.key || name) || 'list';
+  const fields = parseFieldDefs(input.fields);
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      insert into public.collections (tenant_id, key, name)
-      values (${tenantId}::uuid, ${key}, ${name})
-      returning id, key, name
+      insert into public.collections (tenant_id, key, name, fields)
+      values (${tenantId}::uuid, ${key}, ${name}, ${json(tx, fields)})
+      returning id, key, name, fields
     `;
-    const row = rows[0] as Record<string, unknown>;
-    return { id: String(row.id), key: String(row.key), name: String(row.name) };
+    return toCollection(rows[0] as Record<string, unknown>);
+  });
+}
+
+/**
+ * Change what fields a collection declares.
+ *
+ * THE WHOLE LIST AT ONCE, not one field at a time, because the screen edits it
+ * as a list and a partial write would leave a client's schema half applied if a
+ * request failed between two of them.
+ *
+ * NOTHING IS DONE TO THE ITEMS. Deleting a definition leaves every item's stored
+ * answer exactly where it was, invisible until a definition with that key exists
+ * again; renaming a label changes no item at all, because items store by key.
+ * That is the whole point of the key/label split, and it is why this is one
+ * cheap UPDATE rather than a migration across two hundred rows.
+ */
+export async function updateCollectionFields(
+  tenantId: string,
+  collectionId: string,
+  fields: unknown,
+): Promise<Collection | null> {
+  const clean = parseFieldDefs(fields);
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.collections set fields = ${json(tx, clean)}
+      where id = ${collectionId}::uuid
+      returning id, key, name, fields
+    `;
+    return rows.length ? toCollection(rows[0] as Record<string, unknown>) : null;
   });
 }
 
@@ -194,7 +248,7 @@ export async function getItem(
 ): Promise<ItemWithContent | null> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select ${summary(tx)}, data, c.key as collection_key
+      select ${summary(tx)}, data, c.key as collection_key, c.fields as collection_fields
       from public.collection_items
       join public.collections c on c.id = collection_id
       where public.collection_items.id = ${itemId}::uuid
@@ -206,6 +260,7 @@ export async function getItem(
       ...toSummary(row),
       item: hydrate(row.data, `item ${String(row.id)}`),
       collectionKey: String(row.collection_key),
+      collectionFields: parseFieldDefs(asObject(row.collection_fields)),
     };
   });
 }
@@ -245,7 +300,16 @@ export async function createItem(
         ${tenantId}::uuid,
         c.id,
         ${slug},
-        ${json(tx, { version: 1, title: clean, summary: '', image: '', alt: '', date: '', sections: [] })}
+        ${json(tx, {
+          version: 1,
+          title: clean,
+          summary: '',
+          image: '',
+          alt: '',
+          date: '',
+          fields: {},
+          sections: [],
+        })}
       from public.collections c
       where c.id = ${collectionId}::uuid
       returning ${summary(tx)}, data
@@ -253,12 +317,15 @@ export async function createItem(
     if (!rows.length) return null;
 
     const row = rows[0] as Record<string, unknown>;
-    const collection = await tx`select key from public.collections where id = ${collectionId}::uuid`;
+    const collection = await tx`
+      select key, fields from public.collections where id = ${collectionId}::uuid
+    `;
 
     return {
       ...toSummary(row),
       item: hydrate(row.data, 'a new item'),
       collectionKey: String(collection[0]?.key ?? ''),
+      collectionFields: parseFieldDefs(asObject(collection[0]?.fields)),
     };
   });
 }
@@ -269,6 +336,13 @@ export async function createItem(
  * Parsed and sanitised before a byte reaches the database, exactly as a page is.
  * The slug travels alongside because it is a column: it is what the address is
  * made of, and a uniqueness rule can only live where the database can see it.
+ *
+ * THE DECLARED FIELDS ARE CLEANED AGAINST THE COLLECTION'S OWN DEFINITIONS, and
+ * those are read here rather than sent from the browser. A definition that
+ * arrived with the save would be a definition the sender chose, so "is this one
+ * of the five choices" would be a question the answer got to set. Reading them
+ * inside the same transaction as the write also means a save cannot be cleaned
+ * against a schema that changed a moment ago.
  */
 export async function saveItem(
   tenantId: string,
@@ -287,9 +361,21 @@ export async function saveItem(
   void userId;
 
   return withTenant(tenantId, async (tx) => {
+    const owner = await tx`
+      select c.fields
+      from public.collection_items i
+      join public.collections c on c.id = i.collection_id
+      where i.id = ${itemId}::uuid
+    `;
+    // No row means no such item for this tenant, and the update below will
+    // find nothing either. Falling through gives the caller the same null a
+    // missing item has always given.
+    const defs = parseFieldDefs(asObject(owner[0]?.fields));
+    const data = { ...clean, fields: cleanFieldValues(defs, clean.fields) };
+
     const rows = await tx`
       update public.collection_items
-      set data = ${json(tx, clean)}, slug = ${address}
+      set data = ${json(tx, data)}, slug = ${address}
       where id = ${itemId}::uuid
       returning ${summary(tx)}
     `;

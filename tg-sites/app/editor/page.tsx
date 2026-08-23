@@ -168,6 +168,7 @@ export default async function EditorPage({
           {...shared}
           itemId={found.id}
           initialItemMeta={itemMeta(found.item, found.slug)}
+          itemFields={found.collectionFields}
           pageId={found.id}
           initialPage={itemAsPage(found.item, found.id, found.slug)}
           initialStatus={found.status}

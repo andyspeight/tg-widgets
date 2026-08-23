@@ -28,6 +28,8 @@
   --ed-accent: #00b4d8;
   --ed-accent-dark: #0096b7;
   --ed-danger: #ef4444;
+  /* Asking rather than refusing: an unanswered field a collection wants. */
+  --ed-warn: #a1621a;
   /* Brand as a foreground colour, which needs a different value per theme
      from brand as a background. One token cannot do both jobs. */
   --ed-brand-ink: #1b2b5b;
@@ -112,6 +114,7 @@
     --ed-primary-light: #3a5296;
     --ed-brand-ink: #93c5fd;
     --ed-danger: #fca5a5;
+    --ed-warn: #fbbf24;
     --ed-select: #60a5fa;
     --ed-select-wash: #172554;
     --ed-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -139,6 +142,7 @@
     --ed-primary-light: #3a5296;
     --ed-brand-ink: #93c5fd;
     --ed-danger: #fca5a5;
+    --ed-warn: #fbbf24;
     --ed-select: #60a5fa;
     --ed-select-wash: #172554;
     --ed-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -2041,6 +2045,12 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   line-height: 1.5;
   color: var(--ed-ink-2);
 }
+/*
+ * A help line that is asking for something rather than explaining it: an empty
+ * field the collection says it wants before publishing. Warm rather than red,
+ * because a half-written draft is normal and nothing is refused.
+ */
+.ed-help[data-tone='warn'] { color: var(--ed-warn); }
 
 .ed-input,
 .ed-select,

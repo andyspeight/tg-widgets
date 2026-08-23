@@ -322,6 +322,7 @@ describe('parseItem', () => {
       author: '',
       date: '',
       tags: [],
+      fields: {},
       sections: [],
     });
   });
@@ -403,6 +404,7 @@ describe('parseItem', () => {
       author: '',
       date: '',
       tags: [],
+      fields: {},
       sections: [],
     });
   });
@@ -450,6 +452,7 @@ describe('an item as the editor sees it', () => {
       author: '',
       date: '2026-08-03',
       tags: [],
+      fields: {},
       slug: 'ten-things-in-crete',
     });
   });
@@ -520,7 +523,7 @@ describe('an item as the editor sees it', () => {
     expect(back.seo).toBeUndefined();
     expect(back.slug).toBeUndefined();
     expect(Object.keys(back).sort()).toEqual(
-      ['alt', 'author', 'date', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
+      ['alt', 'author', 'date', 'fields', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
     );
   });
 });
@@ -1229,7 +1232,7 @@ describe('writing entries', () => {
         data: { version: 1, title: 'Ten things', summary: '', image: '', alt: '', date: '', sections: [] },
       },
     ]);
-    respond('select key from public.collections', [{ key: 'blog' }]);
+    respond('select key, fields from public.collections', [{ key: 'blog', fields: [] }]);
 
     const created = await createItem(ALPHA, 'c1', 'Ten things');
 
@@ -1247,6 +1250,140 @@ describe('writing entries', () => {
    * through that table's own policy first, so another client's collection is
    * simply not there to select and nothing is inserted.
    */
+  /*
+   * A collection's own fields, from migration 0004's dormant column.
+   *
+   * The rule these hold to: the DEFINITIONS come from the database, and the
+   * VALUES come from the browser. A definition arriving with the save would let
+   * whoever sent the answer decide what counts as a valid one.
+   */
+  it('cleans an entry against its own collections definitions, read at save', async () => {
+    const { saveItem } = await import('../lib/db/collections');
+
+    respond('select c.fields', [
+      {
+        fields: [
+          { key: 'nights', label: 'Nights', kind: 'number', required: true, choices: [] },
+          { key: 'board', label: 'Board', kind: 'choice', required: false, choices: ['Half board'] },
+        ],
+      },
+    ]);
+    respond('update public.collection_items', [
+      { id: 'i1', collection_id: 'c1', slug: 'x', status: 'draft', updated_at: '2026-08-03T09:00:00Z' },
+    ]);
+
+    await saveItem(
+      ALPHA,
+      'i1',
+      { version: 1, title: 'Western Isles', fields: { nights: '7 nights', board: 'Whatever I like' } },
+      'x',
+    );
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(writtenJson(write)).toMatchObject({ fields: { nights: 7 } });
+    // Off the list, so it is not stored at all.
+    expect((writtenJson(write) as { fields: Record<string, unknown> }).fields.board).toBeUndefined();
+  });
+
+  it('reads the definitions from the row, not from what the browser sent', async () => {
+    const { saveItem } = await import('../lib/db/collections');
+
+    respond('update public.collection_items', [
+      { id: 'i1', collection_id: 'c1', slug: 'x', status: 'draft', updated_at: '2026-08-03T09:00:00Z' },
+    ]);
+
+    await saveItem(ALPHA, 'i1', { version: 1, title: 'Western Isles' }, 'x');
+
+    const read = log.find((s) => s.sql.includes('select c.fields'))!;
+    expect(read.sql).toContain('join public.collections c');
+    expect(read.role).toBe('app');
+    // Inside the same transaction as the write, so a schema edit landing
+    // between the two cannot clean a save against a schema that has gone.
+    expect(log.findIndex((s) => s.sql === 'BEGIN')).toBeLessThan(log.indexOf(read));
+  });
+
+  it('keeps an answer whose definition has been deleted', async () => {
+    const { saveItem } = await import('../lib/db/collections');
+
+    // The collection declares nights and nothing else any more.
+    respond('select c.fields', [
+      { fields: [{ key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [] }] },
+    ]);
+    respond('update public.collection_items', [
+      { id: 'i1', collection_id: 'c1', slug: 'x', status: 'draft', updated_at: '2026-08-03T09:00:00Z' },
+    ]);
+
+    await saveItem(
+      ALPHA,
+      'i1',
+      { version: 1, title: 'Western Isles', fields: { nights: 7, board: 'Half board' } },
+      'x',
+    );
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(writtenJson(write)).toMatchObject({ fields: { nights: 7, board: 'Half board' } });
+  });
+
+  it('reads a collection back with its declared fields', async () => {
+    const { listCollections } = await import('../lib/db/collections');
+
+    respond('select id, key, name, fields from public.collections', [
+      {
+        id: 'c1',
+        key: 'tours',
+        name: 'Tours',
+        fields: [{ key: 'nights', label: 'Nights', kind: 'number', required: true, choices: [] }],
+      },
+      { id: 'c2', key: 'blog', name: 'Blog', fields: null },
+    ]);
+
+    const [tours, blog] = await listCollections(ALPHA);
+    expect(tours.fields).toHaveLength(1);
+    expect(tours.fields[0].label).toBe('Nights');
+    // A collection made before any of this existed reads as no fields.
+    expect(blog.fields).toEqual([]);
+  });
+
+  it('changes a schema with one update and touches no entry', async () => {
+    const { updateCollectionFields } = await import('../lib/db/collections');
+
+    respond('update public.collections set fields', [
+      {
+        id: 'c1',
+        key: 'tours',
+        name: 'Tours',
+        fields: [{ key: 'nights', label: 'Nights aboard', kind: 'number', required: false, choices: [] }],
+      },
+    ]);
+
+    const updated = await updateCollectionFields(ALPHA, 'c1', [
+      { key: 'nights', label: 'Nights aboard', kind: 'number', required: false, choices: [] },
+    ]);
+
+    expect(updated?.fields[0].label).toBe('Nights aboard');
+    // Renaming is a label change on one row. Nothing rewrites the entries.
+    expect(log.some((s) => s.sql.includes('update public.collection_items'))).toBe(false);
+  });
+
+  it('puts a schema from the browser through the same parser as a read', async () => {
+    const { updateCollectionFields } = await import('../lib/db/collections');
+
+    respond('update public.collections set fields', [
+      { id: 'c1', key: 'tours', name: 'Tours', fields: [] },
+    ]);
+
+    await updateCollectionFields(ALPHA, 'c1', [
+      { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [] },
+      { nonsense: true },
+      { key: '', label: 'No key' },
+    ]);
+
+    const write = log.find((s) => s.sql.includes('update public.collections set fields'))!;
+    expect(writtenJson(write)).toEqual([
+      { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [] },
+    ]);
+  });
+
   it('cannot start an entry inside somebody elses collection', async () => {
     const { createItem } = await import('../lib/db/collections');
 

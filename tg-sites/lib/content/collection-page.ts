@@ -15,7 +15,7 @@
  * already has a title box in the top bar, and a post's title belongs there.
  */
 
-import type { CollectionItem } from './collection';
+import type { CollectionItem, FieldValue } from './collection';
 import { CONTENT_VERSION, type Page } from './schema';
 
 /** The fields of an item that are not its body. */
@@ -29,6 +29,13 @@ export interface ItemMeta {
   date: string;
   /** The post's tags, edited beside the summary and the date. */
   tags: string[];
+  /**
+   * The answers to the fields this item's own collection declares, keyed by
+   * field key. Travels with the meta rather than inside the Page for the same
+   * reason the summary does: the editor has nowhere in a Page to put it, and
+   * the collection's definitions are what give these keys meaning.
+   */
+  fields: Record<string, FieldValue>;
   /** The address, which is a column on the row rather than part of the JSON. */
   slug: string;
 }
@@ -42,6 +49,7 @@ export function itemMeta(item: CollectionItem, slug: string): ItemMeta {
     author: item.author,
     date: item.date,
     tags: item.tags,
+    fields: item.fields,
     slug,
   };
 }
@@ -83,6 +91,7 @@ export function pageAsItem(page: Page, meta: ItemMeta): CollectionItem {
     author: meta.author,
     date: meta.date,
     tags: meta.tags,
+    fields: meta.fields,
     sections: page.sections,
   };
 }

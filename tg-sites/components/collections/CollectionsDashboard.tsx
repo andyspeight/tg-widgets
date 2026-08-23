@@ -28,8 +28,18 @@ import {
   publishItemAction,
   scheduleItemAction,
   unpublishItemAction,
+  updateCollectionFieldsAction,
 } from '../../app/actions/collections';
 import { safeSlug } from '../../lib/content/collection';
+import {
+  FIELD_KIND_HINT,
+  FIELD_KIND_LABEL,
+  FIELD_KINDS,
+  FIELD_PRESETS,
+  mintFieldKey,
+  type FieldDef,
+  type FieldKind,
+} from '../../lib/content/collection-fields';
 import type { Collection, ItemSummary } from '../../lib/db/collections';
 import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
@@ -42,6 +52,7 @@ const THEME_KEY = 'tg-sites:theme:v1';
 type Dialog =
   | { kind: 'new-collection' }
   | { kind: 'new-item' }
+  | { kind: 'fields'; collection: Collection }
   | { kind: 'schedule'; item: ItemSummary }
   | null;
 
@@ -83,6 +94,16 @@ export function CollectionsDashboard({
 
   const open = collections.find((entry) => entry.id === openId) ?? null;
   const host = siteUrl.replace(/^https?:\/\//, '');
+
+  /*
+   * The open collection's declared fields, held here as well as on the prop.
+   *
+   * Same reason the entries are: saving the schema patches this in place so the
+   * bar's count is right immediately, and the server refresh that follows
+   * replaces it with what actually landed.
+   */
+  const [fields, setFields] = useState<FieldDef[]>(open?.fields ?? []);
+  useEffect(() => setFields(open?.fields ?? []), [open]);
 
   /*
    * The entries come from the server on every navigation, and switching
@@ -143,6 +164,27 @@ export function CollectionsDashboard({
         });
       }),
     [patch],
+  );
+
+  const saveFields = useCallback(
+    (collectionId: string, next: FieldDef[]): Promise<string | null> =>
+      new Promise((done) => {
+        setError(null);
+        startTransition(async () => {
+          const result = await updateCollectionFieldsAction(collectionId, next);
+          if (!result.ok) {
+            done(result.error);
+            return;
+          }
+          if (result.data) setFields(result.data.fields);
+          setDialog(null);
+          done(null);
+          // The editor reads these to draw its form, so what the server holds
+          // has to be what this screen shows from here on.
+          router.refresh();
+        });
+      }),
+    [router],
   );
 
   const [deletingItem, setDeletingItem] = useState<ItemSummary | null>(null);
@@ -289,6 +331,29 @@ export function CollectionsDashboard({
                   <p className="sv-collection-bar__url">
                     at <code>{host}/{open.key}/…</code>
                   </p>
+
+                  {/*
+                    The schema, beside the address rather than behind a settings
+                    screen, because on a Tours collection it is the thing that
+                    gets edited second and looked at often. The count is the
+                    label: "Fields" alone gives no reason to press it.
+                  */}
+                  <button
+                    type="button"
+                    className="sv-btn"
+                    data-variant="quiet"
+                    disabled={busy}
+                    onClick={() => {
+                      setError(null);
+                      setDialog({ kind: 'fields', collection: { ...open, fields } });
+                    }}
+                  >
+                    <Icon name="list" size={16} />
+                    {fields.length === 0
+                      ? 'Add fields'
+                      : `${fields.length} ${fields.length === 1 ? 'field' : 'fields'}`}
+                  </button>
+
                   <button
                     type="button"
                     className="sv-btn"
@@ -417,10 +482,10 @@ export function CollectionsDashboard({
           host={host}
           taken={collections.map((entry) => entry.key)}
           onClose={() => setDialog(null)}
-          onSubmit={(name, key) =>
+          onSubmit={(name, key, presetFields) =>
             new Promise((done) => {
               startTransition(async () => {
-                const result = await createCollectionAction({ name, key });
+                const result = await createCollectionAction({ name, key, fields: presetFields });
                 if (!result.ok) {
                   done(result.error);
                   return;
@@ -463,6 +528,15 @@ export function CollectionsDashboard({
               });
             })
           }
+        />
+      )}
+
+      {dialog?.kind === 'fields' && (
+        <FieldsDialog
+          collection={dialog.collection}
+          entryCount={items.length}
+          onClose={() => setDialog(null)}
+          onSubmit={(next) => saveFields(dialog.collection.id, next)}
         />
       )}
 
@@ -538,19 +612,33 @@ function CollectionDialog({
   /** The short names already in use, so a clash is caught before the database. */
   taken: string[];
   onClose: () => void;
-  onSubmit: (name: string, key: string) => Promise<string | null>;
+  onSubmit: (name: string, key: string, fields: FieldDef[]) => Promise<string | null>;
 }) {
-  const [name, setName] = useState('Blog');
+  /*
+   * The preset leads, and the name follows it.
+   *
+   * A client making their second collection is not making another blog, and a
+   * blank schema designer is a worse first question than "what is this a list
+   * of". So picking Tours names it Tours and gives it the six fields a tour
+   * needs, all of them renameable afterwards. Typing a name of your own stops
+   * the preset from overwriting it.
+   */
+  const [presetId, setPresetId] = useState(FIELD_PRESETS[0]?.id ?? 'blog');
+  const preset = FIELD_PRESETS.find((entry) => entry.id === presetId) ?? FIELD_PRESETS[0];
+
+  const [name, setName] = useState(preset?.collectionName ?? 'Blog');
+  const [nameIsMine, setNameIsMine] = useState(false);
   const [key, setKey] = useState('');
   const [keyIsMine, setKeyIsMine] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const effectiveKey = safeSlug(keyIsMine ? key : name);
+  const effectiveName = nameIsMine ? name : (preset?.collectionName ?? '');
+  const effectiveKey = safeSlug(keyIsMine ? key : effectiveName);
   const clash = taken.includes(effectiveKey);
 
   async function submit() {
-    if (!name.trim()) {
+    if (!effectiveName.trim()) {
       setMessage('Give the collection a name.');
       return;
     }
@@ -563,7 +651,7 @@ function CollectionDialog({
       return;
     }
     setSaving(true);
-    setMessage(await onSubmit(name.trim(), effectiveKey));
+    setMessage(await onSubmit(effectiveName.trim(), effectiveKey, preset?.fields ?? []));
     setSaving(false);
   }
 
@@ -601,13 +689,33 @@ function CollectionDialog({
           </p>
         )}
 
+        <fieldset className="sv-choices">
+          <legend>What is it a list of?</legend>
+          {FIELD_PRESETS.map((entry) => (
+            <label className="sv-choice" key={entry.id} data-on={entry.id === presetId}>
+              <input
+                type="radio"
+                name="collection-preset"
+                value={entry.id}
+                checked={entry.id === presetId}
+                onChange={() => setPresetId(entry.id)}
+              />
+              <span className="sv-choice__name">{entry.name}</span>
+              <span className="sv-choice__blurb">{entry.blurb}</span>
+            </label>
+          ))}
+        </fieldset>
+
         <div className="sv-field">
           <label htmlFor="collection-name">Name</label>
           <input
             id="collection-name"
-            value={name}
+            value={effectiveName}
             placeholder="Blog"
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setNameIsMine(true);
+              setName(event.target.value);
+            }}
           />
           <small>What it is called in your list of collections.</small>
         </div>
@@ -616,7 +724,7 @@ function CollectionDialog({
           <label htmlFor="collection-key">Short name</label>
           <input
             id="collection-key"
-            value={keyIsMine ? key : safeSlug(name)}
+            value={keyIsMine ? key : safeSlug(effectiveName)}
             placeholder="blog"
             onChange={(event) => {
               setKeyIsMine(true);
@@ -642,6 +750,13 @@ function CollectionDialog({
               <code>
                 {host}/<strong>{effectiveKey || 'blog'}</strong>/…
               </code>
+              {preset && preset.fields.length > 0 && (
+                <>
+                  , each with {preset.fields.length} fields to fill in:{' '}
+                  {preset.fields.map((field) => field.label.toLowerCase()).join(', ')}. Rename
+                  or change them whenever you like.
+                </>
+              )}
             </span>
           )}
         </p>
@@ -749,6 +864,258 @@ function ItemDialog({
 
         <button type="submit" className="tg-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>
+    </Modal>
+  );
+}
+
+// ---------------------------------------------------------------------------
+
+/** A row being edited. A field with no key yet has never been saved. */
+type DraftField = FieldDef & { key: string };
+
+/**
+ * What a collection's entries have, beyond a title and some words.
+ *
+ * THE KEY IS MINTED ON SAVE, NOT ON ADD, so it comes from the label the client
+ * settled on rather than from whatever was in the box when they pressed the
+ * button. After that it never moves: renaming "Nights" to "Nights aboard"
+ * changes the label and nothing else, and every entry keeps its answer.
+ *
+ * DELETING A FIELD DELETES NO WRITING. The answers stay in each entry, out of
+ * sight, and come back if a field with that key is ever added again. The note
+ * under the delete button says so, because a client deciding whether to tidy
+ * their schema deserves to know that before they press it rather than after.
+ */
+function FieldsDialog({
+  collection,
+  entryCount,
+  onClose,
+  onSubmit,
+}: {
+  collection: Collection;
+  entryCount: number;
+  onClose: () => void;
+  onSubmit: (fields: FieldDef[]) => Promise<string | null>;
+}) {
+  const [rows, setRows] = useState<DraftField[]>(collection.fields);
+  const [message, setMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const patch = (index: number, next: Partial<DraftField>) =>
+    setRows((current) => current.map((row, at) => (at === index ? { ...row, ...next } : row)));
+
+  const move = (index: number, by: number) =>
+    setRows((current) => {
+      const to = index + by;
+      if (to < 0 || to >= current.length) return current;
+      const next = [...current];
+      const [row] = next.splice(index, 1);
+      next.splice(to, 0, row);
+      return next;
+    });
+
+  const add = () =>
+    setRows((current) => [
+      ...current,
+      { key: '', label: '', kind: 'text', required: false, choices: [] },
+    ]);
+
+  async function submit() {
+    const named = rows.filter((row) => row.label.trim());
+    if (named.length !== rows.length) {
+      setMessage('Give every field a name, or remove the empty ones.');
+      return;
+    }
+
+    const missingChoices = named.find((row) => row.kind === 'choice' && row.choices.length === 0);
+    if (missingChoices) {
+      setMessage(`"${missingChoices.label}" is a choice, so it needs a list to choose from.`);
+      return;
+    }
+
+    // Keys are minted here, from the settled labels, and only for rows that
+    // have never had one. Everything already saved keeps the key its entries
+    // are stored under.
+    const taken = new Set(named.filter((row) => row.key).map((row) => row.key));
+    const ready: FieldDef[] = named.map((row) => {
+      if (row.key) return { ...row, label: row.label.trim() };
+      const key = mintFieldKey(row.label, taken);
+      taken.add(key);
+      return { ...row, key, label: row.label.trim() };
+    });
+
+    setSaving(true);
+    setMessage(await onSubmit(ready));
+    setSaving(false);
+  }
+
+  const gone = collection.fields.filter((was) => !rows.some((row) => row.key === was.key));
+
+  return (
+    <Modal
+      title={`Fields in ${collection.name}`}
+      description="What every entry in this collection has, beyond its title, picture and words."
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="tg-btn" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="tg-btn"
+            data-variant="primary"
+            disabled={saving}
+            onClick={submit}
+          >
+            {saving ? 'Working' : 'Save fields'}
+          </button>
+        </>
+      }
+    >
+      {message && (
+        <p className="sv-msg" role="alert">
+          {message}
+        </p>
+      )}
+
+      {rows.length === 0 ? (
+        <div className="sv-fields__empty">
+          <p>
+            No fields yet, which is right for a blog: a post already has a title, a
+            picture, a date and its words.
+          </p>
+          <p>
+            Add some when the entries are things rather than articles. A tour has a
+            price and a number of nights. A destination has a country and a flying
+            time. Those go on every card and every page without anybody typing them
+            into the words.
+          </p>
+        </div>
+      ) : (
+        <ul className="sv-fields">
+          {rows.map((row, index) => (
+            <li className="sv-fieldrow" key={row.key || `new-${index}`}>
+              <div className="sv-fieldrow__top">
+                <div className="sv-field">
+                  <label htmlFor={`field-label-${index}`}>Name</label>
+                  <input
+                    id={`field-label-${index}`}
+                    value={row.label}
+                    placeholder="Nights"
+                    onChange={(event) => patch(index, { label: event.target.value })}
+                  />
+                </div>
+
+                <div className="sv-field">
+                  <label htmlFor={`field-kind-${index}`}>Holds</label>
+                  <select
+                    id={`field-kind-${index}`}
+                    value={row.kind}
+                    onChange={(event) => patch(index, { kind: event.target.value as FieldKind })}
+                  >
+                    {FIELD_KINDS.map((kind) => (
+                      <option value={kind} key={kind}>
+                        {FIELD_KIND_LABEL[kind]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sv-fieldrow__tools">
+                  <button
+                    type="button"
+                    className="sv-btn"
+                    data-variant="quiet"
+                    aria-label={`Move ${row.label || 'this field'} up`}
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                  >
+                    <Icon name="arrow-up" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="sv-btn"
+                    data-variant="quiet"
+                    aria-label={`Move ${row.label || 'this field'} down`}
+                    disabled={index === rows.length - 1}
+                    onClick={() => move(index, 1)}
+                  >
+                    <Icon name="arrow-down" size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="sv-btn"
+                    data-variant="quiet"
+                    data-danger="true"
+                    aria-label={`Remove ${row.label || 'this field'}`}
+                    onClick={() => setRows((current) => current.filter((_, at) => at !== index))}
+                  >
+                    <Icon name="trash" size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <p className="sv-fieldrow__hint">{FIELD_KIND_HINT[row.kind]}</p>
+
+              {row.kind === 'choice' && (
+                <div className="sv-field">
+                  <label htmlFor={`field-choices-${index}`}>The list, one to a line</label>
+                  <textarea
+                    id={`field-choices-${index}`}
+                    rows={4}
+                    value={row.choices.join('\n')}
+                    placeholder={'Half board\nFull board\nAll inclusive'}
+                    onChange={(event) =>
+                      patch(index, {
+                        choices: event.target.value
+                          .split('\n')
+                          .map((line) => line.trim())
+                          .filter(Boolean),
+                      })
+                    }
+                  />
+                </div>
+              )}
+
+              <label className="sv-check">
+                <input
+                  type="checkbox"
+                  checked={row.required}
+                  onChange={(event) => patch(index, { required: event.target.checked })}
+                />
+                <span>
+                  Ask for this before publishing
+                  {row.required && entryCount > 0 && (
+                    <small>
+                      {' '}
+                      Entries already written are left alone. Nothing is unpublished.
+                    </small>
+                  )}
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <button type="button" className="sv-btn" onClick={add}>
+        <Icon name="plus" size={16} />
+        Add a field
+      </button>
+
+      {gone.length > 0 && (
+        <p className="sv-preview" data-tone="warn">
+          <Icon name="warning" size={16} />
+          <span>
+            {gone.map((field) => field.label).join(', ')}{' '}
+            {gone.length === 1 ? 'goes' : 'go'} when you save. What your{' '}
+            {entryCount === 1 ? 'entry has' : `${entryCount} entries have`} already
+            answered stays put and comes back if you add {gone.length === 1 ? 'it' : 'them'}{' '}
+            again, so nothing written is lost either way.
+          </span>
+        </p>
+      )}
     </Modal>
   );
 }

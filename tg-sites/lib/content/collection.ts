@@ -1,19 +1,21 @@
 /**
- * A collection item: the shape of a blog post, a destination guide, a job.
+ * A collection item: the shape of a blog post, a destination guide, a tour.
  *
- * WHY THE SHAPE IS FIXED RATHER THAN DESIGNED PER COLLECTION.
+ * THE SHAPE IS FIXED, AND THEN THE COLLECTION ADDS ITS OWN.
  *
- * The `collections` table has had a `fields` column since migration 0004, meant
- * for a client to design their own. Filling it in would mean building a schema
- * designer, then a form generator for whatever it produced, then a migration
- * story for the day somebody renames a field with two hundred items already
- * using it. That is a product on its own and it is not the product Andy asked
- * for: a blog, and a listing page that stays in step with it.
- *
- * So every item has the same six things, and they are the six that every
+ * Every item has the same seven things, and they are the seven that every
  * listing of anything actually needs: a title, an address, a date, a picture, a
- * summary and the body. `fields` stays empty and stays available, so the day
- * that product IS wanted, nothing here has to be undone.
+ * summary, the body and now a bag of the fields its own collection declares.
+ * The fixed part is fixed because a blog post is a blog post everywhere; the
+ * bag is what makes a tour different from a post, and its definitions live on
+ * the collection (lib/content/collection-fields.ts).
+ *
+ * The `fields` COLUMN on `collections` has been there since migration 0004,
+ * waiting for the three things that had to exist first: a schema designer, a
+ * form generator, and an answer for the day somebody renames a field with two
+ * hundred items already using it. That answer is the key/label split in
+ * collection-fields.ts, and it is why the column could be filled in without a
+ * migration or an undo.
  *
  * THE BODY IS A PAGE. Sections, rows, columns, blocks, exactly as a page and a
  * header are. That is what makes a blog post editable in the real editor with
@@ -120,6 +122,46 @@ export function tagArchivePath(collectionKey: string, tag: string): string {
   return `/${collectionKey}/tag/${safeSlug(tag)}`;
 }
 
+/** What one declared field's answer may be. */
+export type FieldValue = string | number | boolean;
+
+/** The most fields one collection may declare, and so the most an item stores. */
+export const MAX_FIELDS = 24;
+
+/**
+ * An item's declared-field answers, made SHAPE-safe WITHOUT the definitions.
+ *
+ * This runs inside the item parse, where the collection's definitions are not in
+ * hand and must not need to be: turning stored bytes into an item cannot depend
+ * on a second database read, or every listing would cost one. So this caps types
+ * and sizes and nothing else. The definition-aware cleaning, which is where a
+ * number becomes a number and a choice is checked against its list, happens once
+ * at save in cleanFieldValues (lib/content/collection-fields.ts).
+ *
+ * UNKNOWN KEYS ARE KEPT ON PURPOSE. A key with no definition is either a
+ * definition somebody deleted or one a newer deploy added, and both must survive
+ * a round trip through an older editor. Nothing renders them, so they cost a few
+ * bytes and save a client's data from a schema edit.
+ */
+export function safeFieldBag(value: unknown): Record<string, FieldValue> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+
+  const out: Record<string, FieldValue> = {};
+  let seen = 0;
+  for (const [rawKey, raw] of Object.entries(value as Record<string, unknown>)) {
+    const key = safeSlug(rawKey).slice(0, 60);
+    if (!key || key in out) continue;
+    // Twice the declared maximum: room for the stranded keys above, and still a
+    // ceiling, because an item is not a place to store a megabyte of anything.
+    if (++seen > MAX_FIELDS * 2) break;
+
+    if (typeof raw === 'boolean') out[key] = raw;
+    else if (typeof raw === 'number' && Number.isFinite(raw)) out[key] = raw;
+    else if (typeof raw === 'string') out[key] = raw.slice(0, 2000);
+  }
+  return out;
+}
+
 export const CollectionItemSchema = z.object({
   version: z.literal(1),
   title: z.string().max(200).default(''),
@@ -135,6 +177,8 @@ export const CollectionItemSchema = z.object({
    *  wherever they arrive from: the editor, an import, or an older stored row
    *  that has none. */
   tags: z.unknown().transform(safeTags),
+  /** The answers to whatever its collection declares, keyed by field key. */
+  fields: z.unknown().transform(safeFieldBag),
   /** The article itself, in the same sections a page is made of. */
   sections: z.array(SectionSchema).default([]),
 });
@@ -146,7 +190,18 @@ export type CollectionItemParseResult =
   | { ok: false; errors: string[] };
 
 export function emptyItem(): CollectionItem {
-  return { version: 1, title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], sections: [] };
+  return {
+    version: 1,
+    title: '',
+    summary: '',
+    image: '',
+    alt: '',
+    author: '',
+    date: '',
+    tags: [],
+    fields: {},
+    sections: [],
+  };
 }
 
 /**

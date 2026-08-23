@@ -21,6 +21,7 @@
 import type { ActionResult } from '../app/actions/pages';
 import type { Collection, ItemSummary, ItemWithContent } from '../lib/db/collections';
 import { emptyItem, parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../lib/content/collection';
+import { cleanFieldValues, parseFieldDefs } from '../lib/content/collection-fields';
 import { sanitiseItem } from '../lib/content/sanitise-page';
 
 interface Row {
@@ -29,7 +30,10 @@ interface Row {
   collectionKey: string;
 }
 
-const collections: Collection[] = [{ id: 'demo-blog', key: 'blog', name: 'Blog' }];
+// The demo blog declares no fields, which is what a blog does. The save below
+// still runs the cleaning, so a double of a collection that DID declare some
+// would behave like the real one rather than waving its values through.
+const collections: Collection[] = [{ id: 'demo-blog', key: 'blog', name: 'Blog', fields: [] }];
 const rows = new Map<string, Row>();
 
 let nextId = 1;
@@ -59,17 +63,44 @@ export async function listItemsAction(): Promise<ActionResult<ItemSummary[]>> {
 
 export async function getItemAction(itemId: string): Promise<ActionResult<ItemWithContent | null>> {
   const row = rows.get(itemId);
-  return { ok: true, data: row ? { ...row.summary, item: row.item, collectionKey: row.collectionKey } : null };
+  return {
+    ok: true,
+    data: row
+      ? { ...row.summary, item: row.item, collectionKey: row.collectionKey, collectionFields: fieldsOf() }
+      : null,
+  };
+}
+
+/** The demo collection's declared fields, parsed the way the real read is. */
+function fieldsOf(): Collection['fields'] {
+  return parseFieldDefs(collections[0]?.fields ?? []);
 }
 
 export async function createCollectionAction(input: {
   name: string;
   key?: string;
+  fields?: unknown;
 }): Promise<ActionResult<Collection>> {
   const name = String(input.name ?? '').trim() || 'Untitled';
-  const made = { id: `demo-${nextId++}`, key: safeSlug(input.key || name) || 'list', name };
+  const made = {
+    id: `demo-${nextId++}`,
+    key: safeSlug(input.key || name) || 'list',
+    name,
+    fields: parseFieldDefs(input.fields),
+  };
   collections.push(made);
   return { ok: true, data: made };
+}
+
+export async function updateCollectionFieldsAction(
+  collectionId: string,
+  fields: unknown,
+): Promise<ActionResult<Collection | null>> {
+  const at = collections.findIndex((entry) => entry.id === collectionId);
+  if (at === -1) return { ok: true, data: null };
+
+  collections[at] = { ...collections[at], fields: parseFieldDefs(fields) };
+  return { ok: true, data: collections[at] };
 }
 
 export async function deleteCollectionAction(id: string): Promise<ActionResult<boolean>> {
@@ -94,7 +125,10 @@ export async function createItemAction(
 
   void collectionId;
   const row = rows.get(id)!;
-  return { ok: true, data: { ...row.summary, item: row.item, collectionKey: row.collectionKey } };
+  return {
+    ok: true,
+    data: { ...row.summary, item: row.item, collectionKey: row.collectionKey, collectionFields: fieldsOf() },
+  };
 }
 
 export async function saveItemAction(
@@ -107,7 +141,8 @@ export async function saveItemAction(
     return { ok: false, error: `Refusing to save a malformed item: ${parsed.errors.join('; ')}` };
   }
 
-  const clean = sanitiseItem(parsed.item);
+  const sanitised = sanitiseItem(parsed.item);
+  const clean = { ...sanitised, fields: cleanFieldValues(fieldsOf(), sanitised.fields) };
   const address = safeSlug(slug) || safeSlug(clean.title) || 'untitled';
   const summary = { ...summaryOf(itemId, address, 'draft'), title: clean.title };
 
@@ -168,6 +203,7 @@ const _list = listCollectionsAction satisfies typeof real.listCollectionsAction;
 const _items = listItemsAction satisfies typeof real.listItemsAction;
 const _get = getItemAction satisfies typeof real.getItemAction;
 const _newCollection = createCollectionAction satisfies typeof real.createCollectionAction;
+const _collectionFields = updateCollectionFieldsAction satisfies typeof real.updateCollectionFieldsAction;
 const _dropCollection = deleteCollectionAction satisfies typeof real.deleteCollectionAction;
 const _newItem = createItemAction satisfies typeof real.createItemAction;
 const _save = saveItemAction satisfies typeof real.saveItemAction;
@@ -179,6 +215,7 @@ void _list;
 void _items;
 void _get;
 void _newCollection;
+void _collectionFields;
 void _dropCollection;
 void _newItem;
 void _save;

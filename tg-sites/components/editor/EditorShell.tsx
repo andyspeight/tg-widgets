@@ -32,6 +32,7 @@ import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
+import type { FieldDef } from '../../lib/content/collection-fields';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
@@ -389,6 +390,14 @@ interface EditorProps {
   itemId?: string | null;
   initialItemMeta?: ItemMeta;
   /**
+   * What this entry's collection declares its entries have.
+   *
+   * Read on the server with the entry itself, and not editable here: the schema
+   * belongs to the collection and is changed on the collections screen. This is
+   * the list the properties pane draws its form from.
+   */
+  itemFields?: FieldDef[];
+  /**
    * The site's header and footer, to show around the page on the canvas and,
    * since slice 2, to edit in place.
    *
@@ -427,6 +436,7 @@ export function EditorShell({
   initialRegionFlags,
   itemId = null,
   initialItemMeta,
+  itemFields,
   chromeHeader = null,
   chromeFooter = null,
   focusComment = null,
@@ -528,7 +538,17 @@ export function EditorShell({
    * for the sake of a date field would be a poor trade.
    */
   const [itemMeta, setItemMeta] = useState<ItemMeta>(
-    initialItemMeta ?? { title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], slug: '' },
+    initialItemMeta ?? {
+      title: '',
+      summary: '',
+      image: '',
+      alt: '',
+      author: '',
+      date: '',
+      tags: [],
+      fields: {},
+      slug: '',
+    },
   );
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
   const [publishing, setPublishing] = useState(false);
@@ -2075,6 +2095,7 @@ export function EditorShell({
         isItem={!!itemId}
         itemMeta={itemMeta}
         onItemMeta={setItemMeta}
+        itemFields={itemFields}
         editingOnCanvas={optionsOpen}
       />
 
@@ -2125,6 +2146,7 @@ export function EditorShell({
             isItem: !!itemId,
             itemMeta,
             onItemMeta: setItemMeta,
+            itemFields,
             onSelect: select,
             tier: viewport,
           }}

@@ -1100,12 +1100,17 @@ end $$;
 -- proving only that it is blind.
 do $$
 declare saw_draft int; saw_live int; wrote boolean := false; other int;
+        saw_fields int; wrote_fields boolean := false;
 begin
-  insert into public.collections (id, tenant_id, key, name) values
+  -- One of the two declares a field, because `fields` stopped being a dormant
+  -- column the day collections grew their own schema. A renderer has to READ it
+  -- (a published entry shows its facts) and must never WRITE it.
+  insert into public.collections (id, tenant_id, key, name, fields) values
     ('cccc0000-0000-0000-0000-00000000c001',
-     '11111111-1111-1111-1111-111111111111', 'iso-blog', 'Blog'),
+     '11111111-1111-1111-1111-111111111111', 'iso-blog', 'Blog',
+     '[{"key":"nights","label":"Nights","kind":"number","required":false,"choices":[]}]'::jsonb),
     ('cccc0000-0000-0000-0000-00000000c002',
-     '22222222-2222-2222-2222-222222222222', 'iso-blog', 'Blog');
+     '22222222-2222-2222-2222-222222222222', 'iso-blog', 'Blog', '[]'::jsonb);
 
   insert into public.collection_items (id, collection_id, tenant_id, slug, status, data) values
     ('cccc0000-0000-0000-0000-0000000000d1',
@@ -1135,6 +1140,15 @@ begin
     wrote := true;
   exception when others then wrote := false; end;
 
+  select count(*) into saw_fields
+  from public.collections
+  where key = 'iso-blog' and jsonb_array_length(fields) = 1;
+
+  begin
+    update public.collections set fields = '[]'::jsonb where key = 'iso-blog';
+    wrote_fields := true;
+  exception when others then wrote_fields := false; end;
+
   reset role;
   insert into checks (name, passed, detail) values
     ('a visitor cannot be shown an unpublished post',
@@ -1146,7 +1160,14 @@ begin
     ('a published post of another client stays hidden',
      other = 0, 'leaked ' || other),
     ('the renderer cannot edit a post',
-     not wrote, case when wrote then 'IT CHANGED THE ROW' else 'refused' end);
+     not wrote, case when wrote then 'IT CHANGED THE ROW' else 'refused' end),
+    ('the renderer can read a collections declared fields',
+     saw_fields = 1,
+     case when saw_fields = 1 then 'read the schema'
+          else 'IT CANNOT, so a published entry could not show its facts' end),
+    ('the renderer cannot change a collections schema',
+     not wrote_fields,
+     case when wrote_fields then 'IT REWROTE THE SCHEMA' else 'refused' end);
 end $$;
 
 -- ---------------------------------------------------------------------------
