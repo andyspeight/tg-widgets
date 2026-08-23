@@ -48,11 +48,7 @@ import { blobConfigured } from '../../lib/media/blob';
 import { importStockAction } from './media';
 import { toCopy, type Copy } from '../../lib/ai/copy';
 import {
-  altPrompt,
-  ALT_RULES,
-  HOUSE_RULES,
   isAiIntent,
-  MAX_ALT,
   MAX_PAGE_TEXT,
   parseSeoAnswer,
   seoPrompt,
@@ -64,6 +60,7 @@ import {
   type AiIntent,
 } from '../../lib/ai/prompt';
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
+import { describePicture, fetchableByModel } from '../../lib/ai/alt';
 import { getMediaItem } from '../../lib/db/media';
 import { createPage, type PageWithContent } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
@@ -237,7 +234,7 @@ export async function describeImageAction(input: unknown): Promise<AltResult> {
      * is what the demo doubles hand back, so this fails honestly in a review
      * copy rather than timing out.
      */
-    if (!/^https:\/\//i.test(item.url)) {
+    if (!fetchableByModel(item.url)) {
       return { ok: false, error: 'That picture is not somewhere the assistant can see it.' };
     }
 
@@ -257,11 +254,7 @@ export async function describeImageAction(input: unknown): Promise<AltResult> {
      * enjoying a luxury Someshop escape", which is a brochure caption and a lie
      * to somebody who cannot see the photograph. See ALT_RULES.
      */
-    const answer = await ask(
-      `${HOUSE_RULES}\n\n${ALT_RULES}`,
-      altPrompt(item.filename),
-      { image: { url: item.url } },
-    );
+    const answer = await describePicture(item.url, item.filename);
 
     if (claim.id) {
       await recordTokens(site.tenantId, claim.id, {
@@ -275,11 +268,7 @@ export async function describeImageAction(input: unknown): Promise<AltResult> {
      * when told not to, and capped. The cap is here as well as in the prompt
      * because a prompt is a request and this is the boundary.
      */
-    const alt = answer.text
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/^["\u201c\u2018']+|["\u201d\u2019']+$/g, '')
-      .slice(0, MAX_ALT);
+    const { alt } = answer;
 
     if (!alt) {
       return {

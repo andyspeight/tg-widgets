@@ -51,6 +51,8 @@ import {
   type SeoFilled,
 } from '../../lib/seo/autofill';
 import { writeSeo } from '../../lib/ai/seo';
+import { describePageImages } from '../../lib/ai/page-alt';
+import { applyAlts, imagesNeedingAlt } from '../../lib/seo/alt-fill';
 import { changeScope } from '../../lib/content/change-scope';
 import { currentUserId, requireTenantId } from '../../lib/auth/session';
 import {
@@ -294,6 +296,8 @@ export interface PublishOutcome {
   summary: PageSummary | null;
   /** The search title and description we filled in, if any. Shown, never silent. */
   filled: SeoFilled;
+  /** How many places a picture description was written into. */
+  altsFilled: number;
 }
 
 /**
@@ -314,32 +318,45 @@ async function fillSeoBeforePublish(
   tenantId: string,
   pageId: string,
   userId: string | undefined,
-): Promise<SeoFilled> {
+): Promise<{ filled: SeoFilled; altsFilled: number }> {
+  const nothing = { filled: {} as SeoFilled, altsFilled: 0 };
+
   try {
     const record = await getPage(tenantId, pageId);
-    if (!record) return {};
+    if (!record) return nothing;
 
     const gaps = seoGaps(record.content);
-    if (!hasGap(gaps)) return {};
+    const undescribed = imagesNeedingAlt(record.content);
+    if (!hasGap(gaps) && undescribed.length === 0) return nothing;
 
-    const settings = await getSettings(tenantId);
-    const written = await writeSeo(
-      gaps,
-      record.content.title,
-      settings.companyName,
-      pageText(record.content),
-    );
+    /*
+     * THE TWO JOBS TOGETHER, because they are independent and the publish waits
+     * for both. Run in turn, a page needing a description and three pictures
+     * described would wait for the listing and then for the pictures; run
+     * together it waits once. The settings read is needed by only one of them
+     * and joins the same wait.
+     */
+    const [settings, alts] = await Promise.all([
+      getSettings(tenantId),
+      describePageImages(tenantId, userId, undescribed),
+    ]);
 
-    const { page, filled } = applySeoFill(record.content, written);
-    if (!wasFilled(filled)) return {};
+    const written = hasGap(gaps)
+      ? await writeSeo(gaps, record.content.title, settings.companyName, pageText(record.content))
+      : {};
+
+    const seoStep = applySeoFill(record.content, written);
+    const altStep = applyAlts(seoStep.page, alts);
+
+    if (!wasFilled(seoStep.filled) && altStep.filled === 0) return nothing;
 
     // Through saveDraft rather than a bespoke update, so what we wrote goes
     // through the same parse and sanitise a client's own save does.
-    await saveDraft(tenantId, pageId, page, userId);
-    return filled;
+    await saveDraft(tenantId, pageId, altStep.page, userId);
+    return { filled: seoStep.filled, altsFilled: altStep.filled };
   } catch (error) {
-    console.error('[tg-sites] could not write the search listing before publishing', error);
-    return {};
+    console.error('[tg-sites] could not finish the search listing before publishing', error);
+    return nothing;
   }
 }
 
@@ -349,14 +366,14 @@ export async function publishPageAction(
   const tenantId = await requireCapability('publish');
   const userId = (await currentUserId()) ?? undefined;
 
-  const filled = await fillSeoBeforePublish(tenantId, pageId, userId);
+  const { filled, altsFilled } = await fillSeoBeforePublish(tenantId, pageId, userId);
 
   const result = await attempt(async () => publishPage(tenantId, pageId, userId));
 
   if (result.ok) {
     revalidatePath('/sites');
     revalidatePath('/preview');
-    return { ok: true, data: { summary: result.data, filled } };
+    return { ok: true, data: { summary: result.data, filled, altsFilled } };
   }
   return result;
 }

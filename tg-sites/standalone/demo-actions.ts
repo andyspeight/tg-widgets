@@ -108,7 +108,7 @@ export async function publishPageAction(
   state.status = 'published';
   state.hasUnpublishedChanges = false;
   state.publishedAt = new Date();
-  return { ok: true, data: { summary: { ...state }, filled: {} } };
+  return { ok: true, data: { summary: { ...state }, filled: {}, altsFilled: 0 } };
 }
 
 /*

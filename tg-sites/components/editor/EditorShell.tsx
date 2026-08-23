@@ -571,6 +571,8 @@ export function EditorShell({
    * Google.
    */
   const [seoFilled, setSeoFilled] = useState<SeoFilled | null>(null);
+  /** How many picture descriptions the last publish wrote in. */
+  const [altsFilled, setAltsFilled] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
   /**
@@ -998,9 +1000,13 @@ export function EditorShell({
      */
     const outcome =
       result.ok && result.data && 'summary' in result.data
-        ? (result.data as { summary: unknown; filled: SeoFilled })
+        ? (result.data as { summary: unknown; filled: SeoFilled; altsFilled: number })
         : null;
-    if (outcome) setSeoFilled(wasFilled(outcome.filled) ? outcome.filled : null);
+    if (outcome) {
+      const wrote = wasFilled(outcome.filled) || outcome.altsFilled > 0;
+      setSeoFilled(wrote ? outcome.filled : null);
+      setAltsFilled(wrote ? outcome.altsFilled : 0);
+    }
 
     const record = (outcome ? outcome.summary : result.ok ? result.data : null) as
       | { status: 'draft' | 'published'; hasUnpublishedChanges: boolean }
@@ -1822,7 +1828,9 @@ export function EditorShell({
         {seoFilled && (
           <div className="ed-seofill" role="status">
             <p className="ed-seofill__lead">
-              Published. This page had no search listing, so we wrote one from the page itself.
+              {wasFilled(seoFilled)
+                ? 'Published. We filled in what this page was missing, from the page itself.'
+                : 'Published. We described this page\u2019s pictures for you.'}
             </p>
             <dl className="ed-seofill__list">
               {seoFilled.title && (
@@ -1837,9 +1845,21 @@ export function EditorShell({
                   <dd>{seoFilled.description}</dd>
                 </>
               )}
+              {altsFilled > 0 && (
+                <>
+                  <dt>Picture descriptions</dt>
+                  <dd>
+                    {altsFilled === 1
+                      ? 'One picture described'
+                      : `${altsFilled} pictures described`}
+                  </dd>
+                </>
+              )}
             </dl>
             <p className="ed-seofill__note">
-              Change either of them any time in this page&rsquo;s settings.
+              {wasFilled(seoFilled)
+                ? 'Change any of these any time, in this page\u2019s settings or on the picture itself.'
+                : 'Change any of these any time, on the picture itself.'}
             </p>
             <button type="button" className="ed-btn ed-btn--quiet" onClick={() => setSeoFilled(null)}>
               Close
