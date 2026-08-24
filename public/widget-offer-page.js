@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.3';
+  const VERSION = '0.4.4';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -70,7 +70,7 @@
       airline: 'Airline', boardBasis: 'Board basis', travelPeriod: 'Travel period',
       bookByLabel: 'Book by', offerReference: 'Offer reference',
       aboutHoliday: 'About this holiday', whatsIncluded: "What's included", whatsNotIncluded: "What's not included",
-      photos: 'Photos', takeALook: 'Take a look', whereYoullBe: "Where you'll be",
+      photos: 'Photos', takeALook: 'Take a look', whereYoullBe: "Where you'll be", yourRoute: 'Your route',
       theDetail: 'The detail',
       // Cruise template
       offerDetails: 'Offer details', quoteReference: 'Quote reference', callUsOn: 'Call us on {phone}',
@@ -111,7 +111,7 @@
       airline: 'Compagnie aérienne', boardBasis: 'Type de pension', travelPeriod: 'Période de voyage',
       bookByLabel: 'Réserver avant le', offerReference: 'Référence de l’offre',
       aboutHoliday: 'À propos de ce séjour', whatsIncluded: 'Ce qui est inclus', whatsNotIncluded: "Ce qui n'est pas inclus",
-      photos: 'Photos', takeALook: 'Jetez un œil', whereYoullBe: 'Où vous serez',
+      photos: 'Photos', takeALook: 'Jetez un œil', whereYoullBe: 'Où vous serez', yourRoute: 'Votre itinéraire',
       theDetail: 'Les détails',
       enquireNow: 'Faire une demande', enquireAbout: 'Renseignez-vous sur cette offre',
       sendEnquiry: 'Envoyer ma demande',
@@ -147,7 +147,7 @@
       airline: 'Fluggesellschaft', boardBasis: 'Verpflegung', travelPeriod: 'Reisezeitraum',
       bookByLabel: 'Buchen bis', offerReference: 'Angebotsreferenz',
       aboutHoliday: 'Über diesen Urlaub', whatsIncluded: 'Was ist inbegriffen', whatsNotIncluded: 'Was ist nicht inbegriffen',
-      photos: 'Fotos', takeALook: 'Werfen Sie einen Blick', whereYoullBe: 'Wo Sie sein werden',
+      photos: 'Fotos', takeALook: 'Werfen Sie einen Blick', whereYoullBe: 'Wo Sie sein werden', yourRoute: 'Ihre Route',
       theDetail: 'Die Details',
       enquireNow: 'Jetzt anfragen', enquireAbout: 'Zu diesem Angebot anfragen',
       sendEnquiry: 'Anfrage senden',
@@ -183,7 +183,7 @@
       airline: 'Aerolínea', boardBasis: 'Régimen', travelPeriod: 'Periodo de viaje',
       bookByLabel: 'Reserva antes del', offerReference: 'Referencia de la oferta',
       aboutHoliday: 'Sobre estas vacaciones', whatsIncluded: 'Qué incluye', whatsNotIncluded: 'Qué no incluye',
-      photos: 'Fotos', takeALook: 'Echa un vistazo', whereYoullBe: 'Dónde estarás',
+      photos: 'Fotos', takeALook: 'Echa un vistazo', whereYoullBe: 'Dónde estarás', yourRoute: 'Tu ruta',
       theDetail: 'Los detalles',
       enquireNow: 'Consultar ahora', enquireAbout: 'Consulta sobre esta oferta',
       sendEnquiry: 'Enviar mi consulta',
@@ -219,7 +219,7 @@
       airline: 'Compagnia aerea', boardBasis: 'Trattamento', travelPeriod: 'Periodo di viaggio',
       bookByLabel: 'Prenota entro il', offerReference: 'Riferimento offerta',
       aboutHoliday: 'Su questa vacanza', whatsIncluded: 'Cosa è incluso', whatsNotIncluded: 'Cosa non è incluso',
-      photos: 'Foto', takeALook: 'Dai un’occhiata', whereYoullBe: 'Dove sarai',
+      photos: 'Foto', takeALook: 'Dai un’occhiata', whereYoullBe: 'Dove sarai', yourRoute: 'Il tuo itinerario',
       theDetail: 'I dettagli',
       enquireNow: 'Richiedi ora', enquireAbout: 'Richiedi informazioni su questa offerta',
       sendEnquiry: 'Invia la mia richiesta',
@@ -255,7 +255,7 @@
       airline: 'Companie aeriană', boardBasis: 'Tip de masă', travelPeriod: 'Perioada de călătorie',
       bookByLabel: 'Rezervă până la', offerReference: 'Referință ofertă',
       aboutHoliday: 'Despre acest sejur', whatsIncluded: 'Ce este inclus', whatsNotIncluded: 'Ce nu este inclus',
-      photos: 'Fotografii', takeALook: 'Aruncă o privire', whereYoullBe: 'Unde vei fi',
+      photos: 'Fotografii', takeALook: 'Aruncă o privire', whereYoullBe: 'Unde vei fi', yourRoute: 'Ruta ta',
       theDetail: 'Detaliile',
       enquireNow: 'Solicită acum', enquireAbout: 'Întreabă despre această ofertă',
       sendEnquiry: 'Trimite solicitarea mea',
@@ -918,6 +918,17 @@
         ? { lat: lat, lng: lng, address: this._f('mapAddress'), style: this._f('mapStyle') || 'streets' }
         : null;
 
+      // Cruise route — ordered ports + a precomputed sea line (built via
+      // /api/sea-route). When present it is shown as a route map, overriding the
+      // single map location above.
+      const cr = o.cruiseRoute;
+      const crPorts = (cr && Array.isArray(cr.ports)) ? cr.ports
+        .map(function (p) { return { name: String((p && p.name) || ''), lat: fnum(p && p.lat), lng: fnum(p && p.lng) }; })
+        .filter(function (p) { return p.lat !== null && p.lng !== null; }) : [];
+      const cruiseRoute = crPorts.length >= 2
+        ? { ports: crPorts, line: (cr && Array.isArray(cr.line)) ? cr.line : [], style: this._f('mapStyle') || 'streets' }
+        : null;
+
       return {
         sym: sym, images: imgs,
         eyebrow: [this._f('style'), shortType(this._f('type'))].filter(Boolean).join('  ·  '),
@@ -975,6 +986,7 @@
         enquiryPhone: this._f('enquiryPhone'),
         video: parseVideo(this._f('video')),
         map: map,
+        cruiseRoute: cruiseRoute,
         currency: sym
       };
     }
@@ -1315,9 +1327,13 @@
         : '';
 
       // Map placeholder — TGMapsWidget is mounted into [data-map] in _bind().
-      const fMap = d.map
-        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('whereYoullBe')) + '</h2>'
-          + (d.map.address ? '<p class="tgop-map-addr">' + I.pin + esc(d.map.address) + '</p>' : '')
+      // A cruise route (ports + sea line) takes precedence over the single
+      // location, with the ports listed as the route summary.
+      const fMap = (d.cruiseRoute || d.map)
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(d.cruiseRoute ? t('yourRoute') : t('whereYoullBe')) + '</h2>'
+          + (d.cruiseRoute
+              ? '<p class="tgop-map-addr">' + I.pin + esc(d.cruiseRoute.ports.map(function (p) { return p.name; }).filter(Boolean).join(' → ')) + '</p>'
+              : (d.map.address ? '<p class="tgop-map-addr">' + I.pin + esc(d.map.address) + '</p>' : ''))
           + '<div class="tgop-map" data-map></div></div>'
         : '';
 
@@ -1519,30 +1535,53 @@
     }
 
     _mountMap(d) {
-      if (!d.map) return;
+      if (!d.map && !d.cruiseRoute) return;
       const holder = this.root.querySelector('[data-map]');
       if (!holder) return;
       const accent = this.cfg.accentColor || '#0891B2';
-      const mapCfg = {
-        mapStyle: d.map.style || 'streets',
-        zoom: 13,
-        autoFit: false,
-        center: { lat: d.map.lat, lng: d.map.lng },
-        height: 360,
-        accent: accent,
-        theme: this.cfg.theme,
-        showList: 'never',
-        scrollWheel: false,
-        directionsButton: true,
-        showInfoCard: false,
-        locations: [{
-          title: d.property || d.title,
-          address: d.map.address || d.loc,
-          lat: d.map.lat,
-          lng: d.map.lng,
-          color: accent
-        }]
-      };
+      let mapCfg;
+      if (d.cruiseRoute) {
+        // A cruise route: a marker per port, in order, plus the land-avoiding
+        // sea line. The map fits itself to the whole voyage.
+        const ports = d.cruiseRoute.ports;
+        mapCfg = {
+          mapStyle: d.cruiseRoute.style || 'streets',
+          autoFit: true,
+          height: 360,
+          accent: accent,
+          theme: this.cfg.theme,
+          showList: 'never',
+          scrollWheel: false,
+          directionsButton: false,
+          showInfoCard: false,
+          // Stored line is [lng, lat] (GeoJSON); Leaflet wants [lat, lng].
+          route: (Array.isArray(d.cruiseRoute.line) ? d.cruiseRoute.line : []).map(function (c) { return [c[1], c[0]]; }),
+          locations: ports.map(function (p, i) {
+            return { title: (i + 1) + '. ' + (p.name || ('Port ' + (i + 1))), address: p.name, lat: p.lat, lng: p.lng, color: accent };
+          }),
+        };
+      } else {
+        mapCfg = {
+          mapStyle: d.map.style || 'streets',
+          zoom: 13,
+          autoFit: false,
+          center: { lat: d.map.lat, lng: d.map.lng },
+          height: 360,
+          accent: accent,
+          theme: this.cfg.theme,
+          showList: 'never',
+          scrollWheel: false,
+          directionsButton: true,
+          showInfoCard: false,
+          locations: [{
+            title: d.property || d.title,
+            address: d.map.address || d.loc,
+            lat: d.map.lat,
+            lng: d.map.lng,
+            color: accent
+          }]
+        };
+      }
       const mount = function (W) {
         try {
           const div = document.createElement('div');
