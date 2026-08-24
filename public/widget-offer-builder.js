@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.6';
+  const VERSION = '0.3.7';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -477,15 +477,7 @@
       background: var(--tgo-ai-soft); color: var(--tgo-ai); padding: 2px 6px; border-radius: 999px;
     }
 
-    /* Chips + includes */
-    .ob-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ob-toggle {
-      border: 1px solid var(--tgo-border); background: var(--tgo-card); color: var(--tgo-sub);
-      border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 13px; cursor: pointer;
-    }
-    .ob-toggle:hover { border-color: var(--tgo-accent); }
-    .ob-toggle.on { background: var(--tgo-accent-soft); border-color: var(--tgo-accent); color: var(--tgo-accent-hover); font-weight: 600; }
-    .ob-toggle.on::before { content: '✓ '; }
+    /* Includes */
     .ob-incl { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
     .ob-incl label {
       display: flex; align-items: center; gap: 9px; font-size: 14px; padding: 9px 12px;
@@ -740,10 +732,7 @@
       this._includes = Array.isArray(offer.includes) ? offer.includes.slice() : [];
       this._excludes = Array.isArray(offer.excludes) ? offer.excludes.slice() : [];
       this._promos = Array.isArray(offer.promos) ? offer.promos.slice() : [];
-      const tags = Array.isArray(offer.tags) ? offer.tags : [];
-      this.root.querySelectorAll('.ob-toggle').forEach((c) => {
-        if (tags.indexOf(c.dataset.tag) !== -1) c.classList.add('on');
-      });
+      this._tags = Array.isArray(offer.tags) ? offer.tags.slice() : [];
       this._images = (Array.isArray(offer.images) ? offer.images : []).map(safePhotoUrl).filter(Boolean);
       this._renderThumbs();
 
@@ -859,9 +848,14 @@
 
       if (cfg.showTags) {
         html += '<div class="ob-fs"><h4>6 · Tags &amp; promos</h4><p class="hint">Tags help people filter. The badge and promos are the coloured flashes on the card.</p>'
-          + '<div class="ob-field" style="margin-bottom:14px"><label>Tags</label><div class="ob-chips">'
-          + cfg.tagOptions.map(function (t) { return '<button type="button" class="ob-toggle" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; }).join('')
-          + '</div></div><div class="ob-grid">'
+          + '<label class="ob-sublabel">Tags</label>'
+          + '<p class="hint">Used to filter offers. Tap a suggestion to add it, or type your own.</p>'
+          + '<div class="ob-pillgroup" data-list="tags">'
+          +   '<div class="ob-pills" data-pills="tags"></div>'
+          +   '<div class="ob-pill-add"><input type="text" class="ob-pill-input" placeholder="e.g. Family friendly, Beachfront" /><button type="button" class="ob-btn ob-pill-go">Add</button></div>'
+          +   '<div class="ob-pill-suggest">' + cfg.tagOptions.map(function (t) { return '<button type="button" class="ob-chip-suggest" data-suggest="' + esc(t) + '">+ ' + esc(t) + '</button>'; }).join('') + '</div>'
+          + '</div>'
+          + '<div class="ob-grid" style="margin-top:16px">'
           + field('badge', 'Lead badge', select('badge', BADGES, BADGES[0]))
           + field('badgeAmount', 'Badge amount', money('badgeAmount', '400'), '(for "Save")')
           + field('badgeText', 'Custom badge text', input('badgeText', 'e.g. €90 onboard spend per cabin'), '(for "Custom text")', true)
@@ -945,6 +939,7 @@
       if (!Array.isArray(this._includes)) this._includes = [];
       if (!Array.isArray(this._excludes)) this._excludes = [];
       if (!Array.isArray(this._promos)) this._promos = [];
+      if (!Array.isArray(this._tags)) this._tags = [];
       if (!this._contentVals || typeof this._contentVals !== 'object') this._contentVals = {};
       if (!this._fieldVals || typeof this._fieldVals !== 'object') this._fieldVals = {};
 
@@ -957,6 +952,7 @@
       this._renderPills('includes');   // free-text: what's included
       this._renderPills('excludes');   // free-text: what's not included
       this._renderPills('promos');     // free-text: extra promo flashes
+      this._renderPills('tags');       // free-text: filter tags (+ preset suggestions)
       this._renderThumbs();
     }
 
@@ -970,9 +966,6 @@
     _bind() {
       const root = this.root;
 
-      // Tag chips
-      root.querySelectorAll('.ob-toggle').forEach((c) =>
-        c.addEventListener('click', () => c.classList.toggle('on')));
 
       // Included / not-included / promos — each a free-text pill list plus
       // one-tap suggestions. Scoped per group so the three lists stay separate.
@@ -1000,7 +993,7 @@
         // A cleared form has no source content, so its translations no longer
         // apply — drop them too rather than leaving orphaned overlays.
         this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
-        this._includes = []; this._excludes = []; this._promos = [];
+        this._includes = []; this._excludes = []; this._promos = []; this._tags = [];
         this._contentVals = {}; this._fieldVals = {};
         this._render();
       });
@@ -1097,7 +1090,7 @@
     // 'includes' (this._includes), 'excludes' (this._excludes), 'promos'
     // (this._promos). Each renders into its own [data-pills="<key>"] holder.
     _listFor(key) {
-      const prop = key === 'promos' ? '_promos' : key === 'excludes' ? '_excludes' : '_includes';
+      const prop = key === 'promos' ? '_promos' : key === 'excludes' ? '_excludes' : key === 'tags' ? '_tags' : '_includes';
       if (!Array.isArray(this[prop])) this[prop] = [];
       return this[prop];
     }
@@ -1466,9 +1459,11 @@
         if (includes.indexOf(i.dataset.incl) !== -1) { i.checked = true; i.closest('label').classList.add('on'); }
       });
       const tags = (draft && draft.tags) || [];
-      root.querySelectorAll('.ob-toggle').forEach((c) => {
-        if (tags.indexOf(c.dataset.tag) !== -1) c.classList.add('on');
-      });
+      if (Array.isArray(tags) && tags.length) {
+        if (!Array.isArray(this._tags)) this._tags = [];
+        tags.forEach((t) => { const v = String(t == null ? '' : t).trim(); if (v && this._tags.indexOf(v) === -1) this._tags.push(v.slice(0, 80)); });
+        this._renderPills('tags');
+      }
     }
 
     // ── Audience languages / translate (content layer) ───────────────────────
@@ -1488,8 +1483,7 @@
         if (v) fields[k] = v;
       });
       const includes = (this._includes || []).slice();
-      const tags = [];
-      root.querySelectorAll('.ob-toggle.on').forEach((c) => tags.push(c.dataset.tag));
+      const tags = (this._tags || []).slice();
       const out = {};
       if (Object.keys(fields).length) out.fields = fields;
       if (includes.length) out.includes = includes;
@@ -1639,7 +1633,7 @@
       if (excludes.length) offer.excludes = excludes;
       const promos = (this._promos || []).slice();
       if (promos.length) offer.promos = promos;
-      root.querySelectorAll('.ob-toggle.on').forEach((c) => offer.tags.push(c.dataset.tag));
+      offer.tags = (this._tags || []).slice();
       const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
       if (imgs.length) offer.images = imgs;
 
