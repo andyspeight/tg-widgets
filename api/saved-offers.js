@@ -88,6 +88,34 @@ function isStaff(user) {
   return r === 'staff' || r === 'admin';
 }
 
+// A cruise route = ordered ports (name + coords) plus a precomputed sea-route
+// line. Bounded so it round-trips through the record without letting unbounded
+// data in. Returns null unless there are at least two valid ports.
+function cleanCruiseRoute(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const num = (v, lo, hi) => { const n = Number(v); return (isFinite(n) && n >= lo && n <= hi) ? n : null; };
+  const ports = [];
+  const rawPorts = Array.isArray(raw.ports) ? raw.ports.slice(0, 14) : [];
+  for (const p of rawPorts) {
+    if (!p || typeof p !== 'object') continue;
+    const lat = num(p.lat, -90, 90), lng = num(p.lng, -180, 180);
+    if (lat === null || lng === null) continue;
+    ports.push({ name: String(p.name == null ? '' : p.name).slice(0, 80), lat: lat, lng: lng });
+  }
+  if (ports.length < 2) return null;
+  const line = [];
+  const rawLine = Array.isArray(raw.line) ? raw.line.slice(0, 600) : [];
+  for (const c of rawLine) {
+    if (!Array.isArray(c) || c.length < 2) continue;
+    const lng = num(c[0], -180, 180), lat = num(c[1], -90, 90);
+    if (lng === null || lat === null) continue;
+    line.push([lng, lat]);
+  }
+  const route = { ports: ports };
+  if (line.length >= 2) route.line = line;
+  return route;
+}
+
 // Whitelist an offer to a small, bounded shape. Returns a clean object.
 function cleanOffer(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
@@ -178,6 +206,8 @@ function cleanOffer(raw) {
   if (Object.keys(i18n).length) out.i18n = i18n;
   if (audienceLanguages.length) out.audienceLanguages = audienceLanguages;
   if (Object.keys(i18nMeta).length) out.i18nMeta = i18nMeta;
+  const cruiseRoute = cleanCruiseRoute(s.cruiseRoute);
+  if (cruiseRoute) out.cruiseRoute = cruiseRoute;
   return out;
 }
 
