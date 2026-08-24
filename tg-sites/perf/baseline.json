@@ -1,26 +1,26 @@
 [
   {
     "profile": "designed",
-    "fcp": 1060,
-    "lcp": 8040,
+    "fcp": 1120,
+    "lcp": 4360,
     "cls": 0,
     "lcpElement": "img.main",
-    "lcpUrl": "/img/hero.jpg",
+    "lcpUrl": "/img/hero-1600.jpg",
     "requests": 6,
     "transferByType": {
-      "document": 10837,
+      "document": 10884,
       "stylesheet": 21392,
-      "image": 1587912
+      "image": 819912
     },
-    "transferTotal": 1620141,
+    "transferTotal": 852188,
     "cssTotalBytes": 132751,
     "cssUsedBytes": 4694,
     "cssUnusedPct": 96.5
   },
   {
     "profile": "native",
-    "fcp": 504,
-    "lcp": 504,
+    "fcp": 516,
+    "lcp": 516,
     "cls": 0,
     "lcpElement": "p",
     "lcpUrl": null,
@@ -36,8 +36,8 @@
   },
   {
     "profile": "photo-single",
-    "fcp": 492,
-    "lcp": 492,
+    "fcp": 524,
+    "lcp": 524,
     "cls": 0,
     "lcpElement": "h2.tgs-heading",
     "lcpUrl": null,
@@ -53,8 +53,8 @@
   },
   {
     "profile": "photo",
-    "fcp": 596,
-    "lcp": 2120,
+    "fcp": 608,
+    "lcp": 2128,
     "cls": 0,
     "lcpElement": "img.tgs-section__bg",
     "lcpUrl": "/img/hero-1600.jpg",

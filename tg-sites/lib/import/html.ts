@@ -41,7 +41,7 @@ import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../content/image-s
  * browser (task #94). Re-exported because this module is where every caller
  * already looks for them.
  */
-import { escapeText, safeImportUrl } from './slots';
+import { escapeText, safeImportUrl, srcsetToken, TOKEN } from './slots';
 export { escapeText, safeImportUrl } from './slots';
 
 type Node = DefaultTreeAdapterMap['node'];
@@ -324,14 +324,50 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
        * this markup, so it is the one place the attribute can be added without a
        * second parse of the whole document on every page view.
        *
-       * WHY THIS DOES NOT REOPEN THE INJECTION SURFACE THIS FILE EXISTS TO CLOSE.
-       * The src is used ONLY as a lookup key. Every URL that reaches the output
-       * comes from a media row in our own database, and a src that matches no row
-       * produces nothing. No value from the input is ever concatenated in.
+       * TWO CASES, because an imported picture is usually not an address yet.
+       *
+       * A LITERAL src is looked up now and the srcset is written now. The src is
+       * only ever a lookup KEY: every url that reaches the output comes from a
+       * media row in our own database, and one that matches no row produces
+       * nothing, so no value from the borrowed markup is concatenated in.
+       *
+       * A SLOT src (`{{tg:i1}}`) has no address at this point: the real one lives
+       * in the block's content and is substituted at render time. So the
+       * ATTRIBUTE is written here with a placeholder, and applyImportContent
+       * fills its value once the address is known. That is the same operation it
+       * already performs for src, and it means nothing has to reshape the tag
+       * later.
+       *
+       * ONLY WHEN THE SOURCE BROUGHT NONE. A design that ships its own srcset
+       * keeps it: this file already filters those candidate by candidate, and
+       * two srcset attributes on one tag resolve differently per browser. Writing
+       * ours over a working one would also be a silent downgrade for a design
+       * whose own sizes are better tuned than a blanket 100vw.
        */
-      if (tag === 'img' && imageSizes) {
+      /*
+       * ONLY WHEN A CALLER ASKED, which in practice means only at render.
+       *
+       * This cleaner runs at SAVE time too, through sanitisePage. Injecting there
+       * would bake the placeholder into stored markup, so a client's saved design
+       * would quietly stop being the thing they imported and three tests that
+       * assert stored content survives the sanitiser unchanged would be telling
+       * the truth when they failed. prepareBlock passes imageSizes; the save path
+       * passes nothing.
+       */
+      if (
+        imageSizes &&
+        tag === 'img' &&
+        !(node.attrs ?? []).some((a) => a.name.toLowerCase() === 'srcset')
+      ) {
         const src = (node.attrs ?? []).find((a) => a.name.toLowerCase() === 'src')?.value ?? '';
-        const set = srcSetFor(src, imageSizes);
+
+        // A src that is exactly one slot token, and nothing else. A src that
+        // merely CONTAINS a token is a shape we did not write and do not guess at.
+        TOKEN.lastIndex = 0;
+        const slot = TOKEN.exec(src.trim());
+        const slotKey = slot && slot[0] === src.trim() ? slot[1] : null;
+
+        const set = slotKey ? srcsetToken(slotKey) : imageSizes ? srcSetFor(src, imageSizes) : null;
         if (set) out += ` srcset="${escapeAttr(set)}" sizes="${FULL_WIDTH_SIZES}"`;
       }
 

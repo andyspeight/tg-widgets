@@ -5,6 +5,8 @@ import '../../../components/sites/sites.css';
 import { PageRenderer } from '../../../components/render/PageRenderer';
 import { RegionRenderer } from '../../../components/render/RegionRenderer';
 import { mergePrepared, prepareSections } from '../../../lib/content/prepare-markup';
+import { imageUrlsIn } from '../../../lib/content/image-sizes';
+import { imageSizesForUrls } from '../../../lib/db/media';
 import { WidgetScripts } from '../../../components/render/WidgetScripts';
 import { MotionScript } from '../../../components/render/MotionScript';
 import { SlideshowScript } from '../../../components/render/SlideshowScript';
@@ -116,6 +118,9 @@ async function load(path: string[] | undefined) {
     regions,
     navPages,
     slug: site.slug,
+    // Carried out so the render can look up image sizes. The preview's whole job
+    // is to be the published DOM, so it has to make the same lookup.
+    tenantId: site.tenantId,
   };
 }
 
@@ -192,14 +197,28 @@ export default async function PublishedPage({ params }: Params) {
 
    */
 
+  /*
+   * The same image-size lookup the published route makes.
+   *
+   * Not an optimisation here, a fidelity one. This route exists to render the
+   * exact DOM a visitor gets, and without this the preview would emit a single
+   * src where the published page emits a srcset. The pixels would look identical
+   * and the markup would not, which is the quiet kind of drift that makes a
+   * preview stop being worth trusting.
+   */
+  const imageSizes = await imageSizesForUrls(
+    found.tenantId,
+    imageUrlsIn([
+      ...(found.regions.header?.sections ?? []),
+      ...(found.page.content.sections ?? []),
+      ...(found.regions.footer?.sections ?? []),
+    ]),
+  );
+
   const prepared = mergePrepared(
-
-    prepareSections(found.regions.header?.sections),
-
-    prepareSections(found.page.content.sections),
-
-    prepareSections(found.regions.footer?.sections),
-
+    prepareSections(found.regions.header?.sections, imageSizes),
+    prepareSections(found.page.content.sections, imageSizes),
+    prepareSections(found.regions.footer?.sections, imageSizes),
   );
 
   return (
@@ -229,6 +248,7 @@ export default async function PublishedPage({ params }: Params) {
         // the preview shows the picture behind the header the way the site will.
         overlapped={(found.page.content.sections[0]?.pullUp ?? 0) > 0}
         prepared={prepared}
+        sizes={imageSizes}
       />
 
       {/* The trail is filled here too, so a client positioning a Breadcrumbs
@@ -243,12 +263,14 @@ export default async function PublishedPage({ params }: Params) {
         )}
         theme={theme}
         prepared={prepared}
+        sizes={imageSizes}
       />
 
       <RegionRenderer
         region={fillNavRegion(found.regions.footer, found.navPages)}
         theme={theme}
         prepared={prepared}
+        sizes={imageSizes}
       />
 
       <WidgetScripts

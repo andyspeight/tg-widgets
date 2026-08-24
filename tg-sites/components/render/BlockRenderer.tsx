@@ -237,7 +237,7 @@ export function BlockRenderer({
        * every block.
        */
       case 'imported':
-        return <ImportedBlock props={props} blockId={block.id} prepared={prepared} />;
+        return <ImportedBlock props={props} blockId={block.id} prepared={prepared} sizes={sizes} />;
       /*
        * `editorCanvas`, NOT `editable`, tells the widget to host itself in an
        * iframe. The two agree while editing but split in preview: `editable` goes

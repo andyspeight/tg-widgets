@@ -99,6 +99,20 @@ export function imageUrlsIn(sections: readonly unknown[] | undefined): string[] 
       }
 
       /*
+       * AND THE SLOT VALUES, which is where a template's real addresses are.
+       *
+       * An imported design's markup holds src="{{tg:i1}}" and the picture itself
+       * lives in props.content. Reading only the markup finds tokens, which match
+       * no media row, so the lookup came back empty and every template page got
+       * no srcset at all. Everything here is a key for a database read; nothing
+       * found is ever written out.
+       */
+      const content = props.content;
+      if (content && typeof content === 'object' && !Array.isArray(content)) {
+        for (const value of Object.values(content as Record<string, unknown>)) add(value);
+      }
+
+      /*
        * A repeater's rows carry the same keys, and an inner container's blocks
        * live in the same place, so one loop covers both. The depth cap is the
        * same one the alt-text walk uses.

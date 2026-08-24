@@ -4772,16 +4772,23 @@ export function ImportedBlock({
   props,
   blockId,
   prepared,
+  sizes,
 }: {
   props: Props;
   blockId: string;
   prepared?: PreparedMap;
+  /*
+   * Stored sizes by url. Absent on the editor canvas, where an empty srcset
+   * placeholder simply resolves to nothing, which is what the canvas wants: it
+   * is not what a visitor downloads.
+   */
+  sizes?: ImageSizes;
 }): ReactElement {
   const scope = importScopeClass(blockId);
   const fields = importFields(props);
 
   const ready = preparedFor(prepared, blockId);
-  const html = applyImportContent(ready?.html ?? '', importContent(props), fields);
+  const html = applyImportContent(ready?.html ?? '', importContent(props), fields, sizes);
   const css = ready?.css ?? '';
 
   if (!html.trim()) {
