@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.7';
+  const VERSION = '0.3.8';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -495,6 +495,11 @@
     .ob-pill button { border: 0; background: rgba(0,0,0,0.06); color: inherit; width: 18px; height: 18px; border-radius: 50%;
       cursor: pointer; font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
     .ob-pill button:hover { background: rgba(0,0,0,0.14); }
+    /* Star toggle on a tag/promo pill — flag it to show on the card image */
+    .ob-pill .ob-pill-star { background: transparent; color: var(--tgo-muted); font-size: 13px; }
+    .ob-pill .ob-pill-star:hover { background: rgba(0,0,0,0.08); color: var(--tgo-warn); }
+    .ob-pill .ob-pill-star.on { color: #EAB308; }
+    .ob-pill.is-badge { background: rgba(234,179,8,0.14); border-color: #EAB308; }
     .ob-pill-empty { font-size: 13px; color: var(--tgo-muted); }
     .ob-pill-add { display: flex; gap: 8px; margin-bottom: 12px; }
     .ob-pill-input { flex: 1; padding: 10px 12px; border: 1px solid var(--tgo-border); border-radius: 9px; font: inherit; font-size: 14px;
@@ -733,6 +738,7 @@
       this._excludes = Array.isArray(offer.excludes) ? offer.excludes.slice() : [];
       this._promos = Array.isArray(offer.promos) ? offer.promos.slice() : [];
       this._tags = Array.isArray(offer.tags) ? offer.tags.slice() : [];
+      this._imageBadges = Array.isArray(offer.imageBadges) ? offer.imageBadges.slice() : [];
       this._images = (Array.isArray(offer.images) ? offer.images : []).map(safePhotoUrl).filter(Boolean);
       this._renderThumbs();
 
@@ -847,7 +853,7 @@
       }
 
       if (cfg.showTags) {
-        html += '<div class="ob-fs"><h4>6 · Tags &amp; promos</h4><p class="hint">Tags help people filter. The badge and promos are the coloured flashes on the card.</p>'
+        html += '<div class="ob-fs"><h4>6 · Tags &amp; promos</h4><p class="hint">Tags help people filter. The badge and promos are the coloured flashes on the card. Tap the ★ on any tag or promo to show it on the main image instead of in the body.</p>'
           + '<label class="ob-sublabel">Tags</label>'
           + '<p class="hint">Used to filter offers. Tap a suggestion to add it, or type your own.</p>'
           + '<div class="ob-pillgroup" data-list="tags">'
@@ -940,6 +946,7 @@
       if (!Array.isArray(this._excludes)) this._excludes = [];
       if (!Array.isArray(this._promos)) this._promos = [];
       if (!Array.isArray(this._tags)) this._tags = [];
+      if (!Array.isArray(this._imageBadges)) this._imageBadges = [];
       if (!this._contentVals || typeof this._contentVals !== 'object') this._contentVals = {};
       if (!this._fieldVals || typeof this._fieldVals !== 'object') this._fieldVals = {};
 
@@ -993,7 +1000,7 @@
         // A cleared form has no source content, so its translations no longer
         // apply — drop them too rather than leaving orphaned overlays.
         this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
-        this._includes = []; this._excludes = []; this._promos = []; this._tags = [];
+        this._includes = []; this._excludes = []; this._promos = []; this._tags = []; this._imageBadges = [];
         this._contentVals = {}; this._fieldVals = {};
         this._render();
       });
@@ -1094,16 +1101,39 @@
       if (!Array.isArray(this[prop])) this[prop] = [];
       return this[prop];
     }
+    // Which pill texts render as a flash ON THE CARD IMAGE (a "badge") rather
+    // than an in-body pill. Tags + promos only, one shared list keyed by text.
+    _badgeSet() { if (!Array.isArray(this._imageBadges)) this._imageBadges = []; return this._imageBadges; }
     _renderPills(key) {
       key = key || 'includes';
       const wrap = this.root && this.root.querySelector('[data-pills="' + key + '"]');
       if (!wrap) return;
       const list = this._listFor(key);
+      const canBadge = (key === 'tags' || key === 'promos');
+      const badges = this._badgeSet();
       wrap.innerHTML = list.length
-        ? list.map((v, i) => '<span class="ob-pill">' + esc(v) + '<button type="button" data-rm="' + i + '" aria-label="Remove">×</button></span>').join('')
+        ? list.map((v, i) => {
+            const on = canBadge && badges.indexOf(v) !== -1;
+            const star = canBadge
+              ? '<button type="button" class="ob-pill-star' + (on ? ' on' : '') + '" data-badge="' + i + '" title="' + (on ? 'Showing on the main image — click to make it a tag' : 'Show this on the main image') + '" aria-label="Show on image">★</button>'
+              : '';
+            return '<span class="ob-pill' + (on ? ' is-badge' : '') + '">' + star + esc(v) + '<button type="button" data-rm="' + i + '" aria-label="Remove">×</button></span>';
+          }).join('')
         : '<span class="ob-pill-empty">Nothing added yet.</span>';
       wrap.querySelectorAll('[data-rm]').forEach((b) => {
-        b.addEventListener('click', () => { list.splice(parseInt(b.dataset.rm, 10), 1); this._renderPills(key); });
+        b.addEventListener('click', () => {
+          const v = list[parseInt(b.dataset.rm, 10)];
+          const bi = badges.indexOf(v); if (bi !== -1) badges.splice(bi, 1); // drop its image flag too
+          list.splice(parseInt(b.dataset.rm, 10), 1); this._renderPills(key);
+        });
+      });
+      if (canBadge) wrap.querySelectorAll('[data-badge]').forEach((b) => {
+        b.addEventListener('click', () => {
+          const v = list[parseInt(b.dataset.badge, 10)];
+          const bi = badges.indexOf(v);
+          if (bi === -1) badges.push(v); else badges.splice(bi, 1);
+          this._renderPills(key);
+        });
       });
     }
     _addPill(key, v) {
@@ -1634,6 +1664,10 @@
       const promos = (this._promos || []).slice();
       if (promos.length) offer.promos = promos;
       offer.tags = (this._tags || []).slice();
+      // Which tags/promos the author flagged to show on the card image. Intersect
+      // with the live lists so a removed pill can't leave a stale flag behind.
+      const flagged = (this._imageBadges || []).filter((v) => offer.tags.indexOf(v) !== -1 || (offer.promos || []).indexOf(v) !== -1);
+      if (flagged.length) offer.imageBadges = flagged;
       const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
       if (imgs.length) offer.images = imgs;
 
