@@ -89,19 +89,8 @@ await esbuild.build({
 
 const { renderProfile } = createRequire(import.meta.url)(bundle);
 
-/*
- * Every remote image becomes the one local hero.
- *
- * Not cosmetic: an <img> pointing at a host this sandbox cannot reach fails, and
- * a failed image is not an LCP candidate, so the largest paint would silently
- * become a heading and the measurement would flatter us.
- */
-function localiseImages(html) {
-  return html.replace(/src="https?:\/\/[^"]*"/g, 'src="/img/hero.jpg"');
-}
-
 for (const profile of ['designed', 'native', 'photo-single', 'photo']) {
-  const html = localiseImages(renderProfile(profile));
+  const html = renderProfile(profile);
   await writeFile(resolve(outDir, `${profile}.html`), html, 'utf8');
   console.log(`${profile}.html  ${(Buffer.byteLength(html) / 1024).toFixed(1)} KB of HTML`);
 }

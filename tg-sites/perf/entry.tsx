@@ -24,7 +24,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { PageRenderer } from '../components/render/PageRenderer';
 import { prepareSections } from '../lib/content/prepare-markup';
-import { imageUrlsIn, type ImageSizes } from '../lib/content/image-sizes';
+import type { ImageSizes } from '../lib/content/image-sizes';
 import { designedHomeSections } from '../lib/content/designed-homes';
 import { SEED_PAGE } from '../lib/content/seed';
 import { CONTENT_VERSION, parsePage, type Page } from '../lib/content/schema';
@@ -149,8 +149,6 @@ export function renderProfile(profile: Profile): string {
    * profile would measure a blank page and report a flattering LCP for a
    * document the product never serves. That happened on the first run here.
    */
-  const prepared = prepareSections(page.sections);
-
   /*
    * The stored sizes, stood in for.
    *
@@ -166,19 +164,84 @@ export function renderProfile(profile: Profile): string {
    * always prints the before and the after side by side: a claim about how much
    * the srcset saved is worth nothing without the control it is measured against.
    */
+  /*
+   * EVERY PICTURE GETS ITS OWN ADDRESS, and that detail is load-bearing.
+   *
+   * The first version of this pointed every img at one local file. The browser
+   * deduplicates by URL, so a four-picture homepage fetched one image and
+   * measured like a one-picture page. Every number it produced was flattering
+   * and none of them were wrong in a way that showed. Distinct query strings
+   * make the browser treat them as four resources while the server still hands
+   * back the same bytes, so the weight is right without needing four real
+   * photographs the repo does not have.
+   */
+  /*
+   * DISCOVERED FROM THE RENDERED OUTPUT, not from the tree, and that difference
+   * is the whole reason this is not a one-liner.
+   *
+   * An imported design keeps its pictures as editable SLOTS: props.html holds
+   * `src="{{tg:i1}}"` and the real address lives in props.content, substituted by
+   * applyImportContent at render time. So walking the tree finds tokens, not
+   * pictures. Keying the size map on those tokens produced a page whose imgs
+   * carried a srcset for a DIFFERENT image, which looked like a working
+   * optimisation and measured like one.
+   *
+   * So: render once to find out what the addresses really are, build the map
+   * from those, render again. Two renders is free here, because this is a build
+   * step rather than a request.
+   */
+  const discover = renderToStaticMarkup(
+    <PageRenderer page={page} theme={tokens} prepared={prepareSections(page.sections)} />,
+  );
+  const urls =
+    profile === 'photo-single'
+      ? []
+      : [...new Set([...discover.matchAll(/\ssrc="([^"]{1,2048})"/g)].map((m) => m[1]))]
+          .map((u) => u.replace(/&amp;/g, '&'))
+          .filter((u) => /^https?:/.test(u));
   const sizes: ImageSizes = {};
-  for (const url of profile === 'photo-single' ? [] : imageUrlsIn(page.sections)) {
+  urls.forEach((url, i) => {
     sizes[url] = [
-      { url: '/img/hero-400.jpg', width: 400, height: 225, bytes: 0 },
-      { url: '/img/hero-800.jpg', width: 800, height: 450, bytes: 0 },
-      { url: '/img/hero-1600.jpg', width: 1600, height: 900, bytes: 0 },
-      { url: '/img/hero.jpg', width: 2400, height: 1350, bytes: 0 },
+      { url: `/img/hero-400.jpg?i=${i}`, width: 400, height: 225, bytes: 0 },
+      { url: `/img/hero-800.jpg?i=${i}`, width: 800, height: 450, bytes: 0 },
+      { url: `/img/hero-1600.jpg?i=${i}`, width: 1600, height: 900, bytes: 0 },
+      { url: `/img/hero.jpg?i=${i}`, width: 2400, height: 1350, bytes: 0 },
     ];
-  }
+  });
+
+  /*
+   * Sizes first, because the import cleaner needs them: an imported design keeps
+   * its pictures inside frozen markup, and the one pass that rebuilds that
+   * markup is the only place a srcset can be added to it without parsing the
+   * whole document twice on every page view.
+   */
+  const prepared = prepareSections(page.sections, sizes);
 
   const body = renderToStaticMarkup(
     <PageRenderer page={page} theme={tokens} prepared={prepared} sizes={sizes} />,
   );
+
+  /*
+   * Localised HERE rather than in the build tool, because this is where the url
+   * list lives and both the src and the srcset have to agree on which picture is
+   * which. A picture the walk did not find keeps its own address and simply
+   * fails to load, which is the honest outcome: it says the discovery missed one.
+   */
+  const localised = urls.reduce((html, url, i) => {
+    /*
+     * Both spellings. The cleaner escapes an attribute on the way out, so a url
+     * carrying a query string appears in the markup with &amp; where the props
+     * hold &. Matching only the raw form replaced one image out of four and left
+     * the rest pointing at a host this sandbox cannot reach, which showed up as
+     * an oddly cheap page rather than as an error.
+     */
+    const escaped = url.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    return html
+      .split(`src="${url}"`)
+      .join(`src="/img/hero.jpg?i=${i}"`)
+      .split(`src="${escaped}"`)
+      .join(`src="/img/hero.jpg?i=${i}"`);
+  }, body);
 
   return `<!doctype html>
 <html lang="en">
@@ -189,7 +252,7 @@ export function renderProfile(profile: Profile): string {
 <link rel="stylesheet" href="/globals.css">
 </head>
 <body>
-${body}
+${localised}
 </body>
 </html>`;
 }

@@ -33,6 +33,8 @@
 
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5';
 
+import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../content/image-sizes';
+
 /*
  * The escaping and the URL check moved to ./slots, which has no parser behind
  * it, so the renderer can substitute a slot without pulling parse5 into the
@@ -200,6 +202,15 @@ export interface CleanOptions {
   classPrefix?: string;
   /** How deep to go before giving up. A design is not a thousand levels deep. */
   maxDepth?: number;
+  /**
+   * The stored sizes of the tenant's pictures, by url.
+   *
+   * When present, an img whose src matches a row gets a srcset built from that
+   * row. Absent, and nothing changes: this is optional precisely so the import
+   * screen and the editor, which have no tenant lookup in hand, keep calling
+   * this exactly as they always have.
+   */
+  imageSizes?: ImageSizes;
   /** How many elements to keep. A guard against a pasted megabyte. */
   maxElements?: number;
 }
@@ -234,6 +245,7 @@ function isElement(node: Node): node is Element {
  */
 export function cleanImportHtml(source: string, options: CleanOptions = {}): CleanResult {
   const prefix = options.classPrefix ?? '';
+  const imageSizes = options.imageSizes;
   const maxDepth = options.maxDepth ?? 40;
   const maxElements = options.maxElements ?? 4000;
 
@@ -301,6 +313,27 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
 
       out += `<${tag}`;
       out += attributes(node, tag, prefix, classes, note);
+
+      /*
+       * THE SRCSET FOR A BORROWED PICTURE.
+       *
+       * Emitted here rather than left to the renderer because an imported design
+       * keeps its markup frozen: components/render never writes an attribute
+       * onto it, so the image work done for native blocks did nothing at all for
+       * the ten get-started templates. This is the one pass that already rebuilds
+       * this markup, so it is the one place the attribute can be added without a
+       * second parse of the whole document on every page view.
+       *
+       * WHY THIS DOES NOT REOPEN THE INJECTION SURFACE THIS FILE EXISTS TO CLOSE.
+       * The src is used ONLY as a lookup key. Every URL that reaches the output
+       * comes from a media row in our own database, and a src that matches no row
+       * produces nothing. No value from the input is ever concatenated in.
+       */
+      if (tag === 'img' && imageSizes) {
+        const src = (node.attrs ?? []).find((a) => a.name.toLowerCase() === 'src')?.value ?? '';
+        const set = srcSetFor(src, imageSizes);
+        if (set) out += ` srcset="${escapeAttr(set)}" sizes="${FULL_WIDTH_SIZES}"`;
+      }
 
       if (VOID_TAGS.has(tag)) {
         out += ' />';

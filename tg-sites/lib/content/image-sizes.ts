@@ -80,6 +80,25 @@ export function imageUrlsIn(sections: readonly unknown[] | undefined): string[] 
       add(props.src);
 
       /*
+       * IMAGES INSIDE BORROWED MARKUP, found by pattern rather than by parsing.
+       *
+       * An imported design keeps its pictures inside props.html, so the ten
+       * get-started templates have no props.src at all and were invisible to
+       * this walk. That meant they got no srcset, which is the worst case: those
+       * are the pages we push clients towards.
+       *
+       * A regex is safe HERE and would not be one line later. Nothing found is
+       * ever written out; it is only used as a KEY to look up rows in our own
+       * media table. A false positive finds no row and costs nothing, and the
+       * srcset that eventually gets emitted is built entirely from database
+       * values. The markup itself is still only ever rewritten by the
+       * parser-backed cleaner.
+       */
+      if (typeof props.html === 'string' && props.html.length < 500_000) {
+        for (const m of props.html.matchAll(/\ssrc\s*=\s*["']([^"']{1,2048})["']/gi)) add(m[1]);
+      }
+
+      /*
        * A repeater's rows carry the same keys, and an inner container's blocks
        * live in the same place, so one loop covers both. The depth cap is the
        * same one the alt-text walk uses.

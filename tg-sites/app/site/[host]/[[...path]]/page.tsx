@@ -457,9 +457,9 @@ export default async function SitePage({ params, searchParams }: Params) {
   );
 
   const prepared = mergePrepared(
-    prepareSections(found.regions.header?.sections),
-    prepareSections(contentTree?.sections),
-    prepareSections(found.regions.footer?.sections),
+    prepareSections(found.regions.header?.sections, imageSizes),
+    prepareSections(contentTree?.sections, imageSizes),
+    prepareSections(found.regions.footer?.sections, imageSizes),
   );
 
   /*
