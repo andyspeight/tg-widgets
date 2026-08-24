@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.5';
+  const VERSION = '0.3.6';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -811,7 +811,13 @@
       let html = '<div class="ob-fs"><h4>1 · The basics</h4><p class="hint">What the offer is and the headline that grabs attention.</p><div class="ob-grid">'
         + field('title', 'Offer title', input('title', 'e.g. 7 nights all inclusive in Cancun'), '', true)
         + field('type', 'Offer type', select('type', cfg.offerTypes, cfg.offerTypes[0]))
-        + field('style', 'Holiday style', select('style', HOLIDAY_STYLES, HOLIDAY_STYLES[0]))
+        // Holiday style is a datalist input, not a fixed dropdown: pick one of the
+        // presets, type your own (custom text), or leave it blank for no style.
+        // The card drops an empty style, so blank simply shows nothing.
+        + field('style', 'Holiday style',
+            '<input type="text" data-key="style" list="ob-styles" placeholder="Pick a style, type your own, or leave blank" autocomplete="off" />'
+            + '<datalist id="ob-styles">' + HOLIDAY_STYLES.map(function (s) { return '<option value="' + esc(s) + '"></option>'; }).join('') + '</datalist>',
+            '(optional)')
         + field('teaser', 'Card teaser', input('teaser', 'One line shown on the card'), '(shown on the card)', true)
         + '</div></div>';
 
