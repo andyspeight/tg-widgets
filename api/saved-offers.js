@@ -170,6 +170,8 @@ function cleanOffer(raw) {
     // badge-sized. Both whitelisted here or they would be scrubbed on save.
     excludes: strArr(s.excludes, 40, 200),
     promos: strArr(s.promos, 20, 80),
+    // The subset of tags/promos the author flagged to show on the card image.
+    imageBadges: strArr(s.imageBadges, 40, 80),
     tags: strArr(s.tags, 30, 60),
     images: strArr(s.images, 20, 1000)
   };

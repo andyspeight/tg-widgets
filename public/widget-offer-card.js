@@ -35,7 +35,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.8';
+  const VERSION = '0.2.9';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -250,6 +250,14 @@
       padding: 4px 11px; border-radius: 6px; font-size: 11px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.5px;
     }
+    /* Top-right stack: the lead badge plus any tag/promo flagged to the image.
+       The badges inside sit statically in the column so they never overlap. */
+    .tgoc-flags {
+      position: absolute; top: 10px; right: 10px; z-index: 2; max-width: 72%;
+      display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+    }
+    .tgoc-flags .tgoc-badge { position: static; }
+    .tgoc-badge--flag { background: var(--tgo-success); }
     .tgoc-pill {
       position: absolute; bottom: 10px; left: 10px; background: var(--tgo-success); color: #fff;
       padding: 4px 11px; border-radius: 999px; font-size: 11px; font-weight: 700;
@@ -570,10 +578,15 @@
         }
       }
 
-      const tags = Array.isArray(o.tags) ? o.tags.slice(0, 3) : [];
       const strList = function (a) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === 'string' && x.trim(); }) : []; };
+      // Tags/promos the author flagged to show on the IMAGE as flashes. They move
+      // out of the body pill lists onto the image, capped so they can't overrun a
+      // small card.
+      const imageBadges = strList(o.imageBadges).slice(0, 4);
+      const inBadges = function (v) { return imageBadges.indexOf(v) !== -1; };
+      const tags = strList(o.tags).filter(function (t) { return !inBadges(t); }).slice(0, 3);
       const includes = strList(o.includes);
-      const promos = strList(o.promos).slice(0, 6);      // extra promo flashes (capped)
+      const promos = strList(o.promos).filter(function (p) { return !inBadges(p); }).slice(0, 6);
 
       return {
         sym: sym,
@@ -585,6 +598,7 @@
         tags: tags,
         includes: includes,
         promos: promos,
+        imageBadges: imageBadges,
         price: money(sym, this._f('price')),
         was: money(sym, this._f('was')),
         priceSub: priceSub,
@@ -603,9 +617,15 @@
     // shared by the image block and the banner layout.
     _chips(d) {
       const stars = d.stars ? '<span class="tgoc-stars">' + '★'.repeat(d.stars) + '</span>' : '';
-      const badge = d.badgeText ? '<span class="tgoc-badge">' + esc(d.badgeText) + '</span>' : '';
       const pill = d.urgency ? '<span class="tgoc-pill">' + esc(d.urgency) + '</span>' : '';
-      return stars + badge + pill;
+      // Top-right stack: the lead promo badge, then any tag/promo the author
+      // flagged to show on the image. Stacked in one container so they never
+      // overlap.
+      const flags = [];
+      if (d.badgeText) flags.push('<span class="tgoc-badge">' + esc(d.badgeText) + '</span>');
+      (d.imageBadges || []).forEach(function (b) { flags.push('<span class="tgoc-badge tgoc-badge--flag">' + esc(b) + '</span>'); });
+      const flagWrap = flags.length ? '<div class="tgoc-flags">' + flags.join('') + '</div>' : '';
+      return stars + flagWrap + pill;
     }
 
     _imageBlock(d) {
@@ -724,6 +744,11 @@
       // run past the image).
       (d.promos || []).slice(0, 3).forEach(function (p) {
         ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--promo">' + ICO.star + esc(p) + '</span>');
+      });
+      // Tags/promos flagged to the image (excluded from the body lists) also ride
+      // as ribbons on the cruise card.
+      (d.imageBadges || []).forEach(function (b) {
+        ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--promo">' + ICO.star + esc(b) + '</span>');
       });
       const ribbonWrap = ribbons.length ? '<div class="tgoc-ribbons">' + ribbons.join('') + '</div>' : '';
 
