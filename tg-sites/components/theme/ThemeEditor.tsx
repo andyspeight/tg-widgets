@@ -24,8 +24,8 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { saveThemeAction } from '../../app/actions/theme';
 import type { FontFamily } from '../../lib/db/fonts';
 import { contrastRatio, normaliseHex } from '../../lib/theme/colour';
-import { resolveStack, type LibraryFont } from '../../lib/theme/fonts';
-import { CORNERS, CORNER_IDS, parseTheme, type Theme } from '../../lib/theme/schema';
+import { FALLBACK_STACK, resolveStack, type LibraryFont } from '../../lib/theme/fonts';
+import { CORNERS, CORNER_IDS, FONTS, FONT_IDS, parseTheme, type Theme } from '../../lib/theme/schema';
 import { themeTokens, themeWarnings } from '../../lib/theme/tokens';
 import {
   TEXT_STYLES,
@@ -34,6 +34,7 @@ import {
   type TextStyleId,
 } from '../../lib/theme/typography';
 import { Icon } from '../editor/Icon';
+import { FontSelect, type FontOption } from './FontSelect';
 import { FontsPanel } from './FontsPanel';
 import { TypePanel } from './TypePanel';
 import './theme.css';
@@ -55,6 +56,45 @@ interface Props {
 }
 
 type ColourField = 'brand' | 'accent' | 'pageBackground' | 'text';
+
+/*
+ * The three derived colours a brand may claim. `derived` reads the current
+ * automatic value (for the swatch, and as the starting point when claiming),
+ * and `against` names what the contrast readout compares with.
+ */
+const ADVANCED_FIELDS: Array<{
+  key: 'surfaceDark' | 'surfaceAlt' | 'textMuted';
+  label: string;
+  help: string;
+  derived: (d: { brandDark: string; surfaceAlt: string; textMuted: string }) => string;
+  against: (theme: Theme) => string;
+  againstLabel: string;
+}> = [
+  {
+    key: 'surfaceDark',
+    label: 'Dark band',
+    help: 'The colour behind dark sections, the header and the footer.',
+    derived: (d) => d.brandDark,
+    against: (theme) => theme.pageBackground,
+    againstLabel: 'the page',
+  },
+  {
+    key: 'surfaceAlt',
+    label: 'Faint band',
+    help: 'The alternating band behind quieter sections.',
+    derived: (d) => d.surfaceAlt,
+    against: (theme) => theme.text,
+    againstLabel: 'text',
+  },
+  {
+    key: 'textMuted',
+    label: 'Quiet text',
+    help: 'Captions, hints and second-rank copy.',
+    derived: (d) => d.textMuted,
+    against: (theme) => theme.pageBackground,
+    againstLabel: 'the page',
+  },
+];
 
 const COLOUR_FIELDS: Array<{ key: ColourField; label: string; help: string }> = [
   { key: 'brand', label: 'Brand colour', help: 'Buttons, links, and the coloured bands between sections.' },
@@ -103,6 +143,26 @@ export function ThemeEditor({ siteName, initial, initialFonts }: Props) {
   );
 
   const tokens = useMemo(() => themeTokens(theme, fonts), [theme, fonts]);
+
+  /* The same grouped list the type styles offer, with "inherit" at the top. */
+  const dataFontOptions: FontOption[] = useMemo(
+    () => [
+      { value: '', label: 'Same as the surrounding text', stack: 'inherit', group: 'Automatic' },
+      ...library.map((font) => ({
+        value: font.slug,
+        label: font.family,
+        stack: `'${font.family}', ${FALLBACK_STACK[font.fallback]}`,
+        group: 'Your fonts',
+      })),
+      ...FONT_IDS.map((id) => ({
+        value: id,
+        label: FONTS[id].label,
+        stack: FONTS[id].stack,
+        group: 'Already on every device',
+      })),
+    ],
+    [library],
+  );
   const warnings = useMemo(() => themeWarnings(theme), [theme]);
 
   /*
@@ -246,8 +306,9 @@ export function ThemeEditor({ siteName, initial, initialFonts }: Props) {
                 <section className="tv-group">
                   <h2 className="tv-group__title">Worked out for you</h2>
                   <p className="tv-note">
-                    From the four colours above. Nothing here is yours to set, and
-                    every one is checked for contrast against whatever it sits on.
+                    From the four colours above, each checked for contrast against
+                    whatever it sits on. Three of them can be claimed below when a
+                    brand has its own exact values.
                   </p>
                   <ul className="tv-derived">
                     <Derived label="Button label" colour={tokens.derived.onBrand} on={theme.brand} />
@@ -258,16 +319,90 @@ export function ThemeEditor({ siteName, initial, initialFonts }: Props) {
                     <Derived label="Faint band" colour={tokens.derived.surfaceAlt} on={theme.pageBackground} />
                   </ul>
                 </section>
+
+                <section className="tv-group">
+                  <h2 className="tv-group__title">Claimed by the brand</h2>
+                  <p className="tv-note">
+                    A brand book sometimes has exact values for these three. Claim
+                    one and the derivation steps aside for it; the contrast checks
+                    stay either way, so a claimed colour that would break its text
+                    is quietly corrected towards one that reads.
+                  </p>
+                  {ADVANCED_FIELDS.map((field) => {
+                    const claimed = theme[field.key];
+                    if (!claimed) {
+                      return (
+                        <div key={field.key} className="tv-claim">
+                          <span
+                            className="tv-claim__swatch"
+                            style={{ background: field.derived(tokens.derived) }}
+                            aria-hidden="true"
+                          />
+                          <span className="tv-claim__label">{field.label}</span>
+                          <button
+                            type="button"
+                            className="tg-btn"
+                            data-variant="ghost"
+                            onClick={() => set(field.key, field.derived(tokens.derived))}
+                          >
+                            Claim it
+                          </button>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={field.key} className="tv-claimed">
+                        <ColourRow
+                          label={field.label}
+                          help={field.help}
+                          value={claimed}
+                          against={field.against(theme)}
+                          againstLabel={field.againstLabel}
+                          onChange={(hex) => set(field.key, hex)}
+                        />
+                        <button
+                          type="button"
+                          className="tg-btn"
+                          data-variant="ghost"
+                          onClick={() => set(field.key, '')}
+                        >
+                          Back to automatic
+                        </button>
+                      </div>
+                    );
+                  })}
+                </section>
               </>
             )}
 
             {tab === 'type' && (
-              <TypePanel
-                typography={theme.typography}
-                library={library}
-                onChange={setStyle}
-                onSetAllHeadings={setAllHeadings}
-              />
+              <>
+                <TypePanel
+                  typography={theme.typography}
+                  library={library}
+                  onChange={setStyle}
+                  onSetAllHeadings={setAllHeadings}
+                />
+
+                <section className="tv-group">
+                  <h2 className="tv-group__title" id="tv-data-font">
+                    The data typeface
+                  </h2>
+                  <p className="tv-note">
+                    Day numbers, fares, key figures and card labels. A world that
+                    wants a plotting-room mono for its data sets it here; left
+                    alone, data dresses like the text around it.
+                  </p>
+                  <FontSelect
+                    id="tv-data-font-select"
+                    value={theme.dataFamily}
+                    options={dataFontOptions}
+                    onChange={(value) => set('dataFamily', value)}
+                    placeholder="Same as the surrounding text"
+                    labelledBy="tv-data-font"
+                  />
+                </section>
+              </>
             )}
 
             {tab === 'fonts' && (

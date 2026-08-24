@@ -467,7 +467,6 @@
       retentionDays: 30,
       view: 'sheet',   // 'sheet' | 'cards'
       newType: '',     // offer type chosen in the blank "add an offer" row
-      full: {},        // id -> full offer (lazy-loaded when a sheet row is edited)
       edits: {},       // id -> { fieldKey: value } pending autosave
       previewOffer: null, // the offer shown in the full-preview modal (null → SAMPLE)
       config: {
@@ -599,7 +598,7 @@
     }
     function loadOffers() {
       state.trashMode = false; setTopbar();
-      state.full = {}; state.edits = {}; // fresh data — drop any cached full offers / pending edits
+      state.edits = {}; // fresh data — drop any pending inline edits
       setState('<div class="state"><p>Loading your offers…</p></div>');
       fetch(OFFERS_API, { credentials: 'include' })
         .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -842,16 +841,6 @@
       clearTimeout(saveTimers[id]);
       saveTimers[id] = setTimeout(function () { saveRow(id); }, 700);
     }
-    async function ensureFull(id) {
-      if (state.full[id]) return state.full[id];
-      const r = await fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' });
-      if (!r.ok) throw new Error(String(r.status));
-      const d = await r.json();
-      const offer = (d && d.offer && typeof d.offer === 'object') ? d.offer : { fields: {} };
-      if (!offer.fields || typeof offer.fields !== 'object') offer.fields = {};
-      state.full[id] = offer;
-      return offer;
-    }
     async function saveRow(id) {
       // Claim the pending edits up front. Any edit that arrives while this save
       // is in flight starts a fresh batch with its own timer, so it is never
@@ -860,12 +849,12 @@
       if (!editing) return;
       delete state.edits[id];
       try {
-        const full = await ensureFull(id);
-        Object.keys(editing).forEach(function (k) {
-          const v = editing[k];
-          if (v === '' || v == null) delete full.fields[k]; else full.fields[k] = String(v);
-        });
-        const r = await fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id: id, offer: full }) });
+        // Send ONLY the changed fields and let the server merge them into the
+        // offer's current stored copy. We must NOT reconstruct and re-POST the
+        // whole offer from a client cache: a cache that predated a builder edit
+        // (photos, itinerary, description) would silently wipe those fields on
+        // the next inline save. The server-side merge touches only these keys.
+        const r = await fetch(OFFERS_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ id: id, fieldPatch: editing }) });
         if (!r.ok) throw new Error(String(r.status));
         // keep the in-memory summary + status chip in sync
         const o = state.offers.find(function (x) { return x.id === id; });
@@ -1063,7 +1052,11 @@
         uploadEndpoint: '/api/upload-photo',
         directUploadEndpoint: '/api/upload-photo-direct',
         offerBaseUrl: normBase(c.offerBaseUrl),
-        theme: c.theme, accentColor: c.accentColor, currency: c.currency,
+        // Reopen an offer in its OWN saved currency, not the editor-wide default
+        // (which is GBP), or a €/$ offer would come back as £ and, if re-saved,
+        // be silently rewritten to £. Falls back to the editor default for a new
+        // offer that has none yet.
+        theme: c.theme, accentColor: c.accentColor, currency: (offer && offer.currency) || c.currency,
         enquiryEmail: c.enquiryEmail, enquiryPhone: c.enquiryPhone, protection: c.protection,
         offer: offer || null, offerId: (offer && offer.id) || '',
         successHeading: offer ? 'Offer updated' : 'Offer saved',

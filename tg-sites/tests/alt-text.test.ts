@@ -128,13 +128,21 @@ describe('the company profile and the alt text prompt', () => {
    * systemPrompt, correctly, because a search description is about the business.
    * The check failed on the right grounds against the wrong text.
    */
-  it('and the action builds the alt prompt without ever calling systemPrompt', () => {
-    const action = describeAction();
+  it('and the describer builds the alt prompt without ever calling systemPrompt', () => {
+    /*
+     * MOVED, NOT WEAKENED. The call itself lives in lib/ai/alt.ts since the
+     * publish path needed the same one (#239); a second copy of it would have
+     * been two boundaries free to drift. The rule it protects is unchanged and
+     * is now asserted where the call is.
+     */
+    const describer = read('lib', 'ai', 'alt.ts');
 
-    expect(action).toContain('ALT_RULES');
-    expect(action).not.toContain('systemPrompt(');
+    expect(describer).toContain('ALT_RULES');
+    expect(describer).not.toContain('systemPrompt(');
     // The house rules DO apply: a harbour is not a harbor.
-    expect(action).toContain('HOUSE_RULES');
+    expect(describer).toContain('HOUSE_RULES');
+    // And the action reaches the model only through it.
+    expect(describeAction()).toContain('describePicture(');
   });
 
   it('keeps the house rules worth applying, since they carry the UK English', () => {
@@ -173,14 +181,19 @@ describe('what the action does before a picture leaves the building', () => {
    * limit, and the charge lands anyway.
    */
   it('takes the daily slot before it spends any money', () => {
+    // The ordering guarantee is the cost control, and it is unchanged: the slot
+    // is claimed before the describer is reached. Only the callee's name moved.
     const claimAt = action.indexOf('claimRequest(');
-    const askAt = action.indexOf('await ask(');
+    const askAt = action.indexOf('describePicture(');
     expect(claimAt).toBeGreaterThan(-1);
+    expect(askAt).toBeGreaterThan(-1);
     expect(claimAt).toBeLessThan(askAt);
   });
 
-  it('caps the answer here as well as asking for a cap in the prompt', () => {
-    expect(action).toContain('.slice(0, MAX_ALT)');
+  it('caps the answer as well as asking for a cap in the prompt', () => {
+    // Asserted where the cleaning is now. A prompt is a request; this is the
+    // boundary, and there is one of it rather than two.
+    expect(read('lib', 'ai', 'alt.ts')).toContain('.slice(0, MAX_ALT)');
   });
 
   /*

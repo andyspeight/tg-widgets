@@ -240,6 +240,29 @@ export function FieldRenderer({
 
     case 'select': {
       const current = asString(value) || field.options[0]?.value;
+      /*
+       * A HEADING'S STYLE FOLLOWS ITS LEVEL, until the client parts them.
+       *
+       * Level is the tag and Style is the size, and a client who has never
+       * touched Style has expressed no opinion about the size: they picked
+       * "Heading 3" and expect heading-3 text. So while the two AGREE, changing
+       * one changes both, in one patch (one undo). The moment somebody chooses
+       * a different Style, they disagree, this stops firing, and the split the
+       * two fields exist for (an h2 tag at h1 scale) behaves as before. Same
+       * onPatch arrangement the image field uses to fill an empty alt.
+       *
+       * Guarded on the pair actually matching, so only the heading (the one
+       * block with a level/style pair) is affected. Without this, Coastwise
+       * shipped seventeen pages of h1 banners rendering at h3 size before
+       * anyone noticed (22 Aug 2026).
+       */
+      const pick = (next: string) => {
+        if (field.key === 'level' && onPatch && siblings && siblings.style === current) {
+          onPatch({ level: next, style: next });
+          return;
+        }
+        onChange(next);
+      };
       // Four or fewer reads better as segmented buttons than a dropdown.
       if (field.options.length <= 4) {
         return (
@@ -254,7 +277,7 @@ export function FieldRenderer({
                   key={option.value}
                   type="button"
                   aria-pressed={current === option.value}
-                  onClick={() => onChange(option.value)}
+                  onClick={() => pick(option.value)}
                 >
                   {option.label}
                 </button>
@@ -269,7 +292,7 @@ export function FieldRenderer({
             id={id}
             className="ed-select"
             value={current}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(event) => pick(event.target.value)}
           >
             {field.options.map((option) => (
               <option key={option.value} value={option.value}>

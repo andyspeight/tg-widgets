@@ -1,0 +1,558 @@
+{
+ "version": 1,
+ "id": "pg_douvnzb0",
+ "title": "Walking ashore",
+ "slug": "walking-ashore",
+ "seo": {
+  "title": "Walking ashore — Coastwise",
+  "description": "Proper walks from the waterline, graded honestly, with a ship to come home to.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_ctgy4nw5",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_cswhw5hw",
+     "columns": [
+      {
+       "id": "col_crmp6k7x",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_co3hbpau",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_cpbp5e7b",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "Walking ashore",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_cqfiumpt",
+         "type": "text",
+         "props": {
+          "html": "<p>The ship does the miles at sea so your boots can do the ones that matter ashore.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_cz06rie4",
+   "name": "The walks",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_cyo5c82s",
+     "columns": [
+      {
+       "id": "col_cx6lywfo",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_cuxgo1zj",
+         "type": "text",
+         "props": {
+          "html": "<p>Every landing has a walk, every walk has a grade, and the grades are honest. A guide goes with every graded walk; the ungraded stroll to the pub needs no supervision and gets none. The ship moves round to meet you, so the good walks are one way. The walks run on every sailing. Pick the coast, not a special week.</p>"
+         }
+        },
+        {
+         "id": "b_cvx4ig10",
+         "type": "table",
+         "props": {
+          "headerRow": true,
+          "firstColumnHeader": true,
+          "style": "lined",
+          "caption": "A sample week, Western Isles voyage.",
+          "textColour": "",
+          "data": "Walk\tGrade\tDistance\tThe reward\nTobermory lighthouse path\tEasy\t3 km\tThe town, the bay, and a dram at the end\nColl strand and machair\tEasy\t5 km\tA mile of white sand with nobody on it\nStaffa clifftop circuit\tModerate\t4 km\tThe cave from above, puffins in June\nCanna to Compass Hill\tModerate\t7 km\tThe Small Isles laid out like a chart\nHarris, Rodel to Drinishader\tStrong\t12 km\tThe weaving sheds, and the east coast bays"
+         }
+        },
+        {
+         "id": "b_cw7ib85u",
+         "type": "tooltip",
+         "props": {
+          "text": "How we grade",
+          "tip": "Easy is under two hours on made paths. Moderate has climbs and rough ground. Strong is a full walking day and needs boots that have already been walked in.",
+          "position": "above",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_d6ge5vn9",
+   "name": "How a landing works",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_d5x5e5h4",
+     "columns": [
+      {
+       "id": "col_d22hgwft",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_d01y3bl4",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "How a landing works",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_d1bagjel",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "The brief",
+            "body": "Ten minutes after breakfast: the route, the grade, the weather and where the ship will be when you come off the hill."
+           },
+           {
+            "title": "The tender",
+            "body": "Boots on aboard, dry landing where the coast allows, a wet one announced honestly where it does not."
+           },
+           {
+            "title": "The walk",
+            "body": "A guide in front on every graded walk, and no forced marching. The group moves at the pace of the person enjoying it most slowly."
+           },
+           {
+            "title": "The pick-up",
+            "body": "The ship has moved round to meet you. Tea on the rail as you come alongside, and the dram is poured when the boots come off."
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_d4fmt6tc",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_d3t8knvz",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/walking-ashore.jpg",
+          "alt": "Walkers descending to the anchorage",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_de6k79yj",
+   "name": "Kit",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_dd7wvja9",
+     "columns": [
+      {
+       "id": "col_d8kw1e71",
+       "width": 33,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_d7h14g77",
+         "type": "icon-item",
+         "props": {
+          "icon": "check",
+          "title": "Bring boots, worn in",
+          "body": "The one thing we cannot lend convincingly. Everything else, the ship’s store covers.",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_daj2sbtp",
+       "width": 33,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_d9pnj10p",
+         "type": "icon-item",
+         "props": {
+          "icon": "cloud",
+          "title": "Weather is scenery",
+          "body": "A graded walk goes in drizzle and is usually better for it. It does not go in a gale, and the master decides which is which.",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_dcfemmw5",
+       "width": 34,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_db1lc420",
+         "type": "icon-item",
+         "props": {
+          "icon": "map",
+          "title": "Maps at the brief",
+          "body": "A printed route card per walker, marked with the pick-up. Nobody navigates by phone on our watch.",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_diomrvmh",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_dhkrw94v",
+     "columns": [
+      {
+       "id": "col_dg8ku59t",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_df8od610",
+         "type": "quote",
+         "props": {
+          "text": "Twelve kilometres over Harris, then a hot shower, then a dram, then dinner I did not cook. I have walked all my life. This is the format.",
+          "attribution": "Jim Crowther, Sheffield",
+          "role": "Western Isles, May 2026"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_dn29v0et",
+   "name": "Closing",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_dm1aegei",
+     "columns": [
+      {
+       "id": "col_dlunp8y0",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_djr5upr5",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Boots in the hold, dram in the saloon.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_dk6xtvuw",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

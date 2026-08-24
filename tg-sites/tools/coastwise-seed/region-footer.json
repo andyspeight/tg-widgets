@@ -1,0 +1,267 @@
+{
+ "sections": [
+  {
+   "id": "sec_iuan42jq",
+   "name": "Footer",
+   "tone": "dark",
+   "width": "wide",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_iprbp9qn",
+     "columns": [
+      {
+       "id": "col_ii2lwul5",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ifanxwi3",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h4",
+          "html": "COASTWISE",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ig0xoz0y",
+         "type": "text",
+         "props": {
+          "html": "<p>Small ship voyages on the Scottish, Norwegian, Faroese and Dalmatian coasts, and one warm one. Sailing since 2011.</p>"
+         }
+        },
+        {
+         "id": "b_ihipiafx",
+         "type": "social",
+         "props": {
+          "align": "left",
+          "size": "s",
+          "items": [
+           {
+            "network": "instagram",
+            "href": "https://instagram.com"
+           },
+           {
+            "network": "facebook",
+            "href": "https://facebook.com"
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_il3o4uzy",
+       "width": 30,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ijphghi1",
+         "type": "heading",
+         "props": {
+          "level": "h3",
+          "style": "h5",
+          "html": "Voyages",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ikx49xn5",
+         "type": "nav",
+         "props": {
+          "layout": "column",
+          "align": "left",
+          "gap": "s",
+          "collapse": "never",
+          "items": [
+           {
+            "label": "Western Isles",
+            "href": "/destinations/western-isles",
+            "newTab": false
+           },
+           {
+            "label": "Norwegian Narrows",
+            "href": "/destinations/norwegian-narrows",
+            "newTab": false
+           },
+           {
+            "label": "Dalmatian Backwater",
+            "href": "/destinations/dalmatian-backwater",
+            "newTab": false
+           },
+           {
+            "label": "Faroe and Shetland",
+            "href": "/destinations/faroe-and-shetland",
+            "newTab": false
+           },
+           {
+            "label": "The Lycian Shore",
+            "href": "/destinations/lycian-shore",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_io6xl68g",
+       "width": 30,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_imwskzie",
+         "type": "heading",
+         "props": {
+          "level": "h3",
+          "style": "h5",
+          "html": "Practical",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_inv8nsl0",
+         "type": "nav",
+         "props": {
+          "layout": "column",
+          "align": "left",
+          "gap": "s",
+          "collapse": "never",
+          "items": [
+           {
+            "label": "The ships",
+            "href": "/about",
+            "newTab": false
+           },
+           {
+            "label": "Our people",
+            "href": "/team",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "newTab": false
+           },
+           {
+            "label": "Booking terms",
+            "href": "/terms",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_itvbg47m",
+     "columns": [
+      {
+       "id": "col_is4nsqhx",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_iq6yvzhd",
+         "type": "divider",
+         "props": {
+          "style": "line",
+          "spacing": "m"
+         }
+        },
+        {
+         "id": "b_ir1wez7c",
+         "type": "copyright",
+         "props": {
+          "owner": "Coastwise Voyages Ltd",
+          "startYear": 2011,
+          "symbol": "symbol",
+          "suffix": "ABTA Y2841 · ATOL 11627 · A Travelgenix demonstration site.",
+          "size": "s",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

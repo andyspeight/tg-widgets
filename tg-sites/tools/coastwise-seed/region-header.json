@@ -1,0 +1,123 @@
+{
+ "sections": [
+  {
+   "id": "sec_ieoc9q6x",
+   "name": "Header",
+   "tone": "dark",
+   "width": "wide",
+   "paddingY": 16,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_idjx4k5y",
+     "columns": [
+      {
+       "id": "col_ia6ykzmy",
+       "width": 30,
+       "align": "centre",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_i9an9v2x",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h4",
+          "html": "COASTWISE",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_icqsqelx",
+       "width": 70,
+       "align": "centre",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ibnohev4",
+         "type": "nav",
+         "props": {
+          "layout": "row",
+          "align": "right",
+          "gap": "l",
+          "collapse": "phone",
+          "uppercase": false,
+          "items": [
+           {
+            "label": "Voyages",
+            "href": "/destinations",
+            "newTab": false
+           },
+           {
+            "label": "Holidays",
+            "href": "/holidays",
+            "newTab": false
+           },
+           {
+            "label": "The ships",
+            "href": "/about",
+            "newTab": false
+           },
+           {
+            "label": "Our people",
+            "href": "/team",
+            "newTab": false
+           },
+           {
+            "label": "Check dates",
+            "href": "/#book",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 16,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

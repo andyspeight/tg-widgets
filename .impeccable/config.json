@@ -32,7 +32,14 @@
       "tg-sites/app/fonts/**",
       "tg-sites/app/preview/**"
     ],
-    "ignoreValues": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": ["components/media/media.css", "tg-sites/components/media/media.css"],
+        "reason": "False positive: the rule matches the words 'broken-image' inside a CSS comment explaining why a document tile deliberately avoids an img element. A stylesheet has no img tags. Both path forms because the hook resolves relative to its working directory, and a session run inside tg-sites/ sees the shorter one."
+      }
+    ],
     "designSystem": { "enabled": true }
   },
   "hook": {

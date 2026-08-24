@@ -12,6 +12,7 @@ import { listFontFaces } from '../../lib/db/fonts';
 import { getTheme } from '../../lib/db/theme';
 import { REGIONS, type RegionName } from '../../lib/content/schema';
 import { regionAsPage } from '../../lib/content/region-page';
+import { mergePrepared, prepareSections } from '../../lib/content/prepare-markup';
 import { familiesFromFiles } from '../../lib/theme/fonts';
 import { themeTokens } from '../../lib/theme/tokens';
 
@@ -140,6 +141,7 @@ export default async function EditorPage({
           // the page path it is not taking; see regionAsPage.
           pageId={`region-${region}`}
           initialPage={regionAsPage(record.region)}
+          preparedSeed={prepareSections(record.region.sections)}
           // A region has no status of its own. Published once means published
           // from then on, and only "are there newer changes" varies after that.
           initialStatus={record.publishedAt ? 'published' : 'draft'}
@@ -168,8 +170,10 @@ export default async function EditorPage({
           {...shared}
           itemId={found.id}
           initialItemMeta={itemMeta(found.item, found.slug)}
+          itemFields={found.collectionFields}
           pageId={found.id}
           initialPage={itemAsPage(found.item, found.id, found.slug)}
+          preparedSeed={prepareSections(found.item.sections)}
           initialStatus={found.status}
           initialHasUnpublishedChanges={found.hasUnpublishedChanges}
         />
@@ -203,6 +207,14 @@ export default async function EditorPage({
         {...shared}
         pageId={page.id}
         initialPage={page.content}
+        /* The page, the header and the footer: all three are drawn on this canvas
+           and any of them can hold an imported design, so all three are cleaned
+           before the shell renders. See lib/content/prepared.ts. */
+        preparedSeed={mergePrepared(
+          prepareSections(page.content.sections),
+          prepareSections(headerRecord.region.sections),
+          prepareSections(footerRecord.region.sections),
+        )}
         initialStatus={page.status}
         initialHasUnpublishedChanges={page.hasUnpublishedChanges}
         focusComment={focusComment ?? null}

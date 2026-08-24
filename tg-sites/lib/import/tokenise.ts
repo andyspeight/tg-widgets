@@ -32,23 +32,18 @@
 
 import { parseFragment, serialize, type DefaultTreeAdapterMap } from 'parse5';
 
-import { escapeText, safeImportUrl } from './html';
+/*
+ * The slot shape, the token pattern and the substitution moved to ./slots, so
+ * the renderer can use them without parse5 (task #94). Re-exported here because
+ * this is where callers already look.
+ */
+import { TOKEN, token, type ImportField, type ImportFieldKind } from './slots';
+export { applyImportContent, TOKEN } from './slots';
+export type { ImportField, ImportFieldKind } from './slots';
 
 type ChildNode = DefaultTreeAdapterMap['childNode'];
 type Element = DefaultTreeAdapterMap['element'];
 
-/** What a slot holds, which decides how it is edited and how it is escaped. */
-export type ImportFieldKind = 'text' | 'image' | 'link';
-
-export interface ImportField {
-  /** `t1`, `i2`, `u3`. Short because it is written into the markup. */
-  key: string;
-  kind: ImportFieldKind;
-  /** What the properties pane calls it, taken from the design itself. */
-  label: string;
-  /** What the design said, which is the starting value. */
-  value: string;
-}
 
 export interface TokeniseResult {
   html: string;
@@ -68,11 +63,6 @@ export interface TokeniseOptions {
 }
 
 /** The slot marker, and the one shape everything here agrees on. */
-const TOKEN = /\{\{tg:([a-z]\d{1,3})\}\}/g;
-
-function token(key: string): string {
-  return `{{tg:${key}}}`;
-}
 
 /**
  * Whether a run of text is content or furniture.
@@ -205,47 +195,6 @@ export function tokeniseImport(html: string, options: TokeniseOptions = {}): Tok
   return { html: serialize(fragment), fields };
 }
 
-/**
- * Put the client's words back into the design.
- *
- * ESCAPED BY WHAT THE SLOT IS, not by where it happens to sit. A text slot is
- * escaped as text, an image or a link goes through the same URL allowlist the
- * cleaner uses, so a client typing `javascript:` into a link field gets nothing
- * rather than a working one. Neither is a second line of defence for the
- * import: it is the first and only one for what the CLIENT types, which the
- * import pipeline has never seen.
- *
- * A slot with nothing stored falls back to what the design said, so a section
- * added and never edited looks exactly like the design it came from.
- */
-export function applyImportContent(
-  html: string,
-  values: Record<string, unknown>,
-  fields: readonly ImportField[],
-): string {
-  const byKey = new Map(fields.map((field) => [field.key, field]));
-
-  /*
-   * ONE PASS. String.replace with a function never re-reads what it has just
-   * written, so a client whose words happen to contain `{{tg:t1}}` gets those
-   * characters on the page rather than a second substitution.
-   */
-  return html.replace(TOKEN, (whole, key: string) => {
-    const field = byKey.get(key);
-    if (!field) return '';
-
-    const stored = values[key];
-    const value = typeof stored === 'string' ? stored : field.value;
-
-    if (field.kind === 'text') return escapeText(value);
-
-    const safe = safeImportUrl(value);
-    if (safe === null) return '';
-
-    // An attribute value, and the cleaner has already written the quotes.
-    return escapeText(safe).replace(/"/g, '&quot;');
-  });
-}
 
 /** Every slot the markup actually uses, in the order it uses them. */
 export function tokensUsed(html: string): string[] {

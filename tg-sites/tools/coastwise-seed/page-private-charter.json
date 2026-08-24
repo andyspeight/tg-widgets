@@ -1,0 +1,467 @@
+{
+ "version": 1,
+ "id": "pg_eg84fhsu",
+ "title": "Private charter",
+ "slug": "private-charter",
+ "seo": {
+  "title": "Private charter — Coastwise",
+  "description": "Take the whole ship: twenty-six to forty-four of your own people, one crew, your plan.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_du5jbv5h",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/charter-evening.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_dts61f12",
+     "columns": [
+      {
+       "id": "col_ds01mshw",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_dpsajamh",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_dqmn6dph",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "Private charter",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_dr6f821g",
+         "type": "text",
+         "props": {
+          "html": "<p>Twenty-six to forty-four of your own people, one ship, one crew, and a plan drawn round you.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_e14bsaqy",
+   "name": "The ships",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_e06ivf0a",
+     "columns": [
+      {
+       "id": "col_dz3m33j5",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_dvkybfpa",
+         "type": "text",
+         "props": {
+          "html": "<p>A charter is not a cruise with your name on it. The route is drawn with you, the galley plans round your table, and the only fixed points are where we start, where we finish and how the tide runs. Families take Freya. Societies take Skua for the birds. Weddings, so far without exception, take Nyren.</p>"
+         }
+        },
+        {
+         "id": "b_dwmv1426",
+         "type": "tabs",
+         "props": {
+          "style": "underline",
+          "align": "left",
+          "textColour": "",
+          "items": [
+           {
+            "title": "MV Freya · 38",
+            "body": "The Scottish ship. Nineteen cabins, the snug library, and the only hull of the three strengthened for the Faroes run. From £84,000 for seven nights, whole ship, full board."
+           },
+           {
+            "title": "MV Skua · 26",
+            "body": "The small one, and the quiet one. Thirteen cabins, a saloon that becomes one long table, and the shallowest draught in the fleet. From £76,000 for seven nights."
+           },
+           {
+            "title": "MV Nyren · 44",
+            "body": "The warm-water ship. Twenty-two cabins, the stern platform and awning, and a galley built for long dinners. From £79,000 for seven nights."
+           }
+          ]
+         }
+        },
+        {
+         "id": "b_dxplpqsq",
+         "type": "read-more",
+         "props": {
+          "html": "<p>The fine print, plainly: the fare covers ship, crew, full board and standard landings. Fuel is included up to 1,200 nautical miles a week, which no charter has yet exceeded. Harbour dues are at cost. The bar is stocked to your list and settled at the end. A provisional date holds for fourteen days while you gather your people, and the deposit is a fifth.</p><p>What we do not do: fireworks, jet skis or eighteenth birthdays. The crew have veto over weather, always, everywhere. That veto is most of what you are paying for.</p>",
+          "lines": 3,
+          "moreLabel": "The fine print",
+          "lessLabel": "Enough",
+          "fade": true,
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_dya0f9i9",
+         "type": "form",
+         "props": {
+          "name": "Charter enquiry",
+          "fields": [
+           {
+            "kind": "text",
+            "label": "Name",
+            "required": true,
+            "placeholder": "",
+            "options": ""
+           },
+           {
+            "kind": "email",
+            "label": "Email",
+            "required": true,
+            "placeholder": "",
+            "options": ""
+           },
+           {
+            "kind": "select",
+            "label": "Roughly how many of you",
+            "required": true,
+            "placeholder": "Pick the nearest",
+            "options": "Up to 26, Up to 38, Up to 44"
+           },
+           {
+            "kind": "text",
+            "label": "When, roughly",
+            "required": false,
+            "placeholder": "A month is plenty",
+            "options": ""
+           },
+           {
+            "kind": "textarea",
+            "label": "What is the week for?",
+            "required": true,
+            "placeholder": "A wedding, a society, a big birthday, a family",
+            "options": ""
+           }
+          ],
+          "submitLabel": "Start the conversation",
+          "successTitle": "The conversation has started",
+          "successBody": "Fiona or one of the masters will come back within one working day with first thoughts and a rough route.",
+          "notifyEmail": "",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_e6tmgi5e",
+   "name": "How a charter comes together",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_e5p56m87",
+     "columns": [
+      {
+       "id": "col_e40hgz6w",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_e2j6rd8x",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "From first call to first cast-off",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_e3s8o0yr",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "The conversation",
+            "body": "Half an hour with Fiona or one of the masters. Who is coming, what the week is for, and which coast fits the month you have in mind."
+           },
+           {
+            "title": "The sketch",
+            "body": "A route drawn on a real chart and photographed for you, with a price that is the price. Two revisions is normal. Seven is the record, and they were lovely about it."
+           },
+           {
+            "title": "The hold",
+            "body": "A provisional date holds for fourteen days with no card while you gather your people. The deposit is a fifth and sits in trust."
+           },
+           {
+            "title": "The sail",
+            "body": "The crew know every name before the gangway goes down. After that the plan belongs to you and the weather, in that order most days."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_eadlvlxq",
+   "name": "Charter words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_e9lh4bdd",
+     "columns": [
+      {
+       "id": "col_e8v43rlb",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_e7jnmgxs",
+         "type": "quote",
+         "props": {
+          "text": "We married on Šipan with thirty-one people and a ship. The crew rigged the awning as a chuppah and the chef cried more than my mother.",
+          "attribution": "Dan and Elena Brooks",
+          "role": "MV Nyren, whole-ship charter, September 2025"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_efe3iq0t",
+   "name": "Closing",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_eevrxy6h",
+     "columns": [
+      {
+       "id": "col_edbi9w21",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ebnc3tvp",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "One ship, your people, and a coast to yourselves.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_ecjkmou7",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Start a charter conversation",
+            "href": "mailto:charter@coastwise.example",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Meet the ships",
+            "href": "/about",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

@@ -328,6 +328,16 @@ export interface PublishedPath {
   updatedAt: string | null;
   /** Asked to be left out of every index, so it is left out of the sitemap too. */
   noindex: boolean;
+  /**
+   * The page's own name, and its search description.
+   *
+   * The sitemap wants neither and ignores both. llms.txt is a READABLE map
+   * rather than a list of addresses, so it needs to say what each page is. The
+   * query already selected `seo` for the noindex flag, so carrying these costs
+   * one more column and no extra read. See lib/seo/llms.ts.
+   */
+  title: string;
+  description: string;
 }
 
 /**
@@ -351,7 +361,7 @@ export interface PublishedPath {
 export async function listPublishedPaths(tenantId: string): Promise<PublishedPath[]> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select id, parent_id, slug, seo, updated_at
+      select id, parent_id, slug, title, seo, updated_at
       from public.pages
       where published_content is not null
     `;
@@ -383,6 +393,11 @@ export async function listPublishedPaths(tenantId: string): Promise<PublishedPat
         path,
         updatedAt: row.updated_at ? new Date(String(row.updated_at)).toISOString() : null,
         noindex: seo.noindex === true,
+        // The SEARCH title where the client (or #239) gave one, and the page's
+        // own name otherwise. A search title is the better label: it is written
+        // to be read by somebody who has not seen the site.
+        title: String(seo.title ?? row.title ?? ''),
+        description: String(seo.description ?? ''),
       });
     }
 

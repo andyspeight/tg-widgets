@@ -44,6 +44,7 @@ import {
   itemAsCard,
   listingIn,
   listingsIn,
+  listingKey,
 } from '../lib/content/listings';
 import { defaultPropsFor } from '../lib/content/blocks';
 import { createSection } from '../lib/content/factory';
@@ -322,6 +323,7 @@ describe('parseItem', () => {
       author: '',
       date: '',
       tags: [],
+      fields: {},
       sections: [],
     });
   });
@@ -403,6 +405,7 @@ describe('parseItem', () => {
       author: '',
       date: '',
       tags: [],
+      fields: {},
       sections: [],
     });
   });
@@ -450,6 +453,7 @@ describe('an item as the editor sees it', () => {
       author: '',
       date: '2026-08-03',
       tags: [],
+      fields: {},
       slug: 'ten-things-in-crete',
     });
   });
@@ -520,7 +524,7 @@ describe('an item as the editor sees it', () => {
     expect(back.seo).toBeUndefined();
     expect(back.slug).toBeUndefined();
     expect(Object.keys(back).sort()).toEqual(
-      ['alt', 'author', 'date', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
+      ['alt', 'author', 'date', 'fields', 'image', 'sections', 'summary', 'tags', 'title', 'version'],
     );
   });
 });
@@ -546,7 +550,8 @@ describe('which blocks want a collection', () => {
 
   it('reads the collection and how many were asked for', () => {
     expect(listingIn(listingBlock({ source: 'collection', collection: 'blog', count: 3 })))
-      .toEqual({ collection: 'blog', count: 3 });
+      // Two facts unless the block says otherwise: see DEFAULT_FACTS.
+      .toEqual({ collection: 'blog', count: 3, facts: 2, filter: null, sort: null });
   });
 
   /*
@@ -598,7 +603,7 @@ describe('what a whole set of trees wants', () => {
 
   it('survives a site with no header or footer published', () => {
     expect(listingsIn([null, tree([listingBlock({ source: 'collection', collection: 'blog' })]), undefined]))
-      .toEqual([{ collection: 'blog', count: 6 }]);
+      .toEqual([{ collection: 'blog', count: 6, facts: 2, filter: null, sort: null }]);
   });
 
   /*
@@ -615,7 +620,7 @@ describe('what a whole set of trees wants', () => {
       ]),
     ]);
 
-    expect(wanted).toEqual([{ collection: 'blog', count: 9 }]);
+    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2, filter: null, sort: null }]);
   });
 });
 
@@ -670,8 +675,16 @@ describe('an item as a card', () => {
 });
 
 describe('filling the listings in', () => {
+  /*
+   * KEYED BY THE WHOLE REQUEST, not by the collection's name. Two blocks
+   * narrowing one collection differently are two different answers, so the key
+   * carries the filter and the sort as well (#238, listingKey).
+   */
+  const plain = (collection: string) =>
+    listingKey({ collection, count: 0, facts: 0, filter: null, sort: null });
+
   const data = new Map([
-    ['blog', [{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]],
+    [plain('blog'), [{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]],
   ]);
 
   it('hands back the very same tree when there is nothing to fill', () => {
@@ -741,7 +754,7 @@ describe('filling the listings in', () => {
     const tree = {
       sections: [section([listingBlock({ source: 'collection', collection: 'blog' })])],
     };
-    const filled = fillListings(tree, new Map([['blog', []]]));
+    const filled = fillListings(tree, new Map([[plain('blog'), []]]));
 
     expect((filled.sections[0].rows[0].columns[0].blocks[0].props as Record<string, unknown>).items)
       .toEqual([]);
@@ -968,9 +981,98 @@ describe('reading published entries', () => {
       },
     ]);
 
-    const [found] = await listPublished(ALPHA, 'blog', 6);
-    expect(found.item.title).toBe('Ten things');
-    expect(found.slug).toBe('ten-things');
+    const { items } = await listPublished(ALPHA, 'blog', 6);
+    expect(items[0].item.title).toBe('Ten things');
+    expect(items[0].slug).toBe('ten-things');
+  });
+
+  /*
+   * NARROWING A LISTING (#238). The engine is proved in
+   * tests/collection-filter.test.ts; these prove the query layer actually asks
+   * it, and that the cost control holds.
+   */
+  const TOURS = [
+    { key: 'board', label: 'Board basis', kind: 'choice', choices: ['Half board', 'Full board'] },
+    { key: 'price', label: 'Price from', kind: 'price' },
+  ];
+
+  const tourRow = (slug: string, title: string, fields: Record<string, unknown>) => ({
+    slug,
+    data: { version: 1, title, fields },
+    published_at: '2026-08-03T09:00:00Z',
+    fields: TOURS,
+  });
+
+  it('narrows a listing to the items that answer the filter', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      tourRow('a', 'Half board tour', { board: 'Half board', price: 1299 }),
+      tourRow('b', 'Full board tour', { board: 'Full board', price: 1899 }),
+      tourRow('c', 'Another half', { board: 'Half board', price: 999 }),
+    ]);
+
+    const { items } = await listPublished(ALPHA, 'tours', 6, {
+      filter: { field: 'board', op: 'is', value: 'Half board' },
+    });
+
+    expect(items.map((row) => row.slug)).toEqual(['a', 'c']);
+  });
+
+  it('orders a listing by a declared field', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      tourRow('a', 'Dearest', { price: 1899 }),
+      tourRow('b', 'Cheapest', { price: 999 }),
+      tourRow('c', 'Middle', { price: 1299 }),
+    ]);
+
+    const { items } = await listPublished(ALPHA, 'tours', 6, {
+      sort: { field: 'price', dir: 'asc' },
+    });
+
+    expect(items.map((row) => row.slug)).toEqual(['b', 'c', 'a']);
+  });
+
+  it('reads a filter naming a field the collection dropped as NO filter', async () => {
+    /*
+     * What a rename leaves behind. A page showing everything is a far better
+     * failure than a page showing nothing with no clue why.
+     */
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [
+      tourRow('a', 'One', { board: 'Half board' }),
+      tourRow('b', 'Two', { board: 'Full board' }),
+    ]);
+
+    const { items } = await listPublished(ALPHA, 'tours', 6, {
+      filter: { field: 'gone', op: 'is', value: 'x' },
+    });
+
+    expect(items).toHaveLength(2);
+  });
+
+  it('keeps its LIMIT when nothing is narrowed, and drops it only when something is', async () => {
+    /*
+     * THE COST CONTROL. Narrowing must happen before the cap or the answer is
+     * wrong, so a narrowed listing reads the collection. A plain one must not:
+     * the overwhelming majority of listings are plain, and this is what stops
+     * every blog grid on every site turning into a full table read.
+     */
+    const { listPublished } = await import('../lib/db/collections');
+
+    respond('from public.collection_items', [tourRow('a', 'One', {})]);
+    await listPublished(ALPHA, 'tours', 6);
+    expect(itemQuery().sql).toContain('limit');
+
+    log = [];
+    respond('from public.collection_items', [tourRow('a', 'One', { board: 'Half board' })]);
+    await listPublished(ALPHA, 'tours', 6, {
+      filter: { field: 'board', op: 'is', value: 'Half board' },
+    });
+    expect(itemQuery().sql).not.toContain('limit');
   });
 
   it('answers with nothing for an entry that is not there', async () => {
@@ -1229,7 +1331,7 @@ describe('writing entries', () => {
         data: { version: 1, title: 'Ten things', summary: '', image: '', alt: '', date: '', sections: [] },
       },
     ]);
-    respond('select key from public.collections', [{ key: 'blog' }]);
+    respond('select key, fields from public.collections', [{ key: 'blog', fields: [] }]);
 
     const created = await createItem(ALPHA, 'c1', 'Ten things');
 
@@ -1247,6 +1349,140 @@ describe('writing entries', () => {
    * through that table's own policy first, so another client's collection is
    * simply not there to select and nothing is inserted.
    */
+  /*
+   * A collection's own fields, from migration 0004's dormant column.
+   *
+   * The rule these hold to: the DEFINITIONS come from the database, and the
+   * VALUES come from the browser. A definition arriving with the save would let
+   * whoever sent the answer decide what counts as a valid one.
+   */
+  it('cleans an entry against its own collections definitions, read at save', async () => {
+    const { saveItem } = await import('../lib/db/collections');
+
+    respond('select c.fields', [
+      {
+        fields: [
+          { key: 'nights', label: 'Nights', kind: 'number', required: true, choices: [] },
+          { key: 'board', label: 'Board', kind: 'choice', required: false, choices: ['Half board'] },
+        ],
+      },
+    ]);
+    respond('update public.collection_items', [
+      { id: 'i1', collection_id: 'c1', slug: 'x', status: 'draft', updated_at: '2026-08-03T09:00:00Z' },
+    ]);
+
+    await saveItem(
+      ALPHA,
+      'i1',
+      { version: 1, title: 'Western Isles', fields: { nights: '7 nights', board: 'Whatever I like' } },
+      'x',
+    );
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(writtenJson(write)).toMatchObject({ fields: { nights: 7 } });
+    // Off the list, so it is not stored at all.
+    expect((writtenJson(write) as { fields: Record<string, unknown> }).fields.board).toBeUndefined();
+  });
+
+  it('reads the definitions from the row, not from what the browser sent', async () => {
+    const { saveItem } = await import('../lib/db/collections');
+
+    respond('update public.collection_items', [
+      { id: 'i1', collection_id: 'c1', slug: 'x', status: 'draft', updated_at: '2026-08-03T09:00:00Z' },
+    ]);
+
+    await saveItem(ALPHA, 'i1', { version: 1, title: 'Western Isles' }, 'x');
+
+    const read = log.find((s) => s.sql.includes('select c.fields'))!;
+    expect(read.sql).toContain('join public.collections c');
+    expect(read.role).toBe('app');
+    // Inside the same transaction as the write, so a schema edit landing
+    // between the two cannot clean a save against a schema that has gone.
+    expect(log.findIndex((s) => s.sql === 'BEGIN')).toBeLessThan(log.indexOf(read));
+  });
+
+  it('keeps an answer whose definition has been deleted', async () => {
+    const { saveItem } = await import('../lib/db/collections');
+
+    // The collection declares nights and nothing else any more.
+    respond('select c.fields', [
+      { fields: [{ key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [] }] },
+    ]);
+    respond('update public.collection_items', [
+      { id: 'i1', collection_id: 'c1', slug: 'x', status: 'draft', updated_at: '2026-08-03T09:00:00Z' },
+    ]);
+
+    await saveItem(
+      ALPHA,
+      'i1',
+      { version: 1, title: 'Western Isles', fields: { nights: 7, board: 'Half board' } },
+      'x',
+    );
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(writtenJson(write)).toMatchObject({ fields: { nights: 7, board: 'Half board' } });
+  });
+
+  it('reads a collection back with its declared fields', async () => {
+    const { listCollections } = await import('../lib/db/collections');
+
+    respond('select id, key, name, fields, layout from public.collections', [
+      {
+        id: 'c1',
+        key: 'tours',
+        name: 'Tours',
+        fields: [{ key: 'nights', label: 'Nights', kind: 'number', required: true, choices: [] }],
+      },
+      { id: 'c2', key: 'blog', name: 'Blog', fields: null },
+    ]);
+
+    const [tours, blog] = await listCollections(ALPHA);
+    expect(tours.fields).toHaveLength(1);
+    expect(tours.fields[0].label).toBe('Nights');
+    // A collection made before any of this existed reads as no fields.
+    expect(blog.fields).toEqual([]);
+  });
+
+  it('changes a schema with one update and touches no entry', async () => {
+    const { updateCollectionFields } = await import('../lib/db/collections');
+
+    respond('update public.collections set fields', [
+      {
+        id: 'c1',
+        key: 'tours',
+        name: 'Tours',
+        fields: [{ key: 'nights', label: 'Nights aboard', kind: 'number', required: false, choices: [] }],
+      },
+    ]);
+
+    const updated = await updateCollectionFields(ALPHA, 'c1', [
+      { key: 'nights', label: 'Nights aboard', kind: 'number', required: false, choices: [] },
+    ]);
+
+    expect(updated?.fields[0].label).toBe('Nights aboard');
+    // Renaming is a label change on one row. Nothing rewrites the entries.
+    expect(log.some((s) => s.sql.includes('update public.collection_items'))).toBe(false);
+  });
+
+  it('puts a schema from the browser through the same parser as a read', async () => {
+    const { updateCollectionFields } = await import('../lib/db/collections');
+
+    respond('update public.collections set fields', [
+      { id: 'c1', key: 'tours', name: 'Tours', fields: [] },
+    ]);
+
+    await updateCollectionFields(ALPHA, 'c1', [
+      { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [] },
+      { nonsense: true },
+      { key: '', label: 'No key' },
+    ]);
+
+    const write = log.find((s) => s.sql.includes('update public.collections set fields'))!;
+    expect(writtenJson(write)).toEqual([
+      { key: 'nights', label: 'Nights', kind: 'number', required: false, choices: [], prefix: '', suffix: '' },
+    ]);
+  });
+
   it('cannot start an entry inside somebody elses collection', async () => {
     const { createItem } = await import('../lib/db/collections');
 

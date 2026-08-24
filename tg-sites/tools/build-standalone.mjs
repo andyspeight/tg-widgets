@@ -142,6 +142,18 @@ const result = await esbuild.build({
         build.onResolve({ filter: /(^|\/)app\/actions\/comments$/ }, () => ({
           path: resolve(root, 'standalone/demo-comment-actions.ts'),
         }));
+
+        /*
+         * The prepare action, since the canvas stopped carrying its own
+         * sanitiser (23 Aug 2026, task #94). The real one checks the session and
+         * imports a `server-only` module; the double keeps the real cleaning, so
+         * what the harness draws for an imported design is what the live editor
+         * draws. Missing this swap would leave every imported design and embed on
+         * the canvas showing its placeholder.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/prepare$/ }, () => ({
+          path: resolve(root, 'standalone/demo-prepare-actions.ts'),
+        }));
       },
     },
   ],

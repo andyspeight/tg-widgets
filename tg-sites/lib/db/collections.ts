@@ -24,6 +24,19 @@
  */
 
 import { parseItem, safeFutureTimestamp, safeSlug, type CollectionItem } from '../content/collection';
+import {
+  cleanFieldValues,
+  fieldFacts,
+  parseFieldDefs,
+  type FieldDef,
+} from '../content/collection-fields';
+import {
+  compareByField,
+  matchesFilter,
+  parseFilter,
+  parseSort,
+} from '../content/collection-filter';
+import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -36,6 +49,14 @@ export interface Collection {
   id: string;
   key: string;
   name: string;
+  /**
+   * The fields this collection declares its entries have, from the `fields`
+   * column that has been sitting there since migration 0004. Empty for a blog,
+   * and empty for every collection made before this existed.
+   */
+  fields: FieldDef[];
+  /** How its published entries are laid out. See lib/content/collection-layout.ts. */
+  layout: EntryLayout;
 }
 
 export interface ItemSummary {
@@ -57,6 +78,12 @@ export interface ItemWithContent extends ItemSummary {
   item: CollectionItem;
   /** The collection it belongs to, so a caller can build its address. */
   collectionKey: string;
+  /**
+   * What its collection declares its entries have. The editor needs these to
+   * draw the form: an item's `fields` is a bag of keys, and these are what turn
+   * a key into a label, an input and a place in the order.
+   */
+  collectionFields: FieldDef[];
 }
 
 function json(tx: Tx, value: unknown) {
@@ -125,14 +152,22 @@ function summary(tx: Tx) {
 // Collections
 // ---------------------------------------------------------------------------
 
+function toCollection(row: Record<string, unknown>): Collection {
+  return {
+    id: String(row.id),
+    key: String(row.key),
+    name: String(row.name),
+    // asObject because the driver hands jsonb back as a value or as text
+    // depending on the column, exactly as it does for `data` below.
+    fields: parseFieldDefs(asObject(row.fields)),
+    layout: parseEntryLayout(row.layout),
+  };
+}
+
 export async function listCollections(tenantId: string): Promise<Collection[]> {
   return withTenant(tenantId, async (tx) => {
-    const rows = await tx`select id, key, name from public.collections order by name`;
-    return rows.map((row) => ({
-      id: String(row.id),
-      key: String(row.key),
-      name: String(row.name),
-    }));
+    const rows = await tx`select id, key, name, fields, layout from public.collections order by name`;
+    return rows.map((row) => toCollection(row as Record<string, unknown>));
   });
 }
 
@@ -142,22 +177,56 @@ export async function listCollections(tenantId: string): Promise<Collection[]> {
  * The key is not made unique here on purpose, the same call pages.ts makes about
  * slugs: a unique index already enforces it, and letting the database refuse
  * means two requests racing cannot both win.
+ *
+ * The field definitions arrive from a starter preset the client picked, and go
+ * through parseFieldDefs on the way in exactly as they will on the way out: the
+ * screen sending them is a browser, so it is a guess like any other.
  */
 export async function createCollection(
   tenantId: string,
-  input: { name: string; key?: string },
+  input: { name: string; key?: string; fields?: unknown },
 ): Promise<Collection> {
   const name = input.name.trim() || 'Untitled';
   const key = safeSlug(input.key || name) || 'list';
+  const fields = parseFieldDefs(input.fields);
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      insert into public.collections (tenant_id, key, name)
-      values (${tenantId}::uuid, ${key}, ${name})
-      returning id, key, name
+      insert into public.collections (tenant_id, key, name, fields)
+      values (${tenantId}::uuid, ${key}, ${name}, ${json(tx, fields)})
+      returning id, key, name, fields, layout
     `;
-    const row = rows[0] as Record<string, unknown>;
-    return { id: String(row.id), key: String(row.key), name: String(row.name) };
+    return toCollection(rows[0] as Record<string, unknown>);
+  });
+}
+
+/**
+ * Change what fields a collection declares.
+ *
+ * THE WHOLE LIST AT ONCE, not one field at a time, because the screen edits it
+ * as a list and a partial write would leave a client's schema half applied if a
+ * request failed between two of them.
+ *
+ * NOTHING IS DONE TO THE ITEMS. Deleting a definition leaves every item's stored
+ * answer exactly where it was, invisible until a definition with that key exists
+ * again; renaming a label changes no item at all, because items store by key.
+ * That is the whole point of the key/label split, and it is why this is one
+ * cheap UPDATE rather than a migration across two hundred rows.
+ */
+export async function updateCollectionFields(
+  tenantId: string,
+  collectionId: string,
+  fields: unknown,
+): Promise<Collection | null> {
+  const clean = parseFieldDefs(fields);
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.collections set fields = ${json(tx, clean)}
+      where id = ${collectionId}::uuid
+      returning id, key, name, fields, layout
+    `;
+    return rows.length ? toCollection(rows[0] as Record<string, unknown>) : null;
   });
 }
 
@@ -194,7 +263,7 @@ export async function getItem(
 ): Promise<ItemWithContent | null> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select ${summary(tx)}, data, c.key as collection_key
+      select ${summary(tx)}, data, c.key as collection_key, c.fields as collection_fields
       from public.collection_items
       join public.collections c on c.id = collection_id
       where public.collection_items.id = ${itemId}::uuid
@@ -206,6 +275,7 @@ export async function getItem(
       ...toSummary(row),
       item: hydrate(row.data, `item ${String(row.id)}`),
       collectionKey: String(row.collection_key),
+      collectionFields: parseFieldDefs(asObject(row.collection_fields)),
     };
   });
 }
@@ -245,7 +315,16 @@ export async function createItem(
         ${tenantId}::uuid,
         c.id,
         ${slug},
-        ${json(tx, { version: 1, title: clean, summary: '', image: '', alt: '', date: '', sections: [] })}
+        ${json(tx, {
+          version: 1,
+          title: clean,
+          summary: '',
+          image: '',
+          alt: '',
+          date: '',
+          fields: {},
+          sections: [],
+        })}
       from public.collections c
       where c.id = ${collectionId}::uuid
       returning ${summary(tx)}, data
@@ -253,12 +332,15 @@ export async function createItem(
     if (!rows.length) return null;
 
     const row = rows[0] as Record<string, unknown>;
-    const collection = await tx`select key from public.collections where id = ${collectionId}::uuid`;
+    const collection = await tx`
+      select key, fields from public.collections where id = ${collectionId}::uuid
+    `;
 
     return {
       ...toSummary(row),
       item: hydrate(row.data, 'a new item'),
       collectionKey: String(collection[0]?.key ?? ''),
+      collectionFields: parseFieldDefs(asObject(collection[0]?.fields)),
     };
   });
 }
@@ -269,6 +351,13 @@ export async function createItem(
  * Parsed and sanitised before a byte reaches the database, exactly as a page is.
  * The slug travels alongside because it is a column: it is what the address is
  * made of, and a uniqueness rule can only live where the database can see it.
+ *
+ * THE DECLARED FIELDS ARE CLEANED AGAINST THE COLLECTION'S OWN DEFINITIONS, and
+ * those are read here rather than sent from the browser. A definition that
+ * arrived with the save would be a definition the sender chose, so "is this one
+ * of the five choices" would be a question the answer got to set. Reading them
+ * inside the same transaction as the write also means a save cannot be cleaned
+ * against a schema that changed a moment ago.
  */
 export async function saveItem(
   tenantId: string,
@@ -287,9 +376,21 @@ export async function saveItem(
   void userId;
 
   return withTenant(tenantId, async (tx) => {
+    const owner = await tx`
+      select c.fields
+      from public.collection_items i
+      join public.collections c on c.id = i.collection_id
+      where i.id = ${itemId}::uuid
+    `;
+    // No row means no such item for this tenant, and the update below will
+    // find nothing either. Falling through gives the caller the same null a
+    // missing item has always given.
+    const defs = parseFieldDefs(asObject(owner[0]?.fields));
+    const data = { ...clean, fields: cleanFieldValues(defs, clean.fields) };
+
     const rows = await tx`
       update public.collection_items
-      set data = ${json(tx, clean)}, slug = ${address}
+      set data = ${json(tx, data)}, slug = ${address}
       where id = ${itemId}::uuid
       returning ${summary(tx)}
     `;
@@ -383,6 +484,24 @@ export interface PublishedItem {
 }
 
 /**
+ * A listing, and the schema its entries were written against.
+ *
+ * THE DEFINITIONS COME BACK WITH THE ITEMS, from the join that was already
+ * there, so a card that shows a price and a number of nights still costs one
+ * read per collection. Fetching them separately would have been a second round
+ * trip per listing block, which is the exact thing lib/content/listings.ts
+ * exists to avoid.
+ *
+ * Empty when the collection declares none, and empty when nothing is published,
+ * because the fields ride on the same rows the items do. Neither case has a
+ * card to put a fact on.
+ */
+export interface PublishedListing {
+  fields: FieldDef[];
+  items: PublishedItem[];
+}
+
+/**
  * Published items in a collection, newest first, for a listing block.
  *
  * THE READ-ONLY ROLE, AND NO STATUS FILTER. The renderer policy written in
@@ -396,20 +515,49 @@ export async function listPublished(
   tenantId: string,
   collectionKey: string,
   limit: number,
-): Promise<PublishedItem[]> {
+  narrow: { filter?: unknown; sort?: unknown } = {},
+): Promise<PublishedListing> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
+  const asked = Boolean(narrow.filter) || Boolean(narrow.sort);
 
   return withPublicTenant(tenantId, async (tx) => {
-    const rows = await tx`
-      select i.slug, i.data, i.published_at
-      from public.collection_items i
-      join public.collections c on c.id = i.collection_id
-      where c.key = ${collectionKey}
-      order by i.published_at desc nulls last, i.id desc
-      limit ${capped}
-    `;
+    /*
+     * THE LIMIT COMES OFF ONLY WHEN SOMETHING IS ASKED FOR, and that condition
+     * is the whole cost control. Narrowing has to happen before the cap or the
+     * answer is wrong: filtering the newest twelve to the half board ones gives
+     * whatever of those twelve happen to qualify, not the twelve half board
+     * tours the page asked for. So a narrowed listing reads the collection and a
+     * plain one does not, and the overwhelming majority are plain.
+     *
+     * WHY THE NARROWING IS NOT IN THE SQL. The values live in data->fields->key
+     * as jsonb, which the database does not constrain: one item holding a string
+     * where a number is expected fails the cast and takes the whole query down
+     * with it. In JS they have been through the item parse and are typed. The
+     * tag archive below already reads and decides in JS for its own reason, so
+     * this is the established shape here rather than a new one.
+     *
+     * The bargain is worth naming: this reads a collection to answer about it.
+     * Fine at the sizes these are, which is a travel agent's tours rather than a
+     * catalogue, and the cap still bounds what is built and sent.
+     */
+    const rows = asked
+      ? await tx`
+          select i.slug, i.data, i.published_at, c.fields
+          from public.collection_items i
+          join public.collections c on c.id = i.collection_id
+          where c.key = ${collectionKey}
+          order by i.published_at desc nulls last, i.id desc
+        `
+      : await tx`
+          select i.slug, i.data, i.published_at, c.fields
+          from public.collection_items i
+          join public.collections c on c.id = i.collection_id
+          where c.key = ${collectionKey}
+          order by i.published_at desc nulls last, i.id desc
+          limit ${capped}
+        `;
 
-    return rows.map((raw) => {
+    let items = rows.map((raw) => {
       const row = raw as Record<string, unknown>;
       return {
         slug: String(row.slug),
@@ -417,6 +565,26 @@ export async function listPublished(
         publishedAt: row.published_at ? new Date(row.published_at as string) : null,
       };
     });
+
+    // Every row carries the same collection, so the first one has the schema.
+    const fields = parseFieldDefs(asObject((rows[0] as Record<string, unknown>)?.fields));
+
+    if (asked) {
+      // Read against the schema that just came back, so a filter naming a field
+      // this collection no longer declares reads as no filter rather than as an
+      // empty page. See lib/content/collection-filter.ts.
+      const filter = parseFilter(fields, narrow.filter);
+      if (filter) items = items.filter((row) => matchesFilter(fields, row.item.fields, filter));
+
+      const sort = parseSort(fields, narrow.sort);
+      if (sort) {
+        items = [...items].sort((a, b) => compareByField(fields, sort, a.item.fields, b.item.fields));
+      }
+
+      items = items.slice(0, capped);
+    }
+
+    return { fields, items };
   });
 }
 
@@ -440,18 +608,22 @@ export async function listPublishedByTag(
   collectionKey: string,
   tagSlug: string,
   limit: number,
-): Promise<{ label: string; items: PublishedItem[] } | null> {
+): Promise<{ label: string; fields: FieldDef[]; items: PublishedItem[] } | null> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
 
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select i.slug, i.data, i.published_at
+      select i.slug, i.data, i.published_at, c.fields
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       where c.key = ${collectionKey}
       order by i.published_at desc nulls last, i.id desc
     `;
 
+    // The same schema listPublished returns, so an archive's cards carry the
+    // same facts the listing they came from does rather than losing them on
+    // the way to a tag page.
+    const fields = parseFieldDefs(asObject((rows[0] as Record<string, unknown>)?.fields));
     let label = '';
     const items: PublishedItem[] = [];
     for (const raw of rows) {
@@ -469,7 +641,7 @@ export async function listPublishedByTag(
       if (items.length >= capped) break;
     }
 
-    return label ? { label, items } : null;
+    return label ? { label, fields, items } : null;
   });
 }
 
@@ -484,10 +656,15 @@ export async function getPublishedItem(
   tenantId: string,
   collectionKey: string,
   slug: string,
-): Promise<{ item: CollectionItem; publishedAt: Date | null } | null> {
+): Promise<{
+  item: CollectionItem;
+  fields: FieldDef[];
+  layout: EntryLayout;
+  publishedAt: Date | null;
+} | null> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select i.data, i.published_at
+      select i.data, i.published_at, c.fields, c.layout
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       where c.key = ${collectionKey} and i.slug = ${slug}
@@ -498,6 +675,10 @@ export async function getPublishedItem(
     const row = rows[0] as Record<string, unknown>;
     return {
       item: hydrate(row.data, `${collectionKey}/${slug}`),
+      // From the join that was already here, so an entry's own page shows its
+      // facts without a second read, exactly as a listing's cards do.
+      fields: parseFieldDefs(asObject(row.fields)),
+      layout: parseEntryLayout(row.layout),
       publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     };
   });
@@ -508,6 +689,16 @@ export interface PublishedEntryPath {
   /** collectionKey/slug, which is exactly how a visitor reaches it. */
   path: string;
   updatedAt: string | null;
+  /**
+   * The collection it belongs to, and what the entry is called.
+   *
+   * The sitemap wants neither: an address and a date are all a crawler needs.
+   * llms.txt is a readable map, so it groups entries under their collection and
+   * names each one. Both come out of the row the query already reads, so this
+   * costs nothing but the two fields. See lib/seo/llms.ts.
+   */
+  collection: string;
+  title: string;
 }
 
 /**
@@ -529,7 +720,11 @@ export async function listAllPublishedEntries(
 ): Promise<PublishedEntryPath[]> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select c.key, i.slug, coalesce(i.updated_at, i.published_at) as changed_at
+      select
+        c.key,
+        i.slug,
+        i.data->>'title' as title,
+        coalesce(i.updated_at, i.published_at) as changed_at
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       order by changed_at desc nulls last
@@ -540,6 +735,10 @@ export async function listAllPublishedEntries(
       return {
         path: `${String(row.key)}/${String(row.slug)}`,
         updatedAt: row.changed_at ? new Date(String(row.changed_at)).toISOString() : null,
+        collection: String(row.key ?? ''),
+        // ->> answers null for a row whose data has no title, which String()
+        // would turn into the word "null" on a page somebody reads.
+        title: row.title == null ? '' : String(row.title),
       };
     });
   });
@@ -592,17 +791,27 @@ export const MAX_SEARCH_ITEMS = 500;
 export async function listPublishedItemsForSearch(tenantId: string): Promise<SearchDoc[]> {
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select c.key, i.slug, i.data
+      select c.key, i.slug, i.data, c.fields
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
       order by i.published_at desc nulls last, i.id desc
       limit ${MAX_SEARCH_ITEMS}
     `;
 
+    /*
+     * One schema per collection, worked out once rather than per row.
+     *
+     * Every entry in a collection shares its definitions, so parsing them for
+     * all five hundred rows would be the same work five hundred times. Keyed by
+     * the collection key, which is what each row already carries.
+     */
+    const schemas = new Map<string, FieldDef[]>();
+
     return (rows as Array<Record<string, unknown>>).map((row) => {
       const key = String(row.key);
       const slug = String(row.slug);
       const item = hydrate(row.data, `${key}/${slug}`);
+      if (!schemas.has(key)) schemas.set(key, parseFieldDefs(asObject(row.fields)));
 
       /*
        * The summary leads, then the article, then the byline and the tags.
@@ -619,7 +828,23 @@ export async function listPublishedItemsForSearch(tenantId: string): Promise<Sea
        * because "posts by Sarah" is a search people actually do.
        */
       const body = pageText(item, 8000);
-      const extras = [item.author, ...item.tags].filter(Boolean).join(' ');
+      /*
+       * The declared facts go in as "Board Half board", label and value both.
+       *
+       * BOTH HALVES, because people search either way: "half board" is the
+       * value and "board basis" is close to the label, and a tour that answers
+       * one should be found by the other. Formatted rather than raw, so a
+       * price is searchable as £1,299 the way it is shown, and an unanswered
+       * field contributes nothing at all.
+       *
+       * LAST, after the prose, for the same reason the tags are: searchDocs
+       * cuts its snippet around the first match, so a result almost always
+       * shows a readable sentence rather than a row of numbers.
+       */
+      const declared = fieldFacts(schemas.get(key) ?? [], item.fields)
+        .map((fact) => `${fact.label} ${fact.value}`)
+        .join(' ');
+      const extras = [item.author, ...item.tags, declared].filter(Boolean).join(' ');
       const text = [item.summary, body, extras].filter(Boolean).join('\n');
 
       return {
@@ -628,5 +853,31 @@ export async function listPublishedItemsForSearch(tenantId: string): Promise<Sea
         text,
       };
     });
+  });
+}
+
+/**
+ * Change how a collection's entries are laid out.
+ *
+ * Its own writer rather than a second argument on updateCollectionFields,
+ * because the two are edited in different places and at different moments: the
+ * schema in a dialog a client opens deliberately, this from a control beside
+ * the collection's name. Bundling them would make either save able to blank the
+ * other by omission.
+ */
+export async function updateCollectionLayout(
+  tenantId: string,
+  collectionId: string,
+  layout: unknown,
+): Promise<Collection | null> {
+  const clean = parseEntryLayout(layout);
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.collections set layout = ${clean}
+      where id = ${collectionId}::uuid
+      returning id, key, name, fields, layout
+    `;
+    return rows.length ? toCollection(rows[0] as Record<string, unknown>) : null;
   });
 }

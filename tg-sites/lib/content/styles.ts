@@ -397,6 +397,103 @@ export const LINE_HEIGHTS: ReadonlyArray<{ value: string; label: string }> = [
 ];
 
 /**
+ * The bands a letter-spacing value is held to, one per unit.
+ *
+ * Tighter than -0.1em and the letters of a heading start to touch; past 0.5em the
+ * words stop reading as words. The pixel band is the same idea in absolute terms,
+ * wide enough for a spaced-out display line and no wider. Both pairs live here,
+ * next to the validator, so the block pane and the sanitiser cannot drift, the
+ * same arrangement the line-spacing and pixel-size bounds have above.
+ */
+export const LETTER_SPACING_EM_MIN = -0.1;
+export const LETTER_SPACING_EM_MAX = 0.5;
+export const LETTER_SPACING_PX_MIN = -10;
+export const LETTER_SPACING_PX_MAX = 40;
+
+/** An em letter-spacing, clamped and shortened. Shared by both entry paths. */
+function emTracking(n: number): string | undefined {
+  if (!Number.isFinite(n)) return undefined;
+  const clamped = Math.min(LETTER_SPACING_EM_MAX, Math.max(LETTER_SPACING_EM_MIN, n));
+  // Three decimals, no trailing zeros, which is the precision the theme's own
+  // tracking tokens are written to (--tgs-h1-tracking is -0.03em). So a stored
+  // value round-trips to the same option the block pane offers.
+  return `${Math.round(clamped * 1000) / 1000}em`;
+}
+
+/**
+ * A block's letter spacing, validated the way its size and line spacing are.
+ *
+ * EM BY DEFAULT, because tracking that does not follow the size is tracking that
+ * breaks the moment somebody changes the size, and this is a per-screen control
+ * sitting next to a per-screen size. The em resolves against the font size of the
+ * element it is set on, which is .tgs-heading or .tgs-text carrying its own
+ * per-screen size, so a heading tracked in on desktop stays in proportion when a
+ * phone override shrinks it. That is also the unit the theme states its own
+ * tracking in (--tgs-p-tracking and the six heading twins), so the block-level
+ * value and the value it overrides are in the same currency.
+ *
+ * IT IS NOT THE UNITLESS LINE-HEIGHT TRICK, and the difference matters. A unitless
+ * line-height inherits as a NUMBER and every nested span re-multiplies it by its
+ * own size, which is what lets tightening one value rescue a heading wrapped in a
+ * stack of oversized size spans. letter-spacing computes to an absolute length at
+ * the element it is set on and inherits THAT, so every span inside gets the same
+ * gap in px whatever size it is (measured: 0.2em on a 48px heading gives 9.6px,
+ * and a 16px span inside it also gets 9.6px, where line-height 1.5 gives 72px and
+ * 24px). So on a heading built from mixed-size spans the small words carry the big
+ * words' tracking, and the remedy is the one that already exists: clear the sizing
+ * spans first (see clearTextSizing), then track the block.
+ *
+ * PIXELS ARE ACCEPTED because a client who wants one exact gap should be able to
+ * type it, and refusing the unit would only push them to guess an em. A bare
+ * number is read as em, matching the theme convention rather than the CSS one,
+ * where a unitless letter-spacing is invalid and would render as nothing.
+ *
+ * ZERO IS A REAL ANSWER, not an absence: an h1 carries -0.03em of its own, so
+ * '0em' means take that tracking off, which is a different instruction from
+ * leaving the control unset. Both bands therefore keep 0 rather than dropping it,
+ * and only a value that is not a number at all returns undefined, so a stray one
+ * falls out of an optional field and a spread cleanly and the element keeps its
+ * own tracking.
+ */
+export function normaliseLetterSpacing(value: unknown): string | undefined {
+  if (typeof value === 'number') return emTracking(value);
+  if (typeof value !== 'string') return undefined;
+
+  const text = value.trim().toLowerCase();
+  if (text === '') return undefined;
+
+  const px = /^(-?\d{1,3}(?:\.\d{1,2})?)px$/.exec(text);
+  if (px) {
+    const n = Number(px[1]);
+    if (!Number.isFinite(n)) return undefined;
+    const clamped = Math.min(LETTER_SPACING_PX_MAX, Math.max(LETTER_SPACING_PX_MIN, n));
+    return `${Math.round(clamped * 100) / 100}px`;
+  }
+
+  // em, or a bare number read as em. Anchored at both ends, so nothing with a
+  // second unit, a calc() or a trailing character can reach the stylesheet.
+  const em = /^(-?\d{1,3}(?:\.\d{1,4})?)(?:em)?$/.exec(text);
+  return em ? emTracking(Number(em[1])) : undefined;
+}
+
+/**
+ * The letter-spacing choices the block pane offers, tight to wide.
+ *
+ * 'None' is not the same as leaving the control alone: it sets 0em, taking off
+ * the tracking the heading style carries of its own, where unset keeps it.
+ */
+export const LETTER_SPACINGS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: '-0.05em', label: 'Very tight' },
+  { value: '-0.03em', label: 'Tight' },
+  { value: '-0.015em', label: 'Snug' },
+  { value: '0em', label: 'None' },
+  { value: '0.02em', label: 'Relaxed' },
+  { value: '0.05em', label: 'Loose' },
+  { value: '0.1em', label: 'Very loose' },
+  { value: '0.2em', label: 'Widest' },
+];
+
+/**
  * Strip the fixed font sizes off the words in a block's HTML, unwrapping any span
  * that then held nothing else.
  *

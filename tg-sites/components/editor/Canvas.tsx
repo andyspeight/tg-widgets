@@ -38,6 +38,8 @@ import {
 } from '../../lib/content/tree';
 import { resolveAt, withOverride } from '../../lib/content/responsive';
 import { PageRenderer } from '../render/PageRenderer';
+import { usePreparedMarkup } from './usePreparedMarkup';
+import type { PreparedMap } from '../../lib/content/prepared';
 import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
 
@@ -61,6 +63,12 @@ export interface DropTarget {
 }
 
 interface Props {
+  /**
+   * Markup the server cleaned for the page this canvas opened with, by block id.
+   * Everything the client makes afterwards is asked for by usePreparedMarkup.
+   * See lib/content/prepared.ts for why the canvas cannot clean it itself.
+   */
+  preparedSeed?: PreparedMap;
   page: Page;
   selected: Path | null;
   selectedKey: string | null;
@@ -229,12 +237,20 @@ export function Canvas({
   navPages = [],
   commentPins = [],
   onOpenComment,
+  preparedSeed,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const heightRef = useRef<HeightDrag | null>(null);
   const [badge, setBadge] = useState<{ x: number; y: number; text: string } | null>(null);
+
+  /*
+   * The imported designs and embeds on this canvas, cleaned. Seeded by the
+   * editor page so an existing page draws on the first paint, and topped up when
+   * the client makes a new one. See usePreparedMarkup.
+   */
+  const prepared = usePreparedMarkup([page, chromeHeader, chromePage, chromeFooter], preparedSeed);
 
   // ---------------------------------------------------------------------
   // Selection outlines
@@ -942,6 +958,7 @@ export function Canvas({
             Preview was pressed. See the Editable interface in PageRenderer.
           */
           editorCanvas
+          prepared={prepared}
           emptyNote={preview ? undefined : emptyNote}
           theme={theme}
           /*
@@ -998,6 +1015,7 @@ export function Canvas({
         theme={theme}
         preview={preview}
         onActivate={onActivateRegion ? () => onActivateRegion(pos) : undefined}
+        prepared={prepared}
       />
     );
   };
@@ -1088,12 +1106,15 @@ function ChromeBand({
   theme,
   preview,
   onActivate,
+  prepared,
 }: {
   page: Page | null;
   tree: 'page' | 'header' | 'footer';
   theme?: CSSProperties;
   preview: boolean;
   onActivate?: () => void;
+  /** Cleaned markup for this band's blocks. See lib/content/prepared.ts. */
+  prepared?: PreparedMap;
 }) {
   const empty = !page || page.sections.length === 0;
   const label = tree === 'header' ? 'Header' : tree === 'footer' ? 'Footer' : 'Page';
@@ -1148,7 +1169,14 @@ function ChromeBand({
           // the page once. In preview it is the real thing, so it is not hidden.
           aria-hidden={preview ? undefined : true}
         >
-          <PageRenderer page={page!} editable={false} editorCanvas theme={theme} region={region} />
+          <PageRenderer
+            page={page!}
+            editable={false}
+            editorCanvas
+            prepared={prepared}
+            theme={theme}
+            region={region}
+          />
         </div>
       )}
     </div>

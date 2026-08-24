@@ -100,6 +100,17 @@ export function robotsTxt(origin: string): string {
 
   lines.push(`Sitemap: ${origin}/sitemap.xml`, '');
 
+  /*
+   * A POINTER TO llms.txt, AS A COMMENT, because that is all it can be.
+   *
+   * There is no registered robots.txt directive for it, and inventing one would
+   * mean writing a line every crawler is entitled to ignore or complain about.
+   * A comment is read by the two audiences that matter: a person auditing the
+   * file, and an assistant that has fetched robots.txt and is deciding what else
+   * to ask for. See lib/seo/llms.ts.
+   */
+  lines.push(`# Plain-language site summary for assistants: ${origin}/llms.txt`, '');
+
   return lines.join('\n');
 }
 

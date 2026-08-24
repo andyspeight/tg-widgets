@@ -32,6 +32,7 @@ import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
+import type { FieldDef } from '../../lib/content/collection-fields';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
@@ -55,6 +56,10 @@ import { Rail } from './Rail';
 import { CommentsPanel } from './CommentsPanel';
 import { PagesPanel, type PageLink } from './PagesPanel';
 import { Canvas, type DropTarget } from './Canvas';
+import { wasFilled, type SeoFilled } from '../../lib/seo/autofill';
+import { outlineCollision } from './outline-collision';
+import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
+import type { PreparedMap } from '../../lib/content/prepared';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -389,6 +394,14 @@ interface EditorProps {
   itemId?: string | null;
   initialItemMeta?: ItemMeta;
   /**
+   * What this entry's collection declares its entries have.
+   *
+   * Read on the server with the entry itself, and not editable here: the schema
+   * belongs to the collection and is changed on the collections screen. This is
+   * the list the properties pane draws its form from.
+   */
+  itemFields?: FieldDef[];
+  /**
    * The site's header and footer, to show around the page on the canvas and,
    * since slice 2, to edit in place.
    *
@@ -402,6 +415,13 @@ interface EditorProps {
    * one of these on its own, and drawing a header around a header is a hall of
    * mirrors.
    */
+  /**
+   * Markup the server cleaned for every tree this shell opened with, by block id.
+   * The canvas cannot clean it itself and asks for anything made afterwards; this
+   * is only so an existing page draws on the first paint rather than flashing its
+   * placeholders. See lib/content/prepared.ts.
+   */
+  preparedSeed?: PreparedMap;
   chromeHeader?: ChromeRegion | null;
   chromeFooter?: ChromeRegion | null;
   /**
@@ -427,6 +447,8 @@ export function EditorShell({
   initialRegionFlags,
   itemId = null,
   initialItemMeta,
+  itemFields,
+  preparedSeed,
   chromeHeader = null,
   chromeFooter = null,
   focusComment = null,
@@ -528,9 +550,29 @@ export function EditorShell({
    * for the sake of a date field would be a poor trade.
    */
   const [itemMeta, setItemMeta] = useState<ItemMeta>(
-    initialItemMeta ?? { title: '', summary: '', image: '', alt: '', author: '', date: '', tags: [], slug: '' },
+    initialItemMeta ?? {
+      title: '',
+      summary: '',
+      image: '',
+      alt: '',
+      author: '',
+      date: '',
+      tags: [],
+      fields: {},
+      slug: '',
+    },
   );
   const [unpublished, setUnpublished] = useState(initialHasUnpublishedChanges);
+  /*
+   * WHAT THE LAST PUBLISH WROTE FOR THEM, or null. A page published with no
+   * search title or description gets one written from its own words (#239), and
+   * this is what the panel afterwards shows. Never silent: a client should not
+   * find out that AI-written words are representing them in Google by reading
+   * Google.
+   */
+  const [seoFilled, setSeoFilled] = useState<SeoFilled | null>(null);
+  /** How many picture descriptions the last publish wrote in. */
+  const [altsFilled, setAltsFilled] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
   /**
@@ -951,13 +993,32 @@ export function EditorShell({
         ? await publishItemAction(itemId)
         : await publishPageAction(pageId);
 
-    if (result.ok && result.data) {
+    /*
+     * A PAGE PUBLISH NOW ANSWERS WITH TWO THINGS: the summary, and anything the
+     * search listing was filled in with on the way (#239). A region and an item
+     * still answer with the summary alone, so this unwraps only the page's.
+     */
+    const outcome =
+      result.ok && result.data && 'summary' in result.data
+        ? (result.data as { summary: unknown; filled: SeoFilled; altsFilled: number })
+        : null;
+    if (outcome) {
+      const wrote = wasFilled(outcome.filled) || outcome.altsFilled > 0;
+      setSeoFilled(wrote ? outcome.filled : null);
+      setAltsFilled(wrote ? outcome.altsFilled : 0);
+    }
+
+    const record = (outcome ? outcome.summary : result.ok ? result.data : null) as
+      | { status: 'draft' | 'published'; hasUnpublishedChanges: boolean }
+      | null;
+
+    if (result.ok && record) {
       // A region has no status column: publishing one makes it live and there
       // is no way to withdraw it short of emptying it. So it is published from
       // here on, and only "are there newer changes" varies. A page and an item
       // both have one, and it is the answer.
-      setStatus(region ? 'published' : (result.data as { status: 'draft' | 'published' }).status);
-      setUnpublished(result.data.hasUnpublishedChanges);
+      setStatus(region ? 'published' : record.status);
+      setUnpublished(record.hasUnpublishedChanges);
     } else if (!result.ok) {
       setSaveError(result.error);
     }
@@ -1563,6 +1624,15 @@ export function EditorShell({
     [moveSectionAt],
   );
 
+  /*
+   * An outline drag in flight, if one is. The canvas drags resolve their target
+   * from the document under the pointer; an outline drag does not, so this flag
+   * is what keeps the two apart: while it is set, the canvas drop hooks are left
+   * alone entirely and no boundary line is drawn on a canvas nobody is dragging
+   * over. See components/editor/outline-move.ts.
+   */
+  const outlineDragRef = useRef<OutlineDragItem | null>(null);
+
   const paletteDrop = usePaletteDrop(dropOnCanvas);
   const sectionDrop = useSectionDrop(dropSectionOnCanvas);
   const dndSensors = useSensors(
@@ -1572,6 +1642,13 @@ export function EditorShell({
   return (
     <DndContext
       sensors={dndSensors}
+      /*
+       * The outline's rows are the only droppables in this context: the canvas
+       * registers none and reads no `over`. So this filter answers for the
+       * outline and answers nothing for everything else, which is both correct
+       * and cheaper than ranking rows a canvas drag would ignore.
+       */
+      collisionDetection={outlineCollision}
       /*
        * autoScroll off, on purpose. dnd-kit would otherwise nudge the canvas
        * while you hover near its edge and fire extra move events as it goes; our
@@ -1587,6 +1664,15 @@ export function EditorShell({
         // One discriminator per source: a palette card carries paletteType, a
         // block handle carries moveFrom, a section handle carries moveSection.
         const data = event.active.data.current;
+
+        // An outline row. It resolves its target from dnd-kit's own droppables
+        // rather than from the canvas, so it takes neither of the drop hooks.
+        if (data?.outlineDrag) {
+          outlineDragRef.current = data.outlineDrag as OutlineDragItem;
+          document.body.dataset.tgDragging = 'outline';
+          return;
+        }
+
         let drag: ActiveDrag | null = null;
         if (typeof data?.paletteType === 'string') {
           drag = { kind: 'add', type: data.paletteType };
@@ -1612,6 +1698,9 @@ export function EditorShell({
         document.body.dataset.tgDragging = 'block';
       }}
       onDragMove={(event: DragMoveEvent) => {
+        // dnd-kit keeps the outline's highlight itself, through isOver on each
+        // row, so there is nothing for this to draw.
+        if (outlineDragRef.current) return;
         const drag = activeDragRef.current;
         if (!drag) return;
         // dnd-kit hands us the pointer as the pointerdown plus how far it moved;
@@ -1623,7 +1712,25 @@ export function EditorShell({
         if (drag.kind === 'move-section') sectionDrop.update(x, y);
         else paletteDrop.update(x, y);
       }}
-      onDragEnd={() => {
+      onDragEnd={(event) => {
+        /*
+         * An outline drop. The row it ended on names its own target, so the
+         * whole move is decided from the event: no geometry, no second guess at
+         * which column was meant. resolveOutlineMove answers null for a drag that
+         * changes nothing, and skipping the commit then is deliberate, because an
+         * undo step that undoes nothing is worse than no step at all.
+         */
+        const outline = outlineDragRef.current;
+        if (outline) {
+          const target = event.over?.data.current?.outlineDrop as OutlineDragItem | undefined;
+          if (target) {
+            commit((current) => resolveOutlineMove(current, outline, target) ?? current);
+          }
+          outlineDragRef.current = null;
+          delete document.body.dataset.tgDragging;
+          return;
+        }
+
         const drag = activeDragRef.current;
         if (drag?.kind === 'move-section') sectionDrop.end();
         else if (drag) paletteDrop.end();
@@ -1632,6 +1739,7 @@ export function EditorShell({
         delete document.body.dataset.tgDragging;
       }}
       onDragCancel={() => {
+        outlineDragRef.current = null;
         paletteDrop.hide();
         sectionDrop.hide();
         activeDragRef.current = null;
@@ -1707,6 +1815,56 @@ export function EditorShell({
           <p className="ed-savefail" role="alert">
             {saveError}
           </p>
+        )}
+
+        {/*
+          WHAT WE WROTE FOR THEM, SAID OUT LOUD (#239).
+          A page published with no search title or description gets one written
+          from its own words. Telling the client is not politeness: those two
+          lines are what appears under their name in Google, and finding out by
+          reading Google is the wrong way round. It states what was written and
+          where to change it, and goes when they close it.
+        */}
+        {seoFilled && (
+          <div className="ed-seofill" role="status">
+            <p className="ed-seofill__lead">
+              {wasFilled(seoFilled)
+                ? 'Published. We filled in what this page was missing, from the page itself.'
+                : 'Published. We described this page\u2019s pictures for you.'}
+            </p>
+            <dl className="ed-seofill__list">
+              {seoFilled.title && (
+                <>
+                  <dt>Search title</dt>
+                  <dd>{seoFilled.title}</dd>
+                </>
+              )}
+              {seoFilled.description && (
+                <>
+                  <dt>Search description</dt>
+                  <dd>{seoFilled.description}</dd>
+                </>
+              )}
+              {altsFilled > 0 && (
+                <>
+                  <dt>Picture descriptions</dt>
+                  <dd>
+                    {altsFilled === 1
+                      ? 'One picture described'
+                      : `${altsFilled} pictures described`}
+                  </dd>
+                </>
+              )}
+            </dl>
+            <p className="ed-seofill__note">
+              {wasFilled(seoFilled)
+                ? 'Change any of these any time, in this page\u2019s settings or on the picture itself.'
+                : 'Change any of these any time, on the picture itself.'}
+            </p>
+            <button type="button" className="ed-btn ed-btn--quiet" onClick={() => setSeoFilled(null)}>
+              Close
+            </button>
+          </div>
         )}
 
         {/*
@@ -2013,6 +2171,7 @@ export function EditorShell({
       )}
 
       <Canvas
+        preparedSeed={preparedSeed}
         onInsertSection={setInsertAt}
         editingPath={editingPath}
         page={page}
@@ -2075,6 +2234,7 @@ export function EditorShell({
         isItem={!!itemId}
         itemMeta={itemMeta}
         onItemMeta={setItemMeta}
+        itemFields={itemFields}
         editingOnCanvas={optionsOpen}
       />
 
@@ -2125,6 +2285,7 @@ export function EditorShell({
             isItem: !!itemId,
             itemMeta,
             onItemMeta: setItemMeta,
+            itemFields,
             onSelect: select,
             tier: viewport,
           }}

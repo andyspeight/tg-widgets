@@ -656,25 +656,36 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
- * PER-SCREEN TEXT SIZE AND LINE SPACING, the block half of the size vars.
+ * PER-SCREEN TEXT SIZE, LINE SPACING AND LETTER SPACING, the block half of the
+ * size vars.
  *
  * A block carries its size as inline custom properties: --tgs-fs (a desktop base)
- * and --tgs-fs-tablet/--tgs-fs-phone (the overrides), and its line spacing the
- * same way in --tgs-lh and its twins. They must NOT inherit past the block that
- * set them, or a size or spacing set on a container would change every block
- * nested inside it. Resetting them to `initial` on every .tgs-block stops that:
- * the inline value still wins for the block it is set on, and a block with none
- * set starts clean rather than inheriting a parent's. --tgs-fs-r/--tgs-lh-r need
- * no reset, since the container queries below set them on each .tgs-block in the
- * band.
+ * and --tgs-fs-tablet/--tgs-fs-phone (the overrides), its line spacing the same
+ * way in --tgs-lh and its twins, and its letter spacing in --tgs-ls and its
+ * twins. They must NOT inherit past the block that set them, or a size or spacing
+ * set on a container would change every block nested inside it. Resetting them to
+ * `initial` on every .tgs-block stops that: the inline value still wins for the
+ * block it is set on, and a block with none set starts clean rather than
+ * inheriting a parent's. The -r variables need no reset, since the container
+ * queries below set them on each .tgs-block in the band.
  *
  * Line spacing is UNITLESS on purpose (see normaliseLineHeight): --tgs-lh flows
  * on into the spans the copy is wrapped in and each re-multiplies it by its own
  * font size, so tightening it pulls a heading built from a stack of oversized
  * size spans back to the height of the text you see.
+ *
+ * Letter spacing is in em, which is a WEAKER guarantee than the line-height one
+ * above and worth not confusing with it. The em resolves against the font size of
+ * the element it lands on, .tgs-heading or .tgs-text, so it does follow that
+ * element's per-screen size: a heading tracked in on desktop stays in proportion
+ * when a phone override shrinks it. But letter-spacing computes to an absolute
+ * length there and inherits it, where a unitless line-height inherits as a number
+ * and is re-multiplied by every nested span. So this does NOT reach into the
+ * wrapped size spans the way the line spacing does. See normaliseLetterSpacing.
  */
 .tgs-block { --tgs-fs: initial; --tgs-fs-tablet: initial; --tgs-fs-phone: initial; }
 .tgs-block { --tgs-lh: initial; --tgs-lh-tablet: initial; --tgs-lh-phone: initial; }
+.tgs-block { --tgs-ls: initial; --tgs-ls-tablet: initial; --tgs-ls-phone: initial; }
 
 /*
  * AUTO-RESIZE, the fluid option (Andy, 11 Aug 2026: "an option so it auto-resizes
@@ -1260,6 +1271,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  *
  * Under reduced motion it is an ordinary stacked list of cards, which is a finished
  * comparison rather than a broken one.
+ *
+ * The Stacked cards ELEMENT (search ".tgs-stack") is this same trick as a
+ * designed block with its own markup. Compared 21 Aug 2026: each had a fix the
+ * other lacked, so if you fix one, look at the other.
  */
 .tgs-section[data-motion='S3'] {
   --tgs-motion-stick: 10vh;
@@ -1288,6 +1303,34 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(3) { top: calc(var(--tgs-motion-stick) + 4.4rem); }
     .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(4) { top: calc(var(--tgs-motion-stick) + 6.6rem); }
     .tgs-section[data-motion='S3'] .tgs-cards > .tgs-card:nth-child(n + 5) { top: calc(var(--tgs-motion-stick) + 8.8rem); }
+
+    /*
+     * THE RUNWAY, added 21 Aug 2026, and without it this recipe did nothing at
+     * all. Measured with four cards: card three stopped 156px short of its stop
+     * and card four 303px short, so the section drew an ordinary one-column list
+     * and no deck ever collected. A tier 0 PROVEN recipe whose whole stated job
+     * is to replace the three-equal-cards row was quietly drawing a plain list.
+     *
+     * A sticky card only travels while there is page left below it, and the last
+     * card has nothing after it. The Stacked cards ELEMENT hit this same wall the
+     * same day and its comment records the two fixes that look right and are not:
+     * padding-bottom SHRINKS the content box a sticky child is constrained to, and
+     * a margin on the last card is kept inside the containing block so that card
+     * overshoots its stop. The runway has to be a sibling that belongs to no card.
+     *
+     * Here the markup is an ordinary Cards block, so there is no element to add.
+     * ::after on the grid is one: a grid item, in the single column, sticky to
+     * nothing, that simply gives the container length below the last card.
+     */
+    .tgs-section[data-motion='S3'] .tgs-cards::after {
+      content: '';
+      display: block;
+      /* Enough for the last card to reach its stop and hold there. Viewport
+         relative because the stops are (--tgs-motion-stick is in vh), and because
+         these cards are content-sized rather than a fixed height like the
+         element's. Measured at 70vh: every card lands. */
+      height: 70vh;
+    }
   }
 }
 
@@ -1563,11 +1606,12 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
    * PER-SCREEN TEXT SIZE, tablet. A block's tablet override, else its desktop
    * base, folds into --tgs-fs-r, which .tgs-text/.tgs-heading read ahead of their
    * own size. With neither set the chain is guaranteed-invalid, so the element
-   * falls back to its natural size and nothing changes. Line spacing folds the
-   * same way into --tgs-lh-r.
+   * falls back to its natural size and nothing changes. Line spacing and letter
+   * spacing fold the same way into --tgs-lh-r and --tgs-ls-r.
    */
   .tgs-block { --tgs-fs-r: var(--tgs-fs-tablet, var(--tgs-fs)); }
   .tgs-block { --tgs-lh-r: var(--tgs-lh-tablet, var(--tgs-lh)); }
+  .tgs-block { --tgs-ls-r: var(--tgs-ls-tablet, var(--tgs-ls)); }
 }
 
 @container tgs-page (max-width: 767px) {
@@ -1583,10 +1627,12 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   /*
    * The phone half of per-screen text size. After the tablet rule, so at a phone
    * width it wins, and its chain reads the phone override, then the tablet one,
-   * then the desktop base. Line spacing folds the same way into --tgs-lh-r.
+   * then the desktop base. Line spacing and letter spacing fold the same way into
+   * --tgs-lh-r and --tgs-ls-r.
    */
   .tgs-block { --tgs-fs-r: var(--tgs-fs-phone, var(--tgs-fs-tablet, var(--tgs-fs))); }
   .tgs-block { --tgs-lh-r: var(--tgs-lh-phone, var(--tgs-lh-tablet, var(--tgs-lh))); }
+  .tgs-block { --tgs-ls-r: var(--tgs-ls-phone, var(--tgs-ls-tablet, var(--tgs-ls))); }
 
   /*
    * A COLUMN FLEX CONTAINER TURNS EVERY VERTICAL ALIGNMENT INTO A HORIZONTAL
@@ -1753,56 +1799,64 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
    */
   --tgs-lh-base: var(--tgs-h2-leading);
   line-height: var(--tgs-lh-r, var(--tgs-lh, var(--tgs-lh-base)));
-  letter-spacing: var(--tgs-h2-tracking);
+  /*
+   * LETTER SPACING, PER SCREEN, the same chain again. --tgs-ls-base is this
+   * heading's own tracking, which its data-style sets; --tgs-ls is a block-level
+   * base the editor may set on desktop; --tgs-ls-r is the tablet or phone
+   * override. In em, so the gap follows the size the text is actually at.
+   */
+  --tgs-ls-base: var(--tgs-h2-tracking);
+  letter-spacing: var(--tgs-ls-r, var(--tgs-ls, var(--tgs-ls-base)));
 }
 
 /*
- * Each data-style sets --tgs-fs-base (its own size) and --tgs-lh-base (its own
- * leading) rather than font-size or line-height direct, so the one chain each on
- * .tgs-heading above stays in charge and a per-screen override can win over it.
- * font-family, weight and tracking are unchanged.
+ * Each data-style sets --tgs-fs-base (its own size), --tgs-lh-base (its own
+ * leading) and --tgs-ls-base (its own tracking) rather than font-size,
+ * line-height or letter-spacing direct, so the one chain each on .tgs-heading
+ * above stays in charge and a per-screen override can win over it. font-family
+ * and weight are unchanged.
  */
 .tgs-heading[data-style='h1'] {
   font-family: var(--tgs-h1-font);
   font-weight: var(--tgs-h1-weight);
   --tgs-fs-base: var(--tgs-h1-size);
   --tgs-lh-base: var(--tgs-h1-leading);
-  letter-spacing: var(--tgs-h1-tracking);
+  --tgs-ls-base: var(--tgs-h1-tracking);
 }
 .tgs-heading[data-style='h2'] {
   font-family: var(--tgs-h2-font);
   font-weight: var(--tgs-h2-weight);
   --tgs-fs-base: var(--tgs-h2-size);
   --tgs-lh-base: var(--tgs-h2-leading);
-  letter-spacing: var(--tgs-h2-tracking);
+  --tgs-ls-base: var(--tgs-h2-tracking);
 }
 .tgs-heading[data-style='h3'] {
   font-family: var(--tgs-h3-font);
   font-weight: var(--tgs-h3-weight);
   --tgs-fs-base: var(--tgs-h3-size);
   --tgs-lh-base: var(--tgs-h3-leading);
-  letter-spacing: var(--tgs-h3-tracking);
+  --tgs-ls-base: var(--tgs-h3-tracking);
 }
 .tgs-heading[data-style='h4'] {
   font-family: var(--tgs-h4-font);
   font-weight: var(--tgs-h4-weight);
   --tgs-fs-base: var(--tgs-h4-size);
   --tgs-lh-base: var(--tgs-h4-leading);
-  letter-spacing: var(--tgs-h4-tracking);
+  --tgs-ls-base: var(--tgs-h4-tracking);
 }
 .tgs-heading[data-style='h5'] {
   font-family: var(--tgs-h5-font);
   font-weight: var(--tgs-h5-weight);
   --tgs-fs-base: var(--tgs-h5-size);
   --tgs-lh-base: var(--tgs-h5-leading);
-  letter-spacing: var(--tgs-h5-tracking);
+  --tgs-ls-base: var(--tgs-h5-tracking);
 }
 .tgs-heading[data-style='h6'] {
   font-family: var(--tgs-h6-font);
   font-weight: var(--tgs-h6-weight);
   --tgs-fs-base: var(--tgs-h6-size);
   --tgs-lh-base: var(--tgs-h6-leading);
-  letter-spacing: var(--tgs-h6-tracking);
+  --tgs-ls-base: var(--tgs-h6-tracking);
 }
 
 /*
@@ -1841,7 +1895,8 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   font-size: var(--tgs-fs-r, var(--tgs-fs, var(--tgs-fs-base)));
   --tgs-lh-base: var(--tgs-p-leading);
   line-height: var(--tgs-lh-r, var(--tgs-lh, var(--tgs-lh-base)));
-  letter-spacing: var(--tgs-p-tracking);
+  --tgs-ls-base: var(--tgs-p-tracking);
+  letter-spacing: var(--tgs-ls-r, var(--tgs-ls, var(--tgs-ls-base)));
 }
 .tgs-block[data-align='centre'] .tgs-text { margin-inline: auto; }
 .tgs-block[data-align='right']  .tgs-text { margin-inline: 0 0 0 auto; }
@@ -2380,7 +2435,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 .tgs-tsl__stars { display: inline-flex; gap: 2px; }
 .tgs-tsl__star { fill: var(--tgs-border-strong); }
-.tgs-tsl__star[data-on='true'] { fill: #f5a623; }
+/* The same star token the rating element uses: one gold across the site,
+   themed by the accent, rather than a second hard-coded amber (a mismatch
+   the 21 Aug review caught: two star colours on one page). */
+.tgs-tsl__star[data-on='true'] { fill: var(--tgs-star, var(--tgs-accent, #f0a13c)); }
 .tgs-tsl__quote {
   margin: 0;
   font-size: var(--tgs-text-l);
@@ -3164,12 +3222,58 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 
 .tgs-cards[data-align='centre'] .tgs-card__body { text-align: center; align-items: center; }
 
+/*
+ * THE FACTS A COLLECTION DECLARES, on the card.
+ *
+ * A price and a number of nights, straight under the title, where a reader
+ * scanning a grid of tours is already looking. Laid out as pairs that wrap, so
+ * two fit on one line on a wide card and stack on a phone without either one
+ * being cut off.
+ *
+ * The VALUE takes the data typeface and tabular figures; the label stays in the
+ * body face. That contrast is the point: a column of prices in a proportional
+ * face does not line up, and lining up is most of what makes a set of numbers
+ * comparable at a glance.
+ */
+.tgs-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--tgs-space-m);
+  margin: var(--tgs-space-s) 0 0;
+}
+.tgs-card__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.tgs-card__fact dt {
+  font-size: var(--tgs-text-s);
+  color: var(--tgs-text-muted, inherit);
+  line-height: 1.3;
+  /* A fact's label is a caption, not a heading: it must never out-shout the
+     number it belongs to. */
+  font-weight: 400;
+}
+.tgs-card__fact dd {
+  margin: 0;
+  font-size: var(--tgs-text-m);
+  font-weight: 650;
+  line-height: 1.25;
+  font-family: var(--tgs-font-data, inherit);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
 .tgs-card__label {
   margin: 0;
   font-size: var(--tgs-text-s);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--tgs-primary);
+  /* Card labels are data ("Day 01 · Oban", "Scotland · 7 nights"): the
+     theme's data typeface when one is named, the surroundings otherwise. */
+  font-family: var(--tgs-font-data, inherit);
 }
 /*
  * The client's own H4, all five properties of it, exactly as
@@ -3289,6 +3393,223 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   aspect-ratio: auto;
 }
 
+/* ------------------------------------------------------------------ */
+/* Card designs: the silhouette, as distinct from the finish           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * WORDS ON THE PICTURE.
+ *
+ * The editorial blog card, and the one shape no combination of the older
+ * controls could make: the picture IS the card and the words sit in it. Same
+ * markup as every other card, so this is the body laid over the frame.
+ *
+ * THE SCRIM IS NOT DECORATION, it is how the text clears 4.5:1 over a
+ * photograph nobody has seen yet. Same reasoning as .tgs-section__scrim, and
+ * deliberately stronger at the foot than the head: the words live at the
+ * bottom, and a gradient that is heaviest where the text is buys contrast
+ * without flattening the whole picture into grey. A card with no picture still
+ * gets it, so the words never sit on bare tint with no contrast promise.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 22rem;
+  /*
+   * The card is already a flex column, so this drops the words to the foot and
+   * leaves the picture the whole space above them. It matters more than it
+   * looks: the body then hugs its own text, and the scrim below only has the
+   * text to cover rather than the entire card.
+   */
+  justify-content: flex-end;
+}
+.tgs-cards[data-design='overlay'] .tgs-card__frame {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  border-radius: inherit;
+}
+/*
+ * A light wash over the whole picture, for mood and so a blown-out sky is not
+ * the brightest thing on the page. It is NOT what carries the contrast.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 6%, transparent) 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 26%, transparent) 100%
+  );
+}
+
+/*
+ * THE SCRIM THAT CARRIES THE CONTRAST SITS ON THE BODY, NOT ON THE CARD.
+ *
+ * A gradient measured down the card only works if you know where the words
+ * ended up, and you do not: a two-line title and a four-line summary put the
+ * text in different places, and the first cut of this failed exactly there,
+ * with the title landing on 3.66:1 over a bright sky while the lines below it
+ * passed comfortably.
+ *
+ * The body hugs its own text, so a scrim on the body tracks every line whatever
+ * the card holds. It reaches above the body's top edge and fades out there, so
+ * the picture is not cut off by a hard horizontal line.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card__body::before {
+  content: '';
+  position: absolute;
+  inset: -3.5rem 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 55%, transparent) 3.5rem,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 82%, transparent) 60%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 90%, transparent) 100%
+  );
+}
+.tgs-cards[data-design='overlay'] .tgs-card__body {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  /*
+   * THE PADDING COMES BACK, whatever the finish says.
+   *
+   * A plain card has its side padding zeroed a few rules up, and that is right
+   * for a plain card: there is no box, so an indent would be an indent from
+   * nothing. This design breaks that assumption. The finish draws no box, but
+   * the PICTURE is one, and words flush against the edge of a photograph read
+   * as broken rather than as flush. Andy caught this on the first screenshot.
+   *
+   * Restated here rather than by excluding overlay from the plain rule, because
+   * the plain rule is about the finish and this is about the design: the two
+   * are separate questions and the exception belongs with the one that has it.
+   */
+  padding: var(--tgs-space-l);
+  /*
+   * NO min-height AND NO flex-grow. The body is exactly as tall as its words,
+   * which is what keeps the scrim off the picture: give the body the card's
+   * height and the scrim that tracks it covers the photograph completely, which
+   * is the first version of this and the reason the picture had gone.
+   */
+  flex: none;
+  /*
+   * The measured on-dark tokens rather than a flat white, so a muted line and a
+   * rule inside the card are the same values a dark section uses and were
+   * checked against the same ground.
+   */
+  color: var(--tgs-text-invert);
+  --tgs-text: var(--tgs-text-invert);
+  --tgs-text-muted: var(--tgs-on-dark-muted);
+  --tgs-border: var(--tgs-on-dark-border);
+  --tgs-primary: var(--tgs-text-invert);
+}
+/* No box, so no finish. The border, tint and shadow have nothing to sit on. */
+.tgs-cards[data-design='overlay'] .tgs-card {
+  border: 0;
+  background: var(--tgs-surface-alt);
+  box-shadow: none;
+}
+.tgs-cards[data-design='overlay'] .tgs-card__noimage { background: var(--tgs-surface-alt); }
+/*
+ * The summary is capped at two lines HERE ONLY. Nothing is thrown away: the
+ * words are in the HTML and the entry's own page shows all of them. But this
+ * design spends the card on a photograph, and one client's four-line summary
+ * would otherwise grow the scrim until there was no photograph left to see.
+ */
+.tgs-cards[data-design='overlay'] .tgs-card__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+/* The picture is the card, so where it "sits" is not a question here. */
+.tgs-cards[data-design='overlay'][data-image='left'] .tgs-card { flex-direction: column; }
+
+/*
+ * A LIST, WITH THE DATE BESIDE THE WORDS.
+ *
+ * One column of rows rather than a grid of tiles: the archive index a blog
+ * wants once it has more than a screenful, where a reader scans titles and the
+ * dates line up down the left.
+ *
+ * IT ALSO FIXES AN EYEBROW. A stacked card puts the date above the title, which
+ * is the label-above-a-heading pattern the craft floor bans outright. Here the
+ * same element becomes the first column, so the date is beside the heading
+ * rather than stacked on top of it, and the heading opens the row.
+ */
+.tgs-cards[data-design='index'] {
+  display: block;
+  border-top: 1px solid var(--tgs-border);
+}
+.tgs-cards[data-design='index'] .tgs-card {
+  flex-direction: row;
+  align-items: start;
+  border: 0;
+  border-bottom: 1px solid var(--tgs-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.tgs-cards[data-design='index'] .tgs-card__body {
+  display: grid;
+  /* The date column is wide enough for "14 September 2026" and no wider. */
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--tgs-space-xs) var(--tgs-space-l);
+  padding-inline: 0;
+  padding-block: var(--tgs-space-l);
+}
+.tgs-cards[data-design='index'] .tgs-card__body > * { grid-column: 2; }
+.tgs-cards[data-design='index'] .tgs-card__label {
+  grid-column: 1;
+  grid-row: 1 / span 6;
+  align-self: start;
+  padding-top: 0.15em;
+}
+/* A title leading its own row wants the weight a section heading has, not the
+   size a tile's title needs. */
+.tgs-cards[data-design='index'] .tgs-card__title { font-size: var(--tgs-h-s); }
+/* The picture becomes a thumbnail at the end of the row, and only if there is
+   one to show: a text index should not carry a column of empty grey boxes. */
+.tgs-cards[data-design='index'] .tgs-card__frame {
+  order: 1;
+  flex: 0 0 clamp(6rem, 14vw, 11rem);
+  align-self: center;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--tgs-radius-sm);
+  margin-inline-start: var(--tgs-space-l);
+}
+.tgs-cards[data-design='index'] .tgs-card:has(.tgs-card__noimage) .tgs-card__frame { display: none; }
+
+@container tgs-page (max-width: 700px) {
+  /*
+   * On a phone the whole ROW folds, not just the body inside it. Folding only
+   * the body was the first version and it left the picture beside the words for
+   * the row's full height, squeezing three-word lines down a narrow column: the
+   * thumbnail took a third of a 390px screen and the title paid for it.
+   *
+   * Same fold the beside-the-words layout already does, so the two agree.
+   */
+  .tgs-cards[data-design='index'] .tgs-card { flex-direction: column; }
+  .tgs-cards[data-design='index'] .tgs-card__body {
+    display: flex;
+    padding-block: var(--tgs-space-m);
+  }
+  .tgs-cards[data-design='index'] .tgs-card__frame {
+    order: -1;
+    flex: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-inline-start: 0;
+    margin-block-end: var(--tgs-space-m);
+  }
+  .tgs-cards[data-design='overlay'] .tgs-card { min-height: 17rem; }
+}
+
 @container tgs-page (max-width: 1023px) {
   .tgs-cards[data-columns='4'] { grid-template-columns: repeat(2, 1fr); }
 }
@@ -3312,6 +3633,150 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
      thumbnail and the words next to it are a column three words wide. */
   .tgs-cards[data-image='left'] .tgs-card { flex-direction: column; }
   .tgs-cards[data-image='left'] .tgs-card__frame { flex: none; aspect-ratio: 16 / 9; }
+}
+
+/* ------------------------------------------------------------------ */
+/* The three entry layouts                                             */
+/* ------------------------------------------------------------------ */
+
+/*
+ * ONE MARKUP, THREE LAYOUTS. Standard is every rule below this block and needs
+ * no selector of its own: a collection that has never chosen gets it, which is
+ * why the column defaults to empty and nothing had to be backfilled.
+ *
+ * The other two are CSS only, on the same elements in the same order, so an
+ * entry's document order never changes with its look. That matters past tidiness:
+ * a screen reader and a crawler read the order, and moving a picture up the page
+ * visually must not move it up the article.
+ */
+
+/*
+ * CENTRED. A narrower measure and a centred opening, for something somebody sits
+ * down to read.
+ *
+ * The measure is capped in CHARACTERS rather than pixels, because the thing that
+ * makes a line hard to read is how many words are on it, and a client who set a
+ * larger body size would otherwise get a longer line as well as a bigger one.
+ * 68ch sits inside the 65 to 75 the craft floor asks for.
+ */
+.tgs-entry[data-layout='centred'] .tgs-entry__head {
+  max-width: 68ch;
+  margin-inline: auto;
+  text-align: center;
+}
+.tgs-entry[data-layout='centred'] .tgs-entry__tags,
+.tgs-entry[data-layout='centred'] .tgs-entry__facts {
+  justify-content: center;
+}
+/* The picture is the one thing that does NOT narrow: a centred article still
+   wants its photograph at the width of the page. */
+.tgs-entry[data-layout='centred'] .tgs-entry__image {
+  max-width: none;
+  margin-inline: 0;
+}
+/* The words of the article itself narrow with the header, or the opening would
+   be a column and the body a slab. */
+.tgs-entry[data-layout='centred'] > .tgs-section .tgs-row {
+  max-width: 68ch;
+  margin-inline: auto;
+}
+
+/*
+ * PICTURE FIRST. The photograph leads at full width with the title on it, which
+ * is what a tour or a destination wants and what an article does not.
+ *
+ * THE PICTURE MOVES WITHOUT MOVING IN THE MARKUP. It is the last child of the
+ * header and stays there; `order` lifts it visually. The header becomes a flex
+ * column for exactly that reason.
+ */
+.tgs-entry[data-layout='hero'] .tgs-entry__head {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+  min-height: min(60vh, 32rem);
+  justify-content: flex-end;
+  padding: var(--tgs-space-l);
+}
+/*
+ * THE TITLE OPENS THE HEADER, and the date follows it.
+ *
+ * Two reasons, and they agree. A date above a heading is the eyebrow the craft
+ * floor bans outright: the standard layout has carried one since the blog
+ * shipped and ripping it off every published site is not this change's business,
+ * but a layout being designed now does not get to reproduce it. And measured
+ * over a photograph the top of the header is where the scrim is lightest, so
+ * the date sat at 3.16:1 up there and clears comfortably once it moves down.
+ *
+ * Order rather than markup, exactly as the picture below: the document keeps
+ * the order a reader and a crawler get.
+ */
+.tgs-entry[data-layout='hero'] .tgs-entry__title { order: 0; }
+.tgs-entry[data-layout='hero'] .tgs-entry__date { order: 1; margin: var(--tgs-space-s) 0 0; }
+.tgs-entry[data-layout='hero'] .tgs-entry__byline { order: 2; }
+.tgs-entry[data-layout='hero'] .tgs-entry__summary { order: 3; }
+.tgs-entry[data-layout='hero'] .tgs-entry__facts { order: 4; }
+.tgs-entry[data-layout='hero'] .tgs-entry__tags { order: 5; }
+
+.tgs-entry[data-layout='hero'] .tgs-entry__image {
+  order: -1;
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  max-width: none;
+  z-index: -2;
+}
+.tgs-entry[data-layout='hero'] .tgs-entry__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+/*
+ * The same scrim decision the overlay card made, and for the same reason: the
+ * words have to clear 4.5:1 over a photograph nobody has seen. It sits on the
+ * header, which is exactly as tall as the words plus the room above them, and
+ * is heaviest at the foot where every line actually is.
+ */
+.tgs-entry[data-layout='hero'] .tgs-entry__head::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 18%, transparent) 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 52%, transparent) 45%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 88%, transparent) 100%
+  );
+}
+.tgs-entry[data-layout='hero'] .tgs-entry__head {
+  color: var(--tgs-text-invert);
+  --tgs-text: var(--tgs-text-invert);
+  --tgs-text-muted: var(--tgs-on-dark-muted);
+  --tgs-border: var(--tgs-on-dark-border);
+  /*
+   * --tgs-primary TOO, and it is the one that is easy to miss. The date takes
+   * the brand colour, and a brand is usually dark: leaving it alone put a navy
+   * date on a dark photograph, which the render showed and the first contrast
+   * probe did not. Anything brand-coloured in this header is on the picture.
+   */
+  --tgs-primary: var(--tgs-text-invert);
+}
+/* An entry with no picture keeps the shape without pretending to have one: the
+   scrim alone would be a grey slab, so the header falls back to a plain band. */
+.tgs-entry[data-layout='hero'] .tgs-entry__head:not(:has(.tgs-entry__image)) {
+  background: var(--tgs-surface-dark);
+  min-height: 0;
+}
+
+@container tgs-page (max-width: 700px) {
+  /* A 60vh hero on a phone is the whole screen before a word is read. */
+  .tgs-entry[data-layout='hero'] .tgs-entry__head {
+    min-height: min(48vh, 22rem);
+    padding: var(--tgs-space-m);
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -3360,6 +3825,55 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   line-height: 1.5;
   color: var(--tgs-text-muted);
   text-wrap: pretty;
+}
+
+/*
+ * THE FACTS AN ENTRY'S COLLECTION DECLARES, above its picture.
+ *
+ * The same pairs the card shows, given the room a page has: bigger values,
+ * ruled off top and bottom so the row reads as a block of answers rather than
+ * as more of the summary. Somebody who opened a tour is deciding, and this is
+ * what they are deciding on.
+ *
+ * A WRAP, NOT A GRID OF FIXED COLUMNS. Six facts and two facts are both
+ * ordinary, and a fixed track count would either strand one on a line of its
+ * own or squash six. The column-gap is wide enough that two pairs never read as
+ * one.
+ */
+.tgs-entry__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-m) var(--tgs-space-l);
+  margin: var(--tgs-space-m) 0 0;
+  padding: var(--tgs-space-m) 0;
+  border-top: 1px solid var(--tgs-border);
+  border-bottom: 1px solid var(--tgs-border);
+}
+
+.tgs-entry__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tgs-entry__fact dt {
+  font-size: var(--tgs-text-s);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--tgs-text-muted);
+}
+
+.tgs-entry__fact dd {
+  margin: 0;
+  font-size: var(--tgs-text-l);
+  font-weight: 650;
+  line-height: 1.2;
+  /* The theme's data typeface where one is named, and figures that line up:
+     the same treatment the card's values get, for the same reason. */
+  font-family: var(--tgs-font-data, inherit);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 /* The post's tags under the summary, a wrap of quiet pills. Each links to the
@@ -3507,8 +4021,14 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-table[data-style='boxed'] th,
 .tgs-table[data-style='boxed'] td { border: 1px solid var(--tgs-border); }
 
+/*
+ * A <figcaption> below the scroll region, not a <caption> inside the table:
+ * inside, it scrolled sideways with the table on a phone and was cut at the
+ * viewport edge mid-word. Out here it wraps like any paragraph.
+ */
+.tgs-table__figure { margin: 0; }
 .tgs-table__caption {
-  caption-side: bottom;
+  display: block;
   padding-top: var(--tgs-space-s);
   font-size: var(--tgs-text-s);
   color: var(--tgs-text-muted);
@@ -3542,9 +4062,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   overscroll-behavior-x: contain;
 }
 
-.tgs-slider[data-slide='narrow'] { --tgs-slide: 260px; }
-.tgs-slider[data-slide='medium'] { --tgs-slide: 340px; }
-.tgs-slider[data-slide='wide']   { --tgs-slide: 440px; }
+/*
+ * THE NEXT CARD ALWAYS PEEKS. A fixed slide width divides some container
+ * widths exactly: at Coastwise's contained width, three medium slides plus
+ * their gaps came to the rail's width to the pixel, so the fourth card
+ * started at the very edge, the edge fade fell on card padding, and days
+ * four to seven were undiscoverable (the 21 Aug review found it; the fade
+ * and the bold bar were both working and both had nothing to show). The cap
+ * keeps each preset's width until the container is tight, and the calc
+ * guarantees the next card shows by at least a finger's width at every
+ * width in between. A visible sliver of card is the one affordance that
+ * needs no scrollbar, no motion and no luck.
+ */
+.tgs-slider[data-slide='narrow'] { --tgs-slide: min(260px, calc((100% - 5.5rem) / 4)); }
+.tgs-slider[data-slide='medium'] { --tgs-slide: min(340px, calc((100% - 5.5rem) / 3)); }
+.tgs-slider[data-slide='wide']   { --tgs-slide: min(440px, calc((100% - 5.5rem) / 2)); }
 
 /* Each card comes to rest at the left edge of the rail. */
 .tgs-slider > .tgs-card { scroll-snap-align: start; }
@@ -4002,9 +4534,15 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  * gains a dropdown of the pages inside it. The browser reveals the dropdown on
  * hover AND on keyboard focus, through :focus-within, so it is reachable with a
  * mouse, a finger and the Tab key without a line of script, the same principle
- * as the phone menu above. The dropdown is its own surface, so its links take the
- * surface's text colour rather than the header's, which would vanish on a header
- * that set white link text.
+ * as the phone menu above.
+ *
+ * COLOUR: the panel matches the band it hangs from. An earlier version gave it
+ * the light surface unconditionally and thought `color: var(--tgs-text)` meant
+ * "the surface's text colour". It does not: a dark or accent section re-scopes
+ * --tgs-text to its own inverted colour, and custom properties inherit, so the
+ * panel came out light with light text in it, unreadable (Coastwise, 21 Aug
+ * 2026). The tone overrides further down keep panel and text measured against
+ * the same band instead of fighting the inheritance.
  */
 .tgs-nav__item { position: relative; }
 
@@ -4044,6 +4582,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   transform: translateY(0);
   transition: opacity 0.14s ease, transform 0.14s ease;
 }
+
+/*
+ * THE HEADER HAS TO RISE WHILE A DROPDOWN IS OPEN, for exactly the reason the
+ * always-on burger's panel documents above: the header is a z-index: 2 stacking
+ * context, and the page's own `.tgs-section__inner` is an equal z-index LATER
+ * in the document, so it paints straight over the open dropdown. The panel's
+ * own z-index: 30 cannot escape the header's box. Same cure, same scope: raise
+ * the header only while a folder item is hovered or holds focus, not always,
+ * so no permanent stacking change leaks onto heroes and sticky bars. Seen on
+ * Coastwise (21 Aug 2026): the home page's copy printing through the menu.
+ */
+.tgs-region[data-region='header']:has(.tgs-nav__item--folder:hover),
+.tgs-region[data-region='header']:has(.tgs-nav__item--folder:focus-within) {
+  z-index: 40;
+}
 .tgs-nav__item--folder:hover > .tgs-nav__link .tgs-nav__chev,
 .tgs-nav__item--folder:focus-within > .tgs-nav__link .tgs-nav__chev {
   transform: rotate(180deg);
@@ -4061,6 +4614,42 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   white-space: nowrap;
 }
 .tgs-nav__sublink:hover { background: var(--tgs-bg); color: var(--tgs-primary); }
+
+/*
+ * THE DETACHED MENU SURFACES FOLLOW THEIR BAND (21 Aug 2026).
+ *
+ * Two pieces of the menu float free of the header bar: the dropdown under a
+ * folder link and the always-on burger's panel. Inside a dark or accent
+ * section the bar's tone rule has already re-scoped --tgs-text, --tgs-text-muted
+ * and --tgs-border to the pairing measured against that band, and those
+ * inherit into the panel whether it likes it or not. So the panel takes the
+ * band's own background too, and every colour inside it is a measured pair
+ * again. Only the background and the hover wash need stating: the text is
+ * already right the moment the ground matches it.
+ *
+ * The hover wash reuses the band's border mix rather than the page --tgs-bg,
+ * which is a light colour that would flash a bright pill on a dark panel.
+ */
+.tgs-section[data-tone='dark'] .tgs-nav__submenu {
+  background: var(--tgs-surface-dark);
+}
+.tgs-section[data-tone='accent'] .tgs-nav__submenu {
+  background: var(--tgs-primary);
+}
+.tgs-section[data-tone='dark'] .tgs-nav__sublink:hover {
+  background: var(--tgs-on-dark-border);
+  color: var(--tgs-text);
+}
+.tgs-section[data-tone='accent'] .tgs-nav__sublink:hover {
+  background: var(--tgs-on-primary-border);
+  color: var(--tgs-text);
+}
+.tgs-section[data-tone='dark'] .tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  background: var(--tgs-surface-dark);
+}
+.tgs-section[data-tone='accent'] .tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  background: var(--tgs-primary);
+}
 
 /*
  * Inside the phone menu there is no hover to open a dropdown, so the pages inside
@@ -4480,7 +5069,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   --tgs-scr-edge: #23262b;
 }
 
-.tgs-screen__device { width: 100%; max-width: 56rem; }
+/*
+ * THE LID IS NARROWED SO THE BASE FITS.
+ *
+ * A laptop's base is wider than its lid and the mockup says so: .tgs-screen__base
+ * below is 118% and offset to sit under the screen. Nothing accounted for that
+ * extra 18% though, so at any width where the lid filled its column the base
+ * hung 32px past it on each side, in every layout including full width. It was
+ * the only thing on the page that stuck out of its own column at 390px.
+ *
+ * 1 / 1.18 is 84.7%, so lid plus base is exactly the space available and the
+ * drawing is unchanged in proportion, only in size.
+ */
+.tgs-screen__device { width: 84.7%; max-width: 56rem; }
+/* A phone has no base, so it keeps the full width it always had. */
+.tgs-screen[data-device='phone'] .tgs-screen__device { width: 100%; }
 .tgs-screen[data-device='phone'] .tgs-screen__device { max-width: 17rem; }
 
 .tgs-screen__bezel {
@@ -4952,6 +5555,15 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  * So the runway is its own empty element after the cards. It extends the
  * container's content box, gives the page more to scroll, and belongs to no
  * card, which is what lets the last one land where it should.
+ *
+ * TWO STICKY-STACKS LIVE IN THIS FILE, deliberately. The S3 section recipe
+ * (search "S3 sticky-stack") turns an ordinary Cards grid into a deck as a
+ * motion setting; this element is a designed two-pane deck a client fills in.
+ * They stay separate because they own different markup, but the physics is the
+ * same, and when they were compared on 21 Aug 2026 each had a fix the other
+ * lacked: S3 was missing this runway (its deck never collected at all) and this
+ * element was missing the reduced-motion stand-down. If you fix one, look at
+ * the other.
  */
 .tgs-stack__runway {
   flex: none;
@@ -4982,6 +5594,29 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-stack[data-radius='md']   .tgs-stack__card { border-radius: var(--tgs-radius, 12px); }
 .tgs-stack[data-radius='lg']   .tgs-stack__card { border-radius: 24px; }
 .tgs-stack[data-radius='full'] .tgs-stack__card { border-radius: 32px; }
+
+/*
+ * STANDS DOWN FOR ANYBODY WHO ASKED FOR LESS MOTION, added 21 Aug 2026 when the
+ * two sticky-stack implementations were compared side by side.
+ *
+ * The S3 section recipe has always done this and this element never did, which
+ * is the sort of disagreement that only shows up when somebody puts them next to
+ * each other. S3's note has the reasoning and it is right: cards sliding over one
+ * another as the page moves is exactly what the preference is for, even though
+ * nothing is animating and sticky never runs a frame of its own.
+ *
+ * Expressed as an override rather than by wrapping the rules above in
+ * no-preference, deliberately: this CSS is live, and an override cannot change
+ * what anybody already sees except for the people who asked it to.
+ *
+ * What is left is an ordinary list of cards, which is a finished comparison
+ * rather than a broken one. The runway goes with it, or the section would end
+ * with a screen of nothing.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .tgs-stack__card { position: static; }
+  .tgs-stack__runway { display: none; }
+}
 
 /* `order` rather than a second set of column rules, so the side is one property
    and the markup order never changes — the words are read before the picture
@@ -5038,13 +5673,21 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
    * ONE COLUMN, PICTURE FIRST. Half a phone screen of photograph beside two
    * words is neither. The stack itself stays, because the gathering is the
    * point of the element and it works just as well vertically.
+   *
+   * The picture must be ORDERED first for BOTH sides, not assumed first: the
+   * rows are 12rem-then-auto, and for the default side (right) the body is
+   * first in the markup, so without this it landed in the 12rem picture row,
+   * was clipped by the card's overflow, and the picture collapsed into the
+   * auto row at zero height (Coastwise home deck, 21 Aug 2026: titles and
+   * buttons cut mid-pill on phones). One order rule covers both sides and the
+   * body's auto row grows to its content.
    */
   .tgs-stack__card {
     grid-template-columns: 1fr;
     grid-template-rows: 12rem auto;
     min-height: 0;
   }
-  .tgs-stack__card[data-side='left'] .tgs-stack__pic { order: 0; }
+  .tgs-stack__card .tgs-stack__pic { order: -1; }
   .tgs-stack__body { padding: var(--tgs-space-l) var(--tgs-space-m); }
   .tgs-stack { --tgs-stack-top: 3.5rem; --tgs-stack-step: 10px; }
 }
@@ -5775,9 +6418,30 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   list-style: none;
 }
 
-.tgs-stats[data-columns='2'] { grid-template-columns: repeat(2, 1fr); }
-.tgs-stats[data-columns='3'] { grid-template-columns: repeat(3, 1fr); }
-.tgs-stats[data-columns='4'] { grid-template-columns: repeat(4, 1fr); }
+/*
+ * THE TRACKS HAVE TO BE ALLOWED TO SHRINK, AND TO REFLOW.
+ *
+ * `repeat(4, 1fr)` looks like four equal quarters and is not: a 1fr track's
+ * minimum is `auto`, so it will not go below its content's min-content width.
+ * A key number is large type that does not wrap, so four of them in a narrow
+ * column simply pushed out of it: measured 192px past a 255px column inside a
+ * four-column section, 101px inside a three, 41px inside a two. It scaled with
+ * the count, which is the signature.
+ *
+ * It never showed on a phone, because there the section's own columns stack and
+ * every column is full width. That is why this survived: the page is wide, so
+ * nothing about the PAGE looks narrow, and the container query below keys off
+ * the page rather than off the column the numbers actually sit in.
+ *
+ * minmax(0, 1fr) lets a track shrink. auto-fit with a floor lets the row reflow
+ * to fewer columns when the COLUMN is narrow, whatever the page is doing, which
+ * is the part a page-level container query cannot do. The client's choice is
+ * still the maximum: they never get more columns than they asked for.
+ */
+.tgs-stats[data-columns='2'] { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+.tgs-stats[data-columns='3'] { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+.tgs-stats[data-columns='4'] { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+
 
 .tgs-stats[data-align='centre'] { text-align: center; }
 .tgs-stats[data-align='right']  { text-align: right; }
@@ -5796,8 +6460,24 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   font-variant-numeric: tabular-nums lining-nums;
 }
 
-.tgs-stats[data-size='m'] .tgs-stats__figure  { font-size: var(--tgs-h-l); }
-.tgs-stats[data-size='l'] .tgs-stats__figure  { font-size: var(--tgs-h-xl); }
+/*
+ * A KEY NUMBER HAS TO FIT THE TRACK IT IS IN.
+ *
+ * These were flat sizes, and a flat size in a track whose width depends on the
+ * section layout is the second half of the overflow bug. Letting the tracks
+ * shrink (above) stopped the LIST pushing out of its column and moved the
+ * problem one level down: "12,000+" at a fixed 36px is about 205px of text in a
+ * 154px track, so the number itself spilled, and the little "+" was measured 51
+ * px outside the column with its own box entirely inside it.
+ *
+ * min() keeps the client's chosen size as the CEILING on a roomy track and lets
+ * a narrow one scale the number down instead of spilling it. cqi is a share of
+ * the item's own width, so it answers to the column the numbers are in rather
+ * than to the page, which is the distinction this whole bug turned on.
+ */
+.tgs-stats__item { container-type: inline-size; }
+.tgs-stats[data-size='m'] .tgs-stats__figure  { font-size: min(var(--tgs-h-l), 19cqi); }
+.tgs-stats[data-size='l'] .tgs-stats__figure  { font-size: min(var(--tgs-h-xl), 22cqi); }
 .tgs-stats[data-size='xl'] .tgs-stats__figure { font-size: calc(var(--tgs-h-xl) * 1.4); }
 
 /*
@@ -5826,6 +6506,10 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 .tgs-stats__value {
   display: inline-block;
   text-align: center;
+  /* The theme's data typeface, when it names one; inherit otherwise, so
+     every site without one is untouched. Key numbers ARE data. */
+  font-family: var(--tgs-font-data, inherit);
+  font-variant-numeric: tabular-nums;
 }
 @property --tgs-count {
   syntax: '<integer>';
@@ -6275,6 +6959,109 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   .tgs-whatsapp__button:hover,
   .tgs-whatsapp[data-look='floating'] .tgs-whatsapp__bubble:hover { transform: none; }
 }
+
+/* ------------------------------------------------------------------ */
+/* The Form                                                            */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The controls hold NO SURFACE OF THEIR OWN: transparent fields, `color:
+ * inherit`, a border from the tone-scoped --tgs-border. That is the search
+ * input's arrangement, and it is what lets one form sit on bone, on the dark
+ * band and on an accent band without a single tone-specific rule — the exact
+ * trap the nav dropdown fell into by owning a light surface under inherited
+ * light text (21 Aug 2026). Inherit and you cannot mismatch.
+ */
+.tgs-form { max-width: 34rem; }
+.tgs-form[data-align='centre'] { margin-inline: auto; }
+.tgs-form[data-align='right'] { margin-inline-start: auto; }
+
+.tgs-form__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-m);
+  align-items: flex-start;
+}
+.tgs-form__field { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.tgs-form__label { font-weight: 600; font-size: 0.95em; }
+.tgs-form__req { font-style: normal; color: var(--tgs-accent, currentColor); }
+
+.tgs-form__control {
+  width: 100%;
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-sm, 6px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 10px 12px;
+}
+.tgs-form__control::placeholder { color: var(--tgs-text-muted); opacity: 1; }
+.tgs-form__control:focus-visible {
+  outline: 2px solid var(--tgs-accent, currentColor);
+  outline-offset: 1px;
+}
+textarea.tgs-form__control { resize: vertical; min-height: 7rem; }
+/* A transparent select keeps the page's colours in its closed state; its
+   dropped-down list is the browser's own and styles itself per platform. */
+select.tgs-form__control option { color: initial; }
+
+.tgs-form__field--tick { flex-direction: row; }
+.tgs-form__tick {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  cursor: pointer;
+}
+.tgs-form__tick input { accent-color: var(--tgs-accent, currentColor); }
+
+/*
+ * THE STATE MACHINE IS THE URL FRAGMENT. The submit route sends the visitor
+ * back to #<id>-done or #<id>-err, and :target does what a script would have:
+ * done hides the form and shows the thank-you; err reveals the error line
+ * above the fields. Load the page with no fragment and none of this matches,
+ * which is the blank slate. No script, nothing to hydrate, works printed.
+ */
+.tgs-form__done {
+  display: none;
+  border: 1px solid var(--tgs-border);
+  border-left: 3px solid var(--tgs-accent, currentColor);
+  border-radius: var(--tgs-radius-sm, 6px);
+  padding: var(--tgs-space-m) var(--tgs-space-l);
+}
+.tgs-form__done-title { margin: 0; font-weight: 700; }
+.tgs-form__done-body { margin: 6px 0 0; color: var(--tgs-text-muted); }
+.tgs-form__done:target { display: block; }
+.tgs-form__done:target + .tgs-form__form { display: none; }
+
+.tgs-form__error {
+  display: none;
+  margin: 0;
+  font-weight: 600;
+  color: var(--tgs-accent, currentColor);
+}
+.tgs-form__error:target { display: block; }
+
+/*
+ * The honeypot is removed from sight and from the accessibility tree, but NOT
+ * display:none: some spam scripts skip fields they can see are not rendered,
+ * and an off-screen field is the classic compromise. aria-hidden and
+ * tabindex=-1 keep it out of every human path.
+ */
+.tgs-form__hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* In the editor the form is a picture: clicks fall through to select the
+   block rather than focusing a control that goes nowhere. */
+.tgs-form[data-editing] input,
+.tgs-form[data-editing] textarea,
+.tgs-form[data-editing] select,
+.tgs-form[data-editing] button { pointer-events: none; }
 
 /* ------------------------------------------------------------------ */
 /* The Coupon                                                          */

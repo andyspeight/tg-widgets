@@ -28,6 +28,8 @@
   --ed-accent: #00b4d8;
   --ed-accent-dark: #0096b7;
   --ed-danger: #ef4444;
+  /* Asking rather than refusing: an unanswered field a collection wants. */
+  --ed-warn: #a1621a;
   /* Brand as a foreground colour, which needs a different value per theme
      from brand as a background. One token cannot do both jobs. */
   --ed-brand-ink: #1b2b5b;
@@ -112,6 +114,7 @@
     --ed-primary-light: #3a5296;
     --ed-brand-ink: #93c5fd;
     --ed-danger: #fca5a5;
+    --ed-warn: #fbbf24;
     --ed-select: #60a5fa;
     --ed-select-wash: #172554;
     --ed-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -139,6 +142,7 @@
     --ed-primary-light: #3a5296;
     --ed-brand-ink: #93c5fd;
     --ed-danger: #fca5a5;
+    --ed-warn: #fbbf24;
     --ed-select: #60a5fa;
     --ed-select-wash: #172554;
     --ed-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -2041,6 +2045,12 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   line-height: 1.5;
   color: var(--ed-ink-2);
 }
+/*
+ * A help line that is asking for something rather than explaining it: an empty
+ * field the collection says it wants before publishing. Warm rather than red,
+ * because a half-written draft is normal and nothing is refused.
+ */
+.ed-help[data-tone='warn'] { color: var(--ed-warn); }
 
 .ed-input,
 .ed-select,
@@ -3448,6 +3458,36 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
  * a toast, because it is not an event that happened, it is a state the page
  * is still in.
  */
+/*
+ * WHAT WE WROTE INTO THE SEARCH LISTING (#239).
+ *
+ * Beside the save failure rather than in a toast, and for the same reason that
+ * one is: it is telling somebody something about their own page that they did
+ * not do themselves, and a message that fades is a message they may never read.
+ * Calm rather than alarming, because nothing has gone wrong: this is the tool
+ * doing the job, and the colour should say so.
+ */
+.ed-seofill {
+  margin: 0;
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-well);
+  color: var(--ed-ink);
+  font-size: var(--ed-text-xs);
+  max-width: 44rem;
+}
+.ed-seofill__lead { margin: 0 0 var(--ed-2); font-weight: 600; }
+.ed-seofill__list {
+  margin: 0 0 var(--ed-2);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--ed-1) var(--ed-2);
+}
+.ed-seofill__list dt { color: var(--ed-ink-2); white-space: nowrap; }
+.ed-seofill__list dd { margin: 0; }
+.ed-seofill__note { margin: 0 0 var(--ed-2); color: var(--ed-ink-2); }
+
 .ed-savefail {
   margin: 0;
   padding: var(--ed-1) var(--ed-3);

@@ -172,7 +172,11 @@ describe('one link per card, never two', () => {
   });
 
   it('a card with nothing in it is not drawn', () => {
-    expect(card).toContain('if (!title && !body && !label && !src && !icon) return null;');
+    // Facts count as something to say: a tour card can be a price and a
+    // number of nights with no summary typed under it yet.
+    expect(card).toContain(
+      'if (!title && !body && !label && !src && !icon && facts.length === 0) return null;',
+    );
   });
 });
 

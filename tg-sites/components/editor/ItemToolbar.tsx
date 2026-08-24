@@ -40,6 +40,7 @@ import {
 import { useDraggable } from '@dnd-kit/core';
 
 import { blockDefinition } from '../../lib/content/blocks';
+import type { FieldDef } from '../../lib/content/collection-fields';
 import type { ItemMeta } from '../../lib/content/collection-page';
 import { itemActions, itemLabel, type ItemAction } from '../../lib/content/item-actions';
 import type { Page, RegionName } from '../../lib/content/schema';
@@ -57,6 +58,8 @@ export interface OptionsProps {
   isItem: boolean;
   itemMeta?: ItemMeta;
   onItemMeta?: (next: ItemMeta) => void;
+  /** The entry's collection's own field definitions, for the same form. */
+  itemFields?: FieldDef[];
   /**
    * Move the selection, so the imported block's "Make editable" can point the
    * editor at the rebuilt section. Without it the popover stays anchored to the
@@ -354,6 +357,7 @@ export function ItemToolbar({
               isItem={options.isItem}
               itemMeta={options.itemMeta}
               onItemMeta={options.onItemMeta}
+              itemFields={options.itemFields}
               tier={options.tier}
             />
           </div>

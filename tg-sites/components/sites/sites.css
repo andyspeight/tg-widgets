@@ -1162,3 +1162,263 @@
 }
 
 .sw-note svg { flex: none; margin-top: 2px; color: var(--ed-select); }
+
+/* ------------------------------------------------------------------ */
+/* Enquiries                                                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The list is read newest first and mostly skimmed, so each enquiry is one
+ * calm card: what form, where, when, then the answers as label/value pairs.
+ * Unread state is a dot and a slightly firmer edge, not a colour wash: the
+ * words are the content and they stay quiet.
+ */
+.enq-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-6);
+}
+.enq-sub { margin: var(--ed-1) 0 0; color: var(--ed-ink-2); font-size: var(--ed-text-sm); }
+
+.enq-empty {
+  border: 1px dashed var(--ed-line);
+  border-radius: 10px;
+  padding: var(--ed-6);
+  color: var(--ed-ink-2);
+  max-width: 40rem;
+}
+.enq-empty p { margin: 0; line-height: 1.55; }
+
+.enq-list { display: flex; flex-direction: column; gap: var(--ed-4); max-width: 46rem; }
+
+.enq {
+  border: 1px solid var(--ed-line);
+  border-radius: 10px;
+  padding: var(--ed-4) var(--ed-5);
+  background: var(--ed-panel, transparent);
+}
+.enq--unread { border-color: var(--ed-select); }
+
+.enq__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  flex-wrap: wrap;
+}
+.enq__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  margin: 0;
+  font-size: var(--ed-text-base);
+  font-weight: 600;
+}
+.enq__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ed-select);
+}
+.enq__meta { color: var(--ed-ink-2); font-size: var(--ed-text-sm); margin-right: auto; }
+
+.enq__answers { margin: var(--ed-3) 0 0; }
+.enq__answer {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) 1fr;
+  gap: var(--ed-2) var(--ed-4);
+  padding: var(--ed-2) 0;
+  border-top: 1px solid var(--ed-line);
+}
+.enq__answer dt { font-weight: 600; font-size: var(--ed-text-sm); color: var(--ed-ink-2); }
+.enq__answer dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .enq__answer { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* ---------------------------------------------------------------------------
+ * A collection's own fields: the starter picker, and the schema editor.
+ *
+ * Everything here reuses the dialog's existing .sv-field treatment rather than
+ * inventing a second one. The two additions are a select and a textarea, which
+ * no dialog had needed until a field could hold a choice from a list.
+ * ------------------------------------------------------------------------- */
+
+.sv-field select,
+.sv-field textarea {
+  width: 100%;
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+.sv-field select { min-height: 44px; }
+.sv-field textarea { resize: vertical; line-height: 1.5; }
+.sv-field textarea::placeholder { color: var(--ed-ink-3); }
+.sv-field select:hover,
+.sv-field textarea:hover { border-color: var(--ed-ink-3); }
+.sv-field select:focus-visible,
+.sv-field select:focus,
+.sv-field textarea:focus-visible,
+.sv-field textarea:focus {
+  outline: none;
+  border-color: var(--ed-select);
+  box-shadow: 0 0 0 3px var(--ed-select-wash);
+}
+
+/* The starter picker: whole cards are the target, not the radio dot. */
+.sv-choices {
+  display: grid;
+  gap: var(--ed-2);
+  margin: 0 0 var(--ed-5);
+  padding: 0;
+  border: 0;
+}
+.sv-choices legend {
+  padding: 0;
+  margin-bottom: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+.sv-choice {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 2px var(--ed-3);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  cursor: pointer;
+  transition: border-color 120ms ease-out, background 120ms ease-out;
+}
+.sv-choice:hover { border-color: var(--ed-ink-3); }
+.sv-choice[data-on='true'] {
+  border-color: var(--ed-select);
+  background: var(--ed-select-wash);
+}
+.sv-choice:focus-within {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 2px;
+}
+.sv-choice input { margin: 0; grid-row: span 2; align-self: center; }
+.sv-choice__name { font-weight: 600; font-size: var(--ed-text-sm); }
+.sv-choice__blurb {
+  grid-column: 2;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+  line-height: 1.45;
+}
+
+/* The schema editor. */
+.sv-fields { list-style: none; margin: 0 0 var(--ed-4); padding: 0; display: grid; gap: var(--ed-3); }
+.sv-fieldrow {
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+}
+.sv-fieldrow__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--ed-3);
+}
+.sv-fieldrow__top .sv-field { margin-bottom: 0; }
+.sv-fieldrow__tools { display: flex; gap: 2px; padding-bottom: 2px; }
+.sv-fieldrow__hint {
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+}
+.sv-fieldrow .sv-field { margin-top: var(--ed-3); }
+
+.sv-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  margin-top: var(--ed-3);
+  font-size: var(--ed-text-sm);
+  cursor: pointer;
+}
+.sv-check input { margin: 3px 0 0; }
+.sv-check small { color: var(--ed-ink-2); }
+
+.sv-fields__empty {
+  padding: var(--ed-4);
+  margin-bottom: var(--ed-4);
+  border: 1px dashed var(--ed-line);
+  border-radius: var(--ed-r-md);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+  line-height: 1.55;
+}
+.sv-fields__empty p { margin: 0 0 var(--ed-2); }
+.sv-fields__empty p:last-child { margin-bottom: 0; }
+
+@media (max-width: 640px) {
+  .sv-fieldrow__top { grid-template-columns: 1fr; align-items: stretch; }
+  .sv-fieldrow__tools { justify-content: flex-end; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-field select,
+  .sv-field textarea,
+  .sv-choice { transition: none; }
+}
+
+/* Before and after a number, side by side: two short boxes, not two rows. */
+.sv-fieldrow__affixes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ed-3);
+  margin-top: var(--ed-3);
+}
+.sv-fieldrow__affixes .sv-field { margin: 0; }
+.sv-fieldrow__affixes .sv-fieldrow__hint { grid-column: 1 / -1; margin-top: 0; }
+
+/*
+ * A segmented control: a small set of always-visible choices where a dropdown
+ * would hide two of three behind a click. Used for how a collection lays its
+ * entries out.
+ */
+.sv-seg {
+  display: inline-flex;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  overflow: hidden;
+}
+.sv-seg__btn {
+  appearance: none;
+  border: 0;
+  border-inline-start: 1px solid var(--ed-line);
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  padding: var(--ed-2) var(--ed-3);
+  min-height: 36px;
+  cursor: pointer;
+  transition: background 120ms ease-out, color 120ms ease-out;
+}
+.sv-seg__btn:first-child { border-inline-start: 0; }
+.sv-seg__btn:hover:not([aria-pressed='true']):not(:disabled) { background: var(--ed-sunken); color: var(--ed-ink); }
+.sv-seg__btn[aria-pressed='true'] {
+  background: var(--ed-select-wash);
+  color: var(--ed-ink);
+  font-weight: 600;
+}
+.sv-seg__btn:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: -2px;
+}
+.sv-seg__btn:disabled { opacity: 0.55; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-seg__btn { transition: none; }
+}

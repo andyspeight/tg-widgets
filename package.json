@@ -132,6 +132,14 @@
     "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs",
     "test:dashboard-required-tier": "node test/dashboard-required-tier-smoke.mjs",
     "test:offer-promos-excludes": "node test/offer-promos-excludes-smoke.mjs",
+    "test:offer-roundtrip": "node test/offer-roundtrip-smoke.mjs",
+    "test:offer-fieldpatch": "node test/offer-fieldpatch-smoke.mjs",
+    "test:offer-style-custom": "node test/offer-style-custom-smoke.mjs",
+    "test:offer-tags-custom": "node test/offer-tags-custom-smoke.mjs",
+    "test:offer-image-badges": "node test/offer-image-badges-smoke.mjs",
+    "test:sea-route": "node test/sea-route-smoke.mjs",
+    "test:offer-cruise-route": "node test/offer-cruise-route-smoke.mjs",
+    "test:offer-cruise-map": "node test/offer-cruise-map-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
     "build:events-snapshot": "node scripts/build-events-snapshot.mjs"
   },
@@ -142,7 +150,8 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "pdf-lib": "^1.17.1",
-    "puppeteer-core": "24.10.2"
+    "puppeteer-core": "24.10.2",
+    "searoute-js": "^0.1.0"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",

@@ -237,6 +237,42 @@ describe('the menu renders a folder as a dropdown', () => {
     expect(css).toContain('left: 100%');
     expect(css).toContain('.tgs-nav__subitem--folder:focus-within > .tgs-nav__submenu');
   });
+
+  it('matches the dropdown to a dark or accent band, so its text stays readable', () => {
+    // A dark section re-scopes --tgs-text to its inverted colour, and custom
+    // properties inherit into the dropdown. On the unconditional light surface
+    // that meant light text on a light panel (Coastwise, 21 Aug 2026). The
+    // panel now takes the band's own background, restoring a measured pair.
+    const css = source('app', 'globals.css');
+    expect(css).toMatch(
+      /\.tgs-section\[data-tone='dark'\] \.tgs-nav__submenu \{\s*background: var\(--tgs-surface-dark\);/,
+    );
+    expect(css).toMatch(
+      /\.tgs-section\[data-tone='accent'\] \.tgs-nav__submenu \{\s*background: var\(--tgs-primary\);/,
+    );
+    // The hover wash comes from the band's border mix, not the page's light
+    // background, which would flash a bright pill on a dark panel.
+    expect(css).toMatch(
+      /\.tgs-section\[data-tone='dark'\] \.tgs-nav__sublink:hover \{\s*background: var\(--tgs-on-dark-border\);/,
+    );
+    // The always-on burger's floating panel is the same detached surface with
+    // the same failure, so it follows its band the same way.
+    expect(css).toMatch(
+      /\.tgs-section\[data-tone='dark'\] \.tgs-nav\[data-burger='always'\] \.tgs-nav__disclosure\[open\] \.tgs-nav__list--stacked \{\s*background: var\(--tgs-surface-dark\);/,
+    );
+  });
+
+  it('raises the header while a dropdown is open, so the page cannot paint over it', () => {
+    // The header is a z-index: 2 stacking context and the page's section inner
+    // is an equal z-index later in the document, so without this the open
+    // dropdown sits UNDER the page copy (Coastwise, 21 Aug 2026). Same :has()
+    // cure the always-on burger's panel uses, and like it, only while open.
+    const css = source('app', 'globals.css');
+    expect(css).toContain(":has(.tgs-nav__item--folder:hover)");
+    expect(css).toMatch(
+      /\.tgs-region\[data-region='header'\]:has\(\.tgs-nav__item--folder:focus-within\) \{\s*z-index: 40;/,
+    );
+  });
 });
 
 describe('the routes fill the menu before rendering it', () => {

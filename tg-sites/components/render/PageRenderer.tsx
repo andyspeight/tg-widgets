@@ -31,9 +31,15 @@ import {
 } from '../../lib/content/schema';
 import { BLEND_DIVIDER, dividerShape, normaliseDividerHeight, safeDivider, sectionFill } from '../../lib/content/dividers';
 import { safeUrl } from '../../lib/content/sanitise';
-import { normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from '../../lib/content/styles';
+import {
+  normaliseLetterSpacing,
+  normaliseLineHeight,
+  normaliseRevealStyle,
+  normaliseTextSize,
+} from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
+import type { PreparedMap } from '../../lib/content/prepared';
 
 /**
  * A container block's own columns.
@@ -121,6 +127,12 @@ interface Editable {
    * pressed Preview, because `editable` alone flipped it to the empty container.)
    */
   editorCanvas?: boolean;
+  /**
+   * Markup the server has already cleaned, by block id (lib/content/prepared.ts).
+   * Threaded rather than hung on the blocks' own props, because props come out of
+   * the database and a side channel cannot be forged by a stored row.
+   */
+  prepared?: PreparedMap;
 }
 
 /**
@@ -152,11 +164,17 @@ const SECTION_RESPONSIVE = [
  * string from the toolbar's own list (see normaliseTextSize), so an override
  * cannot say anything an inline size could not; a stray one drops rather than
  * rendering broken. The twins fold into --tgs-fs-r, which .tgs-text/.tgs-heading
- * read ahead of their own size (globals.css).
+ * read ahead of their own size (globals.css). Line spacing and letter spacing
+ * ride the same engine, into --tgs-lh-r and --tgs-ls-r.
  */
 const BLOCK_RESPONSIVE = [
   { property: 'fontSize', varBase: '--tgs-fs', toCss: (value: unknown) => normaliseTextSize(value) ?? null },
   { property: 'lineHeight', varBase: '--tgs-lh', toCss: (value: unknown) => normaliseLineHeight(value) ?? null },
+  {
+    property: 'letterSpacing',
+    varBase: '--tgs-ls',
+    toCss: (value: unknown) => normaliseLetterSpacing(value) ?? null,
+  },
 ] as const;
 
 // ---------------------------------------------------------------------------
@@ -168,6 +186,7 @@ export function PageRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
   emptyNote = 'This page is empty. Add a section to get started.',
   theme,
   region = null,
@@ -237,6 +256,7 @@ export function PageRenderer({
             editable={editable}
             editingPath={editingPath}
             editorCanvas={editorCanvas}
+            prepared={prepared}
             /*
               A shaped edge is the BOUNDARY between two sections, so drawing one
               needs the colour on the other side of it. Only this component
@@ -306,6 +326,7 @@ export function SectionRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
   above,
   below,
   hangBottomDivider = false,
@@ -648,6 +669,7 @@ export function SectionRenderer({
             editable={editable}
             editingPath={editingPath}
             editorCanvas={editorCanvas}
+            prepared={prepared}
           />
         ))}
         {editable && section.rows.length === 0 && (
@@ -871,6 +893,7 @@ export function RowRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
@@ -919,6 +942,7 @@ export function RowRenderer({
           editable={editable}
           editingPath={editingPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       ))}
     </div>
@@ -942,18 +966,20 @@ function blockHost(
   editable: boolean,
   editingPath: string | null,
   editorCanvas: boolean,
+  prepared: PreparedMap | undefined,
 ): ReactElement {
   const box = block.box ?? EMPTY_BOX;
   const boxed = !boxIsEmpty(box);
   const props = block.props as Record<string, unknown>;
   const textColour = safeColour(props?.textColour);
-  // Text size and line spacing: the block's own base (desktop), plus its
-  // per-screen twins. Each is an inline custom property the text element reads
-  // ahead of its natural value; absent when unset, so a plain block renders
-  // exactly as before. The twins for BOTH come from sizeVars, since
-  // BLOCK_RESPONSIVE now maps fontSize and lineHeight together.
+  // Text size, line spacing and letter spacing: the block's own base (desktop),
+  // plus its per-screen twins. Each is an inline custom property the text element
+  // reads ahead of its natural value; absent when unset, so a plain block renders
+  // exactly as before. The twins for ALL THREE come from sizeVars, since
+  // BLOCK_RESPONSIVE maps fontSize, lineHeight and letterSpacing together.
   const baseSize = normaliseTextSize(props?.fontSize);
   const baseLineHeight = normaliseLineHeight(props?.lineHeight);
+  const baseLetterSpacing = normaliseLetterSpacing(props?.letterSpacing);
   const sizeVars = responsiveVars(block.responsive, BLOCK_RESPONSIVE);
   // Animated gradient heading: the letters filled with a moving gradient
   // (globals.css, background-clip: text). Heading only, and only on the published
@@ -970,6 +996,7 @@ function blockHost(
     ...(textColour ? { color: textColour } : {}),
     ...(baseSize ? { '--tgs-fs': baseSize } : {}),
     ...(baseLineHeight ? { '--tgs-lh': baseLineHeight } : {}),
+    ...(baseLetterSpacing ? { '--tgs-ls': baseLetterSpacing } : {}),
     ...(gradFrom ? { '--tgs-grad-a': gradFrom } : {}),
     ...(gradTo ? { '--tgs-grad-b': gradTo } : {}),
     ...sizeVars,
@@ -978,6 +1005,7 @@ function blockHost(
     boxed ||
     Boolean(textColour) ||
     Boolean(baseLineHeight) ||
+    Boolean(baseLetterSpacing) ||
     Boolean(baseSize) ||
     Boolean(gradFrom) ||
     Boolean(gradTo) ||
@@ -1032,6 +1060,7 @@ function blockHost(
           editable={editable}
           editingPath={editingPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       ) : block.type === 'container' ? (
         <InnerColumns
@@ -1042,6 +1071,7 @@ function blockHost(
           editable={editable}
           editingPath={editingPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       ) : (
         <BlockRenderer
@@ -1049,6 +1079,7 @@ function blockHost(
           editable={editable}
           editingHost={editable && editingPath === keyPath}
           editorCanvas={editorCanvas}
+          prepared={prepared}
         />
       )}
     </div>
@@ -1091,6 +1122,7 @@ function InnerGrid({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: {
   cells: Column[];
   across: { desktop: number; tablet: number; phone: number };
@@ -1134,7 +1166,7 @@ function InnerGrid({
             {...pathAttr(editable, cellPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas),
+              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1176,6 +1208,7 @@ function InnerColumns({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: {
   columns: Column[];
   gap: number;
@@ -1214,7 +1247,7 @@ function InnerColumns({
             {...pathAttr(editable, colPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas),
+              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1279,6 +1312,7 @@ export function ColumnRenderer({
   editable = false,
   editingPath = null,
   editorCanvas = false,
+  prepared,
 }: {
   column: Column;
   sectionIndex: number;
@@ -1300,7 +1334,7 @@ export function ColumnRenderer({
       {...pathAttr(editable, path)}
     >
       {column.blocks.map((block, blockIndex) =>
-        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas),
+        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas, prepared),
       )}
 
       {/*

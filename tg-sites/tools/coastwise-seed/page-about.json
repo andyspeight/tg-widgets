@@ -1,0 +1,807 @@
+{
+ "version": 1,
+ "id": "pg_fwbpc7ph",
+ "title": "The ships",
+ "slug": "about",
+ "seo": {
+  "title": "The ships and the story — Coastwise",
+  "description": "Three ships, one idea, sailing since 2011. Who we are and why the ships stay small.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_emceg16g",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_elki575b",
+     "columns": [
+      {
+       "id": "col_ek7iacvp",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ehdn0ze9",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_eii7ptg6",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "Three ships, one idea",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ej9fsqf3",
+         "type": "text",
+         "props": {
+          "html": "<p>Coastwise exists because two ferry officers kept a list of every harbour their employer was too big to enter. In 2011 they bought a ship that fitted.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_esyqimu2",
+   "name": "The story",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_er76degz",
+     "columns": [
+      {
+       "id": "col_eou8eos4",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_enkfxde7",
+         "type": "text",
+         "props": {
+          "html": "<p>Freya began as a Norwegian fjord ferry with thirty-three years of service and a hull like a bank vault. We spent a winter refitting her in Leith: nineteen cabins where the car deck was, a saloon where the cafeteria was, and the bridge left exactly as we found it, because it worked.</p><p>The idea has not changed since. Buy sound working ships, refit them warm rather than grand, and keep them small enough that the plan can bend. Skua joined in 2014 for the narrow water. Nyren joined in 2019 for the warm.</p><p>We are still run from a shed on Oban harbour, on purpose. The people who answer the phone can see the weather you are asking about.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_eqbogtsc",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_epdqzerf",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+          "alt": "Teak deck and brass, kept right",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_exyltgev",
+   "name": "The years",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_ew8fjsr4",
+     "columns": [
+      {
+       "id": "col_ev4ay4jr",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_eta8zovi",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Fifteen years, four decisions",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_eu4cyf5i",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "dot",
+          "connector": true,
+          "items": [
+           {
+            "title": "2011 · Freya",
+            "body": "The first ship, and the winter in Leith that set the pattern: warm, not grand."
+           },
+           {
+            "title": "2014 · Skua",
+            "body": "Twenty-six berths for the water Freya could not reach. The Norwegian arms became a voyage."
+           },
+           {
+            "title": "2019 · Nyren",
+            "body": "The warm-water ship. Dalmatia first, then the Lycian shore. The awning was her refit’s biggest single expense, and worth it."
+           },
+           {
+            "title": "2024 · The refusal",
+            "body": "We were offered a fourth ship, larger, at a good price. We said no. Thirty-eight guests is not a stage we are at. It is the idea."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_f14vpdl6",
+   "name": "The numbers",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_f0nqpsb7",
+     "columns": [
+      {
+       "id": "col_ezas48p8",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_eyciwh7n",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "l",
+          "align": "centre",
+          "divided": true,
+          "items": [
+           {
+            "value": "3",
+            "suffix": "",
+            "label": "Ships, and no plans for four",
+            "detail": ""
+           },
+           {
+            "value": "108",
+            "suffix": "",
+            "label": "Berths across the fleet",
+            "detail": ""
+           },
+           {
+            "value": "61",
+            "suffix": "%",
+            "label": "Guests who have sailed before",
+            "detail": ""
+           },
+           {
+            "value": "2011",
+            "suffix": "",
+            "label": "Sailing since",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_f6xf60kc",
+   "name": "The fleet, side by side",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_f5mqxebl",
+     "columns": [
+      {
+       "id": "col_f40downc",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_f2tf75qd",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "The fleet, side by side",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_f3zygjcv",
+         "type": "table",
+         "props": {
+          "headerRow": true,
+          "firstColumnHeader": true,
+          "style": "lined",
+          "caption": "Draughts are why we get in close.",
+          "textColour": "",
+          "data": "Ship\tGuests\tCabins\tDraught\tBuilt and refit\tHer coast\nMV Freya\t38\t19\t3.8 m\t1978 · Leith 2011\tScotland and the Faroes\nMV Skua\t26\t13\t2.9 m\t1985 · Leith 2014\tThe Norwegian arms\nMV Nyren\t44\t22\t3.4 m\t1992 · Split 2019\tDalmatia and Lycia"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_fe3kfy5b",
+   "name": "The cabins",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_fdev7rxl",
+     "columns": [
+      {
+       "id": "col_f90fuier",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_f7zu4zrs",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "The cabins, plainly",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_f8rl0pw6",
+         "type": "text",
+         "props": {
+          "html": "<p>Every cabin aboard is a twin or a double, which is what the arithmetic in the table above means: nobody sleeps in a bunk over a stranger. The grades are plain. A lower-deck twin is what the from fare buys, snug and nearest the engine&rsquo;s hum. An upper-deck double adds about a fifth of the fare and a bigger window. Nyren adds two step-free cabins beside her lift.</p><p>You book a grade, not a numbered door. Fiona assigns cabins a month out, solo travellers first, and sailing alone takes a double at a modest supplement, never a doubled fare.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_fck2u6bo",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_fa82aq4v",
+         "type": "heading",
+         "props": {
+          "level": "h3",
+          "style": "h3",
+          "html": "In every grade",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_fb2b2sgw",
+         "type": "list",
+         "props": {
+          "style": "tick",
+          "items": [
+           {
+            "text": "Oak, wool and a window that opens"
+           },
+           {
+            "text": "Proper duvets and no ceremony"
+           },
+           {
+            "text": "A shower that behaves in a swell"
+           },
+           {
+            "text": "Blackout blinds for the northern light"
+           },
+           {
+            "text": "A kettle on request, which half the ship requests"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_fmbyk4bh",
+   "name": "The skipper’s welcome",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_flq3o0ov",
+     "columns": [
+      {
+       "id": "col_fibio0du",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ffhq7tif",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Thirty seconds of Ewan",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_fgs82hcr",
+         "type": "text",
+         "props": {
+          "html": "<p>Every voyage opens the same way: the master on the saloon steps, no microphone, saying roughly this. We recorded it so you know the register of the thing you are booking.</p>"
+         }
+        },
+        {
+         "id": "b_fhuyyj91",
+         "type": "audio",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/skipper-welcome.wav",
+          "title": "The welcome, as said on the saloon steps",
+          "caption": "Ewan MacAskill, master of MV Freya. The bit about the blue jerseys is true.",
+          "textColour": ""
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_fk5hu3ez",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_fjd5gomy",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-master.jpg",
+          "alt": "Ewan MacAskill at the bridge window",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_fqhsbjgn",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_fpg84xv8",
+     "columns": [
+      {
+       "id": "col_fohois25",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_fn3fv0n5",
+         "type": "quote",
+         "props": {
+          "text": "It is the only holiday we take where the owner might carry your bag up the gangway and the master might pour your nightcap.",
+          "attribution": "Alan and Josie Metcalfe, Kendal",
+          "role": "Eleven voyages since 2015"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_fv5gjdgy",
+   "name": "Closing",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_fuezqovr",
+     "columns": [
+      {
+       "id": "col_ftmpu217",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_fr6pxh29",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "The ships are small. The welcome is not.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_fseugbvb",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

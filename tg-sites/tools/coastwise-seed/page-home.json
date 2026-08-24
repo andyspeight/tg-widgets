@@ -1,0 +1,1028 @@
+{
+ "version": 1,
+ "id": "pg_1lvm88wv",
+ "title": "Home",
+ "slug": "",
+ "seo": {
+  "title": "Coastwise — Small Ship Voyages",
+  "description": "Small-ship voyages for thirty-eight guests: the Western Isles, the Norwegian narrows and the Dalmatian backwater, by ships that tie up in the village.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_65b5tyf",
+   "name": "Hero",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 640,
+   "reveal": true,
+   "revealStyle": "rise",
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+   "overlay": 40,
+   "backgroundSlides": [
+    {
+     "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg"
+    },
+    {
+     "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg"
+    }
+   ],
+   "backgroundTransition": "fade",
+   "backgroundInterval": 6,
+   "rows": [
+    {
+     "id": "row_5usomsa",
+     "columns": [
+      {
+       "id": "col_4cqiirq",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1w0u8uy",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "Thirty-eight guests. No queue for anything.",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_2kznvn4",
+         "type": "text",
+         "props": {
+          "html": "<p>Seven nights along a coast a large ship cannot reach. We tie up in the village, not the terminal.</p>"
+         }
+        },
+        {
+         "id": "b_3ga3dwx",
+         "type": "button-group",
+         "props": {
+          "align": "left",
+          "buttons": [
+           {
+            "label": "Five coasts, three ships",
+            "href": "/destinations",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Check dates",
+            "href": "#book",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_epw45ku",
+   "name": "Booking search — drop the Travelify widget here",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "anchor": "book",
+   "rows": [
+    {
+     "id": "row_dtpo3zo",
+     "columns": [
+      {
+       "id": "col_92pciz8",
+       "width": 45,
+       "align": "centre",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7gtdxtg",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Check dates and cabins",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_81y7wps",
+         "type": "text",
+         "props": {
+          "html": "<p>Pick a coast, a week and a cabin. The 2027 season is open.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_c1vn2ag",
+       "width": 55,
+       "align": "centre",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_aurix1y",
+         "type": "spacer",
+         "props": {
+          "height": "xl"
+         }
+        },
+        {
+         "id": "b_br79i0v",
+         "type": "button-group",
+         "props": {
+          "align": "left",
+          "buttons": [
+           {
+            "label": "Talk to us instead",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_nx039lv",
+   "name": "What we do",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_h3a91jy",
+     "columns": [
+      {
+       "id": "col_gknbi5y",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_f08tm6h",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "A coast is a sequence of small places. We go at the speed of the small places.",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_mxfqpab",
+     "columns": [
+      {
+       "id": "col_jyfrwfc",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ixa29bo",
+         "type": "text",
+         "props": {
+          "html": "<p>Coastwise runs three ships and nothing else. Each carries between twenty-six and forty-four guests, draws under four metres, and can lie alongside a stone quay that a 3,000-berth ship has to admire from six miles out.</p><p>There is no theatre, no atrium, no photographer waiting at the gangway. There is a saloon with eight tables, a bar that runs on trust, and a bridge you are welcome on whenever the master says so. Dinner is whatever came aboard that morning at the last port.</p><p>Our masters have sailed these waters an average of nineteen seasons. When the weather turns, they change the plan rather than the arrival time. That is the whole reason to travel this way.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_lp3d47j",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_kwphc59",
+         "type": "stats",
+         "props": {
+          "columns": "2",
+          "size": "l",
+          "divided": true,
+          "align": "left",
+          "items": [
+           {
+            "value": "38",
+            "label": "Guests aboard MV Freya"
+           },
+           {
+            "value": "12",
+            "label": "Crew, all seasons"
+           },
+           {
+            "value": "3.8",
+            "suffix": "m",
+            "label": "Draught, so village quays"
+           },
+           {
+            "value": "19",
+            "label": "Seasons, average, per master"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_s76wxoo",
+   "name": "Why a small ship",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "revealStagger": true,
+   "hoverTint": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_r59wuks",
+     "columns": [
+      {
+       "id": "col_q1gxd0w",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_ojj1lyy",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "What thirty-eight guests changes",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_psw8iof",
+         "type": "cards",
+         "props": {
+          "source": "typed",
+          "columns": "3",
+          "gap": "m",
+          "style": "tinted",
+          "lead": "icon",
+          "iconAlign": "left",
+          "iconColour": "#c8452c",
+          "imagePosition": "top",
+          "radius": "md",
+          "align": "left",
+          "wholeCardLinks": false,
+          "items": [
+           {
+            "src": "",
+            "icon": "map",
+            "alt": "",
+            "label": "",
+            "title": "The village, not the terminal",
+            "body": "Under four metres of draught means the stone quay in the middle of town, not a tender queue in the bay.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "",
+            "icon": "compass",
+            "alt": "",
+            "label": "",
+            "title": "Plans that bend",
+            "body": "When the weather turns, the master changes the plan rather than the arrival time. A schedule is not the point of a coast.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "",
+            "icon": "quote",
+            "alt": "",
+            "label": "",
+            "title": "One sitting, no seating plan",
+            "body": "Eight tables and no rota. By Wednesday you have eaten with everyone aboard, whether you meant to or not.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_yao3f0u",
+   "name": "A week, day by day",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_xhwfqh0",
+     "columns": [
+      {
+       "id": "col_wtslove",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_t8e4w9x",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Seven nights, Oban to Stornoway",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_u1zcwif",
+         "type": "text",
+         "props": {
+          "html": "<p>One week of the Western Isles voyage, day by day. Every voyage page shows its own week.</p>"
+         }
+        },
+        {
+         "id": "b_vsgirkl",
+         "type": "slider",
+         "props": {
+          "slideWidth": "medium",
+          "tilt": "none",
+          "gap": "m",
+          "style": "plain",
+          "ratio": "4/5",
+          "radius": "md",
+          "rows": "1",
+          "scrollbar": "bar",
+          "align": "left",
+          "wholeCardLinks": false,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/harbour.jpg",
+            "alt": "Oban harbour from the water",
+            "label": "Day 01 · Oban",
+            "title": "Board at four, sail at six",
+            "body": "Kippers smoking on the quay as we clear the Sound of Kerrera.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+            "alt": "Teak deck and brass cleat",
+            "label": "Day 02 · Tobermory",
+            "title": "Alongside by nine",
+            "body": "The distillery does a tasting for us before it opens to the road.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+            "alt": "White strand on Coll",
+            "label": "Day 03 · Coll",
+            "title": "Coll and the Cairns",
+            "body": "Anchor off the white strand. Tenders ashore all afternoon; nobody else lands that day.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "The ship threading between islands",
+            "label": "Day 04 · Iona and Staffa",
+            "title": "Fingal’s Cave at slack water",
+            "body": "When you can hear the columns rather than the swell.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "Open sea and low sun",
+            "label": "Day 05 · Canna",
+            "title": "Eleven residents, one post box",
+            "body": "The best anchorage in the Small Isles. Dinner on deck if it holds.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "Still water at first light",
+            "label": "Day 06 · Harris",
+            "title": "Ashore at Rodel",
+            "body": "A weaver in Drinishader works the loom while we stand in her shed.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+            "alt": "The dining saloon at dusk",
+            "label": "Day 07 · Stornoway",
+            "title": "In at seven, ashore by nine",
+            "body": "Breakfast aboard. Cars and the ferry are both a short walk.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_167o6flu",
+   "name": "Aboard",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_15kzanli",
+     "columns": [
+      {
+       "id": "col_12yr6lga",
+       "width": 45,
+       "align": "centre",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_z9br7vk",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Two decks, one table, and a door onto the water.",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_10i98xfa",
+         "type": "text",
+         "props": {
+          "html": "<p>Cabins are plain and warm: oak, wool, a window that opens. Nobody dresses for dinner, and there is no fixed seating. The saloon does the introductions.</p>"
+         }
+        },
+        {
+         "id": "b_11ngcow5",
+         "type": "tags",
+         "props": {
+          "style": "bullets",
+          "size": "m",
+          "colour": "",
+          "align": "left",
+          "items": [
+           {
+            "label": "Full board",
+            "href": ""
+           },
+           {
+            "label": "All landings",
+            "href": ""
+           },
+           {
+            "label": "No tipping",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_145q9fmw",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_13furvjj",
+         "type": "shifting-images",
+         "props": {
+          "interval": 5,
+          "height": "medium",
+          "radius": "md",
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+            "alt": "The dining saloon at dusk, the coast passing outside"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/deck-teak.jpg",
+            "alt": "Teak deck and rope detail"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "First light from the bridge"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_1biafpfi",
+   "name": "The voyages",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_1a8mt7u8",
+     "columns": [
+      {
+       "id": "col_19dcd4jv",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_17cksgni",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Three ships. Five coasts.",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_18yksdnv",
+         "type": "stacked-cards",
+         "props": {
+          "side": "right",
+          "height": "tall",
+          "radius": "md",
+          "cardColour": "#f2efe9",
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/hebrides-shore.jpg",
+            "alt": "Hebridean shoreline of black rock and clear water",
+            "title": "Western Isles · MV Freya, 38 guests",
+            "body": "Oban to Stornoway through the Small Isles, with landings on Coll, Canna and Staffa. Seven nights, April to September, from £2,340. In early summer Freya alternates these weeks with the Faroe and Shetland run, eight nights from £2,890.",
+            "linkLabel": "See the voyage",
+            "linkHref": "/destinations/western-isles"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/fjord-dawn.jpg",
+            "alt": "A small ship entering a fjord at first light",
+            "title": "Norwegian Narrows · MV Skua, 26 guests",
+            "body": "Bergen to Ålesund the slow way, up the arms the express boats skip. Nine nights, four of them at anchor under something vertical. May to August, from £3,180.",
+            "linkLabel": "See the voyage",
+            "linkHref": "/destinations/norwegian-narrows"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/dalmatia.jpg",
+            "alt": "A limestone harbour on a Dalmatian island",
+            "title": "Dalmatian Backwater · MV Nyren, 44 guests",
+            "body": "Split to Dubrovnik by way of Vis, Lastovo and Šipan. Six nights of warm water and cold wine, June to September, from £1,895. At the season’s edges Nyren slips east to the Lycian Shore, seven nights from £1,760.",
+            "linkLabel": "See the voyage",
+            "linkHref": "/destinations/dalmatian-backwater"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_1fepr7rq",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_1ee9c4ow",
+     "columns": [
+      {
+       "id": "col_1d00c2y9",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1cspmjrr",
+         "type": "testimonials",
+         "props": {
+          "items": [
+           {
+            "quote": "We were alongside in Canna before I had finished my coffee. On the last cruise we took, that was a coach transfer.",
+            "name": "Margaret Ellwood",
+            "detail": "Hexham · MV Freya, June 2026 · fourth voyage",
+            "rating": 5
+           },
+           {
+            "quote": "The master turned us round in the night to miss a blow, and we woke up somewhere better. Nobody announced it. It was just done.",
+            "name": "David Okafor",
+            "detail": "Bristol · MV Skua, July 2026",
+            "rating": 5
+           },
+           {
+            "quote": "I swam before breakfast every day for six days. The chef bought octopus off a boy on the quay at Vis and that was dinner.",
+            "name": "Sarah and Tom Whittle",
+            "detail": "York · MV Nyren, September 2025",
+            "rating": 4.5
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_1kauvzwm",
+   "name": "Closing",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 480,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+   "overlay": 50,
+   "rows": [
+    {
+     "id": "row_1j0t69tl",
+     "columns": [
+      {
+       "id": "col_1ivngh0v",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_1gv2u8sx",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Pick a coast. We will do the rest.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_1h13hjnq",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

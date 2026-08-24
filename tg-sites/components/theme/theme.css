@@ -1140,3 +1140,31 @@
 .fs-option[aria-selected='true'] {
   font-weight: 600;
 }
+
+/* ------------------------------------------------------------------ */
+/* Claimed brand colours                                               */
+/* ------------------------------------------------------------------ */
+
+/* An unclaimed row: the automatic swatch, its name, and the claim button. */
+.tv-claim {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ed-line);
+}
+.tv-claim__swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--ed-line);
+  flex: none;
+}
+.tv-claim__label { font-weight: 600; margin-right: auto; }
+
+/* A claimed row: the full colour editor plus the way back. */
+.tv-claimed {
+  padding: 10px 0;
+  border-top: 1px solid var(--ed-line);
+}
+.tv-claimed > .tg-btn { margin-top: 4px; }

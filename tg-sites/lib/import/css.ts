@@ -52,18 +52,13 @@ export interface ScopeResult {
   removed: string[];
 }
 
-/**
- * The class that confines one import.
- *
- * ONE PLACE DECIDES IT, because the block that writes this class onto its
- * wrapper and the stylesheet that depends on it being there have to agree, and
- * a rendered section whose CSS is scoped to a class it does not carry is an
- * unstyled section with no error anywhere.
+/*
+ * The scope class moved to ./scope, which has no parser behind it, so the
+ * renderer can write the wrapper's class without pulling postcss into the
+ * browser (task #94). Re-exported here because every server-side caller of this
+ * module wants both halves and there is no reason to make them import twice.
  */
-export function importScopeClass(id: string): string {
-  const safe = String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  return `tgi-${safe || 'x'}`;
-}
+export { importScopeClass } from './scope';
 
 // ---------------------------------------------------------------------------
 // Selector lists

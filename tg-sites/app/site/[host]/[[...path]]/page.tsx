@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
 import { fillBreadcrumbs, hasBreadcrumbsBlock } from '../../../../lib/content/breadcrumbs';
+import { mergePrepared, prepareSections } from '../../../../lib/content/prepare-markup';
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
 import { safeUrl } from '../../../../lib/content/sanitise';
@@ -28,8 +29,9 @@ import {
   listPublishedItemsForSearch,
   MAX_LISTING_ITEMS,
 } from '../../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingsIn } from '../../../../lib/content/listings';
+import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
+import { fieldFacts } from '../../../../lib/content/collection-fields';
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
@@ -138,7 +140,8 @@ async function load(host: string, path: string[] | undefined) {
         archive: {
           collectionKey: segments[0],
           tag: tagged.label,
-          cards: tagged.items.map((row) => itemAsCard(row.item, segments[0], row.slug)),
+          cards: tagged.items.map((row) =>
+            itemAsCard(row.item, segments[0], row.slug, tagged.fields)),
         },
         theme,
         faces,
@@ -180,13 +183,20 @@ async function load(host: string, path: string[] | undefined) {
     const results = await Promise.all(
       wanted.map(async (request) => ({
         request,
-        items: await listPublished(tenantId, request.collection, request.count),
+        listing: await listPublished(tenantId, request.collection, request.count, {
+          filter: request.filter,
+          sort: request.sort,
+        }),
       })),
     );
-    for (const { request, items } of results) {
+    for (const { request, listing } of results) {
       listings.set(
-        request.collection,
-        items.map((row) => itemAsCard(row.item, request.collection, row.slug)),
+        // Keyed by the whole request, not the collection: two blocks narrowing
+        // the same collection differently are two answers. See listingKey.
+        listingKey(request),
+        // The collection's own field definitions came back with its items, so
+        // a card can carry a price and a number of nights without a second read.
+        listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
       );
     }
   }
@@ -385,6 +395,24 @@ export default async function SitePage({ params, searchParams }: Params) {
   const contentTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
 
   /*
+   * THE SERVER'S PASS OVER BORROWED MARKUP, once for all three trees.
+   *
+   * The imported design and the embed block hold somebody else's HTML, and the
+   * cleaners that make it safe run here rather than in the components, so the
+   * editor canvas can draw the same blocks without a parser in the browser (see
+   * lib/content/prepared.ts, task #94). One map across the header, the content
+   * and the footer because they share the block-id space and each of the three
+   * renderers wants the same answer. Re-cleaned on every render, exactly as it
+   * was when the components did it, so a restored snapshot or a hand-edited row
+   * still lands on today's rules rather than the rules of the day it was saved.
+   */
+  const prepared = mergePrepared(
+    prepareSections(found.regions.header?.sections),
+    prepareSections(contentTree?.sections),
+    prepareSections(found.regions.footer?.sections),
+  );
+
+  /*
    * Has the client PUT a trail on this page? If so the automatic one stands
    * down, so the page has exactly one either way. Read off the tree rather than
    * a flag on the row, because the block is content and a flag would be a second
@@ -530,6 +558,7 @@ export default async function SitePage({ params, searchParams }: Params) {
             pageTitle,
           )}
           theme={theme}
+          prepared={prepared}
         />
       ) : found.entry ? (
         /* A post's own sections get the same fill. Without it a blog post
@@ -542,12 +571,17 @@ export default async function SitePage({ params, searchParams }: Params) {
             item: fillBreadcrumbs(found.entry.item, currentPath, pageTitle),
           }}
           theme={theme}
+          prepared={prepared}
         />
       ) : (
         <ArchiveRenderer archive={found.archive!} theme={theme} />
       )}
 
-      <RegionRenderer region={fillNavRegion(found.regions.footer, found.navPages)} theme={theme} />
+      <RegionRenderer
+        region={fillNavRegion(found.regions.footer, found.navPages)}
+        theme={theme}
+        prepared={prepared}
+      />
 
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}
@@ -600,16 +634,33 @@ export default async function SitePage({ params, searchParams }: Params) {
 function EntryRenderer({
   entry,
   theme,
+  prepared,
 }: {
   entry: {
     item: import('../../../../lib/content/collection').CollectionItem;
     /** The collection the post is in, so its tags can link to their archives. */
     collectionKey: string;
+    /** What that collection declares, which is what turns its answers into
+     *  a labelled row of facts. Empty for a blog. */
+    fields: import('../../../../lib/content/collection-fields').FieldDef[];
+    /** How the collection lays its entries out. See collection-layout.ts. */
+    layout: import('../../../../lib/content/collection-layout').EntryLayout;
   };
   theme: React.CSSProperties;
+  /** Markup the server has already cleaned. See lib/content/prepared.ts. */
+  prepared?: import('../../../../lib/content/prepared').PreparedMap;
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
+  /*
+   * The facts this entry's collection declares, formatted into words.
+   *
+   * ALL OF THEM, unlike a card, which shows the first few. A card is a glance
+   * inside a grid and has a fixed height to keep; this is the page somebody
+   * opened to find these out, so holding any of them back would be answering
+   * less than was asked.
+   */
+  const facts = fieldFacts(entry.fields, item.fields);
   // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
   // worked out from the body, never stored: see lib/content/reading-time.ts.
   const minutes = readingTime(item.sections);
@@ -618,7 +669,16 @@ function EntryRenderer({
     .join(' · ');
 
   return (
-    <article className="tgs-page tgs-entry" style={theme}>
+    /*
+     * ONE ATTRIBUTE, AND THE STYLESHEET BUILDS THE REST.
+     *
+     * The three layouts draw the same markup in the same order, which is what
+     * keeps one entry component honest about what an entry contains. A second
+     * component per layout is how two of them drift apart the first time
+     * somebody adds a field, and it would have put the picture in two places in
+     * the document for the sake of moving it on the screen.
+     */
+    <article className="tgs-page tgs-entry" data-layout={entry.layout} style={theme}>
       <header className="tgs-entry__head">
         {item.date && (
           <p className="tgs-entry__date">
@@ -628,6 +688,25 @@ function EntryRenderer({
         <h1 className="tgs-entry__title">{item.title}</h1>
         {byline && <p className="tgs-entry__byline">{byline}</p>}
         {item.summary && <p className="tgs-entry__summary">{item.summary}</p>}
+
+        {facts.length > 0 && (
+          /*
+           * ABOVE THE PICTURE, not below the article. Somebody who has opened a
+           * tour is deciding, and the price and the length are the decision;
+           * putting them under a thousand words would be making them scroll for
+           * the answer they came for. A definition list for the same reason the
+           * card uses one: these are labelled values, not loose numbers.
+           */
+          <dl className="tgs-entry__facts">
+            {facts.map((fact) => (
+              <div className="tgs-entry__fact" key={fact.key}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">
             {item.tags.map((tag) => (
@@ -650,7 +729,7 @@ function EntryRenderer({
       </header>
 
       {item.sections.map((section, index) => (
-        <SectionRenderer key={section.id} section={section} index={index} />
+        <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} />
       ))}
     </article>
   );

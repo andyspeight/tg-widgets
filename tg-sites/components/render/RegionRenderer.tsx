@@ -29,12 +29,14 @@
 
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import type { Region } from '../../lib/content/schema';
+import type { PreparedMap } from '../../lib/content/prepared';
 import { SectionRenderer } from './PageRenderer';
 
 export function RegionRenderer({
   region,
   theme,
   overlapped,
+  prepared,
 }: {
   region: Region | null;
   /** The tenant's theme as custom properties, as PageRenderer takes it. */
@@ -46,6 +48,12 @@ export function RegionRenderer({
    * wrapper, so no CSS `:has()` can reach from one to the other. Header only.
    */
   overlapped?: boolean;
+  /**
+   * Markup the server has already cleaned, by block id. A header or a footer can
+   * hold an imported design the same as a page can, so it needs the same channel.
+   * See lib/content/prepared.ts.
+   */
+  prepared?: PreparedMap;
 }): ReactElement | null {
   if (!region || region.sections.length === 0) return null;
 
@@ -77,6 +85,7 @@ export function RegionRenderer({
           <SectionRenderer
             section={section}
             index={index}
+            prepared={prepared}
             hangBottomDivider={region.region === 'header' && index === region.sections.length - 1}
           />
         </Fragment>

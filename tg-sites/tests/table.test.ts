@@ -179,10 +179,17 @@ describe('what makes it readable to a screen reader', () => {
     expect(render).not.toContain('role="table"');
   });
 
-  it('the caption is a caption, so it is read before the table', () => {
-    expect(render).toContain('<caption className="tgs-table__caption">');
-    // And shown underneath, which is where a table's note belongs.
-    expect(source('app', 'globals.css')).toContain('caption-side: bottom');
+  it('the caption names the region and shows below it, outside the scroll', () => {
+    /*
+     * It used to be a <caption> inside the table, which scrolled sideways
+     * with the table on a phone and was cut mid-word at the viewport edge
+     * (the 21 Aug review). Now the visible text is a <figcaption> after the
+     * scroll region, and the region itself is named by aria-label, so a
+     * screen reader still hears what the table is on the way in.
+     */
+    expect(render).toContain('<figcaption className="tgs-table__caption">');
+    expect(render).not.toContain('<caption ');
+    expect(render).toContain('aria-label={caption ||');
   });
 
   /*

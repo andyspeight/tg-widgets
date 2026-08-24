@@ -341,7 +341,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
      * off. Only the block default, so it reaches a heading a client adds, not the
      * headings already stored in a page.
      */
-    defaults: { html: 'A new heading', level: 'h2', style: 'h3', align: 'left', shadow: 'none', fluid: true },
+    defaults: { html: 'A new heading', level: 'h2', style: 'h2', align: 'left', shadow: 'none', fluid: true },
     summarise: (props) =>
       firstWords(stripTags(asString(props.html)), 6) || asString(props.text) || 'Heading',
     fields: [
@@ -1800,6 +1800,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       source: 'typed',
       collection: '',
       count: 6,
+      facts: 2,
+      design: 'stacked',
       columns: '3',
       gap: 'm',
       style: 'bordered',
@@ -1884,6 +1886,25 @@ export const BLOCKS: readonly BlockDefinition[] = [
         max: 60,
         step: 1,
         help: 'The newest this many. Only used when the cards come from a collection.',
+      },
+      {
+        /*
+         * HOW MANY FACTS, NOT WHICH ONES.
+         *
+         * A collection can declare fields of its own (a price, a number of
+         * nights), and a card shows the first few. Which few is decided by the
+         * ORDER on the Collections screen, where the arrows are, rather than by
+         * a picker here: this pane has no server on the other side of it, so a
+         * picker would have to guess at the collection's schema or fetch it on
+         * every keystroke.
+         */
+        kind: 'number',
+        key: 'facts',
+        label: 'Facts on each card',
+        min: 0,
+        max: 4,
+        step: 1,
+        help: 'The first few fields the collection declares, in the order they are listed there. Only used when the cards come from a collection.',
       },
       {
         kind: 'repeater',
@@ -1972,6 +1993,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
       },
       { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
       {
+        /*
+         * THE SHAPE OF A CARD, which is a different question from its finish.
+         *
+         * `style` below is the finish: a border, a tint, a shadow. Those are the
+         * same card wearing something. This is the card's SILHOUETTE, and the
+         * reason it exists is Principle 3 in PRODUCT.md: if two client sites
+         * feel interchangeable the design failed, and until now every client's
+         * blog had the one card.
+         *
+         * Three, because three are genuinely different shapes rather than three
+         * paddings. Stacked is what every published site already has and stays
+         * the default, so nothing anybody has live moves.
+         */
+        kind: 'select',
+        key: 'design',
+        label: 'Card design',
+        options: [
+          { value: 'stacked', label: 'Picture, then words' },
+          { value: 'overlay', label: 'Words on the picture' },
+          { value: 'index', label: 'A list, date beside the words' },
+        ],
+        help: 'The shape of each card. The style below is its finish.',
+      },
+      {
         kind: 'select',
         key: 'style',
         label: 'Card style',
@@ -1981,6 +2026,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'raised', label: 'Raised' },
           { value: 'tinted', label: 'Tinted' },
         ],
+        help: 'The finish on the box. Words on the picture have no box, so this does nothing there.',
       },
       {
         kind: 'select',
@@ -3557,6 +3603,103 @@ export const BLOCKS: readonly BlockDefinition[] = [
     ],
   },
 
+
+  {
+    /*
+     * THE FIRST THING A VISITOR CAN SEND US.
+     *
+     * Every element before this one shows; this one listens. The fields are
+     * configuration, not markup: labels and placeholders render as escaped
+     * text, never through innerHTML, so nothing a client types here can
+     * script the page. The form posts, without JavaScript, to /_form on the
+     * site's own host (an address the slug rules cannot produce), where the
+     * submission is validated, capped and stored per tenant, and the page
+     * returns to a success message revealed by CSS :target alone. See
+     * app/site/[host]/_form/route.ts for the other half.
+     */
+    type: 'form',
+    label: 'Form',
+    group: 'Actions and contact',
+    keywords: 'form contact enquiry enquire lead capture fields submit email',
+    icon: 'form',
+    description: 'Fields a visitor fills in. Submissions land in Enquiries.',
+    defaults: {
+      name: 'Enquiry',
+      fields: [
+        { kind: 'text', label: 'Name', required: true, placeholder: '', options: '' },
+        { kind: 'email', label: 'Email', required: true, placeholder: '', options: '' },
+        { kind: 'textarea', label: 'How can we help?', required: true, placeholder: '', options: '' },
+      ],
+      submitLabel: 'Send',
+      successTitle: 'Thank you',
+      successBody: 'We have your message and will reply within one working day.',
+      notifyEmail: '',
+      align: 'left',
+    },
+    summarise: (props) => {
+      const name = asString(props.name).trim();
+      const count = Array.isArray(props.fields) ? props.fields.length : 0;
+      return `${name ? `Form: ${firstWords(name, 4)}` : 'Form'} (${count} field${count === 1 ? '' : 's'})`;
+    },
+    fields: [
+      {
+        kind: 'text',
+        key: 'name',
+        label: 'Form name',
+        max: 120,
+        help: 'How this form is labelled in Enquiries and in the notification email.',
+      },
+      {
+        kind: 'repeater',
+        key: 'fields',
+        label: 'Fields',
+        itemLabel: 'Field',
+        max: 12,
+        fields: [
+          {
+            kind: 'select',
+            key: 'kind',
+            label: 'Type',
+            options: [
+              { value: 'text', label: 'Short answer' },
+              { value: 'email', label: 'Email address' },
+              { value: 'phone', label: 'Phone number' },
+              { value: 'textarea', label: 'Long answer' },
+              { value: 'select', label: 'A choice from a list' },
+              { value: 'checkbox', label: 'A yes/no tick' },
+            ],
+          },
+          { kind: 'text', key: 'label', label: 'Label', max: 120 },
+          { kind: 'toggle', key: 'required', label: 'Required' },
+          { kind: 'text', key: 'placeholder', label: 'Placeholder', max: 120 },
+          {
+            kind: 'text',
+            key: 'options',
+            label: 'Choices',
+            max: 500,
+            help: 'Only for a choice from a list. Separate the choices with commas.',
+          },
+        ],
+      },
+      { kind: 'text', key: 'submitLabel', label: 'Button label', max: 40 },
+      { kind: 'text', key: 'successTitle', label: 'After sending: title', max: 120 },
+      {
+        kind: 'text',
+        key: 'successBody',
+        label: 'After sending: message',
+        max: 300,
+        help: 'Shown in place of the form once it has been sent.',
+      },
+      {
+        kind: 'text',
+        key: 'notifyEmail',
+        label: 'Email new enquiries to',
+        max: 200,
+        help: 'Leave empty to only collect them in Enquiries.',
+      },
+      { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
+    ],
+  },
   {
     /*
      * A DISCOUNT CODE, asked for on 20 Aug 2026 from the Duda list.

@@ -26,8 +26,10 @@
  *     fixes the fact that hover does not exist on a tablet.
  */
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import type { Block, Page, Row } from '../../lib/content/schema';
+import type { OutlineDragItem } from './outline-move';
 import { hasInnerColumns } from '../../lib/content/inner-columns';
 import { blockLabel, createRow } from '../../lib/content/factory';
 import {
@@ -75,9 +77,96 @@ interface Props {
   onAddElement: (type: string) => void;
 }
 
-type DragItem =
-  | { kind: 'section'; section: number }
-  | { kind: 'block'; section: number; row: number; column: number; block: number };
+// ---------------------------------------------------------------------------
+
+/**
+ * A row something can be dropped on.
+ *
+ * ONE HOOK PER ROW, which is why this is a component rather than a few lines
+ * inside the map: useDroppable is a hook and a hook cannot be called in a loop.
+ *
+ * The highlight comes from dnd-kit's own isOver rather than from state this pane
+ * keeps, and that is the real change. The native version tracked the hovered row
+ * itself through onDragOver and onDragLeave, a pair that fires in the wrong order
+ * when the pointer crosses between two rows, so the row being left cleared the
+ * highlight the row being entered had just set. The is-dragover class is the same
+ * one; only who decides it has changed.
+ */
+function OutlineDropRow({
+  id,
+  item,
+  className,
+  open,
+  selected,
+  children,
+}: {
+  id: string;
+  item: OutlineDragItem;
+  className: string;
+  open?: boolean;
+  selected?: boolean;
+  children: ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: `odrop:${id}`, data: { outlineDrop: item } });
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${className}${isOver ? ' is-dragover' : ''}`}
+      data-open={open}
+      data-selected={selected}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * The button that both selects a row and drags it.
+ *
+ * STILL A BUTTON, and still clickable. dnd-kit's PointerSensor up in EditorShell
+ * starts a drag only once the pointer has moved 5px, so a plain click reaches
+ * onClick exactly as before. That is the whole reason the handle can be the row's
+ * own control rather than a separate grip: with native drag it could not, because
+ * `draggable` swallowed the gesture from the first pixel.
+ *
+ * dnd-kit's attributes bring aria-roledescription and a described-by pointing at
+ * its own instructions, which is groundwork for #138 rather than decoration.
+ */
+function OutlineDragHandle({
+  id,
+  item,
+  label,
+  className,
+  onClick,
+  expanded,
+  children,
+}: {
+  id: string;
+  item: OutlineDragItem;
+  label: string;
+  className: string;
+  onClick: () => void;
+  expanded?: boolean;
+  children: ReactNode;
+}) {
+  const { setNodeRef, listeners, attributes } = useDraggable({
+    id: `odrag:${id}`,
+    data: { outlineDrag: item, moveLabel: label },
+  });
+  return (
+    <button
+      type="button"
+      ref={setNodeRef}
+      className={className}
+      aria-expanded={expanded}
+      onClick={onClick}
+      {...attributes}
+      {...listeners}
+    >
+      {children}
+    </button>
+  );
+}
 
 // ---------------------------------------------------------------------------
 
@@ -93,8 +182,6 @@ export function Outline({
   onAddElement,
 }: Props) {
   const [open, setOpen] = useState<Set<string>>(() => new Set());
-  const [drag, setDrag] = useState<DragItem | null>(null);
-  const [over, setOver] = useState<string | null>(null);
   /** Which face of the left pane: the page tree, or the elements to drag from. */
   const [tab, setTab] = useState<'outline' | 'elements'>('outline');
 
@@ -118,30 +205,6 @@ export function Outline({
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-
-  function handleDrop(target: DragItem) {
-    const source = drag;
-    setDrag(null);
-    setOver(null);
-    if (!source || source.kind !== target.kind) return;
-
-    if (source.kind === 'section' && target.kind === 'section') {
-      if (source.section === target.section) return;
-      onCommit((current) => moveSection(current, source.section, target.section));
-      return;
-    }
-
-    if (source.kind === 'block' && target.kind === 'block') {
-      const sameColumn =
-        source.section === target.section &&
-        source.row === target.row &&
-        source.column === target.column;
-      if (!sameColumn || source.block === target.block) return;
-      onCommit((current) =>
-        moveBlockWithinColumn(current, source.section, source.row, source.column, source.block, target.block),
-      );
-    }
-  }
 
   return (
     <aside className="ed-outline" aria-label="Page outline">
@@ -186,30 +249,21 @@ export function Outline({
             const blocks = contentCount(section);
 
             return (
-              <div
+              <OutlineDropRow
                 key={section.id}
-                className={`ed-sec${over === dragKey ? ' is-dragover' : ''}`}
-                data-open={isOpen}
-                data-selected={selected}
-                onDragOver={(event) => {
-                  if (drag?.kind !== 'section') return;
-                  event.preventDefault();
-                  setOver(dragKey);
-                }}
-                onDragLeave={() => setOver((k) => (k === dragKey ? null : k))}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  handleDrop({ kind: 'section', section: sectionIndex });
-                }}
+                id={dragKey}
+                item={{ kind: 'section', section: sectionIndex }}
+                className="ed-sec"
+                open={isOpen}
+                selected={selected}
               >
                 <div className="ed-sec-head">
-                  <button
-                    type="button"
+                  <OutlineDragHandle
+                    id={dragKey}
+                    item={{ kind: 'section', section: sectionIndex }}
+                    label={sectionName(section, sectionIndex)}
                     className="ed-sec-toggle"
-                    aria-expanded={isOpen}
-                    draggable
-                    onDragStart={() => setDrag({ kind: 'section', section: sectionIndex })}
-                    onDragEnd={() => { setDrag(null); setOver(null); }}
+                    expanded={isOpen}
                     onClick={() => {
                       toggle(section.id);
                       onSelect({ kind: 'section', section: sectionIndex });
@@ -217,7 +271,7 @@ export function Outline({
                   >
                     <Icon name="chevron-right" size={16} className="ed-sec-chevron" />
                     <span className="ed-sec-name">{sectionName(section, sectionIndex)}</span>
-                  </button>
+                  </OutlineDragHandle>
 
                   <Menu
                     label={`Options for ${sectionName(section, sectionIndex)}`}
@@ -273,11 +327,6 @@ export function Outline({
                         rowIndex={rowIndex}
                         canRemove={section.rows.length > 1}
                         selectedKey={selectedKey}
-                        drag={drag}
-                        over={over}
-                        setDrag={setDrag}
-                        setOver={setOver}
-                        onDropItem={handleDrop}
                         onSelect={onSelect}
                         onCommit={onCommit}
                         onPickBlock={onPickBlock}
@@ -288,7 +337,7 @@ export function Outline({
                     <AddRow onAdd={(preset) => onCommit((c) => addRow(c, sectionIndex, createRow(preset)))} />
                   </div>
                 )}
-              </div>
+              </OutlineDropRow>
             );
           })}
         </div>
@@ -322,11 +371,6 @@ function Band({
   rowIndex,
   canRemove,
   selectedKey,
-  drag,
-  over,
-  setDrag,
-  setOver,
-  onDropItem,
   onSelect,
   onCommit,
   onPickBlock,
@@ -337,11 +381,6 @@ function Band({
   rowIndex: number;
   canRemove: boolean;
   selectedKey: string | null;
-  drag: DragItem | null;
-  over: string | null;
-  setDrag: (item: DragItem | null) => void;
-  setOver: (key: string | null) => void;
-  onDropItem: (target: DragItem) => void;
   onSelect: (path: Path) => void;
   onCommit: Props['onCommit'];
   onPickBlock: Props['onPickBlock'];
@@ -392,40 +431,29 @@ function Band({
 
             return (
               <Fragment key={block.id}>
-              <div
-                className={`ed-item${over === key ? ' is-dragover' : ''}`}
-                data-selected={selectedKey === pathKey(path)}
-                onDragOver={(event) => {
-                  if (drag?.kind !== 'block') return;
-                  event.preventDefault();
-                  setOver(key);
+              <OutlineDropRow
+                id={key}
+                item={{
+                  kind: 'block',
+                  section: sectionIndex,
+                  row: rowIndex,
+                  column: columnIndex,
+                  block: blockIndex,
                 }}
-                onDragLeave={() => setOver(over === key ? null : over)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  onDropItem({
+                className="ed-item"
+                selected={selectedKey === pathKey(path)}
+              >
+                <OutlineDragHandle
+                  id={key}
+                  item={{
                     kind: 'block',
                     section: sectionIndex,
                     row: rowIndex,
                     column: columnIndex,
                     block: blockIndex,
-                  });
-                }}
-              >
-                <button
-                  type="button"
+                  }}
+                  label={blockLabel(block)}
                   className="ed-item-main"
-                  draggable
-                  onDragStart={() =>
-                    setDrag({
-                      kind: 'block',
-                      section: sectionIndex,
-                      row: rowIndex,
-                      column: columnIndex,
-                      block: blockIndex,
-                    })
-                  }
-                  onDragEnd={() => { setDrag(null); setOver(null); }}
                   onClick={() => onSelect(path)}
                 >
                   <Icon name={definition?.icon ?? 'text'} size={16} className="ed-item-icon" />
@@ -433,7 +461,7 @@ function Band({
                     <span className="ed-item-label">{blockLabel(block)}</span>
                     <span className="ed-item-kind">{definition?.label ?? block.type}</span>
                   </span>
-                </button>
+                </OutlineDragHandle>
 
                 <Menu
                   label={`Options for ${blockLabel(block)}`}
@@ -472,7 +500,7 @@ function Band({
                     },
                   ]}
                 />
-              </div>
+              </OutlineDropRow>
 
               {/* A container opens up: its inner columns and blocks are listed
                   under it, each one selectable so the outline reaches them. */}

@@ -14,6 +14,9 @@
  * ends and the browser runs what the sanitiser waved through.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import { cleanEmbedHtml, sanitiseEmbedHtml } from '../lib/content/sanitise-embed';
@@ -267,9 +270,19 @@ describe('the one door', () => {
    * that stopped reaching the parser-backed module, everything above would still
    * pass while the live page went back through the tokeniser.
    */
-  it('routes embed mode through the parser, not the tag walk', () => {
-    const payload = '<div><p>x</div></p><script>alert(1)</script>';
-    expect(sanitiseHtml(payload, 'embed')).toBe(sanitiseEmbedHtml(payload));
+  it('keeps embed markup out of sanitiseHtml entirely, rather than branching inside it', () => {
+    /*
+     * This used to assert that sanitiseHtml(x, 'embed') delegated here. It no
+     * longer can, and that is the stronger arrangement: while the delegation
+     * existed, every client component that imported sanitise.ts for escapeHtml
+     * pulled parse5 into the browser with it (task #94, measured across four
+     * routes). The edge is cut at the module rather than guarded at runtime, so
+     * the two things worth proving are that the import is gone and that 'embed'
+     * is not a mode this function will answer to.
+     */
+    const source = readFileSync(join(__dirname, '..', 'lib', 'content', 'sanitise.ts'), 'utf8');
+    expect(source).not.toMatch(/from '\.\/sanitise-embed'/);
+    expect(source).toMatch(/export type SanitiseMode = 'richtext' \| 'heading';/);
   });
 
   it('leaves rich text on its own allowlist, which admits no div', () => {

@@ -23,7 +23,6 @@
  * interface here did not change, which is what that old note was buying.
  */
 
-import { sanitiseEmbedHtml } from './sanitise-embed';
 import { sanitiseStyle } from './styles';
 
 /**
@@ -109,23 +108,6 @@ const HEADING_TAGS: Record<string, readonly string[]> = {
 };
 
 /** Tags additionally allowed inside a staff embed. */
-const EMBED_TAGS: Record<string, readonly string[]> = {
-  ...RICH_TEXT_TAGS,
-  div: ['class'],
-  section: ['class'],
-  figure: ['class'],
-  figcaption: ['class'],
-  img: ['src', 'alt', 'width', 'height', 'loading'],
-  picture: [],
-  source: ['srcset', 'type', 'media'],
-  iframe: ['src', 'width', 'height', 'title', 'allow', 'allowfullscreen', 'loading'],
-  table: [],
-  thead: [],
-  tbody: [],
-  tr: [],
-  th: ['colspan', 'rowspan'],
-  td: ['colspan', 'rowspan'],
-};
 
 /** Void elements, emitted self-closing. */
 const VOID_TAGS = new Set(['br', 'img', 'source']);
@@ -139,12 +121,28 @@ const IFRAME_HOSTS = new Set([
   'maps.google.com',
 ]);
 
-export type SanitiseMode = 'richtext' | 'heading' | 'embed';
+/**
+ * The modes this function handles. EMBED IS NOT ONE OF THEM, and that is the
+ * point rather than an omission.
+ *
+ * Embed markup is parser-backed (lib/content/sanitise-embed.ts, parse5), and
+ * this module is imported by client components for escapeHtml and safeUrl. While
+ * the embed branch lived here, every one of those components pulled parse5 into
+ * the browser with it: measured 23 Aug 2026 on /editor, /collections, /settings
+ * and /sites. Callers that need embed markup now call sanitiseEmbedHtml
+ * directly, and all of them are server side.
+ *
+ * DROPPED FROM THE TYPE RATHER THAN GUARDED AT RUNTIME. A leftover
+ * sanitiseHtml(x, 'embed') would otherwise fall through to the regex walk below,
+ * which is sound for the rich text our own toolbar makes and NOT sound for
+ * markup a stranger pasted. That is a silent downgrade of a sanitiser, so the
+ * type makes it a build error instead of a code review someone has to catch.
+ */
+export type SanitiseMode = 'richtext' | 'heading';
 
 const ALLOWED_BY_MODE: Record<SanitiseMode, Record<string, readonly string[]>> = {
   richtext: RICH_TEXT_TAGS,
   heading: HEADING_TAGS,
-  embed: EMBED_TAGS,
 };
 
 /**
@@ -155,20 +153,12 @@ export function sanitiseHtml(input: unknown, mode: SanitiseMode = 'richtext'): s
   if (typeof input !== 'string' || input.length === 0) return '';
 
   /*
-   * EMBED IS PARSER-BACKED AND LIVES ELSEWHERE, since 20 Aug 2026.
-   *
-   * The header above used to end "until then, the embed block stays staff-only",
-   * because a regex walk over HTML a stranger pasted is how mutation XSS gets
-   * in. Andy needed the block open to every client, so the prerequisite was
-   * built rather than skipped: lib/content/sanitise-embed.ts parses with parse5
-   * and rebuilds the markup from values it checked itself.
-   *
-   * The two are still one call for every caller, so the save path and the
-   * renderer did not have to learn anything new. The tag walk below now guards
-   * only the rich text our own toolbar produces, which is the job it is
-   * actually sound for.
+   * EMBED IS PARSER-BACKED AND LIVES ELSEWHERE, since 20 Aug 2026, and since
+   * 23 Aug 2026 it is not reachable from here at all. See SanitiseMode above for
+   * why the delegation was removed rather than kept as a branch. The tag walk
+   * below guards only the rich text our own toolbar produces, which is the job
+   * it is actually sound for.
    */
-  if (mode === 'embed') return sanitiseEmbedHtml(input);
 
   /*
    * A map rather than a chain of ternaries, so a fourth mode is one line here

@@ -1,0 +1,661 @@
+{
+ "version": 1,
+ "id": "pg_8mbld0dh",
+ "title": "The Lycian Shore",
+ "slug": "lycian-shore",
+ "seo": {
+  "title": "Lycian Shore voyage — Coastwise",
+  "description": "Seven nights, Fethiye to Kaş aboard MV Nyren. Pine-backed anchorages, ruins at the waterline, warm sea.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_7n1jnsdy",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/lycian-coast.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_7mcar769",
+     "columns": [
+      {
+       "id": "col_7lhy3znw",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7il5l1m2",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7jlo2g5n",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "The Lycian Shore",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7krpuixu",
+         "type": "text",
+         "props": {
+          "html": "<p>Fethiye to Kaş along the pine-backed coast of ancient Lycia, aboard MV Nyren. Our warm-water escape at either end of the season.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_80pytuvh",
+   "name": "The voyage",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7ty2why3",
+     "columns": [
+      {
+       "id": "col_7pho3638",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7oyh6r7l",
+         "type": "text",
+         "props": {
+          "html": "<p>Lycia buried its dead in cliff tombs facing the sea, which tells you the sea was the road. It still is: half the ruins on this coast have no land access worth the name, so a shallow-draught ship is not a luxury here, it is the only ticket.</p><p>The pattern is simple. Sail early, anchor by ten, swim, lunch under the awning, ruin in the late afternoon when the stone goes gold, dinner ashore or on deck. Repeat until improved.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_7s1a5rfu",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7qlrcr2c",
+         "type": "rating",
+         "props": {
+          "rating": 4.8,
+          "showValue": true,
+          "count": "from 163 post-voyage questionnaires",
+          "size": "m",
+          "colour": "",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_7r9z89me",
+         "type": "tags",
+         "props": {
+          "style": "pills",
+          "size": "m",
+          "colour": "#1b333d",
+          "align": "left",
+          "items": [
+           {
+            "label": "Ruins by sea",
+            "href": ""
+           },
+           {
+            "label": "October warmth",
+            "href": ""
+           },
+           {
+            "label": "Deck dining",
+            "href": ""
+           },
+           {
+            "label": "Seven nights",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_7w4ahghd",
+     "columns": [
+      {
+       "id": "col_7vv2fuln",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7ukta84x",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "left",
+          "divided": true,
+          "items": [
+           {
+            "value": "7",
+            "suffix": "",
+            "label": "Nights",
+            "detail": ""
+           },
+           {
+            "value": "Apr, May, Oct",
+            "suffix": "",
+            "label": "Season",
+            "detail": ""
+           },
+           {
+            "value": "MV Nyren",
+            "suffix": "",
+            "label": "Ship",
+            "detail": ""
+           },
+           {
+            "value": "£1,760",
+            "suffix": "",
+            "label": "From, per person",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_7znlrmvz",
+     "columns": [
+      {
+       "id": "col_7y36hp8t",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7xh5mucw",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: join at Fethiye from three. Dalaman airport is forty minutes over the hill and we book the flights where wanted. Nyren carries a lift and two step-free cabins, and the swimming ladder is the busiest gangway aboard. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_85qi2vl1",
+   "name": "The detail",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_84vlrggt",
+     "columns": [
+      {
+       "id": "col_83pvmwho",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_819gzt43",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "The ship, the route, the food",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_82k3o0an",
+         "type": "tabs",
+         "props": {
+          "style": "underline",
+          "align": "left",
+          "textColour": "",
+          "items": [
+           {
+            "title": "The ship",
+            "body": "MV Nyren, forty-four guests, the awning rigged the whole voyage. The swimming ladder lives down. Cabins are cooled the quiet way: stone-coloured blinds and a ship designed to face her stern to the afternoon sun."
+           },
+           {
+            "title": "The route",
+            "body": "Fethiye, Gemiler Island and its Byzantine chapels, the long beach at Patara by tender, sunken Kekova where the harbour walls of a drowned town slide under the hull, then Kaş. Two nights at anchor, the rest alongside."
+           },
+           {
+            "title": "The food",
+            "body": "A Turkish chef joins for the season. Mezze at lunch, one fish a day bought over the rail, and a farewell dinner in a chandlery-turned-restaurant in Kaş that we will not name here because it seats twenty."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8c5z20ln",
+   "name": "A day, hour by hour",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8b2n3xqd",
+     "columns": [
+      {
+       "id": "col_886ao5i4",
+       "width": 55,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_86nk4dx4",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "A day, hour by hour",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_87bchyru",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "dot",
+          "connector": true,
+          "items": [
+           {
+            "title": "Eight",
+            "body": "Sail with coffee on the rail. An hour of coast slides past before anyone is properly awake, which is the correct way to see it."
+           },
+           {
+            "title": "Ten",
+            "body": "Anchor in a bay with pine down to the water. The ladder goes down. The first swimmer sets the tone for the day."
+           },
+           {
+            "title": "One",
+            "body": "Mezze under the awning. The chef counts the plates back like a customs officer."
+           },
+           {
+            "title": "Five",
+            "body": "The ruin, in the late light after the coach parties have gone. A drowned harbour wall slides under the hull on the way."
+           },
+           {
+            "title": "Eight",
+            "body": "Dinner on deck or ashore. The sea is still warm. Somebody swims again and pretends it was for science."
+           }
+          ]
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_8a0qk9kh",
+       "width": 45,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_89m556l0",
+         "type": "image",
+         "props": {
+          "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/lycian-coast.jpg",
+          "alt": "A pine-backed anchorage in the late sun",
+          "ratio": "4/5",
+          "fit": "cover",
+          "radius": "md"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8gdq1t0h",
+   "name": "Guest words",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8f4vraeu",
+     "columns": [
+      {
+       "id": "col_8egyi8pb",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8dufq5mo",
+         "type": "quote",
+         "props": {
+          "text": "We floated over the drowned town at Kekova in a flat calm and I could see window openings under the boat. I think about it weekly.",
+          "attribution": "Helen Marsh, Cardiff",
+          "role": "MV Nyren, October 2025"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_8la8r5y0",
+   "name": "Closing",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_8klzd3lv",
+     "columns": [
+      {
+       "id": "col_8jgizwoh",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_8he80m25",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "October. Everyone says October.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_8iucy8d1",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

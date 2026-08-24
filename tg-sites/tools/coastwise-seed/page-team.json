@@ -1,0 +1,514 @@
+{
+ "version": 1,
+ "id": "pg_gpz0mf3t",
+ "title": "Our people",
+ "slug": "team",
+ "seo": {
+  "title": "Our people — Coastwise",
+  "description": "The masters, the galley and the shed on Oban harbour. The people a small ship actually runs on.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_g2lrwxzg",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/saloon.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_g1su6q8p",
+     "columns": [
+      {
+       "id": "col_g09f2kwp",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_fxjzvu9s",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_fy569993",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "The people the ships run on",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_fz0r0o8b",
+         "type": "text",
+         "props": {
+          "html": "<p>Twelve crew to a ship, and a shed on Oban harbour. These are the ones you will meet first.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_g6klgstk",
+   "name": "The crew",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "revealStagger": true,
+   "hoverLift": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_g5918tgb",
+     "columns": [
+      {
+       "id": "col_g467rbgo",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_g3a0g4hn",
+         "type": "cards",
+         "props": {
+          "source": "typed",
+          "columns": "3",
+          "gap": "m",
+          "style": "bordered",
+          "imagePosition": "top",
+          "lead": "image",
+          "ratio": "4/5",
+          "radius": "md",
+          "align": "left",
+          "wholeCardLinks": false,
+          "items": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-master.jpg",
+            "icon": "",
+            "alt": "Ewan MacAskill at the bridge window",
+            "label": "Master, MV Freya",
+            "title": "Ewan MacAskill",
+            "body": "Twenty-six seasons in the Hebrides. Reads a sky faster than a forecast, and has been right more often than the forecast.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-mate.jpg",
+            "icon": "",
+            "alt": "Ingrid Solheim on deck",
+            "label": "Master, MV Skua",
+            "title": "Ingrid Solheim",
+            "body": "Grew up piloting her father’s fjord ferry. Knows which arms hold their glass at dusk, and anchors there.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-engineer.jpg",
+            "icon": "",
+            "alt": "Ante Kovačić in the engine room doorway",
+            "label": "Master, MV Nyren",
+            "title": "Ante Kovačić",
+            "body": "Split-born, navy-trained. Swears the Adriatic has two hundred anchorages and has personally slept in ninety of them.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-chef.jpg",
+            "icon": "",
+            "alt": "Marta Reid in the galley",
+            "label": "Head of galley",
+            "title": "Marta Reid",
+            "body": "Cooked in two starred kitchens and left both for a galley with a view. First down the gangway in every harbour.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-guide.jpg",
+            "icon": "",
+            "alt": "Tom Ellery with binoculars",
+            "label": "Naturalist",
+            "title": "Tom Ellery",
+            "body": "Leads the naturalists, and keeps the Faroes weeks for himself. Can tell a minke from a swell at a mile, and will wake you for it if you asked.",
+            "linkLabel": "",
+            "linkHref": ""
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/crew-purser.jpg",
+            "icon": "",
+            "alt": "Fiona Bell at the shed door",
+            "label": "The shed, Oban",
+            "title": "Fiona Bell",
+            "body": "Answers the phone, holds the plan, and has re-routed more holidays around more weather than anyone afloat.",
+            "linkLabel": "",
+            "linkHref": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_ge2442ly",
+   "name": "How we work",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_gd0t404k",
+     "columns": [
+      {
+       "id": "col_g8worept",
+       "width": 33,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_g7gigl2j",
+         "type": "icon-item",
+         "props": {
+          "icon": "compass",
+          "title": "Masters decide",
+          "body": "Weather calls are made on the bridge, never in the office. The office agrees with the bridge.",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_gahwv94t",
+       "width": 33,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_g93mwau8",
+         "type": "icon-item",
+         "props": {
+          "icon": "heart",
+          "title": "Crew stay",
+          "body": "Most of the crew return season after season. Ask Marta about her ninth spring provisioning run.",
+          "align": "left"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_gct36yub",
+       "width": 34,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_gb2utxeg",
+         "type": "icon-item",
+         "props": {
+          "icon": "phone",
+          "title": "A person answers",
+          "body": "The shed keeps ship’s hours, seven days in season. You will not meet a phone menu.",
+          "align": "left"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_gj5k59pl",
+   "name": "Asked on deck",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_giqo99v6",
+     "columns": [
+      {
+       "id": "col_ghcvltfa",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_gfb9jbnl",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Questions the crew actually get",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_ggr2sx80",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": true,
+          "openFirst": false,
+          "textColour": "",
+          "items": [
+           {
+            "title": "Can I have a go at steering?",
+            "body": "Yes, in open water, with the master beside you and the autopilot quietly disagreeing. You get a certificate. Adults ask for this more than children do, and take it more seriously."
+           },
+           {
+            "title": "Do the crew ever get off?",
+            "body": "Every crew member walks one landing a week as a guest, by rota. Marta uses hers to raid whichever market the ship is nearest. This is not a coincidence."
+           },
+           {
+            "title": "Who names the ships?",
+            "body": "Freya kept her Norwegian name because repainting a name is bad luck and worse paperwork. Skua is named for the bird that steals from gannets, which the crew insist is a compliment. Nyren is a family name from her Danish first owner, kept for the same reason as Freya’s."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_gog7ndey",
+   "name": "Closing",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_gnm4huo0",
+     "columns": [
+      {
+       "id": "col_gmjk9hoz",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_gkua1ptb",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Come and meet the rest aboard.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_gl481m19",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

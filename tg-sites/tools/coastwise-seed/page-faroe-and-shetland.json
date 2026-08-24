@@ -1,0 +1,733 @@
+{
+ "version": 1,
+ "id": "pg_7hi4payn",
+ "title": "Faroe and Shetland",
+ "slug": "faroe-and-shetland",
+ "seo": {
+  "title": "Faroe and Shetland voyage — Coastwise",
+  "description": "Eight nights, Lerwick to Tórshavn aboard MV Freya, across the bird cliffs of the north.",
+  "noindex": false
+ },
+ "sections": [
+  {
+   "id": "sec_6eegdypw",
+   "name": "Banner",
+   "tone": "dark",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 420,
+   "kenBurns": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "backgroundImage": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/faroe-cliffs.jpg",
+   "overlay": 45,
+   "rows": [
+    {
+     "id": "row_6ddt3zbb",
+     "columns": [
+      {
+       "id": "col_6c911gmy",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_69zldz80",
+         "type": "breadcrumbs",
+         "props": {
+          "separator": "slash",
+          "showHome": true,
+          "size": "s",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6anthj05",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h1",
+          "html": "Faroe and Shetland",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6bhio13h",
+         "type": "text",
+         "props": {
+          "html": "<p>Lerwick to Tórshavn across the top of the Atlantic, aboard MV Freya. The serious one, and the one the crew fight to work.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6rmhz47r",
+   "name": "The voyage",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6kyxeut4",
+     "columns": [
+      {
+       "id": "col_6g8fpaew",
+       "width": 60,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6f7s1b6e",
+         "type": "text",
+         "props": {
+          "html": "<p>This is the voyage for people who think they have seen coastline. Mykines has a million seabirds and ten households. The cliffs at Enniberg drop 750 metres straight into the sea, and we idle beneath them with the engine at dead slow, because there is no other correct speed.</p><p>It is also the voyage where the plan bends most. The master holds two routes in his head at all times and picks at dawn. You will not know which day the whales come. Neither do we. That is rather the point.</p><p>In high summer Freya alternates these weeks with her Hebridean ones, which is why the northern season is short and books first.</p>"
+         }
+        }
+       ]
+      },
+      {
+       "id": "col_6j4z511z",
+       "width": 40,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6hwxna2n",
+         "type": "rating",
+         "props": {
+          "rating": 4.9,
+          "showValue": true,
+          "count": "from 96 post-voyage questionnaires",
+          "size": "m",
+          "colour": "",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6ism62g3",
+         "type": "tags",
+         "props": {
+          "style": "pills",
+          "size": "m",
+          "colour": "#1b333d",
+          "align": "left",
+          "items": [
+           {
+            "label": "Bird cliffs",
+            "href": ""
+           },
+           {
+            "label": "Whale watch",
+            "href": ""
+           },
+           {
+            "label": "Hard weather",
+            "href": ""
+           },
+           {
+            "label": "Eight nights",
+            "href": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 64,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_6n21jmoe",
+     "columns": [
+      {
+       "id": "col_6mjlzas8",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6lcpzv60",
+         "type": "stats",
+         "props": {
+          "columns": "4",
+          "size": "m",
+          "align": "left",
+          "divided": true,
+          "items": [
+           {
+            "value": "8",
+            "suffix": "",
+            "label": "Nights",
+            "detail": ""
+           },
+           {
+            "value": "May–Jul",
+            "suffix": "",
+            "label": "Season",
+            "detail": ""
+           },
+           {
+            "value": "MV Freya",
+            "suffix": "",
+            "label": "Ship",
+            "detail": ""
+           },
+           {
+            "value": "£2,890",
+            "suffix": "",
+            "label": "From, per person",
+            "detail": ""
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    },
+    {
+     "id": "row_6qatzm3u",
+     "columns": [
+      {
+       "id": "col_6pkp4zot",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6ow1fia5",
+         "type": "text",
+         "props": {
+          "html": "<p>The practical bit: join at Lerwick by noon and fly home from Tórshavn; we book both legs where wanted, under the ATOL. Landings are by tender and some are wet, announced honestly at the morning brief. Freya is a ship of stairs, and this is her sternest coast. Travel insurance is a condition of booking.</p>"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_6xnkm28s",
+   "name": "The shape of the week",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_6wjvmgk0",
+     "columns": [
+      {
+       "id": "col_6v5s6zi1",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6s78bri4",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Eight nights, held loosely",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6tw1bxpw",
+         "type": "text",
+         "props": {
+          "html": "<p>This voyage refuses a fixed itinerary on principle, so here is its shape instead. Treat the order as the weather&rsquo;s to decide.</p>"
+         }
+        },
+        {
+         "id": "b_6u6ljntr",
+         "type": "steps",
+         "props": {
+          "layout": "down",
+          "marker": "number",
+          "connector": true,
+          "items": [
+           {
+            "title": "Lerwick",
+            "body": "Board by noon, and the bird cliffs of Noss the same afternoon. The season starts loudly."
+           },
+           {
+            "title": "The crossing",
+            "body": "One open sea day, picked by forecast, not calendar. The galley answers with a famous stew."
+           },
+           {
+            "title": "The Faroes, four days",
+            "body": "Tórshavn, the sounds and the sea lochs, with two spare days folded in so the weather has room to be generous."
+           },
+           {
+            "title": "Mykines",
+            "body": "When the swell settles, which is four voyages in five. The best landing of the season."
+           },
+           {
+            "title": "Enniberg, then home",
+            "body": "Dead slow under 750 metres of cliff, then Tórshavn, and the flight home booked by us."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_72j67emo",
+   "name": "Practical",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_711i6mz3",
+     "columns": [
+      {
+       "id": "col_706gk3rj",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_6yy5p2nf",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "The questions everyone asks",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_6zziah8w",
+         "type": "accordion",
+         "props": {
+          "style": "separated",
+          "single": true,
+          "openFirst": true,
+          "textColour": "",
+          "items": [
+           {
+            "title": "How rough does it get?",
+            "body": "Between the islands, sheltered. The two open crossings are chosen by forecast, not by calendar, and the master will sit one out in harbour rather than take a bad one. Bring the tablets and you will probably not need them."
+           },
+           {
+            "title": "What do I pack?",
+            "body": "Layers, a real waterproof, boots you can wade a tender landing in. The ship carries spares of everything anyone has ever forgotten."
+           },
+           {
+            "title": "Will we land on Mykines?",
+            "body": "On about four voyages in five. It needs a settled swell, which is why the plan holds two spare days. When it comes off, it is the best landing of the season."
+           },
+           {
+            "title": "Is there daylight?",
+            "body": "In June, functionally all of it. The saloon has blackout blinds and the bar stays open until the last guest concedes."
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_77mk6a65",
+   "name": "The north in pictures",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "reveal": true,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_76hacwx2",
+     "columns": [
+      {
+       "id": "col_7569gbu3",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_73xehz7q",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "What hard light does",
+          "align": "left"
+         }
+        },
+        {
+         "id": "b_74hyi111",
+         "type": "gallery",
+         "props": {
+          "columns": "4",
+          "gap": "m",
+          "radius": "md",
+          "layout": "grid",
+          "lightbox": true,
+          "images": [
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/faroe-cliffs.jpg",
+            "alt": "Sea cliffs and birds in hard northern light"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/wildlife.jpg",
+            "alt": "Seabirds working the water beside the ship"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/open-sea.jpg",
+            "alt": "The open crossing in a long swell"
+           },
+           {
+            "src": "https://qvzbothxlrzeklcvdhzp.supabase.co/storage/v1/object/public/coastwise/aerial-channel.jpg",
+            "alt": "Threading the sounds between islands"
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7bt6v2fk",
+   "name": "Guest words",
+   "tone": "light",
+   "width": "contained",
+   "paddingY": 48,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7a4ajijy",
+     "columns": [
+      {
+       "id": "col_79364gm1",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_78b3o9qb",
+         "type": "quote",
+         "props": {
+          "text": "I have birded for forty years and I made three lifers before lunch on the second day. Then the master idled under Enniberg and I stopped counting.",
+          "attribution": "Gordon Shaw, Aberdeen",
+          "role": "MV Freya, June 2026"
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  },
+  {
+   "id": "sec_7gzhe6m4",
+   "name": "Closing",
+   "tone": "subtle",
+   "width": "contained",
+   "paddingY": 64,
+   "minHeight": 0,
+   "box": {
+    "padding": {
+     "top": 0,
+     "right": 0,
+     "bottom": 0,
+     "left": 0
+    },
+    "radius": 0,
+    "borderWidth": 0,
+    "shadow": "none",
+    "blur": 0
+   },
+   "overlay": 60,
+   "rows": [
+    {
+     "id": "row_7f1ydru4",
+     "columns": [
+      {
+       "id": "col_7ezvf042",
+       "width": 100,
+       "align": "top",
+       "flow": "stacked",
+       "box": {
+        "padding": {
+         "top": 0,
+         "right": 0,
+         "bottom": 0,
+         "left": 0
+        },
+        "radius": 0,
+        "borderWidth": 0,
+        "shadow": "none",
+        "blur": 0
+       },
+       "blocks": [
+        {
+         "id": "b_7csh8x97",
+         "type": "heading",
+         "props": {
+          "level": "h2",
+          "style": "h2",
+          "html": "Book the whole eight nights. The weather needs room to be generous.",
+          "align": "centre"
+         }
+        },
+        {
+         "id": "b_7d872cjy",
+         "type": "button-group",
+         "props": {
+          "align": "centre",
+          "buttons": [
+           {
+            "label": "Check dates and cabins",
+            "href": "/#book",
+            "variant": "primary",
+            "newTab": false
+           },
+           {
+            "label": "Talk to us",
+            "href": "/contact",
+            "variant": "secondary",
+            "newTab": false
+           }
+          ]
+         }
+        }
+       ]
+      }
+     ],
+     "gap": 32,
+     "stackBelow": "mobile",
+     "reverseOnStack": false
+    }
+   ]
+  }
+ ]
+}

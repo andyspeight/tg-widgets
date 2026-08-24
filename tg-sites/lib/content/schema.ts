@@ -33,7 +33,13 @@ import { z } from 'zod';
 import { normaliseDividerHeight, safeDivider } from './dividers';
 import { escapeHtml } from './sanitise';
 import { hasInnerColumns } from './inner-columns';
-import { COLOUR_TOKENS, normaliseLineHeight, normaliseRevealStyle, normaliseTextSize } from './styles';
+import {
+  COLOUR_TOKENS,
+  normaliseLetterSpacing,
+  normaliseLineHeight,
+  normaliseRevealStyle,
+  normaliseTextSize,
+} from './styles';
 
 // ---------------------------------------------------------------------------
 // Constraints
@@ -484,14 +490,15 @@ export const STACK_BREAKPOINTS: Record<StackBelow, number> = {
  * that means nothing for the element it sits on (a section has no fontSize, a
  * block no paddingY) simply never appears there. The set of KNOWN properties
  * grows as per-breakpoint controls are added. Today: paddingY, a section's
- * vertical spacing, and fontSize, lineHeight and align, a block's text size, line
- * spacing and alignment.
+ * vertical spacing, and fontSize, lineHeight, letterSpacing and align, a block's
+ * text size, line spacing, letter spacing and alignment.
  */
 const OverridesSchema = z
   .object({
     paddingY: z.unknown().transform(normaliseSectionPadding).optional(),
     fontSize: z.unknown().transform(normaliseTextSize).optional(),
     lineHeight: z.unknown().transform(normaliseLineHeight).optional(),
+    letterSpacing: z.unknown().transform(normaliseLetterSpacing).optional(),
     align: z.unknown().transform(normaliseAlign).optional(),
   })
   .passthrough();
@@ -546,9 +553,9 @@ export const BlockSchema = z.object({
   props: z.record(z.unknown()).default({}),
   /**
    * Per-screen overrides of the block's own style, a sibling of box the same way
-   * a section's is. Today: fontSize and lineHeight, the block's text size and
-   * line spacing, and align, its alignment, at tablet and phone. See
-   * ResponsiveSchema.
+   * a section's is. Today: fontSize, lineHeight and letterSpacing, the block's
+   * text size, line spacing and letter spacing, and align, its alignment, at
+   * tablet and phone. See ResponsiveSchema.
    */
   responsive: ResponsiveSchema.optional(),
   /**

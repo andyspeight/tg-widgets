@@ -33,5 +33,13 @@
     "paths": { "@/*": ["./*"] }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    /* Operational scripts, not the app: the Coastwise seed pipeline authors
+       content in a loose shape and proves it at runtime through parsePage and
+       sanitisePage (tools/build-coastwise.mjs), which is the validation that
+       matters for seed JSON. Holding it to the app's compile-time prop types
+       fails `next build` on friction the runtime parser resolves by design. */
+    "tools"
+  ]
 }

@@ -21,9 +21,9 @@ import { safeColour } from '../../lib/content/schema';
 import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
-import { cleanImportHtml } from '../../lib/import/html';
-import { importScopeClass, scopeImportCss } from '../../lib/import/css';
-import { applyImportContent } from '../../lib/import/tokenise';
+import { preparedFor, type PreparedMap } from '../../lib/content/prepared';
+import { importScopeClass } from '../../lib/import/scope';
+import { applyImportContent } from '../../lib/import/slots';
 import { parseTable } from '../../lib/content/table';
 import { resolveVideo } from '../../lib/content/video';
 import { mapDirectionsUrl, mapEmbedSrc } from '../../lib/content/map';
@@ -1368,6 +1368,9 @@ function renderCard(
   options: {
     showImage: boolean;
     ratio: string;
+    /** The grid's card design, because the frame is built differently for one
+     *  of them. See the frame below. */
+    design: 'stacked' | 'overlay' | 'index';
     radius: (typeof RADII)[number];
     /*
      * WHAT THE CARD LEADS WITH (Andy, 21 Aug 2026, from Duda's "Fancy Grid").
@@ -1400,6 +1403,23 @@ function renderCard(
   // The byline and the reading time, joined into one line, each part only when
   // it is there: "By Jane Doe" · "4 min read". Both are rendered as text.
   const author = str(card, 'author');
+  /*
+   * The collection's declared facts, already formatted into words by
+   * itemAsCard: "From £1,299", "7 nights". Read defensively for the same reason
+   * tags are: a typed-in card with a stray facts prop must not be able to put
+   * anything but strings on the page, and both halves are rendered as text.
+   */
+  const rawFacts = (card as Record<string, unknown>).facts;
+  const facts = Array.isArray(rawFacts)
+    ? rawFacts
+        .filter((fact): fact is { label: string; value: string } =>
+          !!fact
+          && typeof fact === 'object'
+          && typeof (fact as { value?: unknown }).value === 'string'
+          && ((fact as { value: string }).value.length > 0)
+          && typeof (fact as { label?: unknown }).label === 'string')
+        .slice(0, 4)
+    : [];
   const rawMinutes = (card as Record<string, unknown>).readingMinutes;
   const readingMinutes = typeof rawMinutes === 'number' && rawMinutes > 0 ? rawMinutes : 0;
   const meta = [author, readingMinutes > 0 ? `${readingMinutes} min read` : '']
@@ -1409,7 +1429,7 @@ function renderCard(
   // A card with nothing to say is not drawn at all rather than drawn empty. An
   // agent who added one and has not filled it in yet still sees it in the
   // properties pane, which is where they are working.
-  if (!title && !body && !label && !src && !icon) return null;
+  if (!title && !body && !label && !src && !icon && facts.length === 0) return null;
 
   return (
     <article className="tgs-card" key={index}>
@@ -1432,7 +1452,18 @@ function renderCard(
       )}
 
       {options.showImage && options.lead === 'image' && (
-        <div className="tgs-card__frame" data-radius={options.radius} style={ratioStyle(options.ratio)}>
+        <div
+          className="tgs-card__frame"
+          data-radius={options.radius}
+          /*
+           * NO RATIO WHEN THE WORDS SIT ON THE PICTURE. The frame is stretched
+           * over the whole card there, so a shape of its own is not just
+           * unused: it is an INLINE style, it therefore beats the stylesheet,
+           * and the picture would stop short of the words and drop them onto
+           * the page below it.
+           */
+          style={options.design === 'overlay' ? undefined : ratioStyle(options.ratio)}
+        >
           {src ? (
             <img src={src} alt={str(card, 'alt')} loading="lazy" decoding="async" />
           ) : (
@@ -1446,6 +1477,23 @@ function renderCard(
       <div className="tgs-card__body">
         {label && <p className="tgs-card__label">{label}</p>}
         {title && <h3 className="tgs-card__title">{title}</h3>}
+
+        {facts.length > 0 && (
+          /*
+           * A definition list, because that is what these are: a label and its
+           * value. It reads as "Price from, per person: £1,299" to a screen
+           * reader, where a row of divs would read as two loose numbers.
+           */
+          <dl className="tgs-card__facts">
+            {facts.map((fact, factIndex) => (
+              <div className="tgs-card__fact" key={factIndex}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         {meta && <p className="tgs-card__meta">{meta}</p>}
         {body && <p className="tgs-card__text">{body}</p>}
 
@@ -1489,6 +1537,17 @@ export function CardsBlock({
   const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
   const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
   const style = oneOf(props, 'style', ['plain', 'bordered', 'raised', 'tinted'] as const, 'bordered');
+  /*
+   * The card's SILHOUETTE, which the stylesheet builds from the same markup.
+   *
+   * All three designs draw the identical DOM and differ only in CSS, which is
+   * not a shortcut: it is what keeps one card component honest about what a
+   * card contains. An overlay is the body laid over the frame, and an index is
+   * the body turned into two columns with the date in the first. Neither needed
+   * a second component, and a second component is how two of them would have
+   * drifted apart the first time somebody added a field.
+   */
+  const design = oneOf(props, 'design', ['stacked', 'overlay', 'index'] as const, 'stacked');
   const imagePosition = oneOf(props, 'imagePosition', ['top', 'left', 'none'] as const, 'top');
   const ratio = str(props, 'ratio', '4/3');
   const radius = oneOf(props, 'radius', RADII, 'md');
@@ -1509,6 +1568,7 @@ export function CardsBlock({
       renderCard(card, index, {
         showImage: imagePosition !== 'none',
         ratio,
+        design,
         radius,
         lead,
         iconColour,
@@ -1550,6 +1610,7 @@ export function CardsBlock({
       data-columns={columns}
       data-gap={gap}
       data-style={style}
+      data-design={design}
       data-image={imagePosition}
       data-radius={radius}
       data-align={align}
@@ -1773,7 +1834,8 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
   const scrollbar = oneOf(props, 'scrollbar', ['thin', 'bar'] as const, 'thin');
 
   const slides = items
-    .map((card, index) => renderCard(card, index, { showImage: true, ratio, radius, lead: 'image' }))
+    .map((card, index) =>
+      renderCard(card, index, { showImage: true, ratio, radius, lead: 'image', design: 'stacked' }))
     .filter((card): card is ReactElement => card !== null);
 
   if (slides.length === 0) {
@@ -3695,7 +3757,16 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
   const body = headerRow ? rows.slice(1) : rows;
   const textColour = safeColour(props.textColour);
 
-  return (
+  /*
+   * THE CAPTION LIVES OUTSIDE THE SCROLL REGION. It used to be a <caption>
+   * inside the table, which meant it scrolled sideways WITH the table on a
+   * phone and its first line was cut mid-word at the viewport edge (the
+   * 21 Aug review: "...where others ancho"), quietly breaking the site's
+   * text-never-touches-the-edge promise. As a <figcaption> on a wrapping
+   * <figure> it wraps at the viewport like any paragraph, while the table
+   * keeps its name for assistive tech through aria-label on the region.
+   */
+  const table = (
     <div
       className="tgs-table__scroll"
       role="region"
@@ -3703,8 +3774,6 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
       tabIndex={0}
     >
       <table className="tgs-table" data-style={style} style={textColour ? { color: textColour } : undefined}>
-        {caption && <caption className="tgs-table__caption">{caption}</caption>}
-
         {head && (
           <thead>
             <tr>
@@ -3734,6 +3803,14 @@ export function TableBlock({ props }: { props: Props }): ReactElement {
         </tbody>
       </table>
     </div>
+  );
+
+  if (!caption) return table;
+  return (
+    <figure className="tgs-table__figure">
+      {table}
+      <figcaption className="tgs-table__caption">{caption}</figcaption>
+    </figure>
   );
 }
 
@@ -3841,6 +3918,171 @@ export function WhatsAppBlock({ props }: { props: Props }): ReactElement {
  * able to see the thing they are editing, so `editing` overrides the hiding and
  * the block says out loud that it has ended.
  */
+/**
+ * A form a visitor fills in, and the first block that LISTENS instead of shows.
+ *
+ * NO JAVASCRIPT, the same bar the search page and the burger menu hold: a plain
+ * POST to /_form on the site's own host (the slug rules cannot mint that path,
+ * so it can never shadow a page). The route validates against the PUBLISHED
+ * page's own copy of this block, stores the answers, and returns the visitor to
+ * this page with a fragment; CSS :target does the rest. `#<id>-done` reveals the
+ * thank-you and hides the form, `#<id>-err` reveals the error line. State
+ * machine by URL fragment, nothing to hydrate.
+ *
+ * Field controls are named q_0, q_1... by INDEX, never by the label a client
+ * typed: the route re-reads the labels from the published content, so nothing a
+ * visitor posts ever becomes a stored key, and nothing a client typed ever
+ * becomes a control name.
+ *
+ * Two traps a bot walks into and a person cannot: a visually hidden extra field
+ * (a person never sees it, so never fills it) and the render timestamp (a
+ * person cannot read and answer a form in under a few seconds). Both are
+ * checked by the route; the page carries no defence logic of its own.
+ *
+ * In the editor the form is a picture of itself: no action, submit disabled,
+ * and the stylesheet turns off pointer events on the controls so a click lands
+ * on the block and selects it.
+ */
+export function FormBlock({
+  props,
+  blockId,
+  editing = false,
+}: {
+  props: Props;
+  blockId: string;
+  editing?: boolean;
+}): ReactElement {
+  const name = str(props, 'name');
+  const submitLabel = str(props, 'submitLabel') || 'Send';
+  const successTitle = str(props, 'successTitle') || 'Thank you';
+  const successBody = str(props, 'successBody');
+  const align = oneOf(props, 'align', ['left', 'centre', 'right'] as const, 'left');
+  const fields = list(props, 'fields');
+  const fid = `f-${blockId}`;
+
+  return (
+    <div className="tgs-form" data-align={align} data-editing={editing ? '' : undefined}>
+      <div className="tgs-form__done" id={`${fid}-done`} role="status" tabIndex={-1}>
+        <p className="tgs-form__done-title">{successTitle}</p>
+        {successBody ? <p className="tgs-form__done-body">{successBody}</p> : null}
+      </div>
+      <form
+        className="tgs-form__form"
+        method="post"
+        {...(editing ? {} : { action: '/_form' })}
+      >
+        <p className="tgs-form__error" id={`${fid}-err`} role="alert" tabIndex={-1}>
+          Something was not right. Please check the fields and send again.
+        </p>
+        <input type="hidden" name="_block" value={blockId} />
+        <input type="hidden" name="_form" value={name} />
+        <input type="hidden" name="_at" value={editing ? 0 : Date.now()} />
+        {/* The trap field. Hidden from eyes and from the tab order, named like
+            something an autofilling bot wants to complete. */}
+        <div className="tgs-form__hp" aria-hidden="true">
+          <label>
+            Leave this field empty
+            <input type="text" name="_website" tabIndex={-1} autoComplete="off" />
+          </label>
+        </div>
+        {fields.map((field, index) => {
+          const kind = oneOf(field, 'kind', ['text', 'email', 'phone', 'textarea', 'select', 'checkbox'] as const, 'text');
+          const label = str(field, 'label') || `Field ${index + 1}`;
+          const required = bool(field, 'required');
+          const placeholder = str(field, 'placeholder');
+          const controlId = `${fid}-q${index}`;
+          const controlName = `q_${index}`;
+
+          if (kind === 'checkbox') {
+            return (
+              <div key={index} className="tgs-form__field tgs-form__field--tick">
+                <label className="tgs-form__tick" htmlFor={controlId}>
+                  <input
+                    id={controlId}
+                    type="checkbox"
+                    name={controlName}
+                    value="Yes"
+                    required={required}
+                  />
+                  <span>{label}{required ? <em className="tgs-form__req" aria-hidden="true"> *</em> : null}</span>
+                </label>
+              </div>
+            );
+          }
+
+          const labelEl = (
+            <label className="tgs-form__label" htmlFor={controlId}>
+              {label}
+              {required ? <em className="tgs-form__req" aria-hidden="true"> *</em> : null}
+            </label>
+          );
+
+          if (kind === 'textarea') {
+            return (
+              <div key={index} className="tgs-form__field">
+                {labelEl}
+                <textarea
+                  id={controlId}
+                  className="tgs-form__control"
+                  name={controlName}
+                  rows={5}
+                  required={required}
+                  placeholder={placeholder || undefined}
+                  maxLength={4000}
+                />
+              </div>
+            );
+          }
+
+          if (kind === 'select') {
+            const options = str(field, 'options')
+              .split(',')
+              .map((option) => option.trim())
+              .filter(Boolean)
+              .slice(0, 24);
+            return (
+              <div key={index} className="tgs-form__field">
+                {labelEl}
+                <select id={controlId} className="tgs-form__control" name={controlName} required={required} defaultValue="">
+                  <option value="" disabled={required}>
+                    {placeholder || 'Choose'}
+                  </option>
+                  {options.map((option, optionIndex) => (
+                    <option key={optionIndex} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          }
+
+          const type = kind === 'email' ? 'email' : kind === 'phone' ? 'tel' : 'text';
+          const autoComplete = kind === 'email' ? 'email' : kind === 'phone' ? 'tel' : undefined;
+          return (
+            <div key={index} className="tgs-form__field">
+              {labelEl}
+              <input
+                id={controlId}
+                className="tgs-form__control"
+                type={type}
+                name={controlName}
+                required={required}
+                placeholder={placeholder || undefined}
+                autoComplete={autoComplete}
+                maxLength={500}
+              />
+            </div>
+          );
+        })}
+        <button className="tgs-button" data-variant="primary" data-size="m" type="submit" disabled={editing}>
+          {submitLabel}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 export function CouponBlock({
   props,
   editing = false,
@@ -4449,10 +4691,32 @@ export function SpacerBlock({ props }: { props: Props }): ReactElement {
 // Advanced
 // ---------------------------------------------------------------------------
 
-export function EmbedBlock({ props }: { props: Props }): ReactElement {
-  const html = sanitiseHtml(props.html, 'embed');
-  if (!html) return <div className="tgs-placeholder">Paste embed code</div>;
-  return <div className="tgs-embed" dangerouslySetInnerHTML={{ __html: html }} />;
+/**
+ * A pasted embed.
+ *
+ * READS THE MARKUP THE SERVER CLEANED rather than cleaning it here. The parser
+ * behind sanitiseHtml('embed') is parse5, and this component renders on the
+ * editor canvas, so calling it here put the parser in the browser. See
+ * lib/content/prepared.ts for the arrangement and task #94 for the measurements.
+ *
+ * NO ENTRY MEANS THE PLACEHOLDER, never the stored string. That is stricter than
+ * the old behaviour rather than looser: there is no sanitiser in the browser any
+ * more, so nothing here CAN render markup the server has not been through, even
+ * if a stored row asks it to.
+ */
+export function EmbedBlock({
+  props,
+  blockId,
+  prepared,
+}: {
+  props: Props;
+  blockId: string;
+  prepared?: PreparedMap;
+}): ReactElement {
+  void props;
+  const ready = preparedFor(prepared, blockId);
+  if (!ready?.html) return <div className="tgs-placeholder">Paste embed code</div>;
+  return <div className="tgs-embed" dangerouslySetInnerHTML={{ __html: ready.html }} />;
 }
 
 /**
@@ -4496,13 +4760,21 @@ export function EmbedBlock({ props }: { props: Props }): ReactElement {
  * CSS depending on it have to agree and a mismatch is an unstyled section with
  * no error anywhere.
  */
-export function ImportedBlock({ props, blockId }: { props: Props; blockId: string }): ReactElement {
+export function ImportedBlock({
+  props,
+  blockId,
+  prepared,
+}: {
+  props: Props;
+  blockId: string;
+  prepared?: PreparedMap;
+}): ReactElement {
   const scope = importScopeClass(blockId);
   const fields = importFields(props);
 
-  const cleaned = cleanImportHtml(str(props, 'html'));
-  const html = applyImportContent(cleaned.html, importContent(props), fields);
-  const { css } = scopeImportCss(str(props, 'css'), { scope: `.${scope}` });
+  const ready = preparedFor(prepared, blockId);
+  const html = applyImportContent(ready?.html ?? '', importContent(props), fields);
+  const css = ready?.css ?? '';
 
   if (!html.trim()) {
     return <div className="tgs-placeholder">This imported design has nothing in it</div>;

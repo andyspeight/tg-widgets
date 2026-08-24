@@ -20,8 +20,14 @@ import { sanitisePage } from '../lib/content/sanitise-page';
 import { withOverride } from '../lib/content/responsive';
 import {
   hasInlineTextSizing,
+  LETTER_SPACINGS,
+  LETTER_SPACING_EM_MAX,
+  LETTER_SPACING_EM_MIN,
+  LETTER_SPACING_PX_MAX,
+  LETTER_SPACING_PX_MIN,
   LINE_HEIGHT_MAX,
   LINE_HEIGHT_MIN,
+  normaliseLetterSpacing,
   normaliseLineHeight,
 } from '../lib/content/styles';
 import {
@@ -343,6 +349,183 @@ describe('a block-level line spacing survives the save path', () => {
     if (!result.ok) return;
     const block = result.page.sections[0].rows[0].columns[0].blocks[0];
     expect(block.responsive?.phone?.lineHeight).toBe('3');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Letter spacing per screen, the third rider on the same engine.
+// ---------------------------------------------------------------------------
+
+describe('a letter-spacing value is held to its band, per unit', () => {
+  it('reads a bare number as em, the unit the theme states its own tracking in', () => {
+    expect(normaliseLetterSpacing(0.02)).toBe('0.02em');
+    expect(normaliseLetterSpacing('0.02')).toBe('0.02em');
+    expect(normaliseLetterSpacing('0.02em')).toBe('0.02em');
+  });
+
+  it('keeps pixels when pixels are asked for, rather than guessing an em', () => {
+    expect(normaliseLetterSpacing('2px')).toBe('2px');
+    expect(normaliseLetterSpacing('-1.5px')).toBe('-1.5px');
+  });
+
+  it('treats zero as a real answer, not an absence', () => {
+    // An h1 carries -0.03em of its own, so 0em means take that off. Dropping it
+    // would silently mean the opposite: keep the tracking the style came with.
+    expect(normaliseLetterSpacing('0em')).toBe('0em');
+    expect(normaliseLetterSpacing(0)).toBe('0em');
+    expect(normaliseLetterSpacing('0px')).toBe('0px');
+  });
+
+  it('clamps to the band at both ends rather than dropping, as line spacing does', () => {
+    expect(normaliseLetterSpacing(-4)).toBe(`${LETTER_SPACING_EM_MIN}em`);
+    expect(normaliseLetterSpacing(9)).toBe(`${LETTER_SPACING_EM_MAX}em`);
+    expect(normaliseLetterSpacing('-99px')).toBe(`${LETTER_SPACING_PX_MIN}px`);
+    expect(normaliseLetterSpacing('999px')).toBe(`${LETTER_SPACING_PX_MAX}px`);
+  });
+
+  it('shortens to the precision the theme tokens are written to', () => {
+    // --tgs-h1-tracking is -0.030em, so three decimals with no trailing zeros.
+    expect(normaliseLetterSpacing('-0.0300em')).toBe('-0.03em');
+    expect(normaliseLetterSpacing('0.10em')).toBe('0.1em');
+  });
+
+  it('refuses anything that is not a plain number with an allowed unit', () => {
+    expect(normaliseLetterSpacing('wide')).toBeUndefined();
+    expect(normaliseLetterSpacing('')).toBeUndefined();
+    expect(normaliseLetterSpacing(null)).toBeUndefined();
+    expect(normaliseLetterSpacing(Number.NaN)).toBeUndefined();
+    expect(normaliseLetterSpacing(Infinity)).toBeUndefined();
+    // Units and expressions the chain has no business carrying.
+    expect(normaliseLetterSpacing('2rem')).toBeUndefined();
+    expect(normaliseLetterSpacing('calc(1em + 2px)')).toBeUndefined();
+    expect(normaliseLetterSpacing('1em; color: red')).toBeUndefined();
+    expect(normaliseLetterSpacing('2px)')).toBeUndefined();
+  });
+
+  it('offers only values it would itself accept, so the pane cannot drift', () => {
+    for (const choice of LETTER_SPACINGS) {
+      expect(normaliseLetterSpacing(choice.value)).toBe(choice.value);
+    }
+  });
+});
+
+describe('a block carries per-screen letter spacing, additively', () => {
+  const schema = read('lib', 'content', 'schema.ts');
+
+  it('adds letterSpacing to the shared overrides, validated as a tracking value', () => {
+    expect(schema).toMatch(
+      /letterSpacing:\s*z\.unknown\(\)\.transform\(normaliseLetterSpacing\)\.optional\(\)/,
+    );
+  });
+});
+
+describe('the renderer emits a block its per-screen letter-spacing vars', () => {
+  const render = read('components', 'render', 'PageRenderer.tsx');
+
+  it('maps letterSpacing to --tgs-ls on the one BLOCK_RESPONSIVE spread', () => {
+    expect(render).toMatch(/property:\s*'letterSpacing',\s*varBase:\s*'--tgs-ls'/);
+    expect(render).toContain('responsiveVars(block.responsive, BLOCK_RESPONSIVE)');
+  });
+
+  it('carries the desktop base as an inline --tgs-ls alongside the twins', () => {
+    expect(render).toContain("{ '--tgs-ls': baseLetterSpacing }");
+  });
+
+  it('counts a letter-spacing base as styling, so the block is not dropped as bare', () => {
+    expect(render).toContain('Boolean(baseLetterSpacing)');
+  });
+});
+
+describe('the text elements read the letter-spacing chain, folded by container queries', () => {
+  const css = read('app', 'globals.css');
+
+  it('.tgs-heading and .tgs-text read the override, then the base, then their own tracking', () => {
+    expect(css).toContain('letter-spacing: var(--tgs-ls-r, var(--tgs-ls, var(--tgs-ls-base)))');
+  });
+
+  it('sets --tgs-ls-base per heading level and on the paragraph, so the chain has a floor', () => {
+    for (const level of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']) {
+      expect(css).toContain(`--tgs-ls-base: var(--tgs-${level}-tracking)`);
+    }
+    expect(css).toContain('--tgs-ls-base: var(--tgs-p-tracking)');
+  });
+
+  it('leaves no heading level stating its tracking flat, which would beat the chain', () => {
+    // A data-style that still said `letter-spacing: var(--tgs-h1-tracking)` would
+    // win over .tgs-heading's chain on specificity, and the control would appear
+    // to do nothing on exactly that heading. Scoped to the heading-style rules so
+    // the other components that legitimately state a tracking are left alone.
+    const styles = css.match(/\.tgs-heading\[data-style='h[1-6]'\] \{[^}]*\}/g) ?? [];
+    expect(styles).toHaveLength(6);
+    for (const rule of styles) {
+      expect(rule).not.toMatch(/^\s*letter-spacing:/m);
+    }
+  });
+
+  it('resets the tracking vars on every block, so they do not bleed into a nested one', () => {
+    expect(css).toContain('.tgs-block { --tgs-ls: initial; --tgs-ls-tablet: initial; --tgs-ls-phone: initial; }');
+  });
+
+  it('folds the tablet twin at the tablet width, phone then tablet at the phone width', () => {
+    expect(css).toMatch(/@container tgs-page \(max-width: 1023px\)[\s\S]*?--tgs-ls-r: var\(--tgs-ls-tablet/);
+    expect(css).toMatch(
+      /@container tgs-page \(max-width: 767px\)[\s\S]*?--tgs-ls-r: var\(--tgs-ls-phone, var\(--tgs-ls-tablet/,
+    );
+  });
+});
+
+describe('the block pane edits the letter spacing for the current screen', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('scopes a Letter spacing control to the tier, base on desktop, override otherwise', () => {
+    expect(props).toContain('<LetterSpacingField');
+    expect(props).toContain("resolveAt<string | undefined>(baseLs, block.responsive, 'letterSpacing', tier)");
+    expect(props).toContain("withOverride(block.responsive, 'letterSpacing', tier, value)");
+    expect(props).toContain("clearOverride(block.responsive, 'letterSpacing', tier)");
+    expect(props).toContain('updateBlockPropsAtPath(c, path, { letterSpacing: value })');
+  });
+});
+
+describe('a block-level letter spacing survives the save path', () => {
+  const path = { kind: 'block' as const, section: 0, row: 0, column: 0, block: 0 };
+
+  function textBlockPage() {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    page = updateBlockPropsAtPath(page, path, { letterSpacing: '0.05em' });
+    page = updateBlockResponsiveAtPath(page, path, withOverride(undefined, 'letterSpacing', 'phone', '0em'));
+    return page;
+  }
+
+  it('keeps the desktop base and the phone override through parsePage', () => {
+    const result = parsePage(JSON.parse(JSON.stringify(textBlockPage())));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.letterSpacing).toBe('0.05em');
+    // Zero survives the round trip rather than being read as unset.
+    expect(block.responsive?.phone?.letterSpacing).toBe('0em');
+  });
+
+  it('and through sanitisePage, which cleans props but keeps the base and the map', () => {
+    const block = sanitisePage(textBlockPage()).sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.letterSpacing).toBe('0.05em');
+    expect(block.responsive?.phone?.letterSpacing).toBe('0em');
+  });
+
+  it('drops a value carrying anything but a number and a unit, at the schema boundary', () => {
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('text'));
+    page = updateBlockResponsiveAtPath(
+      page,
+      path,
+      withOverride(undefined, 'letterSpacing', 'phone', '1em; position: fixed'),
+    );
+    const result = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.responsive?.phone?.letterSpacing).toBeUndefined();
   });
 });
 

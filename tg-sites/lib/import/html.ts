@@ -33,6 +33,15 @@
 
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5';
 
+/*
+ * The escaping and the URL check moved to ./slots, which has no parser behind
+ * it, so the renderer can substitute a slot without pulling parse5 into the
+ * browser (task #94). Re-exported because this module is where every caller
+ * already looks for them.
+ */
+import { escapeText, safeImportUrl } from './slots';
+export { escapeText, safeImportUrl } from './slots';
+
 type Node = DefaultTreeAdapterMap['node'];
 type Element = DefaultTreeAdapterMap['element'];
 type ChildNode = DefaultTreeAdapterMap['childNode'];
@@ -146,46 +155,6 @@ const DROP_WITH_CONTENTS = new Set([
   'link', 'meta', 'base', 'head', 'title',
 ]);
 
-/**
- * A URL this product is willing to put in a page.
- *
- * SCHEME FIRST AND NOTHING CLEVER. Whitespace and control characters are
- * stripped before the check because `java\nscript:` is the oldest trick there
- * is, and a scheme is matched at the very start of the string so a value like
- * `/x?u=javascript:alert(1)` stays a perfectly ordinary relative path.
- *
- * data: is allowed for images only. An inline SVG data URL is a script vector,
- * so the media type has to be a raster one by name.
- */
-export function safeImportUrl(value: unknown): string | null {
-  if (typeof value !== 'string') return null;
-
-  // Control characters and every kind of space, anywhere in the value.
-  const tidy = value.replace(/[\u0000-\u0020\u007F\u00A0\u2000-\u200D\uFEFF]/g, '');
-  if (tidy === '') return null;
-  if (tidy.length > 4000) return null;
-
-  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(tidy);
-
-  if (!scheme) {
-    // No scheme at all: a relative or root-relative path, or a fragment.
-    return value.trim();
-  }
-
-  const name = scheme[1].toLowerCase();
-  if (name === 'http' || name === 'https' || name === 'mailto' || name === 'tel') {
-    return value.trim();
-  }
-
-  if (name === 'data') {
-    // Raster images only. image/svg+xml carries script.
-    return /^data:image\/(png|jpe?g|gif|webp|avif);base64,[a-z0-9+/=]+$/i.test(tidy)
-      ? value.trim()
-      : null;
-  }
-
-  return null;
-}
 
 /** srcset is a comma-separated list of URL plus descriptor. Each is checked. */
 function safeSrcset(value: string): string | null {
@@ -208,18 +177,6 @@ function safeSrcset(value: string): string | null {
 // Escaping
 // ---------------------------------------------------------------------------
 
-/**
- * Text, made safe to sit between two tags.
- *
- * `<` and `&` are the two that matter; `>` is escaped as well because a lone
- * one after an unescaped `<` is what turns a stray character into a tag.
- */
-export function escapeText(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 /** A value, made safe to sit inside double quotes. */
 function escapeAttr(value: string): string {

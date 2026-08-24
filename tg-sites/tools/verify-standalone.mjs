@@ -521,12 +521,20 @@ await check('block picker opens from a section', async () => {
  * hover tint is a section setting, and the icon lead and its alignment are settings
  * on Cards.
  *
- * The harness runs as staff, so the staff-only Embed block is counted here too:
- * 52 is the whole library, one fewer than that for a client.
+ * The harness runs as staff, so the staff-only Embed block is counted here too.
+ *
+ * 53 on 23 Aug 2026, for the Form block (8f98900, the forms epic). This one had
+ * been lying on the floor for two days: the tripwire fired the moment Form landed
+ * and nobody reset it, so verify:browser has been reporting two red checks that
+ * were not really about the picker at all. That is the failure mode a tripwire has
+ * when it is left tripped, and it is worse than the one it guards against, because
+ * a permanently red check stops being read. Checked rather than assumed: 53 cards
+ * draw and the registry holds 53 (the block-catalogue test agrees), so the counts
+ * match and nothing has quietly stopped rendering.
  */
 await check('block picker offers the full library', async () => {
   const count = await page.locator('.ed-block-card').count();
-  return count === 52 ? true : `${count} blocks in the picker, expected 52`;
+  return count === 53 ? true : `${count} blocks in the picker, expected 53`;
 });
 
 await check('including both ways to put a widget on a page', async () => {
@@ -5083,9 +5091,9 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 52 the page picker offers a staff user. See the note on that check for
+  // The same 53 the page picker offers a staff user. See the note on that check for
   // why the number is written down rather than read from the registry.
-  return count === 52 ? true : `${count} blocks in the header picker, expected 52`;
+  return count === 53 ? true : `${count} blocks in the header picker, expected 53`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -6016,14 +6024,44 @@ await check('the rail can be reached by a keyboard, and shows that it has been',
     : `focused ${focused.isFocused}, focus-visible ${focused.visible}, outline ${focused.outline}`;
 });
 
+/*
+ * PARKED AT A KNOWN PLACE FIRST, and that line is the whole check.
+ *
+ * This read as a failure for two days and the block was never at fault. The
+ * "rail scrolls sideways" check above sets scrollLeft to 400 to prove the rail
+ * scrolls; the browser clamps that to the maximum, which for this rail is 286
+ * (838 wide inside 552). So this check inherited a rail parked hard against its
+ * right end, pressed ArrowRight, and reported that nothing moved. Nothing COULD
+ * move. Measured at the time: scrollLeft 286, maxScroll 286, and ArrowLeft from
+ * there moved it to 171, so the keyboard scrolling was working the whole time.
+ *
+ * The lesson is about the check rather than the block: one that reads a global
+ * the check before it wrote is not testing what it says it is. Both directions
+ * are asserted now, from a known start, so this cannot depend on what ran first.
+ */
 await check('and arrow keys then move it, which is why there are no arrow buttons', async () => {
   const rail = added().locator('.tgs-slider');
-  const before = await rail.evaluate((el) => el.scrollLeft);
+  await rail.evaluate((el) => {
+    el.scrollLeft = 0;
+  });
+  await page.waitForTimeout(200);
+
+  const start = await rail.evaluate((el) => el.scrollLeft);
+  if (start !== 0) return `the rail would not go back to the start, sitting at ${start}`;
+
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(400);
-  const after = await rail.evaluate((el) => el.scrollLeft);
-  return after !== before ? true : `scrollLeft stayed at ${before}`;
+  const right = await rail.evaluate((el) => el.scrollLeft);
+  if (!(right > start)) return `ArrowRight did not move it: ${start} -> ${right}`;
+
+  // And back, so this proves a keyboard can reach both ends rather than only
+  // that something nudged the rail once.
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(400);
+  const left = await rail.evaluate((el) => el.scrollLeft);
+  return left < right ? true : `ArrowLeft did not bring it back: ${right} -> ${left}`;
 });
 
 /*
@@ -8214,6 +8252,113 @@ await check('a block line spacing set on Phone tightens phone, not desktop', asy
   return Math.abs(deskAgain - info.deskLh) < 0.5
     ? true
     : `the desktop line height changed under a phone edit: ${info.deskLh} -> ${deskAgain}`;
+});
+
+/*
+ * Letter spacing per screen, the third rider on the same engine. The block carries
+ * --tgs-ls-phone, the container queries fold it into --tgs-ls-r, and .tgs-heading
+ * reads that ahead of the tracking its own style carries. In em, so it follows the
+ * size rather than holding a gap measured for the desktop one. Add a heading,
+ * switch to Phone, open the tracking out, and prove the phone letter-spacing widens
+ * while the desktop one holds.
+ */
+await check('a block letter spacing set on Phone widens phone, not desktop', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  // getComputedStyle answers in px, and 'normal' where there is no tracking at
+  // all, which is zero rather than nothing to compare against.
+  const info = await host.evaluate((el) => {
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const raw = text ? getComputedStyle(text).letterSpacing : null;
+    return { path: el.getAttribute('data-path'), deskLs: raw === 'normal' ? 0 : parseFloat(raw) };
+  });
+  if (!info || !Number.isFinite(info.deskLs)) return 'the heading did not render its text';
+
+  await page.getByRole('button', { name: 'Phone', exact: true }).click();
+  await page.waitForTimeout(200);
+
+  // Targeted by id, to keep it apart from the size and line-spacing selects beside it.
+  const select = page.locator('.ed-props select[id^="ed-letter-spacing"]').first();
+  if ((await select.count()) === 0) return 'the letter spacing control was not scoped to the screen';
+  await select.selectOption('0.2em'); // Widest, well past any heading's own tracking.
+  await page.waitForTimeout(200);
+
+  const after = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const style = el.getAttribute('style') || '';
+    const m = style.match(/--tgs-ls-phone:\s*([^;]+)/);
+    const raw = getComputedStyle(text).letterSpacing;
+    return { phoneVar: m ? m[1].trim() : null, phoneLs: raw === 'normal' ? 0 : parseFloat(raw) };
+  }, info.path);
+  if (after.phoneVar !== '0.2em') return `the phone override was not stored: ${after.phoneVar}`;
+  if (!(after.phoneLs > info.deskLs + 2)) {
+    return `phone letter spacing did not widen: phone ${after.phoneLs}, desktop ${info.deskLs}`;
+  }
+
+  // Back to Desktop: the heading's own tracking returns, untouched by the phone edit.
+  await page.getByRole('button', { name: 'Desktop', exact: true }).click();
+  await page.waitForTimeout(200);
+  const deskAgain = await page.evaluate((path) => {
+    const el = document.querySelector(`.ed-canvas-frame [data-path="${path}"]`);
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const raw = getComputedStyle(text).letterSpacing;
+    return raw === 'normal' ? 0 : parseFloat(raw);
+  }, info.path);
+  await showPanels();
+  return Math.abs(deskAgain - info.deskLs) < 0.5
+    ? true
+    : `the desktop letter spacing changed under a phone edit: ${info.deskLs} -> ${deskAgain}`;
+});
+
+/*
+ * BORROWED MARKUP IS CLEANED ON THE SERVER, and the canvas draws what comes back.
+ *
+ * Since 23 Aug 2026 (task #94) the renderer carries no sanitiser: parse5 and
+ * postcss are server side, and a block holding somebody else's HTML draws from a
+ * map the server fills. A block the CLIENT makes is not in that map yet, so the
+ * canvas asks for it. This is that round trip, driven through the block a client
+ * actually pastes into.
+ *
+ * IT IS ALSO THE ONE THING A UNIT TEST CANNOT REACH. Everything about this
+ * arrangement type-checks and passes its unit tests whether or not the answer
+ * ever gets back to the canvas, and the failure mode is silent: the block draws
+ * its placeholder and nothing errors. The first version of the hook failed
+ * exactly here, marking the block as asked about while it was still empty and
+ * never asking again, so the pasted HTML never appeared.
+ */
+await check('HTML pasted into an embed is cleaned by the server and drawn', async () => {
+  await addBlock('HTML');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+
+  // Empty to begin with, which is the state the first version got stuck in.
+  const before = await host.innerText();
+  if (!before.includes('Paste embed code')) return `a new HTML block did not start empty: "${before}"`;
+
+  const field = page.locator('.ed-props textarea').first();
+  if ((await field.count()) === 0) return 'the HTML block offered no field to paste into';
+  await field.fill('<p class="tg-probe">hello from an embed</p><script>window.__tgBad = 1;</script>');
+  // The paste settles, then one round trip. Generous, since this is the one
+  // check that is allowed to wait for a server answer.
+  await page.waitForTimeout(1500);
+
+  const after = await host.evaluate((el) => ({
+    text: el.innerText,
+    hasEmbed: !!el.querySelector('.tgs-embed'),
+    hasProbe: !!el.querySelector('.tg-probe'),
+    hasScript: !!el.querySelector('script'),
+    bad: typeof window.__tgBad !== 'undefined',
+  }));
+
+  if (!after.hasEmbed || !after.hasProbe) {
+    return `the cleaned markup never reached the canvas: "${after.text.slice(0, 80)}"`;
+  }
+  // The server cleaned it, so the script went and never ran.
+  if (after.hasScript || after.bad) return 'a script survived the clean';
+
+  return true;
 });
 
 /*
@@ -10445,6 +10590,57 @@ await check('a blog post offers an author byline that takes a name and persists'
 // Back to the page for anything that runs after.
 await page.evaluate(() => window.__TG_SET_ITEM__(null));
 await page.waitForTimeout(300);
+
+/*
+ * THE OUTLINE PANE REORDERS BY DRAG, ON THE SAME SYSTEM THE CANVAS USES.
+ *
+ * Task #137. The pane used to use native HTML5 drag and drop, which meant two
+ * drag systems in one editor and no keyboard story at all for one of them. It is
+ * dnd-kit now, and it also gained the thing native drag never had here: a block
+ * can move to a DIFFERENT column, not just up and down inside its own.
+ *
+ * DRIVEN AS A REAL DRAG rather than by calling the handler, because everything in
+ * this slice happens between the pointer and the commit: the 5px activation
+ * distance, the collision filter that stops a block resolving to the section box
+ * around it, and the shell reading the target off the row it landed on. A unit
+ * test reaches none of that, and the resolver it would exercise is already proved
+ * in tests/outline-move.test.ts.
+ */
+await check('a block dragged onto another row in the outline changes the order', async () => {
+  await page.locator('.ed-lefttab', { hasText: 'Outline' }).click();
+  await page.waitForTimeout(300);
+
+  // Open the sections until at least two block rows are showing.
+  const toggles = page.locator('.ed-sec-toggle');
+  const sections = await toggles.count();
+  for (let i = 0; i < sections; i += 1) {
+    if ((await page.locator('.ed-item-main').count()) >= 2) break;
+    await toggles.nth(i).click();
+    await page.waitForTimeout(200);
+  }
+
+  const rows = page.locator('.ed-item-main');
+  if ((await rows.count()) < 2) return `only ${await rows.count()} block rows in the outline`;
+
+  const before = await rows.allInnerTexts();
+  const from = await rows.nth(1).boundingBox();
+  const to = await rows.nth(0).boundingBox();
+  if (!from || !to) return 'the outline rows had no box to drag between';
+
+  // Past the 5px activation distance first, then onto the target row.
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2 - 12, { steps: 4 });
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+  await page.waitForTimeout(150);
+  await page.mouse.up();
+  await page.waitForTimeout(400);
+
+  const after = await page.locator('.ed-item-main').allInnerTexts();
+  return JSON.stringify(after) !== JSON.stringify(before)
+    ? true
+    : `the outline order did not change: ${JSON.stringify(before.slice(0, 3))}`;
+});
 
 await browser.close();
 

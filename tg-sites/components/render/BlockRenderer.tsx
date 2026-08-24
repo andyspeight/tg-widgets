@@ -10,6 +10,7 @@
 
 import type { ReactElement } from 'react';
 import type { Block } from '../../lib/content/schema';
+import type { PreparedMap } from '../../lib/content/prepared';
 import { isKnownBlock } from '../../lib/content/blocks';
 import {
   AccordionBlock,
@@ -52,6 +53,7 @@ import {
   LocationsBlock,
   ShapeBlock,
   FileBlock,
+  FormBlock,
   ReadMoreBlock,
   SpacerBlock,
   StatsBlock,
@@ -70,6 +72,7 @@ export function BlockRenderer({
   editable = false,
   editingHost = false,
   editorCanvas = false,
+  prepared,
 }: {
   block: Block;
   editable?: boolean;
@@ -81,6 +84,13 @@ export function BlockRenderer({
    * off. See the Editable interface in PageRenderer and WidgetBlock.
    */
   editorCanvas?: boolean;
+  /**
+   * Markup the server has already cleaned, by block id. The embed and the
+   * imported design read their own entry from here; every other block ignores
+   * it. See lib/content/prepared.ts for why it arrives beside the tree rather
+   * than on the block's own props.
+   */
+  prepared?: PreparedMap;
 }): ReactElement | null {
   const props = block.props ?? {};
 
@@ -191,6 +201,13 @@ export function BlockRenderer({
          and fix the thing they are editing. On a live page it goes. */
       case 'whatsapp':
         return <WhatsAppBlock props={props} />;
+      /*
+       * The form takes the block id (its :target ids and control ids hang off
+       * it) and whether this tree is the editor, where it must be a picture of
+       * a form rather than a working one: no action, submit disabled.
+       */
+      case 'form':
+        return <FormBlock props={props} blockId={block.id} editing={editorCanvas} />;
       case 'coupon':
         return <CouponBlock props={props} editing={editable} />;
       case 'locations':
@@ -208,7 +225,7 @@ export function BlockRenderer({
       case 'breadcrumbs':
         return <BreadcrumbsBlock props={props} editing={editable} />;
       case 'embed':
-        return <EmbedBlock props={props} />;
+        return <EmbedBlock props={props} prepared={prepared} blockId={block.id} />;
       /*
        * Takes the block's own id, which becomes the class its stylesheet is
        * scoped to. Same reason accordion and tabs take it: nothing else in this
@@ -216,7 +233,7 @@ export function BlockRenderer({
        * every block.
        */
       case 'imported':
-        return <ImportedBlock props={props} blockId={block.id} />;
+        return <ImportedBlock props={props} blockId={block.id} prepared={prepared} />;
       /*
        * `editorCanvas`, NOT `editable`, tells the widget to host itself in an
        * iframe. The two agree while editing but split in preview: `editable` goes
