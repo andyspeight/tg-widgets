@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.4';
+  const VERSION = '0.3.5';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -87,7 +87,11 @@
     u = String(u == null ? '' : u).trim();
     if (!/^https?:\/\//i.test(u)) return '';
     if (/[\s"'()<>\\]/.test(u)) return '';
-    if (u.length > 600) return '';
+    // Match the server's persisted cap (strArr(s.images, 20, 1000) in
+    // api/saved-offers.js). A tighter client cap here silently DROPPED a
+    // valid saved image URL of 600-1000 chars on reopen, so the photo
+    // vanished from an offer that had saved it fine.
+    if (u.length > 1000) return '';
     return u;
   }
   function safeFileName(name) {
@@ -709,6 +713,15 @@
     // Populate the form from an existing offer (edit mode).
     _prefillOffer(offer) {
       if (!offer) return;
+      // Restore the offer's OWN currency so the £/€/$ prefixes and the saved
+      // currency code are right, even if the host forgot to pass it in config.
+      // Without this a €/$ offer reopened as £ and, if re-saved, was rewritten
+      // to £. Belt-and-braces to the openForm currency fix in the editor.
+      if (offer.currency) {
+        this.cfg.currency = offer.currency;
+        const sym = currencySymbol(offer.currency);
+        this.root.querySelectorAll('.ob-prefix .sym').forEach(function (el) { el.textContent = sym; });
+      }
       const fields = (offer.fields && typeof offer.fields === 'object') ? offer.fields : offer;
       // Fill the static fields (and the type select) that are already in the DOM.
       this.root.querySelectorAll('[data-key]').forEach((el) => {

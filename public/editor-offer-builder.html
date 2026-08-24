@@ -1063,7 +1063,11 @@
         uploadEndpoint: '/api/upload-photo',
         directUploadEndpoint: '/api/upload-photo-direct',
         offerBaseUrl: normBase(c.offerBaseUrl),
-        theme: c.theme, accentColor: c.accentColor, currency: c.currency,
+        // Reopen an offer in its OWN saved currency, not the editor-wide default
+        // (which is GBP), or a €/$ offer would come back as £ and, if re-saved,
+        // be silently rewritten to £. Falls back to the editor default for a new
+        // offer that has none yet.
+        theme: c.theme, accentColor: c.accentColor, currency: (offer && offer.currency) || c.currency,
         enquiryEmail: c.enquiryEmail, enquiryPhone: c.enquiryPhone, protection: c.protection,
         offer: offer || null, offerId: (offer && offer.id) || '',
         successHeading: offer ? 'Offer updated' : 'Offer saved',
