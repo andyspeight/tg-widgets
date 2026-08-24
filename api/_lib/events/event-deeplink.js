@@ -63,7 +63,9 @@
  * without one the option is not offered (status 'no-airport'). `frd`, `dur`
  * and `dir` are copied verbatim from the working example.
  *
- * A ticket-plus-hotel shape exists too and is not built here yet.
+ * THE HOTEL LINK (ticket + accommodation) is the package minus the flight
+ * leg — same pin and anchor plus frd and dur, nothing else — so it needs no
+ * chooser and ships ready. See buildEventHotelDeeplink for its live example.
  */
 
 /** Travelify's deeplink host, as used by the offers widgets. */
@@ -74,6 +76,9 @@ export const SEARCH_TYPE = 'TicketsAttractions';
 
 /** The Travelify product a ticket + accommodation + flight package belongs to. */
 export const SEARCH_TYPE_PACKAGE = 'TicketAccommodationFlight';
+
+/** The Travelify product a ticket + accommodation package belongs to. */
+export const SEARCH_TYPE_HOTEL = 'TicketAccommodation';
 
 /**
  * Stands in for the visitor's departure airport in a package link until they
@@ -238,6 +243,53 @@ function setLoc(params, source, event, date) {
   params.set('loc', stamp ? `${rawName}: ${stamp}` : rawName);
 }
 
+/**
+ * Build a ticket + accommodation package deeplink.
+ *
+ * Built to the live example Andy supplied on 24 Aug 2026:
+ *
+ *   https://dl.tvllnk.com/deeplink/384?st=TicketAccommodation
+ *     &supp=144&refe=1939276025ff419489c076968d8f51b8_gnr
+ *     &curr=GBP&fr=2026-09-16&to=2026-09-16
+ *     &lat=41.38087&lng=2.122802&rad=20&frd=0&dur=1
+ *     &adt=2&chd=0&inf=0&loc=FC+Barcelona+vs+...
+ *
+ * The flight package minus the flight leg: same pin, same mandatory anchor,
+ * frd and dur verbatim, and nothing the feed does not already know — so it
+ * comes back 'ready' with a finished url, no chooser involved.
+ */
+export function buildEventHotelDeeplink(event, options = {}) {
+  const pre = preflight(event, options);
+  if (pre.err) return pre.err;
+  const { id, source, supp, refe, geo, date, curr, adt, chd, inf } = pre;
+
+  const params = new URLSearchParams();
+  params.set('st', SEARCH_TYPE_HOTEL);
+  if (supp) params.set('supp', supp);
+  params.set('refe', refe);
+  params.set('curr', curr);
+  params.set('fr', date);
+  params.set('to', date);
+  params.set('lat', String(geo.lat));
+  params.set('lng', String(geo.lng));
+  params.set('rad', String(DEFAULTS.radiusKm));
+  params.set('frd', String(DEFAULTS.flightFlexDays));
+  params.set('dur', String(DEFAULTS.nights));
+  params.set('adt', adt);
+  params.set('chd', chd);
+  params.set('inf', inf);
+  setLoc(params, source, event, date);
+
+  return {
+    url: `${DEEPLINK_BASE}/${encodeURIComponent(id)}?${params.toString()}`,
+    status: 'ready',
+    reason: null,
+    supplier: source.supplier || null,
+    supplierId: supp || null,
+    reference: refe,
+  };
+}
+
 const IATA_RE = /^[A-Z]{3}$/;
 
 /**
@@ -303,9 +355,9 @@ export function buildEventPackageDeeplink(event, options = {}) {
 // a ticket sold with a hotel than on a ticket alone, so every event needs to be
 // bookable three ways and the widget needs to offer all three.
 //
-// Ticket-only and the flight package are built from verified live examples
-// (21 and 24 Aug 2026). Ticket + hotel is still declared with `ready: false`
-// and returns a null url with status 'spec-needed', so:
+// All three are now built from verified live examples (ticket 21 Aug 2026,
+// the flight package and ticket + hotel both 24 Aug 2026). The table stays,
+// because a future combination will want the same treatment:
 //
 //   - a surface can render exactly the options that work and silently omit the
 //     rest, rather than showing a button that dead-ends
@@ -328,10 +380,8 @@ export const BOOKING_KINDS = [
     kind: 'ticket-hotel',
     label: 'Ticket + hotel',
     short: '+ Hotel',
-    ready: false,
-    // Awaiting a live example. Expect an accommodation search type plus nights
-    // and a destination alongside the same supp/refe pin.
-    build: null,
+    ready: true,
+    build: buildEventHotelDeeplink,
   },
   {
     kind: 'ticket-flight-hotel',

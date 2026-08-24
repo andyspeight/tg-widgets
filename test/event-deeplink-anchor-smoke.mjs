@@ -6,7 +6,8 @@
  */
 import assert from 'node:assert/strict';
 import {
-  buildEventDeeplink, buildEventPackageDeeplink, buildBookingOptions, ORG_PLACEHOLDER,
+  buildEventDeeplink, buildEventPackageDeeplink, buildEventHotelDeeplink,
+  buildBookingOptions, ORG_PLACEHOLDER,
 } from '../api/_lib/events/event-deeplink.js';
 
 let passed = 0;
@@ -102,6 +103,36 @@ const monza = {
   const noAirport = buildBookingOptions(camp, { appId: '250', kinds: ['ticket', 'ticket-flight-hotel'] });
   ok(!noAirport.some((o) => o.kind === 'ticket-flight-hotel'),
     'options: package omitted entirely when no airport is near');
+}
+
+// ── Ticket + hotel, rebuilt from Andy's 24 Aug 2026 example ─────────────────
+{
+  const camp = {
+    sources: [{ supplier: 'xs2event', searchboxId: '144:1939276025ff419489c076968d8f51b8_gnr',
+      filterId: '1939276025ff419489c076968d8f51b8_gnr',
+      rawName: 'FC Barcelona vs Racing de Santander (Football, La Liga)' }],
+    startDate: '2026-09-16',
+    title: 'FC Barcelona vs Racing Santander',
+    geo: { lat: 41.38087, lng: 2.122802 },
+  };
+  const r = buildEventHotelDeeplink(camp, { appId: '384' });
+  ok(r.status === 'ready', 'hotel: ready with nothing extra');
+  ok(r.url === 'https://dl.tvllnk.com/deeplink/384?st=TicketAccommodation&supp=144'
+    + '&refe=1939276025ff419489c076968d8f51b8_gnr&curr=GBP&fr=2026-09-16&to=2026-09-16'
+    + '&lat=41.38087&lng=2.122802&rad=20&frd=0&dur=1&adt=2&chd=0&inf=0'
+    + '&loc=FC+Barcelona+vs+Racing+de+Santander+%28Football%2C+La+Liga%29%3A+16-Sep-2026',
+  'hotel: reproduces the live example parameter for parameter (loc carries our date stamp)');
+
+  const anchorless = buildEventHotelDeeplink({ ...camp, geo: null }, { appId: '384' });
+  ok(anchorless.status === 'no-anchor', 'hotel: the anchor stays mandatory');
+
+  const opts = buildBookingOptions(camp, {
+    appId: '250', kinds: ['ticket', 'ticket-hotel', 'ticket-flight-hotel'], destAirport: 'BCN',
+  });
+  ok(opts.length === 3, 'options: all three kinds offered');
+  const hotel = opts.find((o) => o.kind === 'ticket-hotel');
+  ok(hotel && hotel.status === 'ready' && /st=TicketAccommodation&/.test(hotel.url),
+    'options: hotel is a finished link, no chooser');
 }
 
 console.log(`\n${passed} passed, 0 failed`);

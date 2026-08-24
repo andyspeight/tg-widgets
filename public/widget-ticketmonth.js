@@ -97,13 +97,193 @@
     return '';
   }
 
-  // A flight package the visitor still needs a departure airport for links
-  // via our /fly chooser, which asks and then continues to Travelify.
-  function flyUrl(o) {
+  // ── Flight package: the departure airport chooser ─────────────────────────
+  // The one thing only the visitor knows is where they fly from, so the
+  // "+ Flight & hotel" button opens a small chooser anchored to itself. The
+  // airport comes ONLY from the suite's own list (view=airports), picked from
+  // the dropdown, never free text — so org always matches the database — and
+  // the link template must be the Travelify booking host before anything
+  // opens.
+  var FLY_TPL_OK = /^https:\/\/dl\.tvllnk\.com\/deeplink\//;
+  var FLY_IATA = /^[A-Z]{3}$/;
+  var flyAirports = null;
+
+  function flyTpl(o) {
     if (!o || o.status !== 'needs-origin' || typeof o.urlTemplate !== 'string') return '';
-    if (o.urlTemplate.indexOf('https://dl.tvllnk.com/deeplink/') !== 0) return '';
-    return ORIGIN + '/fly?d=' + encodeURIComponent(o.urlTemplate);
+    return FLY_TPL_OK.test(o.urlTemplate) ? o.urlTemplate : '';
   }
+
+  function flyLoadAirports() {
+    if (flyAirports) return flyAirports;
+    flyAirports = fetch(FEED_API + '?view=airports', { credentials: 'omit' })
+      .then(function (r) { if (!r.ok) throw new Error('airports ' + r.status); return r.json(); })
+      .then(function (d) {
+        var rows = Array.isArray(d.airports) ? d.airports : [];
+        return rows.filter(function (a) { return Array.isArray(a) && FLY_IATA.test(String(a[0] || '')); });
+      })
+      .catch(function () { flyAirports = null; return []; });
+    return flyAirports;
+  }
+
+  function flyRemember(code) {
+    try { localStorage.setItem('tgev_org', JSON.stringify(code)); } catch (e) { /* private mode */ }
+  }
+  function flyRemembered() {
+    try { return JSON.parse(localStorage.getItem('tgev_org') || 'null'); } catch (e) { return null; }
+  }
+
+  function flyInit(w) {
+    w.shadow.addEventListener('click', function (e) {
+      var t = e.target;
+      var btn = t && t.closest ? t.closest('[data-fly]') : null;
+      if (btn) { flyOpen(w, btn); return; }
+      if (w._fly && (!e.composedPath || e.composedPath().indexOf(w._fly.box) === -1)) flyClose(w);
+    });
+  }
+
+  function flyClose(w) {
+    var f = w._fly;
+    if (!f) return;
+    w._fly = null;
+    if (f.box.parentNode) f.box.parentNode.removeChild(f.box);
+    document.removeEventListener('keydown', f.onKey, true);
+    document.removeEventListener('click', f.onDoc, true);
+    if (f.btn && f.btn.isConnected) try { f.btn.focus(); } catch (e) { /* gone */ }
+  }
+
+  function flyOpen(w, btn) {
+    if (w._fly && w._fly.btn === btn) { flyClose(w); return; }
+    flyClose(w);
+    var tpl = String(btn.getAttribute('data-fly') || '');
+    if (!FLY_TPL_OK.test(tpl)) return;
+    var root = w.shadow.querySelector('.tgtm-root');
+    if (!root) return;
+
+    var box = document.createElement('div');
+    box.className = 'tgtm-fly';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-label', 'Choose your departure airport');
+    box.innerHTML = '<div class="tgtm-fly-t">Where are you flying from?</div>'
+      + '<input class="tgtm-fly-in" type="text" placeholder="Type an airport or code"'
+      + ' autocomplete="off" spellcheck="false" aria-label="Search airports">'
+      + '<div class="tgtm-fly-list" role="listbox"></div>'
+      + '<div class="tgtm-fly-note">Loading airports&hellip;</div>';
+    root.appendChild(box);
+
+    // Anchored to the button, kept inside the widget, flipped above when the
+    // room below is short.
+    var rr = root.getBoundingClientRect();
+    var br = btn.getBoundingClientRect();
+    var width = Math.min(300, Math.max(230, rr.width - 16));
+    box.style.width = width + 'px';
+    box.style.left = Math.max(8, Math.min(br.left - rr.left, rr.width - width - 8)) + 'px';
+    if (window.innerHeight - br.bottom < 330 && br.top > 330) {
+      box.style.bottom = (rr.bottom - br.top + 6) + 'px';
+    } else {
+      box.style.top = (br.bottom - rr.top + 6) + 'px';
+    }
+
+    var input = box.querySelector('.tgtm-fly-in');
+    var list = box.querySelector('.tgtm-fly-list');
+    var note = box.querySelector('.tgtm-fly-note');
+    var state = { box: box, btn: btn, all: null, list: [], active: 0, onKey: null, onDoc: null };
+    w._fly = state;
+
+    function choose(code) {
+      if (!FLY_IATA.test(code)) return;
+      if (!state.all || !state.all.some(function (a) { return a[0] === code; })) return;
+      flyRemember(code);
+      var url = tpl.replace('__ORG__', code);
+      if (!FLY_TPL_OK.test(url) || url.indexOf('__ORG__') !== -1) return;
+      flyClose(w);
+      window.open(url, '_blank', 'noopener');
+    }
+
+    function matches(q) {
+      var f = String(q || '').trim().toLowerCase();
+      var out = [];
+      var all = state.all || [];
+      var last = flyRemembered();
+      if (!f && FLY_IATA.test(String(last || ''))) {
+        for (var j = 0; j < all.length; j++) if (all[j][0] === last) { out.push(all[j]); break; }
+      }
+      for (var i = 0; i < all.length && out.length < 8; i++) {
+        var a = all[i];
+        if (out.length && out[0][0] === a[0] && out.length === 1 && !f) continue;
+        if (out.some(function (b) { return b[0] === a[0]; })) continue;
+        if (!f || a[0].toLowerCase().indexOf(f) === 0 || a[1].toLowerCase().indexOf(f) !== -1) out.push(a);
+      }
+      return out;
+    }
+
+    function draw() {
+      state.list = matches(input.value);
+      if (state.active >= state.list.length) state.active = 0;
+      var html = '';
+      for (var i = 0; i < state.list.length; i++) {
+        var a = state.list[i];
+        html += '<button type="button" class="tgtm-fly-opt' + (i === state.active ? ' is-active' : '') + '"'
+          + ' role="option" aria-selected="' + (i === state.active) + '" data-iata="' + esc(a[0]) + '">'
+          + '<span class="tgtm-fly-code">' + esc(a[0]) + '</span>'
+          + '<span class="tgtm-fly-name">' + esc(a[1]) + '</span></button>';
+      }
+      list.innerHTML = html;
+      if (state.all) note.textContent = state.list.length ? '' : 'No airport matches that. Try the three-letter code.';
+    }
+
+    list.addEventListener('click', function (e) {
+      var opt = e.target && e.target.closest ? e.target.closest('.tgtm-fly-opt') : null;
+      if (opt) choose(opt.getAttribute('data-iata'));
+    });
+    input.addEventListener('input', function () { state.active = 0; draw(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (state.active < state.list.length - 1) { state.active++; draw(); } }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (state.active > 0) { state.active--; draw(); } }
+      else if (e.key === 'Enter') { e.preventDefault(); if (state.list[state.active]) choose(state.list[state.active][0]); }
+      else if (e.key === 'Escape') { flyClose(w); }
+    });
+
+    state.onKey = function (e) { if (e.key === 'Escape') flyClose(w); };
+    state.onDoc = function (e) {
+      var path = e.composedPath ? e.composedPath() : [];
+      if (path.indexOf(box) === -1 && path.indexOf(btn) === -1) flyClose(w);
+    };
+    document.addEventListener('keydown', state.onKey, true);
+    document.addEventListener('click', state.onDoc, true);
+
+    flyLoadAirports().then(function (all) {
+      if (w._fly !== state) return;
+      state.all = all;
+      if (!all.length) { note.textContent = 'The airport list did not load. Please try again.'; return; }
+      note.textContent = '';
+      draw();
+    });
+    input.focus();
+  }
+
+  var FLY_CSS = '.tgtm-root{position:relative}'
+    + 'button.tgtm-btn{border:0;font:inherit;cursor:pointer}'
+    + '.tgtm-fly{position:absolute;z-index:40;background:#fff;color:#1a2733;border:1px solid #dde4ea;'
+    + 'border-radius:12px;box-shadow:0 12px 32px rgba(10,30,50,.18);padding:12px;box-sizing:border-box;'
+    + 'font-size:14px;line-height:1.4;text-align:left}'
+    + '.tgtm-fly-t{font-weight:600;margin:0 0 8px;font-size:14px}'
+    + '.tgtm-fly-in{width:100%;box-sizing:border-box;padding:8px 10px;font:inherit;color:inherit;'
+    + 'background:transparent;border:1.5px solid #cfd8e0;border-radius:8px;outline:none}'
+    + '.tgtm-fly-in:focus{border-color:currentColor}'
+    + '.tgtm-fly-list{margin-top:8px;max-height:224px;overflow-y:auto}'
+    + '.tgtm-fly-opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;'
+    + 'font:inherit;color:inherit;background:none;border:0;border-radius:8px;cursor:pointer}'
+    + '.tgtm-fly-opt.is-active,.tgtm-fly-opt:hover{background:rgba(0,0,0,.07)}'
+    + '.tgtm-fly-code{font-weight:700;font-size:12px;letter-spacing:.04em;min-width:38px}'
+    + '.tgtm-fly-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+    + '.tgtm-fly-note{color:#5b6b7b;font-size:12px;margin-top:6px}'
+    + '.tgtm-fly-note:empty{display:none}'
+    + '.tgtm-root[data-theme="dark"] .tgtm-fly{background:#16202c;color:#e8eef4;border-color:#263442;'
+    + 'box-shadow:0 12px 32px rgba(0,0,0,.55)}'
+    + '.tgtm-root[data-theme="dark"] .tgtm-fly-in{border-color:#3a4a5a}'
+    + '.tgtm-root[data-theme="dark"] .tgtm-fly-opt.is-active,'
+    + '.tgtm-root[data-theme="dark"] .tgtm-fly-opt:hover{background:rgba(255,255,255,.09)}'
+    + '.tgtm-root[data-theme="dark"] .tgtm-fly-note{color:#93a4b5}';
   function safeColour(c, fallback) {
     var s = String(c == null ? '' : c).trim();
     return (/^#[0-9a-f]{3}$/i.test(s) || /^#[0-9a-f]{6}$/i.test(s)) ? s : fallback;
@@ -258,6 +438,7 @@
     this.el = container;
     this.cfg = Object.assign({}, DEFAULTS, config || {});
     this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
+    flyInit(this);
     var t = todayParts();
     this.view = { y: t.y, m: t.m };
     this.today = t;
@@ -367,14 +548,23 @@
 
     var opts = Array.isArray(ev.bookingOptions) ? ev.bookingOptions : [];
     var usable = opts.map(function (o) {
-      var u = safeUrl(o.url) || flyUrl(o);
-      return u ? { kind: o.kind, label: o.label, short: o.short, url: u } : null;
+      var direct = safeUrl(o.url);
+      if (direct) return { kind: o.kind, label: o.label, short: o.short, url: direct };
+      var tpl = flyTpl(o);
+      if (tpl) return { kind: o.kind, label: o.label, short: o.short, fly: tpl };
+      return null;
     }).filter(Boolean);
     if (!usable.length && ev.booking && safeUrl(ev.booking.url)) {
       usable = [{ kind: 'ticket', short: c.bookLabel, url: ev.booking.url }];
     }
     var actions = usable.map(function (o, i) {
       var label = usable.length === 1 ? c.bookLabel : (o.short || o.label || c.bookLabel);
+      if (o.fly) {
+        return '<button type="button" class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + '"'
+          + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'
+          + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
+          + esc(label) + icon('ext') + '</button>';
+      }
       return '<a class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + '" href="' + esc(safeUrl(o.url)) + '"'
         + ' target="_blank" rel="noopener noreferrer"'
         + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">' + esc(label) + icon('ext') + '</a>';
@@ -499,7 +689,7 @@
       }
     }
 
-    this.shadow.innerHTML = '<style>' + styles(c) + '</style>'
+    this.shadow.innerHTML = '<style>' + styles(c) + FLY_CSS + '</style>'
       + '<div class="tgtm-root" data-theme="' + esc(this._theme()) + '">'
       + head + bar + body + this._panelHtml() + '</div>';
 

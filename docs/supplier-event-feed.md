@@ -276,12 +276,18 @@ simply not offered (`status: 'no-airport'`).
 
 `org` is the one thing neither the feed nor the config can know, so the
 builder returns a `urlTemplate` with `__ORG__` where the code goes and
-`status: 'needs-origin'`. A surface renders that option as a button to
-**/fly** (public/fly.html), our departure chooser: it validates the template
-(https, dl.tvllnk.com, /deeplink/ — never an open redirect), asks the
-visitor, remembers their answer for next time, substitutes a validated IATA
-code and continues to Travelify. The chooser's menu is `view=airports` on
-the feed. A caller that already knows the airport can pass `&org=LGW` to the
+`status: 'needs-origin'`. Each surface renders that option as a button that
+opens a small chooser dialog ANCHORED TO THE BUTTON (Andy, 24 Aug 2026: a
+modal on the button, not a separate page — an interstitial /fly page shipped
+first and was replaced the same day). The visitor types an airport name or
+code and picks FROM THE DROPDOWN ONLY — free text never books, so `org`
+always matches the suite's own list (`view=airports` on the feed, the menu's
+source). The chooser validates the template before opening anything (https,
+dl.tvllnk.com, /deeplink/), remembers the last airport (`tgev_org` in
+localStorage, per site) and opens the finished link in a new tab. It lives
+inside each widget's shadow root (the `fly*` functions, stamped identically
+into all six widgets) and once in events-explorer.js for the dashboard
+pages. A caller that already knows the airport can pass `&org=LGW` to the
 feed and get finished `ready` links instead.
 
 Widgets offer the kinds in `cfg.bookingKinds` (default ticket only — the

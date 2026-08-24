@@ -198,6 +198,135 @@
    * card works on a team page (where linking back to the team is pointless) and
    * in the browser (where everything is a way in).
    */
+  // ── Flight package: the departure airport chooser ───────────────────────
+  // A small dialog anchored to the "+ Flight & hotel" button. The airport is
+  // picked from the suite's own list (view=airports), never typed free, so
+  // org always matches the database; the template must be the Travelify
+  // booking host before anything opens.
+  var FLY_TPL_OK = /^https:\/\/dl\.tvllnk\.com\/deeplink\//;
+  var FLY_IATA = /^[A-Z]{3}$/;
+  var flyAirports = null;
+  var flyState = null;
+
+  function flyLoadAirports() {
+    if (flyAirports) return flyAirports;
+    flyAirports = fetch(API + '?view=airports', { credentials: 'omit' })
+      .then(function (r) { if (!r.ok) throw new Error('airports'); return r.json(); })
+      .then(function (d) {
+        return (Array.isArray(d.airports) ? d.airports : []).filter(function (a) {
+          return Array.isArray(a) && FLY_IATA.test(String(a[0] || ''));
+        });
+      })
+      .catch(function () { flyAirports = null; return []; });
+    return flyAirports;
+  }
+
+  function flyClose() {
+    var f = flyState;
+    if (!f) return;
+    flyState = null;
+    if (f.box.parentNode) f.box.parentNode.removeChild(f.box);
+    document.removeEventListener('keydown', f.onKey, true);
+    document.removeEventListener('click', f.onDoc, true);
+    if (f.btn && f.btn.isConnected) try { f.btn.focus(); } catch (e) { /* gone */ }
+  }
+
+  function flyPicker(btn, tpl) {
+    if (flyState && flyState.btn === btn) { flyClose(); return; }
+    flyClose();
+    if (!FLY_TPL_OK.test(tpl)) return;
+
+    var input = el('input', { class: 'ev-fly-in', type: 'text', autocomplete: 'off',
+      spellcheck: 'false', placeholder: 'Type an airport or code', 'aria-label': 'Search airports' });
+    var list = el('div', { class: 'ev-fly-list', role: 'listbox' });
+    var note = el('div', { class: 'ev-fly-note', text: 'Loading airports…' });
+    var box = el('div', { class: 'ev-fly', role: 'dialog', 'aria-label': 'Choose your departure airport' }, [
+      el('div', { class: 'ev-fly-t', text: 'Where are you flying from?' }), input, list, note,
+    ]);
+    document.body.appendChild(box);
+
+    var br = btn.getBoundingClientRect();
+    var width = 290;
+    box.style.width = width + 'px';
+    box.style.left = Math.max(8, Math.min(br.left + window.pageXOffset,
+      window.pageXOffset + document.documentElement.clientWidth - width - 8)) + 'px';
+    if (window.innerHeight - br.bottom < 330 && br.top > 330) {
+      box.style.top = (br.top + window.pageYOffset - 6) + 'px';
+      box.style.transform = 'translateY(-100%)';
+    } else {
+      box.style.top = (br.bottom + window.pageYOffset + 6) + 'px';
+    }
+
+    var state = { box: box, btn: btn, all: null, list: [], active: 0 };
+    flyState = state;
+
+    function choose(code) {
+      if (!FLY_IATA.test(code)) return;
+      if (!state.all || !state.all.some(function (a) { return a[0] === code; })) return;
+      try { localStorage.setItem('tgev_org', JSON.stringify(code)); } catch (e) { /* fine */ }
+      var url = tpl.replace('__ORG__', code);
+      if (!FLY_TPL_OK.test(url) || url.indexOf('__ORG__') !== -1) return;
+      flyClose();
+      window.open(url, '_blank', 'noopener');
+    }
+
+    function matches(q) {
+      var f = String(q || '').trim().toLowerCase();
+      var out = [];
+      var all = state.all || [];
+      var last = null;
+      try { last = JSON.parse(localStorage.getItem('tgev_org') || 'null'); } catch (e) { /* fine */ }
+      if (!f && FLY_IATA.test(String(last || ''))) {
+        for (var j = 0; j < all.length; j++) if (all[j][0] === last) { out.push(all[j]); break; }
+      }
+      for (var i = 0; i < all.length && out.length < 8; i++) {
+        var a = all[i];
+        if (out.some(function (b) { return b[0] === a[0]; })) continue;
+        if (!f || a[0].toLowerCase().indexOf(f) === 0 || a[1].toLowerCase().indexOf(f) !== -1) out.push(a);
+      }
+      return out;
+    }
+
+    function draw() {
+      state.list = matches(input.value);
+      if (state.active >= state.list.length) state.active = 0;
+      list.textContent = '';
+      state.list.forEach(function (a, i) {
+        var opt = el('button', { class: 'ev-fly-opt' + (i === state.active ? ' is-active' : ''),
+          type: 'button', role: 'option', 'aria-selected': String(i === state.active) }, [
+          el('span', { class: 'ev-fly-code tnum', text: a[0] }),
+          el('span', { class: 'ev-fly-name', text: a[1] }),
+        ]);
+        opt.addEventListener('click', function () { choose(a[0]); });
+        list.appendChild(opt);
+      });
+      if (state.all) note.textContent = state.list.length ? '' : 'No airport matches that. Try the three-letter code.';
+    }
+
+    input.addEventListener('input', function () { state.active = 0; draw(); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (state.active < state.list.length - 1) { state.active++; draw(); } }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (state.active > 0) { state.active--; draw(); } }
+      else if (e.key === 'Enter') { e.preventDefault(); if (state.list[state.active]) choose(state.list[state.active][0]); }
+      else if (e.key === 'Escape') { flyClose(); }
+    });
+    state.onKey = function (e) { if (e.key === 'Escape') flyClose(); };
+    state.onDoc = function (e) {
+      if (!box.contains(e.target) && e.target !== btn && !btn.contains(e.target)) flyClose();
+    };
+    document.addEventListener('keydown', state.onKey, true);
+    document.addEventListener('click', state.onDoc, true);
+
+    flyLoadAirports().then(function (all) {
+      if (flyState !== state) return;
+      state.all = all;
+      if (!all.length) { note.textContent = 'The airport list did not load. Please try again.'; return; }
+      note.textContent = '';
+      draw();
+    });
+    input.focus();
+  }
+
   function eventCard(ev, links) {
     links = links || {};
     var p = dateParts(ev.startDate);
@@ -254,24 +383,33 @@
       }, ['No link']));
     }
     // The flight package needs the visitor's departure airport, so its button
-    // goes via the /fly chooser, which asks and then continues to Travelify.
+    // opens the airport chooser anchored to itself; the pick comes only from
+    // the suite's own list.
     (ev.bookingOptions || []).forEach(function (o) {
       if (o.kind === 'ticket' || (!o.url && !o.urlTemplate)) return;
-      var href = null;
-      if (o.url && /^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(o.url)) href = o.url;
-      else if (o.status === 'needs-origin'
-        && /^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(o.urlTemplate || '')) {
-        href = '/fly?d=' + encodeURIComponent(o.urlTemplate);
+      if (o.url && /^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(o.url)) {
+        actions.push(el('a', {
+          class: 'ev-btn ev-btn-secondary',
+          href: o.url,
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          title: o.label || o.short,
+          'aria-label': (o.label || o.short) + ': ' + titleText,
+        }, [o.short || o.label]));
+        return;
       }
-      if (!href) return;
-      actions.push(el('a', {
+      if (o.status !== 'needs-origin') return;
+      var tpl = String(o.urlTemplate || '');
+      if (!/^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(tpl)) return;
+      var flyBtn = el('button', {
         class: 'ev-btn ev-btn-secondary',
-        href: href,
-        target: '_blank',
-        rel: 'noopener noreferrer',
+        type: 'button',
+        'aria-haspopup': 'dialog',
         title: o.label || o.short,
         'aria-label': (o.label || o.short) + ': ' + titleText,
-      }, [o.short || o.label]));
+      }, [o.short || o.label]);
+      flyBtn.addEventListener('click', function () { flyPicker(flyBtn, tpl); });
+      actions.push(flyBtn);
     });
 
     return el('article', { class: 'ev-card' }, [
