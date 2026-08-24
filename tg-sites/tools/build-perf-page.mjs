@@ -106,7 +106,44 @@ for (const profile of ['designed', 'native']) {
   console.log(`${profile}.html  ${(Buffer.byteLength(html) / 1024).toFixed(1)} KB of HTML`);
 }
 
-await copyFile(resolve(root, 'app/globals.css'), resolve(outDir, 'globals.css'));
+/*
+ * THE STYLESHEET COMES FROM THE BUILD, NOT FROM SOURCE.
+ *
+ * This copied app/globals.css at first, and that overstated the cost roughly
+ * fourfold: the source is 302 KB raw and 80.9 KB gzipped, while what the route
+ * actually ships is Next's minified output at 129.6 KB raw and 20.7 KB gzipped.
+ * A harness that measures a proxy for the artefact instead of the artefact is
+ * worse than no harness, because its numbers look authoritative.
+ *
+ * The manifest is the authority on WHICH css the published route loads. It comes
+ * off the root layout, not the page, because globals.css is imported there.
+ */
+const manifestPath = resolve(root, '.next/app-build-manifest.json');
+let manifest;
+try {
+  manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+} catch {
+  console.error('No production build found. Run: npx next build');
+  process.exit(1);
+}
+
+const cssFiles = Object.entries(manifest.pages)
+  .filter(([route]) => route === '/layout' || route.includes('site/[host]/[[...path]]'))
+  .flatMap(([, files]) => files)
+  .filter((f) => f.endsWith('.css'));
+
+if (cssFiles.length === 0) {
+  console.error('The build manifest lists no CSS for the published route. Refusing to measure nothing.');
+  process.exit(1);
+}
+
+const cssParts = [];
+for (const file of cssFiles) cssParts.push(await readFile(resolve(root, '.next', file)));
+const css = Buffer.concat(cssParts);
+await writeFile(resolve(outDir, 'globals.css'), css);
+console.log(
+  `globals.css   ${(css.length / 1024).toFixed(1)} KB minified, from ${cssFiles.length} built file(s) the route ships`,
+);
 
 /*
  * A real photograph padded to the target size.
