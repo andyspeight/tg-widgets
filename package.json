@@ -134,6 +134,7 @@
     "test:offer-promos-excludes": "node test/offer-promos-excludes-smoke.mjs",
     "test:offer-roundtrip": "node test/offer-roundtrip-smoke.mjs",
     "test:offer-fieldpatch": "node test/offer-fieldpatch-smoke.mjs",
+    "test:offer-style-custom": "node test/offer-style-custom-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
     "build:events-snapshot": "node scripts/build-events-snapshot.mjs"
   },
