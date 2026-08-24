@@ -32,6 +32,19 @@
 -- is exactly what it does today. Nothing regresses on an old image, it simply
 -- does not improve until it is re-uploaded or a backfill runs.
 --
+-- SAFE FOR THE RENDERER WITHOUT A NEW GRANT, and this was checked against the
+-- live database rather than assumed, because getting it wrong breaks every
+-- published page the moment the code deploys. public.media carries a TABLE-level
+-- grant, so a new column is covered automatically. public.site_regions does NOT:
+-- it uses column-level ACLs (see 0016), so the same one-line ALTER there would
+-- have left the renderer unable to read the new column. Check with:
+--
+--   select has_column_privilege('tg_sites_renderer','public.media','variants','SELECT');
+--
+-- APPLIED 23 Aug 2026 to project qvzbothxlrzeklcvdhzp (tg-sites, eu-west-2).
+-- Verified afterwards: jsonb, default '[]', not null; renderer can read; app can
+-- write; all 30 existing rows read as an empty list.
+--
 -- NO BACKFILL HERE. Regenerating variants for images already in the bank means
 -- re-decoding originals, which is a job for a tool that can be watched and
 -- retried, not for a migration that has to be atomic and fast.
