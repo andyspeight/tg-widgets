@@ -456,6 +456,54 @@ export default async function handler(req, res) {
         return res.status(200).json({ saved: ids.length, updated: updated, skipped: skipped, ids: ids });
       }
 
+      // ── Field patch: { id, fieldPatch: {k:v} } — the sheet's inline edit ──
+      // Merge the changed FIELDS into the offer's OWN current stored copy,
+      // server-side, and touch nothing else. The sheet used to reconstruct the
+      // whole offer from a client-side cache and POST it back; a cache that
+      // predated a builder edit (photos, itinerary) silently wiped those on the
+      // next inline save — the intermittent "photos + itinerary vanish" bug
+      // (Tully's Travel, Aug 2026). A server-side merge cannot clobber a field
+      // it was not given, so the race is gone.
+      if (body.fieldPatch && typeof body.fieldPatch === 'object' && !Array.isArray(body.fieldPatch)) {
+        const pid = body.id ? String(body.id) : '';
+        if (!ID_RE.test(pid)) return res.status(400).json({ error: 'Bad offer id.' });
+        const existing = await getJson('offer:' + pid);
+        if (!existing) return res.status(404).json({ error: 'Offer not found.' });
+        if (existing.ownerKey !== ck && !isStaff(user)) {
+          return res.status(403).json({ error: 'You do not own this offer.' });
+        }
+        const base = (existing.offer && typeof existing.offer === 'object') ? existing.offer : { fields: {} };
+        const mergedFields = Object.assign({}, (base.fields && typeof base.fields === 'object') ? base.fields : {});
+        let touched = 0;
+        for (const k of Object.keys(body.fieldPatch)) {
+          if (touched >= 80) break;
+          if (!/^[A-Za-z0-9_]{1,40}$/.test(k)) continue;
+          const v = body.fieldPatch[k];
+          if (v === '' || v == null) { delete mergedFields[k]; touched++; }
+          else if (typeof v === 'string' || typeof v === 'number') { mergedFields[k] = String(v).slice(0, 5000); touched++; }
+        }
+        // Re-sanitise the whole merged offer (keeps images / includes / promos /
+        // excludes / i18n / currency from the stored copy untouched).
+        const merged = cleanOffer(Object.assign({}, base, { fields: mergedFields }));
+        if (!merged || !merged.fields || !Object.keys(merged.fields).length) {
+          return res.status(400).json({ error: 'Offer would be empty.' });
+        }
+        if (JSON.stringify(merged).length > MAX_OFFER_BYTES) {
+          return res.status(413).json({ error: 'Offer is too large. Trim the description or images.' });
+        }
+        const nowP = Date.now();
+        const okP = await setJson('offer:' + pid, {
+          id: pid, offer: merged,
+          ownerKey: existing.ownerKey || ck,
+          ownerEmail: existing.ownerEmail || user.email || '',
+          clientId: existing.clientId || user.clientId || '',
+          createdAt: existing.createdAt || nowP, updatedAt: nowP
+        });
+        if (!okP) return res.status(502).json({ error: 'Could not save the offer. Please try again.' });
+        await zadd('offers:idx:' + ck, nowP, pid);
+        return res.status(200).json({ id: pid, ok: true, patched: true });
+      }
+
       const offer = cleanOffer(body.offer);
       if (!offer || !offer.fields || !Object.keys(offer.fields).length) {
         return res.status(400).json({ error: 'Offer is missing or empty.' });
