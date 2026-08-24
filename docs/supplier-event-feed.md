@@ -253,12 +253,20 @@ Before the sheet carried coordinates this table was built by geocoding (21 Aug
 2026, one afternoon, three failed drafts and 174 hand checks); that build and
 its lessons live in git history and in scripts/geocode-venues-via-vercel.mjs.
 
-`BOOKING_KINDS` in that file declares all three combinations. Every surface
-reads that list rather than hard-coding a Book button, so a kind with
-`ready: false` shows greyed out with an "Awaiting spec" pill instead of
-pretending it does not exist, and filling in its `build` lights it up
-everywhere at once with no change to any widget. "Ticket + hotel" is the one
-still waiting on a live example.
+`BOOKING_KINDS` in that file declares all three combinations, and as of
+24 Aug 2026 ALL THREE are built from verified live examples. Every surface
+reads that list rather than hard-coding a Book button, so a future kind with
+`ready: false` would show greyed with an "Awaiting spec" pill instead of
+pretending not to exist, and filling in its `build` lights it up everywhere
+at once with no change to any widget.
+
+### Ticket + hotel (ticket + accommodation, live 24 Aug 2026)
+
+`st=TicketAccommodation`: the flight package minus the flight leg — same
+pin, same mandatory anchor, `frd=0&dur=1` verbatim, and nothing the feed
+does not already know, so it comes back `ready` with a finished url and no
+chooser. Probe-verified live before the button shipped, on app 384 and the
+demo app 250 alike (same probe script as the flight package).
 
 ### The flight package (ticket + accommodation + flight, live 24 Aug 2026)
 

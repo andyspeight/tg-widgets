@@ -11,6 +11,10 @@
  * still always substitutes a real IATA code, because a junk org would break
  * the flight leg inside the funnel.
  *
+ * Second run, same day: the TicketAccommodation (ticket + hotel) cases all
+ * 302d too — our built link on 384 and 250, and Andy's example — so the
+ * hotel button shipped verified as well.
+ *
  * The three cases: our built link on Andy's app (the example's own account),
  * the same link on the demo 250 app the demos run on, and the __ORG__
  * placeholder form as a control (expected to fail — surfaces must always
