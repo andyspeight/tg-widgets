@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.9';
+  const VERSION = '0.3.10';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -159,7 +159,10 @@
     shipDesc:    { label: 'About the ship',        hint: 'The cruise ship: cabins, dining, bars, pools, entertainment.', ph: 'Describe the ship...' },
     itinerary:   { label: 'Itinerary / ports of call', hint: 'Where it goes, port by port or day by day.', ph: 'List the ports or the day-by-day plan...' },
     highlights:  { label: 'Highlights',            hint: 'The stand-out moments and included excursions.', ph: 'The highlights of the trip...' },
-    skiArea:     { label: 'The resort & ski area', hint: 'The slopes, the lifts, ski school and après.', ph: 'Describe the ski resort and the area...' }
+    skiArea:     { label: 'The resort & ski area', hint: 'The slopes, the lifts, ski school and après.', ph: 'Describe the ski resort and the area...' },
+    // Free-text box shown at the very BOTTOM of the offer page. Manual only (no
+    // AI), and hidden entirely when left blank.
+    notes:       { label: 'Anything else', hint: 'Free text shown in a box at the very bottom of the offer page — extra terms, small print or a note. Leave blank to hide the box.', ph: "e.g. Prices are per person based on two sharing. Deposits are non-refundable. Full booking conditions apply.", noAi: true }
   };
   // Offer type → the content sections shown, in order. Anything not listed uses _default.
   const TYPE_CONTENT = {
@@ -173,7 +176,9 @@
     'City break':           ['description', 'hotelDesc', 'resortDesc', 'countryDesc'],
     _default:               ['description', 'hotelDesc', 'resortDesc', 'countryDesc']
   };
-  function contentKeysFor(type) { return TYPE_CONTENT[type] || TYPE_CONTENT._default; }
+  // The free-text "Anything else" box is appended to every type so it always
+  // sits last, whatever the offer is.
+  function contentKeysFor(type) { return (TYPE_CONTENT[type] || TYPE_CONTENT._default).concat(['notes']); }
 
   // ── Type-aware structured fields ──────────────────────────────────────────
   // The two field sections between "The basics" and "Price" change with the
@@ -1126,7 +1131,7 @@
         const val = this._contentVals[k] || '';
         return '<div class="ob-content-sec" data-field="' + k + '">'
           + '<div class="ob-content-head"><label>' + esc(s.label) + '</label>'
-          + (ai ? '<button type="button" class="ob-ai-write" data-write="' + k + '"><span class="spark">✨</span> Write with AI</button>' : '')
+          + (ai && !s.noAi ? '<button type="button" class="ob-ai-write" data-write="' + k + '"><span class="spark">✨</span> Write with AI</button>' : '')
           + '</div>'
           + '<p class="ob-content-hint">' + esc(s.hint) + '</p>'
           + '<textarea data-key="' + k + '" rows="4" placeholder="' + esc(s.ph) + '">' + esc(val) + '</textarea>'
