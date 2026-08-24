@@ -117,6 +117,14 @@
     return /^https?:\/\//i.test(s) ? s : '';
   }
 
+  // A flight package the visitor still needs a departure airport for links
+  // via our /fly chooser, which asks and then continues to Travelify.
+  function flyUrl(o) {
+    if (!o || o.status !== 'needs-origin' || typeof o.urlTemplate !== 'string') return '';
+    if (o.urlTemplate.indexOf('https://dl.tvllnk.com/deeplink/') !== 0) return '';
+    return ORIGIN + '/fly?d=' + encodeURIComponent(o.urlTemplate);
+  }
+
   function fmtDate(iso) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return '';
     var p = iso.split('-');
@@ -362,7 +370,10 @@
           if (e.timeKnown && e.startTime) meta.push(esc(e.startTime));
           if (e.competitionLabel) meta.push(esc(e.competitionLabel));
           else if (e.categoryLabel) meta.push(esc(e.categoryLabel));
-          var usable = (e.bookingOptions || []).filter(function (o) { return safeUrl(o.url); });
+          var usable = (e.bookingOptions || []).map(function (o) {
+            var u = safeUrl(o.url) || flyUrl(o);
+            return u ? { short: o.short, url: u } : null;
+          }).filter(Boolean);
           if (!usable.length && e.booking && safeUrl(e.booking.url)) {
             usable = [{ short: c.bookLabel, url: e.booking.url }];
           }

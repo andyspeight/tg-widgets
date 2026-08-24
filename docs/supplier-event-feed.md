@@ -253,17 +253,40 @@ Before the sheet carried coordinates this table was built by geocoding (21 Aug
 2026, one afternoon, three failed drafts and 174 hand checks); that build and
 its lessons live in git history and in scripts/geocode-venues-via-vercel.mjs.
 
-`BOOKING_KINDS` in that file declares all three combinations. Two of them have
-`ready: false` and no builder, so `buildBookingOptions` returns them with a null
-url and `status: 'spec-needed'`. Every surface reads that list rather than
-hard-coding a Book button, so the editors show "Ticket + hotel" and
-"Ticket, flight + hotel" greyed out with an "Awaiting spec" pill instead of
-pretending they do not exist. Filling in `build` on those two entries lights
-them up everywhere at once, with no change to any widget.
+`BOOKING_KINDS` in that file declares all three combinations. Every surface
+reads that list rather than hard-coding a Book button, so a kind with
+`ready: false` shows greyed out with an "Awaiting spec" pill instead of
+pretending it does not exist, and filling in its `build` lights it up
+everywhere at once with no change to any widget. "Ticket + hotel" is the one
+still waiting on a live example.
 
-Ticket-plus-flight-plus-hotel will also need a **departure airport**, which the
-feed does not carry and cannot derive. That has to come from widget config, so
-it is a field on the editor as well as a link builder.
+### The flight package (ticket + accommodation + flight, live 24 Aug 2026)
+
+Built to the live example Andy supplied, `st=TicketAccommodationFlight` with
+the same pin and the same mandatory anchor plus five parameters: `org` (the
+visitor's departure airport), `dst` (the destination airport), and
+`frd=0&dur=1&dir=false` copied verbatim. Probe-verified the same day: our
+built link 302s into the Travelify results funnel on app 384 and on the demo
+app 250 alike (`scripts/probe-flight-deeplink.js` is the record).
+
+`dst` is computed in the feed as the airport nearest the EVENT's own anchor
+(within 150km, from the suite's bundled list), so a merged venue key flies
+each fixture to its own city. No airport near enough means the package is
+simply not offered (`status: 'no-airport'`).
+
+`org` is the one thing neither the feed nor the config can know, so the
+builder returns a `urlTemplate` with `__ORG__` where the code goes and
+`status: 'needs-origin'`. A surface renders that option as a button to
+**/fly** (public/fly.html), our departure chooser: it validates the template
+(https, dl.tvllnk.com, /deeplink/ — never an open redirect), asks the
+visitor, remembers their answer for next time, substitutes a validated IATA
+code and continues to Travelify. The chooser's menu is `view=airports` on
+the feed. A caller that already knows the airport can pass `&org=LGW` to the
+feed and get finished `ready` links instead.
+
+Widgets offer the kinds in `cfg.bookingKinds` (default ticket only — the
+agent turns the package on per widget in the editor, where it is now live
+instead of greyed).
 
 
 ## The widget family

@@ -253,6 +253,26 @@
         title: (ev.booking && ev.booking.note) || 'No booking link',
       }, ['No link']));
     }
+    // The flight package needs the visitor's departure airport, so its button
+    // goes via the /fly chooser, which asks and then continues to Travelify.
+    (ev.bookingOptions || []).forEach(function (o) {
+      if (o.kind === 'ticket' || (!o.url && !o.urlTemplate)) return;
+      var href = null;
+      if (o.url && /^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(o.url)) href = o.url;
+      else if (o.status === 'needs-origin'
+        && /^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(o.urlTemplate || '')) {
+        href = '/fly?d=' + encodeURIComponent(o.urlTemplate);
+      }
+      if (!href) return;
+      actions.push(el('a', {
+        class: 'ev-btn ev-btn-secondary',
+        href: href,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        title: o.label || o.short,
+        'aria-label': (o.label || o.short) + ': ' + titleText,
+      }, [o.short || o.label]));
+    });
 
     return el('article', { class: 'ev-card' }, [
       el('div', { class: 'ev-date tnum' }, p ? [

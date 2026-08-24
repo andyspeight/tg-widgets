@@ -1,6 +1,15 @@
 /**
- * TEMPORARY — verifies the built TicketAccommodationFlight links against the
- * live Travelify endpoint before any widget shows the button. Deleted after.
+ * Flight package deeplink probe — PRESERVED as the record of the 24 Aug 2026
+ * live verification and for the next deeplink shape. It ran as a temporary
+ * Vercel endpoint (copy to api/, add a vercel.json functions entry, push the
+ * branch, fetch /api/dev-flight-link-probe from the preview, then delete).
+ *
+ * Result on 24 Aug 2026: every case 302d into the Travelify results funnel —
+ * our built link on app 384 (worldchoicesports.co.uk) and on the demo app
+ * 250 (traveldemo.site), and Andy's own example. The org=__ORG__ control
+ * also 302d, so Travelify tolerates a junk org at the door; the /fly chooser
+ * still always substitutes a real IATA code, because a junk org would break
+ * the flight leg inside the funnel.
  *
  * The three cases: our built link on Andy's app (the example's own account),
  * the same link on the demo 250 app the demos run on, and the __ORG__

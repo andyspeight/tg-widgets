@@ -120,6 +120,14 @@
     return '';
   }
 
+  // A flight package the visitor still needs a departure airport for links
+  // via our /fly chooser, which asks and then continues to Travelify.
+  function flyUrl(o) {
+    if (!o || o.status !== 'needs-origin' || typeof o.urlTemplate !== 'string') return '';
+    if (o.urlTemplate.indexOf('https://dl.tvllnk.com/deeplink/') !== 0) return '';
+    return ORIGIN + '/fly?d=' + encodeURIComponent(o.urlTemplate);
+  }
+
   /** A colour we are willing to put in a stylesheet. */
   function safeColour(c, fallback) {
     var s = String(c == null ? '' : c).trim();
@@ -406,7 +414,10 @@
     // Only options the API could actually build. An option awaiting its spec
     // comes back without a url and is simply not offered.
     var opts = Array.isArray(ev.bookingOptions) ? ev.bookingOptions : [];
-    var usable = opts.filter(function (o) { return safeUrl(o.url); });
+    var usable = opts.map(function (o) {
+      var u = safeUrl(o.url) || flyUrl(o);
+      return u ? { kind: o.kind, label: o.label, short: o.short, url: u } : null;
+    }).filter(Boolean);
     if (!usable.length && ev.booking && safeUrl(ev.booking.url)) {
       usable = [{ kind: 'ticket', short: c.bookLabel, url: ev.booking.url }];
     }
