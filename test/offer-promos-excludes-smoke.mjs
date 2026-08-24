@@ -43,17 +43,14 @@ console.log('The builder collects promos + not-included as free-text pill lists'
   ok('all three lists render on load', /_renderPills\('includes'\)[\s\S]*?_renderPills\('excludes'\)[\s\S]*?_renderPills\('promos'\)/.test(BUILDER));
 }
 
-console.log('The card renders promos + not-included');
+console.log('The card renders promos, but NOT the not-included list (that lives on the offer page only)');
 {
-  ok('the card derives promos + excludes', /excludes: excludes,[\s\S]*?promos: promos,/.test(CARD));
+  ok('the card derives promos', /promos: promos,/.test(CARD));
   ok('a promos block of coloured pills exists', /_promosBlock\(d\)[\s\S]*?tgoc-promo/.test(CARD));
-  ok('a not-included block with a label exists', /_excludesBlock\(d\)[\s\S]*?tgoc-nots-label[\s\S]*?tgoc-exclude/.test(CARD));
-  ok('the body renders promos, includes then excludes', /_promosBlock\(d\) \+ teaser[\s\S]*?_includesBlock\(d\) \+ this\._excludesBlock\(d\)/.test(CARD));
   ok('cruise promos ride as extra ribbons', /tgoc-ribbon--promo/.test(CARD));
-  ok('the cruise body shows the not-included block', /featList \+ this\._excludesBlock\(d\)/.test(CARD));
-  ok('the not-included label is localised (notIncluded key, EN + a translation)',
-    /notIncluded: 'Not included'/.test(CARD) && /notIncluded: 'Non inclus'/.test(CARD));
-  ok('the exclude marker is a cross, not a tick', /\.tgoc-exclude::before \{ content: '✕'/.test(CARD));
+  ok('the body renders promos + includes (no excludes on the card)', /_promosBlock\(d\) \+ teaser[\s\S]*?_includesBlock\(d\) \+ tags/.test(CARD));
+  ok('the card no longer references an excludes block (removed from the card box)', !/_excludesBlock/.test(CARD));
+  ok('the card no longer carries not-included markup or CSS', !/tgoc-excludes/.test(CARD) && !/tgoc-nots/.test(CARD));
 }
 
 console.log('The offer page renders promos + a What\'s not included section');
