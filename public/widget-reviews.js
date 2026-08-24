@@ -44,7 +44,10 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.5';
+  // The live reviews feed sits next to widget-config on the SAME origin the
+  // script was served from, so a client site fetches OUR cache, never Google.
+  const FEED_BASE = API_BASE.replace(/\/widget-config\/?$/, '/reviews-feed');
+  const VERSION = '1.1.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (rating summary, section labels, controls). Platform
@@ -435,6 +438,10 @@
       return Object.assign({
         place: { name: 'My Business', rating: 4.8, total: 50 },
         source: 'google',
+        // Live connection (e.g. Google via Wextractor). When both are set, a real
+        // embed pulls the latest reviews from our cached feed on load; the reviews
+        // baked into config act as the instant first paint + offline fallback.
+        liveSource: '', liveId: '',
         header: { title: '', subtitle: '' },
         brandColor: '#0891B2', accentColor: '#6366F1', pageBg: '#F8FAFC', cardBg: '#FFFFFF',
         textColor: '#0F172A', subtextColor: '#64748B', borderRadius: 16,
@@ -773,6 +780,52 @@
       });
     }
 
+    /**
+     * Pull the latest reviews from our cached feed for a connected source
+     * (e.g. Google via Wextractor). Called ONLY from the real-embed path — never
+     * the constructor — so the editor preview and dashboard mini-preview use the
+     * baked snapshot and don't spend billed calls on every re-render. Degrades
+     * quietly: on any failure the reviews already in config are kept, so the
+     * widget never blanks and never triggers a live search on the visitor.
+     */
+    async _loadLive() {
+      const src = String(this.c.liveSource || '').trim();
+      const id = String(this.c.liveId || '').trim();
+      if (!src || !id || typeof fetch === 'undefined') return;
+      try {
+        const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
+        let data;
+        try {
+          const url = `${FEED_BASE}?source=${encodeURIComponent(src)}&id=${encodeURIComponent(id)}&max=12`;
+          const resp = await fetch(url, ctrl ? { signal: ctrl.signal } : undefined);
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          data = await resp.json();
+        } finally { if (timer) clearTimeout(timer); }
+        if (!data || data.ok === false || !Array.isArray(data.reviews) || !data.reviews.length) return;
+
+        const placeName = (data.business && data.business.name) || this.c.place.name;
+        // Map the feed's card shape onto the widget's; a reply arrives as a plain
+        // string and the card renderer wants { author, text }.
+        this.c.reviews = data.reviews.map((r) => ({
+          id: r.id, author: r.author, rating: r.rating, text: r.text,
+          date: r.date, source: r.source || src,
+          photoUrl: r.photoUrl || '', hasPhoto: !!r.hasPhoto,
+          helpful: r.helpful || 0, tags: Array.isArray(r.tags) ? r.tags : [],
+          reply: r.reply ? { author: placeName, text: r.reply } : null,
+        }));
+        if (data.rating) {
+          this.c.place = Object.assign({}, this.c.place, {
+            name: placeName,
+            rating: data.rating.average || this.c.place.rating,
+            total: data.rating.count || this.c.place.total,
+          });
+        }
+        this.activeTag = null; this.spotlightIdx = 0;
+        this._render();
+      } catch (e) { /* keep the baked snapshot — never blank on a live failure */ }
+    }
+
     update(newConfig) { this.c = this._defaults(newConfig); ensureFont(this.c.fontFamily); this.t = makeT(this.c); this.activeTag = null; this.spotlightIdx = 0; this._render(); }
     destroy() { if (this._spotTimer) clearInterval(this._spotTimer); this.shadow.innerHTML = ''; }
   }
@@ -783,7 +836,7 @@
     for (const el of containers) {
       const inlineConfig = el.dataset.tgConfig;
       if (inlineConfig) {
-        try { new TGReviewsWidget(el, JSON.parse(inlineConfig)); } catch (e) { console.error('[TG Reviews] Invalid config:', e); }
+        try { const w = new TGReviewsWidget(el, JSON.parse(inlineConfig)); w._loadLive(); } catch (e) { console.error('[TG Reviews] Invalid config:', e); }
         continue;
       }
       const widgetId = el.dataset.tgId;
@@ -796,7 +849,8 @@
           try {
             const resp = await fetch(`${API_BASE}?id=${encodeURIComponent(widgetId)}`, ctrl ? { signal: ctrl.signal } : undefined);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            new TGReviewsWidget(el, await resp.json());
+            const w = new TGReviewsWidget(el, await resp.json());
+            w._loadLive();
           } finally { if (timer) clearTimeout(timer); }
         } catch (e) { console.error('[TG Reviews] Failed to load:', e); }
         continue;
