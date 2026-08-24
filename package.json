@@ -138,6 +138,7 @@
     "test:offer-tags-custom": "node test/offer-tags-custom-smoke.mjs",
     "test:offer-image-badges": "node test/offer-image-badges-smoke.mjs",
     "test:sea-route": "node test/sea-route-smoke.mjs",
+    "test:offer-cruise-route": "node test/offer-cruise-route-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
     "build:events-snapshot": "node scripts/build-events-snapshot.mjs"
   },

@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.8';
+  const VERSION = '0.3.9';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -114,6 +114,11 @@
   const DATE_MODES = ['Selected dates in a period', 'Fixed departure date', 'Flexible / call for dates'];
   const FLIGHT_TYPES = ['Direct', 'Connecting', 'Not included'];
   const PRICE_BASES = ['per person', 'per couple', 'per night', 'total holiday price'];
+  // MapTiler geocoding key — the same shared, domain-restricted Travelgenix key
+  // the map widgets use for tiles. The builder runs only on our own editor
+  // origin (never embedded on a customer site), so a direct geocoding fetch is
+  // fine; the domain restriction is the protection.
+  const MAPTILER_KEY = 'zSDRMRY6Fi2YzknQVzXf';
   // Type-specific option lists, used by the per-type field layouts below.
   const CRUISE_CABINS = ['Inside', 'Ocean view', 'Balcony', 'Suite'];
   const CRUISE_FLIGHTS = ['Flights included', 'Cruise only', 'Fly-cruise'];
@@ -510,6 +515,29 @@
       padding: 5px 11px; font: inherit; font-size: 12.5px; cursor: pointer; }
     .ob-chip-suggest:hover { border-color: var(--tgo-accent); color: var(--tgo-accent-hover); }
 
+    /* Cruise route — ordered ports + sea-route status */
+    .ob-crroute { margin-top: 4px; }
+    .ob-crport-add { display: flex; gap: 8px; margin-bottom: 8px; }
+    .ob-crport-input { flex: 1; padding: 10px 12px; border: 1px solid var(--tgo-border); border-radius: 9px; font: inherit; font-size: 14px; background: var(--tgo-card); color: var(--tgo-ink); }
+    .ob-crport-input:focus { outline: 2px solid var(--tgo-accent); border-color: var(--tgo-accent); }
+    .ob-crport-results { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+    .ob-crport-cand { text-align: left; border: 1px solid var(--tgo-border); background: var(--tgo-card); color: var(--tgo-ink); border-radius: 8px; padding: 8px 11px; font: inherit; font-size: 13.5px; cursor: pointer; }
+    .ob-crport-cand:hover { border-color: var(--tgo-accent); background: var(--tgo-card-alt); }
+    .ob-crport-hint { font-size: 13px; color: var(--tgo-muted); padding: 2px 2px 6px; }
+    .ob-crports { list-style: none; margin: 0 0 8px; padding: 0; counter-reset: crport; display: flex; flex-direction: column; gap: 6px; }
+    .ob-crport { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--tgo-border); border-radius: 9px; background: var(--tgo-card); }
+    .ob-crport::before { counter-increment: crport; content: counter(crport); flex: 0 0 22px; height: 22px; border-radius: 50%; background: var(--tgo-accent-soft); color: var(--tgo-accent-hover); font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+    .ob-crport-name { flex: 1; min-width: 120px; font-size: 14px; font-weight: 500; color: var(--tgo-ink); }
+    .ob-crport-actions { display: inline-flex; gap: 4px; }
+    .ob-crport-btn { border: 1px solid var(--tgo-border); background: var(--tgo-card); color: var(--tgo-sub); width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+    .ob-crport-btn:hover:not([disabled]) { border-color: var(--tgo-accent); color: var(--tgo-accent-hover); }
+    .ob-crport-btn[disabled] { opacity: .4; cursor: default; }
+    .ob-crport-rm:hover { border-color: var(--tgo-warn); color: var(--tgo-warn); }
+    .ob-crport-coords { flex-basis: 100%; display: flex; gap: 8px; }
+    .ob-crport-coords input { flex: 1; padding: 7px 10px; border: 1px solid var(--tgo-border); border-radius: 7px; font: inherit; font-size: 13px; background: var(--tgo-card); color: var(--tgo-ink); }
+    .ob-crport-empty { font-size: 13px; color: var(--tgo-muted); }
+    .ob-crroute-status { font-size: 13px; color: var(--tgo-sub); min-height: 1em; }
+
     /* Type-aware long-text content sections */
     .ob-content { display: flex; flex-direction: column; gap: 20px; }
     .ob-content-sec { border: 1px solid var(--tgo-border); border-radius: 12px; padding: 14px 14px 16px; background: var(--tgo-card-alt); }
@@ -650,6 +678,7 @@
         // tg-offer-created event only).
         save: bool(c.save, false),
         saveEndpoint: c.saveEndpoint || API_BASE.replace('/widget-config', '/saved-offers'),
+        seaRouteEndpoint: c.seaRouteEndpoint || API_BASE.replace('/widget-config', '/sea-route'),
         offerId: c.offerId || '',                 // set when editing an existing saved offer
         offerBaseUrl: c.offerBaseUrl || '',        // optional absolute base for the shareable link
 
@@ -739,6 +768,11 @@
       this._promos = Array.isArray(offer.promos) ? offer.promos.slice() : [];
       this._tags = Array.isArray(offer.tags) ? offer.tags.slice() : [];
       this._imageBadges = Array.isArray(offer.imageBadges) ? offer.imageBadges.slice() : [];
+      const cr = offer.cruiseRoute;
+      this._cruisePorts = (cr && Array.isArray(cr.ports))
+        ? cr.ports.map((p) => ({ name: String((p && p.name) || ''), lat: Number(p && p.lat), lng: Number(p && p.lng) })).filter((p) => isFinite(p.lat) && isFinite(p.lng))
+        : [];
+      this._cruiseLine = (cr && Array.isArray(cr.line)) ? cr.line.slice() : [];
       this._images = (Array.isArray(offer.images) ? offer.images : []).map(safePhotoUrl).filter(Boolean);
       this._renderThumbs();
 
@@ -906,7 +940,15 @@
           + field('mapLng', 'Longitude', input('mapLng', 'e.g. -86.8126', 'text'), '(from Google Maps)')
           + field('mapStyle', 'Map style', select('mapStyle', ['streets', 'minimal', 'muted', 'dark', 'satellite'], 'streets'))
           + field('video', 'Video link', input('video', 'YouTube, Vimeo or MP4 URL', 'text'), '(optional)', true)
-          + '</div><p class="hint" style="margin-top:10px">Tip: in Google Maps, right-click the resort and click the coordinates to copy them. Leave the map blank to hide it.</p></div>';
+          + '</div><p class="hint" style="margin-top:10px">Tip: in Google Maps, right-click the resort and click the coordinates to copy them. Leave the map blank to hide it.</p>'
+          + '<label class="ob-sublabel" style="margin-top:16px">Cruise route <span class="opt">(optional)</span></label>'
+          + '<p class="hint">For a cruise, add the ports in the order visited. Each is looked up on the map and a sea route that stays off land is drawn on the offer page. This replaces the single map location above.</p>'
+          + '<div class="ob-crroute">'
+          +   '<div class="ob-crport-add"><input type="text" class="ob-crport-input" placeholder="Type a port, e.g. Barcelona" autocomplete="off" /><button type="button" class="ob-btn ob-crport-go">Add port</button></div>'
+          +   '<div class="ob-crport-results" data-crresults hidden></div>'
+          +   '<ol class="ob-crports" data-crports></ol>'
+          +   '<div class="ob-crroute-status" data-crstatus></div>'
+          + '</div></div>';
       }
 
       if (cfg.showDescription) {
@@ -947,6 +989,8 @@
       if (!Array.isArray(this._promos)) this._promos = [];
       if (!Array.isArray(this._tags)) this._tags = [];
       if (!Array.isArray(this._imageBadges)) this._imageBadges = [];
+      if (!Array.isArray(this._cruisePorts)) this._cruisePorts = [];
+      if (!Array.isArray(this._cruiseLine)) this._cruiseLine = [];
       if (!this._contentVals || typeof this._contentVals !== 'object') this._contentVals = {};
       if (!this._fieldVals || typeof this._fieldVals !== 'object') this._fieldVals = {};
 
@@ -960,6 +1004,7 @@
       this._renderPills('excludes');   // free-text: what's not included
       this._renderPills('promos');     // free-text: extra promo flashes
       this._renderPills('tags');       // free-text: filter tags (+ preset suggestions)
+      this._renderCruisePorts();       // cruise route ports + sea-route status
       this._renderThumbs();
     }
 
@@ -1001,11 +1046,13 @@
         // apply — drop them too rather than leaving orphaned overlays.
         this._images = []; this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
         this._includes = []; this._excludes = []; this._promos = []; this._tags = []; this._imageBadges = [];
+        this._cruisePorts = []; this._cruiseLine = [];
         this._contentVals = {}; this._fieldVals = {};
         this._render();
       });
 
       this._bindPhotos();
+      this._bindCruiseRoute();
     }
 
     // ── Structured fields (type-aware) ───────────────────────────────────────
@@ -1143,6 +1190,118 @@
       const list = this._listFor(key);
       if (list.indexOf(v) === -1) list.push(v.slice(0, 80));
       this._renderPills(key);
+    }
+
+    // ── Cruise route (ordered ports → a sea route that stays off land) ────────
+    _bindCruiseRoute() {
+      const root = this.root;
+      const input = root.querySelector('.ob-crport-input');
+      const go = root.querySelector('.ob-crport-go');
+      const add = () => { const q = input ? input.value.trim() : ''; if (q) this._searchPort(q); };
+      if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+      if (go) go.addEventListener('click', add);
+    }
+
+    // Look a port up on the map (MapTiler geocoding) and offer the candidates.
+    async _searchPort(q) {
+      const box = this.root.querySelector('[data-crresults]');
+      if (box) { box.hidden = false; box.innerHTML = '<div class="ob-crport-hint">Searching…</div>'; }
+      let cands = [];
+      try {
+        const url = 'https://api.maptiler.com/geocoding/' + encodeURIComponent(q) + '.json?key=' + MAPTILER_KEY + '&limit=6';
+        const r = await fetch(url);
+        if (r.ok) {
+          const d = await r.json();
+          cands = (d && Array.isArray(d.features) ? d.features : []).map((f) => ({
+            name: (f && (f.place_name || f.text)) || q,
+            lng: f && f.center && Number(f.center[0]),
+            lat: f && f.center && Number(f.center[1]),
+          })).filter((c) => isFinite(c.lat) && isFinite(c.lng));
+        }
+      } catch (e) { /* offline / blocked — fall through to the empty state */ }
+      if (!box) return;
+      if (!cands.length) { box.innerHTML = '<div class="ob-crport-hint">No match. Try a nearby city, or add it then adjust its position.</div>'; return; }
+      box.innerHTML = cands.map((c, i) => '<button type="button" class="ob-crport-cand" data-ci="' + i + '">' + esc(c.name) + '</button>').join('');
+      box.querySelectorAll('[data-ci]').forEach((b) => b.addEventListener('click', () => {
+        const c = cands[parseInt(b.dataset.ci, 10)];
+        this._addCruisePort({ name: c.name, lat: c.lat, lng: c.lng });
+        box.hidden = true; box.innerHTML = '';
+        const inp = this.root.querySelector('.ob-crport-input'); if (inp) { inp.value = ''; inp.focus(); }
+      }));
+    }
+
+    _addCruisePort(port) {
+      if (!Array.isArray(this._cruisePorts)) this._cruisePorts = [];
+      if (this._cruisePorts.length >= 14) return;
+      this._cruisePorts.push({ name: String(port.name || '').slice(0, 80), lat: Number(port.lat), lng: Number(port.lng) });
+      this._renderCruisePorts();
+      this._recomputeRoute();
+    }
+
+    _renderCruisePorts() {
+      const wrap = this.root && this.root.querySelector('[data-crports]');
+      if (!wrap) return;
+      const ports = this._cruisePorts || [];
+      wrap.innerHTML = ports.length
+        ? ports.map((p, i) => '<li class="ob-crport">'
+            + '<span class="ob-crport-name">' + esc(p.name || ('Port ' + (i + 1))) + '</span>'
+            + '<span class="ob-crport-actions">'
+            +   '<button type="button" class="ob-crport-btn" data-up="' + i + '" title="Move up"' + (i === 0 ? ' disabled' : '') + '>↑</button>'
+            +   '<button type="button" class="ob-crport-btn" data-down="' + i + '" title="Move down"' + (i === ports.length - 1 ? ' disabled' : '') + '>↓</button>'
+            +   '<button type="button" class="ob-crport-btn" data-nudge="' + i + '" title="Adjust position">⤢</button>'
+            +   '<button type="button" class="ob-crport-btn ob-crport-rm" data-crrm="' + i + '" title="Remove">×</button>'
+            + '</span>'
+            + '<span class="ob-crport-coords" data-coords="' + i + '" hidden><input type="number" step="any" class="ob-crport-lat" value="' + p.lat + '" aria-label="Latitude" /><input type="number" step="any" class="ob-crport-lng" value="' + p.lng + '" aria-label="Longitude" /></span>'
+          + '</li>').join('')
+        : '<li class="ob-crport-empty">No ports yet. Type the first port above.</li>';
+      const move = (i, d) => { const a = this._cruisePorts; if (i + d < 0 || i + d >= a.length) return; const t = a[i]; a[i] = a[i + d]; a[i + d] = t; this._renderCruisePorts(); this._recomputeRoute(); };
+      wrap.querySelectorAll('[data-up]').forEach((b) => b.addEventListener('click', () => move(parseInt(b.dataset.up, 10), -1)));
+      wrap.querySelectorAll('[data-down]').forEach((b) => b.addEventListener('click', () => move(parseInt(b.dataset.down, 10), 1)));
+      wrap.querySelectorAll('[data-crrm]').forEach((b) => b.addEventListener('click', () => { this._cruisePorts.splice(parseInt(b.dataset.crrm, 10), 1); this._renderCruisePorts(); this._recomputeRoute(); }));
+      wrap.querySelectorAll('[data-nudge]').forEach((b) => b.addEventListener('click', () => { const box = wrap.querySelector('[data-coords="' + b.dataset.nudge + '"]'); if (box) box.hidden = !box.hidden; }));
+      wrap.querySelectorAll('.ob-crport-coords').forEach((box) => {
+        const idx = parseInt(box.getAttribute('data-coords'), 10);
+        const lat = box.querySelector('.ob-crport-lat'), lng = box.querySelector('.ob-crport-lng');
+        const upd = () => { const p = this._cruisePorts[idx]; if (!p) return; const la = Number(lat.value), lo = Number(lng.value); if (isFinite(la)) p.lat = la; if (isFinite(lo)) p.lng = lo; this._recomputeRoute(); };
+        if (lat) lat.addEventListener('change', upd);
+        if (lng) lng.addEventListener('change', upd);
+      });
+    }
+
+    // Ask /api/sea-route for the land-avoiding line through the current ports.
+    // Debounced so a burst of edits makes one request.
+    _recomputeRoute() {
+      clearTimeout(this._crTimer);
+      this._renderCruiseStatus('working');
+      this._crTimer = setTimeout(() => this._doRecomputeRoute(), 400);
+    }
+    async _doRecomputeRoute() {
+      const ports = this._cruisePorts || [];
+      if (ports.length < 2) { this._cruiseLine = []; this._cruiseNm = 0; this._renderCruiseStatus(); return; }
+      try {
+        const r = await fetch(this.cfg.seaRouteEndpoint, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ports: ports.map((p) => ({ name: p.name, lat: p.lat, lng: p.lng })) }),
+        });
+        if (!r.ok) throw new Error(String(r.status));
+        const d = await r.json();
+        this._cruiseLine = Array.isArray(d.line) ? d.line : [];
+        this._cruiseNm = Number(d.nm) || 0;
+      } catch (e) { this._cruiseLine = []; this._cruiseNm = 0; }
+      this._renderCruiseStatus();
+    }
+
+    _renderCruiseStatus(state) {
+      const el = this.root && this.root.querySelector('[data-crstatus]');
+      if (!el) return;
+      const n = (this._cruisePorts || []).length;
+      if (state === 'working') { el.textContent = 'Working out the route…'; return; }
+      if (n < 2) { el.textContent = n === 1 ? 'Add at least one more port to draw a route.' : ''; return; }
+      if (this._cruiseLine && this._cruiseLine.length >= 2) {
+        el.textContent = n + ' ports · sea route ' + (this._cruiseNm ? '~' + this._cruiseNm.toLocaleString('en-GB') + ' nm' : 'ready') + '. It shows on the offer page.';
+      } else {
+        el.textContent = n + ' ports added. Could not draw the sea route just now — it will retry on save.';
+      }
     }
 
     async _writeSection(key, btn) {
@@ -1668,6 +1827,15 @@
       // with the live lists so a removed pill can't leave a stale flag behind.
       const flagged = (this._imageBadges || []).filter((v) => offer.tags.indexOf(v) !== -1 || (offer.promos || []).indexOf(v) !== -1);
       if (flagged.length) offer.imageBadges = flagged;
+      // Cruise route: ordered ports + the precomputed sea line. Only saved when
+      // there are at least two valid ports.
+      const crPorts = (this._cruisePorts || []).filter((p) => isFinite(p.lat) && isFinite(p.lng));
+      if (crPorts.length >= 2) {
+        offer.cruiseRoute = {
+          ports: crPorts.map((p) => ({ name: String(p.name || '').slice(0, 80), lat: p.lat, lng: p.lng })),
+          line: (this._cruiseLine || []).slice(),
+        };
+      }
       const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
       if (imgs.length) offer.images = imgs;
 
