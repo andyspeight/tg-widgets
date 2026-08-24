@@ -35,7 +35,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.7';
+  const VERSION = '0.2.9';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -63,12 +63,12 @@
   // prices, dates, board/type labels, ATOL/ABTA wording — is author content and
   // is never translated here. English is the source + fallback.
   const MESSAGES = {
-    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer', from: 'From', viewHolidayDetails: 'View holiday details', notIncluded: 'Not included' },
-    fr: { viewDeal: "Voir l'offre", save: 'Économisez', nights: 'nuits', untitled: 'Offre sans titre', notIncluded: 'Non inclus' },
-    de: { viewDeal: 'Angebot ansehen', save: 'Sparen', nights: 'Nächte', untitled: 'Angebot ohne Titel', notIncluded: 'Nicht inbegriffen' },
-    es: { viewDeal: 'Ver oferta', save: 'Ahorra', nights: 'noches', untitled: 'Oferta sin título', notIncluded: 'No incluido' },
-    it: { viewDeal: 'Vedi offerta', save: 'Risparmia', nights: 'notti', untitled: 'Offerta senza titolo', notIncluded: 'Non incluso' },
-    ro: { viewDeal: 'Vezi oferta', save: 'Economisește', nights: 'nopți', untitled: 'Ofertă fără titlu', notIncluded: 'Neinclus' },
+    en: { viewDeal: 'View deal', save: 'Save', nights: 'nights', untitled: 'Untitled offer', from: 'From', viewHolidayDetails: 'View holiday details' },
+    fr: { viewDeal: "Voir l'offre", save: 'Économisez', nights: 'nuits', untitled: 'Offre sans titre' },
+    de: { viewDeal: 'Angebot ansehen', save: 'Sparen', nights: 'Nächte', untitled: 'Angebot ohne Titel' },
+    es: { viewDeal: 'Ver oferta', save: 'Ahorra', nights: 'noches', untitled: 'Oferta sin título' },
+    it: { viewDeal: 'Vedi offerta', save: 'Risparmia', nights: 'notti', untitled: 'Offerta senza titolo' },
+    ro: { viewDeal: 'Vezi oferta', save: 'Economisește', nights: 'nopți', untitled: 'Ofertă fără titlu' },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
   // resolver keeps the widget self-contained.
@@ -250,6 +250,14 @@
       padding: 4px 11px; border-radius: 6px; font-size: 11px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.5px;
     }
+    /* Top-right stack: the lead badge plus any tag/promo flagged to the image.
+       The badges inside sit statically in the column so they never overlap. */
+    .tgoc-flags {
+      position: absolute; top: 10px; right: 10px; z-index: 2; max-width: 72%;
+      display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+    }
+    .tgoc-flags .tgoc-badge { position: static; }
+    .tgoc-badge--flag { background: var(--tgo-success); }
     .tgoc-pill {
       position: absolute; bottom: 10px; left: 10px; background: var(--tgo-success); color: #fff;
       padding: 4px 11px; border-radius: 999px; font-size: 11px; font-weight: 700;
@@ -273,13 +281,6 @@
     .tgoc-includes { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
     .tgoc-include { font-size: 12px; color: var(--tgo-sub); line-height: 1.4; padding-left: 16px; position: relative; }
     .tgoc-include::before { content: '✓'; position: absolute; left: 0; color: var(--tgo-success); font-weight: 700; }
-
-    /* What's NOT included — muted list with a cross marker + a small label */
-    .tgoc-nots { margin: 6px 0 0; }
-    .tgoc-nots-label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--tgo-muted); margin-bottom: 2px; }
-    .tgoc-excludes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
-    .tgoc-exclude { font-size: 12px; color: var(--tgo-muted); line-height: 1.4; padding-left: 16px; position: relative; }
-    .tgoc-exclude::before { content: '✕'; position: absolute; left: 0; color: var(--tgo-strike); font-weight: 700; }
 
     /* Extra promo flashes — a wrap row of small coloured pills */
     .tgoc-promos { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; }
@@ -534,7 +535,6 @@
       }
 
       if (Array.isArray(tr.includes) && tr.includes.length) out.includes = tr.includes;
-      if (Array.isArray(tr.excludes) && tr.excludes.length) out.excludes = tr.excludes;
       if (Array.isArray(tr.promos) && tr.promos.length) out.promos = tr.promos;
       if (Array.isArray(tr.tags) && tr.tags.length) out.tags = tr.tags;
 
@@ -578,11 +578,15 @@
         }
       }
 
-      const tags = Array.isArray(o.tags) ? o.tags.slice(0, 3) : [];
       const strList = function (a) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === 'string' && x.trim(); }) : []; };
+      // Tags/promos the author flagged to show on the IMAGE as flashes. They move
+      // out of the body pill lists onto the image, capped so they can't overrun a
+      // small card.
+      const imageBadges = strList(o.imageBadges).slice(0, 4);
+      const inBadges = function (v) { return imageBadges.indexOf(v) !== -1; };
+      const tags = strList(o.tags).filter(function (t) { return !inBadges(t); }).slice(0, 3);
       const includes = strList(o.includes);
-      const excludes = strList(o.excludes);              // what's NOT included
-      const promos = strList(o.promos).slice(0, 6);      // extra promo flashes (capped)
+      const promos = strList(o.promos).filter(function (p) { return !inBadges(p); }).slice(0, 6);
 
       return {
         sym: sym,
@@ -593,8 +597,8 @@
         teaser: this._f('teaser'),
         tags: tags,
         includes: includes,
-        excludes: excludes,
         promos: promos,
+        imageBadges: imageBadges,
         price: money(sym, this._f('price')),
         was: money(sym, this._f('was')),
         priceSub: priceSub,
@@ -613,9 +617,15 @@
     // shared by the image block and the banner layout.
     _chips(d) {
       const stars = d.stars ? '<span class="tgoc-stars">' + '★'.repeat(d.stars) + '</span>' : '';
-      const badge = d.badgeText ? '<span class="tgoc-badge">' + esc(d.badgeText) + '</span>' : '';
       const pill = d.urgency ? '<span class="tgoc-pill">' + esc(d.urgency) + '</span>' : '';
-      return stars + badge + pill;
+      // Top-right stack: the lead promo badge, then any tag/promo the author
+      // flagged to show on the image. Stacked in one container so they never
+      // overlap.
+      const flags = [];
+      if (d.badgeText) flags.push('<span class="tgoc-badge">' + esc(d.badgeText) + '</span>');
+      (d.imageBadges || []).forEach(function (b) { flags.push('<span class="tgoc-badge tgoc-badge--flag">' + esc(b) + '</span>'); });
+      const flagWrap = flags.length ? '<div class="tgoc-flags">' + flags.join('') + '</div>' : '';
+      return stars + flagWrap + pill;
     }
 
     _imageBlock(d) {
@@ -635,7 +645,7 @@
       return '<div class="tgoc-body">' + eyebrow
         + '<h3 class="tgoc-title">' + esc(d.title) + '</h3>'
         + loc + this._promosBlock(d) + teaser
-        + this._includesBlock(d) + this._excludesBlock(d) + tags + '</div>';
+        + this._includesBlock(d) + tags + '</div>';
     }
 
     // Extra promo flashes (beyond the single lead badge) — a row of small
@@ -654,17 +664,6 @@
       return '<ul class="tgoc-includes">'
         + d.includes.map(function (t) { return '<li class="tgoc-include">' + esc(t) + '</li>'; }).join('')
         + '</ul>';
-    }
-
-    // What's NOT included — a muted list with a cross marker and a small label,
-    // so a visitor knows what the price leaves out (flights, gratuities, etc.).
-    // Only rendered when the offer carries excludes.
-    _excludesBlock(d) {
-      if (!d.excludes || !d.excludes.length) return '';
-      return '<div class="tgoc-nots"><span class="tgoc-nots-label">' + esc(this.t('notIncluded')) + '</span>'
-        + '<ul class="tgoc-excludes">'
-        + d.excludes.map(function (t) { return '<li class="tgoc-exclude">' + esc(t) + '</li>'; }).join('')
-        + '</ul></div>';
     }
 
     _priceBlock(d) {
@@ -723,7 +722,7 @@
           + '<h3 class="tgoc-s-title">' + esc(d.title) + '</h3>'
           + '<div class="tgoc-s-meta">' + loc + stars + '</div>'
           + this._promosBlock(d)
-          + teaser + this._includesBlock(d) + this._excludesBlock(d) + tags
+          + teaser + this._includesBlock(d) + tags
           + '<div class="tgoc-sfoot">' + this._priceBlock(d) + this._cta() + '</div>'
         + '</div>';
     }
@@ -745,6 +744,11 @@
       // run past the image).
       (d.promos || []).slice(0, 3).forEach(function (p) {
         ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--promo">' + ICO.star + esc(p) + '</span>');
+      });
+      // Tags/promos flagged to the image (excluded from the body lists) also ride
+      // as ribbons on the cruise card.
+      (d.imageBadges || []).forEach(function (b) {
+        ribbons.push('<span class="tgoc-ribbon tgoc-ribbon--promo">' + ICO.star + esc(b) + '</span>');
       });
       const ribbonWrap = ribbons.length ? '<div class="tgoc-ribbons">' + ribbons.join('') + '</div>' : '';
 
@@ -786,7 +790,7 @@
         + '<div class="tgoc-cbody">'
           + '<h3 class="tgoc-c-title">' + esc(d.title) + '</h3>'
           + shipLine
-          + headline + featList + this._excludesBlock(d)
+          + headline + featList
         + '</div>'
         + cta;
     }

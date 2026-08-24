@@ -102,6 +102,65 @@ function venueGeo() { loadGeo(); return GEO; }
 function eventGeo() { loadGeo(); return EVENT_GEO; }
 
 /**
+ * The suite's bundled airport list, for the flight package's `dst` leg and
+ * for view=airports (the departure chooser's menu). Missing file means no
+ * package links, never an error.
+ */
+let AIRPORTS = null;
+
+function airports() {
+  if (AIRPORTS) return AIRPORTS;
+  AIRPORTS = [];
+  try {
+    const url = new URL('./_data/airports.json', import.meta.url);
+    AIRPORTS = JSON.parse(readFileSync(url, 'utf8')).airports || [];
+  } catch (err) {
+    console.error('[api/events-feed] airports load failed (package links will be withheld):', err && err.message);
+  }
+  return AIRPORTS;
+}
+
+/**
+ * The DEPARTURE list for the chooser: every large or medium airport with
+ * scheduled service worldwide (OurAirports), because a visitor can fly from
+ * anywhere. Falls back to the curated majors if the file is missing.
+ * Arrivals are different: dst and the fact sheets stay on the majors,
+ * because a package needs a hub with hotels and inbound flights.
+ */
+let DEPARTURES = null;
+
+function departureAirports() {
+  if (DEPARTURES) return DEPARTURES;
+  try {
+    const url = new URL('./_data/airports-departures.json', import.meta.url);
+    DEPARTURES = JSON.parse(readFileSync(url, 'utf8')).airports || [];
+  } catch (err) {
+    console.error('[api/events-feed] departures load failed (falling back to majors):', err && err.message);
+    DEPARTURES = airports().map(([iata, name, cc]) => [iata, name, cc]);
+  }
+  return DEPARTURES;
+}
+
+/**
+ * The airport nearest an event's OWN anchor, within 150km straight-line, as
+ * the package link's `dst`. Per event rather than per venue so a merged venue
+ * key (Red Bull Arena is Leipzig, Salzburg AND Harrison NJ) flies each
+ * fixture to its own city.
+ */
+function nearestAirport(geo) {
+  if (!geo) return null;
+  let best = null;
+  let bestKm = 150;
+  for (const [iata, , , lat, lng] of airports()) {
+    const dLat = (lat - geo.lat) * 111;
+    const dLng = (lng - geo.lng) * 111 * Math.cos((geo.lat * Math.PI) / 180);
+    const d = Math.hypot(dLat, dLng);
+    if (d <= bestKm) { bestKm = d; best = iata; }
+  }
+  return best;
+}
+
+/**
  * Venue fact sheets: city, country, timezone, capacity, opened, photo with
  * its Commons credit, official site, Wikipedia, nearest airports. Built by
  * scripts/build-venue-facts.mjs from the feed itself plus Wikidata matched by
@@ -213,7 +272,7 @@ function teamName(snap, key) {
  * Expand a short snapshot row into a full event, filling in every display name
  * from the registries and attaching a booking deeplink.
  */
-function expand(snap, ev, appId, currency, adults, bookingKinds) {
+function expand(snap, ev, appId, currency, adults, bookingKinds, origin) {
   const home = teamName(snap, ev.hk);
   const away = teamName(snap, ev.ak);
   const performer = ev.pk ? (snap.performerByKey.get(ev.pk) || {}).name || null : null;
@@ -261,6 +320,11 @@ function expand(snap, ev, appId, currency, adults, bookingKinds) {
   };
 
   const target = { sources, startDate: ev.dt, title, geo: eventGeo().get(ev.i) || venueGeo().get(ev.vk) || null };
+  // The flight leg lands at the airport nearest THIS event's anchor, so a
+  // merged venue key's fixtures each fly to their own city.
+  const destAirport = (bookingKinds || []).includes('ticket-flight-hotel')
+    ? nearestAirport(target.geo)
+    : null;
   const link = buildEventDeeplink(target, { appId, currency, adults });
   out.booking = {
     url: link.url,
@@ -273,7 +337,9 @@ function expand(snap, ev, appId, currency, adults, bookingKinds) {
   // Every way this event can be bought, in the order the caller asked for.
   // A ticket sold with a hotel is worth more to an agent than a ticket, so the
   // surfaces need all of them rather than one Book button.
-  out.bookingOptions = buildBookingOptions(target, { appId, currency, adults, kinds: bookingKinds });
+  out.bookingOptions = buildBookingOptions(target, {
+    appId, currency, adults, kinds: bookingKinds, destAirport, origin,
+  });
   return out;
 }
 
@@ -330,7 +396,7 @@ function page(snap, rows, q, appId, opts = {}) {
     total: sorted.length,
     offset,
     limit: size,
-    events: sorted.slice(offset, offset + size).map((e) => expand(snap, e, appId, opts.currency, opts.adults, opts.bookingKinds)),
+    events: sorted.slice(offset, offset + size).map((e) => expand(snap, e, appId, opts.currency, opts.adults, opts.bookingKinds, opts.origin)),
   };
 }
 
@@ -377,7 +443,12 @@ export default function handler(req, res) {
     const bookingKinds = kindsRaw
       ? kindsRaw.split(',').map((k) => k.trim()).filter(Boolean).slice(0, 6)
       : readyBookingKinds();
-    const linkOpts = { currency, adults, bookingKinds };
+    // The visitor's departure airport, when the caller already knows it.
+    // Without it a package option comes back as a urlTemplate for the
+    // surfaces' airport chooser to finish.
+    const orgRaw = str(q.org, 3).toUpperCase();
+    const origin = /^[A-Z]{3}$/.test(orgRaw) ? orgRaw : null;
+    const linkOpts = { currency, adults, bookingKinds, origin };
 
     const meta = {
       generatedAt: snap.generatedAt,
@@ -405,6 +476,14 @@ export default function handler(req, res) {
     // ── diagnostics ──────────────────────────────────────────────────────────
     if (view === 'diagnostics') {
       res.status(200).json({ meta, report: snap.report });
+      return;
+    }
+
+    // ── airports ─────────────────────────────────────────────────────────────
+    // The departure chooser's menu: every scheduled-service airport worldwide
+    // as [iata, label, country], large first so the majors rank on top.
+    if (view === 'airports') {
+      res.status(200).json({ airports: departureAirports() });
       return;
     }
 

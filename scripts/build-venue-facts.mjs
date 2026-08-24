@@ -102,6 +102,23 @@ for (const v of snap.venues) {
   out[v.key] = f;
 }
 
+// Hand-reviewed rematches (api/_data/venue-facts-overrides.json). The
+// coordinate gate cannot tell a venue from the demolished venue it replaced
+// on the same ground, so those venues' Wikidata fields come from a reviewed
+// match instead of the research pages. An override REPLACES the whole
+// Wikidata-sourced group, so a field it omits stays absent rather than
+// falling back to the predecessor's value.
+const WD_FIELDS = ['cap', 'opened', 'web', 'wiki', 'img', 'qid'];
+try {
+  const ov = JSON.parse(readFileSync('api/_data/venue-facts-overrides.json', 'utf8')).venues || {};
+  for (const [key, fields] of Object.entries(ov)) {
+    if (!out[key]) continue;
+    for (const k of WD_FIELDS) delete out[key][k];
+    Object.assign(out[key], fields);
+    console.log('override applied:', key, '->', fields.wiki || '(no wiki)');
+  }
+} catch (e) { /* no overrides file, nothing to apply */ }
+
 writeFileSync('api/_data/venue-facts.json', JSON.stringify({
   _comment: 'Venue fact sheets. Sources: the feed itself (city, country), '
     + 'Wikidata matched by coordinates (capacity, opened, website, Wikipedia, '

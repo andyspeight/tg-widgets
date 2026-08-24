@@ -253,17 +253,64 @@ Before the sheet carried coordinates this table was built by geocoding (21 Aug
 2026, one afternoon, three failed drafts and 174 hand checks); that build and
 its lessons live in git history and in scripts/geocode-venues-via-vercel.mjs.
 
-`BOOKING_KINDS` in that file declares all three combinations. Two of them have
-`ready: false` and no builder, so `buildBookingOptions` returns them with a null
-url and `status: 'spec-needed'`. Every surface reads that list rather than
-hard-coding a Book button, so the editors show "Ticket + hotel" and
-"Ticket, flight + hotel" greyed out with an "Awaiting spec" pill instead of
-pretending they do not exist. Filling in `build` on those two entries lights
-them up everywhere at once, with no change to any widget.
+`BOOKING_KINDS` in that file declares all three combinations, and as of
+24 Aug 2026 ALL THREE are built from verified live examples. Every surface
+reads that list rather than hard-coding a Book button, so a future kind with
+`ready: false` would show greyed with an "Awaiting spec" pill instead of
+pretending not to exist, and filling in its `build` lights it up everywhere
+at once with no change to any widget.
 
-Ticket-plus-flight-plus-hotel will also need a **departure airport**, which the
-feed does not carry and cannot derive. That has to come from widget config, so
-it is a field on the editor as well as a link builder.
+### Ticket + hotel (ticket + accommodation, live 24 Aug 2026)
+
+`st=TicketAccommodation`: the flight package minus the flight leg — same
+pin, same mandatory anchor, `frd=0&dur=1` verbatim, and nothing the feed
+does not already know, so it comes back `ready` with a finished url and no
+chooser. Probe-verified live before the button shipped, on app 384 and the
+demo app 250 alike (same probe script as the flight package).
+
+### The flight package (ticket + accommodation + flight, live 24 Aug 2026)
+
+Built to the live example Andy supplied, `st=TicketAccommodationFlight` with
+the same pin and the same mandatory anchor plus five parameters: `org` (the
+visitor's departure airport), `dst` (the destination airport), and
+`frd=0&dur=1&dir=false` copied verbatim. Probe-verified the same day: our
+built link 302s into the Travelify results funnel on app 384 and on the demo
+app 250 alike (`scripts/probe-flight-deeplink.js` is the record).
+
+`dst` is computed in the feed as the airport nearest the EVENT's own anchor
+(within 150km, from the suite's bundled list), so a merged venue key flies
+each fixture to its own city. No airport near enough means the package is
+simply not offered (`status: 'no-airport'`).
+
+`org` is the one thing neither the feed nor the config can know, so the
+builder returns a `urlTemplate` with `__ORG__` where the code goes and
+`status: 'needs-origin'`. Each surface renders that option as a button that
+opens a small chooser dialog ANCHORED TO THE BUTTON (Andy, 24 Aug 2026: a
+modal on the button, not a separate page — an interstitial /fly page shipped
+first and was replaced the same day). The visitor types an airport name or
+code and picks FROM THE DROPDOWN ONLY — free text never books, so `org`
+always matches the suite's own list (`view=airports` on the feed, the menu's
+source). That list is `api/_data/airports-departures.json`: every large or
+medium scheduled-service airport worldwide with an IATA code (3,242 from the
+OurAirports public-domain dataset, added 24 Aug 2026 after Cologne failed to
+match the old 106-major list), municipality folded into the label so a city
+search finds its airports, large airports first so hubs rank on top.
+Departures only: the package's `dst` and the venue fact sheets stay on the
+curated majors in `airports.json`, because an arrival needs a hub with
+hotels and inbound flights. Refresh with
+`scripts/fetch-departure-airports-via-vercel.js` (instructions in its
+header); `tests/test-departure-airports.cjs` guards the coverage. The
+chooser validates the template before opening anything (https,
+dl.tvllnk.com, /deeplink/), remembers the last airport (`tgev_org` in
+localStorage, per site) and opens the finished link in a new tab. It lives
+inside each widget's shadow root (the `fly*` functions, stamped identically
+into all six widgets) and once in events-explorer.js for the dashboard
+pages. A caller that already knows the airport can pass `&org=LGW` to the
+feed and get finished `ready` links instead.
+
+Widgets offer the kinds in `cfg.bookingKinds` (default ticket only — the
+agent turns the package on per widget in the editor, where it is now live
+instead of greyed).
 
 
 ## The widget family
@@ -434,8 +481,28 @@ run taught us, both encoded in the pruner:
   82,000, opened 1923, all "confirmed", all about the wrong building. Five
   keys (wembleystadium, sanmamesstadium, stadelouisii,
   hidegkutinandorstadion, sergiolanfranchi) plus theo2 (Millennium Dome)
-  are purged of all Wikidata facts until someone rematches them to the
-  current articles and re-verifies.
+  were purged of all Wikidata facts.
+
+### Rematched predecessors (24 Aug 2026)
+
+The purged venues were rematched by hand-reviewed article title with
+`scripts/rematch-venues-via-vercel.js` (rerun instructions in its header),
+under the same standard: the reviewed title must resolve, the item's own
+coordinate must sit within 2km of our supplier anchor, and every fact must
+be corroborated by the live article before it returns to the sheet. Five
+came back: Wembley (90,000, opened 2007), San Mamés on its duplicate key,
+Stade Louis II (opened and website only - Wikidata's capacity is not in
+the article), Hidegkuti Nándor Stadion and The O2 Arena. One stayed out:
+sergiolanfranchi, whose current stadium is 2.33km from the supplier
+anchor, outside the gate, so it keeps a bare sheet rather than a bent
+rule.
+
+The reviewed results live in `api/_data/venue-facts-overrides.json`, which
+`scripts/build-venue-facts.mjs` applies AFTER assembly - an override
+replaces the venue's whole Wikidata-sourced group, so a rebuild cannot
+resurrect the predecessor match. The pruner pins the same titles in its
+reviewed-renames map. A future predecessor discovery follows the same
+loop: purge first, rematch by reviewed title, verify, then override.
 
 ## Venue keys that merge different real venues
 

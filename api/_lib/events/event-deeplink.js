@@ -42,8 +42,30 @@
  * An event whose venue has no entry gets NO url and status 'no-anchor',
  * because a missing button is honest and a dead one is not.
  *
- * Other deeplink shapes exist for ticket-plus-hotel and
- * ticket-plus-flight-plus-hotel. They are not built here yet.
+ * THE PACKAGE LINK (ticket + accommodation + flight)
+ * Built to the live example Andy supplied on 24 Aug 2026:
+ *
+ *   https://dl.tvllnk.com/deeplink/384?st=TicketAccommodationFlight
+ *     &supp=144&refe=1939276025ff419489c076968d8f51b8_gnr
+ *     &curr=GBP&fr=2026-09-16&to=2026-09-16
+ *     &lat=41.38087&lng=2.122802&rad=20
+ *     &org=LGW&dst=BCN&frd=0&dur=1&dir=false
+ *     &adt=2&chd=0&inf=0
+ *     &loc=FC+Barcelona+vs+Racing+de+Santander+(Football%2C+La+Liga)%3A+...
+ *
+ * Same pin, same mandatory anchor, five more parameters. `org` is the
+ * visitor's departure airport and is the one thing neither the feed nor the
+ * widget config can know, so the builder emits a URL with the __ORG__
+ * placeholder and status 'needs-origin'; the surfaces ask the visitor on
+ * button press (the /fly chooser) and substitute a validated IATA code.
+ * `dst` is the airport nearest the EVENT's own anchor (so a merged venue key
+ * flies to the right city), supplied by the caller as options.destAirport;
+ * without one the option is not offered (status 'no-airport'). `frd`, `dur`
+ * and `dir` are copied verbatim from the working example.
+ *
+ * THE HOTEL LINK (ticket + accommodation) is the package minus the flight
+ * leg — same pin and anchor plus frd and dur, nothing else — so it needs no
+ * chooser and ships ready. See buildEventHotelDeeplink for its live example.
  */
 
 /** Travelify's deeplink host, as used by the offers widgets. */
@@ -52,10 +74,28 @@ export const DEEPLINK_BASE = 'https://dl.tvllnk.com/deeplink';
 /** The Travelify product an event ticket belongs to. */
 export const SEARCH_TYPE = 'TicketsAttractions';
 
+/** The Travelify product a ticket + accommodation + flight package belongs to. */
+export const SEARCH_TYPE_PACKAGE = 'TicketAccommodationFlight';
+
+/** The Travelify product a ticket + accommodation package belongs to. */
+export const SEARCH_TYPE_HOTEL = 'TicketAccommodation';
+
+/**
+ * Stands in for the visitor's departure airport in a package link until they
+ * choose one. Alphanumeric + underscores so URLSearchParams leaves it alone;
+ * surfaces replace it with a validated three-letter IATA code.
+ */
+export const ORG_PLACEHOLDER = '__ORG__';
+
 /** Built against a real link rather than a guess. */
 export const SPEC_VERIFIED = true;
 
-export const DEFAULTS = { currency: 'GBP', adults: 2, children: 0, infants: 0, radiusKm: 20 };
+export const DEFAULTS = {
+  currency: 'GBP', adults: 2, children: 0, infants: 0, radiusKm: 20,
+  // Package parameters, verbatim from the live 24 Aug 2026 example. `nights`
+  // becomes `dur`; `flightFlexDays` becomes `frd`; `directOnly` becomes `dir`.
+  nights: 1, flightFlexDays: 0, directOnly: false,
+};
 
 const APPID_RE = /^[A-Za-z0-9_-]{1,32}$/;
 const REF_RE = /^[A-Za-z0-9_-]{1,120}$/;
@@ -105,6 +145,44 @@ function pinFrom(source) {
  *             supplier: string|null, supplierId: string|null, reference: string|null }}
  */
 export function buildEventDeeplink(event, options = {}) {
+  const pre = preflight(event, options);
+  if (pre.err) return pre.err;
+  const { id, source, supp, refe, geo, date, curr, adt, chd, inf } = pre;
+
+  const params = new URLSearchParams();
+  params.set('st', SEARCH_TYPE);
+  if (supp) params.set('supp', supp);
+  params.set('refe', refe);
+  params.set('curr', curr);
+  // A single-day event, so the window is the same date on both sides.
+  params.set('fr', date);
+  params.set('to', date);
+  // In the working example the anchor sits between the dates and the pax
+  // counts, and it is reproduced in that exact position.
+  params.set('lat', String(geo.lat));
+  params.set('lng', String(geo.lng));
+  params.set('rad', String(DEFAULTS.radiusKm));
+  params.set('adt', adt);
+  params.set('chd', chd);
+  params.set('inf', inf);
+  setLoc(params, source, event, date);
+
+  return {
+    url: `${DEEPLINK_BASE}/${encodeURIComponent(id)}?${params.toString()}`,
+    status: 'ready',
+    reason: null,
+    supplier: source.supplier || null,
+    supplierId: supp || null,
+    reference: refe,
+  };
+}
+
+/**
+ * Everything the two link shapes validate identically: the app id, the
+ * supplier pin, the date and the mandatory anchor. Returns { err } with the
+ * finished failure result, or the validated pieces.
+ */
+function preflight(event, options = {}) {
   const {
     appId = '',
     supplier = null,
@@ -114,9 +192,9 @@ export function buildEventDeeplink(event, options = {}) {
     infants = DEFAULTS.infants,
   } = options;
 
-  const none = (reason) => ({
+  const none = (reason) => ({ err: {
     url: null, status: 'unavailable', reason, supplier: null, supplierId: null, reference: null,
-  });
+  } });
 
   if (!event || !Array.isArray(event.sources) || !event.sources.length) return none('no-source');
 
@@ -139,38 +217,68 @@ export function buildEventDeeplink(event, options = {}) {
     ? event.geo
     : null;
   if (!geo) {
-    return { url: null, status: 'no-anchor', reason: 'venue-not-geocoded',
-      supplier: source.supplier || null, supplierId: supp || null, reference: refe };
+    return { err: { url: null, status: 'no-anchor', reason: 'venue-not-geocoded',
+      supplier: source.supplier || null, supplierId: supp || null, reference: refe } };
   }
 
-  const curr = CURRENCY_RE.test(String(currency)) ? currency : DEFAULTS.currency;
   const clamp = (n, max) => {
     const v = Number.parseInt(n, 10);
     return Number.isFinite(v) && v >= 0 && v <= max ? v : 0;
   };
 
+  return {
+    id, source, supp, refe, geo, date,
+    curr: CURRENCY_RE.test(String(currency)) ? currency : DEFAULTS.currency,
+    adt: String(Math.max(1, clamp(adults, 20) || DEFAULTS.adults)),
+    chd: String(clamp(children, 20)),
+    inf: String(clamp(infants, 20)),
+  };
+}
+
+/** `loc` is the raw feed event name plus ": DD-Mon-YYYY", brackets and all. */
+function setLoc(params, source, event, date) {
+  const rawName = String((source && source.rawName) || event.rawName || event.title || '').trim();
+  if (!rawName) return;
+  const stamp = formatDeeplinkDate(date);
+  params.set('loc', stamp ? `${rawName}: ${stamp}` : rawName);
+}
+
+/**
+ * Build a ticket + accommodation package deeplink.
+ *
+ * Built to the live example Andy supplied on 24 Aug 2026:
+ *
+ *   https://dl.tvllnk.com/deeplink/384?st=TicketAccommodation
+ *     &supp=144&refe=1939276025ff419489c076968d8f51b8_gnr
+ *     &curr=GBP&fr=2026-09-16&to=2026-09-16
+ *     &lat=41.38087&lng=2.122802&rad=20&frd=0&dur=1
+ *     &adt=2&chd=0&inf=0&loc=FC+Barcelona+vs+...
+ *
+ * The flight package minus the flight leg: same pin, same mandatory anchor,
+ * frd and dur verbatim, and nothing the feed does not already know — so it
+ * comes back 'ready' with a finished url, no chooser involved.
+ */
+export function buildEventHotelDeeplink(event, options = {}) {
+  const pre = preflight(event, options);
+  if (pre.err) return pre.err;
+  const { id, source, supp, refe, geo, date, curr, adt, chd, inf } = pre;
+
   const params = new URLSearchParams();
-  params.set('st', SEARCH_TYPE);
+  params.set('st', SEARCH_TYPE_HOTEL);
   if (supp) params.set('supp', supp);
   params.set('refe', refe);
   params.set('curr', curr);
-  // A single-day event, so the window is the same date on both sides.
   params.set('fr', date);
   params.set('to', date);
-  // In the working example the anchor sits between the dates and the pax
-  // counts, and it is reproduced in that exact position.
   params.set('lat', String(geo.lat));
   params.set('lng', String(geo.lng));
   params.set('rad', String(DEFAULTS.radiusKm));
-  params.set('adt', String(Math.max(1, clamp(adults, 20) || DEFAULTS.adults)));
-  params.set('chd', String(clamp(children, 20)));
-  params.set('inf', String(clamp(infants, 20)));
-
-  const rawName = String((source && source.rawName) || event.rawName || event.title || '').trim();
-  if (rawName) {
-    const stamp = formatDeeplinkDate(date);
-    params.set('loc', stamp ? `${rawName}: ${stamp}` : rawName);
-  }
+  params.set('frd', String(DEFAULTS.flightFlexDays));
+  params.set('dur', String(DEFAULTS.nights));
+  params.set('adt', adt);
+  params.set('chd', chd);
+  params.set('inf', inf);
+  setLoc(params, source, event, date);
 
   return {
     url: `${DEEPLINK_BASE}/${encodeURIComponent(id)}?${params.toString()}`,
@@ -182,15 +290,74 @@ export function buildEventDeeplink(event, options = {}) {
   };
 }
 
+const IATA_RE = /^[A-Z]{3}$/;
+
+/**
+ * Build a ticket + accommodation + flight package deeplink.
+ *
+ * Same pin and anchor as the ticket link, plus the flight leg. The departure
+ * airport is the visitor's own choice, so without options.origin the result
+ * carries `urlTemplate` (with __ORG__ where the IATA code goes) and status
+ * 'needs-origin'; a surface asks on button press and substitutes. With a
+ * valid options.origin the finished url comes back 'ready'.
+ *
+ * @param {object} event As buildEventDeeplink.
+ * @param {object} [options] As buildEventDeeplink, plus:
+ *   @param {string} [options.destAirport] IATA of the airport nearest the
+ *     EVENT's anchor. Required: no airport, no package (status 'no-airport').
+ *   @param {string} [options.origin] The visitor's departure airport, when
+ *     already known (e.g. the API's &org= parameter).
+ */
+export function buildEventPackageDeeplink(event, options = {}) {
+  const pre = preflight(event, options);
+  if (pre.err) return pre.err;
+  const { id, source, supp, refe, geo, date, curr, adt, chd, inf } = pre;
+
+  const base = { supplier: source.supplier || null, supplierId: supp || null, reference: refe };
+
+  const dst = String(options.destAirport || '').trim().toUpperCase();
+  if (!IATA_RE.test(dst)) {
+    return { url: null, status: 'no-airport', reason: 'no-airport-near-event', ...base };
+  }
+  const org = String(options.origin || '').trim().toUpperCase();
+  const hasOrigin = IATA_RE.test(org);
+
+  const params = new URLSearchParams();
+  params.set('st', SEARCH_TYPE_PACKAGE);
+  if (supp) params.set('supp', supp);
+  params.set('refe', refe);
+  params.set('curr', curr);
+  params.set('fr', date);
+  params.set('to', date);
+  params.set('lat', String(geo.lat));
+  params.set('lng', String(geo.lng));
+  params.set('rad', String(DEFAULTS.radiusKm));
+  // The flight leg sits between the anchor and the pax counts in the live
+  // example, and frd/dur/dir are copied from it verbatim.
+  params.set('org', hasOrigin ? org : ORG_PLACEHOLDER);
+  params.set('dst', dst);
+  params.set('frd', String(DEFAULTS.flightFlexDays));
+  params.set('dur', String(DEFAULTS.nights));
+  params.set('dir', String(DEFAULTS.directOnly));
+  params.set('adt', adt);
+  params.set('chd', chd);
+  params.set('inf', inf);
+  setLoc(params, source, event, date);
+
+  const url = `${DEEPLINK_BASE}/${encodeURIComponent(id)}?${params.toString()}`;
+  if (hasOrigin) return { url, status: 'ready', reason: null, dst, ...base };
+  return { url: null, urlTemplate: url, status: 'needs-origin', reason: null, dst, ...base };
+}
+
 // ── Booking options: ticket, ticket + hotel, ticket + flight + hotel ────────
 //
 // A Book button is the wrong shape for this product. An agent earns far more on
 // a ticket sold with a hotel than on a ticket alone, so every event needs to be
 // bookable three ways and the widget needs to offer all three.
 //
-// Only the ticket-only link is built here, because it is the only one of the
-// three we have a verified example of. The other two are declared with
-// `ready: false` and return a null url with status 'spec-needed', so:
+// All three are now built from verified live examples (ticket 21 Aug 2026,
+// the flight package and ticket + hotel both 24 Aug 2026). The table stays,
+// because a future combination will want the same treatment:
 //
 //   - a surface can render exactly the options that work and silently omit the
 //     rest, rather than showing a button that dead-ends
@@ -213,20 +380,15 @@ export const BOOKING_KINDS = [
     kind: 'ticket-hotel',
     label: 'Ticket + hotel',
     short: '+ Hotel',
-    ready: false,
-    // Awaiting a live example. Expect an accommodation search type plus nights
-    // and a destination alongside the same supp/refe pin.
-    build: null,
+    ready: true,
+    build: buildEventHotelDeeplink,
   },
   {
     kind: 'ticket-flight-hotel',
     label: 'Ticket, flight + hotel',
     short: '+ Flight & hotel',
-    ready: false,
-    // Awaiting a live example. Expect a packaging search type plus an origin
-    // airport, which no other option needs and the feed does not carry — it
-    // will have to come from widget config.
-    build: null,
+    ready: true,
+    build: buildEventPackageDeeplink,
   },
 ];
 
@@ -266,8 +428,8 @@ export function buildBookingOptions(event, options = {}) {
     }
 
     const link = def.build(event, options);
-    if (!link.url && !includeUnavailable) continue;
-    out.push({
+    if (!link.url && !link.urlTemplate && !includeUnavailable) continue;
+    const row = {
       kind: def.kind,
       label: def.label,
       short: def.short,
@@ -275,7 +437,11 @@ export function buildBookingOptions(event, options = {}) {
       status: link.status,
       reason: link.reason,
       supplier: link.supplier,
-    });
+    };
+    // A package link the visitor still has to choose an airport for.
+    if (link.urlTemplate) row.urlTemplate = link.urlTemplate;
+    if (link.dst) row.dst = link.dst;
+    out.push(row);
   }
 
   return out;
@@ -292,6 +458,9 @@ export function readyBookingKinds() {
  */
 export const DEEPLINK_STATUS_TEXT = {
   ready: null,
+  // Usable, the visitor just chooses a departure airport first.
+  'needs-origin': null,
   unavailable: 'No booking link for this event',
   'no-anchor': 'Booking opens once this venue\u2019s location is confirmed',
+  'no-airport': 'No major airport near enough to this venue for a flight package',
 };
