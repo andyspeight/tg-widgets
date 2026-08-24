@@ -24,15 +24,98 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import { PageRenderer } from '../components/render/PageRenderer';
 import { prepareSections } from '../lib/content/prepare-markup';
+import { imageUrlsIn, type ImageSizes } from '../lib/content/image-sizes';
 import { designedHomeSections } from '../lib/content/designed-homes';
 import { SEED_PAGE } from '../lib/content/seed';
 import { CONTENT_VERSION, parsePage, type Page } from '../lib/content/schema';
 import { DEFAULT_THEME, parseTheme } from '../lib/theme/schema';
 import { themeTokens } from '../lib/theme/tokens';
 
-export type Profile = 'designed' | 'native';
+export type Profile = 'designed' | 'native' | 'photo' | 'photo-single';
+
+/**
+ * A page whose largest paint is a photograph the client placed themselves.
+ *
+ * WHY THIS PROFILE HAD TO EXIST. The other two cannot measure the srcset at all,
+ * and finding that out was the point of building the harness before the fix. The
+ * seed page's image block carries no src, so it renders no img. The designed
+ * homepages DO carry pictures, but inside `imported` blocks, which are frozen
+ * markup our renderer never writes an attribute onto. So a change to ImageBlock
+ * and to the section background was invisible to both.
+ *
+ * This is the shape the change actually serves: a full-bleed hero with a picture
+ * on the section, and a photograph in a column below it, both from the bank.
+ */
+function photoPage(): Page {
+  const hero = 'https://example.test/hero.jpg';
+  const inline = 'https://example.test/inline.jpg';
+
+  const parsed = parsePage({
+    version: CONTENT_VERSION,
+    id: 'perf_photo',
+    title: 'Home',
+    slug: '',
+    sections: [
+      {
+        id: 'sec_hero',
+        tone: 'dark',
+        width: 'full',
+        paddingY: 96,
+        minHeight: 70,
+        overlay: 40,
+        backgroundImage: hero,
+        rows: [
+          {
+            id: 'row_hero',
+            columns: [
+              {
+                id: 'col_hero',
+                width: 100,
+                blocks: [
+                  { id: 'b_h1', type: 'heading', props: { text: 'Slow mornings on the Amalfi Coast', level: 'h1' } },
+                  { id: 'b_p1', type: 'text', props: { html: '<p>Ten nights, two harbours and a boat that waits for you.</p>' } },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        id: 'sec_body',
+        tone: 'light',
+        width: 'contained',
+        paddingY: 64,
+        minHeight: 0,
+        overlay: 0,
+        rows: [
+          {
+            id: 'row_body',
+            columns: [
+              {
+                id: 'col_img',
+                width: 50,
+                blocks: [{ id: 'b_img', type: 'image', props: { src: inline, alt: 'A harbour at dusk' } }],
+              },
+              {
+                id: 'col_txt',
+                width: 50,
+                blocks: [
+                  { id: 'b_h2', type: 'heading', props: { text: 'What the week looks like', level: 'h2' } },
+                  { id: 'b_p2', type: 'text', props: { html: '<p>Mornings are yours. Afternoons are ours.</p>' } },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  if (!parsed.ok) throw new Error(`photo page did not parse: ${parsed.errors.join('; ')}`);
+  return parsed.page;
+}
 
 function pageFor(profile: Profile): Page {
+  if (profile === 'photo' || profile === 'photo-single') return photoPage();
   if (profile === 'native') {
     const parsed = parsePage(SEED_PAGE);
     if (!parsed.ok) throw new Error(`seed page did not parse: ${parsed.errors.join('; ')}`);
@@ -68,8 +151,33 @@ export function renderProfile(profile: Profile): string {
    */
   const prepared = prepareSections(page.sections);
 
+  /*
+   * The stored sizes, stood in for.
+   *
+   * On the real site these come from the media row. Here every picture is given
+   * the same modelled ladder, pointing at the local files the build writes, so
+   * the RENDERER genuinely produces the srcset rather than the harness pasting
+   * one in afterwards. That distinction is the whole point: this measures what
+   * components/render emits, not what I hoped it would emit.
+   */
+  /*
+   * photo-single is the SAME page with no stored sizes, which is the state every
+   * image uploaded before variants existed is in. It is here so the harness
+   * always prints the before and the after side by side: a claim about how much
+   * the srcset saved is worth nothing without the control it is measured against.
+   */
+  const sizes: ImageSizes = {};
+  for (const url of profile === 'photo-single' ? [] : imageUrlsIn(page.sections)) {
+    sizes[url] = [
+      { url: '/img/hero-400.jpg', width: 400, height: 225, bytes: 0 },
+      { url: '/img/hero-800.jpg', width: 800, height: 450, bytes: 0 },
+      { url: '/img/hero-1600.jpg', width: 1600, height: 900, bytes: 0 },
+      { url: '/img/hero.jpg', width: 2400, height: 1350, bytes: 0 },
+    ];
+  }
+
   const body = renderToStaticMarkup(
-    <PageRenderer page={page} theme={tokens} prepared={prepared} />,
+    <PageRenderer page={page} theme={tokens} prepared={prepared} sizes={sizes} />,
   );
 
   return `<!doctype html>

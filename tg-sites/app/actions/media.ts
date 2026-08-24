@@ -50,7 +50,7 @@ import {
   type Orientation,
 } from '../../lib/media/pexels';
 import { importStockPhoto } from '../../lib/media/stock';
-import type { MediaItem, StockPhoto } from '../../lib/media/types';
+import type { MediaItem, MediaVariant, StockPhoto } from '../../lib/media/types';
 
 export type MediaResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -144,6 +144,67 @@ export interface RecordUpload {
   /** Pixel dimensions the browser measured on the way past. */
   width?: number;
   height?: number;
+  /**
+   * Smaller copies the browser encoded and uploaded alongside the primary.
+   *
+   * Claims, not facts, exactly like every other field here. Each one is checked
+   * against the store before it is recorded.
+   */
+  variants?: Array<{ url?: string; width?: number; height?: number }>;
+}
+
+/**
+ * The variants, checked the same way the primary is.
+ *
+ * SAME THREE CHECKS, AND FOR THE SAME REASONS. A variant url is a string a
+ * browser sent, so it gets the store-url shape test, the store is asked what it
+ * actually holds, and the pathname has to sit under this tenant's prefix. A
+ * variant that fails any of them is DROPPED rather than raised: the primary is
+ * already good, and the cost of dropping one is some extra bytes for a visitor,
+ * where the cost of throwing is somebody losing an upload that actually worked.
+ *
+ * Width and height come from the browser because they are measurements the store
+ * never made, the same reason the primary's do. The byte count comes from the
+ * store, because the store is the one that knows.
+ *
+ * Bounded, so a crafted request cannot make this loop over a thousand
+ * describeBlob calls.
+ */
+const MAX_VARIANTS = 6;
+
+async function verifiedVariants(
+  claimed: RecordUpload['variants'],
+  tenantId: string,
+  primaryUrl: string,
+): Promise<MediaVariant[]> {
+  if (!Array.isArray(claimed)) return [];
+
+  const out: MediaVariant[] = [];
+  const seen = new Set<string>([primaryUrl]);
+
+  for (const raw of claimed.slice(0, MAX_VARIANTS)) {
+    const url = String(raw?.url ?? '');
+    const width = pixelDimension(raw?.width);
+    const height = pixelDimension(raw?.height);
+
+    if (!url || seen.has(url) || !BLOB_URL.test(url) || !width || !height) continue;
+
+    try {
+      const stored = await describeBlob(url);
+      if (!stored) continue;
+      // Throws for anything outside this tenant's prefix.
+      assertPathnameForTenant(stored.pathname, tenantId);
+      if (stored.size > MAX_UPLOAD_BYTES) continue;
+
+      seen.add(url);
+      out.push({ url, width, height, bytes: stored.size });
+    } catch {
+      // Not this tenant's, or the store could not answer. Dropped silently: the
+      // picture still works, it just has one fewer size.
+    }
+  }
+
+  return out.sort((a, b) => a.width - b.width);
 }
 
 /**
@@ -229,6 +290,11 @@ export async function recordUploadAction(input: RecordUpload): Promise<MediaResu
       alt: text(input?.alt, 300),
       source: 'upload',
       credit: {},
+      /*
+       * Only for images. A document has no sizes, and a browser claiming
+       * otherwise should not cause a single describeBlob call.
+       */
+      variants: kind === 'file' ? [] : await verifiedVariants(input?.variants, tenantId, url),
     });
 
     revalidatePath('/', 'layout');

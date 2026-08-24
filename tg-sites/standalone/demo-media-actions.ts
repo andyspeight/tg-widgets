@@ -54,6 +54,8 @@ function item(partial: Partial<MediaItem> & { filename: string; url: string }): 
     bytes: 240_000,
     width: 2400,
     height: 1600,
+    // The double stands in for the real bank; a demo image has no stored copies.
+    variants: [],
     alt: '',
     source: 'upload',
     credit: {},

@@ -29,6 +29,20 @@ export interface MediaCredit {
   providerId?: string;
 }
 
+/**
+ * One smaller copy of an image, for an srcset.
+ *
+ * The width is stored rather than parsed back out of the filename, because a
+ * client can upload a picture called "photo-800.webp" and a renderer that
+ * believed the name would then serve it as an 800px copy of itself.
+ */
+export interface MediaVariant {
+  url: string;
+  width: number;
+  height: number;
+  bytes: number;
+}
+
 export interface MediaItem {
   id: string;
   /** The public URL. Goes straight into an img tag. */
@@ -51,6 +65,16 @@ export interface MediaItem {
   alt: string;
   source: MediaSource;
   credit: MediaCredit;
+  /**
+   * Smaller copies of this same picture, ascending by width.
+   *
+   * EMPTY IS NORMAL AND IS NOT AN ERROR. Every image uploaded before variants
+   * existed has none, a stock photograph has none because it is resized at its
+   * own origin instead, and a GIF has none because we never touch one. A renderer
+   * given an empty list emits a single src, which is what it did for all of them
+   * yesterday.
+   */
+  variants: MediaVariant[];
   createdAt: Date;
 }
 

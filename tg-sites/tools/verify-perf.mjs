@@ -172,7 +172,7 @@ try {
 
 const server = await serve();
 const results = [];
-for (const profile of ['designed', 'native']) results.push(await measure(server, profile));
+for (const profile of ['designed', 'native', 'photo-single', 'photo']) results.push(await measure(server, profile));
 server.close();
 
 let baseline = null;

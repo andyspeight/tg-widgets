@@ -1,37 +1,73 @@
 [
   {
     "profile": "designed",
-    "fcp": 1616,
-    "lcp": 3004,
+    "fcp": 840,
+    "lcp": 2676,
     "cls": 0,
     "lcpElement": "img.main",
     "lcpUrl": "/img/hero.jpg",
     "requests": 3,
     "transferByType": {
-      "document": 10774,
-      "stylesheet": 82833,
+      "document": 10778,
+      "stylesheet": 21392,
       "image": 460978
     },
-    "transferTotal": 554585,
-    "cssTotalBytes": 309302,
-    "cssUsedBytes": 9842,
-    "cssUnusedPct": 96.8
+    "transferTotal": 493148,
+    "cssTotalBytes": 132751,
+    "cssUsedBytes": 4694,
+    "cssUnusedPct": 96.5
   },
   {
     "profile": "native",
-    "fcp": 872,
-    "lcp": 872,
+    "fcp": 524,
+    "lcp": 524,
     "cls": 0,
     "lcpElement": "p",
     "lcpUrl": null,
     "requests": 2,
     "transferByType": {
       "document": 1795,
-      "stylesheet": 82833
+      "stylesheet": 21392
     },
-    "transferTotal": 84628,
-    "cssTotalBytes": 309302,
-    "cssUsedBytes": 15793,
-    "cssUnusedPct": 94.9
+    "transferTotal": 23187,
+    "cssTotalBytes": 132751,
+    "cssUsedBytes": 8758,
+    "cssUnusedPct": 93.4
+  },
+  {
+    "profile": "photo-single",
+    "fcp": 604,
+    "lcp": 4564,
+    "cls": 0,
+    "lcpElement": "img.tgs-section__bg",
+    "lcpUrl": "/img/hero.jpg",
+    "requests": 4,
+    "transferByType": {
+      "document": 1425,
+      "stylesheet": 21392,
+      "image": 921956
+    },
+    "transferTotal": 944773,
+    "cssTotalBytes": 132751,
+    "cssUsedBytes": 6564,
+    "cssUnusedPct": 95.1
+  },
+  {
+    "profile": "photo",
+    "fcp": 608,
+    "lcp": 2120,
+    "cls": 0,
+    "lcpElement": "img.tgs-section__bg",
+    "lcpUrl": "/img/hero-1600.jpg",
+    "requests": 4,
+    "transferByType": {
+      "document": 1461,
+      "stylesheet": 21392,
+      "image": 409956
+    },
+    "transferTotal": 432809,
+    "cssTotalBytes": 132751,
+    "cssUsedBytes": 6564,
+    "cssUnusedPct": 95.1
   }
 ]

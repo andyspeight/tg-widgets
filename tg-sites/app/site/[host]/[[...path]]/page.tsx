@@ -5,6 +5,8 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
 import { fillBreadcrumbs, hasBreadcrumbsBlock } from '../../../../lib/content/breadcrumbs';
 import { mergePrepared, prepareSections } from '../../../../lib/content/prepare-markup';
+import { imageUrlsIn } from '../../../../lib/content/image-sizes';
+import { imageSizesForUrls } from '../../../../lib/db/media';
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
 import { safeUrl } from '../../../../lib/content/sanitise';
@@ -427,6 +429,33 @@ export default async function SitePage({ params, searchParams }: Params) {
    * was when the components did it, so a restored snapshot or a hand-edited row
    * still lands on today's rules rather than the rules of the day it was saved.
    */
+  /*
+   * WHICH SIZES OF EACH PICTURE EXIST, in one query for the whole document.
+   *
+   * A block stores an address and nothing else, so the tree cannot know that the
+   * same photograph is also stored at 400, 800 and 1600 pixels wide. That lives
+   * on the media row, so it is read here and threaded beside the tree the way
+   * `prepared` is, rather than written onto props where it would drift from the
+   * bank. One query across all three trees, not one per image: a homepage can
+   * carry twenty pictures and this runs on every published page view.
+   *
+   * Deliberately NOT inside load(): generateMetadata calls that too, and metadata
+   * never renders an image, so putting it there would buy a query the social
+   * card has no use for.
+   *
+   * An empty answer is the normal state for an older site and costs nothing: the
+   * renderers fall back to a single src, which is what they did before variants
+   * existed.
+   */
+  const imageSizes = await imageSizesForUrls(
+    found.tenantId,
+    imageUrlsIn([
+      ...(found.regions.header?.sections ?? []),
+      ...(contentTree?.sections ?? []),
+      ...(found.regions.footer?.sections ?? []),
+    ]),
+  );
+
   const prepared = mergePrepared(
     prepareSections(found.regions.header?.sections),
     prepareSections(contentTree?.sections),
@@ -580,6 +609,7 @@ export default async function SitePage({ params, searchParams }: Params) {
           )}
           theme={theme}
           prepared={prepared}
+          sizes={imageSizes}
         />
       ) : found.entry ? (
         /* A post's own sections get the same fill. Without it a blog post
@@ -593,6 +623,7 @@ export default async function SitePage({ params, searchParams }: Params) {
           }}
           theme={theme}
           prepared={prepared}
+          sizes={imageSizes}
         />
       ) : (
         <ArchiveRenderer archive={found.archive!} theme={theme} />
@@ -602,6 +633,7 @@ export default async function SitePage({ params, searchParams }: Params) {
         region={fillNavRegion(found.regions.footer, found.navPages)}
         theme={theme}
         prepared={prepared}
+        sizes={imageSizes}
       />
 
       {/* One script per distinct widget across all three, rather than each tree
@@ -656,6 +688,7 @@ function EntryRenderer({
   entry,
   theme,
   prepared,
+  sizes,
 }: {
   entry: {
     item: import('../../../../lib/content/collection').CollectionItem;
@@ -670,6 +703,8 @@ function EntryRenderer({
   theme: React.CSSProperties;
   /** Markup the server has already cleaned. See lib/content/prepared.ts. */
   prepared?: import('../../../../lib/content/prepared').PreparedMap;
+  /** Stored sizes by url. See lib/content/image-sizes.ts. */
+  sizes?: import('../../../../lib/content/image-sizes').ImageSizes;
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
@@ -750,7 +785,7 @@ function EntryRenderer({
       </header>
 
       {item.sections.map((section, index) => (
-        <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} />
+        <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} sizes={sizes} />
       ))}
     </article>
   );

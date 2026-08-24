@@ -1186,6 +1186,7 @@ describe('copyMediaToTenant', () => {
       alt: 'a hero',
       source: 'pexels' as const,
       credit: { photographer: 'Sam' },
+      variants: [{ url: 'https://old/y-800.webp', width: 800, height: 533, bytes: 40_000 }],
       createdAt: new Date('2026-08-01T00:00:00Z'),
     };
     const stored = { url: 'https://new/y.png', pathname: 'new/key', size: 222, contentType: 'image/png' as const };
@@ -1203,7 +1204,41 @@ describe('copyMediaToTenant', () => {
       alt: 'a hero',
       source: 'pexels',
       credit: { photographer: 'Sam' },
+      /*
+       * Empty, even though the source row had one. A variant's url points into
+       * the SOURCE tenant's prefix, so carrying the list across would leave the
+       * new site serving the old site's objects and quietly undo the isolation
+       * this whole copy exists to provide.
+       */
+      variants: [],
     });
+  });
+
+  it('never carries a source tenant\'s variant URLs into the copy', async () => {
+    const { copiedMediaRow } = await import('../lib/db/duplicate');
+    const item = {
+      id: 'm2',
+      url: 'https://old/z.webp',
+      storageKey: 'old/z',
+      filename: 'z.webp',
+      mime: 'image/webp',
+      bytes: 900,
+      width: 2400,
+      height: 1600,
+      alt: '',
+      source: 'upload' as const,
+      credit: {},
+      variants: [
+        { url: 'https://old/z-400.webp', width: 400, height: 267, bytes: 9_000 },
+        { url: 'https://old/z-800.webp', width: 800, height: 533, bytes: 30_000 },
+      ],
+      createdAt: new Date('2026-08-01T00:00:00Z'),
+    };
+    const stored = { url: 'https://new/z.webp', pathname: 'new/z', size: 900, contentType: 'image/webp' as const };
+
+    const copied = copiedMediaRow(item, stored);
+    expect(copied.variants).toEqual([]);
+    expect(JSON.stringify(copied)).not.toContain('old/');
   });
 });
 

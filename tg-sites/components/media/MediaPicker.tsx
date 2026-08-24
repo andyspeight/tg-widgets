@@ -618,12 +618,42 @@ function UploadPanel({
           },
         );
 
+        /*
+         * THE SMALLER COPIES, uploaded after the primary and never instead of it.
+         *
+         * Sequential rather than parallel on purpose. These are a nice-to-have on
+         * top of an upload that has already succeeded, and firing four concurrent
+         * uploads from a phone on a hotel wifi is a good way to make the one that
+         * mattered time out. The progress line names what is happening because
+         * otherwise a big photograph looks like it has stalled after "Uploading".
+         *
+         * Each failure is swallowed. A missing size costs a visitor some bytes;
+         * an exception here would lose a picture that is already safely stored.
+         */
+        const uploadedVariants: Array<{ url: string; width: number; height: number }> = [];
+        for (const [n, variant] of prepared.variants.entries()) {
+          try {
+            setProgress(
+              `Making ${prepared.filename} smaller for phones${label} (${n + 1} of ${prepared.variants.length})`,
+            );
+            const stored = await upload(
+              `${uploadPrefix}${filenameStem(variant.filename)}.${MEDIA_MIME[variant.mime]}`,
+              variant.body,
+              { access: 'public', handleUploadUrl: '/api/media/upload', contentType: variant.mime },
+            );
+            uploadedVariants.push({ url: stored.url, width: variant.width, height: variant.height });
+          } catch {
+            // This size is simply not available. The next one may still be.
+          }
+        }
+
         setProgress(`Saving ${prepared.filename}${label}`);
         const recorded = await recordUploadAction({
           url: result.url,
           filename: prepared.filename,
           width: prepared.width ?? undefined,
           height: prepared.height ?? undefined,
+          variants: uploadedVariants,
         });
 
         if (!recorded.ok) {

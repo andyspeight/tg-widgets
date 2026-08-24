@@ -41,7 +41,7 @@ if (!Number.isFinite(heroKb) || heroKb < 1) {
 }
 
 await mkdir(resolve(outDir, 'img'), { recursive: true });
-for (const name of ['designed.html', 'native.html', 'globals.css', 'render.cjs']) {
+for (const name of ['designed.html', 'native.html', 'photo.html', 'photo-single.html', 'globals.css', 'render.cjs']) {
   await rm(resolve(outDir, name), { force: true });
 }
 
@@ -100,7 +100,7 @@ function localiseImages(html) {
   return html.replace(/src="https?:\/\/[^"]*"/g, 'src="/img/hero.jpg"');
 }
 
-for (const profile of ['designed', 'native']) {
+for (const profile of ['designed', 'native', 'photo-single', 'photo']) {
   const html = localiseImages(renderProfile(profile));
   await writeFile(resolve(outDir, `${profile}.html`), html, 'utf8');
   console.log(`${profile}.html  ${(Buffer.byteLength(html) / 1024).toFixed(1)} KB of HTML`);
@@ -161,5 +161,22 @@ const hero =
     : source;
 await writeFile(resolve(outDir, 'img/hero.jpg'), hero);
 console.log(`img/hero.jpg  ${(hero.length / 1024).toFixed(0)} KB (real photo, padded to model a client upload)`);
+
+/*
+ * The smaller copies, weighted by pixel count.
+ *
+ * A photograph's compressed size tracks its area rather than its width, so a
+ * 1600px copy of a 2400px original is about (1600/2400)^2 of the bytes, not two
+ * thirds. Modelled, like the primary, and for the same reason: there is no real
+ * client photograph here to measure. What it makes honest is the COMPARISON, and
+ * that is what the harness is for.
+ */
+for (const width of [400, 800, 1600]) {
+  const bytes = Math.max(source.length, Math.round(target * (width / 2400) ** 2));
+  const variant =
+    bytes > source.length ? Buffer.concat([source, Buffer.alloc(bytes - source.length, 0)]) : source;
+  await writeFile(resolve(outDir, `img/hero-${width}.jpg`), variant);
+  console.log(`img/hero-${width}.jpg  ${(variant.length / 1024).toFixed(0)} KB`);
+}
 
 await rm(bundle, { force: true });

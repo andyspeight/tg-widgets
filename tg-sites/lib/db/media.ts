@@ -21,7 +21,8 @@ import {
   type MediaKind,
   type MediaMime,
 } from '../media/limits';
-import type { MediaCredit, MediaItem, MediaSource } from '../media/types';
+import type { ImageSizes } from '../content/image-sizes';
+import type { MediaCredit, MediaItem, MediaSource, MediaVariant } from '../media/types';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
 /**
@@ -64,6 +65,32 @@ function asCredit(value: unknown): MediaCredit {
   };
 }
 
+/**
+ * The variants column, read without trusting it.
+ *
+ * jsonb is free-form as far as Postgres is concerned, and this value was written
+ * from a browser upload months ago and may have been anything since. Anything
+ * that is not a usable {url,width,height} is dropped rather than repaired: a
+ * variant with a bad width would be served to the wrong screen, and no variant
+ * at all merely costs bytes.
+ */
+function asVariants(value: unknown): MediaVariant[] {
+  if (!Array.isArray(value)) return [];
+
+  const out: MediaVariant[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') continue;
+    const v = raw as Record<string, unknown>;
+    const url = typeof v.url === 'string' ? v.url : '';
+    const width = Number(v.width);
+    const height = Number(v.height);
+    if (!url || !Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) continue;
+    out.push({ url, width: Math.round(width), height: Math.round(height), bytes: Number(v.bytes) || 0 });
+  }
+  // Ascending, so a caller can build an srcset by walking it.
+  return out.sort((a, b) => a.width - b.width);
+}
+
 function toItem(row: Record<string, unknown>): MediaItem {
   return {
     id: String(row.id),
@@ -77,6 +104,7 @@ function toItem(row: Record<string, unknown>): MediaItem {
     alt: row.alt == null ? '' : String(row.alt),
     source: row.source === 'pexels' ? 'pexels' : 'upload',
     credit: asCredit(row.credit),
+    variants: asVariants(row.variants),
     createdAt: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),
   };
 }
@@ -124,7 +152,7 @@ export async function listMedia(
   return withTenant(tenantId, async (tx) => {
     const rows = mimes
       ? await tx`
-          select id, url, storage_key, filename, mime, bytes,
+          select id, url, storage_key, filename, mime, bytes, variants,
                  width, height, alt, source, credit, created_at
           from public.media
           where mime = any(${mimes})
@@ -132,7 +160,7 @@ export async function listMedia(
           limit ${limit + 1} offset ${offset}
         `
       : await tx`
-          select id, url, storage_key, filename, mime, bytes,
+          select id, url, storage_key, filename, mime, bytes, variants,
                  width, height, alt, source, credit, created_at
           from public.media
           order by created_at desc, id desc
@@ -156,7 +184,7 @@ export async function listMedia(
 export async function listAllMedia(tenantId: string): Promise<MediaItem[]> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select id, url, storage_key, filename, mime, bytes,
+      select id, url, storage_key, filename, mime, bytes, variants,
              width, height, alt, source, credit, created_at
       from public.media
       order by created_at, id
@@ -184,7 +212,7 @@ export async function getPublicMedia(
 
   return withPublicTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select id, url, storage_key, filename, mime, bytes,
+      select id, url, storage_key, filename, mime, bytes, variants,
              width, height, alt, source, credit, created_at
       from public.media where id = ${id} limit 1
     `;
@@ -209,6 +237,11 @@ export interface NewMedia {
   alt: string;
   source: MediaSource;
   credit: MediaCredit;
+  /**
+   * Smaller copies, already uploaded and already verified against the store by
+   * the caller. Optional: a stock import and any older caller has none.
+   */
+  variants?: MediaVariant[];
 }
 
 /**
@@ -225,15 +258,75 @@ export interface NewMedia {
  * second upload of the same file has a different key and is a different row, which
  * is right: somebody uploading the same photograph twice on purpose gets two.
  */
+/**
+ * Every stored size of each of these pictures, for a page that is about to render.
+ *
+ * ONE QUERY FOR THE WHOLE PAGE, not one per image. A homepage can carry twenty
+ * pictures and this runs on every published page view, so a per-image lookup
+ * would be twenty round trips to eu-west-2 inside the request a visitor is
+ * waiting on.
+ *
+ * THE PRIMARY IS IN THE RESULT, as the largest candidate. The column holds only
+ * the smaller copies, because that is what it is for, but a srcset needs every
+ * candidate including the full-size one, and building it here means the renderer
+ * never has to know that the row's own url is a special case.
+ *
+ * Through the READ-ONLY role, like everything else a visitor's request touches.
+ * A url that belongs to another tenant simply does not come back: the policy
+ * makes "no such image" and "not yours" the same answer.
+ *
+ * Bounded. A tree with a thousand image URLs is a malformed page rather than a
+ * real one, and this is not the place to find that out slowly.
+ */
+const MAX_IMAGE_LOOKUP = 200;
+
+export async function imageSizesForUrls(
+  tenantId: string,
+  urls: readonly string[],
+): Promise<ImageSizes> {
+  const wanted = [...new Set(urls.filter((u) => typeof u === 'string' && u !== ''))].slice(
+    0,
+    MAX_IMAGE_LOOKUP,
+  );
+  if (wanted.length === 0) return {};
+
+  return withPublicTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select url, width, height, bytes, variants
+        from public.media
+       where url = any(${wanted as string[]})
+    `;
+
+    const out: ImageSizes = {};
+    for (const raw of rows as Record<string, unknown>[]) {
+      const url = String(raw.url);
+      const width = raw.width == null ? 0 : Number(raw.width);
+      const height = raw.height == null ? 0 : Number(raw.height);
+
+      const sizes = asVariants(raw.variants);
+      // The row's own file, as the largest candidate. Skipped when the row never
+      // recorded its dimensions, because a candidate with no width is useless in
+      // a srcset and a guessed one would be worse.
+      if (width > 0 && height > 0) {
+        sizes.push({ url, width, height, bytes: Number(raw.bytes) || 0 });
+      }
+
+      if (sizes.length > 1) out[url] = sizes.sort((a, b) => a.width - b.width);
+    }
+
+    return out;
+  });
+}
+
 export async function insertMedia(tenantId: string, media: NewMedia): Promise<MediaItem> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
       insert into public.media
-        (tenant_id, storage_key, url, filename, mime, bytes, width, height, alt, source, credit)
+        (tenant_id, storage_key, url, filename, mime, bytes, width, height, alt, source, credit, variants)
       values (
         ${tenantId}, ${media.storageKey}, ${media.url}, ${media.filename},
         ${media.mime}, ${media.bytes}, ${media.width}, ${media.height},
-        ${media.alt}, ${media.source}, ${json(tx, media.credit)}
+        ${media.alt}, ${media.source}, ${json(tx, media.credit)}, ${json(tx, media.variants ?? [])}
       )
       on conflict (tenant_id, storage_key) do update
         set url = excluded.url,
@@ -244,8 +337,9 @@ export async function insertMedia(tenantId: string, media: NewMedia): Promise<Me
             height = excluded.height,
             alt = excluded.alt,
             source = excluded.source,
-            credit = excluded.credit
-      returning id, url, storage_key, filename, mime, bytes,
+            credit = excluded.credit,
+            variants = excluded.variants
+      returning id, url, storage_key, filename, mime, bytes, variants,
                 width, height, alt, source, credit, created_at
     `;
     return toItem(rows[0] as Record<string, unknown>);
@@ -275,7 +369,7 @@ export async function getMediaItem(
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      select id, url, storage_key, filename, mime, bytes,
+      select id, url, storage_key, filename, mime, bytes, variants,
              width, height, alt, source, credit, created_at
       from public.media where id = ${id} limit 1
     `;
@@ -302,7 +396,7 @@ export async function setMediaAlt(
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
       update public.media set alt = ${alt} where id = ${id}
-      returning id, url, storage_key, filename, mime, bytes,
+      returning id, url, storage_key, filename, mime, bytes, variants,
                 width, height, alt, source, credit, created_at
     `;
     return rows.length ? toItem(rows[0] as Record<string, unknown>) : null;

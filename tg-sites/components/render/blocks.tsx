@@ -22,6 +22,7 @@ import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { preparedFor, type PreparedMap } from '../../lib/content/prepared';
+import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../../lib/content/image-sizes';
 import { importScopeClass } from '../../lib/import/scope';
 import { applyImportContent } from '../../lib/import/slots';
 import { parseTable } from '../../lib/content/table';
@@ -505,11 +506,14 @@ export function IconItemBlock({
 export function ImageBlock({
   props,
   editing = false,
+  sizes,
 }: {
   props: Props;
   /* Only a film slide reads this: it must not autoplay on the canvas, where the
      editor re-renders on every keystroke and moving pictures fight the pointer. */
   editing?: boolean;
+  /* Stored sizes by url, threaded beside the tree. Absent on the canvas. */
+  sizes?: ImageSizes;
 }): ReactElement {
   const src = safeUrl(str(props, 'src'));
   const alt = str(props, 'alt');
@@ -745,6 +749,8 @@ export function ImageBlock({
     >
       <img
         src={src}
+        srcSet={srcSetFor(src, sizes) ?? undefined}
+        sizes={srcSetFor(src, sizes) ? FULL_WIDTH_SIZES : undefined}
         alt={alt}
         loading="lazy"
         decoding="async"
@@ -765,6 +771,8 @@ export function ImageBlock({
           package. */}
       <img
         src={src}
+        srcSet={srcSetFor(src, sizes) ?? undefined}
+        sizes={srcSetFor(src, sizes) ? FULL_WIDTH_SIZES : undefined}
         alt={alt}
         loading="lazy"
         decoding="async"

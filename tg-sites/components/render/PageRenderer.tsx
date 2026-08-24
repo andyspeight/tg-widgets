@@ -40,6 +40,7 @@ import {
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 import type { PreparedMap } from '../../lib/content/prepared';
+import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../../lib/content/image-sizes';
 
 /**
  * A container block's own columns.
@@ -133,6 +134,16 @@ interface Editable {
    * the database and a side channel cannot be forged by a stored row.
    */
   prepared?: PreparedMap;
+  /**
+   * The stored sizes of each picture on this tree, by url.
+   *
+   * Beside the tree for the same reason `prepared` is: a block stores an address
+   * and the sizes live on the media row, so putting them on props would be
+   * denormalising a value that changes when the bank changes. Absent on the
+   * editor canvas, which is correct: the canvas is not what a visitor downloads,
+   * and a srcset there would only make the preview harder to reason about.
+   */
+  sizes?: ImageSizes;
 }
 
 /**
@@ -187,6 +198,7 @@ export function PageRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
   emptyNote = 'This page is empty. Add a section to get started.',
   theme,
   region = null,
@@ -257,6 +269,7 @@ export function PageRenderer({
             editingPath={editingPath}
             editorCanvas={editorCanvas}
             prepared={prepared}
+            sizes={sizes}
             /*
               A shaped edge is the BOUNDARY between two sections, so drawing one
               needs the colour on the other side of it. Only this component
@@ -327,6 +340,7 @@ export function SectionRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
   above,
   below,
   hangBottomDivider = false,
@@ -577,6 +591,8 @@ export function SectionRenderer({
               key={i}
               className="tgs-section__bgslide"
               src={image.src}
+              srcSet={srcSetFor(image.src, sizes) ?? undefined}
+              sizes={srcSetFor(image.src, sizes) ? FULL_WIDTH_SIZES : undefined}
               alt=""
               aria-hidden="true"
               loading={i === 0 ? 'eager' : 'lazy'}
@@ -591,6 +607,13 @@ export function SectionRenderer({
         <img
           className="tgs-section__bg"
           src={bgImages[0].src}
+          /*
+           * A full-bleed background genuinely is the viewport's width, so the
+           * conservative 100vw hint is also the accurate one here. This is the
+           * usual largest-paint element on a travel homepage.
+           */
+          srcSet={srcSetFor(bgImages[0].src, sizes) ?? undefined}
+          sizes={srcSetFor(bgImages[0].src, sizes) ? FULL_WIDTH_SIZES : undefined}
           alt=""
           aria-hidden="true"
           style={bgImages[0].style}
@@ -670,6 +693,7 @@ export function SectionRenderer({
             editingPath={editingPath}
             editorCanvas={editorCanvas}
             prepared={prepared}
+            sizes={sizes}
           />
         ))}
         {editable && section.rows.length === 0 && (
@@ -894,6 +918,7 @@ export function RowRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
@@ -943,6 +968,7 @@ export function RowRenderer({
           editingPath={editingPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       ))}
     </div>
@@ -967,6 +993,7 @@ function blockHost(
   editingPath: string | null,
   editorCanvas: boolean,
   prepared: PreparedMap | undefined,
+  sizes: ImageSizes | undefined,
 ): ReactElement {
   const box = block.box ?? EMPTY_BOX;
   const boxed = !boxIsEmpty(box);
@@ -1061,6 +1088,7 @@ function blockHost(
           editingPath={editingPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       ) : block.type === 'container' ? (
         <InnerColumns
@@ -1072,6 +1100,7 @@ function blockHost(
           editingPath={editingPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       ) : (
         <BlockRenderer
@@ -1080,6 +1109,7 @@ function blockHost(
           editingHost={editable && editingPath === keyPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       )}
     </div>
@@ -1123,6 +1153,7 @@ function InnerGrid({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   cells: Column[];
   across: { desktop: number; tablet: number; phone: number };
@@ -1166,7 +1197,7 @@ function InnerGrid({
             {...pathAttr(editable, cellPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
+              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared, sizes),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1209,6 +1240,7 @@ function InnerColumns({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   columns: Column[];
   gap: number;
@@ -1247,7 +1279,7 @@ function InnerColumns({
             {...pathAttr(editable, colPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
+              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared, sizes),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1313,6 +1345,7 @@ export function ColumnRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   column: Column;
   sectionIndex: number;
@@ -1334,7 +1367,7 @@ export function ColumnRenderer({
       {...pathAttr(editable, path)}
     >
       {column.blocks.map((block, blockIndex) =>
-        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas, prepared),
+        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas, prepared, sizes),
       )}
 
       {/*
