@@ -1,6 +1,13 @@
 /**
- * TEMPORARY rematch probe — deleted once the six predecessor-purged venues
- * are rematched. See docs/supplier-event-feed.md (double verification).
+ * Venue rematch probe — PRESERVED for the next predecessor discovery. It ran
+ * as a temporary Vercel endpoint on 24 Aug 2026 and was then removed from
+ * api/. To run again: edit PLAN below (key, reviewed article title, supplier
+ * anchor, feed city), copy this file to api/dev-venue-rematch-probe.js on a
+ * work branch, add a vercel.json functions entry with maxDuration 60, push,
+ * fetch /api/dev-venue-rematch-probe from the branch preview, then write the
+ * PASSING facts into api/_data/venue-facts-overrides.json (omit anything
+ * whose verdict failed, skip any venue whose coordKm is over 2), patch
+ * api/_data/venue-facts.json the same way, and delete the api/ copy again.
  *
  * Six venues had coordinate-matched the Wikipedia article for the DEMOLISHED
  * building on the same ground (or the Millennium Dome for The O2) and were

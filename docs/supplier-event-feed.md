@@ -434,8 +434,28 @@ run taught us, both encoded in the pruner:
   82,000, opened 1923, all "confirmed", all about the wrong building. Five
   keys (wembleystadium, sanmamesstadium, stadelouisii,
   hidegkutinandorstadion, sergiolanfranchi) plus theo2 (Millennium Dome)
-  are purged of all Wikidata facts until someone rematches them to the
-  current articles and re-verifies.
+  were purged of all Wikidata facts.
+
+### Rematched predecessors (24 Aug 2026)
+
+The purged venues were rematched by hand-reviewed article title with
+`scripts/rematch-venues-via-vercel.js` (rerun instructions in its header),
+under the same standard: the reviewed title must resolve, the item's own
+coordinate must sit within 2km of our supplier anchor, and every fact must
+be corroborated by the live article before it returns to the sheet. Five
+came back: Wembley (90,000, opened 2007), San Mamés on its duplicate key,
+Stade Louis II (opened and website only - Wikidata's capacity is not in
+the article), Hidegkuti Nándor Stadion and The O2 Arena. One stayed out:
+sergiolanfranchi, whose current stadium is 2.33km from the supplier
+anchor, outside the gate, so it keeps a bare sheet rather than a bent
+rule.
+
+The reviewed results live in `api/_data/venue-facts-overrides.json`, which
+`scripts/build-venue-facts.mjs` applies AFTER assembly - an override
+replaces the venue's whole Wikidata-sourced group, so a rebuild cannot
+resurrect the predecessor match. The pruner pins the same titles in its
+reviewed-renames map. A future predecessor discovery follows the same
+loop: purge first, rematch by reviewed title, verify, then override.
 
 ## Venue keys that merge different real venues
 

@@ -1,0 +1,68 @@
+{
+  "_comment": "Hand-reviewed Wikidata rematches, applied by scripts/build-venue-facts.mjs AFTER assembly so they survive a rebuild. These venues had coordinate-matched the article for the DEMOLISHED building on the same ground; each entry here replaces the venue's whole Wikidata-sourced group (cap, opened, web, wiki, img, qid) with the reviewed current article's claims. Every value was double-verified on 2026-08-24: reviewed title resolved on Wikipedia, item coordinate within 2km of our supplier anchor, and each fact corroborated by the live article's infobox. Omitted fields FAILED corroboration and must stay absent (sanmamesstadium web, stadelouisii capacity). sergiolanfranchi is deliberately NOT here: the current stadium's coordinate is 2.33km from the supplier anchor, outside the 2km identity gate, so it keeps a bare sheet. Edit only with the same two-source standard (rerun: docs/supplier-event-feed.md).",
+  "reviewedAt": "2026-08-24",
+  "venues": {
+    "wembleystadium": {
+      "cap": 90000,
+      "opened": 2007,
+      "web": "https://www.wembleystadium.com/",
+      "wiki": "https://en.wikipedia.org/wiki/Wembley_Stadium",
+      "img": {
+        "u": "https://commons.wikimedia.org/wiki/Special:FilePath/London_Wembley.jpg?width=900",
+        "page": "https://commons.wikimedia.org/wiki/File:London_Wembley.jpg",
+        "by": "Arne Müseler",
+        "lic": "CC BY-SA 3.0 de"
+      },
+      "qid": "Q128468"
+    },
+    "sanmamesstadium": {
+      "cap": 53289,
+      "opened": 2013,
+      "wiki": "https://en.wikipedia.org/wiki/San_Mam%C3%A9s_Stadium_(2013)",
+      "img": {
+        "u": "https://commons.wikimedia.org/wiki/Special:FilePath/Bilbao_San_Mam%C3%A9s_Stadium_4.jpg?width=900",
+        "page": "https://commons.wikimedia.org/wiki/File:Bilbao_San_Mam%C3%A9s_Stadium_4.jpg",
+        "by": "Валерий Дед",
+        "lic": "CC BY 3.0"
+      },
+      "qid": "Q182864"
+    },
+    "stadelouisii": {
+      "opened": 1985,
+      "web": "http://www.stadelouis2.mc",
+      "wiki": "https://en.wikipedia.org/wiki/Stade_Louis_II",
+      "img": {
+        "u": "https://commons.wikimedia.org/wiki/Special:FilePath/Monaco_Stade_Louis-II_1.jpg?width=900",
+        "page": "https://commons.wikimedia.org/wiki/File:Monaco_Stade_Louis-II_1.jpg",
+        "by": "Валерий Дед",
+        "lic": "CC BY 3.0"
+      },
+      "qid": "Q318851"
+    },
+    "hidegkutinandorstadion": {
+      "cap": 5322,
+      "opened": 2016,
+      "wiki": "https://en.wikipedia.org/wiki/Hidegkuti_N%C3%A1ndor_Stadion",
+      "img": {
+        "u": "https://commons.wikimedia.org/wiki/Special:FilePath/MTK_stadion_-_l%C3%A9gi_fot%C3%B3.jpg?width=900",
+        "page": "https://commons.wikimedia.org/wiki/File:MTK_stadion_-_l%C3%A9gi_fot%C3%B3.jpg",
+        "by": "Civertan",
+        "lic": "CC BY-SA 4.0"
+      },
+      "qid": "Q259307"
+    },
+    "theo2": {
+      "cap": 20000,
+      "opened": 2007,
+      "web": "http://www.theo2.co.uk",
+      "wiki": "https://en.wikipedia.org/wiki/The_O2_Arena",
+      "img": {
+        "u": "https://commons.wikimedia.org/wiki/Special:FilePath/O2_Arena.jpg?width=900",
+        "page": "https://commons.wikimedia.org/wiki/File:O2_Arena.jpg",
+        "by": "Heuschrecke",
+        "lic": "CC BY-SA 3.0"
+      },
+      "qid": "Q5364202"
+    }
+  }
+}

@@ -80,6 +80,15 @@ const REVIEWED_RENAMES = {
   stadioolimpico: 'Stadio Olimpico',
   stadiummunicipal: 'Stadium de Toulouse',
   westfalenhalle: 'Westfalenhallen',
+  // The rematched venues (24 Aug 2026): reviewed current articles that
+  // replaced predecessor matches. See venue-facts-overrides.json. Not here:
+  // sergiolanfranchi, whose current stadium failed the 2km coordinate gate
+  // against the supplier anchor and stays on a bare sheet.
+  wembleystadium: 'Wembley Stadium',
+  sanmamesstadium: 'San Mamés Stadium (2013)',
+  stadelouisii: 'Stade Louis II',
+  hidegkutinandorstadion: 'Hidegkuti Nándor Stadion',
+  theo2: 'The O2 Arena',
 };
 const wikiTitle = (url) => {
   const m = /\/wiki\/(.+)$/.exec(url || '');
