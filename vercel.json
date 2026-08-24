@@ -83,6 +83,10 @@
       "memory": 1024,
       "maxDuration": 15,
       "includeFiles": "api/_data/events-snapshot.json"
+    },
+    "api/dev-airports-probe.js": {
+      "maxDuration": 60,
+      "memory": 1024
     }
   },
   "crons": [
