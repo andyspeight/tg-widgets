@@ -121,6 +121,27 @@ function airports() {
 }
 
 /**
+ * The DEPARTURE list for the chooser: every large or medium airport with
+ * scheduled service worldwide (OurAirports), because a visitor can fly from
+ * anywhere. Falls back to the curated majors if the file is missing.
+ * Arrivals are different: dst and the fact sheets stay on the majors,
+ * because a package needs a hub with hotels and inbound flights.
+ */
+let DEPARTURES = null;
+
+function departureAirports() {
+  if (DEPARTURES) return DEPARTURES;
+  try {
+    const url = new URL('./_data/airports-departures.json', import.meta.url);
+    DEPARTURES = JSON.parse(readFileSync(url, 'utf8')).airports || [];
+  } catch (err) {
+    console.error('[api/events-feed] departures load failed (falling back to majors):', err && err.message);
+    DEPARTURES = airports().map(([iata, name, cc]) => [iata, name, cc]);
+  }
+  return DEPARTURES;
+}
+
+/**
  * The airport nearest an event's OWN anchor, within 150km straight-line, as
  * the package link's `dst`. Per event rather than per venue so a merged venue
  * key (Red Bull Arena is Leipzig, Salzburg AND Harrison NJ) flies each
@@ -459,10 +480,10 @@ export default function handler(req, res) {
     }
 
     // ── airports ─────────────────────────────────────────────────────────────
-    // The departure chooser's menu: the suite's bundled list as
-    // [iata, name, country]. Coordinates stay server-side.
+    // The departure chooser's menu: every scheduled-service airport worldwide
+    // as [iata, label, country], large first so the majors rank on top.
     if (view === 'airports') {
-      res.status(200).json({ airports: airports().map(([iata, name, cc]) => [iata, name, cc]) });
+      res.status(200).json({ airports: departureAirports() });
       return;
     }
 

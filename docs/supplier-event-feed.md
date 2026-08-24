@@ -290,7 +290,17 @@ modal on the button, not a separate page — an interstitial /fly page shipped
 first and was replaced the same day). The visitor types an airport name or
 code and picks FROM THE DROPDOWN ONLY — free text never books, so `org`
 always matches the suite's own list (`view=airports` on the feed, the menu's
-source). The chooser validates the template before opening anything (https,
+source). That list is `api/_data/airports-departures.json`: every large or
+medium scheduled-service airport worldwide with an IATA code (3,242 from the
+OurAirports public-domain dataset, added 24 Aug 2026 after Cologne failed to
+match the old 106-major list), municipality folded into the label so a city
+search finds its airports, large airports first so hubs rank on top.
+Departures only: the package's `dst` and the venue fact sheets stay on the
+curated majors in `airports.json`, because an arrival needs a hub with
+hotels and inbound flights. Refresh with
+`scripts/fetch-departure-airports-via-vercel.js` (instructions in its
+header); `tests/test-departure-airports.cjs` guards the coverage. The
+chooser validates the template before opening anything (https,
 dl.tvllnk.com, /deeplink/), remembers the last airport (`tgev_org` in
 localStorage, per site) and opens the finished link in a new tab. It lives
 inside each widget's shadow root (the `fly*` functions, stamped identically

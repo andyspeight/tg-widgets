@@ -1,8 +1,14 @@
 /**
- * TEMPORARY — fetches the OurAirports public-domain dataset and returns the
- * departure-airport candidates (the build sandbox cannot reach external
- * hosts, so this runs on Vercel like the other research probes). Deleted
- * once api/_data/airports-departures.json is built from its output.
+ * Departure-airports fetcher — PRESERVED for the next refresh of
+ * api/_data/airports-departures.json. It ran as a temporary Vercel endpoint
+ * on 24 Aug 2026 (the build sandbox cannot reach external hosts). To rerun:
+ * copy to api/dev-airports-probe.js, add a vercel.json functions entry
+ * (maxDuration 60, memory 1024), push a branch, fetch
+ * /api/dev-airports-probe from the preview, then rebuild the committed file
+ * from the response: dedupe IATA preferring large, fold the municipality
+ * into the label when the name lacks it, order large-then-medium
+ * alphabetical, validate (count 2000-5000, CGN/LHR/JFK present, every
+ * airports.json major present), and delete the api/ copy again.
  *
  * Filter: large or medium airports, scheduled service, with a real IATA
  * code. That is roughly every airport a visitor could actually fly from.
