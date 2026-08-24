@@ -50,7 +50,7 @@
   }
 
   const API_BASE = resolveApiBase();
-  const VERSION = '1.0.2';
+  const VERSION = '1.0.3';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (control aria-labels, empty/error states, the
@@ -574,7 +574,21 @@
         return m;
       });
 
-      if (locs.length > 1 && this.cfg.autoFit !== false) {
+      // Optional route polyline (e.g. a cruise sea route). Points are [lat, lng].
+      // Drawn under a subtle dash, and its extent folded into the fit bounds so
+      // a leg that bulges around land is not clipped.
+      const routePts = Array.isArray(this.cfg.route)
+        ? this.cfg.route.map((p) => (Array.isArray(p) && p.length >= 2 && isFinite(Number(p[0])) && isFinite(Number(p[1]))) ? [Number(p[0]), Number(p[1])] : null).filter(Boolean)
+        : [];
+      if (routePts.length >= 2) {
+        this.routeLine = L.polyline(routePts, {
+          color: this.cfg.accent || '#0891B2', weight: 3, opacity: 0.9,
+          dashArray: '2 8', lineCap: 'round', lineJoin: 'round',
+        }).addTo(this.map);
+        routePts.forEach((p) => this.bounds.extend(p));
+      }
+
+      if ((locs.length > 1 || routePts.length >= 2) && this.cfg.autoFit !== false) {
         this.map.fitBounds(this.bounds, { padding: [48, 48], maxZoom: 16 });
       } else {
         this.map.setView([first.lat, first.lng], Math.min(19, Math.max(1, num(this.cfg.zoom) || 14)));
