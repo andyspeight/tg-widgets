@@ -456,7 +456,11 @@
     };
     if (c.appId) q.appId = c.appId;
     var kinds = Array.isArray(c.bookingKinds) ? c.bookingKinds.filter(Boolean) : [];
-    if (kinds.length) q.booking = kinds.join(',');
+    // Always explicit: an agent who unticked every booking type means NO
+    // buttons, and an absent parameter would fall back to the server's
+    // default of every ready kind - the exact opposite. 'none' is not a
+    // kind, so the API builds zero options for it.
+    q.booking = kinds.length ? kinds.join(',') : 'none';
 
     var v = String(c.sourceValue || '').trim();
     switch (c.sourceType) {
@@ -594,11 +598,18 @@
       if (tpl) return { kind: o.kind, label: o.label, short: o.short, fly: tpl };
       return null;
     }).filter(Boolean);
-    if (!usable.length && ev.booking && safeUrl(ev.booking.url)) {
+    // The plain ticket link is only a fallback where the agent still offers
+    // tickets; with every type turned off, no button is the point.
+    var wantsTicket = !Array.isArray(c.bookingKinds) || c.bookingKinds.indexOf('ticket') !== -1;
+    if (!usable.length && wantsTicket && ev.booking && safeUrl(ev.booking.url)) {
       usable = [{ kind: 'ticket', short: c.bookLabel, url: ev.booking.url }];
     }
     var actions = usable.map(function (o, i) {
-      var label = usable.length === 1 ? c.bookLabel : (o.short || o.label || c.bookLabel);
+      // The agent's custom label belongs to the plain ticket button; a lone
+      // package button keeps its own name, or "+ Hotel" would read "Book".
+      var label = usable.length === 1 && o.kind === 'ticket'
+        ? c.bookLabel
+        : (o.short || o.label || c.bookLabel);
       if (o.fly) {
         return '<button type="button" class="tgne-btn' + (i > 0 ? ' tgne-btn2' : '') + '"'
           + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'

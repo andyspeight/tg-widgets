@@ -103,6 +103,12 @@ const monza = {
   const noAirport = buildBookingOptions(camp, { appId: '250', kinds: ['ticket', 'ticket-flight-hotel'] });
   ok(!noAirport.some((o) => o.kind === 'ticket-flight-hotel'),
     'options: package omitted entirely when no airport is near');
+
+  // The widgets send booking=none when an agent unticks every type: not a
+  // kind, so it builds nothing. Without it an absent parameter falls back to
+  // every ready kind, which is the opposite of switched off.
+  ok(buildBookingOptions(camp, { appId: '250', kinds: ['none'] }).length === 0,
+    'options: none is nothing, not the default');
 }
 
 // ── Ticket + hotel, rebuilt from Andy's 24 Aug 2026 example ─────────────────

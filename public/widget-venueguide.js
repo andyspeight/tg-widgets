@@ -345,7 +345,12 @@
       + '&limit=' + clamp(c.eventLimit, 1, 12, 4)
       + '&currency=' + encodeURIComponent(/^[A-Z]{3}$/.test(c.currency) ? c.currency : 'GBP')
       + '&adults=' + clamp(c.adults, 1, 9, 2)
-      + '&booking=' + encodeURIComponent((Array.isArray(c.bookingKinds) ? c.bookingKinds : ['ticket']).join(','));
+      + '&booking=' + encodeURIComponent(
+        // Explicit 'none' when every type is off: an absent parameter would
+        // fall back to the server's default of every ready kind.
+        (Array.isArray(c.bookingKinds) && c.bookingKinds.filter(Boolean).length
+          ? c.bookingKinds.filter(Boolean)
+          : (Array.isArray(c.bookingKinds) ? ['none'] : ['ticket'])).join(','));
     if (c.appId) q += '&appId=' + encodeURIComponent(String(c.appId).slice(0, 32));
 
     this._seq = (this._seq || 0) + 1;
@@ -553,13 +558,14 @@
           else if (e.categoryLabel) meta.push(esc(e.categoryLabel));
           var usable = (e.bookingOptions || []).map(function (o) {
             var direct = safeUrl(o.url);
-            if (direct) return { short: o.short, url: direct };
+            if (direct) return { kind: o.kind, short: o.short, url: direct };
             var tpl = flyTpl(o);
-            if (tpl) return { short: o.short, fly: tpl };
+            if (tpl) return { kind: o.kind, short: o.short, fly: tpl };
             return null;
           }).filter(Boolean);
-          if (!usable.length && e.booking && safeUrl(e.booking.url)) {
-            usable = [{ short: c.bookLabel, url: e.booking.url }];
+          var wantsTicket = !Array.isArray(c.bookingKinds) || c.bookingKinds.indexOf('ticket') !== -1;
+          if (!usable.length && wantsTicket && e.booking && safeUrl(e.booking.url)) {
+            usable = [{ kind: 'ticket', short: c.bookLabel, url: e.booking.url }];
           }
           out += '<div class="tgvg-ev">'
             + '<div class="tgvg-date"><b>' + esc(e.startDate ? String(+e.startDate.slice(8, 10)) : '') + '</b>'
@@ -572,7 +578,8 @@
                   + ' aria-haspopup="dialog">'
                   + esc(usable[0].short || c.bookLabel || 'Book') + icon('ext') + '</button>'
                 : '<a class="tgvg-btn" href="' + esc(safeUrl(usable[0].url)) + '" target="_blank" rel="noopener noreferrer">'
-                  + esc(c.bookLabel || usable[0].short || 'Book') + icon('ext') + '</a>')
+                  + esc((usable[0].kind === 'ticket' ? c.bookLabel : usable[0].short)
+                    || usable[0].short || 'Book') + icon('ext') + '</a>')
               : '');
           out += '</div>';
         }
