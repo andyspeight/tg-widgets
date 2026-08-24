@@ -140,6 +140,7 @@
     "test:sea-route": "node test/sea-route-smoke.mjs",
     "test:offer-cruise-route": "node test/offer-cruise-route-smoke.mjs",
     "test:offer-cruise-map": "node test/offer-cruise-map-smoke.mjs",
+    "test:offer-notes-box": "node test/offer-notes-box-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
     "build:events-snapshot": "node scripts/build-events-snapshot.mjs"
   },

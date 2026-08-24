@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.4';
+  const VERSION = '0.4.5';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -69,7 +69,7 @@
       resort: 'Resort', destination: 'Destination', departsFrom: 'Departs from',
       airline: 'Airline', boardBasis: 'Board basis', travelPeriod: 'Travel period',
       bookByLabel: 'Book by', offerReference: 'Offer reference',
-      aboutHoliday: 'About this holiday', whatsIncluded: "What's included", whatsNotIncluded: "What's not included",
+      aboutHoliday: 'About this holiday', goodToKnow: 'Good to know', whatsIncluded: "What's included", whatsNotIncluded: "What's not included",
       photos: 'Photos', takeALook: 'Take a look', whereYoullBe: "Where you'll be", yourRoute: 'Your route',
       theDetail: 'The detail',
       // Cruise template
@@ -110,7 +110,7 @@
       resort: 'Station', destination: 'Destination', departsFrom: 'Départ de',
       airline: 'Compagnie aérienne', boardBasis: 'Type de pension', travelPeriod: 'Période de voyage',
       bookByLabel: 'Réserver avant le', offerReference: 'Référence de l’offre',
-      aboutHoliday: 'À propos de ce séjour', whatsIncluded: 'Ce qui est inclus', whatsNotIncluded: "Ce qui n'est pas inclus",
+      aboutHoliday: 'À propos de ce séjour', goodToKnow: 'Bon à savoir', whatsIncluded: 'Ce qui est inclus', whatsNotIncluded: "Ce qui n'est pas inclus",
       photos: 'Photos', takeALook: 'Jetez un œil', whereYoullBe: 'Où vous serez', yourRoute: 'Votre itinéraire',
       theDetail: 'Les détails',
       enquireNow: 'Faire une demande', enquireAbout: 'Renseignez-vous sur cette offre',
@@ -146,7 +146,7 @@
       resort: 'Ferienort', destination: 'Reiseziel', departsFrom: 'Abflug ab',
       airline: 'Fluggesellschaft', boardBasis: 'Verpflegung', travelPeriod: 'Reisezeitraum',
       bookByLabel: 'Buchen bis', offerReference: 'Angebotsreferenz',
-      aboutHoliday: 'Über diesen Urlaub', whatsIncluded: 'Was ist inbegriffen', whatsNotIncluded: 'Was ist nicht inbegriffen',
+      aboutHoliday: 'Über diesen Urlaub', goodToKnow: 'Gut zu wissen', whatsIncluded: 'Was ist inbegriffen', whatsNotIncluded: 'Was ist nicht inbegriffen',
       photos: 'Fotos', takeALook: 'Werfen Sie einen Blick', whereYoullBe: 'Wo Sie sein werden', yourRoute: 'Ihre Route',
       theDetail: 'Die Details',
       enquireNow: 'Jetzt anfragen', enquireAbout: 'Zu diesem Angebot anfragen',
@@ -182,7 +182,7 @@
       resort: 'Complejo', destination: 'Destino', departsFrom: 'Sale de',
       airline: 'Aerolínea', boardBasis: 'Régimen', travelPeriod: 'Periodo de viaje',
       bookByLabel: 'Reserva antes del', offerReference: 'Referencia de la oferta',
-      aboutHoliday: 'Sobre estas vacaciones', whatsIncluded: 'Qué incluye', whatsNotIncluded: 'Qué no incluye',
+      aboutHoliday: 'Sobre estas vacaciones', goodToKnow: 'Información útil', whatsIncluded: 'Qué incluye', whatsNotIncluded: 'Qué no incluye',
       photos: 'Fotos', takeALook: 'Echa un vistazo', whereYoullBe: 'Dónde estarás', yourRoute: 'Tu ruta',
       theDetail: 'Los detalles',
       enquireNow: 'Consultar ahora', enquireAbout: 'Consulta sobre esta oferta',
@@ -218,7 +218,7 @@
       resort: 'Località', destination: 'Destinazione', departsFrom: 'Partenza da',
       airline: 'Compagnia aerea', boardBasis: 'Trattamento', travelPeriod: 'Periodo di viaggio',
       bookByLabel: 'Prenota entro il', offerReference: 'Riferimento offerta',
-      aboutHoliday: 'Su questa vacanza', whatsIncluded: 'Cosa è incluso', whatsNotIncluded: 'Cosa non è incluso',
+      aboutHoliday: 'Su questa vacanza', goodToKnow: 'Buono a sapersi', whatsIncluded: 'Cosa è incluso', whatsNotIncluded: 'Cosa non è incluso',
       photos: 'Foto', takeALook: 'Dai un’occhiata', whereYoullBe: 'Dove sarai', yourRoute: 'Il tuo itinerario',
       theDetail: 'I dettagli',
       enquireNow: 'Richiedi ora', enquireAbout: 'Richiedi informazioni su questa offerta',
@@ -254,7 +254,7 @@
       resort: 'Stațiune', destination: 'Destinație', departsFrom: 'Pleacă din',
       airline: 'Companie aeriană', boardBasis: 'Tip de masă', travelPeriod: 'Perioada de călătorie',
       bookByLabel: 'Rezervă până la', offerReference: 'Referință ofertă',
-      aboutHoliday: 'Despre acest sejur', whatsIncluded: 'Ce este inclus', whatsNotIncluded: 'Ce nu este inclus',
+      aboutHoliday: 'Despre acest sejur', goodToKnow: 'Bine de știut', whatsIncluded: 'Ce este inclus', whatsNotIncluded: 'Ce nu este inclus',
       photos: 'Fotografii', takeALook: 'Aruncă o privire', whereYoullBe: 'Unde vei fi', yourRoute: 'Ruta ta',
       theDetail: 'Detaliile',
       enquireNow: 'Solicită acum', enquireAbout: 'Întreabă despre această ofertă',
@@ -987,6 +987,7 @@
         video: parseVideo(this._f('video')),
         map: map,
         cruiseRoute: cruiseRoute,
+        notes: this._f('notes'),
         currency: sym
       };
     }
@@ -1282,6 +1283,14 @@
           + tags + '</div>'
         : '';
 
+      // Free-text "Good to know" box — the author's Anything-else field. Shown at
+      // the very bottom, and only when they have actually typed something.
+      const notesParas = String(d.notes || '').split(/\n+/).filter(Boolean)
+        .map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+      const fNotes = notesParas
+        ? '<div class="tgop-section tgop-reveal"><h2 class="tgop-h2">' + esc(t('goodToKnow')) + '</h2><div class="tgop-prose">' + notesParas + '</div></div>'
+        : '';
+
       // Extra long-text sections (hotel, resort, country, ship, itinerary,
       // highlights, ski area). Each renders only when it has content, with a
       // heading that borrows the place name where it helps. Type-aware: a
@@ -1413,13 +1422,13 @@
         + '<button type="button" class="tgop-lb-btn next" data-lb-next aria-label="' + esc(t('nextPhoto')) + '">' + I.chevDown + '</button></div>';
 
       // Main column content order (shared by classic + immersive)
-      const mainCol = fAbout + fContent + fIncludes + fExcludes + fVideo + fGallery + fMap + fDetail;
+      const mainCol = fAbout + fContent + fIncludes + fExcludes + fVideo + fGallery + fMap + fDetail + fNotes;
 
       // ── Assemble by template ──
       let html;
       if (cfg.template === 'editorial') {
         html = fBar + fHero + fFacts
-          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fContent + fIncludes + fExcludes + fGallery + fVideo + fMap + fDetail + '</div>'
+          + '<div class="tgop-wrap tgop-editorial">' + fAbout + fContent + fIncludes + fExcludes + fGallery + fVideo + fMap + fDetail + fNotes + '</div>'
           + '<div class="tgop-enqband"><div class="tgop-wrap tgop-enqband-inner">'
             + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">' + esc(t('likeTheLook')) + '</h2><p>' + esc(t('enqBandCopy')) + '</p></div>'
             + '<div class="tgop-enqband-card">' + this._bookCard(d) + '</div>'
@@ -1447,7 +1456,7 @@
           : '';
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap tgop-cruise-top">'
-            + '<div class="tgop-cruise-main">' + fAbout + fIncludes + fExcludes + fDetail + '</div>'
+            + '<div class="tgop-cruise-main">' + fAbout + fIncludes + fExcludes + fDetail + fNotes + '</div>'
             + '<aside class="tgop-cruise-aside">' + this._cruiseBook(d) + '</aside>'
           + '</div>'
           + this._cruiseStory(d)
