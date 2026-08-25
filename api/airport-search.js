@@ -20,6 +20,7 @@
  */
 
 import { sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
+import { servableStatusFormula } from './_lib/airport-status.js';
 
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY;
 const DESTINATION_BASE_ID = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
@@ -116,11 +117,15 @@ export default async function handler(req, res) {
     // 'City Served'. Earlier draft used {Name} which doesn't exist on this
     // table and poisoned the whole OR, causing every search to fail with
     // INVALID_FILTER_BY_FORMULA.
-    const formula = "OR(" +
+    const matches = "OR(" +
       "SEARCH(LOWER('" + safe + "'),LOWER({Airport Name}))," +
       "SEARCH(UPPER('" + safe + "'),UPPER({IATA Code}))," +
       "SEARCH(LOWER('" + safe + "'),LOWER({City Served}))" +
     ")";
+    // Only offer records finished enough to serve. Without this the picker
+    // offered identity-only skeletons and unsourced drafts alongside audited
+    // records, with nothing on screen to tell an agent which was which.
+    const formula = "AND(" + matches + "," + servableStatusFormula() + ")";
 
     const data = await airtableGet(AIRPORTS_TABLE_ID, {
       filterByFormula: formula,
