@@ -27,9 +27,11 @@ import { requireTenantId } from '../../lib/auth/session';
 import {
   deleteMedia,
   findImportedProviderIds,
+  getMediaItem,
   insertMedia,
   listMedia,
   setMediaAlt,
+  setMediaVariants,
 } from '../../lib/db/media';
 import { blobConfigured, describeBlob, removeBlob } from '../../lib/media/blob';
 import {
@@ -404,6 +406,53 @@ export async function importStockAction(photo: StockPhoto): Promise<MediaResult<
 // ---------------------------------------------------------------------------
 // Editing and removing
 // ---------------------------------------------------------------------------
+
+/**
+ * Attach smaller copies to a picture that is already in the bank.
+ *
+ * THE BACKFILL'S ONLY WRITE. Variants are encoded in the browser, so a picture
+ * uploaded before that existed has none: 30 images on the live database the day
+ * the feature shipped, 30 without. The srcset work was live and doing nothing for
+ * any existing page. The picker re-encodes them the same way an upload does and
+ * calls this once per picture.
+ *
+ * EVERY VARIANT IS CHECKED AGAINST THE STORE, through the same verifiedVariants
+ * the upload path uses. That is the rule this file already keeps and it applies
+ * with more force here, not less: this call names a row that already exists and
+ * says what its pictures are, so believing the browser would let a session point
+ * a client's image at anything shaped like a store url.
+ *
+ * REFUSES TO OVERWRITE. A picture that already has copies is left exactly as it
+ * is. The backfill plans around those anyway, so reaching this means two runs
+ * overlapped or a request was replayed, and in both cases the copies already
+ * recorded are the ones the store actually holds.
+ */
+export async function recordVariantsAction(
+  id: string,
+  variants: RecordUpload['variants'],
+): Promise<MediaResult<MediaItem | null>> {
+  try {
+    const tenantId = await requireTenantId();
+
+    const existing = await getMediaItem(tenantId, String(id ?? ''));
+    if (!existing) return { ok: false, error: 'That picture is not in this bank.' };
+    if (existing.variants.length > 0) return { ok: true, data: existing };
+
+    const checked = await verifiedVariants(variants, tenantId, existing.url);
+    if (checked.length === 0) {
+      return {
+        ok: false,
+        error: 'None of those smaller copies arrived in the store, so nothing was recorded.',
+      };
+    }
+
+    const saved = await setMediaVariants(tenantId, existing.id, checked);
+    revalidatePath('/', 'layout');
+    return { ok: true, data: saved };
+  } catch (error) {
+    return { ok: false, error: explain(error, 'Could not record those smaller copies.') };
+  }
+}
 
 export async function setMediaAltAction(
   id: string,

@@ -318,6 +318,40 @@ export async function imageSizesForUrls(
   });
 }
 
+/**
+ * Attach smaller copies to a picture that is already in the bank.
+ *
+ * SEPARATE FROM insertMedia because this is the backfill's path, not an upload's.
+ * An upload knows every fact about the row at once; this knows one, and going
+ * through the insert would mean reconstructing the rest from a client's word to
+ * write it straight back over itself.
+ *
+ * The caller has already checked every url against the store and against this
+ * tenant's prefix. Scoped to the tenant here as well, so a wrong id changes
+ * nothing rather than another client's row.
+ */
+export async function setMediaVariants(
+  tenantId: string,
+  id: string,
+  variants: readonly MediaVariant[],
+): Promise<MediaItem | null> {
+  // Same shape check the other single-row readers do, and for the same reason:
+  // a malformed id is a bad request, not a database error, and Postgres raises
+  // on a cast it cannot make.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
+
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      update public.media
+         set variants = ${json(tx, variants as MediaVariant[])}
+       where id = ${id}
+      returning id, url, storage_key, filename, mime, bytes, variants,
+                width, height, alt, source, credit, created_at
+    `;
+    return rows.length ? toItem(rows[0] as Record<string, unknown>) : null;
+  });
+}
+
 export async function insertMedia(tenantId: string, media: NewMedia): Promise<MediaItem> {
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`

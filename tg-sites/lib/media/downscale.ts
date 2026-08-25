@@ -341,6 +341,50 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
   }
 }
 
+/**
+ * Smaller copies for a picture that is ALREADY in the store.
+ *
+ * The backfill's half of the work. Everything a normal upload does happens on a
+ * File the person just chose; this starts from a url, so it fetches the original
+ * back before it can decode it, and that is the one meaningful difference.
+ *
+ * NEVER THROWS, like everything else in this file. A picture that cannot be
+ * fetched or decoded returns an empty list and the run moves to the next one,
+ * because a backfill that stops on the first awkward file is a backfill nobody
+ * finishes. The caller counts the empties and says so rather than hiding them.
+ *
+ * THE FETCH IS THE FRAGILE PART, and it is worth naming. The store's public urls
+ * are on another origin, so this needs them to allow a cross-origin read. If they
+ * do not, every picture comes back empty and the count makes that obvious
+ * immediately rather than looking like a slow no-op. The fix in that case is to
+ * read the original back through our own origin, and it is deliberately not
+ * written until we know it is needed.
+ */
+export async function variantsForStoredImage(
+  url: string,
+  filename: string,
+): Promise<PreparedVariant[]> {
+  let bitmap: ImageBitmap;
+  try {
+    const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+    if (!response.ok) return [];
+    const blob = await response.blob();
+    if (!isImageMime(blob.type)) return [];
+    bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+  } catch {
+    return [];
+  }
+
+  const stem = cleanFilename(filename).replace(/\.[a-z0-9]+$/i, '') || 'image';
+  try {
+    return await encodeVariants(bitmap, bitmap.width, bitmap.height, stem);
+  } catch {
+    return [];
+  } finally {
+    bitmap.close();
+  }
+}
+
 /** canvas.toBlob as a promise, because it is one of the last callback APIs left. */
 function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
   return new Promise((resolve) => {

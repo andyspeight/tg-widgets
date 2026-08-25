@@ -32,12 +32,14 @@ import {
   importStockAction,
   loadMediaAction,
   recordUploadAction,
+  recordVariantsAction,
   searchStockAction,
   setMediaAltAction,
 } from '../../app/actions/media';
 import { describeImageAction } from '../../app/actions/ai';
 import { MAX_ALT } from '../../lib/ai/prompt';
-import { prepareImageForUpload } from '../../lib/media/downscale';
+import { prepareImageForUpload, variantsForStoredImage } from '../../lib/media/downscale';
+import { backfillPlan, describePlan } from '../../lib/media/backfill';
 import {
   ALLOWED_DOCUMENT_MIME,
   filenameStem,
@@ -194,6 +196,8 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
               onAltSaved={onAltSaved}
               onMore={() => void load(items.length)}
               onUploadInstead={() => setTab(canUpload ? 'upload' : 'stock')}
+              uploadPrefix={uploadPrefix}
+              onError={setError}
             />
           )}
 
@@ -387,9 +391,14 @@ function Bank({
   onAltSaved,
   onMore,
   onUploadInstead,
+  uploadPrefix,
+  onError,
 }: {
   kind: MediaKind;
   items: MediaItem[];
+  /** Where a variant is allowed to be written. The route re-derives it anyway. */
+  uploadPrefix: string;
+  onError: (message: string) => void;
   hasMore: boolean;
   loaded: boolean;
   busy: boolean;
@@ -423,6 +432,13 @@ function Bank({
 
   return (
     <>
+      <BackfillPanel
+        items={items}
+        uploadPrefix={uploadPrefix}
+        onUpdated={onAltSaved}
+        onError={onError}
+      />
+
       <div className="mp-grid" data-kind={kind}>
         {items.map((item) => (
           <figure className="mp-tile" key={item.id} data-current={item.url === currentUrl}>
@@ -509,6 +525,114 @@ function Bank({
 // ---------------------------------------------------------------------------
 // Upload
 // ---------------------------------------------------------------------------
+
+/**
+ * Make the pictures already in this bank smaller for phones.
+ *
+ * WHY IT EXISTS. Variants are encoded in the browser when a picture is uploaded,
+ * so every picture that predates that feature has none: on the live database the
+ * day it shipped, 30 images and 30 without. The srcset work was live and doing
+ * nothing at all for any existing page. This is the one path that fixes that, and
+ * it lives here because the bank is here and because the encoding needs a canvas,
+ * which means it needs a browser.
+ *
+ * IT SAYS WHAT IT WILL DO BEFORE IT DOES IT. This re-encodes and re-uploads
+ * somebody's whole photograph library, so the count of pictures AND the count of
+ * files it will create are both on the button. Those differ by about three, and
+ * the second is the one that decides how long they wait.
+ *
+ * SEQUENTIAL, AND IT KEEPS GOING. One picture at a time, because a dozen parallel
+ * uploads from an office connection is how the one that mattered times out. A
+ * picture that cannot be read is counted and skipped rather than stopping the
+ * run, and the count is reported at the end instead of being swallowed: if the
+ * store will not allow a cross-origin read, every picture fails and that number
+ * says so at once rather than looking like a slow no-op.
+ */
+function BackfillPanel({
+  items,
+  uploadPrefix,
+  onUpdated,
+  onError,
+}: {
+  items: MediaItem[];
+  uploadPrefix: string;
+  onUpdated: (item: MediaItem) => void;
+  onError: (message: string) => void;
+}) {
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
+
+  const plan = backfillPlan(items);
+  if (plan.candidates.length === 0 || !uploadPrefix) return null;
+
+  async function run() {
+    setRunning(true);
+    let done = 0;
+    let unreadable = 0;
+
+    try {
+      const { upload } = await import('@vercel/blob/client');
+
+      for (const [n, item] of plan.candidates.entries()) {
+        setProgress(`Working through your pictures, ${n + 1} of ${plan.candidates.length}`);
+
+        const variants = await variantsForStoredImage(item.url, item.filename);
+        if (variants.length === 0) {
+          unreadable += 1;
+          continue;
+        }
+
+        const uploaded: Array<{ url: string; width: number; height: number }> = [];
+        for (const variant of variants) {
+          try {
+            const stored = await upload(
+              `${uploadPrefix}${filenameStem(variant.filename)}.${MEDIA_MIME[variant.mime]}`,
+              variant.body,
+              { access: 'public', handleUploadUrl: '/api/media/upload', contentType: variant.mime },
+            );
+            uploaded.push({ url: stored.url, width: variant.width, height: variant.height });
+          } catch {
+            // One size short is still better than none.
+          }
+        }
+
+        if (uploaded.length === 0) {
+          unreadable += 1;
+          continue;
+        }
+
+        const recorded = await recordVariantsAction(item.id, uploaded);
+        if (recorded.ok && recorded.data) {
+          onUpdated(recorded.data);
+          done += 1;
+        } else if (!recorded.ok) {
+          onError(recorded.error);
+        }
+      }
+
+      setProgress(
+        unreadable === 0
+          ? `Done. ${done} ${done === 1 ? 'picture is' : 'pictures are'} now smaller on phones.`
+          : `Done. ${done} sorted, ${unreadable} could not be read back from storage.`,
+      );
+    } catch (error) {
+      onError(error instanceof Error ? error.message : 'Could not finish making those smaller.');
+      setProgress(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <div className="mp-backfill">
+      <p className="mp-backfill__note">{describePlan(plan)}</p>
+      <button type="button" className="mp-btn" onClick={() => void run()} disabled={running}>
+        {running ? 'Working' : 'Make them smaller for phones'}
+      </button>
+      {progress && <p className="mp-backfill__progress">{progress}</p>}
+    </div>
+  );
+}
 
 function UploadPanel({
   kind,
