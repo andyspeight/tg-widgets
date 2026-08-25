@@ -1,5 +1,19 @@
 /**
- * GET/POST /api/cron/reference-identity  (Vercel Cron, daily)
+ * POST /api/cron/reference-identity  (NOT SCHEDULED, manual invocation only)
+ *
+ * UNSCHEDULED 25 Aug 2026 at Andy's instruction. The automated fill was solving
+ * the wrong problem: it can verify that an airport exists and where it is, but
+ * the value in this table is the narrative, and no cron can verify that. Filling
+ * coordinates on 368 new airports while the 102 records already live on client
+ * sites had never been audited would have widened a problem instead of fixing
+ * it. The data is being rebuilt by hand, record by record, against the
+ * airport-spotlight methodology.
+ *
+ * Kept because the identity cross-check is still the right first step for any
+ * record once the manual audit reaches it, and because the backfill pass is the
+ * cheapest way to give an audited record its coordinates. Invoke deliberately,
+ * do not re-add to vercel.json crons without deciding that automation is
+ * wanted again.
  *
  * Works the airport table towards full coverage, a batch at a time, using the
  * two-independent-source model. Two passes per run:
