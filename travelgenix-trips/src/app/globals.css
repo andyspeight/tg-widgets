@@ -1,0 +1,44 @@
+/* Travelgenix Trips — base only.
+   The console is Travelgenix-branded and governed by travelgenix-design.
+   Public trip pages are OPERATOR-branded: they take their palette from
+   gt_operators.brand at render time, never from these tokens. */
+
+:root {
+  --tg-ink: #12211f;
+  --tg-ink-2: #3a4b47;
+  --tg-muted: #6b7671;
+  --tg-paper: #fbfaf7;
+  --tg-surface: #ffffff;
+  --tg-rule: #dedfd8;
+  --tg-accent: #0e6e5c;
+  --tg-danger: #b3421f;
+  --tg-radius: 6px;
+  --tg-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tg-ink: #e9edea;
+    --tg-ink-2: #bac5c1;
+    --tg-muted: #8c9894;
+    --tg-paper: #0e1817;
+    --tg-surface: #16211f;
+    --tg-rule: #2a3936;
+    --tg-accent: #5fc0a5;
+    --tg-danger: #e8875f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--tg-paper);
+  color: var(--tg-ink);
+  font-family: var(--tg-font);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--tg-accent); }
+:focus-visible { outline: 2px solid var(--tg-accent); outline-offset: 2px; }

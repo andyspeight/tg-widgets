@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+build/
+.env
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.vercel
+
+# Vercel needs a committed lockfile for reproducible installs. While this
+# project is staged inside the tg-widgets working tree, that repo's root
+# .gitignore excludes every package-lock.json, so it is re-included here
+# explicitly. Harmless once this repo stands alone.
+!package-lock.json

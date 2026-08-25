@@ -371,8 +371,9 @@ what makes both true at once, which a single flat fee could not do.
 
 ## 7. Data model
 
-Extends the three existing `gt_*` tables rather than replacing them. The migration
-series continues from `gt_001`.
+Extends the three existing `gt_*` tables rather than replacing them. Thirteen new
+tables, written and committed as `gt_002_platform.sql`. The migration series
+continues from `gt_001`.
 
 **New**
 
@@ -411,9 +412,12 @@ exported and unit-tested in `computeSpotsTaken`. It moves to counting against
 Each phase ships something an operator can use. No phase is a refactor with nothing
 to show.
 
-**Phase 0 — Foundations.** Repo, Vercel project, SSO against tg-widgets, schema
-migration `gt_002`, Stripe Connect onboarding. *Everything except the Connect step
-can start today. Unblocks every money phase below, see section 9.*
+**Phase 0 — Foundations. BUILT 25 Aug 2026.** Next.js 15 App Router app, the SSO
+bridge to tg-widgets, the service-role data layer, the capacity and money rules
+ported from the widget with 24 tests, the `gt_002_platform.sql` migration, a
+console shell and a public trip page. Typecheck clean, build clean, tests green.
+*Two things are outstanding and both need Andy: the GitHub repo itself, and the
+Stripe Connect step. See section 9.*
 
 **Phase 1 — A trip is a real thing.** Trips move out of Airtable widget config into
 `gt_trips` and `gt_departures`. Operator console: create, edit, publish. Public trip
@@ -460,22 +464,37 @@ The Supabase side is fully unblocked. `TRIPS_SUPABASE_URL` and
 `TRIPS_SUPABASE_SERVICE_ROLE_KEY` are already in Vercel and the schema is live.
 
 This is three weeks old as of 25 Aug 2026. Phases 2, 3, 6 and 8 cannot start without
-it. Phases 1, 4, 5 and 7 can, and so can all of phase 0 bar the Connect step, so
-the plan is ordered to keep moving. But the booking engine is the product, and it
+it. Phases 1, 4, 5 and 7 can, and so could all of phase 0 bar the Connect step,
+which is why phase 0 is now built. But the booking engine is the product, and it
 is waiting on a login to Stripe.
+
+### The second blocker: the repo does not exist yet
+
+Andy approved creating `travelgenix-trips` on 25 Aug 2026, but the GitHub App this
+session authenticates through has **no repository-creation scope**, so the call
+fails with a 403. Andy needs to create the empty private repo himself, which takes
+about thirty seconds. Nothing else is waiting on it: phase 0 is built and staged in
+this branch at `travelgenix-trips/`, and moves across as soon as the repo exists.
+
+### A constraint worth knowing, found while building phase 0
+
+The SSO cookie is `tg_session`, set on `.travelify.io` for cross-subdomain SSO. So
+the **console must be served from a `*.travelify.io` host** or the browser simply
+never sends the cookie and every visitor looks signed out. `trips.travelify.io` is
+therefore not a branding preference, it is a technical requirement. The knock-on:
+an operator **custom domain can only ever serve public trip pages, never the
+console**, which is now written into the repo's own `CLAUDE.md`.
 
 ---
 
 ## 10. Open questions for Andy
 
-1. **Confirm the volume banding** in section 5: Start £39 to £75k, Grow £99 to
-   £400k, Scale £249 above that, core product flat across all three. Two sub-questions
-   ride on it. (a) Is the band metric **volume processed** or **travellers booked**?
-   Volume aligns better to value, travellers sidesteps the "so you are taking a cut"
-   perception and is easier to verify. Recommend volume, with travellers as the
-   fallback if the perception bites in sales calls. (b) Bookings taken offline and
-   marked paid by hand sit outside anything we can meter, so state the policy: we
-   band on volume that passes through Trips, and we do not chase the rest.
+1. **Confirm the band figures** in section 5: Start £39 to £75k, Grow £99 to £400k,
+   Scale £249 above that, core product flat across all three. The band **metric** is
+   settled: **volume processed**, decided 25 Aug 2026. Still open: bookings taken
+   offline and marked paid by hand sit outside anything we can meter, so we need a
+   stated policy. Recommend we band on volume that passes through Trips and do not
+   chase the rest.
 2. **Repo name and domain.** Suggest repo `travelgenix-trips`, domain
    `trips.travelify.io`, with operator custom domains in Enterprise.
 3. **Do the existing widget tiles stay?** Group Trips and Escorted Tour are still
