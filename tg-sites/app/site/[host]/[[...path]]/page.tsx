@@ -39,7 +39,7 @@ import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
 import { getPublicTheme } from '../../../../lib/db/theme';
-import { resolveTenantByHostname } from '../../../../lib/db/tenants';
+import { getPublicTenantSlug, resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
 import { jsonLdScript, pageJsonLd, profileLinks } from '../../../../lib/seo/jsonld';
 import { familiesFromFiles } from '../../../../lib/theme/fonts';
@@ -121,7 +121,7 @@ const load = cache(async function load(host: string, path: string[] | undefined)
    * eu-west-2 before a byte of HTML. The header and the footer are one read
    * between them rather than two, for the same reason.
    */
-  const [page, theme, faces, settings, regions, navPages] = await Promise.all([
+  const [page, theme, faces, settings, regions, navPages, tenantSlug] = await Promise.all([
     getPublishedPage(tenantId, (path ?? []).join('/')),
     getPublicTheme(tenantId),
     listFontFaces(tenantId),
@@ -133,6 +133,11 @@ const load = cache(async function load(host: string, path: string[] | undefined)
      * waits on, so it rides the same Promise.all rather than adding a round trip.
      */
     listPublishedNavPages(tenantId),
+    /*
+     * The tenant's OWN slug, which is not the hostname and is what the font
+     * route wants. Rides this Promise.all rather than adding a round trip.
+     */
+    getPublicTenantSlug(tenantId),
   ]);
 
   const segments = (path ?? []).filter(Boolean);
@@ -172,6 +177,7 @@ const load = cache(async function load(host: string, path: string[] | undefined)
         regions,
         navPages,
         tenantId,
+        tenantSlug,
       };
     }
 
@@ -189,6 +195,7 @@ const load = cache(async function load(host: string, path: string[] | undefined)
       regions,
       navPages,
       tenantId,
+      tenantSlug,
     };
   }
 
@@ -234,6 +241,7 @@ const load = cache(async function load(host: string, path: string[] | undefined)
     regions,
     navPages,
     tenantId,
+    tenantSlug,
   };
 });
 
@@ -534,7 +542,21 @@ export default async function SitePage({ params, searchParams }: Params) {
 
       {/* @font-face and the preloads, before the content, so the browser starts
           fetching the font while it is still reading the page. */}
-      <FontHead tenantSlug={slug} files={found.faces} typography={found.theme.typography} />
+      {/*
+        THE TENANT'S SLUG, NOT THE HOSTNAME, and the difference was invisible and
+        total. The font route takes a bare slug and builds the hostname itself,
+        refusing anything with a dot on purpose so a slug cannot be dressed up as
+        another domain. Handing it `slug`, which is decodeURIComponent(host),
+        meant every font URL on every published page 404'd, and every client site
+        was drawn in a fallback face rather than the typeface its design
+        committed to. Nothing errored and no test caught it; the page simply
+        looked slightly wrong forever.
+
+        Found on 25 Aug 2026 because Andy noticed a headline wrapping onto two
+        lines in the editor and one line live. The editor was right: it passes
+        site.slug and always had.
+      */}
+      <FontHead tenantSlug={found.tenantSlug ?? slug} files={found.faces} typography={found.theme.typography} />
 
       {/*
         The page's only h1. Section headings start at h2, which the heading
@@ -853,15 +875,19 @@ async function loadSearch(host: string, query: string) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
   if (!tenantId) return null;
 
-  const [theme, faces, settings, regions, navPages, pageDocs, postDocs] = await Promise.all([
-    getPublicTheme(tenantId),
-    listFontFaces(tenantId),
-    getPublicSettings(tenantId),
-    getPublishedRegions(tenantId),
-    listPublishedNavPages(tenantId),
-    listPublishedForSearch(tenantId),
-    listPublishedItemsForSearch(tenantId),
-  ]);
+  const [theme, faces, settings, regions, navPages, pageDocs, postDocs, tenantSlug] =
+    await Promise.all([
+      getPublicTheme(tenantId),
+      listFontFaces(tenantId),
+      getPublicSettings(tenantId),
+      getPublishedRegions(tenantId),
+      listPublishedNavPages(tenantId),
+      listPublishedForSearch(tenantId),
+      listPublishedItemsForSearch(tenantId),
+      // The slug the font route wants, which is not the hostname. See the note
+      // on FontHead in this file.
+      getPublicTenantSlug(tenantId),
+    ]);
 
   /*
    * PAGES AND POSTS IN ONE CORPUS, ranked together with no thumb on the scale
@@ -870,7 +896,10 @@ async function loadSearch(host: string, query: string) {
    * already asking. Sorting posts below pages would be asserting that a page is
    * always more relevant, which on a travel site is often the opposite of true.
    */
-  return { theme, faces, settings, regions, navPages, query, hits: searchDocs([...pageDocs, ...postDocs], query) };
+  return {
+    theme, faces, settings, regions, navPages, tenantSlug, query,
+    hits: searchDocs([...pageDocs, ...postDocs], query),
+  };
 }
 
 function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typeof loadSearch>>>) {
@@ -886,7 +915,8 @@ function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typ
     <>
       <ThemeToggleScript active={dark} />
       <SiteHead settings={data.settings} />
-      <FontHead tenantSlug={slug} files={data.faces} typography={data.theme.typography} />
+      {/* The slug, not the hostname. See the note on the other FontHead above. */}
+      <FontHead tenantSlug={data.tenantSlug ?? slug} files={data.faces} typography={data.theme.typography} />
 
       {/* The header and footer are siblings of the results, each carrying the
           theme itself, exactly as they are around a page. */}

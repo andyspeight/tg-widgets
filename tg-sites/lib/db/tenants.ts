@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { slugify } from '../content/slug';
 import { isPreviewHostname, PREVIEW_DOT_SUFFIX } from '../domains/preview';
 import { db, type DbRole } from './client';
-import { withTenant, type Tx } from './withTenant';
+import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
 export interface Tenant {
   id: string;
@@ -171,6 +171,31 @@ function toTenant(row: Record<string, unknown>): Tenant {
  * and "not yours" are the same answer here: RLS makes another tenant's row
  * indistinguishable from one that does not exist, which is what it should do.
  */
+/**
+ * A tenant's slug, read through the READ-ONLY role a visitor's request uses.
+ *
+ * WHY THE PUBLISHED PAGE NEEDS THIS AT ALL. Fonts are served from
+ * /fonts/<slug>/<file>, and that route takes a bare SLUG which it turns into a
+ * hostname itself; it refuses anything with a dot on purpose, so a slug cannot
+ * be dressed up as another domain. The published route had been handing it the
+ * HOSTNAME, so every font URL on every live page 404'd and every client site was
+ * drawn in a fallback face instead of the typeface its design committed to.
+ *
+ * Deriving it from the hostname would fix only the preview subdomains. A client
+ * on their own domain has a hostname with no slug in it anywhere, and that is
+ * the case that matters most.
+ *
+ * getTenant reads through the app role, which a visitor's request does not have.
+ * This is the same row through withPublicTenant, which is the whole difference.
+ */
+export async function getPublicTenantSlug(tenantId: string): Promise<string | null> {
+  return withPublicTenant(tenantId, async (tx) => {
+    // One visible row: the policy on `tenants` is id = current_tenant().
+    const rows = await tx`select slug from public.tenants limit 1`;
+    return rows.length ? String((rows[0] as Record<string, unknown>).slug) : null;
+  });
+}
+
 export async function getTenant(tenantId: string): Promise<Tenant | null> {
   return withTenant(tenantId, async (tx) => {
     // No WHERE clause needed. The policy on `tenants` is `id = current_tenant()`,
