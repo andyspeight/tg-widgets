@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { db } from './client';
+import type { Tx } from './withTenant';
 import { REFERENCE_KINDS, type ReferenceKind } from '../content/reference';
 
 /**
@@ -43,6 +44,23 @@ export interface SyncOutcome {
   written: number;
   /** Why any were refused, deduplicated, for the log. */
   refused: string[];
+}
+
+/**
+ * The driver's json() wrapper, with the one cast it needs.
+ *
+ * THE SAME HELPER AS pages.ts AND theme.ts, AND FOR THE SAME BUG. Writing a
+ * jsonb column with JSON.stringify hands the driver a JS string, which it then
+ * serialises as JSON, so what lands is a JSON *string* containing JSON rather
+ * than an object. It has bitten this codebase four times now; the fourth was
+ * this module, caught by counting rows after the first real sync rather than by
+ * anything failing. See db/migrations/0007_unwrap_double_encoded_json.sql.
+ *
+ * The quiet half is the dangerous half: referenceFacts() returns null for a
+ * string, so a destination page would simply have drawn no facts at all.
+ */
+function json(tx: Tx, value: unknown) {
+  return tx.json(value as Parameters<Tx['json']>[0]);
 }
 
 /** A short trimmed string, or ''. */
@@ -135,8 +153,8 @@ export async function saveReferenceRecords(records: readonly ReferenceRecord[]):
         source_id: record.sourceId,
         name: record.name,
         slug: record.slug,
-        facts: JSON.stringify(record.facts),
-        prose: JSON.stringify(record.prose),
+        facts: json(tx, record.facts),
+        prose: json(tx, record.prose),
         synced_at: new Date().toISOString(),
       }));
 
