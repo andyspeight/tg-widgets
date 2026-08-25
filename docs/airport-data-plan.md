@@ -202,10 +202,15 @@ depth rather than cut the standard:
 Add a Depth field to the table so the widget picks a layout instead of drawing
 blank sections, and so an agent can see what they are embedding.
 
-### Phase 4: Keep it true
+### Phase 4: Keep it true (done 25 Aug 2026)
 
-Fix the freshness arithmetic. 25 records a week against a table of 230 and a 60
-day TTL never converges. Either run daily, raise the batch, or set the TTL by
+The freshness arithmetic never converged: 25 records a week against a table of
+230 and a 60 day TTL left every record permanently overdue and nothing was ever
+re-stamped. `/api/cron/reference-freshness` now runs daily with a batch of 40,
+which clears the table inside the TTL even at 593 records.
+
+The original note, for the record. 25 records a week against a table of 230 and
+a 60 day TTL never converges. Either run daily, raise the batch, or set the TTL by
 tier so Tier 1 is checked often and Tier 3 rarely. Turn on re-stamping for clean
 two-source confirmations, and keep drift flagged for a human.
 
@@ -262,9 +267,11 @@ all. An uncorroborated field is left blank and reported, never filled.
 `runBreadthFill` creates records we are missing, both writing only corroborated
 identity and never narrative. `POST /api/reference/identity-backfill` runs the
 first on demand (dry run by default). `/api/cron/reference-identity` works both
-daily in bounded batches. Backfill writes by default because it only fills
-blanks. Creation waits for `REFERENCE_BREADTH_CREATE=true`, since creating
-hundreds of records deserves a deliberate switch rather than a silent cron.
+daily in bounded batches. Both write by default. Backfill only ever fills blanks, and every record
+creation is corroborated by both sources and lands as In progress, which the
+Status gate keeps out of the picker and off every client site until a human has
+written and verified its narrative. `REFERENCE_BREADTH_CREATE=false` stops
+creation if it is ever needed.
 
 65 assertions across `test/airport-status-gate-smoke.mjs` and
 `test/airport-identity-verify-smoke.mjs`.
@@ -320,10 +327,9 @@ acts on them:
 
 ## 7. Open decisions for Andy
 
-1. Flip `REFERENCE_BREADTH_CREATE=true` when you want the cron to start
-   creating the missing records, or say so and I will run the fill in bounded
-   batches by hand first so you can see a sample before it runs nightly.
-2. Confirm the REP and PNH findings above, which change what we sell.
+1. Confirm the REP and PNH findings above, which change what we sell. Neither
+   is safe to correct on one source, so both are left flagged rather than
+   guessed.
 3. Whether cohort B's existing prose is kept and enriched, or rewritten. It is
    longer than cohort A's but written in a different register, and none of it
    has a cited source.

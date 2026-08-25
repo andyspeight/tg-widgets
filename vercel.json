@@ -122,7 +122,7 @@
     },
     {
       "path": "/api/cron/reference-freshness",
-      "schedule": "0 4 * * 1"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/cron/reference-identity",

@@ -1,5 +1,5 @@
 /**
- * GET/POST /api/cron/reference-freshness  (Vercel Cron, weekly)
+ * GET/POST /api/cron/reference-freshness  (Vercel Cron, daily)
  *
  * Re-checks reference airports whose Verified Date has lapsed against their
  * cited sources and logs a freshness report. Report-only by default: it does
@@ -20,9 +20,13 @@ export default async function handler(req, res) {
 
   const ttlDays = parseInt(process.env.BRAIN_FRESHNESS_TTL_DAYS || '60', 10);
   const flagDrift = process.env.BRAIN_FRESHNESS_FLAG_DRIFT === 'true';
+  // 25 a week against a 60 day TTL never caught up even on 230 records, so every
+  // record sat permanently overdue and nothing was ever re-stamped. Daily now,
+  // with a batch that can clear the table inside the TTL as it grows to 593.
+  const freshnessLimit = parseInt(process.env.BRAIN_FRESHNESS_LIMIT || '40', 10);
 
   try {
-    const summary = await runFreshness({ ttlDays, limit: 25, restampValid: false, flagDrift });
+    const summary = await runFreshness({ ttlDays, limit: freshnessLimit, restampValid: false, flagDrift });
     console.log('[cron/reference-freshness]', JSON.stringify({
       ttlDays: summary.ttlDays, due: summary.due, checked: summary.checked,
       holds: summary.holds, drifted: summary.drifted, unverifiable: summary.unverifiable, flagged: summary.flagged,

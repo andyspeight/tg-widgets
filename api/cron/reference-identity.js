@@ -9,9 +9,10 @@
  *      default: it cannot overwrite anything and cannot touch narrative.
  *   2. Create    identity-verified skeletons for airports on the worklist we
  *      have no record for. Status In progress, so the picker never offers them
- *      until a human has written and verified the narrative. OFF unless
- *      REFERENCE_BREADTH_CREATE=true, because creating hundreds of records is a
- *      bigger step than filling blanks and deserves a deliberate switch.
+ *      and no client site can reach them until a human has written and verified
+ *      the narrative. On by default: reaching full coverage is the job, every
+ *      created record is corroborated by both sources, and nothing created here
+ *      is servable. Set REFERENCE_BREADTH_CREATE=false to stop it.
  *
  * Batch sizes keep each run inside the function timeout; the daily schedule is
  * what gets through the backlog. See docs/airport-data-plan.md.
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
 
   const backfillLimit = parseInt(process.env.REFERENCE_BACKFILL_LIMIT || '25', 10);
   const createLimit = parseInt(process.env.REFERENCE_CREATE_LIMIT || '25', 10);
-  const create = process.env.REFERENCE_BREADTH_CREATE === 'true';
+  const create = process.env.REFERENCE_BREADTH_CREATE !== 'false';
 
   try {
     const backfill = await runIdentityBackfill({ limit: backfillLimit, write: true });
