@@ -243,6 +243,26 @@ const VIEWPORTS: ReadonlyArray<{ value: Viewport; label: string; icon: IconName 
  * the three phone sizes that cover almost everything. Anything else can be
  * typed in.
  */
+/**
+ * Where a page's content actually stops, from --tgs-width-contained.
+ *
+ * THE THRESHOLD THAT DECIDES WHETHER THE PREVIEW IS TRUE, which is not the same
+ * as the chosen viewport width and is the more useful thing to say. A contained
+ * section caps its inner at this, so from here upward every desktop width lays
+ * out identically: measured on a real page, the hero's heading box was 1068px at
+ * a 1200px viewport and 1068px at 2560px. Above this line the canvas is exact
+ * however narrow the window is; below it, text wraps in places it will not wrap
+ * on the published site.
+ *
+ * Andy hit this on 25 Aug 2026 with a headline on one line live and two in the
+ * editor, and the old badge could not have told him why: it compared the drawn
+ * width against the width he had CHOSEN, so 1150px warned while being perfectly
+ * faithful and 1050px warned in the same words while not being.
+ *
+ * Kept in step with globals.css by tests/editor-fidelity.test.ts.
+ */
+const CONTAINED_WIDTH = 1100;
+
 const VIEWPORT_DEFAULT: Record<Viewport, number> = {
   desktop: 1200,
   // Sits clearly between the two container breakpoints (768 and 1024), so
@@ -1960,9 +1980,19 @@ export function EditorShell({
           {actualWidth !== null && (
             <span
               className="ed-vw__actual"
-              title={`There is only room for ${actualWidth}px. Fold a panel for the full width.`}
+              data-faithful={actualWidth >= CONTAINED_WIDTH ? '' : undefined}
+              title={
+                actualWidth >= CONTAINED_WIDTH
+                  ? `There is only room for ${actualWidth}px, but a page's content stops at ` +
+                    `${CONTAINED_WIDTH}px anyway, so this is still exactly what a visitor sees. ` +
+                    `Fold a panel for the full width of the frame.`
+                  : `There is only room for ${actualWidth}px, which is under the ${CONTAINED_WIDTH}px ` +
+                    `a page's content stops at. Text wraps in places it will not wrap on the real ` +
+                    `site. Fold a panel to get back above ${CONTAINED_WIDTH}px.`
+              }
             >
               showing {actualWidth}
+              {actualWidth < CONTAINED_WIDTH ? ', wraps early' : ''}
             </span>
           )}
           <Menu
