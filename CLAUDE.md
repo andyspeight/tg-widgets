@@ -43,6 +43,13 @@ Owner: Andy Speight, CEO, Travelgenix.
   2026): the element axis is closed, so a new "how do we compare to Duda"
   question belongs there rather than in a fresh element sweep.
 
+- **tg-sites (the CMS)**: `docs/tg-sites-handover.md`. START HERE for any
+  tg-sites session. It carries the current state, the open queue in priority
+  order, the numbers you can quote, and a list of things that will bite you
+  that is not derivable from the code. Its companions are
+  `docs/tg-sites-speed-and-visibility.md` (the analysis behind the performance
+  work) and `docs/duda-gap-analysis.md` (the platform comparison).
+
 - **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
   BUILT and switchable in the editor: nine movement recipes with three strengths,
   six reveal styles, the background and hover effects, and which recipes collide
