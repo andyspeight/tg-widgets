@@ -22,6 +22,7 @@ import 'server-only';
 
 import { del, head, put } from '@vercel/blob';
 
+import { pixelSizeOf, type PixelSize } from './dimensions';
 import { isAllowedMime, type MediaMime } from './limits';
 
 /**
@@ -120,7 +121,22 @@ export async function copyIntoStore(
   sourceUrl: string,
   pathname: string,
   maxBytes: number,
-): Promise<{ url: string; pathname: string; size: number; contentType: MediaMime }> {
+): Promise<{
+  url: string;
+  pathname: string;
+  size: number;
+  contentType: MediaMime;
+  /**
+   * Measured from the bytes that were actually stored, or null when the format
+   * is one dimensions.ts does not read.
+   *
+   * Here rather than left to the caller because this function is the only place
+   * that ever holds the file. A caller that wanted the size afterwards would have
+   * to fetch the object back to find out, and the one caller that did not ask
+   * ended up writing down the provider's numbers for a different file entirely.
+   */
+  pixels: PixelSize | null;
+}> {
   const response = await fetch(sourceUrl, {
     // No credentials, no cookies, no redirect chain to somewhere unexpected.
     redirect: 'follow',
@@ -172,6 +188,7 @@ export async function copyIntoStore(
     pathname: stored.pathname,
     size: bytes.byteLength,
     contentType,
+    pixels: pixelSizeOf(bytes),
   };
 }
 

@@ -435,6 +435,7 @@ export async function importStockAction(photo: StockPhoto): Promise<MediaResult<
 export async function recordVariantsAction(
   id: string,
   variants: RecordUpload['variants'],
+  measured?: { width?: number; height?: number },
 ): Promise<MediaResult<MediaItem | null>> {
   try {
     const tenantId = await requireTenantId();
@@ -442,8 +443,27 @@ export async function recordVariantsAction(
     const existing = await getMediaItem(tenantId, String(id ?? ''));
     if (!existing) return { ok: false, error: 'That picture is not in this bank.' };
 
+    /*
+     * THE MEASUREMENT, WHICH IS SOMETIMES THE WHOLE POINT OF THE CALL.
+     *
+     * A stock import recorded the dimensions the provider's API gave for the
+     * ORIGINAL photograph while storing their much smaller rendering, so rows
+     * exist saying 8192 by 4608 above a 168KB file. The backfill decodes each
+     * picture anyway, so it is the one thing in the product that knows the truth,
+     * and a row can be put right without fetching anything twice.
+     *
+     * Trusted here where the browser is not trusted about urls, and the
+     * difference is what a wrong answer costs. A forged url would point a
+     * client's page at somebody else's object; a forged size makes a srcset
+     * choose badly on that client's own page. The second is worth correcting
+     * from the only place that can see it.
+     */
+    const width = pixelDimension(measured?.width);
+    const height = pixelDimension(measured?.height);
+    const size = width && height ? { width, height } : undefined;
+
     const checked = await verifiedVariants(variants, tenantId, existing.url);
-    if (checked.length === 0) {
+    if (checked.length === 0 && !size) {
       return {
         ok: false,
         error: 'None of those smaller copies arrived in the store, so nothing was recorded.',
@@ -456,7 +476,7 @@ export async function recordVariantsAction(
     for (const variant of existing.variants) byWidth.set(variant.width, variant);
     const merged = [...byWidth.values()].sort((a, b) => a.width - b.width);
 
-    const saved = await setMediaVariants(tenantId, existing.id, merged);
+    const saved = await setMediaVariants(tenantId, existing.id, merged, size);
     revalidatePath('/', 'layout');
     return { ok: true, data: saved };
   } catch (error) {

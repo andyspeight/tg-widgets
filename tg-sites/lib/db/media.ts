@@ -334,6 +334,8 @@ export async function setMediaVariants(
   tenantId: string,
   id: string,
   variants: readonly MediaVariant[],
+  /** The picture's real size, when the caller measured it. Left alone otherwise. */
+  size?: { width: number; height: number },
 ): Promise<MediaItem | null> {
   // Same shape check the other single-row readers do, and for the same reason:
   // a malformed id is a bad request, not a database error, and Postgres raises
@@ -343,7 +345,9 @@ export async function setMediaVariants(
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
       update public.media
-         set variants = ${json(tx, variants as MediaVariant[])}
+         set variants = ${json(tx, variants as MediaVariant[])},
+             width  = coalesce(${size?.width ?? null}, width),
+             height = coalesce(${size?.height ?? null}, height)
        where id = ${id}
       returning id, url, storage_key, filename, mime, bytes, variants,
                 width, height, alt, source, credit, created_at

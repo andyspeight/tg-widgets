@@ -34,8 +34,25 @@ export async function importStockPhoto(tenantId: string, photo: StockPhoto): Pro
     filename: `${stem}.${MEDIA_MIME[stored.contentType]}`,
     mime: stored.contentType,
     bytes: stored.size,
-    width: pixelDimension(photo?.width),
-    height: pixelDimension(photo?.height),
+    /*
+     * MEASURED FROM THE FILE WE KEPT, not taken from the provider's word about a
+     * different one.
+     *
+     * The API describes the ORIGINAL photograph, often several thousand pixels
+     * wide, while what is fetched and stored is Pexels' own `large2x` rendering
+     * at around 1880. Recording the first while holding the second put six rows
+     * on a live site claiming 8192 by 4608 above a 168KB file. That was dormant
+     * until a srcset started quoting the recorded width to browsers as a
+     * candidate: one would choose the "8192" primary over a genuine 1600px copy
+     * and draw the smaller file stretched.
+     *
+     * The provider's numbers stay as the fallback, because a picture whose header
+     * cannot be read is still better described by an approximate aspect ratio
+     * than by nothing. Same posture as the rest of this pipeline: measure what
+     * you have, and only believe someone else when you cannot.
+     */
+    width: stored.pixels?.width ?? pixelDimension(photo?.width),
+    height: stored.pixels?.height ?? pixelDimension(photo?.height),
     /*
      * The provider's own description becomes the starting alt text.
      *

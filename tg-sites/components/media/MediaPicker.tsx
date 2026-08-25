@@ -580,18 +580,28 @@ function BackfillPanel({
          * Told what is already stored, so a second run adds only the missing
          * rungs rather than re-encoding and re-uploading work that is done.
          */
-        const variants = await variantsForStoredImage(
+        const work = await variantsForStoredImage(
           item.url,
           item.filename,
           item.variants.map((v) => v.width),
         );
-        if (variants.length === 0) {
+
+        /*
+         * A picture whose real size we now know but which needed no new copies is
+         * still worth recording: a stock import may have stored the provider's
+         * numbers for a different, much larger file, and this is the moment that
+         * gets corrected.
+         */
+        const measured =
+          work.width && work.height ? { width: work.width, height: work.height } : undefined;
+
+        if (work.variants.length === 0 && !measured) {
           unreadable += 1;
           continue;
         }
 
         const uploaded: Array<{ url: string; width: number; height: number }> = [];
-        for (const variant of variants) {
+        for (const variant of work.variants) {
           try {
             const stored = await upload(
               `${uploadPrefix}${filenameStem(variant.filename)}.${MEDIA_MIME[variant.mime]}`,
@@ -604,12 +614,12 @@ function BackfillPanel({
           }
         }
 
-        if (uploaded.length === 0) {
+        if (uploaded.length === 0 && !measured) {
           unreadable += 1;
           continue;
         }
 
-        const recorded = await recordVariantsAction(item.id, uploaded);
+        const recorded = await recordVariantsAction(item.id, uploaded, measured);
         if (recorded.ok && recorded.data) {
           onUpdated(recorded.data);
           done += 1;

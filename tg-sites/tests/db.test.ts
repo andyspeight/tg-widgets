@@ -1119,6 +1119,7 @@ describe('copyMediaToTenant', () => {
       pathname: `${pathname}--abc`,
       size: 4242,
       contentType: 'image/jpeg' as const,
+      pixels: null,
     }));
 
     respond('from public.media', [sourceRow(1), sourceRow(2)]);

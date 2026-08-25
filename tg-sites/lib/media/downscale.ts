@@ -381,6 +381,12 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
  * because a backfill that stops on the first awkward file is a backfill nobody
  * finishes. The caller counts the empties and says so rather than hiding them.
  *
+ * ALSO REPORTS THE REAL SIZE, because it has the picture decoded and nothing else
+ * in the product does. A stock import used to record the provider's numbers for
+ * the ORIGINAL photograph while storing a much smaller rendering, so rows exist
+ * claiming 8192px above a 168KB file. This is the one moment those can be put
+ * right without fetching anything extra.
+ *
  * THE FETCH IS THE FRAGILE PART, and it is worth naming. The store's public urls
  * are on another origin, so this needs them to allow a cross-origin read. If they
  * do not, every picture comes back empty and the count makes that obvious
@@ -388,27 +394,38 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
  * read the original back through our own origin, and it is deliberately not
  * written until we know it is needed.
  */
+export interface StoredImageWork {
+  variants: PreparedVariant[];
+  /** The picture's true size, as decoded. Null when it could not be read at all. */
+  width: number | null;
+  height: number | null;
+}
+
 export async function variantsForStoredImage(
   url: string,
   filename: string,
   have: readonly number[] = [],
-): Promise<PreparedVariant[]> {
+): Promise<StoredImageWork> {
+  const nothing: StoredImageWork = { variants: [], width: null, height: null };
+
   let bitmap: ImageBitmap;
   try {
     const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
-    if (!response.ok) return [];
+    if (!response.ok) return nothing;
     const blob = await response.blob();
-    if (!isImageMime(blob.type)) return [];
+    if (!isImageMime(blob.type)) return nothing;
     bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
   } catch {
-    return [];
+    return nothing;
   }
 
+  const { width, height } = bitmap;
   const stem = cleanFilename(filename).replace(/\.[a-z0-9]+$/i, '') || 'image';
   try {
-    return await encodeVariants(bitmap, bitmap.width, bitmap.height, stem, have);
+    return { variants: await encodeVariants(bitmap, width, height, stem, have), width, height };
   } catch {
-    return [];
+    // The measurement still stands even if the encoding did not.
+    return { variants: [], width, height };
   } finally {
     bitmap.close();
   }
