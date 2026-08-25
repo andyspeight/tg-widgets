@@ -412,17 +412,34 @@ exported and unit-tested in `computeSpotsTaken`. It moves to counting against
 Each phase ships something an operator can use. No phase is a refactor with nothing
 to show.
 
-**Phase 0 — Foundations. BUILT 25 Aug 2026.** Next.js 15 App Router app, the SSO
+**Phase 0 — Foundations. BUILT AND SHIPPED 25 Aug 2026.** Next.js 15 App Router app, the SSO
 bridge to tg-widgets, the service-role data layer, the capacity and money rules
 ported from the widget with 24 tests, the `gt_002_platform.sql` migration, a
 console shell and a public trip page. Typecheck clean, build clean, tests green.
 *Two things are outstanding and both need Andy: the GitHub repo itself, and the
 Stripe Connect step. See section 9.*
 
-**Phase 1 — A trip is a real thing.** Trips move out of Airtable widget config into
-`gt_trips` and `gt_departures`. Operator console: create, edit, publish. Public trip
-page at a real URL. Existing widgets repointed at the platform API. Migrate the two
-Global Travel Solution tours as the proof.
+**Phase 1 — A trip is a real thing. CORE BUILT 25 Aug 2026.** `gt_002` is APPLIED
+to the live database (16 tables, RLS on, verified at zero rows). Trips and
+departures are real records. The console does create, edit, publish and unpublish
+with departures managed inline, the public trip page renders from the database, and
+`GET /api/v1/trips/{id}` is live for the widgets, accepting either the trip uuid or
+the legacy `tgw_` id. Ownership is enforced in the query rather than by the caller.
+55 tests, typecheck and build clean, and the schema was smoke-tested against the
+live database with the exact column sets the code writes.
+
+*Two pieces of phase 1 are deliberately NOT done yet, and both deserve their own
+pass rather than being rushed in behind the rest:*
+
+1. **Repointing the live widgets.** `widget-trips.js`, `widget-trips-page.js`,
+   `widget-tour.js` and `widget-tour-card.js` still read Airtable widget config.
+   The API they need exists, but changing them touches embeds already on customer
+   sites, so it wants a careful migration with the old path kept working. That is
+   what `legacy_widget_id` and the dual-lookup in the API are for.
+2. **Migrating the Kenya and Tanzania tours.** Needs an operator record for GLOBAL
+   TRAVEL SOLUTION and a one-off script to move the two saved configs across. Worth
+   doing as the proof the model holds, and it will expose whatever the `content`
+   jsonb shape gets wrong.
 
 **Phase 2 — Take the money.** Deposit checkout through Connect Standard, the
 webhook, the transactional hold on capacity, the confirmation email. This is the old
@@ -460,8 +477,15 @@ none of which Claude can do:
 2. Enable **Stripe Connect** on the Travelgenix account
 3. Register the Connect webhook and add `STRIPE_CONNECT_WEBHOOK_SECRET`
 
-The Supabase side is fully unblocked. `TRIPS_SUPABASE_URL` and
-`TRIPS_SUPABASE_SERVICE_ROLE_KEY` are already in Vercel and the schema is live.
+The Supabase side is fully unblocked and, as of 25 Aug 2026, fully built:
+`gt_002_platform.sql` is APPLIED. Sixteen tables, RLS on with no policies on every
+one, verified at zero rows. `TRIPS_SUPABASE_URL` and
+`TRIPS_SUPABASE_SERVICE_ROLE_KEY` are already in Vercel.
+
+A note so nobody panics at it later: Supabase's security advisor reports sixteen
+`rls_enabled_no_policy` notices against these tables. They are INFO level and they
+are the design, not a finding. Service-role-only access with no policies is exactly
+what we want, and adding a policy to silence the advisor would be the bug.
 
 This is three weeks old as of 25 Aug 2026. Phases 2, 3, 6 and 8 cannot start without
 it. Phases 1, 4, 5 and 7 can, and so could all of phase 0 bar the Connect step,
