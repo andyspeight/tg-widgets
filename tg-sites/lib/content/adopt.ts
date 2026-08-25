@@ -182,6 +182,34 @@ function band(partial: Partial<Section> & { rows: Row[] }): Section {
   return { ...section, ...partial } as Section;
 }
 
+/**
+ * Alternate the paper grounds so the page bands.
+ *
+ * WHY THIS IS A PASS OVER THE FINISHED LIST rather than a tone written on each
+ * band as it is made. Sections are skipped when the corpus has nothing for them,
+ * so the neighbours are not known until the page is assembled: writing "subtle"
+ * on the events band is right after a light one and wrong after another subtle
+ * one, and which it gets depends on whether the record happened to have a things
+ * to do list. The first version did exactly that and produced two adjacent
+ * subtle bands, which is not a band at all, it is one taller band with a heading
+ * stranded in the middle of it. Invisible on screen, obvious in the data.
+ *
+ * The dark bands are left alone. They are the picture and the closing call, and
+ * they are dark because of what they are rather than because of where they fell.
+ */
+function alternate(sections: Section[]): Section[] {
+  let previous = '';
+  return sections.map((section) => {
+    if (section.tone === 'dark' || section.tone === 'accent') {
+      previous = section.tone;
+      return section;
+    }
+    const tone = previous === 'light' ? 'subtle' : 'light';
+    previous = tone;
+    return { ...section, tone } as Section;
+  });
+}
+
 function heading(text: string): Block {
   return withProps('heading', { level: 'h2', style: 'h2', html: escapeHtml(text), align: 'left' });
 }
@@ -243,7 +271,7 @@ export function seedItemFromCorpus(input: {
   const highlights = (prose.highlights ?? []).filter((h) => h?.title && h?.description);
   if (highlights.length > 0) {
     sections.push(band({
-      tone: 'subtle',
+      tone: 'light',
       paddingY: 64,
       rows: stack([
         heading('What you will remember'),
@@ -334,7 +362,7 @@ export function seedItemFromCorpus(input: {
       }),
     ];
     sections.push(band({
-      tone: 'subtle',
+      tone: 'light',
       paddingY: 64,
       rows: images[2]
         ? pair(list, [withProps('image', {
@@ -357,7 +385,7 @@ export function seedItemFromCorpus(input: {
   const events = (prose.events ?? []).filter((e) => e?.month && e?.name);
   if (events.length > 0) {
     sections.push(band({
-      tone: 'subtle',
+      tone: 'light',
       paddingY: 64,
       rows: stack([
         heading('Worth timing a trip around'),
@@ -428,6 +456,6 @@ export function seedItemFromCorpus(input: {
      */
     image: images[0] ?? '',
     alt: images[0] ? altFromCredit(credits[0], name) : '',
-    sections,
+    sections: alternate(sections),
   };
 }

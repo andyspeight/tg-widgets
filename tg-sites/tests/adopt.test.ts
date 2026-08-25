@@ -363,6 +363,27 @@ describe('the magazine page it builds', () => {
     expect(tones[tones.length - 1]).toBe('dark');
   });
 
+  it('never puts two bands of the same ground next to each other', () => {
+    /*
+     * Two adjacent subtle bands is not a band, it is one taller band with a
+     * heading in the middle of it, and the alternation is the whole point.
+     * Caught by reading the built page rather than by looking at it: on screen
+     * the two simply merged and the seam was invisible.
+     *
+     * A section that draws nothing is skipped when the corpus is thin, so the
+     * neighbours change per record. Checking every kind of record here rather
+     * than the full one only.
+     */
+    for (const prose of [GREECE.prose, { ...GREECE.prose, events: [] }, { ...GREECE.prose, highlights: [] },
+                         { ...GREECE.prose, thingsToDo: [] }, {}]) {
+      const built = seedItemFromCorpus({ name: 'X', prose, facts: { lat: 1, lng: 1 } });
+      const tones = built.sections.map((s) => (s as { tone?: string }).tone);
+      for (let i = 1; i < tones.length; i += 1) {
+        expect(tones[i], `${tones.join(' ')} repeats at ${i}`).not.toBe(tones[i - 1]);
+      }
+    }
+  });
+
   it('names the destination in the button rather than saying "enquire"', () => {
     const buttons = find('button-group')[0].props.buttons as Array<{ label: string; href: string }>;
     expect(buttons).toHaveLength(1);
