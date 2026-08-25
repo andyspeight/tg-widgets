@@ -31,6 +31,7 @@
     "test:worldmap-resilience": "node test/worldmap-offers-resilience-smoke.mjs",
     "test:airport-content-widgetid": "node test/airport-content-widgetid-smoke.mjs",
     "test:airport-status-gate": "node test/airport-status-gate-smoke.mjs",
+    "test:airport-identity": "node test/airport-identity-verify-smoke.mjs",
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
     "test:appointment-cadence": "node test/appointment-reminder-cadence-smoke.mjs",
     "test:appointment-overrides": "node test/appointment-overrides-smoke.mjs",

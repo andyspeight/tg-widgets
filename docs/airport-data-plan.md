@@ -211,11 +211,88 @@ two-source confirmations, and keep drift flagged for a human.
 
 ---
 
-## 6. Open decisions for Andy
+## 6. Progress log
 
-1. Which definition of "major" (A, B or C above).
-2. Phase 0 before Phase 2, or add coverage first and remediate after. The
-   recommendation is Phase 0 first.
+### 25 August 2026: scope agreed and Phase 0 completed
+
+Andy chose Option C, the full build to roughly 600, with the two-source rule
+applying to every piece of information.
+
+**Target list agreed and committed.** 593 airports: the 475 best-connected
+large airports with scheduled service (`api/_data/airport-targets.json`, built
+by `scripts/build-airport-targets.mjs`), unioned at run time with the airports
+already in the table and the 129 our own destination prose names. The committed
+file holds IATA codes and a rank only, so no single-sourced value can leak into
+a record.
+
+**Phase 0 is done.**
+
+| Action | Result |
+|---|---|
+| Status gate on the picker | `api/airport-search.js` now offers Done and Live only |
+| Provisional flag on content | `api/airport-content.js` marks unfinished records rather than refusing them |
+| Duplicates merged | ARN, BUD, HEL, PRG, WAW resolved, 230 records down to 225 |
+| Source-less records reclassified | 123 moved from Done to In progress |
+| Em dashes stripped | 200 replaced across the 59 live records, zero remain in any servable record |
+
+The table is now internally consistent: 102 Done, every one carrying Source 1
+and Source 2, and 123 In progress, none of which cites a source. No duplicate
+IATA codes remain. Status finally means something.
+
+**One deliberate change from the plan as written.** Section 5 said to gate the
+content endpoint as well as the picker. Checking the live widget configs first
+showed why that would have been wrong: a hard gate would 404 any embed already
+running on a client site. The content endpoint therefore returns the record and
+marks it `provisional: true`, so the widget can render a compact card instead of
+a spotlight full of empty sections. Only one airport is currently pinned in a
+live config (DXB, fully sourced), so nothing in production was affected either
+way.
+
+**Verification tightened.** The reference layer previously answered "are these
+the same airport" and then wrote name, city and country from OurAirports alone.
+A record whose coordinates matched could carry a single-sourced name wearing a
+verified badge. `corroborateFields` in `api/reference/_breadth_fill.js` now
+checks each field on its own terms: name on label overlap, coordinates on
+distance, country on matching ISO 3166-1 alpha-2 codes, city on matching place
+names. The Wikidata query was extended to fetch the ISO code (P297) and the
+administrative place (P131) so country and city have a second pair of eyes at
+all. An uncorroborated field is left blank and reported, never filled.
+
+**The machinery to reach 600.** `runIdentityBackfill` repairs records we have,
+`runBreadthFill` creates records we are missing, both writing only corroborated
+identity and never narrative. `POST /api/reference/identity-backfill` runs the
+first on demand (dry run by default). `/api/cron/reference-identity` works both
+daily in bounded batches. Backfill writes by default because it only fills
+blanks. Creation waits for `REFERENCE_BREADTH_CREATE=true`, since creating
+hundreds of records deserves a deliberate switch rather than a silent cron.
+
+65 assertions across `test/airport-status-gate-smoke.mjs` and
+`test/airport-identity-verify-smoke.mjs`.
+
+### Findings that need a human
+
+The dataset pass surfaced three that two sources should settle before anyone
+acts on them:
+
+- **REP is retired.** Our record is named "Siem Reap-Angkor International" but
+  carries IATA `REP`, the old Siem Reap airport. OurAirports no longer lists
+  `REP` at all; Siem Reap-Angkor is `SAI`.
+- **PNH shows as closed.** OurAirports marks Phnom Penh as no longer having
+  scheduled service, with traffic at the new Techo International (`KTI`). Our
+  destination prose still points readers at `PNH`.
+- **Prose contains codes that are not the airport meant.** `KLM` in a
+  parenthesis resolves to Kalaleh in Iran. `PUL` resolves to a seaplane base in
+  Washington state. Both are false positives the gap detector should ignore, and
+  both are now filtered by requiring scheduled service.
+
+---
+
+## 7. Open decisions for Andy
+
+1. Flip `REFERENCE_BREADTH_CREATE=true` when you want the cron to start
+   creating the missing records, or say so and I will run the fill in bounded
+   batches by hand first so you can see a sample before it runs nightly.
+2. Confirm the REP and PNH findings above, which change what we sell.
 3. Whether cohort B's existing prose is kept and enriched, or rewritten. It is
    longer than cohort A's but written in a different register, and none of it
    has a cited source.
