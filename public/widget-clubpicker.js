@@ -324,6 +324,17 @@
     return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate());
   }
 
+  // Which side of a fixture the queried team is on. The feed tags every event
+  // with homeTeamKey / awayTeamKey (lowercased, same space as the entity keys),
+  // so a visitor Home/Away filter needs no extra fetch. Returns '' if neither
+  // matches (never expected on a team view, but then the game shows under "All").
+  function sideOf(ev, teamKey) {
+    if (!teamKey || !ev) return '';
+    if (ev.homeTeamKey && ev.homeTeamKey === teamKey) return 'home';
+    if (ev.awayTeamKey && ev.awayTeamKey === teamKey) return 'away';
+    return '';
+  }
+
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
@@ -407,6 +418,17 @@
       + '.tgcp-close:hover{color:var(--tgcp-text);}'
       + '.tgcp-close svg{width:14px;height:14px;}'
 
+      // Visitor Home/Away filter (segmented, shown only when a team has both).
+      + '.tgcp-hafilter{display:inline-flex;margin:0 0 12px;border:1px solid var(--tgcp-border);'
+      + 'border-radius:calc(var(--tgcp-radius) - 4px);overflow:hidden;background:var(--tgcp-bg);}'
+      + '.tgcp-hf{padding:0 14px;min-height:36px;font:inherit;font-size:12.5px;font-weight:600;'
+      + 'color:var(--tgcp-sub);background:transparent;border:0;border-right:1px solid var(--tgcp-border);'
+      + 'cursor:pointer;white-space:nowrap;transition:background .15s ease-out,color .15s ease-out;}'
+      + '.tgcp-hf:last-child{border-right:0;}'
+      + '.tgcp-hf:hover{color:var(--tgcp-text);}'
+      + '.tgcp-hf.is-on{background:var(--tgcp-accent);color:var(--tgcp-on-accent);}'
+      + '.tgcp-hf:focus-visible{outline:2px solid var(--tgcp-accent);outline-offset:-2px;}'
+
       + '.tgcp-list{display:flex;flex-direction:column;gap:8px;}'
       + '.tgcp-row{min-width:0;display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;'
       + 'padding:11px 12px;background:var(--tgcp-bg);border:1px solid var(--tgcp-border);'
@@ -463,6 +485,7 @@
     this.openLabel = '';
     this.events = null;
     this.eventsState = 'idle';
+    this._side = 'all';           // visitor Home/Away filter (client-side)
     this._gridReq = 0;
     this._eventsReq = 0;
     this._render();
@@ -671,7 +694,32 @@
       body = '<div class="tgcp-state" role="status">' + icon('cal') + '<p>Nothing coming up for them just yet.</p></div>';
     } else {
       var self = this;
-      body = '<div class="tgcp-list">' + this.events.map(function (e) { return self._rowHtml(e); }).join('') + '</div>';
+      var evs = this.events;
+      var filterHtml = '';
+      // Home/Away filter — only for a team, and only when there is actually a
+      // split to filter (both home AND away games are present in the loaded set).
+      if (this.cfg.gridOf === 'team' && this.openKey) {
+        var tk = this.openKey, homeN = 0, awayN = 0;
+        for (var i = 0; i < evs.length; i++) {
+          var s = sideOf(evs[i], tk);
+          if (s === 'home') homeN++; else if (s === 'away') awayN++;
+        }
+        if (homeN > 0 && awayN > 0) {
+          var sv = (this._side === 'home' || this._side === 'away') ? this._side : 'all';
+          var hf = function (v, label, on) {
+            return '<button type="button" class="tgcp-hf' + (on ? ' is-on' : '') + '" data-side="' + v + '"'
+              + ' aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
+          };
+          filterHtml = '<div class="tgcp-hafilter" role="group" aria-label="Home or away">'
+            + hf('all', 'All', sv === 'all')
+            + hf('home', 'Home (' + homeN + ')', sv === 'home')
+            + hf('away', 'Away (' + awayN + ')', sv === 'away')
+            + '</div>';
+          if (sv === 'home') evs = evs.filter(function (e) { return sideOf(e, tk) === 'home'; });
+          else if (sv === 'away') evs = evs.filter(function (e) { return sideOf(e, tk) === 'away'; });
+        }
+      }
+      body = filterHtml + '<div class="tgcp-list">' + evs.map(function (e) { return self._rowHtml(e); }).join('') + '</div>';
     }
 
     var count = (this.events && this.events.length)
@@ -760,6 +808,7 @@
   // from a real user action here — never a passive re-render (an editor calls
   // update() per keystroke and a focus grab would steal the cursor).
   TGClubPickerWidget.prototype._openEntity = function (key) {
+    this._side = 'all';           // a fresh club starts on "All games"
     var found = null;
     for (var j = 0; j < (this.entities || []).length; j++) {
       if (this.entities[j].key === key) { found = this.entities[j]; break; }
@@ -786,6 +835,15 @@
       var key = this.value;
       if (key && self.openKey !== key) self._openEntity(key);
     });
+    var hfs = this.shadow.querySelectorAll('.tgcp-hf');
+    for (var h = 0; h < hfs.length; h++) {
+      hfs[h].addEventListener('click', function () {
+        var side = this.getAttribute('data-side') || 'all';
+        if (self._side === side) return;
+        self._side = side;
+        self._render();   // client-side re-filter of the already-loaded events, no refetch
+      });
+    }
     var close = this.shadow.querySelector('[data-close]');
     if (close) close.addEventListener('click', function () { self._close(); });
   };
@@ -804,6 +862,7 @@
     this.openKey = null;
     this.events = null;
     this.eventsState = 'idle';
+    this._side = 'all';
     this._eventsReq++;
     this._render();
     // Send focus back to the badge they came from, not to the top of the page.
