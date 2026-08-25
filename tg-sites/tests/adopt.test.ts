@@ -11,8 +11,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { altFromCredit, proseToHtml, seedItemFromCorpus, shortName } from '../lib/content/adopt';
+import { proseToHtml, seedItemFromCorpus, shortName } from '../lib/content/adopt';
 import { CollectionItemSchema } from '../lib/content/collection';
+import { carriesOwnBanner } from '../lib/content/collection-layout';
 
 const GREECE = {
   name: 'Santorini',
@@ -38,6 +39,9 @@ const GREECE = {
   },
   facts: { lat: 36.3932, lng: 25.4615 },
 };
+
+/** The item alone. The plan is asserted separately, further down. */
+const seed = (input: Parameters<typeof seedItemFromCorpus>[0]) => seedItemFromCorpus(input).item;
 
 /** Every block on the page, in document order. */
 function blocksOf(item: { sections: Array<{ rows: Array<{ columns: Array<{ blocks: unknown[] }> }> }> }) {
@@ -79,33 +83,55 @@ describe('corpus prose becomes inert markup', () => {
 
 describe('the seed a client starts from', () => {
   it('takes its title and summary from the corpus', () => {
-    const item = seedItemFromCorpus(GREECE);
+    const item = seed(GREECE);
     expect(item.title).toBe('Santorini');
     expect(item.summary).toBe('A flooded volcano you can have dinner on.');
   });
 
   it('opens with the hero intro then the overview, in that order', () => {
-    const item = seedItemFromCorpus(GREECE);
-    const blocks = item.sections[0].rows[0].columns[0].blocks;
+    const item = seed(GREECE);
+    // [0] is the banner; the words start in the band after it.
+    const blocks = item.sections[1].rows[0].columns[0].blocks;
     expect(blocks).toHaveLength(2);
     expect(String(blocks[0].props.html)).toContain('Whitewashed towns');
     expect(String(blocks[1].props.html)).toContain('The caldera');
   });
 
-  it('gives the opening no heading, because the banner already prints the title', () => {
-    /*
-     * The page has headings further down and should: "Where it is" and "Worth
-     * doing" are section titles doing real work. What it must never do is print
-     * the place name twice, once in the banner and again over the first
-     * paragraph, which is what the old two-block seed would have needed.
-     */
-    const item = seedItemFromCorpus(GREECE);
-    const opening = item.sections[0].rows[0].columns[0].blocks;
+  it('prints the place name once, in the banner, and never again', () => {
+    const item = seed(GREECE);
+    const opening = item.sections[1].rows[0].columns[0].blocks;
     expect(opening.map((b) => b.type)).not.toContain('heading');
 
-    const headings = blocksOf(item).filter((b) => b.type === 'heading');
-    expect(headings.length).toBeGreaterThan(0);
-    for (const h of headings) expect(String(h.props.html)).not.toBe('Santorini');
+    const named = blocksOf(item)
+      .filter((b) => b.type === 'heading' && String(b.props.html) === 'Santorini');
+    expect(named).toHaveLength(1);
+    expect(named[0].props.style).toBe('h1');
+  });
+
+  it('builds the banner the way the hand-built pages build theirs', () => {
+    /*
+     * Matched to tools/coastwise-site.ts banner(): the trail inside it rather
+     * than above the picture, an h2 set at h1 so the type matches every other
+     * page, and the same scrim and height. Without this the entry drew its own
+     * blog header instead: different type, a stray trail above the photograph
+     * and "3 min read" on a page about an island.
+     */
+    const item = seed(GREECE);
+    const banner = item.sections[0] as Record<string, unknown>;
+    expect(banner.name).toBe('Banner');
+    expect(banner.tone).toBe('dark');
+    expect(banner.minHeight).toBe(420);
+    expect(banner.overlay).toBe(45);
+
+    const blocks = item.sections[0].rows[0].columns[0].blocks as Array<{ type: string; props: Record<string, unknown> }>;
+    expect(blocks.map((b) => b.type)).toEqual(['breadcrumbs', 'heading', 'text']);
+    expect(blocks[1].props.level).toBe('h2');
+    expect(blocks[1].props.style).toBe('h1');
+  });
+
+  it('carries a trail inside the banner, which is what stands the automatic one down', () => {
+    const item = seed(GREECE);
+    expect(blocksOf(item).filter((b) => b.type === 'breadcrumbs')).toHaveLength(1);
   });
 
   it('still builds a page when the corpus holds no prose at all', () => {
@@ -115,7 +141,7 @@ describe('the seed a client starts from', () => {
      * could publish, which means the map and the way to get in touch, not an
      * empty item that looks broken in the editor.
      */
-    const item = seedItemFromCorpus({ name: 'Dalaman', facts: { lat: 36.7131, lng: 28.7925 } });
+    const item = seed({ name: 'Dalaman', facts: { lat: 36.7131, lng: 28.7925 } });
     expect(item.title).toBe('Dalaman');
     expect(item.summary).toBe('');
     expect(item.image).toBe('');
@@ -129,11 +155,11 @@ describe('the seed a client starts from', () => {
   });
 
   it('never produces an untitled item from a blank name', () => {
-    expect(seedItemFromCorpus({ name: '   ' }).title).toBe('Untitled');
+    expect(seed({ name: '   ' }).title).toBe('Untitled');
   });
 
   it('holds the title and summary inside what the schema will accept', () => {
-    const item = seedItemFromCorpus({
+    const item = seed({
       name: 'x'.repeat(500),
       prose: { tagline: 'y'.repeat(900) },
     });
@@ -148,7 +174,7 @@ describe('the seed a client starts from', () => {
      * would be a page that changed the first time its owner touched it. This is
      * the cheap check that it does.
      */
-    const item = seedItemFromCorpus(GREECE);
+    const item = seed(GREECE);
     const parsed = CollectionItemSchema.parse(item);
     expect(parsed.title).toBe('Santorini');
     expect(parsed.summary).toBe(item.summary);
@@ -243,46 +269,32 @@ describe('the picker', () => {
 });
 
 describe('the magazine page it builds', () => {
-  const item = seedItemFromCorpus(GREECE);
+  const item = seed(GREECE);
   const blocks = blocksOf(item);
   const find = (type: string) => blocks.filter((b) => b.type === type);
 
-  it('gives each of the three pictures a different job', () => {
-    // Banner, then beside the opening words, then the full-width drift.
-    expect(item.image).toBe('https://images.unsplash.com/one');
-    expect(find('image').map((b) => b.props.src)).toEqual(['https://images.unsplash.com/two']);
-    const backgrounds = item.sections.map((s) => (s as { backgroundImage?: string }).backgroundImage).filter(Boolean);
-    expect(backgrounds).toEqual(['https://images.unsplash.com/three']);
-  });
-
-  it('writes real alt text out of the credit rather than the place name', () => {
+  it('asks the photo library for three pictures, each with its own job', () => {
     /*
-     * "Santorini" as alt on a photograph of Santorini tells a screen reader
-     * nothing the heading has not already said. The credit's Unsplash slug is a
-     * description somebody actually wrote.
+     * The slots leave here EMPTY and the importer fills them, so what this pins
+     * is the plan: the banner searches the place, and the two supporting
+     * pictures search real highlights the corpus already wrote about it rather
+     * than a modifier bolted onto the name.
      */
-    expect(item.alt).toBe('A white church above a blue sea');
-    expect(find('image')[0].props.alt).toBe('A boat in a caldera');
+    const { photos } = seedItemFromCorpus(GREECE);
+    expect(photos.map((t) => t.query)).toEqual(['Santorini', 'The caldera rim', 'Assyrtiko']);
+    expect(photos.map((t) => t.place.kind)).toEqual(['background', 'image', 'background']);
+    // Every target points at a slot that is actually there and actually empty.
+    for (const t of photos) {
+      const section = item.sections[t.section] as Record<string, unknown>;
+      expect(section, `no section ${t.section}`).toBeTruthy();
+      if (t.place.kind === 'background') expect(section.backgroundImage).toBe('');
+      else expect(find('image')[0].props.src).toBe('');
+    }
   });
 
-  it('falls back to the place name when a credit carries no description', () => {
-    expect(altFromCredit('Photo by Someone', 'Hvar')).toBe('Hvar');
-    expect(altFromCredit(undefined, 'Hvar')).toBe('Hvar');
-    // And drops the opaque id on the end rather than reading it out.
-    expect(altFromCredit('https://unsplash.com/photos/a-boat-in-a-caldera-uW_84e6O_eA', 'x'))
-      .toBe('A boat in a caldera');
-  });
-
-  it('drops an id that arrives in more than one part', () => {
-    /*
-     * Caught on the real Dalmatian Islands banner. The id "Ch-odXM4SCg" carries
-     * a hyphen, so it splits into two parts and a single pop left the alt text
-     * reading "...during daytime Ch".
-     */
-    expect(altFromCredit(
-      'https://unsplash.com/photos/aerial-view-of-city-near-body-of-water-during-daytime-Ch-odXM4SCg',
-      'x',
-    )).toBe('Aerial view of city near body of water during daytime');
+  it('falls back to the place name when there are no highlights to search for', () => {
+    const { photos } = seedItemFromCorpus({ name: 'Dalaman', facts: { lat: 1, lng: 1 } });
+    for (const t of photos) expect(t.query).toBe('Dalaman');
   });
 
   it('maps the corpus icon vocabulary onto the one tg-sites can actually draw', () => {
@@ -336,12 +348,12 @@ describe('the magazine page it builds', () => {
   });
 
   it('leaves the map uncaptioned rather than guessing when there is no position', () => {
-    const nowhere = seedItemFromCorpus({ name: 'Santorini', prose: GREECE.prose });
+    const nowhere = seed({ name: 'Santorini', prose: GREECE.prose });
     expect(blocksOf(nowhere).filter((b) => b.type === 'map')[0].props.caption).toBe('');
   });
 
   it('gets the hemispheres right, which a sign alone would not', () => {
-    const south = seedItemFromCorpus({ name: 'Queenstown', facts: { lat: -45.0312, lng: 168.6626 } });
+    const south = seed({ name: 'Queenstown', facts: { lat: -45.0312, lng: 168.6626 } });
     expect(blocksOf(south).filter((b) => b.type === 'map')[0].props.caption)
       .toBe('45.0312° S, 168.6626° E');
   });
@@ -352,16 +364,15 @@ describe('the magazine page it builds', () => {
      * belongs to the one full-bleed photograph and to nothing that holds words.
      */
     const moving = item.sections.filter((s) => (s as { kenBurns?: boolean }).kenBurns);
-    expect(moving).toHaveLength(1);
-    expect((moving[0] as { backgroundImage?: string }).backgroundImage).toBe('https://images.unsplash.com/three');
-    expect(moving[0].rows.flatMap((r) => r.columns.flatMap((c) => c.blocks))).toHaveLength(0);
+    // The banner and the full-width picture. Both photographs, neither is type.
+    expect(moving.map((s) => (s as { name?: string }).name)).toEqual(['Banner', 'The wide view']);
   });
 
   it('bands the page rather than running it on one ground', () => {
     const tones = item.sections.map((s) => (s as { tone?: string }).tone);
     expect(new Set(tones).size).toBeGreaterThan(1);
-    // Exactly one dark band, and it is the photograph rather than a word of copy.
-    expect(tones.filter((t) => t === 'dark')).toHaveLength(1);
+    // Two dark bands: the banner and the full-width photograph. Both pictures.
+    expect(tones.filter((t) => t === 'dark')).toHaveLength(2);
   });
 
   it('never puts two bands of the same ground next to each other', () => {
@@ -377,7 +388,7 @@ describe('the magazine page it builds', () => {
      */
     for (const prose of [GREECE.prose, { ...GREECE.prose, events: [] }, { ...GREECE.prose, highlights: [] },
                          { ...GREECE.prose, thingsToDo: [] }, {}]) {
-      const built = seedItemFromCorpus({ name: 'X', prose, facts: { lat: 1, lng: 1 } });
+      const built = seed({ name: 'X', prose, facts: { lat: 1, lng: 1 } });
       const tones = built.sections.map((s) => (s as { tone?: string }).tone);
       for (let i = 1; i < tones.length; i += 1) {
         expect(tones[i], `${tones.join(' ')} repeats at ${i}`).not.toBe(tones[i - 1]);
@@ -415,7 +426,7 @@ describe('the magazine page it builds', () => {
     expect(shortName('Dalmatian Islands')).toBe('Dalmatian Islands');
     expect(shortName('Hvar')).toBe('Hvar');
 
-    const built = seedItemFromCorpus({ name: "Split Old Town & Diocletian's Palace", facts: { lat: 1, lng: 1 } });
+    const built = seed({ name: "Split Old Town & Diocletian's Palace", facts: { lat: 1, lng: 1 } });
     expect(built.title).toBe("Split Old Town & Diocletian's Palace");
     const cta = blocksOf(built).find((b) => b.type === 'button-group');
     expect((cta!.props.buttons as Array<{ label: string }>)[0].label).toBe('Enquire about Split Old Town');
@@ -428,8 +439,15 @@ describe('the magazine page it builds', () => {
      * both "The Azores" and "Dalmatian Islands" and both are correct.
      */
     for (const name of ['Hvar', 'Dalmatian Islands', 'The Azores', 'Patagonia, Mendoza & the Andes']) {
-      const built = seedItemFromCorpus({ name, facts: { lat: 1, lng: 1 } });
-      const headings = blocksOf(built).filter((b) => b.type === 'heading').map((h) => String(h.props.html));
+      const built = seed({ name, facts: { lat: 1, lng: 1 } });
+      /*
+       * The banner heading IS the place name and should be. What must never
+       * happen is a SENTENCE built around it, because no rule knows which names
+       * take "the".
+       */
+      const headings = blocksOf(built)
+        .filter((b) => b.type === 'heading' && b.props.style !== 'h1')
+        .map((h) => String(h.props.html));
       for (const h of headings) {
         expect(h, `${name}: "${h}"`).not.toMatch(/\b(about|to|in|at|for)\s*$/);
         expect(h, `${name}: "${h}"`).not.toContain(name);
@@ -453,7 +471,7 @@ describe('the magazine page it builds', () => {
      * What this pins is that it never lands in an `html` prop, which IS rendered
      * as markup and would need escaping to be safe.
      */
-    const nasty = seedItemFromCorpus({
+    const nasty = seed({
       name: '<img src=x onerror=alert(1)>',
       prose: { overview: 'A <script>alert(1)</script> place.' },
       facts: { lat: 1, lng: 1 },
@@ -477,7 +495,7 @@ describe('it matches the site it has to live on', () => {
    * was generated. These pin the conventions taken from that build rather than
    * from taste.
    */
-  const item = seedItemFromCorpus(GREECE);
+  const item = seed(GREECE);
   const built = readFileSync(resolve(__dirname, '..', 'tools', 'coastwise-site.ts'), 'utf8');
 
   it('names every band, because the name is what the client sees in the editor', () => {
@@ -494,10 +512,14 @@ describe('it matches the site it has to live on', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it('reveals the bands that hold words, and not the one that holds a photograph', () => {
-    // A reveal on a band with no words is a band that fades in for no reason.
-    for (const section of item.sections as Array<{ name?: string; reveal?: boolean; backgroundImage?: string }>) {
-      expect(section.reveal, `${section.name}`).toBe(!section.backgroundImage);
+  it('reveals the bands that hold words, and not the two that are only a picture', () => {
+    /*
+     * A reveal on a band with no words fades in nothing, and a reveal on the
+     * banner fades in the page's own title as somebody lands on it.
+     */
+    const still = ['Banner', 'The wide view'];
+    for (const section of item.sections as Array<{ name?: string; reveal?: boolean }>) {
+      expect(section.reveal, `${section.name}`).toBe(!still.includes(section.name ?? ''));
     }
   });
 
@@ -513,5 +535,65 @@ describe('it matches the site it has to live on', () => {
     // second spacing vocabulary on one site.
     const raw = readFileSync(resolve(__dirname, '..', 'lib', 'content', 'adopt.ts'), 'utf8');
     expect(raw).not.toMatch(/paddingY: \d+/);
+  });
+});
+
+describe('the entry header stands down for a page that opens itself', () => {
+  it('recognises a banner by its h1, picture or no picture', () => {
+    /*
+     * The first rule here keyed off the background photograph, and Split has
+     * none in the corpus: it would have kept the blog header, the stray trail
+     * and the reading time on the one page least able to carry them.
+     */
+    const withPicture = seed(GREECE);
+    const without = seed({ name: 'Split', prose: { tagline: 'A palace that became a city.' } });
+    expect(carriesOwnBanner(withPicture)).toBe(true);
+    expect(carriesOwnBanner(without)).toBe(true);
+    // The slot is there and empty either way; the h1 is what makes it a banner.
+    expect((without.sections[0] as { backgroundImage?: string }).backgroundImage).toBe('');
+  });
+
+  it('leaves an ordinary post its header', () => {
+    // A blog post has no h1 in its content, so nothing takes the header's job.
+    expect(carriesOwnBanner({ sections: [] })).toBe(false);
+    expect(carriesOwnBanner(null)).toBe(false);
+    expect(carriesOwnBanner({
+      sections: [{ rows: [{ columns: [{ blocks: [{ type: 'heading', props: { style: 'h2' } }] }] }] }],
+    })).toBe(false);
+  });
+
+  it('is wired into the route, not just exported', () => {
+    const route = readFileSync(
+      resolve(__dirname, '..', 'app', 'site', '[host]', '[[...path]]', 'page.tsx'), 'utf8');
+    expect(route).toContain('carriesOwnBanner(item)');
+    expect(route).toContain('{!ownBanner && (');
+  });
+});
+
+describe('adoption does its slow work outside the database transaction', () => {
+  const db = readFileSync(resolve(__dirname, '..', 'lib', 'db', 'reference.ts'), 'utf8');
+  const fn = db.slice(db.indexOf('export async function adoptDestination'));
+
+  it('imports the photographs between two transactions, never inside one', () => {
+    /*
+     * Importing makes network calls and copies files into blob storage.
+     * Doing that with a transaction open holds a pooled connection for the
+     * duration, and a handful of clients adopting at once is then enough to
+     * exhaust the pool. The first pass answers "may this happen and what from",
+     * the import runs with nothing held, and the second writes the row.
+     */
+    const fill = fn.indexOf('await fillPlannedPhotos(');
+    expect(fill).toBeGreaterThan(-1);
+
+    const opens = [...fn.matchAll(/withTenant\(tenantId/g)].map((m) => m.index ?? -1);
+    expect(opens.length, 'expected exactly two transactions').toBe(2);
+    // The import sits after the first opens and before the second does.
+    expect(fill).toBeGreaterThan(opens[0]);
+    expect(fill).toBeLessThan(opens[1]);
+  });
+
+  it('lifts the banner picture onto the row only once one was actually found', () => {
+    // The fill is best effort, so an empty slot must not blank out the card.
+    expect(fn).toContain('if (banner?.backgroundImage) seed.image = banner.backgroundImage;');
   });
 });

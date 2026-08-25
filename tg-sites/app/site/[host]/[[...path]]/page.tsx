@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { carriesOwnBanner } from '../../../../lib/content/collection-layout';
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
@@ -741,6 +742,17 @@ function EntryRenderer({
   const { item } = entry;
   const image = safeUrl(item.image);
   /*
+   * THE HEADER STANDS DOWN WHEN THE CONTENT OPENS WITH ITS OWN BANNER, the same
+   * way the automatic breadcrumb trail stands down for a breadcrumbs block.
+   *
+   * An adopted destination builds the banner the rest of the site uses: a
+   * section with a background photograph, its own trail, an h1-styled heading
+   * and a line of copy. Drawing the blog header as well gave the page two
+   * openings, the second in a different type treatment, with a stray trail
+   * above the picture and "3 min read" on a page about an island.
+   */
+  const ownBanner = carriesOwnBanner(item);
+  /*
    * The facts this entry's collection declares, formatted into words.
    *
    * ALL OF THEM, unlike a card, which shows the first few. A card is a glance
@@ -778,6 +790,7 @@ function EntryRenderer({
      * the document for the sake of moving it on the screen.
      */
     <article className="tgs-page tgs-entry" data-layout={entry.layout} style={theme}>
+      {!ownBanner && (
       <header className="tgs-entry__head">
         {item.date && (
           <p className="tgs-entry__date">
@@ -826,6 +839,7 @@ function EntryRenderer({
           </div>
         )}
       </header>
+      )}
 
       {/*
         THE CORPUS PANEL IS A BAND OF ITS OWN, NOT PART OF THE HEADER, and it was

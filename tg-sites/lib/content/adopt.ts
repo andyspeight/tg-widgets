@@ -1,6 +1,7 @@
 import { createBlock, createRow, createSection } from './factory';
 import { emptyItem, type CollectionItem } from './collection';
 import { escapeHtml } from './sanitise';
+import type { PhotoTarget } from './photo-plan';
 import type { Block, Row, Section } from './schema';
 
 /**
@@ -38,10 +39,6 @@ export interface CorpusProse {
   tagline?: string;
   heroIntro?: string;
   overview?: string;
-  /** Up to three picture URLs, https only, validated by the exporter. */
-  images?: string[];
-  /** Photographer credits, in the same order as the pictures. */
-  credits?: string[];
   highlights?: Array<{ icon?: string; title?: string; description?: string }>;
   events?: Array<{ month?: string; name?: string; description?: string }>;
   thingsToDo?: string[];
@@ -79,40 +76,6 @@ export function proseToHtml(value: unknown): string {
     // new paragraph, so it becomes a space rather than a <br>.
     .map((para) => `<p>${escapeHtml(para.replace(/\n/g, ' '))}</p>`)
     .join('');
-}
-
-/**
- * Alt text for a corpus photograph, recovered from its credit line.
- *
- * THE CREDIT CARRIES A DESCRIPTION AND ALMOST NOBODY NOTICES. A stock credit
- * reads "Photo by Lawrence Krowdeed on Unsplash
- * (https://unsplash.com/photos/a-group-of-people-sitting-on-a-pier-next-to-a-body-of-water-G8T7njOVE6Y)",
- * and that slug is a real description of the picture written by a person. It is
- * a far better alt than the place name, which describes the page rather than the
- * image and tells a screen reader nothing it did not already have from the
- * heading.
- *
- * The trailing token is the photo id and is dropped. Falls back to the place
- * name, because empty alt on a content photograph is worse than a general one.
- */
-export function altFromCredit(credit: unknown, fallback: string): string {
-  const text = typeof credit === 'string' ? credit : '';
-  const slug = /unsplash\.com\/photos\/([a-z0-9-]+)/i.exec(text)?.[1] ?? '';
-  const words = slug.split('-').filter(Boolean);
-  /*
-   * Strip the opaque id off the end. Every word Unsplash puts in a slug is plain
-   * lower-case, so a part carrying a capital, a digit or an underscore is the id
-   * rather than the description.
-   *
-   * A LOOP RATHER THAN ONE POP, because the id itself can contain a hyphen and
-   * therefore arrive as more than one part. "Ch-odXM4SCg" split to ["Ch",
-   * "odXM4SCg"], a single pop left the "Ch", and the alt text on the Dalmatian
-   * Islands banner read "...during daytime Ch".
-   */
-  while (words.length > 2 && /[A-Z0-9_]/.test(words[words.length - 1])) words.pop();
-  const phrase = words.join(' ').trim();
-  if (phrase.length < 8) return fallback;
-  return phrase.charAt(0).toUpperCase() + phrase.slice(1);
 }
 
 /**
@@ -271,17 +234,100 @@ function paragraphs(html: string, size = 'm'): Block {
  * heading with nothing underneath it reads as a fault the client has to tidy up,
  * and the whole promise here is that they do not have to.
  */
+export interface Seeded {
+  item: CollectionItem;
+  /**
+   * The picture slots, for lib/media/photo-fill.ts to resolve and write in.
+   *
+   * Returned rather than filled here so this module stays pure and testable
+   * without a network, exactly the split lib/content/photo-plan.ts draws for the
+   * starter build: this half decides WHAT is wanted, the server half fetches it.
+   */
+  photos: PhotoTarget[];
+}
+
 export function seedItemFromCorpus(input: {
   name: string;
   prose?: CorpusProse;
   facts?: { lat?: number; lng?: number };
-}): CollectionItem {
+}): Seeded {
   const prose = input.prose ?? {};
   const name = input.name.trim().slice(0, 200) || 'Untitled';
-  const images = Array.isArray(prose.images) ? prose.images.filter((url) => typeof url === 'string') : [];
-  const credits = Array.isArray(prose.credits) ? prose.credits : [];
+
+  /*
+   * WHAT EACH PICTURE SLOT ASKS THE PHOTO LIBRARY FOR.
+   *
+   * Andy, 25 Aug 2026: the images should be our stock or AI generated. The
+   * corpus carries hotlinked stock URLs and they are the wrong thing to put on a
+   * client's site twice over: the provider sees every visitor, and a hotlinked
+   * file gets no responsive variants, so it arrives without the srcSet every
+   * hand-placed picture on the site has.
+   *
+   * So the slots are planned here and filled by the same importer a starter or a
+   * template uses (lib/media/photo-fill.ts), which copies the file into the
+   * tenant's own media, measures it, keeps the photographer's credit and carries
+   * their description as the alt text.
+   *
+   * THE SECONDARY QUERIES COME FROM THE HIGHLIGHTS rather than from a modifier
+   * bolted onto the place name. "Hvar coastline" is a guess; "Pakleni Islands"
+   * is a real thing the corpus already wrote about this place, so the picture
+   * has some chance of showing what the page is discussing.
+   */
+  const photos: PhotoTarget[] = [];
+  const highlightTitles = (prose.highlights ?? [])
+    .map((h) => (typeof h?.title === 'string' ? h.title.trim() : ''))
+    .filter(Boolean);
+  const query = (n: number) => highlightTitles[n] ?? name;
 
   const sections: Section[] = [];
+
+  /*
+   * THE BANNER, BUILT THE WAY EVERY OTHER PAGE ON THIS KIND OF SITE BUILDS ONE.
+   *
+   * A section with the photograph behind it, its own breadcrumb trail, an
+   * h1-styled heading and one line of copy. Taken from the hand-built pages
+   * rather than designed here, down to the scrim strength and the height.
+   *
+   * WHY IT IS NOT THE ENTRY'S OWN HEADER. That header is blog furniture, drawn
+   * from the row: a bare title in its own type treatment, a byline and a reading
+   * time. Beside pages that open like this it read as a different page: the type
+   * did not match, the automatic breadcrumb trail sat above the picture instead
+   * of inside it, and a page about an island announced "3 min read". The header
+   * stands down when the content carries its own h1, which is what this section
+   * gives it. See carriesOwnBanner in collection-layout.ts.
+   *
+   * THE TRAIL IS A BLOCK HERE ON PURPOSE. The published route draws a trail
+   * automatically between the header and the content, and a breadcrumbs block
+   * does not add a second one, it MOVES that one. So putting it inside the
+   * banner is what takes it off the top of the page.
+   */
+  sections.push(band({
+    name: 'Banner',
+    tone: 'dark',
+    width: 'contained',
+    paddingY: 'xl' as unknown as number,
+    minHeight: 420,
+    overlay: 45,
+    // A reveal on the thing somebody lands on would fade in the page's own title.
+    reveal: false,
+    backgroundImage: '',
+    kenBurns: true,
+    rows: stack([
+      withProps('breadcrumbs', { separator: 'slash', showHome: true, size: 's', align: 'left' }),
+      withProps('heading', {
+        // An h2 set at h1 size, exactly as the built pages do it: one h1 per
+        // document belongs to the page, and the route already emits it.
+        level: 'h2',
+        style: 'h1',
+        align: 'left',
+        html: escapeHtml(name),
+      }),
+      ...(typeof prose.tagline === 'string' && prose.tagline.trim()
+        ? [paragraphs(`<p>${escapeHtml(prose.tagline.trim())}</p>`)]
+        : []),
+    ]),
+  }));
+  photos.push({ query: name, section: sections.length - 1, place: { kind: 'background' } });
 
   /*
    * THE PLACE. The hero intro is the standfirst and the overview is the body,
@@ -300,16 +346,15 @@ export function seedItemFromCorpus(input: {
       name: 'The place',
       tone: 'light',
       paddingY: 'xl' as unknown as number,
-      rows: images[1]
-        ? pair(words, [withProps('image', {
-            src: images[1],
-            alt: altFromCredit(credits[1], name),
-            ratio: '3/4',
-            fit: 'cover',
-            radius: 'md',
-          })])
-        : stack(words),
+      rows: pair(words, [withProps('image', {
+        src: '', alt: '', ratio: '3/4', fit: 'cover', radius: 'md',
+      })]),
     }));
+    photos.push({
+      query: query(0),
+      section: sections.length - 1,
+      place: { kind: 'image', row: 0, column: 1, block: 0 },
+    });
   }
 
   /*
@@ -351,14 +396,20 @@ export function seedItemFromCorpus(input: {
    * look at the photograph still sees it move. Both are pure CSS and both are
    * held back under prefers-reduced-motion.
    */
-  if (images[2]) {
+  /*
+   * NOT WHEN IT WOULD LAND AGAINST THE BANNER. Both are dark photographs, so
+   * with no opening prose between them the page opened with two picture bands
+   * running together and the seam disappeared. A record thin enough to do that
+   * does not need a second full-width photograph anyway.
+   */
+  if ((sections[sections.length - 1] as { tone?: string }).tone !== 'dark') {
     sections.push(band({
       name: 'The wide view',
       tone: 'dark',
       width: 'full',
       paddingY: 'xl' as unknown as number,
       minHeight: 420,
-      backgroundImage: images[2],
+      backgroundImage: '',
       overlay: 30,
       kenBurns: true,
       // Nothing to reveal, and a reveal on a band with no words is a band that
@@ -366,6 +417,7 @@ export function seedItemFromCorpus(input: {
       reveal: false,
       rows: stack([]),
     }));
+    photos.push({ query: query(1), section: sections.length - 1, place: { kind: 'background' } });
   }
 
   /*
@@ -467,7 +519,7 @@ export function seedItemFromCorpus(input: {
     ]),
   }));
 
-  return {
+  const item: CollectionItem = {
     ...emptyItem(),
     title: name,
     /*
@@ -482,8 +534,14 @@ export function seedItemFromCorpus(input: {
      * background, because the "Picture first" entry layout exists for exactly
      * this and draws the title over it.
      */
-    image: images[0] ?? '',
-    alt: images[0] ? altFromCredit(credits[0], name) : '',
+    /*
+     * The card picture and the og:image are filled in by the caller once the
+     * banner's photograph has been imported, since it is the same file.
+     */
+    image: '',
+    alt: '',
     sections: alternate(sections),
   };
+
+  return { item, photos };
 }

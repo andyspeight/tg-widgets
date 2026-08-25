@@ -4,6 +4,7 @@ import { db } from './client';
 import { withTenant, type Tx } from './withTenant';
 import { REFERENCE_KINDS, type ReferenceKind } from '../content/reference';
 import { seedItemFromCorpus, type CorpusProse } from '../content/adopt';
+import { fillPlannedPhotos } from '../media/photo-fill';
 
 /**
  * The shared destination corpus.
@@ -366,7 +367,22 @@ export async function adoptDestination(
   const id = text(sourceId, 40);
   if (!id) return { ok: false, reason: 'No corpus record was named.' };
 
-  return withTenant(tenantId, async (tx) => {
+  /*
+   * TWO TRANSACTIONS WITH THE IMPORT BETWEEN THEM, and the split is the point.
+   *
+   * Importing the photographs makes network calls and copies files into blob
+   * storage, which takes as long as it takes. Doing that with a database
+   * transaction open holds a pooled connection for the duration, and a handful
+   * of clients adopting at once is then enough to exhaust the pool. So the first
+   * transaction answers "may this happen and what from", the import runs with
+   * nothing held, and the second writes the row.
+   *
+   * What the split costs is that the slug is allocated at the end rather than
+   * reserved at the start, so two adoptions racing for one address can collide.
+   * The unique index on (collection_id, slug) is what catches that, and the loop
+   * below simply picks the next free one.
+   */
+  const prepared = await withTenant(tenantId, async (tx) => {
     const found = await tx`
       select name, slug, prose, facts
         from public.reference_records
@@ -374,7 +390,7 @@ export async function adoptDestination(
        limit 1
     `;
     if (!found.length) {
-      return { ok: false, reason: 'That destination is no longer in the corpus.' };
+      return { ok: false as const, reason: 'That destination is no longer in the corpus.' };
     }
 
     const record = found[0] as Record<string, unknown>;
@@ -391,7 +407,7 @@ export async function adoptDestination(
        where id = ${collectionId}::uuid and tenant_id = ${tenantId}::uuid
        limit 1
     `;
-    if (!owns.length) return { ok: false, reason: 'That collection does not exist.' };
+    if (!owns.length) return { ok: false as const, reason: 'That collection does not exist.' };
 
     const already = await tx`
       select slug from public.collection_items
@@ -401,12 +417,56 @@ export async function adoptDestination(
     `;
     if (already.length) {
       return {
-        ok: false,
+        ok: false as const,
         slug: String((already[0] as Record<string, unknown>).slug),
         reason: `${name} has been added already.`,
       };
     }
 
+    return { ok: true as const, record, name };
+  });
+
+  if (!prepared.ok) return prepared;
+  const { record, name } = prepared;
+
+  /*
+   * The whole prose payload and the coordinates. The seed builds a full
+   * magazine page out of the first and pins a map with the second; see
+   * lib/content/adopt.ts for what it makes and why every part of it is the
+   * client's the moment it is written.
+   */
+  const { item: seed, photos } = seedItemFromCorpus({
+    name,
+    prose: plainObject(record.prose) as CorpusProse,
+    facts: plainObject(record.facts) as { lat?: number; lng?: number },
+  });
+
+  /*
+   * THE PICTURES, IMPORTED INTO THE CLIENT'S OWN MEDIA.
+   *
+   * The same importer a starter or a template build uses, so a photograph on an
+   * adopted page is indistinguishable from one the client placed by hand:
+   * copied into their store, measured, credited, and given the responsive
+   * variants that produce the srcSet every other picture on the site has. The
+   * corpus's own stock URLs are deliberately not used: hotlinking them would
+   * show the provider every visitor to a client's site, and they arrive without
+   * variants.
+   *
+   * BEST EFFORT BY DESIGN. fillPlannedPhotos swallows its own failures and
+   * leaves a slot empty, which is the right trade: a destination page with the
+   * words and no pictures is worth having, and the client can drop their own
+   * photography in.
+   */
+  await fillPlannedPhotos(tenantId, photos, seed.sections);
+
+  /*
+   * The banner's picture is also the card picture and the og:image, so it is
+   * lifted onto the row once the import has actually put one there.
+   */
+  const banner = seed.sections[0] as { backgroundImage?: string } | undefined;
+  if (banner?.backgroundImage) seed.image = banner.backgroundImage;
+
+  return withTenant(tenantId, async (tx) => {
     const wanted = text(record.slug, 80) || 'destination';
     const taken = await tx`
       select slug from public.collection_items
@@ -416,18 +476,6 @@ export async function adoptDestination(
     const used = new Set(taken.map((row) => String((row as Record<string, unknown>).slug)));
     let slug = wanted;
     for (let n = 2; used.has(slug); n += 1) slug = `${wanted}-${n}`;
-
-    /*
-     * The whole prose payload and the coordinates. The seed builds a full
-     * magazine page out of the first and pins a map with the second; see
-     * lib/content/adopt.ts for what it makes and why every part of it is the
-     * client's the moment it is written.
-     */
-    const seed = seedItemFromCorpus({
-      name,
-      prose: plainObject(record.prose) as CorpusProse,
-      facts: plainObject(record.facts) as { lat?: number; lng?: number },
-    });
 
     const rows = await tx`
       insert into public.collection_items
