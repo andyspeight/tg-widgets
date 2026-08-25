@@ -437,6 +437,28 @@ export function normaliseAlign(value: unknown): 'left' | 'centre' | 'right' | un
 }
 
 /**
+ * Where a section's content sits when the section is taller than the content is.
+ *
+ * WHY THIS HAD TO EXIST. minHeight could always make a section taller than what
+ * was in it, and the leftover height had nowhere to go but underneath: a section
+ * is a plain block, so its content sat at the top and the rest was a void. On a
+ * 1200px hero holding 249px of words that is 950px of empty ground below the
+ * buttons, which reads as a broken page rather than a tall one. Found on a live
+ * client site on 25 Aug 2026 by rendering the served HTML and looking at it.
+ *
+ * The column's own align does NOT cover this. That one centres a column against
+ * its ROW, and a row is only as tall as its content, so on a tall section it has
+ * nothing to centre against and quietly does nothing.
+ *
+ * UNDEFINED MEANS TOP, and top stays the default so not one stored section
+ * moves. The renderer emits no attribute at all for it, and the stylesheet only
+ * changes the layout when the attribute is present.
+ */
+export function normaliseAlignY(value: unknown): 'centre' | 'bottom' | undefined {
+  return value === 'centre' || value === 'bottom' ? value : undefined;
+}
+
+/**
  * Where a row's columns collapse to a single stacked column.
  *
  * There is deliberately no 'never'. See the header note: a row that refuses to
@@ -786,6 +808,12 @@ export const SectionSchema = z.object({
    * defaults a missing style to rise regardless.
    */
   revealStyle: z.unknown().transform(normaliseRevealStyle).optional(),
+  /**
+   * Where the content sits when minHeight makes the section taller than it.
+   *
+   * Absent is top, which is what every section did before this existed.
+   */
+  alignY: z.unknown().transform(normaliseAlignY).optional(),
   /**
    * Reveal the section's items one after another rather than the whole block at
    * once: the columns of a row, or the cards, tiles or logos of a grid, each

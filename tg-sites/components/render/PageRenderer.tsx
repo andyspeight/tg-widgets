@@ -522,6 +522,11 @@ export function SectionRenderer({
        * the gentlest setting still moves; globals.css reads it as custom properties
        * and the recipes themselves are pure CSS.
        */
+      /*
+       * Absent means top, so a section that never asked carries no attribute and
+       * the stylesheet leaves its layout exactly as it was.
+       */
+      data-align-y={section.alignY}
       data-motion={motion}
       data-motion-intensity={motion ? String(section.motion?.intensity ?? 2) : undefined}
       /*

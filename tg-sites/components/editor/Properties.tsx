@@ -1252,6 +1252,39 @@ function SectionFields({
         onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
       />
 
+      {/*
+        * Only worth asking once the section can actually be taller than its
+        * content. Below that there is no spare height to place, and a control
+        * that does nothing is worse than no control.
+        */}
+      {(section.minHeight ?? 0) > 0 && (
+        <div className="ed-field">
+          <label className="ed-label" htmlFor={`ed-aligny-${index}`}>
+            Content sits
+          </label>
+          <select
+            id={`ed-aligny-${index}`}
+            className="ed-select"
+            value={section.alignY ?? 'top'}
+            onChange={(event) => {
+              const v = event.target.value;
+              set(
+                { alignY: v === 'centre' || v === 'bottom' ? v : undefined },
+                `sec:${index}:alignY`,
+              );
+            }}
+          >
+            <option value="top">At the top</option>
+            <option value="centre">In the middle</option>
+            <option value="bottom">At the bottom</option>
+          </select>
+          <p className="ed-hint">
+            Where the words go when the section is taller than they are. Only does
+            anything once there is spare height to place.
+          </p>
+        </div>
+      )}
+
       <Measure
         label="Overlap the section above"
         value={section.pullUp ?? 0}

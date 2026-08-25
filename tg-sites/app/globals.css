@@ -581,6 +581,30 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   width: 100%;
 }
 
+/*
+ * WHERE THE SPARE HEIGHT GOES WHEN A SECTION IS TALLER THAN ITS CONTENT.
+ *
+ * A section is a plain block, so minHeight could always make one taller than
+ * what was in it and the leftover simply sat underneath. A 1200px hero holding
+ * 249px of words had 950px of empty ground below the buttons, which reads as a
+ * broken page rather than a tall one.
+ *
+ * ONLY A SECTION THAT ASKED CHANGES. No attribute, no flex, no difference to any
+ * stored page. Safe to switch the display because every other child of a section
+ * is out of flow already: the background, the background slideshow, the scrim and
+ * both dividers are all position:absolute, so the inner is the only thing flex
+ * can reach.
+ *
+ * The column's own align does not solve this: it centres a column against its
+ * ROW, and a row is only as tall as its content.
+ */
+.tgs-section[data-align-y] {
+  display: flex;
+  flex-direction: column;
+}
+.tgs-section[data-align-y='centre'] { justify-content: center; }
+.tgs-section[data-align-y='bottom'] { justify-content: flex-end; }
+
 .tgs-section[data-width='narrow']    .tgs-section__inner { max-width: var(--tgs-width-narrow); }
 .tgs-section[data-width='contained'] .tgs-section__inner { max-width: var(--tgs-width-contained); }
 .tgs-section[data-width='wide']      .tgs-section__inner { max-width: var(--tgs-width-wide); }
