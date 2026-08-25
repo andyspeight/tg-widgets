@@ -104,6 +104,13 @@ Both roughly halved. The remaining cost is different in each case: the designed
 page is still carrying 820 KB of images, the native page is fast enough that
 CSS is now the visible floor.
 
+**Measured for real on 25 Aug 2026** (PageSpeed Insights, lab, no field data
+because the site has no traffic yet): Performance **98 mobile / 99 desktop**,
+Accessibility, Best Practices and SEO **100** on both. LCP 2.4 s mobile and
+0.7 s desktop, CLS **0** on both, TBT 10 ms. Desktop FCP of 0.3 s is worth
+noting on its own: FCP includes server time, so TTFB is already small, which
+means edge caching buys less than the queue assumed.
+
 Two caveats before quoting any of it:
 
 - These are harness pages, not the live site. They render through the real
@@ -209,6 +216,38 @@ in `components/editor/Canvas.tsx` around line 1041 before touching it.
 ## Things that will bite you
 
 Hard-won, none of it obvious from the code.
+
+**ANYTHING A PUBLISHED PAGE LOADS BY NAME FROM OUR ORIGIN HAS TO BE LISTED IN
+THE MIDDLEWARE.** This bit twice in one day. Everything on a client's hostname
+is rewritten into the site renderer, and `isPlatformPath` names the exceptions.
+The fonts were the first case (they asked by hostname instead of slug); the four
+scripts in `public/` were the second, and they were simply missing from the list,
+so `/tg-motion.js` on a client domain returned a 404 HTML document with a
+JavaScript content type. Both were silent: nothing errored where anyone would
+see it, the feature just did not happen. The list lives in `middleware.ts` as
+`SITE_ASSETS` and is repeated in the matcher literal, because Next reads that at
+build time and cannot call a function. `tests/site-assets.test.ts` checks the
+directory, the function and the matcher against each other.
+
+**CLS IS ZERO BECAUSE OF THE FONT PRELOADS, not by luck.** PageSpeed measured 0
+on mobile and desktop on 25 Aug. `font-display: swap` with no metric overrides
+would shift the layout if the font arrived after first paint; the three
+`rel=preload` links in FontHead are what stop it arriving late. Forced to swap
+in a probe (font held back 600 ms) the same page scored 0.047. If anyone ever
+trims those preloads as dead weight, this comes back.
+
+**LIGHTHOUSE'S "LEGACY JAVASCRIPT" IS NOT ACTIONABLE HERE.** Next emits the
+polyfills chunk with `noModule`, so no browser supporting ES modules downloads
+it and the 12 KiB it counts costs real users nothing. A browserslist does not
+remove it either: measured both ways on identical code, adding
+`supports es6-module, not dead` made the client bundle 23,336 bytes BIGGER,
+because it is a wider target set than Next's own default.
+
+**THE BIG "EFFICIENT CACHE LIFETIMES" NUMBER IS THE DEMO, NOT THE PRODUCT.**
+PageSpeed reports about 1,789 KB of desktop savings, nearly all of it pictures.
+Those are hardcoded Supabase urls in `tools/coastwise-seed`, put there by hand.
+Real client media goes to Vercel Blob through `/api/media/upload`, which now asks
+for a year. Fixing the demo's number means the bucket's own settings.
 
 **`cssUnusedPct` does not mean what it looks like, and it mis-ranked the whole
 queue.** It read 93 to 97 per cent and put "split the CSS" at the top. It is
