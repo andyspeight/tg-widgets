@@ -1643,6 +1643,13 @@ describe('nothing queries round the side', () => {
       .sort();
 
     expect(opens, 'a new file opens its own connection, which needs a look').toEqual([
+      /*
+       * The shared destination corpus, which has no tenant_id to scope to: the
+       * same rows serve every client. Its transaction therefore sets no scope,
+       * which is why this door was worth adding on purpose. See the note at the
+       * top of lib/db/reference.ts and db/migrations/0028_reference_records.sql.
+       */
+      join('lib', 'db', 'reference.ts'),
       join('lib', 'db', 'tenants.ts'), // resolve_tenant, before a tenant is known
       join('lib', 'db', 'users.ts'), // withLogin and withUser, likewise
       join('lib', 'db', 'withTenant.ts'), // withTenant and withPublicTenant
