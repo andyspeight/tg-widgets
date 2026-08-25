@@ -1,5 +1,7 @@
 {
-  "projectRoots": ["designs/*"],
+  "projectRoots": [
+    "designs/*"
+  ],
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [
@@ -36,14 +38,31 @@
       {
         "rule": "broken-image",
         "value": "*",
-        "files": ["components/media/media.css", "tg-sites/components/media/media.css"],
+        "files": [
+          "components/media/media.css",
+          "tg-sites/components/media/media.css"
+        ],
         "reason": "False positive: the rule matches the words 'broken-image' inside a CSS comment explaining why a document tile deliberately avoids an img element. A stylesheet has no img tags. Both path forms because the hook resolves relative to its working directory, and a session run inside tg-sites/ sees the shorter one."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "render-quote.js"
+        ],
+        "createdAt": "2026-08-25T08:46:30.150Z",
+        "reason": "Travelgenix-branded Quote PDF template (widget-suite output), governed by travelgenix-design not Impeccable per CLAUDE.md scope; pre-existing style, not introduced by the <a href> link fix."
       }
     ],
-    "designSystem": { "enabled": true }
+    "designSystem": {
+      "enabled": true
+    }
   },
   "hook": {
     "enabled": true,
-    "limits": { "maxFindings": 5, "maxChars": 8000 }
+    "limits": {
+      "maxFindings": 5,
+      "maxChars": 8000
+    }
   }
 }
