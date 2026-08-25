@@ -114,11 +114,16 @@ async function searchPlaces(q) {
   }
   clearTimeout(timer);
 
-  if (r.status === 403 || r.status === 401) return { error: 'Business search is not authorised — check the Google key.', status: 502 };
   if (!r.ok) {
-    let msg = '';
-    try { const j = await r.json(); msg = j && j.error && (j.error.message || j.error.status); } catch (e) {}
-    return { error: msg ? ('Business search error: ' + String(msg)) : 'Business search returned an error.', status: 502 };
+    // Surface Google's own reason so a setup problem (API not enabled, billing
+    // off, key restriction) names itself instead of hiding behind a generic line.
+    let detail = '';
+    try { const j = await r.json(); detail = (j && j.error && (j.error.message || j.error.status)) || ''; } catch (e) {}
+    if (detail) console.error('[place-search] Google', r.status, detail);
+    if (r.status === 401 || r.status === 403) {
+      return { error: detail ? ('Google refused the search: ' + String(detail)) : 'Google refused the search — check the key is enabled for Places API (New), billing is on, and any key restriction allows it.', status: 502 };
+    }
+    return { error: detail ? ('Business search error: ' + String(detail)) : 'Business search returned an error.', status: 502 };
   }
   let j;
   try { j = await r.json(); } catch (e) { return { error: 'Could not read the search response.', status: 502 }; }
