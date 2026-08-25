@@ -177,13 +177,13 @@ export function referenceFacts(data: unknown): ReferenceFacts | null {
   return {
     kind: kind as ReferenceKind,
     sourceId,
-    region: text(raw.region, 60),
-    flightTime: text(raw.flightTime, 20),
-    timeZone: text(raw.timeZone, 20),
-    currency: text(raw.currency, 40),
-    language: text(raw.language, 40),
-    voltage: text(raw.voltage, 30),
-    visaStatus: text(raw.visaStatus, 60),
+    region: text(raw.region, 400),
+    flightTime: text(raw.flightTime, 400),
+    timeZone: text(raw.timeZone, 400),
+    currency: text(raw.currency, 400),
+    language: text(raw.language, 400),
+    voltage: text(raw.voltage, 400),
+    visaStatus: text(raw.visaStatus, 400),
     climate: climate(raw.climate),
     bestFor: tags(raw.bestFor),
     syncedAt: text(raw.syncedAt, 40),
@@ -198,6 +198,16 @@ export interface ReferenceRow {
   key: string;
   label: string;
   value: string;
+  /**
+   * True when the corpus holds a sentence here rather than a datum.
+   *
+   * The tables are not consistent about it and both are legitimate: Greece's
+   * flight time is "3h 30m", Mexico City's is "11h 30m direct from the UK to
+   * Mexico City Benito Juárez (MEX). The new Felipe Ángeles airport (NLU)
+   * handles some routes." The second is the better answer and it is not a
+   * heading-sized value, so the renderer sets it as prose and lets it span.
+   */
+  long: boolean;
 }
 
 /**
@@ -223,7 +233,10 @@ export function referenceRows(facts: ReferenceFacts): ReferenceRow[] {
   ];
   return rows
     .filter((row): row is [string, string, string] => Boolean(row[2]))
-    .map(([key, label, value]) => ({ key, label, value }));
+    // Forty is where a value stops being something you read at a glance in a
+    // grid cell. Chosen by looking at the corpus: every datum is well under it
+    // and every sentence is well over.
+    .map(([key, label, value]) => ({ key, label, value, long: value.length > 40 }));
 }
 
 /** January to December, short, for the chart's axis. */

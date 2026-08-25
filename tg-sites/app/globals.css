@@ -1850,6 +1850,26 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   color: var(--tgs-text);
 }
 
+/*
+ * A FACT THAT IS A SENTENCE SPANS THE ROW AND READS AS PROSE.
+ *
+ * The corpus is not consistent about these fields and both shapes are right:
+ * Greece's flight time is "3h 30m", Mexico City's names both of its airports in
+ * a sentence. Set at heading size in a nine-rem cell the second one is a wall of
+ * six words a line; given the row and the body face it is simply a useful note.
+ */
+.tgs-dest__fact[data-long] {
+  grid-column: 1 / -1;
+}
+
+.tgs-dest__fact[data-long] dd {
+  font-family: var(--tgs-p-font);
+  font-weight: 400;
+  font-size: var(--tgs-p-size);
+  line-height: var(--tgs-p-leading, 1.6);
+  max-width: 68ch;
+}
+
 /* --- the climate year --------------------------------------------- */
 
 .tgs-dest__climate { margin: 0; }

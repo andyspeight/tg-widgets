@@ -204,17 +204,26 @@ function toRecord(kind, record, map) {
       kind,
       sourceId: record.id,
       /*
-       * The numbers are headroom, not formats. Each is far above the longest
-       * real value, so a drop means genuinely odd data rather than a slightly
-       * chatty author, and the facts row stays a row rather than a paragraph.
+       * FOUR HUNDRED IS A RUNAWAY GUARD, NOT A FORMAT, and the difference cost a
+       * round trip. The first pass set these from each field's description
+       * ("Format: 'Xh YYm'") and truncated; the second dropped anything past a
+       * hundred, which lost ninety-nine cities whose flight time is a sentence:
+       *
+       *   "11h 30m direct from the UK to Mexico City Benito Juárez (MEX). The
+       *    new Felipe Ángeles airport (NLU) handles some routes."
+       *
+       * That is a better answer than "11h 30m", and the corpus is simply not
+       * consistent about which of the two a record holds. Both are legitimate,
+       * so the export keeps both and the renderer sets a long one differently.
+       * Anything past four hundred is not a fact at all.
        */
-      region: fact(get('region'), 100),
-      flightTime: fact(get('flightTime'), 100),
-      timeZone: fact(get('timeZone'), 60),
-      currency: fact(get('currency'), 60),
-      language: fact(get('language'), 60),
-      voltage: fact(get('voltage'), 60),
-      visaStatus: fact(get('visaStatus'), 120),
+      region: fact(get('region'), 400),
+      flightTime: fact(get('flightTime'), 400),
+      timeZone: fact(get('timeZone'), 400),
+      currency: fact(get('currency'), 400),
+      language: fact(get('language'), 400),
+      voltage: fact(get('voltage'), 400),
+      visaStatus: fact(get('visaStatus'), 400),
       // All three or none, the same rule the renderer applies.
       ...(temps && rainfall && season ? { climate: { temps, rainfall, season } } : {}),
       ...(bestFor.length ? { bestFor } : {}),
