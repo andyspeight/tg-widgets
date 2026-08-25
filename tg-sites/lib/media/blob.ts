@@ -181,6 +181,23 @@ export async function copyIntoStore(
      * that went in, which is why the RETURNED value is what the caller stores.
      */
     addRandomSuffix: true,
+    /*
+     * A YEAR, AND THE RANDOM SUFFIX ABOVE IS WHAT MAKES THAT SAFE.
+     *
+     * Every stored object gets a suffix the store chooses, so one address can
+     * only ever serve one set of bytes: replacing a picture makes a new url
+     * rather than new content at the old one. That is the same property that
+     * lets /fonts be immutable, and it is the whole argument for a long cache.
+     *
+     * Added 25 Aug 2026 because we were taking whatever the SDK's default was
+     * and PageSpeed reported roughly 1.8 MB of desktop savings under "use
+     * efficient cache lifetimes", nearly all of it pictures.
+     *
+     * FORWARD ONLY. Headers are written when an object is stored, so this
+     * reaches pictures uploaded from here on. Everything already in a bank keeps
+     * the header it was given.
+     */
+    cacheControlMaxAge: 31536000,
   });
 
   return {
