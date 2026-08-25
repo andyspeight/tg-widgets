@@ -188,17 +188,38 @@ function stack(blocks: Block[]): Row[] {
   return [row];
 }
 
-/** Two columns, for a picture beside its words. */
+/**
+ * Two columns, weighted, for a picture beside its words.
+ *
+ * SIXTY FORTY, NOT FIFTY FIFTY, because that is what the site this seed has to
+ * live on already does: every two-column row in the Coastwise build is 60/40 or
+ * 70/30. Equal halves read as a grid rather than as a column of text with
+ * something beside it, and a picture given the same width as the words competes
+ * with them instead of supporting them.
+ */
 function pair(left: Block[], right: Block[]): Row[] {
-  const row = createRow('1-1');
+  const row = createRow('60-40');
   row.columns[0].blocks = left;
   row.columns[1].blocks = right;
   return [row];
 }
 
-function band(partial: Partial<Section> & { rows: Row[] }): Section {
+/**
+ * One band of the page.
+ *
+ * NAMED, AND THAT IS NOT COSMETIC. Every section in the hand-built Coastwise
+ * site carries a name, because the name is what the client sees in the editor's
+ * section list. An unnamed band shows up as its first block's summary, so a page
+ * of seven of them reads as a list of half-sentences and nobody can find the
+ * one they want to change. A seed that is meant to be edited has to be
+ * navigable.
+ *
+ * REVEAL ON BY DEFAULT, again following the build: 44 of its sections use it.
+ * Free under prefers-reduced-motion, since the CMS blocks all honour it.
+ */
+function band(partial: Partial<Section> & { rows: Row[]; name: string }): Section {
   const section = createSection('1');
-  return { ...section, ...partial } as Section;
+  return { reveal: true, ...section, ...partial } as Section;
 }
 
 /**
@@ -263,35 +284,45 @@ export function seedItemFromCorpus(input: {
   const sections: Section[] = [];
 
   /*
-   * THE OPENING. The hero intro is the standfirst and the overview is the body,
-   * which is the order they were written to be read in. Set on the page's own
-   * ground rather than a band, so the banner above it is the only dark thing at
-   * the top of the page.
+   * THE PLACE. The hero intro is the standfirst and the overview is the body,
+   * which is the order they were written to be read in. A picture sits beside
+   * them where the corpus has a second one, weighted 60/40 the way every
+   * two-column row on this kind of site is.
    */
   const lead = proseToHtml(prose.heroIntro);
   const body = proseToHtml(prose.overview);
   if (lead || body) {
+    const words = [
+      ...(lead ? [paragraphs(lead, 'l')] : []),
+      ...(body ? [paragraphs(body)] : []),
+    ];
     sections.push(band({
+      name: 'The place',
       tone: 'light',
-      paddingY: 64,
-      rows: stack([
-        ...(lead ? [paragraphs(lead, 'l')] : []),
-        ...(body ? [paragraphs(body)] : []),
-      ]),
+      paddingY: 'xl' as unknown as number,
+      rows: images[1]
+        ? pair(words, [withProps('image', {
+            src: images[1],
+            alt: altFromCredit(credits[1], name),
+            ratio: '3/4',
+            fit: 'cover',
+            radius: 'md',
+          })])
+        : stack(words),
     }));
   }
 
   /*
-   * THE HIGHLIGHTS, on the alternate ground so the page bands rather than runs
-   * on. Two columns, not three: five items in threes leaves a widowed row of
-   * two, and three equal cards is the first thing on this client's
-   * anti-reference list.
+   * THE HIGHLIGHTS. Two columns, not three: five items in threes leaves a
+   * widowed row of two, and three equal cards is the first entry on this kind of
+   * client's anti-reference list.
    */
   const highlights = (prose.highlights ?? []).filter((h) => h?.title && h?.description);
   if (highlights.length > 0) {
     sections.push(band({
+      name: 'Highlights',
       tone: 'light',
-      paddingY: 64,
+      paddingY: 'xl' as unknown as number,
       rows: stack([
         heading('What you will remember'),
         withProps('cards', {
@@ -305,14 +336,9 @@ export function seedItemFromCorpus(input: {
           gap: 'l',
           wholeCardLinks: false,
           items: highlights.map((entry) => ({
-            src: '',
-            alt: '',
-            icon: icon(entry.icon),
-            label: '',
-            title: entry.title ?? '',
-            body: entry.description ?? '',
-            linkLabel: '',
-            href: '',
+            src: '', alt: '', icon: icon(entry.icon), label: '',
+            title: entry.title ?? '', body: entry.description ?? '',
+            linkLabel: '', href: '',
           })),
         }),
       ]),
@@ -320,38 +346,42 @@ export function seedItemFromCorpus(input: {
   }
 
   /*
-   * A PICTURE, FULL WIDTH, WITH THE WATER MOVING. The one place the seed asks
-   * for motion. Ken Burns rather than parallax because it drifts on its own
-   * clock: a reader who has stopped to look at the photograph still sees it
-   * move. Both are pure CSS and both are held back under prefers-reduced-motion.
+   * A PICTURE, FULL WIDTH, WITH THE WATER MOVING. Ken Burns rather than
+   * parallax because it drifts on its own clock: a reader who has stopped to
+   * look at the photograph still sees it move. Both are pure CSS and both are
+   * held back under prefers-reduced-motion.
    */
-  if (images[1]) {
+  if (images[2]) {
     sections.push(band({
+      name: 'The wide view',
       tone: 'dark',
       width: 'full',
-      paddingY: 120,
+      paddingY: 'xl' as unknown as number,
       minHeight: 420,
-      backgroundImage: images[1],
+      backgroundImage: images[2],
       overlay: 30,
       kenBurns: true,
+      // Nothing to reveal, and a reveal on a band with no words is a band that
+      // fades in for no reason.
+      reveal: false,
       rows: stack([]),
     }));
   }
 
   /*
-   * WHERE IT IS. The map is the product's own block: keyless, host-fixed, and it
-   * takes the place name rather than the coordinates because Google resolves a
-   * name to a pin more reliably than it centres on a decimal pair. The
-   * coordinates go in the caption, which is where this client's design world
-   * says a mono face is legitimate: a ship's log, not a label maker.
+   * WHERE IT IS. The map takes the place name rather than the coordinates,
+   * because a name resolves to a pin more reliably than a decimal pair centres.
+   * The coordinates go in the caption, which is where a mono face is legitimate
+   * on a site like this: a ship's log, not a label maker.
    */
   const { lat, lng } = input.facts ?? {};
   const position = typeof lat === 'number' && typeof lng === 'number'
-    ? `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`
+    ? `${Math.abs(lat).toFixed(4)}\u00b0 ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(4)}\u00b0 ${lng >= 0 ? 'E' : 'W'}`
     : '';
   sections.push(band({
+    name: 'Where it is',
     tone: 'light',
-    paddingY: 64,
+    paddingY: 'xl' as unknown as number,
     rows: stack([
       heading('Where it is'),
       withProps('map', {
@@ -366,67 +396,35 @@ export function seedItemFromCorpus(input: {
     ]),
   }));
 
-  /*
-   * WORTH DOING. A numbered list because the corpus writes it as one and the
-   * order is the author's ranking, not an arbitrary sequence. Beside the third
-   * picture where there is one, so the band is not a column of text on its own.
-   */
+  /* WORTH DOING. Numbered because the corpus ranks them, and the order is the
+     author's judgement rather than an arbitrary sequence. */
   const doing = (prose.thingsToDo ?? []).filter(Boolean);
   if (doing.length > 0) {
-    const list = [
-      heading('Worth doing'),
-      withProps('list', {
-        style: 'number',
-        items: doing.map((text) => ({ text })),
-      }),
-    ];
     sections.push(band({
+      name: 'Worth doing',
       tone: 'light',
-      paddingY: 64,
-      rows: images[2]
-        ? pair(list, [withProps('image', {
-            src: images[2],
-            alt: altFromCredit(credits[2], name),
-            ratio: '3/4',
-            fit: 'cover',
-            radius: 'md',
-            caption: '',
-          })])
-        : stack(list),
+      paddingY: 'xl' as unknown as number,
+      rows: stack([
+        heading('Worth doing'),
+        withProps('list', { style: 'number', items: doing.map((text) => ({ text })) }),
+      ]),
     }));
   }
 
   /*
-   * WHEN TO GO. The month leads each one because that is what the reader is
-   * scanning for, and the climate chart in the facts panel above has already
-   * told them which months are worth it.
+   * WHEN TO GO. A month, a name and a paragraph is a list, not a table and not
+   * cards: cards lead with a picture or an icon and have no third option, and a
+   * table refuses to squash so a two-hundred-character cell scrolls the band
+   * sideways. Both were tried on the page before this shape stuck.
    */
   const events = (prose.events ?? []).filter((e) => e?.month && e?.name);
   if (events.length > 0) {
     sections.push(band({
+      name: 'When to go',
       tone: 'light',
-      paddingY: 64,
+      paddingY: 'xl' as unknown as number,
       rows: stack([
         heading('Worth timing a trip around'),
-        /*
-         * A STACKED LIST, AND IT TOOK TWO WRONG ANSWERS TO GET HERE.
-         *
-         * Cards first: the block leads with a picture or an icon and has no
-         * third option, so three events with neither drew three cards each with
-         * an empty picture frame on top. Three equal cards is also the first
-         * entry on this client's anti-reference list.
-         *
-         * Then a table, which is genuinely the right shape for a month against
-         * an event, and wrong here for a reason only the render showed: the
-         * corpus descriptions run past two hundred characters, the table
-         * correctly refuses to squash, and the whole band ended up scrolling
-         * sideways inside its own box. Handled, but not something to put on a
-         * magazine page on purpose.
-         *
-         * A month, a name and a paragraph is what icon-item is for. It reads
-         * down, which is how somebody scans for the month that suits them, and
-         * it holds at one event or at six.
-         */
         ...events.map((entry) => withProps('icon-item', {
           icon: 'calendar-check',
           // The month leads, because it is the thing being scanned for.
@@ -439,30 +437,31 @@ export function seedItemFromCorpus(input: {
   }
 
   /*
-   * THE WAY IN. One button, one destination, on the dark ground the rest of the
-   * site closes on. The label names the place rather than saying "enquire",
-   * because a page about one destination should ask about that destination.
+   * THE WAY IN, built the way the rest of this kind of site closes: centred,
+   * on a paper ground, with the way to book first and the way to ask second.
+   *
+   * THE HEADING CARRIES NO PLACE NAME. "Thinking about Hvar?" reads fine and
+   * "Thinking about Dalmatian Islands?" does not: a plural or a region wants
+   * "the" in front of it, and which names take an article is not something a
+   * rule can know. The corpus holds "The Azores" and "Dalmatian Islands" and
+   * both are right. The button names the place instead, because a label is the
+   * one place English lets you drop the article without it grating.
    */
   const short = shortName(name);
   sections.push(band({
-    tone: 'dark',
-    paddingY: 80,
+    name: 'Closing',
+    tone: 'light',
+    paddingY: 'xl' as unknown as number,
     rows: stack([
-      /*
-       * THE HEADING DOES NOT NAME THE PLACE, and that is not laziness.
-       * "Thinking about Hvar?" reads fine and "Thinking about Dalmatian
-       * Islands?" does not: a plural or a region wants "the" in front of it,
-       * and which names take an article is not something a rule can know. The
-       * corpus holds "The Azores" and "Dalmatian Islands" and both are right.
-       * So the heading carries no name, the button does, and a label is the one
-       * place English lets you drop the article without it grating.
-       */
-      heading('Ready when you are.'),
-      paragraphs('<p>Tell us roughly when and for how long, and we will come back with what it would take.</p>'),
+      withProps('heading', {
+        level: 'h2', style: 'h2', align: 'centre',
+        html: escapeHtml('Ready when you are.'),
+      }),
       withProps('button-group', {
-        align: 'left',
+        align: 'centre',
         buttons: [
           { label: `Enquire about ${short}`, href: '/contact', variant: 'primary', newTab: false },
+          { label: 'Talk to us', href: '/contact', variant: 'secondary', newTab: false },
         ],
       }),
     ]),

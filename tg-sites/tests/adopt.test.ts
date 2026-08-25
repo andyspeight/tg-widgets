@@ -247,11 +247,12 @@ describe('the magazine page it builds', () => {
   const blocks = blocksOf(item);
   const find = (type: string) => blocks.filter((b) => b.type === type);
 
-  it('takes the first picture as the banner and the rest into the page', () => {
+  it('gives each of the three pictures a different job', () => {
+    // Banner, then beside the opening words, then the full-width drift.
     expect(item.image).toBe('https://images.unsplash.com/one');
+    expect(find('image').map((b) => b.props.src)).toEqual(['https://images.unsplash.com/two']);
     const backgrounds = item.sections.map((s) => (s as { backgroundImage?: string }).backgroundImage).filter(Boolean);
-    expect(backgrounds).toContain('https://images.unsplash.com/two');
-    expect(find('image').map((b) => b.props.src)).toContain('https://images.unsplash.com/three');
+    expect(backgrounds).toEqual(['https://images.unsplash.com/three']);
   });
 
   it('writes real alt text out of the credit rather than the place name', () => {
@@ -261,7 +262,7 @@ describe('the magazine page it builds', () => {
      * description somebody actually wrote.
      */
     expect(item.alt).toBe('A white church above a blue sea');
-    expect(find('image')[0].props.alt).toBe('Steps down to the water');
+    expect(find('image')[0].props.alt).toBe('A boat in a caldera');
   });
 
   it('falls back to the place name when a credit carries no description', () => {
@@ -352,15 +353,15 @@ describe('the magazine page it builds', () => {
      */
     const moving = item.sections.filter((s) => (s as { kenBurns?: boolean }).kenBurns);
     expect(moving).toHaveLength(1);
-    expect((moving[0] as { backgroundImage?: string }).backgroundImage).toBe('https://images.unsplash.com/two');
+    expect((moving[0] as { backgroundImage?: string }).backgroundImage).toBe('https://images.unsplash.com/three');
     expect(moving[0].rows.flatMap((r) => r.columns.flatMap((c) => c.blocks))).toHaveLength(0);
   });
 
   it('bands the page rather than running it on one ground', () => {
     const tones = item.sections.map((s) => (s as { tone?: string }).tone);
     expect(new Set(tones).size).toBeGreaterThan(1);
-    // And it closes on the dark ground the rest of the site closes on.
-    expect(tones[tones.length - 1]).toBe('dark');
+    // Exactly one dark band, and it is the photograph rather than a word of copy.
+    expect(tones.filter((t) => t === 'dark')).toHaveLength(1);
   });
 
   it('never puts two bands of the same ground next to each other', () => {
@@ -384,11 +385,23 @@ describe('the magazine page it builds', () => {
     }
   });
 
-  it('names the destination in the button rather than saying "enquire"', () => {
-    const buttons = find('button-group')[0].props.buttons as Array<{ label: string; href: string }>;
-    expect(buttons).toHaveLength(1);
-    expect(buttons[0].label).toBe('Enquire about Santorini');
-    expect(buttons[0].href).toBe('/contact');
+  it('closes the way the rest of this kind of site closes', () => {
+    /*
+     * Centred, on a paper ground, with the way to book first and the way to ask
+     * second. Taken from the hand-built site rather than invented: an adopted
+     * page that closed differently from every other page on the same site would
+     * be the tell that it was generated.
+     */
+    const group = find('button-group')[0];
+    expect(group.props.align).toBe('centre');
+    const buttons = group.props.buttons as Array<{ label: string; href: string; variant: string }>;
+    expect(buttons).toHaveLength(2);
+    expect(buttons[0]).toMatchObject({ label: 'Enquire about Santorini', href: '/contact', variant: 'primary' });
+    expect(buttons[1]).toMatchObject({ label: 'Talk to us', variant: 'secondary' });
+
+    const closing = item.sections[item.sections.length - 1] as { name?: string; tone?: string };
+    expect(closing.name).toBe('Closing');
+    expect(closing.tone).not.toBe('dark');
   });
 
   it('says the short name in a sentence, and keeps the full one as the title', () => {
@@ -453,5 +466,52 @@ describe('the magazine page it builds', () => {
     // And the corpus prose that DOES go into html arrives inert.
     const text = blocksOf(nasty).filter((b) => b.type === 'text').map((b) => String(b.props.html)).join('');
     expect(text).toContain('&lt;script&gt;');
+  });
+});
+
+describe('it matches the site it has to live on', () => {
+  /*
+   * The seed does not get to invent its own conventions. Coastwise was built by
+   * hand in tools/coastwise-site.ts and an adopted page sits alongside those
+   * pages in the same nav, so anything it does differently is the tell that it
+   * was generated. These pin the conventions taken from that build rather than
+   * from taste.
+   */
+  const item = seedItemFromCorpus(GREECE);
+  const built = readFileSync(resolve(__dirname, '..', 'tools', 'coastwise-site.ts'), 'utf8');
+
+  it('names every band, because the name is what the client sees in the editor', () => {
+    /*
+     * An unnamed section shows up in the editor's list as its first block's
+     * summary, so a seven-band page reads as a list of half-sentences and
+     * nobody can find the one they want to change. The hand-built site names
+     * every one of its sections.
+     */
+    expect(built).toContain("name: 'Closing'");
+    const names = item.sections.map((s) => (s as { name?: string }).name);
+    expect(names.every((n) => typeof n === 'string' && n.length > 0), names.join(' | ')).toBe(true);
+    // And no two the same, or the list is no easier to navigate than no names.
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('reveals the bands that hold words, and not the one that holds a photograph', () => {
+    // A reveal on a band with no words is a band that fades in for no reason.
+    for (const section of item.sections as Array<{ name?: string; reveal?: boolean; backgroundImage?: string }>) {
+      expect(section.reveal, `${section.name}`).toBe(!section.backgroundImage);
+    }
+  });
+
+  it('weights a two-column row 60/40, as every such row on the site does', () => {
+    const withPicture = item.sections.find((s) => s.rows[0].columns.length === 2);
+    expect(withPicture, 'no two-column row was built').toBeTruthy();
+    expect(withPicture!.rows[0].columns.map((c) => Math.round(c.width))).toEqual([60, 40]);
+  });
+
+  it('uses the padding token the build uses rather than a number of its own', () => {
+    expect(built).toContain("paddingY: 'xl'");
+    // Stored as the token; the schema resolves it. A raw number here would be a
+    // second spacing vocabulary on one site.
+    const raw = readFileSync(resolve(__dirname, '..', 'lib', 'content', 'adopt.ts'), 'utf8');
+    expect(raw).not.toMatch(/paddingY: \d+/);
   });
 });
