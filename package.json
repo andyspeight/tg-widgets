@@ -77,6 +77,7 @@
     "test:worldmap-departures": "node test/worldmap-departure-filter-smoke.mjs",
     "test:worldmap-header-stacking": "node test/worldmap-header-stacking-smoke.mjs",
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",
+    "test:widget-appid": "node test/widget-appid-injection-smoke.mjs",
     "test:widget-actas-legacy": "node test/widget-actas-legacy-owner-smoke.mjs",
     "test:widget-copy-actas": "node test/widget-copy-actas-scope-smoke.mjs",
     "test:staff-led-setup": "node test/staff-led-setup-smoke.mjs",
