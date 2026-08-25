@@ -27,6 +27,7 @@
     "test:enquiry-luna-work": "node test/enquiry-luna-work-smoke.mjs",
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
     "test:quote-pdf-email-guard": "node test/quote-pdf-email-guard-smoke.mjs",
+    "test:quote-pdf-links": "node test/quote-pdf-links-smoke.mjs",
     "test:worldmap-resilience": "node test/worldmap-offers-resilience-smoke.mjs",
     "test:airport-content-widgetid": "node test/airport-content-widgetid-smoke.mjs",
     "test:appointment-time": "node test/appointment-time-format-smoke.mjs",
