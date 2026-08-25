@@ -151,14 +151,21 @@ async function fetchJson(url) {
   }
   clearTimeout(timer);
 
-  if (r.status === 401 || r.status === 403) return { error: 'That account is not open for public reviews.', status: 422 };
-  if (r.status === 404) return { error: 'No reviews found for that identifier.', status: 404 };
   if (!r.ok) {
-    // Both providers return a JSON error body we can surface for the common cases.
+    // Read the upstream body ONCE and surface its own words — a 401/403 from
+    // Wextractor means the API key or its credit, not "account not public", and
+    // hiding that behind a fixed line sends setup debugging in the wrong
+    // direction. (Only runs on the error path; the ok path reads below.)
+    let raw = '';
+    try { raw = await r.text(); } catch (e) {}
     let msg = '';
-    try { const j = await r.json(); msg = (j && (j.message || j.error)) ? String(j.message || j.error) : ''; } catch (e) {}
+    try { const j = JSON.parse(raw); msg = (j && (j.message || j.error || j.detail)) ? String(j.message || j.error || j.detail) : ''; }
+    catch (e) { msg = String(raw || '').replace(/\s+/g, ' ').trim().slice(0, 200); }
+    if (msg) console.error('[reviews-feed] upstream', r.status, msg);
+    if (r.status === 404) return { error: msg || 'No reviews found for that identifier.', status: 404 };
     if (/closed/i.test(msg)) return { error: 'That account is closed on the review provider.', status: 422 };
-    return { error: 'The review provider returned an error.', status: 502 };
+    if (r.status === 401 || r.status === 403) return { error: msg ? ('The review provider refused the request: ' + msg) : 'The review provider refused the request — check the API key and its remaining credit.', status: 502 };
+    return { error: msg ? ('The review provider returned an error: ' + msg) : 'The review provider returned an error.', status: 502 };
   }
 
   // Size-capped read
