@@ -223,18 +223,72 @@ already do. Say this plainly in sales, it is a scope choice, not a gap.
 
 ## 5. Pricing
 
-Recommendation, to confirm before the pricing page is built. Plan names follow the
-suite's four tiers where they map.
+Recommendation, to confirm before the pricing page is built. **Revised 25 Aug 2026
+after Andy asked whether we should band on volume. We should.**
 
-| Tier | Price | What is in it |
-|---|---|---|
-| Trial | 14 days | Everything in Pro, no card |
-| **Trips Lite** | £49/mo | 3 active trips, deposits, single balance payment, reminders |
-| **Trips Pro** | £99/mo | Unlimited trips, payment plans, waivers, forms, rooming, traveller app |
-| **Trips Enterprise** | custom | Multi-brand, API, custom domains, onboarding |
+### Band on volume, not on trip count
+
+The first draft gated Lite at three active trips. That is the wrong metric and it
+should not survive. Trip count punishes an operator for building their catalogue,
+which is the exact behaviour we want from them, and it correlates badly with the
+value they get. Volume correlates well.
+
+It also fixes a hole. Because we take nothing per transaction, our revenue is
+completely decoupled from the customer's success. An operator on £2m of volume pays
+the same £99 as one running a single trip a year, while costing us far more to
+support. Volume bands are how the "we take no cut" promise survives contact with
+our own P&L.
+
+| Band | Trailing 12-month volume | Price | Beyond the core product |
+|---|---|---|---|
+| Trial | any | 14 days free, no card | everything |
+| **Trips Start** | up to £75k | **£39/mo** | core product, one brand |
+| **Trips Grow** | £75k to £400k | **£99/mo** | extra users, saved templates |
+| **Trips Scale** | £400k+ | **£249/mo** | multi-brand, API, custom domains, priority support |
+| **Enterprise** | custom | custom | onboarding, SLA, bespoke work |
 
 No free tier. WeTravel can afford free because they earn on every transaction, we
 cannot and should not pretend otherwise. The trial does that job.
+
+### The core product does not move between bands
+
+This matters more than the numbers. **Payment plans, waivers, forms, rooming and the
+traveller app are in every band, including Start.** Gate on scale (users, brands,
+API, domains), never on the ability to run a trip properly. Two reasons: a small
+operator who cannot take a deposit instalment is not a customer we have won, they
+are one we have sent to WeTravel, and "you get the whole product" is a far cleaner
+sentence than a feature matrix.
+
+### The promise the bands must not break
+
+Our pitch is a flat fee and no cut. Bands bend that unless we are careful, and a
+sharp operator will say so. The defence is real, not cosmetic: **inside a band, the
+marginal pound costs nothing.** On WeTravel every extra £1,000 of sales costs £39.
+On us it costs £0 until the band steps, and the step is known in advance. We charge
+for the size of the platform, not for the pound that moves through it.
+
+So three rules, and they are not negotiable if the story is to hold:
+
+1. Never a percentage. Never a per-transaction fee.
+2. Bands assessed on **trailing 12 months**, reviewed annually, never auto-upgraded
+   mid-term without notice. This also answers the seasonal-operator complaint in
+   section 2: a quiet year drops them a band rather than billing them through it.
+3. Three bands, wide. The moment there are six, we are metering, not pricing.
+
+### What each band looks like against WeTravel
+
+| Their volume | WeTravel Pro | Us | They save |
+|---|---|---|---|
+| £75k (top of Start) | £3,675 | £1,593 | £2,082 |
+| £400k (top of Grow) | £16,350 | £7,188 | £9,162 |
+| £1m (Scale) | £39,750 | £17,988 | £21,762 |
+
+At £1m we earn **£2,988** from that operator instead of £1,188, and they still save
+£21,762. That is the whole argument for banding in one row.
+
+The £39 entry also closes the objection from the last section. At £39 we are cheaper
+than WeTravel Pro at **every** volume, and cheaper than their **free** plan above
+about **£19,500** rather than £49,500.
 
 ### Where the break-even sits, and who moves it
 
@@ -254,8 +308,8 @@ Against **WeTravel Pro** at $79/month, roughly £750 a year:
 | £129 | £33,250 |
 
 Anything at or below about **£62 a month makes us cheaper than WeTravel Pro at
-every volume**, including an operator who sells nothing all year. That is worth
-knowing before we settle on £99.
+every volume**, including an operator who sells nothing all year. That is why the
+Start band is £39 and not £49.
 
 **The comparison that is harder, and the one I missed first time round.** WeTravel
 also has a **free** plan: no monthly fee, the same cut on cards, minus the itinerary
@@ -268,10 +322,10 @@ price-sensitive operator will hold it up anyway, so have the answer ready:
 | £79 | £39,500 |
 | £99 | £49,500 |
 
-So at £99 we beat their paid plan above about **£18k** of annual card volume and
-their free plan above about **£50k**, which is three or four group departures a
-year. A real operator clears that. A hobbyist does not, and a hobbyist was never
-the customer. Say that plainly rather than claiming we are cheaper for everybody.
+Read against the bands above: **Start at £39 beats their free plan above about
+£19,500**, and beats Pro everywhere. Grow at £99 needs about £50k against free,
+which is inside its own band anyway, so nobody sits in the wrong place. Banding is
+what makes both true at once, which a single flat fee could not do.
 
 ---
 
@@ -414,7 +468,14 @@ is waiting on a login to Stripe.
 
 ## 10. Open questions for Andy
 
-1. **Confirm the pricing** in section 5 before the pricing page is built.
+1. **Confirm the volume banding** in section 5: Start £39 to £75k, Grow £99 to
+   £400k, Scale £249 above that, core product flat across all three. Two sub-questions
+   ride on it. (a) Is the band metric **volume processed** or **travellers booked**?
+   Volume aligns better to value, travellers sidesteps the "so you are taking a cut"
+   perception and is easier to verify. Recommend volume, with travellers as the
+   fallback if the perception bites in sales calls. (b) Bookings taken offline and
+   marked paid by hand sit outside anything we can meter, so state the policy: we
+   band on volume that passes through Trips, and we do not chase the rest.
 2. **Repo name and domain.** Suggest repo `travelgenix-trips`, domain
    `trips.travelify.io`, with operator custom domains in Enterprise.
 3. **Do the existing widget tiles stay?** Group Trips and Escorted Tour are still
