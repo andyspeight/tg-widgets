@@ -35,6 +35,12 @@ Owner: Andy Speight, CEO, Travelgenix.
 - **Event Tickets widget family** (the supplier event feed and the six ticket
   widgets built on it): `docs/supplier-event-feed.md` (Airtable record
   `recdVmyNz4nCXltMc`).
+- **Travelgenix Trips (the standalone WeTravel alternative)**:
+  `docs/trips-platform-handover.md` (Airtable record `recLlu3Y30QX6vOsr`, still
+  titled "Group Trips"). START HERE for anything about group trips, escorted
+  tours, trip bookings, deposits, payment plans or WeTravel. It supersedes the
+  26 Jul 2026 "widget inside tg-widgets" decision: as of 25 Aug 2026 Trips is a
+  standalone product in its own repo, and tg-widgets is its embed channel.
 - **The Duda element audit (tg-sites)**: `docs/duda-element-audit.md`. Read it
   the moment a session mentions Duda, "the next list", or elements. It carries
   what has been checked, what was built, what Andy has asked to skip, and the
