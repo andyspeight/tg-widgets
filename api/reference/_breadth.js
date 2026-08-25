@@ -9,7 +9,29 @@
  * human-verified against two sources, so we never auto-create content here.
  */
 
+import { readFileSync } from 'node:fs';
 import { listAll, AIRPORTS_TBL, COUNTRIES_TBL, AF } from './_ref.js';
+
+/**
+ * The globally major airports we intend to carry, independent of whether our
+ * own prose happens to mention them. Without this the detector could only find
+ * gaps in what we had already written about, which caps coverage at the content
+ * we happen to have. See scripts/build-airport-targets.mjs.
+ *
+ * Read via `new URL(..., import.meta.url)` so Vercel's file tracer follows it,
+ * the same way api/events-feed.js loads its bundled data. A missing file means
+ * no target seeding, never an error: the prose-referenced gaps still work.
+ */
+export function targetCodes() {
+  try {
+    const url = new URL('../_data/airport-targets.json', import.meta.url);
+    const raw = JSON.parse(readFileSync(url, 'utf8'));
+    return Array.isArray(raw.codes) ? raw.codes.filter(c => /^[A-Z]{3}$/.test(c)) : [];
+  } catch (err) {
+    console.error('[reference/_breadth] target worklist load failed (prose gaps only):', err && err.message);
+    return [];
+  }
+}
 
 const CITIES_TBL = 'tblTkKujdVZgWPAQe';
 const PARKS_TBL = 'tblhVDUdpwaLabDmQ';
@@ -68,14 +90,30 @@ export async function runBreadth() {
   scan(cities, CITY_GETTING_THERE, 'fld2VkY61c1JKUWKB');
   scan(parks, PARK_NEAREST_AIRPORT, 'fldboK0kstNohXgqJ');
 
-  const missing = missingCodes([...referenced.keys()], existing)
-    .map(iata => ({ iata, mentions: referenced.get(iata).count, sample: referenced.get(iata).sample }))
+  // Two independent reasons an airport belongs in the table: our own content
+  // already promises it, or it is one of the globally major airports on the
+  // worklist. Airports our prose names come first, because those are the ones a
+  // reader can already be sent looking for.
+  const targets = targetCodes();
+  const fromProse = missingCodes([...referenced.keys()], existing)
+    .map(iata => ({ iata, reason: 'content-referenced', mentions: referenced.get(iata).count, sample: referenced.get(iata).sample }))
     .sort((a, b) => b.mentions - a.mentions);
+
+  const proseCodes = new Set(fromProse.map(m => m.iata));
+  const fromTargets = missingCodes(targets, existing)
+    .filter(iata => !proseCodes.has(iata))
+    .map((iata, i) => ({ iata, reason: 'global-major', mentions: 0, rank: targets.indexOf(iata) + 1 || i + 1 }))
+    .sort((a, b) => a.rank - b.rank);
+
+  const missing = [...fromProse, ...fromTargets];
 
   return {
     existingAirports: existing.size,
     referencedCodes: referenced.size,
+    targetCodes: targets.length,
     missingCount: missing.length,
+    missingFromProse: fromProse.length,
+    missingFromTargets: fromTargets.length,
     missing,
   };
 }

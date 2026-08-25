@@ -28,6 +28,8 @@
  */
 
 // --- Environment ---------------------------------------------------
+import { isServableAirportStatus } from './_lib/airport-status.js';
+
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY;
 const DESTINATION_BASE_ID = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
 const WIDGETS_BASE_ID = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -319,6 +321,14 @@ async function buildAirportPayload(airportRec) {
   const lng = fldNum(airportRec, AF.lng);
 
   return {
+    // Verification state. A record that is not yet servable (identity-only
+    // skeleton, or narrative written but not audited against two sources) is
+    // still returned, because refusing it would break embeds that are already
+    // live on client sites. The flag lets the widget render a compact card
+    // instead of a full spotlight with empty sections. See
+    // api/_lib/airport-status.js and docs/airport-data-plan.md.
+    provisional: !isServableAirportStatus(fldSelect(airportRec, AF.status)),
+
     // Identity
     name:       txt(fld(airportRec, AF.name)),
     iata:       txt(fld(airportRec, AF.iata)).toUpperCase(),
