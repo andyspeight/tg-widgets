@@ -233,9 +233,23 @@ export function referenceRows(facts: ReferenceFacts): ReferenceRow[] {
   ];
   return rows
     .filter((row): row is [string, string, string] => Boolean(row[2]))
-    // Forty is where a value stops being something you read at a glance in a
-    // grid cell. Chosen by looking at the corpus: every datum is well under it
-    // and every sentence is well over.
+    /*
+     * Forty is a LAYOUT threshold, not a fact about the corpus.
+     *
+     * An earlier version of this comment claimed the corpus splits cleanly
+     * either side of it, every datum under and every sentence over. It does
+     * not, and it is worth writing down because it was checked: the lengths
+     * are one continuous tail. About 3,300 values sit under 25 characters,
+     * then it thins out and keeps going past 100 with no gap anywhere, 107
+     * values landing in 36-40 and 95 in 41-45.
+     *
+     * So this line runs through the middle of a continuum rather than between
+     * two populations, and the only thing it can honestly mean is "wider than
+     * a grid cell reads at a glance". Both sides have to look deliberate,
+     * because there is no threshold that would put every awkward value on one
+     * side of it. Move it if the layout changes; do not expect the data to
+     * justify a particular number.
+     */
     .map(([key, label, value]) => ({ key, label, value, long: value.length > 40 }));
 }
 

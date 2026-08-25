@@ -140,6 +140,61 @@ describe('the rows a page draws', () => {
   });
 });
 
+/*
+ * A SENTENCE AND A DATUM LIVE IN THE SAME COLUMN, and the corpus will not pick
+ * one. Greece's flight time is "3h 45m"; Mexico City's names both airports and
+ * runs to two clauses. Three passes at this went wrong in three ways: a 20
+ * character cap silently turned Santorini's "4h to Santorini, 25min transfer"
+ * into "4h to Santorini, 25m", which is a plausible lie; dropping anything
+ * longer instead lost 99 cities outright; only then did marking it and letting
+ * the renderer set it as prose work. These pin that, because all three earlier
+ * versions passed the tests that existed at the time.
+ */
+describe('a long fact is a note, not a number', () => {
+  it('marks a sentence so the renderer can set it as prose', () => {
+    const rows = referenceRows(referenceFacts({
+      __ref: {
+        ...GREECE.__ref,
+        flightTime: '11h 30m direct from the UK to Mexico City Benito Juarez (MEX). '
+          + 'The new Felipe Angeles airport (NLU) handles some routes.',
+      },
+    })!);
+    const flight = rows.find((r) => r.key === 'flightTime')!;
+    expect(flight.long).toBe(true);
+    // Marked, never shortened. The whole sentence reaches the page.
+    expect(flight.value).toContain('Felipe Angeles');
+    expect(flight.value).toContain('11h 30m');
+  });
+
+  it('leaves an ordinary datum unmarked', () => {
+    const rows = referenceRows(referenceFacts(GREECE)!);
+    expect(rows.find((r) => r.key === 'flightTime')!.long).toBe(false);
+  });
+
+  it('never truncates a fact that is merely long, which is how a lie gets in', () => {
+    const value = '4h to Santorini, 25min transfer';
+    const rows = referenceRows(referenceFacts({
+      __ref: { ...GREECE.__ref, flightTime: value },
+    })!);
+    expect(rows.find((r) => r.key === 'flightTime')!.value).toBe(value);
+  });
+
+  it('and never drops one either, which is how ninety-nine cities went missing', () => {
+    const long = `${'A very long sentence about the flight. '.repeat(6)}`.trim();
+    const rows = referenceRows(referenceFacts({
+      __ref: { ...GREECE.__ref, flightTime: long },
+    })!);
+    expect(rows.map((r) => r.key)).toContain('flightTime');
+  });
+
+  it('still guards against a runaway value, which is what the cap is FOR', () => {
+    const rows = referenceRows(referenceFacts({
+      __ref: { ...GREECE.__ref, flightTime: 'x'.repeat(5000) },
+    })!);
+    expect(rows.find((r) => r.key === 'flightTime')!.value.length).toBe(400);
+  });
+});
+
 describe('scaling the chart', () => {
   it('scales to the place, so a cold country still has a readable year', () => {
     const cold: ReferenceClimate = { ...CLIMATE, temps: [2, 2, 4, 6, 9, 12, 14, 13, 10, 7, 4, 2] };
