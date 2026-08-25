@@ -31,19 +31,51 @@ function esc(value) {
     .replace(/'/g, '&#39;');
 }
 
+/** Decode the handful of HTML entities a supplier href might arrive encoded as,
+ *  so a query string's &amp; is not double-escaped back into the attribute. */
+function decodeEntities(s) {
+  return String(s == null ? '' : s)
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*39;|&#x27;/gi, "'");
+}
+
+/** Whitelist a supplier href to safe schemes only, so a javascript:/data: URL
+ *  can never ride in on an anchor. Returns '' (no link) if it is not safe. */
+function safeHref(url) {
+  const s = decodeEntities(url).trim();
+  if (!s) return '';
+  if (/^(https?:|mailto:|tel:)/i.test(s)) return s;
+  if (/^\/\//.test(s)) return 'https:' + s;                        // protocol-relative
+  if (/^[a-z0-9.-]+\.[a-z]{2,}([/?#]|$)/i.test(s)) return 'https://' + s; // bare domain
+  return '';
+}
+
 /**
  * Sanitise the supplier-provided description HTML against a small allowlist.
- * Permits only h3, p, br, hr, ul, li, strong, em. Strips everything else,
- * including any attributes, scripts, event handlers, and unknown tags.
+ * Permits h3, p, br, hr, ul, li, strong, em, b, i — and <a> carrying a
+ * scheme-validated href, so a supplier link such as "View Full Hotel Info"
+ * stays clickable in the PDF (Chromium turns a real <a href> into an active PDF
+ * link). Every other tag, and every attribute other than a safe href, is
+ * stripped, along with scripts, event handlers and unknown tags.
  */
 function sanitiseDescription(html) {
   if (!html) return '';
-  const allowed = new Set(['h3', 'p', 'br', 'hr', 'ul', 'li', 'strong', 'em', 'b', 'i']);
-  // Remove any tag that isn't in the allowlist; strip all attributes from those that are.
-  return String(html).replace(/<\/?([a-zA-Z0-9]+)(\s[^>]*)?>/g, (match, tag) => {
+  const allowed = new Set(['h3', 'p', 'br', 'hr', 'ul', 'li', 'strong', 'em', 'b', 'i', 'a']);
+  return String(html).replace(/<\/?([a-zA-Z0-9]+)(\s[^>]*)?>/g, (match, tag, attrs) => {
     const t = tag.toLowerCase();
     if (!allowed.has(t)) return '';
-    return match.startsWith('</') ? `</${t}>` : `<${t}>`;
+    if (match.startsWith('</')) return `</${t}>`;
+    if (t === 'a') {
+      // Keep ONLY a validated href; drop target, onclick, style and the rest.
+      const m = attrs && attrs.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+      const raw = m ? (m[1] != null ? m[1] : (m[2] != null ? m[2] : m[3])) : '';
+      const href = safeHref(raw);
+      return href ? `<a href="${esc(href)}">` : '<a>';
+    }
+    return `<${t}>`;
   });
 }
 
@@ -1073,6 +1105,8 @@ function renderQuoteHTML(input, opts) {
   .description h3{font-size:13px;color:var(--navy);margin:16px 0 6px;font-weight:700;}
   .description p{margin:0 0 8px;}
   .description hr{border:none;border-top:1px solid var(--line);margin:14px 0;}
+  /* Supplier links (e.g. "View Full Hotel Info") stay visibly clickable. */
+  .description a,.day-divider-desc a,.loc-block a{color:var(--teal);text-decoration:underline;word-break:break-word;}
 
   /* Total */
   .total{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:14px;padding:20px 24px;margin-top:4px;}
