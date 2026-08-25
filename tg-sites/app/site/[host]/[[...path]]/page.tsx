@@ -806,14 +806,6 @@ function EntryRenderer({
           </dl>
         )}
 
-        {/*
-          AFTER THE CLIENT'S OWN FACTS, not instead of them. The list above is
-          whatever they declared on the collection; this is what Travelgenix
-          maintains centrally and keeps current. Both belong on the page and the
-          order says which is which.
-        */}
-        {reference && <DestinationPanel facts={reference} />}
-
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">
             {item.tags.map((tag) => (
@@ -834,6 +826,27 @@ function EntryRenderer({
           </div>
         )}
       </header>
+
+      {/*
+        THE CORPUS PANEL IS A BAND OF ITS OWN, NOT PART OF THE HEADER, and it was
+        moved out here the day the magazine seed landed.
+
+        In the "Picture first" layout the header IS the banner photograph: it has
+        a min-height, its picture at inset 0 behind everything, and an explicit
+        order on each child. .tgs-dest had no order, so it fell to 0 and a facts
+        grid and a twelve-month chart drew straight over the photograph.
+
+        Reading it as a band is also just truer. What sits in the header is the
+        entry announcing itself, title and summary and picture. This is reference
+        material about the place, which is a different thing that happens to come
+        next, and giving it its own ground is what lets it look deliberate on
+        every one of the three entry layouts rather than only on the flat one.
+      */}
+      {reference && (
+        <div className="tgs-entry__reference">
+          <DestinationPanel facts={reference} />
+        </div>
+      )}
 
       {item.sections.map((section, index) => (
         <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} sizes={sizes} />

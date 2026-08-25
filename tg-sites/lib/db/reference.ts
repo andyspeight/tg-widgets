@@ -3,7 +3,7 @@ import 'server-only';
 import { db } from './client';
 import { withTenant, type Tx } from './withTenant';
 import { REFERENCE_KINDS, type ReferenceKind } from '../content/reference';
-import { seedItemFromCorpus } from '../content/adopt';
+import { seedItemFromCorpus, type CorpusProse } from '../content/adopt';
 
 /**
  * The shared destination corpus.
@@ -368,7 +368,7 @@ export async function adoptDestination(
 
   return withTenant(tenantId, async (tx) => {
     const found = await tx`
-      select name, slug, prose
+      select name, slug, prose, facts
         from public.reference_records
        where kind = ${kind} and source_id = ${id}
        limit 1
@@ -417,9 +417,16 @@ export async function adoptDestination(
     let slug = wanted;
     for (let n = 2; used.has(slug); n += 1) slug = `${wanted}-${n}`;
 
+    /*
+     * The whole prose payload and the coordinates. The seed builds a full
+     * magazine page out of the first and pins a map with the second; see
+     * lib/content/adopt.ts for what it makes and why every part of it is the
+     * client's the moment it is written.
+     */
     const seed = seedItemFromCorpus({
       name,
-      prose: plainObject(record.prose) as { tagline?: string; heroIntro?: string; overview?: string },
+      prose: plainObject(record.prose) as CorpusProse,
+      facts: plainObject(record.facts) as { lat?: number; lng?: number },
     });
 
     const rows = await tx`

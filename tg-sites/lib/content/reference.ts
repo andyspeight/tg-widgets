@@ -77,6 +77,15 @@ export interface ReferenceFacts {
   climate?: ReferenceClimate;
   /** "Families", "Couples", "Foodies". Short audience tags from the corpus. */
   bestFor?: string[];
+  /**
+   * Where it is. Both or neither, never one.
+   *
+   * A fact rather than seed prose because a map is either right or it is a map
+   * of somewhere else, and because unlike the pictures and the highlights a
+   * client has no reason to want to edit it.
+   */
+  lat?: number;
+  lng?: number;
   /** When the sync last wrote this, ISO. Absent on a payload written before it existed. */
   syncedAt?: string;
 }
@@ -148,6 +157,24 @@ function climate(value: unknown): ReferenceClimate | undefined {
   return { temps, rainfall, season };
 }
 
+/**
+ * A coordinate pair, or nothing.
+ *
+ * BOTH OR NEITHER, the same argument the climate year makes. Half a position is
+ * not a position: a map pinned to (43.17, 0) draws the Gulf of Guinea, which
+ * reads as a confident answer rather than as the missing value it is.
+ */
+function position(lat: unknown, lng: unknown): { lat: number; lng: number } | Record<string, never> {
+  const y = Number(lat);
+  const x = Number(lng);
+  if (!Number.isFinite(y) || !Number.isFinite(x)) return {};
+  if (y < -90 || y > 90 || x < -180 || x > 180) return {};
+  // Exactly (0, 0) is Null Island: legal, in the Atlantic, and in practice always
+  // a record where somebody left both columns empty.
+  if (y === 0 && x === 0) return {};
+  return { lat: Math.round(y * 10000) / 10000, lng: Math.round(x * 10000) / 10000 };
+}
+
 function tags(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const out: string[] = [];
@@ -192,6 +219,7 @@ export function referenceFacts(payload: unknown): ReferenceFacts | null {
     visaStatus: text(raw.visaStatus, 400),
     climate: climate(raw.climate),
     bestFor: tags(raw.bestFor),
+    ...position(raw.lat, raw.lng),
     syncedAt: text(raw.syncedAt, 40),
   };
 }

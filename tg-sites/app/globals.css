@@ -1794,6 +1794,30 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * this section names a colour.
  */
 
+/*
+ * THE CORPUS PANEL AS A BAND.
+ *
+ * It used to sit inside the entry header, which was fine while every entry drew
+ * a flat header and wrong the moment the magazine seed started using the
+ * "Picture first" layout: there the header IS the photograph, and a facts grid
+ * over a picture is neither readable nor what anybody meant.
+ *
+ * So it is a band now, on the alternate ground, with its contents held to the
+ * same contained width a section uses. Matching the section's own measurements
+ * rather than inventing new ones is what makes it read as part of the page
+ * rather than as something bolted to the top of it.
+ */
+.tgs-entry__reference {
+  background: var(--tgs-surface-alt);
+  padding-block: var(--tgs-space-l);
+  padding-inline: var(--tgs-space-m);
+}
+
+.tgs-entry__reference > .tgs-dest {
+  max-width: var(--tgs-width-contained);
+  margin-inline: auto;
+}
+
 .tgs-dest {
   display: flex;
   flex-direction: column;
@@ -4066,7 +4090,28 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   isolation: isolate;
   min-height: min(60vh, 32rem);
   justify-content: flex-end;
-  padding: var(--tgs-space-l);
+
+  /*
+   * FULL BLEED, AND IT HAD TO BE SAID EXPLICITLY.
+   *
+   * The base rule caps every header at the 680px reading measure, which is right
+   * for the two layouts that are articles and wrong for this one, where the
+   * header IS the banner photograph. It rendered as a 680px box floating in the
+   * middle of a 1280px page: "the picture fills the top" was the description and
+   * a third of the top was what it did. Found by measuring the built page rather
+   * than by reading this file, which had looked correct for months.
+   *
+   * The words inside it still hold the contained width, so the headline never
+   * touches the viewport edge. That is this client's 21 Aug correction and it is
+   * the reason the padding is a max() rather than a fixed gutter: on a wide
+   * screen the text lines up with the sections below it, and on a narrow one it
+   * keeps a real margin instead of collapsing onto the edge.
+   */
+  max-width: none;
+  padding: var(--tgs-space-l) max(
+    var(--tgs-space-l),
+    (100% - var(--tgs-width-contained)) / 2
+  );
 }
 /*
  * THE TITLE OPENS THE HEADER, and the date follows it.
