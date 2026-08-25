@@ -468,13 +468,23 @@ it. Phases 1, 4, 5 and 7 can, and so could all of phase 0 bar the Connect step,
 which is why phase 0 is now built. But the booking engine is the product, and it
 is waiting on a login to Stripe.
 
-### The second blocker: the repo does not exist yet
+### The repo now exists, and phase 0 is in it
 
-Andy approved creating `travelgenix-trips` on 25 Aug 2026, but the GitHub App this
-session authenticates through has **no repository-creation scope**, so the call
-fails with a 403. Andy needs to create the empty private repo himself, which takes
-about thirty seconds. Nothing else is waiting on it: phase 0 is built and staged in
-this branch at `travelgenix-trips/`, and moves across as soon as the repo exists.
+`github.com/andyspeight/travelgenix-trips`, created by Andy on 25 Aug 2026 after
+the GitHub App turned out to have no repository-creation scope. Phase 0 was pushed
+to `main` the same day and the staged copy has been removed from this branch, so
+there is one home for the code.
+
+**It is PUBLIC.** Andy's call, made knowingly. Two consequences that bind every
+future session:
+
+- Commercial detail was **stripped out of the public repo before the first push**:
+  no pricing, no bands, no competitor analysis, no Airtable or Supabase
+  identifiers. Its `CLAUDE.md` carries technical conventions only and says so at
+  the top. **This document is where the strategy lives.** Keep it that way.
+- Nothing sensitive goes into that repo, its commit messages or its issues. If a
+  future decision needs the pricing rationale to make sense, write the rationale
+  here and reference it there as "the private handover".
 
 ### A constraint worth knowing, found while building phase 0
 
