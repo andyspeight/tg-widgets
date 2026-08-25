@@ -316,8 +316,8 @@ Each phase ships something an operator can use. No phase is a refactor with noth
 to show.
 
 **Phase 0 — Foundations.** Repo, Vercel project, SSO against tg-widgets, schema
-migration `gt_002`, Stripe Connect onboarding. *Unblocks everything below. Blocked
-today, see section 9.*
+migration `gt_002`, Stripe Connect onboarding. *Everything except the Connect step
+can start today. Unblocks every money phase below, see section 9.*
 
 **Phase 1 — A trip is a real thing.** Trips move out of Airtable widget config into
 `gt_trips` and `gt_departures`. Operator console: create, edit, publish. Public trip
@@ -364,8 +364,9 @@ The Supabase side is fully unblocked. `TRIPS_SUPABASE_URL` and
 `TRIPS_SUPABASE_SERVICE_ROLE_KEY` are already in Vercel and the schema is live.
 
 This is three weeks old as of 25 Aug 2026. Phases 2, 3, 6 and 8 cannot start without
-it. Phases 0, 1, 4, 5 and 7 can, so the plan is ordered to keep moving, but the
-booking engine is the product and it is waiting on a login to Stripe.
+it. Phases 1, 4, 5 and 7 can, and so can all of phase 0 bar the Connect step, so
+the plan is ordered to keep moving. But the booking engine is the product, and it
+is waiting on a login to Stripe.
 
 ---
 
