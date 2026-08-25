@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   function resolveOrigin() {
     if (typeof window === 'undefined') return '';
@@ -62,6 +62,7 @@
     emptyText: '',
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '',
     radius: 12,
     fontFamily: '',
     appId: '',
@@ -323,8 +324,18 @@
     return { y: Math.floor(i / 12), m: (i % 12) + 1 };
   }
 
+  // Which side of a fixture the queried team is on (feed tags every event with
+  // homeTeamKey / awayTeamKey), so a visitor Home/Away filter needs no refetch.
+  function sideOf(ev, teamKey) {
+    if (!teamKey || !ev) return '';
+    if (ev.homeTeamKey && ev.homeTeamKey === teamKey) return 'home';
+    if (ev.awayTeamKey && ev.awayTeamKey === teamKey) return 'away';
+    return '';
+  }
+
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
+    var btnText = safeColour(cfg.bookTextColor, '#04212B');
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -339,7 +350,7 @@
       + '.tgtm-root{container-type:inline-size;font-family:' + stack + ';'
       + '--tgtm-accent:' + accent + ';--tgtm-radius:' + radius + 'px;'
       + '--tgtm-bg:#FFFFFF;--tgtm-bg2:#F8FAFC;--tgtm-bg3:#F1F5F9;--tgtm-border:#E2E8F0;'
-      + '--tgtm-text:#0F172A;--tgtm-sub:#475569;--tgtm-mute:#64748B;--tgtm-on-accent:#04212B;'
+      + '--tgtm-text:#0F172A;--tgtm-sub:#475569;--tgtm-mute:#64748B;--tgtm-on-accent:' + btnText + ';'
       + 'font-size:15px;line-height:1.6;color:var(--tgtm-text);box-sizing:border-box;'
       + '-webkit-font-smoothing:antialiased;}'
       + '.tgtm-root *,.tgtm-root *::before,.tgtm-root *::after{box-sizing:border-box;}'
@@ -399,13 +410,29 @@
       + 'color:var(--tgtm-sub);font-size:11px;font-weight:500;white-space:nowrap;}'
 
       + '.tgtm-actions{display:flex;flex-wrap:wrap;gap:6px;}'
+      + '.tgtm-hafilter{display:inline-flex;margin:0 0 12px;border:1px solid var(--tgtm-border);'
+      + 'border-radius:calc(var(--tgtm-radius) - 4px);overflow:hidden;background:var(--tgtm-bg);}'
+      + '.tgtm-hf{padding:0 14px;min-height:36px;font:inherit;font-size:12.5px;font-weight:600;'
+      + 'color:var(--tgtm-sub);background:transparent;border:0;border-right:1px solid var(--tgtm-border);'
+      + 'cursor:pointer;white-space:nowrap;transition:background .15s ease-out,color .15s ease-out;}'
+      + '.tgtm-hf:last-child{border-right:0;}'
+      + '.tgtm-hf:hover{color:var(--tgtm-text);}'
+      + '.tgtm-hf.is-on{background:var(--tgtm-accent);color:var(--tgtm-on-accent);}'
+      + '.tgtm-hf:focus-visible{outline:2px solid var(--tgtm-accent);outline-offset:-2px;}'
       + '.tgtm-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;'
       + 'padding:0 14px;border-radius:calc(var(--tgtm-radius) - 4px);border:1px solid transparent;'
       + 'background:var(--tgtm-accent);color:var(--tgtm-on-accent);font:inherit;font-size:13px;'
       + 'font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;transition:filter .16s ease-out;}'
-      + '.tgtm-btn:hover{filter:brightness(.93);}'
+      + '.tgtm-btn{font-weight:700;letter-spacing:.01em;'
+      + 'box-shadow:0 2px 6px color-mix(in srgb,var(--tgtm-accent) 34%,transparent);'
+      + 'transition:transform .16s ease-out,box-shadow .16s ease-out,filter .16s ease-out;}'
+      + '.tgtm-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
+      + 'box-shadow:0 7px 18px color-mix(in srgb,var(--tgtm-accent) 44%,transparent);}'
+      + '.tgtm-btn:active{transform:translateY(0) scale(.99);}'
       + '.tgtm-btn svg{width:13px;height:13px;}'
-      + '.tgtm-btn2{background:var(--tgtm-bg);border-color:var(--tgtm-border);color:var(--tgtm-text);}'
+      + '.tgtm-btn2{background:var(--tgtm-bg);border-color:var(--tgtm-border);color:var(--tgtm-text);box-shadow:none;}'
+      + '.tgtm-btn2:hover{transform:translateY(-1px);border-color:var(--tgtm-accent);'
+      + 'background:var(--tgtm-bg3);box-shadow:0 4px 10px rgba(15,23,42,.08);}'
       + '.tgtm-btn:focus-visible{outline:2px solid var(--tgtm-accent);outline-offset:2px;}'
 
       + '.tgtm-state{padding:22px 16px;text-align:center;color:var(--tgtm-sub);background:var(--tgtm-bg);'
@@ -443,6 +470,8 @@
     this.view = { y: t.y, m: t.m };
     this.today = t;
     this.byDay = {};
+    this._all = [];               // raw events for the month (unfiltered)
+    this._side = 'all';           // visitor Home/Away filter (client-side)
     this.state = 'loading';
     this.openDay = null;
     this._reqId = 0;
@@ -520,16 +549,10 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status === 404 ? 'not-found' : 'failed'); return r.json(); })
       .then(function (d) {
         if (mine !== self._reqId) return;
-        var map = {};
-        (d.events || []).forEach(function (e) {
-          var day = parseInt(String(e.startDate).slice(8, 10), 10);
-          if (!map[day]) map[day] = [];
-          map[day].push(e);
-        });
-        self.byDay = map;
+        self._all = d.events || [];
+        self._side = 'all';         // a fresh month starts on "All games"
+        self._buildByDay();         // lays events on days, honouring the filter
         self.state = 'ready';
-        // Keep the open day only if it still has anything in it.
-        if (self.openDay && !map[self.openDay]) self.openDay = null;
         self._render();
       })
       .catch(function (err) {
@@ -538,6 +561,48 @@
         self.state = err && err.message === 'not-found' ? 'empty' : 'error';
         self._render();
       });
+  };
+
+  // Lay the month's events onto their days, dropping the ones the Home/Away
+  // filter excludes (only when sourced by a team).
+  TGTicketMonthWidget.prototype._buildByDay = function () {
+    var c = this.cfg;
+    var tk = c.sourceType === 'team' ? String(c.sourceValue || '').trim() : '';
+    var side = (this._side === 'home' || this._side === 'away') ? this._side : '';
+    var map = {};
+    (this._all || []).forEach(function (e) {
+      if (tk && side && sideOf(e, tk) !== side) return;
+      var day = parseInt(String(e.startDate).slice(8, 10), 10);
+      if (!map[day]) map[day] = [];
+      map[day].push(e);
+    });
+    this.byDay = map;
+    if (this.openDay && !map[this.openDay]) this.openDay = null;
+  };
+
+  // The Home/Away toggle, shown only for a team month with a real split (both
+  // home AND away games this month). Counts come from the full month, not the
+  // filtered view, so they stay stable.
+  TGTicketMonthWidget.prototype._haFilterHtml = function () {
+    var c = this.cfg;
+    if (c.sourceType !== 'team') return '';
+    var tk = String(c.sourceValue || '').trim();
+    var all = this._all || [], homeN = 0, awayN = 0;
+    for (var i = 0; i < all.length; i++) {
+      var s = sideOf(all[i], tk);
+      if (s === 'home') homeN++; else if (s === 'away') awayN++;
+    }
+    if (!(homeN > 0 && awayN > 0)) return '';
+    var sv = (this._side === 'home' || this._side === 'away') ? this._side : 'all';
+    var hf = function (v, label, on) {
+      return '<button type="button" class="tgtm-hf' + (on ? ' is-on' : '') + '" data-side="' + v + '"'
+        + ' aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
+    };
+    return '<div class="tgtm-hafilter" role="group" aria-label="Home or away">'
+      + hf('all', 'All', sv === 'all')
+      + hf('home', 'Home (' + homeN + ')', sv === 'home')
+      + hf('away', 'Away (' + awayN + ')', sv === 'away')
+      + '</div>';
   };
 
   TGTicketMonthWidget.prototype._rowHtml = function (ev) {
@@ -692,7 +757,7 @@
       for (var i = 0; i < 35; i++) sk += '<div class="tgtm-skel"></div>';
       body = '<div class="tgtm-grid" aria-busy="true">' + sk + '</div>';
     } else {
-      body = this._gridHtml();
+      body = this._haFilterHtml() + this._gridHtml();
       var any = Object.keys(this.byDay).length;
       if (!any) {
         body += '<div class="tgtm-state" style="margin-top:12px" role="status">'
@@ -726,6 +791,16 @@
       cells[j].addEventListener('click', function () {
         var d = parseInt(this.getAttribute('data-day'), 10);
         self.openDay = (self.openDay === d) ? null : d;
+        self._render();
+      });
+    }
+    var hfs = this.shadow.querySelectorAll('.tgtm-hf');
+    for (var k = 0; k < hfs.length; k++) {
+      hfs[k].addEventListener('click', function () {
+        var side = this.getAttribute('data-side') || 'all';
+        if (self._side === side) return;
+        self._side = side;
+        self._buildByDay();   // re-lay the month for the chosen side, no refetch
         self._render();
       });
     }

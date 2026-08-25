@@ -178,15 +178,25 @@ Slices 1 and 2 are on main (25 Aug 2026). Slice 3, adoption, is next.
 far changes a live page until these are set, and the cron will answer 500 every
 night until they are.
 
-1. `REFERENCE_EXPORT_SECRET` on the **tg-widgets** project. Any long random
-   string. It gates `/api/reference/export`.
-2. `REFERENCE_EXPORT_SECRET` on the **tg-sites-shell** project, the same value.
-3. `REFERENCE_EXPORT_URL` on tg-sites-shell:
+1. DONE 25 Aug. `REFERENCE_EXPORT_SECRET` on the **tg-widgets** project. It
+   gates `/api/reference/export`.
+2. DONE 25 Aug. `REFERENCE_EXPORT_SECRET` on **tg-sites-shell**, same value.
+3. DONE 25 Aug. `REFERENCE_EXPORT_URL` on tg-sites-shell:
    `https://tg-widgets.vercel.app/api/reference/export`
-4. Apply `db/migrations/0028_reference_records.sql`.
+4. DONE 25 Aug. `0028_reference_records` applied to the tg-sites database
+   (Supabase project `qvzbothxlrzeklcvdhzp`, eu-west-2). Verified after: RLS on
+   and forced, two policies, and tg_sites_renderer holding SELECT and nothing
+   else, matching every other table in the schema.
 
-`CRON_SECRET` already exists on tg-sites-shell if the estate's pattern holds;
-check it, because the cron route reads it and refuses everything without it.
+**STILL OUTSTANDING: `CRON_SECRET` on tg-sites-shell.** It did not exist, which
+is why this is written down rather than assumed. Vercel only sends
+`Authorization: Bearer <CRON_SECRET>` on a cron request when that variable is
+set, so without it the nightly run arrives unauthenticated and the route
+refuses it. Any long random string; it need not match anything else.
+
+Note that a missing secret and a wrong one both answer 401, deliberately, so
+the endpoint cannot be used to tell whether it is configured. The project's
+settings are the only place that says.
 
 **HOW A DESTINATION IS STORED.** An adopted destination is an ordinary
 collection item, which gets it routing, entry pages, listings, cards, SEO,

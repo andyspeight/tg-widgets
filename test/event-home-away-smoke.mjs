@@ -94,5 +94,30 @@ console.log('Event Tickets: Home/Away toggle filters a team\'s events');
   ok('Away shows only the away fixture', w.shadow.innerHTML.includes('Brighton vs Arsenal') && !w.shadow.innerHTML.includes('Arsenal vs Chelsea'));
 }
 
+console.log('Ticket Month: Home/Away toggle re-lays the calendar');
+{
+  const window = makeWindow('../public/widget-ticketmonth.js');
+  const el = window.document.createElement('div'); window.document.body.appendChild(el);
+  const w = new window.TGTicketMonthWidget(el, { sourceType: 'team', sourceValue: 'arsenal', competition: 'english-premier-league', bookingKinds: ['ticket'] });
+  await sleep(15);
+
+  const hfBtn = (side) => [...w.shadow.querySelectorAll('.tgtm-hf')].find((b) => b.getAttribute('data-side') === side);
+  ok('the Home/Away filter appears above the calendar', !!w.shadow.querySelector('.tgtm-hafilter'));
+  ok('it offers All, Home and Away', w.shadow.querySelectorAll('.tgtm-hf').length === 3);
+  ok('both games are laid on the month under All', Object.keys(w.byDay).length === 2);
+
+  hfBtn('home').dispatchEvent(new window.Event('click'));
+  await sleep(5);
+  ok('Home leaves only the home fixture (day 12)', Object.keys(w.byDay).length === 1 && w.byDay[12] && w.byDay[12][0].title === 'Arsenal vs Chelsea');
+
+  hfBtn('away').dispatchEvent(new window.Event('click'));
+  await sleep(5);
+  ok('Away leaves only the away fixture (day 20)', Object.keys(w.byDay).length === 1 && w.byDay[20] && w.byDay[20][0].title === 'Brighton vs Arsenal');
+
+  hfBtn('all').dispatchEvent(new window.Event('click'));
+  await sleep(5);
+  ok('All restores both fixtures', Object.keys(w.byDay).length === 2);
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

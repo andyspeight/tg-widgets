@@ -95,10 +95,36 @@ const TABLES = {
 };
 
 /** A trimmed string, or ''. Handles the {name} shape a singleSelect comes back as. */
-function txt(value, max = 400) {
+function txt(value, max = 4000) {
   const raw = value && typeof value === 'object' && !Array.isArray(value) ? value.name : value;
   if (typeof raw !== 'string') return '';
   return raw.replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+/**
+ * A short labelled fact: the whole value, or nothing at all.
+ *
+ * TRUNCATING A FACT IS WORSE THAN LOSING IT, and this was learned the expensive
+ * way. The first version of this file capped flightTime at twenty characters,
+ * taken from the field's own description ("Format: 'Xh YYm'"). The data does not
+ * keep to that description. Santorini's real value is
+ * "4h to Santorini, 25min transfer", which arrived on a client's page as
+ * "4h to Santorini, 25m" — a complete-looking sentence and the wrong answer.
+ * 699 of 1,035 records were sitting at exactly that cap.
+ *
+ * A missing fact is honest and simply draws no row. A truncated one is a lie
+ * that looks like an answer, and nothing downstream can tell it was cut. So the
+ * cap is now a GUARD against a runaway value rather than a formatter, set well
+ * above anything real, and a value past it is dropped.
+ *
+ * The same argument the climate series already made: an impossible temperature
+ * is dropped rather than clamped, because a clamped one looks deliberate. That
+ * rule was applied to the numbers and not to the strings, which is the gap.
+ */
+function fact(value, max) {
+  const clean = txt(value, max + 1);
+  if (!clean || clean.length > max) return '';
+  return clean;
 }
 
 /** A URL-safe segment, for the tables that carry no slug of their own. */
@@ -143,7 +169,7 @@ function seasons(value) {
 function toRecord(kind, record, map) {
   const get = (key) => (map[key] ? record.fields?.[map[key]] : undefined);
 
-  const name = txt(get('name'), 120);
+  const name = txt(get('name'), 200);
   if (!name) return null;
 
   const temps = series(get('temps'));
@@ -152,7 +178,7 @@ function toRecord(kind, record, map) {
 
   const bestForRaw = get('bestFor');
   const bestFor = Array.isArray(bestForRaw)
-    ? bestForRaw.map((tag) => txt(tag, 40)).filter(Boolean).slice(0, 6)
+    ? bestForRaw.map((tag) => txt(tag, 60)).filter(Boolean).slice(0, 6)
     : [];
 
   return {
@@ -162,22 +188,33 @@ function toRecord(kind, record, map) {
     // Airports and attractions carry no slug column, so one is derived. The IATA
     // code is the better handle for an airport: two airports can share a city
     // name and nobody searches for "london-heathrow-airport".
-    slug: txt(get('slug'), 80) || slugify(kind === 'airport' ? txt(get('iata'), 8) || name : name),
+    slug: txt(get('slug'), 120) || slugify(kind === 'airport' ? txt(get('iata'), 10) || name : name),
     prose: {
-      tagline: txt(get('tagline'), 120),
-      heroIntro: txt(get('heroIntro'), 600),
-      overview: txt(get('overview'), 3000),
+      /*
+       * Prose is the SEED a client edits, so a cap here is tolerable in a way it
+       * is not for a fact: a person reads this before publishing it and would
+       * notice a sentence that stopped. Still raised, because 23 taglines were
+       * sitting on the old one and none of them should have been.
+       */
+      tagline: txt(get('tagline'), 300),
+      heroIntro: txt(get('heroIntro'), 1200),
+      overview: txt(get('overview'), 6000),
     },
     facts: {
       kind,
       sourceId: record.id,
-      region: txt(get('region'), 60),
-      flightTime: txt(get('flightTime'), 20),
-      timeZone: txt(get('timeZone'), 20),
-      currency: txt(get('currency'), 40),
-      language: txt(get('language'), 40),
-      voltage: txt(get('voltage'), 30),
-      visaStatus: txt(get('visaStatus'), 60),
+      /*
+       * The numbers are headroom, not formats. Each is far above the longest
+       * real value, so a drop means genuinely odd data rather than a slightly
+       * chatty author, and the facts row stays a row rather than a paragraph.
+       */
+      region: fact(get('region'), 100),
+      flightTime: fact(get('flightTime'), 100),
+      timeZone: fact(get('timeZone'), 60),
+      currency: fact(get('currency'), 60),
+      language: fact(get('language'), 60),
+      voltage: fact(get('voltage'), 60),
+      visaStatus: fact(get('visaStatus'), 120),
       // All three or none, the same rule the renderer applies.
       ...(temps && rainfall && season ? { climate: { temps, rainfall, season } } : {}),
       ...(bestFor.length ? { bestFor } : {}),

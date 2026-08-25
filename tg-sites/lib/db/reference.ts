@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { db } from './client';
+import type { Tx } from './withTenant';
 import { REFERENCE_KINDS, type ReferenceKind } from '../content/reference';
 
 /**
@@ -43,6 +44,23 @@ export interface SyncOutcome {
   written: number;
   /** Why any were refused, deduplicated, for the log. */
   refused: string[];
+}
+
+/**
+ * The driver's json() wrapper, with the one cast it needs.
+ *
+ * THE SAME HELPER AS pages.ts AND theme.ts, AND FOR THE SAME BUG. Writing a
+ * jsonb column with JSON.stringify hands the driver a JS string, which it then
+ * serialises as JSON, so what lands is a JSON *string* containing JSON rather
+ * than an object. It has bitten this codebase four times now; the fourth was
+ * this module, caught by counting rows after the first real sync rather than by
+ * anything failing. See db/migrations/0007_unwrap_double_encoded_json.sql.
+ *
+ * The quiet half is the dangerous half: referenceFacts() returns null for a
+ * string, so a destination page would simply have drawn no facts at all.
+ */
+function json(tx: Tx, value: unknown) {
+  return tx.json(value as Parameters<Tx['json']>[0]);
 }
 
 /** A short trimmed string, or ''. */
@@ -135,8 +153,8 @@ export async function saveReferenceRecords(records: readonly ReferenceRecord[]):
         source_id: record.sourceId,
         name: record.name,
         slug: record.slug,
-        facts: JSON.stringify(record.facts),
-        prose: JSON.stringify(record.prose),
+        facts: json(tx, record.facts),
+        prose: json(tx, record.prose),
         synced_at: new Date().toISOString(),
       }));
 
@@ -164,20 +182,31 @@ export async function saveReferenceRecords(records: readonly ReferenceRecord[]):
  * than taking the whole sync down.
  */
 export async function syncReferenceKind(kind: ReferenceKind): Promise<SyncOutcome> {
-  const base = process.env.REFERENCE_EXPORT_URL;
+  /*
+   * Trimmed, and a trailing slash taken off. Both of those come from pasting a
+   * URL into a settings box, and `.../export/?kind=country` is a 404 whose
+   * message tells you nothing about why. Cheap to absorb, annoying to diagnose.
+   */
+  const base = (process.env.REFERENCE_EXPORT_URL ?? '').trim().replace(/\/+$/, '');
   const secret = process.env.REFERENCE_EXPORT_SECRET;
   if (!base || !secret) {
     throw new Error('REFERENCE_EXPORT_URL and REFERENCE_EXPORT_SECRET must both be set.');
   }
 
-  const response = await fetch(`${base}?kind=${encodeURIComponent(kind)}`, {
+  const url = `${base}?kind=${encodeURIComponent(kind)}`;
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${secret}` },
     // Nothing about this should be cached: it is the thing that fills the cache.
     cache: 'no-store',
   });
 
   if (!response.ok) {
-    throw new Error(`The exporter answered ${response.status} for ${kind}.`);
+    /*
+     * The URL is in the message and the secret is not. A 401 here means the two
+     * ends hold different secrets and a 404 means the address is wrong, and
+     * telling those apart without the address takes a deploy to work out.
+     */
+    throw new Error(`The exporter answered ${response.status} for ${kind} at ${url}.`);
   }
 
   const payload = (await response.json()) as { records?: unknown; seen?: number; served?: number };

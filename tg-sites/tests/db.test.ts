@@ -1656,6 +1656,53 @@ describe('nothing queries round the side', () => {
     ]);
   });
 
+  /*
+   * THE SAME BUG, A FOURTH TIME, SO NOW IT IS A RULE RATHER THAN A HABIT.
+   *
+   * Writing a jsonb column with JSON.stringify hands the driver a JS string,
+   * which it serialises as JSON, so a JSON *string* containing JSON lands in the
+   * column. It cost migration 0007, notes at the top of pages.ts, theme.ts and
+   * media.ts, and then bit lib/db/reference.ts anyway, where it was invisible:
+   * the sync answered 200, a thousand rows were written, and every one of them
+   * had facts nothing could read.
+   *
+   * The behavioural test above proves the invariant for one write in pages.ts. A
+   * new module does not inherit it, which is exactly what happened. This is the
+   * cheap version that covers every module at once: lib/db does not stringify
+   * JSON, it hands the driver an object through the json() helper.
+   */
+  it('no module in lib/db serialises JSON before handing it to the driver', () => {
+    const offenders: string[] = [];
+
+    for (const file of walk(join(ROOT, 'lib', 'db'))) {
+      const source = readFileSync(file, 'utf8')
+        // Comments talk ABOUT the mistake; several of them are the warnings left
+        // by the last three times. Only real code counts.
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/.*$/gm, '');
+
+      for (const match of source.matchAll(/JSON\.stringify/g)) {
+        /*
+         * FORMATTING A BAD VALUE INTO A MESSAGE IS NOT A WRITE. assertTenantId
+         * and assertUserId both say `Not a tenant id: ${JSON.stringify(value)}`,
+         * which is exactly right: it is the one place you want the quotes and
+         * the shape of whatever nonsense arrived. The first version of this test
+         * flagged both and would have had somebody make two good functions worse.
+         */
+        const before = source.slice(Math.max(0, match.index! - 200), match.index!);
+        if (/\b(throw|new Error\()/.test(before)) continue;
+
+        const line = source.slice(0, match.index!).split('\n').length;
+        offenders.push(`${file.slice(ROOT.length + 1)}:${line}`);
+      }
+    }
+
+    expect(
+      offenders,
+      'these hand the driver a string for a jsonb column; use the json() helper instead',
+    ).toEqual([]);
+  });
+
   it('every connection is opened inside a transaction', () => {
     const offenders: string[] = [];
 
