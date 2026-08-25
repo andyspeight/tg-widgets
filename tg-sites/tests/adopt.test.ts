@@ -408,6 +408,22 @@ describe('the magazine page it builds', () => {
     expect((cta!.props.buttons as Array<{ label: string }>)[0].label).toBe('Enquire about Split Old Town');
   });
 
+  it('never writes a heading that would need an article it cannot know about', () => {
+    /*
+     * "Thinking about Hvar?" reads fine. "Thinking about Dalmatian Islands?"
+     * does not, and no rule can tell which corpus names take "the": it holds
+     * both "The Azores" and "Dalmatian Islands" and both are correct.
+     */
+    for (const name of ['Hvar', 'Dalmatian Islands', 'The Azores', 'Patagonia, Mendoza & the Andes']) {
+      const built = seedItemFromCorpus({ name, facts: { lat: 1, lng: 1 } });
+      const headings = blocksOf(built).filter((b) => b.type === 'heading').map((h) => String(h.props.html));
+      for (const h of headings) {
+        expect(h, `${name}: "${h}"`).not.toMatch(/\b(about|to|in|at|for)\s*$/);
+        expect(h, `${name}: "${h}"`).not.toContain(name);
+      }
+    }
+  });
+
   it('numbers the things to do, because the corpus ranks them', () => {
     const list = find('list')[0];
     expect(list.props.style).toBe('number');
@@ -415,10 +431,27 @@ describe('the magazine page it builds', () => {
       .toEqual(['Walk the caldera path', 'Eat at Metaxi Mas']);
   });
 
-  it('escapes a hostile place name everywhere it puts it', () => {
-    const nasty = seedItemFromCorpus({ name: '<img src=x onerror=alert(1)>', facts: { lat: 1, lng: 1 } });
-    const headings = blocksOf(nasty).filter((b) => b.type === 'heading');
-    for (const h of headings) expect(String(h.props.html)).not.toContain('<img');
-    expect(headings.some((h) => String(h.props.html).includes('&lt;img'))).toBe(true);
+  it('never lets a hostile name reach a prop that is rendered as markup', () => {
+    /*
+     * The name comes from a corpus record edited by hand, so it is treated as
+     * hostile. Since the call-to-action heading stopped carrying it, the name
+     * reaches only the title, the summary, the map address and the button
+     * label, none of which are html props: React escapes those on the way out.
+     * What this pins is that it never lands in an `html` prop, which IS rendered
+     * as markup and would need escaping to be safe.
+     */
+    const nasty = seedItemFromCorpus({
+      name: '<img src=x onerror=alert(1)>',
+      prose: { overview: 'A <script>alert(1)</script> place.' },
+      facts: { lat: 1, lng: 1 },
+    });
+    for (const block of blocksOf(nasty)) {
+      const html = block.props.html;
+      if (typeof html !== 'string') continue;
+      expect(html, `${block.type} carries raw markup`).not.toMatch(/<(img|script)\b/i);
+    }
+    // And the corpus prose that DOES go into html arrives inert.
+    const text = blocksOf(nasty).filter((b) => b.type === 'text').map((b) => String(b.props.html)).join('');
+    expect(text).toContain('&lt;script&gt;');
   });
 });

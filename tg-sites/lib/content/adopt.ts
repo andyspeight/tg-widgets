@@ -448,7 +448,16 @@ export function seedItemFromCorpus(input: {
     tone: 'dark',
     paddingY: 80,
     rows: stack([
-      heading(`Thinking about ${short}?`),
+      /*
+       * THE HEADING DOES NOT NAME THE PLACE, and that is not laziness.
+       * "Thinking about Hvar?" reads fine and "Thinking about Dalmatian
+       * Islands?" does not: a plural or a region wants "the" in front of it,
+       * and which names take an article is not something a rule can know. The
+       * corpus holds "The Azores" and "Dalmatian Islands" and both are right.
+       * So the heading carries no name, the button does, and a label is the one
+       * place English lets you drop the article without it grating.
+       */
+      heading('Ready when you are.'),
       paragraphs('<p>Tell us roughly when and for how long, and we will come back with what it would take.</p>'),
       withProps('button-group', {
         align: 'left',
