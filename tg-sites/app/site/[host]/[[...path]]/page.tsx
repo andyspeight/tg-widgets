@@ -35,6 +35,8 @@ import {
 import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
+import { referenceFacts } from '../../../../lib/content/reference';
+import { DestinationPanel } from '../../../../components/render/DestinationPanel';
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
@@ -740,6 +742,12 @@ function EntryRenderer({
    * less than was asked.
    */
   const facts = fieldFacts(entry.fields, item.fields);
+  /*
+   * THE CORPUS'S OWN FACTS, when this entry was adopted from it rather than typed.
+   * Null for every ordinary entry, which is most of them, so a blog post renders
+   * exactly as it did. See lib/content/reference.ts.
+   */
+  const reference = referenceFacts(item.fields);
   // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
   // worked out from the body, never stored: see lib/content/reading-time.ts.
   const minutes = readingTime(item.sections);
@@ -785,6 +793,14 @@ function EntryRenderer({
             ))}
           </dl>
         )}
+
+        {/*
+          AFTER THE CLIENT'S OWN FACTS, not instead of them. The list above is
+          whatever they declared on the collection; this is what Travelgenix
+          maintains centrally and keeps current. Both belong on the page and the
+          order says which is which.
+        */}
+        {reference && <DestinationPanel facts={reference} />}
 
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">
