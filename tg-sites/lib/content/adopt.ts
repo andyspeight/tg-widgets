@@ -147,6 +147,25 @@ const ICON_MAP: Record<string, string> = {
   camera: 'map-pin',
 };
 
+/**
+ * The short form of a destination's name, for a sentence.
+ *
+ * THE CORPUS NAMES A RECORD, IT DOES NOT WRITE A SENTENCE. "Split Old Town &
+ * Diocletian's Palace" is exactly right as the title of the page and absurd in
+ * a button: "Enquire about Split Old Town & Diocletian's Palace" is not a line
+ * anybody would say out loud. Same for "Sousse & Port El Kantaoui" and
+ * "Patagonia, Mendoza & the Andes".
+ *
+ * The first segment before an ampersand, a comma or a trailing "and" is the
+ * place; what follows is the rest of the area it covers. The page title keeps
+ * the full name, because that is what the destination is called.
+ */
+export function shortName(name: string): string {
+  const first = name.split(/\s+(?:&|and)\s+|,\s*/)[0].trim();
+  // Only if something is actually left. A name that is all separator keeps itself.
+  return first.length >= 2 ? first : name.trim();
+}
+
 function icon(name: unknown): string {
   const key = typeof name === 'string' ? name.trim().toLowerCase() : '';
   return ICON_MAP[key] ?? 'map-pin';
@@ -424,16 +443,17 @@ export function seedItemFromCorpus(input: {
    * site closes on. The label names the place rather than saying "enquire",
    * because a page about one destination should ask about that destination.
    */
+  const short = shortName(name);
   sections.push(band({
     tone: 'dark',
     paddingY: 80,
     rows: stack([
-      heading(`Thinking about ${name}?`),
+      heading(`Thinking about ${short}?`),
       paragraphs('<p>Tell us roughly when and for how long, and we will come back with what it would take.</p>'),
       withProps('button-group', {
         align: 'left',
         buttons: [
-          { label: `Enquire about ${name}`, href: '/contact', variant: 'primary', newTab: false },
+          { label: `Enquire about ${short}`, href: '/contact', variant: 'primary', newTab: false },
         ],
       }),
     ]),

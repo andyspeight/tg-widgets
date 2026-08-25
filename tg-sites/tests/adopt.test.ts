@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { altFromCredit, proseToHtml, seedItemFromCorpus } from '../lib/content/adopt';
+import { altFromCredit, proseToHtml, seedItemFromCorpus, shortName } from '../lib/content/adopt';
 import { CollectionItemSchema } from '../lib/content/collection';
 
 const GREECE = {
@@ -389,6 +389,23 @@ describe('the magazine page it builds', () => {
     expect(buttons).toHaveLength(1);
     expect(buttons[0].label).toBe('Enquire about Santorini');
     expect(buttons[0].href).toBe('/contact');
+  });
+
+  it('says the short name in a sentence, and keeps the full one as the title', () => {
+    /*
+     * The corpus NAMES a record, it does not write a sentence. "Enquire about
+     * Split Old Town & Diocletian's Palace" is not a line anybody says out loud.
+     */
+    expect(shortName("Split Old Town & Diocletian's Palace")).toBe('Split Old Town');
+    expect(shortName('Sousse & Port El Kantaoui')).toBe('Sousse');
+    expect(shortName('Patagonia, Mendoza & the Andes')).toBe('Patagonia');
+    expect(shortName('Dalmatian Islands')).toBe('Dalmatian Islands');
+    expect(shortName('Hvar')).toBe('Hvar');
+
+    const built = seedItemFromCorpus({ name: "Split Old Town & Diocletian's Palace", facts: { lat: 1, lng: 1 } });
+    expect(built.title).toBe("Split Old Town & Diocletian's Palace");
+    const cta = blocksOf(built).find((b) => b.type === 'button-group');
+    expect((cta!.props.buttons as Array<{ label: string }>)[0].label).toBe('Enquire about Split Old Town');
   });
 
   it('numbers the things to do, because the corpus ranks them', () => {

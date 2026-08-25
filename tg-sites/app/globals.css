@@ -4147,6 +4147,35 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   object-fit: cover;
   border-radius: 0;
 }
+
+/*
+ * THE BANNER DRIFTS, THE SAME WAY EVERY OTHER BANNER ON A SITE DOES.
+ *
+ * Every inner page a client builds gets its photograph from a section, and a
+ * section has carried Ken Burns since 13 Aug. An entry's banner is the same
+ * thing doing the same job, and it was the one photograph on a site that sat
+ * still, which read as an oversight rather than as a choice. Andy, 25 Aug 2026:
+ * the main image should be in the style the rest of the site has.
+ *
+ * The SAME keyframe the section uses, deliberately. Two hand-tuned drifts at
+ * slightly different speeds on one site is the kind of difference nobody can
+ * name and everybody feels, and a second set of numbers is a second thing to
+ * keep in step.
+ *
+ * Behind prefers-reduced-motion, so a visitor who asked for less gets the
+ * picture still and full-bleed. The header clips, because the pan scales the
+ * photograph past its own edges and the overspill would otherwise sit over the
+ * band below.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-entry[data-layout='hero'] .tgs-entry__head:has(.tgs-entry__image) {
+    overflow: clip;
+  }
+  .tgs-entry[data-layout='hero'] .tgs-entry__image img {
+    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
+}
 /*
  * The same scrim decision the overlay card made, and for the same reason: the
  * words have to clear 4.5:1 over a photograph nobody has seen. It sits on the
