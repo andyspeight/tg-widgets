@@ -217,6 +217,27 @@ in `components/editor/Canvas.tsx` around line 1041 before touching it.
 
 Hard-won, none of it obvious from the code.
 
+**A RULE THAT READS A TOKEN THE THEME HAS NOT GOT DRAWS NOTHING, NOT THE
+FALLBACK.** This is a hole in the whole stylesheet, found on 25 Aug 2026 in the
+destination panel. A `var()` that cannot be substituted invalidates its
+declaration AT COMPUTED-VALUE TIME, and the property then takes its INITIAL
+value rather than falling back to the earlier declaration in the cascade, which
+is what everybody expects. So
+`background: color-mix(in srgb, var(--tgs-accent) 42%, var(--tgs-bg))` did not
+come out grey from the rule above it. It came out TRANSPARENT, and two months of
+a climate chart were simply absent with every unit test green.
+
+The trap is that a CLIENT THEME IS SPARSER THAN THE DEFAULTS. Coastwise does not
+define `--tgs-bg` at all. Before using a token in a rule, check a real tenant's
+token set carries it, not just `:root` in globals.css.
+
+**AND A TRIPWIRE NOBODY HAS WATCHED FAIL IS NOT ONE.**
+`tools/verify-destination.mjs` took three goes. The first rendered with no theme
+and passed the broken build. The second read the ground off `<body>` rather than
+off what is actually behind the element, and passed it too. Only the third, which
+carries a real tenant's sparse tokens, failed. Reintroduce the bug and watch the
+check go red before believing it.
+
 **ANYTHING A PUBLISHED PAGE LOADS BY NAME FROM OUR ORIGIN HAS TO BE LISTED IN
 THE MIDDLEWARE.** This bit twice in one day. Everything on a client's hostname
 is rewritten into the site renderer, and `isPlatformPath` names the exceptions.
