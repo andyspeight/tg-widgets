@@ -53,9 +53,13 @@ give it away.
 
 **What it costs an operator**
 
-- Free plan, Pro at **$79/month**, Enterprise custom
+- Free plan, Pro at **$79/month**, Enterprise custom. The free plan carries the
+  **same ~1% platform cut**, it drops the itinerary builder, customisation and
+  lead capture. So free is a payment link, Pro is the platform.
 - Card payments: **1% platform + 2.9% processing + $0.30**, so **3.9% + $0.30** a
   transaction, and **4.9%** on AMEX
+- A minimum WeTravel fee of **$1.50** a transaction, so the percentage floor bites
+  only below about $38 and never on a real trip deposit
 - Bank rails advertised as fee-free to the traveller
 - Wire transfer fixed at $25 / €25
 - Fees can be absorbed or passed to the traveller
@@ -156,12 +160,17 @@ roughly 400 transactions:
 | Subscription | $79/mo ≈ **£750** | £99/mo = **£1,188** |
 | **Total a year** | **≈ £8,645** | **≈ £4,268** |
 
-A saving of about **£4,377 a year, roughly half**. The break-even is around
-**£18,000 of annual card volume**, which almost every real operator clears. Below
-that WeTravel is cheaper and we should say so rather than pretend otherwise.
+A saving of about **£4,377 a year, roughly half**, at the £99 proposed in section 5.
 
-*Assumes Stripe UK standard rates for UK cards. EEA and international cards cost
-more, so quote the range, never the single number.*
+**The part that does not depend on our pricing.** Their marginal rate is 3.9%, ours
+is Stripe's 1.5%. We are **2.4 percentage points cheaper on every pound that moves**,
+whatever we end up charging. That is the fact about WeTravel, and it is the only
+part of this that is theirs. Where the break-even sits is a fact about *our* price,
+which is a dial we control. Section 5 sets it.
+
+*Assumes Stripe UK standard rates for UK cards, and $79 ≈ £62.50 a month at roughly
+1.26 USD to the pound. EEA and international cards cost more, so quote the range in
+front of a customer, never the single number.*
 
 ### Pillar 2 — The trip sells itself
 
@@ -227,9 +236,42 @@ suite's four tiers where they map.
 No free tier. WeTravel can afford free because they earn on every transaction, we
 cannot and should not pretend otherwise. The trial does that job.
 
-The honest line for a small seasonal operator: below about £18k of card volume a
-year, WeTravel costs them less. Send those to Lite or let them go. Trying to win
-everybody is how the pricing gets muddled.
+### Where the break-even sits, and who moves it
+
+We beat them by 2.4 points on marginal rate whatever we charge. Our monthly fee
+decides only at what volume that advantage has paid for itself. That number is ours
+to set, not a property of WeTravel.
+
+Against **WeTravel Pro** at $79/month, roughly £750 a year:
+
+| Our monthly | We are cheaper above |
+|---|---|
+| £49 | every volume, including zero |
+| £59 | every volume, including zero |
+| £62.50 | break-even at zero, the crossover point |
+| £79 | £8,250 |
+| £99 | £18,250 |
+| £129 | £33,250 |
+
+Anything at or below about **£62 a month makes us cheaper than WeTravel Pro at
+every volume**, including an operator who sells nothing all year. That is worth
+knowing before we settle on £99.
+
+**The comparison that is harder, and the one I missed first time round.** WeTravel
+also has a **free** plan: no monthly fee, the same cut on cards, minus the itinerary
+builder, customisation and lead capture. It is not feature-comparable to us, but a
+price-sensitive operator will hold it up anyway, so have the answer ready:
+
+| Our monthly | Cheaper than WeTravel Free above |
+|---|---|
+| £49 | £24,500 |
+| £79 | £39,500 |
+| £99 | £49,500 |
+
+So at £99 we beat their paid plan above about **£18k** of annual card volume and
+their free plan above about **£50k**, which is three or four group departures a
+year. A real operator clears that. A hobbyist does not, and a hobbyist was never
+the customer. Say that plainly rather than claiming we are cheaper for everybody.
 
 ---
 
@@ -390,7 +432,11 @@ is waiting on a login to Stripe.
 - WeTravel: **5,000+** companies, **$79/mo** Pro, **3.9% + $0.30** a card
   transaction, **4.9%** AMEX
 - Us at £200k annual card volume: **≈ £4,377 a year cheaper, about half**
-- Break-even against WeTravel: **≈ £18,000** of annual card volume
+- The invariant, true whatever we charge: we are **2.4 percentage points** cheaper
+  on marginal rate (Stripe 1.5% against their 3.9%)
+- At the proposed £99/mo: cheaper than WeTravel **Pro** above **≈ £18,000** of
+  annual card volume, and than WeTravel **Free** above **≈ £49,500**
+- At **£62/mo or below** we are cheaper than WeTravel Pro at every volume
 - Reported FX damage on their side: bank international fees **as high as 6%** on AUD
 - We already have **40+** widgets, a **six-language** traveller PWA and a
   destination content database. None of that is on their roadmap.
