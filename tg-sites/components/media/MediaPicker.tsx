@@ -576,7 +576,15 @@ function BackfillPanel({
       for (const [n, item] of plan.candidates.entries()) {
         setProgress(`Working through your pictures, ${n + 1} of ${plan.candidates.length}`);
 
-        const variants = await variantsForStoredImage(item.url, item.filename);
+        /*
+         * Told what is already stored, so a second run adds only the missing
+         * rungs rather than re-encoding and re-uploading work that is done.
+         */
+        const variants = await variantsForStoredImage(
+          item.url,
+          item.filename,
+          item.variants.map((v) => v.width),
+        );
         if (variants.length === 0) {
           unreadable += 1;
           continue;

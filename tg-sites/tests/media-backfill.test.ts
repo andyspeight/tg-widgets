@@ -35,11 +35,35 @@ describe('skipReason', () => {
     expect(skipReason(item({ mime: 'application/pdf' }))).toBe('not an image');
   });
 
-  it('leaves a picture that already has copies alone', () => {
+  it('leaves a picture that already has every useful size', () => {
     const done = item({
-      variants: [{ url: 'https://cdn.test/a-800.webp', width: 800, height: 533, bytes: 30_000 }],
+      width: 1400, height: 1050,
+      variants: [
+        { url: 'https://cdn.test/a-400.webp', width: 400, height: 300, bytes: 9_000 },
+        { url: 'https://cdn.test/a-800.webp', width: 800, height: 600, bytes: 30_000 },
+      ],
     });
-    expect(skipReason(done)).toBe('already has smaller copies');
+    expect(skipReason(done)).toBe('already has every useful size');
+  });
+
+  it('picks up a picture that is missing a rung the ladder now offers', () => {
+    /*
+     * THE REAL CASE, from backfilling a client's bank on 25 Aug 2026. Their
+     * photographs are 1920px wide and had been given 400 and 800 only, because
+     * the rule deciding the ladder was expressed in width when the saving is
+     * quadratic in width. A phone at 3x on a 390px viewport needs about 1170
+     * device pixels, found nothing between 800 and the 1920 original, and took
+     * the original. Treating "has some copies" as "is finished" would have left
+     * every one of them that way permanently.
+     */
+    const partial = item({
+      width: 1920, height: 1080,
+      variants: [
+        { url: 'https://cdn.test/a-400.webp', width: 400, height: 225, bytes: 9_000 },
+        { url: 'https://cdn.test/a-800.webp', width: 800, height: 450, bytes: 30_000 },
+      ],
+    });
+    expect(skipReason(partial)).toBeNull();
   });
 
   it('cannot plan for a row with no stored dimensions', () => {

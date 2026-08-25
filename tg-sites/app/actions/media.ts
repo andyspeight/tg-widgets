@@ -422,10 +422,15 @@ export async function importStockAction(photo: StockPhoto): Promise<MediaResult<
  * says what its pictures are, so believing the browser would let a session point
  * a client's image at anything shaped like a store url.
  *
- * REFUSES TO OVERWRITE. A picture that already has copies is left exactly as it
- * is. The backfill plans around those anyway, so reaching this means two runs
- * overlapped or a request was replayed, and in both cases the copies already
- * recorded are the ones the store actually holds.
+ * ADDS RATHER THAN REPLACES. A picture that already has copies keeps every one
+ * of them and gains whatever is new. That is not politeness, it is the only way
+ * a second run can ever fix a first: the ladder changed once already, when the
+ * rule deciding it was corrected, and a client's 1920px photographs had been
+ * given 400 and 800 and nothing between 800 and the original. Refusing to touch
+ * a picture that had "some" copies would have left them that way permanently.
+ *
+ * An existing width wins over a new one carrying the same width. The stored copy
+ * is the one the store is known to hold and the one live pages already point at.
  */
 export async function recordVariantsAction(
   id: string,
@@ -436,7 +441,6 @@ export async function recordVariantsAction(
 
     const existing = await getMediaItem(tenantId, String(id ?? ''));
     if (!existing) return { ok: false, error: 'That picture is not in this bank.' };
-    if (existing.variants.length > 0) return { ok: true, data: existing };
 
     const checked = await verifiedVariants(variants, tenantId, existing.url);
     if (checked.length === 0) {
@@ -446,7 +450,13 @@ export async function recordVariantsAction(
       };
     }
 
-    const saved = await setMediaVariants(tenantId, existing.id, checked);
+    const byWidth = new Map<number, MediaVariant>();
+    for (const variant of checked) byWidth.set(variant.width, variant);
+    // Second, so a stored copy wins a width that both carry.
+    for (const variant of existing.variants) byWidth.set(variant.width, variant);
+    const merged = [...byWidth.values()].sort((a, b) => a.width - b.width);
+
+    const saved = await setMediaVariants(tenantId, existing.id, merged);
     revalidatePath('/', 'layout');
     return { ok: true, data: saved };
   } catch (error) {

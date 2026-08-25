@@ -59,3 +59,29 @@ describe('variantWidthsFor', () => {
     for (const w of VARIANT_WIDTHS) expect(w).toBeLessThan(MAX_IMAGE_EDGE);
   });
 });
+
+describe('the ladder is measured in pixels, not in width', () => {
+  /*
+   * Corrected 25 Aug 2026 after a real backfill. The rule used to require a
+   * variant to be 80% of the primary's WIDTH or less. That sounds equivalent to
+   * "meaningfully smaller" and is not: a saving is quadratic in width, so 0.8 of
+   * the width is 0.64 of the pixels, and the rule came out about half again as
+   * strict as intended. It refused the 1600 rung on a 1920px photograph, which is
+   * precisely the one a phone at 3x would have used.
+   */
+  it('gives a 1920px photograph its 1600 rung, which saves 31% of the pixels', () => {
+    expect(variantWidthsFor(1920, 1080)).toContain(1600);
+  });
+
+  it('still refuses a rung that saves almost nothing', () => {
+    // 1600 from 1700 saves 11% of the pixels and costs a whole stored object.
+    expect(variantWidthsFor(1700, 1000)).not.toContain(1600);
+    // 800 from 900 saves 21%, under the quarter this rule asks for.
+    expect(variantWidthsFor(900, 600)).not.toContain(800);
+  });
+
+  it('offers only what is missing when told what is already stored', () => {
+    expect(variantWidthsFor(1920, 1080, [400, 800])).toEqual([1600]);
+    expect(variantWidthsFor(1920, 1080, [400, 800, 1600])).toEqual([]);
+  });
+});

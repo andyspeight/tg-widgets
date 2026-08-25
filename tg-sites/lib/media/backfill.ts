@@ -27,9 +27,14 @@ import { variantWidthsFor } from './downscale';
 /** Why a picture is being left alone, in words a person can act on. */
 export type SkipReason =
   | 'not an image'
-  | 'already has smaller copies'
+  | 'already has every useful size'
   | 'no stored dimensions'
   | 'already small enough';
+
+/** The widths a picture already has stored, for asking what is still missing. */
+function storedWidths(item: MediaItem): number[] {
+  return (item.variants ?? []).map((v) => v.width).filter((w) => Number.isFinite(w));
+}
 
 export interface BackfillPlan {
   /** Pictures worth re-encoding, largest first so the biggest wins land early. */
@@ -45,9 +50,7 @@ export function skipReason(item: MediaItem): SkipReason | null {
   if (!item || typeof item.mime !== 'string' || !item.mime.startsWith('image/')) {
     return 'not an image';
   }
-  if (Array.isArray(item.variants) && item.variants.length > 0) {
-    return 'already has smaller copies';
-  }
+
   /*
    * A row with no dimensions cannot be planned for: the ladder is decided from
    * the picture's size, and guessing would mean either skipping one that would
@@ -63,7 +66,17 @@ export function skipReason(item: MediaItem): SkipReason | null {
    */
   if (!item.width || !item.height) return 'no stored dimensions';
 
-  if (variantWidthsFor(item.width, item.height).length === 0) return 'already small enough';
+  /*
+   * ASKED AGAINST WHAT IS ALREADY THERE, not merely whether anything is. A run
+   * that treats "has some copies" as "is finished" cannot ever add a rung, and
+   * the ladder has already changed once: a real client's 1920px photographs were
+   * given 400 and 800 and nothing between 800 and the original, so a phone at 3x
+   * took the original and the whole run bought it nothing.
+   */
+  const missing = variantWidthsFor(item.width, item.height, storedWidths(item));
+  if (missing.length === 0) {
+    return storedWidths(item).length > 0 ? 'already has every useful size' : 'already small enough';
+  }
 
   return null;
 }
@@ -88,7 +101,7 @@ export function backfillPlan(items: readonly MediaItem[]): BackfillPlan {
   candidates.sort((a, b) => (b.width ?? 0) * (b.height ?? 0) - (a.width ?? 0) * (a.height ?? 0));
 
   const variantCount = candidates.reduce(
-    (n, item) => n + variantWidthsFor(item.width ?? 0, item.height ?? 0).length,
+    (n, item) => n + variantWidthsFor(item.width ?? 0, item.height ?? 0, storedWidths(item)).length,
     0,
   );
 

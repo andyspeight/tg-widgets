@@ -68,13 +68,27 @@ export interface PreparedVariant {
 export const VARIANT_WIDTHS = [400, 800, 1600] as const;
 
 /**
- * How much smaller a variant has to be before it earns its storage.
+ * How much smaller a variant has to be before it earns its storage, in PIXELS.
  *
- * Generating a 1600px copy of a 1700px original saves almost nothing and costs a
- * whole object. A variant has to come in at or under this fraction of the
- * primary width to be worth keeping.
+ * A rung is worth an object when it saves at least a quarter of the pixels.
+ *
+ * EXPRESSED AS AREA BECAUSE THAT IS WHAT IT IS ABOUT, and getting this wrong in
+ * width cost us a real run. The first version required a variant to be 80% of the
+ * primary's WIDTH or less, which sounds equivalent and is not: a saving is
+ * quadratic in width, so 0.8 of the width is 0.64 of the pixels and the rule was
+ * roughly half again as strict as intended.
+ *
+ * What that did, found by backfilling a real client's bank on 25 Aug 2026: their
+ * photographs are 1920px wide, 1600 is more than 80% of 1920, so the 1600 rung
+ * was refused and every picture got 400 and 800 only. A phone at 3x on a 390px
+ * viewport needs about 1170 device pixels, finds nothing between 800 and the
+ * 1920 original, and takes the original. The entire run bought those devices
+ * nothing at all while looking like it had worked.
+ *
+ * In area terms the intent survives: 1600 from 1920 saves 31% of the pixels and
+ * is kept, 1600 from 1700 saves 11% and is still refused.
  */
-const VARIANT_MAX_RATIO = 0.8;
+const VARIANT_MIN_PIXEL_SAVING = 0.25;
 
 export interface PreparedImage {
   /** What to upload. The original file when nothing needed doing. */
@@ -122,14 +136,27 @@ const RECOMPRESS_ABOVE_BYTES = 1_200_000;
  * 2. EARN THE STORAGE. Every width is an object, an upload and a row, so a
  *    variant has to be meaningfully smaller than the primary to be worth having.
  */
-export function variantWidthsFor(width: number, height: number): number[] {
+export function variantWidthsFor(width: number, height: number, have: readonly number[] = []): number[] {
   if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return [];
 
   const longest = Math.max(width, height);
   const scale = longest > MAX_IMAGE_EDGE ? MAX_IMAGE_EDGE / longest : 1;
   const primaryWidth = Math.round(width * scale);
 
-  return VARIANT_WIDTHS.filter((target) => target <= primaryWidth * VARIANT_MAX_RATIO);
+  /*
+   * `have` is what is already stored, so a second run adds only what is missing.
+   * That is not a nicety: the ladder changed once already, when the rule that
+   * decides it was corrected, and without this every picture that had ANY copies
+   * would have been read as finished and never gained the rung it was owed.
+   */
+  const already = new Set(have);
+
+  return VARIANT_WIDTHS.filter((target) => {
+    if (already.has(target)) return false;
+    // Both dimensions scale together, so the pixel ratio is the width ratio squared.
+    const pixelRatio = (target / primaryWidth) ** 2;
+    return 1 - pixelRatio >= VARIANT_MIN_PIXEL_SAVING;
+  });
 }
 
 /**
@@ -147,10 +174,11 @@ async function encodeVariants(
   width: number,
   height: number,
   stem: string,
+  have: readonly number[] = [],
 ): Promise<PreparedVariant[]> {
   const out: PreparedVariant[] = [];
 
-  for (const target of variantWidthsFor(width, height)) {
+  for (const target of variantWidthsFor(width, height, have)) {
     try {
       const scale = target / width;
       const w = Math.max(1, Math.round(width * scale));
@@ -363,6 +391,7 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
 export async function variantsForStoredImage(
   url: string,
   filename: string,
+  have: readonly number[] = [],
 ): Promise<PreparedVariant[]> {
   let bitmap: ImageBitmap;
   try {
@@ -377,7 +406,7 @@ export async function variantsForStoredImage(
 
   const stem = cleanFilename(filename).replace(/\.[a-z0-9]+$/i, '') || 'image';
   try {
-    return await encodeVariants(bitmap, bitmap.width, bitmap.height, stem);
+    return await encodeVariants(bitmap, bitmap.width, bitmap.height, stem, have);
   } catch {
     return [];
   } finally {
