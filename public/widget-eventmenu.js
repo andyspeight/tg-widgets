@@ -28,7 +28,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   function resolveOrigin() {
     if (typeof window === 'undefined') return '';
@@ -53,6 +53,7 @@
     layout: 'auto',                 // sidebar | drawer | auto
     drawerBelow: 900,               // px, only used by layout:auto
     triggerLabel: 'Browse events',
+    triggerTextColor: '',           // "Browse events" icon + text; '' = theme default
     groupBy: 'category',            // category | country | none
     sections: ['competitions'],     // competitions | teams | venues | performers
     linkPattern: '/tickets/{type}/{slug}',
@@ -494,11 +495,13 @@
 
   function styles(c) {
     var accent = safeColour(c.accent, '#00B4D8');
+    var trigText = safeColour(c.triggerTextColor, '');
     var radius = clamp(c.radius, 0, 24, 12);
     var font = safeFont(c.fontFamily);
     return ':host{all:initial;display:block;}'
       + '*,*::before,*::after{box-sizing:border-box;}'
       + '.tgmn-root{--tgmn-accent:' + accent + ';--tgmn-radius:' + radius + 'px;'
+      + (trigText ? '--tgmn-trigger-text:' + trigText + ';' : '')
       + 'font-family:' + font + '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;'
       + '-webkit-font-smoothing:antialiased;text-align:left;line-height:1.45;}'
       + '.tgmn-root[data-theme="light"]{--tgmn-bg:#fff;--tgmn-bg2:#f6f8fa;--tgmn-bg3:#eef1f5;'
@@ -574,7 +577,7 @@
 
       // trigger + drawer
       + '.tgmn-trigger{display:inline-flex;align-items:center;gap:9px;padding:11px 16px;font:inherit;'
-      + 'font-size:14px;font-weight:600;color:var(--tgmn-on-accent);background:var(--tgmn-accent);'
+      + 'font-size:14px;font-weight:600;color:var(--tgmn-trigger-text, var(--tgmn-on-accent));background:var(--tgmn-accent);'
       + 'border:0;border-radius:var(--tgmn-radius);cursor:pointer;}'
       + '.tgmn-trigger svg{width:17px;height:17px;}'
       + '.tgmn-trigger:focus-visible{outline:2px solid var(--tgmn-accent);outline-offset:3px;}'
@@ -705,7 +708,7 @@
   TGEventMenuWidget.prototype._shellKey = function () {
     var c = this.cfg;
     return [this._mode(), c.theme, c.accent, c.radius, c.fontFamily, c.heading,
-      c.showSearch, c.triggerLabel].join('~');
+      c.showSearch, c.triggerLabel, c.triggerTextColor].join('~');
   };
 
   TGEventMenuWidget.prototype._render = function () {
@@ -743,7 +746,12 @@
     var trigger = root.querySelector('[data-open]');
     if (trigger) trigger.addEventListener('click', function () { self._openDrawer(); });
 
-    this._bindPanel(root);
+    // Bind the panel handler on root ONLY for the sidebar, whose panel lives in
+    // root. In drawer mode root holds just the trigger; the drawer panel gets its
+    // OWN handler in _openDrawer, and since it is a child of root, a root handler
+    // here would catch the same click too — toggling a group open then shut in
+    // one press (the "clicking a group does nothing" bug).
+    if (root.querySelector('.tgmn-panel')) this._bindPanel(root);
   };
 
   /** Wired once per panel, on the container, so a repaint keeps every handler. */

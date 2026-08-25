@@ -220,6 +220,14 @@
               </div>
               <div class="field-help">Marks the page you are on, and fills the drawer button.</div>
             </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-trigtext">"Browse events" button text</label>
+              <div class="colour-row">
+                <input type="color" id="f-trigtext-swatch" aria-label="Pick the Browse events button text colour">
+                <input class="input" type="text" id="f-trigtext" maxlength="7" spellcheck="false">
+              </div>
+              <div class="field-help">Icon and label colour on the drawer button. Leave as the default to follow the theme.</div>
+            </div>
           </div>
         </div>
 
@@ -372,6 +380,7 @@
     activePath: '',
     theme: 'light',
     accent: '#00B4D8',
+    triggerTextColor: '#FFFFFF',
     radius: 12,
     fontFamily: 'Inter',
   };
@@ -509,6 +518,7 @@
     c.slider('f-pergroup', 'v-pergroup', 'maxPerGroup');
     c.slider('f-radius', 'v-radius', 'radius', function (v) { return v + 'px'; });
     c.colour('f-accent-swatch', 'f-accent', 'accent');
+    c.colour('f-trigtext-swatch', 'f-trigtext', 'triggerTextColor');
 
     c.toggle('t-newtab', 'newTab');
     c.toggle('t-search', 'showSearch');
@@ -531,6 +541,7 @@
     c.sliderSync('f-pergroup', 'v-pergroup', C.maxPerGroup);
     c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
     c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    c.colourSync('f-trigtext-swatch', 'f-trigtext', C.triggerTextColor);
     c.toggleSync('t-newtab', C.newTab);
     c.toggleSync('t-search', C.showSearch);
     c.toggleSync('t-counts', C.showCounts);
