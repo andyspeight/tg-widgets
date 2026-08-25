@@ -26,6 +26,15 @@ claim checkable.
 
 ## Status
 
-| Airport | Audited | Log |
-|---|---|---|
-| MAN Manchester | 25 Aug 2026 | [MAN.md](MAN.md) |
+**All 102 servable records audited as of 25 August 2026.** Every one carries two
+cited sources and a Verified Date. Zero live records remain on the May 2026
+stamp. 123 records sit at `In progress`, gated out of the picker and off every
+client site until their own audit.
+
+| Batch | Records | Audited | Log |
+|---|---|---|---|
+| Manchester (worked example) | 1 | 25 Aug 2026 | [MAN.md](MAN.md) |
+| UK origins | 24 | 25 Aug 2026 | [UK-origins.md](UK-origins.md) |
+| Spain and Greece | 40 (+7 elsewhere) | 25 Aug 2026 | [Spain-Greece.md](Spain-Greece.md) |
+| USA | 14 | 25 Aug 2026 | [USA.md](USA.md) |
+| Gulf, Turkey, North Africa | 17 | 25 Aug 2026 | [Gulf-North-Africa.md](Gulf-North-Africa.md) |
