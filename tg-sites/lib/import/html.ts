@@ -211,6 +211,21 @@ export interface CleanOptions {
    * this exactly as they always have.
    */
   imageSizes?: ImageSizes;
+  /**
+   * Which picture is the hero, and therefore which ones can wait.
+   *
+   * PRESENT ONLY AT RENDER, the same rule imageSizes follows and for the same
+   * reason: this cleaner also runs at SAVE time through sanitisePage, and a
+   * loading attribute baked into stored markup would mean a client's saved
+   * design quietly stopped being the thing they imported.
+   *
+   * `heroFirst` says the FIRST image this fragment emits may be the page's
+   * largest paint, so it is left eager and told to hurry. Every other image
+   * here, and every image in a fragment that says false, is deferred. The
+   * caller threads it: the first block on the page that actually contains a
+   * picture takes the hero and the rest are told they cannot have it.
+   */
+  imagePriority?: { heroFirst: boolean };
   /** How many elements to keep. A guard against a pasted megabyte. */
   maxElements?: number;
 }
@@ -228,6 +243,13 @@ export interface CleanResult {
   classes: Set<string>;
   /** What was thrown away, so the screen can say so rather than silently differ. */
   removed: string[];
+  /**
+   * How many images this fragment emitted.
+   *
+   * The caller needs it to thread the hero: a fragment that drew no picture has
+   * not used the one eager slot up, so the next one still gets it.
+   */
+  images: number;
 }
 
 function isElement(node: Node): node is Element {
@@ -246,6 +268,7 @@ function isElement(node: Node): node is Element {
 export function cleanImportHtml(source: string, options: CleanOptions = {}): CleanResult {
   const prefix = options.classPrefix ?? '';
   const imageSizes = options.imageSizes;
+  const imagePriority = options.imagePriority;
   const maxDepth = options.maxDepth ?? 40;
   const maxElements = options.maxElements ?? 4000;
 
@@ -256,6 +279,8 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
   };
 
   let elements = 0;
+  // Images emitted so far, in document order. Only the first can be the hero.
+  let images = 0;
 
   const walk = (nodes: ChildNode[], depth: number): string => {
     if (depth > maxDepth) {
@@ -371,6 +396,42 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
         if (set) out += ` srcset="${escapeAttr(set)}" sizes="${FULL_WIDTH_SIZES}"`;
       }
 
+      /*
+       * ONE PICTURE HURRIES, THE REST WAIT (25 Aug 2026).
+       *
+       * The ten get-started templates ship four images and, until this, not one
+       * loading attribute between them, so all four were fetched at once. On slow
+       * 4G that is the whole page's images sharing one pipe, and the one the
+       * visitor is looking at finishes last because it is finishing alongside
+       * three it cannot see. Measured on the perf harness: 800 KB over four
+       * images, LCP 4372 ms, which is 800 KB at 1.6 Mbps almost exactly.
+       *
+       * fetchpriority on the hero because a background <img> the browser has not
+       * laid out yet is fetched at Low priority by default, and it is the largest
+       * paint on nearly every travel homepage.
+       *
+       * A DESIGN THAT ALREADY SAID keeps what it said. An import carrying its own
+       * loading attribute has been tuned by somebody who could see it, which is
+       * more than this rule can claim, and the same argument the srcset block
+       * above makes about a design that brought its own candidates.
+       */
+      if (
+        imagePriority &&
+        tag === 'img' &&
+        !(node.attrs ?? []).some((a) => a.name.toLowerCase() === 'loading')
+      ) {
+        if (imagePriority.heroFirst && images === 0) {
+          out += ' fetchpriority="high"';
+        } else {
+          out += ' loading="lazy"';
+          if (!(node.attrs ?? []).some((a) => a.name.toLowerCase() === 'decoding')) {
+            out += ' decoding="async"';
+          }
+        }
+      }
+
+      if (tag === 'img') images += 1;
+
       if (VOID_TAGS.has(tag)) {
         out += ' />';
         continue;
@@ -385,7 +446,7 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
   };
 
   const html = walk(parseFragment(source).childNodes as ChildNode[], 0);
-  return { html, classes, removed };
+  return { html, classes, removed, images };
 }
 
 function attributes(

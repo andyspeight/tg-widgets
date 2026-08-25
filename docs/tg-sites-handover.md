@@ -97,8 +97,8 @@ Measured with `node tools/verify-perf.mjs`: Playwright, slow 4G, CPU throttled
 
 | Profile | LCP before | LCP now |
 |---|---|---|
-| A page of native blocks | 4564 ms | **2132 ms** |
-| An imported design | 8040 ms | **4360 ms** |
+| A page of native blocks | 4564 ms | **2128 ms** |
+| An imported design | 8040 ms | **1892 ms** |
 
 Both roughly halved. The remaining cost is different in each case: the designed
 page is still carrying 820 KB of images, the native page is fast enough that
@@ -114,11 +114,13 @@ Two caveats before quoting any of it:
 
 ### What is still fat
 
-`cssUnusedPct` is between 93 and 97 on every profile. A page that uses six
-blocks is served the CSS for all 53. That is item 4 below and it is the single
-biggest remaining win on the native profile.
+Not the CSS, whatever `cssUnusedPct` says. See the entry under "Things that
+will bite you" before ranking that work again.
 
----
+The honest remaining fat is image BYTES. On a designed page the two pictures
+still on the critical path are 400 KB between them, and at 390px on a DPR-3
+phone both legitimately want the 1600px candidate, so `sizes` will not save
+them. Format would.
 
 ## What shipped this session
 
@@ -163,32 +165,77 @@ Test suite: **3386 passing**, 8 skipped. Was 3321 at the start of the session.
 
 ## The open queue, in order
 
-1. **Decide whether published HTML is cached at the edge.** Andy's call, not a
-   code decision. It is the ceiling on every number above, because TTFB sits
-   inside LCP and no amount of image work touches it. It interacts with
-   server-side personalisation, so decide that first.
-2. **Stop sending 53 blocks of CSS to a page that uses six.** Biggest remaining
-   measured win. See `cssUnusedPct` above.
-3. **Image bytes, then priority hints.** `fetchpriority`, preload, lazy opt-out.
-   Measurement reordered this below CSS, it used to be higher.
-4. **Tell the browser how wide an image really is, per column.** Desktop
-   `sizes` is still `100vw`, which is honest for full-bleed and wasteful in a
-   three-column grid.
-5. **Backfill Demo Travel.** 9 images, dimensions also wrong. Coastwise is
-   done. The command is in `lib/media/backfill.ts`.
-6. **Site-wide widgets panel, cookie consent first.** Compliance exposure, so
-   it outranks the rest of the widget panel work.
-7. **Collections fed from an external source.**
+Re-ordered on 25 Aug 2026 after re-measuring. The order the queue had before
+rested on a number that does not mean what it looks like.
 
-Also parked: option A on canvas fidelity, a counter-scaled canvas. Still on the
-table if the current approach proves insufficient. Read the note in
-`components/editor/Canvas.tsx` around line 1041 before touching it.
+1. **Andy decides: is published HTML cached at the edge.** The thing that kept
+   this parked was a worry about colliding with server-side personalisation.
+   There is none: no cookies, no geography, no user agent, no A/B or audience
+   feature anywhere in tg-sites. A published page is a pure function of
+   hostname, path, query and database state. The route currently says
+   `dynamic = 'force-dynamic'` and the response says
+   `private, no-cache, no-store`, which is the strongest refusal there is.
+   Recommended: `revalidate = 60`. One line, reversible in one line, no
+   invalidation matrix. The cost is that Publish means "live within a minute".
+   **Switch Web Analytics on first** — it is off, so there is no real-user TTFB
+   and every number in this doc is a harness floor.
 
----
+2. **The CSS work, whose shape item 1 decides.** Cached pages mean inlining
+   each page's own CSS, which removes a render-blocking round trip and is worth
+   more than halving the file. Dynamic pages mean an external core stylesheet
+   plus per-block files. Different builds; do not start before 1 is settled.
+
+3. **Let a block's Text size take a typed pixel value.** It stops at 2.5rem
+   while the toolbar takes 6 to 200px, which is what pushed a 100px hero onto
+   the words and silently disabled auto-resize. `normaliseTextSize` already
+   accepts a typed px on a block, so this is UI only.
+
+4. **Submit travelgenixsites.com to the Public Suffix List.** Free, and it
+   matters more now the client subdomains are live: without it a script on one
+   client's subdomain can set a cookie another client's subdomain receives.
+
+5. **Backfill Demo Travel.** 9 images, dimensions also wrong. Coastwise is done.
+
+6. **Per-column `sizes`.** Worth less than it looks: at 390px on a DPR-3 phone
+   almost everything wants the 1600 candidate anyway.
+
+7. **Site-wide widgets panel, cookie consent first.** Compliance exposure.
+
+8. **Collections fed from an external source.**
+
+Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
+in `components/editor/Canvas.tsx` around line 1041 before touching it.
 
 ## Things that will bite you
 
 Hard-won, none of it obvious from the code.
+
+**`cssUnusedPct` does not mean what it looks like, and it mis-ranked the whole
+queue.** It read 93 to 97 per cent and put "split the CSS" at the top. It is
+Chrome coverage: a rule counts as used only if it matched an element during
+that page load, so it excludes hover and focus states, container-query branches
+for other widths, dark mode, and variants of blocks that ARE on the page. All of
+those are needed. Measured properly with postcss and attribution by class root,
+69.7 per cent of the code is block-attributable and a realistic page needs 53
+per cent of it: about 8 KB brotli off a 17.9 KB stylesheet, not 96 per cent.
+
+**And `globals.css` resists splitting anyway.** It alternates between shared and
+block rules 49 times, with 102 KB of block rules sitting BEFORE the last shared
+one. Lifting blocks into their own files reorders 792 rules against shared ones,
+and any equal-specificity tie flips silently. A safe split needs a
+conflict-detection pass, not just an attribution pass.
+
+**The hero must be eager, and that is not the same as "the others are lazy".**
+Making every picture lazy, hero included, measured 2916 ms. Hero eager with
+`fetchpriority="high"` and the rest lazy measured 1892 ms. The all-lazy version
+still saves the bytes below the fold, so it reads like a win while delaying
+discovery of the one image being waited on. `tests/image-priority.test.ts`
+asserts the first image is NOT lazy for exactly this reason.
+
+**The harness diverged from the site a fourth time.** `perf/entry.tsx` called
+`prepareSections` without `heroFirst`, so it measured an arrangement we do not
+ship, and a thousand milliseconds sat in the difference. It is now pinned by a
+test. Whenever you add a render-time option, ask what the harness passes.
 
 **The canvas has already eaten two attempts.** `Canvas.tsx` lines 1041 to 1063
 record them with measurements: a fixed width overflowed, and shrinking gave

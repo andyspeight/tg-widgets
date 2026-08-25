@@ -466,7 +466,8 @@ export default async function SitePage({ params, searchParams }: Params) {
 
   const prepared = mergePrepared(
     prepareSections(found.regions.header?.sections, imageSizes),
-    prepareSections(contentTree?.sections, imageSizes),
+    // The page's own tree, and the only one allowed to spend the eager slot.
+    prepareSections(contentTree?.sections, imageSizes, { heroFirst: true }),
     prepareSections(found.regions.footer?.sections, imageSizes),
   );
 

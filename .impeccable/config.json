@@ -52,6 +52,15 @@
         ],
         "createdAt": "2026-08-25T08:46:30.150Z",
         "reason": "Travelgenix-branded Quote PDF template (widget-suite output), governed by travelgenix-design not Impeccable per CLAUDE.md scope; pre-existing style, not introduced by the <a href> link fix."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "tg-sites/tests/image-priority.test.ts"
+        ],
+        "createdAt": "2026-08-25T12:28:24.172Z",
+        "reason": "Test fixture URLs, not a rendered page: cdn.example.com strings feed cleanImportHtml unit tests. tests/ is also outside the detector scope set in .impeccable/config.json (components/render, lib/content, app/site, theme, seo)."
       }
     ],
     "designSystem": {
