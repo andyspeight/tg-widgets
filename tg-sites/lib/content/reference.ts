@@ -10,22 +10,32 @@
  * with each other for it.
  *
  * So an adopted destination is stored as an ordinary collection item, and it
- * carries two kinds of value:
+ * carries two kinds of value that live in two different places:
  *
- *   PROSE   ordinary collection fields. Seeded once when the client adopts the
+ *   PROSE   the item's own `data`. Seeded once when the client adopts the
  *           destination, then theirs. Never overwritten by a sync.
- *   FACTS   this payload, under the reserved `__ref` key. Refreshed on every
- *           sync, never shown as an editable field, never authored by hand.
+ *   FACTS   the corpus row the item points at, through the ref_kind and
+ *           ref_source_id columns added in migration 0029. Refreshed by the
+ *           sync, never editable, never authored by hand. This module
+ *           validates that payload on the way out.
  *
  * That split is the whole design. It is what lets the corpus stay current and the
  * page still sound like the agency that published it.
  *
- * WHY `__ref` CANNOT COLLIDE WITH A CLIENT'S FIELD, which matters because both
- * live in the same `data` object. A field key is not free text: it goes through
- * `safeSlug` in collection-fields.ts, which admits lower-case letters, digits and
- * hyphens. An underscore cannot survive that, so no client field can ever be
- * called `__ref`. The reservation is structural rather than a convention somebody
- * has to remember, and tests/reference.test.ts pins it.
+ * AN EARLIER VERSION PUT THE FACTS INSIDE `data` UNDER A RESERVED `__ref` KEY,
+ * and it is worth saying why that is gone rather than leaving somebody to
+ * reinvent it. `data` is parsed through CollectionItemSchema on every save, and
+ * that is a plain zod object, so it strips keys it does not know about. The
+ * facts would have been deleted the first time a client fixed a typo in their
+ * own copy: no error, no warning, just a destination page that quietly stopped
+ * having any facts on it. Nothing had been written in that shape yet, so nothing
+ * was lost, but the lesson generalises. One blob with two writers is also how
+ * the four jsonb double-encode failures happened. The client writes `data`, the
+ * corpus owns its own columns, and neither can reach the other.
+ *
+ * A POINTER RATHER THAN A COPY, so there is exactly one of every fact. A visa
+ * rule that changes is live on every site the moment the sync writes it, with no
+ * pass over adopted items and no window where two copies disagree.
  *
  * EVERYTHING HERE TREATS ITS INPUT AS HOSTILE. This payload is read back out of
  * a jsonb column, which means it is a value from the database rather than a value
@@ -42,9 +52,6 @@ export type ReferenceKind = (typeof REFERENCE_KINDS)[number];
 /** How a month reads for a UK traveller, from the corpus's own Climate Season field. */
 export const SEASONS = ['best', 'shoulder', 'off'] as const;
 export type Season = (typeof SEASONS)[number];
-
-/** The reserved key. See the note above for why a client field can never be this. */
-export const REFERENCE_KEY = '__ref';
 
 export interface ReferenceClimate {
   /** Average daytime high in Celsius, January to December. Always twelve. */
@@ -154,17 +161,16 @@ function tags(value: unknown): string[] | undefined {
 }
 
 /**
- * The facts payload on a collection item, or null when there is not one.
+ * The corpus facts for an item, or null when there are none.
  *
- * Null for an ordinary item, which is most of them: a blog post has no `__ref`
- * and every caller reads that as "this is not a destination" rather than having
- * to ask first.
+ * Null for an ordinary item, which is most of them: a blog post points at no
+ * corpus record, so the join returns nothing and every caller reads that as
+ * "this is not a destination" rather than having to ask first. Null also for a
+ * payload that arrives malformed, which is the same answer for the same reason:
+ * draw the page without a panel rather than throw on the way to a visitor.
  */
-export function referenceFacts(data: unknown): ReferenceFacts | null {
-  if (!data || typeof data !== 'object') return null;
-  const payload = (data as Record<string, unknown>)[REFERENCE_KEY];
+export function referenceFacts(payload: unknown): ReferenceFacts | null {
   if (!payload || typeof payload !== 'object') return null;
-
   const raw = payload as Record<string, unknown>;
   const kind = typeof raw.kind === 'string' ? raw.kind : '';
   if (!(REFERENCE_KINDS as readonly string[]).includes(kind)) return null;

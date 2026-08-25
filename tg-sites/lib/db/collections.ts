@@ -37,6 +37,7 @@ import {
   parseSort,
 } from '../content/collection-filter';
 import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
+import { referenceFacts, type ReferenceFacts } from '../content/reference';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -661,12 +662,27 @@ export async function getPublishedItem(
   fields: FieldDef[];
   layout: EntryLayout;
   publishedAt: Date | null;
+  /** The corpus facts, when this entry is an adopted destination. */
+  reference: ReferenceFacts | null;
 } | null> {
   return withPublicTenant(tenantId, async (tx) => {
+    /*
+     * THE CORPUS JOIN IS A LEFT JOIN AND HAS TO BE. The overwhelming majority
+     * of entries are ordinary posts pointing at nothing, and an inner join
+     * would have silently stopped serving every one of them. It costs nothing
+     * for those rows: ref_source_id is null, so collection_items_ref_lookup_idx
+     * is not even consulted.
+     *
+     * Joined rather than copied onto the item, so there is exactly one of every
+     * fact and a corpus change is live here the moment the sync writes it. See
+     * db/migrations/0029_adopted_destinations.sql for why that beat a copy.
+     */
     const rows = await tx`
-      select i.data, i.published_at, c.fields, c.layout
+      select i.data, i.published_at, c.fields, c.layout, r.facts as reference_facts
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
+      left join public.reference_records r
+        on r.kind = i.ref_kind and r.source_id = i.ref_source_id
       where c.key = ${collectionKey} and i.slug = ${slug}
       limit 1
     `;
@@ -680,6 +696,14 @@ export async function getPublishedItem(
       fields: parseFieldDefs(asObject(row.fields)),
       layout: parseEntryLayout(row.layout),
       publishedAt: row.published_at ? new Date(row.published_at as string) : null,
+      /*
+       * Validated here rather than trusted, even though the sync wrote it. It
+       * is a value from a jsonb column, which is the same category as anything
+       * off the network, and referenceFacts answers null for a payload it does
+       * not recognise so the page draws without a panel rather than throwing on
+       * its way to a visitor.
+       */
+      reference: referenceFacts(row.reference_facts),
     };
   });
 }

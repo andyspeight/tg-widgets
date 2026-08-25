@@ -9,12 +9,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { safeSlug } from '../lib/content/collection';
+import { CollectionItemSchema } from '../lib/content/collection';
 import {
   climateMonths,
   referenceFacts,
   referenceRows,
-  REFERENCE_KEY,
   type ReferenceClimate,
 } from '../lib/content/reference';
 
@@ -27,35 +26,44 @@ const CLIMATE: ReferenceClimate = {
 };
 
 const GREECE = {
-  [REFERENCE_KEY]: {
-    kind: 'country',
-    sourceId: 'recGreece123',
-    region: 'Mediterranean · Southern Europe',
-    flightTime: '3h 45m',
-    timeZone: 'GMT +2',
-    currency: 'Euro (€)',
-    language: 'Greek',
-    voltage: '230V · Type F',
-    climate: CLIMATE,
-    bestFor: ['Couples', 'Island hopping', 'Food'],
-  },
+  kind: 'country',
+  sourceId: 'recGreece123',
+  region: 'Mediterranean · Southern Europe',
+  flightTime: '3h 45m',
+  timeZone: 'GMT +2',
+  currency: 'Euro (€)',
+  language: 'Greek',
+  voltage: '230V · Type F',
+  climate: CLIMATE,
+  bestFor: ['Couples', 'Island hopping', 'Food'],
 };
 
-describe('the reserved key cannot collide with a client field', () => {
+describe('facts must never be stored in the item blob', () => {
   /*
-   * The whole two-layer design rests on this. A field key goes through safeSlug,
-   * which admits lower-case letters, digits and hyphens, so an underscore cannot
-   * survive it. That makes the reservation structural rather than a convention
-   * somebody has to remember when they add a field.
+   * WHY THIS TEST EXISTS AT ALL, given nothing tries to do it any more.
+   *
+   * The first design put the facts inside the item's own `data` under a reserved
+   * `__ref` key. It looked safe: a field key goes through safeSlug, which admits
+   * only lower-case letters, digits and hyphens, so no client field could ever
+   * be called `__ref` and collide with it.
+   *
+   * The collision was never the problem. `data` is parsed through this schema on
+   * every save, and a plain zod object STRIPS what it does not declare. The facts
+   * would have been deleted the first time a client fixed a typo in their own
+   * copy, with no error and no warning. Migration 0029 moved them to columns of
+   * their own for that reason. This pins the behaviour that forced the change, so
+   * nobody puts them back.
    */
-  it('safeSlug cannot produce the reserved key, however it is asked', () => {
-    for (const attempt of [REFERENCE_KEY, '__ref', '_ _ref', '__REF', 'a__ref']) {
-      expect(safeSlug(attempt)).not.toBe(REFERENCE_KEY);
-    }
-  });
+  it('the item schema silently drops a key it does not declare', () => {
+    const parsed = CollectionItemSchema.parse({
+      version: 1, title: 'Santorini', summary: '', image: '', alt: '',
+      author: '', date: '', tags: [], fields: {}, sections: [],
+      __ref: { kind: 'city', sourceId: 'recX', flightTime: '4h 15m' },
+    }) as Record<string, unknown>;
 
-  it('and the reserved key starts with the character safeSlug drops', () => {
-    expect(REFERENCE_KEY.startsWith('_')).toBe(true);
+    expect('__ref' in parsed).toBe(false);
+    // Dropped, not rejected. That is what makes it quiet, and quiet is the danger.
+    expect(parsed.title).toBe('Santorini');
   });
 });
 
@@ -76,17 +84,17 @@ describe('reading a payload back', () => {
   });
 
   it('refuses a kind that is not one of the five', () => {
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'hotel', sourceId: 'rec1' } })).toBeNull();
+    expect(referenceFacts({ kind: 'hotel', sourceId: 'rec1' })).toBeNull();
   });
 
   it('refuses a record a sync could never find again', () => {
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'country' } })).toBeNull();
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'country', sourceId: '  ' } })).toBeNull();
+    expect(referenceFacts({ kind: 'country' })).toBeNull();
+    expect(referenceFacts({ kind: 'country', sourceId: '  ' })).toBeNull();
   });
 
   it('drops a fact that is not a string rather than rendering an object', () => {
     const facts = referenceFacts({
-      [REFERENCE_KEY]: { kind: 'city', sourceId: 'rec1', currency: { usd: 1 }, language: 'Greek' },
+      kind: 'city', sourceId: 'rec1', currency: { usd: 1 }, language: 'Greek',
     });
     expect(facts?.currency).toBeUndefined();
     expect(facts?.language).toBe('Greek');
@@ -100,7 +108,7 @@ describe('the climate year, which is all three series or none', () => {
 
   it('refuses a short series, because month eight would sit under month seven', () => {
     const short = { ...CLIMATE, temps: CLIMATE.temps.slice(0, 11) };
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'country', sourceId: 'r', climate: short } })?.climate)
+    expect(referenceFacts({ kind: 'country', sourceId: 'r', climate: short })?.climate)
       .toBeUndefined();
   });
 
@@ -110,19 +118,19 @@ describe('the climate year, which is all three series or none', () => {
      * would draw a chart that looks deliberate, which is worse than drawing none.
      */
     const broken = { ...CLIMATE, temps: [...twelve(20).slice(0, 7), 400, ...twelve(20).slice(0, 4)] };
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'country', sourceId: 'r', climate: broken } })?.climate)
+    expect(referenceFacts({ kind: 'country', sourceId: 'r', climate: broken })?.climate)
       .toBeUndefined();
   });
 
   it('refuses a season token outside the closed set', () => {
     const broken = { ...CLIMATE, season: [...CLIMATE.season.slice(0, 11), 'perfect'] };
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'country', sourceId: 'r', climate: broken } })?.climate)
+    expect(referenceFacts({ kind: 'country', sourceId: 'r', climate: broken })?.climate)
       .toBeUndefined();
   });
 
   it('drops the whole chart when only two of the three series are usable', () => {
     const partial = { temps: CLIMATE.temps, rainfall: CLIMATE.rainfall };
-    expect(referenceFacts({ [REFERENCE_KEY]: { kind: 'country', sourceId: 'r', climate: partial } })?.climate)
+    expect(referenceFacts({ kind: 'country', sourceId: 'r', climate: partial })?.climate)
       .toBeUndefined();
   });
 });
@@ -153,11 +161,9 @@ describe('the rows a page draws', () => {
 describe('a long fact is a note, not a number', () => {
   it('marks a sentence so the renderer can set it as prose', () => {
     const rows = referenceRows(referenceFacts({
-      __ref: {
-        ...GREECE.__ref,
-        flightTime: '11h 30m direct from the UK to Mexico City Benito Juarez (MEX). '
-          + 'The new Felipe Angeles airport (NLU) handles some routes.',
-      },
+      ...GREECE,
+      flightTime: '11h 30m direct from the UK to Mexico City Benito Juarez (MEX). '
+        + 'The new Felipe Angeles airport (NLU) handles some routes.',
     })!);
     const flight = rows.find((r) => r.key === 'flightTime')!;
     expect(flight.long).toBe(true);
@@ -173,24 +179,18 @@ describe('a long fact is a note, not a number', () => {
 
   it('never truncates a fact that is merely long, which is how a lie gets in', () => {
     const value = '4h to Santorini, 25min transfer';
-    const rows = referenceRows(referenceFacts({
-      __ref: { ...GREECE.__ref, flightTime: value },
-    })!);
+    const rows = referenceRows(referenceFacts({ ...GREECE, flightTime: value })!);
     expect(rows.find((r) => r.key === 'flightTime')!.value).toBe(value);
   });
 
   it('and never drops one either, which is how ninety-nine cities went missing', () => {
     const long = `${'A very long sentence about the flight. '.repeat(6)}`.trim();
-    const rows = referenceRows(referenceFacts({
-      __ref: { ...GREECE.__ref, flightTime: long },
-    })!);
+    const rows = referenceRows(referenceFacts({ ...GREECE, flightTime: long })!);
     expect(rows.map((r) => r.key)).toContain('flightTime');
   });
 
   it('still guards against a runaway value, which is what the cap is FOR', () => {
-    const rows = referenceRows(referenceFacts({
-      __ref: { ...GREECE.__ref, flightTime: 'x'.repeat(5000) },
-    })!);
+    const rows = referenceRows(referenceFacts({ ...GREECE, flightTime: 'x'.repeat(5000) })!);
     expect(rows.find((r) => r.key === 'flightTime')!.value.length).toBe(400);
   });
 });

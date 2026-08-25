@@ -35,7 +35,6 @@ import {
 import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
-import { referenceFacts } from '../../../../lib/content/reference';
 import { DestinationPanel } from '../../../../components/render/DestinationPanel';
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
@@ -724,6 +723,14 @@ function EntryRenderer({
     fields: import('../../../../lib/content/collection-fields').FieldDef[];
     /** How the collection lays its entries out. See collection-layout.ts. */
     layout: import('../../../../lib/content/collection-layout').EntryLayout;
+    /**
+     * The corpus facts, when this entry is an adopted destination.
+     *
+     * Read on the JOIN in getPublishedItem rather than out of the item, because
+     * the item holds the client's words and the corpus holds ours. Null for
+     * every ordinary entry, which is nearly all of them.
+     */
+    reference: import('../../../../lib/content/reference').ReferenceFacts | null;
   };
   theme: React.CSSProperties;
   /** Markup the server has already cleaned. See lib/content/prepared.ts. */
@@ -746,8 +753,13 @@ function EntryRenderer({
    * THE CORPUS'S OWN FACTS, when this entry was adopted from it rather than typed.
    * Null for every ordinary entry, which is most of them, so a blog post renders
    * exactly as it did. See lib/content/reference.ts.
+   *
+   * COMES FROM THE READ, NOT FROM THE ITEM. An earlier version looked in
+   * `item.fields`, which is the client's own answers to their own collection's
+   * questions, and would have found nothing there however many destinations had
+   * been adopted. The facts live on the corpus row this entry points at.
    */
-  const reference = referenceFacts(item.fields);
+  const reference = entry.reference;
   // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
   // worked out from the body, never stored: see lib/content/reading-time.ts.
   const minutes = readingTime(item.sections);
