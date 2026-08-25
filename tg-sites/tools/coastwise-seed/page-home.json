@@ -110,7 +110,10 @@
      "reverseOnStack": false
     }
    ],
-   "kenBurns": true
+   "motion": {
+    "recipe": "A6",
+    "intensity": 3
+   }
   },
   {
    "id": "sec_epw45ku",
