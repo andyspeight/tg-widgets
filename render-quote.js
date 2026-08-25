@@ -875,6 +875,26 @@ function resolveBrand(opts) {
   const labels = hex(c.labels, hex(c.accentDark,  '#0096B7'));
   const titles = hex(c.titles, hex(c.primary,     '#1B2B5B'));
   const text   = hex(c.text,   '#0F172A');
+  // Link colour for supplier description links. Honour an explicit client choice
+  // as-is; otherwise default to a brand colour GUARANTEED readable on the white
+  // description panel — a near-white accent must never leave the link invisible
+  // (the reported "white link" bug). Falls back darker until it passes.
+  const relLum = (hx) => {
+    const m = /^#([0-9a-fA-F]{6})$/.exec(String(hx || '').trim());
+    if (!m) return 1;
+    const h = m[1];
+    const lin = (v) => { const ch = parseInt(v, 16) / 255; return ch <= 0.03928 ? ch / 12.92 : Math.pow((ch + 0.055) / 1.055, 2.4); };
+    return 0.2126 * lin(h.slice(0, 2)) + 0.7152 * lin(h.slice(2, 4)) + 0.0722 * lin(h.slice(4, 6));
+  };
+  const linkExplicit = typeof c.link === 'string' && /^#[0-9a-fA-F]{6}$/.test(c.link.trim());
+  let link = hex(c.link, labels);
+  if (!linkExplicit) {
+    // Guard the DEFAULT only (an explicit choice is the client's to make): keep at
+    // least ~3:1 contrast on the white description panel (luminance <= 0.30), so a
+    // brand teal reads fine but a near-white accent can never be the link colour.
+    if (relLum(link) > 0.30) link = titles;     // darker brand title colour
+    if (relLum(link) > 0.30) link = '#1D4ED8';  // last-resort readable blue
+  }
   const btn = (b.button && typeof b.button === 'object') ? b.button : {};
   return {
     name: (b.name && String(b.name).trim()) || 'Your Travel Co',
@@ -883,7 +903,7 @@ function resolveBrand(opts) {
       ? b.logoUrl.trim() : '',
     supportEmail: (b.supportEmail && String(b.supportEmail).trim()) || '',
     supportPhone: (b.supportPhone && String(b.supportPhone).trim()) || '',
-    colors: { topBar, hero, accent, labels, titles, text },
+    colors: { topBar, hero, accent, labels, titles, text, link },
     // Embed Download/Email button colours (used by widget-quote-pdf.js, not the
     // PDF itself). Kept here so a single config drives both.
     button: {
@@ -957,7 +977,7 @@ function renderQuoteHTML(input, opts) {
   :root{
     --topbar:${brand.colors.topBar}; --hero:${brand.colors.hero}; --accent:${brand.colors.accent}; --labels:${brand.colors.labels}; --titles:${brand.colors.titles}; --text:${brand.colors.text};
     /* Legacy aliases kept so existing rules resolve to the right new colour. */
-    --navy:${brand.colors.titles}; --navy-dark:${brand.colors.topBar}; --teal:${brand.colors.accent}; --teal-dark:${brand.colors.labels};
+    --navy:${brand.colors.titles}; --navy-dark:${brand.colors.topBar}; --teal:${brand.colors.accent}; --teal-dark:${brand.colors.labels}; --link:${brand.colors.link};
     --ink:${brand.colors.text}; --slate:#475569; --mute:#94A3B8;
     --bg:#FFFFFF; --bg2:#F8FAFC; --bg3:#F1F5F9; --line:#E2E8F0;
     --ok:#10B981; --no:#94A3B8;
@@ -1106,7 +1126,7 @@ function renderQuoteHTML(input, opts) {
   .description p{margin:0 0 8px;}
   .description hr{border:none;border-top:1px solid var(--line);margin:14px 0;}
   /* Supplier links (e.g. "View Full Hotel Info") stay visibly clickable. */
-  .description a,.day-divider-desc a,.loc-block a{color:var(--teal);text-decoration:underline;word-break:break-word;}
+  .description a,.day-divider-desc a,.loc-block a{color:var(--link);text-decoration:underline;word-break:break-word;}
 
   /* Total */
   .total{display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:14px;padding:20px 24px;margin-top:4px;}

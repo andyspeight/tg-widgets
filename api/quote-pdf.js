@@ -234,6 +234,9 @@ function buildRenderOpts(config) {
         labels: colors.labels,
         titles: colors.titles,
         text: colors.text,
+        // Link colour for description links (added Aug 2026). Forwarded like the
+        // rest so a client's chosen link colour reaches the renderer.
+        link: colors.link,
         // Legacy keys kept so pre-6-colour saved configs still map through
         // resolveBrand()'s back-compat fallback.
         primary: colors.primary,
