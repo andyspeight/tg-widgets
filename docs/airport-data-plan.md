@@ -269,6 +269,37 @@ hundreds of records deserves a deliberate switch rather than a silent cron.
 65 assertions across `test/airport-status-gate-smoke.mjs` and
 `test/airport-identity-verify-smoke.mjs`.
 
+### Pre-flight for the fill run
+
+593 airports in the agreed union, 225 already in the table, **368 to create**.
+All 368 are present in OurAirports with scheduled service, so source 1 covers
+the whole run and nothing should come back "not in OurAirports". Whether each
+one is created depends on Wikidata corroborating it, which happens on the
+deploy.
+
+| Continent | New records |
+|---|---|
+| Asia | 122 |
+| North America | 95 |
+| Europe | 70 |
+| Africa | 39 |
+| South America | 30 |
+| Oceania | 12 |
+
+Heaviest countries: USA 56, China 47, Brazil 16, Italy 11, Russia 11, Germany 9,
+Mexico 8. South America and Central America go from nothing to covered, and the
+gaps flagged in section 3 (no Belgium, no Bulgaria, no Romania, no Cape Verde)
+all close.
+
+**Why the run cannot happen from a Claude Code session.** The egress policy in
+the session sandbox blocks `query.wikidata.org` and OurAirports' own host. The
+OurAirports data is reachable through its GitHub origin, but the obvious
+alternatives for a second source are not independent: OpenFlights records are
+100% sourced from OurAirports by its own provenance column, and mwgg/Airports
+returns coordinates byte-identical to OurAirports'. Using either would be
+single-sourcing with two file names. The Vercel deployment reaches both real
+sources, so the fill runs there.
+
 ### Findings that need a human
 
 The dataset pass surfaced three that two sources should settle before anyone
