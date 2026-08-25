@@ -14,7 +14,7 @@
     "test": "vitest run",
     "catalogue": "node tools/block-catalogue.mjs",
     "catalogue:check": "node tools/block-catalogue.mjs --check",
-    "verify:browser": "node tools/build-standalone.mjs && node tools/build-theme-harness.mjs && node tools/verify-standalone.mjs && node tools/verify-theme.mjs && node tools/verify-settings.mjs && node tools/verify-motion.mjs && node tools/verify-motion-recipes.mjs && node tools/verify-motion-rail.mjs && node tools/verify-motion-video.mjs",
+    "verify:browser": "node tools/build-standalone.mjs && node tools/build-theme-harness.mjs && node tools/verify-standalone.mjs && node tools/verify-theme.mjs && node tools/verify-settings.mjs && node tools/verify-motion.mjs && node tools/verify-motion-recipes.mjs && node tools/verify-motion-rail.mjs && node tools/verify-motion-video.mjs && node tools/verify-destination.mjs",
     "test:live": "TG_LIVE_FONTS=1 vitest run tests/fonts.live.test.ts",
     "perf": "node tools/build-perf-page.mjs && node tools/verify-perf.mjs",
     "perf:baseline": "node tools/build-perf-page.mjs && node tools/verify-perf.mjs --save-baseline"

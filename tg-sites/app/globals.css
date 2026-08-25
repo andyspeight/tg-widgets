@@ -1782,6 +1782,276 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /* ------------------------------------------------------------------ */
+/* A destination's facts                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * THE CORPUS TALKING, not the client. See lib/content/reference.ts for why a
+ * destination page carries two kinds of value and only one of them is editable.
+ *
+ * Everything here is drawn from the site's own theme tokens, because a client's
+ * destination page has to look like their site rather than like ours. Nothing in
+ * this section names a colour.
+ */
+
+.tgs-dest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-l, 32px);
+  margin-block: var(--tgs-space-l, 32px);
+}
+
+.tgs-dest__tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-s, 8px);
+}
+
+.tgs-dest__tag {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.82);
+  line-height: 1.2;
+  padding: 0.45em 0.85em;
+  border-radius: var(--tgs-radius-lg, 20px);
+  border: 1px solid var(--tgs-border);
+  color: var(--tgs-text-muted);
+}
+
+/*
+ * The facts, as a grid of labelled values rather than a run of sentences. auto-fit
+ * so a record with three facts fills the row and one with six wraps evenly,
+ * without the count being written down anywhere.
+ */
+.tgs-dest__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--tgs-space-m, 16px);
+}
+
+.tgs-dest__fact dt {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.78);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tgs-text-muted);
+  margin-bottom: 0.25em;
+}
+
+.tgs-dest__fact dd {
+  margin: 0;
+  font-family: var(--tgs-h5-font);
+  font-weight: var(--tgs-h5-weight);
+  font-size: var(--tgs-h5-size);
+  line-height: 1.25;
+  color: var(--tgs-text);
+}
+
+/* --- the climate year --------------------------------------------- */
+
+.tgs-dest__climate { margin: 0; }
+
+.tgs-dest__climate-title {
+  font-family: var(--tgs-h4-font);
+  font-weight: var(--tgs-h4-weight);
+  font-size: var(--tgs-h4-size);
+  line-height: var(--tgs-h4-leading);
+  color: var(--tgs-text);
+  margin-bottom: var(--tgs-space-m, 16px);
+}
+
+/*
+ * A TABLE DRAWN AS A CHART. The markup is tabular because the data is, so a
+ * screen reader gets "August, 27 degrees, 5 millimetres, best time to go". The
+ * grid below re-lays those same cells as twelve columns; nothing is duplicated
+ * and there is no second copy of the numbers to disagree with the first.
+ */
+.tgs-dest__chart {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The caption and the header row are for a screen reader; the chart says the
+   same things visually with its axis, its bars and its key. */
+.tgs-dest__chart-caption,
+.tgs-dest__chart thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tgs-dest__chart tbody {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  align-items: end;
+}
+
+.tgs-dest__month {
+  display: grid;
+  /* Bar, then month, then the two values under it. */
+  grid-template-rows: 1fr auto auto auto;
+  gap: 0.35em;
+  align-items: end;
+  text-align: center;
+  min-width: 0;
+}
+
+.tgs-dest__temp {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: end;
+  gap: 0.3em;
+  height: clamp(90px, 18vw, 160px);
+  padding: 0;
+}
+
+/*
+ * The bar. Its height is the month's share of the warmest one, handed in as
+ * --tgs-dest-bar by the render, which clamps it to 8-100 first.
+ *
+ * The season decides the fill: the best months are the brand colour at full
+ * strength, the shoulder ones a wash of it, and the off months a neutral. That
+ * is the whole point of the chart, so it is carried by colour rather than by a
+ * label somebody has to read.
+ */
+.tgs-dest__bar {
+  display: block;
+  align-self: end;
+  height: var(--tgs-dest-bar, 8%);
+  border-radius: var(--tgs-radius-sm, 4px) var(--tgs-radius-sm, 4px) 0 0;
+  background: var(--tgs-border-strong);
+  min-height: 4px;
+}
+
+.tgs-dest__month[data-season='best'] .tgs-dest__bar { background: var(--tgs-accent); }
+/*
+ * SHOULDER IS THE ACCENT MADE TRANSLUCENT, not the accent mixed into the
+ * background. Mixing toward --tgs-bg was the first attempt and it drew nothing
+ * at all on a light theme: 42 per cent of a terracotta into cream lands within a
+ * shade or two of the cream, so March and April read as months with no data
+ * rather than as quieter months. Measured by rendering it.
+ *
+ * Against transparent it keeps the hue and lets whatever is behind show through,
+ * so it stays visible on a light ground, a dark one, and over a tinted section.
+ */
+.tgs-dest__month[data-season='shoulder'] .tgs-dest__bar {
+  background: color-mix(in srgb, var(--tgs-accent) 55%, transparent);
+}
+
+.tgs-dest__value {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.8);
+  line-height: 1;
+  color: var(--tgs-text);
+}
+
+.tgs-dest__month-name {
+  font-family: var(--tgs-p-font);
+  font-weight: 600;
+  font-size: calc(var(--tgs-p-size) * 0.78);
+  line-height: 1;
+  color: var(--tgs-text);
+  padding: 0;
+}
+
+.tgs-dest__rain {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.7);
+  line-height: 1;
+  color: var(--tgs-text-muted);
+  padding: 0;
+}
+
+/* The season is said in colour on the bar and in the key below, so the cell
+   itself is for a screen reader only. */
+.tgs-dest__season {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tgs-dest__key {
+  list-style: none;
+  margin: var(--tgs-space-m, 16px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-m, 16px);
+}
+
+.tgs-dest__key-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.78);
+  color: var(--tgs-text-muted);
+}
+
+.tgs-dest__key-item::before {
+  content: '';
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: var(--tgs-radius-sm, 4px);
+  background: var(--tgs-border-strong);
+  flex: none;
+}
+
+.tgs-dest__key-item[data-season='best']::before { background: var(--tgs-accent); }
+/* The same translucent accent as the bar it explains. See the note above. */
+.tgs-dest__key-item[data-season='shoulder']::before {
+  background: color-mix(in srgb, var(--tgs-accent) 55%, transparent);
+}
+
+/*
+ * ON A PHONE THE CHART TURNS ON ITS SIDE. Twelve columns in 390px gives each
+ * month about 30px, which is not enough for a month name and two numbers, so
+ * they stack: one row per month, the bar running across instead of up. The same
+ * cells, re-laid; still one table, still the same numbers.
+ */
+@container tgs-page (max-width: 599px) {
+  .tgs-dest__chart tbody {
+    grid-template-columns: 1fr;
+    gap: 0.4em;
+  }
+
+  .tgs-dest__month {
+    grid-template-columns: 3.2em 1fr auto;
+    grid-template-rows: none;
+    align-items: center;
+    text-align: left;
+    gap: 0.75em;
+  }
+
+  .tgs-dest__temp {
+    grid-template-rows: none;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    height: auto;
+  }
+
+  .tgs-dest__bar {
+    align-self: center;
+    height: 0.9em;
+    width: var(--tgs-dest-bar, 8%);
+    border-radius: 0 var(--tgs-radius-sm, 4px) var(--tgs-radius-sm, 4px) 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Blocks                                                              */
 /* ------------------------------------------------------------------ */
 
