@@ -844,3 +844,47 @@ describe('the video hero is not downloaded by people who will not see it', () =>
     }
   });
 });
+
+describe('a scroll-driven recipe on the first section', () => {
+  /*
+   * A view() timeline measures an element ENTERING the scrollport, and the first
+   * section never enters: it is on screen when the page loads. Measured on
+   * 25 Aug 2026 with a 1200px hero in a 900px viewport, S5's range was already
+   * about 43% spent before the visitor touched anything, so the animation sat at
+   * its end state at every scroll position. The recipe was offered in the editor,
+   * stored on the page, attached by the browser, and did nothing whatsoever.
+   *
+   * The fix drives that one case off the document's own scroll instead. These
+   * assertions exist because the failure is invisible: nothing errors, the
+   * attribute is present, and the only symptom is a hero that does not move.
+   */
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const sheet = read('app', 'globals.css');
+  const code = render.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  it('marks the first section, and only when a recipe is actually on', () => {
+    expect(code).toContain("data-motion-lead={motion && index === 0 ? '' : undefined}");
+  });
+
+  it('drives the lead section off the document scroll rather than its own entry', () => {
+    const css = sheet.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).toContain("[data-motion='S5'][data-motion-lead] .tgs-section__bg");
+    expect(css).toMatch(/\[data-motion-lead\][\s\S]{0,160}animation-timeline:\s*scroll\(\)/);
+  });
+
+  it('settles over the hero own height, so a taller hero simply takes longer', () => {
+    const css = sheet.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).toMatch(/animation-range:\s*0\s+calc\(var\(--tgs-min-h/);
+  });
+
+  it('stays inside the reduced-motion and feature guards the rest of S5 sits in', () => {
+    /*
+     * The lead rule only overrides the timeline; it must not become a second way
+     * to start an animation for somebody who asked for less motion, or in a
+     * browser with no scroll timelines at all.
+     */
+    const guarded = sheet.slice(sheet.indexOf('@supports (animation-timeline: view())'));
+    const leadAt = guarded.indexOf("[data-motion='S5'][data-motion-lead]");
+    expect(leadAt).toBeGreaterThan(-1);
+  });
+});

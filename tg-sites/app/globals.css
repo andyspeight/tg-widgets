@@ -1369,6 +1369,27 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
       animation-range: entry 0% cover 35%;
       transform-origin: center;
     }
+
+    /*
+     * THE LEAD SECTION IS TIMED BY THE PAGE, NOT BY ITSELF.
+     *
+     * view() measures an element ENTERING the scrollport, and the first section
+     * never enters: it is on screen the moment the page loads. Measured with a
+     * 1200px hero in a 900px viewport, the range above was already about 43%
+     * spent before a visitor touched anything, so the animation sat at its end
+     * state at every scroll position. The recipe was attached, stored, offered
+     * in the editor, and doing nothing at all.
+     *
+     * scroll() is the document's own timeline, which starts at the top where a
+     * hero starts. The picture settles over the hero's OWN height rather than an
+     * arbitrary distance, so a taller hero simply takes longer, and it is done
+     * well before the section leaves so the words are read against a still
+     * picture. Same intent as the range above, different clock.
+     */
+    .tgs-section[data-motion='S5'][data-motion-lead] .tgs-section__bg {
+      animation-timeline: scroll();
+      animation-range: 0 calc(var(--tgs-min-h, 100vh) * 0.6);
+    }
   }
 }
 

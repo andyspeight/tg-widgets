@@ -525,6 +525,21 @@ export function SectionRenderer({
       data-motion={motion}
       data-motion-intensity={motion ? String(section.motion?.intensity ?? 2) : undefined}
       /*
+       * THE FIRST SECTION IS A DIFFERENT PROBLEM AND HAS TO SAY SO.
+       *
+       * A scroll-driven recipe is timed by the section entering the viewport,
+       * and the first section never enters: it is already there when the page
+       * loads. Measured on 25 Aug 2026 with a 1200px hero in a 900px viewport,
+       * S5's range was about 43% used up before the visitor touched anything and
+       * the animation sat finished at every scroll position. The recipe was
+       * offered, stored, attached, and did nothing.
+       *
+       * So the stylesheet is told which section is the lead one and drives that
+       * case off the document's own scroll instead. Only set when a recipe is
+       * actually on, so nothing else in the DOM changes shape.
+       */
+      data-motion-lead={motion && index === 0 ? '' : undefined}
+      /*
        * Slide this section up under the one above it. Structural, not decorative,
        * so it is NOT gated on `editable` the way the reveal and the hover are: an
        * overlap you set is part of the layout, and a preview that did not show it

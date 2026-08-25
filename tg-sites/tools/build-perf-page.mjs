@@ -22,7 +22,7 @@
  */
 
 import * as esbuild from 'esbuild';
-import { mkdir, readFile, writeFile, rm, copyFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rm, copyFile, stat } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -123,6 +123,28 @@ const cssFiles = Object.entries(manifest.pages)
 
 if (cssFiles.length === 0) {
   console.error('The build manifest lists no CSS for the published route. Refusing to measure nothing.');
+  process.exit(1);
+}
+
+/*
+ * REFUSE A STALE STYLESHEET, the same guard tools/verify-standalone.mjs keeps and
+ * for the same reason, learned here the hard way on 25 Aug 2026.
+ *
+ * This serves what `next build` produced. Editing app/globals.css and re-running
+ * the harness without rebuilding measures the PREVIOUS stylesheet, and the
+ * failure is silent: every check still passes, the numbers look plausible, and a
+ * rule that was just added appears to have no effect at all. That cost a round of
+ * debugging a fix that was already correct.
+ */
+const sourceCss = resolve(root, 'app/globals.css');
+const builtNewest = Math.max(
+  ...(await Promise.all(cssFiles.map(async (f) => (await stat(resolve(root, '.next', f))).mtimeMs))),
+);
+if ((await stat(sourceCss)).mtimeMs > builtNewest) {
+  console.error(
+    'app/globals.css is newer than the built stylesheet. Run `npx next build` first,\n' +
+      'or this measures the previous one and says nothing about your change.',
+  );
   process.exit(1);
 }
 
