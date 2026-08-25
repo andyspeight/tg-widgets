@@ -26,7 +26,7 @@ import {
   listAllRecords,
   getRecord,
 } from '../../_lib/auth/airtable.js';
-import { provisionLunaChat } from '../../_lib/luna-chat-provision.js';
+import { provisionLunaChat, entitlementsGrantLunaChat } from '../../_lib/luna-chat-provision.js';
 import { jsonError } from '../../_lib/auth/http.js';
 import {
   PRODUCTS,
@@ -266,6 +266,20 @@ export default async function handler(req, res) {
   );
   const activeEntitlements = entitlements.filter((e) => activeCatIds.has(e.catalogueItemId));
   const skippedInactive = entitlements.filter((e) => !activeCatIds.has(e.catalogueItemId));
+
+  // ─── Does this client actually end up with Luna Chat? ────────────
+  // The luna_chat ENTITLEMENT is the real answer to that question, and it is
+  // what decides whether Luna Chat gets told the client exists.
+  //
+  // It used to be decided by whether the optional Luna Chat section of the
+  // onboarding form had been filled in. Those two things are unrelated: a
+  // package grants luna_chat automatically as a Package Default, while that
+  // form section is extra configuration nobody has to touch. So the normal
+  // case — onboard a client, package hands them Luna Chat, skip the optional
+  // section — created a client who was entitled to Luna Chat and did not exist
+  // in it. They reached the dashboard and got "No Luna Chat client linked to
+  // your account". By 25 Aug 2026 that had happened to 22 clients.
+  const grantsLunaChat = entitlementsGrantLunaChat(activeEntitlements, allCatalogue);
   if (skippedInactive.length) {
     console.warn('[admin/clients/create] skipped inactive catalogue items:',
       skippedInactive.map((e) => e.catalogueItemId).join(', '));
@@ -499,8 +513,14 @@ export default async function handler(req, res) {
   //
   // Not fatal — the client and their entitlements are already saved, so a Luna
   // Chat outage must not fail onboarding. The result is reported instead.
+  //
+  // Gated on the ENTITLEMENT, not on the optional config block. The config
+  // block still counts, so a form that supplies it keeps working exactly as it
+  // did — this can only ever provision more clients than before, never fewer.
   let lunaChat;
-  if (lunaChatPayload) {
+  if (grantsLunaChat || lunaChatPayload) {
+    console.log('[admin/clients/create] provisioning Luna Chat for', clientId,
+      grantsLunaChat ? '(entitled via catalogue)' : '(onboarding config supplied, no luna_chat entitlement)');
     lunaChat = await provisionLunaChat(clientRec, true);
   }
 
