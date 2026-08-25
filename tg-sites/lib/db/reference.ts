@@ -164,20 +164,31 @@ export async function saveReferenceRecords(records: readonly ReferenceRecord[]):
  * than taking the whole sync down.
  */
 export async function syncReferenceKind(kind: ReferenceKind): Promise<SyncOutcome> {
-  const base = process.env.REFERENCE_EXPORT_URL;
+  /*
+   * Trimmed, and a trailing slash taken off. Both of those come from pasting a
+   * URL into a settings box, and `.../export/?kind=country` is a 404 whose
+   * message tells you nothing about why. Cheap to absorb, annoying to diagnose.
+   */
+  const base = (process.env.REFERENCE_EXPORT_URL ?? '').trim().replace(/\/+$/, '');
   const secret = process.env.REFERENCE_EXPORT_SECRET;
   if (!base || !secret) {
     throw new Error('REFERENCE_EXPORT_URL and REFERENCE_EXPORT_SECRET must both be set.');
   }
 
-  const response = await fetch(`${base}?kind=${encodeURIComponent(kind)}`, {
+  const url = `${base}?kind=${encodeURIComponent(kind)}`;
+  const response = await fetch(url, {
     headers: { Authorization: `Bearer ${secret}` },
     // Nothing about this should be cached: it is the thing that fills the cache.
     cache: 'no-store',
   });
 
   if (!response.ok) {
-    throw new Error(`The exporter answered ${response.status} for ${kind}.`);
+    /*
+     * The URL is in the message and the secret is not. A 401 here means the two
+     * ends hold different secrets and a 404 means the address is wrong, and
+     * telling those apart without the address takes a deploy to work out.
+     */
+    throw new Error(`The exporter answered ${response.status} for ${kind} at ${url}.`);
   }
 
   const payload = (await response.json()) as { records?: unknown; seen?: number; served?: number };
