@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { fluidiseInlineSizes } from '../../lib/content/fluid-text';
 import { burgerMode, hasBurger, showsRow } from '../../lib/content/burger';
 import { copyrightLine } from '../../lib/content/copyright';
 import { couponEndsLabel, couponExpired, todayUtc } from '../../lib/content/coupon';
@@ -196,7 +197,15 @@ export function HeadingBlock({
    * and the back half of the heading falls out with it. See sanitise.ts.
    */
   const stored = sanitiseHtml(props.html, 'heading');
-  const html = stored || escapeHtml(str(props, 'text'));
+  /*
+   * Auto-resize has to reach a size set on the WORDS, not just on the block.
+   * fluidiseInlineSizes restates each inline font-size as --tgs-fs-w, which the
+   * clamp in globals.css consumes; the original size stays put as the fallback.
+   * Display only, and never on the editing host: that copy is seeded straight
+   * from block.props, so nothing here can be typed over and saved back.
+   */
+  const sized = props.fluid === true ? fluidiseInlineSizes(stored) : stored;
+  const html = sized || escapeHtml(str(props, 'text'));
 
   /*
    * Typed in place, like the paragraph, and for the same reason: the words are
@@ -260,7 +269,9 @@ export function TextBlock({
   const headingShadow = shadow === 'none' ? undefined : shadow;
   // Sanitised again here even though it was sanitised on save. Stored HTML
   // is never trusted, and this is the last gate before the browser.
-  const html = sanitiseHtml(props.html, 'richtext');
+  const clean = sanitiseHtml(props.html, 'richtext');
+  // See the note in HeadingBlock: auto-resize reaches a size set on the words.
+  const html = props.fluid === true ? fluidiseInlineSizes(clean) : clean;
 
   if (editingHost) {
     return (
