@@ -615,7 +615,22 @@ export function SectionRenderer({
               sizes={srcSetFor(image.src, sizes) ? FULL_WIDTH_SIZES : undefined}
               alt=""
               aria-hidden="true"
-              loading={i === 0 ? 'eager' : 'lazy'}
+              /*
+               * THE FIRST SLIDE OF THE FIRST SECTION IS THE LARGEST PAINT, and
+               * until 25 Aug 2026 the condition here said `i === 0`, which is
+               * the first slide of EVERY section. On a page of four photo
+               * sections that eagerly fetched four heroes at once, and on slow
+               * 4G they share the pipe, so the one a visitor is actually
+               * looking at finished last. Measured: 800 KB over four images,
+               * LCP 4372 ms, which is 800 KB at 1.6 Mbps almost to the
+               * millisecond.
+               *
+               * So the section index decides it now, not the slide index. The
+               * hero is eager and high; every other background waits until it
+               * is near the viewport.
+               */
+              loading={index === 0 && i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 && i === 0 ? 'high' : undefined}
               style={{
                 ...image.style,
                 animationDelay: `calc(${i} * var(--tgs-ss-cycle) / ${bgImages.length})`,
@@ -636,6 +651,21 @@ export function SectionRenderer({
           sizes={srcSetFor(bgImages[0].src, sizes) ? FULL_WIDTH_SIZES : undefined}
           alt=""
           aria-hidden="true"
+          /*
+           * THE HERO SAYS IT IS THE HERO. The comment above has called this the
+           * usual largest-paint element since it was written, and it still
+           * carried no priority hint of any kind: a background image is
+           * discovered late (it is markup, not a preload) and an <img> a browser
+           * has not laid out yet is fetched at Low priority. fetchpriority=high
+           * is the one attribute that says otherwise, and it costs nothing.
+           *
+           * Below the first section it is the opposite job. This element had no
+           * loading attribute at all, so every section's background was eager
+           * and they raced the hero for the same pipe. Lazy from the second
+           * section down.
+           */
+          fetchPriority={index === 0 ? 'high' : undefined}
+          loading={index === 0 ? undefined : 'lazy'}
           style={bgImages[0].style}
         />
       ) : null}

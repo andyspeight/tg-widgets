@@ -215,7 +215,15 @@ export function renderProfile(profile: Profile): string {
    * markup is the only place a srcset can be added to it without parsing the
    * whole document twice on every page view.
    */
-  const prepared = prepareSections(page.sections, sizes);
+  /*
+   * heroFirst, because the PUBLISHED ROUTE passes it and a harness that renders
+   * differently from the site is the thing this harness has been caught doing
+   * three times already. Without it every picture came out lazy, the hero
+   * included, which measured well for the wrong reason: it saved the bytes of
+   * the images below the fold while delaying discovery of the one being waited
+   * on.
+   */
+  const prepared = prepareSections(page.sections, sizes, { heroFirst: true });
 
   const body = renderToStaticMarkup(
     <PageRenderer page={page} theme={tokens} prepared={prepared} sizes={sizes} />,
