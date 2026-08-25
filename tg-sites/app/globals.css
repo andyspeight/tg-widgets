@@ -739,6 +739,41 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
+ * AND THE SAME FOR A SIZE SET ON THE WORDS (Andy, 25 Aug 2026: "it needs to be
+ * at word level as well").
+ *
+ * The rule above styles the ELEMENT, and a size set on a phrase is an inline
+ * font-size on a span inside it. An inline style beats any selector, so until
+ * this rule existed a heading sized through the toolbar sat at one size on every
+ * screen while the toggle claimed it was resizing. Measured in Chromium against
+ * the shipped stylesheet: 100px at 1618, 1100, 834 and 390 alike, where the same
+ * size set on the block went 100 / 99 / 75 / 62.
+ *
+ * That was not a corner case. The block-level Text size control offers the theme
+ * sizes and a fixed scale stopping at 2.5rem, so any hero-sized headline COULD
+ * ONLY be set on the words, which meant the one control big enough for the job
+ * was the one that switched auto-resize off.
+ *
+ * `!important` IS THE POINT, not an oversight. It is the only way a stylesheet
+ * outranks an inline style, and outranking one is precisely what this rule is
+ * for. The render (lib/content/fluid-text.ts) restates each inline size as
+ * --tgs-fs-w and LEAVES the original font-size in place, so if this rule is ever
+ * missing the words keep their size instead of collapsing to the block's.
+ *
+ * Same clamp as above, deliberately, so the two cannot drift: the set size is the
+ * ceiling, two thirds of it the floor, and the same container-relative middle
+ * between them. tests/fluid-text.test.ts pins the two to each other.
+ */
+.tgs-block[data-fluid] .tgs-heading [style*='--tgs-fs-w'],
+.tgs-block[data-fluid] .tgs-text [style*='--tgs-fs-w'] {
+  font-size: clamp(
+    calc(var(--tgs-fs-w) * 0.62),
+    9cqi,
+    var(--tgs-fs-w)
+  ) !important;
+}
+
+/*
  * ANIMATED GRADIENT HEADING (Andy, 13 Aug 2026, the fun list). A heading marked
  * data-gradient has its letters filled with the site's brand colours as a gradient,
  * which slides slowly along the text so the colours flow. background-clip: text is
@@ -4750,9 +4785,25 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 .tgs-nav__list--stacked .tgs-nav__subchev { display: none; }
 
-@container tgs-page (max-width: 767px) {
-  /* Below the phone breakpoint the plain row gives way to the button, but only
-     for a menu whose owner asked for one. */
+/*
+ * THE MENU BECOMES A BURGER BELOW A LAPTOP, not below a phone.
+ *
+ * WAS 767px, AND THAT LEFT A HOLE THE SIZE OF AN iPAD (Andy, 25 Aug 2026, with
+ * a screenshot of it). The editor's Tablet is 834px, real iPad portrait is 768
+ * to 834, and everything in that band got the FULL horizontal menu with nowhere
+ * near the room for it. On Coastwise the bar broke into three rows: the links,
+ * then the wordmark, then "Check dates" stranded on its own. Not a Coastwise
+ * problem either, it was every site with more than about three menu items.
+ *
+ * 1023px is the same line the rest of the tablet rules already use, so the menu
+ * now changes shape at the width everything else does rather than at one of its
+ * own. Below a laptop, a burger; a laptop and up, the bar.
+ *
+ * STILL ONLY FOR A MENU WHOSE OWNER ASKED FOR ONE (data-collapse), and still
+ * nothing to do with data-burger='always', which is the separate choice to have
+ * a burger at every width.
+ */
+@container tgs-page (max-width: 1023px) {
   .tgs-nav__list[data-collapse='true'] { display: none; }
   .tgs-nav__disclosure { display: block; }
 }
