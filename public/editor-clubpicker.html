@@ -155,6 +155,15 @@
           </div>
           <div class="tgse-section-body">
             <div class="tgse-field">
+              <label class="tgse-field-label">Selector</label>
+              <div class="seg" id="f-selector" role="group" aria-label="Selector style">
+                <button type="button" data-v="grid" aria-pressed="true">Grid</button>
+                <button type="button" data-v="dropdown">Dropdown</button>
+                <button type="button" data-v="both">Both</button>
+              </div>
+              <div class="field-help">How visitors pick — a badge grid, a dropdown, or both.</div>
+            </div>
+            <div class="tgse-field">
               <label class="tgse-field-label" for="f-cols">Columns</label>
               <div class="slider-wrap">
                 <input type="range" id="f-cols" min="0" max="8" step="1">
@@ -329,6 +338,7 @@
 
   var C = {
     gridOf: 'team',
+    selectorMode: 'grid',
     competition: 'english-premier-league',
     competitionLabel: 'Premier League',
     category: '',
@@ -434,6 +444,7 @@
     });
 
     c.seg('f-gridof', 'gridOf', function () { syncSourceUi(); });
+    c.seg('f-selector', 'selectorMode');
     c.seg('f-side', 'side');
     c.select('f-category', 'category');
 
@@ -466,6 +477,7 @@
   function syncForm() {
     var c = K.controls(C, function () {});
     c.segSync('f-gridof', C.gridOf);
+    c.segSync('f-selector', C.selectorMode);
     c.segSync('f-side', C.side);
     if ($('f-category').options.length) $('f-category').value = C.category || '';
     $('f-heading').value = C.heading || '';
