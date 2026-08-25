@@ -28,7 +28,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   function resolveOrigin() {
     if (typeof window === 'undefined') return '';
@@ -55,6 +55,7 @@
     heading: '',
     subheading: '',
     prompt: 'Pick a badge to see their fixtures',
+    selectorMode: 'grid',      // grid | dropdown | both
     columns: 0,                // 0 = auto-fill
     showBadges: true,
     showHomeVenue: true,
@@ -82,6 +83,7 @@
     ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6',
     cal: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',
     back: 'M19 12H5M12 19l-7-7 7-7',
+    chev: 'M6 9l6 6 6-6',
   };
 
   function icon(name, cls) {
@@ -322,6 +324,17 @@
     return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate());
   }
 
+  // Which side of a fixture the queried team is on. The feed tags every event
+  // with homeTeamKey / awayTeamKey (lowercased, same space as the entity keys),
+  // so a visitor Home/Away filter needs no extra fetch. Returns '' if neither
+  // matches (never expected on a team view, but then the game shows under "All").
+  function sideOf(ev, teamKey) {
+    if (!teamKey || !ev) return '';
+    if (ev.homeTeamKey && ev.homeTeamKey === teamKey) return 'home';
+    if (ev.awayTeamKey && ev.awayTeamKey === teamKey) return 'away';
+    return '';
+  }
+
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
@@ -355,6 +368,17 @@
       + '.tgcp-h{margin:0;font-size:22px;font-weight:700;line-height:1.25;letter-spacing:-.01em;}'
       + '.tgcp-sub{margin:4px 0 0;font-size:15px;color:var(--tgcp-sub);}'
       + '.tgcp-prompt{margin:0 0 14px;font-size:13px;color:var(--tgcp-mute);}'
+
+      // Dropdown selector (an alternative or companion to the grid).
+      + '.tgcp-selwrap{position:relative;max-width:420px;margin:0 0 14px;}'
+      + '.tgcp-select{width:100%;min-height:46px;padding:0 40px 0 14px;appearance:none;-webkit-appearance:none;'
+      + 'background:var(--tgcp-bg);border:1px solid var(--tgcp-border);border-radius:var(--tgcp-radius);'
+      + 'font:inherit;font-size:15px;color:var(--tgcp-text);cursor:pointer;line-height:1.3;'
+      + 'transition:border-color .18s ease-out;}'
+      + '.tgcp-select:hover{border-color:var(--tgcp-accent);}'
+      + '.tgcp-select:focus-visible{outline:2px solid var(--tgcp-accent);outline-offset:2px;}'
+      + '.tgcp-selchev{position:absolute;right:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;'
+      + 'color:var(--tgcp-mute);pointer-events:none;}'
 
       + '.tgcp-grid{display:grid;grid-template-columns:' + grid + ';gap:10px;}'
       // min-width:0 on the tile is load-bearing. A grid item defaults to
@@ -393,6 +417,17 @@
       + 'background:var(--tgcp-bg);color:var(--tgcp-sub);font:inherit;font-size:12.5px;cursor:pointer;}'
       + '.tgcp-close:hover{color:var(--tgcp-text);}'
       + '.tgcp-close svg{width:14px;height:14px;}'
+
+      // Visitor Home/Away filter (segmented, shown only when a team has both).
+      + '.tgcp-hafilter{display:inline-flex;margin:0 0 12px;border:1px solid var(--tgcp-border);'
+      + 'border-radius:calc(var(--tgcp-radius) - 4px);overflow:hidden;background:var(--tgcp-bg);}'
+      + '.tgcp-hf{padding:0 14px;min-height:36px;font:inherit;font-size:12.5px;font-weight:600;'
+      + 'color:var(--tgcp-sub);background:transparent;border:0;border-right:1px solid var(--tgcp-border);'
+      + 'cursor:pointer;white-space:nowrap;transition:background .15s ease-out,color .15s ease-out;}'
+      + '.tgcp-hf:last-child{border-right:0;}'
+      + '.tgcp-hf:hover{color:var(--tgcp-text);}'
+      + '.tgcp-hf.is-on{background:var(--tgcp-accent);color:var(--tgcp-on-accent);}'
+      + '.tgcp-hf:focus-visible{outline:2px solid var(--tgcp-accent);outline-offset:-2px;}'
 
       + '.tgcp-list{display:flex;flex-direction:column;gap:8px;}'
       + '.tgcp-row{min-width:0;display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;'
@@ -450,6 +485,7 @@
     this.openLabel = '';
     this.events = null;
     this.eventsState = 'idle';
+    this._side = 'all';           // visitor Home/Away filter (client-side)
     this._gridReq = 0;
     this._eventsReq = 0;
     this._render();
@@ -658,7 +694,32 @@
       body = '<div class="tgcp-state" role="status">' + icon('cal') + '<p>Nothing coming up for them just yet.</p></div>';
     } else {
       var self = this;
-      body = '<div class="tgcp-list">' + this.events.map(function (e) { return self._rowHtml(e); }).join('') + '</div>';
+      var evs = this.events;
+      var filterHtml = '';
+      // Home/Away filter — only for a team, and only when there is actually a
+      // split to filter (both home AND away games are present in the loaded set).
+      if (this.cfg.gridOf === 'team' && this.openKey) {
+        var tk = this.openKey, homeN = 0, awayN = 0;
+        for (var i = 0; i < evs.length; i++) {
+          var s = sideOf(evs[i], tk);
+          if (s === 'home') homeN++; else if (s === 'away') awayN++;
+        }
+        if (homeN > 0 && awayN > 0) {
+          var sv = (this._side === 'home' || this._side === 'away') ? this._side : 'all';
+          var hf = function (v, label, on) {
+            return '<button type="button" class="tgcp-hf' + (on ? ' is-on' : '') + '" data-side="' + v + '"'
+              + ' aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
+          };
+          filterHtml = '<div class="tgcp-hafilter" role="group" aria-label="Home or away">'
+            + hf('all', 'All', sv === 'all')
+            + hf('home', 'Home (' + homeN + ')', sv === 'home')
+            + hf('away', 'Away (' + awayN + ')', sv === 'away')
+            + '</div>';
+          if (sv === 'home') evs = evs.filter(function (e) { return sideOf(e, tk) === 'home'; });
+          else if (sv === 'away') evs = evs.filter(function (e) { return sideOf(e, tk) === 'away'; });
+        }
+      }
+      body = filterHtml + '<div class="tgcp-list">' + evs.map(function (e) { return self._rowHtml(e); }).join('') + '</div>';
     }
 
     var count = (this.events && this.events.length)
@@ -674,6 +735,27 @@
 
   TGClubPickerWidget.prototype._noun = function () {
     return this.cfg.gridOf === 'performer' ? 'artists' : this.cfg.gridOf === 'venue' ? 'venues' : 'clubs';
+  };
+
+  /** The count line for an entity, shared by the grid tile and the dropdown. */
+  TGClubPickerWidget.prototype._countLabel = function (x) {
+    return this.cfg.gridOf === 'performer' ? x.events + ' dates'
+      : this.cfg.gridOf === 'venue' ? x.events + ' events'
+        : (x.home + x.away) + ' games';
+  };
+
+  /** The dropdown selector — an alternative (or companion) to the badge grid. */
+  TGClubPickerWidget.prototype._selectHtml = function () {
+    var c = this.cfg;
+    var self = this;
+    var placeholder = c.prompt || ('Choose a ' + this._noun().replace(/s$/, ''));
+    var opts = '<option value="" disabled' + (this.openKey ? '' : ' selected') + '>' + esc(placeholder) + '</option>';
+    opts += (this.entities || []).map(function (x) {
+      var label = x.name + (c.showCounts ? ' (' + self._countLabel(x) + ')' : '');
+      return '<option value="' + esc(x.key) + '"' + (self.openKey === x.key ? ' selected' : '') + '>' + esc(label) + '</option>';
+    }).join('');
+    return '<div class="tgcp-selwrap"><select class="tgcp-select" aria-label="' + esc(placeholder) + '">'
+      + opts + '</select>' + icon('chev', 'tgcp-selchev') + '</div>';
   };
 
   TGClubPickerWidget.prototype._render = function () {
@@ -702,8 +784,16 @@
         + '<p>Nothing to show here just yet.</p></div>';
     } else {
       var self = this;
-      grid = (c.prompt ? '<p class="tgcp-prompt">' + esc(c.prompt) + '</p>' : '')
-        + '<div class="tgcp-grid">' + this.entities.map(function (x) { return self._tileHtml(x); }).join('') + '</div>';
+      var mode = (c.selectorMode === 'dropdown' || c.selectorMode === 'both') ? c.selectorMode : 'grid';
+      var gridHtml = '<div class="tgcp-grid">' + this.entities.map(function (x) { return self._tileHtml(x); }).join('') + '</div>';
+      if (mode === 'dropdown') {
+        // The dropdown's placeholder option carries the prompt, so no paragraph.
+        grid = this._selectHtml();
+      } else if (mode === 'both') {
+        grid = this._selectHtml() + gridHtml;
+      } else {
+        grid = (c.prompt ? '<p class="tgcp-prompt">' + esc(c.prompt) + '</p>' : '') + gridHtml;
+      }
     }
 
     this.shadow.innerHTML = '<style>' + styles(c) + FLY_CSS + '</style>'
@@ -713,6 +803,23 @@
     this._bind();
   };
 
+  // Open an entity's fixtures by key. Shared by a grid-tile click and a dropdown
+  // change so both selectors behave identically. Focus moves to the panel ONLY
+  // from a real user action here — never a passive re-render (an editor calls
+  // update() per keystroke and a focus grab would steal the cursor).
+  TGClubPickerWidget.prototype._openEntity = function (key) {
+    this._side = 'all';           // a fresh club starts on "All games"
+    var found = null;
+    for (var j = 0; j < (this.entities || []).length; j++) {
+      if (this.entities[j].key === key) { found = this.entities[j]; break; }
+    }
+    this.openKey = key;
+    this.openLabel = found ? found.name : key;
+    this.events = null;
+    this._loadEvents(key);
+    this._focusPanel();
+  };
+
   TGClubPickerWidget.prototype._bind = function () {
     var self = this;
     var tiles = this.shadow.querySelectorAll('.tgcp-tile');
@@ -720,18 +827,21 @@
       tiles[i].addEventListener('click', function () {
         var key = this.getAttribute('data-key');
         if (self.openKey === key) { self._close(); return; }
-        var found = null;
-        for (var j = 0; j < self.entities.length; j++) {
-          if (self.entities[j].key === key) { found = self.entities[j]; break; }
-        }
-        self.openKey = key;
-        self.openLabel = found ? found.name : key;
-        self.events = null;
-        self._loadEvents(key);
-        // Focus moves to the panel ONLY here, on a real click. Never on a
-        // passive re-render: an editor calls update() on every keystroke and a
-        // focus grab would steal the cursor out of the field being typed into.
-        self._focusPanel();
+        self._openEntity(key);
+      });
+    }
+    var sel = this.shadow.querySelector('.tgcp-select');
+    if (sel) sel.addEventListener('change', function () {
+      var key = this.value;
+      if (key && self.openKey !== key) self._openEntity(key);
+    });
+    var hfs = this.shadow.querySelectorAll('.tgcp-hf');
+    for (var h = 0; h < hfs.length; h++) {
+      hfs[h].addEventListener('click', function () {
+        var side = this.getAttribute('data-side') || 'all';
+        if (self._side === side) return;
+        self._side = side;
+        self._render();   // client-side re-filter of the already-loaded events, no refetch
       });
     }
     var close = this.shadow.querySelector('[data-close]');
@@ -752,6 +862,7 @@
     this.openKey = null;
     this.events = null;
     this.eventsState = 'idle';
+    this._side = 'all';
     this._eventsReq++;
     this._render();
     // Send focus back to the badge they came from, not to the top of the page.

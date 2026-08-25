@@ -170,6 +170,50 @@ Test suite: **3386 passing**, 8 skipped. Was 3321 at the start of the session.
 
 ---
 
+## Destinations: what is built, and what it needs before it runs
+
+Slices 1 and 2 are on main (25 Aug 2026). Slice 3, adoption, is next.
+
+**BEFORE THE SYNC CAN RUN, three env vars and a migration.** Nothing built so
+far changes a live page until these are set, and the cron will answer 500 every
+night until they are.
+
+1. `REFERENCE_EXPORT_SECRET` on the **tg-widgets** project. Any long random
+   string. It gates `/api/reference/export`.
+2. `REFERENCE_EXPORT_SECRET` on the **tg-sites-shell** project, the same value.
+3. `REFERENCE_EXPORT_URL` on tg-sites-shell:
+   `https://tg-widgets.vercel.app/api/reference/export`
+4. Apply `db/migrations/0028_reference_records.sql`.
+
+`CRON_SECRET` already exists on tg-sites-shell if the estate's pattern holds;
+check it, because the cron route reads it and refuses everything without it.
+
+**HOW A DESTINATION IS STORED.** An adopted destination is an ordinary
+collection item, which gets it routing, entry pages, listings, cards, SEO,
+search and the editor for free. It carries two kinds of value:
+
+- PROSE, ordinary collection fields, seeded once at adoption and then the
+  client's, never overwritten.
+- FACTS, a payload under the reserved `__ref` key, refreshed on every sync and
+  never editable.
+
+`__ref` cannot collide with a client field because a field key goes through
+`safeSlug`, which cannot emit an underscore. That is structural, not a
+convention, and `tests/reference.test.ts` pins it.
+
+**THE STATUS VOCABULARY DIFFERS PER TABLE.** Countries, cities and resorts run
+Draft / Reviewed / Live. Airports run Todo / In progress / Done / Draft / Live.
+Attractions add Published. The airports gate (Done, Live) applied to Countries
+matches nothing, and an export of zero looks exactly like an empty table. That
+is why `api/_lib/reference-status.js` states it per kind and the export reports
+`seen` alongside `served`.
+
+**A SYNC THAT RETURNS NOTHING IS A FAULT, NOT AN ANSWER.** Zero of 495 resorts
+means a gate stopped matching or a credential lapsed. The sync throws, and the
+cron answers 500 even when the other kinds were written.
+
+---
+
 ## The open queue, in order
 
 Re-ordered on 25 Aug 2026 after re-measuring. The order the queue had before
@@ -216,6 +260,27 @@ in `components/editor/Canvas.tsx` around line 1041 before touching it.
 ## Things that will bite you
 
 Hard-won, none of it obvious from the code.
+
+**A RULE THAT READS A TOKEN THE THEME HAS NOT GOT DRAWS NOTHING, NOT THE
+FALLBACK.** This is a hole in the whole stylesheet, found on 25 Aug 2026 in the
+destination panel. A `var()` that cannot be substituted invalidates its
+declaration AT COMPUTED-VALUE TIME, and the property then takes its INITIAL
+value rather than falling back to the earlier declaration in the cascade, which
+is what everybody expects. So
+`background: color-mix(in srgb, var(--tgs-accent) 42%, var(--tgs-bg))` did not
+come out grey from the rule above it. It came out TRANSPARENT, and two months of
+a climate chart were simply absent with every unit test green.
+
+The trap is that a CLIENT THEME IS SPARSER THAN THE DEFAULTS. Coastwise does not
+define `--tgs-bg` at all. Before using a token in a rule, check a real tenant's
+token set carries it, not just `:root` in globals.css.
+
+**AND A TRIPWIRE NOBODY HAS WATCHED FAIL IS NOT ONE.**
+`tools/verify-destination.mjs` took three goes. The first rendered with no theme
+and passed the broken build. The second read the ground off `<body>` rather than
+off what is actually behind the element, and passed it too. Only the third, which
+carries a real tenant's sparse tokens, failed. Reintroduce the bug and watch the
+check go red before believing it.
 
 **ANYTHING A PUBLISHED PAGE LOADS BY NAME FROM OUR ORIGIN HAS TO BE LISTED IN
 THE MIDDLEWARE.** This bit twice in one day. Everything on a client's hostname
