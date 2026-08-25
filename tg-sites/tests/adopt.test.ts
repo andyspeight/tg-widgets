@@ -146,3 +146,54 @@ describe('the wiring the renderer depends on', () => {
     expect(fn).toContain('referenceFacts(row.reference_facts)');
   });
 });
+
+describe('the picker', () => {
+  const dialog = readFileSync(
+    resolve(__dirname, '..', 'components', 'collections', 'AdoptDialog.tsx'),
+    'utf8',
+  );
+  const actions = readFileSync(resolve(__dirname, '..', 'app', 'actions', 'collections.ts'), 'utf8');
+
+  it('takes focus once on mount and never on a re-render', () => {
+    /*
+     * The rule in CLAUDE.md, and the bug behind it: a focus call that runs on
+     * every render steals the cursor out of the box being typed into, one
+     * letter at a time. The effect that focuses must have an empty dependency
+     * list, which is what makes it a mount effect rather than a render effect.
+     */
+    const focus = dialog.slice(dialog.indexOf('box.current?.focus()'));
+    expect(focus.slice(0, 40)).toContain('}, []);');
+    expect(dialog.match(/\.focus\(\)/g) ?? []).toHaveLength(1);
+  });
+
+  it('throws away an answer that arrives after a newer request', () => {
+    // Typing "por" then "porto" must not end up showing the results for "por".
+    expect(dialog).toContain('if (latest.current !== ticket) return;');
+  });
+
+  it('shows what is already added rather than hiding it', () => {
+    /*
+     * A client who searches for Santorini and cannot see it will reasonably
+     * conclude we do not have it, and write one by hand. That duplication is
+     * the thing adoption exists to prevent.
+     */
+    expect(dialog).toContain('Added');
+    expect(dialog).toContain('entry.adopted');
+  });
+
+  it('disables only the row being adopted, not the whole list', () => {
+    expect(dialog).toContain("adopting === entry.sourceId ? 'Adding' : 'Add'");
+  });
+
+  it('narrows the kind on the server rather than trusting the browser', () => {
+    const fn = actions.slice(actions.indexOf('export async function listAdoptableAction'));
+    expect(fn.slice(0, 900)).toContain('REFERENCE_KINDS as readonly string[]).includes');
+  });
+
+  it('guards both actions with the same capability creating an entry needs', () => {
+    for (const name of ['listAdoptableAction', 'adoptDestinationAction']) {
+      const fn = actions.slice(actions.indexOf(`export async function ${name}`));
+      expect(fn.slice(0, 900), name).toContain("requireEitherCapability('collections', 'blog')");
+    }
+  });
+});
