@@ -80,6 +80,7 @@
     emptyText: '',
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '',
     radius: 12,
     fontFamily: '',
     appId: '',
@@ -368,6 +369,7 @@
 
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
+    var btnText = safeColour(cfg.bookTextColor, '#04212B');
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -385,14 +387,14 @@
       + '--tgtk-radius:' + radius + 'px;'
       + '--tgtk-bg:#FFFFFF;--tgtk-bg2:#F8FAFC;--tgtk-bg3:#F1F5F9;'
       + '--tgtk-border:#E2E8F0;--tgtk-text:#0F172A;--tgtk-sub:#475569;--tgtk-mute:#64748B;'
-      + '--tgtk-on-accent:#04212B;'
+      + '--tgtk-on-accent:' + btnText + ';'
       + 'font-size:15px;line-height:1.6;color:var(--tgtk-text);box-sizing:border-box;'
       + '-webkit-font-smoothing:antialiased;}'
       + '.tgtk-root *,.tgtk-root *::before,.tgtk-root *::after{box-sizing:border-box;}'
       + '.tgtk-root[data-theme="dark"]{'
       + '--tgtk-bg:#0F172A;--tgtk-bg2:#1E293B;--tgtk-bg3:#334155;'
       + '--tgtk-border:#334155;--tgtk-text:#F8FAFC;--tgtk-sub:#CBD5E1;--tgtk-mute:#94A3B8;'
-      + '--tgtk-on-accent:#04212B;}'
+      + '--tgtk-on-accent:' + btnText + ';}'
 
       + '.tgtk-head{margin:0 0 16px;}'
       + '.tgtk-h{margin:0;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;}'
@@ -446,11 +448,16 @@
       + 'border:1px solid transparent;background:var(--tgtk-accent);color:var(--tgtk-on-accent);'
       + 'font:inherit;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;'
       + 'transition:filter .16s ease-out,transform .12s ease-out;}'
-      + '.tgtk-btn:hover{filter:brightness(.93);}'
-      + '.tgtk-btn:active{transform:scale(.97);}'
+      + '.tgtk-btn{font-weight:700;letter-spacing:.01em;'
+      + 'box-shadow:0 2px 6px color-mix(in srgb,var(--tgtk-accent) 34%,transparent);'
+      + 'transition:transform .16s ease-out,box-shadow .16s ease-out,filter .16s ease-out;}'
+      + '.tgtk-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
+      + 'box-shadow:0 7px 18px color-mix(in srgb,var(--tgtk-accent) 44%,transparent);}'
+      + '.tgtk-btn:active{transform:translateY(0) scale(.98);}'
       + '.tgtk-btn svg{width:14px;height:14px;}'
-      + '.tgtk-btn2{background:var(--tgtk-bg);border-color:var(--tgtk-border);color:var(--tgtk-text);}'
-      + '.tgtk-btn2:hover{background:var(--tgtk-bg3);filter:none;}'
+      + '.tgtk-btn2{background:var(--tgtk-bg);border-color:var(--tgtk-border);color:var(--tgtk-text);box-shadow:none;}'
+      + '.tgtk-btn2:hover{background:var(--tgtk-bg3);filter:none;transform:translateY(-1px);'
+      + 'border-color:var(--tgtk-accent);box-shadow:0 4px 10px rgba(15,23,42,.08);}'
       + '.tgtk-btn:focus-visible,.tgtk-more:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:2px;}'
 
       + '.tgtk-state{padding:32px 20px;text-align:center;color:var(--tgtk-sub);'

@@ -153,6 +153,13 @@
                 <input class="input" type="text" id="f-accent" maxlength="7" spellcheck="false">
               </div>
             </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-btntext">Book button text</label>
+              <div class="colour-row">
+                <input type="color" id="f-btntext-swatch" aria-label="Pick book button text colour">
+                <input class="input" type="text" id="f-btntext" maxlength="7" spellcheck="false">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -309,6 +316,7 @@
     fallbackText: '',
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '#04212B',
     radius: 16,
     fontFamily: 'Inter',
     appId: '250',
@@ -403,6 +411,7 @@
     c.text('f-fallback', 'fallbackText');
     c.slider('f-radius', 'v-radius', 'radius', function (v) { return v + 'px'; });
     c.colour('f-accent-swatch', 'f-accent', 'accent');
+    c.colour('f-btntext-swatch', 'f-btntext', 'bookTextColor');
     c.select('f-currency', 'currency');
     c.number('f-adults', 'adults');
     c.toggle('t-count', 'showCountdown');
@@ -426,6 +435,7 @@
     $('f-fallback').value = C.fallbackText || '';
     c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
     c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    c.colourSync('f-btntext-swatch', 'f-btntext', C.bookTextColor);
     $('f-currency').value = C.currency;
     $('f-adults').value = String(C.adults);
     c.toggleSync('t-count', C.showCountdown);

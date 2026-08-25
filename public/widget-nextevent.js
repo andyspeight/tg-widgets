@@ -25,7 +25,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   function resolveOrigin() {
     if (typeof window === 'undefined') return '';
@@ -62,6 +62,7 @@
     fallbackText: '',
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '',
     radius: 16,
     fontFamily: '',
     appId: '',
@@ -333,6 +334,7 @@
 
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
+    var btnText = safeColour(cfg.bookTextColor, '#04212B');
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -347,7 +349,7 @@
       + '.tgne-root{container-type:inline-size;font-family:' + stack + ';'
       + '--tgne-accent:' + accent + ';--tgne-radius:' + radius + 'px;'
       + '--tgne-bg:#FFFFFF;--tgne-bg2:#F8FAFC;--tgne-bg3:#F1F5F9;--tgne-border:#E2E8F0;'
-      + '--tgne-text:#0F172A;--tgne-sub:#475569;--tgne-mute:#64748B;--tgne-on-accent:#04212B;'
+      + '--tgne-text:#0F172A;--tgne-sub:#475569;--tgne-mute:#64748B;--tgne-on-accent:' + btnText + ';'
       + 'font-size:15px;line-height:1.6;color:var(--tgne-text);box-sizing:border-box;'
       + '-webkit-font-smoothing:antialiased;}'
       + '.tgne-root *,.tgne-root *::before,.tgne-root *::after{box-sizing:border-box;}'
@@ -384,11 +386,16 @@
       + 'border:1px solid transparent;background:var(--tgne-accent);color:var(--tgne-on-accent);'
       + 'font:inherit;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;'
       + 'transition:filter .16s ease-out,transform .12s ease-out;}'
-      + '.tgne-btn:hover{filter:brightness(.93);}'
-      + '.tgne-btn:active{transform:scale(.98);}'
+      + '.tgne-btn{font-weight:700;letter-spacing:.01em;'
+      + 'box-shadow:0 2px 7px color-mix(in srgb,var(--tgne-accent) 34%,transparent);'
+      + 'transition:transform .16s ease-out,box-shadow .16s ease-out,filter .16s ease-out;}'
+      + '.tgne-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
+      + 'box-shadow:0 8px 20px color-mix(in srgb,var(--tgne-accent) 46%,transparent);}'
+      + '.tgne-btn:active{transform:translateY(0) scale(.98);}'
       + '.tgne-btn svg{width:15px;height:15px;}'
-      + '.tgne-btn2{background:var(--tgne-bg);border-color:var(--tgne-border);color:var(--tgne-text);}'
-      + '.tgne-btn2:hover{background:var(--tgne-bg3);filter:none;}'
+      + '.tgne-btn2{background:var(--tgne-bg);border-color:var(--tgne-border);color:var(--tgne-text);box-shadow:none;}'
+      + '.tgne-btn2:hover{background:var(--tgne-bg3);filter:none;transform:translateY(-1px);'
+      + 'border-color:var(--tgne-accent);box-shadow:0 4px 10px rgba(15,23,42,.08);}'
       + '.tgne-btn:focus-visible{outline:2px solid var(--tgne-accent);outline-offset:2px;}'
 
       // Banner: one wide strip, for above or below a hero.

@@ -80,6 +80,7 @@
     "test:widget-appid": "node test/widget-appid-injection-smoke.mjs",
     "test:clubpicker-selector": "node test/clubpicker-selector-smoke.mjs",
     "test:event-home-away": "node test/event-home-away-smoke.mjs",
+    "test:event-book-button": "node test/event-book-button-smoke.mjs",
     "test:widget-actas-legacy": "node test/widget-actas-legacy-owner-smoke.mjs",
     "test:widget-copy-actas": "node test/widget-copy-actas-scope-smoke.mjs",
     "test:staff-led-setup": "node test/staff-led-setup-smoke.mjs",

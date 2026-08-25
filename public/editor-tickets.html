@@ -197,6 +197,13 @@
               </div>
               <div class="field-help">Used for the Book button and focus rings.</div>
             </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-btntext">Book button text</label>
+              <div class="colour-row">
+                <input type="color" id="f-btntext-swatch" aria-label="Pick book button text colour">
+                <input class="input" type="text" id="f-btntext" maxlength="7" spellcheck="false">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -370,6 +377,7 @@
     adults: 2,
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '#04212B',
     radius: 12,
     fontFamily: 'Inter',
     appId: '250',
@@ -480,6 +488,7 @@
     c.slider('f-days', 'v-days', 'daysAhead', function (v) { return v + 'd'; });
     c.slider('f-radius', 'v-radius', 'radius', function (v) { return v + 'px'; });
     c.colour('f-accent-swatch', 'f-accent', 'accent');
+    c.colour('f-btntext-swatch', 'f-btntext', 'bookTextColor');
 
     c.select('f-currency', 'currency');
     c.number('f-adults', 'adults');
@@ -509,6 +518,7 @@
     c.sliderSync('f-days', 'v-days', C.daysAhead, function (v) { return v + 'd'; });
     c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
     c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    c.colourSync('f-btntext-swatch', 'f-btntext', C.bookTextColor);
     $('f-currency').value = C.currency;
     $('f-adults').value = String(C.adults);
     c.toggleSync('t-time', C.showTime);
