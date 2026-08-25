@@ -1,11 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-
-  "//": "WHY THIS FILE EXISTS AT ALL, and it is one key. Vercel defaults a project to iad1, Washington DC. This app's Postgres is in eu-west-2, London, and its visitors are the customers of UK travel agencies. Nothing had ever set a region, so every published page view was answered by a function in Virginia that then made its reads across the Atlantic, and each read is a transaction: a begin, a set_config to name the tenant for RLS, the query, a commit. Time to first byte sits inside Largest Contentful Paint, so it was being paid on the metric Google ranks on.",
-
-  "//2": "IN vercel.json RATHER THAN AS preferredRegion IN A ROUTE. That was the first attempt and the deployment came back still reporting iad1, so it either did not apply from a layout or does not surface anywhere anyone can check. This is the documented project-level setting and it shows up in the deployment record, which means the next person can verify it rather than trust it.",
-
-  "//3": "ONE REGION, DELIBERATELY. Every request has to reach the database, so spreading compute out only moves the wait around. If the audience ever stops being UK-centred, the thing to change first is whether published HTML is cached at the edge, not this.",
-
   "regions": ["lhr1"]
 }
