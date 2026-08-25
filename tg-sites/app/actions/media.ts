@@ -494,7 +494,24 @@ export async function deleteMediaAction(id: string): Promise<MediaResult<{ id: s
       return { ok: false, error: 'That image is not in your library.' };
     }
 
-    await removeBlob(removed.url);
+    /*
+     * THE SMALLER COPIES GO TOO, and this is the only moment they can.
+     *
+     * The row was the only record of where they were, and it has just been
+     * deleted, so anything not removed here is unreachable and paid for forever.
+     * A backfill over a real client's bank makes three of these per picture, so
+     * the leak would have been three times the size of the thing it was leaking
+     * from.
+     *
+     * In parallel and after the row is gone, matching what the primary already
+     * does: an object left behind is invisible and costs pennies, while a delete
+     * that fails because the store was briefly unreachable would leave the client
+     * looking at a picture they asked us to remove.
+     */
+    await Promise.all([
+      removeBlob(removed.url),
+      ...removed.variants.map((variant) => removeBlob(variant.url)),
+    ]);
 
     revalidatePath('/', 'layout');
     return { ok: true, data: { id: String(id) } };

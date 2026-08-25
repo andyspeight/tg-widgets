@@ -453,16 +453,25 @@ export async function setMediaAlt(
 export async function deleteMedia(
   tenantId: string,
   id: string,
-): Promise<{ storageKey: string; url: string } | null> {
+): Promise<{ storageKey: string; url: string; variants: MediaVariant[] } | null> {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
 
   return withTenant(tenantId, async (tx) => {
     const rows = await tx`
-      delete from public.media where id = ${id} returning storage_key, url
+      delete from public.media where id = ${id} returning storage_key, url, variants
     `;
     if (!rows.length) return null;
     const row = rows[0] as Record<string, unknown>;
-    return { storageKey: String(row.storage_key), url: String(row.url) };
+    /*
+     * The variants come back too, because the row is the only record of where
+     * they are. Once it is gone their addresses are unrecoverable and the objects
+     * sit in the store forever, paid for and unreachable.
+     */
+    return {
+      storageKey: String(row.storage_key),
+      url: String(row.url),
+      variants: asVariants(row.variants),
+    };
   });
 }
 

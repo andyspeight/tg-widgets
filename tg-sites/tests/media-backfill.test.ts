@@ -10,6 +10,8 @@
  * to the picker, which does it the same way a real upload does.
  */
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { backfillPlan, describePlan, skipReason } from '../lib/media/backfill';
@@ -96,5 +98,31 @@ describe('describePlan', () => {
     expect(describePlan(backfillPlan([item({ width: 300, height: 200 })]))).toContain(
       'already as small as it needs to be',
     );
+  });
+});
+
+describe('deleting a picture takes its smaller copies with it', () => {
+  /*
+   * The row is the ONLY record of where the variants are, so the moment it is
+   * deleted their addresses are unrecoverable and the objects sit in the store
+   * forever, paid for and unreachable. A backfill makes three per picture, so
+   * the leak would be three times the size of the thing leaking.
+   */
+  it('returns the variants from the delete, so the caller can remove them', async () => {
+    const { deleteMedia } = await import('../lib/db/media');
+    expect(typeof deleteMedia).toBe('function');
+
+    const source = readFileSync(resolve(__dirname, '..', 'lib/db/media.ts'), 'utf8');
+    const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    // The column has to be in the RETURNING clause or there is nothing to remove.
+    expect(code).toMatch(/delete from public\.media[\s\S]{0,80}returning storage_key, url, variants/);
+  });
+
+  it('the delete action removes every variant, not just the primary', () => {
+    const source = readFileSync(resolve(__dirname, '..', 'app/actions/media.ts'), 'utf8');
+    const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    const action = code.slice(code.indexOf('deleteMediaAction'));
+    expect(action).toContain('removed.variants.map');
+    expect(action).toContain('removeBlob(variant.url)');
   });
 });
