@@ -88,12 +88,39 @@ export function isAppHost(host: string, reservedSuffix = PREVIEW_DOT_SUFFIX): bo
  * own domain, and it needs the Next asset paths. Rewriting those into the site
  * renderer would break the page they are part of.
  */
+/**
+ * The behaviour scripts a published page loads by name, at the root.
+ *
+ * WHY THEY HAVE TO BE LISTED (25 Aug 2026). Everything on a client's hostname is
+ * rewritten into the site renderer, and these are the four paths that must not
+ * be. Without them `/tg-motion.js` on coastwise.travelgenixsites.com resolved to
+ * /site/coastwise.travelgenixsites.com/tg-motion.js, which is not a page, so the
+ * browser was handed a 404 HTML document with a JavaScript content type. Nothing
+ * errored anywhere a client would see: motion simply did not move, the theme
+ * toggle did not toggle, and the slideshow arrows did nothing.
+ *
+ * Exactly the same shape as the font 404 fixed earlier the same day, and the same
+ * lesson: a static asset a client site loads by name needs saying so here.
+ *
+ * KEPT IN STEP WITH public/ BY A TEST. The matcher below has to repeat these as a
+ * literal, because Next reads it at build time and cannot call a function, so the
+ * two can drift. tests/site-assets.test.ts asserts that every root script in
+ * public/ appears in both.
+ */
+export const SITE_ASSETS: readonly string[] = [
+  '/tg-motion.js',
+  '/slideshow.js',
+  '/theme-toggle.js',
+  '/no-right-click.js',
+];
+
 function isPlatformPath(pathname: string): boolean {
   return (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/fonts/') ||
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    SITE_ASSETS.includes(pathname)
   );
 }
 
@@ -165,5 +192,5 @@ export const config = {
    * for an asset, which is the cheap win, and the function check is what makes the
    * behaviour testable without a request object.
    */
-  matcher: ['/((?!_next/|api/|fonts/|favicon.ico).*)'],
+  matcher: ['/((?!_next/|api/|fonts/|favicon\\.ico|tg-motion\\.js|slideshow\\.js|theme-toggle\\.js|no-right-click\\.js).*)'],
 };
