@@ -15,7 +15,7 @@
    "tone": "dark",
    "width": "contained",
    "paddingY": 64,
-   "minHeight": 640,
+   "minHeight": 860,
    "reveal": true,
    "revealStyle": "rise",
    "box": {
