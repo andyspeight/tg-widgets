@@ -43,6 +43,14 @@ Owner: Andy Speight, CEO, Travelgenix.
   2026): the element axis is closed, so a new "how do we compare to Duda"
   question belongs there rather than in a fresh element sweep.
 
+- **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
+  BUILT and switchable in the editor: nine movement recipes with three strengths,
+  six reveal styles, the background and hover effects, and which recipes collide
+  with which. Its companion is `references/motion-recipes.md` in the
+  travelgenix-taste skill, which is the DESIGN catalogue (purpose, tier,
+  rationale, including recipes not yet built). Read the skill to decide whether
+  something should move, this doc to find what is on the menu.
+
 Living project state lives in Airtable: base `appj9tksreHOwkhYg`, table
 `tblpyhPNhiQg3XkkT` (Projects). Read the record at the start of a session that
 resumes a project and update it at the end (Current Focus, Next Steps, Last
