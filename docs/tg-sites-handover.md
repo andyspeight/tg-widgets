@@ -18,24 +18,49 @@ Airtable project record: base `appj9tksreHOwkhYg`, table `tblpyhPNhiQg3XkkT`.
 
 ---
 
-## Do this first
+## The font fix is done
 
-**The font fix is committed and pushed to
-`claude/travelgenix-sites-handover-py1mx0` but it is NOT on main, so it is not
-live.** It is the only unmerged commit on the branch (`1054904`). Everything
-else in this doc already shipped.
+**Merged and verified live on 25 Aug 2026.** Main is at `9a7275b`, the
+production deployment is READY in `lhr1`, and every published client site now
+loads the typeface its design committed to. Nothing here is outstanding; start
+at the open queue below.
 
-Merge it to main, let Vercel deploy, then verify like this:
+How it was proved, in case the method is useful again. The decisive evidence
+came BEFORE the deploy: the same file id was fetched from the running
+production site under both URL shapes, so the only variable was the tenant
+segment.
 
-```
-# The URL in the <head> must now be /fonts/coastwise/... and return 200.
-# Sandbox egress is blocked, so fetch through the Vercel MCP tool:
-#   mcp__Vercel__web_fetch_vercel_url on https://coastwise.travelgenixsites.com/
-# then fetch the font URL you find in the markup.
-```
+| URL | Result |
+|---|---|
+| `/fonts/coastwise.travelgenixsites.com/<id>.woff2` (what the page asked for) | 404 |
+| `/fonts/coastwise/<id>.woff2` (what the fix asks for) | 200, `font/woff2`, 34,928 bytes |
 
-Success signal: the font URL returns 200 rather than 404, and the Coastwise
-homepage headline wraps onto two lines the way the editor shows it.
+That is causation rather than inference, and it means a fix like this can be
+confirmed without spending a deploy on the question.
+
+After the deploy, the served homepage and the search results page both carry
+eight slug-shaped font URLs and zero hostname-shaped ones, three `rel=preload`
+links among them, sixteen `@font-face` blocks across weights 400 to 700, and
+`--tgs-font-display` resolving to Archivo. Three of the eight URLs were fetched
+and returned real WOFF2 bytes.
+
+Sandbox egress is blocked, so all of that went through
+`mcp__Vercel__web_fetch_vercel_url`. The responses are large; parse them as JSON
+and grep rather than reading them whole.
+
+### Two things worth keeping from this
+
+**The renderer role could have failed here and only in production.** The fix
+reads the slug through `getPublicTenantSlug`, which uses the read-only renderer
+role. That works because `public.tenants` carries a TABLE-level grant to
+`tg_sites_renderer`, so the `slug` column is covered without a column grant, and
+because both `resolve_tenant` and the `tenants_renderer` policy require
+`status = 'active'` — so if a page rendered at all, the slug read cannot come
+back empty. Check both halves before adding another renderer-role read.
+
+**The `?? slug` fallback in the published route is unreachable, not
+load-bearing.** If it ever does fire it silently restores the 404, so do not
+treat it as a safety net.
 
 ### Why this matters more than it looks
 
