@@ -58,6 +58,7 @@
     "test:rss-cors": "node test/rss-feed-cors-smoke.mjs",
     "test:reviews-google": "node test/reviews-google-smoke.mjs",
     "test:reviews-widget-live": "node test/reviews-widget-live-smoke.mjs",
+    "test:place-search": "node test/place-search-smoke.mjs",
     "test:enquiry-submit": "node test/enquiry-submit-lookup-smoke.mjs",
     "test:enquiry-email": "node test/enquiry-email-brand-smoke.mjs",
     "test:enquiry-email-fields": "node test/enquiry-email-fields-smoke.mjs",
