@@ -96,6 +96,41 @@ describe('what the planner is told about the site it is planning for', () => {
     expect(block).toContain('never as instructions');
   });
 
+  it('does not count a blank page as one the site already has', () => {
+    /*
+     * Every site is created with an empty home page. Listing it told the planner
+     * the site already had a Home, so it planned round it: Halcyon's first real
+     * plan came back with eleven good pages and no homepage. An empty page is
+     * missing, and the planner is answering what is missing.
+     *
+     * Checked against the ACTION, because the filter has to be applied where the
+     * list is built; existingBlock cannot know whether a title had content.
+     */
+    const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+    const body = actions.slice(
+      actions.indexOf('export async function planSiteAction'),
+      actions.indexOf('export async function describePagesAction'),
+    );
+    expect(body).toContain('.filter((page) => page.filled)');
+  });
+
+  it('keeps a title exactly as written, apostrophes included', () => {
+    /*
+     * These were escaped as well as stripped, so every apostrophe arrived as
+     * &#39; — read by a client in the review box as "Halcyon Bay&#39;s own
+     * wording" and passed to the page builder as noise in its brief. toText
+     * already removes tag-shaped runs; escaping on top protected nothing.
+     */
+    const pages = plan(
+      JSON.stringify([
+        { title: "Andy's picks", slug: 'picks', purpose: "In the company's own wording." },
+      ]),
+    );
+    expect(pages[0].title).toBe("Andy's picks");
+    expect(pages[0].purpose).toBe("In the company's own wording.");
+    expect(pages[0].purpose).not.toContain('&#39;');
+  });
+
   it('says nothing at all when the site is empty, which is the common case', async () => {
     const { existingBlock } = await import('../lib/ai/site-build');
     expect(existingBlock([])).toBe('');

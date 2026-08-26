@@ -674,7 +674,21 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
      * it offered "Voyages" to a site that already has a Voyages page, and the
      * address did not even collide because that page lives at /destinations.
      */
-    const existingTitles = (await listPageFill(site.tenantId)).map((page) => page.title);
+    /*
+     * ONLY PAGES WITH SOMETHING ON THEM COUNT AS EXISTING.
+     *
+     * Every site is created with a blank home page, so listing all of them told
+     * the planner "you already have Home" and it correctly left out the one page
+     * that most needed building. Halcyon's first real plan came back with eleven
+     * good pages and no homepage for exactly this reason.
+     *
+     * The question the model is answering is what the site is MISSING, and an
+     * empty page is missing. It is the same test buildPlannedPageAction uses to
+     * decide what it may build into, which is why both read the same column.
+     */
+    const existingTitles = (await listPageFill(site.tenantId))
+      .filter((page) => page.filled)
+      .map((page) => page.title);
 
     const system = buildSiteSystemPrompt(settings, existingTitles);
     const userPrompt = buildSiteUserPrompt(brief);
