@@ -96,6 +96,55 @@ console.log('The builder _collect() always sends the content arrays (authoritati
   ok('excludes is always present', Array.isArray(c2.excludes));
   ok('promos is always present', Array.isArray(c2.promos));
   ok('imageBadges is always present', Array.isArray(c2.imageBadges));
+  ok('cruiseRoute is always present (null when no route)', 'cruiseRoute' in c2 && c2.cruiseRoute === null);
+  ok('audienceLanguages is always present', Array.isArray(c2.audienceLanguages));
+  ok('i18n is always present', c2.i18n && typeof c2.i18n === 'object');
+  ok('i18nMeta is always present', c2.i18nMeta && typeof c2.i18nMeta === 'object');
+
+  // HIGH vector 1: Save is blocked while a photo upload is in flight, so a click
+  // mid-upload can't snapshot an empty photo list and persist images:[].
+  const d3 = window.document.createElement('div'); window.document.body.appendChild(d3);
+  const up = new window.TGOfferBuilderWidget(d3, { currency: 'GBP', uploadEndpoint: '/api/upload-photo' });
+  const submit = up.root.querySelector('.ob-submit');
+  ok('submit starts enabled', submit && submit.disabled === false);
+  let landUpload;
+  up._uploadOne = () => new Promise((r) => { landUpload = () => r(IMG); });
+  const file = new window.File(['x'], 'p.jpg', { type: 'image/jpeg' });
+  const pending = up._uploadFiles([file]);
+  ok('submit is DISABLED while the upload is in flight', submit.disabled === true);
+  landUpload();
+  await pending;
+  ok('submit is re-enabled once the upload lands', submit.disabled === false);
+  ok('the uploaded photo made it into the list', up._images.length === 1 && up._images[0] === IMG);
+
+  // HIGH vector 2: "Create another offer" drops the just-saved id + photos, so the
+  // next save creates a fresh offer instead of overwriting (and wiping) the saved
+  // one.
+  const d4 = window.document.createElement('div'); window.document.body.appendChild(d4);
+  const again = new window.TGOfferBuilderWidget(d4, { currency: 'GBP', save: true, offer: { fields: { title: 'Saved' }, images: [IMG, IMG2] }, offerId: 'tgo_prev123' });
+  ok('opens with the saved id + photos', again.cfg.offerId === 'tgo_prev123' && again._images.length === 2);
+  again._success({ fields: { title: 'Saved' } }, { id: 'tgo_prev123' });   // render the success screen (has .ob-again)
+  again.root.querySelector('.ob-again').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  ok('Create another clears the previous offer id', again.cfg.offerId === '');
+  ok('Create another clears the carried-over photos', again._images.length === 0);
+}
+
+console.log('The server preserves route + translations the update payload OMITTED');
+{
+  // existing stored offer carries a cruise route, translations and audience langs.
+  const existingContent = { fields: { title: 'T' }, images: [IMG], cruiseRoute: { ports: [{ name: 'A', lat: 1, lng: 2 }, { name: 'B', lat: 3, lng: 4 }], line: [[2, 1], [4, 3]] }, i18n: { fr: { title: 'Titre' } }, audienceLanguages: ['fr'] };
+  const rawNoContent = { fields: { title: 'T', price: '9' } };   // omits route / i18n / langs
+  const c = cleanOffer(rawNoContent);
+  preserveOmittedContent(c, rawNoContent, existingContent);
+  ok('cruiseRoute is preserved when omitted', c.cruiseRoute && c.cruiseRoute.ports && c.cruiseRoute.ports.length === 2);
+  ok('i18n is preserved when omitted', c.i18n && c.i18n.fr && c.i18n.fr.title === 'Titre');
+  ok('audienceLanguages are preserved when omitted', Array.isArray(c.audienceLanguages) && c.audienceLanguages.indexOf('fr') !== -1);
+
+  // A present null cruiseRoute (the author removed the route) clears it.
+  const rawNullRoute = { fields: { title: 'T' }, cruiseRoute: null };
+  const c2r = cleanOffer(rawNullRoute);
+  preserveOmittedContent(c2r, rawNullRoute, existingContent);
+  ok('a present null cruiseRoute removes the route (author cleared it)', c2r.cruiseRoute === undefined);
 }
 
 console.log('The server actually calls preserveOmittedContent on update');
