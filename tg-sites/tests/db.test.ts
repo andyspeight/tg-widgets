@@ -1382,8 +1382,10 @@ describe('copyFontsToTenant', () => {
       { id: 'F1', family: 'Brand Sans', slug: 'brand-sans', source: 'upload', fallback: 'sans' },
     ]);
     respond('from public.font_files where font_id', [
-      { weight: 400, style: 'normal', format: 'woff2', subset: null, unicode_range: null, bytes: Buffer.from('regular'), byte_size: 7 },
-      { weight: 400, style: 'italic', format: 'woff2', subset: 'latin', unicode_range: 'U+0-FF', bytes: Buffer.from('italic'), byte_size: 6 },
+      // A variable face covering 400 to 700, and a single-weight italic beside
+      // it, so the copy is checked against both shapes rather than one.
+      { weight: 400, weight_max: 700, style: 'normal', format: 'woff2', subset: null, unicode_range: null, bytes: Buffer.from('regular'), byte_size: 7 },
+      { weight: 400, weight_max: null, style: 'italic', format: 'woff2', subset: 'latin', unicode_range: 'U+0-FF', bytes: Buffer.from('italic'), byte_size: 6 },
     ]);
     respond('insert into public.fonts', [{ id: 'DEST_F1' }]);
 
@@ -1391,13 +1393,21 @@ describe('copyFontsToTenant', () => {
 
     // Both faces written under the new font id, with the italic PRESERVED rather
     // than flattened to normal the way a re-import would.
-    // params: tenant, font_id, weight, style, format, subset, unicode_range, bytes, byte_size
+    // params: tenant, font_id, weight, weight_max, style, format, subset,
+    //         unicode_range, bytes, byte_size
     const fileInserts = log.filter((s) => s.sql.includes('insert into public.font_files'));
     expect(fileInserts).toHaveLength(2);
     expect(fileInserts.every((s) => s.params[1] === 'DEST_F1')).toBe(true);
-    expect(fileInserts.map((s) => s.params[3])).toEqual(['normal', 'italic']);
+    expect(fileInserts.map((s) => s.params[4])).toEqual(['normal', 'italic']);
+    /*
+     * The weight RANGE travels too. Copying a site used to write the weight and
+     * drop everything else about the file, so a duplicated tenant would have got
+     * a variable family back as single-weight rows: the exact bug 0030 exists to
+     * remove, reintroduced one copy at a time.
+     */
+    expect(fileInserts.map((s) => s.params[3])).toEqual([700, null]);
     // The bytes travel as the Buffer they were read as, not a reference.
-    expect(Buffer.isBuffer(fileInserts[1].params[7])).toBe(true);
+    expect(Buffer.isBuffer(fileInserts[1].params[8])).toBe(true);
 
     // ONE destination transaction: insertCopiedFont reused the scope rather than
     // open its own, so the tenant is set for the destination exactly once.

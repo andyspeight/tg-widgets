@@ -40,6 +40,7 @@ export async function resolveListings(
       listing: await listPublished(tenantId, request.collection, request.count, {
         filter: request.filter,
         sort: request.sort,
+        order: request.order,
       }),
     })),
   );

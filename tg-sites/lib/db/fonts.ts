@@ -15,6 +15,7 @@ import {
   type FontFormat,
   type ImportedFamily,
 } from '../fonts/google';
+import { weightsCovered } from '../theme/fonts';
 import { withPublicTenant, withTenant, type Tx } from './withTenant';
 
 /** A family, as the library and the theme see it. */
@@ -48,6 +49,8 @@ export interface FontFaceRow {
   slug: string;
   fallback: FontFamily['fallback'];
   weight: number;
+  /** The top of a variable file's range, or null for a single weight. */
+  weightMax: number | null;
   style: 'normal' | 'italic';
   format: FontFormat;
   unicodeRange: string | null;
@@ -68,6 +71,8 @@ export interface FontForCopy {
   fallback: FontFamily['fallback'];
   files: Array<{
     weight: number;
+    /** The top of a variable file's range, or null for a single weight. */
+    weightMax: number | null;
     style: 'normal' | 'italic';
     format: FontFormat;
     subset: string | null;
@@ -93,8 +98,11 @@ export async function listFonts(tenantId: string): Promise<FontFamily[]> {
     const rows = await tx`
       select
         f.id, f.family, f.slug, f.source, f.fallback,
-        coalesce(array_agg(distinct ff.weight order by ff.weight)
-                 filter (where ff.weight is not null), '{}') as weights,
+        coalesce(
+          jsonb_agg(distinct jsonb_build_array(ff.weight, ff.weight_max))
+            filter (where ff.weight is not null),
+          '[]'::jsonb
+        ) as ranges,
         coalesce(sum(ff.byte_size), 0) as bytes
       from public.fonts f
       left join public.font_files ff on ff.font_id = f.id
@@ -108,7 +116,19 @@ export async function listFonts(tenantId: string): Promise<FontFamily[]> {
       slug: String(row.slug),
       source: row.source === 'upload' ? 'upload' : 'google',
       fallback: String(row.fallback) as FontFamily['fallback'],
-      weights: (row.weights as number[]).map(Number),
+      /*
+       * Expanded from the RANGES rather than aggregated from the filed weights.
+       * A variable family is one row covering 400 to 700, and aggregating the
+       * column would have reported it as offering 400 alone, which is what the
+       * type panel would then have let anyone pick.
+       */
+      weights: [
+        ...new Set(
+          (row.ranges as Array<[number, number | null]>).flatMap(([weight, weightMax]) =>
+            weightsCovered({ weight: Number(weight), weightMax: weightMax == null ? null : Number(weightMax) }),
+          ),
+        ),
+      ].sort((a, b) => a - b),
       bytes: Number(row.bytes),
     }));
   });
@@ -137,7 +157,7 @@ export async function listFontsForCopy(tenantId: string): Promise<FontForCopy[]>
     for (const raw of families) {
       const row = raw as Record<string, unknown>;
       const files = await tx`
-        select weight, style, format, subset, unicode_range, bytes, byte_size
+        select weight, weight_max, style, format, subset, unicode_range, bytes, byte_size
         from public.font_files where font_id = ${String(row.id)}::uuid
         order by weight, style
       `;
@@ -151,6 +171,7 @@ export async function listFontsForCopy(tenantId: string): Promise<FontForCopy[]>
           const file = fileRaw as Record<string, unknown>;
           return {
             weight: Number(file.weight),
+            weightMax: file.weight_max == null ? null : Number(file.weight_max),
             style: file.style === 'italic' ? 'italic' : 'normal',
             format: file.format as FontFormat,
             subset: file.subset == null ? null : String(file.subset),
@@ -184,7 +205,7 @@ export async function listFontFaces(
     const rows = await tx`
       select
         ff.id, f.family, f.slug, f.fallback,
-        ff.weight, ff.style, ff.format, ff.unicode_range
+        ff.weight, ff.weight_max, ff.style, ff.format, ff.unicode_range
       from public.font_files ff
       join public.fonts f on f.id = ff.font_id
       order by f.family, ff.weight, ff.subset nulls first
@@ -196,6 +217,7 @@ export async function listFontFaces(
       slug: String(row.slug),
       fallback: String(row.fallback) as FontFamily['fallback'],
       weight: Number(row.weight),
+      weightMax: row.weight_max == null ? null : Number(row.weight_max),
       style: row.style === 'italic' ? 'italic' : 'normal',
       format: row.format as FontFormat,
       unicodeRange: row.unicode_range == null ? null : String(row.unicode_range),
@@ -289,9 +311,9 @@ export async function saveFontFamily(
 
       await tx`
         insert into public.font_files
-          (tenant_id, font_id, weight, style, format, subset, unicode_range, bytes, byte_size)
+          (tenant_id, font_id, weight, weight_max, style, format, subset, unicode_range, bytes, byte_size)
         values (
-          ${tenantId}, ${fontId}, ${file.weight}, 'normal', ${file.format},
+          ${tenantId}, ${fontId}, ${file.weight}, ${file.weightMax}, 'normal', ${file.format},
           ${file.subset}, ${file.unicodeRange},
           ${bytes}, ${bytes.byteLength}
         )
@@ -304,7 +326,9 @@ export async function saveFontFamily(
       slug,
       source,
       fallback,
-      weights: [...new Set(imported.files.map((f) => f.weight))].sort((a, b) => a - b),
+      // Expanded, so a variable family imported as one file per subset reports
+      // the four weights it can actually render rather than only its lightest.
+      weights: [...new Set(imported.files.flatMap((f) => weightsCovered(f)))].sort((a, b) => a - b),
       bytes: total,
     };
   });
@@ -342,9 +366,9 @@ export async function insertCopiedFont(tenantId: string, font: FontForCopy): Pro
     for (const file of font.files) {
       await tx`
         insert into public.font_files
-          (tenant_id, font_id, weight, style, format, subset, unicode_range, bytes, byte_size)
+          (tenant_id, font_id, weight, weight_max, style, format, subset, unicode_range, bytes, byte_size)
         values (
-          ${tenantId}, ${fontId}, ${file.weight}, ${file.style}, ${file.format},
+          ${tenantId}, ${fontId}, ${file.weight}, ${file.weightMax}, ${file.style}, ${file.format},
           ${file.subset}, ${file.unicodeRange}, ${file.bytes}, ${file.byteSize}
         )
       `;

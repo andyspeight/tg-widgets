@@ -36,6 +36,7 @@ import {
   parseFilter,
   parseSort,
 } from '../content/collection-filter';
+import type { ListingOrder } from '../content/listings';
 import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
 import { referenceFacts, type ReferenceFacts } from '../content/reference';
 import { sanitiseItem } from '../content/sanitise-page';
@@ -533,10 +534,18 @@ export async function listPublished(
   tenantId: string,
   collectionKey: string,
   limit: number,
-  narrow: { filter?: unknown; sort?: unknown } = {},
+  narrow: { filter?: unknown; sort?: unknown; order?: ListingOrder } = {},
 ): Promise<PublishedListing> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
-  const asked = Boolean(narrow.filter) || Boolean(narrow.sort);
+  const order: ListingOrder = narrow.order ?? 'newest';
+  /*
+   * An order other than newest has to read the collection before the cap, for
+   * the same reason a filter does: taking the newest six and then sorting them
+   * A to Z gives the six newest alphabetised, not the first six alphabetically.
+   * 'newest' is the SQL order below, so the common case still reads no more
+   * rows than it ever did.
+   */
+  const asked = Boolean(narrow.filter) || Boolean(narrow.sort) || order !== 'newest';
 
   return withPublicTenant(tenantId, async (tx) => {
     /*
@@ -593,6 +602,29 @@ export async function listPublished(
       // empty page. See lib/content/collection-filter.ts.
       const filter = parseFilter(fields, narrow.filter);
       if (filter) items = items.filter((row) => matchesFilter(fields, row.item.fields, filter));
+
+      /*
+       * The intrinsic order first, then the field sort on top.
+       *
+       * That way round because the field sort is the more specific ask: a
+       * client who sets both wants "by price, and where prices tie, newest".
+       * Reversing them would let the coarse order shuffle the fine one.
+       */
+      if (order === 'oldest') {
+        items = [...items].reverse();
+      } else if (order === 'title' || order === 'title-desc') {
+        const direction = order === 'title' ? 1 : -1;
+        items = [...items].sort(
+          (a, b) =>
+            direction *
+            // Locale-aware and case-insensitive, so "Ålesund" and "apple" land
+            // where a reader expects rather than where their code points fall.
+            String(a.item.title ?? '').localeCompare(String(b.item.title ?? ''), 'en', {
+              sensitivity: 'base',
+              numeric: true,
+            }),
+        );
+      }
 
       const sort = parseSort(fields, narrow.sort);
       if (sort) {

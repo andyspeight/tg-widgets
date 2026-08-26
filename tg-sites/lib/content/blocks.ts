@@ -1800,6 +1800,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       source: 'typed',
       collection: '',
       count: 6,
+      // What every collection listing did before there was a control for it.
+      order: 'newest',
       facts: 2,
       design: 'stacked',
       columns: '3',
@@ -1886,6 +1888,30 @@ export const BLOCKS: readonly BlockDefinition[] = [
         max: 60,
         step: 1,
         help: 'The newest this many. Only used when the cards come from a collection.',
+      },
+      {
+        /*
+         * WHICH ORDER, and intrinsic rather than by a declared field.
+         *
+         * Andy, 26 Aug 2026: "in the cards i can't see a way to reorder them".
+         * Typed cards have had up and down arrows all along; collection cards
+         * are a live query and had no control at all, so they came back newest
+         * first and that was that. A sort by one of the collection's own fields
+         * was already plumbed through to the reader but never exposed, and it
+         * would not have helped here anyway: Coastwise's guides collection
+         * declares no fields, so there was nothing to sort by. These four work
+         * on any collection because every item has a date and a title.
+         */
+        kind: 'select',
+        key: 'order',
+        label: 'Order',
+        options: [
+          { value: 'newest', label: 'Newest first' },
+          { value: 'oldest', label: 'Oldest first' },
+          { value: 'title', label: 'Title A to Z' },
+          { value: 'title-desc', label: 'Title Z to A' },
+        ],
+        help: 'Only used when the cards come from a collection.',
       },
       {
         /*

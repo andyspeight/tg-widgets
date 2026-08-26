@@ -2228,6 +2228,19 @@
           "default": 6
         },
         {
+          "name": "order",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "newest",
+            "oldest",
+            "title",
+            "title-desc"
+          ],
+          "default": "newest"
+        },
+        {
           "name": "facts",
           "type": "number",
           "role": "config",
