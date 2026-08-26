@@ -274,7 +274,7 @@ export async function unpublishItemAction(
  * and a full list is idempotent and repairs older gaps on the way through.
  */
 export async function reorderItemsAction(
-  collectionId: string,
+  collectionKey: string,
   orderedIds: string[],
 ): Promise<ActionResult<boolean>> {
   /*
@@ -291,7 +291,7 @@ export async function reorderItemsAction(
   const result = await attempt(async () =>
     reorderItems(
       await requireEitherCapability('collections', 'blog'),
-      collectionId,
+      collectionKey,
       orderedIds,
     ),
   );

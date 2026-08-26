@@ -173,15 +173,17 @@ export function CollectionsDashboard({
       setItems(next);
       setError(null);
 
-      const collectionId = next[0]?.collectionId;
-      if (!collectionId) return;
+      // The collection's short name, which is what reorderItems takes so the
+      // cards block in the editor can call the same action with what it has.
+      const key = open?.key;
+      if (!key) return;
 
       startTransition(async () => {
-        const result = await reorderItemsAction(collectionId, next.map((item) => item.id));
+        const result = await reorderItemsAction(key, next.map((item) => item.id));
         if (!result.ok) setError(result.error);
       });
     },
-    [items],
+    [items, open],
   );
 
   const publish = useCallback(

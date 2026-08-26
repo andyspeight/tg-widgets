@@ -513,6 +513,39 @@ export function EditorShell({
   const region = activeTree === 'page' ? null : activeTree;
 
   /**
+   * The collection cards, held locally so a reorder redraws at once.
+   *
+   * They arrive from the server with the page. Arranging a grid's entries from
+   * the properties pane writes to the database and would otherwise leave the
+   * canvas showing the old order until a reload, which reads as the arrows not
+   * working. So the move is applied here as well, to the one listing the block
+   * is drawing.
+   *
+   * Only that listing. Another grid elsewhere on the page showing the same
+   * collection in the same order is stale until the next load, which is a rare
+   * page and a small lie; rebuilding every variant would mean re-reading them
+   * all for one arrow press.
+   */
+  const [cards, setCards] = useState(listings);
+
+  const reorderCards = useCallback((key: string, orderedIds: string[]) => {
+    setCards((current) => {
+      const held = current?.get(key);
+      if (!held) return current;
+
+      const byId = new Map(held.map((card) => [String(card.id ?? ''), card]));
+      const moved = orderedIds.map((id) => byId.get(id)).filter(Boolean) as typeof held;
+      // Anything the list did not mention keeps its place at the end, so a card
+      // with no id cannot be dropped by a reorder that never knew about it.
+      const rest = held.filter((card) => !orderedIds.includes(String(card.id ?? '')));
+
+      const next = new Map(current);
+      next.set(key, [...moved, ...rest]);
+      return next;
+    });
+  }, []);
+
+  /**
    * The two trees you are NOT editing, as content for the chrome bands and as the
    * stash a switch restores from. The active tree's slot is left null: its live
    * copy is history.present, and it is filled back in when you switch away.
@@ -2234,7 +2267,7 @@ export function EditorShell({
 
       <Canvas
         preparedSeed={preparedSeed}
-        listings={listings}
+        listings={cards}
         onInsertSection={setInsertAt}
         editingPath={editingPath}
         page={page}
@@ -2299,6 +2332,8 @@ export function EditorShell({
         onItemMeta={setItemMeta}
         itemFields={itemFields}
         editingOnCanvas={optionsOpen}
+        listings={cards}
+        onListingOrder={reorderCards}
       />
 
       {/*

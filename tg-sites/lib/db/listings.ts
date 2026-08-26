@@ -84,7 +84,7 @@ export async function resolveListings(
       listingKey(request),
       // The collection's own field definitions came back with its items, so a
       // card can carry a price and a number of nights without a second read.
-      listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
+      listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields, row.id)),
     );
   }
 

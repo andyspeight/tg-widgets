@@ -2222,3 +2222,82 @@ describe('the reorder arrows are not hidden by the row-action reveal', () => {
     expect(css).toContain(".sv-btn[data-icon='true']");
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * ARRANGING THE ENTRIES FROM THE BLOCK THAT DRAWS THEM.
+ *
+ * Andy picked "The order I set" on the cards block, looked at his two cards and
+ * said "There are no arrows". They existed, on the collections screen, which is
+ * a different page. A setting whose effect you cannot reach from where you set
+ * it reads as broken however clear the help line is, so on his instruction they
+ * are now in both places.
+ *
+ * That needed three things to be true at once, and each is checked here because
+ * any one of them silently disables the control rather than breaking it.
+ */
+describe('a collection grid can be arranged from its own block', () => {
+  it('a card carries the id of the row it came from', async () => {
+    const { itemAsCard } = await import('../lib/content/listings');
+    const card = itemAsCard(
+      { title: 'Hvar', sections: [] } as never,
+      'guides',
+      'hvar',
+      [],
+      'ITEM-1',
+    );
+    // Without this the pane has titles and nothing to reorder BY.
+    expect(card.id).toBe('ITEM-1');
+  });
+
+  it('and a card built without one simply has none, rather than a wrong one', async () => {
+    const { itemAsCard } = await import('../lib/content/listings');
+    const card = itemAsCard({ title: 'Hvar', sections: [] } as never, 'guides', 'hvar', []);
+    expect(card.id).toBeUndefined();
+  });
+
+  it('the writer is keyed on the collection SHORT NAME, which is all the block has', async () => {
+    /*
+     * The block knows 'guides' because that is what somebody typed into it; it
+     * has never seen a uuid. Keying the writer on the key is what lets the pane
+     * and the collections screen call one action.
+     */
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('update public.collection_items', [{ id: 'i1' }]);
+    await reorderItems(ALPHA, 'guides', ['i1']);
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(write.params).toContain('guides');
+    // Joined to collections rather than filtered in JS, so an id from another
+    // collection updates no rows at all.
+    expect(write.sql).toContain('public.collections c');
+    expect(write.sql).toContain('c.key =');
+  });
+
+  it('the pane shows the arrows only when the order is actually hand-set', () => {
+    const pane = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    /*
+     * Under any of the other four orders the position is not what decides the
+     * sequence, so arrows there would move a number nothing reads and appear to
+     * do nothing at all, which is the complaint this whole thread began with.
+     */
+    expect(pane).toContain("block.props.order === 'manual'");
+    expect(pane).toContain('<ListingOrderArrows');
+    // It is handed the cards the canvas is drawing, so it needs no read of its own.
+    expect(pane).toContain('listings?.get(key)');
+  });
+
+  it('and the canvas is told about the move, so it redraws without a reload', () => {
+    const shell = readFileSync(join(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+    /*
+     * Writing to the database alone would leave the grid showing the old order
+     * until a reload, which reads as the arrows not working: exactly the report
+     * that started this.
+     */
+    expect(shell).toContain('const reorderCards = useCallback(');
+    expect(shell).toContain('onListingOrder={reorderCards}');
+    expect(shell).toContain('listings={cards}');
+  });
+});

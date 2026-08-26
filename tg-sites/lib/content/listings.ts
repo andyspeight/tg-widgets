@@ -238,8 +238,20 @@ export function itemAsCard(
   collectionKey: string,
   slug: string,
   defs: readonly FieldDef[] = [],
+  id?: string,
 ): Record<string, unknown> {
   return {
+    /*
+     * The row's id, carried so the EDITOR can offer the hand-set order without
+     * a second read. Nothing renders it: the card renderer reads known keys and
+     * this is not one of them.
+     *
+     * It never reaches a saved page. fillListings writes these cards into
+     * props.items, and the editor deliberately fills a COPY of the tree rather
+     * than the document, which is the same guard that stops today's cards being
+     * baked into tomorrow's page. See lib/db/listings.ts.
+     */
+    id,
     src: item.image,
     alt: item.alt,
     // The date is the small label above the title, which is what a blog card
