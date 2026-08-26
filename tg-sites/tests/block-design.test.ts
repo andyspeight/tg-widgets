@@ -14,7 +14,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { blockDefinition } from '../lib/content/blocks';
+import { BLOCKS, blockDefinition } from '../lib/content/blocks';
 import { BlockSchema, EMPTY_BOX } from '../lib/content/schema';
 import { createBlock } from '../lib/content/factory';
 import { addBlock, updateBlockBox } from '../lib/content/tree';
@@ -203,8 +203,32 @@ describe('a select renders as buttons only when its labels fit', () => {
     expect(order, 'the cards block has no order field').toBeTruthy();
     if (!order || order.kind !== 'select') throw new Error('order is not a select');
 
-    expect(order.options.length).toBeLessThanOrEqual(4);
-    // Every one of them is twelve characters, so none of them fitted.
-    expect(order.options.every((option) => option.label.length > 11)).toBe(true);
+    /*
+     * Either rule sends it to a dropdown and it does not matter which. It began
+     * as four options of twelve characters, which is the length rule; the
+     * hand-set order made it five, which is the count rule. Asserting the
+     * OUTCOME rather than the count means adding a sixth order does not fail a
+     * test about label widths.
+     */
+    const segmented = order.options.length <= 4 && order.options.every((o) => o.label.length <= 11);
+    expect(segmented, 'the Order control would render as truncated buttons').toBe(false);
+  });
+
+  it('and the length rule is doing real work, not just covering that one field', () => {
+    /*
+     * The rule earns its place across the catalogue or it is a special case
+     * wearing a general name. These are selects short enough for buttons whose
+     * labels are far too long for them, and every one was truncating before.
+     */
+    const longLabelled = BLOCKS.flatMap((block) =>
+      block.fields
+        .filter((field) => field.kind === 'select' && field.options.length <= 4)
+        .filter((field) =>
+          field.kind === 'select' && field.options.some((option) => option.label.length > 11),
+        )
+        .map((field) => `${block.type}.${field.key}`),
+    );
+
+    expect(longLabelled.length, 'no field needs the length rule any more').toBeGreaterThan(5);
   });
 });

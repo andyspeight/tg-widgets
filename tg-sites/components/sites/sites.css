@@ -178,6 +178,30 @@
 .sv-item:last-child { border-bottom: 0; }
 .sv-item:hover { background: var(--ed-well); }
 
+/*
+ * The reorder arrows, stacked so the pair takes one column rather than two.
+ *
+ * A fixed width, so the titles beside them line up down the list: without it
+ * the column is as wide as whatever the buttons happen to be and the list reads
+ * as ragged. They keep their place when the row wraps on a phone, which is why
+ * the wrap rule below gives them flex-basis auto rather than letting them join
+ * the full-width main block.
+ */
+.sv-item__move {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.sv-item__move .sv-btn {
+  padding: 2px 4px;
+  min-height: 0;
+  line-height: 1;
+}
+/* Nothing to arrange with one entry, so the column collapses rather than
+   showing a pair of arrows that are both disabled. */
+.sv-list .sv-item:only-child .sv-item__move { display: none; }
+
 .sv-item__main {
   flex: 1;
   min-width: 0;
@@ -483,7 +507,7 @@
    rather than squeezing the page name to nothing. */
 @media (max-width: 720px) {
   .sv-item { flex-wrap: wrap; }
-  .sv-item__main { flex-basis: 100%; }
+  .sv-item__main { flex-basis: calc(100% - 3rem); }
 }
 
 

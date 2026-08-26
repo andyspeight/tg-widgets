@@ -1910,8 +1910,11 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'oldest', label: 'Oldest first' },
           { value: 'title', label: 'Title A to Z' },
           { value: 'title-desc', label: 'Title Z to A' },
+          { value: 'manual', label: 'The order I set' },
         ],
-        help: 'Only used when the cards come from a collection.',
+        help:
+          'Only used when the cards come from a collection. "The order I set" ' +
+          'follows the arrows on the Collections screen.',
       },
       {
         /*

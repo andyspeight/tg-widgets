@@ -2236,7 +2236,8 @@
             "newest",
             "oldest",
             "title",
-            "title-desc"
+            "title-desc",
+            "manual"
           ],
           "default": "newest"
         },

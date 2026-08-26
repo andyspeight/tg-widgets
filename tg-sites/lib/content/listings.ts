@@ -36,8 +36,13 @@ import type { Page, Section } from './schema';
  * case: Coastwise's guides collection declares nothing at all, so there was no
  * order a client could choose and no control offering one. Andy, 26 Aug 2026:
  * "in the cards i can't see a way to reorder them".
+ *
+ * 'manual' is the one that is not a rule at all: the order the client set by
+ * hand on the collections screen, stored per item (migration 0031). An agency
+ * featuring a destination wants it first because they decided so, and no rule
+ * derived from a date or a title can say that.
  */
-export const LISTING_ORDERS = ['newest', 'oldest', 'title', 'title-desc'] as const;
+export const LISTING_ORDERS = ['newest', 'oldest', 'title', 'title-desc', 'manual'] as const;
 export type ListingOrder = (typeof LISTING_ORDERS)[number];
 
 export interface ListingRequest {

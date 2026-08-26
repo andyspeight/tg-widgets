@@ -23,6 +23,7 @@ import {
   listCollections,
   listItems,
   publishItem,
+  reorderItems,
   saveItem,
   scheduleItem,
   unpublishItem,
@@ -40,6 +41,15 @@ import {
 } from '../../lib/db/reference';
 import { REFERENCE_KINDS, type ReferenceKind } from '../../lib/content/reference';
 import type { ActionResult } from './pages';
+
+/**
+ * The longest list of ids a reorder will accept.
+ *
+ * Not a limit on how many entries a collection may hold, which is unbounded:
+ * this is the screen's own list, and MAX_LISTING_ITEMS is the most anything
+ * shows at once. A longer list is not a client arranging their entries.
+ */
+const MAX_REORDER = 500;
 
 async function attempt<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
   try {
@@ -254,6 +264,44 @@ export async function unpublishItemAction(
     revalidatePath('/preview', 'layout');
   }
   return result;
+}
+
+/**
+ * Put a collection's entries in the order somebody dragged them into.
+ *
+ * Takes the whole list rather than a move, for the reasons on reorderItems: a
+ * swap describes a pair that may not still be neighbours by the time it lands,
+ * and a full list is idempotent and repairs older gaps on the way through.
+ */
+export async function reorderItemsAction(
+  collectionId: string,
+  orderedIds: string[],
+): Promise<ActionResult<boolean>> {
+  /*
+   * Shape-checked here, ownership checked by the query.
+   *
+   * reorderItems scopes on tenant AND collection, so an id from anywhere else
+   * updates no rows rather than being rejected. This cap is only against a list
+   * long enough to be a nuisance.
+   */
+  if (!Array.isArray(orderedIds) || orderedIds.length > MAX_REORDER) {
+    return { ok: false, error: 'That is not an order I can save.' };
+  }
+
+  const result = await attempt(async () =>
+    reorderItems(
+      await requireEitherCapability('collections', 'blog'),
+      collectionId,
+      orderedIds,
+    ),
+  );
+
+  if (result.ok) {
+    revalidatePath('/collections');
+    revalidatePath('/preview', 'layout');
+  }
+  // The count of rows moved is not interesting to the screen; that it worked is.
+  return result.ok ? { ok: true, data: true } : result;
 }
 
 export async function deleteItemAction(itemId: string): Promise<ActionResult<boolean>> {

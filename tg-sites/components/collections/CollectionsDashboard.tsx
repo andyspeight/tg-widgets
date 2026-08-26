@@ -28,6 +28,7 @@ import {
   deleteCollectionAction,
   deleteItemAction,
   publishItemAction,
+  reorderItemsAction,
   scheduleItemAction,
   unpublishItemAction,
   updateCollectionFieldsAction,
@@ -148,6 +149,40 @@ export function CollectionsDashboard({
       next ? current.map((item) => (item.id === id ? next : item)) : current.filter((item) => item.id !== id),
     );
   }, []);
+
+  /**
+   * Move an entry up or down, and save the new order.
+   *
+   * OPTIMISTIC, then corrected. The list re-renders from local state at once so
+   * an arrow feels like an arrow, and the server is told the whole list rather
+   * than the swap. If the save fails the message says so and the next load
+   * shows the stored order, which is the honest outcome: the alternative is
+   * animating a move back under somebody's cursor.
+   *
+   * Sends every id on screen, in order, so positions come out contiguous even
+   * for a collection whose rows were never numbered.
+   */
+  const move = useCallback(
+    (index: number, delta: number) => {
+      const to = index + delta;
+      if (to < 0 || to >= items.length) return;
+
+      const next = [...items];
+      const [moved] = next.splice(index, 1);
+      next.splice(to, 0, moved);
+      setItems(next);
+      setError(null);
+
+      const collectionId = next[0]?.collectionId;
+      if (!collectionId) return;
+
+      startTransition(async () => {
+        const result = await reorderItemsAction(collectionId, next.map((item) => item.id));
+        if (!result.ok) setError(result.error);
+      });
+    },
+    [items],
+  );
 
   const publish = useCallback(
     (item: ItemSummary) => {
@@ -466,8 +501,45 @@ export function CollectionsDashboard({
                   </div>
                 ) : (
                   <ul className="sv-list">
-                    {items.map((item) => (
+                    {items.map((item, index) => (
                       <li className="sv-item" key={item.id}>
+                        {/*
+                          * THE ARROWS COME FIRST, before the title, because they
+                          * are about the row's place in the list rather than
+                          * about the entry. Same reasoning and same icons as the
+                          * field rows further down this screen.
+                          *
+                          * Shown whatever order a grid is set to. This list IS
+                          * the stored order, and somebody arranging it here has
+                          * usually not yet set a grid to follow it: hiding the
+                          * arrows until they had would mean the setting and the
+                          * arranging each waited for the other.
+                          */}
+                        <span className="sv-item__move">
+                          <button
+                            type="button"
+                            className="sv-btn"
+                            data-variant="quiet"
+                            data-icon="true"
+                            disabled={busy || index === 0}
+                            aria-label={`Move ${item.title || 'this entry'} up`}
+                            onClick={() => move(index, -1)}
+                          >
+                            <Icon name="arrow-up" size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="sv-btn"
+                            data-variant="quiet"
+                            data-icon="true"
+                            disabled={busy || index === items.length - 1}
+                            aria-label={`Move ${item.title || 'this entry'} down`}
+                            onClick={() => move(index, 1)}
+                          >
+                            <Icon name="arrow-down" size={16} />
+                          </button>
+                        </span>
+
                         <div className="sv-item__main">
                           <Link className="sv-item__title" href={`/editor?item=${item.id}`}>
                             {item.title || 'Untitled'}

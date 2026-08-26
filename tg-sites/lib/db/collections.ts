@@ -74,6 +74,13 @@ export interface ItemSummary {
   scheduled: boolean;
   publishedAt: Date | null;
   updatedAt: Date;
+  /**
+   * Where the client put it, or null if they never have.
+   *
+   * Null sorts LAST rather than first, so a collection nobody has arranged
+   * reads exactly as it did before this existed. See migration 0031.
+   */
+  position: number | null;
 }
 
 export interface ItemWithContent extends ItemSummary {
@@ -125,6 +132,7 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
     scheduled: Boolean(row.scheduled),
     publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     updatedAt: new Date(row.updated_at as string),
+    position: row.position == null ? null : Number(row.position),
   };
 }
 
@@ -160,7 +168,7 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
 function summary(tx: Tx) {
   return tx`
     public.collection_items.id as id,
-    collection_id, slug, status, published_at, updated_at,
+    collection_id, slug, status, published_at, updated_at, position,
     data->>'title' as title,
     (published_at is null or updated_at > published_at) as has_unpublished_changes,
     (status = 'published' and published_at is not null and published_at > now()) as scheduled
@@ -270,9 +278,57 @@ export async function listItems(
     const rows = await tx`
       select ${summary(tx)} from public.collection_items
       where collection_id = ${collectionId}::uuid
-      order by coalesce(published_at, updated_at) desc, id desc
+      order by position asc nulls last, coalesce(published_at, updated_at) desc, id desc
     `;
     return rows.map((row) => toSummary(row as Record<string, unknown>));
+  });
+}
+
+/**
+ * Put a collection's entries in the order the client chose.
+ *
+ * TAKES THE WHOLE LIST, not a move. An arrow press could be sent as "swap this
+ * one with the one above", which is smaller and is wrong the moment two tabs
+ * are open or a press lands while a delete is in flight: the pair it names may
+ * no longer be neighbours, and the swap silently reorders something else. A
+ * full list is idempotent, describes the state the client can actually see, and
+ * repairs any gap or duplicate left by an older write.
+ *
+ * IDS NOT IN THE COLLECTION ARE IGNORED rather than rejected, and the filter is
+ * a WHERE on collection_id rather than a check in JS. An id from another
+ * collection therefore updates nothing at all, which is the behaviour that
+ * matters: this is reachable from a browser and the tenant scoping alone would
+ * still have let somebody renumber a different collection of their own.
+ *
+ * Anything the list does not mention keeps the position it had. That is the
+ * honest reading of "these are the ones on screen": a filtered or paged view
+ * has no opinion about rows it never showed.
+ */
+export async function reorderItems(
+  tenantId: string,
+  collectionId: string,
+  orderedIds: readonly string[],
+): Promise<number> {
+  if (orderedIds.length === 0) return 0;
+
+  return withTenant(tenantId, async (tx) => {
+    /*
+     * One statement, so the list can never be half applied. The positions come
+     * in as a pair of arrays and are joined back by ordinality, which is how
+     * postgres lets an ordered list arrive as data rather than as generated SQL.
+     */
+    const rows = await tx`
+      update public.collection_items i
+      set position = wanted.seat
+      from (
+        select id::uuid as id, seat
+        from unnest(${orderedIds as string[]}::uuid[]) with ordinality as t(id, seat)
+      ) as wanted
+      where i.id = wanted.id
+        and i.collection_id = ${collectionId}::uuid
+      returning i.id
+    `;
+    return rows.length;
   });
 }
 
@@ -500,6 +556,15 @@ export interface PublishedItem {
   slug: string;
   item: CollectionItem;
   publishedAt: Date | null;
+  /**
+   * Where the client put it, for the hand-set order. See migration 0031.
+   *
+   * OPTIONAL because the tag archive below does not read it: a tag page is a
+   * date-ordered archive and has never offered an order control, so making it
+   * carry a column it does not use would be a wider read for nothing. Absent
+   * and null both mean "not placed", which the sort treats the same way.
+   */
+  position?: number | null;
 }
 
 /**
@@ -569,14 +634,14 @@ export async function listPublished(
      */
     const rows = asked
       ? await tx`
-          select i.slug, i.data, i.published_at, c.fields
+          select i.slug, i.data, i.published_at, i.position, c.fields
           from public.collection_items i
           join public.collections c on c.id = i.collection_id
           where c.key = ${collectionKey}
           order by i.published_at desc nulls last, i.id desc
         `
       : await tx`
-          select i.slug, i.data, i.published_at, c.fields
+          select i.slug, i.data, i.published_at, i.position, c.fields
           from public.collection_items i
           join public.collections c on c.id = i.collection_id
           where c.key = ${collectionKey}
@@ -590,6 +655,7 @@ export async function listPublished(
         slug: String(row.slug),
         item: hydrate(row.data, `${collectionKey}/${String(row.slug)}`),
         publishedAt: row.published_at ? new Date(row.published_at as string) : null,
+        position: row.position == null ? null : Number(row.position),
       };
     });
 
@@ -610,7 +676,18 @@ export async function listPublished(
        * client who sets both wants "by price, and where prices tie, newest".
        * Reversing them would let the coarse order shuffle the fine one.
        */
-      if (order === 'oldest') {
+      if (order === 'manual') {
+        /*
+         * The order the client set on the collections screen. Stable, so items
+         * with no position at all keep the date order they arrived in and sit
+         * after the placed ones rather than in an arbitrary spot.
+         */
+        items = [...items].sort((a, b) => {
+          const left = a.position ?? Number.MAX_SAFE_INTEGER;
+          const right = b.position ?? Number.MAX_SAFE_INTEGER;
+          return left - right;
+        });
+      } else if (order === 'oldest') {
         items = [...items].reverse();
       } else if (order === 'title' || order === 'title-desc') {
         const direction = order === 'title' ? 1 : -1;
