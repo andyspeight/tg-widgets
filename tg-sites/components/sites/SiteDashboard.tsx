@@ -25,6 +25,7 @@ import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
+import { PublishSiteDialog } from '../ui/PublishSiteDialog';
 import { SiteBuilder } from './SiteBuilder';
 import { StarterWizard, type StarterProfile } from './StarterWizard';
 import './sites.css';
@@ -84,6 +85,8 @@ export function SiteDashboard({
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
+  /** Whether the whole-site publish overlay is open. */
+  const [publishingSite, setPublishingSite] = useState(false);
 
   // The dialog shows the real address the page will have, so the scheme is
   // stripped: nobody reads "https://" in a preview, it is just noise in
@@ -288,7 +291,6 @@ export function SiteDashboard({
             <button
               type="button"
               className="sv-btn"
-              data-variant="primary"
               onClick={() => {
                 setError(null);
                 setDialog({ kind: 'new' });
@@ -296,6 +298,29 @@ export function SiteDashboard({
             >
               <Icon name="plus" size={16} />
               New page
+            </button>
+
+            {/*
+              PUBLISH THE WHOLE SITE, the headline action of this screen.
+
+              Publishing has always been per page, which left an agent who edited
+              six pages and published one looking at the other five still reading
+              "Live, with unpublished edits". This puts every pending page live at
+              once, behind a progress overlay that says what it is doing and holds
+              back anything still in draft. It patches each row to "Live" as it
+              goes. See components/ui/PublishSiteDialog.tsx.
+            */}
+            <button
+              type="button"
+              className="sv-btn"
+              data-variant="primary"
+              onClick={() => {
+                setError(null);
+                setPublishingSite(true);
+              }}
+            >
+              <Icon name="upload" size={16} />
+              Publish site
             </button>
           </div>
         </header>
@@ -455,6 +480,15 @@ export function SiteDashboard({
           destructive
           onConfirm={() => remove(deleting)}
           onCancel={() => setDeleting(null)}
+        />
+      )}
+
+      {publishingSite && (
+        <PublishSiteDialog
+          onClose={() => setPublishingSite(false)}
+          // Each page turns from "Live, with unpublished edits" to "Live" as its
+          // own publish returns, so the list is right the moment the overlay is.
+          onPagePublished={(summary) => patch(summary.id, summary)}
         />
       )}
 

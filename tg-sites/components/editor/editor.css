@@ -4551,6 +4551,158 @@ body[data-tg-dragging='block'] .tg-scrim {
 }
 
 /* ---------------------------------------------------------------------------
+   Publish site.
+
+   The overlay that puts the whole site live at once. A dialog like every other,
+   so the scrim, the focus trap and Escape come for free; this is only the body:
+   a progress bar that measures real work, and a row per page moving from waiting
+   to working to done. Lives here with the other shared dialog styles so it is
+   loaded on both the editor and the Pages screen (sites.css imports this file).
+   Every value is an --ed- token that exists, or a literal with the token as a
+   fallback, the same way the SEO-fill panel below uses --ed-ok. See
+   components/ui/PublishSiteDialog.tsx.
+--------------------------------------------------------------------------- */
+.tg-pub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+}
+
+/* An anchor can be a button here (the "View your site" link), and a link's
+   underline would read as a second, competing affordance next to the label. */
+a.tg-btn { text-decoration: none; }
+
+.tg-pub__bar {
+  height: 8px;
+  border-radius: var(--ed-r-full);
+  background: var(--ed-sunken);
+  overflow: hidden;
+}
+
+.tg-pub__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ed-primary);
+  transition: width 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tg-pub__count {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink-2);
+}
+
+.tg-pub__lead {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+  color: var(--ed-ink-2);
+}
+
+.tg-pub__note {
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  line-height: 1.6;
+  color: var(--ed-ink-3);
+}
+
+.tg-pub__error {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.6;
+  color: var(--ed-danger);
+}
+
+.tg-pub__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ed-line-soft);
+  border-radius: var(--ed-r-md);
+  /* The bar and the count stay put; a long site scrolls inside its own list. */
+  max-height: min(46vh, 360px);
+  overflow-y: auto;
+}
+
+.tg-pub__list li {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  padding: var(--ed-2) var(--ed-3);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+}
+
+.tg-pub__list li + li { border-top: 1px solid var(--ed-line-soft); }
+.tg-pub__list li[data-state='pending'] { color: var(--ed-ink-3); }
+.tg-pub__list li[data-state='working'] { background: var(--ed-well); }
+
+.tg-pub__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+/* Pending renders no icon: a faint dot stands in, so every row has a leading
+   mark and the list does not jump when one starts. */
+.tg-pub__mark:empty::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--ed-r-full);
+  background: currentColor;
+  opacity: 0.4;
+}
+
+.tg-pub__list li[data-state='done'] .tg-pub__mark { color: var(--ed-ok, #0a7d33); }
+.tg-pub__list li[data-state='failed'] .tg-pub__mark { color: var(--ed-danger); }
+
+.tg-pub__spin {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--ed-r-full);
+  border: 2px solid var(--ed-line);
+  border-top-color: var(--ed-primary);
+  animation: tg-pub-spin 620ms linear infinite;
+}
+
+@keyframes tg-pub-spin { to { transform: rotate(360deg); } }
+
+.tg-pub__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tg-pub__state {
+  flex: none;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink-3);
+}
+
+.tg-pub__list li[data-state='working'] .tg-pub__state { color: var(--ed-primary); }
+.tg-pub__list li[data-state='done'] .tg-pub__state { color: var(--ed-ok, #0a7d33); }
+.tg-pub__list li[data-state='failed'] .tg-pub__state { color: var(--ed-danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-pub__fill { transition: none; }
+  /* No spin. The part-drawn ring still reads as "working" beside a plain dot. */
+  .tg-pub__spin { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
    The left drawer.
 
    The section picker, anchored to the left edge top to bottom rather than

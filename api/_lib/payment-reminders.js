@@ -446,12 +446,33 @@ const httpsOnly = (v) => (typeof v === 'string' && /^https:\/\//i.test(v.trim())
  * own branding fields — the email then has no booking-page button and leans
  * on the contact details instead.
  */
+// Client-authored reminder copy from the My Booking config. Two stages: `interim`
+// (deposit / any instalment balance) and `final`. Each is {subject, body}; a
+// missing or empty body falls back to the built-in template for that stage.
+// Bounded so a bad config can't bloat the email.
+export function normaliseReminderEmails(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const one = (t) => {
+    if (!t || typeof t !== 'object') return null;
+    const subject = String(t.subject == null ? '' : t.subject).slice(0, 200);
+    const body = String(t.body == null ? '' : t.body).slice(0, 8000);
+    return body.trim() ? { subject, body } : null;
+  };
+  const out = {};
+  const interim = one(raw.interim || raw.deposit || raw.depositBalance);
+  const final = one(raw.final || raw.finalBalance);
+  if (interim) out.interim = interim;
+  if (final) out.final = final;
+  return (out.interim || out.final) ? out : null;
+}
+
 export async function resolveReminderBranding(application) {
   const brand = {
     name: (application && application.clientName) || 'Your travel team',
     logoUrl: '', footerLine: '', replyTo: '',
     supportEmail: '', supportPhone: '', pageUrl: '',
     schedule: normaliseReminderSchedule(null),
+    reminderEmails: null,
   };
 
   const recordId = application && application.recordId;
@@ -482,6 +503,7 @@ export async function resolveReminderBranding(application) {
       brand.supportPhone = String(cfg?.support?.phone || '').trim();
       brand.pageUrl = httpsOnly(cfg?.pageUrl);
       brand.schedule = normaliseReminderSchedule(cfg?.reminders);
+      brand.reminderEmails = normaliseReminderEmails(cfg?.reminderEmails);
       return brand;
     }
   } catch (err) {

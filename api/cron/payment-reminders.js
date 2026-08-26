@@ -192,6 +192,11 @@ async function processRecord(record) {
     ? f.GapDays : branding.schedule.gapDays;
   const cycle = emailsSent + 1;
   const orderRef = readOrderRef(order);
+  // The client's own copy for this stage, when they've written it: FinalBalance
+  // uses the 'final' template, every other balance (deposit / each instalment)
+  // uses 'interim'. Absent → the built-in template renders instead.
+  const stage = f.ReminderType === 'FinalBalance' ? 'final' : 'interim';
+  const template = (branding.reminderEmails && branding.reminderEmails[stage]) || null;
   const { subject, html } = renderReminderEmail({
     agency: branding,
     customerFirstName: typeof order.customerFirstname === 'string' ? order.customerFirstname : '',
@@ -200,6 +205,7 @@ async function processRecord(record) {
     dueDateIso: f.DueDate || charge.dueDate || '',
     payUrl: buildPayUrl(branding.pageUrl, orderRef),
     sequence: { n: cycle, of: Math.max(planned, cycle) },
+    template,
   });
 
   // Everything a successful (or guard-recovered) send stamps: the count,

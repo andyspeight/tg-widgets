@@ -52,7 +52,25 @@
 import { listAll } from './_ref.js';
 
 const OPEN_METEO_ARCHIVE = 'https://archive-api.open-meteo.com/v1/archive';
-const NASA_POWER_CLIMATOLOGY = 'https://power.larc.nasa.gov/api/temporal/climatology/point';
+
+/**
+ * POWER's DAILY product, not its climatology product, and the difference is the
+ * whole reason the first two runs wrote nothing.
+ *
+ * The climatology endpoint was tried first and its T2M_MAX ran 5 to 9 degrees
+ * above Open-Meteo, widening through the summer. Checked against reality on
+ * three of the disagreeing records: Sousse in June is about 31C and POWER said
+ * 40.4; Sintra in January is about 15C and POWER said 18.8; Rotorua in January
+ * is about 23C and POWER said 30.1. Open-Meteo was right in all three. That
+ * offset is the signature of an ABSOLUTE maximum over the whole period rather
+ * than the mean of daily maxima, which is the number a climate chart shows.
+ *
+ * So both sources now go through the same daily aggregation below. Corroborating
+ * two figures that are not the same statistic is not corroboration at all, and
+ * a tolerance wide enough to hide a nine degree gap would have made the second
+ * source decorative.
+ */
+const NASA_POWER_DAILY = 'https://power.larc.nasa.gov/api/temporal/daily/point';
 
 /** WMO standard normal period. */
 export const NORMAL_START = '1991-01-01';
@@ -169,12 +187,8 @@ export function monthlyFromOpenMeteo(json) {
   const temps = daily.temperature_2m_max;
   const rain = daily.precipitation_sum;
   if (!Array.isArray(temps) || !Array.isArray(rain)) return null;
-  if (times.length < 365) return null;
 
-  const tSum = Array(12).fill(0), tCount = Array(12).fill(0);
-  // rain is accumulated per (year, month) first, then averaged over the years.
-  const rByYearMonth = new Map();
-
+  const samples = [];
   for (let i = 0; i < times.length; i++) {
     const t = times[i];
     let year, month;
@@ -187,15 +201,40 @@ export function monthlyFromOpenMeteo(json) {
       year = Number(s.slice(0, 4));
       month = Number(s.slice(5, 7)) - 1;
     }
+    samples.push({ year, month, temp: temps[i], rain: rain[i] });
+  }
+  return aggregateDailySamples(samples);
+}
+
+/**
+ * Turn daily samples into monthly normals. Pure. Shared by BOTH sources on
+ * purpose: corroboration only means something when the two numbers being
+ * compared are the same statistic computed the same way.
+ *
+ * Temperature is the mean of the daily maxima falling in that calendar month
+ * across every year. Rainfall is the mean ACROSS YEARS of each year's monthly
+ * total, which is not the mean daily rate times the month length and is the
+ * figure a "monthly rainfall" chart is expected to show.
+ *
+ * @param samples [{ year, month (0-11), temp, rain }]
+ * @returns { tempMax: number[12], rainTotal: number[12] } or null
+ */
+export function aggregateDailySamples(samples) {
+  if (!Array.isArray(samples) || samples.length < 365) return null;
+  const tSum = Array(12).fill(0), tCount = Array(12).fill(0);
+  const rByYearMonth = new Map();
+
+  for (const s of samples) {
+    const { year, month } = s;
     if (!(month >= 0 && month <= 11) || !Number.isFinite(year)) continue;
-
-    const tv = temps[i];
-    if (typeof tv === 'number' && Number.isFinite(tv)) { tSum[month] += tv; tCount[month]++; }
-
-    const rv = rain[i];
-    if (typeof rv === 'number' && Number.isFinite(rv)) {
+    // Both APIs use a large negative sentinel for "no data". Treating -999 as a
+    // temperature would drag a month's mean into fiction.
+    const t = s.temp;
+    if (typeof t === 'number' && Number.isFinite(t) && t > -900) { tSum[month] += t; tCount[month]++; }
+    const r = s.rain;
+    if (typeof r === 'number' && Number.isFinite(r) && r > -900) {
       const key = year * 12 + month;
-      rByYearMonth.set(key, (rByYearMonth.get(key) || 0) + rv);
+      rByYearMonth.set(key, (rByYearMonth.get(key) || 0) + r);
     }
   }
 
@@ -214,28 +253,29 @@ export function monthlyFromOpenMeteo(json) {
 }
 
 /**
- * Turn a NASA POWER climatology response into the same shape. Pure.
+ * Turn a NASA POWER DAILY response into the same shape, through the same
+ * aggregation Open-Meteo goes through. Pure.
  *
- * POWER reports PRECTOTCORR as a mean DAILY rate in mm/day, so it has to be
- * multiplied by the month length to compare with a monthly total. Getting this
- * wrong understates rainfall roughly thirtyfold, which is exactly the sort of
- * unit error a second source exists to catch, so it is asserted in the tests.
- * Missing values come back as -999.
+ * Keys are YYYYMMDD strings. PRECTOTCORR is a daily total in mm, so summing the
+ * days of a month gives that month's total directly, with no month-length
+ * multiplication: the climatology product needed one because it reported a mean
+ * daily RATE, and that difference is what made the two products look
+ * interchangeable when they are not.
  */
 export function monthlyFromPower(json) {
   const p = json && json.properties && json.properties.parameter;
   if (!p || !p.T2M_MAX || !p.PRECTOTCORR) return null;
-  const tempMax = [], rainTotal = [];
-  for (let m = 0; m < 12; m++) {
-    const key = POWER_MONTHS[m];
-    const t = p.T2M_MAX[key];
-    const r = p.PRECTOTCORR[key];
-    if (typeof t !== 'number' || typeof r !== 'number') return null;
-    if (t <= -900 || r <= -900) return null;
-    tempMax.push(t);
-    rainTotal.push(r * DAYS_IN_MONTH[m]);
+  const samples = [];
+  for (const key of Object.keys(p.T2M_MAX)) {
+    if (!/^\d{8}$/.test(key)) continue; // skips any ANN or summary key
+    samples.push({
+      year: Number(key.slice(0, 4)),
+      month: Number(key.slice(4, 6)) - 1,
+      temp: p.T2M_MAX[key],
+      rain: p.PRECTOTCORR[key],
+    });
   }
-  return { tempMax, rainTotal };
+  return aggregateDailySamples(samples);
 }
 
 // ---- pure: corroboration --------------------------------------------------
@@ -358,9 +398,11 @@ async function fetchPower(lat, lon) {
     community: 'AG',
     latitude: String(lat),
     longitude: String(lon),
+    start: NORMAL_START.replace(/-/g, ''),
+    end: NORMAL_END.replace(/-/g, ''),
     format: 'JSON',
   });
-  const { json, error } = await getJson(`${NASA_POWER_CLIMATOLOGY}?${qs}`);
+  const { json, error } = await getJson(`${NASA_POWER_DAILY}?${qs}`);
   if (!json) return { data: null, error: error || 'no response' };
   const data = monthlyFromPower(json);
   return { data, error: data ? null : 'response did not parse into 12 months' };
@@ -394,7 +436,9 @@ async function patchRecord(tableId, recordId, fields) {
  *          whose write threw. They are separate on purpose, and neither is
  *          allowed to be reported as the other.
  */
-export async function runClimateFill({ table = 'cities', limit = 20, write = false, authoredSeasons = {}, fetchers } = {}) {
+const pause = ms => (ms > 0 ? new Promise(r => setTimeout(r, ms)) : Promise.resolve());
+
+export async function runClimateFill({ table = 'cities', limit = 20, write = false, authoredSeasons = {}, pauseMs = 3000, fetchers } = {}) {
   const map = CLIMATE_TABLES[table];
   if (!map) throw new Error(`unknown climate table: ${table}`);
 
@@ -411,7 +455,16 @@ export async function runClimateFill({ table = 'cities', limit = 20, write = fal
   const items = [];
   let filled = 0, failed = 0, skipped = 0, awaitingSeason = 0;
 
+  // Open-Meteo answered the first live run with "Minutely API request limit
+  // exceeded". A 30-year daily pull is charged as many calls, not one, so twenty
+  // of them back to back trips the per-minute limit partway through and the rest
+  // of the batch is lost to a 429 rather than to anything about the data. A
+  // pause between records costs a few seconds of a 300 second budget and makes
+  // the batch size the thing that decides throughput.
+  let first = true;
   for (const row of due.slice(0, limit)) {
+    if (!first) await pause(pauseMs);
+    first = false;
     const fields = row.fields || {};
     const name = fields[map.name] || row.id;
     const coords = readCoords(fields, map);

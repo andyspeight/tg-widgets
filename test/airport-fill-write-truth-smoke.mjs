@@ -75,6 +75,25 @@ ok('a failed patch is counted as failed', bad.failed === 1);
 ok('the backfill item reports it was not applied', bad.items[0].applied === false);
 ok('the backfill item carries the write error', /500/.test(bad.items[0].writeError || ''));
 
+// A record with coordinates and both sources but NO NAME is still due. That
+// was Tahiti and Puerto Vallarta: created nameless by the accent bug, and the
+// old test called them complete, so the fix would never have reached them.
+const complete = { [AF.iata]: 'PPT', [AF.name]: 'Faa a International Airport', [AF.latitude]: 1, [AF.longitude]: 2, [AF.source1]: 'a', [AF.source2]: 'b' };
+const nameless = { ...complete };
+delete nameless[AF.name];
+
+const namelessRun = await runIdentityBackfill({
+  limit: 5, write: false,
+  fetchers: { ...fetchers, listRows: async () => [{ id: 'r1', fields: nameless }] },
+});
+ok('a record with no name is due for backfill', namelessRun.due === 1);
+
+const completeRun = await runIdentityBackfill({
+  limit: 5, write: false,
+  fetchers: { ...fetchers, listRows: async () => [{ id: 'r2', fields: complete }] },
+});
+ok('a genuinely complete record is not due', completeRun.due === 0);
+
 const fine = await runIdentityBackfill({
   limit: 1, write: true, nowIso: '2026-08-26T00:00:00Z',
   fetchers: { ...fetchers, listRows: async () => [row], patch: async () => {} },

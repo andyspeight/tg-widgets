@@ -428,9 +428,19 @@ export async function runIdentityBackfill({ limit = 10, write = false, nowIso, f
   const readRows = (fetchers && fetchers.listRows)
     || (() => listAll(AIRPORTS_TBL, [AF.iata, AF.name, AF.cityServed, AF.countryText, AF.latitude, AF.longitude, AF.source1, AF.source2]));
   const rows = await readRows();
+  // A blank NAME counts as due, not just missing coordinates or sources.
+  // Tahiti and Puerto Vallarta were created nameless on 26 Aug because
+  // normalizeName was mangling accents, and once that was fixed nothing would
+  // ever have gone back for them: they already had coordinates and both source
+  // URLs, so the old test called them complete. Retrying costs one batch slot
+  // and writes nothing unless both sources now agree, which is the same rule as
+  // everywhere else.
   const due = rows.filter(r => {
     const f = r.fields || {};
-    return f[AF.iata] && (f[AF.latitude] == null || f[AF.longitude] == null || !f[AF.source1] || !f[AF.source2]);
+    return f[AF.iata] && (
+      !f[AF.name] || f[AF.latitude] == null || f[AF.longitude] == null
+      || !f[AF.source1] || !f[AF.source2]
+    );
   });
 
   const items = [];

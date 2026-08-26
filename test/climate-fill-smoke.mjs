@@ -2,15 +2,20 @@
  * Smoke test for the two-source climate series fill.
  *
  * The rules this guards, in order of how badly they bite:
- *   1. A record is written only when BOTH sources agree on all 24 values. A
- *      partial series is worse than none, because 11 good months and one guess
- *      still parses as a complete answer.
- *   2. NASA POWER reports rainfall in mm/day and Open-Meteo in mm/month. Miss
- *      the conversion and rainfall is understated roughly thirtyfold. That is
- *      the exact error a second source exists to catch, so it is asserted here.
+ *   1. Both sources must compute the SAME STATISTIC. The first build compared
+ *      Open-Meteo's mean daily maximum against NASA POWER's climatology
+ *      T2M_MAX, which is an absolute maximum over the period and ran 5 to 9
+ *      degrees hotter. Every record disagreed and nothing was ever written.
+ *      Both now go through one shared aggregation, and a test asserts they
+ *      return identical numbers from identical daily inputs.
+ *   2. A record is written only when both agree on all 24 values. A partial
+ *      series is worse than none, because 11 good months and one guess still
+ *      parses as a complete answer.
  *   3. A failed write is never counted as a fill.
- *   4. Season is a derived draft, and the rule knows it does not fit winter
- *      destinations. It must say so rather than quietly writing twelve 'off'.
+ *   4. Season is authored, never derived. The fill refuses to write a record it
+ *      has no authored season for, rather than leaving it half converted.
+ *   5. A skip says what the host actually said, so a run that writes nothing is
+ *      diagnosable without reading a log that cannot be searched.
  *
  * Run: node test/climate-fill-smoke.mjs
  */
@@ -94,20 +99,47 @@ ok('a truncated response is refused', monthlyFromOpenMeteo({ daily: { time: [1],
 ok('a malformed response is refused', monthlyFromOpenMeteo({}) === null);
 
 // --- NASA POWER aggregation ------------------------------------------------
-function buildPower({ temp = 10, rainPerDay = 1 } = {}) {
+// POWER's DAILY product, keyed YYYYMMDD. The climatology product was tried
+// first and its T2M_MAX ran 5 to 9 degrees hot because it is an ABSOLUTE
+// maximum over the period, not the mean of daily maxima. Both sources now go
+// through the same aggregation, which is the only way a comparison between them
+// means anything.
+function buildPower({ temp = 10, rainPerDay = 1, years = [1991, 1992], sentinel = false } = {}) {
   const T2M_MAX = {}, PRECTOTCORR = {};
-  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  months.forEach((k, m) => { T2M_MAX[k] = temp + m; PRECTOTCORR[k] = rainPerDay; });
-  T2M_MAX.ANN = 15; PRECTOTCORR.ANN = rainPerDay;
+  for (const y of years) {
+    for (let m = 0; m < 12; m++) {
+      for (let d = 1; d <= DAYS_IN_MONTH[m]; d++) {
+        const key = `${y}${String(m + 1).padStart(2, '0')}${String(d).padStart(2, '0')}`;
+        T2M_MAX[key] = sentinel && d === 1 ? -999 : temp + m;
+        PRECTOTCORR[key] = sentinel && d === 1 ? -999 : rainPerDay;
+      }
+    }
+  }
+  T2M_MAX.ANN = 15; PRECTOTCORR.ANN = rainPerDay; // summary key that must be ignored
   return { properties: { parameter: { T2M_MAX, PRECTOTCORR } } };
 }
 
 const pw = monthlyFromPower(buildPower());
-ok('power returns 12 months and ignores ANN', pw && pw.tempMax.length === 12);
-ok('power rainfall is converted from mm/day to a month total', Math.abs(pw.rainTotal[0] - 31) < 1e-9);
-ok('power february uses 28 days', Math.abs(pw.rainTotal[1] - 28) < 1e-9);
-ok('power missing values (-999) are refused', monthlyFromPower({ properties: { parameter: { T2M_MAX: { JAN: -999 }, PRECTOTCORR: { JAN: 1 } } } }) === null);
+ok('power returns 12 months', pw && pw.tempMax.length === 12);
+ok('power january temp is the mean of daily maxima', Math.abs(pw.tempMax[0] - 10) < 1e-9);
+ok('power july maps to the right month', Math.abs(pw.tempMax[6] - 16) < 1e-9);
+ok('power rainfall sums the days into a month total', Math.abs(pw.rainTotal[0] - 31) < 1e-9);
+ok('power february sums 28 days', Math.abs(pw.rainTotal[1] - 28) < 1e-9);
+ok('the ANN summary key is ignored', Math.abs(pw.tempMax[0] - 10) < 1e-9);
+
+// The two sources must produce IDENTICAL numbers from identical daily inputs.
+// If they ever diverge here, the corroboration step is comparing two different
+// statistics and every disagreement it reports is meaningless.
+const omSame = monthlyFromOpenMeteo(buildDaily());
+const pwSame = monthlyFromPower(buildPower());
+ok('both sources agree exactly on the same daily inputs',
+  omSame.tempMax.every((t, i) => Math.abs(t - pwSame.tempMax[i]) < 1e-9)
+  && omSame.rainTotal.every((r, i) => Math.abs(r - pwSame.rainTotal[i]) < 1e-9));
+
+const sentinelled = monthlyFromPower(buildPower({ sentinel: true }));
+ok('a -999 sentinel does not drag the mean down', sentinelled && Math.abs(sentinelled.tempMax[0] - 10) < 1e-9);
 ok('a malformed power response is refused', monthlyFromPower({}) === null);
+ok('a power response with too few days is refused', monthlyFromPower({ properties: { parameter: { T2M_MAX: { 19910101: 5 }, PRECTOTCORR: { 19910101: 1 } } } }) === null);
 
 // --- corroboration ---------------------------------------------------------
 const agree = corroborateMonthly(om, pw);
@@ -163,7 +195,7 @@ const seam = {
 
 const AUTHORED = { 'Mexico City': 'shoulder,shoulder,best,best,best,shoulder,shoulder,shoulder,shoulder,best,best,shoulder' };
 
-const dry = await runClimateFill({ table: 'cities', limit: 10, write: false, authoredSeasons: AUTHORED, fetchers: { ...seam, patch: async () => { throw new Error('should not write'); } } });
+const dry = await runClimateFill({ table: 'cities', limit: 10, write: false, pauseMs: 0, authoredSeasons: AUTHORED, fetchers: { ...seam, patch: async () => { throw new Error('should not write'); } } });
 ok('only the broken record is due', dry.due === 1);
 ok('a valid record is left alone', !dry.items.some(i => i.name === 'Already Fine'));
 ok('a dry run writes nothing', dry.filled === 0 && dry.failed === 0);
@@ -173,7 +205,7 @@ ok('a dry run writes nothing', dry.filled === 0 && dry.failed === 0);
 // than leaving the record alone.
 let untouched = true;
 const noSeason = await runClimateFill({
-  table: 'cities', limit: 10, write: true,
+  table: 'cities', limit: 10, write: true, pauseMs: 0,
   fetchers: { ...seam, patch: async () => { untouched = false; } },
 });
 ok('a record with no authored season is not written', untouched === true && noSeason.filled === 0);
@@ -182,7 +214,7 @@ ok('the report carries the corroborated numbers for the author', isValidNumberSe
 ok('the report offers a suggestion, clearly separate from a value', isValidSeasonSeries(noSeason.items[0].suggestion));
 
 const badSeason = await runClimateFill({
-  table: 'cities', limit: 10, write: true,
+  table: 'cities', limit: 10, write: true, pauseMs: 0,
   authoredSeasons: { 'Mexico City': 'best,best,best' },
   fetchers: { ...seam, patch: async () => { untouched = false; } },
 });
@@ -190,7 +222,7 @@ ok('a malformed authored season is refused', badSeason.filled === 0 && badSeason
 ok('and says the authored value was the problem', /not 12 valid tokens/.test(badSeason.items[0].reason));
 
 let wrote = null;
-const good = await runClimateFill({ table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED, fetchers: { ...seam, patch: async (id, f) => { wrote = f; } } });
+const good = await runClimateFill({ table: 'cities', limit: 10, write: true, pauseMs: 0, authoredSeasons: AUTHORED, fetchers: { ...seam, patch: async (id, f) => { wrote = f; } } });
 ok('a successful write is counted', good.filled === 1 && good.failed === 0);
 ok('all three fields are written together', !!wrote && Object.keys(wrote).length === 3);
 // Read through a guard: when an upstream rule correctly refuses to write, this
@@ -201,14 +233,14 @@ ok('rainfall written is valid', isValidNumberSeries(w(CITY.rainfall), 0, 2000));
 ok('season written is valid', isValidSeasonSeries(w(CITY.season)));
 ok('the AUTHORED season is written, not a derived one', w(CITY.season) === AUTHORED['Mexico City']);
 
-const broke = await runClimateFill({ table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED, fetchers: { ...seam, patch: async () => { throw new Error('airtable 422'); } } });
+const broke = await runClimateFill({ table: 'cities', limit: 10, write: true, pauseMs: 0, authoredSeasons: AUTHORED, fetchers: { ...seam, patch: async () => { throw new Error('airtable 422'); } } });
 ok('a failed write is not counted as filled', broke.filled === 0);
 ok('a failed write is counted as failed', broke.failed === 1);
 ok('the item carries the write error', /422/.test(broke.items[0].writeError || ''));
 
 let touched = false;
 const conflict = await runClimateFill({
-  table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED,
+  table: 'cities', limit: 10, write: true, pauseMs: 0, authoredSeasons: AUTHORED,
   fetchers: { ...seam, power: async () => ({ data: unitBug }), patch: async () => { touched = true; } },
 });
 ok('a disagreeing record is never written', touched === false && conflict.filled === 0);
@@ -216,13 +248,13 @@ ok('a disagreeing record is reported as a conflict', conflict.items[0].verdict =
 ok('the conflict names the months', (conflict.items[0].disagreements || []).length > 0);
 
 const noCoords = await runClimateFill({
-  table: 'cities', limit: 10, write: true,
+  table: 'cities', limit: 10, write: true, pauseMs: 0,
   fetchers: { ...seam, listRows: async () => [{ id: 'r', fields: { [CITY.name]: 'Nowhere', [CITY.temps]: PROSE } }], patch: async () => { touched = true; } },
 });
 ok('a record with no coordinates is skipped, not guessed', noCoords.skipped === 1 && noCoords.filled === 0);
 
 const deadSource = await runClimateFill({
-  table: 'cities', limit: 10, write: true,
+  table: 'cities', limit: 10, write: true, pauseMs: 0,
   fetchers: { ...seam, power: async () => ({ data: null, error: 'HTTP 429 rate limited' }), patch: async () => { throw new Error('should not write'); } },
 });
 ok('one source failing means no write', deadSource.filled === 0 && deadSource.skipped === 1);
@@ -232,7 +264,7 @@ ok('and it says which source failed', /POWER/.test(deadSource.items[0].reason ||
 ok('and repeats what the host actually said', /429/.test(deadSource.items[0].reason || ''));
 
 const bothDead = await runClimateFill({
-  table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED,
+  table: 'cities', limit: 10, write: true, pauseMs: 0, authoredSeasons: AUTHORED,
   fetchers: {
     ...seam,
     openMeteo: async () => ({ data: null, error: 'timed out after 45000ms' }),
@@ -244,7 +276,7 @@ ok('both sources failing is reported per source', /Open-Meteo/.test(bothDead.ite
 ok('a timeout is distinguishable from a rejection', /timed out/.test(bothDead.items[0].reason) && /503/.test(bothDead.items[0].reason));
 
 const unparseable = await runClimateFill({
-  table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED,
+  table: 'cities', limit: 10, write: true, pauseMs: 0, authoredSeasons: AUTHORED,
   fetchers: { ...seam, power: async () => ({ data: null, error: 'response did not parse into 12 months' }), patch: async () => { throw new Error('should not write'); } },
 });
 ok('a response that parsed to nothing says so', /did not parse/.test(unparseable.items[0].reason));
