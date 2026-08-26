@@ -270,6 +270,32 @@ export async function ask(
 
   const payload = (await response.json().catch(() => null)) as unknown;
   const text = readText(payload);
+  const stop = readStopReason(payload);
+
+  /*
+   * RAN OUT OF ROOM RATHER THAN CAME BACK EMPTY, and the difference is an hour
+   * of looking in the wrong place.
+   *
+   * These models think, and thinking is charged against max_tokens like any
+   * other output. A budget that is generous for the ANSWER can still be spent
+   * entirely on working it out, and what arrives then is a response with no text
+   * block in it at all. Reported as "came back with nothing", which sends you
+   * hunting a broken parser or a bad prompt when the model simply never got to
+   * the reply. Andy hit exactly that on the site planner.
+   */
+  if (!text && stop === 'max_tokens') {
+    throw new AiError('That answer ran out of room before it finished. Try asking for less.', {
+      retryable: true,
+    });
+  }
+
+  /*
+   * A refusal is a decision, not a fault, and it has its own stop reason. Saying
+   * "try again" to one is advice that cannot work.
+   */
+  if (stop === 'refusal') {
+    throw new AiError('The assistant declined to answer that one.');
+  }
 
   if (!text) {
     throw new AiError('The assistant came back with nothing. Try asking again.', {
@@ -289,6 +315,13 @@ export async function ask(
  * server action, which reaches the person as a blank failure rather than as the
  * "came back with nothing" above.
  */
+/** Why the model stopped, when it says. Null rather than a guess when it does not. */
+function readStopReason(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const reason = (payload as { stop_reason?: unknown }).stop_reason;
+  return typeof reason === 'string' ? reason : null;
+}
+
 function readText(payload: unknown): string {
   if (!payload || typeof payload !== 'object') return '';
   const content = (payload as { content?: unknown }).content;

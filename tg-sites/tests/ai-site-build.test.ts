@@ -647,3 +647,66 @@ describe('how many pages a plan should have', () => {
     expect(SITE_RULES).toContain('the client supplies the words');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE BUDGET HAS TO COVER THE THINKING, NOT JUST THE ANSWER.
+ *
+ * Andy, on the first Halcyon run with the new rules: "The assistant came back
+ * with nothing."
+ *
+ * Not an empty model and not a broken parser. These models think, no `thinking`
+ * parameter is sent so adaptive thinking is on, and thinking is charged against
+ * max_tokens like any other output. A cap sized for the visible sitemap is
+ * sized for a fraction of what the call really produces, so a harder prompt
+ * spent the whole 2,048 reasoning and returned a response with no text block in
+ * it at all.
+ *
+ * Two things were wrong and both are fixed: the budget, and the message, which
+ * described the symptom in a way that sends you hunting the wrong thing.
+ */
+describe('a build has room to think', () => {
+  const ai = readFileSync(join(ROOT, 'lib', 'ai', 'anthropic.ts'), 'utf8');
+
+  it('gives every builder a ceiling well clear of its largest real answer', async () => {
+    const { SITE_BUILD_MAX_TOKENS } = await import('../lib/ai/site-build');
+    const { PAGE_BUILD_MAX_TOKENS } = await import('../lib/ai/page-build');
+    const { BUILD_MAX_TOKENS } = await import('../lib/ai/section-build');
+
+    // The largest answer ever recorded from these calls was 1,723 output tokens,
+    // and that number includes thinking. Four times it is the floor here.
+    for (const [name, cap] of [
+      ['site', SITE_BUILD_MAX_TOKENS],
+      ['page', PAGE_BUILD_MAX_TOKENS],
+      ['section', BUILD_MAX_TOKENS],
+    ] as const) {
+      expect(cap, `${name} builder has too little room`).toBeGreaterThanOrEqual(1723 * 4);
+    }
+  });
+
+  it('says the answer ran out of room, rather than that nothing came back', () => {
+    /*
+     * The message is the fix that saves the next hour. "Came back with nothing"
+     * is true and useless: it describes an empty response and says nothing about
+     * why, so it reads as a bug in the parser or the prompt.
+     */
+    expect(ai).toContain("stop === 'max_tokens'");
+    expect(ai).toContain('ran out of room before it finished');
+    // And it is worth retrying with less, unlike a genuine empty answer.
+    expect(ai.slice(ai.indexOf('ran out of room'), ai.indexOf('ran out of room') + 120))
+      .toContain('retryable: true');
+  });
+
+  it('treats a refusal as a decision rather than something to retry', () => {
+    // A refusal has its own stop reason. Telling somebody to try again is
+    // advice that cannot work.
+    expect(ai).toContain("stop === 'refusal'");
+    expect(ai).toContain('declined to answer');
+  });
+
+  it('reads the stop reason defensively, without guessing one', () => {
+    const fn = ai.slice(ai.indexOf('function readStopReason'));
+    expect(fn.slice(0, 300)).toContain("typeof reason === 'string' ? reason : null");
+  });
+});

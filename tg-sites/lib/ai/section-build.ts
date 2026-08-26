@@ -39,7 +39,15 @@ const MAX_BLOCKS = 40;
 export const MAX_BUILD_INSTRUCTION = 600;
 
 /** Long enough for a rich section of JSON, capped so a build cannot run away. */
-export const BUILD_MAX_TOKENS = 4096;
+/**
+ * A ceiling that has to cover the THINKING as well as the answer.
+ *
+ * Same correction as SITE_BUILD_MAX_TOKENS, for the same reason and on the
+ * same model: no `thinking` parameter is sent, so adaptive thinking is on and
+ * is charged here. 4096 was sized for the visible output alone, which is the
+ * cap that returned an empty answer on the planner once a prompt got harder.
+ */
+export const BUILD_MAX_TOKENS = 8192;
 
 export type BuildResult =
   | {

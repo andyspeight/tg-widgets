@@ -52,15 +52,24 @@ export const MAX_SITE_BRIEF = 400;
 export const MAX_SITE_PAGES = 12;
 
 /**
- * One line each for a dozen pages, with room for the reasoning around it.
+ * The room a plan gets, and it is mostly not the plan.
  *
- * RAISED FROM 2048 ON EVIDENCE. A real run against Coastwise came back using
- * 1,687 output tokens, which is 82% of that cap. A plan that runs slightly
- * longer gets cut off mid-JSON, fails the parse, and spends the repair on a
- * problem that was never the model's fault. Headroom is cheap; a truncated
- * answer costs a whole second call.
+ * THESE MODELS THINK, AND THINKING IS CHARGED AGAINST max_tokens. We send no
+ * `thinking` parameter, and on the build model that means adaptive thinking is
+ * ON: the budget covers working the answer out as well as writing it. A cap
+ * sized for the visible sitemap is therefore sized for perhaps a third of what
+ * the call actually produces.
+ *
+ * 2,048 was that mistake. It survived the easy runs and failed the first hard
+ * one: a longer prompt asking for more pages spent the whole budget reasoning
+ * and returned a response with no text block in it, which reads as "the
+ * assistant came back with nothing".
+ *
+ * 8,192 is roughly five times the largest answer ever observed here (1,723
+ * output tokens), which leaves the thinking room to breathe. It is a ceiling
+ * rather than a target, so a short plan still costs what a short plan costs.
  */
-export const SITE_BUILD_MAX_TOKENS = 3072;
+export const SITE_BUILD_MAX_TOKENS = 8192;
 
 /** A purpose is a brief for one page, so it is a sentence rather than a paragraph. */
 const MAX_PURPOSE = 240;
