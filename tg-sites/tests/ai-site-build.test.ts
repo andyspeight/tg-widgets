@@ -381,3 +381,80 @@ describe('building an approved page', () => {
     expect(body.indexOf('repairPagePrompt(')).toBeGreaterThan(at('claimRequest('));
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * HOW LONG A BUILD IS ALLOWED TO TAKE.
+ *
+ * The first time the planner was pointed at a real company profile it came back
+ * with "That took too long". Not a bug in the planner: ask() had one timeout
+ * for every caller, twenty seconds, and its own comment says what that was
+ * sized for — "one to three short paragraphs" and "four hundred tokens or so".
+ * A site plan runs on the larger model with a system prompt of several thousand
+ * characters. The evidence was in ai_usage: a row claimed at 12:55 with zero
+ * input and zero output tokens, because the call threw before anything could be
+ * recorded.
+ *
+ * These pin the numbers against the things that constrain them, because both
+ * ends of this are easy to change without noticing the other.
+ */
+describe('a build gets longer than a paragraph does', () => {
+  const ai = readFileSync(join(ROOT, 'lib', 'ai', 'anthropic.ts'), 'utf8');
+  const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+
+  it('every call on the build model asks for the build timeout', () => {
+    /*
+     * Not just the planner. The section builder and both page builders run on
+     * the same model with bigger answers, so they were living on the same
+     * twenty seconds and the same margin.
+     */
+    const calls = actions.match(/model: MODEL_BUILD[^}]*}/g) ?? [];
+    expect(calls.length).toBeGreaterThanOrEqual(4);
+    for (const call of calls) {
+      expect(call, `a build call with no timeout: ${call}`).toContain('timeoutMs: BUILD_TIMEOUT_MS');
+    }
+  });
+
+  it('the whole budget stays under what the route allows', async () => {
+    /*
+     * THE CROSS-FILE ONE. Being killed by the platform produces a blank failure
+     * with no message, which is exactly the outcome the timeout exists to avoid.
+     * So the budget has to stay below the route's maxDuration, and that number
+     * lives in a different file.
+     */
+    const { BUILD_BUDGET_MS, BUILD_TIMEOUT_MS } = await import('../lib/ai/anthropic');
+    const route = readFileSync(join(ROOT, 'app', 'sites', 'page.tsx'), 'utf8');
+    const declared = /export const maxDuration = (\d+);/.exec(route);
+
+    expect(declared, 'the route no longer declares a maxDuration').toBeTruthy();
+    const seconds = Number(declared![1]);
+
+    expect(BUILD_BUDGET_MS).toBeLessThan(seconds * 1000);
+    // And one call must fit inside the budget with room for the repair.
+    expect(BUILD_TIMEOUT_MS).toBeLessThan(BUILD_BUDGET_MS);
+  });
+
+  it('leaves the paragraph writers exactly as they were', async () => {
+    // Haiku answering a toolbar prompt still gets twenty seconds: a spinner in
+    // a toolbar hanging for forty is a worse experience, not a better one.
+    expect(ai).toContain('const TIMEOUT_MS = 20_000;');
+    expect(ai).toContain('timeoutMs = TIMEOUT_MS');
+  });
+
+  it('hands a repair only what is left, and skips one with no time to run', async () => {
+    const { remainingBudget, BUILD_BUDGET_MS } = await import('../lib/ai/anthropic');
+    const start = 1_000_000;
+
+    // A quick first answer leaves nearly the whole budget.
+    expect(remainingBudget(start, start + 2_000)).toBe(BUILD_BUDGET_MS - 2_000);
+    // A slow one leaves little, and the caller checks that against a floor.
+    expect(remainingBudget(start, start + 46_000)).toBe(BUILD_BUDGET_MS - 46_000);
+    // Past the budget it is zero, never negative, so no call is made with a
+    // nonsense timeout.
+    expect(remainingBudget(start, start + 90_000)).toBe(0);
+
+    expect(actions).toContain('const MIN_REPAIR_MS = 8_000;');
+    expect(actions).toContain('leftForRepair >= MIN_REPAIR_MS');
+  });
+});
