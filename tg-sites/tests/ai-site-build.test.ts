@@ -106,8 +106,16 @@ describe('what the planner is told about the site it is planning for', () => {
   it('does not crowd the prompt with a very large site', async () => {
     const { existingBlock } = await import('../lib/ai/site-build');
     const many = Array.from({ length: 200 }, (_, i) => `Page ${i}`);
-    const lines = existingBlock(many).split('\n').filter((line) => line.startsWith('- '));
+    /*
+     * Counted INSIDE the <existing> block only. The first version counted every
+     * "- " line in the whole prompt block and broke the moment the rules below
+     * it gained a checklist, which is a test measuring the wrong thing rather
+     * than a cap that moved.
+     */
+    const listed = /<existing>([\s\S]*?)<\/existing>/.exec(existingBlock(many))?.[1] ?? '';
+    const lines = listed.split('\n').filter((line) => line.startsWith('- '));
     expect(lines.length).toBeLessThanOrEqual(40);
+    expect(lines.length).toBeGreaterThan(0);
   });
 
   it('an empty plan is an answer, not a failure', () => {

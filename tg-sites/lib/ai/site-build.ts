@@ -51,8 +51,16 @@ export const MAX_SITE_BRIEF = 400;
  */
 export const MAX_SITE_PAGES = 12;
 
-/** One line each for a dozen pages, with room for the reasoning around it. */
-export const SITE_BUILD_MAX_TOKENS = 2048;
+/**
+ * One line each for a dozen pages, with room for the reasoning around it.
+ *
+ * RAISED FROM 2048 ON EVIDENCE. A real run against Coastwise came back using
+ * 1,687 output tokens, which is 82% of that cap. A plan that runs slightly
+ * longer gets cut off mid-JSON, fails the parse, and spends the repair on a
+ * problem that was never the model's fault. Headroom is cheap; a truncated
+ * answer costs a whole second call.
+ */
+export const SITE_BUILD_MAX_TOKENS = 3072;
 
 /** A purpose is a brief for one page, so it is a sentence rather than a paragraph. */
 const MAX_PURPOSE = 240;
@@ -139,7 +147,14 @@ ${list}
 
 Plan only what is MISSING. Do not propose a page that is already there under any name: "The ships" and "About the ships" are the same page. If a subject is covered, leave it out even if a site of this kind would normally have one.
 
-If the site already covers everything it needs, return an empty array. That is a real answer and a better one than padding.`;
+Work through these in turn against the list above, rather than forming a general impression, and name only the ones genuinely absent:
+- One page for each distinct thing they sell, where a visitor arriving on it would find what they came for.
+- A page saying who these people are and why a stranger should trust them with a holiday.
+- A way to get in touch.
+- The practical page somebody reads BEFORE committing: what to expect, what is included, how booking works, what they need to bring or know.
+- Anything the profile says this company does that no page above covers.
+
+If every one of those is already covered, return an empty array.`;
 }
 
 /** The system prompt: house voice, the planner's job, the shape, the client's profile. */
