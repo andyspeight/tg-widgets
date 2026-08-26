@@ -76,7 +76,12 @@ export default async function handler(req, res) {
   // between records to stay under Open-Meteo's per-minute limit, so a record
   // costs roughly ten seconds of the 300 available. Twelve leaves room for a
   // couple of slow responses without the run being killed mid-batch.
-  const limit = parseInt(process.env.REFERENCE_CLIMATE_LIMIT || '12', 10);
+  // Three seconds between records was not enough: the 20:30 run still lost a
+  // record to "Minutely API request limit exceeded". The pause is eight seconds
+  // now and the batch is eight, which spreads a run over roughly two minutes
+  // and stays well inside the 300 second budget. A 429 wastes the record
+  // entirely, so paying for it in throughput is the cheaper side of the trade.
+  const limit = parseInt(process.env.REFERENCE_CLIMATE_LIMIT || '8', 10);
   const write = process.env.REFERENCE_CLIMATE_WRITE !== 'false';
 
   try {
@@ -136,9 +141,14 @@ export default async function handler(req, res) {
     // level is the one log query that reliably completes on this project, so
     // that is where a no-op run belongs, with the reasons attached.
     const outstanding = results.reduce((n, r) => n + r.due, 0);
-    if (outstanding > 0 && summary.totals.filled === 0) {
-      const why = results.flatMap(r => (r.needsHuman || []).map(h => `${h.name}: ${h.detail}`)).slice(0, 5);
-      console.error('[cron/reference-climate] WROTE NOTHING with', outstanding, 'records due.',
+    const processed = results.reduce((n, r) => n + r.processed, 0);
+    const unwritten = processed - summary.totals.filled;
+    if (outstanding > 0 && unwritten > 0) {
+      const why = results.flatMap(r => (r.needsHuman || []).map(h => `${h.name}: ${h.detail}`)).slice(0, 6);
+      const headline = summary.totals.filled === 0
+        ? `WROTE NOTHING with ${outstanding} records due`
+        : `wrote only ${summary.totals.filled} of ${processed} processed, ${outstanding} still due`;
+      console.error('[cron/reference-climate]', headline,
         JSON.stringify({ totals: summary.totals, writeEnabled: write, firstReasons: why }));
     } else {
       console.log('[cron/reference-climate]', JSON.stringify(summary));

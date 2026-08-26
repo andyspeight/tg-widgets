@@ -438,7 +438,7 @@ async function patchRecord(tableId, recordId, fields) {
  */
 const pause = ms => (ms > 0 ? new Promise(r => setTimeout(r, ms)) : Promise.resolve());
 
-export async function runClimateFill({ table = 'cities', limit = 20, write = false, authoredSeasons = {}, pauseMs = 3000, fetchers } = {}) {
+export async function runClimateFill({ table = 'cities', limit = 20, write = false, authoredSeasons = {}, pauseMs = 8000, fetchers } = {}) {
   const map = CLIMATE_TABLES[table];
   if (!map) throw new Error(`unknown climate table: ${table}`);
 
