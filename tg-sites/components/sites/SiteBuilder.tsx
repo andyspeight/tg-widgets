@@ -24,7 +24,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { buildPlannedPageAction, planSiteAction } from '../../app/actions/ai';
+import { buildPlannedPageAction, describePagesAction, planSiteAction } from '../../app/actions/ai';
 import type { PlannedPage } from '../../lib/ai/site-build';
 import { Icon } from '../editor/Icon';
 import { Modal } from '../ui/Modal';
@@ -73,6 +73,8 @@ export function SiteBuilder({
   /** The planner looked and found nothing this site is short of. */
   const [nothingMissing, setNothingMissing] = useState(false);
   const [brief, setBrief] = useState('');
+  /** Page names the client typed, to be described and added to the list. */
+  const [extra, setExtra] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -115,6 +117,32 @@ export function SiteBuilder({
     setRows(result.data.map((page) => ({ ...page, progress: 'waiting' as const })));
     setStage('review');
     setNothingMissing(result.data.length === 0);
+  }
+
+  /**
+   * Add pages the client named, with the purposes written for them.
+   *
+   * APPENDED, NOT MERGED INTO THE PLAN. They go on the end where the client put
+   * them and can be moved like anything else. A page somebody typed is a page
+   * they want, so nothing here judges the names.
+   */
+  async function addOwn() {
+    if (!extra.trim()) return;
+    setBusy(true);
+    setError(null);
+    const result = await describePagesAction({ titles: extra });
+    setBusy(false);
+
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRows((current) => [
+      ...current,
+      ...result.data.map((page) => ({ ...page, progress: 'waiting' as const })),
+    ]);
+    setExtra('');
+    setNothingMissing(false);
   }
 
   function patch(index: number, next: Partial<Row>) {
@@ -355,6 +383,28 @@ export function SiteBuilder({
             </li>
           ))}
         </ul>
+
+        <div className="sv-field sv-plan__add">
+          <label htmlFor="plan-extra">Add pages of your own</label>
+          <textarea
+            id="plan-extra"
+            rows={3}
+            value={extra}
+            placeholder={'Terms and conditions\nPrivacy policy\nBarbados villas'}
+            onChange={(event) => setExtra(event.target.value)}
+          />
+          <small>One page name per line. The builder writes what each one is for, and you can
+            change it before building.</small>
+          <button
+            type="button"
+            className="sv-btn"
+            disabled={busy || !extra.trim()}
+            onClick={() => void addOwn()}
+          >
+            <Icon name="plus" size={16} />
+            {busy ? 'Adding…' : 'Add these pages'}
+          </button>
+        </div>
 
         {rows.length === 0 && (
           <p className="sv-empty__note">

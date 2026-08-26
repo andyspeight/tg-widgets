@@ -1743,3 +1743,17 @@
 .sv-plan__clash svg { flex: 0 0 auto; margin-top: 2px; color: var(--ed-warning, #8a5a0c); }
 
 .sv-plan__row[data-progress='skipped'] .sv-plan__state { color: var(--ed-ink-2); }
+
+/*
+ * Adding pages by hand, under the plan.
+ *
+ * Set apart from the rows above it rather than looking like one more of them:
+ * this is a different action, and a box that looked like another planned page
+ * would read as one somebody had to fill in.
+ */
+.sv-plan__add {
+  margin-top: var(--ed-5);
+  padding-top: var(--ed-5);
+  border-top: 1px solid var(--ed-line);
+}
+.sv-plan__add .sv-btn { align-self: flex-start; margin-top: var(--ed-2); }

@@ -546,3 +546,104 @@ describe('a build gets longer than a paragraph does', () => {
     expect(actions).toContain('leftForRepair >= MIN_REPAIR_MS');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * PAGES THE CLIENT NAMES THEMSELVES.
+ *
+ * Andy, 26 Aug 2026: "you also need to be able to give it an additional list of
+ * page names and it will write the what is it for and add them to the build
+ * list." Beyond convenience, it is the answer to a planner that will always miss
+ * something a client knows about their own business: add the page rather than
+ * argue with the plan.
+ */
+describe('reading a list of page names somebody typed', () => {
+  it('takes one per line and keeps the order', async () => {
+    const { titlesFromInput } = await import('../lib/ai/site-build');
+    expect(titlesFromInput('Terms and conditions\nPrivacy policy\nBarbados villas')).toEqual([
+      'Terms and conditions',
+      'Privacy policy',
+      'Barbados villas',
+    ]);
+  });
+
+  it('forgives the way people actually type a list', async () => {
+    const { titlesFromInput } = await import('../lib/ai/site-build');
+    // Bullets, blank lines and trailing spaces are sloppiness, not an error.
+    expect(titlesFromInput('- Terms\n\n  * Privacy  \n• Cookies\n')).toEqual([
+      'Terms',
+      'Privacy',
+      'Cookies',
+    ]);
+  });
+
+  it('drops a repeat rather than planning the same page twice', async () => {
+    const { titlesFromInput } = await import('../lib/ai/site-build');
+    expect(titlesFromInput('Terms\nterms\nTERMS')).toEqual(['Terms']);
+  });
+
+  it('stops at the cap and ignores an empty box', async () => {
+    const { titlesFromInput, MAX_ADDED_PAGES } = await import('../lib/ai/site-build');
+    const many = Array.from({ length: 50 }, (_, i) => `Page ${i}`).join('\n');
+    expect(titlesFromInput(many)).toHaveLength(MAX_ADDED_PAGES);
+    expect(titlesFromInput('   \n\n  ')).toEqual([]);
+  });
+
+  it('tells the model to keep every name exactly as it was given', async () => {
+    /*
+     * The one rule that matters here. A page somebody typed is a page they want;
+     * renaming it, dropping it or adding to the list is the model overruling the
+     * person, which is the opposite of what this control is for.
+     */
+    const { buildDescribeSystemPrompt } = await import('../lib/ai/site-build');
+    const { parseSettings } = await import('../lib/settings/schema');
+    const prompt = buildDescribeSystemPrompt(parseSettings({ companyAbout: 'Caribbean villas.' }));
+
+    expect(prompt).toContain('Do not add pages, do not remove pages, do not rename them');
+    expect(prompt).toContain('one plain sentence');
+  });
+
+  it('keeps the pages even when the description fails', () => {
+    /*
+     * The client asked for these by name, and the page builder can work from a
+     * title alone. Losing somebody's list because a sentence could not be
+     * written would be the tool discarding what it was told.
+     */
+    const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+    const body = actions.slice(
+      actions.indexOf('export async function describePagesAction'),
+      actions.indexOf('export async function buildPlannedPageAction'),
+    );
+    expect(body).toContain("purpose: ''");
+    expect(body).toContain('titles.map');
+    // And it creates nothing, like the planner.
+    expect(body).not.toContain('createPage(');
+    expect(body).not.toContain('saveDraft(');
+  });
+});
+
+describe('how many pages a plan should have', () => {
+  it('lets the profile decide rather than naming a target', async () => {
+    /*
+     * Andy on the Halcyon run: six pages "feels very light" for a company with
+     * five islands and three kinds of holiday. The old rule said "five to eight"
+     * flatly, which is right for a one-product agency and wrong for this one.
+     */
+    const { SITE_RULES } = await import('../lib/ai/site-build');
+    expect(SITE_RULES).toContain('LET THE PROFILE DECIDE HOW MANY');
+    expect(SITE_RULES).toContain('The number is an outcome, not a target');
+    expect(SITE_RULES).not.toContain('Five to eight pages.');
+  });
+
+  it('asks for the pages a travel site cannot legally do without', async () => {
+    // The same run ignored terms and privacy entirely. Those are not optional
+    // for a UK travel company and nothing in the rules had ever mentioned them.
+    const { SITE_RULES } = await import('../lib/ai/site-build');
+    expect(SITE_RULES).toContain('booking conditions or terms');
+    expect(SITE_RULES).toContain('privacy policy');
+    expect(SITE_RULES).toContain("money is protected");
+    // And it must not invent legal wording.
+    expect(SITE_RULES).toContain('the client supplies the words');
+  });
+});

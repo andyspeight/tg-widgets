@@ -90,8 +90,11 @@ import {
   SITE_BUILD_MAX_TOKENS,
   buildSiteSystemPrompt,
   buildSiteUserPrompt,
+  buildDescribeSystemPrompt,
+  buildDescribeUserPrompt,
   homeFirst,
   planSiteFromModel,
+  titlesFromInput,
   repairSitePrompt,
   type PlannedPage,
 } from '../../lib/ai/site-build';
@@ -751,6 +754,97 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
  * starter, and an address can only belong to one page, so creating would fail on
  * the unique index and "build my site" would skip the most important page in it.
  */
+/**
+ * Write the purpose for pages the client named, and hand them back as plan rows.
+ *
+ * CREATES NOTHING, like the planner: these join the list on screen and are built
+ * by the same button as everything else. The client keeps the names they typed;
+ * all this decides is what each page is for.
+ */
+export async function describePagesAction(input: unknown): Promise<SitePlanActionResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const titles = titlesFromInput(typeof fields.titles === 'string' ? fields.titles : '');
+    if (titles.length === 0) {
+      return { ok: false, error: 'Type at least one page name, one per line.' };
+    }
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildDescribeSystemPrompt(settings);
+    const userPrompt = buildDescribeUserPrompt(titles);
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    const startedAt = Date.now();
+    const firstAnswer = await ask(system, userPrompt, call);
+    inputTokens += firstAnswer.inputTokens;
+    outputTokens += firstAnswer.outputTokens;
+    let plan = planSiteFromModel(firstAnswer.text);
+
+    const leftForRepair = remainingBudget(startedAt);
+    if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
+      const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, {
+        ...call,
+        timeoutMs: leftForRepair,
+      });
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      plan = planSiteFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    /*
+     * THE PAGES SURVIVE A FAILED DESCRIPTION. If the model would not answer in
+     * shape, the client still asked for these pages by name and the builder can
+     * work from a title alone. Losing their list because a sentence could not be
+     * written would be the tool discarding what it was told.
+     */
+    if (!plan.ok) {
+      return {
+        ok: true,
+        data: titles.map((title) => ({ title, slug: safeSlug(title), purpose: '' })),
+      };
+    }
+
+    return { ok: true, data: plan.pages };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) {
+      return { ok: false, error: message };
+    }
+    console.error('[tg-sites] describing pages failed', error);
+    return { ok: false, error: 'Something went wrong adding those pages. Try again.' };
+  }
+}
+
 export async function buildPlannedPageAction(input: unknown): Promise<AiPageResult> {
   try {
     if (!aiIsConfigured()) {
