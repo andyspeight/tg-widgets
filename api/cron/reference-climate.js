@@ -76,7 +76,12 @@ export default async function handler(req, res) {
   // between records to stay under Open-Meteo's per-minute limit, so a record
   // costs roughly ten seconds of the 300 available. Twelve leaves room for a
   // couple of slow responses without the run being killed mid-batch.
-  const limit = parseInt(process.env.REFERENCE_CLIMATE_LIMIT || '12', 10);
+  // Three seconds between records was not enough: the 20:30 run still lost a
+  // record to "Minutely API request limit exceeded". The pause is eight seconds
+  // now and the batch is eight, which spreads a run over roughly two minutes
+  // and stays well inside the 300 second budget. A 429 wastes the record
+  // entirely, so paying for it in throughput is the cheaper side of the trade.
+  const limit = parseInt(process.env.REFERENCE_CLIMATE_LIMIT || '8', 10);
   const write = process.env.REFERENCE_CLIMATE_WRITE !== 'false';
 
   try {
