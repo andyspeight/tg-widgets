@@ -1068,8 +1068,44 @@ function blockHost(
   const gradient = block.type === 'heading' && props?.gradient === true;
   const gradFrom = gradient ? safeColour(props?.gradientFrom) : undefined;
   const gradTo = gradient ? safeColour(props?.gradientTo) : undefined;
+  /*
+   * A CARDS GRID PUTS ITS BOX ON THE CARDS, NOT ON ITSELF.
+   *
+   * Andy, 26 Aug 2026: changing a card background changes the block background,
+   * a border goes round the block not the card, a shadow lands on the block. He
+   * is right, and it is the only block where the generic box is the wrong
+   * target: everywhere else "the block" is the thing you can see, and here the
+   * thing you can see is a grid of cards with nothing but gaps between them. A
+   * background on the container paints behind the gaps; a border draws a rectangle
+   * round the lot.
+   *
+   * ONLY WHAT WAS ACTUALLY SET TRAVELS. boxStyle always emits every property,
+   * filling the unset ones with transparent and 0, which is right for a block
+   * painting itself and wrong here: it would wipe the finish the card already
+   * has from its style preset the moment anyone touched any box control. So
+   * these are separate properties, each emitted only when the client set it, and
+   * the CSS keys off their presence. A tinted card that gains a border keeps its
+   * tint.
+   *
+   * Padding stays on the container, because padding around a grid is space
+   * around the grid. A card's own inner padding is the card's business.
+   */
+  const cardBox: CSSProperties = block.type === 'cards' && boxed
+    ? {
+        ...(box.background ? { '--tgs-card-bg': box.background } : {}),
+        ...(box.borderWidth > 0
+          ? {
+              '--tgs-card-bw': `${box.borderWidth}px`,
+              '--tgs-card-bc': box.borderColour ?? 'currentColor',
+            }
+          : {}),
+        ...(box.radius > 0 ? { '--tgs-card-radius': `${box.radius}px` } : {}),
+      } as CSSProperties
+    : {};
+
   const style: CSSProperties = {
     ...(boxed ? boxStyle(box) : {}),
+    ...cardBox,
     ...(textColour ? { color: textColour } : {}),
     ...(baseSize ? { '--tgs-fs': baseSize } : {}),
     ...(baseLineHeight ? { '--tgs-lh': baseLineHeight } : {}),
@@ -1121,6 +1157,8 @@ function blockHost(
       data-hide-tablet={!editable && block.hideOn?.includes('tablet') ? '' : undefined}
       data-hide-phone={!editable && block.hideOn?.includes('phone') ? '' : undefined}
       data-boxed={boxed ? '' : undefined}
+      /* Which element the box paints. See the note on cardBox above. */
+      data-box-target={block.type === 'cards' && boxed ? 'card' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
       data-fluid={fluid ? '' : undefined}
       data-gradient={gradient && !editable ? '' : undefined}

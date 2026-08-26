@@ -164,13 +164,13 @@ export function AdoptDialog({
         <small>Leave it empty to browse the first hundred alphabetically.</small>
       </div>
 
-      <div className="tgs-adopt" aria-busy={loading}>
+      <div className="sv-adopt" aria-busy={loading}>
         {loading && entries.length === 0 && (
-          <p className="tgs-adopt__note">Looking…</p>
+          <p className="sv-adopt__note">Looking…</p>
         )}
 
         {!loading && entries.length === 0 && !error && (
-          <p className="tgs-adopt__note">
+          <p className="sv-adopt__note">
             {search
               ? `Nothing in ${KIND_LABEL[kind].toLowerCase()} matches “${search}”.`
               : 'Nothing here yet. The corpus syncs overnight.'}
@@ -178,12 +178,12 @@ export function AdoptDialog({
         )}
 
         {entries.length > 0 && (
-          <ul className="tgs-adopt__list">
+          <ul className="sv-adopt__list">
             {entries.map((entry) => (
-              <li className="tgs-adopt__row" key={`${entry.kind}:${entry.sourceId}`}>
-                <span className="tgs-adopt__name">{entry.name}</span>
+              <li className="sv-adopt__row" key={`${entry.kind}:${entry.sourceId}`}>
+                <span className="sv-adopt__name">{entry.name}</span>
                 {entry.adopted ? (
-                  <span className="tgs-adopt__added">
+                  <span className="sv-adopt__added">
                     <Icon name="check" size={16} />
                     Added
                   </span>

@@ -1781,6 +1781,26 @@ export function EditorShell({
     >
     <div
       className="ed-root"
+      /*
+       * THE CLIENT'S BRAND, ON THE WHOLE EDITOR, NOT JUST THE CANVAS.
+       *
+       * Every colour swatch in the properties panel is a THEME TOKEN rather than
+       * a hex: picking "Accent" writes var(--tgs-accent), so the colour follows
+       * the client's brand and keeps following it when they change it. That is
+       * the right design and it looked broken, because the chips draw themselves
+       * with the same token and the panel sits outside the canvas. Outside, the
+       * token falls back to the value in globals.css :root, which is the default
+       * Travelgenix palette: navy, cyan, grey. So an agency was offered a row of
+       * OUR colours, picked one, and watched THEIR colour appear on the card.
+       * Andy, 26 Aug 2026, and he is right that it cannot ship like that.
+       *
+       * Safe to put here rather than thread through every panel because the
+       * editor chrome does not use a single --tgs- token: it is --ed-* from top
+       * to bottom, checked across the whole stylesheet. So this changes nothing
+       * about how the editor looks and everything about what a preview of the
+       * client's own colours and fonts resolves to.
+       */
+      style={siteTheme}
       data-pane={mobilePane}
       data-theme={theme}
       data-outline={panels.outline ? undefined : 'folded'}

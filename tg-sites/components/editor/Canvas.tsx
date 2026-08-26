@@ -620,6 +620,28 @@ export function Canvas({
     const href = link.getAttribute('href') ?? '';
     if (href === '' || href.startsWith('#')) return;
     event.preventDefault();
+
+    /*
+     * AN INTERNAL LINK GOES TO THE PREVIEW OF THAT PAGE, IN THIS TAB.
+     *
+     * Two things were wrong and both showed the day collection cards started
+     * drawing on the canvas, because until then preview had almost nothing
+     * clickable in it. A card links to "/guides/hvar", which is an address on
+     * the CLIENT'S site; resolved against the editor's own origin it is
+     * tg-sites-shell.vercel.app/guides/hvar, and that is a 404. And it opened
+     * in a new tab, which nobody asked for: following a link in a preview
+     * should feel like browsing the site.
+     *
+     * The app already serves the whole site under /preview, so an internal path
+     * is simply prefixed. Same tab, because the editor guards unload and will
+     * ask before losing anything unsaved. An external link still opens away
+     * from the editor, which is what a new tab is actually for.
+     */
+    const internal = href.startsWith('/') && !href.startsWith('//');
+    if (internal) {
+      window.location.assign(href.startsWith('/preview') ? href : `/preview${href}`);
+      return;
+    }
     window.open(link.href, '_blank', 'noopener,noreferrer');
   }, []);
 

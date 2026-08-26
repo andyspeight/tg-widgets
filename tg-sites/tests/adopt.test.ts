@@ -684,3 +684,131 @@ describe('the editor draws the same cards the site does', () => {
     expect(blocks).not.toContain('listPublished');
   });
 });
+
+describe('the card finishes actually do something', () => {
+  const css = readFileSync(resolve(__dirname, '..', 'app', 'globals.css'), 'utf8');
+
+  it('gives every design a rule for every finish it offers', () => {
+    /*
+     * Measured in a browser first: eight of the twelve combinations drew an
+     * identical card, because the overlay and index designs cancelled the
+     * border, the tint and the shadow outright and nothing put them back. The
+     * editor still offered four choices, so the setting looked broken to
+     * anybody who tried it. Andy, 26 Aug 2026: the styling options do not work
+     * very well.
+     */
+    for (const design of ['overlay', 'index']) {
+      for (const style of ['bordered', 'raised', 'tinted']) {
+        expect(css, `${design}/${style}`)
+          .toMatch(new RegExp(`\\[data-design='${design}'\\]\\[data-style='${style}'\\]`));
+      }
+    }
+  });
+
+  it('separates index rows once they each have a surface of their own', () => {
+    // Touching is right for a rule-separated list and wrong for a stack of
+    // boxes: three rows become one tall panel with lines through it.
+    expect(css).toContain(".tgs-cards[data-design='index']:not([data-style='plain'])");
+  });
+
+  it('drops the date column when nothing has a date', () => {
+    // Ten rems reserved for "14 September 2026" on a page of destinations,
+    // which have none, so every row started a third of the way across.
+    expect(css).toContain(".tgs-card:not(:has(.tgs-card__label)) .tgs-card__body");
+  });
+});
+
+describe('following a link in the editor preview', () => {
+  const canvas = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'Canvas.tsx'), 'utf8');
+
+  it('sends an internal link to the preview route, in this tab', () => {
+    /*
+     * A card links to "/guides/hvar", an address on the CLIENT'S site. Resolved
+     * against the editor's own origin that is tg-sites-shell.vercel.app/guides/
+     * hvar, which 404s, and it opened in a new tab as well. Both surfaced the
+     * day collection cards started drawing on the canvas, because until then
+     * preview had almost nothing clickable in it.
+     */
+    expect(canvas).toContain('`/preview${href}`');
+    expect(canvas).toContain('window.location.assign(');
+  });
+
+  it('still sends an external link away from the editor', () => {
+    expect(canvas).toContain("window.open(link.href, '_blank', 'noopener,noreferrer')");
+  });
+});
+
+describe('the client brand reaches the editor, not just the canvas', () => {
+  const shell = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+  const chrome = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'editor.css'), 'utf8');
+
+  it('puts the site theme on the editor root', () => {
+    /*
+     * Every colour swatch is a THEME TOKEN rather than a hex: picking "Accent"
+     * writes var(--tgs-accent) so the colour follows the client's brand and
+     * keeps following it. Right design, and it looked broken, because the chips
+     * draw themselves with the same token and the panel sits outside the canvas.
+     * Outside, the token falls back to globals.css :root, which is the default
+     * Travelgenix palette. An agency was shown a row of OUR colours, picked one,
+     * and watched THEIR colour appear on the card.
+     */
+    const root = shell.slice(shell.indexOf('className="ed-root"'));
+    expect(root.slice(0, 1600)).toContain('style={siteTheme}');
+  });
+
+  it('is safe there, because the chrome owns no site tokens', () => {
+    // The whole reason this can sit on the root rather than be threaded through
+    // every panel: the editor is --ed-* from top to bottom.
+    expect(chrome).not.toContain('--tgs-');
+  });
+
+  it('offers tokens rather than hexes, so a rebrand carries', () => {
+    const styles = readFileSync(resolve(__dirname, '..', 'lib', 'content', 'styles.ts'), 'utf8');
+    const list = styles.slice(styles.indexOf('COLOUR_SWATCHES'), styles.indexOf('HIGHLIGHT_SWATCHES'));
+    expect(list).not.toMatch(/value: '#/);
+    expect(list).toContain("var(--tgs-accent)");
+  });
+});
+
+describe('a cards grid puts its box on the cards', () => {
+  const renderer = readFileSync(resolve(__dirname, '..', 'components', 'render', 'PageRenderer.tsx'), 'utf8');
+  const css = readFileSync(resolve(__dirname, '..', 'app', 'globals.css'), 'utf8');
+
+  it('targets the card rather than the block', () => {
+    /*
+     * Andy, 26 Aug 2026: a card background changed the block background, a
+     * border went round the block, a shadow landed on the block. Everywhere
+     * else "the block" is the thing you can see. Here it is a grid whose
+     * visible parts are the cards, so a background paints behind the gaps and
+     * a border draws a rectangle round the lot.
+     */
+    expect(renderer).toContain("data-box-target={block.type === 'cards' && boxed ? 'card' : undefined}");
+    expect(css).toContain(".tgs-block[data-boxed][data-box-target='card']");
+  });
+
+  it('emits only what was actually set, so a preset is not wiped', () => {
+    /*
+     * boxStyle fills every unset property with transparent and 0, which is
+     * right for a block painting itself and wrong here: touching any box
+     * control would have blanked the finish the card already had. Verified in a
+     * browser: a tinted card given a border keeps its tint.
+     */
+    const fn = renderer.slice(renderer.indexOf('const cardBox'), renderer.indexOf('const style: CSSProperties'));
+    expect(fn).toContain('box.background ?');
+    expect(fn).toContain('box.borderWidth > 0');
+    expect(fn).toContain('box.radius > 0');
+  });
+
+  it('overrides the finish preset rather than losing to it', () => {
+    // Same specificity, so source order decides. The override has to come after.
+    const preset = css.indexOf(".tgs-cards[data-style='tinted']");
+    const override = css.indexOf("[data-box-target='card'][style*='--tgs-card-bg']");
+    expect(preset).toBeGreaterThan(-1);
+    expect(override).toBeGreaterThan(preset);
+  });
+
+  it('leaves padding on the container, where it means space around the grid', () => {
+    const fn = renderer.slice(renderer.indexOf('const cardBox'), renderer.indexOf('const style: CSSProperties'));
+    expect(fn).not.toContain('padding');
+  });
+});

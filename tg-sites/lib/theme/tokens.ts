@@ -223,6 +223,24 @@ export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTok
     // The dark band. A darkened brand rather than a fixed near-black, so a
     // dark-tone section reads as the client's colour rather than as ours.
     '--tgs-surface-dark': brandDark,
+    /*
+     * THE COLOUR EVERY SCRIM IS MADE OF, and until now it was ours.
+     *
+     * globals.css asks for var(--tgs-scrim-colour, #0f172a) in a dozen places:
+     * the wash over a section's background photograph, an overlay card, an
+     * entry's banner, a heading's text shadow. Nothing ever set it, so every
+     * scrim on every client's site was that fallback navy, on the most
+     * prominent element of every page. Found by auditing what themeTokens emits
+     * against what the stylesheet asks for, rather than by looking at a page:
+     * a navy wash over a photograph looks deliberate, which is exactly why it
+     * survived.
+     *
+     * brandDark is the right source and needs no new derivation. It is the
+     * client's own dark, already deepened until light text clears 7:1, so a
+     * scrim built from it is at least as legible as the fixed navy was and
+     * belongs to them.
+     */
+    '--tgs-scrim-colour': brandDark,
 
     '--tgs-text': text,
     '--tgs-text-muted': textMuted,
