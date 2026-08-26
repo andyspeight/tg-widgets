@@ -536,11 +536,18 @@ describe('a build gets longer than a paragraph does', () => {
 
     // A quick first answer leaves nearly the whole budget.
     expect(remainingBudget(start, start + 2_000)).toBe(BUILD_BUDGET_MS - 2_000);
-    // A slow one leaves little, and the caller checks that against a floor.
-    expect(remainingBudget(start, start + 46_000)).toBe(BUILD_BUDGET_MS - 46_000);
-    // Past the budget it is zero, never negative, so no call is made with a
-    // nonsense timeout.
-    expect(remainingBudget(start, start + 90_000)).toBe(0);
+    /*
+     * DERIVED FROM THE BUDGET, not written as a number. The first version used
+     * 90_000 as "past the budget", which was true when the budget was 50s and
+     * quietly false the moment it moved to 100s: the test failed for a reason
+     * that had nothing to do with the behaviour it was checking.
+     */
+    const nearlyGone = BUILD_BUDGET_MS - 4_000;
+    expect(remainingBudget(start, start + nearlyGone)).toBe(4_000);
+
+    // Past the budget it is zero, never negative, so no call is ever made with
+    // a nonsense timeout.
+    expect(remainingBudget(start, start + BUILD_BUDGET_MS + 30_000)).toBe(0);
 
     expect(actions).toContain('const MIN_REPAIR_MS = 8_000;');
     expect(actions).toContain('leftForRepair >= MIN_REPAIR_MS');
@@ -683,6 +690,38 @@ describe('a build has room to think', () => {
     ] as const) {
       expect(cap, `${name} builder has too little room`).toBeGreaterThanOrEqual(1723 * 4);
     }
+  });
+
+  it('sets a proportionate effort rather than paying for more thinking', async () => {
+    /*
+     * The engineered half of the fix. Giving a build 8,192 tokens of room let
+     * adaptive thinking expand into it and the call outran the clock, so the
+     * answer is not only a longer clock: effort controls thinking depth
+     * directly, and a builder choosing from a fixed catalogue is structured
+     * work rather than deep reasoning.
+     */
+    const { BUILD_EFFORT } = await import('../lib/ai/anthropic');
+    expect(BUILD_EFFORT).toBe('medium');
+
+    const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+    const calls = actions.match(/model: MODEL_BUILD[^}]*}/g) ?? [];
+    for (const call of calls) {
+      expect(call, `a build call with no effort: ${call}`).toContain('effort: BUILD_EFFORT');
+    }
+  });
+
+  it('sends output_config only when an effort was asked for', () => {
+    // Every existing caller must send exactly what it always sent.
+    expect(ai).toContain('...(effort ? { output_config: { effort } } : {})');
+  });
+
+  it('keeps the whole budget inside what the route allows, after both moved', async () => {
+    const { BUILD_BUDGET_MS, BUILD_TIMEOUT_MS } = await import('../lib/ai/anthropic');
+    const route = readFileSync(join(ROOT, 'app', 'sites', 'page.tsx'), 'utf8');
+    const seconds = Number(/export const maxDuration = (\d+);/.exec(route)![1]);
+
+    expect(BUILD_BUDGET_MS).toBeLessThan(seconds * 1000);
+    expect(BUILD_TIMEOUT_MS).toBeLessThan(BUILD_BUDGET_MS);
   });
 
   it('says the answer ran out of room, rather than that nothing came back', () => {

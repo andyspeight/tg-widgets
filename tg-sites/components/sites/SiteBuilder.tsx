@@ -238,7 +238,8 @@ export function SiteBuilder({
               onClick={() => void plan()}
             >
               <Icon name="sparkle" size={16} />
-              {busy ? 'Planning…' : 'Plan the pages'}
+              {/* Named honestly: this call thinks, and a silent minute reads as a hang. */}
+            {busy ? 'Planning, up to a minute…' : 'Plan the pages'}
             </button>
           </>
         }
@@ -426,7 +427,7 @@ export function SiteBuilder({
       description={
         finished
           ? 'Everything arrived as a draft, so nothing is live until you publish it.'
-          : 'One page at a time. This takes a moment per page.'
+          : 'One page at a time, and each one can take up to a minute.'
       }
       size="large"
       onClose={finished ? onClose : () => undefined}

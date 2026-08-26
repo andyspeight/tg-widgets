@@ -37,6 +37,7 @@ import {
   aiIsConfigured,
   AiError,
   ask,
+  BUILD_EFFORT,
   BUILD_TIMEOUT_MS,
   MODEL_BUILD,
   remainingBudget,
@@ -483,7 +484,7 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
 
     let inputTokens = 0;
     let outputTokens = 0;
-    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     const first = await ask(system, buildUserPrompt(instruction), build);
     inputTokens += first.inputTokens;
@@ -677,7 +678,7 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
 
     const system = buildSiteSystemPrompt(settings, existingTitles);
     const userPrompt = buildSiteUserPrompt(brief);
-    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     let inputTokens = 0;
     let outputTokens = 0;
@@ -789,7 +790,7 @@ export async function describePagesAction(input: unknown): Promise<SitePlanActio
     const settings = await getSettings(site.tenantId);
     const system = buildDescribeSystemPrompt(settings);
     const userPrompt = buildDescribeUserPrompt(titles);
-    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     let inputTokens = 0;
     let outputTokens = 0;
@@ -883,7 +884,7 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     const userPrompt = buildPageUserPrompt(
       purpose ? `The page is called "${title}". ${purpose}` : `A page called "${title}".`,
     );
-    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     let inputTokens = 0;
     let outputTokens = 0;
@@ -1042,8 +1043,8 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
     // The picture rides along on both attempts, so the model sees it whether the
     // first answer parsed or the repair did.
     const build = imageUrl
-      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, image: { url: imageUrl } }
-      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT, image: { url: imageUrl } }
+      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
     const userPrompt = buildPageUserPrompt(brief, Boolean(imageUrl));
 
     let inputTokens = 0;

@@ -28,13 +28,15 @@ export const dynamic = 'force-dynamic';
 /*
  * A minute, for the duplicate action.
  *
- * Every other thing this route does is quick, but duplicateSiteAction copies a
- * whole site including every image object one at a time, and an image-heavy site
- * runs well past the default limit. The rest of the route is unaffected: this is
+ * Two things here are slow. duplicateSiteAction copies a whole site including
+ * every image object one at a time, and an image-heavy site runs well past the
+ * default limit. The AI site planner is the other: it runs on the build model
+ * with thinking on, and its own budget has to sit inside this number so a slow
+ * answer times out with a message rather than being killed without one. The rest of the route is unaffected: this is
  * a ceiling, not a reservation. A site so large it needs longer than this would
  * want a background job rather than a bigger number here.
  */
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 export default async function SitesPage() {
   let user: Awaited<ReturnType<typeof currentUser>> = null;
