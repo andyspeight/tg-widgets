@@ -140,9 +140,26 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
  * 0020): published, but with a go-live time still ahead, so the public cannot
  * see it yet. Computed here so the writing screen can, and can say so.
  */
+/**
+ * The columns every item read hands back.
+ *
+ * `id` IS QUALIFIED, and it has to be. This fragment is spliced into seven
+ * statements, six of which touch collection_items alone. The seventh is getItem,
+ * which joins collections to fetch the entry's schema alongside it, and
+ * collections has an `id` of its own: a bare one there is ambiguous, so Postgres
+ * refused the statement outright with 42702 and the editor answered a 500 to
+ * anybody opening a collection entry.
+ *
+ * It had never fired because nothing opened an entry in the editor until
+ * adopting a destination started redirecting to /editor?item=. Qualified by
+ * table name rather than an alias because five of the seven uses are RETURNING
+ * clauses, where there is no alias to use; checked against the database that
+ * this parses in both positions.
+ */
 function summary(tx: Tx) {
   return tx`
-    id, collection_id, slug, status, published_at, updated_at,
+    public.collection_items.id as id,
+    collection_id, slug, status, published_at, updated_at,
     data->>'title' as title,
     (published_at is null or updated_at > published_at) as has_unpublished_changes,
     (status = 'published' and published_at is not null and published_at > now()) as scheduled

@@ -597,3 +597,30 @@ describe('adoption does its slow work outside the database transaction', () => {
     expect(fn).toContain('if (banner?.backgroundImage) seed.image = banner.backgroundImage;');
   });
 });
+
+describe('opening an adopted entry in the editor', () => {
+  const db = readFileSync(resolve(__dirname, '..', 'lib', 'db', 'collections.ts'), 'utf8');
+
+  it('qualifies the id, because getItem joins a table that has one too', () => {
+    /*
+     * Postgres 42702, "column reference id is ambiguous". The shared column
+     * fragment opened with a bare `id` and getItem joins public.collections,
+     * which has its own. Postgres refused the statement, so the editor answered
+     * a 500 to anybody opening a collection entry.
+     *
+     * It sat there unnoticed because nothing opened an entry in the editor until
+     * adopting a destination started redirecting to /editor?item=. Andy hit it
+     * on the first click.
+     */
+    const fragment = db.slice(db.indexOf('function summary(tx: Tx)'));
+    const columns = fragment.slice(fragment.indexOf('`'), fragment.indexOf('`', fragment.indexOf('`') + 1));
+    expect(columns).toContain('public.collection_items.id as id');
+    expect(columns).not.toMatch(/`\s*\n\s*id,/);
+  });
+
+  it('still joins the collection, which is what the entry editor needs', () => {
+    const fn = db.slice(db.indexOf('export async function getItem'));
+    expect(fn.slice(0, 700)).toContain('join public.collections c');
+    expect(fn.slice(0, 700)).toContain('c.fields as collection_fields');
+  });
+});
