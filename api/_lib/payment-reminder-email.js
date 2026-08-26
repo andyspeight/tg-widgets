@@ -124,13 +124,109 @@ function step(num, title, body) {
  * @param {{n: number, of: number}} [p.sequence]  Which email in the chase this is (1-based) and how many are planned
  * @returns {{subject: string, preheader: string, html: string}}
  */
-export function renderReminderEmail({ agency, customerFirstName, orderRef, charge, dueDateIso, payUrl, sequence }) {
+// ── Client-authored copy ─────────────────────────────────────────────────────
+// A client can write their OWN reminder wording in the My Booking editor, per
+// stage (interim / final), using merge tags. We fill the tags, escape every
+// value, wrap their prose in the same branded, deliverability-safe shell and add
+// the "Pay my balance" button for them. Tags are case-insensitive; an unknown
+// tag is left as-is so a typo shows rather than silently blanking.
+function applyMergeTags(text, vars) {
+  return String(text == null ? '' : text).replace(/\{\s*([a-zA-Z]+)\s*\}/g, (m, key) => {
+    const k = key.toLowerCase();
+    return Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k] == null ? '' : vars[k]) : m;
+  });
+}
+
+// Plain-text body -> safe HTML. A blank line starts a new paragraph, a single
+// newline is a line break. Everything is escaped: no client HTML reaches email.
+function bodyToHtml(text) {
+  return String(text || '').replace(/\r\n/g, '\n').split(/\n{2,}/)
+    .map((b) => b.trim()).filter(Boolean)
+    .map((b) => `<p style="margin:0 0 15px;font-family:${FONT};font-size:15px;line-height:1.65;color:${C.textSecondary};">${escHtml(b).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+
+// The branded shell for client-authored copy: logo + booking ref, the author's
+// prose, the auto "Pay my balance" button, agency contacts and footer. Same
+// chrome as the default template so deliverability is identical.
+function renderCustomReminder({ subject, preheader, bodyHtml, name, logoUrl, orderRef, payUrl, supportPhone, supportEmail, footerLine }) {
+  const logo = logoUrl
+    ? `<img src="${escHtml(logoUrl)}" alt="${escHtml(name)}" height="32" style="display:block;height:32px;max-width:220px;border:0;">`
+    : `<span style="font-family:${FONT};font-size:15px;font-weight:700;letter-spacing:-0.01em;color:${C.textPrimary};">${escHtml(name)}</span>`;
+  const refCell = orderRef
+    ? `<td align="right" style="font-family:${FONT};font-size:11px;color:${C.textTertiary};">Booking ref&nbsp;&middot;&nbsp;<span style="color:${C.textPrimary};font-weight:600;">${escHtml(orderRef)}</span></td>`
+    : '<td></td>';
+  const ctaBlock = payUrl ? `
+    <tr><td style="padding:8px 32px 8px;">${bulletproofButton(payUrl, 'Pay my balance')}</td></tr>
+    <tr><td align="center" style="padding:0 32px 28px;font-family:${FONT};font-size:12px;color:${C.textTertiary};">The secure payment page opens on our website.</td></tr>` : '';
+  const contacts = [];
+  if (supportPhone) contacts.push(`<a href="tel:${escHtml(String(supportPhone).replace(/[^+\d]/g, ''))}" style="font-family:${FONT};font-size:13px;font-weight:600;color:${C.navy};text-decoration:none;">${escHtml(supportPhone)}</a>`);
+  if (supportEmail) contacts.push(`<a href="mailto:${escHtml(supportEmail)}" style="font-family:${FONT};font-size:13px;font-weight:600;color:${C.navy};text-decoration:none;">${escHtml(supportEmail)}</a>`);
+  const contactsBlock = contacts.length ? `
+    <tr><td bgcolor="${C.bgSecondary}" style="padding:20px 32px;border-top:1px solid ${C.border};" align="center">
+      <div style="font-family:${FONT};font-size:13px;color:${C.textSecondary};padding-bottom:8px;">Prefer to talk to us?</div>
+      <div>${contacts.join('&nbsp;&nbsp;&middot;&nbsp;&nbsp;')}</div>
+    </td></tr>` : '';
+  const footer = (footerLine ? `${escHtml(footerLine)}<br>` : '')
+    + `You are receiving this email because you have a booking with ${escHtml(name)}.${orderRef ? ` Booking reference ${escHtml(orderRef)}.` : ''}`;
+  return `<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light"><title>${escHtml(subject)}</title></head>
+<body style="margin:0;padding:0;background:#f1f5f9;">
+  <span style="display:none;font-size:1px;color:#f1f5f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${escHtml(preheader)}</span>
+  <table border="0" cellspacing="0" cellpadding="0" width="100%" bgcolor="#f1f5f9"><tr><td align="center" style="padding:32px 12px;">
+    <table border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;max-width:100%;background:#ffffff;border-radius:12px;">
+      <tr><td style="padding:20px 32px;border-bottom:1px solid ${C.border};">
+        <table border="0" cellspacing="0" cellpadding="0" width="100%"><tr><td>${logo}</td>${refCell}</tr></table>
+      </td></tr>
+      <tr><td style="padding:34px 32px 8px;">${bodyHtml}</td></tr>
+      ${ctaBlock}
+      ${contactsBlock}
+      <tr><td align="center" style="padding:20px 32px 26px;border-top:1px solid #f1f5f9;">
+        <div style="font-family:${FONT};font-size:11px;line-height:1.6;color:${C.textTertiary};">${footer}</div>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body></html>`;
+}
+
+export function renderReminderEmail({ agency, customerFirstName, orderRef, charge, dueDateIso, payUrl, sequence, template, instalment }) {
   const name = (agency && agency.name) || 'Your travel team';
   const money = formatMoney(charge.amount, charge.currency);
   const dueLong = formatLongDate(dueDateIso);
   const dueBy = dueLong ? ` by ${dueLong}` : '';
   const first = typeof customerFirstName === 'string' && customerFirstName.trim()
     ? customerFirstName.trim() : '';
+
+  // When the client has written their own copy for this stage, render THAT (with
+  // merge tags filled) instead of the built-in template. Values are display-ready
+  // and escaped inside bodyToHtml; the pay button is added for them.
+  if (template && typeof template.body === 'string' && template.body.trim()) {
+    const mergeVars = {
+      firstname: first, name: first,
+      amount: money,
+      duedate: dueLong || '',
+      balance: Number.isFinite(charge.outstanding) ? formatMoney(charge.outstanding, charge.currency) : money,
+      agencyname: (agency && agency.name) || name,
+      agencyphone: (agency && agency.supportPhone) || '',
+      agencyemail: (agency && agency.supportEmail) || '',
+      bookingref: orderRef || '',
+      instalmentnumber: (instalment && Number.isFinite(instalment.number)) ? String(instalment.number) : '',
+      instalmenttotal: (instalment && Number.isFinite(instalment.total)) ? String(instalment.total) : '',
+    };
+    const custSubject = (template.subject && String(template.subject).trim())
+      ? applyMergeTags(template.subject, mergeVars).slice(0, 200)
+      : `A payment reminder from ${name}`;
+    const custPre = `A reminder from ${name}${money ? `: ${money} due` : ''}${dueBy}${orderRef ? ` on booking ${orderRef}` : ''}.`;
+    const html = renderCustomReminder({
+      subject: custSubject, preheader: custPre, bodyHtml: bodyToHtml(applyMergeTags(template.body, mergeVars)),
+      name, logoUrl: agency && agency.logoUrl, orderRef, payUrl,
+      supportPhone: agency && agency.supportPhone, supportEmail: agency && agency.supportEmail,
+      footerLine: agency && agency.footerLine,
+    });
+    return { subject: custSubject, preheader: custPre, html };
+  }
 
   const seqN = sequence && Number.isFinite(sequence.n) ? sequence.n : 1;
   const seqOf = sequence && Number.isFinite(sequence.of) ? sequence.of : 1;
