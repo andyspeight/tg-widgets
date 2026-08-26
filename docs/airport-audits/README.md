@@ -38,3 +38,21 @@ client site until their own audit.
 | Spain and Greece | 40 (+7 elsewhere) | 25 Aug 2026 | [Spain-Greece.md](Spain-Greece.md) |
 | USA | 14 | 25 Aug 2026 | [USA.md](USA.md) |
 | Gulf, Turkey, North Africa | 17 | 25 Aug 2026 | [Gulf-North-Africa.md](Gulf-North-Africa.md) |
+
+## Complete — 26 August 2026
+
+**All 225 airport records are Status Done and carry an August 2026 Verified
+Date.** Zero remain gated; zero remain on the May 2026 stamp that started this
+work.
+
+| Batch | Records | Log |
+|---|---|---|
+| France | 8 | [France.md](France.md) |
+| Italy | 10 | [Italy.md](Italy.md) |
+| Schengen (rest) | 24 | [Schengen.md](Schengen.md) |
+| Australia, India, USA, Thailand, Canada, Ireland | 32 | [Six-blocks.md](Six-blocks.md) |
+| Long tail (46 countries) | 46 | [Long-tail.md](Long-tail.md) |
+| Flight times, all overseas | 201 | [flight-times/](flight-times/) |
+
+Earlier batches (UK origins, Spain and Greece, USA, Gulf and North Africa,
+Manchester) are listed in the table above this section.

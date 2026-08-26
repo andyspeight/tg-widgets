@@ -239,7 +239,7 @@ function mergeImportOntoExisting(existingOffer, cleaned) {
 // PRESENT (even as []) stays authoritative so the author can still clear it.
 // Presence is read from the RAW body because cleanOffer has already coerced an
 // absent array into []. This is the server half of the disappearing-images fix.
-const PRESERVE_ON_ABSENT = ['images', 'includes', 'excludes', 'promos', 'imageBadges', 'tags'];
+const PRESERVE_ON_ABSENT = ['images', 'includes', 'excludes', 'promos', 'imageBadges', 'tags', 'cruiseRoute', 'i18n', 'i18nMeta', 'audienceLanguages'];
 function preserveOmittedContent(cleaned, rawOffer, existingOffer) {
   const raw = (rawOffer && typeof rawOffer === 'object' && !Array.isArray(rawOffer)) ? rawOffer : {};
   const ex = (existingOffer && typeof existingOffer === 'object') ? existingOffer : {};
