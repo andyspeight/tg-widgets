@@ -19,7 +19,7 @@
  */
 
 import { FONTS, type FontId } from './schema';
-import { TEXT_STYLES, type Typography } from './typography';
+import { FONT_WEIGHTS, TEXT_STYLES, type Typography } from './typography';
 
 /** What this module needs to know about a family in the library. */
 export interface LibraryFont {
@@ -38,10 +38,39 @@ export interface LibraryFontFile {
   family: string;
   /** Carried on every file so the family list can be derived from the files. */
   fallback: LibraryFont['fallback'];
+  /** The lightest weight this file covers. */
   weight: number;
+  /**
+   * The heaviest weight it covers, or null for a single-weight file.
+   *
+   * A variable font is ONE file spanning a range. Storing that range rather
+   * than a row per weight is what lets the @font-face below declare it, so the
+   * browser downloads the file once and interpolates the weights between.
+   */
+  weightMax?: number | null;
   style: 'normal' | 'italic';
   format: string;
   unicodeRange: string | null;
+}
+
+/**
+ * The standard weights a file actually offers, expanding a variable range.
+ *
+ * A file covering 400 to 700 can render 500 and 600 as well, and the type panel
+ * has to know that or a client who picks a variable family is offered one
+ * weight. Expanded to the four standard steps rather than to every integer:
+ * those are the ones the panel names, and a range covers the ones inside it.
+ */
+export function weightsCovered(file: {
+  weight: number;
+  weightMax?: number | null;
+}): number[] {
+  const top = file.weightMax ?? file.weight;
+  if (top <= file.weight) return [file.weight];
+  const steps = FONT_WEIGHTS.filter((w) => w >= file.weight && w <= top);
+  // Keep the ends even when they are not standard steps, so a 350-450 face is
+  // not reported as offering nothing.
+  return [...new Set([file.weight, ...steps, top])].sort((a, b) => a - b);
 }
 
 /**
@@ -56,16 +85,21 @@ export function familiesFromFiles(files: LibraryFontFile[]): LibraryFont[] {
   const byslug = new Map<string, LibraryFont>();
 
   for (const file of files) {
+    // Every weight the file can render, not just the one it is filed under, or
+    // a variable family reports a single weight and the type panel offers one.
+    const covered = weightsCovered(file);
     const existing = byslug.get(file.slug);
     if (existing) {
-      if (!existing.weights.includes(file.weight)) existing.weights.push(file.weight);
+      for (const weight of covered) {
+        if (!existing.weights.includes(weight)) existing.weights.push(weight);
+      }
       continue;
     }
     byslug.set(file.slug, {
       slug: file.slug,
       family: file.family,
       fallback: file.fallback,
-      weights: [file.weight],
+      weights: [...covered],
     });
   }
 
@@ -238,9 +272,22 @@ export function fontFaceCss(
     }')`;
 
     // No newlines or spare spaces. This goes in every page's HTML.
+    /*
+     * A RANGE WHEN THE FILE COVERS ONE, and it does two things at once.
+     *
+     * The browser downloads a variable file once instead of once per weight,
+     * and it can render the weights BETWEEN the steps. A face pinned to a
+     * single weight says "this file is 700", so a style asking for 650 snaps to
+     * the nearest pinned face: measured in Chromium, Coastwise's h2 at 650 came
+     * out at exactly the width of 700. With the range declared the same file
+     * renders 650 between 400 and 700, where the client asked for it.
+     */
+    const top = file.weightMax ?? file.weight;
+    const weight = top > file.weight ? `${file.weight} ${top}` : `${file.weight}`;
+
     rules.push(
       `@font-face{font-family:'${file.family}';font-style:${file.style};` +
-        `font-weight:${file.weight};font-display:swap;src:${src};` +
+        `font-weight:${weight};font-display:swap;src:${src};` +
         (file.unicodeRange ? `unicode-range:${file.unicodeRange};` : '') +
         '}',
     );
@@ -295,7 +342,25 @@ export function fontPreloads(
 
   for (const file of files) {
     if (file.format !== 'woff2') continue;
-    if (!wanted.has(`${file.slug}:${file.weight}`)) continue;
+
+    /*
+     * Wanted if ANY weight the page asks for falls inside this file's range.
+     *
+     * A variable file covering 400 to 700 answers for every style using this
+     * family, so matching on the single weight it is filed under would have
+     * skipped the preload for a page whose body is 400 and whose headings are
+     * 700, and preloaded the same bytes twice when it did match.
+     */
+    const top = file.weightMax ?? file.weight;
+    let asked = false;
+    for (const key of wanted) {
+      const [slug, weight] = key.split(':');
+      if (slug === file.slug && Number(weight) >= file.weight && Number(weight) <= top) {
+        asked = true;
+        break;
+      }
+    }
+    if (!asked) continue;
 
     /*
      * One file per family and weight, and the FIRST one wins.
@@ -306,7 +371,13 @@ export function fontPreloads(
      * in English will actually need", and it is asserted by a test rather than
      * left as a coincidence of the ORDER BY.
      */
-    const key = `${file.slug}:${file.weight}`;
+    /*
+     * Keyed on the RANGE, not on a single weight. A static family filed at 400
+     * and 700 is two ranges and still gets two preloads, one per weight, which
+     * is what it needs. A variable family is one range however many weights the
+     * page uses, so its file is preloaded once rather than once per weight.
+     */
+    const key = `${file.slug}:${file.weight}:${top}`;
     if (seen.has(key)) continue;
     seen.add(key);
 

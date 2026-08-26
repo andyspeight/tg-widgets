@@ -75,7 +75,17 @@ export const BROWSER_UA =
  * woff upload would have been stored as woff2 and served with the wrong type.
  */
 export interface FontFile {
+  /** The lightest weight this file covers. */
   weight: number;
+  /**
+   * The heaviest weight it covers, or null when it is a single weight.
+   *
+   * A VARIABLE FONT IS ONE FILE FOR A WHOLE RANGE, and Google says so by
+   * pointing every weight's @font-face at the same url. Recording the range
+   * rather than storing the file once per weight is what lets the browser
+   * download it once and interpolate the weights in between.
+   */
+  weightMax: number | null;
   format: FontFormat;
   bytes: Uint8Array;
   /** Which Latin subset, or null when the file is not split by subset. */
@@ -300,10 +310,38 @@ export async function importGoogleFamily(
     );
   }
 
+  /*
+   * ONE DOWNLOAD PER FILE, NOT PER WEIGHT.
+   *
+   * Google returns a variable family as one file per SUBSET, referenced by one
+   * @font-face per weight, all pointing at the same url. Fetching per face
+   * therefore downloaded the identical file four times and stored it four
+   * times, and because each stored row got its own id it also got its own
+   * /fonts/<tenant>/<id>.woff2 url, so a browser could not tell they were the
+   * same file either and downloaded it again per weight. Coastwise was
+   * preloading 102,384 bytes across three requests for 34,928 bytes of font.
+   *
+   * Grouping on the url is exactly the signal Google is giving us. A static
+   * family answers with a different url per weight and groups of one, so it
+   * behaves as it always did.
+   */
+  const byUrl = new Map<string, { weights: number[]; subset: string; unicodeRange: string | null }>();
+  for (const face of faces) {
+    const group = byUrl.get(face.url);
+    if (group) group.weights.push(face.weight);
+    else byUrl.set(face.url, {
+      weights: [face.weight],
+      subset: face.subset,
+      unicodeRange: face.unicodeRange,
+    });
+  }
+
   const files: FontFile[] = [];
   let total = 0;
 
-  for (const face of faces) {
+  for (const [url, group] of byUrl) {
+    const weights = [...group.weights].sort((a, b) => a - b);
+    const face = { url, weight: weights[0], subset: group.subset, unicodeRange: group.unicodeRange };
     const file = await fetchImpl(face.url);
     if (!file.ok) throw new Error(`Could not download ${family} ${face.weight}.`);
 
@@ -322,7 +360,10 @@ export async function importGoogleFamily(
     }
 
     files.push({
-      weight: face.weight,
+      weight: weights[0],
+      // Null for a static face, so nothing downstream has to special-case the
+      // ordinary one-weight-one-file family.
+      weightMax: weights.length > 1 ? weights[weights.length - 1] : null,
       format: 'woff2',
       bytes,
       subset: face.subset as Subset,
