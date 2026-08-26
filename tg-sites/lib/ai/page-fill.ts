@@ -43,11 +43,16 @@ export const FILL_MAX_TOKENS = 8192;
 /**
  * The most slots offered in one go.
  *
- * A page of eight sections has perhaps twenty. Past this the answer is long
- * enough to be unreliable, and the tail is the least important copy on the page,
- * so the rest keep their factory text and the stripper takes them out.
+ * Raised from 24 when the slots stopped being only headings and paragraphs: a
+ * single three-card block is twelve slots on its own. Past this the answer is
+ * long enough to be unreliable, and the tail is the least important copy on
+ * the page, so the rest keep their factory text and the stripper takes them
+ * out.
  */
-export const MAX_SLOTS = 24;
+export const MAX_SLOTS = 64;
+
+/** The most items of one repeater offered. Past eight, nobody is reading them. */
+const MAX_ITEMS = 8;
 
 /** A heading is a line. A paragraph is a paragraph. */
 const MAX_HEADING = 90;
@@ -55,9 +60,26 @@ const MAX_BODY = 400;
 
 /** One thing on the page that needs words. */
 export interface Slot {
+  /**
+   * The block's own id, or a composite address into a block's items:
+   * `blk_x` for a heading or paragraph's html, `blk_x:item:2:title` for one
+   * field of one card or step, `blk_x:prop:title` for a field that sits
+   * directly on the block's props (an icon-item). Composite, because the model
+   * answers with these keys and an id it was never offered is dropped — so
+   * copy cannot land in the wrong slot however shuffled the answer.
+   */
   id: string;
   /** 'heading' or 'text', so the model knows a line from a paragraph. */
   kind: 'heading' | 'text';
+  /**
+   * True when the destination is a PLAIN-TEXT prop rather than a block's html.
+   *
+   * The difference is the apostrophe bug, third time round. Heading and text
+   * blocks store html, so their words are HTML-escaped on the way in. A card
+   * item's title is a plain string that React escapes at render — escaping it
+   * here too would ship "Halcyon Bay&#39;s" into the editor and the page.
+   */
+  plain?: boolean;
   /** What the preset put there, which says what the slot is FOR. */
   current: string;
 }
@@ -78,18 +100,68 @@ function visible(block: Block): string {
  */
 export function slotsOf(sections: readonly Section[]): Slot[] {
   const slots: Slot[] = [];
+  const add = (slot: Slot) => {
+    if (slots.length < MAX_SLOTS) slots.push(slot);
+  };
+
+  /** One plain-text field of one repeater item, offered under a composite key. */
+  const itemField = (
+    blockId: string,
+    index: number,
+    field: string,
+    value: unknown,
+    kind: Slot['kind'],
+  ) => {
+    // Only fields the preset item actually carries. An empty field is a design
+    // choice (a card with no label), not a slot waiting for words.
+    const current = typeof value === 'string' ? value.trim() : '';
+    if (!current) return;
+    add({ id: `${blockId}:item:${index}:${field}`, kind, plain: true, current: current.slice(0, 200) });
+  };
 
   for (const section of sections) {
     for (const row of section.rows) {
       for (const column of row.columns) {
         for (const block of column.blocks) {
           if (slots.length >= MAX_SLOTS) return slots;
-          if (block.type !== 'heading' && block.type !== 'text') continue;
-          slots.push({
-            id: block.id,
-            kind: block.type,
-            current: visible(block).slice(0, 200),
-          });
+
+          if (block.type === 'heading' || block.type === 'text') {
+            add({ id: block.id, kind: block.type, current: visible(block).slice(0, 200) });
+            continue;
+          }
+
+          /*
+           * COMPOSITE KEYS NEED THE COLON TO BE OURS. App-minted ids are
+           * base36 after `blk_`, so a colon can never appear in one — but the
+           * schema only requires a non-empty string, and an imported page
+           * could carry anything. A block whose own id contains a colon is
+           * skipped rather than risking an ambiguous parse.
+           */
+          if (block.id.includes(':')) continue;
+
+          const props = (block.props ?? {}) as Record<string, unknown>;
+
+          if (block.type === 'cards' || block.type === 'steps') {
+            const items = Array.isArray(props.items)
+              ? (props.items as Array<Record<string, unknown>>)
+              : [];
+            items.slice(0, MAX_ITEMS).forEach((item, index) => {
+              // The fields a card carries; a step has only the first two.
+              itemField(block.id, index, 'title', item.title, 'heading');
+              itemField(block.id, index, 'body', item.body, 'text');
+              itemField(block.id, index, 'label', item.label, 'heading');
+              itemField(block.id, index, 'linkLabel', item.linkLabel, 'heading');
+            });
+            continue;
+          }
+
+          if (block.type === 'icon-item') {
+            // A single item whose fields sit directly on props.
+            const title = typeof props.title === 'string' ? props.title.trim() : '';
+            const body = typeof props.body === 'string' ? props.body.trim() : '';
+            if (title) add({ id: `${block.id}:prop:title`, kind: 'heading', plain: true, current: title.slice(0, 200) });
+            if (body) add({ id: `${block.id}:prop:body`, kind: 'text', plain: true, current: body.slice(0, 200) });
+          }
         }
       }
     }
@@ -113,6 +185,7 @@ How to write them:
 - Write EVERY slot you are given. A slot you skip keeps the placeholder it has now, and a page with "This is a short title" on it reads as broken.
 - What a slot currently says tells you what it is FOR. "Tagline here" under a headline wants one line of support, not a second headline. A short title above a paragraph in a list of questions wants a question.
 - A heading is one line and carries no full stop unless it is a question. A paragraph is one to three sentences.
+- Slots addressed like "id:item:2:title" are one entry in a row of cards or steps. Each entry is its own thing: three cards saying the same thing in different words read as padding. A "label" is two or three words (a place, a date, a price band). A "linkLabel" is a short invitation like "See the island", never a sentence.
 - Do not repeat yourself. The same fact stated in three sections reads as padding, and a visitor scanning the page sees it at once.
 - Invent no facts. No price, date, award, number, rating or place detail the profile and the brief did not give you. Where a claim would help and you do not have it, write around it. That applies twice over to terms, privacy and financial protection: say what the page covers and that the company sets out the detail, never invented policy.`;
 
@@ -157,8 +230,12 @@ export type FillResult =
 /**
  * Whatever the model said, turned into copy we would put on a page.
  *
- * Escaped here, the escape-first rule the page builder and the copy writer both
- * follow: these words are written straight into a block's html.
+ * ESCAPED BY DESTINATION, not uniformly, and the difference is a bug this
+ * feature has now had twice. Words bound for a heading or text block's html
+ * are HTML-escaped on the way in, the escape-first rule the page builder and
+ * the copy writer follow. Words bound for a PLAIN prop (a card item's title, a
+ * step's body) are stripped to text and nothing more, because React escapes
+ * them at render and a second escape ships "&#39;" to the screen.
  */
 export function fillFromModel(answer: unknown, slots: readonly Slot[]): FillResult {
   const parsed = typeof answer === 'string' ? extractJson(answer) : answer;
@@ -166,16 +243,19 @@ export function fillFromModel(answer: unknown, slots: readonly Slot[]): FillResu
     return { ok: false, error: 'the answer was not a JSON object' };
   }
 
-  const wanted = new Map(slots.map((slot) => [slot.id, slot.kind]));
+  const wanted = new Map(slots.map((slot) => [slot.id, { kind: slot.kind, plain: slot.plain === true }]));
   const record = parsed as Record<string, unknown>;
   const copy: Record<string, string> = {};
 
   for (const [id, value] of Object.entries(record)) {
-    const kind = wanted.get(id);
+    const slot = wanted.get(id);
     // An id we did not offer is not a slot on this page.
-    if (!kind) continue;
+    if (!slot) continue;
 
-    const words = escapeHtml(toText(value)).slice(0, kind === 'heading' ? MAX_HEADING : MAX_BODY).trim();
+    const text = toText(value);
+    const words = (slot.plain ? text : escapeHtml(text))
+      .slice(0, slot.kind === 'heading' ? MAX_HEADING : MAX_BODY)
+      .trim();
     if (words) copy[id] = words;
   }
 
@@ -190,6 +270,32 @@ export function fillFromModel(answer: unknown, slots: readonly Slot[]): FillResu
  * instruction means the placeholder stripper removes it. That is the right
  * order: better a shorter page than one carrying "Tagline here".
  */
+/** The composite answers addressed to one block, parsed off their keys. */
+function answersFor(blockId: string, copy: Record<string, string>) {
+  const items: Array<{ index: number; field: string; words: string }> = [];
+  const props: Array<{ field: string; words: string }> = [];
+
+  const itemPrefix = `${blockId}:item:`;
+  const propPrefix = `${blockId}:prop:`;
+
+  for (const [key, words] of Object.entries(copy)) {
+    if (key.startsWith(itemPrefix)) {
+      const [indexPart, field] = key.slice(itemPrefix.length).split(':');
+      const index = Number(indexPart);
+      if (Number.isInteger(index) && index >= 0 && field) items.push({ index, field, words });
+    } else if (key.startsWith(propPrefix)) {
+      const field = key.slice(propPrefix.length);
+      if (field) props.push({ field, words });
+    }
+  }
+
+  return { items, props };
+}
+
+/** The item fields the fill is allowed to write. Nothing structural, ever. */
+const ITEM_FIELDS = new Set(['title', 'body', 'label', 'linkLabel']);
+const PROP_FIELDS = new Set(['title', 'body']);
+
 export function applyFill(sections: Section[], copy: Record<string, string>): Section[] {
   return sections.map((section) => ({
     ...section,
@@ -198,19 +304,54 @@ export function applyFill(sections: Section[], copy: Record<string, string>): Se
       columns: row.columns.map((column) => ({
         ...column,
         blocks: column.blocks.map((block) => {
-          const words = copy[block.id];
-          if (!words) return block;
-          if (block.type !== 'heading' && block.type !== 'text') return block;
+          if (block.type === 'heading' || block.type === 'text') {
+            const words = copy[block.id];
+            if (!words) return block;
+            return {
+              ...block,
+              props: {
+                ...block.props,
+                // A heading is written bare; a paragraph is wrapped, the same shape
+                // buildSection uses so the renderer sees nothing new.
+                html: block.type === 'heading' ? words : `<p>${words}</p>`,
+              },
+            };
+          }
 
-          return {
-            ...block,
-            props: {
-              ...block.props,
-              // A heading is written bare; a paragraph is wrapped, the same shape
-              // buildSection uses so the renderer sees nothing new.
-              html: block.type === 'heading' ? words : `<p>${words}</p>`,
-            },
-          };
+          const { items, props } = answersFor(block.id, copy);
+
+          if ((block.type === 'cards' || block.type === 'steps') && items.length > 0) {
+            const existing = (block.props as Record<string, unknown>)?.items;
+            if (!Array.isArray(existing)) return block;
+
+            const next = (existing as Array<Record<string, unknown>>).map((item) => ({ ...item }));
+            for (const { index, field, words } of items) {
+              /*
+               * Only a field the item ALREADY carries non-empty, and only from
+               * the allowed set. The fill writes words into slots that exist;
+               * it cannot add a field the design left out, and an index past
+               * the array is dropped rather than growing it.
+               */
+              if (!ITEM_FIELDS.has(field)) continue;
+              const item = next[index];
+              if (!item) continue;
+              if (typeof item[field] !== 'string' || !(item[field] as string).trim()) continue;
+              item[field] = words;
+            }
+            return { ...block, props: { ...block.props, items: next } };
+          }
+
+          if (block.type === 'icon-item' && props.length > 0) {
+            const nextProps = { ...(block.props as Record<string, unknown>) };
+            for (const { field, words } of props) {
+              if (!PROP_FIELDS.has(field)) continue;
+              if (typeof nextProps[field] !== 'string' || !(nextProps[field] as string).trim()) continue;
+              nextProps[field] = words;
+            }
+            return { ...block, props: nextProps };
+          }
+
+          return block;
         }),
       })),
     })),

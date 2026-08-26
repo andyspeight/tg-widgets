@@ -586,16 +586,22 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
  *
  * THE ONE PATH EVERY AI-BUILT PAGE TAKES, in the one order that works:
  *
- *   1. BUILD  the chosen presets into real sections, each with its heading and
- *             opening paragraph.
- *   2. FILL   every remaining slot with its own words, so a section is not a
- *             headline sitting on the copy a preset ships with.
- *   3. STRIP  whatever the fill could not reach, so no page ever leaves here
- *             carrying "Tagline here".
+ *   1. BUILD   the chosen presets into real sections, each with its heading and
+ *              opening paragraph.
+ *   2. FILL    every slot with its own words — headings, paragraphs, card and
+ *              step entries, icon items — so a section is not a headline
+ *              sitting on the copy a preset ships with.
+ *   3. PHOTOS  from the FILLED sections, so a card rewritten to say Barbados
+ *              searches for Barbados, and while every address in the photo plan
+ *              still points at the block it was computed for.
+ *   4. STRIP   whatever the fill could not reach, so no page ever leaves here
+ *              carrying "Tagline here".
  *
- * The order is the whole thing, and getting it wrong is silent: stripping before
- * filling deletes the very slots the fill exists to write, and the page comes out
- * exactly as thin as it was before any of this was built.
+ * The order is the whole thing, and getting it wrong is silent — both ways are
+ * bugs this file has already had. Stripping before filling deleted the very
+ * slots the fill exists to write. Stripping before PHOTOS shifted the numeric
+ * addresses the plan was computed against, so pictures landed on the wrong
+ * blocks whenever the strip removed anything.
  *
  * THE FILL IS BEST EFFORT. A planned page that could not be filled is still a
  * page, so a failure there costs richness and never the build. It shares the
@@ -611,8 +617,6 @@ async function sectionsForPage(
     title: string;
     purpose: string;
     startedAt: number;
-    /** Set when the client gave a picture, so the fill can be skipped for it. */
-    system?: string;
   },
 ): Promise<Section[]> {
   const built = await sectionsFromPlan(plan);
@@ -625,7 +629,7 @@ async function sectionsForPage(
    */
   const left = remainingBudget(ctx.startedAt);
   if (slots.length === 0 || left < MIN_REPAIR_MS) {
-    return withPhotos(ctx.tenantId, plan, stripPlaceholders(built));
+    return stripPlaceholders(await withPhotos(ctx.tenantId, plan, built));
   }
 
   try {
@@ -645,14 +649,16 @@ async function sectionsForPage(
     }
 
     const filled = fillFromModel(answer.text, slots);
-    if (filled.ok) return withPhotos(ctx.tenantId, plan, stripPlaceholders(applyFill(built, filled.copy)));
+    if (filled.ok) {
+      return stripPlaceholders(await withPhotos(ctx.tenantId, plan, applyFill(built, filled.copy)));
+    }
   } catch (error) {
     // Never fatal: the page stands without it. Logged because a fill that keeps
     // failing is worth knowing about, and the client will never see it.
     console.error('[tg-sites] filling a page failed', error);
   }
 
-  return withPhotos(ctx.tenantId, plan, stripPlaceholders(built));
+  return stripPlaceholders(await withPhotos(ctx.tenantId, plan, built));
 }
 
 /**
@@ -665,11 +671,12 @@ async function sectionsForPage(
  * where the queries come from.
  *
  * WHICH IS THE MODEL. The plan carries a "photo" per section, two or three words
- * naming what a picture there should show, so a Barbados page gets Barbados
- * pictures rather than the preset's generic travel query. That override is a
- * field the starter specs already had for exactly this reason: every template
- * page opens with the same banner preset, and an About banner and a Holidays
- * banner should not share a photograph.
+ * naming what a picture there should show — and the photo plan itself now reads
+ * the FILLED sections, so a card the fill rewrote to say Barbados searches for
+ * Barbados rather than for the factory card's Italy. The subject only ever
+ * REPLACES a background on presets designed to carry one; everywhere else it
+ * steers the inline pictures, because the first built site proved what a forced
+ * background does to a section designed for a white ground.
  *
  * BEST EFFORT, ALL THE WAY DOWN. fillPagePhotos swallows a miss, a rate limit
  * and an unconfigured library alike, and one picture that cannot be found leaves

@@ -58,7 +58,48 @@ export const PAGE_BUILD_MAX_TOKENS = 8192;
  * id) is dropped rather than trusted. PAGE_PRESETS is page scope only, so site
  * chrome cannot land in the middle of a page.
  */
-const PAGE_PRESET_IDS = new Set(PAGE_PRESETS.map((preset) => preset.id));
+/**
+ * Presets an AI BUILD may not choose, because their content can only be true.
+ *
+ * Found by scanning the presets rather than by naming them, so a new
+ * testimonial or stats preset is excluded the day it is written. Three kinds:
+ *
+ *   QUOTES. Every quote block in the library is a factory testimonial from
+ *   "A customer" — "We have used them four times now and I would not go
+ *   anywhere else." On a template a person fills in, that is an example. On a
+ *   page a builder hands over finished, it is a fabricated review on a real
+ *   company's website.
+ *
+ *   STATS. "4.9/5 across 300 reviews", "12,000 holidays booked", "100% ATOL
+ *   protected" — invented numbers, and the last one is an invented protection
+ *   claim, which is the single worst thing this feature could publish.
+ *
+ *   LOGOS. The badge strips deliberately ship EMPTY (a badge is never a
+ *   placeholder), so on a built page they render as "Add your badges" over
+ *   trust copy like "Your money is protected. Here is who by." — a claim with
+ *   a hole where the evidence goes.
+ *
+ *   The testimonial RAIL carries its quotes inside a slider block, which is why
+ *   the category is checked as well as the block types.
+ *
+ * These sections are not gone from the product: a client can add them by hand
+ * and fill them with their real reviews, real numbers and real memberships.
+ * They are gone from what a machine is allowed to assert on a client's behalf.
+ */
+const FABRICATION_BLOCKS = new Set(['quote', 'stats', 'logos']);
+const FABRICATION_CATEGORIES = new Set(['testimonials', 'stats', 'logos']);
+
+function needsRealContent(preset: (typeof PAGE_PRESETS)[number]): boolean {
+  if (FABRICATION_CATEGORIES.has(preset.category)) return true;
+  return preset.rows.some((row) =>
+    row.columns.some((column) => column.some((block) => FABRICATION_BLOCKS.has(block.type))),
+  );
+}
+
+/** The presets the model may build from: the library minus what must be true. */
+const BUILDABLE_PRESETS = PAGE_PRESETS.filter((preset) => !needsRealContent(preset));
+
+const PAGE_PRESET_IDS = new Set(BUILDABLE_PRESETS.map((preset) => preset.id));
 
 /** Blank facts: an AI page names no company, so no {{token}} needs a real value. */
 const BLANK_FACTS: StarterFacts = { company: '', town: '', about: '' };
@@ -74,7 +115,7 @@ const BLANK_FACTS: StarterFacts = { company: '', town: '', about: '' };
  */
 export function pageCatalogue(): string {
   const byCategory = new Map<string, string[]>();
-  for (const preset of PAGE_PRESETS) {
+  for (const preset of BUILDABLE_PRESETS) {
     const line = `- ${preset.id}: ${preset.label}. ${preset.description}`;
     const list = byCategory.get(preset.category) ?? [];
     list.push(line);
@@ -307,7 +348,15 @@ export function stripPlaceholders(sections: Section[]): Section[] {
           .map((column) => ({
             ...column,
             blocks: column.blocks.filter(
-              (block) => !PLACEHOLDER_COPY.includes(visibleText(block)),
+              (block) =>
+                /*
+                 * The fabrication backstop. The catalogue no longer offers the
+                 * presets these blocks live in, but a block-level guard costs
+                 * nothing and holds even if one arrives some other way — a
+                 * repair answer, a preset that gains a quote block later.
+                 */
+                !FABRICATION_BLOCKS.has(block.type)
+                && !PLACEHOLDER_COPY.includes(visibleText(block)),
             ),
           }))
           .filter((column) => column.blocks.length > 0),

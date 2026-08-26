@@ -149,3 +149,127 @@ describe('applyPhoto', () => {
     ).not.toThrow();
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE TWO RULES THE FIRST AI-BUILT SITE WAS MISSING, 26 Aug 2026.
+ *
+ * All seven sections of a generated homepage came back with a photograph behind
+ * them — a flat-lay of maps and coffee behind the steps, a wedding behind the
+ * icon row — because the per-section photo subject CREATED backgrounds on
+ * presets designed for a white ground. And the cards got the factory pictures,
+ * because their queries derived from the preset's example items rather than
+ * from what the fill had just written into them.
+ */
+describe('an override replaces a designed background, never creates one', () => {
+  it('a preset with no background of its own gets none, whatever the spec says', () => {
+    // features-cards-with-pictures has cards and no section backgroundQuery.
+    const targets = sectionPhotoTargets(
+      presetById('features-cards-with-pictures')!,
+      0,
+      'caribbean beach aerial',
+    );
+    expect(targets.some((target) => target.place.kind === 'background')).toBe(false);
+  });
+
+  it('a preset designed for one still lets the subject choose it', () => {
+    const targets = sectionPhotoTargets(presetById('hero-page-banner')!, 0, 'barbados west coast');
+    const background = targets.find((target) => target.place.kind === 'background');
+    expect(background?.query).toBe('barbados west coast');
+  });
+
+  it('steers an inline picture by the subject where no background competes', () => {
+    /*
+     * cta-with-picture has an explicit block query, which wins. So use a hero
+     * with an inline image and no designed background: the subject beats the
+     * generic palette fallback, because the subject knows what the page is
+     * about and the fallback does not.
+     */
+    const preset = presetById('hero-split-right')!;
+    expect(preset.section?.backgroundQuery).toBeFalsy();
+
+    const targets = sectionPhotoTargets(preset, 0, 'mustique villa terrace');
+    const image = targets.find((target) => target.place.kind === 'image');
+    expect(image?.query).toBe('mustique villa terrace');
+  });
+
+  it('does not point the inline picture at the background it is already steering', () => {
+    // One subject, one background: the same photograph twice on one section is
+    // the failure the precedence exists to avoid.
+    const preset = presetById('hero-page-banner')!;
+    const targets = sectionPhotoTargets(preset, 0, 'antigua harbour dusk');
+    const images = targets.filter((target) => target.place.kind === 'image');
+    for (const image of images) {
+      expect(image.query).not.toBe('antigua harbour dusk');
+    }
+  });
+});
+
+describe('card pictures follow the words the cards actually carry', () => {
+  it('queries derive from the BUILT items once they have been rewritten', () => {
+    const preset = presetById('features-cards-with-pictures')!;
+    const section = buildPresetSection(preset);
+
+    // The fill rewrote the factory Greece/Italy/Portugal cards to the client's
+    // own islands, exactly as the AI pass does.
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const block of column.blocks) {
+          if (block.type !== 'cards') continue;
+          const items = (block.props as { items: Array<Record<string, unknown>> }).items;
+          items[0].label = 'Barbados';
+          items[1].label = 'St Lucia';
+          items[2].label = 'Mustique';
+        }
+      }
+    }
+
+    const targets = sectionPhotoTargets(preset, 0, undefined, section);
+    const cards = targets.filter((target) => target.place.kind === 'card');
+    expect(cards.map((target) => target.query)).toEqual([
+      'Barbados coast landscape',
+      'St Lucia coast landscape',
+      'Mustique coast landscape',
+    ]);
+  });
+
+  it('leaves a built card that already carries a picture alone', () => {
+    const preset = presetById('features-cards-with-pictures')!;
+    const section = buildPresetSection(preset);
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const block of column.blocks) {
+          if (block.type !== 'cards') continue;
+          const items = (block.props as { items: Array<Record<string, unknown>> }).items;
+          items[1].src = 'https://cdn.test/their-own.jpg';
+        }
+      }
+    }
+
+    const targets = sectionPhotoTargets(preset, 0, undefined, section);
+    const cards = targets.filter((target) => target.place.kind === 'card');
+    // Three factory cards, one of them now owned: two targets.
+    expect(cards).toHaveLength(2);
+    expect(cards.map((t) => (t.place.kind === 'card' ? t.place.item : -1))).toEqual([0, 2]);
+  });
+
+  it('the whole-page plan hands each built section to its own targets', () => {
+    const spec = page([{ preset: 'features-cards-with-pictures', photo: 'caribbean sailing' }]);
+    const section = built('features-cards-with-pictures');
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const block of column.blocks) {
+          if (block.type !== 'cards') continue;
+          (block.props as { items: Array<Record<string, unknown>> }).items[0].label = 'Antigua';
+        }
+      }
+    }
+
+    const plan = pagePhotoPlan(spec, [section]);
+    const cards = plan.filter((target) => target.place.kind === 'card');
+    expect(cards[0]?.query).toBe('Antigua coast landscape');
+    // And still no background, because the preset has none to replace.
+    expect(plan.some((target) => target.place.kind === 'background')).toBe(false);
+  });
+});
