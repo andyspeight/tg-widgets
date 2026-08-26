@@ -1,4 +1,4 @@
-# Flight Time From UK — verification log
+# Flight Time From UK: verification log
 
 Field: `Flight Time From UK` (fldnqWFQ5fykmZ5Ci); caveats in `Flight Time Note` (fldsvod5EoGW065jr).
 Two independent sources per route, pushed one record at a time with `typecast: true`, per the airport-spotlight skill.

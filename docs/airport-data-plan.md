@@ -335,3 +335,62 @@ acts on them:
    has a cited source.
 4. Whether to log this as its own project row, separate from the widget build
    row `rec95Ed74DWhznnyb`.
+
+---
+
+### 26 August 2026: the manual audit finished, Phase 2 restarted
+
+**All 225 existing records are Status Done**, two-sourced, and carry an August
+2026 Verified Date. Verified against the live table, not counted: a query for
+records that are not Done, or have no Verified Date, or carry a date before 1
+August 2026, returns zero rows. Nothing remains on the May 2026 stamp that
+started this work. Audit logs are in `docs/airport-audits/`.
+
+That closes the objection recorded on 25 August, which was that creating 368
+identity-only records while the live ones had never been audited would widen a
+problem rather than fix it. The live ones are now audited, so the breadth pass
+is the right next step and `/api/cron/reference-identity` is scheduled again,
+every two hours. **Turn it off when coverage is reached**: each run scans four
+tables in full to work out what is missing, which is waste once nothing is.
+
+**The worklist is `docs/airport-audits/new-airports.md`.** 293 codes from the
+committed target list are still missing, pre-flighted one by one against
+OurAirports using the repo's own parser: all 293 present, all with scheduled
+service, all with a municipality and coordinates. The plan's headline 368 is
+this 293 plus the airports our own prose names, which the breadth detector
+recomputes on each run because the prose changes.
+
+**Two write-reporting defects fixed before the run, not after.** Both fill
+passes did this:
+
+```js
+await createSkeleton(record).catch(() => {}); didCreate = true; created++;
+```
+
+A failed Airtable write was swallowed and then counted as a success. Pointed at
+293 records with a bad token or a 422, the run would have reported "created
+293" having created none, and the needsHuman list would have been empty because
+nothing disagreed. That is the same class of untruth as a record stamped
+Verified that was never checked, which is the thing this whole project exists to
+remove. Both passes now count the result rather than the attempt, report a
+`failed` count and a `writeFailures` list, and leave a record that failed to
+write on the worklist so the next run retries it.
+`test/airport-fill-write-truth-smoke.mjs` covers it with 23 assertions, checked
+against the old code to confirm it fails there.
+
+**Why the run cannot be driven from a Claude Code session.** The container's
+egress policy allows `raw.githubusercontent.com` but denies
+`query.wikidata.org`, `davidmegginson.github.io` and `tg-widgets.vercel.app`.
+Source 1 is reachable, source 2 is not, and neither is our own deploy. A session
+can therefore prepare and verify the run but cannot execute it, and must not
+create records from source 1 alone. The cron on Vercel has no such restriction,
+which is what the "validated on a deploy, not here" note in `_breadth_fill.js`
+has always meant.
+
+**What a created record is, and is not.** Identity only: IATA, name, city,
+country, coordinates, both source URLs, the date, Status `In progress`. No
+narrative. `identityFields` cannot write an overview, terminal, parking, lounge,
+train, coach, taxi or arrival field, and the test asserts it. So a skeleton
+carries no prose at all, which is the only guarantee worth making about AI
+tells: there is nothing generated in the record to detect. The narrative is
+Phase 3, written and two-sourced by hand.

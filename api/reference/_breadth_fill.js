@@ -236,20 +236,29 @@ async function fetchOurAirports(iata) {
 // ---- orchestrator ---------------------------------------------------------
 /**
  * @param opts.limit   max missing airports to process
- * @param opts.create  if true, create Draft skeletons for verified ones (default false: dry run)
- * @param opts.fetchers test seam: { ourAirports, wikidata } override the live adapters
- * @returns { missing, processed, verified, conflict, unverifiable, created, items[] }
+ * @param opts.create  if true, create skeletons for verified ones (default false: dry run)
+ * @param opts.fetchers test seam: { ourAirports, wikidata, breadth, create } override the live adapters
+ * @returns { missing, processed, verified, conflict, unverifiable, created, failed, items[] }
+ *          `created` counts records actually written; `failed` counts records
+ *          that verified cleanly but whose write threw. The two are separate on
+ *          purpose: a write failure is not a verification failure, and neither
+ *          may be reported as a success.
  */
 export async function runBreadthFill({ limit = 10, create = false, nowIso, fetchers } = {}) {
   const today = (nowIso || new Date().toISOString()).slice(0, 10);
   const getOA = (fetchers && fetchers.ourAirports) || fetchOurAirports;
   const getWD = (fetchers && fetchers.wikidata) || fetchWikidata;
+  // Same test seam as `patch` below, so the write-failure path is exercisable
+  // without a live Airtable. A run that cannot prove it reports failures
+  // honestly is not a run worth pointing at 293 records.
+  const getWorklist = (fetchers && fetchers.breadth) || runBreadth;
+  const createOne = (fetchers && fetchers.create) || createSkeleton;
 
-  const breadth = await runBreadth();
+  const breadth = await getWorklist();
   const targets = breadth.missing.slice(0, limit);
 
   const items = [];
-  let created = 0;
+  let created = 0, failed = 0;
   for (const t of targets) {
     const [oa, wd] = await Promise.all([getOA(t.iata), getWD(t.iata)]);
     if (!oa || !wd) {
@@ -267,15 +276,31 @@ export async function runBreadthFill({ limit = 10, create = false, nowIso, fetch
       iata: t.iata, ...fields,
       source1: oa.source, source2: wd.source, verifiedDate: today,
     };
+    // Count the RESULT of the write, never the attempt. Swallowing the error
+    // and incrementing anyway is how a run reports 293 records created having
+    // created none, which is the same class of untruth the Status audit
+    // existed to remove. A verified record that failed to write stays verified
+    // and is reported as unwritten, so the next run picks it up again.
     let didCreate = false;
-    if (create) { await createSkeleton(record).catch(() => {}); didCreate = true; created++; }
+    let writeError = null;
+    if (create) {
+      try {
+        await createOne(record);
+        didCreate = true;
+        created++;
+      } catch (err) {
+        writeError = (err && err.message) || String(err);
+        failed++;
+      }
+    }
     items.push({
       iata: t.iata, verdict: 'verified', name: fields.name || oa.name,
       distanceKm: cv.distanceKm, corroborated, uncorroborated, created: didCreate,
+      ...(writeError ? { writeError } : {}),
     });
   }
 
-  const summary = { missing: breadth.missingCount, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, created, items };
+  const summary = { missing: breadth.missingCount, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, created, failed, items };
   for (const it of items) summary[it.verdict === 'verified' ? 'verified' : it.verdict === 'conflict' ? 'conflict' : 'unverifiable']++;
   return summary;
 }
@@ -328,8 +353,8 @@ async function createAirport(fields) {
  *
  * @param opts.limit   max records to process
  * @param opts.write   if true, patch the records (default false: dry run)
- * @param opts.fetchers test seam
- * @returns { due, processed, filled, conflict, unverifiable, items[] }
+ * @param opts.fetchers test seam: { ourAirports, wikidata, listRows, patch }
+ * @returns { due, processed, filled, conflict, unverifiable, failed, items[] }
  */
 export async function runIdentityBackfill({ limit = 10, write = false, nowIso, fetchers } = {}) {
   const today = (nowIso || new Date().toISOString()).slice(0, 10);
@@ -337,14 +362,16 @@ export async function runIdentityBackfill({ limit = 10, write = false, nowIso, f
   const getWD = (fetchers && fetchers.wikidata) || fetchWikidata;
   const patch = (fetchers && fetchers.patch) || patchAirport;
 
-  const rows = await listAll(AIRPORTS_TBL, [AF.iata, AF.name, AF.cityServed, AF.countryText, AF.latitude, AF.longitude, AF.source1, AF.source2]);
+  const readRows = (fetchers && fetchers.listRows)
+    || (() => listAll(AIRPORTS_TBL, [AF.iata, AF.name, AF.cityServed, AF.countryText, AF.latitude, AF.longitude, AF.source1, AF.source2]));
+  const rows = await readRows();
   const due = rows.filter(r => {
     const f = r.fields || {};
     return f[AF.iata] && (f[AF.latitude] == null || f[AF.longitude] == null || !f[AF.source1] || !f[AF.source2]);
   });
 
   const items = [];
-  let filled = 0;
+  let filled = 0, failed = 0;
   for (const row of due.slice(0, limit)) {
     const iata = String(row.fields[AF.iata]).toUpperCase();
     const [oa, wd] = await Promise.all([getOA(iata), getWD(iata)]);
@@ -373,14 +400,26 @@ export async function runIdentityBackfill({ limit = 10, write = false, nowIso, f
     if (Object.keys(out).length) out[AF.verifiedDate] = today;
 
     const willWrite = Object.keys(out).length > 0;
-    if (write && willWrite) { await patch(row.id, out).catch(() => {}); filled++; }
+    let applied = false;
+    let writeError = null;
+    if (write && willWrite) {
+      try {
+        await patch(row.id, out);
+        applied = true;
+        filled++;
+      } catch (err) {
+        writeError = (err && err.message) || String(err);
+        failed++;
+      }
+    }
     items.push({
       iata, verdict: 'verified', corroborated, uncorroborated,
-      wrote: willWrite ? Object.keys(out).length : 0, applied: write && willWrite,
+      wrote: willWrite ? Object.keys(out).length : 0, applied,
+      ...(writeError ? { writeError } : {}),
     });
   }
 
-  const summary = { due: due.length, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, filled, items };
+  const summary = { due: due.length, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, filled, failed, items };
   for (const it of items) summary[it.verdict === 'verified' ? 'verified' : it.verdict === 'conflict' ? 'conflict' : 'unverifiable']++;
   return summary;
 }

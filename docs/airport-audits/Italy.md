@@ -1,4 +1,4 @@
-# Italy — audit log, 25 and 26 August 2026
+# Italy: audit log, 25 and 26 August 2026
 
 10 records: FCO MXP LIN BGY CIA NAP VCE PSA CTA OLB. All promoted to Done.
 
@@ -16,7 +16,7 @@ some Ciampino-licensed drivers refuse the flat fare and run the meter, which
 is not legal on this route.
 
 **Fiumicino terminal count.** The record claimed five terminals with T5
-active in one field and closed in another — internally contradictory. Only
+active in one field and closed in another, internally contradictory. Only
 **T1 and T3** operate. T2 was demolished to expand T1; T5 has been closed
 since 2024.
 
