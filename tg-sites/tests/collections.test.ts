@@ -2044,22 +2044,68 @@ describe('changing the order does not empty the canvas', () => {
     }
   });
 
-  it('the editor is the one that asks for every order, not the site', () => {
+  it('hands back the props beside each request, which is what gets sent', async () => {
     /*
-     * The published and preview routes render a tree that cannot change under
-     * them, so paying for four reads there would be four times the work for an
-     * answer nobody can ask for.
+     * The server validates the ask by running listingIn over the SAME props the
+     * tree holds, rather than trusting a request assembled on the client. That
+     * only works if the walker carries them, and rebuilding a props bag from a
+     * ListingRequest would be a second copy of the mapping to keep in step.
      */
-    const editor = readFileSync(join(__dirname, '..', 'app', 'editor', 'page.tsx'), 'utf8');
-    expect(editor).toContain('everyOrder: true');
+    const { listingBlocksIn } = await import('../lib/content/listings');
 
-    for (const route of [
-      join('app', 'site', '[host]', '[[...path]]', 'page.tsx'),
-      join('app', 'preview', '[[...path]]', 'page.tsx'),
-    ]) {
-      const source = readFileSync(join(__dirname, '..', route), 'utf8');
-      expect(source, `${route} should not pay for every order`).not.toContain('everyOrder');
-    }
+    const tree = {
+      sections: [
+        section([
+          listingBlock({ source: 'collection', collection: 'guides', order: 'title', count: 4 }),
+          listingBlock({ source: 'typed' }),
+        ]),
+      ],
+    };
+
+    const found = listingBlocksIn([tree]);
+    // The typed one is not a listing at all, so it is not in here.
+    expect(found).toHaveLength(1);
+    expect(found[0].request.collection).toBe('guides');
+    expect(found[0].request.order).toBe('title');
+    expect(found[0].props.collection).toBe('guides');
+    expect(found[0].props.order).toBe('title');
+  });
+
+  it('keeps every block, not one per request, so each can be asked for', async () => {
+    /*
+     * listingsIn DEDUPES by request because two grids showing the same thing are
+     * one read. This one must not: the editor looks each block up by its own key
+     * and needs the props for whichever ones are missing, and two blocks that
+     * happen to match today may not after the next keystroke.
+     */
+    const { listingBlocksIn, listingsIn } = await import('../lib/content/listings');
+    const same = () => listingBlock({ source: 'collection', collection: 'guides' });
+    const tree = { sections: [section([same(), same()])] };
+
+    expect(listingsIn([tree])).toHaveLength(1);
+    expect(listingBlocksIn([tree])).toHaveLength(2);
+  });
+
+  it('the canvas asks for a listing it does not have, rather than pre-guessing', () => {
+    /*
+     * REPLACED THE PRE-FETCH. The first fix read all four orders when the editor
+     * loaded, which answered the order control and nothing else: the collection
+     * name and the filter are in the key too, and there is no finite set of
+     * collection names to read ahead of time. So the canvas asks for what it
+     * turns out to need and the pre-fetch is gone, which is both more correct
+     * and fewer reads.
+     */
+    const shell = readFileSync(join(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+    expect(shell).toContain('listingCardsAction');
+    // Debounced, or typing a collection name is one request per letter.
+    expect(shell).toContain('LISTING_DEBOUNCE_MS');
+    // Asked once per key, or a collection with nothing published is re-requested
+    // for ever: an empty list is a real answer and has to be cached as one.
+    expect(shell).toContain('askedFor.current.has(key)');
+    expect(shell).toContain('askedFor.current.add(key)');
+
+    const editor = readFileSync(join(__dirname, '..', 'app', 'editor', 'page.tsx'), 'utf8');
+    expect(editor, 'the pre-fetch should be gone').not.toContain('everyOrder');
   });
 });
 
@@ -2220,5 +2266,84 @@ describe('the reorder arrows are not hidden by the row-action reveal', () => {
     const fine = css.slice(css.indexOf('@media (hover: hover) and (pointer: fine)'));
     expect(fine.slice(0, 300)).toContain('min-height: 24px');
     expect(css).toContain(".sv-btn[data-icon='true']");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * ARRANGING THE ENTRIES FROM THE BLOCK THAT DRAWS THEM.
+ *
+ * Andy picked "The order I set" on the cards block, looked at his two cards and
+ * said "There are no arrows". They existed, on the collections screen, which is
+ * a different page. A setting whose effect you cannot reach from where you set
+ * it reads as broken however clear the help line is, so on his instruction they
+ * are now in both places.
+ *
+ * That needed three things to be true at once, and each is checked here because
+ * any one of them silently disables the control rather than breaking it.
+ */
+describe('a collection grid can be arranged from its own block', () => {
+  it('a card carries the id of the row it came from', async () => {
+    const { itemAsCard } = await import('../lib/content/listings');
+    const card = itemAsCard(
+      { title: 'Hvar', sections: [] } as never,
+      'guides',
+      'hvar',
+      [],
+      'ITEM-1',
+    );
+    // Without this the pane has titles and nothing to reorder BY.
+    expect(card.id).toBe('ITEM-1');
+  });
+
+  it('and a card built without one simply has none, rather than a wrong one', async () => {
+    const { itemAsCard } = await import('../lib/content/listings');
+    const card = itemAsCard({ title: 'Hvar', sections: [] } as never, 'guides', 'hvar', []);
+    expect(card.id).toBeUndefined();
+  });
+
+  it('the writer is keyed on the collection SHORT NAME, which is all the block has', async () => {
+    /*
+     * The block knows 'guides' because that is what somebody typed into it; it
+     * has never seen a uuid. Keying the writer on the key is what lets the pane
+     * and the collections screen call one action.
+     */
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('update public.collection_items', [{ id: 'i1' }]);
+    await reorderItems(ALPHA, 'guides', ['i1']);
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(write.params).toContain('guides');
+    // Joined to collections rather than filtered in JS, so an id from another
+    // collection updates no rows at all.
+    expect(write.sql).toContain('public.collections c');
+    expect(write.sql).toContain('c.key =');
+  });
+
+  it('the pane shows the arrows only when the order is actually hand-set', () => {
+    const pane = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    /*
+     * Under any of the other four orders the position is not what decides the
+     * sequence, so arrows there would move a number nothing reads and appear to
+     * do nothing at all, which is the complaint this whole thread began with.
+     */
+    expect(pane).toContain("block.props.order === 'manual'");
+    expect(pane).toContain('<ListingOrderArrows');
+    // It is handed the cards the canvas is drawing, so it needs no read of its own.
+    expect(pane).toContain('listings?.get(key)');
+  });
+
+  it('and the canvas is told about the move, so it redraws without a reload', () => {
+    const shell = readFileSync(join(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+    /*
+     * Writing to the database alone would leave the grid showing the old order
+     * until a reload, which reads as the arrows not working: exactly the report
+     * that started this.
+     */
+    expect(shell).toContain('const reorderCards = useCallback(');
+    expect(shell).toContain('onListingOrder={reorderCards}');
+    expect(shell).toContain('listings={cards}');
   });
 });

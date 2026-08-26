@@ -294,8 +294,14 @@ export async function listItems(
  * full list is idempotent, describes the state the client can actually see, and
  * repairs any gap or duplicate left by an older write.
  *
+ * KEYED ON THE COLLECTION'S SHORT NAME, not its uuid. Both callers have the key
+ * and only one has the id: the collections screen knows both, and the cards
+ * block in the editor knows only the key, because that is what a client types
+ * into it. Taking the key means one signature for both rather than a lookup on
+ * one side to satisfy the other.
+ *
  * IDS NOT IN THE COLLECTION ARE IGNORED rather than rejected, and the filter is
- * a WHERE on collection_id rather than a check in JS. An id from another
+ * a join to collections rather than a check in JS. An id from another
  * collection therefore updates nothing at all, which is the behaviour that
  * matters: this is reachable from a browser and the tenant scoping alone would
  * still have let somebody renumber a different collection of their own.
@@ -306,7 +312,7 @@ export async function listItems(
  */
 export async function reorderItems(
   tenantId: string,
-  collectionId: string,
+  collectionKey: string,
   orderedIds: readonly string[],
 ): Promise<number> {
   if (orderedIds.length === 0) return 0;
@@ -323,9 +329,11 @@ export async function reorderItems(
       from (
         select id::uuid as id, seat
         from unnest(${orderedIds as string[]}::uuid[]) with ordinality as t(id, seat)
-      ) as wanted
+      ) as wanted,
+      public.collections c
       where i.id = wanted.id
-        and i.collection_id = ${collectionId}::uuid
+        and c.id = i.collection_id
+        and c.key = ${collectionKey}
       returning i.id
     `;
     return rows.length;
@@ -553,6 +561,13 @@ export async function deleteItem(tenantId: string, itemId: string): Promise<bool
 // ---------------------------------------------------------------------------
 
 export interface PublishedItem {
+  /**
+   * The row's id, so the editor can reorder these without a second read.
+   *
+   * OPTIONAL for the same reason position is: the tag archive does not select
+   * it and has no reordering to do.
+   */
+  id?: string;
   slug: string;
   item: CollectionItem;
   publishedAt: Date | null;
@@ -634,14 +649,14 @@ export async function listPublished(
      */
     const rows = asked
       ? await tx`
-          select i.slug, i.data, i.published_at, i.position, c.fields
+          select i.id, i.slug, i.data, i.published_at, i.position, c.fields
           from public.collection_items i
           join public.collections c on c.id = i.collection_id
           where c.key = ${collectionKey}
           order by i.published_at desc nulls last, i.id desc
         `
       : await tx`
-          select i.slug, i.data, i.published_at, i.position, c.fields
+          select i.id, i.slug, i.data, i.published_at, i.position, c.fields
           from public.collection_items i
           join public.collections c on c.id = i.collection_id
           where c.key = ${collectionKey}
@@ -652,6 +667,7 @@ export async function listPublished(
     let items = rows.map((raw) => {
       const row = raw as Record<string, unknown>;
       return {
+        id: String(row.id),
         slug: String(row.slug),
         item: hydrate(row.data, `${collectionKey}/${String(row.slug)}`),
         publishedAt: row.published_at ? new Date(row.published_at as string) : null,

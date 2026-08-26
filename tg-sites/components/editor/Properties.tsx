@@ -92,6 +92,9 @@ import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
 import { ListingFilterFields } from './ListingFilterFields';
+import { ListingOrderArrows } from './ListingOrderArrows';
+import { listingIn, listingKey } from '../../lib/content/listings';
+import type { ListingCards } from '../../lib/db/listings';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
 import { writeSeoAction } from '../../app/actions/ai';
 import { rebuildImportAction } from '../../app/actions/import';
@@ -110,6 +113,12 @@ const ALIGN_CHOICES: Array<{ value: string; label: string }> = [
 ];
 
 interface Props {
+  /**
+   * The collection cards the canvas is drawing, so a grid's entries can be
+   * arranged from the block that shows them. See ListingOrderArrows.
+   */
+  listings?: ListingCards;
+  onListingOrder?: (key: string, orderedIds: string[]) => void;
   page: Page;
   selected: Path | null;
   isStaff: boolean;
@@ -306,6 +315,8 @@ export function Properties({
   itemFields,
   editingOnCanvas = false,
   viewport = 'desktop',
+  listings,
+  onListingOrder,
 }: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
@@ -391,6 +402,8 @@ export function ItemOptions({
   onItemMeta,
   itemFields,
   tier = 'desktop',
+  listings,
+  onListingOrder,
 }: {
   page: Page;
   selected: Path | null;
@@ -421,6 +434,9 @@ export function ItemOptions({
   itemMeta?: Props['itemMeta'];
   onItemMeta?: Props['onItemMeta'];
   itemFields?: Props['itemFields'];
+  /** The drawn collection cards, so a grid can be arranged from its own block. */
+  listings?: ListingCards;
+  onListingOrder?: (key: string, orderedIds: string[]) => void;
 }) {
   return (
     <>
@@ -486,6 +502,8 @@ export function ItemOptions({
           onCommit={onCommit}
           onSelect={onSelect}
           tier={tier}
+          listings={listings}
+          onListingOrder={onListingOrder}
         />
       )}
     </>
@@ -2694,6 +2712,8 @@ function BlockFields({
   onCommit,
   onSelect,
   tier = 'desktop',
+  listings,
+  onListingOrder,
 }: {
   /*
    * A block in an ordinary column, OR a block inside a container's inner column.
@@ -2714,6 +2734,9 @@ function BlockFields({
   onSelect?: Props['onSelect'];
   /** The screen the device switcher is on, so Text size edits that size. */
   tier?: Tier;
+  /** The drawn collection cards, so a grid can be arranged from its own block. */
+  listings?: ListingCards;
+  onListingOrder?: (key: string, orderedIds: string[]) => void;
 }) {
   const block = blockAtPath(page, path);
   if (!block) return null;
@@ -2787,6 +2810,37 @@ function BlockFields({
    * whatever the named collection declares, which is why this is not a registry
    * field like everything else on this pane. See ListingFilterFields.
    */
+  /*
+   * ARRANGING THE ENTRIES, from the block that draws them.
+   *
+   * Andy picked "The order I set" on this block, looked at his two cards and
+   * said "There are no arrows". The arrows existed, on the collections screen,
+   * which is a different page: a setting whose effect you cannot reach from
+   * where you set it reads as broken however clear the help line is. So they
+   * are in both places, and this is the one beside the grid.
+   *
+   * Only when the order is actually hand-set. Under any of the other four the
+   * position is not what decides the sequence, so arrows here would move a
+   * number nothing is reading and appear to do nothing.
+   */
+  if (
+    block.type === 'cards' &&
+    block.props.source === 'collection' &&
+    block.props.order === 'manual'
+  ) {
+    const request = listingIn(block);
+    const key = request ? listingKey(request) : '';
+    add(
+      'content',
+      <ListingOrderArrows
+        key="listing-order"
+        collectionKey={typeof block.props.collection === 'string' ? block.props.collection : ''}
+        cards={(key && listings?.get(key)) || []}
+        onMoved={(orderedIds) => onListingOrder?.(key, orderedIds)}
+      />,
+    );
+  }
+
   if (block.type === 'cards' && block.props.source === 'collection') {
     add(
       'content',

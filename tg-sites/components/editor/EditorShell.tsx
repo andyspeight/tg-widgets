@@ -25,7 +25,8 @@ import {
   saveDraftAction,
 } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
-import { publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listingCardsAction, publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listingBlocksIn, listingKey } from '../../lib/content/listings';
 import { listPageCommentsAction, openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
 import type { NavPage } from '../../lib/content/nav';
@@ -61,6 +62,14 @@ import { outlineCollision } from './outline-collision';
 import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
 import type { PreparedMap } from '../../lib/content/prepared';
 import type { ListingCards } from '../../lib/db/listings';
+
+/**
+ * How long to wait after the last keystroke before asking for a listing.
+ *
+ * A collection name is TYPED. Without this, "guides" is six requests, five of
+ * them for collections that do not exist. Same figure the adopt dialog uses.
+ */
+const LISTING_DEBOUNCE_MS = 300;
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -513,6 +522,47 @@ export function EditorShell({
   const region = activeTree === 'page' ? null : activeTree;
 
   /**
+   * The collection cards, held locally so a reorder redraws at once.
+   *
+   * They arrive from the server with the page. Arranging a grid's entries from
+   * the properties pane writes to the database and would otherwise leave the
+   * canvas showing the old order until a reload, which reads as the arrows not
+   * working. So the move is applied here as well, to the one listing the block
+   * is drawing.
+   *
+   * Only that listing. Another grid elsewhere on the page showing the same
+   * collection in the same order is stale until the next load, which is a rare
+   * page and a small lie; rebuilding every variant would mean re-reading them
+   * all for one arrow press.
+   */
+  const [cards, setCards] = useState(listings);
+
+  /*
+   * Keys already asked for, so a collection that genuinely has no cards is not
+   * requested again on every render. A ref rather than state because changing it
+   * must not itself cause a render, which is how this becomes a loop.
+   */
+  const askedFor = useRef<Set<string>>(new Set());
+
+
+  const reorderCards = useCallback((key: string, orderedIds: string[]) => {
+    setCards((current) => {
+      const held = current?.get(key);
+      if (!held) return current;
+
+      const byId = new Map(held.map((card) => [String(card.id ?? ''), card]));
+      const moved = orderedIds.map((id) => byId.get(id)).filter(Boolean) as typeof held;
+      // Anything the list did not mention keeps its place at the end, so a card
+      // with no id cannot be dropped by a reorder that never knew about it.
+      const rest = held.filter((card) => !orderedIds.includes(String(card.id ?? '')));
+
+      const next = new Map(current);
+      next.set(key, [...moved, ...rest]);
+      return next;
+    });
+  }, []);
+
+  /**
    * The two trees you are NOT editing, as content for the chrome bands and as the
    * stash a switch restores from. The active tree's slot is left null: its live
    * copy is history.present, and it is filled back in when you switch away.
@@ -764,6 +814,53 @@ export function EditorShell({
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
+
+  /**
+   * FETCH ON MISS: the listing the canvas turns out to need.
+   *
+   * The map arrives with the page, keyed by the whole request. Change the
+   * collection name, the filter, the sort or the order on a grid and the key
+   * stops matching anything in it, fillListings finds no cards, and the grid
+   * empties until a reload. Andy hit that on the order control; it was equally
+   * true of the other three and nobody had ever changed one on the canvas and
+   * watched.
+   *
+   * DEBOUNCED, because a collection name is TYPED. Without it "guides" is six
+   * requests, five of them for collections that do not exist.
+   *
+   * ASKED ONCE PER KEY. A collection with nothing published answers with an
+   * empty list, which is a real answer and is cached as one; without the ref
+   * that empty answer would be re-requested on every render for ever.
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const missing = new Map<string, Record<string, unknown>>();
+      for (const { request, props } of listingBlocksIn([page, otherContent.header, otherContent.footer])) {
+        const key = listingKey(request);
+        if (cards?.has(key) || askedFor.current.has(key)) continue;
+        missing.set(key, props);
+      }
+      if (missing.size === 0) return;
+
+      for (const key of missing.keys()) askedFor.current.add(key);
+
+      void Promise.all(
+        [...missing].map(async ([key, props]) => ({
+          key,
+          result: await listingCardsAction(props),
+        })),
+      ).then((answers) => {
+        setCards((current) => {
+          const next = new Map(current);
+          for (const { key, result } of answers) if (result.ok) next.set(key, result.data);
+          return next;
+        });
+      });
+    }, LISTING_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [page, otherContent.header, otherContent.footer, cards]);
+
 
   /*
    * Which block is being typed into ON THE CANVAS, and what kind it is.
@@ -2234,7 +2331,7 @@ export function EditorShell({
 
       <Canvas
         preparedSeed={preparedSeed}
-        listings={listings}
+        listings={cards}
         onInsertSection={setInsertAt}
         editingPath={editingPath}
         page={page}
@@ -2299,6 +2396,8 @@ export function EditorShell({
         onItemMeta={setItemMeta}
         itemFields={itemFields}
         editingOnCanvas={optionsOpen}
+        listings={cards}
+        onListingOrder={reorderCards}
       />
 
       {/*

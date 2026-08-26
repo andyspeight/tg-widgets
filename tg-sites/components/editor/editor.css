@@ -2653,6 +2653,55 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
 .ed-rt > :last-child { margin-bottom: 0; }
 
 /* Repeater */
+/*
+ * ARRANGING A COLLECTION GRID'S ENTRIES, in the properties pane.
+ *
+ * Lighter than .ed-repeat-item below, deliberately. A repeater item is a thing
+ * you open and edit; these are rows you only ever move, so they are a list with
+ * a pair of arrows rather than a set of framed cards. Same arrows and same
+ * order as the repeater's, because it is the same gesture.
+ */
+.ed-orderlist {
+  list-style: none;
+  margin: 0 0 var(--ed-2);
+  padding: 0;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  overflow: hidden;
+}
+.ed-orderlist__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-1) var(--ed-2);
+  background: var(--ed-well);
+  border-bottom: 1px solid var(--ed-line);
+}
+.ed-orderlist__row:last-child { border-bottom: 0; }
+.ed-orderlist__name {
+  flex: 1;
+  min-width: 0;
+  /* One line each, so ten entries stay a list you can see the shape of. A long
+     destination name is truncated and carries its full text as a title. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink);
+}
+.ed-orderlist__tools {
+  display: flex;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+/* Small enough that two of them fit the row's own height, the same trade the
+   collections screen makes for the same pair of buttons. */
+.ed-orderlist__tools .ed-btn[data-icon='true'] {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+}
+
 .ed-repeat-item {
   border: 1px solid var(--ed-line);
   border-radius: var(--ed-r-md);

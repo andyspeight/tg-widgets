@@ -39,6 +39,8 @@ import {
   type AdoptionResult,
   type CorpusEntry,
 } from '../../lib/db/reference';
+import { listingIn } from '../../lib/content/listings';
+import { cardsForRequest } from '../../lib/db/listings';
 import { REFERENCE_KINDS, type ReferenceKind } from '../../lib/content/reference';
 import type { ActionResult } from './pages';
 
@@ -50,6 +52,9 @@ import type { ActionResult } from './pages';
  * shows at once. A longer list is not a client arranging their entries.
  */
 const MAX_REORDER = 500;
+
+/** The longest collection key the block's own field will accept. */
+const MAX_COLLECTION_KEY = 120;
 
 async function attempt<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
   try {
@@ -273,8 +278,45 @@ export async function unpublishItemAction(
  * swap describes a pair that may not still be neighbours by the time it lands,
  * and a full list is idempotent and repairs older gaps on the way through.
  */
+/**
+ * The cards for one collection grid, asked for by the canvas as it needs them.
+ *
+ * WHY THE EDITOR NEEDS THIS AT ALL. The listing map is built on the server when
+ * the editor page loads, from the tree as it stood then, and keyed by the whole
+ * REQUEST: collection, filter, sort and order. The canvas re-fills a copy of the
+ * tree on every keystroke, so the moment anybody changes one of those four the
+ * key stops matching anything in the map and the grid empties until a reload.
+ *
+ * That was reported against the order control and fixed there by pre-fetching
+ * all four orders. The same fault was still live for the collection name and
+ * the filter, and pre-fetching cannot answer those: there is no finite set of
+ * collection names to read ahead of time. So the canvas asks for what it turns
+ * out to need, and the pre-fetch is gone.
+ *
+ * VALIDATED BY RUNNING THE REAL EXTRACTOR. This takes the block's props exactly
+ * as the tree holds them and puts them through listingIn, the same function the
+ * renderer uses, so the count and facts are clamped and the filter and sort are
+ * shape-checked by one implementation rather than by a copy here that could
+ * drift from it. A props bag that is not a collection grid resolves to nothing
+ * and reads nothing.
+ */
+export async function listingCardsAction(
+  props: Record<string, unknown>,
+): Promise<ActionResult<Array<Record<string, unknown>>>> {
+  const request = listingIn({ type: 'cards', props: props ?? {} });
+  if (!request) return { ok: true, data: [] };
+
+  // A name longer than the field allows is not a collection anybody has, and
+  // there is no reason to carry it as far as the query.
+  if (request.collection.length > MAX_COLLECTION_KEY) return { ok: true, data: [] };
+
+  return attempt(async () =>
+    cardsForRequest(await requireEitherCapability('collections', 'blog'), request),
+  );
+}
+
 export async function reorderItemsAction(
-  collectionId: string,
+  collectionKey: string,
   orderedIds: string[],
 ): Promise<ActionResult<boolean>> {
   /*
@@ -291,7 +333,7 @@ export async function reorderItemsAction(
   const result = await attempt(async () =>
     reorderItems(
       await requireEitherCapability('collections', 'blog'),
-      collectionId,
+      collectionKey,
       orderedIds,
     ),
   );
