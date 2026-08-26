@@ -68,6 +68,14 @@
   --tgs-surface: #ffffff;
   --tgs-surface-alt: #f8f8f9;
   --tgs-surface-dark: #0c1329;
+  /*
+   * What every scrim is made of: the wash over a section's background
+   * photograph, an overlay card, an entry banner, a heading's shadow. Themed
+   * from the client's own dark since 26 Aug 2026; before that nothing set it and
+   * every scrim on every site was the fixed navy this replaces. The value here
+   * is what the default theme derives, same as every other token in this block.
+   */
+  --tgs-scrim-colour: #0c1329;
   --tgs-text: #0f172a;
   --tgs-text-muted: #4d5361;
   --tgs-text-invert: #ffffff;

@@ -1426,6 +1426,14 @@
 /* ---------------------------------------------------------------------------
    Adopting a destination from the shared corpus.
 
+   NAMED sv-, NOT tgs-. This dialog is an OPERATE surface: it is part of the
+   Travelgenix tool, styled from --ed-* tokens, and it never carries a client's
+   brand. The tgs- namespace belongs to the published site, which is
+   client-branded. Getting that the wrong way round was harmless while the two
+   never met, and stopped being harmless the moment the client's theme went onto
+   the editor root: anything in the site namespace is a candidate for the
+   client's colours, and a picker dialog is not.
+
    Built on the same tokens and the same row rhythm as .sv-list above, because
    it is the same thing: a list of named things with one action each. The list
    scrolls inside the dialog rather than growing it, so the search box and the
@@ -1433,7 +1441,7 @@
    on every keystroke would move the control being typed into.
    --------------------------------------------------------------------------- */
 
-.tgs-adopt {
+.sv-adopt {
   margin-top: var(--ed-4);
   /* Tall enough that a short result set does not make the dialog jump when the
      next search returns more, capped so the footer stays reachable. */
@@ -1445,7 +1453,7 @@
   background: var(--ed-panel);
 }
 
-.tgs-adopt__note {
+.sv-adopt__note {
   margin: 0;
   padding: var(--ed-6) var(--ed-4);
   text-align: center;
@@ -1453,13 +1461,13 @@
   font-size: var(--ed-text-sm);
 }
 
-.tgs-adopt__list {
+.sv-adopt__list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.tgs-adopt__row {
+.sv-adopt__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1468,10 +1476,10 @@
   border-bottom: 1px solid var(--ed-line-soft);
 }
 
-.tgs-adopt__row:last-child { border-bottom: 0; }
-.tgs-adopt__row:hover { background: var(--ed-well); }
+.sv-adopt__row:last-child { border-bottom: 0; }
+.sv-adopt__row:hover { background: var(--ed-well); }
 
-.tgs-adopt__name {
+.sv-adopt__name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1482,7 +1490,7 @@
 
 /* Already on the site. Quieter than the button beside it, because it is a state
    rather than something to press. */
-.tgs-adopt__added {
+.sv-adopt__added {
   display: inline-flex;
   align-items: center;
   gap: var(--ed-1);
@@ -1493,4 +1501,4 @@
 
 /* The list is a live region while a search is running, so the row heights do
    not shift under a pointer that is already moving towards a button. */
-.tgs-adopt[aria-busy='true'] .tgs-adopt__list { opacity: 0.55; }
+.sv-adopt[aria-busy='true'] .sv-adopt__list { opacity: 0.55; }
