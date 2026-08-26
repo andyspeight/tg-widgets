@@ -60,6 +60,7 @@ import { wasFilled, type SeoFilled } from '../../lib/seo/autofill';
 import { outlineCollision } from './outline-collision';
 import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
 import type { PreparedMap } from '../../lib/content/prepared';
+import type { ListingCards } from '../../lib/db/listings';
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -442,6 +443,16 @@ interface EditorProps {
    * placeholders. See lib/content/prepared.ts.
    */
   preparedSeed?: PreparedMap;
+  /**
+   * The cards a collection-backed grid will draw, by listing key.
+   *
+   * Beside the tree rather than in it, for the same reason preparedSeed is:
+   * this tree is the document being edited, and folding the cards into
+   * `props.items` would let a save bake today's listing into the page. The
+   * canvas fills a copy of the tree at the moment it draws. See
+   * lib/db/listings.ts.
+   */
+  listings?: ListingCards;
   chromeHeader?: ChromeRegion | null;
   chromeFooter?: ChromeRegion | null;
   /**
@@ -469,6 +480,7 @@ export function EditorShell({
   initialItemMeta,
   itemFields,
   preparedSeed,
+  listings,
   chromeHeader = null,
   chromeFooter = null,
   focusComment = null,
@@ -2202,6 +2214,7 @@ export function EditorShell({
 
       <Canvas
         preparedSeed={preparedSeed}
+        listings={listings}
         onInsertSection={setInsertAt}
         editingPath={editingPath}
         page={page}

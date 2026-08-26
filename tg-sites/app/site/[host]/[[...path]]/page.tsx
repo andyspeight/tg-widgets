@@ -28,12 +28,12 @@ import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import {
   getPublishedItem,
-  listPublished,
   listPublishedByTag,
   listPublishedItemsForSearch,
   MAX_LISTING_ITEMS,
 } from '../../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
+import { fillPageListings, itemAsCard } from '../../../../lib/content/listings';
+import { resolveListings } from '../../../../lib/db/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
 import { DestinationPanel } from '../../../../components/render/DestinationPanel';
@@ -208,30 +208,7 @@ const load = cache(async function load(host: string, path: string[] | undefined)
    * for the largest count any block asked for, rather than one per block. See
    * lib/content/listings.ts for why this is not the block's own job.
    */
-  const wanted = listingsIn([regions.header, page.content, regions.footer]);
-  const listings = new Map<string, Array<Record<string, unknown>>>();
-
-  if (wanted.length > 0) {
-    const results = await Promise.all(
-      wanted.map(async (request) => ({
-        request,
-        listing: await listPublished(tenantId, request.collection, request.count, {
-          filter: request.filter,
-          sort: request.sort,
-        }),
-      })),
-    );
-    for (const { request, listing } of results) {
-      listings.set(
-        // Keyed by the whole request, not the collection: two blocks narrowing
-        // the same collection differently are two answers. See listingKey.
-        listingKey(request),
-        // The collection's own field definitions came back with its items, so
-        // a card can carry a price and a number of nights without a second read.
-        listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
-      );
-    }
-  }
+  const listings = await resolveListings(tenantId, [regions.header, page.content, regions.footer]);
 
   return {
     page: { ...page, content: fillPageListings(page.content, listings) },

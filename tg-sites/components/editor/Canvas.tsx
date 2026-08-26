@@ -40,6 +40,8 @@ import { resolveAt, withOverride } from '../../lib/content/responsive';
 import { PageRenderer } from '../render/PageRenderer';
 import { usePreparedMarkup } from './usePreparedMarkup';
 import type { PreparedMap } from '../../lib/content/prepared';
+import { fillListings } from '../../lib/content/listings';
+import type { ListingCards } from '../../lib/db/listings';
 import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
 
@@ -69,6 +71,8 @@ interface Props {
    * See lib/content/prepared.ts for why the canvas cannot clean it itself.
    */
   preparedSeed?: PreparedMap;
+  /** The cards a collection grid will draw. See lib/db/listings.ts. */
+  listings?: ListingCards;
   page: Page;
   selected: Path | null;
   selectedKey: string | null;
@@ -238,6 +242,7 @@ export function Canvas({
   commentPins = [],
   onOpenComment,
   preparedSeed,
+  listings,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -251,6 +256,18 @@ export function Canvas({
    * the client makes a new one. See usePreparedMarkup.
    */
   const prepared = usePreparedMarkup([page, chromeHeader, chromePage, chromeFooter], preparedSeed);
+
+  /*
+   * THE TREE THE CANVAS DRAWS, which is not the tree it edits.
+   *
+   * fillListings writes the cards into `props.items`, so filling `page` itself
+   * would put a snapshot of today's listing into the document and the next save
+   * would keep it. This copy is display only; every id, section, row, column and
+   * block sits at exactly the same path, because the fill replaces one prop and
+   * changes nothing else, so selection and every commit still land where they
+   * did.
+   */
+  const shown = useMemo(() => fillListings(page, listings ?? new Map()), [page, listings]);
 
   // ---------------------------------------------------------------------
   // Selection outlines
@@ -944,10 +961,11 @@ export function Canvas({
         onKeyDown={preview ? undefined : onKeyDown}
       >
         <PageRenderer
-          /* Menu folder links filled for the preview, at the render boundary so
-             the tree the editor holds and saves is untouched. Non-structural, so
-             it changes no data-path the editing handlers resolve against. */
-          page={fillNavFolders(page, navPages)}
+          /* Menu folder links and collection cards filled for the preview, at
+             the render boundary so the tree the editor holds and saves is
+             untouched. Both are non-structural, so neither changes a data-path
+             the editing handlers resolve against. */
+          page={fillNavFolders(shown, navPages)}
           editable={!preview}
           editingPath={preview ? null : editingPath}
           /*

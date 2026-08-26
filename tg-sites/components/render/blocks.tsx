@@ -1599,12 +1599,27 @@ export function CardsBlock({
   const fromCollection = str(props, 'source') === 'collection';
   const collection = str(props, 'collection').trim();
 
-  if (editing && fromCollection) {
+  /*
+   * ONLY WHEN THERE IS GENUINELY NOTHING TO DRAW.
+   *
+   * This used to fire for every collection grid on the canvas, so an agent who
+   * published a post and went to look at the page it belonged on was told "the
+   * newest 24 from guides will show here" and nothing else. The page was right
+   * and the editor was lying about it. Andy, 26 Aug 2026: it has to show in the
+   * editor as well.
+   *
+   * The canvas now resolves the same cards the published page does and fills a
+   * copy of the tree at the point it draws (see components/editor/Canvas.tsx),
+   * so by the time this runs there are real items. What is left here is the
+   * honest empty state: a block nobody has pointed at a collection yet, and a
+   * collection with nothing published in it.
+   */
+  if (editing && fromCollection && cards.length === 0) {
     const count = clamp(props.count, 1, 60, 6);
     return (
       <div className="tgs-placeholder">
         {collection
-          ? `The newest ${count} from "${collection}" will show here.`
+          ? `Nothing published in "${collection}" yet. The newest ${count} will show here.`
           : 'Say which collection these come from.'}
       </div>
     );

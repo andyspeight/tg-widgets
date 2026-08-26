@@ -649,3 +649,38 @@ describe('a destination card is not a blog card', () => {
     expect(card.body).toBe('A flooded volcano you can have dinner on.');
   });
 });
+
+describe('the editor draws the same cards the site does', () => {
+  const canvas = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'Canvas.tsx'), 'utf8');
+  const blocks = readFileSync(resolve(__dirname, '..', 'components', 'render', 'blocks.tsx'), 'utf8');
+
+  it('fills a display copy, never the tree the editor saves', () => {
+    /*
+     * fillListings writes the cards into `props.items`. Filling the editable
+     * tree would put a snapshot of today's listing into the document and the
+     * next save would keep it, so the canvas fills a copy at the point it draws
+     * and the document stays clean. Same arrangement the menu fill uses.
+     */
+    expect(canvas).toContain('const shown = useMemo(() => fillListings(page, listings');
+    expect(canvas).toContain('fillNavFolders(shown, navPages)');
+    // The editable state is still the unfilled page.
+    expect(canvas).not.toMatch(/setPage\(\s*shown/);
+  });
+
+  it('shows the placeholder only when there is genuinely nothing', () => {
+    /*
+     * It used to fire for every collection grid on the canvas, so publishing a
+     * destination and going to look at the page it belonged on told you nothing
+     * had happened. The page was right and the editor was lying about it.
+     */
+    expect(blocks).toContain('if (editing && fromCollection && cards.length === 0)');
+    expect(blocks).not.toContain('if (editing && fromCollection) {');
+  });
+
+  it('leaves the block itself with nothing to read', () => {
+    // The same component draws the published page and the canvas. A database
+    // import in there is what would end that.
+    expect(blocks).not.toContain('lib/db/');
+    expect(blocks).not.toContain('listPublished');
+  });
+});

@@ -6,6 +6,7 @@ import { currentCapabilities } from '../../lib/auth/capabilities';
 import { getPage, listPages } from '../../lib/db/pages';
 import { getRegion } from '../../lib/db/regions';
 import { getItem } from '../../lib/db/collections';
+import { resolveListings } from '../../lib/db/listings';
 import { itemAsPage, itemMeta } from '../../lib/content/collection-page';
 import { FontHead } from '../../components/render/FontHead';
 import { listFontFaces } from '../../lib/db/fonts';
@@ -197,6 +198,26 @@ export default async function EditorPage({
   ]);
   if (!page) redirect('/sites');
 
+  /*
+   * THE CARDS A COLLECTION GRID WILL DRAW, resolved here the way the published
+   * route and the preview resolve them, through the one shared reader.
+   *
+   * Without this the canvas showed a grey "the newest 24 from guides will show
+   * here" box whatever was in the collection, so publishing a destination and
+   * then looking at the page it belongs on told you nothing had happened. Andy,
+   * 26 Aug 2026: it has to show in the editor as well.
+   *
+   * Passed down BESIDE the tree rather than folded into it. The tree here is the
+   * document somebody is editing and fillListings writes the cards into
+   * `props.items`, so folding them in would let the next save bake a snapshot of
+   * today's cards into the page. The canvas fills a copy at the point it draws.
+   */
+  const listings = await resolveListings(site.tenantId, [
+    headerRecord.region,
+    page.content,
+    footerRecord.region,
+  ]);
+
   return (
     <>
       {/* The canvas shows the client's real typefaces, so the same rules the
@@ -207,6 +228,7 @@ export default async function EditorPage({
         {...shared}
         pageId={page.id}
         initialPage={page.content}
+        listings={listings}
         /* The page, the header and the footer: all three are drawn on this canvas
            and any of them can hold an imported design, so all three are cleaned
            before the shell renders. See lib/content/prepared.ts. */
