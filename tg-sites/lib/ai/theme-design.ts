@@ -93,7 +93,9 @@ export function pairingCatalogue(): string {
 
 export const THEME_RULES = `Your job here is to design the LOOK of a travel company's website: its colours and its typefaces. Not the words, not the pages.
 
-- Design for THIS company, from the profile. A luxury house and a family-budget operator must never get the same look. If the profile names a place, let the palette come from that place: its sea, its stone, its evenings.
+- Design for THIS company, from the profile: its market POSITION first, then its place. A luxury house and a family-budget operator must never get the same look, even for the same islands.
+- Luxury is aspiration, and aspiration is restraint: a deep, quiet ground (ink, petrol, forest, aubergine), warm paper, and an accent that reads expensive - champagne, bronze, terracotta, old gold. Nothing bright, nothing busy. A family brand is warmer and brighter; a budget brand louder; an adventure brand earthier.
+- If the profile names a place, take the HUES from it but let the position decide their treatment. The same Caribbean sea is a bright turquoise on a family site and a deep petrol on a luxury one; the same sand is primary-yellow fun or bone-white calm.
 - The palette is four colours. "brand" carries buttons, links and the dark closing band, so it must be a colour with some depth to it. "accent" is the highlight; it should genuinely contrast with the brand, not be its neighbour. "pageBackground" is the paper: white, or a very pale tint with a temperature (warm bone, cool chalk); never a mid tone. "text" is near-black, warmed or cooled to match the paper.
 - NEVER the platform's own defaults (navy ${DEFAULT_THEME.brand}, cyan ${DEFAULT_THEME.accent}). A site the platform designed for nobody is the look we are replacing.
 - Avoid the AI cliches: purple-to-blue gradients, corporate #0066ff blue, and teal-plus-coral as a pair. When the place hands you a teal sea, keep the sea and take the accent from somewhere else in that place: the stone, the shutters, the dark of the harbour at dusk.
