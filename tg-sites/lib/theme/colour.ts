@@ -274,11 +274,35 @@ export function fadeButKeepReadable(
  *
  * Walking towards black always converges, because black takes white to 21:1.
  */
-export function deepenUntilTextFits(colour: string, target: number): string {
+function shiftUntilTextFits(colour: string, target: number, towards: string): string {
   let current = colour;
   for (let step = 0; step < 40; step += 1) {
     if (contrast(current, readableOn(current)) >= target) return current;
-    current = mix(current, '#000000', 0.06);
+    current = mix(current, towards, 0.06);
   }
   return current;
+}
+
+export function deepenUntilTextFits(colour: string, target: number): string {
+  return shiftUntilTextFits(colour, target, '#000000');
+}
+
+/**
+ * The same walk, towards white: lighten a colour until a label fits on it.
+ *
+ * THE MIRROR EXISTS BECAUSE THE DARK PALETTE PULLS THE OTHER WAY. On a light
+ * page a band that cannot hold text is too pale, so it is deepened. On a near
+ * black page the brand has already been lifted to be readable AS text against
+ * the page, and a brand that is dark to begin with lands in the mid tones on
+ * the way up: the one region where neither white nor near-black reaches 4.5:1,
+ * so the band it paints cannot hold a label. Deepening it there would undo the
+ * lift that made it readable in the first place.
+ *
+ * Lifting further satisfies both at once, which is what makes this the right
+ * direction rather than merely the opposite one: a lighter band is further from
+ * the near-black page AND further from a near-black label. Found by measuring a
+ * burgundy brand, which came out at 4.3:1 for its own button label.
+ */
+export function liftUntilTextFits(colour: string, target: number): string {
+  return shiftUntilTextFits(colour, target, '#ffffff');
 }

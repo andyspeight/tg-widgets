@@ -1087,8 +1087,22 @@ function blockHost(
    * the CSS keys off their presence. A tinted card that gains a border keeps its
    * tint.
    *
-   * Padding stays on the container, because padding around a grid is space
-   * around the grid. A card's own inner padding is the card's business.
+   * PADDING TARGETS THE CARD TOO, and this took a second pass to get right. The
+   * first version left it on the container, reasoning that padding around a grid
+   * is space around the grid. That reasoning is fine in the abstract and wrong at
+   * the panel: every other control in that panel moved to the card, so padding
+   * staying behind made it the one control that did something else, and Andy hit
+   * it immediately. Consistency inside one panel beats the tidier theory.
+   *
+   * It lands on the card's BODY rather than the card, so a picture stays
+   * full bleed at the top and the padding is the space around the words, which
+   * is what a card's padding means everywhere else. Space around the whole grid
+   * is still available: it is the section's padding, one level up.
+   *
+   * ALL FOUR OR NONE. The other controls test a single number, but padding is
+   * four, and a client who sets only a top would otherwise get their top with
+   * the preset's other three, which reads as a bug. So any non-zero means the
+   * client has touched it and all four travel exactly as set.
    */
   const cardBox: CSSProperties = block.type === 'cards' && boxed
     ? {
@@ -1100,6 +1114,17 @@ function blockHost(
             }
           : {}),
         ...(box.radius > 0 ? { '--tgs-card-radius': `${box.radius}px` } : {}),
+        ...(box.padding.top > 0 ||
+        box.padding.right > 0 ||
+        box.padding.bottom > 0 ||
+        box.padding.left > 0
+          ? {
+              '--tgs-card-pt': `${box.padding.top}px`,
+              '--tgs-card-pr': `${box.padding.right}px`,
+              '--tgs-card-pb': `${box.padding.bottom}px`,
+              '--tgs-card-pl': `${box.padding.left}px`,
+            }
+          : {}),
       } as CSSProperties
     : {};
 
