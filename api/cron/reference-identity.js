@@ -48,7 +48,18 @@ export default async function handler(req, res) {
   // 25 + 50 leaves room for a slow Wikidata. A run killed by the timeout is not
   // dangerous, since records already written stay written and the next run
   // recomputes what is missing, but it is wasted work. Leave the margin alone.
-  const backfillLimit = parseInt(process.env.REFERENCE_BACKFILL_LIMIT || '25', 10);
+  // The backfill takes the first N due records in the SAME ORDER every run, so
+  // any record that can never be corroborated sits at the front and starves
+  // everything behind it. Two records created nameless on 26 Aug were still
+  // nameless two runs after the fix for exactly that reason: 61 records were
+  // due, the limit was 25, and the front of the queue holds airports whose two
+  // sources genuinely disagree about the name and always will.
+  //
+  // Raising the limit past the size of the backlog is the honest fix for a
+  // migration that ends. If this table ever has more permanently-stuck records
+  // than one run can cover, the ordering needs to rotate rather than the number
+  // going up again.
+  const backfillLimit = parseInt(process.env.REFERENCE_BACKFILL_LIMIT || '70', 10);
   const createLimit = parseInt(process.env.REFERENCE_CREATE_LIMIT || '50', 10);
   const create = process.env.REFERENCE_BREADTH_CREATE !== 'false';
 
