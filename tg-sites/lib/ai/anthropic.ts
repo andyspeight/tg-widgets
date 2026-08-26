@@ -68,6 +68,43 @@ const MAX_TOKENS = 1024;
  */
 const TIMEOUT_MS = 20_000;
 
+/**
+ * The budget for a BUILD, which is a different shape of ask entirely.
+ *
+ * Twenty seconds is right for the copy writer above: a toolbar spinner, three
+ * short paragraphs, four hundred tokens. It is not right for planning a site or
+ * composing a page. Those run on the larger model, carry a system prompt of
+ * several thousand characters and return a structured answer, and the first
+ * time the site planner was pointed at a real profile it was aborted at twenty
+ * seconds with nothing to show. The evidence is in ai_usage: a row claimed at
+ * 12:55 with zero input and zero output tokens, because the call threw before
+ * anything could be recorded.
+ *
+ * Forty seconds, not sixty, because the route that hosts these actions declares
+ * maxDuration = 60 and being killed by the platform produces a blank failure
+ * with no message. Timing out here leaves room to say so.
+ */
+export const BUILD_TIMEOUT_MS = 40_000;
+
+/**
+ * The whole budget an action may spend across a first attempt and its repair.
+ *
+ * Below the route's sixty, so a slow first answer plus a repair still returns a
+ * message rather than being killed mid-flight. See remainingBudget.
+ */
+export const BUILD_BUDGET_MS = 50_000;
+
+/**
+ * What is left of the budget, for a second call after a slow first one.
+ *
+ * A repair with four seconds to live is a request that will certainly fail and
+ * still be paid for, so a caller that gets back less than a floor should not
+ * bother: the honest answer is the first failure, not a second one.
+ */
+export function remainingBudget(startedAt: number, now = Date.now()): number {
+  return Math.max(0, BUILD_BUDGET_MS - (now - startedAt));
+}
+
 /** Whatever the answer runs to, this is where it stops. */
 export const MAX_ANSWER = 8_000;
 
@@ -123,6 +160,11 @@ export interface AskOptions {
   model?: string;
   /** Defaults to MAX_TOKENS. The builder needs more room for a section. */
   maxTokens?: number;
+  /**
+   * Defaults to TIMEOUT_MS. A build passes BUILD_TIMEOUT_MS, because the
+   * default is sized for a paragraph and a build is not one.
+   */
+  timeoutMs?: number;
 }
 
 /**
@@ -138,7 +180,7 @@ export async function ask(
   user: string,
   opts: AskOptions = {},
 ): Promise<Answer> {
-  const { image, model = MODEL, maxTokens = MAX_TOKENS } = opts;
+  const { image, model = MODEL, maxTokens = MAX_TOKENS, timeoutMs = TIMEOUT_MS } = opts;
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
@@ -146,7 +188,7 @@ export async function ask(
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   let response: Response;
   try {
@@ -228,6 +270,32 @@ export async function ask(
 
   const payload = (await response.json().catch(() => null)) as unknown;
   const text = readText(payload);
+  const stop = readStopReason(payload);
+
+  /*
+   * RAN OUT OF ROOM RATHER THAN CAME BACK EMPTY, and the difference is an hour
+   * of looking in the wrong place.
+   *
+   * These models think, and thinking is charged against max_tokens like any
+   * other output. A budget that is generous for the ANSWER can still be spent
+   * entirely on working it out, and what arrives then is a response with no text
+   * block in it at all. Reported as "came back with nothing", which sends you
+   * hunting a broken parser or a bad prompt when the model simply never got to
+   * the reply. Andy hit exactly that on the site planner.
+   */
+  if (!text && stop === 'max_tokens') {
+    throw new AiError('That answer ran out of room before it finished. Try asking for less.', {
+      retryable: true,
+    });
+  }
+
+  /*
+   * A refusal is a decision, not a fault, and it has its own stop reason. Saying
+   * "try again" to one is advice that cannot work.
+   */
+  if (stop === 'refusal') {
+    throw new AiError('The assistant declined to answer that one.');
+  }
 
   if (!text) {
     throw new AiError('The assistant came back with nothing. Try asking again.', {
@@ -247,6 +315,13 @@ export async function ask(
  * server action, which reaches the person as a blank failure rather than as the
  * "came back with nothing" above.
  */
+/** Why the model stopped, when it says. Null rather than a guess when it does not. */
+function readStopReason(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const reason = (payload as { stop_reason?: unknown }).stop_reason;
+  return typeof reason === 'string' ? reason : null;
+}
+
 function readText(payload: unknown): string {
   if (!payload || typeof payload !== 'object') return '';
   const content = (payload as { content?: unknown }).content;

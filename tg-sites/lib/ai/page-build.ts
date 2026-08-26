@@ -42,7 +42,15 @@ export const MAX_PAGE_BRIEF = 800;
 export const MAX_PLAN_SECTIONS = 12;
 
 /** Long enough for a plan of eight sections with copy, capped so it cannot run away. */
-export const PAGE_BUILD_MAX_TOKENS = 4096;
+/**
+ * A ceiling that has to cover the THINKING as well as the answer.
+ *
+ * Same correction as SITE_BUILD_MAX_TOKENS, for the same reason and on the
+ * same model: no `thinking` parameter is sent, so adaptive thinking is on and
+ * is charged here. 4096 was sized for the visible output alone, which is the
+ * cap that returned an empty answer on the planner once a prompt got harder.
+ */
+export const PAGE_BUILD_MAX_TOKENS = 8192;
 
 /**
  * Every page-section preset id, as a set, so a model that names something outside

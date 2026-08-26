@@ -33,7 +33,14 @@ import {
   isSignInRequired,
   requireSite,
 } from '../../lib/auth/session';
-import { aiIsConfigured, AiError, ask, MODEL_BUILD } from '../../lib/ai/anthropic';
+import {
+  aiIsConfigured,
+  AiError,
+  ask,
+  BUILD_TIMEOUT_MS,
+  MODEL_BUILD,
+  remainingBudget,
+} from '../../lib/ai/anthropic';
 import {
   BUILD_MAX_TOKENS,
   buildSystemPrompt,
@@ -83,8 +90,11 @@ import {
   SITE_BUILD_MAX_TOKENS,
   buildSiteSystemPrompt,
   buildSiteUserPrompt,
+  buildDescribeSystemPrompt,
+  buildDescribeUserPrompt,
   homeFirst,
   planSiteFromModel,
+  titlesFromInput,
   repairSitePrompt,
   type PlannedPage,
 } from '../../lib/ai/site-build';
@@ -473,7 +483,7 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
 
     let inputTokens = 0;
     let outputTokens = 0;
-    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS };
+    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
 
     const first = await ask(system, buildUserPrompt(instruction), build);
     inputTokens += first.inputTokens;
@@ -591,6 +601,15 @@ export type AiPageResult =
  * fails to parse falls to an honest error rather than to anything reaching the
  * database.
  */
+/**
+ * The least time worth giving a repair.
+ *
+ * A second call with four seconds to live will certainly be aborted and will
+ * still be paid for, so below this the honest answer is the first failure
+ * rather than a second one dressed up as a retry.
+ */
+const MIN_REPAIR_MS = 8_000;
+
 export type SitePlanActionResult =
   | { ok: true; data: PlannedPage[] }
   | { ok: false; error: string; retryable?: boolean };
@@ -648,20 +667,38 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
       };
     }
 
-    const system = buildSiteSystemPrompt(settings);
+    /*
+     * The pages already on this site, by TITLE, so the planner proposes what is
+     * missing rather than a generic sitemap. Andy's first real run made the case:
+     * it offered "Voyages" to a site that already has a Voyages page, and the
+     * address did not even collide because that page lives at /destinations.
+     */
+    const existingTitles = (await listPageFill(site.tenantId)).map((page) => page.title);
+
+    const system = buildSiteSystemPrompt(settings, existingTitles);
     const userPrompt = buildSiteUserPrompt(brief);
-    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS };
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
 
     let inputTokens = 0;
     let outputTokens = 0;
+
+    // The clock for the whole action, so a repair after a slow first answer
+
+    // cannot run past what the route allows. See remainingBudget.
+
+    const startedAt = Date.now();
 
     const firstAnswer = await ask(system, userPrompt, call);
     inputTokens += firstAnswer.inputTokens;
     outputTokens += firstAnswer.outputTokens;
     let plan = planSiteFromModel(firstAnswer.text);
 
-    if (!plan.ok) {
-      const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, call);
+    const leftForRepair = remainingBudget(startedAt);
+    if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
+      const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, {
+        ...call,
+        timeoutMs: leftForRepair,
+      });
       inputTokens += second.inputTokens;
       outputTokens += second.outputTokens;
       plan = planSiteFromModel(second.text);
@@ -717,6 +754,97 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
  * starter, and an address can only belong to one page, so creating would fail on
  * the unique index and "build my site" would skip the most important page in it.
  */
+/**
+ * Write the purpose for pages the client named, and hand them back as plan rows.
+ *
+ * CREATES NOTHING, like the planner: these join the list on screen and are built
+ * by the same button as everything else. The client keeps the names they typed;
+ * all this decides is what each page is for.
+ */
+export async function describePagesAction(input: unknown): Promise<SitePlanActionResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const titles = titlesFromInput(typeof fields.titles === 'string' ? fields.titles : '');
+    if (titles.length === 0) {
+      return { ok: false, error: 'Type at least one page name, one per line.' };
+    }
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildDescribeSystemPrompt(settings);
+    const userPrompt = buildDescribeUserPrompt(titles);
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    const startedAt = Date.now();
+    const firstAnswer = await ask(system, userPrompt, call);
+    inputTokens += firstAnswer.inputTokens;
+    outputTokens += firstAnswer.outputTokens;
+    let plan = planSiteFromModel(firstAnswer.text);
+
+    const leftForRepair = remainingBudget(startedAt);
+    if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
+      const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, {
+        ...call,
+        timeoutMs: leftForRepair,
+      });
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      plan = planSiteFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    /*
+     * THE PAGES SURVIVE A FAILED DESCRIPTION. If the model would not answer in
+     * shape, the client still asked for these pages by name and the builder can
+     * work from a title alone. Losing their list because a sentence could not be
+     * written would be the tool discarding what it was told.
+     */
+    if (!plan.ok) {
+      return {
+        ok: true,
+        data: titles.map((title) => ({ title, slug: safeSlug(title), purpose: '' })),
+      };
+    }
+
+    return { ok: true, data: plan.pages };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) {
+      return { ok: false, error: message };
+    }
+    console.error('[tg-sites] describing pages failed', error);
+    return { ok: false, error: 'Something went wrong adding those pages. Try again.' };
+  }
+}
+
 export async function buildPlannedPageAction(input: unknown): Promise<AiPageResult> {
   try {
     if (!aiIsConfigured()) {
@@ -755,18 +883,28 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     const userPrompt = buildPageUserPrompt(
       purpose ? `The page is called "${title}". ${purpose}` : `A page called "${title}".`,
     );
-    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS };
+    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
 
     let inputTokens = 0;
     let outputTokens = 0;
+
+    // The clock for the whole action, so a repair after a slow first answer
+
+    // cannot run past what the route allows. See remainingBudget.
+
+    const startedAt = Date.now();
 
     const firstAnswer = await ask(system, userPrompt, call);
     inputTokens += firstAnswer.inputTokens;
     outputTokens += firstAnswer.outputTokens;
     let plan = planFromModel(firstAnswer.text);
 
-    if (!plan.ok) {
-      const second = await ask(system, `${userPrompt}\n\n${repairPagePrompt(plan.error)}`, call);
+    const leftForRepair = remainingBudget(startedAt);
+    if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
+      const second = await ask(system, `${userPrompt}\n\n${repairPagePrompt(plan.error)}`, {
+        ...call,
+        timeoutMs: leftForRepair,
+      });
       inputTokens += second.inputTokens;
       outputTokens += second.outputTokens;
       plan = planFromModel(second.text);
@@ -904,12 +1042,18 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
     // The picture rides along on both attempts, so the model sees it whether the
     // first answer parsed or the repair did.
     const build = imageUrl
-      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, image: { url: imageUrl } }
-      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS };
+      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, image: { url: imageUrl } }
+      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
     const userPrompt = buildPageUserPrompt(brief, Boolean(imageUrl));
 
     let inputTokens = 0;
     let outputTokens = 0;
+
+    // The clock for the whole action, so a repair after a slow first answer
+
+    // cannot run past what the route allows. See remainingBudget.
+
+    const startedAt = Date.now();
 
     const firstAnswer = await ask(system, userPrompt, build);
     inputTokens += firstAnswer.inputTokens;
@@ -917,8 +1061,12 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
     let plan = planFromModel(firstAnswer.text);
 
     // The one repair: hand back the request and what went wrong, ask again.
-    if (!plan.ok) {
-      const second = await ask(system, `${userPrompt}\n\n${repairPagePrompt(plan.error)}`, build);
+    const leftForRepair = remainingBudget(startedAt);
+    if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
+      const second = await ask(system, `${userPrompt}\n\n${repairPagePrompt(plan.error)}`, {
+        ...build,
+        timeoutMs: leftForRepair,
+      });
       inputTokens += second.inputTokens;
       outputTokens += second.outputTokens;
       plan = planFromModel(second.text);

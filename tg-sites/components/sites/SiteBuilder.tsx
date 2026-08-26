@@ -24,7 +24,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { buildPlannedPageAction, planSiteAction } from '../../app/actions/ai';
+import { buildPlannedPageAction, describePagesAction, planSiteAction } from '../../app/actions/ai';
 import type { PlannedPage } from '../../lib/ai/site-build';
 import { Icon } from '../editor/Icon';
 import { Modal } from '../ui/Modal';
@@ -58,9 +58,23 @@ export function SiteBuilder({
 }) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>('ask');
-  /** The home page's id, so Done can open what was just built. */
-  const [homeId, setHomeId] = useState<string | null>(null);
+  /**
+   * A page to open when this is finished. The home page if one was built,
+   * otherwise the first page that was.
+   *
+   * NOT JUST THE HOME PAGE, which is what this held at first and was wrong for
+   * the commonest run of all: planning on a site that already exists usually
+   * builds no home page, so there was nothing to open. Falling back to a
+   * refresh did not help either, because the dashboard seeds its page list into
+   * state on mount and will not show a new row without a navigation. The page
+   * was created and appeared to have vanished.
+   */
+  const [toOpen, setToOpen] = useState<{ id: string; title: string } | null>(null);
+  /** The planner looked and found nothing this site is short of. */
+  const [nothingMissing, setNothingMissing] = useState(false);
   const [brief, setBrief] = useState('');
+  /** Page names the client typed, to be described and added to the list. */
+  const [extra, setExtra] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -71,6 +85,24 @@ export function SiteBuilder({
 
   /** The page already on this site at that address, if anything is built there. */
   const clash = (slug: string) => existing.find((page) => page.slug === slug && page.filled);
+
+  /**
+   * A page already covering the same SUBJECT, wherever it lives.
+   *
+   * Address is not enough, and Andy's first real run proved it: the planner
+   * offered "Voyages" to a site whose Voyages page sits at /destinations, so
+   * nothing collided and a duplicate would have been built. The server can only
+   * refuse on address, because that is the thing it can be certain about; a
+   * matching NAME is a caution rather than a refusal, since somebody may well
+   * want a second page with a similar title.
+   */
+  const sameName = (row: Row) => {
+    const wanted = row.title.trim().toLowerCase();
+    if (!wanted) return undefined;
+    return existing.find(
+      (page) => page.filled && page.slug !== row.slug && page.title.trim().toLowerCase() === wanted,
+    );
+  };
 
   async function plan() {
     setBusy(true);
@@ -84,6 +116,33 @@ export function SiteBuilder({
     }
     setRows(result.data.map((page) => ({ ...page, progress: 'waiting' as const })));
     setStage('review');
+    setNothingMissing(result.data.length === 0);
+  }
+
+  /**
+   * Add pages the client named, with the purposes written for them.
+   *
+   * APPENDED, NOT MERGED INTO THE PLAN. They go on the end where the client put
+   * them and can be moved like anything else. A page somebody typed is a page
+   * they want, so nothing here judges the names.
+   */
+  async function addOwn() {
+    if (!extra.trim()) return;
+    setBusy(true);
+    setError(null);
+    const result = await describePagesAction({ titles: extra });
+    setBusy(false);
+
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRows((current) => [
+      ...current,
+      ...result.data.map((page) => ({ ...page, progress: 'waiting' as const })),
+    ]);
+    setExtra('');
+    setNothingMissing(false);
   }
 
   function patch(index: number, next: Partial<Row>) {
@@ -133,7 +192,11 @@ export function SiteBuilder({
             },
       );
 
-      if (result.ok && page.slug === '') setHomeId(result.data.id);
+      if (result.ok) {
+        const opened = { id: result.data.id, title: page.title };
+        // The home page wins if there is one; otherwise the first page built.
+        setToOpen((current) => (page.slug === '' ? opened : current ?? opened));
+      }
     }
 
     setStage('done');
@@ -149,7 +212,7 @@ export function SiteBuilder({
    */
   function finish() {
     onClose();
-    if (homeId) router.push(`/editor?page=${encodeURIComponent(homeId)}`);
+    if (toOpen) router.push(`/editor?page=${encodeURIComponent(toOpen.id)}`);
     else router.refresh();
   }
 
@@ -267,13 +330,19 @@ export function SiteBuilder({
                   {row.slug === '' ? 'The home page' : `/${row.slug}`}
                 </span>
 
-                {clash(row.slug) && (
+                {clash(row.slug) ? (
                   <span className="sv-plan__clash">
                     <Icon name="warning" size={14} />
                     {`"${clash(row.slug)!.title}" is already here and has content on it, so this one
                       will be left alone. Rename it to build it somewhere else, or remove it.`}
                   </span>
-                )}
+                ) : sameName(row) ? (
+                  <span className="sv-plan__clash">
+                    <Icon name="warning" size={14} />
+                    {`You already have a page called "${sameName(row)!.title}", at /${sameName(row)!.slug || ''}.
+                      This one would be built as a second page. Remove it unless you meant that.`}
+                  </span>
+                ) : null}
               </div>
 
               <span className="sv-plan__tools">
@@ -315,9 +384,33 @@ export function SiteBuilder({
           ))}
         </ul>
 
+        <div className="sv-field sv-plan__add">
+          <label htmlFor="plan-extra">Add pages of your own</label>
+          <textarea
+            id="plan-extra"
+            rows={3}
+            value={extra}
+            placeholder={'Terms and conditions\nPrivacy policy\nBarbados villas'}
+            onChange={(event) => setExtra(event.target.value)}
+          />
+          <small>One page name per line. The builder writes what each one is for, and you can
+            change it before building.</small>
+          <button
+            type="button"
+            className="sv-btn"
+            disabled={busy || !extra.trim()}
+            onClick={() => void addOwn()}
+          >
+            <Icon name="plus" size={16} />
+            {busy ? 'Adding…' : 'Add these pages'}
+          </button>
+        </div>
+
         {rows.length === 0 && (
           <p className="sv-empty__note">
-            Every page has been removed. Plan again, or cancel and start from a blank page.
+            {nothingMissing
+              ? 'Nothing obvious is missing. This site already covers what a site like it needs, so the builder had nothing to add.'
+              : 'Every page has been removed. Plan again, or cancel and start from a blank page.'}
           </p>
         )}
       </Modal>
@@ -340,7 +433,8 @@ export function SiteBuilder({
       footer={
         finished ? (
           <button type="button" className="sv-btn" data-variant="primary" onClick={finish}>
-            {homeId ? 'Open my home page' : 'Done'}
+            {/* Named, so the button says where it goes rather than "continue". */}
+            {toOpen ? `Open ${toOpen.title}` : 'Done'}
           </button>
         ) : undefined
       }
