@@ -33,7 +33,7 @@
  *   LUNA_CHAT_BASE_URL    optional — defaults to https://chat.travelify.io
  */
 
-import { CLIENTS } from './auth/schema.js';
+import { CLIENTS, CATALOGUE, PRODUCTS } from './auth/schema.js';
 
 const DEFAULT_BASE = 'https://chat.travelify.io';
 const TIMEOUT_MS = 8000;
@@ -109,6 +109,39 @@ export async function provisionLunaChat(clientRecord, enabled) {
         + 'correct; retry the toggle when Luna Chat is back.'
     };
   }
+}
+
+/**
+ * Does this set of entitlements grant Luna Chat?
+ *
+ * The luna_chat entitlement is the real answer to "does this client have Luna
+ * Chat", so it is what should decide whether Luna Chat is told the client
+ * exists. Onboarding used to decide that from whether the OPTIONAL Luna Chat
+ * section of the form had been filled in, which is a different question
+ * entirely: a package grants luna_chat automatically as a Package Default,
+ * while that form section is extra configuration nobody has to touch.
+ *
+ * So the ordinary path — onboard a client, package hands them Luna Chat, skip
+ * the optional section — produced a client entitled to Luna Chat who did not
+ * exist in it, and who got "No Luna Chat client linked to your account" at the
+ * dashboard. By 25 Aug 2026 that had happened to 22 clients.
+ *
+ * @param {Array<{catalogueItemId: string}>} entitlements  the rows actually created
+ * @param {Array<object>} catalogueRecords                 Catalogue table records
+ * @returns {boolean}
+ */
+export function entitlementsGrantLunaChat(entitlements, catalogueRecords) {
+  if (!Array.isArray(entitlements) || !entitlements.length) return false;
+  const byId = new Map(
+    (Array.isArray(catalogueRecords) ? catalogueRecords : [])
+      .filter((c) => c && c.id)
+      .map((c) => [c.id, c])
+  );
+  return entitlements.some((e) => {
+    const item = e && byId.get(e.catalogueItemId);
+    return !!item && item.fields
+      && item.fields[CATALOGUE.fields.productSlug] === PRODUCTS.slugs.LUNA_CHAT;
+  });
 }
 
 export default provisionLunaChat;

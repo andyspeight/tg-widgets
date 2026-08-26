@@ -1794,6 +1794,30 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * this section names a colour.
  */
 
+/*
+ * THE CORPUS PANEL AS A BAND.
+ *
+ * It used to sit inside the entry header, which was fine while every entry drew
+ * a flat header and wrong the moment the magazine seed started using the
+ * "Picture first" layout: there the header IS the photograph, and a facts grid
+ * over a picture is neither readable nor what anybody meant.
+ *
+ * So it is a band now, on the alternate ground, with its contents held to the
+ * same contained width a section uses. Matching the section's own measurements
+ * rather than inventing new ones is what makes it read as part of the page
+ * rather than as something bolted to the top of it.
+ */
+.tgs-entry__reference {
+  background: var(--tgs-surface-alt);
+  padding-block: var(--tgs-space-l);
+  padding-inline: var(--tgs-space-m);
+}
+
+.tgs-entry__reference > .tgs-dest {
+  max-width: var(--tgs-width-contained);
+  margin-inline: auto;
+}
+
 .tgs-dest {
   display: flex;
   flex-direction: column;
@@ -1848,6 +1872,26 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   font-size: var(--tgs-h5-size);
   line-height: 1.25;
   color: var(--tgs-text);
+}
+
+/*
+ * A FACT THAT IS A SENTENCE SPANS THE ROW AND READS AS PROSE.
+ *
+ * The corpus is not consistent about these fields and both shapes are right:
+ * Greece's flight time is "3h 30m", Mexico City's names both of its airports in
+ * a sentence. Set at heading size in a nine-rem cell the second one is a wall of
+ * six words a line; given the row and the body face it is simply a useful note.
+ */
+.tgs-dest__fact[data-long] {
+  grid-column: 1 / -1;
+}
+
+.tgs-dest__fact[data-long] dd {
+  font-family: var(--tgs-p-font);
+  font-weight: 400;
+  font-size: var(--tgs-p-size);
+  line-height: var(--tgs-p-leading, 1.6);
+  max-width: 68ch;
 }
 
 /* --- the climate year --------------------------------------------- */
@@ -4046,7 +4090,28 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   isolation: isolate;
   min-height: min(60vh, 32rem);
   justify-content: flex-end;
-  padding: var(--tgs-space-l);
+
+  /*
+   * FULL BLEED, AND IT HAD TO BE SAID EXPLICITLY.
+   *
+   * The base rule caps every header at the 680px reading measure, which is right
+   * for the two layouts that are articles and wrong for this one, where the
+   * header IS the banner photograph. It rendered as a 680px box floating in the
+   * middle of a 1280px page: "the picture fills the top" was the description and
+   * a third of the top was what it did. Found by measuring the built page rather
+   * than by reading this file, which had looked correct for months.
+   *
+   * The words inside it still hold the contained width, so the headline never
+   * touches the viewport edge. That is this client's 21 Aug correction and it is
+   * the reason the padding is a max() rather than a fixed gutter: on a wide
+   * screen the text lines up with the sections below it, and on a narrow one it
+   * keeps a real margin instead of collapsing onto the edge.
+   */
+  max-width: none;
+  padding: var(--tgs-space-l) max(
+    var(--tgs-space-l),
+    (100% - var(--tgs-width-contained)) / 2
+  );
 }
 /*
  * THE TITLE OPENS THE HEADER, and the date follows it.
@@ -4081,6 +4146,35 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   height: 100%;
   object-fit: cover;
   border-radius: 0;
+}
+
+/*
+ * THE BANNER DRIFTS, THE SAME WAY EVERY OTHER BANNER ON A SITE DOES.
+ *
+ * Every inner page a client builds gets its photograph from a section, and a
+ * section has carried Ken Burns since 13 Aug. An entry's banner is the same
+ * thing doing the same job, and it was the one photograph on a site that sat
+ * still, which read as an oversight rather than as a choice. Andy, 25 Aug 2026:
+ * the main image should be in the style the rest of the site has.
+ *
+ * The SAME keyframe the section uses, deliberately. Two hand-tuned drifts at
+ * slightly different speeds on one site is the kind of difference nobody can
+ * name and everybody feels, and a second set of numbers is a second thing to
+ * keep in step.
+ *
+ * Behind prefers-reduced-motion, so a visitor who asked for less gets the
+ * picture still and full-bleed. The header clips, because the pan scales the
+ * photograph past its own edges and the overspill would otherwise sit over the
+ * band below.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-entry[data-layout='hero'] .tgs-entry__head:has(.tgs-entry__image) {
+    overflow: clip;
+  }
+  .tgs-entry[data-layout='hero'] .tgs-entry__image img {
+    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
 }
 /*
  * The same scrim decision the overlay card made, and for the same reason: the

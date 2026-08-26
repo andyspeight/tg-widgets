@@ -37,6 +37,7 @@ import {
   parseSort,
 } from '../content/collection-filter';
 import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
+import { referenceFacts, type ReferenceFacts } from '../content/reference';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -139,9 +140,26 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
  * 0020): published, but with a go-live time still ahead, so the public cannot
  * see it yet. Computed here so the writing screen can, and can say so.
  */
+/**
+ * The columns every item read hands back.
+ *
+ * `id` IS QUALIFIED, and it has to be. This fragment is spliced into seven
+ * statements, six of which touch collection_items alone. The seventh is getItem,
+ * which joins collections to fetch the entry's schema alongside it, and
+ * collections has an `id` of its own: a bare one there is ambiguous, so Postgres
+ * refused the statement outright with 42702 and the editor answered a 500 to
+ * anybody opening a collection entry.
+ *
+ * It had never fired because nothing opened an entry in the editor until
+ * adopting a destination started redirecting to /editor?item=. Qualified by
+ * table name rather than an alias because five of the seven uses are RETURNING
+ * clauses, where there is no alias to use; checked against the database that
+ * this parses in both positions.
+ */
 function summary(tx: Tx) {
   return tx`
-    id, collection_id, slug, status, published_at, updated_at,
+    public.collection_items.id as id,
+    collection_id, slug, status, published_at, updated_at,
     data->>'title' as title,
     (published_at is null or updated_at > published_at) as has_unpublished_changes,
     (status = 'published' and published_at is not null and published_at > now()) as scheduled
@@ -661,12 +679,27 @@ export async function getPublishedItem(
   fields: FieldDef[];
   layout: EntryLayout;
   publishedAt: Date | null;
+  /** The corpus facts, when this entry is an adopted destination. */
+  reference: ReferenceFacts | null;
 } | null> {
   return withPublicTenant(tenantId, async (tx) => {
+    /*
+     * THE CORPUS JOIN IS A LEFT JOIN AND HAS TO BE. The overwhelming majority
+     * of entries are ordinary posts pointing at nothing, and an inner join
+     * would have silently stopped serving every one of them. It costs nothing
+     * for those rows: ref_source_id is null, so collection_items_ref_lookup_idx
+     * is not even consulted.
+     *
+     * Joined rather than copied onto the item, so there is exactly one of every
+     * fact and a corpus change is live here the moment the sync writes it. See
+     * db/migrations/0029_adopted_destinations.sql for why that beat a copy.
+     */
     const rows = await tx`
-      select i.data, i.published_at, c.fields, c.layout
+      select i.data, i.published_at, c.fields, c.layout, r.facts as reference_facts
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
+      left join public.reference_records r
+        on r.kind = i.ref_kind and r.source_id = i.ref_source_id
       where c.key = ${collectionKey} and i.slug = ${slug}
       limit 1
     `;
@@ -680,6 +713,14 @@ export async function getPublishedItem(
       fields: parseFieldDefs(asObject(row.fields)),
       layout: parseEntryLayout(row.layout),
       publishedAt: row.published_at ? new Date(row.published_at as string) : null,
+      /*
+       * Validated here rather than trusted, even though the sync wrote it. It
+       * is a value from a jsonb column, which is the same category as anything
+       * off the network, and referenceFacts answers null for a payload it does
+       * not recognise so the page draws without a panel rather than throwing on
+       * its way to a visitor.
+       */
+      reference: referenceFacts(row.reference_facts),
     };
   });
 }

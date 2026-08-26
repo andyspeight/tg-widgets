@@ -14,8 +14,8 @@ import { FontHead } from '../../../components/render/FontHead';
 import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage, listPublishedNavPages } from '../../../lib/db/pages';
 import { getPublishedRegions } from '../../../lib/db/regions';
-import { listPublished } from '../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../lib/content/listings';
+import { fillPageListings } from '../../../lib/content/listings';
+import { resolveListings } from '../../../lib/db/listings';
 import { fillNavFolders, fillNavRegion } from '../../../lib/content/nav';
 import { fillBreadcrumbs } from '../../../lib/content/breadcrumbs';
 import { getPublicTheme } from '../../../lib/db/theme';
@@ -89,27 +89,7 @@ async function load(path: string[] | undefined) {
    * public route resolves those. The listing still shows, with links that work
    * once the site is on its own domain.
    */
-  const wanted = listingsIn([regions.header, page.content, regions.footer]);
-  const listings = new Map<string, Array<Record<string, unknown>>>();
-
-  if (wanted.length > 0) {
-    const results = await Promise.all(
-      wanted.map(async (request) => ({
-        request,
-        listing: await listPublished(site.tenantId, request.collection, request.count),
-      })),
-    );
-    for (const { request, listing } of results) {
-      listings.set(
-        // Keyed by the whole request, not the collection: two blocks narrowing
-        // the same collection differently are two answers. See listingKey.
-        listingKey(request),
-        // The collection's own field definitions came back with its items, so
-        // a card can carry a price and a number of nights without a second read.
-        listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
-      );
-    }
-  }
+  const listings = await resolveListings(site.tenantId, [regions.header, page.content, regions.footer]);
 
   return {
     page: { ...page, content: fillPageListings(page.content, listings) },

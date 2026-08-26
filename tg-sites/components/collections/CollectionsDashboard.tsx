@@ -21,8 +21,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import {
+  adoptDestinationAction,
   createCollectionAction,
   createItemAction,
+  listAdoptableAction,
   deleteCollectionAction,
   deleteItemAction,
   publishItemAction,
@@ -48,6 +50,9 @@ import {
   type EntryLayout,
 } from '../../lib/content/collection-layout';
 import type { Collection, ItemSummary } from '../../lib/db/collections';
+import type { CorpusEntry } from '../../lib/db/reference';
+import type { ReferenceKind } from '../../lib/content/reference';
+import { AdoptDialog } from './AdoptDialog';
 import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
@@ -59,6 +64,7 @@ const THEME_KEY = 'tg-sites:theme:v1';
 type Dialog =
   | { kind: 'new-collection' }
   | { kind: 'new-item' }
+  | { kind: 'adopt' }
   | { kind: 'fields'; collection: Collection }
   | { kind: 'schedule'; item: ItemSummary }
   | null;
@@ -291,18 +297,38 @@ export function CollectionsDashboard({
             </button>
 
             {open && (
-              <button
-                type="button"
-                className="sv-btn"
-                data-variant="primary"
-                onClick={() => {
-                  setError(null);
-                  setDialog({ kind: 'new-item' });
-                }}
-              >
-                <Icon name="plus" size={16} />
-                New entry
-              </button>
+              <>
+                {/*
+                  * SECONDARY, next to New entry rather than instead of it. Both
+                  * make an entry in the same collection; this one starts from
+                  * the corpus and the other from a blank page, and which a
+                  * client wants depends on whether we hold the place they are
+                  * writing about.
+                  */}
+                <button
+                  type="button"
+                  className="sv-btn"
+                  onClick={() => {
+                    setError(null);
+                    setDialog({ kind: 'adopt' });
+                  }}
+                >
+                  <Icon name="map" size={16} />
+                  Add a destination
+                </button>
+                <button
+                  type="button"
+                  className="sv-btn"
+                  data-variant="primary"
+                  onClick={() => {
+                    setError(null);
+                    setDialog({ kind: 'new-item' });
+                  }}
+                >
+                  <Icon name="plus" size={16} />
+                  New entry
+                </button>
+              </>
             )}
           </div>
         </header>
@@ -579,6 +605,48 @@ export function CollectionsDashboard({
                 // A new entry is empty, so there is nothing to look at on this
                 // screen. Straight to the editor, where the writing happens.
                 router.push(`/editor?item=${result.data.id}`);
+              });
+            })
+          }
+        />
+      )}
+
+      {dialog?.kind === 'adopt' && open && (
+        <AdoptDialog
+          collectionName={open.name}
+          onClose={() => setDialog(null)}
+          onSearch={(options: { kind: ReferenceKind; search: string }) =>
+            new Promise((done) => {
+              startTransition(async () => {
+                const result = await listAdoptableAction(options);
+                done(result.ok
+                  ? { ok: true as const, entries: result.data }
+                  : { ok: false as const, error: result.error });
+              });
+            })
+          }
+          onAdopt={(entry: CorpusEntry) =>
+            new Promise((done) => {
+              const collectionId = open.id;
+              startTransition(async () => {
+                const result = await adoptDestinationAction(collectionId, entry.kind, entry.sourceId);
+                if (!result.ok) {
+                  done(result.error);
+                  return;
+                }
+                if (!result.data.ok) {
+                  done(result.data.reason ?? 'That could not be added.');
+                  return;
+                }
+                setDialog(null);
+                done(null);
+                /*
+                 * Straight to the editor, exactly as writing a new entry does.
+                 * An adopted draft has real words in it already, so there IS
+                 * something to look at, and the first thing a client should do
+                 * is make those words theirs.
+                 */
+                router.push(`/editor?item=${result.data.itemId}`);
               });
             })
           }

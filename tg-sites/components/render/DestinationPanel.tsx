@@ -56,7 +56,15 @@ export function DestinationPanel({ facts }: { facts: ReferenceFacts }): ReactEle
       {rows.length > 0 && (
         <dl className="tgs-dest__facts">
           {rows.map((row) => (
-            <div className="tgs-dest__fact" key={row.key}>
+            /*
+             * A LONG ONE IS A NOTE, NOT A NUMBER. The corpus is not consistent
+             * about which it holds: Greece's flight time is "3h 30m", Mexico
+             * City's is a sentence naming both airports. Both are correct and
+             * the sentence is the more useful of the two, so it is set as prose
+             * and allowed to span the grid rather than squeezed into a cell at
+             * heading size.
+             */
+            <div className="tgs-dest__fact" key={row.key} data-long={row.long ? '' : undefined}>
               <dt>{row.label}</dt>
               <dd>{row.value}</dd>
             </div>

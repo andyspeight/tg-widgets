@@ -10,22 +10,32 @@
  * with each other for it.
  *
  * So an adopted destination is stored as an ordinary collection item, and it
- * carries two kinds of value:
+ * carries two kinds of value that live in two different places:
  *
- *   PROSE   ordinary collection fields. Seeded once when the client adopts the
+ *   PROSE   the item's own `data`. Seeded once when the client adopts the
  *           destination, then theirs. Never overwritten by a sync.
- *   FACTS   this payload, under the reserved `__ref` key. Refreshed on every
- *           sync, never shown as an editable field, never authored by hand.
+ *   FACTS   the corpus row the item points at, through the ref_kind and
+ *           ref_source_id columns added in migration 0029. Refreshed by the
+ *           sync, never editable, never authored by hand. This module
+ *           validates that payload on the way out.
  *
  * That split is the whole design. It is what lets the corpus stay current and the
  * page still sound like the agency that published it.
  *
- * WHY `__ref` CANNOT COLLIDE WITH A CLIENT'S FIELD, which matters because both
- * live in the same `data` object. A field key is not free text: it goes through
- * `safeSlug` in collection-fields.ts, which admits lower-case letters, digits and
- * hyphens. An underscore cannot survive that, so no client field can ever be
- * called `__ref`. The reservation is structural rather than a convention somebody
- * has to remember, and tests/reference.test.ts pins it.
+ * AN EARLIER VERSION PUT THE FACTS INSIDE `data` UNDER A RESERVED `__ref` KEY,
+ * and it is worth saying why that is gone rather than leaving somebody to
+ * reinvent it. `data` is parsed through CollectionItemSchema on every save, and
+ * that is a plain zod object, so it strips keys it does not know about. The
+ * facts would have been deleted the first time a client fixed a typo in their
+ * own copy: no error, no warning, just a destination page that quietly stopped
+ * having any facts on it. Nothing had been written in that shape yet, so nothing
+ * was lost, but the lesson generalises. One blob with two writers is also how
+ * the four jsonb double-encode failures happened. The client writes `data`, the
+ * corpus owns its own columns, and neither can reach the other.
+ *
+ * A POINTER RATHER THAN A COPY, so there is exactly one of every fact. A visa
+ * rule that changes is live on every site the moment the sync writes it, with no
+ * pass over adopted items and no window where two copies disagree.
  *
  * EVERYTHING HERE TREATS ITS INPUT AS HOSTILE. This payload is read back out of
  * a jsonb column, which means it is a value from the database rather than a value
@@ -42,9 +52,6 @@ export type ReferenceKind = (typeof REFERENCE_KINDS)[number];
 /** How a month reads for a UK traveller, from the corpus's own Climate Season field. */
 export const SEASONS = ['best', 'shoulder', 'off'] as const;
 export type Season = (typeof SEASONS)[number];
-
-/** The reserved key. See the note above for why a client field can never be this. */
-export const REFERENCE_KEY = '__ref';
 
 export interface ReferenceClimate {
   /** Average daytime high in Celsius, January to December. Always twelve. */
@@ -70,6 +77,15 @@ export interface ReferenceFacts {
   climate?: ReferenceClimate;
   /** "Families", "Couples", "Foodies". Short audience tags from the corpus. */
   bestFor?: string[];
+  /**
+   * Where it is. Both or neither, never one.
+   *
+   * A fact rather than seed prose because a map is either right or it is a map
+   * of somewhere else, and because unlike the pictures and the highlights a
+   * client has no reason to want to edit it.
+   */
+  lat?: number;
+  lng?: number;
   /** When the sync last wrote this, ISO. Absent on a payload written before it existed. */
   syncedAt?: string;
 }
@@ -141,6 +157,24 @@ function climate(value: unknown): ReferenceClimate | undefined {
   return { temps, rainfall, season };
 }
 
+/**
+ * A coordinate pair, or nothing.
+ *
+ * BOTH OR NEITHER, the same argument the climate year makes. Half a position is
+ * not a position: a map pinned to (43.17, 0) draws the Gulf of Guinea, which
+ * reads as a confident answer rather than as the missing value it is.
+ */
+function position(lat: unknown, lng: unknown): { lat: number; lng: number } | Record<string, never> {
+  const y = Number(lat);
+  const x = Number(lng);
+  if (!Number.isFinite(y) || !Number.isFinite(x)) return {};
+  if (y < -90 || y > 90 || x < -180 || x > 180) return {};
+  // Exactly (0, 0) is Null Island: legal, in the Atlantic, and in practice always
+  // a record where somebody left both columns empty.
+  if (y === 0 && x === 0) return {};
+  return { lat: Math.round(y * 10000) / 10000, lng: Math.round(x * 10000) / 10000 };
+}
+
 function tags(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const out: string[] = [];
@@ -154,17 +188,16 @@ function tags(value: unknown): string[] | undefined {
 }
 
 /**
- * The facts payload on a collection item, or null when there is not one.
+ * The corpus facts for an item, or null when there are none.
  *
- * Null for an ordinary item, which is most of them: a blog post has no `__ref`
- * and every caller reads that as "this is not a destination" rather than having
- * to ask first.
+ * Null for an ordinary item, which is most of them: a blog post points at no
+ * corpus record, so the join returns nothing and every caller reads that as
+ * "this is not a destination" rather than having to ask first. Null also for a
+ * payload that arrives malformed, which is the same answer for the same reason:
+ * draw the page without a panel rather than throw on the way to a visitor.
  */
-export function referenceFacts(data: unknown): ReferenceFacts | null {
-  if (!data || typeof data !== 'object') return null;
-  const payload = (data as Record<string, unknown>)[REFERENCE_KEY];
+export function referenceFacts(payload: unknown): ReferenceFacts | null {
   if (!payload || typeof payload !== 'object') return null;
-
   const raw = payload as Record<string, unknown>;
   const kind = typeof raw.kind === 'string' ? raw.kind : '';
   if (!(REFERENCE_KINDS as readonly string[]).includes(kind)) return null;
@@ -177,15 +210,16 @@ export function referenceFacts(data: unknown): ReferenceFacts | null {
   return {
     kind: kind as ReferenceKind,
     sourceId,
-    region: text(raw.region, 60),
-    flightTime: text(raw.flightTime, 20),
-    timeZone: text(raw.timeZone, 20),
-    currency: text(raw.currency, 40),
-    language: text(raw.language, 40),
-    voltage: text(raw.voltage, 30),
-    visaStatus: text(raw.visaStatus, 60),
+    region: text(raw.region, 400),
+    flightTime: text(raw.flightTime, 400),
+    timeZone: text(raw.timeZone, 400),
+    currency: text(raw.currency, 400),
+    language: text(raw.language, 400),
+    voltage: text(raw.voltage, 400),
+    visaStatus: text(raw.visaStatus, 400),
     climate: climate(raw.climate),
     bestFor: tags(raw.bestFor),
+    ...position(raw.lat, raw.lng),
     syncedAt: text(raw.syncedAt, 40),
   };
 }
@@ -198,6 +232,16 @@ export interface ReferenceRow {
   key: string;
   label: string;
   value: string;
+  /**
+   * True when the corpus holds a sentence here rather than a datum.
+   *
+   * The tables are not consistent about it and both are legitimate: Greece's
+   * flight time is "3h 30m", Mexico City's is "11h 30m direct from the UK to
+   * Mexico City Benito Juárez (MEX). The new Felipe Ángeles airport (NLU)
+   * handles some routes." The second is the better answer and it is not a
+   * heading-sized value, so the renderer sets it as prose and lets it span.
+   */
+  long: boolean;
 }
 
 /**
@@ -223,7 +267,24 @@ export function referenceRows(facts: ReferenceFacts): ReferenceRow[] {
   ];
   return rows
     .filter((row): row is [string, string, string] => Boolean(row[2]))
-    .map(([key, label, value]) => ({ key, label, value }));
+    /*
+     * Forty is a LAYOUT threshold, not a fact about the corpus.
+     *
+     * An earlier version of this comment claimed the corpus splits cleanly
+     * either side of it, every datum under and every sentence over. It does
+     * not, and it is worth writing down because it was checked: the lengths
+     * are one continuous tail. About 3,300 values sit under 25 characters,
+     * then it thins out and keeps going past 100 with no gap anywhere, 107
+     * values landing in 36-40 and 95 in 41-45.
+     *
+     * So this line runs through the middle of a continuum rather than between
+     * two populations, and the only thing it can honestly mean is "wider than
+     * a grid cell reads at a glance". Both sides have to look deliberate,
+     * because there is no threshold that would put every awkward value on one
+     * side of it. Move it if the layout changes; do not expect the data to
+     * justify a particular number.
+     */
+    .map(([key, label, value]) => ({ key, label, value, long: value.length > 40 }));
 }
 
 /** January to December, short, for the chart's axis. */

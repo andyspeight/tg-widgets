@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { carriesOwnBanner } from '../../../../lib/content/collection-layout';
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
@@ -27,15 +28,14 @@ import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import {
   getPublishedItem,
-  listPublished,
   listPublishedByTag,
   listPublishedItemsForSearch,
   MAX_LISTING_ITEMS,
 } from '../../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
+import { fillPageListings, itemAsCard } from '../../../../lib/content/listings';
+import { resolveListings } from '../../../../lib/db/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
-import { referenceFacts } from '../../../../lib/content/reference';
 import { DestinationPanel } from '../../../../components/render/DestinationPanel';
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
@@ -208,30 +208,7 @@ const load = cache(async function load(host: string, path: string[] | undefined)
    * for the largest count any block asked for, rather than one per block. See
    * lib/content/listings.ts for why this is not the block's own job.
    */
-  const wanted = listingsIn([regions.header, page.content, regions.footer]);
-  const listings = new Map<string, Array<Record<string, unknown>>>();
-
-  if (wanted.length > 0) {
-    const results = await Promise.all(
-      wanted.map(async (request) => ({
-        request,
-        listing: await listPublished(tenantId, request.collection, request.count, {
-          filter: request.filter,
-          sort: request.sort,
-        }),
-      })),
-    );
-    for (const { request, listing } of results) {
-      listings.set(
-        // Keyed by the whole request, not the collection: two blocks narrowing
-        // the same collection differently are two answers. See listingKey.
-        listingKey(request),
-        // The collection's own field definitions came back with its items, so
-        // a card can carry a price and a number of nights without a second read.
-        listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
-      );
-    }
-  }
+  const listings = await resolveListings(tenantId, [regions.header, page.content, regions.footer]);
 
   return {
     page: { ...page, content: fillPageListings(page.content, listings) },
@@ -724,6 +701,14 @@ function EntryRenderer({
     fields: import('../../../../lib/content/collection-fields').FieldDef[];
     /** How the collection lays its entries out. See collection-layout.ts. */
     layout: import('../../../../lib/content/collection-layout').EntryLayout;
+    /**
+     * The corpus facts, when this entry is an adopted destination.
+     *
+     * Read on the JOIN in getPublishedItem rather than out of the item, because
+     * the item holds the client's words and the corpus holds ours. Null for
+     * every ordinary entry, which is nearly all of them.
+     */
+    reference: import('../../../../lib/content/reference').ReferenceFacts | null;
   };
   theme: React.CSSProperties;
   /** Markup the server has already cleaned. See lib/content/prepared.ts. */
@@ -733,6 +718,17 @@ function EntryRenderer({
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
+  /*
+   * THE HEADER STANDS DOWN WHEN THE CONTENT OPENS WITH ITS OWN BANNER, the same
+   * way the automatic breadcrumb trail stands down for a breadcrumbs block.
+   *
+   * An adopted destination builds the banner the rest of the site uses: a
+   * section with a background photograph, its own trail, an h1-styled heading
+   * and a line of copy. Drawing the blog header as well gave the page two
+   * openings, the second in a different type treatment, with a stray trail
+   * above the picture and "3 min read" on a page about an island.
+   */
+  const ownBanner = carriesOwnBanner(item);
   /*
    * The facts this entry's collection declares, formatted into words.
    *
@@ -746,8 +742,13 @@ function EntryRenderer({
    * THE CORPUS'S OWN FACTS, when this entry was adopted from it rather than typed.
    * Null for every ordinary entry, which is most of them, so a blog post renders
    * exactly as it did. See lib/content/reference.ts.
+   *
+   * COMES FROM THE READ, NOT FROM THE ITEM. An earlier version looked in
+   * `item.fields`, which is the client's own answers to their own collection's
+   * questions, and would have found nothing there however many destinations had
+   * been adopted. The facts live on the corpus row this entry points at.
    */
-  const reference = referenceFacts(item.fields);
+  const reference = entry.reference;
   // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
   // worked out from the body, never stored: see lib/content/reading-time.ts.
   const minutes = readingTime(item.sections);
@@ -766,6 +767,7 @@ function EntryRenderer({
      * the document for the sake of moving it on the screen.
      */
     <article className="tgs-page tgs-entry" data-layout={entry.layout} style={theme}>
+      {!ownBanner && (
       <header className="tgs-entry__head">
         {item.date && (
           <p className="tgs-entry__date">
@@ -794,14 +796,6 @@ function EntryRenderer({
           </dl>
         )}
 
-        {/*
-          AFTER THE CLIENT'S OWN FACTS, not instead of them. The list above is
-          whatever they declared on the collection; this is what Travelgenix
-          maintains centrally and keeps current. Both belong on the page and the
-          order says which is which.
-        */}
-        {reference && <DestinationPanel facts={reference} />}
-
         {item.tags.length > 0 && (
           <ul className="tgs-entry__tags">
             {item.tags.map((tag) => (
@@ -822,6 +816,28 @@ function EntryRenderer({
           </div>
         )}
       </header>
+      )}
+
+      {/*
+        THE CORPUS PANEL IS A BAND OF ITS OWN, NOT PART OF THE HEADER, and it was
+        moved out here the day the magazine seed landed.
+
+        In the "Picture first" layout the header IS the banner photograph: it has
+        a min-height, its picture at inset 0 behind everything, and an explicit
+        order on each child. .tgs-dest had no order, so it fell to 0 and a facts
+        grid and a twelve-month chart drew straight over the photograph.
+
+        Reading it as a band is also just truer. What sits in the header is the
+        entry announcing itself, title and summary and picture. This is reference
+        material about the place, which is a different thing that happens to come
+        next, and giving it its own ground is what lets it look deliberate on
+        every one of the three entry layouts rather than only on the flat one.
+      */}
+      {reference && (
+        <div className="tgs-entry__reference">
+          <DestinationPanel facts={reference} />
+        </div>
+      )}
 
       {item.sections.map((section, index) => (
         <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} sizes={sizes} />

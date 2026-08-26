@@ -1653,7 +1653,27 @@ describe('the listing blocks on a page', () => {
   it('are resolved on the server, before anything renders', () => {
     const route = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
     expect(route).toContain('fillPageListings');
-    expect(route).toContain('listingsIn([regions.header, page.content, regions.footer])');
+    expect(route).toContain('resolveListings(tenantId, [regions.header, page.content, regions.footer])');
+  });
+
+  it('reads them through the one shared reader, on all three surfaces', () => {
+    /*
+     * There were three copies: the published route, the preview and nothing at
+     * all in the editor, which is why a collection grid drew real cards on the
+     * site and a grey box on the canvas. The preview's copy had also already
+     * drifted, dropping the filter and the sort, so a narrowed listing previewed
+     * as the whole collection.
+     */
+    for (const where of [
+      ['app', 'site', '[host]', '[[...path]]', 'page.tsx'],
+      ['app', 'preview', '[[...path]]', 'page.tsx'],
+      ['app', 'editor', 'page.tsx'],
+    ]) {
+      const file = read(...where);
+      expect(file, where.join('/')).toContain('resolveListings(');
+      // Nobody rolls their own any more.
+      expect(file, where.join('/')).not.toContain('listingsIn(');
+    }
   });
 
   it('are resolved on the preview too, or the two would disagree', () => {

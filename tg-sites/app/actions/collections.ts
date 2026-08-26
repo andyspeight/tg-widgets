@@ -32,6 +32,13 @@ import {
   type ItemSummary,
   type ItemWithContent,
 } from '../../lib/db/collections';
+import {
+  adoptDestination,
+  listAdoptable,
+  type AdoptionResult,
+  type CorpusEntry,
+} from '../../lib/db/reference';
+import { REFERENCE_KINDS, type ReferenceKind } from '../../lib/content/reference';
 import type { ActionResult } from './pages';
 
 async function attempt<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
@@ -255,5 +262,55 @@ export async function deleteItemAction(itemId: string): Promise<ActionResult<boo
     revalidatePath('/collections');
     revalidatePath('/preview', 'layout');
   }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Adopting a destination
+//
+// The corpus is shared by every client, so these two are the only place in the
+// app where a read is not about this tenant's own content. The write very much
+// is: adoptDestination creates a row in this tenant's collection, and the
+// capability check below is the same one creating an entry by hand goes through.
+// ---------------------------------------------------------------------------
+
+export async function listAdoptableAction(options: {
+  kind?: string;
+  search?: string;
+  limit?: number;
+} = {}): Promise<ActionResult<CorpusEntry[]>> {
+  /*
+   * The kind is narrowed HERE rather than trusted from the browser, even though
+   * listAdoptable narrows it again. Two reasons: the type at this boundary
+   * should say what it means, and a caller passing something else gets an empty
+   * filter rather than a thrown error, which is the right answer for a picker.
+   */
+  const kind = (REFERENCE_KINDS as readonly string[]).includes(String(options.kind))
+    ? (options.kind as ReferenceKind)
+    : undefined;
+
+  return attempt(async () =>
+    listAdoptable(await requireEitherCapability('collections', 'blog'), {
+      kind,
+      search: String(options.search ?? '').slice(0, 80),
+      limit: Number(options.limit) || 50,
+    }),
+  );
+}
+
+export async function adoptDestinationAction(
+  collectionId: string,
+  kind: string,
+  sourceId: string,
+): Promise<ActionResult<AdoptionResult>> {
+  const result = await attempt(async () =>
+    adoptDestination(
+      await requireEitherCapability('collections', 'blog'),
+      String(collectionId ?? ''),
+      String(kind ?? '') as ReferenceKind,
+      String(sourceId ?? '').slice(0, 40),
+    ),
+  );
+  if (result.ok && result.data.ok) revalidatePath('/collections');
   return result;
 }
