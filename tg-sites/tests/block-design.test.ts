@@ -150,3 +150,61 @@ describe('the pane groups a review block and the renderer draws the box', () => 
     expect(css).toContain(".tgs-block[data-boxed][data-shadow='strong']");
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * A SEGMENTED CONTROL ONLY WHEN THE LABELS FIT.
+ *
+ * Andy, 26 Aug 2026, on a four-option Order control: "make it a dropdown, as
+ * you can't read them as they are all truncated at the moment".
+ *
+ * The rule was the option count alone, four or fewer. That is right for Left /
+ * Centre / Right and wrong as soon as the labels are words, and it was never
+ * only that one control: twenty-one of the sixty-nine short selects in the
+ * catalogue were truncating, the worst of them "Coloured pills, a different
+ * colour each" inside a 95px button.
+ *
+ * The threshold is derived from the CSS rather than picked, so this checks BOTH
+ * halves: that the code keys off label length, and that the CSS it was measured
+ * against still says what it said. Widen the buttons and this fails, which is
+ * the moment to re-derive the number rather than discover it in a screenshot.
+ */
+describe('a select renders as buttons only when its labels fit', () => {
+  const fields = source('components', 'editor', 'Fields.tsx');
+  const css = source('components', 'editor', 'editor.css');
+
+  it('decides on the labels, not only on how many there are', () => {
+    expect(fields).toContain('const SEGMENTED_MAX_LABEL = 11;');
+    expect(fields).toContain('field.options.length <= 4 && fits');
+    expect(fields).toContain('option.label.length <= SEGMENTED_MAX_LABEL');
+  });
+
+  it('and the CSS the eleven was measured against has not moved', () => {
+    const rule = /\.ed-segmented \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(rule, '.ed-segmented has moved or gone').not.toBe('');
+    /*
+     * auto-fit with a floor is why the budget is a constant rather than a
+     * function of the option count: the buttons WRAP onto another row instead
+     * of shrinking, so a fifth of the panel is never what one of them gets.
+     */
+    expect(rule).toContain('repeat(auto-fit, minmax(56px, 1fr))');
+
+    const button = /\.ed-segmented button \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    // The truncation itself. If this ever goes, long labels wrap or overflow
+    // instead, and the whole reason for the threshold changes.
+    expect(button).toContain('text-overflow: ellipsis');
+    expect(button).toContain('font-size: var(--ed-text-sm)');
+  });
+
+  it('sends the Order control to a dropdown, which is what prompted this', () => {
+    const cards = blockDefinition('cards');
+    const order = cards?.fields.find((field) => field.key === 'order');
+    expect(order, 'the cards block has no order field').toBeTruthy();
+    if (!order || order.kind !== 'select') throw new Error('order is not a select');
+
+    expect(order.options.length).toBeLessThanOrEqual(4);
+    // Every one of them is twelve characters, so none of them fitted.
+    expect(order.options.every((option) => option.label.length > 11)).toBe(true);
+  });
+});

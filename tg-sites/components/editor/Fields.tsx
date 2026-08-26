@@ -27,6 +27,16 @@ import { CornerBox, type Corners } from './BoxControls';
 import { IconField } from './IconField';
 import { Icon } from './Icon';
 
+/**
+ * How long a label can be before a segmented button truncates it.
+ *
+ * Measured against the CSS rather than guessed: .ed-segmented is
+ * repeat(auto-fit, minmax(56px, 1fr)) with 8px of padding a side, so a button
+ * is 56 to 95px wide and the text sits at --ed-text-sm. That is about eleven
+ * characters. See the note where it is used.
+ */
+const SEGMENTED_MAX_LABEL = 11;
+
 interface FieldProps {
   field: Field;
   value: unknown;
@@ -263,8 +273,26 @@ export function FieldRenderer({
         }
         onChange(next);
       };
-      // Four or fewer reads better as segmented buttons than a dropdown.
-      if (field.options.length <= 4) {
+      /*
+       * Segmented buttons when the labels FIT, a dropdown when they do not.
+       *
+       * The rule used to be the count alone, four or fewer, which is right for
+       * Left / Centre / Right and wrong the moment the labels are words. The
+       * buttons are a grid of repeat(auto-fit, minmax(56px, 1fr)) with
+       * text-overflow: ellipsis, so they WRAP rather than shrink: the width per
+       * button stays around 56 to 95px whatever the count, which is roughly
+       * eleven characters at this font size. Anything longer silently truncated.
+       *
+       * Andy, 26 Aug 2026, on a new four-option control: "make it a dropdown, as
+       * you can't read them as they are all truncated at the moment". He is
+       * right, and it was never only that control: twenty-one of the sixty-nine
+       * short selects in the block catalogue were truncating, including
+       * "Separated by bullets | Coloured pills | Coloured pills, a different
+       * colour each". A dropdown shows a long label in full and costs a click
+       * that a truncated button never earns back.
+       */
+      const fits = field.options.every((option) => option.label.length <= SEGMENTED_MAX_LABEL);
+      if (field.options.length <= 4 && fits) {
         return (
           // The segmented group names ITSELF with aria-label, not the visible
           // label above it. That was already a real accessible name, so this is

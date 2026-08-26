@@ -39,6 +39,7 @@ import {
 import { itemAsPage, itemMeta, pageAsItem } from '../lib/content/collection-page';
 import { readingTime } from '../lib/content/reading-time';
 import {
+  LISTING_ORDERS,
   fillListings,
   fillPageListings,
   itemAsCard,
@@ -1989,5 +1990,75 @@ describe('the order a listing comes back in', () => {
     respond('from public.collection_items', ROWS);
     const listing = await listPublished(ALPHA, 'guides', 2, { order: 'title' } as never);
     expect(listing.items.map((row) => String(row.item.title))).toEqual(['ålesund', 'Brac']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE CANVAS KEEPS ITS CARDS WHEN THE ORDER CHANGES.
+ *
+ * The regression the Order control caused on its first outing. Andy clicked it
+ * and every card on the page vanished, 26 Aug 2026.
+ *
+ * The editor builds its listing map on the SERVER, once, from the tree as it
+ * was at page load. The canvas then fills a copy of the tree on every keystroke
+ * and looks each block up by listingKey, and that key carries the order. Pick a
+ * different order and the key matches nothing, fillListings finds no cards, and
+ * the grid falls back to its empty state until a reload.
+ *
+ * So the editor asks for every order up front. This is the test that the map it
+ * gets back can answer all four, and it fails against a map built the way the
+ * published route builds one, which is exactly what the editor was doing.
+ */
+describe('changing the order does not empty the canvas', () => {
+  const REQUEST = { collection: 'guides', count: 6, facts: 0, filter: null, sort: null };
+
+  it('a map built for one order cannot answer another, which is the bug', () => {
+    const forNewest = new Map([
+      [listingKey({ ...REQUEST, order: 'newest' }), [{ title: 'Hvar' }]],
+    ]);
+    const tree = {
+      sections: [section([listingBlock({ source: 'collection', collection: 'guides', order: 'title' })])],
+    };
+    // Untouched: no cards, which on the canvas is the grid going empty.
+    expect(fillListings(tree, forNewest)).toBe(tree);
+  });
+
+  it('and a map holding every order answers whichever one is picked', () => {
+    const everyOrder = new Map(
+      LISTING_ORDERS.map((order) => [
+        listingKey({ ...REQUEST, order }),
+        [{ title: `first by ${order}` }],
+      ]),
+    );
+
+    for (const order of LISTING_ORDERS) {
+      const tree = {
+        sections: [section([listingBlock({ source: 'collection', collection: 'guides', order })])],
+      };
+      const filled = fillListings(tree, everyOrder) as typeof tree;
+      const items = filled.sections[0].rows[0].columns[0].blocks[0].props.items as Array<{ title: string }>;
+      expect(items, `nothing filled for "${order}"`).toHaveLength(1);
+      expect(items[0].title).toBe(`first by ${order}`);
+    }
+  });
+
+  it('the editor is the one that asks for every order, not the site', () => {
+    /*
+     * The published and preview routes render a tree that cannot change under
+     * them, so paying for four reads there would be four times the work for an
+     * answer nobody can ask for.
+     */
+    const editor = readFileSync(join(__dirname, '..', 'app', 'editor', 'page.tsx'), 'utf8');
+    expect(editor).toContain('everyOrder: true');
+
+    for (const route of [
+      join('app', 'site', '[host]', '[[...path]]', 'page.tsx'),
+      join('app', 'preview', '[[...path]]', 'page.tsx'),
+    ]) {
+      const source = readFileSync(join(__dirname, '..', route), 'utf8');
+      expect(source, `${route} should not pay for every order`).not.toContain('everyOrder');
+    }
   });
 });
