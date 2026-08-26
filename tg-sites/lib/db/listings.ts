@@ -1,4 +1,4 @@
-import { itemAsCard, listingKey, listingsIn } from '../content/listings';
+import { LISTING_ORDERS, itemAsCard, listingKey, listingsIn } from '../content/listings';
 import type { Section } from '../content/schema';
 import { listPublished } from './collections';
 
@@ -29,8 +29,42 @@ export type ListingCards = Map<string, Array<Record<string, unknown>>>;
 export async function resolveListings(
   tenantId: string,
   trees: ReadonlyArray<{ sections: Section[] } | null | undefined>,
+  options: { everyOrder?: boolean } = {},
 ): Promise<ListingCards> {
-  const wanted = listingsIn(trees);
+  const asked = listingsIn(trees);
+  /*
+   * EVERY ORDER, FOR THE EDITOR ONLY.
+   *
+   * This map is built on the server, once, from the tree as it was when the
+   * page loaded. The canvas then fills a COPY of the tree on every keystroke,
+   * looking each block up by listingKey, and that key carries the order. So the
+   * moment somebody picked a different order the key stopped matching anything
+   * in the map, fillListings found nothing, and every card vanished until a
+   * reload. Andy hit it on the first click of the control that had just been
+   * added, 26 Aug 2026.
+   *
+   * The published and preview routes render once from a tree that cannot change
+   * underneath them, so they ask for exactly the order the page stored and this
+   * does nothing for them.
+   *
+   * Reading each order rather than reordering what came back, because an order
+   * changes WHICH items you get and not only their sequence: the oldest six of
+   * twenty are not the newest six rearranged. Four small reads in an editor is
+   * the honest price of the canvas telling the truth.
+   */
+  const wanted = options.everyOrder
+    ? [
+        ...new Map(
+          asked.flatMap((request) =>
+            LISTING_ORDERS.map((order) => {
+              const variant = { ...request, order };
+              return [listingKey(variant), variant] as const;
+            }),
+          ),
+        ).values(),
+      ]
+    : asked;
+
   const cards: ListingCards = new Map();
   if (wanted.length === 0) return cards;
 
