@@ -31,7 +31,6 @@
  * "we are dropping the cruise side", "this is the trade-facing site".
  */
 
-import { escapeHtml } from '../content/sanitise';
 import { safeSlug } from '../content/collection';
 import { extractJson } from './section-build';
 import { HOUSE_RULES, profileBlock } from './prompt';
@@ -297,10 +296,17 @@ function asRecord(value: unknown): Record<string, unknown> {
 /**
  * Whatever the model said, turned into a sitemap we would be willing to build.
  *
- * ESCAPED HERE, the same escape-first rule the page builder follows. A title
- * becomes a page title and a heading, and a purpose is handed back to the model
- * as a brief, so both are stripped to plain words on the way in rather than
- * trusted on the way out.
+ * STRIPPED, NOT ESCAPED, and the difference showed up on screen. toText already
+ * removes tag-shaped runs, so escaping on top of it protects nothing and does
+ * real harm: it turned every apostrophe into &#39;, which a client then read in
+ * the review box as "Halcyon Bay&#39;s own wording" and which travelled into the
+ * page builder's brief as noise.
+ *
+ * The page builder escapes for a reason that does not apply here. Its headings
+ * are written straight into a block's html. These are not: a title becomes a
+ * page title, which is data and is sanitised on save and escaped by React on
+ * render, and a purpose becomes a line in a prompt. Neither is ever written raw
+ * into markup.
  *
  * A DUPLICATE SLUG IS DROPPED, NOT RENAMED. Two pages at one address is not a
  * plan with a clash in it, it is a plan that thought it had two pages and has
@@ -329,7 +335,7 @@ export function planSiteFromModel(answer: unknown): SitePlanResult {
     if (pages.length >= MAX_SITE_PAGES) break;
     const item = asRecord(raw);
 
-    const title = escapeHtml(toText(item.title)).slice(0, MAX_TITLE).trim();
+    const title = toText(item.title).slice(0, MAX_TITLE).trim();
     // A page with no name is not a page. Everything else can be recovered.
     if (!title) continue;
 
@@ -373,7 +379,7 @@ export function planSiteFromModel(answer: unknown): SitePlanResult {
     pages.push({
       title,
       slug,
-      purpose: escapeHtml(toText(item.purpose)).slice(0, MAX_PURPOSE).trim(),
+      purpose: toText(item.purpose).slice(0, MAX_PURPOSE).trim(),
     });
   }
 

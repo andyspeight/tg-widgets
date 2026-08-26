@@ -342,3 +342,101 @@ describe('the page builder action', () => {
     expect(action).not.toContain('ANTHROPIC_API_KEY');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * NO PRESET INSTRUCTIONS ON A PAGE THE BUILDER JUST HANDED OVER.
+ *
+ * Andy, 26 Aug 2026, on the first full site it produced: "it's very poor. No
+ * images. Placeholder text. Short pages." Nine of the twelve pages carried at
+ * least one placeholder, most often "Tagline here" or "This is a short title".
+ *
+ * One cause behind all three complaints: buildSection writes exactly two things,
+ * the heading into the section title and the body into the first paragraph.
+ * Everything else a preset holds keeps its factory copy, so a real headline sits
+ * on top of instructions written for whoever was meant to fill the preset in.
+ *
+ * This is the safety net rather than the fix. The fix is for the builder to
+ * fill every slot it chooses, and that is the next piece of work.
+ */
+describe('stripping the copy the builder never filled', () => {
+  const row = (blocks: Array<{ type: string; props?: Record<string, unknown> }>) => ({
+    id: 'r1',
+    layout: '100',
+    columns: [{ id: 'c1', width: 100, blocks }],
+  });
+
+  const section = (blocks: Array<{ type: string; props?: Record<string, unknown> }>) =>
+    ({ id: 's1', rows: [row(blocks)] }) as never;
+
+  it('takes out a block whose whole text is a placeholder', async () => {
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const out = stripPlaceholders([
+      section([
+        { type: 'heading', props: { html: 'Barbados' } },
+        { type: 'heading', props: { html: 'This is a short title' } },
+        { type: 'text', props: { html: '<p>Another one. Three or four of these is usually enough.</p>' } },
+      ]),
+    ]);
+
+    const blocks = out[0].rows[0].columns[0].blocks;
+    expect(blocks).toHaveLength(1);
+    expect((blocks[0].props as { html: string }).html).toBe('Barbados');
+  });
+
+  it('leaves real copy that merely echoes a placeholder', async () => {
+    /*
+     * Conservative on purpose: the whole visible text has to BE a placeholder.
+     * A sentence that happens to contain one of these phrases is somebody's
+     * writing and removing it would be worse than leaving the placeholder.
+     */
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const out = stripPlaceholders([
+      section([
+        { type: 'text', props: { html: '<p>This is a short title we chose deliberately.</p>' } },
+      ]),
+    ]);
+    expect(out[0].rows[0].columns[0].blocks).toHaveLength(1);
+  });
+
+  it('drops a section left with nothing, rather than leaving an empty band', async () => {
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const out = stripPlaceholders([
+      section([{ type: 'heading', props: { html: 'Tagline here' } }]),
+    ]);
+    expect(out).toHaveLength(0);
+  });
+
+  it('ignores markup and case, since the copy arrives wrapped', async () => {
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const out = stripPlaceholders([
+      section([{ type: 'text', props: { html: '<p>  TAGLINE HERE  </p>' } }]),
+    ]);
+    expect(out).toHaveLength(0);
+  });
+
+  it('every AI page goes through it, so no route can forget', () => {
+    const text = read('lib', 'ai', 'page-build.ts');
+    const fn = text.slice(text.indexOf('export async function sectionsFromPlan'));
+    expect(fn.slice(0, 500)).toContain('stripPlaceholders(built)');
+  });
+
+  it('the list still matches what the presets actually contain', async () => {
+    /*
+     * THE GUARD AGAINST ROT. This list is a copy of strings that live in
+     * presets-page.ts, so it goes stale the moment somebody rewords a preset,
+     * and it goes stale silently: the placeholder simply starts shipping again.
+     * Every entry has to still be found in the presets.
+     */
+    const presets = read('lib', 'content', 'presets-page.ts').toLowerCase();
+    const text = read('lib', 'ai', 'page-build.ts');
+    const list = /const PLACEHOLDER_COPY: readonly string\[] = \[([\s\S]*?)\];/.exec(text)?.[1] ?? '';
+    const entries = [...list.matchAll(/'([^']+)'/g)].map((m) => m[1]);
+
+    expect(entries.length).toBeGreaterThan(5);
+    for (const entry of entries) {
+      expect(presets, `"${entry}" is no longer in any preset`).toContain(entry);
+    }
+  });
+});

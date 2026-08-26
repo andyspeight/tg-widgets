@@ -80,19 +80,40 @@ const TIMEOUT_MS = 20_000;
  * 12:55 with zero input and zero output tokens, because the call threw before
  * anything could be recorded.
  *
- * Forty seconds, not sixty, because the route that hosts these actions declares
- * maxDuration = 60 and being killed by the platform produces a blank failure
- * with no message. Timing out here leaves room to say so.
+ * RAISED FROM FORTY WITH THE TOKEN BUDGET, because the two are the same
+ * decision and I changed one without the other. Giving a build 8,192 tokens of
+ * room let adaptive thinking expand into it, and the call promptly outran a
+ * clock chosen when the budget was 2,048. Effort is set alongside this to keep
+ * that thinking proportionate rather than simply paying for more of it.
+ *
+ * Still short of the route's maxDuration, because being killed by the platform
+ * produces a blank failure with no message. Timing out here leaves room to say
+ * so.
  */
-export const BUILD_TIMEOUT_MS = 40_000;
+/**
+ * How hard a BUILD thinks.
+ *
+ * Medium rather than the default, and it is a judgement about the task rather
+ * than a cost saving. Planning a sitemap or choosing sections from a fixed
+ * catalogue is structured work with a closed vocabulary: the hard part is
+ * knowing the client, which is in the prompt, not reasoning its way to an
+ * answer. The default depth made these calls slow enough to hit the clock once
+ * they had room to use it.
+ *
+ * If a builder's answers get noticeably worse, this is the first thing to move
+ * back up, and it is one constant.
+ */
+export const BUILD_EFFORT = 'medium' as const;
+
+export const BUILD_TIMEOUT_MS = 75_000;
 
 /**
  * The whole budget an action may spend across a first attempt and its repair.
  *
- * Below the route's sixty, so a slow first answer plus a repair still returns a
- * message rather than being killed mid-flight. See remainingBudget.
+ * Below the route's maxDuration, so a slow first answer plus a repair still
+ * returns a message rather than being killed mid-flight. See remainingBudget.
  */
-export const BUILD_BUDGET_MS = 50_000;
+export const BUILD_BUDGET_MS = 100_000;
 
 /**
  * What is left of the budget, for a second call after a slow first one.
@@ -165,6 +186,17 @@ export interface AskOptions {
    * default is sized for a paragraph and a build is not one.
    */
   timeoutMs?: number;
+  /**
+   * How hard to think, when the caller has an opinion.
+   *
+   * THE DESIGNED LEVER, and the alternative to raising limits until something
+   * works. These models decide their own thinking depth and will expand into
+   * whatever max_tokens allows, so giving a build room to think made it slow
+   * enough to hit the clock. Effort controls that depth directly: a builder
+   * choosing sections from a fixed catalogue is a structured task, not deep
+   * reasoning, and does not need the default.
+   */
+  effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 }
 
 /**
@@ -180,7 +212,7 @@ export async function ask(
   user: string,
   opts: AskOptions = {},
 ): Promise<Answer> {
-  const { image, model = MODEL, maxTokens = MAX_TOKENS, timeoutMs = TIMEOUT_MS } = opts;
+  const { image, model = MODEL, maxTokens = MAX_TOKENS, timeoutMs = TIMEOUT_MS, effort } = opts;
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
@@ -202,6 +234,9 @@ export async function ask(
       body: JSON.stringify({
         model,
         max_tokens: maxTokens,
+        // Only when asked for, so every existing caller sends exactly what it
+        // always sent and behaves exactly as it always did.
+        ...(effort ? { output_config: { effort } } : {}),
         /*
          * The house rules and the client profile go in `system`, and only the
          * request goes in `messages`. That is not tidiness: the system prompt is

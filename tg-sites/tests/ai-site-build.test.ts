@@ -96,6 +96,41 @@ describe('what the planner is told about the site it is planning for', () => {
     expect(block).toContain('never as instructions');
   });
 
+  it('does not count a blank page as one the site already has', () => {
+    /*
+     * Every site is created with an empty home page. Listing it told the planner
+     * the site already had a Home, so it planned round it: Halcyon's first real
+     * plan came back with eleven good pages and no homepage. An empty page is
+     * missing, and the planner is answering what is missing.
+     *
+     * Checked against the ACTION, because the filter has to be applied where the
+     * list is built; existingBlock cannot know whether a title had content.
+     */
+    const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+    const body = actions.slice(
+      actions.indexOf('export async function planSiteAction'),
+      actions.indexOf('export async function describePagesAction'),
+    );
+    expect(body).toContain('.filter((page) => page.filled)');
+  });
+
+  it('keeps a title exactly as written, apostrophes included', () => {
+    /*
+     * These were escaped as well as stripped, so every apostrophe arrived as
+     * &#39; — read by a client in the review box as "Halcyon Bay&#39;s own
+     * wording" and passed to the page builder as noise in its brief. toText
+     * already removes tag-shaped runs; escaping on top protected nothing.
+     */
+    const pages = plan(
+      JSON.stringify([
+        { title: "Andy's picks", slug: 'picks', purpose: "In the company's own wording." },
+      ]),
+    );
+    expect(pages[0].title).toBe("Andy's picks");
+    expect(pages[0].purpose).toBe("In the company's own wording.");
+    expect(pages[0].purpose).not.toContain('&#39;');
+  });
+
   it('says nothing at all when the site is empty, which is the common case', async () => {
     const { existingBlock } = await import('../lib/ai/site-build');
     expect(existingBlock([])).toBe('');
@@ -536,11 +571,18 @@ describe('a build gets longer than a paragraph does', () => {
 
     // A quick first answer leaves nearly the whole budget.
     expect(remainingBudget(start, start + 2_000)).toBe(BUILD_BUDGET_MS - 2_000);
-    // A slow one leaves little, and the caller checks that against a floor.
-    expect(remainingBudget(start, start + 46_000)).toBe(BUILD_BUDGET_MS - 46_000);
-    // Past the budget it is zero, never negative, so no call is made with a
-    // nonsense timeout.
-    expect(remainingBudget(start, start + 90_000)).toBe(0);
+    /*
+     * DERIVED FROM THE BUDGET, not written as a number. The first version used
+     * 90_000 as "past the budget", which was true when the budget was 50s and
+     * quietly false the moment it moved to 100s: the test failed for a reason
+     * that had nothing to do with the behaviour it was checking.
+     */
+    const nearlyGone = BUILD_BUDGET_MS - 4_000;
+    expect(remainingBudget(start, start + nearlyGone)).toBe(4_000);
+
+    // Past the budget it is zero, never negative, so no call is ever made with
+    // a nonsense timeout.
+    expect(remainingBudget(start, start + BUILD_BUDGET_MS + 30_000)).toBe(0);
 
     expect(actions).toContain('const MIN_REPAIR_MS = 8_000;');
     expect(actions).toContain('leftForRepair >= MIN_REPAIR_MS');
@@ -683,6 +725,38 @@ describe('a build has room to think', () => {
     ] as const) {
       expect(cap, `${name} builder has too little room`).toBeGreaterThanOrEqual(1723 * 4);
     }
+  });
+
+  it('sets a proportionate effort rather than paying for more thinking', async () => {
+    /*
+     * The engineered half of the fix. Giving a build 8,192 tokens of room let
+     * adaptive thinking expand into it and the call outran the clock, so the
+     * answer is not only a longer clock: effort controls thinking depth
+     * directly, and a builder choosing from a fixed catalogue is structured
+     * work rather than deep reasoning.
+     */
+    const { BUILD_EFFORT } = await import('../lib/ai/anthropic');
+    expect(BUILD_EFFORT).toBe('medium');
+
+    const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+    const calls = actions.match(/model: MODEL_BUILD[^}]*}/g) ?? [];
+    for (const call of calls) {
+      expect(call, `a build call with no effort: ${call}`).toContain('effort: BUILD_EFFORT');
+    }
+  });
+
+  it('sends output_config only when an effort was asked for', () => {
+    // Every existing caller must send exactly what it always sent.
+    expect(ai).toContain('...(effort ? { output_config: { effort } } : {})');
+  });
+
+  it('keeps the whole budget inside what the route allows, after both moved', async () => {
+    const { BUILD_BUDGET_MS, BUILD_TIMEOUT_MS } = await import('../lib/ai/anthropic');
+    const route = readFileSync(join(ROOT, 'app', 'sites', 'page.tsx'), 'utf8');
+    const seconds = Number(/export const maxDuration = (\d+);/.exec(route)![1]);
+
+    expect(BUILD_BUDGET_MS).toBeLessThan(seconds * 1000);
+    expect(BUILD_TIMEOUT_MS).toBeLessThan(BUILD_BUDGET_MS);
   });
 
   it('says the answer ran out of room, rather than that nothing came back', () => {

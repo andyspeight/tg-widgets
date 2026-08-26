@@ -37,6 +37,7 @@ import {
   aiIsConfigured,
   AiError,
   ask,
+  BUILD_EFFORT,
   BUILD_TIMEOUT_MS,
   MODEL_BUILD,
   remainingBudget,
@@ -483,7 +484,7 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
 
     let inputTokens = 0;
     let outputTokens = 0;
-    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     const first = await ask(system, buildUserPrompt(instruction), build);
     inputTokens += first.inputTokens;
@@ -673,11 +674,25 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
      * it offered "Voyages" to a site that already has a Voyages page, and the
      * address did not even collide because that page lives at /destinations.
      */
-    const existingTitles = (await listPageFill(site.tenantId)).map((page) => page.title);
+    /*
+     * ONLY PAGES WITH SOMETHING ON THEM COUNT AS EXISTING.
+     *
+     * Every site is created with a blank home page, so listing all of them told
+     * the planner "you already have Home" and it correctly left out the one page
+     * that most needed building. Halcyon's first real plan came back with eleven
+     * good pages and no homepage for exactly this reason.
+     *
+     * The question the model is answering is what the site is MISSING, and an
+     * empty page is missing. It is the same test buildPlannedPageAction uses to
+     * decide what it may build into, which is why both read the same column.
+     */
+    const existingTitles = (await listPageFill(site.tenantId))
+      .filter((page) => page.filled)
+      .map((page) => page.title);
 
     const system = buildSiteSystemPrompt(settings, existingTitles);
     const userPrompt = buildSiteUserPrompt(brief);
-    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     let inputTokens = 0;
     let outputTokens = 0;
@@ -789,7 +804,7 @@ export async function describePagesAction(input: unknown): Promise<SitePlanActio
     const settings = await getSettings(site.tenantId);
     const system = buildDescribeSystemPrompt(settings);
     const userPrompt = buildDescribeUserPrompt(titles);
-    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     let inputTokens = 0;
     let outputTokens = 0;
@@ -883,7 +898,7 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     const userPrompt = buildPageUserPrompt(
       purpose ? `The page is called "${title}". ${purpose}` : `A page called "${title}".`,
     );
-    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 
     let inputTokens = 0;
     let outputTokens = 0;
@@ -1042,8 +1057,8 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
     // The picture rides along on both attempts, so the model sees it whether the
     // first answer parsed or the repair did.
     const build = imageUrl
-      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, image: { url: imageUrl } }
-      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
+      ? { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT, image: { url: imageUrl } }
+      : { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
     const userPrompt = buildPageUserPrompt(brief, Boolean(imageUrl));
 
     let inputTokens = 0;
