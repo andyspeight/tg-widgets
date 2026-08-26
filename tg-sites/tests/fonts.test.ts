@@ -607,11 +607,16 @@ describe('preview families in the browser', () => {
  *   browser could not tell they were one file. The published page preloaded
  *   102,384 bytes across three requests for 34,928 bytes of font.
  *
- *   WEIGHTS. A face pinned to one weight says the file IS that weight, so a
- *   style asking for 650 snaps to the nearest pinned face instead of
- *   interpolating. In Chromium, Coastwise's h2 at 650 rendered at exactly the
- *   width of 700 (396.11px both). With the range declared, the same file
- *   renders 650 at 389.09px, between 400 and 700 where it was asked for.
+ *   WEIGHTS, and this one is LATENT rather than live. A face pinned to one
+ *   weight says the file IS that weight, so a style asking for 650 snaps to the
+ *   nearest pinned face instead of interpolating: in Chromium, 650 rendered at
+ *   exactly the width of 700 (396.11px both) with pinned faces, and at 389.09px
+ *   with the range. No site shows that difference today, because parseTheme
+ *   admits only 400, 500, 600 and 700 and rewrites anything else to the style's
+ *   default. Coastwise's stored h2 weight of 650 is already 700 by the time it
+ *   renders, and the theme parser is what does it. I claimed the stronger
+ *   version of this first and it was wrong; it is written down so the next
+ *   person does not have to find it out twice.
  */
 describe('a variable font is one file across a range', () => {
   const VARIABLE = [

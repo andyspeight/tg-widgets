@@ -22,13 +22,25 @@
 -- weights returns 3 urls, each repeated 4 times, and the latin file's md5 is
 -- byte-for-byte the cd56e2ec... already in this table.
 --
--- THE SECOND FAULT, WHICH IS A CORRECTNESS ONE. A face pinned to a single
--- weight tells the browser that file IS that weight, so a style asking for a
--- weight in between snaps to the nearest pinned face instead of interpolating.
--- Coastwise's h2 asks for 650 and renders at 700: measured in Chromium, the
--- 650 and 700 samples come out at exactly the same width, 396.11px. With the
--- range declared, the same file renders 650 at 389.09px, between 400 and 700
--- where it belongs. The client set a weight and silently got a different one.
+-- THE SECOND THING, AND IT IS LATENT RATHER THAN LIVE. Read the paragraph
+-- before believing the stronger version of it.
+--
+-- A face pinned to a single weight tells the browser that file IS that weight,
+-- so a style asking for a weight in between snaps to the nearest pinned face
+-- instead of interpolating. Measured in Chromium: with four pinned faces, 650
+-- and 700 render at exactly the same width, 396.11px; with the range declared,
+-- the same file renders 650 at 389.09px, between 400 and 700 where it belongs.
+--
+-- That is a real property of the CSS and it is NOT visible on any site today,
+-- which I got wrong on the first pass and am recording so nobody re-derives it.
+-- parseTheme admits only 400, 500, 600 and 700 and rewrites anything else to
+-- the style's default, so no in-between weight can reach the page. Coastwise's
+-- stored h2 weight of 650 is already 700 by the time it is rendered, and that
+-- is the theme parser doing it, not font matching.
+--
+-- So the win this migration actually banks is the bytes. The interpolation
+-- becomes a real one the day the type panel offers a weight off the four steps,
+-- which a variable font is precisely what makes possible.
 --
 -- WHAT THIS DOES. weight becomes the BOTTOM of the range a file covers and
 -- weight_max the top, null meaning a single weight as before. Then the

@@ -276,11 +276,16 @@ export function fontFaceCss(
      * A RANGE WHEN THE FILE COVERS ONE, and it does two things at once.
      *
      * The browser downloads a variable file once instead of once per weight,
-     * and it can render the weights BETWEEN the steps. A face pinned to a
-     * single weight says "this file is 700", so a style asking for 650 snaps to
-     * the nearest pinned face: measured in Chromium, Coastwise's h2 at 650 came
-     * out at exactly the width of 700. With the range declared the same file
-     * renders 650 between 400 and 700, where the client asked for it.
+     * which is the win that lands today: Coastwise went from three preload
+     * requests for one file to one.
+     *
+     * It can also render the weights BETWEEN the steps, and that one is latent.
+     * A face pinned to a single weight says "this file is 700", so a style
+     * asking for 650 snaps to it: measured in Chromium, 650 came out at exactly
+     * the width of 700 with pinned faces and at 389.09px with the range. But
+     * parseTheme admits only the four steps and rewrites anything else to the
+     * style's default, so nothing in between can reach the page yet. Worth
+     * having anyway, because it is what the file actually is.
      */
     const top = file.weightMax ?? file.weight;
     const weight = top > file.weight ? `${file.weight} ${top}` : `${file.weight}`;
