@@ -807,8 +807,18 @@ describe('a cards grid puts its box on the cards', () => {
     expect(override).toBeGreaterThan(preset);
   });
 
-  it('leaves padding on the container, where it means space around the grid', () => {
+  /*
+   * REVERSED ON 26 AUG 2026. This used to assert the opposite, that padding
+   * stayed on the container where it means space around the grid. That was my
+   * reasoning rather than Andy's requirement, and he reported it as a bug the
+   * first time he used it: every other control in that panel moves to the card,
+   * so the one that did not read as broken. The completeness check that would
+   * have caught it before he did now lives in tests/cards.test.ts.
+   */
+  it('sends padding to the card as well, since every other control goes there', () => {
     const fn = renderer.slice(renderer.indexOf('const cardBox'), renderer.indexOf('const style: CSSProperties'));
-    expect(fn).not.toContain('padding');
+    expect(fn).toContain('--tgs-card-pt');
+    // All four together: a top with the preset's other three reads as a bug.
+    for (const side of ['pt', 'pr', 'pb', 'pl']) expect(fn).toContain(`--tgs-card-${side}`);
   });
 });

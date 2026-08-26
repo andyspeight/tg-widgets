@@ -297,6 +297,16 @@
     --tgs-text-muted: var(--tgs-d-text-muted) !important;
     --tgs-border: var(--tgs-d-border) !important;
     --tgs-border-strong: var(--tgs-d-border-strong) !important;
+    /* The brand, lifted to read on a near-black page, and everything measured
+       against it re-measured. See darkThemeTokens. */
+    --tgs-primary: var(--tgs-d-primary) !important;
+    --tgs-primary-light: var(--tgs-d-primary-light) !important;
+    --tgs-accent: var(--tgs-d-accent) !important;
+    --tgs-on-primary: var(--tgs-d-on-primary) !important;
+    --tgs-on-accent: var(--tgs-d-on-accent) !important;
+    --tgs-on-primary-muted: var(--tgs-d-on-primary-muted) !important;
+    --tgs-on-primary-accent: var(--tgs-d-on-primary-accent) !important;
+    --tgs-on-primary-border: var(--tgs-d-on-primary-border) !important;
     --tgs-tag-lmin: 0.72 !important;
     --tgs-tag-lmax: 1 !important;
   }
@@ -308,6 +318,16 @@ html[data-theme='dark'] .tgs-page[style*='--tgs-d-surface'] {
   --tgs-text-muted: var(--tgs-d-text-muted) !important;
   --tgs-border: var(--tgs-d-border) !important;
   --tgs-border-strong: var(--tgs-d-border-strong) !important;
+  /* The brand, lifted to read on a near-black page, and everything measured
+     against it re-measured. See darkThemeTokens. */
+  --tgs-primary: var(--tgs-d-primary) !important;
+  --tgs-primary-light: var(--tgs-d-primary-light) !important;
+  --tgs-accent: var(--tgs-d-accent) !important;
+  --tgs-on-primary: var(--tgs-d-on-primary) !important;
+  --tgs-on-accent: var(--tgs-d-on-accent) !important;
+  --tgs-on-primary-muted: var(--tgs-d-on-primary-muted) !important;
+  --tgs-on-primary-accent: var(--tgs-d-on-primary-accent) !important;
+  --tgs-on-primary-border: var(--tgs-d-on-primary-border) !important;
   --tgs-tag-lmin: 0.72 !important;
   --tgs-tag-lmax: 1 !important;
 }
@@ -3819,6 +3839,19 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   background-image: none;
   border: 0;
   box-shadow: none;
+  /* And the padding, which would otherwise be applied twice: once as space
+     around the grid here and once inside each card below. */
+  padding: 0;
+}
+
+/*
+ * The card's own padding, on the BODY so a picture stays full bleed at the top.
+ * Later in the file than the plain-style padding rules it has to beat, which are
+ * the same specificity; source order is doing the work, as it is for the finish
+ * presets above.
+ */
+.tgs-block[data-box-target='card'][style*='--tgs-card-pt'] .tgs-card__body {
+  padding: var(--tgs-card-pt) var(--tgs-card-pr) var(--tgs-card-pb) var(--tgs-card-pl);
 }
 
 .tgs-block[data-box-target='card'][style*='--tgs-card-bg'] .tgs-card {
