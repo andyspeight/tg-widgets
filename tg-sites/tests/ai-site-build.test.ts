@@ -343,6 +343,39 @@ describe('building an approved page', () => {
     expect(body).toContain('sectionsFromPlan(');
   });
 
+  it('NEVER builds over a page that already has content', () => {
+    /*
+     * The planner can be run on a site that is already part built, which is a
+     * reasonable thing to want and is how it is reachable now. What must never
+     * happen is a plan quietly replacing a home page somebody spent a week on.
+     *
+     * The check is HERE rather than only in the screen, because a guard that
+     * exists only in the UI is not a guard: this action is a server action and
+     * is callable directly.
+     */
+    expect(body).toContain('listPageFill(');
+    expect(at('listPageFill(')).toBeLessThan(at('saveDraft('));
+    expect(at('listPageFill(')).toBeLessThan(at('createPage('));
+    expect(body).toContain('already?.filled');
+  });
+
+  it('marks that refusal as a skip rather than a failure', () => {
+    // "Seven built, one left alone" is a different sentence from "one broke",
+    // and showing the second would send somebody hunting a bug that is not there.
+    expect(body).toContain('skipped: true');
+  });
+
+  it('a blank page is still built into, which is the ordinary case', () => {
+    /*
+     * Every new site has an empty home page and building into it is the entire
+     * point, so the test is on CONTENT and not on the page existing.
+     */
+    const fill = readFileSync(join(ROOT, 'lib', 'db', 'pages.ts'), 'utf8');
+    const fn = fill.slice(fill.indexOf('export async function listPageFill'));
+    expect(fn.slice(0, 900)).toContain("draft_content -> 'sections'");
+    expect(fn.slice(0, 900)).toContain("published_content -> 'sections'");
+  });
+
   it('retries once on a mangled answer, inside the one claimed slot', () => {
     expect(body).toContain('repairPagePrompt(');
     expect(body.indexOf('repairPagePrompt(')).toBeGreaterThan(at('claimRequest('));

@@ -33,7 +33,7 @@ import { Modal } from '../ui/Modal';
 type Stage = 'ask' | 'review' | 'building' | 'done';
 
 /** What happened to one page once building started. */
-type Progress = 'waiting' | 'building' | 'built' | 'failed';
+type Progress = 'waiting' | 'building' | 'built' | 'failed' | 'skipped';
 
 interface Row extends PlannedPage {
   progress: Progress;
@@ -42,7 +42,20 @@ interface Row extends PlannedPage {
 
 const MAX_BRIEF = 400;
 
-export function SiteBuilder({ onClose }: { onClose: () => void }) {
+export function SiteBuilder({
+  onClose,
+  existing,
+}: {
+  onClose: () => void;
+  /**
+   * The addresses already on this site, and whether anything is built on them.
+   *
+   * So the review step can say which planned pages would be left alone BEFORE
+   * anybody presses build. The server refuses to build over content whatever
+   * this says; this is here so the client is not surprised by the refusal.
+   */
+  existing: ReadonlyArray<{ slug: string; title: string; filled: boolean }>;
+}) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>('ask');
   /** The home page's id, so Done can open what was just built. */
@@ -54,6 +67,10 @@ export function SiteBuilder({ onClose }: { onClose: () => void }) {
 
   const built = rows.filter((row) => row.progress === 'built').length;
   const failed = rows.filter((row) => row.progress === 'failed');
+  const skipped = rows.filter((row) => row.progress === 'skipped');
+
+  /** The page already on this site at that address, if anything is built there. */
+  const clash = (slug: string) => existing.find((page) => page.slug === slug && page.filled);
 
   async function plan() {
     setBusy(true);
@@ -109,7 +126,11 @@ export function SiteBuilder({ onClose }: { onClose: () => void }) {
         index,
         result.ok
           ? { progress: 'built', error: undefined }
-          : { progress: 'failed', error: result.error },
+          : {
+              // A page left alone is not a page that broke.
+              progress: result.skipped ? 'skipped' : 'failed',
+              error: result.error,
+            },
       );
 
       if (result.ok && page.slug === '') setHomeId(result.data.id);
@@ -245,6 +266,14 @@ export function SiteBuilder({ onClose }: { onClose: () => void }) {
                 <span className="sv-plan__path">
                   {row.slug === '' ? 'The home page' : `/${row.slug}`}
                 </span>
+
+                {clash(row.slug) && (
+                  <span className="sv-plan__clash">
+                    <Icon name="warning" size={14} />
+                    {`"${clash(row.slug)!.title}" is already here and has content on it, so this one
+                      will be left alone. Rename it to build it somewhere else, or remove it.`}
+                  </span>
+                )}
               </div>
 
               <span className="sv-plan__tools">
@@ -327,6 +356,7 @@ export function SiteBuilder({ onClose }: { onClose: () => void }) {
             <span className="sv-plan__state" aria-hidden="true">
               {row.progress === 'built' && <Icon name="check" size={16} />}
               {row.progress === 'failed' && <Icon name="warning" size={16} />}
+              {row.progress === 'skipped' && <Icon name="divider" size={16} />}
               {row.progress === 'building' && <span className="sv-spinner" />}
             </span>
             <span className="sv-plan__main">
@@ -338,6 +368,7 @@ export function SiteBuilder({ onClose }: { onClose: () => void }) {
               {row.progress === 'building' && 'Building'}
               {row.progress === 'built' && 'Built'}
               {row.progress === 'failed' && 'Not built'}
+              {row.progress === 'skipped' && 'Left alone'}
             </span>
           </li>
         ))}
@@ -345,9 +376,12 @@ export function SiteBuilder({ onClose }: { onClose: () => void }) {
 
       {finished && (
         <p className="sv-plan__summary">
-          {failed.length === 0
-            ? `${built} ${built === 1 ? 'page' : 'pages'} built. Open any of them to change the words and the pictures.`
-            : `${built} of ${rows.length} built. The ${failed.length === 1 ? 'one that did not' : 'ones that did not'} can be added by hand, or plan again with a different description.`}
+          {`${built} ${built === 1 ? 'page' : 'pages'} built.`}
+          {skipped.length > 0
+            && ` ${skipped.length} left alone, because ${skipped.length === 1 ? 'it' : 'they'} already had content.`}
+          {failed.length > 0
+            && ` ${failed.length} could not be built, and can be added by hand or planned again.`}
+          {failed.length === 0 && ' Open any of them to change the words and the pictures.'}
         </p>
       )}
     </Modal>

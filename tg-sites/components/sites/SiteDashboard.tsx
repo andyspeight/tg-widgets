@@ -56,6 +56,12 @@ interface Props {
    * every new site is in.
    */
   canStart: boolean;
+  /**
+   * Every address on this site and whether anything is built there, for the AI
+   * planner's review step. Cheap, and it is the difference between a client
+   * being told a page will be left alone and finding out afterwards.
+   */
+  existingPages: ReadonlyArray<{ slug: string; title: string; filled: boolean }>;
   /** What is already in settings, so the wizard asks nothing twice. */
   profile: StarterProfile;
   /** Whether this person may make a new site: Travelgenix staff. */
@@ -69,6 +75,7 @@ export function SiteDashboard({
   siteUrl,
   pages: initial,
   canStart,
+  existingPages,
   profile,
   canCreateSite,
 }: Props) {
@@ -254,6 +261,29 @@ export function SiteDashboard({
               <Icon name="edit" size={16} />
               Settings
             </a>
+
+            {/*
+              * THE PLANNER IS REACHABLE ON A SITE THAT ALREADY HAS PAGES.
+              *
+              * It began life inside the empty-site block beside the starter,
+              * which meant it disappeared the moment a site had anything on it —
+              * so Coastwise, the site we test on, could not run it at all, and
+              * neither could an agency part way through a build. Planning the
+              * REST of a site is a perfectly ordinary thing to want. Nothing is
+              * built over: the action refuses a page that already has content
+              * and the review step says which ones those are.
+              */}
+            <button
+              type="button"
+              className="sv-btn"
+              onClick={() => {
+                setError(null);
+                setDialog({ kind: 'ai-site' });
+              }}
+            >
+              <Icon name="sparkle" size={16} />
+              Plan pages with AI
+            </button>
 
             <button
               type="button"
@@ -462,7 +492,9 @@ export function SiteDashboard({
         <StarterWizard profile={profile} onClose={() => setDialog(null)} />
       )}
 
-      {dialog?.kind === 'ai-site' && <SiteBuilder onClose={() => setDialog(null)} />}
+      {dialog?.kind === 'ai-site' && (
+        <SiteBuilder onClose={() => setDialog(null)} existing={existingPages} />
+      )}
 
       {dialog?.kind === 'rename' && (
         <PageDialog

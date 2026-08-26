@@ -62,7 +62,7 @@ import {
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
 import { describePicture, fetchableByModel } from '../../lib/ai/alt';
 import { getMediaItem } from '../../lib/db/media';
-import { createPage, getPage, listPages, saveDraft, type PageWithContent } from '../../lib/db/pages';
+import { createPage, getPage, listPageFill, listPages, saveDraft, type PageWithContent } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
 import { safeSlug } from '../../lib/content/collection';
 import {
@@ -560,7 +560,14 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
 
 export type AiPageResult =
   | { ok: true; data: PageWithContent }
-  | { ok: false; error: string; retryable?: boolean };
+  /**
+   * `skipped` marks a refusal that is not a failure: the page was left alone
+   * because it already had content on it. The screen reads it differently for
+   * that reason — "seven built, one left alone" is a different sentence from
+   * "seven built, one broke", and showing the second when the first is true
+   * would have somebody hunting a bug that is not there.
+   */
+  | { ok: false; error: string; retryable?: boolean; skipped?: boolean };
 
 /**
  * Build a whole page from a description, and create it.
@@ -778,6 +785,26 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     }
 
     const sections = await sectionsFromPlan(plan.plan);
+
+    /*
+     * NOTHING IS BUILT OVER WORK THAT IS ALREADY THERE, and this check is on the
+     * SERVER because a guard that only exists in the screen is not a guard.
+     *
+     * The planner can be run on a site that is already part built, which is a
+     * reasonable thing to want. What must never happen is a plan quietly
+     * replacing a home page somebody has spent a week on, or a second page
+     * appearing at an address that is taken. A BLANK page is different and is
+     * the ordinary case: every new site has an empty home page and building
+     * into it is the whole point.
+     */
+    const already = (await listPageFill(site.tenantId)).find((page) => page.slug === slug);
+    if (already?.filled) {
+      return {
+        ok: false,
+        skipped: true,
+        error: `"${already.title}" already has content, so it was left as it is.`,
+      };
+    }
 
     if (isHome) {
       const home = (await listPages(site.tenantId)).find((page) => page.slug === '');

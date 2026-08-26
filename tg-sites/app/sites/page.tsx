@@ -8,7 +8,7 @@ import '../../components/sites/sites.css';
 import { SiteDashboard } from '../../components/sites/SiteDashboard';
 import { activeSite, currentUser } from '../../lib/auth/session';
 import { isStaffEmail } from '../../lib/auth/staff';
-import { listPages } from '../../lib/db/pages';
+import { listPageFill, listPages } from '../../lib/db/pages';
 import { getSettings } from '../../lib/db/settings';
 import { siteIsEmpty } from '../../lib/db/starters';
 import { getTenant, siteUrl } from '../../lib/db/tenants';
@@ -79,12 +79,15 @@ export default async function SitesPage() {
    * client has already told us so it asks nothing twice. Both are cheap and
    * neither depends on the others.
    */
-  const [tenant, url, pages, canStart, settings] = await Promise.all([
+  const [tenant, url, pages, canStart, settings, existingPages] = await Promise.all([
     getTenant(site.tenantId),
     siteUrl(site.tenantId),
     listPages(site.tenantId),
     siteIsEmpty(site.tenantId),
     getSettings(site.tenantId),
+    // Which addresses are taken and which of them have work on them, so the AI
+    // planner can say what it would leave alone before anybody presses build.
+    listPageFill(site.tenantId),
   ]);
 
   return (
@@ -95,6 +98,7 @@ export default async function SitesPage() {
       siteUrl={url}
       pages={pages}
       canStart={canStart}
+      existingPages={existingPages}
       // Making a site is a staff job, the same gate as custom code and domains.
       // The action checks it too; this only decides whether the button is drawn.
       canCreateSite={isStaffEmail(user.email)}

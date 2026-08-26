@@ -1668,9 +1668,20 @@
   color: var(--ed-ink-2);
 }
 
-/* The reason a page did not build, next to the page it is about. */
+/*
+ * The reason, next to the page it is about, in the colour of the state it
+ * belongs to.
+ *
+ * It was red for both outcomes at first, which quietly undid the distinction
+ * the skip exists for: a page LEFT ALONE because it already had content is the
+ * right result, and painting that explanation the same red as a failure tells
+ * somebody they have a problem when they have not.
+ */
 .sv-plan__why {
   font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+.sv-plan__row[data-progress='failed'] .sv-plan__why {
   color: var(--ed-danger);
 }
 
@@ -1712,3 +1723,23 @@
   .sv-plan__row { flex-wrap: wrap; }
   .sv-plan__tools { flex-direction: row; }
 }
+
+/*
+ * A page the plan would leave alone, said BEFORE anybody presses build. Not an
+ * error: the page is somebody's existing work and leaving it is the right
+ * outcome, so it reads as a caution rather than a failure.
+ */
+.sv-plan__clash {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+  background: var(--ed-well);
+  border-radius: var(--ed-r-md);
+  padding: var(--ed-2) var(--ed-3);
+}
+.sv-plan__clash svg { flex: 0 0 auto; margin-top: 2px; color: var(--ed-warning, #8a5a0c); }
+
+.sv-plan__row[data-progress='skipped'] .sv-plan__state { color: var(--ed-ink-2); }
