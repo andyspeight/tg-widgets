@@ -39,7 +39,7 @@ client site until their own audit.
 | USA | 14 | 25 Aug 2026 | [USA.md](USA.md) |
 | Gulf, Turkey, North Africa | 17 | 25 Aug 2026 | [Gulf-North-Africa.md](Gulf-North-Africa.md) |
 
-## Complete — 26 August 2026
+## Complete, 26 August 2026
 
 **All 225 airport records are Status Done and carry an August 2026 Verified
 Date.** Zero remain gated; zero remain on the May 2026 stamp that started this

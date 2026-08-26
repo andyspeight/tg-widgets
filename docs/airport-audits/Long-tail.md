@@ -1,4 +1,4 @@
-# Long tail — East Asia, Australasia, Americas, Africa, Indian Ocean,
+# Long tail: East Asia, Australasia, Americas, Africa, Indian Ocean,
 # Middle East. 26 August 2026
 
 46 records promoted to Done, completing the table.
@@ -15,7 +15,7 @@ before quoting a 2027 trip.
 **Indonesia went the other way.** British citizens are NO LONGER visa-exempt.
 A Visa on Arrival is required, IDR 500,000 (~£25) for 30 days, with the e-VOA
 available in advance at evisa.imigrasi.go.id. Bali also charges a **separate**
-tourist levy of IDR 150,000 (~£8) on arrival — a second payment customers do
+tourist levy of IDR 150,000 (~£8) on arrival, a second payment customers do
 not expect.
 
 ## Other entry changes caught
@@ -24,7 +24,7 @@ not expect.
   large increase on the old allowance. Plus Vietnam Airlines' new London
   nonstops to Hanoi and Ho Chi Minh City.
 - **South Korea**: UK citizens are EXEMPT from the K-ETA through December 2026
-  — so do not buy one — but must complete the **e-Arrival Card** up to 72 hours
+  (so do not buy one) but must complete the **e-Arrival Card** up to 72 hours
   before arrival. Older guidance gets this exactly backwards.
 - **Malaysia**: 90 days visa-free but the **MDAC** is mandatory within 72 hours.
 - **Singapore**: 90 days visa-free but the **SG Arrival Card** is mandatory.
@@ -34,7 +34,7 @@ not expect.
   is **10 days** before travel, longer than most systems, which catches late
   bookers.
 - **New Zealand**: NZeTA is NZ$17 (app) or NZ$23 (web) **plus** a NZ$100
-  International Visitor Levy — around NZ$117–123 all in, not the NZeTA fee alone.
+  International Visitor Levy, around NZ$117–123 all in, not the NZeTA fee alone.
 - **Cuba**: the regional exception. Tourist card required before travel, and
   medical travel insurance is a legal entry requirement that is checked.
 

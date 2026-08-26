@@ -1,4 +1,4 @@
-# France — audit log, 26 August 2026
+# France: audit log, 26 August 2026
 
 8 records: CDG ORY NCE LYS MRS BOD TLS BIQ. All promoted to Done.
 
@@ -14,7 +14,7 @@ Sources: iledefrance-mobilites.fr / bonjour-ratp.fr (operator) + parisbytrain.co
 
 **Orly taxi flat fare.** Record said €41 Left Bank / €50 Right Bank. The
 prefectural decree sets **€37 Left Bank / €44 Right Bank**. Note these are
-the opposite way round to CDG, where the Left Bank is the dearer side —
+the opposite way round to CDG, where the Left Bank is the dearer side,
 easy to transpose.
 Sources: g7.fr (Paris taxi operator) + allotaxi.net.
 
