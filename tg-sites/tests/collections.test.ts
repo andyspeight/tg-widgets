@@ -551,7 +551,7 @@ describe('which blocks want a collection', () => {
   it('reads the collection and how many were asked for', () => {
     expect(listingIn(listingBlock({ source: 'collection', collection: 'blog', count: 3 })))
       // Two facts unless the block says otherwise: see DEFAULT_FACTS.
-      .toEqual({ collection: 'blog', count: 3, facts: 2, filter: null, sort: null });
+      .toEqual({ collection: 'blog', count: 3, facts: 2, order: 'newest' as const, filter: null, sort: null });
   });
 
   /*
@@ -603,7 +603,7 @@ describe('what a whole set of trees wants', () => {
 
   it('survives a site with no header or footer published', () => {
     expect(listingsIn([null, tree([listingBlock({ source: 'collection', collection: 'blog' })]), undefined]))
-      .toEqual([{ collection: 'blog', count: 6, facts: 2, filter: null, sort: null }]);
+      .toEqual([{ collection: 'blog', count: 6, facts: 2, order: 'newest' as const, filter: null, sort: null }]);
   });
 
   /*
@@ -620,7 +620,7 @@ describe('what a whole set of trees wants', () => {
       ]),
     ]);
 
-    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2, filter: null, sort: null }]);
+    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2, order: 'newest' as const, filter: null, sort: null }]);
   });
 });
 
@@ -681,7 +681,7 @@ describe('filling the listings in', () => {
    * carries the filter and the sort as well (#238, listingKey).
    */
   const plain = (collection: string) =>
-    listingKey({ collection, count: 0, facts: 0, filter: null, sort: null });
+    listingKey({ collection, count: 0, facts: 0, order: 'newest', filter: null, sort: null });
 
   const data = new Map([
     [plain('blog'), [{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]],
@@ -1914,5 +1914,80 @@ describe('the schedule control on the writing screen', () => {
   it('has a pill colour for the scheduled state, apart from live and changed', () => {
     const css = read('components', 'sites', 'sites.css');
     expect(css).toContain("data-state='scheduled'");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * WHICH ORDER A COLLECTION LISTING COMES BACK IN.
+ *
+ * Andy, 26 Aug 2026: "in the cards i can't see a way to reorder them". Typed
+ * cards have had up and down arrows all along. Collection cards are a live
+ * query, so there was nothing to drag, and no control either: they came back
+ * newest first and that was the only order there was.
+ *
+ * The field sort already plumbed through here did not help. It can only sort by
+ * a field the collection DECLARES, and the guides collection this was reported
+ * against declares none, so there was provably no order a client could pick.
+ * These four are intrinsic, so they work on any collection at all.
+ */
+describe('the order a listing comes back in', () => {
+  const ROWS = [
+    { slug: 'c', data: { title: 'Cephalonia' }, published_at: '2026-08-03', fields: [] },
+    { slug: 'a', data: { title: 'ålesund' },    published_at: '2026-08-02', fields: [] },
+    { slug: 'b', data: { title: 'Brac' },       published_at: '2026-08-01', fields: [] },
+  ];
+
+  async function titles(order?: string): Promise<string[]> {
+    const { listPublished } = await import('../lib/db/collections');
+    respond('from public.collection_items', ROWS);
+    const listing = await listPublished(ALPHA, 'guides', 6, order ? { order } as never : {});
+    return listing.items.map((row) => String(row.item.title));
+  }
+
+  it('is newest first when nothing is chosen, exactly as before', async () => {
+    // The SQL already orders by published_at desc, so this is the rows as read.
+    expect(await titles()).toEqual(['Cephalonia', 'ålesund', 'Brac']);
+    expect(await titles('newest')).toEqual(['Cephalonia', 'ålesund', 'Brac']);
+  });
+
+  it('turns round for oldest first', async () => {
+    expect(await titles('oldest')).toEqual(['Brac', 'ålesund', 'Cephalonia']);
+  });
+
+  it('sorts by title, ignoring case and accents', async () => {
+    // "ålesund" sorts with the As rather than after Z, which is where a plain
+    // code-point comparison would put it, and its lower-case initial does not
+    // send it to the end either.
+    expect(await titles('title')).toEqual(['ålesund', 'Brac', 'Cephalonia']);
+    expect(await titles('title-desc')).toEqual(['Cephalonia', 'Brac', 'ålesund']);
+  });
+
+  it('reads the whole collection before cutting, or the answer is wrong', async () => {
+    /*
+     * The subtle one. Taking the newest six and THEN sorting them A to Z gives
+     * six newest alphabetised, not the first six alphabetically. So an order
+     * other than newest has to drop the LIMIT, the same way a filter does.
+     */
+    const { listPublished } = await import('../lib/db/collections');
+
+    log.length = 0;
+    respond('from public.collection_items', ROWS);
+    await listPublished(ALPHA, 'guides', 2, { order: 'title' } as never);
+    expect(itemQuery().sql).not.toContain('limit');
+
+    log.length = 0;
+    respond('from public.collection_items', ROWS);
+    await listPublished(ALPHA, 'guides', 2, {});
+    // And the common case still reads no more rows than it ever did.
+    expect(itemQuery().sql).toContain('limit');
+  });
+
+  it('still cuts to the count once it has ordered', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+    respond('from public.collection_items', ROWS);
+    const listing = await listPublished(ALPHA, 'guides', 2, { order: 'title' } as never);
+    expect(listing.items.map((row) => String(row.item.title))).toEqual(['ålesund', 'Brac']);
   });
 });

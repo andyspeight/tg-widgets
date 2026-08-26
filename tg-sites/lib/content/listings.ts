@@ -27,9 +27,24 @@ import { readingTime } from './reading-time';
 import type { Page, Section } from './schema';
 
 /** What a listing block asks for. */
+/**
+ * The orders a collection listing can be shown in.
+ *
+ * INTRINSIC, so they work on a collection that declares no fields of its own.
+ * The field-based sort below can only sort by something the collection
+ * declares, which is right for "cheapest first" and useless for the common
+ * case: Coastwise's guides collection declares nothing at all, so there was no
+ * order a client could choose and no control offering one. Andy, 26 Aug 2026:
+ * "in the cards i can't see a way to reorder them".
+ */
+export const LISTING_ORDERS = ['newest', 'oldest', 'title', 'title-desc'] as const;
+export type ListingOrder = (typeof LISTING_ORDERS)[number];
+
 export interface ListingRequest {
   collection: string;
   count: number;
+  /** Which way round, before any field sort. Newest is what it has always done. */
+  order: ListingOrder;
   /**
    * How many of the collection's declared fields each card shows.
    *
@@ -85,7 +100,9 @@ export function listingKey(request: ListingRequest): string {
     ? `${request.filter.field}\u0000${request.filter.op}\u0000${request.filter.value}`
     : '';
   const sort = request.sort ? `${request.sort.field}\u0000${request.sort.dir}` : '';
-  return `${request.collection}\u0001${filter}\u0001${sort}`;
+  // The order is part of the request. Without it, a page with a newest-first
+  // grid and an A to Z one would ask once and draw the same cards twice.
+  return `${request.collection}\u0001${filter}\u0001${sort}\u0001${request.order}`;
 }
 
 const MIN_COUNT = 1;
@@ -132,7 +149,14 @@ export function listingIn(block: { type: string; props?: Record<string, unknown>
     ? Math.min(MAX_FACTS, Math.max(0, Math.round(rawFacts)))
     : DEFAULT_FACTS;
 
-  return { collection, count, facts, filter: filterIn(props), sort: sortIn(props) };
+  return {
+    collection,
+    count,
+    facts,
+    order: orderIn(props),
+    filter: filterIn(props),
+    sort: sortIn(props),
+  };
 }
 
 /**
@@ -150,6 +174,12 @@ function filterIn(props: Record<string, unknown>): RawFilter | null {
 }
 
 /** The sort a block stored, or null for newest first, which is the default. */
+/** The chosen order, falling back to what every listing did before this existed. */
+function orderIn(props: Record<string, unknown>): ListingOrder {
+  const raw = asString(props.order).trim();
+  return (LISTING_ORDERS as readonly string[]).includes(raw) ? (raw as ListingOrder) : 'newest';
+}
+
 function sortIn(props: Record<string, unknown>): RawSort | null {
   const field = asString(props.sortField).trim();
   if (!field) return null;

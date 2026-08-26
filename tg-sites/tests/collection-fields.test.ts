@@ -573,7 +573,7 @@ describe('a collections facts on its cards', () => {
     const card = itemAsCard(tour(), 'tours', 'western-isles', defs);
     // Keyed by the whole request now, not by the collection's name, because two
     // blocks narrowing one collection differently are two answers (#238).
-    const key = listingKey({ collection: 'tours', count: 0, facts: 0, filter: null, sort: null });
+    const key = listingKey({ collection: 'tours', count: 0, facts: 0, order: 'newest' as const, filter: null, sort: null });
     const filled = fillListings(tree, new Map([[key, [card]]]));
 
     const factsOn = (index: number) => {
