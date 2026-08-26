@@ -844,3 +844,23 @@ describe('the build reports real progress', () => {
     expect(css).toContain('.sv-progress__fill { transition: none; }');
   });
 });
+
+// ---------------------------------------------------------------------------
+
+describe('the ledger adds, it does not overwrite', () => {
+  it('recordTokens increments the claim row', () => {
+    /*
+     * A page build records twice against one claimed slot: the plan call, then
+     * the fill. An absolute write meant the second erased the first — usually
+     * the larger — so every AI page's real cost quietly vanished from ai_usage.
+     */
+    const db = readFileSync(join(ROOT, 'lib', 'db', 'ai.ts'), 'utf8');
+    expect(db).toContain('coalesce(input_tokens, 0) + ${tokens.input}');
+    expect(db).toContain('coalesce(output_tokens, 0) + ${tokens.output}');
+  });
+
+  it('the photo download cannot run to the platform kill', () => {
+    const blob = readFileSync(join(ROOT, 'lib', 'media', 'blob.ts'), 'utf8');
+    expect(blob).toContain('AbortSignal.timeout(');
+  });
+});

@@ -432,11 +432,20 @@ describe('stripping the copy the builder never filled', () => {
 
     const build = fn.indexOf('sectionsFromPlan(plan)');
     const fill = fn.indexOf('applyFill(built');
-    const strip = fn.indexOf('stripPlaceholders(applyFill');
+    /*
+     * BUILD, FILL, PHOTOS, STRIP — and the middle two both matter. Photos read
+     * the FILLED sections (a card rewritten to Barbados must search for
+     * Barbados) and run BEFORE the strip, because the plan's numeric addresses
+     * were computed against the unstripped tree: stripping first shifted them
+     * and pictures landed on the wrong blocks.
+     */
+    const photographed = fn.indexOf('sections = await withPhotos(ctx.tenantId, planned, sections);');
+    const stripped = fn.indexOf('return stripPlaceholders(stripUnfilled(sections, slots));');
 
     expect(build, 'the build step has moved').toBeGreaterThan(-1);
     expect(fill, 'the fill step has moved').toBeGreaterThan(build);
-    expect(strip, 'the strip no longer wraps the fill').toBeGreaterThan(-1);
+    expect(photographed, 'photos no longer see the filled sections').toBeGreaterThan(fill);
+    expect(stripped, 'the strip no longer runs last').toBeGreaterThan(photographed);
   });
 
   it('the list still matches what the presets actually contain', async () => {
@@ -454,6 +463,149 @@ describe('stripping the copy the builder never filled', () => {
     expect(entries.length).toBeGreaterThan(5);
     for (const entry of entries) {
       expect(presets, `"${entry}" is no longer in any preset`).toContain(entry);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * WHAT A MACHINE MAY NOT ASSERT ON A CLIENT'S BEHALF.
+ *
+ * The first full AI-built site shipped a quote block reading "We have used them
+ * four times now and I would not go anywhere else" — a fabricated customer
+ * review, attributed to "A customer", on a real company's website. The scan
+ * that followed found worse waiting: stats presets carrying "4.9/5 across 300
+ * reviews", "12,000 holidays booked" and "100% ATOL protected" — that last an
+ * invented PROTECTION claim — and logo strips that render "Add your badges"
+ * under "Your money is protected. Here is who by."
+ *
+ * None of it was strippable, because the stripper only read heading/text html,
+ * and all of it was actively offered: the catalogue advertised every one of
+ * those presets to a model whose rules say "trust is the currency".
+ */
+describe('fabrication presets are not offered and their blocks cannot ship', () => {
+  it('the catalogue no longer offers testimonials, stats or logo strips', async () => {
+    const { pageCatalogue } = await import('../lib/ai/page-build');
+    const catalogue = pageCatalogue();
+
+    for (const id of [
+      'testimonials-one-big',
+      'testimonials-three',
+      'testimonials-rail',
+      'testimonials-with-stats',
+      'hero-with-stats',
+      'hero-with-badges',
+      'stats-three',
+      'logos-row',
+      'features-badges',
+      /*
+       * The review round's additions. pricing-three-panels ships "From £549 /
+       * £699 / £899" with invented inclusions; banner-line ships "Book by 31
+       * August and the deposit is half price" — a fabricated dated offer. A
+       * machine has no prices and no announcements.
+       */
+      'pricing-three-panels',
+      'banner-line',
+      'banner-centred',
+    ]) {
+      expect(catalogue, `${id} is still offered to the model`).not.toContain(`- ${id}:`);
+    }
+
+    // And the ordinary library is untouched: plenty left to build with.
+    expect(catalogue).toContain('- hero-page-banner:');
+    expect(catalogue).toContain('- features-cards-with-pictures:');
+  });
+
+  it('a plan naming an excluded preset loses that section, like any unknown id', () => {
+    const result = planFromModel(
+      JSON.stringify([
+        { preset: 'hero-page-banner', heading: 'Kept' },
+        { preset: 'testimonials-one-big', heading: 'Dropped' },
+        { preset: 'cta-centred', heading: 'Kept too' },
+      ]),
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.plan.map((spec) => spec.preset)).toEqual(['hero-page-banner', 'cta-centred']);
+  });
+
+  it('the presets themselves still exist, for a client to fill by hand', async () => {
+    /*
+     * Nothing is removed from the product. A client with real reviews and real
+     * memberships adds these sections from the drawer and fills them with the
+     * truth; they are only gone from what a machine asserts unprompted.
+     */
+    const { PAGE_PRESETS } = await import('../lib/content/presets-page');
+    expect(PAGE_PRESETS.some((preset) => preset.id === 'testimonials-one-big')).toBe(true);
+    expect(PAGE_PRESETS.some((preset) => preset.id === 'stats-three')).toBe(true);
+  });
+
+  it('the block backstop strips a quote, stats or logos block that arrives anyway', async () => {
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const sections = [
+      {
+        id: 's1',
+        rows: [
+          {
+            id: 'r1',
+            layout: '100',
+            columns: [
+              {
+                id: 'c1',
+                width: 100,
+                blocks: [
+                  { id: 'b1', type: 'heading', props: { html: 'Real heading' } },
+                  { id: 'b2', type: 'quote', props: { text: 'We have used them four times now.', attribution: 'A customer' } },
+                  { id: 'b3', type: 'stats', props: { items: [{ value: '4.9/5', label: 'Average review score' }] } },
+                  { id: 'b4', type: 'logos', props: { items: [] } },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ] as never;
+
+    const out = stripPlaceholders(sections);
+    const kept = out[0].rows[0].columns[0].blocks.map((block) => block.type);
+    expect(kept).toEqual(['heading']);
+  });
+
+  it('no buildable preset contains a fabrication block, checked against the library', async () => {
+    /*
+     * The exclusion is a SCAN, not a list, so this holds for presets written
+     * next month too: if it is in the catalogue, it contains no quote, stats or
+     * logos block anywhere in its rows.
+     */
+    /*
+     * On the EXPORTED buildable set, not a regex over the rendered catalogue:
+     * the review showed the regex could quietly match nothing and pass. The
+     * catalogue draws from this same array, so scanning it scans what is
+     * offered.
+     */
+    const { BUILDABLE_PRESETS, pageCatalogue } = await import('../lib/ai/page-build');
+    expect(BUILDABLE_PRESETS.length).toBeGreaterThan(20);
+    // The catalogue really is fed from it.
+    for (const preset of BUILDABLE_PRESETS.slice(0, 5)) {
+      expect(pageCatalogue()).toContain(`- ${preset.id}:`);
+    }
+
+    for (const preset of BUILDABLE_PRESETS) {
+      expect(
+        ['testimonials', 'stats', 'logos', 'pricing', 'banner'].includes(preset.category),
+        `${preset.id} is offered from a fabrication category`,
+      ).toBe(false);
+      for (const row of preset.rows) {
+        for (const column of row.columns) {
+          for (const block of column) {
+            expect(
+              ['quote', 'stats', 'logos', 'table'].includes(block.type),
+              `${preset.id} is offered but contains a ${block.type} block`,
+            ).toBe(false);
+          }
+        }
+      }
     }
   });
 });

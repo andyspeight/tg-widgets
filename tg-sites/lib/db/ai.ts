@@ -118,6 +118,13 @@ export async function claimRequest(
  * already counts against the limit, so the worst case is a row with null tokens,
  * which the table treats as "we paid for nothing" and is only slightly wrong.
  */
+/**
+ * ADDITIVE, NOT ABSOLUTE. A page build records twice against one claimed slot:
+ * the plan call, then the fill. An absolute write meant the second call erased
+ * the first — usually the larger — so the ledger silently under-counted what
+ * every AI page really cost. Adding is also correct for the single-call
+ * actions, whose row starts at zero.
+ */
 export async function recordTokens(
   tenantId: string,
   id: string,
@@ -127,7 +134,8 @@ export async function recordTokens(
     await withTenant(tenantId, async (tx: Tx) => {
       await tx`
         update public.ai_usage
-           set input_tokens = ${tokens.input}, output_tokens = ${tokens.output}
+           set input_tokens  = coalesce(input_tokens, 0) + ${tokens.input},
+               output_tokens = coalesce(output_tokens, 0) + ${tokens.output}
          where id = ${id}::uuid
       `;
     });
