@@ -29,6 +29,7 @@ import { listingCardsAction, publishItemAction, saveItemAction } from '../../app
 import { listingBlocksIn, listingKey } from '../../lib/content/listings';
 import { listPageCommentsAction, openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
+import { PublishSiteDialog } from '../ui/PublishSiteDialog';
 import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
@@ -656,6 +657,8 @@ export function EditorShell({
   /** How many picture descriptions the last publish wrote in. */
   const [altsFilled, setAltsFilled] = useState(0);
   const [publishing, setPublishing] = useState(false);
+  /** Whether the whole-site publish overlay is open. */
+  const [sitePublishOpen, setSitePublishOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
   /**
    * Which side panels are open. Both, until somebody folds one away.
@@ -1155,6 +1158,26 @@ export function EditorShell({
   }, [itemId, page, pageId, persist, region, regionFlags, itemMeta]);
 
   /**
+   * Open the whole-site publish overlay.
+   *
+   * FLUSHES FIRST, exactly as publish does above, so the sweep reads this page
+   * with the latest keystroke in it rather than the version from before the
+   * debounce. The overlay reads its plan from the database the moment it opens,
+   * so the flush has to have landed before it does.
+   */
+  const openSitePublish = useCallback(async () => {
+    setSaveError(null);
+    const pending = await persist(page, regionFlags, itemMeta);
+    if (!pending.ok) {
+      setSaved('error');
+      setSaveError(pending.error);
+      return;
+    }
+    setSaved('saved');
+    setSitePublishOpen(true);
+  }, [persist, page, regionFlags, itemMeta]);
+
+  /**
    * Switch which tree is being edited: click the header or the footer on the
    * canvas and it becomes the thing you are editing, with the page shown around
    * it. Clicking the page brings it back.
@@ -1563,9 +1586,13 @@ export function EditorShell({
 
   const publishLabel = useMemo(() => {
     if (publishing) return 'Publishing';
-    if (status !== 'published') return 'Publish';
-    return unpublished ? 'Publish changes' : 'Published';
-  }, [publishing, status, unpublished]);
+    // The quieter, single-unit publish that sits beside "Publish site": it names
+    // what it does, so the two are never mistaken for each other. A region is a
+    // header or a footer, an item is a post, everything else is the page.
+    const unit = region ?? (itemId ? 'post' : 'page');
+    if (status !== 'published') return `Publish this ${unit}`;
+    return unpublished ? `Publish this ${unit}` : 'Published';
+  }, [publishing, status, unpublished, region, itemId]);
 
   // Add a block at an explicit place. Shared by the canvas drop and the elements
   // palette, so a dropped block and a clicked one land the one same way.
@@ -2191,32 +2218,52 @@ export function EditorShell({
         </button>
 
         {/*
-          Disabled once published with nothing new to say, rather than hidden.
-          A button that vanishes leaves an agent wondering where it went; one
-          that reads "Published" and sits still answers the question.
+          TWO PUBLISH ACTIONS, and the difference between them is the point.
 
-          Hidden ENTIRELY, though, for a member without the publish capability:
-          there is no "disabled Publish" that helps them, and the server refuses
-          it anyway (slice 3). Staff and an unset owner keep it.
+          "Publish site" is the headline: it puts every page with changes live at
+          once, behind the progress overlay, so an agent never has to visit six
+          pages to publish six edits. Beside it, quieter, is the single-unit
+          publish this editor has always had, for when you have touched one page
+          and only want that one live. Andy, 26 Aug 2026.
+
+          The single-unit button is disabled once its target is published with
+          nothing new to say, rather than hidden: a button that vanishes leaves an
+          agent wondering where it went; one that reads "Published" and sits still
+          answers the question. Both are hidden ENTIRELY for a member without the
+          publish capability, since the server refuses it anyway (slice 3). Staff
+          and an unset owner keep them.
         */}
         {canPublish && (
-          <button
-            type="button"
-            className="ed-btn ed-editing-only"
-            data-variant="primary"
-            onClick={publish}
-            disabled={publishing || (status === 'published' && !unpublished)}
-            title={
-              status === 'published' && !unpublished
-                ? `The live ${region ?? 'page'} already matches this draft`
-                : region
-                  ? `Put this ${region} on every page of the site`
-                  : 'Make this the version visitors see'
-            }
-          >
-            <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
-            {publishLabel}
-          </button>
+          <>
+            <button
+              type="button"
+              className="ed-btn ed-editing-only"
+              onClick={publish}
+              disabled={publishing || (status === 'published' && !unpublished)}
+              title={
+                status === 'published' && !unpublished
+                  ? `The live ${region ?? 'page'} already matches this draft`
+                  : region
+                    ? `Publish just the ${region}, not the rest of the site`
+                    : `Publish just this ${itemId ? 'post' : 'page'}, not the whole site`
+              }
+            >
+              <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
+              {publishLabel}
+            </button>
+
+            <button
+              type="button"
+              className="ed-btn ed-editing-only"
+              data-variant="primary"
+              onClick={openSitePublish}
+              disabled={publishing}
+              title="Put every page with changes live, along with the header and footer"
+            >
+              <Icon name="upload" size={16} />
+              Publish site
+            </button>
+          </>
         )}
 
         <Menu
@@ -2522,6 +2569,30 @@ export function EditorShell({
              */
             setSelected(null);
             commit(restored);
+          }}
+        />
+      )}
+
+      {sitePublishOpen && (
+        <PublishSiteDialog
+          onClose={() => setSitePublishOpen(false)}
+          onPagePublished={(summary) => {
+            // The editor holds one tree. If the sweep just published the very
+            // page or post this editor is on, catch its own status up so the
+            // quieter single-unit button settles to "Published" too.
+            const editingThis =
+              (!region && !itemId && summary.id === pageId) ||
+              (itemId !== null && summary.id === itemId);
+            if (editingThis) {
+              setStatus(summary.status);
+              setUnpublished(summary.hasUnpublishedChanges);
+            }
+          }}
+          onRegionPublished={(name) => {
+            if (region === name) {
+              setStatus('published');
+              setUnpublished(false);
+            }
           }}
         />
       )}
