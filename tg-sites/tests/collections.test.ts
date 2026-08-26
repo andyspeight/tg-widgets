@@ -2160,3 +2160,65 @@ describe('saving a hand-set order', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE ARROWS ARE ACTUALLY VISIBLE, which is not the same as being rendered.
+ *
+ * Andy, twice in a row: "i can't see the arrows to manually move them". They
+ * were there. Correct markup, correct icons, deployed, and drawn at opacity 0.
+ *
+ * sites.css hides every .sv-btn inside a row until the row is hovered, so the
+ * list of pages is not a wall of controls. That is right for Edit, Publish and
+ * Delete, which you go looking for on a row you have already picked, and wrong
+ * for reordering, which is a property of the LIST: you cannot go looking for it
+ * without first knowing it is there.
+ *
+ * I had checked the markup, the class, the build and the deployment, and never
+ * once looked at the screen. Rendering it in Chromium reported the button at
+ * 44x44, visible, with a 16px icon inside it, and opacity 0. So this test
+ * checks the one property none of those checks covered: that the exemption
+ * exists, comes after the rule it is exempting itself from, and is not zero.
+ */
+describe('the reorder arrows are not hidden by the row-action reveal', () => {
+  const css = readFileSync(join(__dirname, '..', 'components', 'sites', 'sites.css'), 'utf8');
+
+  it('still hides the row ACTIONS until the row is hovered', () => {
+    // The behaviour being worked around is deliberate and stays.
+    expect(css).toContain('.sv-item .sv-btn { opacity: 0; transition: opacity 120ms ease-out; }');
+  });
+
+  it('exempts the move column, after that rule so it wins', () => {
+    const hides = css.indexOf('.sv-item .sv-btn { opacity: 0;');
+    const exempt = css.indexOf('.sv-item .sv-item__move .sv-btn { opacity:');
+    expect(hides, 'the hide rule has moved or gone').toBeGreaterThan(-1);
+    expect(exempt, 'nothing exempts the arrows from it').toBeGreaterThan(-1);
+    // Same specificity would be a coin toss; later in the file is the mechanism.
+    expect(exempt).toBeGreaterThan(hides);
+  });
+
+  it('and the exemption leaves them actually painted', () => {
+    const rule = /\.sv-item \.sv-item__move \.sv-btn \{ opacity: ([0-9.]+); \}/.exec(css);
+    expect(rule, 'the exemption is not the shape this test can read').toBeTruthy();
+    const resting = Number(rule![1]);
+    /*
+     * Faint enough not to compete with the titles, which is what the hide rule
+     * is protecting, and nowhere near invisible. Zero is the bug.
+     */
+    expect(resting).toBeGreaterThan(0.3);
+    expect(resting).toBeLessThanOrEqual(1);
+  });
+
+  it('keeps a full-size touch target where there is no cursor', () => {
+    /*
+     * The arrows are 24px on a pointer so two stacked buttons fit inside the
+     * height the row already had: at 44 each they pushed every row from about
+     * 80px to 123px. Touch still gets 44, where the target is the whole point.
+     */
+    expect(css).toContain('@media (hover: hover) and (pointer: fine)');
+    const fine = css.slice(css.indexOf('@media (hover: hover) and (pointer: fine)'));
+    expect(fine.slice(0, 300)).toContain('min-height: 24px');
+    expect(css).toContain(".sv-btn[data-icon='true']");
+  });
+});

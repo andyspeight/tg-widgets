@@ -194,9 +194,23 @@
   flex: 0 0 auto;
 }
 .sv-item__move .sv-btn {
-  padding: 2px 4px;
-  min-height: 0;
+  padding: 0;
   line-height: 1;
+}
+
+/*
+ * A 44px touch target each way would be 88px of stacked buttons, which pushed
+ * every row from about 80px to 123px: a list of twenty guides loses a third of
+ * a screen to two arrows. So on a POINTER device they are 24px each, which is
+ * still a comfortable click and lets the pair sit inside the height the row
+ * already had. Touch keeps the full 44, where the target size is the thing
+ * that matters and there is no cursor to aim with.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .sv-item__move .sv-btn[data-icon='true'] {
+    min-width: 24px;
+    min-height: 24px;
+  }
 }
 /* Nothing to arrange with one entry, so the column collapses rather than
    showing a pair of arrows that are both disabled. */
@@ -603,6 +617,26 @@
 @media (hover: none) {
   .sv-item .sv-btn { opacity: 1; }
 }
+
+/*
+ * THE REORDER ARROWS ARE EXEMPT, and this is the difference between an action
+ * and an affordance.
+ *
+ * Edit, Publish and Delete are things you go looking for on a row you have
+ * already chosen, so hiding them until you point at that row costs nothing.
+ * Reordering is a property of the LIST, and you cannot go looking for it
+ * without first knowing it is there. Andy was told the arrows existed, went to
+ * the screen, and reported that he could not see them: they were rendering
+ * perfectly, at opacity 0, waiting for a hover he had no reason to try.
+ *
+ * Resting at 0.55 rather than 1 so two more controls per row do not compete
+ * with the titles, which is the thing the rule above is protecting. Full
+ * strength on hover and focus like everything else.
+ */
+.sv-item .sv-item__move .sv-btn { opacity: 0.55; }
+.sv-item:hover .sv-item__move .sv-btn,
+.sv-item:focus-within .sv-item__move .sv-btn { opacity: 1; }
+.sv-item .sv-item__move .sv-btn:disabled { opacity: 0.25; }
 
 /* ------------------------------------------------------------------ */
 /* Status pills                                                        */
