@@ -2468,13 +2468,18 @@
           ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.08)",
           ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.12)",
           ".tgs-cards[data-design='overlay'] .tgs-card__frame::after: #0f172a",
-          ".tgs-cards[data-design='overlay'] .tgs-card__body::before: #0f172a"
+          ".tgs-cards[data-design='overlay'] .tgs-card__body::before: #0f172a",
+          ".tgs-cards[data-design='overlay'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.10)",
+          ".tgs-cards[data-design='overlay'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.16)",
+          ".tgs-cards[data-design='overlay'][data-style='tinted'] .tgs-card__body::before: #0f172a",
+          ".tgs-cards[data-design='index'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.06)",
+          ".tgs-cards[data-design='index'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.08)"
         ],
         "spacing": [
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 87,
+      "cssRules": 98,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1539",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2701,13 +2706,18 @@
           ".tgs-cards[data-whole='true'][data-style='raised'] .tgs-card:hover: rgba(15, 23, 42, 0.12)",
           ".tgs-cards[data-design='overlay'] .tgs-card__frame::after: #0f172a",
           ".tgs-cards[data-design='overlay'] .tgs-card__body::before: #0f172a",
+          ".tgs-cards[data-design='overlay'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.10)",
+          ".tgs-cards[data-design='overlay'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.16)",
+          ".tgs-cards[data-design='overlay'][data-style='tinted'] .tgs-card__body::before: #0f172a",
+          ".tgs-cards[data-design='index'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.06)",
+          ".tgs-cards[data-design='index'][data-style='raised'] .tgs-card: rgba(15, 23, 42, 0.08)",
           ".tgs-slider[data-scrollbar='bar']: #000"
         ],
         "spacing": [
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 113,
+      "cssRules": 124,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1852",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },

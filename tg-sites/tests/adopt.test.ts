@@ -684,3 +684,56 @@ describe('the editor draws the same cards the site does', () => {
     expect(blocks).not.toContain('listPublished');
   });
 });
+
+describe('the card finishes actually do something', () => {
+  const css = readFileSync(resolve(__dirname, '..', 'app', 'globals.css'), 'utf8');
+
+  it('gives every design a rule for every finish it offers', () => {
+    /*
+     * Measured in a browser first: eight of the twelve combinations drew an
+     * identical card, because the overlay and index designs cancelled the
+     * border, the tint and the shadow outright and nothing put them back. The
+     * editor still offered four choices, so the setting looked broken to
+     * anybody who tried it. Andy, 26 Aug 2026: the styling options do not work
+     * very well.
+     */
+    for (const design of ['overlay', 'index']) {
+      for (const style of ['bordered', 'raised', 'tinted']) {
+        expect(css, `${design}/${style}`)
+          .toMatch(new RegExp(`\\[data-design='${design}'\\]\\[data-style='${style}'\\]`));
+      }
+    }
+  });
+
+  it('separates index rows once they each have a surface of their own', () => {
+    // Touching is right for a rule-separated list and wrong for a stack of
+    // boxes: three rows become one tall panel with lines through it.
+    expect(css).toContain(".tgs-cards[data-design='index']:not([data-style='plain'])");
+  });
+
+  it('drops the date column when nothing has a date', () => {
+    // Ten rems reserved for "14 September 2026" on a page of destinations,
+    // which have none, so every row started a third of the way across.
+    expect(css).toContain(".tgs-card:not(:has(.tgs-card__label)) .tgs-card__body");
+  });
+});
+
+describe('following a link in the editor preview', () => {
+  const canvas = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'Canvas.tsx'), 'utf8');
+
+  it('sends an internal link to the preview route, in this tab', () => {
+    /*
+     * A card links to "/guides/hvar", an address on the CLIENT'S site. Resolved
+     * against the editor's own origin that is tg-sites-shell.vercel.app/guides/
+     * hvar, which 404s, and it opened in a new tab as well. Both surfaced the
+     * day collection cards started drawing on the canvas, because until then
+     * preview had almost nothing clickable in it.
+     */
+    expect(canvas).toContain('`/preview${href}`');
+    expect(canvas).toContain('window.location.assign(');
+  });
+
+  it('still sends an external link away from the editor', () => {
+    expect(canvas).toContain("window.open(link.href, '_blank', 'noopener,noreferrer')");
+  });
+});

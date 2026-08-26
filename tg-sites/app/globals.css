@@ -3901,11 +3901,114 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   --tgs-border: var(--tgs-on-dark-border);
   --tgs-primary: var(--tgs-text-invert);
 }
-/* No box, so no finish. The border, tint and shadow have nothing to sit on. */
+/*
+ * THE FINISH ON AN OVERLAY CARD, which used to be cancelled outright.
+ *
+ * The old rule said "no box, so no finish" and zeroed the border, the tint and
+ * the shadow. That is right about a tint, which a full-bleed photograph
+ * completely covers, and wrong about the other two: an overlay card IS a box,
+ * it is just a box with a picture in it, and both a hairline round it and a
+ * shadow under it read perfectly well. The consequence was that all four
+ * finishes drew an identical card, so the setting looked broken to anybody who
+ * tried it. Andy, 26 Aug 2026: the styling options do not work very well.
+ *
+ * So the base cancels nothing and each finish says what it means. "Tinted" is
+ * the one that cannot be a background here, so it earns its keep by deepening
+ * the scrim: the same card with the words held harder against the picture,
+ * which is the useful thing to want on a busy photograph.
+ */
 .tgs-cards[data-design='overlay'] .tgs-card {
   border: 0;
   background: var(--tgs-surface-alt);
   box-shadow: none;
+}
+
+.tgs-cards[data-design='overlay'][data-style='bordered'] .tgs-card {
+  border: 1px solid var(--tgs-border);
+}
+
+.tgs-cards[data-design='overlay'][data-style='raised'] .tgs-card {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.10), 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+/*
+ * "Tinted" on an overlay card is a DEEPER SCRIM, not a background: the
+ * photograph covers a background completely, so the setting would do nothing.
+ * The first attempt here raised the scrim's opacity, which also did nothing,
+ * because the scrim was already fully opaque and its strength lives in the
+ * colour stops. This restates them, taller and heavier, which is the useful
+ * thing to want on a busy photograph.
+ */
+.tgs-cards[data-design='overlay'][data-style='tinted'] .tgs-card__body::before {
+  inset: -6rem 0 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 70%, transparent) 6rem,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 92%, transparent) 60%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 97%, transparent) 100%
+  );
+}
+
+/*
+ * THE FINISH ON AN INDEX ROW, cancelled for the same reason and wrong in the
+ * same way. A row is a box too; it is simply a wide one.
+ *
+ * Plain keeps the rule-separated list, which is what the design is for. The
+ * other three give each row a surface of its own, so the separating rule comes
+ * off and the rows are spaced instead: a hairline UNDER a bordered row would
+ * read as a second border a pixel below the first.
+ */
+/*
+ * A ROW WITH A SURFACE NEEDS AIR AROUND IT.
+ *
+ * The index is a block with a rule across the top and rows that touch, which is
+ * exactly what a rule-separated list should be. Give each row a border, a tint
+ * or a shadow and touching turns three rows into one tall panel with lines
+ * through it, and the rule above the first one floats free of the box beneath.
+ * So a finished index is a stack with a gap, and the list's own top rule goes.
+ */
+.tgs-cards[data-design='index']:not([data-style='plain']) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-m);
+  border-top: 0;
+}
+
+.tgs-cards[data-design='index'][data-style='bordered'] .tgs-card,
+.tgs-cards[data-design='index'][data-style='raised'] .tgs-card,
+.tgs-cards[data-design='index'][data-style='tinted'] .tgs-card {
+  border-bottom: 0;
+  padding-inline: var(--tgs-space-m);
+}
+
+.tgs-cards[data-design='index'][data-style='bordered'] .tgs-card {
+  border: 1px solid var(--tgs-border);
+}
+
+.tgs-cards[data-design='index'][data-style='raised'] .tgs-card {
+  background: var(--tgs-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.tgs-cards[data-design='index'][data-style='tinted'] .tgs-card {
+  background: var(--tgs-surface-alt);
+}
+
+/*
+ * NO DATE, NO DATE COLUMN.
+ *
+ * The index reserves ten rems on the left for "14 September 2026" and lines the
+ * dates up down the page, which is exactly right for the blog archive it was
+ * built for. A destination guide has no date, so every row opened with ten rems
+ * of nothing and the words started a third of the way across an empty page.
+ */
+.tgs-cards[data-design='index'] .tgs-card:not(:has(.tgs-card__label)) .tgs-card__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tgs-cards[data-design='index'] .tgs-card:not(:has(.tgs-card__label)) .tgs-card__body > * {
+  grid-column: 1;
 }
 .tgs-cards[data-design='overlay'] .tgs-card__noimage { background: var(--tgs-surface-alt); }
 /*
@@ -3944,10 +4047,13 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   align-items: start;
   border: 0;
   border-bottom: 1px solid var(--tgs-border);
-  border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
+
+/* Square, because a rule-separated list is not a stack of boxes. A row that has
+   been given a border, a tint or a shadow takes the client's own corners. */
+.tgs-cards[data-design='index'][data-style='plain'] .tgs-card { border-radius: 0; }
 .tgs-cards[data-design='index'] .tgs-card__body {
   display: grid;
   /* The date column is wide enough for "14 September 2026" and no wider. */
