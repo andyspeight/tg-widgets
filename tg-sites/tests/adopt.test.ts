@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 import { proseToHtml, seedItemFromCorpus, shortName } from '../lib/content/adopt';
 import { CollectionItemSchema } from '../lib/content/collection';
 import { carriesOwnBanner } from '../lib/content/collection-layout';
+import { itemAsCard } from '../lib/content/listings';
 
 const GREECE = {
   name: 'Santorini',
@@ -622,5 +623,29 @@ describe('opening an adopted entry in the editor', () => {
     const fn = db.slice(db.indexOf('export async function getItem'));
     expect(fn.slice(0, 700)).toContain('join public.collections c');
     expect(fn.slice(0, 700)).toContain('c.fields as collection_fields');
+  });
+});
+
+describe('a destination card is not a blog card', () => {
+  it('carries no reading time, because a guide is not an article', () => {
+    /*
+     * "3 min read" under a photograph of Hvar is the same blog furniture that
+     * was showing above the banner until the entry header learned to stand
+     * down. Somebody scanning a grid of places is not deciding how long a read
+     * is; on a post they are. Same signal decides both.
+     */
+    const guide = seed(GREECE);
+    const post = {
+      ...guide,
+      sections: guide.sections.slice(1), // no banner, so no h1: an ordinary post
+    };
+    expect(itemAsCard(guide, 'guides', 'santorini').readingMinutes).toBe(0);
+    expect(itemAsCard(post as never, 'blog', 'a-post').readingMinutes).toBeGreaterThan(0);
+  });
+
+  it('still gives the card its picture, title and summary', () => {
+    const card = itemAsCard(seed(GREECE), 'guides', 'santorini');
+    expect(card.title).toBe('Santorini');
+    expect(card.body).toBe('A flooded volcano you can have dinner on.');
   });
 });

@@ -22,6 +22,7 @@
 
 import type { CollectionItem } from './collection';
 import { fieldFacts, type FieldDef } from './collection-fields';
+import { carriesOwnBanner } from './collection-layout';
 import { readingTime } from './reading-time';
 import type { Page, Section } from './schema';
 
@@ -220,7 +221,18 @@ export function itemAsCard(
     // signals the post does. Reading time is worked out from the body here, never
     // stored: see lib/content/reading-time.ts.
     author: item.author,
-    readingMinutes: readingTime(item.sections),
+    /*
+     * A READING TIME IS AN ARTICLE'S, AND A DESTINATION GUIDE IS NOT ONE.
+     *
+     * "3 min read" under a photograph of Hvar is the same blog furniture that
+     * was showing above the banner until the entry header learned to stand
+     * down, and it looks just as odd on the card. Somebody scanning a grid of
+     * places is not deciding how long a read is; on a post they are.
+     *
+     * The same signal decides it: an item that builds its own banner is a page
+     * rather than a post. See carriesOwnBanner in collection-layout.ts.
+     */
+    readingMinutes: carriesOwnBanner(item) ? 0 : readingTime(item.sections),
     /*
      * The collection's declared facts, already formatted into words, in the
      * order the collections screen puts them in. Formatted HERE rather than in
