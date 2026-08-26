@@ -14,8 +14,8 @@
       "mcp__Airtable__list_record_comments",
       "mcp__Airtable__ping",
       "mcp__Airtable__update_records_for_table",
-"mcp__Airtable__create_records_for_table",
-"mcp__Airtable__create_record_comment"
+      "mcp__Airtable__create_records_for_table",
+      "mcp__Airtable__create_record_comment"
     ]
   },
   "hooks": {
