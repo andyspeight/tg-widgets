@@ -70,6 +70,7 @@ import {
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
 import { describePicture, fetchableByModel } from '../../lib/ai/alt';
 import { getMediaItem } from '../../lib/db/media';
+import { fillPagePhotos } from '../../lib/media/photo-fill';
 import { createPage, getPage, listPageFill, listPages, saveDraft, type PageWithContent } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
 import { safeSlug } from '../../lib/content/collection';
@@ -623,7 +624,9 @@ async function sectionsForPage(
    * seconds left is a call that will be aborted and still be paid for.
    */
   const left = remainingBudget(ctx.startedAt);
-  if (slots.length === 0 || left < MIN_REPAIR_MS) return stripPlaceholders(built);
+  if (slots.length === 0 || left < MIN_REPAIR_MS) {
+    return withPhotos(ctx.tenantId, plan, stripPlaceholders(built));
+  }
 
   try {
     const system = buildFillSystemPrompt(ctx.settings);
@@ -642,14 +645,50 @@ async function sectionsForPage(
     }
 
     const filled = fillFromModel(answer.text, slots);
-    if (filled.ok) return stripPlaceholders(applyFill(built, filled.copy));
+    if (filled.ok) return withPhotos(ctx.tenantId, plan, stripPlaceholders(applyFill(built, filled.copy)));
   } catch (error) {
     // Never fatal: the page stands without it. Logged because a fill that keeps
     // failing is worth knowing about, and the client will never see it.
     console.error('[tg-sites] filling a page failed', error);
   }
 
-  return stripPlaceholders(built);
+  return withPhotos(ctx.tenantId, plan, stripPlaceholders(built));
+}
+
+/**
+ * The page's photographs, from the client's own library.
+ *
+ * REUSED WHOLESALE from the starter wizard, which has filled template pages this
+ * way since August: fillPagePhotos resolves each distinct query against Pexels,
+ * copies what it finds into the tenant's own storage with the photographer's
+ * credit, and writes the stored url into the slot. Nothing here is new except
+ * where the queries come from.
+ *
+ * WHICH IS THE MODEL. The plan carries a "photo" per section, two or three words
+ * naming what a picture there should show, so a Barbados page gets Barbados
+ * pictures rather than the preset's generic travel query. That override is a
+ * field the starter specs already had for exactly this reason: every template
+ * page opens with the same banner preset, and an About banner and a Holidays
+ * banner should not share a photograph.
+ *
+ * BEST EFFORT, ALL THE WAY DOWN. fillPagePhotos swallows a miss, a rate limit
+ * and an unconfigured library alike, and one picture that cannot be found leaves
+ * that slot as it was. A page without a photograph is still a page.
+ *
+ * The distinct queries resolve together, so a page of eight sections costs one
+ * round of latency rather than eight.
+ */
+async function withPhotos(
+  tenantId: string,
+  plan: StarterSection[],
+  sections: Section[],
+): Promise<Section[]> {
+  await fillPagePhotos(
+    tenantId,
+    { title: '', slug: '', description: '', sections: plan },
+    sections,
+  );
+  return sections;
 }
 
 export type AiPageResult =

@@ -158,8 +158,16 @@ describe('what the fill costs, and what it cannot cost', () => {
   );
 
   it('never fails the build, because a planned page is still a page', () => {
+    /*
+     * The catch has to END in a page rather than a rethrow. Asserting the exact
+     * return expression broke the moment photographs were added around it, so
+     * this checks the property instead: every path out of the catch returns
+     * something built from `built`.
+     */
     expect(fn).toContain('catch (error)');
-    expect(fn).toContain('return stripPlaceholders(built);');
+    const after = fn.slice(fn.indexOf('catch (error)'));
+    expect(after).toContain('stripPlaceholders(built)');
+    expect(after).not.toContain('throw');
   });
 
   it('shares the slot already claimed rather than charging twice', () => {
@@ -177,6 +185,57 @@ describe('what the fill costs, and what it cannot cost', () => {
 
   it('skips a page that has nothing to fill', () => {
     expect(fn).toContain('slots.length === 0');
+  });
+});
+
+describe('the page gets photographs', () => {
+  const build = readFileSync(join(ROOT, 'lib', 'ai', 'page-build.ts'), 'utf8');
+  const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+
+  it('asks the model what a picture on each section should SHOW', async () => {
+    /*
+     * The preset's own query is generic by necessity: one banner preset opens
+     * every page. A Barbados page wants Barbados pictures, and the only thing
+     * that knows the page is about Barbados is the model.
+     */
+    const { PAGE_RULES, PAGE_OUTPUT_SHAPE } = await import('../lib/ai/page-build');
+    expect(PAGE_RULES).toContain('"photo"');
+    expect(PAGE_OUTPUT_SHAPE).toContain('"photo"');
+    // A search term wants a thing that can be photographed, not a mood.
+    expect(PAGE_RULES).toContain('not a mood');
+  });
+
+  it('reads the subject back without escaping it, since it is a search term', () => {
+    const fn = build.slice(build.indexOf('export function planFromModel'));
+    expect(fn.slice(0, 2000)).toContain('toText(item.photo)');
+    expect(fn.slice(0, 2000)).not.toContain('escapeHtml(toText(item.photo))');
+  });
+
+  it('reuses the starter wizard pipeline rather than a second one', () => {
+    // fillPagePhotos has filled template pages since August: it searches,
+    // copies into the tenant's own storage with the credit, and writes the url.
+    expect(actions).toContain('fillPagePhotos(');
+  });
+
+  it('fills photographs whether or not the copy pass worked', () => {
+    /*
+     * The three ways out of sectionsForPage are a successful fill, a failed one
+     * and a skipped one. A page with no copy pass still deserves its pictures.
+     */
+    const fn = actions.slice(
+      actions.indexOf('async function sectionsForPage'),
+      actions.indexOf('export type AiPageResult'),
+    );
+    const calls = fn.match(/withPhotos\(/g) ?? [];
+    expect(calls.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('never lets a missing picture cost the page', () => {
+    const fill = readFileSync(join(ROOT, 'lib', 'media', 'photo-fill.ts'), 'utf8');
+    // Best effort all the way down: a miss, a rate limit and an unconfigured
+    // library are all swallowed, and the slot simply stays as it was.
+    expect(fill).toContain('pexelsConfigured() || !blobConfigured()');
+    expect(fill).toContain('catch');
   });
 });
 
