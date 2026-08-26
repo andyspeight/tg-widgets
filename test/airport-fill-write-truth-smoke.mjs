@@ -11,7 +11,8 @@
  *
  * Run: node test/airport-fill-write-truth-smoke.mjs
  */
-import { runBreadthFill, runIdentityBackfill, identityFields } from '../api/reference/_breadth_fill.js';
+import { runBreadthFill, runIdentityBackfill, identityFields, isWorthCreatingFromProse } from '../api/reference/_breadth_fill.js';
+import { extractIatas } from '../api/reference/_breadth.js';
 import { AF, AIRPORT_STATUS } from '../api/reference/_ref.js';
 
 let pass = 0; const fails = [];
@@ -80,6 +81,50 @@ const fine = await runIdentityBackfill({
 });
 ok('a successful patch is counted', fine.filled === 1 && fine.failed === 0);
 ok('backfill never writes narrative', NARRATIVE.every(k => !(AF[k] in (fine.items[0].out || {}))));
+
+// --- prose codes that are not airports ------------------------------------
+// All of this is from the first live run on 26 Aug 2026, which created records
+// for an Iranian regional airport and a Belize airstrip. Both came from our own
+// prose, neither from the curated target list.
+
+// The real sentence, from the Curacao and Aruba records.
+const REAL_PROSE = 'Curacao Airport (CUR) is 15 min from Willemstad. Connect via Amsterdam (KLM) or US cities.';
+ok('an airport code in prose is still found', extractIatas(REAL_PROSE).includes('CUR'));
+ok('an AIRLINE in brackets is not read as an airport', !extractIatas(REAL_PROSE).includes('KLM'));
+ok('other airlines are blocked too', extractIatas('Fly with (TUI) or (SAS) via (TAP)').length === 0);
+ok('currencies in brackets are not airports', extractIatas('Budget around (AED) 400 or (THB) 2000').length === 0);
+ok('travel abbreviations are not airports', extractIatas('You need an (ETA) and a (PCR) test').length === 0);
+ok('a real code beside a blocked one still survives', extractIatas('Rome (FCO) connects via Amsterdam (KLM)').join() === 'FCO');
+
+const asOA = (type, scheduledService) => ({ type, scheduledService });
+ok('a large airport from prose is worth creating', isWorthCreatingFromProse(asOA('large_airport', 'yes')));
+ok('a medium airport from prose is worth creating', isWorthCreatingFromProse(asOA('medium_airport', 'yes')));
+ok('Kalaleh, small with no service, is refused', !isWorthCreatingFromProse(asOA('small_airport', 'no')));
+ok('Hector Silva Airstrip, small with no service, is refused', !isWorthCreatingFromProse(asOA('small_airport', 'no')));
+ok('El Nido, small but scheduled, is kept', isWorthCreatingFromProse(asOA('small_airport', 'yes')));
+ok('Phnom Penh, large but mis-flagged by OurAirports, is kept', isWorthCreatingFromProse(asOA('large_airport', 'no')));
+ok('a heliport is refused', !isWorthCreatingFromProse(asOA('heliport', 'yes')));
+ok('a closed airport is refused', !isWorthCreatingFromProse(asOA('closed', 'no')));
+ok('a missing record is refused', !isWorthCreatingFromProse(null));
+
+// The filter must apply to prose codes only. A curated target is wanted even if
+// OurAirports describes it oddly.
+const smallOA = { iata: 'ENI', name: 'El Nido Airport', city: 'El Nido', country: 'PH', lat: 11.2, lon: 119.4, type: 'small_airport', scheduledService: 'no', source: 'https://ourairports/' };
+const smallWD = { iata: 'ENI', name: 'El Nido Airport', city: 'El Nido', country: 'Philippines', countryCode: 'PH', lat: 11.2, lon: 119.4, source: 'https://wikidata/' };
+const smallSeam = { ourAirports: async () => smallOA, wikidata: async () => smallWD };
+
+const fromProse = await runBreadthFill({
+  limit: 1, create: true,
+  fetchers: { ...smallSeam, breadth: async () => ({ missingCount: 1, missing: [{ iata: 'ENI', reason: 'content-referenced' }] }), create: async () => {} },
+});
+ok('a non-bookable PROSE code is not created', fromProse.created === 0 && fromProse.unverifiable === 1);
+ok('and the reason names what it actually is', /small_airport/.test(fromProse.items[0].reason || ''));
+
+const fromTarget = await runBreadthFill({
+  limit: 1, create: true,
+  fetchers: { ...smallSeam, breadth: async () => ({ missingCount: 1, missing: [{ iata: 'ENI', reason: 'global-major' }] }), create: async () => {} },
+});
+ok('the same code from the curated TARGET list is still created', fromTarget.created === 1);
 
 console.log(`airport-fill-write-truth: ${pass} passed, ${fails.length} failed`);
 if (fails.length) { for (const f of fails) console.error('  FAIL:', f); process.exit(1); }

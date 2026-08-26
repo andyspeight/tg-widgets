@@ -34,8 +34,27 @@ const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
 const COORD_TOLERANCE_KM = 50;
 
 // ---- pure: normalisation + cross-verification -----------------------------
+/**
+ * Fold a name down to comparable tokens. Pure.
+ *
+ * Diacritics are stripped to their base letter and apostrophes are removed
+ * outright, both before the catch-all that turns punctuation into spaces. That
+ * ordering is the whole point, and it was not always here.
+ *
+ * Until 26 Aug 2026 anything outside a-z became a SPACE, which quietly broke
+ * accented and apostrophed names by splitting them mid-word: "Malaga" tokenised
+ * to "malaga" but "Málaga" to "m laga", so the two never matched, and
+ * "Fa'a'a" collapsed to tokens too short to survive the length filter at all,
+ * leaving an empty set and a zero score. The first fill run created Tahiti and
+ * Puerto Vallarta with no name because of it. Spanish, French, Portuguese and
+ * Nordic airports are a large share of what is left to create, so this was
+ * costing far more than the two records that made it visible.
+ */
 export function normalizeName(s) {
-  return String(s || '').toLowerCase()
+  return String(s || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // á -> a, ā -> a
+    .toLowerCase()
+    .replace(/['’ʻ`]/g, '') // Fa'a'a -> faaa, not "fa a a"
     .replace(/\b(airport|international|intl|regional|the)\b/g, ' ')
     .replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -136,6 +155,34 @@ export function corroborateFields(oa, wd) {
   return { fields, corroborated, uncorroborated };
 }
 
+/**
+ * Is a code found in our own prose worth making a record for? Pure.
+ *
+ * The target list is curated, so anything on it is wanted by definition. A code
+ * scraped from prose is not: it is any three uppercase letters in brackets, so
+ * it picks up airlines, currencies and abbreviations as well as airports. The
+ * stop list in _breadth.js catches the ones we can name, and this catches the
+ * rest by asking what OurAirports thinks the code actually is.
+ *
+ * Evidence, from the first fill run on 26 Aug 2026: it created Hector Silva
+ * Airstrip in Belize and Kalaleh Airport in Iran, neither of which anyone would
+ * put in a holiday picker. Both are small_airport with no scheduled service.
+ *
+ * Deliberately permissive in one direction. Phnom Penh is large_airport but
+ * OurAirports records it as having no scheduled service, which is wrong, so
+ * scheduled service alone is not allowed to reject an airport. Type carries the
+ * decision, and a small airport is kept when it does have scheduled service,
+ * which is how genuinely small destinations like El Nido stay in.
+ */
+export function isWorthCreatingFromProse(oa) {
+  if (!oa) return false;
+  const type = String(oa.type || '');
+  if (type === 'large_airport' || type === 'medium_airport') return true;
+  if (type === 'small_airport') return String(oa.scheduledService) === 'yes';
+  // heliport, seaplane_base, closed, balloonport
+  return false;
+}
+
 // ---- pure: source parsers -------------------------------------------------
 /** Parse the OurAirports CSV for one IATA. Pure. Returns normalized record or null. */
 export function parseOurAirports(csvText, iata) {
@@ -157,6 +204,10 @@ export function parseOurAirports(csvText, iata) {
       country: cells[col('iso_country')] || '',
       lat: parseFloat(cells[col('latitude_deg')]),
       lon: parseFloat(cells[col('longitude_deg')]),
+      // Carried so a prose-derived code can be sanity-checked before it becomes
+      // a record. Never written to Airtable, and never used for identity.
+      type: cells[col('type')] || '',
+      scheduledService: cells[col('scheduled_service')] || '',
       source: OURAIRPORTS_CSV,
     };
   }
@@ -265,6 +316,18 @@ export async function runBreadthFill({ limit = 10, create = false, nowIso, fetch
       items.push({ iata: t.iata, verdict: 'unverifiable', reason: !oa && !wd ? 'neither source found' : !oa ? 'not in OurAirports' : 'not in Wikidata' });
       continue;
     }
+    // A code lifted from our own prose has to prove it is an airport a customer
+    // could fly to. Codes from the curated target list skip this: they are
+    // wanted by definition.
+    if (t.reason === 'content-referenced' && !isWorthCreatingFromProse(oa)) {
+      items.push({
+        iata: t.iata,
+        verdict: 'unverifiable',
+        reason: `prose code is ${oa.type || 'an unknown facility'}${oa.scheduledService === 'yes' ? '' : ' with no scheduled service'}, not a bookable airport`,
+      });
+      continue;
+    }
+
     const cv = crossVerify(oa, wd);
     if (!cv.verified) {
       items.push({ iata: t.iata, verdict: 'conflict', conflicts: cv.conflicts, oa: oa.name, wd: wd.name });

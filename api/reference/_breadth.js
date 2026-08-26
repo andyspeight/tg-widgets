@@ -39,8 +39,28 @@ const COUNTRY_GETTING_THERE = 'fld98IDBKf9mFpxoG';
 const CITY_GETTING_THERE = 'fldDppgzDttdnfmTZ';
 const PARK_NEAREST_AIRPORT = 'fldOM08zdOuuOpjBX';
 
-// A few codes that look like IATA but are common false positives in prose.
-const STOP = new Set(['THE', 'AND', 'FOR', 'ARE', 'YOU', 'GMT', 'VIP', 'WWW', 'USD', 'GBP', 'EUR', 'CEO', 'FAQ', 'ATM', 'SUV']);
+/**
+ * Codes that look like IATA but are something else in travel prose.
+ *
+ * The airline block is not theoretical. On 26 Aug 2026 the first fill run
+ * created a record for Kalaleh Airport in Iran, because two Caribbean records
+ * say "Connect via Amsterdam (KLM)" and KLM is both the Dutch airline and the
+ * IATA code for Kalaleh. Airline names in brackets are exactly how a travel
+ * writer writes, so they will keep appearing.
+ */
+const STOP = new Set([
+  // words
+  'THE', 'AND', 'FOR', 'ARE', 'YOU', 'ALL', 'ANY', 'CAN', 'ONE', 'TWO', 'NEW', 'OUR',
+  // organisations and general abbreviations
+  'GMT', 'VIP', 'WWW', 'CEO', 'FAQ', 'ATM', 'SUV', 'MPV', 'CDW', 'TBC', 'TBA',
+  'NHS', 'VAT', 'TSA', 'PCR', 'ETA', 'EES',
+  // currencies
+  'USD', 'GBP', 'EUR', 'CHF', 'JPY', 'AUD', 'NZD', 'ZAR', 'THB', 'SEK', 'NOK',
+  'DKK', 'PLN', 'CZK', 'HUF', 'IDR', 'INR', 'AED', 'SAR', 'QAR', 'HKD', 'SGD',
+  // airlines, which is how this list earned its comment
+  'KLM', 'TUI', 'BAW', 'DLH', 'AFR', 'UAE', 'QTR', 'SIA', 'ANA', 'JAL', 'AAL',
+  'DAL', 'UAL', 'RYR', 'EZY', 'EJU', 'VIR', 'ETD', 'THY', 'SAS', 'TAP', 'LOT',
+]);
 
 /** Extract parenthesised 3-letter codes, e.g. "Orlando International (MCO)" -> ["MCO"]. Pure. */
 export function extractIatas(text) {

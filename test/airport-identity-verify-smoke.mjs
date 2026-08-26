@@ -99,6 +99,34 @@ ok('every target is a valid IATA shape', targets.every(c => /^[A-Z]{3}$/.test(c)
 ok('target worklist has no duplicates', new Set(targets).size === targets.length);
 ok('the busiest airports are on the worklist', ['ATL', 'LHR', 'JFK', 'DXB'].every(c => targets.includes(c)));
 
+// --- accented and apostrophed names ---------------------------------------
+// Real pairs from the first fill run on 26 Aug 2026. Punctuation used to become
+// a space BEFORE the token length filter, which split accented words mid-letter
+// ("Málaga" -> "m laga") and reduced apostrophed ones to nothing. Tahiti and
+// Puerto Vallarta were created with no name because of it.
+const tok = s => new Set(normalizeName(s).split(' ').filter(w => w.length > 2));
+const overlaps = (a, b) => {
+  const ta = tok(a), tb = tok(b);
+  if (!ta.size || !tb.size) return 0;
+  let n = 0; for (const w of ta) if (tb.has(w)) n++;
+  return n / Math.min(ta.size, tb.size);
+};
+
+ok('an accent folds to its base letter', normalizeName('Málaga Airport') === 'malaga');
+ok('an accent does not split the word', !normalizeName('Díaz Ordaz').includes('d az'));
+ok('apostrophes are removed, not turned into gaps', normalizeName("Fa'a'a Airport") === 'faaa');
+ok('a macron folds too', normalizeName("Fa'a'ā Airport") === 'faaa');
+
+ok('Malaga matches Málaga-Costa del Sol', overlaps('Malaga Airport', 'Málaga-Costa del Sol Airport') >= 0.5);
+ok('Tahiti matches across the apostrophes', overlaps("Faa'a International Airport", "Fa'a'ā International Airport") >= 0.5);
+ok('Puerto Vallarta matches its longer official name', overlaps('Licenciado Gustavo Díaz Ordaz International Airport', 'Gustavo Díaz Ordaz International Airport') >= 0.5);
+ok('Sao Paulo matches São Paulo', overlaps('Sao Paulo Guarulhos International Airport', 'São Paulo/Guarulhos International Airport') >= 0.5);
+ok('Dusseldorf matches Düsseldorf', overlaps('Dusseldorf Airport', 'Düsseldorf Airport') >= 0.5);
+
+// Folding must not make genuinely different airports look the same.
+ok('folding does not collide unrelated names', overlaps('Malaga Airport', 'Malta International Airport') < 0.5);
+ok('folding does not collide two Paris fields', overlaps('Charles de Gaulle International Airport', 'Paris Orly Airport') < 0.5);
+
 if (fails.length) {
   console.error(`FAIL ${fails.length} of ${pass + fails.length}`);
   for (const f of fails) console.error('  x ' + f);
