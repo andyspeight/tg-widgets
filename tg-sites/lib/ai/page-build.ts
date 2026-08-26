@@ -101,17 +101,18 @@ How to plan a page:
 - Choose 4 to 8 sections that form a coherent page. Usually open with a hero or opener, put the substance in the middle, and end with a way to get in touch.
 - Pick section ids ONLY from the catalogue. Use each id at most once unless a repeat genuinely helps.
 - Order matters: the list is the order the sections appear down the page, top to bottom.
-- For each section, write a "heading" (its title, one line, in the house voice, grounded in the brief) and, where a paragraph suits it, a short "body" of one or two sentences. Leave "body" out for a section that is a row of points, a set of logos or a bare call to action. Leave "heading" out to keep the section's own wording.`;
+- For each section, write a "heading" (its title, one line, in the house voice, grounded in the brief) and, where a paragraph suits it, a short "body" of one or two sentences. Leave "body" out for a section that is a row of points, a set of logos or a bare call to action. Leave "heading" out to keep the section's own wording.
+- Give each section a "photo": two or three words naming what a photograph behind it should SHOW. Name the real subject, so a page about Barbados says "Barbados beach villa" and not "travel" or "holiday". This is a search against a stock library, so it wants a thing that can be photographed, not a mood: "Antigua harbour at dusk" finds pictures, "unforgettable memories" does not.`;
 
 /** The output contract, so the model returns a JSON array and only that. */
 export const PAGE_OUTPUT_SHAPE = `Return a JSON array and NOTHING else. No prose before or after, no markdown fences. Each item is one section, in the order it appears down the page:
 
 [
-  { "preset": "<an id from the catalogue>", "heading": "the section title", "body": "one or two sentences, or omit" },
+  { "preset": "<an id from the catalogue>", "heading": "the section title", "body": "one or two sentences, or omit", "photo": "what a picture here shows" },
   { "preset": "<another id>", "heading": "..." }
 ]
 
-"preset" is required and must be one of the catalogue ids exactly. "heading" and "body" are optional plain text, no markup.`;
+"preset" is required and must be one of the catalogue ids exactly. "heading", "body" and "photo" are optional plain text, no markup.`;
 
 /** The system prompt: house voice, the builder's job, the catalogue, the shape, the brand. */
 export function buildPageSystemPrompt(settings: SiteSettings): string {
@@ -209,6 +210,15 @@ export function planFromModel(answer: unknown): PlanResult {
     const body = escapeHtml(toText(item.body));
     if (body) spec.body = body;
 
+    /*
+     * The photograph's SUBJECT, not its copy, so it is not escaped: it becomes a
+     * search term against the stock library and never reaches a page as markup.
+     * Capped because a search term is two or three words and a sentence here is
+     * a query that finds nothing.
+     */
+    const photo = toText(item.photo).slice(0, 60).trim();
+    if (photo) spec.photo = photo;
+
     plan.push(spec);
   }
 
@@ -226,8 +236,93 @@ export function planFromModel(answer: unknown): PlanResult {
  * pick costs that wording, not the build. The page's own title and address are set
  * by the action from what the client named it, so blanks here are fine.
  */
+/**
+ * The copy a preset ships with to show an author what goes where.
+ *
+ * NOT A STYLE LIST AND NOT A BLOCKLIST OF BAD WRITING. Every one of these is a
+ * literal string in lib/content/presets-page.ts, written as an instruction to
+ * the person filling the preset in. They are fine in the editor, where somebody
+ * is about to replace them, and they are not fine on a page a builder just
+ * produced and handed over.
+ */
+const PLACEHOLDER_COPY: readonly string[] = [
+  'add title here',
+  'add your medium length title here',
+  'add your title here',
+  'an intro title here',
+  'tagline here',
+  'this is a short title',
+  'this is a title',
+  'write down an introduction title here',
+  'write the opening title here',
+  'a line or two on what this is and why it matters.',
+  'another one. three or four of these is usually enough.',
+  'the answer, in a sentence or two. short answers get read.',
+  'their role, and a sentence or two on what they know.',
+];
+
+/** The words a block shows, with any markup taken off. */
+function visibleText(block: { props?: Record<string, unknown> }): string {
+  const props = block.props ?? {};
+  const raw = typeof props.html === 'string' ? props.html : '';
+  return raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+/**
+ * Take out the preset copy the builder never filled in.
+ *
+ * WHY THIS IS NEEDED AT ALL. buildSection writes exactly two things: the plan's
+ * heading into the section's title, and its body into the first paragraph.
+ * Everything else a preset contains keeps the factory copy, so a section with a
+ * tagline, three feature items or a list of questions arrives with a real
+ * headline sitting on top of "This is a short title" and "Another one. Three or
+ * four of these is usually enough."
+ *
+ * Andy, 26 Aug 2026, on the first full site the builder produced: "it's very
+ * poor. No images. Placeholder text. Short pages." Nine of the twelve pages
+ * carried at least one of these.
+ *
+ * THE BACKSTOP, AND IT RUNS LAST. lib/ai/page-fill.ts now writes every slot, so
+ * most of these are replaced before this ever sees them. What is left is what
+ * the fill could not reach: a slot past the cap, a page whose fill call failed,
+ * a block the model skipped. Better a shorter page than one carrying
+ * instructions to the author, which tells a client the tool does not work.
+ *
+ * ORDER MATTERS AND IT BIT ME. This lived inside sectionsFromPlan first, which
+ * put it BEFORE the fill and deleted the very slots the fill existed to write.
+ *
+ * Conservative on purpose: it removes a block whose whole visible text IS one of
+ * these, never one that merely contains a phrase, so real copy that happens to
+ * echo a placeholder survives. Emptied columns, rows and sections go with it,
+ * since an empty band is its own kind of broken.
+ */
+export function stripPlaceholders(sections: Section[]): Section[] {
+  const kept: Section[] = [];
+
+  for (const section of sections) {
+    const rows = section.rows
+      .map((row) => ({
+        ...row,
+        columns: row.columns
+          .map((column) => ({
+            ...column,
+            blocks: column.blocks.filter(
+              (block) => !PLACEHOLDER_COPY.includes(visibleText(block)),
+            ),
+          }))
+          .filter((column) => column.blocks.length > 0),
+      }))
+      .filter((row) => row.columns.length > 0);
+
+    if (rows.length > 0) kept.push({ ...section, rows });
+  }
+
+  return kept;
+}
+
 export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[]> {
-  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)).sections;
+  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS))
+    .sections;
 }
 
 /**

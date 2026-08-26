@@ -126,7 +126,19 @@ export default async function handler(req, res) {
       },
       tables: results,
     };
-    console.log('[cron/reference-climate]', JSON.stringify(summary));
+    // A fill that fills nothing while work is outstanding is a failure wearing
+    // a 200. The first live run did exactly that, and finding out why cost an
+    // hour because the only trace was a success line among thousands. Error
+    // level is the one log query that reliably completes on this project, so
+    // that is where a no-op run belongs, with the reasons attached.
+    const outstanding = results.reduce((n, r) => n + r.due, 0);
+    if (outstanding > 0 && summary.totals.filled === 0) {
+      const why = results.flatMap(r => (r.needsHuman || []).map(h => `${h.name}: ${h.detail}`)).slice(0, 5);
+      console.error('[cron/reference-climate] WROTE NOTHING with', outstanding, 'records due.',
+        JSON.stringify({ totals: summary.totals, writeEnabled: write, firstReasons: why }));
+    } else {
+      console.log('[cron/reference-climate]', JSON.stringify(summary));
+    }
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify(summary));

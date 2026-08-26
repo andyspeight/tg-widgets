@@ -307,6 +307,14 @@ export function formatSeries(values) {
 }
 
 // ---- network adapters (validated on a deploy) -----------------------------
+/**
+ * Fetch JSON and say what went wrong when it does. Returns { json, error }.
+ *
+ * The first live run on 26 Aug 2026 returned 200 having written nothing, and
+ * the logs could not say why: a swallowed null looks identical whether the host
+ * rate-limited us, timed out, or answered with something unparseable. Carrying
+ * the reason costs one string and turns a silent no-op into a diagnosis.
+ */
 async function getJson(url, timeoutMs = 45000) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -315,10 +323,14 @@ async function getJson(url, timeoutMs = 45000) {
       signal: ctrl.signal,
       headers: { 'User-Agent': 'LunaBrain/1.0 (+https://travelify.io)', Accept: 'application/json' },
     });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch {
-    return null;
+    if (!r.ok) {
+      const body = await r.text().catch(() => '');
+      return { json: null, error: `HTTP ${r.status}${body ? ': ' + body.slice(0, 160) : ''}` };
+    }
+    return { json: await r.json(), error: null };
+  } catch (err) {
+    const msg = (err && err.message) || String(err);
+    return { json: null, error: err && err.name === 'AbortError' ? `timed out after ${timeoutMs}ms` : msg };
   } finally {
     clearTimeout(timer);
   }
@@ -334,8 +346,10 @@ async function fetchOpenMeteo(lat, lon) {
     timezone: 'UTC',
     timeformat: 'unixtime',
   });
-  const json = await getJson(`${OPEN_METEO_ARCHIVE}?${qs}`);
-  return json ? monthlyFromOpenMeteo(json) : null;
+  const { json, error } = await getJson(`${OPEN_METEO_ARCHIVE}?${qs}`);
+  if (!json) return { data: null, error: error || 'no response' };
+  const data = monthlyFromOpenMeteo(json);
+  return { data, error: data ? null : 'response did not parse into 12 months' };
 }
 
 async function fetchPower(lat, lon) {
@@ -346,8 +360,10 @@ async function fetchPower(lat, lon) {
     longitude: String(lon),
     format: 'JSON',
   });
-  const json = await getJson(`${NASA_POWER_CLIMATOLOGY}?${qs}`);
-  return json ? monthlyFromPower(json) : null;
+  const { json, error } = await getJson(`${NASA_POWER_CLIMATOLOGY}?${qs}`);
+  if (!json) return { data: null, error: error || 'no response' };
+  const data = monthlyFromPower(json);
+  return { data, error: data ? null : 'response did not parse into 12 months' };
 }
 
 async function patchRecord(tableId, recordId, fields) {
@@ -370,7 +386,9 @@ async function patchRecord(tableId, recordId, fields) {
  * @param opts.authoredSeasons map of record name to a valid 12-token season
  *        string. A record without one is reported as awaiting-season and left
  *        untouched, because Season cannot be derived (see deriveSeason).
- * @param opts.fetchers test seam: { openMeteo, power, listRows, patch }
+ * @param opts.fetchers test seam: { openMeteo, power, listRows, patch }. The
+ *        two source fetchers return { data, error } so a skip can say what the
+ *        host actually said rather than only that it said nothing.
  * @returns { due, processed, filled, failed, skipped, awaitingSeason, items[] }
  *          `filled` counts records actually written. `failed` counts records
  *          whose write threw. They are separate on purpose, and neither is
@@ -403,13 +421,16 @@ export async function runClimateFill({ table = 'cities', limit = 20, write = fal
       continue;
     }
 
-    const [om, pw] = await Promise.all([getOM(coords.lat, coords.lon), getPW(coords.lat, coords.lon)]);
+    const [omRes, pwRes] = await Promise.all([getOM(coords.lat, coords.lon), getPW(coords.lat, coords.lon)]);
+    const om = omRes && omRes.data;
+    const pw = pwRes && pwRes.data;
     if (!om || !pw) {
-      items.push({
-        name,
-        verdict: 'skipped',
-        reason: !om && !pw ? 'neither source answered' : !om ? 'Open-Meteo did not answer' : 'NASA POWER did not answer',
-      });
+      // Name the source AND what it said. "did not answer" was true of the
+      // first live run and told nobody anything.
+      const why = [];
+      if (!om) why.push(`Open-Meteo: ${(omRes && omRes.error) || 'no response'}`);
+      if (!pw) why.push(`NASA POWER: ${(pwRes && pwRes.error) || 'no response'}`);
+      items.push({ name, verdict: 'skipped', reason: why.join('; ') });
       skipped++;
       continue;
     }

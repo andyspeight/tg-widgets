@@ -76,6 +76,15 @@ export function SiteBuilder({
   /** Page names the client typed, to be described and added to the list. */
   const [extra, setExtra] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
+  /**
+   * Time actually spent building, so what is left can be MEASURED not guessed.
+   *
+   * A progress bar that moves on a timer is a lie that gets found out: it either
+   * finishes early and waits, or fills up and sits there. This one only ever
+   * reports pages that really finished, and the estimate is their average
+   * multiplied by the ones still to go.
+   */
+  const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -170,6 +179,8 @@ export function SiteBuilder({
     setRows(plannedPages);
     setStage('building');
     setError(null);
+    const began = Date.now();
+    setElapsed(0);
 
     for (let index = 0; index < plannedPages.length; index += 1) {
       const page = plannedPages[index];
@@ -197,6 +208,9 @@ export function SiteBuilder({
         // The home page wins if there is one; otherwise the first page built.
         setToOpen((current) => (page.slug === '' ? opened : current ?? opened));
       }
+
+      // Measured after each page, so the estimate below is real time spent.
+      setElapsed(Date.now() - began);
     }
 
     setStage('done');
@@ -421,6 +435,25 @@ export function SiteBuilder({
   // Building and done share a list, so the rows do not jump when it finishes.
   const finished = stage === 'done';
 
+  /** Pages that have had their turn, whether they built, were skipped or failed. */
+  const done = rows.filter((row) => row.progress !== 'waiting' && row.progress !== 'building').length;
+  const percent = rows.length > 0 ? Math.round((done / rows.length) * 100) : 0;
+
+  /**
+   * How much longer, in words, once there is enough evidence to say.
+   *
+   * NOTHING UNTIL TWO PAGES HAVE FINISHED. One page is not an average, and a
+   * wildly wrong first estimate is worse than none: somebody who is told two
+   * minutes and waits six stops believing the next thing the screen says.
+   */
+  const remaining = (() => {
+    if (done < 2 || done >= rows.length || elapsed <= 0) return '';
+    const each = elapsed / done;
+    const left = Math.round((each * (rows.length - done)) / 1000);
+    if (left < 45) return 'nearly there';
+    return `about ${Math.max(1, Math.round(left / 60))} ${left < 90 ? 'minute' : 'minutes'} left`;
+  })();
+
   return (
     <Modal
       title={finished ? 'Your site is built' : 'Building your site'}
@@ -445,6 +478,34 @@ export function SiteBuilder({
         * sighted person watches the ticks appear; without this nobody else knows
         * anything is happening at all.
         */}
+      {/*
+        * REAL PROGRESS, NOT A TIMED ANIMATION. The count and the bar report pages
+        * that have actually finished, and the estimate is the average of the ones
+        * that really built multiplied by the ones left. A bar that moves on a
+        * timer either finishes early and waits or fills up and sits there, and
+        * both teach somebody to distrust it.
+        */}
+      {!finished && (
+        <div className="sv-progress">
+          <div className="sv-progress__line">
+            <span className="sv-progress__count">
+              {`${done} of ${rows.length} built`}
+            </span>
+            {remaining && <span className="sv-progress__left">{remaining}</span>}
+          </div>
+          <div
+            className="sv-progress__track"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={rows.length}
+            aria-valuenow={done}
+            aria-label="Pages built"
+          >
+            <div className="sv-progress__fill" style={{ width: `${percent}%` }} />
+          </div>
+        </div>
+      )}
+
       <ul className="sv-plan sv-plan--progress" aria-live="polite" aria-busy={!finished}>
         {rows.map((row) => (
           <li className="sv-plan__row" key={row.slug} data-progress={row.progress}>
