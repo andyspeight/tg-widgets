@@ -1757,3 +1757,44 @@
   border-top: 1px solid var(--ed-line);
 }
 .sv-plan__add .sv-btn { align-self: flex-start; margin-top: var(--ed-2); }
+
+/*
+ * How far through a build is.
+ *
+ * The bar reports pages that have actually finished, so it can sit still for
+ * thirty seconds while one page is written and that is correct rather than
+ * broken. The COUNT beside it is what makes that legible: "3 of 12 built" says
+ * why nothing is moving in a way a bar alone cannot.
+ */
+.sv-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  margin-bottom: var(--ed-4);
+}
+.sv-progress__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  font-size: var(--ed-text-sm);
+}
+.sv-progress__count { font-weight: 600; color: var(--ed-ink); }
+.sv-progress__left { color: var(--ed-ink-2); }
+
+.sv-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ed-line);
+  overflow: hidden;
+}
+.sv-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ed-brand-ink, currentColor);
+  /* Eases between real values. It never animates ahead of one. */
+  transition: width 400ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-progress__fill { transition: none; }
+}

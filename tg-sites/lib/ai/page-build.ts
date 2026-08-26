@@ -101,17 +101,18 @@ How to plan a page:
 - Choose 4 to 8 sections that form a coherent page. Usually open with a hero or opener, put the substance in the middle, and end with a way to get in touch.
 - Pick section ids ONLY from the catalogue. Use each id at most once unless a repeat genuinely helps.
 - Order matters: the list is the order the sections appear down the page, top to bottom.
-- For each section, write a "heading" (its title, one line, in the house voice, grounded in the brief) and, where a paragraph suits it, a short "body" of one or two sentences. Leave "body" out for a section that is a row of points, a set of logos or a bare call to action. Leave "heading" out to keep the section's own wording.`;
+- For each section, write a "heading" (its title, one line, in the house voice, grounded in the brief) and, where a paragraph suits it, a short "body" of one or two sentences. Leave "body" out for a section that is a row of points, a set of logos or a bare call to action. Leave "heading" out to keep the section's own wording.
+- Give each section a "photo": two or three words naming what a photograph behind it should SHOW. Name the real subject, so a page about Barbados says "Barbados beach villa" and not "travel" or "holiday". This is a search against a stock library, so it wants a thing that can be photographed, not a mood: "Antigua harbour at dusk" finds pictures, "unforgettable memories" does not.`;
 
 /** The output contract, so the model returns a JSON array and only that. */
 export const PAGE_OUTPUT_SHAPE = `Return a JSON array and NOTHING else. No prose before or after, no markdown fences. Each item is one section, in the order it appears down the page:
 
 [
-  { "preset": "<an id from the catalogue>", "heading": "the section title", "body": "one or two sentences, or omit" },
+  { "preset": "<an id from the catalogue>", "heading": "the section title", "body": "one or two sentences, or omit", "photo": "what a picture here shows" },
   { "preset": "<another id>", "heading": "..." }
 ]
 
-"preset" is required and must be one of the catalogue ids exactly. "heading" and "body" are optional plain text, no markup.`;
+"preset" is required and must be one of the catalogue ids exactly. "heading", "body" and "photo" are optional plain text, no markup.`;
 
 /** The system prompt: house voice, the builder's job, the catalogue, the shape, the brand. */
 export function buildPageSystemPrompt(settings: SiteSettings): string {
@@ -209,6 +210,15 @@ export function planFromModel(answer: unknown): PlanResult {
     const body = escapeHtml(toText(item.body));
     if (body) spec.body = body;
 
+    /*
+     * The photograph's SUBJECT, not its copy, so it is not escaped: it becomes a
+     * search term against the stock library and never reaches a page as markup.
+     * Capped because a search term is two or three words and a sentence here is
+     * a query that finds nothing.
+     */
+    const photo = toText(item.photo).slice(0, 60).trim();
+    if (photo) spec.photo = photo;
+
     plan.push(spec);
   }
 
@@ -272,10 +282,14 @@ function visibleText(block: { props?: Record<string, unknown> }): string {
  * poor. No images. Placeholder text. Short pages." Nine of the twelve pages
  * carried at least one of these.
  *
- * A SAFETY NET, NOT THE FIX. The real answer is for the builder to fill every
- * slot it chooses rather than two, and that is the next piece of work. Until
- * then a shorter honest page beats a longer one with instructions to the author
- * printed on it, because the second tells a client the tool does not work.
+ * THE BACKSTOP, AND IT RUNS LAST. lib/ai/page-fill.ts now writes every slot, so
+ * most of these are replaced before this ever sees them. What is left is what
+ * the fill could not reach: a slot past the cap, a page whose fill call failed,
+ * a block the model skipped. Better a shorter page than one carrying
+ * instructions to the author, which tells a client the tool does not work.
+ *
+ * ORDER MATTERS AND IT BIT ME. This lived inside sectionsFromPlan first, which
+ * put it BEFORE the fill and deleted the very slots the fill existed to write.
  *
  * Conservative on purpose: it removes a block whose whole visible text IS one of
  * these, never one that merely contains a phrase, so real copy that happens to
@@ -307,12 +321,8 @@ export function stripPlaceholders(sections: Section[]): Section[] {
 }
 
 export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[]> {
-  const built = (
-    await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)
-  ).sections;
-
-  // Every AI-built page goes through this, so no route can forget it.
-  return stripPlaceholders(built);
+  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS))
+    .sections;
 }
 
 /**

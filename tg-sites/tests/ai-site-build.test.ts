@@ -435,7 +435,9 @@ describe('building an approved page', () => {
     // composed belongs in this action.
     expect(body).toContain('buildPageSystemPrompt(');
     expect(body).toContain('planFromModel(');
-    expect(body).toContain('sectionsFromPlan(');
+    // Through the one orchestrator, which is build then fill then strip. Calling
+    // sectionsFromPlan directly would skip the last two.
+    expect(body).toContain('sectionsForPage(');
   });
 
   it('NEVER builds over a page that already has content', () => {
@@ -533,9 +535,14 @@ describe('a build gets longer than a paragraph does', () => {
      * twenty seconds and the same margin.
      */
     const calls = actions.match(/model: MODEL_BUILD[^}]*}/g) ?? [];
-    expect(calls.length).toBeGreaterThanOrEqual(4);
+    expect(calls.length).toBeGreaterThanOrEqual(5);
     for (const call of calls) {
-      expect(call, `a build call with no timeout: ${call}`).toContain('timeoutMs: BUILD_TIMEOUT_MS');
+      /*
+       * The fill pass asks for min(BUILD_TIMEOUT_MS, whatever is left), because
+       * it is the second call in an action that has already spent time. So the
+       * check is that the constant is REACHED FOR, not that it is used bare.
+       */
+      expect(call, `a build call with no timeout: ${call}`).toContain('BUILD_TIMEOUT_MS');
     }
   });
 
@@ -782,5 +789,58 @@ describe('a build has room to think', () => {
   it('reads the stop reason defensively, without guessing one', () => {
     const fn = ai.slice(ai.indexOf('function readStopReason'));
     expect(fn.slice(0, 300)).toContain("typeof reason === 'string' ? reason : null");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * WHAT THE SCREEN SAYS WHILE IT WAITS.
+ *
+ * Andy, mid-build: "I think we can do something more interesting while the user
+ * is waiting, like a progress bar." Twelve pages is several minutes, and a
+ * static list with a spinner on one row gives nobody a sense of how long.
+ *
+ * The tempting version is a bar that moves on a timer, and it is a lie that gets
+ * found out: it finishes early and waits, or fills up and sits there, and either
+ * way somebody stops believing the next thing the screen tells them. So both
+ * numbers here come from pages that actually finished.
+ */
+describe('the build reports real progress', () => {
+  const screen = readFileSync(join(ROOT, 'components', 'sites', 'SiteBuilder.tsx'), 'utf8');
+  const css = readFileSync(join(ROOT, 'components', 'sites', 'sites.css'), 'utf8');
+
+  it('counts pages that finished, not time that passed', () => {
+    expect(screen).toContain("row.progress !== 'waiting' && row.progress !== 'building'");
+    expect(screen).toContain('Math.round((done / rows.length) * 100)');
+  });
+
+  it('says nothing about the time left until it has two pages to average', () => {
+    /*
+     * One page is not an average, and a wildly wrong first estimate is worse
+     * than none: told two minutes and made to wait six, somebody stops trusting
+     * the screen.
+     */
+    expect(screen).toContain('done < 2');
+  });
+
+  it('measures the average from real elapsed time', () => {
+    expect(screen).toContain('elapsed / done');
+    expect(screen).toContain('Date.now() - began');
+  });
+
+  it('carries the count in words as well as a bar', () => {
+    // A bar that sits still for thirty seconds while one page is written is
+    // correct rather than broken, and only the count makes that legible.
+    expect(screen).toContain('of ${rows.length} built');
+    expect(screen).toContain('role="progressbar"');
+    expect(screen).toContain('aria-valuenow={done}');
+  });
+
+  it('animates between real values and never ahead of one', () => {
+    const rule = /\.sv-progress__fill \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(rule).toContain('transition: width');
+    // And it stops for anybody who asked motion to stop.
+    expect(css).toContain('.sv-progress__fill { transition: none; }');
   });
 });
