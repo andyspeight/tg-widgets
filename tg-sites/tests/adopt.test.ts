@@ -737,3 +737,35 @@ describe('following a link in the editor preview', () => {
     expect(canvas).toContain("window.open(link.href, '_blank', 'noopener,noreferrer')");
   });
 });
+
+describe('the client brand reaches the editor, not just the canvas', () => {
+  const shell = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+  const chrome = readFileSync(resolve(__dirname, '..', 'components', 'editor', 'editor.css'), 'utf8');
+
+  it('puts the site theme on the editor root', () => {
+    /*
+     * Every colour swatch is a THEME TOKEN rather than a hex: picking "Accent"
+     * writes var(--tgs-accent) so the colour follows the client's brand and
+     * keeps following it. Right design, and it looked broken, because the chips
+     * draw themselves with the same token and the panel sits outside the canvas.
+     * Outside, the token falls back to globals.css :root, which is the default
+     * Travelgenix palette. An agency was shown a row of OUR colours, picked one,
+     * and watched THEIR colour appear on the card.
+     */
+    const root = shell.slice(shell.indexOf('className="ed-root"'));
+    expect(root.slice(0, 1600)).toContain('style={siteTheme}');
+  });
+
+  it('is safe there, because the chrome owns no site tokens', () => {
+    // The whole reason this can sit on the root rather than be threaded through
+    // every panel: the editor is --ed-* from top to bottom.
+    expect(chrome).not.toContain('--tgs-');
+  });
+
+  it('offers tokens rather than hexes, so a rebrand carries', () => {
+    const styles = readFileSync(resolve(__dirname, '..', 'lib', 'content', 'styles.ts'), 'utf8');
+    const list = styles.slice(styles.indexOf('COLOUR_SWATCHES'), styles.indexOf('HIGHLIGHT_SWATCHES'));
+    expect(list).not.toMatch(/value: '#/);
+    expect(list).toContain("var(--tgs-accent)");
+  });
+});
