@@ -1,0 +1,840 @@
+{
+  "note": "Original written climate summaries from the Cities and Regions table, captured before they were replaced by the 12-value numeric series. This prose existed nowhere else in the base: the Best Time to Visit field was already populated with different content on all 284 records, so there was no field to move it into. Restoring a record means writing these three strings back to the field ids below.",
+  "capturedAt": "2026-08-26",
+  "base": "appuZdlMJ7HKUt6qS",
+  "table": "tblTkKujdVZgWPAQe",
+  "fieldIds": {
+    "climateTemps": "fldxjOSYkYRPOZQgx",
+    "climateRainfall": "fldl296lX37f8stws",
+    "climateSeason": "fldHwvHjSwkpEgFa2"
+  },
+  "count": 118,
+  "records": [
+    {
+      "recordId": "recGlMAacqWXb1mf5",
+      "name": "Mexico City",
+      "climateTemps": "Spring-like year-round thanks to the 2,240 m altitude. Cool mornings (6-12°C in winter), warm afternoons (20-26°C). Big day-night temperature swings.",
+      "climateRainfall": "Around 700mm a year. Almost all of it falls May to October as afternoon thunderstorms. November to April is bone dry.",
+      "climateSeason": "March-May is the warmest and driest. June-September is rainy season — expect a downpour every afternoon. Avoid late October to early November if you want to skip Day of the Dead crowds."
+    },
+    {
+      "recordId": "recEr4e7bpB0mYvJW",
+      "name": "Milan",
+      "climateTemps": "Continental — cold, foggy winters (around 5°C in January) and hot, humid summers (28-30°C in July-August). Spring and autumn are mild and pleasant.",
+      "climateRainfall": "Around 1,000mm a year, fairly evenly distributed but heavier in spring and autumn. Sticky summer humidity, occasional winter fog.",
+      "climateSeason": "April-May and September-October are the sweet spots. July-August get hot, humid and sticky. December for Christmas markets and shopping; February-March for Fashion Week."
+    },
+    {
+      "recordId": "recHg9k8iEA2RZ8YQ",
+      "name": "Montego Bay",
+      "climateTemps": "Tropical and warm year-round, 24-30°C. Sea temperature 26-30°C. Trade winds keep it bearable in summer.",
+      "climateRainfall": "Around 1,400mm a year. Two wet peaks: October-December and mid-April to mid-June. Showers are usually short and tropical.",
+      "climateSeason": "December to April is the dry, peak season. May-June and November are quieter shoulders. Hurricane risk runs June-November, peaking August-October."
+    },
+    {
+      "recordId": "recRnQUjOyJ0FVTcy",
+      "name": "Montreal & Quebec City",
+      "climateTemps": "Cold, snowy winters from -14°C to -4°C in January with deep snow cover, mild springs, warm summers 20°C to 26°C, crisp colourful autumns",
+      "climateRainfall": "Around 1000mm rainfall plus around 210cm snow per year, fairly even spread with summer thunderstorms",
+      "climateSeason": "September to October for autumn colours, December to February for winter activities and Carnival, June to August for warm city breaks"
+    },
+    {
+      "recordId": "recJgyBjmFco6Xmab",
+      "name": "Mount Fuji & the Japanese Alps",
+      "climateTemps": "At Fuji's base 16°C to 28°C in summer, near freezing in winter; summit -10°C to 5°C even in summer; alpine villages cooler year-round",
+      "climateRainfall": "Around 1500mm to 2500mm depending on altitude, peaking June to early July in the rainy season",
+      "climateSeason": "April for cherry blossom around the Fuji Five Lakes, July to early September for climbing season, October to November for autumn colours, January to February for snow and clear Fuji views"
+    },
+    {
+      "recordId": "recG6EF5jRSYvkgHl",
+      "name": "Mumbai",
+      "climateTemps": "Tropical year-round, 18°C to 32°C with high humidity, hot dry March to May, monsoon-cooled June to September",
+      "climateRainfall": "Around 2200mm with a dramatic monsoon June to September, peak rainfall in July",
+      "climateSeason": "November to February for the cooler dry season, the only really comfortable window"
+    },
+    {
+      "recordId": "rechQ6ZGQ1I8pb0bz",
+      "name": "Munich",
+      "climateTemps": "Cold winters from -3°C to 4°C in January with regular snow, warm summers 14°C to 24°C, mild springs and autumns",
+      "climateRainfall": "Around 950mm spread across the year, with the heaviest months June and July",
+      "climateSeason": "Late September to early October for Oktoberfest, May to September for beer gardens, December for Christmas markets"
+    },
+    {
+      "recordId": "recVfGjCmR4kmNYRP",
+      "name": "Musandam Peninsula",
+      "climateTemps": "Hot dry summers from 35°C to 45°C May to September, warm pleasant winters 22°C to 30°C October to April",
+      "climateRainfall": "Less than 100mm a year, almost entirely in winter",
+      "climateSeason": "October to April for comfortable temperatures and calm seas, the only really pleasant window"
+    },
+    {
+      "recordId": "recVoRWa2XH02NO7Q",
+      "name": "Muscat & the Coast",
+      "climateTemps": "Hot dry summers from 35°C to 45°C May to September, warm pleasant winters 22°C to 30°C October to April",
+      "climateRainfall": "Around 100mm a year, almost entirely December to March",
+      "climateSeason": "October to April for comfortable temperatures, November to March for the wadis at their fullest, October to May for snorkelling at the Daymaniyats"
+    },
+    {
+      "recordId": "recqJ0urVF6fqux46",
+      "name": "Naples & the Bay",
+      "climateTemps": "Mediterranean. Mild winters from 6°C to 13°C, warm springs, hot summers 21°C to 31°C, pleasant autumns",
+      "climateRainfall": "Around 900mm spread across the year, wettest October to December, dry summers",
+      "climateSeason": "March to June and September to November for warm sunny days and manageable crowds, year-round for culture and food"
+    },
+    {
+      "recordId": "recCACxlnvGp4KHq7",
+      "name": "Nashville & Memphis",
+      "climateTemps": "Cold winters from -2°C to 9°C in January, hot humid summers 21°C to 32°C, mild springs and autumns",
+      "climateRainfall": "Around 1300mm spread across the year, wettest March to May",
+      "climateSeason": "March to May and September to November for comfortable temperatures, June for CMA Fest in Nashville, May for Memphis in May barbecue festival"
+    },
+    {
+      "recordId": "recLoXbKZqfS7CJ9G",
+      "name": "Nassau & Paradise Island",
+      "climateTemps": "Tropical year-round. Cooler dry season 22°C to 27°C November to April, warmer humid wet season 26°C to 32°C May to October",
+      "climateRainfall": "Around 1400mm with a wet season May to October, peak rainfall June and August",
+      "climateSeason": "November to April for the driest, most comfortable conditions, June to November is hurricane season"
+    },
+    {
+      "recordId": "recDCTXwrMx4FVm0Y",
+      "name": "Negril",
+      "climateTemps": "Tropical year-round. Cooler dry season 22°C to 30°C December to April, warmer humid wet season 24°C to 32°C May to November",
+      "climateRainfall": "Around 1300mm a year, drier than the rest of Jamaica, wettest May to October",
+      "climateSeason": "December to April for the driest sunniest weather, year-round for warm seas and reliable sunsets, June to November is hurricane season but cheaper"
+    },
+    {
+      "recordId": "rec6afempFIFE0zY0",
+      "name": "Nevis",
+      "climateTemps": "Tropical year-round. Cooler dry season 23°C to 28°C December to April, warmer humid wet season 25°C to 31°C May to November",
+      "climateRainfall": "Around 1100mm a year with a wetter season May to November, the west coast (Pinney's) is sheltered",
+      "climateSeason": "December to April for the driest weather, year-round for warm seas, June to November is hurricane season"
+    },
+    {
+      "recordId": "recyXOuGd9ZefJbHH",
+      "name": "New Orleans",
+      "climateTemps": "Subtropical. Mild winters from 8°C to 18°C, hot humid summers 24°C to 33°C, very pleasant springs and autumns",
+      "climateRainfall": "Around 1600mm a year, fairly evenly spread but with summer thunderstorms, hurricane season June to November",
+      "climateSeason": "February to May and October to November for comfortable temperatures, late February or early March for Mardi Gras, late April to early May for Jazz Fest"
+    },
+    {
+      "recordId": "rec8XgB2MjWBagWjM",
+      "name": "New York",
+      "climateTemps": "Cold winters from -3°C to 4°C in January with snow possible, hot humid summers 21°C to 30°C, beautiful springs and autumns",
+      "climateRainfall": "Around 1200mm spread fairly evenly across the year, with summer thunderstorms and occasional winter snowstorms",
+      "climateSeason": "April to June and September to November for ideal weather, late November to early January for the Christmas and New Year window, year-round for everything else"
+    },
+    {
+      "recordId": "recjMYXgYID4Iz7vw",
+      "name": "Normandy & Brittany",
+      "climateTemps": "Oceanic, milder than the rest of France. Cool winters 3°C to 9°C, mild summers 14°C to 22°C, wet most of the year",
+      "climateRainfall": "Around 800mm to 1100mm spread across the year, slightly wetter than further south, fairly mild and damp climate",
+      "climateSeason": "May to September for warm dry weather, June for the D-Day anniversary, year-round for the wild Atlantic coast and Mont Saint-Michel"
+    },
+    {
+      "recordId": "recRcGMwyJCYyNh9Q",
+      "name": "North & South Male Atolls",
+      "climateTemps": "Tropical year-round, 26°C to 31°C all year. Sea temperature 27°C to 30°C",
+      "climateRainfall": "Around 2000mm a year, with the wet season May to October bringing afternoon showers",
+      "climateSeason": "November to April for the dry season with the calmest seas and clearest visibility, May to October is wetter but cheaper"
+    },
+    {
+      "recordId": "recsY053wMDthYZ90",
+      "name": "North Coast & Grand Baie",
+      "climateTemps": "Tropical year-round. Cooler dry season 19°C to 26°C May to November, warmer humid wet season 23°C to 30°C December to April",
+      "climateRainfall": "Around 1100mm a year on the north coast, drier than the central plateau, wettest December to March",
+      "climateSeason": "May to November for the cooler dry season, the most comfortable time to visit, December to April is warmer and wetter with cyclone risk"
+    },
+    {
+      "recordId": "recJbYD4qvUTLM1Fb",
+      "name": "Northern Ireland & the Causeway Coast",
+      "climateTemps": "Cool oceanic. Mild winters from 2°C to 8°C, mild summers 11°C to 19°C, fresh and frequently changeable",
+      "climateRainfall": "Around 950mm to 1200mm spread fairly evenly, with wetter winters and slightly drier summers",
+      "climateSeason": "May to September for the warmest, driest weather, year-round for dramatic coastal scenery and Belfast's culture"
+    },
+    {
+      "recordId": "recxDnUEOfoRxhwWg",
+      "name": "Norwegian Ski Resorts",
+      "climateTemps": "Cold winters from -10°C to -2°C in resorts December to March, snow reliable through April, brief mild summers",
+      "climateRainfall": "Around 800mm to 1200mm a year depending on resort, falling mostly as snow December to April",
+      "climateSeason": "December to April for the ski season, January to March for the most reliable snow and coldest temperatures, Easter is peak Norwegian ski week"
+    },
+    {
+      "recordId": "recOmDNzKrBFPm9Cg",
+      "name": "Nova Scotia & the Maritimes",
+      "climateTemps": "Cool maritime climate. Cold winters from -8°C to 0°C with snow, mild summers 14°C to 24°C, beautiful crisp autumns",
+      "climateRainfall": "Around 1400mm to 1500mm a year, fairly evenly spread, with snow possible November to April",
+      "climateSeason": "June to October for the Cabot Trail and warm weather, late September to mid October for spectacular autumn foliage, mid October for the Celtic Colours festival on Cape Breton"
+    },
+    {
+      "recordId": "rech3dMKy6rp4pfei",
+      "name": "Oaxaca",
+      "climateTemps": "Mild year-round at altitude. Cool nights 8°C to 12°C, warm days 22°C to 30°C, comfortable highland climate",
+      "climateRainfall": "Around 700mm a year, almost all between June and September, otherwise dry and sunny",
+      "climateSeason": "October to November for Day of the Dead, December to March for the dry season, July for the Guelaguetza festival"
+    },
+    {
+      "recordId": "recoFUO8l1DpNrQdj",
+      "name": "Ocho Rios & the North Coast",
+      "climateTemps": "Tropical year-round. Cooler dry season 22°C to 29°C December to April, warmer humid wet season 24°C to 32°C May to November",
+      "climateRainfall": "Around 2000mm a year, wetter than the rest of Jamaica due to the Blue Mountains behind, peaks May and October",
+      "climateSeason": "December to April for the driest weather, year-round for the falls and warm seas, June to November is hurricane season but the falls are at their fullest"
+    },
+    {
+      "recordId": "recCginP8aOIKUu8N",
+      "name": "Okavango Delta & Chobe",
+      "climateTemps": "Cool dry winters from 5°C to 25°C May to August, hot wet summers 18°C to 35°C November to March",
+      "climateRainfall": "Around 450mm a year, almost all between November and March, otherwise dry",
+      "climateSeason": "May to October dry season for the best wildlife viewing, June to August for the peak Delta flood, November to April green season is cheaper and best for birds"
+    },
+    {
+      "recordId": "recKxPSyUGUjQgubv",
+      "name": "Oslo",
+      "climateTemps": "Cool oceanic. Cold winters from -7°C to -1°C with snow, mild summers 13°C to 22°C, long bright June and July days",
+      "climateRainfall": "Around 800mm spread across the year, with snow December to March and afternoon showers July and August",
+      "climateSeason": "May to September for warm weather and outdoor dining, December for Christmas markets and snow, year-round for the museums and food scene"
+    },
+    {
+      "recordId": "recwGa0H48Xa800MJ",
+      "name": "Ottawa",
+      "climateTemps": "Continental. Bitter winters from -15°C to -6°C in January with deep snow, hot humid summers 16°C to 27°C, beautiful brief springs and autumns",
+      "climateRainfall": "Around 950mm a year split between rain and around 220cm of snow, fairly evenly spread",
+      "climateSeason": "June to September for summer festivals and the canal pathway, late January to early March for skating on the canal and the Winterlude festival, May for the Tulip Festival"
+    },
+    {
+      "recordId": "recD1l6tiUV6KZ93k",
+      "name": "Palawan & El Nido",
+      "climateTemps": "Tropical year-round, 25°C to 32°C, water temperature 27°C to 30°C",
+      "climateRainfall": "Around 2200mm a year with most rainfall June to October, dry sunny weather November to May",
+      "climateSeason": "December to May for the dry season with calm seas and consistent boat tours, June to October is rainy with rougher seas"
+    },
+    {
+      "recordId": "recXh9euN5HK1JH8J",
+      "name": "Palm Beach & Eagle Beach",
+      "climateTemps": "Tropical year-round, 26°C to 32°C with constant trade winds keeping it comfortable, sea temperature 27°C to 29°C",
+      "climateRainfall": "Around 450mm a year, very dry, with most rainfall in October and November",
+      "climateSeason": "Year-round, the island is outside the hurricane belt with 300 plus days of sunshine a year, December to April is the cooler peak season"
+    },
+    {
+      "recordId": "recFpD08NwqVBJRzg",
+      "name": "Panama City & the Canal",
+      "climateTemps": "Tropical year-round, 24°C to 32°C with high humidity, slightly cooler December to March",
+      "climateRainfall": "Around 1900mm a year with a clear wet season May to November and dry season December to April",
+      "climateSeason": "December to April for the dry season, May to November is rainy with afternoon downpours but lush green countryside"
+    },
+    {
+      "recordId": "recQlhASJ6zXK7rAB",
+      "name": "Paris",
+      "climateTemps": "Cool oceanic. Mild winters from 3°C to 8°C, warm summers 16°C to 25°C, beautiful springs and autumns",
+      "climateRainfall": "Around 640mm spread across the year, fairly evenly with slightly wetter May and October",
+      "climateSeason": "April to June and September to October for ideal weather, December for Christmas markets and lights, year-round city break with quieter low-season months in February and November"
+    },
+    {
+      "recordId": "receBXNBEZq49maJ4",
+      "name": "Paros",
+      "climateTemps": "Mediterranean. Mild winters from 9°C to 15°C, hot dry summers 22°C to 31°C, the meltemi wind keeps July and August comfortable",
+      "climateRainfall": "Around 350mm a year, almost all between November and March, summer is dry and sunny",
+      "climateSeason": "May to October for warm sunny weather, June and September for the sweet spot of warm seas and fewer crowds, July and August for windsurfing and full nightlife"
+    },
+    {
+      "recordId": "recIQEw4yKreAVzfc",
+      "name": "Patagonia, Mendoza & the Andes",
+      "climateTemps": "Patagonia: cool windy summers 5°C to 15°C, snowy winters. Mendoza: dry continental, 28°C to 33°C summer, 5°C to 16°C winter. Ushuaia: chilly even in summer, 5°C to 12°C",
+      "climateRainfall": "Patagonia 200mm to 800mm depending on location, Mendoza 200mm a year (semi-desert irrigated by Andean snowmelt)",
+      "climateSeason": "November to March for Patagonia in the southern summer, March to May for the Mendoza wine harvest, September to November for spring blossom in the vineyards"
+    },
+    {
+      "recordId": "recxLaAU8AqLO3UTN",
+      "name": "Penang",
+      "climateTemps": "Highs 30-32°C year-round, lows 23-25°C. Penang sits just north of the equator, so the temperature barely shifts month to month — what changes is the rain.",
+      "climateRainfall": "Wettest months are September to November (over 200mm in October), driest are January and February. Even in dry months expect short tropical downpours — they pass quickly.",
+      "climateSeason": "December to March is the most settled stretch — slightly less rain, lower humidity, busier streets. June to August is hot and humid with afternoon storms. The Penang International Food Festival in April is a highlight."
+    },
+    {
+      "recordId": "recOb26yIndpa4p8I",
+      "name": "Petra & the Dead Sea",
+      "climateTemps": "Petra summers (Jun-Aug) hit 32-35°C, winters (Dec-Feb) drop to 13-14°C with cold nights near freezing. The Dead Sea, 1,400m lower, is hotter year-round — 32°C in winter, 39°C+ in high summer.",
+      "climateRainfall": "Most rain falls Dec-Feb — modest in Petra (Wadi Musa around 30-50mm/month) and almost nothing at the Dead Sea. Summer is bone dry. Occasional flash floods can affect the Siq in winter.",
+      "climateSeason": "March-May and September-November are the sweet spots — warm days, cool nights, comfortable for hiking Petra. June-August is brutally hot at the Dead Sea but manageable in Petra. December-February gets cold at altitude — bring layers."
+    },
+    {
+      "recordId": "rec6ailoRmDB2S7nM",
+      "name": "Phnom Penh",
+      "climateTemps": "Hot year-round. Highs 33°C in the cool season (Dec-Jan) up to 37°C in April. Nights stay warm at 23-27°C. Phnom Penh is genuinely tropical — there's no cool month, just less hot.",
+      "climateRainfall": "Wet season May to October with the heaviest rain in September (around 250mm). Dry season November to April — February averages just 12mm. Showers in wet season are usually short and dramatic, not all-day rain.",
+      "climateSeason": "November to March is the prime window — dry, warm, manageable humidity. April-May is uncomfortably hot before the rains break. Khmer New Year mid-April is a major holiday but the heat is brutal."
+    },
+    {
+      "recordId": "recd7bHm9Wkb7Yy9k",
+      "name": "Phu Quoc Island",
+      "climateTemps": "Hot year-round. Highs 28-32°C with little seasonal variation — April and May are hottest at up to 35°C. Lows 23-25°C. Sea temperature 27-30°C all year.",
+      "climateRainfall": "Driest months January-March (under 50mm). Wettest July-September with August often topping 400mm. The dry season is genuinely dry; the wet season can mean continuous rain.",
+      "climateSeason": "November to April is the dry season — calm seas, blue skies, ideal for the west coast beaches. May to October is the southwest monsoon with frequent heavy showers. East coast beaches (Sao, Khem) are sheltered during the wet season."
+    },
+    {
+      "recordId": "recIWqmzPK5sGg8LJ",
+      "name": "Phuket & the Andaman Coast",
+      "climateTemps": "Hot year-round. Highs 30-34°C, lows 24-27°C. April is the hottest month, January-February the coolest. Sea temperature 28-30°C all year — always warm.",
+      "climateRainfall": "Wet season May to October peaks in September with around 320mm. Driest is February with about 35mm. Even in wet season showers are usually afternoon storms, not all-day rain.",
+      "climateSeason": "November to April is the dry, cooler season — ideal weather and the busiest months. May to October is monsoon — cheaper and quieter, but with daily storms (often short and dramatic) and rougher seas."
+    },
+    {
+      "recordId": "recKtxAbtrPGfxdEl",
+      "name": "Porto & the Douro",
+      "climateTemps": "Cooler than Lisbon. Summer highs 24-26°C, lows 14-16°C. Winter highs 13-15°C, lows 5-8°C. Atlantic breeze keeps it from getting really hot — even in August it rarely tops 30°C.",
+      "climateRainfall": "Driest months June-August (around 15-25mm). Wettest October-February (90-130mm). Porto is noticeably wetter than Lisbon — atlantic weather, not Mediterranean.",
+      "climateSeason": "May, June and September are the sweet spots — warm, dry, manageable crowds. July-August is hot and busy. Sao Joao Festival (23-24 June) is unmissable. Winter is mild but wet — the city has its own moody charm in the rain."
+    },
+    {
+      "recordId": "recewZQarR0RjpErG",
+      "name": "Prague",
+      "climateTemps": "Continental climate. Summer highs 24-26°C, lows 13-15°C. Winter highs 1-3°C, lows -3 to -5°C with snow likely. Spring and autumn are mild. Sharp temperature swings between day and night.",
+      "climateRainfall": "Wettest months May, June, July (around 70-80mm). Driest February-April (around 25-35mm). Snow possible December-February. Summer thunderstorms common.",
+      "climateSeason": "May, June and September are the sweet spots — warm days, manageable crowds. December is magical for Christmas markets but very busy. July-August is hot and packed. January-February is cold but quiet and atmospheric."
+    },
+    {
+      "recordId": "rec9j7KP1235Tt2Q4",
+      "name": "Praslin",
+      "climateTemps": "Hot and humid year-round. Highs 28-31°C, lows 24-25°C. Sea temperature 27-29°C all year. Two seasons defined by wind direction rather than temperature.",
+      "climateRainfall": "Wettest months December-February (around 250-300mm with northwest monsoon). Driest May-September (around 60-100mm). Even in the wet season, rain is usually short tropical bursts.",
+      "climateSeason": "April to May and October to November are calmest — light winds, clear seas. Southeast trade winds (May-Sep) bring choppier water and seaweed to east-facing beaches. Northwest winds (Dec-Mar) affect west coast. There is no bad time — it's a year-round destination."
+    },
+    {
+      "recordId": "recVAm0lcFFTQC1b0",
+      "name": "Provence",
+      "climateTemps": "Mediterranean climate. Summer highs 28-32°C, lows 16-20°C — hot but lower humidity than coastal Spain. Winter highs 11-14°C, lows 2-5°C. The mistral wind blows cold and dry from the north — around 100 days a year.",
+      "climateRainfall": "Driest months June, July, August (around 15-25mm). Wettest October and November (90-100mm). Provence is one of the sunniest parts of France — around 300 sunny days a year.",
+      "climateSeason": "May to early July is the best of all worlds: warm days, cooler nights, lavender at peak. September is also superb — wine harvest, fewer crowds, perfect light. August is hot, busy and expensive. Winter is gentle but many smaller restaurants close."
+    },
+    {
+      "recordId": "recMEKgqWAAnouXy9",
+      "name": "Providenciales",
+      "climateTemps": "Hot and sunny year-round. Highs 28-32°C, lows 22-26°C. Sea temperature 26-29°C. Trade winds keep humidity manageable even in summer.",
+      "climateRainfall": "Driest months February-April (around 50-70mm). Wettest October-November (130-150mm). Even in wet season, rainfall is usually short tropical bursts rather than all-day rain.",
+      "climateSeason": "December to April is the prime window — sunny, dry, comfortable. June to November is hurricane season with higher humidity and risk of named storms (peak August-October). May and November are quieter shoulder months with good weather."
+    },
+    {
+      "recordId": "recBj4W8vqnG95qWv",
+      "name": "Puerto Vallarta",
+      "climateTemps": "Hot tropical year-round. Highs 28-32°C, lows 18-25°C. Hottest July-September. December-February is balmier with cooler evenings. Sea temperature 24-29°C.",
+      "climateRainfall": "Bone dry November to May (less than 25mm/month). Wet season June-October peaks in August-September with around 220-250mm. Wet-season showers are usually short, dramatic late afternoon storms.",
+      "climateSeason": "November to April is the prime season — dry, sunny, lower humidity, prime whale-watching (Dec-Mar). May and June are hot but quieter. July-October is wet season with afternoon storms and lush green hills."
+    },
+    {
+      "recordId": "reclZj0ppaeNtZjvQ",
+      "name": "Puglia",
+      "climateTemps": "Mediterranean climate. Summer highs 30-33°C, lows 18-22°C. Winter highs 12-14°C, lows 5-7°C. Sea temperature peaks at 26°C in August.",
+      "climateRainfall": "Driest June-August (around 15-30mm). Wettest October-December (around 70-90mm). Long dry summers, mild rainy winters.",
+      "climateSeason": "May, June and September are the sweet spots — hot enough for the sea, not unbearable, manageable crowds. July-August is hot and busy. October is harvest season — olive groves and vineyards in their element. Many restaurants close mid-November to February."
+    },
+    {
+      "recordId": "reccaY6gzayFcKzpd",
+      "name": "Punta Cana & Bavaro",
+      "climateTemps": "Hot and tropical year-round. Highs 28-32°C, lows 20-23°C. Sea temperature 26-29°C all year. Trade winds keep humidity manageable.",
+      "climateRainfall": "Wettest May-October (around 100-180mm/month) with September-October bringing peak hurricane risk. Driest February-March (around 50mm). Rain in wet season usually short, dramatic afternoon bursts.",
+      "climateSeason": "December to April is the peak window — dry, sunny, perfect temperatures, also the most expensive. May, June and November are good shoulder months. June-November is hurricane season; rare to be hit but worth checking forecasts. October has the most rain."
+    },
+    {
+      "recordId": "recBD8eUYIJTog9RX",
+      "name": "Queenstown & the Southern Lakes",
+      "climateTemps": "Alpine, four distinct seasons. Summer (Dec-Feb) highs 22-25°C, lows 10-12°C. Winter (Jun-Aug) highs 7-9°C, lows -2 to 1°C with snow likely in town. Spring and autumn changeable — layers always needed.",
+      "climateRainfall": "Modest year-round (60-90mm/month) with no big dry season. December-February sees occasional thunderstorms; winter brings snow at altitude. Drier than west coast Fiordland.",
+      "climateSeason": "December to February (NZ summer) for hiking, lakes and long daylight. June to August for skiing. Spring (Sep-Nov) and autumn (Mar-May) are quieter and gorgeous. Avoid Christmas-New Year and Easter for crowds and prices."
+    },
+    {
+      "recordId": "recwfYvG4chQJkk6K",
+      "name": "Quito & the Highlands",
+      "climateTemps": "City of Eternal Spring at 2,850m. Daytime highs 18-21°C year-round, nighttime lows 8-11°C. UV is intense at altitude even when overcast — sun cream essential. Take it easy on day one for the altitude.",
+      "climateRainfall": "Drier June-September (around 30-50mm/month). Wetter October-May with peaks April (~150mm). Mostly afternoon thunderstorms rather than all-day rain.",
+      "climateSeason": "June to September is the dry season — sunny days, cool nights, the best window for hiking and clear views of the volcanoes. October to May is wetter (afternoon rain) but lush. Quito sits on the equator at altitude, so seasons are about rain rather than temperature."
+    },
+    {
+      "recordId": "recfcgs75dj70cJi2",
+      "name": "Rajasthan & the Golden Triangle",
+      "climateTemps": "Desert and semi-desert climate. Winter (November-February) is comfortable at 18-28°C in the day and 5-15°C at night. Summer (April-June) is brutally hot (38-45°C+). The monsoon (July-September) is hot and humid at 28-35°C with afternoon storms. Plan around the cool dry season.",
+      "climateRainfall": "Rajasthan is one of India's driest regions. The monsoon (July-September) brings most of the annual rainfall but is much lighter than southern India; the desert west sees almost no rain at all. October to June is essentially dry.",
+      "climateSeason": "October to March is the only sensible season — cool, dry and clear, with daytime temperatures of 18-28°C. November to February is the peak. April and May are extremely hot (40°C+, often 45°C+). The monsoon (July-September) brings rain, humidity and lower hotel rates but reliable touring conditions return in October."
+    },
+    {
+      "recordId": "rec4nGNbMcQKzjvsf",
+      "name": "Ras Al Khaimah",
+      "climateTemps": "Subtropical desert. Winter (November-March) is comfortable at 22-30°C with cool nights (15-20°C). Summer (April-October) is extreme — 38-48°C with high humidity on the coast. Sea temperature stays at 22-32°C year-round (warmest in summer).",
+      "climateRainfall": "RAK sees almost no rain. The little it gets falls in brief winter showers between November and March. Summer is bone dry.",
+      "climateSeason": "October to April is the comfortable season — 22-30°C, low humidity, sunshine almost guaranteed. December to February is peak (and busy with European winter sun seekers). May to September is brutally hot (38-48°C) and humid — great resort discounts but limited outdoor enjoyment. Jebel Jais runs 10-15°C cooler than the coast year-round."
+    },
+    {
+      "recordId": "reccwL71UTV2g7fNk",
+      "name": "Reykjavik & the Golden Circle",
+      "climateTemps": "Cool oceanic climate. Summer (June-August) is mild at 10-15°C with 20+ hours of daylight. Winter (December-February) is cold at -2 to 4°C, with 4-6 hours of daylight, snow and the Northern Lights. Spring and autumn run cool at 4-10°C. Sea winds make every season feel colder than the thermometer suggests.",
+      "climateRainfall": "Iceland's weather is famously unpredictable. October-February is the wettest, with rain, sleet and snow alternating. Summer is drier but still likely to see at least one wet day. Pack layers and waterproofs in every season.",
+      "climateSeason": "Year-round. Summer (June-August) brings 24-hour daylight, the warmest temperatures (10-15°C) and the easiest road conditions. Winter (November-March) brings the Northern Lights, the lava-fields-in-snow scenery, the Christmas markets and lower visitor numbers (alongside short days, cold and the occasional storm). September-October and April-May offer fewer crowds, decent weather and a chance of aurora."
+    },
+    {
+      "recordId": "rec3oAvrFBR4eqYnI",
+      "name": "Rhodes",
+      "climateTemps": "Long, hot summers and mild winters. June to September runs 28-35°C with low humidity and a near-guarantee of sunshine; the meltemi wind cools the north and west coasts. April-May and October are 18-26°C and ideal for touring. Winter (December-February) is mild at 10-16°C with the lowest visitor numbers.",
+      "climateRainfall": "Rhodes is one of the driest Greek islands. Summer is essentially rain-free (May-October). Winter (December-March) sees occasional showers but never the prolonged rainfall of mainland Greece.",
+      "climateSeason": "Mid-May to early October is the main season — reliably warm, sunny and swimmable. June and September are arguably the sweet spots (24-30°C, fewer crowds than peak July-August at 32-38°C). The shoulder months (April and October-early November) are still pleasant at 18-24°C and ideal for sightseeing."
+    },
+    {
+      "recordId": "recnvWypguTM5pjtV",
+      "name": "Rio de Janeiro",
+      "climateTemps": "Tropical climate. Summer (December-March) is hot and humid at 28-35°C, often hotter; the beach is the only sensible place to be. Winter (May-September) is mild at 20-26°C with cooler evenings — still beach weather most days but less stifling for sightseeing. Sea temperature stays at 22-26°C all year.",
+      "climateRainfall": "Rio is rainy in summer (December-March) with dramatic afternoon thunderstorms. The cooler months (May-September) are mostly dry. Even in the rainy season, downpours are typically short and intense rather than full-day grey.",
+      "climateSeason": "December to March is the Brazilian summer — hottest, busiest, full beaches and Carnival. May to September is the cooler dry season (great for hiking and sightseeing). October-November and April are the shoulder months. Carnival (February or March) is the cultural peak; New Year's Eve on Copacabana Beach (with two million revellers in white) is the other big set-piece."
+    },
+    {
+      "recordId": "recG0WfvAjmlFZ0ys",
+      "name": "Rodney Bay & the North",
+      "climateTemps": "Tropical, with little annual variation. Daytime highs sit at 27-31°C all year, dropping to 22-25°C overnight. Sea temperature stays at 26-28°C every month. The trade winds keep evenings comfortable.",
+      "climateRainfall": "St Lucia's wet season is June to November (with September the wettest); short heavy showers rather than full-day rain. December to May is reliably dry. The north coast is sheltered from the Atlantic swell that hits the east.",
+      "climateSeason": "December to April is the dry, sunny peak season — 27-30°C, low humidity, calm seas. June to November is hurricane season; direct hits are rare but September-October sees the most rain. May and November are quieter shoulder months. The Saint Lucia Jazz Festival (May) is the calendar highlight."
+    },
+    {
+      "recordId": "recjCXHufqq2YnKOx",
+      "name": "Rome",
+      "climateTemps": "Mediterranean climate. Summer (June-August) is hot and dry at 28-35°C; the city empties in August as Romans head for the coast. Spring and autumn are warm at 18-25°C and ideal for sightseeing. Winter (December-February) is mild at 8-14°C with occasional rain.",
+      "climateRainfall": "Rome's wettest months are October to December (occasional heavy showers) and again in March. Summer (June-August) is largely dry. Winter is mild but damp. Even in the wet months, full-day rain is rare — most precipitation is brief and dramatic.",
+      "climateSeason": "April to June and September to October are the sweet spots — 20-28°C, comfortable for walking and reasonably uncrowded. July and August are very hot (32-38°C) and packed. Winter (November-February) is mild at 8-14°C — quiet, atmospheric and significantly cheaper. Book Vatican and Colosseum tickets ahead in any season; queues at the gate can be hours long."
+    },
+    {
+      "recordId": "recRcvfIQdXy2pZgk",
+      "name": "Roseau & the Volcanic South",
+      "climateTemps": "Tropical, with little annual variation. Daytime highs sit at 28-31°C all year on the coast, dropping to 22-24°C overnight. The highlands run 5-8°C cooler. Sea temperature stays at 26-28°C every month.",
+      "climateRainfall": "Dominica is the rainiest of the Eastern Caribbean islands — the central highlands receive over 7,500mm a year and feed the rivers and waterfalls that define the island. The wet season (June-November) sees daily downpours, especially in the highlands. The dry season (December-May) is much sunnier but rain is possible any day of the year.",
+      "climateSeason": "December to May is the dry, sunny season — the best time for hiking the Boiling Lake. February to April is the driest. June to November is the wet season; trails get muddy and the Boiling Lake hike can be temporarily closed after heavy rain. Whale watching is best November to March."
+    },
+    {
+      "recordId": "rec2y2nHaoqlIGP04",
+      "name": "Rotorua & the Central Plateau",
+      "climateTemps": "Temperate climate. Summer (December-February) is warm at 20-26°C; spring and autumn run 12-18°C; winter (June-August) is cool at 5-12°C with snow on Mount Ruapehu. The Central Plateau is significantly colder than Rotorua — add layers if you're heading to Tongariro in any season.",
+      "climateRainfall": "Rotorua sees moderate rainfall spread fairly evenly through the year. Summer is drier and sunnier; winter brings the most rain and (at altitude) snow on the volcanoes.",
+      "climateSeason": "Year-round destination. Summer (December-February) at 20-26°C is best for the Tongariro Crossing and lake activities — long days, settled weather. Autumn (March-May) brings golden colour to the redwoods and is quieter. Winter (June-August) at 0-12°C — ski season at Whakapapa and Tuūroa on Ruapehu, and the geothermal pools are at their most atmospheric in the cold air. Spring (September-November) is unpredictable but quieter."
+    },
+    {
+      "recordId": "recwywZ44bfnz27Q3",
+      "name": "Sal",
+      "climateTemps": "Subtropical desert. Daytime highs sit at 22-32°C all year, dropping to 18-25°C overnight. Sea temperature stays at 22-26°C every month. The trade winds (November-May) make it feel cooler than the thermometer suggests; July-October is calmer and warmer.",
+      "climateRainfall": "Sal is one of the driest islands in Cape Verde — less than 100mm of rainfall annually, almost all of it in brief showers between August and October. Most months see no rain at all.",
+      "climateSeason": "Year-round destination, with daytime temperatures barely shifting. November to June is the dry, sunny season — 22-28°C, low humidity, the trade winds at their strongest (best for kitesurfing). July to October is slightly warmer and more humid (25-32°C) — still mostly sunny but with the occasional brief downpour. Turtle nesting runs June to October, hatching August to November."
+    },
+    {
+      "recordId": "recYNswzsExcPim3g",
+      "name": "Salalah & the Dhofar Coast",
+      "climateTemps": "Two distinct climates. Khareef season (late June to early September) is cool and misty at 20-25°C with high humidity and drizzle. The dry season (October to May) is warm and sunny at 25-32°C, with low humidity and clear skies. The sea stays at 25-28°C year-round.",
+      "climateRainfall": "Salalah is one of the few places on the Arabian Peninsula with significant rainfall — almost all during the khareef monsoon (late June to early September), as cool drizzle and mist rather than tropical downpours. The dry season (October to May) is essentially rain-free.",
+      "climateSeason": "Two distinct seasons. The khareef monsoon (late June to early September) is cool, misty and green at 20-25°C — unique on the Arabian Peninsula. The dry season (October to May) is warm, sunny and excellent for beach days at 25-32°C. UK visitors are typically best served October to March; Gulf visitors come for the khareef. The sea is warm year-round."
+    },
+    {
+      "recordId": "recjxppGXbRCF0bf2",
+      "name": "Salzburg & the Lakes",
+      "climateTemps": "Continental climate. Summer (June-August) is warm at 20-25°C with occasional 30°C+ heatwaves. Spring and autumn run 10-18°C and are reliably comfortable for sightseeing. Winter (December-February) is cold at -3 to 4°C with snow common; the city looks magical under a snowfall.",
+      "climateRainfall": "Salzburg sees moderate rainfall spread throughout the year, with the wettest months in summer (June-August) when afternoon thunderstorms are common. Winter brings reliable snow.",
+      "climateSeason": "Year-round, with three different angles. Late spring to early autumn (May-September) at 18-25°C is best for the lakes, walking and the Salzburg Festival in July-August. December for the Christmas markets and the snowy fortress views (cold, atmospheric, 0-5°C). Spring and autumn are quieter and good for sightseeing."
+    },
+    {
+      "recordId": "recc44LAorRP3XZxI",
+      "name": "Siem Reap & Angkor",
+      "climateTemps": "Tropical climate with consistent warmth year-round. Daytime highs range from 32°C in December to 36°C in April. Nights cool to around 22°C in the dry season and 26°C through the rains.",
+      "climateRainfall": "Annual rainfall around 1,470mm. The dry season (November to April) is mostly clear, with under 30mm a month. The wet season (May to October) brings frequent afternoon downpours, peaking in September at around 286mm.",
+      "climateSeason": "November to February for cool, dry weather and the best temple-viewing conditions. Late September and October offer dramatic green landscapes and fewer crowds. April is the hottest month — temples become demanding from late morning onward."
+    },
+    {
+      "recordId": "recvCnLPDhIsLXwL7",
+      "name": "Sihanoukville, Koh Rong & the Coast",
+      "climateTemps": "Tropical monsoon climate, warm year-round. Daytime highs sit between 31°C and 33°C, with nights between 23°C and 26°C. Sea temperatures hold at 28–30°C all year.",
+      "climateRainfall": "One of the wettest spots in Cambodia, with around 3,300mm a year. The dry season (November to March) sees under 50mm a month and long sunny days. The wet season (May to October) is heavy, peaking in July and August at over 500mm.",
+      "climateSeason": "November to March for clear skies, calm seas and the best beach conditions. April and early May are hot but still mostly dry. Avoid June to September unless you're prepared for daily downpours."
+    },
+    {
+      "recordId": "rec34d7t6xqZOUMWU",
+      "name": "Sintra & the Lisbon Coast",
+      "climateTemps": "Mild Mediterranean microclimate, cooler and damper than nearby Lisbon thanks to the Serra de Sintra hills catching Atlantic moisture. Summers average 23°C with cool nights around 16°C. Winters are mild at 14–15°C with cold nights near 8°C.",
+      "climateRainfall": "Around 640mm a year, with most rain falling between October and April. November is wettest at around 96mm. July is driest, often with only one or two rainy days. Mountain areas can receive up to 1,000mm — the famous Sintra mist is part of the place's appeal.",
+      "climateSeason": "May, June, September and October offer warm days and quiet attractions. July and August are hot in Lisbon but pleasantly cooler in Sintra. Spring brings full gardens at Pena and Monserrate. Winter is moody and atmospheric — perfect for the palaces."
+    },
+    {
+      "recordId": "recFMJAUDTtK7cSkd",
+      "name": "Skiathos",
+      "climateTemps": "Mediterranean climate with hot, dry summers and mild, wet winters. Daytime highs reach 30–34°C in July and August, dropping to 24–27°C in May and October. Winter daytime temperatures are 12–16°C.",
+      "climateRainfall": "Around 700mm a year, almost all of it falling between October and March. Summers are very dry — July and August see less than 10mm a month and many days of unbroken sun.",
+      "climateSeason": "May to October. June and September are ideal with daytime temperatures of 24–30°C. July and August are hot at 30–34°C and the most popular beaches get busy. The sea is warm enough to swim from June through to October."
+    },
+    {
+      "recordId": "recR5BOLAZxYtb25Y",
+      "name": "Sliema, St Julian's & the North",
+      "climateTemps": "Mediterranean climate with hot, dry summers and mild, wet winters. Summer highs reach 30–34°C, sometimes pushing 36°C. Winters are mild at 15–18°C in the day, rarely dropping below 10°C at night.",
+      "climateRainfall": "Around 550mm a year, almost all of it falling between October and March. Summers are virtually rain-free — July and August see less than 5mm a month, often weeks of unbroken sun.",
+      "climateSeason": "Year-round destination, though the beaches are best from May to October. June, September and October offer warm sea, sunshine and quieter resorts. July and August are hot and busy. Winter is mild and ideal for sightseeing without crowds."
+    },
+    {
+      "recordId": "recYLyuHPiBTHQK20",
+      "name": "Sossusvlei & the Namib Desert",
+      "climateTemps": "Hot desert climate with extreme day-night swings. Summer (November to March) sees daytime highs of 35–40°C and warm nights at 18–22°C. Winter (May to August) brings warm days at 20–25°C but nights can drop to near freezing.",
+      "climateRainfall": "One of the driest places on earth, averaging less than 100mm a year. Most rain falls between January and April as occasional thunderstorms. Morning fog rolling in from the Atlantic provides much of the moisture for desert plants and animals.",
+      "climateSeason": "May to October offer cooler conditions (15–28°C) and clear skies — ideal for dune climbs and stargazing. November to March is summer with daytime highs of 35–40°C and occasional thunderstorms. Sunrise is the essential time year-round."
+    },
+    {
+      "recordId": "recvEG0Z21rTiV53v",
+      "name": "Soufriere & the Pitons",
+      "climateTemps": "Tropical climate with consistent warmth year-round. Daytime highs of 28–31°C, nights at 22–24°C. Sea temperatures hold at 26–28°C all year.",
+      "climateRainfall": "Around 2,400mm a year, with most rain falling between June and November. The dry season (December to April) sees lighter, briefer showers. The west coast around Soufriere is sheltered and drier than the windward east.",
+      "climateSeason": "Year-round, but January to April is the dry season and peak. The Pitons are usually clear in the morning and cloud often builds in the afternoon. May to October is greener but wetter, with hurricane risk peaking August to October."
+    },
+    {
+      "recordId": "rec1EK3jJP3UIIPtJ",
+      "name": "Sousse & Port El Kantaoui",
+      "climateTemps": "Mediterranean climate with hot, dry summers and mild, wet winters. Summer highs reach 30–35°C, occasionally pushing 38°C in July and August. Winters are mild at 15–18°C in the day, dropping to around 8–10°C at night.",
+      "climateRainfall": "Around 320mm a year, almost all of it between October and March. Summers are virtually rain-free, with weeks of unbroken sun.",
+      "climateSeason": "May to October for beach weather. July and August are hottest at 30–35°C. September and October offer the best value with warm sea and fewer crowds. Winter (November to April) is mild at 12–18°C and good for sightseeing."
+    },
+    {
+      "recordId": "recadYUUQcJ9QxwBy",
+      "name": "South Ari Atoll & Beyond",
+      "climateTemps": "Tropical climate with consistent warmth year-round. Daytime highs sit between 29°C and 32°C. Nights stay warm at 26–27°C. Sea temperatures hold at 28–30°C every month.",
+      "climateRainfall": "Around 1,900mm a year. The dry season (November to April) is mostly clear, with brief afternoon showers. The wet season (May to October) brings heavier rain but plenty of sun between showers.",
+      "climateSeason": "Year-round. November to April is the dry season with the best visibility for diving. May to October is wetter but excellent for marine encounters. Whale sharks are resident year-round in South Ari. Manta rays at Hanifaru peak May to November."
+    },
+    {
+      "recordId": "recOtQRiGz3zxvxff",
+      "name": "South Coast",
+      "climateTemps": "Warm and tropical with very stable temperatures. Daytime highs sit at 28-30°C all year. Overnight lows are 22-25°C. The trade winds give the south coast a constant gentle breeze that keeps the heat comfortable.",
+      "climateRainfall": "The dry season runs January to May; June to November is wetter with brief afternoon showers. Annual rainfall is around 1,300mm. The trade winds keep humidity manageable year-round.",
+      "climateSeason": "Year-round. December to April is peak with the driest weather and most reliable trade winds. May-November is warmer, occasionally wetter and significantly cheaper. Hurricane risk peaks in September but Barbados sits south of the main belt and is hit relatively rarely."
+    },
+    {
+      "recordId": "recY8l3wC2g1J2wNv",
+      "name": "South Coast & Galle",
+      "climateTemps": "Warm and tropical year-round. Daytime highs sit at 28-31°C every month with overnight lows of 23-25°C. Sea temperatures are a constant 27-29°C. Humidity is consistently high.",
+      "climateRainfall": "The south-west monsoon runs May to September, bringing daily rain and rough seas. The dry season is December-April with very little rain. The east coast runs to the opposite pattern - useful to know if planning a multi-region trip.",
+      "climateSeason": "December to April is the south-coast dry season - warm, sunny, calm seas and the prime whale-watching window. The south-west monsoon runs May to September and brings rain and choppy seas; October-November is the inter-monsoon transition."
+    },
+    {
+      "recordId": "recAypVzUpZWhW660",
+      "name": "South Coast & Glacier Lagoon",
+      "climateTemps": "Mild but cool by international standards. Summer (Jun-Aug) highs sit at 12-15°C with daylight stretching to nearly 24 hours in midsummer. Winter (Dec-Feb) highs of 1-3°C with overnight lows around -3°C. Strong winds can make it feel much colder.",
+      "climateRainfall": "Iceland's south coast is the wettest part of the country, with around 1,500-2,000mm of rain a year. Showers are possible in any month. Weather can change in minutes - the local saying is 'if you don't like the weather, wait five minutes'.",
+      "climateSeason": "May-September for the easiest driving conditions, longest days, and access to all the highlights. Peak summer (Jun-Aug) brings near-24 hour daylight. November-March for ice caves and Northern Lights, but driving requires care and a 4WD is recommended."
+    },
+    {
+      "recordId": "recP97rIuUwToHJvz",
+      "name": "South Shore & Hamilton",
+      "climateTemps": "Subtropical: 18-22°C winter, 26-30°C summer. Sea temperature 19-28°C across the year",
+      "climateRainfall": "Rain spread evenly across the year, with August-October the wettest months and hurricane season running June to November",
+      "climateSeason": "March to November is best, with May to October giving the warmest sea and sunniest weather"
+    },
+    {
+      "recordId": "reclZ2mTXxYVbZskF",
+      "name": "South-West Coast & Le Morne",
+      "climateTemps": "22-26°C in austral winter (May-October), 26-32°C in summer (November-April). Sea temperature 24-28°C year-round",
+      "climateRainfall": "Drier May to November, wetter December to April with cyclone risk January to March",
+      "climateSeason": "May to December for sunshine and watersports; June to November for kitesurfing trade winds"
+    },
+    {
+      "recordId": "recbgEKUSa7JRkbY8",
+      "name": "South-West Coast & St George's",
+      "climateTemps": "26-31°C year-round, with cooler trade winds from December to April",
+      "climateRainfall": "Drier January to May, wetter June to November with hurricane season July to October",
+      "climateSeason": "December to April for sunshine and dry weather; year-round for warm sea"
+    },
+    {
+      "recordId": "rec8WcGJGmtmS49t8",
+      "name": "Split & Central Dalmatia",
+      "climateTemps": "Mediterranean: 5-12°C in winter, 26-32°C in summer. Sea temperature 13-25°C",
+      "climateRainfall": "Hot, dry summers (June-August) and mild, wetter winters; sea temperature 18-25°C May to October",
+      "climateSeason": "May to October for sunshine, swimming and ferries; June to September peak season"
+    },
+    {
+      "recordId": "recfX0cNK9H7LGTJU",
+      "name": "St Kitts",
+      "climateTemps": "26-31°C year-round, with cooler trade winds from December to April",
+      "climateRainfall": "Drier January to May, wetter September to November with hurricane season July to October",
+      "climateSeason": "December to April for the driest sunshine; year-round for warm sea"
+    },
+    {
+      "recordId": "recrbkHDW7koOSchC",
+      "name": "Stockholm",
+      "climateTemps": "-3 to 0°C in winter (December-February), 18-23°C in summer (June-August)",
+      "climateRainfall": "Cold, snowy winters and mild summers; long daylight May-July, very short days December-January",
+      "climateSeason": "May to September for warmth and long daylight; December for snow and Christmas markets"
+    },
+    {
+      "recordId": "recB0G54bFvNzJ8nR",
+      "name": "Sunny Beach & Nessebar",
+      "climateTemps": "Continental: -2 to 6°C in winter, 25-30°C in summer. Sea temperature 13-26°C across the year",
+      "climateRainfall": "Hot, dry summers and cool, wet winters; sea temperature 20-26°C June to September",
+      "climateSeason": "May to September for sunshine and warm sea; July and August are peak family weeks"
+    },
+    {
+      "recordId": "recGsVh95MhwAu8cA",
+      "name": "Swedish Lapland & Are",
+      "climateTemps": "-15 to -25°C in deep winter (December-February); 10-20°C in summer (June-August)",
+      "climateRainfall": "Long, very cold winters with deep snow; short, mild summers with midnight sun above Arctic Circle",
+      "climateSeason": "December to March for snow, Northern Lights and Icehotel; June to August for midnight sun and hiking"
+    },
+    {
+      "recordId": "recY6KshIkufmQUGM",
+      "name": "Sydney & New South Wales",
+      "climateTemps": "Subtropical: 8-17°C in winter, 19-26°C in summer. Sea temperature 17-23°C",
+      "climateRainfall": "Warm, dry summers (December-February) and mild winters (June-August); rain spread across the year with a slight summer peak",
+      "climateSeason": "September to November and March to May for warm, dry weather; December to February for peak summer"
+    },
+    {
+      "recordId": "recd3Ud79g1oTHln8",
+      "name": "Tbilisi & Kakheti Wine Region",
+      "climateTemps": "1-7°C in winter (December-February), 25-32°C in summer (June-August)",
+      "climateRainfall": "Hot, dry summers in Tbilisi and Kakheti; cold, often snowy winters; rain peaks in May",
+      "climateSeason": "May, June, September and October for warm dry weather and the wine harvest (Rtveli) in late September"
+    },
+    {
+      "recordId": "recSLfqqLkOgv4m7l",
+      "name": "Tenerife",
+      "climateTemps": "Subtropical: 16-22°C in winter, 23-30°C in summer. Sea temperature 19-23°C",
+      "climateRainfall": "Almost no rain on the south coast (under 200mm/year); the north is greener and wetter; sea temperature 19-23°C year-round",
+      "climateSeason": "Year-round - 22-25°C even in winter; June-August for summer heat, October-March for winter sun"
+    },
+    {
+      "recordId": "recyTFggijAAjr2fB",
+      "name": "Thassos",
+      "climateTemps": "Mediterranean: 4-12°C in winter, 26-32°C in summer. Sea temperature 14-25°C",
+      "climateRainfall": "Hot, dry summers (June-August) and mild, wetter winters; sea temperature 18-25°C May to October",
+      "climateSeason": "May to October for sunshine and warm sea; July and August are peak family weeks"
+    },
+    {
+      "recordId": "recgs8Se3WtlkRm7R",
+      "name": "The Austrian Alps",
+      "climateTemps": "-10 to 0°C in deep winter (December-February), 0 to 10°C in early/late season at resort altitude",
+      "climateRainfall": "Reliable December to April snow at altitude; cold, often heavy snowfalls during peak winter",
+      "climateSeason": "December to April for skiing; Christmas and February half-term peak; March for sunshine and softer snow"
+    },
+    {
+      "recordId": "rec1eeueS1iVKmYCL",
+      "name": "The Azores",
+      "climateTemps": "Subtropical: 14-19°C in winter, 19-25°C in summer. Sea temperature 16-22°C",
+      "climateRainfall": "Mild and damp year-round; rain spread across the year; sea temperature 16-22°C",
+      "climateSeason": "May to October for warmer dry weather; April-June for blue whales; July-August warmest sea"
+    },
+    {
+      "recordId": "recKcwQ8wSq8ytq9C",
+      "name": "The Canadian Rockies",
+      "climateTemps": "-15 to -5°C in winter (December-February), 10-22°C in summer (June-August)",
+      "climateRainfall": "Long, cold winters with deep snow at altitude; short, mild summers; rain peaks in June",
+      "climateSeason": "June to September for hiking and lakes; December to March for skiing at Lake Louise, Sunshine and Norquay"
+    },
+    {
+      "recordId": "recjF5W6xhWva9DId",
+      "name": "The Exumas",
+      "climateTemps": "23-30°C year-round, with cooler trade winds from December to March",
+      "climateRainfall": "Drier January to April, wetter June to October with hurricane season July to October",
+      "climateSeason": "December to April for the driest sunshine; year-round for warm sea"
+    },
+    {
+      "recordId": "recHINTI8pXduInr0",
+      "name": "The French Alps",
+      "climateTemps": "-10 to 0°C in deep winter (December-February) at resort altitude; 0 to 10°C in early/late season",
+      "climateRainfall": "Reliable December to April snow at altitude; fresh snowfall typically every 7-10 days during peak season",
+      "climateSeason": "December to April for skiing; February half-term peak; March-April for sunshine and softer snow"
+    },
+    {
+      "recordId": "recz6ApuM6pGsloXS",
+      "name": "The Galapagos Islands",
+      "climateTemps": "Equatorial: 22-26°C in dry season (June-November), 24-30°C in wet season (December-May)",
+      "climateRainfall": "Two seasons: warmer wet (December-May, daily showers) and cooler dry (June-November, garua mist); sea 18-26°C",
+      "climateSeason": "December to May for warmer sea and calmer water; June to November for cooler air, more nutrients and bigger marine action"
+    },
+    {
+      "recordId": "recJ7MSq0si746ssY",
+      "name": "The Garden Route",
+      "climateTemps": "8-18°C in winter (June-August), 17-26°C in summer (December-February)",
+      "climateRainfall": "Mild Mediterranean climate; rain spread across the year with a slight peak in winter (June-August); sea temperature 17-22°C",
+      "climateSeason": "October to April for warm weather and whale watching; September is whale season opening; December-February peak"
+    },
+    {
+      "recordId": "rec7RDPpetJc0zTzI",
+      "name": "The Holy Cities",
+      "climateTemps": "Hot desert: 18-30°C in winter (December-February), 35-45°C in summer (June-August)",
+      "climateRainfall": "Hot, dry desert climate; very low rainfall; extreme heat in summer (often above 40°C); milder winters",
+      "climateSeason": "Hajj follows the Islamic calendar (5-day window each year); Umrah year-round, with Ramadan especially blessed but extremely busy"
+    },
+    {
+      "recordId": "recGwgaFYzewUc4mu",
+      "name": "The Italian Dolomites & Alps",
+      "climateTemps": "-8 to 2°C in deep winter (December-February), 5 to 15°C in early/late season at resort altitude",
+      "climateRainfall": "Cold, snowy winters at altitude; reliable December to April snow cover; 'enrosadira' alpenglow turns the rock pink at dawn and dusk",
+      "climateSeason": "December to April for skiing; February half-term peak; March for sunshine on the slopes and aperitivo terraces"
+    },
+    {
+      "recordId": "recGkSKcg96KCAPmg",
+      "name": "The National Parks",
+      "climateTemps": "Wide range: -5 to 5°C in winter at altitude (Yellowstone, Yosemite); 30-40°C in summer at low elevation (Death Valley, Grand Canyon)",
+      "climateRainfall": "Hot, dry summers (often above 35°C in low desert); cold winters at altitude with snow on canyon rims; very dry year-round",
+      "climateSeason": "May, June, September and October for warm weather and smaller crowds; July-August peak; winter for snow on the rim and quieter parks"
+    },
+    {
+      "recordId": "recqHbK4Hgb6teYf9",
+      "name": "The Swiss Alps",
+      "climateTemps": "-12 to -2°C in deep winter at resort altitude (December-February); 0-12°C in early/late season; -20°C+ on glacier peaks",
+      "climateRainfall": "Reliable December to April snow at altitude; longer seasons than the French Alps thanks to higher base altitudes; clear sunshine common in winter",
+      "climateSeason": "December to April for skiing; February-March for the most reliable snow; July-August for hiking and mountain railways"
+    },
+    {
+      "recordId": "recsTphRkgCOLtGAX",
+      "name": "Tokyo",
+      "climateTemps": "3-12°C in winter (December-February), 26-32°C in summer (July-August)",
+      "climateRainfall": "Four distinct seasons; hot humid summers (often 30°C+ with high humidity); cold dry winters; rainy season in June; typhoon risk September-October",
+      "climateSeason": "March-May for cherry blossom season; October-November for autumn colours and clear weather"
+    },
+    {
+      "recordId": "recXmcmkfcgn2P9Qz",
+      "name": "Toronto & Niagara Falls",
+      "climateTemps": "-7 to 0°C in winter (December-February), 19-27°C in summer (June-August)",
+      "climateRainfall": "Cold, snowy winters and warm humid summers; spring and autumn are short and changeable; lake-effect snow common in winter",
+      "climateSeason": "May to October for the warmest weather; September-October for autumn colours; December-February for ice wine and frozen Niagara photo ops"
+    },
+    {
+      "recordId": "recp2MkiTYTJacpXj",
+      "name": "Torres del Paine & Chilean Patagonia",
+      "climateTemps": "Cool temperate: -2 to 5°C in winter (June-August), 8-18°C in summer (December-February)",
+      "climateRainfall": "Notoriously variable - all four seasons in one day is the Patagonian saying; persistent strong winds especially in summer; sea-level Puerto Natales 0-15°C",
+      "climateSeason": "December to March for the southern summer - longer days and warmer weather; November and April are quieter shoulder months"
+    },
+    {
+      "recordId": "recgARjnP2YpdpDeO",
+      "name": "Tromso & the Northern Lights",
+      "climateTemps": "-5 to 0°C in winter (December-February), 8-15°C in summer (June-August)",
+      "climateRainfall": "Surprisingly mild for the latitude thanks to the Gulf Stream; long, dark winters; cool, bright summers; rain spread across the year",
+      "climateSeason": "September-March for Northern Lights (peak November-February); May-July for midnight sun and hiking"
+    },
+    {
+      "recordId": "rectfuZ4nuC3NFeF8",
+      "name": "Tuscany & Florence",
+      "climateTemps": "A Mediterranean climate with proper four seasons. Florence summers are hot at 30-33°C, with the Val d'Orcia a degree or two cooler at altitude. Spring and autumn sit in the gentle 18-25°C range. Winters are crisp and cool at 5-12°C, occasionally damp.",
+      "climateRainfall": "Spring and autumn bring the most rain, often in short afternoon showers. July and August are the driest months. November can be wet and misty - atmospheric for the hill towns, less so for landscape photography. Snow is rare but possible at higher elevations in January and February.",
+      "climateSeason": "Late April to mid-June and September to mid-October are the sweet spots: warm days, soft golden light and the landscape at its most photogenic. May has poppies in the wheat fields. October brings the grape harvest and truffle season. Avoid August if you can - it's hot, crowded and many trattorias close for the holidays."
+    },
+    {
+      "recordId": "recyBmf5XqNWyrohE",
+      "name": "Ubud & the Highlands",
+      "climateTemps": "Ubud sits at around 200 metres in central Bali, so it's a touch cooler than the southern beaches. Daytime temperatures hover at 28-32°C year round, dropping to a pleasant 21-23°C overnight. Humidity stays high. The hills above Ubud are noticeably cooler still in the early morning.",
+      "climateRainfall": "April to October is the dry season - sunny days with the occasional short shower. November to March is the wet season, with heavier afternoon downpours that usually clear within an hour or two. The rice terraces are at their greenest in March and April, just as the rains taper off.",
+      "climateSeason": "May, June and September are the sweet spot - dry, warm and just before peak season. July and August are the busiest months. April brings the freshest green to the rice terraces. Avoid mid-December to early January if you want quieter resorts."
+    },
+    {
+      "recordId": "recIBi5BJCrcWCVcl",
+      "name": "Valencia",
+      "climateTemps": "Mediterranean climate with very warm summers and mild winters. July and August reach 30-32°C with overnight lows around 21-22°C. Winter days sit at a pleasant 16-18°C with crisp clear skies. Spring and autumn hover in the comfortable 22-26°C range.",
+      "climateRainfall": "Among the driest cities on the Spanish coast. October has the heaviest rain - usually short, heavy bursts rather than long grey days. Summer is almost completely dry. Winter showers are occasional and brief. Year-round, you'll see far more sunshine than rain.",
+      "climateSeason": "March to June and September to early November are the sweet spot - warm days, sea-warm enough for swimming from late spring, and the city at its most enjoyable. March is also Las Fallas. July and August are hot but the beach compensates. December to February is a quiet, mild city break."
+    },
+    {
+      "recordId": "rec4ru6tyCzi3Ieek",
+      "name": "Valletta & the Harbour",
+      "climateTemps": "A classic Mediterranean climate - hot, dry summers and mild, sunny winters. July and August reach 32-34°C with steady humidity from the surrounding sea. Winter days sit at a pleasant 15-17°C. Spring and autumn hover comfortably in the 20-26°C range.",
+      "climateRainfall": "One of the driest capitals in Europe. November to February see the heaviest rain - usually short downpours rather than long grey days. Summer is essentially rainless. Winter rain rarely interferes with sightseeing for long.",
+      "climateSeason": "April to June and September to early November are the sweet spots - warm days, swimmable sea (from late spring) and the city at its most pleasant. July and August are hot and busy. Winter (December to March) is mild and atmospheric, ideal for a culture-led short break."
+    },
+    {
+      "recordId": "recDhcM3DCzdI3e5t",
+      "name": "Vancouver & British Columbia",
+      "climateTemps": "Mild for Canada thanks to the Pacific - never extreme. Summer days sit at a pleasant 20-23°C with cool 12-14°C nights. Winter is wet rather than freezing, with daytime highs around 4-7°C. The mountains are a different story - Whistler gets serious snow.",
+      "climateRainfall": "Vancouver is famously rainy from October to March - long stretches of grey, drizzly weather, though heavy snowfall in the city is rare. May to September is dramatically drier. Whistler gets enormous winter snowfall but the city itself does not.",
+      "climateSeason": "July to early September for the city - long sunny days, everything open, festival season. Late September into October brings fewer crowds and stunning autumn colour. The ski season at Whistler runs from late November to April. Winter in the city itself is mild but rainy."
+    },
+    {
+      "recordId": "rec9GnLp8FPpKmHTe",
+      "name": "Varadero",
+      "climateTemps": "Tropical Caribbean climate - warm year round and tempered by sea breezes. June to September is hottest at 30-32°C with high humidity and warm 26-28°C sea. December to February is the coolest stretch at a pleasant 25-27°C. Sea temperatures rarely drop below 24°C.",
+      "climateRainfall": "December to April is the dry, breezy season with very little rain. May to October is wetter, with afternoon thunderstorms that usually pass quickly. Hurricane risk is highest from August through early October.",
+      "climateSeason": "December to April is dry-season high season - warm days, low rainfall and the calmest sea. November and early May are excellent shoulder months. Hurricane season runs June to November, with most activity in August, September and early October."
+    },
+    {
+      "recordId": "rec7m6RkwCJhgScRX",
+      "name": "Venice",
+      "climateTemps": "Mediterranean climate moderated by the lagoon - hot, humid summers and cold, damp winters. July and August reach 28-30°C with heavy humidity. Spring and autumn are mild at 15-22°C. Winter sits at 2-8°C with morning fog over the canals - atmospheric but cold.",
+      "climateRainfall": "Venice is wettest in autumn, when high tides combine with rainfall to occasionally produce acqua alta - shallow flooding of low-lying areas like St Mark's Square that usually clears within hours. Boardwalks appear on the affected streets. Summer is mostly dry but with the risk of dramatic afternoon thunderstorms.",
+      "climateSeason": "April to early June and late September to November are the sweet spots - mild weather, softer light and the lagoon at its most photogenic. Carnival in February brings costumes and crowds in equal measure. Avoid July and August: punishingly hot, humid and overrun with day-trippers."
+    },
+    {
+      "recordId": "recTAXeUMNM3q3GMK",
+      "name": "Vienna",
+      "climateTemps": "Continental climate with proper four seasons. Summer days reach 25-28°C, occasionally hotter. Spring and autumn sit at a comfortable 14-20°C. Winter is properly cold at 0-5°C, with regular snow and crisp clear days that suit the Christmas markets.",
+      "climateRainfall": "Rainfall is fairly evenly spread through the year, with a slight summer peak from thunderstorms. Snow is likely between December and February but rarely heavy. Christmas markets thrive in cold dry weather - bring proper layers in winter.",
+      "climateSeason": "April to June and September to October are the sweet spot - warm days, comfortable for walking the Ringstrasse and outdoor cafe seating. Late November to early January is Christmas-market season and a different kind of magic. July and August can be hot and busy."
+    },
+    {
+      "recordId": "rec9AAzE4zsWp9uyH",
+      "name": "Virgin Gorda & the Islands",
+      "climateTemps": "Tropical Caribbean - warm year-round and tempered by the trade winds. June to September is hottest at 30-32°C with high humidity. December to February is cooler at 25-27°C. Sea temperatures stay between 26 and 29°C all year.",
+      "climateRainfall": "December to April is the dry, breezy season. May to October is wetter, with most rain falling as short tropical showers in the late afternoon. Hurricane risk peaks in August, September and early October.",
+      "climateSeason": "Mid-December to mid-April is dry-season high season - reliable trade winds, sunny days and the calmest sailing conditions. November and early May are excellent shoulder months. Hurricane season runs June to November, with peak risk August to early October."
+    },
+    {
+      "recordId": "recygTRpEXhBmEOH3",
+      "name": "Volcanoes National Park & Kigali",
+      "climateTemps": "Despite sitting just south of the equator, Rwanda's high altitude keeps things mild. Kigali averages 23-27°C year round. The Virunga volcanoes are noticeably cooler at altitude, especially in the early morning when treks begin - layer up.",
+      "climateRainfall": "Rwanda has two dry seasons (June-September and December-February) and two rainy seasons. The rains rarely interfere with trekking - they tend to come as short, intense afternoon downpours. Mornings, when treks set out, are typically clear.",
+      "climateSeason": "June to mid-September is the long dry season - the best months for trekking and clearer mountain views. Late December to early February is the shorter dry season. Trekking runs year-round, and the wetter months (March-May, October-November) have the lushest forest and the cheapest lodges."
+    },
+    {
+      "recordId": "recCZVKDJkHh2LCg5",
+      "name": "Wadi Rum",
+      "climateTemps": "Classic high desert - hot, dry days and cold nights, with big swings between the two. Summer days reach 35-40°C. Winter days at 12-18°C feel pleasant; nights can drop below freezing. Spring and autumn sit comfortably at 25-30°C by day, around 12-15°C at night. Always pack layers.",
+      "climateRainfall": "An arid desert climate - rainfall is rare and sporadic year-round. The wettest months (December to March) might still see only a handful of light showers. Sand and wind storms are more common, particularly in spring. Skies are generally clear and night-time stargazing exceptional.",
+      "climateSeason": "March to May and September to November are the sweet spots - warm but not punishing days, cool nights and the clearest light for photography. Spring (March-April) adds short-lived desert wildflowers. Avoid July and August (extreme heat) and December-January nights (genuinely cold)."
+    },
+    {
+      "recordId": "recCkIrpbhx1Depwy",
+      "name": "Washington DC",
+      "climateTemps": "Humid subtropical climate with proper four seasons. July and August are hot and sticky at 30-32°C with high humidity. Winter is cold at 1-7°C with occasional snow. Spring and autumn are the comfortable seasons at 15-22°C.",
+      "climateRainfall": "Rainfall is fairly evenly distributed across the year, with a slight summer peak from afternoon thunderstorms. Snow falls between December and February but rarely enough to disrupt the city. Spring can be unsettled - bring a light waterproof for cherry blossom season.",
+      "climateSeason": "Late March to early April for the cherry blossom (the city's peak event of the year). May, June, September and October are the most pleasant months for walking the Mall. July and August are properly hot and humid. Winter is cold but quiet - the museums make excellent indoor escapes."
+    },
+    {
+      "recordId": "rec9cW8kJ5tlL2ZoV",
+      "name": "West Coast (Platinum Coast)",
+      "climateTemps": "Tropical Caribbean climate - warm year round and tempered by trade winds. June to October is hottest at 30-32°C with high humidity. December to February is the coolest stretch at a pleasant 26-28°C. Sea temperatures stay between 26 and 29°C all year.",
+      "climateRainfall": "December to April is the dry, breezy season - very little rainfall and reliable trade winds. May to October is wetter, with most rain falling as short tropical showers. Hurricanes are rare in Barbados thanks to its southerly position; the last direct hit before recent years was Hurricane Janet in 1955.",
+      "climateSeason": "Mid-December to mid-April is dry-season high season - reliable trade winds, the lowest rainfall and the calmest sea. November and early May are excellent shoulder months. Hurricane season runs June to November, but Barbados sits south of the main hurricane belt and is generally less affected."
+    },
+    {
+      "recordId": "rec5HOlREGm2VPgzD",
+      "name": "West Coast, Glaciers & Fiordland",
+      "climateTemps": "Cool maritime climate, even in summer. The glaciers and fjords are a few degrees cooler than coastal NZ. December to February reaches 18-22°C in the daytime; June to August is properly cold at 4-10°C with snow on the passes. Layers and waterproofs are non-negotiable year round.",
+      "climateRainfall": "Milford Sound is one of the wettest inhabited places on earth, with rain falling on around 200 days a year - this is what produces the cascade of waterfalls that makes it spectacular. The West Coast in general is wet year-round; pack a proper waterproof. Eastern Fiordland and the glacier towns are slightly drier.",
+      "climateSeason": "November to April is the most reliable window - longer days, milder weather and the Great Walks open. December to February is summer high season. The shoulder months of November and March often have the best balance of weather and quieter trails. Winter (June-August) is cold and quieter, with snow on the passes but the fjords still operating."
+    },
+    {
+      "recordId": "recNhCIo67j2KXfsl",
+      "name": "Wild Atlantic Way & Galway",
+      "climateTemps": "Cool, mild and wet. Summer days reach 17-20°C and rarely get hotter. Winter sits around 5-9°C, occasionally dipping lower. Strong Atlantic winds and frequent showers year round - waterproofs are not optional.",
+      "climateRainfall": "Wet at any time of year - rainfall is the price of admission for the green countryside. November to January are the wettest months, but rain can fall in any season. Conditions change quickly on the coast; the Cliffs of Moher in changing weather are arguably more dramatic than in sunshine.",
+      "climateSeason": "May to September is the sweet spot - longer days, the warmest weather and most attractions running full hours. June and September give the best balance of weather and lower crowds. July and August are peak. Spring and autumn are atmospheric and perfectly viable - just bring waterproofs."
+    },
+    {
+      "recordId": "recVy6CGEQYx0yStF",
+      "name": "Willemstad & the South Coast",
+      "climateTemps": "Tropical and reliable - warm year round and tempered by steady trade winds. Daytime temperatures stay between 28 and 32°C in every season, with overnight lows around 24-26°C. Sea temperatures hold between 26 and 29°C all year.",
+      "climateRainfall": "Curacao is one of the driest islands in the Caribbean, with around 550mm of rain a year - mostly falling in short showers between October and December. Long dry spells are normal. The trade winds keep things breezy and pleasant.",
+      "climateSeason": "Year-round - Curacao sits below the hurricane belt and the climate is reliably warm and dry. May to November is the warmest and slightly more humid stretch but rarely uncomfortable. Carnival in late February or early March is a particularly fun time to visit."
+    },
+    {
+      "recordId": "recTIjud9M9LubwO0",
+      "name": "Xi'an & the Silk Road",
+      "climateTemps": "Continental climate with proper four seasons. Summer is hot at 30-34°C and can be humid. Winter is cold at -2 to 5°C with the occasional snowfall. Spring and autumn sit comfortably at 15-22°C and are easily the best months for sightseeing.",
+      "climateRainfall": "A continental, dry climate. July and August see the most rain (often as short, heavy storms) but totals are still modest. Spring and autumn are dry and clear. Winter is cold and largely dry. Air quality in winter can be poor.",
+      "climateSeason": "April-May and September-October are the sweet spot - mild temperatures, clear skies and the city walls comfortable to walk. July and August are hot and humid. Avoid the first week of October (Golden Week) when domestic tourism is overwhelming. Winter is cold but quiet."
+    },
+    {
+      "recordId": "rec9Ai7D9ALgqdqGG",
+      "name": "Zante",
+      "climateTemps": "Classic Mediterranean - warm summers and mild, wetter winters. July and August reach 30-33°C and the sea hits 26°C. May, June, September and October sit comfortably at 22-28°C. The sea stays swimmable into early October.",
+      "climateRainfall": "Mediterranean climate - very dry summers and milder, wetter winters. May to September is essentially rainless; October sees occasional showers; the wettest months are November to February when most resorts close. Sea breezes keep summer days comfortable.",
+      "climateSeason": "May to mid-October. June and September are the sweet spot - warm sea, sunshine and lower prices than peak. July and August are hot and busy. The boat trips to Shipwreck Beach and the Blue Caves run from late April through October, weather dependent."
+    },
+    {
+      "recordId": "recohfpQX0awvABMl",
+      "name": "Zanzibar",
+      "climateTemps": "Tropical and warm year round, tempered by sea breezes. June to October is the dry, slightly cooler season at 26-30°C. December to March is hotter and more humid at 30-34°C. Sea temperatures hold between 26 and 29°C all year.",
+      "climateRainfall": "Two rainy seasons - the long rains (mid-March to May) and the short rains (late October to mid-December). The long dry from June to October is the most reliable. Even in rainier months, mornings are usually clear and the afternoon downpours pass quickly.",
+      "climateSeason": "June to October is the long dry season - the most reliable window and easily combined with a Tanzania safari. December to early March is hot, sunny and humid. Avoid the long rains (mid-March to May) and the shorter rains in November when many beach hotels close."
+    }
+  ]
+}
