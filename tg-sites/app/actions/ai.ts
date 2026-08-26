@@ -664,7 +664,15 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
       };
     }
 
-    const system = buildSiteSystemPrompt(settings);
+    /*
+     * The pages already on this site, by TITLE, so the planner proposes what is
+     * missing rather than a generic sitemap. Andy's first real run made the case:
+     * it offered "Voyages" to a site that already has a Voyages page, and the
+     * address did not even collide because that page lives at /destinations.
+     */
+    const existingTitles = (await listPageFill(site.tenantId)).map((page) => page.title);
+
+    const system = buildSiteSystemPrompt(settings, existingTitles);
     const userPrompt = buildSiteUserPrompt(brief);
     const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS };
 

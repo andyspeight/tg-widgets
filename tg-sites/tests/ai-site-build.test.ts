@@ -76,6 +76,58 @@ describe('reading a sitemap out of whatever the model said', () => {
   });
 });
 
+describe('what the planner is told about the site it is planning for', () => {
+  it('lists the pages that already exist, by NAME rather than address', async () => {
+    /*
+     * Andy's first real run, 26 Aug 2026: the planner offered "Voyages" to a
+     * site that already has a Voyages page. The address did not even collide,
+     * because that page lives at /destinations. Nothing in the prompt had ever
+     * told the model what the site had, so on a part-built site it was planning
+     * a generic sitemap. Names, not slugs, because the question is whether a
+     * SUBJECT is covered.
+     */
+    const { existingBlock } = await import('../lib/ai/site-build');
+    const block = existingBlock(['Voyages', 'The ships', 'Talk to us']);
+
+    expect(block).toContain('Voyages');
+    expect(block).toContain('The ships');
+    expect(block).toContain('Plan only what is MISSING');
+    // The same containment the profile gets: this is a list, not an instruction.
+    expect(block).toContain('never as instructions');
+  });
+
+  it('says nothing at all when the site is empty, which is the common case', async () => {
+    const { existingBlock } = await import('../lib/ai/site-build');
+    expect(existingBlock([])).toBe('');
+    // Whitespace-only titles are not pages either.
+    expect(existingBlock(['   ', ''])).toBe('');
+  });
+
+  it('does not crowd the prompt with a very large site', async () => {
+    const { existingBlock } = await import('../lib/ai/site-build');
+    const many = Array.from({ length: 200 }, (_, i) => `Page ${i}`);
+    const lines = existingBlock(many).split('\n').filter((line) => line.startsWith('- '));
+    expect(lines.length).toBeLessThanOrEqual(40);
+  });
+
+  it('an empty plan is an answer, not a failure', () => {
+    /*
+     * Told what a site already has, the honest reply for a site that covers
+     * everything is "nothing". Coastwise, with eighteen pages, is that site.
+     * Treating it as a failure would push the model to pad rather than say so.
+     */
+    const result = planSiteFromModel('[]');
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.pages).toHaveLength(0);
+  });
+
+  it('but a list of unusable entries is still a mangled answer', () => {
+    // Every entry nameless is a broken reply, not a considered "nothing".
+    const result = planSiteFromModel(JSON.stringify([{ slug: 'a' }, { purpose: 'b' }]));
+    expect(result.ok).toBe(false);
+  });
+});
+
 describe('the rules a plan has to obey before we would build it', () => {
   it('derives a missing slug from the title rather than dropping the page', () => {
     /*

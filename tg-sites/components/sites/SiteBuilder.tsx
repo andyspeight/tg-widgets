@@ -60,6 +60,8 @@ export function SiteBuilder({
   const [stage, setStage] = useState<Stage>('ask');
   /** The home page's id, so Done can open what was just built. */
   const [homeId, setHomeId] = useState<string | null>(null);
+  /** The planner looked and found nothing this site is short of. */
+  const [nothingMissing, setNothingMissing] = useState(false);
   const [brief, setBrief] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,24 @@ export function SiteBuilder({
 
   /** The page already on this site at that address, if anything is built there. */
   const clash = (slug: string) => existing.find((page) => page.slug === slug && page.filled);
+
+  /**
+   * A page already covering the same SUBJECT, wherever it lives.
+   *
+   * Address is not enough, and Andy's first real run proved it: the planner
+   * offered "Voyages" to a site whose Voyages page sits at /destinations, so
+   * nothing collided and a duplicate would have been built. The server can only
+   * refuse on address, because that is the thing it can be certain about; a
+   * matching NAME is a caution rather than a refusal, since somebody may well
+   * want a second page with a similar title.
+   */
+  const sameName = (row: Row) => {
+    const wanted = row.title.trim().toLowerCase();
+    if (!wanted) return undefined;
+    return existing.find(
+      (page) => page.filled && page.slug !== row.slug && page.title.trim().toLowerCase() === wanted,
+    );
+  };
 
   async function plan() {
     setBusy(true);
@@ -84,6 +104,7 @@ export function SiteBuilder({
     }
     setRows(result.data.map((page) => ({ ...page, progress: 'waiting' as const })));
     setStage('review');
+    setNothingMissing(result.data.length === 0);
   }
 
   function patch(index: number, next: Partial<Row>) {
@@ -267,13 +288,19 @@ export function SiteBuilder({
                   {row.slug === '' ? 'The home page' : `/${row.slug}`}
                 </span>
 
-                {clash(row.slug) && (
+                {clash(row.slug) ? (
                   <span className="sv-plan__clash">
                     <Icon name="warning" size={14} />
                     {`"${clash(row.slug)!.title}" is already here and has content on it, so this one
                       will be left alone. Rename it to build it somewhere else, or remove it.`}
                   </span>
-                )}
+                ) : sameName(row) ? (
+                  <span className="sv-plan__clash">
+                    <Icon name="warning" size={14} />
+                    {`You already have a page called "${sameName(row)!.title}", at /${sameName(row)!.slug || ''}.
+                      This one would be built as a second page. Remove it unless you meant that.`}
+                  </span>
+                ) : null}
               </div>
 
               <span className="sv-plan__tools">
@@ -317,7 +344,9 @@ export function SiteBuilder({
 
         {rows.length === 0 && (
           <p className="sv-empty__note">
-            Every page has been removed. Plan again, or cancel and start from a blank page.
+            {nothingMissing
+              ? 'Nothing obvious is missing. This site already covers what a site like it needs, so the builder had nothing to add.'
+              : 'Every page has been removed. Plan again, or cancel and start from a blank page.'}
           </p>
         )}
       </Modal>
