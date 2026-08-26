@@ -1,4 +1,4 @@
-import { LISTING_ORDERS, itemAsCard, listingKey, listingsIn } from '../content/listings';
+import { itemAsCard, listingKey, listingsIn, type ListingRequest } from '../content/listings';
 import type { Section } from '../content/schema';
 import { listPublished } from './collections';
 
@@ -16,6 +16,13 @@ import { listPublished } from './collections';
  * same collection share an answer, two grids narrowing it differently do not.
  * See listingKey in lib/content/listings.ts.
  *
+ * THE EDITOR TOPS THIS UP AS IT GOES. This is the page's listings as the tree
+ * stood when it loaded, and the canvas can ask for a listing that was not in it:
+ * a different order, a different collection typed into the block, a filter
+ * changed. Those arrive one at a time through cardsForRequest rather than being
+ * guessed at in advance, because there is no finite set of collection names to
+ * fetch ahead of time. See EditorShell.
+ *
  * WHAT THE CALLER DOES WITH IT DIFFERS, AND THAT MATTERS. The published route
  * folds the result into the tree it is about to render and throws the tree away.
  * The editor must NOT: its tree is the document somebody is editing, and
@@ -26,67 +33,45 @@ import { listPublished } from './collections';
  */
 export type ListingCards = Map<string, Array<Record<string, unknown>>>;
 
+/**
+ * The cards for ONE request.
+ *
+ * Split out so the editor can ask for a single listing it turns out to need,
+ * rather than the whole page's worth. See listingCardsAction.
+ */
+export async function cardsForRequest(
+  tenantId: string,
+  request: ListingRequest,
+): Promise<Array<Record<string, unknown>>> {
+  const listing = await listPublished(tenantId, request.collection, request.count, {
+    filter: request.filter,
+    sort: request.sort,
+    order: request.order,
+  });
+
+  // The collection's own field definitions came back with its items, so a card
+  // can carry a price and a number of nights without a second read.
+  return listing.items.map((row) =>
+    itemAsCard(row.item, request.collection, row.slug, listing.fields, row.id),
+  );
+}
+
 export async function resolveListings(
   tenantId: string,
   trees: ReadonlyArray<{ sections: Section[] } | null | undefined>,
-  options: { everyOrder?: boolean } = {},
 ): Promise<ListingCards> {
-  const asked = listingsIn(trees);
-  /*
-   * EVERY ORDER, FOR THE EDITOR ONLY.
-   *
-   * This map is built on the server, once, from the tree as it was when the
-   * page loaded. The canvas then fills a COPY of the tree on every keystroke,
-   * looking each block up by listingKey, and that key carries the order. So the
-   * moment somebody picked a different order the key stopped matching anything
-   * in the map, fillListings found nothing, and every card vanished until a
-   * reload. Andy hit it on the first click of the control that had just been
-   * added, 26 Aug 2026.
-   *
-   * The published and preview routes render once from a tree that cannot change
-   * underneath them, so they ask for exactly the order the page stored and this
-   * does nothing for them.
-   *
-   * Reading each order rather than reordering what came back, because an order
-   * changes WHICH items you get and not only their sequence: the oldest six of
-   * twenty are not the newest six rearranged. Four small reads in an editor is
-   * the honest price of the canvas telling the truth.
-   */
-  const wanted = options.everyOrder
-    ? [
-        ...new Map(
-          asked.flatMap((request) =>
-            LISTING_ORDERS.map((order) => {
-              const variant = { ...request, order };
-              return [listingKey(variant), variant] as const;
-            }),
-          ),
-        ).values(),
-      ]
-    : asked;
-
+  const wanted = listingsIn(trees);
   const cards: ListingCards = new Map();
   if (wanted.length === 0) return cards;
 
   const results = await Promise.all(
     wanted.map(async (request) => ({
       request,
-      listing: await listPublished(tenantId, request.collection, request.count, {
-        filter: request.filter,
-        sort: request.sort,
-        order: request.order,
-      }),
+      cards: await cardsForRequest(tenantId, request),
     })),
   );
 
-  for (const { request, listing } of results) {
-    cards.set(
-      listingKey(request),
-      // The collection's own field definitions came back with its items, so a
-      // card can carry a price and a number of nights without a second read.
-      listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields, row.id)),
-    );
-  }
+  for (const { request, cards: rows } of results) cards.set(listingKey(request), rows);
 
   return cards;
 }

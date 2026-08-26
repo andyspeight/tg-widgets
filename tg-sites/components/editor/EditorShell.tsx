@@ -25,7 +25,8 @@ import {
   saveDraftAction,
 } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
-import { publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listingCardsAction, publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listingBlocksIn, listingKey } from '../../lib/content/listings';
 import { listPageCommentsAction, openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
 import type { NavPage } from '../../lib/content/nav';
@@ -61,6 +62,14 @@ import { outlineCollision } from './outline-collision';
 import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
 import type { PreparedMap } from '../../lib/content/prepared';
 import type { ListingCards } from '../../lib/db/listings';
+
+/**
+ * How long to wait after the last keystroke before asking for a listing.
+ *
+ * A collection name is TYPED. Without this, "guides" is six requests, five of
+ * them for collections that do not exist. Same figure the adopt dialog uses.
+ */
+const LISTING_DEBOUNCE_MS = 300;
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -528,6 +537,14 @@ export function EditorShell({
    */
   const [cards, setCards] = useState(listings);
 
+  /*
+   * Keys already asked for, so a collection that genuinely has no cards is not
+   * requested again on every render. A ref rather than state because changing it
+   * must not itself cause a render, which is how this becomes a loop.
+   */
+  const askedFor = useRef<Set<string>>(new Set());
+
+
   const reorderCards = useCallback((key: string, orderedIds: string[]) => {
     setCards((current) => {
       const held = current?.get(key);
@@ -797,6 +814,53 @@ export function EditorShell({
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
+
+  /**
+   * FETCH ON MISS: the listing the canvas turns out to need.
+   *
+   * The map arrives with the page, keyed by the whole request. Change the
+   * collection name, the filter, the sort or the order on a grid and the key
+   * stops matching anything in it, fillListings finds no cards, and the grid
+   * empties until a reload. Andy hit that on the order control; it was equally
+   * true of the other three and nobody had ever changed one on the canvas and
+   * watched.
+   *
+   * DEBOUNCED, because a collection name is TYPED. Without it "guides" is six
+   * requests, five of them for collections that do not exist.
+   *
+   * ASKED ONCE PER KEY. A collection with nothing published answers with an
+   * empty list, which is a real answer and is cached as one; without the ref
+   * that empty answer would be re-requested on every render for ever.
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const missing = new Map<string, Record<string, unknown>>();
+      for (const { request, props } of listingBlocksIn([page, otherContent.header, otherContent.footer])) {
+        const key = listingKey(request);
+        if (cards?.has(key) || askedFor.current.has(key)) continue;
+        missing.set(key, props);
+      }
+      if (missing.size === 0) return;
+
+      for (const key of missing.keys()) askedFor.current.add(key);
+
+      void Promise.all(
+        [...missing].map(async ([key, props]) => ({
+          key,
+          result: await listingCardsAction(props),
+        })),
+      ).then((answers) => {
+        setCards((current) => {
+          const next = new Map(current);
+          for (const { key, result } of answers) if (result.ok) next.set(key, result.data);
+          return next;
+        });
+      });
+    }, LISTING_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [page, otherContent.header, otherContent.footer, cards]);
+
 
   /*
    * Which block is being typed into ON THE CANVAS, and what kind it is.

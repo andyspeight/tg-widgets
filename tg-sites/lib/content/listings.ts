@@ -192,6 +192,37 @@ function sortIn(props: Record<string, unknown>): RawSort | null {
 }
 
 /** Every distinct collection a tree wants, and the most any block asked for. */
+/**
+ * Every listing block on a set of trees, with the props it was read from.
+ *
+ * The props travel because the EDITOR needs them: when the canvas finds it has
+ * no cards for a block it asks the server for that one listing, and the server
+ * validates the ask by running listingIn over the same props rather than
+ * trusting a request assembled on the client. Rebuilding a props bag from a
+ * ListingRequest would be a second copy of that mapping to keep in step.
+ */
+export function listingBlocksIn(
+  trees: ReadonlyArray<{ sections: Section[] } | null | undefined>,
+): Array<{ request: ListingRequest; props: Record<string, unknown> }> {
+  const found: Array<{ request: ListingRequest; props: Record<string, unknown> }> = [];
+
+  for (const tree of trees) {
+    if (!tree) continue;
+    for (const section of tree.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const block of column.blocks) {
+            const request = listingIn(block);
+            if (request) found.push({ request, props: block.props ?? {} });
+          }
+        }
+      }
+    }
+  }
+
+  return found;
+}
+
 export function listingsIn(trees: ReadonlyArray<{ sections: Section[] } | null | undefined>): ListingRequest[] {
   const wanted = new Map<string, ListingRequest>();
 

@@ -2044,22 +2044,68 @@ describe('changing the order does not empty the canvas', () => {
     }
   });
 
-  it('the editor is the one that asks for every order, not the site', () => {
+  it('hands back the props beside each request, which is what gets sent', async () => {
     /*
-     * The published and preview routes render a tree that cannot change under
-     * them, so paying for four reads there would be four times the work for an
-     * answer nobody can ask for.
+     * The server validates the ask by running listingIn over the SAME props the
+     * tree holds, rather than trusting a request assembled on the client. That
+     * only works if the walker carries them, and rebuilding a props bag from a
+     * ListingRequest would be a second copy of the mapping to keep in step.
      */
-    const editor = readFileSync(join(__dirname, '..', 'app', 'editor', 'page.tsx'), 'utf8');
-    expect(editor).toContain('everyOrder: true');
+    const { listingBlocksIn } = await import('../lib/content/listings');
 
-    for (const route of [
-      join('app', 'site', '[host]', '[[...path]]', 'page.tsx'),
-      join('app', 'preview', '[[...path]]', 'page.tsx'),
-    ]) {
-      const source = readFileSync(join(__dirname, '..', route), 'utf8');
-      expect(source, `${route} should not pay for every order`).not.toContain('everyOrder');
-    }
+    const tree = {
+      sections: [
+        section([
+          listingBlock({ source: 'collection', collection: 'guides', order: 'title', count: 4 }),
+          listingBlock({ source: 'typed' }),
+        ]),
+      ],
+    };
+
+    const found = listingBlocksIn([tree]);
+    // The typed one is not a listing at all, so it is not in here.
+    expect(found).toHaveLength(1);
+    expect(found[0].request.collection).toBe('guides');
+    expect(found[0].request.order).toBe('title');
+    expect(found[0].props.collection).toBe('guides');
+    expect(found[0].props.order).toBe('title');
+  });
+
+  it('keeps every block, not one per request, so each can be asked for', async () => {
+    /*
+     * listingsIn DEDUPES by request because two grids showing the same thing are
+     * one read. This one must not: the editor looks each block up by its own key
+     * and needs the props for whichever ones are missing, and two blocks that
+     * happen to match today may not after the next keystroke.
+     */
+    const { listingBlocksIn, listingsIn } = await import('../lib/content/listings');
+    const same = () => listingBlock({ source: 'collection', collection: 'guides' });
+    const tree = { sections: [section([same(), same()])] };
+
+    expect(listingsIn([tree])).toHaveLength(1);
+    expect(listingBlocksIn([tree])).toHaveLength(2);
+  });
+
+  it('the canvas asks for a listing it does not have, rather than pre-guessing', () => {
+    /*
+     * REPLACED THE PRE-FETCH. The first fix read all four orders when the editor
+     * loaded, which answered the order control and nothing else: the collection
+     * name and the filter are in the key too, and there is no finite set of
+     * collection names to read ahead of time. So the canvas asks for what it
+     * turns out to need and the pre-fetch is gone, which is both more correct
+     * and fewer reads.
+     */
+    const shell = readFileSync(join(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+    expect(shell).toContain('listingCardsAction');
+    // Debounced, or typing a collection name is one request per letter.
+    expect(shell).toContain('LISTING_DEBOUNCE_MS');
+    // Asked once per key, or a collection with nothing published is re-requested
+    // for ever: an empty list is a real answer and has to be cached as one.
+    expect(shell).toContain('askedFor.current.has(key)');
+    expect(shell).toContain('askedFor.current.add(key)');
+
+    const editor = readFileSync(join(__dirname, '..', 'app', 'editor', 'page.tsx'), 'utf8');
+    expect(editor, 'the pre-fetch should be gone').not.toContain('everyOrder');
   });
 });
 

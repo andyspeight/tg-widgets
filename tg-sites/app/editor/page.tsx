@@ -212,18 +212,11 @@ export default async function EditorPage({
    * `props.items`, so folding them in would let the next save bake a snapshot of
    * today's cards into the page. The canvas fills a copy at the point it draws.
    */
-  const listings = await resolveListings(
-    site.tenantId,
-    [headerRecord.region, page.content, footerRecord.region],
-    /*
-     * Every order, because this tree CHANGES under the canvas. The published
-     * route renders one fixed tree and asks for the one order it stored; here
-     * somebody can pick a different order and the canvas re-fills immediately,
-     * so the answer for that order has to be here already or the cards vanish.
-     * See the note in resolveListings.
-     */
-    { everyOrder: true },
-  );
+  const listings = await resolveListings(site.tenantId, [
+    headerRecord.region,
+    page.content,
+    footerRecord.region,
+  ]);
 
   return (
     <>
