@@ -13,6 +13,9 @@
  * build, or is refused.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -22,6 +25,9 @@ import {
   planSiteFromModel,
   type PlannedPage,
 } from '../lib/ai/site-build';
+
+/** The app root, for the source-order checks on the actions at the foot of this file. */
+const ROOT = join(__dirname, '..');
 
 /** The shape of a good answer, as the prompt asks for it. */
 const GOOD = JSON.stringify([
@@ -218,5 +224,127 @@ describe('the ask itself', () => {
 
   it('caps the brief, so a pasted document cannot become the prompt', () => {
     expect(buildSiteUserPrompt('z'.repeat(5000)).length).toBeLessThan(600);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE TWO ACTIONS, checked the way the other AI actions are checked: by reading
+ * the order things happen in.
+ *
+ * The properties here are about money and about damage. A planner that spends
+ * before it checks, or that writes pages while claiming to propose them, is
+ * wrong in a way no unit test of the parser would catch.
+ */
+describe('planning a site spends nothing it should not, and writes nothing at all', () => {
+  const source = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+  const body = source.slice(
+    source.indexOf('export async function planSiteAction'),
+    source.indexOf('export async function buildPlannedPageAction'),
+  );
+
+  const at = (needle: string) => {
+    const index = body.indexOf(needle);
+    expect(index, `${needle} is not in the action at all`).toBeGreaterThan(-1);
+    return index;
+  };
+
+  it('is a real slice of the file, not an empty string', () => {
+    // Guards every other test here: a renamed action would otherwise pass them all.
+    expect(body.length).toBeGreaterThan(500);
+  });
+
+  it('checks the key, then membership, then claims, then calls', () => {
+    expect(at('aiIsConfigured()')).toBeLessThan(at('requireSite()'));
+    expect(at('requireSite()')).toBeLessThan(at('claimRequest('));
+    expect(at('claimRequest(')).toBeLessThan(at('await ask('));
+  });
+
+  it('records what it cost after the call, not before', () => {
+    // Recording first would mean a timeout costs money and counts for nothing.
+    expect(at('recordTokens(')).toBeGreaterThan(at('await ask('));
+  });
+
+  it('refuses a site with no profile BEFORE taking a slot', () => {
+    /*
+     * A sitemap planned from a company name alone would fit anybody, which is
+     * worse than refusing because it looks like the feature working. Refusing
+     * after claiming would also charge somebody a request for the privilege.
+     */
+    expect(at('hasBrandProfile(settings)')).toBeLessThan(at('claimRequest('));
+  });
+
+  it('CREATES NOTHING, which is the whole promise of the plan step', () => {
+    /*
+     * The plan is a proposal to read and edit. If this wrote pages, approving
+     * would be meaningless and a bad plan would already have cost eight pages.
+     */
+    expect(body).not.toContain('createPage(');
+    expect(body).not.toContain('saveDraft(');
+    expect(body).not.toContain('updatePageMeta(');
+  });
+
+  it('hands back the menu order with home first', () => {
+    expect(body).toContain('homeFirst(');
+  });
+});
+
+describe('building an approved page', () => {
+  const source = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');
+  const body = source.slice(
+    source.indexOf('export async function buildPlannedPageAction'),
+    source.indexOf('export async function createAiPageAction'),
+  );
+
+  const at = (needle: string) => {
+    const index = body.indexOf(needle);
+    expect(index, `${needle} is not in the action at all`).toBeGreaterThan(-1);
+    return index;
+  };
+
+  it('is a real slice of the file', () => {
+    expect(body.length).toBeGreaterThan(500);
+  });
+
+  it('checks the key, then membership, then claims, then calls', () => {
+    expect(at('aiIsConfigured()')).toBeLessThan(at('requireSite()'));
+    expect(at('requireSite()')).toBeLessThan(at('claimRequest('));
+    expect(at('claimRequest(')).toBeLessThan(at('await ask('));
+    expect(at('recordTokens(')).toBeGreaterThan(at('await ask('));
+  });
+
+  it('UPDATES the home page rather than creating a second one', () => {
+    /*
+     * Every site already has a home page from the starter and an address belongs
+     * to one page, so a create would fail the unique index and "build my site"
+     * would skip the most important page in it.
+     */
+    expect(body).toContain('saveDraft(');
+    expect(at('saveDraft(')).toBeLessThan(at('createPage('));
+    expect(body).toContain("fields.slug === ''");
+  });
+
+  it('keeps everything about the home page except its sections', () => {
+    // Building the home page is not the same as replacing it: the address, the
+    // SEO and its place in the tree all survive.
+    expect(body).toContain('...existing.content');
+  });
+
+  it('puts the address through the same gate the planner used', () => {
+    expect(body).toContain('safeSlug(fields.slug)');
+  });
+
+  it('reuses the page builder rather than repeating it', () => {
+    // The purpose from the plan IS the brief. Nothing about how a page is
+    // composed belongs in this action.
+    expect(body).toContain('buildPageSystemPrompt(');
+    expect(body).toContain('planFromModel(');
+    expect(body).toContain('sectionsFromPlan(');
+  });
+
+  it('retries once on a mangled answer, inside the one claimed slot', () => {
+    expect(body).toContain('repairPagePrompt(');
+    expect(body.indexOf('repairPagePrompt(')).toBeGreaterThan(at('claimRequest('));
   });
 });

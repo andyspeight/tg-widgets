@@ -1560,3 +1560,155 @@
 /* The list is a live region while a search is running, so the row heights do
    not shift under a pointer that is already moving towards a button. */
 .sv-adopt[aria-busy='true'] .sv-adopt__list { opacity: 0.55; }
+
+/* ------------------------------------------------------------------ */
+/* The AI site plan: proposing pages, then building them              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Two lists in one shape. The REVIEW list is a form — every page's name and
+ * purpose is editable, because approving a plan you cannot change is not
+ * approving anything. The PROGRESS list is the same rows read-only with a state
+ * against each, so the layout does not jump when building starts.
+ */
+.sv-plan {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+}
+
+.sv-plan__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-3);
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+/*
+ * The two fields sit SIDE BY SIDE once there is room, and that is a density
+ * decision rather than a cosmetic one. Stacked, one page was 278px tall, so a
+ * plan of eight was 2,200px of scrolling to review two short fields each. The
+ * name is the narrow one because a page name is two or three words; the purpose
+ * gets the rest because it is the sentence the page is built from.
+ */
+.sv-plan__main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) 2fr;
+  gap: var(--ed-2) var(--ed-3);
+  align-items: start;
+}
+
+/* The address runs under both, where it reads as belonging to the row. */
+.sv-plan__main > .sv-plan__path { grid-column: 1 / -1; }
+
+@media (max-width: 720px) {
+  .sv-plan__main { grid-template-columns: 1fr; }
+}
+
+/* The address, so somebody can see what a rename would do before doing it. */
+.sv-plan__path {
+  font-family: var(--ed-mono, ui-monospace, monospace);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+.sv-plan__tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+  flex: 0 0 auto;
+}
+
+/* ---- Progress ---- */
+
+.sv-plan--progress .sv-plan__row {
+  align-items: center;
+  padding: var(--ed-3) var(--ed-4);
+}
+
+/*
+ * The progress list is one column, not the review grid. Its two children are a
+ * page name and the reason it did not build, and a reason belongs UNDER the
+ * thing it is about: side by side, a long message pushes the name off its own
+ * row and reads as being about the next page down.
+ */
+.sv-plan--progress .sv-plan__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+}
+
+.sv-plan__name { font-weight: 600; }
+
+.sv-plan__state {
+  flex: 0 0 auto;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ed-ink-2);
+}
+
+/* State is carried by an icon and a word, never by colour alone. */
+.sv-plan__row[data-progress='built'] .sv-plan__state  { color: var(--ed-success, #16745a); }
+.sv-plan__row[data-progress='failed'] .sv-plan__state { color: var(--ed-danger); }
+.sv-plan__row[data-progress='waiting'] { opacity: 0.6; }
+
+.sv-plan__status {
+  flex: 0 0 auto;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+/* The reason a page did not build, next to the page it is about. */
+.sv-plan__why {
+  font-size: var(--ed-text-sm);
+  color: var(--ed-danger);
+}
+
+.sv-plan__summary {
+  margin-top: var(--ed-4);
+  color: var(--ed-ink-2);
+}
+
+.sv-empty__note {
+  color: var(--ed-ink-2);
+  text-align: center;
+  padding: var(--ed-6) 0;
+}
+
+/*
+ * The one spinner. Rotation only, so it composes with reduced motion by simply
+ * stopping rather than by needing a second design: a still ring beside the word
+ * "Building" still says what is happening, which is why the word is there.
+ */
+.sv-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ed-line-soft);
+  border-top-color: var(--ed-brand-ink, currentColor);
+  border-radius: 50%;
+  animation: sv-spin 700ms linear infinite;
+}
+
+@keyframes sv-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-spinner { animation: none; }
+}
+
+/* On a phone the arrows sit under the fields rather than beside them. */
+@media (max-width: 640px) {
+  .sv-plan__row { flex-wrap: wrap; }
+  .sv-plan__tools { flex-direction: row; }
+}

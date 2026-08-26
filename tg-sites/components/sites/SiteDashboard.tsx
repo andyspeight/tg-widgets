@@ -25,6 +25,7 @@ import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
+import { SiteBuilder } from './SiteBuilder';
 import { StarterWizard, type StarterProfile } from './StarterWizard';
 import './sites.css';
 
@@ -34,6 +35,7 @@ type Dialog =
   | { kind: 'new' }
   | { kind: 'rename'; page: PageSummary }
   | { kind: 'starter' }
+  | { kind: 'ai-site' }
   | null;
 
 interface Props {
@@ -302,6 +304,21 @@ export function SiteDashboard({
                 <Icon name="sparkle" size={16} />
                 Build me a site
               </button>
+              {/*
+                * THREE WAYS IN, AND THEY ARE GENUINELY DIFFERENT. The starter is
+                * a template filled with four answers: fast, and every site built
+                * from one shares its shape. The planner reads the company profile
+                * and proposes pages for THIS business, then builds each one. The
+                * blank page is for somebody who already knows what they want.
+                */}
+              <button
+                type="button"
+                className="sv-btn"
+                onClick={() => setDialog({ kind: 'ai-site' })}
+              >
+                <Icon name="sparkle" size={16} />
+                Plan it with AI
+              </button>
               <button
                 type="button"
                 className="sv-btn"
@@ -444,6 +461,8 @@ export function SiteDashboard({
       {dialog?.kind === 'starter' && (
         <StarterWizard profile={profile} onClose={() => setDialog(null)} />
       )}
+
+      {dialog?.kind === 'ai-site' && <SiteBuilder onClose={() => setDialog(null)} />}
 
       {dialog?.kind === 'rename' && (
         <PageDialog

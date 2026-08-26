@@ -62,8 +62,9 @@ import {
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
 import { describePicture, fetchableByModel } from '../../lib/ai/alt';
 import { getMediaItem } from '../../lib/db/media';
-import { createPage, type PageWithContent } from '../../lib/db/pages';
+import { createPage, getPage, listPages, saveDraft, type PageWithContent } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
+import { safeSlug } from '../../lib/content/collection';
 import {
   buildPageSystemPrompt,
   buildPageUserPrompt,
@@ -76,6 +77,17 @@ import {
 } from '../../lib/ai/page-build';
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
+import { hasBrandProfile } from '../../lib/settings/schema';
+import {
+  MAX_SITE_BRIEF,
+  SITE_BUILD_MAX_TOKENS,
+  buildSiteSystemPrompt,
+  buildSiteUserPrompt,
+  homeFirst,
+  planSiteFromModel,
+  repairSitePrompt,
+  type PlannedPage,
+} from '../../lib/ai/site-build';
 import { revalidatePath } from 'next/cache';
 
 export type AiResult =
@@ -572,6 +584,250 @@ export type AiPageResult =
  * fails to parse falls to an honest error rather than to anything reaching the
  * database.
  */
+export type SitePlanActionResult =
+  | { ok: true; data: PlannedPage[] }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * Plan the pages a site needs. CREATES NOTHING.
+ *
+ * The one network call and the one repair, exactly like the page builder above.
+ * What it does NOT do is write anything: the answer is a proposal for somebody
+ * to read, edit and approve, and the pages are built one at a time afterwards by
+ * buildPlannedPageAction. Approving a sitemap is cheap; rejecting eight
+ * generated pages is not.
+ *
+ * A BLANK BRIEF IS THE ORDINARY CASE. The settings screen already carries the
+ * company profile and it already feeds every other AI surface, so a client who
+ * has filled that in has said enough. The brief is for what a profile does not
+ * cover: "we are dropping the cruise side", "this is the trade-facing site".
+ *
+ * WITHOUT A PROFILE THERE IS NOTHING TO PLAN FROM, and the check is
+ * hasBrandProfile rather than a name. A sitemap built from a company name alone
+ * is a sitemap that would fit anybody, which is worse than refusing, because it
+ * looks like the feature working.
+ */
+export async function planSiteAction(input: unknown): Promise<SitePlanActionResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const brief = text(fields.brief, MAX_SITE_BRIEF);
+
+    const settings = await getSettings(site.tenantId);
+    if (!hasBrandProfile(settings) && !brief) {
+      return {
+        ok: false,
+        error:
+          'Tell the builder about the company first. Fill in "About the company" on the '
+          + 'Settings screen, or say a line here about what this site is for.',
+      };
+    }
+
+    // One slot covers the plan and its repair, the same bargain the page builder
+    // makes: a retry for a mangled answer is not a second request.
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const system = buildSiteSystemPrompt(settings);
+    const userPrompt = buildSiteUserPrompt(brief);
+    const call = { model: MODEL_BUILD, maxTokens: SITE_BUILD_MAX_TOKENS };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    const firstAnswer = await ask(system, userPrompt, call);
+    inputTokens += firstAnswer.inputTokens;
+    outputTokens += firstAnswer.outputTokens;
+    let plan = planSiteFromModel(firstAnswer.text);
+
+    if (!plan.ok) {
+      const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, call);
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      plan = planSiteFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    if (!plan.ok) {
+      return {
+        ok: false,
+        error: 'The builder could not plan a site from that. Try saying a little more about the company.',
+        retryable: true,
+      };
+    }
+
+    // Home first whatever order it came back in: this list is also the menu.
+    return { ok: true, data: homeFirst(plan.pages) };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) {
+      return { ok: false, error: message };
+    }
+    // Generic below this line: the prompt, with the client's profile in it, has
+    // been in scope.
+    console.error('[tg-sites] the site planner failed', error);
+    return { ok: false, error: 'Something went wrong planning that site. Try again.' };
+  }
+}
+
+/**
+ * Build ONE page from an approved plan.
+ *
+ * ONE PAGE PER CALL, NOT A WHOLE SITE PER CALL, and that is deliberate three
+ * times over. A serverless function has a time limit and eight page builds would
+ * walk into it. A failure on page six loses page six rather than the five that
+ * worked. And the screen can say which page it is on, which matters when the
+ * thing takes a minute: a progress line is the difference between working and
+ * hung.
+ *
+ * IT REUSES THE PAGE BUILDER RATHER THAN REPEATING IT. The purpose from the plan
+ * IS the brief, so this is the existing builder with the sitemap's answer handed
+ * to it. Nothing about how a page is composed lives here.
+ *
+ * THE HOME PAGE IS UPDATED, NEVER CREATED. Every site already has one from the
+ * starter, and an address can only belong to one page, so creating would fail on
+ * the unique index and "build my site" would skip the most important page in it.
+ */
+export async function buildPlannedPageAction(input: unknown): Promise<AiPageResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const title = text(fields.title, 200);
+    const purpose = text(fields.purpose, MAX_PAGE_BRIEF);
+    // Trusted only as far as safeSlug takes it, the same gate the planner used.
+    const slug = typeof fields.slug === 'string' ? safeSlug(fields.slug) : '';
+    const isHome = fields.slug === '';
+
+    if (!title) return { ok: false, error: 'That page has no name.' };
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error:
+          `This site has used all ${DAILY_LIMIT} of today's AI requests. `
+          + 'It resets through the day, so try again later.',
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildPageSystemPrompt(settings);
+    /*
+     * The page's own name rides with its purpose. A purpose is one sentence and
+     * the builder is choosing sections from it, so "Where we go" alongside "the
+     * regions they know" is a materially better brief than either alone.
+     */
+    const userPrompt = buildPageUserPrompt(
+      purpose ? `The page is called "${title}". ${purpose}` : `A page called "${title}".`,
+    );
+    const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS };
+
+    let inputTokens = 0;
+    let outputTokens = 0;
+
+    const firstAnswer = await ask(system, userPrompt, call);
+    inputTokens += firstAnswer.inputTokens;
+    outputTokens += firstAnswer.outputTokens;
+    let plan = planFromModel(firstAnswer.text);
+
+    if (!plan.ok) {
+      const second = await ask(system, `${userPrompt}\n\n${repairPagePrompt(plan.error)}`, call);
+      inputTokens += second.inputTokens;
+      outputTokens += second.outputTokens;
+      plan = planFromModel(second.text);
+    }
+
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+    }
+
+    if (!plan.ok) {
+      return {
+        ok: false,
+        error: `The builder could not put "${title}" together. Try changing what that page is for.`,
+        retryable: true,
+      };
+    }
+
+    const sections = await sectionsFromPlan(plan.plan);
+
+    if (isHome) {
+      const home = (await listPages(site.tenantId)).find((page) => page.slug === '');
+      if (!home) {
+        return { ok: false, error: 'This site has no home page to build into.' };
+      }
+      const existing = await getPage(site.tenantId, home.id);
+      if (!existing) {
+        return { ok: false, error: 'This site has no home page to build into.' };
+      }
+      /*
+       * The sections are replaced and everything else about the page is kept:
+       * its address, its SEO, its place in the tree. Building the home page is
+       * not the same as replacing it.
+       */
+      await saveDraft(
+        site.tenantId,
+        home.id,
+        { ...existing.content, title, sections },
+        userId ?? undefined,
+      );
+      const built = await getPage(site.tenantId, home.id);
+      revalidatePath('/sites');
+      return built
+        ? { ok: true, data: built }
+        : { ok: false, error: 'The home page was built but could not be read back.' };
+    }
+
+    const page = await createPage(site.tenantId, { title, slug, sections });
+    revalidatePath('/sites');
+    return { ok: true, data: page };
+  } catch (error) {
+    if (error instanceof AiError) {
+      return { ok: false, error: error.message, retryable: error.retryable };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) {
+      return { ok: false, error: message };
+    }
+    if (message.includes('23505') || message.includes('duplicate key')) {
+      return { ok: false, error: 'A page already has that address. Rename it in the plan and try again.' };
+    }
+    console.error('[tg-sites] building a planned page failed', error);
+    return { ok: false, error: 'Something went wrong building that page. Try again.' };
+  }
+}
+
 export async function createAiPageAction(input: unknown): Promise<AiPageResult> {
   try {
     if (!aiIsConfigured()) {
