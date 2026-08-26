@@ -127,59 +127,77 @@ export function PublishSiteDialog({ onClose, onPagePublished, onRegionPublished 
       });
 
     (async () => {
-      const result = await sitePublishPlanAction();
-      if (cancelled.current) return;
-      if (!result.ok) {
-        setError(result.error);
-        setPhase('error');
-        return;
-      }
-
-      const plan = result.data;
-      setPlan(plan);
-      const work = buildItems(plan);
-      if (work.length === 0) {
-        setPhase('nothing');
-        return;
-      }
-
-      setStates(new Array(work.length).fill('pending'));
-      setPhase('running');
-
-      let seo = 0;
-      let alts = 0;
-      for (let i = 0; i < work.length; i += 1) {
+      try {
+        const result = await sitePublishPlanAction();
         if (cancelled.current) return;
-        mark(i, 'working');
+        if (!result.ok) {
+          setError(result.error);
+          setPhase('error');
+          return;
+        }
 
-        const item = work[i];
-        let ok = false;
-        try {
-          if (item.kind === 'page') {
-            const published = await publishPageAction(item.id);
-            ok = published.ok;
-            if (published.ok) {
-              if (published.data.summary) onPage.current?.(published.data.summary);
-              if (wasFilled(published.data.filled)) seo += 1;
-              alts += published.data.altsFilled;
+        const plan = result.data;
+        setPlan(plan);
+        const work = buildItems(plan);
+        if (work.length === 0) {
+          setPhase('nothing');
+          return;
+        }
+
+        setStates(new Array(work.length).fill('pending'));
+        setPhase('running');
+
+        let seo = 0;
+        let alts = 0;
+        for (let i = 0; i < work.length; i += 1) {
+          if (cancelled.current) return;
+          mark(i, 'working');
+
+          const item = work[i];
+          let ok = false;
+          try {
+            if (item.kind === 'page') {
+              const published = await publishPageAction(item.id);
+              ok = published.ok;
+              if (published.ok) {
+                if (published.data.summary) onPage.current?.(published.data.summary);
+                if (wasFilled(published.data.filled)) seo += 1;
+                alts += published.data.altsFilled;
+              }
+            } else {
+              const published = await publishRegionAction(item.name);
+              ok = published.ok;
+              if (published.ok) onRegion.current?.(item.name);
             }
-          } else {
-            const published = await publishRegionAction(item.name);
-            ok = published.ok;
-            if (published.ok) onRegion.current?.(item.name);
+          } catch {
+            // A single publish that rejects at the transport level is this
+            // item's failure, not the sweep's: mark it and carry on, so one
+            // dropped request does not take the rest of the site with it.
+            ok = false;
           }
-        } catch {
-          ok = false;
+
+          if (cancelled.current) return;
+          mark(i, ok ? 'done' : 'failed');
         }
 
         if (cancelled.current) return;
-        mark(i, ok ? 'done' : 'failed');
+        setSeoPages(seo);
+        setAltsFilled(alts);
+        setPhase('done');
+      } catch {
+        /*
+         * The safety net for the ONE await the per-item catch above does not
+         * cover: the plan read. sitePublishPlanAction turns its own errors into
+         * a resolved { ok: false }, but a transport-level rejection (a dropped
+         * connection, a 5xx, a stale server-action id right after a deploy)
+         * rejects the promise instead. Without this the overlay would hang on
+         * the planning spinner with nothing to close it back down. Nothing has
+         * been published in this case, so it is safe to say so.
+         */
+        if (cancelled.current) return;
+        setError('Something went wrong working out what to publish. Nothing was changed. Please try again.');
+        setPhase('error');
       }
-
-      if (cancelled.current) return;
-      setSeoPages(seo);
-      setAltsFilled(alts);
-      setPhase('done');
     })();
   }, []);
 
@@ -201,7 +219,11 @@ export function PublishSiteDialog({ onClose, onPagePublished, onRegionPublished 
     phase === 'error'
       ? 'Could not publish'
       : phase === 'nothing'
-        ? 'Everything is up to date'
+        ? // A site whose only pending work is drafts is not "up to date": it has
+          // pages that are simply not live yet, so say what is really going on.
+          plan && plan.draftsHeldBack > 0
+          ? 'Nothing to publish right now'
+          : 'Everything is up to date'
         : phase === 'done'
           ? failed > 0
             ? 'Published, with some left to sort'
@@ -251,10 +273,27 @@ export function PublishSiteDialog({ onClose, onPagePublished, onRegionPublished 
       )}
 
       {phase === 'nothing' && (
-        <p className="tg-pub__lead">
-          Every live page already matches what you have in the editor. There is
-          nothing waiting to publish.
-        </p>
+        <div className="tg-pub">
+          <p className="tg-pub__lead">
+            {plan && plan.draftsHeldBack > 0
+              ? 'Your live pages already match what you have in the editor, so there is nothing to publish.'
+              : 'Every live page already matches what you have in the editor. There is nothing waiting to publish.'}
+          </p>
+          {/*
+            The held-back drafts, said here too. "Publish site" holding drafts
+            back only counts as visibly true if the overlay says so even when it
+            publishes nothing, which is exactly the state a brand-new site of
+            drafts opens in.
+          */}
+          {plan && plan.draftsHeldBack > 0 && (
+            <p className="tg-pub__note">
+              {plan.draftsHeldBack === 1
+                ? '1 page is still a draft and has been left as it is.'
+                : `${plan.draftsHeldBack} pages are still drafts and have been left as they are.`}{' '}
+              Publish a draft on its own when it is ready.
+            </p>
+          )}
+        </div>
       )}
 
       {(phase === 'planning' || phase === 'running' || phase === 'done') && (
