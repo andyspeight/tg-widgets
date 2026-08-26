@@ -38,8 +38,8 @@ console.log('The builder collects promos + not-included as free-text pill lists'
     /_listFor\(key\)[\s\S]*?_promos[\s\S]*?_excludes[\s\S]*?_includes/.test(BUILDER));
   ok('excludes are prefilled from a saved offer', /this\._excludes = Array\.isArray\(offer\.excludes\)/.test(BUILDER));
   ok('promos are prefilled from a saved offer', /this\._promos = Array\.isArray\(offer\.promos\)/.test(BUILDER));
-  ok('excludes are serialised onto the offer', /offer\.excludes = excludes/.test(BUILDER));
-  ok('promos are serialised onto the offer', /offer\.promos = promos/.test(BUILDER));
+  ok('excludes are serialised onto the offer (always, even empty)', /offer\.excludes = \(this\._excludes/.test(BUILDER));
+  ok('promos are serialised onto the offer (always, even empty)', /offer\.promos = \(this\._promos/.test(BUILDER));
   ok('all three lists render on load', /_renderPills\('includes'\)[\s\S]*?_renderPills\('excludes'\)[\s\S]*?_renderPills\('promos'\)/.test(BUILDER));
 }
 
