@@ -72,7 +72,11 @@ export default async function handler(req, res) {
   // deliberately modest. A run killed by the timeout is not dangerous, since
   // records already written stay written and the next run recomputes what is
   // due, but it is wasted work.
-  const limit = parseInt(process.env.REFERENCE_CLIMATE_LIMIT || '20', 10);
+  // Both sources now pull thirty years of DAILY values, and there is a pause
+  // between records to stay under Open-Meteo's per-minute limit, so a record
+  // costs roughly ten seconds of the 300 available. Twelve leaves room for a
+  // couple of slow responses without the run being killed mid-batch.
+  const limit = parseInt(process.env.REFERENCE_CLIMATE_LIMIT || '12', 10);
   const write = process.env.REFERENCE_CLIMATE_WRITE !== 'false';
 
   try {
