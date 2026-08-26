@@ -59,7 +59,7 @@ import {
   maskEmail,
 } from '../_lib/payment-reminders.js';
 import { renderReminderEmail } from '../_lib/payment-reminder-email.js';
-import { decideCharge } from '../pay-balance.js';
+import { decideCharge, instalmentPosition } from '../pay-balance.js';
 import { sendViaSendGrid, buildFromField, isValidEmail } from '../_lib/sendgrid.js';
 import { DEMO_APP_ID } from '../_lib/travelify.js';
 
@@ -197,15 +197,21 @@ async function processRecord(record) {
   // uses 'interim'. Absent → the built-in template renders instead.
   const stage = f.ReminderType === 'FinalBalance' ? 'final' : 'interim';
   const template = (branding.reminderEmails && branding.reminderEmails[stage]) || null;
+  const dueDateIso = f.DueDate || charge.dueDate || '';
+  // Position within a multi-stage balance schedule, for the {instalmentNumber} /
+  // {instalmentTotal} tags. null for a plain single balance — the tags then stay
+  // unfilled, matching a client who never used them.
+  const instalment = instalmentPosition(order, dueDateIso) || undefined;
   const { subject, html } = renderReminderEmail({
     agency: branding,
     customerFirstName: typeof order.customerFirstname === 'string' ? order.customerFirstname : '',
     orderRef,
     charge,
-    dueDateIso: f.DueDate || charge.dueDate || '',
+    dueDateIso,
     payUrl: buildPayUrl(branding.pageUrl, orderRef),
     sequence: { n: cycle, of: Math.max(planned, cycle) },
     template,
+    instalment,
   });
 
   // Everything a successful (or guard-recovered) send stamps: the count,
