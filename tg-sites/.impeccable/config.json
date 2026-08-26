@@ -1,0 +1,16 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "transition: width",
+        "files": [
+          "tests/ai-site-build.test.ts"
+        ],
+        "createdAt": "2026-08-26T17:09:22.228Z"
+      }
+    ]
+  }
+}
