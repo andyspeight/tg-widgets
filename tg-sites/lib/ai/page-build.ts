@@ -86,8 +86,17 @@ export const PAGE_BUILD_MAX_TOKENS = 8192;
  * and fill them with their real reviews, real numbers and real memberships.
  * They are gone from what a machine is allowed to assert on a client's behalf.
  */
-const FABRICATION_BLOCKS = new Set(['quote', 'stats', 'logos']);
-const FABRICATION_CATEGORIES = new Set(['testimonials', 'stats', 'logos']);
+const FABRICATION_BLOCKS = new Set(['quote', 'stats', 'logos', 'table']);
+/*
+ * PRICING AND BANNERS JOINED THE LIST after the review round. The pricing
+ * presets ship "From £549 / £699 / £899" with invented inclusions, and a
+ * banner's whole reason to exist is an announcement — the factory one reads
+ * "Book by 31 August and the deposit is half price", a fabricated dated offer.
+ * A machine has no prices and no announcements; both are the client's alone.
+ * Tables ride along in FABRICATION_BLOCKS because the only tables in the
+ * library are price grids.
+ */
+const FABRICATION_CATEGORIES = new Set(['testimonials', 'stats', 'logos', 'pricing', 'banner']);
 
 function needsRealContent(preset: (typeof PAGE_PRESETS)[number]): boolean {
   if (FABRICATION_CATEGORIES.has(preset.category)) return true;
@@ -97,7 +106,7 @@ function needsRealContent(preset: (typeof PAGE_PRESETS)[number]): boolean {
 }
 
 /** The presets the model may build from: the library minus what must be true. */
-const BUILDABLE_PRESETS = PAGE_PRESETS.filter((preset) => !needsRealContent(preset));
+export const BUILDABLE_PRESETS = PAGE_PRESETS.filter((preset) => !needsRealContent(preset));
 
 const PAGE_PRESET_IDS = new Set(BUILDABLE_PRESETS.map((preset) => preset.id));
 
@@ -153,7 +162,7 @@ export const PAGE_OUTPUT_SHAPE = `Return a JSON array and NOTHING else. No prose
   { "preset": "<another id>", "heading": "..." }
 ]
 
-"preset" is required and must be one of the catalogue ids exactly. "heading", "body" and "photo" are optional plain text, no markup.`;
+"preset" is required and must be one of the catalogue ids exactly. "heading" and "body" are optional plain text, no markup. Give EVERY section a "photo": a section without one falls back to stock imagery chosen for nobody's page.`;
 
 /** The system prompt: house voice, the builder's job, the catalogue, the shape, the brand. */
 export function buildPageSystemPrompt(settings: SiteSettings): string {
@@ -300,6 +309,10 @@ const PLACEHOLDER_COPY: readonly string[] = [
   'another one. three or four of these is usually enough.',
   'the answer, in a sentence or two. short answers get read.',
   'their role, and a sentence or two on what they know.',
+  'add the enquiry or form widget below this line and delete this paragraph.',
+  'add the maps widget here and delete this paragraph.',
+  'add the enquiry widget below this line and delete this paragraph.',
+  'one line saying what these have in common.',
 ];
 
 /** The words a block shows, with any markup taken off. */

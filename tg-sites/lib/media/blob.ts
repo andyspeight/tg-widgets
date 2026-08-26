@@ -141,6 +141,13 @@ export async function copyIntoStore(
     // No credentials, no cookies, no redirect chain to somewhere unexpected.
     redirect: 'follow',
     /*
+     * A stalled download must not run to the platform's kill. These imports
+     * happen inside a serverless invocation with a hard maxDuration, and being
+     * killed there is a blank failure with no message; a picture that takes
+     * longer than this is a picture the page does without.
+     */
+    signal: AbortSignal.timeout(15_000),
+    /*
      * Was `image/*` until 20 Aug 2026, when the media library gained documents.
      * The two callers are a Pexels import, which only ever asks for photographs,
      * and site duplication, which copies whatever a client already had — and

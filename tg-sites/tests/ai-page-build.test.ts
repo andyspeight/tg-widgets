@@ -439,13 +439,13 @@ describe('stripping the copy the builder never filled', () => {
      * were computed against the unstripped tree: stripping first shifted them
      * and pictures landed on the wrong blocks.
      */
-    const photographed = fn.indexOf('withPhotos(ctx.tenantId, plan, applyFill(built');
-    const stripped = fn.indexOf('stripPlaceholders(await withPhotos');
+    const photographed = fn.indexOf('sections = await withPhotos(ctx.tenantId, planned, sections);');
+    const stripped = fn.indexOf('return stripPlaceholders(stripUnfilled(sections, slots));');
 
     expect(build, 'the build step has moved').toBeGreaterThan(-1);
     expect(fill, 'the fill step has moved').toBeGreaterThan(build);
-    expect(photographed, 'photos no longer see the filled sections').toBeGreaterThan(-1);
-    expect(stripped, 'the strip no longer runs last').toBeGreaterThan(-1);
+    expect(photographed, 'photos no longer see the filled sections').toBeGreaterThan(fill);
+    expect(stripped, 'the strip no longer runs last').toBeGreaterThan(photographed);
   });
 
   it('the list still matches what the presets actually contain', async () => {
@@ -499,6 +499,15 @@ describe('fabrication presets are not offered and their blocks cannot ship', () 
       'stats-three',
       'logos-row',
       'features-badges',
+      /*
+       * The review round's additions. pricing-three-panels ships "From £549 /
+       * £699 / £899" with invented inclusions; banner-line ships "Book by 31
+       * August and the deposit is half price" — a fabricated dated offer. A
+       * machine has no prices and no announcements.
+       */
+      'pricing-three-panels',
+      'banner-line',
+      'banner-centred',
     ]) {
       expect(catalogue, `${id} is still offered to the model`).not.toContain(`- ${id}:`);
     }
@@ -569,20 +578,29 @@ describe('fabrication presets are not offered and their blocks cannot ship', () 
      * next month too: if it is in the catalogue, it contains no quote, stats or
      * logos block anywhere in its rows.
      */
-    const { pageCatalogue } = await import('../lib/ai/page-build');
-    const { PAGE_PRESETS } = await import('../lib/content/presets-page');
-    const offered = new Set(
-      [...pageCatalogue().matchAll(/^- ([a-z0-9-]+):/gm)].map((match) => match[1]),
-    );
-    expect(offered.size).toBeGreaterThan(20);
+    /*
+     * On the EXPORTED buildable set, not a regex over the rendered catalogue:
+     * the review showed the regex could quietly match nothing and pass. The
+     * catalogue draws from this same array, so scanning it scans what is
+     * offered.
+     */
+    const { BUILDABLE_PRESETS, pageCatalogue } = await import('../lib/ai/page-build');
+    expect(BUILDABLE_PRESETS.length).toBeGreaterThan(20);
+    // The catalogue really is fed from it.
+    for (const preset of BUILDABLE_PRESETS.slice(0, 5)) {
+      expect(pageCatalogue()).toContain(`- ${preset.id}:`);
+    }
 
-    for (const preset of PAGE_PRESETS) {
-      if (!offered.has(preset.id)) continue;
+    for (const preset of BUILDABLE_PRESETS) {
+      expect(
+        ['testimonials', 'stats', 'logos', 'pricing', 'banner'].includes(preset.category),
+        `${preset.id} is offered from a fabrication category`,
+      ).toBe(false);
       for (const row of preset.rows) {
         for (const column of row.columns) {
           for (const block of column) {
             expect(
-              ['quote', 'stats', 'logos'].includes(block.type),
+              ['quote', 'stats', 'logos', 'table'].includes(block.type),
               `${preset.id} is offered but contains a ${block.type} block`,
             ).toBe(false);
           }

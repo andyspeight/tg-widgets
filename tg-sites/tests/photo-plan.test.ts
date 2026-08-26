@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest';
 
 import { applyPhoto, pagePhotoPlan, sectionPhotoTargets } from '../lib/content/photo-plan';
 import { buildPresetSection, heroPhotoQuery, presetById } from '../lib/content/presets';
+import { PAGE_PRESETS } from '../lib/content/presets-page';
 import type { Section } from '../lib/content/schema';
 import type { StarterPage } from '../lib/content/starters';
 
@@ -194,15 +195,42 @@ describe('an override replaces a designed background, never creates one', () => 
     expect(image?.query).toBe('mustique villa terrace');
   });
 
-  it('does not point the inline picture at the background it is already steering', () => {
-    // One subject, one background: the same photograph twice on one section is
-    // the failure the precedence exists to avoid.
-    const preset = presetById('hero-page-banner')!;
+  it('never duplicates the subject anywhere, swept across the whole library', () => {
+    /*
+     * The first version of this test picked hero-page-banner, which has no
+     * inline image at all, so its loop asserted over an empty array and would
+     * have passed whatever the code did. The review caught it. Swept instead:
+     * for EVERY preset, with a subject supplied, at most one target may carry
+     * the subject as its query — one photograph per subject per section,
+     * whether it landed as a background or as an inline frame.
+     */
+    let presetsWithImages = 0;
+    for (const preset of PAGE_PRESETS) {
+      const targets = sectionPhotoTargets(preset, 0, 'antigua harbour dusk');
+      if (targets.length > 0) presetsWithImages += 1;
+      const subjectHits = targets.filter((target) => target.query === 'antigua harbour dusk');
+      expect(
+        subjectHits.length,
+        `${preset.id} would fetch the identical photograph ${subjectHits.length} times`,
+      ).toBeLessThanOrEqual(1);
+    }
+    // The sweep must have actually swept something.
+    expect(presetsWithImages).toBeGreaterThan(10);
+  });
+
+  it('a two-frame section keeps distinct pictures beside the subject', () => {
+    /*
+     * The regression the review found: a section-constant subject applied to
+     * every bare frame, and the photo fill dedupes by query, so a two-image
+     * hero drew the same photograph twice, side by side. The subject buys ONE
+     * frame; the second keeps its hashed fallback, distinct by index.
+     */
+    const preset = presetById('hero-centred-two-images');
+    if (!preset) return;
     const targets = sectionPhotoTargets(preset, 0, 'antigua harbour dusk');
     const images = targets.filter((target) => target.place.kind === 'image');
-    for (const image of images) {
-      expect(image.query).not.toBe('antigua harbour dusk');
-    }
+    expect(images.length).toBeGreaterThanOrEqual(2);
+    expect(new Set(images.map((target) => target.query)).size).toBe(images.length);
   });
 });
 
@@ -271,5 +299,84 @@ describe('card pictures follow the words the cards actually carry', () => {
     expect(cards[0]?.query).toBe('Antigua coast landscape');
     // And still no background, because the preset has none to replace.
     expect(plan.some((target) => target.place.kind === 'background')).toBe(false);
+  });
+});
+
+
+describe('the freshest field chooses the card picture', () => {
+  function cardsSection(mutate: (items: Array<Record<string, unknown>>) => void) {
+    const preset = presetById('features-cards-with-pictures')!;
+    const section = buildPresetSection(preset);
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const block of column.blocks) {
+          if (block.type === 'cards') mutate((block.props as { items: Array<Record<string, unknown>> }).items);
+        }
+      }
+    }
+    return { preset, section };
+  }
+
+  it('a rewritten title beats a factory label', () => {
+    /*
+     * Review finding: the fill wrote the title but skipped the label, and
+     * label-first meant a "Barbados villas" card searched for "Italy". The
+     * factory items say which field is still factory, so the changed one wins.
+     */
+    const { preset, section } = cardsSection((items) => {
+      items[1].title = 'Barbados villas with staff';
+      // items[1].label stays the factory 'Italy'.
+    });
+    const targets = sectionPhotoTargets(preset, 0, undefined, section);
+    const second = targets.filter((t) => t.place.kind === 'card')[1];
+    expect(second.query).toBe('Barbados villas with staff coast landscape');
+  });
+
+  it('a rewritten label still wins when both changed', () => {
+    const { preset, section } = cardsSection((items) => {
+      items[0].label = 'St Lucia';
+      items[0].title = 'The Pitons up close';
+    });
+    const targets = sectionPhotoTargets(preset, 0, undefined, section);
+    const first = targets.filter((t) => t.place.kind === 'card')[0];
+    expect(first.query).toBe('St Lucia coast landscape');
+  });
+});
+
+describe('a designed background always arrives with readable text', () => {
+  it('every preset with a backgroundQuery sets a dark tone, swept', () => {
+    /*
+     * The whole background gate rests on this: presets that carry photographs
+     * are presets that dressed for them. If one ever declares a backgroundQuery
+     * while keeping a light tone, the gate would wave through the exact
+     * dark-text-on-photograph failure it exists to stop.
+     */
+    let designed = 0;
+    for (const preset of PAGE_PRESETS) {
+      if (!preset.section?.backgroundQuery?.trim()) continue;
+      designed += 1;
+
+      if (preset.section?.tone === 'dark') continue;
+
+      /*
+       * The one legitimate light-toned shape over a photograph: the words sit
+       * inside a solid COLUMN CARD (hero-card-on-photo), so the card carries
+       * the contrast, not the tone. Then every column that holds words must be
+       * boxed with its own background — an unboxed light column over a
+       * photograph is exactly the failure this sweep exists to stop.
+       */
+      for (const row of preset.rows) {
+        row.columns.forEach((column, index) => {
+          const hasWords = column.some((block) => block.type === 'heading' || block.type === 'text');
+          if (!hasWords) return;
+          const box = row.columnBox?.[index] as { background?: string } | undefined;
+          expect(
+            Boolean(box?.background),
+            `${preset.id} puts light-toned words straight onto a photograph`,
+          ).toBe(true);
+        });
+      }
+    }
+    expect(designed).toBeGreaterThan(0);
   });
 });

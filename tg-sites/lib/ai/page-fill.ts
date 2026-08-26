@@ -37,19 +37,28 @@ import { HOUSE_RULES, profileBlock } from './prompt';
 import { toText } from './copy';
 import type { SiteSettings } from '../settings/schema';
 
-/** Long enough for a dozen slots of real copy, capped so it cannot run away. */
-export const FILL_MAX_TOKENS = 8192;
+/**
+ * Room for the whole answer PLUS the thinking, sized to the slot cap.
+ *
+ * Raised with MAX_SLOTS after the review round: ninety-odd slots of copy plus
+ * composite keys plus adaptive thinking can pass 8k, and a truncated answer
+ * fails the JSON parse and silently discards the ENTIRE fill — the worst
+ * possible exchange, one over-long answer for a whole placeholder page.
+ */
+export const FILL_MAX_TOKENS = 16384;
 
 /**
  * The most slots offered in one go.
  *
- * Raised from 24 when the slots stopped being only headings and paragraphs: a
- * single three-card block is twelve slots on its own. Past this the answer is
- * long enough to be unreliable, and the tail is the least important copy on
- * the page, so the rest keep their factory text and the stripper takes them
- * out.
+ * Sized so a full twelve-section plan FITS — a cap that a real page can hit is
+ * not a cap, it is a cliff: everything past it kept factory copy, and factory
+ * card copy is unstrippable by the placeholder pass. Blocks are offered
+ * ATOMICALLY against this cap (see slotsOf): a block whose slots do not all
+ * fit is not offered at all, because half-filling a card ships a fresh title
+ * on a factory body, and stripUnfilled then removes the whole unoffered block
+ * rather than letting it ship as somebody else's example.
  */
-export const MAX_SLOTS = 64;
+export const MAX_SLOTS = 96;
 
 /** The most items of one repeater offered. Past eight, nobody is reading them. */
 const MAX_ITEMS = 8;
@@ -98,69 +107,86 @@ function visible(block: Block): string {
  * see the headline above it. The first pass's heading and paragraph are simply
  * offered back with everything else, and it may improve them or leave them.
  */
-export function slotsOf(sections: readonly Section[]): Slot[] {
-  const slots: Slot[] = [];
-  const add = (slot: Slot) => {
-    if (slots.length < MAX_SLOTS) slots.push(slot);
-  };
+/** The block types whose content the structured fill knows how to write. */
+export const STRUCTURED_TYPES = new Set(['cards', 'steps', 'icon-item', 'list']);
 
-  /** One plain-text field of one repeater item, offered under a composite key. */
-  const itemField = (
-    blockId: string,
-    index: number,
-    field: string,
-    value: unknown,
-    kind: Slot['kind'],
-  ) => {
-    // Only fields the preset item actually carries. An empty field is a design
+/** The composite slots one structured block wants, or none for other types. */
+function blockSlots(block: Block): Slot[] {
+  /*
+   * COMPOSITE KEYS NEED THE COLON TO BE OURS. App-minted ids are base36 after
+   * `blk_`, so a colon can never appear in one — but the schema only requires
+   * a non-empty string, and an imported page could carry anything. A block
+   * whose own id contains a colon is skipped rather than risking an ambiguous
+   * parse.
+   */
+  if (block.id.includes(':')) return [];
+
+  const out: Slot[] = [];
+  const props = (block.props ?? {}) as Record<string, unknown>;
+
+  const itemField = (index: number, field: string, value: unknown, kind: Slot['kind']) => {
+    // Only fields the item actually carries. An empty field is a design
     // choice (a card with no label), not a slot waiting for words.
     const current = typeof value === 'string' ? value.trim() : '';
     if (!current) return;
-    add({ id: `${blockId}:item:${index}:${field}`, kind, plain: true, current: current.slice(0, 200) });
+    out.push({ id: `${block.id}:item:${index}:${field}`, kind, plain: true, current: current.slice(0, 200) });
   };
+
+  if (block.type === 'cards' || block.type === 'steps') {
+    const items = Array.isArray(props.items) ? (props.items as Array<Record<string, unknown>>) : [];
+    items.slice(0, MAX_ITEMS).forEach((item, index) => {
+      // The fields a card carries; a step has only the first two.
+      itemField(index, 'title', item.title, 'heading');
+      itemField(index, 'body', item.body, 'text');
+      itemField(index, 'label', item.label, 'heading');
+      itemField(index, 'linkLabel', item.linkLabel, 'heading');
+    });
+  } else if (block.type === 'list') {
+    // A tick list's entries are pure copy — and the factory ones include
+    // "ATOL protected", which is a trust claim nobody should ship unwritten.
+    const items = Array.isArray(props.items) ? (props.items as Array<Record<string, unknown>>) : [];
+    items.slice(0, MAX_ITEMS).forEach((item, index) => {
+      itemField(index, 'text', item.text, 'heading');
+    });
+  } else if (block.type === 'icon-item') {
+    // A single item whose fields sit directly on props.
+    const title = typeof props.title === 'string' ? props.title.trim() : '';
+    const body = typeof props.body === 'string' ? props.body.trim() : '';
+    if (title) out.push({ id: `${block.id}:prop:title`, kind: 'heading', plain: true, current: title.slice(0, 200) });
+    if (body) out.push({ id: `${block.id}:prop:body`, kind: 'text', plain: true, current: body.slice(0, 200) });
+  }
+
+  return out;
+}
+
+export function slotsOf(sections: readonly Section[]): Slot[] {
+  const slots: Slot[] = [];
 
   for (const section of sections) {
     for (const row of section.rows) {
       for (const column of row.columns) {
         for (const block of column.blocks) {
-          if (slots.length >= MAX_SLOTS) return slots;
-
           if (block.type === 'heading' || block.type === 'text') {
-            add({ id: block.id, kind: block.type, current: visible(block).slice(0, 200) });
+            // The colon guard holds here too: a heading whose imported id
+            // happens to LOOK like a composite key would otherwise double-fill
+            // some other block's card item.
+            if (block.id.includes(':')) continue;
+            if (slots.length < MAX_SLOTS) {
+              slots.push({ id: block.id, kind: block.type, current: visible(block).slice(0, 200) });
+            }
             continue;
           }
 
           /*
-           * COMPOSITE KEYS NEED THE COLON TO BE OURS. App-minted ids are
-           * base36 after `blk_`, so a colon can never appear in one — but the
-           * schema only requires a non-empty string, and an imported page
-           * could carry anything. A block whose own id contains a colon is
-           * skipped rather than risking an ambiguous parse.
+           * ATOMIC PER BLOCK. Offering half a card's fields ships a hybrid: a
+           * freshly written title sitting on a factory body about the Amalfi
+           * coast. So a block's slots go in together or not at all — and a
+           * block offered not at all is provably unfilled, which is exactly
+           * what stripUnfilled removes.
            */
-          if (block.id.includes(':')) continue;
-
-          const props = (block.props ?? {}) as Record<string, unknown>;
-
-          if (block.type === 'cards' || block.type === 'steps') {
-            const items = Array.isArray(props.items)
-              ? (props.items as Array<Record<string, unknown>>)
-              : [];
-            items.slice(0, MAX_ITEMS).forEach((item, index) => {
-              // The fields a card carries; a step has only the first two.
-              itemField(block.id, index, 'title', item.title, 'heading');
-              itemField(block.id, index, 'body', item.body, 'text');
-              itemField(block.id, index, 'label', item.label, 'heading');
-              itemField(block.id, index, 'linkLabel', item.linkLabel, 'heading');
-            });
-            continue;
-          }
-
-          if (block.type === 'icon-item') {
-            // A single item whose fields sit directly on props.
-            const title = typeof props.title === 'string' ? props.title.trim() : '';
-            const body = typeof props.body === 'string' ? props.body.trim() : '';
-            if (title) add({ id: `${block.id}:prop:title`, kind: 'heading', plain: true, current: title.slice(0, 200) });
-            if (body) add({ id: `${block.id}:prop:body`, kind: 'text', plain: true, current: body.slice(0, 200) });
+          const wanted = blockSlots(block);
+          if (wanted.length > 0 && slots.length + wanted.length <= MAX_SLOTS) {
+            slots.push(...wanted);
           }
         }
       }
@@ -252,10 +278,17 @@ export function fillFromModel(answer: unknown, slots: readonly Slot[]): FillResu
     // An id we did not offer is not a slot on this page.
     if (!slot) continue;
 
-    const text = toText(value);
-    const words = (slot.plain ? text : escapeHtml(text))
+    /*
+     * SLICED BY CODE POINTS, BEFORE ESCAPING. A .slice on the string bisects
+     * surrogate pairs (an emoji becomes a lone half) and, applied after
+     * escaping, bisects entities (a literal "&am" lands on the page). Slicing
+     * the plain text by code points first, then escaping, cannot do either.
+     */
+    const text = [...toText(value)]
       .slice(0, slot.kind === 'heading' ? MAX_HEADING : MAX_BODY)
+      .join('')
       .trim();
+    const words = slot.plain ? text : escapeHtml(text);
     if (words) copy[id] = words;
   }
 
@@ -270,6 +303,85 @@ export function fillFromModel(answer: unknown, slots: readonly Slot[]): FillResu
  * instruction means the placeholder stripper removes it. That is the right
  * order: better a shorter page than one carrying "Tagline here".
  */
+/**
+ * Remove structured blocks the fill provably never reached.
+ *
+ * THE FAILURE PATH'S AMALFI PROBLEM. When the fill call dies, heading and text
+ * placeholders are caught by the placeholder stripper — but a card's factory
+ * copy lives in plain props that stripper cannot see, so a Caribbean site whose
+ * fill failed still shipped "The Amalfi coast, slowly". Rendered and confirmed,
+ * not theorised: the failure-path harness showed Amalfi back on the page.
+ *
+ * THE SLOTS ARE THE EVIDENCE. Every structured field the fill was going to
+ * write was captured as a slot BEFORE the call, with what it said at the time.
+ * So "was this block filled" has an exact answer: compare each field's value in
+ * the final tree with the slot's recorded current. A block where EVERY offered
+ * field is unchanged was never written, and its content is still a preset's
+ * example — some other company's coast, invented trip names. Wrong words on a
+ * client's site are worse than a shorter page, so the block goes.
+ *
+ * A PARTLY-FILLED block stays: one field the model skipped is a flaw, not a
+ * fabrication, and dropping the whole block for it would throw away good copy.
+ * On the success path every block changed, so this is a no-op that costs one
+ * comparison per slot.
+ */
+export function stripUnfilled(sections: Section[], slots: readonly Slot[]): Section[] {
+  /*
+   * TWO WAYS TO BE UNFILLED. A block whose offered fields all still say what
+   * they said was written by nobody. And a structured block that was NEVER
+   * OFFERED — skipped whole at the slot cap, or carrying a type the fill
+   * gained later — has factory copy by definition. Both ship somebody else's
+   * example on a client's page, so both go. A structured block with no
+   * offerable text at all (a collection-fed cards grid, whose items arrive at
+   * render time) is neither, and stays.
+   */
+  // block id -> the composite slots offered for it, with what they said.
+  const offered = new Map<string, Array<{ item?: number; field: string; current: string }>>();
+  for (const slot of slots) {
+    const itemMatch = /^(.+?):item:(\d+):(.+)$/.exec(slot.id);
+    const propMatch = /^(.+?):prop:(.+)$/.exec(slot.id);
+    if (!itemMatch && !propMatch) continue;
+    const blockId = (itemMatch ?? propMatch)![1];
+    const list = offered.get(blockId) ?? [];
+    if (itemMatch) list.push({ item: Number(itemMatch[2]), field: itemMatch[3], current: slot.current });
+    else list.push({ field: propMatch![2], current: slot.current });
+    offered.set(blockId, list);
+  }
+
+  const untouched = (block: Block): boolean => {
+    const fields = offered.get(block.id);
+    if (!fields || fields.length === 0) {
+      // Never offered: unfilled exactly when there was something to offer.
+      return STRUCTURED_TYPES.has(block.type) && blockSlots(block).length > 0;
+    }
+    const props = (block.props ?? {}) as Record<string, unknown>;
+    const items = Array.isArray(props.items) ? (props.items as Array<Record<string, unknown>>) : [];
+
+    return fields.every(({ item, field, current }) => {
+      const value = item === undefined ? props[field] : items[item]?.[field];
+      const now = typeof value === 'string' ? value.trim().slice(0, 200) : '';
+      return now === current;
+    });
+  };
+
+  const kept: Section[] = [];
+  for (const section of sections) {
+    const rows = section.rows
+      .map((row) => ({
+        ...row,
+        columns: row.columns
+          .map((column) => ({
+            ...column,
+            blocks: column.blocks.filter((block) => !untouched(block)),
+          }))
+          .filter((column) => column.blocks.length > 0),
+      }))
+      .filter((row) => row.columns.length > 0);
+    if (rows.length > 0) kept.push({ ...section, rows });
+  }
+  return kept;
+}
+
 /** The composite answers addressed to one block, parsed off their keys. */
 function answersFor(blockId: string, copy: Record<string, string>) {
   const items: Array<{ index: number; field: string; words: string }> = [];
@@ -293,7 +405,7 @@ function answersFor(blockId: string, copy: Record<string, string>) {
 }
 
 /** The item fields the fill is allowed to write. Nothing structural, ever. */
-const ITEM_FIELDS = new Set(['title', 'body', 'label', 'linkLabel']);
+const ITEM_FIELDS = new Set(['title', 'body', 'label', 'linkLabel', 'text']);
 const PROP_FIELDS = new Set(['title', 'body']);
 
 export function applyFill(sections: Section[], copy: Record<string, string>): Section[] {
@@ -305,6 +417,9 @@ export function applyFill(sections: Section[], copy: Record<string, string>): Se
         ...column,
         blocks: column.blocks.map((block) => {
           if (block.type === 'heading' || block.type === 'text') {
+            // The same colon guard as the offer side: an imported heading whose
+            // id looks like a composite key is nobody's slot.
+            if (block.id.includes(':')) return block;
             const words = copy[block.id];
             if (!words) return block;
             return {
@@ -320,7 +435,7 @@ export function applyFill(sections: Section[], copy: Record<string, string>): Se
 
           const { items, props } = answersFor(block.id, copy);
 
-          if ((block.type === 'cards' || block.type === 'steps') && items.length > 0) {
+          if ((block.type === 'cards' || block.type === 'steps' || block.type === 'list') && items.length > 0) {
             const existing = (block.props as Record<string, unknown>)?.items;
             if (!Array.isArray(existing)) return block;
 

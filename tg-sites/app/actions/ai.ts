@@ -96,6 +96,7 @@ import {
   buildFillUserPrompt,
   fillFromModel,
   slotsOf,
+  stripUnfilled,
 } from '../../lib/ai/page-fill';
 import { hasBrandProfile } from '../../lib/settings/schema';
 import {
@@ -623,43 +624,79 @@ async function sectionsForPage(
   const slots = slotsOf(built);
 
   /*
-   * Only when there is both something to write and time to write it. A page of
-   * one section has nothing the first pass missed, and a fill started with
-   * seconds left is a call that will be aborted and still be paid for.
+   * EVERY SECTION GETS A PHOTO SUBJECT, defaulting to the page's own name.
+   *
+   * The output contract asks the model for one per section, but it may omit
+   * them, and an omitted subject used to fall through to the hero palette —
+   * which fetched a mountain lake, or an Amalfi photograph, for a Caribbean
+   * page. The page title is not a great query; it is an honest one, about this
+   * page rather than about a palette written for no page in particular. Only
+   * when the title actually names something: "Home" and "New page" describe
+   * nothing photographable.
+   */
+  const generic = new Set(['', 'home', 'new page']);
+  const pageSubject = generic.has(ctx.title.trim().toLowerCase()) ? '' : ctx.title.trim().slice(0, 60);
+  const planned = pageSubject
+    ? plan.map((entry) => (entry.photo ? entry : { ...entry, photo: pageSubject }))
+    : plan;
+
+  /*
+   * ONE EXIT, so the fill can only ever change `sections` and every path is
+   * photographed and stripped identically. The previous three-exit shape let a
+   * throw from the photos or the strip on the SUCCESS path be caught as
+   * "filling a page failed", discarding a fill that had been paid for.
+   */
+  let sections = built;
+
+  /*
+   * The fill runs only when there is both something to write and time to write
+   * it. A page of one section has nothing the first pass missed, and a fill
+   * started with seconds left is a call that will be aborted and still be paid
+   * for.
    */
   const left = remainingBudget(ctx.startedAt);
-  if (slots.length === 0 || left < MIN_REPAIR_MS) {
-    return stripPlaceholders(await withPhotos(ctx.tenantId, plan, built));
-  }
-
-  try {
-    const system = buildFillSystemPrompt(ctx.settings);
-    const answer = await ask(system, buildFillUserPrompt(ctx.title, ctx.purpose, slots), {
-      model: MODEL_BUILD,
-      maxTokens: FILL_MAX_TOKENS,
-      timeoutMs: Math.min(BUILD_TIMEOUT_MS, left),
-      effort: BUILD_EFFORT,
-    });
-
-    if (ctx.claimId) {
-      await recordTokens(ctx.tenantId, ctx.claimId, {
-        input: answer.inputTokens,
-        output: answer.outputTokens,
+  if (slots.length > 0 && left >= MIN_REPAIR_MS) {
+    try {
+      const system = buildFillSystemPrompt(ctx.settings);
+      const answer = await ask(system, buildFillUserPrompt(ctx.title, ctx.purpose, slots), {
+        model: MODEL_BUILD,
+        maxTokens: FILL_MAX_TOKENS,
+        timeoutMs: Math.min(BUILD_TIMEOUT_MS, left),
+        effort: BUILD_EFFORT,
       });
-    }
 
-    const filled = fillFromModel(answer.text, slots);
-    if (filled.ok) {
-      return stripPlaceholders(await withPhotos(ctx.tenantId, plan, applyFill(built, filled.copy)));
+      if (ctx.claimId) {
+        await recordTokens(ctx.tenantId, ctx.claimId, {
+          input: answer.inputTokens,
+          output: answer.outputTokens,
+        });
+      }
+
+      const filled = fillFromModel(answer.text, slots);
+      if (filled.ok) sections = applyFill(built, filled.copy);
+      else console.error('[tg-sites] the fill answer could not be used:', filled.error);
+    } catch (error) {
+      // Never fatal: the page stands without it. Logged because a fill that
+      // keeps failing is worth knowing about, and the client will never see it.
+      console.error('[tg-sites] filling a page failed', error);
     }
-  } catch (error) {
-    // Never fatal: the page stands without it. Logged because a fill that keeps
-    // failing is worth knowing about, and the client will never see it.
-    console.error('[tg-sites] filling a page failed', error);
   }
 
-  return stripPlaceholders(await withPhotos(ctx.tenantId, plan, built));
+  /*
+   * Photographs only while there is budget to fetch them: the imports run
+   * inside this same serverless invocation, and being killed at the route's
+   * maxDuration is a blank failure with no message. A page without pictures is
+   * a page; a function killed mid-write is not.
+   */
+  if (remainingBudget(ctx.startedAt) >= PHOTO_FLOOR_MS) {
+    sections = await withPhotos(ctx.tenantId, planned, sections);
+  }
+
+  return stripPlaceholders(stripUnfilled(sections, slots));
 }
+
+/** The least budget worth starting the photo imports with. */
+const PHOTO_FLOOR_MS = 12_000;
 
 /**
  * The page's photographs, from the client's own library.

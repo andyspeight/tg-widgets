@@ -70,15 +70,36 @@ function cardQueries(
 ): Array<string | null> {
   const suffix = spec.photo?.trim();
   if (!suffix) return [];
-  const preset = Array.isArray(spec.props?.items) ? (spec.props.items as Array<Record<string, unknown>>) : [];
-  const items = builtItems ?? preset;
-  return items.map((item) => {
+  const factory = Array.isArray(spec.props?.items) ? (spec.props.items as Array<Record<string, unknown>>) : [];
+  const items = builtItems ?? factory;
+
+  const text = (item: Record<string, unknown> | undefined, field: string): string => {
+    const value = item?.[field];
+    return typeof value === 'string' && value.trim() ? value.trim() : '';
+  };
+
+  return items.map((item, index) => {
     // Only a card still showing its empty frame. One that already carries a
     // picture, from the preset or from a pass before this one, is left alone.
     if (typeof item.src === 'string' && item.src.trim()) return null;
-    const label = typeof item.label === 'string' && item.label.trim() ? item.label.trim() : '';
-    const title = typeof item.title === 'string' && item.title.trim() ? item.title.trim() : '';
-    const subject = label || title;
+
+    const label = text(item, 'label');
+    const title = text(item, 'title');
+    /*
+     * PREFER THE FIELD THE FILL ACTUALLY CHANGED. A fill that rewrote the title
+     * to "Barbados villas" but skipped the label leaves the factory "Italy"
+     * sitting there, and label-first would search for Italy on a Barbados card.
+     * The factory items say which fields are still factory, so the freshest
+     * field wins; when both changed or neither did, label-first as always.
+     */
+    const was = builtItems ? factory[index] : undefined;
+    const labelFresh = was ? label !== text(was, 'label') : true;
+    const titleFresh = was ? title !== text(was, 'title') : true;
+    const subject =
+      (labelFresh ? label : '')
+      || (titleFresh ? title : '')
+      || label
+      || title;
     return subject ? `${subject} ${suffix}` : suffix;
   });
 }
@@ -122,6 +143,15 @@ export function sectionPhotoTargets(
   const designedBackground = preset.section?.backgroundQuery?.trim() ?? '';
   const subject = backgroundOverride?.trim() ?? '';
   let imageIndex = 0;
+  /*
+   * THE SUBJECT IS ONE PICTURE, NOT A WALLPAPER ROLL. Review finding, 26 Aug:
+   * a section-constant subject applied to every bare frame meant a two-image
+   * hero fetched the identical photograph twice, side by side, because the
+   * photo fill deduplicates by query. So the subject steers the FIRST bare
+   * frame only; the rest keep the hero fallback, whose queries are hashed per
+   * index and therefore distinct, exactly as they were before any of this.
+   */
+  let subjectSpent = false;
 
   preset.rows.forEach((row, rowIndex) => {
     row.columns.forEach((column, columnIndex) => {
@@ -152,10 +182,9 @@ export function sectionPhotoTargets(
          * the same query would put the same photograph on the section twice.
          * The generic hero fallback comes last, as it always did.
          */
-        const query =
-          explicit
-          || (!designedBackground && subject ? subject : '')
-          || (isHero ? heroPhotoQuery(preset.id, imageIndex) : '');
+        const steer = !designedBackground && subject && !subjectSpent ? subject : '';
+        const query = explicit || steer || (isHero ? heroPhotoQuery(preset.id, imageIndex) : '');
+        if (steer && query === steer) subjectSpent = true;
         imageIndex += 1;
 
         // Only single images are filled. A gallery is several pictures at once
