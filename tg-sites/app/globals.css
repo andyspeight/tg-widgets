@@ -3788,6 +3788,56 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* A cards grid's box lands on the cards                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 26 Aug 2026: a card background changed the block background, a border
+ * went round the block, a shadow landed on the block. Everywhere else "the
+ * block" is the thing you see; here it is a grid whose visible parts are the
+ * cards, so a background paints behind the gaps and a border draws a rectangle
+ * round the lot.
+ *
+ * The block stops painting its own surface and the cards take it instead.
+ * PADDING STAYS ON THE CONTAINER, because padding around a grid is space around
+ * the grid; the card's inner padding is the card's own.
+ *
+ * These rules come after the finish presets on purpose. They carry the same
+ * specificity, so source order is what lets an explicit setting win over the
+ * preset, and only the properties the client actually set are emitted at all,
+ * so a tinted card that gains a border keeps its tint.
+ */
+.tgs-block[data-boxed][data-box-target='card'] {
+  background-image: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.tgs-block[data-box-target='card'][style*='--tgs-card-bg'] .tgs-card {
+  background: var(--tgs-card-bg);
+}
+
+.tgs-block[data-box-target='card'][style*='--tgs-card-bw'] .tgs-card {
+  border: var(--tgs-card-bw) solid var(--tgs-card-bc, currentColor);
+}
+
+.tgs-block[data-box-target='card'][style*='--tgs-card-radius'] .tgs-card {
+  border-radius: var(--tgs-card-radius);
+}
+
+.tgs-block[data-box-target='card'][data-shadow='soft'] .tgs-card {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
+}
+
+.tgs-block[data-box-target='card'][data-shadow='medium'] .tgs-card {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+.tgs-block[data-box-target='card'][data-shadow='strong'] .tgs-card {
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+}
+
+/* ------------------------------------------------------------------ */
 /* Card designs: the silhouette, as distinct from the finish           */
 /* ------------------------------------------------------------------ */
 

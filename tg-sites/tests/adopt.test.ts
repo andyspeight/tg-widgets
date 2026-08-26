@@ -769,3 +769,46 @@ describe('the client brand reaches the editor, not just the canvas', () => {
     expect(list).toContain("var(--tgs-accent)");
   });
 });
+
+describe('a cards grid puts its box on the cards', () => {
+  const renderer = readFileSync(resolve(__dirname, '..', 'components', 'render', 'PageRenderer.tsx'), 'utf8');
+  const css = readFileSync(resolve(__dirname, '..', 'app', 'globals.css'), 'utf8');
+
+  it('targets the card rather than the block', () => {
+    /*
+     * Andy, 26 Aug 2026: a card background changed the block background, a
+     * border went round the block, a shadow landed on the block. Everywhere
+     * else "the block" is the thing you can see. Here it is a grid whose
+     * visible parts are the cards, so a background paints behind the gaps and
+     * a border draws a rectangle round the lot.
+     */
+    expect(renderer).toContain("data-box-target={block.type === 'cards' && boxed ? 'card' : undefined}");
+    expect(css).toContain(".tgs-block[data-boxed][data-box-target='card']");
+  });
+
+  it('emits only what was actually set, so a preset is not wiped', () => {
+    /*
+     * boxStyle fills every unset property with transparent and 0, which is
+     * right for a block painting itself and wrong here: touching any box
+     * control would have blanked the finish the card already had. Verified in a
+     * browser: a tinted card given a border keeps its tint.
+     */
+    const fn = renderer.slice(renderer.indexOf('const cardBox'), renderer.indexOf('const style: CSSProperties'));
+    expect(fn).toContain('box.background ?');
+    expect(fn).toContain('box.borderWidth > 0');
+    expect(fn).toContain('box.radius > 0');
+  });
+
+  it('overrides the finish preset rather than losing to it', () => {
+    // Same specificity, so source order decides. The override has to come after.
+    const preset = css.indexOf(".tgs-cards[data-style='tinted']");
+    const override = css.indexOf("[data-box-target='card'][style*='--tgs-card-bg']");
+    expect(preset).toBeGreaterThan(-1);
+    expect(override).toBeGreaterThan(preset);
+  });
+
+  it('leaves padding on the container, where it means space around the grid', () => {
+    const fn = renderer.slice(renderer.indexOf('const cardBox'), renderer.indexOf('const style: CSSProperties'));
+    expect(fn).not.toContain('padding');
+  });
+});
