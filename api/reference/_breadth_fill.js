@@ -34,8 +34,27 @@ const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
 const COORD_TOLERANCE_KM = 50;
 
 // ---- pure: normalisation + cross-verification -----------------------------
+/**
+ * Fold a name down to comparable tokens. Pure.
+ *
+ * Diacritics are stripped to their base letter and apostrophes are removed
+ * outright, both before the catch-all that turns punctuation into spaces. That
+ * ordering is the whole point, and it was not always here.
+ *
+ * Until 26 Aug 2026 anything outside a-z became a SPACE, which quietly broke
+ * accented and apostrophed names by splitting them mid-word: "Malaga" tokenised
+ * to "malaga" but "Málaga" to "m laga", so the two never matched, and
+ * "Fa'a'a" collapsed to tokens too short to survive the length filter at all,
+ * leaving an empty set and a zero score. The first fill run created Tahiti and
+ * Puerto Vallarta with no name because of it. Spanish, French, Portuguese and
+ * Nordic airports are a large share of what is left to create, so this was
+ * costing far more than the two records that made it visible.
+ */
 export function normalizeName(s) {
-  return String(s || '').toLowerCase()
+  return String(s || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // á -> a, ā -> a
+    .toLowerCase()
+    .replace(/['’ʻ`]/g, '') // Fa'a'a -> faaa, not "fa a a"
     .replace(/\b(airport|international|intl|regional|the)\b/g, ' ')
     .replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
