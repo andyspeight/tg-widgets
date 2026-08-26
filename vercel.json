@@ -125,6 +125,10 @@
       "schedule": "0 4 * * *"
     },
     {
+      "path": "/api/cron/reference-identity",
+      "schedule": "0 */2 * * *"
+    },
+    {
       "path": "/api/admin/backfill-enquiry-clients",
       "schedule": "23 * * * *"
     }
