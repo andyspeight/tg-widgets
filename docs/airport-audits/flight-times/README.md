@@ -225,3 +225,27 @@ one aggregator claimed 6h 50m to Dalaman against the airline's own 4h 15m; anoth
 | ZTH | 3h 35m |
 
 **Complete. All 201 overseas airports carry a verified flight time from the UK.**
+
+## Record fix: Siem Reap, 26 August 2026
+
+The record carried the retired IATA code `REP`. That airport closed on
+16 October 2023 and was replaced the same day by Siem Reap Angkor
+International (`SAI`), 25 miles east of the town instead of the old
+airport's short hop. Code changed to `SAI` on Andy's explicit instruction.
+
+Worth recording accurately: the record's prose was already written about
+the new airport (25 miles out, 45 to 60 minute transfers, opened October
+2023). Only the code was stale. An earlier note of mine implied the record
+still described the old airport's ten minute transfer. It did not, and that
+note has been corrected.
+
+Also fixed on the same record while it was open: five em dashes, a corrupted
+`¤` currency symbol in the taxi fare, and the `(REP)` reference in the
+overview.
+
+Checked before changing the code: `?iata=` is a live public lookup mode on
+`/api/airport-content`, so the code is a join key, not just a label. This
+record has never been servable (status `In progress`, gated out of the
+picker by `servableStatusFormula`), so an existing embed keyed to `REP` is
+very unlikely. If one somehow exists it would now 404 and need repointing
+to `SAI`.
