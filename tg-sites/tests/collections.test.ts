@@ -2062,3 +2062,101 @@ describe('changing the order does not empty the canvas', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE ORDER THE CLIENT SET BY HAND.
+ *
+ * The half of Andy's "i can't see a way to reorder them" that no rule can
+ * answer. An agency featuring a destination wants Hvar first because they
+ * decided so, and neither a date nor a title expresses that. Stored per item as
+ * a position (migration 0031), arranged with the arrows on the collections
+ * screen, and read back by the 'manual' order.
+ */
+describe('the hand-set order', () => {
+  const ROWS = [
+    { slug: 'c', data: { title: 'Cephalonia' }, published_at: '2026-08-03', position: 3, fields: [] },
+    { slug: 'a', data: { title: 'Hvar' },       published_at: '2026-08-02', position: 1, fields: [] },
+    { slug: 'b', data: { title: 'Brac' },       published_at: '2026-08-01', position: 2, fields: [] },
+  ];
+
+  async function titles(rows: Record<string, unknown>[]): Promise<string[]> {
+    const { listPublished } = await import('../lib/db/collections');
+    respond('from public.collection_items', rows);
+    const listing = await listPublished(ALPHA, 'guides', 6, { order: 'manual' } as never);
+    return listing.items.map((row) => String(row.item.title));
+  }
+
+  it('follows the positions, not the dates', async () => {
+    // Newest first would be Cephalonia, Hvar, Brac. The client said otherwise.
+    expect(await titles(ROWS)).toEqual(['Hvar', 'Brac', 'Cephalonia']);
+  });
+
+  it('puts entries nobody has placed last, in the order they already had', async () => {
+    /*
+     * Null is a real state meaning "never arranged", not a missing value. A new
+     * entry appearing at the top of a hand-set grid would silently displace
+     * whatever the client had chosen to lead with.
+     */
+    const withNew = [
+      { slug: 'd', data: { title: 'Korcula' }, published_at: '2026-08-09', position: null, fields: [] },
+      ...ROWS,
+    ];
+    expect(await titles(withNew)).toEqual(['Hvar', 'Brac', 'Cephalonia', 'Korcula']);
+  });
+
+  it('degrades to the date order when nothing has been arranged at all', async () => {
+    const none = ROWS.map((row) => ({ ...row, position: null }));
+    // Which is the order they were read in, so a collection nobody has touched
+    // behaves exactly as it did before positions existed.
+    expect(await titles(none)).toEqual(['Cephalonia', 'Hvar', 'Brac']);
+  });
+
+  it('reads the whole collection first, like every order but newest', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('from public.collection_items', ROWS);
+    await listPublished(ALPHA, 'guides', 2, { order: 'manual' } as never);
+    expect(itemQuery().sql).not.toContain('limit');
+  });
+});
+
+describe('saving a hand-set order', () => {
+  it('writes the whole list in one statement, scoped to the collection', async () => {
+    const { reorderItems } = await import('../lib/db/collections');
+
+    log.length = 0;
+    respond('update public.collection_items', [{ id: 'i1' }, { id: 'i2' }]);
+    const moved = await reorderItems(ALPHA, 'COLL', ['i2', 'i1']);
+
+    expect(moved).toBe(2);
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(write.sql).toContain('with ordinality');
+    /*
+     * The collection scope is the part that matters. reorderItems is reachable
+     * from a browser, and tenant scoping alone would still have let somebody
+     * renumber a DIFFERENT collection of their own by sending its ids.
+     */
+    expect(write.sql).toContain('collection_id');
+    expect(write.params).toContain('COLL');
+    expect(write.params).toContainEqual(['i2', 'i1']);
+  });
+
+  it('does nothing at all for an empty list rather than writing', async () => {
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    expect(await reorderItems(ALPHA, 'COLL', [])).toBe(0);
+    expect(log.filter((s) => s.sql.includes('update public.collection_items'))).toHaveLength(0);
+  });
+
+  it('writes as the app role, never the renderer', async () => {
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('update public.collection_items', []);
+    await reorderItems(ALPHA, 'COLL', ['i1']);
+    for (const statement of log.filter((s) => s.sql.includes('collection_items'))) {
+      expect(statement.role).toBe('app');
+    }
+  });
+});
