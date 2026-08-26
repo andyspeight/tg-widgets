@@ -451,6 +451,34 @@ describe('building an approved page', () => {
  * These pin the numbers against the things that constrain them, because both
  * ends of this are easy to change without noticing the other.
  */
+describe('finishing a build lands somewhere useful', () => {
+  const screen = readFileSync(join(ROOT, 'components', 'sites', 'SiteBuilder.tsx'), 'utf8');
+  const dashboard = readFileSync(join(ROOT, 'components', 'sites', 'SiteDashboard.tsx'), 'utf8');
+
+  it('opens whatever was built, not only a home page', () => {
+    /*
+     * The commonest run of all is planning on a site that already exists, which
+     * usually builds NO home page. Holding only the home id meant there was
+     * nothing to open then, and the fallback did not save it: see below.
+     */
+    expect(screen).toContain("page.slug === '' ? opened : current ?? opened");
+  });
+
+  it('and a refresh alone would not have shown it', () => {
+    /*
+     * The reason the fallback does not save it, checked against the dashboard
+     * rather than asserted here: it seeds its page list into state on mount, so
+     * new server props do not reach the list. The page is created and appears
+     * to have vanished.
+     */
+    expect(dashboard).toContain('useState(initial)');
+  });
+
+  it('names the page on the button rather than saying continue', () => {
+    expect(screen).toContain('`Open ${toOpen.title}`');
+  });
+});
+
 describe('a build gets longer than a paragraph does', () => {
   const ai = readFileSync(join(ROOT, 'lib', 'ai', 'anthropic.ts'), 'utf8');
   const actions = readFileSync(join(ROOT, 'app', 'actions', 'ai.ts'), 'utf8');

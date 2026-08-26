@@ -58,8 +58,18 @@ export function SiteBuilder({
 }) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>('ask');
-  /** The home page's id, so Done can open what was just built. */
-  const [homeId, setHomeId] = useState<string | null>(null);
+  /**
+   * A page to open when this is finished. The home page if one was built,
+   * otherwise the first page that was.
+   *
+   * NOT JUST THE HOME PAGE, which is what this held at first and was wrong for
+   * the commonest run of all: planning on a site that already exists usually
+   * builds no home page, so there was nothing to open. Falling back to a
+   * refresh did not help either, because the dashboard seeds its page list into
+   * state on mount and will not show a new row without a navigation. The page
+   * was created and appeared to have vanished.
+   */
+  const [toOpen, setToOpen] = useState<{ id: string; title: string } | null>(null);
   /** The planner looked and found nothing this site is short of. */
   const [nothingMissing, setNothingMissing] = useState(false);
   const [brief, setBrief] = useState('');
@@ -154,7 +164,11 @@ export function SiteBuilder({
             },
       );
 
-      if (result.ok && page.slug === '') setHomeId(result.data.id);
+      if (result.ok) {
+        const opened = { id: result.data.id, title: page.title };
+        // The home page wins if there is one; otherwise the first page built.
+        setToOpen((current) => (page.slug === '' ? opened : current ?? opened));
+      }
     }
 
     setStage('done');
@@ -170,7 +184,7 @@ export function SiteBuilder({
    */
   function finish() {
     onClose();
-    if (homeId) router.push(`/editor?page=${encodeURIComponent(homeId)}`);
+    if (toOpen) router.push(`/editor?page=${encodeURIComponent(toOpen.id)}`);
     else router.refresh();
   }
 
@@ -369,7 +383,8 @@ export function SiteBuilder({
       footer={
         finished ? (
           <button type="button" className="sv-btn" data-variant="primary" onClick={finish}>
-            {homeId ? 'Open my home page' : 'Done'}
+            {/* Named, so the button says where it goes rather than "continue". */}
+            {toOpen ? `Open ${toOpen.title}` : 'Done'}
           </button>
         ) : undefined
       }
