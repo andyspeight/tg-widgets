@@ -24,7 +24,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { buildPlannedPageAction, describePagesAction, planSiteAction } from '../../app/actions/ai';
+import { buildPlannedPageAction, describePagesAction, planSiteAction, syncSiteMenuAction } from '../../app/actions/ai';
 import type { PlannedPage } from '../../lib/ai/site-build';
 import { Icon } from '../editor/Icon';
 import { Modal } from '../ui/Modal';
@@ -182,6 +182,15 @@ export function SiteBuilder({
     const began = Date.now();
     setElapsed(0);
 
+    /*
+     * Every build call carries the WHOLE plan, so a page's buttons can point
+     * at the contact page the same plan is creating. And the pages that end
+     * up existing - built now, or skipped because they already had content -
+     * are what the menu is synced to afterwards.
+     */
+    const planRefs = plannedPages.map((page) => ({ title: page.title, slug: page.slug }));
+    const existing: Array<{ title: string; slug: string }> = [];
+
     for (let index = 0; index < plannedPages.length; index += 1) {
       const page = plannedPages[index];
       patch(index, { progress: 'building' });
@@ -190,6 +199,7 @@ export function SiteBuilder({
         title: page.title,
         slug: page.slug,
         purpose: page.purpose,
+        pages: planRefs,
       });
 
       patch(
@@ -203,6 +213,10 @@ export function SiteBuilder({
             },
       );
 
+      if (result.ok || result.skipped) {
+        existing.push({ title: page.title, slug: page.slug });
+      }
+
       if (result.ok) {
         const opened = { id: result.data.id, title: page.title };
         // The home page wins if there is one; otherwise the first page built.
@@ -212,6 +226,10 @@ export function SiteBuilder({
       // Measured after each page, so the estimate below is real time spent.
       setElapsed(Date.now() - began);
     }
+
+    // The plan is also the menu. Best effort: pages built and menu stale beats
+    // pages built and an error screen.
+    if (existing.length > 0) await syncSiteMenuAction({ pages: existing });
 
     setStage('done');
   }

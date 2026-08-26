@@ -40,13 +40,21 @@ import type { StarterPage } from './starters';
 export interface PhotoTarget {
   /** The search term, ready for the photo library. */
   query: string;
+  /**
+   * Which of the query's results this target wants. A gallery is several
+   * frames of ONE subject, and the same query resolves to the same first
+   * photo every time - so each frame asks for the next result instead of
+   * four copies of one picture. Absent means the first, as it always did.
+   */
+  variant?: number;
   /** Index into the built sections array. */
   section: number;
   /** Where the picture lands inside that section. */
   place:
     | { kind: 'background' }
     | { kind: 'image'; row: number; column: number; block: number }
-    | { kind: 'card'; row: number; column: number; block: number; item: number };
+    | { kind: 'card'; row: number; column: number; block: number; item: number }
+    | { kind: 'gallery'; row: number; column: number; block: number; frame: number };
 }
 
 /**
@@ -125,6 +133,13 @@ function builtItemsAt(
  * a row/column/block address computed here lands on the block the preset put
  * there; the image index counts image, video and gallery blocks the same way
  * the picker's preview does, so a hero's fallback pictures match its thumbnail.
+ *
+ * ONE CAVEAT ON THE AI PATH: stripEyebrows removes eyebrow-role heading blocks
+ * from the built sections before photos run, so the mirror holds there only
+ * while no image, video, gallery or cards block sits AFTER an eyebrow in the
+ * title's own column. True across the whole library today, and pinned by a
+ * sweep in tests/ai-page-build.test.ts so the preset that breaks it fails a
+ * test instead of quietly dropping its photographs.
  */
 export function sectionPhotoTargets(
   preset: SectionPreset,
@@ -187,10 +202,32 @@ export function sectionPhotoTargets(
         if (steer && query === steer) subjectSpent = true;
         imageIndex += 1;
 
-        // Only single images are filled. A gallery is several pictures at once
-        // and stays the client's to choose; the index still counted it so hero
-        // fallback queries line up with the preview.
-        if (block.type !== 'image' || !query) return;
+        if (!query) return;
+
+        /*
+         * A GALLERY IS FILLED FRAME BY FRAME, with the query's successive
+         * results. It used to stay empty ("several pictures at once and the
+         * client's to choose") - the right answer in the editor, and the wrong
+         * one on the AI path, where an unfilled gallery ships the author-facing
+         * "Add some images" placeholder on a page nobody has edited yet. Frames
+         * follow the grid: a two-column gallery gets four (two rows), wider
+         * grids get one row.
+         */
+        if (block.type === 'gallery') {
+          const columns = block.props?.columns === '2' ? 2 : block.props?.columns === '4' ? 4 : 3;
+          const frames = columns === 2 ? 4 : columns;
+          for (let frame = 0; frame < frames; frame += 1) {
+            targets.push({
+              query,
+              variant: frame,
+              section: sectionIndex,
+              place: { kind: 'gallery', row: rowIndex, column: columnIndex, block: blockIndex, frame },
+            });
+          }
+          return;
+        }
+
+        if (block.type !== 'image') return;
 
         targets.push({
           query,
@@ -275,6 +312,18 @@ export function applyPhoto(sections: Section[], target: PhotoTarget, url: string
   if (target.place.kind === 'image') {
     if (found.type !== 'image') return;
     found.props = { ...found.props, src: url };
+    return;
+  }
+
+  if (target.place.kind === 'gallery') {
+    if (found.type !== 'gallery') return;
+    const images = Array.isArray(found.props.images)
+      ? [...(found.props.images as Array<Record<string, unknown>>)]
+      : [];
+    // Frames land in order; the query doubles as the alt, since it names
+    // exactly what the picture was chosen to show.
+    images[target.place.frame] = { src: url, alt: target.query };
+    found.props = { ...found.props, images };
     return;
   }
 

@@ -210,6 +210,15 @@ export interface SectionPreset {
      * URL, and it drives both the preview and the fill on insert.
      */
     backgroundQuery?: string;
+    /**
+     * A floor on the section's height, for the heroes that should feel like a
+     * curtain rather than a strip. Without it every full-bleed photo hero was
+     * exactly as tall as its words plus padding, which is the single cheapest
+     * tell between a designed opener and an assembled one.
+     */
+    minHeight?: number;
+    /** Where the words sit when minHeight makes the section taller than them. */
+    alignY?: 'centre' | 'bottom';
   };
 }
 

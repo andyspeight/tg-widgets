@@ -59,6 +59,7 @@ import {
   isAiIntent,
   MAX_PAGE_TEXT,
   parseSeoAnswer,
+  profileBlock,
   seoPrompt,
   seoRules,
   MAX_INSTRUCTION,
@@ -78,13 +79,28 @@ import {
   buildPageSystemPrompt,
   stripPlaceholders,
   buildPageUserPrompt,
+  dressPage,
   featurePageImage,
   MAX_PAGE_BRIEF,
   PAGE_BUILD_MAX_TOKENS,
   planFromModel,
   repairPagePrompt,
   sectionsFromPlan,
+  wireButtons,
 } from '../../lib/ai/page-build';
+import {
+  pairingCatalogue,
+  THEME_OUTPUT_SHAPE,
+  THEME_RULES,
+  themeFromModel,
+} from '../../lib/ai/theme-design';
+import { applyDesignedTheme } from '../../lib/ai/theme-apply';
+import { getTheme } from '../../lib/db/theme';
+import { themeIsDefault } from '../../lib/theme/schema';
+import { getRegion, saveRegionDraft } from '../../lib/db/regions';
+import { currentCapabilities, PermissionError, requireCapability } from '../../lib/auth/capabilities';
+import { buildStarterRegion } from '../../lib/content/starters';
+import type { Region, RegionName } from '../../lib/content/schema';
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
 import type { StarterSection } from '../../lib/content/starters';
@@ -618,6 +634,10 @@ async function sectionsForPage(
     title: string;
     purpose: string;
     startedAt: number;
+    /** Where this page's calls to action point: the planned contact page. */
+    contactHref?: string;
+    /** A client-uploaded photo to feature behind the opening section. */
+    featureImageUrl?: string;
   },
 ): Promise<Section[]> {
   const built = await sectionsFromPlan(plan);
@@ -692,7 +712,19 @@ async function sectionsForPage(
     sections = await withPhotos(ctx.tenantId, planned, sections);
   }
 
-  return stripPlaceholders(stripUnfilled(sections, slots));
+  /*
+   * The finishing order: STRIP what was never written, WIRE the surviving
+   * buttons at the contact page, then DRESS what is left - tones and motion
+   * are positional, so they are decided by the sections that survived, not
+   * the ones the strip was about to remove.
+   */
+  const kept = stripPlaceholders(stripUnfilled(sections, slots));
+  const wired = wireButtons(kept, ctx.contactHref ?? '');
+  // The uploaded photo lands BEFORE the dress: a featured hero is a background
+  // hero, and the dress is what gives a background hero its drift and counts
+  // it dark in the banding. Featuring it afterwards left it unmoving and the
+  // tones below it one step out.
+  return dressPage(ctx.featureImageUrl ? featurePageImage(wired, ctx.featureImageUrl) : wired);
 }
 
 /** The least budget worth starting the photo imports with. */
@@ -800,6 +832,115 @@ export type SitePlanActionResult =
  * is a sitemap that would fit anybody, which is worse than refusing, because it
  * looks like the feature working.
  */
+/** One planned page as the client sends it back: a name and an address. */
+interface PlannedPageRef {
+  title: string;
+  slug: string;
+}
+
+/** The plan's page list from the client, made safe. Same gates as a page's own fields. */
+function plannedPagesFrom(value: unknown): PlannedPageRef[] {
+  if (!Array.isArray(value)) return [];
+  const pages: PlannedPageRef[] = [];
+  for (const entry of value.slice(0, 40)) {
+    if (entry === null || typeof entry !== 'object') continue;
+    const fields = entry as Record<string, unknown>;
+    const title = text(fields.title, 200);
+    const home = fields.slug === '';
+    const slug = typeof fields.slug === 'string' ? safeSlug(fields.slug) : '';
+    if (!title || (!home && !slug)) continue;
+    pages.push({ title, slug: home ? '' : slug });
+  }
+  return pages;
+}
+
+/**
+ * The page a call to action should point at, from the plan.
+ *
+ * A slug or title that says contact, enquire, quote or "get in touch" is that
+ * page. The match is deliberately dull: a plan without one leaves the buttons
+ * alone rather than guessing, because a button pointing at the wrong page is
+ * worse than one a human still has to wire.
+ */
+const CONTACT_WORDS = /contact|enquir|quote|get in touch|talk to us|speak to/i;
+
+function contactHrefFrom(pages: PlannedPageRef[]): string {
+  const found = pages.find((page) => page.slug !== '' && (CONTACT_WORDS.test(page.slug) || CONTACT_WORDS.test(page.title)));
+  return found ? `/${found.slug}` : '';
+}
+
+/** The same, against the site's real pages, for builds outside a site plan. */
+async function contactHrefFromSite(tenantId: string): Promise<string> {
+  try {
+    const pages = await listPages(tenantId);
+    return contactHrefFrom(pages.map((page) => ({ title: page.title, slug: page.slug })));
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Design the site's THEME from the profile, once, while the sitemap is planned.
+ *
+ * ONLY WHEN THE THEME IS STILL THE PLATFORM DEFAULT. A theme somebody has set,
+ * by hand or by an earlier plan, is a decision, and the planner does not
+ * overrule decisions (never rebuild, always upgrade). This is why running
+ * "Plan my site" twice does not repaint the site between plans.
+ *
+ * BEST EFFORT, SHARING THE PLAN'S REQUEST SLOT. A failed design leaves the
+ * default look and costs nothing else: the plan is the thing the client asked
+ * for. Tokens are recorded against the same claim (recordTokens adds). This
+ * function never rejects, which is what lets the caller await it in a finally
+ * without masking a real plan error.
+ */
+async function designSiteTheme(
+  tenantId: string,
+  settings: SiteSettings,
+  brief: string,
+  claimId: string | null,
+): Promise<Extract<ReturnType<typeof themeFromModel>, { ok: true }> | null> {
+  try {
+    if (!themeIsDefault(await getTheme(tenantId))) return null;
+
+    const system = [
+      THEME_RULES,
+      `TYPEFACE PAIRINGS you may choose from:\n${pairingCatalogue()}`,
+      THEME_OUTPUT_SHAPE,
+      profileBlock(settings),
+    ].join('\n\n');
+    const user = brief
+      ? `Design the look for this company's website. What they have said about the site:\n\n${brief}`
+      : "Design the look for this company's website, working from their profile above.";
+
+    const answer = await ask(system, user, {
+      model: MODEL_BUILD,
+      maxTokens: 4096,
+      timeoutMs: BUILD_TIMEOUT_MS,
+      effort: BUILD_EFFORT,
+    });
+    if (claimId) {
+      await recordTokens(tenantId, claimId, { input: answer.inputTokens, output: answer.outputTokens });
+    }
+
+    const design = themeFromModel(answer.text);
+    if (!design.ok) {
+      console.error('[tg-sites] the theme design could not be used:', design.error);
+      return null;
+    }
+    /*
+     * Returned, not applied. The write happens in planSiteAction, and ONLY
+     * when the plan itself succeeded: a failed plan must leave the site
+     * exactly as it was, and an applied theme would also stop the retry from
+     * designing one (themeIsDefault would be false).
+     */
+    return design;
+  } catch (error) {
+    // The plan is the deliverable; a site that keeps the default look is not a failure of it.
+    console.error('[tg-sites] designing a theme failed', error);
+    return null;
+  }
+}
+
 export async function planSiteAction(input: unknown): Promise<SitePlanActionResult> {
   try {
     if (!aiIsConfigured()) {
@@ -869,32 +1010,65 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
 
     const startedAt = Date.now();
 
-    const firstAnswer = await ask(system, userPrompt, call);
-    inputTokens += firstAnswer.inputTokens;
-    outputTokens += firstAnswer.outputTokens;
-    let plan = planSiteFromModel(firstAnswer.text);
+    /*
+     * The LOOK is designed alongside the sitemap, from the same profile, in
+     * the same claimed slot - but only for a caller who could change the
+     * theme by hand. A member without the theme capability still gets their
+     * plan; the site keeps its look.
+     */
+    const themeAllowed = await requireCapability('theme').then(() => true, () => false);
+    const themePromise = themeAllowed
+      ? designSiteTheme(site.tenantId, settings, brief, claim.id)
+      : Promise.resolve(null);
+    let design: Awaited<typeof themePromise> = null;
 
-    const leftForRepair = remainingBudget(startedAt);
-    if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
-      const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, {
-        ...call,
-        timeoutMs: leftForRepair,
-      });
-      inputTokens += second.inputTokens;
-      outputTokens += second.outputTokens;
-      plan = planSiteFromModel(second.text);
-    }
+    let plan;
+    try {
+      const firstAnswer = await ask(system, userPrompt, call);
+      inputTokens += firstAnswer.inputTokens;
+      outputTokens += firstAnswer.outputTokens;
+      plan = planSiteFromModel(firstAnswer.text);
 
-    if (claim.id) {
-      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+      const leftForRepair = remainingBudget(startedAt);
+      if (!plan.ok && leftForRepair >= MIN_REPAIR_MS) {
+        const second = await ask(system, `${userPrompt}\n\n${repairSitePrompt(plan.error)}`, {
+          ...call,
+          timeoutMs: leftForRepair,
+        });
+        inputTokens += second.inputTokens;
+        outputTokens += second.outputTokens;
+        plan = planSiteFromModel(second.text);
+      }
+
+      if (claim.id) {
+        await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
+      }
+    } finally {
+      /*
+       * EVERY exit waits for the theme call, the failing ones included: a
+       * serverless invocation can be frozen the moment the response returns,
+       * and a design still in flight would be killed mid-write. Safe because
+       * designSiteTheme never rejects, so this cannot mask a real error.
+       */
+      design = await themePromise;
     }
 
     if (!plan.ok) {
+      // The site keeps its look when the plan failed: a retry should start
+      // from exactly the state this attempt found.
       return {
         ok: false,
         error: 'The builder could not plan a site from that. Try saying a little more about the company.',
         retryable: true,
       };
+    }
+
+    if (design) {
+      try {
+        await applyDesignedTheme(site.tenantId, design);
+      } catch (error) {
+        console.error('[tg-sites] applying the designed theme failed', error);
+      }
     }
 
     // Home first whatever order it came back in: this list is also the menu.
@@ -1042,6 +1216,13 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     const slug = typeof fields.slug === 'string' ? safeSlug(fields.slug) : '';
     const isHome = fields.slug === '';
 
+    /*
+     * The rest of the plan rides along, so this page's buttons can point at a
+     * page that is really being made. Trusted exactly as far as the page's own
+     * fields are: titles capped, slugs through safeSlug, the list capped.
+     */
+    const planned = plannedPagesFrom(fields.pages);
+
     if (!title) return { ok: false, error: 'That page has no name.' };
 
     const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
@@ -1055,6 +1236,9 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     }
 
     const settings = await getSettings(site.tenantId);
+    // After the claim, so an invalid or rate-limited request never pays for
+    // the fallback lookup. The plan's own list answers without a query.
+    const contactHref = contactHrefFrom(planned) || (await contactHrefFromSite(site.tenantId));
     const system = buildPageSystemPrompt(settings);
     /*
      * The page's own name rides with its purpose. A purpose is one sentence and
@@ -1110,6 +1294,7 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       title,
       purpose,
       startedAt,
+      contactHref,
     });
 
     /*
@@ -1178,6 +1363,161 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
     }
     console.error('[tg-sites] building a planned page failed', error);
     return { ok: false, error: 'Something went wrong building that page. Try again.' };
+  }
+}
+
+/** Which planned pages are chrome for the footer rather than the menu. */
+const LEGAL_WORDS = /terms|privacy|cookie|conditions|legal|complaint|protect/i;
+
+/**
+ * Make the site's menu match the plan that was just built.
+ *
+ * The plan IS the sitemap, and a sitemap the header does not show may as well
+ * not exist: the wizard has written its own menu since starters shipped, and
+ * the AI path was leaving whatever menu the site had before, pointing at pages
+ * from another life. Called once by the builder dialog after the last page.
+ *
+ * WHAT IT TOUCHES AND WHAT IT KEEPS. In a header or footer that already has
+ * sections, only the nav blocks' items are replaced: the design, the logo, the
+ * phone number and everything else somebody set stay exactly as they are. A
+ * region with no sections at all gets the wizard's own default preset, so an
+ * AI-built site has a working menu even when no wizard ever ran. Legal pages
+ * go to the footer's nav, not the header's, and the header list is capped
+ * because an eleven-item menu is not navigation, it is a sitemap.
+ */
+export async function syncSiteMenuAction(input: unknown): Promise<{ ok: boolean; error?: string }> {
+  try {
+    /*
+     * The same gates the manual region editor enforces (see saveRegionAction):
+     * items in a nav are content, and conjuring a header out of nothing is
+     * structure. An AI convenience is not a way around either.
+     */
+    const { tenantId, userId, caps } = await currentCapabilities();
+    if (!caps.has('content')) throw new PermissionError('content');
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const planned = plannedPagesFrom(fields.pages);
+    if (planned.length === 0) return { ok: false, error: 'No pages to put in the menu.' };
+
+    /*
+     * THE PLAN IS NOT THE WHOLE SITE. The planner deliberately proposes only
+     * what is missing, so a site that already had a filled Voyages page would
+     * lose it from its own menu if the menu were rebuilt from the plan alone.
+     * The client's list says what is new and in what order; the site's own
+     * filled pages fill in the rest, server-side, where the client cannot
+     * understate them.
+     */
+    const pages = [...planned];
+    for (const page of (await listPageFill(tenantId)).filter((entry) => entry.filled)) {
+      if (!pages.some((entry) => entry.slug === page.slug)) {
+        pages.push({ title: page.title, slug: page.slug });
+      }
+    }
+
+    const contactHref = contactHrefFrom(pages);
+    const isLegal = (page: PlannedPageRef) => LEGAL_WORDS.test(page.slug) || LEGAL_WORDS.test(page.title);
+    const nonLegal = pages.filter((page) => !isLegal(page));
+
+    // Seven at most, and never at the cost of the page the buttons point at.
+    let headerPages = nonLegal.slice(0, 7);
+    const contact = contactHref ? nonLegal.find((page) => `/${page.slug}` === contactHref) : undefined;
+    if (contact && !headerPages.includes(contact)) {
+      headerPages = [...headerPages.slice(0, 6), contact];
+    }
+
+    const item = (page: PlannedPageRef) => ({
+      label: page.title,
+      href: page.slug === '' ? '/' : `/${page.slug}`,
+      newTab: false,
+    });
+
+    const writeMenu = async (name: RegionName, preset: string, main: PlannedPageRef[]) => {
+      const record = await getRegion(tenantId, name);
+      let region: Region = record.region;
+
+      if (region.sections.length === 0) {
+        // Building furniture from nothing is a structural change.
+        if (!caps.has('structure')) return;
+        const starterPages = main.map((page) => ({
+          title: page.title,
+          slug: page.slug,
+          description: '',
+          menu: page.title,
+          sections: [],
+        }));
+        region = buildStarterRegion(preset, name, starterPages, { company: '', town: '', about: '' });
+        /*
+         * The starter presets ship their call-to-action pointing at /contact
+         * by name. On a freshly built region only, follow the plan's actual
+         * contact page instead; wireButtons below cannot, since it writes
+         * only into EMPTY hrefs.
+         */
+        if (contactHref && contactHref !== '/contact') {
+          for (const section of region.sections) {
+            for (const row of section.rows) {
+              for (const column of row.columns) {
+                for (const block of column.blocks) {
+                  if (block.type === 'button' && block.props.href === '/contact') block.props.href = contactHref;
+                  if (block.type === 'button-group' && Array.isArray(block.props.buttons)) {
+                    for (const button of block.props.buttons as Array<Record<string, unknown>>) {
+                      if (button.href === '/contact') button.href = contactHref;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        /*
+         * WHICH NAV GETS WHAT. A header's nav blocks all carry the menu (a
+         * two-tier header is two copies by design). A footer is different:
+         * the default footer keeps THREE curated nav columns, and stamping
+         * one list into all of them flattens a design somebody may have
+         * arranged. So a one-nav footer takes the whole list, and a multi-nav
+         * footer gets the pages in its FIRST column and the legal pages in
+         * its LAST, with anything between left exactly as it is.
+         */
+        const navs: Array<{ props: Record<string, unknown> }> = [];
+        for (const section of region.sections) {
+          for (const row of section.rows) {
+            for (const column of row.columns) {
+              for (const block of column.blocks) {
+                if (block.type === 'nav') navs.push(block);
+              }
+            }
+          }
+        }
+        if (navs.length === 0) return;
+
+        if (name === 'header' || navs.length === 1) {
+          const items = main.map(item);
+          for (const nav of navs) nav.props.items = items.map((entry) => ({ ...entry }));
+        } else {
+          navs[0].props.items = nonLegal.map(item);
+          navs[navs.length - 1].props.items = pages.filter(isLegal).map(item);
+        }
+      }
+
+      if (contactHref) wireButtons(region.sections as Section[], contactHref);
+
+      await saveRegionDraft(tenantId, name, region, userId || undefined);
+    };
+
+    await writeMenu('header', 'header-cta-bar', headerPages);
+    await writeMenu('footer', 'footer-tinted-four', pages);
+
+    revalidatePath('/sites');
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof PermissionError) {
+      return { ok: false, error: error.message };
+    }
+    if (isSignInRequired(error)) {
+      return { ok: false, error: (error as Error).message };
+    }
+    console.error('[tg-sites] syncing the site menu failed', error);
+    return { ok: false, error: 'The pages were built, but the menu could not be updated.' };
   }
 }
 
@@ -1272,17 +1612,18 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
       };
     }
 
-    let sections = await sectionsForPage(plan.plan, {
+    const sections = await sectionsForPage(plan.plan, {
       tenantId: site.tenantId,
       claimId: claim.id,
       settings,
       title: title || 'New page',
       purpose: brief,
       startedAt,
+      contactHref: await contactHrefFromSite(site.tenantId),
+      // Featured inside the pipeline, before the dress, so the uploaded hero
+      // moves and the tones band around it.
+      featureImageUrl: imageUrl || undefined,
     });
-    // Feature the uploaded picture behind the opening section, so it is used and
-    // not only read.
-    if (imageUrl) sections = featurePageImage(sections, imageUrl);
 
     const page = await createPage(site.tenantId, {
       title: title || 'New page',

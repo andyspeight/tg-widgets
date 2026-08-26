@@ -197,6 +197,18 @@
  * and no separate mobile preview mode. A published page gets the same
  * behaviour because the container is the full viewport width.
  */
+
+/*
+ * Text selection, from the palette. Same reasoning as the caret above. The
+ * pair is accent + on-accent, which the token layer has already pushed to a
+ * readable contrast, so a pale accent selects with dark words on it rather
+ * than white-on-lemon.
+ */
+.tgs-page ::selection {
+  background: var(--tgs-accent);
+  color: var(--tgs-on-accent);
+}
+
 .tgs-page {
   container-type: inline-size;
   container-name: tgs-page;
@@ -206,6 +218,13 @@
   line-height: var(--tgs-p-leading);
   color: var(--tgs-text);
   background: var(--tgs-surface);
+  /*
+   * The caret is a brand surface. Selecting text or typing into a form on a
+   * client's site should answer in the client's colour, not the browser's
+   * default blue: it is the cheapest tell between a page that was designed
+   * and one that was assembled, and --tgs-accent is already on this element.
+   */
+  caret-color: var(--tgs-accent);
   /*
    * A rendered page must never scroll sideways. Non-negotiable. CLIP, not hidden:
    * both stop the sideways scroll, but `hidden` makes this box a SCROLL CONTAINER
@@ -407,7 +426,13 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   padding-bottom: calc(var(--tgs-pad-r, var(--tgs-pad, 48px)) + var(--tgs-pb, 0px));
   padding-left: var(--tgs-pl, 0px);
   padding-right: var(--tgs-pr, 0px);
-  min-height: var(--tgs-min-h, 0px);
+  /*
+   * A section floor can never exceed one screen. 560px is a curtain on a
+   * laptop and taller than the whole viewport on a phone held sideways; the
+   * svh line wins where supported, the vh line is the fallback.
+   */
+  min-height: min(var(--tgs-min-h, 0px), 100vh);
+  min-height: min(var(--tgs-min-h, 0px), 100svh);
   border-radius: var(--tgs-radius, 0px);
   border: var(--tgs-bw, 0px) solid var(--tgs-bc, transparent);
 }
