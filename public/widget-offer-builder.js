@@ -1822,16 +1822,20 @@
         const v = (el.value || '').trim();
         if (v) offer.fields[el.dataset.key] = v;
       });
+      // Send every content array ALWAYS, even when empty. An empty array is the
+      // author's authoritative "there are none / I cleared them"; OMITTING the key
+      // is what the save API treats as "not managed, keep what's stored" — so a
+      // conditional key made "no photos yet" indistinguishable from "don't touch
+      // the photos", and a save could silently wipe them. (The recurring
+      // disappearing-images bug: _collect used to drop images when the list was
+      // momentarily empty, and the server then replaced the stored ones with [].)
       offer.includes = (this._includes || []).slice();
-      const excludes = (this._excludes || []).slice();
-      if (excludes.length) offer.excludes = excludes;
-      const promos = (this._promos || []).slice();
-      if (promos.length) offer.promos = promos;
+      offer.excludes = (this._excludes || []).slice();
+      offer.promos = (this._promos || []).slice();
       offer.tags = (this._tags || []).slice();
       // Which tags/promos the author flagged to show on the card image. Intersect
       // with the live lists so a removed pill can't leave a stale flag behind.
-      const flagged = (this._imageBadges || []).filter((v) => offer.tags.indexOf(v) !== -1 || (offer.promos || []).indexOf(v) !== -1);
-      if (flagged.length) offer.imageBadges = flagged;
+      offer.imageBadges = (this._imageBadges || []).filter((v) => offer.tags.indexOf(v) !== -1 || (offer.promos || []).indexOf(v) !== -1);
       // Cruise route: ordered ports + the precomputed sea line. Only saved when
       // there are at least two valid ports.
       const crPorts = (this._cruisePorts || []).filter((p) => isFinite(p.lat) && isFinite(p.lng));
@@ -1841,8 +1845,9 @@
           line: (this._cruiseLine || []).slice(),
         };
       }
-      const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
-      if (imgs.length) offer.images = imgs;
+      // Always authoritative (see the content-array note above): [] means the
+      // author has no photos, an omitted key would mean "keep the stored ones".
+      offer.images = (this._images || []).map(safePhotoUrl).filter(Boolean);
 
       // Content-layer translations. i18n is whitelisted by /api/saved-offers and
       // read by the card/page at render time. audienceLanguages and i18nMeta ride
