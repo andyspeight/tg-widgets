@@ -325,7 +325,8 @@ describe('the page builder action', () => {
     // planFromModel keeps only catalogue ids and escapes the copy; createPage
     // parses and sanitises before a byte is stored.
     expect(action).toContain('planFromModel(');
-    expect(action).toContain('sectionsFromPlan(');
+    // Through the orchestrator, which builds, fills and strips in that order.
+    expect(action).toContain('sectionsForPage(');
     expect(action).toContain('createPage(');
   });
 
@@ -416,10 +417,26 @@ describe('stripping the copy the builder never filled', () => {
     expect(out).toHaveLength(0);
   });
 
-  it('every AI page goes through it, so no route can forget', () => {
-    const text = read('lib', 'ai', 'page-build.ts');
-    const fn = text.slice(text.indexOf('export async function sectionsFromPlan'));
-    expect(fn.slice(0, 500)).toContain('stripPlaceholders(built)');
+  it('runs LAST, after the fill, which is the order that matters', () => {
+    /*
+     * THE ORDER IS THE WHOLE THING and getting it wrong is silent. Stripping
+     * before filling deletes the very slots the fill exists to write, and the
+     * page comes out as thin as it was before any of it was built. That is
+     * exactly what the first version of this did.
+     */
+    const actions = read('app', 'actions', 'ai.ts');
+    const fn = actions.slice(
+      actions.indexOf('async function sectionsForPage'),
+      actions.indexOf('export type AiPageResult'),
+    );
+
+    const build = fn.indexOf('sectionsFromPlan(plan)');
+    const fill = fn.indexOf('applyFill(built');
+    const strip = fn.indexOf('stripPlaceholders(applyFill');
+
+    expect(build, 'the build step has moved').toBeGreaterThan(-1);
+    expect(fill, 'the fill step has moved').toBeGreaterThan(build);
+    expect(strip, 'the strip no longer wraps the fill').toBeGreaterThan(-1);
   });
 
   it('the list still matches what the presets actually contain', async () => {

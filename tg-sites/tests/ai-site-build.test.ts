@@ -435,7 +435,9 @@ describe('building an approved page', () => {
     // composed belongs in this action.
     expect(body).toContain('buildPageSystemPrompt(');
     expect(body).toContain('planFromModel(');
-    expect(body).toContain('sectionsFromPlan(');
+    // Through the one orchestrator, which is build then fill then strip. Calling
+    // sectionsFromPlan directly would skip the last two.
+    expect(body).toContain('sectionsForPage(');
   });
 
   it('NEVER builds over a page that already has content', () => {
@@ -533,9 +535,14 @@ describe('a build gets longer than a paragraph does', () => {
      * twenty seconds and the same margin.
      */
     const calls = actions.match(/model: MODEL_BUILD[^}]*}/g) ?? [];
-    expect(calls.length).toBeGreaterThanOrEqual(4);
+    expect(calls.length).toBeGreaterThanOrEqual(5);
     for (const call of calls) {
-      expect(call, `a build call with no timeout: ${call}`).toContain('timeoutMs: BUILD_TIMEOUT_MS');
+      /*
+       * The fill pass asks for min(BUILD_TIMEOUT_MS, whatever is left), because
+       * it is the second call in an action that has already spent time. So the
+       * check is that the constant is REACHED FOR, not that it is used bare.
+       */
+      expect(call, `a build call with no timeout: ${call}`).toContain('BUILD_TIMEOUT_MS');
     }
   });
 

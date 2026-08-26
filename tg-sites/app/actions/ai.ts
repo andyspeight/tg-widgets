@@ -75,6 +75,7 @@ import { slugify } from '../../lib/content/slug';
 import { safeSlug } from '../../lib/content/collection';
 import {
   buildPageSystemPrompt,
+  stripPlaceholders,
   buildPageUserPrompt,
   featurePageImage,
   MAX_PAGE_BRIEF,
@@ -85,6 +86,16 @@ import {
 } from '../../lib/ai/page-build';
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
+import type { StarterSection } from '../../lib/content/starters';
+import type { SiteSettings } from '../../lib/settings/schema';
+import {
+  FILL_MAX_TOKENS,
+  applyFill,
+  buildFillSystemPrompt,
+  buildFillUserPrompt,
+  fillFromModel,
+  slotsOf,
+} from '../../lib/ai/page-fill';
 import { hasBrandProfile } from '../../lib/settings/schema';
 import {
   MAX_SITE_BRIEF,
@@ -569,6 +580,78 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
 // The page builder
 // ---------------------------------------------------------------------------
 
+/**
+ * A plan, turned into the finished sections of a page.
+ *
+ * THE ONE PATH EVERY AI-BUILT PAGE TAKES, in the one order that works:
+ *
+ *   1. BUILD  the chosen presets into real sections, each with its heading and
+ *             opening paragraph.
+ *   2. FILL   every remaining slot with its own words, so a section is not a
+ *             headline sitting on the copy a preset ships with.
+ *   3. STRIP  whatever the fill could not reach, so no page ever leaves here
+ *             carrying "Tagline here".
+ *
+ * The order is the whole thing, and getting it wrong is silent: stripping before
+ * filling deletes the very slots the fill exists to write, and the page comes out
+ * exactly as thin as it was before any of this was built.
+ *
+ * THE FILL IS BEST EFFORT. A planned page that could not be filled is still a
+ * page, so a failure there costs richness and never the build. It shares the
+ * request slot already claimed, because a client asked for one page and should
+ * pay for one page.
+ */
+async function sectionsForPage(
+  plan: StarterSection[],
+  ctx: {
+    tenantId: string;
+    claimId: string | null;
+    settings: SiteSettings;
+    title: string;
+    purpose: string;
+    startedAt: number;
+    /** Set when the client gave a picture, so the fill can be skipped for it. */
+    system?: string;
+  },
+): Promise<Section[]> {
+  const built = await sectionsFromPlan(plan);
+  const slots = slotsOf(built);
+
+  /*
+   * Only when there is both something to write and time to write it. A page of
+   * one section has nothing the first pass missed, and a fill started with
+   * seconds left is a call that will be aborted and still be paid for.
+   */
+  const left = remainingBudget(ctx.startedAt);
+  if (slots.length === 0 || left < MIN_REPAIR_MS) return stripPlaceholders(built);
+
+  try {
+    const system = buildFillSystemPrompt(ctx.settings);
+    const answer = await ask(system, buildFillUserPrompt(ctx.title, ctx.purpose, slots), {
+      model: MODEL_BUILD,
+      maxTokens: FILL_MAX_TOKENS,
+      timeoutMs: Math.min(BUILD_TIMEOUT_MS, left),
+      effort: BUILD_EFFORT,
+    });
+
+    if (ctx.claimId) {
+      await recordTokens(ctx.tenantId, ctx.claimId, {
+        input: answer.inputTokens,
+        output: answer.outputTokens,
+      });
+    }
+
+    const filled = fillFromModel(answer.text, slots);
+    if (filled.ok) return stripPlaceholders(applyFill(built, filled.copy));
+  } catch (error) {
+    // Never fatal: the page stands without it. Logged because a fill that keeps
+    // failing is worth knowing about, and the client will never see it.
+    console.error('[tg-sites] filling a page failed', error);
+  }
+
+  return stripPlaceholders(built);
+}
+
 export type AiPageResult =
   | { ok: true; data: PageWithContent }
   /**
@@ -937,7 +1020,14 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       };
     }
 
-    const sections = await sectionsFromPlan(plan.plan);
+    const sections = await sectionsForPage(plan.plan, {
+      tenantId: site.tenantId,
+      claimId: claim.id,
+      settings,
+      title,
+      purpose,
+      startedAt,
+    });
 
     /*
      * NOTHING IS BUILT OVER WORK THAT IS ALREADY THERE, and this check is on the
@@ -1099,7 +1189,14 @@ export async function createAiPageAction(input: unknown): Promise<AiPageResult> 
       };
     }
 
-    let sections = await sectionsFromPlan(plan.plan);
+    let sections = await sectionsForPage(plan.plan, {
+      tenantId: site.tenantId,
+      claimId: claim.id,
+      settings,
+      title: title || 'New page',
+      purpose: brief,
+      startedAt,
+    });
     // Feature the uploaded picture behind the opening section, so it is used and
     // not only read.
     if (imageUrl) sections = featurePageImage(sections, imageUrl);

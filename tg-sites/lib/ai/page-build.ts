@@ -272,10 +272,14 @@ function visibleText(block: { props?: Record<string, unknown> }): string {
  * poor. No images. Placeholder text. Short pages." Nine of the twelve pages
  * carried at least one of these.
  *
- * A SAFETY NET, NOT THE FIX. The real answer is for the builder to fill every
- * slot it chooses rather than two, and that is the next piece of work. Until
- * then a shorter honest page beats a longer one with instructions to the author
- * printed on it, because the second tells a client the tool does not work.
+ * THE BACKSTOP, AND IT RUNS LAST. lib/ai/page-fill.ts now writes every slot, so
+ * most of these are replaced before this ever sees them. What is left is what
+ * the fill could not reach: a slot past the cap, a page whose fill call failed,
+ * a block the model skipped. Better a shorter page than one carrying
+ * instructions to the author, which tells a client the tool does not work.
+ *
+ * ORDER MATTERS AND IT BIT ME. This lived inside sectionsFromPlan first, which
+ * put it BEFORE the fill and deleted the very slots the fill existed to write.
  *
  * Conservative on purpose: it removes a block whose whole visible text IS one of
  * these, never one that merely contains a phrase, so real copy that happens to
@@ -307,12 +311,8 @@ export function stripPlaceholders(sections: Section[]): Section[] {
 }
 
 export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[]> {
-  const built = (
-    await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)
-  ).sections;
-
-  // Every AI-built page goes through this, so no route can forget it.
-  return stripPlaceholders(built);
+  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS))
+    .sections;
 }
 
 /**
