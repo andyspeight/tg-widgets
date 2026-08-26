@@ -1,0 +1,17 @@
+{
+  "note": "Authored Climate Season values, keyed by record name, read by api/cron/reference-climate.js. Twelve comma-separated tokens per record, Jan to Dec, each one of best, shoulder or off. A record with no entry here is never written: the fill refuses to convert a record it cannot complete, because two of the three climate fields is the half-converted state the 26 Aug 2026 audit found worse than leaving a record alone.",
+  "whyAuthored": "Season is not derivable from climate data. A warm-and-dry rule was written and then measured against the 166 city records a human had already filled: 59.7% month-level agreement, 5 of 166 matching in full. It failed systematically rather than randomly, calling northern European city-break springs off for not being beach-warm, calling every Caribbean month off on rainfall, and inverting ski seasons exactly. The field encodes destination type, school holidays and crowds, so it is written by hand.",
+  "source": "Each value below is authored from the written climate summary that record used to hold, archived at docs/climate-archive/cities-climate-prose.json. Those summaries usually state the season outright, which is why they were worth keeping.",
+  "seasons": {
+    "Mexico City": "shoulder,shoulder,best,best,best,off,off,off,off,shoulder,shoulder,shoulder",
+    "Milan": "off,shoulder,shoulder,best,best,shoulder,off,off,best,best,off,shoulder",
+    "Montego Bay": "best,best,best,best,shoulder,shoulder,off,off,off,off,shoulder,best",
+    "Montreal & Quebec City": "shoulder,best,off,off,shoulder,best,best,best,best,best,off,best",
+    "Mount Fuji & the Japanese Alps": "best,best,shoulder,best,shoulder,off,best,best,shoulder,best,best,shoulder",
+    "Mumbai": "best,best,shoulder,off,off,off,off,off,off,shoulder,best,best",
+    "Munich": "off,off,shoulder,shoulder,best,best,best,best,best,best,off,best",
+    "Musandam Peninsula": "best,best,best,best,off,off,off,off,off,best,best,best",
+    "Muscat & the Coast": "best,best,best,best,shoulder,off,off,off,off,best,best,best",
+    "Naples & the Bay": "shoulder,shoulder,best,best,best,best,shoulder,shoulder,best,best,best,shoulder"
+  }
+}

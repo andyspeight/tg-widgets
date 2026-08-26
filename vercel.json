@@ -74,6 +74,10 @@
       "maxDuration": 300,
       "includeFiles": "api/_data/airport-targets.json"
     },
+    "api/cron/reference-climate.js": {
+      "maxDuration": 300,
+      "includeFiles": "api/_data/climate-seasons.json"
+    },
     "api/reference/breadth-fill.js": {
       "includeFiles": "api/_data/airport-targets.json"
     },
@@ -127,6 +131,10 @@
     {
       "path": "/api/cron/reference-identity",
       "schedule": "0 */2 * * *"
+    },
+    {
+      "path": "/api/cron/reference-climate",
+      "schedule": "30 */2 * * *"
     },
     {
       "path": "/api/admin/backfill-enquiry-clients",
