@@ -136,6 +136,34 @@ export function corroborateFields(oa, wd) {
   return { fields, corroborated, uncorroborated };
 }
 
+/**
+ * Is a code found in our own prose worth making a record for? Pure.
+ *
+ * The target list is curated, so anything on it is wanted by definition. A code
+ * scraped from prose is not: it is any three uppercase letters in brackets, so
+ * it picks up airlines, currencies and abbreviations as well as airports. The
+ * stop list in _breadth.js catches the ones we can name, and this catches the
+ * rest by asking what OurAirports thinks the code actually is.
+ *
+ * Evidence, from the first fill run on 26 Aug 2026: it created Hector Silva
+ * Airstrip in Belize and Kalaleh Airport in Iran, neither of which anyone would
+ * put in a holiday picker. Both are small_airport with no scheduled service.
+ *
+ * Deliberately permissive in one direction. Phnom Penh is large_airport but
+ * OurAirports records it as having no scheduled service, which is wrong, so
+ * scheduled service alone is not allowed to reject an airport. Type carries the
+ * decision, and a small airport is kept when it does have scheduled service,
+ * which is how genuinely small destinations like El Nido stay in.
+ */
+export function isWorthCreatingFromProse(oa) {
+  if (!oa) return false;
+  const type = String(oa.type || '');
+  if (type === 'large_airport' || type === 'medium_airport') return true;
+  if (type === 'small_airport') return String(oa.scheduledService) === 'yes';
+  // heliport, seaplane_base, closed, balloonport
+  return false;
+}
+
 // ---- pure: source parsers -------------------------------------------------
 /** Parse the OurAirports CSV for one IATA. Pure. Returns normalized record or null. */
 export function parseOurAirports(csvText, iata) {
@@ -157,6 +185,10 @@ export function parseOurAirports(csvText, iata) {
       country: cells[col('iso_country')] || '',
       lat: parseFloat(cells[col('latitude_deg')]),
       lon: parseFloat(cells[col('longitude_deg')]),
+      // Carried so a prose-derived code can be sanity-checked before it becomes
+      // a record. Never written to Airtable, and never used for identity.
+      type: cells[col('type')] || '',
+      scheduledService: cells[col('scheduled_service')] || '',
       source: OURAIRPORTS_CSV,
     };
   }
@@ -265,6 +297,18 @@ export async function runBreadthFill({ limit = 10, create = false, nowIso, fetch
       items.push({ iata: t.iata, verdict: 'unverifiable', reason: !oa && !wd ? 'neither source found' : !oa ? 'not in OurAirports' : 'not in Wikidata' });
       continue;
     }
+    // A code lifted from our own prose has to prove it is an airport a customer
+    // could fly to. Codes from the curated target list skip this: they are
+    // wanted by definition.
+    if (t.reason === 'content-referenced' && !isWorthCreatingFromProse(oa)) {
+      items.push({
+        iata: t.iata,
+        verdict: 'unverifiable',
+        reason: `prose code is ${oa.type || 'an unknown facility'}${oa.scheduledService === 'yes' ? '' : ' with no scheduled service'}, not a bookable airport`,
+      });
+      continue;
+    }
+
     const cv = crossVerify(oa, wd);
     if (!cv.verified) {
       items.push({ iata: t.iata, verdict: 'conflict', conflicts: cv.conflicts, oa: oa.name, wd: wd.name });
