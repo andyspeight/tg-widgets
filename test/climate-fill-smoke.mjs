@@ -157,8 +157,8 @@ const row = {
 };
 const seam = {
   listRows: async () => [row, { id: 'rec2', fields: { [CITY.name]: 'Already Fine', ...goodRecord } }],
-  openMeteo: async () => om,
-  power: async () => pw,
+  openMeteo: async () => ({ data: om }),
+  power: async () => ({ data: pw }),
 };
 
 const AUTHORED = { 'Mexico City': 'shoulder,shoulder,best,best,best,shoulder,shoulder,shoulder,shoulder,best,best,shoulder' };
@@ -209,7 +209,7 @@ ok('the item carries the write error', /422/.test(broke.items[0].writeError || '
 let touched = false;
 const conflict = await runClimateFill({
   table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED,
-  fetchers: { ...seam, power: async () => unitBug, patch: async () => { touched = true; } },
+  fetchers: { ...seam, power: async () => ({ data: unitBug }), patch: async () => { touched = true; } },
 });
 ok('a disagreeing record is never written', touched === false && conflict.filled === 0);
 ok('a disagreeing record is reported as a conflict', conflict.items[0].verdict === 'conflict');
@@ -223,10 +223,31 @@ ok('a record with no coordinates is skipped, not guessed', noCoords.skipped === 
 
 const deadSource = await runClimateFill({
   table: 'cities', limit: 10, write: true,
-  fetchers: { ...seam, power: async () => null, patch: async () => { throw new Error('should not write'); } },
+  fetchers: { ...seam, power: async () => ({ data: null, error: 'HTTP 429 rate limited' }), patch: async () => { throw new Error('should not write'); } },
 });
 ok('one source failing means no write', deadSource.filled === 0 && deadSource.skipped === 1);
 ok('and it says which source failed', /POWER/.test(deadSource.items[0].reason || ''));
+// The first live run returned 200 having written nothing, and "did not answer"
+// was all it could say. A skip has to carry what the host actually told us.
+ok('and repeats what the host actually said', /429/.test(deadSource.items[0].reason || ''));
+
+const bothDead = await runClimateFill({
+  table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED,
+  fetchers: {
+    ...seam,
+    openMeteo: async () => ({ data: null, error: 'timed out after 45000ms' }),
+    power: async () => ({ data: null, error: 'HTTP 503' }),
+    patch: async () => { throw new Error('should not write'); },
+  },
+});
+ok('both sources failing is reported per source', /Open-Meteo/.test(bothDead.items[0].reason) && /POWER/.test(bothDead.items[0].reason));
+ok('a timeout is distinguishable from a rejection', /timed out/.test(bothDead.items[0].reason) && /503/.test(bothDead.items[0].reason));
+
+const unparseable = await runClimateFill({
+  table: 'cities', limit: 10, write: true, authoredSeasons: AUTHORED,
+  fetchers: { ...seam, power: async () => ({ data: null, error: 'response did not parse into 12 months' }), patch: async () => { throw new Error('should not write'); } },
+});
+ok('a response that parsed to nothing says so', /did not parse/.test(unparseable.items[0].reason));
 
 // --- the other two tables share the contract -------------------------------
 ok('countries table is configured', !!CLIMATE_TABLES.countries.temps);
