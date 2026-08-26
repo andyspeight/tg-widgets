@@ -226,8 +226,93 @@ export function planFromModel(answer: unknown): PlanResult {
  * pick costs that wording, not the build. The page's own title and address are set
  * by the action from what the client named it, so blanks here are fine.
  */
+/**
+ * The copy a preset ships with to show an author what goes where.
+ *
+ * NOT A STYLE LIST AND NOT A BLOCKLIST OF BAD WRITING. Every one of these is a
+ * literal string in lib/content/presets-page.ts, written as an instruction to
+ * the person filling the preset in. They are fine in the editor, where somebody
+ * is about to replace them, and they are not fine on a page a builder just
+ * produced and handed over.
+ */
+const PLACEHOLDER_COPY: readonly string[] = [
+  'add title here',
+  'add your medium length title here',
+  'add your title here',
+  'an intro title here',
+  'tagline here',
+  'this is a short title',
+  'this is a title',
+  'write down an introduction title here',
+  'write the opening title here',
+  'a line or two on what this is and why it matters.',
+  'another one. three or four of these is usually enough.',
+  'the answer, in a sentence or two. short answers get read.',
+  'their role, and a sentence or two on what they know.',
+];
+
+/** The words a block shows, with any markup taken off. */
+function visibleText(block: { props?: Record<string, unknown> }): string {
+  const props = block.props ?? {};
+  const raw = typeof props.html === 'string' ? props.html : '';
+  return raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+/**
+ * Take out the preset copy the builder never filled in.
+ *
+ * WHY THIS IS NEEDED AT ALL. buildSection writes exactly two things: the plan's
+ * heading into the section's title, and its body into the first paragraph.
+ * Everything else a preset contains keeps the factory copy, so a section with a
+ * tagline, three feature items or a list of questions arrives with a real
+ * headline sitting on top of "This is a short title" and "Another one. Three or
+ * four of these is usually enough."
+ *
+ * Andy, 26 Aug 2026, on the first full site the builder produced: "it's very
+ * poor. No images. Placeholder text. Short pages." Nine of the twelve pages
+ * carried at least one of these.
+ *
+ * A SAFETY NET, NOT THE FIX. The real answer is for the builder to fill every
+ * slot it chooses rather than two, and that is the next piece of work. Until
+ * then a shorter honest page beats a longer one with instructions to the author
+ * printed on it, because the second tells a client the tool does not work.
+ *
+ * Conservative on purpose: it removes a block whose whole visible text IS one of
+ * these, never one that merely contains a phrase, so real copy that happens to
+ * echo a placeholder survives. Emptied columns, rows and sections go with it,
+ * since an empty band is its own kind of broken.
+ */
+export function stripPlaceholders(sections: Section[]): Section[] {
+  const kept: Section[] = [];
+
+  for (const section of sections) {
+    const rows = section.rows
+      .map((row) => ({
+        ...row,
+        columns: row.columns
+          .map((column) => ({
+            ...column,
+            blocks: column.blocks.filter(
+              (block) => !PLACEHOLDER_COPY.includes(visibleText(block)),
+            ),
+          }))
+          .filter((column) => column.blocks.length > 0),
+      }))
+      .filter((row) => row.columns.length > 0);
+
+    if (rows.length > 0) kept.push({ ...section, rows });
+  }
+
+  return kept;
+}
+
 export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[]> {
-  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)).sections;
+  const built = (
+    await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)
+  ).sections;
+
+  // Every AI-built page goes through this, so no route can forget it.
+  return stripPlaceholders(built);
 }
 
 /**
