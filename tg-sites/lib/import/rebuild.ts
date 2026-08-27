@@ -736,6 +736,12 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
     } else {
       model.background = background.colour;
     }
+  } else if (darkScrim(css)) {
+    // A photo hero, dark through its scrim rather than a solid fill. Stand it on
+    // the site's own dark band so its text stays light and the drama survives,
+    // re-themed to the site's brand like every other rebuilt band.
+    model.background = 'var(--tgs-surface-dark)';
+    model.tone = 'dark';
   } else if (/<canvas[\s>]/i.test(html)) {
     // A canvas or WebGL hero paints its background in JavaScript, so it captures
     // blank and sets no background-colour we can read. Rather than rebuild the
@@ -748,6 +754,33 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   }
 
   return model;
+}
+
+/**
+ * Whether the section is dark because of a SCRIM, not a solid background.
+ *
+ * A full-bleed photo hero is dark not through `background-color` on its root -
+ * rootBackground finds none there - but through a dark overlay painted over the
+ * picture so the text stays readable: a `background` or `background-image`
+ * gradient with a dark, mostly-opaque colour in it (aurelia's hero scrim is
+ * `rgba(22, 16, 9, .82)`). Without reading that, every photo hero rebuilt onto
+ * bare white and the page lost all its drama. This looks for the darkest such
+ * layer anywhere in the design's CSS and calls the section dark when one is
+ * both dark and covering (alpha at least 0.4).
+ */
+function darkScrim(css: string): boolean {
+  const decls = css.match(/background(?:-image)?\s*:[^;{}]+/gi) ?? [];
+  for (const decl of decls) {
+    for (const rgba of decl.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([0-9.]+)\s*)?\)/gi)) {
+      const r = Number(rgba[1]);
+      const g = Number(rgba[2]);
+      const b = Number(rgba[3]);
+      const alpha = rgba[4] === undefined ? 1 : Number.parseFloat(rgba[4]);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      if (luminance < 0.45 && alpha >= 0.4) return true;
+    }
+  }
+  return false;
 }
 
 /**

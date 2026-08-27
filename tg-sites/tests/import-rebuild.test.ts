@@ -333,6 +333,31 @@ describe('rebuilding an imported design', () => {
       expect(result.section.tone).toBe('dark');
     });
 
+    it('reads darkness from a photo hero scrim, not just a solid fill', () => {
+      // A full-bleed photo hero is dark through a scrim gradient over the
+      // picture, with no background-color on its root - the case that made
+      // every designed hero rebuild onto bare white. rgba(22,16,9,.82) is
+      // aurelia's own scrim.
+      const html = '<header class="hero"><div class="scrim"></div><h1>Go somewhere warm</h1></header>';
+      const css = '.hero { position: relative; } .scrim { position: absolute; inset: 0; background: radial-gradient(120% 90% at 18% 42%, rgba(22, 16, 9, .82) 0%, rgba(22, 16, 9, .45) 60%); }';
+      const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Hero' });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.section.tone).toBe('dark');
+      expect(result.section.box.background).toBe('var(--tgs-surface-dark)');
+    });
+
+    it('a pale gradient overlay is not a dark band', () => {
+      // A light scrim (a white wash for legibility over a bright photo) must
+      // not flip the section dark.
+      const html = '<header class="hero"><div class="scrim"></div><h1>Bright</h1></header>';
+      const css = '.scrim { background: linear-gradient(rgba(255, 255, 255, .6), rgba(240, 240, 240, .3)); }';
+      const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Hero' });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.section.tone).not.toBe('dark');
+    });
+
     it('leaves a plain white or transparent background alone', () => {
       const white = rebuildSection({
         html: '<div class="r"><h2>Hi</h2></div>',
