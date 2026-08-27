@@ -397,15 +397,17 @@ Phase 3, written and two-sourced by hand.
 
 ### 27 August 2026: the fill finished
 
-**602 records, 602 distinct IATA codes, no duplicates.** The table went from 225
-to 602 overnight on two-hourly runs, covering 474 of the 475 airports on the
-committed target list plus the airports our own prose names.
+**600 records, 600 distinct IATA codes, no duplicates.** The table went from 225
+to 602 overnight on two-hourly runs, then to 600 after two bad records were
+deleted. It covers 474 of the 475 airports on the committed target list plus
+the airports our own prose names.
 
 | | |
 |---|---:|
 | Records before | 225 |
 | Created by the fill | 377 |
-| Total now | 602 |
+| Deleted as not real airports | 2 |
+| Total now | 600 |
 | Targets covered | 474 of 475 |
 | Records needing a human | 17 |
 
@@ -438,3 +440,9 @@ trusting it:
    permanently-stuck records at the head of the queue starved everything
    behind them. Two records created nameless by bug 2 were still nameless two
    runs after the fix, because the fix could never reach them.
+
+**Kalaleh (KLM) and Hector Silva Airstrip (BCV) were deleted** on 27 Aug at
+Andy's instruction, having been created from prose false positives before the
+detector was fixed. Both were checked before deletion: Status In progress, no
+narrative, nothing to lose. The stop list and the bookable-airport test mean
+neither can come back.
