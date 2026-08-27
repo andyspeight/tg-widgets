@@ -606,6 +606,26 @@ that opens the booking as an OVERLAY on the operator's site (Andy's two choices)
     behind Vercel deployment protection, so the demo only fully works for someone
     logged in to Vercel until the custom domain is live.
 
+**Manage Trip (once bookings arrive) — BUILT 27 Aug 2026.** Andy asked for two
+management surfaces, modelled on WeTravel's Manage Trip screen.
+
+  - **Operator**: `/console/trips/[id]/manage`. A header with the trip, a money
+    summary across it (**Booked / Collected / Outstanding**, collected =
+    deposits on deposit_paid plus the full total on paid), and Preview / Edit.
+    Tabs: **Bookings** (the trip's bookings, each linking to its detail) and
+    **Participants** (every named traveller with buyer, room, dates, status),
+    with Waitlist / Messages / Promote shown as coming soon. **Export CSV** of
+    participants via an operator-gated `GET /console/trips/[id]/participants.csv`.
+    repo `getTripManage` inner-joins bookings to the trip through the departure;
+    `lib/participants` is the shared pure flatten used by both screen and export.
+    A Manage link on the trips list and a Manage-bookings button on the editor.
+    Live-verified with three seeded bookings (held / deposit_paid / paid):
+    £22,200 booked, £4,700 collected, £17,500 outstanding, all correct.
+  - **Traveller**: the `/booked/[reference]` hub now also shows the balance due
+    after the deposit, so the whole money picture is in one place they return to
+    with their reference (alongside what they booked, the room, and the
+    update-details / register link). Real online payment is still the Stripe seam.
+
 ---
 
 ## 9. The blocker, and it has not moved since 7 August
