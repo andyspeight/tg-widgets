@@ -1,8 +1,21 @@
 /**
- * POST /api/cron/reference-identity
+ * POST /api/cron/reference-identity  (UNSCHEDULED AGAIN 27 Aug 2026, it finished)
  *
- * SCHEDULED AGAIN 26 Aug 2026, every two hours, at Andy's instruction to start
- * creating the airports we do not yet carry.
+ * It ran two-hourly through the night of 26 Aug and did the job it was turned
+ * back on for. The table went from 225 records to 602, with 602 distinct IATA
+ * codes and no duplicates, covering 474 of the 475 airports on the target list.
+ * Only HBE, Borg El Arab at Alexandria, was never created, and 16 records of
+ * 602 carry everything except a name because their two sources disagree about
+ * what the airport is called. Both need a human, not another run.
+ *
+ * So it is off the schedule again, for the reason written here the first time:
+ * every run scans four tables in full to work out what is missing, which is
+ * pure waste when the answer is nothing. Left alone it would reprocess the same
+ * 16 stuck records every two hours forever. Invoke it deliberately if the
+ * target list grows.
+ *
+ * SCHEDULED 26 Aug 2026, every two hours, at Andy's instruction to start
+ * creating the airports we did not yet carry.
  *
  * It was unscheduled on 25 Aug 2026 for a good reason and that reason has now
  * expired. The objection then was that filling coordinates on 368 new airports
