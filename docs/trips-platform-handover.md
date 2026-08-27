@@ -196,14 +196,15 @@ To be credible we need these, because an operator will ask. Honest status:
 |---|---|---|---|
 | Trip page builder | yes | yes, Tour Builder | polish |
 | Itinerary with maps | yes | yes | polish |
-| Packages, options, add-ons | yes | display only | **build** |
+| Packages (rooming) with photos and links | yes | **yes, built** (phase 5) | done |
+| Options / add-ons | yes | display only | **build** (needs a selection table) |
 | Payment plans, up to 18 instalments | yes | no | **build** |
 | Auto-billing and reminders | yes | reminder pipeline exists | wire up |
 | Waivers with e-signature | yes | **yes, built** (phase 4, mandatory gate) | done |
 | Custom booking forms | yes | **yes, built** (phase 4) | done |
 | Document and ID collection | yes | Luna viewer only | **build** (needs a private blob store) |
 | Participant dashboard | yes | Luna Travel | wire up |
-| Inventory and rooming | yes | no | **build** |
+| Inventory and rooming | yes | **rooming built** (phase 5); per-package allocation to come | part |
 | Multi-currency | yes | no | **build** |
 | CRM | integration | Airtable, native | done |
 | Supplier payments | yes | **not building** | see below |
@@ -519,8 +520,43 @@ Stripe needed: it all hangs off the confirmation/registration side, not payment.
   limiting** on the public registration action still wants a shared store; the
   action guards the inet column and the booking status in the meantime.
 
-**Phase 5 — Inventory.** Packages and rooming with photos and links, add-ons,
-per-departure capacity, allocation.
+**Phase 5 — Inventory. ROOMING BUILT 27 Aug 2026.** Packages (room types /
+occupancy tiers) are a real, bookable thing end to end, closing WeTravel's named
+"rooming with no photos and no direct links" gap. No Stripe needed.
+
+  - Migration **gt_007** teaches the atomic hold about packages, strictly
+    additively over gt_004 (every earlier guarantee untouched): a new optional
+    `p_package_id` that must belong to the departure's own trip (else 'invalid',
+    so a forged or borrowed package cannot ride in), the package's per-person
+    price overriding the departure's when set, and the package stamped on the
+    booking and every traveller. Applied and LIVE-VERIFIED against the database:
+    total priced off the package, deposit still off the departure, foreign
+    package rejected.
+  - Operator authoring: a Packages section on the trip editor (name, sleeps,
+    per-person price, how many available, description, photo via the media
+    picker, an https info link, order). A package with bookings against it is
+    kept, not deleted. Public: a Room options section on the trip page (and the
+    preview), each package a card with photo, price, occupancy and a link.
+    Booking: a required Room option picker; the choice prices the booking. The
+    chosen package shows on the confirmation and the operator's booking detail.
+  - `validatePackage` + booking `package_id` are covered by 6 new tests (145
+    total).
+
+  While live-testing this, the **/book page's first-ever live render surfaced a
+  pre-existing phase-2 500** (unrelated to packages): `book/actions.ts` is a
+  'use server' file that also exported `const EMPTY_BOOKING_STATE`, which does
+  not survive the client boundary, so the form's initial state was wrong and
+  `errors.departure_id` threw. Fixed by moving the state to lib/action-state
+  (the exact pattern the console already uses). Diagnosed from the live runtime
+  error and the compiled bundle, not guessed.
+
+  **Deliberately deferred, two clearly-scoped next slices:**
+  - **Per-package allocation** (a limited number of single rooms) needs a
+    further, careful change to the reviewed hold RPC to count per package as
+    well as per departure. Capacity is per-departure for now.
+  - **Options / add-ons** (`gt_options` exists as a definition) need a
+    per-booking SELECTION table before they can be chosen at booking; none
+    exists yet, so this is a small migration plus a picker.
 
 **Phase 6 — The console.** Bookings list, per-departure manifest, payment status,
 outstanding balances, supplier cost and margin, CSV and PDF export.
