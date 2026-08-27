@@ -199,12 +199,12 @@ To be credible we need these, because an operator will ask. Honest status:
 | Packages, options, add-ons | yes | display only | **build** |
 | Payment plans, up to 18 instalments | yes | no | **build** |
 | Auto-billing and reminders | yes | reminder pipeline exists | wire up |
-| Waivers with e-signature | yes | no | **build** |
-| Document and ID collection | yes | Luna viewer only | **build** |
+| Waivers with e-signature | yes | **yes, built** (phase 4, mandatory gate) | done |
+| Custom booking forms | yes | **yes, built** (phase 4) | done |
+| Document and ID collection | yes | Luna viewer only | **build** (needs a private blob store) |
 | Participant dashboard | yes | Luna Travel | wire up |
 | Inventory and rooming | yes | no | **build** |
 | Multi-currency | yes | no | **build** |
-| Custom booking forms | yes | enquiry engine exists | adapt |
 | CRM | integration | Airtable, native | done |
 | Supplier payments | yes | **not building** | see below |
 | AI brochure import | no | **yes** | ours |
@@ -469,14 +469,55 @@ seam, the confirmation page, and the booking landing in the operator console.
   - **The booking reference doubles as the confirmation access token** at about
     38 bits. Fine for reading down a phone; thin as a bearer token. The proper
     fix is a separate high-entropy link token on the row, a small schema change.
+    This now covers the registration flow too (same reference gate), so the
+    link-token upgrade is worth a little more when it lands.
+
+  Also added 27 Aug 2026: a **Preview** route. `/trip/preview/[id]` renders the
+  real brochure for a trip in ANY status, gated like the console and never
+  cached, so an operator can preview a draft and see an edit the moment they
+  save it (the public page is ISR-cached, which read as a broken preview). The
+  public and preview routes share one `TripView` component. Preview buttons are
+  on the trip editor and on each draft in the trips list.
 
 **Phase 3 — Payment plans.** Schedules up to 18 instalments, auto-billing on saved
 payment method, reminders on the existing pipeline, a pay-balance link. Parity with
 their headline feature.
 
-**Phase 4 — The people.** `gt_travellers`, custom forms per trip, waivers with
-e-signature and a **mandatory gate at registration**, document and passport upload.
-Three of their named gaps closed in one phase.
+**Phase 4 — The people. BUILT 27 Aug 2026, bar document upload.** `gt_travellers`,
+custom forms per trip, and waivers with e-signature and the **mandatory gate at
+registration** are live and on the existing (already-applied) gt_002 tables. No
+Stripe needed: it all hangs off the confirmation/registration side, not payment.
+
+  - `lib/registration.ts` is the pure authority (12 tests): sanitises an
+    operator's form schema (stable unique keys, drops junk, a choose-one with no
+    options is dropped), validates a traveller submission with `party_size`
+    authoritative and the mandatory-waiver gate, and decides completion from the
+    stored rows rather than a flag. A signature pins the exact text via a
+    server-computed `body_sha256` and the waiver version, so editing a signed
+    waiver spawns a NEW version rather than rewriting what was agreed.
+  - Two trust models sit side by side in repo.ts: operator-gated authoring
+    (through the owning trip) and reference-gated registration (the booking's
+    bearer token, like the confirmation page). Every id the browser sends is
+    re-resolved against the booking, never trusted.
+  - Operator authoring: a Registration section on the trip editor (a question
+    builder + a waiver editor). Traveller flow: `/register/[reference]`,
+    operator-branded, a card per place with the custom questions and a signature
+    line per traveller; reached from a "Complete your booking" CTA on the
+    confirmation page. Operator manifest: `/console/bookings/[id]` shows every
+    traveller, their answers, who signed, and a registration-complete banner;
+    the bookings list shows "3 of 4" named and links through.
+
+  **Deliberately deferred: document and passport upload.** Passport and ID scans
+  are sensitive PII and must NOT sit in the PUBLIC media blob store the widget
+  images use. They need their own PRIVATE Vercel Blob store with signed access,
+  which is an Andy step (create the store) exactly like the media one was. The
+  `gt_documents` table already exists and is ready for it. Passport *numbers*
+  can already be collected today as a short-text custom question (stored in the
+  service-role-only `gt_form_responses`), so only the file upload is waiting.
+
+  Follow-up carried over from phase 2 and relevant here too: **per-IP rate
+  limiting** on the public registration action still wants a shared store; the
+  action guards the inet column and the booking status in the meantime.
 
 **Phase 5 — Inventory.** Packages and rooming with photos and links, add-ons,
 per-departure capacity, allocation.
