@@ -55,6 +55,9 @@ import { parsePage } from '../../lib/content/schema';
 import { sanitisePage } from '../../lib/content/sanitise-page';
 import { pexelsConfigured, searchPexels } from '../../lib/media/pexels';
 import { blobConfigured } from '../../lib/media/blob';
+import { imageGenConfigured } from '../../lib/media/imagegen';
+import { generateAndStore } from '../../lib/media/generate';
+import { heroImagePrompt } from '../../lib/ai/image-prompt';
 import { importStockAction } from './media';
 import { toCopy, toText, type Copy } from '../../lib/ai/copy';
 import {
@@ -592,23 +595,69 @@ async function buildOneSection(
     };
   }
 
-  if (result.backgroundQuery && pexelsConfigured() && blobConfigured()) {
-    try {
-      const found = await searchPexels({ query: result.backgroundQuery, orientation: 'landscape' });
-      const photo = found.photos[0];
-      if (photo) {
-        const imported = await importStockAction(photo);
-        if (imported.ok) {
-          result.section.backgroundImage = imported.data.url;
-          if (result.section.overlay < 30) result.section.overlay = 45;
-        }
-      }
-    } catch {
-      // Leave it image-ready. A good dark hero with no photo is still a good hero.
+  /*
+   * THE HERO PICTURE, best effort and part of the one build.
+   *
+   * When AI image generation is switched on it draws the hero from the same
+   * subject the model asked for, which is what Andy chose: a built section gets
+   * a made picture rather than a stock one. When it is not, the Pexels search is
+   * the fallback, exactly as before. Either way this is unmetered on its own,
+   * because building the section is the metered action and the picture is part
+   * of it, the same way the stock search always was. Nothing here throws: a good
+   * dark hero with no photo is still a good hero.
+   */
+  if (result.backgroundQuery && blobConfigured()) {
+    const url = await heroPicture(tenantId, result.backgroundQuery);
+    if (url) {
+      result.section.backgroundImage = url;
+      if (result.section.overlay < 30) result.section.overlay = 45;
     }
   }
 
   return { ok: true, section: result.section };
+}
+
+/**
+ * One hero image for a built section, best effort, generated or searched.
+ *
+ * Generation wins when it is configured, because a made picture is what a built
+ * section is meant to get now; the photo library is the fallback. Returns the
+ * stored url, or null when neither could produce one, and never throws.
+ */
+async function heroPicture(tenantId: string, subject: string): Promise<string | null> {
+  if (imageGenConfigured()) {
+    try {
+      const prompt = heroImagePrompt(subject);
+      if (prompt) {
+        // Shorter than the picker's window: this runs after the text build inside
+        // one invocation, so the two together stay under the route's ceiling.
+        const item = await generateAndStore(tenantId, {
+          prompt,
+          orientation: 'landscape',
+          alt: subject,
+          timeoutMs: 40_000,
+        });
+        return item.url;
+      }
+    } catch {
+      // Fall through to the library: a failed generation should not lose the hero.
+    }
+  }
+
+  if (pexelsConfigured()) {
+    try {
+      const found = await searchPexels({ query: subject, orientation: 'landscape' });
+      const photo = found.photos[0];
+      if (photo) {
+        const imported = await importStockAction(photo);
+        if (imported.ok) return imported.data.url;
+      }
+    } catch {
+      // No photo. The section stands on its dark background.
+    }
+  }
+
+  return null;
 }
 
 // ---------------------------------------------------------------------------

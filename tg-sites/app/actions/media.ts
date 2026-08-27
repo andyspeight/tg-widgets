@@ -23,7 +23,8 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { requireTenantId } from '../../lib/auth/session';
+import { currentUserId, requireTenantId } from '../../lib/auth/session';
+import { claimRequest, DAILY_LIMIT } from '../../lib/db/ai';
 import {
   deleteMedia,
   findImportedProviderIds,
@@ -33,7 +34,14 @@ import {
   setMediaAlt,
   setMediaVariants,
 } from '../../lib/db/media';
+import {
+  cleanImagePrompt,
+  pickerImagePrompt,
+  type ImageOrientation,
+} from '../../lib/ai/image-prompt';
 import { blobConfigured, describeBlob, removeBlob } from '../../lib/media/blob';
+import { generateAndStore } from '../../lib/media/generate';
+import { imageGenConfigured } from '../../lib/media/imagegen';
 import {
   assertPathnameForTenant,
   cleanFilename,
@@ -67,6 +75,8 @@ export interface MediaPage {
   canUpload: boolean;
   /** False when there is no Pexels key, so the photo tab can say so. */
   canSearchStock: boolean;
+  /** False when there is no image-generation key (or no store), so the AI tab can say so. */
+  canGenerate: boolean;
   /**
    * The prefix the browser must upload under.
    *
@@ -111,6 +121,8 @@ export async function loadMediaAction(
         hasMore,
         canUpload: blobConfigured(),
         canSearchStock: pexelsConfigured(),
+        // Generation stores its result, so it needs the store as well as the key.
+        canGenerate: imageGenConfigured() && blobConfigured(),
         uploadPrefix: tenantPrefix(tenantId),
       },
     };
@@ -403,6 +415,70 @@ export async function importStockAction(photo: StockPhoto): Promise<MediaResult<
   }
 }
 
+/**
+ * Draw an image from a description and keep it in this tenant's own bank.
+ *
+ * COSTS MONEY, so it is metered like the writer: every call takes a slot from
+ * the same daily claim before it reaches the model, so a client cannot run up a
+ * bill a keystroke at a time. The prompt is shaped and guard-railed in
+ * lib/ai/image-prompt (a real photograph, no text baked in), and the person's
+ * own words become the picture's starting description. Everything downstream is
+ * the ordinary media path, so a generated picture behaves like any other.
+ */
+export async function generateImageAction(input: {
+  prompt: string;
+  orientation?: string;
+}): Promise<MediaResult<MediaItem>> {
+  try {
+    const tenantId = await requireTenantId();
+    const userId = await currentUserId();
+
+    if (!imageGenConfigured()) {
+      return {
+        ok: false,
+        error:
+          'AI image generation is not switched on yet. Add an OPENAI_API_KEY to this ' +
+          'project in Vercel and redeploy, and it will start working.',
+      };
+    }
+    if (!blobConfigured()) {
+      return {
+        ok: false,
+        error:
+          'Image storage is not connected yet, so a generated picture cannot be saved. ' +
+          'Add a Blob store to this project in Vercel and redeploy.',
+      };
+    }
+
+    // The brief, cleaned. The alt text is the person's own words; the prompt that
+    // goes to the model is those words wrapped with the photo rules.
+    const alt = cleanImagePrompt(input?.prompt);
+    if (!alt) return { ok: false, error: 'Say what the picture should be, in a few words.' };
+    const prompt = pickerImagePrompt(input?.prompt);
+
+    const orientation: ImageOrientation =
+      input?.orientation === 'portrait' || input?.orientation === 'square'
+        ? input.orientation
+        : 'landscape';
+
+    // One slot from today's allowance, the same pool the writer draws from.
+    const claim = await claimRequest(tenantId, { userId, intent: 'image' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error: `This site has used all ${DAILY_LIMIT} of today's AI requests. It resets through the day, so try again later.`,
+      };
+    }
+
+    const item = await generateAndStore(tenantId, { prompt, orientation, alt });
+
+    revalidatePath('/', 'layout');
+    return { ok: true, data: item };
+  } catch (error) {
+    return { ok: false, error: explain(error, 'Could not generate that image.') };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Editing and removing
 // ---------------------------------------------------------------------------
@@ -560,6 +636,15 @@ function explain(error: unknown, generic: string): string {
   if (message.startsWith('This account is not a member')) return message;
   if (message.startsWith('Image storage is not connected')) return message;
   if (message.startsWith('The photo library')) return message;
+  // Generation messages a person can act on: a rejected prompt, a bad key, a
+  // busy generator, or nothing usable back.
+  if (message.startsWith('AI image generation is not switched on')) return message;
+  if (message.startsWith('That picture could not be generated')) return message;
+  if (message.startsWith('The image generation key')) return message;
+  if (message.startsWith('The image generator')) return message;
+  if (message.startsWith('The image could not be generated')) return message;
+  if (message.startsWith('The generated image')) return message;
+  if (message.startsWith('There is nothing to draw')) return message;
   if (message.includes('does not belong to this site')) return message;
   if (message.includes('is too large')) return message;
   if (message.includes('could not be fetched')) return message;

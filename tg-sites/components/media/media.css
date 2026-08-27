@@ -437,6 +437,34 @@
 
 .mp-note a { color: var(--ed-ink-2); }
 
+/* --- Generate with AI --------------------------------------------------- */
+
+.mp-gen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+}
+
+.mp-gen__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+}
+
+.mp-gen__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  align-items: center;
+}
+
+.mp-gen__controls .ed-select {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.mp-gen__controls .tg-btn { flex: none; }
+
 /* --- The field control -------------------------------------------------- */
 
 .mp-choose {

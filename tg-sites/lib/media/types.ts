@@ -9,7 +9,7 @@
  */
 
 /** Where an image came from, which decides whether a credit line is owed. */
-export type MediaSource = 'upload' | 'pexels';
+export type MediaSource = 'upload' | 'pexels' | 'ai';
 
 /**
  * Attribution for anything that came out of a library.
