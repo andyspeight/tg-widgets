@@ -684,6 +684,25 @@ function workingSequence(nodes: Element[], css: string): Element[] {
   return level;
 }
 
+/**
+ * Whether this element holds a grid or a split somewhere BELOW it.
+ *
+ * A design nests its layout: a section carries a heading and, under it, a grid
+ * of cards. The top-level walk sees the section, which is neither a grid nor a
+ * split itself, and would flatten the cards inside it. This lets the walk
+ * recurse into such a container instead, so the nested grid becomes its own
+ * row rather than a stacked run of loose blocks.
+ */
+function containsLayout(el: Element, css: string, depth = 0): boolean {
+  if (depth > 12) return false;
+  for (const kid of elementChildren(el)) {
+    if (IGNORE.has(tagOf(kid))) continue;
+    if (isGrid(kid) || rowColumns(kid, css)) return true;
+    if (containsLayout(kid, css, depth + 1)) return true;
+  }
+  return false;
+}
+
 /** How many columns to a row, so a grid of six reads as two rows of three. */
 function perRow(count: number): number {
   if (count <= 4) return count;
@@ -697,27 +716,20 @@ function perRow(count: number): number {
 // ---------------------------------------------------------------------------
 
 /**
- * An imported block's stored props to a native block model, or null if there is
- * nothing in it we can rebuild (in which case the caller keeps the import).
+ * A run of elements to rows, recursing into a container that nests a grid.
+ *
+ * The heart of reading a design's layout. Each element becomes a row: a grid a
+ * multi-column row (a Cards block when it is uniform picture tiles), a split a
+ * proportional row, a plain element a stacked run. A container that is none of
+ * those but HOLDS a grid deeper down is recursed into rather than flattened,
+ * so a section wrapping a heading and a card grid keeps both as their own rows.
  */
-export function modelFromImport(props: Record<string, unknown>): RebuildModel | null {
-  const html = typeof props.html === 'string' ? props.html : '';
-  if (!html.trim()) return null;
-
-  const fields = importFields(props);
-  const stored = importContent(props);
-  const resolve = makeResolver(fields, stored);
-
-  let fragment;
-  try {
-    fragment = parseFragment(html);
-  } catch {
-    return null;
-  }
-
-  const css = typeof props.css === 'string' ? props.css : '';
-  const sequence = workingSequence(elementChildren(fragment), css);
-
+function rowsFrom(
+  elements: Element[],
+  css: string,
+  resolve: (raw: string) => string,
+  depth = 0,
+): RebuildModel['rows'] {
   const rows: RebuildModel['rows'] = [];
   let stack: ModelBlock[] = [];
   const flushStack = () => {
@@ -727,22 +739,19 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
     }
   };
 
-  for (const el of sequence) {
+  for (const el of elements) {
     const tag = tagOf(el);
     if (IGNORE.has(tag) || tag === 'svg') continue;
 
     // A PROPORTIONAL SPLIT wins over the grid reading. When the design's own
-    // grid-template-columns is UNEVEN (7fr 5fr, words beside a picture), the
-    // CSS is authoritative that these are columns of different weight, not a
-    // uniform card grid - so it is columned here, before isGrid can treat its
-    // two differently-shaped children as cards. An even grid (1fr 1fr 1fr) is
-    // left to isGrid, which turns a uniform run of cards into a Cards block.
-    const split = rowColumns(el, css);
-    if (split && split.length >= 2 && Math.max(...split) / Math.min(...split) >= 1.25) {
+    // grid-template-columns is UNEVEN (7fr 5fr), the CSS is authoritative that
+    // these are columns of different weight, not a uniform card grid.
+    const uneven = rowColumns(el, css);
+    if (uneven && uneven.length >= 2 && Math.max(...uneven) / Math.min(...uneven) >= 1.25) {
       const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)) && hasWords(kid));
-      if (kids.length === split.length) {
+      if (kids.length === uneven.length) {
         const columns = kids
-          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: split[i] }))
+          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: uneven[i] }))
           .filter((column) => column.blocks.length > 0);
         if (columns.length >= 2) {
           flushStack();
@@ -756,11 +765,7 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
       flushStack();
       const cards = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)));
 
-      // A uniform grid of linked picture cards becomes ONE editable Cards block,
-      // a list with an Add button, rather than a column of loose image and
-      // heading blocks per card that a client would have to keep in step by
-      // hand. Every card has to be a picture-and-link tile for this; an icon
-      // grid or a linkless badge row falls through to the per-card blocks below.
+      // A uniform grid of linked picture cards becomes ONE editable Cards block.
       const items = cards
         .map((card) => cardItem(card, resolve))
         .filter((item): item is CardItem => item !== null);
@@ -787,18 +792,14 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
       continue;
     }
 
-    // A SPLIT: an element whose CSS lays its children out in columns (a hero's
-    // words beside its picture, a feature's text beside a photo). Its direct
-    // children become the row's columns, at the design's own proportions,
-    // instead of collapsing into one flat stack. Only when the children match
-    // the track count, so a mismatch falls through to the safe flatten.
-    const weights = rowColumns(el, css);
-    if (weights) {
+    // An EVEN split or flex row: even columns, the count from its children.
+    const even = rowColumns(el, css);
+    if (even) {
       const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)) && hasWords(kid));
-      const wanted = weights.length || kids.length;
+      const wanted = even.length || kids.length;
       if (kids.length === wanted && kids.length >= 2 && kids.length <= 4) {
         const columns = kids
-          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: weights[i] }))
+          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: even[i] }))
           .filter((column) => column.blocks.length > 0);
         if (columns.length >= 2) {
           flushStack();
@@ -808,9 +809,43 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
       }
     }
 
+    // A CONTAINER THAT NESTS LAYOUT: recurse into it rather than flatten, so the
+    // grid or split inside becomes its own row. Guarded on depth so a pathological
+    // tree cannot recurse forever.
+    if (depth < 12 && elementChildren(el).length > 0 && containsLayout(el, css)) {
+      flushStack();
+      rows.push(...rowsFrom(elementChildren(el), css, resolve, depth + 1));
+      continue;
+    }
+
     if (!emitLeaf(el, resolve, stack)) stack.push(...blocksFrom(el, resolve));
   }
   flushStack();
+  return rows;
+}
+
+/**
+ * An imported block's stored props to a native block model, or null if there is
+ * nothing in it we can rebuild (in which case the caller keeps the import).
+ */
+export function modelFromImport(props: Record<string, unknown>): RebuildModel | null {
+  const html = typeof props.html === 'string' ? props.html : '';
+  if (!html.trim()) return null;
+
+  const fields = importFields(props);
+  const stored = importContent(props);
+  const resolve = makeResolver(fields, stored);
+
+  let fragment;
+  try {
+    fragment = parseFragment(html);
+  } catch {
+    return null;
+  }
+
+  const css = typeof props.css === 'string' ? props.css : '';
+  const sequence = workingSequence(elementChildren(fragment), css);
+  const rows = rowsFrom(sequence, css, resolve);
 
   const total = rows.reduce(
     (sum, row) => sum + row.columns.reduce((n, column) => n + column.blocks.length, 0),

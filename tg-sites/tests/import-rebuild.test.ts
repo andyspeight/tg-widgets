@@ -501,3 +501,40 @@ describe('reading a design\'s columns from its grid', () => {
     expect(result.section.rows.every((r) => r.columns.length === 1)).toBe(true);
   });
 });
+
+describe('reading layout nested inside a section', () => {
+  it('recurses into a section wrapping a heading and a card grid', () => {
+    // The real shape of a designed section: an outer <section> holds a heading
+    // AND a nested grid of cards. The top-level walk sees only the section and
+    // used to flatten the cards; now it recurses so the grid keeps its columns.
+    const html =
+      '<section class="escapes">' +
+      '<div class="head"><h2>Three escapes</h2></div>' +
+      '<div class="grid">' +
+      '<a class="card"><img src="{{tg:i1}}" alt="a"><h3>One</h3></a>' +
+      '<a class="card"><img src="{{tg:i2}}" alt="b"><h3>Two</h3></a>' +
+      '<a class="card"><img src="{{tg:i3}}" alt="c"><h3>Three</h3></a>' +
+      '</div></section>';
+    const css = '.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; }';
+    const result = rebuildSection({
+      html,
+      css,
+      fields: [
+        { key: 'i1', kind: 'image', label: '', value: 'https://cdn/a.jpg' },
+        { key: 'i2', kind: 'image', label: '', value: 'https://cdn/b.jpg' },
+        { key: 'i3', kind: 'image', label: '', value: 'https://cdn/c.jpg' },
+      ],
+      content: {},
+      label: 'Escapes',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // The heading stays its own single-column row; the grid became three across
+    // (a Cards block or three columns), not one flat stack of everything.
+    const wide = result.section.rows.find((r) => r.columns.length === 3 || r.columns[0].blocks.some((b) => b.type === 'cards'));
+    expect(wide, 'the nested card grid kept its columns').toBeTruthy();
+    // And nothing was lost: all three card titles survive.
+    const text = JSON.stringify(result.section);
+    for (const word of ['One', 'Two', 'Three']) expect(text).toContain(word);
+  });
+});
