@@ -621,6 +621,14 @@ management surfaces, modelled on WeTravel's Manage Trip screen.
     A Manage link on the trips list and a Manage-bookings button on the editor.
     Live-verified with three seeded bookings (held / deposit_paid / paid):
     £22,200 booked, £4,700 collected, £17,500 outstanding, all correct.
+    **Bookings tab upgraded (P1 #7, 27 Aug 2026)** to an interactive client
+    table matching WeTravel's participant table: filter by status and room,
+    a Columns chooser persisted per browser, sortable headers, row selection,
+    and **bulk status actions** (mark deposit paid / paid / cancelled) — the
+    offline-payment equivalent of WeTravel's bulk actions until Stripe wires the
+    online path. `bulkSetBookingStatus` is scoped three ways (operator, the
+    trip's departures, the id list) and only permits statuses that cannot
+    oversell, so the hold RPC is untouched. Live-verified.
   - **Traveller**: the `/booked/[reference]` hub now also shows the balance due
     after the deposit, so the whole money picture is in one place they return to
     with their reference (alongside what they booked, the room, and the
