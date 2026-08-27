@@ -446,3 +446,41 @@ Andy's instruction, having been created from prose false positives before the
 detector was fixed. Both were checked before deletion: Status In progress, no
 narrative, nothing to lose. The stop list and the bookable-airport test mean
 neither can come back.
+
+### 27 August 2026: two serving depths
+
+The fill left 375 records that were correct, two-source verified and completely
+invisible: the picker offered Done and Live only, so an airport whose position
+we knew precisely could not be shown on a map. Records are now served at one of
+two depths.
+
+| Depth | Which records | What is served |
+|---|---|---|
+| full | Done, Live | everything, including the audited narrative |
+| identity | anything with a name, coordinates and BOTH source URLs | name, IATA, city, country, coordinates, linked cities and resorts |
+
+**The narrative is stripped server side**, in `api/airport-content.js`, not
+skipped by the widget. A Draft record is prose that has been written and NOT
+checked, and if the widget were trusted to skip it the prose would still be in
+the response, one careless consumer away from a client site.
+
+**No widget change was needed.** Every section renderer in
+`public/widget-airport.js` already returns nothing when its field is absent, so
+an identity record renders as hero, map and nothing else. The claim that these
+records would produce "a spotlight full of empty sections" was wrong, and
+checking before building saved the work.
+
+**The allowlist is an allowlist because the blocklist failed within the hour.**
+The first version listed the narrative keys to remove, written from memory, and
+seven were wrong: the payload calls them `gettingThereByTrain`,
+`taxiAndRideshare`, `parking`, `dropOffInfo` and `flightTimeFromUK`, so all the
+transport prose plus flight times would have been served. A blocklist fails
+open. The smoke test now reads the real key list out of `airport-content.js`
+rather than checking a hand-written list against itself, which is what let it
+through: the extraction had to be fixed too, since it missed shorthand
+properties and several keys on one line.
+
+`officialWebsite` is withheld at identity depth. It is the one omission that
+costs something, being the obvious onward link, but it is typed by a human and
+never checked, and sending a customer to the wrong airport's website is worse
+than sending them nowhere.
