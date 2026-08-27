@@ -204,15 +204,22 @@ describe('an override replaces a designed background, never creates one', () => 
      * the subject as its query — one photograph per subject per section,
      * whether it landed as a background or as an inline frame.
      */
+    /*
+     * Identity is (query, variant), not query alone: a gallery deliberately
+     * asks for the SAME query at successive variants, which is four different
+     * photographs of one subject, not four copies of one photograph.
+     */
     let presetsWithImages = 0;
     for (const preset of PAGE_PRESETS) {
       const targets = sectionPhotoTargets(preset, 0, 'antigua harbour dusk');
       if (targets.length > 0) presetsWithImages += 1;
-      const subjectHits = targets.filter((target) => target.query === 'antigua harbour dusk');
+      const subjectHits = targets
+        .filter((target) => target.query === 'antigua harbour dusk')
+        .map((target) => `#${target.variant ?? 0}`);
       expect(
-        subjectHits.length,
-        `${preset.id} would fetch the identical photograph ${subjectHits.length} times`,
-      ).toBeLessThanOrEqual(1);
+        new Set(subjectHits).size,
+        `${preset.id} would fetch the identical photograph more than once`,
+      ).toBe(subjectHits.length);
     }
     // The sweep must have actually swept something.
     expect(presetsWithImages).toBeGreaterThan(10);
@@ -378,5 +385,50 @@ describe('a designed background always arrives with readable text', () => {
       }
     }
     expect(designed).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+describe('galleries are filled frame by frame', () => {
+  it('plans one target per frame, same subject, successive variants', () => {
+    /*
+     * gallery-wide is the AI page's visual punctuation: a four-across grid,
+     * full width, no words. Unfilled it ships the author-facing "Add some
+     * images" placeholder, which is exactly the kind of thing Andy meant by
+     * "not something I could give to a client".
+     */
+    const preset = presetById('gallery-wide')!;
+    const targets = sectionPhotoTargets(preset, 0, 'st lucia pitons');
+    const frames = targets.filter((target) => target.place.kind === 'gallery');
+    expect(frames).toHaveLength(4);
+    expect(frames.map((target) => target.variant)).toEqual([0, 1, 2, 3]);
+    for (const frame of frames) expect(frame.query).toBe('st lucia pitons');
+  });
+
+  it('writes each frame into the gallery with the query as its alt', () => {
+    const preset = presetById('gallery-wide')!;
+    const section = buildPresetSection(preset);
+    const targets = sectionPhotoTargets(preset, 0, 'st lucia pitons');
+    targets.forEach((target, index) => applyPhoto([section], target, `https://media.example/p${index}.jpg`));
+
+    const gallery = section.rows[0].columns[0].blocks[0];
+    const images = gallery.props.images as Array<{ src: string; alt: string }>;
+    expect(images).toHaveLength(4);
+    expect(images.map((image) => image.src)).toEqual([
+      'https://media.example/p0.jpg',
+      'https://media.example/p1.jpg',
+      'https://media.example/p2.jpg',
+      'https://media.example/p3.jpg',
+    ]);
+    expect(images[0].alt).toBe('st lucia pitons');
+  });
+
+  it('a two-column gallery gets two rows of frames, wider grids one row', () => {
+    const wordsBeside = presetById('gallery-words-beside')!;
+    const frames = sectionPhotoTargets(wordsBeside, 0, 'harbour town evening').filter(
+      (target) => target.place.kind === 'gallery',
+    );
+    expect(frames.length).toBe(4);
   });
 });

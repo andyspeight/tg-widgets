@@ -23,8 +23,13 @@
  */
 
 import { escapeHtml } from '../content/sanitise';
-import type { Section } from '../content/schema';
+import type { Block, Section } from '../content/schema';
 import { PAGE_PRESETS } from '../content/presets-page';
+import {
+  presetRoles,
+  presetSignature,
+  type SectionPreset,
+} from '../content/preset-types';
 import {
   buildStarterPage,
   type StarterFacts,
@@ -122,10 +127,52 @@ const BLANK_FACTS: StarterFacts = { company: '', town: '', about: '' };
  * drifts. Grouped by category, because a model picking a varied page reads better
  * from "here are the heroes, here are the feature layouts" than from a flat list.
  */
+/**
+ * One bracketed phrase telling the model what a section IS, visually.
+ *
+ * The catalogue used to offer nothing but each preset's label and sales line,
+ * so the model chose layout blind - and blind, the rational pick is always
+ * the safe centred stack, which is how every AI-built page converged on the
+ * same shape. The library already knows its own geometry (presetSignature);
+ * this puts that knowledge in front of the model, in words, so "vary the
+ * shape" is an instruction it can actually follow.
+ */
+export function shapeNote(preset: SectionPreset): string {
+  const signature = presetSignature(preset);
+  const parts: string[] = [];
+
+  if (preset.section?.backgroundQuery) parts.push('full-bleed photograph behind the words');
+  else if (preset.section?.tone === 'dark') parts.push('dark band');
+  else if (preset.section?.tone === 'accent') parts.push('accent-colour band');
+  else if (preset.section?.tone === 'subtle') parts.push('tinted band');
+
+  // A cards or gallery BLOCK is a grid even in a single column, which is how
+  // most of the library builds its grids; presetSignature's `repeated` only
+  // sees multi-column rows, and calling those presets a "centred stack" sent
+  // the model to the same shape every time.
+  const grid = preset.rows
+    .flatMap((row) => row.columns.flat())
+    .find((block) => block.type === 'cards' || block.type === 'gallery');
+
+  if (signature.repeated) parts.push(`${signature.columns}-across grid`);
+  else if (grid) {
+    const across = Number(grid.props?.columns) || 3;
+    parts.push(`${across}-across grid of ${grid.type === 'cards' ? 'cards' : 'pictures'}`);
+  } else if (signature.columns > 1) {
+    if (signature.media === 'left') parts.push('split, picture left');
+    else if (signature.media === 'right') parts.push('split, picture right');
+    else parts.push('side-by-side columns');
+  } else if (signature.media === 'above') parts.push('picture first, words below');
+  else if (signature.media === 'below') parts.push('words over a wide picture');
+  else parts.push(signature.align === 'centre' ? 'centred stack' : 'left-aligned');
+
+  return parts.join(', ');
+}
+
 export function pageCatalogue(): string {
   const byCategory = new Map<string, string[]>();
   for (const preset of BUILDABLE_PRESETS) {
-    const line = `- ${preset.id}: ${preset.label}. ${preset.description}`;
+    const line = `- ${preset.id}: ${preset.label}. ${preset.description} [${shapeNote(preset)}]`;
     const list = byCategory.get(preset.category) ?? [];
     list.push(line);
     byCategory.set(preset.category, list);
@@ -152,7 +199,12 @@ How to plan a page:
 - Pick section ids ONLY from the catalogue. Use each id at most once unless a repeat genuinely helps.
 - Order matters: the list is the order the sections appear down the page, top to bottom.
 - For each section, write a "heading" (its title, one line, in the house voice, grounded in the brief) and, where a paragraph suits it, a short "body" of one or two sentences. Leave "body" out for a section that is a row of points, a set of logos or a bare call to action. Leave "heading" out to keep the section's own wording.
-- Give each section a "photo": two or three words naming what a photograph behind it should SHOW. Name the real subject, so a page about Barbados says "Barbados beach villa" and not "travel" or "holiday". This is a search against a stock library, so it wants a thing that can be photographed, not a mood: "Antigua harbour at dusk" finds pictures, "unforgettable memories" does not.`;
+Design the page's RHYTHM, not just its content. Each catalogue line ends with [what the section is, visually]; use it:
+- Vary the shape down the page. After a centred section prefer a split or side-by-side one; two sections of the same shape in a row read as a template, and three read as a machine.
+- At most one grid of cards and one row of points per page. A page of grids is a brochure nobody designed.
+- Give the middle of a long page one visual PUNCTUATION mark: a full-bleed photograph section, a tinted band with a split layout, or a wide gallery. White sections either side of it will breathe.
+- The safe centred opener is not always right: a page that is mostly reading suits a left-aligned or split opener better than a banner.
+- Give each section a "photo": two or three words naming what a photograph behind it should SHOW. Name the real subject, so a page about Barbados says "Barbados beach villa" and not "travel" or "holiday". This is a search against a stock library, so it wants a thing that can be photographed, not a mood: "Antigua harbour at dusk" finds pictures, "unforgettable memories" does not. Let the photograph carry the company's position too: a luxury page wants the villa's infinity pool at dusk or the empty bay from the water, never the crowded beach; a family page wants the pool with children in it, not the silent spa.`;
 
 /** The output contract, so the model returns a JSON array and only that. */
 export const PAGE_OUTPUT_SHAPE = `Return a JSON array and NOTHING else. No prose before or after, no markdown fences. Each item is one section, in the order it appears down the page:
@@ -350,6 +402,12 @@ function visibleText(block: { props?: Record<string, unknown> }): string {
  * echo a placeholder survives. Emptied columns, rows and sections go with it,
  * since an empty band is its own kind of broken.
  */
+/** Whether a gallery block has at least one frame with a real picture in it. */
+function galleryHasPictures(block: { props: Record<string, unknown> }): boolean {
+  const images = Array.isArray(block.props.images) ? (block.props.images as Array<Record<string, unknown>>) : [];
+  return images.some((image) => typeof image?.src === 'string' && image.src.trim() !== '');
+}
+
 export function stripPlaceholders(sections: Section[]): Section[] {
   const kept: Section[] = [];
 
@@ -369,7 +427,17 @@ export function stripPlaceholders(sections: Section[]): Section[] {
                  * repair answer, a preset that gains a quote block later.
                  */
                 !FABRICATION_BLOCKS.has(block.type)
-                && !PLACEHOLDER_COPY.includes(visibleText(block)),
+                && !PLACEHOLDER_COPY.includes(visibleText(block))
+                /*
+                 * Empty media is an author placeholder on a published page:
+                 * an image with no picture renders "Choose an image", a
+                 * gallery with none renders "Add some images". They are empty
+                 * here only when the photo pass failed or ran out of budget,
+                 * and a page missing a picture beats a page telling its
+                 * visitors to add one.
+                 */
+                && !(block.type === 'image' && !toText(block.props.src))
+                && !(block.type === 'gallery' && !galleryHasPictures(block)),
             ),
           }))
           .filter((column) => column.blocks.length > 0),
@@ -382,9 +450,185 @@ export function stripPlaceholders(sections: Section[]): Section[] {
   return kept;
 }
 
+/**
+ * Remove the eyebrow headings from a built page.
+ *
+ * The craft floor bans the kicker - the small label above a heading - outright,
+ * and it is the single strongest "an AI made this" tell. Seventeen presets in
+ * the library carry one as factory copy, the fill happily writes fresh words
+ * into it, and fresh words are exactly what the placeholder stripper cannot
+ * catch. So the block is removed STRUCTURALLY, at build, before the fill ever
+ * sees it: no eyebrow slot is offered, no eyebrow is written, none ships.
+ *
+ * The roles come from the preset's own derivation (presetRoles), not from
+ * guessing at the built blocks, and the built section mirrors its preset
+ * block for block, so positions line up by construction. Wizard and designed
+ * pages keep their eyebrows: those are committed looks, and this is the AI
+ * path's own bar.
+ */
+export function stripEyebrows(plan: StarterSection[], sections: Section[]): Section[] {
+  return sections.map((section, index) => {
+    const preset = PAGE_PRESETS.find((entry) => entry.id === plan[index]?.preset);
+    if (!preset) return section;
+
+    const roles = presetRoles(preset);
+
+    /*
+     * ONLY AN EYEBROW IN THE TITLE'S OWN COLUMN IS A KICKER. presetRoles
+     * flattens across columns, so it also labels a margin heading - the small
+     * label that IS the left column of a [1,2] editorial row - as an eyebrow,
+     * and stripping that collapses a designed layout into a plain stack
+     * (text-title-and-bullets was the case that proved it). The banned
+     * pattern is the label stacked ABOVE the heading; a label BESIDE it is a
+     * layout.
+     */
+    let titleAt = '';
+    preset.rows.forEach((row, rowIndex) => {
+      row.columns.forEach((column, columnIndex) => {
+        column.forEach((block) => {
+          if (roles.get(block) === 'title') titleAt = `${rowIndex}:${columnIndex}`;
+        });
+      });
+    });
+
+    const eyebrows = new Set<string>();
+    preset.rows.forEach((row, rowIndex) => {
+      row.columns.forEach((column, columnIndex) => {
+        column.forEach((block, blockIndex) => {
+          if (roles.get(block) === 'eyebrow' && `${rowIndex}:${columnIndex}` === titleAt) {
+            eyebrows.add(`${rowIndex}:${columnIndex}:${blockIndex}`);
+          }
+        });
+      });
+    });
+    if (eyebrows.size === 0) return section;
+
+    return {
+      ...section,
+      rows: section.rows.map((row, rowIndex) => ({
+        ...row,
+        columns: row.columns.map((column, columnIndex) => ({
+          ...column,
+          blocks: column.blocks.filter(
+            (_block: Block, blockIndex: number) => !eyebrows.has(`${rowIndex}:${columnIndex}:${blockIndex}`),
+          ),
+        })),
+      })),
+    } as Section;
+  });
+}
+
 export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[]> {
-  return (await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS))
-    .sections;
+  const built = (
+    await buildStarterPage({ title: '', slug: '', description: '', sections: plan }, BLANK_FACTS)
+  ).sections;
+  return stripEyebrows(plan, built);
+}
+
+/**
+ * The finishing pass: band the tones and give the page its motion.
+ *
+ * Runs LAST, after the strip, because both decisions are positional and only
+ * the sections that survived know their neighbours. Two things happen:
+ *
+ * TONES ALTERNATE, the same pass the adopted destination pages use (see
+ * lib/content/adopt.ts): dark and accent bands keep the tone they are dark or
+ * accent FOR, and everything else bands light/subtle so the page reads as
+ * bands rather than a wall of white. (Andy, 19 Aug 2026: template pages must
+ * be proper styled pages, not a wall of white. The AI's pages were the last
+ * ones still ignoring that.)
+ *
+ * ONE AUTHORED MOTION MOMENT, copied from the wizard's own defaults ("a new
+ * site MOVES out of the box", 20 Aug 2026): the full-bleed photograph drifts
+ * (A6), and one mid-page picture section gets A5. Both are tier 0 - pure CSS,
+ * no JavaScript - and both stand down under prefers-reduced-motion. Not an
+ * entrance effect bolted onto every section: the craft floor is one moment
+ * per page, and this is it.
+ */
+export function dressPage(sections: Section[]): Section[] {
+  let previous = '';
+  let heroMoved = false;
+  let midMoved = false;
+
+  return sections.map((section, index) => {
+    const dressed: Section = { ...section };
+
+    /*
+     * WHAT COUNTS AS AN AUTHORED TONE, and is therefore kept: dark and accent
+     * always; subtle too, because on this path the default is light, so a
+     * subtle section can only mean the preset chose it - and the catalogue
+     * advertised exactly that to the model as "[tinted band]". Repainting it
+     * would make the catalogue a liar. Sections whose columns carry a tinted
+     * box are also left alone: a PANEL is drawn against the ground its
+     * designer chose, and on a subtle band the same tint disappears.
+     */
+    if (section.tone === 'dark' || section.tone === 'accent' || section.tone === 'subtle') {
+      previous = section.tone;
+    } else if (hasTintedBox(section)) {
+      previous = section.tone;
+    } else {
+      const tone = previous === 'light' ? 'subtle' : 'light';
+      previous = tone;
+      dressed.tone = tone as Section['tone'];
+    }
+
+    if (!dressed.motion) {
+      if (!heroMoved && dressed.backgroundImage) {
+        dressed.motion = { recipe: 'A6', intensity: 2 };
+        heroMoved = true;
+      } else if (!midMoved && index > 0 && hasImageBlock(dressed)) {
+        dressed.motion = { recipe: 'A5', intensity: 2 };
+        midMoved = true;
+      }
+    }
+
+    return dressed;
+  });
+}
+
+/** Whether any column in the section paints its own box background. */
+function hasTintedBox(section: Section): boolean {
+  return section.rows.some((row) =>
+    row.columns.some((column) => {
+      const box = (column as { box?: { background?: string } }).box;
+      return typeof box?.background === 'string' && box.background.trim() !== '';
+    }),
+  );
+}
+
+function hasImageBlock(section: Section): boolean {
+  return section.rows.some((row) =>
+    row.columns.some((column) => column.blocks.some((block: Block) => block.type === 'image')),
+  );
+}
+
+/**
+ * Point the page's dead buttons somewhere real.
+ *
+ * Every button in the preset library ships href '' and the fill is forbidden
+ * from touching buttons, so before this every call to action on an AI-built
+ * page rendered as href="#": a page that asks for an enquiry and swallows the
+ * click. The target is the planned contact page when the site plan knows one,
+ * and only EMPTY hrefs are written: a button that already points somewhere is
+ * somebody's decision.
+ */
+export function wireButtons(sections: Section[], href: string): Section[] {
+  if (!href) return sections;
+  for (const section of sections) {
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const block of column.blocks as Block[]) {
+          if (block.type === 'button' && !block.props.href) block.props.href = href;
+          if (block.type === 'button-group' && Array.isArray(block.props.buttons)) {
+            for (const button of block.props.buttons as Array<Record<string, unknown>>) {
+              if (!button.href) button.href = href;
+            }
+          }
+        }
+      }
+    }
+  }
+  return sections;
 }
 
 /**

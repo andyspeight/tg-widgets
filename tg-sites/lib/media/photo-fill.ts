@@ -30,19 +30,47 @@ import type { Section } from '../content/schema';
 import type { StarterPage } from '../content/starters';
 import { blobConfigured } from './blob';
 import { pexelsConfigured, searchPexels } from './pexels';
+import type { StockPhoto } from './types';
 import { importStockPhoto } from './stock';
 
 /** Query → the one in-flight or settled import for it. Null found nothing. */
 export type PhotoCache = Map<string, Promise<string | null>>;
 
-function resolve(tenantId: string, query: string, cache: PhotoCache): Promise<string | null> {
-  const known = cache.get(query);
+/** The cache key: plain query for the first result, suffixed for the rest. */
+function keyOf(query: string, variant: number): string {
+  return variant > 0 ? `${query}#${variant}` : query;
+}
+
+/**
+ * One imported url per (query, variant).
+ *
+ * The variant is which of the query's RESULTS this caller wants: a gallery is
+ * four frames of one subject, and resolving the same query four times gives
+ * the same first photo four times. One search per query (shared through
+ * `searches`), one import per distinct result actually used. A variant past
+ * what the search returned is a null, not a repeat: a gallery with three good
+ * frames beats one with two copies of the second.
+ */
+function resolve(
+  tenantId: string,
+  query: string,
+  variant: number,
+  cache: PhotoCache,
+  searches: Map<string, Promise<StockPhoto[]>>,
+): Promise<string | null> {
+  const key = keyOf(query, variant);
+  const known = cache.get(key);
   if (known) return known;
+
+  let search = searches.get(query);
+  if (!search) {
+    search = searchPexels({ query, orientation: 'landscape' }).then((found) => found.photos);
+    searches.set(query, search);
+  }
 
   const pending = (async () => {
     try {
-      const found = await searchPexels({ query, orientation: 'landscape' });
-      const photo = found.photos[0];
+      const photo = (await search)[variant];
       return photo ? (await importStockPhoto(tenantId, photo)).url : null;
     } catch {
       // A miss stays cached, so a failing query is not retried per section.
@@ -50,7 +78,7 @@ function resolve(tenantId: string, query: string, cache: PhotoCache): Promise<st
     }
   })();
 
-  cache.set(query, pending);
+  cache.set(key, pending);
   return pending;
 }
 
@@ -65,16 +93,22 @@ async function fill(
     if (plan.length === 0) return;
     if (!pexelsConfigured() || !blobConfigured()) return;
 
-    const queries = [...new Set(plan.map((target) => target.query))];
+    const searches = new Map<string, Promise<StockPhoto[]>>();
+    const wanted = new Map<string, { query: string; variant: number }>();
+    for (const target of plan) {
+      const variant = target.variant ?? 0;
+      wanted.set(keyOf(target.query, variant), { query: target.query, variant });
+    }
+
     const urls = new Map<string, string | null>();
     await Promise.all(
-      queries.map(async (query) => {
-        urls.set(query, await resolve(tenantId, query, cache));
+      [...wanted.entries()].map(async ([key, ask]) => {
+        urls.set(key, await resolve(tenantId, ask.query, ask.variant, cache, searches));
       }),
     );
 
     for (const target of plan) {
-      const url = urls.get(target.query);
+      const url = urls.get(keyOf(target.query, target.variant ?? 0));
       if (url) applyPhoto(sections, target, url);
     }
   } catch {

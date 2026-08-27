@@ -253,7 +253,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
      * into the client's own media, so nobody ships a stock file they meant to
      * swap. The dark tone is the fallback if the photo library is not connected.
      */
-    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'santorini sunset sea' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'santorini sunset sea', minHeight: 560, alignY: 'centre' },
   },
 
   {
@@ -755,7 +755,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'coastal cliffs ocean view' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'coastal cliffs ocean view', minHeight: 560, alignY: 'centre' },
   },
 
   /*
@@ -1060,7 +1060,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 112, width: 'full', backgroundQuery: 'mediterranean coast view' },
+    section: { paddingY: 112, width: 'full', backgroundQuery: 'mediterranean coast view', minHeight: 520, alignY: 'centre' },
   },
 
   {
@@ -1082,7 +1082,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'aerial turquoise coast' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'aerial turquoise coast', minHeight: 560, alignY: 'centre' },
   },
 
   {

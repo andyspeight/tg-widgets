@@ -33,12 +33,17 @@ import { parsePage, type Block, type Section } from '../lib/content/schema';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import {
   buildPageUserPrompt,
+  dressPage,
   featurePageImage,
   MAX_PLAN_SECTIONS,
   pageCatalogue,
+  PAGE_RULES,
   planFromModel,
   sectionsFromPlan,
+  shapeNote,
+  wireButtons,
 } from '../lib/ai/page-build';
+import { PAGE_PRESETS } from '../lib/content/presets-page';
 
 function read(...parts: string[]): string {
   return readFileSync(join(__dirname, '..', ...parts), 'utf8');
@@ -335,7 +340,9 @@ describe('the page builder action', () => {
     // only an https one is handed to the model, the same rule the alt text uses.
     expect(action).toContain('getMediaItem(site.tenantId, imageId)');
     expect(action).toContain('/^https:\\/\\//i.test(item.url)');
-    expect(action).toContain('featurePageImage(');
+    // Featured INSIDE the pipeline now, before the dress, so the uploaded
+    // hero gets its drift and the tone banding counts it dark.
+    expect(action).toContain('featureImageUrl: imageUrl');
   });
 
   it('never names the model endpoint or key where an error could echo it', () => {
@@ -440,12 +447,17 @@ describe('stripping the copy the builder never filled', () => {
      * and pictures landed on the wrong blocks.
      */
     const photographed = fn.indexOf('sections = await withPhotos(ctx.tenantId, planned, sections);');
-    const stripped = fn.indexOf('return stripPlaceholders(stripUnfilled(sections, slots));');
+    const stripped = fn.indexOf('const kept = stripPlaceholders(stripUnfilled(sections, slots));');
+    // And the finishing passes run on what SURVIVED: tones and motion are
+    // positional, and a wired button on a stripped section is a wasted write.
+    // The uploaded hero is featured before the dress for the same reason.
+    const dressed = fn.indexOf('return dressPage(ctx.featureImageUrl ? featurePageImage(wired, ctx.featureImageUrl) : wired);');
 
     expect(build, 'the build step has moved').toBeGreaterThan(-1);
     expect(fill, 'the fill step has moved').toBeGreaterThan(build);
     expect(photographed, 'photos no longer see the filled sections').toBeGreaterThan(fill);
-    expect(stripped, 'the strip no longer runs last').toBeGreaterThan(photographed);
+    expect(stripped, 'the strip no longer runs after the finishing passes').toBeGreaterThan(photographed);
+    expect(dressed, 'the dress pass no longer runs last').toBeGreaterThan(stripped);
   });
 
   it('the list still matches what the presets actually contain', async () => {
@@ -607,5 +619,271 @@ describe('fabrication presets are not offered and their blocks cannot ship', () 
         }
       }
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE CLIENT-GRADE ROUND (26 Aug). Andy on the first correct build: "AI
+ * standard fare, not something I could give to a client." The faults were not
+ * in the words but in the design: every page a wall of white centred stacks,
+ * every heading wearing a kicker, every button dead. Each fix is pinned here.
+ */
+
+describe('the model can see shape', () => {
+  it('every catalogue line ends with what the section is, visually', () => {
+    for (const line of pageCatalogue().split('\n')) {
+      if (!line.startsWith('- ')) continue;
+      expect(line, line).toMatch(/\[[^\]]+\]$/);
+    }
+  });
+
+  it('describes the shapes it claims', () => {
+    const byId = new Map(PAGE_PRESETS.map((preset) => [preset.id, preset]));
+    const note = (id: string) => shapeNote(byId.get(id)!);
+    expect(note('hero-background')).toContain('full-bleed photograph');
+    expect(note('hero-split-right')).toContain('split, picture right');
+    expect(note('features-three-icons')).toContain('grid');
+    expect(note('cta-centred')).toContain('accent-colour band');
+  });
+
+  it('and is told to use it', () => {
+    expect(PAGE_RULES).toContain('RHYTHM');
+    expect(PAGE_RULES).toContain('Vary the shape');
+  });
+});
+
+describe('no eyebrow ships from the AI path', () => {
+  it('strips the kicker at build, so the fill never even sees it', async () => {
+    /*
+     * hero-eyebrow is literally the pattern: an h6 tagline over the h1. The
+     * craft floor bans it outright, and stripping it STRUCTURALLY at build is
+     * the only strip that works - filled with fresh words, an eyebrow is
+     * invisible to the placeholder pass.
+     */
+    const [section] = await sectionsFromPlan([{ preset: 'hero-eyebrow', heading: 'Real heading' }]);
+    const styles = section.rows
+      .flatMap((row) => row.columns)
+      .flatMap((column) => column.blocks)
+      .filter((block) => block.type === 'heading')
+      .map((block) => (block.props as { style?: string }).style);
+    expect(styles).not.toContain('h6');
+    expect(styles.length).toBeGreaterThan(0);
+  });
+
+  it('across the whole buildable catalogue, not just the named preset', async () => {
+    /*
+     * 17 presets carried one. Build EVERY buildable preset and assert no
+     * section opens with a small heading before its biggest one - the same
+     * derivation presetRoles uses, applied to what actually shipped.
+     */
+    /*
+     * The ban is the label stacked ABOVE the title - so the check is per
+     * COLUMN, matching stripEyebrows. A margin label BESIDE the title (the
+     * left column of an editorial [1,2] row, e.g. text-title-and-bullets) is
+     * a layout, and it stays.
+     */
+    const { BUILDABLE_PRESETS } = await import('../lib/ai/page-build');
+    const rank: Record<string, number> = { h1: 6, h2: 5, h3: 4, h4: 3, h5: 2, h6: 1 };
+    for (const preset of BUILDABLE_PRESETS) {
+      const [section] = await sectionsFromPlan([{ preset: preset.id }]);
+      const all = section.rows
+        .flatMap((row) => row.columns)
+        .flatMap((column) => column.blocks)
+        .filter((block) => block.type === 'heading')
+        .map((block) => rank[(block.props as { style?: string }).style ?? ''] ?? 0);
+      const biggest = Math.max(0, ...all);
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          const headings = column.blocks
+            .filter((block) => block.type === 'heading')
+            .map((block) => rank[(block.props as { style?: string }).style ?? ''] ?? 0);
+          if (!headings.includes(biggest)) continue;
+          const beforeTitle = headings.slice(0, headings.indexOf(biggest));
+          expect(
+            beforeTitle.every((size) => size >= biggest),
+            `${preset.id} still opens with a kicker above its title`,
+          ).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('leaves a preset with no eyebrow exactly alone', async () => {
+    const preset = PAGE_PRESETS.find((entry) => entry.id === HERO)!;
+    const [section] = await sectionsFromPlan([{ preset: HERO }]);
+    const built = section.rows.flatMap((row) => row.columns).flatMap((column) => column.blocks);
+    expect(built.length).toBe(preset.rows.flatMap((row) => row.columns).flat().length);
+  });
+});
+
+describe('the page is dressed, not just written', () => {
+  const bare = (tone: string, blocks: Block[] = []): Section =>
+    ({
+      id: `sec_${Math.random().toString(36).slice(2, 8)}`,
+      tone,
+      rows: [{ columns: [{ blocks }] }],
+    }) as unknown as Section;
+  const image = { type: 'image', props: { src: '', alt: '' } } as unknown as Block;
+
+  it('bands the tones and leaves the designed bands alone', () => {
+    const dressed = dressPage([bare('light'), bare('light'), bare('accent'), bare('light'), bare('light')]);
+    expect(dressed.map((section) => section.tone)).toEqual(['light', 'subtle', 'accent', 'light', 'subtle']);
+  });
+
+  it('gives the photograph hero its drift and one picture section its motion', () => {
+    const hero = { ...bare('dark'), backgroundImage: 'https://example.com/a.jpg' } as Section;
+    const dressed = dressPage([hero, bare('light', [image]), bare('light', [image])]);
+    expect(dressed[0].motion).toEqual({ recipe: 'A6', intensity: 2 });
+    expect(dressed[1].motion).toEqual({ recipe: 'A5', intensity: 2 });
+    // ONE moment, not an effect bolted onto every section.
+    expect(dressed[2].motion).toBeUndefined();
+  });
+
+  it('never overrules motion a section already carries', () => {
+    const hero = {
+      ...bare('dark'),
+      backgroundImage: 'https://example.com/a.jpg',
+      motion: { recipe: 'A2', intensity: 1 },
+    } as Section;
+    expect(dressPage([hero])[0].motion).toEqual({ recipe: 'A2', intensity: 1 });
+  });
+});
+
+describe('the buttons work', () => {
+  const withButtons = (): Section =>
+    ({
+      id: 'sec_btns',
+      tone: 'light',
+      rows: [
+        {
+          columns: [
+            {
+              blocks: [
+                { type: 'button', props: { label: 'Start an enquiry', href: '' } },
+                {
+                  type: 'button-group',
+                  props: {
+                    buttons: [
+                      { label: 'Talk to us', href: '' },
+                      { label: 'Our story', href: '/about' },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }) as unknown as Section;
+
+  it('points empty hrefs at the planned contact page and touches nothing else', () => {
+    const [section] = wireButtons([withButtons()], '/contact');
+    const blocks = section.rows[0].columns[0].blocks as Array<{ props: Record<string, unknown> }>;
+    expect(blocks[0].props.href).toBe('/contact');
+    const buttons = blocks[1].props.buttons as Array<{ href: string }>;
+    expect(buttons[0].href).toBe('/contact');
+    // A button that already points somewhere is somebody's decision.
+    expect(buttons[1].href).toBe('/about');
+  });
+
+  it('does nothing without a target, because a wrong link is worse than a dead one', () => {
+    const [section] = wireButtons([withButtons()], '');
+    const blocks = section.rows[0].columns[0].blocks as Array<{ props: Record<string, unknown> }>;
+    expect(blocks[0].props.href).toBe('');
+  });
+});
+
+describe('empty media never ships', () => {
+  it('strips images and galleries the photo pass could not fill', async () => {
+    /*
+     * When Pexels is unconfigured or the budget ran out, an empty image block
+     * renders "Choose an image" and an empty gallery "Add some images" - an
+     * author placeholder shown to a VISITOR. A missing picture beats a page
+     * telling its readers to add one.
+     */
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const [section] = await sectionsFromPlan([{ preset: 'gallery-wide' }]);
+    const stripped = stripPlaceholders([section]);
+    // The whole section was pictures; with none found it disappears.
+    expect(stripped).toHaveLength(0);
+  });
+
+  it('keeps them the moment they carry a real picture', async () => {
+    const { stripPlaceholders } = await import('../lib/ai/page-build');
+    const [section] = await sectionsFromPlan([{ preset: 'gallery-wide' }]);
+    const gallery = section.rows[0].columns[0].blocks[0];
+    gallery.props = { ...gallery.props, images: [{ src: 'https://media.example/p.jpg', alt: 'a bay' }] };
+    expect(stripPlaceholders([section])).toHaveLength(1);
+  });
+});
+
+describe('the eyebrow strip cannot shift a photograph address', () => {
+  it('no picture block follows a stripped eyebrow in its column, across the library', async () => {
+    /*
+     * sectionPhotoTargets walks the PRESET to compute row/column/block
+     * addresses, then applyPhoto dereferences them into the eyebrow-STRIPPED
+     * sections. Removing a block above a picture in the same column would
+     * shift the address and silently drop the photograph. This holds by data
+     * today; this sweep is what turns "by data" into "by contract".
+     */
+    const { presetRoles } = await import('../lib/content/preset-types');
+    const pictures = new Set(['image', 'video', 'gallery', 'cards']);
+    for (const preset of PAGE_PRESETS) {
+      const roles = presetRoles(preset);
+      let titleAt = '';
+      preset.rows.forEach((row, rowIndex) => {
+        row.columns.forEach((column, columnIndex) => {
+          column.forEach((block) => {
+            if (roles.get(block) === 'title') titleAt = `${rowIndex}:${columnIndex}`;
+          });
+        });
+      });
+      preset.rows.forEach((row, rowIndex) => {
+        row.columns.forEach((column, columnIndex) => {
+          let sawEyebrow = false;
+          column.forEach((block) => {
+            if (roles.get(block) === 'eyebrow' && `${rowIndex}:${columnIndex}` === titleAt) sawEyebrow = true;
+            if (sawEyebrow) {
+              expect(
+                pictures.has(block.type),
+                `${preset.id} puts a ${block.type} after a kicker: its photo address would shift when the kicker is stripped`,
+              ).toBe(false);
+            }
+          });
+        });
+      });
+    }
+  });
+});
+
+describe('what the dress keeps', () => {
+  const bare2 = (tone: string): Section =>
+    ({ id: 'sec_t', tone, rows: [{ columns: [{ blocks: [] }] }] }) as unknown as Section;
+
+  it('a preset-authored subtle band stays subtle, as the catalogue promised', () => {
+    const dressed = dressPage([bare2('light'), bare2('subtle'), bare2('light')]);
+    expect(dressed.map((section) => section.tone)).toEqual(['light', 'subtle', 'light']);
+  });
+
+  it('a section whose column paints its own box keeps its ground', () => {
+    const boxed = {
+      id: 'sec_b',
+      tone: 'light',
+      rows: [{ columns: [{ box: { background: 'var(--tgs-surface-alt)' }, blocks: [] }] }],
+    } as unknown as Section;
+    // Second in the run, where the alternation would have turned it subtle
+    // and made its panel invisible against the band.
+    const dressed = dressPage([bare2('light'), boxed, bare2('light')]);
+    expect(dressed[1].tone).toBe('light');
+  });
+});
+
+describe('grids read as grids in the catalogue', () => {
+  it('single-column card and gallery presets are not "centred stack"', () => {
+    const byId = new Map(PAGE_PRESETS.map((preset) => [preset.id, preset]));
+    expect(shapeNote(byId.get('gallery-wide')!)).toContain('grid of pictures');
+    expect(shapeNote(byId.get('features-cards-with-pictures')!)).toContain('grid of cards');
   });
 });

@@ -128,7 +128,8 @@ export function buildPresetSection(preset: SectionPreset): Section {
     tone: preset.section?.tone ?? 'light',
     width: preset.section?.width ?? 'contained',
     paddingY: preset.section?.paddingY ?? DEFAULT_SECTION_PADDING,
-    minHeight: 0,
+    minHeight: preset.section?.minHeight ?? 0,
+    ...(preset.section?.alignY ? { alignY: preset.section.alignY } : {}),
     // The scrim strength over a background. 60 is what it was fixed at.
     overlay: 60,
     box: { ...EMPTY_BOX },
