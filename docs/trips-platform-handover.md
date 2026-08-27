@@ -20,8 +20,9 @@ settled, do not re-open them without Andy saying so.
 |---|---|---|
 | 1 | **Market: both, agents first** | Launch into the existing UK and Ireland agent base, on architecture that opens self-serve to retreat hosts and group leaders in phase 2. We ship with real trips on day one rather than a cold start. |
 | 2 | **Money: SaaS subscription only** | Stripe Connect **Standard**, application fee **zero**. Funds land in the operator's own Stripe account on their own payout schedule. We never hold traveller money. This confirms the 26 Jul decision rather than overriding it. |
-| 3 | **Architecture: new repo, reuse the plumbing** | A fresh Next.js app in its own repo and its own Vercel project, on the already-provisioned `group-trips` Supabase. tg-widgets stays as the embed and distribution channel. |
+| 3 | **Architecture: new repo, reuse the plumbing** | A fresh Next.js app in its own repo and its own Vercel project, on the already-provisioned `group-trips` Supabase. See decision 5 for the embed channel. |
 | 4 | **Brand: Travelgenix sub-brand** | Working product name **Travelgenix Trips**. Uses travelgenix-design and travelgenix-taste as-is. No separate design world to invent. |
+| 5 | **Trips is fully standalone, with its OWN embed widgets (27 Aug 2026)** | Andy's call: Trips does NOT live in the tg-widgets suite and will not be one of those widgets. It ships its OWN embeddable widgets, like WeTravel's, served from Trips itself (trips.travelify.io) — a snippet an operator drops on their own site. This SUPERSEDES the earlier "tg-widgets is the embed/distribution channel" clause in decision 3 and the phase-1 "repoint the four live tg-widgets" task, which is dropped. The tg-widgets Group Trips / Escorted Tour widgets are legacy and not part of Trips. |
 
 **The consequence of decision 2 that matters most.** Because we take nothing per
 transaction and never touch traveller funds, Travelgenix Trips is software, not a
@@ -343,13 +344,25 @@ what makes both true at once, which a single flat fee could not do.
     +-- data        Supabase group-trips  uzyckitibyfudnboaezm  (service role only)
     +-- money       Stripe Connect Standard, application fee 0
     +-- content     Destination Content Airtable base
-    |
-  tg-widgets  (unchanged, stays the distribution channel)
-    widget-trips.js / widget-trips-page.js / widget-tour.js / widget-tour-card.js
-      read the platform API instead of Airtable widget config
+    +-- embed       Trips' OWN embed widgets (see 6a), served from this app
     |
   luna-travel  (the traveller PWA, post-booking)
 ```
+
+### 6a. Embed widgets — Trips' own (decision 5, 27 Aug 2026)
+
+Trips ships its own embeddable widgets, like WeTravel's, served from the Trips
+app (trips.travelify.io), NOT from tg-widgets. An operator drops a container plus
+one script on their own site and gets an operator-branded card / grid / button
+that launches the hosted Trips booking flow.
+
+The plumbing is already in place: `GET /api/v1/trips/{id}` is public, CORS-open,
+counts-only (published trips, public brand only, no PII), and `next.config.ts`
+deliberately leaves the public `/trip` and `/book` pages frame-able (only
+`/console` is frame-denied), so the booking can open in an overlay iframe on the
+operator's site while the PII stays on our origin. The embed loader (`embed.js`),
+the container contract, and the widget rendering are the build. See section 8,
+"Embed widgets" for status.
 
 **Rules that must hold**
 
@@ -432,11 +445,13 @@ live database with the exact column sets the code writes.
 *Two pieces of phase 1 are deliberately NOT done yet, and both deserve their own
 pass rather than being rushed in behind the rest:*
 
-1. **Repointing the live widgets.** `widget-trips.js`, `widget-trips-page.js`,
-   `widget-tour.js` and `widget-tour-card.js` still read Airtable widget config.
-   The API they need exists, but changing them touches embeds already on customer
-   sites, so it wants a careful migration with the old path kept working. That is
-   what `legacy_widget_id` and the dual-lookup in the API are for.
+1. ~~**Repointing the live widgets.**~~ **DROPPED 27 Aug 2026 by decision 5.**
+   Trips is standalone and gets its OWN embed widgets (see section 6a), so the
+   tg-widgets `widget-trips.js` / `widget-trips-page.js` / `widget-tour.js` /
+   `widget-tour-card.js` are not repointed and are not part of Trips. The
+   `legacy_widget_id` column and the API's dual-lookup stay harmless and can keep
+   serving any old embed already on a customer site, but they are no longer a
+   migration target.
 2. **Migrating the Kenya and Tanzania tours.** Needs an operator record for GLOBAL
    TRAVEL SOLUTION and a one-off script to move the two saved configs across. Worth
    doing as the proof the model holds, and it will expose whatever the `content`
