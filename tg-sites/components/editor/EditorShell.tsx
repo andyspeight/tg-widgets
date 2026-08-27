@@ -19,6 +19,11 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { createAiPageAction, writeCopyAction } from '../../app/actions/ai';
 import { buildDesignedSectionAction } from '../../app/actions/designed';
 import {
+  deleteSectionTemplateAction,
+  listSectionTemplatesAction,
+} from '../../app/actions/section-templates';
+import type { SectionTemplate } from '../../lib/db/section-templates';
+import {
   createPageAction,
   movePageAction,
   publishPageAction,
@@ -596,6 +601,24 @@ export function EditorShell({
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  /*
+   * This client's saved sections, for the "My sections" tab of the add-a-section
+   * dialog. Loaded when the dialog opens rather than at mount, so a section
+   * saved this session is offered back the next time the dialog is opened, and a
+   * client with none never pays for the read.
+   */
+  const [templates, setTemplates] = useState<SectionTemplate[]>([]);
+  useEffect(() => {
+    if (insertAt === null) return;
+    let live = true;
+    void listSectionTemplatesAction().then((result) => {
+      if (live && result.ok) setTemplates(result.data);
+    });
+    return () => {
+      live = false;
+    };
+  }, [insertAt]);
 
   /*
    * Whether the on-canvas options popover is open, held here rather than inside
@@ -2640,6 +2663,19 @@ export function EditorShell({
            */
           onPickImported={(sections) => insertSections(sections)}
           onPickBuilt={(section) => insertSection(section)}
+          /*
+           * The page so far and its title, so the AI tab can suggest the section
+           * that should come next, and this client's own saved sections for the
+           * "My sections" tab. Delete goes straight to the action and drops the
+           * row from the list in hand, so it leaves the tab as it went.
+           */
+          pageSections={page.sections}
+          pageTitle={page.title}
+          templates={templates}
+          onDeleteTemplate={(id) => {
+            setTemplates((current) => current.filter((template) => template.id !== id));
+            void deleteSectionTemplateAction({ id });
+          }}
         />
       )}
 

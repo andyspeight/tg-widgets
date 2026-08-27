@@ -3214,6 +3214,76 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   line-height: 1.4;
 }
 
+/* --------------------------------------------------------------------------
+   My sections: this client's saved sections. A grid of name cards, each with a
+   quiet delete in the corner. No thumbnail, because a saved section is a real
+   Section and not a preset spec, so it names its shape rather than drawing it.
+   -------------------------------------------------------------------------- */
+
+.ed-mine__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--ed-3);
+}
+
+.ed-mine__card {
+  position: relative;
+  display: flex;
+}
+
+.ed-mine__insert {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ed-1);
+  width: 100%;
+  padding: var(--ed-3);
+  padding-right: var(--ed-5);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.ed-mine__insert:hover { border-color: var(--ed-accent); background: var(--ed-well); }
+
+.ed-mine__name {
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+}
+
+.ed-mine__meta {
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+}
+
+.ed-mine__delete {
+  position: absolute;
+  top: var(--ed-1);
+  right: var(--ed-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--ed-r-sm);
+  background: transparent;
+  color: var(--ed-ink-2);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+
+.ed-mine__delete:hover { background: var(--ed-well); color: var(--ed-danger, #c0392b); }
+
 /* Filled, not outlined. See the note at the top of this block. */
 .ed-thumb--preset rect { stroke: none; }
 .ed-thumb--preset rect[data-tone='strong'] { fill: var(--ed-ink-2); }
