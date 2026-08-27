@@ -282,7 +282,22 @@ export function monthlyFromPower(json) {
 /** Tolerances. Loose enough that two reanalyses can agree, tight enough to
  *  catch the errors that matter: wrong grid cell, wrong hemisphere, wrong unit. */
 export const TEMP_TOLERANCE_C = 3;
-export const RAIN_TOLERANCE_FRACTION = 0.4;
+
+/**
+ * Rainfall was widened from 0.4 to 0.6 on 26 Aug 2026, Andy's decision, taken
+ * with the trade stated: a 60% band passes places where the two reanalyses
+ * genuinely disagree, and is also loose enough that a wrong figure can pass
+ * unnoticed. It buys throughput by weakening the check rather than by changing
+ * what is checked.
+ *
+ * Worth knowing what it does and does not fix, because the arithmetic is not
+ * obvious. MERRA-2's coarser grid smooths orographic rain, so the gap grows
+ * with terrain: the Azores at 109mm against 70mm is a 44% gap and now passes,
+ * but Fiordland at 375mm against 176mm is 72% and still fails, and Mecca at
+ * 42mm against 5mm is 157% and would fail at any defensible number. The
+ * wettest and driest places on the worklist stay blocked.
+ */
+export const RAIN_TOLERANCE_FRACTION = 0.6;
 export const RAIN_TOLERANCE_FLOOR_MM = 12;
 
 /**
@@ -438,7 +453,7 @@ async function patchRecord(tableId, recordId, fields) {
  */
 const pause = ms => (ms > 0 ? new Promise(r => setTimeout(r, ms)) : Promise.resolve());
 
-export async function runClimateFill({ table = 'cities', limit = 20, write = false, authoredSeasons = {}, pauseMs = 8000, fetchers } = {}) {
+export async function runClimateFill({ table = 'cities', limit = 20, write = false, authoredSeasons = {}, pauseMs = 15000, offset = 0, fetchers } = {}) {
   const map = CLIMATE_TABLES[table];
   if (!map) throw new Error(`unknown climate table: ${table}`);
 
@@ -452,6 +467,23 @@ export async function runClimateFill({ table = 'cities', limit = 20, write = fal
   const rows = await readRows();
   const due = rows.filter(r => needsClimateFill(r.fields || {}, map));
 
+  // Take a ROTATING window, not always the front of the list.
+  //
+  // Taking the first N every run is what nearly killed this job. Records the
+  // two sources will never agree on sit at the head of the queue and are
+  // reprocessed every two hours while everything behind them is never reached
+  // at all: overnight on 26 Aug the fill moved 114 records to 112 across six
+  // runs, because it kept working the same eight. The airport backfill had the
+  // identical fault and was found the same day.
+  //
+  // The caller passes an offset that changes per run, so the window walks the
+  // backlog. Written records leave the due list, so the window naturally
+  // tightens onto whatever is left.
+  const start = due.length ? (Math.max(0, Math.trunc(offset)) % due.length) : 0;
+  const window = due.length > limit
+    ? due.slice(start, start + limit).concat(start + limit > due.length ? due.slice(0, start + limit - due.length) : [])
+    : due;
+
   const items = [];
   let filled = 0, failed = 0, skipped = 0, awaitingSeason = 0;
 
@@ -462,7 +494,7 @@ export async function runClimateFill({ table = 'cities', limit = 20, write = fal
   // pause between records costs a few seconds of a 300 second budget and makes
   // the batch size the thing that decides throughput.
   let first = true;
-  for (const row of due.slice(0, limit)) {
+  for (const row of window) {
     if (!first) await pause(pauseMs);
     first = false;
     const fields = row.fields || {};

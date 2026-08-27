@@ -91,7 +91,11 @@ export default async function handler(req, res) {
 
     for (const table of TABLE_ORDER) {
       if (budget <= 0) break;
-      const run = await runClimateFill({ table, limit: budget, write, authoredSeasons: seasons });
+      // Walk the backlog rather than restarting at the front every run. The
+      // clock is the only run counter available here, and the schedule is
+      // two-hourly, so the hour gives twelve distinct windows a day.
+      const offset = Math.floor(new Date().getUTCHours() / 2) * budget;
+      const run = await runClimateFill({ table, limit: budget, write, authoredSeasons: seasons, offset });
       results.push({
         table,
         due: run.due,

@@ -394,3 +394,55 @@ train, coach, taxi or arrival field, and the test asserts it. So a skeleton
 carries no prose at all, which is the only guarantee worth making about AI
 tells: there is nothing generated in the record to detect. The narrative is
 Phase 3, written and two-sourced by hand.
+
+### 27 August 2026: the fill finished
+
+**600 records, 600 distinct IATA codes, no duplicates.** The table went from 225
+to 602 overnight on two-hourly runs, then to 600 after two bad records were
+deleted. It covers 474 of the 475 airports on the committed target list plus
+the airports our own prose names.
+
+| | |
+|---|---:|
+| Records before | 225 |
+| Created by the fill | 377 |
+| Deleted as not real airports | 2 |
+| Total now | 600 |
+| Targets covered | 474 of 475 |
+| Records needing a human | 17 |
+
+**What needs a human, and why.** HBE, Borg El Arab at Alexandria, was never
+created: the two sources would not corroborate it. Sixteen more records carry
+coordinates, both source URLs and the date but no name, because OurAirports and
+Wikidata disagree about what the airport is called. LIR is "Daniel Oduber
+Quirós" to one and something else to the other; IGU is "Cataratas" to one and
+"Foz do Iguaçu" to the other; PVR is "Puerto Vallarta" to one and "Licenciado
+Gustavo Díaz Ordaz" to the other. The rule leaves those blank rather than
+picking a side, which is correct, and it works out at roughly one record in
+thirty-seven.
+
+**The cron is off again.** It has nothing left to do except reprocess those 16
+every two hours while scanning four tables to find them. The note at the top of
+`api/cron/reference-identity.js` says what would justify turning it back on.
+
+**Three bugs the run itself found**, each caught by checking output rather than
+trusting it:
+
+1. The breadth detector read "(KLM)" in two Caribbean records as an IATA code
+   and created Kalaleh Airport in Iran. The stop list now covers airlines,
+   currencies and travel abbreviations, and a prose-derived code has to prove
+   it is an airport a customer could fly to.
+2. `normalizeName` turned every character outside a-z into a space before the
+   token length filter, so "Málaga" tokenised to "laga" and never matched
+   "malaga", and "Fa'a'a" collapsed to nothing at all. Diacritics now fold and
+   apostrophes are removed.
+3. The backfill took the first 25 due records in the same order every run, so
+   permanently-stuck records at the head of the queue starved everything
+   behind them. Two records created nameless by bug 2 were still nameless two
+   runs after the fix, because the fix could never reach them.
+
+**Kalaleh (KLM) and Hector Silva Airstrip (BCV) were deleted** on 27 Aug at
+Andy's instruction, having been created from prose false positives before the
+detector was fixed. Both were checked before deletion: Status In progress, no
+narrative, nothing to lose. The stop list and the bookable-airport test mean
+neither can come back.

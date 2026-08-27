@@ -129,10 +129,6 @@
       "schedule": "0 4 * * *"
     },
     {
-      "path": "/api/cron/reference-identity",
-      "schedule": "0 */2 * * *"
-    },
-    {
       "path": "/api/cron/reference-climate",
       "schedule": "30 */2 * * *"
     },
