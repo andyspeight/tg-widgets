@@ -195,6 +195,27 @@ function evenWidths(n: number): number[] {
 }
 
 /**
+ * Whole-number widths in the given proportions, summing to EXACTLY 100.
+ *
+ * Carries a design's own split - a 7:5 grid becomes 58:42 - rather than
+ * snapping it to even. Rounded down first, then the remainder handed to the
+ * widest columns so the sum is exact and the biggest column stays biggest,
+ * with a floor of 1 so no column collapses to nothing.
+ */
+function proportionalWidths(weights: number[]): number[] {
+  const total = weights.reduce((sum, w) => sum + w, 0);
+  if (total <= 0) return evenWidths(weights.length);
+  const widths = weights.map((w) => Math.max(1, Math.floor((w / total) * 100)));
+  let remainder = 100 - widths.reduce((sum, w) => sum + w, 0);
+  const order = widths.map((_, i) => i).sort((a, b) => weights[b] - weights[a]);
+  for (let i = 0; remainder > 0; i = (i + 1) % order.length, remainder -= 1) widths[order[i]] += 1;
+  for (let i = 0; remainder < 0; i = (i + 1) % order.length, remainder += 1) {
+    if (widths[order[i]] > 1) widths[order[i]] -= 1;
+  }
+  return widths;
+}
+
+/**
  * Keep only the props that are real fields of this block.
  *
  * A model prop that is not a field is dropped here rather than left for the
@@ -251,6 +272,7 @@ export function sectionFromModel(answer: unknown): BuildResult {
       : [];
 
     const columns = [];
+    const weights: number[] = [];
     for (const rawColumn of rawColumns) {
       const rawBlocks = Array.isArray(asRecord(rawColumn).blocks)
         ? (asRecord(rawColumn).blocks as unknown[]).slice(0, MAX_BLOCKS_PER_COLUMN)
@@ -266,12 +288,22 @@ export function sectionFromModel(answer: unknown): BuildResult {
         }
       }
       // An empty column would draw a gap nobody asked for; drop it.
-      if (blocks.length) columns.push(createColumn(0, blocks));
+      if (blocks.length) {
+        columns.push(createColumn(0, blocks));
+        // The captured proportion, when the recogniser read a split from the
+        // design's grid (7fr 5fr). Absent for the AI builder, which asks for no
+        // widths and gets even ones.
+        const rawWidth = asRecord(rawColumn).width;
+        weights.push(typeof rawWidth === 'number' && rawWidth > 0 ? rawWidth : 0);
+      }
     }
 
     if (columns.length) {
       const row = createRow('1');
-      row.columns = columns.map((column, index) => ({ ...column, width: evenWidths(columns.length)[index] }));
+      const widths = weights.some((w) => w > 0)
+        ? proportionalWidths(weights)
+        : evenWidths(columns.length);
+      row.columns = columns.map((column, index) => ({ ...column, width: widths[index] }));
       rows.push(row);
     }
   }

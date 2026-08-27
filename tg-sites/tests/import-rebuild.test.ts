@@ -449,3 +449,55 @@ describe('rebuilding an imported design', () => {
     expect(types.filter((type) => type === 'icon-item').length).toBe(3);
   });
 });
+
+describe('reading a design\'s columns from its grid', () => {
+  it('splits a two-track grid into two columns at the design\'s proportions', () => {
+    // "words beside a picture" as every designed home states it: a grid whose
+    // template is 7fr 5fr. Before this, the whole thing flattened to one column.
+    const html =
+      '<section class="split">' +
+      '<div class="words"><h2>A quiet kind of luxury</h2><p>Villas with staff.</p></div>' +
+      '<div class="media"><img src="{{tg:i1}}" alt="villa"></div>' +
+      '</section>';
+    const css = '.split { display: grid; grid-template-columns: minmax(0,7fr) minmax(0,5fr); }';
+    const result = rebuildSection({ html, css, fields: [{ key: 'i1', kind: 'image', label: '', value: 'https://cdn/x.jpg' }], content: {}, label: 'Split' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const row = result.section.rows.find((r) => r.columns.length === 2);
+    expect(row, 'the split became two columns').toBeTruthy();
+    // 7:5 -> 59:41, biggest column stays biggest, widths sum to 100.
+    const widths = row!.columns.map((c) => c.width);
+    expect(widths[0]).toBeGreaterThan(widths[1]);
+    expect(widths[0] + widths[1]).toBe(100);
+    expect(widths[0]).toBe(59);
+  });
+
+  it('splits a flex row into even columns', () => {
+    const html = '<div class="row"><div><h3>One</h3></div><div><h3>Two</h3></div></div>';
+    const css = '.row { display: flex; }';
+    const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Row' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.section.rows.some((r) => r.columns.length === 2 && r.columns[0].width === 50)).toBe(true);
+  });
+
+  it('leaves a plain stacked container as one column', () => {
+    const html = '<div class="stack"><h2>Title</h2><p>Body one.</p><p>Body two.</p></div>';
+    const css = '.stack { display: block; }';
+    const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Stack' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.section.rows.every((r) => r.columns.length === 1)).toBe(true);
+  });
+
+  it('does not split when the children do not match the track count', () => {
+    // Two tracks but three children: a mismatch we cannot safely column, so it
+    // falls through to the flatten rather than mangling the layout.
+    const html = '<div class="grid"><h2>A</h2><p>B</p><p>C</p></div>';
+    const css = '.grid { grid-template-columns: 1fr 1fr; }';
+    const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Grid' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.section.rows.every((r) => r.columns.length === 1)).toBe(true);
+  });
+});

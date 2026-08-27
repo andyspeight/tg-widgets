@@ -52,7 +52,7 @@ interface ModelBlock {
 /** The shape sectionFromModel accepts. Widths are worked out for us. */
 export interface RebuildModel {
   name?: string;
-  rows: { columns: { blocks: ModelBlock[] }[] }[];
+  rows: { columns: { blocks: ModelBlock[]; width?: number }[] }[];
   /** The design's own background colour, carried onto the section's box. */
   background?: string;
   /** Set dark when that background is dark, so the section's text stays light. */
@@ -566,6 +566,62 @@ function blocksFrom(el: Element, resolve: (raw: string) => string): ModelBlock[]
 }
 
 // ---------------------------------------------------------------------------
+// Layout: reading the columns a design laid its children out in
+// ---------------------------------------------------------------------------
+
+/**
+ * The relative widths of a grid-template-columns value, or null.
+ *
+ * Every one of the ten designs states its splits as `grid-template-columns`
+ * with fraction units - "minmax(0,7fr) minmax(0,5fr)" is a 7:5 words-beside-
+ * picture row. This reads the fr (or %, px, auto) weight of each track so the
+ * rebuilt columns keep the design's proportions rather than snapping to equal.
+ */
+function trackWeights(value: string): number[] | null {
+  const tracks = value.trim().match(/minmax\([^)]*\)|repeat\([^)]*\)|[^\s]+/g) ?? [];
+  if (tracks.length < 2 || tracks.length > 4) return null;
+  const weights = tracks.map((track) => {
+    const fr = /(\d*\.?\d+)fr/.exec(track);
+    if (fr) return Number(fr[1]);
+    const pct = /(\d*\.?\d+)%/.exec(track);
+    if (pct) return Number(pct[1]) / 10;
+    const px = /(\d*\.?\d+)px/.exec(track);
+    if (px) return Math.max(1, Number(px[1]) / 100);
+    if (/auto/i.test(track)) return 0.6; // a slim auto track, e.g. a logo beside a menu
+    return 1;
+  });
+  return weights.every((w) => w > 0) ? weights : null;
+}
+
+/**
+ * The column weights this element lays its children out in, or null for a stack.
+ *
+ * A grid with two-to-four tracks, or a flex row (display:flex that is not a
+ * column), means the direct children are COLUMNS, not a vertical run. Reading
+ * this is what stops every hero and every words-beside-picture section from
+ * collapsing into one flat column. The element's own class is looked up in the
+ * design's CSS, the same way its background is.
+ */
+function rowColumns(el: Element, css: string): number[] | null {
+  for (const raw of classOf(el).split(/\s+/)) {
+    const cls = raw.replace(/[^a-z0-9_-]/gi, '');
+    if (!cls) continue;
+    const rule = new RegExp('\\.' + cls + '\\s*\\{([^}]*)\\}', 'i').exec(css);
+    if (!rule) continue;
+    const body = rule[1];
+    const grid = /grid-template-columns:\s*([^;]+)/i.exec(body);
+    if (grid) {
+      const weights = trackWeights(grid[1]);
+      if (weights) return weights;
+    }
+    if (/display:\s*flex/i.test(body) && !/flex-direction:\s*column/i.test(body)) {
+      return []; // a flex row: equal columns, the count filled in by the caller
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Layout: finding the grid
 // ---------------------------------------------------------------------------
 
@@ -610,13 +666,17 @@ function isGrid(el: Element): boolean {
 }
 
 /** Descend past the wrappers to the run of siblings the design laid out. */
-function workingSequence(nodes: Element[]): Element[] {
+function workingSequence(nodes: Element[], css: string): Element[] {
   let level = nodes;
   for (let depth = 0; depth < 16; depth += 1) {
     if (level.length !== 1) return level;
     const only = level[0];
     if (LEAF.has(tagOf(only))) return level;
     if (isGrid(only)) return level;
+    // Stop at a container that lays its children out in columns, so a section
+    // that IS a single split is columned rather than descended past and
+    // flattened. The same reason it stops at a grid.
+    if (rowColumns(only, css)) return level;
     const children = elementChildren(only);
     if (children.length === 0) return level;
     level = children;
@@ -655,7 +715,8 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
     return null;
   }
 
-  const sequence = workingSequence(elementChildren(fragment));
+  const css = typeof props.css === 'string' ? props.css : '';
+  const sequence = workingSequence(elementChildren(fragment), css);
 
   const rows: RebuildModel['rows'] = [];
   let stack: ModelBlock[] = [];
@@ -669,6 +730,27 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   for (const el of sequence) {
     const tag = tagOf(el);
     if (IGNORE.has(tag) || tag === 'svg') continue;
+
+    // A PROPORTIONAL SPLIT wins over the grid reading. When the design's own
+    // grid-template-columns is UNEVEN (7fr 5fr, words beside a picture), the
+    // CSS is authoritative that these are columns of different weight, not a
+    // uniform card grid - so it is columned here, before isGrid can treat its
+    // two differently-shaped children as cards. An even grid (1fr 1fr 1fr) is
+    // left to isGrid, which turns a uniform run of cards into a Cards block.
+    const split = rowColumns(el, css);
+    if (split && split.length >= 2 && Math.max(...split) / Math.min(...split) >= 1.25) {
+      const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)) && hasWords(kid));
+      if (kids.length === split.length) {
+        const columns = kids
+          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: split[i] }))
+          .filter((column) => column.blocks.length > 0);
+        if (columns.length >= 2) {
+          flushStack();
+          rows.push({ columns });
+          continue;
+        }
+      }
+    }
 
     if (isGrid(el)) {
       flushStack();
@@ -705,6 +787,27 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
       continue;
     }
 
+    // A SPLIT: an element whose CSS lays its children out in columns (a hero's
+    // words beside its picture, a feature's text beside a photo). Its direct
+    // children become the row's columns, at the design's own proportions,
+    // instead of collapsing into one flat stack. Only when the children match
+    // the track count, so a mismatch falls through to the safe flatten.
+    const weights = rowColumns(el, css);
+    if (weights) {
+      const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)) && hasWords(kid));
+      const wanted = weights.length || kids.length;
+      if (kids.length === wanted && kids.length >= 2 && kids.length <= 4) {
+        const columns = kids
+          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: weights[i] }))
+          .filter((column) => column.blocks.length > 0);
+        if (columns.length >= 2) {
+          flushStack();
+          rows.push({ columns });
+          continue;
+        }
+      }
+    }
+
     if (!emitLeaf(el, resolve, stack)) stack.push(...blocksFrom(el, resolve));
   }
   flushStack();
@@ -727,7 +830,6 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   // section is not stripped to white, which is the fault that carrying the
   // colour first fixed. A light tint is left as captured for now; the dark brand
   // band is the case that matters and the one a rebuild strips without this.
-  const css = typeof props.css === 'string' ? props.css : '';
   const background = rootBackground(html, css);
   if (background) {
     if (background.dark) {
@@ -922,7 +1024,9 @@ export function importOutline(props: Record<string, unknown>): string {
     for (const child of childNodes(node)) emit(child);
   };
 
-  for (const el of workingSequence(elementChildren(fragment))) emit(el);
+  // The outline flattens to text regardless of layout, so column detection is
+  // irrelevant here: pass no CSS.
+  for (const el of workingSequence(elementChildren(fragment), '')) emit(el);
   return lines.filter(Boolean).join('\n').slice(0, 6000);
 }
 
