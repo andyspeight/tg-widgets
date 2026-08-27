@@ -441,9 +441,34 @@ pass rather than being rushed in behind the rest:*
    doing as the proof the model holds, and it will expose whatever the `content`
    jsonb shape gets wrong.
 
-**Phase 2 — Take the money.** Deposit checkout through Connect Standard, the
-webhook, the transactional hold on capacity, the confirmation email. This is the old
-GT-4 to GT-7, finally unblocked.
+**Phase 2 — Take the money. THE JOURNEY IS BUILT, THE PAYMENT CALL IS THE SEAM
+(27 Aug 2026).** Everything except the Stripe checkout call is done and on the
+live database: a public checkout form, the ATOMIC hold, the confirmation email
+seam, the confirmation page, and the booking landing in the operator console.
+
+  - The hold (`gt_003` + `gt_004`) was designed by a four-way panel and judged
+    before a line was written: a plpgsql RPC that locks the one departure row
+    FOR UPDATE, counts in a separate statement under READ COMMITTED, then
+    inserts. It cannot oversell. Verified against the live DB, and a live
+    `information_schema` check caught FIVE gt_001 NOT-NULL columns the panel's
+    SQL would have tripped on (only widget_id was flagged in the design).
+  - An adversarial review (five lenses, every finding independently verified)
+    found 13 real defects. Eleven fixed, including two HIGH: a double-booking
+    path on ambiguous network failure, and a group deposit understated by the
+    party size. Two documented follow-ups, below.
+  - STILL THE SEAM: the Stripe deposit checkout call takes the slot right after
+    the hold. When the three Stripe steps are cleared this is an afternoon: the
+    booking is already created as `pending`, and the webhook flips it to
+    `deposit_paid`. Nothing else has to move.
+
+  Two follow-ups the review raised that were deliberately NOT rushed:
+  - **Per-IP rate limiting** on the public booking action needs a shared store
+    (Vercel KV, Upstash, or the estate's Redis). Infra-free mitigations are in
+    already: a per-email cap of six live holds per departure, and a publish kill
+    switch in the hold function. Per-IP is the real defence and an infra call.
+  - **The booking reference doubles as the confirmation access token** at about
+    38 bits. Fine for reading down a phone; thin as a bearer token. The proper
+    fix is a separate high-entropy link token on the row, a small schema change.
 
 **Phase 3 — Payment plans.** Schedules up to 18 instalments, auto-billing on saved
 payment method, reminders on the existing pipeline, a pay-balance link. Parity with
