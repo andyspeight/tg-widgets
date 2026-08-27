@@ -583,6 +583,29 @@ becomes the participant dashboard. The pillar nobody can copy.
 own subscription, pricing page, onboarding. This is the phase that opens the retreat
 host and group leader market, which is why it is late and not never.
 
+**Embed widgets (decision 5) — CARD WIDGET BUILT 27 Aug 2026.** Trips' own
+embeddable widgets, served from Trips itself. First widget shipped: a trip CARD
+that opens the booking as an OVERLAY on the operator's site (Andy's two choices).
+
+  - `public/embed.js` (v0.1.0): one container `<div data-tg-trip="TRIP_ID">` plus
+    one `<script src="…/embed.js" defer>`. Resolves the API base from the
+    script's own origin, reads the public CORS `GET /api/v1/trips/{id}` (counts
+    only, no PII), renders an operator-branded card in Shadow DOM
+    (`:host{all:initial}`), and Reserve opens `/book/{operator}/{slug}` in a
+    modal iframe overlay (Esc / backdrop / close, body scroll locked). CSP-clean;
+    a brand colour is hex-whitelisted and an image URL is https-and-trusted-host
+    only. Optional `data-tg-cta` (button label) and `data-tg-api` (dev override).
+    `public/embed-demo.html` is a stand-in operator page. Verified in headless
+    Chromium against a mock (card + overlay both correct).
+  - **Next embed slices** (same loader, quick to add): a **grid** of an operator's
+    live trips (`data-tg-trips="<operator-slug>"`, needs a small per-operator list
+    endpoint), and a **bare book button** (`data-tg-book`) for operators who
+    already have their own trip page.
+  - A note for go-live: the embed's fetch and the overlay iframe are public on the
+    real `trips.travelify.io` domain, but on the `*.vercel.app` host they sit
+    behind Vercel deployment protection, so the demo only fully works for someone
+    logged in to Vercel until the custom domain is live.
+
 ---
 
 ## 9. The blocker, and it has not moved since 7 August
