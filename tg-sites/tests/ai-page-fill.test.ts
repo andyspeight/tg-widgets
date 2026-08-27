@@ -168,7 +168,7 @@ describe('what the fill costs, and what it cannot cost', () => {
     expect(fn).toContain('catch (error)');
     const after = fn.slice(fn.indexOf('catch (error)'));
     expect(after).not.toContain('throw');
-    expect(after).toContain('const kept = stripPlaceholders(stripUnfilled(sections, slots));');
+    expect(after).toContain('const kept = dropStubSections(stripPlaceholders(stripUnfilled(sections, slots)));');
   });
 
   it('shares the slot already claimed rather than charging twice', () => {

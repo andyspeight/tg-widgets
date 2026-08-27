@@ -204,7 +204,7 @@ Design the page's RHYTHM, not just its content. Each catalogue line ends with [w
 - At most one grid of cards and one row of points per page. A page of grids is a brochure nobody designed.
 - Give the middle of a long page one visual PUNCTUATION mark: a full-bleed photograph section, a tinted band with a split layout, or a wide gallery. White sections either side of it will breathe.
 - The safe centred opener is not always right: a page that is mostly reading suits a left-aligned or split opener better than a banner.
-- Give each section a "photo": two or three words naming what a photograph behind it should SHOW. Name the real subject, so a page about Barbados says "Barbados beach villa" and not "travel" or "holiday". This is a search against a stock library, so it wants a thing that can be photographed, not a mood: "Antigua harbour at dusk" finds pictures, "unforgettable memories" does not. Let the photograph carry the company's position too: a luxury page wants the villa's infinity pool at dusk or the empty bay from the water, never the crowded beach; a family page wants the pool with children in it, not the silent spa.`;
+- Give each section a "photo": two or three words naming what a photograph behind it should SHOW. Name the real subject, so a page about Barbados says "Barbados beach villa" and not "travel" or "holiday". This is a search against a stock library, so it wants a thing that can be photographed, not a mood: "Antigua harbour at dusk" finds pictures, "unforgettable memories" does not. Let the photograph carry the company's position too: a luxury page wants the villa's infinity pool at dusk or the empty bay from the water, never the crowded beach; a family page wants the pool with children in it, not the silent spa. And NEVER ask for a photograph of a person to stand for the company - a stock face reads as fake on every site. For a section about the company itself, ask for its world instead: the harbour office, the marked-up chart, the marina at first light.`;
 
 /** The output contract, so the model returns a JSON array and only that. */
 export const PAGE_OUTPUT_SHAPE = `Return a JSON array and NOTHING else. No prose before or after, no markdown fences. Each item is one section, in the order it appears down the page:
@@ -526,6 +526,25 @@ export async function sectionsFromPlan(plan: StarterSection[]): Promise<Section[
 }
 
 /**
+ * Remove the stubs: a section reduced to nothing but headings.
+ *
+ * The strips do their job block by block, and their leftovers are sections
+ * like Halcyon's "How an enquiry becomes a holiday" - a heading whose steps
+ * the fill missed and the strip removed, left announcing nothing. A heading
+ * with no content under it is worse than no section: it reads as a page that
+ * lost its way. Dividers do not count as content (a statement band is a
+ * heading and a rule, and that is a designed moment), so the rule is: a
+ * section with at least one heading and nothing but headings goes.
+ */
+export function dropStubSections(sections: Section[]): Section[] {
+  return sections.filter((section) => {
+    const blocks = section.rows.flatMap((row) => row.columns.flatMap((column) => column.blocks));
+    if (blocks.length === 0) return false;
+    return !blocks.every((block: Block) => block.type === 'heading');
+  });
+}
+
+/**
  * The finishing pass: band the tones and give the page its motion.
  *
  * Runs LAST, after the strip, because both decisions are positional and only
@@ -562,8 +581,22 @@ export function dressPage(sections: Section[]): Section[] {
      * box are also left alone: a PANEL is drawn against the ground its
      * designer chose, and on a subtle band the same tint disappears.
      */
-    if (section.tone === 'dark' || section.tone === 'accent' || section.tone === 'subtle') {
+    if (section.tone === 'dark' || section.tone === 'accent') {
       previous = section.tone;
+    } else if (section.tone === 'subtle') {
+      /*
+       * Authored, so honoured - except when honouring it would weld two
+       * tinted bands into one grey slab with a heading stranded in the
+       * middle (the exact fault the alternation exists to prevent, and
+       * exactly what Halcyon's sections three-to-five shipped). Position
+       * beats preference: the second of two adjacent subtles goes light.
+       */
+      if (previous === 'subtle') {
+        previous = 'light';
+        dressed.tone = 'light' as Section['tone'];
+      } else {
+        previous = section.tone;
+      }
     } else if (hasTintedBox(section)) {
       previous = section.tone;
     } else {

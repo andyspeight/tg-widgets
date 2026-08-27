@@ -447,7 +447,7 @@ describe('stripping the copy the builder never filled', () => {
      * and pictures landed on the wrong blocks.
      */
     const photographed = fn.indexOf('sections = await withPhotos(ctx.tenantId, planned, sections);');
-    const stripped = fn.indexOf('const kept = stripPlaceholders(stripUnfilled(sections, slots));');
+    const stripped = fn.indexOf('const kept = dropStubSections(stripPlaceholders(stripUnfilled(sections, slots)));');
     // And the finishing passes run on what SURVIVED: tones and motion are
     // positional, and a wired button on a stripped section is a wasted write.
     // The uploaded hero is featured before the dress for the same reason.
@@ -885,5 +885,59 @@ describe('grids read as grids in the catalogue', () => {
     const byId = new Map(PAGE_PRESETS.map((preset) => [preset.id, preset]));
     expect(shapeNote(byId.get('gallery-wide')!)).toContain('grid of pictures');
     expect(shapeNote(byId.get('features-cards-with-pictures')!)).toContain('grid of cards');
+  });
+});
+
+describe('what the 27 Aug Halcyon build taught us', () => {
+  const bare3 = (tone: string, blocks: Block[]): Section =>
+    ({ id: 'sec_x', tone, rows: [{ columns: [{ blocks }] }] }) as unknown as Section;
+  const heading = { type: 'heading', props: { html: 'A heading', style: 'h2' } } as unknown as Block;
+  const text = { type: 'text', props: { html: '<p>Words.</p>' } } as unknown as Block;
+  const divider = { type: 'divider', props: {} } as unknown as Block;
+
+  it('a heading announcing nothing is dropped with its section', async () => {
+    const { dropStubSections } = await import('../lib/ai/page-build');
+    // "How an enquiry becomes a holiday", and nothing under it.
+    expect(dropStubSections([bare3('subtle', [heading])])).toHaveLength(0);
+    expect(dropStubSections([bare3('light', [heading, text])])).toHaveLength(1);
+    // A statement band is a heading and a rule: designed, kept.
+    expect(dropStubSections([bare3('light', [heading, divider])])).toHaveLength(1);
+  });
+
+  it('two authored tinted bands never weld into a slab', () => {
+    const dressed = dressPage([
+      bare3('light', [text]),
+      bare3('subtle', [text]),
+      bare3('subtle', [text]),
+      bare3('subtle', [text]),
+    ]);
+    // The first subtle is honoured; the run is broken after it.
+    expect(dressed.map((section) => section.tone)).toEqual(['light', 'subtle', 'light', 'subtle']);
+  });
+
+  it('no plan leaves without a contact page and the legal three', async () => {
+    const { ensureMustHavePages } = await import('../lib/ai/site-build');
+    const planned = ensureMustHavePages([
+      { title: 'Home', slug: '', purpose: 'The front door.' },
+      { title: 'Barbados', slug: 'barbados', purpose: 'The island.' },
+    ]);
+    const slugs = planned.map((page) => page.slug);
+    expect(slugs).toContain('contact');
+    expect(slugs).toContain('booking-terms');
+    expect(slugs).toContain('privacy');
+    expect(slugs).toContain('financial-protection');
+    // And a plan that already carries them is left alone.
+    const again = ensureMustHavePages(planned);
+    expect(again).toHaveLength(planned.length);
+    const named = ensureMustHavePages([
+      { title: 'Get in touch', slug: 'talk-to-us', purpose: 'Contact.' },
+      { title: 'Terms of booking', slug: 'terms', purpose: 'Terms.' },
+    ]);
+    expect(named.filter((page) => /contact/.test(page.slug))).toHaveLength(0);
+  });
+
+  it('the home page is told to open full-bleed', () => {
+    const action = read('app', 'actions', 'ai.ts');
+    expect(action).toContain("This is the site's HOME page: open it with a full-bleed photograph hero");
   });
 });
