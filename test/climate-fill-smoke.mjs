@@ -326,6 +326,35 @@ ok('the archive still holds all 118 records', archive.records.length === 118);
 ok('no authored season is a season of one token repeated 12 times by accident',
   authoredEntries.every(([, v]) => new Set(v.split(',')).size > 1));
 
+// --- the rotating window ---------------------------------------------------
+// Taking the first N every run nearly killed this job. Records the two sources
+// will never agree on sit at the head of the queue and get reprocessed every
+// two hours while everything behind them is never reached: overnight on 26 Aug
+// the fill moved 114 records to 112 across six runs because it kept working the
+// same eight. The window has to walk the backlog.
+const manyRows = Array.from({ length: 20 }, (_, i) => ({
+  id: `rec${i}`,
+  fields: { [CITY.name]: `City ${i}`, [CITY.temps]: PROSE, [CITY.coords[0][0]]: 10, [CITY.coords[0][1]]: 20 },
+}));
+const namesFor = async off => {
+  const run = await runClimateFill({
+    table: 'cities', limit: 5, write: false, pauseMs: 0, offset: off,
+    fetchers: { ...seam, listRows: async () => manyRows },
+  });
+  return run.items.map(i => i.name).join(',');
+};
+
+const w0 = await namesFor(0);
+const w5 = await namesFor(5);
+const w10 = await namesFor(10);
+ok('offset 0 takes the front of the queue', w0 === 'City 0,City 1,City 2,City 3,City 4');
+ok('a later offset takes a DIFFERENT set', w5 === 'City 5,City 6,City 7,City 8,City 9');
+ok('successive offsets do not overlap', new Set([...w0.split(','), ...w5.split(',')]).size === 10);
+ok('a third offset moves again', w10 === 'City 10,City 11,City 12,City 13,City 14');
+ok('the window wraps past the end', (await namesFor(18)) === 'City 18,City 19,City 0,City 1,City 2');
+ok('an offset beyond the list wraps rather than returning nothing', (await namesFor(25)) === w5);
+ok('every window is still full size', (await namesFor(19)).split(',').length === 5);
+
 console.log(`  authored seasons: ${authoredEntries.length} of ${archive.records.length} records`);
 console.log(`climate-fill: ${pass} passed, ${fails.length} failed`);
 if (fails.length) { for (const f of fails) console.error('  FAIL:', f); process.exit(1); }
