@@ -22,7 +22,7 @@
 import {
   CLIMATE_TABLES, DAYS_IN_MONTH,
   isValidNumberSeries, isValidSeasonSeries, needsClimateFill, readCoords,
-  monthlyFromOpenMeteo, monthlyFromPower, corroborateMonthly, deriveSeason,
+  monthlyFromOpenMeteo, monthlyFromPower, corroborateMonthly, deriveSeason, RAIN_TOLERANCE_FRACTION,
   formatSeries, runClimateFill,
 } from '../api/reference/_climate.js';
 
@@ -160,6 +160,20 @@ ok('a seasonally inverted source is caught', corroborateMonthly(om, flipped).agr
 // A small honest difference between two reanalyses must NOT be rejected.
 const nudged = { tempMax: om.tempMax.map(t => t + 1.5), rainTotal: om.rainTotal.map(r => r * 1.15) };
 ok('a plausible reanalysis difference still corroborates', corroborateMonthly(om, nudged).agreed === true);
+
+// The rainfall band is a deliberate setting, widened to 0.6 on 26 Aug 2026.
+// Pinned at both sides so it cannot drift without a test failing and somebody
+// deciding again. The pair below sits either side of the boundary: 44% apart
+// passes, which is the Azores, and 72% apart does not, which is Fiordland.
+const azores = { tempMax: om.tempMax, rainTotal: om.rainTotal.map(r => r * 0.56) };
+ok('a 44 percent rainfall gap passes at the agreed band', corroborateMonthly(om, azores).agreed === true);
+const fiordland = { tempMax: om.tempMax, rainTotal: om.rainTotal.map(r => r * 0.47) };
+ok('a 72 percent rainfall gap still fails', corroborateMonthly(om, fiordland).agreed === false);
+ok('the band is the agreed 0.6', RAIN_TOLERANCE_FRACTION === 0.6);
+
+// Widening rainfall must not have widened temperature by accident.
+const tempDrift = { tempMax: om.tempMax.map(t => t + 4), rainTotal: om.rainTotal };
+ok('a 4 degree temperature gap still fails', corroborateMonthly(om, tempDrift).agreed === false);
 
 // --- season derivation -----------------------------------------------------
 const med = deriveSeason([14, 15, 17, 20, 24, 29, 32, 32, 28, 23, 18, 15], [80, 70, 60, 40, 20, 5, 1, 2, 25, 70, 90, 95]);

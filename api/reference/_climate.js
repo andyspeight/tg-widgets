@@ -282,7 +282,22 @@ export function monthlyFromPower(json) {
 /** Tolerances. Loose enough that two reanalyses can agree, tight enough to
  *  catch the errors that matter: wrong grid cell, wrong hemisphere, wrong unit. */
 export const TEMP_TOLERANCE_C = 3;
-export const RAIN_TOLERANCE_FRACTION = 0.4;
+
+/**
+ * Rainfall was widened from 0.4 to 0.6 on 26 Aug 2026, Andy's decision, taken
+ * with the trade stated: a 60% band passes places where the two reanalyses
+ * genuinely disagree, and is also loose enough that a wrong figure can pass
+ * unnoticed. It buys throughput by weakening the check rather than by changing
+ * what is checked.
+ *
+ * Worth knowing what it does and does not fix, because the arithmetic is not
+ * obvious. MERRA-2's coarser grid smooths orographic rain, so the gap grows
+ * with terrain: the Azores at 109mm against 70mm is a 44% gap and now passes,
+ * but Fiordland at 375mm against 176mm is 72% and still fails, and Mecca at
+ * 42mm against 5mm is 157% and would fail at any defensible number. The
+ * wettest and driest places on the worklist stay blocked.
+ */
+export const RAIN_TOLERANCE_FRACTION = 0.6;
 export const RAIN_TOLERANCE_FLOOR_MM = 12;
 
 /**
