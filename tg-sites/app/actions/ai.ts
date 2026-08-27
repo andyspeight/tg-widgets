@@ -80,6 +80,7 @@ import {
   stripPlaceholders,
   buildPageUserPrompt,
   dressPage,
+  dropStubSections,
   featurePageImage,
   MAX_PAGE_BRIEF,
   PAGE_BUILD_MAX_TOKENS,
@@ -127,6 +128,7 @@ import {
   titlesFromInput,
   repairSitePrompt,
   type PlannedPage,
+  ensureMustHavePages,
 } from '../../lib/ai/site-build';
 import { revalidatePath } from 'next/cache';
 
@@ -718,7 +720,7 @@ async function sectionsForPage(
    * are positional, so they are decided by the sections that survived, not
    * the ones the strip was about to remove.
    */
-  const kept = stripPlaceholders(stripUnfilled(sections, slots));
+  const kept = dropStubSections(stripPlaceholders(stripUnfilled(sections, slots)));
   const wired = wireButtons(kept, ctx.contactHref ?? '');
   // The uploaded photo lands BEFORE the dress: a featured hero is a background
   // hero, and the dress is what gives a background hero its drift and counts
@@ -1072,7 +1074,10 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
     }
 
     // Home first whatever order it came back in: this list is also the menu.
-    return { ok: true, data: homeFirst(plan.pages) };
+    // Home first, and the pages no plan may omit appended when the model
+    // forgot them - the 27 Aug run came back with twelve pages and no way to
+    // get in touch, which silently killed every button on the site.
+    return { ok: true, data: homeFirst(ensureMustHavePages(plan.pages)) };
   } catch (error) {
     if (error instanceof AiError) {
       return { ok: false, error: error.message, retryable: error.retryable };
@@ -1245,8 +1250,17 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
      * the builder is choosing sections from it, so "Where we go" alongside "the
      * regions they know" is a materially better brief than either alone.
      */
+    const brief = purpose ? `The page is called "${title}". ${purpose}` : `A page called "${title}".`;
+    /*
+     * The home page carries the whole first impression, and left to its own
+     * judgement the model opens it with a modest contained banner (Halcyon,
+     * 27 Aug: a light split hero, padding 80, no photograph). The opening is
+     * not the model's call on a home page.
+     */
     const userPrompt = buildPageUserPrompt(
-      purpose ? `The page is called "${title}". ${purpose}` : `A page called "${title}".`,
+      isHome
+        ? `${brief} This is the site's HOME page: open it with a full-bleed photograph hero - a section whose shape note says [full-bleed photograph behind the words] - and make the opening confident, not a thin banner.`
+        : brief,
     );
     const call = { model: MODEL_BUILD, maxTokens: PAGE_BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
 

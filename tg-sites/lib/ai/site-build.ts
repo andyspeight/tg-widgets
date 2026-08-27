@@ -108,7 +108,7 @@ You are planning for a travel business: an agency, a tour operator or a travel a
 How to plan a site:
 - LET THE PROFILE DECIDE HOW MANY, between five and twelve. The number is an outcome, not a target. A company selling one thing in one place needs five or six pages. One that names five destinations and three kinds of holiday has more that a visitor would search for, and squeezing that into six hides most of what they sell. Padding a thin company out to twelve is the opposite mistake and just as bad.
 - A page earns its place when somebody would SEARCH for the thing it is about, or would refuse to book without reading it. Not when a website of this kind usually has one.
-- THE PAGES A TRAVEL SITE MUST HAVE, whether or not the profile mentions them: booking conditions or terms, a privacy policy, and how a customer's money is protected. Propose these every time. Their wording is the client's own and part legal, so let the purpose say that the client supplies the words rather than describing content you would have to invent.
+- THE PAGES A TRAVEL SITE MUST HAVE, whether or not the profile mentions them: a CONTACT page (how to reach the company and start an enquiry), booking conditions or terms, a privacy policy, and how a customer's money is protected. Propose these every time. The legal pages' wording is the client's own and part legal, so let their purpose say that the client supplies the words rather than describing content you would have to invent.
 - Plan for THIS company, from the profile. A three-person agency has no careers page and no press room. An operator running its own trips needs a page about the trips; an adviser who books other people's does not.
 - Order them as a visitor would meet them, because this is also the order they appear in the menu. Home first, a way to get in touch last.
 - Give each page a PURPOSE: one plain sentence saying what that page is for and who it is for. That sentence is the brief the page itself will be built from, so make it specific enough to build from and do not simply restate the title.
@@ -411,4 +411,69 @@ export function homeFirst(pages: readonly PlannedPage[]): PlannedPage[] {
   const home = pages.filter((page) => page.slug === '');
   const rest = pages.filter((page) => page.slug !== '');
   return [...home, ...rest];
+}
+
+// ---------------------------------------------------------------------------
+// The pages no plan may omit
+// ---------------------------------------------------------------------------
+
+/**
+ * Belt and braces under the MUST-HAVE line in SITE_RULES: the model is told
+ * to propose these every time, and Halcyon's 27 Aug run proved a twelve-page
+ * plan can still come back without a single one of them. That run's real
+ * cost was invisible: with no contact page in the plan, every call to action
+ * on every page was left pointing at nothing. So the guarantee moves out of
+ * the prompt and into code, where it cannot be ignored.
+ *
+ * Appended AFTER the model's pages: contact closes the main run (the menu
+ * order convention SITE_RULES itself states), the legal pages close the
+ * site. Matching is by the same word tests the menu builder uses, so a plan
+ * that already carries "Get in touch" or "Terms of booking" is left alone.
+ */
+const MUST_HAVE_PAGES: ReadonlyArray<{ match: RegExp; page: PlannedPage }> = [
+  {
+    match: /contact|enquir|get in touch|talk to us|speak to/i,
+    page: {
+      title: 'Contact us',
+      slug: 'contact',
+      purpose: 'How to reach the company and start an enquiry, with the enquiry form front and centre.',
+    },
+  },
+  {
+    match: /terms|booking conditions|conditions/i,
+    page: {
+      title: 'Booking terms',
+      slug: 'booking-terms',
+      purpose: 'The booking conditions. The client supplies the wording; the page only needs to hold it clearly.',
+    },
+  },
+  {
+    match: /privacy/i,
+    page: {
+      title: 'Privacy policy',
+      slug: 'privacy',
+      purpose: 'The privacy policy. The client supplies the wording; the page only needs to hold it clearly.',
+    },
+  },
+  {
+    match: /protect|atol|abta/i,
+    page: {
+      title: 'How your money is protected',
+      slug: 'financial-protection',
+      purpose: 'How customer money is protected. The client supplies the scheme details; invent none.',
+    },
+  },
+];
+
+export function ensureMustHavePages(pages: readonly PlannedPage[]): PlannedPage[] {
+  const ensured = [...pages];
+  for (const { match, page } of MUST_HAVE_PAGES) {
+    const present = ensured.some(
+      (entry) => match.test(entry.title) || match.test(entry.slug),
+    );
+    if (!present && !ensured.some((entry) => entry.slug === page.slug)) {
+      ensured.push({ ...page });
+    }
+  }
+  return ensured;
 }
