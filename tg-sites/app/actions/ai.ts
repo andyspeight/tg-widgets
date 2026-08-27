@@ -101,6 +101,15 @@ import { themeIsDefault } from '../../lib/theme/schema';
 import { getRegion, saveRegionDraft } from '../../lib/db/regions';
 import { currentCapabilities, PermissionError, requireCapability } from '../../lib/auth/capabilities';
 import { buildStarterRegion } from '../../lib/content/starters';
+import { designedHomeSections } from '../../lib/content/designed-homes';
+import {
+  applyHomeCopy,
+  buildHomeSystemPrompt,
+  buildHomeUserPrompt,
+  homeCopyFromModel,
+  homeTextSlots,
+  neutraliseFabricated,
+} from '../../lib/ai/home-personalise';
 import type { Region, RegionName } from '../../lib/content/schema';
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
@@ -812,7 +821,7 @@ export type AiPageResult =
 const MIN_REPAIR_MS = 8_000;
 
 export type SitePlanActionResult =
-  | { ok: true; data: PlannedPage[] }
+  | { ok: true; data: PlannedPage[]; homeDesign?: string }
   | { ok: false; error: string; retryable?: boolean };
 
 /**
@@ -1065,9 +1074,14 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
       };
     }
 
+    let homeDesign: string | undefined;
     if (design) {
       try {
         await applyDesignedTheme(site.tenantId, design);
+        // The pairing the theme landed on names a hand-built home page when it
+        // is one of the ten designed pairs. That id rides back to the client so
+        // the home page is seeded from the design rather than assembled.
+        homeDesign = design.pairing.home;
       } catch (error) {
         console.error('[tg-sites] applying the designed theme failed', error);
       }
@@ -1077,7 +1091,7 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
     // Home first, and the pages no plan may omit appended when the model
     // forgot them - the 27 Aug run came back with twelve pages and no way to
     // get in touch, which silently killed every button on the site.
-    return { ok: true, data: homeFirst(ensureMustHavePages(plan.pages)) };
+    return { ok: true, data: homeFirst(ensureMustHavePages(plan.pages)), homeDesign };
   } catch (error) {
     if (error instanceof AiError) {
       return { ok: false, error: error.message, retryable: error.retryable };
@@ -1205,6 +1219,70 @@ export async function describePagesAction(input: unknown): Promise<SitePlanActio
   }
 }
 
+/** The most budget worth starting the home rewrite with. */
+const HOME_REWRITE_FLOOR_MS = MIN_REPAIR_MS;
+
+/**
+ * The home page, seeded from a designed home and reworded for the client.
+ *
+ * The designed home is a committed, hand-built page carried as frozen imported
+ * blocks (lib/content/designed-homes.ts). Its layout, colour, type and pictures
+ * are kept exactly; only its TEXT slots are rewritten, into each block's content
+ * override, the same channel a client's own edit uses. The rewrite is best
+ * effort and shares the page's claimed slot: a home that could not be reworded
+ * still ships the design, just carrying the design's own placeholder words,
+ * which is a real page and not a broken one. Returns null when the id names no
+ * designed home, so the caller falls back to the assembled build.
+ */
+async function homeFromDesign(
+  homeId: string,
+  ctx: {
+    tenantId: string;
+    claimId: string | null;
+    settings: SiteSettings;
+    company: string;
+    startedAt: number;
+    contactHref: string;
+  },
+): Promise<Section[] | null> {
+  const seeded = designedHomeSections(homeId);
+  if (seeded.length === 0) return null;
+
+  // No fake licence number OR fabricated contact detail ships, on any path.
+  const guard = {
+    ownPhone: ctx.settings.telephone ?? '',
+    contactHref: ctx.contactHref,
+  };
+
+  const slots = homeTextSlots(seeded);
+  if (slots.length === 0 || remainingBudget(ctx.startedAt) < HOME_REWRITE_FLOOR_MS) {
+    return neutraliseFabricated(seeded, guard);
+  }
+
+  try {
+    const system = buildHomeSystemPrompt(ctx.settings);
+    const answer = await ask(system, buildHomeUserPrompt(ctx.company, slots), {
+      model: MODEL_BUILD,
+      maxTokens: FILL_MAX_TOKENS,
+      timeoutMs: Math.min(BUILD_TIMEOUT_MS, remainingBudget(ctx.startedAt)),
+      effort: BUILD_EFFORT,
+    });
+    if (ctx.claimId) {
+      await recordTokens(ctx.tenantId, ctx.claimId, { input: answer.inputTokens, output: answer.outputTokens });
+    }
+    const rewritten = homeCopyFromModel(answer.text, slots);
+    if (!rewritten.ok) {
+      console.error('[tg-sites] the home rewrite could not be used:', rewritten.error);
+      return neutraliseFabricated(seeded, guard);
+    }
+    return neutraliseFabricated(applyHomeCopy(seeded, rewritten.copy), guard);
+  } catch (error) {
+    // Never fatal: the designed home stands on its own words.
+    console.error('[tg-sites] rewording the home failed', error);
+    return neutraliseFabricated(seeded, guard);
+  }
+}
+
 export async function buildPlannedPageAction(input: unknown): Promise<AiPageResult> {
   try {
     if (!aiIsConfigured()) {
@@ -1227,6 +1305,9 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
      * fields are: titles capped, slugs through safeSlug, the list capped.
      */
     const planned = plannedPagesFrom(fields.pages);
+    // The designed home chosen when the site was planned, threaded from the
+    // client. Only meaningful for the home page.
+    const homeDesign = typeof fields.homeDesign === 'string' ? fields.homeDesign : '';
 
     if (!title) return { ok: false, error: 'That page has no name.' };
 
@@ -1301,7 +1382,26 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       };
     }
 
-    const sections = await sectionsForPage(plan.plan, {
+    /*
+     * THE HOME PAGE, WHEN A DESIGNED HOME WAS CHOSEN, is seeded from that
+     * hand-built page and reworded rather than assembled from sections. It
+     * carries its own header and footer, so the page is saved with chrome
+     * off and the site regions are skipped for it. A design that could not be
+     * seeded (a stale id) falls through to the ordinary build.
+     */
+    let designedHome: Section[] | null = null;
+    if (isHome && homeDesign) {
+      designedHome = await homeFromDesign(homeDesign, {
+        tenantId: site.tenantId,
+        claimId: claim.id,
+        settings,
+        company: settings.companyName || title,
+        startedAt,
+        contactHref,
+      });
+    }
+
+    const sections = designedHome ?? (await sectionsForPage(plan.plan, {
       tenantId: site.tenantId,
       claimId: claim.id,
       settings,
@@ -1309,7 +1409,8 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       purpose,
       startedAt,
       contactHref,
-    });
+    }));
+    const carriesOwnChrome = designedHome !== null;
 
     /*
      * NOTHING IS BUILT OVER WORK THAT IS ALREADY THERE, and this check is on the
@@ -1348,7 +1449,7 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       await saveDraft(
         site.tenantId,
         home.id,
-        { ...existing.content, title, sections },
+        { ...existing.content, title, sections, chrome: !carriesOwnChrome },
         userId ?? undefined,
       );
       const built = await getPage(site.tenantId, home.id);

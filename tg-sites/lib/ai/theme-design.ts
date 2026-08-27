@@ -51,6 +51,16 @@ export interface FontPairing {
    * platform scale (h1 48). Big type is a voice, not a default.
    */
   scale: 'grand' | 'classic';
+  /**
+   * The designed home this pairing belongs to, when it has one.
+   *
+   * The first ten pairings ARE the ten designed homepages' own type, so a
+   * theme that picks one of them has also chosen a hand-built home page to
+   * seed from - the whole site starts from a masterpiece rather than an
+   * assembly. The six extra pairings widen the palette of looks and have no
+   * home; a brief that lands on one gets the AI-built home instead.
+   */
+  home?: string;
 }
 
 /**
@@ -60,16 +70,16 @@ export interface FontPairing {
  * imports through the standard pipeline.
  */
 export const FONT_PAIRINGS: readonly FontPairing[] = [
-  { id: 'young-serif-hanken', display: 'Young Serif', body: 'Hanken Grotesk', voice: 'Warm and sunlit. An island or beach specialist with sand in their shoes.', displayWeight: 400, displayTracking: -1, scale: 'classic' },
-  { id: 'baloo-nunito', display: 'Baloo 2', body: 'Nunito Sans', voice: 'Bright and friendly. Family holidays, kids clubs, no dawn flights.', displayWeight: 600, displayTracking: -1, scale: 'classic' },
-  { id: 'lora-dm-sans', display: 'Lora', body: 'DM Sans', voice: 'Gentle and dependable. A family specialist parents trust.', displayWeight: 600, displayTracking: -1, scale: 'classic' },
-  { id: 'source-serif-pt-sans', display: 'Source Serif 4', body: 'PT Sans', voice: 'Steady and nautical. Cruises, itineraries, a specialist on the phone.', displayWeight: 600, displayTracking: -1, scale: 'classic' },
-  { id: 'albert-literata', display: 'Albert Sans', body: 'Literata', voice: 'Considered and scholarly. Cultural touring, expert-led, long reads.', displayWeight: 700, displayTracking: -2, scale: 'classic' },
-  { id: 'oswald-source-sans', display: 'Oswald', body: 'Source Sans 3', voice: 'Bold and outdoorsy. Treks, expeditions, honest grades.', displayWeight: 500, displayTracking: 0, scale: 'grand' },
-  { id: 'bricolage-figtree', display: 'Bricolage Grotesque', body: 'Figtree', voice: 'Loud and fast. Budget city breaks, deposits, deals.', displayWeight: 700, displayTracking: -2, scale: 'grand' },
-  { id: 'fraunces-archivo', display: 'Fraunces', body: 'Archivo', voice: 'A studio with taste. Bespoke trips designed one client at a time.', displayWeight: 600, displayTracking: -1, scale: 'grand' },
-  { id: 'playfair-manrope', display: 'Playfair Display', body: 'Manrope', voice: 'Classic luxury. Villas with staff, a limited book of clients.', displayWeight: 500, displayTracking: 0, scale: 'grand' },
-  { id: 'bodoni-jost', display: 'Bodoni Moda', body: 'Jost', voice: 'High fashion. Private travel as couture, spare and editorial.', displayWeight: 500, displayTracking: 0, scale: 'grand' },
+  { id: 'young-serif-hanken', display: 'Young Serif', body: 'Hanken Grotesk', voice: 'Warm and sunlit. An island or beach specialist with sand in their shoes.', displayWeight: 400, displayTracking: -1, scale: 'classic', home: 'windward-west' },
+  { id: 'baloo-nunito', display: 'Baloo 2', body: 'Nunito Sans', voice: 'Bright and friendly. Family holidays, kids clubs, no dawn flights.', displayWeight: 600, displayTracking: -1, scale: 'classic', home: 'bucket-and-spade' },
+  { id: 'lora-dm-sans', display: 'Lora', body: 'DM Sans', voice: 'Gentle and dependable. A family specialist parents trust.', displayWeight: 600, displayTracking: -1, scale: 'classic', home: 'sandpiper' },
+  { id: 'source-serif-pt-sans', display: 'Source Serif 4', body: 'PT Sans', voice: 'Steady and nautical. Cruises, itineraries, a specialist on the phone.', displayWeight: 600, displayTracking: -1, scale: 'classic', home: 'harbourline' },
+  { id: 'albert-literata', display: 'Albert Sans', body: 'Literata', voice: 'Considered and scholarly. Cultural touring, expert-led, long reads.', displayWeight: 700, displayTracking: -2, scale: 'classic', home: 'fenwick-hale' },
+  { id: 'oswald-source-sans', display: 'Oswald', body: 'Source Sans 3', voice: 'Bold and outdoorsy. Treks, expeditions, honest grades.', displayWeight: 500, displayTracking: 0, scale: 'grand', home: 'peak-and-pass' },
+  { id: 'bricolage-figtree', display: 'Bricolage Grotesque', body: 'Figtree', voice: 'Loud and fast. Budget city breaks, deposits, deals.', displayWeight: 700, displayTracking: -2, scale: 'grand', home: 'awaydays' },
+  { id: 'fraunces-archivo', display: 'Fraunces', body: 'Archivo', voice: 'A studio with taste. Bespoke trips designed one client at a time.', displayWeight: 600, displayTracking: -1, scale: 'grand', home: 'harland-vane' },
+  { id: 'playfair-manrope', display: 'Playfair Display', body: 'Manrope', voice: 'Classic luxury. Villas with staff, a limited book of clients.', displayWeight: 500, displayTracking: 0, scale: 'grand', home: 'aurelia' },
+  { id: 'bodoni-jost', display: 'Bodoni Moda', body: 'Jost', voice: 'High fashion. Private travel as couture, spare and editorial.', displayWeight: 500, displayTracking: 0, scale: 'grand', home: 'harlow-wren' },
   { id: 'cormorant-inter', display: 'Cormorant Garamond', body: 'Inter', voice: 'Quiet refinement. Understated luxury that never raises its voice.', displayWeight: 600, displayTracking: 0, scale: 'grand' },
   { id: 'libre-caslon-karla', display: 'Libre Caslon Text', body: 'Karla', voice: 'Literary and boutique. Small hotels, slow travel, good writing.', displayWeight: 400, displayTracking: -1, scale: 'classic' },
   { id: 'dm-serif-work-sans', display: 'DM Serif Display', body: 'Work Sans', voice: 'Polished and modern. Grown-up hotels and city stays.', displayWeight: 400, displayTracking: -1, scale: 'grand' },

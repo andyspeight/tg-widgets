@@ -76,6 +76,8 @@ export function SiteBuilder({
   /** Page names the client typed, to be described and added to the list. */
   const [extra, setExtra] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
+  // The designed home the planner chose for this site, threaded to the home build.
+  const [homeDesign, setHomeDesign] = useState<string>('');
   /**
    * Time actually spent building, so what is left can be MEASURED not guessed.
    *
@@ -124,6 +126,7 @@ export function SiteBuilder({
       return;
     }
     setRows(result.data.map((page) => ({ ...page, progress: 'waiting' as const })));
+    setHomeDesign(result.homeDesign ?? '');
     setStage('review');
     setNothingMissing(result.data.length === 0);
   }
@@ -200,6 +203,8 @@ export function SiteBuilder({
         slug: page.slug,
         purpose: page.purpose,
         pages: planRefs,
+        // Only the home page reads this, but it is harmless to send everywhere.
+        homeDesign,
       });
 
       patch(

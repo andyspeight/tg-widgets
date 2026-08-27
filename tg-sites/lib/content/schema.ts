@@ -1064,6 +1064,18 @@ export const PageSchema = z.object({
     .max(120)
     .regex(/^[a-z0-9]*(?:-[a-z0-9]+)*$/, 'Slug must be lowercase words separated by hyphens'),
   seo: SeoSchema.default({ noindex: false }),
+  /*
+   * Whether this page shows the site header and footer.
+   *
+   * True for every ordinary page, and the default, so nothing stored before
+   * this existed changes. False for a page that carries its OWN complete
+   * chrome and would otherwise show two headers - a home page seeded from one
+   * of the ten designed homepages, whose hero bakes in its own nav. The flag
+   * lives on the page because only the page knows it is self-contained; the
+   * renderer reads it to skip the header and footer regions for that page
+   * alone.
+   */
+  chrome: z.boolean().optional(),
   sections: z.array(SectionSchema).default([]),
 });
 
