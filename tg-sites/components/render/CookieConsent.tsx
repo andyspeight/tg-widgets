@@ -30,6 +30,7 @@ export function CookieConsent({ settings }: { settings: SiteSettings }): ReactEl
       <div
         id="tgs-consent"
         hidden
+        data-layout={consent.layout}
         data-title={consent.title}
         data-message={consent.message}
         data-accept={consent.acceptLabel}

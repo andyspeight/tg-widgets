@@ -87,8 +87,20 @@ function oneLine(value: unknown, max: number): string {
  * accepts, and the banner is the thing that flips it to granted. That is what
  * makes this a real gate rather than a notice bar that changes nothing.
  */
+/**
+ * The shape of the banner. Four looks, one behaviour:
+ *   card    a friendly rounded card, centred along the foot. The default.
+ *   bar     a full width strip across the bottom, words left and buttons right.
+ *   corner  a small quiet card tucked into the bottom-left.
+ *   solid   the card, filled with the brand accent, for a bolder site.
+ */
+export const COOKIE_LAYOUTS = ['card', 'bar', 'corner', 'solid'] as const;
+export type CookieLayout = (typeof COOKIE_LAYOUTS)[number];
+
 export interface CookieConsentSettings {
   enabled: boolean;
+  /** Which of the four looks to draw. */
+  layout: CookieLayout;
   title: string;
   message: string;
   acceptLabel: string;
@@ -99,6 +111,7 @@ export interface CookieConsentSettings {
 
 export const DEFAULT_COOKIE_CONSENT: CookieConsentSettings = {
   enabled: false,
+  layout: 'card',
   title: 'Cookies on this site',
   message: 'We use cookies to understand how this site is used. Accept them, or carry on with only the essentials.',
   acceptLabel: 'Accept',
@@ -418,6 +431,9 @@ export const SiteSettingsSchema = z.object({
       const o = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
       return {
         enabled: o.enabled === true,
+        layout: (COOKIE_LAYOUTS as readonly string[]).includes(o.layout as string)
+          ? (o.layout as CookieLayout)
+          : DEFAULT_COOKIE_CONSENT.layout,
         title: oneLine(o.title, 80) || DEFAULT_COOKIE_CONSENT.title,
         message: oneLine(o.message, 300) || DEFAULT_COOKIE_CONSENT.message,
         acceptLabel: oneLine(o.acceptLabel, 40) || DEFAULT_COOKIE_CONSENT.acceptLabel,

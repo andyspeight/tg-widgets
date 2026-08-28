@@ -527,6 +527,32 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
                 )}
 
                 <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-layout">
+                    Style
+                  </label>
+                  <select
+                    className="tv-select"
+                    id="cc-layout"
+                    value={settings.cookieConsent.layout}
+                    onChange={(event) =>
+                      set('cookieConsent', {
+                        ...settings.cookieConsent,
+                        layout: event.target.value as SiteSettings['cookieConsent']['layout'],
+                      })
+                    }
+                  >
+                    <option value="card">Card, centred along the bottom</option>
+                    <option value="bar">Bar across the bottom</option>
+                    <option value="corner">Small card, bottom left</option>
+                    <option value="solid">Filled with your brand colour</option>
+                  </select>
+                  <p className="tv-field__help">
+                    All four ask the same thing and remember the answer the same
+                    way. Pick the one that sits best with your site.
+                  </p>
+                </div>
+
+                <div className="tv-field">
                   <label className="tv-field__label" htmlFor="cc-title">
                     Banner heading
                   </label>
