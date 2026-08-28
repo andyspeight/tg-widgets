@@ -198,22 +198,29 @@ To be credible we need these, because an operator will ask. Honest status:
 | Trip page builder | yes | yes, Tour Builder | polish |
 | Itinerary with maps | yes | yes | polish |
 | Packages (rooming) with photos and links | yes | **yes, built** (phase 5) | done |
-| Options / add-ons | yes | display only | **build** (needs a selection table) |
+| Options / add-ons | yes | **yes, built** (gt_014, priced by the hold) | done |
+| Promo / early-bird codes | yes | **yes, built** (gt_011/012) | done |
 | Payment plans, up to 18 instalments | yes | no | **build** |
-| Auto-billing and reminders | yes | reminder pipeline exists | wire up |
+| Auto-billing and reminders | yes | reminder pipeline exists (gt_010) | wire up (needs Stripe) |
 | Waivers with e-signature | yes | **yes, built** (phase 4, mandatory gate) | done |
 | Custom booking forms | yes | **yes, built** (phase 4) | done |
-| Document and ID collection | yes | Luna viewer only | **build** (needs a private blob store) |
-| Participant dashboard | yes | Luna Travel | wire up |
-| Inventory and rooming | yes | **rooming built** (phase 5); per-package allocation to come | part |
+| Document and ID collection | yes | **yes, built** (gt_015, private Supabase Storage) | done |
+| Broadcast messaging + templates | yes | **yes, built** (gt_009) | done |
+| Waitlist on full trips | yes | **yes, built** (gt_008) | done |
+| Team roles / permissions | yes | **yes, built** (gt_016, owner/manager/viewer) | done |
+| Reporting (money across trips) | yes | **yes, built** | done |
+| Participant dashboard | yes | Luna Travel + Manage Trip | wire up |
+| Inventory and rooming | yes | **rooming + per-package allocation built** (gt_013) | done |
 | Multi-currency | yes | no | **build** |
 | CRM | integration | Airtable, native | done |
 | Supplier payments | yes | **not building** | see below |
-| AI brochure import | no | **yes** | ours |
-| Traveller PWA | no | **yes** | ours |
+| AI brochure import | **yes now** (Smart Import AI) | **yes** | **parity, not a moat** |
+| Embeddable widgets | **yes now** (widget suite + WP plugin + reviews) | **yes** | **parity, not a moat** |
+| Traveller PWA | view-only app | **yes**, Luna Travel | ours |
 | Destination content | no | **yes** | ours |
-| Embeddable widgets | no | **yes** | ours |
 | Site builder | no | **yes**, tg-sites | ours |
+| No booking-fee money model | no | **yes** | ours |
+| SMS to travellers | no | possible | ours |
 
 **Supplier payments: deliberately not building.** Moving operator money to third
 parties is a regulated activity and it is the one part of WeTravel that genuinely
@@ -398,13 +405,24 @@ continues from `gt_001`.
 - `gt_departures` — one trip, many dates, each with its own capacity and price.
 - `gt_packages` — room types and tiers. Carries photos and links, which is a named
   WeTravel gap.
-- `gt_options` — add-ons and priced extras, per booking or per traveller.
+- `gt_options` — add-ons and priced extras, per booking or per traveller. Now
+  selectable and billable through the hold (gt_014); a booking snapshots its
+  chosen extras in `gt_bookings.selected_options` jsonb.
 - `gt_travellers` — a person on a booking. A party of six is six rows.
 - `gt_payment_plans` and `gt_instalments` — the schedule and each due amount.
-- `gt_forms` and `gt_form_responses` — custom questions per trip.
+- `gt_forms` and `gt_form_responses` — custom questions per trip. A question can
+  now be of type `document` (an upload), authored like any other field.
 - `gt_waivers` and `gt_signatures` — the document, its version, and who signed what
   and when. Version matters, a signature must point at the exact text signed.
-- `gt_documents` — traveller uploads, passports and insurance.
+- `gt_documents` — traveller uploads (passport, ID, insurance). RESHAPED by gt_017
+  from the gt_002 placeholder to the shipped shape (operator_id, trip_id,
+  field_key, file_path); the file lives in the private `traveller-docs` Supabase
+  Storage bucket, never a public URL.
+- `gt_promo_codes` (gt_011) — discount / early-bird codes, operator-scoped.
+- `gt_waitlist` (gt_008) — would-be travellers when a departure is full.
+- `gt_message_templates` and `gt_messages` (gt_009) — broadcast messaging.
+- `gt_operator_members` (gt_016) — team roles (owner / manager / viewer) within an
+  operator. Authorisation only; identity is tg-widgets SSO. See lib/members.ts.
 
 **Existing, extended**
 
@@ -499,7 +517,7 @@ seam, the confirmation page, and the booking landing in the operator console.
 payment method, reminders on the existing pipeline, a pay-balance link. Parity with
 their headline feature.
 
-**Phase 4 — The people. BUILT 27 Aug 2026, bar document upload.** `gt_travellers`,
+**Phase 4 — The people. FULLY BUILT (document upload landed 28 Aug 2026).** `gt_travellers`,
 custom forms per trip, and waivers with e-signature and the **mandatory gate at
 registration** are live and on the existing (already-applied) gt_002 tables. No
 Stripe needed: it all hangs off the confirmation/registration side, not payment.
@@ -523,17 +541,27 @@ Stripe needed: it all hangs off the confirmation/registration side, not payment.
     traveller, their answers, who signed, and a registration-complete banner;
     the bookings list shows "3 of 4" named and links through.
 
-  **Deliberately deferred: document and passport upload.** Passport and ID scans
-  are sensitive PII and must NOT sit in the PUBLIC media blob store the widget
-  images use. They need their own PRIVATE Vercel Blob store with signed access,
-  which is an Andy step (create the store) exactly like the media one was. The
-  `gt_documents` table already exists and is ready for it. Passport *numbers*
-  can already be collected today as a short-text custom question (stored in the
-  service-role-only `gt_form_responses`), so only the file upload is waiting.
+  **Document and passport upload. BUILT 28 Aug 2026, on Supabase Storage (NOT
+  Vercel Blob).** The earlier plan flagged a private Vercel Blob store as an Andy
+  dependency; that turned out to be unnecessary. We already run Supabase, whose
+  private Storage buckets with short-lived signed URLs are the right home for
+  sensitive PII and need no new provisioning. So documents are a new `'document'`
+  registration field type (authored exactly like a question, per traveller or
+  once per booking): the file uploads out of band through
+  `POST /api/register/document` (bearer reference, size and mime capped to match
+  the bucket), lands in the private `traveller-docs` bucket, and is recorded in
+  `gt_documents` (gt_015). Completeness folds a present document into the answered
+  set, so a required passport gates "registration complete" with no change to the
+  completeness rule. The operator views one through `/api/console/document/[id]`,
+  which checks ownership and 302-redirects to a 90-second signed URL — the
+  traveller never holds a durable link. `lib/storage.ts` is the server-only
+  Storage seam. Live-verified end to end on the deployed environment (upload →
+  signed URL → fetch matched bytes → delete; the bucket rejects a disallowed mime).
 
   Follow-up carried over from phase 2 and relevant here too: **per-IP rate
-  limiting** on the public registration action still wants a shared store; the
-  action guards the inet column and the booking status in the meantime.
+  limiting** on the public registration and document-upload actions still wants a
+  shared store; the actions guard the inet column, the booking status, and the
+  bucket's size/mime limits in the meantime.
 
 **Phase 5 — Inventory. ROOMING BUILT 27 Aug 2026.** Packages (room types /
 occupancy tiers) are a real, bookable thing end to end, closing WeTravel's named
@@ -565,13 +593,31 @@ occupancy tiers) are a real, bookable thing end to end, closing WeTravel's named
   (the exact pattern the console already uses). Diagnosed from the live runtime
   error and the compiled bundle, not guessed.
 
-  **Deliberately deferred, two clearly-scoped next slices:**
-  - **Per-package allocation** (a limited number of single rooms) needs a
-    further, careful change to the reviewed hold RPC to count per package as
-    well as per departure. Capacity is per-departure for now.
-  - **Options / add-ons** (`gt_options` exists as a definition) need a
-    per-booking SELECTION table before they can be chosen at booking; none
-    exists yet, so this is a small migration plus a picker.
+  **Both later slices now BUILT (28 Aug 2026):**
+  - **Per-package allocation** — **gt_013** rewrites the hold to count a package's
+    own capacity per departure under the same row lock, returning `package_full`
+    when a party would go over, while a null-capacity package is unaffected.
+    Live-verified: a 2-cap package fills at party 2, a third booking returns
+    package_full while the departure still has room.
+  - **Options / add-ons** — **gt_014** rewrites the hold again (10th arg
+    `p_option_ids`): every REQUIRED option is folded in plus any the traveller
+    chose, priced per booking or per traveller, added AFTER any promo discount (a
+    trip discount must not discount the airport transfer), and snapshotted onto
+    the booking as `selected_options` jsonb so the record survives an edit. No
+    junction table needed. The same migration FIXED a latent promo-redemption
+    leak (a code was counted before the capacity/allocation checks, so a failed
+    hold burned a use; it now increments only after the insert). Operator authors
+    extras on the trip editor; the booking form has an extras picker; the
+    confirmation and operator booking detail show them. Live-verified: base
+    £3,700pp + £40pp transfer + £250 guide + folded-in £15pp required levy priced
+    to £7,760 for party 2; a 20% code discounted the base only to £3,015; a failed
+    hold left the code's redeemed count at 0, a successful one moved it to 1.
+
+    Deferred within options: **option capacity capping** (the `gt_options.capacity`
+    column exists but is not enforced, so it is deliberately NOT offered in the
+    authoring UI — offering a limit we do not enforce would be dishonest); and a
+    **per-option quantity** picker (an option is currently all-or-nothing per
+    party). Both are small follow-ups when a real operator needs them.
 
 **Phase 6 — The console.** Bookings list, per-departure manifest, payment status,
 outstanding balances, supplier cost and margin, CSV and PDF export.
@@ -633,6 +679,45 @@ management surfaces, modelled on WeTravel's Manage Trip screen.
     after the deposit, so the whole money picture is in one place they return to
     with their reference (alongside what they booked, the room, and the
     update-details / register link). Real online payment is still the Stripe seam.
+
+**The P1 sweep — ALL DONE (27–28 Aug 2026).** After the deep WeTravel teardown
+(§4), the non-Stripe P1 gaps were worked straight down the list, each live-verified
+and pushed on its own commit. Migrations gt_008–gt_016. In order:
+
+  1. **Reporting** — a cross-trip money dashboard at `/console/reports`.
+  2. **Waitlist** — gt_008. A full trip shows a waitlist form instead of a dead
+     end; the operator gets a Waitlist tab with invite / remove.
+  3. **Broadcast messaging** — gt_009. Compose to a segment (status / room) with a
+     live recipient count, save/reuse templates, sent history. The real Brevo
+     transport activates on `BREVO_API_KEY` + `TRIPS_EMAIL_FROM`, logging until then.
+  4. **Automated emails** — gt_010. Operator new-booking notice, a confirmation
+     "complete your booking" link, and a daily reminder cron (CRON_SECRET-guarded).
+  5. **Promo / early-bird codes** — gt_011/012. Percent or amount, per booking or
+     per person, date window and redemption cap, validated and applied inside the
+     hold. (gt_014 later fixed the redemption-count ordering — see phase 5.)
+  6. **Package allocation + add-ons** — gt_013/014. See phase 5 above.
+  7. **Document / passport upload** — gt_015, private Supabase Storage. See phase 4.
+  8. **Team roles / permissions** — gt_016. Owner / manager / viewer WITHIN an
+     operator. Identity stays in tg-widgets SSO, so this is authorisation, not a
+     second login: `lib/members.ts` (pure, tested) resolves a person's role from
+     the operator's contact and its member list. Two invariants make it safe to
+     ship — the contact_email is always owner (a team can never lock itself out),
+     and until the first member is added everyone under the client stays owner (the
+     deploy changes nothing until an owner opts in; then an unlisted user is
+     read-only, never shut out). Server-side and fail-closed: `requireEditor` is
+     null for a viewer and guards every console write (18 actions + the media write
+     routes); `requireOwner` guards the Team screen (`/console/team`, add teammates
+     by email, set roles). A view-only banner and hidden edit affordances for
+     viewers. Live-verified (case-insensitive unique index, the Team page renders
+     the contact as fixed owner). **Deferred UI polish:** the trip editor still
+     renders its forms for a viewer (saves fail server-side with a view-only
+     message) rather than being fully read-only — a cosmetic follow-up; the
+     security boundary is the server gate, which is complete.
+
+The test suite is **168 green** (`node --test`), typecheck and build clean. The one
+still-open non-Stripe P1 is **multi-currency** (each trip is single-currency today;
+reports flag mixed-currency totals as indicative). Everything else on the parity
+list that does not need Stripe is built.
 
 ---
 
