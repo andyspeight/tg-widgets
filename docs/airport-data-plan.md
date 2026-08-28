@@ -484,3 +484,32 @@ properties and several keys on one line.
 costs something, being the obvious onward link, but it is typed by a human and
 never checked, and sending a customer to the wrong airport's website is worse
 than sending them nowhere.
+
+### 28 August 2026: the climate fill stopped at its floor
+
+64 of the 118 city records converted. 54 did not, and further runs were not
+going to change that: the rate went 7.5 per run, then 4.25, 3.25, 2.25, then 1
+of 8, then 0 of 8. The window rotates, so everything outstanding had been tried
+repeatedly and failed the same way each time.
+
+**Why the 54 fail, read from the run logs rather than assumed.** This corrects
+what was being said about it for two days. Three causes, and only the third is
+"mountains and deserts":
+
+| Cause | Examples | Nature |
+|---|---|---|
+| Temperature, the 3 degree band | New York, Queenstown, Varadero, Phnom Penh, Thassos, Norwegian ski resorts | gaps of 3.0 to 3.9 degrees, just over the line |
+| Rainfall, the 12mm floor | Sal, Volcanoes National Park, Petra, the Holy Cities | 5mm against 21mm: trivial in absolute terms, large as a ratio |
+| Rainfall, real divergence | Fiordland 375 against 176, Galapagos 122 against 64 | MERRA-2's coarser grid smooths orographic rain |
+
+The largest bucket is temperature, and New York is in it. That is not exotic
+terrain, it is a band set at 3 degrees when two reanalyses routinely differ by
+more.
+
+**Andy set the rainfall FRACTION at 0.6 knowing the trade.** He has never been
+asked about the temperature band or the rainfall floor, and they are now the
+bigger share of the blockage. Those are decisions for him, not knobs to turn
+quietly, so the cron is off and the position is reported rather than loosened.
+
+The prose in every unconverted record is untouched, and archived at
+`docs/climate-archive/cities-climate-prose.json` regardless.

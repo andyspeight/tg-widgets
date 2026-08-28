@@ -1,5 +1,33 @@
 /**
- * POST /api/cron/reference-climate
+ * POST /api/cron/reference-climate  (UNSCHEDULED 28 Aug 2026, it hit its floor)
+ *
+ * Ran two-hourly from 26 to 28 Aug and converted 64 of the 118 city records
+ * that were holding prose. Then it stopped converting: 7.5 records per run, then
+ * 4.25, then 3.25, then 2.25, then 1 of 8, then 0 of 8. The window rotates, so
+ * everything still outstanding has been tried repeatedly and failed for the same
+ * reason each time. Left on, it would spend eight Open-Meteo and eight NASA
+ * requests every two hours to re-fail the same 54 places.
+ *
+ * WHY THE REMAINING 54 FAIL, from the run logs rather than assumed. Three
+ * causes, and only the third is what I had been calling it:
+ *
+ *   1. TEMPERATURE, the 3 degree band. Gaps of 3.0 to 3.9 degrees, just over.
+ *      New York, Queenstown, Varadero, Phnom Penh, Thassos, the Norwegian ski
+ *      resorts. Not exotic terrain at all: New York fails this.
+ *   2. RAINFALL, the 12mm floor. Arid months where 5mm against 21mm is a
+ *      trivial absolute difference but a large ratio. Sal, Volcanoes National
+ *      Park, Petra, the Holy Cities.
+ *   3. RAINFALL, genuine divergence in wet terrain. Fiordland at 375mm against
+ *      176mm, the Galapagos at 122 against 64. Here the two reanalyses really
+ *      do disagree, because MERRA-2's coarser grid smooths orographic rain.
+ *
+ * Andy set the rainfall FRACTION at 0.6 knowing the trade. He has never been
+ * asked about the temperature band or the rainfall floor, and those are now the
+ * larger share. That is a decision for him, not a knob to turn quietly, which
+ * is why this is stopped and reported rather than loosened.
+ *
+ * The prose every unconverted record still holds is intact, and archived at
+ * docs/climate-archive/cities-climate-prose.json either way.
  *
  * Fills the three climate series fields on the Countries, Cities and Resorts
  * tables from two independent reanalyses, a batch at a time. Added 26 Aug 2026,
