@@ -68,6 +68,45 @@ function analyticsId(pattern: RegExp) {
 }
 
 // ---------------------------------------------------------------------------
+// Cookie consent
+// ---------------------------------------------------------------------------
+
+/** One line of client copy, control characters stripped, capped. */
+function oneLine(value: unknown, max: number): string {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
+/**
+ * The cookie consent banner's settings.
+ *
+ * OFF BY DEFAULT, and it does nothing on its own. A client turns it on once they
+ * have added analytics, because only then is there a non-essential cookie to ask
+ * about. When it is on, lib/settings/head.ts defaults Google's consent to DENIED
+ * before the tags load, so GA4 and Tag Manager set no cookie until the visitor
+ * accepts, and the banner is the thing that flips it to granted. That is what
+ * makes this a real gate rather than a notice bar that changes nothing.
+ */
+export interface CookieConsentSettings {
+  enabled: boolean;
+  title: string;
+  message: string;
+  acceptLabel: string;
+  rejectLabel: string;
+  /** A link to the client's own cookie or privacy policy, or null. */
+  policyUrl: string | null;
+}
+
+export const DEFAULT_COOKIE_CONSENT: CookieConsentSettings = {
+  enabled: false,
+  title: 'Cookies on this site',
+  message: 'We use cookies to understand how this site is used. Accept them, or carry on with only the essentials.',
+  acceptLabel: 'Accept',
+  rejectLabel: 'Reject',
+  policyUrl: null,
+};
+
+// ---------------------------------------------------------------------------
 // Images
 // ---------------------------------------------------------------------------
 
@@ -365,6 +404,29 @@ export const SiteSettingsSchema = z.object({
   /** A GA4 measurement id, or null. Also generated. */
   ga4Id: analyticsId(GA4_ID),
 
+  /**
+   * The cookie consent banner. See CookieConsentSettings above.
+   *
+   * Total, like everything here: any field missing or wrong falls back to its
+   * default, and the whole thing to DEFAULT_COOKIE_CONSENT, so a hand-edited row
+   * can never stop a page rendering. The copy is the client's own words, capped
+   * and stripped; the policy link goes through safeUrl like every other url.
+   */
+  cookieConsent: z
+    .unknown()
+    .transform((value): CookieConsentSettings => {
+      const o = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+      return {
+        enabled: o.enabled === true,
+        title: oneLine(o.title, 80) || DEFAULT_COOKIE_CONSENT.title,
+        message: oneLine(o.message, 300) || DEFAULT_COOKIE_CONSENT.message,
+        acceptLabel: oneLine(o.acceptLabel, 40) || DEFAULT_COOKIE_CONSENT.acceptLabel,
+        rejectLabel: oneLine(o.rejectLabel, 40) || DEFAULT_COOKIE_CONSENT.rejectLabel,
+        policyUrl: (typeof o.policyUrl === 'string' && o.policyUrl && safeUrl(o.policyUrl)) || null,
+      };
+    })
+    .catch({ ...DEFAULT_COOKIE_CONSENT }),
+
   /** The little icon in a browser tab. */
   faviconUrl: imageUrl,
   /** What appears when somebody shares a page. Per-page SEO can override it. */
@@ -426,6 +488,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   openingHours: [],
   gtmId: null,
   ga4Id: null,
+  cookieConsent: { ...DEFAULT_COOKIE_CONSENT },
   faviconUrl: null,
   socialImageUrl: null,
   touchIconUrl: null,
