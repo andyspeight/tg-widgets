@@ -18,6 +18,44 @@ Airtable project record: base `appj9tksreHOwkhYg`, table `tblpyhPNhiQg3XkkT`.
 
 ---
 
+## Latest: editor AI + client-site compliance (28 Aug 2026, fifth session)
+
+All merged to `main` and live on `travelgenixsites.com` (tg-sites-shell
+production READY). tsc clean, 3823 tests passing, next build green. Four
+things shipped, none touching the destination corpus or the publish work:
+
+1. **Section-level AI in the editor.** Rewrite a selected section (touches only
+   the slot COPY, never the design), suggest the next section, and save a
+   section as a reusable per-tenant template shown under a **My sections** tab.
+   `lib/ai/section-rewrite.ts`, `lib/db/section-templates.ts`,
+   `app/actions/section-templates.ts`, migration `0032_section_templates`.
+   `buildOneSection` in `app/actions/ai.ts` is the one engine behind both
+   Add-a-section-with-AI and Suggest-the-next-section.
+
+2. **AI image generation.** OpenAI `gpt-image-1` (webp), in the media picker
+   Generate tab and wired into the AI section builder's hero, **gated behind
+   `OPENAI_API_KEY`**. Confined to `lib/media/imagegen.ts`; metered against the
+   same daily AI claim as the writer; a generated image is an ordinary media
+   row, source `'ai'` (migration `0033_media_ai_source`).
+
+3. **Six designed section presets** in `lib/content/presets-page.ts` (cta-phone,
+   features-reassurance, features-included, steps-plan-trip, stats-proof,
+   banner-reassurance). Adding a preset needs nothing beyond the data array.
+
+4. **Cookie consent banner** for published sites — a real Google Consent Mode v2
+   gate (all client-side, so pages stay cacheable), four looks (card default,
+   bar, corner, solid) and an optional granular per-category mode (Essential /
+   Analytics / Marketing). `components/render/CookieConsent.tsx` +
+   `public/cookie-consent.js` (registered in `middleware` SITE_ASSETS and the
+   matcher — `tests/site-assets.test.ts` pins this).
+
+**Waiting on Andy:** add `OPENAI_API_KEY` in Vercel to switch image generation
+on (gpt-image-1 may also need OpenAI org verification); test all four; decide
+the consent default look (kept `card`) and whether granular defaults on (kept
+off). The full state is in the Airtable record and its Decisions Locked.
+
+---
+
 ## The font fix is done
 
 **Merged and verified live on 25 Aug 2026.** Main is at `9a7275b`, the
