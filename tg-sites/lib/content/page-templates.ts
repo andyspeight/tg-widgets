@@ -168,6 +168,158 @@ const REVIEWS_PAGE: StarterPage = {
   ],
 };
 
+// ---------------------------------------------------------------------------
+// Destination guides, added 28 Aug 2026.
+//
+// A page ABOUT A PLACE, the prose frame around the facts. An adopted
+// destination carries the corpus facts (flight time, currency, the climate
+// year) which the site route draws for itself beside the entry; these
+// templates are the words a person writes around them: the name, the feeling,
+// what not to miss, and a way to ask about a trip. Four distinct shapes, so a
+// country, a city and a resort do not all read as the same page reskinned.
+//
+// SAME RULES AS EVERY TEMPLATE. Nothing invents a place: the hero heading is a
+// prompt to name it, every {{token}} carries its fallback, and a heading is set
+// only where a preset has a title, a body only where it has a paragraph.
+// ---------------------------------------------------------------------------
+
+/** The standard guide: name it, why go, what not to miss, a shape for the days, ask. */
+const DESTINATION_GUIDE: StarterPage = {
+  title: 'Destination guide',
+  slug: 'destination',
+  description:
+    'A guide to one place: why go, what not to miss, and how a trip might come '
+    + 'together. The words around the facts, ready to make your own.',
+  sections: [
+    {
+      preset: 'hero-page-banner',
+      photo: 'coastal old town golden hour',
+      heading: 'Name the place this guide is about',
+      body: 'One line on why it is worth the journey.',
+    },
+    {
+      preset: 'text-intro',
+      heading: 'Why go',
+      body:
+        'A short paragraph on what makes this place special and who it suits, '
+        + 'written like you have been. The bit a search result cannot tell them.',
+    },
+    {
+      preset: 'features-cards-with-pictures',
+      tone: 'subtle',
+      heading: 'What not to miss',
+      body: 'Three or four things worth building a trip around.',
+    },
+    {
+      preset: 'steps-itinerary',
+      heading: 'A few days here',
+    },
+    {
+      preset: 'cta-centred',
+      tone: 'accent',
+      heading: 'Plan a trip here',
+      body: 'Tell us roughly what you are after and we will put it together. No obligation.',
+    },
+  ],
+};
+
+/** Picture-led: a full-bleed opener, the feeling of the place, a gallery, a bold ask. */
+const DESTINATION_IMMERSIVE: StarterPage = {
+  title: 'Destination, picture-led',
+  slug: 'destination-immersive',
+  description:
+    'The same guide, led by the pictures: a full-bleed opener, the feeling of '
+    + 'the place, and a wall of photographs. For a destination that sells itself '
+    + 'on the view.',
+  sections: [
+    {
+      preset: 'hero-background',
+      photo: 'dramatic coastline aerial blue hour',
+      heading: 'The place, in one bold line',
+      body: 'A short, evocative hook under the name.',
+    },
+    {
+      preset: 'text-centred-intro',
+      heading: 'The feeling of the place',
+      body: 'Two sentences that set the scene. The sound of it, the light, the pace.',
+    },
+    { preset: 'gallery-grid', tone: 'subtle' },
+    { preset: 'features-picture-beside-points' },
+    {
+      preset: 'cta-split',
+      tone: 'accent',
+      heading: 'Take me there',
+      body: 'One line, one button. We will do the rest.',
+    },
+  ],
+};
+
+/** At a glance: a split opener, quick orientation, the highlights as a list, a statement close. */
+const DESTINATION_GLANCE: StarterPage = {
+  title: 'Destination, at a glance',
+  slug: 'destination-at-a-glance',
+  description:
+    'A quicker read: the place, a short orientation, and the highlights as a '
+    + 'list. Sits well above the facts panel, which answers the practical '
+    + 'questions on its own.',
+  sections: [
+    {
+      preset: 'hero-split-right',
+      photo: 'sunlit street market morning',
+      heading: 'The place, and the one reason to go',
+      body: 'A sentence a visitor could not get anywhere else.',
+    },
+    {
+      preset: 'text-intro',
+      heading: 'Getting your bearings',
+      body: 'A sentence or two to orient a visitor: where it is, when to go, the shape of a trip.',
+    },
+    {
+      preset: 'features-six-points',
+      tone: 'subtle',
+      heading: 'The highlights',
+    },
+    { preset: 'gallery-two-up' },
+    {
+      preset: 'cta-statement',
+      tone: 'accent',
+      heading: 'Somewhere here take your eye?',
+    },
+  ],
+};
+
+/** Where to stay: a resort or area, who it suits, the place and the stays, then a call. */
+const DESTINATION_STAY: StarterPage = {
+  title: 'Where to stay',
+  slug: 'where-to-stay',
+  description:
+    'For a resort or an area: who it suits, what the place is like and where you '
+    + 'might stay, then a person to talk it through with.',
+  sections: [
+    {
+      preset: 'hero-page-banner',
+      photo: 'resort pool palm trees evening',
+      heading: 'Name the resort or area',
+      body: 'A line on who has the best time here.',
+    },
+    {
+      preset: 'text-intro',
+      heading: 'Who it suits',
+      body:
+        'A short paragraph on the kind of trip this place is for. Families, '
+        + 'couples, a quiet week or a lively one. Saying who it is NOT for helps too.',
+    },
+    { preset: 'features-two-rows-alternating' },
+    { preset: 'features-three-steps-across' },
+    {
+      preset: 'cta-phone',
+      tone: 'accent',
+      heading: 'Rather talk it through?',
+      body: 'A real person who knows the place, on the end of the phone.',
+    },
+  ],
+};
+
 export interface PageTemplate {
   id: string;
   label: string;
@@ -253,6 +405,30 @@ export const PAGE_TEMPLATES: readonly PageTemplate[] = [
     label: 'Contact',
     description: 'A short enquiry prompt beside your details, and a map of where to find you.',
     page: agencyPage('contact'),
+  },
+  {
+    id: 'destination-guide',
+    label: 'Destination guide',
+    description: 'A page about one place: why go, what not to miss, a shape for the days, and a way to ask about a trip.',
+    page: DESTINATION_GUIDE,
+  },
+  {
+    id: 'destination-immersive',
+    label: 'Destination, picture-led',
+    description: 'The same guide led by the pictures: a full-bleed opener, the feeling of the place, and a wall of photographs.',
+    page: DESTINATION_IMMERSIVE,
+  },
+  {
+    id: 'destination-glance',
+    label: 'Destination, at a glance',
+    description: 'A quicker read: the place, a short orientation, and the highlights as a list, above the facts panel.',
+    page: DESTINATION_GLANCE,
+  },
+  {
+    id: 'destination-stay',
+    label: 'Where to stay',
+    description: 'For a resort or an area: who it suits, what the place is like and where to stay, then a person to talk it through with.',
+    page: DESTINATION_STAY,
   },
   ...DESIGNED_TEMPLATES,
 ];

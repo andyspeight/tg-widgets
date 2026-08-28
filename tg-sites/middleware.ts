@@ -112,6 +112,7 @@ export const SITE_ASSETS: readonly string[] = [
   '/slideshow.js',
   '/theme-toggle.js',
   '/no-right-click.js',
+  '/cookie-consent.js',
 ];
 
 function isPlatformPath(pathname: string): boolean {
@@ -192,5 +193,5 @@ export const config = {
    * for an asset, which is the cheap win, and the function check is what makes the
    * behaviour testable without a request object.
    */
-  matcher: ['/((?!_next/|api/|fonts/|favicon\\.ico|tg-motion\\.js|slideshow\\.js|theme-toggle\\.js|no-right-click\\.js).*)'],
+  matcher: ['/((?!_next/|api/|fonts/|favicon\\.ico|tg-motion\\.js|slideshow\\.js|theme-toggle\\.js|no-right-click\\.js|cookie-consent\\.js).*)'],
 };

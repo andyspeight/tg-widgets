@@ -102,7 +102,7 @@ function toItem(row: Record<string, unknown>): MediaItem {
     width: row.width == null ? null : Number(row.width),
     height: row.height == null ? null : Number(row.height),
     alt: row.alt == null ? '' : String(row.alt),
-    source: row.source === 'pexels' ? 'pexels' : 'upload',
+    source: row.source === 'pexels' ? 'pexels' : row.source === 'ai' ? 'ai' : 'upload',
     credit: asCredit(row.credit),
     variants: asVariants(row.variants),
     createdAt: row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at)),

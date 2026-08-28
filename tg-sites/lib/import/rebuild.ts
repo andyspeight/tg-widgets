@@ -52,7 +52,7 @@ interface ModelBlock {
 /** The shape sectionFromModel accepts. Widths are worked out for us. */
 export interface RebuildModel {
   name?: string;
-  rows: { columns: { blocks: ModelBlock[] }[] }[];
+  rows: { columns: { blocks: ModelBlock[]; width?: number }[] }[];
   /** The design's own background colour, carried onto the section's box. */
   background?: string;
   /** Set dark when that background is dark, so the section's text stays light. */
@@ -566,6 +566,62 @@ function blocksFrom(el: Element, resolve: (raw: string) => string): ModelBlock[]
 }
 
 // ---------------------------------------------------------------------------
+// Layout: reading the columns a design laid its children out in
+// ---------------------------------------------------------------------------
+
+/**
+ * The relative widths of a grid-template-columns value, or null.
+ *
+ * Every one of the ten designs states its splits as `grid-template-columns`
+ * with fraction units - "minmax(0,7fr) minmax(0,5fr)" is a 7:5 words-beside-
+ * picture row. This reads the fr (or %, px, auto) weight of each track so the
+ * rebuilt columns keep the design's proportions rather than snapping to equal.
+ */
+function trackWeights(value: string): number[] | null {
+  const tracks = value.trim().match(/minmax\([^)]*\)|repeat\([^)]*\)|[^\s]+/g) ?? [];
+  if (tracks.length < 2 || tracks.length > 4) return null;
+  const weights = tracks.map((track) => {
+    const fr = /(\d*\.?\d+)fr/.exec(track);
+    if (fr) return Number(fr[1]);
+    const pct = /(\d*\.?\d+)%/.exec(track);
+    if (pct) return Number(pct[1]) / 10;
+    const px = /(\d*\.?\d+)px/.exec(track);
+    if (px) return Math.max(1, Number(px[1]) / 100);
+    if (/auto/i.test(track)) return 0.6; // a slim auto track, e.g. a logo beside a menu
+    return 1;
+  });
+  return weights.every((w) => w > 0) ? weights : null;
+}
+
+/**
+ * The column weights this element lays its children out in, or null for a stack.
+ *
+ * A grid with two-to-four tracks, or a flex row (display:flex that is not a
+ * column), means the direct children are COLUMNS, not a vertical run. Reading
+ * this is what stops every hero and every words-beside-picture section from
+ * collapsing into one flat column. The element's own class is looked up in the
+ * design's CSS, the same way its background is.
+ */
+function rowColumns(el: Element, css: string): number[] | null {
+  for (const raw of classOf(el).split(/\s+/)) {
+    const cls = raw.replace(/[^a-z0-9_-]/gi, '');
+    if (!cls) continue;
+    const rule = new RegExp('\\.' + cls + '\\s*\\{([^}]*)\\}', 'i').exec(css);
+    if (!rule) continue;
+    const body = rule[1];
+    const grid = /grid-template-columns:\s*([^;]+)/i.exec(body);
+    if (grid) {
+      const weights = trackWeights(grid[1]);
+      if (weights) return weights;
+    }
+    if (/display:\s*flex/i.test(body) && !/flex-direction:\s*column/i.test(body)) {
+      return []; // a flex row: equal columns, the count filled in by the caller
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Layout: finding the grid
 // ---------------------------------------------------------------------------
 
@@ -610,18 +666,41 @@ function isGrid(el: Element): boolean {
 }
 
 /** Descend past the wrappers to the run of siblings the design laid out. */
-function workingSequence(nodes: Element[]): Element[] {
+function workingSequence(nodes: Element[], css: string): Element[] {
   let level = nodes;
   for (let depth = 0; depth < 16; depth += 1) {
     if (level.length !== 1) return level;
     const only = level[0];
     if (LEAF.has(tagOf(only))) return level;
     if (isGrid(only)) return level;
+    // Stop at a container that lays its children out in columns, so a section
+    // that IS a single split is columned rather than descended past and
+    // flattened. The same reason it stops at a grid.
+    if (rowColumns(only, css)) return level;
     const children = elementChildren(only);
     if (children.length === 0) return level;
     level = children;
   }
   return level;
+}
+
+/**
+ * Whether this element holds a grid or a split somewhere BELOW it.
+ *
+ * A design nests its layout: a section carries a heading and, under it, a grid
+ * of cards. The top-level walk sees the section, which is neither a grid nor a
+ * split itself, and would flatten the cards inside it. This lets the walk
+ * recurse into such a container instead, so the nested grid becomes its own
+ * row rather than a stacked run of loose blocks.
+ */
+function containsLayout(el: Element, css: string, depth = 0): boolean {
+  if (depth > 12) return false;
+  for (const kid of elementChildren(el)) {
+    if (IGNORE.has(tagOf(kid))) continue;
+    if (isGrid(kid) || rowColumns(kid, css)) return true;
+    if (containsLayout(kid, css, depth + 1)) return true;
+  }
+  return false;
 }
 
 /** How many columns to a row, so a grid of six reads as two rows of three. */
@@ -637,26 +716,20 @@ function perRow(count: number): number {
 // ---------------------------------------------------------------------------
 
 /**
- * An imported block's stored props to a native block model, or null if there is
- * nothing in it we can rebuild (in which case the caller keeps the import).
+ * A run of elements to rows, recursing into a container that nests a grid.
+ *
+ * The heart of reading a design's layout. Each element becomes a row: a grid a
+ * multi-column row (a Cards block when it is uniform picture tiles), a split a
+ * proportional row, a plain element a stacked run. A container that is none of
+ * those but HOLDS a grid deeper down is recursed into rather than flattened,
+ * so a section wrapping a heading and a card grid keeps both as their own rows.
  */
-export function modelFromImport(props: Record<string, unknown>): RebuildModel | null {
-  const html = typeof props.html === 'string' ? props.html : '';
-  if (!html.trim()) return null;
-
-  const fields = importFields(props);
-  const stored = importContent(props);
-  const resolve = makeResolver(fields, stored);
-
-  let fragment;
-  try {
-    fragment = parseFragment(html);
-  } catch {
-    return null;
-  }
-
-  const sequence = workingSequence(elementChildren(fragment));
-
+function rowsFrom(
+  elements: Element[],
+  css: string,
+  resolve: (raw: string) => string,
+  depth = 0,
+): RebuildModel['rows'] {
   const rows: RebuildModel['rows'] = [];
   let stack: ModelBlock[] = [];
   const flushStack = () => {
@@ -666,19 +739,33 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
     }
   };
 
-  for (const el of sequence) {
+  for (const el of elements) {
     const tag = tagOf(el);
     if (IGNORE.has(tag) || tag === 'svg') continue;
+
+    // A PROPORTIONAL SPLIT wins over the grid reading. When the design's own
+    // grid-template-columns is UNEVEN (7fr 5fr), the CSS is authoritative that
+    // these are columns of different weight, not a uniform card grid.
+    const uneven = rowColumns(el, css);
+    if (uneven && uneven.length >= 2 && Math.max(...uneven) / Math.min(...uneven) >= 1.25) {
+      const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)) && hasWords(kid));
+      if (kids.length === uneven.length) {
+        const columns = kids
+          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: uneven[i] }))
+          .filter((column) => column.blocks.length > 0);
+        if (columns.length >= 2) {
+          flushStack();
+          rows.push({ columns });
+          continue;
+        }
+      }
+    }
 
     if (isGrid(el)) {
       flushStack();
       const cards = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)));
 
-      // A uniform grid of linked picture cards becomes ONE editable Cards block,
-      // a list with an Add button, rather than a column of loose image and
-      // heading blocks per card that a client would have to keep in step by
-      // hand. Every card has to be a picture-and-link tile for this; an icon
-      // grid or a linkless badge row falls through to the per-card blocks below.
+      // A uniform grid of linked picture cards becomes ONE editable Cards block.
       const items = cards
         .map((card) => cardItem(card, resolve))
         .filter((item): item is CardItem => item !== null);
@@ -705,9 +792,60 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
       continue;
     }
 
+    // An EVEN split or flex row: even columns, the count from its children.
+    const even = rowColumns(el, css);
+    if (even) {
+      const kids = elementChildren(el).filter((kid) => !IGNORE.has(tagOf(kid)) && hasWords(kid));
+      const wanted = even.length || kids.length;
+      if (kids.length === wanted && kids.length >= 2 && kids.length <= 4) {
+        const columns = kids
+          .map((kid, i) => ({ blocks: blocksFrom(kid, resolve), width: even[i] }))
+          .filter((column) => column.blocks.length > 0);
+        if (columns.length >= 2) {
+          flushStack();
+          rows.push({ columns });
+          continue;
+        }
+      }
+    }
+
+    // A CONTAINER THAT NESTS LAYOUT: recurse into it rather than flatten, so the
+    // grid or split inside becomes its own row. Guarded on depth so a pathological
+    // tree cannot recurse forever.
+    if (depth < 12 && elementChildren(el).length > 0 && containsLayout(el, css)) {
+      flushStack();
+      rows.push(...rowsFrom(elementChildren(el), css, resolve, depth + 1));
+      continue;
+    }
+
     if (!emitLeaf(el, resolve, stack)) stack.push(...blocksFrom(el, resolve));
   }
   flushStack();
+  return rows;
+}
+
+/**
+ * An imported block's stored props to a native block model, or null if there is
+ * nothing in it we can rebuild (in which case the caller keeps the import).
+ */
+export function modelFromImport(props: Record<string, unknown>): RebuildModel | null {
+  const html = typeof props.html === 'string' ? props.html : '';
+  if (!html.trim()) return null;
+
+  const fields = importFields(props);
+  const stored = importContent(props);
+  const resolve = makeResolver(fields, stored);
+
+  let fragment;
+  try {
+    fragment = parseFragment(html);
+  } catch {
+    return null;
+  }
+
+  const css = typeof props.css === 'string' ? props.css : '';
+  const sequence = workingSequence(elementChildren(fragment), css);
+  const rows = rowsFrom(sequence, css, resolve);
 
   const total = rows.reduce(
     (sum, row) => sum + row.columns.reduce((n, column) => n + column.blocks.length, 0),
@@ -727,7 +865,6 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   // section is not stripped to white, which is the fault that carrying the
   // colour first fixed. A light tint is left as captured for now; the dark brand
   // band is the case that matters and the one a rebuild strips without this.
-  const css = typeof props.css === 'string' ? props.css : '';
   const background = rootBackground(html, css);
   if (background) {
     if (background.dark) {
@@ -736,6 +873,12 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
     } else {
       model.background = background.colour;
     }
+  } else if (darkScrim(css)) {
+    // A photo hero, dark through its scrim rather than a solid fill. Stand it on
+    // the site's own dark band so its text stays light and the drama survives,
+    // re-themed to the site's brand like every other rebuilt band.
+    model.background = 'var(--tgs-surface-dark)';
+    model.tone = 'dark';
   } else if (/<canvas[\s>]/i.test(html)) {
     // A canvas or WebGL hero paints its background in JavaScript, so it captures
     // blank and sets no background-colour we can read. Rather than rebuild the
@@ -748,6 +891,33 @@ export function modelFromImport(props: Record<string, unknown>): RebuildModel | 
   }
 
   return model;
+}
+
+/**
+ * Whether the section is dark because of a SCRIM, not a solid background.
+ *
+ * A full-bleed photo hero is dark not through `background-color` on its root -
+ * rootBackground finds none there - but through a dark overlay painted over the
+ * picture so the text stays readable: a `background` or `background-image`
+ * gradient with a dark, mostly-opaque colour in it (aurelia's hero scrim is
+ * `rgba(22, 16, 9, .82)`). Without reading that, every photo hero rebuilt onto
+ * bare white and the page lost all its drama. This looks for the darkest such
+ * layer anywhere in the design's CSS and calls the section dark when one is
+ * both dark and covering (alpha at least 0.4).
+ */
+function darkScrim(css: string): boolean {
+  const decls = css.match(/background(?:-image)?\s*:[^;{}]+/gi) ?? [];
+  for (const decl of decls) {
+    for (const rgba of decl.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([0-9.]+)\s*)?\)/gi)) {
+      const r = Number(rgba[1]);
+      const g = Number(rgba[2]);
+      const b = Number(rgba[3]);
+      const alpha = rgba[4] === undefined ? 1 : Number.parseFloat(rgba[4]);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      if (luminance < 0.45 && alpha >= 0.4) return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -889,7 +1059,9 @@ export function importOutline(props: Record<string, unknown>): string {
     for (const child of childNodes(node)) emit(child);
   };
 
-  for (const el of workingSequence(elementChildren(fragment))) emit(el);
+  // The outline flattens to text regardless of layout, so column detection is
+  // irrelevant here: pass no CSS.
+  for (const el of workingSequence(elementChildren(fragment), '')) emit(el);
   return lines.filter(Boolean).join('\n').slice(0, 6000);
 }
 

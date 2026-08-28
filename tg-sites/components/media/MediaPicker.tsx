@@ -29,6 +29,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   deleteMediaAction,
+  generateImageAction,
   importStockAction,
   loadMediaAction,
   recordUploadAction,
@@ -54,7 +55,7 @@ import type { MediaItem, StockPhoto } from '../../lib/media/types';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
 
-type Tab = 'bank' | 'upload' | 'stock';
+type Tab = 'bank' | 'upload' | 'stock' | 'generate';
 
 interface Props {
   /** Called with the chosen item. The caller decides what to do with it. */
@@ -78,6 +79,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
 
   const [canUpload, setCanUpload] = useState(true);
   const [canSearchStock, setCanSearchStock] = useState(true);
+  const [canGenerate, setCanGenerate] = useState(true);
   /* Where this site's uploads are filed. Comes from the server, because the
      browser has no other way to know the tenant id, and is re-derived from the
      session by the token route so editing it here buys nothing. */
@@ -102,6 +104,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
       setHasMore(result.data.hasMore);
       setCanUpload(result.data.canUpload);
       setCanSearchStock(result.data.canSearchStock);
+      setCanGenerate(result.data.canGenerate);
       setUploadPrefix(result.data.uploadPrefix);
       setLoaded(true);
     },
@@ -174,6 +177,12 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
             {!files && (
               <TabButton id="stock" current={tab} onSelect={setTab} label="Photo library" icon="search" />
             )}
+            {/* Generate is images only, and last: it is the newest and the most
+                expensive way to get a picture, reached for when neither your own
+                images nor the library have the one you want. */}
+            {!files && (
+              <TabButton id="generate" current={tab} onSelect={setTab} label="Generate" icon="sparkle" />
+            )}
           </div>
 
           {error && (
@@ -214,6 +223,10 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
           {tab === 'stock' && !files && (
             <StockPanel canSearch={canSearchStock} onAdded={added} onError={setError} />
           )}
+
+          {tab === 'generate' && !files && (
+            <GeneratePanel canGenerate={canGenerate} onAdded={added} onError={setError} />
+          )}
         </div>
       </Modal>
 
@@ -242,7 +255,7 @@ function TabButton({
   current: Tab;
   onSelect: (tab: Tab) => void;
   label: string;
-  icon: 'gallery' | 'upload' | 'search' | 'file';
+  icon: 'gallery' | 'upload' | 'search' | 'file' | 'sparkle';
 }) {
   return (
     <button
@@ -1077,6 +1090,146 @@ function StockPanel({
         Photographs from <a href="https://www.pexels.com" target="_blank" rel="noreferrer noopener">Pexels</a>,
         free to use commercially. Adding one copies it into your own storage, so your
         pages never depend on somebody else keeping it online.
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Generate with AI
+// ---------------------------------------------------------------------------
+
+const GEN_IDEAS = [
+  'A sunlit villa terrace overlooking the sea at golden hour',
+  'A quiet Greek harbour with fishing boats at dawn',
+  'A couple walking a palm-lined beach, seen from behind',
+  'Snowy mountain chalets under a clear evening sky',
+];
+
+/**
+ * Draw a picture from a description.
+ *
+ * The same shape as the photo library tab on purpose: a box, a shape, a button,
+ * and the picture lands in your bank ready to use. The one thing said out loud
+ * that the library does not need to say is that generated pictures are best for
+ * a mood or a scene, and a real photograph is still the better answer for a
+ * named place, because a model has never been to Santorini.
+ */
+function GeneratePanel({
+  canGenerate,
+  onAdded,
+  onError,
+}: {
+  canGenerate: boolean;
+  onAdded: (item: MediaItem) => void;
+  onError: (message: string) => void;
+}) {
+  const [prompt, setPrompt] = useState('');
+  const [orientation, setOrientation] = useState<string>('landscape');
+  const [busy, setBusy] = useState(false);
+
+  if (!canGenerate) {
+    return (
+      <div className="mp-error mp-error--panel">
+        <h3>AI image generation is not switched on yet</h3>
+        <p>
+          It needs an OpenAI API key. Get one at platform.openai.com, add it to this
+          project in Vercel as <code>OPENAI_API_KEY</code>, and redeploy. A Blob store
+          has to be connected too, so the pictures it draws have somewhere to live.
+        </p>
+        <p>
+          Your own images and the photo library do not need this, so those tabs work
+          on their own.
+        </p>
+      </div>
+    );
+  }
+
+  async function generate() {
+    const wanted = prompt.trim();
+    if (!wanted || busy) return;
+    setBusy(true);
+    onError('');
+    const result = await generateImageAction({ prompt: wanted, orientation });
+    setBusy(false);
+
+    if (!result.ok) {
+      onError(result.error);
+      return;
+    }
+    onAdded(result.data);
+  }
+
+  return (
+    <div className="mp-gen">
+      <form
+        className="mp-gen__form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void generate();
+        }}
+      >
+        <textarea
+          className="ed-textarea"
+          rows={3}
+          value={prompt}
+          placeholder="Describe the picture you want. A scene, a mood, a moment."
+          maxLength={1000}
+          disabled={busy}
+          onChange={(event) => setPrompt(event.target.value)}
+          aria-label="Describe the image to generate"
+        />
+        <div className="mp-gen__controls">
+          <select
+            className="ed-select"
+            value={orientation}
+            aria-label="Shape"
+            disabled={busy}
+            onChange={(event) => setOrientation(event.target.value)}
+          >
+            <option value="landscape">Landscape</option>
+            <option value="portrait">Portrait</option>
+            <option value="square">Square</option>
+          </select>
+          <button
+            type="submit"
+            className="tg-btn"
+            data-variant="primary"
+            disabled={busy || !prompt.trim()}
+          >
+            <Icon name="sparkle" size={14} />
+            {busy ? 'Drawing it…' : 'Generate'}
+          </button>
+        </div>
+      </form>
+
+      {!prompt && (
+        <div className="mp-suggest">
+          {GEN_IDEAS.map((idea) => (
+            <button
+              key={idea}
+              type="button"
+              className="mp-chip"
+              disabled={busy}
+              onClick={() => setPrompt(idea)}
+            >
+              {idea}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {busy && (
+        <p className="mp-quiet" role="status">
+          Drawing your picture. This takes a few seconds.
+        </p>
+      )}
+
+      <p className="mp-note">
+        Generated pictures are best for a mood or a scene. For a real place, the photo
+        library is usually the better answer, because a model has never been there.
+        Each picture you make is kept in your own storage and counts towards your daily
+        AI allowance.
       </p>
     </div>
   );

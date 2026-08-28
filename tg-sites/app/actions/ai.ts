@@ -51,10 +51,15 @@ import {
   sectionFromModel,
 } from '../../lib/ai/section-build';
 import type { Section } from '../../lib/content/schema';
+import { parsePage } from '../../lib/content/schema';
+import { sanitisePage } from '../../lib/content/sanitise-page';
 import { pexelsConfigured, searchPexels } from '../../lib/media/pexels';
 import { blobConfigured } from '../../lib/media/blob';
+import { imageGenConfigured } from '../../lib/media/imagegen';
+import { generateAndStore } from '../../lib/media/generate';
+import { heroImagePrompt } from '../../lib/ai/image-prompt';
 import { importStockAction } from './media';
-import { toCopy, type Copy } from '../../lib/ai/copy';
+import { toCopy, toText, type Copy } from '../../lib/ai/copy';
 import {
   isAiIntent,
   MAX_PAGE_TEXT,
@@ -101,6 +106,16 @@ import { themeIsDefault } from '../../lib/theme/schema';
 import { getRegion, saveRegionDraft } from '../../lib/db/regions';
 import { currentCapabilities, PermissionError, requireCapability } from '../../lib/auth/capabilities';
 import { buildStarterRegion } from '../../lib/content/starters';
+import { designedHomeSections } from '../../lib/content/designed-homes';
+import {
+  applyHomeCopy,
+  buildHomeSystemPrompt,
+  buildHomeUserPrompt,
+  homeCopyFromModel,
+  homeTextSlots,
+  slotId,
+  neutraliseFabricated,
+} from '../../lib/ai/home-personalise';
 import type { Region, RegionName } from '../../lib/content/schema';
 import { DESCRIPTION_MAX, DESCRIPTION_MIN, TITLE_MAX } from '../../lib/seo/audit';
 import { getSettings } from '../../lib/db/settings';
@@ -115,6 +130,13 @@ import {
   slotsOf,
   stripUnfilled,
 } from '../../lib/ai/page-fill';
+import {
+  buildImportedRewriteUserPrompt,
+  buildRewriteSystemPrompt,
+  buildRewriteUserPrompt,
+  MAX_REWRITE_INSTRUCTION,
+  sectionIsImported,
+} from '../../lib/ai/section-rewrite';
 import { hasBrandProfile } from '../../lib/settings/schema';
 import {
   MAX_SITE_BRIEF,
@@ -511,73 +533,7 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
     }
 
     const settings = await getSettings(site.tenantId);
-    const system = buildSystemPrompt(settings);
-
-    let inputTokens = 0;
-    let outputTokens = 0;
-    const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
-
-    const first = await ask(system, buildUserPrompt(instruction), build);
-    inputTokens += first.inputTokens;
-    outputTokens += first.outputTokens;
-    let result = sectionFromModel(first.text);
-
-    // The one repair: hand back the request and what went wrong, ask again.
-    if (!result.ok) {
-      const second = await ask(
-        system,
-        `${buildUserPrompt(instruction)}\n\n${repairUserPrompt(result.error)}`,
-        build,
-      );
-      inputTokens += second.inputTokens;
-      outputTokens += second.outputTokens;
-      result = sectionFromModel(second.text);
-    }
-
-    if (claim.id) {
-      await recordTokens(site.tenantId, claim.id, { input: inputTokens, output: outputTokens });
-    }
-
-    if (!result.ok) {
-      return {
-        ok: false,
-        error: 'The builder could not put that together. Try describing it a little differently.',
-        retryable: true,
-      };
-    }
-
-    /*
-     * A RELEVANT PHOTOGRAPH BEHIND THE HERO, if the model asked for one. The wow
-     * is in the picture, so a hero that arrives dark and empty undersells the
-     * whole feature (Andy, 3 Aug 2026). The model proposes the search words,
-     * which it is good at because it read the brief, and the picture is fetched
-     * here rather than there because finding one is a network call and a client's
-     * media, neither of which belongs in a pure function.
-     *
-     * IMPORTED INTO THE CLIENT'S OWN MEDIA, not hotlinked: it becomes theirs,
-     * served from our CDN, credited, and it shows in their library to reuse or
-     * swap. BEST EFFORT to the last: a search that finds nothing, a store that is
-     * not connected, or any error leaves the hero image-ready rather than failing
-     * the build. A good dark hero with no photo is still a good hero.
-     */
-    if (result.backgroundQuery && pexelsConfigured() && blobConfigured()) {
-      try {
-        const found = await searchPexels({ query: result.backgroundQuery, orientation: 'landscape' });
-        const photo = found.photos[0];
-        if (photo) {
-          const imported = await importStockAction(photo);
-          if (imported.ok) {
-            result.section.backgroundImage = imported.data.url;
-            // A scrim so white hero text stays readable over a bright photograph.
-            if (result.section.overlay < 30) result.section.overlay = 45;
-          }
-        }
-      } catch {
-        // Leave it image-ready. The hero is still a good hero without the photo.
-      }
-    }
-
-    return { ok: true, section: result.section };
+    return await buildOneSection(site.tenantId, claim.id, settings, instruction);
   } catch (error) {
     if (error instanceof AiError) {
       return { ok: false, error: error.message, retryable: error.retryable };
@@ -593,6 +549,290 @@ export async function buildSectionAction(input: unknown): Promise<BuildResult> {
     // been in scope.
     console.error('[tg-sites] the section builder failed', error);
     return { ok: false, error: 'Something went wrong building that. Try again.' };
+  }
+}
+
+/**
+ * Build ONE native section from an instruction: the shared engine behind
+ * "Add a section with AI" and "Suggest the next section". The claim slot is
+ * already taken by the caller, and tokens for the build, its one repair and
+ * the photo search all record against it. A relevant hero photograph is
+ * fetched into the client's own media when the model asks for one, best effort.
+ */
+async function buildOneSection(
+  tenantId: string,
+  claimId: string | null,
+  settings: SiteSettings,
+  instruction: string,
+): Promise<BuildResult> {
+  const system = buildSystemPrompt(settings);
+  const build = { model: MODEL_BUILD, maxTokens: BUILD_MAX_TOKENS, timeoutMs: BUILD_TIMEOUT_MS, effort: BUILD_EFFORT };
+
+  let inputTokens = 0;
+  let outputTokens = 0;
+
+  const first = await ask(system, buildUserPrompt(instruction), build);
+  inputTokens += first.inputTokens;
+  outputTokens += first.outputTokens;
+  let result = sectionFromModel(first.text);
+
+  if (!result.ok) {
+    const second = await ask(system, `${buildUserPrompt(instruction)}\n\n${repairUserPrompt(result.error)}`, build);
+    inputTokens += second.inputTokens;
+    outputTokens += second.outputTokens;
+    result = sectionFromModel(second.text);
+  }
+
+  if (claimId) {
+    await recordTokens(tenantId, claimId, { input: inputTokens, output: outputTokens });
+  }
+
+  if (!result.ok) {
+    return {
+      ok: false,
+      error: 'The builder could not put that together. Try describing it a little differently.',
+      retryable: true,
+    };
+  }
+
+  /*
+   * THE HERO PICTURE, best effort and part of the one build.
+   *
+   * When AI image generation is switched on it draws the hero from the same
+   * subject the model asked for, which is what Andy chose: a built section gets
+   * a made picture rather than a stock one. When it is not, the Pexels search is
+   * the fallback, exactly as before. Either way this is unmetered on its own,
+   * because building the section is the metered action and the picture is part
+   * of it, the same way the stock search always was. Nothing here throws: a good
+   * dark hero with no photo is still a good hero.
+   */
+  if (result.backgroundQuery && blobConfigured()) {
+    const url = await heroPicture(tenantId, result.backgroundQuery);
+    if (url) {
+      result.section.backgroundImage = url;
+      if (result.section.overlay < 30) result.section.overlay = 45;
+    }
+  }
+
+  return { ok: true, section: result.section };
+}
+
+/**
+ * One hero image for a built section, best effort, generated or searched.
+ *
+ * Generation wins when it is configured, because a made picture is what a built
+ * section is meant to get now; the photo library is the fallback. Returns the
+ * stored url, or null when neither could produce one, and never throws.
+ */
+async function heroPicture(tenantId: string, subject: string): Promise<string | null> {
+  if (imageGenConfigured()) {
+    try {
+      const prompt = heroImagePrompt(subject);
+      if (prompt) {
+        // Shorter than the picker's window: this runs after the text build inside
+        // one invocation, so the two together stay under the route's ceiling.
+        const item = await generateAndStore(tenantId, {
+          prompt,
+          orientation: 'landscape',
+          alt: subject,
+          timeoutMs: 40_000,
+        });
+        return item.url;
+      }
+    } catch {
+      // Fall through to the library: a failed generation should not lose the hero.
+    }
+  }
+
+  if (pexelsConfigured()) {
+    try {
+      const found = await searchPexels({ query: subject, orientation: 'landscape' });
+      const photo = found.photos[0];
+      if (photo) {
+        const imported = await importStockAction(photo);
+        if (imported.ok) return imported.data.url;
+      }
+    } catch {
+      // No photo. The section stands on its dark background.
+    }
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Editing one section with AI
+// ---------------------------------------------------------------------------
+
+/**
+ * A section sent from the editor, validated and sanitised.
+ *
+ * The editor's live section is already a valid Section, but as an action input
+ * it is untrusted, so it goes through the same parse and sanitise every stored
+ * page does before the model or the renderer sees a byte of it. Null when it is
+ * not a section we can use.
+ */
+function incomingSection(raw: unknown): Section | null {
+  const parsed = parsePage({
+    version: 1,
+    id: 'pg_edit',
+    title: 'Editing',
+    slug: '',
+    seo: { noindex: false },
+    sections: [raw],
+  });
+  if (!parsed.ok) return null;
+  const clean = sanitisePage(parsed.page);
+  return clean.sections[0] ?? null;
+}
+
+/** A one-line outline of the page so far, for context. */
+function sectionsOutline(sections: readonly Section[]): string {
+  return sections
+    .slice(0, 30)
+    .map((section, index) => {
+      const heading = section.rows
+        .flatMap((row) => row.columns)
+        .flatMap((column) => column.blocks)
+        .find((block) => block.type === 'heading');
+      const words = heading ? toText((heading.props as { html?: unknown }).html).slice(0, 60) : '';
+      const kinds = [
+        ...new Set(
+          section.rows.flatMap((row) => row.columns).flatMap((column) => column.blocks.map((block) => block.type)),
+        ),
+      ].join(', ');
+      return `${index + 1}. ${words || '(no heading)'} [${kinds}]`;
+    })
+    .join('\n');
+}
+
+export type SectionEditResult =
+  | { ok: true; section: Section }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * Rewrite the WORDS of one section on an instruction, design untouched.
+ *
+ * "Make it warmer", "shorter", "for families": the section's slots are
+ * rewritten and nothing else. A native section is addressed through page-fill's
+ * slots; a section that is a frozen imported design through home-personalise's.
+ * The section comes back the same shape it went in, with new copy in its slots.
+ */
+export async function rewriteSectionAction(input: unknown): Promise<SectionEditResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI writer is not switched on for this site yet.' };
+    }
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const instruction = text(fields.instruction, MAX_REWRITE_INSTRUCTION);
+    if (!instruction) return { ok: false, error: 'Say how you would like it rewritten.' };
+
+    const section = incomingSection(fields.section);
+    if (!section) return { ok: false, error: 'That section could not be read.' };
+
+    const imported = sectionIsImported(section);
+    const nativeSlots = imported ? [] : slotsOf([section]);
+    const importedSlots = imported ? homeTextSlots([section]) : [];
+    if (nativeSlots.length === 0 && importedSlots.length === 0) {
+      return { ok: false, error: 'This section has no words to rewrite.' };
+    }
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error: `This site has used all ${DAILY_LIMIT} of today's AI requests. It resets through the day, so try again later.`,
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildRewriteSystemPrompt(settings);
+    const user = imported
+      ? buildImportedRewriteUserPrompt(instruction, importedSlots, slotId)
+      : buildRewriteUserPrompt(instruction, nativeSlots);
+
+    const answer = await ask(system, user, {
+      model: MODEL_BUILD,
+      maxTokens: FILL_MAX_TOKENS,
+      timeoutMs: BUILD_TIMEOUT_MS,
+      effort: BUILD_EFFORT,
+    });
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: answer.inputTokens, output: answer.outputTokens });
+    }
+
+    if (imported) {
+      const rewritten = homeCopyFromModel(answer.text, importedSlots);
+      if (!rewritten.ok) return { ok: false, error: 'The rewrite could not be used.', retryable: true };
+      return { ok: true, section: applyHomeCopy([section], rewritten.copy)[0] };
+    }
+
+    const filled = fillFromModel(answer.text, nativeSlots);
+    if (!filled.ok) return { ok: false, error: 'The rewrite could not be used.', retryable: true };
+    return { ok: true, section: applyFill([section], filled.copy)[0] };
+  } catch (error) {
+    if (error instanceof AiError) return { ok: false, error: error.message, retryable: error.retryable };
+    if (isSignInRequired(error)) return { ok: false, error: (error as Error).message };
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) return { ok: false, error: message };
+    console.error('[tg-sites] rewriting a section failed', error);
+    return { ok: false, error: 'Something went wrong rewriting that. Try again.' };
+  }
+}
+
+/**
+ * Propose the section that should come NEXT on this page.
+ *
+ * Reads the page so far as an outline and asks the section builder for one more
+ * that adds to it rather than repeating it. Returns a preview section for the
+ * editor to show and, on one click, insert - it writes nothing itself.
+ */
+export async function suggestNextSectionAction(input: unknown): Promise<SectionEditResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI builder is not switched on for this site yet.' };
+    }
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const rawSections = Array.isArray(fields.sections) ? fields.sections : [];
+    const parsed = parsePage({
+      version: 1,
+      id: 'pg_ctx',
+      title: text(fields.title, 200) || 'this page',
+      slug: '',
+      seo: { noindex: false },
+      sections: rawSections,
+    });
+    const context = parsed.ok ? sanitisePage(parsed.page) : null;
+    const outline = context ? sectionsOutline(context.sections) : '';
+    const pageTitle = text(fields.title, 200) || 'this page';
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error: `This site has used all ${DAILY_LIMIT} of today's AI requests. It resets through the day, so try again later.`,
+      };
+    }
+
+    const instruction = outline
+      ? `Build the section that should come NEXT on the page "${pageTitle}". The page already has, top to bottom:\n${outline}\n\nAdd something that carries the page forward - do not repeat a section that is already there, and if the page has no way to get in touch yet, a call to action is a good next step.`
+      : `Build the opening section for a travel page called "${pageTitle}".`;
+
+    const settings = await getSettings(site.tenantId);
+    return await buildOneSection(site.tenantId, claim.id, settings, instruction);
+  } catch (error) {
+    if (error instanceof AiError) return { ok: false, error: error.message, retryable: error.retryable };
+    if (isSignInRequired(error)) return { ok: false, error: (error as Error).message };
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) return { ok: false, error: message };
+    console.error('[tg-sites] suggesting a section failed', error);
+    return { ok: false, error: 'Something went wrong suggesting a section. Try again.' };
   }
 }
 
@@ -812,7 +1052,7 @@ export type AiPageResult =
 const MIN_REPAIR_MS = 8_000;
 
 export type SitePlanActionResult =
-  | { ok: true; data: PlannedPage[] }
+  | { ok: true; data: PlannedPage[]; homeDesign?: string }
   | { ok: false; error: string; retryable?: boolean };
 
 /**
@@ -1065,9 +1305,14 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
       };
     }
 
+    let homeDesign: string | undefined;
     if (design) {
       try {
         await applyDesignedTheme(site.tenantId, design);
+        // The pairing the theme landed on names a hand-built home page when it
+        // is one of the ten designed pairs. That id rides back to the client so
+        // the home page is seeded from the design rather than assembled.
+        homeDesign = design.pairing.home;
       } catch (error) {
         console.error('[tg-sites] applying the designed theme failed', error);
       }
@@ -1077,7 +1322,7 @@ export async function planSiteAction(input: unknown): Promise<SitePlanActionResu
     // Home first, and the pages no plan may omit appended when the model
     // forgot them - the 27 Aug run came back with twelve pages and no way to
     // get in touch, which silently killed every button on the site.
-    return { ok: true, data: homeFirst(ensureMustHavePages(plan.pages)) };
+    return { ok: true, data: homeFirst(ensureMustHavePages(plan.pages)), homeDesign };
   } catch (error) {
     if (error instanceof AiError) {
       return { ok: false, error: error.message, retryable: error.retryable };
@@ -1205,6 +1450,70 @@ export async function describePagesAction(input: unknown): Promise<SitePlanActio
   }
 }
 
+/** The most budget worth starting the home rewrite with. */
+const HOME_REWRITE_FLOOR_MS = MIN_REPAIR_MS;
+
+/**
+ * The home page, seeded from a designed home and reworded for the client.
+ *
+ * The designed home is a committed, hand-built page carried as frozen imported
+ * blocks (lib/content/designed-homes.ts). Its layout, colour, type and pictures
+ * are kept exactly; only its TEXT slots are rewritten, into each block's content
+ * override, the same channel a client's own edit uses. The rewrite is best
+ * effort and shares the page's claimed slot: a home that could not be reworded
+ * still ships the design, just carrying the design's own placeholder words,
+ * which is a real page and not a broken one. Returns null when the id names no
+ * designed home, so the caller falls back to the assembled build.
+ */
+async function homeFromDesign(
+  homeId: string,
+  ctx: {
+    tenantId: string;
+    claimId: string | null;
+    settings: SiteSettings;
+    company: string;
+    startedAt: number;
+    contactHref: string;
+  },
+): Promise<Section[] | null> {
+  const seeded = designedHomeSections(homeId);
+  if (seeded.length === 0) return null;
+
+  // No fake licence number OR fabricated contact detail ships, on any path.
+  const guard = {
+    ownPhone: ctx.settings.telephone ?? '',
+    contactHref: ctx.contactHref,
+  };
+
+  const slots = homeTextSlots(seeded);
+  if (slots.length === 0 || remainingBudget(ctx.startedAt) < HOME_REWRITE_FLOOR_MS) {
+    return neutraliseFabricated(seeded, guard);
+  }
+
+  try {
+    const system = buildHomeSystemPrompt(ctx.settings);
+    const answer = await ask(system, buildHomeUserPrompt(ctx.company, slots), {
+      model: MODEL_BUILD,
+      maxTokens: FILL_MAX_TOKENS,
+      timeoutMs: Math.min(BUILD_TIMEOUT_MS, remainingBudget(ctx.startedAt)),
+      effort: BUILD_EFFORT,
+    });
+    if (ctx.claimId) {
+      await recordTokens(ctx.tenantId, ctx.claimId, { input: answer.inputTokens, output: answer.outputTokens });
+    }
+    const rewritten = homeCopyFromModel(answer.text, slots);
+    if (!rewritten.ok) {
+      console.error('[tg-sites] the home rewrite could not be used:', rewritten.error);
+      return neutraliseFabricated(seeded, guard);
+    }
+    return neutraliseFabricated(applyHomeCopy(seeded, rewritten.copy), guard);
+  } catch (error) {
+    // Never fatal: the designed home stands on its own words.
+    console.error('[tg-sites] rewording the home failed', error);
+    return neutraliseFabricated(seeded, guard);
+  }
+}
+
 export async function buildPlannedPageAction(input: unknown): Promise<AiPageResult> {
   try {
     if (!aiIsConfigured()) {
@@ -1227,6 +1536,9 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
      * fields are: titles capped, slugs through safeSlug, the list capped.
      */
     const planned = plannedPagesFrom(fields.pages);
+    // The designed home chosen when the site was planned, threaded from the
+    // client. Only meaningful for the home page.
+    const homeDesign = typeof fields.homeDesign === 'string' ? fields.homeDesign : '';
 
     if (!title) return { ok: false, error: 'That page has no name.' };
 
@@ -1301,7 +1613,26 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       };
     }
 
-    const sections = await sectionsForPage(plan.plan, {
+    /*
+     * THE HOME PAGE, WHEN A DESIGNED HOME WAS CHOSEN, is seeded from that
+     * hand-built page and reworded rather than assembled from sections. It
+     * carries its own header and footer, so the page is saved with chrome
+     * off and the site regions are skipped for it. A design that could not be
+     * seeded (a stale id) falls through to the ordinary build.
+     */
+    let designedHome: Section[] | null = null;
+    if (isHome && homeDesign) {
+      designedHome = await homeFromDesign(homeDesign, {
+        tenantId: site.tenantId,
+        claimId: claim.id,
+        settings,
+        company: settings.companyName || title,
+        startedAt,
+        contactHref,
+      });
+    }
+
+    const sections = designedHome ?? (await sectionsForPage(plan.plan, {
       tenantId: site.tenantId,
       claimId: claim.id,
       settings,
@@ -1309,7 +1640,8 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       purpose,
       startedAt,
       contactHref,
-    });
+    }));
+    const carriesOwnChrome = designedHome !== null;
 
     /*
      * NOTHING IS BUILT OVER WORK THAT IS ALREADY THERE, and this check is on the
@@ -1348,7 +1680,7 @@ export async function buildPlannedPageAction(input: unknown): Promise<AiPageResu
       await saveDraft(
         site.tenantId,
         home.id,
-        { ...existing.content, title, sections },
+        { ...existing.content, title, sections, chrome: !carriesOwnChrome },
         userId ?? undefined,
       );
       const built = await getPage(site.tenantId, home.id);

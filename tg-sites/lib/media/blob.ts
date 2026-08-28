@@ -217,6 +217,50 @@ export async function copyIntoStore(
 }
 
 /**
+ * Put bytes we already hold into the store.
+ *
+ * The counterpart to copyIntoStore for content that did not come from a URL: a
+ * generated image arrives as base64 in an API response, so there is nothing to
+ * fetch, only bytes to keep. Same storage step, same random suffix and long
+ * cache, and the pixels are measured from the very bytes stored so the row never
+ * describes a different file than the one it points at.
+ */
+export async function storeBytes(
+  bytes: Buffer,
+  pathname: string,
+  contentType: MediaMime,
+  maxBytes: number,
+): Promise<{
+  url: string;
+  pathname: string;
+  size: number;
+  contentType: MediaMime;
+  pixels: PixelSize | null;
+}> {
+  if (bytes.byteLength === 0) throw new Error('That image came back empty.');
+  if (bytes.byteLength > maxBytes) throw new Error('That image is too large to add.');
+  if (!isAllowedMime(contentType)) {
+    throw new Error('That is not a file type this product can serve.');
+  }
+
+  const stored = await put(pathname, bytes, {
+    access: 'public',
+    token: requireToken(),
+    contentType,
+    addRandomSuffix: true,
+    cacheControlMaxAge: 31536000,
+  });
+
+  return {
+    url: stored.url,
+    pathname: stored.pathname,
+    size: bytes.byteLength,
+    contentType,
+    pixels: pixelSizeOf(bytes),
+  };
+}
+
+/**
  * Remove an object.
  *
  * Never throws. Deleting an image is a two step operation, the row and the

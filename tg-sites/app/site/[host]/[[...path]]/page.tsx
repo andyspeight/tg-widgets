@@ -16,6 +16,7 @@ import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { MotionScript } from '../../../../components/render/MotionScript';
 import { NoRightClickScript } from '../../../../components/render/NoRightClickScript';
+import { CookieConsent } from '../../../../components/render/CookieConsent';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
 import { ThemeToggleScript } from '../../../../components/render/ThemeToggleScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
@@ -405,6 +406,14 @@ export default async function SitePage({ params, searchParams }: Params) {
   const contentTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
 
   /*
+   * A page that carries its own header and footer (a home seeded from a
+   * designed home) shows no site chrome, so the page is not double-headed.
+   * Only a real page can opt out; a collection entry or archive always keeps
+   * the site's header and footer.
+   */
+  const showChrome = found.page ? found.page.content.chrome !== false : true;
+
+  /*
    * THE SERVER'S PASS OVER BORROWED MARKUP, once for all three trees.
    *
    * The imported design and the embed block hold somebody else's HTML, and the
@@ -562,6 +571,7 @@ export default async function SitePage({ params, searchParams }: Params) {
         Each renders nothing at all when the client has never published one, so
         a site without a footer has no empty `<footer>` claiming a landmark.
       */}
+      {showChrome && (
       <RegionRenderer
         /* A Menu link that points at a folder is filled with the pages inside it
            here, the same place the Cards block's collection is filled: the block
@@ -577,6 +587,7 @@ export default async function SitePage({ params, searchParams }: Params) {
         */
         overlapped={Boolean(found.page && (found.page.content.sections[0]?.pullUp ?? 0) > 0)}
       />
+      )}
 
       {/*
         THE TRAIL, AND THE REASON IT IS HERE RATHER THAN A BLOCK A CLIENT ADDS.
@@ -631,12 +642,14 @@ export default async function SitePage({ params, searchParams }: Params) {
         <ArchiveRenderer archive={found.archive!} theme={theme} />
       )}
 
-      <RegionRenderer
-        region={fillNavRegion(found.regions.footer, found.navPages)}
-        theme={theme}
-        prepared={prepared}
-        sizes={imageSizes}
-      />
+      {showChrome && (
+        <RegionRenderer
+          region={fillNavRegion(found.regions.footer, found.navPages)}
+          theme={theme}
+          prepared={prepared}
+          sizes={imageSizes}
+        />
+      )}
 
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}
@@ -670,6 +683,7 @@ export default async function SitePage({ params, searchParams }: Params) {
       {/* The tag manager noscript fallback, and any custom body HTML. Last, so
           nothing here delays the content above it. */}
       <NoRightClickScript settings={found.settings} />
+      <CookieConsent settings={found.settings} />
       <SiteBody settings={found.settings} />
     </>
   );
@@ -964,6 +978,7 @@ function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typ
       <SlideshowScript trees={[data.regions.header, data.regions.footer]} />
       <MotionScript trees={[data.regions.header, data.regions.footer]} />
       <NoRightClickScript settings={data.settings} />
+      <CookieConsent settings={data.settings} />
       <SiteBody settings={data.settings} />
     </>
   );

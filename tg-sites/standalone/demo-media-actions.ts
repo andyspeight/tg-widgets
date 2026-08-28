@@ -125,6 +125,7 @@ export async function loadMediaAction(offset = 0) {
       hasMore: false,
       canUpload: true,
       canSearchStock: true,
+      canGenerate: true,
       uploadPrefix: 'sites/demo/media/',
     },
   };

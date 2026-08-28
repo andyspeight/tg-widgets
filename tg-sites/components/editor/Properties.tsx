@@ -96,7 +96,8 @@ import { ListingOrderArrows } from './ListingOrderArrows';
 import { listingIn, listingKey } from '../../lib/content/listings';
 import type { ListingCards } from '../../lib/db/listings';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
-import { writeSeoAction } from '../../app/actions/ai';
+import { rewriteSectionAction, writeSeoAction } from '../../app/actions/ai';
+import { saveSectionTemplateAction } from '../../app/actions/section-templates';
 import { rebuildImportAction } from '../../app/actions/import';
 import { pageText } from '../../lib/seo/audit';
 
@@ -1155,6 +1156,178 @@ function SeoAssistant({
 
 // ---------------------------------------------------------------------------
 
+/**
+ * The two AI tools that live on a whole section: rewrite its words, and save it
+ * as a reusable section.
+ *
+ * REWRITE keeps the design and changes only the copy. It hands the section to
+ * the server, which addresses its slots (native or imported) and rewrites them
+ * on the instruction, then swaps the one section back in. SAVE AS A SECTION
+ * keeps a sanitised copy of the section in this client's own library, which the
+ * "My sections" tab of the add-a-section dialog offers back on any page.
+ *
+ * Both are thin: the judgement, the money and the validation are on the server.
+ * This holds an input, a button, and the one message the person can act on.
+ */
+function SectionAiTools({
+  page,
+  index,
+  onCommit,
+}: {
+  page: Page;
+  index: number;
+  onCommit: Props['onCommit'];
+}) {
+  const [instruction, setInstruction] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  async function rewrite() {
+    const wanted = instruction.trim();
+    const section = page.sections[index];
+    if (!wanted || busy || !section) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await rewriteSectionAction({ instruction: wanted, section });
+      if (result.ok) {
+        onCommit((current) => {
+          if (!current.sections[index]) return current;
+          const sections = [...current.sections];
+          sections[index] = result.section;
+          return { ...current, sections };
+        }, `sec:${index}:rewrite`);
+        setInstruction('');
+        return;
+      }
+      setError(result.error);
+    } catch {
+      setError('Something went wrong rewriting that. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function save() {
+    const wanted = name.trim();
+    const section = page.sections[index];
+    if (!wanted || saving || !section) return;
+    setSaving(true);
+    setSaveError('');
+    setSaved(false);
+    try {
+      const result = await saveSectionTemplateAction({ name: wanted, section });
+      if (result.ok) {
+        setSaved(true);
+        setName('');
+        return;
+      }
+      setSaveError(result.error);
+    } catch {
+      setSaveError('Something went wrong saving that. Try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Group title="AI and saving" defaultOpen={false}>
+      <div className="ed-field">
+        <label className="ed-label" htmlFor={`ed-rewrite-${index}`}>
+          Rewrite this section
+        </label>
+        <input
+          id={`ed-rewrite-${index}`}
+          className="ed-input"
+          value={instruction}
+          placeholder="warmer, shorter, for families"
+          maxLength={200}
+          disabled={busy}
+          onChange={(event) => setInstruction(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              void rewrite();
+            }
+          }}
+        />
+        <p className="ed-help">
+          Say how you want it read and the words are rewritten in place. The
+          layout, the pictures and the design stay exactly as they are.
+        </p>
+        <button
+          type="button"
+          className="ed-btn"
+          data-variant="primary"
+          disabled={busy || !instruction.trim()}
+          onClick={() => void rewrite()}
+        >
+          <Icon name="sparkle" size={14} />
+          {busy ? 'Rewriting…' : 'Rewrite the words'}
+        </button>
+        {error && (
+          <p className="ed-help" role="alert" style={{ marginTop: 6 }}>
+            {error}
+          </p>
+        )}
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label" htmlFor={`ed-savesec-${index}`}>
+          Save as a section
+        </label>
+        <input
+          id={`ed-savesec-${index}`}
+          className="ed-input"
+          value={name}
+          placeholder="My villa hero"
+          maxLength={80}
+          disabled={saving}
+          onChange={(event) => {
+            setName(event.target.value);
+            setSaved(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              void save();
+            }
+          }}
+        />
+        <p className="ed-help">
+          Keep this section in your own library to drop onto any page later. Find
+          it under "My sections" when you add a section.
+        </p>
+        <button
+          type="button"
+          className="ed-btn"
+          data-variant="ghost"
+          disabled={saving || !name.trim()}
+          onClick={() => void save()}
+        >
+          <Icon name="copy" size={14} />
+          {saving ? 'Saving…' : 'Save this section'}
+        </button>
+        {saved && (
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Saved to your sections.
+          </p>
+        )}
+        {saveError && (
+          <p className="ed-help" role="alert" style={{ marginTop: 6 }}>
+            {saveError}
+          </p>
+        )}
+      </div>
+    </Group>
+  );
+}
+
 function SectionFields({
   page,
   index,
@@ -1188,6 +1361,8 @@ function SectionFields({
       </div>
 
       </Group>
+
+      <SectionAiTools page={page} index={index} onCommit={onCommit} />
 
       <Group title="Layout">
       <Segmented

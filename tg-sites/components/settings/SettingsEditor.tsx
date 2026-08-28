@@ -436,6 +436,7 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
         )}
 
         {tab === 'analytics' && (
+          <>
           <section className="tv-group">
             <h2 className="tv-group__title">Google Tag Manager</h2>
             <div className="tv-field">
@@ -491,6 +492,183 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
               </p>
             )}
           </section>
+
+          <section className="tv-group">
+            <h2 className="tv-group__title">Cookie consent</h2>
+            <div className="tv-field">
+              <label className="tv-check">
+                <input
+                  type="checkbox"
+                  checked={settings.cookieConsent.enabled}
+                  onChange={(event) =>
+                    set('cookieConsent', { ...settings.cookieConsent, enabled: event.target.checked })
+                  }
+                />
+                <span>Ask visitors before analytics cookies are set</span>
+              </label>
+              <p className="tv-field__help">
+                Shows a banner on your published site. Until a visitor accepts,
+                Google Analytics and Tag Manager load with consent denied and set
+                no cookie, so this is a real gate rather than a notice. It only
+                appears when you have an ID above, because there is nothing to ask
+                about otherwise.
+              </p>
+            </div>
+
+            {settings.cookieConsent.enabled && (
+              <>
+                {!settings.gtmId && !settings.ga4Id && (
+                  <p className="st-warn">
+                    <Icon name="warning" size={16} />
+                    Add a Tag Manager or Analytics ID above and the banner will
+                    start showing. With neither, there is nothing to consent to, so
+                    it stays hidden.
+                  </p>
+                )}
+
+                <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-layout">
+                    Style
+                  </label>
+                  <select
+                    className="tv-select"
+                    id="cc-layout"
+                    value={settings.cookieConsent.layout}
+                    onChange={(event) =>
+                      set('cookieConsent', {
+                        ...settings.cookieConsent,
+                        layout: event.target.value as SiteSettings['cookieConsent']['layout'],
+                      })
+                    }
+                  >
+                    <option value="card">Card, centred along the bottom</option>
+                    <option value="bar">Bar across the bottom</option>
+                    <option value="corner">Small card, bottom left</option>
+                    <option value="solid">Filled with your brand colour</option>
+                  </select>
+                  <p className="tv-field__help">
+                    All four ask the same thing and remember the answer the same
+                    way. Pick the one that sits best with your site.
+                  </p>
+                </div>
+
+                <div className="tv-field">
+                  <label className="tv-check">
+                    <input
+                      type="checkbox"
+                      checked={settings.cookieConsent.granular}
+                      onChange={(event) =>
+                        set('cookieConsent', {
+                          ...settings.cookieConsent,
+                          granular: event.target.checked,
+                        })
+                      }
+                    />
+                    <span>Let visitors choose which cookies they accept</span>
+                  </label>
+                  <p className="tv-field__help">
+                    Adds a "Choose" button and a small screen where a visitor can
+                    turn Analytics and Marketing on or off separately. Essential
+                    cookies are always on. Leave it off for a plain accept or
+                    reject, which is just as compliant.
+                  </p>
+                </div>
+
+                <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-title">
+                    Banner heading
+                  </label>
+                  <input
+                    className="tv-colour__hex"
+                    id="cc-title"
+                    type="text"
+                    maxLength={80}
+                    value={settings.cookieConsent.title}
+                    onChange={(event) =>
+                      set('cookieConsent', { ...settings.cookieConsent, title: event.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-message">
+                    Message
+                  </label>
+                  <textarea
+                    className="tv-textarea"
+                    id="cc-message"
+                    rows={2}
+                    maxLength={300}
+                    value={settings.cookieConsent.message}
+                    onChange={(event) =>
+                      set('cookieConsent', { ...settings.cookieConsent, message: event.target.value })
+                    }
+                  />
+                  <p className="tv-field__help">
+                    Keep it plain. Say what the cookies are for and that they can
+                    accept or carry on without.
+                  </p>
+                </div>
+
+                <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-accept">
+                    Accept button
+                  </label>
+                  <input
+                    className="tv-colour__hex"
+                    id="cc-accept"
+                    type="text"
+                    maxLength={40}
+                    value={settings.cookieConsent.acceptLabel}
+                    onChange={(event) =>
+                      set('cookieConsent', { ...settings.cookieConsent, acceptLabel: event.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-reject">
+                    Reject button
+                  </label>
+                  <input
+                    className="tv-colour__hex"
+                    id="cc-reject"
+                    type="text"
+                    maxLength={40}
+                    value={settings.cookieConsent.rejectLabel}
+                    onChange={(event) =>
+                      set('cookieConsent', { ...settings.cookieConsent, rejectLabel: event.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="tv-field">
+                  <label className="tv-field__label" htmlFor="cc-policy">
+                    Cookie policy link
+                  </label>
+                  <input
+                    className="tv-colour__hex"
+                    id="cc-policy"
+                    type="text"
+                    placeholder="https://your-site.com/cookies"
+                    spellCheck={false}
+                    value={settings.cookieConsent.policyUrl ?? ''}
+                    onChange={(event) =>
+                      set('cookieConsent', {
+                        ...settings.cookieConsent,
+                        policyUrl: event.target.value as SiteSettings['cookieConsent']['policyUrl'],
+                      })
+                    }
+                  />
+                  <p className="tv-field__help">
+                    Optional. If you have a cookie or privacy page, link it and the
+                    banner shows a "Read our cookie policy" link.
+                  </p>
+                </div>
+              </>
+            )}
+          </section>
+          </>
         )}
 
         {tab === 'branding' && (
