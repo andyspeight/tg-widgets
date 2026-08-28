@@ -101,6 +101,14 @@ export interface CookieConsentSettings {
   enabled: boolean;
   /** Which of the four looks to draw. */
   layout: CookieLayout;
+  /**
+   * Let visitors choose which kinds of cookie they accept, rather than the plain
+   * accept-or-reject. Adds a "Choose" button and a small preferences view with
+   * Essential (always on), Analytics and Marketing, each mapped to the matching
+   * Google Consent Mode signal. Off by default: accept-or-reject is fully
+   * compliant, and it is the right answer for a site that only has analytics.
+   */
+  granular: boolean;
   title: string;
   message: string;
   acceptLabel: string;
@@ -112,6 +120,7 @@ export interface CookieConsentSettings {
 export const DEFAULT_COOKIE_CONSENT: CookieConsentSettings = {
   enabled: false,
   layout: 'card',
+  granular: false,
   title: 'Cookies on this site',
   message: 'We use cookies to understand how this site is used. Accept them, or carry on with only the essentials.',
   acceptLabel: 'Accept',
@@ -434,6 +443,7 @@ export const SiteSettingsSchema = z.object({
         layout: (COOKIE_LAYOUTS as readonly string[]).includes(o.layout as string)
           ? (o.layout as CookieLayout)
           : DEFAULT_COOKIE_CONSENT.layout,
+        granular: o.granular === true,
         title: oneLine(o.title, 80) || DEFAULT_COOKIE_CONSENT.title,
         message: oneLine(o.message, 300) || DEFAULT_COOKIE_CONSENT.message,
         acceptLabel: oneLine(o.acceptLabel, 40) || DEFAULT_COOKIE_CONSENT.acceptLabel,

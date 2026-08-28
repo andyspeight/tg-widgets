@@ -553,6 +553,28 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
                 </div>
 
                 <div className="tv-field">
+                  <label className="tv-check">
+                    <input
+                      type="checkbox"
+                      checked={settings.cookieConsent.granular}
+                      onChange={(event) =>
+                        set('cookieConsent', {
+                          ...settings.cookieConsent,
+                          granular: event.target.checked,
+                        })
+                      }
+                    />
+                    <span>Let visitors choose which cookies they accept</span>
+                  </label>
+                  <p className="tv-field__help">
+                    Adds a "Choose" button and a small screen where a visitor can
+                    turn Analytics and Marketing on or off separately. Essential
+                    cookies are always on. Leave it off for a plain accept or
+                    reject, which is just as compliant.
+                  </p>
+                </div>
+
+                <div className="tv-field">
                   <label className="tv-field__label" htmlFor="cc-title">
                     Banner heading
                   </label>

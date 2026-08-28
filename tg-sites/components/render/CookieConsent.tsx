@@ -31,6 +31,7 @@ export function CookieConsent({ settings }: { settings: SiteSettings }): ReactEl
         id="tgs-consent"
         hidden
         data-layout={consent.layout}
+        data-granular={consent.granular ? '1' : ''}
         data-title={consent.title}
         data-message={consent.message}
         data-accept={consent.acceptLabel}
