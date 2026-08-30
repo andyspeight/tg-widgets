@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { middleware } from '../middleware';
 import { RETURNING_VISITOR_COOKIE } from '../lib/content/audience';
+import { ISO_COUNTRIES } from '../lib/content/countries';
 
 const read = (...p: string[]) => readFileSync(join(__dirname, '..', ...p), 'utf8');
 
@@ -87,11 +88,30 @@ describe('the editor exposes the audience rule per section', () => {
     // control produces is normalised by the schema on save.
     expect(props).toContain('Show only to');
     expect(props).toContain('Hide from');
-    expect(props).toContain('COMMON_COUNTRIES.map');
+    // The country facet is a searchable picker over the full ISO list.
+    expect(props).toContain('<CountryPicker');
+    expect(props).toContain('ISO_COUNTRIES');
     expect(props).toContain('AUDIENCE_SOURCES.map');
     expect(props).toContain('Been before');
     // An empty rule is tidied to nothing, exactly a section with no rule.
     expect(props).toContain('tidyAudience');
+  });
+});
+
+describe('the full country list backs the picker', () => {
+  it('is comprehensive and every code is a valid alpha-2 the rule accepts', () => {
+    expect(ISO_COUNTRIES.length).toBeGreaterThan(200);
+    const codes = new Set<string>();
+    for (const country of ISO_COUNTRIES) {
+      expect(country.code).toMatch(/^[A-Z]{2}$/);
+      expect(country.name.length).toBeGreaterThan(0);
+      expect(codes.has(country.code)).toBe(false);
+      codes.add(country.code);
+    }
+    // A few anchors so a bad regeneration is caught.
+    expect(codes.has('GB')).toBe(true);
+    expect(codes.has('US')).toBe(true);
+    expect(codes.has('JP')).toBe(true);
   });
 });
 
@@ -105,7 +125,7 @@ describe('Preview as lets a client check an audience in the editor', () => {
     expect(shell).toContain('{preview && (');
     expect(shell).toContain('previewAs={preview ? previewAs : undefined}');
     // It offers the same axes the rule uses.
-    expect(shell).toContain('COMMON_COUNTRIES.map');
+    expect(shell).toContain('ISO_COUNTRIES.map');
     expect(shell).toContain('Been before');
   });
 

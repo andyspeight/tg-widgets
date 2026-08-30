@@ -10,7 +10,7 @@
  * undo step rather than one per character.
  */
 
-import { useState, useTransition, type CSSProperties, type ReactNode } from 'react';
+import { useMemo, useState, useTransition, type CSSProperties, type ReactNode } from 'react';
 import type { Block, Box, Page, RegionName } from '../../lib/content/schema';
 import {
   DEFAULT_DIVIDER_HEIGHT,
@@ -65,12 +65,12 @@ import {
 } from '../../lib/content/styles';
 import {
   AUDIENCE_SOURCES,
-  COMMON_COUNTRIES,
   type Audience,
   type AudienceDevice,
   type AudienceMode,
   type AudienceVisitor,
 } from '../../lib/content/audience';
+import { ISO_COUNTRIES } from '../../lib/content/countries';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -2761,6 +2761,84 @@ const SOURCE_LABEL: Record<(typeof AUDIENCE_SOURCES)[number], string> = {
 };
 
 /**
+ * A searchable multi-select over the whole country list, so a client is not
+ * boxed into a shortlist. The chosen countries sit as removable chips above a
+ * search box; typing filters the full ISO list and each result toggles. The rule
+ * stores alpha-2 codes; the names are presentation only (lib/content/countries).
+ */
+function CountryPicker({
+  selected,
+  onChange,
+}: {
+  selected: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const nameByCode = useMemo(() => new Map(ISO_COUNTRIES.map((c) => [c.code, c.name])), []);
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? ISO_COUNTRIES.filter(
+        (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase() === q,
+      ).slice(0, 60)
+    : [];
+  const toggle = (code: string) =>
+    onChange(selected.includes(code) ? selected.filter((x) => x !== code) : [...selected, code]);
+
+  return (
+    <div className="ed-country">
+      {selected.length > 0 && (
+        <div className="ed-chips" role="group" aria-label="Chosen countries">
+          {selected.map((code) => (
+            <button
+              key={code}
+              type="button"
+              className="ed-chip is-on"
+              aria-label={`Remove ${nameByCode.get(code) ?? code}`}
+              onClick={() => toggle(code)}
+            >
+              {nameByCode.get(code) ?? code} <span aria-hidden="true">×</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <input
+        className="ed-input"
+        type="search"
+        placeholder="Search countries…"
+        aria-label="Search countries"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      {q && (
+        <ul className="ed-country__list">
+          {matches.length === 0 && (
+            <li className="ed-help" style={{ padding: '6px 8px' }}>
+              No match.
+            </li>
+          )}
+          {matches.map((country) => {
+            const on = selected.includes(country.code);
+            return (
+              <li key={country.code}>
+                <button
+                  type="button"
+                  className={`ed-country__opt${on ? ' is-on' : ''}`}
+                  aria-pressed={on}
+                  onClick={() => toggle(country.code)}
+                >
+                  <span>{country.name}</span>
+                  {on && <span aria-hidden="true">✓</span>}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/**
  * WHO SEES THIS SECTION: the per-section personalisation control.
  *
  * The working rule is held locally, seeded from the section, so a choice like
@@ -2828,29 +2906,11 @@ function AudienceField({
 
           <div className="ed-field">
             <label className="ed-label">Countries</label>
-            <div className="ed-chips" role="group" aria-label="Countries">
-              {COMMON_COUNTRIES.map((country) => {
-                const on = countries.includes(country.code);
-                return (
-                  <button
-                    key={country.code}
-                    type="button"
-                    className={`ed-chip${on ? ' is-on' : ''}`}
-                    aria-pressed={on}
-                    onClick={() =>
-                      change({
-                        countries: on
-                          ? countries.filter((code) => code !== country.code)
-                          : [...countries, country.code],
-                      })
-                    }
-                  >
-                    {country.name}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="ed-help">None selected means any country.</p>
+            <CountryPicker
+              selected={countries}
+              onChange={(next) => change({ countries: next })}
+            />
+            <p className="ed-help">None chosen means any country.</p>
           </div>
 
           <div className="ed-field">

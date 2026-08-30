@@ -44,13 +44,13 @@ import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
 import {
-  COMMON_COUNTRIES,
   DEFAULT_VISITOR_SIGNALS,
   type AudienceDevice,
   type AudienceSource,
   type AudienceVisitor,
   type VisitorSignals,
 } from '../../lib/content/audience';
+import { ISO_COUNTRIES } from '../../lib/content/countries';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
@@ -2289,7 +2289,7 @@ export function EditorShell({
                   }
                 >
                   <option value="">Unknown / anywhere</option>
-                  {COMMON_COUNTRIES.map((country) => (
+                  {ISO_COUNTRIES.map((country) => (
                     <option key={country.code} value={country.code}>
                       {country.name}
                     </option>
