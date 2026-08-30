@@ -19,8 +19,10 @@ import { cookies, headers } from 'next/headers';
 
 import {
   classifyDevice,
+  classifyLanguage,
   classifySource,
   DEFAULT_VISITOR_SIGNALS,
+  normaliseCampaign,
   normaliseCountry,
   RETURNING_VISITOR_COOKIE,
   type VisitorSignals,
@@ -30,17 +32,24 @@ import {
  * Read the visitor signals for this request.
  *
  * `selfHost` is the site's own hostname, so a click from one page of the site to
- * another reads as direct rather than as a referral from itself. Absent-header
- * safe throughout: on localhost, or from a crawler, every facet falls to its
- * default (unknown country, desktop, direct, new), which is exactly the
+ * another reads as direct rather than as a referral from itself. `campaignRaw` is
+ * the utm_campaign off the URL, which lives in the query rather than a header, so
+ * the route reads it and hands it in. Absent-header safe throughout: on localhost,
+ * or from a crawler, every facet falls to its default (unknown country and
+ * language, no campaign, desktop, direct, new), which is exactly the
  * unpersonalised variant a client should design as the baseline.
  */
-export async function readVisitorSignals(selfHost?: string): Promise<VisitorSignals> {
+export async function readVisitorSignals(
+  selfHost?: string,
+  campaignRaw?: string | null,
+): Promise<VisitorSignals> {
   try {
     const [h, c] = await Promise.all([headers(), cookies()]);
     return {
       // Vercel sets x-vercel-ip-country at the edge; absent off-platform.
       country: normaliseCountry(h.get('x-vercel-ip-country')),
+      language: classifyLanguage(h.get('accept-language')),
+      campaign: normaliseCampaign(campaignRaw),
       device: classifyDevice(h.get('user-agent')),
       source: classifySource(h.get('referer'), selfHost),
       visitor: c.get(RETURNING_VISITOR_COOKIE) ? 'returning' : 'new',

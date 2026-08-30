@@ -12,8 +12,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   classifyDevice,
+  classifyLanguage,
   classifySource,
   DEFAULT_VISITOR_SIGNALS,
+  normaliseCampaign,
   normaliseCountry,
   parseAudience,
   sectionVisibleFor,
@@ -62,6 +64,47 @@ describe('parseAudience keeps only a real, safe rule', () => {
     expect(a?.mode).toBe('show');
     expect(parseAudience({ device: 'mobile', mode: 'hide' })?.mode).toBe('hide');
     expect(parseAudience({ device: 'mobile', mode: 'sideways' })?.mode).toBe('show');
+  });
+});
+
+describe('the language and campaign facets (v2)', () => {
+  it('keeps language codes on their primary subtag, drops junk', () => {
+    const a = parseAudience({ languages: ['en-GB', 'FR', 'de', 'en', 'zzzz', 3] });
+    expect(a?.languages).toEqual(['en', 'fr', 'de']);
+    expect(parseAudience({ languages: ['!!'] })).toBeUndefined();
+  });
+
+  it('lowercases and de-dupes campaign names, strips control characters', () => {
+    const a = parseAudience({ campaigns: ['Summer-Sale', 'summer-sale', '  Winter  ', ''] });
+    expect(a?.campaigns).toEqual(['summer-sale', 'winter']);
+    expect(parseAudience({ campaigns: [] })).toBeUndefined();
+  });
+
+  it('matches a visitor on language and on campaign, unknown fails', () => {
+    const lang = parseAudience({ languages: ['de'] });
+    expect(sectionVisibleFor(lang, signals({ language: 'de' }))).toBe(true);
+    expect(sectionVisibleFor(lang, signals({ language: 'en' }))).toBe(false);
+    expect(sectionVisibleFor(lang, signals({ language: null }))).toBe(false);
+
+    const camp = parseAudience({ campaigns: ['summer-sale'] });
+    expect(sectionVisibleFor(camp, signals({ campaign: 'summer-sale' }))).toBe(true);
+    expect(sectionVisibleFor(camp, signals({ campaign: 'other' }))).toBe(false);
+    expect(sectionVisibleFor(camp, signals({ campaign: null }))).toBe(false);
+  });
+
+  it('reads the primary language from an Accept-Language header', () => {
+    expect(classifyLanguage('en-GB,en;q=0.9,fr;q=0.8')).toBe('en');
+    expect(classifyLanguage('de-DE')).toBe('de');
+    expect(classifyLanguage('')).toBeNull();
+    expect(classifyLanguage(null)).toBeNull();
+    expect(classifyLanguage('*')).toBeNull();
+  });
+
+  it('normalises a campaign value for matching, or null', () => {
+    expect(normaliseCampaign('Summer Sale')).toBe('summer sale');
+    expect(normaliseCampaign('  ')).toBeNull();
+    expect(normaliseCampaign(42)).toBeNull();
+    expect(normaliseCampaign('x'.repeat(200))?.length).toBe(80);
   });
 });
 

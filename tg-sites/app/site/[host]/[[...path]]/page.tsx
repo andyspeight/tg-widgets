@@ -376,7 +376,14 @@ export default async function SitePage({ params, searchParams }: Params) {
    * mutation of the cached load() result, so the metadata pass that shares it is
    * untouched and a crawler indexes the full page. See lib/content/audience.
    */
-  const signals = await readVisitorSignals(slug);
+  const query = await searchParams;
+  const utmCampaign =
+    typeof query.utm_campaign === 'string'
+      ? query.utm_campaign
+      : Array.isArray(query.utm_campaign)
+        ? query.utm_campaign[0] ?? null
+        : null;
+  const signals = await readVisitorSignals(slug, utmCampaign);
   const found = {
     ...rawFound,
     page: rawFound.page

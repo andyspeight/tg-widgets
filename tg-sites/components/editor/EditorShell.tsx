@@ -45,12 +45,14 @@ import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
 import {
   DEFAULT_VISITOR_SIGNALS,
+  normaliseCampaign,
   type AudienceDevice,
   type AudienceSource,
   type AudienceVisitor,
   type VisitorSignals,
 } from '../../lib/content/audience';
 import { ISO_COUNTRIES } from '../../lib/content/countries';
+import { COMMON_LANGUAGES } from '../../lib/content/languages';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
@@ -2335,6 +2337,34 @@ export function EditorShell({
                   <option value="new">New visitor</option>
                   <option value="returning">Returning</option>
                 </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Language</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.language ?? ''}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, language: event.target.value || null }))
+                  }
+                >
+                  <option value="">Unknown / any</option>
+                  {COMMON_LANGUAGES.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Campaign</span>
+                <input
+                  className="ed-input"
+                  value={previewAs.campaign ?? ''}
+                  placeholder="utm_campaign"
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, campaign: normaliseCampaign(event.target.value) }))
+                  }
+                />
               </label>
             </div>
           </details>

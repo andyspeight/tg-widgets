@@ -71,6 +71,7 @@ import {
   type AudienceVisitor,
 } from '../../lib/content/audience';
 import { ISO_COUNTRIES } from '../../lib/content/countries';
+import { COMMON_LANGUAGES } from '../../lib/content/languages';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -2746,11 +2747,22 @@ function GridCellsControl({
 function tidyAudience(audience: Audience): Audience | undefined {
   const out: Audience = { mode: audience.mode === 'hide' ? 'hide' : 'show' };
   if (audience.countries && audience.countries.length) out.countries = audience.countries;
+  if (audience.languages && audience.languages.length) out.languages = audience.languages;
+  if (audience.campaigns && audience.campaigns.length) out.campaigns = audience.campaigns;
   if (audience.source && audience.source.length) out.source = audience.source;
   if (audience.device) out.device = audience.device;
   if (audience.visitor) out.visitor = audience.visitor;
   // A rule with no facet constrains nobody, so it is no rule.
-  if (!out.countries && !out.source && !out.device && !out.visitor) return undefined;
+  if (
+    !out.countries &&
+    !out.languages &&
+    !out.campaigns &&
+    !out.source &&
+    !out.device &&
+    !out.visitor
+  ) {
+    return undefined;
+  }
   return out;
 }
 
@@ -2858,6 +2870,9 @@ function AudienceField({
 }) {
   const [enabled, setEnabled] = useState<boolean>(Boolean(audience));
   const [draft, setDraft] = useState<Audience>(audience ?? { mode: 'show' });
+  // The campaign box keeps the raw text so a comma the client is mid-typing is
+  // not eaten; the committed value is the split, lowercased list.
+  const [campaignText, setCampaignText] = useState((audience?.campaigns ?? []).join(', '));
 
   const change = (patch: Partial<Audience>) => {
     const next: Audience = { ...draft, ...patch };
@@ -2866,6 +2881,7 @@ function AudienceField({
   };
 
   const countries = draft.countries ?? [];
+  const languages = draft.languages ?? [];
   const sources = draft.source ?? [];
 
   return (
@@ -2911,6 +2927,61 @@ function AudienceField({
               onChange={(next) => change({ countries: next })}
             />
             <p className="ed-help">None chosen means any country.</p>
+          </div>
+
+          <div className="ed-field">
+            <label className="ed-label">Languages</label>
+            <div className="ed-chips" role="group" aria-label="Languages">
+              {COMMON_LANGUAGES.map((language) => {
+                const on = languages.includes(language.code);
+                return (
+                  <button
+                    key={language.code}
+                    type="button"
+                    className={`ed-chip${on ? ' is-on' : ''}`}
+                    aria-pressed={on}
+                    onClick={() =>
+                      change({
+                        languages: on
+                          ? languages.filter((code) => code !== language.code)
+                          : [...languages, language.code],
+                      })
+                    }
+                  >
+                    {language.name}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="ed-help">The visitor&apos;s browser language. None means any.</p>
+          </div>
+
+          <div className="ed-field">
+            <label className="ed-label" htmlFor="ed-audience-campaigns">
+              Campaigns
+            </label>
+            <input
+              id="ed-audience-campaigns"
+              className="ed-input"
+              value={campaignText}
+              placeholder="summer-sale, winter-2026"
+              onChange={(event) => {
+                setCampaignText(event.target.value);
+                const list = Array.from(
+                  new Set(
+                    event.target.value
+                      .split(',')
+                      .map((entry) => entry.trim().toLowerCase())
+                      .filter(Boolean),
+                  ),
+                );
+                change({ campaigns: list });
+              }}
+            />
+            <p className="ed-help">
+              Match a link&apos;s <code>utm_campaign</code>, so a section shows only to
+              visitors who arrived on that campaign. Comma separated. None means any.
+            </p>
           </div>
 
           <div className="ed-field">

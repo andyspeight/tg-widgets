@@ -46,6 +46,10 @@ export type AudienceMode = 'show' | 'hide';
 export interface Audience {
   mode: AudienceMode;
   countries?: string[];
+  /** ISO 639-1 language subtags, lowercase (the visitor's browser language). */
+  languages?: string[];
+  /** utm_campaign values to match, lowercase (the visitor arrived on one). */
+  campaigns?: string[];
   source?: AudienceSource[];
   device?: AudienceDevice;
   visitor?: AudienceVisitor;
@@ -55,6 +59,10 @@ export interface Audience {
 export interface VisitorSignals {
   /** ISO 3166-1 alpha-2, uppercase, or null when geo is unknown. */
   country: string | null;
+  /** ISO 639-1 language subtag, lowercase, or null when unknown. */
+  language: string | null;
+  /** utm_campaign from the URL, lowercase, or null when there is none. */
+  campaign: string | null;
   source: AudienceSource;
   device: AudienceDevice;
   visitor: AudienceVisitor;
@@ -63,6 +71,8 @@ export interface VisitorSignals {
 /** A sane default for when nothing about the request is known (dev, a bot). */
 export const DEFAULT_VISITOR_SIGNALS: VisitorSignals = {
   country: null,
+  language: null,
+  campaign: null,
   source: 'direct',
   device: 'desktop',
   visitor: 'new',
@@ -121,6 +131,55 @@ function countryList(value: unknown): string[] | undefined {
   return out.length ? out : undefined;
 }
 
+const LANGUAGE = /^[a-z]{2,3}$/;
+const MAX_LANGUAGES = 40;
+
+function languageList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const entry of value) {
+    if (typeof entry !== 'string') continue;
+    // A browser sends en-GB; the facet matches on the primary subtag, en.
+    const code = entry.trim().toLowerCase().split('-')[0];
+    if (LANGUAGE.test(code) && !seen.has(code)) {
+      seen.add(code);
+      out.push(code);
+      if (out.length >= MAX_LANGUAGES) break;
+    }
+  }
+  return out.length ? out : undefined;
+}
+
+// A campaign name is free text a client typed, matched case-insensitively, so it
+// is lowercased and stripped of control characters and capped, the same care a
+// stored-then-rendered string gets everywhere.
+const CONTROL = /[\u0000-\u001F\u007F]/g;
+const MAX_CAMPAIGN_LEN = 80;
+const MAX_CAMPAIGNS = 20;
+
+/** One utm_campaign value, made safe for matching, or null. */
+export function normaliseCampaign(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const clean = value.replace(CONTROL, '').trim().toLowerCase().slice(0, MAX_CAMPAIGN_LEN);
+  return clean || null;
+}
+
+function campaignList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const entry of value) {
+    const clean = normaliseCampaign(entry);
+    if (clean && !seen.has(clean)) {
+      seen.add(clean);
+      out.push(clean);
+      if (out.length >= MAX_CAMPAIGNS) break;
+    }
+  }
+  return out.length ? out : undefined;
+}
+
 /**
  * A section's audience, made safe, or undefined when there is no real rule.
  *
@@ -134,17 +193,21 @@ export function parseAudience(value: unknown): Audience | undefined {
   const o = value as Record<string, unknown>;
 
   const countries = countryList(o.countries);
+  const languages = languageList(o.languages);
+  const campaigns = campaignList(o.campaigns);
   const source = whitelist(o.source, AUDIENCE_SOURCES);
   const device = oneOf(o.device, AUDIENCE_DEVICES);
   const visitor = oneOf(o.visitor, AUDIENCE_VISITORS);
 
   // No facet means no constraint, so there is nothing to store. mode alone is
   // not a rule.
-  if (!countries && !source && !device && !visitor) return undefined;
+  if (!countries && !languages && !campaigns && !source && !device && !visitor) return undefined;
 
   const mode: AudienceMode = o.mode === 'hide' ? 'hide' : 'show';
   const audience: Audience = { mode };
   if (countries) audience.countries = countries;
+  if (languages) audience.languages = languages;
+  if (campaigns) audience.campaigns = campaigns;
   if (source) audience.source = source;
   if (device) audience.device = device;
   if (visitor) audience.visitor = visitor;
@@ -155,6 +218,12 @@ export function parseAudience(value: unknown): Audience | undefined {
 function audienceMatches(audience: Audience, signals: VisitorSignals): boolean {
   if (audience.countries) {
     if (signals.country === null || !audience.countries.includes(signals.country)) return false;
+  }
+  if (audience.languages) {
+    if (signals.language === null || !audience.languages.includes(signals.language)) return false;
+  }
+  if (audience.campaigns) {
+    if (signals.campaign === null || !audience.campaigns.includes(signals.campaign)) return false;
   }
   if (audience.source && !audience.source.includes(signals.source)) return false;
   if (audience.device && audience.device !== signals.device) return false;
@@ -274,4 +343,18 @@ export function normaliseCountry(value: string | null | undefined): string | nul
   if (typeof value !== 'string') return null;
   const code = value.trim().toUpperCase();
   return COUNTRY.test(code) ? code : null;
+}
+
+/**
+ * The visitor's primary language from an Accept-Language header, or null.
+ *
+ * The header is a weighted list (en-GB,en;q=0.9,fr;q=0.8); the first entry is the
+ * one the browser prefers, and the facet matches on its primary subtag, so en-GB
+ * and en-US both read as en. Quality values, extra tags and casing are ignored.
+ */
+export function classifyLanguage(acceptLanguage: string | null | undefined): string | null {
+  if (typeof acceptLanguage !== 'string') return null;
+  const first = acceptLanguage.split(',')[0]?.split(';')[0]?.trim().toLowerCase() ?? '';
+  const primary = first.split('-')[0];
+  return LANGUAGE.test(primary) ? primary : null;
 }

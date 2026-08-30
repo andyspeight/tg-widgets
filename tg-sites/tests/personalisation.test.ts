@@ -50,9 +50,17 @@ describe('the site route personalises what it renders', () => {
   const route = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
 
   it('reads the visitor and filters both a page and a collection entry', () => {
-    expect(route).toContain('readVisitorSignals(slug)');
+    expect(route).toContain('readVisitorSignals(slug, utmCampaign)');
     expect(route).toContain('visibleSections(rawFound.page.content.sections, signals)');
     expect(route).toContain('visibleSections(rawFound.entry.item.sections, signals)');
+    // The campaign facet comes off the URL, not a header.
+    expect(route).toContain('query.utm_campaign');
+  });
+
+  it('the signal reader reads language from a header and campaign from the URL', () => {
+    const reader = read('lib', 'site', 'visitor-signals.ts');
+    expect(reader).toContain("classifyLanguage(h.get('accept-language'))");
+    expect(reader).toContain('normaliseCampaign(campaignRaw)');
   });
 
   it('filters a copy, never the shared cached load result', () => {
@@ -93,6 +101,9 @@ describe('the editor exposes the audience rule per section', () => {
     expect(props).toContain('ISO_COUNTRIES');
     expect(props).toContain('AUDIENCE_SOURCES.map');
     expect(props).toContain('Been before');
+    // v2 facets: language chips and a utm_campaign box.
+    expect(props).toContain('COMMON_LANGUAGES.map');
+    expect(props).toContain('utm_campaign');
     // An empty rule is tidied to nothing, exactly a section with no rule.
     expect(props).toContain('tidyAudience');
   });
