@@ -124,6 +124,18 @@ describe('what the shell emits', () => {
     expect(withNumber[0].config.theme).toEqual({ brand: '#25D366' });
   });
 
+  it('turns the popup delay from seconds into the milliseconds its widget wants, only for a timed trigger', () => {
+    const timed = enabledFloatingWidgets(
+      parseFloatingWidgets({ popup: { enabled: true, trigger: 'time', delaySeconds: 5 } }),
+    );
+    expect(timed[0].config.triggerDelay).toBe(5000);
+    expect(timed[0].config.contentType).toBe('announcement');
+    const onLoad = enabledFloatingWidgets(
+      parseFloatingWidgets({ popup: { enabled: true, trigger: 'load', delaySeconds: 5 } }),
+    );
+    expect(onLoad[0].config.triggerDelay).toBe(0);
+  });
+
   it('nests the loader colours the way its widget reads them', () => {
     const out = enabledFloatingWidgets(parseFloatingWidgets({ loader: { enabled: true, primary: '#00b4d8' } }));
     expect(out[0].config.colors).toEqual({ primary: '#00b4d8', secondary: '#1B2B5B', track: '#E2E8F0' });
@@ -160,13 +172,14 @@ describe('the registry that turns a tag into a url', () => {
           whatsapp: { enabled: true, phone: '+1' },
           dealBar: { enabled: true },
           loader: { enabled: true },
+          popup: { enabled: true },
         }),
       ).map((w) => w.tag),
     );
     for (const tag of emitted) {
       expect((FLOATING_WIDGET_TAGS as readonly string[]).includes(tag)).toBe(true);
     }
-    expect(emitted.size).toBe(4);
+    expect(emitted.size).toBe(FLOATING_WIDGET_TAGS.length);
   });
 });
 
@@ -176,6 +189,13 @@ describe('the published shell wires it up on both paths', () => {
   it('mounts FloatingWidgets in the main render AND the search render', () => {
     const mounts = page.match(/<FloatingWidgets settings=\{/g) ?? [];
     expect(mounts.length).toBe(2);
+  });
+
+  it('mounts FloatingWidgets in the preview route too, so a client can see them without publishing', () => {
+    const preview = read('app', 'preview', '[[...path]]', 'page.tsx');
+    expect(preview).toContain('<FloatingWidgets settings=');
+    // The preview reads settings, which is what makes the widgets show there.
+    expect(preview).toContain('getPublicSettings');
   });
 
   it('never adds the external widget scripts to the same-origin asset allowlist', () => {

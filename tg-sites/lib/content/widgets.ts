@@ -153,11 +153,12 @@ export function widgetScriptUrl(tag: unknown): string | null {
  * WIDGET_KINDS, so a floating tag can never also be dropped in a column, which
  * would put two containers and two inits of the same widget on one page.
  *
- * Popup is deliberately not here yet: its config surface is large and its
- * page/device targeting belongs with the personalisation work, so it is a
- * fast-follow rather than part of the first site-wide panel.
+ * Popup carries a large surface (eight layouts, six content types, page and
+ * device targeting, scheduling). The panel exposes the common announcement use
+ * of it: the content, one trigger, a button and how often it shows. The rest of
+ * its targeting is a natural home for the personalisation work later.
  */
-export const FLOATING_WIDGET_TAGS = ['backtotop', 'whatsapp', 'dealbar', 'loader'] as const;
+export const FLOATING_WIDGET_TAGS = ['backtotop', 'whatsapp', 'dealbar', 'loader', 'popup'] as const;
 
 export type FloatingWidgetTag = (typeof FLOATING_WIDGET_TAGS)[number];
 

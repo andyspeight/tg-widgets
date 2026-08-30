@@ -10,7 +10,11 @@ import { imageSizesForUrls } from '../../../lib/db/media';
 import { WidgetScripts } from '../../../components/render/WidgetScripts';
 import { MotionScript } from '../../../components/render/MotionScript';
 import { SlideshowScript } from '../../../components/render/SlideshowScript';
+import { NoRightClickScript } from '../../../components/render/NoRightClickScript';
+import { CookieConsent } from '../../../components/render/CookieConsent';
+import { FloatingWidgets } from '../../../components/render/FloatingWidgets';
 import { FontHead } from '../../../components/render/FontHead';
+import { getPublicSettings } from '../../../lib/db/settings';
 import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage, listPublishedNavPages } from '../../../lib/db/pages';
 import { getPublishedRegions } from '../../../lib/db/regions';
@@ -68,13 +72,18 @@ async function load(path: string[] | undefined) {
    * theme cannot be read for a tenant the request is not scoped to, and neither
    * call can write anything.
    */
-  const [page, theme, faces, regions, navPages] = await Promise.all([
+  const [page, theme, faces, regions, navPages, settings] = await Promise.all([
     getPublishedPage(site.tenantId, (path ?? []).join('/')),
     getPublicTheme(site.tenantId),
     listFontFaces(site.tenantId),
     getPublishedRegions(site.tenantId),
     // The published pages, so a Menu link to a folder fills with the pages inside.
     listPublishedNavPages(site.tenantId),
+    // The site settings, so the preview shows the floating widgets, the cookie
+    // banner and the no-right-click chrome the same way the published site does.
+    // Settings are saved live rather than published, so a client sees a widget
+    // they just set up here without publishing a page first.
+    getPublicSettings(site.tenantId),
   ]);
 
   if (!page) return null;
@@ -97,6 +106,7 @@ async function load(path: string[] | undefined) {
     faces,
     regions,
     navPages,
+    settings,
     slug: site.slug,
     // Carried out so the render can look up image sizes. The preview's whole job
     // is to be the published DOM, so it has to make the same lookup.
@@ -262,6 +272,18 @@ export default async function PublishedPage({ params }: Params) {
       <MotionScript
         trees={[found.regions.header, found.page.content, found.regions.footer]}
       />
+
+      {/*
+        The site-level chrome, so the preview is faithful: the floating widgets a
+        client set up, the cookie banner, and no-right-click. This is the whole
+        point of adding settings to the load above, and it is why the panel tells
+        a client to press Preview rather than to visit their live domain. The
+        analytics head is deliberately NOT here: a preview should not fire a
+        client's tracking, and the widgets read their config inline regardless.
+      */}
+      <NoRightClickScript settings={found.settings} />
+      <CookieConsent settings={found.settings} />
+      <FloatingWidgets settings={found.settings} />
     </>
   );
 }

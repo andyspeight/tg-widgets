@@ -329,6 +329,72 @@ function parseLoader(value: unknown): LoaderSettings {
 }
 
 // ---------------------------------------------------------------------------
+// Popup (the common announcement use)
+// ---------------------------------------------------------------------------
+
+const POPUP_LAYOUTS = ['centered', 'slide-in', 'floating-card', 'top-bar', 'bottom-bar'] as const;
+const POPUP_TRIGGERS = ['load', 'time', 'scroll', 'exit-intent'] as const;
+const POPUP_FREQUENCIES = ['session', 'visitor', 'every-visit', 'every-n-days'] as const;
+
+export interface PopupSettings {
+  enabled: boolean;
+  layout: (typeof POPUP_LAYOUTS)[number];
+  title: string;
+  body: string;
+  image: string;
+  ctaText: string;
+  ctaUrl: string;
+  trigger: (typeof POPUP_TRIGGERS)[number];
+  /** Seconds; only used by the 'time' trigger. Emitted to the widget in ms. */
+  delaySeconds: number;
+  scrollPercent: number;
+  frequency: (typeof POPUP_FREQUENCIES)[number];
+  frequencyDays: number;
+  brand: string;
+  accent: string;
+  overlay: boolean;
+}
+
+const DEFAULT_POPUP: PopupSettings = {
+  enabled: false,
+  layout: 'centered',
+  title: '',
+  body: 'Sign up to get exclusive travel deals straight to your inbox.',
+  image: '',
+  ctaText: '',
+  ctaUrl: '',
+  trigger: 'load',
+  delaySeconds: 5,
+  scrollPercent: 50,
+  frequency: 'session',
+  frequencyDays: 7,
+  brand: '#1B2B5B',
+  accent: '#00B4D8',
+  overlay: true,
+};
+
+function parsePopup(value: unknown): PopupSettings {
+  const o = asObject(value);
+  return {
+    enabled: bool(o.enabled, false),
+    layout: oneOf(o.layout, POPUP_LAYOUTS, 'centered'),
+    title: line(o.title, 80),
+    body: multiline(o.body, 300) || DEFAULT_POPUP.body,
+    image: link(o.image),
+    ctaText: line(o.ctaText, 40),
+    ctaUrl: link(o.ctaUrl),
+    trigger: oneOf(o.trigger, POPUP_TRIGGERS, 'load'),
+    delaySeconds: num(o.delaySeconds, 0, 120, 5),
+    scrollPercent: num(o.scrollPercent, 1, 100, 50),
+    frequency: oneOf(o.frequency, POPUP_FREQUENCIES, 'session'),
+    frequencyDays: num(o.frequencyDays, 1, 90, 7),
+    brand: colour(o.brand, '#1B2B5B'),
+    accent: colour(o.accent, '#00B4D8'),
+    overlay: bool(o.overlay, true),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // The whole set
 // ---------------------------------------------------------------------------
 
@@ -337,6 +403,7 @@ export interface FloatingWidgetsSettings {
   whatsapp: WhatsAppSettings;
   dealBar: DealBarSettings;
   loader: LoaderSettings;
+  popup: PopupSettings;
 }
 
 export const DEFAULT_FLOATING_WIDGETS: FloatingWidgetsSettings = {
@@ -344,6 +411,7 @@ export const DEFAULT_FLOATING_WIDGETS: FloatingWidgetsSettings = {
   whatsapp: DEFAULT_WHATSAPP,
   dealBar: DEFAULT_DEAL_BAR,
   loader: DEFAULT_LOADER,
+  popup: DEFAULT_POPUP,
 };
 
 /** Total: nonsense in, defaults out, never a throw. */
@@ -354,6 +422,7 @@ export function parseFloatingWidgets(value: unknown): FloatingWidgetsSettings {
     whatsapp: parseWhatsApp(o.whatsapp),
     dealBar: parseDealBar(o.dealBar),
     loader: parseLoader(o.loader),
+    popup: parsePopup(o.popup),
   };
 }
 
@@ -451,6 +520,34 @@ export function enabledFloatingWidgets(fw: FloatingWidgetsSettings): EnabledFloa
         background: l.background,
         label: l.label,
         labelColor: l.labelColor,
+      },
+    });
+  }
+
+  const p = fw.popup;
+  if (p.enabled) {
+    out.push({
+      tag: 'popup',
+      config: {
+        // The panel exposes the announcement use; the widget's other content
+        // types (email capture, discount, video) keep their defaults.
+        contentType: 'announcement',
+        layout: p.layout,
+        title: p.title,
+        body: p.body,
+        image: p.image,
+        ctaText: p.ctaText,
+        ctaUrl: p.ctaUrl,
+        trigger: p.trigger,
+        // The widget takes the delay in milliseconds, and only for the 'time'
+        // trigger; a scroll or exit popup ignores it.
+        triggerDelay: p.trigger === 'time' ? p.delaySeconds * 1000 : 0,
+        triggerScrollPercent: p.scrollPercent,
+        frequency: p.frequency,
+        frequencyDays: p.frequencyDays,
+        brand: p.brand,
+        accent: p.accent,
+        overlay: p.overlay,
       },
     });
   }

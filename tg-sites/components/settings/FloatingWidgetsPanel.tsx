@@ -31,18 +31,24 @@ export function FloatingWidgetsPanel({
     onChange({ ...value, dealBar: { ...value.dealBar, ...patch } });
   const setLoader: Setter<FloatingWidgetsSettings['loader']> = (patch) =>
     onChange({ ...value, loader: { ...value.loader, ...patch } });
+  const setPopup: Setter<FloatingWidgetsSettings['popup']> = (patch) =>
+    onChange({ ...value, popup: { ...value.popup, ...patch } });
 
   const btt = value.backToTop;
   const wa = value.whatsapp;
   const db = value.dealBar;
   const ld = value.loader;
+  const pu = value.popup;
 
   return (
     <>
       <p className="tv-field__help" style={{ marginBottom: 12 }}>
-        These sit across every published page rather than in a column. They do not
-        show in the editor preview, so switch one on, save, and check it on your
-        live site.
+        These sit across every published page rather than in a column, so they do
+        not show on the editing canvas. Switch one on, save, and{' '}
+        <a href="/preview" target="_blank" rel="noopener noreferrer">
+          open a preview
+        </a>{' '}
+        to see it on your site. You do not have to publish first.
       </p>
 
       {/* --- Back to top --- */}
@@ -218,6 +224,74 @@ export function FloatingWidgetsPanel({
             {ld.label.trim() !== '' && (
               <Colour label="Caption colour" value={ld.labelColor} onChange={(labelColor) => setLoader({ labelColor })} />
             )}
+          </>
+        )}
+      </section>
+
+      {/* --- Popup --- */}
+      <section className="tv-group">
+        <Enable
+          title="Popup"
+          on={pu.enabled}
+          onChange={(enabled) => setPopup({ enabled })}
+          hint="A message that appears over the page, once a visitor arrives, scrolls or goes to leave. Keep it to one clear ask."
+        />
+        {pu.enabled && (
+          <>
+            <Select
+              label="Style"
+              value={pu.layout}
+              onChange={(layout) => setPopup({ layout: layout as typeof pu.layout })}
+              options={[
+                ['centered', 'Centred box'],
+                ['slide-in', 'Slide in from a corner'],
+                ['floating-card', 'Floating card in a corner'],
+                ['top-bar', 'Bar along the top'],
+                ['bottom-bar', 'Bar along the bottom'],
+              ]}
+            />
+            <Text label="Heading" value={pu.title} maxLength={80} placeholder="Welcome aboard!" onChange={(title) => setPopup({ title })} />
+            <Area label="Message" value={pu.body} rows={2} maxLength={300} onChange={(body) => setPopup({ body })} />
+            <Text label="Image (optional)" value={pu.image} placeholder="https://…" onChange={(image) => setPopup({ image })} />
+            <Text label="Button label" value={pu.ctaText} maxLength={40} placeholder="Find out more" onChange={(ctaText) => setPopup({ ctaText })} />
+            <Text label="Button link" value={pu.ctaUrl} placeholder="https://…" onChange={(ctaUrl) => setPopup({ ctaUrl })} />
+
+            <Select
+              label="When it appears"
+              value={pu.trigger}
+              onChange={(trigger) => setPopup({ trigger: trigger as typeof pu.trigger })}
+              options={[
+                ['load', 'As the page loads'],
+                ['time', 'After a delay'],
+                ['scroll', 'After scrolling down'],
+                ['exit-intent', 'As they go to leave'],
+              ]}
+            />
+            {pu.trigger === 'time' && (
+              <Num label="Delay (seconds)" value={pu.delaySeconds} min={0} max={120} onChange={(delaySeconds) => setPopup({ delaySeconds })} />
+            )}
+            {pu.trigger === 'scroll' && (
+              <Num label="After scrolling (% of page)" value={pu.scrollPercent} min={1} max={100} onChange={(scrollPercent) => setPopup({ scrollPercent })} />
+            )}
+
+            <Select
+              label="How often"
+              value={pu.frequency}
+              onChange={(frequency) => setPopup({ frequency: frequency as typeof pu.frequency })}
+              options={[
+                ['session', 'Once per visit'],
+                ['visitor', 'Once ever'],
+                ['every-visit', 'Every time'],
+                ['every-n-days', 'Every few days'],
+              ]}
+            />
+            {pu.frequency === 'every-n-days' && (
+              <Num label="Days between showings" value={pu.frequencyDays} min={1} max={90} onChange={(frequencyDays) => setPopup({ frequencyDays })} />
+            )}
+
+            <Colour label="Brand colour" value={pu.brand} onChange={(brand) => setPopup({ brand })} />
+            <Colour label="Button colour" value={pu.accent} onChange={(accent) => setPopup({ accent })} />
+            <Check label="Dim the page behind it" value={pu.overlay} onChange={(overlay) => setPopup({ overlay })} />
           </>
         )}
       </section>

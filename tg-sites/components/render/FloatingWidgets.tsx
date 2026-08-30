@@ -18,9 +18,11 @@
  * in the middleware allowlist. The config attribute is a JSX attribute, so React
  * escapes it; the schema has already reduced the config to sanitised primitives.
  *
- * NEVER IN THE EDITOR. Like WidgetScripts and CookieConsent this is only in the
- * published tree, so a client cannot preview a floating widget on the canvas. The
- * settings panel says so.
+ * NOT ON THE EDITING CANVAS, but yes in the PREVIEW. Like WidgetScripts it is
+ * left out of the inline editor canvas, where a fixed-position widget would float
+ * over the editor chrome rather than the page. It IS mounted on the /preview
+ * route (a real full page), so a client presses Preview to see their widgets
+ * without publishing. The settings panel points them there.
  */
 
 import { Fragment, type ReactElement } from 'react';
