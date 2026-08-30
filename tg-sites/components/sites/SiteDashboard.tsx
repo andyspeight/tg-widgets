@@ -244,6 +244,12 @@ export function SiteDashboard({
               Enquiries
             </a>
 
+            {/* This month at a glance: enquiries, what went live, images added. */}
+            <a className="sv-btn" href="/reports">
+              <Icon name="stats" size={16} />
+              Report
+            </a>
+
             {/*
               Everybody gets this link, not only an owner. Seeing who your
               colleagues are is not a privilege, and a viewer who cannot tell
