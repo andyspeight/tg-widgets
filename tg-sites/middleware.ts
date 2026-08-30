@@ -28,6 +28,8 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { RETURNING_VISITOR_COOKIE } from './lib/content/audience';
+
 /*
  * A pure module, deliberately. lib/domains/preview.ts has no imports at all, which
  * is what lets middleware use it: see the note above about what must never end up
@@ -183,7 +185,27 @@ export function middleware(request: NextRequest) {
   url.pathname = `/site/${encodeURIComponent(host.toLowerCase().split(':')[0])}${pathname}`;
   url.search = search;
 
-  return NextResponse.rewrite(url);
+  const response = NextResponse.rewrite(url);
+
+  /*
+   * MARK A RETURNING VISITOR, for the section-level personalisation the render
+   * reads (lib/content/audience). Set on the first visit and read on the next,
+   * so a first-ever visit reads as new. One character, no identifier and no
+   * personal data: a functional first-party cookie, the same class as the site
+   * and consent cookies, so it is set without gating on consent. Only when
+   * absent, so a real returning visitor's marker is never refreshed away.
+   */
+  if (!request.cookies.get(RETURNING_VISITOR_COOKIE)) {
+    response.cookies.set(RETURNING_VISITOR_COOKIE, '1', {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+    });
+  }
+
+  return response;
 }
 
 export const config = {

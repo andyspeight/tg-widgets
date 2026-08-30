@@ -17,6 +17,7 @@ import {
   normaliseCountry,
   parseAudience,
   sectionVisibleFor,
+  visibleSections,
   type VisitorSignals,
 } from '../lib/content/audience';
 import { parsePage } from '../lib/content/schema';
@@ -97,6 +98,30 @@ describe('sectionVisibleFor decides who sees a section', () => {
       const seen = [targeted, fallback].filter((a) => sectionVisibleFor(a, signals({ country })));
       expect(seen).toHaveLength(1);
     }
+  });
+});
+
+describe('visibleSections keeps only what the visitor should see', () => {
+  const sections = [
+    { id: 'always' },
+    { id: 'uk', audience: parseAudience({ countries: ['GB'] }) },
+    { id: 'not-uk', audience: parseAudience({ countries: ['GB'], mode: 'hide' }) },
+    { id: 'mobile', audience: parseAudience({ device: 'mobile' }) },
+  ];
+
+  it('a UK visitor on a phone sees the unruled, the UK and the mobile section', () => {
+    const seen = visibleSections(sections, signals({ country: 'GB', device: 'mobile' })).map((s) => s.id);
+    expect(seen).toEqual(['always', 'uk', 'mobile']);
+  });
+
+  it('a US visitor on desktop sees the unruled and the not-UK default', () => {
+    const seen = visibleSections(sections, signals({ country: 'US', device: 'desktop' })).map((s) => s.id);
+    expect(seen).toEqual(['always', 'not-uk']);
+  });
+
+  it('an unknown visitor gets the baseline: unruled plus the not-UK default', () => {
+    const seen = visibleSections(sections, DEFAULT_VISITOR_SIGNALS).map((s) => s.id);
+    expect(seen).toEqual(['always', 'not-uk']);
   });
 });
 

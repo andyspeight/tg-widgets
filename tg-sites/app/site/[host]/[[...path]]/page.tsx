@@ -42,6 +42,8 @@ import { DestinationPanel } from '../../../../components/render/DestinationPanel
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
+import { visibleSections } from '../../../../lib/content/audience';
+import { readVisitorSignals } from '../../../../lib/site/visitor-signals';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { getPublicTenantSlug, resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
@@ -344,8 +346,8 @@ async function gone(host: string, path: string[] | undefined): Promise<never> {
 export default async function SitePage({ params, searchParams }: Params) {
   const { host, path } = await params;
 
-  const found = await load(host, path);
-  if (!found) {
+  const rawFound = await load(host, path);
+  if (!rawFound) {
     /*
      * /search, but only when no real page lives there, so load has already had
      * its say and a client's own "search" page wins. The query rides in ?q= (a
@@ -362,6 +364,40 @@ export default async function SitePage({ params, searchParams }: Params) {
   }
 
   const slug = decodeURIComponent(host);
+
+  /*
+   * SERVER-SIDE PERSONALISATION, resolved once here and applied to the tree
+   * before anything else reads it. A section can carry an audience rule, and the
+   * request says what the visitor is (country, device, traffic source, new
+   * versus returning); the sections that fail the rule are dropped from the tree
+   * NOW, so every derivation below (the hero and pull-up on sections[0], the
+   * image preload set, the JSON-LD scan, the render) sees only what this visitor
+   * sees, and the initial HTML carries exactly that. A shallow copy, never a
+   * mutation of the cached load() result, so the metadata pass that shares it is
+   * untouched and a crawler indexes the full page. See lib/content/audience.
+   */
+  const signals = await readVisitorSignals(slug);
+  const found = {
+    ...rawFound,
+    page: rawFound.page
+      ? {
+          ...rawFound.page,
+          content: {
+            ...rawFound.page.content,
+            sections: visibleSections(rawFound.page.content.sections, signals),
+          },
+        }
+      : rawFound.page,
+    entry: rawFound.entry
+      ? {
+          ...rawFound.entry,
+          item: {
+            ...rawFound.entry.item,
+            sections: visibleSections(rawFound.entry.item.sections, signals),
+          },
+        }
+      : rawFound.entry,
+  };
 
   /*
    * Dark mode is OPT IN: a page turns dark only when it actually carries a Light

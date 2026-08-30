@@ -68,6 +68,15 @@ export const DEFAULT_VISITOR_SIGNALS: VisitorSignals = {
   visitor: 'new',
 };
 
+/**
+ * The first-party cookie that marks a returning visitor. Set by middleware on
+ * the first visit and read on the next, so a first-ever visit reads as new. It
+ * holds one character, no identifier and no personal data, and it lives here (in
+ * the pure module) so both the edge middleware and the server reader can name it
+ * without either importing the other's runtime.
+ */
+export const RETURNING_VISITOR_COOKIE = 'tgs_rv';
+
 const COUNTRY = /^[A-Z]{2}$/;
 // A rule targeting more countries than this is almost certainly a mistake or an
 // attempt to bloat the stored JSON; the cap keeps an inline attribute honest.
@@ -164,6 +173,22 @@ export function sectionVisibleFor(
   if (!audience) return true;
   const matched = audienceMatches(audience, signals);
   return audience.mode === 'hide' ? !matched : matched;
+}
+
+/**
+ * Keep only the sections this visitor should see.
+ *
+ * Generic and structural (any object carrying an optional `audience`), so it
+ * filters a page's or a collection item's sections without this pure module
+ * importing the content schema that imports it. The render calls it once on the
+ * tree it is about to draw, so the initial HTML already holds only the sections
+ * for this visitor and nothing is hidden with CSS after the fact.
+ */
+export function visibleSections<S extends { audience?: Audience }>(
+  sections: readonly S[],
+  signals: VisitorSignals,
+): S[] {
+  return sections.filter((section) => sectionVisibleFor(section.audience, signals));
 }
 
 // ---------------------------------------------------------------------------
