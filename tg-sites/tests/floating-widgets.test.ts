@@ -26,6 +26,7 @@ import {
   WIDGET_ORIGIN,
 } from '../lib/content/widgets';
 import { DEFAULT_SETTINGS, parseSettings } from '../lib/settings/schema';
+import { DEFAULT_VISITOR_SIGNALS, sectionVisibleFor } from '../lib/content/audience';
 
 const read = (...p: string[]) => readFileSync(join(__dirname, '..', ...p), 'utf8');
 
@@ -206,6 +207,42 @@ describe('the published shell wires it up on both paths', () => {
   });
 });
 
+describe('the popup can target an audience (v2 slice H)', () => {
+  it('carries the popup audience through to its enabled entry, for the gate', () => {
+    const fw = parseFloatingWidgets({
+      popup: { enabled: true, audience: { mode: 'show', countries: ['gb'] } },
+    });
+    const popup = enabledFloatingWidgets(fw).find((entry) => entry.tag === 'popup');
+    expect(popup?.audience).toEqual({ mode: 'show', countries: ['GB'] });
+    // The gate the renderer applies: emit only for a matching visitor.
+    expect(sectionVisibleFor(popup?.audience, { ...DEFAULT_VISITOR_SIGNALS, country: 'GB' })).toBe(true);
+    expect(sectionVisibleFor(popup?.audience, { ...DEFAULT_VISITOR_SIGNALS, country: 'US' })).toBe(false);
+  });
+
+  it('leaves a popup with no audience showing to everyone', () => {
+    const fw = parseFloatingWidgets({ popup: { enabled: true } });
+    const popup = enabledFloatingWidgets(fw).find((entry) => entry.tag === 'popup');
+    expect(popup?.audience).toBeUndefined();
+    expect(sectionVisibleFor(popup?.audience, DEFAULT_VISITOR_SIGNALS)).toBe(true);
+  });
+
+  it('gates emission server-side and threads the visitor through, on every surface', () => {
+    // The renderer filters by the same decision a section uses.
+    const widget = read('components', 'render', 'FloatingWidgets.tsx');
+    expect(widget).toContain('sectionVisibleFor(widget.audience, signals)');
+    // The published page hands it the resolved visitor.
+    const site = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
+    expect(site).toContain('<FloatingWidgets settings={found.settings} signals={signals} />');
+    // The editor preview loader filters by the Preview-as visitor.
+    const preview = read('components', 'editor', 'PreviewWidgets.tsx');
+    expect(preview).toContain('sectionVisibleFor(widget.audience, signals)');
+    // The settings panel offers the shared audience control on the popup.
+    const panel = read('components', 'settings', 'FloatingWidgetsPanel.tsx');
+    expect(panel).toContain('<AudienceField');
+    expect(panel).toContain('setPopup({ audience })');
+  });
+});
+
 describe('the editor preview shows them too', () => {
   it('the editor page reads settings and hands the widgets to the shell', () => {
     const page = read('app', 'editor', 'page.tsx');
@@ -225,7 +262,7 @@ describe('the editor preview shows them too', () => {
     // screen passes none), and mounted via the effect-based PreviewWidgets, the
     // one loader whose script actually runs client-side.
     expect(canvas).toContain('preview && floatingWidgets');
-    expect(canvas).toContain('<PreviewWidgets settings={floatingWidgets} active={preview} />');
+    expect(canvas).toContain('<PreviewWidgets settings={floatingWidgets} active={preview} signals={previewAs} />');
   });
 
   it('the preview loader creates the container and the widget script by hand', () => {

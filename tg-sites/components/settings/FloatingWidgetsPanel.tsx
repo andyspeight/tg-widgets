@@ -13,6 +13,7 @@
  */
 
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
+import { AudienceField } from '../editor/AudienceField';
 
 type Setter<T> = (patch: Partial<T>) => void;
 
@@ -292,6 +293,16 @@ export function FloatingWidgetsPanel({
             <Colour label="Brand colour" value={pu.brand} onChange={(brand) => setPopup({ brand })} />
             <Colour label="Button colour" value={pu.accent} onChange={(accent) => setPopup({ accent })} />
             <Check label="Dim the page behind it" value={pu.overlay} onChange={(overlay) => setPopup({ overlay })} />
+            {/* WHO SEES THE POPUP (personalisation v2). The same audience control
+                the sections use, resolved server-side: a targeted popup is simply
+                not emitted for anyone else. */}
+            <div className="ed-field">
+              <label className="ed-label">Who sees this</label>
+              <AudienceField
+                audience={pu.audience}
+                onChange={(audience) => setPopup({ audience })}
+              />
+            </div>
           </>
         )}
       </section>

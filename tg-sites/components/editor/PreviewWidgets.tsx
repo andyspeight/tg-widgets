@@ -32,13 +32,25 @@ import { useEffect, useRef } from 'react';
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
 import { enabledFloatingWidgets } from '../../lib/settings/floating-widgets';
 import { floatingWidgetScriptUrl } from '../../lib/content/widgets';
+import {
+  DEFAULT_VISITOR_SIGNALS,
+  sectionVisibleFor,
+  type VisitorSignals,
+} from '../../lib/content/audience';
 
 export function PreviewWidgets({
   settings,
   active,
+  signals = DEFAULT_VISITOR_SIGNALS,
 }: {
   settings: FloatingWidgetsSettings;
   active: boolean;
+  /**
+   * The Preview-as visitor, so a targeted popup shows here only when the
+   * pretended visitor matches, the same server-side decision the published page
+   * makes. Absent shows every enabled widget.
+   */
+  signals?: VisitorSignals;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +58,9 @@ export function PreviewWidgets({
     const host = hostRef.current;
     if (!active || !host) return undefined;
 
-    const widgets = enabledFloatingWidgets(settings);
+    const widgets = enabledFloatingWidgets(settings).filter((widget) =>
+      sectionVisibleFor(widget.audience, signals),
+    );
     const added: Element[] = [];
 
     for (const widget of widgets) {
@@ -70,7 +84,7 @@ export function PreviewWidgets({
       for (const element of added) element.remove();
     };
     // Re-run when Preview is toggled or the widget settings change.
-  }, [active, settings]);
+  }, [active, settings, signals]);
 
   // The host is inert; the widgets draw their own fixed UI into it.
   return <div ref={hostRef} className="ed-preview-widgets" aria-hidden />;

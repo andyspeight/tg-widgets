@@ -79,7 +79,7 @@ describe('the prune reaches inside a container', () => {
 
   it("drops a container's inner block the visitor fails, keeps the container", () => {
     const out = personaliseSections(sections(raw), signals({ country: 'US' }));
-    const container = out[0].rows[0].columns[0].blocks[0] as {
+    const container = out[0].rows[0].columns[0].blocks[0] as unknown as {
       props: { columns: { blocks: { id: string }[] }[] };
     };
     expect(container.props.columns[0].blocks.map((b) => b.id)).toEqual(['b-always']);
@@ -87,7 +87,7 @@ describe('the prune reaches inside a container', () => {
 
   it('keeps the inner block for the visitor it targets', () => {
     const out = personaliseSections(sections(raw), signals({ country: 'GB' }));
-    const container = out[0].rows[0].columns[0].blocks[0] as {
+    const container = out[0].rows[0].columns[0].blocks[0] as unknown as {
       props: { columns: { blocks: { id: string }[] }[] };
     };
     expect(container.props.columns[0].blocks.map((b) => b.id)).toEqual(['b-always', 'b-uk']);

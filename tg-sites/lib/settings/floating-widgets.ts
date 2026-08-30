@@ -22,6 +22,7 @@
  */
 
 import { safeUrl } from '../content/sanitise';
+import { parseAudience, type Audience } from '../content/audience';
 import type { FloatingWidgetTag } from '../content/widgets';
 
 // ---------------------------------------------------------------------------
@@ -353,6 +354,8 @@ export interface PopupSettings {
   brand: string;
   accent: string;
   overlay: boolean;
+  /** Who sees the popup (personalisation v2), resolved server-side. */
+  audience?: Audience;
 }
 
 const DEFAULT_POPUP: PopupSettings = {
@@ -391,6 +394,7 @@ function parsePopup(value: unknown): PopupSettings {
     brand: colour(o.brand, '#1B2B5B'),
     accent: colour(o.accent, '#00B4D8'),
     overlay: bool(o.overlay, true),
+    audience: parseAudience(o.audience),
   };
 }
 
@@ -434,6 +438,12 @@ export function parseFloatingWidgets(value: unknown): FloatingWidgetsSettings {
 export interface EnabledFloatingWidget {
   tag: FloatingWidgetTag;
   config: Record<string, unknown>;
+  /**
+   * Who this widget is for, resolved SERVER-SIDE by FloatingWidgets: a widget the
+   * visitor fails is not emitted at all. Only the popup exposes it today. Absent
+   * means everyone, exactly as an unruled section shows to everyone.
+   */
+  audience?: Audience;
 }
 
 /**
@@ -528,6 +538,9 @@ export function enabledFloatingWidgets(fw: FloatingWidgetsSettings): EnabledFloa
   if (p.enabled) {
     out.push({
       tag: 'popup',
+      // Gated server-side in FloatingWidgets, so a popup targeted at, say, UK
+      // returning visitors is simply not emitted for anyone else.
+      audience: p.audience,
       config: {
         // The panel exposes the announcement use; the widget's other content
         // types (email capture, discount, video) keep their defaults.

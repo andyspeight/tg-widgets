@@ -91,21 +91,21 @@ describe('the editor exposes the audience rule per section', () => {
   });
 
   it('offers every facet the rule and the render understand', () => {
-    // Mode, the country chips, the traffic-source chips, device and visitor. The
-    // values it emits are the codes and enums slice A validates, so whatever the
-    // control produces is normalised by the schema on save.
-    expect(props).toContain('Show only to');
-    expect(props).toContain('Hide from');
+    // The control is a shared component now (AudienceField.tsx), reused by the
+    // section, block and Popup panels; the facets live there.
+    const field = read('components', 'editor', 'AudienceField.tsx');
+    expect(field).toContain('Show only to');
+    expect(field).toContain('Hide from');
     // The country facet is a searchable picker over the full ISO list.
-    expect(props).toContain('<CountryPicker');
-    expect(props).toContain('ISO_COUNTRIES');
-    expect(props).toContain('AUDIENCE_SOURCES.map');
-    expect(props).toContain('Been before');
+    expect(field).toContain('<CountryPicker');
+    expect(field).toContain('ISO_COUNTRIES');
+    expect(field).toContain('AUDIENCE_SOURCES.map');
+    expect(field).toContain('Been before');
     // v2 facets: language chips and a utm_campaign box.
-    expect(props).toContain('COMMON_LANGUAGES.map');
-    expect(props).toContain('utm_campaign');
+    expect(field).toContain('COMMON_LANGUAGES.map');
+    expect(field).toContain('utm_campaign');
     // An empty rule is tidied to nothing, exactly a section with no rule.
-    expect(props).toContain('tidyAudience');
+    expect(field).toContain('tidyAudience');
   });
 
   it('also exposes the rule per block (v2), through the path-aware setter', () => {

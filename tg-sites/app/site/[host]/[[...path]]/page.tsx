@@ -728,7 +728,7 @@ export default async function SitePage({ params, searchParams }: Params) {
           nothing here delays the content above it. */}
       <NoRightClickScript settings={found.settings} />
       <CookieConsent settings={found.settings} />
-      <FloatingWidgets settings={found.settings} />
+      <FloatingWidgets settings={found.settings} signals={signals} />
       <SiteBody settings={found.settings} />
     </>
   );

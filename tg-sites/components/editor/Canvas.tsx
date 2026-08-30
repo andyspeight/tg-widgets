@@ -1047,7 +1047,7 @@ export function Canvas({
           with the DOM API instead.
         */}
         {preview && floatingWidgets && (
-          <PreviewWidgets settings={floatingWidgets} active={preview} />
+          <PreviewWidgets settings={floatingWidgets} active={preview} signals={previewAs} />
         )}
         {/*
           Comment pins, over the page but inside the frame so they scroll with it.

@@ -30,9 +30,28 @@ import { Fragment, type ReactElement } from 'react';
 import type { SiteSettings } from '../../lib/settings/schema';
 import { enabledFloatingWidgets } from '../../lib/settings/floating-widgets';
 import { floatingWidgetScriptUrl } from '../../lib/content/widgets';
+import {
+  DEFAULT_VISITOR_SIGNALS,
+  sectionVisibleFor,
+  type VisitorSignals,
+} from '../../lib/content/audience';
 
-export function FloatingWidgets({ settings }: { settings: SiteSettings }): ReactElement | null {
-  const widgets = enabledFloatingWidgets(settings.floatingWidgets);
+export function FloatingWidgets({
+  settings,
+  signals = DEFAULT_VISITOR_SIGNALS,
+}: {
+  settings: SiteSettings;
+  /**
+   * The visitor, so a widget that carries an audience (the popup) is emitted only
+   * for a match, decided here on the server exactly as a section is. Absent (the
+   * baseline) shows every enabled widget, which is right for a preview with no
+   * visitor and keeps the older call sites working.
+   */
+  signals?: VisitorSignals;
+}): ReactElement | null {
+  const widgets = enabledFloatingWidgets(settings.floatingWidgets).filter((widget) =>
+    sectionVisibleFor(widget.audience, signals),
+  );
   if (widgets.length === 0) return null;
 
   return (
