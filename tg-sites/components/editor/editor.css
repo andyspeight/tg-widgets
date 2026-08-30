@@ -2461,6 +2461,36 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   outline-offset: 2px;
 }
 
+/* PREVIEW AS: a native <details> in the top bar, its panel floating below the
+   summary button over the canvas. */
+.ed-preview-as { position: relative; }
+.ed-preview-as > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.ed-preview-as > summary::-webkit-details-marker { display: none; }
+.ed-preview-as__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  display: grid;
+  gap: 8px;
+  width: 240px;
+  padding: 12px;
+  background: var(--ed-panel);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  box-shadow: var(--ed-shadow-md);
+}
+.ed-preview-as__row {
+  display: grid;
+  gap: 4px;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+.ed-preview-as__row .ed-select { width: 100%; }
+
 /* The swatch tray hangs below the toolbar rather than sitting in the row. Six
    colours plus a hex box would have doubled the width of a bar that is already
    wrapping. */

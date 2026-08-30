@@ -43,6 +43,14 @@ import type { FieldDef } from '../../lib/content/collection-fields';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
+import {
+  COMMON_COUNTRIES,
+  DEFAULT_VISITOR_SIGNALS,
+  type AudienceDevice,
+  type AudienceSource,
+  type AudienceVisitor,
+  type VisitorSignals,
+} from '../../lib/content/audience';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
@@ -819,6 +827,13 @@ export function EditorShell({
    * it reflects the current work including edits not yet saved.
    */
   const [preview, setPreview] = useState(false);
+  /**
+   * The visitor Preview is pretending to be, so a client can check a section's
+   * audience rule (slice C/D). Starts at the baseline every unknown visitor gets,
+   * and only matters in preview: the Preview-as control edits it and the canvas
+   * filters the draft's sections against it exactly as the published site does.
+   */
+  const [previewAs, setPreviewAs] = useState<VisitorSignals>(DEFAULT_VISITOR_SIGNALS);
   /** What each preview is drawn at, in pixels. See VIEWPORTS_KEY. */
   const [widths, setWidths] = useState<Record<Viewport, number>>(VIEWPORT_DEFAULT);
   /**
@@ -2250,6 +2265,82 @@ export function EditorShell({
         </button>
 
         {/*
+          PREVIEW AS, only while previewing. A client sets a section's audience
+          (slice C), then checks it here by pretending to be a visitor: country,
+          device, how they arrived, and whether they have been before. The canvas
+          filters the draft against exactly this, the same rule the published site
+          resolves per request. A native <details> so it opens and closes with no
+          extra state, and it is desktop-only like the width control beside it.
+        */}
+        {preview && (
+          <details className="ed-preview-as ed-desktop-only">
+            <summary className="ed-btn" title="See the page as a chosen visitor">
+              <Icon name="user" size={16} />
+              Preview as
+            </summary>
+            <div className="ed-preview-as__panel" role="group" aria-label="Preview as a visitor">
+              <label className="ed-preview-as__row">
+                <span>Country</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.country ?? ''}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, country: event.target.value || null }))
+                  }
+                >
+                  <option value="">Unknown / anywhere</option>
+                  {COMMON_COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Device</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.device}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, device: event.target.value as AudienceDevice }))
+                  }
+                >
+                  <option value="desktop">Desktop</option>
+                  <option value="mobile">Phone</option>
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Arrived from</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.source}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, source: event.target.value as AudienceSource }))
+                  }
+                >
+                  <option value="direct">Direct</option>
+                  <option value="search">Search</option>
+                  <option value="social">Social</option>
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Been before</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.visitor}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, visitor: event.target.value as AudienceVisitor }))
+                  }
+                >
+                  <option value="new">New visitor</option>
+                  <option value="returning">Returning</option>
+                </select>
+              </label>
+            </div>
+          </details>
+        )}
+
+        {/*
           TWO PUBLISH ACTIONS, and the difference between them is the point.
 
           "Publish site" is the headline: it puts every page with changes live at
@@ -2446,6 +2537,9 @@ export function EditorShell({
         // only on a page and only in Preview; the region and item screens pass
         // nothing, so there is nothing to draw there.
         floatingWidgets={floatingWidgets}
+        // Who Preview is pretending to be, so the canvas hides the sections this
+        // visitor would not see. Only in preview; editing always shows them all.
+        previewAs={preview ? previewAs : undefined}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never

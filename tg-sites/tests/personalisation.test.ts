@@ -94,3 +94,26 @@ describe('the editor exposes the audience rule per section', () => {
     expect(props).toContain('tidyAudience');
   });
 });
+
+describe('Preview as lets a client check an audience in the editor', () => {
+  const shell = read('components', 'editor', 'EditorShell.tsx');
+  const canvas = read('components', 'editor', 'Canvas.tsx');
+
+  it('the shell holds a preview-as visitor and shows the control only in preview', () => {
+    expect(shell).toContain('const [previewAs, setPreviewAs] = useState<VisitorSignals>');
+    // The control is gated on preview, and so is what is handed to the canvas.
+    expect(shell).toContain('{preview && (');
+    expect(shell).toContain('previewAs={preview ? previewAs : undefined}');
+    // It offers the same axes the rule uses.
+    expect(shell).toContain('COMMON_COUNTRIES.map');
+    expect(shell).toContain('Been before');
+  });
+
+  it('the canvas filters the draft against the preview-as visitor, only when set', () => {
+    // A profile is only ever set in preview, so filtering keys on its presence,
+    // and editing (no profile) shows every section so a hidden one stays
+    // selectable. The renderer draws the filtered tree.
+    expect(canvas).toContain('previewAs ? { ...shown, sections: visibleSections(shown.sections, previewAs) } : shown');
+    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages)');
+  });
+});

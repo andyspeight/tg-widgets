@@ -45,6 +45,7 @@ import type { ListingCards } from '../../lib/db/listings';
 import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
+import { visibleSections, type VisitorSignals } from '../../lib/content/audience';
 import { PreviewWidgets } from './PreviewWidgets';
 
 /**
@@ -151,6 +152,12 @@ interface Props {
    * have no site chrome of their own to preview.
    */
   floatingWidgets?: FloatingWidgetsSettings;
+  /**
+   * The visitor Preview is pretending to be, or absent to show everything. When
+   * set (only in preview), the canvas hides the sections whose audience rule this
+   * visitor fails, exactly as the published site does. See lib/content/audience.
+   */
+  previewAs?: VisitorSignals;
 }
 
 /**
@@ -252,6 +259,7 @@ export function Canvas({
   preparedSeed,
   listings,
   floatingWidgets,
+  previewAs,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -277,6 +285,18 @@ export function Canvas({
    * did.
    */
   const shown = useMemo(() => fillListings(page, listings ?? new Map()), [page, listings]);
+
+  /*
+   * PREVIEW AS a chosen visitor: hide the sections that visitor's audience rule
+   * fails, the same decision the published site makes per request. Only when a
+   * profile is set (which is only ever in preview); editing always shows every
+   * section so a hidden one can still be selected and changed. A new object so
+   * the memo below and the renderer see the filtered tree, never a mutation.
+   */
+  const shownForVisitor = useMemo(
+    () => (previewAs ? { ...shown, sections: visibleSections(shown.sections, previewAs) } : shown),
+    [shown, previewAs],
+  );
 
   // ---------------------------------------------------------------------
   // Selection outlines
@@ -996,7 +1016,7 @@ export function Canvas({
              the render boundary so the tree the editor holds and saves is
              untouched. Both are non-structural, so neither changes a data-path
              the editing handlers resolve against. */
-          page={fillNavFolders(shown, navPages)}
+          page={fillNavFolders(shownForVisitor, navPages)}
           editable={!preview}
           editingPath={preview ? null : editingPath}
           /*
