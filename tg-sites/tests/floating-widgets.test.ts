@@ -22,6 +22,7 @@ import {
 import {
   FLOATING_WIDGET_TAGS,
   floatingWidgetScriptUrl,
+  WIDGET_KINDS,
   WIDGET_ORIGIN,
 } from '../lib/content/widgets';
 import { DEFAULT_SETTINGS, parseSettings } from '../lib/settings/schema';
@@ -133,6 +134,21 @@ describe('the registry that turns a tag into a url', () => {
   it('builds a script url on the widget origin for every floating tag', () => {
     for (const tag of FLOATING_WIDGET_TAGS) {
       expect(floatingWidgetScriptUrl(tag)).toBe(`${WIDGET_ORIGIN}/widget-${tag}.js`);
+    }
+  });
+
+  /*
+   * DERIVED FROM THE SOURCE LIST, not a hardcoded copy. A floating widget is
+   * emitted once per page from settings; if the same tag were also a placeable
+   * column block (in WIDGET_KINDS) a page could carry two containers and two
+   * inits of it. The comment on FLOATING_WIDGET_TAGS says the two lists must stay
+   * disjoint; this proves it for whatever the list holds, so a fifth floating tag
+   * added to both places fails here rather than shipping the double-init.
+   */
+  it('keeps every floating tag out of the placeable widget registry', () => {
+    const placeable = new Set(WIDGET_KINDS.map((kind) => kind.tag));
+    for (const tag of FLOATING_WIDGET_TAGS) {
+      expect(placeable.has(tag), `${tag} is both floating and placeable — it would init twice`).toBe(false);
     }
   });
 
