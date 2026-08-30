@@ -90,6 +90,7 @@ import {
   updateColumn,
   updateRow,
   updateSection,
+  updateBlockAudienceAtPath,
   updateBlockBoxAtPath,
   updateBlockPropsAtPath,
   updateBlockResponsiveAtPath,
@@ -2864,9 +2865,12 @@ function CountryPicker({
 function AudienceField({
   audience,
   onChange,
+  noun = 'section',
 }: {
   audience: Audience | undefined;
   onChange: (next: Audience | undefined) => void;
+  /** 'section' or 'block', so the copy names what the rule is on. */
+  noun?: 'section' | 'block';
 }) {
   const [enabled, setEnabled] = useState<boolean>(Boolean(audience));
   const [draft, setDraft] = useState<Audience>(audience ?? { mode: 'show' });
@@ -2899,13 +2903,13 @@ function AudienceField({
             }
           }}
         />
-        <span>Show this section to some visitors only</span>
+        <span>Show this {noun} to some visitors only</span>
       </label>
       <p className="ed-help" style={{ marginTop: 6 }}>
-        A section can be shown to, or hidden from, visitors by where they are, how
-        they arrived, their device, or whether they have been before. Leave a choice
-        empty or on Any to not use it. Design a plain version alongside a targeted
-        one, so every visitor sees something.
+        A {noun} can be shown to, or hidden from, visitors by where they are, how
+        they arrived, their language, their device, or whether they have been before.
+        Leave a choice empty or on Any to not use it. Design a plain version alongside
+        a targeted one, so every visitor sees something.
       </p>
 
       {enabled && (
@@ -3730,6 +3734,24 @@ function BlockFields({
     );
   };
   add('layout', <HideOnField key="hide-on" tier={tier} hidden={hideOn.includes(tier)} onChange={setHidden} />);
+
+  // WHO SEES THIS BLOCK: the same audience rule a section carries, on one block
+  // (personalisation v2). Committed like hideOn, through the path-aware setter so
+  // it works on a block in a column and one inside a container alike.
+  add(
+    'layout',
+    <div className="ed-field" key="who-sees-block">
+      <label className="ed-label">Who sees this</label>
+      <AudienceField
+        key={`blk-aud-${block.id}`}
+        noun="block"
+        audience={block.audience}
+        onChange={(next) =>
+          onCommit((c) => updateBlockAudienceAtPath(c, path, next), `blk:${block.id}:audience`)
+        }
+      />
+    </div>,
+  );
 
   // A content-only member keeps the Content group, the words, the picture and
   // the link, and loses the design panels they cannot save anyway.

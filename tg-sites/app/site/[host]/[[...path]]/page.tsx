@@ -42,7 +42,7 @@ import { DestinationPanel } from '../../../../components/render/DestinationPanel
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
-import { visibleSections } from '../../../../lib/content/audience';
+import { personaliseSections } from '../../../../lib/content/personalise';
 import { readVisitorSignals } from '../../../../lib/site/visitor-signals';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { getPublicTenantSlug, resolveTenantByHostname } from '../../../../lib/db/tenants';
@@ -391,7 +391,7 @@ export default async function SitePage({ params, searchParams }: Params) {
           ...rawFound.page,
           content: {
             ...rawFound.page.content,
-            sections: visibleSections(rawFound.page.content.sections, signals),
+            sections: personaliseSections(rawFound.page.content.sections, signals),
           },
         }
       : rawFound.page,
@@ -400,7 +400,7 @@ export default async function SitePage({ params, searchParams }: Params) {
           ...rawFound.entry,
           item: {
             ...rawFound.entry.item,
-            sections: visibleSections(rawFound.entry.item.sections, signals),
+            sections: personaliseSections(rawFound.entry.item.sections, signals),
           },
         }
       : rawFound.entry,

@@ -599,6 +599,14 @@ export const BlockSchema = z.object({
    * absent box renders as nothing, exactly as before blocks had one (5 Aug 2026).
    */
   box: BoxSchema.optional(),
+  /**
+   * WHO SEES THIS BLOCK, added 30 Aug 2026 (personalisation v2): the same
+   * audience rule a section carries, on a single block. Resolved at render from
+   * the request, additive and absent on every stored block, dropped to undefined
+   * when it carries no real facet. A block a visitor fails is pruned from the tree
+   * before render, the same as a section. See ./audience and ./personalise.
+   */
+  audience: z.unknown().transform(parseAudience).optional(),
 });
 
 export type Block = z.infer<typeof BlockSchema>;

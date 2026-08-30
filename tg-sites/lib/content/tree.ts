@@ -522,6 +522,21 @@ export function updateBlockHideOn(
   }));
 }
 
+/** Set (or clear) a block's audience rule. A sibling of hideOn, set the same way. */
+export function updateBlockAudience(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  audience: Block['audience'],
+): Page {
+  return mapColumn(page, section, row, column, (c) => ({
+    ...c,
+    blocks: c.blocks.map((b, i) => (i === block ? { ...b, audience } : b)),
+  }));
+}
+
 // ---------------------------------------------------------------------------
 // The container element: a block that holds its own columns, one level deep.
 // Its columns are ordinary Columns kept in props.columns, so they carry the same
@@ -531,7 +546,9 @@ export function updateBlockHideOn(
 
 /** A container's own columns, or an empty list for anything that is not one. */
 export function containerColumns(block: Block): Column[] {
-  const columns = (block.props as { columns?: unknown }).columns;
+  // Null-safe on props: a block reached from raw or imported JSON (a container's
+  // own inner blocks are stored opaque and are not re-parsed) can lack props.
+  const columns = (block.props as { columns?: unknown } | undefined)?.columns;
   return Array.isArray(columns) ? (columns as Column[]) : [];
 }
 
@@ -673,6 +690,22 @@ export function updateInnerBlockHideOn(
 ): Page {
   return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
     blocks.map((b, i) => (i === innerBlock ? { ...b, hideOn } : b)),
+  );
+}
+
+/** The audience of a block inside a container's inner column. */
+export function updateInnerBlockAudience(
+  page: Page,
+  section: number,
+  row: number,
+  column: number,
+  block: number,
+  inner: number,
+  innerBlock: number,
+  audience: Block['audience'],
+): Page {
+  return mapInnerColumn(page, section, row, column, block, inner, (blocks) =>
+    blocks.map((b, i) => (i === innerBlock ? { ...b, audience } : b)),
   );
 }
 
@@ -970,6 +1003,20 @@ export function updateBlockHideOnAtPath(
   }
   return updateInnerBlockHideOn(
     page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, hideOn,
+  );
+}
+
+/** Set a block's audience whether it sits in a column or a container, like hideOn. */
+export function updateBlockAudienceAtPath(
+  page: Page,
+  path: AnyBlockPath,
+  audience: Block['audience'],
+): Page {
+  if (path.kind === 'block') {
+    return updateBlockAudience(page, path.section, path.row, path.column, path.block, audience);
+  }
+  return updateInnerBlockAudience(
+    page, path.section, path.row, path.column, path.block, path.inner, path.innerBlock, audience,
   );
 }
 

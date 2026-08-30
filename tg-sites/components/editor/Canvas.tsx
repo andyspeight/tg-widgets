@@ -45,7 +45,8 @@ import type { ListingCards } from '../../lib/db/listings';
 import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
 import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
-import { visibleSections, type VisitorSignals } from '../../lib/content/audience';
+import type { VisitorSignals } from '../../lib/content/audience';
+import { personaliseSections } from '../../lib/content/personalise';
 import { PreviewWidgets } from './PreviewWidgets';
 
 /**
@@ -294,7 +295,7 @@ export function Canvas({
    * the memo below and the renderer see the filtered tree, never a mutation.
    */
   const shownForVisitor = useMemo(
-    () => (previewAs ? { ...shown, sections: visibleSections(shown.sections, previewAs) } : shown),
+    () => (previewAs ? { ...shown, sections: personaliseSections(shown.sections, previewAs) } : shown),
     [shown, previewAs],
   );
 

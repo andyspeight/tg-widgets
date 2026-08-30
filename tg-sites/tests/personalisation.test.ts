@@ -51,8 +51,8 @@ describe('the site route personalises what it renders', () => {
 
   it('reads the visitor and filters both a page and a collection entry', () => {
     expect(route).toContain('readVisitorSignals(slug, utmCampaign)');
-    expect(route).toContain('visibleSections(rawFound.page.content.sections, signals)');
-    expect(route).toContain('visibleSections(rawFound.entry.item.sections, signals)');
+    expect(route).toContain('personaliseSections(rawFound.page.content.sections, signals)');
+    expect(route).toContain('personaliseSections(rawFound.entry.item.sections, signals)');
     // The campaign facet comes off the URL, not a header.
     expect(route).toContain('query.utm_campaign');
   });
@@ -73,7 +73,7 @@ describe('the site route personalises what it renders', () => {
     const metaEnd = route.indexOf('export default async function SitePage');
     expect(metaStart).toBeGreaterThanOrEqual(0);
     const metaBody = route.slice(metaStart, metaEnd);
-    expect(metaBody).not.toContain('visibleSections');
+    expect(metaBody).not.toContain('personaliseSections');
     expect(metaBody).not.toContain('readVisitorSignals');
   });
 });
@@ -106,6 +106,13 @@ describe('the editor exposes the audience rule per section', () => {
     expect(props).toContain('utm_campaign');
     // An empty rule is tidied to nothing, exactly a section with no rule.
     expect(props).toContain('tidyAudience');
+  });
+
+  it('also exposes the rule per block (v2), through the path-aware setter', () => {
+    // The same AudienceField, named for a block, committing through
+    // updateBlockAudienceAtPath so it works in a column and in a container alike.
+    expect(props).toContain('noun="block"');
+    expect(props).toContain('updateBlockAudienceAtPath(c, path, next)');
   });
 });
 
@@ -144,7 +151,7 @@ describe('Preview as lets a client check an audience in the editor', () => {
     // A profile is only ever set in preview, so filtering keys on its presence,
     // and editing (no profile) shows every section so a hidden one stays
     // selectable. The renderer draws the filtered tree.
-    expect(canvas).toContain('previewAs ? { ...shown, sections: visibleSections(shown.sections, previewAs) } : shown');
+    expect(canvas).toContain('previewAs ? { ...shown, sections: personaliseSections(shown.sections, previewAs) } : shown');
     expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages)');
   });
 });
