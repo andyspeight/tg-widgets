@@ -1414,6 +1414,24 @@
  */
 .ed-root[data-preview='true'] .ed-canvas-frame { overflow: clip; }
 
+/*
+ * PREVIEW makes the frame the containing block for the floating widgets (Andy,
+ * 30 Aug 2026). A widget draws its UI with position: fixed, which is otherwise
+ * fixed to the whole editor window: a deal bar would sit over the editor's top
+ * bar and a back-to-top button in the corner of the tool, not the page. A
+ * transform makes this frame the containing block for those fixed descendants
+ * (shadow-DOM ones included), so they land on the previewed page as they would
+ * on the published site. translateZ(0) is the cheapest trigger and does not make
+ * the frame a scroll container, so it leaves the reveal timeline above intact.
+ * Preview only: there are no widgets on the editing canvas.
+ */
+.ed-root[data-preview='true'] .ed-canvas-frame { transform: translateZ(0); }
+
+/* The floating-widgets host is an inert marker: the widgets draw their own
+ * fixed UI, contained by the frame transform above rather than by this element,
+ * so it needs no box of its own and must never intercept a click on the page. */
+.ed-preview-widgets { display: contents; }
+
 .ed-canvas-frame [data-path] { position: relative; }
 
 /*

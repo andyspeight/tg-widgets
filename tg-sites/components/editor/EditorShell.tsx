@@ -42,6 +42,7 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import type { FieldDef } from '../../lib/content/collection-fields';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
+import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
@@ -400,6 +401,13 @@ interface EditorProps {
    */
   pages?: readonly PageLink[];
   /**
+   * The site-wide floating widgets, so Preview can draw them the way the
+   * published site does. Absent on the region and item screens, which carry no
+   * site chrome to preview; Canvas only draws them on a page and only in
+   * Preview. See PreviewWidgets for why the editor loads them by hand.
+   */
+  floatingWidgets?: FloatingWidgetsSettings;
+  /**
    * Editing the site's header or footer rather than a page.
    *
    * WHAT THIS CHANGES, AND WHAT IT DELIBERATELY DOES NOT
@@ -489,6 +497,7 @@ export function EditorShell({
   siteTheme,
   currentUserId = null,
   pages = [],
+  floatingWidgets,
   region: initialRegion = null,
   initialRegionFlags,
   itemId = null,
@@ -2433,6 +2442,10 @@ export function EditorShell({
         // the Comments panel on that thread.
         commentPins={commentPins}
         onOpenComment={openCommentThread}
+        // The site-wide floating widgets, for Preview to draw. Canvas shows them
+        // only on a page and only in Preview; the region and item screens pass
+        // nothing, so there is nothing to draw there.
+        floatingWidgets={floatingWidgets}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never

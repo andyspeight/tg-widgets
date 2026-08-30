@@ -205,3 +205,35 @@ describe('the published shell wires it up on both paths', () => {
     }
   });
 });
+
+describe('the editor preview shows them too', () => {
+  it('the editor page reads settings and hands the widgets to the shell', () => {
+    const page = read('app', 'editor', 'page.tsx');
+    // Read through the app role, like the rest of the editor's own reads.
+    expect(page).toContain('getSettings(site.tenantId)');
+    expect(page).toContain('floatingWidgets: settings.floatingWidgets');
+  });
+
+  it('the shell forwards the widgets to the canvas', () => {
+    const shell = read('components', 'editor', 'EditorShell.tsx');
+    expect(shell).toContain('floatingWidgets={floatingWidgets}');
+  });
+
+  it('the canvas draws them only in preview, through the DOM loader', () => {
+    const canvas = read('components', 'editor', 'Canvas.tsx');
+    // Gated on preview AND on there being widgets to draw (a region or item
+    // screen passes none), and mounted via the effect-based PreviewWidgets, the
+    // one loader whose script actually runs client-side.
+    expect(canvas).toContain('preview && floatingWidgets');
+    expect(canvas).toContain('<PreviewWidgets settings={floatingWidgets} active={preview} />');
+  });
+
+  it('the preview loader creates the container and the widget script by hand', () => {
+    const loader = read('components', 'editor', 'PreviewWidgets.tsx');
+    // A <script> React renders never runs; these must be real DOM nodes.
+    expect(loader).toContain("document.createElement('script')");
+    expect(loader).toContain('floatingWidgetScriptUrl(widget.tag)');
+    // And torn down on exit, so leaving Preview takes the widgets with it.
+    expect(loader).toContain('element.remove()');
+  });
+});

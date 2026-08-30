@@ -11,6 +11,7 @@ import { itemAsPage, itemMeta } from '../../lib/content/collection-page';
 import { FontHead } from '../../components/render/FontHead';
 import { listFontFaces } from '../../lib/db/fonts';
 import { getTheme } from '../../lib/db/theme';
+import { getSettings } from '../../lib/db/settings';
 import { REGIONS, type RegionName } from '../../lib/content/schema';
 import { regionAsPage } from '../../lib/content/region-page';
 import { mergePrepared, prepareSections } from '../../lib/content/prepare-markup';
@@ -85,12 +86,15 @@ export default async function EditorPage({
   // whichever kind it is: the canvas has to show the site in the client's own
   // colours, or the preview is a preview of a different site, and the rail's
   // Pages panel needs the list to let you jump between pages without leaving.
-  const [theme, faces, sitePages] = await Promise.all([
+  const [theme, faces, sitePages, settings] = await Promise.all([
     getTheme(site.tenantId),
     // The app role, not the renderer: the editor is behind sign-in and reads its
     // own tenant's library through the connection it already has.
     listFontFaces(site.tenantId, 'app'),
     listPages(site.tenantId),
+    // The site settings, so Preview can show the floating widgets the same way
+    // the published site does. Read through the app role like the rest here.
+    getSettings(site.tenantId),
   ]);
 
   const head = (
@@ -123,6 +127,8 @@ export default async function EditorPage({
       status: summary.status,
       parentId: summary.parentId,
     })),
+    // For the Preview canvas to draw the site-wide floating widgets.
+    floatingWidgets: settings.floatingWidgets,
   };
 
   if (region) {

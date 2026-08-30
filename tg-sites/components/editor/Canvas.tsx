@@ -44,6 +44,8 @@ import { fillListings } from '../../lib/content/listings';
 import type { ListingCards } from '../../lib/db/listings';
 import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
+import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
+import { PreviewWidgets } from './PreviewWidgets';
 
 /**
  * Where a block is added or dropped.
@@ -143,6 +145,12 @@ interface Props {
   commentPins?: readonly { path: string; threadId: string; count: number }[];
   /** Open the Comments panel on a thread, from a click on its canvas pin. */
   onOpenComment?: (threadId: string) => void;
+  /**
+   * The site-wide floating widgets, drawn in Preview so a client sees them the
+   * way the published site does. Absent on the region and item screens, which
+   * have no site chrome of their own to preview.
+   */
+  floatingWidgets?: FloatingWidgetsSettings;
 }
 
 /**
@@ -243,6 +251,7 @@ export function Canvas({
   onOpenComment,
   preparedSeed,
   listings,
+  floatingWidgets,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -1008,6 +1017,17 @@ export function Canvas({
           */
           region={region}
         />
+        {/*
+          The site-wide floating widgets, shown only in Preview and only on a
+          page (not the header, footer or a collection item, which have no site
+          chrome of their own). Inside the frame so its transform contains their
+          position:fixed to the previewed page rather than the editor window. See
+          PreviewWidgets: a <script> React renders never runs, so it loads them
+          with the DOM API instead.
+        */}
+        {preview && floatingWidgets && (
+          <PreviewWidgets settings={floatingWidgets} active={preview} />
+        )}
         {/*
           Comment pins, over the page but inside the frame so they scroll with it.
           A React overlay rather than DOM injected onto the blocks, so the renderer
