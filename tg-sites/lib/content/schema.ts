@@ -31,6 +31,7 @@
 import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
+import { parseAudience } from './audience';
 import { escapeHtml } from './sanitise';
 import { hasInnerColumns } from './inner-columns';
 import {
@@ -1007,6 +1008,17 @@ export const SectionSchema = z.object({
   dividerTop: z.unknown().transform(safeDivider).optional(),
   dividerBottom: z.unknown().transform(safeDivider).optional(),
   dividerHeight: z.unknown().transform(normaliseDividerHeight).optional(),
+  /**
+   * WHO SEES THIS SECTION, added 30 Aug 2026: server-side personalisation.
+   *
+   * An optional audience rule, resolved at render from what the request says
+   * about the visitor (country, device, traffic source, new versus returning),
+   * so a section can be shown to or hidden from an audience in the initial HTML
+   * with no client flip. Additive and absent on every stored section, and
+   * dropped to undefined when it carries no real facet, so a section without a
+   * rule is untouched. The pure rule and the decision live in ./audience.
+   */
+  audience: z.unknown().transform(parseAudience).optional(),
   rows: z.array(RowSchema).default([]),
 });
 
