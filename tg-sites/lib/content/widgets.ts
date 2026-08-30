@@ -142,6 +142,34 @@ export function widgetScriptUrl(tag: unknown): string | null {
 }
 
 /**
+ * The floating widgets that live in a site-wide SETTING rather than a column.
+ *
+ * These are the ones the excluded-8 note above sends here: they float or sit
+ * across the whole site, so a client sets them once and the published shell
+ * emits one container per enabled one on every page (see
+ * components/render/FloatingWidgets.tsx). A CLOSED LIST, exactly like
+ * WIDGET_KINDS and for the same reason: the tag decides a script src, so it can
+ * only ever be one of these, never something a client typed. Kept DISJOINT from
+ * WIDGET_KINDS, so a floating tag can never also be dropped in a column, which
+ * would put two containers and two inits of the same widget on one page.
+ *
+ * Popup is deliberately not here yet: its config surface is large and its
+ * page/device targeting belongs with the personalisation work, so it is a
+ * fast-follow rather than part of the first site-wide panel.
+ */
+export const FLOATING_WIDGET_TAGS = ['backtotop', 'whatsapp', 'dealbar', 'loader'] as const;
+
+export type FloatingWidgetTag = (typeof FLOATING_WIDGET_TAGS)[number];
+
+/**
+ * The script url for a floating widget. Takes a tag from the closed list above,
+ * so `${WIDGET_ORIGIN}/widget-<tag>.js` is built only from a value we control.
+ */
+export function floatingWidgetScriptUrl(tag: FloatingWidgetTag): string {
+  return `${WIDGET_ORIGIN}/widget-${tag}.js`;
+}
+
+/**
  * A widget config id, or null.
  *
  * The ids the widgets API issues are `tgw_` and then a short code. Checked so a
