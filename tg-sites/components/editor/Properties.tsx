@@ -59,6 +59,8 @@ import {
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
+  PX_SIZE_MIN,
+  PX_SIZE_MAX,
   REVEAL_STYLES,
 } from '../../lib/content/styles';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
@@ -2718,12 +2720,26 @@ function GridCellsControl({
   );
 }
 
+/** A value the dropdown offers, versus one typed by hand in pixels. */
+const CUSTOM_TEXT_SIZE = '__custom_px__';
+/** A stored size the dropdown has no option for is a hand-typed pixel size. */
+function isCustomPx(value: string | undefined): value is string {
+  return typeof value === 'string' && /^\d{1,4}px$/.test(value);
+}
+
 /**
- * The Text size dropdown, per screen. Offers the site's own sizes and the fixed
+ * The Text size control, per screen. Offers the site's own sizes and the fixed
  * scale, the very list the toolbar offers a phrase, plus one empty option: on
  * desktop it means "no size of my own, use the block's style", and on a smaller
  * screen "the same size as the screen above". The caller sets the base on desktop
  * and the override otherwise, so this is only the picker.
+ *
+ * A SIZE OF YOUR OWN, IN PIXELS. The scale tops out at 2.5rem, and Andy wanted a
+ * heading bigger than that (the toolbar already lets a phrase go to 200px). So
+ * "Custom…" reveals a pixel box, 6 to 200, exactly the range and validator the
+ * toolbar uses (PX_SIZE_MIN/MAX, sizeValue), because what a whole block may be
+ * set to and what a phrase may be set to must not drift. A stored px size the
+ * dropdown has no option for reopens the box with the number in it.
  */
 function TextSizeField({
   tier,
@@ -2735,8 +2751,15 @@ function TextSizeField({
   onChange: (value: string | undefined) => void;
 }) {
   const id = `ed-text-size-${tier}`;
+  const custom = isCustomPx(value);
+  // Kept open once chosen from the dropdown, before a number is typed, so the box
+  // does not vanish the moment it appears. A real px value keeps it open too.
+  const [pxOpen, setPxOpen] = useState(false);
+  const showPx = custom || pxOpen;
   const autoLabel =
     tier === 'desktop' ? 'Auto (the block style)' : `Same as ${TIER_LABEL[INHERITS_FROM[tier]]}`;
+  // The select shows the matching option, "Custom…" for a typed px, or Auto.
+  const selectValue = custom ? CUSTOM_TEXT_SIZE : showPx ? CUSTOM_TEXT_SIZE : value ?? '';
   return (
     <div className="ed-field">
       <label className="ed-label" htmlFor={id}>
@@ -2745,8 +2768,18 @@ function TextSizeField({
       <select
         id={id}
         className="ed-select"
-        value={value ?? ''}
-        onChange={(event) => onChange(event.target.value || undefined)}
+        value={selectValue}
+        onChange={(event) => {
+          const next = event.target.value;
+          if (next === CUSTOM_TEXT_SIZE) {
+            // Open the box; do not commit yet, the block keeps its size until a
+            // number is typed, so choosing Custom never blanks the text.
+            setPxOpen(true);
+            return;
+          }
+          setPxOpen(false);
+          onChange(next || undefined);
+        }}
       >
         <option value="">{autoLabel}</option>
         {FONT_SIZE_GROUPS.map((group) => (
@@ -2758,7 +2791,56 @@ function TextSizeField({
             ))}
           </optgroup>
         ))}
+        <optgroup label="Your own">
+          <option value={CUSTOM_TEXT_SIZE}>Custom…</option>
+        </optgroup>
       </select>
+      {showPx && (
+        <div className="ed-text-size-px">
+          <input
+            /*
+              UNCONTROLLED, and committed on blur or Enter, not on every keystroke.
+              A number input that clamped each keystroke turned "120" into "6" the
+              moment the first digit was typed, because 1 is below the minimum. So
+              the box holds the raw digits while typing and only clamps when the
+              person is done, exactly the split the toolbar uses. Keyed on the
+              stored value and screen so switching screens, or an undo, reseeds it.
+            */
+            key={`${tier}:${custom ? value : 'new'}`}
+            type="number"
+            className="ed-input"
+            aria-label="Text size in pixels"
+            min={PX_SIZE_MIN}
+            max={PX_SIZE_MAX}
+            step={1}
+            placeholder={`${PX_SIZE_MIN}–${PX_SIZE_MAX}`}
+            defaultValue={custom ? String(parseInt(value, 10)) : ''}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                event.currentTarget.blur();
+              }
+            }}
+            onBlur={(event) => {
+              const digits = event.currentTarget.value.trim();
+              if (digits === '') {
+                // Cleared: back to Auto, the same as picking the empty option.
+                setPxOpen(false);
+                onChange(undefined);
+                return;
+              }
+              if (!/^\d{1,4}$/.test(digits)) return;
+              // Clamped here, refused by the sanitiser: type 500 and it becomes
+              // 200 rather than nothing taking, the friendlier half of the split.
+              const n = Math.min(PX_SIZE_MAX, Math.max(PX_SIZE_MIN, Number(digits)));
+              onChange(`${n}px`);
+            }}
+          />
+          <span className="ed-text-size-px__unit" aria-hidden="true">
+            px
+          </span>
+        </div>
+      )}
     </div>
   );
 }

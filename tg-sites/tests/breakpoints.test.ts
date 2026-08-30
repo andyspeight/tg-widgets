@@ -216,6 +216,31 @@ describe('a block-level text size survives the save path', () => {
     const block = result.page.sections[0].rows[0].columns[0].blocks[0];
     expect(block.responsive?.phone?.fontSize).toBeUndefined();
   });
+
+  it('keeps a hand-typed pixel size larger than the dropdown scale, as the block base', () => {
+    // The Text size dropdown tops out at 2.5rem (40px); the point of the Custom
+    // box is a hero size past that. 120px is well over the scale and inside the
+    // 6-200 range, so it must survive the whole save path as the block's own size.
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('heading'));
+    page = updateBlockPropsAtPath(page, path, { fontSize: '120px' });
+    const result = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.fontSize).toBe('120px');
+  });
+
+  it('exposes a Custom pixel entry on the block Text size field, bounded by the shared range', () => {
+    // The value the schema keeps (above) is only reachable if the field lets a
+    // person type it. Pin the UI: a Custom option and the px box clamped by the
+    // same PX_SIZE bounds the toolbar uses, so the two cannot drift.
+    const props = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    expect(props).toContain('CUSTOM_TEXT_SIZE');
+    expect(props).toContain('Custom…');
+    expect(props).toContain('PX_SIZE_MIN');
+    expect(props).toContain('PX_SIZE_MAX');
+  });
 });
 
 // ---------------------------------------------------------------------------

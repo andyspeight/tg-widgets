@@ -2413,6 +2413,20 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   padding-right: 2px;
 }
 
+/* The block Text size "Custom…" pixel box, under its dropdown. A narrow number
+   field with a quiet px suffix, matching the toolbar's own size box. */
+.ed-text-size-px {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ed-text-size-px .ed-input { width: 88px; }
+.ed-text-size-px__unit {
+  color: var(--ed-text-muted, #64748b);
+  font-size: var(--ed-text-sm);
+}
+
 /* The swatch tray hangs below the toolbar rather than sitting in the row. Six
    colours plus a hex box would have doubled the width of a bar that is already
    wrapping. */
