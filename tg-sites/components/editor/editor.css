@@ -2427,6 +2427,40 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
   font-size: var(--ed-text-sm);
 }
 
+/* WHO SEES THIS: the per-section personalisation control. A stack of facets,
+   each a wrap of toggle chips or a segmented control. */
+.ed-audience {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+}
+.ed-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ed-chip {
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  line-height: 1.1;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ed-line);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  cursor: pointer;
+}
+.ed-chip:hover { border-color: var(--ed-accent); }
+.ed-chip.is-on {
+  background: var(--ed-accent);
+  border-color: var(--ed-accent);
+  color: #fff;
+}
+.ed-chip:focus-visible {
+  outline: 2px solid var(--ed-accent);
+  outline-offset: 2px;
+}
+
 /* The swatch tray hangs below the toolbar rather than sitting in the row. Six
    colours plus a hex box would have doubled the width of a bar that is already
    wrapping. */

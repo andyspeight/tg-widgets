@@ -77,6 +77,41 @@ export const DEFAULT_VISITOR_SIGNALS: VisitorSignals = {
  */
 export const RETURNING_VISITOR_COOKIE = 'tgs_rv';
 
+/**
+ * The countries the editor offers as chips, by name. A curated set of the
+ * markets these travel sites actually target rather than the full ISO 3166 list,
+ * because a wall of 250 checkboxes is not a control anybody uses. Codes are
+ * alpha-2 uppercase, the shape the rule stores and the geo header sends. A
+ * country outside this list is a later enhancement, not a wrong answer: the rule
+ * accepts any valid code by shape.
+ */
+export const COMMON_COUNTRIES: ReadonlyArray<{ code: string; name: string }> = [
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'US', name: 'United States' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'IN', name: 'India' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'JP', name: 'Japan' },
+];
+
 const COUNTRY = /^[A-Z]{2}$/;
 // A rule targeting more countries than this is almost certainly a mistake or an
 // attempt to bloat the stored JSON; the cap keeps an inline attribute honest.

@@ -68,3 +68,29 @@ describe('the site route personalises what it renders', () => {
     expect(metaBody).not.toContain('readVisitorSignals');
   });
 });
+
+describe('the editor exposes the audience rule per section', () => {
+  const props = read('components', 'editor', 'Properties.tsx');
+
+  it('renders the audience control in a section, keyed and committing the rule', () => {
+    // Keyed on the section id so switching sections re-seeds the draft, and it
+    // commits section.audience through the same updateSection path as every
+    // other section field.
+    expect(props).toContain('<AudienceField');
+    expect(props).toContain('key={`aud-${section.id}`}');
+    expect(props).toContain('set({ audience: next }');
+  });
+
+  it('offers every facet the rule and the render understand', () => {
+    // Mode, the country chips, the traffic-source chips, device and visitor. The
+    // values it emits are the codes and enums slice A validates, so whatever the
+    // control produces is normalised by the schema on save.
+    expect(props).toContain('Show only to');
+    expect(props).toContain('Hide from');
+    expect(props).toContain('COMMON_COUNTRIES.map');
+    expect(props).toContain('AUDIENCE_SOURCES.map');
+    expect(props).toContain('Been before');
+    // An empty rule is tidied to nothing, exactly a section with no rule.
+    expect(props).toContain('tidyAudience');
+  });
+});

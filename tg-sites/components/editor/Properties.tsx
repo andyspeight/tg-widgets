@@ -63,6 +63,14 @@ import {
   PX_SIZE_MAX,
   REVEAL_STYLES,
 } from '../../lib/content/styles';
+import {
+  AUDIENCE_SOURCES,
+  COMMON_COUNTRIES,
+  type Audience,
+  type AudienceDevice,
+  type AudienceMode,
+  type AudienceVisitor,
+} from '../../lib/content/audience';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -1510,6 +1518,20 @@ function SectionFields({
 
       </Group>
 
+      <Group title="Who sees this" defaultOpen={false}>
+        {/*
+          SERVER-SIDE PERSONALISATION, per section. Keyed on the section id so
+          switching between sections re-reads each one's own rule rather than
+          carrying the last section's draft across. The rule resolves at render on
+          the published site (lib/content/audience); nothing is hidden with CSS.
+        */}
+        <AudienceField
+          key={`aud-${section.id}`}
+          audience={section.audience}
+          onChange={(next) => set({ audience: next }, `sec:${index}:audience`)}
+        />
+      </Group>
+
       <Group title="Motion" defaultOpen={false}>
         {/*
           THE MOTION RECIPE, first in the group because it is the headline choice: it
@@ -2716,6 +2738,178 @@ function GridCellsControl({
         Cells fill the grid in order and wrap onto a new line when they run out of
         room. Removing one moves its blocks into the cell beside it.
       </p>
+    </div>
+  );
+}
+
+/** Strip a working audience down to what is worth storing, or nothing. */
+function tidyAudience(audience: Audience): Audience | undefined {
+  const out: Audience = { mode: audience.mode === 'hide' ? 'hide' : 'show' };
+  if (audience.countries && audience.countries.length) out.countries = audience.countries;
+  if (audience.source && audience.source.length) out.source = audience.source;
+  if (audience.device) out.device = audience.device;
+  if (audience.visitor) out.visitor = audience.visitor;
+  // A rule with no facet constrains nobody, so it is no rule.
+  if (!out.countries && !out.source && !out.device && !out.visitor) return undefined;
+  return out;
+}
+
+const SOURCE_LABEL: Record<(typeof AUDIENCE_SOURCES)[number], string> = {
+  search: 'Search',
+  social: 'Social',
+  direct: 'Direct',
+};
+
+/**
+ * WHO SEES THIS SECTION: the per-section personalisation control.
+ *
+ * The working rule is held locally, seeded from the section, so a choice like
+ * "Hide from" sticks while the client is still picking the country it applies to
+ * (the stored value is dropped to nothing until a facet exists, but the panel
+ * must not forget the mode in the meantime). The parent keys this by section id,
+ * so switching sections remounts it and re-seeds from that section's own rule.
+ * Every change commits the tidied rule up; an empty one commits undefined, which
+ * is exactly a section with no rule.
+ */
+function AudienceField({
+  audience,
+  onChange,
+}: {
+  audience: Audience | undefined;
+  onChange: (next: Audience | undefined) => void;
+}) {
+  const [enabled, setEnabled] = useState<boolean>(Boolean(audience));
+  const [draft, setDraft] = useState<Audience>(audience ?? { mode: 'show' });
+
+  const change = (patch: Partial<Audience>) => {
+    const next: Audience = { ...draft, ...patch };
+    setDraft(next);
+    onChange(tidyAudience(next));
+  };
+
+  const countries = draft.countries ?? [];
+  const sources = draft.source ?? [];
+
+  return (
+    <div className="ed-field">
+      <label className="ed-toggle">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(event) => {
+            if (event.target.checked) {
+              setEnabled(true);
+            } else {
+              setEnabled(false);
+              onChange(undefined);
+            }
+          }}
+        />
+        <span>Show this section to some visitors only</span>
+      </label>
+      <p className="ed-help" style={{ marginTop: 6 }}>
+        A section can be shown to, or hidden from, visitors by where they are, how
+        they arrived, their device, or whether they have been before. Leave a choice
+        empty or on Any to not use it. Design a plain version alongside a targeted
+        one, so every visitor sees something.
+      </p>
+
+      {enabled && (
+        <div className="ed-audience">
+          <Segmented
+            label="Rule"
+            value={draft.mode}
+            options={[
+              { value: 'show', label: 'Show only to' },
+              { value: 'hide', label: 'Hide from' },
+            ]}
+            onChange={(value) => change({ mode: value as AudienceMode })}
+          />
+
+          <div className="ed-field">
+            <label className="ed-label">Countries</label>
+            <div className="ed-chips" role="group" aria-label="Countries">
+              {COMMON_COUNTRIES.map((country) => {
+                const on = countries.includes(country.code);
+                return (
+                  <button
+                    key={country.code}
+                    type="button"
+                    className={`ed-chip${on ? ' is-on' : ''}`}
+                    aria-pressed={on}
+                    onClick={() =>
+                      change({
+                        countries: on
+                          ? countries.filter((code) => code !== country.code)
+                          : [...countries, country.code],
+                      })
+                    }
+                  >
+                    {country.name}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="ed-help">None selected means any country.</p>
+          </div>
+
+          <div className="ed-field">
+            <label className="ed-label">Arrived from</label>
+            <div className="ed-chips" role="group" aria-label="Traffic source">
+              {AUDIENCE_SOURCES.map((source) => {
+                const on = sources.includes(source);
+                return (
+                  <button
+                    key={source}
+                    type="button"
+                    className={`ed-chip${on ? ' is-on' : ''}`}
+                    aria-pressed={on}
+                    onClick={() =>
+                      change({
+                        source: on ? sources.filter((s) => s !== source) : [...sources, source],
+                      })
+                    }
+                  >
+                    {SOURCE_LABEL[source]}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="ed-help">Search engines, social links, or a direct visit. None means any.</p>
+          </div>
+
+          <Segmented
+            label="Device"
+            value={draft.device ?? 'any'}
+            options={[
+              { value: 'any', label: 'Any' },
+              { value: 'mobile', label: 'Phone' },
+              { value: 'desktop', label: 'Desktop' },
+            ]}
+            onChange={(value) =>
+              change({ device: value === 'any' ? undefined : (value as AudienceDevice) })
+            }
+          />
+
+          <Segmented
+            label="Been before"
+            value={draft.visitor ?? 'any'}
+            options={[
+              { value: 'any', label: 'Any' },
+              { value: 'new', label: 'New' },
+              { value: 'returning', label: 'Returning' },
+            ]}
+            onChange={(value) =>
+              change({ visitor: value === 'any' ? undefined : (value as AudienceVisitor) })
+            }
+          />
+
+          <p className="ed-help" data-tone="warn" style={{ marginTop: 4 }}>
+            Press the eye button and use Preview as to check each audience. Country is
+            read at the edge and is unknown in the editor.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
