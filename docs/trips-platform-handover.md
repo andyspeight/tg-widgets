@@ -746,8 +746,18 @@ priority-ish order so the next session picks up without re-deriving them:
   9. **White-label / custom domain** for an operator's booking pages (Enterprise band).
   10. **Integrations** — a public WRITE API, Zapier, and accounting export
       (QuickBooks / Xero). Only `/api/v1/trips` read exists today.
-  11. **Abandoned-booking recovery** — email a traveller who started but did not
-      finish (the tg-widgets enquiry engine is close but not wired into Trips).
+  11. **Abandoned-booking recovery** — DONE 28 Aug. gt_020 adds recovery_sent_at.
+      A daily CRON_SECRET-guarded cron (/api/cron/abandoned-recovery, in
+      vercel.json, 10:00 UTC) sweeps pending holds that lapsed without completing
+      (never nudged, reachable, created within 30 days) and sends one warm
+      come-back email (notify.sendAbandonedRecovery) linking to /book/{op}/{trip}.
+      lib/recovery isAbandoned is the pure rule; the PostgREST filter mirrors it.
+      Live-verified: a completed booking is excluded, a genuinely-abandoned one
+      selected with its slugs; the endpoint refuses without CRON_SECRET. NEEDS
+      (shared with the registration reminder): CRON_SECRET set in Vercel for the
+      cron to run, and BREVO_API_KEY + TRIPS_EMAIL_FROM to deliver rather than
+      log. Note: this recovers holds that were created; true pre-submit cart
+      capture (email-on-blur before a booking exists) is a larger follow-up.
   12. **AI brochure import inside the standalone Trips app** — exists in the
       tg-widgets Tour Builder, not yet ported to the new platform.
   13. **Full embed set** — DONE 28 Aug. `embed.js` v0.2.0 now dispatches three
