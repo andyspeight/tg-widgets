@@ -27,6 +27,7 @@ import {
   MOTION_RECIPES,
   MOTION_TIERS,
   parsePage,
+  sectionMotionGaps,
   type MotionRecipe,
 } from '../lib/content/schema';
 import { MOTION_CHOICES, MOTION_INTENSITIES } from '../lib/content/styles';
@@ -903,5 +904,103 @@ describe('a scroll-driven recipe on the first section', () => {
     const guarded = sheet.slice(sheet.indexOf('@supports (animation-timeline: view())'));
     const leadAt = guarded.indexOf("[data-motion='S5'][data-motion-lead]");
     expect(leadAt).toBeGreaterThan(-1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The editor says why a recipe will not move (31 Aug 2026). A background recipe
+// or a background toggle set on a section with nothing behind it is inert, and
+// the pane warns what to add rather than leave the client thinking it is broken.
+// ---------------------------------------------------------------------------
+describe('the editor knows when a motion setting has nothing to move', () => {
+  const motion = (recipe: MotionRecipe) => ({ recipe, intensity: 2 as const });
+
+  it('a still-background recipe with no background is a gap, and none once one is set', () => {
+    for (const recipe of ['A4', 'A6', 'S5'] as const) {
+      expect(sectionMotionGaps({ motion: motion(recipe) })).toContain('recipe-still');
+      expect(
+        sectionMotionGaps({ motion: motion(recipe), backgroundImage: 'https://x/y.jpg' }),
+      ).toEqual([]);
+    }
+  });
+
+  it('a still-background recipe is still inert on a slideshow or a video', () => {
+    // A single still picture is what A6/S5 need; a slideshow (2+) or a video is not it.
+    expect(
+      sectionMotionGaps({
+        motion: motion('A6'),
+        backgroundImage: 'https://x/1.jpg',
+        backgroundSlides: [{ src: 'https://x/2.jpg' }],
+      }),
+    ).toContain('recipe-still');
+    expect(
+      sectionMotionGaps({ motion: motion('A6'), backgroundVideo: 'https://x/v.mp4' }),
+    ).toContain('recipe-still');
+  });
+
+  it('the cycling recipe wants two or more pictures', () => {
+    expect(sectionMotionGaps({ motion: motion('A2') })).toContain('recipe-pictures');
+    expect(
+      sectionMotionGaps({ motion: motion('A2'), backgroundImage: 'https://x/1.jpg' }),
+    ).toContain('recipe-pictures');
+    expect(
+      sectionMotionGaps({
+        motion: motion('A2'),
+        backgroundImage: 'https://x/1.jpg',
+        backgroundSlides: [{ src: 'https://x/2.jpg' }],
+      }),
+    ).toEqual([]);
+  });
+
+  it('the video recipe wants a video', () => {
+    expect(sectionMotionGaps({ motion: motion('A7') })).toContain('recipe-video');
+    // A picture is not a video, so the gap stands.
+    expect(
+      sectionMotionGaps({ motion: motion('A7'), backgroundImage: 'https://x/1.jpg' }),
+    ).toContain('recipe-video');
+    expect(
+      sectionMotionGaps({ motion: motion('A7'), backgroundVideo: 'https://x/v.mp4' }),
+    ).toEqual([]);
+  });
+
+  it('the recipes that need no background never raise a gap', () => {
+    for (const recipe of ['A3', 'A5', 'S1', 'S3'] as const) {
+      expect(sectionMotionGaps({ motion: motion(recipe) })).toEqual([]);
+    }
+  });
+
+  it('parallax and Ken Burns flag a missing still picture, and clear once it is set', () => {
+    expect(sectionMotionGaps({ parallax: true })).toContain('parallax-still');
+    expect(sectionMotionGaps({ kenBurns: true })).toContain('ken-burns-still');
+    expect(sectionMotionGaps({ parallax: true, backgroundImage: 'https://x/1.jpg' })).toEqual([]);
+    // Ken Burns stands down under parallax, exactly as the render gates it, so only
+    // the parallax gap shows when both are on with nothing behind them.
+    const both = sectionMotionGaps({ parallax: true, kenBurns: true });
+    expect(both).toContain('parallax-still');
+    expect(both).not.toContain('ken-burns-still');
+  });
+
+  it('a background recipe takes the background, so parallax and Ken Burns are not also flagged', () => {
+    // A6 owns the background; the two toggles are moot, so the only gap is the recipe's.
+    const gaps = sectionMotionGaps({ motion: motion('A6'), parallax: true, kenBurns: true });
+    expect(gaps).toEqual(['recipe-still']);
+  });
+
+  it('the editor wires the gaps into the Motion pane as warnings', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('sectionMotionGaps(section)');
+    expect(props).toContain("motionGaps.includes('recipe-still')");
+    expect(props).toContain("motionGaps.includes('recipe-pictures')");
+    expect(props).toContain("motionGaps.includes('recipe-video')");
+    expect(props).toContain("motionGaps.includes('parallax-still')");
+    expect(props).toContain("motionGaps.includes('ken-burns-still')");
+  });
+
+  it('mirrors the render guard it stands in for, so the two cannot drift apart', () => {
+    // If this rule changes in PageRenderer, sectionMotionGaps must change too.
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).toContain('if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);');
+    expect(render).toContain('if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;');
+    expect(render).toContain('if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;');
   });
 });

@@ -403,6 +403,82 @@ export type MotionIntensity = 1 | 2 | 3;
 export type Motion = { recipe: MotionRecipe; intensity: MotionIntensity };
 
 /**
+ * A motion setting that is switched on but cannot move, because the section is
+ * missing the background content it needs. The editor turns each of these into a
+ * quiet hint saying what to add, so a client who picks a background recipe on an
+ * empty section is told why nothing happens rather than assuming it is broken
+ * (the same confusion that had motion looking dead, Andy 30 Aug 2026).
+ *
+ * - recipe-video: the recipe plays a background VIDEO and there is none (A7).
+ * - recipe-pictures: the recipe plays a SEQUENCE of pictures and there are fewer
+ *   than two (A2, the cycling background).
+ * - recipe-still: the recipe moves ONE still background picture and there is none,
+ *   or a slideshow or a video is set instead (A4, A6, S5).
+ * - parallax-still / ken-burns-still: the same missing still picture, for the two
+ *   background toggles.
+ */
+export type MotionGap =
+  | 'recipe-video'
+  | 'recipe-pictures'
+  | 'recipe-still'
+  | 'parallax-still'
+  | 'ken-burns-still';
+
+/**
+ * Which of a section's motion settings are switched on but have nothing to move.
+ *
+ * This MIRRORS the render's own guard in PageRenderer (motionHasWhatItNeeds, plus
+ * the stillBackground checks on data-parallax and data-ken-burns): a hint is shown
+ * exactly when the published page would stand the motion down. Keep the two in
+ * step; a test pins the render rule so a change there flags this. Pure, so it is
+ * unit-tested.
+ *
+ * The background content is read the same way the render reads it: the section's
+ * own picture is the first, the extra slides follow, two or more of them (and no
+ * video) make a cycling slideshow, and a video takes precedence over any picture.
+ * Presence of a non-empty string stands in for the render's safeUrl, which is
+ * close enough for a hint: the picker only ever writes real URLs.
+ */
+export function sectionMotionGaps(section: {
+  motion?: Motion;
+  backgroundImage?: string;
+  backgroundVideo?: string;
+  backgroundSlides?: ReadonlyArray<{ src?: string }> | null;
+  parallax?: boolean;
+  kenBurns?: boolean;
+}): MotionGap[] {
+  const hasVideo = Boolean(section.backgroundVideo && section.backgroundVideo.trim());
+  const picCount =
+    (section.backgroundImage && section.backgroundImage.trim() ? 1 : 0) +
+    (section.backgroundSlides ?? []).filter((slide) => slide?.src && slide.src.trim()).length;
+  const bgShow = !hasVideo && picCount > 1; // a cycling slideshow
+  const stillBackground = picCount >= 1 && !bgShow && !hasVideo; // exactly one still picture
+
+  const gaps: MotionGap[] = [];
+  const recipe = section.motion?.recipe;
+  if (recipe && recipe !== 'none') {
+    if (MOTION_VIDEO_RECIPES.has(recipe)) {
+      if (!hasVideo) gaps.push('recipe-video');
+    } else if (MOTION_CYCLING_RECIPES.has(recipe)) {
+      if (!bgShow) gaps.push('recipe-pictures');
+    } else if (MOTION_BACKGROUND_RECIPES.has(recipe)) {
+      if (!stillBackground) gaps.push('recipe-still');
+    }
+  }
+
+  // Parallax and Ken Burns only when a background RECIPE has not taken the picture.
+  // A background recipe wins the background, so the two toggles are moot then and
+  // the editor already clears them when one is chosen; skipping their hints keeps
+  // the pane from warning about a control the recipe has already stood down.
+  const recipeOwnsBackground = Boolean(recipe && MOTION_BACKGROUND_RECIPES.has(recipe));
+  if (!recipeOwnsBackground) {
+    if (section.parallax && !stillBackground) gaps.push('parallax-still');
+    if (section.kenBurns && !section.parallax && !stillBackground) gaps.push('ken-burns-still');
+  }
+  return gaps;
+}
+
+/**
  * Reads a stored motion value, refusing anything that is not in the closed list.
  *
  * Returns undefined for absent, malformed or 'none', the same shape `pullUp` uses

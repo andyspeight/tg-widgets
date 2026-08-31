@@ -35,6 +35,7 @@ import {
   MOTION_BACKGROUND_RECIPES,
   normaliseSectionPadding,
   PADDING_PRESETS,
+  sectionMotionGaps,
   type MotionRecipe,
 } from '../../lib/content/schema';
 import {
@@ -1350,6 +1351,11 @@ function SectionFields({
   const set = (patch: Parameters<typeof updateSection>[2], key: string) =>
     onCommit((current) => updateSection(current, index, patch), key);
 
+  // Motion settings that are switched on but have no background content to move,
+  // so the pane can say what to add rather than leave the client thinking it is
+  // broken. Mirrors the render's own guard; see sectionMotionGaps.
+  const motionGaps = sectionMotionGaps(section);
+
   return (
     <>
       <Group title="Name">
@@ -1638,6 +1644,31 @@ function SectionFields({
             background picture instead, which suits a closing section at the foot of a page.
             Both stop for anyone who prefers less motion.
           </p>
+          {/*
+            WHY IT WILL NOT MOVE. Some recipes move the section's background, so they
+            need one to move. When the client has picked such a recipe on a section
+            with nothing behind it, say what to add rather than leave them thinking
+            it is broken. Only one of these can be true at a time.
+          */}
+          {motionGaps.includes('recipe-video') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement plays a background video, and there isn&apos;t one yet. Add a
+              video under Background image below and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-pictures') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement plays a sequence of pictures. Add two or more under Background
+              image below and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement moves a still background picture, and there isn&apos;t one yet.
+              Add one under Background image below (a single picture, not a slideshow or
+              video) and it will move.
+            </p>
+          )}
         </div>
         {section.motion && (
           <div className="ed-field">
@@ -1827,6 +1858,12 @@ function SectionFields({
             visitor scrolls, for a sense of depth. It needs a still background picture, and it
             eases off for anyone who prefers less motion.
           </p>
+          {motionGaps.includes('parallax-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              There is no still background picture to drift yet. Add one under Background
+              image below and it will move.
+            </p>
+          )}
         </div>
         {/*
           Ken Burns is the other background motion, and the two move the one picture,
@@ -1853,6 +1890,12 @@ function SectionFields({
             instead of parallax rather than with it, and eases off for anyone who prefers less
             motion.
           </p>
+          {motionGaps.includes('ken-burns-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              There is no still background picture to zoom yet. Add one under Background
+              image below and it will move.
+            </p>
+          )}
         </div>
       </Group>
 
