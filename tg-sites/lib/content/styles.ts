@@ -599,6 +599,30 @@ export function normaliseRevealStyle(value: unknown): RevealStyle {
 }
 
 /**
+ * The named seas the cinematic recipe (A1) can wear, each a water body colour (deep and
+ * shallow, mixed by the light in the shader), a horizon/sky-reflection colour the sea
+ * dissolves into, and a sun angle in degrees. Tuned in a browser 31 Aug 2026 so each
+ * reads as its own sea: the northern default is the deep steel blue A1 shipped with, and
+ * Caribbean, Tropical, Mediterranean and Storm are distinct at a glance. The keys match
+ * SEA_TONES in schema.ts (a test holds them in step); the render turns the chosen name
+ * into the data-sea-* attributes tg-sea.js reads.
+ */
+export const SEA_TONE_PRESETS = [
+  { value: 'northern', label: 'Northern', deep: '#082a40', shallow: '#175c78', horizon: '#c7dae3', sun: 12 },
+  { value: 'mediterranean', label: 'Mediterranean', deep: '#0a3a58', shallow: '#1f8fb0', horizon: '#d9eaef', sun: 20 },
+  { value: 'caribbean', label: 'Caribbean', deep: '#0a5f6b', shallow: '#2fbdb8', horizon: '#e4f2ec', sun: 24 },
+  { value: 'tropical', label: 'Tropical lagoon', deep: '#0e7a73', shallow: '#47d6c2', horizon: '#eef7f0', sun: 26 },
+  { value: 'storm', label: 'Storm grey', deep: '#123049', shallow: '#3a6f88', horizon: '#dfe7ec', sun: -6 },
+] as const;
+
+export type SeaTonePreset = (typeof SEA_TONE_PRESETS)[number];
+
+/** The preset for a stored tone, or the northern default for anything absent or unknown. */
+export function seaTonePreset(value: unknown): SeaTonePreset {
+  return SEA_TONE_PRESETS.find((tone) => tone.value === value) ?? SEA_TONE_PRESETS[0];
+}
+
+/**
  * Weight. Only the two that mean something in running text.
  *
  * Browsers emit `font-weight: bold` for a bold command when they are asked to

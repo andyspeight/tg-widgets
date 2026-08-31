@@ -63,6 +63,7 @@ import {
   PX_SIZE_MIN,
   PX_SIZE_MAX,
   REVEAL_STYLES,
+  SEA_TONE_PRESETS,
 } from '../../lib/content/styles';
 import { AudienceField } from './AudienceField';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
@@ -1694,6 +1695,41 @@ function SectionFields({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+        {/*
+          THE SEA'S TONE, only for the cinematic sea. A travel agent picks their water
+          by name rather than dialling three colours: Caribbean turquoise, Nordic steel.
+          Absent is the northern default, so a section that never chose one still has a
+          finished sea.
+        */}
+        {section.motion?.recipe === 'A1' && (
+          <div className="ed-field">
+            <label className="ed-label" htmlFor={`ed-sea-tone-${index}`}>
+              Sea tone
+            </label>
+            <select
+              id={`ed-sea-tone-${index}`}
+              className="ed-select"
+              value={section.seaTone ?? 'northern'}
+              onChange={(event) => {
+                const tone = SEA_TONE_PRESETS.find((t) => t.value === event.target.value)?.value;
+                set(
+                  { seaTone: tone && tone !== 'northern' ? tone : undefined },
+                  `sec:${index}:seaTone`,
+                );
+              }}
+            >
+              {SEA_TONE_PRESETS.map((tone) => (
+                <option key={tone.value} value={tone.value}>
+                  {tone.label}
+                </option>
+              ))}
+            </select>
+            <p className="ed-help" style={{ marginTop: 6 }}>
+              Which water to paint. Give the section a sky photograph as its background and
+              the sea meets it at the horizon.
+            </p>
           </div>
         )}
         <div className="ed-field">

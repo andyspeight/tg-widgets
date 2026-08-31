@@ -550,6 +550,23 @@ export function normaliseAlignY(value: unknown): 'centre' | 'bottom' | undefined
 }
 
 /**
+ * The named seas the cinematic recipe (A1) can wear. A CLOSED list, like the reveal
+ * styles: a travel agent picks their water by name (a Caribbean site is turquoise, a
+ * Nordic one is steel) rather than dialling three colours. The colours and sun angle
+ * each name maps to live in SEA_TONE_PRESETS in styles.ts, kept in step by a test; the
+ * render turns the chosen name into the data-sea-* attributes tg-sea.js reads. Absent
+ * is the northern default, so no stored section changes and a page with no tone still
+ * gets a finished sea.
+ */
+export const SEA_TONES = ['northern', 'mediterranean', 'caribbean', 'tropical', 'storm'] as const;
+export type SeaTone = (typeof SEA_TONES)[number];
+export function normaliseSeaTone(value: unknown): SeaTone | undefined {
+  return typeof value === 'string' && (SEA_TONES as readonly string[]).includes(value)
+    ? (value as SeaTone)
+    : undefined;
+}
+
+/**
  * Where a row's columns collapse to a single stacked column.
  *
  * There is deliberately no 'never'. See the header note: a row that refuses to
@@ -1005,6 +1022,13 @@ export const SectionSchema = z.object({
    * Optional and absent when 'none', so no stored section changes shape.
    */
   motion: z.unknown().transform(normaliseMotion).optional(),
+  /**
+   * Which named sea the cinematic recipe (A1) wears, so a client's water matches their
+   * destination. Normalised to the closed SEA_TONES list; absent is the northern
+   * default. Means nothing unless the section's recipe is A1, and the render only emits
+   * the sea colours for that recipe, so a stored section carrying a stray tone is inert.
+   */
+  seaTone: z.unknown().transform(normaliseSeaTone).optional(),
   /**
    * An animated gradient behind the section, in place of a solid tone or picture.
    *

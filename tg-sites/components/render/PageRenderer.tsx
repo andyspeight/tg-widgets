@@ -36,6 +36,7 @@ import {
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
+  seaTonePreset,
 } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
@@ -410,6 +411,9 @@ export function SectionRenderer({
   };
   const motion =
     recipe && MOTION_LIVE_RECIPES.has(recipe) && motionHasWhatItNeeds(recipe) ? recipe : undefined;
+  // The named sea the cinematic recipe wears, resolved to its colours and sun angle.
+  // Only for A1, so no other section carries the data-sea-* colour attributes.
+  const seaTone = motion === 'A1' ? seaTonePreset(section.seaTone) : undefined;
   /*
    * The recipe WINS the background. Parallax and Ken Burns have moved that one
    * picture since 11 and 13 Aug 2026 and globals.css has always said only one of
@@ -539,6 +543,12 @@ export function SectionRenderer({
           ? String([0.45, 0.65, 0.9][(section.motion?.intensity ?? 2) - 1] ?? 0.65)
           : undefined
       }
+      /* The chosen sea's colours and sun angle, for A1 only. tg-sea.js validates each
+         again on the way in, so a stray value can never reach the shader. */
+      data-sea-deep={seaTone?.deep}
+      data-sea-shallow={seaTone?.shallow}
+      data-sea-horizon={seaTone?.horizon}
+      data-sea-sun={seaTone ? String(seaTone.sun) : undefined}
       /*
        * THE FIRST SECTION IS A DIFFERENT PROBLEM AND HAS TO SAY SO.
        *

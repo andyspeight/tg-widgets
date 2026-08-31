@@ -29,9 +29,10 @@ import {
   MOTION_TIERS,
   parsePage,
   sectionMotionGaps,
+  SEA_TONES,
   type MotionRecipe,
 } from '../lib/content/schema';
-import { MOTION_CHOICES, MOTION_INTENSITIES } from '../lib/content/styles';
+import { MOTION_CHOICES, MOTION_INTENSITIES, SEA_TONE_PRESETS } from '../lib/content/styles';
 import { needsMotionScript, needsSeaScript } from '../lib/content/motion';
 import { presetById } from '../lib/content/presets';
 import { buildStarterPage, STARTERS, type StarterFacts } from '../lib/content/starters';
@@ -1176,5 +1177,65 @@ describe('the cinematic sea is a first-class recipe with tier-2 discipline', () 
     expect(seaScript).toContain('getContext');
     expect(seaScript).not.toContain('require(');
     expect(seaScript).not.toContain("from '");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The cinematic sea wears a named tone per client (31 Aug 2026), so a Caribbean
+// site is turquoise and a Nordic one is steel, picked by name not by colour dial.
+// ---------------------------------------------------------------------------
+describe('the cinematic sea wears a named tone', () => {
+  const rawPage = (seaTone: unknown) => ({
+    version: 1,
+    id: 'p',
+    title: 'T',
+    slug: '',
+    sections: [{ id: 's', rows: [], motion: { recipe: 'A1', intensity: 2 }, seaTone }],
+  });
+
+  it('keeps a valid tone through parsePage and drops nonsense to the default', () => {
+    const parsed = parsePage(rawPage('caribbean'));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].seaTone).toBe('caribbean');
+    const junk = parsePage(rawPage('lime-green'));
+    expect(junk.ok).toBe(true);
+    if (junk.ok) expect(junk.page.sections[0].seaTone).toBeUndefined();
+  });
+
+  it('the preset table covers exactly the schema tone list, so the two cannot drift', () => {
+    expect(SEA_TONE_PRESETS.map((t) => t.value).sort()).toEqual([...SEA_TONES].sort());
+  });
+
+  it('every tone is a real water colour set and a plain-word name', () => {
+    for (const tone of SEA_TONE_PRESETS) {
+      for (const key of ['deep', 'shallow', 'horizon'] as const) {
+        expect(tone[key], `${tone.value} ${key} is not a hex colour`).toMatch(/^#[0-9a-f]{6}$/i);
+      }
+      expect(typeof tone.sun).toBe('number');
+      // Named for a travel agent, never by a catalogue code.
+      expect(tone.label).not.toMatch(/^[AS]\d$/);
+    }
+  });
+
+  it('the render emits the tone colours, and only for the sea recipe', () => {
+    expect(render).toContain("motion === 'A1' ? seaTonePreset(section.seaTone) : undefined");
+    expect(render).toContain('data-sea-deep={seaTone?.deep}');
+    expect(render).toContain('data-sea-shallow={seaTone?.shallow}');
+    expect(render).toContain('data-sea-horizon={seaTone?.horizon}');
+  });
+
+  it('the editor offers the tone picker for the sea and nowhere else', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain("section.motion?.recipe === 'A1'");
+    expect(props).toContain('Sea tone');
+    expect(props).toContain('SEA_TONE_PRESETS.map');
+  });
+
+  it('the sea script validates each colour again, so a bad tone cannot reach the shader', () => {
+    // Defence in depth: the render only emits known-good hex, but tg-sea.js re-parses
+    // data-sea-deep/shallow/horizon and falls back to its defaults on anything invalid.
+    expect(seaScript).toContain("rgb(section.getAttribute('data-sea-deep')");
+    expect(seaScript).toContain('/^#?([0-9a-f]{6})$/i');
   });
 });
