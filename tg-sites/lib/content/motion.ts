@@ -58,3 +58,25 @@ export function needsMotionScript(tree: Tree): boolean {
 export function anyNeedsMotionScript(trees: ReadonlyArray<Tree>): boolean {
   return trees.some((tree) => needsMotionScript(tree));
 }
+
+/**
+ * True when any section carries the WebGL sea (A1), which loads a DIFFERENT file,
+ * public/tg-sea.js, the shader engine. Kept apart from needsMotionScript so a page
+ * with a drifting rail does not pull the sea and a page with the sea does not pull
+ * the rail: two files, each conditional, neither dragging the other onto a page.
+ */
+export function needsSeaScript(tree: Tree): boolean {
+  const sections = tree && typeof tree === 'object' ? (tree as { sections?: unknown }).sections : null;
+  if (!Array.isArray(sections)) return false;
+  return sections.some((raw) => {
+    if (!raw || typeof raw !== 'object') return false;
+    const motion = (raw as LooseSection).motion;
+    if (!motion || typeof motion !== 'object') return false;
+    return (motion as { recipe?: unknown }).recipe === 'A1';
+  });
+}
+
+/** True when ANY of the trees making up a document carries the sea. */
+export function anyNeedsSeaScript(trees: ReadonlyArray<Tree>): boolean {
+  return trees.some((tree) => needsSeaScript(tree));
+}

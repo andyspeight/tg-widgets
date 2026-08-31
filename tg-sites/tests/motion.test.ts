@@ -25,13 +25,14 @@ import {
   MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
   MOTION_RECIPES,
+  MOTION_SEA_RECIPES,
   MOTION_TIERS,
   parsePage,
   sectionMotionGaps,
   type MotionRecipe,
 } from '../lib/content/schema';
 import { MOTION_CHOICES, MOTION_INTENSITIES } from '../lib/content/styles';
-import { needsMotionScript } from '../lib/content/motion';
+import { needsMotionScript, needsSeaScript } from '../lib/content/motion';
 import { presetById } from '../lib/content/presets';
 import { buildStarterPage, STARTERS, type StarterFacts } from '../lib/content/starters';
 
@@ -56,6 +57,7 @@ const render = read('components', 'render', 'PageRenderer.tsx');
 const schema = read('lib', 'content', 'schema.ts');
 const blocks = read('lib', 'content', 'blocks.ts');
 const motionScript = read('public', 'tg-motion.js');
+const seaScript = read('public', 'tg-sea.js');
 
 /**
  * The bodies of every `@media (prefers-reduced-motion: no-preference)` block in the
@@ -175,6 +177,24 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
       return;
     }
 
+    /*
+     * THE WEBGL SEA KEEPS ITS GUARD IN ITS OWN SCRIPT. A1 draws from a shader, not the
+     * stylesheet, so like A3 there is no keyframe to sit inside the media query; tg-sea.js
+     * must refuse to create a canvas at all under reduced motion, which is a stronger
+     * guarantee than hiding one (no GPU work happens either).
+     */
+    if (MOTION_SEA_RECIPES.has(recipe)) {
+      expect(
+        /prefers-reduced-motion:\s*reduce/.test(seaScript),
+        `${recipe} is the WebGL sea but tg-sea.js never asks about reduced motion`,
+      ).toBe(true);
+      expect(
+        /matches\)\s*return/.test(seaScript),
+        `${recipe}'s script checks reduced motion but does not bail on it`,
+      ).toBe(true);
+      return;
+    }
+
     expect(moving.length, `${recipe} has no rule that makes anything move`).toBeGreaterThan(0);
     for (const rule of moving) {
       const head = rule.slice(rule.indexOf(selector));
@@ -213,6 +233,17 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
         ).toBe(true);
         expect(
           /now - start/.test(motionScript),
+          `${recipe}'s script does not derive its phase from elapsed time`,
+        ).toBe(true);
+        continue;
+      }
+
+      if (MOTION_SEA_RECIPES.has(recipe)) {
+        // The sea's wave phase is read from the frame timestamp (now - t0), not a
+        // per-frame step, so a slow GPU shows a coarser sea at the right speed.
+        expect(/requestAnimationFrame/.test(seaScript), `${recipe} runs no frame loop`).toBe(true);
+        expect(
+          /now - t0/.test(seaScript),
           `${recipe}'s script does not derive its phase from elapsed time`,
         ).toBe(true);
         continue;
@@ -401,21 +432,21 @@ describe('the cost of a recipe is declared, so a page budget can be held', () =>
   });
 
   /*
-   * GUARDRAIL: no more than one tier-2 (WebGL) block on a page.
+   * GUARDRAIL: no more than one tier-2 (WebGL) canvas on a page.
    *
-   * Today that cap cannot be breached from here, because no recipe a SECTION can
-   * carry is tier 2: A1 ambient-terrain is deliberately outside this enum and will
-   * arrive on the hero-cinematic block instead. This test holds that precondition,
-   * so adding a WebGL recipe to the section vocabulary fails here and the real
-   * per-page cap has to be written at the same time.
+   * A1 the cinematic sea is the one tier-2 section recipe (31 Aug 2026). The cap that
+   * used to be kept by holding A1 out of the enum entirely is now kept by the script:
+   * tg-sea.js animates the FIRST [data-motion='A1'] section on a page and leaves any
+   * other on its still photograph. So this checks two things: A1 is the ONLY tier-2
+   * recipe, and the script really takes just the first rather than looping every match.
    */
-  it('has no WebGL recipe in the section vocabulary, so the one-per-page cap cannot be breached yet', () => {
+  it('caps the one WebGL recipe at a single canvas per page, in the script', () => {
     const webgl = MOTION_RECIPES.filter((r) => MOTION_TIERS[r] === 2);
-    expect(
-      webgl,
-      'a tier-2 recipe reached the section enum: write the one-per-page cap before shipping it',
-    ).toEqual([]);
-    expect(MOTION_RECIPES).not.toContain('A1' as MotionRecipe);
+    expect(webgl, 'a second tier-2 recipe would need its own per-page accounting').toEqual(['A1']);
+    expect(seaScript).toContain("data-motion='A1'");
+    expect(seaScript).toContain('querySelector(');
+    expect(seaScript, 'the cap must take the first A1 section only, never loop all of them')
+      .not.toContain('querySelectorAll');
   });
 
   it('only a recipe that really needs a script is rated above tier 0', () => {
@@ -427,7 +458,9 @@ describe('the cost of a recipe is declared, so a page budget can be held', () =>
      * would be putting a script on a page while claiming to be free.
      */
     for (const recipe of MOTION_LIVE_RECIPES) {
-      const needsScript = MOTION_SCRIPT_RECIPES.has(recipe);
+      // Either script counts: the DOM-nudging tg-motion.js (A3) or the WebGL tg-sea.js
+      // (A1). A recipe that pulls either is not free and must be rated above tier 0.
+      const needsScript = MOTION_SCRIPT_RECIPES.has(recipe) || MOTION_SEA_RECIPES.has(recipe);
       expect(
         MOTION_TIERS[recipe] > 0,
         needsScript
@@ -753,7 +786,8 @@ describe('the script only reaches a page that actually needs it', () => {
   });
 
   it('renders nothing at all rather than an empty tag when no tree needs it', () => {
-    expect(emitter).toContain('if (!anyNeedsMotionScript(trees)) return null;');
+    // Neither the DOM script nor the sea: the component is null, not an empty fragment.
+    expect(emitter).toContain('if (!motion && !sea) return null;');
   });
 
   it('is emitted once per document, from the routes that assemble one', () => {
@@ -1077,5 +1111,70 @@ describe('reveal and parallax fall back for browsers with no scroll timeline', (
     expect(block).toContain('[data-parallax-fb]');
     expect(block).toContain('translateY(var(--tgs-parallax-y');
     expect(block).not.toContain('@supports');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The cinematic sea (A1), the one WebGL recipe (31 Aug 2026). Tier 2, its own
+// script, capped at one canvas per page, no canvas at all under reduced motion.
+// ---------------------------------------------------------------------------
+describe('the cinematic sea is a first-class recipe with tier-2 discipline', () => {
+  const seaPage = { sections: [{ id: 'a', motion: { recipe: 'A1', intensity: 2 } }] };
+
+  it('is in the vocabulary, live, tier 2, a background recipe, and its own script kind', () => {
+    expect(MOTION_RECIPES).toContain('A1');
+    expect(MOTION_LIVE_RECIPES.has('A1')).toBe(true);
+    expect(MOTION_TIERS.A1).toBe(2);
+    expect(MOTION_SEA_RECIPES.has('A1')).toBe(true);
+    // It owns the background, so the editor and render stand parallax and Ken Burns down.
+    expect(MOTION_BACKGROUND_RECIPES.has('A1')).toBe(true);
+    // It loads tg-sea.js, NOT tg-motion.js: the two script sets are disjoint.
+    expect(MOTION_SCRIPT_RECIPES.has('A1' as MotionRecipe)).toBe(false);
+  });
+
+  it('the editor offers it in plain words, not its catalogue code', () => {
+    const choice = MOTION_CHOICES.find((c) => c.value === 'A1');
+    expect(choice, 'A1 is live but the editor does not offer it').toBeTruthy();
+    expect(choice?.label).toBe('Cinematic sea');
+  });
+
+  it('pulls tg-sea.js only for a page that carries it, and never tg-motion.js by mistake', () => {
+    expect(needsSeaScript(seaPage)).toBe(true);
+    expect(needsSeaScript({ sections: [{ id: 'a', motion: { recipe: 'A6', intensity: 2 } }] })).toBe(false);
+    expect(needsSeaScript({ sections: [{ id: 'a' }] })).toBe(false);
+    // A6 is a pure-CSS background recipe: no script at all, sea or otherwise.
+    expect(needsMotionScript(seaPage)).toBe(false);
+  });
+
+  it('emits the sea tag separately from the motion tag', () => {
+    const emitter = read('components', 'render', 'MotionScript.tsx');
+    expect(emitter).toContain('anyNeedsSeaScript(trees)');
+    expect(emitter).toContain('src="/tg-sea.js"');
+  });
+
+  it('is registered as a site asset in both the allowlist and the matcher', () => {
+    const mw = read('middleware.ts');
+    expect(mw).toContain("'/tg-sea.js'");
+    // The matcher escapes the dot, so the source carries a doubled backslash.
+    expect(mw).toContain('tg-sea\\\\.js');
+  });
+
+  it('reads its swell from the section intensity, in the render', () => {
+    expect(render).toContain("motion === 'A1'");
+    expect(render).toContain('data-sea-swell');
+  });
+
+  it('the stylesheet only places and clips the canvas; the movement is the shader', () => {
+    expect(css).toContain("[data-motion='A1']");
+    // No keyframe named for the sea: it is drawn on the GPU, not animated in CSS.
+    expect(css).not.toContain('@keyframes tgs-sea');
+  });
+
+  it('the sea script is hand-written WebGL with no library import', () => {
+    // Clause: ours, hand-written, no libraries. A shader engine that pulled three.js
+    // would be exactly the dependency weight the whole motion layer refuses.
+    expect(seaScript).toContain('getContext');
+    expect(seaScript).not.toContain('require(');
+    expect(seaScript).not.toContain("from '");
   });
 });

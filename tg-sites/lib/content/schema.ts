@@ -286,11 +286,15 @@ export function boxIsEmpty(box: Box): boolean {
  *
  * A CLOSED LIST, like REVEAL_STYLES, so the value the render puts in data-motion
  * can only ever be one of these and anything unknown falls back to no motion.
- * A1 ambient-terrain is deliberately absent: it is WebGL and belongs to the
- * hero-cinematic block rather than to any section.
+ * A1 ambient-terrain (the water variant) joined on 31 Aug 2026: it is the one WebGL
+ * recipe, tier 2, driven by public/tg-sea.js rather than by CSS, and it caps itself
+ * at one canvas per page in the script. It was held out of this enum until the
+ * per-page cap and the still fallback both existed; they do now (the sea composites
+ * over the section's own still photograph, which is the reduced-motion and no-WebGL
+ * fallback).
  */
 export const MOTION_RECIPES = [
-  'none', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+  'none', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
 ] as const;
 export type MotionRecipe = (typeof MOTION_RECIPES)[number];
 
@@ -323,7 +327,7 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
+  none: 0, A1: 2, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -338,7 +342,7 @@ export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
  * so it composes with parallax and Ken Burns rather than fighting them.
  */
 export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A4', 'A6', 'A7', 'S5',
+  'A1', 'A2', 'A4', 'A6', 'A7', 'S5',
 ]);
 
 /**
@@ -368,7 +372,7 @@ export const MOTION_VIDEO_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRec
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+  'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
 ]);
 
 /**
@@ -385,6 +389,16 @@ export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionReci
  * or a view() timeline. Four recipes were expected to need a script and did not.
  */
 export const MOTION_SCRIPT_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A3']);
+
+/**
+ * The recipes driven by public/tg-sea.js, the WebGL sea. Separate from the script
+ * set above because they load a DIFFERENT file: tg-motion.js is a few KB of DOM
+ * nudging, tg-sea.js is the shader engine, and a page with a drifting rail should
+ * not pull the sea, nor the other way round. A1 is the only member and, being the
+ * one tier-2 recipe, it is the whole reason the per-page cap exists: tg-sea.js
+ * animates the FIRST such section only and leaves any other on its still photograph.
+ */
+export const MOTION_SEA_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A1']);
 
 /**
  * The recipes that animate the section's BLOCKS ARRIVING.

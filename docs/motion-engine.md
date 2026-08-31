@@ -15,7 +15,7 @@ If the two ever disagree, this file is wrong: `MOTION_CHOICES` in
 
 ---
 
-## Nine movements, each with three strengths
+## Ten movements, each with three strengths
 
 A section's **Movement** dropdown. Every one also takes an intensity, and the
 band is deliberately Gentle / Medium / Strong with no "off": a recipe that can be
@@ -28,18 +28,31 @@ turned down to nothing is a checkbox wearing a slider's clothes.
 | Scenes change | A2 | Background frames cross-fading |
 | Layers drift apart | A4 | Near and far layers separating |
 | Film behind the words | A7 | A moving background behind the text |
+| Cinematic sea | A1 | A WebGL Gerstner-wave sea on the GPU, behind the words |
 | Background settles | S5 | The background scrubbing to rest as you scroll |
 | Words rise like a tide | S1 | The section's text arriving |
 | Cards stack up | S3 | Sticky-stacking cards |
 | Cards drift past | A3 | A rail drifting on its own, added to by scroll |
 
-**All nine are live.** Every entry the editor offers has CSS behind it and a
-reduced-motion path, and `tests/motion.test.ts` fails if one does not.
+**All ten are live.** Every entry the editor offers renders, and
+`tests/motion.test.ts` fails if one does not.
 
-**Only A3 needs JavaScript.** Everything else is a stylesheet. That is the whole
-point of the split: a page that asks for nothing ships nothing, and A3 is the one
-thing CSS cannot express (a track that drifts by itself AND is added to by
-scroll).
+**Two need JavaScript, each its own file, and the rest are pure stylesheet.** A3
+drifting-rail pulls `tg-motion.js` (a track that drifts by itself AND is added to
+by scroll is the one thing CSS cannot express). A1 cinematic sea (added 31 Aug
+2026) pulls `tg-sea.js`, the hand-written WebGL shader engine: it is the one tier-2
+recipe, so it caps itself at one canvas per page, creates NO canvas at all under
+reduced motion (the section's own still photograph is the fallback and a finished
+hero), caps the device pixel ratio, and pauses when off-screen or the tab is
+hidden. A page carrying neither ships neither file: a page that asks for nothing
+ships nothing.
+
+Separately, `tg-motion.js` now also carries a fallback so **reveal and parallax
+move on Safari and Firefox** (added 31 Aug 2026), not just Chromium. They are
+scroll-driven CSS on a view() timeline that only Chromium ships; where it is
+missing the script drives the same keyframes on an IntersectionObserver and a
+scroll listener, and where it is present the CSS does it all and the script stands
+down. See the reveal/parallax fallback in `app/globals.css` and `public/tg-motion.js`.
 
 ---
 

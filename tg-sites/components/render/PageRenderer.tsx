@@ -530,6 +530,16 @@ export function SectionRenderer({
       data-motion={motion}
       data-motion-intensity={motion ? String(section.motion?.intensity ?? 2) : undefined}
       /*
+       * The sea reads its swell from the section's intensity band, so Gentle / Medium
+       * / Strong turns down or up how much the water heaves. Only for A1, and read by
+       * tg-sea.js; every other recipe carries its intensity in the stylesheet instead.
+       */
+      data-sea-swell={
+        motion === 'A1'
+          ? String([0.45, 0.65, 0.9][(section.motion?.intensity ?? 2) - 1] ?? 0.65)
+          : undefined
+      }
+      /*
        * THE FIRST SECTION IS A DIFFERENT PROBLEM AND HAS TO SAY SO.
        *
        * A scroll-driven recipe is timed by the section entering the viewport,

@@ -689,6 +689,26 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * CINEMATIC SEA (A1, Andy 31 Aug 2026). The one WebGL recipe: public/tg-sea.js mounts
+ * a <canvas class="tgs-sea"> into the section, over its still photographic background
+ * and under the scrim and the words, and animates a Gerstner-wave sea on the GPU.
+ *
+ * There is NO keyframe here to guard, because the movement is the shader and the
+ * script refuses to create a canvas at all under prefers-reduced-motion (and where
+ * there is no WebGL, and for any second A1 section on a page). What is left for the
+ * stylesheet is to place the canvas and clip its overspill. With no script, no WebGL
+ * or reduced motion the canvas never appears and the section is simply its still
+ * photograph, which is a finished hero rather than a broken one.
+ */
+.tgs-section[data-motion='A1'] { overflow: clip; }
+.tgs-section[data-motion='A1'] .tgs-sea {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* ------------------------------------------------------------------ */
 /* Rows and columns                                                    */
 /* ------------------------------------------------------------------ */
