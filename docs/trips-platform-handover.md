@@ -724,8 +724,16 @@ priority-ish order so the next session picks up without re-deriving them:
   6. **Multi-currency** — price / hold / checkout in the traveller's currency, and
      cross-trip reporting that converts (needs an FX source). One currency per trip
      today. Decide: wire an FX feed and build it, or keep the "indicative" label.
-  7. **Reviews** — collect verified post-trip reviews and an embeddable reviews
-     widget. Nothing in Trips yet (tg-widgets has a reviews widget to draw on).
+  7. **Reviews** — DONE 28 Aug. gt_018 gt_reviews. Verified collection
+     (/review/[reference], reference-gated so only real bookers), operator
+     moderation (a Reviews tab on Manage Trip: approve / hide / remove), public
+     display on the trip page with a star roll-up (lib/reviews, pure + tested),
+     a public GET /api/v1/trips/{id}/reviews, a data-tg-reviews embed widget
+     (embed.js v0.3.0) and a [tg_reviews] WP shortcode. Live-verified: endpoint
+     returns approved-only 4.7/3 with no PII, the trip page shows the three and
+     hides the pending one, the widget renders the half-star summary. FOLLOW-UP:
+     an automatic post-trip review-invite email and a per-booking copy-link
+     button (operators share /review/{reference} today).
   8. **Participant tasks** — a per-traveller to-do checklist with reminders
      ("upload passport", "pay balance") as trackable tasks, not just collected data.
   9. **White-label / custom domain** for an operator's booking pages (Enterprise band).
