@@ -1,11 +1,27 @@
 /**
- * POST /api/cron/reference-climate  (RESCHEDULED 28 Aug 2026 with wider bands)
+ * POST /api/cron/reference-climate  (OFF for good, 31 Aug 2026. 74 of 118 done.)
  *
- * Turned back on the same day it was stopped, because the reason it stopped was
- * a decision waiting to be made rather than a limit of the data. Andy widened
- * the temperature band from 3 to 5 degrees and the rainfall floor from 12mm to
- * 25mm, which between them address the first two causes below. Expect the third
- * to survive: Fiordland and the Galapagos should still fail, and should.
+ * FINAL POSITION. 74 of the 118 city records converted. 44 did not and will not
+ * from these two sources.
+ *
+ * It was widened once, on 28 Aug, when temperature turned out to be the biggest
+ * blocker and the failures were ordinary places rather than exotic terrain: New
+ * York at 3.9 degrees, Queenstown at 3.4. Andy took the band from 3 to 5 degrees
+ * and the rainfall floor from 12mm to 25mm. That released ten records over the
+ * following three days and then stopped: roughly 36 runs, 288 record attempts,
+ * ten successes, about 3.5%. Verified that the cron really was firing (12 times
+ * a day) and the widened constants really were deployed, before concluding the
+ * data rather than the plumbing was the limit.
+ *
+ * NOT WIDENED A THIRD TIME, deliberately. Two rounds of loosening is where this
+ * ends. A band wide enough to pass Fiordland at 375mm against 176mm is a band
+ * that has stopped checking anything, and the whole point of a second source is
+ * that it can still say no.
+ *
+ * The 44 keep the written climate summary they have always had, archived at
+ * docs/climate-archive/cities-climate-prose.json. Finishing them means
+ * hand-verification against a published source, one record at a time, which is
+ * a person's job and not this cron's.
  *
  * The history that produced those numbers is worth keeping.
  *

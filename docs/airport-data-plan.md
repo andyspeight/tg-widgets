@@ -513,3 +513,28 @@ quietly, so the cron is off and the position is reported rather than loosened.
 
 The prose in every unconverted record is untouched, and archived at
 `docs/climate-archive/cities-climate-prose.json` regardless.
+
+### 31 August 2026: the climate fill is finished at 74 of 118
+
+One widening, on 28 Aug, took the temperature band from 3 to 5 degrees and the
+rainfall floor from 12mm to 25mm. It released ten records over the following
+three days and then stopped: about 36 runs, 288 record attempts, ten successes,
+roughly 3.5%.
+
+Before calling that a limit of the data, both plausible plumbing faults were
+ruled out. The cron really was firing, twelve times a day, confirmed by
+isolating a single cron slot in the logs rather than trusting a top-25 listing
+that had hidden it. The widened constants really were on main and deployed.
+
+| | |
+|---|---:|
+| Records holding prose at the start | 118 |
+| Converted | 74 |
+| Remaining | 44 |
+
+**Not widened a third time.** A band wide enough to pass Fiordland at 375mm
+against 176mm is a band that has stopped checking anything, and the value of a
+second source is that it can still say no. The 44 keep the written summary they
+have always had, archived at `docs/climate-archive/cities-climate-prose.json`.
+Finishing them means hand-verification against a published source, one record at
+a time.
