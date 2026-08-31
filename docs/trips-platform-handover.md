@@ -744,6 +744,30 @@ priority-ish order so the next session picks up without re-deriving them:
      automated task reminders (reuse the notify seam + daily cron) and a
      per-traveller variant.
   9. **White-label / custom domain** for an operator's booking pages (Enterprise band).
+      BRANDING SLICE DONE 31 Aug (custom-domain DNS still parked — the one part
+      that can't be exercised without wiring DNS). Before, only the trip page
+      wore the operator logo and /booked was barely branded. Now the WHOLE
+      traveller journey — trip, book, register, review, confirmation — carries
+      the operator's logo masthead, accent colour and font, so it feels like the
+      operator's own site. lib/brand-ui.tsx: shared BrandMast (logo or name) and
+      PoweredBy (footer credit). /booked was the big gap: getConfirmation now
+      returns the operator brand + hide_powered_by, and the page themes
+      accent+font, adds the masthead and the footer. gt_023 adds
+      hide_powered_by (default false) on gt_operators — the white-label toggle:
+      a small "Powered by Travelgenix Trips" credit (links trips.travelify.io)
+      shows by default and vanishes when the toggle is on, the operator's brand
+      staying put. Owner-gated /console/branding page: a live masthead preview +
+      the toggle (setPoweredByAction); a Branding nav tab across the console.
+      Live-verified on prod: /booked renders the operator's navy #1b2b5b + DM
+      Sans, the name masthead and the credit; flipping hide_powered_by removes
+      the credit while the brand stays; the console Branding page shows the
+      preview + toggle. 209 tests green. NOTE: brand fields (logo, colour, font)
+      come from the client's brand record, not authored in Trips, so the console
+      Branding screen only owns the white-label toggle. FOLLOW-UP / DECISION FOR
+      ANDY: (a) custom-domain DNS (book.theiroperator.com → their pages) is the
+      remaining half of gap 9 and needs infra; (b) whether to band-gate the
+      hide-powered-by toggle (make white-label a paid perk, e.g. scale/enterprise
+      only) — today any owner can toggle it.
   10. **Integrations** — a public WRITE API, Zapier, and accounting export
       (QuickBooks / Xero). ACCOUNTING EXPORT DONE 31 Aug: an operator downloads
       a finance ledger of every booking from the Reports page (a Download
