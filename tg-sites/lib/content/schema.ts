@@ -801,6 +801,19 @@ export const SectionSchema = z.object({
   /** Floor on the section's height, so a short section can still be tall. */
   minHeight: z.unknown().transform((v) => px(v, MAX_MIN_HEIGHT)),
   /**
+   * FILL THE SCREEN, added 30 Aug 2026. The section is exactly one viewport tall
+   * (100svh), device-independent, the standard hero want that a pixel minimum
+   * could never hit on every screen at once. A floor still, so a section with more
+   * content than a screenful grows past it. Off by default and optional, so no
+   * stored section changes shape; when on it overrides the pixel minimum height,
+   * which the editor hides. See the --tgs-min-h clamp in globals.css.
+   *
+   * Total, not a strict boolean: a hand-edited or imported page can carry any
+   * value on a new key, and only `true` turns it on; anything else is off, never
+   * a parse failure that would lose the whole page.
+   */
+  fullHeight: z.unknown().transform((v) => (v === true ? true : undefined)).optional(),
+  /**
    * Animate the section's blocks up into view as it scrolls onto the screen.
    *
    * Off by default and optional, so no stored section changes shape. The render

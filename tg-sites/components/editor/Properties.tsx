@@ -1440,21 +1440,46 @@ function SectionFields({
         the foot of the section to fine tune it.
       </p>
 
-      <Measure
-        label="Minimum height"
-        value={section.minHeight}
-        max={MAX_MIN_HEIGHT}
-        step={10}
-        hint="A floor, not a fixed height. A section with more content in it still grows."
-        onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
-      />
+      {/*
+        FILL THE SCREEN. A viewport-tall section (100svh), device-independent,
+        which a pixel minimum could never hit on every screen at once. It wins
+        over the pixel height, so that control steps aside while it is on.
+      */}
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={section.fullHeight === true}
+            onChange={(event) =>
+              set({ fullHeight: event.target.checked || undefined }, `sec:${index}:fullh`)
+            }
+          />
+          <span>Fill the screen</span>
+        </label>
+        <p className="ed-help" style={{ marginTop: 6 }}>
+          Makes the section exactly one screen tall, whatever the device. A section
+          with more than a screenful of content still grows past it.
+        </p>
+      </div>
+
+      {!section.fullHeight && (
+        <Measure
+          label="Minimum height"
+          value={section.minHeight}
+          max={MAX_MIN_HEIGHT}
+          step={10}
+          hint="A floor, not a fixed height. A section with more content in it still grows."
+          onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
+        />
+      )}
 
       {/*
         * Only worth asking once the section can actually be taller than its
-        * content. Below that there is no spare height to place, and a control
-        * that does nothing is worse than no control.
+        * content: a screenful (fill the screen) or a pixel floor. Below that
+        * there is no spare height to place, and a control that does nothing is
+        * worse than no control.
         */}
-      {(section.minHeight ?? 0) > 0 && (
+      {(section.fullHeight || (section.minHeight ?? 0) > 0) && (
         <div className="ed-field">
           <label className="ed-label" htmlFor={`ed-aligny-${index}`}>
             Content sits

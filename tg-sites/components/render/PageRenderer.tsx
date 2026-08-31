@@ -566,7 +566,9 @@ export function SectionRenderer({
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,
-        '--tgs-min-h': `${section.minHeight}px`,
+        // Fill the screen wins over the pixel floor: 100svh is exactly one
+        // viewport, and the --tgs-min-h clamp already caps a pixel floor at it.
+        '--tgs-min-h': section.fullHeight ? '100svh' : `${section.minHeight}px`,
         '--tgs-scrim': section.overlay,
         ...(section.pullUp ? { '--tgs-pull-up': `${section.pullUp}px` } : {}),
         // Only when a colour was chosen. Left unset, the scrim CSS falls back to

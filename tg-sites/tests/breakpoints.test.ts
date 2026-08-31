@@ -1484,3 +1484,39 @@ describe('a card link underline sweeps in on hover rather than snapping', () => 
     expect(css).not.toContain('.tgs-card__link:hover { text-decoration: underline; }');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Fill the screen: a viewport-tall section (30 Aug 2026).
+// ---------------------------------------------------------------------------
+describe('a section can fill the screen', () => {
+  const rawPage = (fullHeight: unknown) => ({
+    version: 1,
+    id: 'p',
+    title: 'T',
+    slug: '',
+    sections: [{ id: 's', rows: [], fullHeight }],
+  });
+
+  it('keeps fullHeight through parsePage, and ignores nonsense', () => {
+    const parsed = parsePage(rawPage(true));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].fullHeight).toBe(true);
+    // A non-boolean is dropped (optional boolean), so a stray value is no rule.
+    const junk = parsePage(rawPage('yes'));
+    expect(junk.ok).toBe(true);
+    if (junk.ok) expect(junk.page.sections[0].fullHeight).toBeUndefined();
+  });
+
+  it('renders 100svh for the floor when full height, the pixel value otherwise', () => {
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).toContain("section.fullHeight ? '100svh' : `${section.minHeight}px`");
+  });
+
+  it('the editor offers the toggle and hides the pixel height when it is on', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('Fill the screen');
+    expect(props).toContain('{ fullHeight: event.target.checked || undefined }');
+    expect(props).toContain('{!section.fullHeight && (');
+  });
+});
