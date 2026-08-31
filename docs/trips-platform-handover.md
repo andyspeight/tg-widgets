@@ -714,10 +714,37 @@ and pushed on its own commit. Migrations gt_008–gt_016. In order:
      message) rather than being fully read-only — a cosmetic follow-up; the
      security boundary is the server gate, which is complete.
 
-The test suite is **168 green** (`node --test`), typecheck and build clean. The one
-still-open non-Stripe P1 is **multi-currency** (each trip is single-currency today;
-reports flag mixed-currency totals as indicative). Everything else on the parity
-list that does not need Stripe is built.
+The test suite is **169 green** (`node --test`), typecheck and build clean.
+
+**WeTravel gap backlog — agreed with Andy 28 Aug 2026, come back to these.** After
+the P1 sweep these are the remaining things WeTravel has that Trips does not.
+Andy chose to do the embed-set item (13) first; the rest are parked here in
+priority-ish order so the next session picks up without re-deriving them:
+
+  6. **Multi-currency** — price / hold / checkout in the traveller's currency, and
+     cross-trip reporting that converts (needs an FX source). One currency per trip
+     today. Decide: wire an FX feed and build it, or keep the "indicative" label.
+  7. **Reviews** — collect verified post-trip reviews and an embeddable reviews
+     widget. Nothing in Trips yet (tg-widgets has a reviews widget to draw on).
+  8. **Participant tasks** — a per-traveller to-do checklist with reminders
+     ("upload passport", "pay balance") as trackable tasks, not just collected data.
+  9. **White-label / custom domain** for an operator's booking pages (Enterprise band).
+  10. **Integrations** — a public WRITE API, Zapier, and accounting export
+      (QuickBooks / Xero). Only `/api/v1/trips` read exists today.
+  11. **Abandoned-booking recovery** — email a traveller who started but did not
+      finish (the tg-widgets enquiry engine is close but not wired into Trips).
+  12. **AI brochure import inside the standalone Trips app** — exists in the
+      tg-widgets Tour Builder, not yet ported to the new platform.
+  13. **Full embed set** — IN PROGRESS 28 Aug: grid + bare Book button + WordPress
+      plugin, extending `public/embed.js`. See the Embed widgets section above.
+
+Stripe-blocked money features (online deposits, payment plans + auto-billing,
+dunning, refunds, receipts) are tracked separately in §9 and the roadmap; they are
+seams, not gaps.
+
+Also still open (non-competitor): the reference-as-token hardening (a separate
+high-entropy link token), per-IP rate limiting on the public actions (needs a
+shared store), and basic observability before real bookings.
 
 ---
 
