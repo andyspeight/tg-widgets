@@ -745,7 +745,20 @@ priority-ish order so the next session picks up without re-deriving them:
      per-traveller variant.
   9. **White-label / custom domain** for an operator's booking pages (Enterprise band).
   10. **Integrations** — a public WRITE API, Zapier, and accounting export
-      (QuickBooks / Xero). Only `/api/v1/trips` read exists today.
+      (QuickBooks / Xero). ACCOUNTING EXPORT DONE 31 Aug: an operator downloads
+      a finance ledger of every booking from the Reports page (a Download
+      bookings CSV button → operator-gated GET /console/bookings.csv). One row
+      per booking: reference, trip, buyer, dates, party, room, promo, status,
+      currency and the money columns (total, deposit, collected, outstanding).
+      lib/finance is the pure, tested core (bookingCollected / bookingOutstanding
+      reuse the exact collected/outstanding model of the Reports and Manage
+      screens, so the ledger reconciles on screen; poundsAmount + bookingsCsv do
+      RFC 4180 quoting and CRLF); repo.listOperatorBookingsForExport joins
+      package/promo/departure/trip. Live-verified on prod: the download returns
+      text/csv with a slug+date filename and a deposit_paid row reconciling
+      7400/1000/1000/6400. No external dependency, so it needs no env keys.
+      STILL OPEN: the public WRITE API (only /api/v1/trips read exists) and
+      Zapier (needs a published Zapier app).
   11. **Abandoned-booking recovery** — DONE 28 Aug. gt_020 adds recovery_sent_at.
       A daily CRON_SECRET-guarded cron (/api/cron/abandoned-recovery, in
       vercel.json, 10:00 UTC) sweeps pending holds that lapsed without completing
