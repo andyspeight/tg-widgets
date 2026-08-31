@@ -129,6 +129,10 @@
       "schedule": "0 4 * * *"
     },
     {
+      "path": "/api/cron/reference-climate",
+      "schedule": "30 */2 * * *"
+    },
+    {
       "path": "/api/admin/backfill-enquiry-clients",
       "schedule": "23 * * * *"
     }

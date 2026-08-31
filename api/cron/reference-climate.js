@@ -1,7 +1,15 @@
 /**
- * POST /api/cron/reference-climate  (UNSCHEDULED 28 Aug 2026, it hit its floor)
+ * POST /api/cron/reference-climate  (RESCHEDULED 28 Aug 2026 with wider bands)
  *
- * Ran two-hourly from 26 to 28 Aug and converted 64 of the 118 city records
+ * Turned back on the same day it was stopped, because the reason it stopped was
+ * a decision waiting to be made rather than a limit of the data. Andy widened
+ * the temperature band from 3 to 5 degrees and the rainfall floor from 12mm to
+ * 25mm, which between them address the first two causes below. Expect the third
+ * to survive: Fiordland and the Galapagos should still fail, and should.
+ *
+ * The history that produced those numbers is worth keeping.
+ *
+ * It ran two-hourly from 26 to 28 Aug and converted 64 of the 118 city records
  * that were holding prose. Then it stopped converting: 7.5 records per run, then
  * 4.25, then 3.25, then 2.25, then 1 of 8, then 0 of 8. The window rotates, so
  * everything still outstanding has been tried repeatedly and failed for the same

@@ -22,7 +22,8 @@
 import {
   CLIMATE_TABLES, DAYS_IN_MONTH,
   isValidNumberSeries, isValidSeasonSeries, needsClimateFill, readCoords,
-  monthlyFromOpenMeteo, monthlyFromPower, corroborateMonthly, deriveSeason, RAIN_TOLERANCE_FRACTION,
+  monthlyFromOpenMeteo, monthlyFromPower, corroborateMonthly, deriveSeason,
+  RAIN_TOLERANCE_FRACTION, RAIN_TOLERANCE_FLOOR_MM, TEMP_TOLERANCE_C,
   formatSeries, runClimateFill,
 } from '../api/reference/_climate.js';
 
@@ -167,13 +168,41 @@ ok('a plausible reanalysis difference still corroborates', corroborateMonthly(om
 // passes, which is the Azores, and 72% apart does not, which is Fiordland.
 const azores = { tempMax: om.tempMax, rainTotal: om.rainTotal.map(r => r * 0.56) };
 ok('a 44 percent rainfall gap passes at the agreed band', corroborateMonthly(om, azores).agreed === true);
-const fiordland = { tempMax: om.tempMax, rainTotal: om.rainTotal.map(r => r * 0.47) };
-ok('a 72 percent rainfall gap still fails', corroborateMonthly(om, fiordland).agreed === false);
-ok('the band is the agreed 0.6', RAIN_TOLERANCE_FRACTION === 0.6);
+ok('the fraction is the agreed 0.6', RAIN_TOLERANCE_FRACTION === 0.6);
+ok('the floor is the agreed 25mm', RAIN_TOLERANCE_FLOOR_MM === 25);
+ok('the temperature band is the agreed 5 degrees', TEMP_TOLERANCE_C === 5);
 
-// Widening rainfall must not have widened temperature by accident.
-const tempDrift = { tempMax: om.tempMax.map(t => t + 4), rainTotal: om.rainTotal };
-ok('a 4 degree temperature gap still fails', corroborateMonthly(om, tempDrift).agreed === false);
+// Real numbers from the 28 Aug run logs, not scaled fixtures, so the bands are
+// pinned against the cases that actually drove the decisions.
+const flat = n => Array(12).fill(n);
+
+// Fiordland: 375mm against 176mm. Genuine divergence in the wettest inhabited
+// terrain on earth, and it must STILL fail. This is the case the fraction is
+// for, and no floor change should rescue it.
+ok('Fiordland at 375 against 176 still fails',
+  corroborateMonthly({ tempMax: flat(15), rainTotal: flat(375) },
+    { tempMax: flat(15), rainTotal: flat(176) }).agreed === false);
+
+// Sal: 5mm against 21mm. A sixteen millimetre gap in a desert month, failing on
+// ratio alone at the old 12mm floor. The floor exists precisely for this.
+ok('Sal at 5 against 21 now passes on the 25mm floor',
+  corroborateMonthly({ tempMax: flat(25), rainTotal: flat(5) },
+    { tempMax: flat(25), rainTotal: flat(21) }).agreed === true);
+
+// New York: 3.9 degrees apart. Not exotic terrain, and the case that showed the
+// 3 degree band was rejecting good data rather than catching bad.
+ok('New York at 3.9 degrees now passes',
+  corroborateMonthly({ tempMax: flat(15.5), rainTotal: flat(90) },
+    { tempMax: flat(11.6), rainTotal: flat(90) }).agreed === true);
+
+// The band must still catch the errors it exists for. The climatology product
+// that caused the original failure was out by 5 to 9 degrees.
+ok('a 6 degree temperature gap still fails',
+  corroborateMonthly({ tempMax: flat(31), rainTotal: flat(90) },
+    { tempMax: flat(37), rainTotal: flat(90) }).agreed === false);
+ok('the original 9 degree climatology error would still be caught',
+  corroborateMonthly({ tempMax: flat(31.6), rainTotal: flat(90) },
+    { tempMax: flat(40.4), rainTotal: flat(90) }).agreed === false);
 
 // --- season derivation -----------------------------------------------------
 const med = deriveSeason([14, 15, 17, 20, 24, 29, 32, 32, 28, 23, 18, 15], [80, 70, 60, 40, 20, 5, 1, 2, 25, 70, 90, 95]);

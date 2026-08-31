@@ -281,7 +281,22 @@ export function monthlyFromPower(json) {
 // ---- pure: corroboration --------------------------------------------------
 /** Tolerances. Loose enough that two reanalyses can agree, tight enough to
  *  catch the errors that matter: wrong grid cell, wrong hemisphere, wrong unit. */
-export const TEMP_TOLERANCE_C = 3;
+/**
+ * Temperature was widened from 3 to 5 degrees on 28 Aug 2026, Andy's decision.
+ *
+ * The evidence that prompted it: after the rainfall band was widened, the
+ * BIGGEST remaining blocker turned out to be temperature, and the failures were
+ * not exotic. New York failed at 3.9 degrees, Queenstown at 3.4, Varadero at
+ * 3.3, Phnom Penh at 3.1, Thassos at 3.2. Three degrees is simply tighter than
+ * two reanalyses agree in ordinary places, so the band was rejecting good data
+ * rather than catching bad.
+ *
+ * Five still catches everything that matters, because the errors worth catching
+ * are not subtle: a wrong grid cell, a swapped hemisphere or a unit mistake all
+ * show as ten degrees or more. The climatology product that started this whole
+ * problem was out by 5 to 9 and would still be caught.
+ */
+export const TEMP_TOLERANCE_C = 5;
 
 /**
  * Rainfall was widened from 0.4 to 0.6 on 26 Aug 2026, Andy's decision, taken
@@ -298,7 +313,19 @@ export const TEMP_TOLERANCE_C = 3;
  * wettest and driest places on the worklist stay blocked.
  */
 export const RAIN_TOLERANCE_FRACTION = 0.6;
-export const RAIN_TOLERANCE_FLOOR_MM = 12;
+/**
+ * The floor went from 12mm to 25mm on 28 Aug 2026, same decision.
+ *
+ * It exists so that a trivial absolute difference cannot fail on ratio alone,
+ * and at 12mm it was not doing that job: Sal failed on 5mm against 21mm and
+ * Volcanoes National Park on 4mm against 25mm. In an arid month a sixteen
+ * millimetre gap is meteorologically nothing, and rejecting a whole record over
+ * it was the floor set too low rather than the sources disagreeing.
+ *
+ * 25mm is still small against the months that matter. Anywhere with real
+ * rainfall is governed by the 60% fraction, not by this.
+ */
+export const RAIN_TOLERANCE_FLOOR_MM = 25;
 
 /**
  * Compare the two sources month by month. Pure.
