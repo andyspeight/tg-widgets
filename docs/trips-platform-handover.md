@@ -734,8 +734,15 @@ priority-ish order so the next session picks up without re-deriving them:
      hides the pending one, the widget renders the half-star summary. FOLLOW-UP:
      an automatic post-trip review-invite email and a per-booking copy-link
      button (operators share /review/{reference} today).
-  8. **Participant tasks** — a per-traveller to-do checklist with reminders
-     ("upload passport", "pay balance") as trackable tasks, not just collected data.
+  8. **Participant tasks** — DONE 28 Aug. gt_019 gt_trip_tasks + gt_task_done
+     (one done-row per task+booking, unique). A per-BOOKING checklist the operator
+     authors on the trip editor (label, optional detail, optional due date);
+     travellers tick items off on /booked (optimistic, overdue dates flagged, a
+     reference-gated tick action); the operator sees "Checklist: N of M done" on
+     the booking detail. Per-traveller obligations stay in the registration +
+     documents engine (not duplicated). Live-verified end to end. FOLLOW-UP:
+     automated task reminders (reuse the notify seam + daily cron) and a
+     per-traveller variant.
   9. **White-label / custom domain** for an operator's booking pages (Enterprise band).
   10. **Integrations** — a public WRITE API, Zapier, and accounting export
       (QuickBooks / Xero). Only `/api/v1/trips` read exists today.
