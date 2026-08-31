@@ -1528,6 +1528,19 @@ function SectionFields({
 
       <Group title="Motion" defaultOpen={false}>
         {/*
+          MOTION IS PAUSED WHILE EDITING. The render suppresses every section motion
+          (the recipe, reveal, parallax, Ken Burns and the hover effects) on the
+          editing canvas, so a drifting background does not jump back to the start on
+          every keystroke and a reveal does not replay as you type. That is right for
+          editing but it is also why a client who sets a recipe and stays in the
+          editor sees nothing move and assumes it is broken (Andy, 30 Aug 2026). The
+          note says where the motion actually is: press the eye to preview it.
+        */}
+        <p className="ed-help" data-tone="warn" style={{ marginBottom: 8 }}>
+          Movement is paused while you edit, so it does not distract. Press the eye
+          (Preview) at the top to see it move.
+        </p>
+        {/*
           THE MOTION RECIPE, first in the group because it is the headline choice: it
           says how the whole section moves, where the switches below it are finer
           adjustments. Picking a recipe that drives the background clears parallax and

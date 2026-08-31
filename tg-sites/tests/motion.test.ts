@@ -368,9 +368,26 @@ describe('one thing moves the background picture, never three', () => {
     }
   });
 
-  it('leaves the Ken Burns rules exactly as they were, so nothing published changes', () => {
-    expect(css).toContain('animation: tgs-ken-burns 24s ease-in-out infinite alternate;');
+  it('runs Ken Burns fast enough to be seen, retuned 30 Aug 2026', () => {
+    // Was 24s, at which the drift was below the eye's threshold and read as a
+    // still. 18s is still the calmest ambient move but visibly drifting on load.
+    expect(css).toContain('animation: tgs-ken-burns 18s ease-in-out infinite alternate;');
     expect(css).toContain('@keyframes tgs-ken-burns');
+  });
+
+  it('the always-on ambient recipes move perceptibly, not at the old sub-threshold rate', () => {
+    // A6 measured 0.075% of movement over 1.5s at 26s; now 16s at the medium band
+    // with a wider pan. A5's frames likewise run at 16s, not 26s.
+    expect(css).toContain('--tgs-motion-duration: 16s;');
+    expect(css).toContain('animation: tgs-motion-slow-frame 16s ease-in-out infinite alternate;');
+    // The drift actually pans across the scene now, not a near-still zoom.
+    expect(css).toContain('transform: scale(var(--tgs-motion-to)) translate(-6%, -4%);');
+  });
+
+  it('the editor tells the client motion is paused while editing, so it is not "broken"', () => {
+    const props = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    expect(props).toContain('Movement is paused while you edit');
+    expect(props).toContain('Press the eye');
   });
 });
 

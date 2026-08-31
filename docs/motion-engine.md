@@ -96,6 +96,39 @@ make and no script at all.
 
 ---
 
+## Why a client might see no motion (30 Aug 2026)
+
+Andy: "it is not obvious there is any motion." Three real causes, all now
+addressed, recorded so the next person does not re-diagnose them:
+
+1. **Motion is PAUSED while editing.** The render suppresses every section motion
+   (the recipe, reveal, parallax, Ken Burns, hover) on the editing canvas, gated
+   on `!editable` in PageRenderer, so a drifting background does not jump back to
+   the start on every keystroke and a reveal does not replay as you type. Correct
+   for editing, but it means a client who sets a recipe and stays in the editor
+   sees nothing. The fix is a note in the Motion group and the answer it gives:
+   **press the eye (Preview) to see it.** Preview and the published page run it.
+
+2. **The ambient recipes were below the eye's threshold.** Measured in Chromium,
+   A6 "Background drifts" moved 0.075% of scale and 0.14px over 1.5 seconds at its
+   old 26s duration: technically animating, perceptually a still. Retuned 30 Aug:
+   A6 16s (was 26s), A5 frames 16s (was 26s), Ken Burns 18s (was 24s), and the
+   drift keyframe pans -6%,-4% (was -2%,-1.5%). Still calm, now visibly moving on
+   load. `tests/motion.test.ts` pins these so they cannot drift back to subtle.
+
+3. **A recipe with an unmet precondition no-ops silently.** A6 needs a background
+   photograph (`.tgs-section__bg`); A5 needs cards or images in the section; S1
+   needs text blocks; S3 needs cards. Pick one without its precondition and
+   nothing moves. `motionHasWhatItNeeds` in the render already refuses to emit
+   `data-motion` for a recipe whose precondition is unmet, so the attribute in the
+   DOM always means something really moves; the remaining gap is telling the
+   client in the editor, a future nicety.
+
+Separately, the scroll-STEERED recipes (S1, S5, parallax, reveal) sit behind
+`@supports (animation-timeline: view())`. That is true in Chromium; where it is
+not, those recipes fall to a still, complete page (progressive enhancement). The
+ambient A-family recipes above need no such support and move everywhere.
+
 ## Where this got embarrassing, recorded so it does not repeat
 
 Asked on 25 Aug to make a client hero "more impressive", I offered Ken Burns and

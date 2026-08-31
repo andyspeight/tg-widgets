@@ -1171,7 +1171,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 @media (prefers-reduced-motion: no-preference) {
   .tgs-section[data-ken-burns] { overflow: clip; }
   .tgs-section[data-ken-burns] .tgs-section__bg {
-    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    /* 18s, not 24s: at 24s the drift was below the eye's threshold, so a client
+       who set it saw a still photo (Andy, 30 Aug 2026). Still the calmest of the
+       ambient moves, a slow documentary drift, but now visibly moving on load. */
+    animation: tgs-ken-burns 18s ease-in-out infinite alternate;
     transform-origin: center;
   }
 }
@@ -1180,7 +1183,9 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(1.05);
   }
   to {
-    transform: scale(1.16) translate(-2%, -1.5%);
+    /* More pan (-4%,-3%, was -2%,-1.5%) so it reads as drifting across the scene,
+       not only zooming in place. */
+    transform: scale(1.16) translate(-4%, -3%);
   }
 }
 
@@ -1215,33 +1220,36 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * ones the hover zoom leans on), and clip is restated here so a drifting picture can
  * never reach its neighbours even if a frame's overflow changes.
  */
+/* Amplitudes and durations retuned 30 Aug 2026: at 26-36s and a 2-9% scale the
+   breathing was imperceptible (measured 0.09px over 1.5s), so a client who set A5
+   saw stills. Faster and a touch wider now, still calm and desynchronised. */
 .tgs-section[data-motion='A5'] {
-  --tgs-motion-from: 1.02;
-  --tgs-motion-to: 1.09;
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.11;
 }
 .tgs-section[data-motion='A5'][data-motion-intensity='1'] {
-  --tgs-motion-from: 1.01;
-  --tgs-motion-to: 1.05;
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.07;
 }
 .tgs-section[data-motion='A5'][data-motion-intensity='3'] {
-  --tgs-motion-from: 1.03;
-  --tgs-motion-to: 1.14;
+  --tgs-motion-from: 1.05;
+  --tgs-motion-to: 1.18;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) { overflow: clip; }
   .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) img {
-    animation: tgs-motion-slow-frame 26s ease-in-out infinite alternate;
+    animation: tgs-motion-slow-frame 16s ease-in-out infinite alternate;
     transform-origin: center;
   }
 
   /* The desync. The item is the card in a card grid and the frame itself in a
      gallery, which is why both are listed: in each case the picture sits inside it. */
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n + 2) img {
-    animation-duration: 31s;
+    animation-duration: 20s;
   }
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n) img {
-    animation-duration: 36s;
+    animation-duration: 24s;
   }
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(even) img {
     animation-direction: alternate-reverse;
@@ -1253,7 +1261,7 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(var(--tgs-motion-from));
   }
   to {
-    transform: scale(var(--tgs-motion-to)) translate(-1.5%, -1%);
+    transform: scale(var(--tgs-motion-to)) translate(-3%, -2%);
   }
 }
 
@@ -1267,20 +1275,23 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * name. The render never sets both, because both move the one picture. Ken Burns is
  * left exactly as it was, so nothing already published changes.
  */
+/* Durations brought down 30 Aug 2026 (26/34/20s -> 16/22/12s): at 26s the drift
+   was 0.075% over 1.5s, below the eye's threshold, so "Background drifts" looked
+   like a still. The pan in the keyframe is widened too. Calm, but now moving. */
 .tgs-section[data-motion='A6'] {
   --tgs-motion-from: 1.04;
   --tgs-motion-to: 1.14;
-  --tgs-motion-duration: 26s;
+  --tgs-motion-duration: 16s;
 }
 .tgs-section[data-motion='A6'][data-motion-intensity='1'] {
   --tgs-motion-from: 1.03;
   --tgs-motion-to: 1.08;
-  --tgs-motion-duration: 34s;
+  --tgs-motion-duration: 22s;
 }
 .tgs-section[data-motion='A6'][data-motion-intensity='3'] {
   --tgs-motion-from: 1.05;
   --tgs-motion-to: 1.2;
-  --tgs-motion-duration: 20s;
+  --tgs-motion-duration: 12s;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1298,7 +1309,7 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(var(--tgs-motion-from));
   }
   to {
-    transform: scale(var(--tgs-motion-to)) translate(-2%, -1.5%);
+    transform: scale(var(--tgs-motion-to)) translate(-6%, -4%);
   }
 }
 
