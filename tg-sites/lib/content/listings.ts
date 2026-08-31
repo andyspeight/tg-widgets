@@ -23,6 +23,7 @@
 import type { CollectionItem } from './collection';
 import { fieldFacts, type FieldDef } from './collection-fields';
 import { carriesOwnBanner } from './collection-layout';
+import { expandLoop, type LoopItem } from './loop';
 import { readingTime } from './reading-time';
 import type { Page, Section } from './schema';
 
@@ -158,6 +159,42 @@ export function listingIn(block: { type: string; props?: Record<string, unknown>
     collection,
     count,
     facts,
+    order: orderIn(props),
+    filter: filterIn(props),
+    sort: sortIn(props),
+  };
+}
+
+/**
+ * Is this block a loop, and which collection does it repeat over?
+ *
+ * The loop's SIBLING to listingIn, and deliberately not folded into it. A loop
+ * reads its data the same way a collection-fed Cards block does (the same query,
+ * ordered and narrowed the same), so it shares the ListingRequest shape and the
+ * whole resolve-once-per-request machinery below. What it does NOT share is what
+ * the data becomes: a Cards block gets the fixed card shape, a loop gets raw items
+ * poured into a designed card. So the request is common and the fill is separate.
+ *
+ * A loop is ALWAYS from a collection (see the block registry), so there is no
+ * source to check, only a collection to have been named. `facts` is zero: a loop
+ * shows the fields it wants through {{field:key}} tokens, not a facts count.
+ */
+export function loopIn(block: { type: string; props?: Record<string, unknown> }): ListingRequest | null {
+  if (block.type !== 'loop') return null;
+  const props = block.props ?? {};
+
+  const collection = asString(props.collection).trim();
+  if (!collection) return null;
+
+  const raw = typeof props.count === 'number' ? props.count : Number(props.count);
+  const count = Number.isFinite(raw)
+    ? Math.min(MAX_COUNT, Math.max(MIN_COUNT, Math.round(raw)))
+    : 6;
+
+  return {
+    collection,
+    count,
+    facts: 0,
     order: orderIn(props),
     filter: filterIn(props),
     sort: sortIn(props),
@@ -388,4 +425,95 @@ export function fillListings<T extends { sections: Section[] }>(tree: T, data: L
 /** The same, typed for a page, which is what the routes hold. */
 export function fillPageListings(page: Page, data: ListingData): Page {
   return fillListings(page, data);
+}
+
+// ---------------------------------------------------------------------------
+// The collection loop: the same read as a listing, poured into a designed card
+// ---------------------------------------------------------------------------
+
+/**
+ * Every distinct loop query on a set of trees, deduped the same way listings are.
+ *
+ * Two loops over the same narrowed collection share one read, for the larger of
+ * the two counts; two loops narrowed differently are two reads. The facts count
+ * plays no part (a loop has none), so it stays zero. See listingKey.
+ */
+export function loopsIn(trees: ReadonlyArray<{ sections: Section[] } | null | undefined>): ListingRequest[] {
+  const wanted = new Map<string, ListingRequest>();
+
+  for (const tree of trees) {
+    if (!tree) continue;
+    for (const section of tree.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const block of column.blocks) {
+            const loop = loopIn(block);
+            if (!loop) continue;
+            const key = listingKey(loop);
+            const soFar = wanted.get(key);
+            wanted.set(key, { ...loop, count: Math.max(soFar?.count ?? 0, loop.count) });
+          }
+        }
+      }
+    }
+  }
+
+  return [...wanted.values()];
+}
+
+/**
+ * One loop query's answer: the raw items and the collection's field definitions.
+ *
+ * RAW, unlike a listing's already-shaped cards, because a loop fills a card the
+ * client designed rather than a fixed one: the tokens reach every field an item
+ * has, and {{field:price}} needs the definition to format 1299 as "£1,299". So
+ * the feed carries what the binding engine (lib/content/loop.ts) needs and no
+ * more, and the shaping happens once per card at expansion rather than up front.
+ */
+export type LoopFeed = { items: readonly LoopItem[]; defs: readonly FieldDef[] };
+
+/** Loop feeds by request key, the loop counterpart to ListingData. */
+export type LoopData = Map<string, LoopFeed>;
+
+/**
+ * A page with its loop blocks expanded over their items.
+ *
+ * The loop counterpart to fillListings, and the same discipline: returns the
+ * SAME tree when there is nothing to expand, walks once, and never mutates a
+ * block (expandLoop returns a fresh one). It runs on a COPY of the tree at
+ * render, so the stored loop keeps its single template column and re-expands on
+ * the next request. A loop whose collection has nothing published expands to no
+ * cells, which the renderer draws as the calm empty state.
+ */
+export function fillLoops<T extends { sections: Section[] }>(tree: T, data: LoopData): T {
+  if (data.size === 0) return tree;
+
+  let touched = false;
+
+  const sections = tree.sections.map((section) => ({
+    ...section,
+    rows: section.rows.map((row) => ({
+      ...row,
+      columns: row.columns.map((column) => ({
+        ...column,
+        blocks: column.blocks.map((block) => {
+          const loop = loopIn(block);
+          if (!loop) return block;
+
+          const feed = data.get(listingKey(loop));
+          if (!feed) return block;
+
+          touched = true;
+          return expandLoop(block, feed.items.slice(0, loop.count), feed.defs);
+        }),
+      })),
+    })),
+  }));
+
+  return touched ? { ...tree, sections } : tree;
+}
+
+/** The same, typed for a page, which is what the routes hold. */
+export function fillPageLoops(page: Page, data: LoopData): Page {
+  return fillLoops(page, data);
 }

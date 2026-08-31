@@ -4080,6 +4080,130 @@
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
+      "id": "loop",
+      "name": "Collection loop",
+      "category": "cards and lists",
+      "travelSpecific": false,
+      "staffOnly": false,
+      "description": "Design one card, repeated over a collection. Your shape, their data.",
+      "variants": [],
+      "props": [
+        {
+          "name": "collection",
+          "type": "text",
+          "role": "content",
+          "required": true,
+          "default": ""
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 6
+        },
+        {
+          "name": "order",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "newest",
+            "oldest",
+            "title",
+            "title-desc",
+            "manual"
+          ],
+          "default": "newest"
+        },
+        {
+          "name": "across",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "3"
+        },
+        {
+          "name": "acrossTablet",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "2"
+        },
+        {
+          "name": "acrossPhone",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "default": "1"
+        },
+        {
+          "name": "gap",
+          "type": "number",
+          "role": "config",
+          "required": false,
+          "default": 16
+        },
+        {
+          "name": "align",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "top",
+            "centre",
+            "bottom",
+            "stretch"
+          ],
+          "default": "stretch"
+        },
+        {
+          "name": "linkWhole",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": true
+        }
+      ],
+      "classNames": [
+        "tgs-loop"
+      ],
+      "tokensUsed": [
+        "colour.accent"
+      ],
+      "hardcoded": {
+        "colours": [],
+        "spacing": []
+      },
+      "cssRules": 5,
+      "sourcePath": "tg-sites/components/render/blocks.tsx",
+      "registryPath": "tg-sites/lib/content/blocks.ts"
+    },
+    {
       "id": "divider",
       "name": "Divider",
       "category": "layout",

@@ -1,4 +1,14 @@
-import { itemAsCard, listingKey, listingsIn, type ListingRequest } from '../content/listings';
+import {
+  itemAsCard,
+  listingKey,
+  listingsIn,
+  loopsIn,
+  type ListingRequest,
+  type LoopData,
+  type LoopFeed,
+} from '../content/listings';
+import type { CollectionItem } from '../content/collection';
+import type { LoopItem } from '../content/loop';
 import type { Section } from '../content/schema';
 import { listPublished } from './collections';
 
@@ -74,4 +84,67 @@ export async function resolveListings(
   for (const { request, cards: rows } of results) cards.set(listingKey(request), rows);
 
   return cards;
+}
+
+// ---------------------------------------------------------------------------
+// The collection loop reads the SAME rows a listing does, kept raw
+// ---------------------------------------------------------------------------
+
+/**
+ * A published item as the loop's raw input, its href pointing at its own page.
+ *
+ * The counterpart to itemAsCard, and deliberately thinner: it shapes NOTHING. A
+ * card is a fixed layout, so itemAsCard decides a label, a reading time and
+ * formatted facts up front. A loop pours the item into a card the client
+ * designed, so every field travels raw and the binding engine decides what each
+ * one becomes when it fills a token. See lib/content/loop.ts.
+ */
+export function itemAsLoopItem(item: CollectionItem, collectionKey: string, slug: string): LoopItem {
+  return {
+    title: item.title,
+    summary: item.summary,
+    image: item.image,
+    alt: item.alt,
+    author: item.author,
+    date: item.date,
+    tags: item.tags,
+    fields: item.fields,
+    href: `/${collectionKey}/${slug}`,
+  };
+}
+
+/**
+ * The raw items every loop block on a set of trees wants, read in one round.
+ *
+ * The loop counterpart to resolveListings, sharing its one-read-per-request
+ * discipline (see loopsIn and listingKey). The collection's field definitions
+ * come back with the items and travel in the feed, so {{field:price}} can be
+ * formatted at expansion without a second read.
+ */
+export async function resolveLoops(
+  tenantId: string,
+  trees: ReadonlyArray<{ sections: Section[] } | null | undefined>,
+): Promise<LoopData> {
+  const wanted = loopsIn(trees);
+  const feeds: LoopData = new Map();
+  if (wanted.length === 0) return feeds;
+
+  const results = await Promise.all(
+    wanted.map(async (request) => {
+      const listing = await listPublished(tenantId, request.collection, request.count, {
+        filter: request.filter,
+        sort: request.sort,
+        order: request.order,
+      });
+      const feed: LoopFeed = {
+        items: listing.items.map((row) => itemAsLoopItem(row.item, request.collection, row.slug)),
+        defs: listing.fields,
+      };
+      return { request, feed };
+    }),
+  );
+
+  for (const { request, feed } of results) feeds.set(listingKey(request), feed);
+
+  return feeds;
 }

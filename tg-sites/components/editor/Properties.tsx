@@ -3612,9 +3612,16 @@ function BlockFields({
       {canStructure && path.kind === 'block' && block.type === 'grid' && (
         <GridCellsControl block={block} path={path} onCommit={onCommit} />
       )}
-      {canStructure && path.kind === 'block' && block.type !== 'grid' && hasInnerColumns(block.type) && (
-        <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
-      )}
+      {/* A loop is a column-holder too, but with exactly ONE column: it repeats a
+          single designed card, so adding or removing columns has no meaning. It
+          keeps the nested editing of that one card and skips this control. */}
+      {canStructure &&
+        path.kind === 'block' &&
+        block.type !== 'grid' &&
+        block.type !== 'loop' &&
+        hasInnerColumns(block.type) && (
+          <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
+        )}
       {ordered.map((group, index) => (
         <Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>
           {groups.get(group)}

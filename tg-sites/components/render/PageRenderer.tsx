@@ -102,6 +102,42 @@ function gridAlign(block: Block): 'top' | 'centre' | 'bottom' | 'stretch' {
   return raw === 'centre' || raw === 'bottom' || raw === 'stretch' ? raw : 'top';
 }
 
+/** One expanded loop cell: a card's bound blocks, the entry it links to, its title. */
+interface LoopCell {
+  blocks: Block[];
+  href: string;
+  label: string;
+}
+
+/** A loop block's `props.columns`, whatever shape they are in (template or expanded). */
+function loopCellsOf(block: Block): LoopCell[] {
+  const columns = (block.props as { columns?: unknown }).columns;
+  return Array.isArray(columns) ? (columns as LoopCell[]) : [];
+}
+
+/**
+ * Has this loop been EXPANDED by the route, or is it still its stored template?
+ *
+ * The discriminator is the per-cell href, which expandLoop writes on every cell
+ * and a stored template column never has (see lib/content/loop.ts). An expanded
+ * loop with items has one or more cells all carrying an href; a stored loop has
+ * its one template column with none. A published loop over an empty collection
+ * expands to zero cells, which reads here as "not expanded" and draws the calm
+ * empty state, which is exactly right.
+ */
+function loopExpanded(block: Block): boolean {
+  const cells = loopCellsOf(block);
+  return (
+    cells.length > 0 &&
+    cells.every((cell) => cell && typeof cell === 'object' && typeof cell.href === 'string')
+  );
+}
+
+/** Does the whole card link to its entry? On unless the client turned it off. */
+function loopLinkWhole(block: Block): boolean {
+  return (block.props as { linkWhole?: unknown }).linkWhole !== false;
+}
+
 interface Editable {
   editable?: boolean;
   /**
@@ -1254,6 +1290,43 @@ function blockHost(
           prepared={prepared}
           sizes={sizes}
         />
+      ) : block.type === 'loop' ? (
+        /*
+         * A COLLECTION LOOP has two faces, and which one shows is decided by
+         * whether the route has EXPANDED it. On a published page the loop arrives
+         * expanded (fillLoops in lib/content/listings.ts has poured its items into
+         * per-item cells, each carrying an href), so it draws as a grid of those
+         * cards, each a link to its entry. On the editor canvas there is no route
+         * to expand it, so it keeps its single template column and is edited in
+         * place exactly as a container is: that is how the client designs the one
+         * card the loop repeats. See loopExpanded.
+         */
+        loopExpanded(block) ? (
+          <InnerLoop
+            cells={loopCellsOf(block)}
+            across={gridAcross(block)}
+            gap={innerGap(block)}
+            align={gridAlign(block)}
+            linkWhole={loopLinkWhole(block)}
+            editorCanvas={editorCanvas}
+            prepared={prepared}
+            sizes={sizes}
+          />
+        ) : editable ? (
+          <InnerColumns
+            columns={innerColumnsOf(block)}
+            gap={innerGap(block)}
+            stack="always"
+            keyPath={keyPath}
+            editable={editable}
+            editingPath={editingPath}
+            editorCanvas={editorCanvas}
+            prepared={prepared}
+            sizes={sizes}
+          />
+        ) : (
+          <LoopEmpty block={block} editorCanvas={editorCanvas} />
+        )
       ) : (
         <BlockRenderer
           block={block}
@@ -1379,6 +1452,91 @@ function InnerGrid({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * An EXPANDED collection loop: the client's one card design, drawn once per item.
+ *
+ * WHY IT REUSES .tgs-grid rather than being its own layout. The expanded cards are
+ * a set of the same shape flowing into a number of tracks and wrapping, which is
+ * precisely a grid; sharing the class shares the responsive track counts and the
+ * gap and the alignment with no second copy of that CSS. What it adds is the LINK:
+ * a covering anchor over each card so the whole thing opens the entry, the same
+ * whole-card pattern the Cards block uses, and for the same reason (one anchor per
+ * card keeps the markup valid and the keyboard to one stop). The anchor has no
+ * text of its own, so its accessible name is the entry's title, carried on the
+ * cell by expandLoop.
+ *
+ * The cards are already bound (their tokens filled) and this never runs on the
+ * canvas, so it takes no editing props: editable is always false here.
+ */
+function InnerLoop({
+  cells,
+  across,
+  gap,
+  align,
+  linkWhole,
+  editorCanvas = false,
+  prepared,
+  sizes,
+}: {
+  cells: LoopCell[];
+  across: { desktop: number; tablet: number; phone: number };
+  gap: number;
+  align: 'top' | 'centre' | 'bottom' | 'stretch';
+  linkWhole: boolean;
+  editorCanvas?: boolean;
+  prepared?: PreparedMap;
+  sizes?: ImageSizes;
+}): ReactElement {
+  const style = {
+    '--tgs-grid-d': String(across.desktop),
+    '--tgs-grid-t': String(across.tablet),
+    '--tgs-grid-p': String(across.phone),
+    '--tgs-gap': `${gap}px`,
+  } as CSSProperties;
+
+  return (
+    <div
+      className="tgs-grid tgs-loop"
+      style={style}
+      data-align={align}
+      data-whole={linkWhole ? 'true' : undefined}
+    >
+      {cells.map((cell, inner) => {
+        const blocks = Array.isArray(cell.blocks) ? cell.blocks : [];
+        const href = linkWhole ? safeUrl(typeof cell.href === 'string' ? cell.href : '') : '';
+        const label = typeof cell.label === 'string' ? cell.label : '';
+        return (
+          <div key={inner} className="tgs-col tgs-grid__cell tgs-loop__cell">
+            {blocks.map((block, innerBlock) =>
+              blockHost(block, `loop${inner}i${innerBlock}`, false, null, editorCanvas, prepared, sizes),
+            )}
+            {href && <a className="tgs-loop__link" href={href} aria-label={label || undefined} />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * A loop that has not drawn any cards: on the editor's preview, a note of what it
+ * repeats over (there is no route behind the canvas to fill it, so it cannot show
+ * the real cards there, the same limitation a collection Cards block has). On a
+ * published page it means the collection has nothing published yet, and the answer
+ * there is the calm nothing an empty offer cache gives: no broken frame, no lorem.
+ */
+function LoopEmpty({ block, editorCanvas }: { block: Block; editorCanvas: boolean }): ReactElement | null {
+  if (!editorCanvas) return null;
+  const collection = String((block.props as { collection?: unknown }).collection ?? '').trim();
+  return (
+    <div className="tgs-placeholder">
+      {collection
+        ? `The "${collection}" collection repeats here, one card per entry.`
+        : 'Say which collection this loop repeats over.'}
     </div>
   );
 }

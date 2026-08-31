@@ -203,15 +203,23 @@ describe('the card stylesheet', () => {
    * gets no visible focus at all. They have to stay in one @supports together.
    */
   it('moves the focus ring to the card and removes it from the link together', () => {
-    const supports = /@supports selector\(:has\(\*\)\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? '';
+    // There is more than one @supports selector(:has(*)) block in the stylesheet
+    // now (the collection loop's whole-card link has its own), so pick the card's
+    // by the selector it contains rather than assuming it is the first.
+    const supports =
+      [...css.matchAll(/@supports selector\(:has\(\*\)\) \{([\s\S]*?)\n\}/g)]
+        .map((match) => match[1])
+        .find((body) => body.includes('.tgs-card__link')) ?? '';
 
     expect(supports, 'the @supports block has gone').not.toBe('');
     expect(supports).toContain(':has(.tgs-card__link:focus-visible)');
     expect(supports).toContain('outline: 3px solid var(--tgs-accent)');
     expect(supports).toContain(".tgs-cards[data-whole='true'] .tgs-card__link:focus-visible { outline: none; }");
 
-    // And nothing removes the link's outline from outside the guard.
-    const outside = css.replace(/@supports selector\(:has\(\*\)\) \{[\s\S]*?\n\}/, '');
+    // And nothing removes the link's outline from outside the guard. Strip every
+    // @supports(:has()) block, not just the first: the loop's whole-card link
+    // added another, and the card's must not be the one left behind.
+    const outside = css.replace(/@supports selector\(:has\(\*\)\) \{[\s\S]*?\n\}/g, '');
     expect(outside).not.toContain('.tgs-card__link:focus-visible');
   });
 

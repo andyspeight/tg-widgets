@@ -15,14 +15,23 @@
  * blocks skip the sanitiser, or never appear in the outline. Naming the set
  * once means the next block of this shape is a one-line change here.
  *
+ * THE LOOP JOINED ON 31 Aug 2026 (Elementor gap #1). A loop stores its ONE
+ * designed card as a single inner column, so a client designs the card in the
+ * same nested editor a container uses, and the render (lib/content/loop.ts)
+ * repeats that one design over a collection. Being in this set is what gives the
+ * card's inner blocks the sanitiser, the outline and the props upgrade for free,
+ * which is exactly the security-load-bearing recursion this list exists to spread.
+ * Its render and its editor differ from a container's, and those two places name
+ * 'loop' on their own; everything structural treats it the same.
+ *
  * WHAT THEY SHARE: `props.columns` is an array of inner columns, each holding
  * its own blocks. What they do NOT share is how those columns are laid out,
  * which is the renderer's business: a container is a row of resizable columns,
- * a grid is tracks that wrap.
+ * a grid is tracks that wrap, a loop is one card repeated over a query.
  */
 
 /** The block types whose `props.columns` holds inner columns. */
-export const COLUMN_BLOCK_TYPES: ReadonlySet<string> = new Set(['container', 'grid']);
+export const COLUMN_BLOCK_TYPES: ReadonlySet<string> = new Set(['container', 'grid', 'loop']);
 
 /** Does this block type keep columns of its own inside its props? */
 export function hasInnerColumns(type: unknown): boolean {

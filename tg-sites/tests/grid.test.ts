@@ -129,10 +129,13 @@ describe('one list says which blocks hold columns', () => {
    * sanitiser, or that never appears in the outline. These tests are cheap
    * insurance that the list is the thing being consulted.
    */
-  it('holds the container and the grid, and nothing else', () => {
-    expect([...COLUMN_BLOCK_TYPES].sort()).toEqual(['container', 'grid']);
+  it('holds the container, the grid and the loop, and nothing else', () => {
+    // The loop joined on 31 Aug 2026: it stores its one designed card as a single
+    // inner column, so it needs the same sanitiser, outline and upgrade recursion.
+    expect([...COLUMN_BLOCK_TYPES].sort()).toEqual(['container', 'grid', 'loop']);
     expect(hasInnerColumns('grid')).toBe(true);
     expect(hasInnerColumns('container')).toBe(true);
+    expect(hasInnerColumns('loop')).toBe(true);
     expect(hasInnerColumns('cards')).toBe(false);
     expect(hasInnerColumns(undefined)).toBe(false);
     expect(hasInnerColumns(42)).toBe(false);
@@ -360,7 +363,11 @@ describe('what the editor promises', () => {
     const properties = source('components', 'editor', 'Properties.tsx');
     expect(properties).toContain('function GridCellsControl');
     expect(properties).toContain("block.type === 'grid' && (\n        <GridCellsControl");
-    expect(properties).toContain("block.type !== 'grid' && hasInnerColumns(block.type)");
+    // The width-sliders control is for a container: not a grid (its own cells
+    // control), and not a loop (one card column, nothing to add or remove).
+    expect(properties).toContain("block.type !== 'grid' &&");
+    expect(properties).toContain("block.type !== 'loop' &&");
+    expect(properties).toContain('hasInnerColumns(block.type) && (\n          <ContainerColumnsControl');
   });
 
   /*

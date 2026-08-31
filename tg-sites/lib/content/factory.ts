@@ -47,6 +47,19 @@ export function createBlock(type: string): Block {
    */
   if (hasInnerColumns(type)) {
     /*
+     * A LOOP STARTS WITH ONE COLUMN HOLDING A DESIGNED CARD, not the even split a
+     * container or grid gets. The loop repeats this ONE card over a collection
+     * (lib/content/loop.ts), so a second column would be a second card design with
+     * no meaning. It is seeded with a card that already carries the tokens a listing
+     * wants, so a freshly added loop shows a real card the moment a collection is
+     * named, and the client shapes it from there rather than from an empty box.
+     */
+    if (type === 'loop') {
+      block.props = { ...block.props, columns: [createColumn(100, starterLoopCard())] };
+      return block;
+    }
+
+    /*
      * A GRID STARTS WITH THREE CELLS, a container with two columns. Both are
      * minted here rather than in the registry defaults, because each carries an
      * id and an id baked into the defaults would be the same on every one ever
@@ -60,6 +73,32 @@ export function createBlock(type: string): Block {
     };
   }
   return block;
+}
+
+/**
+ * The card a new loop starts with: a picture, a title, a line of summary and a
+ * link, each bound to the item it will repeat over through a token. Built from
+ * real blocks (so they carry valid default props and fresh ids) with the token
+ * written into the one prop that holds the item's data. See lib/content/loop.ts
+ * for what each token resolves to.
+ *
+ * The link is the CARD'S OWN, not a whole-card overlay: a plain button bound to
+ * `{{link}}`. The whole card is clickable too (the render lays a covering anchor
+ * over it), and a button here gives a client a visible, editable call to action
+ * to keep or remove. It sits last so it lands at the foot of every card in a row.
+ */
+function starterLoopCard(): Block[] {
+  const withProps = (type: string, extra: Record<string, unknown>): Block => {
+    const block = createBlock(type);
+    block.props = { ...block.props, ...extra };
+    return block;
+  };
+  return [
+    withProps('image', { src: '{{image}}', alt: '{{alt}}', ratio: '4/3' }),
+    withProps('heading', { html: '{{title}}', level: 'h3', style: 'h3', fluid: false }),
+    withProps('text', { html: '<p>{{summary}}</p>' }),
+    withProps('button', { label: 'Read more', href: '{{link}}', variant: 'ghost' }),
+  ];
 }
 
 export function createColumn(width: number, blocks: Block[] = []): Column {
