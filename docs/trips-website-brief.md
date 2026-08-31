@@ -9,21 +9,30 @@ not invent capabilities, and respect the claims guardrails in section 5.
 
 ## 0. Before you write a line
 
-**Confirm the build target with Andy first — it changes HOW, not WHAT.** There is
-no `travelgenix-website` repo. The Travelgenix marketing site is almost certainly
-built in **Duda** (the estate uses Duda; the repos are all products, not the site).
-So a Claude Code session cannot push to it like a repo. Ask Andy which of these the
-section should be delivered as, and whether there is Duda API access:
+**The site is built in Framer.** So there is no repo to push to, and most of a Framer
+marketing page is assembled visually by Andy inside Framer. That shapes what a Claude
+Code session actually hands over. It changes HOW, not WHAT — the copy, positioning,
+feature list and guardrails below are identical regardless. Agree with Andy which of
+these the section is delivered as (they combine well):
 
-1. **A designed HTML block** Andy pastes into a Duda HTML/embed widget (most likely).
-   Must be self-contained and CSP-clean: inline styles, no external scripts, no eval.
-2. **An embeddable Trips widget** from the tg-widgets suite or Trips' own `embed.js`
-   (the product already ships embeddable trip cards/grids — one could BE the live
-   demo on the page).
-3. **A repo**, if the site turns out to live in one after all.
+1. **Copy plus a design spec** Andy builds visually in Framer. Always useful, and for
+   a plain content section it may be the whole job. Give him section-by-section copy
+   and a layout/structure he can drop into Framer's own components.
+2. **A Framer code component** (`.tsx`). Framer code components are React and
+   TypeScript with `addPropertyControls` for editable props and `framer-motion`
+   available — this is the part most in a code session's wheelhouse. Use it for
+   anything custom or interactive: the cost-comparison panel, an animated pillar row,
+   a live Trips embed. Andy adds it as a new code component in the Framer project.
+3. **An Embed of the live Trips widget.** Framer has an Embed element. The product
+   already ships embeddable trip cards/grids (`embed.js` on trips.travelify.io), so a
+   real Trips widget can sit on the marketing page as the live demo, via Embed or an
+   iframe to a demo page. Confirm the widget behaves inside Framer's embed sandbox.
 
-The substance below (copy, positioning, feature list, guardrails) is identical
-whichever we pick. Only the final packaging in section 7/10 differs.
+Ask Andy: is the section content-only (route 1), or does he want a custom/interactive
+piece (route 2), or a live product demo on the page (route 3)? And how does he prefer
+to receive a Framer code component (pasted into a new code component, or a file)?
+The substance below is the same whichever we pick; only the packaging in section 7/10
+differs.
 
 **Read before building:**
 - `docs/trips-platform-handover.md` — the product truth: what is built, what is a
@@ -157,8 +166,8 @@ before publishing.
    caveat visible, or just the pillar-1 line if a full table feels heavy for the site.
 5. **How it works** — three steps: build the trip, share it (hosted page or embed),
    travellers book and register.
-6. **A live proof point** — link or embed the demo trip; if we go the widget route,
-   drop a real Trips widget here so the page demonstrates the product.
+6. **A live proof point** — link or embed the demo trip; a real Trips widget in a
+   Framer Embed here shows the product instead of describing it.
 7. **Pricing** — only if Andy has confirmed the bands; otherwise a "get in touch" CTA.
 8. **Closing CTA** — start the free trial, or book a demo.
 
@@ -190,16 +199,17 @@ before publishing.
 - Design matches the Travelgenix brand and passes the craft floor.
 - CTAs point at real, confirmed destinations.
 - Responsive and accessible.
-- Delivered in the form Andy can actually publish (Duda HTML block, embeddable
-  widget, or repo — per the section 0 decision), and handed to Andy with a one-line
-  note on how to place it.
+- Delivered in the form Andy can actually publish in Framer (copy + layout spec, a
+  Framer code component, or a Trips Embed — per the section 0 decision), and handed
+  to Andy with a one-line note on how to place it in the Framer project.
 
 ---
 
 ## 11. Open questions for Andy (resolve at the start)
 
-1. Where/how is the Travelgenix website built, and how should this be delivered
-   (Duda HTML block, embeddable widget, or a repo)? Is there Duda API access?
+1. The site is in Framer. Which delivery does Andy want: copy + a layout spec he
+   builds visually, a Framer code component for a custom/interactive piece, or a live
+   Trips Embed on the page? (They can combine.)
 2. Is this a section on an existing page, or its own page? Where in the nav?
 3. Are the pricing bands from handover section 5 approved to publish?
 4. What is the real trial-signup URL, and is self-serve signup live yet?
