@@ -758,8 +758,18 @@ priority-ish order so the next session picks up without re-deriving them:
       cron to run, and BREVO_API_KEY + TRIPS_EMAIL_FROM to deliver rather than
       log. Note: this recovers holds that were created; true pre-submit cart
       capture (email-on-blur before a booking exists) is a larger follow-up.
-  12. **AI brochure import inside the standalone Trips app** — exists in the
-      tg-widgets Tour Builder, not yet ported to the new platform.
+  12. **AI brochure import inside the standalone Trips app** — DONE 28 Aug. An
+      operator pastes an itinerary on the New Trip page; POST /api/import calls
+      claude-opus-5 (@anthropic-ai/sdk) with a proven injection-hardened
+      extraction prompt (extract, do not invent; strip the letterhead) and
+      creates a DRAFT trip to review. lib/import is pure and tested: draftFromImport
+      runs the model's JSON back through validateTrip + sanitiseTripContent (the
+      editor's own sanitiser), so a non-trip document is refused and a hostile
+      field never reaches the DB. A SEAM like Stripe/email: NEEDS ANTHROPIC_API_KEY
+      in the Trips env (verified absent today, so it reports not-configured until
+      set). FOLLOW-UP: browser PDF text extraction (pdf.js) so an operator can
+      upload a PDF, and importing departures/prices (left out for now since the
+      model must never guess a price).
   13. **Full embed set** — DONE 28 Aug. `embed.js` v0.2.0 now dispatches three
       containers from one script: `data-tg-trip` (card), `data-tg-trips` (a GRID
       of an operator's trips, reading a new `GET /api/v1/operators/{slug}/trips`),
