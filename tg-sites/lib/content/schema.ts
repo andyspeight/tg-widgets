@@ -814,6 +814,20 @@ export const SectionSchema = z.object({
    */
   fullHeight: z.unknown().transform((v) => (v === true ? true : undefined)).optional(),
   /**
+   * STICK TO THE TOP, added 31 Aug 2026. The section pins to the top of the
+   * viewport once the page scrolls it there, and stays put while the rest of the
+   * page scrolls under it: a sticky sub-nav, a running headline, a booking bar.
+   * Pure CSS (position: sticky; top: 0) in globals.css, behind an @supports
+   * guard, so a browser without it simply keeps the section in flow. The render
+   * only emits the attribute off the editing canvas, so a sticky band never pins
+   * over the editor toolbar while you build the page.
+   *
+   * Total, not a strict boolean, for the same reason as fullHeight: a hand-edited
+   * or imported page can carry any value on this new key, and only `true` turns it
+   * on. Anything else is off, never a parse failure that would lose the page.
+   */
+  sticky: z.unknown().transform((v) => (v === true ? true : undefined)).optional(),
+  /**
    * Animate the section's blocks up into view as it scrolls onto the screen.
    *
    * Off by default and optional, so no stored section changes shape. The render

@@ -663,6 +663,32 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 .tgs-section[data-width='wide']      .tgs-section__inner { max-width: var(--tgs-width-wide); }
 .tgs-section[data-width='full']      .tgs-section__inner { max-width: none; padding-inline: 0; }
 
+/*
+ * STICK TO THE TOP. A section marked data-sticky pins to the top of the viewport
+ * once the page scrolls it there, and the rest of the page scrolls under it: a
+ * running sub-nav, a headline, a booking bar. Pure CSS, no script.
+ *
+ * This works because .tgs-page uses overflow-x: clip, NOT overflow-x: hidden.
+ * clip leaves overflow-y at its visible default, so the page is not a scroll
+ * container and a sticky child pins to the viewport as intended. hidden would
+ * coerce overflow-y to auto and make .tgs-page its own scroller, which would trap
+ * the sticky child inside it and break the pin. That choice is load-bearing here.
+ * (Verified in a browser, 31 Aug 2026.)
+ *
+ * @supports so a browser without position: sticky keeps the section in normal
+ * flow rather than losing it. z-index keeps the pinned section above the sections
+ * that scroll under it, and well below the fixed header, popup and widgets panel.
+ * The render only emits data-sticky off the editing canvas (see PageRenderer), so
+ * a sticky band never pins over the editor toolbar while you build the page.
+ */
+@supports (position: sticky) {
+  .tgs-section[data-sticky] {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Rows and columns                                                    */
 /* ------------------------------------------------------------------ */

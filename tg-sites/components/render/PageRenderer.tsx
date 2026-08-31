@@ -554,6 +554,14 @@ export function SectionRenderer({
        */
       data-pull-up={section.pullUp ? '' : undefined}
       /*
+       * Pin the section to the top of the viewport as the page scrolls past it.
+       * Gated on `editable`, unlike pull-up above: the editor canvas scrolls inside
+       * its own frame under a fixed toolbar, so a section left free to pin would
+       * stick over the toolbar and the section you are actually editing. It pins on
+       * the published page and in preview, where there is no toolbar to fight.
+       */
+      data-sticky={section.sticky && !editable ? '' : undefined}
+      /*
        * Hidden on some screens, the whole section. Same list and same container
        * queries as a block's, and the same `editable` gate as the reveal and hover
        * above: while editing the section stays on the canvas so it can be selected

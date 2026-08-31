@@ -1507,6 +1507,30 @@ function SectionFields({
         </div>
       )}
 
+      {/*
+        STICK TO THE TOP. The section pins to the top of the screen as the page
+        scrolls past it and stays there while the rest scrolls under: a sub-nav, a
+        headline, a booking bar. It only pins on the live site and in preview, so
+        it will not stick over the toolbar while you build the page here.
+      */}
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={section.sticky === true}
+            onChange={(event) =>
+              set({ sticky: event.target.checked || undefined }, `sec:${index}:sticky`)
+            }
+          />
+          <span>Stick to the top on scroll</span>
+        </label>
+        <p className="ed-help" style={{ marginTop: 6 }}>
+          Pins the section to the top of the screen once it is scrolled there, so it
+          stays in view while the rest of the page moves under it. Press the eye
+          (Preview) at the top to see it in action.
+        </p>
+      </div>
+
       <Measure
         label="Overlap the section above"
         value={section.pullUp ?? 0}

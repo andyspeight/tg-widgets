@@ -1520,3 +1520,45 @@ describe('a section can fill the screen', () => {
     expect(props).toContain('{!section.fullHeight && (');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Stick to the top: a section that pins to the viewport on scroll (31 Aug 2026).
+// ---------------------------------------------------------------------------
+describe('a section can stick to the top on scroll', () => {
+  const rawPage = (sticky: unknown) => ({
+    version: 1,
+    id: 'p',
+    title: 'T',
+    slug: '',
+    sections: [{ id: 's', rows: [], sticky }],
+  });
+
+  it('keeps sticky through parsePage, and ignores nonsense', () => {
+    const parsed = parsePage(rawPage(true));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].sticky).toBe(true);
+    // Only `true` turns it on. Any other value is dropped, never a parse failure.
+    const junk = parsePage(rawPage('yes'));
+    expect(junk.ok).toBe(true);
+    if (junk.ok) expect(junk.page.sections[0].sticky).toBeUndefined();
+  });
+
+  it('renders data-sticky only off the editing canvas', () => {
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).toContain("data-sticky={section.sticky && !editable ? '' : undefined}");
+  });
+
+  it('pins with position: sticky behind an @supports guard', () => {
+    const css = read('app', 'globals.css');
+    expect(css).toContain('@supports (position: sticky)');
+    expect(css).toMatch(/\.tgs-section\[data-sticky\]\s*\{[^}]*position:\s*sticky/);
+    expect(css).toMatch(/\.tgs-section\[data-sticky\]\s*\{[^}]*top:\s*0/);
+  });
+
+  it('the editor offers the toggle', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('Stick to the top on scroll');
+    expect(props).toContain('{ sticky: event.target.checked || undefined }');
+  });
+});
