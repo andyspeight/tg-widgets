@@ -189,7 +189,7 @@
     gl.uniform1f(U('uFarFade'), 165.0);
     var sun = cfg.sunRad;
     gl.uniform3fv(U('uSun'), new Float32Array(normalize([Math.sin(sun) * 0.9, 0.24, -Math.cos(sun) * 0.9])));
-    gl.uniform3fv(U('uSunCol'), new Float32Array([1.0, 0.96, 0.86]));
+    gl.uniform3fv(U('uSunCol'), new Float32Array(cfg.sunCol));
     gl.uniform3fv(U('uDeep'), new Float32Array(cfg.deep));
     gl.uniform3fv(U('uShallow'), new Float32Array(cfg.shallow));
     gl.uniform3fv(U('uHorizon'), new Float32Array(cfg.horizon));
@@ -247,6 +247,9 @@
       deep: rgb(section.getAttribute('data-sea-deep'), [0.03, 0.16, 0.25]),
       shallow: rgb(section.getAttribute('data-sea-shallow'), [0.09, 0.36, 0.47]),
       horizon: rgb(section.getAttribute('data-sea-horizon'), [0.78, 0.85, 0.89]),
+      // The sun's own colour, so a scene can be warm gold, cool silver or plain
+      // daylight. Defaults to the warm white the daylight tones ship with.
+      sunCol: rgb(section.getAttribute('data-sea-suncol'), [1.0, 0.96, 0.86]),
     };
 
     var sea;

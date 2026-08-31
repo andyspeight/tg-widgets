@@ -1712,7 +1712,7 @@ function SectionFields({
         {section.motion?.recipe === 'A1' && (
           <div className="ed-field">
             <label className="ed-label" htmlFor={`ed-sea-tone-${index}`}>
-              Sea tone
+              Sea scene
             </label>
             <select
               id={`ed-sea-tone-${index}`}

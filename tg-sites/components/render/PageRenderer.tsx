@@ -554,6 +554,7 @@ export function SectionRenderer({
       data-sea-shallow={seaTone?.shallow}
       data-sea-horizon={seaTone?.horizon}
       data-sea-sun={seaTone ? String(seaTone.sun) : undefined}
+      data-sea-suncol={seaTone?.sunCol}
       /*
        * THE FIRST SECTION IS A DIFFERENT PROBLEM AND HAS TO SAY SO.
        *

@@ -591,7 +591,10 @@ export function normaliseAlignY(value: unknown): 'centre' | 'bottom' | undefined
  * is the northern default, so no stored section changes and a page with no tone still
  * gets a finished sea.
  */
-export const SEA_TONES = ['northern', 'mediterranean', 'caribbean', 'tropical', 'storm'] as const;
+export const SEA_TONES = [
+  'northern', 'mediterranean', 'caribbean', 'tropical', 'storm',
+  'golden', 'moonlit', 'sunrise',
+] as const;
 export type SeaTone = (typeof SEA_TONES)[number];
 export function normaliseSeaTone(value: unknown): SeaTone | undefined {
   return typeof value === 'string' && (SEA_TONES as readonly string[]).includes(value)

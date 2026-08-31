@@ -1211,9 +1211,9 @@ describe('the cinematic sea wears a named tone', () => {
     expect(SEA_TONE_PRESETS.map((t) => t.value).sort()).toEqual([...SEA_TONES].sort());
   });
 
-  it('every tone is a real water colour set and a plain-word name', () => {
+  it('every scene is a real colour set with a sun and a plain-word name', () => {
     for (const tone of SEA_TONE_PRESETS) {
-      for (const key of ['deep', 'shallow', 'horizon'] as const) {
+      for (const key of ['deep', 'shallow', 'horizon', 'sunCol'] as const) {
         expect(tone[key], `${tone.value} ${key} is not a hex colour`).toMatch(/^#[0-9a-f]{6}$/i);
       }
       expect(typeof tone.sun).toBe('number');
@@ -1222,17 +1222,32 @@ describe('the cinematic sea wears a named tone', () => {
     }
   });
 
-  it('the render emits the tone colours, and only for the sea recipe', () => {
+  it('has light scenes, not just water colours: the sun colour actually varies', () => {
+    // Golden hour, moonlit and dawn change the LIGHT, so at least one scene carries a
+    // sun colour different from the daylight warm-white default.
+    const suns = new Set(SEA_TONE_PRESETS.map((t) => t.sunCol));
+    expect(suns.size).toBeGreaterThan(1);
+    expect(SEA_TONE_PRESETS.map((t) => t.value)).toEqual(
+      expect.arrayContaining(['golden', 'moonlit', 'sunrise']),
+    );
+  });
+
+  it('the render emits the scene colours and its sun colour, only for the sea recipe', () => {
     expect(render).toContain("motion === 'A1' ? seaTonePreset(section.seaTone) : undefined");
     expect(render).toContain('data-sea-deep={seaTone?.deep}');
     expect(render).toContain('data-sea-shallow={seaTone?.shallow}');
     expect(render).toContain('data-sea-horizon={seaTone?.horizon}');
+    expect(render).toContain('data-sea-suncol={seaTone?.sunCol}');
   });
 
-  it('the editor offers the tone picker for the sea and nowhere else', () => {
+  it('the sea script reads the sun colour, so a scene can be gold or silver light', () => {
+    expect(seaScript).toContain("rgb(section.getAttribute('data-sea-suncol')");
+  });
+
+  it('the editor offers the scene picker for the sea and nowhere else', () => {
     const props = read('components', 'editor', 'Properties.tsx');
     expect(props).toContain("section.motion?.recipe === 'A1'");
-    expect(props).toContain('Sea tone');
+    expect(props).toContain('Sea scene');
     expect(props).toContain('SEA_TONE_PRESETS.map');
   });
 
@@ -1254,9 +1269,9 @@ describe('the pinned itinerary travels a row of cards', () => {
     type: 'cards',
     props: { items: Array.from({ length: n }, (_, i) => ({ text: `Day ${i + 1}` })) },
   });
-  const sectionWith = (n: number, recipe = 'S2') => ({
+  const sectionWith = (n: number, recipe: MotionRecipe = 'S2') => ({
     id: 's',
-    motion: { recipe, intensity: 2 },
+    motion: { recipe, intensity: 2 as const },
     rows: [{ columns: [{ blocks: n > 0 ? [cardsBlock(n)] : [] }] }],
   });
 

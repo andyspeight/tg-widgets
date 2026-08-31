@@ -609,11 +609,17 @@ export function normaliseRevealStyle(value: unknown): RevealStyle {
  * into the data-sea-* attributes tg-sea.js reads.
  */
 export const SEA_TONE_PRESETS = [
-  { value: 'northern', label: 'Northern', deep: '#082a40', shallow: '#175c78', horizon: '#c7dae3', sun: 12 },
-  { value: 'mediterranean', label: 'Mediterranean', deep: '#0a3a58', shallow: '#1f8fb0', horizon: '#d9eaef', sun: 20 },
-  { value: 'caribbean', label: 'Caribbean', deep: '#0a5f6b', shallow: '#2fbdb8', horizon: '#e4f2ec', sun: 24 },
-  { value: 'tropical', label: 'Tropical lagoon', deep: '#0e7a73', shallow: '#47d6c2', horizon: '#eef7f0', sun: 26 },
-  { value: 'storm', label: 'Storm grey', deep: '#123049', shallow: '#3a6f88', horizon: '#dfe7ec', sun: -6 },
+  // The daylight seas, named for the water. Warm-white sun, the engine's default.
+  { value: 'northern', label: 'Northern', deep: '#082a40', shallow: '#175c78', horizon: '#c7dae3', sun: 12, sunCol: '#fff5db' },
+  { value: 'mediterranean', label: 'Mediterranean', deep: '#0a3a58', shallow: '#1f8fb0', horizon: '#d9eaef', sun: 20, sunCol: '#fff5db' },
+  { value: 'caribbean', label: 'Caribbean', deep: '#0a5f6b', shallow: '#2fbdb8', horizon: '#e4f2ec', sun: 24, sunCol: '#fff5db' },
+  { value: 'tropical', label: 'Tropical lagoon', deep: '#0e7a73', shallow: '#47d6c2', horizon: '#eef7f0', sun: 26, sunCol: '#fff5db' },
+  { value: 'storm', label: 'Storm grey', deep: '#123049', shallow: '#3a6f88', horizon: '#dfe7ec', sun: -6, sunCol: '#fff5db' },
+  // The light scenes, named for the hour. These vary the sun's colour and angle, not
+  // just the water, so the sea reads as evening, night or dawn (tuned in a browser).
+  { value: 'golden', label: 'Golden hour', deep: '#0e2438', shallow: '#2a5a6e', horizon: '#f6cf92', sun: -3, sunCol: '#ffcf87' },
+  { value: 'moonlit', label: 'Moonlit', deep: '#04101c', shallow: '#12283a', horizon: '#9fb0c6', sun: 8, sunCol: '#cdd9ec' },
+  { value: 'sunrise', label: 'Sunrise', deep: '#123044', shallow: '#3a6f88', horizon: '#f4d9d0', sun: 4, sunCol: '#ffdcc0' },
 ] as const;
 
 export type SeaTonePreset = (typeof SEA_TONE_PRESETS)[number];
