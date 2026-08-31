@@ -757,8 +757,29 @@ priority-ish order so the next session picks up without re-deriving them:
       package/promo/departure/trip. Live-verified on prod: the download returns
       text/csv with a slug+date filename and a deposit_paid row reconciling
       7400/1000/1000/6400. No external dependency, so it needs no env keys.
-      STILL OPEN: the public WRITE API (only /api/v1/trips read exists) and
-      Zapier (needs a published Zapier app).
+      OUTBOUND WEBHOOKS DONE 31 Aug: the real-time counterpart, and the
+      primitive a future Zapier app would consume. An operator registers HTTPS
+      endpoints on an owner-only /console/integrations screen; Trips POSTs a
+      signed JSON event on booking.created (after a hold) and booking.updated
+      (when an operator changes booking status). gt_021 gt_webhooks
+      (operator-scoped endpoints, per-endpoint secret, event-subscription
+      filter, last-delivery health; RLS on, no policies). lib/webhooks is the
+      pure, tested core: HMAC-SHA256 signing over `${timestamp}.${body}`
+      (Stripe-style, replay-aware), verify, a stable { id, type, created_at,
+      data } envelope whose collected/outstanding reuse the finance rules, and
+      secret mint/redact (whsec_, shown once). lib/dispatch does best-effort
+      signed delivery with a 4s timeout and records status; it NEVER throws, so
+      it can't break the booking it observes. A seam: no endpoints = silent
+      no-op (no env key to set). Headers: x-tg-signature, x-tg-timestamp,
+      x-tg-event. The console screen adds/pauses/removes endpoints and has a
+      Send-test button. Live-verified on the deployed Node runtime via a
+      temporary self-test (since removed): a signed POST round trip returned
+      transportIntact + bodyIntact + signatureVerifies all true and the money
+      reconciled (collected 20000, outstanding 80000 on a deposit_paid sample).
+      7 webhook tests (204 green total). FOLLOW-UP: delivery retries/backoff and
+      a payment.succeeded event once Stripe is wired. STILL OPEN in this gap:
+      the public WRITE API (only /api/v1/trips read exists) and a published
+      Zapier app (which would just consume these webhooks).
   11. **Abandoned-booking recovery** — DONE 28 Aug. gt_020 adds recovery_sent_at.
       A daily CRON_SECRET-guarded cron (/api/cron/abandoned-recovery, in
       vercel.json, 10:00 UTC) sweeps pending holds that lapsed without completing
