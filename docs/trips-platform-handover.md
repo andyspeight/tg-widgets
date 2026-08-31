@@ -777,9 +777,31 @@ priority-ish order so the next session picks up without re-deriving them:
       transportIntact + bodyIntact + signatureVerifies all true and the money
       reconciled (collected 20000, outstanding 80000 on a deposit_paid sample).
       7 webhook tests (204 green total). FOLLOW-UP: delivery retries/backoff and
-      a payment.succeeded event once Stripe is wired. STILL OPEN in this gap:
-      the public WRITE API (only /api/v1/trips read exists) and a published
-      Zapier app (which would just consume these webhooks).
+      a payment.succeeded event once Stripe is wired.
+      AUTHENTICATED v1 API + API KEYS DONE 31 Aug: the pull-and-write half. An
+      operator mints keys on the same owner-only /console/integrations screen
+      and uses them as a Bearer token against /api/v1. gt_022 gt_api_keys stores
+      ONLY the SHA-256 hash of a key (shown once at creation, like a password),
+      key_prefix in clear to tell keys apart, revoked_at to disable without
+      losing the audit row; RLS on, no policies. lib/apikeys (pure, tested):
+      mint (tgk_live_ + 192 bits), hash, prefix, shape guard, strict Bearer
+      parser. lib/api-auth authenticateApiKey resolves a Bearer token to an
+      operator id, fails closed at every step. Endpoints (Bearer auth,
+      server-to-server so NO CORS, unlike the public read endpoints):
+      GET /api/v1/bookings (list), GET /api/v1/bookings/{reference} (one,
+      operator-scoped), POST /api/v1/trips (create — ALWAYS a draft, body run
+      through the same validateTrip the console uses, so the API is not a back
+      door around validation). finance.bookingJson gives the JSON money, same
+      finance rules so the API reconciles with the screen, CSV and webhooks.
+      5 apikey tests (209 green total). Live-verified on prod via a temporary
+      self-test (since removed): no-key read AND write both 401, keyed list 200
+      with the operator's bookings, single-by-reference matched and scoped,
+      POST created status "draft" (201), bad body with a good key 422; the test
+      cleaned up the draft and key it made. STILL OPEN in this gap: a published
+      Zapier app (would consume the webhooks) and, if wanted, more write
+      endpoints (departures/prices, publish) — deliberately NOT built so the API
+      can never publish or oversell without a human. The API base on prod is
+      https://travelgenix-trips.vercel.app/api/v1 (alias trips.travelify.io).
   11. **Abandoned-booking recovery** — DONE 28 Aug. gt_020 adds recovery_sent_at.
       A daily CRON_SECRET-guarded cron (/api/cron/abandoned-recovery, in
       vercel.json, 10:00 UTC) sweeps pending holds that lapsed without completing
