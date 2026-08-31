@@ -735,8 +735,13 @@ priority-ish order so the next session picks up without re-deriving them:
       finish (the tg-widgets enquiry engine is close but not wired into Trips).
   12. **AI brochure import inside the standalone Trips app** — exists in the
       tg-widgets Tour Builder, not yet ported to the new platform.
-  13. **Full embed set** — IN PROGRESS 28 Aug: grid + bare Book button + WordPress
-      plugin, extending `public/embed.js`. See the Embed widgets section above.
+  13. **Full embed set** — DONE 28 Aug. `embed.js` v0.2.0 now dispatches three
+      containers from one script: `data-tg-trip` (card), `data-tg-trips` (a GRID
+      of an operator's trips, reading a new `GET /api/v1/operators/{slug}/trips`),
+      and `data-tg-book` (a bare Book button). Plus an installable **WordPress
+      plugin** (`wordpress-plugin/travelgenix-trips`) with `[tg_trip]`, `[tg_trips]`
+      and `[tg_book]` shortcodes. Live-verified: the grid endpoint returns
+      counts-only, brand-whitelisted data with CORS; all three render.
 
 Stripe-blocked money features (online deposits, payment plans + auto-billing,
 dunning, refunds, receipts) are tracked separately in §9 and the roadmap; they are
