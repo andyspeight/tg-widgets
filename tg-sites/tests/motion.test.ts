@@ -1004,3 +1004,78 @@ describe('the editor knows when a motion setting has nothing to move', () => {
     expect(render).toContain('if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Reveal and parallax reach Safari and Firefox too (31 Aug 2026). They are pure
+// CSS on a view() scroll timeline, which only Chromium ships, so tg-motion.js
+// carries a fallback that runs ONLY where the timeline is missing.
+// ---------------------------------------------------------------------------
+describe('reveal and parallax fall back for browsers with no scroll timeline', () => {
+  const withReveal = { sections: [{ id: 'a', reveal: true }] };
+  const withParallax = { sections: [{ id: 'a', parallax: true }] };
+
+  it('pulls the script for a reveal or a parallax, not just for A3', () => {
+    expect(needsMotionScript(withReveal)).toBe(true);
+    expect(needsMotionScript(withParallax)).toBe(true);
+    // A reveal that is off, or any other section, still asks for nothing.
+    expect(needsMotionScript({ sections: [{ id: 'a', reveal: false }] })).toBe(false);
+    expect(needsMotionScript({ sections: [{ id: 'a' }] })).toBe(false);
+  });
+
+  it('runs the fallback only where the browser lacks its own scroll timeline', () => {
+    // The whole point: on Chromium the CSS does it and the script must not fight it.
+    expect(motionScript).toContain("CSS.supports('animation-timeline: view()')");
+    expect(motionScript).toContain('if (!HAS_SCROLL_TL) {');
+    expect(motionScript).toContain('setUpRevealFallback();');
+    expect(motionScript).toContain('setUpParallaxFallback();');
+  });
+
+  it('never hides a reveal without an observer to bring it back', () => {
+    // Clause 2 again: the content cannot depend on the script. The marker that hides a
+    // block (data-reveal-fb) is only set after an IntersectionObserver is confirmed, so
+    // no observer, blocked JS or reduced motion all leave the content fully in view.
+    expect(motionScript).toContain("if (!('IntersectionObserver' in window)) return;");
+    expect(motionScript).toContain("setAttribute('data-reveal-fb', '1')");
+    expect(motionScript).toContain("setAttribute('data-seen', '1')");
+    // The renderer must NEVER write the hide marker itself, or a no-JS page would blank.
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).not.toContain('data-reveal-fb');
+    expect(render).not.toContain('data-parallax-fb');
+  });
+
+  it('reduced motion gets neither the fallback nor a hidden start', () => {
+    // The script returns before any fallback when reduced motion is set, so the markers
+    // are never added; and the CSS holds the fallback behind no-preference besides.
+    // (css here has its comments stripped, so anchor on selectors, not prose.)
+    expect(motionScript).toContain("window.matchMedia('(prefers-reduced-motion: reduce)')");
+    const fbSel = css.indexOf('.tgs-section[data-reveal][data-reveal-fb]');
+    const block = css.slice(css.lastIndexOf('@media', fbSel), css.indexOf('@keyframes tgs-reveal-rise'));
+    expect(block).toContain('@media (prefers-reduced-motion: no-preference)');
+    expect(block).toContain('[data-reveal-fb]');
+    // OUTSIDE the @supports (animation-timeline) guard, or it would never run on the
+    // very browsers it is for.
+    expect(block).not.toContain('@supports');
+  });
+
+  it('reuses the real keyframes rather than a second set, held paused until seen', () => {
+    // The fallback plays the same tgs-reveal-* keyframes on a clock, paused at frame one
+    // (the hidden state) until data-seen runs them. One set of keyframes, one look.
+    const fbSel = css.indexOf('.tgs-section[data-reveal][data-reveal-fb]');
+    const block = css.slice(fbSel, css.indexOf('@keyframes tgs-reveal-rise'));
+    expect(block).toContain('animation: tgs-reveal-rise');
+    expect(block).toContain('paused');
+    expect(block).toContain('.tgs-block[data-seen]');
+    expect(block).toContain('animation-play-state: running');
+  });
+
+  it('the parallax fallback drives a CSS variable, never a scroll timeline or a raw transform', () => {
+    // Same discipline as the rail: no style.transform reassignment (tested elsewhere).
+    // The script sets --tgs-parallax-y; the CSS reads it into a translate.
+    expect(motionScript).toContain("setProperty('--tgs-parallax-y'");
+    const paraSel = css.indexOf('.tgs-section[data-parallax][data-parallax-fb]');
+    const block = css.slice(css.lastIndexOf('@media', paraSel), css.indexOf('[data-ken-burns]', paraSel));
+    expect(block).toContain('[data-parallax-fb]');
+    expect(block).toContain('translateY(var(--tgs-parallax-y');
+    expect(block).not.toContain('@supports');
+  });
+});

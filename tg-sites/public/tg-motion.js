@@ -6,6 +6,23 @@
  * genuinely cannot do: a track that moves on its own AND is added to by scroll, two
  * sources combined into one offset. CSS can do either alone and neither together.
  *
+ * AND A FALLBACK FOR TWO EFFECTS THE REST OF THE WEB CANNOT PLAY YET (31 Aug 2026).
+ * Reveal and parallax are pure CSS, but on a view() scroll timeline, which only
+ * Chromium ships today; on Safari and Firefox those sections simply sat still. So this
+ * file also carries a fallback for those two, and ONLY runs it where the scroll timeline
+ * is missing (CSS.supports below). Where it is present the CSS does the whole job and
+ * the fallback stands down, so nothing here ever fights the real thing. The fallback
+ * marks the sections, watches them with an IntersectionObserver for the reveal and the
+ * scroll position for the parallax, and lets the same keyframes the CSS uses play on a
+ * clock instead of a timeline. A page with no reveal, no parallax and no A3 still ships
+ * none of this; lib/content/motion.ts decides.
+ *
+ * THE CONTENT NEVER DEPENDS ON IT, the same promise A3 keeps. The reveal fallback only
+ * hides a block once it has marked the section (data-reveal-fb) AND confirmed an
+ * IntersectionObserver to bring it back, so a browser with no observer, blocked JS or a
+ * visitor who asked for less motion keeps every reveal section fully in view, exactly as
+ * before. The parallax fallback only ever nudges a background that was already full-bleed.
+ *
  * WHAT THE PAGE IS WITHOUT IT, which is the whole design. The rail is a native
  * horizontal scroll-snap carousel, written in globals.css and working on its own:
  * swipeable on a phone, draggable on a trackpad, reachable from a keyboard, and with
@@ -35,18 +52,27 @@
  * CSP-CLEAN, like everything else here. No inline handlers, no injected script, no
  * eval, no innerHTML. It only ever reads the data- attributes the renderer wrote.
  *
- * @version 1.0.0
+ * @version 1.1.0
  */
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   /* Nothing here runs for a visitor who asked for less movement. Not a reduced
      amount: none, and no rAF loop is ever started. The CSS rail is already a
      finished, swipeable carousel without it. */
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   if (REDUCED && REDUCED.matches) return;
+
+  /*
+   * The one feature that decides the fallback. Where the browser has a view() scroll
+   * timeline the reveal and parallax CSS play on their own, so the fallback below must
+   * stand down and never touch them; where it does not, the fallback is the only way
+   * those two move. A3's rail runs either way, so this gate is only for the fallback.
+   */
+  var HAS_SCROLL_TL =
+    typeof CSS !== 'undefined' && CSS.supports && CSS.supports('animation-timeline: view()');
 
   /*
    * TWO OUT-OF-PHASE SINE WAVES, per the catalogue, and deliberately not a marquee.
@@ -154,6 +180,118 @@
     window.requestAnimationFrame(frame);
   }
 
+  /*
+   * The elements the reveal animates: the section's blocks normally, or its items under
+   * stagger. The item selector matches the stylesheet's exactly; if a browser cannot run
+   * it (no :has in querySelectorAll) fall back to the blocks, so the section still
+   * reveals rather than throwing and leaving everything hidden.
+   */
+  var STAGGER_ITEMS =
+    '.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)),'
+    + ' .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item';
+
+  function revealTargets(section, stagger) {
+    if (stagger) {
+      try {
+        var items = section.querySelectorAll(STAGGER_ITEMS);
+        if (items.length) return items;
+      } catch (err) {
+        /* querySelectorAll threw on :has; use the blocks instead. */
+      }
+    }
+    return section.querySelectorAll('.tgs-block');
+  }
+
+  /*
+   * REVEAL, on a browser with no scroll timeline. Mark each reveal section so the
+   * fallback CSS takes hold (which is what hides its blocks), then reveal each target
+   * the moment it scrolls into view. It ONLY runs behind an IntersectionObserver: with
+   * no observer nothing is ever marked, so the content stays fully in view rather than
+   * hidden for good. The marker doubles as the re-init guard, the same idea as the rail.
+   */
+  function setUpRevealFallback() {
+    if (!('IntersectionObserver' in window)) return;
+
+    var sections = document.querySelectorAll('[data-reveal]');
+    if (!sections.length) return;
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        for (var i = 0; i < entries.length; i += 1) {
+          if (entries[i].isIntersecting) {
+            entries[i].target.setAttribute('data-seen', '1');
+            io.unobserve(entries[i].target);
+          }
+        }
+      },
+      /* A touch inside the bottom edge so a block reveals as it rises into comfortable
+         view rather than the instant it peeks over, echoing the CSS animation-range. */
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    );
+
+    for (var s = 0; s < sections.length; s += 1) {
+      var section = sections[s];
+      if (section.getAttribute('data-reveal-fb') === '1') continue;
+      section.setAttribute('data-reveal-fb', '1');
+
+      var stagger = section.hasAttribute('data-reveal-stagger');
+      var targets = revealTargets(section, stagger);
+      for (var t = 0; t < targets.length; t += 1) {
+        if (stagger) {
+          /* Cascade a row that all arrives at once: a small step per item, capped so a
+             long grid never trails too far behind the scroll. Set inline rather than as a
+             custom property so the block catalogue never reads a timing value as a colour. */
+          targets[t].style.animationDelay = Math.min(t, 6) * 70 + 'ms';
+        }
+        io.observe(targets[t]);
+      }
+    }
+  }
+
+  /*
+   * PARALLAX, on a browser with no scroll timeline. Mark each parallax section so the
+   * fallback CSS grows and clips the picture, then set --tgs-parallax-y from the
+   * section's position on every scroll, rAF-throttled and passive. The travel matches
+   * the keyframe: -8% as the section enters, 8% as it leaves.
+   */
+  function setUpParallaxFallback() {
+    var found = document.querySelectorAll('[data-parallax]');
+    var sections = [];
+    for (var i = 0; i < found.length; i += 1) {
+      if (found[i].getAttribute('data-parallax-fb') === '1') continue;
+      if (!found[i].querySelector('.tgs-section__bg')) continue; /* nothing to drift */
+      found[i].setAttribute('data-parallax-fb', '1');
+      sections.push(found[i]);
+    }
+    if (!sections.length) return;
+
+    var ticking = false;
+
+    function apply() {
+      ticking = false;
+      var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      if (vh <= 0) return;
+      for (var i = 0; i < sections.length; i += 1) {
+        var rect = sections[i].getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > vh) continue; /* off screen, leave it */
+        var progress = (vh - rect.top) / (vh + rect.height);
+        progress = progress < 0 ? 0 : progress > 1 ? 1 : progress;
+        sections[i].style.setProperty('--tgs-parallax-y', ((progress - 0.5) * 16).toFixed(2) + '%');
+      }
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        window.requestAnimationFrame(apply);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    apply(); /* set the starting positions before the first scroll */
+  }
+
   function init() {
     var rails = document.querySelectorAll("[data-motion='A3'] .tgs-cards");
     for (var i = 0; i < rails.length; i += 1) {
@@ -166,6 +304,14 @@
       var section = track.closest("[data-motion='A3']");
       var intensity = parseInt(section && section.getAttribute('data-motion-intensity'), 10) || 2;
       setUpRail(track, intensity);
+    }
+
+    /* The reveal and parallax fallback, only where the browser has no scroll timeline
+       of its own. On Chromium HAS_SCROLL_TL is true and the CSS does it all, so these
+       never mark a thing. */
+    if (!HAS_SCROLL_TL) {
+      setUpRevealFallback();
+      setUpParallaxFallback();
     }
   }
 

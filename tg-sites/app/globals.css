@@ -977,6 +977,56 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * REVEAL, THE FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINES (Andy, 31 Aug 2026).
+ *
+ * The reveal above rides a view() timeline, which only Chromium has today, so on Safari
+ * and Firefox a reveal section simply showed in place. This block brings the same
+ * arrival to those browsers, driven by tg-motion.js: where animation-timeline is missing
+ * the script marks each reveal section data-reveal-fb and, as each target scrolls into
+ * view, stamps it data-seen. NOTHING HERE APPLIES WITHOUT THAT MARKER, so a browser that
+ * has scroll timelines (the @supports block above wins and this never matches, since the
+ * script does not add the marker there) and one where the script never runs at all (JS
+ * blocked, or no IntersectionObserver) both keep the content in place exactly as before.
+ * The content never depends on the script.
+ *
+ * It REUSES the very keyframes the real reveal uses, run as an ordinary time-based
+ * animation held paused at its first frame (the hidden state) until data-seen sets it
+ * running. Same arrivals, same look, no second set of keyframes to keep in step. Inside
+ * prefers-reduced-motion as well as the script's own reduced-motion guard, so the hidden
+ * start can never be left on for a visitor who asked for less movement.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-reveal][data-reveal-fb] .tgs-block {
+    animation: tgs-reveal-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both paused;
+  }
+  .tgs-section[data-reveal='fade'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-fade; }
+  .tgs-section[data-reveal='slide-left'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-slide-left; }
+  .tgs-section[data-reveal='slide-right'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-slide-right; }
+  .tgs-section[data-reveal='zoom'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-zoom; }
+  .tgs-section[data-reveal='blur'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-blur; }
+  .tgs-section[data-reveal][data-reveal-fb] .tgs-block[data-seen] { animation-play-state: running; }
+
+  /*
+   * Staggered: the items move, not the block wrappers (matched off), and a per-item
+   * animation-delay the script sets inline on each item cascades a row that all enters
+   * at once. The item selector is copied verbatim from the scroll-timeline stagger
+   * above, so the two pick exactly the same elements, including the :has() step-aside
+   * for a column that holds a grid. (The delay is set inline rather than through a
+   * custom property so the block catalogue does not read a timing value as a colour.)
+   */
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] .tgs-block { animation: none; }
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) {
+    animation: tgs-reveal-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both paused;
+  }
+  .tgs-section[data-reveal='fade'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-fade; }
+  .tgs-section[data-reveal='slide-left'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-left; }
+  .tgs-section[data-reveal='slide-right'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-right; }
+  .tgs-section[data-reveal='zoom'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-zoom; }
+  .tgs-section[data-reveal='blur'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-blur; }
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item)[data-seen] { animation-play-state: running; }
+}
+
 @keyframes tgs-reveal-rise {
   from {
     opacity: 0;
@@ -1180,6 +1230,27 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
   to {
     transform: translateY(8%);
+  }
+}
+
+/*
+ * PARALLAX, THE FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINES (Andy, 31 Aug 2026).
+ * Same story as the reveal fallback: the parallax above rides a view() timeline that
+ * only Chromium has, so elsewhere the picture sat still. Where animation-timeline is
+ * missing, tg-motion.js marks the section data-parallax-fb and sets --tgs-parallax-y
+ * from the section's position on each scroll; here the picture is grown and the section
+ * clipped exactly as the real one, and the picture is translated by that variable. No
+ * marker, no change, so a browser with scroll timelines or no script keeps the still,
+ * full-bleed picture. The -8% to 8% travel matches the keyframe above.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-parallax][data-parallax-fb] { overflow: clip; }
+  .tgs-section[data-parallax][data-parallax-fb] .tgs-section__bg {
+    top: -10%;
+    bottom: auto;
+    height: 120%;
+    transform: translateY(var(--tgs-parallax-y, 0%));
+    will-change: transform;
   }
 }
 
