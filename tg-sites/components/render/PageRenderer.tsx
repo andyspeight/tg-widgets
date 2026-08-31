@@ -22,6 +22,7 @@ import {
   MOTION_VIDEO_RECIPES,
   safeAnchor,
   safeColour,
+  sectionCardCount,
   type Block,
   type Box,
   type Column,
@@ -402,11 +403,15 @@ export function SectionRenderer({
    * wants the cycling background and is inert on one still picture; A6 and S5 drive
    * that one still picture and are inert without it. Everything else needs neither.
    */
+  const cardCount = sectionCardCount(section);
   const motionHasWhatItNeeds = (r: typeof recipe): boolean => {
     if (!r) return false;
     if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);
     if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;
     if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;
+    // S2 pins the section and travels its cards sideways, so it needs a row of them.
+    // Without cards the pinned section would just be a tall empty screen.
+    if (r === 'S2') return cardCount > 0;
     return true;
   };
   const motion =
@@ -597,6 +602,9 @@ export function SectionRenderer({
         // Fill the screen wins over the pixel floor: 100svh is exactly one
         // viewport, and the --tgs-min-h clamp already caps a pixel floor at it.
         '--tgs-min-h': section.fullHeight ? '100svh' : `${section.minHeight}px`,
+        // How many cards the pinned itinerary travels, so the stylesheet makes the
+        // section tall enough for a longer row to have somewhere to scroll. Only for S2.
+        ...(motion === 'S2' ? { '--tgs-s2-len': String(cardCount) } : {}),
         '--tgs-scrim': section.overlay,
         ...(section.pullUp ? { '--tgs-pull-up': `${section.pullUp}px` } : {}),
         // Only when a colour was chosen. Left unset, the scrim CSS falls back to

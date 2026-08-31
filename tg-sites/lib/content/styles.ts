@@ -568,6 +568,7 @@ export const MOTION_CHOICES = [
   { value: 'S5', label: 'Background settles' },
   { value: 'S1', label: 'Words rise like a tide' },
   { value: 'S3', label: 'Cards stack up' },
+  { value: 'S2', label: 'Cards travel sideways' },
   { value: 'A3', label: 'Cards drift past' },
 ] as const;
 

@@ -709,6 +709,76 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   pointer-events: none;
 }
 
+/*
+ * PINNED ITINERARY (S2, Andy 31 Aug 2026). A section marked S2 pins to the screen and
+ * travels its row of cards sideways as the visitor scrolls down: day 1 to day 7 moving
+ * left, which is the itinerary's own axis, a road trip's route, a cruise's ports. Pure
+ * CSS, no script. The render only sets S2 on a section that HAS a row of cards.
+ *
+ * BASE, EVERYWHERE: a swipeable scroll-snap carousel, the same finished pattern the A3
+ * rail uses. This is what a browser without a view() scroll timeline gets, and what a
+ * visitor who asked for less motion gets: a working, swipeable row of cards rather than
+ * a broken pin, so the recipe never depends on the enhancement below.
+ */
+.tgs-section[data-motion='S2'] .tgs-cards {
+  grid-template-columns: none;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--tgs-space-s);
+}
+.tgs-section[data-motion='S2'] .tgs-cards > .tgs-card {
+  scroll-snap-align: start;
+  flex: 0 0 clamp(260px, 34%, 380px);
+}
+
+/*
+ * ENHANCEMENT: pin the section and drive the card row with the page scroll, on a browser
+ * with a view() timeline and where movement is welcome. The section is made tall (the
+ * extra height is the horizontal scroll distance, longer for more cards via --tgs-s2-len
+ * the render sets), the inner becomes a full-height sticky stage that clips the overspill,
+ * the row and column step aside so the track can span the whole screen, and the card row
+ * translates from its start to its end across the section's own passage (animation-range:
+ * contain, which for an element taller than the viewport is exactly the pinned stretch).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-motion='S2'] {
+      height: calc(100vh + var(--tgs-s2-len, 3) * 58vh);
+      view-timeline: --tgs-s2;
+    }
+    .tgs-section[data-motion='S2'] .tgs-section__inner {
+      max-width: none;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .tgs-section[data-motion='S2'] .tgs-row { display: block; }
+    .tgs-section[data-motion='S2'] .tgs-cards {
+      overflow: visible;
+      scroll-snap-type: none;
+      width: max-content;
+      padding-inline: var(--tgs-space-l);
+      /* No animation-range: the default is the section's whole travel across the
+         viewport, which spreads the sideways move smoothly over the pinned scroll
+         rather than bunching it. Naming `contain` looked right but travelled the cards
+         in a rush near the end (measured 31 Aug 2026). Same choice the parallax makes. */
+      animation: tgs-s2 linear both;
+      animation-timeline: --tgs-s2;
+    }
+    .tgs-section[data-motion='S2'] .tgs-cards > .tgs-card {
+      flex-basis: clamp(300px, 32vw, 440px);
+    }
+  }
+}
+@keyframes tgs-s2 {
+  to { transform: translateX(calc(-100% + 100vw)); }
+}
+
 /* ------------------------------------------------------------------ */
 /* Rows and columns                                                    */
 /* ------------------------------------------------------------------ */

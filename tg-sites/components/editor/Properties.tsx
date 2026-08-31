@@ -1670,6 +1670,12 @@ function SectionFields({
               video) and it will move.
             </p>
           )}
+          {motionGaps.includes('recipe-cards') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement travels a row of cards sideways, and the section has no cards
+              yet. Add a Cards block and it will move.
+            </p>
+          )}
         </div>
         {section.motion && (
           <div className="ed-field">

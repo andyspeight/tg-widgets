@@ -294,7 +294,7 @@ export function boxIsEmpty(box: Box): boolean {
  * fallback).
  */
 export const MOTION_RECIPES = [
-  'none', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+  'none', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S2', 'S3', 'S5',
 ] as const;
 export type MotionRecipe = (typeof MOTION_RECIPES)[number];
 
@@ -327,7 +327,7 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A1: 2, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
+  none: 0, A1: 2, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S2: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -372,7 +372,7 @@ export const MOTION_VIDEO_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRec
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+  'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S2', 'S3', 'S5',
 ]);
 
 /**
@@ -428,6 +428,7 @@ export type Motion = { recipe: MotionRecipe; intensity: MotionIntensity };
  *   than two (A2, the cycling background).
  * - recipe-still: the recipe moves ONE still background picture and there is none,
  *   or a slideshow or a video is set instead (A4, A6, S5).
+ * - recipe-cards: the recipe travels a row of CARDS and the section has none (S2).
  * - parallax-still / ken-burns-still: the same missing still picture, for the two
  *   background toggles.
  */
@@ -435,8 +436,34 @@ export type MotionGap =
   | 'recipe-video'
   | 'recipe-pictures'
   | 'recipe-still'
+  | 'recipe-cards'
   | 'parallax-still'
   | 'ken-burns-still';
+
+/**
+ * How many cards the section's first cards block holds, or 0 if it has none. The
+ * pinned-itinerary recipe (S2) travels this row sideways, so it needs one, exactly as
+ * the background recipes need a picture. A plain walk over the stored shape, defensive
+ * because the routes hand it whatever came out of the database. Used by both the render
+ * (to gate S2 and size the pinned section) and the editor hint, so the two agree.
+ */
+export function sectionCardCount(section: {
+  rows?: ReadonlyArray<{
+    columns?: ReadonlyArray<{ blocks?: ReadonlyArray<{ type?: unknown; props?: unknown }> }>;
+  }> | null;
+}): number {
+  for (const row of section.rows ?? []) {
+    for (const column of row?.columns ?? []) {
+      for (const block of column?.blocks ?? []) {
+        if (block?.type === 'cards') {
+          const items = (block.props as { items?: unknown } | undefined)?.items;
+          if (Array.isArray(items)) return items.length;
+        }
+      }
+    }
+  }
+  return 0;
+}
 
 /**
  * Which of a section's motion settings are switched on but have nothing to move.
@@ -460,6 +487,9 @@ export function sectionMotionGaps(section: {
   backgroundSlides?: ReadonlyArray<{ src?: string }> | null;
   parallax?: boolean;
   kenBurns?: boolean;
+  rows?: ReadonlyArray<{
+    columns?: ReadonlyArray<{ blocks?: ReadonlyArray<{ type?: unknown; props?: unknown }> }>;
+  }> | null;
 }): MotionGap[] {
   const hasVideo = Boolean(section.backgroundVideo && section.backgroundVideo.trim());
   const picCount =
@@ -477,6 +507,9 @@ export function sectionMotionGaps(section: {
       if (!bgShow) gaps.push('recipe-pictures');
     } else if (MOTION_BACKGROUND_RECIPES.has(recipe)) {
       if (!stillBackground) gaps.push('recipe-still');
+    } else if (recipe === 'S2') {
+      // The pinned itinerary travels a row of cards, so it needs a cards block.
+      if (sectionCardCount(section) === 0) gaps.push('recipe-cards');
     }
   }
 

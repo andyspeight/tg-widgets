@@ -32,10 +32,15 @@ turned down to nothing is a checkbox wearing a slider's clothes.
 | Background settles | S5 | The background scrubbing to rest as you scroll |
 | Words rise like a tide | S1 | The section's text arriving |
 | Cards stack up | S3 | Sticky-stacking cards |
+| Cards travel sideways | S2 | The section pins and its cards travel horizontally on scroll |
 | Cards drift past | A3 | A rail drifting on its own, added to by scroll |
 
-**All ten are live.** Every entry the editor offers renders, and
-`tests/motion.test.ts` fails if one does not.
+**All eleven are live.** Every entry the editor offers renders, and
+`tests/motion.test.ts` fails if one does not. S2 the pinned itinerary (added 31 Aug
+2026) is pure CSS: on Chromium the section pins and its card row travels sideways on
+a named view-timeline; on Safari, Firefox and under reduced motion it falls back to a
+swipeable scroll-snap carousel, a finished section either way. It only turns on when
+the section actually has a Cards block to travel.
 
 **Two need JavaScript, each its own file, and the rest are pure stylesheet.** A3
 drifting-rail pulls `tg-motion.js` (a track that drifts by itself AND is added to

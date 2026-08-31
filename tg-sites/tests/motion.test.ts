@@ -28,6 +28,7 @@ import {
   MOTION_SEA_RECIPES,
   MOTION_TIERS,
   parsePage,
+  sectionCardCount,
   sectionMotionGaps,
   SEA_TONES,
   type MotionRecipe,
@@ -266,7 +267,10 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
        * what the parallax has done since 11 Aug 2026. An earlier version of this test
        * demanded a range and failed A4 for matching the house pattern.
        */
-      if (rules.some((r) => /animation-timeline:\s*view\(\)/.test(r))) {
+      // Scroll-steered off a view timeline, anonymous view() or a named one (S2 pins the
+      // section and drives its cards off the section's own --tgs-s2 view-timeline). Either
+      // way it is paced by scroll, so a duration in the shorthand is ignored and misleads.
+      if (rules.some((r) => /animation-timeline:\s*(view\(\)|--[\w-]+)/.test(r))) {
         expect(
           /animation:[^;]*?\d+m?s/.test(animation),
           `${recipe} is scroll-steered but carries a duration, which is ignored and misleads`,
@@ -1237,5 +1241,73 @@ describe('the cinematic sea wears a named tone', () => {
     // data-sea-deep/shallow/horizon and falls back to its defaults on anything invalid.
     expect(seaScript).toContain("rgb(section.getAttribute('data-sea-deep')");
     expect(seaScript).toContain('/^#?([0-9a-f]{6})$/i');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The pinned itinerary (S2), the catalogue's "strongest" recipe (31 Aug 2026).
+// A section pins and travels its cards sideways; the fallback is a swipeable
+// carousel on non-Chromium and reduced motion. Pure CSS, no script.
+// ---------------------------------------------------------------------------
+describe('the pinned itinerary travels a row of cards', () => {
+  const cardsBlock = (n: number) => ({
+    type: 'cards',
+    props: { items: Array.from({ length: n }, (_, i) => ({ text: `Day ${i + 1}` })) },
+  });
+  const sectionWith = (n: number, recipe = 'S2') => ({
+    id: 's',
+    motion: { recipe, intensity: 2 },
+    rows: [{ columns: [{ blocks: n > 0 ? [cardsBlock(n)] : [] }] }],
+  });
+
+  it('is in the vocabulary, live, tier 0, and no kind of script recipe', () => {
+    expect(MOTION_RECIPES).toContain('S2');
+    expect(MOTION_LIVE_RECIPES.has('S2')).toBe(true);
+    expect(MOTION_TIERS.S2).toBe(0);
+    expect(MOTION_SCRIPT_RECIPES.has('S2' as MotionRecipe)).toBe(false);
+    expect(MOTION_SEA_RECIPES.has('S2' as MotionRecipe)).toBe(false);
+    // It travels the cards, it does not own the section background.
+    expect(MOTION_BACKGROUND_RECIPES.has('S2' as MotionRecipe)).toBe(false);
+  });
+
+  it('the editor offers it in plain words', () => {
+    const choice = MOTION_CHOICES.find((c) => c.value === 'S2');
+    expect(choice?.label).toBe('Cards travel sideways');
+  });
+
+  it('counts the first cards block, and gaps flag a pinned itinerary with none', () => {
+    expect(sectionCardCount(sectionWith(5))).toBe(5);
+    expect(sectionCardCount(sectionWith(0))).toBe(0);
+    // The editor hint: S2 with no cards has nothing to travel.
+    expect(sectionMotionGaps(sectionWith(0))).toContain('recipe-cards');
+    expect(sectionMotionGaps(sectionWith(4))).toEqual([]);
+    // A different recipe with no cards is not a cards gap.
+    expect(sectionMotionGaps(sectionWith(0, 'A5'))).not.toContain('recipe-cards');
+  });
+
+  it('the render gates it on having cards and sizes the pinned section by their number', () => {
+    expect(render).toContain("if (r === 'S2') return cardCount > 0;");
+    expect(render).toContain("motion === 'S2' ? { '--tgs-s2-len': String(cardCount) }");
+  });
+
+  it('the editor warns when the itinerary has no cards to travel', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain("motionGaps.includes('recipe-cards')");
+    expect(props).toContain('Add a Cards block');
+  });
+
+  it('falls back to a swipeable carousel, and pins only behind the scroll-timeline guard', () => {
+    // Base, everywhere: an overflow-x carousel with scroll snap (the non-Chromium and
+    // reduced-motion fallback). It is the FIRST S2 cards rule, before the pinned one.
+    const baseIdx = css.indexOf("[data-motion='S2'] .tgs-cards {");
+    const baseRule = css.slice(baseIdx, css.indexOf('}', baseIdx));
+    expect(baseRule).toContain('overflow-x: auto');
+    expect(baseRule).toContain('scroll-snap-type: x proximity');
+    // The pin (a named view timeline) comes after the base carousel, inside the guard.
+    const pinIdx = css.indexOf('view-timeline: --tgs-s2');
+    expect(pinIdx).toBeGreaterThan(baseIdx);
+    expect(css).toContain('animation-timeline: --tgs-s2');
+    expect(css).toContain('@keyframes tgs-s2');
+    expect(css).toContain('translateX(calc(-100% + 100vw))');
   });
 });

@@ -2493,7 +2493,7 @@
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 105,
+      "cssRules": 109,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1539",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2731,7 +2731,7 @@
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 131,
+      "cssRules": 135,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1852",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
