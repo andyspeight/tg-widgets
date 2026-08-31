@@ -768,6 +768,33 @@ priority-ish order so the next session picks up without re-deriving them:
       remaining half of gap 9 and needs infra; (b) whether to band-gate the
       hide-powered-by toggle (make white-label a paid perk, e.g. scale/enterprise
       only) — today any owner can toggle it.
+      BRANDED EMAILS + PAGE METADATA DONE 31 Aug (cont.) — the two remaining
+      buildable white-label surfaces that still leaked Travelgenix. EMAILS:
+      lib/email-template.ts (pure, 9 tests) renders a branded HTML email — the
+      operator's logo (or name) header, accent colour, facts block and CTA
+      button, with the Powered by credit unless white-label; everything escaped,
+      the accent hex validated so nothing breaks out of the HTML. notify.ts now
+      sends this HTML (plain text kept as fallback) AND sets the inbox SENDER
+      NAME to the operator (the from ADDRESS stays the one verified sending
+      domain — a custom sending domain is DNS/DKIM, the email counterpart of the
+      custom domain). All four emails (confirmation, operator notice,
+      registration reminder, abandoned recovery) carry the brand, threaded
+      through the booking context and both crons. Still a SEAM: real delivery
+      needs BREVO_API_KEY + TRIPS_EMAIL_FROM; until then the log transport runs.
+      METADATA/FAVICON: lib/seo.ts operatorMetadata titles every public page by
+      the OPERATOR, sets the favicon to the operator's logo where they have one
+      (no logo = no icon, never a Travelgenix mark), and Open Graph uses the
+      operator as the site name + the hero as the card image. trip/book/booked/
+      register/review all use it; book and booked no longer inherit the
+      Travelgenix marketing description. repo.getOperatorBrandByReference is the
+      light name+logo lookup for the reference-gated pages. Live-verified on
+      prod: /booked now titles "Booking confirmed · Global Travel Solution" with
+      the operator description and og:site_name, the Travelgenix description gone;
+      the trip page titles "{trip} · {operator}". 215 tests green. So the white-
+      label surfaces now DONE: branded pages, remove-powered-by, branded emails
+      (sender + HTML), branded page metadata/favicon, branded embed widgets. The
+      only white-label pieces LEFT both need DNS: the custom booking DOMAIN and a
+      custom email SENDING domain (DKIM).
   10. **Integrations** — a public WRITE API, Zapier, and accounting export
       (QuickBooks / Xero). ACCOUNTING EXPORT DONE 31 Aug: an operator downloads
       a finance ledger of every booking from the Reports page (a Download
