@@ -2184,7 +2184,7 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 37,
+      "cssRules": 44,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1233",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2493,7 +2493,7 @@
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 98,
+      "cssRules": 109,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1539",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -2731,7 +2731,7 @@
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 124,
+      "cssRules": 135,
       "sourcePath": "tg-sites/components/render/blocks.tsx:1852",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -3739,7 +3739,7 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 35,
+      "cssRules": 42,
       "sourcePath": "tg-sites/components/render/blocks.tsx:3610",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },

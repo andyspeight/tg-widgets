@@ -210,7 +210,28 @@ Test suite: **3386 passing**, 8 skipped. Was 3321 at the start of the session.
 
 ## Destinations: what is built, and what it needs before it runs
 
-Slices 1 and 2 are on main (25 Aug 2026). Slice 3, adoption, is next.
+**ALL THREE SLICES ARE ON MAIN AND LIVE.** Slices 1 and 2 shipped 25 Aug am;
+slice 3, ADOPTION, shipped 25 Aug pm (commits `6172913d`..`0978ae88`), a few
+hours after this section was first written, which is why the line below used to
+say "next". It is done: a client opens a collection, presses **Add a
+destination**, searches the corpus and adopts one, and a finished magazine
+destination page appears with the facts panel. Verified 28 Aug: the live corpus
+holds 1,158 records (495 resorts, 284 cities, 225 airports, 108 countries, 46
+attractions), two resort pages are already adopted in production, and
+`tests/adopt.test.ts` + `tests/collections.test.ts` are green (265). The code is
+`lib/content/adopt.ts` (the seed), `lib/db/reference.ts` (`listAdoptable`,
+`adoptDestination`), `app/actions/collections.ts` (the two actions),
+`components/collections/AdoptDialog.tsx`, and the facts render in
+`app/site/[host]/[[...path]]/page.tsx`.
+
+The one thing still outstanding is OPERATIONAL, not code: **`CRON_SECRET` on
+tg-sites-shell**, so the nightly sync keeps the corpus fresh (see below). The
+data is already there from manual runs, so adoption works today; without the
+secret it simply stops getting newer.
+
+Note: the four "Destination" page templates added 28 Aug (page-templates.ts) are
+a SEPARATE, manual path — a client building a destination page by hand without
+adopting. Adoption has its own richer, place-aware seed in adopt.ts.
 
 **BEFORE THE SYNC CAN RUN, three env vars and a migration.** Nothing built so
 far changes a live page until these are set, and the cron will answer 500 every

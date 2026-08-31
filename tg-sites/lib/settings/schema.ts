@@ -28,6 +28,13 @@
 import { z } from 'zod';
 
 import { safeUrl } from '../content/sanitise';
+import {
+  DEFAULT_FLOATING_WIDGETS,
+  parseFloatingWidgets,
+  type FloatingWidgetsSettings,
+} from './floating-widgets';
+
+export type { FloatingWidgetsSettings } from './floating-widgets';
 
 // ---------------------------------------------------------------------------
 // Analytics
@@ -453,6 +460,17 @@ export const SiteSettingsSchema = z.object({
     })
     .catch({ ...DEFAULT_COOKIE_CONSENT }),
 
+  /**
+   * The site-wide floating widgets (back to top, WhatsApp, deal bar, loader).
+   * See lib/settings/floating-widgets.ts: each is validated to what its widget
+   * will accept, so the inline config the published shell emits only ever holds
+   * sanitised primitives. Total and defensive, like everything here.
+   */
+  floatingWidgets: z
+    .unknown()
+    .transform((value): FloatingWidgetsSettings => parseFloatingWidgets(value))
+    .catch(DEFAULT_FLOATING_WIDGETS),
+
   /** The little icon in a browser tab. */
   faviconUrl: imageUrl,
   /** What appears when somebody shares a page. Per-page SEO can override it. */
@@ -515,6 +533,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   gtmId: null,
   ga4Id: null,
   cookieConsent: { ...DEFAULT_COOKIE_CONSENT },
+  floatingWidgets: DEFAULT_FLOATING_WIDGETS,
   faviconUrl: null,
   socialImageUrl: null,
   touchIconUrl: null,

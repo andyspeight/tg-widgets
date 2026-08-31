@@ -663,6 +663,122 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 .tgs-section[data-width='wide']      .tgs-section__inner { max-width: var(--tgs-width-wide); }
 .tgs-section[data-width='full']      .tgs-section__inner { max-width: none; padding-inline: 0; }
 
+/*
+ * STICK TO THE TOP. A section marked data-sticky pins to the top of the viewport
+ * once the page scrolls it there, and the rest of the page scrolls under it: a
+ * running sub-nav, a headline, a booking bar. Pure CSS, no script.
+ *
+ * This works because .tgs-page uses overflow-x: clip, NOT overflow-x: hidden.
+ * clip leaves overflow-y at its visible default, so the page is not a scroll
+ * container and a sticky child pins to the viewport as intended. hidden would
+ * coerce overflow-y to auto and make .tgs-page its own scroller, which would trap
+ * the sticky child inside it and break the pin. That choice is load-bearing here.
+ * (Verified in a browser, 31 Aug 2026.)
+ *
+ * @supports so a browser without position: sticky keeps the section in normal
+ * flow rather than losing it. z-index keeps the pinned section above the sections
+ * that scroll under it, and well below the fixed header, popup and widgets panel.
+ * The render only emits data-sticky off the editing canvas (see PageRenderer), so
+ * a sticky band never pins over the editor toolbar while you build the page.
+ */
+@supports (position: sticky) {
+  .tgs-section[data-sticky] {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+}
+
+/*
+ * CINEMATIC SEA (A1, Andy 31 Aug 2026). The one WebGL recipe: public/tg-sea.js mounts
+ * a <canvas class="tgs-sea"> into the section, over its still photographic background
+ * and under the scrim and the words, and animates a Gerstner-wave sea on the GPU.
+ *
+ * There is NO keyframe here to guard, because the movement is the shader and the
+ * script refuses to create a canvas at all under prefers-reduced-motion (and where
+ * there is no WebGL, and for any second A1 section on a page). What is left for the
+ * stylesheet is to place the canvas and clip its overspill. With no script, no WebGL
+ * or reduced motion the canvas never appears and the section is simply its still
+ * photograph, which is a finished hero rather than a broken one.
+ */
+.tgs-section[data-motion='A1'] { overflow: clip; }
+.tgs-section[data-motion='A1'] .tgs-sea {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/*
+ * PINNED ITINERARY (S2, Andy 31 Aug 2026). A section marked S2 pins to the screen and
+ * travels its row of cards sideways as the visitor scrolls down: day 1 to day 7 moving
+ * left, which is the itinerary's own axis, a road trip's route, a cruise's ports. Pure
+ * CSS, no script. The render only sets S2 on a section that HAS a row of cards.
+ *
+ * BASE, EVERYWHERE: a swipeable scroll-snap carousel, the same finished pattern the A3
+ * rail uses. This is what a browser without a view() scroll timeline gets, and what a
+ * visitor who asked for less motion gets: a working, swipeable row of cards rather than
+ * a broken pin, so the recipe never depends on the enhancement below.
+ */
+.tgs-section[data-motion='S2'] .tgs-cards {
+  grid-template-columns: none;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--tgs-space-s);
+}
+.tgs-section[data-motion='S2'] .tgs-cards > .tgs-card {
+  scroll-snap-align: start;
+  flex: 0 0 clamp(260px, 34%, 380px);
+}
+
+/*
+ * ENHANCEMENT: pin the section and drive the card row with the page scroll, on a browser
+ * with a view() timeline and where movement is welcome. The section is made tall (the
+ * extra height is the horizontal scroll distance, longer for more cards via --tgs-s2-len
+ * the render sets), the inner becomes a full-height sticky stage that clips the overspill,
+ * the row and column step aside so the track can span the whole screen, and the card row
+ * translates from its start to its end across the section's own passage (animation-range:
+ * contain, which for an element taller than the viewport is exactly the pinned stretch).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-motion='S2'] {
+      height: calc(100vh + var(--tgs-s2-len, 3) * 58vh);
+      view-timeline: --tgs-s2;
+    }
+    .tgs-section[data-motion='S2'] .tgs-section__inner {
+      max-width: none;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .tgs-section[data-motion='S2'] .tgs-row { display: block; }
+    .tgs-section[data-motion='S2'] .tgs-cards {
+      overflow: visible;
+      scroll-snap-type: none;
+      width: max-content;
+      padding-inline: var(--tgs-space-l);
+      /* No animation-range: the default is the section's whole travel across the
+         viewport, which spreads the sideways move smoothly over the pinned scroll
+         rather than bunching it. Naming `contain` looked right but travelled the cards
+         in a rush near the end (measured 31 Aug 2026). Same choice the parallax makes. */
+      animation: tgs-s2 linear both;
+      animation-timeline: --tgs-s2;
+    }
+    .tgs-section[data-motion='S2'] .tgs-cards > .tgs-card {
+      flex-basis: clamp(300px, 32vw, 440px);
+    }
+  }
+}
+@keyframes tgs-s2 {
+  to { transform: translateX(calc(-100% + 100vw)); }
+}
+
 /* ------------------------------------------------------------------ */
 /* Rows and columns                                                    */
 /* ------------------------------------------------------------------ */
@@ -951,6 +1067,56 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   }
 }
 
+/*
+ * REVEAL, THE FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINES (Andy, 31 Aug 2026).
+ *
+ * The reveal above rides a view() timeline, which only Chromium has today, so on Safari
+ * and Firefox a reveal section simply showed in place. This block brings the same
+ * arrival to those browsers, driven by tg-motion.js: where animation-timeline is missing
+ * the script marks each reveal section data-reveal-fb and, as each target scrolls into
+ * view, stamps it data-seen. NOTHING HERE APPLIES WITHOUT THAT MARKER, so a browser that
+ * has scroll timelines (the @supports block above wins and this never matches, since the
+ * script does not add the marker there) and one where the script never runs at all (JS
+ * blocked, or no IntersectionObserver) both keep the content in place exactly as before.
+ * The content never depends on the script.
+ *
+ * It REUSES the very keyframes the real reveal uses, run as an ordinary time-based
+ * animation held paused at its first frame (the hidden state) until data-seen sets it
+ * running. Same arrivals, same look, no second set of keyframes to keep in step. Inside
+ * prefers-reduced-motion as well as the script's own reduced-motion guard, so the hidden
+ * start can never be left on for a visitor who asked for less movement.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-reveal][data-reveal-fb] .tgs-block {
+    animation: tgs-reveal-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both paused;
+  }
+  .tgs-section[data-reveal='fade'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-fade; }
+  .tgs-section[data-reveal='slide-left'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-slide-left; }
+  .tgs-section[data-reveal='slide-right'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-slide-right; }
+  .tgs-section[data-reveal='zoom'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-zoom; }
+  .tgs-section[data-reveal='blur'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-blur; }
+  .tgs-section[data-reveal][data-reveal-fb] .tgs-block[data-seen] { animation-play-state: running; }
+
+  /*
+   * Staggered: the items move, not the block wrappers (matched off), and a per-item
+   * animation-delay the script sets inline on each item cascades a row that all enters
+   * at once. The item selector is copied verbatim from the scroll-timeline stagger
+   * above, so the two pick exactly the same elements, including the :has() step-aside
+   * for a column that holds a grid. (The delay is set inline rather than through a
+   * custom property so the block catalogue does not read a timing value as a colour.)
+   */
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] .tgs-block { animation: none; }
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) {
+    animation: tgs-reveal-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both paused;
+  }
+  .tgs-section[data-reveal='fade'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-fade; }
+  .tgs-section[data-reveal='slide-left'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-left; }
+  .tgs-section[data-reveal='slide-right'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-right; }
+  .tgs-section[data-reveal='zoom'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-zoom; }
+  .tgs-section[data-reveal='blur'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-blur; }
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item)[data-seen] { animation-play-state: running; }
+}
+
 @keyframes tgs-reveal-rise {
   from {
     opacity: 0;
@@ -1158,6 +1324,27 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
+ * PARALLAX, THE FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINES (Andy, 31 Aug 2026).
+ * Same story as the reveal fallback: the parallax above rides a view() timeline that
+ * only Chromium has, so elsewhere the picture sat still. Where animation-timeline is
+ * missing, tg-motion.js marks the section data-parallax-fb and sets --tgs-parallax-y
+ * from the section's position on each scroll; here the picture is grown and the section
+ * clipped exactly as the real one, and the picture is translated by that variable. No
+ * marker, no change, so a browser with scroll timelines or no script keeps the still,
+ * full-bleed picture. The -8% to 8% travel matches the keyframe above.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-parallax][data-parallax-fb] { overflow: clip; }
+  .tgs-section[data-parallax][data-parallax-fb] .tgs-section__bg {
+    top: -10%;
+    bottom: auto;
+    height: 120%;
+    transform: translateY(var(--tgs-parallax-y, 0%));
+    will-change: transform;
+  }
+}
+
+/*
  * KEN BURNS BACKGROUND (Andy, 13 Aug 2026). A section marked data-ken-burns drifts
  * and zooms its single background picture slowly on its own, the documentary trick
  * that gives a still photo life. Unlike the parallax above it is NOT tied to the
@@ -1171,7 +1358,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 @media (prefers-reduced-motion: no-preference) {
   .tgs-section[data-ken-burns] { overflow: clip; }
   .tgs-section[data-ken-burns] .tgs-section__bg {
-    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    /* 18s, not 24s: at 24s the drift was below the eye's threshold, so a client
+       who set it saw a still photo (Andy, 30 Aug 2026). Still the calmest of the
+       ambient moves, a slow documentary drift, but now visibly moving on load. */
+    animation: tgs-ken-burns 18s ease-in-out infinite alternate;
     transform-origin: center;
   }
 }
@@ -1180,7 +1370,9 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(1.05);
   }
   to {
-    transform: scale(1.16) translate(-2%, -1.5%);
+    /* More pan (-4%,-3%, was -2%,-1.5%) so it reads as drifting across the scene,
+       not only zooming in place. */
+    transform: scale(1.16) translate(-4%, -3%);
   }
 }
 
@@ -1215,33 +1407,36 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * ones the hover zoom leans on), and clip is restated here so a drifting picture can
  * never reach its neighbours even if a frame's overflow changes.
  */
+/* Amplitudes and durations retuned 30 Aug 2026: at 26-36s and a 2-9% scale the
+   breathing was imperceptible (measured 0.09px over 1.5s), so a client who set A5
+   saw stills. Faster and a touch wider now, still calm and desynchronised. */
 .tgs-section[data-motion='A5'] {
-  --tgs-motion-from: 1.02;
-  --tgs-motion-to: 1.09;
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.11;
 }
 .tgs-section[data-motion='A5'][data-motion-intensity='1'] {
-  --tgs-motion-from: 1.01;
-  --tgs-motion-to: 1.05;
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.07;
 }
 .tgs-section[data-motion='A5'][data-motion-intensity='3'] {
-  --tgs-motion-from: 1.03;
-  --tgs-motion-to: 1.14;
+  --tgs-motion-from: 1.05;
+  --tgs-motion-to: 1.18;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) { overflow: clip; }
   .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) img {
-    animation: tgs-motion-slow-frame 26s ease-in-out infinite alternate;
+    animation: tgs-motion-slow-frame 16s ease-in-out infinite alternate;
     transform-origin: center;
   }
 
   /* The desync. The item is the card in a card grid and the frame itself in a
      gallery, which is why both are listed: in each case the picture sits inside it. */
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n + 2) img {
-    animation-duration: 31s;
+    animation-duration: 20s;
   }
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n) img {
-    animation-duration: 36s;
+    animation-duration: 24s;
   }
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(even) img {
     animation-direction: alternate-reverse;
@@ -1253,7 +1448,7 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(var(--tgs-motion-from));
   }
   to {
-    transform: scale(var(--tgs-motion-to)) translate(-1.5%, -1%);
+    transform: scale(var(--tgs-motion-to)) translate(-3%, -2%);
   }
 }
 
@@ -1267,20 +1462,23 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * name. The render never sets both, because both move the one picture. Ken Burns is
  * left exactly as it was, so nothing already published changes.
  */
+/* Durations brought down 30 Aug 2026 (26/34/20s -> 16/22/12s): at 26s the drift
+   was 0.075% over 1.5s, below the eye's threshold, so "Background drifts" looked
+   like a still. The pan in the keyframe is widened too. Calm, but now moving. */
 .tgs-section[data-motion='A6'] {
   --tgs-motion-from: 1.04;
   --tgs-motion-to: 1.14;
-  --tgs-motion-duration: 26s;
+  --tgs-motion-duration: 16s;
 }
 .tgs-section[data-motion='A6'][data-motion-intensity='1'] {
   --tgs-motion-from: 1.03;
   --tgs-motion-to: 1.08;
-  --tgs-motion-duration: 34s;
+  --tgs-motion-duration: 22s;
 }
 .tgs-section[data-motion='A6'][data-motion-intensity='3'] {
   --tgs-motion-from: 1.05;
   --tgs-motion-to: 1.2;
-  --tgs-motion-duration: 20s;
+  --tgs-motion-duration: 12s;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1298,7 +1496,7 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(var(--tgs-motion-from));
   }
   to {
-    transform: scale(var(--tgs-motion-to)) translate(-2%, -1.5%);
+    transform: scale(var(--tgs-motion-to)) translate(-6%, -4%);
   }
 }
 

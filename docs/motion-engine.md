@@ -15,7 +15,7 @@ If the two ever disagree, this file is wrong: `MOTION_CHOICES` in
 
 ---
 
-## Nine movements, each with three strengths
+## Ten movements, each with three strengths
 
 A section's **Movement** dropdown. Every one also takes an intensity, and the
 band is deliberately Gentle / Medium / Strong with no "off": a recipe that can be
@@ -28,18 +28,36 @@ turned down to nothing is a checkbox wearing a slider's clothes.
 | Scenes change | A2 | Background frames cross-fading |
 | Layers drift apart | A4 | Near and far layers separating |
 | Film behind the words | A7 | A moving background behind the text |
+| Cinematic sea | A1 | A WebGL Gerstner-wave sea on the GPU, behind the words |
 | Background settles | S5 | The background scrubbing to rest as you scroll |
 | Words rise like a tide | S1 | The section's text arriving |
 | Cards stack up | S3 | Sticky-stacking cards |
+| Cards travel sideways | S2 | The section pins and its cards travel horizontally on scroll |
 | Cards drift past | A3 | A rail drifting on its own, added to by scroll |
 
-**All nine are live.** Every entry the editor offers has CSS behind it and a
-reduced-motion path, and `tests/motion.test.ts` fails if one does not.
+**All eleven are live.** Every entry the editor offers renders, and
+`tests/motion.test.ts` fails if one does not. S2 the pinned itinerary (added 31 Aug
+2026) is pure CSS: on Chromium the section pins and its card row travels sideways on
+a named view-timeline; on Safari, Firefox and under reduced motion it falls back to a
+swipeable scroll-snap carousel, a finished section either way. It only turns on when
+the section actually has a Cards block to travel.
 
-**Only A3 needs JavaScript.** Everything else is a stylesheet. That is the whole
-point of the split: a page that asks for nothing ships nothing, and A3 is the one
-thing CSS cannot express (a track that drifts by itself AND is added to by
-scroll).
+**Two need JavaScript, each its own file, and the rest are pure stylesheet.** A3
+drifting-rail pulls `tg-motion.js` (a track that drifts by itself AND is added to
+by scroll is the one thing CSS cannot express). A1 cinematic sea (added 31 Aug
+2026) pulls `tg-sea.js`, the hand-written WebGL shader engine: it is the one tier-2
+recipe, so it caps itself at one canvas per page, creates NO canvas at all under
+reduced motion (the section's own still photograph is the fallback and a finished
+hero), caps the device pixel ratio, and pauses when off-screen or the tab is
+hidden. A page carrying neither ships neither file: a page that asks for nothing
+ships nothing.
+
+Separately, `tg-motion.js` now also carries a fallback so **reveal and parallax
+move on Safari and Firefox** (added 31 Aug 2026), not just Chromium. They are
+scroll-driven CSS on a view() timeline that only Chromium ships; where it is
+missing the script drives the same keyframes on an IntersectionObserver and a
+scroll listener, and where it is present the CSS does it all and the script stands
+down. See the reveal/parallax fallback in `app/globals.css` and `public/tg-motion.js`.
 
 ---
 
@@ -95,6 +113,39 @@ down, so a site using none of this carries no motion CSS decisions it did not
 make and no script at all.
 
 ---
+
+## Why a client might see no motion (30 Aug 2026)
+
+Andy: "it is not obvious there is any motion." Three real causes, all now
+addressed, recorded so the next person does not re-diagnose them:
+
+1. **Motion is PAUSED while editing.** The render suppresses every section motion
+   (the recipe, reveal, parallax, Ken Burns, hover) on the editing canvas, gated
+   on `!editable` in PageRenderer, so a drifting background does not jump back to
+   the start on every keystroke and a reveal does not replay as you type. Correct
+   for editing, but it means a client who sets a recipe and stays in the editor
+   sees nothing. The fix is a note in the Motion group and the answer it gives:
+   **press the eye (Preview) to see it.** Preview and the published page run it.
+
+2. **The ambient recipes were below the eye's threshold.** Measured in Chromium,
+   A6 "Background drifts" moved 0.075% of scale and 0.14px over 1.5 seconds at its
+   old 26s duration: technically animating, perceptually a still. Retuned 30 Aug:
+   A6 16s (was 26s), A5 frames 16s (was 26s), Ken Burns 18s (was 24s), and the
+   drift keyframe pans -6%,-4% (was -2%,-1.5%). Still calm, now visibly moving on
+   load. `tests/motion.test.ts` pins these so they cannot drift back to subtle.
+
+3. **A recipe with an unmet precondition no-ops silently.** A6 needs a background
+   photograph (`.tgs-section__bg`); A5 needs cards or images in the section; S1
+   needs text blocks; S3 needs cards. Pick one without its precondition and
+   nothing moves. `motionHasWhatItNeeds` in the render already refuses to emit
+   `data-motion` for a recipe whose precondition is unmet, so the attribute in the
+   DOM always means something really moves; the remaining gap is telling the
+   client in the editor, a future nicety.
+
+Separately, the scroll-STEERED recipes (S1, S5, parallax, reveal) sit behind
+`@supports (animation-timeline: view())`. That is true in Chromium; where it is
+not, those recipes fall to a still, complete page (progressive enhancement). The
+ambient A-family recipes above need no such support and move everywhere.
 
 ## Where this got embarrassing, recorded so it does not repeat
 

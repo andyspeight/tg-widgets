@@ -329,6 +329,7 @@ describe('staff settings are a different shape entirely', () => {
       'companyName',
       'cookieConsent',
       'faviconUrl',
+      'floatingWidgets',
       'ga4Id',
       'gtmId',
       'locale',

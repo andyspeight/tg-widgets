@@ -217,6 +217,23 @@ export const REGION_LAYOUTS: readonly SectionPreset[] = [
     ],
     section: { paddingY: 48 },
   },
+  {
+    id: 'layout-footer-oneline',
+    category: 'footer',
+    label: 'One line',
+    description: 'The leanest footer: a short row of links and the copyright, nothing else. For a one-page site.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[
+          { type: 'nav', props: { items: LINKS, collapse: 'never', ...CENTRED } },
+          /* The copyright block, not a typed year: it looks after itself (see the simple footer). */
+          { type: 'copyright', props: { owner: 'Your company name', suffix: 'ATOL protected. All rights reserved.', symbol: 'symbol', size: 's', align: 'centre' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 24 },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -859,5 +876,119 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
       },
     ],
     section: { paddingY: 40, tone: 'subtle' },
+  },
+  {
+    id: 'footer-dark-signup',
+    category: 'footer',
+    label: 'Big, dark, with a sign-up',
+    description: 'The premium ending: a newsletter with a button, two lists and your details, all on the dark tone.',
+    rows: [
+      {
+        widths: [2, 1, 1, 1],
+        gap: 40,
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Never miss the good ones', style: 'h5', level: 'h3' } },
+            { type: 'text', props: { html: '<p>One email a month and nothing else. Add the Newsletter widget under this line.</p>', size: 's' } },
+            { type: 'button', props: { label: 'Sign up', href: '/newsletter', variant: 'primary' } },
+          ],
+          [
+            { type: 'heading', props: { html: 'Holidays', style: 'h6', level: 'h3' } },
+            { type: 'nav', props: { ...FOOTER_MENU, items: [
+              { label: 'Beach', href: '/beach', newTab: false },
+              { label: 'City breaks', href: '/city-breaks', newTab: false },
+              { label: 'Cruises', href: '/cruises', newTab: false },
+              { label: 'Tailor made', href: '/tailor-made', newTab: false },
+            ] } },
+          ],
+          [
+            { type: 'heading', props: { html: 'About', style: 'h6', level: 'h3' } },
+            { type: 'nav', props: { ...FOOTER_MENU, items: [
+              { label: 'About us', href: '/about', newTab: false },
+              { label: 'Reviews', href: '/reviews', newTab: false },
+              { label: 'Contact', href: '/contact', newTab: false },
+            ] } },
+          ],
+          [
+            { type: 'heading', props: { html: 'Get in touch', style: 'h6', level: 'h3' } },
+            { type: 'text', props: { html: '<p>01234 567890</p><p>hello@yourshop.co.uk</p>', size: 's' } },
+            { type: 'social', props: { style: 'circle', size: 's' } },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[
+          { type: 'divider' },
+          { type: 'text', props: { html: '<p>Your company name. ATOL number here, ABTA number here.</p>', size: 's' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 56, tone: 'dark' },
+  },
+  {
+    id: 'footer-cta',
+    category: 'footer',
+    label: 'Call to action, then links',
+    description: 'A line that asks for the booking with a button, a rule, then your details and two lists.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[
+          { type: 'heading', props: { html: 'Ready to plan your next trip?', style: 'h5', level: 'h2', align: 'centre' } },
+          { type: 'text', props: { html: '<p>Talk to a real person who has actually been there.</p>', size: 's', ...CENTRED } },
+          { type: 'button', props: { label: 'Get in touch', href: '/contact', variant: 'primary', align: 'centre' } },
+        ]],
+      },
+      {
+        widths: [2, 1, 1],
+        gap: 32,
+        columns: [
+          [
+            { type: 'divider' },
+            { type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } },
+            { type: 'text', props: { html: '<p>Your address, over two lines.</p><p>01234 567890</p>', size: 's' } },
+          ],
+          [
+            { type: 'divider' },
+            { type: 'heading', props: { html: 'Explore', style: 'h6', level: 'h3' } },
+            { type: 'nav', props: { ...FOOTER_MENU, items: [
+              { label: 'Beach', href: '/beach', newTab: false },
+              { label: 'City breaks', href: '/city-breaks', newTab: false },
+              { label: 'Cruises', href: '/cruises', newTab: false },
+            ] } },
+          ],
+          [
+            { type: 'divider' },
+            { type: 'heading', props: { html: 'Company', style: 'h6', level: 'h3' } },
+            { type: 'nav', props: { ...FOOTER_MENU, items: [
+              { label: 'About us', href: '/about', newTab: false },
+              { label: 'Privacy', href: '/privacy', newTab: false },
+              { label: 'Contact', href: '/contact', newTab: false },
+            ] } },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 48, tone: 'subtle' },
+  },
+  {
+    id: 'footer-centred-dark',
+    category: 'footer',
+    label: 'Centred, dark',
+    description: 'A logo, a row of links and your socials down the middle on the dark tone. A clean, quiet ending.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[
+          { type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } },
+          { type: 'nav', props: { items: LINKS, collapse: 'never', ...CENTRED } },
+          { type: 'social', props: { align: 'centre' } },
+          { type: 'divider' },
+          { type: 'copyright', props: { owner: 'Your company name', suffix: 'ATOL protected. All rights reserved.', symbol: 'symbol', size: 's', align: 'centre' } },
+        ]],
+      },
+    ],
+    section: { paddingY: 44, tone: 'dark' },
   },
 ];

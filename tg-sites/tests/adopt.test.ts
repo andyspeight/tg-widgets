@@ -662,7 +662,9 @@ describe('the editor draws the same cards the site does', () => {
      * and the document stays clean. Same arrangement the menu fill uses.
      */
     expect(canvas).toContain('const shown = useMemo(() => fillListings(page, listings');
-    expect(canvas).toContain('fillNavFolders(shown, navPages)');
+    // The render draws shownForVisitor, a further display copy of `shown` (the
+    // Preview-as filter), so both fills stay off the saved tree.
+    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages)');
     // The editable state is still the unfilled page.
     expect(canvas).not.toMatch(/setPage\(\s*shown/);
   });

@@ -26,9 +26,18 @@
 
 import type { ReactElement } from 'react';
 
-import { anyNeedsMotionScript, type Tree } from '../../lib/content/motion';
+import { anyNeedsMotionScript, anyNeedsSeaScript, type Tree } from '../../lib/content/motion';
 
 export function MotionScript({ trees }: { trees: ReadonlyArray<Tree> }): ReactElement | null {
-  if (!anyNeedsMotionScript(trees)) return null;
-  return <script src="/tg-motion.js" defer />;
+  const motion = anyNeedsMotionScript(trees);
+  // The WebGL sea (A1) is a SEPARATE file, tier 2, loaded only when a section carries
+  // it. Same one-tag-per-document reasoning, same never-in-the-editor rule.
+  const sea = anyNeedsSeaScript(trees);
+  if (!motion && !sea) return null;
+  return (
+    <>
+      {motion ? <script src="/tg-motion.js" defer /> : null}
+      {sea ? <script src="/tg-sea.js" defer /> : null}
+    </>
+  );
 }

@@ -35,6 +35,7 @@ import {
   MOTION_BACKGROUND_RECIPES,
   normaliseSectionPadding,
   PADDING_PRESETS,
+  sectionMotionGaps,
   type MotionRecipe,
 } from '../../lib/content/schema';
 import {
@@ -59,8 +60,12 @@ import {
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
+  PX_SIZE_MIN,
+  PX_SIZE_MAX,
   REVEAL_STYLES,
+  SEA_TONE_PRESETS,
 } from '../../lib/content/styles';
+import { AudienceField } from './AudienceField';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -79,6 +84,7 @@ import {
   updateColumn,
   updateRow,
   updateSection,
+  updateBlockAudienceAtPath,
   updateBlockBoxAtPath,
   updateBlockPropsAtPath,
   updateBlockResponsiveAtPath,
@@ -1346,6 +1352,11 @@ function SectionFields({
   const set = (patch: Parameters<typeof updateSection>[2], key: string) =>
     onCommit((current) => updateSection(current, index, patch), key);
 
+  // Motion settings that are switched on but have no background content to move,
+  // so the pane can say what to add rather than leave the client thinking it is
+  // broken. Mirrors the render's own guard; see sectionMotionGaps.
+  const motionGaps = sectionMotionGaps(section);
+
   return (
     <>
       <Group title="Name">
@@ -1436,21 +1447,46 @@ function SectionFields({
         the foot of the section to fine tune it.
       </p>
 
-      <Measure
-        label="Minimum height"
-        value={section.minHeight}
-        max={MAX_MIN_HEIGHT}
-        step={10}
-        hint="A floor, not a fixed height. A section with more content in it still grows."
-        onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
-      />
+      {/*
+        FILL THE SCREEN. A viewport-tall section (100svh), device-independent,
+        which a pixel minimum could never hit on every screen at once. It wins
+        over the pixel height, so that control steps aside while it is on.
+      */}
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={section.fullHeight === true}
+            onChange={(event) =>
+              set({ fullHeight: event.target.checked || undefined }, `sec:${index}:fullh`)
+            }
+          />
+          <span>Fill the screen</span>
+        </label>
+        <p className="ed-help" style={{ marginTop: 6 }}>
+          Makes the section exactly one screen tall, whatever the device. A section
+          with more than a screenful of content still grows past it.
+        </p>
+      </div>
+
+      {!section.fullHeight && (
+        <Measure
+          label="Minimum height"
+          value={section.minHeight}
+          max={MAX_MIN_HEIGHT}
+          step={10}
+          hint="A floor, not a fixed height. A section with more content in it still grows."
+          onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
+        />
+      )}
 
       {/*
         * Only worth asking once the section can actually be taller than its
-        * content. Below that there is no spare height to place, and a control
-        * that does nothing is worse than no control.
+        * content: a screenful (fill the screen) or a pixel floor. Below that
+        * there is no spare height to place, and a control that does nothing is
+        * worse than no control.
         */}
-      {(section.minHeight ?? 0) > 0 && (
+      {(section.fullHeight || (section.minHeight ?? 0) > 0) && (
         <div className="ed-field">
           <label className="ed-label" htmlFor={`ed-aligny-${index}`}>
             Content sits
@@ -1477,6 +1513,30 @@ function SectionFields({
           </p>
         </div>
       )}
+
+      {/*
+        STICK TO THE TOP. The section pins to the top of the screen as the page
+        scrolls past it and stays there while the rest scrolls under: a sub-nav, a
+        headline, a booking bar. It only pins on the live site and in preview, so
+        it will not stick over the toolbar while you build the page here.
+      */}
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={section.sticky === true}
+            onChange={(event) =>
+              set({ sticky: event.target.checked || undefined }, `sec:${index}:sticky`)
+            }
+          />
+          <span>Stick to the top on scroll</span>
+        </label>
+        <p className="ed-help" style={{ marginTop: 6 }}>
+          Pins the section to the top of the screen once it is scrolled there, so it
+          stays in view while the rest of the page moves under it. Press the eye
+          (Preview) at the top to see it in action.
+        </p>
+      </div>
 
       <Measure
         label="Overlap the section above"
@@ -1508,7 +1568,34 @@ function SectionFields({
 
       </Group>
 
+      <Group title="Who sees this" defaultOpen={false}>
+        {/*
+          SERVER-SIDE PERSONALISATION, per section. Keyed on the section id so
+          switching between sections re-reads each one's own rule rather than
+          carrying the last section's draft across. The rule resolves at render on
+          the published site (lib/content/audience); nothing is hidden with CSS.
+        */}
+        <AudienceField
+          key={`aud-${section.id}`}
+          audience={section.audience}
+          onChange={(next) => set({ audience: next }, `sec:${index}:audience`)}
+        />
+      </Group>
+
       <Group title="Motion" defaultOpen={false}>
+        {/*
+          MOTION IS PAUSED WHILE EDITING. The render suppresses every section motion
+          (the recipe, reveal, parallax, Ken Burns and the hover effects) on the
+          editing canvas, so a drifting background does not jump back to the start on
+          every keystroke and a reveal does not replay as you type. That is right for
+          editing but it is also why a client who sets a recipe and stays in the
+          editor sees nothing move and assumes it is broken (Andy, 30 Aug 2026). The
+          note says where the motion actually is: press the eye to preview it.
+        */}
+        <p className="ed-help" data-tone="warn" style={{ marginBottom: 8 }}>
+          Movement is paused while you edit, so it does not distract. Press the eye
+          (Preview) at the top to see it move.
+        </p>
         {/*
           THE MOTION RECIPE, first in the group because it is the headline choice: it
           says how the whole section moves, where the switches below it are finer
@@ -1558,6 +1645,37 @@ function SectionFields({
             background picture instead, which suits a closing section at the foot of a page.
             Both stop for anyone who prefers less motion.
           </p>
+          {/*
+            WHY IT WILL NOT MOVE. Some recipes move the section's background, so they
+            need one to move. When the client has picked such a recipe on a section
+            with nothing behind it, say what to add rather than leave them thinking
+            it is broken. Only one of these can be true at a time.
+          */}
+          {motionGaps.includes('recipe-video') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement plays a background video, and there isn&apos;t one yet. Add a
+              video under Background image below and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-pictures') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement plays a sequence of pictures. Add two or more under Background
+              image below and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement moves a still background picture, and there isn&apos;t one yet.
+              Add one under Background image below (a single picture, not a slideshow or
+              video) and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-cards') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement travels a row of cards sideways, and the section has no cards
+              yet. Add a Cards block and it will move.
+            </p>
+          )}
         </div>
         {section.motion && (
           <div className="ed-field">
@@ -1583,6 +1701,41 @@ function SectionFields({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+        {/*
+          THE SEA'S TONE, only for the cinematic sea. A travel agent picks their water
+          by name rather than dialling three colours: Caribbean turquoise, Nordic steel.
+          Absent is the northern default, so a section that never chose one still has a
+          finished sea.
+        */}
+        {section.motion?.recipe === 'A1' && (
+          <div className="ed-field">
+            <label className="ed-label" htmlFor={`ed-sea-tone-${index}`}>
+              Sea scene
+            </label>
+            <select
+              id={`ed-sea-tone-${index}`}
+              className="ed-select"
+              value={section.seaTone ?? 'northern'}
+              onChange={(event) => {
+                const tone = SEA_TONE_PRESETS.find((t) => t.value === event.target.value)?.value;
+                set(
+                  { seaTone: tone && tone !== 'northern' ? tone : undefined },
+                  `sec:${index}:seaTone`,
+                );
+              }}
+            >
+              {SEA_TONE_PRESETS.map((tone) => (
+                <option key={tone.value} value={tone.value}>
+                  {tone.label}
+                </option>
+              ))}
+            </select>
+            <p className="ed-help" style={{ marginTop: 6 }}>
+              Which water to paint. Give the section a sky photograph as its background and
+              the sea meets it at the horizon.
+            </p>
           </div>
         )}
         <div className="ed-field">
@@ -1747,6 +1900,12 @@ function SectionFields({
             visitor scrolls, for a sense of depth. It needs a still background picture, and it
             eases off for anyone who prefers less motion.
           </p>
+          {motionGaps.includes('parallax-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              There is no still background picture to drift yet. Add one under Background
+              image below and it will move.
+            </p>
+          )}
         </div>
         {/*
           Ken Burns is the other background motion, and the two move the one picture,
@@ -1773,6 +1932,12 @@ function SectionFields({
             instead of parallax rather than with it, and eases off for anyone who prefers less
             motion.
           </p>
+          {motionGaps.includes('ken-burns-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              There is no still background picture to zoom yet. Add one under Background
+              image below and it will move.
+            </p>
+          )}
         </div>
       </Group>
 
@@ -2718,12 +2883,26 @@ function GridCellsControl({
   );
 }
 
+/** A value the dropdown offers, versus one typed by hand in pixels. */
+const CUSTOM_TEXT_SIZE = '__custom_px__';
+/** A stored size the dropdown has no option for is a hand-typed pixel size. */
+function isCustomPx(value: string | undefined): value is string {
+  return typeof value === 'string' && /^\d{1,4}px$/.test(value);
+}
+
 /**
- * The Text size dropdown, per screen. Offers the site's own sizes and the fixed
+ * The Text size control, per screen. Offers the site's own sizes and the fixed
  * scale, the very list the toolbar offers a phrase, plus one empty option: on
  * desktop it means "no size of my own, use the block's style", and on a smaller
  * screen "the same size as the screen above". The caller sets the base on desktop
  * and the override otherwise, so this is only the picker.
+ *
+ * A SIZE OF YOUR OWN, IN PIXELS. The scale tops out at 2.5rem, and Andy wanted a
+ * heading bigger than that (the toolbar already lets a phrase go to 200px). So
+ * "Custom…" reveals a pixel box, 6 to 200, exactly the range and validator the
+ * toolbar uses (PX_SIZE_MIN/MAX, sizeValue), because what a whole block may be
+ * set to and what a phrase may be set to must not drift. A stored px size the
+ * dropdown has no option for reopens the box with the number in it.
  */
 function TextSizeField({
   tier,
@@ -2735,8 +2914,15 @@ function TextSizeField({
   onChange: (value: string | undefined) => void;
 }) {
   const id = `ed-text-size-${tier}`;
+  const custom = isCustomPx(value);
+  // Kept open once chosen from the dropdown, before a number is typed, so the box
+  // does not vanish the moment it appears. A real px value keeps it open too.
+  const [pxOpen, setPxOpen] = useState(false);
+  const showPx = custom || pxOpen;
   const autoLabel =
     tier === 'desktop' ? 'Auto (the block style)' : `Same as ${TIER_LABEL[INHERITS_FROM[tier]]}`;
+  // The select shows the matching option, "Custom…" for a typed px, or Auto.
+  const selectValue = custom ? CUSTOM_TEXT_SIZE : showPx ? CUSTOM_TEXT_SIZE : value ?? '';
   return (
     <div className="ed-field">
       <label className="ed-label" htmlFor={id}>
@@ -2745,8 +2931,18 @@ function TextSizeField({
       <select
         id={id}
         className="ed-select"
-        value={value ?? ''}
-        onChange={(event) => onChange(event.target.value || undefined)}
+        value={selectValue}
+        onChange={(event) => {
+          const next = event.target.value;
+          if (next === CUSTOM_TEXT_SIZE) {
+            // Open the box; do not commit yet, the block keeps its size until a
+            // number is typed, so choosing Custom never blanks the text.
+            setPxOpen(true);
+            return;
+          }
+          setPxOpen(false);
+          onChange(next || undefined);
+        }}
       >
         <option value="">{autoLabel}</option>
         {FONT_SIZE_GROUPS.map((group) => (
@@ -2758,7 +2954,56 @@ function TextSizeField({
             ))}
           </optgroup>
         ))}
+        <optgroup label="Your own">
+          <option value={CUSTOM_TEXT_SIZE}>Custom…</option>
+        </optgroup>
       </select>
+      {showPx && (
+        <div className="ed-text-size-px">
+          <input
+            /*
+              UNCONTROLLED, and committed on blur or Enter, not on every keystroke.
+              A number input that clamped each keystroke turned "120" into "6" the
+              moment the first digit was typed, because 1 is below the minimum. So
+              the box holds the raw digits while typing and only clamps when the
+              person is done, exactly the split the toolbar uses. Keyed on the
+              stored value and screen so switching screens, or an undo, reseeds it.
+            */
+            key={`${tier}:${custom ? value : 'new'}`}
+            type="number"
+            className="ed-input"
+            aria-label="Text size in pixels"
+            min={PX_SIZE_MIN}
+            max={PX_SIZE_MAX}
+            step={1}
+            placeholder={`${PX_SIZE_MIN}–${PX_SIZE_MAX}`}
+            defaultValue={custom ? String(parseInt(value, 10)) : ''}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                event.currentTarget.blur();
+              }
+            }}
+            onBlur={(event) => {
+              const digits = event.currentTarget.value.trim();
+              if (digits === '') {
+                // Cleared: back to Auto, the same as picking the empty option.
+                setPxOpen(false);
+                onChange(undefined);
+                return;
+              }
+              if (!/^\d{1,4}$/.test(digits)) return;
+              // Clamped here, refused by the sanitiser: type 500 and it becomes
+              // 200 rather than nothing taking, the friendlier half of the split.
+              const n = Math.min(PX_SIZE_MAX, Math.max(PX_SIZE_MIN, Number(digits)));
+              onChange(`${n}px`);
+            }}
+          />
+          <span className="ed-text-size-px__unit" aria-hidden="true">
+            px
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -3323,6 +3568,24 @@ function BlockFields({
     );
   };
   add('layout', <HideOnField key="hide-on" tier={tier} hidden={hideOn.includes(tier)} onChange={setHidden} />);
+
+  // WHO SEES THIS BLOCK: the same audience rule a section carries, on one block
+  // (personalisation v2). Committed like hideOn, through the path-aware setter so
+  // it works on a block in a column and one inside a container alike.
+  add(
+    'layout',
+    <div className="ed-field" key="who-sees-block">
+      <label className="ed-label">Who sees this</label>
+      <AudienceField
+        key={`blk-aud-${block.id}`}
+        noun="block"
+        audience={block.audience}
+        onChange={(next) =>
+          onCommit((c) => updateBlockAudienceAtPath(c, path, next), `blk:${block.id}:audience`)
+        }
+      />
+    </div>,
+  );
 
   // A content-only member keeps the Content group, the words, the picture and
   // the link, and loses the design panels they cannot save anyway.

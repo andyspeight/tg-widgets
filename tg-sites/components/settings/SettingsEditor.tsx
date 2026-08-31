@@ -37,6 +37,7 @@ import { Icon } from '../editor/Icon';
 import { ImageField } from '../media/ImageField';
 import { ActivityPanel } from './ActivityPanel';
 import { DomainsPanel } from './DomainsPanel';
+import { FloatingWidgetsPanel } from './FloatingWidgetsPanel';
 import './settings.css';
 
 type Tab =
@@ -45,6 +46,7 @@ type Tab =
   | 'analytics'
   | 'branding'
   | 'language'
+  | 'widgets'
   | 'activity'
   | 'domains'
   | 'code';
@@ -88,7 +90,7 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
    */
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get('tab');
-    const valid: Tab[] = ['company', 'contact', 'analytics', 'branding', 'language', 'activity', 'domains', 'code'];
+    const valid: Tab[] = ['company', 'contact', 'analytics', 'branding', 'language', 'widgets', 'activity', 'domains', 'code'];
     if (wanted && (valid as string[]).includes(wanted)) setTab(wanted as Tab);
   }, []);
 
@@ -131,6 +133,9 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
     { id: 'analytics', label: 'Analytics' },
     { id: 'branding', label: 'Icons and sharing' },
     { id: 'language', label: 'Language' },
+    // A client choice, not a technical one, so it is not behind the owner gate,
+    // the same reasoning that keeps the cookie banner and no-right-click off it.
+    { id: 'widgets', label: 'Floating widgets' },
     // Activity is for everybody: seeing what happened to a site you belong to is
     // not a privilege, the same reasoning as the members screen, and the action
     // it reads is scoped to the caller's own tenant. It sits before the gated
@@ -786,6 +791,13 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
               a way for a visitor to switch. This is the groundwork.
             </p>
           </section>
+        )}
+
+        {tab === 'widgets' && (
+          <FloatingWidgetsPanel
+            value={settings.floatingWidgets}
+            onChange={(next) => set('floatingWidgets', next)}
+          />
         )}
 
         {tab === 'activity' && <ActivityPanel />}

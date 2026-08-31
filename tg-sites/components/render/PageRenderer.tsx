@@ -22,6 +22,7 @@ import {
   MOTION_VIDEO_RECIPES,
   safeAnchor,
   safeColour,
+  sectionCardCount,
   type Block,
   type Box,
   type Column,
@@ -36,6 +37,7 @@ import {
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
+  seaTonePreset,
 } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
@@ -401,15 +403,22 @@ export function SectionRenderer({
    * wants the cycling background and is inert on one still picture; A6 and S5 drive
    * that one still picture and are inert without it. Everything else needs neither.
    */
+  const cardCount = sectionCardCount(section);
   const motionHasWhatItNeeds = (r: typeof recipe): boolean => {
     if (!r) return false;
     if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);
     if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;
     if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;
+    // S2 pins the section and travels its cards sideways, so it needs a row of them.
+    // Without cards the pinned section would just be a tall empty screen.
+    if (r === 'S2') return cardCount > 0;
     return true;
   };
   const motion =
     recipe && MOTION_LIVE_RECIPES.has(recipe) && motionHasWhatItNeeds(recipe) ? recipe : undefined;
+  // The named sea the cinematic recipe wears, resolved to its colours and sun angle.
+  // Only for A1, so no other section carries the data-sea-* colour attributes.
+  const seaTone = motion === 'A1' ? seaTonePreset(section.seaTone) : undefined;
   /*
    * The recipe WINS the background. Parallax and Ken Burns have moved that one
    * picture since 11 and 13 Aug 2026 and globals.css has always said only one of
@@ -530,6 +539,23 @@ export function SectionRenderer({
       data-motion={motion}
       data-motion-intensity={motion ? String(section.motion?.intensity ?? 2) : undefined}
       /*
+       * The sea reads its swell from the section's intensity band, so Gentle / Medium
+       * / Strong turns down or up how much the water heaves. Only for A1, and read by
+       * tg-sea.js; every other recipe carries its intensity in the stylesheet instead.
+       */
+      data-sea-swell={
+        motion === 'A1'
+          ? String([0.45, 0.65, 0.9][(section.motion?.intensity ?? 2) - 1] ?? 0.65)
+          : undefined
+      }
+      /* The chosen sea's colours and sun angle, for A1 only. tg-sea.js validates each
+         again on the way in, so a stray value can never reach the shader. */
+      data-sea-deep={seaTone?.deep}
+      data-sea-shallow={seaTone?.shallow}
+      data-sea-horizon={seaTone?.horizon}
+      data-sea-sun={seaTone ? String(seaTone.sun) : undefined}
+      data-sea-suncol={seaTone?.sunCol}
+      /*
        * THE FIRST SECTION IS A DIFFERENT PROBLEM AND HAS TO SAY SO.
        *
        * A scroll-driven recipe is timed by the section entering the viewport,
@@ -554,6 +580,14 @@ export function SectionRenderer({
        */
       data-pull-up={section.pullUp ? '' : undefined}
       /*
+       * Pin the section to the top of the viewport as the page scrolls past it.
+       * Gated on `editable`, unlike pull-up above: the editor canvas scrolls inside
+       * its own frame under a fixed toolbar, so a section left free to pin would
+       * stick over the toolbar and the section you are actually editing. It pins on
+       * the published page and in preview, where there is no toolbar to fight.
+       */
+      data-sticky={section.sticky && !editable ? '' : undefined}
+      /*
        * Hidden on some screens, the whole section. Same list and same container
        * queries as a block's, and the same `editable` gate as the reveal and hover
        * above: while editing the section stays on the canvas so it can be selected
@@ -566,7 +600,12 @@ export function SectionRenderer({
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,
-        '--tgs-min-h': `${section.minHeight}px`,
+        // Fill the screen wins over the pixel floor: 100svh is exactly one
+        // viewport, and the --tgs-min-h clamp already caps a pixel floor at it.
+        '--tgs-min-h': section.fullHeight ? '100svh' : `${section.minHeight}px`,
+        // How many cards the pinned itinerary travels, so the stylesheet makes the
+        // section tall enough for a longer row to have somewhere to scroll. Only for S2.
+        ...(motion === 'S2' ? { '--tgs-s2-len': String(cardCount) } : {}),
         '--tgs-scrim': section.overlay,
         ...(section.pullUp ? { '--tgs-pull-up': `${section.pullUp}px` } : {}),
         // Only when a colour was chosen. Left unset, the scrim CSS falls back to
