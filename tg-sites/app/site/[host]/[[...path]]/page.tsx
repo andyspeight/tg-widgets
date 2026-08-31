@@ -34,8 +34,8 @@ import {
   listPublishedItemsForSearch,
   MAX_LISTING_ITEMS,
 } from '../../../../lib/db/collections';
-import { fillPageListings, itemAsCard } from '../../../../lib/content/listings';
-import { resolveListings } from '../../../../lib/db/listings';
+import { fillPageListings, fillPageLoops, itemAsCard } from '../../../../lib/content/listings';
+import { resolveListings, resolveLoops } from '../../../../lib/db/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
 import { DestinationPanel } from '../../../../components/render/DestinationPanel';
@@ -206,16 +206,22 @@ const load = cache(async function load(host: string, path: string[] | undefined)
   }
 
   /*
-   * The listing blocks, filled in before anything renders.
+   * The listing blocks and the loop blocks, filled in before anything renders.
    *
    * One read per distinct collection across the header, the page and the footer,
-   * for the largest count any block asked for, rather than one per block. See
-   * lib/content/listings.ts for why this is not the block's own job.
+   * for the largest count any block asked for, rather than one per block. The two
+   * resolve in parallel: a listing pours a collection into a fixed card, a loop
+   * into a card the client designed, but both read the same rows the same way.
+   * See lib/content/listings.ts for why this is not the block's own job.
    */
-  const listings = await resolveListings(tenantId, [regions.header, page.content, regions.footer]);
+  const trees = [regions.header, page.content, regions.footer];
+  const [listings, loops] = await Promise.all([
+    resolveListings(tenantId, trees),
+    resolveLoops(tenantId, trees),
+  ]);
 
   return {
-    page: { ...page, content: fillPageListings(page.content, listings) },
+    page: { ...page, content: fillPageLoops(fillPageListings(page.content, listings), loops) },
     entry: null,
     archive: null,
     theme,

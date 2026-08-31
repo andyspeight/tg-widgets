@@ -18,8 +18,8 @@ import { getPublicSettings } from '../../../lib/db/settings';
 import { listFontFaces } from '../../../lib/db/fonts';
 import { getPublishedPage, listPublishedNavPages } from '../../../lib/db/pages';
 import { getPublishedRegions } from '../../../lib/db/regions';
-import { fillPageListings } from '../../../lib/content/listings';
-import { resolveListings } from '../../../lib/db/listings';
+import { fillPageListings, fillPageLoops } from '../../../lib/content/listings';
+import { resolveListings, resolveLoops } from '../../../lib/db/listings';
 import { fillNavFolders, fillNavRegion } from '../../../lib/content/nav';
 import { fillBreadcrumbs } from '../../../lib/content/breadcrumbs';
 import { getPublicTheme } from '../../../lib/db/theme';
@@ -98,10 +98,14 @@ async function load(path: string[] | undefined) {
    * public route resolves those. The listing still shows, with links that work
    * once the site is on its own domain.
    */
-  const listings = await resolveListings(site.tenantId, [regions.header, page.content, regions.footer]);
+  const trees = [regions.header, page.content, regions.footer];
+  const [listings, loops] = await Promise.all([
+    resolveListings(site.tenantId, trees),
+    resolveLoops(site.tenantId, trees),
+  ]);
 
   return {
-    page: { ...page, content: fillPageListings(page.content, listings) },
+    page: { ...page, content: fillPageLoops(fillPageListings(page.content, listings), loops) },
     theme,
     faces,
     regions,

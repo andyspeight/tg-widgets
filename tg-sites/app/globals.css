@@ -2405,6 +2405,48 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   .tgs-grid { --tgs-grid-across: var(--tgs-grid-p, 1); }
 }
 
+/*
+ * THE COLLECTION LOOP: one designed card, repeated over a collection.
+ *
+ * It borrows .tgs-grid for the tracks, the gap and the alignment above, so all
+ * that is left here is the WHOLE-CARD LINK. Each card carries a covering anchor
+ * with no text (its name is the entry's title), stretched over the card so a
+ * click anywhere on it opens the entry. Same whole-card pattern as the Cards
+ * block, kept to one anchor per card so the markup stays valid and a keyboard
+ * stops once per card.
+ */
+.tgs-loop__cell { position: relative; }
+.tgs-loop[data-whole='true'] .tgs-loop__cell { cursor: pointer; }
+.tgs-loop[data-whole='true'] .tgs-loop__link {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+/*
+ * A card can hold its own links and buttons (a bound {{link}} button is in the
+ * starter card). They sit ABOVE the covering anchor so they still respond, and
+ * so a screen reader and a keyboard reach them as distinct targets. Anything not
+ * interactive stays below and lets the whole-card click through.
+ */
+.tgs-loop[data-whole='true'] .tgs-loop__cell a:not(.tgs-loop__link),
+.tgs-loop[data-whole='true'] .tgs-loop__cell button {
+  position: relative;
+  z-index: 1;
+}
+/*
+ * The focus ring belongs on the CARD, not on the invisible covering anchor.
+ * Both rules live inside the @supports together: moving the ring to the card
+ * needs :has(), taking it off the anchor does not, and split apart a browser
+ * without :has() would leave a keyboard user with no visible focus at all.
+ */
+@supports selector(:has(*)) {
+  .tgs-loop[data-whole='true'] .tgs-loop__cell:has(.tgs-loop__link:focus-visible) {
+    outline: 3px solid var(--tgs-accent);
+    outline-offset: 2px;
+  }
+  .tgs-loop[data-whole='true'] .tgs-loop__link:focus-visible { outline: none; }
+}
+
 
 /* Heading */
 /*

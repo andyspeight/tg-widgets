@@ -134,3 +134,48 @@ export function bindCardTemplate(
 ): Block[] {
   return template.map((block) => bindBlock(block, item, defs));
 }
+
+/**
+ * The designed card a loop repeats: the blocks of its FIRST inner column. A loop is
+ * stored like a container with one column, so the client designs the card in the same
+ * nested editor a container uses, and the render expands that one design over the items.
+ */
+export function loopCardTemplate(block: Block): Block[] {
+  const columns = (block as { props?: { columns?: unknown } }).props?.columns;
+  if (!Array.isArray(columns) || !columns[0] || typeof columns[0] !== 'object') return [];
+  const first = (columns[0] as { blocks?: unknown }).blocks;
+  return Array.isArray(first) ? (first as Block[]) : [];
+}
+
+/**
+ * One expanded cell: the bound card for an item, the item's own page to link to,
+ * and its title. The title is the accessible name for the whole-card link, which
+ * is otherwise a rectangle a screen reader cannot announce (the card's own words
+ * are in `blocks` and a covering anchor has no text of its own). See InnerLoop in
+ * components/render/PageRenderer.tsx.
+ */
+export type LoopCell = { blocks: Block[]; href: string; label: string };
+
+/**
+ * Expand a loop block over its items: fill the one designed card once per item and
+ * carry each item's link. Returns a NEW block whose `props.columns` are the per-item
+ * cells, which the render lays out like a grid with each cell wrapped in its link.
+ *
+ * Pure, and it runs on a COPY of the tree at render time (see fillLoops), so the
+ * stored block keeps its single template column and can be re-expanded on the next
+ * request. The caller has already cut the items to the block's count.
+ */
+export function expandLoop(
+  block: Block,
+  items: readonly LoopItem[],
+  defs: readonly FieldDef[] = [],
+): Block {
+  const template = loopCardTemplate(block);
+  const props = (block as { props?: Record<string, unknown> }).props ?? {};
+  const cells: LoopCell[] = items.map((item) => ({
+    blocks: bindCardTemplate(template, item, defs),
+    href: item.href,
+    label: item.title ?? '',
+  }));
+  return { ...(block as object), props: { ...props, columns: cells } } as unknown as Block;
+}

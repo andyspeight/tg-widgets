@@ -1654,7 +1654,10 @@ describe('the listing blocks on a page', () => {
   it('are resolved on the server, before anything renders', () => {
     const route = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
     expect(route).toContain('fillPageListings');
-    expect(route).toContain('resolveListings(tenantId, [regions.header, page.content, regions.footer])');
+    // The header, the page and the footer, gathered once and read by both the
+    // listing and the loop resolver (they share the collection read).
+    expect(route).toContain('const trees = [regions.header, page.content, regions.footer]');
+    expect(route).toContain('resolveListings(tenantId, trees)');
   });
 
   it('reads them through the one shared reader, on all three surfaces', () => {
