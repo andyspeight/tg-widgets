@@ -68,6 +68,8 @@
     showTime: true,
     bookLabel: 'Book',
     bookingKinds: ['ticket'],
+    packageBgColor: '',       // '' = the standard secondary look
+    packageTextColor: '',
     currency: 'GBP',
     adults: 2,
     theme: 'light',
@@ -552,6 +554,17 @@
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
     var btnText = safeColour(cfg.bookTextColor, inkOn(accent));
+    // QA ask: the package buttons take their own colours when set; blank
+    // keeps the standard outline look. Text defaults to whichever ink
+    // reads better on the chosen background.
+    var pkgBg = safeColour(cfg.packageBgColor, '');
+    var pkgInk = safeColour(cfg.packageTextColor, '');
+    var pkgCss = pkgBg || pkgInk
+      ? '.tgcp-btn.tgcp-btn-pkg{'
+        + (pkgBg ? 'background:' + pkgBg + ';border-color:' + pkgBg + ';box-shadow:none;' : '')
+        + 'color:' + (pkgInk || inkOn(pkgBg)) + ';}'
+        + (pkgBg ? '.tgcp-btn.tgcp-btn-pkg:hover{background:' + pkgBg + ';filter:brightness(.93);}' : '')
+      : '';
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var cols = clampInt(cfg.columns, 0, 8, 0);
     var font = safeFont(cfg.fontFamily);
@@ -692,7 +705,8 @@
       + '.tgcp-row{grid-template-columns:48px minmax(0,1fr);row-gap:9px;}'
       + '.tgcp-actions{grid-column:1/-1;}.tgcp-btn{flex:1 1 auto;}}'
       + '@media (prefers-reduced-motion:reduce){.tgcp-root *{animation-duration:.01ms !important;'
-      + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}';
+      + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}'
+      + pkgCss;
   }
 
   function TGClubPickerWidget(container, config) {
@@ -888,18 +902,18 @@
         ? c.bookLabel
         : (o.short || o.label || c.bookLabel);
       if (o.stay) {
-        return '<button type="button" class="tgcp-btn' + (i > 0 ? ' tgcp-btn2' : '') + '"'
+        return '<button type="button" class="tgcp-btn' + (i > 0 ? ' tgcp-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgcp-btn-pkg') + '"'
           + ' data-stay="' + esc(o.stay) + '" aria-haspopup="dialog"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</button>';
       }
       if (o.fly) {
-        return '<button type="button" class="tgcp-btn' + (i > 0 ? ' tgcp-btn2' : '') + '"'
+        return '<button type="button" class="tgcp-btn' + (i > 0 ? ' tgcp-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgcp-btn-pkg') + '"'
           + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</button>';
       }
-      return '<a class="tgcp-btn' + (i > 0 ? ' tgcp-btn2' : '') + '" href="' + esc(safeUrl(o.url)) + '"'
+      return '<a class="tgcp-btn' + (i > 0 ? ' tgcp-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgcp-btn-pkg') + '" href="' + esc(safeUrl(o.url)) + '"'
         + ' target="_blank" rel="noopener noreferrer"'
         + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">' + esc(label) + icon(kindIcon(o.kind)) + '</a>';
     }).join('');

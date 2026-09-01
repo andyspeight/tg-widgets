@@ -253,6 +253,21 @@
             <div class="tgse-field">
               <label class="tgse-field-label">What customers can book</label>
               <div id="book-opts"></div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-pkgbg">Package button colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-pkgbg-swatch" aria-label="Pick package button colour">
+                <input class="input" type="text" id="f-pkgbg" maxlength="7" spellcheck="false" placeholder="Auto">
+              </div>
+              <div class="field-help">Fills the + Hotel and + Flight &amp; hotel buttons. Leave blank for the standard outline look.</div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-pkgtext">Package button text</label>
+              <div class="colour-row">
+                <input type="color" id="f-pkgtext-swatch" aria-label="Pick package button text colour">
+                <input class="input" type="text" id="f-pkgtext" maxlength="7" spellcheck="false" placeholder="Auto">
+              </div>
+            </div>
               <div class="field-help">
                 Ticket-only is live. The packaged options appear on the widget the moment their
                 Travelify links are confirmed — no change needed here.
@@ -499,6 +514,8 @@
 
     K.bookingOptions('book-opts', function () { return C.bookingKinds; },
       function (kinds) { C.bookingKinds = kinds; changed(); });
+    c.colourOpt('f-pkgbg-swatch', 'f-pkgbg', 'packageBgColor');
+    c.colourOpt('f-pkgtext-swatch', 'f-pkgtext', 'packageTextColor');
 
     $('name-input').addEventListener('input', function () { shell.markDirty(); });
   }
@@ -518,6 +535,8 @@
     c.sliderSync('f-days', 'v-days', C.daysAhead, function (v) { return v + 'd'; });
     c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
     c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    c.colourOptSync('f-pkgbg-swatch', 'f-pkgbg', C.packageBgColor);
+    c.colourOptSync('f-pkgtext-swatch', 'f-pkgtext', C.packageTextColor);
     c.colourSync('f-btntext-swatch', 'f-btntext', C.bookTextColor);
     $('f-currency').value = C.currency;
     $('f-adults').value = String(C.adults);

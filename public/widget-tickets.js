@@ -75,6 +75,8 @@
     showBadge: true,
     bookLabel: 'Book',
     bookingKinds: ['ticket'],
+    packageBgColor: '',       // '' = the standard secondary look
+    packageTextColor: '',
     currency: 'GBP',
     adults: 2,
     emptyText: '',
@@ -583,6 +585,17 @@
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
     var btnText = safeColour(cfg.bookTextColor, inkOn(accent));
+    // QA ask: the package buttons take their own colours when set; blank
+    // keeps the standard outline look. Text defaults to whichever ink
+    // reads better on the chosen background.
+    var pkgBg = safeColour(cfg.packageBgColor, '');
+    var pkgInk = safeColour(cfg.packageTextColor, '');
+    var pkgCss = pkgBg || pkgInk
+      ? '.tgtk-btn.tgtk-btn-pkg{'
+        + (pkgBg ? 'background:' + pkgBg + ';border-color:' + pkgBg + ';box-shadow:none;' : '')
+        + 'color:' + (pkgInk || inkOn(pkgBg)) + ';}'
+        + (pkgBg ? '.tgtk-btn.tgtk-btn-pkg:hover{background:' + pkgBg + ';filter:brightness(.93);}' : '')
+      : '';
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -695,7 +708,8 @@
 
       + '@media (prefers-reduced-motion:reduce){'
       + '.tgtk-root *{animation-duration:.01ms !important;animation-iteration-count:1 !important;'
-      + 'transition-duration:.01ms !important;}}';
+      + 'transition-duration:.01ms !important;}}'
+      + pkgCss;
   }
 
   // ── The widget ────────────────────────────────────────────────────────────
@@ -879,18 +893,18 @@
           ? c.bookLabel
           : (o.short || o.label || c.bookLabel);
         if (o.stay) {
-          return '<button type="button" class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + '"'
+          return '<button type="button" class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgtk-btn-pkg') + '"'
             + ' data-stay="' + esc(o.stay) + '" aria-haspopup="dialog"'
             + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
             + esc(label) + icon(kindIcon(o.kind)) + '</button>';
         }
         if (o.fly) {
-          return '<button type="button" class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + '"'
+          return '<button type="button" class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgtk-btn-pkg') + '"'
             + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'
             + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
             + esc(label) + icon(kindIcon(o.kind)) + '</button>';
         }
-        return '<a class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + '"'
+        return '<a class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgtk-btn-pkg') + '"'
           + ' href="' + esc(safeUrl(o.url)) + '" target="_blank" rel="noopener noreferrer"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</a>';

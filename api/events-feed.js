@@ -594,11 +594,25 @@ export default function handler(req, res) {
         return;
       }
       const hit = matcher(term);
-      const named = (x) => hit(x.name) || (x.aliases || []).some(hit);
+      // Every word of the query must appear somewhere in the entity's text,
+      // so the label a card DISPLAYS ("Championship - England") typed back
+      // verbatim still finds it: punctuation splits away, and "championship"
+      // matches the label while "england" matches the country.
+      const fold = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+      const tokens = fold(term).split(/[^a-z0-9]+/).filter(Boolean);
+      if (!tokens.length) {
+        res.status(200).json({
+          meta, query: term, competitions: [], teams: [], venues: [], performers: [],
+          total: 0, offset: 0, limit: 0, events: [],
+        });
+        return;
+      }
+      const hitAll = (hay) => { const h = fold(hay); return tokens.every((t) => h.includes(t)); };
+      const named = (x) => hitAll(x.name + ' ' + (x.aliases || []).join(' '));
       const ENTITY_CAP = 8;
 
       const competitions = snap.competitions
-        .filter((c) => hit(c.label) || hit(c.country) || hit(c.categoryLabel));
+        .filter((c) => hitAll(c.label + ' ' + (c.country || '') + ' ' + (c.categoryLabel || '')));
       const teams = snap.teams.filter(named);
       const venues = snap.venues.filter(named);
       const performers = snap.performers.filter(named);
@@ -627,13 +641,13 @@ export default function handler(req, res) {
       const to = str(q.to, 10);
       pool = windowRows(pool, from, to);
 
-      const rows = pool.filter((e) => hit(e.t)
-        || hit(teamName(snap, e.hk))
-        || hit(teamName(snap, e.ak))
-        || hit(e.pk && (snap.performerByKey.get(e.pk) || {}).name)
-        || hit((snap.venueByKey.get(e.vk) || {}).name)
-        || hit(e.lo)
-        || hit(e.o && (snap.competitionBySlug.get(e.o) || {}).label));
+      const rows = pool.filter((e) => {
+        const comp = e.o ? snap.competitionBySlug.get(e.o) : null;
+        return hitAll([e.t, teamName(snap, e.hk), teamName(snap, e.ak),
+          e.pk && (snap.performerByKey.get(e.pk) || {}).name,
+          (snap.venueByKey.get(e.vk) || {}).name, e.lo,
+          comp && comp.label, comp && comp.country].filter(Boolean).join(' '));
+      });
 
       res.status(200).json({
         meta,

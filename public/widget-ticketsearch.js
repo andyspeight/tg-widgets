@@ -58,6 +58,8 @@
     showCompetition: true,
     bookLabel: 'Book',
     bookingKinds: ['ticket'],
+    packageBgColor: '',       // '' = the standard secondary look
+    packageTextColor: '',
     currency: 'GBP',
     adults: 2,
     theme: 'light',
@@ -530,6 +532,17 @@
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
     var btnText = safeColour(cfg.bookTextColor, inkOn(accent));
+    // QA ask: the package buttons take their own colours when set; blank
+    // keeps the standard outline look. Text defaults to whichever ink
+    // reads better on the chosen background.
+    var pkgBg = safeColour(cfg.packageBgColor, '');
+    var pkgInk = safeColour(cfg.packageTextColor, '');
+    var pkgCss = pkgBg || pkgInk
+      ? '.tgts-btn.tgts-btn-pkg{'
+        + (pkgBg ? 'background:' + pkgBg + ';border-color:' + pkgBg + ';box-shadow:none;' : '')
+        + 'color:' + (pkgInk || inkOn(pkgBg)) + ';}'
+        + (pkgBg ? '.tgts-btn.tgts-btn-pkg:hover{background:' + pkgBg + ';filter:brightness(.93);}' : '')
+      : '';
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -647,7 +660,17 @@
       + '.tgts-row{grid-template-columns:48px minmax(0,1fr);row-gap:9px;}'
       + '.tgts-actions{grid-column:1/-1;}.tgts-btn{flex:1 1 auto;}}'
       + '@media (prefers-reduced-motion:reduce){.tgts-root *{animation-duration:.01ms !important;'
-      + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}';
+      + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}'
+      + 'button.tgts-card{appearance:none;-webkit-appearance:none;margin:0;font:inherit;'
+      + 'text-align:left;cursor:pointer;}'
+      + '.tgts-fbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px;}'
+      + '.tgts-fclear{border:1px solid var(--tgts-border);background:var(--tgts-bg);color:var(--tgts-sub);'
+      + 'font:inherit;font-size:12.5px;font-weight:600;min-height:34px;padding:0 12px;'
+      + 'border-radius:999px;cursor:pointer;}'
+      + '.tgts-fclear:hover{color:var(--tgts-text);border-color:var(--tgts-accent);}'
+      + '.tgts-fname{font-weight:700;font-size:14.5px;}'
+      + '.tgts-fcount{font-size:12.5px;color:var(--tgts-mute);}'
+      + pkgCss;
   }
 
   function TGTicketSearchWidget(container, config) {
@@ -679,6 +702,7 @@
     var self = this;
     var mine = ++this._reqId;
     var c = this.cfg;
+    this._filter = null;
 
     if (!term || term.trim().length < 2) {
       this.data = null;
@@ -726,6 +750,53 @@
       });
   };
 
+  /**
+   * Narrow to one entity's events: a competition, club, venue or artist card
+   * acts as a filter (QA expected exactly this), with a Back pill to return
+   * to the text results.
+   */
+  TGTicketSearchWidget.prototype._filterTo = function (type, key, label) {
+    var self = this;
+    var mine = ++this._reqId;
+    var c = this.cfg;
+    if (!/^[a-z0-9-]{1,80}$/.test(key)) return;
+    var view = { competition: 'competition', team: 'team', venue: 'venue', performer: 'performer' }[type];
+    if (!view) return;
+
+    this._filter = { type: type, key: key, label: label };
+    var q = {
+      view: view,
+      limit: String(clampInt(c.eventLimit, 1, 50, 10)),
+      from: localToday(0),
+      to: localToday(clampInt(c.daysAhead, 1, 730, 365)),
+      currency: c.currency,
+      adults: String(clampInt(c.adults, 1, 20, 2)),
+    };
+    q[view === 'competition' ? 'slug' : 'key'] = key;
+    if (c.appId) q.appId = c.appId;
+    var kinds = Array.isArray(c.bookingKinds) ? c.bookingKinds.filter(Boolean) : [];
+    q.booking = kinds.length ? kinds.join(',') : 'none';
+
+    this.state = 'loading';
+    this._render();
+
+    var qs = Object.keys(q).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]); }).join('&');
+    fetch(FEED_API + '?' + qs, { headers: { Accept: 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('failed'); return r.json(); })
+      .then(function (d) {
+        if (mine !== self._reqId) return;
+        self.data = d;
+        self.state = 'ready';
+        self._render();
+      })
+      .catch(function () {
+        if (mine !== self._reqId) return;
+        self.data = null;
+        self.state = 'error';
+        self._render();
+      });
+  };
+
   TGTicketSearchWidget.prototype._cardHtml = function (name, meta, hue, href) {
     var h = typeof hue === 'number' ? hue : 210;
     var ini = String(name || '?').replace(/\([^)]*\)/g, ' ').split(/[^A-Za-z0-9]+/)
@@ -735,8 +806,13 @@
       + 'color:hsl(' + h + ' 62% var(--tgts-badge-t))">' + esc(initials.toUpperCase()) + '</span>'
       + '<span class="tgts-cbody"><span class="tgts-cname">' + esc(name) + '</span>'
       + '<span class="tgts-cmeta">' + esc(meta) + '</span></span>';
-    // A card only becomes a link when the client gave us somewhere to send
-    // people. Otherwise it is a plain tile — never a link to nowhere.
+    // A card with a filter target narrows the results to that entity's
+    // events on click; a card with a link goes there; otherwise it is a
+    // plain tile — never a link to nowhere.
+    if (arguments.length > 4 && arguments[4]) {
+      return '<button type="button" class="tgts-card" data-fs="' + esc(arguments[4]) + '"'
+        + ' data-fsl="' + esc(name) + '">' + body + '</button>';
+    }
     return href
       ? '<a class="tgts-card" href="' + esc(safeUrl(href)) + '">' + body + '</a>'
       : '<div class="tgts-card" style="cursor:default">' + body + '</div>';
@@ -779,18 +855,18 @@
         ? c.bookLabel
         : (o.short || o.label || c.bookLabel);
       if (o.stay) {
-        return '<button type="button" class="tgts-btn' + (i > 0 ? ' tgts-btn2' : '') + '"'
+        return '<button type="button" class="tgts-btn' + (i > 0 ? ' tgts-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgts-btn-pkg') + '"'
           + ' data-stay="' + esc(o.stay) + '" aria-haspopup="dialog"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</button>';
       }
       if (o.fly) {
-        return '<button type="button" class="tgts-btn' + (i > 0 ? ' tgts-btn2' : '') + '"'
+        return '<button type="button" class="tgts-btn' + (i > 0 ? ' tgts-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgts-btn-pkg') + '"'
           + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</button>';
       }
-      return '<a class="tgts-btn' + (i > 0 ? ' tgts-btn2' : '') + '" href="' + esc(safeUrl(o.url)) + '"'
+      return '<a class="tgts-btn' + (i > 0 ? ' tgts-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgts-btn-pkg') + '" href="' + esc(safeUrl(o.url)) + '"'
         + ' target="_blank" rel="noopener noreferrer"'
         + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">' + esc(label) + icon(kindIcon(o.kind)) + '</a>';
     }).join('');
@@ -825,6 +901,25 @@
 
     var d = this.data || {};
     var events = d.events || [];
+
+    // Narrowed to one entity: a Back pill, then just that entity's events.
+    if (this._filter) {
+      var f = this._filter;
+      var self0 = this;
+      var total = typeof d.total === 'number' ? d.total : events.length;
+      var pill = '<div class="tgts-fbar">'
+        + '<button type="button" class="tgts-fclear" data-fclear="1">&#8249; All results</button>'
+        + '<span class="tgts-fname">' + esc(f.label) + '</span>'
+        + '<span class="tgts-fcount">' + esc(total + (total === 1 ? ' event' : ' events')) + '</span>'
+        + '</div>';
+      if (!events.length) {
+        return pill + '<div class="tgts-state" role="status">' + icon('search')
+          + '<p>' + esc('Nothing coming up here just yet.') + '</p></div>';
+      }
+      return pill + '<div class="tgts-list">'
+        + events.map(function (e) { return self0._rowHtml(e); }).join('') + '</div>';
+    }
+
     var groups = '';
     var counted = 0;
 
@@ -838,16 +933,16 @@
       };
       groups += section('Competitions', d.competitions, function (x) {
         return self._cardHtml(x.label + (x.country ? ' - ' + x.country : ''),
-          x.events + ' events', null, '');
+          x.events + ' events', null, '', 'competition:' + x.slug);
       });
       groups += section('Clubs', d.teams, function (x) {
-        return self._cardHtml(x.name, x.events + ' games · ' + x.home + ' home', x.hue, '');
+        return self._cardHtml(x.name, x.events + ' games · ' + x.home + ' home', x.hue, '', 'team:' + x.key);
       });
       groups += section('Venues', d.venues, function (x) {
-        return self._cardHtml(x.name, x.events + ' events', x.hue, '');
+        return self._cardHtml(x.name, x.events + ' events', x.hue, '', 'venue:' + x.key);
       });
       groups += section('Artists', d.performers, function (x) {
-        return self._cardHtml(x.name, x.events + ' dates', x.hue, '');
+        return self._cardHtml(x.name, x.events + ' dates', x.hue, '', 'performer:' + x.key);
       });
     }
 
@@ -935,6 +1030,20 @@
       self._syncForm();
       input.focus();
       self._search('');
+    });
+
+    this.shadow.querySelector('.tgts-results').addEventListener('click', function (e) {
+      var t = e.target;
+      var card = t && t.closest ? t.closest('[data-fs]') : null;
+      if (card) {
+        var fs = String(card.getAttribute('data-fs') || '').split(':');
+        self._filterTo(fs[0], fs.slice(1).join(':'), card.getAttribute('data-fsl') || '');
+        return;
+      }
+      if (t && t.closest && t.closest('[data-fclear]')) {
+        self._filter = null;
+        self._search(self.query);
+      }
     });
 
     var chips = this.shadow.querySelectorAll('.tgts-quick button');

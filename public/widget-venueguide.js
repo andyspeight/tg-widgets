@@ -59,6 +59,8 @@
     showLinks: true,
     bookLabel: 'Book',
     bookingKinds: ['ticket'],
+    packageBgColor: '',
+    packageTextColor: '',
     currency: 'GBP',
     adults: 2,
     mapZoom: 14,
@@ -587,6 +589,14 @@
 
   function styles(c) {
     var accent = safeColour(c.accent, DEFAULTS.accent);
+    var pkgBg = safeColour(c.packageBgColor, '');
+    var pkgInk = safeColour(c.packageTextColor, '');
+    var pkgCss = pkgBg || pkgInk
+      ? '.tgvg-btn.tgvg-btn-pkg{'
+        + (pkgBg ? 'background:' + pkgBg + ';border-color:' + pkgBg + ';' : '')
+        + 'color:' + (pkgInk || inkOn(pkgBg)) + ';}'
+        + (pkgBg ? '.tgvg-btn.tgvg-btn-pkg:hover{background:' + pkgBg + ';filter:brightness(.93);}' : '')
+      : '';
     var radius = clamp(c.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(c.fontFamily);
     return ':host{all:initial;display:block;}'
@@ -674,7 +684,8 @@
       + '.tgvg-facts{grid-template-columns:minmax(0,1fr);}'
       + '.tgvg-ev{grid-template-columns:44px minmax(0,1fr);}'
       + '.tgvg-ev .tgvg-btn{grid-column:2;justify-self:start;}'
-      + '}';
+      + '}'
+      + pkgCss;
   }
 
   // ── Markup ────────────────────────────────────────────────────────────────
@@ -796,14 +807,14 @@
                   ? (c.bookLabel || o.short || 'Book')
                   : (o.short || c.bookLabel || 'Book');
                 if (o.stay) {
-                  return '<button type="button" class="tgvg-btn" data-stay="' + esc(o.stay) + '"'
+                  return '<button type="button" class="tgvg-btn' + (o.kind === 'ticket' ? '' : ' tgvg-btn-pkg') + '" data-stay="' + esc(o.stay) + '"'
                     + ' aria-haspopup="dialog">' + esc(label) + icon(kindIcon(o.kind)) + '</button>';
                 }
                 if (o.fly) {
-                  return '<button type="button" class="tgvg-btn" data-fly="' + esc(o.fly) + '"'
+                  return '<button type="button" class="tgvg-btn' + (o.kind === 'ticket' ? '' : ' tgvg-btn-pkg') + '" data-fly="' + esc(o.fly) + '"'
                     + ' aria-haspopup="dialog">' + esc(label) + icon(kindIcon(o.kind)) + '</button>';
                 }
-                return '<a class="tgvg-btn" href="' + esc(safeUrl(o.url)) + '" target="_blank"'
+                return '<a class="tgvg-btn' + (o.kind === 'ticket' ? '' : ' tgvg-btn-pkg') + '" href="' + esc(safeUrl(o.url)) + '" target="_blank"'
                   + ' rel="noopener noreferrer">' + esc(label) + icon(kindIcon(o.kind)) + '</a>';
               }).join('') + '</div>'
               : '');

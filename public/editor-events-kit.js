@@ -210,6 +210,29 @@
         if (sw) sw.value = value;
         if (hex) hex.value = value;
       },
+
+      /** Colour pair where a blank hex means "not set" — the standard look. */
+      colourOpt: function (swatchId, hexId, key) {
+        var sw = $(swatchId);
+        var hex = $(hexId);
+        if (!sw || !hex) return;
+        sw.addEventListener('input', function () {
+          cfg[key] = sw.value;
+          hex.value = sw.value;
+          bump();
+        });
+        hex.addEventListener('input', function () {
+          var v = hex.value.trim();
+          if (v === '') { cfg[key] = ''; bump(); return; }
+          if (/^#[0-9a-fA-F]{6}$/.test(v)) { cfg[key] = v; sw.value = v; bump(); }
+        });
+      },
+      colourOptSync: function (swatchId, hexId, value) {
+        var sw = $(swatchId);
+        var hex = $(hexId);
+        if (hex) hex.value = value || '';
+        if (sw && value) sw.value = value;
+      },
     };
   }
 

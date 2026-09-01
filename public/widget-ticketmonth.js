@@ -57,6 +57,8 @@
     showCompetition: true,
     bookLabel: 'Book',
     bookingKinds: ['ticket'],
+    packageBgColor: '',       // '' = the standard secondary look
+    packageTextColor: '',
     currency: 'GBP',
     adults: 2,
     emptyText: '',
@@ -549,6 +551,17 @@
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
     var btnText = safeColour(cfg.bookTextColor, inkOn(accent));
+    // QA ask: the package buttons take their own colours when set; blank
+    // keeps the standard outline look. Text defaults to whichever ink
+    // reads better on the chosen background.
+    var pkgBg = safeColour(cfg.packageBgColor, '');
+    var pkgInk = safeColour(cfg.packageTextColor, '');
+    var pkgCss = pkgBg || pkgInk
+      ? '.tgtm-btn.tgtm-btn-pkg{'
+        + (pkgBg ? 'background:' + pkgBg + ';border-color:' + pkgBg + ';box-shadow:none;' : '')
+        + 'color:' + (pkgInk || inkOn(pkgBg)) + ';}'
+        + (pkgBg ? '.tgtm-btn.tgtm-btn-pkg:hover{background:' + pkgBg + ';filter:brightness(.93);}' : '')
+      : '';
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -667,7 +680,8 @@
       + '.tgtm-row{grid-template-columns:minmax(0,1fr);row-gap:9px;}'
       + '.tgtm-btn{flex:1 1 auto;}}'
       + '@media (prefers-reduced-motion:reduce){.tgtm-root *{animation-duration:.01ms !important;'
-      + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}';
+      + 'animation-iteration-count:1 !important;transition-duration:.01ms !important;}}'
+      + pkgCss;
   }
 
   function needsValue(t) {
@@ -855,18 +869,18 @@
         ? c.bookLabel
         : (o.short || o.label || c.bookLabel);
       if (o.stay) {
-        return '<button type="button" class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + '"'
+        return '<button type="button" class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgtm-btn-pkg') + '"'
           + ' data-stay="' + esc(o.stay) + '" aria-haspopup="dialog"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</button>';
       }
       if (o.fly) {
-        return '<button type="button" class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + '"'
+        return '<button type="button" class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgtm-btn-pkg') + '"'
           + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
           + esc(label) + icon(kindIcon(o.kind)) + '</button>';
       }
-      return '<a class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + '" href="' + esc(safeUrl(o.url)) + '"'
+      return '<a class="tgtm-btn' + (i > 0 ? ' tgtm-btn2' : '') + (o.kind === 'ticket' ? '' : ' tgtm-btn-pkg') + '" href="' + esc(safeUrl(o.url)) + '"'
         + ' target="_blank" rel="noopener noreferrer"'
         + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">' + esc(label) + icon(kindIcon(o.kind)) + '</a>';
     }).join('');
