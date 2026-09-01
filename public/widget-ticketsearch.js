@@ -111,6 +111,23 @@
   var FLY_IATA = /^[A-Z]{3}$/;
   var flyAirports = null;
 
+  /**
+   * White or the house dark ink, whichever reads better on the given colour.
+   * The crossover is where both give equal WCAG contrast, so a dark accent
+   * gets white text and icons, and the default cyan keeps dark ones.
+   */
+  function inkOn(hex) {
+    var h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return '#04212B';
+    var lin = function (i) {
+      var c = parseInt(h.substr(i, 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    var L = 0.2126 * lin(0) + 0.7152 * lin(2) + 0.0722 * lin(4);
+    return L > 0.21 ? '#04212B' : '#FFFFFF';
+  }
+
   /** The product each booking type sells, as its button icon. */
   function kindIcon(kind) {
     if (kind === 'ticket-hotel') return 'bed';
@@ -326,7 +343,7 @@
 
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
-    var btnText = safeColour(cfg.bookTextColor, '#04212B');
+    var btnText = safeColour(cfg.bookTextColor, inkOn(accent));
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -424,7 +441,7 @@
       + '.tgts-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
       + 'box-shadow:0 7px 18px color-mix(in srgb,var(--tgts-accent) 44%,transparent);}'
       + '.tgts-btn:active{transform:translateY(0) scale(.99);}'
-      + '.tgts-btn svg{width:13px;height:13px;}'
+      + '.tgts-btn svg{width:20px;height:20px;}'
       + '.tgts-btn2{background:var(--tgts-bg);border-color:var(--tgts-border);color:var(--tgts-text);box-shadow:none;}'
       + '.tgts-btn2:hover{transform:translateY(-1px);border-color:var(--tgts-accent);'
       + 'background:var(--tgts-bg3);box-shadow:0 4px 10px rgba(15,23,42,.08);}'

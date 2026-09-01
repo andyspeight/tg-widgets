@@ -314,7 +314,7 @@ h3 { font-size: var(--text-lg); line-height: 1.4; font-weight: 600; margin: 0 0 
 }
 .ev-btn:hover { background: var(--tg-accent-dark); }
 .ev-btn:active { transform: scale(0.97); }
-.ev-btn svg { width: 15px; height: 15px; }
+.ev-btn svg { width: 22px; height: 22px; }
 .ev-btn-secondary { background: var(--tg-bg-primary); border-color: var(--tg-border); color: var(--tg-text-primary); }
 .ev-btn-secondary:hover { background: var(--tg-bg-tertiary); }
 .ev-btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; pointer-events: none; }

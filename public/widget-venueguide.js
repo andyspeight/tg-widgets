@@ -130,6 +130,23 @@
   var FLY_IATA = /^[A-Z]{3}$/;
   var flyAirports = null;
 
+  /**
+   * White or the house dark ink, whichever reads better on the given colour.
+   * The crossover is where both give equal WCAG contrast, so a dark accent
+   * gets white text and icons, and the default cyan keeps dark ones.
+   */
+  function inkOn(hex) {
+    var h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return '#04212B';
+    var lin = function (i) {
+      var c = parseInt(h.substr(i, 2), 16) / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    var L = 0.2126 * lin(0) + 0.7152 * lin(2) + 0.0722 * lin(4);
+    return L > 0.21 ? '#04212B' : '#FFFFFF';
+  }
+
   /** The product each booking type sells, as its button icon. */
   function kindIcon(kind) {
     if (kind === 'ticket-hotel') return 'bed';
@@ -394,9 +411,9 @@
       + 'font-family:' + font + '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;'
       + '-webkit-font-smoothing:antialiased;text-align:left;line-height:1.45;}'
       + '.tgvg-root[data-theme="light"]{--tgvg-bg:#fff;--tgvg-bg2:#f6f8fa;--tgvg-bg3:#eef1f5;'
-      + '--tgvg-text:#0f1720;--tgvg-mute:#5b6875;--tgvg-border:#e3e8ee;--tgvg-on-accent:#fff;}'
+      + '--tgvg-text:#0f1720;--tgvg-mute:#5b6875;--tgvg-border:#e3e8ee;--tgvg-on-accent:' + inkOn(accent) + ';}'
       + '.tgvg-root[data-theme="dark"]{--tgvg-bg:#12171d;--tgvg-bg2:#171d24;--tgvg-bg3:#1e252e;'
-      + '--tgvg-text:#eef2f6;--tgvg-mute:#9aa7b4;--tgvg-border:#28313b;--tgvg-on-accent:#06121a;}'
+      + '--tgvg-text:#eef2f6;--tgvg-mute:#9aa7b4;--tgvg-border:#28313b;--tgvg-on-accent:' + inkOn(accent) + ';}'
 
       + '.tgvg-card{background:var(--tgvg-bg);color:var(--tgvg-text);border:1px solid var(--tgvg-border);'
       + 'border-radius:var(--tgvg-radius);overflow:hidden;}'
@@ -445,7 +462,7 @@
       + 'font-weight:650;color:var(--tgvg-on-accent);background:var(--tgvg-accent);border-radius:10px;'
       + 'text-decoration:none;white-space:nowrap;}'
       + '.tgvg-btn:hover{filter:brightness(.93);}'
-      + '.tgvg-btn svg{width:13px;height:13px;}'
+      + '.tgvg-btn svg{width:20px;height:20px;}'
       + '.tgvg-btn:focus-visible{outline:2px solid var(--tgvg-accent);outline-offset:2px;}'
 
       + '.tgvg-links{display:flex;flex-wrap:wrap;gap:8px;padding:14px 18px 18px;}'
