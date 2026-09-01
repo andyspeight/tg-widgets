@@ -151,6 +151,10 @@
       "destination": "/admin.html"
     },
     {
+      "source": "/payment-reminders-api",
+      "destination": "/payment-reminders-api.html"
+    },
+    {
       "source": "/admin/traffic",
       "destination": "/admin/traffic.html"
     },

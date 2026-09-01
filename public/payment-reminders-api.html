@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Payment Reminders API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground: #eef2f7;
+    --panel: #ffffff;
+    --panel-2: #f4f7fb;
+    --ink: #0f1a2b;
+    --ink-2: #48576e;
+    --ink-3: #6b7a92;
+    --line: #dbe3ee;
+    --line-strong: #c4d0e0;
+    --navy: #1b2b5b;
+    --accent: #0b7f9e;
+    --accent-soft: rgba(11,127,158,.10);
+    --ok: #0f7a4d;   --ok-bg: rgba(15,122,77,.10);
+    --warn: #9a6400; --warn-bg: rgba(154,100,0,.12);
+    --crit: #b0341f; --crit-bg: rgba(176,52,31,.10);
+    --code-bg: #101a2c;
+    --code-ink: #d7e2f2;
+    --code-line: #22304a;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0a1120;
+      --panel: #10192a;
+      --panel-2: #142033;
+      --ink: #eaf1fb;
+      --ink-2: #a9b8d0;
+      --ink-3: #7e8ea8;
+      --line: #223047;
+      --line-strong: #2c3d58;
+      --navy: #a9c4ff;
+      --accent: #38b6d4;
+      --accent-soft: rgba(56,182,212,.14);
+      --ok: #4cc38a;   --ok-bg: rgba(76,195,138,.14);
+      --warn: #e0a53a; --warn-bg: rgba(224,165,58,.14);
+      --crit: #ef6a54; --crit-bg: rgba(239,106,84,.14);
+      --code-bg: #0b1322;
+      --code-ink: #d3def0;
+      --code-line: #1e2c44;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0a1120;
+    --panel: #10192a;
+    --panel-2: #142033;
+    --ink: #eaf1fb;
+    --ink-2: #a9b8d0;
+    --ink-3: #7e8ea8;
+    --line: #223047;
+    --line-strong: #2c3d58;
+    --navy: #a9c4ff;
+    --accent: #38b6d4;
+    --accent-soft: rgba(56,182,212,.14);
+    --ok: #4cc38a;   --ok-bg: rgba(76,195,138,.14);
+    --warn: #e0a53a; --warn-bg: rgba(224,165,58,.14);
+    --crit: #ef6a54; --crit-bg: rgba(239,106,84,.14);
+    --code-bg: #0b1322;
+    --code-ink: #d3def0;
+    --code-line: #1e2c44;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; }
+
+  .wrap { max-width: 820px; margin: 0 auto; padding: 40px 22px 96px; }
+
+  /* Masthead */
+  header.mast { margin-bottom: 30px; }
+  .kicker {
+    font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 500;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px;
+  }
+  h1 {
+    font-size: clamp(28px, 4.4vw, 40px); font-weight: 700; line-height: 1.08;
+    letter-spacing: -.015em; margin: 0 0 12px; text-wrap: balance;
+  }
+  .sub { font-size: 16.5px; color: var(--ink-2); margin: 0; max-width: 62ch; }
+
+  /* Endpoint band */
+  .endpoint {
+    margin: 26px 0 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: 0 1px 2px rgba(15,26,43,.05);
+    overflow-x: auto;
+  }
+  .verb {
+    font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 13px;
+    letter-spacing: .06em; color: #fff; background: var(--accent);
+    padding: 5px 10px; border-radius: 7px; flex: 0 0 auto;
+  }
+  .url { font-family: "JetBrains Mono", monospace; font-size: 14.5px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .url .host { color: var(--ink-3); }
+  .endpoint-note { font-size: 12.5px; color: var(--ink-3); margin: 0 0 30px; }
+  .endpoint-note code { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-2); }
+
+  section { margin-top: 40px; }
+  h2 {
+    font-size: 13px; font-family: "JetBrains Mono", monospace; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
+    margin: 0 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--line);
+  }
+  h2 .n { color: var(--ink-3); margin-right: 10px; }
+  section > p { color: var(--ink-2); margin: 14px 0; }
+  section > p:first-of-type { margin-top: 16px; }
+  strong { color: var(--ink); font-weight: 600; }
+  a { color: var(--accent); }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); margin: 16px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 520px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    background: var(--panel-2); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line-strong);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.field, td.code, code.inline {
+    font-family: "JetBrains Mono", monospace;
+  }
+  td.field { font-weight: 500; color: var(--ink); white-space: nowrap; }
+  td.type { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+  td.rule { color: var(--ink-2); }
+  code.inline {
+    background: var(--accent-soft); color: var(--ink); padding: 1px 6px; border-radius: 5px; font-size: 12.5px;
+  }
+  .req { color: var(--crit); font-weight: 700; }
+  .opt { color: var(--ink-3); }
+
+  .pill {
+    display: inline-block; font-family: "JetBrains Mono", monospace; font-weight: 700;
+    font-size: 12px; padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .pill.ok   { color: var(--ok);   background: var(--ok-bg); }
+  .pill.warn { color: var(--warn); background: var(--warn-bg); }
+  .pill.crit { color: var(--crit); background: var(--crit-bg); }
+
+  /* Code blocks */
+  .code {
+    position: relative; background: var(--code-bg); border: 1px solid var(--code-line);
+    border-radius: var(--radius); margin: 16px 0; overflow: hidden;
+  }
+  .code-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 14px; border-bottom: 1px solid var(--code-line);
+  }
+  .code-head .label {
+    font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: #8296b4;
+  }
+  .copy {
+    font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: #b9c8e0;
+    background: transparent; border: 1px solid var(--code-line); border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; transition: all .14s ease;
+  }
+  .copy:hover { border-color: #3a5580; color: #eaf1fb; }
+  .copy.done { color: var(--ok); border-color: var(--ok); }
+  pre {
+    margin: 0; padding: 15px 16px; overflow-x: auto;
+    font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.65; color: var(--code-ink);
+  }
+  pre .k { color: #7cc7ff; }        /* keys */
+  pre .s { color: #a5e6b0; }        /* strings */
+  pre .n { color: #f0b979; }        /* numbers */
+  pre .c { color: #6b7a95; font-style: italic; } /* comments */
+
+  /* Callout */
+  .note {
+    border: 1px solid var(--line-strong); border-left: 3px solid var(--accent);
+    background: var(--panel); border-radius: 10px; padding: 14px 16px; margin: 18px 0;
+    font-size: 14.5px; color: var(--ink-2);
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note strong { color: var(--ink); }
+
+  ul.clean { margin: 14px 0; padding-left: 20px; color: var(--ink-2); }
+  ul.clean li { margin: 7px 0; }
+  ul.clean li strong { color: var(--ink); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-3);
+  }
+  footer .mono { font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <p class="kicker">Travelgenix &middot; Integration reference</p>
+    <h1>Payment Reminders API</h1>
+    <p class="sub">The endpoint the Travelify core platform calls when an order has a balance due. We validate it, queue it, and send the customer a branded reminder email that links back to the My&nbsp;Booking widget to pay. Server&#8209;to&#8209;server only.</p>
+  </header>
+
+  <div class="endpoint">
+    <span class="verb">POST</span>
+    <span class="url"><span class="host">https://widgets.travelify.io</span>/api/v1/payment-reminders</span>
+  </div>
+  <p class="endpoint-note">The Vercel origin <code>https://tg-widgets.vercel.app/api/v1/payment-reminders</code> serves the same endpoint if the alias domain is ever unavailable. There are no CORS headers by design &mdash; a browser must never call this.</p>
+
+  <section>
+    <h2>Authentication</h2>
+    <p>Every request carries a shared secret in a header. We hold the secret and will share it with you over a secure channel &mdash; it is never in this document.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Header</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td class="field">X-Api-Key</td><td class="rule">The shared secret, sent verbatim. Compared in constant time. A missing or wrong key returns <span class="pill crit">401</span> with an empty body and no detail.</td></tr>
+          <tr><td class="field">Content-Type</td><td class="rule"><code class="inline">application/json</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Request body</h2>
+    <p>A single JSON object. <span class="req">Required</span> fields must all be present and valid, or the whole request is rejected with <span class="pill crit">400</span> and a per&#8209;field message.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="field">applicationId <span class="req">*</span></td>
+            <td class="type">integer</td>
+            <td class="rule">The client's <strong>Travelify App ID</strong>. Must be a JSON number (not a string) and a positive integer. Must match a client we already hold &mdash; an unknown id returns <span class="pill crit">400</span> <code class="inline">Unknown applicationId</code>.</td>
+          </tr>
+          <tr>
+            <td class="field">orderId <span class="req">*</span></td>
+            <td class="type">integer</td>
+            <td class="rule">The Travelify order id. JSON number, positive integer.</td>
+          </tr>
+          <tr>
+            <td class="field">orderKey <span class="req">*</span></td>
+            <td class="type">string</td>
+            <td class="rule">The order's 36&#8209;character GUID (e.g. <code class="inline">3f2504e0-4f89-41d3-9a0c-0305e82c3301</code>). Case&#8209;insensitive. We use it server&#8209;side to fetch the live order &mdash; it is never exposed to the customer's browser.</td>
+          </tr>
+          <tr>
+            <td class="field">reminderType <span class="req">*</span></td>
+            <td class="type">string</td>
+            <td class="rule">One of <code class="inline">DepositBalance</code> or <code class="inline">FinalBalance</code>. Use <code class="inline">DepositBalance</code> for a deposit balance or any interim instalment; <code class="inline">FinalBalance</code> for the last balance.</td>
+          </tr>
+          <tr>
+            <td class="field">amountDue <span class="req">*</span></td>
+            <td class="type">number</td>
+            <td class="rule">The amount due for this stage, in the order currency. Greater than 0, up to 10,000,000. Rounded to 2 decimal places. <em>Advisory only</em> &mdash; we recompute the real outstanding from the live order before sending, so a customer who has already paid is never chased.</td>
+          </tr>
+          <tr>
+            <td class="field">currency <span class="req">*</span></td>
+            <td class="type">string</td>
+            <td class="rule">Three&#8209;letter ISO&nbsp;4217 code, e.g. <code class="inline">GBP</code>. Case&#8209;insensitive.</td>
+          </tr>
+          <tr>
+            <td class="field">dueDate <span class="opt">optional</span></td>
+            <td class="type">string</td>
+            <td class="rule">ISO&nbsp;8601 date <code class="inline">YYYY-MM-DD</code>. Optional in general, but <strong>required to separate instalments</strong> &mdash; it is part of the de&#8209;duplication key (see below). Omit it and all instalments for one order collapse into a single reminder.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Optional header</strong> &mdash; <code class="inline">Idempotency-Key</code>: your own key for the notification (printable ASCII, up to 128 chars). When present it overrides the natural de&#8209;dupe key below. Not required; the natural key already makes retries safe.</p>
+  </section>
+
+  <section>
+    <h2>Responses</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Status</th><th>Body</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill ok">202</span></td>
+            <td class="code mono" style="background:none;border:0;padding:11px 14px;font-size:12.5px;color:var(--ink-2)">{ status: "accepted", reference, receivedAtUtc }</td>
+            <td class="rule">Queued. Store the <code class="inline">reference</code> (a UUID) &mdash; it is our handle on this reminder.</td>
+          </tr>
+          <tr>
+            <td><span class="pill crit">400</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "validation_failed", fields: {&hellip;} }</td>
+            <td class="rule"><code class="inline">fields</code> maps each bad field to a message. Also returned for an unknown <code class="inline">applicationId</code>. Fix and resend.</td>
+          </tr>
+          <tr>
+            <td><span class="pill crit">401</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{}</td>
+            <td class="rule">Missing or wrong <code class="inline">X-Api-Key</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">409</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ status: "duplicate", reference }</td>
+            <td class="rule">This notification was already accepted. Safe &mdash; the <code class="inline">reference</code> is the original one. Log it and move on.</td>
+          </tr>
+          <tr>
+            <td><span class="pill warn">429</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "rate_limited" }</td>
+            <td class="rule">Over 2,000 requests in 15 minutes from one IP. Back off and retry.</td>
+          </tr>
+          <tr>
+            <td><span class="pill crit">500</span></td>
+            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "server_error" }</td>
+            <td class="rule">Transient (recording failed). <strong>Retry</strong> &mdash; the natural de&#8209;dupe key stops a retry ever double&#8209;chasing.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Treat <span class="pill ok">202</span> and <span class="pill warn">409</span> as success. Retry on <span class="pill crit">500</span> and <span class="pill warn">429</span>. Fix and resend on <span class="pill crit">400</span> / <span class="pill crit">401</span>.</p>
+  </section>
+
+  <section>
+    <h2>De-duplication &amp; retries</h2>
+    <p>One reminder record represents <strong>one balance being chased</strong>, not one message per day. The full schedule &mdash; the first email plus the follow&#8209;ups the agent configures &mdash; lives on that record.</p>
+    <div class="note">
+      <strong>Natural key</strong> = <span class="mono">applicationId &nbsp;|&nbsp; orderKey &nbsp;|&nbsp; reminderType &nbsp;|&nbsp; dueDate</span>
+    </div>
+    <ul class="clean">
+      <li><strong>Re&#8209;sending the same balance is safe.</strong> If your daily job re&#8209;pushes a balance that is still outstanding, you get <span class="pill warn">409</span> with the original reference. It does <em>not</em> start a second chase.</li>
+      <li><strong>A new balance is a new record.</strong> A different <code class="inline">dueDate</code>, or <code class="inline">FinalBalance</code> after an earlier <code class="inline">DepositBalance</code>, is treated as a fresh reminder.</li>
+      <li><strong>The window is 60 days.</strong> Within that period the same key always resolves to the same reminder.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Instalment plans</h2>
+    <p>For a client whose customers pay in several instalments, send <strong>one notification per instalment, on its own due date</strong>. Because <code class="inline">dueDate</code> is part of the key, each distinct date becomes its own reminder chase.</p>
+    <ul class="clean">
+      <li>Use <code class="inline">reminderType: "DepositBalance"</code> for each interim instalment, and <code class="inline">"FinalBalance"</code> for the last one.</li>
+      <li>Set <code class="inline">amountDue</code> to that instalment's amount and <code class="inline">dueDate</code> to that instalment's date.</li>
+      <li>You do <strong>not</strong> need to tell us "instalment 2 of 3" &mdash; we derive the amount and the instalment position from the live order at send time.</li>
+    </ul>
+    <p>A two&#8209;stage trip (an interim payment then a final balance) is simply one <code class="inline">DepositBalance</code> and one <code class="inline">FinalBalance</code>, each with its own due date.</p>
+  </section>
+
+  <section>
+    <h2>Cadence &amp; volume</h2>
+    <ul class="clean">
+      <li><strong>Call roughly daily.</strong> Pushing the whole daily batch in one burst from one IP is fine &mdash; the rate limit (2,000 / 15&nbsp;min) is there to stop runaway loops, not to shape normal traffic.</li>
+      <li><strong>Re&#8209;send outstanding balances each day.</strong> We re&#8209;check the live order before every email and close the chase the moment the balance is paid, so you never need to send a "cancel".</li>
+      <li><strong>Registration first.</strong> Each <code class="inline">applicationId</code> must be a client we hold before its notifications are accepted. Travelify's demo app <code class="inline">250</code> is accepted out of the box for integration testing.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Example</h2>
+    <div class="code">
+      <div class="code-head"><span class="label">Request &middot; interim instalment</span><button class="copy" type="button" data-copy="req">Copy</button></div>
+<pre id="req"><span class="c">POST https://widgets.travelify.io/api/v1/payment-reminders</span>
+<span class="k">X-Api-Key</span>: &lt;shared secret&gt;
+<span class="k">Content-Type</span>: application/json
+
+{
+  <span class="k">"applicationId"</span>: <span class="n">295</span>,
+  <span class="k">"orderId"</span>: <span class="n">100482113</span>,
+  <span class="k">"orderKey"</span>: <span class="s">"3f2504e0-4f89-41d3-9a0c-0305e82c3301"</span>,
+  <span class="k">"reminderType"</span>: <span class="s">"DepositBalance"</span>,
+  <span class="k">"amountDue"</span>: <span class="n">349.00</span>,
+  <span class="k">"currency"</span>: <span class="s">"GBP"</span>,
+  <span class="k">"dueDate"</span>: <span class="s">"2026-10-17"</span>
+}</pre>
+    </div>
+    <div class="code">
+      <div class="code-head"><span class="label">Response &middot; 202 Accepted</span><button class="copy" type="button" data-copy="res">Copy</button></div>
+<pre id="res">{
+  <span class="k">"status"</span>: <span class="s">"accepted"</span>,
+  <span class="k">"reference"</span>: <span class="s">"7f1c9b34-8a2e-4c1d-9f0a-2b6d5e4a1c88"</span>,
+  <span class="k">"receivedAtUtc"</span>: <span class="s">"2026-09-01T14:07:00.000Z"</span>
+}</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2>Current status</h2>
+    <div class="note warn">
+      <strong>Email sending is gated off on our side until go&#8209;live.</strong> The endpoint already validates, de&#8209;duplicates and queues, so you can integrate and test against the <span class="pill ok">202</span> / <span class="pill warn">409</span> / <span class="pill crit">400</span> responses now. Nothing is emailed to a customer until we flip the switch for a client.
+    </div>
+  </section>
+
+  <footer>
+    Travelgenix Widget Platform &middot; Payment Reminders intake. Questions on this contract go to the Travelgenix team.
+    <div class="mono" style="margin-top:6px">POST /api/v1/payment-reminders</div>
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.getAttribute('data-copy'));
+      if (!el) return;
+      var text = el.innerText;
+      var done = function () {
+        var old = btn.textContent;
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(function () { btn.textContent = old; btn.classList.remove('done'); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {});
+      } else {
+        try {
+          var r = document.createRange(); r.selectNodeContents(el);
+          var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+          document.execCommand('copy'); s.removeAllRanges(); done();
+        } catch (e) { /* no-op */ }
+      }
+    });
+  });
+</script>
+</body>
+</html>
