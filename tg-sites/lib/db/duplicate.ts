@@ -60,6 +60,23 @@ export function copiedMediaRow(
     alt: item.alt,
     source: item.source,
     credit: item.credit,
+    /*
+     * DELIBERATELY DROPPED, and dropping them is the safe answer rather than the
+     * lazy one.
+     *
+     * A variant's url points at an object in the SOURCE tenant's prefix. Copying
+     * the list across would leave the new site serving the old site's blobs,
+     * which is exactly the sharing this function exists to prevent: the comment
+     * below is explicit that deleting or replacing an image on one site must
+     * never be able to break the other, and an srcset full of the other
+     * tenant's URLs breaks that in the quietest possible way.
+     *
+     * Empty is correct and costs only bytes: the copied site serves the single
+     * primary, which is what every site did before variants existed. Copying the
+     * variant objects properly means four blob copies per picture instead of
+     * one, and belongs with the backfill tool rather than here.
+     */
+    variants: [],
   };
 }
 

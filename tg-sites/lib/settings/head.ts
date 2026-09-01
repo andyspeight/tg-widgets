@@ -146,6 +146,33 @@ export interface Analytics {
   bothConfigured: boolean;
 }
 
+/**
+ * Whether the cookie consent banner should gate the analytics.
+ *
+ * Both halves have to be true: the client turned the banner on, AND there is an
+ * analytics tag to gate. A banner with nothing behind it would ask a visitor to
+ * consent to cookies the site does not set, which is worse than no banner. This
+ * one predicate is the whole condition, shared by the head gate, the banner
+ * component and the tests, so the three can never disagree about when it is on.
+ */
+export function consentGates(settings: SiteSettings): boolean {
+  return settings.cookieConsent.enabled && Boolean(settings.gtmId || settings.ga4Id);
+}
+
+/**
+ * Google Consent Mode v2, defaulting everything non-essential to DENIED.
+ *
+ * This runs BEFORE the tag scripts, so GA4 and Tag Manager start with consent
+ * denied and set no cookie until the banner flips it to granted. It defines the
+ * gtag stub itself so it works whether GA4 is present or not, and asks the tags
+ * to wait half a second for a stored choice so a returning visitor who already
+ * accepted is not counted as denied for the first tick.
+ */
+const CONSENT_DEFAULT_DENIED =
+  `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}`
+  + `gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',`
+  + `ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});`;
+
 export function analytics(settings: SiteSettings): Analytics {
   const headInline: string[] = [];
   const headSrc: string[] = [];
@@ -186,7 +213,10 @@ export function analytics(settings: SiteSettings): Analytics {
   }
 
   return {
-    headInline,
+    // The consent default goes FIRST, ahead of the GTM and GA4 snippets, so it
+    // is in force before either tag can run. Only when the banner is on and
+    // there is a tag to gate; otherwise the head is byte-for-byte what it was.
+    headInline: consentGates(settings) ? [CONSENT_DEFAULT_DENIED, ...headInline] : headInline,
     headSrc,
     bodyMarkup,
     bothConfigured: Boolean(settings.gtmId && settings.ga4Id),

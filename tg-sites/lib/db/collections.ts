@@ -36,7 +36,9 @@ import {
   parseFilter,
   parseSort,
 } from '../content/collection-filter';
+import type { ListingOrder } from '../content/listings';
 import { parseEntryLayout, type EntryLayout } from '../content/collection-layout';
+import { referenceFacts, type ReferenceFacts } from '../content/reference';
 import { sanitiseItem } from '../content/sanitise-page';
 import type { SearchDoc } from '../content/search';
 import { pageText } from '../seo/audit';
@@ -72,6 +74,13 @@ export interface ItemSummary {
   scheduled: boolean;
   publishedAt: Date | null;
   updatedAt: Date;
+  /**
+   * Where the client put it, or null if they never have.
+   *
+   * Null sorts LAST rather than first, so a collection nobody has arranged
+   * reads exactly as it did before this existed. See migration 0031.
+   */
+  position: number | null;
 }
 
 export interface ItemWithContent extends ItemSummary {
@@ -123,6 +132,7 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
     scheduled: Boolean(row.scheduled),
     publishedAt: row.published_at ? new Date(row.published_at as string) : null,
     updatedAt: new Date(row.updated_at as string),
+    position: row.position == null ? null : Number(row.position),
   };
 }
 
@@ -139,9 +149,26 @@ function toSummary(row: Record<string, unknown>): ItemSummary {
  * 0020): published, but with a go-live time still ahead, so the public cannot
  * see it yet. Computed here so the writing screen can, and can say so.
  */
+/**
+ * The columns every item read hands back.
+ *
+ * `id` IS QUALIFIED, and it has to be. This fragment is spliced into seven
+ * statements, six of which touch collection_items alone. The seventh is getItem,
+ * which joins collections to fetch the entry's schema alongside it, and
+ * collections has an `id` of its own: a bare one there is ambiguous, so Postgres
+ * refused the statement outright with 42702 and the editor answered a 500 to
+ * anybody opening a collection entry.
+ *
+ * It had never fired because nothing opened an entry in the editor until
+ * adopting a destination started redirecting to /editor?item=. Qualified by
+ * table name rather than an alias because five of the seven uses are RETURNING
+ * clauses, where there is no alias to use; checked against the database that
+ * this parses in both positions.
+ */
 function summary(tx: Tx) {
   return tx`
-    id, collection_id, slug, status, published_at, updated_at,
+    public.collection_items.id as id,
+    collection_id, slug, status, published_at, updated_at, position,
     data->>'title' as title,
     (published_at is null or updated_at > published_at) as has_unpublished_changes,
     (status = 'published' and published_at is not null and published_at > now()) as scheduled
@@ -251,9 +278,65 @@ export async function listItems(
     const rows = await tx`
       select ${summary(tx)} from public.collection_items
       where collection_id = ${collectionId}::uuid
-      order by coalesce(published_at, updated_at) desc, id desc
+      order by position asc nulls last, coalesce(published_at, updated_at) desc, id desc
     `;
     return rows.map((row) => toSummary(row as Record<string, unknown>));
+  });
+}
+
+/**
+ * Put a collection's entries in the order the client chose.
+ *
+ * TAKES THE WHOLE LIST, not a move. An arrow press could be sent as "swap this
+ * one with the one above", which is smaller and is wrong the moment two tabs
+ * are open or a press lands while a delete is in flight: the pair it names may
+ * no longer be neighbours, and the swap silently reorders something else. A
+ * full list is idempotent, describes the state the client can actually see, and
+ * repairs any gap or duplicate left by an older write.
+ *
+ * KEYED ON THE COLLECTION'S SHORT NAME, not its uuid. Both callers have the key
+ * and only one has the id: the collections screen knows both, and the cards
+ * block in the editor knows only the key, because that is what a client types
+ * into it. Taking the key means one signature for both rather than a lookup on
+ * one side to satisfy the other.
+ *
+ * IDS NOT IN THE COLLECTION ARE IGNORED rather than rejected, and the filter is
+ * a join to collections rather than a check in JS. An id from another
+ * collection therefore updates nothing at all, which is the behaviour that
+ * matters: this is reachable from a browser and the tenant scoping alone would
+ * still have let somebody renumber a different collection of their own.
+ *
+ * Anything the list does not mention keeps the position it had. That is the
+ * honest reading of "these are the ones on screen": a filtered or paged view
+ * has no opinion about rows it never showed.
+ */
+export async function reorderItems(
+  tenantId: string,
+  collectionKey: string,
+  orderedIds: readonly string[],
+): Promise<number> {
+  if (orderedIds.length === 0) return 0;
+
+  return withTenant(tenantId, async (tx) => {
+    /*
+     * One statement, so the list can never be half applied. The positions come
+     * in as a pair of arrays and are joined back by ordinality, which is how
+     * postgres lets an ordered list arrive as data rather than as generated SQL.
+     */
+    const rows = await tx`
+      update public.collection_items i
+      set position = wanted.seat
+      from (
+        select id::uuid as id, seat
+        from unnest(${orderedIds as string[]}::uuid[]) with ordinality as t(id, seat)
+      ) as wanted,
+      public.collections c
+      where i.id = wanted.id
+        and c.id = i.collection_id
+        and c.key = ${collectionKey}
+      returning i.id
+    `;
+    return rows.length;
   });
 }
 
@@ -478,9 +561,25 @@ export async function deleteItem(tenantId: string, itemId: string): Promise<bool
 // ---------------------------------------------------------------------------
 
 export interface PublishedItem {
+  /**
+   * The row's id, so the editor can reorder these without a second read.
+   *
+   * OPTIONAL for the same reason position is: the tag archive does not select
+   * it and has no reordering to do.
+   */
+  id?: string;
   slug: string;
   item: CollectionItem;
   publishedAt: Date | null;
+  /**
+   * Where the client put it, for the hand-set order. See migration 0031.
+   *
+   * OPTIONAL because the tag archive below does not read it: a tag page is a
+   * date-ordered archive and has never offered an order control, so making it
+   * carry a column it does not use would be a wider read for nothing. Absent
+   * and null both mean "not placed", which the sort treats the same way.
+   */
+  position?: number | null;
 }
 
 /**
@@ -515,10 +614,18 @@ export async function listPublished(
   tenantId: string,
   collectionKey: string,
   limit: number,
-  narrow: { filter?: unknown; sort?: unknown } = {},
+  narrow: { filter?: unknown; sort?: unknown; order?: ListingOrder } = {},
 ): Promise<PublishedListing> {
   const capped = Math.min(MAX_LISTING_ITEMS, Math.max(1, Math.floor(limit) || 1));
-  const asked = Boolean(narrow.filter) || Boolean(narrow.sort);
+  const order: ListingOrder = narrow.order ?? 'newest';
+  /*
+   * An order other than newest has to read the collection before the cap, for
+   * the same reason a filter does: taking the newest six and then sorting them
+   * A to Z gives the six newest alphabetised, not the first six alphabetically.
+   * 'newest' is the SQL order below, so the common case still reads no more
+   * rows than it ever did.
+   */
+  const asked = Boolean(narrow.filter) || Boolean(narrow.sort) || order !== 'newest';
 
   return withPublicTenant(tenantId, async (tx) => {
     /*
@@ -542,14 +649,14 @@ export async function listPublished(
      */
     const rows = asked
       ? await tx`
-          select i.slug, i.data, i.published_at, c.fields
+          select i.id, i.slug, i.data, i.published_at, i.position, c.fields
           from public.collection_items i
           join public.collections c on c.id = i.collection_id
           where c.key = ${collectionKey}
           order by i.published_at desc nulls last, i.id desc
         `
       : await tx`
-          select i.slug, i.data, i.published_at, c.fields
+          select i.id, i.slug, i.data, i.published_at, i.position, c.fields
           from public.collection_items i
           join public.collections c on c.id = i.collection_id
           where c.key = ${collectionKey}
@@ -560,9 +667,11 @@ export async function listPublished(
     let items = rows.map((raw) => {
       const row = raw as Record<string, unknown>;
       return {
+        id: String(row.id),
         slug: String(row.slug),
         item: hydrate(row.data, `${collectionKey}/${String(row.slug)}`),
         publishedAt: row.published_at ? new Date(row.published_at as string) : null,
+        position: row.position == null ? null : Number(row.position),
       };
     });
 
@@ -575,6 +684,40 @@ export async function listPublished(
       // empty page. See lib/content/collection-filter.ts.
       const filter = parseFilter(fields, narrow.filter);
       if (filter) items = items.filter((row) => matchesFilter(fields, row.item.fields, filter));
+
+      /*
+       * The intrinsic order first, then the field sort on top.
+       *
+       * That way round because the field sort is the more specific ask: a
+       * client who sets both wants "by price, and where prices tie, newest".
+       * Reversing them would let the coarse order shuffle the fine one.
+       */
+      if (order === 'manual') {
+        /*
+         * The order the client set on the collections screen. Stable, so items
+         * with no position at all keep the date order they arrived in and sit
+         * after the placed ones rather than in an arbitrary spot.
+         */
+        items = [...items].sort((a, b) => {
+          const left = a.position ?? Number.MAX_SAFE_INTEGER;
+          const right = b.position ?? Number.MAX_SAFE_INTEGER;
+          return left - right;
+        });
+      } else if (order === 'oldest') {
+        items = [...items].reverse();
+      } else if (order === 'title' || order === 'title-desc') {
+        const direction = order === 'title' ? 1 : -1;
+        items = [...items].sort(
+          (a, b) =>
+            direction *
+            // Locale-aware and case-insensitive, so "Ålesund" and "apple" land
+            // where a reader expects rather than where their code points fall.
+            String(a.item.title ?? '').localeCompare(String(b.item.title ?? ''), 'en', {
+              sensitivity: 'base',
+              numeric: true,
+            }),
+        );
+      }
 
       const sort = parseSort(fields, narrow.sort);
       if (sort) {
@@ -661,12 +804,27 @@ export async function getPublishedItem(
   fields: FieldDef[];
   layout: EntryLayout;
   publishedAt: Date | null;
+  /** The corpus facts, when this entry is an adopted destination. */
+  reference: ReferenceFacts | null;
 } | null> {
   return withPublicTenant(tenantId, async (tx) => {
+    /*
+     * THE CORPUS JOIN IS A LEFT JOIN AND HAS TO BE. The overwhelming majority
+     * of entries are ordinary posts pointing at nothing, and an inner join
+     * would have silently stopped serving every one of them. It costs nothing
+     * for those rows: ref_source_id is null, so collection_items_ref_lookup_idx
+     * is not even consulted.
+     *
+     * Joined rather than copied onto the item, so there is exactly one of every
+     * fact and a corpus change is live here the moment the sync writes it. See
+     * db/migrations/0029_adopted_destinations.sql for why that beat a copy.
+     */
     const rows = await tx`
-      select i.data, i.published_at, c.fields, c.layout
+      select i.data, i.published_at, c.fields, c.layout, r.facts as reference_facts
       from public.collection_items i
       join public.collections c on c.id = i.collection_id
+      left join public.reference_records r
+        on r.kind = i.ref_kind and r.source_id = i.ref_source_id
       where c.key = ${collectionKey} and i.slug = ${slug}
       limit 1
     `;
@@ -680,6 +838,14 @@ export async function getPublishedItem(
       fields: parseFieldDefs(asObject(row.fields)),
       layout: parseEntryLayout(row.layout),
       publishedAt: row.published_at ? new Date(row.published_at as string) : null,
+      /*
+       * Validated here rather than trusted, even though the sync wrote it. It
+       * is a value from a jsonb column, which is the same category as anything
+       * off the network, and referenceFacts answers null for a payload it does
+       * not recognise so the page draws without a panel rather than throwing on
+       * its way to a visitor.
+       */
+      reference: referenceFacts(row.reference_facts),
     };
   });
 }

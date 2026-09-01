@@ -28,6 +28,8 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { RETURNING_VISITOR_COOKIE } from './lib/content/audience';
+
 /*
  * A pure module, deliberately. lib/domains/preview.ts has no imports at all, which
  * is what lets middleware use it: see the note above about what must never end up
@@ -88,12 +90,41 @@ export function isAppHost(host: string, reservedSuffix = PREVIEW_DOT_SUFFIX): bo
  * own domain, and it needs the Next asset paths. Rewriting those into the site
  * renderer would break the page they are part of.
  */
+/**
+ * The behaviour scripts a published page loads by name, at the root.
+ *
+ * WHY THEY HAVE TO BE LISTED (25 Aug 2026). Everything on a client's hostname is
+ * rewritten into the site renderer, and these are the four paths that must not
+ * be. Without them `/tg-motion.js` on coastwise.travelgenixsites.com resolved to
+ * /site/coastwise.travelgenixsites.com/tg-motion.js, which is not a page, so the
+ * browser was handed a 404 HTML document with a JavaScript content type. Nothing
+ * errored anywhere a client would see: motion simply did not move, the theme
+ * toggle did not toggle, and the slideshow arrows did nothing.
+ *
+ * Exactly the same shape as the font 404 fixed earlier the same day, and the same
+ * lesson: a static asset a client site loads by name needs saying so here.
+ *
+ * KEPT IN STEP WITH public/ BY A TEST. The matcher below has to repeat these as a
+ * literal, because Next reads it at build time and cannot call a function, so the
+ * two can drift. tests/site-assets.test.ts asserts that every root script in
+ * public/ appears in both.
+ */
+export const SITE_ASSETS: readonly string[] = [
+  '/tg-motion.js',
+  '/tg-sea.js',
+  '/slideshow.js',
+  '/theme-toggle.js',
+  '/no-right-click.js',
+  '/cookie-consent.js',
+];
+
 function isPlatformPath(pathname: string): boolean {
   return (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/fonts/') ||
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    SITE_ASSETS.includes(pathname)
   );
 }
 
@@ -155,7 +186,27 @@ export function middleware(request: NextRequest) {
   url.pathname = `/site/${encodeURIComponent(host.toLowerCase().split(':')[0])}${pathname}`;
   url.search = search;
 
-  return NextResponse.rewrite(url);
+  const response = NextResponse.rewrite(url);
+
+  /*
+   * MARK A RETURNING VISITOR, for the section-level personalisation the render
+   * reads (lib/content/audience). Set on the first visit and read on the next,
+   * so a first-ever visit reads as new. One character, no identifier and no
+   * personal data: a functional first-party cookie, the same class as the site
+   * and consent cookies, so it is set without gating on consent. Only when
+   * absent, so a real returning visitor's marker is never refreshed away.
+   */
+  if (!request.cookies.get(RETURNING_VISITOR_COOKIE)) {
+    response.cookies.set(RETURNING_VISITOR_COOKIE, '1', {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: true,
+    });
+  }
+
+  return response;
 }
 
 export const config = {
@@ -165,5 +216,5 @@ export const config = {
    * for an asset, which is the cheap win, and the function check is what makes the
    * behaviour testable without a request object.
    */
-  matcher: ['/((?!_next/|api/|fonts/|favicon.ico).*)'],
+  matcher: ['/((?!_next/|api/|fonts/|favicon\\.ico|tg-motion\\.js|tg-sea\\.js|slideshow\\.js|theme-toggle\\.js|no-right-click\\.js|cookie-consent\\.js).*)'],
 };

@@ -33,13 +33,15 @@
 
 import { parseFragment, type DefaultTreeAdapterMap } from 'parse5';
 
+import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../content/image-sizes';
+
 /*
  * The escaping and the URL check moved to ./slots, which has no parser behind
  * it, so the renderer can substitute a slot without pulling parse5 into the
  * browser (task #94). Re-exported because this module is where every caller
  * already looks for them.
  */
-import { escapeText, safeImportUrl } from './slots';
+import { escapeText, safeImportUrl, srcsetToken, TOKEN } from './slots';
 export { escapeText, safeImportUrl } from './slots';
 
 type Node = DefaultTreeAdapterMap['node'];
@@ -200,6 +202,30 @@ export interface CleanOptions {
   classPrefix?: string;
   /** How deep to go before giving up. A design is not a thousand levels deep. */
   maxDepth?: number;
+  /**
+   * The stored sizes of the tenant's pictures, by url.
+   *
+   * When present, an img whose src matches a row gets a srcset built from that
+   * row. Absent, and nothing changes: this is optional precisely so the import
+   * screen and the editor, which have no tenant lookup in hand, keep calling
+   * this exactly as they always have.
+   */
+  imageSizes?: ImageSizes;
+  /**
+   * Which picture is the hero, and therefore which ones can wait.
+   *
+   * PRESENT ONLY AT RENDER, the same rule imageSizes follows and for the same
+   * reason: this cleaner also runs at SAVE time through sanitisePage, and a
+   * loading attribute baked into stored markup would mean a client's saved
+   * design quietly stopped being the thing they imported.
+   *
+   * `heroFirst` says the FIRST image this fragment emits may be the page's
+   * largest paint, so it is left eager and told to hurry. Every other image
+   * here, and every image in a fragment that says false, is deferred. The
+   * caller threads it: the first block on the page that actually contains a
+   * picture takes the hero and the rest are told they cannot have it.
+   */
+  imagePriority?: { heroFirst: boolean };
   /** How many elements to keep. A guard against a pasted megabyte. */
   maxElements?: number;
 }
@@ -217,6 +243,13 @@ export interface CleanResult {
   classes: Set<string>;
   /** What was thrown away, so the screen can say so rather than silently differ. */
   removed: string[];
+  /**
+   * How many images this fragment emitted.
+   *
+   * The caller needs it to thread the hero: a fragment that drew no picture has
+   * not used the one eager slot up, so the next one still gets it.
+   */
+  images: number;
 }
 
 function isElement(node: Node): node is Element {
@@ -234,6 +267,8 @@ function isElement(node: Node): node is Element {
  */
 export function cleanImportHtml(source: string, options: CleanOptions = {}): CleanResult {
   const prefix = options.classPrefix ?? '';
+  const imageSizes = options.imageSizes;
+  const imagePriority = options.imagePriority;
   const maxDepth = options.maxDepth ?? 40;
   const maxElements = options.maxElements ?? 4000;
 
@@ -244,6 +279,8 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
   };
 
   let elements = 0;
+  // Images emitted so far, in document order. Only the first can be the hero.
+  let images = 0;
 
   const walk = (nodes: ChildNode[], depth: number): string => {
     if (depth > maxDepth) {
@@ -302,6 +339,99 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
       out += `<${tag}`;
       out += attributes(node, tag, prefix, classes, note);
 
+      /*
+       * THE SRCSET FOR A BORROWED PICTURE.
+       *
+       * Emitted here rather than left to the renderer because an imported design
+       * keeps its markup frozen: components/render never writes an attribute
+       * onto it, so the image work done for native blocks did nothing at all for
+       * the ten get-started templates. This is the one pass that already rebuilds
+       * this markup, so it is the one place the attribute can be added without a
+       * second parse of the whole document on every page view.
+       *
+       * TWO CASES, because an imported picture is usually not an address yet.
+       *
+       * A LITERAL src is looked up now and the srcset is written now. The src is
+       * only ever a lookup KEY: every url that reaches the output comes from a
+       * media row in our own database, and one that matches no row produces
+       * nothing, so no value from the borrowed markup is concatenated in.
+       *
+       * A SLOT src (`{{tg:i1}}`) has no address at this point: the real one lives
+       * in the block's content and is substituted at render time. So the
+       * ATTRIBUTE is written here with a placeholder, and applyImportContent
+       * fills its value once the address is known. That is the same operation it
+       * already performs for src, and it means nothing has to reshape the tag
+       * later.
+       *
+       * ONLY WHEN THE SOURCE BROUGHT NONE. A design that ships its own srcset
+       * keeps it: this file already filters those candidate by candidate, and
+       * two srcset attributes on one tag resolve differently per browser. Writing
+       * ours over a working one would also be a silent downgrade for a design
+       * whose own sizes are better tuned than a blanket 100vw.
+       */
+      /*
+       * ONLY WHEN A CALLER ASKED, which in practice means only at render.
+       *
+       * This cleaner runs at SAVE time too, through sanitisePage. Injecting there
+       * would bake the placeholder into stored markup, so a client's saved design
+       * would quietly stop being the thing they imported and three tests that
+       * assert stored content survives the sanitiser unchanged would be telling
+       * the truth when they failed. prepareBlock passes imageSizes; the save path
+       * passes nothing.
+       */
+      if (
+        imageSizes &&
+        tag === 'img' &&
+        !(node.attrs ?? []).some((a) => a.name.toLowerCase() === 'srcset')
+      ) {
+        const src = (node.attrs ?? []).find((a) => a.name.toLowerCase() === 'src')?.value ?? '';
+
+        // A src that is exactly one slot token, and nothing else. A src that
+        // merely CONTAINS a token is a shape we did not write and do not guess at.
+        TOKEN.lastIndex = 0;
+        const slot = TOKEN.exec(src.trim());
+        const slotKey = slot && slot[0] === src.trim() ? slot[1] : null;
+
+        const set = slotKey ? srcsetToken(slotKey) : imageSizes ? srcSetFor(src, imageSizes) : null;
+        if (set) out += ` srcset="${escapeAttr(set)}" sizes="${FULL_WIDTH_SIZES}"`;
+      }
+
+      /*
+       * ONE PICTURE HURRIES, THE REST WAIT (25 Aug 2026).
+       *
+       * The ten get-started templates ship four images and, until this, not one
+       * loading attribute between them, so all four were fetched at once. On slow
+       * 4G that is the whole page's images sharing one pipe, and the one the
+       * visitor is looking at finishes last because it is finishing alongside
+       * three it cannot see. Measured on the perf harness: 800 KB over four
+       * images, LCP 4372 ms, which is 800 KB at 1.6 Mbps almost exactly.
+       *
+       * fetchpriority on the hero because a background <img> the browser has not
+       * laid out yet is fetched at Low priority by default, and it is the largest
+       * paint on nearly every travel homepage.
+       *
+       * A DESIGN THAT ALREADY SAID keeps what it said. An import carrying its own
+       * loading attribute has been tuned by somebody who could see it, which is
+       * more than this rule can claim, and the same argument the srcset block
+       * above makes about a design that brought its own candidates.
+       */
+      if (
+        imagePriority &&
+        tag === 'img' &&
+        !(node.attrs ?? []).some((a) => a.name.toLowerCase() === 'loading')
+      ) {
+        if (imagePriority.heroFirst && images === 0) {
+          out += ' fetchpriority="high"';
+        } else {
+          out += ' loading="lazy"';
+          if (!(node.attrs ?? []).some((a) => a.name.toLowerCase() === 'decoding')) {
+            out += ' decoding="async"';
+          }
+        }
+      }
+
+      if (tag === 'img') images += 1;
+
       if (VOID_TAGS.has(tag)) {
         out += ' />';
         continue;
@@ -316,7 +446,7 @@ export function cleanImportHtml(source: string, options: CleanOptions = {}): Cle
   };
 
   const html = walk(parseFragment(source).childNodes as ChildNode[], 0);
-  return { html, classes, removed };
+  return { html, classes, removed, images };
 }
 
 function attributes(

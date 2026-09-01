@@ -16,6 +16,13 @@
  * their old names, so every existing caller still reads the same way.
  */
 
+/*
+ * The one import, and it keeps the promise above. lib/content/image-sizes.ts is
+ * types and pure string work with no parser behind it, so the editor canvas
+ * still substitutes a slot without shipping parse5.
+ */
+import { srcSetFor, type ImageSizes } from '../content/image-sizes';
+
 /** What a slot holds, which decides how it is edited and how it is escaped. */
 export type ImportFieldKind = 'text' | 'image' | 'link';
 
@@ -90,6 +97,27 @@ export function token(key: string): string {
 }
 
 /**
+ * The placeholder an image slot's srcset carries until its address is known.
+ *
+ * A SEPARATE PATTERN, DELIBERATELY, rather than a new shape inside TOKEN. That
+ * regex decides what counts as a substitutable slot in borrowed markup and every
+ * escaping decision hangs off it; widening it to carry a second kind of key would
+ * put a performance tweak inside the one expression that must stay boring.
+ *
+ * Why this exists at all: an imported design keeps its pictures as slots, so at
+ * cleaning time the markup says src="{{tg:i1}}" and the real address does not
+ * exist yet. A srcset cannot be built from a token. The parser-backed cleaner
+ * therefore writes the ATTRIBUTE with this placeholder as its value, and the
+ * substitution below fills it in once the address is known, which is exactly the
+ * operation it already performs for src. Nothing reshapes the tag.
+ */
+export const SRCSET_TOKEN = /\{\{tgset:([a-z]\d{1,3})\}\}/g;
+
+export function srcsetToken(key: string): string {
+  return `{{tgset:${key}}}`;
+}
+
+/**
  * Put the client's words back into the design.
  *
  * ESCAPED BY WHAT THE SLOT IS, not by where it happens to sit. A text slot is
@@ -106,15 +134,42 @@ export function applyImportContent(
   html: string,
   values: Record<string, unknown>,
   fields: readonly ImportField[],
+  sizes?: ImageSizes,
 ): string {
   const byKey = new Map(fields.map((field) => [field.key, field]));
+
+  /*
+   * SRCSET FIRST, AND THE ORDER IS THE SAFETY ARGUMENT.
+   *
+   * At this point the markup is still entirely our own: the cleaner produced it
+   * and no client value has been substituted into it yet. Running this pass now
+   * means the only {{tgset:...}} placeholders in the string are ones the cleaner
+   * wrote. Running it after the main pass would let a client whose text happens
+   * to contain that sequence have it replaced, which is precisely the re-reading
+   * the one-pass rule below exists to prevent.
+   */
+  const withSrcset = html.replace(SRCSET_TOKEN, (_whole, key: string) => {
+    const field = byKey.get(key);
+    if (!field || field.kind === 'text' || !sizes) return '';
+
+    const stored = values[key];
+    const url = safeImportUrl(typeof stored === 'string' ? stored : field.value);
+    if (url === null) return '';
+
+    // Escaped like any other attribute value. Every url inside it came out of our
+    // own media table, but escaping is not a thing to do only when worried.
+    // Escaped the same way an image slot's own url is, two functions below.
+    // Every url inside came out of our own media table, but escaping is not
+    // something to do only when worried.
+    return escapeText(srcSetFor(url, sizes) ?? '').replace(/"/g, '&quot;');
+  });
 
   /*
    * ONE PASS. String.replace with a function never re-reads what it has just
    * written, so a client whose words happen to contain `{{tg:t1}}` gets those
    * characters on the page rather than a second substitution.
    */
-  return html.replace(TOKEN, (whole, key: string) => {
+  return withSrcset.replace(TOKEN, (whole, key: string) => {
     const field = byKey.get(key);
     if (!field) return '';
 

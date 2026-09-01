@@ -68,6 +68,14 @@
   --tgs-surface: #ffffff;
   --tgs-surface-alt: #f8f8f9;
   --tgs-surface-dark: #0c1329;
+  /*
+   * What every scrim is made of: the wash over a section's background
+   * photograph, an overlay card, an entry banner, a heading's shadow. Themed
+   * from the client's own dark since 26 Aug 2026; before that nothing set it and
+   * every scrim on every site was the fixed navy this replaces. The value here
+   * is what the default theme derives, same as every other token in this block.
+   */
+  --tgs-scrim-colour: #0c1329;
   --tgs-text: #0f172a;
   --tgs-text-muted: #4d5361;
   --tgs-text-invert: #ffffff;
@@ -189,6 +197,18 @@
  * and no separate mobile preview mode. A published page gets the same
  * behaviour because the container is the full viewport width.
  */
+
+/*
+ * Text selection, from the palette. Same reasoning as the caret above. The
+ * pair is accent + on-accent, which the token layer has already pushed to a
+ * readable contrast, so a pale accent selects with dark words on it rather
+ * than white-on-lemon.
+ */
+.tgs-page ::selection {
+  background: var(--tgs-accent);
+  color: var(--tgs-on-accent);
+}
+
 .tgs-page {
   container-type: inline-size;
   container-name: tgs-page;
@@ -198,6 +218,13 @@
   line-height: var(--tgs-p-leading);
   color: var(--tgs-text);
   background: var(--tgs-surface);
+  /*
+   * The caret is a brand surface. Selecting text or typing into a form on a
+   * client's site should answer in the client's colour, not the browser's
+   * default blue: it is the cheapest tell between a page that was designed
+   * and one that was assembled, and --tgs-accent is already on this element.
+   */
+  caret-color: var(--tgs-accent);
   /*
    * A rendered page must never scroll sideways. Non-negotiable. CLIP, not hidden:
    * both stop the sideways scroll, but `hidden` makes this box a SCROLL CONTAINER
@@ -289,6 +316,16 @@
     --tgs-text-muted: var(--tgs-d-text-muted) !important;
     --tgs-border: var(--tgs-d-border) !important;
     --tgs-border-strong: var(--tgs-d-border-strong) !important;
+    /* The brand, lifted to read on a near-black page, and everything measured
+       against it re-measured. See darkThemeTokens. */
+    --tgs-primary: var(--tgs-d-primary) !important;
+    --tgs-primary-light: var(--tgs-d-primary-light) !important;
+    --tgs-accent: var(--tgs-d-accent) !important;
+    --tgs-on-primary: var(--tgs-d-on-primary) !important;
+    --tgs-on-accent: var(--tgs-d-on-accent) !important;
+    --tgs-on-primary-muted: var(--tgs-d-on-primary-muted) !important;
+    --tgs-on-primary-accent: var(--tgs-d-on-primary-accent) !important;
+    --tgs-on-primary-border: var(--tgs-d-on-primary-border) !important;
     --tgs-tag-lmin: 0.72 !important;
     --tgs-tag-lmax: 1 !important;
   }
@@ -300,6 +337,16 @@ html[data-theme='dark'] .tgs-page[style*='--tgs-d-surface'] {
   --tgs-text-muted: var(--tgs-d-text-muted) !important;
   --tgs-border: var(--tgs-d-border) !important;
   --tgs-border-strong: var(--tgs-d-border-strong) !important;
+  /* The brand, lifted to read on a near-black page, and everything measured
+     against it re-measured. See darkThemeTokens. */
+  --tgs-primary: var(--tgs-d-primary) !important;
+  --tgs-primary-light: var(--tgs-d-primary-light) !important;
+  --tgs-accent: var(--tgs-d-accent) !important;
+  --tgs-on-primary: var(--tgs-d-on-primary) !important;
+  --tgs-on-accent: var(--tgs-d-on-accent) !important;
+  --tgs-on-primary-muted: var(--tgs-d-on-primary-muted) !important;
+  --tgs-on-primary-accent: var(--tgs-d-on-primary-accent) !important;
+  --tgs-on-primary-border: var(--tgs-d-on-primary-border) !important;
   --tgs-tag-lmin: 0.72 !important;
   --tgs-tag-lmax: 1 !important;
 }
@@ -379,7 +426,13 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   padding-bottom: calc(var(--tgs-pad-r, var(--tgs-pad, 48px)) + var(--tgs-pb, 0px));
   padding-left: var(--tgs-pl, 0px);
   padding-right: var(--tgs-pr, 0px);
-  min-height: var(--tgs-min-h, 0px);
+  /*
+   * A section floor can never exceed one screen. 560px is a curtain on a
+   * laptop and taller than the whole viewport on a phone held sideways; the
+   * svh line wins where supported, the vh line is the fallback.
+   */
+  min-height: min(var(--tgs-min-h, 0px), 100vh);
+  min-height: min(var(--tgs-min-h, 0px), 100svh);
   border-radius: var(--tgs-radius, 0px);
   border: var(--tgs-bw, 0px) solid var(--tgs-bc, transparent);
 }
@@ -581,10 +634,150 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   width: 100%;
 }
 
+/*
+ * WHERE THE SPARE HEIGHT GOES WHEN A SECTION IS TALLER THAN ITS CONTENT.
+ *
+ * A section is a plain block, so minHeight could always make one taller than
+ * what was in it and the leftover simply sat underneath. A 1200px hero holding
+ * 249px of words had 950px of empty ground below the buttons, which reads as a
+ * broken page rather than a tall one.
+ *
+ * ONLY A SECTION THAT ASKED CHANGES. No attribute, no flex, no difference to any
+ * stored page. Safe to switch the display because every other child of a section
+ * is out of flow already: the background, the background slideshow, the scrim and
+ * both dividers are all position:absolute, so the inner is the only thing flex
+ * can reach.
+ *
+ * The column's own align does not solve this: it centres a column against its
+ * ROW, and a row is only as tall as its content.
+ */
+.tgs-section[data-align-y] {
+  display: flex;
+  flex-direction: column;
+}
+.tgs-section[data-align-y='centre'] { justify-content: center; }
+.tgs-section[data-align-y='bottom'] { justify-content: flex-end; }
+
 .tgs-section[data-width='narrow']    .tgs-section__inner { max-width: var(--tgs-width-narrow); }
 .tgs-section[data-width='contained'] .tgs-section__inner { max-width: var(--tgs-width-contained); }
 .tgs-section[data-width='wide']      .tgs-section__inner { max-width: var(--tgs-width-wide); }
 .tgs-section[data-width='full']      .tgs-section__inner { max-width: none; padding-inline: 0; }
+
+/*
+ * STICK TO THE TOP. A section marked data-sticky pins to the top of the viewport
+ * once the page scrolls it there, and the rest of the page scrolls under it: a
+ * running sub-nav, a headline, a booking bar. Pure CSS, no script.
+ *
+ * This works because .tgs-page uses overflow-x: clip, NOT overflow-x: hidden.
+ * clip leaves overflow-y at its visible default, so the page is not a scroll
+ * container and a sticky child pins to the viewport as intended. hidden would
+ * coerce overflow-y to auto and make .tgs-page its own scroller, which would trap
+ * the sticky child inside it and break the pin. That choice is load-bearing here.
+ * (Verified in a browser, 31 Aug 2026.)
+ *
+ * @supports so a browser without position: sticky keeps the section in normal
+ * flow rather than losing it. z-index keeps the pinned section above the sections
+ * that scroll under it, and well below the fixed header, popup and widgets panel.
+ * The render only emits data-sticky off the editing canvas (see PageRenderer), so
+ * a sticky band never pins over the editor toolbar while you build the page.
+ */
+@supports (position: sticky) {
+  .tgs-section[data-sticky] {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+}
+
+/*
+ * CINEMATIC SEA (A1, Andy 31 Aug 2026). The one WebGL recipe: public/tg-sea.js mounts
+ * a <canvas class="tgs-sea"> into the section, over its still photographic background
+ * and under the scrim and the words, and animates a Gerstner-wave sea on the GPU.
+ *
+ * There is NO keyframe here to guard, because the movement is the shader and the
+ * script refuses to create a canvas at all under prefers-reduced-motion (and where
+ * there is no WebGL, and for any second A1 section on a page). What is left for the
+ * stylesheet is to place the canvas and clip its overspill. With no script, no WebGL
+ * or reduced motion the canvas never appears and the section is simply its still
+ * photograph, which is a finished hero rather than a broken one.
+ */
+.tgs-section[data-motion='A1'] { overflow: clip; }
+.tgs-section[data-motion='A1'] .tgs-sea {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/*
+ * PINNED ITINERARY (S2, Andy 31 Aug 2026). A section marked S2 pins to the screen and
+ * travels its row of cards sideways as the visitor scrolls down: day 1 to day 7 moving
+ * left, which is the itinerary's own axis, a road trip's route, a cruise's ports. Pure
+ * CSS, no script. The render only sets S2 on a section that HAS a row of cards.
+ *
+ * BASE, EVERYWHERE: a swipeable scroll-snap carousel, the same finished pattern the A3
+ * rail uses. This is what a browser without a view() scroll timeline gets, and what a
+ * visitor who asked for less motion gets: a working, swipeable row of cards rather than
+ * a broken pin, so the recipe never depends on the enhancement below.
+ */
+.tgs-section[data-motion='S2'] .tgs-cards {
+  grid-template-columns: none;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--tgs-space-s);
+}
+.tgs-section[data-motion='S2'] .tgs-cards > .tgs-card {
+  scroll-snap-align: start;
+  flex: 0 0 clamp(260px, 34%, 380px);
+}
+
+/*
+ * ENHANCEMENT: pin the section and drive the card row with the page scroll, on a browser
+ * with a view() timeline and where movement is welcome. The section is made tall (the
+ * extra height is the horizontal scroll distance, longer for more cards via --tgs-s2-len
+ * the render sets), the inner becomes a full-height sticky stage that clips the overspill,
+ * the row and column step aside so the track can span the whole screen, and the card row
+ * translates from its start to its end across the section's own passage (animation-range:
+ * contain, which for an element taller than the viewport is exactly the pinned stretch).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .tgs-section[data-motion='S2'] {
+      height: calc(100vh + var(--tgs-s2-len, 3) * 58vh);
+      view-timeline: --tgs-s2;
+    }
+    .tgs-section[data-motion='S2'] .tgs-section__inner {
+      max-width: none;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .tgs-section[data-motion='S2'] .tgs-row { display: block; }
+    .tgs-section[data-motion='S2'] .tgs-cards {
+      overflow: visible;
+      scroll-snap-type: none;
+      width: max-content;
+      padding-inline: var(--tgs-space-l);
+      /* No animation-range: the default is the section's whole travel across the
+         viewport, which spreads the sideways move smoothly over the pinned scroll
+         rather than bunching it. Naming `contain` looked right but travelled the cards
+         in a rush near the end (measured 31 Aug 2026). Same choice the parallax makes. */
+      animation: tgs-s2 linear both;
+      animation-timeline: --tgs-s2;
+    }
+    .tgs-section[data-motion='S2'] .tgs-cards > .tgs-card {
+      flex-basis: clamp(300px, 32vw, 440px);
+    }
+  }
+}
+@keyframes tgs-s2 {
+  to { transform: translateX(calc(-100% + 100vw)); }
+}
 
 /* ------------------------------------------------------------------ */
 /* Rows and columns                                                    */
@@ -715,6 +908,41 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
+ * AND THE SAME FOR A SIZE SET ON THE WORDS (Andy, 25 Aug 2026: "it needs to be
+ * at word level as well").
+ *
+ * The rule above styles the ELEMENT, and a size set on a phrase is an inline
+ * font-size on a span inside it. An inline style beats any selector, so until
+ * this rule existed a heading sized through the toolbar sat at one size on every
+ * screen while the toggle claimed it was resizing. Measured in Chromium against
+ * the shipped stylesheet: 100px at 1618, 1100, 834 and 390 alike, where the same
+ * size set on the block went 100 / 99 / 75 / 62.
+ *
+ * That was not a corner case. The block-level Text size control offers the theme
+ * sizes and a fixed scale stopping at 2.5rem, so any hero-sized headline COULD
+ * ONLY be set on the words, which meant the one control big enough for the job
+ * was the one that switched auto-resize off.
+ *
+ * `!important` IS THE POINT, not an oversight. It is the only way a stylesheet
+ * outranks an inline style, and outranking one is precisely what this rule is
+ * for. The render (lib/content/fluid-text.ts) restates each inline size as
+ * --tgs-fs-w and LEAVES the original font-size in place, so if this rule is ever
+ * missing the words keep their size instead of collapsing to the block's.
+ *
+ * Same clamp as above, deliberately, so the two cannot drift: the set size is the
+ * ceiling, two thirds of it the floor, and the same container-relative middle
+ * between them. tests/fluid-text.test.ts pins the two to each other.
+ */
+.tgs-block[data-fluid] .tgs-heading [style*='--tgs-fs-w'],
+.tgs-block[data-fluid] .tgs-text [style*='--tgs-fs-w'] {
+  font-size: clamp(
+    calc(var(--tgs-fs-w) * 0.62),
+    9cqi,
+    var(--tgs-fs-w)
+  ) !important;
+}
+
+/*
  * ANIMATED GRADIENT HEADING (Andy, 13 Aug 2026, the fun list). A heading marked
  * data-gradient has its letters filled with the site's brand colours as a gradient,
  * which slides slowly along the text so the colours flow. background-clip: text is
@@ -837,6 +1065,56 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     .tgs-section[data-reveal='zoom'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-zoom; }
     .tgs-section[data-reveal='blur'][data-reveal-stagger] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-blur; }
   }
+}
+
+/*
+ * REVEAL, THE FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINES (Andy, 31 Aug 2026).
+ *
+ * The reveal above rides a view() timeline, which only Chromium has today, so on Safari
+ * and Firefox a reveal section simply showed in place. This block brings the same
+ * arrival to those browsers, driven by tg-motion.js: where animation-timeline is missing
+ * the script marks each reveal section data-reveal-fb and, as each target scrolls into
+ * view, stamps it data-seen. NOTHING HERE APPLIES WITHOUT THAT MARKER, so a browser that
+ * has scroll timelines (the @supports block above wins and this never matches, since the
+ * script does not add the marker there) and one where the script never runs at all (JS
+ * blocked, or no IntersectionObserver) both keep the content in place exactly as before.
+ * The content never depends on the script.
+ *
+ * It REUSES the very keyframes the real reveal uses, run as an ordinary time-based
+ * animation held paused at its first frame (the hidden state) until data-seen sets it
+ * running. Same arrivals, same look, no second set of keyframes to keep in step. Inside
+ * prefers-reduced-motion as well as the script's own reduced-motion guard, so the hidden
+ * start can never be left on for a visitor who asked for less movement.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-reveal][data-reveal-fb] .tgs-block {
+    animation: tgs-reveal-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both paused;
+  }
+  .tgs-section[data-reveal='fade'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-fade; }
+  .tgs-section[data-reveal='slide-left'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-slide-left; }
+  .tgs-section[data-reveal='slide-right'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-slide-right; }
+  .tgs-section[data-reveal='zoom'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-zoom; }
+  .tgs-section[data-reveal='blur'][data-reveal-fb] .tgs-block { animation-name: tgs-reveal-blur; }
+  .tgs-section[data-reveal][data-reveal-fb] .tgs-block[data-seen] { animation-play-state: running; }
+
+  /*
+   * Staggered: the items move, not the block wrappers (matched off), and a per-item
+   * animation-delay the script sets inline on each item cascades a row that all enters
+   * at once. The item selector is copied verbatim from the scroll-timeline stagger
+   * above, so the two pick exactly the same elements, including the :has() step-aside
+   * for a column that holds a grid. (The delay is set inline rather than through a
+   * custom property so the block catalogue does not read a timing value as a colour.)
+   */
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] .tgs-block { animation: none; }
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) {
+    animation: tgs-reveal-rise 760ms cubic-bezier(0.16, 1, 0.3, 1) both paused;
+  }
+  .tgs-section[data-reveal='fade'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-fade; }
+  .tgs-section[data-reveal='slide-left'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-left; }
+  .tgs-section[data-reveal='slide-right'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-slide-right; }
+  .tgs-section[data-reveal='zoom'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-zoom; }
+  .tgs-section[data-reveal='blur'][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item) { animation-name: tgs-reveal-blur; }
+  .tgs-section[data-reveal][data-reveal-stagger][data-reveal-fb] :is(.tgs-row > .tgs-col:not(:has(.tgs-cards, .tgs-gallery, .tgs-logos)), .tgs-cards > .tgs-card, .tgs-gallery > *, .tgs-logos > .tgs-logos__item)[data-seen] { animation-play-state: running; }
 }
 
 @keyframes tgs-reveal-rise {
@@ -1046,6 +1324,27 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
+ * PARALLAX, THE FALLBACK FOR BROWSERS WITHOUT SCROLL TIMELINES (Andy, 31 Aug 2026).
+ * Same story as the reveal fallback: the parallax above rides a view() timeline that
+ * only Chromium has, so elsewhere the picture sat still. Where animation-timeline is
+ * missing, tg-motion.js marks the section data-parallax-fb and sets --tgs-parallax-y
+ * from the section's position on each scroll; here the picture is grown and the section
+ * clipped exactly as the real one, and the picture is translated by that variable. No
+ * marker, no change, so a browser with scroll timelines or no script keeps the still,
+ * full-bleed picture. The -8% to 8% travel matches the keyframe above.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-parallax][data-parallax-fb] { overflow: clip; }
+  .tgs-section[data-parallax][data-parallax-fb] .tgs-section__bg {
+    top: -10%;
+    bottom: auto;
+    height: 120%;
+    transform: translateY(var(--tgs-parallax-y, 0%));
+    will-change: transform;
+  }
+}
+
+/*
  * KEN BURNS BACKGROUND (Andy, 13 Aug 2026). A section marked data-ken-burns drifts
  * and zooms its single background picture slowly on its own, the documentary trick
  * that gives a still photo life. Unlike the parallax above it is NOT tied to the
@@ -1059,7 +1358,10 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 @media (prefers-reduced-motion: no-preference) {
   .tgs-section[data-ken-burns] { overflow: clip; }
   .tgs-section[data-ken-burns] .tgs-section__bg {
-    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    /* 18s, not 24s: at 24s the drift was below the eye's threshold, so a client
+       who set it saw a still photo (Andy, 30 Aug 2026). Still the calmest of the
+       ambient moves, a slow documentary drift, but now visibly moving on load. */
+    animation: tgs-ken-burns 18s ease-in-out infinite alternate;
     transform-origin: center;
   }
 }
@@ -1068,7 +1370,9 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(1.05);
   }
   to {
-    transform: scale(1.16) translate(-2%, -1.5%);
+    /* More pan (-4%,-3%, was -2%,-1.5%) so it reads as drifting across the scene,
+       not only zooming in place. */
+    transform: scale(1.16) translate(-4%, -3%);
   }
 }
 
@@ -1103,33 +1407,36 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * ones the hover zoom leans on), and clip is restated here so a drifting picture can
  * never reach its neighbours even if a frame's overflow changes.
  */
+/* Amplitudes and durations retuned 30 Aug 2026: at 26-36s and a 2-9% scale the
+   breathing was imperceptible (measured 0.09px over 1.5s), so a client who set A5
+   saw stills. Faster and a touch wider now, still calm and desynchronised. */
 .tgs-section[data-motion='A5'] {
-  --tgs-motion-from: 1.02;
-  --tgs-motion-to: 1.09;
+  --tgs-motion-from: 1.03;
+  --tgs-motion-to: 1.11;
 }
 .tgs-section[data-motion='A5'][data-motion-intensity='1'] {
-  --tgs-motion-from: 1.01;
-  --tgs-motion-to: 1.05;
+  --tgs-motion-from: 1.02;
+  --tgs-motion-to: 1.07;
 }
 .tgs-section[data-motion='A5'][data-motion-intensity='3'] {
-  --tgs-motion-from: 1.03;
-  --tgs-motion-to: 1.14;
+  --tgs-motion-from: 1.05;
+  --tgs-motion-to: 1.18;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) { overflow: clip; }
   .tgs-section[data-motion='A5'] :is(.tgs-card__frame, .tgs-image__frame) img {
-    animation: tgs-motion-slow-frame 26s ease-in-out infinite alternate;
+    animation: tgs-motion-slow-frame 16s ease-in-out infinite alternate;
     transform-origin: center;
   }
 
   /* The desync. The item is the card in a card grid and the frame itself in a
      gallery, which is why both are listed: in each case the picture sits inside it. */
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n + 2) img {
-    animation-duration: 31s;
+    animation-duration: 20s;
   }
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(3n) img {
-    animation-duration: 36s;
+    animation-duration: 24s;
   }
   .tgs-section[data-motion='A5'] :is(.tgs-cards > .tgs-card, .tgs-gallery > *):nth-child(even) img {
     animation-direction: alternate-reverse;
@@ -1141,7 +1448,7 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(var(--tgs-motion-from));
   }
   to {
-    transform: scale(var(--tgs-motion-to)) translate(-1.5%, -1%);
+    transform: scale(var(--tgs-motion-to)) translate(-3%, -2%);
   }
 }
 
@@ -1155,20 +1462,23 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
  * name. The render never sets both, because both move the one picture. Ken Burns is
  * left exactly as it was, so nothing already published changes.
  */
+/* Durations brought down 30 Aug 2026 (26/34/20s -> 16/22/12s): at 26s the drift
+   was 0.075% over 1.5s, below the eye's threshold, so "Background drifts" looked
+   like a still. The pan in the keyframe is widened too. Calm, but now moving. */
 .tgs-section[data-motion='A6'] {
   --tgs-motion-from: 1.04;
   --tgs-motion-to: 1.14;
-  --tgs-motion-duration: 26s;
+  --tgs-motion-duration: 16s;
 }
 .tgs-section[data-motion='A6'][data-motion-intensity='1'] {
   --tgs-motion-from: 1.03;
   --tgs-motion-to: 1.08;
-  --tgs-motion-duration: 34s;
+  --tgs-motion-duration: 22s;
 }
 .tgs-section[data-motion='A6'][data-motion-intensity='3'] {
   --tgs-motion-from: 1.05;
   --tgs-motion-to: 1.2;
-  --tgs-motion-duration: 20s;
+  --tgs-motion-duration: 12s;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1186,7 +1496,7 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
     transform: scale(var(--tgs-motion-from));
   }
   to {
-    transform: scale(var(--tgs-motion-to)) translate(-2%, -1.5%);
+    transform: scale(var(--tgs-motion-to)) translate(-6%, -4%);
   }
 }
 
@@ -1368,6 +1678,27 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
          still while it is being read rather than moving under the words. */
       animation-range: entry 0% cover 35%;
       transform-origin: center;
+    }
+
+    /*
+     * THE LEAD SECTION IS TIMED BY THE PAGE, NOT BY ITSELF.
+     *
+     * view() measures an element ENTERING the scrollport, and the first section
+     * never enters: it is on screen the moment the page loads. Measured with a
+     * 1200px hero in a 900px viewport, the range above was already about 43%
+     * spent before a visitor touched anything, so the animation sat at its end
+     * state at every scroll position. The recipe was attached, stored, offered
+     * in the editor, and doing nothing at all.
+     *
+     * scroll() is the document's own timeline, which starts at the top where a
+     * hero starts. The picture settles over the hero's OWN height rather than an
+     * arbitrary distance, so a taller hero simply takes longer, and it is done
+     * well before the section leaves so the words are read against a still
+     * picture. Same intent as the range above, different clock.
+     */
+    .tgs-section[data-motion='S5'][data-motion-lead] .tgs-section__bg {
+      animation-timeline: scroll();
+      animation-range: 0 calc(var(--tgs-min-h, 100vh) * 0.6);
     }
   }
 }
@@ -1702,6 +2033,320 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /* ------------------------------------------------------------------ */
+/* A destination's facts                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * THE CORPUS TALKING, not the client. See lib/content/reference.ts for why a
+ * destination page carries two kinds of value and only one of them is editable.
+ *
+ * Everything here is drawn from the site's own theme tokens, because a client's
+ * destination page has to look like their site rather than like ours. Nothing in
+ * this section names a colour.
+ */
+
+/*
+ * THE CORPUS PANEL AS A BAND.
+ *
+ * It used to sit inside the entry header, which was fine while every entry drew
+ * a flat header and wrong the moment the magazine seed started using the
+ * "Picture first" layout: there the header IS the photograph, and a facts grid
+ * over a picture is neither readable nor what anybody meant.
+ *
+ * So it is a band now, on the alternate ground, with its contents held to the
+ * same contained width a section uses. Matching the section's own measurements
+ * rather than inventing new ones is what makes it read as part of the page
+ * rather than as something bolted to the top of it.
+ */
+.tgs-entry__reference {
+  background: var(--tgs-surface-alt);
+  padding-block: var(--tgs-space-l);
+  padding-inline: var(--tgs-space-m);
+}
+
+.tgs-entry__reference > .tgs-dest {
+  max-width: var(--tgs-width-contained);
+  margin-inline: auto;
+}
+
+.tgs-dest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-l, 32px);
+  margin-block: var(--tgs-space-l, 32px);
+}
+
+.tgs-dest__tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-s, 8px);
+}
+
+.tgs-dest__tag {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.82);
+  line-height: 1.2;
+  padding: 0.45em 0.85em;
+  border-radius: var(--tgs-radius-lg, 20px);
+  border: 1px solid var(--tgs-border);
+  color: var(--tgs-text-muted);
+}
+
+/*
+ * The facts, as a grid of labelled values rather than a run of sentences. auto-fit
+ * so a record with three facts fills the row and one with six wraps evenly,
+ * without the count being written down anywhere.
+ */
+.tgs-dest__facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--tgs-space-m, 16px);
+}
+
+.tgs-dest__fact dt {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.78);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tgs-text-muted);
+  margin-bottom: 0.25em;
+}
+
+.tgs-dest__fact dd {
+  margin: 0;
+  font-family: var(--tgs-h5-font);
+  font-weight: var(--tgs-h5-weight);
+  font-size: var(--tgs-h5-size);
+  line-height: 1.25;
+  color: var(--tgs-text);
+}
+
+/*
+ * A FACT THAT IS A SENTENCE SPANS THE ROW AND READS AS PROSE.
+ *
+ * The corpus is not consistent about these fields and both shapes are right:
+ * Greece's flight time is "3h 30m", Mexico City's names both of its airports in
+ * a sentence. Set at heading size in a nine-rem cell the second one is a wall of
+ * six words a line; given the row and the body face it is simply a useful note.
+ */
+.tgs-dest__fact[data-long] {
+  grid-column: 1 / -1;
+}
+
+.tgs-dest__fact[data-long] dd {
+  font-family: var(--tgs-p-font);
+  font-weight: 400;
+  font-size: var(--tgs-p-size);
+  line-height: var(--tgs-p-leading, 1.6);
+  max-width: 68ch;
+}
+
+/* --- the climate year --------------------------------------------- */
+
+.tgs-dest__climate { margin: 0; }
+
+.tgs-dest__climate-title {
+  font-family: var(--tgs-h4-font);
+  font-weight: var(--tgs-h4-weight);
+  font-size: var(--tgs-h4-size);
+  line-height: var(--tgs-h4-leading);
+  color: var(--tgs-text);
+  margin-bottom: var(--tgs-space-m, 16px);
+}
+
+/*
+ * A TABLE DRAWN AS A CHART. The markup is tabular because the data is, so a
+ * screen reader gets "August, 27 degrees, 5 millimetres, best time to go". The
+ * grid below re-lays those same cells as twelve columns; nothing is duplicated
+ * and there is no second copy of the numbers to disagree with the first.
+ */
+.tgs-dest__chart {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The caption and the header row are for a screen reader; the chart says the
+   same things visually with its axis, its bars and its key. */
+.tgs-dest__chart-caption,
+.tgs-dest__chart thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tgs-dest__chart tbody {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  align-items: end;
+}
+
+.tgs-dest__month {
+  display: grid;
+  /* Bar, then month, then the two values under it. */
+  grid-template-rows: 1fr auto auto auto;
+  gap: 0.35em;
+  align-items: end;
+  text-align: center;
+  min-width: 0;
+}
+
+.tgs-dest__temp {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: end;
+  gap: 0.3em;
+  height: clamp(90px, 18vw, 160px);
+  padding: 0;
+}
+
+/*
+ * The bar. Its height is the month's share of the warmest one, handed in as
+ * --tgs-dest-bar by the render, which clamps it to 8-100 first.
+ *
+ * The season decides the fill: the best months are the brand colour at full
+ * strength, the shoulder ones a wash of it, and the off months a neutral. That
+ * is the whole point of the chart, so it is carried by colour rather than by a
+ * label somebody has to read.
+ */
+.tgs-dest__bar {
+  display: block;
+  align-self: end;
+  height: var(--tgs-dest-bar, 8%);
+  border-radius: var(--tgs-radius-sm, 4px) var(--tgs-radius-sm, 4px) 0 0;
+  background: var(--tgs-border-strong);
+  min-height: 4px;
+}
+
+.tgs-dest__month[data-season='best'] .tgs-dest__bar { background: var(--tgs-accent); }
+/*
+ * SHOULDER IS THE ACCENT MADE TRANSLUCENT, not the accent mixed into the
+ * background. Mixing toward --tgs-bg was the first attempt and it drew nothing
+ * at all on a light theme: 42 per cent of a terracotta into cream lands within a
+ * shade or two of the cream, so March and April read as months with no data
+ * rather than as quieter months. Measured by rendering it.
+ *
+ * Against transparent it keeps the hue and lets whatever is behind show through,
+ * so it stays visible on a light ground, a dark one, and over a tinted section.
+ */
+.tgs-dest__month[data-season='shoulder'] .tgs-dest__bar {
+  background: color-mix(in srgb, var(--tgs-accent) 55%, transparent);
+}
+
+.tgs-dest__value {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.8);
+  line-height: 1;
+  color: var(--tgs-text);
+}
+
+.tgs-dest__month-name {
+  font-family: var(--tgs-p-font);
+  font-weight: 600;
+  font-size: calc(var(--tgs-p-size) * 0.78);
+  line-height: 1;
+  color: var(--tgs-text);
+  padding: 0;
+}
+
+.tgs-dest__rain {
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.7);
+  line-height: 1;
+  color: var(--tgs-text-muted);
+  padding: 0;
+}
+
+/* The season is said in colour on the bar and in the key below, so the cell
+   itself is for a screen reader only. */
+.tgs-dest__season {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tgs-dest__key {
+  list-style: none;
+  margin: var(--tgs-space-m, 16px) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tgs-space-m, 16px);
+}
+
+.tgs-dest__key-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--tgs-p-font);
+  font-size: calc(var(--tgs-p-size) * 0.78);
+  color: var(--tgs-text-muted);
+}
+
+.tgs-dest__key-item::before {
+  content: '';
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: var(--tgs-radius-sm, 4px);
+  background: var(--tgs-border-strong);
+  flex: none;
+}
+
+.tgs-dest__key-item[data-season='best']::before { background: var(--tgs-accent); }
+/* The same translucent accent as the bar it explains. See the note above. */
+.tgs-dest__key-item[data-season='shoulder']::before {
+  background: color-mix(in srgb, var(--tgs-accent) 55%, transparent);
+}
+
+/*
+ * ON A PHONE THE CHART TURNS ON ITS SIDE. Twelve columns in 390px gives each
+ * month about 30px, which is not enough for a month name and two numbers, so
+ * they stack: one row per month, the bar running across instead of up. The same
+ * cells, re-laid; still one table, still the same numbers.
+ */
+@container tgs-page (max-width: 599px) {
+  .tgs-dest__chart tbody {
+    grid-template-columns: 1fr;
+    gap: 0.4em;
+  }
+
+  .tgs-dest__month {
+    grid-template-columns: 3.2em 1fr auto;
+    grid-template-rows: none;
+    align-items: center;
+    text-align: left;
+    gap: 0.75em;
+  }
+
+  .tgs-dest__temp {
+    grid-template-rows: none;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    height: auto;
+  }
+
+  .tgs-dest__bar {
+    align-self: center;
+    height: 0.9em;
+    width: var(--tgs-dest-bar, 8%);
+    border-radius: 0 var(--tgs-radius-sm, 4px) var(--tgs-radius-sm, 4px) 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Blocks                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -1758,6 +2403,48 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 
 @container tgs-page (max-width: 767px) {
   .tgs-grid { --tgs-grid-across: var(--tgs-grid-p, 1); }
+}
+
+/*
+ * THE COLLECTION LOOP: one designed card, repeated over a collection.
+ *
+ * It borrows .tgs-grid for the tracks, the gap and the alignment above, so all
+ * that is left here is the WHOLE-CARD LINK. Each card carries a covering anchor
+ * with no text (its name is the entry's title), stretched over the card so a
+ * click anywhere on it opens the entry. Same whole-card pattern as the Cards
+ * block, kept to one anchor per card so the markup stays valid and a keyboard
+ * stops once per card.
+ */
+.tgs-loop__cell { position: relative; }
+.tgs-loop[data-whole='true'] .tgs-loop__cell { cursor: pointer; }
+.tgs-loop[data-whole='true'] .tgs-loop__link {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+/*
+ * A card can hold its own links and buttons (a bound {{link}} button is in the
+ * starter card). They sit ABOVE the covering anchor so they still respond, and
+ * so a screen reader and a keyboard reach them as distinct targets. Anything not
+ * interactive stays below and lets the whole-card click through.
+ */
+.tgs-loop[data-whole='true'] .tgs-loop__cell a:not(.tgs-loop__link),
+.tgs-loop[data-whole='true'] .tgs-loop__cell button {
+  position: relative;
+  z-index: 1;
+}
+/*
+ * The focus ring belongs on the CARD, not on the invisible covering anchor.
+ * Both rules live inside the @supports together: moving the ring to the card
+ * needs :has(), taking it off the anchor does not, and split apart a browser
+ * without :has() would leave a keyboard user with no visible focus at all.
+ */
+@supports selector(:has(*)) {
+  .tgs-loop[data-whole='true'] .tgs-loop__cell:has(.tgs-loop__link:focus-visible) {
+    outline: 3px solid var(--tgs-accent);
+    outline-offset: 2px;
+  }
+  .tgs-loop[data-whole='true'] .tgs-loop__link:focus-visible { outline: none; }
 }
 
 
@@ -3394,6 +4081,69 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /* ------------------------------------------------------------------ */
+/* A cards grid's box lands on the cards                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Andy, 26 Aug 2026: a card background changed the block background, a border
+ * went round the block, a shadow landed on the block. Everywhere else "the
+ * block" is the thing you see; here it is a grid whose visible parts are the
+ * cards, so a background paints behind the gaps and a border draws a rectangle
+ * round the lot.
+ *
+ * The block stops painting its own surface and the cards take it instead.
+ * PADDING STAYS ON THE CONTAINER, because padding around a grid is space around
+ * the grid; the card's inner padding is the card's own.
+ *
+ * These rules come after the finish presets on purpose. They carry the same
+ * specificity, so source order is what lets an explicit setting win over the
+ * preset, and only the properties the client actually set are emitted at all,
+ * so a tinted card that gains a border keeps its tint.
+ */
+.tgs-block[data-boxed][data-box-target='card'] {
+  background-image: none;
+  border: 0;
+  box-shadow: none;
+  /* And the padding, which would otherwise be applied twice: once as space
+     around the grid here and once inside each card below. */
+  padding: 0;
+}
+
+/*
+ * The card's own padding, on the BODY so a picture stays full bleed at the top.
+ * Later in the file than the plain-style padding rules it has to beat, which are
+ * the same specificity; source order is doing the work, as it is for the finish
+ * presets above.
+ */
+.tgs-block[data-box-target='card'][style*='--tgs-card-pt'] .tgs-card__body {
+  padding: var(--tgs-card-pt) var(--tgs-card-pr) var(--tgs-card-pb) var(--tgs-card-pl);
+}
+
+.tgs-block[data-box-target='card'][style*='--tgs-card-bg'] .tgs-card {
+  background: var(--tgs-card-bg);
+}
+
+.tgs-block[data-box-target='card'][style*='--tgs-card-bw'] .tgs-card {
+  border: var(--tgs-card-bw) solid var(--tgs-card-bc, currentColor);
+}
+
+.tgs-block[data-box-target='card'][style*='--tgs-card-radius'] .tgs-card {
+  border-radius: var(--tgs-card-radius);
+}
+
+.tgs-block[data-box-target='card'][data-shadow='soft'] .tgs-card {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
+}
+
+.tgs-block[data-box-target='card'][data-shadow='medium'] .tgs-card {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+.tgs-block[data-box-target='card'][data-shadow='strong'] .tgs-card {
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+}
+
+/* ------------------------------------------------------------------ */
 /* Card designs: the silhouette, as distinct from the finish           */
 /* ------------------------------------------------------------------ */
 
@@ -3507,11 +4257,114 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   --tgs-border: var(--tgs-on-dark-border);
   --tgs-primary: var(--tgs-text-invert);
 }
-/* No box, so no finish. The border, tint and shadow have nothing to sit on. */
+/*
+ * THE FINISH ON AN OVERLAY CARD, which used to be cancelled outright.
+ *
+ * The old rule said "no box, so no finish" and zeroed the border, the tint and
+ * the shadow. That is right about a tint, which a full-bleed photograph
+ * completely covers, and wrong about the other two: an overlay card IS a box,
+ * it is just a box with a picture in it, and both a hairline round it and a
+ * shadow under it read perfectly well. The consequence was that all four
+ * finishes drew an identical card, so the setting looked broken to anybody who
+ * tried it. Andy, 26 Aug 2026: the styling options do not work very well.
+ *
+ * So the base cancels nothing and each finish says what it means. "Tinted" is
+ * the one that cannot be a background here, so it earns its keep by deepening
+ * the scrim: the same card with the words held harder against the picture,
+ * which is the useful thing to want on a busy photograph.
+ */
 .tgs-cards[data-design='overlay'] .tgs-card {
   border: 0;
   background: var(--tgs-surface-alt);
   box-shadow: none;
+}
+
+.tgs-cards[data-design='overlay'][data-style='bordered'] .tgs-card {
+  border: 1px solid var(--tgs-border);
+}
+
+.tgs-cards[data-design='overlay'][data-style='raised'] .tgs-card {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.10), 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+/*
+ * "Tinted" on an overlay card is a DEEPER SCRIM, not a background: the
+ * photograph covers a background completely, so the setting would do nothing.
+ * The first attempt here raised the scrim's opacity, which also did nothing,
+ * because the scrim was already fully opaque and its strength lives in the
+ * colour stops. This restates them, taller and heavier, which is the useful
+ * thing to want on a busy photograph.
+ */
+.tgs-cards[data-design='overlay'][data-style='tinted'] .tgs-card__body::before {
+  inset: -6rem 0 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 70%, transparent) 6rem,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 92%, transparent) 60%,
+    color-mix(in srgb, var(--tgs-scrim-colour, #0f172a) 97%, transparent) 100%
+  );
+}
+
+/*
+ * THE FINISH ON AN INDEX ROW, cancelled for the same reason and wrong in the
+ * same way. A row is a box too; it is simply a wide one.
+ *
+ * Plain keeps the rule-separated list, which is what the design is for. The
+ * other three give each row a surface of its own, so the separating rule comes
+ * off and the rows are spaced instead: a hairline UNDER a bordered row would
+ * read as a second border a pixel below the first.
+ */
+/*
+ * A ROW WITH A SURFACE NEEDS AIR AROUND IT.
+ *
+ * The index is a block with a rule across the top and rows that touch, which is
+ * exactly what a rule-separated list should be. Give each row a border, a tint
+ * or a shadow and touching turns three rows into one tall panel with lines
+ * through it, and the rule above the first one floats free of the box beneath.
+ * So a finished index is a stack with a gap, and the list's own top rule goes.
+ */
+.tgs-cards[data-design='index']:not([data-style='plain']) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tgs-space-m);
+  border-top: 0;
+}
+
+.tgs-cards[data-design='index'][data-style='bordered'] .tgs-card,
+.tgs-cards[data-design='index'][data-style='raised'] .tgs-card,
+.tgs-cards[data-design='index'][data-style='tinted'] .tgs-card {
+  border-bottom: 0;
+  padding-inline: var(--tgs-space-m);
+}
+
+.tgs-cards[data-design='index'][data-style='bordered'] .tgs-card {
+  border: 1px solid var(--tgs-border);
+}
+
+.tgs-cards[data-design='index'][data-style='raised'] .tgs-card {
+  background: var(--tgs-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.tgs-cards[data-design='index'][data-style='tinted'] .tgs-card {
+  background: var(--tgs-surface-alt);
+}
+
+/*
+ * NO DATE, NO DATE COLUMN.
+ *
+ * The index reserves ten rems on the left for "14 September 2026" and lines the
+ * dates up down the page, which is exactly right for the blog archive it was
+ * built for. A destination guide has no date, so every row opened with ten rems
+ * of nothing and the words started a third of the way across an empty page.
+ */
+.tgs-cards[data-design='index'] .tgs-card:not(:has(.tgs-card__label)) .tgs-card__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tgs-cards[data-design='index'] .tgs-card:not(:has(.tgs-card__label)) .tgs-card__body > * {
+  grid-column: 1;
 }
 .tgs-cards[data-design='overlay'] .tgs-card__noimage { background: var(--tgs-surface-alt); }
 /*
@@ -3550,10 +4403,13 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   align-items: start;
   border: 0;
   border-bottom: 1px solid var(--tgs-border);
-  border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
+
+/* Square, because a rule-separated list is not a stack of boxes. A row that has
+   been given a border, a tint or a shadow takes the client's own corners. */
+.tgs-cards[data-design='index'][data-style='plain'] .tgs-card { border-radius: 0; }
 .tgs-cards[data-design='index'] .tgs-card__body {
   display: grid;
   /* The date column is wide enough for "14 September 2026" and no wider. */
@@ -3696,7 +4552,28 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   isolation: isolate;
   min-height: min(60vh, 32rem);
   justify-content: flex-end;
-  padding: var(--tgs-space-l);
+
+  /*
+   * FULL BLEED, AND IT HAD TO BE SAID EXPLICITLY.
+   *
+   * The base rule caps every header at the 680px reading measure, which is right
+   * for the two layouts that are articles and wrong for this one, where the
+   * header IS the banner photograph. It rendered as a 680px box floating in the
+   * middle of a 1280px page: "the picture fills the top" was the description and
+   * a third of the top was what it did. Found by measuring the built page rather
+   * than by reading this file, which had looked correct for months.
+   *
+   * The words inside it still hold the contained width, so the headline never
+   * touches the viewport edge. That is this client's 21 Aug correction and it is
+   * the reason the padding is a max() rather than a fixed gutter: on a wide
+   * screen the text lines up with the sections below it, and on a narrow one it
+   * keeps a real margin instead of collapsing onto the edge.
+   */
+  max-width: none;
+  padding: var(--tgs-space-l) max(
+    var(--tgs-space-l),
+    (100% - var(--tgs-width-contained)) / 2
+  );
 }
 /*
  * THE TITLE OPENS THE HEADER, and the date follows it.
@@ -3731,6 +4608,35 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   height: 100%;
   object-fit: cover;
   border-radius: 0;
+}
+
+/*
+ * THE BANNER DRIFTS, THE SAME WAY EVERY OTHER BANNER ON A SITE DOES.
+ *
+ * Every inner page a client builds gets its photograph from a section, and a
+ * section has carried Ken Burns since 13 Aug. An entry's banner is the same
+ * thing doing the same job, and it was the one photograph on a site that sat
+ * still, which read as an oversight rather than as a choice. Andy, 25 Aug 2026:
+ * the main image should be in the style the rest of the site has.
+ *
+ * The SAME keyframe the section uses, deliberately. Two hand-tuned drifts at
+ * slightly different speeds on one site is the kind of difference nobody can
+ * name and everybody feels, and a second set of numbers is a second thing to
+ * keep in step.
+ *
+ * Behind prefers-reduced-motion, so a visitor who asked for less gets the
+ * picture still and full-bleed. The header clips, because the pan scales the
+ * photograph past its own edges and the overspill would otherwise sit over the
+ * band below.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-entry[data-layout='hero'] .tgs-entry__head:has(.tgs-entry__image) {
+    overflow: clip;
+  }
+  .tgs-entry[data-layout='hero'] .tgs-entry__image img {
+    animation: tgs-ken-burns 24s ease-in-out infinite alternate;
+    transform-origin: center;
+  }
 }
 /*
  * The same scrim decision the overlay card made, and for the same reason: the
@@ -4705,9 +5611,25 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 .tgs-nav__list--stacked .tgs-nav__subchev { display: none; }
 
-@container tgs-page (max-width: 767px) {
-  /* Below the phone breakpoint the plain row gives way to the button, but only
-     for a menu whose owner asked for one. */
+/*
+ * THE MENU BECOMES A BURGER BELOW A LAPTOP, not below a phone.
+ *
+ * WAS 767px, AND THAT LEFT A HOLE THE SIZE OF AN iPAD (Andy, 25 Aug 2026, with
+ * a screenshot of it). The editor's Tablet is 834px, real iPad portrait is 768
+ * to 834, and everything in that band got the FULL horizontal menu with nowhere
+ * near the room for it. On Coastwise the bar broke into three rows: the links,
+ * then the wordmark, then "Check dates" stranded on its own. Not a Coastwise
+ * problem either, it was every site with more than about three menu items.
+ *
+ * 1023px is the same line the rest of the tablet rules already use, so the menu
+ * now changes shape at the width everything else does rather than at one of its
+ * own. Below a laptop, a burger; a laptop and up, the bar.
+ *
+ * STILL ONLY FOR A MENU WHOSE OWNER ASKED FOR ONE (data-collapse), and still
+ * nothing to do with data-burger='always', which is the separate choice to have
+ * a burger at every width.
+ */
+@container tgs-page (max-width: 1023px) {
   .tgs-nav__list[data-collapse='true'] { display: none; }
   .tgs-nav__disclosure { display: block; }
 }

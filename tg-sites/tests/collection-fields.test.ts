@@ -431,9 +431,17 @@ describe('an entry shows its own facts', () => {
 
   it('reads the schema back with the entry, from the join already there', () => {
     const db = read('lib', 'db', 'collections.ts');
-    const fn = db.slice(db.indexOf('export async function getPublishedItem'));
-    expect(fn.slice(0, 900)).toContain('select i.data, i.published_at, c.fields');
-    expect(fn.slice(0, 900)).toContain('fields: parseFieldDefs(asObject(row.fields))');
+    const start = db.indexOf('export async function getPublishedItem');
+    const fn = db.slice(start, db.indexOf('\nexport ', start + 10));
+    expect(fn).toContain('select i.data, i.published_at, c.fields');
+    expect(fn).toContain('fields: parseFieldDefs(asObject(row.fields))');
+    /*
+     * ONE QUERY, which is the actual claim. This used to assert against the
+     * first 900 characters of the function, which broke the moment a comment
+     * grew and said nothing about whether a second read had crept in. Counting
+     * the queries pins what the test is for.
+     */
+    expect(fn.match(/await tx`/g) ?? []).toHaveLength(1);
   });
 
   it('shows ALL of them, unlike a card, which shows the first few', () => {
@@ -565,7 +573,7 @@ describe('a collections facts on its cards', () => {
     const card = itemAsCard(tour(), 'tours', 'western-isles', defs);
     // Keyed by the whole request now, not by the collection's name, because two
     // blocks narrowing one collection differently are two answers (#238).
-    const key = listingKey({ collection: 'tours', count: 0, facts: 0, filter: null, sort: null });
+    const key = listingKey({ collection: 'tours', count: 0, facts: 0, order: 'newest' as const, filter: null, sort: null });
     const filled = fillListings(tree, new Map([[key, [card]]]));
 
     const factsOn = (index: number) => {

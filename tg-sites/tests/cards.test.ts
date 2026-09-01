@@ -203,15 +203,23 @@ describe('the card stylesheet', () => {
    * gets no visible focus at all. They have to stay in one @supports together.
    */
   it('moves the focus ring to the card and removes it from the link together', () => {
-    const supports = /@supports selector\(:has\(\*\)\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? '';
+    // There is more than one @supports selector(:has(*)) block in the stylesheet
+    // now (the collection loop's whole-card link has its own), so pick the card's
+    // by the selector it contains rather than assuming it is the first.
+    const supports =
+      [...css.matchAll(/@supports selector\(:has\(\*\)\) \{([\s\S]*?)\n\}/g)]
+        .map((match) => match[1])
+        .find((body) => body.includes('.tgs-card__link')) ?? '';
 
     expect(supports, 'the @supports block has gone').not.toBe('');
     expect(supports).toContain(':has(.tgs-card__link:focus-visible)');
     expect(supports).toContain('outline: 3px solid var(--tgs-accent)');
     expect(supports).toContain(".tgs-cards[data-whole='true'] .tgs-card__link:focus-visible { outline: none; }");
 
-    // And nothing removes the link's outline from outside the guard.
-    const outside = css.replace(/@supports selector\(:has\(\*\)\) \{[\s\S]*?\n\}/, '');
+    // And nothing removes the link's outline from outside the guard. Strip every
+    // @supports(:has()) block, not just the first: the loop's whole-card link
+    // added another, and the card's must not be the one left behind.
+    const outside = css.replace(/@supports selector\(:has\(\*\)\) \{[\s\S]*?\n\}/g, '');
     expect(outside).not.toContain('.tgs-card__link:focus-visible');
   });
 
@@ -260,5 +268,120 @@ describe('the card stylesheet', () => {
     for (const token of ['font', 'weight', 'size', 'leading', 'tracking']) {
       expect(title, `the card title picks its own ${token}`).toContain(`--tgs-h4-${token}`);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * EVERY BOX CONTROL REACHES THE CARD, not the container behind it.
+ *
+ * Andy, twice: "the styling appears to be attached to the block, not the
+ * individual card", then a fortnight later "the padding of the cards is also
+ * applying to the block not the cards". The second one is the interesting one,
+ * because the first was supposedly fixed and had a test. That test asserted the
+ * lines I had written were present, so it passed while padding still went to the
+ * wrong element: it could only ever confirm the fix I had already made.
+ *
+ * So this checks the CONTRACT instead: whatever set of controls the panel
+ * offers, each one has to be emitted for the card and consumed by a rule that
+ * paints a card. A control added to BoxPanel and not wired for cards fails here
+ * with the name of the control, which is the failure the last round needed and
+ * did not have.
+ */
+describe('the box controls target the card, not the block', () => {
+  const css = source('app', 'globals.css');
+  const controls = source('components', 'editor', 'BoxControls.tsx');
+  const renderer = source('components', 'render', 'PageRenderer.tsx');
+
+  /**
+   * What BoxPanel actually lets a client change, read off the panel itself.
+   *
+   * SLICED TO THE NEXT EXPORT rather than matched with a lazy brace. The first
+   * version of this used /export function BoxPanel\(\{[\s\S]*?\n\}/, which ends
+   * at the closing brace of the DESTRUCTURED PARAMETERS, four lines in. It
+   * returned a non-empty string, passed the guard below, and yielded no controls
+   * at all, so both loops ran zero times and reported green. Caught by reverting
+   * the fix and finding only one of three tests failed.
+   */
+  function offered(): string[] {
+    const start = controls.indexOf('export function BoxPanel(');
+    expect(start, 'BoxPanel has moved or been renamed').toBeGreaterThan(-1);
+    const rest = controls.slice(start + 1);
+    const end = rest.indexOf('\nexport ');
+    const panel = end === -1 ? rest : rest.slice(0, end);
+    const found = [...new Set([...panel.matchAll(/patch\(\{\s*(\w+)/g)].map((m) => m[1]))];
+    /*
+     * The guard that makes the rest of this block mean something. Every test
+     * here loops over this list, so an extraction that quietly returns nothing
+     * passes all of them. Naming padding specifically because padding is the
+     * control that was broken when this was written.
+     */
+    expect(found, 'the controls could not be read out of BoxPanel').toContain('padding');
+    expect(found.length, 'BoxPanel offers fewer controls than it used to').toBeGreaterThanOrEqual(5);
+    return found;
+  }
+
+  /*
+   * The card-side property each control has to end up as. Kept as a map rather
+   * than derived, because the point is to notice a control that has NO answer:
+   * an unlisted key fails the last test in this block by name.
+   */
+  const CARD_PROPERTY: Record<string, string> = {
+    padding: '--tgs-card-pt',
+    background: '--tgs-card-bg',
+    radius: '--tgs-card-radius',
+    borderWidth: '--tgs-card-bw',
+    borderColour: '--tgs-card-bc',
+    // Not a custom property: the shadow rides the same data-shadow attribute the
+    // block uses, re-pointed at the card. Checked separately below.
+    shadow: 'data-shadow',
+  };
+
+  it('offers the controls this block knows how to answer, and no others', () => {
+    for (const control of offered()) {
+      expect(
+        CARD_PROPERTY[control],
+        `BoxPanel offers "${control}" and nothing here says how a CARD gets it. ` +
+          'Wire it in cardBox in PageRenderer and add a rule that paints .tgs-card, ' +
+          'then add it to CARD_PROPERTY.',
+      ).toBeTruthy();
+    }
+  });
+
+  it('emits each one as a card property rather than only a block one', () => {
+    for (const control of offered()) {
+      const property = CARD_PROPERTY[control];
+      if (!property || property === 'data-shadow') continue;
+      expect(renderer, `cardBox never emits ${property} for "${control}"`).toContain(property);
+    }
+  });
+
+  it('has a rule painting a card for each one, not just the block', () => {
+    for (const control of offered()) {
+      const property = CARD_PROPERTY[control];
+      if (!property || property === 'data-shadow') continue;
+      // borderColour rides the border rule rather than carrying its own.
+      const key = control === 'borderColour' ? '--tgs-card-bw' : property;
+      const rule = new RegExp(
+        `\\[data-box-target='card'\\][^{]*${key.replace(/[-]/g, '-')}[^{]*\\{[^}]*\\}`,
+      ).exec(css)?.[0];
+      expect(rule, `no CSS applies ${property} to a card`).toBeTruthy();
+      expect(rule, `the ${control} rule does not paint a card`).toMatch(/\.tgs-card/);
+    }
+  });
+
+  it('paints the shadow on the card and takes it off the block', () => {
+    for (const strength of ['soft', 'medium', 'strong']) {
+      expect(css, `a ${strength} shadow never reaches the card`)
+        .toContain(`[data-box-target='card'][data-shadow='${strength}'] .tgs-card`);
+    }
+    const container = /\.tgs-block\[data-boxed\]\[data-box-target='card'\] \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(container, 'the container rule has moved').not.toBe('');
+    // The four the container must stop drawing itself, or they land twice.
+    expect(container).toContain('box-shadow: none');
+    expect(container).toContain('border: 0');
+    expect(container).toContain('background-image: none');
+    expect(container).toContain('padding: 0');
   });
 });

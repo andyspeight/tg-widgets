@@ -1,0 +1,198 @@
+{
+ "HND": {
+  "t": "13h 45m",
+  "n": "Direct from London Heathrow with BA, JAL and ANA. Scheduled block time runs 13h 25m to 14h 15m. Longer than the map suggests because flights have routed around Russian airspace since 2022. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LHR-HND",
+  "s2": "https://www.flightconnections.com/flights-from-lhr-to-hnd",
+  "pushed": true
+ },
+ "ICN": {
+  "t": "12h 45m",
+  "n": "Direct from London Heathrow with Korean Air, Asiana and Virgin Atlantic. Scheduled block time runs 12h 20m to 12h 45m outbound. The return leg to London is notably longer at around 14h 50m because of prevailing winds, so warn customers the two directions are not symmetrical. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LHR-ICN",
+  "s2": "https://www.flightconnections.com/flights-from-lhr-to-icn",
+  "pushed": true
+ },
+ "HKG": {
+  "t": "12h 45m",
+  "n": "Direct from London Heathrow with Cathay Pacific (T3) and British Airways (T5), around 41 flights a week. Scheduled block time runs 12h 30m to 13h 05m. Both arrive at Hong Kong Terminal 1. Checked Aug 2026.",
+  "s1": "https://flights.cathaypacific.com/destinations/en_GB/flights-from-london-to-hong-kong",
+  "s2": "https://www.flightsfrom.com/LHR-HKG",
+  "pushed": true
+ },
+ "BKK": {
+  "t": "11h 35m",
+  "n": "Direct from London Heathrow with Thai Airways, EVA Air and TAP Air Portugal, around 64 flights a week. Scheduled block time runs 11h 25m to 11h 55m. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LHR-BKK",
+  "s2": "https://www.skyscanner.com/routes/lhr/bkk/london-heathrow-to-bangkok-suvarnabhumi.html",
+  "pushed": true
+ },
+ "PER": {
+  "t": "16h 45m direct from London Heathrow, but the return leg is not direct",
+  "n": "Qantas QF10 still flies London Heathrow to Perth nonstop, scheduled at 16h 40m to 16h 50m. The return is the catch worth flagging: since 4 March 2026 the westbound Perth to London service has been rerouted via Singapore because of Middle East airspace restrictions, adding roughly three to four hours and taking total westbound travel past 20 hours. Qantas has framed this as temporary and it is expected to run through at least January 2027, so confirm the routing before quoting a return time. Checked Aug 2026.",
+  "s1": "https://www.headforpoints.com/2026/03/04/qantas-reroutes-perth-to-london-flights/",
+  "s2": "https://www.paddleyourownkanoo.com/2026/03/03/qantas-cancels-non-stop-perth-to-london-flights-as-middle-east-airspace-closures-drag-on/",
+  "pushed": true
+ },
+ "SYD": {
+  "t": "No direct service. Around 23 to 25 hours total with one stop",
+  "n": "There is no nonstop London to Sydney flight. Perth is currently the only Australian airport with a nonstop service from the UK. The quickest routings are one stop via Singapore, Dubai, Doha or Hong Kong, giving roughly 23 to 25 hours gate to gate depending on the connection, and published estimates vary because they assume different layover lengths. Qantas plans to launch a nonstop London to Sydney of about 22 hours in 2027 under Project Sunrise, which would be the world's longest scheduled flight. Checked Aug 2026.",
+  "s1": "https://www.timeout.com/uk/news/the-worlds-longest-flight-will-launch-from-the-uk-in-2027-032625",
+  "s2": "https://simpleflying.com/why-qantas-quietly-killed-its-nonstop-perth-london-flight-in-2026/",
+  "pushed": true
+ },
+ "MEL": {
+  "t": "No direct service. Around 23 to 25 hours total with one stop",
+  "n": "There is no nonstop London to Melbourne flight. Perth is currently the only Australian airport with a nonstop service from the UK. Quickest routings are one stop via Singapore, Dubai, Doha or Hong Kong, giving roughly 23 to 25 hours gate to gate depending on the connection. Checked Aug 2026.",
+  "s1": "https://www.timeout.com/uk/news/the-worlds-longest-flight-will-launch-from-the-uk-in-2027-032625",
+  "s2": "https://freedomdestinations.co.uk/australia/flights/direct",
+  "pushed": true
+ },
+ "BNE": {
+  "t": "No direct service. Around 23 to 25 hours total with one stop",
+  "n": "There is no nonstop London to Brisbane flight. Perth is currently the only Australian airport with a nonstop service from the UK. Quickest routings are one stop via Singapore, Dubai, Doha or Hong Kong, giving roughly 23 to 25 hours gate to gate depending on the connection. Checked Aug 2026.",
+  "s1": "https://www.timeout.com/uk/news/the-worlds-longest-flight-will-launch-from-the-uk-in-2027-032625",
+  "s2": "https://freedomdestinations.co.uk/australia/flights/direct",
+  "pushed": true
+ },
+ "ADL": {
+  "t": "No direct service. Around 24 to 26 hours total with one or two stops",
+  "n": "There is no nonstop London to Adelaide flight. Perth is currently the only Australian airport with a nonstop service from the UK. Adelaide usually needs a Middle East or Asian hub plus, on some itineraries, an Australian domestic leg, so allow roughly 24 to 26 hours gate to gate. Checked Aug 2026.",
+  "s1": "https://www.timeout.com/uk/news/the-worlds-longest-flight-will-launch-from-the-uk-in-2027-032625",
+  "s2": "https://freedomdestinations.co.uk/australia/flights/direct",
+  "pushed": true
+ },
+ "CNS": {
+  "t": "No direct service. Around 25 to 28 hours total, usually with two stops",
+  "n": "There is no nonstop London to Cairns flight. Perth is currently the only Australian airport with a nonstop service from the UK. Cairns normally needs a Middle East or Asian hub plus an Australian domestic connection through Sydney, Melbourne or Brisbane, so allow roughly 25 to 28 hours gate to gate. Checked Aug 2026.",
+  "s1": "https://www.timeout.com/uk/news/the-worlds-longest-flight-will-launch-from-the-uk-in-2027-032625",
+  "s2": "https://freedomdestinations.co.uk/australia/flights/direct",
+  "pushed": true
+ },
+ "OOL": {
+  "t": "No direct service. Around 25 to 28 hours total, usually with two stops",
+  "n": "There is no nonstop London to Gold Coast flight. Perth is currently the only Australian airport with a nonstop service from the UK. Gold Coast normally needs a Middle East or Asian hub plus an Australian domestic connection, most often through Sydney or Brisbane, so allow roughly 25 to 28 hours gate to gate. Brisbane is close by and often the better routing to quote. Checked Aug 2026.",
+  "s1": "https://www.timeout.com/uk/news/the-worlds-longest-flight-will-launch-from-the-uk-in-2027-032625",
+  "s2": "https://freedomdestinations.co.uk/australia/flights/direct",
+  "pushed": true
+ },
+ "AKL": {
+  "t": "No direct service. Around 24 hours total with one stop",
+  "n": "There is no nonstop London to Auckland flight. The quickest published one stop routing is via Singapore at about 23h 40m with Singapore Airlines, and via Dubai at about 24h 15m. Emirates, British Airways, Singapore Airlines and Air New Zealand all sell the route with a single change. Total time depends heavily on the layover, so quote a range rather than a fixed figure. Checked Aug 2026.",
+  "s1": "https://www.singaporeair.com/en-gb/flights-from-london-to-auckland",
+  "s2": "https://www.prokerala.com/travel/flight-time/from-LHR/to-AKL/",
+  "pushed": true
+ },
+ "WLG": {
+  "t": "No direct service. Around 26 to 29 hours total, usually with two stops",
+  "n": "There is no nonstop London to Wellington flight, and no nonstop UK to New Zealand service at all. Expect a Middle East or Asian hub, then Auckland, then a short domestic hop to Wellington, so allow roughly 26 to 29 hours gate to gate. For reference the quickest London to Auckland routing is about 23h 40m via Singapore. Checked Aug 2026.",
+  "s1": "https://www.singaporeair.com/en-gb/flights-from-london-to-auckland",
+  "s2": "https://www.prokerala.com/travel/flight-time/from-LHR/to-AKL/",
+  "pushed": true
+ },
+ "CHC": {
+  "t": "No direct service. Around 26 to 29 hours total, usually with two stops",
+  "n": "There is no nonstop London to Christchurch flight, and no nonstop UK to New Zealand service at all. Expect a Middle East or Asian hub, then Auckland, then a domestic leg to Christchurch, so allow roughly 26 to 29 hours gate to gate. Some itineraries route via Australia instead. For reference the quickest London to Auckland routing is about 23h 40m via Singapore. Checked Aug 2026.",
+  "s1": "https://www.singaporeair.com/en-gb/flights-from-london-to-auckland",
+  "s2": "https://www.prokerala.com/travel/flight-time/from-LHR/to-AKL/",
+  "pushed": true
+ },
+ "ATH": {
+  "t": "3h 45m",
+  "n": "Direct from London with BA, easyJet, Aegean and others. Scheduled block time runs 3h 35m to 3h 55m. Checked Aug 2026.",
+  "s1": "https://www.directflights.com/LHR-ATH",
+  "s2": "https://www.flightconnections.com/flights-from-lhr-to-ath",
+  "pushed": true
+ },
+ "HER": {
+  "t": "4h 15m",
+  "n": "Direct from London to Heraklion, Crete. The fastest scheduled service is around 4h 05m from Heathrow and UK departures typically run 4h to 4h 30m depending on the airport and aircraft. Heavily seasonal, with far more capacity May to October. Checked Aug 2026.",
+  "s1": "https://www.flightconnections.com/flights-from-lhr-to-her",
+  "s2": "https://caledoniantravel.uk/how-long-is-flight-to-greece/",
+  "pushed": true
+ },
+ "RHO": {
+  "t": "4h 10m",
+  "n": "Direct from London to Rhodes, typically 4h to 4h 15m from UK airports. Heavily seasonal, with most capacity May to October. Checked Aug 2026.",
+  "s1": "https://caledoniantravel.uk/how-long-is-flight-to-greece/",
+  "s2": "https://www.flightsfrom.com/LHR-RHO",
+  "pushed": true
+ },
+ "ALC": {
+  "t": "2h 32m",
+  "n": "Direct from all major London airports plus most UK regionals with easyJet, Ryanair, Jet2, BA and TUI. Typical block time around 2h 30m. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LTN-ALC",
+  "s2": "https://www.trip.com/hot/london-to-alicante-flight-time/",
+  "pushed": true
+ },
+ "PMI": {
+  "t": "2h 25m",
+  "n": "Direct from all major London airports and most UK regionals with easyJet, Ryanair, Jet2, BA and TUI. Typical block time around 2h 25m. Very heavily seasonal, with far more capacity May to October. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LGW-PMI",
+  "s2": "https://www.travelmath.com/flying-time/from/London,+United+Kingdom/to/Palma+de+Mallorca,+Spain",
+  "pushed": true
+ },
+ "IBZ": {
+  "t": "2h 30m",
+  "n": "Direct from London with BA, easyJet and Ryanair among others. Published block times range from about 2h 20m to 2h 32m. Strongly seasonal, with most capacity May to October. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LHR-IBZ",
+  "s2": "https://www.trip.com/hot/flight-time-from-london-to-ibiza/",
+  "pushed": true
+ },
+ "DLM": {
+  "t": "4h 15m",
+  "n": "Direct from London and many UK regionals with Jet2, TUI, easyJet and Turkish Airlines. Typical block time 4h 15m to 4h 20m. Almost entirely a summer season route. Checked Aug 2026.",
+  "s1": "https://www.turkishairlines.com/en-gb/flights-from-london-to-dalaman",
+  "s2": "https://caledoniantravel.uk/how-long-is-flight-to-turkey-from-uk/",
+  "pushed": true
+ },
+ "AYT": {
+  "t": "4h 10m",
+  "n": "Direct from London and many UK regionals with Jet2, TUI, easyJet and Turkish Airlines. Typical block time around 4h 10m. Overwhelmingly a summer season route. Checked Aug 2026.",
+  "s1": "https://caledoniantravel.uk/how-long-is-flight-to-turkey-from-uk/",
+  "s2": "https://www.flightsfrom.com/AYT-DLM",
+  "pushed": true
+ },
+ "BJV": {
+  "t": "4h 05m",
+  "n": "Direct from London and several UK regionals with Jet2, TUI and easyJet. Typical block time around 4h 05m. Summer season route, with very little winter service. Checked Aug 2026.",
+  "s1": "https://caledoniantravel.uk/how-long-is-flight-to-turkey-from-uk/",
+  "s2": "https://www.trip.com/hot/london-to-bodrum-flight-time/",
+  "pushed": true
+ },
+ "FAO": {
+  "t": "2h 55m",
+  "n": "Direct from every major London airport and most UK regionals with easyJet, Ryanair, Jet2, TUI and BA. Typical block time 2h 55m to 3h. One of the highest frequency UK leisure routes in Europe, and unlike most Med destinations it runs year round because of the golf trade. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LGW-FAO",
+  "s2": "https://www.travelmath.com/flying-time/from/London,+United+Kingdom/to/Faro,+Portugal",
+  "pushed": true
+ },
+ "FNC": {
+  "t": "3h 55m",
+  "n": "Direct from London Gatwick, Luton and several UK regionals with easyJet, Jet2, TUI and BA. Fastest scheduled service is around 3h 55m. Madeira runs year round rather than seasonally, which is unusual for an Atlantic island. Landing at Funchal is famously wind affected, so diversions to Porto Santo or Tenerife do happen. Checked Aug 2026.",
+  "s1": "https://www.flightconnections.com/flights-from-lgw-to-fnc",
+  "s2": "https://www.flightsfrom.com/LHR-FNC",
+  "pushed": true
+ },
+ "TFS": {
+  "t": "4h 30m",
+  "n": "Direct from every major London airport and most UK regionals with easyJet, Jet2, Ryanair, BA and TUI. Scheduled block time runs 4h 15m to 4h 45m. The Canaries run year round rather than summer only, which is what makes them the UK's winter sun staple. Checked Aug 2026.",
+  "s1": "https://www.flightsfrom.com/LHR-TFS",
+  "s2": "https://www.directflights.com/LGW-TFS",
+  "pushed": true
+ },
+ "ACE": {
+  "t": "4h 10m",
+  "n": "Direct from London Gatwick and most UK regionals with easyJet, Jet2, Ryanair and TUI. Scheduled block time runs 4h 05m to 4h 20m. Year round rather than summer only. Checked Aug 2026.",
+  "s1": "https://www.flightconnections.com/flights-from-lgw-to-ace",
+  "s2": "https://www.flightsfrom.com/LGW-ACE",
+  "pushed": true
+ },
+ "LPA": {
+  "t": "4h 30m",
+  "n": "Direct from London Gatwick and most UK regionals with easyJet, Jet2, Ryanair, BA and TUI. Scheduled block time runs 4h 25m to 4h 35m. Year round rather than summer only. Checked Aug 2026.",
+  "s1": "https://www.directflights.com/LGW-LPA",
+  "s2": "https://www.flightroutes.com/LGW-LPA",
+  "pushed": true
+ }
+}

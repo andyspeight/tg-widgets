@@ -437,6 +437,34 @@
 
 .mp-note a { color: var(--ed-ink-2); }
 
+/* --- Generate with AI --------------------------------------------------- */
+
+.mp-gen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+}
+
+.mp-gen__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+}
+
+.mp-gen__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  align-items: center;
+}
+
+.mp-gen__controls .ed-select {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.mp-gen__controls .tg-btn { flex: none; }
+
 /* --- The field control -------------------------------------------------- */
 
 .mp-choose {
@@ -812,4 +840,40 @@
   border-color: var(--ed-select);
   background: var(--ed-select-wash);
   color: var(--ed-select);
+}
+
+/* ---------------------------------------------------------------------- */
+/* Making the pictures already here smaller                               */
+/* ---------------------------------------------------------------------- */
+
+/*
+ * Shown above the grid only when there is something to do, so it is absent on
+ * a bank that is already in good shape rather than being a permanent control
+ * that usually does nothing.
+ */
+.mp-backfill {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-well);
+}
+
+.mp-backfill__note {
+  margin: 0;
+  flex: 1 1 260px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ed-ink-2);
+}
+
+.mp-backfill__progress {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 12px;
+  color: var(--ed-ink-2);
 }

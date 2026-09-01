@@ -22,13 +22,35 @@
 
 import type { CollectionItem } from './collection';
 import { fieldFacts, type FieldDef } from './collection-fields';
+import { carriesOwnBanner } from './collection-layout';
+import { expandLoop, type LoopItem } from './loop';
 import { readingTime } from './reading-time';
 import type { Page, Section } from './schema';
 
 /** What a listing block asks for. */
+/**
+ * The orders a collection listing can be shown in.
+ *
+ * INTRINSIC, so they work on a collection that declares no fields of its own.
+ * The field-based sort below can only sort by something the collection
+ * declares, which is right for "cheapest first" and useless for the common
+ * case: Coastwise's guides collection declares nothing at all, so there was no
+ * order a client could choose and no control offering one. Andy, 26 Aug 2026:
+ * "in the cards i can't see a way to reorder them".
+ *
+ * 'manual' is the one that is not a rule at all: the order the client set by
+ * hand on the collections screen, stored per item (migration 0031). An agency
+ * featuring a destination wants it first because they decided so, and no rule
+ * derived from a date or a title can say that.
+ */
+export const LISTING_ORDERS = ['newest', 'oldest', 'title', 'title-desc', 'manual'] as const;
+export type ListingOrder = (typeof LISTING_ORDERS)[number];
+
 export interface ListingRequest {
   collection: string;
   count: number;
+  /** Which way round, before any field sort. Newest is what it has always done. */
+  order: ListingOrder;
   /**
    * How many of the collection's declared fields each card shows.
    *
@@ -84,7 +106,9 @@ export function listingKey(request: ListingRequest): string {
     ? `${request.filter.field}\u0000${request.filter.op}\u0000${request.filter.value}`
     : '';
   const sort = request.sort ? `${request.sort.field}\u0000${request.sort.dir}` : '';
-  return `${request.collection}\u0001${filter}\u0001${sort}`;
+  // The order is part of the request. Without it, a page with a newest-first
+  // grid and an A to Z one would ask once and draw the same cards twice.
+  return `${request.collection}\u0001${filter}\u0001${sort}\u0001${request.order}`;
 }
 
 const MIN_COUNT = 1;
@@ -131,7 +155,50 @@ export function listingIn(block: { type: string; props?: Record<string, unknown>
     ? Math.min(MAX_FACTS, Math.max(0, Math.round(rawFacts)))
     : DEFAULT_FACTS;
 
-  return { collection, count, facts, filter: filterIn(props), sort: sortIn(props) };
+  return {
+    collection,
+    count,
+    facts,
+    order: orderIn(props),
+    filter: filterIn(props),
+    sort: sortIn(props),
+  };
+}
+
+/**
+ * Is this block a loop, and which collection does it repeat over?
+ *
+ * The loop's SIBLING to listingIn, and deliberately not folded into it. A loop
+ * reads its data the same way a collection-fed Cards block does (the same query,
+ * ordered and narrowed the same), so it shares the ListingRequest shape and the
+ * whole resolve-once-per-request machinery below. What it does NOT share is what
+ * the data becomes: a Cards block gets the fixed card shape, a loop gets raw items
+ * poured into a designed card. So the request is common and the fill is separate.
+ *
+ * A loop is ALWAYS from a collection (see the block registry), so there is no
+ * source to check, only a collection to have been named. `facts` is zero: a loop
+ * shows the fields it wants through {{field:key}} tokens, not a facts count.
+ */
+export function loopIn(block: { type: string; props?: Record<string, unknown> }): ListingRequest | null {
+  if (block.type !== 'loop') return null;
+  const props = block.props ?? {};
+
+  const collection = asString(props.collection).trim();
+  if (!collection) return null;
+
+  const raw = typeof props.count === 'number' ? props.count : Number(props.count);
+  const count = Number.isFinite(raw)
+    ? Math.min(MAX_COUNT, Math.max(MIN_COUNT, Math.round(raw)))
+    : 6;
+
+  return {
+    collection,
+    count,
+    facts: 0,
+    order: orderIn(props),
+    filter: filterIn(props),
+    sort: sortIn(props),
+  };
 }
 
 /**
@@ -149,6 +216,12 @@ function filterIn(props: Record<string, unknown>): RawFilter | null {
 }
 
 /** The sort a block stored, or null for newest first, which is the default. */
+/** The chosen order, falling back to what every listing did before this existed. */
+function orderIn(props: Record<string, unknown>): ListingOrder {
+  const raw = asString(props.order).trim();
+  return (LISTING_ORDERS as readonly string[]).includes(raw) ? (raw as ListingOrder) : 'newest';
+}
+
 function sortIn(props: Record<string, unknown>): RawSort | null {
   const field = asString(props.sortField).trim();
   if (!field) return null;
@@ -156,6 +229,37 @@ function sortIn(props: Record<string, unknown>): RawSort | null {
 }
 
 /** Every distinct collection a tree wants, and the most any block asked for. */
+/**
+ * Every listing block on a set of trees, with the props it was read from.
+ *
+ * The props travel because the EDITOR needs them: when the canvas finds it has
+ * no cards for a block it asks the server for that one listing, and the server
+ * validates the ask by running listingIn over the same props rather than
+ * trusting a request assembled on the client. Rebuilding a props bag from a
+ * ListingRequest would be a second copy of that mapping to keep in step.
+ */
+export function listingBlocksIn(
+  trees: ReadonlyArray<{ sections: Section[] } | null | undefined>,
+): Array<{ request: ListingRequest; props: Record<string, unknown> }> {
+  const found: Array<{ request: ListingRequest; props: Record<string, unknown> }> = [];
+
+  for (const tree of trees) {
+    if (!tree) continue;
+    for (const section of tree.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const block of column.blocks) {
+            const request = listingIn(block);
+            if (request) found.push({ request, props: block.props ?? {} });
+          }
+        }
+      }
+    }
+  }
+
+  return found;
+}
+
 export function listingsIn(trees: ReadonlyArray<{ sections: Section[] } | null | undefined>): ListingRequest[] {
   const wanted = new Map<string, ListingRequest>();
 
@@ -202,8 +306,20 @@ export function itemAsCard(
   collectionKey: string,
   slug: string,
   defs: readonly FieldDef[] = [],
+  id?: string,
 ): Record<string, unknown> {
   return {
+    /*
+     * The row's id, carried so the EDITOR can offer the hand-set order without
+     * a second read. Nothing renders it: the card renderer reads known keys and
+     * this is not one of them.
+     *
+     * It never reaches a saved page. fillListings writes these cards into
+     * props.items, and the editor deliberately fills a COPY of the tree rather
+     * than the document, which is the same guard that stops today's cards being
+     * baked into tomorrow's page. See lib/db/listings.ts.
+     */
+    id,
     src: item.image,
     alt: item.alt,
     // The date is the small label above the title, which is what a blog card
@@ -220,7 +336,18 @@ export function itemAsCard(
     // signals the post does. Reading time is worked out from the body here, never
     // stored: see lib/content/reading-time.ts.
     author: item.author,
-    readingMinutes: readingTime(item.sections),
+    /*
+     * A READING TIME IS AN ARTICLE'S, AND A DESTINATION GUIDE IS NOT ONE.
+     *
+     * "3 min read" under a photograph of Hvar is the same blog furniture that
+     * was showing above the banner until the entry header learned to stand
+     * down, and it looks just as odd on the card. Somebody scanning a grid of
+     * places is not deciding how long a read is; on a post they are.
+     *
+     * The same signal decides it: an item that builds its own banner is a page
+     * rather than a post. See carriesOwnBanner in collection-layout.ts.
+     */
+    readingMinutes: carriesOwnBanner(item) ? 0 : readingTime(item.sections),
     /*
      * The collection's declared facts, already formatted into words, in the
      * order the collections screen puts them in. Formatted HERE rather than in
@@ -298,4 +425,95 @@ export function fillListings<T extends { sections: Section[] }>(tree: T, data: L
 /** The same, typed for a page, which is what the routes hold. */
 export function fillPageListings(page: Page, data: ListingData): Page {
   return fillListings(page, data);
+}
+
+// ---------------------------------------------------------------------------
+// The collection loop: the same read as a listing, poured into a designed card
+// ---------------------------------------------------------------------------
+
+/**
+ * Every distinct loop query on a set of trees, deduped the same way listings are.
+ *
+ * Two loops over the same narrowed collection share one read, for the larger of
+ * the two counts; two loops narrowed differently are two reads. The facts count
+ * plays no part (a loop has none), so it stays zero. See listingKey.
+ */
+export function loopsIn(trees: ReadonlyArray<{ sections: Section[] } | null | undefined>): ListingRequest[] {
+  const wanted = new Map<string, ListingRequest>();
+
+  for (const tree of trees) {
+    if (!tree) continue;
+    for (const section of tree.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const block of column.blocks) {
+            const loop = loopIn(block);
+            if (!loop) continue;
+            const key = listingKey(loop);
+            const soFar = wanted.get(key);
+            wanted.set(key, { ...loop, count: Math.max(soFar?.count ?? 0, loop.count) });
+          }
+        }
+      }
+    }
+  }
+
+  return [...wanted.values()];
+}
+
+/**
+ * One loop query's answer: the raw items and the collection's field definitions.
+ *
+ * RAW, unlike a listing's already-shaped cards, because a loop fills a card the
+ * client designed rather than a fixed one: the tokens reach every field an item
+ * has, and {{field:price}} needs the definition to format 1299 as "£1,299". So
+ * the feed carries what the binding engine (lib/content/loop.ts) needs and no
+ * more, and the shaping happens once per card at expansion rather than up front.
+ */
+export type LoopFeed = { items: readonly LoopItem[]; defs: readonly FieldDef[] };
+
+/** Loop feeds by request key, the loop counterpart to ListingData. */
+export type LoopData = Map<string, LoopFeed>;
+
+/**
+ * A page with its loop blocks expanded over their items.
+ *
+ * The loop counterpart to fillListings, and the same discipline: returns the
+ * SAME tree when there is nothing to expand, walks once, and never mutates a
+ * block (expandLoop returns a fresh one). It runs on a COPY of the tree at
+ * render, so the stored loop keeps its single template column and re-expands on
+ * the next request. A loop whose collection has nothing published expands to no
+ * cells, which the renderer draws as the calm empty state.
+ */
+export function fillLoops<T extends { sections: Section[] }>(tree: T, data: LoopData): T {
+  if (data.size === 0) return tree;
+
+  let touched = false;
+
+  const sections = tree.sections.map((section) => ({
+    ...section,
+    rows: section.rows.map((row) => ({
+      ...row,
+      columns: row.columns.map((column) => ({
+        ...column,
+        blocks: column.blocks.map((block) => {
+          const loop = loopIn(block);
+          if (!loop) return block;
+
+          const feed = data.get(listingKey(loop));
+          if (!feed) return block;
+
+          touched = true;
+          return expandLoop(block, feed.items.slice(0, loop.count), feed.defs);
+        }),
+      })),
+    })),
+  }));
+
+  return touched ? { ...tree, sections } : tree;
+}
+
+/** The same, typed for a page, which is what the routes hold. */
+export function fillPageLoops(page: Page, data: LoopData): Page {
+  return fillLoops(page, data);
 }

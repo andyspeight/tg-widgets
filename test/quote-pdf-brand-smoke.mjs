@@ -85,6 +85,17 @@ ok(r.hero === DEFAULTS.hero, 'non-hex chars → default');
 ok(r.accent === DEFAULTS.accent, 'short hex → default');
 ok(r.titles === DEFAULTS.titles, 'non-string → default');
 
+// ── Link colour: honoured when set, guarded to stay visible when defaulted ───
+ok(resolve({ colors: { link: '#FF3366' } }).link === '#FF3366', 'explicit link colour is used');
+ok(resolve({ colors: { link: '#FFFFFF' } }).link === '#FFFFFF', 'an explicit link colour is honoured even if light (client choice)');
+ok(resolve({ colors: {} }).link === '#0096B7', 'no link → the brand teal (labels) default, which is visible on white');
+// The reported bug: a near-white accent/labels must not become an invisible link.
+ok(resolve({ colors: { accent: '#FFFFFF', labels: '#FDFDFD' } }).link === '#1B2B5B', 'near-white labels default → falls back to the darker titles colour');
+ok(resolve({ colors: { accent: '#FFFFFF', labels: '#FFFFFF', titles: '#FEFEFE' } }).link === '#1D4ED8', 'all-light brand → last-resort readable blue');
+// The renderer paints links from --link, and the anchor rule uses it.
+ok(/--link:\$\{brand\.colors\.link\}/.test(renderer), '--link CSS var injected from brand.colors.link');
+ok(/\.description a,\.day-divider-desc a,\.loc-block a\{color:var\(--link\)/.test(renderer), 'description links paint from var(--link)');
+
 // ── Non-colour brand fields still flow (proves the config shape is right) ────
 const full = resolveBrand(buildRenderOpts({ brandName: 'Exclusively Travel', supportPhone: '0203 012 9623', colors: CUSTOM }));
 ok(full.name === 'Exclusively Travel', 'brandName flows through');

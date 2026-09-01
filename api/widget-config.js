@@ -6,7 +6,7 @@
  * Security: GET is public (widgets must load without auth), POST requires valid session token.
  * All inputs sanitised before Airtable queries.
  */
-import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS, lookupClientCredentialsByEmail } from './_auth.js';
+import { requireAuth, sanitiseForFormula, sanitiseConfig, setCors, applyRateLimit, RATE_LIMITS, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { getJson } from './_redis.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import { logWidgetEvent } from './_lib/telemetry.js';
@@ -834,9 +834,20 @@ export default async function handler(req, res) {
         // the client's own application and never calls Travelify itself.
         const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'World Map', 'Event Tickets',
           'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month'];
-        if (NEEDS_APP_ID.includes(widgetType) && clientEmail) {
+        // Resolve the client's Travelify credentials from the widget's AUTHORITATIVE
+        // owning account (ClientRecordId), NOT the creator's email. One person can
+        // own several client accounts under the same email (staff acting-as, a
+        // multi-brand owner), so an email lookup returns an ARBITRARY account and
+        // injected the wrong AppID/site — a Club Picker built in the "250" account
+        // came back 475 because its creator's email also owns other accounts. The
+        // ClientRecordId is the exact account the widget belongs to and is already
+        // the authoritative owner for the edit-permission check; fall back to the
+        // email lookup only for legacy widgets that predate the field.
+        const clientRecordId = (widgetRecord.fields.ClientRecordId || '').toString().trim();
+        if (NEEDS_APP_ID.includes(widgetType) && (clientRecordId || clientEmail)) {
           try {
-            const creds = await lookupClientCredentialsByEmail(clientEmail);
+            const creds = (clientRecordId ? await lookupClientCredentialsByRecordId(clientRecordId) : null)
+                        || (clientEmail ? await lookupClientCredentialsByEmail(clientEmail) : null);
             if (creds) {
               config.appId = creds.appId;
               if (widgetType === 'Travel Offers') {
@@ -855,7 +866,7 @@ export default async function handler(req, res) {
               const supplierFilter = await supplierFilterForClient(creds.recordId);
               if (supplierFilter) config.supplierFilter = supplierFilter;
             } else {
-              console.warn('[widget-config] no Travelify credentials on Clients record for', clientEmail, 'widgetId:', widgetId);
+              console.warn('[widget-config] no Travelify credentials on Clients record for', clientRecordId || clientEmail, 'widgetId:', widgetId);
               // Leave config without creds — widget will show "Missing Travelify credentials"
               // which correctly tells the user something is wrong.
             }

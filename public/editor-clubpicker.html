@@ -155,6 +155,15 @@
           </div>
           <div class="tgse-section-body">
             <div class="tgse-field">
+              <label class="tgse-field-label">Selector</label>
+              <div class="seg" id="f-selector" role="group" aria-label="Selector style">
+                <button type="button" data-v="grid" aria-pressed="true">Grid</button>
+                <button type="button" data-v="dropdown">Dropdown</button>
+                <button type="button" data-v="both">Both</button>
+              </div>
+              <div class="field-help">How visitors pick — a badge grid, a dropdown, or both.</div>
+            </div>
+            <div class="tgse-field">
               <label class="tgse-field-label" for="f-cols">Columns</label>
               <div class="slider-wrap">
                 <input type="range" id="f-cols" min="0" max="8" step="1">
@@ -190,6 +199,13 @@
               <div class="colour-row">
                 <input type="color" id="f-accent-swatch" aria-label="Pick accent colour">
                 <input class="input" type="text" id="f-accent" maxlength="7" spellcheck="false">
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-btntext">Book button text</label>
+              <div class="colour-row">
+                <input type="color" id="f-btntext-swatch" aria-label="Pick book button text colour">
+                <input class="input" type="text" id="f-btntext" maxlength="7" spellcheck="false">
               </div>
             </div>
           </div>
@@ -329,6 +345,7 @@
 
   var C = {
     gridOf: 'team',
+    selectorMode: 'grid',
     competition: 'english-premier-league',
     competitionLabel: 'Premier League',
     category: '',
@@ -351,6 +368,7 @@
     adults: 2,
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '#04212B',
     radius: 12,
     fontFamily: 'Inter',
     appId: '250',
@@ -434,6 +452,7 @@
     });
 
     c.seg('f-gridof', 'gridOf', function () { syncSourceUi(); });
+    c.seg('f-selector', 'selectorMode');
     c.seg('f-side', 'side');
     c.select('f-category', 'category');
 
@@ -447,6 +466,7 @@
     c.slider('f-cols', 'v-cols', 'columns', function (v) { return v ? String(v) : 'Auto'; });
     c.slider('f-radius', 'v-radius', 'radius', function (v) { return v + 'px'; });
     c.colour('f-accent-swatch', 'f-accent', 'accent');
+    c.colour('f-btntext-swatch', 'f-btntext', 'bookTextColor');
 
     c.select('f-currency', 'currency');
     c.number('f-adults', 'adults');
@@ -466,6 +486,7 @@
   function syncForm() {
     var c = K.controls(C, function () {});
     c.segSync('f-gridof', C.gridOf);
+    c.segSync('f-selector', C.selectorMode);
     c.segSync('f-side', C.side);
     if ($('f-category').options.length) $('f-category').value = C.category || '';
     $('f-heading').value = C.heading || '';
@@ -477,6 +498,7 @@
     c.sliderSync('f-cols', 'v-cols', C.columns, function (v) { return v ? String(v) : 'Auto'; });
     c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
     c.colourSync('f-accent-swatch', 'f-accent', C.accent);
+    c.colourSync('f-btntext-swatch', 'f-btntext', C.bookTextColor);
     $('f-currency').value = C.currency;
     $('f-adults').value = String(C.adults);
     c.toggleSync('t-badges', C.showBadges);

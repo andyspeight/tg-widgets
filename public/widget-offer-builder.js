@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.9';
+  const VERSION = '0.3.10';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -159,7 +159,10 @@
     shipDesc:    { label: 'About the ship',        hint: 'The cruise ship: cabins, dining, bars, pools, entertainment.', ph: 'Describe the ship...' },
     itinerary:   { label: 'Itinerary / ports of call', hint: 'Where it goes, port by port or day by day.', ph: 'List the ports or the day-by-day plan...' },
     highlights:  { label: 'Highlights',            hint: 'The stand-out moments and included excursions.', ph: 'The highlights of the trip...' },
-    skiArea:     { label: 'The resort & ski area', hint: 'The slopes, the lifts, ski school and après.', ph: 'Describe the ski resort and the area...' }
+    skiArea:     { label: 'The resort & ski area', hint: 'The slopes, the lifts, ski school and après.', ph: 'Describe the ski resort and the area...' },
+    // Free-text box shown at the very BOTTOM of the offer page. Manual only (no
+    // AI), and hidden entirely when left blank.
+    notes:       { label: 'Anything else', hint: 'Free text shown in a box at the very bottom of the offer page — extra terms, small print or a note. Leave blank to hide the box.', ph: "e.g. Prices are per person based on two sharing. Deposits are non-refundable. Full booking conditions apply.", noAi: true }
   };
   // Offer type → the content sections shown, in order. Anything not listed uses _default.
   const TYPE_CONTENT = {
@@ -173,7 +176,9 @@
     'City break':           ['description', 'hotelDesc', 'resortDesc', 'countryDesc'],
     _default:               ['description', 'hotelDesc', 'resortDesc', 'countryDesc']
   };
-  function contentKeysFor(type) { return TYPE_CONTENT[type] || TYPE_CONTENT._default; }
+  // The free-text "Anything else" box is appended to every type so it always
+  // sits last, whatever the offer is.
+  function contentKeysFor(type) { return (TYPE_CONTENT[type] || TYPE_CONTENT._default).concat(['notes']); }
 
   // ── Type-aware structured fields ──────────────────────────────────────────
   // The two field sections between "The basics" and "Price" change with the
@@ -1126,7 +1131,7 @@
         const val = this._contentVals[k] || '';
         return '<div class="ob-content-sec" data-field="' + k + '">'
           + '<div class="ob-content-head"><label>' + esc(s.label) + '</label>'
-          + (ai ? '<button type="button" class="ob-ai-write" data-write="' + k + '"><span class="spark">✨</span> Write with AI</button>' : '')
+          + (ai && !s.noAi ? '<button type="button" class="ob-ai-write" data-write="' + k + '"><span class="spark">✨</span> Write with AI</button>' : '')
           + '</div>'
           + '<p class="ob-content-hint">' + esc(s.hint) + '</p>'
           + '<textarea data-key="' + k + '" rows="4" placeholder="' + esc(s.ph) + '">' + esc(val) + '</textarea>'
@@ -1402,6 +1407,25 @@
       el.classList.toggle('show', !!msg);
     }
 
+    // Block Save while any photo upload is in flight, so a click mid-upload can't
+    // snapshot an empty/partial photo list and persist images:[] over the stored
+    // ones (the disappearing-images race — an author on a slow connection presses
+    // Save before the uploads land). Counter-based so overlapping uploads (drag
+    // then paste) only re-enable Save once ALL are done.
+    _setUploading(delta) {
+      this._uploadsPending = Math.max(0, (this._uploadsPending || 0) + delta);
+      const btn = this.root && this.root.querySelector('.ob-submit');
+      if (!btn) return;
+      if (this._uploadsPending > 0) {
+        btn.disabled = true;
+        if (!btn.dataset.obLabel) btn.dataset.obLabel = btn.textContent;
+        btn.textContent = 'Photos uploading…';
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.obLabel || this.cfg.submitLabel;
+        delete btn.dataset.obLabel;
+      }
+    }
     async _uploadFiles(files) {
       const imgs = files.filter((f) => f && /^image\//.test(f.type));
       if (!imgs.length) return;
@@ -1411,13 +1435,18 @@
       if (drop) { drop.classList.add('busy'); drop.textContent = 'Uploading…'; }
       this._photoError('');
       this._uploadAuthFailed = false;
+      this._setUploading(1);
       let added = 0;
-      for (const f of imgs) {
-        if (f.size > 8 * 1024 * 1024) { this._photoError(safeFileName(f.name) + ' is over 8MB. Please use a smaller image.'); continue; }
-        const url = await this._uploadOne(f);
-        if (url) { this._images.push(url); added++; this._renderThumbs(); }
+      try {
+        for (const f of imgs) {
+          if (f.size > 8 * 1024 * 1024) { this._photoError(safeFileName(f.name) + ' is over 8MB. Please use a smaller image.'); continue; }
+          const url = await this._uploadOne(f);
+          if (url) { this._images.push(url); added++; this._renderThumbs(); }
+        }
+      } finally {
+        if (drop) { drop.classList.remove('busy'); drop.innerHTML = original; }
+        this._setUploading(-1);
       }
-      if (drop) { drop.classList.remove('busy'); drop.innerHTML = original; }
       if (!added && !this.root.querySelector('.ob-photo-err.show')) {
         this._photoError(this._uploadAuthFailed
           ? 'Your session has expired. Please sign in again, then re-add the photos.'
@@ -1817,37 +1846,45 @@
         const v = (el.value || '').trim();
         if (v) offer.fields[el.dataset.key] = v;
       });
+      // Send every content array ALWAYS, even when empty. An empty array is the
+      // author's authoritative "there are none / I cleared them"; OMITTING the key
+      // is what the save API treats as "not managed, keep what's stored" — so a
+      // conditional key made "no photos yet" indistinguishable from "don't touch
+      // the photos", and a save could silently wipe them. (The recurring
+      // disappearing-images bug: _collect used to drop images when the list was
+      // momentarily empty, and the server then replaced the stored ones with [].)
       offer.includes = (this._includes || []).slice();
-      const excludes = (this._excludes || []).slice();
-      if (excludes.length) offer.excludes = excludes;
-      const promos = (this._promos || []).slice();
-      if (promos.length) offer.promos = promos;
+      offer.excludes = (this._excludes || []).slice();
+      offer.promos = (this._promos || []).slice();
       offer.tags = (this._tags || []).slice();
       // Which tags/promos the author flagged to show on the card image. Intersect
       // with the live lists so a removed pill can't leave a stale flag behind.
-      const flagged = (this._imageBadges || []).filter((v) => offer.tags.indexOf(v) !== -1 || (offer.promos || []).indexOf(v) !== -1);
-      if (flagged.length) offer.imageBadges = flagged;
+      offer.imageBadges = (this._imageBadges || []).filter((v) => offer.tags.indexOf(v) !== -1 || (offer.promos || []).indexOf(v) !== -1);
       // Cruise route: ordered ports + the precomputed sea line. Only saved when
       // there are at least two valid ports.
+      // Cruise route: the object when there are >=2 valid ports, else explicit
+      // null so a REMOVED route is authoritative (present-null clears; an omitted
+      // key would be preserved by the save API). Same authoritative rule as the
+      // content arrays above — _prefillOffer round-trips it, so editing keeps it.
       const crPorts = (this._cruisePorts || []).filter((p) => isFinite(p.lat) && isFinite(p.lng));
-      if (crPorts.length >= 2) {
-        offer.cruiseRoute = {
-          ports: crPorts.map((p) => ({ name: String(p.name || '').slice(0, 80), lat: p.lat, lng: p.lng })),
-          line: (this._cruiseLine || []).slice(),
-        };
-      }
-      const imgs = (this._images || []).map(safePhotoUrl).filter(Boolean);
-      if (imgs.length) offer.images = imgs;
+      offer.cruiseRoute = crPorts.length >= 2
+        ? {
+            ports: crPorts.map((p) => ({ name: String(p.name || '').slice(0, 80), lat: p.lat, lng: p.lng })),
+            line: (this._cruiseLine || []).slice(),
+          }
+        : null;
+      // Always authoritative (see the content-array note above): [] means the
+      // author has no photos, an omitted key would mean "keep the stored ones".
+      offer.images = (this._images || []).map(safePhotoUrl).filter(Boolean);
 
       // Content-layer translations. i18n is whitelisted by /api/saved-offers and
       // read by the card/page at render time. audienceLanguages and i18nMeta ride
-      // along so the chosen set and staleness signatures round-trip while editing
-      // (the save API only persists i18n, which is all the public render needs).
-      if (this._audienceLanguages && this._audienceLanguages.length) {
-        offer.audienceLanguages = this._audienceLanguages.slice();
-      }
-      if (this._i18n && Object.keys(this._i18n).length) offer.i18n = this._i18n;
-      if (this._i18nMeta && Object.keys(this._i18nMeta).length) offer.i18nMeta = this._i18nMeta;
+      // along so the chosen set and staleness signatures round-trip while editing.
+      // Always sent (even empty) so the save API treats them as authoritative and
+      // never preserves stale overlays — _prefillOffer round-trips them on edit.
+      offer.audienceLanguages = (this._audienceLanguages || []).slice();
+      offer.i18n = (this._i18n && typeof this._i18n === 'object') ? this._i18n : {};
+      offer.i18nMeta = (this._i18nMeta && typeof this._i18nMeta === 'object') ? this._i18nMeta : {};
       return offer;
     }
 
@@ -1945,7 +1982,20 @@
         + extra
         + '<div class="ob-summary">' + esc(JSON.stringify(offer, null, 2)) + '</div>'
         + '<button type="button" class="ob-btn primary ob-again">Create another offer</button></div>';
-      this.root.querySelector('.ob-again').addEventListener('click', () => this._render());
+      this.root.querySelector('.ob-again').addEventListener('click', () => {
+        // A genuinely NEW offer: drop the just-saved id and ALL of its content, so
+        // the next Save creates a fresh offer rather than UPDATING (and wiping the
+        // one we just saved). Without this, "Create another" kept the previous
+        // offerId + photos, and saving the new offer overwrote the old offer's
+        // images. Mirrors the Reset button.
+        this.cfg.offerId = '';
+        this.cfg.offer = null;
+        this._images = []; this._includes = []; this._excludes = []; this._promos = [];
+        this._tags = []; this._imageBadges = []; this._cruisePorts = []; this._cruiseLine = [];
+        this._i18n = {}; this._i18nMeta = {}; this._audienceLanguages = [];
+        this._contentVals = {}; this._fieldVals = {};
+        this._render();
+      });
       const copy = this.root.querySelector('.ob-copy');
       if (copy) copy.addEventListener('click', () => {
         const inp = this.root.querySelector('.ob-saved-link');

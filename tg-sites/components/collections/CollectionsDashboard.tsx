@@ -21,11 +21,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import {
+  adoptDestinationAction,
   createCollectionAction,
   createItemAction,
+  listAdoptableAction,
   deleteCollectionAction,
   deleteItemAction,
   publishItemAction,
+  reorderItemsAction,
   scheduleItemAction,
   unpublishItemAction,
   updateCollectionFieldsAction,
@@ -48,6 +51,9 @@ import {
   type EntryLayout,
 } from '../../lib/content/collection-layout';
 import type { Collection, ItemSummary } from '../../lib/db/collections';
+import type { CorpusEntry } from '../../lib/db/reference';
+import type { ReferenceKind } from '../../lib/content/reference';
+import { AdoptDialog } from './AdoptDialog';
 import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
@@ -59,6 +65,7 @@ const THEME_KEY = 'tg-sites:theme:v1';
 type Dialog =
   | { kind: 'new-collection' }
   | { kind: 'new-item' }
+  | { kind: 'adopt' }
   | { kind: 'fields'; collection: Collection }
   | { kind: 'schedule'; item: ItemSummary }
   | null;
@@ -142,6 +149,42 @@ export function CollectionsDashboard({
       next ? current.map((item) => (item.id === id ? next : item)) : current.filter((item) => item.id !== id),
     );
   }, []);
+
+  /**
+   * Move an entry up or down, and save the new order.
+   *
+   * OPTIMISTIC, then corrected. The list re-renders from local state at once so
+   * an arrow feels like an arrow, and the server is told the whole list rather
+   * than the swap. If the save fails the message says so and the next load
+   * shows the stored order, which is the honest outcome: the alternative is
+   * animating a move back under somebody's cursor.
+   *
+   * Sends every id on screen, in order, so positions come out contiguous even
+   * for a collection whose rows were never numbered.
+   */
+  const move = useCallback(
+    (index: number, delta: number) => {
+      const to = index + delta;
+      if (to < 0 || to >= items.length) return;
+
+      const next = [...items];
+      const [moved] = next.splice(index, 1);
+      next.splice(to, 0, moved);
+      setItems(next);
+      setError(null);
+
+      // The collection's short name, which is what reorderItems takes so the
+      // cards block in the editor can call the same action with what it has.
+      const key = open?.key;
+      if (!key) return;
+
+      startTransition(async () => {
+        const result = await reorderItemsAction(key, next.map((item) => item.id));
+        if (!result.ok) setError(result.error);
+      });
+    },
+    [items, open],
+  );
 
   const publish = useCallback(
     (item: ItemSummary) => {
@@ -291,18 +334,38 @@ export function CollectionsDashboard({
             </button>
 
             {open && (
-              <button
-                type="button"
-                className="sv-btn"
-                data-variant="primary"
-                onClick={() => {
-                  setError(null);
-                  setDialog({ kind: 'new-item' });
-                }}
-              >
-                <Icon name="plus" size={16} />
-                New entry
-              </button>
+              <>
+                {/*
+                  * SECONDARY, next to New entry rather than instead of it. Both
+                  * make an entry in the same collection; this one starts from
+                  * the corpus and the other from a blank page, and which a
+                  * client wants depends on whether we hold the place they are
+                  * writing about.
+                  */}
+                <button
+                  type="button"
+                  className="sv-btn"
+                  onClick={() => {
+                    setError(null);
+                    setDialog({ kind: 'adopt' });
+                  }}
+                >
+                  <Icon name="map" size={16} />
+                  Add a destination
+                </button>
+                <button
+                  type="button"
+                  className="sv-btn"
+                  data-variant="primary"
+                  onClick={() => {
+                    setError(null);
+                    setDialog({ kind: 'new-item' });
+                  }}
+                >
+                  <Icon name="plus" size={16} />
+                  New entry
+                </button>
+              </>
             )}
           </div>
         </header>
@@ -440,8 +503,45 @@ export function CollectionsDashboard({
                   </div>
                 ) : (
                   <ul className="sv-list">
-                    {items.map((item) => (
+                    {items.map((item, index) => (
                       <li className="sv-item" key={item.id}>
+                        {/*
+                          * THE ARROWS COME FIRST, before the title, because they
+                          * are about the row's place in the list rather than
+                          * about the entry. Same reasoning and same icons as the
+                          * field rows further down this screen.
+                          *
+                          * Shown whatever order a grid is set to. This list IS
+                          * the stored order, and somebody arranging it here has
+                          * usually not yet set a grid to follow it: hiding the
+                          * arrows until they had would mean the setting and the
+                          * arranging each waited for the other.
+                          */}
+                        <span className="sv-item__move">
+                          <button
+                            type="button"
+                            className="sv-btn"
+                            data-variant="quiet"
+                            data-icon="true"
+                            disabled={busy || index === 0}
+                            aria-label={`Move ${item.title || 'this entry'} up`}
+                            onClick={() => move(index, -1)}
+                          >
+                            <Icon name="arrow-up" size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="sv-btn"
+                            data-variant="quiet"
+                            data-icon="true"
+                            disabled={busy || index === items.length - 1}
+                            aria-label={`Move ${item.title || 'this entry'} down`}
+                            onClick={() => move(index, 1)}
+                          >
+                            <Icon name="arrow-down" size={16} />
+                          </button>
+                        </span>
+
                         <div className="sv-item__main">
                           <Link className="sv-item__title" href={`/editor?item=${item.id}`}>
                             {item.title || 'Untitled'}
@@ -579,6 +679,48 @@ export function CollectionsDashboard({
                 // A new entry is empty, so there is nothing to look at on this
                 // screen. Straight to the editor, where the writing happens.
                 router.push(`/editor?item=${result.data.id}`);
+              });
+            })
+          }
+        />
+      )}
+
+      {dialog?.kind === 'adopt' && open && (
+        <AdoptDialog
+          collectionName={open.name}
+          onClose={() => setDialog(null)}
+          onSearch={(options: { kind: ReferenceKind; search: string }) =>
+            new Promise((done) => {
+              startTransition(async () => {
+                const result = await listAdoptableAction(options);
+                done(result.ok
+                  ? { ok: true as const, entries: result.data }
+                  : { ok: false as const, error: result.error });
+              });
+            })
+          }
+          onAdopt={(entry: CorpusEntry) =>
+            new Promise((done) => {
+              const collectionId = open.id;
+              startTransition(async () => {
+                const result = await adoptDestinationAction(collectionId, entry.kind, entry.sourceId);
+                if (!result.ok) {
+                  done(result.error);
+                  return;
+                }
+                if (!result.data.ok) {
+                  done(result.data.reason ?? 'That could not be added.');
+                  return;
+                }
+                setDialog(null);
+                done(null);
+                /*
+                 * Straight to the editor, exactly as writing a new entry does.
+                 * An adopted draft has real words in it already, so there IS
+                 * something to look at, and the first thing a client should do
+                 * is make those words theirs.
+                 */
+                router.push(`/editor?item=${result.data.itemId}`);
               });
             })
           }

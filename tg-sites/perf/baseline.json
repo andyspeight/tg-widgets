@@ -1,0 +1,72 @@
+[
+  {
+    "profile": "designed",
+    "fcp": 832,
+    "lcp": 1904,
+    "cls": 0,
+    "lcpElement": "img.main",
+    "lcpUrl": "/img/hero-1600.jpg",
+    "requests": 4,
+    "transferByType": {
+      "document": 10920,
+      "stylesheet": 21479,
+      "image": 409956
+    },
+    "transferTotal": 442355,
+    "cssTotalBytes": 133264,
+    "cssUsedBytes": 4694,
+    "cssUnusedPct": 96.5
+  },
+  {
+    "profile": "native",
+    "fcp": 520,
+    "lcp": 520,
+    "cls": 0,
+    "lcpElement": "p",
+    "lcpUrl": null,
+    "requests": 2,
+    "transferByType": {
+      "document": 1795,
+      "stylesheet": 21479
+    },
+    "transferTotal": 23274,
+    "cssTotalBytes": 133264,
+    "cssUsedBytes": 8758,
+    "cssUnusedPct": 93.4
+  },
+  {
+    "profile": "photo-single",
+    "fcp": 500,
+    "lcp": 500,
+    "cls": 0.005488955730485009,
+    "lcpElement": "h2.tgs-heading",
+    "lcpUrl": null,
+    "requests": 2,
+    "transferByType": {
+      "document": 1446,
+      "stylesheet": 21479
+    },
+    "transferTotal": 22925,
+    "cssTotalBytes": 133264,
+    "cssUsedBytes": 6564,
+    "cssUnusedPct": 95.1
+  },
+  {
+    "profile": "photo",
+    "fcp": 608,
+    "lcp": 2128,
+    "cls": 0,
+    "lcpElement": "img.tgs-section__bg",
+    "lcpUrl": "/img/hero-1600.jpg",
+    "requests": 4,
+    "transferByType": {
+      "document": 1503,
+      "stylesheet": 21479,
+      "image": 409956
+    },
+    "transferTotal": 432938,
+    "cssTotalBytes": 133264,
+    "cssUsedBytes": 6564,
+    "cssUnusedPct": 95.1
+  }
+]

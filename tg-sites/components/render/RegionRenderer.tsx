@@ -30,6 +30,7 @@
 import { Fragment, type CSSProperties, type ReactElement } from 'react';
 import type { Region } from '../../lib/content/schema';
 import type { PreparedMap } from '../../lib/content/prepared';
+import type { ImageSizes } from '../../lib/content/image-sizes';
 import { SectionRenderer } from './PageRenderer';
 
 export function RegionRenderer({
@@ -37,6 +38,7 @@ export function RegionRenderer({
   theme,
   overlapped,
   prepared,
+  sizes,
 }: {
   region: Region | null;
   /** The tenant's theme as custom properties, as PageRenderer takes it. */
@@ -54,6 +56,8 @@ export function RegionRenderer({
    * See lib/content/prepared.ts.
    */
   prepared?: PreparedMap;
+  /** Stored sizes by url, so a header logo or a footer picture gets an srcset. */
+  sizes?: ImageSizes;
 }): ReactElement | null {
   if (!region || region.sections.length === 0) return null;
 
@@ -86,6 +90,7 @@ export function RegionRenderer({
             section={section}
             index={index}
             prepared={prepared}
+            sizes={sizes}
             hangBottomDivider={region.region === 'header' && index === region.sections.length - 1}
           />
         </Fragment>

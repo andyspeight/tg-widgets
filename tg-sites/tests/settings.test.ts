@@ -29,11 +29,13 @@ import { isAppHost } from '../middleware';
 
 import {
   analytics,
+  consentGates,
   iconLinks,
   manifest,
   socialMetas,
 } from '../lib/settings/head';
 import {
+  DEFAULT_COOKIE_CONSENT,
   DEFAULT_LOCALE,
   DEFAULT_SETTINGS,
   LOCALE_IDS,
@@ -325,7 +327,9 @@ describe('staff settings are a different shape entirely', () => {
       'avoid',
       'companyAbout',
       'companyName',
+      'cookieConsent',
       'faviconUrl',
+      'floatingWidgets',
       'ga4Id',
       'gtmId',
       'locale',
@@ -1004,5 +1008,82 @@ describe('the settings harness can still be built', () => {
       const double = join(__dirname, '..', match[1]);
       expect(statSync(double).isFile(), `${match[1]} is swapped in but does not exist`).toBe(true);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cookie consent
+// ---------------------------------------------------------------------------
+
+describe('cookie consent settings', () => {
+  it('is off by default and carries sensible copy', () => {
+    const consent = parseSettings({}).cookieConsent;
+    expect(consent.enabled).toBe(false);
+    expect(consent.title).toBe(DEFAULT_COOKIE_CONSENT.title);
+    expect(consent.acceptLabel).toBe('Accept');
+    expect(consent.rejectLabel).toBe('Reject');
+    expect(consent.policyUrl).toBeNull();
+  });
+
+  it('coerces enabled to a real boolean and never throws on nonsense', () => {
+    expect(parseSettings({ cookieConsent: 'not an object' }).cookieConsent.enabled).toBe(false);
+    expect(parseSettings({ cookieConsent: { enabled: 'yes' } }).cookieConsent.enabled).toBe(false);
+    expect(parseSettings({ cookieConsent: { enabled: true } }).cookieConsent.enabled).toBe(true);
+  });
+
+  it('caps the copy and falls back when a field is emptied', () => {
+    const consent = parseSettings({
+      cookieConsent: { enabled: true, title: 'x'.repeat(400), message: '   ' },
+    }).cookieConsent;
+    expect(consent.title.length).toBeLessThanOrEqual(80);
+    // An emptied field takes the default rather than showing a blank banner.
+    expect(consent.message).toBe(DEFAULT_COOKIE_CONSENT.message);
+  });
+
+  it('runs the policy link through the same url whitelist as everything else', () => {
+    expect(
+      parseSettings({ cookieConsent: { enabled: true, policyUrl: 'https://ok.example/cookies' } })
+        .cookieConsent.policyUrl,
+    ).toBe('https://ok.example/cookies');
+    expect(
+      // eslint-disable-next-line no-script-url
+      parseSettings({ cookieConsent: { enabled: true, policyUrl: 'javascript:alert(1)' } })
+        .cookieConsent.policyUrl,
+    ).toBeNull();
+  });
+});
+
+describe('consent gates the analytics', () => {
+  const enabled = { cookieConsent: { ...DEFAULT_COOKIE_CONSENT, enabled: true } };
+
+  it('is on only when the banner is enabled AND a tag exists', () => {
+    expect(consentGates(withSettings({ ...enabled, gtmId: 'GTM-ABC1234' }))).toBe(true);
+    expect(consentGates(withSettings({ ...enabled, ga4Id: 'G-ABC1234567' }))).toBe(true);
+    // Enabled but nothing to gate.
+    expect(consentGates(withSettings(enabled))).toBe(false);
+    // A tag, but the banner is off: today's behaviour, unchanged.
+    expect(consentGates(withSettings({ gtmId: 'GTM-ABC1234' }))).toBe(false);
+  });
+
+  it('defaults Google consent to denied BEFORE the tag runs', () => {
+    const out = analytics(
+      withSettings({ cookieConsent: { ...DEFAULT_COOKIE_CONSENT, enabled: true }, ga4Id: 'G-ABC1234567' }),
+    );
+    // First inline is the consent default, ahead of the GA4 config snippet.
+    expect(out.headInline[0]).toContain("gtag('consent','default'");
+    expect(out.headInline[0]).toContain("analytics_storage:'denied'");
+    expect(out.headInline[0]).toContain("ad_storage:'denied'");
+    const configIndex = out.headInline.findIndex((s) => s.includes("gtag('config'"));
+    expect(configIndex).toBeGreaterThan(0);
+  });
+
+  it('changes nothing when the banner is off', () => {
+    const gated = analytics(withSettings({ ga4Id: 'G-ABC1234567' }));
+    expect(gated.headInline.some((s) => s.includes("gtag('consent'"))).toBe(false);
+  });
+
+  it('adds no consent default when enabled but there is no tag to gate', () => {
+    const out = analytics(withSettings({ cookieConsent: { ...DEFAULT_COOKIE_CONSENT, enabled: true } }));
+    expect(out.headInline.length).toBe(0);
   });
 });

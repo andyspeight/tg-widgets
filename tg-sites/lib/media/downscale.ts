@@ -37,6 +37,59 @@ import {
   type MediaMime,
 } from './limits';
 
+/**
+ * One smaller copy of the same picture, for an srcset.
+ *
+ * Generated in the browser from the SAME decoded bitmap as the primary, so a
+ * variant costs one more canvas draw and one more encode rather than a second
+ * decode of the file.
+ */
+export interface PreparedVariant {
+  body: Blob;
+  mime: MediaMime;
+  filename: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * The widths worth storing, smallest first.
+ *
+ * WHY THESE FOUR AND NOT A CONTINUOUS LADDER. Every entry is a stored object, a
+ * direct upload and a row of metadata, so the ladder is a cost, not a free win.
+ * 400 covers a phone at 1x and a small card at 2x, 800 a phone at 2x and a
+ * tablet, 1600 a laptop, and the primary (up to MAX_IMAGE_EDGE, 2400) covers a
+ * desktop at 2x. A visitor on a 390px phone currently downloads the 2400px file,
+ * which is the single largest thing on a published page.
+ *
+ * Never upscale: a width is only generated when it is genuinely smaller than the
+ * picture we already have.
+ */
+export const VARIANT_WIDTHS = [400, 800, 1600] as const;
+
+/**
+ * How much smaller a variant has to be before it earns its storage, in PIXELS.
+ *
+ * A rung is worth an object when it saves at least a quarter of the pixels.
+ *
+ * EXPRESSED AS AREA BECAUSE THAT IS WHAT IT IS ABOUT, and getting this wrong in
+ * width cost us a real run. The first version required a variant to be 80% of the
+ * primary's WIDTH or less, which sounds equivalent and is not: a saving is
+ * quadratic in width, so 0.8 of the width is 0.64 of the pixels and the rule was
+ * roughly half again as strict as intended.
+ *
+ * What that did, found by backfilling a real client's bank on 25 Aug 2026: their
+ * photographs are 1920px wide, 1600 is more than 80% of 1920, so the 1600 rung
+ * was refused and every picture got 400 and 800 only. A phone at 3x on a 390px
+ * viewport needs about 1170 device pixels, finds nothing between 800 and the
+ * 1920 original, and takes the original. The entire run bought those devices
+ * nothing at all while looking like it had worked.
+ *
+ * In area terms the intent survives: 1600 from 1920 saves 31% of the pixels and
+ * is kept, 1600 from 1700 saves 11% and is still refused.
+ */
+const VARIANT_MIN_PIXEL_SAVING = 0.25;
+
 export interface PreparedImage {
   /** What to upload. The original file when nothing needed doing. */
   body: Blob;
@@ -49,6 +102,12 @@ export interface PreparedImage {
   height: number | null;
   /** True when the bytes were re-encoded, so the UI can say so honestly. */
   resized: boolean;
+  /**
+   * Smaller copies for an srcset, largest-useful first. Possibly empty, and an
+   * empty list is always safe: the renderer falls back to `body` alone, which is
+   * exactly what every image uploaded before this existed already does.
+   */
+  variants: PreparedVariant[];
 }
 
 /**
@@ -60,6 +119,95 @@ export interface PreparedImage {
  * hundred kilobytes.
  */
 const RECOMPRESS_ABOVE_BYTES = 1_200_000;
+
+/**
+ * Which widths are worth generating for a picture of this size.
+ *
+ * PURE, AND EXPORTED SO IT CAN BE TESTED. The encoding around it needs a canvas
+ * and a real browser; the decision does not, and the decision is where the
+ * mistakes live. Two rules, both easy to get subtly wrong:
+ *
+ * 1. NEVER UPSCALE. The width to beat is the width of the PRIMARY, which is the
+ *    original capped to MAX_IMAGE_EDGE on its longest edge, not the original's
+ *    own width. A 3000x4000 portrait has a 4000px longest edge, so its primary
+ *    is 1800 wide, and generating a "1600" variant of it would save almost
+ *    nothing while a naive check against the original's 3000 would wave it
+ *    through.
+ * 2. EARN THE STORAGE. Every width is an object, an upload and a row, so a
+ *    variant has to be meaningfully smaller than the primary to be worth having.
+ */
+export function variantWidthsFor(width: number, height: number, have: readonly number[] = []): number[] {
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return [];
+
+  const longest = Math.max(width, height);
+  const scale = longest > MAX_IMAGE_EDGE ? MAX_IMAGE_EDGE / longest : 1;
+  const primaryWidth = Math.round(width * scale);
+
+  /*
+   * `have` is what is already stored, so a second run adds only what is missing.
+   * That is not a nicety: the ladder changed once already, when the rule that
+   * decides it was corrected, and without this every picture that had ANY copies
+   * would have been read as finished and never gained the rung it was owed.
+   */
+  const already = new Set(have);
+
+  return VARIANT_WIDTHS.filter((target) => {
+    if (already.has(target)) return false;
+    // Both dimensions scale together, so the pixel ratio is the width ratio squared.
+    const pixelRatio = (target / primaryWidth) ** 2;
+    return 1 - pixelRatio >= VARIANT_MIN_PIXEL_SAVING;
+  });
+}
+
+/**
+ * The smaller copies, drawn from a bitmap that is already decoded.
+ *
+ * BEST EFFORT, ALWAYS. Every failure here returns whatever succeeded so far,
+ * including nothing. A missing variant costs a visitor some bytes; a variant
+ * that throws would cost somebody their upload, and this file's whole posture is
+ * that the second is far worse than the first.
+ *
+ * Does NOT close the bitmap. The caller still needs it for the primary.
+ */
+async function encodeVariants(
+  bitmap: ImageBitmap,
+  width: number,
+  height: number,
+  stem: string,
+  have: readonly number[] = [],
+): Promise<PreparedVariant[]> {
+  const out: PreparedVariant[] = [];
+
+  for (const target of variantWidthsFor(width, height, have)) {
+    try {
+      const scale = target / width;
+      const w = Math.max(1, Math.round(width * scale));
+      const h = Math.max(1, Math.round(height * scale));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const context = canvas.getContext('2d');
+      if (!context) continue;
+      context.drawImage(bitmap, 0, 0, w, h);
+
+      const encoded = await toBlob(canvas, 'image/webp', REENCODE_QUALITY);
+      if (!encoded || !isImageMime(encoded.type)) continue;
+
+      out.push({
+        body: encoded,
+        mime: encoded.type as MediaMime,
+        filename: `${stem}-${w}.${MEDIA_MIME[encoded.type as MediaMime]}`,
+        width: w,
+        height: h,
+      });
+    } catch {
+      // This width is simply not available. The next one may still be.
+    }
+  }
+
+  return out;
+}
 
 /**
  * Get a file ready to upload.
@@ -94,6 +242,7 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
       width: null,
       height: null,
       resized: false,
+      variants: [],
     };
   }
 
@@ -106,6 +255,13 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
     width: null,
     height: null,
     resized: false,
+    /*
+     * Empty, and every failure path below spreads this shape. That is the point:
+     * a picture we could not decode, a GIF we refuse to touch, or a browser
+     * without a canvas all end up with no variants and one perfectly good image,
+     * which is exactly the behaviour every upload had before variants existed.
+     */
+    variants: [],
   };
 
   /*
@@ -128,13 +284,23 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
 
   const { width, height } = bitmap;
   const longest = Math.max(width, height);
+  const stem = cleanFilename(file.name).replace(/\.[a-z0-9]+$/i, '') || 'image';
+
+  /*
+   * Variants come off the bitmap BEFORE the branch below, because both branches
+   * want them: a 900px photograph needs no resizing and still benefits from a
+   * 400px copy on a phone. The bitmap stays open until the primary is done with
+   * it.
+   */
+  const variants = await encodeVariants(bitmap, width, height, stem);
   const needsResize = longest > MAX_IMAGE_EDGE;
   const needsRecompress = file.size > RECOMPRESS_ABOVE_BYTES;
 
   if (!needsResize && !needsRecompress) {
     bitmap.close();
-    // Nothing to do to the bytes, but the measurement is still worth keeping.
-    return { ...original, width, height };
+    // Nothing to do to the bytes, but the measurement and the smaller copies are
+    // both still worth keeping.
+    return { ...original, width, height, variants };
   }
 
   // Never upscale: a small image that is merely a heavy file gets recompressed at
@@ -189,8 +355,6 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
       return { ...original, width, height };
     }
 
-    const stem = cleanFilename(file.name).replace(/\.[a-z0-9]+$/i, '') || 'image';
-
     return {
       body: encoded,
       mime: encoded.type as MediaMime,
@@ -198,9 +362,72 @@ export async function prepareImageForUpload(file: File): Promise<PreparedImage> 
       width: targetWidth,
       height: targetHeight,
       resized: true,
+      variants,
     };
   } catch {
     return { ...original, width, height };
+  }
+}
+
+/**
+ * Smaller copies for a picture that is ALREADY in the store.
+ *
+ * The backfill's half of the work. Everything a normal upload does happens on a
+ * File the person just chose; this starts from a url, so it fetches the original
+ * back before it can decode it, and that is the one meaningful difference.
+ *
+ * NEVER THROWS, like everything else in this file. A picture that cannot be
+ * fetched or decoded returns an empty list and the run moves to the next one,
+ * because a backfill that stops on the first awkward file is a backfill nobody
+ * finishes. The caller counts the empties and says so rather than hiding them.
+ *
+ * ALSO REPORTS THE REAL SIZE, because it has the picture decoded and nothing else
+ * in the product does. A stock import used to record the provider's numbers for
+ * the ORIGINAL photograph while storing a much smaller rendering, so rows exist
+ * claiming 8192px above a 168KB file. This is the one moment those can be put
+ * right without fetching anything extra.
+ *
+ * THE FETCH IS THE FRAGILE PART, and it is worth naming. The store's public urls
+ * are on another origin, so this needs them to allow a cross-origin read. If they
+ * do not, every picture comes back empty and the count makes that obvious
+ * immediately rather than looking like a slow no-op. The fix in that case is to
+ * read the original back through our own origin, and it is deliberately not
+ * written until we know it is needed.
+ */
+export interface StoredImageWork {
+  variants: PreparedVariant[];
+  /** The picture's true size, as decoded. Null when it could not be read at all. */
+  width: number | null;
+  height: number | null;
+}
+
+export async function variantsForStoredImage(
+  url: string,
+  filename: string,
+  have: readonly number[] = [],
+): Promise<StoredImageWork> {
+  const nothing: StoredImageWork = { variants: [], width: null, height: null };
+
+  let bitmap: ImageBitmap;
+  try {
+    const response = await fetch(url, { mode: 'cors', credentials: 'omit' });
+    if (!response.ok) return nothing;
+    const blob = await response.blob();
+    if (!isImageMime(blob.type)) return nothing;
+    bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+  } catch {
+    return nothing;
+  }
+
+  const { width, height } = bitmap;
+  const stem = cleanFilename(filename).replace(/\.[a-z0-9]+$/i, '') || 'image';
+  try {
+    return { variants: await encodeVariants(bitmap, width, height, stem, have), width, height };
+  } catch {
+    // The measurement still stands even if the encoding did not.
+    return { variants: [], width, height };
+  } finally {
+    bitmap.close();
   }
 }
 

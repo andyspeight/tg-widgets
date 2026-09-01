@@ -32,6 +32,11 @@ screenshots for anything unclear — ask rather than guess. Guessing at
 | Travelgenix customs (built for Duda) | **Done.** Stacked Collection and Expand & Focus ignored on Andy's word |
 | Travelgenix customs, second list (21 Aug) | Done. Six built, three skipped |
 
+**The platform-level comparison lives in `duda-gap-analysis.md`** (23 Aug 2026).
+Elements are parity; the gaps that remain are image delivery, collections fed
+from outside, and site-wide widgets. Read that before answering a broad "how do
+we compare to Duda" question, and keep this file for elements only.
+
 **THE AUDIT IS CLOSED.** Andy said "that's all of them for now" on 21 Aug 2026.
 Every Duda category and both Travelgenix custom lists have been checked, and
 everything not explicitly skipped is built and tested. If a new list arrives,

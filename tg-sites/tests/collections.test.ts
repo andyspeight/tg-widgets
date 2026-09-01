@@ -39,6 +39,7 @@ import {
 import { itemAsPage, itemMeta, pageAsItem } from '../lib/content/collection-page';
 import { readingTime } from '../lib/content/reading-time';
 import {
+  LISTING_ORDERS,
   fillListings,
   fillPageListings,
   itemAsCard,
@@ -551,7 +552,7 @@ describe('which blocks want a collection', () => {
   it('reads the collection and how many were asked for', () => {
     expect(listingIn(listingBlock({ source: 'collection', collection: 'blog', count: 3 })))
       // Two facts unless the block says otherwise: see DEFAULT_FACTS.
-      .toEqual({ collection: 'blog', count: 3, facts: 2, filter: null, sort: null });
+      .toEqual({ collection: 'blog', count: 3, facts: 2, order: 'newest' as const, filter: null, sort: null });
   });
 
   /*
@@ -603,7 +604,7 @@ describe('what a whole set of trees wants', () => {
 
   it('survives a site with no header or footer published', () => {
     expect(listingsIn([null, tree([listingBlock({ source: 'collection', collection: 'blog' })]), undefined]))
-      .toEqual([{ collection: 'blog', count: 6, facts: 2, filter: null, sort: null }]);
+      .toEqual([{ collection: 'blog', count: 6, facts: 2, order: 'newest' as const, filter: null, sort: null }]);
   });
 
   /*
@@ -620,7 +621,7 @@ describe('what a whole set of trees wants', () => {
       ]),
     ]);
 
-    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2, filter: null, sort: null }]);
+    expect(wanted).toEqual([{ collection: 'blog', count: 9, facts: 2, order: 'newest' as const, filter: null, sort: null }]);
   });
 });
 
@@ -681,7 +682,7 @@ describe('filling the listings in', () => {
    * carries the filter and the sort as well (#238, listingKey).
    */
   const plain = (collection: string) =>
-    listingKey({ collection, count: 0, facts: 0, filter: null, sort: null });
+    listingKey({ collection, count: 0, facts: 0, order: 'newest', filter: null, sort: null });
 
   const data = new Map([
     [plain('blog'), [{ title: 'One' }, { title: 'Two' }, { title: 'Three' }]],
@@ -1653,7 +1654,30 @@ describe('the listing blocks on a page', () => {
   it('are resolved on the server, before anything renders', () => {
     const route = read('app', 'site', '[host]', '[[...path]]', 'page.tsx');
     expect(route).toContain('fillPageListings');
-    expect(route).toContain('listingsIn([regions.header, page.content, regions.footer])');
+    // The header, the page and the footer, gathered once and read by both the
+    // listing and the loop resolver (they share the collection read).
+    expect(route).toContain('const trees = [regions.header, page.content, regions.footer]');
+    expect(route).toContain('resolveListings(tenantId, trees)');
+  });
+
+  it('reads them through the one shared reader, on all three surfaces', () => {
+    /*
+     * There were three copies: the published route, the preview and nothing at
+     * all in the editor, which is why a collection grid drew real cards on the
+     * site and a grey box on the canvas. The preview's copy had also already
+     * drifted, dropping the filter and the sort, so a narrowed listing previewed
+     * as the whole collection.
+     */
+    for (const where of [
+      ['app', 'site', '[host]', '[[...path]]', 'page.tsx'],
+      ['app', 'preview', '[[...path]]', 'page.tsx'],
+      ['app', 'editor', 'page.tsx'],
+    ]) {
+      const file = read(...where);
+      expect(file, where.join('/')).toContain('resolveListings(');
+      // Nobody rolls their own any more.
+      expect(file, where.join('/')).not.toContain('listingsIn(');
+    }
   });
 
   it('are resolved on the preview too, or the two would disagree', () => {
@@ -1894,5 +1918,435 @@ describe('the schedule control on the writing screen', () => {
   it('has a pill colour for the scheduled state, apart from live and changed', () => {
     const css = read('components', 'sites', 'sites.css');
     expect(css).toContain("data-state='scheduled'");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * WHICH ORDER A COLLECTION LISTING COMES BACK IN.
+ *
+ * Andy, 26 Aug 2026: "in the cards i can't see a way to reorder them". Typed
+ * cards have had up and down arrows all along. Collection cards are a live
+ * query, so there was nothing to drag, and no control either: they came back
+ * newest first and that was the only order there was.
+ *
+ * The field sort already plumbed through here did not help. It can only sort by
+ * a field the collection DECLARES, and the guides collection this was reported
+ * against declares none, so there was provably no order a client could pick.
+ * These four are intrinsic, so they work on any collection at all.
+ */
+describe('the order a listing comes back in', () => {
+  const ROWS = [
+    { slug: 'c', data: { title: 'Cephalonia' }, published_at: '2026-08-03', fields: [] },
+    { slug: 'a', data: { title: 'ålesund' },    published_at: '2026-08-02', fields: [] },
+    { slug: 'b', data: { title: 'Brac' },       published_at: '2026-08-01', fields: [] },
+  ];
+
+  async function titles(order?: string): Promise<string[]> {
+    const { listPublished } = await import('../lib/db/collections');
+    respond('from public.collection_items', ROWS);
+    const listing = await listPublished(ALPHA, 'guides', 6, order ? { order } as never : {});
+    return listing.items.map((row) => String(row.item.title));
+  }
+
+  it('is newest first when nothing is chosen, exactly as before', async () => {
+    // The SQL already orders by published_at desc, so this is the rows as read.
+    expect(await titles()).toEqual(['Cephalonia', 'ålesund', 'Brac']);
+    expect(await titles('newest')).toEqual(['Cephalonia', 'ålesund', 'Brac']);
+  });
+
+  it('turns round for oldest first', async () => {
+    expect(await titles('oldest')).toEqual(['Brac', 'ålesund', 'Cephalonia']);
+  });
+
+  it('sorts by title, ignoring case and accents', async () => {
+    // "ålesund" sorts with the As rather than after Z, which is where a plain
+    // code-point comparison would put it, and its lower-case initial does not
+    // send it to the end either.
+    expect(await titles('title')).toEqual(['ålesund', 'Brac', 'Cephalonia']);
+    expect(await titles('title-desc')).toEqual(['Cephalonia', 'Brac', 'ålesund']);
+  });
+
+  it('reads the whole collection before cutting, or the answer is wrong', async () => {
+    /*
+     * The subtle one. Taking the newest six and THEN sorting them A to Z gives
+     * six newest alphabetised, not the first six alphabetically. So an order
+     * other than newest has to drop the LIMIT, the same way a filter does.
+     */
+    const { listPublished } = await import('../lib/db/collections');
+
+    log.length = 0;
+    respond('from public.collection_items', ROWS);
+    await listPublished(ALPHA, 'guides', 2, { order: 'title' } as never);
+    expect(itemQuery().sql).not.toContain('limit');
+
+    log.length = 0;
+    respond('from public.collection_items', ROWS);
+    await listPublished(ALPHA, 'guides', 2, {});
+    // And the common case still reads no more rows than it ever did.
+    expect(itemQuery().sql).toContain('limit');
+  });
+
+  it('still cuts to the count once it has ordered', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+    respond('from public.collection_items', ROWS);
+    const listing = await listPublished(ALPHA, 'guides', 2, { order: 'title' } as never);
+    expect(listing.items.map((row) => String(row.item.title))).toEqual(['ålesund', 'Brac']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE CANVAS KEEPS ITS CARDS WHEN THE ORDER CHANGES.
+ *
+ * The regression the Order control caused on its first outing. Andy clicked it
+ * and every card on the page vanished, 26 Aug 2026.
+ *
+ * The editor builds its listing map on the SERVER, once, from the tree as it
+ * was at page load. The canvas then fills a copy of the tree on every keystroke
+ * and looks each block up by listingKey, and that key carries the order. Pick a
+ * different order and the key matches nothing, fillListings finds no cards, and
+ * the grid falls back to its empty state until a reload.
+ *
+ * So the editor asks for every order up front. This is the test that the map it
+ * gets back can answer all four, and it fails against a map built the way the
+ * published route builds one, which is exactly what the editor was doing.
+ */
+describe('changing the order does not empty the canvas', () => {
+  const REQUEST = { collection: 'guides', count: 6, facts: 0, filter: null, sort: null };
+
+  it('a map built for one order cannot answer another, which is the bug', () => {
+    const forNewest = new Map([
+      [listingKey({ ...REQUEST, order: 'newest' }), [{ title: 'Hvar' }]],
+    ]);
+    const tree = {
+      sections: [section([listingBlock({ source: 'collection', collection: 'guides', order: 'title' })])],
+    };
+    // Untouched: no cards, which on the canvas is the grid going empty.
+    expect(fillListings(tree, forNewest)).toBe(tree);
+  });
+
+  it('and a map holding every order answers whichever one is picked', () => {
+    const everyOrder = new Map(
+      LISTING_ORDERS.map((order) => [
+        listingKey({ ...REQUEST, order }),
+        [{ title: `first by ${order}` }],
+      ]),
+    );
+
+    for (const order of LISTING_ORDERS) {
+      const tree = {
+        sections: [section([listingBlock({ source: 'collection', collection: 'guides', order })])],
+      };
+      const filled = fillListings(tree, everyOrder) as typeof tree;
+      const items = filled.sections[0].rows[0].columns[0].blocks[0].props.items as Array<{ title: string }>;
+      expect(items, `nothing filled for "${order}"`).toHaveLength(1);
+      expect(items[0].title).toBe(`first by ${order}`);
+    }
+  });
+
+  it('hands back the props beside each request, which is what gets sent', async () => {
+    /*
+     * The server validates the ask by running listingIn over the SAME props the
+     * tree holds, rather than trusting a request assembled on the client. That
+     * only works if the walker carries them, and rebuilding a props bag from a
+     * ListingRequest would be a second copy of the mapping to keep in step.
+     */
+    const { listingBlocksIn } = await import('../lib/content/listings');
+
+    const tree = {
+      sections: [
+        section([
+          listingBlock({ source: 'collection', collection: 'guides', order: 'title', count: 4 }),
+          listingBlock({ source: 'typed' }),
+        ]),
+      ],
+    };
+
+    const found = listingBlocksIn([tree]);
+    // The typed one is not a listing at all, so it is not in here.
+    expect(found).toHaveLength(1);
+    expect(found[0].request.collection).toBe('guides');
+    expect(found[0].request.order).toBe('title');
+    expect(found[0].props.collection).toBe('guides');
+    expect(found[0].props.order).toBe('title');
+  });
+
+  it('keeps every block, not one per request, so each can be asked for', async () => {
+    /*
+     * listingsIn DEDUPES by request because two grids showing the same thing are
+     * one read. This one must not: the editor looks each block up by its own key
+     * and needs the props for whichever ones are missing, and two blocks that
+     * happen to match today may not after the next keystroke.
+     */
+    const { listingBlocksIn, listingsIn } = await import('../lib/content/listings');
+    const same = () => listingBlock({ source: 'collection', collection: 'guides' });
+    const tree = { sections: [section([same(), same()])] };
+
+    expect(listingsIn([tree])).toHaveLength(1);
+    expect(listingBlocksIn([tree])).toHaveLength(2);
+  });
+
+  it('the canvas asks for a listing it does not have, rather than pre-guessing', () => {
+    /*
+     * REPLACED THE PRE-FETCH. The first fix read all four orders when the editor
+     * loaded, which answered the order control and nothing else: the collection
+     * name and the filter are in the key too, and there is no finite set of
+     * collection names to read ahead of time. So the canvas asks for what it
+     * turns out to need and the pre-fetch is gone, which is both more correct
+     * and fewer reads.
+     */
+    const shell = readFileSync(join(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+    expect(shell).toContain('listingCardsAction');
+    // Debounced, or typing a collection name is one request per letter.
+    expect(shell).toContain('LISTING_DEBOUNCE_MS');
+    // Asked once per key, or a collection with nothing published is re-requested
+    // for ever: an empty list is a real answer and has to be cached as one.
+    expect(shell).toContain('askedFor.current.has(key)');
+    expect(shell).toContain('askedFor.current.add(key)');
+
+    const editor = readFileSync(join(__dirname, '..', 'app', 'editor', 'page.tsx'), 'utf8');
+    expect(editor, 'the pre-fetch should be gone').not.toContain('everyOrder');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE ORDER THE CLIENT SET BY HAND.
+ *
+ * The half of Andy's "i can't see a way to reorder them" that no rule can
+ * answer. An agency featuring a destination wants Hvar first because they
+ * decided so, and neither a date nor a title expresses that. Stored per item as
+ * a position (migration 0031), arranged with the arrows on the collections
+ * screen, and read back by the 'manual' order.
+ */
+describe('the hand-set order', () => {
+  const ROWS = [
+    { slug: 'c', data: { title: 'Cephalonia' }, published_at: '2026-08-03', position: 3, fields: [] },
+    { slug: 'a', data: { title: 'Hvar' },       published_at: '2026-08-02', position: 1, fields: [] },
+    { slug: 'b', data: { title: 'Brac' },       published_at: '2026-08-01', position: 2, fields: [] },
+  ];
+
+  async function titles(rows: Record<string, unknown>[]): Promise<string[]> {
+    const { listPublished } = await import('../lib/db/collections');
+    respond('from public.collection_items', rows);
+    const listing = await listPublished(ALPHA, 'guides', 6, { order: 'manual' } as never);
+    return listing.items.map((row) => String(row.item.title));
+  }
+
+  it('follows the positions, not the dates', async () => {
+    // Newest first would be Cephalonia, Hvar, Brac. The client said otherwise.
+    expect(await titles(ROWS)).toEqual(['Hvar', 'Brac', 'Cephalonia']);
+  });
+
+  it('puts entries nobody has placed last, in the order they already had', async () => {
+    /*
+     * Null is a real state meaning "never arranged", not a missing value. A new
+     * entry appearing at the top of a hand-set grid would silently displace
+     * whatever the client had chosen to lead with.
+     */
+    const withNew = [
+      { slug: 'd', data: { title: 'Korcula' }, published_at: '2026-08-09', position: null, fields: [] },
+      ...ROWS,
+    ];
+    expect(await titles(withNew)).toEqual(['Hvar', 'Brac', 'Cephalonia', 'Korcula']);
+  });
+
+  it('degrades to the date order when nothing has been arranged at all', async () => {
+    const none = ROWS.map((row) => ({ ...row, position: null }));
+    // Which is the order they were read in, so a collection nobody has touched
+    // behaves exactly as it did before positions existed.
+    expect(await titles(none)).toEqual(['Cephalonia', 'Hvar', 'Brac']);
+  });
+
+  it('reads the whole collection first, like every order but newest', async () => {
+    const { listPublished } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('from public.collection_items', ROWS);
+    await listPublished(ALPHA, 'guides', 2, { order: 'manual' } as never);
+    expect(itemQuery().sql).not.toContain('limit');
+  });
+});
+
+describe('saving a hand-set order', () => {
+  it('writes the whole list in one statement, scoped to the collection', async () => {
+    const { reorderItems } = await import('../lib/db/collections');
+
+    log.length = 0;
+    respond('update public.collection_items', [{ id: 'i1' }, { id: 'i2' }]);
+    const moved = await reorderItems(ALPHA, 'COLL', ['i2', 'i1']);
+
+    expect(moved).toBe(2);
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(write.sql).toContain('with ordinality');
+    /*
+     * The collection scope is the part that matters. reorderItems is reachable
+     * from a browser, and tenant scoping alone would still have let somebody
+     * renumber a DIFFERENT collection of their own by sending its ids.
+     */
+    expect(write.sql).toContain('collection_id');
+    expect(write.params).toContain('COLL');
+    expect(write.params).toContainEqual(['i2', 'i1']);
+  });
+
+  it('does nothing at all for an empty list rather than writing', async () => {
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    expect(await reorderItems(ALPHA, 'COLL', [])).toBe(0);
+    expect(log.filter((s) => s.sql.includes('update public.collection_items'))).toHaveLength(0);
+  });
+
+  it('writes as the app role, never the renderer', async () => {
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('update public.collection_items', []);
+    await reorderItems(ALPHA, 'COLL', ['i1']);
+    for (const statement of log.filter((s) => s.sql.includes('collection_items'))) {
+      expect(statement.role).toBe('app');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * THE ARROWS ARE ACTUALLY VISIBLE, which is not the same as being rendered.
+ *
+ * Andy, twice in a row: "i can't see the arrows to manually move them". They
+ * were there. Correct markup, correct icons, deployed, and drawn at opacity 0.
+ *
+ * sites.css hides every .sv-btn inside a row until the row is hovered, so the
+ * list of pages is not a wall of controls. That is right for Edit, Publish and
+ * Delete, which you go looking for on a row you have already picked, and wrong
+ * for reordering, which is a property of the LIST: you cannot go looking for it
+ * without first knowing it is there.
+ *
+ * I had checked the markup, the class, the build and the deployment, and never
+ * once looked at the screen. Rendering it in Chromium reported the button at
+ * 44x44, visible, with a 16px icon inside it, and opacity 0. So this test
+ * checks the one property none of those checks covered: that the exemption
+ * exists, comes after the rule it is exempting itself from, and is not zero.
+ */
+describe('the reorder arrows are not hidden by the row-action reveal', () => {
+  const css = readFileSync(join(__dirname, '..', 'components', 'sites', 'sites.css'), 'utf8');
+
+  it('still hides the row ACTIONS until the row is hovered', () => {
+    // The behaviour being worked around is deliberate and stays.
+    expect(css).toContain('.sv-item .sv-btn { opacity: 0; transition: opacity 120ms ease-out; }');
+  });
+
+  it('exempts the move column, after that rule so it wins', () => {
+    const hides = css.indexOf('.sv-item .sv-btn { opacity: 0;');
+    const exempt = css.indexOf('.sv-item .sv-item__move .sv-btn { opacity:');
+    expect(hides, 'the hide rule has moved or gone').toBeGreaterThan(-1);
+    expect(exempt, 'nothing exempts the arrows from it').toBeGreaterThan(-1);
+    // Same specificity would be a coin toss; later in the file is the mechanism.
+    expect(exempt).toBeGreaterThan(hides);
+  });
+
+  it('and the exemption leaves them actually painted', () => {
+    const rule = /\.sv-item \.sv-item__move \.sv-btn \{ opacity: ([0-9.]+); \}/.exec(css);
+    expect(rule, 'the exemption is not the shape this test can read').toBeTruthy();
+    const resting = Number(rule![1]);
+    /*
+     * Faint enough not to compete with the titles, which is what the hide rule
+     * is protecting, and nowhere near invisible. Zero is the bug.
+     */
+    expect(resting).toBeGreaterThan(0.3);
+    expect(resting).toBeLessThanOrEqual(1);
+  });
+
+  it('keeps a full-size touch target where there is no cursor', () => {
+    /*
+     * The arrows are 24px on a pointer so two stacked buttons fit inside the
+     * height the row already had: at 44 each they pushed every row from about
+     * 80px to 123px. Touch still gets 44, where the target is the whole point.
+     */
+    expect(css).toContain('@media (hover: hover) and (pointer: fine)');
+    const fine = css.slice(css.indexOf('@media (hover: hover) and (pointer: fine)'));
+    expect(fine.slice(0, 300)).toContain('min-height: 24px');
+    expect(css).toContain(".sv-btn[data-icon='true']");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * ARRANGING THE ENTRIES FROM THE BLOCK THAT DRAWS THEM.
+ *
+ * Andy picked "The order I set" on the cards block, looked at his two cards and
+ * said "There are no arrows". They existed, on the collections screen, which is
+ * a different page. A setting whose effect you cannot reach from where you set
+ * it reads as broken however clear the help line is, so on his instruction they
+ * are now in both places.
+ *
+ * That needed three things to be true at once, and each is checked here because
+ * any one of them silently disables the control rather than breaking it.
+ */
+describe('a collection grid can be arranged from its own block', () => {
+  it('a card carries the id of the row it came from', async () => {
+    const { itemAsCard } = await import('../lib/content/listings');
+    const card = itemAsCard(
+      { title: 'Hvar', sections: [] } as never,
+      'guides',
+      'hvar',
+      [],
+      'ITEM-1',
+    );
+    // Without this the pane has titles and nothing to reorder BY.
+    expect(card.id).toBe('ITEM-1');
+  });
+
+  it('and a card built without one simply has none, rather than a wrong one', async () => {
+    const { itemAsCard } = await import('../lib/content/listings');
+    const card = itemAsCard({ title: 'Hvar', sections: [] } as never, 'guides', 'hvar', []);
+    expect(card.id).toBeUndefined();
+  });
+
+  it('the writer is keyed on the collection SHORT NAME, which is all the block has', async () => {
+    /*
+     * The block knows 'guides' because that is what somebody typed into it; it
+     * has never seen a uuid. Keying the writer on the key is what lets the pane
+     * and the collections screen call one action.
+     */
+    const { reorderItems } = await import('../lib/db/collections');
+    log.length = 0;
+    respond('update public.collection_items', [{ id: 'i1' }]);
+    await reorderItems(ALPHA, 'guides', ['i1']);
+
+    const write = log.find((s) => s.sql.includes('update public.collection_items'))!;
+    expect(write.params).toContain('guides');
+    // Joined to collections rather than filtered in JS, so an id from another
+    // collection updates no rows at all.
+    expect(write.sql).toContain('public.collections c');
+    expect(write.sql).toContain('c.key =');
+  });
+
+  it('the pane shows the arrows only when the order is actually hand-set', () => {
+    const pane = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    /*
+     * Under any of the other four orders the position is not what decides the
+     * sequence, so arrows there would move a number nothing reads and appear to
+     * do nothing at all, which is the complaint this whole thread began with.
+     */
+    expect(pane).toContain("block.props.order === 'manual'");
+    expect(pane).toContain('<ListingOrderArrows');
+    // It is handed the cards the canvas is drawing, so it needs no read of its own.
+    expect(pane).toContain('listings?.get(key)');
+  });
+
+  it('and the canvas is told about the move, so it redraws without a reload', () => {
+    const shell = readFileSync(join(__dirname, '..', 'components', 'editor', 'EditorShell.tsx'), 'utf8');
+    /*
+     * Writing to the database alone would leave the grid showing the old order
+     * until a reload, which reads as the arrows not working: exactly the report
+     * that started this.
+     */
+    expect(shell).toContain('const reorderCards = useCallback(');
+    expect(shell).toContain('onListingOrder={reorderCards}');
+    expect(shell).toContain('listings={cards}');
   });
 });

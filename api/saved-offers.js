@@ -211,6 +211,44 @@ function cleanOffer(raw) {
   return out;
 }
 
+// Merge a cleaned CSV-import row onto the offer it is UPDATING, so a re-upload
+// never wipes anything the spreadsheet didn't carry. A blank scalar cell keeps
+// the stored value; an empty list cell keeps the stored list; and fields the CSV
+// has no column for (promos, excludes, imageBadges, cruiseRoute, i18n) are always
+// preserved. Fixes the "downloaded the spreadsheet, changed a price, re-uploaded
+// and the photos / itinerary were gone" data loss — a blank Image URLs cell used
+// to replace the whole offer and wipe the images.
+function mergeImportOntoExisting(existingOffer, cleaned) {
+  const base = (existingOffer && typeof existingOffer === 'object' && !Array.isArray(existingOffer)) ? existingOffer : { fields: {} };
+  const out = Object.assign({}, base);   // start from the stored offer → keeps cruiseRoute, i18n, etc.
+  out.fields = Object.assign({}, (base.fields && typeof base.fields === 'object') ? base.fields : {});
+  const cf = (cleaned && cleaned.fields) || {};
+  for (const k of Object.keys(cf)) {
+    const v = cf[k];
+    if (v !== '' && v != null) out.fields[k] = v;   // blank cell → keep the stored value
+  }
+  if (cleaned && cleaned.currency) out.currency = cleaned.currency;
+  ['includes', 'excludes', 'promos', 'imageBadges', 'tags', 'images'].forEach((k) => {
+    if (Array.isArray(cleaned && cleaned[k]) && cleaned[k].length) out[k] = cleaned[k];   // empty cell → keep the stored list
+  });
+  return out;
+}
+
+// Content keys a direct save might omit. On an UPDATE, a key ABSENT from the raw
+// payload keeps the stored value (so a partial/legacy save cannot wipe it); a key
+// PRESENT (even as []) stays authoritative so the author can still clear it.
+// Presence is read from the RAW body because cleanOffer has already coerced an
+// absent array into []. This is the server half of the disappearing-images fix.
+const PRESERVE_ON_ABSENT = ['images', 'includes', 'excludes', 'promos', 'imageBadges', 'tags', 'cruiseRoute', 'i18n', 'i18nMeta', 'audienceLanguages'];
+function preserveOmittedContent(cleaned, rawOffer, existingOffer) {
+  const raw = (rawOffer && typeof rawOffer === 'object' && !Array.isArray(rawOffer)) ? rawOffer : {};
+  const ex = (existingOffer && typeof existingOffer === 'object') ? existingOffer : {};
+  for (const k of PRESERVE_ON_ABSENT) {
+    if (!(k in raw) && ex[k] !== undefined) cleaned[k] = ex[k];
+  }
+  return cleaned;
+}
+
 // Is an offer within its show window? (UTC day granularity; the card/page also
 // re-check in the viewer's local time and self-hide, so this is the gate that
 // keeps scheduled/ended offers out of the public feed.)
@@ -461,8 +499,12 @@ export default async function handler(req, res) {
             if (!ID_RE.test(wantId)) { skipped++; continue; }
             const existing = await getJson('offer:' + wantId);
             if (!existing || (existing.ownerKey !== ck && !isStaff(user))) { skipped++; continue; }
+            // Merge onto the stored offer rather than replace it, so a blank cell
+            // (or a field with no CSV column) never wipes existing data.
+            const merged = mergeImportOntoExisting(existing.offer, cleaned);
+            if (JSON.stringify(merged).length > MAX_OFFER_BYTES) { skipped++; continue; }
             const ok = await setJson('offer:' + wantId, {
-              id: wantId, offer: cleaned,
+              id: wantId, offer: merged,
               ownerKey: existing.ownerKey || ck,
               ownerEmail: existing.ownerEmail || user.email || '',
               clientId: existing.clientId || user.clientId || '',
@@ -556,6 +598,17 @@ export default async function handler(req, res) {
           return res.status(403).json({ error: 'You do not own this offer.' });
         }
         createdAt = existing.createdAt || now;
+        // PRESERVE stored content for any content key the RAW payload OMITTED, so
+        // an update can never wipe images/includes/etc by leaving them out. This
+        // is the recurring "the images keep disappearing" bug: the full-form save
+        // REPLACED the whole offer, and cleanOffer coerces an absent array to [],
+        // so a payload that simply did not carry `images` zeroed the stored ones.
+        // A key PRESENT in the raw body (even as []) stays authoritative, so an
+        // author can still clear photos. Presence is read from the RAW body, not
+        // the cleaned offer, because cleaning has already turned absent into [].
+        // Mirrors the fieldPatch and bulk-import merges — all three write paths
+        // now behave the same and none can silently drop stored content.
+        preserveOmittedContent(offer, body.offer, existing.offer);
       } else {
         id = await reserveNewId();
         if (!id) return res.status(503).json({ error: 'Could not allocate an offer id. Please try again.' });
@@ -613,4 +666,4 @@ export default async function handler(req, res) {
 }
 
 // Exported for unit tests.
-export const _test = { cleanOffer, genId, ID_RE, clientKeyOf, isStaff, summarise, summariseTrash, isLiveOffer, slugify, offerUrl, idsFromQuery, TRASH_RETENTION_MS, TRASH_RETENTION_DAYS };
+export const _test = { cleanOffer, mergeImportOntoExisting, preserveOmittedContent, genId, ID_RE, clientKeyOf, isStaff, summarise, summariseTrash, isLiveOffer, slugify, offerUrl, idsFromQuery, TRASH_RETENTION_MS, TRASH_RETENTION_DAYS };

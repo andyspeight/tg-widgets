@@ -31,6 +31,7 @@
 import { z } from 'zod';
 
 import { normaliseDividerHeight, safeDivider } from './dividers';
+import { parseAudience } from './audience';
 import { escapeHtml } from './sanitise';
 import { hasInnerColumns } from './inner-columns';
 import {
@@ -285,11 +286,15 @@ export function boxIsEmpty(box: Box): boolean {
  *
  * A CLOSED LIST, like REVEAL_STYLES, so the value the render puts in data-motion
  * can only ever be one of these and anything unknown falls back to no motion.
- * A1 ambient-terrain is deliberately absent: it is WebGL and belongs to the
- * hero-cinematic block rather than to any section.
+ * A1 ambient-terrain (the water variant) joined on 31 Aug 2026: it is the one WebGL
+ * recipe, tier 2, driven by public/tg-sea.js rather than by CSS, and it caps itself
+ * at one canvas per page in the script. It was held out of this enum until the
+ * per-page cap and the still fallback both existed; they do now (the sea composites
+ * over the section's own still photograph, which is the reduced-motion and no-WebGL
+ * fallback).
  */
 export const MOTION_RECIPES = [
-  'none', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+  'none', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S2', 'S3', 'S5',
 ] as const;
 export type MotionRecipe = (typeof MOTION_RECIPES)[number];
 
@@ -322,7 +327,7 @@ export type MotionRecipe = (typeof MOTION_RECIPES)[number];
  * that costs an hour to get right elsewhere is free here.
  */
 export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
-  none: 0, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S3: 0, S5: 0,
+  none: 0, A1: 2, A2: 0, A3: 1, A4: 0, A5: 0, A6: 0, A7: 0, S1: 0, S2: 0, S3: 0, S5: 0,
 };
 
 /**
@@ -337,7 +342,7 @@ export const MOTION_TIERS: Readonly<Record<MotionRecipe, 0 | 1 | 2>> = {
  * so it composes with parallax and Ken Burns rather than fighting them.
  */
 export const MOTION_BACKGROUND_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A4', 'A6', 'A7', 'S5',
+  'A1', 'A2', 'A4', 'A6', 'A7', 'S5',
 ]);
 
 /**
@@ -367,7 +372,7 @@ export const MOTION_VIDEO_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRec
  * reduced-motion path in globals.css.
  */
 export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>([
-  'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S3', 'S5',
+  'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'S1', 'S2', 'S3', 'S5',
 ]);
 
 /**
@@ -386,6 +391,16 @@ export const MOTION_LIVE_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionReci
 export const MOTION_SCRIPT_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A3']);
 
 /**
+ * The recipes driven by public/tg-sea.js, the WebGL sea. Separate from the script
+ * set above because they load a DIFFERENT file: tg-motion.js is a few KB of DOM
+ * nudging, tg-sea.js is the shader engine, and a page with a drifting rail should
+ * not pull the sea, nor the other way round. A1 is the only member and, being the
+ * one tier-2 recipe, it is the whole reason the per-page cap exists: tg-sea.js
+ * animates the FIRST such section only and leaves any other on its still photograph.
+ */
+export const MOTION_SEA_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionRecipe>(['A1']);
+
+/**
  * The recipes that animate the section's BLOCKS ARRIVING.
  *
  * The second resolution rule, and the same shape as the background one above. The
@@ -400,6 +415,115 @@ export const MOTION_ARRIVAL_RECIPES: ReadonlySet<MotionRecipe> = new Set<MotionR
 export type MotionIntensity = 1 | 2 | 3;
 
 export type Motion = { recipe: MotionRecipe; intensity: MotionIntensity };
+
+/**
+ * A motion setting that is switched on but cannot move, because the section is
+ * missing the background content it needs. The editor turns each of these into a
+ * quiet hint saying what to add, so a client who picks a background recipe on an
+ * empty section is told why nothing happens rather than assuming it is broken
+ * (the same confusion that had motion looking dead, Andy 30 Aug 2026).
+ *
+ * - recipe-video: the recipe plays a background VIDEO and there is none (A7).
+ * - recipe-pictures: the recipe plays a SEQUENCE of pictures and there are fewer
+ *   than two (A2, the cycling background).
+ * - recipe-still: the recipe moves ONE still background picture and there is none,
+ *   or a slideshow or a video is set instead (A4, A6, S5).
+ * - recipe-cards: the recipe travels a row of CARDS and the section has none (S2).
+ * - parallax-still / ken-burns-still: the same missing still picture, for the two
+ *   background toggles.
+ */
+export type MotionGap =
+  | 'recipe-video'
+  | 'recipe-pictures'
+  | 'recipe-still'
+  | 'recipe-cards'
+  | 'parallax-still'
+  | 'ken-burns-still';
+
+/**
+ * How many cards the section's first cards block holds, or 0 if it has none. The
+ * pinned-itinerary recipe (S2) travels this row sideways, so it needs one, exactly as
+ * the background recipes need a picture. A plain walk over the stored shape, defensive
+ * because the routes hand it whatever came out of the database. Used by both the render
+ * (to gate S2 and size the pinned section) and the editor hint, so the two agree.
+ */
+export function sectionCardCount(section: {
+  rows?: ReadonlyArray<{
+    columns?: ReadonlyArray<{ blocks?: ReadonlyArray<{ type?: unknown; props?: unknown }> }>;
+  }> | null;
+}): number {
+  for (const row of section.rows ?? []) {
+    for (const column of row?.columns ?? []) {
+      for (const block of column?.blocks ?? []) {
+        if (block?.type === 'cards') {
+          const items = (block.props as { items?: unknown } | undefined)?.items;
+          if (Array.isArray(items)) return items.length;
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+/**
+ * Which of a section's motion settings are switched on but have nothing to move.
+ *
+ * This MIRRORS the render's own guard in PageRenderer (motionHasWhatItNeeds, plus
+ * the stillBackground checks on data-parallax and data-ken-burns): a hint is shown
+ * exactly when the published page would stand the motion down. Keep the two in
+ * step; a test pins the render rule so a change there flags this. Pure, so it is
+ * unit-tested.
+ *
+ * The background content is read the same way the render reads it: the section's
+ * own picture is the first, the extra slides follow, two or more of them (and no
+ * video) make a cycling slideshow, and a video takes precedence over any picture.
+ * Presence of a non-empty string stands in for the render's safeUrl, which is
+ * close enough for a hint: the picker only ever writes real URLs.
+ */
+export function sectionMotionGaps(section: {
+  motion?: Motion;
+  backgroundImage?: string;
+  backgroundVideo?: string;
+  backgroundSlides?: ReadonlyArray<{ src?: string }> | null;
+  parallax?: boolean;
+  kenBurns?: boolean;
+  rows?: ReadonlyArray<{
+    columns?: ReadonlyArray<{ blocks?: ReadonlyArray<{ type?: unknown; props?: unknown }> }>;
+  }> | null;
+}): MotionGap[] {
+  const hasVideo = Boolean(section.backgroundVideo && section.backgroundVideo.trim());
+  const picCount =
+    (section.backgroundImage && section.backgroundImage.trim() ? 1 : 0) +
+    (section.backgroundSlides ?? []).filter((slide) => slide?.src && slide.src.trim()).length;
+  const bgShow = !hasVideo && picCount > 1; // a cycling slideshow
+  const stillBackground = picCount >= 1 && !bgShow && !hasVideo; // exactly one still picture
+
+  const gaps: MotionGap[] = [];
+  const recipe = section.motion?.recipe;
+  if (recipe && recipe !== 'none') {
+    if (MOTION_VIDEO_RECIPES.has(recipe)) {
+      if (!hasVideo) gaps.push('recipe-video');
+    } else if (MOTION_CYCLING_RECIPES.has(recipe)) {
+      if (!bgShow) gaps.push('recipe-pictures');
+    } else if (MOTION_BACKGROUND_RECIPES.has(recipe)) {
+      if (!stillBackground) gaps.push('recipe-still');
+    } else if (recipe === 'S2') {
+      // The pinned itinerary travels a row of cards, so it needs a cards block.
+      if (sectionCardCount(section) === 0) gaps.push('recipe-cards');
+    }
+  }
+
+  // Parallax and Ken Burns only when a background RECIPE has not taken the picture.
+  // A background recipe wins the background, so the two toggles are moot then and
+  // the editor already clears them when one is chosen; skipping their hints keeps
+  // the pane from warning about a control the recipe has already stood down.
+  const recipeOwnsBackground = Boolean(recipe && MOTION_BACKGROUND_RECIPES.has(recipe));
+  if (!recipeOwnsBackground) {
+    if (section.parallax && !stillBackground) gaps.push('parallax-still');
+    if (section.kenBurns && !section.parallax && !stillBackground) gaps.push('ken-burns-still');
+  }
+  return gaps;
+}
 
 /**
  * Reads a stored motion value, refusing anything that is not in the closed list.
@@ -434,6 +558,48 @@ export const TextAlign = z.enum(['left', 'centre', 'right']);
  */
 export function normaliseAlign(value: unknown): 'left' | 'centre' | 'right' | undefined {
   return value === 'left' || value === 'centre' || value === 'right' ? value : undefined;
+}
+
+/**
+ * Where a section's content sits when the section is taller than the content is.
+ *
+ * WHY THIS HAD TO EXIST. minHeight could always make a section taller than what
+ * was in it, and the leftover height had nowhere to go but underneath: a section
+ * is a plain block, so its content sat at the top and the rest was a void. On a
+ * 1200px hero holding 249px of words that is 950px of empty ground below the
+ * buttons, which reads as a broken page rather than a tall one. Found on a live
+ * client site on 25 Aug 2026 by rendering the served HTML and looking at it.
+ *
+ * The column's own align does NOT cover this. That one centres a column against
+ * its ROW, and a row is only as tall as its content, so on a tall section it has
+ * nothing to centre against and quietly does nothing.
+ *
+ * UNDEFINED MEANS TOP, and top stays the default so not one stored section
+ * moves. The renderer emits no attribute at all for it, and the stylesheet only
+ * changes the layout when the attribute is present.
+ */
+export function normaliseAlignY(value: unknown): 'centre' | 'bottom' | undefined {
+  return value === 'centre' || value === 'bottom' ? value : undefined;
+}
+
+/**
+ * The named seas the cinematic recipe (A1) can wear. A CLOSED list, like the reveal
+ * styles: a travel agent picks their water by name (a Caribbean site is turquoise, a
+ * Nordic one is steel) rather than dialling three colours. The colours and sun angle
+ * each name maps to live in SEA_TONE_PRESETS in styles.ts, kept in step by a test; the
+ * render turns the chosen name into the data-sea-* attributes tg-sea.js reads. Absent
+ * is the northern default, so no stored section changes and a page with no tone still
+ * gets a finished sea.
+ */
+export const SEA_TONES = [
+  'northern', 'mediterranean', 'caribbean', 'tropical', 'storm',
+  'golden', 'moonlit', 'sunrise',
+] as const;
+export type SeaTone = (typeof SEA_TONES)[number];
+export function normaliseSeaTone(value: unknown): SeaTone | undefined {
+  return typeof value === 'string' && (SEA_TONES as readonly string[]).includes(value)
+    ? (value as SeaTone)
+    : undefined;
 }
 
 /**
@@ -576,6 +742,14 @@ export const BlockSchema = z.object({
    * absent box renders as nothing, exactly as before blocks had one (5 Aug 2026).
    */
   box: BoxSchema.optional(),
+  /**
+   * WHO SEES THIS BLOCK, added 30 Aug 2026 (personalisation v2): the same
+   * audience rule a section carries, on a single block. Resolved at render from
+   * the request, additive and absent on every stored block, dropped to undefined
+   * when it carries no real facet. A block a visitor fails is pruned from the tree
+   * before render, the same as a section. See ./audience and ./personalise.
+   */
+  audience: z.unknown().transform(parseAudience).optional(),
 });
 
 export type Block = z.infer<typeof BlockSchema>;
@@ -770,6 +944,33 @@ export const SectionSchema = z.object({
   /** Floor on the section's height, so a short section can still be tall. */
   minHeight: z.unknown().transform((v) => px(v, MAX_MIN_HEIGHT)),
   /**
+   * FILL THE SCREEN, added 30 Aug 2026. The section is exactly one viewport tall
+   * (100svh), device-independent, the standard hero want that a pixel minimum
+   * could never hit on every screen at once. A floor still, so a section with more
+   * content than a screenful grows past it. Off by default and optional, so no
+   * stored section changes shape; when on it overrides the pixel minimum height,
+   * which the editor hides. See the --tgs-min-h clamp in globals.css.
+   *
+   * Total, not a strict boolean: a hand-edited or imported page can carry any
+   * value on a new key, and only `true` turns it on; anything else is off, never
+   * a parse failure that would lose the whole page.
+   */
+  fullHeight: z.unknown().transform((v) => (v === true ? true : undefined)).optional(),
+  /**
+   * STICK TO THE TOP, added 31 Aug 2026. The section pins to the top of the
+   * viewport once the page scrolls it there, and stays put while the rest of the
+   * page scrolls under it: a sticky sub-nav, a running headline, a booking bar.
+   * Pure CSS (position: sticky; top: 0) in globals.css, behind an @supports
+   * guard, so a browser without it simply keeps the section in flow. The render
+   * only emits the attribute off the editing canvas, so a sticky band never pins
+   * over the editor toolbar while you build the page.
+   *
+   * Total, not a strict boolean, for the same reason as fullHeight: a hand-edited
+   * or imported page can carry any value on this new key, and only `true` turns it
+   * on. Anything else is off, never a parse failure that would lose the page.
+   */
+  sticky: z.unknown().transform((v) => (v === true ? true : undefined)).optional(),
+  /**
    * Animate the section's blocks up into view as it scrolls onto the screen.
    *
    * Off by default and optional, so no stored section changes shape. The render
@@ -786,6 +987,12 @@ export const SectionSchema = z.object({
    * defaults a missing style to rise regardless.
    */
   revealStyle: z.unknown().transform(normaliseRevealStyle).optional(),
+  /**
+   * Where the content sits when minHeight makes the section taller than it.
+   *
+   * Absent is top, which is what every section did before this existed.
+   */
+  alignY: z.unknown().transform(normaliseAlignY).optional(),
   /**
    * Reveal the section's items one after another rather than the whole block at
    * once: the columns of a row, or the cards, tiles or logos of a grid, each
@@ -851,6 +1058,13 @@ export const SectionSchema = z.object({
    * Optional and absent when 'none', so no stored section changes shape.
    */
   motion: z.unknown().transform(normaliseMotion).optional(),
+  /**
+   * Which named sea the cinematic recipe (A1) wears, so a client's water matches their
+   * destination. Normalised to the closed SEA_TONES list; absent is the northern
+   * default. Means nothing unless the section's recipe is A1, and the render only emits
+   * the sea colours for that recipe, so a stored section carrying a stray tone is inert.
+   */
+  seaTone: z.unknown().transform(normaliseSeaTone).optional(),
   /**
    * An animated gradient behind the section, in place of a solid tone or picture.
    *
@@ -979,6 +1193,17 @@ export const SectionSchema = z.object({
   dividerTop: z.unknown().transform(safeDivider).optional(),
   dividerBottom: z.unknown().transform(safeDivider).optional(),
   dividerHeight: z.unknown().transform(normaliseDividerHeight).optional(),
+  /**
+   * WHO SEES THIS SECTION, added 30 Aug 2026: server-side personalisation.
+   *
+   * An optional audience rule, resolved at render from what the request says
+   * about the visitor (country, device, traffic source, new versus returning),
+   * so a section can be shown to or hidden from an audience in the initial HTML
+   * with no client flip. Additive and absent on every stored section, and
+   * dropped to undefined when it carries no real facet, so a section without a
+   * rule is untouched. The pure rule and the decision live in ./audience.
+   */
+  audience: z.unknown().transform(parseAudience).optional(),
   rows: z.array(RowSchema).default([]),
 });
 
@@ -1036,6 +1261,18 @@ export const PageSchema = z.object({
     .max(120)
     .regex(/^[a-z0-9]*(?:-[a-z0-9]+)*$/, 'Slug must be lowercase words separated by hyphens'),
   seo: SeoSchema.default({ noindex: false }),
+  /*
+   * Whether this page shows the site header and footer.
+   *
+   * True for every ordinary page, and the default, so nothing stored before
+   * this existed changes. False for a page that carries its OWN complete
+   * chrome and would otherwise show two headers - a home page seeded from one
+   * of the ten designed homepages, whose hero bakes in its own nav. The flag
+   * lives on the page because only the page knows it is self-contained; the
+   * renderer reads it to skip the header and footer regions for that page
+   * alone.
+   */
+  chrome: z.boolean().optional(),
   sections: z.array(SectionSchema).default([]),
 });
 

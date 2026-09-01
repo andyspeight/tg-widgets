@@ -31,7 +31,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   /**
    * Resolve our own origin.
@@ -80,6 +80,7 @@
     emptyText: '',
     theme: 'light',
     accent: '#00B4D8',
+    bookTextColor: '',
     radius: 12,
     fontFamily: '',
     appId: '',
@@ -367,8 +368,18 @@
 
   // ── Styles ────────────────────────────────────────────────────────────────
 
+  // Which side of a fixture the queried team is on (feed tags every event with
+  // homeTeamKey / awayTeamKey), so a visitor Home/Away filter needs no refetch.
+  function sideOf(ev, teamKey) {
+    if (!teamKey || !ev) return '';
+    if (ev.homeTeamKey && ev.homeTeamKey === teamKey) return 'home';
+    if (ev.awayTeamKey && ev.awayTeamKey === teamKey) return 'away';
+    return '';
+  }
+
   function styles(cfg) {
     var accent = safeColour(cfg.accent, DEFAULTS.accent);
+    var btnText = safeColour(cfg.bookTextColor, '#04212B');
     var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
@@ -386,18 +397,29 @@
       + '--tgtk-radius:' + radius + 'px;'
       + '--tgtk-bg:#FFFFFF;--tgtk-bg2:#F8FAFC;--tgtk-bg3:#F1F5F9;'
       + '--tgtk-border:#E2E8F0;--tgtk-text:#0F172A;--tgtk-sub:#475569;--tgtk-mute:#64748B;'
-      + '--tgtk-on-accent:#04212B;'
+      + '--tgtk-on-accent:' + btnText + ';'
       + 'font-size:15px;line-height:1.6;color:var(--tgtk-text);box-sizing:border-box;'
       + '-webkit-font-smoothing:antialiased;}'
       + '.tgtk-root *,.tgtk-root *::before,.tgtk-root *::after{box-sizing:border-box;}'
       + '.tgtk-root[data-theme="dark"]{'
       + '--tgtk-bg:#0F172A;--tgtk-bg2:#1E293B;--tgtk-bg3:#334155;'
       + '--tgtk-border:#334155;--tgtk-text:#F8FAFC;--tgtk-sub:#CBD5E1;--tgtk-mute:#94A3B8;'
-      + '--tgtk-on-accent:#04212B;}'
+      + '--tgtk-on-accent:' + btnText + ';}'
 
       + '.tgtk-head{margin:0 0 16px;}'
       + '.tgtk-h{margin:0;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;}'
       + '.tgtk-sub{margin:4px 0 0;font-size:15px;color:var(--tgtk-sub);}'
+
+      // Visitor Home/Away filter (segmented, shown only when a team has both).
+      + '.tgtk-hafilter{display:inline-flex;margin:0 0 12px;border:1px solid var(--tgtk-border);'
+      + 'border-radius:calc(var(--tgtk-radius) - 4px);overflow:hidden;background:var(--tgtk-bg);}'
+      + '.tgtk-hf{padding:0 14px;min-height:36px;font:inherit;font-size:12.5px;font-weight:600;'
+      + 'color:var(--tgtk-sub);background:transparent;border:0;border-right:1px solid var(--tgtk-border);'
+      + 'cursor:pointer;white-space:nowrap;transition:background .15s ease-out,color .15s ease-out;}'
+      + '.tgtk-hf:last-child{border-right:0;}'
+      + '.tgtk-hf:hover{color:var(--tgtk-text);}'
+      + '.tgtk-hf.is-on{background:var(--tgtk-accent);color:var(--tgtk-on-accent);}'
+      + '.tgtk-hf:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:-2px;}'
 
       + '.tgtk-list{display:flex;flex-direction:column;gap:8px;}'
       + '.tgtk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}'
@@ -436,11 +458,16 @@
       + 'border:1px solid transparent;background:var(--tgtk-accent);color:var(--tgtk-on-accent);'
       + 'font:inherit;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;'
       + 'transition:filter .16s ease-out,transform .12s ease-out;}'
-      + '.tgtk-btn:hover{filter:brightness(.93);}'
-      + '.tgtk-btn:active{transform:scale(.97);}'
+      + '.tgtk-btn{font-weight:700;letter-spacing:.01em;'
+      + 'box-shadow:0 2px 6px color-mix(in srgb,var(--tgtk-accent) 34%,transparent);'
+      + 'transition:transform .16s ease-out,box-shadow .16s ease-out,filter .16s ease-out;}'
+      + '.tgtk-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
+      + 'box-shadow:0 7px 18px color-mix(in srgb,var(--tgtk-accent) 44%,transparent);}'
+      + '.tgtk-btn:active{transform:translateY(0) scale(.98);}'
       + '.tgtk-btn svg{width:14px;height:14px;}'
-      + '.tgtk-btn2{background:var(--tgtk-bg);border-color:var(--tgtk-border);color:var(--tgtk-text);}'
-      + '.tgtk-btn2:hover{background:var(--tgtk-bg3);filter:none;}'
+      + '.tgtk-btn2{background:var(--tgtk-bg);border-color:var(--tgtk-border);color:var(--tgtk-text);box-shadow:none;}'
+      + '.tgtk-btn2:hover{background:var(--tgtk-bg3);filter:none;transform:translateY(-1px);'
+      + 'border-color:var(--tgtk-accent);box-shadow:0 4px 10px rgba(15,23,42,.08);}'
       + '.tgtk-btn:focus-visible,.tgtk-more:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:2px;}'
 
       + '.tgtk-state{padding:32px 20px;text-align:center;color:var(--tgtk-sub);'
@@ -479,7 +506,17 @@
     this.total = 0;
     this.error = null;
     this.loading = true;
+    this._side = 'all';           // visitor Home/Away filter (client-side)
     this._reqId = 0;
+    // Delegated: the shadow root survives each innerHTML re-render, so one
+    // listener here keeps the Home/Away toggle working without re-binding.
+    var self = this;
+    this.shadow.addEventListener('click', function (e) {
+      var hf = e.target && e.target.closest ? e.target.closest('.tgtk-hf') : null;
+      if (!hf) return;
+      var side = hf.getAttribute('data-side') || 'all';
+      if (self._side !== side) { self._side = side; self._render(); }
+    });
     this._render();
     this._load();
   }
@@ -539,6 +576,7 @@
   TGTicketsWidget.prototype._load = function () {
     var self = this;
     var mine = ++this._reqId;
+    this._side = 'all';           // a fresh query starts on "All games"
 
     // No source picked yet. That is a half-finished embed, not an outage, so
     // it must not call the API (which would 400) and must not shout an error
@@ -691,9 +729,35 @@
     }
 
     var self = this;
-    var cards = this.events.map(function (ev) { return self._cardHtml(ev); }).join('');
+    var evs = this.events;
+    var filterHtml = '';
+    // Home/Away filter — only when sourced by a team and there is a real split
+    // (both home AND away games loaded).
+    if (c.sourceType === 'team') {
+      var tk = String(c.sourceValue || '').trim();
+      var homeN = 0, awayN = 0;
+      for (var i = 0; i < evs.length; i++) {
+        var s = sideOf(evs[i], tk);
+        if (s === 'home') homeN++; else if (s === 'away') awayN++;
+      }
+      if (homeN > 0 && awayN > 0) {
+        var sv = (this._side === 'home' || this._side === 'away') ? this._side : 'all';
+        var hf = function (v, label, on) {
+          return '<button type="button" class="tgtk-hf' + (on ? ' is-on' : '') + '" data-side="' + v + '"'
+            + ' aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
+        };
+        filterHtml = '<div class="tgtk-hafilter" role="group" aria-label="Home or away">'
+          + hf('all', 'All', sv === 'all')
+          + hf('home', 'Home (' + homeN + ')', sv === 'home')
+          + hf('away', 'Away (' + awayN + ')', sv === 'away')
+          + '</div>';
+        if (sv === 'home') evs = evs.filter(function (e) { return sideOf(e, tk) === 'home'; });
+        else if (sv === 'away') evs = evs.filter(function (e) { return sideOf(e, tk) === 'away'; });
+      }
+    }
+    var cards = evs.map(function (ev) { return self._cardHtml(ev); }).join('');
     var cls = c.layout === 'cards' ? 'tgtk-grid' : 'tgtk-list';
-    return '<div class="' + cls + '">' + cards + '</div>';
+    return filterHtml + '<div class="' + cls + '">' + cards + '</div>';
   };
 
   TGTicketsWidget.prototype._render = function () {

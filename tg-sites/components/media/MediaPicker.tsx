@@ -29,15 +29,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   deleteMediaAction,
+  generateImageAction,
   importStockAction,
   loadMediaAction,
   recordUploadAction,
+  recordVariantsAction,
   searchStockAction,
   setMediaAltAction,
 } from '../../app/actions/media';
 import { describeImageAction } from '../../app/actions/ai';
 import { MAX_ALT } from '../../lib/ai/prompt';
-import { prepareImageForUpload } from '../../lib/media/downscale';
+import { prepareImageForUpload, variantsForStoredImage } from '../../lib/media/downscale';
+import { backfillPlan, describePlan } from '../../lib/media/backfill';
 import {
   ALLOWED_DOCUMENT_MIME,
   filenameStem,
@@ -52,7 +55,7 @@ import type { MediaItem, StockPhoto } from '../../lib/media/types';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
 
-type Tab = 'bank' | 'upload' | 'stock';
+type Tab = 'bank' | 'upload' | 'stock' | 'generate';
 
 interface Props {
   /** Called with the chosen item. The caller decides what to do with it. */
@@ -76,6 +79,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
 
   const [canUpload, setCanUpload] = useState(true);
   const [canSearchStock, setCanSearchStock] = useState(true);
+  const [canGenerate, setCanGenerate] = useState(true);
   /* Where this site's uploads are filed. Comes from the server, because the
      browser has no other way to know the tenant id, and is re-derived from the
      session by the token route so editing it here buys nothing. */
@@ -100,6 +104,7 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
       setHasMore(result.data.hasMore);
       setCanUpload(result.data.canUpload);
       setCanSearchStock(result.data.canSearchStock);
+      setCanGenerate(result.data.canGenerate);
       setUploadPrefix(result.data.uploadPrefix);
       setLoaded(true);
     },
@@ -172,6 +177,12 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
             {!files && (
               <TabButton id="stock" current={tab} onSelect={setTab} label="Photo library" icon="search" />
             )}
+            {/* Generate is images only, and last: it is the newest and the most
+                expensive way to get a picture, reached for when neither your own
+                images nor the library have the one you want. */}
+            {!files && (
+              <TabButton id="generate" current={tab} onSelect={setTab} label="Generate" icon="sparkle" />
+            )}
           </div>
 
           {error && (
@@ -194,6 +205,8 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
               onAltSaved={onAltSaved}
               onMore={() => void load(items.length)}
               onUploadInstead={() => setTab(canUpload ? 'upload' : 'stock')}
+              uploadPrefix={uploadPrefix}
+              onError={setError}
             />
           )}
 
@@ -209,6 +222,10 @@ export function MediaPicker({ onChoose, onClose, currentUrl, kind = 'image' }: P
 
           {tab === 'stock' && !files && (
             <StockPanel canSearch={canSearchStock} onAdded={added} onError={setError} />
+          )}
+
+          {tab === 'generate' && !files && (
+            <GeneratePanel canGenerate={canGenerate} onAdded={added} onError={setError} />
           )}
         </div>
       </Modal>
@@ -238,7 +255,7 @@ function TabButton({
   current: Tab;
   onSelect: (tab: Tab) => void;
   label: string;
-  icon: 'gallery' | 'upload' | 'search' | 'file';
+  icon: 'gallery' | 'upload' | 'search' | 'file' | 'sparkle';
 }) {
   return (
     <button
@@ -387,9 +404,14 @@ function Bank({
   onAltSaved,
   onMore,
   onUploadInstead,
+  uploadPrefix,
+  onError,
 }: {
   kind: MediaKind;
   items: MediaItem[];
+  /** Where a variant is allowed to be written. The route re-derives it anyway. */
+  uploadPrefix: string;
+  onError: (message: string) => void;
   hasMore: boolean;
   loaded: boolean;
   busy: boolean;
@@ -423,6 +445,13 @@ function Bank({
 
   return (
     <>
+      <BackfillPanel
+        items={items}
+        uploadPrefix={uploadPrefix}
+        onUpdated={onAltSaved}
+        onError={onError}
+      />
+
       <div className="mp-grid" data-kind={kind}>
         {items.map((item) => (
           <figure className="mp-tile" key={item.id} data-current={item.url === currentUrl}>
@@ -509,6 +538,132 @@ function Bank({
 // ---------------------------------------------------------------------------
 // Upload
 // ---------------------------------------------------------------------------
+
+/**
+ * Make the pictures already in this bank smaller for phones.
+ *
+ * WHY IT EXISTS. Variants are encoded in the browser when a picture is uploaded,
+ * so every picture that predates that feature has none: on the live database the
+ * day it shipped, 30 images and 30 without. The srcset work was live and doing
+ * nothing at all for any existing page. This is the one path that fixes that, and
+ * it lives here because the bank is here and because the encoding needs a canvas,
+ * which means it needs a browser.
+ *
+ * IT SAYS WHAT IT WILL DO BEFORE IT DOES IT. This re-encodes and re-uploads
+ * somebody's whole photograph library, so the count of pictures AND the count of
+ * files it will create are both on the button. Those differ by about three, and
+ * the second is the one that decides how long they wait.
+ *
+ * SEQUENTIAL, AND IT KEEPS GOING. One picture at a time, because a dozen parallel
+ * uploads from an office connection is how the one that mattered times out. A
+ * picture that cannot be read is counted and skipped rather than stopping the
+ * run, and the count is reported at the end instead of being swallowed: if the
+ * store will not allow a cross-origin read, every picture fails and that number
+ * says so at once rather than looking like a slow no-op.
+ */
+function BackfillPanel({
+  items,
+  uploadPrefix,
+  onUpdated,
+  onError,
+}: {
+  items: MediaItem[];
+  uploadPrefix: string;
+  onUpdated: (item: MediaItem) => void;
+  onError: (message: string) => void;
+}) {
+  const [running, setRunning] = useState(false);
+  const [progress, setProgress] = useState<string | null>(null);
+
+  const plan = backfillPlan(items);
+  if (plan.candidates.length === 0 || !uploadPrefix) return null;
+
+  async function run() {
+    setRunning(true);
+    let done = 0;
+    let unreadable = 0;
+
+    try {
+      const { upload } = await import('@vercel/blob/client');
+
+      for (const [n, item] of plan.candidates.entries()) {
+        setProgress(`Working through your pictures, ${n + 1} of ${plan.candidates.length}`);
+
+        /*
+         * Told what is already stored, so a second run adds only the missing
+         * rungs rather than re-encoding and re-uploading work that is done.
+         */
+        const work = await variantsForStoredImage(
+          item.url,
+          item.filename,
+          item.variants.map((v) => v.width),
+        );
+
+        /*
+         * A picture whose real size we now know but which needed no new copies is
+         * still worth recording: a stock import may have stored the provider's
+         * numbers for a different, much larger file, and this is the moment that
+         * gets corrected.
+         */
+        const measured =
+          work.width && work.height ? { width: work.width, height: work.height } : undefined;
+
+        if (work.variants.length === 0 && !measured) {
+          unreadable += 1;
+          continue;
+        }
+
+        const uploaded: Array<{ url: string; width: number; height: number }> = [];
+        for (const variant of work.variants) {
+          try {
+            const stored = await upload(
+              `${uploadPrefix}${filenameStem(variant.filename)}.${MEDIA_MIME[variant.mime]}`,
+              variant.body,
+              { access: 'public', handleUploadUrl: '/api/media/upload', contentType: variant.mime },
+            );
+            uploaded.push({ url: stored.url, width: variant.width, height: variant.height });
+          } catch {
+            // One size short is still better than none.
+          }
+        }
+
+        if (uploaded.length === 0 && !measured) {
+          unreadable += 1;
+          continue;
+        }
+
+        const recorded = await recordVariantsAction(item.id, uploaded, measured);
+        if (recorded.ok && recorded.data) {
+          onUpdated(recorded.data);
+          done += 1;
+        } else if (!recorded.ok) {
+          onError(recorded.error);
+        }
+      }
+
+      setProgress(
+        unreadable === 0
+          ? `Done. ${done} ${done === 1 ? 'picture is' : 'pictures are'} now smaller on phones.`
+          : `Done. ${done} sorted, ${unreadable} could not be read back from storage.`,
+      );
+    } catch (error) {
+      onError(error instanceof Error ? error.message : 'Could not finish making those smaller.');
+      setProgress(null);
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <div className="mp-backfill">
+      <p className="mp-backfill__note">{describePlan(plan)}</p>
+      <button type="button" className="mp-btn" onClick={() => void run()} disabled={running}>
+        {running ? 'Working' : 'Make them smaller for phones'}
+      </button>
+      {progress && <p className="mp-backfill__progress">{progress}</p>}
+    </div>
+  );
+}
 
 function UploadPanel({
   kind,
@@ -618,12 +773,42 @@ function UploadPanel({
           },
         );
 
+        /*
+         * THE SMALLER COPIES, uploaded after the primary and never instead of it.
+         *
+         * Sequential rather than parallel on purpose. These are a nice-to-have on
+         * top of an upload that has already succeeded, and firing four concurrent
+         * uploads from a phone on a hotel wifi is a good way to make the one that
+         * mattered time out. The progress line names what is happening because
+         * otherwise a big photograph looks like it has stalled after "Uploading".
+         *
+         * Each failure is swallowed. A missing size costs a visitor some bytes;
+         * an exception here would lose a picture that is already safely stored.
+         */
+        const uploadedVariants: Array<{ url: string; width: number; height: number }> = [];
+        for (const [n, variant] of prepared.variants.entries()) {
+          try {
+            setProgress(
+              `Making ${prepared.filename} smaller for phones${label} (${n + 1} of ${prepared.variants.length})`,
+            );
+            const stored = await upload(
+              `${uploadPrefix}${filenameStem(variant.filename)}.${MEDIA_MIME[variant.mime]}`,
+              variant.body,
+              { access: 'public', handleUploadUrl: '/api/media/upload', contentType: variant.mime },
+            );
+            uploadedVariants.push({ url: stored.url, width: variant.width, height: variant.height });
+          } catch {
+            // This size is simply not available. The next one may still be.
+          }
+        }
+
         setProgress(`Saving ${prepared.filename}${label}`);
         const recorded = await recordUploadAction({
           url: result.url,
           filename: prepared.filename,
           width: prepared.width ?? undefined,
           height: prepared.height ?? undefined,
+          variants: uploadedVariants,
         });
 
         if (!recorded.ok) {
@@ -905,6 +1090,146 @@ function StockPanel({
         Photographs from <a href="https://www.pexels.com" target="_blank" rel="noreferrer noopener">Pexels</a>,
         free to use commercially. Adding one copies it into your own storage, so your
         pages never depend on somebody else keeping it online.
+      </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Generate with AI
+// ---------------------------------------------------------------------------
+
+const GEN_IDEAS = [
+  'A sunlit villa terrace overlooking the sea at golden hour',
+  'A quiet Greek harbour with fishing boats at dawn',
+  'A couple walking a palm-lined beach, seen from behind',
+  'Snowy mountain chalets under a clear evening sky',
+];
+
+/**
+ * Draw a picture from a description.
+ *
+ * The same shape as the photo library tab on purpose: a box, a shape, a button,
+ * and the picture lands in your bank ready to use. The one thing said out loud
+ * that the library does not need to say is that generated pictures are best for
+ * a mood or a scene, and a real photograph is still the better answer for a
+ * named place, because a model has never been to Santorini.
+ */
+function GeneratePanel({
+  canGenerate,
+  onAdded,
+  onError,
+}: {
+  canGenerate: boolean;
+  onAdded: (item: MediaItem) => void;
+  onError: (message: string) => void;
+}) {
+  const [prompt, setPrompt] = useState('');
+  const [orientation, setOrientation] = useState<string>('landscape');
+  const [busy, setBusy] = useState(false);
+
+  if (!canGenerate) {
+    return (
+      <div className="mp-error mp-error--panel">
+        <h3>AI image generation is not switched on yet</h3>
+        <p>
+          It needs an OpenAI API key. Get one at platform.openai.com, add it to this
+          project in Vercel as <code>OPENAI_API_KEY</code>, and redeploy. A Blob store
+          has to be connected too, so the pictures it draws have somewhere to live.
+        </p>
+        <p>
+          Your own images and the photo library do not need this, so those tabs work
+          on their own.
+        </p>
+      </div>
+    );
+  }
+
+  async function generate() {
+    const wanted = prompt.trim();
+    if (!wanted || busy) return;
+    setBusy(true);
+    onError('');
+    const result = await generateImageAction({ prompt: wanted, orientation });
+    setBusy(false);
+
+    if (!result.ok) {
+      onError(result.error);
+      return;
+    }
+    onAdded(result.data);
+  }
+
+  return (
+    <div className="mp-gen">
+      <form
+        className="mp-gen__form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void generate();
+        }}
+      >
+        <textarea
+          className="ed-textarea"
+          rows={3}
+          value={prompt}
+          placeholder="Describe the picture you want. A scene, a mood, a moment."
+          maxLength={1000}
+          disabled={busy}
+          onChange={(event) => setPrompt(event.target.value)}
+          aria-label="Describe the image to generate"
+        />
+        <div className="mp-gen__controls">
+          <select
+            className="ed-select"
+            value={orientation}
+            aria-label="Shape"
+            disabled={busy}
+            onChange={(event) => setOrientation(event.target.value)}
+          >
+            <option value="landscape">Landscape</option>
+            <option value="portrait">Portrait</option>
+            <option value="square">Square</option>
+          </select>
+          <button
+            type="submit"
+            className="tg-btn"
+            data-variant="primary"
+            disabled={busy || !prompt.trim()}
+          >
+            <Icon name="sparkle" size={14} />
+            {busy ? 'Drawing it…' : 'Generate'}
+          </button>
+        </div>
+      </form>
+
+      {!prompt && (
+        <div className="mp-suggest">
+          {GEN_IDEAS.map((idea) => (
+            <button
+              key={idea}
+              type="button"
+              className="mp-chip"
+              disabled={busy}
+              onClick={() => setPrompt(idea)}
+            >
+              {idea}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {busy && (
+        <p className="mp-quiet" role="status">
+          Drawing your picture. This takes a few seconds.
+        </p>
+      )}
+
+      <p className="mp-note">
+        Generated pictures are best for a mood or a scene. For a real place, the photo
+        library is usually the better answer, because a model has never been there.
+        Each picture you make is kept in your own storage and counts towards your daily
+        AI allowance.
       </p>
     </div>
   );

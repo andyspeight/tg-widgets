@@ -35,6 +35,7 @@ import {
   MOTION_BACKGROUND_RECIPES,
   normaliseSectionPadding,
   PADDING_PRESETS,
+  sectionMotionGaps,
   type MotionRecipe,
 } from '../../lib/content/schema';
 import {
@@ -59,8 +60,12 @@ import {
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
+  PX_SIZE_MIN,
+  PX_SIZE_MAX,
   REVEAL_STYLES,
+  SEA_TONE_PRESETS,
 } from '../../lib/content/styles';
+import { AudienceField } from './AudienceField';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
 import {
@@ -79,6 +84,7 @@ import {
   updateColumn,
   updateRow,
   updateSection,
+  updateBlockAudienceAtPath,
   updateBlockBoxAtPath,
   updateBlockPropsAtPath,
   updateBlockResponsiveAtPath,
@@ -92,8 +98,12 @@ import { ImageField } from '../media/ImageField';
 import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
 import { ListingFilterFields } from './ListingFilterFields';
+import { ListingOrderArrows } from './ListingOrderArrows';
+import { listingIn, listingKey } from '../../lib/content/listings';
+import type { ListingCards } from '../../lib/db/listings';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
-import { writeSeoAction } from '../../app/actions/ai';
+import { rewriteSectionAction, writeSeoAction } from '../../app/actions/ai';
+import { saveSectionTemplateAction } from '../../app/actions/section-templates';
 import { rebuildImportAction } from '../../app/actions/import';
 import { pageText } from '../../lib/seo/audit';
 
@@ -110,6 +120,12 @@ const ALIGN_CHOICES: Array<{ value: string; label: string }> = [
 ];
 
 interface Props {
+  /**
+   * The collection cards the canvas is drawing, so a grid's entries can be
+   * arranged from the block that shows them. See ListingOrderArrows.
+   */
+  listings?: ListingCards;
+  onListingOrder?: (key: string, orderedIds: string[]) => void;
   page: Page;
   selected: Path | null;
   isStaff: boolean;
@@ -306,6 +322,8 @@ export function Properties({
   itemFields,
   editingOnCanvas = false,
   viewport = 'desktop',
+  listings,
+  onListingOrder,
 }: Props) {
   return (
     <aside className="ed-props" aria-label="Properties">
@@ -391,6 +409,8 @@ export function ItemOptions({
   onItemMeta,
   itemFields,
   tier = 'desktop',
+  listings,
+  onListingOrder,
 }: {
   page: Page;
   selected: Path | null;
@@ -421,6 +441,9 @@ export function ItemOptions({
   itemMeta?: Props['itemMeta'];
   onItemMeta?: Props['onItemMeta'];
   itemFields?: Props['itemFields'];
+  /** The drawn collection cards, so a grid can be arranged from its own block. */
+  listings?: ListingCards;
+  onListingOrder?: (key: string, orderedIds: string[]) => void;
 }) {
   return (
     <>
@@ -486,6 +509,8 @@ export function ItemOptions({
           onCommit={onCommit}
           onSelect={onSelect}
           tier={tier}
+          listings={listings}
+          onListingOrder={onListingOrder}
         />
       )}
     </>
@@ -1137,6 +1162,178 @@ function SeoAssistant({
 
 // ---------------------------------------------------------------------------
 
+/**
+ * The two AI tools that live on a whole section: rewrite its words, and save it
+ * as a reusable section.
+ *
+ * REWRITE keeps the design and changes only the copy. It hands the section to
+ * the server, which addresses its slots (native or imported) and rewrites them
+ * on the instruction, then swaps the one section back in. SAVE AS A SECTION
+ * keeps a sanitised copy of the section in this client's own library, which the
+ * "My sections" tab of the add-a-section dialog offers back on any page.
+ *
+ * Both are thin: the judgement, the money and the validation are on the server.
+ * This holds an input, a button, and the one message the person can act on.
+ */
+function SectionAiTools({
+  page,
+  index,
+  onCommit,
+}: {
+  page: Page;
+  index: number;
+  onCommit: Props['onCommit'];
+}) {
+  const [instruction, setInstruction] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  async function rewrite() {
+    const wanted = instruction.trim();
+    const section = page.sections[index];
+    if (!wanted || busy || !section) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await rewriteSectionAction({ instruction: wanted, section });
+      if (result.ok) {
+        onCommit((current) => {
+          if (!current.sections[index]) return current;
+          const sections = [...current.sections];
+          sections[index] = result.section;
+          return { ...current, sections };
+        }, `sec:${index}:rewrite`);
+        setInstruction('');
+        return;
+      }
+      setError(result.error);
+    } catch {
+      setError('Something went wrong rewriting that. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function save() {
+    const wanted = name.trim();
+    const section = page.sections[index];
+    if (!wanted || saving || !section) return;
+    setSaving(true);
+    setSaveError('');
+    setSaved(false);
+    try {
+      const result = await saveSectionTemplateAction({ name: wanted, section });
+      if (result.ok) {
+        setSaved(true);
+        setName('');
+        return;
+      }
+      setSaveError(result.error);
+    } catch {
+      setSaveError('Something went wrong saving that. Try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Group title="AI and saving" defaultOpen={false}>
+      <div className="ed-field">
+        <label className="ed-label" htmlFor={`ed-rewrite-${index}`}>
+          Rewrite this section
+        </label>
+        <input
+          id={`ed-rewrite-${index}`}
+          className="ed-input"
+          value={instruction}
+          placeholder="warmer, shorter, for families"
+          maxLength={200}
+          disabled={busy}
+          onChange={(event) => setInstruction(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              void rewrite();
+            }
+          }}
+        />
+        <p className="ed-help">
+          Say how you want it read and the words are rewritten in place. The
+          layout, the pictures and the design stay exactly as they are.
+        </p>
+        <button
+          type="button"
+          className="ed-btn"
+          data-variant="primary"
+          disabled={busy || !instruction.trim()}
+          onClick={() => void rewrite()}
+        >
+          <Icon name="sparkle" size={14} />
+          {busy ? 'Rewriting…' : 'Rewrite the words'}
+        </button>
+        {error && (
+          <p className="ed-help" role="alert" style={{ marginTop: 6 }}>
+            {error}
+          </p>
+        )}
+      </div>
+
+      <div className="ed-field">
+        <label className="ed-label" htmlFor={`ed-savesec-${index}`}>
+          Save as a section
+        </label>
+        <input
+          id={`ed-savesec-${index}`}
+          className="ed-input"
+          value={name}
+          placeholder="My villa hero"
+          maxLength={80}
+          disabled={saving}
+          onChange={(event) => {
+            setName(event.target.value);
+            setSaved(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              void save();
+            }
+          }}
+        />
+        <p className="ed-help">
+          Keep this section in your own library to drop onto any page later. Find
+          it under "My sections" when you add a section.
+        </p>
+        <button
+          type="button"
+          className="ed-btn"
+          data-variant="ghost"
+          disabled={saving || !name.trim()}
+          onClick={() => void save()}
+        >
+          <Icon name="copy" size={14} />
+          {saving ? 'Saving…' : 'Save this section'}
+        </button>
+        {saved && (
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Saved to your sections.
+          </p>
+        )}
+        {saveError && (
+          <p className="ed-help" role="alert" style={{ marginTop: 6 }}>
+            {saveError}
+          </p>
+        )}
+      </div>
+    </Group>
+  );
+}
+
 function SectionFields({
   page,
   index,
@@ -1155,6 +1352,11 @@ function SectionFields({
   const set = (patch: Parameters<typeof updateSection>[2], key: string) =>
     onCommit((current) => updateSection(current, index, patch), key);
 
+  // Motion settings that are switched on but have no background content to move,
+  // so the pane can say what to add rather than leave the client thinking it is
+  // broken. Mirrors the render's own guard; see sectionMotionGaps.
+  const motionGaps = sectionMotionGaps(section);
+
   return (
     <>
       <Group title="Name">
@@ -1170,6 +1372,8 @@ function SectionFields({
       </div>
 
       </Group>
+
+      <SectionAiTools page={page} index={index} onCommit={onCommit} />
 
       <Group title="Layout">
       <Segmented
@@ -1243,14 +1447,96 @@ function SectionFields({
         the foot of the section to fine tune it.
       </p>
 
-      <Measure
-        label="Minimum height"
-        value={section.minHeight}
-        max={MAX_MIN_HEIGHT}
-        step={10}
-        hint="A floor, not a fixed height. A section with more content in it still grows."
-        onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
-      />
+      {/*
+        FILL THE SCREEN. A viewport-tall section (100svh), device-independent,
+        which a pixel minimum could never hit on every screen at once. It wins
+        over the pixel height, so that control steps aside while it is on.
+      */}
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={section.fullHeight === true}
+            onChange={(event) =>
+              set({ fullHeight: event.target.checked || undefined }, `sec:${index}:fullh`)
+            }
+          />
+          <span>Fill the screen</span>
+        </label>
+        <p className="ed-help" style={{ marginTop: 6 }}>
+          Makes the section exactly one screen tall, whatever the device. A section
+          with more than a screenful of content still grows past it.
+        </p>
+      </div>
+
+      {!section.fullHeight && (
+        <Measure
+          label="Minimum height"
+          value={section.minHeight}
+          max={MAX_MIN_HEIGHT}
+          step={10}
+          hint="A floor, not a fixed height. A section with more content in it still grows."
+          onChange={(minHeight) => set({ minHeight }, `sec:${index}:minh`)}
+        />
+      )}
+
+      {/*
+        * Only worth asking once the section can actually be taller than its
+        * content: a screenful (fill the screen) or a pixel floor. Below that
+        * there is no spare height to place, and a control that does nothing is
+        * worse than no control.
+        */}
+      {(section.fullHeight || (section.minHeight ?? 0) > 0) && (
+        <div className="ed-field">
+          <label className="ed-label" htmlFor={`ed-aligny-${index}`}>
+            Content sits
+          </label>
+          <select
+            id={`ed-aligny-${index}`}
+            className="ed-select"
+            value={section.alignY ?? 'top'}
+            onChange={(event) => {
+              const v = event.target.value;
+              set(
+                { alignY: v === 'centre' || v === 'bottom' ? v : undefined },
+                `sec:${index}:alignY`,
+              );
+            }}
+          >
+            <option value="top">At the top</option>
+            <option value="centre">In the middle</option>
+            <option value="bottom">At the bottom</option>
+          </select>
+          <p className="ed-hint">
+            Where the words go when the section is taller than they are. Only does
+            anything once there is spare height to place.
+          </p>
+        </div>
+      )}
+
+      {/*
+        STICK TO THE TOP. The section pins to the top of the screen as the page
+        scrolls past it and stays there while the rest scrolls under: a sub-nav, a
+        headline, a booking bar. It only pins on the live site and in preview, so
+        it will not stick over the toolbar while you build the page here.
+      */}
+      <div className="ed-field">
+        <label className="ed-toggle">
+          <input
+            type="checkbox"
+            checked={section.sticky === true}
+            onChange={(event) =>
+              set({ sticky: event.target.checked || undefined }, `sec:${index}:sticky`)
+            }
+          />
+          <span>Stick to the top on scroll</span>
+        </label>
+        <p className="ed-help" style={{ marginTop: 6 }}>
+          Pins the section to the top of the screen once it is scrolled there, so it
+          stays in view while the rest of the page moves under it. Press the eye
+          (Preview) at the top to see it in action.
+        </p>
+      </div>
 
       <Measure
         label="Overlap the section above"
@@ -1282,7 +1568,34 @@ function SectionFields({
 
       </Group>
 
+      <Group title="Who sees this" defaultOpen={false}>
+        {/*
+          SERVER-SIDE PERSONALISATION, per section. Keyed on the section id so
+          switching between sections re-reads each one's own rule rather than
+          carrying the last section's draft across. The rule resolves at render on
+          the published site (lib/content/audience); nothing is hidden with CSS.
+        */}
+        <AudienceField
+          key={`aud-${section.id}`}
+          audience={section.audience}
+          onChange={(next) => set({ audience: next }, `sec:${index}:audience`)}
+        />
+      </Group>
+
       <Group title="Motion" defaultOpen={false}>
+        {/*
+          MOTION IS PAUSED WHILE EDITING. The render suppresses every section motion
+          (the recipe, reveal, parallax, Ken Burns and the hover effects) on the
+          editing canvas, so a drifting background does not jump back to the start on
+          every keystroke and a reveal does not replay as you type. That is right for
+          editing but it is also why a client who sets a recipe and stays in the
+          editor sees nothing move and assumes it is broken (Andy, 30 Aug 2026). The
+          note says where the motion actually is: press the eye to preview it.
+        */}
+        <p className="ed-help" data-tone="warn" style={{ marginBottom: 8 }}>
+          Movement is paused while you edit, so it does not distract. Press the eye
+          (Preview) at the top to see it move.
+        </p>
         {/*
           THE MOTION RECIPE, first in the group because it is the headline choice: it
           says how the whole section moves, where the switches below it are finer
@@ -1332,6 +1645,37 @@ function SectionFields({
             background picture instead, which suits a closing section at the foot of a page.
             Both stop for anyone who prefers less motion.
           </p>
+          {/*
+            WHY IT WILL NOT MOVE. Some recipes move the section's background, so they
+            need one to move. When the client has picked such a recipe on a section
+            with nothing behind it, say what to add rather than leave them thinking
+            it is broken. Only one of these can be true at a time.
+          */}
+          {motionGaps.includes('recipe-video') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement plays a background video, and there isn&apos;t one yet. Add a
+              video under Background image below and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-pictures') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement plays a sequence of pictures. Add two or more under Background
+              image below and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement moves a still background picture, and there isn&apos;t one yet.
+              Add one under Background image below (a single picture, not a slideshow or
+              video) and it will move.
+            </p>
+          )}
+          {motionGaps.includes('recipe-cards') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              This movement travels a row of cards sideways, and the section has no cards
+              yet. Add a Cards block and it will move.
+            </p>
+          )}
         </div>
         {section.motion && (
           <div className="ed-field">
@@ -1357,6 +1701,41 @@ function SectionFields({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+        {/*
+          THE SEA'S TONE, only for the cinematic sea. A travel agent picks their water
+          by name rather than dialling three colours: Caribbean turquoise, Nordic steel.
+          Absent is the northern default, so a section that never chose one still has a
+          finished sea.
+        */}
+        {section.motion?.recipe === 'A1' && (
+          <div className="ed-field">
+            <label className="ed-label" htmlFor={`ed-sea-tone-${index}`}>
+              Sea scene
+            </label>
+            <select
+              id={`ed-sea-tone-${index}`}
+              className="ed-select"
+              value={section.seaTone ?? 'northern'}
+              onChange={(event) => {
+                const tone = SEA_TONE_PRESETS.find((t) => t.value === event.target.value)?.value;
+                set(
+                  { seaTone: tone && tone !== 'northern' ? tone : undefined },
+                  `sec:${index}:seaTone`,
+                );
+              }}
+            >
+              {SEA_TONE_PRESETS.map((tone) => (
+                <option key={tone.value} value={tone.value}>
+                  {tone.label}
+                </option>
+              ))}
+            </select>
+            <p className="ed-help" style={{ marginTop: 6 }}>
+              Which water to paint. Give the section a sky photograph as its background and
+              the sea meets it at the horizon.
+            </p>
           </div>
         )}
         <div className="ed-field">
@@ -1521,6 +1900,12 @@ function SectionFields({
             visitor scrolls, for a sense of depth. It needs a still background picture, and it
             eases off for anyone who prefers less motion.
           </p>
+          {motionGaps.includes('parallax-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              There is no still background picture to drift yet. Add one under Background
+              image below and it will move.
+            </p>
+          )}
         </div>
         {/*
           Ken Burns is the other background motion, and the two move the one picture,
@@ -1547,6 +1932,12 @@ function SectionFields({
             instead of parallax rather than with it, and eases off for anyone who prefers less
             motion.
           </p>
+          {motionGaps.includes('ken-burns-still') && (
+            <p className="ed-help" data-tone="warn" style={{ marginTop: 6 }}>
+              There is no still background picture to zoom yet. Add one under Background
+              image below and it will move.
+            </p>
+          )}
         </div>
       </Group>
 
@@ -2492,12 +2883,26 @@ function GridCellsControl({
   );
 }
 
+/** A value the dropdown offers, versus one typed by hand in pixels. */
+const CUSTOM_TEXT_SIZE = '__custom_px__';
+/** A stored size the dropdown has no option for is a hand-typed pixel size. */
+function isCustomPx(value: string | undefined): value is string {
+  return typeof value === 'string' && /^\d{1,4}px$/.test(value);
+}
+
 /**
- * The Text size dropdown, per screen. Offers the site's own sizes and the fixed
+ * The Text size control, per screen. Offers the site's own sizes and the fixed
  * scale, the very list the toolbar offers a phrase, plus one empty option: on
  * desktop it means "no size of my own, use the block's style", and on a smaller
  * screen "the same size as the screen above". The caller sets the base on desktop
  * and the override otherwise, so this is only the picker.
+ *
+ * A SIZE OF YOUR OWN, IN PIXELS. The scale tops out at 2.5rem, and Andy wanted a
+ * heading bigger than that (the toolbar already lets a phrase go to 200px). So
+ * "Custom…" reveals a pixel box, 6 to 200, exactly the range and validator the
+ * toolbar uses (PX_SIZE_MIN/MAX, sizeValue), because what a whole block may be
+ * set to and what a phrase may be set to must not drift. A stored px size the
+ * dropdown has no option for reopens the box with the number in it.
  */
 function TextSizeField({
   tier,
@@ -2509,8 +2914,15 @@ function TextSizeField({
   onChange: (value: string | undefined) => void;
 }) {
   const id = `ed-text-size-${tier}`;
+  const custom = isCustomPx(value);
+  // Kept open once chosen from the dropdown, before a number is typed, so the box
+  // does not vanish the moment it appears. A real px value keeps it open too.
+  const [pxOpen, setPxOpen] = useState(false);
+  const showPx = custom || pxOpen;
   const autoLabel =
     tier === 'desktop' ? 'Auto (the block style)' : `Same as ${TIER_LABEL[INHERITS_FROM[tier]]}`;
+  // The select shows the matching option, "Custom…" for a typed px, or Auto.
+  const selectValue = custom ? CUSTOM_TEXT_SIZE : showPx ? CUSTOM_TEXT_SIZE : value ?? '';
   return (
     <div className="ed-field">
       <label className="ed-label" htmlFor={id}>
@@ -2519,8 +2931,18 @@ function TextSizeField({
       <select
         id={id}
         className="ed-select"
-        value={value ?? ''}
-        onChange={(event) => onChange(event.target.value || undefined)}
+        value={selectValue}
+        onChange={(event) => {
+          const next = event.target.value;
+          if (next === CUSTOM_TEXT_SIZE) {
+            // Open the box; do not commit yet, the block keeps its size until a
+            // number is typed, so choosing Custom never blanks the text.
+            setPxOpen(true);
+            return;
+          }
+          setPxOpen(false);
+          onChange(next || undefined);
+        }}
       >
         <option value="">{autoLabel}</option>
         {FONT_SIZE_GROUPS.map((group) => (
@@ -2532,7 +2954,56 @@ function TextSizeField({
             ))}
           </optgroup>
         ))}
+        <optgroup label="Your own">
+          <option value={CUSTOM_TEXT_SIZE}>Custom…</option>
+        </optgroup>
       </select>
+      {showPx && (
+        <div className="ed-text-size-px">
+          <input
+            /*
+              UNCONTROLLED, and committed on blur or Enter, not on every keystroke.
+              A number input that clamped each keystroke turned "120" into "6" the
+              moment the first digit was typed, because 1 is below the minimum. So
+              the box holds the raw digits while typing and only clamps when the
+              person is done, exactly the split the toolbar uses. Keyed on the
+              stored value and screen so switching screens, or an undo, reseeds it.
+            */
+            key={`${tier}:${custom ? value : 'new'}`}
+            type="number"
+            className="ed-input"
+            aria-label="Text size in pixels"
+            min={PX_SIZE_MIN}
+            max={PX_SIZE_MAX}
+            step={1}
+            placeholder={`${PX_SIZE_MIN}–${PX_SIZE_MAX}`}
+            defaultValue={custom ? String(parseInt(value, 10)) : ''}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                event.currentTarget.blur();
+              }
+            }}
+            onBlur={(event) => {
+              const digits = event.currentTarget.value.trim();
+              if (digits === '') {
+                // Cleared: back to Auto, the same as picking the empty option.
+                setPxOpen(false);
+                onChange(undefined);
+                return;
+              }
+              if (!/^\d{1,4}$/.test(digits)) return;
+              // Clamped here, refused by the sanitiser: type 500 and it becomes
+              // 200 rather than nothing taking, the friendlier half of the split.
+              const n = Math.min(PX_SIZE_MAX, Math.max(PX_SIZE_MIN, Number(digits)));
+              onChange(`${n}px`);
+            }}
+          />
+          <span className="ed-text-size-px__unit" aria-hidden="true">
+            px
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -2661,6 +3132,8 @@ function BlockFields({
   onCommit,
   onSelect,
   tier = 'desktop',
+  listings,
+  onListingOrder,
 }: {
   /*
    * A block in an ordinary column, OR a block inside a container's inner column.
@@ -2681,6 +3154,9 @@ function BlockFields({
   onSelect?: Props['onSelect'];
   /** The screen the device switcher is on, so Text size edits that size. */
   tier?: Tier;
+  /** The drawn collection cards, so a grid can be arranged from its own block. */
+  listings?: ListingCards;
+  onListingOrder?: (key: string, orderedIds: string[]) => void;
 }) {
   const block = blockAtPath(page, path);
   if (!block) return null;
@@ -2754,6 +3230,37 @@ function BlockFields({
    * whatever the named collection declares, which is why this is not a registry
    * field like everything else on this pane. See ListingFilterFields.
    */
+  /*
+   * ARRANGING THE ENTRIES, from the block that draws them.
+   *
+   * Andy picked "The order I set" on this block, looked at his two cards and
+   * said "There are no arrows". The arrows existed, on the collections screen,
+   * which is a different page: a setting whose effect you cannot reach from
+   * where you set it reads as broken however clear the help line is. So they
+   * are in both places, and this is the one beside the grid.
+   *
+   * Only when the order is actually hand-set. Under any of the other four the
+   * position is not what decides the sequence, so arrows here would move a
+   * number nothing is reading and appear to do nothing.
+   */
+  if (
+    block.type === 'cards' &&
+    block.props.source === 'collection' &&
+    block.props.order === 'manual'
+  ) {
+    const request = listingIn(block);
+    const key = request ? listingKey(request) : '';
+    add(
+      'content',
+      <ListingOrderArrows
+        key="listing-order"
+        collectionKey={typeof block.props.collection === 'string' ? block.props.collection : ''}
+        cards={(key && listings?.get(key)) || []}
+        onMoved={(orderedIds) => onListingOrder?.(key, orderedIds)}
+      />,
+    );
+  }
+
   if (block.type === 'cards' && block.props.source === 'collection') {
     add(
       'content',
@@ -3062,6 +3569,24 @@ function BlockFields({
   };
   add('layout', <HideOnField key="hide-on" tier={tier} hidden={hideOn.includes(tier)} onChange={setHidden} />);
 
+  // WHO SEES THIS BLOCK: the same audience rule a section carries, on one block
+  // (personalisation v2). Committed like hideOn, through the path-aware setter so
+  // it works on a block in a column and one inside a container alike.
+  add(
+    'layout',
+    <div className="ed-field" key="who-sees-block">
+      <label className="ed-label">Who sees this</label>
+      <AudienceField
+        key={`blk-aud-${block.id}`}
+        noun="block"
+        audience={block.audience}
+        onChange={(next) =>
+          onCommit((c) => updateBlockAudienceAtPath(c, path, next), `blk:${block.id}:audience`)
+        }
+      />
+    </div>,
+  );
+
   // A content-only member keeps the Content group, the words, the picture and
   // the link, and loses the design panels they cannot save anyway.
   const ordered = GROUP_ORDER.filter((group) => groups.get(group)?.length).filter(
@@ -3087,9 +3612,16 @@ function BlockFields({
       {canStructure && path.kind === 'block' && block.type === 'grid' && (
         <GridCellsControl block={block} path={path} onCommit={onCommit} />
       )}
-      {canStructure && path.kind === 'block' && block.type !== 'grid' && hasInnerColumns(block.type) && (
-        <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
-      )}
+      {/* A loop is a column-holder too, but with exactly ONE column: it repeats a
+          single designed card, so adding or removing columns has no meaning. It
+          keeps the nested editing of that one card and skips this control. */}
+      {canStructure &&
+        path.kind === 'block' &&
+        block.type !== 'grid' &&
+        block.type !== 'loop' &&
+        hasInnerColumns(block.type) && (
+          <ContainerColumnsControl block={block} path={path} onCommit={onCommit} />
+        )}
       {ordered.map((group, index) => (
         <Group key={group} title={GROUP_LABELS[group]} defaultOpen={index === 0}>
           {groups.get(group)}

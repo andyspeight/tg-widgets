@@ -40,8 +40,14 @@ import { resolveAt, withOverride } from '../../lib/content/responsive';
 import { PageRenderer } from '../render/PageRenderer';
 import { usePreparedMarkup } from './usePreparedMarkup';
 import type { PreparedMap } from '../../lib/content/prepared';
+import { fillListings } from '../../lib/content/listings';
+import type { ListingCards } from '../../lib/db/listings';
 import { fillNavFolders, type NavPage } from '../../lib/content/nav';
 import type { Viewport } from './EditorShell';
+import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
+import type { VisitorSignals } from '../../lib/content/audience';
+import { personaliseSections } from '../../lib/content/personalise';
+import { PreviewWidgets } from './PreviewWidgets';
 
 /**
  * Where a block is added or dropped.
@@ -69,6 +75,8 @@ interface Props {
    * See lib/content/prepared.ts for why the canvas cannot clean it itself.
    */
   preparedSeed?: PreparedMap;
+  /** The cards a collection grid will draw. See lib/db/listings.ts. */
+  listings?: ListingCards;
   page: Page;
   selected: Path | null;
   selectedKey: string | null;
@@ -139,6 +147,18 @@ interface Props {
   commentPins?: readonly { path: string; threadId: string; count: number }[];
   /** Open the Comments panel on a thread, from a click on its canvas pin. */
   onOpenComment?: (threadId: string) => void;
+  /**
+   * The site-wide floating widgets, drawn in Preview so a client sees them the
+   * way the published site does. Absent on the region and item screens, which
+   * have no site chrome of their own to preview.
+   */
+  floatingWidgets?: FloatingWidgetsSettings;
+  /**
+   * The visitor Preview is pretending to be, or absent to show everything. When
+   * set (only in preview), the canvas hides the sections whose audience rule this
+   * visitor fails, exactly as the published site does. See lib/content/audience.
+   */
+  previewAs?: VisitorSignals;
 }
 
 /**
@@ -238,6 +258,9 @@ export function Canvas({
   commentPins = [],
   onOpenComment,
   preparedSeed,
+  listings,
+  floatingWidgets,
+  previewAs,
 }: Props) {
   const frameRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -251,6 +274,30 @@ export function Canvas({
    * the client makes a new one. See usePreparedMarkup.
    */
   const prepared = usePreparedMarkup([page, chromeHeader, chromePage, chromeFooter], preparedSeed);
+
+  /*
+   * THE TREE THE CANVAS DRAWS, which is not the tree it edits.
+   *
+   * fillListings writes the cards into `props.items`, so filling `page` itself
+   * would put a snapshot of today's listing into the document and the next save
+   * would keep it. This copy is display only; every id, section, row, column and
+   * block sits at exactly the same path, because the fill replaces one prop and
+   * changes nothing else, so selection and every commit still land where they
+   * did.
+   */
+  const shown = useMemo(() => fillListings(page, listings ?? new Map()), [page, listings]);
+
+  /*
+   * PREVIEW AS a chosen visitor: hide the sections that visitor's audience rule
+   * fails, the same decision the published site makes per request. Only when a
+   * profile is set (which is only ever in preview); editing always shows every
+   * section so a hidden one can still be selected and changed. A new object so
+   * the memo below and the renderer see the filtered tree, never a mutation.
+   */
+  const shownForVisitor = useMemo(
+    () => (previewAs ? { ...shown, sections: personaliseSections(shown.sections, previewAs) } : shown),
+    [shown, previewAs],
+  );
 
   // ---------------------------------------------------------------------
   // Selection outlines
@@ -603,6 +650,28 @@ export function Canvas({
     const href = link.getAttribute('href') ?? '';
     if (href === '' || href.startsWith('#')) return;
     event.preventDefault();
+
+    /*
+     * AN INTERNAL LINK GOES TO THE PREVIEW OF THAT PAGE, IN THIS TAB.
+     *
+     * Two things were wrong and both showed the day collection cards started
+     * drawing on the canvas, because until then preview had almost nothing
+     * clickable in it. A card links to "/guides/hvar", which is an address on
+     * the CLIENT'S site; resolved against the editor's own origin it is
+     * tg-sites-shell.vercel.app/guides/hvar, and that is a 404. And it opened
+     * in a new tab, which nobody asked for: following a link in a preview
+     * should feel like browsing the site.
+     *
+     * The app already serves the whole site under /preview, so an internal path
+     * is simply prefixed. Same tab, because the editor guards unload and will
+     * ask before losing anything unsaved. An external link still opens away
+     * from the editor, which is what a new tab is actually for.
+     */
+    const internal = href.startsWith('/') && !href.startsWith('//');
+    if (internal) {
+      window.location.assign(href.startsWith('/preview') ? href : `/preview${href}`);
+      return;
+    }
     window.open(link.href, '_blank', 'noopener,noreferrer');
   }, []);
 
@@ -944,10 +1013,11 @@ export function Canvas({
         onKeyDown={preview ? undefined : onKeyDown}
       >
         <PageRenderer
-          /* Menu folder links filled for the preview, at the render boundary so
-             the tree the editor holds and saves is untouched. Non-structural, so
-             it changes no data-path the editing handlers resolve against. */
-          page={fillNavFolders(page, navPages)}
+          /* Menu folder links and collection cards filled for the preview, at
+             the render boundary so the tree the editor holds and saves is
+             untouched. Both are non-structural, so neither changes a data-path
+             the editing handlers resolve against. */
+          page={fillNavFolders(shownForVisitor, navPages)}
           editable={!preview}
           editingPath={preview ? null : editingPath}
           /*
@@ -968,6 +1038,17 @@ export function Canvas({
           */
           region={region}
         />
+        {/*
+          The site-wide floating widgets, shown only in Preview and only on a
+          page (not the header, footer or a collection item, which have no site
+          chrome of their own). Inside the frame so its transform contains their
+          position:fixed to the previewed page rather than the editor window. See
+          PreviewWidgets: a <script> React renders never runs, so it loads them
+          with the DOM API instead.
+        */}
+        {preview && floatingWidgets && (
+          <PreviewWidgets settings={floatingWidgets} active={preview} signals={previewAs} />
+        )}
         {/*
           Comment pins, over the page but inside the frame so they scroll with it.
           A React overlay rather than DOM injected onto the blocks, so the renderer

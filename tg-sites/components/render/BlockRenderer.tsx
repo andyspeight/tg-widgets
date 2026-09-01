@@ -11,6 +11,7 @@
 import type { ReactElement } from 'react';
 import type { Block } from '../../lib/content/schema';
 import type { PreparedMap } from '../../lib/content/prepared';
+import type { ImageSizes } from '../../lib/content/image-sizes';
 import { isKnownBlock } from '../../lib/content/blocks';
 import {
   AccordionBlock,
@@ -73,6 +74,7 @@ export function BlockRenderer({
   editingHost = false,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   block: Block;
   editable?: boolean;
@@ -91,6 +93,8 @@ export function BlockRenderer({
    * than on the block's own props.
    */
   prepared?: PreparedMap;
+  /** Stored sizes by url, for an srcset. See lib/content/image-sizes.ts. */
+  sizes?: ImageSizes;
 }): ReactElement | null {
   const props = block.props ?? {};
 
@@ -120,7 +124,7 @@ export function BlockRenderer({
       case 'tabs':
         return <TabsBlock props={props} blockId={block.id} />;
       case 'image':
-        return <ImageBlock props={props} editing={editable} />;
+        return <ImageBlock props={props} editing={editable} sizes={sizes} />;
       case 'video':
         return <VideoBlock props={props} />;
       case 'gallery':
@@ -233,7 +237,7 @@ export function BlockRenderer({
        * every block.
        */
       case 'imported':
-        return <ImportedBlock props={props} blockId={block.id} prepared={prepared} />;
+        return <ImportedBlock props={props} blockId={block.id} prepared={prepared} sizes={sizes} />;
       /*
        * `editorCanvas`, NOT `editable`, tells the widget to host itself in an
        * iframe. The two agree while editing but split in preview: `editable` goes

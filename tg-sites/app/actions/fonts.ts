@@ -206,6 +206,14 @@ export async function uploadFontAction(form: FormData): Promise<FontResult> {
 
       files.push({
         weight: Number.isFinite(weight) ? Math.min(900, Math.max(100, Math.round(weight))) : 400,
+        /*
+         * One weight, because the person uploading told us which one.
+         *
+         * A variable file uploaded by hand would cover a range, but nothing on
+         * this form asks for one and guessing it from the file's own axes is a
+         * different job. Null keeps an upload behaving exactly as it did.
+         */
+        weightMax: null,
         format,
         bytes,
         // An uploaded file covers whatever it covers. There is nothing to split

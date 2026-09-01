@@ -56,7 +56,12 @@ export async function buildDesignedSectionAction(input: unknown): Promise<Design
 
   const section = buildPresetSection(preset);
 
-  const plan = sectionPhotoTargets(preset, 0);
+  /*
+     * A gallery stays the client's to choose in the editor. The frame-fill
+     * exists for the AI page path, where nobody has chosen yet; on a designed
+     * insert it would replace that choice with generic stock.
+     */
+    const plan = sectionPhotoTargets(preset, 0).filter((target) => target.place.kind !== 'gallery');
   if (plan.length > 0) {
     await fillPlannedPhotos(tenantId, plan, [section]);
   }

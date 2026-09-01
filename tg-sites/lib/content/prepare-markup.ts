@@ -37,6 +37,7 @@ import { importScopeClass, scopeImportCss } from '../import/css';
 import { sanitiseEmbedHtml } from './sanitise-embed';
 import { hasInnerColumns } from './inner-columns';
 import { needsPreparing, type PreparedMap, type PreparedMarkup } from './prepared';
+import type { ImageSizes } from './image-sizes';
 import type { Block, Page, Section } from './schema';
 
 function str(props: Record<string, unknown>, key: string): string {
@@ -51,7 +52,15 @@ function str(props: Record<string, unknown>, key: string): string {
  * `preparedFor` reads the two cases the same way and the block draws its own
  * placeholder either way.
  */
-export function prepareBlock(block: Block): PreparedMarkup | null {
+export function prepareBlock(
+  block: Block,
+  imageSizes?: ImageSizes,
+  /*
+   * Whether this block may claim the page's one eager picture. Absent means the
+   * caller is not rendering (the editor, the save path), and nothing is injected.
+   */
+  imagePriority?: { heroFirst: boolean },
+): PreparedMarkup | null {
   if (!block || !needsPreparing(block.type)) return null;
   const props = (block.props ?? {}) as Record<string, unknown>;
 
@@ -64,9 +73,9 @@ export function prepareBlock(block: Block): PreparedMarkup | null {
   // wrapper wears, and importScopeClass is the single place that name is
   // decided, because a stylesheet scoped to a class the wrapper does not carry
   // is an unstyled section with no error anywhere.
-  const { html } = cleanImportHtml(str(props, 'html'));
+  const { html, images } = cleanImportHtml(str(props, 'html'), { imageSizes, imagePriority });
   const { css } = scopeImportCss(str(props, 'css'), { scope: `.${importScopeClass(block.id)}` });
-  return html.trim() || css ? { html, css } : null;
+  return html.trim() || css ? { html, css, images } : null;
 }
 
 /**
@@ -111,20 +120,46 @@ function eachBlock(sections: readonly Section[], visit: (block: Block) => void):
  * item go through the same call: all three are sections, and all three can hold
  * an imported design.
  */
-export function prepareSections(sections: readonly Section[] | undefined): PreparedMap {
+export function prepareSections(
+  sections: readonly Section[] | undefined,
+  imageSizes?: ImageSizes,
+  /*
+   * THE PAGE'S OWN TREE PASSES TRUE, the header and the footer do not.
+   *
+   * Only one picture on a page should be eager, and on a travel site it is the
+   * hero in the first section rather than a logo in the bar above it. eachBlock
+   * walks in document order, so the first block here that actually draws a
+   * picture takes the slot and every block after it is told the slot has gone.
+   *
+   * A header logo therefore comes out lazy, which sounds worse than it is: a
+   * browser fetches a lazy image that is already in the viewport straight away.
+   * What lazy really buys is the picture four sections down not racing the hero.
+   */
+  options?: { heroFirst?: boolean },
+): PreparedMap {
   const out: PreparedMap = {};
   if (!Array.isArray(sections)) return out;
 
+  let heroAvailable = options?.heroFirst === true;
+
   eachBlock(sections, (block) => {
-    const entry = prepareBlock(block);
-    if (entry) out[block.id] = entry;
+    // Absent unless the caller is rendering, which is what keeps the save path
+    // and the editor canvas byte-for-byte what they were.
+    const priority = imageSizes ? { heroFirst: heroAvailable } : undefined;
+    const entry = prepareBlock(block, imageSizes, priority);
+    if (!entry) return;
+    if (heroAvailable && (entry.images ?? 0) > 0) heroAvailable = false;
+    out[block.id] = entry;
   });
   return out;
 }
 
 /** The same, for a whole page. */
-export function preparePage(page: Pick<Page, 'sections'> | null | undefined): PreparedMap {
-  return prepareSections(page?.sections);
+export function preparePage(
+  page: Pick<Page, 'sections'> | null | undefined,
+  imageSizes?: ImageSizes,
+): PreparedMap {
+  return prepareSections(page?.sections, imageSizes);
 }
 
 /**

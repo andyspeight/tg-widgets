@@ -178,6 +178,44 @@
 .sv-item:last-child { border-bottom: 0; }
 .sv-item:hover { background: var(--ed-well); }
 
+/*
+ * The reorder arrows, stacked so the pair takes one column rather than two.
+ *
+ * A fixed width, so the titles beside them line up down the list: without it
+ * the column is as wide as whatever the buttons happen to be and the list reads
+ * as ragged. They keep their place when the row wraps on a phone, which is why
+ * the wrap rule below gives them flex-basis auto rather than letting them join
+ * the full-width main block.
+ */
+.sv-item__move {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.sv-item__move .sv-btn {
+  padding: 0;
+  line-height: 1;
+}
+
+/*
+ * A 44px touch target each way would be 88px of stacked buttons, which pushed
+ * every row from about 80px to 123px: a list of twenty guides loses a third of
+ * a screen to two arrows. So on a POINTER device they are 24px each, which is
+ * still a comfortable click and lets the pair sit inside the height the row
+ * already had. Touch keeps the full 44, where the target size is the thing
+ * that matters and there is no cursor to aim with.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .sv-item__move .sv-btn[data-icon='true'] {
+    min-width: 24px;
+    min-height: 24px;
+  }
+}
+/* Nothing to arrange with one entry, so the column collapses rather than
+   showing a pair of arrows that are both disabled. */
+.sv-list .sv-item:only-child .sv-item__move { display: none; }
+
 .sv-item__main {
   flex: 1;
   min-width: 0;
@@ -483,7 +521,7 @@
    rather than squeezing the page name to nothing. */
 @media (max-width: 720px) {
   .sv-item { flex-wrap: wrap; }
-  .sv-item__main { flex-basis: 100%; }
+  .sv-item__main { flex-basis: calc(100% - 3rem); }
 }
 
 
@@ -579,6 +617,26 @@
 @media (hover: none) {
   .sv-item .sv-btn { opacity: 1; }
 }
+
+/*
+ * THE REORDER ARROWS ARE EXEMPT, and this is the difference between an action
+ * and an affordance.
+ *
+ * Edit, Publish and Delete are things you go looking for on a row you have
+ * already chosen, so hiding them until you point at that row costs nothing.
+ * Reordering is a property of the LIST, and you cannot go looking for it
+ * without first knowing it is there. Andy was told the arrows existed, went to
+ * the screen, and reported that he could not see them: they were rendering
+ * perfectly, at opacity 0, waiting for a hover he had no reason to try.
+ *
+ * Resting at 0.55 rather than 1 so two more controls per row do not compete
+ * with the titles, which is the thing the rule above is protecting. Full
+ * strength on hover and focus like everything else.
+ */
+.sv-item .sv-item__move .sv-btn { opacity: 0.55; }
+.sv-item:hover .sv-item__move .sv-btn,
+.sv-item:focus-within .sv-item__move .sv-btn { opacity: 1; }
+.sv-item .sv-item__move .sv-btn:disabled { opacity: 0.25; }
 
 /* ------------------------------------------------------------------ */
 /* Status pills                                                        */
@@ -1422,3 +1480,419 @@
 @media (prefers-reduced-motion: reduce) {
   .sv-seg__btn { transition: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   Adopting a destination from the shared corpus.
+
+   NAMED sv-, NOT tgs-. This dialog is an OPERATE surface: it is part of the
+   Travelgenix tool, styled from --ed-* tokens, and it never carries a client's
+   brand. The tgs- namespace belongs to the published site, which is
+   client-branded. Getting that the wrong way round was harmless while the two
+   never met, and stopped being harmless the moment the client's theme went onto
+   the editor root: anything in the site namespace is a candidate for the
+   client's colours, and a picker dialog is not.
+
+   Built on the same tokens and the same row rhythm as .sv-list above, because
+   it is the same thing: a list of named things with one action each. The list
+   scrolls inside the dialog rather than growing it, so the search box and the
+   kind filter stay put while results change under them. A dialog that resized
+   on every keystroke would move the control being typed into.
+   --------------------------------------------------------------------------- */
+
+.sv-adopt {
+  margin-top: var(--ed-4);
+  /* Tall enough that a short result set does not make the dialog jump when the
+     next search returns more, capped so the footer stays reachable. */
+  min-height: 12rem;
+  max-height: min(48vh, 26rem);
+  overflow-y: auto;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+.sv-adopt__note {
+  margin: 0;
+  padding: var(--ed-6) var(--ed-4);
+  text-align: center;
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+}
+
+.sv-adopt__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sv-adopt__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  padding: var(--ed-2) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line-soft);
+}
+
+.sv-adopt__row:last-child { border-bottom: 0; }
+.sv-adopt__row:hover { background: var(--ed-well); }
+
+.sv-adopt__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ed-ink);
+  font-weight: 500;
+}
+
+/* Already on the site. Quieter than the button beside it, because it is a state
+   rather than something to press. */
+.sv-adopt__added {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-1);
+  flex: none;
+  color: var(--ed-ink-3);
+  font-size: var(--ed-text-xs);
+}
+
+/* The list is a live region while a search is running, so the row heights do
+   not shift under a pointer that is already moving towards a button. */
+.sv-adopt[aria-busy='true'] .sv-adopt__list { opacity: 0.55; }
+
+/* ------------------------------------------------------------------ */
+/* The AI site plan: proposing pages, then building them              */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Two lists in one shape. The REVIEW list is a form — every page's name and
+ * purpose is editable, because approving a plan you cannot change is not
+ * approving anything. The PROGRESS list is the same rows read-only with a state
+ * against each, so the layout does not jump when building starts.
+ */
+.sv-plan {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+}
+
+.sv-plan__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-3);
+  padding: var(--ed-4);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-panel);
+}
+
+/*
+ * The two fields sit SIDE BY SIDE once there is room, and that is a density
+ * decision rather than a cosmetic one. Stacked, one page was 278px tall, so a
+ * plan of eight was 2,200px of scrolling to review two short fields each. The
+ * name is the narrow one because a page name is two or three words; the purpose
+ * gets the rest because it is the sentence the page is built from.
+ */
+.sv-plan__main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) 2fr;
+  gap: var(--ed-2) var(--ed-3);
+  align-items: start;
+}
+
+/* The address runs under both, where it reads as belonging to the row. */
+.sv-plan__main > .sv-plan__path { grid-column: 1 / -1; }
+
+@media (max-width: 720px) {
+  .sv-plan__main { grid-template-columns: 1fr; }
+}
+
+/* The address, so somebody can see what a rename would do before doing it. */
+.sv-plan__path {
+  font-family: var(--ed-mono, ui-monospace, monospace);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+.sv-plan__tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+  flex: 0 0 auto;
+}
+
+/* ---- Progress ---- */
+
+.sv-plan--progress .sv-plan__row {
+  align-items: center;
+  padding: var(--ed-3) var(--ed-4);
+}
+
+/*
+ * The progress list is one column, not the review grid. Its two children are a
+ * page name and the reason it did not build, and a reason belongs UNDER the
+ * thing it is about: side by side, a long message pushes the name off its own
+ * row and reads as being about the next page down.
+ */
+.sv-plan--progress .sv-plan__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-1);
+}
+
+.sv-plan__name { font-weight: 600; }
+
+.sv-plan__state {
+  flex: 0 0 auto;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ed-ink-2);
+}
+
+/* State is carried by an icon and a word, never by colour alone. */
+.sv-plan__row[data-progress='built'] .sv-plan__state  { color: var(--ed-success, #16745a); }
+.sv-plan__row[data-progress='failed'] .sv-plan__state { color: var(--ed-danger); }
+.sv-plan__row[data-progress='waiting'] { opacity: 0.6; }
+
+.sv-plan__status {
+  flex: 0 0 auto;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+/*
+ * The reason, next to the page it is about, in the colour of the state it
+ * belongs to.
+ *
+ * It was red for both outcomes at first, which quietly undid the distinction
+ * the skip exists for: a page LEFT ALONE because it already had content is the
+ * right result, and painting that explanation the same red as a failure tells
+ * somebody they have a problem when they have not.
+ */
+.sv-plan__why {
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+.sv-plan__row[data-progress='failed'] .sv-plan__why {
+  color: var(--ed-danger);
+}
+
+.sv-plan__summary {
+  margin-top: var(--ed-4);
+  color: var(--ed-ink-2);
+}
+
+.sv-empty__note {
+  color: var(--ed-ink-2);
+  text-align: center;
+  padding: var(--ed-6) 0;
+}
+
+/*
+ * The one spinner. Rotation only, so it composes with reduced motion by simply
+ * stopping rather than by needing a second design: a still ring beside the word
+ * "Building" still says what is happening, which is why the word is there.
+ */
+.sv-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ed-line-soft);
+  border-top-color: var(--ed-brand-ink, currentColor);
+  border-radius: 50%;
+  animation: sv-spin 700ms linear infinite;
+}
+
+@keyframes sv-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-spinner { animation: none; }
+}
+
+/* On a phone the arrows sit under the fields rather than beside them. */
+@media (max-width: 640px) {
+  .sv-plan__row { flex-wrap: wrap; }
+  .sv-plan__tools { flex-direction: row; }
+}
+
+/*
+ * A page the plan would leave alone, said BEFORE anybody presses build. Not an
+ * error: the page is somebody's existing work and leaving it is the right
+ * outcome, so it reads as a caution rather than a failure.
+ */
+.sv-plan__clash {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+  background: var(--ed-well);
+  border-radius: var(--ed-r-md);
+  padding: var(--ed-2) var(--ed-3);
+}
+.sv-plan__clash svg { flex: 0 0 auto; margin-top: 2px; color: var(--ed-warning, #8a5a0c); }
+
+.sv-plan__row[data-progress='skipped'] .sv-plan__state { color: var(--ed-ink-2); }
+
+/*
+ * Adding pages by hand, under the plan.
+ *
+ * Set apart from the rows above it rather than looking like one more of them:
+ * this is a different action, and a box that looked like another planned page
+ * would read as one somebody had to fill in.
+ */
+.sv-plan__add {
+  margin-top: var(--ed-5);
+  padding-top: var(--ed-5);
+  border-top: 1px solid var(--ed-line);
+}
+.sv-plan__add .sv-btn { align-self: flex-start; margin-top: var(--ed-2); }
+
+/*
+ * How far through a build is.
+ *
+ * The bar reports pages that have actually finished, so it can sit still for
+ * thirty seconds while one page is written and that is correct rather than
+ * broken. The COUNT beside it is what makes that legible: "3 of 12 built" says
+ * why nothing is moving in a way a bar alone cannot.
+ */
+.sv-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  margin-bottom: var(--ed-4);
+}
+.sv-progress__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ed-3);
+  font-size: var(--ed-text-sm);
+}
+.sv-progress__count { font-weight: 600; color: var(--ed-ink); }
+.sv-progress__left { color: var(--ed-ink-2); }
+
+.sv-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ed-line);
+  overflow: hidden;
+}
+.sv-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ed-brand-ink, currentColor);
+  /* Eases between real values. It never animates ahead of one. */
+  transition: width 400ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-progress__fill { transition: none; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Monthly report (/reports)                                          */
+/* ------------------------------------------------------------------ */
+.rep-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-5);
+}
+.rep-sub { margin: var(--ed-1) 0 0; color: var(--ed-ink-2); font-size: var(--ed-text-sm); }
+
+/* A quiet, non-clickable button face for a capped Next. */
+.sv-btn--muted { opacity: 0.45; cursor: default; pointer-events: none; }
+
+.rep-months {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-3);
+  margin-bottom: var(--ed-6);
+}
+.rep-months__now {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: var(--ed-text-base);
+}
+.rep-months__partial { color: var(--ed-ink-3); font-weight: 400; }
+
+.rep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--ed-4);
+  margin-bottom: var(--ed-5);
+}
+.rep-card {
+  border: 1px solid var(--ed-line);
+  border-radius: 12px;
+  padding: var(--ed-4) var(--ed-5);
+  background: var(--ed-panel, transparent);
+}
+.rep-card__n {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ed-primary);
+}
+.rep-card__label {
+  margin-top: var(--ed-1);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+.rep-delta {
+  margin-top: var(--ed-2);
+  font-size: var(--ed-text-xs, 11px);
+  color: var(--ed-ink-3);
+}
+.rep-delta--up { color: var(--ed-accent-dark); }
+.rep-delta--down { color: var(--ed-ink-2); }
+
+.rep-note {
+  max-width: 44rem;
+  margin: 0 0 var(--ed-6);
+  padding: var(--ed-3) var(--ed-4);
+  border-left: 3px solid var(--ed-line);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+  line-height: 1.55;
+}
+
+.rep-glance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-5);
+  margin-bottom: var(--ed-6);
+  color: var(--ed-ink-2);
+  font-size: var(--ed-text-sm);
+}
+.rep-glance strong { color: var(--ed-ink); font-size: var(--ed-text-base); }
+.rep-glance__unread { color: var(--ed-accent-dark); }
+
+.rep-h2 { font-size: var(--ed-text-base); margin: 0 0 var(--ed-3); }
+.rep-empty { color: var(--ed-ink-2); font-size: var(--ed-text-sm); }
+.rep-enq { list-style: none; margin: 0; padding: 0; max-width: 46rem; }
+.rep-enq__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: var(--ed-3);
+  padding: var(--ed-3) 0;
+  border-bottom: 1px solid var(--ed-line);
+  font-size: var(--ed-text-sm);
+}
+.rep-enq__name { font-weight: 600; }
+.rep-enq__path { color: var(--ed-ink-3); }
+.rep-enq__when { color: var(--ed-ink-2); white-space: nowrap; }
+.rep-more { margin-top: var(--ed-4); font-size: var(--ed-text-sm); }

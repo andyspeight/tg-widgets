@@ -333,6 +333,31 @@ describe('rebuilding an imported design', () => {
       expect(result.section.tone).toBe('dark');
     });
 
+    it('reads darkness from a photo hero scrim, not just a solid fill', () => {
+      // A full-bleed photo hero is dark through a scrim gradient over the
+      // picture, with no background-color on its root - the case that made
+      // every designed hero rebuild onto bare white. rgba(22,16,9,.82) is
+      // aurelia's own scrim.
+      const html = '<header class="hero"><div class="scrim"></div><h1>Go somewhere warm</h1></header>';
+      const css = '.hero { position: relative; } .scrim { position: absolute; inset: 0; background: radial-gradient(120% 90% at 18% 42%, rgba(22, 16, 9, .82) 0%, rgba(22, 16, 9, .45) 60%); }';
+      const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Hero' });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.section.tone).toBe('dark');
+      expect(result.section.box.background).toBe('var(--tgs-surface-dark)');
+    });
+
+    it('a pale gradient overlay is not a dark band', () => {
+      // A light scrim (a white wash for legibility over a bright photo) must
+      // not flip the section dark.
+      const html = '<header class="hero"><div class="scrim"></div><h1>Bright</h1></header>';
+      const css = '.scrim { background: linear-gradient(rgba(255, 255, 255, .6), rgba(240, 240, 240, .3)); }';
+      const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Hero' });
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.section.tone).not.toBe('dark');
+    });
+
     it('leaves a plain white or transparent background alone', () => {
       const white = rebuildSection({
         html: '<div class="r"><h2>Hi</h2></div>',
@@ -422,5 +447,94 @@ describe('rebuilding an imported design', () => {
     );
     expect(types).toContain('heading');
     expect(types.filter((type) => type === 'icon-item').length).toBe(3);
+  });
+});
+
+describe('reading a design\'s columns from its grid', () => {
+  it('splits a two-track grid into two columns at the design\'s proportions', () => {
+    // "words beside a picture" as every designed home states it: a grid whose
+    // template is 7fr 5fr. Before this, the whole thing flattened to one column.
+    const html =
+      '<section class="split">' +
+      '<div class="words"><h2>A quiet kind of luxury</h2><p>Villas with staff.</p></div>' +
+      '<div class="media"><img src="{{tg:i1}}" alt="villa"></div>' +
+      '</section>';
+    const css = '.split { display: grid; grid-template-columns: minmax(0,7fr) minmax(0,5fr); }';
+    const result = rebuildSection({ html, css, fields: [{ key: 'i1', kind: 'image', label: '', value: 'https://cdn/x.jpg' }], content: {}, label: 'Split' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const row = result.section.rows.find((r) => r.columns.length === 2);
+    expect(row, 'the split became two columns').toBeTruthy();
+    // 7:5 -> 59:41, biggest column stays biggest, widths sum to 100.
+    const widths = row!.columns.map((c) => c.width);
+    expect(widths[0]).toBeGreaterThan(widths[1]);
+    expect(widths[0] + widths[1]).toBe(100);
+    expect(widths[0]).toBe(59);
+  });
+
+  it('splits a flex row into even columns', () => {
+    const html = '<div class="row"><div><h3>One</h3></div><div><h3>Two</h3></div></div>';
+    const css = '.row { display: flex; }';
+    const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Row' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.section.rows.some((r) => r.columns.length === 2 && r.columns[0].width === 50)).toBe(true);
+  });
+
+  it('leaves a plain stacked container as one column', () => {
+    const html = '<div class="stack"><h2>Title</h2><p>Body one.</p><p>Body two.</p></div>';
+    const css = '.stack { display: block; }';
+    const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Stack' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.section.rows.every((r) => r.columns.length === 1)).toBe(true);
+  });
+
+  it('does not split when the children do not match the track count', () => {
+    // Two tracks but three children: a mismatch we cannot safely column, so it
+    // falls through to the flatten rather than mangling the layout.
+    const html = '<div class="grid"><h2>A</h2><p>B</p><p>C</p></div>';
+    const css = '.grid { grid-template-columns: 1fr 1fr; }';
+    const result = rebuildSection({ html, css, fields: [], content: {}, label: 'Grid' });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.section.rows.every((r) => r.columns.length === 1)).toBe(true);
+  });
+});
+
+describe('reading layout nested inside a section', () => {
+  it('recurses into a section wrapping a heading and a card grid', () => {
+    // The real shape of a designed section: an outer <section> holds a heading
+    // AND a nested grid of cards. The top-level walk sees only the section and
+    // used to flatten the cards; now it recurses so the grid keeps its columns.
+    const html =
+      '<section class="escapes">' +
+      '<div class="head"><h2>Three escapes</h2></div>' +
+      '<div class="grid">' +
+      '<a class="card"><img src="{{tg:i1}}" alt="a"><h3>One</h3></a>' +
+      '<a class="card"><img src="{{tg:i2}}" alt="b"><h3>Two</h3></a>' +
+      '<a class="card"><img src="{{tg:i3}}" alt="c"><h3>Three</h3></a>' +
+      '</div></section>';
+    const css = '.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; }';
+    const result = rebuildSection({
+      html,
+      css,
+      fields: [
+        { key: 'i1', kind: 'image', label: '', value: 'https://cdn/a.jpg' },
+        { key: 'i2', kind: 'image', label: '', value: 'https://cdn/b.jpg' },
+        { key: 'i3', kind: 'image', label: '', value: 'https://cdn/c.jpg' },
+      ],
+      content: {},
+      label: 'Escapes',
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // The heading stays its own single-column row; the grid became three across
+    // (a Cards block or three columns), not one flat stack of everything.
+    const wide = result.section.rows.find((r) => r.columns.length === 3 || r.columns[0].blocks.some((b) => b.type === 'cards'));
+    expect(wide, 'the nested card grid kept its columns').toBeTruthy();
+    // And nothing was lost: all three card titles survive.
+    const text = JSON.stringify(result.section);
+    for (const word of ['One', 'Two', 'Three']) expect(text).toContain(word);
   });
 });

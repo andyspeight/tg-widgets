@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { fluidiseInlineSizes } from '../../lib/content/fluid-text';
 import { burgerMode, hasBurger, showsRow } from '../../lib/content/burger';
 import { copyrightLine } from '../../lib/content/copyright';
 import { couponEndsLabel, couponExpired, todayUtc } from '../../lib/content/coupon';
@@ -22,6 +23,7 @@ import { humanBytes } from '../../lib/media/limits';
 import { FONT_CHOICES, FONT_SIZES } from '../../lib/content/styles';
 import { importContent, importFields } from '../../lib/content/imported';
 import { preparedFor, type PreparedMap } from '../../lib/content/prepared';
+import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../../lib/content/image-sizes';
 import { importScopeClass } from '../../lib/import/scope';
 import { applyImportContent } from '../../lib/import/slots';
 import { parseTable } from '../../lib/content/table';
@@ -195,7 +197,15 @@ export function HeadingBlock({
    * and the back half of the heading falls out with it. See sanitise.ts.
    */
   const stored = sanitiseHtml(props.html, 'heading');
-  const html = stored || escapeHtml(str(props, 'text'));
+  /*
+   * Auto-resize has to reach a size set on the WORDS, not just on the block.
+   * fluidiseInlineSizes restates each inline font-size as --tgs-fs-w, which the
+   * clamp in globals.css consumes; the original size stays put as the fallback.
+   * Display only, and never on the editing host: that copy is seeded straight
+   * from block.props, so nothing here can be typed over and saved back.
+   */
+  const sized = props.fluid === true ? fluidiseInlineSizes(stored) : stored;
+  const html = sized || escapeHtml(str(props, 'text'));
 
   /*
    * Typed in place, like the paragraph, and for the same reason: the words are
@@ -259,7 +269,9 @@ export function TextBlock({
   const headingShadow = shadow === 'none' ? undefined : shadow;
   // Sanitised again here even though it was sanitised on save. Stored HTML
   // is never trusted, and this is the last gate before the browser.
-  const html = sanitiseHtml(props.html, 'richtext');
+  const clean = sanitiseHtml(props.html, 'richtext');
+  // See the note in HeadingBlock: auto-resize reaches a size set on the words.
+  const html = props.fluid === true ? fluidiseInlineSizes(clean) : clean;
 
   if (editingHost) {
     return (
@@ -505,11 +517,14 @@ export function IconItemBlock({
 export function ImageBlock({
   props,
   editing = false,
+  sizes,
 }: {
   props: Props;
   /* Only a film slide reads this: it must not autoplay on the canvas, where the
      editor re-renders on every keystroke and moving pictures fight the pointer. */
   editing?: boolean;
+  /* Stored sizes by url, threaded beside the tree. Absent on the canvas. */
+  sizes?: ImageSizes;
 }): ReactElement {
   const src = safeUrl(str(props, 'src'));
   const alt = str(props, 'alt');
@@ -745,6 +760,8 @@ export function ImageBlock({
     >
       <img
         src={src}
+        srcSet={srcSetFor(src, sizes) ?? undefined}
+        sizes={srcSetFor(src, sizes) ? FULL_WIDTH_SIZES : undefined}
         alt={alt}
         loading="lazy"
         decoding="async"
@@ -765,6 +782,8 @@ export function ImageBlock({
           package. */}
       <img
         src={src}
+        srcSet={srcSetFor(src, sizes) ?? undefined}
+        sizes={srcSetFor(src, sizes) ? FULL_WIDTH_SIZES : undefined}
         alt={alt}
         loading="lazy"
         decoding="async"
@@ -1580,12 +1599,27 @@ export function CardsBlock({
   const fromCollection = str(props, 'source') === 'collection';
   const collection = str(props, 'collection').trim();
 
-  if (editing && fromCollection) {
+  /*
+   * ONLY WHEN THERE IS GENUINELY NOTHING TO DRAW.
+   *
+   * This used to fire for every collection grid on the canvas, so an agent who
+   * published a post and went to look at the page it belonged on was told "the
+   * newest 24 from guides will show here" and nothing else. The page was right
+   * and the editor was lying about it. Andy, 26 Aug 2026: it has to show in the
+   * editor as well.
+   *
+   * The canvas now resolves the same cards the published page does and fills a
+   * copy of the tree at the point it draws (see components/editor/Canvas.tsx),
+   * so by the time this runs there are real items. What is left here is the
+   * honest empty state: a block nobody has pointed at a collection yet, and a
+   * collection with nothing published in it.
+   */
+  if (editing && fromCollection && cards.length === 0) {
     const count = clamp(props.count, 1, 60, 6);
     return (
       <div className="tgs-placeholder">
         {collection
-          ? `The newest ${count} from "${collection}" will show here.`
+          ? `Nothing published in "${collection}" yet. The newest ${count} will show here.`
           : 'Say which collection these come from.'}
       </div>
     );
@@ -4764,16 +4798,23 @@ export function ImportedBlock({
   props,
   blockId,
   prepared,
+  sizes,
 }: {
   props: Props;
   blockId: string;
   prepared?: PreparedMap;
+  /*
+   * Stored sizes by url. Absent on the editor canvas, where an empty srcset
+   * placeholder simply resolves to nothing, which is what the canvas wants: it
+   * is not what a visitor downloads.
+   */
+  sizes?: ImageSizes;
 }): ReactElement {
   const scope = importScopeClass(blockId);
   const fields = importFields(props);
 
   const ready = preparedFor(prepared, blockId);
-  const html = applyImportContent(ready?.html ?? '', importContent(props), fields);
+  const html = applyImportContent(ready?.html ?? '', importContent(props), fields, sizes);
   const css = ready?.css ?? '';
 
   if (!html.trim()) {

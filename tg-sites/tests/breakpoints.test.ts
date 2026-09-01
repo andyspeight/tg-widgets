@@ -216,6 +216,31 @@ describe('a block-level text size survives the save path', () => {
     const block = result.page.sections[0].rows[0].columns[0].blocks[0];
     expect(block.responsive?.phone?.fontSize).toBeUndefined();
   });
+
+  it('keeps a hand-typed pixel size larger than the dropdown scale, as the block base', () => {
+    // The Text size dropdown tops out at 2.5rem (40px); the point of the Custom
+    // box is a hero size past that. 120px is well over the scale and inside the
+    // 6-200 range, so it must survive the whole save path as the block's own size.
+    let page = createPage();
+    page = addBlock(page, 0, 0, 0, createBlock('heading'));
+    page = updateBlockPropsAtPath(page, path, { fontSize: '120px' });
+    const result = parsePage(JSON.parse(JSON.stringify(page)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const block = result.page.sections[0].rows[0].columns[0].blocks[0];
+    expect(block.props.fontSize).toBe('120px');
+  });
+
+  it('exposes a Custom pixel entry on the block Text size field, bounded by the shared range', () => {
+    // The value the schema keeps (above) is only reachable if the field lets a
+    // person type it. Pin the UI: a Custom option and the px box clamped by the
+    // same PX_SIZE bounds the toolbar uses, so the two cannot drift.
+    const props = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    expect(props).toContain('CUSTOM_TEXT_SIZE');
+    expect(props).toContain('Custom…');
+    expect(props).toContain('PX_SIZE_MIN');
+    expect(props).toContain('PX_SIZE_MAX');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -1457,5 +1482,83 @@ describe('a card link underline sweeps in on hover rather than snapping', () => 
 
   it('no longer snaps a plain underline on', () => {
     expect(css).not.toContain('.tgs-card__link:hover { text-decoration: underline; }');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Fill the screen: a viewport-tall section (30 Aug 2026).
+// ---------------------------------------------------------------------------
+describe('a section can fill the screen', () => {
+  const rawPage = (fullHeight: unknown) => ({
+    version: 1,
+    id: 'p',
+    title: 'T',
+    slug: '',
+    sections: [{ id: 's', rows: [], fullHeight }],
+  });
+
+  it('keeps fullHeight through parsePage, and ignores nonsense', () => {
+    const parsed = parsePage(rawPage(true));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].fullHeight).toBe(true);
+    // A non-boolean is dropped (optional boolean), so a stray value is no rule.
+    const junk = parsePage(rawPage('yes'));
+    expect(junk.ok).toBe(true);
+    if (junk.ok) expect(junk.page.sections[0].fullHeight).toBeUndefined();
+  });
+
+  it('renders 100svh for the floor when full height, the pixel value otherwise', () => {
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).toContain("section.fullHeight ? '100svh' : `${section.minHeight}px`");
+  });
+
+  it('the editor offers the toggle and hides the pixel height when it is on', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('Fill the screen');
+    expect(props).toContain('{ fullHeight: event.target.checked || undefined }');
+    expect(props).toContain('{!section.fullHeight && (');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Stick to the top: a section that pins to the viewport on scroll (31 Aug 2026).
+// ---------------------------------------------------------------------------
+describe('a section can stick to the top on scroll', () => {
+  const rawPage = (sticky: unknown) => ({
+    version: 1,
+    id: 'p',
+    title: 'T',
+    slug: '',
+    sections: [{ id: 's', rows: [], sticky }],
+  });
+
+  it('keeps sticky through parsePage, and ignores nonsense', () => {
+    const parsed = parsePage(rawPage(true));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].sticky).toBe(true);
+    // Only `true` turns it on. Any other value is dropped, never a parse failure.
+    const junk = parsePage(rawPage('yes'));
+    expect(junk.ok).toBe(true);
+    if (junk.ok) expect(junk.page.sections[0].sticky).toBeUndefined();
+  });
+
+  it('renders data-sticky only off the editing canvas', () => {
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).toContain("data-sticky={section.sticky && !editable ? '' : undefined}");
+  });
+
+  it('pins with position: sticky behind an @supports guard', () => {
+    const css = read('app', 'globals.css');
+    expect(css).toContain('@supports (position: sticky)');
+    expect(css).toMatch(/\.tgs-section\[data-sticky\]\s*\{[^}]*position:\s*sticky/);
+    expect(css).toMatch(/\.tgs-section\[data-sticky\]\s*\{[^}]*top:\s*0/);
+  });
+
+  it('the editor offers the toggle', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('Stick to the top on scroll');
+    expect(props).toContain('{ sticky: event.target.checked || undefined }');
   });
 });

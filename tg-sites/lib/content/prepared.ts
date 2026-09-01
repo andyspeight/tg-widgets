@@ -42,6 +42,15 @@ export interface PreparedMarkup {
   html: string;
   /** Scoped CSS, or '' where the block has none. */
   css: string;
+  /**
+   * How many pictures the block drew, so the caller can thread the hero.
+   *
+   * Optional because an embed block has no import pass behind it and a map read
+   * back from an older shape has no such field. Absent reads as none, which is
+   * the safe direction: a block that cannot prove it drew a picture does not get
+   * to spend the page's one eager slot.
+   */
+  images?: number;
 }
 
 /** Cleaned markup for a page's blocks, by block id. */

@@ -177,7 +177,8 @@
             <div class="qp-color-row"><label>Labels</label><span class="qp-hex" id="hex-labels">#0096B7</span><input type="color" id="c-labels" data-key="labels" value="#0096B7" aria-label="Labels colour"></div>
             <div class="qp-color-row"><label>Titles &amp; prices</label><span class="qp-hex" id="hex-titles">#1B2B5B</span><input type="color" id="c-titles" data-key="titles" value="#1B2B5B" aria-label="Titles and prices colour"></div>
             <div class="qp-color-row"><label>Text</label><span class="qp-hex" id="hex-text">#0F172A</span><input type="color" id="c-text" data-key="text" value="#0F172A" aria-label="Text colour"></div>
-            <div class="qp-help">These six colours re-theme the whole quote.</div>
+            <div class="qp-color-row"><label>Links</label><span class="qp-hex" id="hex-link">#0096B7</span><input type="color" id="c-link" data-key="link" value="#0096B7" aria-label="Link colour"></div>
+            <div class="qp-help">These seven colours re-theme the whole quote. Links is the colour of any web link inside a description (e.g. "View Full Hotel Info").</div>
           </div>
         </div>
 
@@ -309,7 +310,7 @@
   const DEFAULTS = {
     brandName:'', tagline:'', logoUrl:'', supportEmail:'', supportPhone:'',
     attachments:[],
-    colors:{ topBar:'#111D3E', hero:'#1B2B5B', accent:'#00B4D8', labels:'#0096B7', titles:'#1B2B5B', text:'#0F172A' },
+    colors:{ topBar:'#111D3E', hero:'#1B2B5B', accent:'#00B4D8', labels:'#0096B7', titles:'#1B2B5B', text:'#0F172A', link:'#0096B7' },
     button:{ bg:'#00B4D8', text:'#FFFFFF' },
     align:'left',
   };
@@ -362,7 +363,7 @@
   function applyToUI() {
     $('brandName').value = C.brandName||''; $('tagline').value = C.tagline||'';
     $('supportEmail').value = C.supportEmail||''; $('supportPhone').value = C.supportPhone||'';
-    ['topBar','hero','accent','labels','titles','text'].forEach(k => {
+    ['topBar','hero','accent','labels','titles','text','link'].forEach(k => {
       const v = isHex(C.colors[k]) ? C.colors[k] : DEFAULTS.colors[k];
       $('c-'+k).value = v; $('hex-'+k).textContent = v.toUpperCase();
     });

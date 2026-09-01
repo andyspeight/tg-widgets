@@ -42,16 +42,35 @@ voice: Dry, confident, concrete. British English. Sentences that could be radioe
   when there is one, is deadpan ("a bar that runs on trust"). Never "nestled",
   never "hidden gem", never an exclamation mark.
 
-motion: The water moves, the type does not chase it. One authored moment per page:
-  home has the voyage deck (stacked cards); destination pages get Ken Burns on the
-  banner; about gets the count-up numbers. Reveals are used at most once per page
-  section group and honour prefers-reduced-motion throughout (free: the CMS blocks
-  all do).
+motion: The water moves, the type does not chase it. Destination pages get Ken
+  Burns on the banner; about gets the count-up numbers; home has the voyage deck
+  (stacked cards) AND Ken Burns on the hero photograph. Reveals are used at most
+  once per page section group and honour prefers-reduced-motion throughout (free:
+  the CMS blocks all do).
+
+  THE ONE-MOMENT-PER-PAGE RULE NO LONGER APPLIES TO THIS SITE, changed by Andy on
+  25 Aug 2026: "we spent a lot of time adding a motion engine, so not using it is
+  not good." It had been read here as a ban on a second moving thing, and on the
+  home page that meant the hero photograph sat still because the voyage deck lower
+  down had already spent the page's allowance. What survives the change is the
+  half that carries the identity: the water moves and the type does not chase it.
+  So the background of a picture may drift, and headings, prices and the booking
+  box still do not move. A page wanting a THIRD moving thing is a fresh decision
+  rather than a precedent set here.
 
 anti-references:
   - The big-ship cruise site: atrium photography, exclamation marks, WIN A CRUISE.
   - The luxury-brand template: gold foil, serif whispering, "curated".
   - The AI tell: three equal cards, hero-metric blocks, kickers over every heading.
+
+corrections (Andy, 25 Aug 2026):
+  - The home hero is 1200px tall, the ceiling the CMS allows, and carries Ken
+    Burns. It had been 640 and still. Note for anyone tempted to make it
+    full-bleed as well: the hero PHOTOGRAPH already is, because a section spans
+    the viewport and its background sits at inset 0. `width` sets the max-width
+    of the text column only, so switching it to full would put the headline
+    against the viewport edge, which is the thing the 21 Aug correction below
+    exists to prevent. Height is the lever; width is not.
 
 corrections (Andy, 21 Aug 2026, from the concept review):
   - Text must never touch the viewport edge. The concept's fluid gutter bottomed

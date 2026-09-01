@@ -188,6 +188,38 @@ export async function listPages(tenantId: string): Promise<PageSummary[]> {
 }
 
 /** One page and its draft content, or null if it is not this tenant's. */
+/**
+ * Every page's address, and whether anything has been built on it.
+ *
+ * For the AI site planner, which has to know two different things about a
+ * collision: a plan naming a page that ALREADY EXISTS is a page it must not
+ * create twice, and a plan naming one that already has CONTENT is a page it
+ * must not build over. A blank page is fair game — every new site has a blank
+ * home page and building into it is the entire point.
+ *
+ * Draft or published counts, the same test siteIsEmpty uses, because a page
+ * somebody has drafted and not published is still their work.
+ */
+export async function listPageFill(
+  tenantId: string,
+): Promise<Array<{ slug: string; title: string; filled: boolean }>> {
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select
+        slug,
+        title,
+        coalesce(jsonb_array_length(draft_content -> 'sections'), 0) as draft_sections,
+        coalesce(jsonb_array_length(published_content -> 'sections'), 0) as live_sections
+      from public.pages
+    `;
+    return (rows as Array<Record<string, unknown>>).map((row) => ({
+      slug: String(row.slug ?? ''),
+      title: String(row.title ?? ''),
+      filled: Number(row.draft_sections ?? 0) > 0 || Number(row.live_sections ?? 0) > 0,
+    }));
+  });
+}
+
 export async function getPage(
   tenantId: string,
   pageId: string,

@@ -8,7 +8,7 @@ import '../../components/sites/sites.css';
 import { SiteDashboard } from '../../components/sites/SiteDashboard';
 import { activeSite, currentUser } from '../../lib/auth/session';
 import { isStaffEmail } from '../../lib/auth/staff';
-import { listPages } from '../../lib/db/pages';
+import { listPageFill, listPages } from '../../lib/db/pages';
 import { getSettings } from '../../lib/db/settings';
 import { siteIsEmpty } from '../../lib/db/starters';
 import { getTenant, siteUrl } from '../../lib/db/tenants';
@@ -28,13 +28,15 @@ export const dynamic = 'force-dynamic';
 /*
  * A minute, for the duplicate action.
  *
- * Every other thing this route does is quick, but duplicateSiteAction copies a
- * whole site including every image object one at a time, and an image-heavy site
- * runs well past the default limit. The rest of the route is unaffected: this is
+ * Two things here are slow. duplicateSiteAction copies a whole site including
+ * every image object one at a time, and an image-heavy site runs well past the
+ * default limit. The AI site planner is the other: it runs on the build model
+ * with thinking on, and its own budget has to sit inside this number so a slow
+ * answer times out with a message rather than being killed without one. The rest of the route is unaffected: this is
  * a ceiling, not a reservation. A site so large it needs longer than this would
  * want a background job rather than a bigger number here.
  */
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 export default async function SitesPage() {
   let user: Awaited<ReturnType<typeof currentUser>> = null;
@@ -79,12 +81,15 @@ export default async function SitesPage() {
    * client has already told us so it asks nothing twice. Both are cheap and
    * neither depends on the others.
    */
-  const [tenant, url, pages, canStart, settings] = await Promise.all([
+  const [tenant, url, pages, canStart, settings, existingPages] = await Promise.all([
     getTenant(site.tenantId),
     siteUrl(site.tenantId),
     listPages(site.tenantId),
     siteIsEmpty(site.tenantId),
     getSettings(site.tenantId),
+    // Which addresses are taken and which of them have work on them, so the AI
+    // planner can say what it would leave alone before anybody presses build.
+    listPageFill(site.tenantId),
   ]);
 
   return (
@@ -95,6 +100,7 @@ export default async function SitesPage() {
       siteUrl={url}
       pages={pages}
       canStart={canStart}
+      existingPages={existingPages}
       // Making a site is a staff job, the same gate as custom code and domains.
       // The action checks it too; this only decides whether the button is drawn.
       canCreateSite={isStaffEmail(user.email)}

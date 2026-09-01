@@ -16,6 +16,11 @@
  * prices, transfer detail) the existing records carry, so auto-created records
  * are Draft skeletons for content enrichment, never Live.
  *
+ * Verification is per FIELD, not per record (see corroborateFields). Identity
+ * agreeing is not enough to write a name or a country: each value has to have
+ * been seen by both sources, or it is left blank for a human. runIdentityBackfill
+ * applies the same rule to records that already exist but were never sourced.
+ *
  * Network note: the build sandbox blocks outbound fetch, so the fetch adapters
  * below are validated on a deploy, not here. The decision logic and parsers
  * are pure and unit-tested. Writes are OFF unless `create:true` is passed.
@@ -29,8 +34,27 @@ const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
 const COORD_TOLERANCE_KM = 50;
 
 // ---- pure: normalisation + cross-verification -----------------------------
+/**
+ * Fold a name down to comparable tokens. Pure.
+ *
+ * Diacritics are stripped to their base letter and apostrophes are removed
+ * outright, both before the catch-all that turns punctuation into spaces. That
+ * ordering is the whole point, and it was not always here.
+ *
+ * Until 26 Aug 2026 anything outside a-z became a SPACE, which quietly broke
+ * accented and apostrophed names by splitting them mid-word: "Malaga" tokenised
+ * to "malaga" but "Málaga" to "m laga", so the two never matched, and
+ * "Fa'a'a" collapsed to tokens too short to survive the length filter at all,
+ * leaving an empty set and a zero score. The first fill run created Tahiti and
+ * Puerto Vallarta with no name because of it. Spanish, French, Portuguese and
+ * Nordic airports are a large share of what is left to create, so this was
+ * costing far more than the two records that made it visible.
+ */
 export function normalizeName(s) {
-  return String(s || '').toLowerCase()
+  return String(s || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // á -> a, ā -> a
+    .toLowerCase()
+    .replace(/['’ʻ`]/g, '') // Fa'a'a -> faaa, not "fa a a"
     .replace(/\b(airport|international|intl|regional|the)\b/g, ' ')
     .replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -78,6 +102,87 @@ export function crossVerify(a, b) {
   };
 }
 
+/**
+ * Decide, FIELD BY FIELD, what the two sources actually agree on. Pure.
+ *
+ * crossVerify above answers "are these the same airport". That is not the same
+ * question as "is this value verified". A record can pass identity on matching
+ * coordinates alone while its name, city or country has been seen by only one
+ * source. Writing those anyway would single-source them, which is exactly what
+ * the airport-spotlight skill exists to prevent.
+ *
+ * So each field is corroborated on its own terms and an uncorroborated field is
+ * left blank for a human rather than filled from one source:
+ *   name     both labels describe the same airport (token overlap)
+ *   lat/lon  both coordinates agree inside COORD_TOLERANCE_KM
+ *   country  both ISO 3166-1 alpha-2 codes match
+ *   city     both place names match after normalisation
+ *
+ * @returns { fields, corroborated: string[], uncorroborated: string[] }
+ */
+export function corroborateFields(oa, wd) {
+  const fields = {};
+  const corroborated = [];
+  const uncorroborated = [];
+  const mark = (key, ok, value) => {
+    if (ok && value !== undefined && value !== null && value !== '') {
+      fields[key] = value;
+      corroborated.push(key);
+    } else {
+      uncorroborated.push(key);
+    }
+  };
+
+  // Name: OurAirports carries the fuller official form, so use it as the value,
+  // but only once the Wikidata label confirms it is the same airport.
+  mark('name', nameOverlap(oa.name, wd.name) >= 0.5, oa.name);
+
+  // Coordinates: only when the two independent fixes agree.
+  const dist = haversineKm(oa.lat, oa.lon, wd.lat, wd.lon);
+  const coordsAgree = dist != null && dist <= COORD_TOLERANCE_KM;
+  mark('lat', coordsAgree, Number.isFinite(oa.lat) ? oa.lat : undefined);
+  mark('lon', coordsAgree, Number.isFinite(oa.lon) ? oa.lon : undefined);
+
+  // Country: compare ISO codes, never a code against a display name.
+  const oaCc = String(oa.country || '').toUpperCase();
+  const wdCc = String(wd.countryCode || '').toUpperCase();
+  mark('country', !!oaCc && oaCc === wdCc, oaCc);
+
+  // City: Wikidata's administrative place against OurAirports' municipality.
+  const cityAgrees = !!oa.city && !!wd.city && normalizeName(oa.city) === normalizeName(wd.city);
+  mark('city', cityAgrees, oa.city);
+
+  return { fields, corroborated, uncorroborated };
+}
+
+/**
+ * Is a code found in our own prose worth making a record for? Pure.
+ *
+ * The target list is curated, so anything on it is wanted by definition. A code
+ * scraped from prose is not: it is any three uppercase letters in brackets, so
+ * it picks up airlines, currencies and abbreviations as well as airports. The
+ * stop list in _breadth.js catches the ones we can name, and this catches the
+ * rest by asking what OurAirports thinks the code actually is.
+ *
+ * Evidence, from the first fill run on 26 Aug 2026: it created Hector Silva
+ * Airstrip in Belize and Kalaleh Airport in Iran, neither of which anyone would
+ * put in a holiday picker. Both are small_airport with no scheduled service.
+ *
+ * Deliberately permissive in one direction. Phnom Penh is large_airport but
+ * OurAirports records it as having no scheduled service, which is wrong, so
+ * scheduled service alone is not allowed to reject an airport. Type carries the
+ * decision, and a small airport is kept when it does have scheduled service,
+ * which is how genuinely small destinations like El Nido stay in.
+ */
+export function isWorthCreatingFromProse(oa) {
+  if (!oa) return false;
+  const type = String(oa.type || '');
+  if (type === 'large_airport' || type === 'medium_airport') return true;
+  if (type === 'small_airport') return String(oa.scheduledService) === 'yes';
+  // heliport, seaplane_base, closed, balloonport
+  return false;
+}
+
 // ---- pure: source parsers -------------------------------------------------
 /** Parse the OurAirports CSV for one IATA. Pure. Returns normalized record or null. */
 export function parseOurAirports(csvText, iata) {
@@ -99,6 +204,10 @@ export function parseOurAirports(csvText, iata) {
       country: cells[col('iso_country')] || '',
       lat: parseFloat(cells[col('latitude_deg')]),
       lon: parseFloat(cells[col('longitude_deg')]),
+      // Carried so a prose-derived code can be sanity-checked before it becomes
+      // a record. Never written to Airtable, and never used for identity.
+      type: cells[col('type')] || '',
+      scheduledService: cells[col('scheduled_service')] || '',
       source: OURAIRPORTS_CSV,
     };
   }
@@ -135,8 +244,9 @@ export function parseWikidataSparql(json, iata) {
   return {
     iata: String(iata).toUpperCase(),
     name: (b.airportLabel && b.airportLabel.value) || '',
-    city: '',
+    city: (b.placeLabel && b.placeLabel.value) || '',
     country: (b.countryLabel && b.countryLabel.value) || '',
+    countryCode: ((b.iso && b.iso.value) || '').toUpperCase(),
     lat, lon,
     source: b.airport && b.airport.value ? b.airport.value : 'https://www.wikidata.org/',
   };
@@ -153,7 +263,11 @@ async function getJson(url) {
 }
 
 async function fetchWikidata(iata) {
-  const q = `SELECT ?airport ?airportLabel ?countryLabel ?coord WHERE { ?airport wdt:P238 "${iata}". OPTIONAL { ?airport wdt:P17 ?country. } OPTIONAL { ?airport wdt:P625 ?coord. } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 1`;
+  // Ask for the ISO country code (P297) and the administrative place (P131) as
+  // well as the label and coordinates. Without those two, country and city
+  // could only ever come from OurAirports, and a field only one source has
+  // seen is not a verified field.
+  const q = `SELECT ?airport ?airportLabel ?countryLabel ?iso ?placeLabel ?coord WHERE { ?airport wdt:P238 "${iata}". OPTIONAL { ?airport wdt:P17 ?country. OPTIONAL { ?country wdt:P297 ?iso. } } OPTIONAL { ?airport wdt:P131 ?place. } OPTIONAL { ?airport wdt:P625 ?coord. } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 1`;
   const json = await getJson(`${WIKIDATA_SPARQL}?format=json&query=${encodeURIComponent(q)}`);
   return json ? parseWikidataSparql(json, iata) : null;
 }
@@ -173,60 +287,107 @@ async function fetchOurAirports(iata) {
 // ---- orchestrator ---------------------------------------------------------
 /**
  * @param opts.limit   max missing airports to process
- * @param opts.create  if true, create Draft skeletons for verified ones (default false: dry run)
- * @param opts.fetchers test seam: { ourAirports, wikidata } override the live adapters
- * @returns { missing, processed, verified, conflict, unverifiable, created, items[] }
+ * @param opts.create  if true, create skeletons for verified ones (default false: dry run)
+ * @param opts.fetchers test seam: { ourAirports, wikidata, breadth, create } override the live adapters
+ * @returns { missing, processed, verified, conflict, unverifiable, created, failed, items[] }
+ *          `created` counts records actually written; `failed` counts records
+ *          that verified cleanly but whose write threw. The two are separate on
+ *          purpose: a write failure is not a verification failure, and neither
+ *          may be reported as a success.
  */
 export async function runBreadthFill({ limit = 10, create = false, nowIso, fetchers } = {}) {
   const today = (nowIso || new Date().toISOString()).slice(0, 10);
   const getOA = (fetchers && fetchers.ourAirports) || fetchOurAirports;
   const getWD = (fetchers && fetchers.wikidata) || fetchWikidata;
+  // Same test seam as `patch` below, so the write-failure path is exercisable
+  // without a live Airtable. A run that cannot prove it reports failures
+  // honestly is not a run worth pointing at 293 records.
+  const getWorklist = (fetchers && fetchers.breadth) || runBreadth;
+  const createOne = (fetchers && fetchers.create) || createSkeleton;
 
-  const breadth = await runBreadth();
+  const breadth = await getWorklist();
   const targets = breadth.missing.slice(0, limit);
 
   const items = [];
-  let created = 0;
+  let created = 0, failed = 0;
   for (const t of targets) {
     const [oa, wd] = await Promise.all([getOA(t.iata), getWD(t.iata)]);
     if (!oa || !wd) {
       items.push({ iata: t.iata, verdict: 'unverifiable', reason: !oa && !wd ? 'neither source found' : !oa ? 'not in OurAirports' : 'not in Wikidata' });
       continue;
     }
+    // A code lifted from our own prose has to prove it is an airport a customer
+    // could fly to. Codes from the curated target list skip this: they are
+    // wanted by definition.
+    if (t.reason === 'content-referenced' && !isWorthCreatingFromProse(oa)) {
+      items.push({
+        iata: t.iata,
+        verdict: 'unverifiable',
+        reason: `prose code is ${oa.type || 'an unknown facility'}${oa.scheduledService === 'yes' ? '' : ' with no scheduled service'}, not a bookable airport`,
+      });
+      continue;
+    }
+
     const cv = crossVerify(oa, wd);
     if (!cv.verified) {
       items.push({ iata: t.iata, verdict: 'conflict', conflicts: cv.conflicts, oa: oa.name, wd: wd.name });
       continue;
     }
+    // Identity holds. Now keep only the individual fields both sources saw.
+    const { fields, corroborated, uncorroborated } = corroborateFields(oa, wd);
     const record = {
-      iata: t.iata, name: oa.name, city: oa.city, country: oa.country,
-      lat: Number.isFinite(oa.lat) ? oa.lat : undefined, lon: Number.isFinite(oa.lon) ? oa.lon : undefined,
+      iata: t.iata, ...fields,
       source1: oa.source, source2: wd.source, verifiedDate: today,
     };
+    // Count the RESULT of the write, never the attempt. Swallowing the error
+    // and incrementing anyway is how a run reports 293 records created having
+    // created none, which is the same class of untruth the Status audit
+    // existed to remove. A verified record that failed to write stays verified
+    // and is reported as unwritten, so the next run picks it up again.
     let didCreate = false;
-    if (create) { await createSkeleton(record).catch(() => {}); didCreate = true; created++; }
-    items.push({ iata: t.iata, verdict: 'verified', name: oa.name, distanceKm: cv.distanceKm, created: didCreate });
+    let writeError = null;
+    if (create) {
+      try {
+        await createOne(record);
+        didCreate = true;
+        created++;
+      } catch (err) {
+        writeError = (err && err.message) || String(err);
+        failed++;
+      }
+    }
+    items.push({
+      iata: t.iata, verdict: 'verified', name: fields.name || oa.name,
+      distanceKm: cv.distanceKm, corroborated, uncorroborated, created: didCreate,
+      ...(writeError ? { writeError } : {}),
+    });
   }
 
-  const summary = { missing: breadth.missingCount, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, created, items };
+  const summary = { missing: breadth.missingCount, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, created, failed, items };
   for (const it of items) summary[it.verdict === 'verified' ? 'verified' : it.verdict === 'conflict' ? 'conflict' : 'unverifiable']++;
   return summary;
 }
 
-async function createSkeleton(rec) {
+/** Map a corroborated record onto Airtable field IDs. Blank fields are omitted,
+ *  never written empty, so an uncorroborated value stays visibly missing. Pure. */
+export function identityFields(rec) {
   const fields = {
     [AF.iata]: rec.iata,
-    [AF.name]: rec.name,
-    [AF.cityServed]: rec.city,
-    [AF.countryText]: rec.country,
     [AF.status]: AIRPORT_STATUS.IN_PROGRESS,
     [AF.source1]: rec.source1,
     [AF.source2]: rec.source2,
     [AF.verifiedDate]: rec.verifiedDate,
   };
+  if (rec.name) fields[AF.name] = rec.name;
+  if (rec.city) fields[AF.cityServed] = rec.city;
+  if (rec.country) fields[AF.countryText] = rec.country;
   if (rec.lat != null) fields[AF.latitude] = rec.lat;
   if (rec.lon != null) fields[AF.longitude] = rec.lon;
-  return createAirport(fields);
+  return fields;
+}
+
+async function createSkeleton(rec) {
+  return createAirport(identityFields(rec));
 }
 
 // Thin write (kept here so the table id stays with the reference helpers).
@@ -237,6 +398,112 @@ async function createAirport(fields) {
     method: 'POST',
     headers: { Authorization: `Bearer ${PAT}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ records: [{ fields }], typecast: true }),
+  });
+  if (!r.ok) throw new Error(`airtable ${r.status}`);
+  return r.json();
+}
+
+// ---- identity backfill for records that already exist ---------------------
+/**
+ * The 25 Aug 2026 audit found 123 records carrying narrative but no
+ * coordinates, no City Served, no Type and no cited source at all. They were
+ * stamped Done and Verified anyway. They are now In progress, and this pass
+ * gives them the identity half of their verification.
+ *
+ * Same rule as a new skeleton: a field is written only when both independent
+ * sources saw it, and only when the record does not already have a value. It
+ * never touches narrative, and it never overwrites a human's work.
+ *
+ * @param opts.limit   max records to process
+ * @param opts.write   if true, patch the records (default false: dry run)
+ * @param opts.fetchers test seam: { ourAirports, wikidata, listRows, patch }
+ * @returns { due, processed, filled, conflict, unverifiable, failed, items[] }
+ */
+export async function runIdentityBackfill({ limit = 10, write = false, nowIso, fetchers } = {}) {
+  const today = (nowIso || new Date().toISOString()).slice(0, 10);
+  const getOA = (fetchers && fetchers.ourAirports) || fetchOurAirports;
+  const getWD = (fetchers && fetchers.wikidata) || fetchWikidata;
+  const patch = (fetchers && fetchers.patch) || patchAirport;
+
+  const readRows = (fetchers && fetchers.listRows)
+    || (() => listAll(AIRPORTS_TBL, [AF.iata, AF.name, AF.cityServed, AF.countryText, AF.latitude, AF.longitude, AF.source1, AF.source2]));
+  const rows = await readRows();
+  // A blank NAME counts as due, not just missing coordinates or sources.
+  // Tahiti and Puerto Vallarta were created nameless on 26 Aug because
+  // normalizeName was mangling accents, and once that was fixed nothing would
+  // ever have gone back for them: they already had coordinates and both source
+  // URLs, so the old test called them complete. Retrying costs one batch slot
+  // and writes nothing unless both sources now agree, which is the same rule as
+  // everywhere else.
+  const due = rows.filter(r => {
+    const f = r.fields || {};
+    return f[AF.iata] && (
+      !f[AF.name] || f[AF.latitude] == null || f[AF.longitude] == null
+      || !f[AF.source1] || !f[AF.source2]
+    );
+  });
+
+  const items = [];
+  let filled = 0, failed = 0;
+  for (const row of due.slice(0, limit)) {
+    const iata = String(row.fields[AF.iata]).toUpperCase();
+    const [oa, wd] = await Promise.all([getOA(iata), getWD(iata)]);
+    if (!oa || !wd) {
+      items.push({ iata, verdict: 'unverifiable', reason: !oa && !wd ? 'neither source found' : !oa ? 'not in OurAirports' : 'not in Wikidata' });
+      continue;
+    }
+    const cv = crossVerify(oa, wd);
+    if (!cv.verified) {
+      items.push({ iata, verdict: 'conflict', conflicts: cv.conflicts, oa: oa.name, wd: wd.name });
+      continue;
+    }
+    const { fields, corroborated, uncorroborated } = corroborateFields(oa, wd);
+
+    // Only supply what is genuinely missing. An existing value is a human's or
+    // an earlier verified pass's, and is not ours to replace.
+    const existing = row.fields || {};
+    const out = {};
+    if (fields.name && !existing[AF.name]) out[AF.name] = fields.name;
+    if (fields.city && !existing[AF.cityServed]) out[AF.cityServed] = fields.city;
+    if (fields.country && !existing[AF.countryText]) out[AF.countryText] = fields.country;
+    if (fields.lat != null && existing[AF.latitude] == null) out[AF.latitude] = fields.lat;
+    if (fields.lon != null && existing[AF.longitude] == null) out[AF.longitude] = fields.lon;
+    if (!existing[AF.source1]) out[AF.source1] = oa.source;
+    if (!existing[AF.source2]) out[AF.source2] = wd.source;
+    if (Object.keys(out).length) out[AF.verifiedDate] = today;
+
+    const willWrite = Object.keys(out).length > 0;
+    let applied = false;
+    let writeError = null;
+    if (write && willWrite) {
+      try {
+        await patch(row.id, out);
+        applied = true;
+        filled++;
+      } catch (err) {
+        writeError = (err && err.message) || String(err);
+        failed++;
+      }
+    }
+    items.push({
+      iata, verdict: 'verified', corroborated, uncorroborated,
+      wrote: willWrite ? Object.keys(out).length : 0, applied,
+      ...(writeError ? { writeError } : {}),
+    });
+  }
+
+  const summary = { due: due.length, processed: items.length, verified: 0, conflict: 0, unverifiable: 0, filled, failed, items };
+  for (const it of items) summary[it.verdict === 'verified' ? 'verified' : it.verdict === 'conflict' ? 'conflict' : 'unverifiable']++;
+  return summary;
+}
+
+async function patchAirport(recordId, fields) {
+  const PAT = process.env.AIRTABLE_DESTINATION_CONTENT_PAT || process.env.AIRTABLE_PAT;
+  const BASE = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
+  const r = await fetch(`https://api.airtable.com/v0/${BASE}/${AIRPORTS_TBL}/${recordId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${PAT}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields, typecast: true }),
   });
   if (!r.ok) throw new Error(`airtable ${r.status}`);
   return r.json();

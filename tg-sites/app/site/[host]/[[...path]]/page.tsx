@@ -1,9 +1,13 @@
+import { cache } from 'react';
+import { carriesOwnBanner } from '../../../../lib/content/collection-layout';
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
 import { fillBreadcrumbs, hasBreadcrumbsBlock } from '../../../../lib/content/breadcrumbs';
 import { mergePrepared, prepareSections } from '../../../../lib/content/prepare-markup';
+import { imageUrlsIn } from '../../../../lib/content/image-sizes';
+import { imageSizesForUrls } from '../../../../lib/db/media';
 import { FontHead } from '../../../../components/render/FontHead';
 import { PageRenderer, SectionRenderer } from '../../../../components/render/PageRenderer';
 import { safeUrl } from '../../../../lib/content/sanitise';
@@ -12,6 +16,8 @@ import { SiteBody, SiteHead } from '../../../../components/render/SiteHead';
 import { WidgetScripts } from '../../../../components/render/WidgetScripts';
 import { MotionScript } from '../../../../components/render/MotionScript';
 import { NoRightClickScript } from '../../../../components/render/NoRightClickScript';
+import { CookieConsent } from '../../../../components/render/CookieConsent';
+import { FloatingWidgets } from '../../../../components/render/FloatingWidgets';
 import { SlideshowScript } from '../../../../components/render/SlideshowScript';
 import { ThemeToggleScript } from '../../../../components/render/ThemeToggleScript';
 import { fillNavFolders, fillNavRegion } from '../../../../lib/content/nav';
@@ -24,19 +30,22 @@ import { resolveRedirect } from '../../../../lib/db/redirects';
 import { getPublishedRegions } from '../../../../lib/db/regions';
 import {
   getPublishedItem,
-  listPublished,
   listPublishedByTag,
   listPublishedItemsForSearch,
   MAX_LISTING_ITEMS,
 } from '../../../../lib/db/collections';
-import { fillPageListings, itemAsCard, listingKey, listingsIn } from '../../../../lib/content/listings';
+import { fillPageListings, fillPageLoops, itemAsCard } from '../../../../lib/content/listings';
+import { resolveListings, resolveLoops } from '../../../../lib/db/listings';
 import { tagArchivePath } from '../../../../lib/content/collection';
 import { fieldFacts } from '../../../../lib/content/collection-fields';
+import { DestinationPanel } from '../../../../components/render/DestinationPanel';
 import { readingTime } from '../../../../lib/content/reading-time';
 import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
+import { personaliseSections } from '../../../../lib/content/personalise';
+import { readVisitorSignals } from '../../../../lib/site/visitor-signals';
 import { getPublicTheme } from '../../../../lib/db/theme';
-import { resolveTenantByHostname } from '../../../../lib/db/tenants';
+import { getPublicTenantSlug, resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
 import { jsonLdScript, pageJsonLd, profileLinks } from '../../../../lib/seo/jsonld';
 import { familiesFromFiles } from '../../../../lib/theme/fonts';
@@ -86,7 +95,27 @@ function isSearchPath(path: string[] | undefined): boolean {
   return segments.length === 1 && segments[0] === 'search';
 }
 
-async function load(host: string, path: string[] | undefined) {
+/**
+ * Everything a published address needs, fetched once per request.
+ *
+ * WRAPPED IN cache() AND THAT IS NOT A MICRO-OPTIMISATION. Next calls
+ * generateMetadata and the page component in the SAME request, and both of them
+ * call this. Without memoisation that is two tenant resolutions and two sets of
+ * the six reads below, and each read is its own transaction that opens with a
+ * begin, writes a set_config to name the tenant for RLS, runs its query and
+ * commits. Twelve transactions to eu-west-2 where six would do, on every single
+ * page view, before a byte of HTML leaves the server.
+ *
+ * It was measured rather than assumed: neither this file nor lib/db had a
+ * cache() anywhere, and the one in lib/db/client.ts is a CONNECTION POOL, which
+ * is a different thing that is easy to mistake for this at a glance.
+ *
+ * React's cache() memoises for the lifetime of one request and no longer, which
+ * is exactly the scope wanted here. It must NOT become a longer-lived cache: a
+ * published page has to reflect a publish immediately, and two visitors must
+ * never share a tenant's data. Request scope is the whole safety argument.
+ */
+const load = cache(async function load(host: string, path: string[] | undefined) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
   if (!tenantId) return null;
 
@@ -98,7 +127,7 @@ async function load(host: string, path: string[] | undefined) {
    * eu-west-2 before a byte of HTML. The header and the footer are one read
    * between them rather than two, for the same reason.
    */
-  const [page, theme, faces, settings, regions, navPages] = await Promise.all([
+  const [page, theme, faces, settings, regions, navPages, tenantSlug] = await Promise.all([
     getPublishedPage(tenantId, (path ?? []).join('/')),
     getPublicTheme(tenantId),
     listFontFaces(tenantId),
@@ -110,6 +139,11 @@ async function load(host: string, path: string[] | undefined) {
      * waits on, so it rides the same Promise.all rather than adding a round trip.
      */
     listPublishedNavPages(tenantId),
+    /*
+     * The tenant's OWN slug, which is not the hostname and is what the font
+     * route wants. Rides this Promise.all rather than adding a round trip.
+     */
+    getPublicTenantSlug(tenantId),
   ]);
 
   const segments = (path ?? []).filter(Boolean);
@@ -149,6 +183,7 @@ async function load(host: string, path: string[] | undefined) {
         regions,
         navPages,
         tenantId,
+        tenantSlug,
       };
     }
 
@@ -166,43 +201,27 @@ async function load(host: string, path: string[] | undefined) {
       regions,
       navPages,
       tenantId,
+      tenantSlug,
     };
   }
 
   /*
-   * The listing blocks, filled in before anything renders.
+   * The listing blocks and the loop blocks, filled in before anything renders.
    *
    * One read per distinct collection across the header, the page and the footer,
-   * for the largest count any block asked for, rather than one per block. See
-   * lib/content/listings.ts for why this is not the block's own job.
+   * for the largest count any block asked for, rather than one per block. The two
+   * resolve in parallel: a listing pours a collection into a fixed card, a loop
+   * into a card the client designed, but both read the same rows the same way.
+   * See lib/content/listings.ts for why this is not the block's own job.
    */
-  const wanted = listingsIn([regions.header, page.content, regions.footer]);
-  const listings = new Map<string, Array<Record<string, unknown>>>();
-
-  if (wanted.length > 0) {
-    const results = await Promise.all(
-      wanted.map(async (request) => ({
-        request,
-        listing: await listPublished(tenantId, request.collection, request.count, {
-          filter: request.filter,
-          sort: request.sort,
-        }),
-      })),
-    );
-    for (const { request, listing } of results) {
-      listings.set(
-        // Keyed by the whole request, not the collection: two blocks narrowing
-        // the same collection differently are two answers. See listingKey.
-        listingKey(request),
-        // The collection's own field definitions came back with its items, so
-        // a card can carry a price and a number of nights without a second read.
-        listing.items.map((row) => itemAsCard(row.item, request.collection, row.slug, listing.fields)),
-      );
-    }
-  }
+  const trees = [regions.header, page.content, regions.footer];
+  const [listings, loops] = await Promise.all([
+    resolveListings(tenantId, trees),
+    resolveLoops(tenantId, trees),
+  ]);
 
   return {
-    page: { ...page, content: fillPageListings(page.content, listings) },
+    page: { ...page, content: fillPageLoops(fillPageListings(page.content, listings), loops) },
     entry: null,
     archive: null,
     theme,
@@ -211,8 +230,9 @@ async function load(host: string, path: string[] | undefined) {
     regions,
     navPages,
     tenantId,
+    tenantSlug,
   };
-}
+});
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { host, path } = await params;
@@ -332,8 +352,8 @@ async function gone(host: string, path: string[] | undefined): Promise<never> {
 export default async function SitePage({ params, searchParams }: Params) {
   const { host, path } = await params;
 
-  const found = await load(host, path);
-  if (!found) {
+  const rawFound = await load(host, path);
+  if (!rawFound) {
     /*
      * /search, but only when no real page lives there, so load has already had
      * its say and a client's own "search" page wins. The query rides in ?q= (a
@@ -350,6 +370,47 @@ export default async function SitePage({ params, searchParams }: Params) {
   }
 
   const slug = decodeURIComponent(host);
+
+  /*
+   * SERVER-SIDE PERSONALISATION, resolved once here and applied to the tree
+   * before anything else reads it. A section can carry an audience rule, and the
+   * request says what the visitor is (country, device, traffic source, new
+   * versus returning); the sections that fail the rule are dropped from the tree
+   * NOW, so every derivation below (the hero and pull-up on sections[0], the
+   * image preload set, the JSON-LD scan, the render) sees only what this visitor
+   * sees, and the initial HTML carries exactly that. A shallow copy, never a
+   * mutation of the cached load() result, so the metadata pass that shares it is
+   * untouched and a crawler indexes the full page. See lib/content/audience.
+   */
+  const query = await searchParams;
+  const utmCampaign =
+    typeof query.utm_campaign === 'string'
+      ? query.utm_campaign
+      : Array.isArray(query.utm_campaign)
+        ? query.utm_campaign[0] ?? null
+        : null;
+  const signals = await readVisitorSignals(slug, utmCampaign);
+  const found = {
+    ...rawFound,
+    page: rawFound.page
+      ? {
+          ...rawFound.page,
+          content: {
+            ...rawFound.page.content,
+            sections: personaliseSections(rawFound.page.content.sections, signals),
+          },
+        }
+      : rawFound.page,
+    entry: rawFound.entry
+      ? {
+          ...rawFound.entry,
+          item: {
+            ...rawFound.entry.item,
+            sections: personaliseSections(rawFound.entry.item.sections, signals),
+          },
+        }
+      : rawFound.entry,
+  };
 
   /*
    * Dark mode is OPT IN: a page turns dark only when it actually carries a Light
@@ -395,6 +456,14 @@ export default async function SitePage({ params, searchParams }: Params) {
   const contentTree = found.page ? found.page.content : found.entry ? found.entry.item : null;
 
   /*
+   * A page that carries its own header and footer (a home seeded from a
+   * designed home) shows no site chrome, so the page is not double-headed.
+   * Only a real page can opt out; a collection entry or archive always keeps
+   * the site's header and footer.
+   */
+  const showChrome = found.page ? found.page.content.chrome !== false : true;
+
+  /*
    * THE SERVER'S PASS OVER BORROWED MARKUP, once for all three trees.
    *
    * The imported design and the embed block hold somebody else's HTML, and the
@@ -406,10 +475,38 @@ export default async function SitePage({ params, searchParams }: Params) {
    * was when the components did it, so a restored snapshot or a hand-edited row
    * still lands on today's rules rather than the rules of the day it was saved.
    */
+  /*
+   * WHICH SIZES OF EACH PICTURE EXIST, in one query for the whole document.
+   *
+   * A block stores an address and nothing else, so the tree cannot know that the
+   * same photograph is also stored at 400, 800 and 1600 pixels wide. That lives
+   * on the media row, so it is read here and threaded beside the tree the way
+   * `prepared` is, rather than written onto props where it would drift from the
+   * bank. One query across all three trees, not one per image: a homepage can
+   * carry twenty pictures and this runs on every published page view.
+   *
+   * Deliberately NOT inside load(): generateMetadata calls that too, and metadata
+   * never renders an image, so putting it there would buy a query the social
+   * card has no use for.
+   *
+   * An empty answer is the normal state for an older site and costs nothing: the
+   * renderers fall back to a single src, which is what they did before variants
+   * existed.
+   */
+  const imageSizes = await imageSizesForUrls(
+    found.tenantId,
+    imageUrlsIn([
+      ...(found.regions.header?.sections ?? []),
+      ...(contentTree?.sections ?? []),
+      ...(found.regions.footer?.sections ?? []),
+    ]),
+  );
+
   const prepared = mergePrepared(
-    prepareSections(found.regions.header?.sections),
-    prepareSections(contentTree?.sections),
-    prepareSections(found.regions.footer?.sections),
+    prepareSections(found.regions.header?.sections, imageSizes),
+    // The page's own tree, and the only one allowed to spend the eager slot.
+    prepareSections(contentTree?.sections, imageSizes, { heroFirst: true }),
+    prepareSections(found.regions.footer?.sections, imageSizes),
   );
 
   /*
@@ -484,7 +581,21 @@ export default async function SitePage({ params, searchParams }: Params) {
 
       {/* @font-face and the preloads, before the content, so the browser starts
           fetching the font while it is still reading the page. */}
-      <FontHead tenantSlug={slug} files={found.faces} typography={found.theme.typography} />
+      {/*
+        THE TENANT'S SLUG, NOT THE HOSTNAME, and the difference was invisible and
+        total. The font route takes a bare slug and builds the hostname itself,
+        refusing anything with a dot on purpose so a slug cannot be dressed up as
+        another domain. Handing it `slug`, which is decodeURIComponent(host),
+        meant every font URL on every published page 404'd, and every client site
+        was drawn in a fallback face rather than the typeface its design
+        committed to. Nothing errored and no test caught it; the page simply
+        looked slightly wrong forever.
+
+        Found on 25 Aug 2026 because Andy noticed a headline wrapping onto two
+        lines in the editor and one line live. The editor was right: it passes
+        site.slug and always had.
+      */}
+      <FontHead tenantSlug={found.tenantSlug ?? slug} files={found.faces} typography={found.theme.typography} />
 
       {/*
         The page's only h1. Section headings start at h2, which the heading
@@ -510,6 +621,7 @@ export default async function SitePage({ params, searchParams }: Params) {
         Each renders nothing at all when the client has never published one, so
         a site without a footer has no empty `<footer>` claiming a landmark.
       */}
+      {showChrome && (
       <RegionRenderer
         /* A Menu link that points at a folder is filled with the pages inside it
            here, the same place the Cards block's collection is filled: the block
@@ -525,6 +637,7 @@ export default async function SitePage({ params, searchParams }: Params) {
         */
         overlapped={Boolean(found.page && (found.page.content.sections[0]?.pullUp ?? 0) > 0)}
       />
+      )}
 
       {/*
         THE TRAIL, AND THE REASON IT IS HERE RATHER THAN A BLOCK A CLIENT ADDS.
@@ -559,6 +672,7 @@ export default async function SitePage({ params, searchParams }: Params) {
           )}
           theme={theme}
           prepared={prepared}
+          sizes={imageSizes}
         />
       ) : found.entry ? (
         /* A post's own sections get the same fill. Without it a blog post
@@ -572,16 +686,20 @@ export default async function SitePage({ params, searchParams }: Params) {
           }}
           theme={theme}
           prepared={prepared}
+          sizes={imageSizes}
         />
       ) : (
         <ArchiveRenderer archive={found.archive!} theme={theme} />
       )}
 
-      <RegionRenderer
-        region={fillNavRegion(found.regions.footer, found.navPages)}
-        theme={theme}
-        prepared={prepared}
-      />
+      {showChrome && (
+        <RegionRenderer
+          region={fillNavRegion(found.regions.footer, found.navPages)}
+          theme={theme}
+          prepared={prepared}
+          sizes={imageSizes}
+        />
+      )}
 
       {/* One script per distinct widget across all three, rather than each tree
           emitting its own and fetching the same file up to three times. */}
@@ -615,6 +733,8 @@ export default async function SitePage({ params, searchParams }: Params) {
       {/* The tag manager noscript fallback, and any custom body HTML. Last, so
           nothing here delays the content above it. */}
       <NoRightClickScript settings={found.settings} />
+      <CookieConsent settings={found.settings} />
+      <FloatingWidgets settings={found.settings} signals={signals} />
       <SiteBody settings={found.settings} />
     </>
   );
@@ -635,6 +755,7 @@ function EntryRenderer({
   entry,
   theme,
   prepared,
+  sizes,
 }: {
   entry: {
     item: import('../../../../lib/content/collection').CollectionItem;
@@ -645,13 +766,34 @@ function EntryRenderer({
     fields: import('../../../../lib/content/collection-fields').FieldDef[];
     /** How the collection lays its entries out. See collection-layout.ts. */
     layout: import('../../../../lib/content/collection-layout').EntryLayout;
+    /**
+     * The corpus facts, when this entry is an adopted destination.
+     *
+     * Read on the JOIN in getPublishedItem rather than out of the item, because
+     * the item holds the client's words and the corpus holds ours. Null for
+     * every ordinary entry, which is nearly all of them.
+     */
+    reference: import('../../../../lib/content/reference').ReferenceFacts | null;
   };
   theme: React.CSSProperties;
   /** Markup the server has already cleaned. See lib/content/prepared.ts. */
   prepared?: import('../../../../lib/content/prepared').PreparedMap;
+  /** Stored sizes by url. See lib/content/image-sizes.ts. */
+  sizes?: import('../../../../lib/content/image-sizes').ImageSizes;
 }) {
   const { item } = entry;
   const image = safeUrl(item.image);
+  /*
+   * THE HEADER STANDS DOWN WHEN THE CONTENT OPENS WITH ITS OWN BANNER, the same
+   * way the automatic breadcrumb trail stands down for a breadcrumbs block.
+   *
+   * An adopted destination builds the banner the rest of the site uses: a
+   * section with a background photograph, its own trail, an h1-styled heading
+   * and a line of copy. Drawing the blog header as well gave the page two
+   * openings, the second in a different type treatment, with a stray trail
+   * above the picture and "3 min read" on a page about an island.
+   */
+  const ownBanner = carriesOwnBanner(item);
   /*
    * The facts this entry's collection declares, formatted into words.
    *
@@ -661,6 +803,17 @@ function EntryRenderer({
    * less than was asked.
    */
   const facts = fieldFacts(entry.fields, item.fields);
+  /*
+   * THE CORPUS'S OWN FACTS, when this entry was adopted from it rather than typed.
+   * Null for every ordinary entry, which is most of them, so a blog post renders
+   * exactly as it did. See lib/content/reference.ts.
+   *
+   * COMES FROM THE READ, NOT FROM THE ITEM. An earlier version looked in
+   * `item.fields`, which is the client's own answers to their own collection's
+   * questions, and would have found nothing there however many destinations had
+   * been adopted. The facts live on the corpus row this entry points at.
+   */
+  const reference = entry.reference;
   // "By Jane Doe · 4 min read", each part only when it is there. Reading time is
   // worked out from the body, never stored: see lib/content/reading-time.ts.
   const minutes = readingTime(item.sections);
@@ -679,6 +832,7 @@ function EntryRenderer({
      * the document for the sake of moving it on the screen.
      */
     <article className="tgs-page tgs-entry" data-layout={entry.layout} style={theme}>
+      {!ownBanner && (
       <header className="tgs-entry__head">
         {item.date && (
           <p className="tgs-entry__date">
@@ -727,9 +881,31 @@ function EntryRenderer({
           </div>
         )}
       </header>
+      )}
+
+      {/*
+        THE CORPUS PANEL IS A BAND OF ITS OWN, NOT PART OF THE HEADER, and it was
+        moved out here the day the magazine seed landed.
+
+        In the "Picture first" layout the header IS the banner photograph: it has
+        a min-height, its picture at inset 0 behind everything, and an explicit
+        order on each child. .tgs-dest had no order, so it fell to 0 and a facts
+        grid and a twelve-month chart drew straight over the photograph.
+
+        Reading it as a band is also just truer. What sits in the header is the
+        entry announcing itself, title and summary and picture. This is reference
+        material about the place, which is a different thing that happens to come
+        next, and giving it its own ground is what lets it look deliberate on
+        every one of the three entry layouts rather than only on the flat one.
+      */}
+      {reference && (
+        <div className="tgs-entry__reference">
+          <DestinationPanel facts={reference} />
+        </div>
+      )}
 
       {item.sections.map((section, index) => (
-        <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} />
+        <SectionRenderer key={section.id} section={section} index={index} prepared={prepared} sizes={sizes} />
       ))}
     </article>
   );
@@ -797,15 +973,19 @@ async function loadSearch(host: string, query: string) {
   const tenantId = await resolveTenantByHostname(decodeURIComponent(host));
   if (!tenantId) return null;
 
-  const [theme, faces, settings, regions, navPages, pageDocs, postDocs] = await Promise.all([
-    getPublicTheme(tenantId),
-    listFontFaces(tenantId),
-    getPublicSettings(tenantId),
-    getPublishedRegions(tenantId),
-    listPublishedNavPages(tenantId),
-    listPublishedForSearch(tenantId),
-    listPublishedItemsForSearch(tenantId),
-  ]);
+  const [theme, faces, settings, regions, navPages, pageDocs, postDocs, tenantSlug] =
+    await Promise.all([
+      getPublicTheme(tenantId),
+      listFontFaces(tenantId),
+      getPublicSettings(tenantId),
+      getPublishedRegions(tenantId),
+      listPublishedNavPages(tenantId),
+      listPublishedForSearch(tenantId),
+      listPublishedItemsForSearch(tenantId),
+      // The slug the font route wants, which is not the hostname. See the note
+      // on FontHead in this file.
+      getPublicTenantSlug(tenantId),
+    ]);
 
   /*
    * PAGES AND POSTS IN ONE CORPUS, ranked together with no thumb on the scale
@@ -814,7 +994,10 @@ async function loadSearch(host: string, query: string) {
    * already asking. Sorting posts below pages would be asserting that a page is
    * always more relevant, which on a travel site is often the opposite of true.
    */
-  return { theme, faces, settings, regions, navPages, query, hits: searchDocs([...pageDocs, ...postDocs], query) };
+  return {
+    theme, faces, settings, regions, navPages, tenantSlug, query,
+    hits: searchDocs([...pageDocs, ...postDocs], query),
+  };
 }
 
 function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typeof loadSearch>>>) {
@@ -830,7 +1013,8 @@ function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typ
     <>
       <ThemeToggleScript active={dark} />
       <SiteHead settings={data.settings} />
-      <FontHead tenantSlug={slug} files={data.faces} typography={data.theme.typography} />
+      {/* The slug, not the hostname. See the note on the other FontHead above. */}
+      <FontHead tenantSlug={data.tenantSlug ?? slug} files={data.faces} typography={data.theme.typography} />
 
       {/* The header and footer are siblings of the results, each carrying the
           theme itself, exactly as they are around a page. */}
@@ -845,6 +1029,8 @@ function renderSearchPage(host: string, data: NonNullable<Awaited<ReturnType<typ
       <SlideshowScript trees={[data.regions.header, data.regions.footer]} />
       <MotionScript trees={[data.regions.header, data.regions.footer]} />
       <NoRightClickScript settings={data.settings} />
+      <CookieConsent settings={data.settings} />
+      <FloatingWidgets settings={data.settings} />
       <SiteBody settings={data.settings} />
     </>
   );

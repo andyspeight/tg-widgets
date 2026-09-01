@@ -31,6 +31,7 @@ import {
   contrastRatio,
   deepenUntilTextFits,
   fadeButKeepReadable,
+  liftUntilTextFits,
   mix,
   nudgeUntilReadable,
   readableOn,
@@ -223,6 +224,24 @@ export function themeTokens(theme: Theme, library: LibraryFont[] = []): ThemeTok
     // The dark band. A darkened brand rather than a fixed near-black, so a
     // dark-tone section reads as the client's colour rather than as ours.
     '--tgs-surface-dark': brandDark,
+    /*
+     * THE COLOUR EVERY SCRIM IS MADE OF, and until now it was ours.
+     *
+     * globals.css asks for var(--tgs-scrim-colour, #0f172a) in a dozen places:
+     * the wash over a section's background photograph, an overlay card, an
+     * entry's banner, a heading's text shadow. Nothing ever set it, so every
+     * scrim on every client's site was that fallback navy, on the most
+     * prominent element of every page. Found by auditing what themeTokens emits
+     * against what the stylesheet asks for, rather than by looking at a page:
+     * a navy wash over a photograph looks deliberate, which is exactly why it
+     * survived.
+     *
+     * brandDark is the right source and needs no new derivation. It is the
+     * client's own dark, already deepened until light text clears 7:1, so a
+     * scrim built from it is at least as legible as the fixed navy was and
+     * belongs to them.
+     */
+    '--tgs-scrim-colour': brandDark,
 
     '--tgs-text': text,
     '--tgs-text-muted': textMuted,
@@ -331,6 +350,54 @@ export function darkThemeTokens(theme: Theme): Record<string, string> {
   const border = mix(surface, text, 0.16);
   const borderStrong = mix(surface, text, 0.28);
 
+  /*
+   * THE BRAND, LIFTED UNTIL IT CAN BE READ ON A NEAR-BLACK PAGE.
+   *
+   * Until this was added the dark palette remapped six tokens and left the brand
+   * alone, so --tgs-primary kept the value measured against the LIGHT page. It is
+   * not only a fill: globals.css uses it as the colour of a body link, a ghost
+   * button's label, a nav hover, an accordion title, a tab and a breadcrumb, so
+   * on a dark page it is body text on a near-black background and needs 4.5:1.
+   *
+   * Measured across eight realistic brands, seven failed and most failed badly:
+   * a deep navy at 1.2:1, a forest green at 1.7:1, our own default at 1.4:1.
+   * That is an invisible link, on every dark-mode page, for very nearly every
+   * travel brand there is, since deep blues and greens are what this industry
+   * uses. Found by diffing what themeTokens emits against what the dark block
+   * remaps, the same audit that found the scrim, and not findable by looking at
+   * a page: our own default fails, so every screenshot looked consistent.
+   *
+   * Lifting rather than replacing keeps it recognisably their colour, and it is
+   * what a dark mode is supposed to do with a brand: a colour chosen to sit on
+   * white is not the same colour that sits on black.
+   */
+  const primary = liftUntilTextFits(
+    nudgeUntilReadable(brand, surface, BODY_CONTRAST).colour,
+    BODY_CONTRAST,
+  );
+  /*
+   * The accent gets the same treatment, and for a reason that is easy to miss:
+   * nothing in globals.css paints text in --tgs-on-accent, so the pair looks
+   * unused. COLOUR_TOKENS (lib/content/styles.ts) offers both to the client as
+   * a background and a text colour, so the pairing is theirs to make even
+   * though ours never does. Caught by a sweep that measured every pair the
+   * tokens can form rather than the ones the stylesheet happens to write.
+   */
+  const accent = liftUntilTextFits(
+    nudgeUntilReadable(theme.accent, surface, BODY_CONTRAST).colour,
+    BODY_CONTRAST,
+  );
+
+  /*
+   * And everything measured against the brand has to be measured again, against
+   * the lifted one. An accent-tone section paints itself var(--tgs-primary) and
+   * writes on it in var(--tgs-on-primary); remapping the background without the
+   * label is how a band ends up with white text on a pale blue. Same pairs as
+   * themeTokens, same helpers, different brand.
+   */
+  const onPrimary = readableOn(primary);
+  const onAccent = readableOn(accent);
+
   return {
     '--tgs-d-surface': surface,
     '--tgs-d-surface-alt': surfaceAlt,
@@ -338,6 +405,22 @@ export function darkThemeTokens(theme: Theme): Record<string, string> {
     '--tgs-d-text-muted': textMuted,
     '--tgs-d-border': border,
     '--tgs-d-border-strong': borderStrong,
+
+    '--tgs-d-primary': primary,
+    '--tgs-d-primary-light': mix(primary, '#ffffff', NUDGE.brandLight),
+    '--tgs-d-accent': accent,
+    '--tgs-d-on-primary': onPrimary,
+    '--tgs-d-on-accent': onAccent,
+
+    // Inside an accent-tone band, whose background is the lifted brand.
+    '--tgs-d-on-primary-muted': fadeButKeepReadable(
+      onPrimary,
+      primary,
+      ON_COLOUR.muted,
+      BODY_CONTRAST,
+    ),
+    '--tgs-d-on-primary-accent': nudgeUntilReadable(accent, primary, BODY_CONTRAST).colour,
+    '--tgs-d-on-primary-border': mix(primary, onPrimary, ON_COLOUR.border),
   };
 }
 

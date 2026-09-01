@@ -19,15 +19,22 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { createAiPageAction, writeCopyAction } from '../../app/actions/ai';
 import { buildDesignedSectionAction } from '../../app/actions/designed';
 import {
+  deleteSectionTemplateAction,
+  listSectionTemplatesAction,
+} from '../../app/actions/section-templates';
+import type { SectionTemplate } from '../../lib/db/section-templates';
+import {
   createPageAction,
   movePageAction,
   publishPageAction,
   saveDraftAction,
 } from '../../app/actions/pages';
 import { publishRegionAction, saveRegionAction } from '../../app/actions/regions';
-import { publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listingCardsAction, publishItemAction, saveItemAction } from '../../app/actions/collections';
+import { listingBlocksIn, listingKey } from '../../lib/content/listings';
 import { listPageCommentsAction, openCommentCountAction } from '../../app/actions/comments';
 import { PublishHistory } from './PublishHistory';
+import { PublishSiteDialog } from '../ui/PublishSiteDialog';
 import type { NavPage } from '../../lib/content/nav';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
@@ -35,6 +42,17 @@ import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
 import type { FieldDef } from '../../lib/content/collection-fields';
 import { pageAsItem, type ItemMeta } from '../../lib/content/collection-page';
 import { ALL_CAPABILITIES, type Capability } from '../../lib/auth/permissions';
+import type { FloatingWidgetsSettings } from '../../lib/settings/schema';
+import {
+  DEFAULT_VISITOR_SIGNALS,
+  normaliseCampaign,
+  type AudienceDevice,
+  type AudienceSource,
+  type AudienceVisitor,
+  type VisitorSignals,
+} from '../../lib/content/audience';
+import { ISO_COUNTRIES } from '../../lib/content/countries';
+import { COMMON_LANGUAGES } from '../../lib/content/languages';
 import { blockLabel, createBlock, createSectionFromLayout, newId } from '../../lib/content/factory';
 import { buildPresetSection } from '../../lib/content/presets';
 import { addBlock, addColumn, addInnerBlock, blockAtPath, containerColumns, locateBlockById, moveBlockTo, moveSection, parsePathKey, type Path, pathKey, resolve, updateBlockPropsAtPath } from '../../lib/content/tree';
@@ -60,6 +78,15 @@ import { wasFilled, type SeoFilled } from '../../lib/seo/autofill';
 import { outlineCollision } from './outline-collision';
 import { resolveOutlineMove, type OutlineDragItem } from './outline-move';
 import type { PreparedMap } from '../../lib/content/prepared';
+import type { ListingCards } from '../../lib/db/listings';
+
+/**
+ * How long to wait after the last keystroke before asking for a listing.
+ *
+ * A collection name is TYPED. Without this, "guides" is six requests, five of
+ * them for collections that do not exist. Same figure the adopt dialog uses.
+ */
+const LISTING_DEBOUNCE_MS = 300;
 import { Properties } from './Properties';
 import { BlockPicker } from './BlockPicker';
 import { ItemToolbar } from './ItemToolbar';
@@ -243,6 +270,26 @@ const VIEWPORTS: ReadonlyArray<{ value: Viewport; label: string; icon: IconName 
  * the three phone sizes that cover almost everything. Anything else can be
  * typed in.
  */
+/**
+ * Where a page's content actually stops, from --tgs-width-contained.
+ *
+ * THE THRESHOLD THAT DECIDES WHETHER THE PREVIEW IS TRUE, which is not the same
+ * as the chosen viewport width and is the more useful thing to say. A contained
+ * section caps its inner at this, so from here upward every desktop width lays
+ * out identically: measured on a real page, the hero's heading box was 1068px at
+ * a 1200px viewport and 1068px at 2560px. Above this line the canvas is exact
+ * however narrow the window is; below it, text wraps in places it will not wrap
+ * on the published site.
+ *
+ * Andy hit this on 25 Aug 2026 with a headline on one line live and two in the
+ * editor, and the old badge could not have told him why: it compared the drawn
+ * width against the width he had CHOSEN, so 1150px warned while being perfectly
+ * faithful and 1050px warned in the same words while not being.
+ *
+ * Kept in step with globals.css by tests/editor-fidelity.test.ts.
+ */
+const CONTAINED_WIDTH = 1100;
+
 const VIEWPORT_DEFAULT: Record<Viewport, number> = {
   desktop: 1200,
   // Sits clearly between the two container breakpoints (768 and 1024), so
@@ -364,6 +411,13 @@ interface EditorProps {
    */
   pages?: readonly PageLink[];
   /**
+   * The site-wide floating widgets, so Preview can draw them the way the
+   * published site does. Absent on the region and item screens, which carry no
+   * site chrome to preview; Canvas only draws them on a page and only in
+   * Preview. See PreviewWidgets for why the editor loads them by hand.
+   */
+  floatingWidgets?: FloatingWidgetsSettings;
+  /**
    * Editing the site's header or footer rather than a page.
    *
    * WHAT THIS CHANGES, AND WHAT IT DELIBERATELY DOES NOT
@@ -422,6 +476,16 @@ interface EditorProps {
    * placeholders. See lib/content/prepared.ts.
    */
   preparedSeed?: PreparedMap;
+  /**
+   * The cards a collection-backed grid will draw, by listing key.
+   *
+   * Beside the tree rather than in it, for the same reason preparedSeed is:
+   * this tree is the document being edited, and folding the cards into
+   * `props.items` would let a save bake today's listing into the page. The
+   * canvas fills a copy of the tree at the moment it draws. See
+   * lib/db/listings.ts.
+   */
+  listings?: ListingCards;
   chromeHeader?: ChromeRegion | null;
   chromeFooter?: ChromeRegion | null;
   /**
@@ -443,12 +507,14 @@ export function EditorShell({
   siteTheme,
   currentUserId = null,
   pages = [],
+  floatingWidgets,
   region: initialRegion = null,
   initialRegionFlags,
   itemId = null,
   initialItemMeta,
   itemFields,
   preparedSeed,
+  listings,
   chromeHeader = null,
   chromeFooter = null,
   focusComment = null,
@@ -479,6 +545,47 @@ export function EditorShell({
    */
   const [activeTree, setActiveTree] = useState<Tree>(initialRegion ?? 'page');
   const region = activeTree === 'page' ? null : activeTree;
+
+  /**
+   * The collection cards, held locally so a reorder redraws at once.
+   *
+   * They arrive from the server with the page. Arranging a grid's entries from
+   * the properties pane writes to the database and would otherwise leave the
+   * canvas showing the old order until a reload, which reads as the arrows not
+   * working. So the move is applied here as well, to the one listing the block
+   * is drawing.
+   *
+   * Only that listing. Another grid elsewhere on the page showing the same
+   * collection in the same order is stale until the next load, which is a rare
+   * page and a small lie; rebuilding every variant would mean re-reading them
+   * all for one arrow press.
+   */
+  const [cards, setCards] = useState(listings);
+
+  /*
+   * Keys already asked for, so a collection that genuinely has no cards is not
+   * requested again on every render. A ref rather than state because changing it
+   * must not itself cause a render, which is how this becomes a loop.
+   */
+  const askedFor = useRef<Set<string>>(new Set());
+
+
+  const reorderCards = useCallback((key: string, orderedIds: string[]) => {
+    setCards((current) => {
+      const held = current?.get(key);
+      if (!held) return current;
+
+      const byId = new Map(held.map((card) => [String(card.id ?? ''), card]));
+      const moved = orderedIds.map((id) => byId.get(id)).filter(Boolean) as typeof held;
+      // Anything the list did not mention keeps its place at the end, so a card
+      // with no id cannot be dropped by a reorder that never knew about it.
+      const rest = held.filter((card) => !orderedIds.includes(String(card.id ?? '')));
+
+      const next = new Map(current);
+      next.set(key, [...moved, ...rest]);
+      return next;
+    });
+  }, []);
 
   /**
    * The two trees you are NOT editing, as content for the chrome bands and as the
@@ -513,6 +620,24 @@ export function EditorShell({
   /** Where a new section would go. null means the picker is closed. */
   const [insertAt, setInsertAt] = useState<number | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  /*
+   * This client's saved sections, for the "My sections" tab of the add-a-section
+   * dialog. Loaded when the dialog opens rather than at mount, so a section
+   * saved this session is offered back the next time the dialog is opened, and a
+   * client with none never pays for the read.
+   */
+  const [templates, setTemplates] = useState<SectionTemplate[]>([]);
+  useEffect(() => {
+    if (insertAt === null) return;
+    let live = true;
+    void listSectionTemplatesAction().then((result) => {
+      if (live && result.ok) setTemplates(result.data);
+    });
+    return () => {
+      live = false;
+    };
+  }, [insertAt]);
 
   /*
    * Whether the on-canvas options popover is open, held here rather than inside
@@ -574,6 +699,8 @@ export function EditorShell({
   /** How many picture descriptions the last publish wrote in. */
   const [altsFilled, setAltsFilled] = useState(0);
   const [publishing, setPublishing] = useState(false);
+  /** Whether the whole-site publish overlay is open. */
+  const [sitePublishOpen, setSitePublishOpen] = useState(false);
   const [mobilePane, setMobilePane] = useState<'canvas' | 'props' | 'outline'>('canvas');
   /**
    * Which side panels are open. Both, until somebody folds one away.
@@ -702,6 +829,13 @@ export function EditorShell({
    * it reflects the current work including edits not yet saved.
    */
   const [preview, setPreview] = useState(false);
+  /**
+   * The visitor Preview is pretending to be, so a client can check a section's
+   * audience rule (slice C/D). Starts at the baseline every unknown visitor gets,
+   * and only matters in preview: the Preview-as control edits it and the canvas
+   * filters the draft's sections against it exactly as the published site does.
+   */
+  const [previewAs, setPreviewAs] = useState<VisitorSignals>(DEFAULT_VISITOR_SIGNALS);
   /** What each preview is drawn at, in pixels. See VIEWPORTS_KEY. */
   const [widths, setWidths] = useState<Record<Viewport, number>>(VIEWPORT_DEFAULT);
   /**
@@ -732,6 +866,53 @@ export function EditorShell({
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
+
+  /**
+   * FETCH ON MISS: the listing the canvas turns out to need.
+   *
+   * The map arrives with the page, keyed by the whole request. Change the
+   * collection name, the filter, the sort or the order on a grid and the key
+   * stops matching anything in it, fillListings finds no cards, and the grid
+   * empties until a reload. Andy hit that on the order control; it was equally
+   * true of the other three and nobody had ever changed one on the canvas and
+   * watched.
+   *
+   * DEBOUNCED, because a collection name is TYPED. Without it "guides" is six
+   * requests, five of them for collections that do not exist.
+   *
+   * ASKED ONCE PER KEY. A collection with nothing published answers with an
+   * empty list, which is a real answer and is cached as one; without the ref
+   * that empty answer would be re-requested on every render for ever.
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const missing = new Map<string, Record<string, unknown>>();
+      for (const { request, props } of listingBlocksIn([page, otherContent.header, otherContent.footer])) {
+        const key = listingKey(request);
+        if (cards?.has(key) || askedFor.current.has(key)) continue;
+        missing.set(key, props);
+      }
+      if (missing.size === 0) return;
+
+      for (const key of missing.keys()) askedFor.current.add(key);
+
+      void Promise.all(
+        [...missing].map(async ([key, props]) => ({
+          key,
+          result: await listingCardsAction(props),
+        })),
+      ).then((answers) => {
+        setCards((current) => {
+          const next = new Map(current);
+          for (const { key, result } of answers) if (result.ok) next.set(key, result.data);
+          return next;
+        });
+      });
+    }, LISTING_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [page, otherContent.header, otherContent.footer, cards]);
+
 
   /*
    * Which block is being typed into ON THE CANVAS, and what kind it is.
@@ -1024,6 +1205,26 @@ export function EditorShell({
     }
     setPublishing(false);
   }, [itemId, page, pageId, persist, region, regionFlags, itemMeta]);
+
+  /**
+   * Open the whole-site publish overlay.
+   *
+   * FLUSHES FIRST, exactly as publish does above, so the sweep reads this page
+   * with the latest keystroke in it rather than the version from before the
+   * debounce. The overlay reads its plan from the database the moment it opens,
+   * so the flush has to have landed before it does.
+   */
+  const openSitePublish = useCallback(async () => {
+    setSaveError(null);
+    const pending = await persist(page, regionFlags, itemMeta);
+    if (!pending.ok) {
+      setSaved('error');
+      setSaveError(pending.error);
+      return;
+    }
+    setSaved('saved');
+    setSitePublishOpen(true);
+  }, [persist, page, regionFlags, itemMeta]);
 
   /**
    * Switch which tree is being edited: click the header or the footer on the
@@ -1434,9 +1635,13 @@ export function EditorShell({
 
   const publishLabel = useMemo(() => {
     if (publishing) return 'Publishing';
-    if (status !== 'published') return 'Publish';
-    return unpublished ? 'Publish changes' : 'Published';
-  }, [publishing, status, unpublished]);
+    // The quieter, single-unit publish that sits beside "Publish site": it names
+    // what it does, so the two are never mistaken for each other. A region is a
+    // header or a footer, an item is a post, everything else is the page.
+    const unit = region ?? (itemId ? 'post' : 'page');
+    if (status !== 'published') return `Publish this ${unit}`;
+    return unpublished ? `Publish this ${unit}` : 'Published';
+  }, [publishing, status, unpublished, region, itemId]);
 
   // Add a block at an explicit place. Shared by the canvas drop and the elements
   // palette, so a dropped block and a clicked one land the one same way.
@@ -1749,6 +1954,26 @@ export function EditorShell({
     >
     <div
       className="ed-root"
+      /*
+       * THE CLIENT'S BRAND, ON THE WHOLE EDITOR, NOT JUST THE CANVAS.
+       *
+       * Every colour swatch in the properties panel is a THEME TOKEN rather than
+       * a hex: picking "Accent" writes var(--tgs-accent), so the colour follows
+       * the client's brand and keeps following it when they change it. That is
+       * the right design and it looked broken, because the chips draw themselves
+       * with the same token and the panel sits outside the canvas. Outside, the
+       * token falls back to the value in globals.css :root, which is the default
+       * Travelgenix palette: navy, cyan, grey. So an agency was offered a row of
+       * OUR colours, picked one, and watched THEIR colour appear on the card.
+       * Andy, 26 Aug 2026, and he is right that it cannot ship like that.
+       *
+       * Safe to put here rather than thread through every panel because the
+       * editor chrome does not use a single --tgs- token: it is --ed-* from top
+       * to bottom, checked across the whole stylesheet. So this changes nothing
+       * about how the editor looks and everything about what a preview of the
+       * client's own colours and fonts resolves to.
+       */
+      style={siteTheme}
       data-pane={mobilePane}
       data-theme={theme}
       data-outline={panels.outline ? undefined : 'folded'}
@@ -1960,9 +2185,19 @@ export function EditorShell({
           {actualWidth !== null && (
             <span
               className="ed-vw__actual"
-              title={`There is only room for ${actualWidth}px. Fold a panel for the full width.`}
+              data-faithful={actualWidth >= CONTAINED_WIDTH ? '' : undefined}
+              title={
+                actualWidth >= CONTAINED_WIDTH
+                  ? `There is only room for ${actualWidth}px, but a page's content stops at ` +
+                    `${CONTAINED_WIDTH}px anyway, so this is still exactly what a visitor sees. ` +
+                    `Fold a panel for the full width of the frame.`
+                  : `There is only room for ${actualWidth}px, which is under the ${CONTAINED_WIDTH}px ` +
+                    `a page's content stops at. Text wraps in places it will not wrap on the real ` +
+                    `site. Fold a panel to get back above ${CONTAINED_WIDTH}px.`
+              }
             >
               showing {actualWidth}
+              {actualWidth < CONTAINED_WIDTH ? ', wraps early' : ''}
             </span>
           )}
           <Menu
@@ -2032,32 +2267,156 @@ export function EditorShell({
         </button>
 
         {/*
-          Disabled once published with nothing new to say, rather than hidden.
-          A button that vanishes leaves an agent wondering where it went; one
-          that reads "Published" and sits still answers the question.
+          PREVIEW AS, only while previewing. A client sets a section's audience
+          (slice C), then checks it here by pretending to be a visitor: country,
+          device, how they arrived, and whether they have been before. The canvas
+          filters the draft against exactly this, the same rule the published site
+          resolves per request. A native <details> so it opens and closes with no
+          extra state, and it is desktop-only like the width control beside it.
+        */}
+        {preview && (
+          <details className="ed-preview-as ed-desktop-only">
+            <summary className="ed-btn" title="See the page as a chosen visitor">
+              <Icon name="user" size={16} />
+              Preview as
+            </summary>
+            <div className="ed-preview-as__panel" role="group" aria-label="Preview as a visitor">
+              <label className="ed-preview-as__row">
+                <span>Country</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.country ?? ''}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, country: event.target.value || null }))
+                  }
+                >
+                  <option value="">Unknown / anywhere</option>
+                  {ISO_COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Device</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.device}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, device: event.target.value as AudienceDevice }))
+                  }
+                >
+                  <option value="desktop">Desktop</option>
+                  <option value="mobile">Phone</option>
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Arrived from</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.source}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, source: event.target.value as AudienceSource }))
+                  }
+                >
+                  <option value="direct">Direct</option>
+                  <option value="search">Search</option>
+                  <option value="social">Social</option>
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Been before</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.visitor}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, visitor: event.target.value as AudienceVisitor }))
+                  }
+                >
+                  <option value="new">New visitor</option>
+                  <option value="returning">Returning</option>
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Language</span>
+                <select
+                  className="ed-select"
+                  value={previewAs.language ?? ''}
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, language: event.target.value || null }))
+                  }
+                >
+                  <option value="">Unknown / any</option>
+                  {COMMON_LANGUAGES.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="ed-preview-as__row">
+                <span>Campaign</span>
+                <input
+                  className="ed-input"
+                  value={previewAs.campaign ?? ''}
+                  placeholder="utm_campaign"
+                  onChange={(event) =>
+                    setPreviewAs((prev) => ({ ...prev, campaign: normaliseCampaign(event.target.value) }))
+                  }
+                />
+              </label>
+            </div>
+          </details>
+        )}
 
-          Hidden ENTIRELY, though, for a member without the publish capability:
-          there is no "disabled Publish" that helps them, and the server refuses
-          it anyway (slice 3). Staff and an unset owner keep it.
+        {/*
+          TWO PUBLISH ACTIONS, and the difference between them is the point.
+
+          "Publish site" is the headline: it puts every page with changes live at
+          once, behind the progress overlay, so an agent never has to visit six
+          pages to publish six edits. Beside it, quieter, is the single-unit
+          publish this editor has always had, for when you have touched one page
+          and only want that one live. Andy, 26 Aug 2026.
+
+          The single-unit button is disabled once its target is published with
+          nothing new to say, rather than hidden: a button that vanishes leaves an
+          agent wondering where it went; one that reads "Published" and sits still
+          answers the question. Both are hidden ENTIRELY for a member without the
+          publish capability, since the server refuses it anyway (slice 3). Staff
+          and an unset owner keep them.
         */}
         {canPublish && (
-          <button
-            type="button"
-            className="ed-btn ed-editing-only"
-            data-variant="primary"
-            onClick={publish}
-            disabled={publishing || (status === 'published' && !unpublished)}
-            title={
-              status === 'published' && !unpublished
-                ? `The live ${region ?? 'page'} already matches this draft`
-                : region
-                  ? `Put this ${region} on every page of the site`
-                  : 'Make this the version visitors see'
-            }
-          >
-            <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
-            {publishLabel}
-          </button>
+          <>
+            <button
+              type="button"
+              className="ed-btn ed-editing-only"
+              onClick={publish}
+              disabled={publishing || (status === 'published' && !unpublished)}
+              title={
+                status === 'published' && !unpublished
+                  ? `The live ${region ?? 'page'} already matches this draft`
+                  : region
+                    ? `Publish just the ${region}, not the rest of the site`
+                    : `Publish just this ${itemId ? 'post' : 'page'}, not the whole site`
+              }
+            >
+              <Icon name={status === 'published' && !unpublished ? 'check' : 'upload'} size={16} />
+              {publishLabel}
+            </button>
+
+            <button
+              type="button"
+              className="ed-btn ed-editing-only"
+              data-variant="primary"
+              onClick={openSitePublish}
+              disabled={publishing}
+              title="Put every page with changes live, along with the header and footer"
+            >
+              <Icon name="upload" size={16} />
+              Publish site
+            </button>
+          </>
         )}
 
         <Menu
@@ -2172,6 +2531,7 @@ export function EditorShell({
 
       <Canvas
         preparedSeed={preparedSeed}
+        listings={cards}
         onInsertSection={setInsertAt}
         editingPath={editingPath}
         page={page}
@@ -2203,6 +2563,13 @@ export function EditorShell({
         // the Comments panel on that thread.
         commentPins={commentPins}
         onOpenComment={openCommentThread}
+        // The site-wide floating widgets, for Preview to draw. Canvas shows them
+        // only on a page and only in Preview; the region and item screens pass
+        // nothing, so there is nothing to draw there.
+        floatingWidgets={floatingWidgets}
+        // Who Preview is pretending to be, so the canvas hides the sections this
+        // visitor would not see. Only in preview; editing always shows them all.
+        previewAs={preview ? previewAs : undefined}
         /*
           "This page is empty" is the wrong sentence on the header screen, and
           it is the sentence somebody meets FIRST, since a client who has never
@@ -2236,6 +2603,8 @@ export function EditorShell({
         onItemMeta={setItemMeta}
         itemFields={itemFields}
         editingOnCanvas={optionsOpen}
+        listings={cards}
+        onListingOrder={reorderCards}
       />
 
       {/*
@@ -2364,6 +2733,30 @@ export function EditorShell({
         />
       )}
 
+      {sitePublishOpen && (
+        <PublishSiteDialog
+          onClose={() => setSitePublishOpen(false)}
+          onPagePublished={(summary) => {
+            // The editor holds one tree. If the sweep just published the very
+            // page or post this editor is on, catch its own status up so the
+            // quieter single-unit button settles to "Published" too.
+            const editingThis =
+              (!region && !itemId && summary.id === pageId) ||
+              (itemId !== null && summary.id === itemId);
+            if (editingThis) {
+              setStatus(summary.status);
+              setUnpublished(summary.hasUnpublishedChanges);
+            }
+          }}
+          onRegionPublished={(name) => {
+            if (region === name) {
+              setStatus('published');
+              setUnpublished(false);
+            }
+          }}
+        />
+      )}
+
       {insertAt !== null && (
         <SectionPicker
           // Which designed sections are worth offering. A page gets the page
@@ -2407,6 +2800,19 @@ export function EditorShell({
            */
           onPickImported={(sections) => insertSections(sections)}
           onPickBuilt={(section) => insertSection(section)}
+          /*
+           * The page so far and its title, so the AI tab can suggest the section
+           * that should come next, and this client's own saved sections for the
+           * "My sections" tab. Delete goes straight to the action and drops the
+           * row from the list in hand, so it leaves the tab as it went.
+           */
+          pageSections={page.sections}
+          pageTitle={page.title}
+          templates={templates}
+          onDeleteTemplate={(id) => {
+            setTemplates((current) => current.filter((template) => template.id !== id));
+            void deleteSectionTemplateAction({ id });
+          }}
         />
       )}
 

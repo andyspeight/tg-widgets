@@ -868,7 +868,7 @@
     }
 
     function openById(id) {
-      fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' })
+      fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include', cache: 'no-store' })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (d) { openForm(Object.assign({ id: id }, d.offer)); })
         .catch(function () { alert('Could not open the offer. Please try again.'); });
@@ -1024,7 +1024,7 @@
           .then(r => { if (!r.ok) throw new Error(r.status); loadTrash(); })
           .catch(() => alert('Could not delete the offer. Please try again.'));
       } else if (btn.dataset.act === 'edit') {
-        fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include' })
+        fetch(OFFERS_API + '?id=' + encodeURIComponent(id), { credentials: 'include', cache: 'no-store' })
           .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
           .then(d => openForm(Object.assign({ id: id }, d.offer)))
           .catch(() => alert('Could not open the offer. Please try again.'));

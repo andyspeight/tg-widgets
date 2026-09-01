@@ -25,12 +25,16 @@ import {
   MOTION_CYCLING_RECIPES,
   MOTION_LIVE_RECIPES,
   MOTION_RECIPES,
+  MOTION_SEA_RECIPES,
   MOTION_TIERS,
   parsePage,
+  sectionCardCount,
+  sectionMotionGaps,
+  SEA_TONES,
   type MotionRecipe,
 } from '../lib/content/schema';
-import { MOTION_CHOICES, MOTION_INTENSITIES } from '../lib/content/styles';
-import { needsMotionScript } from '../lib/content/motion';
+import { MOTION_CHOICES, MOTION_INTENSITIES, SEA_TONE_PRESETS } from '../lib/content/styles';
+import { needsMotionScript, needsSeaScript } from '../lib/content/motion';
 import { presetById } from '../lib/content/presets';
 import { buildStarterPage, STARTERS, type StarterFacts } from '../lib/content/starters';
 
@@ -55,6 +59,7 @@ const render = read('components', 'render', 'PageRenderer.tsx');
 const schema = read('lib', 'content', 'schema.ts');
 const blocks = read('lib', 'content', 'blocks.ts');
 const motionScript = read('public', 'tg-motion.js');
+const seaScript = read('public', 'tg-sea.js');
 
 /**
  * The bodies of every `@media (prefers-reduced-motion: no-preference)` block in the
@@ -174,6 +179,24 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
       return;
     }
 
+    /*
+     * THE WEBGL SEA KEEPS ITS GUARD IN ITS OWN SCRIPT. A1 draws from a shader, not the
+     * stylesheet, so like A3 there is no keyframe to sit inside the media query; tg-sea.js
+     * must refuse to create a canvas at all under reduced motion, which is a stronger
+     * guarantee than hiding one (no GPU work happens either).
+     */
+    if (MOTION_SEA_RECIPES.has(recipe)) {
+      expect(
+        /prefers-reduced-motion:\s*reduce/.test(seaScript),
+        `${recipe} is the WebGL sea but tg-sea.js never asks about reduced motion`,
+      ).toBe(true);
+      expect(
+        /matches\)\s*return/.test(seaScript),
+        `${recipe}'s script checks reduced motion but does not bail on it`,
+      ).toBe(true);
+      return;
+    }
+
     expect(moving.length, `${recipe} has no rule that makes anything move`).toBeGreaterThan(0);
     for (const rule of moving) {
       const head = rule.slice(rule.indexOf(selector));
@@ -217,6 +240,17 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
         continue;
       }
 
+      if (MOTION_SEA_RECIPES.has(recipe)) {
+        // The sea's wave phase is read from the frame timestamp (now - t0), not a
+        // per-frame step, so a slow GPU shows a coarser sea at the right speed.
+        expect(/requestAnimationFrame/.test(seaScript), `${recipe} runs no frame loop`).toBe(true);
+        expect(
+          /now - t0/.test(seaScript),
+          `${recipe}'s script does not derive its phase from elapsed time`,
+        ).toBe(true);
+        continue;
+      }
+
       if (!animation) {
         expect(sticky, `${recipe} neither animates nor sticks, so nothing moves`).toBe(true);
         continue;
@@ -233,7 +267,10 @@ describe('the reduced-motion guard, which is the one nothing may skip', () => {
        * what the parallax has done since 11 Aug 2026. An earlier version of this test
        * demanded a range and failed A4 for matching the house pattern.
        */
-      if (rules.some((r) => /animation-timeline:\s*view\(\)/.test(r))) {
+      // Scroll-steered off a view timeline, anonymous view() or a named one (S2 pins the
+      // section and drives its cards off the section's own --tgs-s2 view-timeline). Either
+      // way it is paced by scroll, so a duration in the shorthand is ignored and misleads.
+      if (rules.some((r) => /animation-timeline:\s*(view\(\)|--[\w-]+)/.test(r))) {
         expect(
           /animation:[^;]*?\d+m?s/.test(animation),
           `${recipe} is scroll-steered but carries a duration, which is ignored and misleads`,
@@ -368,9 +405,26 @@ describe('one thing moves the background picture, never three', () => {
     }
   });
 
-  it('leaves the Ken Burns rules exactly as they were, so nothing published changes', () => {
-    expect(css).toContain('animation: tgs-ken-burns 24s ease-in-out infinite alternate;');
+  it('runs Ken Burns fast enough to be seen, retuned 30 Aug 2026', () => {
+    // Was 24s, at which the drift was below the eye's threshold and read as a
+    // still. 18s is still the calmest ambient move but visibly drifting on load.
+    expect(css).toContain('animation: tgs-ken-burns 18s ease-in-out infinite alternate;');
     expect(css).toContain('@keyframes tgs-ken-burns');
+  });
+
+  it('the always-on ambient recipes move perceptibly, not at the old sub-threshold rate', () => {
+    // A6 measured 0.075% of movement over 1.5s at 26s; now 16s at the medium band
+    // with a wider pan. A5's frames likewise run at 16s, not 26s.
+    expect(css).toContain('--tgs-motion-duration: 16s;');
+    expect(css).toContain('animation: tgs-motion-slow-frame 16s ease-in-out infinite alternate;');
+    // The drift actually pans across the scene now, not a near-still zoom.
+    expect(css).toContain('transform: scale(var(--tgs-motion-to)) translate(-6%, -4%);');
+  });
+
+  it('the editor tells the client motion is paused while editing, so it is not "broken"', () => {
+    const props = readFileSync(join(__dirname, '..', 'components', 'editor', 'Properties.tsx'), 'utf8');
+    expect(props).toContain('Movement is paused while you edit');
+    expect(props).toContain('Press the eye');
   });
 });
 
@@ -383,21 +437,21 @@ describe('the cost of a recipe is declared, so a page budget can be held', () =>
   });
 
   /*
-   * GUARDRAIL: no more than one tier-2 (WebGL) block on a page.
+   * GUARDRAIL: no more than one tier-2 (WebGL) canvas on a page.
    *
-   * Today that cap cannot be breached from here, because no recipe a SECTION can
-   * carry is tier 2: A1 ambient-terrain is deliberately outside this enum and will
-   * arrive on the hero-cinematic block instead. This test holds that precondition,
-   * so adding a WebGL recipe to the section vocabulary fails here and the real
-   * per-page cap has to be written at the same time.
+   * A1 the cinematic sea is the one tier-2 section recipe (31 Aug 2026). The cap that
+   * used to be kept by holding A1 out of the enum entirely is now kept by the script:
+   * tg-sea.js animates the FIRST [data-motion='A1'] section on a page and leaves any
+   * other on its still photograph. So this checks two things: A1 is the ONLY tier-2
+   * recipe, and the script really takes just the first rather than looping every match.
    */
-  it('has no WebGL recipe in the section vocabulary, so the one-per-page cap cannot be breached yet', () => {
+  it('caps the one WebGL recipe at a single canvas per page, in the script', () => {
     const webgl = MOTION_RECIPES.filter((r) => MOTION_TIERS[r] === 2);
-    expect(
-      webgl,
-      'a tier-2 recipe reached the section enum: write the one-per-page cap before shipping it',
-    ).toEqual([]);
-    expect(MOTION_RECIPES).not.toContain('A1' as MotionRecipe);
+    expect(webgl, 'a second tier-2 recipe would need its own per-page accounting').toEqual(['A1']);
+    expect(seaScript).toContain("data-motion='A1'");
+    expect(seaScript).toContain('querySelector(');
+    expect(seaScript, 'the cap must take the first A1 section only, never loop all of them')
+      .not.toContain('querySelectorAll');
   });
 
   it('only a recipe that really needs a script is rated above tier 0', () => {
@@ -409,7 +463,9 @@ describe('the cost of a recipe is declared, so a page budget can be held', () =>
      * would be putting a script on a page while claiming to be free.
      */
     for (const recipe of MOTION_LIVE_RECIPES) {
-      const needsScript = MOTION_SCRIPT_RECIPES.has(recipe);
+      // Either script counts: the DOM-nudging tg-motion.js (A3) or the WebGL tg-sea.js
+      // (A1). A recipe that pulls either is not free and must be rated above tier 0.
+      const needsScript = MOTION_SCRIPT_RECIPES.has(recipe) || MOTION_SEA_RECIPES.has(recipe);
       expect(
         MOTION_TIERS[recipe] > 0,
         needsScript
@@ -735,7 +791,8 @@ describe('the script only reaches a page that actually needs it', () => {
   });
 
   it('renders nothing at all rather than an empty tag when no tree needs it', () => {
-    expect(emitter).toContain('if (!anyNeedsMotionScript(trees)) return null;');
+    // Neither the DOM script nor the sea: the component is null, not an empty fragment.
+    expect(emitter).toContain('if (!motion && !sea) return null;');
   });
 
   it('is emitted once per document, from the routes that assemble one', () => {
@@ -842,5 +899,430 @@ describe('the video hero is not downloaded by people who will not see it', () =>
       expect(MOTION_SCRIPT_RECIPES.has(recipe), `${recipe} should not need a script`).toBe(false);
       expect(MOTION_TIERS[recipe]).toBe(0);
     }
+  });
+});
+
+describe('a scroll-driven recipe on the first section', () => {
+  /*
+   * A view() timeline measures an element ENTERING the scrollport, and the first
+   * section never enters: it is on screen when the page loads. Measured on
+   * 25 Aug 2026 with a 1200px hero in a 900px viewport, S5's range was already
+   * about 43% spent before the visitor touched anything, so the animation sat at
+   * its end state at every scroll position. The recipe was offered in the editor,
+   * stored on the page, attached by the browser, and did nothing whatsoever.
+   *
+   * The fix drives that one case off the document's own scroll instead. These
+   * assertions exist because the failure is invisible: nothing errors, the
+   * attribute is present, and the only symptom is a hero that does not move.
+   */
+  const render = read('components', 'render', 'PageRenderer.tsx');
+  const sheet = read('app', 'globals.css');
+  const code = render.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+  it('marks the first section, and only when a recipe is actually on', () => {
+    expect(code).toContain("data-motion-lead={motion && index === 0 ? '' : undefined}");
+  });
+
+  it('drives the lead section off the document scroll rather than its own entry', () => {
+    const css = sheet.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).toContain("[data-motion='S5'][data-motion-lead] .tgs-section__bg");
+    expect(css).toMatch(/\[data-motion-lead\][\s\S]{0,160}animation-timeline:\s*scroll\(\)/);
+  });
+
+  it('settles over the hero own height, so a taller hero simply takes longer', () => {
+    const css = sheet.replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(css).toMatch(/animation-range:\s*0\s+calc\(var\(--tgs-min-h/);
+  });
+
+  it('stays inside the reduced-motion and feature guards the rest of S5 sits in', () => {
+    /*
+     * The lead rule only overrides the timeline; it must not become a second way
+     * to start an animation for somebody who asked for less motion, or in a
+     * browser with no scroll timelines at all.
+     */
+    const guarded = sheet.slice(sheet.indexOf('@supports (animation-timeline: view())'));
+    const leadAt = guarded.indexOf("[data-motion='S5'][data-motion-lead]");
+    expect(leadAt).toBeGreaterThan(-1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The editor says why a recipe will not move (31 Aug 2026). A background recipe
+// or a background toggle set on a section with nothing behind it is inert, and
+// the pane warns what to add rather than leave the client thinking it is broken.
+// ---------------------------------------------------------------------------
+describe('the editor knows when a motion setting has nothing to move', () => {
+  const motion = (recipe: MotionRecipe) => ({ recipe, intensity: 2 as const });
+
+  it('a still-background recipe with no background is a gap, and none once one is set', () => {
+    for (const recipe of ['A4', 'A6', 'S5'] as const) {
+      expect(sectionMotionGaps({ motion: motion(recipe) })).toContain('recipe-still');
+      expect(
+        sectionMotionGaps({ motion: motion(recipe), backgroundImage: 'https://x/y.jpg' }),
+      ).toEqual([]);
+    }
+  });
+
+  it('a still-background recipe is still inert on a slideshow or a video', () => {
+    // A single still picture is what A6/S5 need; a slideshow (2+) or a video is not it.
+    expect(
+      sectionMotionGaps({
+        motion: motion('A6'),
+        backgroundImage: 'https://x/1.jpg',
+        backgroundSlides: [{ src: 'https://x/2.jpg' }],
+      }),
+    ).toContain('recipe-still');
+    expect(
+      sectionMotionGaps({ motion: motion('A6'), backgroundVideo: 'https://x/v.mp4' }),
+    ).toContain('recipe-still');
+  });
+
+  it('the cycling recipe wants two or more pictures', () => {
+    expect(sectionMotionGaps({ motion: motion('A2') })).toContain('recipe-pictures');
+    expect(
+      sectionMotionGaps({ motion: motion('A2'), backgroundImage: 'https://x/1.jpg' }),
+    ).toContain('recipe-pictures');
+    expect(
+      sectionMotionGaps({
+        motion: motion('A2'),
+        backgroundImage: 'https://x/1.jpg',
+        backgroundSlides: [{ src: 'https://x/2.jpg' }],
+      }),
+    ).toEqual([]);
+  });
+
+  it('the video recipe wants a video', () => {
+    expect(sectionMotionGaps({ motion: motion('A7') })).toContain('recipe-video');
+    // A picture is not a video, so the gap stands.
+    expect(
+      sectionMotionGaps({ motion: motion('A7'), backgroundImage: 'https://x/1.jpg' }),
+    ).toContain('recipe-video');
+    expect(
+      sectionMotionGaps({ motion: motion('A7'), backgroundVideo: 'https://x/v.mp4' }),
+    ).toEqual([]);
+  });
+
+  it('the recipes that need no background never raise a gap', () => {
+    for (const recipe of ['A3', 'A5', 'S1', 'S3'] as const) {
+      expect(sectionMotionGaps({ motion: motion(recipe) })).toEqual([]);
+    }
+  });
+
+  it('parallax and Ken Burns flag a missing still picture, and clear once it is set', () => {
+    expect(sectionMotionGaps({ parallax: true })).toContain('parallax-still');
+    expect(sectionMotionGaps({ kenBurns: true })).toContain('ken-burns-still');
+    expect(sectionMotionGaps({ parallax: true, backgroundImage: 'https://x/1.jpg' })).toEqual([]);
+    // Ken Burns stands down under parallax, exactly as the render gates it, so only
+    // the parallax gap shows when both are on with nothing behind them.
+    const both = sectionMotionGaps({ parallax: true, kenBurns: true });
+    expect(both).toContain('parallax-still');
+    expect(both).not.toContain('ken-burns-still');
+  });
+
+  it('a background recipe takes the background, so parallax and Ken Burns are not also flagged', () => {
+    // A6 owns the background; the two toggles are moot, so the only gap is the recipe's.
+    const gaps = sectionMotionGaps({ motion: motion('A6'), parallax: true, kenBurns: true });
+    expect(gaps).toEqual(['recipe-still']);
+  });
+
+  it('the editor wires the gaps into the Motion pane as warnings', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain('sectionMotionGaps(section)');
+    expect(props).toContain("motionGaps.includes('recipe-still')");
+    expect(props).toContain("motionGaps.includes('recipe-pictures')");
+    expect(props).toContain("motionGaps.includes('recipe-video')");
+    expect(props).toContain("motionGaps.includes('parallax-still')");
+    expect(props).toContain("motionGaps.includes('ken-burns-still')");
+  });
+
+  it('mirrors the render guard it stands in for, so the two cannot drift apart', () => {
+    // If this rule changes in PageRenderer, sectionMotionGaps must change too.
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).toContain('if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);');
+    expect(render).toContain('if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;');
+    expect(render).toContain('if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reveal and parallax reach Safari and Firefox too (31 Aug 2026). They are pure
+// CSS on a view() scroll timeline, which only Chromium ships, so tg-motion.js
+// carries a fallback that runs ONLY where the timeline is missing.
+// ---------------------------------------------------------------------------
+describe('reveal and parallax fall back for browsers with no scroll timeline', () => {
+  const withReveal = { sections: [{ id: 'a', reveal: true }] };
+  const withParallax = { sections: [{ id: 'a', parallax: true }] };
+
+  it('pulls the script for a reveal or a parallax, not just for A3', () => {
+    expect(needsMotionScript(withReveal)).toBe(true);
+    expect(needsMotionScript(withParallax)).toBe(true);
+    // A reveal that is off, or any other section, still asks for nothing.
+    expect(needsMotionScript({ sections: [{ id: 'a', reveal: false }] })).toBe(false);
+    expect(needsMotionScript({ sections: [{ id: 'a' }] })).toBe(false);
+  });
+
+  it('runs the fallback only where the browser lacks its own scroll timeline', () => {
+    // The whole point: on Chromium the CSS does it and the script must not fight it.
+    expect(motionScript).toContain("CSS.supports('animation-timeline: view()')");
+    expect(motionScript).toContain('if (!HAS_SCROLL_TL) {');
+    expect(motionScript).toContain('setUpRevealFallback();');
+    expect(motionScript).toContain('setUpParallaxFallback();');
+  });
+
+  it('never hides a reveal without an observer to bring it back', () => {
+    // Clause 2 again: the content cannot depend on the script. The marker that hides a
+    // block (data-reveal-fb) is only set after an IntersectionObserver is confirmed, so
+    // no observer, blocked JS or reduced motion all leave the content fully in view.
+    expect(motionScript).toContain("if (!('IntersectionObserver' in window)) return;");
+    expect(motionScript).toContain("setAttribute('data-reveal-fb', '1')");
+    expect(motionScript).toContain("setAttribute('data-seen', '1')");
+    // The renderer must NEVER write the hide marker itself, or a no-JS page would blank.
+    const render = read('components', 'render', 'PageRenderer.tsx');
+    expect(render).not.toContain('data-reveal-fb');
+    expect(render).not.toContain('data-parallax-fb');
+  });
+
+  it('reduced motion gets neither the fallback nor a hidden start', () => {
+    // The script returns before any fallback when reduced motion is set, so the markers
+    // are never added; and the CSS holds the fallback behind no-preference besides.
+    // (css here has its comments stripped, so anchor on selectors, not prose.)
+    expect(motionScript).toContain("window.matchMedia('(prefers-reduced-motion: reduce)')");
+    const fbSel = css.indexOf('.tgs-section[data-reveal][data-reveal-fb]');
+    const block = css.slice(css.lastIndexOf('@media', fbSel), css.indexOf('@keyframes tgs-reveal-rise'));
+    expect(block).toContain('@media (prefers-reduced-motion: no-preference)');
+    expect(block).toContain('[data-reveal-fb]');
+    // OUTSIDE the @supports (animation-timeline) guard, or it would never run on the
+    // very browsers it is for.
+    expect(block).not.toContain('@supports');
+  });
+
+  it('reuses the real keyframes rather than a second set, held paused until seen', () => {
+    // The fallback plays the same tgs-reveal-* keyframes on a clock, paused at frame one
+    // (the hidden state) until data-seen runs them. One set of keyframes, one look.
+    const fbSel = css.indexOf('.tgs-section[data-reveal][data-reveal-fb]');
+    const block = css.slice(fbSel, css.indexOf('@keyframes tgs-reveal-rise'));
+    expect(block).toContain('animation: tgs-reveal-rise');
+    expect(block).toContain('paused');
+    expect(block).toContain('.tgs-block[data-seen]');
+    expect(block).toContain('animation-play-state: running');
+  });
+
+  it('the parallax fallback drives a CSS variable, never a scroll timeline or a raw transform', () => {
+    // Same discipline as the rail: no style.transform reassignment (tested elsewhere).
+    // The script sets --tgs-parallax-y; the CSS reads it into a translate.
+    expect(motionScript).toContain("setProperty('--tgs-parallax-y'");
+    const paraSel = css.indexOf('.tgs-section[data-parallax][data-parallax-fb]');
+    const block = css.slice(css.lastIndexOf('@media', paraSel), css.indexOf('[data-ken-burns]', paraSel));
+    expect(block).toContain('[data-parallax-fb]');
+    expect(block).toContain('translateY(var(--tgs-parallax-y');
+    expect(block).not.toContain('@supports');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The cinematic sea (A1), the one WebGL recipe (31 Aug 2026). Tier 2, its own
+// script, capped at one canvas per page, no canvas at all under reduced motion.
+// ---------------------------------------------------------------------------
+describe('the cinematic sea is a first-class recipe with tier-2 discipline', () => {
+  const seaPage = { sections: [{ id: 'a', motion: { recipe: 'A1', intensity: 2 } }] };
+
+  it('is in the vocabulary, live, tier 2, a background recipe, and its own script kind', () => {
+    expect(MOTION_RECIPES).toContain('A1');
+    expect(MOTION_LIVE_RECIPES.has('A1')).toBe(true);
+    expect(MOTION_TIERS.A1).toBe(2);
+    expect(MOTION_SEA_RECIPES.has('A1')).toBe(true);
+    // It owns the background, so the editor and render stand parallax and Ken Burns down.
+    expect(MOTION_BACKGROUND_RECIPES.has('A1')).toBe(true);
+    // It loads tg-sea.js, NOT tg-motion.js: the two script sets are disjoint.
+    expect(MOTION_SCRIPT_RECIPES.has('A1' as MotionRecipe)).toBe(false);
+  });
+
+  it('the editor offers it in plain words, not its catalogue code', () => {
+    const choice = MOTION_CHOICES.find((c) => c.value === 'A1');
+    expect(choice, 'A1 is live but the editor does not offer it').toBeTruthy();
+    expect(choice?.label).toBe('Cinematic sea');
+  });
+
+  it('pulls tg-sea.js only for a page that carries it, and never tg-motion.js by mistake', () => {
+    expect(needsSeaScript(seaPage)).toBe(true);
+    expect(needsSeaScript({ sections: [{ id: 'a', motion: { recipe: 'A6', intensity: 2 } }] })).toBe(false);
+    expect(needsSeaScript({ sections: [{ id: 'a' }] })).toBe(false);
+    // A6 is a pure-CSS background recipe: no script at all, sea or otherwise.
+    expect(needsMotionScript(seaPage)).toBe(false);
+  });
+
+  it('emits the sea tag separately from the motion tag', () => {
+    const emitter = read('components', 'render', 'MotionScript.tsx');
+    expect(emitter).toContain('anyNeedsSeaScript(trees)');
+    expect(emitter).toContain('src="/tg-sea.js"');
+  });
+
+  it('is registered as a site asset in both the allowlist and the matcher', () => {
+    const mw = read('middleware.ts');
+    expect(mw).toContain("'/tg-sea.js'");
+    // The matcher escapes the dot, so the source carries a doubled backslash.
+    expect(mw).toContain('tg-sea\\\\.js');
+  });
+
+  it('reads its swell from the section intensity, in the render', () => {
+    expect(render).toContain("motion === 'A1'");
+    expect(render).toContain('data-sea-swell');
+  });
+
+  it('the stylesheet only places and clips the canvas; the movement is the shader', () => {
+    expect(css).toContain("[data-motion='A1']");
+    // No keyframe named for the sea: it is drawn on the GPU, not animated in CSS.
+    expect(css).not.toContain('@keyframes tgs-sea');
+  });
+
+  it('the sea script is hand-written WebGL with no library import', () => {
+    // Clause: ours, hand-written, no libraries. A shader engine that pulled three.js
+    // would be exactly the dependency weight the whole motion layer refuses.
+    expect(seaScript).toContain('getContext');
+    expect(seaScript).not.toContain('require(');
+    expect(seaScript).not.toContain("from '");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The cinematic sea wears a named tone per client (31 Aug 2026), so a Caribbean
+// site is turquoise and a Nordic one is steel, picked by name not by colour dial.
+// ---------------------------------------------------------------------------
+describe('the cinematic sea wears a named tone', () => {
+  const rawPage = (seaTone: unknown) => ({
+    version: 1,
+    id: 'p',
+    title: 'T',
+    slug: '',
+    sections: [{ id: 's', rows: [], motion: { recipe: 'A1', intensity: 2 }, seaTone }],
+  });
+
+  it('keeps a valid tone through parsePage and drops nonsense to the default', () => {
+    const parsed = parsePage(rawPage('caribbean'));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.page.sections[0].seaTone).toBe('caribbean');
+    const junk = parsePage(rawPage('lime-green'));
+    expect(junk.ok).toBe(true);
+    if (junk.ok) expect(junk.page.sections[0].seaTone).toBeUndefined();
+  });
+
+  it('the preset table covers exactly the schema tone list, so the two cannot drift', () => {
+    expect(SEA_TONE_PRESETS.map((t) => t.value).sort()).toEqual([...SEA_TONES].sort());
+  });
+
+  it('every scene is a real colour set with a sun and a plain-word name', () => {
+    for (const tone of SEA_TONE_PRESETS) {
+      for (const key of ['deep', 'shallow', 'horizon', 'sunCol'] as const) {
+        expect(tone[key], `${tone.value} ${key} is not a hex colour`).toMatch(/^#[0-9a-f]{6}$/i);
+      }
+      expect(typeof tone.sun).toBe('number');
+      // Named for a travel agent, never by a catalogue code.
+      expect(tone.label).not.toMatch(/^[AS]\d$/);
+    }
+  });
+
+  it('has light scenes, not just water colours: the sun colour actually varies', () => {
+    // Golden hour, moonlit and dawn change the LIGHT, so at least one scene carries a
+    // sun colour different from the daylight warm-white default.
+    const suns = new Set(SEA_TONE_PRESETS.map((t) => t.sunCol));
+    expect(suns.size).toBeGreaterThan(1);
+    expect(SEA_TONE_PRESETS.map((t) => t.value)).toEqual(
+      expect.arrayContaining(['golden', 'moonlit', 'sunrise']),
+    );
+  });
+
+  it('the render emits the scene colours and its sun colour, only for the sea recipe', () => {
+    expect(render).toContain("motion === 'A1' ? seaTonePreset(section.seaTone) : undefined");
+    expect(render).toContain('data-sea-deep={seaTone?.deep}');
+    expect(render).toContain('data-sea-shallow={seaTone?.shallow}');
+    expect(render).toContain('data-sea-horizon={seaTone?.horizon}');
+    expect(render).toContain('data-sea-suncol={seaTone?.sunCol}');
+  });
+
+  it('the sea script reads the sun colour, so a scene can be gold or silver light', () => {
+    expect(seaScript).toContain("rgb(section.getAttribute('data-sea-suncol')");
+  });
+
+  it('the editor offers the scene picker for the sea and nowhere else', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain("section.motion?.recipe === 'A1'");
+    expect(props).toContain('Sea scene');
+    expect(props).toContain('SEA_TONE_PRESETS.map');
+  });
+
+  it('the sea script validates each colour again, so a bad tone cannot reach the shader', () => {
+    // Defence in depth: the render only emits known-good hex, but tg-sea.js re-parses
+    // data-sea-deep/shallow/horizon and falls back to its defaults on anything invalid.
+    expect(seaScript).toContain("rgb(section.getAttribute('data-sea-deep')");
+    expect(seaScript).toContain('/^#?([0-9a-f]{6})$/i');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The pinned itinerary (S2), the catalogue's "strongest" recipe (31 Aug 2026).
+// A section pins and travels its cards sideways; the fallback is a swipeable
+// carousel on non-Chromium and reduced motion. Pure CSS, no script.
+// ---------------------------------------------------------------------------
+describe('the pinned itinerary travels a row of cards', () => {
+  const cardsBlock = (n: number) => ({
+    type: 'cards',
+    props: { items: Array.from({ length: n }, (_, i) => ({ text: `Day ${i + 1}` })) },
+  });
+  const sectionWith = (n: number, recipe: MotionRecipe = 'S2') => ({
+    id: 's',
+    motion: { recipe, intensity: 2 as const },
+    rows: [{ columns: [{ blocks: n > 0 ? [cardsBlock(n)] : [] }] }],
+  });
+
+  it('is in the vocabulary, live, tier 0, and no kind of script recipe', () => {
+    expect(MOTION_RECIPES).toContain('S2');
+    expect(MOTION_LIVE_RECIPES.has('S2')).toBe(true);
+    expect(MOTION_TIERS.S2).toBe(0);
+    expect(MOTION_SCRIPT_RECIPES.has('S2' as MotionRecipe)).toBe(false);
+    expect(MOTION_SEA_RECIPES.has('S2' as MotionRecipe)).toBe(false);
+    // It travels the cards, it does not own the section background.
+    expect(MOTION_BACKGROUND_RECIPES.has('S2' as MotionRecipe)).toBe(false);
+  });
+
+  it('the editor offers it in plain words', () => {
+    const choice = MOTION_CHOICES.find((c) => c.value === 'S2');
+    expect(choice?.label).toBe('Cards travel sideways');
+  });
+
+  it('counts the first cards block, and gaps flag a pinned itinerary with none', () => {
+    expect(sectionCardCount(sectionWith(5))).toBe(5);
+    expect(sectionCardCount(sectionWith(0))).toBe(0);
+    // The editor hint: S2 with no cards has nothing to travel.
+    expect(sectionMotionGaps(sectionWith(0))).toContain('recipe-cards');
+    expect(sectionMotionGaps(sectionWith(4))).toEqual([]);
+    // A different recipe with no cards is not a cards gap.
+    expect(sectionMotionGaps(sectionWith(0, 'A5'))).not.toContain('recipe-cards');
+  });
+
+  it('the render gates it on having cards and sizes the pinned section by their number', () => {
+    expect(render).toContain("if (r === 'S2') return cardCount > 0;");
+    expect(render).toContain("motion === 'S2' ? { '--tgs-s2-len': String(cardCount) }");
+  });
+
+  it('the editor warns when the itinerary has no cards to travel', () => {
+    const props = read('components', 'editor', 'Properties.tsx');
+    expect(props).toContain("motionGaps.includes('recipe-cards')");
+    expect(props).toContain('Add a Cards block');
+  });
+
+  it('falls back to a swipeable carousel, and pins only behind the scroll-timeline guard', () => {
+    // Base, everywhere: an overflow-x carousel with scroll snap (the non-Chromium and
+    // reduced-motion fallback). It is the FIRST S2 cards rule, before the pinned one.
+    const baseIdx = css.indexOf("[data-motion='S2'] .tgs-cards {");
+    const baseRule = css.slice(baseIdx, css.indexOf('}', baseIdx));
+    expect(baseRule).toContain('overflow-x: auto');
+    expect(baseRule).toContain('scroll-snap-type: x proximity');
+    // The pin (a named view timeline) comes after the base carousel, inside the guard.
+    const pinIdx = css.indexOf('view-timeline: --tgs-s2');
+    expect(pinIdx).toBeGreaterThan(baseIdx);
+    expect(css).toContain('animation-timeline: --tgs-s2');
+    expect(css).toContain('@keyframes tgs-s2');
+    expect(css).toContain('translateX(calc(-100% + 100vw))');
   });
 });

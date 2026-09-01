@@ -253,7 +253,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
      * into the client's own media, so nobody ships a stock file they meant to
      * swap. The dark tone is the fallback if the photo library is not connected.
      */
-    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'santorini sunset sea' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'santorini sunset sea', minHeight: 560, alignY: 'centre' },
   },
 
   {
@@ -755,7 +755,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'coastal cliffs ocean view' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'coastal cliffs ocean view', minHeight: 560, alignY: 'centre' },
   },
 
   /*
@@ -1060,7 +1060,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 112, width: 'full', backgroundQuery: 'mediterranean coast view' },
+    section: { paddingY: 112, width: 'full', backgroundQuery: 'mediterranean coast view', minHeight: 520, alignY: 'centre' },
   },
 
   {
@@ -1082,7 +1082,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'aerial turquoise coast' },
+    section: { tone: 'dark', paddingY: 128, width: 'full', backgroundQuery: 'aerial turquoise coast', minHeight: 560, alignY: 'centre' },
   },
 
   {
@@ -4246,5 +4246,250 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
       },
     ],
     section: { tone: 'accent', paddingY: 32 },
+  },
+
+  /*
+   * ---------------------------------------------------------------------------
+   * Designed sections, 27 Aug 2026
+   * ---------------------------------------------------------------------------
+   *
+   * Andy asked to raise the CRAFT of the library, not just its count: a handful
+   * of ready-composed bands a travel operator reaches for and drops in finished,
+   * rather than a single title or a bare card grid to assemble. Each is more than
+   * one element working together, each is in the brand voice and rewords cleanly,
+   * and none bakes in a picture or a regulated claim: a protection line is a
+   * PROMPT ("say how you are protected"), never an asserted "ATOL protected" the
+   * client might not be able to stand behind.
+   *
+   * They sit in existing categories, so they appear on the right tab with no
+   * plumbing; the picker groups by category, not by position in this array.
+   */
+
+  {
+    id: 'cta-phone',
+    category: 'cta',
+    label: 'Talk to a real person',
+    description: 'A warm closing band with your phone number front and centre.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Would you rather just talk it through?', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>No call centre and no script. You get somebody who knows the places and can start on it there and then.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            { type: 'heading', props: { html: '01234 567 890', style: 'h3', level: 'h3', ...CENTRED } },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [{ label: 'Send an enquiry instead', href: '', variant: 'secondary' }],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'accent', paddingY: 80 },
+  },
+
+  {
+    id: 'features-reassurance',
+    category: 'features',
+    label: 'Why book with us, four reasons',
+    description: 'A reassurance band: four short reasons with icons, under one line.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Why people book with us', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>The things that are easy to say and harder to do, kept to the ones you can stand behind.</p>',
+                ...CENTRED,
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1, 1, 1, 1],
+        gap: 32,
+        columns: [
+          [{ type: 'icon-item', props: { icon: 'phone', title: 'A real person', body: 'One number, and somebody who already knows your trip on the end of it.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'compass', title: 'Been there', body: 'We send you where we have been, not where the screen ranks highest.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'circle-check', title: 'Nothing hidden', body: 'The price you see is the price, with what is in it written down.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'heart', title: 'Looked after', body: 'One number to ring while you are away, answered by us.', ...CENTRED } }],
+        ],
+      },
+    ],
+    section: { tone: 'subtle' },
+  },
+
+  {
+    id: 'features-included',
+    category: 'features',
+    label: 'What is included, and what to know',
+    description: 'Two plain columns: what is in the price, and what is worth knowing.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[{ type: 'heading', props: { html: 'What is included', style: 'h2', ...CENTRED } }]],
+      },
+      {
+        widths: [1, 1],
+        gap: 32,
+        columnBox: [CARD_ROOMY, CARD_ROOMY],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'In the price', style: 'h4' } },
+            {
+              type: 'list',
+              props: {
+                style: 'tick',
+                items: [
+                  { text: 'Flights and airport transfers' },
+                  { text: 'Your rooms, chosen for the spot not the star rating' },
+                  { text: 'A day by day plan you can change' },
+                  { text: 'One number to ring the whole time you are away' },
+                ],
+              },
+            },
+          ],
+          [
+            { type: 'heading', props: { html: 'Good to know', style: 'h4' } },
+            {
+              type: 'list',
+              props: {
+                style: 'bullet',
+                items: [
+                  { text: 'Deposit now, the balance twelve weeks before you fly' },
+                  { text: 'Travel insurance is yours to arrange, and we will remind you' },
+                  { text: 'Anything not listed here, ask, and we will say plainly' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { tone: 'subtle' },
+  },
+
+  {
+    id: 'steps-plan-trip',
+    category: 'steps',
+    label: 'How we plan your trip, with a title',
+    description: 'A short intro, four steps across, then somewhere to start.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'How we plan your trip', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>Four steps, and none of them is a form you fill in alone.</p>', ...CENTRED },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'steps',
+              props: {
+                layout: 'across',
+                marker: 'number',
+                connector: true,
+                items: [
+                  { title: 'Tell us the shape of it', body: 'Where, roughly when, and what matters most. A call or a few lines.' },
+                  { title: 'We put it together', body: 'Flights, rooms, transfers and the bits nobody thinks of until they are missing.' },
+                  { title: 'We change it with you', body: 'Nobody gets it right first time, so we expect a second and a third look.' },
+                  { title: 'You go', body: 'With one number to ring if anything needs sorting while you are away.' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'button-group',
+              props: { align: 'centre', buttons: [{ label: 'Start with a conversation', href: '', variant: 'primary' }] },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 88 },
+  },
+
+  {
+    id: 'stats-proof',
+    category: 'stats',
+    label: 'A claim over the numbers',
+    description: 'One line you can stand behind, then the numbers under it.',
+    rows: [
+      {
+        widths: [1],
+        columns: [[{ type: 'heading', props: { html: 'Thirty years, and still the same shop', style: 'h2', ...CENTRED } }]],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'stats',
+              props: {
+                columns: '4',
+                align: 'centre',
+                divided: true,
+                items: [
+                  { value: '30', suffix: ' years', label: 'On the same high street' },
+                  { value: '12,000', label: 'Holidays booked' },
+                  { value: '4.9', suffix: '/5', label: 'From 800 reviews' },
+                  { value: '9', suffix: ' in 10', label: 'Book with us again' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
+    id: 'banner-reassurance',
+    category: 'banner',
+    label: 'Protected and rated strip',
+    description: 'A slim line for your protection, your rating and your hours.',
+    rows: [
+      {
+        widths: [1, 1, 1],
+        gap: 24,
+        align: 'centre',
+        columns: [
+          [{ type: 'icon-item', props: { icon: 'circle-check', title: 'Fully protected', body: 'Say how: ABTA, ATOL, a trust account.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'star', title: 'Rated by travellers', body: 'Name who rates you, and the score.', ...CENTRED } }],
+          [{ type: 'icon-item', props: { icon: 'phone', title: 'Here all week', body: 'Your hours, or the number that always answers.', ...CENTRED } }],
+        ],
+      },
+    ],
+    section: { tone: 'subtle', paddingY: 32 },
   },
 ];

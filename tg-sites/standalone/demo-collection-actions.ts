@@ -49,6 +49,8 @@ function summaryOf(id: string, slug: string, status: 'draft' | 'published'): Ite
     slug,
     title: rows.get(id)?.item.title ?? '',
     status,
+    // The standalone demo has no reordering, so nothing has ever been placed.
+    position: null,
     hasUnpublishedChanges: status !== 'published',
     scheduled: false,
     publishedAt: status === 'published' ? new Date() : (existing?.publishedAt ?? null),

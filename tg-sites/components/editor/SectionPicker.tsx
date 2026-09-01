@@ -35,8 +35,28 @@ import type { Section } from '../../lib/content/schema';
 import { Modal } from '../ui/Modal';
 import { ImportPanel } from './ImportPanel';
 import { AiPanel } from './AiPanel';
+import { Icon } from './Icon';
+import type { SectionTemplate } from '../../lib/db/section-templates';
 
-type Tab = 'layouts' | 'designed' | 'ai' | 'import';
+/**
+ * A one-line "what is this" for a saved section, drawn from its own shape so the
+ * card says more than a name. The block kinds it is made of, in reading order,
+ * de-duplicated: "hero, cards" tells you at a glance what you are dropping in.
+ */
+function sectionSummary(section: Section): string {
+  const kinds: string[] = [];
+  for (const row of section.rows) {
+    for (const column of row.columns) {
+      for (const block of column.blocks) {
+        if (!kinds.includes(block.type)) kinds.push(block.type);
+      }
+    }
+  }
+  if (kinds.length === 0) return 'Empty section';
+  return kinds.slice(0, 3).join(', ');
+}
+
+type Tab = 'layouts' | 'designed' | 'mine' | 'ai' | 'import';
 
 /*
  * Import is LAST, and that is not a judgement on it. The order is the order
@@ -46,6 +66,7 @@ type Tab = 'layouts' | 'designed' | 'ai' | 'import';
 const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
   { id: 'layouts', label: 'Layouts' },
   { id: 'designed', label: 'Designed' },
+  { id: 'mine', label: 'My sections' },
   { id: 'ai', label: 'AI' },
   { id: 'import', label: 'Import' },
 ];
@@ -204,6 +225,10 @@ export function SectionPicker({
   onPickImported,
   onPickBuilt,
   onClose,
+  pageSections,
+  pageTitle,
+  templates,
+  onDeleteTemplate,
 }: {
   /**
    * Which screen this was opened from.
@@ -221,6 +246,12 @@ export function SectionPicker({
   /** One section, built by the AI from a description. */
   onPickBuilt: (section: Section) => void;
   onClose: () => void;
+  /** The page so far, so the AI can suggest what comes next. */
+  pageSections?: Section[];
+  pageTitle?: string;
+  /** The client's saved sections, for the "My sections" tab. */
+  templates?: SectionTemplate[];
+  onDeleteTemplate?: (id: string) => void;
 }) {
   const categories = categoriesFor(scope);
 
@@ -403,7 +434,49 @@ export function SectionPicker({
 
       {tab === 'import' && <ImportPanel onAdd={onPickImported} />}
 
-      {tab === 'ai' && <AiPanel onBuilt={onPickBuilt} />}
+      {tab === 'ai' && (
+        <AiPanel onBuilt={onPickBuilt} pageSections={pageSections} pageTitle={pageTitle} />
+      )}
+
+      {tab === 'mine' && (
+        <div className="ed-mine">
+          {(templates ?? []).length === 0 ? (
+            <p className="ed-help">
+              You have no saved sections yet. When a section is just right, use
+              "Save as a section" on it and it will show up here to drop onto any
+              page.
+            </p>
+          ) : (
+            <div className="ed-mine__grid">
+              {(templates ?? []).map((template) => (
+                <div key={template.id} className="ed-mine__card">
+                  <button
+                    type="button"
+                    className="ed-mine__insert"
+                    onClick={() => onPickBuilt(template.section)}
+                    title={`Add "${template.name}" to the page`}
+                  >
+                    <Icon name="section" size={18} />
+                    <span className="ed-mine__name">{template.name}</span>
+                    <span className="ed-mine__meta">{sectionSummary(template.section)}</span>
+                  </button>
+                  {onDeleteTemplate && (
+                    <button
+                      type="button"
+                      className="ed-mine__delete"
+                      onClick={() => onDeleteTemplate(template.id)}
+                      aria-label={`Delete saved section "${template.name}"`}
+                      title="Delete this saved section"
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </Modal>
   );
 }

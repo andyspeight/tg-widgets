@@ -588,3 +588,122 @@ describe('preview families in the browser', () => {
     expect(previewStack('Lato', true, 'sans-serif')).toBe("'TGP Lato', sans-serif");
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * A VARIABLE FONT IS ONE FILE FOR A RANGE OF WEIGHTS.
+ *
+ * Found on 26 Aug 2026 by looking at what Coastwise had actually stored rather
+ * than at the code. Archivo was eight rows holding two distinct files: the same
+ * md5 at 400, 500, 600 and 700 for latin, and again for latin-ext. Google says
+ * so plainly, and we were throwing it away: asking for four weights returns
+ * three urls, each repeated four times, and the latin file's md5 was
+ * byte-for-byte the one already in our table.
+ *
+ * Two faults came out of it, and both are measured rather than argued:
+ *
+ *   BYTES. Each stored row got its own id and therefore its own url, so a
+ *   browser could not tell they were one file. The published page preloaded
+ *   102,384 bytes across three requests for 34,928 bytes of font.
+ *
+ *   WEIGHTS, and this one is LATENT rather than live. A face pinned to one
+ *   weight says the file IS that weight, so a style asking for 650 snaps to the
+ *   nearest pinned face instead of interpolating: in Chromium, 650 rendered at
+ *   exactly the width of 700 (396.11px both) with pinned faces, and at 389.09px
+ *   with the range. No site shows that difference today, because parseTheme
+ *   admits only 400, 500, 600 and 700 and rewrites anything else to the style's
+ *   default. Coastwise's stored h2 weight of 650 is already 700 by the time it
+ *   renders, and the theme parser is what does it. I claimed the stronger
+ *   version of this first and it was wrong; it is written down so the next
+ *   person does not have to find it out twice.
+ */
+describe('a variable font is one file across a range', () => {
+  const VARIABLE = [
+    {
+      id: 'v-latin', slug: 'archivo', family: 'Archivo', fallback: 'sans' as const,
+      weight: 400, weightMax: 700, style: 'normal' as const, format: 'woff2',
+      unicodeRange: 'U+0000-00FF',
+    },
+    {
+      id: 'v-latin-ext', slug: 'archivo', family: 'Archivo', fallback: 'sans' as const,
+      weight: 400, weightMax: 700, style: 'normal' as const, format: 'woff2',
+      unicodeRange: 'U+0100-02BA',
+    },
+  ];
+
+  const typography = {
+    p:  { size: 17, family: 'archivo', weight: 400, tracking: 0, lineHeight: 1.6 },
+    h1: { size: 56, family: 'archivo', weight: 700, tracking: 0, lineHeight: 1.05 },
+    h2: { size: 38, family: 'archivo', weight: 650, tracking: 0, lineHeight: 1.1 },
+    h3: { size: 28, family: 'archivo', weight: 600, tracking: 0, lineHeight: 1.2 },
+    h4: { size: 22, family: 'archivo', weight: 600, tracking: 0, lineHeight: 1.25 },
+    h5: { size: 18, family: 'archivo', weight: 600, tracking: 0, lineHeight: 1.3 },
+    h6: { size: 16, family: 'archivo', weight: 600, tracking: 0, lineHeight: 1.35 },
+  } as never;
+
+  it('declares the range, so the weights in between can be rendered', () => {
+    const css = fontFaceCss(VARIABLE, 'coastwise', new Set(['archivo']));
+    expect(css).toContain('font-weight:400 700');
+    // And not the pinned form, which is what snapped 650 to 700.
+    expect(css).not.toContain('font-weight:400;');
+  });
+
+  it('preloads the file ONCE however many weights the page uses', () => {
+    // This page asks for 400, 600, 650 and 700 of the one family.
+    const preloads = fontPreloads(VARIABLE, 'coastwise', typography);
+    expect(preloads).toHaveLength(1);
+    expect(preloads[0].href).toBe('/fonts/coastwise/v-latin.woff2');
+  });
+
+  it('preloads it even when no style names its lightest weight', () => {
+    /*
+     * The regression this guards. Matching on the single weight a file is filed
+     * under meant a page whose body was 600 and whose headings were 700 matched
+     * nothing at all, because the file is filed at 400.
+     */
+    const heavy = { ...(typography as Record<string, { weight: number }>) };
+    for (const id of ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']) heavy[id] = { ...heavy[id], weight: 600 };
+    expect(fontPreloads(VARIABLE, 'coastwise', heavy as never)).toHaveLength(1);
+  });
+
+  it('reports every weight it can render, not just the one it is filed under', () => {
+    const [family] = familiesFromFiles(VARIABLE);
+    // Or the type panel offers a client one weight for a family that has four.
+    expect(family.weights).toEqual([400, 500, 600, 700]);
+  });
+
+  it('leaves a static family exactly as it was', () => {
+    /*
+     * The other half of the bargain. A static family is a different file per
+     * weight, so it must still get a rule and a preload for each: the fix must
+     * not quietly collapse two real files into one.
+     */
+    const STATIC = [
+      { id: 's4', slug: 'plex', family: 'IBM Plex Mono', fallback: 'mono' as const,
+        weight: 400, weightMax: null, style: 'normal' as const, format: 'woff2', unicodeRange: null },
+      { id: 's5', slug: 'plex', family: 'IBM Plex Mono', fallback: 'mono' as const,
+        weight: 500, weightMax: null, style: 'normal' as const, format: 'woff2', unicodeRange: null },
+    ];
+    const css = fontFaceCss(STATIC, 'demo', new Set(['plex']));
+    expect(css.match(/@font-face/g)).toHaveLength(2);
+    expect(css).toContain('font-weight:400;');
+    expect(css).toContain('font-weight:500;');
+
+    const mono = {
+      ...(typography as Record<string, { weight: number; family: string }>),
+    };
+    for (const id of ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']) {
+      mono[id] = { ...mono[id], family: 'plex', weight: id === 'p' ? 400 : 500 };
+    }
+    expect(fontPreloads(STATIC, 'demo', mono as never)).toHaveLength(2);
+  });
+
+  it('treats a file with no range as the single weight it always was', () => {
+    const [family] = familiesFromFiles([
+      { id: 'x', slug: 'one', family: 'One', fallback: 'sans' as const,
+        weight: 600, weightMax: null, style: 'normal' as const, format: 'woff2', unicodeRange: null },
+    ]);
+    expect(family.weights).toEqual([600]);
+  });
+});

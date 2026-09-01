@@ -128,7 +128,8 @@ export function buildPresetSection(preset: SectionPreset): Section {
     tone: preset.section?.tone ?? 'light',
     width: preset.section?.width ?? 'contained',
     paddingY: preset.section?.paddingY ?? DEFAULT_SECTION_PADDING,
-    minHeight: 0,
+    minHeight: preset.section?.minHeight ?? 0,
+    ...(preset.section?.alignY ? { alignY: preset.section.alignY } : {}),
     // The scrim strength over a background. 60 is what it was fixed at.
     overlay: 60,
     box: { ...EMPTY_BOX },
@@ -181,7 +182,15 @@ function buildBlock(spec: PresetBlock): Block {
   const block = createBlock(spec.type);
   return {
     ...block,
-    props: { ...block.props, ...spec.props },
+    /*
+     * DEEP-CLONED, because a shallow spread carries the preset's items ARRAY
+     * into the built block by reference — and the presets are module
+     * singletons. Every consumer today happens to copy-on-write, but one
+     * future `props.items[0].title = x` on a built section would silently
+     * poison the library for every tenant in the process. Found when tests
+     * that mutated built sections started seeing each other's edits.
+     */
+    props: { ...block.props, ...structuredClone(spec.props) },
     // The block's own frame, for the circle chips and inner pills the designed
     // bars are made of. Merged over the empty box exactly as columnBox is; the
     // cast is sound because the spread starts from the block's complete box.

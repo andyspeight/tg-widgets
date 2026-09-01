@@ -15,7 +15,7 @@
    "tone": "dark",
    "width": "contained",
    "paddingY": 64,
-   "minHeight": 640,
+   "minHeight": 1200,
    "reveal": true,
    "revealStyle": "rise",
    "box": {
@@ -109,7 +109,12 @@
      "stackBelow": "mobile",
      "reverseOnStack": false
     }
-   ]
+   ],
+   "motion": {
+    "recipe": "A2",
+    "intensity": 3
+   },
+   "alignY": "centre"
   },
   {
    "id": "sec_epw45ku",

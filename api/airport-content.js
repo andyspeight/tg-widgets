@@ -28,6 +28,10 @@
  */
 
 // --- Environment ---------------------------------------------------
+import {
+  isServableAirportStatus, airportDepth, toIdentityCard, AIRPORT_DEPTH,
+} from './_lib/airport-status.js';
+
 const AIRTABLE_KEY = process.env.AIRTABLE_KEY;
 const DESTINATION_BASE_ID = process.env.DESTINATION_CONTENT_BASE_ID || 'appuZdlMJ7HKUt6qS';
 const WIDGETS_BASE_ID = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -319,6 +323,14 @@ async function buildAirportPayload(airportRec) {
   const lng = fldNum(airportRec, AF.lng);
 
   return {
+    // Verification state. A record that is not yet servable (identity-only
+    // skeleton, or narrative written but not audited against two sources) is
+    // still returned, because refusing it would break embeds that are already
+    // live on client sites. The flag lets the widget render a compact card
+    // instead of a full spotlight with empty sections. See
+    // api/_lib/airport-status.js and docs/airport-data-plan.md.
+    provisional: !isServableAirportStatus(fldSelect(airportRec, AF.status)),
+
     // Identity
     name:       txt(fld(airportRec, AF.name)),
     iata:       txt(fld(airportRec, AF.iata)).toUpperCase(),
@@ -496,8 +508,14 @@ export default async function handler(req, res) {
       return res.status(404).json({ found: false, error: 'Airport not found' });
     }
 
-    const airport = await buildAirportPayload(airportRec);
-    return res.status(200).json({ found: true, airport });
+    // Depth is enforced here, at the only door out, rather than trusted to the
+    // caller. An unaudited record is served as an identity card whatever it
+    // holds, so narrative that has been written but not checked against two
+    // sources cannot reach a client site by any route.
+    const full = await buildAirportPayload(airportRec);
+    const depth = airportDepth(fldSelect(airportRec, AF.status));
+    const airport = depth === AIRPORT_DEPTH.FULL ? full : toIdentityCard(full);
+    return res.status(200).json({ found: true, depth, airport });
 
   } catch (err) {
     console.error('[api/airport-content] Error:', err && err.stack ? err.stack : err);

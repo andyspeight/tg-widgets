@@ -22,6 +22,7 @@ import 'server-only';
 
 import { del, head, put } from '@vercel/blob';
 
+import { pixelSizeOf, type PixelSize } from './dimensions';
 import { isAllowedMime, type MediaMime } from './limits';
 
 /**
@@ -120,10 +121,32 @@ export async function copyIntoStore(
   sourceUrl: string,
   pathname: string,
   maxBytes: number,
-): Promise<{ url: string; pathname: string; size: number; contentType: MediaMime }> {
+): Promise<{
+  url: string;
+  pathname: string;
+  size: number;
+  contentType: MediaMime;
+  /**
+   * Measured from the bytes that were actually stored, or null when the format
+   * is one dimensions.ts does not read.
+   *
+   * Here rather than left to the caller because this function is the only place
+   * that ever holds the file. A caller that wanted the size afterwards would have
+   * to fetch the object back to find out, and the one caller that did not ask
+   * ended up writing down the provider's numbers for a different file entirely.
+   */
+  pixels: PixelSize | null;
+}> {
   const response = await fetch(sourceUrl, {
     // No credentials, no cookies, no redirect chain to somewhere unexpected.
     redirect: 'follow',
+    /*
+     * A stalled download must not run to the platform's kill. These imports
+     * happen inside a serverless invocation with a hard maxDuration, and being
+     * killed there is a blank failure with no message; a picture that takes
+     * longer than this is a picture the page does without.
+     */
+    signal: AbortSignal.timeout(15_000),
     /*
      * Was `image/*` until 20 Aug 2026, when the media library gained documents.
      * The two callers are a Pexels import, which only ever asks for photographs,
@@ -165,6 +188,23 @@ export async function copyIntoStore(
      * that went in, which is why the RETURNED value is what the caller stores.
      */
     addRandomSuffix: true,
+    /*
+     * A YEAR, AND THE RANDOM SUFFIX ABOVE IS WHAT MAKES THAT SAFE.
+     *
+     * Every stored object gets a suffix the store chooses, so one address can
+     * only ever serve one set of bytes: replacing a picture makes a new url
+     * rather than new content at the old one. That is the same property that
+     * lets /fonts be immutable, and it is the whole argument for a long cache.
+     *
+     * Added 25 Aug 2026 because we were taking whatever the SDK's default was
+     * and PageSpeed reported roughly 1.8 MB of desktop savings under "use
+     * efficient cache lifetimes", nearly all of it pictures.
+     *
+     * FORWARD ONLY. Headers are written when an object is stored, so this
+     * reaches pictures uploaded from here on. Everything already in a bank keeps
+     * the header it was given.
+     */
+    cacheControlMaxAge: 31536000,
   });
 
   return {
@@ -172,6 +212,51 @@ export async function copyIntoStore(
     pathname: stored.pathname,
     size: bytes.byteLength,
     contentType,
+    pixels: pixelSizeOf(bytes),
+  };
+}
+
+/**
+ * Put bytes we already hold into the store.
+ *
+ * The counterpart to copyIntoStore for content that did not come from a URL: a
+ * generated image arrives as base64 in an API response, so there is nothing to
+ * fetch, only bytes to keep. Same storage step, same random suffix and long
+ * cache, and the pixels are measured from the very bytes stored so the row never
+ * describes a different file than the one it points at.
+ */
+export async function storeBytes(
+  bytes: Buffer,
+  pathname: string,
+  contentType: MediaMime,
+  maxBytes: number,
+): Promise<{
+  url: string;
+  pathname: string;
+  size: number;
+  contentType: MediaMime;
+  pixels: PixelSize | null;
+}> {
+  if (bytes.byteLength === 0) throw new Error('That image came back empty.');
+  if (bytes.byteLength > maxBytes) throw new Error('That image is too large to add.');
+  if (!isAllowedMime(contentType)) {
+    throw new Error('That is not a file type this product can serve.');
+  }
+
+  const stored = await put(pathname, bytes, {
+    access: 'public',
+    token: requireToken(),
+    contentType,
+    addRandomSuffix: true,
+    cacheControlMaxAge: 31536000,
+  });
+
+  return {
+    url: stored.url,
+    pathname: stored.pathname,
+    size: bytes.byteLength,
+    contentType,
+    pixels: pixelSizeOf(bytes),
   };
 }
 

@@ -1,0 +1,3 @@
+# Built artefacts. The baseline JSON beside this file IS tracked: it is the
+# number we compare against, so it belongs in the history.
+out/

@@ -25,6 +25,8 @@ import type { Membership } from '../../lib/db/users';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
+import { PublishSiteDialog } from '../ui/PublishSiteDialog';
+import { SiteBuilder } from './SiteBuilder';
 import { StarterWizard, type StarterProfile } from './StarterWizard';
 import './sites.css';
 
@@ -34,6 +36,7 @@ type Dialog =
   | { kind: 'new' }
   | { kind: 'rename'; page: PageSummary }
   | { kind: 'starter' }
+  | { kind: 'ai-site' }
   | null;
 
 interface Props {
@@ -54,6 +57,12 @@ interface Props {
    * every new site is in.
    */
   canStart: boolean;
+  /**
+   * Every address on this site and whether anything is built there, for the AI
+   * planner's review step. Cheap, and it is the difference between a client
+   * being told a page will be left alone and finding out afterwards.
+   */
+  existingPages: ReadonlyArray<{ slug: string; title: string; filled: boolean }>;
   /** What is already in settings, so the wizard asks nothing twice. */
   profile: StarterProfile;
   /** Whether this person may make a new site: Travelgenix staff. */
@@ -67,6 +76,7 @@ export function SiteDashboard({
   siteUrl,
   pages: initial,
   canStart,
+  existingPages,
   profile,
   canCreateSite,
 }: Props) {
@@ -75,6 +85,8 @@ export function SiteDashboard({
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('light');
+  /** Whether the whole-site publish overlay is open. */
+  const [publishingSite, setPublishingSite] = useState(false);
 
   // The dialog shows the real address the page will have, so the scheme is
   // stripped: nobody reads "https://" in a preview, it is just noise in
@@ -232,6 +244,12 @@ export function SiteDashboard({
               Enquiries
             </a>
 
+            {/* This month at a glance: enquiries, what went live, images added. */}
+            <a className="sv-btn" href="/reports">
+              <Icon name="stats" size={16} />
+              Report
+            </a>
+
             {/*
               Everybody gets this link, not only an owner. Seeing who your
               colleagues are is not a privilege, and a viewer who cannot tell
@@ -253,10 +271,32 @@ export function SiteDashboard({
               Settings
             </a>
 
+            {/*
+              * THE PLANNER IS REACHABLE ON A SITE THAT ALREADY HAS PAGES.
+              *
+              * It began life inside the empty-site block beside the starter,
+              * which meant it disappeared the moment a site had anything on it —
+              * so Coastwise, the site we test on, could not run it at all, and
+              * neither could an agency part way through a build. Planning the
+              * REST of a site is a perfectly ordinary thing to want. Nothing is
+              * built over: the action refuses a page that already has content
+              * and the review step says which ones those are.
+              */}
             <button
               type="button"
               className="sv-btn"
-              data-variant="primary"
+              onClick={() => {
+                setError(null);
+                setDialog({ kind: 'ai-site' });
+              }}
+            >
+              <Icon name="sparkle" size={16} />
+              Plan pages with AI
+            </button>
+
+            <button
+              type="button"
+              className="sv-btn"
               onClick={() => {
                 setError(null);
                 setDialog({ kind: 'new' });
@@ -264,6 +304,29 @@ export function SiteDashboard({
             >
               <Icon name="plus" size={16} />
               New page
+            </button>
+
+            {/*
+              PUBLISH THE WHOLE SITE, the headline action of this screen.
+
+              Publishing has always been per page, which left an agent who edited
+              six pages and published one looking at the other five still reading
+              "Live, with unpublished edits". This puts every pending page live at
+              once, behind a progress overlay that says what it is doing and holds
+              back anything still in draft. It patches each row to "Live" as it
+              goes. See components/ui/PublishSiteDialog.tsx.
+            */}
+            <button
+              type="button"
+              className="sv-btn"
+              data-variant="primary"
+              onClick={() => {
+                setError(null);
+                setPublishingSite(true);
+              }}
+            >
+              <Icon name="upload" size={16} />
+              Publish site
             </button>
           </div>
         </header>
@@ -301,6 +364,21 @@ export function SiteDashboard({
               >
                 <Icon name="sparkle" size={16} />
                 Build me a site
+              </button>
+              {/*
+                * THREE WAYS IN, AND THEY ARE GENUINELY DIFFERENT. The starter is
+                * a template filled with four answers: fast, and every site built
+                * from one shares its shape. The planner reads the company profile
+                * and proposes pages for THIS business, then builds each one. The
+                * blank page is for somebody who already knows what they want.
+                */}
+              <button
+                type="button"
+                className="sv-btn"
+                onClick={() => setDialog({ kind: 'ai-site' })}
+              >
+                <Icon name="sparkle" size={16} />
+                Plan it with AI
               </button>
               <button
                 type="button"
@@ -411,6 +489,15 @@ export function SiteDashboard({
         />
       )}
 
+      {publishingSite && (
+        <PublishSiteDialog
+          onClose={() => setPublishingSite(false)}
+          // Each page turns from "Live, with unpublished edits" to "Live" as its
+          // own publish returns, so the list is right the moment the overlay is.
+          onPagePublished={(summary) => patch(summary.id, summary)}
+        />
+      )}
+
       {dialog?.kind === 'new' && (
         <PageDialog
           heading="New page"
@@ -443,6 +530,10 @@ export function SiteDashboard({
 
       {dialog?.kind === 'starter' && (
         <StarterWizard profile={profile} onClose={() => setDialog(null)} />
+      )}
+
+      {dialog?.kind === 'ai-site' && (
+        <SiteBuilder onClose={() => setDialog(null)} existing={existingPages} />
       )}
 
       {dialog?.kind === 'rename' && (

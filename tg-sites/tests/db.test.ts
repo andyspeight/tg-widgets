@@ -1119,6 +1119,7 @@ describe('copyMediaToTenant', () => {
       pathname: `${pathname}--abc`,
       size: 4242,
       contentType: 'image/jpeg' as const,
+      pixels: null,
     }));
 
     respond('from public.media', [sourceRow(1), sourceRow(2)]);
@@ -1186,6 +1187,7 @@ describe('copyMediaToTenant', () => {
       alt: 'a hero',
       source: 'pexels' as const,
       credit: { photographer: 'Sam' },
+      variants: [{ url: 'https://old/y-800.webp', width: 800, height: 533, bytes: 40_000 }],
       createdAt: new Date('2026-08-01T00:00:00Z'),
     };
     const stored = { url: 'https://new/y.png', pathname: 'new/key', size: 222, contentType: 'image/png' as const };
@@ -1203,7 +1205,41 @@ describe('copyMediaToTenant', () => {
       alt: 'a hero',
       source: 'pexels',
       credit: { photographer: 'Sam' },
+      /*
+       * Empty, even though the source row had one. A variant's url points into
+       * the SOURCE tenant's prefix, so carrying the list across would leave the
+       * new site serving the old site's objects and quietly undo the isolation
+       * this whole copy exists to provide.
+       */
+      variants: [],
     });
+  });
+
+  it('never carries a source tenant\'s variant URLs into the copy', async () => {
+    const { copiedMediaRow } = await import('../lib/db/duplicate');
+    const item = {
+      id: 'm2',
+      url: 'https://old/z.webp',
+      storageKey: 'old/z',
+      filename: 'z.webp',
+      mime: 'image/webp',
+      bytes: 900,
+      width: 2400,
+      height: 1600,
+      alt: '',
+      source: 'upload' as const,
+      credit: {},
+      variants: [
+        { url: 'https://old/z-400.webp', width: 400, height: 267, bytes: 9_000 },
+        { url: 'https://old/z-800.webp', width: 800, height: 533, bytes: 30_000 },
+      ],
+      createdAt: new Date('2026-08-01T00:00:00Z'),
+    };
+    const stored = { url: 'https://new/z.webp', pathname: 'new/z', size: 900, contentType: 'image/webp' as const };
+
+    const copied = copiedMediaRow(item, stored);
+    expect(copied.variants).toEqual([]);
+    expect(JSON.stringify(copied)).not.toContain('old/');
   });
 });
 
@@ -1346,8 +1382,10 @@ describe('copyFontsToTenant', () => {
       { id: 'F1', family: 'Brand Sans', slug: 'brand-sans', source: 'upload', fallback: 'sans' },
     ]);
     respond('from public.font_files where font_id', [
-      { weight: 400, style: 'normal', format: 'woff2', subset: null, unicode_range: null, bytes: Buffer.from('regular'), byte_size: 7 },
-      { weight: 400, style: 'italic', format: 'woff2', subset: 'latin', unicode_range: 'U+0-FF', bytes: Buffer.from('italic'), byte_size: 6 },
+      // A variable face covering 400 to 700, and a single-weight italic beside
+      // it, so the copy is checked against both shapes rather than one.
+      { weight: 400, weight_max: 700, style: 'normal', format: 'woff2', subset: null, unicode_range: null, bytes: Buffer.from('regular'), byte_size: 7 },
+      { weight: 400, weight_max: null, style: 'italic', format: 'woff2', subset: 'latin', unicode_range: 'U+0-FF', bytes: Buffer.from('italic'), byte_size: 6 },
     ]);
     respond('insert into public.fonts', [{ id: 'DEST_F1' }]);
 
@@ -1355,13 +1393,21 @@ describe('copyFontsToTenant', () => {
 
     // Both faces written under the new font id, with the italic PRESERVED rather
     // than flattened to normal the way a re-import would.
-    // params: tenant, font_id, weight, style, format, subset, unicode_range, bytes, byte_size
+    // params: tenant, font_id, weight, weight_max, style, format, subset,
+    //         unicode_range, bytes, byte_size
     const fileInserts = log.filter((s) => s.sql.includes('insert into public.font_files'));
     expect(fileInserts).toHaveLength(2);
     expect(fileInserts.every((s) => s.params[1] === 'DEST_F1')).toBe(true);
-    expect(fileInserts.map((s) => s.params[3])).toEqual(['normal', 'italic']);
+    expect(fileInserts.map((s) => s.params[4])).toEqual(['normal', 'italic']);
+    /*
+     * The weight RANGE travels too. Copying a site used to write the weight and
+     * drop everything else about the file, so a duplicated tenant would have got
+     * a variable family back as single-weight rows: the exact bug 0030 exists to
+     * remove, reintroduced one copy at a time.
+     */
+    expect(fileInserts.map((s) => s.params[3])).toEqual([700, null]);
     // The bytes travel as the Buffer they were read as, not a reference.
-    expect(Buffer.isBuffer(fileInserts[1].params[7])).toBe(true);
+    expect(Buffer.isBuffer(fileInserts[1].params[8])).toBe(true);
 
     // ONE destination transaction: insertCopiedFont reused the scope rather than
     // open its own, so the tenant is set for the destination exactly once.
@@ -1607,10 +1653,64 @@ describe('nothing queries round the side', () => {
       .sort();
 
     expect(opens, 'a new file opens its own connection, which needs a look').toEqual([
+      /*
+       * The shared destination corpus, which has no tenant_id to scope to: the
+       * same rows serve every client. Its transaction therefore sets no scope,
+       * which is why this door was worth adding on purpose. See the note at the
+       * top of lib/db/reference.ts and db/migrations/0028_reference_records.sql.
+       */
+      join('lib', 'db', 'reference.ts'),
       join('lib', 'db', 'tenants.ts'), // resolve_tenant, before a tenant is known
       join('lib', 'db', 'users.ts'), // withLogin and withUser, likewise
       join('lib', 'db', 'withTenant.ts'), // withTenant and withPublicTenant
     ]);
+  });
+
+  /*
+   * THE SAME BUG, A FOURTH TIME, SO NOW IT IS A RULE RATHER THAN A HABIT.
+   *
+   * Writing a jsonb column with JSON.stringify hands the driver a JS string,
+   * which it serialises as JSON, so a JSON *string* containing JSON lands in the
+   * column. It cost migration 0007, notes at the top of pages.ts, theme.ts and
+   * media.ts, and then bit lib/db/reference.ts anyway, where it was invisible:
+   * the sync answered 200, a thousand rows were written, and every one of them
+   * had facts nothing could read.
+   *
+   * The behavioural test above proves the invariant for one write in pages.ts. A
+   * new module does not inherit it, which is exactly what happened. This is the
+   * cheap version that covers every module at once: lib/db does not stringify
+   * JSON, it hands the driver an object through the json() helper.
+   */
+  it('no module in lib/db serialises JSON before handing it to the driver', () => {
+    const offenders: string[] = [];
+
+    for (const file of walk(join(ROOT, 'lib', 'db'))) {
+      const source = readFileSync(file, 'utf8')
+        // Comments talk ABOUT the mistake; several of them are the warnings left
+        // by the last three times. Only real code counts.
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/\/\/.*$/gm, '');
+
+      for (const match of source.matchAll(/JSON\.stringify/g)) {
+        /*
+         * FORMATTING A BAD VALUE INTO A MESSAGE IS NOT A WRITE. assertTenantId
+         * and assertUserId both say `Not a tenant id: ${JSON.stringify(value)}`,
+         * which is exactly right: it is the one place you want the quotes and
+         * the shape of whatever nonsense arrived. The first version of this test
+         * flagged both and would have had somebody make two good functions worse.
+         */
+        const before = source.slice(Math.max(0, match.index! - 200), match.index!);
+        if (/\b(throw|new Error\()/.test(before)) continue;
+
+        const line = source.slice(0, match.index!).split('\n').length;
+        offenders.push(`${file.slice(ROOT.length + 1)}:${line}`);
+      }
+    }
+
+    expect(
+      offenders,
+      'these hand the driver a string for a jsonb column; use the json() helper instead',
+    ).toEqual([]);
   });
 
   it('every connection is opened inside a transaction', () => {

@@ -54,6 +54,8 @@ function item(partial: Partial<MediaItem> & { filename: string; url: string }): 
     bytes: 240_000,
     width: 2400,
     height: 1600,
+    // The double stands in for the real bank; a demo image has no stored copies.
+    variants: [],
     alt: '',
     source: 'upload',
     credit: {},
@@ -123,6 +125,7 @@ export async function loadMediaAction(offset = 0) {
       hasMore: false,
       canUpload: true,
       canSearchStock: true,
+      canGenerate: true,
       uploadPrefix: 'sites/demo/media/',
     },
   };
@@ -175,6 +178,19 @@ export async function importStockAction(photo: StockPhoto) {
   });
   bank.unshift(added);
   return { ok: true as const, data: added };
+}
+
+/**
+ * The backfill's write, stood down in the standalone bundle.
+ *
+ * Reports that nothing was recorded rather than pretending it worked. The panel
+ * that calls this only appears when a picture has no smaller copies, and every
+ * demo picture is a drawn SVG placeholder that has none and never will, so a
+ * cheerful lie here would put a button in the offline bundle that looks like it
+ * did something.
+ */
+export async function recordVariantsAction() {
+  return { ok: false as const, error: 'There is no storage behind this preview, so nothing was saved.' };
 }
 
 export async function setMediaAltAction(id: string, alt: string) {

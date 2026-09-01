@@ -70,6 +70,20 @@
     "api/cron/reference-freshness.js": {
       "maxDuration": 300
     },
+    "api/cron/reference-identity.js": {
+      "maxDuration": 300,
+      "includeFiles": "api/_data/airport-targets.json"
+    },
+    "api/cron/reference-climate.js": {
+      "maxDuration": 300,
+      "includeFiles": "api/_data/climate-seasons.json"
+    },
+    "api/reference/breadth-fill.js": {
+      "includeFiles": "api/_data/airport-targets.json"
+    },
+    "api/reference/breadth.js": {
+      "includeFiles": "api/_data/airport-targets.json"
+    },
     "api/cron/brain-verify.js": {
       "maxDuration": 300
     },
@@ -112,7 +126,7 @@
     },
     {
       "path": "/api/cron/reference-freshness",
-      "schedule": "0 4 * * 1"
+      "schedule": "0 4 * * *"
     },
     {
       "path": "/api/admin/backfill-enquiry-clients",

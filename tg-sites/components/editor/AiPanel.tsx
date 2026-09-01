@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 
-import { buildSectionAction } from '../../app/actions/ai';
+import { buildSectionAction, suggestNextSectionAction } from '../../app/actions/ai';
 import type { Section } from '../../lib/content/schema';
 import { Icon } from './Icon';
 
@@ -33,10 +33,40 @@ const EXAMPLES = [
   'How booking with us works, step by step',
 ];
 
-export function AiPanel({ onBuilt }: { onBuilt: (section: Section) => void }) {
+export function AiPanel({
+  onBuilt,
+  pageSections,
+  pageTitle,
+}: {
+  onBuilt: (section: Section) => void;
+  /** The page so far, so the AI can propose what should come next. */
+  pageSections?: Section[];
+  pageTitle?: string;
+}) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  async function suggest() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const result = await suggestNextSectionAction({
+        sections: pageSections ?? [],
+        title: pageTitle ?? '',
+      });
+      if (result.ok) {
+        onBuilt(result.section);
+        return;
+      }
+      setError(result.error);
+    } catch {
+      setError('Something went wrong suggesting a section. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function build() {
     const instruction = text.trim();
@@ -112,6 +142,19 @@ export function AiPanel({ onBuilt }: { onBuilt: (section: Section) => void }) {
           <Icon name="sparkle" size={14} />
           {busy ? 'Building it…' : 'Build it'}
         </button>
+        {(pageSections?.length ?? 0) > 0 && (
+          <button
+            type="button"
+            className="ed-btn"
+            data-variant="ghost"
+            disabled={busy}
+            onClick={() => void suggest()}
+            title="Let the AI propose the section that should come next on this page"
+          >
+            <Icon name="sparkle" size={14} />
+            {busy ? 'Thinking…' : 'Suggest what comes next'}
+          </button>
+        )}
         {busy && (
           <span className="ed-ai-panel__wait">This takes a few seconds.</span>
         )}

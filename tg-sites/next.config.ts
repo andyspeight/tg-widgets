@@ -29,6 +29,35 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        /*
+         * THE BEHAVIOUR SCRIPTS A PUBLISHED PAGE LOADS, cached properly.
+         *
+         * They were served with Next's default for public/, which is
+         * `max-age=0, must-revalidate`: every page view revalidated four small
+         * files that change only on a deploy. PageSpeed called this out under
+         * "use efficient cache lifetimes".
+         *
+         * A DAY, NOT A YEAR, and the difference is the URL. These paths carry no
+         * content hash, so the same address serves different bytes after a
+         * deploy; an immutable year would pin a stale script in every visitor's
+         * browser until they cleared it. stale-while-revalidate is what makes a
+         * day cheap: for the following week the cached copy is used at once and
+         * refreshed in the background, so a repeat visitor never waits and a
+         * deploy still reaches everyone within a day.
+         *
+         * The immutable year belongs to /fonts and /_next, whose URLs are keyed
+         * on their content and therefore cannot go stale. If these scripts are
+         * ever hashed too, this becomes a year.
+         */
+        source: '/:file(tg-motion\\.js|slideshow\\.js|theme-toggle\\.js|no-right-click\\.js)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
+      {
         // The editor is never framed by anyone, including us.
         source: '/editor/:path*',
         headers: [

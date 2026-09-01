@@ -1800,6 +1800,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       source: 'typed',
       collection: '',
       count: 6,
+      // What every collection listing did before there was a control for it.
+      order: 'newest',
       facts: 2,
       design: 'stacked',
       columns: '3',
@@ -1886,6 +1888,33 @@ export const BLOCKS: readonly BlockDefinition[] = [
         max: 60,
         step: 1,
         help: 'The newest this many. Only used when the cards come from a collection.',
+      },
+      {
+        /*
+         * WHICH ORDER, and intrinsic rather than by a declared field.
+         *
+         * Andy, 26 Aug 2026: "in the cards i can't see a way to reorder them".
+         * Typed cards have had up and down arrows all along; collection cards
+         * are a live query and had no control at all, so they came back newest
+         * first and that was that. A sort by one of the collection's own fields
+         * was already plumbed through to the reader but never exposed, and it
+         * would not have helped here anyway: Coastwise's guides collection
+         * declares no fields, so there was nothing to sort by. These four work
+         * on any collection because every item has a date and a title.
+         */
+        kind: 'select',
+        key: 'order',
+        label: 'Order',
+        options: [
+          { value: 'newest', label: 'Newest first' },
+          { value: 'oldest', label: 'Oldest first' },
+          { value: 'title', label: 'Title A to Z' },
+          { value: 'title-desc', label: 'Title Z to A' },
+          { value: 'manual', label: 'The order I set' },
+        ],
+        help:
+          'Only used when the cards come from a collection. "The order I set" ' +
+          'follows the arrows on the Collections screen.',
       },
       {
         /*
@@ -3315,6 +3344,144 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: 'stretch', label: 'Same height' },
         ],
         help: 'Same height is what makes a row of cards match when their words differ in length.',
+      },
+    ],
+  },
+  {
+    /*
+     * THE COLLECTION LOOP, asked for on 31 Aug 2026 as Elementor gap #1.
+     *
+     * WHAT MAKES IT DIFFERENT FROM THE CARDS BLOCK, which is the question anybody
+     * looking at both will ask, because both draw a grid from a collection. The
+     * Cards block pours a collection into ONE FIXED SHAPE: a picture, a title, a
+     * line of text, a few facts, in that order, and a client chooses between three
+     * finishes. The Loop lets the client DESIGN the card themselves, out of the
+     * whole block library, and repeats that one design over the query. A price
+     * over the photograph, a two-column split with the nights beside the map, a
+     * badge in the corner: things the fixed card cannot express and a designed one
+     * can. It is the Cards block's grown-up sibling, for the agency that has
+     * outgrown the template.
+     *
+     * HOW IT IS STORED: exactly like a container with ONE column, and that is the
+     * whole trick. The one column IS the card, edited in the same nested editor a
+     * container uses, so nothing new had to be built to design it. The render
+     * expands that one design once per item, filling the tokens (see
+     * lib/content/loop.ts) and laying the results out as a grid. See
+     * lib/content/inner-columns.ts, the one list that says which blocks carry
+     * columns, and the loop branches in the factory and the renderer.
+     *
+     * ALWAYS FROM A COLLECTION. There is no "typed in here" source: a hand-typed
+     * loop is just a grid, which already exists. The point of the loop is the
+     * repeat over live data.
+     */
+    type: 'loop',
+    label: 'Collection loop',
+    group: 'Cards and lists',
+    keywords: 'repeat collection loop design card dynamic list posts tours query',
+    icon: 'cards',
+    description: 'Design one card, repeated over a collection. Your shape, their data.',
+    // The one card column is minted by the factory with a starter card and a fresh
+    // id, for the same reason a container's columns are: an id in the defaults would
+    // be the same on every loop ever added. across/gap/align mirror the grid, since
+    // the expanded cards are laid out as one.
+    defaults: {
+      collection: '',
+      count: 6,
+      order: 'newest',
+      across: '3',
+      acrossTablet: '2',
+      acrossPhone: '1',
+      gap: 16,
+      align: 'stretch',
+      linkWhole: true,
+      columns: [],
+    },
+    summarise: (props) => {
+      const collection = asString(props.collection).trim();
+      return collection ? `Loop (${collection})` : 'Collection loop';
+    },
+    fields: [
+      {
+        kind: 'text',
+        key: 'collection',
+        label: 'Which collection',
+        placeholder: 'tours',
+        max: 120,
+        help: 'The short name from the Collections screen. The card repeats over the newest entries in it.',
+      },
+      {
+        kind: 'number',
+        key: 'count',
+        label: 'How many',
+        min: 1,
+        max: 60,
+        step: 1,
+        help: 'At most this many cards, newest first unless you change the order.',
+      },
+      {
+        kind: 'select',
+        key: 'order',
+        label: 'Order',
+        options: [
+          { value: 'newest', label: 'Newest first' },
+          { value: 'oldest', label: 'Oldest first' },
+          { value: 'title', label: 'Title A to Z' },
+          { value: 'title-desc', label: 'Title Z to A' },
+          { value: 'manual', label: 'The order I set' },
+        ],
+        help: '"The order I set" follows the arrows on the Collections screen.',
+      },
+      {
+        kind: 'select',
+        key: 'across',
+        label: 'Columns on a desktop',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+      },
+      {
+        kind: 'select',
+        key: 'acrossTablet',
+        label: 'Columns on a tablet',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+      },
+      {
+        kind: 'select',
+        key: 'acrossPhone',
+        label: 'Columns on a phone',
+        group: 'layout',
+        options: ACROSS_OPTIONS,
+        help: 'One is usually right on a phone. Two suits small tiles.',
+      },
+      {
+        kind: 'number',
+        key: 'gap',
+        label: 'Space between cards',
+        min: 0,
+        max: 96,
+        step: 2,
+        group: 'layout',
+        help: 'The gap between cards, in pixels. Applies both across and down.',
+      },
+      {
+        kind: 'select',
+        key: 'align',
+        label: 'Cards line up',
+        group: 'layout',
+        options: [
+          { value: 'top', label: 'At the top' },
+          { value: 'centre', label: 'In the middle' },
+          { value: 'bottom', label: 'At the bottom' },
+          { value: 'stretch', label: 'Same height' },
+        ],
+        help: 'Same height is what makes a row of cards match when their words differ in length.',
+      },
+      {
+        kind: 'toggle',
+        key: 'linkWhole',
+        label: 'The whole card links to the entry',
+        group: 'layout',
+        help: 'A click anywhere on a card opens its page. Turn it off to link only from a button inside the card.',
       },
     ],
   },

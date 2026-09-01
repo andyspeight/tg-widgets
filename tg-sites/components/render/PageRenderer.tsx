@@ -22,6 +22,7 @@ import {
   MOTION_VIDEO_RECIPES,
   safeAnchor,
   safeColour,
+  sectionCardCount,
   type Block,
   type Box,
   type Column,
@@ -36,10 +37,12 @@ import {
   normaliseLineHeight,
   normaliseRevealStyle,
   normaliseTextSize,
+  seaTonePreset,
 } from '../../lib/content/styles';
 import { responsiveVars } from '../../lib/content/responsive';
 import { BlockRenderer } from './BlockRenderer';
 import type { PreparedMap } from '../../lib/content/prepared';
+import { FULL_WIDTH_SIZES, srcSetFor, type ImageSizes } from '../../lib/content/image-sizes';
 
 /**
  * A container block's own columns.
@@ -99,6 +102,42 @@ function gridAlign(block: Block): 'top' | 'centre' | 'bottom' | 'stretch' {
   return raw === 'centre' || raw === 'bottom' || raw === 'stretch' ? raw : 'top';
 }
 
+/** One expanded loop cell: a card's bound blocks, the entry it links to, its title. */
+interface LoopCell {
+  blocks: Block[];
+  href: string;
+  label: string;
+}
+
+/** A loop block's `props.columns`, whatever shape they are in (template or expanded). */
+function loopCellsOf(block: Block): LoopCell[] {
+  const columns = (block.props as { columns?: unknown }).columns;
+  return Array.isArray(columns) ? (columns as LoopCell[]) : [];
+}
+
+/**
+ * Has this loop been EXPANDED by the route, or is it still its stored template?
+ *
+ * The discriminator is the per-cell href, which expandLoop writes on every cell
+ * and a stored template column never has (see lib/content/loop.ts). An expanded
+ * loop with items has one or more cells all carrying an href; a stored loop has
+ * its one template column with none. A published loop over an empty collection
+ * expands to zero cells, which reads here as "not expanded" and draws the calm
+ * empty state, which is exactly right.
+ */
+function loopExpanded(block: Block): boolean {
+  const cells = loopCellsOf(block);
+  return (
+    cells.length > 0 &&
+    cells.every((cell) => cell && typeof cell === 'object' && typeof cell.href === 'string')
+  );
+}
+
+/** Does the whole card link to its entry? On unless the client turned it off. */
+function loopLinkWhole(block: Block): boolean {
+  return (block.props as { linkWhole?: unknown }).linkWhole !== false;
+}
+
 interface Editable {
   editable?: boolean;
   /**
@@ -133,6 +172,16 @@ interface Editable {
    * the database and a side channel cannot be forged by a stored row.
    */
   prepared?: PreparedMap;
+  /**
+   * The stored sizes of each picture on this tree, by url.
+   *
+   * Beside the tree for the same reason `prepared` is: a block stores an address
+   * and the sizes live on the media row, so putting them on props would be
+   * denormalising a value that changes when the bank changes. Absent on the
+   * editor canvas, which is correct: the canvas is not what a visitor downloads,
+   * and a srcset there would only make the preview harder to reason about.
+   */
+  sizes?: ImageSizes;
 }
 
 /**
@@ -187,6 +236,7 @@ export function PageRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
   emptyNote = 'This page is empty. Add a section to get started.',
   theme,
   region = null,
@@ -257,6 +307,7 @@ export function PageRenderer({
             editingPath={editingPath}
             editorCanvas={editorCanvas}
             prepared={prepared}
+            sizes={sizes}
             /*
               A shaped edge is the BOUNDARY between two sections, so drawing one
               needs the colour on the other side of it. Only this component
@@ -327,6 +378,7 @@ export function SectionRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
   above,
   below,
   hangBottomDivider = false,
@@ -387,15 +439,22 @@ export function SectionRenderer({
    * wants the cycling background and is inert on one still picture; A6 and S5 drive
    * that one still picture and are inert without it. Everything else needs neither.
    */
+  const cardCount = sectionCardCount(section);
   const motionHasWhatItNeeds = (r: typeof recipe): boolean => {
     if (!r) return false;
     if (MOTION_VIDEO_RECIPES.has(r)) return Boolean(video);
     if (MOTION_CYCLING_RECIPES.has(r)) return bgShow;
     if (MOTION_BACKGROUND_RECIPES.has(r)) return stillBackground;
+    // S2 pins the section and travels its cards sideways, so it needs a row of them.
+    // Without cards the pinned section would just be a tall empty screen.
+    if (r === 'S2') return cardCount > 0;
     return true;
   };
   const motion =
     recipe && MOTION_LIVE_RECIPES.has(recipe) && motionHasWhatItNeeds(recipe) ? recipe : undefined;
+  // The named sea the cinematic recipe wears, resolved to its colours and sun angle.
+  // Only for A1, so no other section carries the data-sea-* colour attributes.
+  const seaTone = motion === 'A1' ? seaTonePreset(section.seaTone) : undefined;
   /*
    * The recipe WINS the background. Parallax and Ken Burns have moved that one
    * picture since 11 and 13 Aug 2026 and globals.css has always said only one of
@@ -508,8 +567,45 @@ export function SectionRenderer({
        * the gentlest setting still moves; globals.css reads it as custom properties
        * and the recipes themselves are pure CSS.
        */
+      /*
+       * Absent means top, so a section that never asked carries no attribute and
+       * the stylesheet leaves its layout exactly as it was.
+       */
+      data-align-y={section.alignY}
       data-motion={motion}
       data-motion-intensity={motion ? String(section.motion?.intensity ?? 2) : undefined}
+      /*
+       * The sea reads its swell from the section's intensity band, so Gentle / Medium
+       * / Strong turns down or up how much the water heaves. Only for A1, and read by
+       * tg-sea.js; every other recipe carries its intensity in the stylesheet instead.
+       */
+      data-sea-swell={
+        motion === 'A1'
+          ? String([0.45, 0.65, 0.9][(section.motion?.intensity ?? 2) - 1] ?? 0.65)
+          : undefined
+      }
+      /* The chosen sea's colours and sun angle, for A1 only. tg-sea.js validates each
+         again on the way in, so a stray value can never reach the shader. */
+      data-sea-deep={seaTone?.deep}
+      data-sea-shallow={seaTone?.shallow}
+      data-sea-horizon={seaTone?.horizon}
+      data-sea-sun={seaTone ? String(seaTone.sun) : undefined}
+      data-sea-suncol={seaTone?.sunCol}
+      /*
+       * THE FIRST SECTION IS A DIFFERENT PROBLEM AND HAS TO SAY SO.
+       *
+       * A scroll-driven recipe is timed by the section entering the viewport,
+       * and the first section never enters: it is already there when the page
+       * loads. Measured on 25 Aug 2026 with a 1200px hero in a 900px viewport,
+       * S5's range was about 43% used up before the visitor touched anything and
+       * the animation sat finished at every scroll position. The recipe was
+       * offered, stored, attached, and did nothing.
+       *
+       * So the stylesheet is told which section is the lead one and drives that
+       * case off the document's own scroll instead. Only set when a recipe is
+       * actually on, so nothing else in the DOM changes shape.
+       */
+      data-motion-lead={motion && index === 0 ? '' : undefined}
       /*
        * Slide this section up under the one above it. Structural, not decorative,
        * so it is NOT gated on `editable` the way the reveal and the hover are: an
@@ -519,6 +615,14 @@ export function SectionRenderer({
        * own band rather than over the page; it shows on the published site.
        */
       data-pull-up={section.pullUp ? '' : undefined}
+      /*
+       * Pin the section to the top of the viewport as the page scrolls past it.
+       * Gated on `editable`, unlike pull-up above: the editor canvas scrolls inside
+       * its own frame under a fixed toolbar, so a section left free to pin would
+       * stick over the toolbar and the section you are actually editing. It pins on
+       * the published page and in preview, where there is no toolbar to fight.
+       */
+      data-sticky={section.sticky && !editable ? '' : undefined}
       /*
        * Hidden on some screens, the whole section. Same list and same container
        * queries as a block's, and the same `editable` gate as the reveal and hover
@@ -532,7 +636,12 @@ export function SectionRenderer({
       style={{
         ...boxStyle(section.box),
         '--tgs-pad': `${section.paddingY}px`,
-        '--tgs-min-h': `${section.minHeight}px`,
+        // Fill the screen wins over the pixel floor: 100svh is exactly one
+        // viewport, and the --tgs-min-h clamp already caps a pixel floor at it.
+        '--tgs-min-h': section.fullHeight ? '100svh' : `${section.minHeight}px`,
+        // How many cards the pinned itinerary travels, so the stylesheet makes the
+        // section tall enough for a longer row to have somewhere to scroll. Only for S2.
+        ...(motion === 'S2' ? { '--tgs-s2-len': String(cardCount) } : {}),
         '--tgs-scrim': section.overlay,
         ...(section.pullUp ? { '--tgs-pull-up': `${section.pullUp}px` } : {}),
         // Only when a colour was chosen. Left unset, the scrim CSS falls back to
@@ -577,9 +686,26 @@ export function SectionRenderer({
               key={i}
               className="tgs-section__bgslide"
               src={image.src}
+              srcSet={srcSetFor(image.src, sizes) ?? undefined}
+              sizes={srcSetFor(image.src, sizes) ? FULL_WIDTH_SIZES : undefined}
               alt=""
               aria-hidden="true"
-              loading={i === 0 ? 'eager' : 'lazy'}
+              /*
+               * THE FIRST SLIDE OF THE FIRST SECTION IS THE LARGEST PAINT, and
+               * until 25 Aug 2026 the condition here said `i === 0`, which is
+               * the first slide of EVERY section. On a page of four photo
+               * sections that eagerly fetched four heroes at once, and on slow
+               * 4G they share the pipe, so the one a visitor is actually
+               * looking at finished last. Measured: 800 KB over four images,
+               * LCP 4372 ms, which is 800 KB at 1.6 Mbps almost to the
+               * millisecond.
+               *
+               * So the section index decides it now, not the slide index. The
+               * hero is eager and high; every other background waits until it
+               * is near the viewport.
+               */
+              loading={index === 0 && i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={index === 0 && i === 0 ? 'high' : undefined}
               style={{
                 ...image.style,
                 animationDelay: `calc(${i} * var(--tgs-ss-cycle) / ${bgImages.length})`,
@@ -591,8 +717,30 @@ export function SectionRenderer({
         <img
           className="tgs-section__bg"
           src={bgImages[0].src}
+          /*
+           * A full-bleed background genuinely is the viewport's width, so the
+           * conservative 100vw hint is also the accurate one here. This is the
+           * usual largest-paint element on a travel homepage.
+           */
+          srcSet={srcSetFor(bgImages[0].src, sizes) ?? undefined}
+          sizes={srcSetFor(bgImages[0].src, sizes) ? FULL_WIDTH_SIZES : undefined}
           alt=""
           aria-hidden="true"
+          /*
+           * THE HERO SAYS IT IS THE HERO. The comment above has called this the
+           * usual largest-paint element since it was written, and it still
+           * carried no priority hint of any kind: a background image is
+           * discovered late (it is markup, not a preload) and an <img> a browser
+           * has not laid out yet is fetched at Low priority. fetchpriority=high
+           * is the one attribute that says otherwise, and it costs nothing.
+           *
+           * Below the first section it is the opposite job. This element had no
+           * loading attribute at all, so every section's background was eager
+           * and they raced the hero for the same pipe. Lazy from the second
+           * section down.
+           */
+          fetchPriority={index === 0 ? 'high' : undefined}
+          loading={index === 0 ? undefined : 'lazy'}
           style={bgImages[0].style}
         />
       ) : null}
@@ -670,6 +818,7 @@ export function SectionRenderer({
             editingPath={editingPath}
             editorCanvas={editorCanvas}
             prepared={prepared}
+            sizes={sizes}
           />
         ))}
         {editable && section.rows.length === 0 && (
@@ -894,6 +1043,7 @@ export function RowRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: { row: Row; sectionIndex: number; index: number } & Editable): ReactElement {
   /*
    * The dragged widths become a single custom property, for example
@@ -943,6 +1093,7 @@ export function RowRenderer({
           editingPath={editingPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       ))}
     </div>
@@ -967,6 +1118,7 @@ function blockHost(
   editingPath: string | null,
   editorCanvas: boolean,
   prepared: PreparedMap | undefined,
+  sizes: ImageSizes | undefined,
 ): ReactElement {
   const box = block.box ?? EMPTY_BOX;
   const boxed = !boxIsEmpty(box);
@@ -991,8 +1143,69 @@ function blockHost(
   const gradient = block.type === 'heading' && props?.gradient === true;
   const gradFrom = gradient ? safeColour(props?.gradientFrom) : undefined;
   const gradTo = gradient ? safeColour(props?.gradientTo) : undefined;
+  /*
+   * A CARDS GRID PUTS ITS BOX ON THE CARDS, NOT ON ITSELF.
+   *
+   * Andy, 26 Aug 2026: changing a card background changes the block background,
+   * a border goes round the block not the card, a shadow lands on the block. He
+   * is right, and it is the only block where the generic box is the wrong
+   * target: everywhere else "the block" is the thing you can see, and here the
+   * thing you can see is a grid of cards with nothing but gaps between them. A
+   * background on the container paints behind the gaps; a border draws a rectangle
+   * round the lot.
+   *
+   * ONLY WHAT WAS ACTUALLY SET TRAVELS. boxStyle always emits every property,
+   * filling the unset ones with transparent and 0, which is right for a block
+   * painting itself and wrong here: it would wipe the finish the card already
+   * has from its style preset the moment anyone touched any box control. So
+   * these are separate properties, each emitted only when the client set it, and
+   * the CSS keys off their presence. A tinted card that gains a border keeps its
+   * tint.
+   *
+   * PADDING TARGETS THE CARD TOO, and this took a second pass to get right. The
+   * first version left it on the container, reasoning that padding around a grid
+   * is space around the grid. That reasoning is fine in the abstract and wrong at
+   * the panel: every other control in that panel moved to the card, so padding
+   * staying behind made it the one control that did something else, and Andy hit
+   * it immediately. Consistency inside one panel beats the tidier theory.
+   *
+   * It lands on the card's BODY rather than the card, so a picture stays
+   * full bleed at the top and the padding is the space around the words, which
+   * is what a card's padding means everywhere else. Space around the whole grid
+   * is still available: it is the section's padding, one level up.
+   *
+   * ALL FOUR OR NONE. The other controls test a single number, but padding is
+   * four, and a client who sets only a top would otherwise get their top with
+   * the preset's other three, which reads as a bug. So any non-zero means the
+   * client has touched it and all four travel exactly as set.
+   */
+  const cardBox: CSSProperties = block.type === 'cards' && boxed
+    ? {
+        ...(box.background ? { '--tgs-card-bg': box.background } : {}),
+        ...(box.borderWidth > 0
+          ? {
+              '--tgs-card-bw': `${box.borderWidth}px`,
+              '--tgs-card-bc': box.borderColour ?? 'currentColor',
+            }
+          : {}),
+        ...(box.radius > 0 ? { '--tgs-card-radius': `${box.radius}px` } : {}),
+        ...(box.padding.top > 0 ||
+        box.padding.right > 0 ||
+        box.padding.bottom > 0 ||
+        box.padding.left > 0
+          ? {
+              '--tgs-card-pt': `${box.padding.top}px`,
+              '--tgs-card-pr': `${box.padding.right}px`,
+              '--tgs-card-pb': `${box.padding.bottom}px`,
+              '--tgs-card-pl': `${box.padding.left}px`,
+            }
+          : {}),
+      } as CSSProperties
+    : {};
+
   const style: CSSProperties = {
     ...(boxed ? boxStyle(box) : {}),
+    ...cardBox,
     ...(textColour ? { color: textColour } : {}),
     ...(baseSize ? { '--tgs-fs': baseSize } : {}),
     ...(baseLineHeight ? { '--tgs-lh': baseLineHeight } : {}),
@@ -1044,6 +1257,8 @@ function blockHost(
       data-hide-tablet={!editable && block.hideOn?.includes('tablet') ? '' : undefined}
       data-hide-phone={!editable && block.hideOn?.includes('phone') ? '' : undefined}
       data-boxed={boxed ? '' : undefined}
+      /* Which element the box paints. See the note on cardBox above. */
+      data-box-target={block.type === 'cards' && boxed ? 'card' : undefined}
       data-shadow={boxed ? box.shadow : undefined}
       data-fluid={fluid ? '' : undefined}
       data-gradient={gradient && !editable ? '' : undefined}
@@ -1061,6 +1276,7 @@ function blockHost(
           editingPath={editingPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       ) : block.type === 'container' ? (
         <InnerColumns
@@ -1072,7 +1288,45 @@ function blockHost(
           editingPath={editingPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
+      ) : block.type === 'loop' ? (
+        /*
+         * A COLLECTION LOOP has two faces, and which one shows is decided by
+         * whether the route has EXPANDED it. On a published page the loop arrives
+         * expanded (fillLoops in lib/content/listings.ts has poured its items into
+         * per-item cells, each carrying an href), so it draws as a grid of those
+         * cards, each a link to its entry. On the editor canvas there is no route
+         * to expand it, so it keeps its single template column and is edited in
+         * place exactly as a container is: that is how the client designs the one
+         * card the loop repeats. See loopExpanded.
+         */
+        loopExpanded(block) ? (
+          <InnerLoop
+            cells={loopCellsOf(block)}
+            across={gridAcross(block)}
+            gap={innerGap(block)}
+            align={gridAlign(block)}
+            linkWhole={loopLinkWhole(block)}
+            editorCanvas={editorCanvas}
+            prepared={prepared}
+            sizes={sizes}
+          />
+        ) : editable ? (
+          <InnerColumns
+            columns={innerColumnsOf(block)}
+            gap={innerGap(block)}
+            stack="always"
+            keyPath={keyPath}
+            editable={editable}
+            editingPath={editingPath}
+            editorCanvas={editorCanvas}
+            prepared={prepared}
+            sizes={sizes}
+          />
+        ) : (
+          <LoopEmpty block={block} editorCanvas={editorCanvas} />
+        )
       ) : (
         <BlockRenderer
           block={block}
@@ -1080,6 +1334,7 @@ function blockHost(
           editingHost={editable && editingPath === keyPath}
           editorCanvas={editorCanvas}
           prepared={prepared}
+          sizes={sizes}
         />
       )}
     </div>
@@ -1123,6 +1378,7 @@ function InnerGrid({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   cells: Column[];
   across: { desktop: number; tablet: number; phone: number };
@@ -1166,7 +1422,7 @@ function InnerGrid({
             {...pathAttr(editable, cellPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
+              blockHost(block, `${cellPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared, sizes),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1200,6 +1456,91 @@ function InnerGrid({
   );
 }
 
+/**
+ * An EXPANDED collection loop: the client's one card design, drawn once per item.
+ *
+ * WHY IT REUSES .tgs-grid rather than being its own layout. The expanded cards are
+ * a set of the same shape flowing into a number of tracks and wrapping, which is
+ * precisely a grid; sharing the class shares the responsive track counts and the
+ * gap and the alignment with no second copy of that CSS. What it adds is the LINK:
+ * a covering anchor over each card so the whole thing opens the entry, the same
+ * whole-card pattern the Cards block uses, and for the same reason (one anchor per
+ * card keeps the markup valid and the keyboard to one stop). The anchor has no
+ * text of its own, so its accessible name is the entry's title, carried on the
+ * cell by expandLoop.
+ *
+ * The cards are already bound (their tokens filled) and this never runs on the
+ * canvas, so it takes no editing props: editable is always false here.
+ */
+function InnerLoop({
+  cells,
+  across,
+  gap,
+  align,
+  linkWhole,
+  editorCanvas = false,
+  prepared,
+  sizes,
+}: {
+  cells: LoopCell[];
+  across: { desktop: number; tablet: number; phone: number };
+  gap: number;
+  align: 'top' | 'centre' | 'bottom' | 'stretch';
+  linkWhole: boolean;
+  editorCanvas?: boolean;
+  prepared?: PreparedMap;
+  sizes?: ImageSizes;
+}): ReactElement {
+  const style = {
+    '--tgs-grid-d': String(across.desktop),
+    '--tgs-grid-t': String(across.tablet),
+    '--tgs-grid-p': String(across.phone),
+    '--tgs-gap': `${gap}px`,
+  } as CSSProperties;
+
+  return (
+    <div
+      className="tgs-grid tgs-loop"
+      style={style}
+      data-align={align}
+      data-whole={linkWhole ? 'true' : undefined}
+    >
+      {cells.map((cell, inner) => {
+        const blocks = Array.isArray(cell.blocks) ? cell.blocks : [];
+        const href = linkWhole ? safeUrl(typeof cell.href === 'string' ? cell.href : '') : '';
+        const label = typeof cell.label === 'string' ? cell.label : '';
+        return (
+          <div key={inner} className="tgs-col tgs-grid__cell tgs-loop__cell">
+            {blocks.map((block, innerBlock) =>
+              blockHost(block, `loop${inner}i${innerBlock}`, false, null, editorCanvas, prepared, sizes),
+            )}
+            {href && <a className="tgs-loop__link" href={href} aria-label={label || undefined} />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * A loop that has not drawn any cards: on the editor's preview, a note of what it
+ * repeats over (there is no route behind the canvas to fill it, so it cannot show
+ * the real cards there, the same limitation a collection Cards block has). On a
+ * published page it means the collection has nothing published yet, and the answer
+ * there is the calm nothing an empty offer cache gives: no broken frame, no lorem.
+ */
+function LoopEmpty({ block, editorCanvas }: { block: Block; editorCanvas: boolean }): ReactElement | null {
+  if (!editorCanvas) return null;
+  const collection = String((block.props as { collection?: unknown }).collection ?? '').trim();
+  return (
+    <div className="tgs-placeholder">
+      {collection
+        ? `The "${collection}" collection repeats here, one card per entry.`
+        : 'Say which collection this loop repeats over.'}
+    </div>
+  );
+}
+
 function InnerColumns({
   columns,
   gap,
@@ -1209,6 +1550,7 @@ function InnerColumns({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   columns: Column[];
   gap: number;
@@ -1247,7 +1589,7 @@ function InnerColumns({
             {...pathAttr(editable, colPath)}
           >
             {blocks.map((block, innerBlock) =>
-              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared),
+              blockHost(block, `${colPath}i${innerBlock}`, editable, editingPath, editorCanvas, prepared, sizes),
             )}
 
             {editable && blocks.length === 0 && (
@@ -1313,6 +1655,7 @@ export function ColumnRenderer({
   editingPath = null,
   editorCanvas = false,
   prepared,
+  sizes,
 }: {
   column: Column;
   sectionIndex: number;
@@ -1334,7 +1677,7 @@ export function ColumnRenderer({
       {...pathAttr(editable, path)}
     >
       {column.blocks.map((block, blockIndex) =>
-        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas, prepared),
+        blockHost(block, `${path}b${blockIndex}`, editable, editingPath, editorCanvas, prepared, sizes),
       )}
 
       {/*

@@ -38,7 +38,25 @@ Owner: Andy Speight, CEO, Travelgenix.
 - **The Duda element audit (tg-sites)**: `docs/duda-element-audit.md`. Read it
   the moment a session mentions Duda, "the next list", or elements. It carries
   what has been checked, what was built, what Andy has asked to skip, and the
-  conventions the audit turned up that are not written anywhere else.
+  conventions the audit turned up that are not written anywhere else. Its
+  companion is `docs/duda-gap-analysis.md`, the PLATFORM-level comparison (23 Aug
+  2026): the element axis is closed, so a new "how do we compare to Duda"
+  question belongs there rather than in a fresh element sweep.
+
+- **tg-sites (the CMS)**: `docs/tg-sites-handover.md`. START HERE for any
+  tg-sites session. It carries the current state, the open queue in priority
+  order, the numbers you can quote, and a list of things that will bite you
+  that is not derivable from the code. Its companions are
+  `docs/tg-sites-speed-and-visibility.md` (the analysis behind the performance
+  work) and `docs/duda-gap-analysis.md` (the platform comparison).
+
+- **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
+  BUILT and switchable in the editor: nine movement recipes with three strengths,
+  six reveal styles, the background and hover effects, and which recipes collide
+  with which. Its companion is `references/motion-recipes.md` in the
+  travelgenix-taste skill, which is the DESIGN catalogue (purpose, tier,
+  rationale, including recipes not yet built). Read the skill to decide whether
+  something should move, this doc to find what is on the menu.
 
 Living project state lives in Airtable: base `appj9tksreHOwkhYg`, table
 `tblpyhPNhiQg3XkkT` (Projects). Read the record at the start of a session that

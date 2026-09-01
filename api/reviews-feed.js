@@ -45,6 +45,22 @@
 
 'use strict';
 
+import { getJson, setJson, claimNxEx } from './_redis.js';
+
+// ─── Costly-source cache (Google via Wextractor) ─────────────────────────────
+// Wextractor bills per request and the monthly credit is small, so a costly
+// source is NEVER hit on a visitor's schedule. We keep the last good normalized
+// payload in Redis under `revcache:<source>:<id>` (no key TTL — set persistently)
+// and treat it as fresh for REVIEWS_TTL. Only the FIRST request after the window
+// lapses triggers one upstream call, guarded by a single-flight lock so a burst
+// of cold traffic can't fan out into many billed calls. If the upstream fails
+// (out of credit, down, throttled) we serve the last good copy indefinitely —
+// a depleted month degrades to "reviews stop updating", never to a blank widget.
+const REVIEWS_TTL_HOURS = Math.max(1, Number(process.env.WEXTRACTOR_REVIEWS_TTL_HOURS) || 168); // default 7 days
+const REVIEWS_TTL_MS = REVIEWS_TTL_HOURS * 3600 * 1000;
+const REFRESH_LOCK_TTL_S = 60; // one refresher at a time per business
+const WEXTRACTOR_KEY = process.env.WEXTRACTOR_API_KEY || '';
+
 // ─── CORS (shared posture with the other data endpoints) ─────────────────────
 const ALLOWED_ORIGINS = [
   'https://tg-widgets.vercel.app',
@@ -109,7 +125,7 @@ function safeImg(u) { return /^https:\/\//i.test(String(u || '').trim()) ? Strin
 // ─── Upstream fetch (FIXED hosts only — see header note on SSRF) ─────────────
 const UPSTREAM_TIMEOUT_MS = 6000;
 const MAX_BYTES = 3 * 1024 * 1024; // 3MB
-const ALLOWED_UPSTREAM_HOSTS = new Set(['api.feefo.com', 'api.reviews.io']);
+const ALLOWED_UPSTREAM_HOSTS = new Set(['api.feefo.com', 'api.reviews.io', 'wextractor.com']);
 
 async function fetchJson(url) {
   // Defence-in-depth: the host is constructed by us, but assert it anyway.
@@ -135,14 +151,21 @@ async function fetchJson(url) {
   }
   clearTimeout(timer);
 
-  if (r.status === 401 || r.status === 403) return { error: 'That account is not open for public reviews.', status: 422 };
-  if (r.status === 404) return { error: 'No reviews found for that identifier.', status: 404 };
   if (!r.ok) {
-    // Both providers return a JSON error body we can surface for the common cases.
+    // Read the upstream body ONCE and surface its own words — a 401/403 from
+    // Wextractor means the API key or its credit, not "account not public", and
+    // hiding that behind a fixed line sends setup debugging in the wrong
+    // direction. (Only runs on the error path; the ok path reads below.)
+    let raw = '';
+    try { raw = await r.text(); } catch (e) {}
     let msg = '';
-    try { const j = await r.json(); msg = (j && (j.message || j.error)) ? String(j.message || j.error) : ''; } catch (e) {}
+    try { const j = JSON.parse(raw); msg = (j && (j.message || j.error || j.detail)) ? String(j.message || j.error || j.detail) : ''; }
+    catch (e) { msg = String(raw || '').replace(/\s+/g, ' ').trim().slice(0, 200); }
+    if (msg) console.error('[reviews-feed] upstream', r.status, msg);
+    if (r.status === 404) return { error: msg || 'No reviews found for that identifier.', status: 404 };
     if (/closed/i.test(msg)) return { error: 'That account is closed on the review provider.', status: 422 };
-    return { error: 'The review provider returned an error.', status: 502 };
+    if (r.status === 401 || r.status === 403) return { error: msg ? ('The review provider refused the request: ' + msg) : 'The review provider refused the request — check the API key and its remaining credit.', status: 502 };
+    return { error: msg ? ('The review provider returned an error: ' + msg) : 'The review provider returned an error.', status: 502 };
   }
 
   // Size-capped read
@@ -248,13 +271,63 @@ const SOURCES = {
       return { business: { id, name }, rating: { average: average || (out.length ? clampRating(out.reduce((a, r) => a + r.rating, 0) / out.length) : 0), count }, reviews: out };
     },
   },
+
+  // Google (via Wextractor) — the one scrape-backed, BILLED source. `costly:true`
+  // routes it through the Redis cache above and `requiresKey` fails clean when
+  // the platform key isn't configured, so we never spend a call on a bad setup.
+  // Client supplies only their Google PLACE ID (e.g. "ChIJ58OtM8pZwokRbd6DT6gcVys").
+  // We fetch a single page (Wextractor returns ~10 newest per call) to hold the
+  // cost to one credit per refresh; the header still shows Google's REAL overall
+  // rating + total count from the `totals` block.
+  google: {
+    name: 'Google',
+    costly: true,
+    requiresKey: 'WEXTRACTOR_API_KEY',
+    // Place ids are ChIJ… (URL-safe base64-ish); also tolerate a hex "data id"
+    // (0x…:0x…). No spaces, no scheme — strictly bounded, then URL-encoded.
+    valid: (id) => /^[A-Za-z0-9_:-]{8,300}$/.test(id),
+    build: (id) => `https://wextractor.com/api/v1/reviews/google?id=${encodeURIComponent(id)}&auth_token=${encodeURIComponent(WEXTRACTOR_KEY)}&offset=0`,
+    parse: (j, id) => {
+      const out = [];
+      const list = Array.isArray(j.reviews) ? j.reviews : [];
+      for (const rv of list) {
+        const text = clip(rv.text || rv.review || rv.comment || '', 1500);
+        const rating = clampRating(rv.rating);
+        if (!rating || !text) continue; // testimonials only — drop rating-only / empty
+        // Owner reply may be an object {text,datetime}, a bare string, or absent.
+        const rep = rv.reply || rv.owner_reply || rv.response || rv.owner_response;
+        const reply = rep ? clip(typeof rep === 'string' ? rep : (rep.text || rep.comment || rep.reply || ''), 800) : '';
+        out.push({
+          id: String(rv.id || rv.review_id || rv.reviewer_id || rv.url || (id + ':' + out.length)),
+          author: clip(rv.reviewer || rv.author || rv.author_name || rv.name || 'Google user', 120),
+          rating,
+          text,
+          date: toIsoDate(rv.datetime || rv.date || rv.time || rv.created_at),
+          source: 'google',
+          photoUrl: '',
+          hasPhoto: false,
+          helpful: Number(rv.likes || rv.helpful || 0) || 0,
+          reply,
+          tags: [],
+        });
+      }
+      const totals = j.totals || j.aggregator || j.summary || {};
+      const average = clampRating(totals.average_rating != null ? totals.average_rating : totals.rating);
+      const count = Number(totals.review_count != null ? totals.review_count : totals.count) || out.length;
+      const name = clip((j.place && (j.place.name || j.place.title)) || j.name || id, 120);
+      return { business: { id, name }, rating: { average: average || (out.length ? clampRating(out.reduce((a, r) => a + r.rating, 0) / out.length) : 0), count }, reviews: out };
+    },
+  },
 };
 
-/** Shared entrypoint — used by the handler and unit-testable directly. */
-export async function fetchSource(source, id, max) {
+/** One live upstream call → normalized payload. No caching here. */
+async function networkFetch(source, id, max) {
   const src = SOURCES[source];
-  if (!src) return { error: 'Unknown review source.', status: 400 };
-  if (!src.valid(id)) return { error: 'That identifier looks invalid.', status: 400 };
+  // A source that needs a platform key fails clean BEFORE any billed call, so a
+  // missing/typo'd env var can never spend a Wextractor credit.
+  if (src.requiresKey && !process.env[src.requiresKey]) {
+    return { error: 'This review source is not set up yet.', status: 503 };
+  }
   const r = await fetchJson(src.build(id, max));
   if (r.error) return r;
   let parsed;
@@ -264,6 +337,51 @@ export async function fetchSource(source, id, max) {
   parsed.reviews = parsed.reviews.slice(0, max);
   return { ok: true, source, ...parsed };
 }
+
+function withMeta(payload, meta) { return Object.assign({}, payload, meta); }
+
+/**
+ * Costly source (Google/Wextractor): serve from the persistent Redis copy,
+ * refreshing at most once per business per REVIEWS_TTL under a single-flight
+ * lock, and NEVER blank on an upstream failure — the last good copy stands.
+ */
+async function cachedFetch(source, id, max) {
+  const cacheKey = 'revcache:' + source + ':' + id;
+  const now = Date.now();
+  const cached = await getJson(cacheKey); // { fetchedAt, payload } | null
+
+  if (cached && cached.payload && (now - (cached.fetchedAt || 0) < REVIEWS_TTL_MS)) {
+    return withMeta(cached.payload, { cached: true, stale: false });
+  }
+
+  // Window lapsed (or nothing stored). Claim the refresh so a burst of cold
+  // traffic bills ONE call, not one per visitor.
+  const lock = await claimNxEx('revlock:' + source + ':' + id, String(now), REFRESH_LOCK_TTL_S);
+  if (lock === 'exists' && cached && cached.payload) {
+    return withMeta(cached.payload, { cached: true, stale: true }); // someone else is refreshing
+  }
+
+  const fresh = await networkFetch(source, id, max);
+  if (fresh.error) {
+    // Upstream down / out of credit → keep serving whatever we last stored.
+    if (cached && cached.payload) return withMeta(cached.payload, { cached: true, stale: true });
+    return fresh;
+  }
+  try { await setJson(cacheKey, { fetchedAt: now, payload: fresh }); } catch (e) { /* cache write best-effort */ }
+  return withMeta(fresh, { cached: false, stale: false });
+}
+
+/** Shared entrypoint — used by the handler and unit-testable directly. */
+export async function fetchSource(source, id, max) {
+  const src = SOURCES[source];
+  if (!src) return { error: 'Unknown review source.', status: 400 };
+  if (!src.valid(id)) return { error: 'That identifier looks invalid.', status: 400 };
+  if (src.costly) return await cachedFetch(source, id, max);
+  return await networkFetch(source, id, max);
+}
+
+// Exposed for unit tests (parser mapping, source registry) — never at runtime.
+export const _test = { SOURCES, networkFetch, cachedFetch };
 
 function fail(res, status, error) {
   res.setHeader('Cache-Control', 'no-store');
