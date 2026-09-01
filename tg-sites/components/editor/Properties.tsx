@@ -99,7 +99,9 @@ import { FieldRenderer } from './Fields';
 import { Icon } from './Icon';
 import { ListingFilterFields } from './ListingFilterFields';
 import { ListingOrderArrows } from './ListingOrderArrows';
+import { LoopCardInserter } from './LoopCardInserter';
 import { listingIn, listingKey } from '../../lib/content/listings';
+import { blockTakesTokens } from '../../lib/content/loop';
 import type { ListingCards } from '../../lib/db/listings';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
 import { rewriteSectionAction, writeSeoAction } from '../../app/actions/ai';
@@ -3270,6 +3272,66 @@ function BlockFields({
         props={block.props}
         onChange={(patch) =>
           onCommit((c) => updateBlockPropsAtPath(c, path, patch), `blk:${block.id}:listing-filter`)
+        }
+      />,
+    );
+  }
+
+  /*
+   * NARROWING A COLLECTION LOOP, the same builder the Cards block gets. A loop reads
+   * its filter and sort exactly as a listing does (see loopIn), so the same pane
+   * narrows it: "only the half-board tours, cheapest first". A loop is always from a
+   * collection, so there is no source to check.
+   */
+  if (block.type === 'loop') {
+    add(
+      'content',
+      <ListingFilterFields
+        key="loop-filter"
+        collectionKey={typeof block.props.collection === 'string' ? block.props.collection : ''}
+        props={block.props}
+        onChange={(patch) =>
+          onCommit((c) => updateBlockPropsAtPath(c, path, patch), `blk:${block.id}:loop-filter`)
+        }
+      />,
+    );
+  }
+
+  /*
+   * THE TOKEN INSERTER, for a block inside a loop's designed card. The card's blocks
+   * are ordinary blocks edited in place (the loop stores them as a container's one
+   * column), so a selected inner block whose PARENT is a loop is a card block. It
+   * gets buttons that write {{title}}, {{image}}, {{link}}, {{field:key}} into its
+   * own props, so a client designs the card without knowing the token syntax. The
+   * parent loop is reachable from the inner-block path's own coordinates.
+   */
+  const parentLoop =
+    path.kind === 'inner-block'
+      ? blockAtPath(page, {
+          kind: 'block',
+          section: path.section,
+          row: path.row,
+          column: path.column,
+          block: path.block,
+        })
+      : null;
+  if (parentLoop?.type === 'loop' && blockTakesTokens(block.type)) {
+    const loopCollection =
+      typeof parentLoop.props.collection === 'string' ? parentLoop.props.collection : '';
+    add(
+      'content',
+      <LoopCardInserter
+        key="loop-tokens"
+        collectionKey={loopCollection}
+        blockType={block.type}
+        onInsert={(prop, text, append) =>
+          onCommit((c) => {
+            const target = blockAtPath(c, path);
+            const current =
+              target && typeof target.props[prop] === 'string' ? (target.props[prop] as string) : '';
+            const next = append && current ? `${current} ${text}` : text;
+            return updateBlockPropsAtPath(c, path, { [prop]: next });
+          }, `blk:${block.id}:token:${prop}`)
         }
       />,
     );

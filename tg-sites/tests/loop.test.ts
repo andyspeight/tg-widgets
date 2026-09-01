@@ -11,7 +11,20 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { bindBlock, bindCardTemplate, expandLoop, loopCardTemplate, type LoopItem } from '../lib/content/loop';
+import {
+  bindBlock,
+  bindCardTemplate,
+  blockTakesTokens,
+  expandLoop,
+  fieldTokens,
+  loopCardTemplate,
+  loopTargetsFor,
+  loopTokens,
+  tokenText,
+  LOOP_FIXED_TOKENS,
+  LOOP_FIXED_TOKEN_NAMES,
+  type LoopItem,
+} from '../lib/content/loop';
 import { blockDefinition } from '../lib/content/blocks';
 import { createBlock } from '../lib/content/factory';
 import { hasInnerColumns } from '../lib/content/inner-columns';
@@ -254,6 +267,93 @@ describe('filling a tree of loops before it renders', () => {
   });
 });
 
+describe('the token catalogue the inserter offers', () => {
+  const fullItem: LoopItem = {
+    title: 'T', summary: 'S', author: 'A', date: '2026-03-01',
+    tags: ['x'], image: 'https://cdn/i.jpg', alt: 'alt', href: '/e',
+  };
+
+  it('offers every fixed token, and each one resolves rather than dropping to blank', () => {
+    // The catalogue and resolveToken must agree: a token the inserter offers that
+    // the resolver does not know would render as an empty card, silently.
+    for (const name of LOOP_FIXED_TOKEN_NAMES) {
+      const out = propsOf(bindBlock(block('image', { alt: tokenText(name) }), fullItem)).alt as string;
+      expect(out, name).not.toBe('');
+      expect(out, name).not.toContain('{{');
+    }
+  });
+
+  it('tags a picture token as a picture and words as text', () => {
+    const byName = Object.fromEntries(LOOP_FIXED_TOKENS.map((t) => [t.name, t.kind]));
+    expect(byName.image).toBe('picture');
+    expect(byName.link).toBe('link');
+    expect(byName.title).toBe('text');
+  });
+
+  it('turns a collection field into a field: token, picture fields included', () => {
+    const defs: FieldDef[] = [
+      price,
+      { key: 'map', label: 'Map', kind: 'image', required: false, choices: [], prefix: '', suffix: '' },
+    ];
+    const tokens = fieldTokens(defs);
+    expect(tokens).toEqual([
+      { name: 'field:price', label: 'From', kind: 'text' },
+      { name: 'field:map', label: 'Map', kind: 'picture' },
+    ]);
+    // loopTokens is the fixed set then the fields, in that order.
+    expect(loopTokens(defs).map((t) => t.name)).toEqual([...LOOP_FIXED_TOKEN_NAMES, 'field:price', 'field:map']);
+  });
+
+  it('a field: token it offers actually formats through the definition', () => {
+    const withPrice: LoopItem = { ...fullItem, fields: { price: 1299 } };
+    const token = fieldTokens([price])[0].name;
+    // The token is the VALUE only (£1,299); the field's label ("From") is a fixed
+    // part of the card the client types beside it, not part of what the token yields.
+    expect(propsOf(bindBlock(block('text', { html: tokenText(token) }), withPrice, [price])).html)
+      .toBe('£1,299');
+  });
+});
+
+describe('where a token lands, by block type', () => {
+  it('offers the right slots for each card block, and none for a block with no data', () => {
+    // A heading takes words in its html; an image a picture in src and words in alt;
+    // a button a link in href and words in a label. A divider takes nothing.
+    expect(loopTargetsFor('heading').map((t) => t.prop)).toEqual(['html']);
+    expect(loopTargetsFor('text').map((t) => t.prop)).toEqual(['html']);
+    expect(loopTargetsFor('image').map((t) => t.prop)).toEqual(['src', 'alt']);
+    expect(loopTargetsFor('button').map((t) => t.prop)).toEqual(['href', 'label']);
+    expect(loopTargetsFor('divider')).toEqual([]);
+  });
+
+  it('marks the html slots for append (rich text keeps its fixed words)', () => {
+    // Only the html slots append; a source, a link, an alt or a label is set.
+    expect(loopTargetsFor('heading')[0].html).toBe(true);
+    expect(loopTargetsFor('image').find((t) => t.prop === 'src')?.html).toBeFalsy();
+  });
+
+  it('a picture slot accepts only picture tokens, a text slot only words', () => {
+    const src = loopTargetsFor('image').find((t) => t.prop === 'src')!;
+    const alt = loopTargetsFor('image').find((t) => t.prop === 'alt')!;
+    expect(src.kinds).toEqual(['picture']);
+    expect(alt.kinds).toEqual(['text']);
+    // So {{image}} is offered for src and never for alt, and {{title}} the reverse.
+    const forSrc = loopTokens().filter((token) => src.kinds.includes(token.kind)).map((t) => t.name);
+    const forAlt = loopTokens().filter((token) => alt.kinds.includes(token.kind)).map((t) => t.name);
+    expect(forSrc).toContain('image');
+    expect(forSrc).not.toContain('title');
+    expect(forAlt).toContain('title');
+    expect(forAlt).not.toContain('image');
+  });
+
+  it('gates the inserter to blocks that take tokens', () => {
+    expect(blockTakesTokens('heading')).toBe(true);
+    expect(blockTakesTokens('image')).toBe(true);
+    expect(blockTakesTokens('button')).toBe(true);
+    expect(blockTakesTokens('divider')).toBe(false);
+    expect(blockTakesTokens('spacer')).toBe(false);
+  });
+});
+
 const source = (...parts: string[]): string => readFileSync(join(__dirname, '..', ...parts), 'utf8');
 
 describe('the whole-card link is valid and keyboard-safe', () => {
@@ -300,5 +400,35 @@ describe('the renderer draws an expanded loop, and edits an unexpanded one', () 
     expect(renderer).toContain('className="tgs-loop__link"');
     // The link's accessible name is the entry title carried on the cell.
     expect(renderer).toContain('aria-label={label || undefined}');
+  });
+});
+
+describe('the editor wires the loop controls', () => {
+  const properties = source('components', 'editor', 'Properties.tsx');
+
+  it('narrows a loop with the same filter/sort builder as the cards block', () => {
+    // A loop reads filter/sort exactly as a listing does, so it shares the builder.
+    expect(properties).toContain("if (block.type === 'loop') {");
+    expect(properties).toContain('key="loop-filter"');
+    expect(properties).toContain('<ListingFilterFields');
+  });
+
+  it('shows the token inserter for a card block whose parent is a loop', () => {
+    // The parent loop is reached from the inner-block path's own coordinates.
+    expect(properties).toContain("path.kind === 'inner-block'");
+    expect(properties).toContain("parentLoop?.type === 'loop' && blockTakesTokens(block.type)");
+    expect(properties).toContain('<LoopCardInserter');
+    // Rich text appends, everything else sets; the fresh page gives the current value.
+    expect(properties).toContain('const next = append && current ? `${current} ${text}` : text;');
+  });
+
+  it('offers tokens through the one shared collection-fields fetch', () => {
+    const inserter = source('components', 'editor', 'LoopCardInserter.tsx');
+    expect(inserter).toContain("import { useCollectionFields } from './useCollectionFields';");
+    expect(inserter).toContain('loopTargetsFor(blockType)');
+    expect(inserter).toContain('loopTokens(fields)');
+    // The cards filter reads from the same shared hook, so one fetch serves both.
+    const filter = source('components', 'editor', 'ListingFilterFields.tsx');
+    expect(filter).toContain("import { useCollectionFields } from './useCollectionFields';");
   });
 });

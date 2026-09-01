@@ -411,6 +411,42 @@
   padding: 0;
 }
 
+/* ------------------------------------------------------------------ */
+/* The collection loop's token inserter                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The buttons that drop {{title}}, {{image}}, {{field:price}} into a loop card's
+ * blocks. Grouped by the slot they fill (a heading, a picture, a link), each group a
+ * label over a row of chips that wrap. The chips are the shared .ed-btn shrunk to a
+ * chip: a token is a small, low-stakes action a client fires several of, so the full
+ * 44px control would make the group a wall. They keep .ed-btn's hover and press.
+ */
+.tgse-tokens__group { margin-top: var(--ed-2); }
+.tgse-tokens__group + .tgse-tokens__group { margin-top: var(--ed-3); }
+
+.tgse-tokens__slot {
+  display: block;
+  margin-bottom: var(--ed-1);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink-2);
+}
+
+.tgse-tokens__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-1);
+}
+
+.tgse-tokens__chip.ed-btn {
+  min-height: 28px;
+  padding: 0 var(--ed-2);
+  border-radius: var(--ed-r-sm);
+  font-size: var(--ed-text-xs);
+  font-weight: 500;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ed-btn { transition: none; }
   .ed-btn:active:not(:disabled) { transform: none; }

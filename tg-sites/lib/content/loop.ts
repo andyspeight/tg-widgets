@@ -179,3 +179,129 @@ export function expandLoop(
   }));
   return { ...(block as object), props: { ...props, columns: cells } } as unknown as Block;
 }
+
+// ---------------------------------------------------------------------------
+// The token catalogue: what the editor's inserter offers, kept beside resolveToken
+// ---------------------------------------------------------------------------
+
+/**
+ * What a token stands for, which decides where it belongs.
+ *
+ * A `picture` token is a source and belongs in an image's `src`; a `link` token is
+ * an address and belongs in a button's or an image's `href`; a `text` token is words
+ * and belongs in a heading, a paragraph, a label or an alt. The inserter uses this to
+ * offer the right tokens for the field a client is filling, rather than every token
+ * everywhere, which is how {{image}} would end up in a heading.
+ */
+export type LoopTokenKind = 'text' | 'picture' | 'link';
+
+/** One offer in the inserter: the token to write, a human label, and what it stands for. */
+export interface LoopToken {
+  /** The name inside the braces, e.g. `title` or `field:price`. */
+  name: string;
+  /** What the inserter shows a client. */
+  label: string;
+  kind: LoopTokenKind;
+}
+
+/**
+ * The fixed tokens every collection item has, in the order the inserter shows them.
+ *
+ * THE SAME SET resolveToken ABOVE ANSWERS. The two are pinned together by a test, so
+ * a token offered here always resolves and a token resolved there is always offered:
+ * the failure this guards is an inserter that writes `{{byline}}` onto a card that
+ * then renders blank because the resolver never learned that name.
+ */
+export const LOOP_FIXED_TOKENS: readonly LoopToken[] = [
+  { name: 'title', label: 'Title', kind: 'text' },
+  { name: 'summary', label: 'Summary', kind: 'text' },
+  { name: 'author', label: 'Author', kind: 'text' },
+  { name: 'date', label: 'Date', kind: 'text' },
+  { name: 'tags', label: 'Tags', kind: 'text' },
+  { name: 'image', label: 'Picture', kind: 'picture' },
+  { name: 'alt', label: 'Picture description', kind: 'text' },
+  { name: 'link', label: 'Link to the entry', kind: 'link' },
+];
+
+/** The names of the fixed tokens, for the test that pins the catalogue to the resolver. */
+export const LOOP_FIXED_TOKEN_NAMES: readonly string[] = LOOP_FIXED_TOKENS.map((token) => token.name);
+
+/**
+ * A collection's declared fields as tokens: `field:key`, one per definition.
+ *
+ * An image field becomes a `picture` token (it holds a second picture, a map or a
+ * deck plan) so the inserter offers it for an image source; everything else is words.
+ * A longtext field is included: it is words a card can carry, even if it is not a
+ * facts-line fact. See fieldFacts, which drops longtext from the facts row for a
+ * different reason (length), not from the tokens.
+ */
+export function fieldTokens(defs: readonly FieldDef[]): LoopToken[] {
+  return defs.map((def) => ({
+    name: `field:${def.key}`,
+    label: def.label,
+    kind: def.kind === 'image' ? 'picture' : 'text',
+  }));
+}
+
+/** Every token the inserter can offer for a collection: the fixed set then its fields. */
+export function loopTokens(defs: readonly FieldDef[] = []): LoopToken[] {
+  return [...LOOP_FIXED_TOKENS, ...fieldTokens(defs)];
+}
+
+/** Wrap a token name in its braces, the exact form the binding engine reads. */
+export function tokenText(name: string): string {
+  return `{{${name}}}`;
+}
+
+/**
+ * Where a token can go in one block: a prop that accepts data, and which KINDS of
+ * token belong in it.
+ *
+ * A block has one or two such slots. A heading takes words in its `html`; an image
+ * takes a picture in its `src` and words in its `alt`; a button takes a link in its
+ * `href` and words in its `label`. The inserter draws one group per target and offers
+ * only the tokens whose kind fits, so a client never drops `{{image}}` into a heading
+ * or `{{title}}` into an image source.
+ */
+export interface LoopTokenTarget {
+  /** The prop the token is written into. */
+  prop: string;
+  /** What the group is called in the inserter. */
+  label: string;
+  /** Which token kinds this prop accepts. */
+  kinds: readonly LoopTokenKind[];
+  /** True when the prop holds HTML (a token there is escaped): the inserter APPENDS
+   *  rather than replaces, since rich text is usually a token amongst fixed words. */
+  html?: boolean;
+}
+
+/**
+ * Which props of a block accept tokens, by block type.
+ *
+ * Covers the block types a designed card is actually built from. A type not listed
+ * takes no tokens (the inserter shows nothing for it), which is the safe default: a
+ * divider or a spacer has no data to bind, and a block we have not thought about
+ * should not be handed a half-working control.
+ */
+const LOOP_TARGETS: Record<string, readonly LoopTokenTarget[]> = {
+  heading: [{ prop: 'html', label: 'Heading', kinds: ['text'], html: true }],
+  text: [{ prop: 'html', label: 'Text', kinds: ['text'], html: true }],
+  image: [
+    { prop: 'src', label: 'Picture', kinds: ['picture'] },
+    { prop: 'alt', label: 'Picture description', kinds: ['text'] },
+  ],
+  button: [
+    { prop: 'href', label: 'Link', kinds: ['link'] },
+    { prop: 'label', label: 'Button label', kinds: ['text'] },
+  ],
+};
+
+/** The token slots a block type offers, or none for a block that binds no data. */
+export function loopTargetsFor(blockType: string): readonly LoopTokenTarget[] {
+  return LOOP_TARGETS[blockType] ?? [];
+}
+
+/** Can this block type carry any token at all? What the inserter's presence keys off. */
+export function blockTakesTokens(blockType: string): boolean {
+  return loopTargetsFor(blockType).length > 0;
+}

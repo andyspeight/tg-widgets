@@ -16,16 +16,11 @@
  * pane the field list and each choice field's own options, and the client picks
  * "Board basis is Half board" from two dropdowns rather than typing a key.
  *
- * FETCHED ONCE FOR THE WHOLE EDITOR, not once per block. The promise is held at
- * module scope, so a page carrying four collection grids makes one request. It is
- * never refetched: a client who adds a field on the Collections screen is on
- * another screen, and coming back reloads this one.
+ * The one fetch lives in useCollectionFields (fetched once for the whole editor,
+ * shared with the loop card's token inserter), so a page carrying both makes one
+ * request rather than one per pane.
  */
 
-import { useEffect, useState } from 'react';
-
-import { listCollectionsAction } from '../../app/actions/collections';
-import type { Collection } from '../../lib/db/collections';
 import {
   canFilter,
   canSort,
@@ -33,6 +28,7 @@ import {
   type FilterOp,
 } from '../../lib/content/collection-filter';
 import type { FieldDef } from '../../lib/content/collection-fields';
+import { useCollectionFields } from './useCollectionFields';
 
 /** What each operator is called in front of a client. */
 const OP_LABEL: Record<FilterOp, string> = {
@@ -43,37 +39,6 @@ const OP_LABEL: Record<FilterOp, string> = {
   before: 'is before',
   after: 'is after',
 };
-
-let pending: Promise<Collection[]> | null = null;
-
-function loadCollections(): Promise<Collection[]> {
-  if (!pending) {
-    pending = listCollectionsAction()
-      .then((result) => (result.ok ? result.data : []))
-      // A failure answers with nothing rather than throwing: the controls then
-      // say the collection has no fields, which is the same calm state as a
-      // collection that genuinely declares none.
-      .catch(() => []);
-  }
-  return pending;
-}
-
-function useCollectionFields(collectionKey: string): { fields: FieldDef[]; ready: boolean } {
-  const [all, setAll] = useState<Collection[] | null>(null);
-
-  useEffect(() => {
-    let live = true;
-    void loadCollections().then((list) => {
-      if (live) setAll(list);
-    });
-    return () => {
-      live = false;
-    };
-  }, []);
-
-  const found = all?.find((c) => c.key === collectionKey);
-  return { fields: found?.fields ?? [], ready: all !== null };
-}
 
 export function ListingFilterFields({
   collectionKey,
