@@ -645,6 +645,8 @@
       + '.tgvg-ev-main{min-width:0;}'
       + '.tgvg-ev-t{font-size:14px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
       + '.tgvg-ev-m{font-size:12px;color:var(--tgvg-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+      + '.tgvg-ev-btns{display:flex;flex-direction:column;gap:5px;align-items:stretch;}'
+      + '.tgvg-ev-btns .tgvg-btn{justify-content:center;}'
       + '.tgvg-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;font-size:13px;'
       + 'font-weight:650;color:var(--tgvg-on-accent);background:var(--tgvg-accent);border-radius:10px;'
       + 'text-decoration:none;white-space:nowrap;}'
@@ -789,17 +791,21 @@
             + '<div class="tgvg-ev-main"><div class="tgvg-ev-t">' + esc(e.title || 'Event') + '</div>'
             + '<div class="tgvg-ev-m">' + esc(mon) + (meta.length ? ' · ' + meta.join(' · ') : '') + '</div></div>'
             + (usable.length
-              ? (usable[0].stay
-                ? '<button type="button" class="tgvg-btn" data-stay="' + esc(usable[0].stay) + '"'
-                  + ' aria-haspopup="dialog">'
-                  + esc(usable[0].short || c.bookLabel || 'Book') + icon(kindIcon(usable[0].kind)) + '</button>'
-                : usable[0].fly
-                ? '<button type="button" class="tgvg-btn" data-fly="' + esc(usable[0].fly) + '"'
-                  + ' aria-haspopup="dialog">'
-                  + esc(usable[0].short || c.bookLabel || 'Book') + icon(kindIcon(usable[0].kind)) + '</button>'
-                : '<a class="tgvg-btn" href="' + esc(safeUrl(usable[0].url)) + '" target="_blank" rel="noopener noreferrer">'
-                  + esc((usable[0].kind === 'ticket' ? c.bookLabel : usable[0].short)
-                    || usable[0].short || 'Book') + icon(kindIcon(usable[0].kind)) + '</a>')
+              ? '<div class="tgvg-ev-btns">' + usable.map(function (o) {
+                var label = usable.length === 1 && o.kind === 'ticket'
+                  ? (c.bookLabel || o.short || 'Book')
+                  : (o.short || c.bookLabel || 'Book');
+                if (o.stay) {
+                  return '<button type="button" class="tgvg-btn" data-stay="' + esc(o.stay) + '"'
+                    + ' aria-haspopup="dialog">' + esc(label) + icon(kindIcon(o.kind)) + '</button>';
+                }
+                if (o.fly) {
+                  return '<button type="button" class="tgvg-btn" data-fly="' + esc(o.fly) + '"'
+                    + ' aria-haspopup="dialog">' + esc(label) + icon(kindIcon(o.kind)) + '</button>';
+                }
+                return '<a class="tgvg-btn" href="' + esc(safeUrl(o.url)) + '" target="_blank"'
+                  + ' rel="noopener noreferrer">' + esc(label) + icon(kindIcon(o.kind)) + '</a>';
+              }).join('') + '</div>'
               : '');
           out += '</div>';
         }
