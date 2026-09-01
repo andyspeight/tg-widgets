@@ -1,5 +1,5 @@
 /**
- * Travelgenix Weather Widget v1.1.0
+ * Travelgenix Weather Widget v1.1.1
  * Self-contained, embeddable destination weather widget.
  * Zero dependencies. Shadow DOM isolation. Works on any website via a single script tag.
  *
@@ -86,7 +86,7 @@
     } catch (e) { /* fall through */ }
     return '/api/destination-content';
   })();
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
 
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; the load method consumes it. Carries its
@@ -415,7 +415,12 @@
 
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       color: var(--tgw-text);
-      background: var(--tgw-bg);
+      /* The root is a transparent wrapper — only the .tgw-card inside it paints a
+         background. A solid fill here put an opaque square behind the card's
+         rounded corners, so on any coloured host page the corners showed white
+         (or dark) triangles instead of the page. The --tgw-bg token is kept: the
+         climate toggle still uses it as its "page colour" cutout in dark mode. */
+      background: transparent;
       line-height: 1.5;
       /* Respond to the WIDGET's own width, not the browser window. Embedded on a
          customer page the widget often sits in a column far narrower than the
