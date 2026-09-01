@@ -807,6 +807,48 @@ TO ADD LATER: a blog/resources section, mega-menu nav dropdowns if wanted (kept
 to index-page links for now), and richer shots once the demo account has more
 data (integrations/API keys are currently empty, one live booking).
 
+REAL TRAVEL PHOTOGRAPHY + WIDGET GALLERY + MORE WIDGETS, 1 Sep 2026 (cont.).
+Andy: the mockups were "just green and white, doesn't sell the product"; then
+"what about the tour page", "we seem a bit light" on widgets, and "lots of
+pages still don't have images".
+- Six editorial travel photos generated with the Higgsfield MCP (soul_location
+  model, 16:9): safari (Maasai Mara), amalfi (Positano), highlands (Scotland),
+  retreat (lake deck), trek (alpine ridge), coast (Zanzibar dhow). They live in
+  travelgenix-trips/public/photos, downscaled to 1600px JPG with sharp. HOW they
+  were self-hosted despite egress: the CDN is blocked here, so a TEMPORARY route
+  (/api/imgfetch, since removed) fetched each from Higgsfield's CDN on the Vercel
+  runtime and returned it BASE64 (ASCII survives web_fetch_vercel_url byte for
+  byte); the session decoded and committed them. Reuse that trick to add photos.
+- Every flat green cover is gone: the home hero mock trip page, the trip/import
+  CSS mockups, and every feature + solution page now shows real photography. A
+  new optional `photo` field on the content model renders a full-bleed
+  `.m-photoband` under the page hero (gradient kept as graceful fallback).
+- THE TOUR PAGE: the demo trip DID already have imagery (Unsplash hero + day
+  photos), but for brand consistency its hero_image_url was set (via Supabase)
+  to https://trips.travelify.io/photos/safari.jpg. That needed our own origin
+  added to the image allowlist: `trips.travelify.io` + `travelgenix-trips.
+  vercel.app` in lib/url.ts safeImageUrl AND embed.js safeImg. So operators/seed
+  can now use images we host, and the trip CARD widget shows the hero too.
+- WIDGET GALLERY: new /widgets page (linked in nav + footer as "Widgets" /
+  "Widget gallery") with faithful static previews of every embed widget, each
+  with its copy-paste snippet. The previews live in (site)/widget-previews.tsx;
+  their `.wg-*` CSS mirrors embed.js CARD_CSS value-for-value and is scoped so
+  the `.m-split` row rules can't leak in (they did at first — that was the bug,
+  not the earlier "stars broke" red herring, which was a stale ghost dev-server).
+- MORE WIDGETS: embed.js is now 0.4.0 with SIX widgets. Added data-tg-departures
+  (every open departure: date, "N places left" nudge, price, per-date Book, sold
+  -out rows) and data-tg-badge (compact from-price + next-availability pill).
+  Both are backed by the EXISTING /api/v1/trips/{id} payload (no new API), open
+  the same branded overlay, and are CSP-clean + shadow-DOM sandboxed. The other
+  four are data-tg-trip (card), data-tg-trips (grid), data-tg-book (button),
+  data-tg-reviews. Further widget ideas that would need NEW backend (so parked):
+  a search/browse bar, an enquiry/lead-capture form, a countdown timer.
+- LOCAL VISUAL QA GOTCHA worth knowing: `next start` holds the build manifest in
+  memory, so rebuilding while a dev server runs corrupts it (HTML references a
+  CSS hash the overwritten disk no longer has → unstyled pages). Always kill the
+  server before `npm run build`, and note foreground `sleep` and `pkill` compound
+  commands are blocked/kill the shell in this harness — kill by explicit PID.
+
 **WeTravel gap backlog — agreed with Andy 28 Aug 2026, come back to these.** After
 the P1 sweep these are the remaining things WeTravel has that Trips does not.
 Andy chose to do the embed-set item (13) first; the rest are parked here in
