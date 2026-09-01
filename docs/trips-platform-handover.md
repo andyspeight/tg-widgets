@@ -742,6 +742,32 @@ claim (checkout still isn't wired). FOLLOW-UPS: self-serve signup + Stripe onboa
 privacy) linked from the footer; a real hero image if wanted; and the Framer
 corporate-site product SECTION is separate (see docs/trips-website-brief.md).
 
+**Marketing site expanded to WeTravel scale, 1 Sep 2026 (cont.).** Andy: "add
+pages and make it much richer, as many pages as the WeTravel site." Grown from 3
+pages to ~26, architected data-first so it scales by adding entries, not files:
+`src/app/(site)/content.ts` holds 10 FEATURES and 5 SOLUTIONS as data; one dynamic
+route each (`/features/[slug]`, `/solutions/[slug]`, both statically generated via
+generateStaticParams) renders them through a shared `content-page.tsx` template
+(page hero, alternating split rows with CSS product panels — no external images —
+a benefits grid, CTA), with `/features` and `/solutions` card-grid indexes.
+Feature pages: payments, trip-pages, bookings, registration, traveller-app,
+widgets, ai-import, integrations, white-label, reporting. Solution pages:
+travel-agents, tour-operators, retreats-wellness, school-group-trips,
+adventure-active. Standalone: `/compare/wetravel` (a factual comparison table),
+`/about`, `/contact` (reuses the demo lead form), `/faq` (10 Q&As), and
+`/legal/terms` + `/legal/privacy` — the legal pages carry a visible "draft for
+review" banner and MUST be reviewed by Andy/legal before go-live, not shipped
+as-is. Nav gained Features / Who it is for / Pricing / vs WeTravel; the footer is
+now a full sitemap built from the content data. site.css gained a section library
+(split rows, CSS panels, benefit grid, stat strip, quote, card index, comparison
+table, prose) all under the `.m` scope on the `--tg-*` tokens, responsive to 320px.
+Copy stays true to what is built (money = the Stripe-Connect model, not a
+live-checkout claim). 215 tests green, typecheck + build clean, all 15
+feature/solution pages prerender. TO ADD LATER: real screenshots in place of the
+CSS panels, a blog/resources section, and mega-menu nav dropdowns if wanted (kept
+to index-page links for now — robust and accessible). Adding a page = add a data
+entry in content.ts (feature/solution) or a new route file for a bespoke page.
+
 **WeTravel gap backlog — agreed with Andy 28 Aug 2026, come back to these.** After
 the P1 sweep these are the remaining things WeTravel has that Trips does not.
 Andy chose to do the embed-set item (13) first; the rest are parked here in
