@@ -221,6 +221,9 @@ function buildRenderOpts(config) {
       logoUrl: c.logoUrl,
       supportEmail: c.supportEmail,
       supportPhone: c.supportPhone,
+      // Contact visibility toggle — forwarded so resolveBrand() can hide phone +
+      // email across the PDF. Undefined for older configs → renderer defaults true.
+      showContact: c.showContact,
       colors: {
         // New 6-colour model the editor saves (topBar, hero, accent, labels,
         // titles, text). These must be forwarded verbatim: the editor preview
