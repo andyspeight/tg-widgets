@@ -157,7 +157,8 @@
     "test:offer-notes-box": "node test/offer-notes-box-smoke.mjs",
     "test:offer-import-merge": "node test/offer-import-merge-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
-    "build:events-snapshot": "node scripts/build-events-snapshot.mjs"
+    "build:events-snapshot": "node scripts/build-events-snapshot.mjs",
+    "test:weather-transparent": "node test/weather-transparent-root-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
