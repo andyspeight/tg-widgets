@@ -903,6 +903,11 @@ function resolveBrand(opts) {
       ? b.logoUrl.trim() : '',
     supportEmail: (b.supportEmail && String(b.supportEmail).trim()) || '',
     supportPhone: (b.supportPhone && String(b.supportPhone).trim()) || '',
+    // Contact visibility (Aug 2026): a client can hide phone + email everywhere on
+    // the PDF (the header block AND the agent footer) when they'd rather not show
+    // an agent's direct details. Default true; only an explicit false hides them,
+    // so every existing saved config renders exactly as before.
+    showContact: b.showContact !== false,
     colors: { topBar, hero, accent, labels, titles, text, link },
     // Embed Download/Email button colours (used by widget-quote-pdf.js, not the
     // PDF itself). Kept here so a single config drives both.
@@ -1158,6 +1163,7 @@ function renderQuoteHTML(input, opts) {
       ${brand.tagline ? `<div class="brand-tag">${esc(brand.tagline)}</div>` : ''}
     </div>
     ${(() => {
+      if (!brand.showContact) return '';
       const phone = brand.supportPhone || q.contactTelNo || '';
       const email = brand.supportEmail || q.contactEmail || '';
       if (!phone && !email) return '';
@@ -1207,15 +1213,15 @@ function renderQuoteHTML(input, opts) {
         <div class="agent-name">${esc(agent.name)}</div>
         <div class="agent-role">${esc(agent.role || 'Travel Consultant')}</div>
       </div>
-      <div class="agent-contact">
+      ${brand.showContact && (agent.email || agent.phone) ? `<div class="agent-contact">
         ${agent.email ? `<div>${esc(agent.email)}</div>` : ''}
         ${agent.phone ? `<div>${esc(agent.phone)}</div>` : ''}
-      </div>
+      </div>` : ''}
     </div>` : ''}
   </main>
 
   <footer class="foot">
-    <div><strong>${esc(brand.name)}</strong>${[esc(brand.supportPhone || q.contactTelNo || ''), esc(brand.supportEmail || q.contactEmail || '')].filter(Boolean).map(x => ' &middot; ' + x).join('')}</div>
+    <div><strong>${esc(brand.name)}</strong>${(brand.showContact ? [esc(brand.supportPhone || q.contactTelNo || ''), esc(brand.supportEmail || q.contactEmail || '')] : []).filter(Boolean).map(x => ' &middot; ' + x).join('')}</div>
     <div>Prices are subject to availability at the time of booking. This quote is for information only and does not constitute a confirmed booking.</div>
   </footer>
 
