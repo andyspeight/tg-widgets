@@ -384,9 +384,12 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
   const rowCount = preset.rows.length;
   const rowHeight = (1 - gap * (rowCount - 1)) / rowCount;
 
-  // Only heroes carry photographs in their previews, which keeps the picker's
-  // calls to the photo library to the one tab that wants them. A running count
-  // of pictures gives each image in a hero a different subject from the palette.
+  // Heroes and galleries carry photographs in their previews: a hero is a photo
+  // with words on it and a gallery is a wall of photos, so both preview grey would
+  // read as broken. Every other category stays wireframe unless a block named a
+  // `photo` of its own, which keeps the picker's calls to the photo library to the
+  // presets that want them. A running count gives each picture a different subject.
+  const isPhotographic = preset.category === 'hero' || preset.category === 'gallery';
   const isHero = preset.category === 'hero';
   let imageIndex = 0;
 
@@ -435,16 +438,16 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
          * A PICTURE WITH A SEARCH TERM CARRIES IT ONTO THE BAR, so the preview
          * can draw a photograph in it. An explicit `photo` on the block wins
          * anywhere, because the insert will fetch exactly that picture and the
-         * preview is the promise the insert keeps; a hero picture with none is
-         * handed one from the palette by position. Anything else stays a grey
-         * frame, which keeps the picker's photo-library calls to the presets
+         * preview is the promise the insert keeps; a hero or gallery picture with
+         * none is handed one from the palette by position. Anything else stays a
+         * grey frame, which keeps the picker's photo-library calls to the presets
          * that opted in. Counted per picture rather than per bar, because a
          * gallery is several bars of one picture idea sharing a subject.
          */
         const picture = spec.type === 'image' || spec.type === 'video' || spec.type === 'gallery';
         const explicit = typeof spec.photo === 'string' && spec.photo.trim() ? spec.photo.trim() : '';
         const query = picture
-          ? explicit || (isHero ? heroPhotoQuery(preset.id, imageIndex) : undefined)
+          ? explicit || (isPhotographic ? heroPhotoQuery(preset.id, imageIndex) : undefined)
           : spec.type === 'cards' && explicit
             ? cardPreviewQuery(spec, explicit)
             : undefined;

@@ -150,6 +150,16 @@ export function sectionPhotoTargets(
   const targets: PhotoTarget[] = [];
   const isHero = preset.category === 'hero';
   /*
+   * THE CATEGORIES THAT PHOTOGRAPH WITHOUT NAMING A SUBJECT. A hero is a
+   * photograph with words on it, and a gallery is a wall of photographs; both are
+   * pointless empty, so a picture in either draws from the shared palette when the
+   * preset and the page name none. Every other category keeps the "empty on
+   * purpose" rule: a picture there stays a "choose an image" prompt unless the
+   * preset opted it in with an explicit `photo`. This is a FALLBACK below the page
+   * subject, so a themed page still steers the gallery to its own place.
+   */
+  const isPhotographic = isHero || preset.category === 'gallery';
+  /*
    * WHETHER THIS SECTION WAS DESIGNED TO CARRY A BACKGROUND AT ALL.
    *
    * Decided once, from the preset, because it also decides what the override
@@ -198,7 +208,7 @@ export function sectionPhotoTargets(
          * The generic hero fallback comes last, as it always did.
          */
         const steer = !designedBackground && subject && !subjectSpent ? subject : '';
-        const query = explicit || steer || (isHero ? heroPhotoQuery(preset.id, imageIndex) : '');
+        const query = explicit || steer || (isPhotographic ? heroPhotoQuery(preset.id, imageIndex) : '');
         if (steer && query === steer) subjectSpent = true;
         imageIndex += 1;
 

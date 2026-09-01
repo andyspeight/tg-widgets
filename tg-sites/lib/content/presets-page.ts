@@ -28,12 +28,24 @@
  * A `photo` QUERY IS THE ONE SANCTIONED EXCEPTION, and it is not a baked
  * picture: it is a search term resolved fresh at insert, into the client's own
  * media, credited and swappable (see PresetBlock.photo and lib/content/
- * photo-plan.ts). Heroes carried them first; the picture-led feature and CTA
- * presets carry them now, so a page built from a template arrives photographed
- * rather than as a wall of grey frames. Queries stay on scenery and travel
- * things, never on people: a stock face presenting as the client's team or
- * customers would be inventing a fact, so the team and testimonial presets keep
- * their empty frames.
+ * photo-plan.ts). A preset author writes one where a picture names a SPECIFIC
+ * thing (the CTA's planning desk, a feature's harbour), and it wins over any
+ * page subject because it was chosen on purpose.
+ *
+ * TWO CATEGORIES PHOTOGRAPH WITHOUT NAMING ONE: heroes, and (since 1 Sep 2026,
+ * Andy) the whole GALLERY category. A picture in either draws a travel subject
+ * from the shared palette when the preset and the page name none, so those
+ * layouts preview and insert photographed rather than as a wall of grey frames.
+ * It is a FALLBACK, not an override: a page with a subject of its own still
+ * steers the gallery (a St Lucia page gets St Lucia), which is what keeps an
+ * AI-built page on theme. See heroPhotoQuery and the `isPhotographic` check in
+ * both presets.ts (the preview) and photo-plan.ts (the fill).
+ *
+ * The one thing a picture never draws is a PERSON: a stock face presenting as
+ * the client's team or customers would be inventing a fact, so the team and
+ * testimonial presets keep their empty frames, and the blank category (neutral
+ * by design) keeps its "choose an image" prompt. The whole point is a real feel
+ * of the layout that the client then swaps for their own.
  */
 
 import type { SectionPreset } from './preset-types';

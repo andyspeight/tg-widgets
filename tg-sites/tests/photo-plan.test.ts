@@ -431,4 +431,38 @@ describe('galleries are filled frame by frame', () => {
     );
     expect(frames.length).toBe(4);
   });
+
+  /*
+   * THE GALLERY CATEGORY PHOTOGRAPHS EVEN WITH NO SUBJECT (Andy, 1 Sep 2026), so a
+   * gallery a client drops from the picker arrives with real travel pictures rather
+   * than the "Add some images" prompt. It is a fallback below the page subject: the
+   * test above shows a subject still steers it, this one shows the palette fills in
+   * when there is none.
+   */
+  it('fills a gallery from the palette when the page names no subject', () => {
+    const grid = presetById('gallery-grid')!;
+    const frames = sectionPhotoTargets(grid, 0).filter((target) => target.place.kind === 'gallery');
+    expect(frames.length).toBeGreaterThan(0);
+    // A real travel term from the shared palette, not empty.
+    for (const frame of frames) expect(frame.query).toBeTruthy();
+  });
+
+  it('fills a gallery-category single picture from the palette too, not just gallery blocks', () => {
+    // "One wide photograph" is an image block in the gallery category: it draws the
+    // fallback the same way, so the category photographs whichever block it uses.
+    const wide = presetById('gallery-single-wide')!;
+    const images = sectionPhotoTargets(wide, 0).filter((target) => target.place.kind === 'image');
+    expect(images.length).toBe(1);
+    expect(images[0].query).toBeTruthy();
+  });
+
+  it('leaves a non-photographic category empty with no subject, keeping "empty on purpose"', () => {
+    // The blank "Picture beside words" is not hero or gallery, so its picture stays a
+    // prompt unless the preset opted in with an explicit photo. Nothing to fill.
+    const blank = presetById('blank-image-and-words')!;
+    const pictures = sectionPhotoTargets(blank, 0).filter(
+      (target) => target.place.kind === 'image' || target.place.kind === 'gallery',
+    );
+    expect(pictures).toEqual([]);
+  });
 });

@@ -57,11 +57,17 @@ export async function buildDesignedSectionAction(input: unknown): Promise<Design
   const section = buildPresetSection(preset);
 
   /*
-     * A gallery stays the client's to choose in the editor. The frame-fill
-     * exists for the AI page path, where nobody has chosen yet; on a designed
-     * insert it would replace that choice with generic stock.
-     */
-    const plan = sectionPhotoTargets(preset, 0).filter((target) => target.place.kind !== 'gallery');
+   * EVERY PICTURE THE PRESET ASKS FOR, GALLERIES INCLUDED. Andy, 1 Sep 2026:
+   * the designed layouts should arrive with real images in them so a client gets
+   * a feel for the thing, and swaps what they do not want. Galleries used to be
+   * held back here ("the client's to choose"), but a freshly inserted gallery
+   * nobody has touched is exactly the case the AI page path already fills, for
+   * the same reason: an empty grid ships the author-facing "Add some images"
+   * prompt rather than a design. Every frame is one swap from the client's own,
+   * so it fills like the rest now. Best effort throughout: no photo library, no
+   * store, no match, and the frame stays empty and image-ready.
+   */
+  const plan = sectionPhotoTargets(preset, 0);
   if (plan.length > 0) {
     await fillPlannedPhotos(tenantId, plan, [section]);
   }
