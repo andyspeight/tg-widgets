@@ -236,6 +236,7 @@
   function flyPicker(btn, tpl) {
     if (flyState && flyState.btn === btn) { flyClose(); return; }
     flyClose();
+    stayClose();
     if (!FLY_TPL_OK.test(tpl)) return;
 
     var input = el('input', { class: 'ev-fly-in', type: 'text', autocomplete: 'off',
@@ -329,6 +330,145 @@
     input.focus();
   }
 
+  // ── Ticket + hotel: the stay calendar ───────────────────────────────────
+  // Pick check-in, pick check-out, and the booking opens with fr, to and dur
+  // rewritten to that stay. The stay must cover the event night; arrive up
+  // to a week before, leave up to two weeks after.
+  var STAY_BEFORE = 7;
+  var STAY_AFTER = 14;
+  var STAY_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  var STAY_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  var stayState = null;
+
+  function stayIso(d) {
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function stayParse(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function stayShift(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+
+  function stayClose() {
+    var s = stayState;
+    if (!s) return;
+    stayState = null;
+    if (s.box.parentNode) s.box.parentNode.removeChild(s.box);
+    document.removeEventListener('keydown', s.onKey, true);
+    document.removeEventListener('click', s.onDoc, true);
+    if (s.btn && s.btn.isConnected) try { s.btn.focus(); } catch (e) { /* gone */ }
+  }
+
+  function stayPicker(btn, url) {
+    if (stayState && stayState.btn === btn) { stayClose(); return; }
+    stayClose();
+    flyClose();
+    if (!FLY_TPL_OK.test(url)) return;
+    var fr = /[?&]fr=(\d{4}-\d{2}-\d{2})/.exec(url);
+    var eventDay = fr && stayParse(fr[1]);
+    if (!eventDay) return;
+    var now = new Date();
+    var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var minIn = stayShift(eventDay, -STAY_BEFORE);
+    if (minIn < today) minIn = today;
+    if (eventDay < minIn) return;
+    var maxOut = stayShift(eventDay, STAY_AFTER);
+
+    var box = el('div', { class: 'ev-fly', role: 'dialog', 'aria-label': 'Choose your stay' });
+    document.body.appendChild(box);
+    var br = btn.getBoundingClientRect();
+    var width = 300;
+    box.style.width = width + 'px';
+    box.style.left = Math.max(8, Math.min(br.left + window.pageXOffset,
+      window.pageXOffset + document.documentElement.clientWidth - width - 8)) + 'px';
+    if (window.innerHeight - br.bottom < 380 && br.top > 380) {
+      box.style.top = (br.top + window.pageYOffset - 6) + 'px';
+      box.style.transform = 'translateY(-100%)';
+    } else {
+      box.style.top = (br.bottom + window.pageYOffset + 6) + 'px';
+    }
+
+    var state = { box: box, btn: btn, checkIn: null,
+      view: new Date(eventDay.getFullYear(), eventDay.getMonth(), 1) };
+    stayState = state;
+
+    function canIn(d) { return d >= minIn && d <= eventDay; }
+    function canOut(d) { return !!state.checkIn && d > eventDay && d <= maxOut; }
+
+    function go(out) {
+      var nights = Math.round((out - state.checkIn) / 86400000);
+      if (nights < 1 || nights > STAY_BEFORE + STAY_AFTER) return;
+      var u;
+      try { u = new URL(url); } catch (e) { return; }
+      u.searchParams.set('fr', stayIso(state.checkIn));
+      u.searchParams.set('to', stayIso(out));
+      u.searchParams.set('dur', String(nights));
+      var finalUrl = u.toString();
+      if (!FLY_TPL_OK.test(finalUrl)) return;
+      stayClose();
+      window.open(finalUrl, '_blank', 'noopener');
+    }
+
+    function draw() {
+      clear(box);
+      var y = state.view.getFullYear();
+      var mo = state.view.getMonth();
+      var startCol = (new Date(y, mo, 1).getDay() + 6) % 7;
+      var dim = new Date(y, mo + 1, 0).getDate();
+      var canPrev = new Date(y, mo, 1) > new Date(minIn.getFullYear(), minIn.getMonth(), 1);
+      var canNext = new Date(y, mo + 1, 1) <= new Date(maxOut.getFullYear(), maxOut.getMonth(), 1);
+
+      box.appendChild(el('div', { class: 'ev-fly-t', text: 'When would you like to stay?' }));
+      var prev = el('button', { class: 'ev-stay-nav', type: 'button', 'aria-label': 'Previous month',
+        disabled: !canPrev, text: '\u2039' });
+      prev.addEventListener('click', function () {
+        state.view = new Date(state.view.getFullYear(), state.view.getMonth() - 1, 1); draw();
+      });
+      var next = el('button', { class: 'ev-stay-nav', type: 'button', 'aria-label': 'Next month',
+        disabled: !canNext, text: '\u203a' });
+      next.addEventListener('click', function () {
+        state.view = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 1); draw();
+      });
+      box.appendChild(el('div', { class: 'ev-stay-head' }, [
+        prev, el('span', { class: 'ev-stay-month', text: STAY_MONTHS[mo] + ' ' + y }), next,
+      ]));
+
+      var grid = el('div', { class: 'ev-stay-grid' });
+      STAY_DAYS.forEach(function (dw) { grid.appendChild(el('span', { class: 'ev-stay-dow', text: dw })); });
+      for (var b = 0; b < startCol; b++) grid.appendChild(el('span'));
+      for (var day = 1; day <= dim; day++) {
+        (function (d) {
+          var ok = state.checkIn ? (canOut(d) || canIn(d)) : canIn(d);
+          var cls = 'ev-stay-day'
+            + (+d === +eventDay ? ' is-event' : '')
+            + (state.checkIn && +d === +state.checkIn ? ' is-pick'
+              : (state.checkIn && d > state.checkIn && d <= eventDay ? ' is-span' : ''));
+          if (!ok) { grid.appendChild(el('span', { class: cls + ' is-off', text: String(d.getDate()) })); return; }
+          var cell = el('button', { class: cls, type: 'button', text: String(d.getDate()) });
+          cell.addEventListener('click', function () {
+            if (state.checkIn && canOut(d)) { go(d); return; }
+            if (canIn(d)) { state.checkIn = d; draw(); }
+          });
+          grid.appendChild(cell);
+        }(new Date(y, mo, day)));
+      }
+      box.appendChild(grid);
+      box.appendChild(el('div', { class: 'ev-fly-note', text: state.checkIn
+        ? 'Check-in ' + formatDate(stayIso(state.checkIn)) + '. Now pick your check-out day.'
+        : 'Pick your check-in day. The event night is ringed.' }));
+    }
+
+    state.onKey = function (e) { if (e.key === 'Escape') stayClose(); };
+    state.onDoc = function (e) {
+      if (!box.contains(e.target) && e.target !== btn && !btn.contains(e.target)) stayClose();
+    };
+    document.addEventListener('keydown', state.onKey, true);
+    document.addEventListener('click', state.onDoc, true);
+    draw();
+  }
+
   function eventCard(ev, links) {
     links = links || {};
     var p = dateParts(ev.startDate);
@@ -390,6 +530,18 @@
     (ev.bookingOptions || []).forEach(function (o) {
       if (o.kind === 'ticket' || (!o.url && !o.urlTemplate)) return;
       if (o.url && /^https:\/\/dl\.tvllnk\.com\/deeplink\//.test(o.url)) {
+        if (o.kind === 'ticket-hotel') {
+          var stayBtn = el('button', {
+            class: 'ev-btn ev-btn-secondary',
+            type: 'button',
+            'aria-haspopup': 'dialog',
+            title: o.label || o.short,
+            'aria-label': (o.label || o.short) + ': ' + titleText,
+          }, [o.short || o.label, icon('bed')]);
+          stayBtn.addEventListener('click', function () { stayPicker(stayBtn, o.url); });
+          actions.push(stayBtn);
+          return;
+        }
         actions.push(el('a', {
           class: 'ev-btn ev-btn-secondary',
           href: o.url,
