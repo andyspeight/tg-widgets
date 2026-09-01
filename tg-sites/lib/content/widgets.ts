@@ -154,9 +154,12 @@ export function widgetScriptUrl(tag: unknown): string | null {
  * would put two containers and two inits of the same widget on one page.
  *
  * Popup carries a large surface (eight layouts, six content types, page and
- * device targeting, scheduling). The panel exposes the common announcement use
- * of it: the content, one trigger, a button and how often it shows. The rest of
- * its targeting is a natural home for the personalisation work later.
+ * device targeting, scheduling). The panel exposes the announcement content use
+ * of it, plus the full trigger vocabulary the widget already understands (load,
+ * delay, scroll, exit intent, inactivity, pageviews, a click on a named element),
+ * a page rule (show on or hide from named paths) and how often it shows. Who sees
+ * it rides the shared audience control (personalisation v2). The content types
+ * beyond the announcement, and scheduling, keep the widget's own defaults.
  */
 export const FLOATING_WIDGET_TAGS = ['backtotop', 'whatsapp', 'dealbar', 'loader', 'popup'] as const;
 

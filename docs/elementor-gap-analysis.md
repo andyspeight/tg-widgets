@@ -35,9 +35,10 @@ motion layer Elementor cannot touch. On the powers that make Elementor Pro worth
 paying for we are behind in four places, and one of them is the same strategic point
 the Duda analysis raised from the other direction.
 
-1. There is no way to design one card and repeat it over a collection. Collection
-   cards come out of a single fixed template, so the travel data that is our whole
-   advantage can only wear one look.
+1. ~~There is no way to design one card and repeat it over a collection.~~ **SHIPPED
+   (1 Sep 2026): the Collection loop block. Design one card from the block library
+   with tokens where an item's data goes, repeated over a collection query, server
+   rendered. See lib/content/loop.ts and the loop block.**
 2. A form stops at an email and a stored row. No webhook, no CRM, no mailing list.
 3. No element can carry its own CSS or a class of its own, so the one thing a
    determined client cannot do is the last five per cent of a design.
@@ -230,9 +231,11 @@ changes, not because Elementor's pricing page lists them.
 2. **Form actions.** A webhook plus one or two named integrations. Small, and it is
    the difference between a lead sitting on a dashboard and a lead landing in the
    client's CRM.
-3. **Expose the popup engine properly.** Trigger and rule authoring on the popup we
-   already own, using the `armTrigger` vocabulary that is already written. Mostly
-   surfacing rather than building.
+3. ~~**Expose the popup engine properly.**~~ **SHIPPED (1 Sep 2026): the popup panel
+   now authors the full trigger vocabulary (load, delay, scroll, exit intent,
+   inactivity, pageviews, a click on a named element) and a page rule (show on or
+   hide from named paths), on top of the audience targeting it already had. See
+   lib/settings/floating-widgets.ts and FloatingWidgetsPanel.tsx.**
 
 **Explicitly parked:** per-element custom CSS beyond a staff tool, arbitrary nesting,
 custom breakpoints, multilingual, the store, memberships, a plugin API. Building any

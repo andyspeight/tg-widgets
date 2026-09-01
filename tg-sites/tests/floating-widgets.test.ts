@@ -143,6 +143,77 @@ describe('what the shell emits', () => {
   });
 });
 
+describe('the popup exposes the full trigger vocabulary (Elementor gap #3)', () => {
+  const popupConfig = (popup: Record<string, unknown>) =>
+    enabledFloatingWidgets(parseFloatingWidgets({ popup: { enabled: true, ...popup } }))[0].config;
+
+  it('accepts the three triggers the panel used to hide, and rejects nonsense to load', () => {
+    for (const trigger of ['load', 'time', 'scroll', 'exit-intent', 'inactivity', 'pageviews', 'click']) {
+      expect(parseFloatingWidgets({ popup: { trigger } }).popup.trigger).toBe(trigger);
+    }
+    expect(parseFloatingWidgets({ popup: { trigger: 'telepathy' } }).popup.trigger).toBe('load');
+  });
+
+  it('holds the widget floor of five seconds for the inactivity trigger', () => {
+    // The widget raises anything below 5 anyway, so the stored value must not read lower.
+    expect(parseFloatingWidgets({ popup: { inactivitySeconds: 2 } }).popup.inactivitySeconds).toBe(5);
+    expect(parseFloatingWidgets({ popup: { inactivitySeconds: 45 } }).popup.inactivitySeconds).toBe(45);
+    expect(popupConfig({ trigger: 'inactivity', inactivitySeconds: 20 }).triggerInactivitySeconds).toBe(20);
+  });
+
+  it('emits the pageviews count the pageviews trigger reads', () => {
+    expect(parseFloatingWidgets({ popup: { pageviews: 0 } }).popup.pageviews).toBe(1);
+    expect(popupConfig({ trigger: 'pageviews', pageviews: 3 }).triggerPageviews).toBe(3);
+  });
+
+  it('keeps a plausible click selector and drops a dangerous one', () => {
+    expect(parseFloatingWidgets({ popup: { clickSelector: '.book-now' } }).popup.clickSelector).toBe('.book-now');
+    expect(parseFloatingWidgets({ popup: { clickSelector: 'a#cta[data-x="1"]' } }).popup.clickSelector).toBe('a#cta[data-x="1"]');
+    // A brace or angle bracket is not a simple selector, so it becomes empty (never fires).
+    expect(parseFloatingWidgets({ popup: { clickSelector: '<script>' } }).popup.clickSelector).toBe('');
+    expect(parseFloatingWidgets({ popup: { clickSelector: 'a{}' } }).popup.clickSelector).toBe('');
+  });
+
+  it('emits the selector only for a click trigger', () => {
+    expect(popupConfig({ trigger: 'click', clickSelector: '.cta' }).triggerSelector).toBe('.cta');
+    // Set the selector but choose another trigger: the selector does not travel.
+    expect(popupConfig({ trigger: 'load', clickSelector: '.cta' }).triggerSelector).toBe('');
+  });
+});
+
+describe('the popup page rule becomes the widget include/exclude lists', () => {
+  const popupConfig = (popup: Record<string, unknown>) =>
+    enabledFloatingWidgets(parseFloatingWidgets({ popup: { enabled: true, ...popup } }))[0].config;
+
+  it('shows everywhere by default, with both lists empty', () => {
+    const config = popupConfig({});
+    expect(config.pageInclude).toEqual([]);
+    expect(config.pageExclude).toEqual([]);
+  });
+
+  it('fills only the list the chosen mode names', () => {
+    const only = popupConfig({ pageMode: 'include', pagePaths: ['/offers', '/deals'] });
+    expect(only.pageInclude).toEqual(['/offers', '/deals']);
+    expect(only.pageExclude).toEqual([]);
+
+    const except = popupConfig({ pageMode: 'exclude', pagePaths: ['/checkout'] });
+    expect(except.pageExclude).toEqual(['/checkout']);
+    expect(except.pageInclude).toEqual([]);
+  });
+
+  it('cleans the path list: blanks and duplicates out, a pasted string split', () => {
+    // The panel stores an array, but a pasted newline string is accepted and split.
+    const parsed = parseFloatingWidgets({ popup: { pageMode: 'include', pagePaths: '/a\n/a\n\n/b' } }).popup;
+    expect(parsed.pagePaths).toEqual(['/a', '/b']);
+  });
+
+  it('never emits an empty path, which would match every page as a prefix', () => {
+    // The live editor can hold a blank line mid-typing; the emit must still be safe.
+    const config = popupConfig({ pageMode: 'include', pagePaths: ['/offers', ''] });
+    expect(config.pageInclude).toEqual(['/offers']);
+  });
+});
+
 describe('the registry that turns a tag into a url', () => {
   it('builds a script url on the widget origin for every floating tag', () => {
     for (const tag of FLOATING_WIDGET_TAGS) {
@@ -240,6 +311,21 @@ describe('the popup can target an audience (v2 slice H)', () => {
     const panel = read('components', 'settings', 'FloatingWidgetsPanel.tsx');
     expect(panel).toContain('<AudienceField');
     expect(panel).toContain('setPopup({ audience })');
+  });
+
+  it('the panel authors the new triggers and the page rule', () => {
+    const panel = read('components', 'settings', 'FloatingWidgetsPanel.tsx');
+    // The three triggers the panel used to hide, each with its own follow-up field.
+    expect(panel).toContain("['inactivity', 'After they go quiet']");
+    expect(panel).toContain("['pageviews', 'After a few pages']");
+    expect(panel).toContain("['click', 'When they click something']");
+    expect(panel).toContain("pu.trigger === 'inactivity'");
+    expect(panel).toContain("pu.trigger === 'pageviews'");
+    expect(panel).toContain("pu.trigger === 'click'");
+    // The page rule: a mode and the paths it reads, joined and split around the array.
+    expect(panel).toContain('setPopup({ pageMode:');
+    expect(panel).toContain('value={pu.pagePaths.join');
+    expect(panel).toContain("setPopup({ pagePaths: text.split('\\n') })");
   });
 });
 

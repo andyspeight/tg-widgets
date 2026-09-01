@@ -104,6 +104,46 @@ function transparentOrHex(value: unknown, fallback: string): string {
   return colour(value, fallback);
 }
 
+/**
+ * A CSS selector for the click trigger, restricted to a safe SIMPLE-selector charset.
+ *
+ * The widget hands this to `element.closest(sel)`, which throws on invalid syntax,
+ * so both the engine and the popup wrap the call in try/catch and a bad selector
+ * simply never fires. This keeps the obviously wrong out one step earlier: letters,
+ * digits, spaces and the punctuation a class/id/attribute/tag selector needs, and
+ * nothing that would carry a brace, a semicolon or an angle bracket. Empty when it
+ * is not a plausible selector, which the widget reads as "never fires".
+ */
+const SIMPLE_SELECTOR = /^[a-z0-9\s,.#>_\-[\]="':()*]+$/i;
+function cssSelector(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  const t = value.trim().slice(0, 120);
+  return t && SIMPLE_SELECTOR.test(t) ? t : '';
+}
+
+/**
+ * A list of page paths for the popup's include/exclude rule.
+ *
+ * Accepts the array the panel stores OR a newline/comma string (an import, a paste),
+ * cleaning each entry to one line, dropping blanks and duplicates, and capping the
+ * count so a runaway list cannot bloat the inline config. The widget matches each
+ * against `pathname + search`, exact or as a prefix, so `/offers` covers `/offers`
+ * and `/offers/summer` both; the values are left as the client typed them.
+ */
+function pathList(value: unknown): string[] {
+  const raw = typeof value === 'string' ? value.split(/[\n,]+/) : Array.isArray(value) ? value : [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    const path = line(item, 200);
+    if (!path || seen.has(path)) continue;
+    seen.add(path);
+    out.push(path);
+    if (out.length >= 40) break;
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Back to top
 // ---------------------------------------------------------------------------
@@ -334,8 +374,18 @@ function parseLoader(value: unknown): LoaderSettings {
 // ---------------------------------------------------------------------------
 
 const POPUP_LAYOUTS = ['centered', 'slide-in', 'floating-card', 'top-bar', 'bottom-bar'] as const;
-const POPUP_TRIGGERS = ['load', 'time', 'scroll', 'exit-intent'] as const;
+/*
+ * THE FULL TRIGGER VOCABULARY THE WIDGET ALREADY UNDERSTANDS. The popup's runtime
+ * (public/widget-popup.js, delegating to public/tgse-rules.js armTrigger) fires on
+ * any of these; the panel used to expose only the first four. 'inactivity' fires
+ * after a stretch of no mouse, key or scroll; 'pageviews' after the visitor has
+ * seen a few pages this session; 'click' when they click an element you name. The
+ * value names match the widget's own config exactly, 'exit-intent' hyphen included.
+ */
+const POPUP_TRIGGERS = ['load', 'time', 'scroll', 'exit-intent', 'inactivity', 'pageviews', 'click'] as const;
 const POPUP_FREQUENCIES = ['session', 'visitor', 'every-visit', 'every-n-days'] as const;
+/** Where the popup is allowed to show: everywhere, only some pages, or all but some. */
+const POPUP_PAGE_MODES = ['all', 'include', 'exclude'] as const;
 
 export interface PopupSettings {
   enabled: boolean;
@@ -349,8 +399,17 @@ export interface PopupSettings {
   /** Seconds; only used by the 'time' trigger. Emitted to the widget in ms. */
   delaySeconds: number;
   scrollPercent: number;
+  /** Seconds of no activity before an 'inactivity' trigger fires. The widget's floor is 5. */
+  inactivitySeconds: number;
+  /** Pages seen this session before a 'pageviews' trigger fires. */
+  pageviews: number;
+  /** A CSS selector for the 'click' trigger, e.g. `.book-now`. Empty never fires. */
+  clickSelector: string;
   frequency: (typeof POPUP_FREQUENCIES)[number];
   frequencyDays: number;
+  /** Which pages the popup may show on, and the paths that mode reads. */
+  pageMode: (typeof POPUP_PAGE_MODES)[number];
+  pagePaths: string[];
   brand: string;
   accent: string;
   overlay: boolean;
@@ -369,8 +428,13 @@ const DEFAULT_POPUP: PopupSettings = {
   trigger: 'load',
   delaySeconds: 5,
   scrollPercent: 50,
+  inactivitySeconds: 30,
+  pageviews: 2,
+  clickSelector: '',
   frequency: 'session',
   frequencyDays: 7,
+  pageMode: 'all',
+  pagePaths: [],
   brand: '#1B2B5B',
   accent: '#00B4D8',
   overlay: true,
@@ -389,8 +453,15 @@ function parsePopup(value: unknown): PopupSettings {
     trigger: oneOf(o.trigger, POPUP_TRIGGERS, 'load'),
     delaySeconds: num(o.delaySeconds, 0, 120, 5),
     scrollPercent: num(o.scrollPercent, 1, 100, 50),
+    // Match the widget's own floor of 5 seconds, so a value it would raise cannot
+    // be stored looking lower than it will behave.
+    inactivitySeconds: num(o.inactivitySeconds, 5, 600, 30),
+    pageviews: num(o.pageviews, 1, 50, 2),
+    clickSelector: cssSelector(o.clickSelector),
     frequency: oneOf(o.frequency, POPUP_FREQUENCIES, 'session'),
     frequencyDays: num(o.frequencyDays, 1, 90, 7),
+    pageMode: oneOf(o.pageMode, POPUP_PAGE_MODES, 'all'),
+    pagePaths: pathList(o.pagePaths),
     brand: colour(o.brand, '#1B2B5B'),
     accent: colour(o.accent, '#00B4D8'),
     overlay: bool(o.overlay, true),
@@ -556,8 +627,22 @@ export function enabledFloatingWidgets(fw: FloatingWidgetsSettings): EnabledFloa
         // trigger; a scroll or exit popup ignores it.
         triggerDelay: p.trigger === 'time' ? p.delaySeconds * 1000 : 0,
         triggerScrollPercent: p.scrollPercent,
+        // The widget reads only the field its active trigger needs, so the two
+        // numbers travel always (like the scroll percent) and the selector only
+        // for a click trigger, where an empty one would silently never fire.
+        triggerInactivitySeconds: p.inactivitySeconds,
+        triggerPageviews: p.pageviews,
+        triggerSelector: p.trigger === 'click' ? p.clickSelector : '',
         frequency: p.frequency,
         frequencyDays: p.frequencyDays,
+        // The page rule, as the widget's own two lists: the chosen mode fills one
+        // and leaves the other empty, and 'all' leaves both empty (show everywhere).
+        // Blanks are filtered here as well as in the parser, because the editor's
+        // live preview emits straight from the in-memory settings, where a path
+        // the client is still typing can be an empty line, and an empty pattern
+        // matches every page (startsWith '') which would quietly mean "everywhere".
+        pageInclude: p.pageMode === 'include' ? p.pagePaths.filter(Boolean) : [],
+        pageExclude: p.pageMode === 'exclude' ? p.pagePaths.filter(Boolean) : [],
         brand: p.brand,
         accent: p.accent,
         overlay: p.overlay,

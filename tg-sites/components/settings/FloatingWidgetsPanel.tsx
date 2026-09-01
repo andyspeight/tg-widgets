@@ -266,6 +266,9 @@ export function FloatingWidgetsPanel({
                 ['time', 'After a delay'],
                 ['scroll', 'After scrolling down'],
                 ['exit-intent', 'As they go to leave'],
+                ['inactivity', 'After they go quiet'],
+                ['pageviews', 'After a few pages'],
+                ['click', 'When they click something'],
               ]}
             />
             {pu.trigger === 'time' && (
@@ -273,6 +276,22 @@ export function FloatingWidgetsPanel({
             )}
             {pu.trigger === 'scroll' && (
               <Num label="After scrolling (% of page)" value={pu.scrollPercent} min={1} max={100} onChange={(scrollPercent) => setPopup({ scrollPercent })} />
+            )}
+            {pu.trigger === 'inactivity' && (
+              <Num label="After idle for (seconds)" value={pu.inactivitySeconds} min={5} max={600} onChange={(inactivitySeconds) => setPopup({ inactivitySeconds })} />
+            )}
+            {pu.trigger === 'pageviews' && (
+              <Num label="After this many pages" value={pu.pageviews} min={1} max={50} onChange={(pageviews) => setPopup({ pageviews })} />
+            )}
+            {pu.trigger === 'click' && (
+              <Text
+                label="Element to watch"
+                value={pu.clickSelector}
+                placeholder=".book-now"
+                maxLength={120}
+                hint="A CSS selector for the thing that opens it, like .book-now or #newsletter. Leave blank and nothing opens it."
+                onChange={(clickSelector) => setPopup({ clickSelector })}
+              />
             )}
 
             <Select
@@ -288,6 +307,30 @@ export function FloatingWidgetsPanel({
             />
             {pu.frequency === 'every-n-days' && (
               <Num label="Days between showings" value={pu.frequencyDays} min={1} max={90} onChange={(frequencyDays) => setPopup({ frequencyDays })} />
+            )}
+
+            {/* WHERE IT SHOWS. The widget matches each path against the page address,
+                exactly or as a prefix, so /offers covers /offers and everything under
+                it. 'all' is the common case and hides the list. */}
+            <Select
+              label="Which pages"
+              value={pu.pageMode}
+              onChange={(pageMode) => setPopup({ pageMode: pageMode as typeof pu.pageMode })}
+              options={[
+                ['all', 'Every page'],
+                ['include', 'Only these pages'],
+                ['exclude', 'Every page except these'],
+              ]}
+            />
+            {pu.pageMode !== 'all' && (
+              <Area
+                label={pu.pageMode === 'include' ? 'Show only on these paths' : 'Hide on these paths'}
+                value={pu.pagePaths.join('\n')}
+                rows={3}
+                maxLength={2000}
+                hint="One path per line, like /offers or /blog. A path also covers everything under it."
+                onChange={(text) => setPopup({ pagePaths: text.split('\n') })}
+              />
             )}
 
             <Colour label="Brand colour" value={pu.brand} onChange={(brand) => setPopup({ brand })} />
@@ -376,12 +419,14 @@ function Area({
   onChange,
   rows,
   maxLength,
+  hint,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   rows: number;
   maxLength: number;
+  hint?: string;
 }) {
   return (
     <div className="tv-field">
@@ -393,6 +438,7 @@ function Area({
         maxLength={maxLength}
         onChange={(event) => onChange(event.target.value)}
       />
+      {hint && <p className="tv-field__help">{hint}</p>}
     </div>
   );
 }
