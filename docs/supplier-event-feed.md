@@ -264,9 +264,19 @@ at once with no change to any widget.
 
 `st=TicketAccommodation`: the flight package minus the flight leg — same
 pin, same mandatory anchor, `frd=0&dur=1` verbatim, and nothing the feed
-does not already know, so it comes back `ready` with a finished url and no
-chooser. Probe-verified live before the button shipped, on app 384 and the
-demo app 250 alike (same probe script as the flight package).
+does not already know, so the API serves it `ready` with a finished url.
+Probe-verified live before the button shipped, on app 384 and the demo app
+250 alike (same probe script as the flight package).
+
+The BUTTON, though, asks for the stay first (Andy, 1 Sep 2026): "+ Hotel"
+opens a small calendar anchored to itself — pick check-in, pick check-out —
+and the widget rewrites `fr` (check-in), `to` (check-out) and `dur`
+(nights) on the verified link before opening it. The stay must cover the
+event night; check-in from a week before the event, check-out up to two
+weeks after. Multi-night links (a 3-night case spanning the event) were
+probe-verified 302 on both apps before shipping. The calendar is the
+`stay*` functions, stamped into all six widgets beside the airport chooser
+(one popover open at a time), and once in events-explorer.js.
 
 ### The flight package (ticket + accommodation + flight, live 24 Aug 2026)
 

@@ -15,6 +15,10 @@
  * 302d too — our built link on 384 and 250, and Andy's example — so the
  * hotel button shipped verified as well.
  *
+ * Third run, 1 Sep 2026: multi-night stays (fr=check-in, to=check-out,
+ * dur=nights, a 3-night case spanning the event) 302d on both apps, so the
+ * stay calendar shipped verified.
+ *
  * The three cases: our built link on Andy's app (the example's own account),
  * the same link on the demo 250 app the demos run on, and the __ORG__
  * placeholder form as a control (expected to fail — surfaces must always
