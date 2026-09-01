@@ -763,10 +763,26 @@ now a full sitemap built from the content data. site.css gained a section librar
 table, prose) all under the `.m` scope on the `--tg-*` tokens, responsive to 320px.
 Copy stays true to what is built (money = the Stripe-Connect model, not a
 live-checkout claim). 215 tests green, typecheck + build clean, all 15
-feature/solution pages prerender. TO ADD LATER: real screenshots in place of the
-CSS panels, a blog/resources section, and mega-menu nav dropdowns if wanted (kept
-to index-page links for now — robust and accessible). Adding a page = add a data
-entry in content.ts (feature/solution) or a new route file for a bespoke page.
+feature/solution pages prerender. Adding a page = add a data entry in content.ts
+(feature/solution) or a new route file for a bespoke page.
+
+VISUALS, 1 Sep (cont.): each feature/solution split now shows a realistic CSS
+product MOCKUP (src/app/(site)/mockups.tsx: trip page, console trips, bookings
+table, reports with stat tiles + bar chart, booking form, registration,
+traveller hub with checklist, integrations, branding preview, embed snippet,
+AI import), chosen per page via a `visuals` pair in content.ts and rendered by
+the shared template. Drawn in markup + CSS (mk- classes), no external images.
+REAL SCREENSHOTS were requested but are NOT capturable in-session: the deployed
+app is egress-blocked from a browser here (org policy, hard block) and there is
+no local Docker/Postgres to run it against; running it locally needs the
+TRIPS_SUPABASE_SERVICE_ROLE_KEY, which the Supabase MCP will not hand out. To
+swap in real screenshots later: run the app locally with that key set in a
+gitignored .env.local (localhost triggers preview mode = acts as the first
+operator with real data), screenshot with Playwright against localhost (which
+bypasses the egress block), drop the PNGs in public/ and replace the <Mockup>
+in a feature page's visuals slot with an <img>. Or capture from the live console
+and drop the files in. TO ADD LATER: a blog/resources section, mega-menu nav
+dropdowns if wanted (kept to index-page links for now).
 
 **WeTravel gap backlog — agreed with Andy 28 Aug 2026, come back to these.** After
 the P1 sweep these are the remaining things WeTravel has that Trips does not.
