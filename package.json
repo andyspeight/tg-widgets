@@ -28,6 +28,7 @@
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
     "test:quote-pdf-email-guard": "node test/quote-pdf-email-guard-smoke.mjs",
     "test:quote-pdf-links": "node test/quote-pdf-links-smoke.mjs",
+    "test:quote-pdf-contact": "node test/quote-pdf-contact-toggle-smoke.mjs",
     "test:worldmap-resilience": "node test/worldmap-offers-resilience-smoke.mjs",
     "test:airport-content-widgetid": "node test/airport-content-widgetid-smoke.mjs",
     "test:airport-status-gate": "node test/airport-status-gate-smoke.mjs",
