@@ -829,6 +829,13 @@ pages still don't have images".
   added to the image allowlist: `trips.travelify.io` + `travelgenix-trips.
   vercel.app` in lib/url.ts safeImageUrl AND embed.js safeImg. So operators/seed
   can now use images we host, and the trip CARD widget shows the hero too.
+  THEN (Andy: "bring the itinerary day photos onto our own imagery") EIGHT more
+  Kenya photos were generated (day-nairobi, day-rhino, day-elephants, mara-lions,
+  mara-sunset, giraffes, balloon, safari-vehicle) and the trip content's image
+  URLs (days, gallery, the "Your safari vehicle" feature) repointed to /photos
+  via a chained jsonb_set on gt_trips.content. The live tour page now carries
+  ZERO Unsplash — every image is ours. Reuse the same generate→imgfetch-base64→
+  sharp→commit→jsonb_set flow to re-image any other seed trip.
 - WIDGET GALLERY: new /widgets page (linked in nav + footer as "Widgets" /
   "Widget gallery") with faithful static previews of every embed widget, each
   with its copy-paste snippet. The previews live in (site)/widget-previews.tsx;
