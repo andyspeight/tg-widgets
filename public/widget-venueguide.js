@@ -683,7 +683,7 @@
       + '.tgvg-media{grid-template-columns:minmax(0,1fr);}'
       + '.tgvg-facts{grid-template-columns:minmax(0,1fr);}'
       + '.tgvg-ev{grid-template-columns:44px minmax(0,1fr);}'
-      + '.tgvg-ev .tgvg-btn{grid-column:2;justify-self:start;}'
+      + '.tgvg-ev .tgvg-ev-btns{grid-column:2;justify-self:start;}'
       + '}'
       + pkgCss;
   }
