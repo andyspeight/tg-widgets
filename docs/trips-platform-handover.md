@@ -716,6 +716,32 @@ and pushed on its own commit. Migrations gt_008–gt_016. In order:
 
 The test suite is **169 green** (`node --test`), typecheck and build clean.
 
+**Public marketing site DONE 1 Sep 2026.** Until now trips.travelify.io/ redirected
+straight into the bare console — no public front door. Andy: "there is no website
+that sits in front of the console, look at WeTravel and build something similar."
+Built INTO the Trips Next.js app (his call — it literally sits in front of the
+console and shares the domain and SSO), a WeTravel-style marketing site as a route
+group `src/app/(site)`: nav + footer chrome scoped under a `.m` class so its styles
+never touch the console or the operator-branded trip pages, on the SAME `--tg-*`
+tokens as the console (light, teal accent) so the product reads as one thing.
+Pages: `/` home (hero with a CSS product shot, the three pillars, a 16-item feature
+grid, how-it-works, cost comparison with the honest range caveat, pricing teaser,
+FAQ, CTA band), `/pricing` (the four volume bands + free-trial line), `/demo` (a
+book-a-demo lead form). Sign in → id.travelify.io/signin; Get started → /demo
+(self-serve signup is NOT built — that's the go-live blocker, so the CTA is
+lead-capture for now, agents-first). gt_024 gt_leads stores every demo request
+reliably (email seam-independent), honeypot defeats basic bots, best-effort notify
+to TRIPS_LEADS_EMAIL. Followed travelgenix-design (SVG icons not emoji, one primary
+CTA, 44px targets, reduced-motion, responsive to 320px); light-only per the product's
+committed decision, which overrides the design skill's dark-mode default here.
+Live-verified: /pricing renders the four plans and the whole site chrome; the root
+redirect is gone. 215 tests green, typecheck + build clean. CLAIMS NOTE for Andy:
+the money copy is written to the locked Stripe-Connect MODEL, not a live-checkout
+claim (checkout still isn't wired). FOLLOW-UPS: self-serve signup + Stripe onboarding
+(so "Get started" can create an account, not just book a demo); legal pages (terms,
+privacy) linked from the footer; a real hero image if wanted; and the Framer
+corporate-site product SECTION is separate (see docs/trips-website-brief.md).
+
 **WeTravel gap backlog — agreed with Andy 28 Aug 2026, come back to these.** After
 the P1 sweep these are the remaining things WeTravel has that Trips does not.
 Andy chose to do the embed-set item (13) first; the rest are parked here in
