@@ -51,6 +51,8 @@
    */
   var ICON_PATHS = {
     ticket: 'M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z M13 5v14',
+    bed: 'M2 4v16 M2 8h18a2 2 0 0 1 2 2v10 M2 17h20 M6 8v9',
+    plane: 'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2Z',
     trophy: 'M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22 M14 14.66V17c0 .55.47.98.97 1.21 1.18.54 2.03 2.03 2.03 3.79 M18 2H6v7a6 6 0 0 0 12 0V2Z',
     pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
     music: 'M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
@@ -374,7 +376,7 @@
         rel: 'noopener noreferrer',
         title: ev.booking.note || 'Open this event in the booking engine',
         'aria-label': 'Book ' + titleText,
-      }, ['Book', icon('external')]));
+      }, ['Book', icon('ticket')]));
     } else {
       actions.push(el('span', {
         class: 'ev-btn ev-btn-secondary',
@@ -395,7 +397,7 @@
           rel: 'noopener noreferrer',
           title: o.label || o.short,
           'aria-label': (o.label || o.short) + ': ' + titleText,
-        }, [o.short || o.label]));
+        }, [o.short || o.label, icon(o.kind === 'ticket-hotel' ? 'bed' : 'plane')]));
         return;
       }
       if (o.status !== 'needs-origin') return;
@@ -407,7 +409,7 @@
         'aria-haspopup': 'dialog',
         title: o.label || o.short,
         'aria-label': (o.label || o.short) + ': ' + titleText,
-      }, [o.short || o.label]);
+      }, [o.short || o.label, icon('plane')]);
       flyBtn.addEventListener('click', function () { flyPicker(flyBtn, tpl); });
       actions.push(flyBtn);
     });

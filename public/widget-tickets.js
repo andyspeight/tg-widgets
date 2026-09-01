@@ -90,6 +90,9 @@
     clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 6v6l4 2',
     pin: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0ZM12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
     ext: 'M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6',
+    ticket: 'M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2ZM13 5v14',
+    bed: 'M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9',
+    plane: 'M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2Z',
     cal: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',
     warn: 'M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z',
   };
@@ -130,6 +133,13 @@
   var FLY_TPL_OK = /^https:\/\/dl\.tvllnk\.com\/deeplink\//;
   var FLY_IATA = /^[A-Z]{3}$/;
   var flyAirports = null;
+
+  /** The product each booking type sells, as its button icon. */
+  function kindIcon(kind) {
+    if (kind === 'ticket-hotel') return 'bed';
+    if (kind === 'ticket-flight-hotel') return 'plane';
+    return 'ticket';
+  }
 
   function flyTpl(o) {
     if (!o || o.status !== 'needs-origin' || typeof o.urlTemplate !== 'string') return '';
@@ -285,7 +295,7 @@
   }
 
   var FLY_CSS = '.tgtk-root{position:relative}'
-    + 'button.tgtk-btn{border:0;font:inherit;cursor:pointer}'
+    + 'button.tgtk-btn{appearance:none;-webkit-appearance:none;margin:0}'
     + '.tgtk-fly{position:absolute;z-index:40;background:#fff;color:#1a2733;border:1px solid #dde4ea;'
     + 'border-radius:12px;box-shadow:0 12px 32px rgba(10,30,50,.18);padding:12px;box-sizing:border-box;'
     + 'font-size:14px;line-height:1.4;text-align:left}'
@@ -625,12 +635,12 @@
           return '<button type="button" class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + '"'
             + ' data-fly="' + esc(o.fly) + '" aria-haspopup="dialog"'
             + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
-            + esc(label) + icon('ext') + '</button>';
+            + esc(label) + icon(kindIcon(o.kind)) + '</button>';
         }
         return '<a class="tgtk-btn' + (i > 0 ? ' tgtk-btn2' : '') + '"'
           + ' href="' + esc(safeUrl(o.url)) + '" target="_blank" rel="noopener noreferrer"'
           + ' aria-label="' + esc(label + ': ' + (ev.title || 'event')) + '">'
-          + esc(label) + icon('ext') + '</a>';
+          + esc(label) + icon(kindIcon(o.kind)) + '</a>';
       }).join('');
     } else {
       actions = '';
