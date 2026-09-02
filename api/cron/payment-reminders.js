@@ -63,7 +63,6 @@ import {
 import { renderReminderEmail } from '../_lib/payment-reminder-email.js';
 import { decideCharge, instalmentPosition } from '../pay-balance.js';
 import { sendViaSendGrid, buildFromField, isValidEmail } from '../_lib/sendgrid.js';
-import { DEMO_APP_ID } from '../_lib/travelify.js';
 
 const BATCH_SIZE = 25;
 
@@ -147,11 +146,13 @@ async function processRecord(record) {
   const emailsSent = Number.isFinite(f.EmailsSent) ? f.EmailsSent : 0;
   const isFollowUp = emailsSent > 0;
 
-  // A test app (PAYMENT_REMINDER_TEST_APP_IDS) is exempt from the two go-live
-  // gates below — the global send switch and the demo-app suppression — so the
-  // Travelify team can exercise the whole pipeline (e.g. with demo app 250)
-  // while every real client stays paused. Its send is otherwise completely
-  // real; only the recipient is forced to the test inbox (below).
+  // A test app (PAYMENT_REMINDER_TEST_APP_IDS) is exempt from the global send
+  // switch below, so the Travelify team can exercise the whole pipeline while
+  // every real client stays paused. Its send is otherwise completely real;
+  // only the recipient is forced to the test inbox (below). The demo app (250)
+  // is NOT specially suppressed: once sending is enabled it behaves like any
+  // client, gated only by its own My Booking opt-in toggle — it is a real test
+  // site. While sending is disabled it rests at the gate below like everyone.
   const isTestApp = isReminderTestApp(f.ApplicationId);
 
   // 3. Sending disabled → phase 1 resting state. An already-Sent row mid
@@ -163,9 +164,6 @@ async function processRecord(record) {
   }
 
   // 4. Email eligibility gates (each terminal, each auditable in Airtable).
-  if (String(f.ApplicationId) === DEMO_APP_ID && !isTestApp) {
-    return suppress('demo application — email suppressed');
-  }
   if (!isFollowUp) {
     // First email only: never turn a stale notification into a surprise.
     // Follow-ups are older than 48h by design — their trigger is the
