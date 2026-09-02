@@ -202,6 +202,13 @@ async function processRecord(record) {
   //    schedule snapshot taken at first send governs follow-ups; the
   //    client's current editor settings seed each new balance's cycle.
   const branding = await resolveReminderBranding(application);
+  // Per-client opt-in: the whole balance reminder email is OFF unless the client
+  // switched it on in their My Booking editor (not everyone wants it). This
+  // applies to test apps too — the demo client must also have it turned on — so
+  // test mode and this switch are independent controls that must BOTH be on.
+  if (!branding.schedule.enabled) {
+    return suppress('balance reminders are switched off for this client');
+  }
   const planned = (isFollowUp && Number.isFinite(f.EmailsPlanned) && f.EmailsPlanned > 0)
     ? f.EmailsPlanned : branding.schedule.count;
   const gapDays = (isFollowUp && Number.isFinite(f.GapDays) && f.GapDays > 0)

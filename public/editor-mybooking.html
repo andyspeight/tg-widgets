@@ -429,6 +429,14 @@
             <div class="field-help">The page on your website where this widget lives. Balance reminder emails link customers here to pay securely. Must start with https://.</div>
             <div class="field">
               <label>Balance reminder emails</label>
+              <select id="reminder-enabled">
+                <option value="off" selected>Off</option>
+                <option value="on">On</option>
+              </select>
+            </div>
+            <div class="field-help">Turn on to automatically email a customer when a balance is due on their booking. Off by default.</div>
+            <div class="field">
+              <label>Number of reminders</label>
               <select id="reminder-count">
                 <option value="1">1 email only</option>
                 <option value="2">2 emails</option>
@@ -647,7 +655,7 @@ import { renderEmailHtml } from '/_email-template.js';
       radius: 12,
       support: { email: '', phone: '' },
       pageUrl: '',
-      reminders: { count: 3, gapDays: 7 },
+      reminders: { enabled: false, count: 3, gapDays: 7 },
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
@@ -866,14 +874,19 @@ import { renderEmailHtml } from '/_email-template.js';
   });
 
   // ===== Balance reminder schedule =====
-  ['reminder-count', 'reminder-gap'].forEach(id => {
+  ['reminder-enabled', 'reminder-count', 'reminder-gap'].forEach(id => {
     document.getElementById(id).addEventListener('change', (e) => {
       if (!state.config.reminders || typeof state.config.reminders !== 'object') {
-        state.config.reminders = { count: 3, gapDays: 7 };
+        state.config.reminders = { enabled: false, count: 3, gapDays: 7 };
       }
-      const n = parseInt(e.target.value, 10);
-      if (id === 'reminder-count') state.config.reminders.count = Number.isFinite(n) ? n : 3;
-      else state.config.reminders.gapDays = Number.isFinite(n) ? n : 7;
+      if (id === 'reminder-enabled') {
+        state.config.reminders.enabled = e.target.value === 'on';
+      } else {
+        const n = parseInt(e.target.value, 10);
+        if (id === 'reminder-count') state.config.reminders.count = Number.isFinite(n) ? n : 3;
+        else state.config.reminders.gapDays = Number.isFinite(n) ? n : 7;
+      }
+      if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
     });
   });
 
@@ -1143,6 +1156,7 @@ import { renderEmailHtml } from '/_email-template.js';
       document.getElementById('support-email').value = state.config.support?.email || '';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
       document.getElementById('page-url').value = state.config.pageUrl || '';
+      document.getElementById('reminder-enabled').value = state.config.reminders?.enabled ? 'on' : 'off';
       document.getElementById('reminder-count').value = String(state.config.reminders?.count || 3);
       document.getElementById('reminder-gap').value = String(state.config.reminders?.gapDays || 7);
       document.getElementById('copy-cancel-email-msg').value = state.config.cancelEmailMessage || '';
