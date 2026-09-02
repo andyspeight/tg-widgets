@@ -48,6 +48,12 @@ export function formatMoney(amount, currency) {
   }
 }
 
+/** True when an ISO date (YYYY-MM-DD) is strictly before today (UTC). */
+export function isPastDate(iso) {
+  if (typeof iso !== 'string' || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return false;
+  return iso.slice(0, 10) < new Date().toISOString().slice(0, 10);
+}
+
 /** "Friday 15 August 2026" from an ISO date, or '' when unparseable. */
 export function formatLongDate(iso) {
   if (typeof iso !== 'string' || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return '';
@@ -121,7 +127,8 @@ function step(num, title, body) {
  * @param {{amount: number, currency: string, total?: number, paid?: number, outstanding: number, isInstalment?: boolean, remainingAmount?: number}} p.charge
  * @param {string} [p.dueDateIso]         YYYY-MM-DD
  * @param {string|null} p.payUrl          Booking page URL with the #tg-pay deep link, or null
- * @param {{n: number, of: number}} [p.sequence]  Which email in the chase this is (1-based) and how many are planned
+ * @param {boolean} [p.chase]             Chaser (reminderType BalanceChase): overdue wording when the due date is past
+ * @param {{n: number, of: number}} [p.sequence]  Legacy: which email in a chase this is. Unused now that each send is one email
  * @returns {{subject: string, preheader: string, html: string}}
  */
 // ── Client-authored copy ─────────────────────────────────────────────────────
@@ -191,11 +198,17 @@ function renderCustomReminder({ subject, preheader, bodyHtml, name, logoUrl, ord
 </body></html>`;
 }
 
-export function renderReminderEmail({ agency, customerFirstName, orderRef, charge, dueDateIso, payUrl, sequence, template, instalment }) {
+export function renderReminderEmail({ agency, customerFirstName, orderRef, charge, dueDateIso, payUrl, sequence, template, instalment, chase }) {
   const name = (agency && agency.name) || 'Your travel team';
   const money = formatMoney(charge.amount, charge.currency);
   const dueLong = formatLongDate(dueDateIso);
   const dueBy = dueLong ? ` by ${dueLong}` : '';
+  const dueOn = dueLong ? ` on ${dueLong}` : '';
+  // A chaser (reminderType BalanceChase): the balance is still unpaid after an
+  // earlier notice. When its due date is in the past it is presented as overdue
+  // ("was due on X") rather than "due by X".
+  const isChase = chase === true;
+  const overdue = isChase && isPastDate(dueDateIso);
   const first = typeof customerFirstName === 'string' && customerFirstName.trim()
     ? customerFirstName.trim() : '';
 
@@ -233,31 +246,43 @@ export function renderReminderEmail({ agency, customerFirstName, orderRef, charg
   const isFollowUp = seqN > 1;
   const isFinal = isFollowUp && seqN >= seqOf;
 
-  const subject = isFinal ? `Final reminder: ${money} is still due`
+  const subject = overdue ? `Reminder: your balance of ${money} is overdue`
+    : isChase ? `Reminder: your balance of ${money} is still due`
+    : isFinal ? `Final reminder: ${money} is still due`
     : isFollowUp ? `Reminder: your balance of ${money} is still due`
     : `Your balance of ${money} is due`;
-  const preheader = `A reminder from ${name}: ${money} is due${dueBy}${orderRef ? ` on booking ${orderRef}` : ''}. Paying online is secure and takes a couple of minutes.`;
+  const preheader = overdue
+    ? `A reminder from ${name}: ${money} is now overdue${dueOn}${orderRef ? ` on booking ${orderRef}` : ''}. Paying online is secure and takes a couple of minutes.`
+    : `A reminder from ${name}: ${money} is due${dueBy}${orderRef ? ` on booking ${orderRef}` : ''}. Paying online is secure and takes a couple of minutes.`;
 
-  const headline = isFinal
-    ? (first ? `${escHtml(first)}, a final reminder about your balance.` : 'A final reminder about your balance.')
-    : first ? `Hello ${escHtml(first)}, your balance is due.` : 'Your balance is due.';
+  const headline = overdue
+    ? (first ? `${escHtml(first)}, your balance is now overdue.` : 'Your balance is now overdue.')
+    : isChase
+      ? (first ? `Hello ${escHtml(first)}, a reminder about your balance.` : 'A reminder about your balance.')
+      : isFinal
+        ? (first ? `${escHtml(first)}, a final reminder about your balance.` : 'A final reminder about your balance.')
+        : first ? `Hello ${escHtml(first)}, your balance is due.` : 'Your balance is due.';
   const introRef = orderRef ? ` on your booking <strong style="color:${C.textPrimary};">${escHtml(orderRef)}</strong>` : ' on your booking';
   const contactTail = payUrl
     ? 'Paying online is secure and takes a couple of minutes.'
     : 'Get in touch using the details below and we will help you settle it.';
-  const intro = isFinal
-    ? `This is our final reminder from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid in the last day or two, thank you, and please ignore this email.`
-    : isFollowUp
-      ? `Just a gentle nudge from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid in the last day or two, please ignore this email.`
-      : `This is a friendly reminder from ${escHtml(name)} that a payment${introRef} is due${escHtml(dueBy)}. ${contactTail}`;
-  const eyebrowText = isFinal ? 'Final payment reminder' : 'Payment reminder';
+  const intro = overdue
+    ? `This is a reminder from ${escHtml(name)}: the payment${introRef} was due${escHtml(dueOn)} and is now overdue. ${contactTail} If you have already paid, thank you, and please ignore this email.`
+    : isChase
+      ? `Just a reminder from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid, please ignore this email.`
+      : isFinal
+        ? `This is our final reminder from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid in the last day or two, thank you, and please ignore this email.`
+        : isFollowUp
+          ? `Just a gentle nudge from ${escHtml(name)}: the payment${introRef} is still outstanding${escHtml(dueBy)}. ${contactTail} If you have already paid in the last day or two, please ignore this email.`
+          : `This is a friendly reminder from ${escHtml(name)} that a payment${introRef} is due${escHtml(dueBy)}. ${contactTail}`;
+  const eyebrowText = overdue ? 'Payment overdue' : isFinal ? 'Final payment reminder' : 'Payment reminder';
 
   // Cost card rows — only rows we genuinely know.
   let rows = '';
   if (Number.isFinite(charge.total) && charge.total > 0) rows += costRow('Total holiday cost', formatMoney(charge.total, charge.currency));
   if (Number.isFinite(charge.paid) && charge.paid > 0) rows += costRow('Paid so far', formatMoney(charge.paid, charge.currency));
   rows += costRow(charge.isInstalment ? 'Due now' : 'Balance due', money, { bold: true, topBorder: rows !== '' });
-  if (dueLong) rows += costRow('Due by', dueLong);
+  if (dueLong) rows += costRow(overdue ? 'Was due' : 'Due by', dueLong);
 
   const instalmentNote = (charge.isInstalment && Number.isFinite(charge.remainingAmount) && charge.remainingAmount > 0)
     ? `<tr><td colspan="2" style="padding:10px 0 2px;font-family:${FONT};font-size:12px;line-height:1.55;color:${C.textSecondary};">You can pay ${escHtml(money)} now and the remaining ${escHtml(formatMoney(charge.remainingAmount, charge.currency))} in later instalments, or settle the full balance in one go.</td></tr>`

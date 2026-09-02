@@ -434,29 +434,7 @@
                 <option value="on">On</option>
               </select>
             </div>
-            <div class="field-help">Turn on to automatically email a customer when a balance is due on their booking. Off by default.</div>
-            <div class="field">
-              <label>Number of reminders</label>
-              <select id="reminder-count">
-                <option value="1">1 email only</option>
-                <option value="2">2 emails</option>
-                <option value="3" selected>3 emails</option>
-                <option value="4">4 emails</option>
-                <option value="5">5 emails</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Days between reminders</label>
-              <select id="reminder-gap">
-                <option value="2">2 days</option>
-                <option value="3">3 days</option>
-                <option value="5">5 days</option>
-                <option value="7" selected>7 days</option>
-                <option value="10">10 days</option>
-                <option value="14">14 days</option>
-              </select>
-            </div>
-            <div class="field-help">How many balance reminder emails a customer receives and how far apart. Reminders stop automatically the moment the balance is paid, and the last one is worded as a final reminder.</div>
+            <div class="field-help">Turn on to email a customer when a balance is due on their booking. Reminders are sent when the booking system flags a balance, and stop automatically once it is paid. Off by default.</div>
           </div></div>
         </div>
 
@@ -688,7 +666,7 @@ import { renderEmailHtml } from '/_email-template.js';
       radius: 12,
       support: { email: '', phone: '' },
       pageUrl: '',
-      reminders: { enabled: false, count: 3, gapDays: 7 },
+      reminders: { enabled: false },
       reminderEmails: { interim: { subject: '', body: '' }, final: { subject: '', body: '' } },
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
@@ -907,21 +885,15 @@ import { renderEmailHtml } from '/_email-template.js';
     });
   });
 
-  // ===== Balance reminder schedule =====
-  ['reminder-enabled', 'reminder-count', 'reminder-gap'].forEach(id => {
-    document.getElementById(id).addEventListener('change', (e) => {
-      if (!state.config.reminders || typeof state.config.reminders !== 'object') {
-        state.config.reminders = { enabled: false, count: 3, gapDays: 7 };
-      }
-      if (id === 'reminder-enabled') {
-        state.config.reminders.enabled = e.target.value === 'on';
-      } else {
-        const n = parseInt(e.target.value, 10);
-        if (id === 'reminder-count') state.config.reminders.count = Number.isFinite(n) ? n : 3;
-        else state.config.reminders.gapDays = Number.isFinite(n) ? n : 7;
-      }
-      if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
-    });
+  // ===== Balance reminder opt-in =====
+  // A single on/off switch. Sending cadence is driven by the booking system
+  // (one email per balance it flags), so there is no count/gap setting here.
+  document.getElementById('reminder-enabled').addEventListener('change', (e) => {
+    if (!state.config.reminders || typeof state.config.reminders !== 'object') {
+      state.config.reminders = { enabled: false };
+    }
+    state.config.reminders.enabled = e.target.value === 'on';
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
   });
 
   // ===== Reminder email templates (per stage) =====
@@ -1248,8 +1220,6 @@ import { renderEmailHtml } from '/_email-template.js';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
       document.getElementById('page-url').value = state.config.pageUrl || '';
       document.getElementById('reminder-enabled').value = state.config.reminders?.enabled ? 'on' : 'off';
-      document.getElementById('reminder-count').value = String(state.config.reminders?.count || 3);
-      document.getElementById('reminder-gap').value = String(state.config.reminders?.gapDays || 7);
       reEnsure();
       document.getElementById('re-interim-subject').value = state.config.reminderEmails.interim.subject || '';
       document.getElementById('re-interim-body').value = state.config.reminderEmails.interim.body || '';

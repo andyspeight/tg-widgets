@@ -19,21 +19,14 @@
  *    normally processed within seconds; the cron is the guarantee, the kick
  *    is the latency optimisation. Swapping in a push queue later (QStash
  *    etc.) only means changing the kick — the contract stays.
- *  - IDEMPOTENCY = an atomic Redis SET NX EX claim on the natural key
- *    applicationId|orderKey|reminderType|dueDate, holding the original
- *    reference as its value so a duplicate can return it. Keying on the
- *    BALANCE (not the receipt day) means one record owns the whole chase:
- *    the client-configured follow-up schedule runs off that record, and
- *    however often the core re-pushes the same balance it gets 409 + the
- *    original reference. This settles the spec's open question: cadence is
- *    OURS, the core's push schedule is just the trigger. A caller-supplied
- *    Idempotency-Key header is honoured in preference when present.
- *    Storage backs Redis up:
- *    the endpoint checks Airtable for the key before every create — not
- *    only when Redis is down — because a record accepted DURING an outage
- *    has no claim, so after recovery a same-day retry looks new to Redis.
- *    Only a concurrent duplicate during an outage remains racy, and the
- *    core's daily cadence makes that vanishingly rare.
+ *  - NO DUPLICATE SUPPRESSION (Sep 2026). Travelify decides when a reminder
+ *    is warranted, so EVERY accepted request sends exactly one email; the
+ *    same order/amount/dueDate may be pushed repeatedly and each one sends.
+ *    Chasing is now caller-driven (Travelify re-pushes as BalanceChase),
+ *    replacing the old model where one record owned a multi-email chase.
+ *    The natural key applicationId|orderKey|reminderType|dueDate is still
+ *    computed and STORED on the record (IdempotencyKey field) for audit and
+ *    support correlation — it no longer gates whether we accept.
  *  - CALLER REGISTRY = the Clients table. applicationId resolves through
  *    lookupClientCredentialsByAppId (the same TravelifyAppId field the rest
  *    of the platform uses), so an unknown applicationId is rejected at the
@@ -50,7 +43,7 @@
 
 import crypto from 'node:crypto';
 import { sanitiseForFormula, lookupClientCredentialsByAppId } from '../_auth.js';
-import { claimNxEx, getString, del } from '../_redis.js';
+import { claimNxEx } from '../_redis.js';
 import { TRAVELIFY_ORIGIN, DEMO_APP_ID, DEMO_PUBLIC_KEY } from './travelify.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -58,12 +51,15 @@ export const REMINDERS_TABLE = 'tblHwa7PI2BSGjXZV';
 
 // Single source of truth for the reminder types the contract accepts. Extend
 // here AND in the Airtable ReminderType select together.
-export const REMINDER_TYPES = ['DepositBalance', 'FinalBalance'];
+//   DepositBalance — a deposit or instalment balance is due (first notice).
+//   FinalBalance   — the final balance is due.
+//   BalanceChase   — a chaser for a balance still unpaid after an earlier
+//                    notice. Rendered as an overdue chaser, and its dueDate
+//                    may be in the past. Added Sep 2026 at Travelify's request.
+export const REMINDER_TYPES = ['DepositBalance', 'FinalBalance', 'BalanceChase'];
 
 export const MAX_ATTEMPTS = 5;
 
-const IDEM_TTL_SECONDS = 60 * 24 * 60 * 60; // the claim spans the whole chase window for a balance; storage backs it beyond that
-const IDEM_PREFIX = 'payrem:idem:';
 const LOCK_PREFIX = 'payrem:lock:';
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
@@ -149,14 +145,6 @@ export function validateReminderPayload(body) {
   };
 }
 
-/** Optional caller-supplied Idempotency-Key header: printable, bounded. */
-export function validateCallerIdempotencyKey(v) {
-  if (typeof v !== 'string') return null;
-  const s = v.trim();
-  if (!s || s.length > 128 || !/^[\x21-\x7E]+$/.test(s)) return null;
-  return s;
-}
-
 // ── Caller registry (applicationId → owning client) ──────────────────────────
 
 /**
@@ -186,41 +174,13 @@ export async function resolveApplication(applicationId) {
 // ── Idempotency ──────────────────────────────────────────────────────────────
 
 /**
- * Natural key: application + order + reminder type + due date. One record
- * per BALANCE being chased, not per day: the whole reminder schedule (first
- * email plus client-configured follow-ups) lives on that one record, so the
- * core's daily re-push for the same balance is a duplicate (409 + original
- * reference) rather than the start of a second chase. A new balance cycle
- * (a different due date, or FinalBalance after DepositBalance) is a fresh
- * record. A caller-supplied Idempotency-Key header takes precedence.
+ * Natural key: application + order + reminder type + due date. Stored on each
+ * record for audit and support correlation. It no longer suppresses anything —
+ * every accepted request sends (chasing is caller-driven) — so several records
+ * can legitimately share a key (e.g. the same balance chased more than once).
  */
-export function buildIdempotencyKey(value, _receivedAt, callerKey) {
-  if (callerKey) return `hdr:${callerKey}`;
+export function buildIdempotencyKey(value) {
   return `${value.applicationId}|${value.orderKey}|${value.reminderType}|${value.dueDate || 'none'}`;
-}
-
-/**
- * Atomically claim the idempotency key, storing our reference as the value.
- * Returns one of:
- *   { state: 'new' }                          — claimed, proceed to record
- *   { state: 'duplicate', reference|null }    — already claimed; original ref if readable
- *   { state: 'unavailable' }                  — Redis can't answer; caller falls back
- */
-export async function claimIdempotency(idemKey, reference) {
-  const key = IDEM_PREFIX + idemKey;
-  const outcome = await claimNxEx(key, reference, IDEM_TTL_SECONDS);
-  if (outcome === 'set') return { state: 'new' };
-  if (outcome === 'exists') {
-    let original = null;
-    try { original = await getString(key); } catch { /* reference stays null */ }
-    return { state: 'duplicate', reference: typeof original === 'string' && original ? original : null };
-  }
-  return { state: 'unavailable' };
-}
-
-/** Best-effort release after a failed record write, so the core's retry isn't 409'd. */
-export async function releaseIdempotencyClaim(idemKey) {
-  try { await del(IDEM_PREFIX + idemKey); } catch { /* claim expires via TTL anyway */ }
 }
 
 /**
@@ -280,26 +240,24 @@ export async function createReminderRecord({ reference, value, idemKey, received
   if (value.dueDate) fields.DueDate = value.dueDate;
   const data = await airtableRequest(
     tableUrl(),
-    { method: 'POST', headers: airtableHeaders(), body: JSON.stringify({ records: [{ fields }] }) },
+    // typecast lets a newly-added ReminderType option (e.g. BalanceChase)
+    // materialise on first use. Safe: ReminderType is the only caller-derived
+    // field and it is validated against the REMINDER_TYPES whitelist before it
+    // reaches here, so typecast cannot smuggle an unknown value in.
+    { method: 'POST', headers: airtableHeaders(), body: JSON.stringify({ records: [{ fields }], typecast: true }) },
     'record',
   );
   return data.records?.[0]?.id || null;
 }
 
-/** Storage-side duplicate check (backs the Redis claim up on every accept). */
-export async function findReminderByIdempotencyKey(idemKey) {
-  const formula = `{IdempotencyKey}='${sanitiseForFormula(idemKey)}'`;
-  const url = `${tableUrl()}?filterByFormula=${encodeURIComponent(formula)}&maxRecords=1`;
-  const data = await airtableRequest(url, { headers: airtableHeaders() }, 'dedupe-lookup');
-  return data.records?.[0] || null;
-}
-
 /**
  * Oldest-first batch of queued rows for the worker. Accepted = not yet
- * fetched; Fetched = order fetched but the email not yet sent (either
- * sending is disabled, or a send failed and awaits its backoff retry);
- * Sent with a NextEmailAtUtc that has passed = a follow-up reminder is due.
- * Sent with no NextEmailAtUtc, Skipped and Failed are terminal.
+ * fetched; Fetched = order fetched but the email not yet sent (either sending
+ * is disabled, or a send failed and awaits its backoff retry). Each record
+ * sends exactly one email, so a Sent row is terminal (chasing is caller-driven,
+ * a fresh push is a fresh record); Sent, Skipped and Failed are all terminal.
+ * The NextEmailAtUtc clause is retained so any legacy row still carrying a
+ * follow-up date is drained cleanly.
  */
 export async function listPendingReminders(limit = 25) {
   const formula = `OR({Status}='Accepted',{Status}='Fetched',AND({Status}='Sent',{NextEmailAtUtc},{NextEmailAtUtc}<=NOW()))`;
