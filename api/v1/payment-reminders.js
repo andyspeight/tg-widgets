@@ -1,27 +1,28 @@
 /**
  * POST /api/v1/payment-reminders — Payment Reminder intake (phase 1).
  *
- * The Travelify core platform calls this (roughly daily) to say an order has
- * a balance due. We validate, record to Airtable, atomically dedupe, answer
- * 202 fast, and hand the real work to the background worker. See
- * api/_lib/payment-reminders.js for the architecture and the contract
- * decisions; the worker is api/cron/payment-reminders.js.
+ * The Travelify core platform calls this to say an order has a balance due.
+ * We validate, record to Airtable, answer 202 fast, and hand the real work to
+ * the background worker. See api/_lib/payment-reminders.js for the architecture
+ * and the contract decisions; the worker is api/cron/payment-reminders.js.
+ *
+ * There is NO duplicate suppression (Sep 2026): the calling platform decides
+ * when a reminder is warranted, so every accepted request results in exactly
+ * one email. The same order/amount/dueDate may be submitted repeatedly and
+ * each call sends. reminderType BalanceChase is the chaser for a still-unpaid
+ * balance; its dueDate may be in the past.
  *
  * Contract (documented for the Travelify team):
  *   Auth      X-Api-Key: <shared secret>   (env PAYMENT_REMINDER_API_KEY,
  *             timing-safe compare, 401 with no detail on any mismatch)
  *   Body      { applicationId, orderId, orderKey, reminderType,
  *               amountDue, currency, dueDate? }
+ *             reminderType ∈ DepositBalance | FinalBalance | BalanceChase
  *   202       { status: 'accepted', reference, receivedAtUtc }
  *   400       { error: 'validation_failed', fields: { <field>: <message> } }
  *   401       {}                            missing/wrong key
- *   409       { status: 'duplicate', reference }   same notification already
- *             accepted today (retries are safe; log the returned reference)
  *   429       { error: 'rate_limited' }
  *   500       { error: 'server_error' }     recording failed — please retry
- *
- * Optional Idempotency-Key request header is honoured in preference to the
- * natural dedupe key when present.
  *
  * Server-to-server only: no CORS headers on purpose — a browser should never
  * call this, so no origin is ever allowed one.
@@ -33,12 +34,8 @@ import {
   resolveExpectedApiKey,
   timingSafeMatch,
   validateReminderPayload,
-  validateCallerIdempotencyKey,
   resolveApplication,
   buildIdempotencyKey,
-  claimIdempotency,
-  releaseIdempotencyClaim,
-  findReminderByIdempotencyKey,
   createReminderRecord,
 } from '../_lib/payment-reminders.js';
 
@@ -117,45 +114,15 @@ export default async function handler(req, res) {
     });
   }
 
-  // ── Record + dedupe + queue ───────────────────────────────────────────────
+  // ── Record + queue ────────────────────────────────────────────────────────
+  // NO duplicate suppression (Sep 2026, Travelify request): the calling
+  // platform decides when a reminder is warranted, so every accepted request
+  // becomes one record and one send — the same order/amount/dueDate may be
+  // pushed repeatedly and each call sends. The natural key is still stored on
+  // the record for audit/correlation, it just no longer gates acceptance.
   const receivedAt = new Date();
   const reference = crypto.randomUUID();
-  const callerKey = validateCallerIdempotencyKey(req.headers['idempotency-key']);
-  const idemKey = buildIdempotencyKey(value, receivedAt, callerKey);
-
-  let claim = await claimIdempotency(idemKey, reference);
-  if (claim.state === 'duplicate') {
-    return res.status(409).json({ status: 'duplicate', reference: claim.reference });
-  }
-  if (claim.state === 'unavailable') {
-    console.warn('[payment-reminders] idempotency degraded to Airtable lookup');
-  }
-  // Storage is consulted on BOTH remaining paths, not just 'unavailable'.
-  // A record with this key can predate the Redis claim: a notification
-  // accepted while Redis was down never wrote one, so after recovery a
-  // same-day retry looks brand new to Redis. Without this check that retry
-  // would be accepted twice (double order fetch now, double email in
-  // phase 2). One extra read per genuinely-new notification is nothing at
-  // the core's daily-batch volume.
-  try {
-    const existing = await findReminderByIdempotencyKey(idemKey);
-    if (existing) {
-      // Our just-taken claim holds a reference that was never used; drop it
-      // so later retries keep resolving to the ORIGINAL reference.
-      if (claim.state === 'new') await releaseIdempotencyClaim(idemKey);
-      return res.status(409).json({ status: 'duplicate', reference: existing.fields?.Reference || null });
-    }
-  } catch (err) {
-    if (claim.state === 'unavailable') {
-      // Can't dedupe AND can't check storage: refuse rather than risk a
-      // double-send in phase 2. The core retries on 500 by contract.
-      console.error('[payment-reminders] dedupe fallback failed:', err.message);
-      return res.status(500).json({ error: 'server_error' });
-    }
-    // Redis already arbitrated atomically; the storage check only guards the
-    // outage-predating case, so a failed read here is safe to proceed past.
-    console.warn('[payment-reminders] storage dedupe check failed (claim held):', err.message);
-  }
+  const idemKey = buildIdempotencyKey(value);
 
   try {
     await createReminderRecord({
@@ -167,14 +134,7 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('[payment-reminders] record create failed:', err.message);
-    if (claim.state === 'new') await releaseIdempotencyClaim(idemKey);
     return res.status(500).json({ error: 'server_error' });
-  }
-
-  if (claim.state === 'unavailable') {
-    // Best-effort claim back-fill so Redis resumes arbitration the moment it
-    // recovers; while it stays down, the storage check above keeps covering.
-    await claimIdempotency(idemKey, reference);
   }
 
   console.log('[payment-reminders] accepted', reference,
