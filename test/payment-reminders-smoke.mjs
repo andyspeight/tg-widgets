@@ -436,7 +436,10 @@ const payableOrder = (over = {}) => ({
   customerFirstname: 'Sarah',
   items: [{ price: 1490 }],
   payments: [{ status: 'Success', amount: 740.5 }],
-  depositOption: { currency: 'GBP', breakdown: [{ amount: 749.5, dueDate: '2026-08-15' }] },
+  // Full Travelify schedule: the £740.50 deposit (initialAmount, already paid via
+  // payments) plus the £749.50 balance instalment. initialAmount + breakdown =
+  // the £1490 total, reconciled against paidToDate — so the balance due is £749.50.
+  depositOption: { currency: 'GBP', initialAmount: 740.5, breakdown: [{ amount: 749.5, dueDate: '2026-08-15' }] },
   ...over,
 });
 const recentIso = () => new Date(Date.now() - 60000).toISOString();

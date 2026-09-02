@@ -158,7 +158,8 @@
     "test:offer-import-merge": "node test/offer-import-merge-smoke.mjs",
     "test:supplier-events": "node test/supplier-events-normalise-smoke.mjs",
     "build:events-snapshot": "node scripts/build-events-snapshot.mjs",
-    "test:weather-transparent": "node test/weather-transparent-root-smoke.mjs"
+    "test:weather-transparent": "node test/weather-transparent-root-smoke.mjs",
+    "test:balance-due": "node test/balance-due-schedule-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

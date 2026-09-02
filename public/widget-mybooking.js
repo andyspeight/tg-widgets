@@ -182,7 +182,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.11.1';
+  const VERSION = '1.11.2';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -3531,64 +3531,86 @@
       </div>`;
   }
 
-  // The PLANNED payment schedule (all scheduled instalments, earliest first)
-  // from the order-level depositOption.breakdown. NOTE: Travelify leaves this
-  // breakdown in place unchanged after payments are taken — it is the original
-  // plan, NOT what is still owed. Never render it directly; use
-  // reconcileSchedule() for the genuinely remaining payments.
-  function computeSchedule(order) {
+  // Payments taken against the order.
+  function paidOf(order) {
+    return (order && typeof order.paidToDate === 'number' && order.paidToDate > 0) ? order.paidToDate : 0;
+  }
+
+  // The order's FULL payment schedule, earliest first: the deposit initialAmount
+  // (due immediately, carrying no explicit due date) PLUS every breakdown
+  // instalment. The initialAmount is the piece the old code missed — it is due
+  // now until it is paid, so it belongs in the schedule. Mirrors buildSchedule()
+  // in /api/pay-balance.
+  function buildSchedule(order) {
     const dep = order && order.depositOption;
-    const bd = dep && Array.isArray(dep.breakdown) ? dep.breakdown : [];
-    return bd
-      .map(b => ({ amount: Number(b.amount), dueDate: b.dueDate || '', due: Date.parse(b.dueDate) }))
-      .filter(e => Number.isFinite(e.amount) && e.amount > 0)
-      .sort((a, b) => (Number.isFinite(a.due) ? a.due : Infinity) - (Number.isFinite(b.due) ? b.due : Infinity));
-  }
-
-  // The REMAINING payment schedule: the planned breakdown reconciled against
-  // the authoritative outstanding balance (total − paidToDate). Payments
-  // settle the earliest scheduled entries first (whether taken online or
-  // added manually in Travelify), so the genuinely remaining schedule is the
-  // TAIL of the plan that sums to the outstanding — walking from the last
-  // entry backwards, capping the boundary entry if a payment part-covered it.
-  // Guarantees the displayed schedule always sums to "Balance remaining".
-  function reconcileSchedule(order) {
-    const all = computeSchedule(order);
-    if (!all.length) return [];
-    const { outstanding } = computeOutstanding(order);
-    if (!(outstanding > 0)) return [];
-    let need = Math.round(outstanding * 100) / 100;
-    const left = [];
-    for (let i = all.length - 1; i >= 0 && need > 0.004; i--) {
-      const take = Math.min(all[i].amount, need);
-      left.unshift({ amount: Math.round(take * 100) / 100, dueDate: all[i].dueDate, due: all[i].due });
-      need = Math.round((need - take) * 100) / 100;
+    if (!dep || typeof dep !== 'object') return [];
+    const entries = [];
+    const initial = Number(dep.initialAmount);
+    if (Number.isFinite(initial) && initial > 0) {
+      entries.push({ amount: Math.round(initial * 100) / 100, dueDate: '', due: -Infinity, isInitial: true });
     }
-    return left;
+    const bd = Array.isArray(dep.breakdown) ? dep.breakdown : [];
+    for (const b of bd) {
+      const amount = Number(b.amount);
+      if (!Number.isFinite(amount) || amount <= 0) continue;
+      const due = Date.parse(b.dueDate);
+      entries.push({ amount: Math.round(amount * 100) / 100, dueDate: b.dueDate || '', due: Number.isFinite(due) ? due : Infinity });
+    }
+    entries.sort((a, b) => a.due - b.due);
+    return entries;
   }
 
-  // Work out the next payment to collect — the earliest entry of the
-  // RECONCILED schedule (so an instalment already settled by a manual or
-  // online payment is never offered again). Mirrors decideCharge() in
-  // /api/pay-balance so the displayed amount matches what the basket charges.
+  // The REMAINING (unpaid) schedule: allocate paidToDate to the EARLIEST entries
+  // first, keeping the unpaid remainder of each (a partial payment settles the
+  // initial, then instalment 1, and any residual reduces the next). Always sums
+  // to the outstanding balance and includes the unpaid initial payment. This is
+  // what we display. Mirrors reconcileSchedule() in /api/pay-balance.
+  function reconcileSchedule(order) {
+    const all = buildSchedule(order);
+    if (!all.length) return [];
+    let left = Math.round(Math.max(0, paidOf(order)) * 100) / 100;
+    const out = [];
+    for (const e of all) {
+      const settle = Math.min(e.amount, left);
+      const unpaid = Math.round((e.amount - settle) * 100) / 100;
+      left = Math.round((left - settle) * 100) / 100;
+      if (unpaid > 0) out.push({ amount: unpaid, dueDate: e.dueDate, due: e.due, isInitial: !!e.isInitial });
+    }
+    return out;
+  }
+
+  // The amount to collect now: everything due on or before today that is still
+  // unpaid (the initial payment plus any instalments now due), or the next
+  // instalment when nothing is due yet. Mirrors decideCharge() in
+  // /api/pay-balance so the displayed figure matches what the basket charges.
   function computeNextDue(order) {
     const entries = reconcileSchedule(order);
     if (!entries.length) return null;
-    const next = entries[0];
-    const rest = entries.slice(1);
+    const today = new Date().toISOString().slice(0, 10);
+    let dueNow = 0, dueNowDate = null, firstFuture = null;
+    for (const e of entries) {
+      const isDue = e.isInitial || (e.dueDate && e.dueDate.slice(0, 10) <= today);
+      if (isDue) {
+        dueNow = Math.round((dueNow + e.amount) * 100) / 100;
+        if (!e.isInitial && e.dueDate) dueNowDate = e.dueDate;
+      } else if (!firstFuture) {
+        firstFuture = e;
+      }
+    }
+    const total = Math.round(entries.reduce((s, e) => s + e.amount, 0) * 100) / 100;
+    const amount = dueNow > 0 ? dueNow : (firstFuture ? firstFuture.amount : 0);
+    const dueDate = dueNow > 0 ? dueNowDate : (firstFuture ? firstFuture.dueDate : null);
     return {
-      amount: next.amount,
-      dueDate: next.dueDate,
-      remaining: rest.length,
-      remainingAmount: Math.round(rest.reduce((s, e) => s + e.amount, 0) * 100) / 100,
+      amount,
+      dueDate,
+      remainingAmount: Math.round((total - amount) * 100) / 100,
       isInstalment: entries.length > 1,
     };
   }
 
-  // Authoritative "what's still owed" = total holiday cost − payments taken.
-  // The depositOption.breakdown is only a SCHEDULE (Travelify leaves it in
-  // place after a payment), so we never treat its sum as the balance — we use
-  // it only for the next due date. Mirrors decideCharge() in /api/pay-balance.
+  // Authoritative "what's still owed". With a deposit schedule the outstanding is
+  // the sum of the unpaid schedule (initial + instalments); otherwise it's the
+  // holiday total less payments taken. Mirrors decideCharge() in /api/pay-balance.
   function computeOutstanding(order) {
     const items = order.items || [];
     const summary = order.summary || {};
@@ -3601,8 +3623,11 @@
     // item prices, so net it off the total the balance is measured against.
     const voucher = (order.voucher && typeof order.voucher.value === 'number') ? order.voucher.value : 0;
     const netTotal = Math.round((total + voucher) * 100) / 100;
-    const paid = typeof order.paidToDate === 'number' ? order.paidToDate : 0;
-    const outstanding = Math.max(0, Math.round((netTotal - paid) * 100) / 100);
+    const paid = paidOf(order);
+    const rec = reconcileSchedule(order);
+    const outstanding = rec.length
+      ? Math.round(rec.reduce((s, e) => s + e.amount, 0) * 100) / 100
+      : Math.max(0, Math.round((netTotal - paid) * 100) / 100);
     return { total, voucher, netTotal, paid, outstanding };
   }
 
@@ -4065,12 +4090,21 @@
                 if (next && next.isInstalment && !installPlan && sched.length > 1) {
                   rows += `<div class="tgm-pay-sched">
                     <div class="tgm-pay-sched-title">${esc(c.labels?.paymentSchedule || c.t('paymentSchedule'))} · ${sched.length} ${esc(c.labels?.payments || c.t('payments'))}</div>
-                    ${sched.map((b, i) => `
-                      <div class="tgm-inst${i === 0 ? ' is-next' : ''}">
-                        <span class="date">${esc(fmtDate(b.dueDate))}${i === 0 ? `<span class="tgm-inst-tag">${esc(c.labels?.next || c.t('next'))}</span>` : ''}</span>
+                    ${(() => {
+                      const _today = new Date().toISOString().slice(0, 10);
+                      return sched.map((b) => {
+                        // "Due now" = the unpaid initial payment plus any instalment
+                        // already due; each gets the "next" tag so the rows add up to
+                        // the amount on the pay button.
+                        const isDue = b.isInitial || (b.dueDate && b.dueDate.slice(0, 10) <= _today);
+                        const when = b.isInitial ? (c.labels?.dueNow || 'Due now') : fmtDate(b.dueDate);
+                        return `
+                      <div class="tgm-inst${isDue ? ' is-next' : ''}">
+                        <span class="date">${esc(when)}${isDue ? `<span class="tgm-inst-tag">${esc(c.labels?.next || c.t('next'))}</span>` : ''}</span>
                         <span class="amt">${esc(fmtMoney(b.amount, currency))}</span>
-                      </div>
-                    `).join('')}
+                      </div>`;
+                      }).join('');
+                    })()}
                   </div>`;
                 } else if (next && next.dueDate) {
                   rows += `<div class="tgm-pay-row"><span class="tgm-pay-label">${esc(c.labels?.nextDueDate || c.t('nextDueDate'))}</span><span class="v">${esc(fmtDate(next.dueDate))}</span></div>`;

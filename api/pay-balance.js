@@ -58,15 +58,11 @@ function parseDate(s) {
   return Number.isFinite(t) ? t : null;
 }
 
-// A scheduled payment is treated as already settled if the raw entry carries
-// any of the common paid markers. Field names aren't confirmed against a live
-// payload yet, so we check the obvious candidates defensively.
-function isPaidEntry(b) {
-  if (!b || typeof b !== 'object') return false;
-  if (b.paid === true || b.isPaid === true || b.settled === true) return true;
-  const status = String(b.status || b.state || '').toLowerCase();
-  return /paid|settled|complete/.test(status);
-}
+// Round to whole pennies.
+function p2(n) { return Math.round(n * 100) / 100; }
+
+// Today's date as YYYY-MM-DD (UTC). Injectable so tests can pin "today".
+function todayIso(now = Date.now()) { return new Date(now).toISOString().slice(0, 10); }
 
 // Find the order's outstanding payment schedule. It lives at the ORDER level
 // as `depositOption` (singular); its `breakdown` is the set of payments still
@@ -83,73 +79,84 @@ function findPaymentPlan(raw) {
   };
 }
 
-// Determine the next payment to collect + how many remain after it.
-// `outstanding` (total − paidToDate) is the authority on what's still owed:
-// Travelify leaves the breakdown unchanged after payments are taken (online
-// OR added manually by the agent), so the genuinely remaining schedule is the
-// TAIL of the plan that sums to the outstanding — payments settle the
-// earliest entries first. Walk from the last entry backwards, capping the
-// boundary entry if a payment part-covered it. This stops an already-settled
-// instalment being offered (and charged) again.
-function computeNextPayment(plan, outstanding) {
-  if (!plan) return null;
-
-  const entries = plan.breakdown
-    .map(b => ({
-      amount: Number(b.amount),
-      dueDate: typeof b.dueDate === 'string' ? b.dueDate : '',
-      due: parseDate(b.dueDate),
-      paid: isPaidEntry(b),
-    }))
-    .filter(e => Number.isFinite(e.amount) && e.amount > 0);
-
-  if (!entries.length) return null;
-
-  // Prefer entries not flagged paid. If nothing carries a paid flag, treat all
-  // scheduled payments as candidates — the reconciliation below settles them
-  // against the real outstanding.
-  const unpaid = entries.filter(e => !e.paid);
-  const pool = unpaid.length ? unpaid : entries;
-
-  pool.sort((a, b) => {
-    if (a.due == null && b.due == null) return 0;
-    if (a.due == null) return 1;
-    if (b.due == null) return -1;
-    return a.due - b.due;
-  });
-
-  // Reconcile: keep only the latest entries summing to the outstanding.
-  let remaining = pool;
-  if (Number.isFinite(outstanding) && outstanding > 0) {
-    let need = Math.round(outstanding * 100) / 100;
-    const left = [];
-    for (let i = pool.length - 1; i >= 0 && need > 0.004; i--) {
-      const take = Math.min(pool[i].amount, need);
-      left.unshift({ ...pool[i], amount: Math.round(take * 100) / 100 });
-      need = Math.round((need - take) * 100) / 100;
-    }
-    if (left.length) remaining = left;
+// Build the order's FULL payment schedule: the deposit `initialAmount` (due
+// immediately, carrying no explicit due date) PLUS every `breakdown` instalment.
+// The initialAmount is the piece the old code missed — it is due from the moment
+// the order is created and is always "due now" until it is paid, so it belongs in
+// the schedule, not outside it. Returns null when the order has no depositOption
+// schedule at all (a booking payable in full).
+function buildSchedule(raw) {
+  const opt = raw && raw.depositOption;
+  if (!opt || typeof opt !== 'object') return null;
+  const currency = opt.currency || raw.currency || 'GBP';
+  const entries = [];
+  const initial = Number(opt.initialAmount);
+  if (Number.isFinite(initial) && initial > 0) {
+    // due: -Infinity sorts it first and always counts as "due now".
+    entries.push({ amount: p2(initial), day: '', due: -Infinity, isInitial: true });
   }
-
-  const next = remaining[0];
-  const rest = remaining.slice(1);
-  return {
-    amount: Math.round(next.amount * 100) / 100,
-    currency: plan.currency,
-    dueDate: next.dueDate || null,
-    remaining: rest.length,
-    remainingAmount: Math.round(rest.reduce((s, e) => s + e.amount, 0) * 100) / 100,
-    isInstalment: remaining.length > 1,
-  };
+  const breakdown = Array.isArray(opt.breakdown) ? opt.breakdown : [];
+  for (const b of breakdown) {
+    const amount = Number(b && b.amount);
+    if (!Number.isFinite(amount) || amount <= 0) continue;
+    const day = (typeof b.dueDate === 'string' && b.dueDate) ? b.dueDate.slice(0, 10) : '';
+    const due = parseDate(b.dueDate);
+    entries.push({ amount: p2(amount), day, due: due == null ? Infinity : due });
+  }
+  if (!entries.length) return null;
+  entries.sort((a, b) => a.due - b.due);
+  return { currency, entries, isInstalment: entries.length > 1 };
 }
 
-// Sum of successful payments already taken against the order.
+// Reconcile a schedule against the amount paid to date, allocating payments to
+// the EARLIEST outstanding amounts first (so a partial payment settles the
+// initial, then instalment 1, and any residual reduces the next). Then split the
+// unpaid remainder into what is due on or before `todayStr` and what is still to
+// come.
+//
+// Returns:
+//   charge       — the amount to collect now: everything due on or before today
+//                  that is still unpaid (initial + due instalments); if nothing
+//                  is due yet, the next unpaid instalment.
+//   outstanding  — the whole unpaid balance (all remaining schedule entries).
+//   dueDate      — the due date the "charge" hangs off (latest due-now instalment
+//                  date, or the next instalment's date), or null for initial-only.
+function reconcileSchedule(schedule, paid, todayStr) {
+  let leftToApply = p2(Math.max(0, paid));
+  let dueNow = 0;
+  let outstanding = 0;
+  let dueNowDate = null;
+  let firstFuture = null; // earliest still-unpaid entry that is NOT yet due
+  for (const e of schedule.entries) {
+    const settled = Math.min(e.amount, leftToApply);
+    const unpaid = p2(e.amount - settled);
+    leftToApply = p2(leftToApply - settled);
+    if (unpaid <= 0) continue;
+    outstanding = p2(outstanding + unpaid);
+    const isDue = e.isInitial || (e.day && e.day <= todayStr);
+    if (isDue) {
+      dueNow = p2(dueNow + unpaid);
+      if (!e.isInitial && e.day) dueNowDate = e.day;
+    } else if (!firstFuture) {
+      firstFuture = { unpaid, day: e.day || null };
+    }
+  }
+  const charge = dueNow > 0 ? dueNow : (firstFuture ? firstFuture.unpaid : 0);
+  const dueDate = dueNow > 0 ? dueNowDate : (firstFuture ? firstFuture.day : null);
+  return { charge, outstanding, dueDate };
+}
+
+// Amount already paid against the order. Travelify gives an authoritative
+// `paidToDate` scalar; use it when present, else sum the successful payments.
 function computePaidToDate(raw) {
+  if (typeof raw?.paidToDate === 'number' && Number.isFinite(raw.paidToDate)) {
+    return p2(Math.max(0, raw.paidToDate));
+  }
   const ps = Array.isArray(raw?.payments) ? raw.payments : [];
   const sum = ps
     .filter(p => p && String(p.status || '').toLowerCase() === 'success')
     .reduce((s, p) => s + (typeof p.amount === 'number' ? p.amount : 0), 0);
-  return Math.round(sum * 100) / 100;
+  return p2(sum);
 }
 
 // The order's payable total (sum of item prices — the holiday cost the
@@ -166,51 +173,58 @@ function computeOrderTotal(raw) {
   return Math.round((sum + voucher) * 100) / 100;
 }
 
-// Single source of truth for "what (if anything) do we collect now". The
-// depositOption.breakdown is only a SCHEDULE — Travelify does NOT clear it
-// after a payment is taken — so the authoritative outstanding figure is
-// total - paidToDate, never the raw breakdown sum. We use the breakdown only
-// to pick the next instalment's amount/date, and we cap that at outstanding.
 // Minimum a customer can choose to part-pay. Full settlement is always allowed
 // even if the outstanding is below this floor.
 const MIN_PART_PAYMENT = 1;
 
-// Decide what to actually collect.
-//   - requested == null  → the default (next instalment, or full balance).
+// Single source of truth for "what (if anything) do we collect now". Everything
+// is derived from the order's full payment SCHEDULE — the deposit initialAmount
+// plus the breakdown instalments — reconciled against paidToDate, per the
+// Travelify contract: the amount due at a date is the sum of every scheduled
+// amount due on or before that date, minus payments recorded, applied
+// earliest-first. The unpaid initialAmount is ALWAYS due now until settled (the
+// bug this fixes: the old code read the breakdown alone and missed it). With no
+// depositOption schedule the whole balance is payable in full.
+//
+//   - requested == null  → the default: everything due on or before today (or the
+//     next instalment when nothing is due yet).
 //   - requested provided → the customer's chosen amount, RE-VALIDATED here
 //     against the real outstanding. The client figure is only a request; the
 //     server is the authority on what may be charged.
-export function decideCharge(raw, requested) {
-  const plan = findPaymentPlan(raw);
+// `now` is injectable so tests can pin "today".
+export function decideCharge(raw, requested, now = Date.now()) {
   const paid = computePaidToDate(raw);
   const total = computeOrderTotal(raw);
-  const outstanding = Math.max(0, Math.round((total - paid) * 100) / 100);
-  const next = computeNextPayment(plan, outstanding);
+  const schedule = buildSchedule(raw);
+
+  let outstanding, defaultAmount, currency, dueDate, isInstalment;
+  if (schedule) {
+    const r = reconcileSchedule(schedule, paid, todayIso(now));
+    outstanding = r.outstanding;
+    defaultAmount = r.charge;
+    currency = schedule.currency;
+    dueDate = r.dueDate;
+    isInstalment = schedule.isInstalment;
+  } else {
+    // No deposit schedule → the whole balance (total − paid) is payable in full.
+    // Bailing on a missing schedule once made a genuine £1,800 balance
+    // uncollectable (Karen / My Booking, 28 Jul 2026).
+    outstanding = Math.max(0, p2(total - paid));
+    defaultAmount = outstanding;
+    currency = raw.currency || 'GBP';
+    dueDate = null;
+    isInstalment = false;
+  }
 
   if (!(outstanding > 0)) return { noBalance: true, total, paid, outstanding };
 
-  // `next` comes from the payment SCHEDULE and is used ONLY to pick an
-  // instalment amount. A booking can owe money with NO schedule — paid in full
-  // at booking, or Travelify attached no deposit breakdown — in which case
-  // `next` is null but the FULL outstanding is still payable. The widget already
-  // shows the balance as owed, so the server must agree and collect the full
-  // outstanding rather than report "nothing to pay". Bailing here on a missing
-  // schedule made a genuine £1,800 balance uncollectable (Karen / My Booking,
-  // 28 Jul 2026). Only a real multi-instalment plan caps the default below the
-  // outstanding.
-  const currency = (next && next.currency) || raw.currency || 'GBP';
-  const isInstalment = !!(next && next.isInstalment && next.amount > 0);
-
-  // Default (no custom amount): the next instalment (capped at outstanding) when
-  // a plan is running; otherwise the full outstanding balance.
-  const defaultAmount = isInstalment
-    ? Math.min(Math.round(next.amount * 100) / 100, outstanding)
-    : outstanding;
-
-  let chargeAmount = defaultAmount;
+  // A schedule fully caught up (nothing due, only future instalments, all paid
+  // down) can leave defaultAmount 0 while a balance still exists — fall back to
+  // the outstanding so the customer can always pay.
+  let chargeAmount = defaultAmount > 0 ? Math.min(defaultAmount, outstanding) : outstanding;
 
   if (requested != null && requested !== '') {
-    const amt = Math.round(Number(requested) * 100) / 100;
+    const amt = p2(Number(requested));
     if (!Number.isFinite(amt) || amt <= 0) {
       return { invalid: 'Please enter a valid amount.', outstanding, currency };
     }
@@ -227,13 +241,13 @@ export function decideCharge(raw, requested) {
 
   if (!(chargeAmount > 0)) return { noBalance: true, total, paid, outstanding };
 
-  const followAmount = Math.max(0, Math.round((outstanding - chargeAmount) * 100) / 100);
+  const followAmount = Math.max(0, p2(outstanding - chargeAmount));
   return {
     noBalance: false,
     total, paid, outstanding,
     amount: chargeAmount,
     currency,
-    dueDate: (next && next.dueDate) || null,
+    dueDate,
     isInstalment: isInstalment && followAmount > 0,
     remainingAmount: followAmount,
   };
