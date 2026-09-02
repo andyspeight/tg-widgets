@@ -836,6 +836,16 @@ pages still don't have images".
   via a chained jsonb_set on gt_trips.content. The live tour page now carries
   ZERO Unsplash — every image is ours. Reuse the same generate→imgfetch-base64→
   sharp→commit→jsonb_set flow to re-image any other seed trip.
+  DOMAIN TRAP (bit us — 2 Sep 2026): the trip page renders hero/day/gallery/
+  feature images from stored ABSOLUTE URLs (safeImageUrl needs absolute https, so
+  a root-relative /photos path is rejected). I first stored them as
+  https://trips.travelify.io/... — but trips.travelify.io is NOT attached to the
+  Vercel project (its only domains are travelgenix-trips*.vercel.app), so every
+  trip-page image 404'd ("all images disappeared") while the marketing pages
+  (relative /photos) were fine. Fix: store the LIVE domain,
+  https://travelgenix-trips.vercel.app/photos/... When someone actually attaches
+  trips.travelify.io in Vercel (+ DNS), repoint these and the hero back to it. The
+  allowlist already trusts both hosts, so only the stored data needs changing.
 - WIDGET GALLERY: new /widgets page (linked in nav + footer as "Widgets" /
   "Widget gallery") with faithful static previews of every embed widget, each
   with its copy-paste snippet. The previews live in (site)/widget-previews.tsx;
