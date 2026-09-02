@@ -43,6 +43,17 @@ console.log('Reference case 118823 — the acceptance criteria');
   ok('flagged as an instalment (more follows)', c.isInstalment === true);
 }
 
+console.log('The due date is TODAY for a due-now amount, never a past instalment date');
+{
+  // Overdue: an instalment due yesterday is still "due now" → the due date is
+  // today, not the past date (the stale-date bug the email showed).
+  const c = decideCharge(order(0, [{ amount: 300, dueDate: '2026-09-01' }, { amount: 100, dueDate: '2026-09-10' }], 0), null, NOW);
+  ok('overdue instalment → due date is today 2026-09-02, not 2026-09-01', c.dueDate === '2026-09-02' && c.amount === 300);
+  // Nothing due yet (initial paid, only future instalments) → the next instalment's own date.
+  const f = decideCharge(order(1, [{ amount: 200, dueDate: '2026-09-10' }, { amount: 211, dueDate: '2026-09-20' }], 1), null, NOW);
+  ok('future-only → due date is the next instalment date 2026-09-10', f.dueDate === '2026-09-10' && f.amount === 200);
+}
+
 console.log('The reminder email shows the corrected figures');
 {
   const c = decideCharge(REF(), null, NOW);

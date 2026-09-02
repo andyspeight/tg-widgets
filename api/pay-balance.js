@@ -125,7 +125,6 @@ function reconcileSchedule(schedule, paid, todayStr) {
   let leftToApply = p2(Math.max(0, paid));
   let dueNow = 0;
   let outstanding = 0;
-  let dueNowDate = null;
   let firstFuture = null; // earliest still-unpaid entry that is NOT yet due
   for (const e of schedule.entries) {
     const settled = Math.min(e.amount, leftToApply);
@@ -134,15 +133,14 @@ function reconcileSchedule(schedule, paid, todayStr) {
     if (unpaid <= 0) continue;
     outstanding = p2(outstanding + unpaid);
     const isDue = e.isInitial || (e.day && e.day <= todayStr);
-    if (isDue) {
-      dueNow = p2(dueNow + unpaid);
-      if (!e.isInitial && e.day) dueNowDate = e.day;
-    } else if (!firstFuture) {
-      firstFuture = { unpaid, day: e.day || null };
-    }
+    if (isDue) dueNow = p2(dueNow + unpaid);
+    else if (!firstFuture) firstFuture = { unpaid, day: e.day || null };
   }
   const charge = dueNow > 0 ? dueNow : (firstFuture ? firstFuture.unpaid : 0);
-  const dueDate = dueNow > 0 ? dueNowDate : (firstFuture ? firstFuture.day : null);
+  // When anything is due now (the initial and/or an instalment due on or before
+  // today, possibly overdue), it is due TODAY — never surface a past instalment
+  // date. When nothing is due yet, it's the next instalment's own date.
+  const dueDate = dueNow > 0 ? todayStr : (firstFuture ? firstFuture.day : null);
   return { charge, outstanding, dueDate };
 }
 

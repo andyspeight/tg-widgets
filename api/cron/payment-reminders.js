@@ -225,7 +225,10 @@ async function processRecord(record) {
     customerFirstName: typeof order.customerFirstname === 'string' ? order.customerFirstname : '',
     orderRef,
     charge,
-    dueDateIso: f.DueDate || charge.dueDate || '',
+    // Prefer the date derived from the LIVE order (today for a due-now amount,
+    // or the next instalment's date) over the notification's stored DueDate,
+    // which can be stale — the order is the authority for both amount and date.
+    dueDateIso: charge.dueDate || f.DueDate || '',
     payUrl: buildPayUrl(branding.pageUrl, orderRef),
     sequence: { n: cycle, of: Math.max(planned, cycle) },
     template,

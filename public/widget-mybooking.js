@@ -182,7 +182,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.11.2';
+  const VERSION = '1.11.3';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -3587,19 +3587,17 @@
     const entries = reconcileSchedule(order);
     if (!entries.length) return null;
     const today = new Date().toISOString().slice(0, 10);
-    let dueNow = 0, dueNowDate = null, firstFuture = null;
+    let dueNow = 0, firstFuture = null;
     for (const e of entries) {
       const isDue = e.isInitial || (e.dueDate && e.dueDate.slice(0, 10) <= today);
-      if (isDue) {
-        dueNow = Math.round((dueNow + e.amount) * 100) / 100;
-        if (!e.isInitial && e.dueDate) dueNowDate = e.dueDate;
-      } else if (!firstFuture) {
-        firstFuture = e;
-      }
+      if (isDue) dueNow = Math.round((dueNow + e.amount) * 100) / 100;
+      else if (!firstFuture) firstFuture = e;
     }
     const total = Math.round(entries.reduce((s, e) => s + e.amount, 0) * 100) / 100;
     const amount = dueNow > 0 ? dueNow : (firstFuture ? firstFuture.amount : 0);
-    const dueDate = dueNow > 0 ? dueNowDate : (firstFuture ? firstFuture.dueDate : null);
+    // Anything due now is due TODAY (never a past instalment date); otherwise the
+    // next instalment's own date. Mirrors reconcileSchedule() in /api/pay-balance.
+    const dueDate = dueNow > 0 ? today : (firstFuture ? firstFuture.dueDate : null);
     return {
       amount,
       dueDate,
