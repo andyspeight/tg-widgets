@@ -373,6 +373,39 @@ export function sendingEnabled() {
 }
 
 /**
+ * TEST MODE — end-to-end integration testing without going live.
+ *
+ * Two env vars, both EMPTY by default so nothing changes for anyone until they
+ * are set (Vercel), and neither touches the global sendingEnabled() switch that
+ * governs real clients:
+ *
+ *   PAYMENT_REMINDER_TEST_APP_IDS  comma-separated Travelify App IDs that may
+ *     send even while global sending is OFF, and that bypass the demo-app
+ *     suppression. Lets the Travelify team exercise the whole pipeline (e.g.
+ *     with the demo app 250) while every real client stays paused.
+ *   PAYMENT_REMINDER_TEST_EMAIL    a single inbox that EVERY test-app send is
+ *     redirected to, so a demo order can never reach a real customer whatever
+ *     email sits on it. When unset, a test-app send falls back to the order's
+ *     own customer email.
+ *
+ * A test-app send is otherwise a completely real send (real branding, real
+ * order fetch, real balance check) — only the go-live gates and the recipient
+ * differ. Remove the env vars to end the test window.
+ */
+export function reminderTestAppIds() {
+  return String(process.env.PAYMENT_REMINDER_TEST_APP_IDS || '')
+    .split(',').map((s) => s.trim()).filter(Boolean);
+}
+export function isReminderTestApp(applicationId) {
+  const ids = reminderTestAppIds();
+  return ids.length > 0 && ids.includes(String(applicationId));
+}
+export function reminderTestRecipient() {
+  const v = String(process.env.PAYMENT_REMINDER_TEST_EMAIL || '').trim();
+  return v || null;
+}
+
+/**
  * Notifications older than this are Skipped, never emailed. Guards the
  * moment sending is first enabled: stale Fetched rows from testing must not
  * turn into surprise emails to real customers weeks later.
