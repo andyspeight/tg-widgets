@@ -446,7 +446,7 @@ state.brandingWidget = {
     WidgetType: 'My Booking', Status: 'Active', ClientRecordId: 'recCLIENT00000001',
     FromName: 'Sunshine Travel', FromEmail: 'bookings@sunshine.example', ClientEmail: 'owner@sunshine.example',
     LogoUrl: 'https://sunshine.example/logo.png', EmailFooter: 'Sunshine Travel Ltd · ATOL 11234',
-    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking' }),
+    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking', reminders: { enabled: true } }),
   },
 };
 
@@ -470,6 +470,19 @@ ok(firstSend?.EmailsSent === 1 && firstSend?.EmailsPlanned === 3 && firstSend?.G
   const expected = Date.now() + 7 * 24 * 3600000;
   ok(Number.isFinite(next) && Math.abs(next - expected) < 60000 && firstSend?.Attempts === 0, 'next reminder scheduled 7 days out, failure budget reset');
 }
+
+// Per-client opt-in: a client whose My Booking widget has reminders switched
+// OFF is never chased, even with sending enabled and a balance due.
+state.redis.clear();
+const onWidget = state.brandingWidget;
+state.brandingWidget = { ...onWidget, fields: { ...onWidget.fields, Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking', reminders: { enabled: false } }) } };
+state.accepted = [queued({ Reference: 'ref-optout', ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && /switched off/.test(state.patches.at(-1)?.fields.LastError || ''), 'reminders switched OFF for the client → no email even with a balance due');
+state.brandingWidget = onWidget; // restore the opted-in widget for the tests below
 
 state.redis.clear();
 state.accepted = [queued({ Reference: 'ref-mail-2', ReceivedAtUtc: recentIso() })];
@@ -522,6 +535,8 @@ res = mockRes();
 await worker(cronReq(), res);
 ok(state.sends.length === 0 && state.patches.at(-1)?.fields.Status === 'Sent', 'send guard prevents a double email after a crash');
 
+// A client with NO My Booking widget cannot have opted in (the toggle lives in
+// that editor), so reminders stay off and nothing is sent.
 state.redis.clear();
 state.brandingWidget = null; // client has no My Booking widget
 state.clientRecord = { id: 'recCLIENT00000001', fields: { fldDbFv039Bip6W8u: 'Sunshine Trading', fldVRiIAlrTjxnNHP: 'accounts@sunshine.example', fldFES7Aa057MB3VT: '01202 999 999' } };
@@ -529,8 +544,7 @@ state.accepted = [queued({ Reference: 'ref-mail-8', ReceivedAtUtc: recentIso() }
 state.patches = []; state.sends = [];
 res = mockRes();
 await worker(cronReq(), res);
-const sg8 = state.sends[0];
-ok(sg8 && sg8.from?.name === 'Sunshine Trading' && !/Pay my balance/.test(sg8.content?.[1]?.value || ''), 'no widget → Clients-record branding, contact-first email without a dead button');
+ok(state.sends.length === 0 && /switched off/.test(state.patches.at(-1)?.fields.LastError || ''), 'no My Booking widget → cannot opt in → reminders stay off, nothing sent');
 state.brandingWidget = null; state.clientRecord = null;
 
 // ── E. Follow-up reminder schedule ───────────────────────────────────────────
@@ -539,7 +553,7 @@ state.brandingWidget = {
   fields: {
     WidgetType: 'My Booking', Status: 'Active', ClientRecordId: 'recCLIENT00000001',
     FromName: 'Sunshine Travel', FromEmail: 'bookings@sunshine.example',
-    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking', reminders: { count: 3, gapDays: 5 } }),
+    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking', reminders: { enabled: true, count: 3, gapDays: 5 } }),
   },
 };
 const pastDue = () => new Date(Date.now() - 3600000).toISOString();
@@ -586,7 +600,7 @@ ok(fup3?.NextEmailAtUtc === null && /balance settled after 2 reminder emails/.te
 
 // Client config with a single email → nothing further scheduled
 state.redis.clear();
-state.brandingWidget.fields.Config = JSON.stringify({ pageUrl: 'https://sunshine.example/my-booking', reminders: { count: 1, gapDays: 7 } });
+state.brandingWidget.fields.Config = JSON.stringify({ pageUrl: 'https://sunshine.example/my-booking', reminders: { enabled: true, count: 1, gapDays: 7 } });
 state.accepted = [queued({ Reference: 'ref-fup-4', ReceivedAtUtc: recentIso() })];
 state.patches = []; state.sends = [];
 state.travelify = () => ({ status: 200, body: payableOrder() });
@@ -622,10 +636,14 @@ state.brandingWidget = {
   fields: {
     WidgetType: 'My Booking', Status: 'Active', ClientRecordId: 'recCLIENT00000001',
     FromName: 'Sunshine Travel', FromEmail: 'bookings@sunshine.example',
-    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking' }),
+    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking', reminders: { enabled: true } }),
   },
 };
 
+// App 250 resolves to a real client record (in production there are Clients
+// rows for it), so resolveReminderBranding reads that client's My Booking
+// widget — the opt-in above — rather than the recordId-less demo fallback.
+state.clients[250] = { apiKey: 'demo-key', name: 'Demo Client' };
 process.env.PAYMENT_REMINDER_TEST_APP_IDS = '250';
 process.env.PAYMENT_REMINDER_TEST_EMAIL = 'devtest@travelify.example';
 state.redis.clear();
@@ -676,6 +694,8 @@ ok(/AND\(\{Status\}='Sent',\{NextEmailAtUtc\},\{NextEmailAtUtc\}<=NOW\(\)\)/.tes
 ok(/normaliseReminderSchedule/.test(libSrc) && /value\.dueDate \|\| 'none'/.test(libSrc), 'schedule normaliser present; idempotency keyed on the balance not the day');
 const mbEditor2 = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
 ok(/id="reminder-count"/.test(mbEditor2) && /id="reminder-gap"/.test(mbEditor2) && /config\.reminders/.test(mbEditor2), 'editor exposes the reminder schedule settings');
+ok(/id="reminder-enabled"/.test(mbEditor2) && /reminders\.enabled\s*=\s*e\.target\.value === 'on'/.test(mbEditor2), 'editor exposes the per-client on/off toggle, off by default');
+ok(/reminders:\s*\{\s*enabled:\s*false/.test(mbEditor2), 'editor default has reminders switched off');
 
 // ── G. Source guards ─────────────────────────────────────────────────────────
 const widgetSrc = readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8');

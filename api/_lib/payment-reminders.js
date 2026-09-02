@@ -425,15 +425,18 @@ export async function claimSendGuard(reference, cycle = 1) {
 }
 
 /**
- * Clamp the client's reminder-schedule settings into safe bounds. Defaults
- * (3 emails, 7 days apart) reflect how agencies actually chase a balance;
- * a client wanting a single email sets count 1 in their editor.
+ * Clamp the client's reminder-schedule settings into safe bounds. `enabled` is
+ * the per-client opt-in for the whole balance reminder email, OFF unless the
+ * client explicitly switched it on in their My Booking editor (not everyone
+ * wants it). Defaults for the schedule (3 emails, 7 days apart) reflect how
+ * agencies actually chase a balance; a client wanting a single email sets
+ * count 1 in their editor.
  */
 export function normaliseReminderSchedule(cfg) {
   const raw = (cfg && typeof cfg === 'object') ? cfg : {};
   const count = Math.min(5, Math.max(1, Math.round(Number(raw.count)) || 3));
   const gapDays = Math.min(30, Math.max(1, Math.round(Number(raw.gapDays)) || 7));
-  return { count, gapDays };
+  return { enabled: raw.enabled === true, count, gapDays };
 }
 
 /** The customer-facing booking reference, when the raw order carries one. */
