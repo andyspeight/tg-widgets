@@ -256,7 +256,7 @@
           <tr>
             <td class="field">reminderType <span class="req">*</span></td>
             <td class="type">string</td>
-            <td class="rule">One of <code class="inline">DepositBalance</code> or <code class="inline">FinalBalance</code>. Use <code class="inline">DepositBalance</code> for a deposit balance or any interim instalment; <code class="inline">FinalBalance</code> for the last balance.</td>
+            <td class="rule">One of <code class="inline">DepositBalance</code>, <code class="inline">FinalBalance</code> or <code class="inline">BalanceChase</code>. Use <code class="inline">DepositBalance</code> for a deposit balance or any interim instalment, <code class="inline">FinalBalance</code> for the last balance, and <code class="inline">BalanceChase</code> to chase a balance that is still unpaid after an earlier reminder. A <code class="inline">BalanceChase</code> email is worded as a chaser, and its <code class="inline">dueDate</code> may be in the past (it then reads as overdue). Any other value returns <span class="pill crit">400</span>.</td>
           </tr>
           <tr>
             <td class="field">amountDue <span class="req">*</span></td>
@@ -271,13 +271,11 @@
           <tr>
             <td class="field">dueDate <span class="opt">optional</span></td>
             <td class="type">string</td>
-            <td class="rule">ISO&nbsp;8601 date <code class="inline">YYYY-MM-DD</code>. Optional in general, but <strong>required to separate instalments</strong> &mdash; it is part of the de&#8209;duplication key (see below). Omit it and all instalments for one order collapse into a single reminder.</td>
+            <td class="rule">ISO&nbsp;8601 date <code class="inline">YYYY-MM-DD</code>. The date this balance is due. It appears in the email, and for a <code class="inline">BalanceChase</code> it may be <strong>in the past</strong> (the email then reads as overdue). Optional, but recommended so the email can name the date.</td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <p><strong>Optional header</strong> &mdash; <code class="inline">Idempotency-Key</code>: your own key for the notification (printable ASCII, up to 128 chars). When present it overrides the natural de&#8209;dupe key below. Not required; the natural key already makes retries safe.</p>
   </section>
 
   <section>
@@ -302,11 +300,6 @@
             <td class="rule">Missing or wrong <code class="inline">X-Api-Key</code>.</td>
           </tr>
           <tr>
-            <td><span class="pill warn">409</span></td>
-            <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ status: "duplicate", reference }</td>
-            <td class="rule">This notification was already accepted. Safe &mdash; the <code class="inline">reference</code> is the original one. Log it and move on.</td>
-          </tr>
-          <tr>
             <td><span class="pill warn">429</span></td>
             <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "rate_limited" }</td>
             <td class="rule">Over 2,000 requests in 15 minutes from one IP. Back off and retry.</td>
@@ -314,33 +307,34 @@
           <tr>
             <td><span class="pill crit">500</span></td>
             <td class="mono" style="font-size:12.5px;color:var(--ink-2)">{ error: "server_error" }</td>
-            <td class="rule">Transient (recording failed). <strong>Retry</strong> &mdash; the natural de&#8209;dupe key stops a retry ever double&#8209;chasing.</td>
+            <td class="rule">Transient (recording failed &mdash; nothing was queued). <strong>Retry</strong> the same request.</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p>Treat <span class="pill ok">202</span> and <span class="pill warn">409</span> as success. Retry on <span class="pill crit">500</span> and <span class="pill warn">429</span>. Fix and resend on <span class="pill crit">400</span> / <span class="pill crit">401</span>.</p>
+    <p>Treat <span class="pill ok">202</span> as success. Retry on <span class="pill crit">500</span> and <span class="pill warn">429</span>. Fix and resend on <span class="pill crit">400</span> / <span class="pill crit">401</span>.</p>
   </section>
 
   <section>
-    <h2>De-duplication &amp; retries</h2>
-    <p>One reminder record represents <strong>one balance being chased</strong>, not one message per day. The full schedule &mdash; the first email plus the follow&#8209;ups the agent configures &mdash; lives on that record.</p>
-    <div class="note">
-      <strong>Natural key</strong> = <span class="mono">applicationId &nbsp;|&nbsp; orderKey &nbsp;|&nbsp; reminderType &nbsp;|&nbsp; dueDate</span>
-    </div>
+    <h2>One request, one email</h2>
+    <p><strong>There is no de&#8209;duplication.</strong> You decide when a reminder is warranted, so <em>every</em> accepted request sends exactly one email. We do not run our own chase schedule &mdash; when you want to chase again, send another request.</p>
     <ul class="clean">
-      <li><strong>Re&#8209;sending the same balance is safe.</strong> If your daily job re&#8209;pushes a balance that is still outstanding, you get <span class="pill warn">409</span> with the original reference. It does <em>not</em> start a second chase.</li>
-      <li><strong>A new balance is a new record.</strong> A different <code class="inline">dueDate</code>, or <code class="inline">FinalBalance</code> after an earlier <code class="inline">DepositBalance</code>, is treated as a fresh reminder.</li>
-      <li><strong>The window is 60 days.</strong> Within that period the same key always resolves to the same reminder.</li>
+      <li><strong>The same balance can be chased repeatedly.</strong> Re&#8209;sending the same <code class="inline">applicationId</code> / <code class="inline">orderId</code> / <code class="inline">amountDue</code> / <code class="inline">dueDate</code> sends again &mdash; typically as a <code class="inline">BalanceChase</code> once an earlier reminder has gone unpaid.</li>
+      <li><strong>Different stages are independent.</strong> A <code class="inline">DepositBalance</code> and a later <code class="inline">BalanceChase</code> (or <code class="inline">FinalBalance</code>) for the same order both send.</li>
+      <li><strong>We still verify before sending.</strong> Each request re&#8209;checks the live order and skips the email if the balance is already settled, so a customer who has paid is never chased &mdash; you never need to send a "cancel".</li>
     </ul>
+    <div class="note">
+      The natural key <span class="mono">applicationId&nbsp;|&nbsp;orderKey&nbsp;|&nbsp;reminderType&nbsp;|&nbsp;dueDate</span> is stored on each record for our audit and support, but it does not suppress anything.
+    </div>
   </section>
 
   <section>
     <h2>Instalment plans</h2>
-    <p>For a client whose customers pay in several instalments, send <strong>one notification per instalment, on its own due date</strong>. Because <code class="inline">dueDate</code> is part of the key, each distinct date becomes its own reminder chase.</p>
+    <p>For a client whose customers pay in several instalments, send <strong>one notification per instalment, on its own due date</strong>, and send another when you want to chase one that is still unpaid.</p>
     <ul class="clean">
       <li>Use <code class="inline">reminderType: "DepositBalance"</code> for each interim instalment, and <code class="inline">"FinalBalance"</code> for the last one.</li>
       <li>Set <code class="inline">amountDue</code> to that instalment's amount and <code class="inline">dueDate</code> to that instalment's date.</li>
+      <li>To chase an instalment that has passed its date and is still unpaid, send <code class="inline">reminderType: "BalanceChase"</code> with the same <code class="inline">dueDate</code> &mdash; the email is worded as an overdue chaser.</li>
       <li>You do <strong>not</strong> need to tell us "instalment 2 of 3" &mdash; we derive the amount and the instalment position from the live order at send time.</li>
     </ul>
     <p>A two&#8209;stage trip (an interim payment then a final balance) is simply one <code class="inline">DepositBalance</code> and one <code class="inline">FinalBalance</code>, each with its own due date.</p>
@@ -349,8 +343,8 @@
   <section>
     <h2>Cadence &amp; volume</h2>
     <ul class="clean">
-      <li><strong>Call roughly daily.</strong> Pushing the whole daily batch in one burst from one IP is fine &mdash; the rate limit (2,000 / 15&nbsp;min) is there to stop runaway loops, not to shape normal traffic.</li>
-      <li><strong>Re&#8209;send outstanding balances each day.</strong> We re&#8209;check the live order before every email and close the chase the moment the balance is paid, so you never need to send a "cancel".</li>
+      <li><strong>You own the cadence.</strong> Each request sends one email, so send a request whenever you want the customer reminded &mdash; a first <code class="inline">DepositBalance</code> / <code class="inline">FinalBalance</code>, then a <code class="inline">BalanceChase</code> each time you want to chase. We do not send follow&#8209;ups on our own.</li>
+      <li><strong>Bursting is fine.</strong> Pushing a whole batch in one go from one IP is fine &mdash; the rate limit (2,000 / 15&nbsp;min) is there to stop runaway loops, not to shape normal traffic.</li>
       <li><strong>Registration first.</strong> Each <code class="inline">applicationId</code> must be a client we hold before its notifications are accepted. Travelify's demo app <code class="inline">250</code> is accepted out of the box for integration testing.</li>
     </ul>
   </section>
@@ -381,12 +375,25 @@
   <span class="k">"receivedAtUtc"</span>: <span class="s">"2026-09-01T14:07:00.000Z"</span>
 }</pre>
     </div>
+    <div class="code">
+      <div class="code-head"><span class="label">Request &middot; chasing a now-overdue balance</span><button class="copy" type="button" data-copy="reqchase">Copy</button></div>
+<pre id="reqchase"><span class="c">A later push for the same order, once the balance is overdue.</span>
+{
+  <span class="k">"applicationId"</span>: <span class="n">295</span>,
+  <span class="k">"orderId"</span>: <span class="n">100482113</span>,
+  <span class="k">"orderKey"</span>: <span class="s">"3f2504e0-4f89-41d3-9a0c-0305e82c3301"</span>,
+  <span class="k">"reminderType"</span>: <span class="s">"BalanceChase"</span>,
+  <span class="k">"amountDue"</span>: <span class="n">349.00</span>,
+  <span class="k">"currency"</span>: <span class="s">"GBP"</span>,
+  <span class="k">"dueDate"</span>: <span class="s">"2026-10-17"</span>
+}</pre>
+    </div>
   </section>
 
   <section>
     <h2>Current status</h2>
     <div class="note warn">
-      <strong>Email sending is gated off on our side until go&#8209;live.</strong> The endpoint already validates, de&#8209;duplicates and queues, so you can integrate and test against the <span class="pill ok">202</span> / <span class="pill warn">409</span> / <span class="pill crit">400</span> responses now. Nothing is emailed to a customer until we flip the switch for a client.
+      <strong>Real clients are gated off until go&#8209;live.</strong> A client is only emailed once they have opted in and we have switched them live, so a live customer is never chased by accident. The <strong>demo app <code class="inline">250</code> is enabled for end&#8209;to&#8209;end testing</strong> &mdash; a valid request for app 250 with an outstanding balance will actually send the reminder email &mdash; so you can exercise the whole flow, including <code class="inline">BalanceChase</code>, against a real send.
     </div>
   </section>
 
