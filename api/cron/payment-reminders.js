@@ -52,6 +52,8 @@ import {
   summariseOrder,
   timingSafeMatch,
   sendingEnabled,
+  isReminderTestApp,
+  reminderTestRecipient,
   claimSendGuard,
   readOrderRef,
   buildPayUrl,
@@ -145,16 +147,23 @@ async function processRecord(record) {
   const emailsSent = Number.isFinite(f.EmailsSent) ? f.EmailsSent : 0;
   const isFollowUp = emailsSent > 0;
 
+  // A test app (PAYMENT_REMINDER_TEST_APP_IDS) is exempt from the two go-live
+  // gates below — the global send switch and the demo-app suppression — so the
+  // Travelify team can exercise the whole pipeline (e.g. with demo app 250)
+  // while every real client stays paused. Its send is otherwise completely
+  // real; only the recipient is forced to the test inbox (below).
+  const isTestApp = isReminderTestApp(f.ApplicationId);
+
   // 3. Sending disabled → phase 1 resting state. An already-Sent row mid
   //    chase is left completely untouched (disabling the flag PAUSES
-  //    follow-ups, it never rewrites their state).
-  if (!sendingEnabled()) {
+  //    follow-ups, it never rewrites their state). Test apps skip this gate.
+  if (!sendingEnabled() && !isTestApp) {
     if (f.Status === 'Sent') return { outcome: 'waiting' };
     return stamp({ Status: 'Fetched', Attempts: attempts + 1, LastError: '' }, 'fetched');
   }
 
   // 4. Email eligibility gates (each terminal, each auditable in Airtable).
-  if (String(f.ApplicationId) === DEMO_APP_ID) {
+  if (String(f.ApplicationId) === DEMO_APP_ID && !isTestApp) {
     return suppress('demo application — email suppressed');
   }
   if (!isFollowUp) {
@@ -177,9 +186,16 @@ async function processRecord(record) {
     }
     return suppress('no outstanding balance on the order');
   }
-  const customerEmail = String(order.customerEmail || '').trim().toLowerCase();
-  if (!isValidEmail(customerEmail)) {
-    return suppress('order has no valid customer email');
+  // Recipient. A test-app send is redirected to the single configured test
+  // inbox (PAYMENT_REMINDER_TEST_EMAIL) so a demo order can never reach a real
+  // customer; without that var set, a test app falls back to the order's email.
+  const orderEmail = String(order.customerEmail || '').trim().toLowerCase();
+  const testTo = isTestApp ? reminderTestRecipient() : null;
+  const recipient = testTo || orderEmail;
+  if (!isValidEmail(recipient)) {
+    return suppress(isTestApp && !testTo
+      ? 'test app: set PAYMENT_REMINDER_TEST_EMAIL (order carries no valid customer email to fall back to)'
+      : 'order has no valid customer email');
   }
 
   // 5. Render with the agency's branding and send AS the agency. The
@@ -227,9 +243,14 @@ async function processRecord(record) {
     return stamp({ ...sentFields, LastError: 'send previously recorded (guard hit)' }, 'sent');
   }
 
+  if (isTestApp) {
+    console.log('[payment-reminders:worker] TEST-MODE send for app', f.ApplicationId,
+      'ref', reference, 'cycle', cycle, '→', maskEmail(recipient));
+  }
+
   const sendResult = await sendViaSendGrid({
     from: buildFromField(branding.name),
-    to: customerEmail,
+    to: recipient,
     replyTo: isValidEmail(branding.replyTo) ? branding.replyTo : undefined,
     subject,
     html,
@@ -243,7 +264,7 @@ async function processRecord(record) {
     return finishFailure(`email send failed: ${sendResult.error || 'unknown'}`, isFollowUp ? {} : { Status: 'Fetched' });
   }
 
-  console.log('[payment-reminders:worker] reminder', `${cycle}/${planned}`, 'emailed for', reference, 'to', maskEmail(customerEmail));
+  console.log('[payment-reminders:worker] reminder', `${cycle}/${planned}`, 'emailed for', reference, 'to', maskEmail(recipient));
   return stamp(sentFields, 'sent');
 }
 

@@ -613,6 +613,63 @@ await worker(cronReq(), res);
 ok(res.body.waiting === 1 && state.patches.length === 0 && state.sends.length === 0, 'sending disabled mid-chase → Sent rows left untouched');
 state.brandingWidget = null;
 
+// ── Test mode — end-to-end integration testing without going live ────────────
+// Global sending stays OFF (deleted above). PAYMENT_REMINDER_TEST_APP_IDS lets
+// named apps send anyway and bypass the demo-app suppression;
+// PAYMENT_REMINDER_TEST_EMAIL redirects every such send to one inbox.
+state.brandingWidget = {
+  id: 'recWIDGETMB00001',
+  fields: {
+    WidgetType: 'My Booking', Status: 'Active', ClientRecordId: 'recCLIENT00000001',
+    FromName: 'Sunshine Travel', FromEmail: 'bookings@sunshine.example',
+    Config: JSON.stringify({ support: { email: 'help@sunshine.example', phone: '01202 123 456' }, pageUrl: 'https://sunshine.example/my-booking' }),
+  },
+};
+
+process.env.PAYMENT_REMINDER_TEST_APP_IDS = '250';
+process.env.PAYMENT_REMINDER_TEST_EMAIL = 'devtest@travelify.example';
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-test-1', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(res.body.sent === 1 && state.sends.length === 1, 'test app sends even with global sending OFF');
+ok(state.sends[0]?.personalizations?.[0]?.to?.[0]?.email === 'devtest@travelify.example', 'test send is redirected to PAYMENT_REMINDER_TEST_EMAIL, never the order customer');
+ok(state.patches.at(-1)?.fields.Status === 'Sent', 'test-app row advances to Sent');
+
+delete process.env.PAYMENT_REMINDER_TEST_EMAIL;
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-test-2', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends[0]?.personalizations?.[0]?.to?.[0]?.email === 'sarah@example.com', 'no test inbox → falls back to the order customer email');
+
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-test-3', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder({ customerEmail: '' }) });
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && /PAYMENT_REMINDER_TEST_EMAIL/.test(state.patches.at(-1)?.fields.LastError || ''), 'test app, no inbox, no order email → Skipped with a clear message');
+
+// With test mode OFF but sending ON, the demo app is suppressed exactly as
+// before — proving the allowlist bypass never weakened the default guard.
+delete process.env.PAYMENT_REMINDER_TEST_APP_IDS;
+process.env.PAYMENT_REMINDER_SEND_ENABLED = 'true';
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-test-4', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+state.travelify = () => ({ status: 200, body: payableOrder() });
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && /demo application/.test(state.patches.at(-1)?.fields.LastError || ''), 'test mode off → demo app 250 suppressed exactly as before');
+
+delete process.env.PAYMENT_REMINDER_SEND_ENABLED;
+delete process.env.PAYMENT_REMINDER_TEST_EMAIL;
+state.brandingWidget = null;
+
 // ── F. Source guards (schedule) ──────────────────────────────────────────────
 const libSrc = readFileSync(new URL('../api/_lib/payment-reminders.js', import.meta.url), 'utf8');
 ok(/AND\(\{Status\}='Sent',\{NextEmailAtUtc\},\{NextEmailAtUtc\}<=NOW\(\)\)/.test(libSrc), 'queue formula picks up due follow-ups');
