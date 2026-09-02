@@ -496,13 +496,17 @@ await worker(cronReq(), res);
 ok(res.body.suppressed === 1 && state.sends.length === 0, 'already paid in full → no email');
 ok(state.patches.at(-1)?.fields.Status === 'Skipped' && /no outstanding balance/.test(state.patches.at(-1)?.fields.LastError), 'settled booking marked Skipped with the reason');
 
+// The demo app 250 is a real test site, not a special case: with sending on and
+// its My Booking widget opted in, it emails like any other app (the demo hard
+// suppression was removed). In production it resolves to a real Clients row.
 state.redis.clear();
+state.clients[250] = { apiKey: 'demo-key', name: 'Demo Client' };
 state.accepted = [queued({ Reference: 'ref-mail-3', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
 state.patches = []; state.sends = [];
 state.travelify = () => ({ status: 200, body: payableOrder() });
 res = mockRes();
 await worker(cronReq(), res);
-ok(state.sends.length === 0 && /demo application/.test(state.patches.at(-1)?.fields.LastError || ''), 'demo app 250 never emails a real customer');
+ok(state.sends.length === 1 && state.patches.at(-1)?.fields.Status === 'Sent', 'demo app 250 sends like any opted-in app when sending is on');
 
 state.redis.clear();
 state.accepted = [queued({ Reference: 'ref-mail-4', ReceivedAtUtc: new Date(Date.now() - 3 * 24 * 3600000).toISOString() })];
@@ -675,8 +679,8 @@ res = mockRes();
 await worker(cronReq(), res);
 ok(state.sends.length === 0 && /PAYMENT_REMINDER_TEST_EMAIL/.test(state.patches.at(-1)?.fields.LastError || ''), 'test app, no inbox, no order email → Skipped with a clear message');
 
-// With test mode OFF but sending ON, the demo app is suppressed exactly as
-// before — proving the allowlist bypass never weakened the default guard.
+// Demo app 250 with sending ON and NO test allowlist: it is a real test site,
+// so it emails like any opted-in client — the demo-app hard suppression is gone.
 delete process.env.PAYMENT_REMINDER_TEST_APP_IDS;
 process.env.PAYMENT_REMINDER_SEND_ENABLED = 'true';
 state.redis.clear();
@@ -685,9 +689,19 @@ state.patches = []; state.sends = [];
 state.travelify = () => ({ status: 200, body: payableOrder() });
 res = mockRes();
 await worker(cronReq(), res);
-ok(state.sends.length === 0 && /demo application/.test(state.patches.at(-1)?.fields.LastError || ''), 'test mode off → demo app 250 suppressed exactly as before');
+ok(state.sends.length === 1 && state.sends[0]?.personalizations?.[0]?.to?.[0]?.email === 'sarah@example.com' && state.patches.at(-1)?.fields.Status === 'Sent', 'sending on, no allowlist → demo app 250 sends to the real order customer like any app');
 
+// Pre-launch guard intact: with sending OFF and 250 not a test app, the demo app
+// rests at the global switch (no email) — the switch is the guard now, not a
+// demo special-case.
 delete process.env.PAYMENT_REMINDER_SEND_ENABLED;
+state.redis.clear();
+state.accepted = [queued({ Reference: 'ref-test-5', ApplicationId: 250, ReceivedAtUtc: recentIso() })];
+state.patches = []; state.sends = [];
+res = mockRes();
+await worker(cronReq(), res);
+ok(state.sends.length === 0 && state.patches.at(-1)?.fields.Status === 'Fetched', 'sending OFF → demo app 250 rests at the global gate, no email');
+
 delete process.env.PAYMENT_REMINDER_TEST_EMAIL;
 state.brandingWidget = null;
 
