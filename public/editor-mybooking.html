@@ -460,6 +460,39 @@
           </div></div>
         </div>
 
+        <div class="section" data-section="reminder-emails">
+          <div class="section-header">
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg> Reminder emails</h3>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="section-body"><div class="section-body-inner">
+            <div class="field-help">Write the balance reminder emails your customers get. Leave a message blank to use our standard wording. Click a tag to drop it in &mdash; we fill it per booking, and the &ldquo;Pay my balance&rdquo; button is added for you automatically.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 14px;">
+              <button type="button" class="re-tag" data-tag="{firstName}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">First name</button>
+              <button type="button" class="re-tag" data-tag="{amount}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Amount due</button>
+              <button type="button" class="re-tag" data-tag="{dueDate}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Due date</button>
+              <button type="button" class="re-tag" data-tag="{balance}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Total balance</button>
+              <button type="button" class="re-tag" data-tag="{bookingRef}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Booking ref</button>
+              <button type="button" class="re-tag" data-tag="{agencyName}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Company name</button>
+              <button type="button" class="re-tag" data-tag="{agencyPhone}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Phone</button>
+              <button type="button" class="re-tag" data-tag="{instalmentNumber}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Instalment no.</button>
+              <button type="button" class="re-tag" data-tag="{instalmentTotal}" style="font:inherit;font-size:11px;font-weight:600;padding:4px 9px;border:1px solid var(--tgse-border);border-radius:20px;background:var(--tgse-panel-2);color:var(--tgse-ink-2);cursor:pointer;">Instalment total</button>
+            </div>
+
+            <div style="font-size:12px;font-weight:700;color:var(--tgse-ink-2);margin:6px 0 8px;text-transform:uppercase;letter-spacing:.04em;">Interim / instalment reminder</div>
+            <div class="field"><label>Subject</label><input type="text" id="re-interim-subject" maxlength="200" placeholder="Your interim payment of {amount} is due"></div>
+            <div class="field"><label>Message</label><textarea id="re-interim-body" rows="8" placeholder="Hello {firstName}&#10;This is a friendly reminder that the interim payment of {amount} for your booking is due on {dueDate}."></textarea></div>
+            <div class="field-help">Preview <span id="re-interim-preview" style="display:block;margin-top:4px;padding:8px 10px;background:var(--tgse-panel-2);border:1px solid var(--tgse-border);border-radius:8px;white-space:pre-wrap;color:var(--tgse-ink-2);"></span></div>
+
+            <div style="font-size:12px;font-weight:700;color:var(--tgse-ink-2);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em;">Final balance reminder</div>
+            <div class="field"><label>Subject</label><input type="text" id="re-final-subject" maxlength="200" placeholder="Your final balance of {amount} is due"></div>
+            <div class="field"><label>Message</label><textarea id="re-final-body" rows="8" placeholder="Hello {firstName}&#10;The countdown is on! The final balance payment of {amount} for your booking is due on {dueDate}."></textarea></div>
+            <div class="field-help">Preview <span id="re-final-preview" style="display:block;margin-top:4px;padding:8px 10px;background:var(--tgse-panel-2);border:1px solid var(--tgse-border);border-radius:8px;white-space:pre-wrap;color:var(--tgse-ink-2);"></span></div>
+
+            <div class="field-help">The interim message covers the deposit balance and every instalment; the final message covers the last balance. For Lapland-style trips that's simply interim + final.</div>
+          </div></div>
+        </div>
+
         <div class="section" data-section="luna">
           <div class="section-header">
             <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Luna Chat Integration</h3>
@@ -656,6 +689,7 @@ import { renderEmailHtml } from '/_email-template.js';
       support: { email: '', phone: '' },
       pageUrl: '',
       reminders: { enabled: false, count: 3, gapDays: 7 },
+      reminderEmails: { interim: { subject: '', body: '' }, final: { subject: '', body: '' } },
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
@@ -887,6 +921,63 @@ import { renderEmailHtml } from '/_email-template.js';
         else state.config.reminders.gapDays = Number.isFinite(n) ? n : 7;
       }
       if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    });
+  });
+
+  // ===== Reminder email templates (per stage) =====
+  let reLastField = null;
+  function reEnsure() {
+    if (!state.config.reminderEmails || typeof state.config.reminderEmails !== 'object') state.config.reminderEmails = {};
+    if (!state.config.reminderEmails.interim) state.config.reminderEmails.interim = { subject: '', body: '' };
+    if (!state.config.reminderEmails.final) state.config.reminderEmails.final = { subject: '', body: '' };
+  }
+  function reSampleVars() {
+    return {
+      firstname: 'Sarah', name: 'Sarah', amount: '£350.00', duedate: 'Friday 15 November 2026',
+      balance: '£1,200.00', bookingref: 'ST-24189',
+      agencyname: (state.config.brand && state.config.brand.name) || 'Your Travel Co',
+      agencyphone: (state.config.support && state.config.support.phone) || '01202 000000',
+      agencyemail: (state.config.support && state.config.support.email) || 'hello@example.com',
+      instalmentnumber: '1', instalmenttotal: '3',
+    };
+  }
+  function reMerge(text) {
+    const v = reSampleVars();
+    return String(text || '').replace(/\{\s*([a-zA-Z]+)\s*\}/g, (m, k) =>
+      Object.prototype.hasOwnProperty.call(v, k.toLowerCase()) ? v[k.toLowerCase()] : m);
+  }
+  function reRenderPreview() {
+    reEnsure();
+    const re = state.config.reminderEmails;
+    const iPrev = document.getElementById('re-interim-preview');
+    const fPrev = document.getElementById('re-final-preview');
+    if (iPrev) iPrev.textContent = re.interim.body ? (reMerge(re.interim.subject) + '\n\n' + reMerge(re.interim.body)) : 'Using our standard interim reminder wording.';
+    if (fPrev) fPrev.textContent = re.final.body ? (reMerge(re.final.subject) + '\n\n' + reMerge(re.final.body)) : 'Using our standard final reminder wording.';
+  }
+  ['re-interim-subject', 're-interim-body', 're-final-subject', 're-final-body'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('focus', () => { reLastField = el; });
+    el.addEventListener('input', () => {
+      reEnsure();
+      const parts = id.split('-'); // re-interim-subject → ['re','interim','subject']
+      state.config.reminderEmails[parts[1]][parts[2]] = el.value;
+      reRenderPreview();
+      if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+    });
+  });
+  document.querySelectorAll('.re-tag').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const tag = chip.getAttribute('data-tag') || '';
+      const el = reLastField || document.getElementById('re-interim-body');
+      if (!el) return;
+      const s = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
+      const e = typeof el.selectionEnd === 'number' ? el.selectionEnd : el.value.length;
+      el.value = el.value.slice(0, s) + tag + el.value.slice(e);
+      el.focus();
+      const pos = s + tag.length;
+      try { el.setSelectionRange(pos, pos); } catch (err) { /* not selectable */ }
+      el.dispatchEvent(new Event('input'));
     });
   });
 
@@ -1159,6 +1250,12 @@ import { renderEmailHtml } from '/_email-template.js';
       document.getElementById('reminder-enabled').value = state.config.reminders?.enabled ? 'on' : 'off';
       document.getElementById('reminder-count').value = String(state.config.reminders?.count || 3);
       document.getElementById('reminder-gap').value = String(state.config.reminders?.gapDays || 7);
+      reEnsure();
+      document.getElementById('re-interim-subject').value = state.config.reminderEmails.interim.subject || '';
+      document.getElementById('re-interim-body').value = state.config.reminderEmails.interim.body || '';
+      document.getElementById('re-final-subject').value = state.config.reminderEmails.final.subject || '';
+      document.getElementById('re-final-body').value = state.config.reminderEmails.final.body || '';
+      reRenderPreview();
       document.getElementById('copy-cancel-email-msg').value = state.config.cancelEmailMessage || '';
       document.getElementById('brand-name').value = state.config.brand?.name || '';
       // Layout tile

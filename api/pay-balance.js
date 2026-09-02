@@ -119,8 +119,8 @@ function buildSchedule(raw) {
 //                  that is still unpaid (initial + due instalments); if nothing
 //                  is due yet, the next unpaid instalment.
 //   outstanding  — the whole unpaid balance (all remaining schedule entries).
-//   dueDate      — the due date the "charge" hangs off (latest due-now instalment
-//                  date, or the next instalment's date), or null for initial-only.
+//   dueDate      — today for a due-now amount (never a past instalment date), or
+//                  the next instalment's date when nothing is due yet.
 function reconcileSchedule(schedule, paid, todayStr) {
   let leftToApply = p2(Math.max(0, paid));
   let dueNow = 0;
@@ -142,6 +142,33 @@ function reconcileSchedule(schedule, paid, todayStr) {
   // date. When nothing is due yet, it's the next instalment's own date.
   const dueDate = dueNow > 0 ? todayStr : (firstFuture ? firstFuture.day : null);
   return { charge, outstanding, dueDate };
+}
+
+// Where this reminder's due date sits in the order's balance schedule, for the
+// {instalmentNumber} / {instalmentTotal} merge tags in a client's own copy. The
+// deposit is `initialAmount` (taken at booking) and is NOT in the breakdown, so
+// the breakdown is exactly the set of balance stages: Lapland's interim + final
+// is a 2-entry schedule. We anchor on the reminder's own due date (Travelify
+// pings once per instalment date, so f.DueDate identifies WHICH one) rather than
+// a live paid-count, which shifts as payments come in. Returns null for a single
+// balance (not an instalment plan) or when the due date matches no stage.
+export function instalmentPosition(raw, dueDateIso) {
+  const plan = findPaymentPlan(raw);
+  if (!plan) return null;
+  const entries = plan.breakdown
+    .map((b) => ({
+      amount: Number(b.amount),
+      day: typeof b.dueDate === 'string' ? b.dueDate.slice(0, 10) : '',
+      due: parseDate(b.dueDate),
+    }))
+    .filter((e) => Number.isFinite(e.amount) && e.amount > 0);
+  if (entries.length < 2) return null; // one balance stage is not an instalment plan
+  entries.sort((a, b) => (a.due == null ? 1 : b.due == null ? -1 : a.due - b.due));
+  const total = entries.length;
+  const want = typeof dueDateIso === 'string' ? dueDateIso.slice(0, 10) : '';
+  const idx = want ? entries.findIndex((e) => e.day === want) : -1;
+  if (idx < 0) return null; // due date not on the schedule — leave the tags unfilled
+  return { number: idx + 1, total };
 }
 
 // Amount already paid against the order. Travelify gives an authoritative

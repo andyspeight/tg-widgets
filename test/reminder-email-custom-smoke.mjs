@@ -10,6 +10,7 @@
  */
 import { renderReminderEmail } from '../api/_lib/payment-reminder-email.js';
 import { normaliseReminderEmails } from '../api/_lib/payment-reminders.js';
+import { instalmentPosition } from '../api/pay-balance.js';
 
 let passed = 0, failed = 0;
 const ok = (name, cond) => { if (cond) { passed++; console.log('  ✓ ' + name); } else { failed++; console.error('  ✗ ' + name); } };
@@ -76,6 +77,41 @@ console.log('An unknown merge tag is left visible (a typo is obvious, not silent
   const template = { subject: 'x', body: 'Hi {firstName}, ref {madeUpTag} here.' };
   const { html } = renderReminderEmail({ agency: AGENCY, customerFirstName: 'Sam', orderRef: 'ST-1', charge: CHARGE, dueDateIso: '2026-11-15', payUrl: PAY, sequence: { n: 1, of: 1 }, template });
   ok('unknown {madeUpTag} stays literal', html.includes('{madeUpTag}'));
+}
+
+console.log('Instalment position is read off the order schedule, and the tags fill');
+{
+  // Lapland-style two-stage balance: interim + final (the deposit is initialAmount,
+  // not in the breakdown). Travelify pings once per due date, so the reminder's own
+  // due date identifies which stage this is.
+  const order = { currency: 'GBP', depositOption: { currency: 'GBP', breakdown: [
+    { amount: 400, dueDate: '2026-09-15' },
+    { amount: 800, dueDate: '2026-11-15' },
+  ] } };
+  ok('interim due date → instalment 1 of 2', JSON.stringify(instalmentPosition(order, '2026-09-15')) === JSON.stringify({ number: 1, total: 2 }));
+  ok('final due date → instalment 2 of 2', JSON.stringify(instalmentPosition(order, '2026-11-15')) === JSON.stringify({ number: 2, total: 2 }));
+  ok('an ISO datetime due date still matches on the day', JSON.stringify(instalmentPosition(order, '2026-11-15T00:00:00')) === JSON.stringify({ number: 2, total: 2 }));
+  ok('a due date not on the schedule → null (tags stay unfilled)', instalmentPosition(order, '2026-12-25') === null);
+  ok('a single balance stage is not an instalment plan → null', instalmentPosition({ depositOption: { breakdown: [{ amount: 500, dueDate: '2026-11-15' }] } }, '2026-11-15') === null);
+  ok('no schedule → null', instalmentPosition({ currency: 'GBP' }, '2026-11-15') === null);
+
+  // And the tags render in a client's own copy when the cron passes the position.
+  const template = { subject: 'x', body: 'This is payment {instalmentNumber} of {instalmentTotal}.' };
+  const { html } = renderReminderEmail({
+    agency: AGENCY, customerFirstName: 'Sam', orderRef: 'ST-1', charge: CHARGE,
+    dueDateIso: '2026-11-15', payUrl: PAY, sequence: { n: 1, of: 2 }, template,
+    instalment: { number: 2, total: 2 },
+  });
+  ok('{instalmentNumber}/{instalmentTotal} fill from the passed position', html.includes('This is payment 2 of 2.'));
+
+  // Without a position (a plain single balance), the instalment tags blank out —
+  // consistent with every other always-defined tag (e.g. {agencyPhone}). They are
+  // situational copy a client only adds to instalment wording, so this is benign.
+  const { html: noInst } = renderReminderEmail({
+    agency: AGENCY, customerFirstName: 'Sam', orderRef: 'ST-1', charge: CHARGE,
+    dueDateIso: '2026-11-15', payUrl: PAY, sequence: { n: 1, of: 1 }, template,
+  });
+  ok('no instalment passed → the instalment tags resolve to empty, not literal', !noInst.includes('{instalmentNumber}') && !noInst.includes('{instalmentTotal}'));
 }
 
 console.log('normaliseReminderEmails sanitises the stored config');
