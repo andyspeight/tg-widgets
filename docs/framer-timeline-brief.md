@@ -492,3 +492,41 @@ page, which is the intended effect.
 - A `CountUp` code component now exists in the project (CountUp.tsx), so the
   July note that count-ups need a code component that does not exist is out
   of date. The chips stayed static anyway, per the brief.
+
+## Home page banner, 3 Sep 2026 (after the page went live)
+
+Andy merged `timeline-roadmap` into main and published, so `/roadmap` is live
+(www.travelgenix.io/roadmap returns 200) and the "Product updates" footer
+link is on every page. The `timeline-roadmap` branch no longer exists; the
+merge consumed it, and the page keeps its node ids (page `JblnZB_PD`).
+
+He then asked for a banner on the HOME page, in the gap between the hero and
+the "One platform, every supplier you need" section, to send people to the
+new page. Built on a NEW branch `home-roadmap-banner` (id `abbduxbdm`, from
+main). Not merged, not published.
+
+Home page is `augiA20Il`; breakpoints Desktop `WQLkyLRf1`, Tablet
+`VupmqOTdF`, Phone `KWaNhfmwl`. Its desktop sections in order: Hero
+`iNpLBEyxH`, Supplier Marquee `MnN8dGzA2`, Engine Room `BoLjWKWwI`, Stats Row
+`w5_fscuBX`, Product Showcase `FGKKGGCzp`, Customer Results `cYfaOsYhH`, Who
+It's For `Z8IYSFVmX`, Pricing `EUkCQoGBN`, Home FAQ Teaser `vB7iCB4dY`, Call
+to Action `IWH0pWgvr`. The banner went in at index 1, between Hero and
+Supplier Marquee.
+
+What it is: a white section (`YkvDT2HNv`, padding 56px 32px 8px) holding one
+navy gradient card (`d5IUY1Z8a`, linear-gradient(135deg, #14224A 0%, #1B2B5B
+100%), radius 24px, maxWidth 1080). Left column (`MlsU6kshl`): a translucent
+eyebrow pill with a teal Sparkles icon and "Product updates", the heading
+"Five months of shipping, in one place" (`lhE7QBH4S`, 34px/800 white), a body
+line (`t54Q3jQLt`) and the Travelgenix Button in its Primary variant
+(`t_jtfBQX2`, "See what we've been working on", href `/roadmap`). Right
+column: a browser-framed preview (`WsLPcXTTr`, 470px) whose screenshot
+(`QIuL2sWyi`) is a real capture of the live page's top, uploaded as
+`roadmap-page-preview.jpg`. Tablet and Phone stack the card vertically with
+the preview full width; Phone drops the heading to 26px.
+
+Gotcha: `maxWidth="none"` is rejected; use `maxWidth="100%"` to clear a
+maxWidth on a replica.
+
+Re-shoot `roadmap-page-preview.jpg` whenever the /roadmap page changes
+enough to make the thumbnail stale.
