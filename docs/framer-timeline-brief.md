@@ -223,54 +223,61 @@ https://framer.com/projects/Scary-Wealth--vna1Dww9wfns4nJSst1v-dfckl?node=JblnZB
 
 ### What is on the page
 
-Path `/roadmap`, title "What we've built, and what's next", on the shared
-"Travelgenix Layout" template, with Desktop, Tablet and Phone breakpoints and
-screenshots checked at all three after every pass.
+Path `/roadmap`, title "What we've been working on, and what's coming soon"
+(Andy's change of direction on 3 Sep: recent work and what is coming, nothing
+before the start of May). On the shared "Travelgenix Layout" template, with
+Desktop, Tablet and Phone breakpoints, screenshots checked at all three after
+every pass.
 
-1. Hero on the teal radial glow (the same fill as the Booking Widgets hero):
-   the site's tri-colour bar, the Display heading, a two-line Body intro and
-   a white stat card with three large static numbers ("6 months of shipping",
-   "2,648 updates shipped", "61 embeddable widgets"). No eyebrow badge, no
-   count-up, no photo. On Phone the card stacks the three numbers.
-2. "Six months, month by month" on white: one continuous rail with a navy
-   medallion per node carrying a Lucide icon (Hourglass, Rocket, Users,
-   Calendar Days, Globe, Sparkles, Ticket). The first node is "January to
-   March 2026" with a hollow medallion and a dashed card labelled "Note for
-   Andy, remove before this goes live", saying the quarter is empty on
-   purpose. Then April to September, each a white card with a headline launch
-   in bold (The widget suite is born / Client accounts and the client portal /
-   The Appointment Scheduler / Travelgenix Sites / The site builder / Event
-   Tickets go live), a one-line blurb, a divider and four to six supporting
-   items with check marks in two columns (one column on Phone).
-3. "What's next" on the light gradient band: three lanes headed by a pill
-   (Now in navy, Next in teal tint, Later outlined) and a one-line meaning.
-   Now has 7 cards, Next 8 and Later 5. Each card is a white tile with a
-   product icon in a teal-tinted square, the product name in small caps navy,
-   the capability in bold and one line on why it matters. Cards lift 3px
-   with a deeper shadow on hover. The lanes container carries the page's ONE
-   scroll reveal (fade and rise on entering view); nothing else animates.
+1. Hero on the teal radial glow: the site's tri-colour bar, the Display
+   heading, a two-line Body intro and a white stat card with three large
+   static numbers ("5 months of shipping", "2,212 updates shipped", "61
+   embeddable widgets"; the commit count is from full git history, 1 May to
+   3 Sep). No eyebrow badge, no count-up. On Phone the card stacks.
+2. "Since May, month by month" on white: one continuous rail with a navy
+   medallion per month carrying a Lucide icon (Users, Calendar Days, Globe,
+   Sparkles, Ticket). Five month cards, May to September. Each card is a
+   white tile split in two on Desktop: copy on the left (a headline launch
+   in bold, a one-line blurb, a divider, four to six check-marked items in
+   one column) and a browser-framed MOCKUP on the right (400px wide, 4:3, a
+   real screenshot). On Tablet and Phone the mockup drops below the copy at
+   full width. The January to March note and the April node are gone.
+   Headlines and mockups: May "Client accounts and the client portal" (the
+   widget catalogue at tg-widgets.vercel.app); June "The Appointment
+   Scheduler" (demo-appointment); July "Travelgenix Sites"
+   (coastwise.travelgenixsites.com); August "Group Trips and Escorted Tours"
+   (demo-trips-page, the Santorini retreat), with the site builder in the
+   blurb; September "Event Tickets go live" (demo-venueguide, Wembley).
+3. "What's coming soon" on the light gradient band: three lanes headed by a
+   pill (Now in navy, Next in teal tint, Later outlined) and a one-line
+   meaning. Now has 7 cards, Next 8 and Later 5. Each card is a white tile
+   with a product icon in a teal-tinted square, the product name in small
+   caps navy, the capability in bold and one line on why it matters. Cards
+   lift 3px on hover. The lanes container carries the page's ONE scroll
+   reveal; nothing else animates.
 4. Closing call to action on the second glow: "Want to see any of this
    running?", one line, the Travelgenix Button in its Primary variant to
    /contact, and a "See pricing" text link using the site's Navigation Link
    preset.
 
-Tablet: sections drop to 24px side padding, the three lanes stack and each
-lane's cards become a two-column grid with rows that fit their content.
-Phone: 20px side padding, the rail moves in and the medallions shrink,
-everything single column, the stat card and the CTA actions stack or wrap.
+The five mockup screenshots were taken by Framer's own screenshot service
+(a `readProject` screenshot query with a `url`), cropped to 1200x900 here,
+and uploaded to the project as image assets named roadmap-may.jpg to
+roadmap-sep.jpg with alt text. They are real pages as they rendered on 3 Sep;
+re-shoot them when the products change.
 
 ### Node ids for the next session
 
 Page `JblnZB_PD`. Breakpoints Desktop `dj9AZu4uB`, Tablet `wDPei4RnY`,
 Phone `LKNmhTH7h` (replica descendants are the breakpoint id followed by the
 desktop id). Sections: Hero `K2lxtp5u5` (stat card `noCscvzV5`), Timeline
-`aFg_kTUuv` (rail list `WijLReGZu`; Q1 note row `EUEm7apXA`, medallion
-`CrSt7HhWQ`; month rows April `egxBNTa5Y`, May `OAwtpba0y`, June
-`bZy2gANM8`, July `OfCz4AtNz`, August `wZxCOm2xY`, September `WoCfe2lng`;
-month cards `Y67zM0PYp`, `MvqVSKDoQ`, `OIqPfcZXh`, `NlYbzUhJV`,
-`MldJNtNDk`, `MN158hOzJ`), Roadmap `pl4u5N4a2` (lanes `Tiqqt69cj`; pills
-`oOswmJklt`, `hTKyZfB8o`, `ANaATYAvm`; card containers `cUHo79m5m`,
-`pFu6prN6W`, `xoXuxp4rI`), Closing CTA `xut44Oqjg`.
+`aFg_kTUuv` (rail list `WijLReGZu`, maxWidth 1040; month rows May
+`OAwtpba0y`, June `bZy2gANM8`, July `OfCz4AtNz`, August `wZxCOm2xY`,
+September `WoCfe2lng`; month cards `MvqVSKDoQ`, `OIqPfcZXh`, `NlYbzUhJV`,
+`MldJNtNDk`, `MN158hOzJ`, each holding a "Copy" column and a "Mockup"
+frame), Roadmap `pl4u5N4a2` (lanes `Tiqqt69cj`; pills `oOswmJklt`,
+`hTKyZfB8o`, `ANaATYAvm`; card containers `cUHo79m5m`, `pFu6prN6W`,
+`xoXuxp4rI`), Closing CTA `xut44Oqjg`.
 
 ### Left out and why
 
@@ -299,11 +306,10 @@ month cards `Y67zM0PYp`, `MvqVSKDoQ`, `OIqPfcZXh`, `NlYbzUhJV`,
 
 ### Still open for Andy
 
-- The January to March milestones (the note card on the page).
-- Whether "2,648 updates shipped" is the number he wants on a public page
-  (it is the commit count from the brief), and whether the chips stay at all.
-- Whether the page should be a draft until the note is removed. It is NOT a
-  draft, so merging the branch and publishing would put it live as is.
+- Whether "2,212 updates shipped" is the number he wants on a public page
+  (it is the commit count since 1 May), and whether the stat card stays.
+- The page is NOT a draft, so merging the branch and publishing would put it
+  live as is. Nothing on it is marked internal any more.
 - The site has grown since July: the product pages now live under
   /what-we-do/, and there are /insights, /compare and /customers sections.
   The July Airtable notes about "11 pages" are out of date.
@@ -339,6 +345,20 @@ month cards `Y67zM0PYp`, `MvqVSKDoQ`, `OIqPfcZXh`, `NlYbzUhJV`,
   Detach first with `textStylePreset="null"` in its own command (this inlines
   the preset's styles), then set the overrides. Colour overrides on a preset
   node are allowed.
+- SETTING `text` ON A RICH TEXT NODE RESETS ITS STYLES to the defaults (16px,
+  weight 400, black, start-aligned) and drops its preset. For a copy change
+  use `framer.agent.replaceText`, or re-apply the preset and inline styles in
+  a second command without `text`. Cost today: five headings and two stat
+  numbers went plain until restyled.
+- Chromium in this container cannot reach the web: the TLS-inspecting proxy
+  closes the tunnel on the browser's hello (both with and without the
+  post-quantum key share). Do not spend time on it. Framer's screenshot
+  service takes screenshots of public URLs from Framer's side and returns a
+  framerusercontent.com image; use that for mockups.
+- `framer.uploadImage({ image: { bytes: <Node Buffer>, mimeType }, name,
+  altText, resolution: "large" })` works from an exec script (pass the
+  Buffer itself, not a `new Uint8Array` made inside the sandbox) and returns
+  the asset `url` to use as a frame `fill`.
 - A `CountUp` code component now exists in the project (CountUp.tsx), so the
   July note that count-ups need a code component that does not exist is out
   of date. The chips stayed static anyway, per the brief.
