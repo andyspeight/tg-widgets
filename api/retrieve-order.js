@@ -132,6 +132,14 @@ function validateWidgetId(s) {
   return s;
 }
 
+// A Control Clients record id (Airtable "rec" + 14 url-safe chars). Only
+// accepted on internal calls — see the handler.
+function validateClientRecordId(s) {
+  if (typeof s !== 'string') return null;
+  const v = s.trim();
+  return /^rec[A-Za-z0-9]{14}$/.test(v) ? v : null;
+}
+
 // ----- Airtable helpers -----
 
 function airtableHeaders() {
@@ -1207,19 +1215,27 @@ export default async function handler(req, res) {
     return notFound(res);
   }
 
-  // Validate inputs
+  // Validate inputs.
+  //
+  // An INTERNAL caller (Luna Work's customer portal) may name the owning
+  // client directly by its Control Clients record id instead of a widget id:
+  // the CRM already knows which client an agency is and has no My Booking
+  // widget to point at. Only honoured on an internal call, so a public caller
+  // can never choose whose Travelify credentials are used.
   const widgetId = validateWidgetId(body.widgetId);
+  const clientRecordId = isInternalCall ? validateClientRecordId(body.clientRecordId) : null;
   const emailAddress = validateEmail(body.emailAddress);
   const departDate = validateDate(body.departDate);
   const orderRef = validateOrderRef(body.orderRef);
 
-  if (!widgetId || !emailAddress || !departDate || !orderRef) {
+  if ((!widgetId && !clientRecordId) || !emailAddress || !departDate || !orderRef) {
     // Generic — don't tell the attacker which field was bad
     return notFound(res);
   }
 
-  // Per-IP+widget rate limit
-  const widgetLimit = rateLimit(`ro:ipw:${ip}:${widgetId}`, 30);
+  // Per-IP+widget (or +client, on the internal path) rate limit
+  const scopeKey = widgetId || `client:${clientRecordId}`;
+  const widgetLimit = rateLimit(`ro:ipw:${ip}:${scopeKey}`, 30);
   if (!widgetLimit.ok) {
     return res.status(429).json({
       error: 'too_many_attempts',
@@ -1232,7 +1248,18 @@ export default async function handler(req, res) {
     let appId;
     let apiKey;
 
-    if (widgetId === DEMO_WIDGET_SENTINEL) {
+    if (clientRecordId) {
+      // ----- Internal client path (no widget) -----
+      // The same credential source as a widget's primary path: the owning
+      // client's Clients record.
+      const creds = await lookupClientCredentialsByRecordId(clientRecordId);
+      if (!creds) {
+        console.warn(`[retrieve-order] No Travelify credentials on Clients record ${clientRecordId} (internal call)`);
+        return notFound(res);
+      }
+      appId = creds.appId;
+      apiKey = creds.apiKey;
+    } else if (widgetId === DEMO_WIDGET_SENTINEL) {
       // ----- Demo path -----
       // Use the hardcoded Travelgenix demo credentials (App 250). These are
       // published in the Travelify docs as the demo account so it's safe to
@@ -1355,7 +1382,7 @@ export default async function handler(req, res) {
       return notFound(res);
     }
     if (!travelifyRes.ok) {
-      console.error(`Travelify returned ${travelifyRes.status} for widget ${widgetId}`);
+      console.error(`Travelify returned ${travelifyRes.status} for ${scopeKey}`);
       return notFound(res);
     }
 
