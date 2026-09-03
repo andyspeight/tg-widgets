@@ -35,7 +35,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.9';
+  const VERSION = '0.3.0';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -303,6 +303,10 @@
 
     /* ── Vertical layout ── */
     .tgoc-card--vertical { flex-direction: column; max-width: 380px; }
+    /* Fluid (opt-in via cfg.fluid): the vertical card fills whatever slot its
+       parent gives it. The offers-grid carousel uses this so cards size to
+       fill the row instead of capping at 380px and leaving gaps. */
+    .tgoc-root--fluid .tgoc-card--vertical { max-width: none; }
     .tgoc-card--vertical .tgoc-img { aspect-ratio: 16 / 10; width: 100%; }
     .tgoc-card--vertical .tgoc-body { flex: 1; }
     .tgoc-card--vertical .tgoc-foot {
@@ -452,6 +456,9 @@
       const layouts = ['vertical', 'horizontal', 'banner', 'split', 'cruise'];
       return {
         layout: layouts.indexOf(c.layout) !== -1 ? c.layout : 'vertical',
+        // Fill the parent's slot instead of capping the vertical card at its
+        // usual 380px — used by carousel/host layouts that size the slot.
+        fluid: c.fluid === true,
         imageSide: c.imageSide === 'right' ? 'right' : 'left',  // split + banner text alignment
         theme: c.theme === 'dark' ? 'dark' : 'light',
         brandColor: c.brandColor || '',
@@ -817,7 +824,7 @@
       const d = this._derive();
 
       this.root = document.createElement('div');
-      this.root.className = 'tgoc-root';
+      this.root.className = 'tgoc-root' + (cfg.fluid ? ' tgoc-root--fluid' : '');
       this.root.setAttribute('data-theme', cfg.theme);
       if (cfg.brandColor) this.root.style.setProperty('--tgo-brand', cfg.brandColor);
       if (cfg.accentColor) {

@@ -236,8 +236,9 @@
                 <button type="button" class="layout-opt" data-layout="cruise"><span class="mini"></span>Cruise</button>
               </div>
               <div class="field-help" id="cruiseHelp" hidden>Cruise style also sets the offer page to the matching Cruise design.</div>
-              <div class="field" id="colsField"><label class="field-label">Grid columns</label>
+              <div class="field" id="colsField"><label class="field-label">Cards across</label>
                 <select id="cfgColumns"><option value="auto">Auto-fit</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+                <div class="field-help">How many cards show side by side — in the grid and the carousel. Auto-fit sizes to the visitor's screen; phones always show one.</div>
               </div>
               <div class="preview-card-wrap"><div class="field-label">Preview</div><div id="cardPreview"></div>
                 <button type="button" class="btn pv-open-full" id="btn-open-preview">
@@ -257,7 +258,7 @@
                 <button type="button" class="layout-opt" data-display="grid"><span class="mini"></span>Grid</button>
                 <button type="button" class="layout-opt" data-display="carousel"><span class="mini"></span>Carousel</button>
               </div>
-              <div class="field-help">Carousel puts the same cards on one swipeable row with arrows and dots, so plenty of offers never make the page longer.</div>
+              <div class="field-help">Carousel puts the same cards on one swipeable row with arrows and dots, so plenty of offers never make the page longer. Cards size to fill the row; use Cards across to show 2, 3 or 4 at a time.</div>
               <div id="carField" hidden>
                 <div class="row2">
                   <div class="field"><label class="field-label">Auto-rotate</label>
@@ -1127,8 +1128,9 @@
       $('cfgCarInterval').value = String(c.carouselInterval || 6);
       $('cfgFilterType').value = c.filterType || '';
       $('cfgFilterTags').value = Array.isArray(c.filterTags) ? c.filterTags.join(', ') : '';
-      // Columns only shape the grid display of vertical cards.
-      $('colsField').hidden = c.cardLayout !== 'vertical' || c.display === 'carousel';
+      // Cards-across applies to vertical cards in both displays (in the
+      // carousel it is the cards-per-view).
+      $('colsField').hidden = c.cardLayout !== 'vertical';
       $('cfgColumns').value = c.columns;
       $('cfgTemplate').value = c.template;
       $('cfgAccent').value = c.accentColor;
@@ -1160,7 +1162,7 @@
       document.querySelectorAll('#layoutGrid .layout-opt').forEach(b => b.addEventListener('click', () => {
         state.config.cardLayout = b.dataset.layout;
         document.querySelectorAll('#layoutGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
-        $('colsField').hidden = state.config.cardLayout !== 'vertical' || state.config.display === 'carousel';
+        $('colsField').hidden = state.config.cardLayout !== 'vertical';
         // Cruise is one cohesive design: the cruise card goes with the cruise
         // offer page, so picking the Cruise card style sets the page template too.
         syncCruise('layout');
@@ -1172,7 +1174,6 @@
         state.config.display = b.dataset.display === 'carousel' ? 'carousel' : 'grid';
         document.querySelectorAll('#displayGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
         $('carField').hidden = state.config.display !== 'carousel';
-        $('colsField').hidden = state.config.cardLayout !== 'vertical' || state.config.display === 'carousel';
         dirty();
       }));
       $('cfgCarAutoplay').addEventListener('change', e => { state.config.carouselAutoplay = e.target.value === 'on'; dirty(); });
