@@ -7,12 +7,12 @@
   #stage { display: block; }
 </style>
 <svg id="stage" xmlns="http://www.w3.org/2000/svg"></svg>
-<script src="heart.js"></script>
+<script src="logo-o.js"></script>
 <script>
 (function () {
   'use strict';
   var q = new URLSearchParams(location.search);
-  var THEME = q.get('theme') === 'blue' ? 'blue' : 'white';
+  var THEME = { white: 1, pink: 1, blue: 1 }[q.get('theme')] ? q.get('theme') : 'white';
   var PRIMARY = '#2F49EA';
   var SECONDARY = '#E10054';
 
@@ -20,21 +20,19 @@
   var W = 240, H = 80;
   var CY = 40;
   var R = 25;             // outer radius of the O
-  var RING_W = 8.5;       // stroke of the O, as heavy as the wordmark's letters
   var X0 = 42, X1 = 198;  // centre of the O at the two ends of the run
   var TRACK_H = 6;
 
   var themes = {
-    // On white: the O and heart exactly as the logo, the bar in the primary blue
-    white: { bg: '#FFFFFF', track: '#E6E9FC', fill: PRIMARY, disc: '#FFFFFF', ring: SECONDARY, heart: SECONDARY },
-    // On the primary blue: the logo reversed out, white O with the pink heart
-    blue:  { bg: PRIMARY,   track: '#697CF0', fill: '#FFFFFF', disc: '#FFFFFF', ring: '#FFFFFF', heart: SECONDARY }
+    // On white: the O in the primary blue, as the master logo, the bar in the secondary pink
+    white: { bg: '#FFFFFF', o: PRIMARY,   hole: '#FFFFFF', track: '#FBE0EA', fill: SECONDARY },
+    // On white: the O in the secondary pink, the bar in the primary blue
+    pink:  { bg: '#FFFFFF', o: SECONDARY, hole: '#FFFFFF', track: '#E6E9FC', fill: PRIMARY },
+    // On the primary blue: the logo reversed out in white
+    blue:  { bg: PRIMARY,   o: '#FFFFFF', hole: PRIMARY,   track: '#697CF0', fill: '#FFFFFF' }
   };
   var C = themes[THEME];
-  // Heart drawing box: inside the counter of the O with clear space around it,
-  // a little larger on the reversed version where the O has no ring
-  var HEART_W = THEME === 'blue' ? 27 : 22;
-  var HEART = loveHeartPath(HEART_W, { overlap: 0.22, stop: 16, k1: 0.28, cp2x: 0.17, cp2y: 0.30, tip: 0.9 });
+  var K = R / LOGO_O.r;   // logo units -> frame pixels
 
   var svg = document.getElementById('stage');
   svg.setAttribute('width', W);
@@ -55,13 +53,16 @@
   el('rect', { x: X0, y: CY - TRACK_H / 2, width: X1 - X0, height: TRACK_H, rx: TRACK_H / 2, fill: C.track });
   var fill = el('rect', { x: X0, y: CY - TRACK_H / 2, width: 0, height: TRACK_H, rx: TRACK_H / 2, fill: C.fill });
 
-  // Two instances of the heart-in-a-circle so the loop can hand over cleanly
+  // Two instances of the O so the loop can hand over cleanly. The heart is the
+  // logo's cut-out: drawn in the background colour on top of the disc, which
+  // on a flat background is the same thing and lets it beat.
   function makePuck() {
     var g = el('g', {});
     var inner = el('g', {}, g);
-    el('circle', { cx: 0, cy: 0, r: R - RING_W / 2, fill: C.disc, stroke: C.ring, 'stroke-width': RING_W }, inner);
-    var heartG = el('g', {}, inner);
-    el('path', { d: HEART.d, fill: C.heart, stroke: C.heart, 'stroke-width': 1.2, 'stroke-linejoin': 'round' }, heartG);
+    var logo = el('g', { transform: 'scale(' + K.toFixed(5) + ') translate(' + (-LOGO_O.cx) + ' ' + (-LOGO_O.cy) + ')' }, inner);
+    el('path', { d: LOGO_O.disc, fill: C.o }, logo);
+    var heartG = el('g', {}, logo);
+    el('path', { d: LOGO_O.heart, fill: C.hole }, heartG);
     return { g: g, inner: inner, heartG: heartG };
   }
   var puckA = makePuck();
@@ -84,9 +85,9 @@
     p.g.setAttribute('transform', 'translate(' + x.toFixed(3) + ' ' + CY + ')');
     p.g.setAttribute('opacity', opacity.toFixed(3));
     p.inner.setAttribute('transform', 'scale(' + scale.toFixed(4) + ')');
-    var hs = 1 + 0.11 * beat;
-    var b = HEART.box, hcx = b.x + b.w / 2, hcy = b.y + b.h / 2 + 0.5; // optical centre sits a touch below the box centre
-    p.heartG.setAttribute('transform', 'scale(' + hs.toFixed(4) + ') translate(' + (-hcx).toFixed(3) + ' ' + (-hcy).toFixed(3) + ')');
+    var hs = 1 + 0.10 * beat;
+    p.heartG.setAttribute('transform',
+      'translate(' + LOGO_O.heartCx + ' ' + LOGO_O.heartCy + ') scale(' + hs.toFixed(4) + ') translate(' + (-LOGO_O.heartCx) + ' ' + (-LOGO_O.heartCy) + ')');
   }
 
   window.setTime = function (t) {

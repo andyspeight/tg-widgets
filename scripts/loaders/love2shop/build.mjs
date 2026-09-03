@@ -4,8 +4,9 @@
 //
 // Renders loader.html frame by frame with Playwright's Chromium (already a
 // devDependency), then hands the PNG frames to make-gif.py, which needs
-// Python 3 with Pillow (`pip install pillow`). Four files come out: the loader
-// on white and on the primary blue, each at 1x and 2x.
+// Python 3 with Pillow (`pip install pillow`). Six files come out: the O in
+// the primary blue on white, the O in the secondary pink on white, and the
+// logo reversed out on the primary blue, each at 1x and 2x.
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -21,6 +22,8 @@ const FPS = 25;
 const variants = [
   { theme: 'white', scale: 1, file: 'love2shop-loader.gif' },
   { theme: 'white', scale: 2, file: 'love2shop-loader@2x.gif' },
+  { theme: 'pink',  scale: 1, file: 'love2shop-loader-pink.gif' },
+  { theme: 'pink',  scale: 2, file: 'love2shop-loader-pink@2x.gif' },
   { theme: 'blue',  scale: 1, file: 'love2shop-loader-blue.gif' },
   { theme: 'blue',  scale: 2, file: 'love2shop-loader-blue@2x.gif' }
 ];

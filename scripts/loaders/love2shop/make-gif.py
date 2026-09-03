@@ -47,11 +47,14 @@ for fr in frames:
     q.putpalette(flat_palette)
     quant.append(q)
 
-# Fail loudly if a brand colour did not survive into the pixels
+# Fail loudly if a brand colour that is in the source frames did not survive
+source = set()
+for fr in (frames[0], frames[len(frames) // 2]):
+    source |= {c for _, c in fr.getcolors(w * h)}
 seen = set()
 for q in (quant[0], quant[len(quant) // 2]):
     seen |= {entries[i] for i in set(q.tobytes())}
-missing = [k for k in KEEP if k not in seen]
+missing = [k for k in KEEP if k in source and k not in seen]
 if missing:
     sys.exit(f"brand colours missing from the GIF: {missing}")
 
