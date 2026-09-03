@@ -19,6 +19,7 @@ import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 
 const GRID = readFileSync(new URL('../public/widget-offers-grid.js', import.meta.url), 'utf8');
+const CARD = readFileSync(new URL('../public/widget-offer-card.js', import.meta.url), 'utf8');
 const EDITOR = readFileSync(new URL('../public/editor-offer-builder.html', import.meta.url), 'utf8');
 
 let passed = 0, failed = 0;
@@ -46,6 +47,15 @@ console.log('Source guards — the carousel is additive and safe');
     /aria-disabled/.test(GRID) && !/\.disabled = /.test(GRID));
   ok('the clamped final scroll position counts as the LAST page (5 offers at 3-up lights dot 2 of 2)',
     /atTrackEnd\(\)\) return pages - 1;/.test(GRID));
+  ok('carousel cards go FLUID so they fill the row instead of capping at 380px with gaps',
+    /fluid: cfg\.display === 'carousel'/.test(GRID)
+    && /fluid: c\.fluid === true/.test(CARD)
+    && /\.tgoc-root--fluid \.tgoc-card--vertical \{ max-width: none; \}/.test(CARD));
+  ok('the original 380px vertical cap is untouched for everything else',
+    /\.tgoc-card--vertical \{ flex-direction: column; max-width: 380px; \}/.test(CARD));
+  ok('the columns choice (2/3/4) drives carousel cards-per-view, clamped on small screens',
+    /const chosen = \(!wideCards && this\.cfg\.columns !== 'auto'\)/.test(GRID)
+    && /w < 640 \? 1 : \(w < 1024 \? Math\.min\(chosen, 2\) : chosen\)/.test(GRID));
   ok('the type/tag filter helper exists and lower-cases both sides',
     /function matchesFilter\(item, cfg\)/.test(GRID) && /filterTags\.indexOf\(String\(tags\[i\]\)\.trim\(\)\.toLowerCase\(\)\)/.test(GRID));
   ok('filter values are normalised once in _defaults',
@@ -78,7 +88,7 @@ console.log('Functional — the real widget in jsdom with inline offers');
   const { window } = new JSDOM('<!doctype html><html><body></body></html>', { runScripts: 'dangerously', pretendToBeVisual: true });
   // Stub the card so ensureCard() resolves without loading widget-offer-card.js.
   const stub = window.document.createElement('script');
-  stub.textContent = 'window.TGOfferCardWidget = function (el, cfg) { el.setAttribute("data-stub-card", (cfg.offer && cfg.offer.fields && cfg.offer.fields.title) || ""); };';
+  stub.textContent = 'window.TGOfferCardWidget = function (el, cfg) { el.setAttribute("data-stub-card", (cfg.offer && cfg.offer.fields && cfg.offer.fields.title) || ""); if (cfg.fluid) el.setAttribute("data-fluid", "1"); };';
   window.document.body.appendChild(stub);
   const s = window.document.createElement('script'); s.textContent = GRID; window.document.body.appendChild(s);
 
@@ -141,6 +151,16 @@ console.log('Functional — the real widget in jsdom with inline offers');
   const max = mk({ display: 'carousel', filterType: 'Cruise', max: 1 });
   await tick();
   ok('max still caps the filtered list', max.root.querySelectorAll('[data-track] > div').length === 1);
+
+  // The columns choice drives cards-per-view (the jsdom window is 1024px wide).
+  const two = mk({ display: 'carousel', columns: '2' });
+  await tick();
+  ok('columns "2" → 2 cards per view → 3 pages of dots for 6 offers', two.root.querySelectorAll('[data-dot]').length === 3);
+  const four = mk({ display: 'carousel', columns: '4' });
+  await tick();
+  ok('columns "4" → 4 cards per view → 2 pages of dots for 6 offers', four.root.querySelectorAll('[data-dot]').length === 2);
+  ok('carousel cards are told to go fluid (fill their slot)', !!four.root.querySelector('[data-fluid]'));
+  ok('grid cards are NOT fluid — the 380px cap stays for the grid', !grid.root.querySelector('[data-fluid]'));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

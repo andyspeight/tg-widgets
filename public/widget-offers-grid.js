@@ -1,6 +1,6 @@
 /* ============================================================================
  * widget-offers-grid.js  ·  Travelgenix Widget Suite
- * Special Offers Grid — embeds a client's live hand-built offers (v0.2.0)
+ * Special Offers Grid — embeds a client's live hand-built offers (v0.3.0)
  *
  * Fetches a client's live offers from /api/saved-offers?client=<id> and renders
  * them as a grid of offer cards (reusing widget-offer-card.js). Each card links
@@ -25,7 +25,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.2.0';
+  const VERSION = '0.3.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -397,6 +397,10 @@
             // Cruise is one design: a cruise page template implies cruise cards,
             // so the two never drift apart even on a hand-written embed.
             layout: cfg.template === 'cruise' ? 'cruise' : cfg.layout,
+            // In the carousel WE size each slot from the measured row, so the
+            // card must fill it — its usual 380px vertical cap would leave the
+            // slack as ugly gaps between cards on wide pages.
+            fluid: cfg.display === 'carousel',
             theme: cfg.theme,
             accentColor: cfg.accentColor,
             brandColor: cfg.brandColor,
@@ -444,7 +448,16 @@
         }
         return w;
       };
-      const cardsPerView = (w) => (wideCards ? 1 : (w >= 1024 ? 3 : (w >= 640 ? 2 : 1)));
+      // Cards-per-view: the client's columns choice (2/3/4) when set, clamped
+      // down on smaller screens so a 4-up never squeezes onto a phone;
+      // otherwise responsive 1/2/3. Wide card styles are full-width designs and
+      // always page one at a time.
+      const chosen = (!wideCards && this.cfg.columns !== 'auto') ? parseInt(this.cfg.columns, 10) : 0;
+      const cardsPerView = (w) => {
+        if (wideCards) return 1;
+        if (chosen) return w < 640 ? 1 : (w < 1024 ? Math.min(chosen, 2) : chosen);
+        return w >= 1024 ? 3 : (w >= 640 ? 2 : 1);
+      };
       const pageCount = (cpv) => Math.max(1, Math.ceil(totalOffers / cpv));
       const cells = () => Array.prototype.slice.call(track.children);
 

@@ -99,7 +99,7 @@
   function render(){
     const layout = $('ctrlLayout').value;
     const display = $('ctrlDisplay').value;
-    $('colsWrap').style.visibility = (layout==='vertical' && display!=='carousel') ? 'visible' : 'hidden';
+    $('colsWrap').style.visibility = layout==='vertical' ? 'visible' : 'hidden';
     $('autoWrap').style.visibility = display==='carousel' ? 'visible' : 'hidden';
     mount.innerHTML = '';
     const div = document.createElement('div');
