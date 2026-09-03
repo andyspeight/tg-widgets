@@ -328,8 +328,14 @@ Operators are shown with their logos.
   and mockup from the live quick-quote page), and "Also in July" (two new
   premium suppliers, Sports Events 365 and HotelPlanner, both with logo
   chips; Luna Support; Cookie Consent and Smart Section; Zoom). The
-  HotelPlanner logo came from cdn.hotelplanner.com (117x80, displayed
-  53x36); like Paximum it is not on any Framer supplier page yet.
+  HotelPlanner logo is the site's own asset from the live
+  /suppliers/accommodation page
+  (framerusercontent .../5v2CoIgPnVtiwhIiYQ1Wt5373hI.png, 480x72, shown
+  133x20). It was added to that page after the timeline-roadmap branch was
+  cut, which is why a branch canvas scan missed it; a first attempt used a
+  mark from cdn.hotelplanner.com and Andy corrected it. When a supplier
+  logo seems missing, check the LIVE page's HTML before fetching from the
+  supplier's own site.
 - September is now FOUR blocks: The Luna Travel App, Luna Marketing (mockup:
   the "5 posts ready" approval queue from the live page), Luna Trips
   (mockup: the "Sell group trips. Keep your money." hero), and "Also in
