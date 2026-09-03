@@ -51,11 +51,20 @@
   </p>
 
   <div class="controls">
+    <div class="field"><label for="ctrlDisplay">Display</label>
+      <select id="ctrlDisplay"><option value="grid" selected>Grid</option><option value="carousel">Carousel</option></select>
+    </div>
     <div class="field"><label for="ctrlLayout">Card style</label>
       <select id="ctrlLayout"><option value="vertical" selected>Vertical (grid)</option><option value="horizontal">Horizontal</option><option value="banner">Banner</option><option value="split">Split</option><option value="cruise">Cruise</option></select>
     </div>
     <div class="field" id="colsWrap"><label for="ctrlCols">Columns</label>
       <select id="ctrlCols"><option value="auto" selected>Auto-fit</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+    </div>
+    <div class="field"><label for="ctrlFilter">Show only</label>
+      <select id="ctrlFilter"><option value="" selected>All types</option><option value="Package holiday (flight + hotel)">Package holidays</option><option value="Hotel / accommodation only">Hotels only</option><option value="Cruise">Cruises</option><option value="Ski holiday">Ski holidays</option></select>
+    </div>
+    <div class="field" id="autoWrap"><label for="ctrlAutoplay">Auto-rotate</label>
+      <select id="ctrlAutoplay"><option value="off" selected>Off</option><option value="on">On</option></select>
     </div>
     <div class="field"><label for="ctrlAccent">Accent</label><input id="ctrlAccent" type="color" value="#00B4D8" /></div>
   </div>
@@ -77,7 +86,9 @@
     { id: 'demo-cancun', offer: { currency:'GBP', images:[img('photo-1510097467424-192d713fd8b2?w=800&q=75')], fields:{ title:'7 nights all inclusive in Cancun', teaser:'Beachfront five star on the white sands of Costa Mujeres.', type:'Package holiday (flight + hotel)', style:'All inclusive', country:'Mexico', resort:'Costa Mujeres', stars:'5 star', board:'All inclusive', nights:'7', price:'899', was:'1299', basis:'per person', badge:'Save', badgeAmount:'400', urgency:'Only 4 left' }, tags:['Family friendly','Beachfront'] } },
     { id: 'demo-tenerife', offer: { currency:'GBP', images:[img('photo-1573843981267-be1999ff37cd?w=800&q=75')], fields:{ title:'Tenerife sunshine escape', teaser:'Adults-only half board minutes from the beach.', type:'Package holiday (flight + hotel)', style:'Adults only', country:'Canary Islands', resort:'Costa Adeje', stars:'4 star', board:'Half board', nights:'7', price:'549', basis:'per person', badge:'Last minute' }, tags:['Adults only','Spa'] } },
     { id: 'demo-algarve', offer: { currency:'GBP', images:[img('photo-1591608971362-f08b2a75731a?w=800&q=75')], fields:{ title:'Private villa week in the Algarve', teaser:'Your own pool, a short stroll to Albufeira old town.', type:'Hotel / accommodation only', style:'Family', country:'Portugal', resort:'Albufeira', stars:'4 star', board:'Self catering', nights:'7', price:'465', basis:'per person', badge:'Best seller' }, tags:['Family friendly','Private pool'] } },
-    { id: 'demo-maldives', offer: { currency:'GBP', images:[img('photo-1514282401047-d79a71a590e8?w=800&q=75')], fields:{ title:'Maldives overwater honeymoon', teaser:'Ten nights in an overwater villa on a warm lagoon.', type:'Package holiday (flight + hotel)', style:'Honeymoon', country:'Maldives', resort:'North Malé Atoll', stars:'5 star', board:'Half board', nights:'10', price:'3200', was:'3950', basis:'per person', badge:'Save', badgeAmount:'750' }, tags:['Adults only','Overwater villa'] } }
+    { id: 'demo-maldives', offer: { currency:'GBP', images:[img('photo-1514282401047-d79a71a590e8?w=800&q=75')], fields:{ title:'Maldives overwater honeymoon', teaser:'Ten nights in an overwater villa on a warm lagoon.', type:'Package holiday (flight + hotel)', style:'Honeymoon', country:'Maldives', resort:'North Malé Atoll', stars:'5 star', board:'Half board', nights:'10', price:'3200', was:'3950', basis:'per person', badge:'Save', badgeAmount:'750' }, tags:['Adults only','Overwater villa'] } },
+    { id: 'demo-fjords', offer: { currency:'GBP', images:[img('photo-1548574505-5e239809ee19?w=800&q=75')], fields:{ title:'Norwegian fjords cruise', teaser:'Seven nights sailing past waterfalls and postcard villages.', type:'Cruise', style:'Culture & sightseeing', country:'Norway', resort:'Bergen round trip', stars:'5 star', board:'Full board', nights:'7', price:'1149', basis:'per person', badge:'New' }, tags:['Cruise','Scenic'] } },
+    { id: 'demo-ski', offer: { currency:'GBP', images:[img('photo-1551524559-8af4e6624178?w=800&q=75')], fields:{ title:'Ski week in Val Thorens', teaser:'Doorstep skiing at the top of the Three Valleys.', type:'Ski holiday', style:'Adventure', country:'France', resort:'Val Thorens', stars:'4 star', board:'Half board', nights:'7', price:'789', basis:'per person', badge:'Early bird' }, tags:['Ski','Groups'] } }
   ];
 
   const themeBtn = $('themeBtn');
@@ -87,13 +98,18 @@
 
   function render(){
     const layout = $('ctrlLayout').value;
-    $('colsWrap').style.visibility = layout==='vertical' ? 'visible' : 'hidden';
+    const display = $('ctrlDisplay').value;
+    $('colsWrap').style.visibility = (layout==='vertical' && display!=='carousel') ? 'visible' : 'hidden';
+    $('autoWrap').style.visibility = display==='carousel' ? 'visible' : 'hidden';
     mount.innerHTML = '';
     const div = document.createElement('div');
     mount.appendChild(div);
     new window.TGOffersGridWidget(div, {
+      display: display,
       layout: layout,
       columns: $('ctrlCols').value,
+      filterType: $('ctrlFilter').value,
+      carouselAutoplay: $('ctrlAutoplay').value === 'on',
       theme: document.documentElement.getAttribute('data-theme'),
       accentColor: $('ctrlAccent').value,
       currency: 'GBP',

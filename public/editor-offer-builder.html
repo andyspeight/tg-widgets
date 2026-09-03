@@ -249,6 +249,49 @@
           </div>
 
           <div class="section" data-open="true">
+            <button class="section-head" data-section>Display
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="layout-grid" id="displayGrid">
+                <button type="button" class="layout-opt" data-display="grid"><span class="mini"></span>Grid</button>
+                <button type="button" class="layout-opt" data-display="carousel"><span class="mini"></span>Carousel</button>
+              </div>
+              <div class="field-help">Carousel puts the same cards on one swipeable row with arrows and dots, so plenty of offers never make the page longer.</div>
+              <div id="carField" hidden>
+                <div class="row2">
+                  <div class="field"><label class="field-label">Auto-rotate</label>
+                    <select id="cfgCarAutoplay"><option value="off">Off</option><option value="on">On</option></select>
+                  </div>
+                  <div class="field"><label class="field-label">Every</label>
+                    <select id="cfgCarInterval"><option value="4">4 seconds</option><option value="6" selected>6 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option></select>
+                  </div>
+                </div>
+              </div>
+              <!-- Options must match OFFER_TYPES in widget-offer-builder.js exactly -->
+              <div class="field"><label class="field-label">Show only this offer type</label>
+                <select id="cfgFilterType">
+                  <option value="">All types</option>
+                  <option>Package holiday (flight + hotel)</option>
+                  <option>Hotel / accommodation only</option>
+                  <option>Flight only</option>
+                  <option>City break</option>
+                  <option>Cruise</option>
+                  <option>Escorted tour</option>
+                  <option>Multi-centre</option>
+                  <option>Ski holiday</option>
+                  <option>Rail holiday</option>
+                  <option>Excursion / day trip</option>
+                </select>
+              </div>
+              <div class="field"><label class="field-label">Show only these tags</label>
+                <input type="text" id="cfgFilterTags" placeholder="e.g. lapland, winter">
+              </div>
+              <div class="field-help">Filters apply to both grid and carousel and leave your offers untouched. Tip: change the filter, copy the embed code, and repeat to put a different selection on each page of your site.</div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
             <button class="section-head" data-section>Offer page
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -473,7 +516,12 @@
         cardLayout: 'vertical', columns: 'auto', template: 'classic',
         theme: 'light', accentColor: '#00B4D8', brandColor: '#1B2B5B', radius: 14,
         currency: 'GBP', enquiryEmail: '', enquiryPhone: '', protection: 'ATOL protected',
-        offerBaseUrl: ''
+        offerBaseUrl: '',
+        // Display: 'grid' (classic) or 'carousel' (one swipeable row). The
+        // filter shows only offers of one builder type and/or carrying a tag,
+        // in either display — several typed embeds can share one offer pool.
+        display: 'grid', filterType: '', filterTags: [],
+        carouselAutoplay: false, carouselInterval: 6
       }
     };
 
@@ -1073,7 +1121,14 @@
       const c = state.config;
       $('name-input').value = state.name || '';
       document.querySelectorAll('#layoutGrid .layout-opt').forEach(b => b.setAttribute('aria-pressed', b.dataset.layout === c.cardLayout ? 'true' : 'false'));
-      $('colsField').hidden = c.cardLayout !== 'vertical';
+      document.querySelectorAll('#displayGrid .layout-opt').forEach(b => b.setAttribute('aria-pressed', b.dataset.display === (c.display === 'carousel' ? 'carousel' : 'grid') ? 'true' : 'false'));
+      $('carField').hidden = c.display !== 'carousel';
+      $('cfgCarAutoplay').value = c.carouselAutoplay ? 'on' : 'off';
+      $('cfgCarInterval').value = String(c.carouselInterval || 6);
+      $('cfgFilterType').value = c.filterType || '';
+      $('cfgFilterTags').value = Array.isArray(c.filterTags) ? c.filterTags.join(', ') : '';
+      // Columns only shape the grid display of vertical cards.
+      $('colsField').hidden = c.cardLayout !== 'vertical' || c.display === 'carousel';
       $('cfgColumns').value = c.columns;
       $('cfgTemplate').value = c.template;
       $('cfgAccent').value = c.accentColor;
@@ -1105,12 +1160,30 @@
       document.querySelectorAll('#layoutGrid .layout-opt').forEach(b => b.addEventListener('click', () => {
         state.config.cardLayout = b.dataset.layout;
         document.querySelectorAll('#layoutGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
-        $('colsField').hidden = state.config.cardLayout !== 'vertical';
+        $('colsField').hidden = state.config.cardLayout !== 'vertical' || state.config.display === 'carousel';
         // Cruise is one cohesive design: the cruise card goes with the cruise
         // offer page, so picking the Cruise card style sets the page template too.
         syncCruise('layout');
         renderCardPreview(); dirty();
       }));
+      // Display: grid vs carousel. Carousel sizes its own cards-per-view from
+      // the visitor's screen, so the columns control only applies to the grid.
+      document.querySelectorAll('#displayGrid .layout-opt').forEach(b => b.addEventListener('click', () => {
+        state.config.display = b.dataset.display === 'carousel' ? 'carousel' : 'grid';
+        document.querySelectorAll('#displayGrid .layout-opt').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+        $('carField').hidden = state.config.display !== 'carousel';
+        $('colsField').hidden = state.config.cardLayout !== 'vertical' || state.config.display === 'carousel';
+        dirty();
+      }));
+      $('cfgCarAutoplay').addEventListener('change', e => { state.config.carouselAutoplay = e.target.value === 'on'; dirty(); });
+      $('cfgCarInterval').addEventListener('change', e => { const n = parseInt(e.target.value, 10); state.config.carouselInterval = isNaN(n) ? 6 : n; dirty(); });
+      $('cfgFilterType').addEventListener('change', e => { state.config.filterType = e.target.value; dirty(); });
+      // Comma-separated tags → array. Apostrophes are stripped because the embed
+      // snippet carries the config inside a single-quoted HTML attribute.
+      $('cfgFilterTags').addEventListener('input', e => {
+        state.config.filterTags = e.target.value.split(',').map(s => s.replace(/'/g, '').trim()).filter(Boolean).slice(0, 30);
+        dirty();
+      });
       const sel = { cfgColumns:'columns', cfgCurrency:'currency', cfgProtection:'protection' };
       Object.entries(sel).forEach(([id,k]) => $(id).addEventListener('change', e => {
         state.config[k]=e.target.value;
@@ -1145,6 +1218,16 @@
       }
       const c = state.config;
       const conf = { client: state.feedKey, layout: c.cardLayout, columns: c.columns, template: c.template, theme: c.theme, accent: c.accentColor, brand: c.brandColor, radius: c.radius, currency: c.currency };
+      // Display + filter travel in the embed, so one offer pool can feed e.g. a
+      // Cruise carousel on the cruise page and a Ski carousel on the ski page —
+      // change the filter, copy the code again. Defaults are left out to keep
+      // the snippet lean.
+      if (c.display === 'carousel') {
+        conf.display = 'carousel';
+        if (c.carouselAutoplay) { conf.carouselAutoplay = true; conf.carouselInterval = c.carouselInterval || 6; }
+      }
+      if (c.filterType) conf.filterType = c.filterType;
+      if (Array.isArray(c.filterTags) && c.filterTags.length) conf.filterTags = c.filterTags;
       // Loading the grid script from the white-label origin makes the grid's
       // offer links resolve to that domain too (it derives its base from its own
       // script src), so no extra config is needed for full white-labelling.
