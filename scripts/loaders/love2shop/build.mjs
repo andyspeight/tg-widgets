@@ -4,9 +4,9 @@
 //
 // Renders loader.html frame by frame with Playwright's Chromium (already a
 // devDependency), then hands the PNG frames to make-gif.py, which needs
-// Python 3 with Pillow (`pip install pillow`). Six files come out: the O in
-// the primary blue on white, the O in the secondary pink on white, and the
-// logo reversed out on the primary blue, each at 1x and 2x.
+// Python 3 with Pillow (`pip install pillow`). Two files come out: the pink
+// O on white at 1x and 2x. loader.html also carries a blue-O-on-white and a
+// reversed-on-blue theme; add them to `variants` below if they are wanted.
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -16,16 +16,11 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(here, '../../../public/loaders');
-const FRAMES = 50;   // 2 s loop at 25 fps
-const FPS = 25;
+const FPS = 25;      // the loop length comes from loader.html
 
 const variants = [
-  { theme: 'white', scale: 1, file: 'love2shop-loader.gif' },
-  { theme: 'white', scale: 2, file: 'love2shop-loader@2x.gif' },
-  { theme: 'pink',  scale: 1, file: 'love2shop-loader-pink.gif' },
-  { theme: 'pink',  scale: 2, file: 'love2shop-loader-pink@2x.gif' },
-  { theme: 'blue',  scale: 1, file: 'love2shop-loader-blue.gif' },
-  { theme: 'blue',  scale: 2, file: 'love2shop-loader-blue@2x.gif' }
+  { theme: 'pink', scale: 1, file: 'love2shop-loader.gif' },
+  { theme: 'pink', scale: 2, file: 'love2shop-loader@2x.gif' }
 ];
 
 const launch = {};
@@ -37,7 +32,8 @@ for (const v of variants) {
   const frameDir = fs.mkdtempSync(path.join(os.tmpdir(), `love2shop-loader-${v.theme}-${v.scale}x-`));
   const page = await browser.newPage({ viewport: { width: 400, height: 200 }, deviceScaleFactor: v.scale });
   await page.goto(`file://${path.join(here, 'loader.html')}?theme=${v.theme}&play=0`);
-  const { W, H } = await page.evaluate(() => window.__FRAME__);
+  const { W, H, LOOP } = await page.evaluate(() => window.__FRAME__);
+  const FRAMES = Math.round(LOOP * FPS);
   for (let i = 0; i < FRAMES; i++) {
     await page.evaluate((t) => window.setTime(t), i / FRAMES);
     await page.screenshot({ path: path.join(frameDir, `f${String(i).padStart(3, '0')}.png`), clip: { x: 0, y: 0, width: W, height: H } });
