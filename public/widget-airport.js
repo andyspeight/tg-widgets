@@ -1,5 +1,5 @@
 /**
- * Travelgenix Airport Spotlight Widget v1.3.0
+ * Travelgenix Airport Spotlight Widget v1.4.0
  * Self-contained, embeddable airport information showcase.
  * Zero hard dependencies (Leaflet loaded on-demand for the map only,
  * with SRI-pinned hashes from unpkg).
@@ -16,9 +16,13 @@
  *   - 'both'        → Both sets rendered; Serves strip shows if linked
  *                     resorts present
  *
- * Render order, each individually toggleable via config.sections:
- *   hero · serves · facts · overview · terminals · located · facilities
- *   · arrival · tips · cta
+ * Layout (v1.4, shared with the Destination and Attraction Spotlights): a
+ * compact hero (serves chips inside it), a quick-facts rail across its bottom
+ * edge, then a two-column body on wide embeds (config.layout 'auto' |
+ * 'stacked'):
+ *   main: overview · terminals · located · facilities
+ *   side: arrival · tips · cta
+ * Each part is individually toggleable via config.sections.
  *
  * Usage (remote config, default):
  *   <div data-tg-widget="airport" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -118,7 +122,7 @@
       document.head.appendChild(l);
     } catch (e) { /* noop */ }
   }
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
@@ -159,6 +163,7 @@
       loadError: 'Could not load airport details. Please try again.',
       iataCode: 'IATA code {code}', mapShowing: 'Map showing {name}',
       terminalSingular: 'terminal', terminalPlural: 'terminals',
+      atAGlance: 'At a glance',
     },
     fr: {
       searchFlights: 'Rechercher des vols', browseResorts: 'Parcourir les destinations',
@@ -548,16 +553,24 @@
 :host { all: initial; display: block; box-sizing: border-box; }
 :host *, :host *::before, :host *::after { box-sizing: border-box; }
 
+/* ─── TOKENS ─────────────────────────────────────────
+   The Spotlight family's compact editorial system (shared with Destination
+   and Attraction): hero, facts rail, two-column body, hairline rails. */
 .tga-root {
   --tga-brand: #1B2B5B;
   --tga-brand-light: #2A3F7A;
+  --tga-brand-ink: var(--tga-brand);
+  --tga-brand-tint: rgba(27,43,91,0.78);
+  --tga-brand-tint-2: rgba(27,43,91,0.35);
   --tga-accent: #00B4D8;
+  --tga-accent-tint: rgba(0,180,216,0.38);
   --tga-bg: #FFFFFF;
   --tga-bg-2: #F8FAFC;
   --tga-card: #F8FAFC;
   --tga-text: #0F172A;
   --tga-sub: #475569;
-  --tga-muted: #94A3B8;
+  --tga-muted: #64748B;
+  --tga-faint: #94A3B8;
   --tga-border: #E2E8F0;
   --tga-border-soft: #F1F5F9;
   --tga-brand-soft: rgba(27,43,91,0.08);
@@ -565,25 +578,28 @@
   --tga-success: #10B981;
   --tga-radius: 16px;
   --tga-radius-sm: 10px;
-  --tga-shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
-  --tga-shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
-  --tga-shadow-lg: 0 20px 40px rgba(15,23,42,0.12), 0 8px 16px rgba(15,23,42,0.06);
+  --tga-radius-xs: 6px;
+  --tga-gap: 28px;
+  --tga-shadow-sm: 0 1px 2px rgba(15,23,42,0.05), 0 1px 3px rgba(27,43,91,0.06);
+  --tga-shadow-md: 0 12px 32px -12px rgba(27,43,91,0.18), 0 2px 6px rgba(15,23,42,0.05);
+  --tga-shadow-lg: 0 24px 48px -16px rgba(27,43,91,0.28), 0 8px 16px -8px rgba(15,23,42,0.08);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
   color: var(--tga-text);
   background: var(--tga-bg);
-  line-height: 1.55;
-  max-width: 1100px;
+  line-height: 1.5;
+  max-width: 1200px;
   margin: 0 auto;
   /* Respond to the WIDGET's own width, not the browser window. Embedded on a
      customer page the widget often sits in a column far narrower than the
-     viewport, so viewport media queries never fired and fixed grids (the facts
-     row, the tab cards) overflowed. All layout breakpoints below are @container. */
+     viewport, so every layout breakpoint below is @container. */
   container-type: inline-size;
   container-name: tga;
-  border-radius: var(--tga-radius);
-  overflow: hidden;
-  box-shadow: var(--tga-shadow-lg);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@supports (color: color-mix(in srgb, red, blue)) {
+  .tga-root { --tga-brand-light: color-mix(in srgb, var(--tga-brand) 82%, #FFFFFF); }
 }
 .tga-root[data-theme="dark"] {
   --tga-bg: #0F172A;
@@ -591,112 +607,164 @@
   --tga-card: #1E293B;
   --tga-text: #F8FAFC;
   --tga-sub: #CBD5E1;
-  --tga-muted: #64748B;
+  --tga-muted: #94A3B8;
+  --tga-faint: #64748B;
   --tga-border: #334155;
   --tga-border-soft: #1E293B;
-  --tga-brand-soft: rgba(0,180,216,0.10);
+  --tga-brand-soft: rgba(0,180,216,0.12);
+  --tga-accent-soft: rgba(0,180,216,0.16);
+  --tga-brand-ink: var(--tga-accent);
+  --tga-shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+  --tga-shadow-md: 0 12px 32px -12px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.25);
+  --tga-shadow-lg: 0 24px 48px -16px rgba(0,0,0,0.6);
 }
 
+/* ─── HERO ───────────────────────────────────────── */
 .tga-hero {
   position: relative;
-  min-height: 380px;
-  padding: 56px 56px 48px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(220px, 30cqi, 400px);
+  border-radius: var(--tga-radius);
+  overflow: hidden;
   color: #FFFFFF;
+  background: var(--tga-brand);
+  box-shadow: var(--tga-shadow-md);
+  isolation: isolate;
+}
+/* No photo: brand gradient with one accent glow. Photo: brand-tinted duotone
+   so any hotel-stock image sits inside the client's palette. */
+.tga-hero::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -2;
   background:
-    linear-gradient(135deg, rgba(27,43,91,0.86) 0%, rgba(27,43,91,0.62) 55%, rgba(0,180,216,0.55) 100%),
-    var(--tga-hero-img, linear-gradient(135deg, #1B2B5B, #00B4D8));
+    radial-gradient(70% 90% at 100% 0%, var(--tga-accent-tint) 0%, rgba(0,180,216,0) 62%),
+    linear-gradient(135deg, var(--tga-brand) 0%, var(--tga-brand-light) 100%);
+}
+.tga-hero.has-img::before {
+  background: var(--tga-hero-img);
   background-size: cover;
   background-position: center;
-  overflow: hidden;
 }
-.tga-hero::after {
+.tga-hero.has-img::after {
   content: '';
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(8,15,30,0) 40%, rgba(8,15,30,0.55) 100%),
+    linear-gradient(135deg, var(--tga-brand-tint) 0%, var(--tga-brand-tint-2) 55%, var(--tga-accent-tint) 100%);
+}
+.tga-hero-mark {
+  position: absolute; right: -24px; top: -28px; z-index: -1;
+  width: 260px; height: 260px;
+  color: #FFFFFF;
+  opacity: 0.09;
+  transform: rotate(-14deg);
   pointer-events: none;
 }
+.tga-hero-mark svg { width: 100%; height: 100%; }
+.tga-hero-content {
+  position: relative;
+  padding: clamp(18px, 3.2cqi, 40px);
+  animation: tga-rise 640ms cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes tga-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 .tga-eyebrow {
-  position: relative;
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  opacity: 0.92; margin-bottom: 16px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.86);
+  margin-bottom: 10px;
 }
-.tga-eyebrow .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--tga-accent); }
+.tga-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--tga-accent); flex: 0 0 6px; }
 .tga-title-row {
-  position: relative;
-  display: flex; align-items: flex-start; gap: 20px;
-  flex-wrap: wrap; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
 }
-.tga-name { font-size: 56px; font-weight: 800; line-height: 1.04; letter-spacing: -0.02em; margin: 0; }
+.tga-name {
+  font-size: clamp(28px, 5cqi, 52px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  overflow-wrap: anywhere;
+}
 .tga-iata {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 96px; height: 64px; padding: 0 20px;
-  font-family: 'Inter', monospace;
-  font-size: 32px; font-weight: 700; letter-spacing: 0.06em;
+  padding: 4px 10px;
+  font-size: clamp(16px, 2cqi, 24px); font-weight: 700; letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
   color: var(--tga-brand);
   background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15,23,42,0.25);
-  flex-shrink: 0; margin-top: 4px;
-}
-.tga-tagline {
-  position: relative;
-  font-size: 19px; line-height: 1.5;
-  max-width: 680px; opacity: 0.94;
-  margin: 0 0 28px;
-}
-.tga-hero-meta {
-  position: relative;
-  display: flex; gap: 24px; flex-wrap: wrap;
-  font-size: 13px; opacity: 0.95;
-}
-.tga-hero-meta .item { display: inline-flex; align-items: center; gap: 8px; }
-.tga-hero-meta .item svg { opacity: 0.85; }
-.tga-hero-badges {
-  position: relative;
-  display: flex; gap: 8px; flex-wrap: wrap;
-  margin-top: 24px;
-}
-.tga-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  background: rgba(255,255,255,0.14);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.22);
-  font-size: 12px; font-weight: 500;
-}
-.tga-badge.is-on { background: rgba(16,185,129,0.25); border-color: rgba(16,185,129,0.5); }
-
-.tga-serves {
-  display: flex; align-items: center; gap: 20px;
-  padding: 20px 56px;
-  background: var(--tga-brand);
-  color: #FFFFFF; flex-wrap: wrap;
-}
-.tga-serves-label {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.25);
   flex-shrink: 0;
 }
-.tga-serves-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.tga-tagline {
+  font-size: clamp(15px, 1.45cqi, 18px);
+  line-height: 1.4;
+  max-width: 62ch;
+  color: rgba(255,255,255,0.92);
+  margin: 10px 0 0;
+}
+.tga-hero-meta {
+  display: flex; gap: 6px 18px; flex-wrap: wrap;
+  font-size: 12.5px; color: rgba(255,255,255,0.9);
+  margin-top: 12px;
+}
+.tga-hero-meta .item { display: inline-flex; align-items: center; gap: 6px; }
+.tga-hero-meta .item svg { opacity: 0.85; flex-shrink: 0; }
+.tga-hero-badges {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-top: 12px;
+}
+.tga-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 12px; font-weight: 600; line-height: 1.2;
+}
+.tga-badge.is-on { background: rgba(16,185,129,0.28); border-color: rgba(16,185,129,0.5); }
+
+/* Serves strip: a row inside the hero (destination airports), or a compact
+   brand band when the hero is toggled off. */
+.tga-serves {
+  display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.18);
+  color: #FFFFFF;
+}
+.tga-root > .tga-serves {
+  margin: 0 0 14px; padding: 12px 16px;
+  border: 0; border-radius: var(--tga-radius-sm);
+  background: var(--tga-brand);
+}
+.tga-serves-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  flex-shrink: 0;
+}
+.tga-serves-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .tga-chip {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 14px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 9999px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  min-height: 30px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.24);
+  border-radius: 999px;
   color: #FFFFFF; text-decoration: none;
-  font-size: 13px; font-weight: 600;
+  font-size: 12px; font-weight: 600; line-height: 1.2;
   transition: background .15s ease-out, border-color .15s ease-out, transform .15s ease-out;
-  min-height: 32px;
 }
 .tga-chip:hover, .tga-chip:focus-visible {
   background: var(--tga-accent);
@@ -704,89 +772,103 @@
   transform: translateY(-1px);
   outline: none;
 }
-.tga-chip:focus-visible { box-shadow: 0 0 0 3px rgba(0,180,216,0.4); }
+.tga-chip:focus-visible { box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
 .tga-chip-meta {
   font-size: 11px; font-weight: 500;
-  opacity: 0.75;
-  padding-left: 8px;
-  border-left: 1px solid rgba(255,255,255,0.25);
+  opacity: 0.8;
+  padding-left: 6px;
+  border-left: 1px solid rgba(255,255,255,0.3);
 }
 
+/* ─── QUICK FACTS RAIL ───────────────────────────── */
+.tga-facts-wrap { position: relative; z-index: 2; margin: 14px 0 0; }
 .tga-facts {
   display: grid;
-  /* auto-fit so the facts row reflows to the container width instead of forcing
+  /* auto-fit so the rail reflows to the container width instead of forcing
      4 columns that overflow a narrow embed. */
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  background: var(--tga-card);
-  border-bottom: 1px solid var(--tga-border);
+  background: var(--tga-bg);
+  border: 1px solid var(--tga-border);
+  border-radius: var(--tga-radius-sm);
+  box-shadow: var(--tga-shadow-md);
+  overflow: hidden;
 }
 .tga-fact {
-  padding: 24px 28px;
-  border-right: 1px solid var(--tga-border);
-  display: flex; align-items: flex-start; gap: 14px;
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  min-width: 0;
+  background: var(--tga-bg);
+  box-shadow: -1px -1px 0 0 var(--tga-border);
 }
-.tga-fact:last-child { border-right: none; }
+.tga-fact > div { min-width: 0; }
 .tga-fact-icon {
-  width: 40px; height: 40px;
-  border-radius: 10px;
-  background: var(--tga-accent-soft);
-  color: var(--tga-accent);
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--tga-brand-soft);
+  color: var(--tga-brand-ink);
   display: inline-flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  flex: 0 0 30px;
 }
 .tga-fact-label {
   font-size: 11px; font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--tga-muted);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  line-height: 1.2;
 }
-.tga-fact-value { font-size: 15px; font-weight: 600; color: var(--tga-text); line-height: 1.35; }
-.tga-fact-sub { font-size: 12px; color: var(--tga-sub); margin-top: 2px; }
+.tga-fact-value { font-size: 14px; font-weight: 600; color: var(--tga-text); line-height: 1.3; overflow-wrap: anywhere; }
+.tga-fact-sub {
+  font-size: 12px; color: var(--tga-sub); margin-top: 1px; line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
 
-.tga-section {
-  padding: 48px 56px;
-  border-bottom: 1px solid var(--tga-border-soft);
+/* ─── BODY GRID ──────────────────────────────────── */
+.tga-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 32px;
+  margin-top: var(--tga-gap);
 }
-.tga-section:last-child { border-bottom: none; }
-.tga-section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.tga-section-icon {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  background: var(--tga-brand-soft);
-  color: var(--tga-brand);
-  display: inline-flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.tga-root[data-theme="dark"] .tga-section-icon { background: rgba(0,180,216,0.10); color: var(--tga-accent); }
+.tga-main, .tga-side { min-width: 0; container-type: inline-size; }
+.tga-main { container-name: tga-main; }
+.tga-side { container-name: tga-side; }
+.tga-side > .tga-section:first-child { margin-top: var(--tga-gap); }
+
+/* ─── SECTIONS ───────────────────────────────────── */
+.tga-section { margin: 0 0 var(--tga-gap); }
+.tga-section:last-child { margin-bottom: 0; }
+.tga-section-head { margin-bottom: 12px; }
 .tga-section-title {
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--tga-brand);
+  display: flex; align-items: center; gap: 8px;
   margin: 0;
-}
-.tga-root[data-theme="dark"] .tga-section-title { color: var(--tga-accent); }
-.tga-section-h2 {
-  font-size: 28px; font-weight: 700;
-  line-height: 1.2; letter-spacing: -0.01em;
-  margin: 0 0 16px;
+  font-size: 17px; font-weight: 600;
+  letter-spacing: -0.01em; line-height: 1.3;
   color: var(--tga-text);
 }
-.tga-prose { font-size: 16px; line-height: 1.65; color: var(--tga-sub); max-width: 780px; }
-.tga-prose p { margin: 0 0 16px; }
+.tga-section-icon {
+  width: 22px; height: 22px; flex: 0 0 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--tga-brand-ink);
+}
+.tga-section-sub { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--tga-sub); }
+.tga-prose { font-size: 15px; line-height: 1.6; color: var(--tga-sub); max-width: 72ch; }
+.tga-prose p { margin: 0 0 12px; }
 .tga-prose p:last-child { margin: 0; }
 .tga-prose strong { color: var(--tga-text); font-weight: 600; }
 
-.tga-locate { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+/* ─── GETTING THERE: map + tabs ──────────────────── */
+.tga-locate { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.tga-locate > div { min-width: 0; }
 .tga-map-wrap {
   position: relative;
   border-radius: var(--tga-radius-sm);
   overflow: hidden;
   border: 1px solid var(--tga-border);
   background: var(--tga-card);
-  box-shadow: var(--tga-shadow-sm);
 }
-.tga-map { width: 100%; height: 320px; background: #E8EEF4; }
+.tga-map { width: 100%; height: 220px; background: #E8EEF4; }
+.tga-root[data-theme="dark"] .tga-map { background: #1E293B; }
 .tga-map .leaflet-control-attribution {
   font-family: 'Inter', sans-serif;
   font-size: 10px;
@@ -818,92 +900,95 @@
 .tga-pin-city   { background: var(--tga-brand); width: 28px; height: 28px; }
 .tga-map-foot {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 8px 12px;
+  padding: 8px 12px;
   background: var(--tga-card);
   border-top: 1px solid var(--tga-border);
-  font-size: 13px;
+  font-size: 12px;
   flex-wrap: wrap;
 }
 .tga-map-foot-coords {
   color: var(--tga-muted);
   font-variant-numeric: tabular-nums;
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; gap: 5px;
 }
-.tga-map-links { display: inline-flex; gap: 14px; }
+.tga-map-links { display: inline-flex; gap: 12px; }
 .tga-map-link {
-  display: inline-flex; align-items: center; gap: 4px;
-  color: var(--tga-brand);
+  display: inline-flex; align-items: center; gap: 3px;
+  color: var(--tga-brand-ink);
   text-decoration: none;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
+  min-height: 24px;
 }
 .tga-map-link:hover { color: var(--tga-accent); }
-.tga-root[data-theme="dark"] .tga-map-link { color: var(--tga-accent); }
 
 .tga-tabs {
-  display: flex; gap: 4px;
-  border-bottom: 1px solid var(--tga-border);
-  margin-bottom: 20px;
-  overflow-x: auto;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 12px;
 }
 .tga-tab {
   appearance: none;
-  background: none; border: none;
-  padding: 12px 18px;
+  background: var(--tga-bg);
+  border: 1px solid var(--tga-border);
+  border-radius: 999px;
+  padding: 0 12px;
+  min-height: 36px;
   font-family: inherit;
-  font-size: 14px; font-weight: 500;
+  font-size: 13px; font-weight: 500;
   color: var(--tga-sub);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
   white-space: nowrap;
-  transition: color .15s ease-out, border-color .15s ease-out;
-  min-height: 44px;
+  transition: color .15s ease-out, border-color .15s ease-out, background .15s ease-out;
 }
-.tga-tab:hover { color: var(--tga-text); }
-.tga-tab.is-active { color: var(--tga-brand); border-bottom-color: var(--tga-accent); font-weight: 600; }
-.tga-root[data-theme="dark"] .tga-tab.is-active { color: var(--tga-accent); }
-.tga-tab:focus-visible { outline: 2px solid var(--tga-accent); outline-offset: 2px; border-radius: 4px; }
+.tga-tab:hover { color: var(--tga-text); border-color: var(--tga-faint); }
+.tga-tab.is-active { background: var(--tga-brand); border-color: var(--tga-brand); color: #FFFFFF; font-weight: 600; }
+.tga-root[data-theme="dark"] .tga-tab.is-active { background: var(--tga-accent); border-color: var(--tga-accent); color: #0F172A; }
+.tga-tab:focus-visible { outline: 2px solid var(--tga-accent); outline-offset: 2px; }
 .tga-tab-panel { display: none; }
 .tga-tab-panel.is-active { display: block; }
+.tga-tab-panel .tga-prose { font-size: 14px; }
 
-.tga-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.tga-card {
-  padding: 24px;
+/* ─── FACILITIES: hairline bento ─────────────────── */
+.tga-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   background: var(--tga-card);
   border: 1px solid var(--tga-border);
   border-radius: var(--tga-radius-sm);
-  transition: border-color .15s ease-out, box-shadow .15s ease-out, transform .15s ease-out;
+  overflow: hidden;
 }
-.tga-card:hover {
-  border-color: var(--tga-accent);
-  box-shadow: var(--tga-shadow-md);
-  transform: translateY(-2px);
+.tga-card {
+  padding: 14px 16px;
+  min-width: 0;
+  background: var(--tga-bg);
+  box-shadow: -1px -1px 0 0 var(--tga-border);
+  transition: background .18s ease-out;
 }
-.tga-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tga-card:hover { background: var(--tga-card); }
+.tga-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .tga-card-icon {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  background: var(--tga-brand);
-  color: #FFFFFF;
+  width: 26px; height: 26px; flex: 0 0 26px;
+  border-radius: 7px;
+  background: var(--tga-brand-soft);
+  color: var(--tga-brand-ink);
   display: inline-flex; align-items: center; justify-content: center;
 }
-.tga-card-title { font-size: 16px; font-weight: 600; color: var(--tga-text); margin: 0; }
-.tga-card-body { font-size: 14px; line-height: 1.6; color: var(--tga-sub); }
+.tga-card-title { font-size: 14px; font-weight: 600; color: var(--tga-text); margin: 0; line-height: 1.3; }
+.tga-card-body { font-size: 13px; line-height: 1.5; color: var(--tga-sub); }
 
+/* ─── RECOMMENDED ARRIVAL (side) ─────────────────── */
 .tga-callout {
-  display: flex; gap: 18px;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, rgba(0,180,216,0.08), rgba(0,180,216,0.02));
-  border: 1px solid rgba(0,180,216,0.25);
-  border-left: 4px solid var(--tga-accent);
+  display: flex; gap: 12px;
+  padding: 14px 16px;
+  background: var(--tga-accent-soft);
+  border: 1px solid rgba(0,180,216,0.28);
   border-radius: var(--tga-radius-sm);
 }
 .tga-callout-icon {
-  width: 44px; height: 44px;
-  border-radius: 12px;
+  width: 34px; height: 34px;
+  border-radius: 9px;
   background: var(--tga-accent);
   color: #FFFFFF;
   display: inline-flex; align-items: center; justify-content: center;
@@ -912,96 +997,125 @@
 .tga-callout-title {
   font-size: 11px; font-weight: 700;
   letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--tga-accent);
-  margin: 0 0 4px;
+  color: var(--tga-brand-ink);
+  margin: 0 0 3px;
 }
-.tga-callout-text { font-size: 15px; line-height: 1.55; color: var(--tga-text); margin: 0; }
+.tga-callout-text { font-size: 13.5px; line-height: 1.5; color: var(--tga-text); margin: 0; }
 
+/* ─── TIPS (side) ────────────────────────────────── */
 .tga-tips {
   position: relative;
-  padding: 28px 32px 28px 60px;
+  padding: 14px 16px 14px 30px;
   background: var(--tga-brand);
   color: #E6EAF4;
   border-radius: var(--tga-radius-sm);
-  font-size: 15px;
-  line-height: 1.65;
+  font-size: 13.5px;
+  line-height: 1.55;
 }
+.tga-root[data-theme="dark"] .tga-tips { border: 1px solid rgba(255,255,255,0.08); }
 .tga-tips::before {
   content: '';
-  position: absolute; top: 24px; left: 24px;
-  width: 4px; height: calc(100% - 48px);
+  position: absolute; top: 14px; left: 14px;
+  width: 3px; height: calc(100% - 28px);
   background: var(--tga-accent);
   border-radius: 2px;
 }
 .tga-tips strong { color: #FFFFFF; }
 .tga-tips-sublabel {
-  margin: 18px 0 8px;
-  font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--tga-sub);
+  margin: 12px 0 6px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--tga-muted);
 }
 
+/* ─── CTA (side card, or a band when it spans the width) ─── */
 .tga-cta {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 32px; padding: 32px 56px;
-  background: linear-gradient(135deg, var(--tga-brand) 0%, var(--tga-brand-light) 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex; flex-direction: column; align-items: stretch;
+  gap: 14px;
+  padding: 22px 24px;
+  border-radius: var(--tga-radius-sm);
+  background: var(--tga-brand);
   color: #FFFFFF;
-  flex-wrap: wrap;
+  box-shadow: var(--tga-shadow-md);
 }
-.tga-cta-text { flex: 1; min-width: 260px; }
-.tga-cta-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
-.tga-cta-sub { font-size: 14px; opacity: 0.85; margin: 0; }
-.tga-cta-actions { display: flex; gap: 12px; }
+.tga-root[data-theme="dark"] .tga-cta { border: 1px solid rgba(255,255,255,0.08); }
+.tga-cta::before {
+  content: '';
+  position: absolute; right: -50px; bottom: -70px;
+  width: 190px; height: 190px; border-radius: 50%;
+  background: var(--tga-accent);
+  opacity: 0.22;
+  pointer-events: none;
+}
+.tga-cta-text { position: relative; flex: 1 1 auto; min-width: 0; }
+.tga-cta-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.25; margin: 0 0 4px; }
+.tga-cta-sub { font-size: 13.5px; opacity: 0.85; margin: 0; line-height: 1.45; }
+.tga-cta-actions { position: relative; display: flex; flex-direction: column; gap: 8px; }
 .tga-btn {
   appearance: none; border: none;
-  padding: 12px 22px;
+  padding: 10px 18px;
   border-radius: 10px;
   font-family: inherit;
   font-size: 14px; font-weight: 600;
   cursor: pointer;
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   text-decoration: none;
-  transition: transform .15s ease-out, background .15s ease-out;
+  transition: transform .15s ease-out, background .15s ease-out, filter .15s ease-out;
   min-height: 44px;
 }
 .tga-btn-primary { background: var(--tga-accent); color: #FFFFFF; }
-.tga-btn-primary:hover, .tga-btn-primary:focus-visible { background: #00C4EA; transform: translateY(-1px); outline: none; }
-.tga-btn-primary:focus-visible { box-shadow: 0 0 0 3px rgba(0,180,216,0.35); }
+.tga-btn-primary:hover, .tga-btn-primary:focus-visible { filter: brightness(1.06); transform: translateY(-1px); outline: none; }
+.tga-btn-primary:focus-visible { box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
 .tga-btn-ghost { background: rgba(255,255,255,0.10); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.25); }
 .tga-btn-ghost:hover, .tga-btn-ghost:focus-visible { background: rgba(255,255,255,0.18); outline: none; }
 .tga-btn-ghost:focus-visible { box-shadow: 0 0 0 3px rgba(255,255,255,0.35); }
-
-.tga-empty { padding: 56px; text-align: center; color: var(--tga-sub); }
-.tga-empty p { margin: 0; font-size: 15px; }
-
-@container tga (max-width: 880px) {
-  .tga-hero { padding: 40px 28px 36px; }
-  .tga-name { font-size: 40px; }
-  .tga-iata { min-width: 78px; height: 52px; font-size: 26px; }
-  .tga-section { padding: 36px 28px; }
-  .tga-cta { padding: 28px; }
-  .tga-serves { padding: 16px 28px; flex-direction: column; align-items: flex-start; gap: 12px; }
-  .tga-fact { border-right: 1px solid var(--tga-border); border-bottom: 1px solid var(--tga-border); }
-  .tga-fact:nth-child(2n) { border-right: none; }
-  .tga-fact:nth-last-child(-n+2) { border-bottom: none; }
-  .tga-locate { grid-template-columns: 1fr; }
-  .tga-map { height: 280px; }
+@container tga-side (min-width: 560px) {
+  .tga-cta { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 28px; }
+  .tga-cta-actions { flex-direction: row; flex: 0 0 auto; }
 }
-@container tga (max-width: 560px) {
-  .tga-name { font-size: 32px; }
-  .tga-tagline { font-size: 16px; }
-  .tga-section-h2 { font-size: 22px; }
-  .tga-fact { border-right: none; }
-  .tga-fact:last-child { border-bottom: none; }
-  .tga-cta { flex-direction: column; align-items: stretch; }
-  .tga-cta-actions { width: 100%; }
-  .tga-btn { flex: 1; justify-content: center; }
+
+/* ─── EMPTY ──────────────────────────────────────── */
+.tga-empty {
+  padding: 36px 24px; text-align: center; color: var(--tga-sub);
+  border: 1px dashed var(--tga-border); border-radius: var(--tga-radius);
+}
+.tga-empty p { margin: 0; font-size: 14px; }
+
+/* ─── FOCUS ──────────────────────────────────────── */
+.tga-root a:focus-visible, .tga-root button:focus-visible {
+  outline: 2px solid var(--tga-accent); outline-offset: 3px; border-radius: 4px;
+}
+
+/* ─── RESPONSIVE (container-relative — tracks .tga-root width) ─── */
+@container tga (min-width: 720px) {
+  .tga-hero.has-rail .tga-hero-content { padding-bottom: calc(clamp(18px, 3.2cqi, 40px) + 30px); }
+  .tga-hero.has-rail + .tga-facts-wrap { margin: -34px clamp(16px, 3.2cqi, 40px) 0; }
+}
+@container tga (min-width: 900px) {
+  .tga-root:not([data-layout="stacked"]) .tga-body[data-side="1"] {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 34%);
+    align-items: start;
+  }
+  .tga-root:not([data-layout="stacked"]) .tga-body[data-side="1"] .tga-side > .tga-section:first-child { margin-top: 0; }
+}
+@container tga (max-width: 719px) {
+  .tga-root { --tga-gap: 24px; }
+}
+@container tga (max-width: 479px) {
+  .tga-fact-sub { display: none; }
+}
+@container tga-main (min-width: 640px) {
+  .tga-locate { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; }
+  .tga-map { height: 260px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tga-hero-content { animation: none; }
   .tga-chip, .tga-tab, .tga-card, .tga-btn, .tga-map-link { transition: none !important; }
-  .tga-chip:hover, .tga-card:hover, .tga-btn-primary:hover { transform: none !important; }
+  .tga-chip:hover, .tga-btn-primary:hover { transform: none !important; }
 }
-`;
+  `;
 
   function ensureFont(family) {
     if (!family || family === 'Inter' || typeof document === 'undefined') return;
@@ -1051,6 +1165,7 @@
     _defaults(c) {
       const base = {
         widgetId: null, theme: 'light',
+        layout: 'auto',   // 'auto' (side column once the widget is 900px wide) | 'stacked'
         brandColor: '#1B2B5B', accentColor: '#00B4D8', radius: 16, fontFamily: '',
         sections: {
           hero: true, serves: true, facts: true, overview: true,
@@ -1073,6 +1188,7 @@
       const m = Object.assign({}, base, c);
       m.sections = Object.assign({}, base.sections, c.sections || {});
       m.cta = Object.assign({}, base.cta, c.cta || {});
+      m.layout = m.layout === 'stacked' ? 'stacked' : 'auto';
       return m;
     }
 
@@ -1118,15 +1234,19 @@
       const root = document.createElement('div');
       root.className = 'tga-root';
       root.setAttribute('data-theme', this.c.theme === 'dark' ? 'dark' : 'light');
+      root.setAttribute('data-layout', this.c.layout === 'stacked' ? 'stacked' : 'auto');
       // Apply the saved editor branding (colours, radius, font) so a live embed
       // matches what the client picked, not just the hardcoded defaults.
       if (hexOk(this.c.brandColor)) {
         root.style.setProperty('--tga-brand', this.c.brandColor);
         root.style.setProperty('--tga-brand-soft', hexToRgba(this.c.brandColor, 0.08));
+        root.style.setProperty('--tga-brand-tint', hexToRgba(this.c.brandColor, 0.78));
+        root.style.setProperty('--tga-brand-tint-2', hexToRgba(this.c.brandColor, 0.35));
       }
       if (hexOk(this.c.accentColor)) {
         root.style.setProperty('--tga-accent', this.c.accentColor);
         root.style.setProperty('--tga-accent-soft', hexToRgba(this.c.accentColor, 0.12));
+        root.style.setProperty('--tga-accent-tint', hexToRgba(this.c.accentColor, 0.38));
       }
       if (this.c.radius != null) {
         const n = Math.max(0, Math.min(24, parseInt(this.c.radius, 10) || 16));
@@ -1148,17 +1268,41 @@
       const role = normaliseRole(d.role);
       const isDest = role === 'destination' || role === 'both';
 
+      // Layout (v1.4): a compact opener, then a two-column body.
+      //   hero, with the "serves" chips inside it for destination airports
+      //   quick-facts rail, riding across the hero's bottom edge on wide embeds
+      //   body: main column = overview → terminals → getting there → facilities
+      //         side column = recommended arrival → tips → CTA
+      // The side column sits to the right once the widget is 900px wide
+      // (container query; never when config.layout is 'stacked') and stacks
+      // beneath the main column otherwise, so this DOM order is also the phone
+      // reading order. Toggles still remove any part; an empty column collapses.
+      const servesHtml = (s.serves && isDest && this._hasServes(d)) ? this._renderServes(d) : '';
+      const factsHtml = s.facts ? this._renderFacts(d, role) : '';
       const html = [];
-      if (s.hero)       html.push(this._renderHero(d, role));
-      if (s.serves && isDest && this._hasServes(d)) html.push(this._renderServes(d));
-      if (s.facts)      html.push(this._renderFacts(d, role));
-      if (s.overview)   html.push(this._renderOverview(d));
-      if (s.terminals)  html.push(this._renderTerminals(d));
-      if (s.located)    html.push(this._renderLocated(d, role));
-      if (s.facilities) html.push(this._renderFacilities(d));
-      if (s.arrival)    html.push(this._renderArrival(d));
-      if (s.tips)       html.push(this._renderTips(d));
-      if (s.cta)        html.push(this._renderCta(d, role));
+      if (s.hero) html.push(this._renderHero(d, role, servesHtml, !!factsHtml));
+      else if (servesHtml) html.push(servesHtml);
+      if (factsHtml) html.push('<section class="tga-facts-wrap" aria-label="' + esc(this.t('atAGlance')) + '">' + factsHtml + '</section>');
+
+      const main = [
+        s.overview   ? this._renderOverview(d) : '',
+        s.terminals  ? this._renderTerminals(d) : '',
+        s.located    ? this._renderLocated(d, role) : '',
+        s.facilities ? this._renderFacilities(d) : '',
+      ].filter(Boolean);
+      const side = [
+        s.arrival ? this._renderArrival(d) : '',
+        s.tips    ? this._renderTips(d) : '',
+        s.cta     ? this._renderCta(d, role) : '',
+      ].filter(Boolean);
+      if (main.length || side.length) {
+        html.push(
+          '<div class="tga-body" data-side="' + (main.length && side.length ? '1' : '0') + '">' +
+            (main.length ? '<div class="tga-main">' + main.join('') + '</div>' : '') +
+            (side.length ? '<aside class="tga-side">' + side.join('') + '</aside>' : '') +
+          '</div>'
+        );
+      }
 
       this._root.innerHTML = html.join('');
       this._bind();
@@ -1173,7 +1317,7 @@
              (Array.isArray(d.cities)  && d.cities.length);
     }
 
-    _renderHero(d, role) {
+    _renderHero(d, role, servesHtml, hasRail) {
       const iata = safeIata(d.iata);
       let heroImg = safeUrl(d.heroImageUrl || this.c.heroImageUrl);
       // The URL goes into a background url() inside a style attribute — reject
@@ -1184,16 +1328,24 @@
       const eyebrow = [d.cityServed, d.country, d.type].filter(Boolean).map(esc).join(' &middot; ');
       const tagline = esc((d.tagline || '').slice(0, 240));
       const style = heroImg ? ' style="--tga-hero-img:url(' + esc(heroImg) + ')"' : '';
+      const cls = 'tga-hero' + (heroImg ? ' has-img' : '') + (hasRail ? ' has-rail' : '');
       return '' +
-        '<header class="tga-hero"' + style + '>' +
-          (eyebrow ? '<div class="tga-eyebrow"><span class="dot"></span>' + eyebrow + '</div>' : '') +
-          '<div class="tga-title-row">' +
-            '<h1 class="tga-name">' + esc(d.name) + '</h1>' +
-            (iata ? '<span class="tga-iata" aria-label="' + esc(this.t('iataCode', { code: iata })) + '">' + iata + '</span>' : '') +
+        '<header class="' + cls + '"' + style + '>' +
+          // No photo: a large plane glyph as a watermark gives the brand
+          // gradient a subject, so an imageless hero is still recognisably
+          // an airport rather than a generic banner.
+          (heroImg ? '' : '<span class="tga-hero-mark" aria-hidden="true">' + icon('plane', 260) + '</span>') +
+          '<div class="tga-hero-content">' +
+            (eyebrow ? '<div class="tga-eyebrow"><span class="dot"></span>' + eyebrow + '</div>' : '') +
+            '<div class="tga-title-row">' +
+              '<h1 class="tga-name">' + esc(d.name) + '</h1>' +
+              (iata ? '<span class="tga-iata" aria-label="' + esc(this.t('iataCode', { code: iata })) + '">' + iata + '</span>' : '') +
+            '</div>' +
+            (tagline ? '<p class="tga-tagline">' + tagline + '</p>' : '') +
+            this._heroMetaBlock(d, role) +
+            this._heroBadgesBlock(d, role) +
+            (servesHtml || '') +
           '</div>' +
-          (tagline ? '<p class="tga-tagline">' + tagline + '</p>' : '') +
-          this._heroMetaBlock(d, role) +
-          this._heroBadgesBlock(d, role) +
         '</header>';
     }
 
@@ -1281,7 +1433,7 @@
 
     _fact(ico, label, value, sub) {
       return '<div class="tga-fact">' +
-        '<span class="tga-fact-icon">' + icon(ico, 20) + '</span>' +
+        '<span class="tga-fact-icon">' + icon(ico, 18) + '</span>' +
         '<div>' +
           '<div class="tga-fact-label">' + esc(label) + '</div>' +
           '<div class="tga-fact-value">' + esc(value) + '</div>' +
@@ -1296,7 +1448,9 @@
         .map(p => p.trim()).filter(Boolean)
         .map(p => '<p>' + esc(p) + '</p>').join('');
       if (!paras) return '';
-      return this._section('info', this.t('overview'), d.overviewHeading || this.t('overviewH2'),
+      // The authored line ("The business airport that earns its name") is the
+      // heading itself; a generic "Overview" label above it earned nothing.
+      return this._section('info', d.overviewHeading || this.t('overviewH2'), '',
         '<div class="tga-prose">' + paras + '</div>');
     }
 
@@ -1396,8 +1550,8 @@
     _card(ico, title, body) {
       return '<div class="tga-card">' +
         '<div class="tga-card-head">' +
-          '<span class="tga-card-icon">' + icon(ico, 18) + '</span>' +
-          '<h4 class="tga-card-title">' + esc(title) + '</h4>' +
+          '<span class="tga-card-icon">' + icon(ico, 15) + '</span>' +
+          '<h3 class="tga-card-title">' + esc(title) + '</h3>' +
         '</div>' +
         '<div class="tga-card-body">' + esc(body) + '</div>' +
       '</div>';
@@ -1448,19 +1602,24 @@
           (sub ? '<p class="tga-cta-sub">' + esc(sub) + '</p>' : '') +
         '</div>' +
         '<div class="tga-cta-actions">' +
-          (official ? '<a href="' + esc(official) + '" target="_blank" rel="noopener noreferrer" class="tga-btn tga-btn-ghost">' + esc(this.t('officialWebsite')) + icon('arrow', 14) + '</a>' : '') +
           (url ? '<a href="' + esc(url) + '" class="tga-btn tga-btn-primary">' + esc(label || this.t('findOutMore')) + icon('arrow', 14) + '</a>' : '') +
+          (official ? '<a href="' + esc(official) + '" target="_blank" rel="noopener noreferrer" class="tga-btn tga-btn-ghost">' + esc(this.t('officialWebsite')) + icon('arrow_out', 13) + '</a>' : '') +
         '</div>' +
       '</div>';
     }
 
+    // One heading per section (the section's name, with its icon inline) and
+    // the editorial line beneath it as a subline. The old kicker-above-h2 pair
+    // cost ~100px per section and read the same everywhere.
     _section(ico, kicker, h2, inner) {
       return '<section class="tga-section">' +
         '<div class="tga-section-head">' +
-          '<span class="tga-section-icon" aria-hidden="true">' + icon(ico, 18) + '</span>' +
-          '<h3 class="tga-section-title">' + esc(kicker) + '</h3>' +
+          '<h2 class="tga-section-title">' +
+            '<span class="tga-section-icon" aria-hidden="true">' + icon(ico, 18) + '</span>' +
+            '<span>' + esc(kicker) + '</span>' +
+          '</h2>' +
+          (h2 ? '<p class="tga-section-sub">' + esc(h2) + '</p>' : '') +
         '</div>' +
-        (h2 ? '<h2 class="tga-section-h2">' + esc(h2) + '</h2>' : '') +
         inner +
       '</section>';
     }

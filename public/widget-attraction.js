@@ -1,5 +1,5 @@
 /**
- * Travelgenix Attraction Spotlight Widget v1.3.0
+ * Travelgenix Attraction Spotlight Widget v1.4.0
  * Self-contained, embeddable showcase for a theme park, resort complex,
  * water park, aquarium or cultural attraction.
  *
@@ -7,7 +7,14 @@
  * Content is fetched live from /api/attraction-content (never snapshotted).
  *
  * The Theme Parks and Attractions table has no image field, so the hero is a
- * branded gradient with an optional editor-supplied hero image.
+ * branded gradient (with a ferris-wheel watermark) or an optional
+ * editor-supplied hero image under a brand-tinted duotone.
+ *
+ * Layout (v1.4, shared with the Destination and Airport Spotlights): compact
+ * hero (Best For chips inside it), quick-facts rail across its bottom edge,
+ * then a two-column body on wide embeds (config.layout 'auto' | 'stacked'):
+ *   main: overview · star · guides · tickets · located · stay · food
+ *   side: tips · combine · cta
  *
  * Usage (remote config, default):
  *   <div data-tg-widget="attraction" data-tg-id="YOUR_WIDGET_ID"></div>
@@ -35,7 +42,7 @@
   }
   const CONFIG_API  = (typeof window !== 'undefined' && window.__TG_WIDGET_API__) || resolveBase('/api/widget-config');
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
 
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; the load method consumes it. Carries its
@@ -90,6 +97,7 @@
       combineTrip: 'Combine your trip', combineSub: 'Other attractions nearby',
       enquire: 'Enquire', startEnquiry: 'Start your enquiry', verified: 'Verified {date}',
       mapLabel: 'Map showing {name}',
+      atAGlance: 'At a glance',
       notFoundTitle: 'Attraction not found',
       notFoundBody: 'This widget is looking for an attraction that is not in the content database yet.',
       errorTitle: 'Unable to load',
@@ -402,6 +410,7 @@
       const base = {
         widgetId: null,
         theme: 'light',
+        layout: 'auto',   // 'auto' (side column once the widget is 900px wide) | 'stacked'
         brandColor: '#1B2B5B',
         accentColor: '#00B4D8',
         radius: 16,
@@ -427,6 +436,7 @@
       const m = Object.assign({}, base, c);
       m.sections = Object.assign({}, base.sections, c.sections || {});
       m.cta = Object.assign({}, base.cta, c.cta || {});
+      m.layout = m.layout === 'stacked' ? 'stacked' : 'auto';
       return m;
     }
 
@@ -439,9 +449,18 @@
       const root = document.createElement('div');
       root.className = 'tgx-root';
       root.setAttribute('data-theme', this.c.theme === 'dark' ? 'dark' : 'light');
+      root.setAttribute('data-layout', this.c.layout === 'stacked' ? 'stacked' : 'auto');
       if (this.c.brandColor) root.style.setProperty('--tgx-brand', this.c.brandColor);
-      if (this.c.accentColor) { root.style.setProperty('--tgx-accent', this.c.accentColor); root.style.setProperty('--tgx-accent-soft', hexToRgba(this.c.accentColor, 0.14)); }
-      if (this.c.brandColor) root.style.setProperty('--tgx-brand-soft', hexToRgba(this.c.brandColor, 0.10));
+      if (this.c.accentColor) {
+        root.style.setProperty('--tgx-accent', this.c.accentColor);
+        root.style.setProperty('--tgx-accent-soft', hexToRgba(this.c.accentColor, 0.14));
+        root.style.setProperty('--tgx-accent-tint', hexToRgba(this.c.accentColor, 0.38));
+      }
+      if (this.c.brandColor) {
+        root.style.setProperty('--tgx-brand-soft', hexToRgba(this.c.brandColor, 0.10));
+        root.style.setProperty('--tgx-brand-tint', hexToRgba(this.c.brandColor, 0.78));
+        root.style.setProperty('--tgx-brand-tint-2', hexToRgba(this.c.brandColor, 0.35));
+      }
       if (this.c.radius != null) {
         const n = Math.max(0, Math.min(24, parseInt(this.c.radius, 10) || 16));
         root.style.setProperty('--tgx-radius', n + 'px');
@@ -498,20 +517,44 @@
       const d = this._data;
       if (!d || !d.name) return this._renderNotFound();
       const s = this.c.sections;
+      // Layout (v1.4): a compact opener, then a two-column body.
+      //   hero, with the Best For chips inside it
+      //   quick-facts rail, riding across the hero's bottom edge on wide embeds
+      //   body: main column = overview → star → guides → tickets → located → stay → food
+      //         side column = insider tips → combine your trip → CTA
+      // The side column sits to the right once the widget is 900px wide
+      // (container query; never when config.layout is 'stacked') and stacks
+      // beneath the main column otherwise, so this DOM order is also the phone
+      // reading order. Toggles still remove any part; an empty column collapses.
+      const bestForHtml = s.bestfor ? this._renderBestForChips(d) : '';
+      const factsHtml = s.facts ? this._renderFacts(d) : '';
       const html = [];
-      if (s.hero)      html.push(this._renderHero(d));
-      if (s.facts)     html.push(this._renderFacts(d));
-      if (s.bestfor)   html.push(this._renderBestFor(d));
-      if (s.overview)  html.push(this._renderOverview(d));
-      if (s.star)      html.push(this._renderStar(d));
-      if (s.guides)    html.push(this._renderGuides(d));
-      if (s.tickets)   html.push(this._renderTickets(d));
-      if (s.located)   html.push(this._renderLocated(d));
-      if (s.stay)      html.push(this._renderStay(d));
-      if (s.food)      html.push(this._renderFood(d));
-      if (s.tips)      html.push(this._renderTips(d));
-      if (s.combine)   html.push(this._renderCombine(d));
-      if (s.cta)       html.push(this._renderCta(d));
+      if (s.hero) html.push(this._renderHero(d, bestForHtml, !!factsHtml));
+      else if (bestForHtml) html.push(this._renderBestFor(d));
+      if (factsHtml) html.push('<section class="tgx-facts-wrap" aria-label="' + esc(this.t('atAGlance')) + '">' + factsHtml + '</section>');
+
+      const main = [
+        s.overview ? this._renderOverview(d) : '',
+        s.star     ? this._renderStar(d) : '',
+        s.guides   ? this._renderGuides(d) : '',
+        s.tickets  ? this._renderTickets(d) : '',
+        s.located  ? this._renderLocated(d) : '',
+        s.stay     ? this._renderStay(d) : '',
+        s.food     ? this._renderFood(d) : '',
+      ].filter(Boolean);
+      const side = [
+        s.tips    ? this._renderTips(d) : '',
+        s.combine ? this._renderCombine(d) : '',
+        s.cta     ? this._renderCta(d) : '',
+      ].filter(Boolean);
+      if (main.length || side.length) {
+        html.push(
+          '<div class="tgx-body" data-side="' + (main.length && side.length ? '1' : '0') + '">' +
+            (main.length ? '<div class="tgx-main">' + main.join('') + '</div>' : '') +
+            (side.length ? '<aside class="tgx-side">' + side.join('') + '</aside>' : '') +
+          '</div>'
+        );
+      }
       this._root.innerHTML = html.filter(Boolean).join('');
       if (s.located && this.c.showMap !== false && typeof d.lat === 'number' && typeof d.lng === 'number') {
         this._initMap(d);
@@ -546,22 +589,26 @@
       }).catch(() => { /* silent: the text directions still show */ });
     }
 
+    // One heading per section (the section's name, with its icon inline) and
+    // the editorial line beneath it as a subline. The old kicker-above-h2 pair
+    // cost ~90px per section and read the same everywhere.
     _section(ico, kicker, h2, inner) {
       if (!inner) return '';
       return '<section class="tgx-section">' +
-        '<div class="tgx-section-head"><span class="tgx-section-icon">' + icon(ico, 18) + '</span>' +
-        '<span class="tgx-kicker">' + esc(kicker) + '</span></div>' +
-        (h2 ? '<h2 class="tgx-h2">' + esc(h2) + '</h2>' : '') + inner + '</section>';
+        '<div class="tgx-section-head">' +
+          '<h2 class="tgx-h2"><span class="tgx-section-icon" aria-hidden="true">' + icon(ico, 18) + '</span><span>' + esc(kicker) + '</span></h2>' +
+          (h2 ? '<p class="tgx-section-sub">' + esc(h2) + '</p>' : '') +
+        '</div>' + inner + '</section>';
     }
     _prose(text, max) { const p = paras(text, max); return p ? '<div class="tgx-prose">' + p + '</div>' : ''; }
     _card(ico, title, body) {
       if (!body) return '';
-      return '<div class="tgx-card"><div class="tgx-card-head"><span class="tgx-card-icon">' + icon(ico, 18) +
-        '</span><h4 class="tgx-card-title">' + esc(title) + '</h4></div>' +
+      return '<div class="tgx-card"><div class="tgx-card-head"><span class="tgx-card-icon">' + icon(ico, 15) +
+        '</span><h3 class="tgx-card-title">' + esc(title) + '</h3></div>' +
         '<div class="tgx-card-body">' + paras(body, 6) + '</div></div>';
     }
 
-    _renderHero(d) {
+    _renderHero(d, bestForHtml, hasRail) {
       let heroImg = safeUrl(this.c.heroImageUrl);
       // The URL goes into a background url() inside a style attribute — reject
       // any URL with characters that could close url()/the attribute or add CSS
@@ -574,17 +621,24 @@
       if (d.hasOnSiteHotels) badges.push('<span class="tgx-badge is-on">' + icon('bed', 13) + ' ' + esc(this.t('onSiteHotels')) + '</span>');
       if (d.dogFriendly) badges.push('<span class="tgx-badge is-on">' + icon('paw', 13) + ' ' + esc(this.t('dogFriendly')) + '</span>');
       const style = heroImg ? ' style="--tgx-hero-img:url(' + esc(heroImg) + ')"' : '';
-      return '<header class="tgx-hero' + (heroImg ? ' has-img' : '') + '"' + style + '>' +
-        (eyebrow ? '<div class="tgx-eyebrow"><span class="dot"></span>' + eyebrow + '</div>' : '') +
-        '<h1 class="tgx-name">' + esc(d.name) + '</h1>' +
-        (d.tagline ? '<p class="tgx-tagline">' + esc(d.tagline) + '</p>' : '') +
-        (badges.length ? '<div class="tgx-badges">' + badges.join('') + '</div>' : '') +
+      const cls = 'tgx-hero' + (heroImg ? ' has-img' : '') + (hasRail ? ' has-rail' : '');
+      return '<header class="' + cls + '"' + style + '>' +
+        // No photo: a large ferris-wheel glyph as a watermark gives the brand
+        // gradient a subject, so the imageless hero still reads as a day out.
+        (heroImg ? '' : '<span class="tgx-hero-mark" aria-hidden="true">' + icon('ferris', 270) + '</span>') +
+        '<div class="tgx-hero-content">' +
+          (eyebrow ? '<div class="tgx-eyebrow"><span class="dot"></span>' + eyebrow + '</div>' : '') +
+          '<h1 class="tgx-name">' + esc(d.name) + '</h1>' +
+          (d.tagline ? '<p class="tgx-tagline">' + esc(d.tagline) + '</p>' : '') +
+          (badges.length ? '<div class="tgx-badges">' + badges.join('') + '</div>' : '') +
+          (bestForHtml || '') +
+        '</div>' +
         '</header>';
     }
 
     _fact(ico, label, value) {
       if (!value) return '';
-      return '<div class="tgx-fact"><span class="tgx-fact-icon">' + icon(ico, 20) + '</span><div>' +
+      return '<div class="tgx-fact"><span class="tgx-fact-icon">' + icon(ico, 18) + '</span><div>' +
         '<div class="tgx-fact-label">' + esc(label) + '</div>' +
         '<div class="tgx-fact-value">' + esc(value) + '</div></div></div>';
     }
@@ -600,11 +654,23 @@
       return '<div class="tgx-facts" data-count="' + tiles.length + '">' + tiles.join('') + '</div>';
     }
 
+    // Best For chips. They sit inside the hero when there is one (with the
+    // name and tagline, where a visitor scans first) and become their own small
+    // section only when the hero is toggled off.
+    _renderBestForChips(d) {
+      const tags = Array.isArray(d.bestFor) ? d.bestFor : [];
+      if (!tags.length) return '';
+      const pills = tags.map(t => '<li class="tgx-tag">' + icon('users', 13) + '<span>' + esc(t) + '</span></li>').join('');
+      return '<div class="tgx-bestfor">' +
+        '<span class="tgx-bestfor-label">' + esc(this.t('bestFor')) + '</span>' +
+        '<ul class="tgx-tags" aria-label="' + esc(this.t('bestFor')) + '">' + pills + '</ul>' +
+      '</div>';
+    }
     _renderBestFor(d) {
       const tags = Array.isArray(d.bestFor) ? d.bestFor : [];
       if (!tags.length) return '';
-      const pills = tags.map(t => '<span class="tgx-tag">' + icon('users', 13) + '<span>' + esc(t) + '</span></span>').join('');
-      return this._section('users', this.t('bestFor'), '', '<div class="tgx-tags">' + pills + '</div>');
+      const pills = tags.map(t => '<li class="tgx-tag">' + icon('users', 13) + '<span>' + esc(t) + '</span></li>').join('');
+      return this._section('users', this.t('bestFor'), '', '<ul class="tgx-tags">' + pills + '</ul>');
     }
 
     _renderOverview(d) {
@@ -646,7 +712,11 @@
       const mapEl = (hasLL && this.c.showMap !== false)
         ? '<div class="tgx-map" data-tgx-map role="region" aria-label="' + esc(this.t('mapLabel', { name: d.name })) + '"></div>' : '';
       if (!blocks.length && !mapEl) return '';
-      return this._section('compass', this.t('gettingThere'), '', mapEl + blocks.join(''));
+      return this._section('compass', this.t('gettingThere'), '',
+        '<div class="tgx-locate">' +
+          (mapEl ? '<div class="tgx-locate-map">' + mapEl + '</div>' : '') +
+          (blocks.length ? '<div class="tgx-locate-text">' + blocks.join('') + '</div>' : '') +
+        '</div>');
     }
 
     _renderStay(d) {
@@ -730,121 +800,258 @@
   }
 
   const STYLES = `
-  :host { all: initial; }
+  :host { all: initial; display: block; box-sizing: border-box; }
+  :host *, :host *::before, :host *::after { box-sizing: border-box; }
+
+  /* ─── TOKENS ─────────────────────────────────────────
+     The Spotlight family's compact editorial system (shared with Destination
+     and Airport): hero, facts rail, two-column body, hairline rails. */
   .tgx-root {
-    --tgx-brand: #1B2B5B; --tgx-accent: #00B4D8;
-    --tgx-brand-soft: rgba(27,43,91,0.10); --tgx-accent-soft: rgba(0,180,216,0.14);
-    --tgx-radius: 16px; --tgx-radius-sm: 10px; --tgx-pad: 30px;
-    --tgx-bg: #FFFFFF; --tgx-card: #FFFFFF; --tgx-border: #E2E8F0; --tgx-border-soft: #F1F5F9;
-    --tgx-text: #0F172A; --tgx-sub: #475569; --tgx-muted: #94A3B8;
+    --tgx-brand: #1B2B5B;
+    --tgx-brand-light: #2A3F7A;
+    --tgx-brand-ink: var(--tgx-brand);
+    --tgx-brand-tint: rgba(27,43,91,0.78);
+    --tgx-brand-tint-2: rgba(27,43,91,0.35);
+    --tgx-accent: #00B4D8;
+    --tgx-accent-tint: rgba(0,180,216,0.38);
+    --tgx-brand-soft: rgba(27,43,91,0.08);
+    --tgx-accent-soft: rgba(0,180,216,0.12);
+    --tgx-radius: 16px;
+    --tgx-radius-sm: 10px;
+    --tgx-radius-xs: 6px;
+    --tgx-gap: 28px;
+    --tgx-bg: #FFFFFF; --tgx-card: #F8FAFC; --tgx-border: #E2E8F0; --tgx-border-soft: #F1F5F9;
+    --tgx-text: #0F172A; --tgx-sub: #475569; --tgx-muted: #64748B; --tgx-faint: #94A3B8;
+    --tgx-shadow-sm: 0 1px 2px rgba(15,23,42,0.05), 0 1px 3px rgba(27,43,91,0.06);
+    --tgx-shadow-md: 0 12px 32px -12px rgba(27,43,91,0.18), 0 2px 6px rgba(15,23,42,0.05);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: var(--tgx-text); background: var(--tgx-bg); display: block; line-height: 1.55;
-    max-width: 1000px; margin: 0 auto; padding: 0 0 12px;
+    font-size: 15px;
+    color: var(--tgx-text); background: var(--tgx-bg); display: block; line-height: 1.5;
+    max-width: 1200px; margin: 0 auto;
     /* Respond to the WIDGET's own width, not the browser window. Embedded on a
        customer page the widget often sits in a column far narrower than the
-       viewport, so viewport media queries never fired and fixed grids overflowed.
-       All layout breakpoints below are @container. */
+       viewport, so every layout breakpoint below is @container. */
     container-type: inline-size; container-name: tgx;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  @supports (color: color-mix(in srgb, red, blue)) {
+    .tgx-root { --tgx-brand-light: color-mix(in srgb, var(--tgx-brand) 82%, #FFFFFF); }
   }
   .tgx-root[data-theme="dark"] {
-    --tgx-bg: #0A0F1E; --tgx-card: #131A2E; --tgx-border: #283349; --tgx-border-soft: #1E283C;
-    --tgx-text: #F8FAFC; --tgx-sub: #CBD5E1; --tgx-muted: #64748B;
+    --tgx-bg: #0F172A; --tgx-card: #1E293B; --tgx-border: #334155; --tgx-border-soft: #1E293B;
+    --tgx-text: #F8FAFC; --tgx-sub: #CBD5E1; --tgx-muted: #94A3B8; --tgx-faint: #64748B;
+    --tgx-brand-soft: rgba(0,180,216,0.12); --tgx-accent-soft: rgba(0,180,216,0.16);
+    --tgx-brand-ink: var(--tgx-accent);
+    --tgx-shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+    --tgx-shadow-md: 0 12px 32px -12px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.25);
   }
-  .tgx-root *, .tgx-root *::before, .tgx-root *::after { box-sizing: border-box; }
-  .tgx-loading { min-height: 280px; }
-  .tgx-skel { height: 220px; border-radius: var(--tgx-radius); background: linear-gradient(90deg, var(--tgx-border-soft), var(--tgx-card), var(--tgx-border-soft)); background-size: 200% 100%; animation: tgxsh 1.4s ease infinite; }
+  .tgx-loading { min-height: 240px; }
+  .tgx-skel { min-height: clamp(220px, 30cqi, 400px); border-radius: var(--tgx-radius); background: linear-gradient(90deg, var(--tgx-border-soft), var(--tgx-card), var(--tgx-border-soft)); background-size: 200% 100%; animation: tgxsh 1.4s ease infinite; }
   @keyframes tgxsh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-  /* Hero */
-  .tgx-hero { position: relative; border-radius: var(--tgx-radius); padding: 40px var(--tgx-pad); color: #fff;
+  /* ─── HERO ───────────────────────────────────────── */
+  .tgx-hero {
+    position: relative;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    min-height: clamp(220px, 30cqi, 400px);
+    border-radius: var(--tgx-radius);
+    overflow: hidden;
+    color: #fff;
     background: var(--tgx-brand);
-    background: linear-gradient(135deg, var(--tgx-brand), var(--tgx-accent)); overflow: hidden; }
-  .tgx-hero.has-img::before { content:""; position:absolute; inset:0; background-image: var(--tgx-hero-img); background-size: cover; background-position: center; }
-  .tgx-hero.has-img::after { content:""; position:absolute; inset:0; background: linear-gradient(135deg, rgba(15,23,42,0.78), rgba(15,23,42,0.45)); }
-  .tgx-hero > * { position: relative; z-index: 1; }
-  .tgx-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; opacity:0.92; margin-bottom:12px; }
-  .tgx-eyebrow .dot { width:6px; height:6px; border-radius:50%; background: var(--tgx-accent); }
-  .tgx-name { margin:0; font-size:34px; font-weight:800; letter-spacing:-0.02em; line-height:1.1; }
-  .tgx-tagline { margin:10px 0 0; font-size:17px; opacity:0.94; max-width:62ch; }
-  .tgx-badges { margin-top:18px; display:flex; flex-wrap:wrap; gap:8px; }
-  .tgx-badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:6px 12px; border-radius:999px; background: rgba(255,255,255,0.16); }
-  .tgx-badge.is-on { background: rgba(255,255,255,0.22); }
+    box-shadow: var(--tgx-shadow-md);
+    isolation: isolate;
+  }
+  /* The attractions table has no image field, so the default hero is the brand
+     gradient with one accent glow and a large ferris-wheel glyph as a watermark.
+     An editor-supplied photo sits under a brand-tinted duotone. */
+  .tgx-hero::before {
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(70% 90% at 100% 0%, var(--tgx-accent-tint) 0%, rgba(0,180,216,0) 62%),
+      linear-gradient(135deg, var(--tgx-brand) 0%, var(--tgx-brand-light) 100%);
+  }
+  .tgx-hero.has-img::before { background-image: var(--tgx-hero-img); background-size: cover; background-position: center; }
+  .tgx-hero.has-img::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(8,15,30,0) 40%, rgba(8,15,30,0.55) 100%),
+      linear-gradient(135deg, var(--tgx-brand-tint) 0%, var(--tgx-brand-tint-2) 55%, var(--tgx-accent-tint) 100%);
+  }
+  .tgx-hero-mark {
+    position: absolute; right: -30px; top: -34px; z-index: -1;
+    width: 270px; height: 270px;
+    color: #fff; opacity: 0.09;
+    transform: rotate(-8deg);
+    pointer-events: none;
+  }
+  .tgx-hero-mark svg { width: 100%; height: 100%; }
+  .tgx-hero-content {
+    position: relative;
+    padding: clamp(18px, 3.2cqi, 40px);
+    animation: tgx-rise 640ms cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes tgx-rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .tgx-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color: rgba(255,255,255,0.86); margin-bottom:10px; }
+  .tgx-eyebrow .dot { width:6px; height:6px; border-radius:50%; background: var(--tgx-accent); flex: 0 0 6px; }
+  .tgx-name { margin:0; font-size: clamp(28px, 5cqi, 52px); font-weight:700; letter-spacing:-0.03em; line-height:1.02; text-shadow: 0 2px 20px rgba(0,0,0,0.3); overflow-wrap: anywhere; }
+  .tgx-tagline { margin:10px 0 0; font-size: clamp(15px, 1.45cqi, 18px); line-height: 1.4; color: rgba(255,255,255,0.92); max-width:62ch; }
+  .tgx-badges { margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; }
+  .tgx-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:12px; font-weight:600; line-height: 1.2;
+    padding:5px 10px; border-radius:999px;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.24);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .tgx-badge.is-on { background: rgba(16,185,129,0.28); border-color: rgba(16,185,129,0.5); }
 
-  /* Sections */
-  .tgx-section { margin: 34px 0; padding: 0 var(--tgx-pad); }
-  .tgx-section-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-  .tgx-section-icon { width:36px; height:36px; flex:0 0 36px; border-radius:10px; background: var(--tgx-accent); color: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px -3px var(--tgx-accent-soft); }
-  .tgx-kicker { font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color: var(--tgx-muted); }
-  .tgx-h2 { margin:0 0 16px; font-size:22px; font-weight:700; letter-spacing:-0.015em; color: var(--tgx-text); }
-  .tgx-subh { margin:18px 0 8px; font-size:15px; font-weight:700; color: var(--tgx-text); }
-  .tgx-prose { font-size:15px; color: var(--tgx-sub); line-height:1.65; }
+  /* Best For chips: inside the hero when there is one, a small section otherwise. */
+  .tgx-bestfor {
+    display:flex; align-items:center; flex-wrap:wrap; gap: 8px 12px;
+    margin-top:14px; padding-top:12px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+  }
+  .tgx-bestfor-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color: rgba(255,255,255,0.75); flex-shrink:0; }
+  .tgx-tags { display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:0; list-style:none; }
+  .tgx-tag { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius:999px; font-size:12px; font-weight:600; line-height:1.2; color: var(--tgx-text); }
+  .tgx-tag svg { color: var(--tgx-accent); flex-shrink:0; }
+  .tgx-hero-content .tgx-tag { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.24); color:#fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .tgx-hero-content .tgx-tag svg { color: rgba(255,255,255,0.9); }
+
+  /* ─── QUICK FACTS RAIL ───────────────────────────── */
+  .tgx-facts-wrap { position: relative; z-index: 2; margin: 14px 0 0; }
+  .tgx-facts {
+    display:grid;
+    /* auto-fit so the rail reflows to the container width instead of forcing
+       fixed columns that overflow a narrow embed. */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    background: var(--tgx-bg);
+    border: 1px solid var(--tgx-border);
+    border-radius: var(--tgx-radius-sm);
+    box-shadow: var(--tgx-shadow-md);
+    overflow: hidden;
+  }
+  .tgx-fact { display:flex; gap:10px; align-items:center; padding:12px 14px; min-width:0; background: var(--tgx-bg); box-shadow: -1px -1px 0 0 var(--tgx-border); }
+  .tgx-fact > div { min-width: 0; }
+  .tgx-fact-icon { width:30px; height:30px; flex:0 0 30px; border-radius:8px; background: var(--tgx-brand-soft); color: var(--tgx-brand-ink); display:flex; align-items:center; justify-content:center; }
+  .tgx-fact-label { font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--tgx-muted); margin-bottom:2px; line-height:1.2; }
+  .tgx-fact-value { font-size:14px; font-weight:600; color: var(--tgx-text); line-height:1.3; overflow-wrap: anywhere; }
+
+  /* ─── BODY GRID ──────────────────────────────────── */
+  .tgx-body { display:grid; grid-template-columns: minmax(0, 1fr); gap: 0 32px; margin-top: var(--tgx-gap); }
+  .tgx-main, .tgx-side { min-width:0; container-type: inline-size; }
+  .tgx-main { container-name: tgx-main; }
+  .tgx-side { container-name: tgx-side; }
+  .tgx-side > .tgx-section:first-child { margin-top: var(--tgx-gap); }
+
+  /* ─── SECTIONS ───────────────────────────────────── */
+  .tgx-section { margin: 0 0 var(--tgx-gap); }
+  .tgx-section:last-child { margin-bottom: 0; }
+  .tgx-section-head { margin-bottom: 12px; }
+  .tgx-h2 { display:flex; align-items:center; gap:8px; margin:0; font-size:17px; font-weight:600; letter-spacing:-0.01em; line-height:1.3; color: var(--tgx-text); }
+  .tgx-section-icon { width:22px; height:22px; flex:0 0 22px; display:inline-flex; align-items:center; justify-content:center; color: var(--tgx-brand-ink); }
+  .tgx-section-sub { margin:4px 0 0; font-size:13.5px; line-height:1.45; color: var(--tgx-sub); }
+  .tgx-subh { margin:14px 0 6px; font-size:14px; font-weight:600; color: var(--tgx-text); }
+  .tgx-prose { font-size:15px; color: var(--tgx-sub); line-height:1.6; max-width: 72ch; }
   .tgx-prose p { margin:0 0 12px; } .tgx-prose p:last-child { margin:0; }
 
-  /* Facts */
-  .tgx-facts { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin: 22px 0; padding: 0 var(--tgx-pad); }
-  .tgx-fact { display:flex; gap:14px; align-items:flex-start; padding:16px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius-sm); }
-  .tgx-fact-icon { width:38px; height:38px; flex:0 0 38px; border-radius:10px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
-  .tgx-fact-label { font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color: var(--tgx-muted); margin-bottom:3px; }
-  .tgx-fact-value { font-size:15px; font-weight:700; color: var(--tgx-text); line-height:1.3; }
+  /* ─── CARDS: hairline bento ──────────────────────── */
+  .tgx-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius-sm); overflow:hidden; }
+  .tgx-card { background: var(--tgx-bg); padding:14px 16px; min-width:0; box-shadow: -1px -1px 0 0 var(--tgx-border); transition: background .18s ease-out; }
+  .tgx-card:hover { background: var(--tgx-card); }
+  .tgx-card-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .tgx-card-icon { width:26px; height:26px; flex:0 0 26px; border-radius:7px; background: var(--tgx-brand-soft); color: var(--tgx-brand-ink); display:flex; align-items:center; justify-content:center; }
+  .tgx-card-title { margin:0; font-size:14px; font-weight:600; color: var(--tgx-text); line-height:1.3; }
+  .tgx-card-body { font-size:13px; color: var(--tgx-sub); line-height:1.5; }
+  .tgx-card-body p { margin:0 0 8px; } .tgx-card-body p:last-child { margin:0; }
 
-  /* Tags */
-  .tgx-tags { display:flex; flex-wrap:wrap; gap:10px; }
-  .tgx-tag { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius:999px; font-size:13px; font-weight:600; color: var(--tgx-text); }
-  .tgx-tag svg { color: var(--tgx-accent); flex-shrink:0; }
-
-  /* Cards */
-  .tgx-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
-  .tgx-card { background: var(--tgx-card); border:1px solid var(--tgx-border); border-radius: var(--tgx-radius); padding:20px 22px; }
-  .tgx-card-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
-  .tgx-card-icon { width:34px; height:34px; flex:0 0 34px; border-radius:9px; background: var(--tgx-accent-soft); color: var(--tgx-accent); display:flex; align-items:center; justify-content:center; }
-  .tgx-card-title { margin:0; font-size:15px; font-weight:700; color: var(--tgx-text); }
-  .tgx-card-body { font-size:14px; color: var(--tgx-sub); line-height:1.6; }
-  .tgx-card-body p { margin:0 0 10px; } .tgx-card-body p:last-child { margin:0; }
-
-  /* Getting there: embedded map + text blocks */
-  .tgx-map { height:300px; border-radius: var(--tgx-radius-sm); overflow:hidden; border:1px solid var(--tgx-border); margin-bottom:18px; background: var(--tgx-border-soft); }
+  /* ─── GETTING THERE: map + text blocks ───────────── */
+  .tgx-locate { display:grid; grid-template-columns: minmax(0, 1fr); gap:16px; align-items:start; }
+  .tgx-locate > div { min-width:0; }
+  .tgx-map { height:220px; border-radius: var(--tgx-radius-sm); overflow:hidden; border:1px solid var(--tgx-border); background: var(--tgx-border-soft); }
   .tgx-map .leaflet-container { height:100%; width:100%; font: inherit; background: var(--tgx-border-soft); }
   .tgx-pin { width:26px; height:26px; border-radius:50% 50% 50% 0; background: var(--tgx-accent); border:3px solid #fff; box-shadow:0 3px 8px rgba(15,23,42,0.35); transform: rotate(-45deg); }
-  .tgx-block { padding:14px 0; }
-  .tgx-block + .tgx-block { border-top:1px solid var(--tgx-border-soft); }
-  .tgx-block-label { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700; color: var(--tgx-text); margin-bottom:8px; }
-  .tgx-block-label svg { color: var(--tgx-brand); flex-shrink:0; }
+  .tgx-block { padding:10px 0; }
+  .tgx-block:first-child { padding-top: 0; }
+  .tgx-block + .tgx-block { border-top:1px solid var(--tgx-border); }
+  .tgx-block-label { display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color: var(--tgx-text); margin-bottom:4px; }
+  .tgx-block-label svg { color: var(--tgx-brand-ink); flex-shrink:0; }
+  .tgx-block .tgx-prose { font-size:14px; }
 
-  /* Callout / tips */
-  .tgx-callout { background: var(--tgx-accent-soft); border-radius: var(--tgx-radius-sm); padding:20px 24px; font-size:15px; color: var(--tgx-text); line-height:1.6; }
-  .tgx-callout p { margin:0 0 10px; } .tgx-callout p:last-child { margin:0; }
-  .tgx-tips { position:relative; background: var(--tgx-brand); color:#E6EAF4; border-radius: var(--tgx-radius-sm); padding:22px 26px 22px 52px; font-size:15px; line-height:1.65; }
-  .tgx-tips::before { content:""; position:absolute; top:20px; left:22px; width:4px; height:calc(100% - 40px); background: var(--tgx-accent); border-radius:2px; }
-  .tgx-tips p { margin:0 0 10px; } .tgx-tips p:last-child { margin:0; }
+  /* ─── TICKETS callout, TIPS ──────────────────────── */
+  .tgx-callout { background: var(--tgx-accent-soft); border: 1px solid rgba(0,180,216,0.28); border-radius: var(--tgx-radius-sm); padding:14px 16px; font-size:14px; color: var(--tgx-text); line-height:1.55; }
+  .tgx-callout p { margin:0 0 8px; } .tgx-callout p:last-child { margin:0; }
+  .tgx-tips { position:relative; background: var(--tgx-brand); color:#E6EAF4; border-radius: var(--tgx-radius-sm); padding:14px 16px 14px 30px; font-size:13.5px; line-height:1.55; }
+  .tgx-root[data-theme="dark"] .tgx-tips { border: 1px solid rgba(255,255,255,0.08); }
+  .tgx-tips::before { content:""; position:absolute; top:14px; left:14px; width:3px; height:calc(100% - 28px); background: var(--tgx-accent); border-radius:2px; }
+  .tgx-tips p { margin:0 0 8px; } .tgx-tips p:last-child { margin:0; }
+  .tgx-side .tgx-prose { font-size: 14px; }
 
-  /* CTA */
-  .tgx-cta { margin: 42px 0 0; display:flex; align-items:center; justify-content:space-between; gap:28px; flex-wrap:wrap; padding:30px var(--tgx-pad); border-radius: var(--tgx-radius); background: var(--tgx-brand); background: linear-gradient(135deg, var(--tgx-brand), var(--tgx-accent)); color:#fff; }
-  .tgx-cta-text { flex:1; min-width:240px; }
-  .tgx-cta-title { margin:0 0 4px; font-size:20px; font-weight:700; }
-  .tgx-cta-sub { margin:0; font-size:14px; opacity:0.88; }
-  .tgx-cta-actions { display:flex; gap:12px; flex-wrap:wrap; }
-  .tgx-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:999px; font-size:14px; font-weight:700; text-decoration:none; cursor:pointer; }
-  .tgx-btn-primary { background:#fff; color: var(--tgx-brand); }
-  .tgx-btn-ghost { background: rgba(255,255,255,0.16); color:#fff; }
-  .tgx-verified { flex-basis:100%; margin:14px 0 0; font-size:12px; opacity:0.8; display:inline-flex; align-items:center; gap:6px; }
+  /* ─── CTA (side card, or a band when it spans the width) ─── */
+  .tgx-cta {
+    position:relative; overflow:hidden;
+    display:flex; flex-direction:column; align-items:stretch; gap:14px;
+    padding:22px 24px;
+    border-radius: var(--tgx-radius-sm);
+    background: var(--tgx-brand); color:#fff;
+    box-shadow: var(--tgx-shadow-md);
+  }
+  .tgx-root[data-theme="dark"] .tgx-cta { border: 1px solid rgba(255,255,255,0.08); }
+  .tgx-cta::before { content:""; position:absolute; right:-50px; bottom:-70px; width:190px; height:190px; border-radius:50%; background: var(--tgx-accent); opacity:0.22; pointer-events:none; }
+  .tgx-cta-text { position:relative; flex:1 1 auto; min-width:0; }
+  .tgx-cta-title { margin:0 0 4px; font-size:18px; font-weight:600; letter-spacing:-0.01em; line-height:1.25; }
+  .tgx-cta-sub { margin:0; font-size:13.5px; opacity:0.85; line-height:1.45; }
+  .tgx-cta-actions { position:relative; display:flex; flex-direction:column; gap:8px; }
+  .tgx-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; min-height:44px; border-radius:10px; font-size:14px; font-weight:600; text-decoration:none; cursor:pointer; transition: transform .15s ease-out, filter .15s ease-out; }
+  .tgx-btn-primary { background: var(--tgx-accent); color:#fff; }
+  .tgx-btn-primary:hover, .tgx-btn-primary:focus-visible { filter: brightness(1.06); transform: translateY(-1px); outline:none; }
+  .tgx-btn-primary:focus-visible { box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+  .tgx-btn-ghost { background: rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(255,255,255,0.25); }
+  .tgx-verified { position:relative; margin:0; font-size:12px; opacity:0.8; display:inline-flex; align-items:center; gap:6px; }
+  .tgx-root > .tgx-verified, .tgx-side > .tgx-verified { margin-top: 12px; color: var(--tgx-muted); opacity: 1; }
+  @container tgx-side (min-width: 560px) {
+    .tgx-cta { flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 24px; padding:24px 28px; }
+    .tgx-cta-actions { flex-direction:row; flex:0 0 auto; }
+    .tgx-verified { flex-basis:100%; }
+  }
 
-  /* Notice */
-  .tgx-notice { text-align:center; padding:60px 24px; }
-  .tgx-notice-icon { width:52px; height:52px; margin:0 auto 16px; border-radius:14px; background: var(--tgx-brand-soft); color: var(--tgx-brand); display:flex; align-items:center; justify-content:center; }
-  .tgx-notice-title { margin:0 0 6px; font-size:19px; color: var(--tgx-text); }
+  /* ─── NOTICE ─────────────────────────────────────── */
+  .tgx-notice { text-align:center; padding:36px 24px; border:1px dashed var(--tgx-border); border-radius: var(--tgx-radius); }
+  .tgx-notice-icon { width:44px; height:44px; margin:0 auto 12px; border-radius:50%; background: var(--tgx-brand-soft); color: var(--tgx-brand-ink); display:flex; align-items:center; justify-content:center; }
+  .tgx-notice-title { margin:0 0 6px; font-size:16px; font-weight:600; color: var(--tgx-text); }
   .tgx-notice-body { margin:0; font-size:14px; color: var(--tgx-sub); }
 
-  @container tgx (max-width: 760px) {
-    /* --tgx-pad lives on .tgx-root, which is the query container and cannot
-       respond to its own container query, so tighten the gutter on the
-       descendants that consume it instead. Grid column counts now reflow via
-       auto-fit, so no grid overrides are needed here. */
-    .tgx-hero, .tgx-section, .tgx-facts, .tgx-cta { --tgx-pad: 20px; }
-    .tgx-hero { padding:30px var(--tgx-pad); } .tgx-name { font-size:27px; }
-    .tgx-cta { padding:26px var(--tgx-pad); }
+  /* ─── FOCUS ──────────────────────────────────────── */
+  .tgx-root a:focus-visible, .tgx-root button:focus-visible { outline: 2px solid var(--tgx-accent); outline-offset: 3px; border-radius: 4px; }
+
+  /* ─── RESPONSIVE (container-relative — tracks .tgx-root width) ─── */
+  @container tgx (min-width: 720px) {
+    .tgx-hero.has-rail .tgx-hero-content { padding-bottom: calc(clamp(18px, 3.2cqi, 40px) + 30px); }
+    .tgx-hero.has-rail + .tgx-facts-wrap { margin: -34px clamp(16px, 3.2cqi, 40px) 0; }
   }
-  @media (prefers-reduced-motion: reduce) { .tgx-skel { animation: none; } }
+  @container tgx (min-width: 900px) {
+    .tgx-root:not([data-layout="stacked"]) .tgx-body[data-side="1"] { grid-template-columns: minmax(0, 1fr) minmax(280px, 34%); align-items: start; }
+    .tgx-root:not([data-layout="stacked"]) .tgx-body[data-side="1"] .tgx-side > .tgx-section:first-child { margin-top: 0; }
+  }
+  @container tgx (max-width: 719px) {
+    .tgx-root { --tgx-gap: 24px; }
+  }
+  @container tgx-main (min-width: 640px) {
+    .tgx-locate { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; }
+    .tgx-map { height: 260px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tgx-skel { animation: none; }
+    .tgx-hero-content { animation: none; }
+    .tgx-btn, .tgx-card { transition: none !important; }
+    .tgx-btn-primary:hover { transform: none !important; }
+  }
   `;
 
   function init() {

@@ -1,5 +1,5 @@
 /**
- * Travelgenix Destination Spotlight Widget v1.0.0
+ * Travelgenix Destination Spotlight Widget v1.6.0
  * Self-contained, embeddable editorial destination showcase.
  * Zero dependencies. Shadow DOM isolation. Works on any website via a single script tag.
  *
@@ -10,7 +10,10 @@
  * (prose only — facts, climate, images and tags always stay live).
  *
  * Features
- *  - Full-bleed editorial hero with destination name + tagline
+ *  - Compact editorial hero (name, tagline, Best For chips) with the quick
+ *    facts as a rail across its bottom edge, then a two-column body on wide
+ *    embeds: climate, highlights, events | good to know, pairs well with, CTA
+ *    (config.layout: 'auto' | 'stacked')
  *  - 12-month climate chart, colour-coded by season, with rainfall strip and
  *    best-time-to-visit callout (the "nobody else does this" hook)
  *  - Quick facts bar (flight time, time zone, currency, language, voltage)
@@ -110,7 +113,7 @@
     p.__abort = function () { if (timer) clearTimeout(timer); if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } };
     return p;
   }
-  const VERSION = '1.5.0';
+  const VERSION = '1.6.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -581,14 +584,21 @@
     :host { all: initial; display: block; box-sizing: border-box; }
     :host *, :host *::before, :host *::after { box-sizing: border-box; }
 
+    /* ─── TOKENS ─────────────────────────────────────────
+       Compact editorial system shared by the Spotlight family (Destination,
+       Airport, Attraction). Same rhythm, same rails, same body grid. */
     .tgs-root {
       --tgs-brand: #1B2B5B;
       --tgs-accent: #00B4D8;
+      /* Ink for icons and small labels on light surfaces: the brand colour in
+         light mode, the accent in dark mode (a navy brand vanishes on navy). */
+      --tgs-brand-ink: var(--tgs-brand);
       --tgs-bg: #FFFFFF;
       --tgs-card: #F8FAFC;
       --tgs-text: #0F172A;
       --tgs-sub: #475569;
-      --tgs-muted: #94A3B8;
+      --tgs-muted: #64748B;
+      --tgs-faint: #94A3B8;
       --tgs-border: #E2E8F0;
       --tgs-border-soft: #F1F5F9;
       --tgs-brand-soft: rgba(27,43,91,0.08);
@@ -602,21 +612,23 @@
       --tgs-radius: 16px;
       --tgs-radius-sm: 10px;
       --tgs-radius-xs: 6px;
+      --tgs-gap: 28px;
 
-      --tgs-shadow-sm: 0 1px 2px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.06);
-      --tgs-shadow-md: 0 4px 16px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
-      --tgs-shadow-lg: 0 20px 40px rgba(15,23,42,0.12), 0 8px 16px rgba(15,23,42,0.06);
+      /* Navy-tinted depth: one elevation for rails and the CTA, nothing else floats. */
+      --tgs-shadow-sm: 0 1px 2px rgba(15,23,42,0.05), 0 1px 3px rgba(27,43,91,0.06);
+      --tgs-shadow-md: 0 12px 32px -12px rgba(27,43,91,0.18), 0 2px 6px rgba(15,23,42,0.05);
+      --tgs-shadow-lg: 0 24px 48px -16px rgba(27,43,91,0.28), 0 8px 16px -8px rgba(15,23,42,0.08);
 
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 15px;
       color: var(--tgs-text);
       background: var(--tgs-bg);
-      line-height: 1.55;
-      max-width: 1440px;
+      line-height: 1.5;
+      max-width: 1200px;
       margin: 0 auto;
       /* Respond to the WIDGET's own width, not the browser window. Embedded on a
          customer page the widget often sits in a column far narrower than the
-         viewport, so viewport media queries never fired and fixed grids (the
-         "At a glance" facts row) overflowed. All breakpoints below are @container. */
+         viewport, so every breakpoint below is @container. */
       container-type: inline-size;
       container-name: tgs;
       -webkit-font-smoothing: antialiased;
@@ -628,91 +640,231 @@
       --tgs-card: #1E293B;
       --tgs-text: #F8FAFC;
       --tgs-sub: #CBD5E1;
-      --tgs-muted: #64748B;
+      --tgs-muted: #94A3B8;
+      --tgs-faint: #64748B;
       --tgs-border: #334155;
       --tgs-border-soft: #1E293B;
       --tgs-brand-soft: rgba(0,180,216,0.12);
       --tgs-accent-soft: rgba(0,180,216,0.18);
+      --tgs-brand-ink: var(--tgs-accent);
       --tgs-season-off: #475569;
       --tgs-rain: rgba(96,165,250,0.65);
       --tgs-shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
-      --tgs-shadow-md: 0 4px 16px rgba(0,0,0,0.35);
-      --tgs-shadow-lg: 0 20px 40px rgba(0,0,0,0.45);
+      --tgs-shadow-md: 0 12px 32px -12px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.25);
+      --tgs-shadow-lg: 0 24px 48px -16px rgba(0,0,0,0.6);
+    }
+
+    .tgs-sr-only, .tgs-climate-sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
     }
 
     /* ─── HERO ───────────────────────────────────────── */
+    .tgs-section-hero { margin: 0; }
     .tgs-hero {
       position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: clamp(240px, 36cqi, 460px);
       overflow: hidden;
       border-radius: var(--tgs-radius);
-      background: var(--tgs-card);
+      background: var(--tgs-brand);
       box-shadow: var(--tgs-shadow-md);
+      isolation: isolate;
     }
     .tgs-hero-img {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      transform: scale(1.01); /* hides hairline edge on scale */
+      transform: scale(1.02); /* hides hairline edge on scale */
     }
     .tgs-hero-scrim {
       position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 85%, rgba(0,0,0,0.75) 100%);
+      background:
+        linear-gradient(180deg, rgba(8,15,30,0.12) 0%, rgba(8,15,30,0) 28%, rgba(8,15,30,0.52) 64%, rgba(8,15,30,0.82) 100%);
     }
     .tgs-hero-content {
-      position: absolute; left: 0; right: 0; bottom: 0;
-      padding: 40px 48px;
+      position: relative;
+      padding: clamp(18px, 3.2cqi, 40px);
       color: #fff;
+      animation: tgs-rise 640ms cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes tgs-rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .tgs-hero-eyebrow {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
-      background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 6px 12px; border-radius: 999px;
-      margin-bottom: 16px;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.86);
+      margin-bottom: 10px;
+    }
+    .tgs-hero-eyebrow::before {
+      content: "";
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--tgs-accent);
+      flex: 0 0 6px;
     }
     .tgs-hero-title {
       margin: 0;
-      font-size: clamp(40px, 6vw, 72px);
+      font-size: clamp(30px, 5.4cqi, 58px);
       font-weight: 700;
-      letter-spacing: -0.025em;
-      line-height: 1.02;
-      text-shadow: 0 2px 24px rgba(0,0,0,0.4);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.35);
+      overflow-wrap: anywhere;
     }
     .tgs-hero-tagline {
-      margin: 14px 0 0;
-      font-size: clamp(16px, 1.6vw, 22px);
+      margin: 10px 0 0;
+      font-size: clamp(15px, 1.45cqi, 19px);
       font-weight: 400;
       color: rgba(255,255,255,0.92);
-      max-width: 640px;
+      max-width: 60ch;
       line-height: 1.4;
       text-shadow: 0 1px 12px rgba(0,0,0,0.35);
     }
     .tgs-hero-attribution {
-      position: absolute; right: 16px; bottom: 12px;
-      font-size: 10px;
-      color: rgba(255,255,255,0.65);
-      letter-spacing: 0.02em;
+      position: absolute; top: 12px; right: 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.8);
+      background: rgba(8,15,30,0.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 3px 8px;
+      border-radius: 999px;
       max-width: 60%;
-      text-align: right;
       line-height: 1.3;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    /* ─── SECTION FRAMING ─────────────────────────────── */
-    .tgs-section { margin: 48px 0; }
-    .tgs-section:first-child { margin-top: 0; }
-    .tgs-section-hero { margin: 0 0 48px; }
+    /* Best For chips: glass inside the hero, bordered pills when standalone. */
+    .tgs-tags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin: 0; padding: 0; list-style: none;
+    }
+    .tgs-hero-content .tgs-tags { margin-top: 14px; }
+    .tgs-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px; font-weight: 600;
+      line-height: 1.2;
+      background: var(--tgs-card);
+      border: 1px solid var(--tgs-border);
+      color: var(--tgs-text);
+    }
+    .tgs-tag svg { color: var(--tgs-accent); flex-shrink: 0; }
+    .tgs-hero-content .tgs-tag {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.24);
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .tgs-hero-content .tgs-tag svg { color: rgba(255,255,255,0.9); }
+    .tgs-section-tags { margin-top: 14px; }
 
+    /* ─── QUICK FACTS RAIL ───────────────────────────────
+       One rail of cells with hairline dividers, sitting across the hero's
+       bottom edge on wide embeds and directly beneath it on narrow ones. */
+    .tgs-section-facts {
+      position: relative;
+      z-index: 2;
+      margin: 14px 0 0;
+    }
+    .tgs-facts-label {
+      position: absolute; top: -10px; left: 14px; z-index: 1;
+      margin: 0;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--tgs-brand-ink);
+      background: var(--tgs-bg);
+      border: 1px solid var(--tgs-border);
+      border-radius: 999px;
+      padding: 2px 9px;
+      line-height: 1.3;
+    }
+    .tgs-facts {
+      display: grid;
+      /* auto-fit so the rail reflows to the container width instead of forcing a
+         fixed 5 columns that overflow a narrow embed. */
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      background: var(--tgs-bg);
+      border: 1px solid var(--tgs-border);
+      border-radius: var(--tgs-radius-sm);
+      box-shadow: var(--tgs-shadow-md);
+      overflow: hidden;
+    }
+    .tgs-fact {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px;
+      min-width: 0;
+      background: var(--tgs-bg);
+      /* hairline dividers between cells, whatever the column count */
+      box-shadow: -1px -1px 0 0 var(--tgs-border);
+    }
+    .tgs-fact-icon {
+      width: 30px; height: 30px;
+      flex: 0 0 30px;
+      border-radius: 8px;
+      background: var(--tgs-brand-soft);
+      color: var(--tgs-brand-ink);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tgs-fact-body { min-width: 0; flex: 1; }
+    .tgs-fact-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tgs-muted);
+      margin: 0 0 2px;
+      line-height: 1.2;
+    }
+    .tgs-fact-value {
+      margin: 0;
+      font-size: 14px; font-weight: 600; color: var(--tgs-text);
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    /* ─── BODY GRID ──────────────────────────────────────
+       main = climate, highlights, events · side = good to know, pairs well with, CTA.
+       Two columns from 900px of widget width unless layout is "stacked". */
+    .tgs-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0 32px;
+      margin-top: var(--tgs-gap);
+    }
+    .tgs-main, .tgs-side {
+      min-width: 0;
+      container-type: inline-size;
+    }
+    .tgs-main { container-name: tgs-main; }
+    .tgs-side { container-name: tgs-side; }
+    .tgs-main:empty, .tgs-side:empty { display: none; }
+    .tgs-side > .tgs-section:first-child { margin-top: var(--tgs-gap); }
+
+    /* ─── SECTION FRAMING ─────────────────────────────── */
+    .tgs-section { margin: 0 0 var(--tgs-gap); }
+    .tgs-section:last-child { margin-bottom: 0; }
     .tgs-section-head {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; margin: 0 0 20px;
+      gap: 12px; margin: 0 0 12px;
     }
     .tgs-section-title {
       margin: 0;
-      font-size: 22px; font-weight: 700; letter-spacing: -0.015em;
+      font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+      line-height: 1.3;
       color: var(--tgs-text);
     }
     .tgs-section-sub {
@@ -722,7 +874,7 @@
     /* ─── UNIT TOGGLE (C/F in climate chart header) ──── */
     .tgs-climate-units {
       display: inline-flex; gap: 2px;
-      padding: 3px;
+      padding: 2px;
       background: var(--tgs-border-soft);
       border-radius: 999px;
     }
@@ -730,21 +882,21 @@
       border: 0; background: transparent;
       font: inherit; font-size: 12px; font-weight: 600;
       color: var(--tgs-sub);
-      padding: 6px 12px;
+      padding: 0 10px;
       border-radius: 999px;
       cursor: pointer;
-      min-width: 40px;
+      min-width: 38px;
+      min-height: 30px;
       transition: background 150ms ease, color 150ms ease, box-shadow 150ms ease;
-      min-height: 28px;
     }
     .tgs-climate-unit:hover { color: var(--tgs-text); }
     .tgs-climate-unit[aria-pressed="true"] {
-      background: var(--tgs-card);
+      background: var(--tgs-bg);
       color: var(--tgs-text);
       box-shadow: 0 1px 2px rgba(15,23,42,0.08);
     }
     .tgs-root[data-theme="dark"] .tgs-climate-unit[aria-pressed="true"] {
-      background: var(--tgs-bg);
+      background: var(--tgs-card);
       box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
 
@@ -752,13 +904,13 @@
     .tgs-climate {
       background: var(--tgs-card);
       border: 1px solid var(--tgs-border);
-      border-radius: var(--tgs-radius);
-      padding: 24px 28px;
+      border-radius: var(--tgs-radius-sm);
+      padding: 16px 18px 14px;
     }
     .tgs-climate-topline {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; flex-wrap: wrap;
-      margin-bottom: 18px;
+      gap: 8px 12px; flex-wrap: wrap;
+      margin-bottom: 12px;
     }
     .tgs-climate-current-label {
       font-size: 12px; color: var(--tgs-sub);
@@ -768,29 +920,40 @@
       font-weight: 600;
     }
     .tgs-climate-callout {
-      display: inline-flex; align-items: center; gap: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
       background: var(--tgs-accent-soft);
       color: var(--tgs-accent);
-      padding: 6px 12px; border-radius: 999px;
+      padding: 5px 10px; border-radius: 999px;
       font-size: 12px; font-weight: 600;
+      line-height: 1.2;
     }
-    .tgs-climate-callout[data-theme-dark] { color: var(--tgs-accent); }
+    .tgs-climate-plot { display: grid; grid-template-columns: minmax(0, 1fr); }
+    .tgs-climate-axis {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 11px; font-weight: 600; color: var(--tgs-muted);
+      padding: 0 0 1px;
+      font-variant-numeric: tabular-nums;
+    }
     .tgs-climate-chart {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 6px;
+      gap: 5px;
       align-items: end;
-      height: 180px;
-      margin: 0 0 6px;
+      height: 128px;
+      margin: 0 0 4px;
     }
     .tgs-climate-col {
       position: relative;
       display: flex; flex-direction: column; align-items: center;
       height: 100%;
+      min-width: 0;
     }
     /* Current month — the "you are here" cue. */
     .tgs-climate-col[data-current="true"] .tgs-climate-bar {
-      box-shadow: 0 0 0 2px var(--tgs-bg), 0 0 0 4px var(--tgs-text);
+      box-shadow: 0 0 0 2px var(--tgs-card), 0 0 0 4px var(--tgs-text);
     }
     .tgs-climate-col[data-current="true"] .tgs-climate-temp {
       color: var(--tgs-text);
@@ -815,16 +978,17 @@
     .tgs-climate-bar[data-season="shoulder"] { background: var(--tgs-season-shoulder); }
     .tgs-climate-bar[data-season="off"] { background: var(--tgs-season-off); }
     .tgs-climate-temp {
-      font-size: 11px; font-weight: 600; color: var(--tgs-text);
-      margin-bottom: 4px;
+      font-size: 11px; font-weight: 600; color: var(--tgs-sub);
+      margin-bottom: 3px;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
     .tgs-climate-rain {
-      height: 36px;
+      height: 22px;
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 6px;
-      margin: 8px 0 6px;
+      gap: 5px;
+      margin: 6px 0 4px;
       align-items: end;
     }
     .tgs-climate-rain-cell {
@@ -835,7 +999,7 @@
     .tgs-climate-months {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 6px;
+      gap: 5px;
       text-align: center;
     }
     .tgs-climate-month {
@@ -843,94 +1007,60 @@
       letter-spacing: 0.04em;
     }
     .tgs-climate-legend {
-      display: flex; gap: 18px; flex-wrap: wrap;
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px solid var(--tgs-border-soft);
-      font-size: 12px; color: var(--tgs-sub);
+      display: flex; gap: 6px 14px; flex-wrap: wrap;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--tgs-border);
+      font-size: 11px; color: var(--tgs-sub);
     }
-    .tgs-climate-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .tgs-climate-legend-item { display: inline-flex; align-items: center; gap: 5px; }
     .tgs-climate-legend-swatch {
-      width: 10px; height: 10px; border-radius: 2px;
+      width: 9px; height: 9px; border-radius: 2px;
     }
-    .tgs-climate-sr-only {
-      position: absolute;
-      width: 1px; height: 1px;
-      padding: 0; margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    /* ─── QUICK FACTS ─────────────────────────────────── */
-    .tgs-facts {
-      display: grid;
-      /* auto-fit so the row reflows to the container width instead of forcing a
-         fixed 5 columns that overflow a narrow embed. */
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 16px;
-    }
-    .tgs-fact {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      padding: 20px;
-      background: var(--tgs-card);
-      border: 1px solid var(--tgs-border);
-      border-radius: var(--tgs-radius-sm);
-    }
-    .tgs-fact-icon {
-      width: 40px; height: 40px;
-      flex: 0 0 40px;
-      border-radius: 10px;
-      background: var(--tgs-brand-soft);
-      color: var(--tgs-brand);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .tgs-fact-body { min-width: 0; flex: 1; }
-    .tgs-fact-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--tgs-muted);
-      margin: 0 0 4px;
-    }
-    .tgs-fact-value {
-      margin: 0;
-      font-size: 15px; font-weight: 600; color: var(--tgs-text);
-      line-height: 1.3;
-      word-break: break-word;
+    /* Narrow chart: per-bar numbers would drop below 11px, so they give way to
+       a two-point axis (top of scale, baseline) and hover/tap titles per month. */
+    @container tgs-main (max-width: 519px) {
+      .tgs-climate-plot { grid-template-columns: auto minmax(0, 1fr); gap: 6px; }
+      .tgs-climate-axis { display: flex; }
+      .tgs-climate-temp { display: none; }
+      .tgs-climate-chart { height: 96px; gap: 3px; }
+      .tgs-climate-rain, .tgs-climate-months { gap: 3px; }
+      .tgs-climate-months { font-size: 10px; }
     }
 
     /* ─── GOOD TO KNOW (planning) ─────────────────────── */
     .tgs-plan-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-    }
-    .tgs-plan-details {
-      margin-top: 16px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .tgs-plan-detail {
-      background: var(--tgs-card);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      background: var(--tgs-bg);
       border: 1px solid var(--tgs-border);
       border-radius: var(--tgs-radius-sm);
       overflow: hidden;
     }
+    .tgs-plan-grid .tgs-fact { box-shadow: -1px -1px 0 0 var(--tgs-border); }
+    .tgs-plan-details {
+      margin-top: 8px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .tgs-plan-detail {
+      background: var(--tgs-bg);
+      border: 1px solid var(--tgs-border);
+      border-radius: var(--tgs-radius-xs);
+      overflow: hidden;
+    }
     .tgs-plan-summary {
       display: flex; align-items: center; gap: 10px;
-      padding: 15px 18px;
+      padding: 10px 14px;
+      min-height: 40px;
       cursor: pointer;
-      font-size: 14px; font-weight: 600; color: var(--tgs-text);
+      font-size: 13px; font-weight: 600; color: var(--tgs-text);
       list-style: none;
       -webkit-tap-highlight-color: transparent;
     }
     .tgs-plan-summary::-webkit-details-marker { display: none; }
+    .tgs-plan-summary:hover { background: var(--tgs-card); }
     .tgs-plan-summary:focus-visible { outline: 2px solid var(--tgs-accent); outline-offset: -2px; }
-    .tgs-plan-summary > svg { color: var(--tgs-brand); flex: 0 0 auto; }
+    .tgs-plan-summary > svg { color: var(--tgs-brand-ink); flex: 0 0 auto; }
     .tgs-plan-chevron {
       margin-left: auto; color: var(--tgs-muted);
       display: inline-flex;
@@ -938,128 +1068,82 @@
     }
     .tgs-plan-detail[open] .tgs-plan-chevron { transform: rotate(180deg); }
     .tgs-plan-detail-body {
-      padding: 0 18px 16px;
-      font-size: 14px; color: var(--tgs-sub); line-height: 1.6;
+      padding: 0 14px 12px;
+      font-size: 13px; color: var(--tgs-sub); line-height: 1.55;
     }
-    .tgs-plan-detail-body p { margin: 0 0 10px; }
+    .tgs-plan-detail-body p { margin: 0 0 8px; }
     .tgs-plan-detail-body p:last-child { margin: 0; }
 
-    /* ─── HIGHLIGHTS GRID ─────────────────────────────── */
+    /* ─── HIGHLIGHTS ─────────────────────────────────────
+       A bento of cells with hairline dividers rather than five floating cards. */
     .tgs-highlights {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .tgs-highlight {
-      position: relative;
       background: var(--tgs-card);
       border: 1px solid var(--tgs-border);
-      border-radius: var(--tgs-radius);
-      padding: 26px 24px;
-      cursor: default;
-      outline: none;
-      /* Single combined transition so lift + border + shadow move together. */
-      transition: transform 220ms cubic-bezier(.22,1,.36,1),
-                  border-color 220ms ease,
-                  box-shadow 220ms ease,
-                  background 220ms ease;
-      /* Isolate so the ::before glow doesn't bleed onto neighbours. */
-      isolation: isolate;
+      border-radius: var(--tgs-radius-sm);
+      overflow: hidden;
     }
-    /* The soft coloured glow sits BEHIND the card. Hidden by default, fades in
-       on hover. Kept out of the normal layout via negative z-index. */
-    .tgs-highlight::before {
-      content: "";
-      position: absolute;
-      inset: -6px;
-      border-radius: calc(var(--tgs-radius) + 4px);
-      background: radial-gradient(ellipse at center, var(--tgs-brand-soft) 0%, transparent 70%);
-      opacity: 0;
-      z-index: -1;
-      transition: opacity 260ms ease;
-      pointer-events: none;
+    .tgs-highlight {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 16px 18px;
+      min-width: 0;
+      background: var(--tgs-bg);
+      box-shadow: -1px -1px 0 0 var(--tgs-border);
+      transition: background 180ms ease;
     }
-    .tgs-highlight:hover,
-    .tgs-highlight:focus-visible {
-      transform: translateY(-4px);
-      border-color: var(--tgs-brand);
-      box-shadow: 0 12px 28px -8px rgba(15,23,42,0.14),
-                  0 4px 10px -2px rgba(15,23,42,0.06);
-    }
-    .tgs-highlight:hover::before,
-    .tgs-highlight:focus-visible::before {
-      opacity: 1;
-    }
-    /* Dark mode tweak — shadows need more weight to register against a dark
-       card. Also dial up the glow slightly. */
-    .tgs-root[data-theme="dark"] .tgs-highlight:hover,
-    .tgs-root[data-theme="dark"] .tgs-highlight:focus-visible {
-      box-shadow: 0 16px 32px -8px rgba(0,0,0,0.5),
-                  0 6px 12px -2px rgba(0,0,0,0.3);
-    }
-
+    .tgs-highlight:hover { background: var(--tgs-card); }
     .tgs-highlight-icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
+      width: 34px; height: 34px;
+      flex: 0 0 34px;
+      border-radius: 9px;
       background: var(--tgs-brand-soft);
-      color: var(--tgs-brand);
+      color: var(--tgs-brand-ink);
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
-      /* Separate transition from the card so icon scales independently. */
-      transition: background 220ms ease, color 220ms ease, transform 260ms cubic-bezier(.22,1,.36,1);
+      transition: background 180ms ease, color 180ms ease;
     }
-    .tgs-highlight:hover .tgs-highlight-icon,
-    .tgs-highlight:focus-visible .tgs-highlight-icon {
+    .tgs-highlight:hover .tgs-highlight-icon {
       background: var(--tgs-brand);
       color: #FFFFFF;
-      transform: scale(1.06);
     }
+    .tgs-root[data-theme="dark"] .tgs-highlight:hover .tgs-highlight-icon {
+      background: var(--tgs-accent);
+      color: #0F172A;
+    }
+    .tgs-highlight-body { min-width: 0; }
     .tgs-highlight-title {
-      margin: 0 0 8px;
-      font-size: 17px; font-weight: 600;
+      margin: 0 0 3px;
+      font-size: 14px; font-weight: 600;
       color: var(--tgs-text);
-      letter-spacing: -0.005em;
+      line-height: 1.3;
     }
     .tgs-highlight-desc {
       margin: 0;
-      font-size: 14px; color: var(--tgs-sub);
-      line-height: 1.55;
+      font-size: 13px; color: var(--tgs-sub);
+      line-height: 1.5;
     }
-
-    /* ─── BEST FOR TAGS ──────────────────────────────── */
-    .tgs-tags {
-      display: flex; flex-wrap: wrap; gap: 10px;
-    }
-    .tgs-tag {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 14px;
-      background: var(--tgs-card);
-      border: 1px solid var(--tgs-border);
-      border-radius: 999px;
-      font-size: 13px; font-weight: 500;
-      color: var(--tgs-text);
-    }
-    .tgs-tag svg { color: var(--tgs-accent); flex-shrink: 0; }
 
     /* ─── PAIRS WELL WITH ────────────────────────────── */
-    .tgs-pairs { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tgs-pairs { display: flex; flex-wrap: wrap; gap: 8px; }
     .tgs-pair {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 15px;
-      background: var(--tgs-card);
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 13px;
+      min-height: 36px;
+      background: var(--tgs-bg);
       border: 1px solid var(--tgs-border);
       border-radius: 999px;
-      font-size: 14px; font-weight: 600;
+      font-size: 13px; font-weight: 600;
+      line-height: 1.2;
       color: var(--tgs-text);
       text-decoration: none;
     }
     .tgs-pair > svg { color: var(--tgs-accent); flex-shrink: 0; }
     a.tgs-pair {
-      transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
     }
     a.tgs-pair:hover, a.tgs-pair:focus-visible {
       border-color: var(--tgs-brand);
-      box-shadow: 0 6px 16px -8px rgba(15,23,42,0.18);
+      background: var(--tgs-card);
       transform: translateY(-1px);
       outline: none;
     }
@@ -1071,95 +1155,117 @@
     a.tgs-pair:hover .tgs-pair-arrow, a.tgs-pair:focus-visible .tgs-pair-arrow {
       opacity: 1; transform: translateX(0);
     }
-    .tgs-root[data-theme="dark"] a.tgs-pair:hover,
-    .tgs-root[data-theme="dark"] a.tgs-pair:focus-visible {
-      box-shadow: 0 8px 18px -8px rgba(0,0,0,0.5);
-    }
 
     /* ─── EVENTS ─────────────────────────────────────── */
-    .tgs-events { display: flex; flex-direction: column; gap: 12px; }
+    .tgs-events {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0 28px;
+      border-top: 1px solid var(--tgs-border);
+    }
     .tgs-event {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 20px;
-      align-items: center;
-      padding: 18px 20px;
-      background: var(--tgs-card);
-      border: 1px solid var(--tgs-border);
-      border-radius: var(--tgs-radius-sm);
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--tgs-border);
     }
     .tgs-event-month {
       font-size: 11px; font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--tgs-brand);
+      letter-spacing: 0.06em;
+      color: var(--tgs-brand-ink);
       background: var(--tgs-brand-soft);
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 5px 8px;
+      border-radius: 6px;
       text-transform: uppercase;
       white-space: nowrap;
-      min-width: 80px;
+      min-width: 60px;
       text-align: center;
+      line-height: 1.2;
+      margin-top: 1px;
     }
-    .tgs-event-body {}
+    .tgs-event-body { min-width: 0; }
     .tgs-event-name {
-      margin: 0 0 4px;
-      font-size: 15px; font-weight: 600;
+      margin: 0 0 2px;
+      font-size: 14px; font-weight: 600;
       color: var(--tgs-text);
+      line-height: 1.3;
     }
     .tgs-event-desc {
       margin: 0;
       font-size: 13px; color: var(--tgs-sub);
-      line-height: 1.5;
+      line-height: 1.45;
     }
 
     /* ─── CTA ────────────────────────────────────────── */
     .tgs-cta {
+      position: relative;
+      overflow: hidden;
       background: var(--tgs-brand);
       color: #fff;
-      border-radius: var(--tgs-radius);
-      padding: 40px 48px;
+      border-radius: var(--tgs-radius-sm);
+      padding: 22px 24px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
       box-shadow: var(--tgs-shadow-md);
     }
-    .tgs-cta-body { flex: 1 1 300px; min-width: 0; }
+    .tgs-root[data-theme="dark"] .tgs-cta { border: 1px solid rgba(255,255,255,0.08); }
+    /* One soft accent orb, not a gradient: gives the panel a focal point. */
+    .tgs-cta::before {
+      content: "";
+      position: absolute;
+      right: -50px; bottom: -70px;
+      width: 190px; height: 190px;
+      border-radius: 50%;
+      background: var(--tgs-accent);
+      opacity: 0.22;
+      pointer-events: none;
+    }
+    .tgs-cta-body { position: relative; flex: 1 1 auto; min-width: 0; }
     .tgs-cta-title {
-      margin: 0 0 6px;
-      font-size: clamp(20px, 2vw, 26px);
+      margin: 0 0 4px;
+      font-size: 18px;
       font-weight: 600;
       color: #fff;
-      letter-spacing: -0.015em;
+      letter-spacing: -0.01em;
       line-height: 1.25;
     }
     .tgs-cta-subtitle {
       margin: 0;
-      font-size: 15px;
-      color: rgba(255,255,255,0.8);
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.84);
       line-height: 1.45;
     }
     .tgs-cta-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 14px 24px;
+      position: relative;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 18px;
       background: var(--tgs-accent);
       color: #fff;
       text-decoration: none;
       border-radius: 10px;
-      font-size: 15px; font-weight: 600;
-      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+      font-size: 14px; font-weight: 600;
+      transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
       min-height: 44px;
       white-space: nowrap;
       border: none;
       cursor: pointer;
     }
-    .tgs-cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+    .tgs-cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(0,0,0,0.2); filter: brightness(1.05); }
+    .tgs-cta-btn:active { transform: translateY(0); }
     .tgs-cta-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    /* Wide enough (a full-width band): title left, button right. */
+    @container tgs-side (min-width: 560px) {
+      .tgs-cta { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 28px; }
+      .tgs-cta-btn { flex: 0 0 auto; }
+    }
 
     /* ─── EMPTY / ERROR STATES ───────────────────────── */
     .tgs-notice {
-      padding: 40px 28px;
+      padding: 36px 24px;
       text-align: center;
       background: var(--tgs-card);
       border: 1px dashed var(--tgs-border);
@@ -1167,16 +1273,16 @@
       color: var(--tgs-sub);
     }
     .tgs-notice-icon {
-      width: 48px; height: 48px;
+      width: 44px; height: 44px;
       border-radius: 50%;
       background: var(--tgs-brand-soft);
-      color: var(--tgs-brand);
+      color: var(--tgs-brand-ink);
       display: inline-flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .tgs-notice-title {
       margin: 0 0 6px;
-      font-size: 17px; font-weight: 600; color: var(--tgs-text);
+      font-size: 16px; font-weight: 600; color: var(--tgs-text);
     }
     .tgs-notice-body {
       margin: 0;
@@ -1186,7 +1292,8 @@
 
     /* ─── LOADING SKELETON ───────────────────────────── */
     .tgs-skel-hero {
-      width: 100%; aspect-ratio: 16 / 9;
+      width: 100%;
+      min-height: clamp(240px, 36cqi, 460px);
       background: linear-gradient(90deg, var(--tgs-card) 0%, var(--tgs-border-soft) 50%, var(--tgs-card) 100%);
       background-size: 200% 100%;
       animation: tgs-shimmer 1.5s infinite;
@@ -1205,37 +1312,26 @@
       border-radius: 4px;
     }
 
-    /* ─── RESPONSIVE (container-relative — tracks .tgs-root width) ───
-       Grid column counts are handled by auto-fit above, so they reflow at every
-       width; these breakpoints only adjust padding, type scale and stacking. */
-    @container tgs (max-width: 1023px) {
-      .tgs-hero-content { padding: 32px; }
+    /* ─── RESPONSIVE (container-relative — tracks .tgs-root width) ─── */
+    @container tgs (min-width: 720px) {
+      /* The facts rail rides across the hero's bottom edge. */
+      .tgs-section-hero.has-rail .tgs-hero-content { padding-bottom: calc(clamp(18px, 3.2cqi, 40px) + 30px); }
+      .tgs-section-hero.has-rail + .tgs-section-facts { margin: -34px clamp(16px, 3.2cqi, 40px) 0; }
     }
-    @container tgs (max-width: 767px) {
-      .tgs-hero { aspect-ratio: 4 / 3; }
-      .tgs-hero-content { padding: 24px 20px; }
-      .tgs-section { margin: 36px 0; }
-      .tgs-section-hero { margin: 0 0 36px; }
+    @container tgs (min-width: 900px) {
+      .tgs-root:not([data-layout="stacked"]) .tgs-body[data-side="1"] {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 34%);
+        align-items: start;
+      }
+      .tgs-root:not([data-layout="stacked"]) .tgs-body[data-side="1"] .tgs-side > .tgs-section:first-child { margin-top: 0; }
+    }
+    @container tgs (max-width: 719px) {
+      .tgs-root { --tgs-gap: 24px; }
       .tgs-section-head { flex-wrap: wrap; }
-      .tgs-section-title { font-size: 20px; }
-      .tgs-climate { padding: 18px; }
-      .tgs-climate-topline { gap: 10px; }
-      .tgs-climate-current-label { order: 2; }
-      .tgs-climate-chart { height: 140px; }
-      .tgs-climate-temp { font-size: 9px; }
-      .tgs-climate-unit { padding: 5px 10px; min-width: 34px; font-size: 11px; }
-      .tgs-fact { padding: 16px; gap: 12px; }
-      .tgs-fact-icon { width: 36px; height: 36px; flex-basis: 36px; border-radius: 8px; }
-      .tgs-cta { padding: 28px; flex-direction: column; align-items: stretch; text-align: center; }
-      .tgs-cta-btn { justify-content: center; }
-      .tgs-event { grid-template-columns: 1fr; gap: 10px; }
-      .tgs-event-month { justify-self: start; }
     }
-    @container tgs (max-width: 380px) {
-      .tgs-hero-content { padding: 20px 16px; }
-      .tgs-climate-chart { gap: 3px; height: 120px; }
-      .tgs-climate-months, .tgs-climate-rain { gap: 3px; }
-      .tgs-climate-temp { font-size: 8px; }
+    @container tgs (max-width: 479px) {
+      /* Keep the photo credit pill clear of the eyebrow on phones. */
+      .tgs-hero.has-credit .tgs-hero-content { padding-top: 44px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1244,10 +1340,8 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
-      .tgs-highlight:hover,
-      .tgs-highlight:focus-visible { transform: none; }
-      .tgs-highlight:hover .tgs-highlight-icon,
-      .tgs-highlight:focus-visible .tgs-highlight-icon { transform: none; }
+      .tgs-hero-content { animation: none; }
+      a.tgs-pair:hover, a.tgs-pair:focus-visible, .tgs-cta-btn:hover { transform: none; }
     }
   `;
 
@@ -1337,6 +1431,7 @@
       const base = {
         widgetId: null,
         theme: 'light',          // 'light' | 'dark'
+        layout: 'auto',          // 'auto' (side column once the widget is 900px wide) | 'stacked'
         brandColor: '#1B2B5B',
         accentColor: '#00B4D8',
         radius: 16,
@@ -1385,6 +1480,7 @@
       merged.sections = Object.assign({}, base.sections, c.sections || {});
       merged.cta = Object.assign({}, base.cta, c.cta || {});
       merged.autoDetect = Object.assign({}, base.autoDetect, c.autoDetect || {});
+      merged.layout = merged.layout === 'stacked' ? 'stacked' : 'auto';
       return merged;
     }
 
@@ -1403,6 +1499,7 @@
       this.root = document.createElement('div');
       this.root.className = 'tgs-root';
       this.root.setAttribute('data-theme', this.c.theme === 'dark' ? 'dark' : 'light');
+      this.root.setAttribute('data-layout', this.c.layout === 'stacked' ? 'stacked' : 'auto');
       this._applyThemeVars();
       this.root.innerHTML =
         '<div class="tgs-loading">' +
@@ -1527,25 +1624,47 @@
       const s = this.c.sections;
       const html = [];
 
-      // Section order: hero → tags → climate → facts → planning → highlights → events → paired → cta
-      // Tags moved up because they're the most scannable "at a glance" read for agents' visitors.
-      // Planning sits next to the quick facts: both are practical trip-planning reads.
-      // Paired sits just before the CTA as a "where next" prompt.
-      if (s.hero) html.push(this._renderHero(d));
-      if (s.tags) html.push(this._renderTags(d));
-      if (s.climate) html.push(this._renderClimate(d));
-      if (s.facts) html.push(this._renderFacts(d));
-      if (s.planning) html.push(this._renderPlanning(d));
-      if (s.highlights) html.push(this._renderHighlights(d));
-      if (s.events) html.push(this._renderEvents(d));
-      if (s.paired) html.push(this._renderPaired(d));
-      if (s.cta) html.push(this._renderCta(d));
+      // Layout (v1.6): a compact editorial opener, then a two-column body.
+      //   hero, with the Best For chips inside it (the most scannable read)
+      //   quick-facts rail, riding across the hero's bottom edge on wide embeds
+      //   body: main column = climate → highlights → events
+      //         side column = good to know → pairs well with → CTA
+      // The side column sits to the right of the main column once the widget
+      // is 900px wide (container query, or never when config.layout is
+      // 'stacked') and stacks beneath it otherwise, so this DOM order is also
+      // the phone reading order: the practical "plan it" reads (price band,
+      // when to book, visa, where next, enquire) close the page together.
+      // Section toggles still remove any part; an empty column collapses.
+      const tagChips = s.tags ? this._renderTagChips(d) : '';
+      const factsHtml = s.facts ? this._renderFacts(d) : '';
+      if (s.hero) html.push(this._renderHero(d, tagChips, !!factsHtml));
+      else if (tagChips) html.push(this._renderTags(d, tagChips));
+      if (factsHtml) html.push(factsHtml);
+
+      const main = [
+        s.climate ? this._renderClimate(d) : '',
+        s.highlights ? this._renderHighlights(d) : '',
+        s.events ? this._renderEvents(d) : '',
+      ].filter(Boolean);
+      const side = [
+        s.planning ? this._renderPlanning(d) : '',
+        s.paired ? this._renderPaired(d) : '',
+        s.cta ? this._renderCta(d) : '',
+      ].filter(Boolean);
+      if (main.length || side.length) {
+        html.push(
+          '<div class="tgs-body" data-side="' + (main.length && side.length ? '1' : '0') + '">' +
+            (main.length ? '<div class="tgs-main">' + main.join('') + '</div>' : '') +
+            (side.length ? '<aside class="tgs-side">' + side.join('') + '</aside>' : '') +
+          '</div>'
+        );
+      }
 
       this.root.innerHTML = html.filter(Boolean).join('');
       this._bind();
     }
 
-    _renderHero(d) {
+    _renderHero(d, tagChips, hasRail) {
       if (!d.name) return '';
       const imgUrl = (d.images && d.images[0]) ? safeUrl(d.images[0]) : '';
       const attribution = (this.c.showAttribution && d.attributions && d.attributions[0])
@@ -1558,8 +1677,8 @@
       const altText = d.name + (d.tagline ? ' — ' + d.tagline : '');
 
       return (
-        '<section class="tgs-section tgs-section-hero" aria-labelledby="tgs-hero-title">' +
-          '<div class="tgs-hero">' +
+        '<section class="tgs-section tgs-section-hero' + (hasRail ? ' has-rail' : '') + '" aria-labelledby="tgs-hero-title">' +
+          '<div class="tgs-hero' + (attribution ? ' has-credit' : '') + '">' +
             (imgUrl
               ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="eager" fetchpriority="high" decoding="async" />'
               : '<div class="tgs-hero-img" style="background:linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent));"></div>') +
@@ -1568,6 +1687,7 @@
               '<span class="tgs-hero-eyebrow">' + esc(eyebrowText) + '</span>' +
               '<h1 class="tgs-hero-title" id="tgs-hero-title">' + esc(d.name) + '</h1>' +
               (tagline ? '<p class="tgs-hero-tagline">' + esc(tagline) + '</p>' : '') +
+              (tagChips || '') +
             '</div>' +
             (attribution ? '<div class="tgs-hero-attribution">' + attribution + '</div>' : '') +
           '</div>' +
@@ -1604,14 +1724,19 @@
 
       const maxRain = Array.isArray(rain) ? Math.max.apply(null, rain.filter(n => typeof n === 'number')) || 1 : 1;
 
+      const monthNames = this.t('monthsFull').split(',');
       const bars = displayTemps.map((t, i) => {
         const valid = Number.isFinite(t);
         const h = valid ? Math.max(6, Math.round(((t - minTempForScaling) / range) * 100)) : 6;
         const s = season[i] || 'off';
         const isCurrent = i === currentMonth;
         const currentAttr = isCurrent ? ' data-current="true"' : '';
+        // Hover/tap detail per month. On narrow embeds the per-bar numbers hide
+        // (they would fall below 11px) and this title is what carries them.
+        const seasonWord = s === 'best' ? this.t('legendBest') : s === 'shoulder' ? this.t('legendShoulder') : this.t('legendOff');
+        const tip = (monthNames[i] || '') + ' · ' + (valid ? t + '°' + unit : '–') + ' · ' + seasonWord;
         return (
-          '<div class="tgs-climate-col"' + currentAttr + '>' +
+          '<div class="tgs-climate-col"' + currentAttr + ' title="' + esc(tip) + '">' +
             '<span class="tgs-climate-temp">' + (valid ? t : '–') + '°</span>' +
             '<div class="tgs-climate-bar" data-season="' + esc(s) + '" style="height:' + h + '%;" aria-hidden="true"></div>' +
           '</div>'
@@ -1665,7 +1790,10 @@
               '<span class="tgs-climate-current-label" aria-hidden="true">' + youAreHereHtml + '</span>' +
             '</div>' +
             '<p class="tgs-climate-sr-only">' + esc(srDesc) + '</p>' +
-            '<div class="tgs-climate-chart" role="img" aria-label="' + esc(srDesc) + '">' + bars + '</div>' +
+            '<div class="tgs-climate-plot">' +
+              '<div class="tgs-climate-axis" aria-hidden="true"><span>' + maxDisplay + '°</span><span>' + minTempForScaling + '°</span></div>' +
+              '<div class="tgs-climate-chart" role="img" aria-label="' + esc(srDesc) + '">' + bars + '</div>' +
+            '</div>' +
             (rainCells ? '<div class="tgs-climate-rain" aria-hidden="true">' + rainCells + '</div>' : '') +
             '<div class="tgs-climate-months" aria-hidden="true">' + months + '</div>' +
             '<div class="tgs-climate-legend" aria-hidden="true">' +
@@ -1693,7 +1821,7 @@
 
       const cards = items.map(it => (
         '<div class="tgs-fact">' +
-          '<div class="tgs-fact-icon">' + icon(factIcon(it.kind), 20) + '</div>' +
+          '<div class="tgs-fact-icon">' + icon(factIcon(it.kind), 18) + '</div>' +
           '<div class="tgs-fact-body">' +
             '<div class="tgs-fact-label">' + esc(it.label) + '</div>' +
             '<p class="tgs-fact-value">' + esc(it.value) + '</p>' +
@@ -1701,11 +1829,11 @@
         '</div>'
       )).join('');
 
+      // The heading is the rail's small caption pill (it hangs off the rail's
+      // top edge) so the rail itself stays one line tall.
       return (
-        '<section class="tgs-section" aria-labelledby="tgs-facts-heading">' +
-          '<div class="tgs-section-head">' +
-            '<h2 class="tgs-section-title" id="tgs-facts-heading">' + esc(this.c.factsHeading || this.t('headingFacts')) + '</h2>' +
-          '</div>' +
+        '<section class="tgs-section tgs-section-facts" aria-labelledby="tgs-facts-heading">' +
+          '<h2 class="tgs-facts-label" id="tgs-facts-heading">' + esc(this.c.factsHeading || this.t('headingFacts')) + '</h2>' +
           '<div class="tgs-facts">' + cards + '</div>' +
         '</section>'
       );
@@ -1741,7 +1869,7 @@
 
       const cards = items.map(it => (
         '<div class="tgs-fact">' +
-          '<div class="tgs-fact-icon">' + icon(planIcon(it.kind), 20) + '</div>' +
+          '<div class="tgs-fact-icon">' + icon(planIcon(it.kind), 18) + '</div>' +
           '<div class="tgs-fact-body">' +
             '<div class="tgs-fact-label">' + esc(it.label) + '</div>' +
             '<p class="tgs-fact-value">' + esc(it.value) + '</p>' +
@@ -1788,10 +1916,12 @@
       const cards = list.slice(0, 6).map(h => {
         if (!h || !h.title) return '';
         return (
-          '<article class="tgs-highlight" tabindex="0">' +
-            '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 22) + '</div>' +
-            '<h3 class="tgs-highlight-title">' + esc(h.title) + '</h3>' +
-            (h.description ? '<p class="tgs-highlight-desc">' + esc(h.description) + '</p>' : '') +
+          '<article class="tgs-highlight">' +
+            '<div class="tgs-highlight-icon">' + icon(h.icon || 'star', 18) + '</div>' +
+            '<div class="tgs-highlight-body">' +
+              '<h3 class="tgs-highlight-title">' + esc(h.title) + '</h3>' +
+              (h.description ? '<p class="tgs-highlight-desc">' + esc(h.description) + '</p>' : '') +
+            '</div>' +
           '</article>'
         );
       }).join('');
@@ -1806,26 +1936,29 @@
       );
     }
 
-    _renderTags(d) {
+    // Best For chips. They sit inside the hero when there is one (with the
+    // name and tagline, where a visitor scans first) and become their own small
+    // section only when the hero is toggled off.
+    _renderTagChips(d) {
       const tags = Array.isArray(d.bestForTags) ? d.bestForTags : [];
       if (tags.length === 0) return '';
-
+      const heading = this.c.tagsHeading || this.t('headingTags');
       const pills = tags.map(t => {
         const iconName = TAG_ICONS[t] || 'star';
-        return (
-          '<span class="tgs-tag">' +
-            icon(iconName, 14) +
-            '<span>' + esc(t) + '</span>' +
-          '</span>'
-        );
+        return '<li class="tgs-tag">' + icon(iconName, 13) + '<span>' + esc(t) + '</span></li>';
       }).join('');
+      return '<ul class="tgs-tags" aria-label="' + esc(heading) + '">' + pills + '</ul>';
+    }
 
+    _renderTags(d, chips) {
+      const pills = chips || this._renderTagChips(d);
+      if (!pills) return '';
       return (
-        '<section class="tgs-section" aria-labelledby="tgs-tags-heading">' +
+        '<section class="tgs-section tgs-section-tags" aria-labelledby="tgs-tags-heading">' +
           '<div class="tgs-section-head">' +
             '<h2 class="tgs-section-title" id="tgs-tags-heading">' + esc(this.c.tagsHeading || this.t('headingTags')) + '</h2>' +
           '</div>' +
-          '<div class="tgs-tags">' + pills + '</div>' +
+          pills +
         '</section>'
       );
     }

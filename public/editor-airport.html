@@ -453,6 +453,14 @@
               <label class="tgse-field-label">Accent colour</label>
               <input type="color" id="accent-color" class="tgse-color-input" value="#00B4D8">
             </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="layout-mode">Layout</label>
+              <select id="layout-mode" class="select">
+                <option value="auto">Auto (side column on wide pages)</option>
+                <option value="stacked">Stacked (one column everywhere)</option>
+              </select>
+              <div class="ap-cta-help" style="margin-top:6px;">Auto moves the arrival time, tips and the enquiry panel into a side column once the widget has 900px of width. Stacked keeps one column at every width.</div>
+            </div>
           </div>
         </div>
 
@@ -610,6 +618,7 @@
       } : null,
       brandColor: document.getElementById('brand-color').value,
       accentColor: document.getElementById('accent-color').value,
+      layout: document.getElementById('layout-mode').value === 'stacked' ? 'stacked' : 'auto',
       heroImageUrl: document.getElementById('hero-url').value.trim(),
       sections,
       showMap: document.getElementById('opt-showMap').checked,
@@ -637,6 +646,7 @@
     { const cv = document.getElementById('content-voice'); if (cv) cv.value = cfg.contentVoice || ''; }
     if (cfg.brandColor)   document.getElementById('brand-color').value = cfg.brandColor;
     if (cfg.accentColor)  document.getElementById('accent-color').value = cfg.accentColor;
+    document.getElementById('layout-mode').value = cfg.layout === 'stacked' ? 'stacked' : 'auto';
     document.getElementById('hero-url').value = cfg.heroImageUrl || '';
     document.getElementById('opt-showMap').checked = cfg.showMap !== false;
     document.getElementById('opt-attrib').checked  = cfg.showAttribution !== false;

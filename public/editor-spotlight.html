@@ -555,6 +555,14 @@
             </button>
             <div class="section-body">
               <div class="field">
+                <label class="field-label" for="layoutMode">Layout</label>
+                <select class="select" id="layoutMode">
+                  <option value="auto">Auto (side column on wide pages)</option>
+                  <option value="stacked">Stacked (one column everywhere)</option>
+                </select>
+                <div class="field-help">Auto moves the practical reads (good to know, where next, the enquiry panel) into a side column once the widget has 900px of width. Stacked keeps one column at every width.</div>
+              </div>
+              <div class="field">
                 <label class="field-label">Corner radius</label>
                 <div class="slider-row">
                   <input class="slider" id="radius" type="range" min="0" max="24" value="16" />
@@ -893,6 +901,7 @@
     function defaultConfig() {
       return {
         theme: 'light',
+        layout: 'auto',
         brandColor: '#1B2B5B',
         accentColor: '#00B4D8',
         radius: 16,
@@ -1723,6 +1732,8 @@
                     && p.accent.toLowerCase() === c.accentColor.toLowerCase());
         btn.setAttribute('aria-pressed', match ? 'true' : 'false');
       });
+      // Layout
+      document.getElementById('layoutMode').value = c.layout === 'stacked' ? 'stacked' : 'auto';
       // Radius
       document.getElementById('radius').value = c.radius;
       document.getElementById('radiusVal').textContent = c.radius + 'px';
@@ -1828,6 +1839,12 @@
     }
     bindColour('brandColor', 'brandHex', 'brandColor');
     bindColour('accentColor', 'accentHex', 'accentColor');
+
+    // Layout
+    document.getElementById('layoutMode').addEventListener('change', (e) => {
+      state.config.layout = e.target.value === 'stacked' ? 'stacked' : 'auto';
+      onConfigChange();
+    });
 
     // Radius
     document.getElementById('radius').addEventListener('input', (e) => {
