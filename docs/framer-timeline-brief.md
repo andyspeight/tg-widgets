@@ -316,6 +316,40 @@ fill="<asset url>"`, then SET the caption text (re-apply
 `textStylePreset="Small" textAlignment="center"` afterwards, see the
 SET-text gotcha below). To change copy use `framer.agent.replaceText`.
 
+
+### Multi-card months (Andy's feedback, 3 Sep evening)
+
+Big releases get their own card now, not one line. A month row can hold
+several release cards (each with headline, blurb and captioned mockup) and a
+compact "Also in <month>" card on the Off White fill for the smaller items.
+Operators are shown with their logos.
+
+- July is now THREE blocks: Luna Chat (existing mockup), Quick Quote (copy
+  and mockup from the live quick-quote page), and "Also in July" (Sports
+  Events 365 with its logo chip, Luna Support, Cookie Consent and Smart
+  Section, Zoom).
+- September is now FOUR blocks: The Luna Travel App, Luna Marketing (mockup:
+  the "5 posts ready" approval queue from the live page), Luna Trips
+  (mockup: the "Sell group trips. Keep your money." hero), and "Also in
+  September" (search box widget, seven sports and event widgets).
+- June gained a premium supplier logo strip under its items: Travelpack,
+  Major Travel, Atlas and Paxium, as white chips.
+- Logo sources: Travelpack, Major Travel, Atlas and Sports Events 365 were
+  already assets in the project on the /suppliers/* pages (reused by URL,
+  sized as those pages size them). Paxium was NOT in the project; its logo
+  was fetched from www.paxium.co.uk/Content/Images/Logo.png and uploaded
+  (orange wordmark, 500x98). If Andy has a better Paxium asset, swap the
+  fill on the fourth chip in the June strip.
+
+New node ids: July cards `vH0nknYVN` (Luna Chat), `yQFmFM4Xw` (Quick Quote),
+`HpiKvlOCj` (also, with logo strip `baV8zzGeQ`); September cards `dA81vZwGu`
+(Travel App), `NjLVujuFk` (Marketing), `rXQukP2Ah` (Trips), `jAwADVyzd`
+(also); June logo strip `z76JlGwg4`. Each split card's screenshot frame is
+`<card id>` + `Shot` in the temp naming, canonical ids in the Airtable
+record; a card's parts follow the month-card pattern (Copy, Head, Blurb,
+MockCol, Mock, Shot, Caption). The old July and September single cards
+(`CF3JSOWuq`, `KkzOSHkiO`) are deleted.
+
 ### Left out and why
 
 - The remaining month items (Text FX, Logo Showcase, Countdown, Weather, the
@@ -345,6 +379,9 @@ SET-text gotcha below). To change copy use `framer.agent.replaceText`.
 
 - June's booking flow widgets: Andy is sending screenshots; swap the June
   mockup and tighten the blurb when they arrive.
+- Luna Support arguably deserves its own card too; it sits in "Also in
+  July" because no public page shows it yet. Promote it when there is
+  something to screenshot.
 - Andy said "there may be more" for the timeline, and the coming soon
   section is still to be reviewed with him.
 - Andy's list says 50 widgets in May; the hero stat says 61 today (60
