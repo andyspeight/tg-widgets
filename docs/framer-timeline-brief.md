@@ -336,10 +336,13 @@ Operators are shown with their logos.
   Major Travel, Atlas and Paxium, as white chips.
 - Logo sources: Travelpack, Major Travel, Atlas and Sports Events 365 were
   already assets in the project on the /suppliers/* pages (reused by URL,
-  sized as those pages size them). Paxium was NOT in the project; its logo
-  was fetched from www.paxium.co.uk/Content/Images/Logo.png and uploaded
-  (orange wordmark, 500x98). If Andy has a better Paxium asset, swap the
-  fill on the fourth chip in the June strip.
+  sized as those pages size them). The fourth supplier is PAXIMUM (not
+  Paxium; a first attempt fetched the wrong company, Paxium Limited, and
+  Andy corrected it). Paximum is not on any Framer supplier page, so its
+  blue "Global Travel Marketplace" SVG was fetched from
+  www.paximum.com/wp-content/uploads/2021/12/paximum_100.yil-Logo_Mavi_1-1.svg,
+  rasterised and uploaded (framerusercontent .../7OmjRkebbtAcPDNDZTeWGUjoGw.png).
+  The June item copy says "Paximum accommodation".
 
 New node ids: July cards `vH0nknYVN` (Luna Chat), `yQFmFM4Xw` (Quick Quote),
 `HpiKvlOCj` (also, with logo strip `baV8zzGeQ`); September cards `dA81vZwGu`
