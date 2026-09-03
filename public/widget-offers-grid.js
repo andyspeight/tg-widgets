@@ -1,6 +1,6 @@
 /* ============================================================================
  * widget-offers-grid.js  ·  Travelgenix Widget Suite
- * Special Offers Grid — embeds a client's live hand-built offers (v0.1.0)
+ * Special Offers Grid — embeds a client's live hand-built offers (v0.2.0)
  *
  * Fetches a client's live offers from /api/saved-offers?client=<id> and renders
  * them as a grid of offer cards (reusing widget-offer-card.js). Each card links
@@ -8,10 +8,16 @@
  * Scheduling is respected twice over: the public feed only returns live offers,
  * and each card re-checks its own window and self-hides as a backstop.
  *
+ * Display: `display:"carousel"` lays the same cards on a horizontal scroll-snap
+ * track (arrows, dots, swipe, optional autoplay) so any number of offers takes
+ * one card of page height. `filterType` / `filterTags` show only offers of one
+ * type or carrying a tag — several typed embeds can share one offer pool.
+ *
  * Embed:
  *   <div data-tg-widget="offers-grid"
  *        data-tg-config='{"client":"CLIENT_ID","layout":"vertical","columns":"auto",
- *                         "template":"classic","theme":"light","accent":"#00B4D8"}'></div>
+ *                         "template":"classic","theme":"light","accent":"#00B4D8",
+ *                         "display":"carousel","filterType":"Cruise"}'></div>
  *   <script src="https://tg-widgets.vercel.app/widget-offers-grid.js"></script>
  *
  * Preview/demo: pass an inline `offers` array in the config to skip the fetch.
@@ -19,7 +25,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.1.6';
+  const VERSION = '0.2.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -27,12 +33,12 @@
   // never translated, nor are brand names or ATOL/ABTA wording. English is the
   // source + fallback.
   const MESSAGES = {
-    en: { viewDeal: 'View deal', empty: 'No offers available right now.' },
-    fr: { viewDeal: "Voir l'offre", empty: 'Aucune offre disponible pour le moment.' },
-    de: { viewDeal: 'Angebot ansehen', empty: 'Derzeit keine Angebote verfügbar.' },
-    es: { viewDeal: 'Ver oferta', empty: 'No hay ofertas disponibles ahora mismo.' },
-    it: { viewDeal: 'Vedi offerta', empty: 'Nessuna offerta disponibile al momento.' },
-    ro: { viewDeal: 'Vezi oferta', empty: 'Nicio ofertă disponibilă momentan.' },
+    en: { viewDeal: 'View deal', empty: 'No offers available right now.', offersLabel: 'Special offers', prevOffers: 'Previous offers', nextOffers: 'More offers', carouselPages: 'Carousel pages', pageOf: 'Page {n} of {total}' },
+    fr: { viewDeal: "Voir l'offre", empty: 'Aucune offre disponible pour le moment.', offersLabel: 'Offres spéciales', prevOffers: 'Offres précédentes', nextOffers: "Plus d'offres", carouselPages: 'Pages du carrousel', pageOf: 'Page {n} sur {total}' },
+    de: { viewDeal: 'Angebot ansehen', empty: 'Derzeit keine Angebote verfügbar.', offersLabel: 'Sonderangebote', prevOffers: 'Vorherige Angebote', nextOffers: 'Weitere Angebote', carouselPages: 'Karussell-Seiten', pageOf: 'Seite {n} von {total}' },
+    es: { viewDeal: 'Ver oferta', empty: 'No hay ofertas disponibles ahora mismo.', offersLabel: 'Ofertas especiales', prevOffers: 'Ofertas anteriores', nextOffers: 'Más ofertas', carouselPages: 'Páginas del carrusel', pageOf: 'Página {n} de {total}' },
+    it: { viewDeal: 'Vedi offerta', empty: 'Nessuna offerta disponibile al momento.', offersLabel: 'Offerte speciali', prevOffers: 'Offerte precedenti', nextOffers: 'Altre offerte', carouselPages: 'Pagine del carosello', pageOf: 'Pagina {n} di {total}' },
+    ro: { viewDeal: 'Vezi oferta', empty: 'Nicio ofertă disponibilă momentan.', offersLabel: 'Oferte speciale', prevOffers: 'Oferte anterioare', nextOffers: 'Mai multe oferte', carouselPages: 'Pagini carusel', pageOf: 'Pagina {n} din {total}' },
   };
   // Uses the shared TGi18n core when present; otherwise an identical inline
   // resolver keeps the widget self-contained.
@@ -143,6 +149,56 @@
     @media (prefers-reduced-motion: reduce) { .tgog-skel .img { animation: none; } }
 
     .tgog-empty { text-align: center; padding: 40px 20px; color: var(--tgog-muted); border: 1px dashed var(--tgog-border); border-radius: 14px; font-size: 14px; }
+
+    /* ===== Carousel display =====
+       The same offer cards on a horizontal scroll-snap track, so any number of
+       live offers takes one card of page height. JS sets explicit pixel widths
+       per card from the measured container (percentage flex-basis misbehaves
+       inside overflow-x tracks whose parents have no width constraint); the
+       flex-basis below is only the no-JS fallback. */
+    .tgog-car { position: relative; padding: 0 44px; width: 100%; max-width: 100%; min-width: 0; }
+    @media (max-width: 640px) { .tgog-car { padding: 0; } }
+    .tgog-car-track {
+      display: flex; gap: 16px;
+      overflow-x: auto; overflow-y: hidden;
+      scroll-snap-type: x mandatory; scroll-behavior: smooth;
+      scrollbar-width: none; -ms-overflow-style: none;
+      padding: 4px 0 12px;
+      width: 100%; min-width: 0;
+    }
+    .tgog-car-track::-webkit-scrollbar { display: none; }
+    .tgog-car-track > div { flex: 0 0 320px; min-width: 0; max-width: 100%; scroll-snap-align: start; scroll-snap-stop: always; }
+    @media (max-width: 640px) { .tgog-car-track { padding-left: 16px; padding-right: 16px; gap: 12px; } }
+    .tgog-car-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 40px; height: 40px; border-radius: 999px;
+      border: 1px solid var(--tgog-border); background: #FFFFFF; color: var(--tgog-text);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 2; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10);
+      transition: transform 0.12s ease, opacity 0.2s ease;
+    }
+    .tgog[data-theme="dark"] .tgog-car-arrow { background: #1E293B; }
+    .tgog-car-arrow:hover:not([aria-disabled="true"]) { transform: translateY(-50%) scale(1.06); }
+    .tgog-car-arrow:focus-visible { outline: 2px solid var(--tgog-accent, #00B4D8); outline-offset: 2px; }
+    /* aria-disabled, not disabled: a native disabled attribute would throw a
+       keyboard user's focus to the page body the moment the arrow they are on
+       reaches the end of the track. */
+    .tgog-car-arrow[aria-disabled="true"] { opacity: 0.35; cursor: not-allowed; }
+    .tgog-car-arrow svg { width: 18px; height: 18px; }
+    .tgog-car-arrow[data-dir="prev"] { left: 0; }
+    .tgog-car-arrow[data-dir="next"] { right: 0; }
+    @media (max-width: 640px) { .tgog-car-arrow { display: none; } }
+    .tgog-car-dots { display: flex; justify-content: center; gap: 6px; margin: 14px 0 0; padding: 0; list-style: none; }
+    .tgog-car-dot { width: 8px; height: 8px; border-radius: 999px; border: 0; padding: 0; background: var(--tgog-border); cursor: pointer; transition: background 0.18s ease, width 0.2s ease; }
+    .tgog-car-dot:hover { background: var(--tgog-sub); }
+    .tgog-car-dot[aria-current="true"] { background: var(--tgog-accent, #00B4D8); width: 22px; }
+    .tgog-car-dot:focus-visible { outline: 2px solid var(--tgog-accent, #00B4D8); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      .tgog-car-track { scroll-behavior: auto; }
+      .tgog-car-arrow { transition: none; }
+      .tgog-car-arrow:hover:not([aria-disabled="true"]) { transform: translateY(-50%); }
+      .tgog-car-dot { transition: none; }
+    }
   `;
 
   function liveLocally(offer) {
@@ -158,6 +214,28 @@
     const from = day(f.showFrom), until = day(f.showUntil);
     if (from !== null && today < from) return false;
     if (until !== null && today > until) return false;
+    return true;
+  }
+
+  // Optional display filter: show only offers of one type (the builder's fixed
+  // "Offer type" select, matched case-insensitively) and/or carrying at least
+  // one of the given tags. This is what lets one offer pool feed several typed
+  // embeds — a Cruise carousel on the cruise page, a Ski one on the ski page.
+  // cfg.filterType and cfg.filterTags arrive pre-lowercased from _defaults.
+  function matchesFilter(item, cfg) {
+    const offer = (item && item.offer) || item || {};
+    const f = offer.fields || offer || {};
+    if (cfg.filterType) {
+      if (String(f.type || '').trim().toLowerCase() !== cfg.filterType) return false;
+    }
+    if (cfg.filterTags.length) {
+      const tags = Array.isArray(offer.tags) ? offer.tags : [];
+      let hit = false;
+      for (let i = 0; i < tags.length && !hit; i++) {
+        hit = cfg.filterTags.indexOf(String(tags[i]).trim().toLowerCase()) !== -1;
+      }
+      if (!hit) return false;
+    }
     return true;
   }
 
@@ -183,6 +261,18 @@
         // into a class attribute (cols-<n>), so an unvalidated string is an
         // innerHTML injection vector.
         columns: ['2', '3', '4'].indexOf(String(c.columns)) !== -1 ? String(c.columns) : 'auto',
+        // Display axis (independent of the card `layout`): 'grid' keeps the
+        // classic arrangement; 'carousel' puts the same cards on a horizontal
+        // scroll-snap track. Whitelisted — anything else falls back to grid.
+        display: c.display === 'carousel' ? 'carousel' : 'grid',
+        // Show only offers of one builder type and/or carrying one of these
+        // tags. Normalised to lower case here so matching is one comparison.
+        filterType: String(c.filterType || '').trim().toLowerCase(),
+        filterTags: Array.isArray(c.filterTags)
+          ? c.filterTags.map(function (t) { return String(t).trim().toLowerCase(); }).filter(Boolean).slice(0, 30)
+          : [],
+        carouselAutoplay: !!c.carouselAutoplay,
+        carouselInterval: typeof c.carouselInterval === 'number' ? c.carouselInterval : 6,
         template: c.template || 'classic',
         theme: c.theme === 'dark' ? 'dark' : 'light',
         accentColor: c.accentColor || c.accent || '',
@@ -214,11 +304,29 @@
       return q.length ? base + '?' + q.join('&') : base;
     }
 
+    // The carousel frame: arrows either side of the track, dot rail below. The
+    // dot rail is populated at wire time because the page count depends on the
+    // measured cards-per-view.
+    _carFrame(inner) {
+      return '<div class="tgog-car" data-car>'
+        + '<button type="button" class="tgog-car-arrow" data-dir="prev" aria-label="' + esc(this.t('prevOffers')) + '">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>'
+        + inner
+        + '<button type="button" class="tgog-car-arrow" data-dir="next" aria-label="' + esc(this.t('nextOffers')) + '">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>'
+        + '<ul class="tgog-car-dots" data-dots role="tablist" aria-label="' + esc(this.t('carouselPages')) + '"></ul>'
+        + '</div>';
+    }
+
     _render(state) {
       const cfg = this.cfg;
+      const isCar = cfg.display === 'carousel';
       const root = document.createElement('div');
       root.className = 'tgog';
       root.setAttribute('data-theme', cfg.theme);
+      // Active-dot / focus-ring accent. Hex only — whitelisting here means a
+      // config string can never smuggle anything past the declaration.
+      if (/^#[0-9a-fA-F]{3,8}$/.test(cfg.accentColor)) root.style.setProperty('--tgog-accent', cfg.accentColor);
 
       const head = (cfg.heading || cfg.subheading)
         ? '<div class="tgog-head">' + (cfg.heading ? '<h2 class="tgog-title">' + esc(cfg.heading) + '</h2>' : '')
@@ -229,17 +337,23 @@
         ? 'grid' + (cfg.columns !== 'auto' ? ' cols-' + cfg.columns : '')
         : 'stack';
 
+      const skel = '<div class="tgog-skel"><div class="img"></div><div class="line"></div><div class="line s"></div></div>';
+
       let body;
       if (state === 'loading') {
-        body = '<div class="tgog-items ' + gridCls + '">'
-          + new Array(cfg.layout === 'vertical' ? 6 : 3).fill(0).map(function () {
-              return '<div class="tgog-skel"><div class="img"></div><div class="line"></div><div class="line s"></div></div>';
-            }).join('')
-          + '</div>';
+        body = isCar
+          ? this._carFrame('<div class="tgog-car-track">'
+              + new Array(3).fill(0).map(function () { return '<div>' + skel + '</div>'; }).join('')
+              + '</div>')
+          : '<div class="tgog-items ' + gridCls + '">'
+            + new Array(cfg.layout === 'vertical' ? 6 : 3).fill(0).map(function () { return skel; }).join('')
+            + '</div>';
       } else if (state === 'empty') {
         body = '<div class="tgog-empty">' + esc(cfg.emptyText) + '</div>';
       } else {
-        body = '<div class="tgog-items ' + gridCls + '" data-items></div>';
+        body = isCar
+          ? this._carFrame('<div class="tgog-car-track" data-items data-track tabindex="0" role="group" aria-roledescription="carousel" aria-label="' + esc(this.t('offersLabel')) + '"></div>')
+          : '<div class="tgog-items ' + gridCls + '" data-items></div>';
       }
 
       root.innerHTML = head + body;
@@ -259,8 +373,11 @@
     }
 
     _fill(list) {
-      // Keep only live offers (the feed already filters; this guards inline data).
+      // Keep only live offers (the feed already filters; this guards inline data),
+      // then apply the optional type/tag display filter. Filtering to nothing is
+      // the calm empty state, same as an empty feed.
       let items = (list || []).filter((it) => liveLocally(it.offer || it));
+      items = items.filter((it) => matchesFilter(it, this.cfg));
       if (this.cfg.max > 0) items = items.slice(0, this.cfg.max);
       if (!items.length) { this._render('empty'); return; }
 
@@ -291,7 +408,196 @@
             offer: offer
           });
         });
+        if (cfg.display === 'carousel') this._wireCarousel(items.length);
       }).catch(() => { /* card script failed to load — leave skeletons cleared */ this._render('empty'); });
+    }
+
+    // Wire the carousel once the cards exist: explicit pixel widths per card
+    // (computed from the measured container — percentage flex-basis is circular
+    // in unconstrained parents), a dot rail sized from the real cards-per-view,
+    // arrows, scroll tracking, resize handling and opt-in autoplay. Nothing in
+    // here scrolls or focuses at wire time — movement only follows a real user
+    // action or the autoplay timer, so editor previews stay calm.
+    _wireCarousel(totalOffers) {
+      const car = this.root.querySelector('[data-car]');
+      const track = this.root.querySelector('[data-track]');
+      const dotRail = this.root.querySelector('[data-dots]');
+      const prevBtn = this.root.querySelector('.tgog-car-arrow[data-dir="prev"]');
+      const nextBtn = this.root.querySelector('.tgog-car-arrow[data-dir="next"]');
+      if (!car || !track || !dotRail) return;
+      if (this._carRO) { try { this._carRO.disconnect(); } catch (e) { /* noop */ } this._carRO = null; }
+      if (this._carStop) { this._carStop(); this._carStop = null; }
+      const self = this;
+
+      // Wide card styles (horizontal, banner, split, cruise) are full-width
+      // designs, so they page one at a time; vertical cards fit 1/2/3 by width.
+      const cardLayout = this.cfg.template === 'cruise' ? 'cruise' : this.cfg.layout;
+      const wideCards = cardLayout !== 'vertical';
+
+      // Measure the available width, but only trust a sane answer — an
+      // unconstrained parent can report an enormous clientWidth.
+      const measureWidth = () => {
+        let w = car.clientWidth;
+        if (w > 3000 || w < 1) {
+          const hostW = this.el.clientWidth;
+          w = (hostW > 0 && hostW <= 3000) ? hostW : Math.min((typeof window !== 'undefined' && window.innerWidth) || 1280, 1280);
+        }
+        return w;
+      };
+      const cardsPerView = (w) => (wideCards ? 1 : (w >= 1024 ? 3 : (w >= 640 ? 2 : 1)));
+      const pageCount = (cpv) => Math.max(1, Math.ceil(totalOffers / cpv));
+      const cells = () => Array.prototype.slice.call(track.children);
+
+      const applyCardWidths = () => {
+        const w = measureWidth();
+        const cpv = cardsPerView(w);
+        const isMobile = w < 640;
+        const padding = isMobile ? 0 : 88;   // .tgog-car side padding ×2
+        const gap = isMobile ? 12 : 16;
+        const cardWidth = ((w - padding) - gap * (cpv - 1)) / cpv;
+        cells().forEach((cell) => {
+          cell.style.flex = '0 0 ' + cardWidth + 'px';
+          cell.style.width = cardWidth + 'px';
+        });
+        return cpv;
+      };
+
+      const buildDots = (pages) => {
+        let html = '';
+        for (let i = 0; i < pages; i++) {
+          html += '<li><button type="button" class="tgog-car-dot" data-dot="' + i + '" role="tab" aria-label="'
+            + esc(self.t('pageOf', { n: i + 1, total: pages })) + '"' + (i === 0 ? ' aria-current="true"' : '') + '></button></li>';
+        }
+        dotRail.innerHTML = html;
+        dotRail.style.display = pages > 1 ? 'flex' : 'none';
+      };
+
+      const trackGap = () => { const g = parseFloat(getComputedStyle(track).gap); return isFinite(g) ? g : 16; };
+      const stepWidth = () => { const c = cells(); return c.length ? c[0].offsetWidth + trackGap() : 0; };
+
+      // Reduced motion governs every programmatic scroll, not just autoplay: an
+      // explicit behavior:'smooth' would override the track's reduced-motion
+      // scroll-behavior CSS, so the behaviour itself must be conditional.
+      let reduce = false;
+      try { reduce = !!(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { /* noop */ }
+      const scrollBehavior = reduce ? 'auto' : 'smooth';
+
+      const atTrackEnd = () => (track.scrollLeft + track.clientWidth) >= (track.scrollWidth - 1);
+
+      const currentPage = () => {
+        const cpv = cardsPerView(measureWidth());
+        const pages = pageCount(cpv);
+        const sw = stepWidth();
+        if (!sw) return 0;
+        // The browser clamps the final scroll position, so a partial last page
+        // never rests on an exact page multiple — being at the end IS the last
+        // page (5 offers at 3-up must light dot 2 of 2, not dot 1).
+        if (track.scrollLeft > 0 && atTrackEnd()) return pages - 1;
+        return Math.min(pages - 1, Math.round(track.scrollLeft / (sw * cpv)));
+      };
+
+      // aria-disabled rather than the native attribute: disabling the button a
+      // keyboard user is focused on would dump their focus to the page body.
+      const setDisabled = (btn, on) => {
+        if (!btn) return;
+        if (on) btn.setAttribute('aria-disabled', 'true');
+        else btn.removeAttribute('aria-disabled');
+      };
+      const isDisabled = (btn) => !!btn && btn.getAttribute('aria-disabled') === 'true';
+
+      const updateState = () => {
+        const cur = currentPage();
+        dotRail.querySelectorAll('[data-dot]').forEach((el, i) => {
+          if (i === cur) el.setAttribute('aria-current', 'true');
+          else el.removeAttribute('aria-current');
+        });
+        setDisabled(prevBtn, track.scrollLeft <= 1);
+        setDisabled(nextBtn, atTrackEnd());
+      };
+
+      const scrollByPage = (dir) => {
+        const sw = stepWidth();
+        if (sw && typeof track.scrollBy === 'function') track.scrollBy({ left: sw * cardsPerView(measureWidth()) * dir, behavior: scrollBehavior });
+      };
+      const scrollToPage = (i) => {
+        const sw = stepWidth();
+        if (sw && typeof track.scrollTo === 'function') track.scrollTo({ left: sw * cardsPerView(measureWidth()) * i, behavior: scrollBehavior });
+      };
+
+      const applyAll = () => { buildDots(pageCount(applyCardWidths())); updateState(); };
+      applyAll();
+
+      // Autoplay is opt-in, never runs for reduced-motion visitors, pauses on
+      // hover/focus/touch, and stops FOR GOOD once the visitor navigates
+      // deliberately (arrow, dot or keyboard) — a pause the visitor chose must
+      // not undo itself the moment their pointer leaves the carousel.
+      const autoplayOn = !!this.cfg.carouselAutoplay && !reduce;
+      const intervalMs = Math.max(2, Math.min(20, this.cfg.carouselInterval || 6)) * 1000;
+      let timer = null;
+      let userStopped = false;
+      const startAutoplay = () => {
+        if (!autoplayOn || userStopped || timer) return;
+        timer = setInterval(() => {
+          // The host may have thrown this instance away (demo controls and SPA
+          // embeds rebuild the widget) — a tick against a detached track ends
+          // the timer instead of scrolling a ghost forever.
+          if (!track.isConnected) { stopAutoplay(); return; }
+          if (atTrackEnd()) { if (typeof track.scrollTo === 'function') track.scrollTo({ left: 0, behavior: scrollBehavior }); }
+          else scrollByPage(1);
+        }, intervalMs);
+      };
+      const stopAutoplay = () => { if (timer) { clearInterval(timer); timer = null; } };
+      const userStop = () => { userStopped = true; stopAutoplay(); };
+      this._carStop = stopAutoplay;
+
+      if (prevBtn) prevBtn.addEventListener('click', () => { if (isDisabled(prevBtn)) return; userStop(); scrollByPage(-1); });
+      if (nextBtn) nextBtn.addEventListener('click', () => { if (isDisabled(nextBtn)) return; userStop(); scrollByPage(1); });
+      dotRail.addEventListener('click', (ev) => {
+        const dot = ev.target && ev.target.closest ? ev.target.closest('[data-dot]') : null;
+        if (!dot) return;
+        userStop();
+        scrollToPage(parseInt(dot.getAttribute('data-dot'), 10) || 0);
+      });
+      let raf = 0;
+      track.addEventListener('scroll', () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => { updateState(); raf = 0; });
+      });
+      // Keyboard navigation when the track has focus.
+      track.addEventListener('keydown', (ev) => {
+        if (ev.key === 'ArrowLeft') { ev.preventDefault(); userStop(); scrollByPage(-1); }
+        else if (ev.key === 'ArrowRight') { ev.preventDefault(); userStop(); scrollByPage(1); }
+        else if (ev.key === 'Home') { ev.preventDefault(); userStop(); scrollToPage(0); }
+        else if (ev.key === 'End') { ev.preventDefault(); userStop(); scrollToPage(pageCount(cardsPerView(measureWidth())) - 1); }
+      });
+
+      // Re-measure on host resize (observing the host, not the carousel — the
+      // carousel derives its width from the host, so observing itself loops).
+      if (typeof ResizeObserver !== 'undefined') {
+        let rraf = 0;
+        const ro = new ResizeObserver(() => {
+          if (rraf) return;
+          rraf = requestAnimationFrame(() => { applyAll(); rraf = 0; });
+        });
+        ro.observe(this.el);
+        this._carRO = ro;
+      }
+
+      if (autoplayOn) {
+        car.addEventListener('mouseenter', stopAutoplay);
+        car.addEventListener('mouseleave', startAutoplay);
+        car.addEventListener('focusin', stopAutoplay);
+        car.addEventListener('touchstart', stopAutoplay, { passive: true });
+        // Document-level, so it removes itself once the widget's DOM has been
+        // discarded — otherwise every rebuild would leave a live listener
+        // pinning a detached shadow tree.
+        const onVisibility = () => {
+          if (!track.isConnected) { stopAutoplay(); document.removeEventListener('visibilitychange', onVisibility); return; }
+          if (document.hidden) stopAutoplay(); else startAutoplay();
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+        startAutoplay();
+      }
     }
   }
 
