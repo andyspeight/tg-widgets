@@ -325,9 +325,11 @@ compact "Also in <month>" card on the Off White fill for the smaller items.
 Operators are shown with their logos.
 
 - July is now THREE blocks: Luna Chat (existing mockup), Quick Quote (copy
-  and mockup from the live quick-quote page), and "Also in July" (Sports
-  Events 365 with its logo chip, Luna Support, Cookie Consent and Smart
-  Section, Zoom).
+  and mockup from the live quick-quote page), and "Also in July" (two new
+  premium suppliers, Sports Events 365 and HotelPlanner, both with logo
+  chips; Luna Support; Cookie Consent and Smart Section; Zoom). The
+  HotelPlanner logo came from cdn.hotelplanner.com (117x80, displayed
+  53x36); like Paximum it is not on any Framer supplier page yet.
 - September is now FOUR blocks: The Luna Travel App, Luna Marketing (mockup:
   the "5 posts ready" approval queue from the live page), Luna Trips
   (mockup: the "Sell group trips. Keep your money." hero), and "Also in
