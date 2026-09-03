@@ -35,6 +35,23 @@ ok(/viewsMonth: 0/.test(list) && /async function attachViews/.test(list), 'widge
 ok(/await attachViews\(widgets\)/.test(list) && /catch \(e\) \{ console\.error\('\[widget-list\] views'/.test(list), 'attachViews is awaited inside a try so a Redis blip keeps the list');
 ok(/Math\.max\(Number\(w\.views\) \|\| 0, all\)/.test(list), 'a hand-entered Airtable Views value still shows when larger');
 
+// ── the dashboard's counter read must survive a big account ────────────────
+// The Upstash REST client puts every argument in the URL path, so an unchunked
+// MGET of two keys per widget passes the usual 8KB URL ceiling at ~100 widgets
+// and the counts vanish for the biggest accounts. Guard the chunking.
+ok(/VIEW_KEYS_PER_CALL = 50/.test(list), 'widget-list chunks the MGET (50 keys per call)');
+ok(/for \(let i = 0; i < keys\.length; i \+= VIEW_KEYS_PER_CALL\)/.test(list), 'keys are sliced into chunks');
+ok(/Promise\.all\(chunks\.map\(c => mget\(c\)\.catch\(\(\) => \[\]\)\)\)/.test(list), 'chunks run concurrently and a failed chunk degrades to empty');
+ok(/vals\.push\(Array\.isArray\(got\) && j < got\.length \? got\[j\] : null\)/.test(list), 'a short or failed chunk contributes nulls so later widgets keep their alignment');
+{
+  // The arithmetic the chunk size defends: recreate the URL growth per widget.
+  const key = VIEWS_PREFIX + 'tgw_1786541681562_64vl50';
+  const perWidget = encodeURIComponent(key).length + 1 + encodeURIComponent(key + ':202609').length + 1;
+  ok(perWidget > 100 && perWidget < 110, 'each widget costs ~103 URL characters (the reason for chunking)');
+  ok(perWidget * 100 > 8000, 'an unchunked read for 100 widgets would exceed 8KB');
+  ok((perWidget / 2) * 50 < 4000, '50 keys per call stays well inside the ceiling');
+}
+
 // ── the three widgets report a real embed, never a preview ────────────────
 for (const [file, guard] of [
   ['public/widget-spotlight.js', /!this\.c\.widgetId \|\| this\.c\.destinationData/],

@@ -270,15 +270,38 @@ export default async function handler(req, res) {
   }
 }
 
+// Keys per MGET. The Upstash REST client sends every argument as a URL-ENCODED
+// PATH SEGMENT, so one call's URL grows by ~52 characters per key (a view key
+// URL-encodes to widget%3Aviews%3Av1%3Atgw_...). Two keys per widget against an
+// account's whole widget list would pass 8KB — the usual server and proxy URL
+// ceiling — at around 100 widgets, and this endpoint pages up to MAX_WIDGETS
+// (1000). Over the ceiling the call fails, callRedis returns null, and the view
+// counts silently vanish for exactly the biggest accounts. 50 keys keeps every
+// URL near 2.6KB. Chunks run concurrently, so the added latency is one round
+// trip, not one per chunk.
+const VIEW_KEYS_PER_CALL = 50;
+
 /** Merge the Redis view counters into the list (mutates in place). */
 async function attachViews(widgets) {
   if (!redisConfigured() || !widgets.length) return;
   const now = new Date();
-  const ids = widgets.map(w => w.widgetId);
   const keys = [];
-  for (const id of ids) { const k = viewKeys(id || '-', now); keys.push(k.allTime, k.month); }
-  const vals = await mget(keys);
-  if (!vals.length) return;
+  for (const w of widgets) { const k = viewKeys(w.widgetId || '-', now); keys.push(k.allTime, k.month); }
+
+  const chunks = [];
+  for (let i = 0; i < keys.length; i += VIEW_KEYS_PER_CALL) chunks.push(keys.slice(i, i + VIEW_KEYS_PER_CALL));
+  const settled = await Promise.all(chunks.map(c => mget(c).catch(() => [])));
+
+  // Rebuild one flat array aligned with `keys`. A chunk that failed or came back
+  // short contributes nulls, so a partial Redis answer leaves those widgets at
+  // zero rather than shifting every later widget's count onto the wrong row.
+  const vals = [];
+  settled.forEach((got, ci) => {
+    const want = chunks[ci].length;
+    for (let j = 0; j < want; j++) vals.push(Array.isArray(got) && j < got.length ? got[j] : null);
+  });
+  if (!vals.some(v => v !== null && v !== undefined)) return;
+
   widgets.forEach((w, i) => {
     const all = Number(vals[i * 2]) || 0;
     const month = Number(vals[i * 2 + 1]) || 0;
