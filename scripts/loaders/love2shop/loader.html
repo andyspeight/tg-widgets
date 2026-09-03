@@ -1,0 +1,141 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Love2Shop heart loader</title>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { background: transparent; }
+  #stage { display: block; }
+</style>
+<svg id="stage" xmlns="http://www.w3.org/2000/svg"></svg>
+<script src="heart.js"></script>
+<script>
+(function () {
+  'use strict';
+  var q = new URLSearchParams(location.search);
+  var THEME = q.get('theme') === 'blue' ? 'blue' : 'white';
+  var PRIMARY = '#2F49EA';
+  var SECONDARY = '#E10054';
+
+  // Frame geometry (1x). Render at a higher deviceScaleFactor for retina.
+  var W = 240, H = 80;
+  var CY = 40;
+  var R = 25;             // outer radius of the O
+  var RING_W = 8.5;       // stroke of the O, as heavy as the wordmark's letters
+  var X0 = 42, X1 = 198;  // centre of the O at the two ends of the run
+  var TRACK_H = 6;
+
+  var themes = {
+    // On white: the O and heart exactly as the logo, the bar in the primary blue
+    white: { bg: '#FFFFFF', track: '#E6E9FC', fill: PRIMARY, disc: '#FFFFFF', ring: SECONDARY, heart: SECONDARY },
+    // On the primary blue: the logo reversed out, white O with the pink heart
+    blue:  { bg: PRIMARY,   track: '#697CF0', fill: '#FFFFFF', disc: '#FFFFFF', ring: '#FFFFFF', heart: SECONDARY }
+  };
+  var C = themes[THEME];
+  // Heart drawing box: inside the counter of the O with clear space around it,
+  // a little larger on the reversed version where the O has no ring
+  var HEART_W = THEME === 'blue' ? 27 : 22;
+  var HEART = loveHeartPath(HEART_W, { overlap: 0.22, stop: 16, k1: 0.28, cp2x: 0.17, cp2y: 0.30, tip: 0.9 });
+
+  var svg = document.getElementById('stage');
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(name, attrs, parent) {
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(n);
+    return n;
+  }
+
+  el('rect', { x: 0, y: 0, width: W, height: H, fill: C.bg });
+
+  // Track and progress fill
+  el('rect', { x: X0, y: CY - TRACK_H / 2, width: X1 - X0, height: TRACK_H, rx: TRACK_H / 2, fill: C.track });
+  var fill = el('rect', { x: X0, y: CY - TRACK_H / 2, width: 0, height: TRACK_H, rx: TRACK_H / 2, fill: C.fill });
+
+  // Two instances of the heart-in-a-circle so the loop can hand over cleanly
+  function makePuck() {
+    var g = el('g', {});
+    var inner = el('g', {}, g);
+    el('circle', { cx: 0, cy: 0, r: R - RING_W / 2, fill: C.disc, stroke: C.ring, 'stroke-width': RING_W }, inner);
+    var heartG = el('g', {}, inner);
+    el('path', { d: HEART.d, fill: C.heart, stroke: C.heart, 'stroke-width': 1.2, 'stroke-linejoin': 'round' }, heartG);
+    return { g: g, inner: inner, heartG: heartG };
+  }
+  var puckA = makePuck();
+  var puckB = makePuck();
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function easeInOutCubic(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+  function easeInOutQuad(p) { return p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+  function easeOutBack(p) { var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); }
+  function bump(p, start, width) {          // smooth 0-1-0 bump
+    var u = (p - start) / width;
+    if (u <= 0 || u >= 1) return 0;
+    return Math.sin(u * Math.PI);
+  }
+
+  // Timeline (t in 0..1 = one 2 s loop)
+  var MOVE_END = 0.64, POP_END = 0.76, OUT_START = 0.76, OUT_END = 0.88, IN_START = 0.84;
+
+  function place(p, x, scale, opacity, beat) {
+    p.g.setAttribute('transform', 'translate(' + x.toFixed(3) + ' ' + CY + ')');
+    p.g.setAttribute('opacity', opacity.toFixed(3));
+    p.inner.setAttribute('transform', 'scale(' + scale.toFixed(4) + ')');
+    var hs = 1 + 0.11 * beat;
+    var b = HEART.box, hcx = b.x + b.w / 2, hcy = b.y + b.h / 2 + 0.5; // optical centre sits a touch below the box centre
+    p.heartG.setAttribute('transform', 'scale(' + hs.toFixed(4) + ') translate(' + (-hcx).toFixed(3) + ' ' + (-hcy).toFixed(3) + ')');
+  }
+
+  window.setTime = function (t) {
+    t = t - Math.floor(t);
+    // Heartbeat: a lub-dub, one a second (two per loop)
+    var ph = (t * 2) % 1;
+    var beat = bump(ph, 0.00, 0.22) + 0.55 * bump(ph, 0.24, 0.22);
+
+    // The travelling O
+    var x, scaleA = 1, opA = 1;
+    if (t < MOVE_END) {
+      x = X0 + (X1 - X0) * easeInOutCubic(t / MOVE_END);
+    } else {
+      x = X1;
+      if (t < POP_END) scaleA = 1 + 0.08 * bump((t - MOVE_END) / (POP_END - MOVE_END), 0, 1);
+    }
+    var fillX = X0, fillW = Math.max(0, x - X0);
+    if (t >= OUT_START) {
+      // The bar drains into the O, which shrinks away
+      var u = clamp((t - OUT_START) / (OUT_END - OUT_START), 0, 1);
+      fillX = X0 + (X1 - X0) * easeInOutQuad(u);
+      fillW = X1 - fillX;
+      scaleA = u < 0.4 ? 1 : 1 - easeInOutCubic((u - 0.4) / 0.6);
+      opA = u < 0.85 ? 1 : 1 - (u - 0.85) / 0.15;
+    }
+    fill.setAttribute('x', fillX.toFixed(3));
+    fill.setAttribute('width', fillW.toFixed(3));
+    place(puckA, x, scaleA, opA, beat);
+
+    // The next O settling in at the start
+    var opB = 0, scaleB = 0;
+    if (t >= IN_START) {
+      var v = clamp((t - IN_START) / (1 - IN_START), 0, 1);
+      opB = Math.min(1, v * 4);
+      scaleB = easeOutBack(v);
+    }
+    place(puckB, X0, scaleB, opB, beat);
+  };
+
+  window.__FRAME__ = { W: W, H: H };
+  window.setTime(0);
+
+  // Live preview when opened in a browser
+  if (q.get('play') !== '0') {
+    var start = performance.now();
+    (function loop() {
+      window.setTime(((performance.now() - start) / 2000) % 1);
+      requestAnimationFrame(loop);
+    })();
+  }
+})();
+</script>
