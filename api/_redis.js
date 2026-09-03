@@ -137,13 +137,31 @@ export async function decr(key) {
   const r = await callRedis('decr', key);
   return Number.isFinite(+r) ? +r : null;
 }
-/** INCR key, and on the first increment give it a TTL — for counters that
- *  should age out (the per-month widget view buckets). Returns the new count. */
+/** INCR key and set its TTL if it has none, in ONE pipelined round trip.
+ *
+ *  The obvious two-call form (INCR, then EXPIRE only when the count is 1) can
+ *  strand a key forever: callRedis swallows failures, so if that second call
+ *  times out the key keeps its count, never gets a TTL, and the count-is-1
+ *  branch never fires again. EXPIRE ... NX sets the TTL only when there is none,
+ *  so sending it on every increment is idempotent and self-healing.
+ *  Mirrors the pipeline form already used by api/_lib/auth/ratelimit.js. */
 export async function incrEx(key, ttlSeconds) {
-  const r = await callRedis('incr', key);
-  const n = Number.isFinite(+r) ? +r : null;
-  if (n === 1 && ttlSeconds > 0) await callRedis('expire', key, String(ttlSeconds));
-  return n;
+  if (!configured()) return null;
+  try {
+    const res = await fetch(`${REDIS_URL}/pipeline`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([['INCR', key], ['EXPIRE', key, String(ttlSeconds), 'NX']]),
+      signal: AbortSignal.timeout(REDIS_READ_TIMEOUT_MS),
+    });
+    if (!res.ok) { console.error('[redis] HTTP', res.status, 'pipeline incrEx'); return null; }
+    const j = await res.json();
+    const first = Array.isArray(j) && j[0] ? j[0].result : null;
+    return Number.isFinite(+first) ? +first : null;
+  } catch (e) {
+    console.error('[redis] error pipeline incrEx', e.message);
+    return null;
+  }
 }
 /** MGET keys — an array aligned with the keys (nulls for misses), [] if unconfigured. */
 export async function mget(keyList) {

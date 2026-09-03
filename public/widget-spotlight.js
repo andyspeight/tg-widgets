@@ -703,7 +703,12 @@
     }
 
     /* ─── HERO ───────────────────────────────────────── */
-    .tgs-section-hero { margin: 0; }
+    /* Two-class specificity throughout this file's section modifiers: the
+       .tgs-section base rule further down sets the margin shorthand, and at
+       equal specificity the later rule would win and silently reset these. That
+       cost the hero/rail overlap (it collapsed to 6px) and pushed the absolutely
+       positioned facts pill outside the widget onto the client's own page. */
+    .tgs-section.tgs-section-hero { margin: 0; }
     .tgs-hero {
       position: relative;
       display: flex;
@@ -807,14 +812,17 @@
       -webkit-backdrop-filter: blur(8px);
     }
     .tgs-hero-content .tgs-tag svg { color: rgba(255,255,255,0.9); }
-    .tgs-section-tags { margin-top: 14px; }
+    .tgs-section.tgs-section-tags { margin-top: 14px; }
 
     /* ─── QUICK FACTS RAIL ───────────────────────────────
        One rail of cells with hairline dividers, sitting across the hero's
        bottom edge on wide embeds and directly beneath it on narrow ones. */
-    .tgs-section-facts {
+    .tgs-section.tgs-section-facts {
       position: relative;
       z-index: 2;
+      /* The label pill hangs 10px above this box, so this margin is what keeps
+         it inside the widget when the facts rail is the first thing rendered
+         (a hero:false config whose destination has no Best For tags). */
       margin: 14px 0 0;
     }
     .tgs-facts-label {
@@ -1090,7 +1098,7 @@
     .tgs-plan-summary {
       display: flex; align-items: center; gap: 10px;
       padding: 10px 14px;
-      min-height: 40px;
+      min-height: 44px;
       cursor: pointer;
       font-size: 13px; font-weight: 600; color: var(--tgs-text);
       list-style: none;
@@ -1365,7 +1373,10 @@
       .tgs-root:not([data-layout="stacked"]) .tgs-body[data-side="1"] .tgs-side > .tgs-section:first-child { margin-top: 0; }
     }
     @container tgs (max-width: 719px) {
-      .tgs-root { --tgs-gap: 24px; }
+      /* --tgs-gap is consumed by these descendants, and it must be set ON them:
+         .tgs-root is this query's own container, and an element is never matched
+         by a container query it establishes, so setting it there did nothing. */
+      .tgs-section, .tgs-body, .tgs-side { --tgs-gap: 24px; }
       .tgs-section-head { flex-wrap: wrap; }
     }
     @container tgs (max-width: 479px) {

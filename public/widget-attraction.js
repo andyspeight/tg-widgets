@@ -1066,7 +1066,9 @@
     .tgx-root:not([data-layout="stacked"]) .tgx-body[data-side="1"] .tgx-side > .tgx-section:first-child { margin-top: 0; }
   }
   @container tgx (max-width: 719px) {
-    .tgx-root { --tgx-gap: 24px; }
+    /* Set on the consumers, not on .tgx-root: an element is never matched by a
+       container query it establishes, so the gap never narrowed. */
+    .tgx-section, .tgx-body, .tgx-side { --tgx-gap: 24px; }
   }
   @container tgx-main (min-width: 640px) {
     .tgx-locate { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; }

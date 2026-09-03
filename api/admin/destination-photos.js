@@ -84,7 +84,12 @@ export function photosToCells(results) {
     const who = p.user && p.user.name ? String(p.user.name).trim() : 'Unsplash';
     const page = p.links && p.links.html ? String(p.links.html) : 'https://unsplash.com';
     credits.push('Photo by ' + who + ' on Unsplash (' + page + ')');
-    if (p.links && p.links.download_location) downloads.push(String(p.links.download_location));
+    // Only ever ping Unsplash's own API for this. The value arrives in a
+    // response body, so without a host check an upstream change or a redirect
+    // could point our authenticated server fetch at an arbitrary or internal
+    // address. Same defence-in-depth as ALLOWED_LOGO_HOSTS in admin/logo-find.js.
+    const dl = p.links && p.links.download_location ? String(p.links.download_location) : '';
+    if (/^https:\/\/api\.unsplash\.com\//.test(dl)) downloads.push(dl);
     if (urls.length >= PHOTOS_PER_RECORD) break;
   }
   return { urls, credits, downloads };
@@ -198,6 +203,10 @@ export default async function handler(req, res) {
   const level = LEVELS[body.level] ? body.level : '';
   if (!level) return res.status(400).json({ error: "level must be 'resort', 'city' or 'country'" });
   const limit = Math.max(1, Math.min(MAX_BATCH, parseInt(body.limit, 10) || 10));
+  // Records that return no Unsplash results are never marked, so they stay at
+  // the head of the queue and would be retried by every later batch — enough of
+  // them and no new record can ever be reached. skip steps past them.
+  const skip = Math.max(0, parseInt(body.skip, 10) || 0);
   const dryRun = body.dryRun === true;
   if (!unsplashKey()) return res.status(409).json({ error: 'UNSPLASH_ACCESS_KEY is not set on the deployment, so nothing can be fetched.', configured: false });
 
@@ -209,7 +218,7 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'Could not read the Destination Content base.' });
   }
   const missing = rows.filter(r => !r.hasImage && r.name);
-  const batch = missing.slice(0, limit);
+  const batch = missing.slice(skip, skip + limit);
   const parents = lv.parentLevel ? await parentNames(lv.parentLevel, batch.map(b => b.parentId)) : new Map();
 
   const items = [];
@@ -241,7 +250,7 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({
-    level, dryRun, limit,
+    level, dryRun, limit, skip,
     considered: batch.length,
     filled,
     remaining: Math.max(0, missing.length - filled),

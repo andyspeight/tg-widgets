@@ -8,7 +8,7 @@
  * Run: node test/widget-views-smoke.mjs   (also: npm run test:widget-views)
  */
 import { readFileSync } from 'node:fs';
-import { viewKeys, monthBucket, isCountableId, VIEWS_PREFIX, MONTH_TTL_SECONDS } from '../api/_lib/widget-views.js';
+import { viewKeys, monthBucket, isCountableId, VIEWS_PREFIX, MONTH_TTL_SECONDS, ALLTIME_TTL_SECONDS } from '../api/_lib/widget-views.js';
 
 let passed = 0, failed = 0;
 const ok = (c, label) => { if (c) { passed++; } else { failed++; console.error('  FAIL:', label); } };
@@ -25,9 +25,39 @@ ok(!isCountableId('') && !isCountableId('a b') && !isCountableId('x'.repeat(61))
 
 // ── widget-log counts a load, and only a load ──────────────────────────────
 const log = read('api/widget-log.js');
-ok(/event === 'load' && isCountableId\(entry\.widgetId\)/.test(log), 'widget-log counts only a load event with a countable id');
-ok(/incr\(k\.allTime\)/.test(log) && /incrEx\(k\.month, MONTH_TTL_SECONDS\)/.test(log), 'widget-log increments the all-time and month counters');
-ok(/redisConfigured\(\)/.test(log.slice(log.indexOf('Per-widget view counters'))), 'counting is skipped when Redis is not configured');
+ok(/bodyEvent === 'load' && isCountableId\(bodyWidgetId\)/.test(log), 'widget-log counts only a load event with a countable id');
+ok(/incrEx\(k\.allTime, ALLTIME_TTL_SECONDS\)/.test(log) && /incrEx\(k\.month, MONTH_TTL_SECONDS\)/.test(log),
+  'widget-log increments both counters and gives each a TTL');
+ok(/bodyEvent === 'load' && isCountableId\(bodyWidgetId\) && redisConfigured\(\)/.test(log), 'counting is skipped when Redis is not configured');
+
+// The counter must NOT sit behind the alerting rate limit. That budget is 60 per
+// 5 minutes per IP, shared by every widget type that beacons here, and a mobile
+// carrier NAT address is shared by thousands of visitors — so gating the counter
+// on it silently undercounted the busiest client sites worst, on a figure the
+// dashboard presents as authoritative.
+{
+  const countAt = log.indexOf("bucket: 'widgetViews'");
+  const alertAt = log.indexOf("bucket: 'widgetLog'");
+  ok(countAt > -1 && alertAt > -1 && countAt < alertAt, 'the view counter runs BEFORE the alerting rate limit');
+  ok(/bucket: 'widgetViews', key: ip, max: 1200/.test(log), 'counting has its own, far larger per-IP budget');
+}
+
+// Every key this public endpoint can mint must age out. The counters live in the
+// same Upstash instance as the offers and world-map caches, whose stated
+// invariant is that their keys never expire, so an unbounded permanent keyspace
+// fed by an unauthenticated endpoint is not acceptable.
+ok(ALLTIME_TTL_SECONDS > 300 * 86400, 'the all-time counter carries a long TTL rather than living forever');
+ok(!isCountableId('abcd') && !isCountableId('not-a-widget-id') && !isCountableId('tgw_short_x'),
+  'a plausible but unminted id is refused, so the public endpoint cannot mint arbitrary keys');
+ok(isCountableId('tgw_1786541681562_64vl50'), 'a genuinely minted id is still counted');
+
+// The TTL must be set idempotently in one round trip: the two-call form could
+// strand a key with a count and no expiry if the second call failed.
+{
+  const redis = read('api/_redis.js');
+  ok(/\/pipeline/.test(redis) && /\['INCR', key\], \['EXPIRE', key, String\(ttlSeconds\), 'NX'\]/.test(redis),
+    'incrEx pipelines INCR with EXPIRE ... NX so a key can never be stranded without a TTL');
+}
 
 // ── widget-list merges the counters ───────────────────────────────────────
 const list = read('api/widget-list.js');

@@ -1124,7 +1124,9 @@
   .tga-root:not([data-layout="stacked"]) .tga-body[data-side="1"] .tga-side > .tga-section:first-child { margin-top: 0; }
 }
 @container tga (max-width: 719px) {
-  .tga-root { --tga-gap: 24px; }
+  /* Set on the consumers, not on .tga-root: an element is never matched by a
+     container query it establishes, so the gap never narrowed. */
+  .tga-section, .tga-body, .tga-side { --tga-gap: 24px; }
 }
 @container tga (max-width: 479px) {
   .tga-fact-sub { display: none; }
