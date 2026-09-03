@@ -223,7 +223,7 @@ https://framer.com/projects/Scary-Wealth--vna1Dww9wfns4nJSst1v-dfckl?node=JblnZB
 
 ### What is on the page
 
-Path `/roadmap`, title "What we've been working on, and what's coming soon".
+Path `/roadmap`, title "What we've been working on".
 Andy's direction on 3 Sep: recent work and what is coming, nothing before the
 start of May, mockups for some products, and HIS list of what shipped each
 month (the git-derived month lists above are superseded for the page). On the
@@ -231,7 +231,9 @@ shared "Travelgenix Layout" template, with Desktop, Tablet and Phone
 breakpoints, screenshots checked at all three after every pass.
 
 1. Hero on the teal radial glow: the site's tri-colour bar, the Display
-   heading, a two-line Body intro and a white stat card ("5 months of
+   heading "What we've been working on", a two-line Body intro ("Everything
+   Travelgenix has shipped since the start of May 2026, month by month, with
+   the products behind each release.") and a white stat card ("5 months of
    shipping", "2,212 updates shipped", "61 embeddable widgets"). No eyebrow
    badge, no count-up. On Phone the card stacks.
 2. "Since May, month by month" on white: one continuous rail with a navy
@@ -267,13 +269,14 @@ breakpoints, screenshots checked at all three after every pass.
      Items: a new search box widget, Luna Marketing, seven new sports and
      event booking widgets, Luna Trips group booking (Stripe, "we never hold
      your money"). Mockup: the Luna Travel App hero from the live page.
-3. "What's coming soon" on the light gradient band: three lanes headed by a
-   pill (Now in navy, Next in teal tint, Later outlined). Now 7 cards, Next 8,
-   Later 5, each with a product icon, product name in small caps navy, the
-   capability in bold and one line on why it matters. Cards lift on hover.
-   The lanes container carries the page's ONE scroll reveal. Andy has NOT yet
-   reviewed this section; he said the coming soon items come after the
-   timeline is agreed.
+3. REMOVED on 3 Sep (Andy's call, so the page can go live): the "What's
+   coming soon" band with the Now / Next / Later lanes. It was built from the
+   brief's roadmap tables and never reviewed with Andy. The whole section
+   node (`pl4u5N4a2`) was deleted, not hidden, so rebuilding it means
+   rebuilding the lanes; the content is still in the roadmap tables above.
+   With it went the page's only scroll reveal, so the hero stat card now
+   carries one gentle rise on mount instead (the page's single motion
+   moment).
 4. Closing call to action on the second glow: "Want to see any of this
    running?", one line, the Travelgenix Button (Primary) to /contact and a
    "See pricing" text link using the Navigation Link preset.
@@ -361,6 +364,33 @@ record; a card's parts follow the month-card pattern (Copy, Head, Blurb,
 MockCol, Mock, Shot, Caption). The old July and September single cards
 (`CF3JSOWuq`, `KkzOSHkiO`) are deleted.
 
+
+### Live, and the footer link (3 Sep, Andy's go-live)
+
+Andy asked for the coming soon section out and a footer link in so he could
+publish. Page metadata is now title "What we've been working on",
+description "Everything Travelgenix has shipped since May 2026, month by
+month, with the products behind each release."
+
+The footer link is in the SHARED LAYOUT TEMPLATE (Travelgenix Layout
+`GRBJqpwl7`, Footer `Z_fusaKQE`), so it appears on every page of the site,
+which is what a footer link means. It sits in the Useful Links column
+(`e1EW3MoSF`) between Insights and GDPR, labelled "Product updates", node
+`b0yHty907`, pointing at `/roadmap`. It copies the existing footer link
+pattern exactly: a `RichTextNode` with `link.href`, `width="1fr"`,
+`textStylePreset="Small"` and `textColor="rgba(247, 249, 252, 0.74)"`. Note
+the site's footer links carry NO `linkStylePreset` (they colour the text
+directly), so the new one matches them rather than the Framer guidance to
+always attach a link preset. Added to the layout template's PRIMARY
+breakpoint, so Tablet and Phone inherit it; verified on all three.
+
+TO PUBLISH: the page lives on the `timeline-roadmap` branch, and a branch
+can only publish a branch preview. Going live means merging into main first
+(`framer.agent.mergeBranch("main")` from the active branch, which CONSUMES
+the branch), then publishing main. The page is NOT a draft, so it goes live
+with the merge and publish. Merging also carries the footer link to every
+page, which is the intended effect.
+
 ### Left out and why
 
 - The remaining month items (Text FX, Logo Showcase, Countdown, Weather, the
@@ -393,15 +423,17 @@ MockCol, Mock, Shot, Caption). The old July and September single cards
 - Luna Support arguably deserves its own card too; it sits in "Also in
   July" because no public page shows it yet. Promote it when there is
   something to screenshot.
-- Andy said "there may be more" for the timeline, and the coming soon
-  section is still to be reviewed with him.
+- Andy said "there may be more" for the timeline.
+- The coming soon section is OUT for now and will be rebuilt to Andy's own
+  list when he has one. Do not restore the deleted version from the brief's
+  roadmap tables without asking; he never reviewed it.
 - Andy's list says 50 widgets in May; the hero stat says 61 today (60
   widget files plus the original pricing widget). Both can be true; confirm
   which number he wants where.
 - Whether "2,212 updates shipped" is the number he wants on a public page
   (it is the commit count since 1 May), and whether the stat card stays.
-- The page is NOT a draft, so merging the branch and publishing would put it
-  live as is. Nothing on it is marked internal any more.
+- The page is NOT a draft and Andy intends to publish it. Nothing on it is
+  marked internal any more.
 - The site has grown since July: the product pages now live under
   /what-we-do/, and there are /insights, /compare and /customers sections.
   The July Airtable notes about "11 pages" are out of date.
