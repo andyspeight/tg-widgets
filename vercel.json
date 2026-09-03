@@ -97,6 +97,9 @@
       "memory": 1024,
       "maxDuration": 15,
       "includeFiles": "api/_data/events-snapshot.json"
+    },
+    "api/admin/destination-photos.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -165,6 +168,10 @@
     {
       "source": "/admin/logo-find",
       "destination": "/admin/logo-find.html"
+    },
+    {
+      "source": "/admin/destination-photos",
+      "destination": "/admin/destination-photos.html"
     },
     {
       "source": "/admin/logo-library",

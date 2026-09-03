@@ -427,7 +427,7 @@ const WIDGETS = [
     id: 'spotlight',
     name: 'Destination Spotlight',
     airtableType: 'Destination Spotlight',
-    description: 'Editorial single-destination showcase with climate chart, highlights, quick facts and branded CTA. Live from the Travelgenix destination content database — updates automatically as content is refreshed.',
+    description: 'Editorial destination showcase in three layouts: the full guide with climate chart and highlights, an essentials strip to sit under your own hero, and a card for sidebars. Live from the Travelgenix destination content database and updated as content is refreshed.',
     category: 'Content',
     status: 'live',
     icon: {viewBox:'0 0 24 24', paths:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'},
@@ -1311,6 +1311,9 @@ async function renderMyWidgets(opts = {}) {
 
   grid.innerHTML = groups.map(({ type, widgets, reg }) => {
     const n = widgets.length;
+    const tv = widgets.reduce((s, w) => s + (w.views || 0), 0);
+    const mv = widgets.reduce((s, w) => s + (w.viewsMonth || 0), 0);
+    const sub = tv ? `${tv.toLocaleString()} view${tv === 1 ? '' : 's'} · ${mv.toLocaleString()} this month` : 'Click to view or edit';
     return `<div class="type-card" onclick="openTypeModal('${esc(type)}')">
       <div class="type-card-visual" style="background:linear-gradient(135deg, ${reg.color}22 0%, ${reg.color}10 100%)">
         <svg viewBox="${reg.icon.viewBox}" style="stroke:${reg.color}">${reg.icon.paths}</svg>
@@ -1318,7 +1321,7 @@ async function renderMyWidgets(opts = {}) {
       </div>
       <div class="type-card-body">
         <div class="type-card-name">${esc(reg.name)}</div>
-        <div class="type-card-sub">Click to view or edit</div>
+        <div class="type-card-sub">${sub}</div>
       </div>
     </div>`;
   }).join('');
@@ -1346,6 +1349,7 @@ function openTypeModal(airtableType) {
           <span class="type-modal-item-id">${esc(w.widgetId)}</span>
           <span><span class="type-modal-item-dot" style="background:${w.status==='Active'?'var(--ok)':'var(--warn)'}"></span> ${esc(w.status || 'Draft')}</span>
           ${w.updated ? `<span>Updated ${esc(w.updated)}</span>` : ''}
+          <span title="Counted from real loads on your site">${w.views ? `${(w.views || 0).toLocaleString()} view${w.views === 1 ? '' : 's'}${w.viewsMonth ? ` · ${w.viewsMonth.toLocaleString()} this month` : ''}` : 'No views yet'}</span>
         </div>
       </div>
       ${isEnquiryForm ? `<a class="type-modal-item-btn type-modal-item-btn-secondary" href="/inbox-enquiry" title="View submissions in your inbox">

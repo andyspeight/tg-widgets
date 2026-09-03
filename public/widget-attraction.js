@@ -44,6 +44,30 @@
   const CONTENT_API = (typeof window !== 'undefined' && window.__TG_ATTRACTION_API__) || resolveBase('/api/attraction-content');
   const VERSION = '1.4.0';
 
+  const WIDGET_LOG_URL = CONFIG_API.replace('/widget-config', '/widget-log');
+  // Telemetry: a one-time load heartbeat per real embed (counts as a view on
+  // the dashboard) and any content failure that carries an HTTP status. Posts
+  // to our own API origin, and it never throws. Mirrors the offers reporter.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'attraction', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
+  // Only a failure the server actually answered (a status in the message) is
+  // worth a beacon; a visitor's dropped connection is not ours to chase.
+  function tgReportFailure(widgetId, label, err) {
+    var detail = err && err.message ? String(err.message) : String(err || '');
+    if (!widgetId || !/\(\d{3}\)/.test(detail)) return;
+    tgReport('error', widgetId, label + ' ' + (detail.match(/\(\d{3}\)/) || [''])[0], detail);
+  }
+
+
   // Start a content fetch early (in parallel with the config fetch) so the two
   // requests don't wait on each other; the load method consumes it. Carries its
   // own timeout. (Spotlight-family speed, step 3.)
@@ -488,13 +512,14 @@
       const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
         const res = await (prefetched || fetch(CONTENT_API + qs, ctrl ? { credentials: 'omit', signal: ctrl.signal } : { credentials: 'omit' }));
-        if (!res.ok) { if (res.status === 404) return this._renderNotFound(); throw new Error('fetch ' + res.status); }
+        if (!res.ok) { if (res.status === 404) return this._renderNotFound(); throw new Error('Attraction content failed (' + res.status + ')'); }
         const data = await res.json();
         if (!data || data.found === false || !data.attraction) return this._renderNotFound();
         this._data = this._withOverrides(data.attraction);
         this._renderContent();
       } catch (err) {
         console.error('[TG Attraction] load failed:', err);
+        tgReportFailure(this.c.widgetId, 'Attraction content unavailable', err);
         this._renderError();
       } finally {
         if (timer) clearTimeout(timer);
@@ -556,6 +581,7 @@
         );
       }
       this._root.innerHTML = html.filter(Boolean).join('');
+      if (!this._reported && this.c.widgetId && !this.c.attractionData) { this._reported = true; tgReport('load', this.c.widgetId); }
       if (s.located && this.c.showMap !== false && typeof d.lat === 'number' && typeof d.lng === 'number') {
         this._initMap(d);
       }

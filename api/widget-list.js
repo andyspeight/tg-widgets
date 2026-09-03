@@ -44,6 +44,8 @@
  * Security: requires a valid session; never trusts a client-supplied clientId
  * or email from the query string. All formula inputs are validated/sanitised.
  */
+import { configured as redisConfigured, mget } from './_redis.js';
+import { viewKeys } from './_lib/widget-views.js';
 import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
@@ -250,8 +252,15 @@ export default async function handler(req, res) {
       type: r.fields.WidgetType || 'Unknown',
       status: r.fields.Status || 'Draft',
       views: r.fields.Views || 0,
+      viewsMonth: 0,
       updated: r.fields.UpdatedAt ? new Date(r.fields.UpdatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '',
     }));
+
+    // Real view counts from the widget-log load heartbeat (Redis): all time
+    // and this month. Nothing ever wrote the Airtable Views field, so the
+    // counter is the source; a value hand-entered in Airtable still shows if
+    // it is larger. Best effort: a Redis blip leaves the list intact.
+    try { await attachViews(widgets); } catch (e) { console.error('[widget-list] views', e.message); }
 
     res.setHeader('Cache-Control', 'private, max-age=10');
     return res.status(200).json(widgets);
@@ -259,6 +268,23 @@ export default async function handler(req, res) {
     console.error('[widget-list]', err.message);
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
+}
+
+/** Merge the Redis view counters into the list (mutates in place). */
+async function attachViews(widgets) {
+  if (!redisConfigured() || !widgets.length) return;
+  const now = new Date();
+  const ids = widgets.map(w => w.widgetId);
+  const keys = [];
+  for (const id of ids) { const k = viewKeys(id || '-', now); keys.push(k.allTime, k.month); }
+  const vals = await mget(keys);
+  if (!vals.length) return;
+  widgets.forEach((w, i) => {
+    const all = Number(vals[i * 2]) || 0;
+    const month = Number(vals[i * 2 + 1]) || 0;
+    w.views = Math.max(Number(w.views) || 0, all);
+    w.viewsMonth = month;
+  });
 }
 
 // Test surface — pure scope-formula logic, no network.

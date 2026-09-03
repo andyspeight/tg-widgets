@@ -124,6 +124,30 @@
   }
   const VERSION = '1.4.0';
 
+  const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
+  // Telemetry: a one-time load heartbeat per real embed (counts as a view on
+  // the dashboard) and any content failure that carries an HTTP status. Posts
+  // to our own API origin, and it never throws. Mirrors the offers reporter.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'airport', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
+  // Only a failure the server actually answered (a status in the message) is
+  // worth a beacon; a visitor's dropped connection is not ours to chase.
+  function tgReportFailure(widgetId, label, err) {
+    var detail = err && err.message ? String(err.message) : String(err || '');
+    if (!widgetId || !/\(\d{3}\)/.test(detail)) return;
+    tgReport('error', widgetId, label + ' ' + (detail.match(/\(\d{3}\)/) || [''])[0], detail);
+  }
+
+
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section/fact labels, tab labels, CTA buttons, map
   // links, empty/error states, aria-labels). Airport names, city names, airline
@@ -1214,7 +1238,7 @@
       const p = prefetched || startContent(url);
       p.then(r => {
           if (r.status === 404) { this._renderNotFound(); return null; }
-          if (!r.ok) throw new Error('HTTP ' + r.status);
+          if (!r.ok) throw new Error('Airport content failed (' + r.status + ')');
           return r.json();
         })
         .then(d => {
@@ -1223,7 +1247,7 @@
           this._airport = this._withOverrides(d.airport || null);
           this._renderContent();
         })
-        .catch(() => this._renderError());
+        .catch((err) => { tgReportFailure(this.c.widgetId, 'Airport content unavailable', err); this._renderError(); });
     }
 
     _renderShell() {
@@ -1306,6 +1330,7 @@
 
       this._root.innerHTML = html.join('');
       this._bind();
+      if (!this._reported && this.c.widgetId && !this.c.airportData) { this._reported = true; tgReport('load', this.c.widgetId); }
 
       if (s.located && this.c.showMap && safeLatLng(d.lat, d.lng)) {
         this._initMap(d, isDest);

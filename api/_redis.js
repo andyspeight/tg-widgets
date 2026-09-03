@@ -137,6 +137,20 @@ export async function decr(key) {
   const r = await callRedis('decr', key);
   return Number.isFinite(+r) ? +r : null;
 }
+/** INCR key, and on the first increment give it a TTL — for counters that
+ *  should age out (the per-month widget view buckets). Returns the new count. */
+export async function incrEx(key, ttlSeconds) {
+  const r = await callRedis('incr', key);
+  const n = Number.isFinite(+r) ? +r : null;
+  if (n === 1 && ttlSeconds > 0) await callRedis('expire', key, String(ttlSeconds));
+  return n;
+}
+/** MGET keys — an array aligned with the keys (nulls for misses), [] if unconfigured. */
+export async function mget(keyList) {
+  if (!Array.isArray(keyList) || !keyList.length) return [];
+  const r = await callRedis('mget', ...keyList);
+  return Array.isArray(r) ? r : [];
+}
 /** DEL key — returns the number of keys removed (0/1), or null if unconfigured. */
 export async function del(key) {
   return await callRedis('del', key);

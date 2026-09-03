@@ -1,5 +1,5 @@
 /**
- * Travelgenix Destination Spotlight Widget v1.6.0
+ * Travelgenix Destination Spotlight Widget v1.7.0
  * Self-contained, embeddable editorial destination showcase.
  * Zero dependencies. Shadow DOM isolation. Works on any website via a single script tag.
  *
@@ -14,6 +14,14 @@
  *    facts as a rail across its bottom edge, then a two-column body on wide
  *    embeds: climate, highlights, events | good to know, pairs well with, CTA
  *    (config.layout: 'auto' | 'stacked')
+ *  - Essentials strip (config.layout: 'strip'): a band to sit under the
+ *    agent's own hero. Name and tagline, Best For chips, the best months line,
+ *    the quick-facts rail, Good to know and a slim CTA. No photo. This is the
+ *    shape 55 of the first 65 live configs had hand-built with the toggles.
+ *  - Card (config.layout: 'card'): a compact vertical card for sidebars and
+ *    grids. Photo with the name over it, tagline, best months, chips, facts, CTA.
+ *  - Own hero photo (config.heroImageUrl) wins over the Luna image; a
+ *    destination with no photo gets a brand gradient with a compass watermark.
  *  - 12-month climate chart, colour-coded by season, with rainfall strip and
  *    best-time-to-visit callout (the "nobody else does this" hook)
  *  - Quick facts bar (flight time, time zone, currency, language, voltage)
@@ -113,7 +121,31 @@
     p.__abort = function () { if (timer) clearTimeout(timer); if (ctrl) { try { ctrl.abort(); } catch (e) { /* noop */ } } };
     return p;
   }
-  const VERSION = '1.6.0';
+  const VERSION = '1.7.0';
+
+  const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
+  // Telemetry: a one-time load heartbeat per real embed (counts as a view on
+  // the dashboard) and any content failure that carries an HTTP status. Posts
+  // to our own API origin, and it never throws. Mirrors the offers reporter.
+  function tgReport(event, widgetId, message, detail) {
+    try {
+      var b = JSON.stringify({
+        event: event, widget: 'spotlight', widgetId: String(widgetId || ''),
+        message: String(message || '').slice(0, 300), detail: String(detail || '').slice(0, 500),
+        url: (function () { try { return location.href; } catch (e) { return ''; } })(),
+      });
+      if (navigator && typeof navigator.sendBeacon === 'function' && navigator.sendBeacon(WIDGET_LOG_URL, new Blob([b], { type: 'text/plain' }))) return;
+      fetch(WIDGET_LOG_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: b, keepalive: true, credentials: 'omit' }).catch(function () {});
+    } catch (e) { /* telemetry must never throw */ }
+  }
+  // Only a failure the server actually answered (a status in the message) is
+  // worth a beacon; a visitor's dropped connection is not ours to chase.
+  function tgReportFailure(widgetId, label, err) {
+    var detail = err && err.message ? String(err.message) : String(err || '');
+    if (!widgetId || !/\(\d{3}\)/.test(detail)) return;
+    tgReport('error', widgetId, label + ' ' + (detail.match(/\(\d{3}\)/) || [''])[0], detail);
+  }
+
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (section default headings, fact/planning labels,
@@ -603,6 +635,8 @@
       --tgs-border-soft: #F1F5F9;
       --tgs-brand-soft: rgba(27,43,91,0.08);
       --tgs-accent-soft: rgba(0,180,216,0.12);
+      --tgs-accent-tint: rgba(0,180,216,0.38);
+      --tgs-brand-light: #2A3F7A;
 
       --tgs-season-best: #00B4D8;
       --tgs-season-shoulder: #F59E0B;
@@ -633,6 +667,10 @@
       container-name: tgs;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+    }
+
+    @supports (color: color-mix(in srgb, red, blue)) {
+      .tgs-root { --tgs-brand-light: color-mix(in srgb, var(--tgs-brand) 82%, #FFFFFF); }
     }
 
     .tgs-root[data-theme="dark"] {
@@ -922,11 +960,12 @@
     .tgs-climate-callout {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--tgs-accent-soft);
-      color: var(--tgs-accent);
+      color: var(--tgs-brand-ink);
       padding: 5px 10px; border-radius: 999px;
       font-size: 12px; font-weight: 600;
       line-height: 1.2;
     }
+    .tgs-climate-callout svg { color: var(--tgs-accent); }
     .tgs-climate-plot { display: grid; grid-template-columns: minmax(0, 1fr); }
     .tgs-climate-axis {
       display: none;
@@ -1343,6 +1382,126 @@
       .tgs-hero-content { animation: none; }
       a.tgs-pair:hover, a.tgs-pair:focus-visible, .tgs-cta-btn:hover { transform: none; }
     }
+
+    /* ─── NO-PHOTO HERO ──────────────────────────────────
+       Brand gradient with one accent glow and a compass glyph as a watermark,
+       so a destination without a photo still reads as a place, not a banner. */
+    .tgs-hero-img--fallback {
+      background:
+        radial-gradient(70% 90% at 100% 0%, var(--tgs-accent-tint) 0%, rgba(0,180,216,0) 62%),
+        linear-gradient(135deg, var(--tgs-brand) 0%, var(--tgs-brand-light) 100%);
+    }
+    .tgs-hero-mark {
+      position: absolute; right: -24px; top: -28px;
+      width: 260px; height: 260px;
+      color: #fff; opacity: 0.09;
+      transform: rotate(-12deg);
+      pointer-events: none;
+    }
+    .tgs-hero-mark svg { width: 100%; height: 100%; }
+
+    /* ─── BEST MONTHS LINE ───────────────────────────────
+       The climate chart's hook, kept alive in the compact layouts. */
+    .tgs-bestline {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+      margin: 0;
+      font-size: 12.5px; color: var(--tgs-sub);
+    }
+    .tgs-bestline-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--tgs-accent-soft);
+      color: var(--tgs-brand-ink);
+      padding: 5px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; line-height: 1.2;
+    }
+    .tgs-bestline-pill svg { color: var(--tgs-accent); }
+    .tgs-bestline-range {
+      font-weight: 600; color: var(--tgs-text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ─── ESSENTIALS STRIP (layout: strip) ───────────────
+       A band that sits under the agent's own hero: identity line, Best For
+       chips, best months, the facts rail, Good to know and a slim CTA. No photo. */
+    .tgs-strip { display: flex; flex-direction: column; gap: 18px; }
+    .tgs-strip-head {
+      display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+      gap: 12px 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--tgs-border);
+    }
+    .tgs-strip-id { min-width: 0; flex: 1 1 280px; }
+    .tgs-strip-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--tgs-muted);
+      margin-bottom: 4px;
+    }
+    .tgs-strip-eyebrow::before {
+      content: ""; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--tgs-accent); flex: 0 0 6px;
+    }
+    .tgs-strip-name {
+      margin: 0;
+      font-size: clamp(22px, 2.6cqi, 30px); font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1.1;
+      color: var(--tgs-text);
+      overflow-wrap: anywhere;
+    }
+    .tgs-strip-tagline { margin: 6px 0 0; font-size: 14px; line-height: 1.45; color: var(--tgs-sub); max-width: 60ch; }
+    .tgs-strip-meta { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; flex: 0 1 auto; max-width: 100%; }
+    .tgs-strip .tgs-section { margin: 0; }
+    .tgs-strip .tgs-section-facts { margin-top: 0; }
+    .tgs-strip .tgs-facts { box-shadow: var(--tgs-shadow-sm); }
+    @container tgs (min-width: 640px) {
+      .tgs-strip-meta { align-items: flex-end; }
+      .tgs-strip-meta .tgs-tags { justify-content: flex-end; }
+      .tgs-strip .tgs-cta { flex-direction: row; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 24px; }
+      .tgs-strip .tgs-cta-btn { flex: 0 0 auto; }
+    }
+
+    /* ─── CARD (layout: card) ────────────────────────────
+       A compact vertical card for sidebars and grids: photo with the name over
+       it, tagline, best months, chips, the facts rail and the CTA. */
+    .tgs-root[data-layout="card"] { max-width: 560px; }
+    .tgs-card {
+      border: 1px solid var(--tgs-border);
+      border-radius: var(--tgs-radius);
+      overflow: hidden;
+      background: var(--tgs-bg);
+      box-shadow: var(--tgs-shadow-md);
+    }
+    .tgs-card-media {
+      position: relative;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      aspect-ratio: 16 / 10;
+      min-height: 180px;
+      overflow: hidden;
+      background: var(--tgs-brand);
+      isolation: isolate;
+    }
+    .tgs-card-media .tgs-hero-img { position: absolute; inset: 0; }
+    .tgs-card-media .tgs-hero-mark { width: 200px; height: 200px; right: -30px; top: -30px; }
+    .tgs-card-title { position: relative; padding: 16px 18px; color: #fff; animation: tgs-rise 640ms cubic-bezier(.22,1,.36,1) both; }
+    .tgs-card-name {
+      margin: 0;
+      font-size: clamp(22px, 5cqi, 30px); font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1.05;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.35);
+      overflow-wrap: anywhere;
+    }
+    .tgs-card-plain { padding: 18px 18px 0; }
+    .tgs-card-plain .tgs-hero-eyebrow { color: var(--tgs-muted); }
+    .tgs-card-plain .tgs-card-name { color: var(--tgs-text); text-shadow: none; }
+    .tgs-card-body { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px 18px; }
+    .tgs-card-tagline { margin: 0; font-size: 14px; line-height: 1.45; color: var(--tgs-sub); }
+    .tgs-card-body .tgs-section { margin: 0; }
+    .tgs-card-body .tgs-section-facts { margin-top: 6px; }
+    .tgs-card-body .tgs-facts { box-shadow: none; }
+    .tgs-card-body .tgs-cta { padding: 18px 20px; }
+    @media (prefers-reduced-motion: reduce) {
+      .tgs-card-title { animation: none; }
+    }
   `;
 
   /* ------------------------------------------------------------------
@@ -1431,7 +1590,8 @@
       const base = {
         widgetId: null,
         theme: 'light',          // 'light' | 'dark'
-        layout: 'auto',          // 'auto' (side column once the widget is 900px wide) | 'stacked'
+        layout: 'auto',          // 'auto' (side column once the widget is 900px wide) | 'stacked' | 'strip' | 'card'
+        heroImageUrl: '',        // the agent's own photo; wins over the Luna image when set
         brandColor: '#1B2B5B',
         accentColor: '#00B4D8',
         radius: 16,
@@ -1480,7 +1640,8 @@
       merged.sections = Object.assign({}, base.sections, c.sections || {});
       merged.cta = Object.assign({}, base.cta, c.cta || {});
       merged.autoDetect = Object.assign({}, base.autoDetect, c.autoDetect || {});
-      merged.layout = merged.layout === 'stacked' ? 'stacked' : 'auto';
+      merged.layout = (merged.layout === 'stacked' || merged.layout === 'strip' || merged.layout === 'card') ? merged.layout : 'auto';
+      merged.heroImageUrl = typeof merged.heroImageUrl === 'string' ? merged.heroImageUrl.trim() : '';
       return merged;
     }
 
@@ -1499,7 +1660,7 @@
       this.root = document.createElement('div');
       this.root.className = 'tgs-root';
       this.root.setAttribute('data-theme', this.c.theme === 'dark' ? 'dark' : 'light');
-      this.root.setAttribute('data-layout', this.c.layout === 'stacked' ? 'stacked' : 'auto');
+      this.root.setAttribute('data-layout', this.c.layout);
       this._applyThemeVars();
       this.root.innerHTML =
         '<div class="tgs-loading">' +
@@ -1522,6 +1683,7 @@
       if (this.c.accentColor) {
         // Derive soft tints
         r.style.setProperty('--tgs-accent-soft', hexToRgba(this.c.accentColor, 0.14));
+        r.style.setProperty('--tgs-accent-tint', hexToRgba(this.c.accentColor, 0.38));
         r.style.setProperty('--tgs-season-best', this.c.accentColor);
       }
       if (this.c.brandColor) {
@@ -1592,6 +1754,7 @@
         this._renderContent();
       } catch (err) {
         console.error('[TG Spotlight] Failed to load destination:', err);
+        tgReportFailure(this.c.widgetId, 'Destination content unavailable', err);
         this._renderError();
       } finally {
         if (timer) clearTimeout(timer);
@@ -1620,6 +1783,10 @@
     _renderContent() {
       const d = this._destination;
       if (!d || !d.name) return this._renderNotFound();
+
+      // Compact layouts render their own composition and skip the full guide.
+      if (this.c.layout === 'strip') { this.root.innerHTML = this._renderStrip(d); this._bind(); this._reportLoad(); return; }
+      if (this.c.layout === 'card')  { this.root.innerHTML = this._renderCard(d);  this._bind(); this._reportLoad(); return; }
 
       const s = this.c.sections;
       const html = [];
@@ -1662,13 +1829,33 @@
 
       this.root.innerHTML = html.filter(Boolean).join('');
       this._bind();
+      this._reportLoad();
+    }
+
+    // One heartbeat per real embed (a widget id from data-tg-id), never for an
+    // editor preview or an inline-config demo. Counts as a view on the dashboard.
+    _reportLoad() {
+      if (this._reported || !this.c.widgetId || this.c.destinationData) return;
+      this._reported = true;
+      tgReport('load', this.c.widgetId);
+    }
+
+    // The agent's own photo (config.heroImageUrl) wins over the Luna image, and
+    // the Luna credit line only shows when the Luna image is the one on screen.
+    _heroImage(d) {
+      const own = safeUrl(this.c.heroImageUrl);
+      const luna = (d.images && d.images[0]) ? safeUrl(d.images[0]) : '';
+      const url = own || luna;
+      const attribution = (!own && this.c.showAttribution && d.attributions && d.attributions[0])
+        ? esc(d.attributions[0]) : '';
+      return { url, attribution };
     }
 
     _renderHero(d, tagChips, hasRail) {
       if (!d.name) return '';
-      const imgUrl = (d.images && d.images[0]) ? safeUrl(d.images[0]) : '';
-      const attribution = (this.c.showAttribution && d.attributions && d.attributions[0])
-        ? esc(d.attributions[0]) : '';
+      const heroImg = this._heroImage(d);
+      const imgUrl = heroImg.url;
+      const attribution = heroImg.attribution;
       const tagline = d.tagline || d.heroIntro || '';
       const levelLabel = d.level === 'country' ? this.t('levelCountry') : d.level === 'city' ? this.t('levelCity') : this.t('levelResort');
       // Compose eyebrow: if a Region is set on the destination, show "Country · Region".
@@ -1681,7 +1868,7 @@
           '<div class="tgs-hero' + (attribution ? ' has-credit' : '') + '">' +
             (imgUrl
               ? '<img class="tgs-hero-img" src="' + esc(imgUrl) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="eager" fetchpriority="high" decoding="async" />'
-              : '<div class="tgs-hero-img" style="background:linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent));"></div>') +
+              : this._heroFallback(260)) +
             '<div class="tgs-hero-scrim" aria-hidden="true"></div>' +
             '<div class="tgs-hero-content">' +
               '<span class="tgs-hero-eyebrow">' + esc(eyebrowText) + '</span>' +
@@ -1692,6 +1879,100 @@
             (attribution ? '<div class="tgs-hero-attribution">' + attribution + '</div>' : '') +
           '</div>' +
         '</section>'
+      );
+    }
+
+    // No photo: a brand gradient with one accent glow and a compass glyph as a
+    // watermark, so the hero still reads as a place rather than a banner.
+    _heroFallback(markSize) {
+      return '<div class="tgs-hero-img tgs-hero-img--fallback"></div>' +
+        '<span class="tgs-hero-mark" aria-hidden="true">' + icon('compass', markSize || 260) + '</span>';
+    }
+
+    _levelEyebrow(d) {
+      const levelLabel = d.level === 'country' ? this.t('levelCountry') : d.level === 'city' ? this.t('levelCity') : this.t('levelResort');
+      return d.region ? levelLabel + ' · ' + d.region : levelLabel;
+    }
+
+    // Best months plus the temperature range in one line: the climate chart's
+    // hook, kept alive in the compact layouts where the full chart does not fit.
+    _bestTimeLine(d) {
+      const c = d.climate || {};
+      if (!Array.isArray(c.temps) || c.temps.length !== 12 || !Array.isArray(c.season) || c.season.length !== 12) return '';
+      const unit = this._tempUnit || (this.c.temperatureUnit === 'F' ? 'F' : 'C');
+      const conv = (n) => Math.round(unit === 'F' ? n * 9 / 5 + 32 : n);
+      const nums = c.temps.map(Number).filter(Number.isFinite);
+      const best = this.c.showBestTimeCallout !== false ? formatBestMonths(c.season, this.t) : '';
+      const range = nums.length
+        ? this.t('monthRange', { from: conv(Math.min.apply(null, nums)) + '°', to: conv(Math.max.apply(null, nums)) + '°' + unit })
+        : '';
+      if (!best && !range) return '';
+      return '<p class="tgs-bestline">' +
+        (best ? '<span class="tgs-bestline-pill">' + icon('sun', 13) + '<span>' + esc(this.t('bestTimePrefix', { months: best })) + '</span></span>' : '') +
+        (range ? '<span class="tgs-bestline-range">' + esc(range) + '</span>' : '') +
+      '</p>';
+    }
+
+    // Essentials strip: sits under the agent's own hero. Honours the tags,
+    // climate (as the best-months line), facts, planning and cta toggles; the
+    // hero, highlights, events and paired sections are not part of this layout.
+    _renderStrip(d) {
+      const s = this.c.sections;
+      const tagline = d.tagline || d.heroIntro || '';
+      const chips = s.tags ? this._renderTagChips(d) : '';
+      const best = s.climate ? this._bestTimeLine(d) : '';
+      return (
+        '<div class="tgs-strip">' +
+          '<header class="tgs-strip-head">' +
+            '<div class="tgs-strip-id">' +
+              '<span class="tgs-strip-eyebrow">' + esc(this._levelEyebrow(d)) + '</span>' +
+              '<h2 class="tgs-strip-name">' + esc(d.name) + '</h2>' +
+              (tagline ? '<p class="tgs-strip-tagline">' + esc(tagline) + '</p>' : '') +
+            '</div>' +
+            ((chips || best) ? '<div class="tgs-strip-meta">' + best + chips + '</div>' : '') +
+          '</header>' +
+          (s.facts ? this._renderFacts(d) : '') +
+          (s.planning ? this._renderPlanning(d) : '') +
+          (s.cta ? this._renderCta(d) : '') +
+        '</div>'
+      );
+    }
+
+    // Card: a compact vertical card for sidebars and grids. Honours the hero
+    // (photo), tags, climate (best months), facts, planning and cta toggles.
+    _renderCard(d) {
+      const s = this.c.sections;
+      const tagline = d.tagline || d.heroIntro || '';
+      const eyebrow = '<span class="tgs-hero-eyebrow">' + esc(this._levelEyebrow(d)) + '</span>';
+      const name = '<h2 class="tgs-card-name">' + esc(d.name) + '</h2>';
+      let media;
+      if (s.hero) {
+        const heroImg = this._heroImage(d);
+        const altText = d.name + (d.tagline ? ' — ' + d.tagline : '');
+        media =
+          '<div class="tgs-card-media' + (heroImg.attribution ? ' has-credit' : '') + '">' +
+            (heroImg.url
+              ? '<img class="tgs-hero-img" src="' + esc(heroImg.url) + '" alt="' + esc(altText) + '" data-fb-hero="1" loading="lazy" decoding="async" />'
+              : this._heroFallback(200)) +
+            '<div class="tgs-hero-scrim" aria-hidden="true"></div>' +
+            '<div class="tgs-card-title">' + eyebrow + name + '</div>' +
+            (heroImg.attribution ? '<div class="tgs-hero-attribution">' + heroImg.attribution + '</div>' : '') +
+          '</div>';
+      } else {
+        media = '<div class="tgs-card-plain">' + eyebrow + name + '</div>';
+      }
+      return (
+        '<article class="tgs-card">' +
+          media +
+          '<div class="tgs-card-body">' +
+            (tagline ? '<p class="tgs-card-tagline">' + esc(tagline) + '</p>' : '') +
+            (s.climate ? this._bestTimeLine(d) : '') +
+            (s.tags ? this._renderTagChips(d) : '') +
+            (s.facts ? this._renderFacts(d) : '') +
+            (s.planning ? this._renderPlanning(d) : '') +
+            (s.cta ? this._renderCta(d) : '') +
+          '</div>' +
+        '</article>'
       );
     }
 
@@ -2144,8 +2425,7 @@
       if (heroImg) {
         heroImg.addEventListener('error', () => {
           const div = document.createElement('div');
-          div.className = 'tgs-hero-img';
-          div.style.background = 'linear-gradient(135deg,var(--tgs-brand),var(--tgs-accent))';
+          div.className = 'tgs-hero-img tgs-hero-img--fallback';
           if (heroImg.parentNode) heroImg.parentNode.replaceChild(div, heroImg);
         }, { once: true });
       }
