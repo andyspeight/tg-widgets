@@ -225,26 +225,30 @@ https://framer.com/projects/Scary-Wealth--vna1Dww9wfns4nJSst1v-dfckl?node=JblnZB
 
 Path `/roadmap`, title "What we've built, and what's next", on the shared
 "Travelgenix Layout" template, with Desktop, Tablet and Phone breakpoints and
-screenshots checked at all three.
+screenshots checked at all three after every pass.
 
 1. Hero on the teal radial glow (the same fill as the Booking Widgets hero):
    the site's tri-colour bar, the Display heading, a two-line Body intro and
-   three Travelgenix Chips carrying the static numbers ("April to September
-   2026", "2,648 updates shipped", "61 embeddable widgets"). No eyebrow badge,
-   no count-up, no photo.
-2. "Six months, month by month" on white: one continuous rail with a dot per
-   node. The first node is "January to March 2026" with a HOLLOW dot and a
-   dashed card labelled "Note for Andy, remove before this goes live", saying
-   the quarter is empty on purpose. Then April to September, six items each
-   (five for September), each a check mark and one line of Body copy. Items
-   were picked from the month lists above and one Luna item was added per
-   month where the Airtable log had one (Luna Chat speed release in May, Luna
-   Travel App in June, Booking Assist in July).
-3. "What's next" on the light gradient band: three lanes, Now (7 cards), Next
-   (8 cards) and Later (5 cards). Each card is a white tile with the product
-   name in small caps navy, the capability in bold and one line on why it
-   matters. The lanes container carries the page's ONE scroll reveal (fade
-   and rise on entering view); nothing else on the page animates.
+   a white stat card with three large static numbers ("6 months of shipping",
+   "2,648 updates shipped", "61 embeddable widgets"). No eyebrow badge, no
+   count-up, no photo. On Phone the card stacks the three numbers.
+2. "Six months, month by month" on white: one continuous rail with a navy
+   medallion per node carrying a Lucide icon (Hourglass, Rocket, Users,
+   Calendar Days, Globe, Sparkles, Ticket). The first node is "January to
+   March 2026" with a hollow medallion and a dashed card labelled "Note for
+   Andy, remove before this goes live", saying the quarter is empty on
+   purpose. Then April to September, each a white card with a headline launch
+   in bold (The widget suite is born / Client accounts and the client portal /
+   The Appointment Scheduler / Travelgenix Sites / The site builder / Event
+   Tickets go live), a one-line blurb, a divider and four to six supporting
+   items with check marks in two columns (one column on Phone).
+3. "What's next" on the light gradient band: three lanes headed by a pill
+   (Now in navy, Next in teal tint, Later outlined) and a one-line meaning.
+   Now has 7 cards, Next 8 and Later 5. Each card is a white tile with a
+   product icon in a teal-tinted square, the product name in small caps navy,
+   the capability in bold and one line on why it matters. Cards lift 3px
+   with a deeper shadow on hover. The lanes container carries the page's ONE
+   scroll reveal (fade and rise on entering view); nothing else animates.
 4. Closing call to action on the second glow: "Want to see any of this
    running?", one line, the Travelgenix Button in its Primary variant to
    /contact, and a "See pricing" text link using the site's Navigation Link
@@ -252,16 +256,21 @@ screenshots checked at all three.
 
 Tablet: sections drop to 24px side padding, the three lanes stack and each
 lane's cards become a two-column grid with rows that fit their content.
-Phone: 20px side padding, the rail moves in, everything single column, the
-chips and the CTA actions wrap.
+Phone: 20px side padding, the rail moves in and the medallions shrink,
+everything single column, the stat card and the CTA actions stack or wrap.
 
 ### Node ids for the next session
 
 Page `JblnZB_PD`. Breakpoints Desktop `dj9AZu4uB`, Tablet `wDPei4RnY`,
 Phone `LKNmhTH7h` (replica descendants are the breakpoint id followed by the
-desktop id). Sections: Hero `K2lxtp5u5`, Timeline `aFg_kTUuv` (list
-`WijLReGZu`, Q1 note row `VG9UDo14M`), Roadmap `pl4u5N4a2` (lanes
-`Tiqqt69cj`), Closing CTA `xut44Oqjg`. Hero chips `LCFdEaoNX`.
+desktop id). Sections: Hero `K2lxtp5u5` (stat card `noCscvzV5`), Timeline
+`aFg_kTUuv` (rail list `WijLReGZu`; Q1 note row `EUEm7apXA`, medallion
+`CrSt7HhWQ`; month rows April `egxBNTa5Y`, May `OAwtpba0y`, June
+`bZy2gANM8`, July `OfCz4AtNz`, August `wZxCOm2xY`, September `WoCfe2lng`;
+month cards `Y67zM0PYp`, `MvqVSKDoQ`, `OIqPfcZXh`, `NlYbzUhJV`,
+`MldJNtNDk`, `MN158hOzJ`), Roadmap `pl4u5N4a2` (lanes `Tiqqt69cj`; pills
+`oOswmJklt`, `hTKyZfB8o`, `ANaATYAvm`; card containers `cUHo79m5m`,
+`pFu6prN6W`, `xoXuxp4rI`), Closing CTA `xut44Oqjg`.
 
 ### Left out and why
 
@@ -282,6 +291,11 @@ desktop id). Sections: Hero `K2lxtp5u5`, Timeline `aFg_kTUuv` (list
   the Spotlight redesign each have their own Now card.
 - Copy uses straight apostrophes as typed; Framer renders them as
   typographic apostrophes, which matches the rest of the site.
+- Second pass on Andy's "make it more visually appealing": the chips became
+  the stat card, the flat check lists became month cards with a headline and
+  two columns, the dots became icon medallions, and the roadmap gained lane
+  pills, card icons and hover. Same tokens, presets and components; nothing
+  new was introduced.
 
 ### Still open for Andy
 
@@ -320,6 +334,11 @@ desktop id). Sections: Hero `K2lxtp5u5`, Timeline `aFg_kTUuv` (list
   overlap; the screenshots showed the sections stacked correctly.
 - `height="1fr"` cannot be set on a replica (breakpoint) descendant; use
   `height="100%"` for a grid child that should fill its row.
+- Inline text styles (fontSize, fontWeight, lineHeight) are IGNORED while a
+  text style preset is set on the node, and the command reports an error.
+  Detach first with `textStylePreset="null"` in its own command (this inlines
+  the preset's styles), then set the overrides. Colour overrides on a preset
+  node are allowed.
 - A `CountUp` code component now exists in the project (CountUp.tsx), so the
   July note that count-ups need a code component that does not exist is out
   of date. The chips stayed static anyway, per the brief.
