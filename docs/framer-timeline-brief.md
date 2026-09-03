@@ -223,61 +223,98 @@ https://framer.com/projects/Scary-Wealth--vna1Dww9wfns4nJSst1v-dfckl?node=JblnZB
 
 ### What is on the page
 
-Path `/roadmap`, title "What we've been working on, and what's coming soon"
-(Andy's change of direction on 3 Sep: recent work and what is coming, nothing
-before the start of May). On the shared "Travelgenix Layout" template, with
-Desktop, Tablet and Phone breakpoints, screenshots checked at all three after
-every pass.
+Path `/roadmap`, title "What we've been working on, and what's coming soon".
+Andy's direction on 3 Sep: recent work and what is coming, nothing before the
+start of May, mockups for some products, and HIS list of what shipped each
+month (the git-derived month lists above are superseded for the page). On the
+shared "Travelgenix Layout" template, with Desktop, Tablet and Phone
+breakpoints, screenshots checked at all three after every pass.
 
 1. Hero on the teal radial glow: the site's tri-colour bar, the Display
-   heading, a two-line Body intro and a white stat card with three large
-   static numbers ("5 months of shipping", "2,212 updates shipped", "61
-   embeddable widgets"; the commit count is from full git history, 1 May to
-   3 Sep). No eyebrow badge, no count-up. On Phone the card stacks.
+   heading, a two-line Body intro and a white stat card ("5 months of
+   shipping", "2,212 updates shipped", "61 embeddable widgets"). No eyebrow
+   badge, no count-up. On Phone the card stacks.
 2. "Since May, month by month" on white: one continuous rail with a navy
-   medallion per month carrying a Lucide icon (Users, Calendar Days, Globe,
-   Sparkles, Ticket). Five month cards, May to September. Each card is a
-   white tile split in two on Desktop: copy on the left (a headline launch
-   in bold, a one-line blurb, a divider, four to six check-marked items in
-   one column) and a browser-framed MOCKUP on the right (400px wide, 4:3, a
-   real screenshot). On Tablet and Phone the mockup drops below the copy at
-   full width. The January to March note and the April node are gone.
-   Headlines and mockups: May "Client accounts and the client portal" (the
-   widget catalogue at tg-widgets.vercel.app); June "The Appointment
-   Scheduler" (demo-appointment); July "Travelgenix Sites"
-   (coastwise.travelgenixsites.com); August "Group Trips and Escorted Tours"
-   (demo-trips-page, the Santorini retreat), with the site builder in the
-   blurb; September "Event Tickets go live" (demo-venueguide, Wembley).
+   medallion per month carrying a Lucide icon (Layers, Calendar Days, Message
+   Circle, Briefcase, Smartphone). Five month cards, May to September, each a
+   white tile split in two on Desktop: copy on the left (headline launch in
+   bold, one-line blurb, divider, four to six check-marked items) and a
+   browser-framed mockup on the right (400px, 4:3, a real screenshot) with a
+   one-line caption under it naming what it shows. On Tablet and Phone the
+   mockup drops below the copy at full width.
+   Content, from Andy's list of 3 Sep, with the extra lines drawn from the
+   repo marked (repo):
+   - May: "The new widget suite: 50 widgets built for travel". Mockup: the
+     widget catalogue at tg-widgets.vercel.app.
+   - June: "New booking flow widgets" (Andy will send screenshots; the blurb
+     is a placeholder until then). Items: the Appointment Scheduler
+     (Calendly-style), four premium supplier integrations (Travelpack
+     Holidays, Major Travel Holidays, Atlas low-cost flights, Paxium
+     accommodation), then (repo) Enquiry Pro and Special Offers, pay a
+     balance and cancel online, multi-language. Mockup: the Appointment
+     Scheduler demo, to be swapped for the booking flow screenshots.
+   - July: "Luna Chat" (copy from the live product page). Items: Quick Quote,
+     Sports Events 365 (premium supplier for sports and event tickets), the
+     new Luna Support platform, then (repo) Cookie Consent and Smart Section,
+     Zoom for video appointments. Mockup: the Luna Chat panel on the Coast &
+     Co client site, from the live product page.
+   - August: "The Contracting Engine" (copy from the live Luna Contracting
+     page). Items: more widgets (Prayer Times, Group Trips, Escorted Tour),
+     the new My Account widget, My Booking rebuilt with balance reminders,
+     the Deal Map widget, the new Travelgenix website. Mockup: the Luna
+     Contracting "Contracted rates" screen from the live product page.
+   - September: "The Luna Travel App" (copy from the live product page).
+     Items: a new search box widget, Luna Marketing, seven new sports and
+     event booking widgets, Luna Trips group booking (Stripe, "we never hold
+     your money"). Mockup: the Luna Travel App hero from the live page.
 3. "What's coming soon" on the light gradient band: three lanes headed by a
-   pill (Now in navy, Next in teal tint, Later outlined) and a one-line
-   meaning. Now has 7 cards, Next 8 and Later 5. Each card is a white tile
-   with a product icon in a teal-tinted square, the product name in small
-   caps navy, the capability in bold and one line on why it matters. Cards
-   lift 3px on hover. The lanes container carries the page's ONE scroll
-   reveal; nothing else animates.
+   pill (Now in navy, Next in teal tint, Later outlined). Now 7 cards, Next 8,
+   Later 5, each with a product icon, product name in small caps navy, the
+   capability in bold and one line on why it matters. Cards lift on hover.
+   The lanes container carries the page's ONE scroll reveal. Andy has NOT yet
+   reviewed this section; he said the coming soon items come after the
+   timeline is agreed.
 4. Closing call to action on the second glow: "Want to see any of this
-   running?", one line, the Travelgenix Button in its Primary variant to
-   /contact, and a "See pricing" text link using the site's Navigation Link
-   preset.
+   running?", one line, the Travelgenix Button (Primary) to /contact and a
+   "See pricing" text link using the Navigation Link preset.
 
-The five mockup screenshots were taken by Framer's own screenshot service
-(a `readProject` screenshot query with a `url`), cropped to 1200x900 here,
-and uploaded to the project as image assets named roadmap-may.jpg to
-roadmap-sep.jpg with alt text. They are real pages as they rendered on 3 Sep;
-re-shoot them when the products change.
+Mockup screenshots were taken by Framer's own screenshot service (a
+`readProject` screenshot query with a `url`), cropped to 1200x900 here and
+uploaded as image assets: roadmap-may.jpg (widget catalogue), roadmap-jun.jpg
+(Appointment Scheduler demo), roadmap-jul-v2.jpg (Luna Chat, travelgenix.io
+luna-chat page from y=700), roadmap-aug-v2.jpg (Luna Contracting page from
+y=560), roadmap-sep.jpg (Luna Travel App page from y=150). Re-shoot when the
+products change. Other captures that rendered well and are not used: the
+travelgenix.io home hero, the Quick Quote, Luna Marketing and Trips pages,
+the World Map demo, the venue guide, the Group Trips page and Coastwise on
+Sites. Candidates that did NOT work: demo-tickets (fixtures still loading),
+kuoni / sandpiper / demo-travel tenant sites (404).
 
 ### Node ids for the next session
 
 Page `JblnZB_PD`. Breakpoints Desktop `dj9AZu4uB`, Tablet `wDPei4RnY`,
 Phone `LKNmhTH7h` (replica descendants are the breakpoint id followed by the
 desktop id). Sections: Hero `K2lxtp5u5` (stat card `noCscvzV5`), Timeline
-`aFg_kTUuv` (rail list `WijLReGZu`, maxWidth 1040; month rows May
-`OAwtpba0y`, June `bZy2gANM8`, July `OfCz4AtNz`, August `wZxCOm2xY`,
-September `WoCfe2lng`; month cards `MvqVSKDoQ`, `OIqPfcZXh`, `NlYbzUhJV`,
-`MldJNtNDk`, `MN158hOzJ`, each holding a "Copy" column and a "Mockup"
-frame), Roadmap `pl4u5N4a2` (lanes `Tiqqt69cj`; pills `oOswmJklt`,
-`hTKyZfB8o`, `ANaATYAvm`; card containers `cUHo79m5m`, `pFu6prN6W`,
-`xoXuxp4rI`), Closing CTA `xut44Oqjg`.
+`aFg_kTUuv` (rail list `WijLReGZu`, maxWidth 1040), Roadmap `pl4u5N4a2`
+(lanes `Tiqqt69cj`; pills `oOswmJklt`, `hTKyZfB8o`, `ANaATYAvm`; card
+containers `cUHo79m5m`, `pFu6prN6W`, `xoXuxp4rI`), Closing CTA `xut44Oqjg`.
+
+Month rows / cards / headline / blurb / items list / screenshot frame /
+caption:
+- May `bV5lgJfe5` / `goJjpG46m` / `DnO7ZoCLr` / `k7NcYMsfO` / `h_VgawMmm` /
+  `dIqrVXVMb` / `alebZdpWe`
+- June `k9HCs5C4g` / `DSfmqUvRR` / `Ele5F8zFv` / `EXJBKVxba` / `kIFa2Z5o7` /
+  `dDmIS9Cxx` / `XDvQ3NC7_`
+- July `ZupggU6Ju` / `CF3JSOWuq` / `amegIw7X0` / `Q5O3GEIzy` / `yJuQKSZ7O` /
+  `IJyG1ihFN` / `x5TPgS4EF`
+- August `RVNepK6hf` / `tnRLUCMD0` / `zA7GZmpzK` / `lBnocWNcU` / `SbBHtRWAI` /
+  `Kml0koXVo` / `YC6IqFGgc`
+- September `iEOxpFEh4` / `KkzOSHkiO` / `BamTJ55Fx` / `Aakbt4Vbm` /
+  `VlRywZZPl` / `NY1erpsJr` / `BdklaNtj8`
+To swap a mockup: upload the new image and `SET <screenshot frame id>
+fill="<asset url>"`, then SET the caption text (re-apply
+`textStylePreset="Small" textAlignment="center"` afterwards, see the
+SET-text gotcha below). To change copy use `framer.agent.replaceText`.
 
 ### Left out and why
 
@@ -306,6 +343,13 @@ frame), Roadmap `pl4u5N4a2` (lanes `Tiqqt69cj`; pills `oOswmJklt`,
 
 ### Still open for Andy
 
+- June's booking flow widgets: Andy is sending screenshots; swap the June
+  mockup and tighten the blurb when they arrive.
+- Andy said "there may be more" for the timeline, and the coming soon
+  section is still to be reviewed with him.
+- Andy's list says 50 widgets in May; the hero stat says 61 today (60
+  widget files plus the original pricing widget). Both can be true; confirm
+  which number he wants where.
 - Whether "2,212 updates shipped" is the number he wants on a public page
   (it is the commit count since 1 May), and whether the stat card stays.
 - The page is NOT a draft, so merging the branch and publishing would put it
@@ -345,6 +389,12 @@ frame), Roadmap `pl4u5N4a2` (lanes `Tiqqt69cj`; pills `oOswmJklt`,
   Detach first with `textStylePreset="null"` in its own command (this inlines
   the preset's styles), then set the overrides. Colour overrides on a preset
   node are allowed.
+- The CLI relay can restart underneath a long session ("Session 1 is invalid
+  or has expired"). `state` (including any temp-to-canonical id map) is lost
+  with it. Run `session new` again, then `switchBranch("qze2h9phe")` and
+  `joinBranch` if needed, and confirm with `getActiveBranch()` before editing:
+  a fresh session comes up on main. Keep canonical ids in this file, not only
+  in `state`.
 - SETTING `text` ON A RICH TEXT NODE RESETS ITS STYLES to the defaults (16px,
   weight 400, black, start-aligned) and drops its preset. For a copy change
   use `framer.agent.replaceText`, or re-apply the preset and inline styles in
