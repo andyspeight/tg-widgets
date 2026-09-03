@@ -425,9 +425,10 @@ const WIDGETS = [
   },
   {
     id: 'spotlight',
+    reportsViews: true,
     name: 'Destination Spotlight',
     airtableType: 'Destination Spotlight',
-    description: 'Editorial single-destination showcase with climate chart, highlights, quick facts and branded CTA. Live from the Travelgenix destination content database — updates automatically as content is refreshed.',
+    description: 'Editorial destination showcase in three layouts: the full guide with climate chart and highlights, an essentials strip to sit under your own hero, and a card for sidebars. Live from the Travelgenix destination content database and updated as content is refreshed.',
     category: 'Content',
     status: 'live',
     icon: {viewBox:'0 0 24 24', paths:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'},
@@ -440,6 +441,7 @@ const WIDGETS = [
   },
   {
     id: 'airport',
+    reportsViews: true,
     name: 'Airport Spotlight',
     airtableType: 'Airport Spotlight',
     description: 'Showcase a UK origin airport or an overseas destination airport. Role-aware single widget with hero, terminals, transfer info, map and CTA. Driven by the Destination Content database — updates automatically as content is refreshed.',
@@ -455,6 +457,7 @@ const WIDGETS = [
   },
   {
     id: 'attraction',
+    reportsViews: true,
     name: 'Attraction Spotlight',
     airtableType: 'Attraction Spotlight',
     description: 'Showcase a theme park, resort complex, water park, aquarium or cultural attraction. Single editorial widget with hero, quick facts, star attractions, family and thrill guides, tickets, getting there, where to stay and a brandable CTA. Driven by the Theme Parks and Attractions database — updates automatically as content is refreshed.',
@@ -710,6 +713,7 @@ const WIDGETS = [
   },
   {
     id: 'form',
+    reportsViews: true,
     name: 'Form',
     airtableType: 'Form',
     description: 'A general-purpose form that asks one question at a time, the way Typeform does. Thirteen question types (text, choice, dropdown, rating, opinion scale, date, consent), keyboard-first answering, a welcome screen and a branded thank-you. Answers route to your inbox, a Google Sheet, email, a webhook or your mailing list.',
@@ -740,6 +744,7 @@ const WIDGETS = [
   },
   {
     id: 'enquirypro',
+    reportsViews: true,
     name: 'Enquiry Pro',
     airtableType: 'Enquiry Pro',
     description: 'A best-in-class multi-step travel enquiry form built for conversion — trip-type tiles, a destination picker wired to your live destination database with free-text fallback, flexible dates, travellers with child ages, budget slider, board basis and a flights toggle. Branded, mobile-first, with a warm guided flow that lands every lead in the same inbox as your Enquiry Form.',
@@ -980,6 +985,7 @@ const WIDGETS = [
   },
   {
     id: 'offers',
+    reportsViews: true,
     name: 'Travel Offers',
     airtableType: 'Travel Offers',
     description: 'Live offer cards from your Travelify cache — accommodation, flights, dynamic packages and operator package holidays. Client-side dedupe with seven strategies, 15-minute browser cache, and full filter control.',
@@ -1055,6 +1061,7 @@ const WIDGETS = [
   },
   {
     id: 'worldmap',
+    reportsViews: true,
     name: 'World Map',
     airtableType: 'World Map',
     description: 'An interactive map of your live holiday offers — price pins by country, drill down to resorts, and an immersive fullscreen explore mode with price and rating filters. Curate which destinations show, set your brand colours, and embed anywhere.',
@@ -1145,6 +1152,7 @@ const WIDGETS = [
   },
   {
     id: 'newsletter',
+    reportsViews: true,
     name: 'Newsletter Signup',
     airtableType: 'Newsletter Signup',
     description: 'Email signup widget with five layouts — card, inline form, popup modal, sticky footer bar, vertical side tab. Pushes subscribers straight to Mailchimp, Brevo, MailerLite, Klaviyo or Constant Contact, plus webhook and Google Sheets. GDPR-friendly consent, dark mode, full brand customisation. The fastest way to grow your mailing list.',
@@ -1311,6 +1319,9 @@ async function renderMyWidgets(opts = {}) {
 
   grid.innerHTML = groups.map(({ type, widgets, reg }) => {
     const n = widgets.length;
+    const tv = widgets.reduce((s, w) => s + (w.views || 0), 0);
+    const mv = widgets.reduce((s, w) => s + (w.viewsMonth || 0), 0);
+    const sub = (reg.reportsViews && tv) ? `${tv.toLocaleString()} view${tv === 1 ? '' : 's'} · ${mv.toLocaleString()} this month` : 'Click to view or edit';
     return `<div class="type-card" onclick="openTypeModal('${esc(type)}')">
       <div class="type-card-visual" style="background:linear-gradient(135deg, ${reg.color}22 0%, ${reg.color}10 100%)">
         <svg viewBox="${reg.icon.viewBox}" style="stroke:${reg.color}">${reg.icon.paths}</svg>
@@ -1318,7 +1329,7 @@ async function renderMyWidgets(opts = {}) {
       </div>
       <div class="type-card-body">
         <div class="type-card-name">${esc(reg.name)}</div>
-        <div class="type-card-sub">Click to view or edit</div>
+        <div class="type-card-sub">${sub}</div>
       </div>
     </div>`;
   }).join('');
@@ -1346,6 +1357,7 @@ function openTypeModal(airtableType) {
           <span class="type-modal-item-id">${esc(w.widgetId)}</span>
           <span><span class="type-modal-item-dot" style="background:${w.status==='Active'?'var(--ok)':'var(--warn)'}"></span> ${esc(w.status || 'Draft')}</span>
           ${w.updated ? `<span>Updated ${esc(w.updated)}</span>` : ''}
+          ${reg.reportsViews ? `<span title="Counted from real loads on your site">${w.views ? `${(w.views || 0).toLocaleString()} view${w.views === 1 ? '' : 's'}${w.viewsMonth ? ` · ${w.viewsMonth.toLocaleString()} this month` : ''}` : 'No views yet'}</span>` : ''}
         </div>
       </div>
       ${isEnquiryForm ? `<a class="type-modal-item-btn type-modal-item-btn-secondary" href="/inbox-enquiry" title="View submissions in your inbox">

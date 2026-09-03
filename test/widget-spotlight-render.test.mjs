@@ -120,12 +120,19 @@ assert(html.includes('UK visa') && html.includes('Not required'), 'visa status c
 assert(html.includes('tgs-plan-detail') && html.includes('Visa and entry'), 'visa detail disclosure present');
 assert(html.includes('Health and vaccinations') && html.includes('Tap water is generally safe'), 'health detail disclosure present');
 
-// Ordering: facts -> planning -> highlights
+// Ordering (v1.6 layout): the quick-facts rail sits under the hero, then the
+// body's main column (climate -> highlights -> events) and its side column
+// (planning -> paired -> CTA). Planning therefore follows highlights and events
+// in the DOM, which is also the phone reading order: the practical "plan it"
+// reads close the page together, right above the CTA.
 const iFacts = html.indexOf('tgs-facts-heading');
 const iPlan = html.indexOf('tgs-planning-heading');
 const iHigh = html.indexOf('tgs-highlights-heading');
+const iEv = html.indexOf('tgs-events-heading');
 assert(iFacts > -1 && iPlan > iFacts, 'planning comes after quick facts');
-assert(iHigh > -1 && iPlan < iHigh, 'planning comes before highlights');
+assert(iHigh > -1 && iEv > iHigh && iPlan > iEv, 'planning opens the side column, after highlights and events');
+assert(html.includes('class="tgs-main"') && html.includes('class="tgs-side"'), 'body renders a main and a side column');
+assert(html.indexOf('class="tgs-side"') > html.indexOf('class="tgs-main"'), 'side column follows the main column');
 
 // ---- Case 2: empty planning hides the section ---------------------------
 console.log('Case 2: planning empty');

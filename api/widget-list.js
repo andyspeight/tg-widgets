@@ -44,6 +44,8 @@
  * Security: requires a valid session; never trusts a client-supplied clientId
  * or email from the query string. All formula inputs are validated/sanitised.
  */
+import { configured as redisConfigured, mget } from './_redis.js';
+import { viewKeys } from './_lib/widget-views.js';
 import { requireAuth, sanitiseForFormula, setCors, applyRateLimit, RATE_LIMITS } from './_auth.js';
 import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
@@ -250,8 +252,15 @@ export default async function handler(req, res) {
       type: r.fields.WidgetType || 'Unknown',
       status: r.fields.Status || 'Draft',
       views: r.fields.Views || 0,
+      viewsMonth: 0,
       updated: r.fields.UpdatedAt ? new Date(r.fields.UpdatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '',
     }));
+
+    // Real view counts from the widget-log load heartbeat (Redis): all time
+    // and this month. Nothing ever wrote the Airtable Views field, so the
+    // counter is the source; a value hand-entered in Airtable still shows if
+    // it is larger. Best effort: a Redis blip leaves the list intact.
+    try { await attachViews(widgets); } catch (e) { console.error('[widget-list] views', e.message); }
 
     res.setHeader('Cache-Control', 'private, max-age=10');
     return res.status(200).json(widgets);
@@ -259,6 +268,46 @@ export default async function handler(req, res) {
     console.error('[widget-list]', err.message);
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
+}
+
+// Keys per MGET. The Upstash REST client sends every argument as a URL-ENCODED
+// PATH SEGMENT, so one call's URL grows by ~52 characters per key (a view key
+// URL-encodes to widget%3Aviews%3Av1%3Atgw_...). Two keys per widget against an
+// account's whole widget list would pass 8KB — the usual server and proxy URL
+// ceiling — at around 100 widgets, and this endpoint pages up to MAX_WIDGETS
+// (1000). Over the ceiling the call fails, callRedis returns null, and the view
+// counts silently vanish for exactly the biggest accounts. 50 keys keeps every
+// URL near 2.6KB. Chunks run concurrently, so the added latency is one round
+// trip, not one per chunk.
+const VIEW_KEYS_PER_CALL = 50;
+
+/** Merge the Redis view counters into the list (mutates in place). */
+async function attachViews(widgets) {
+  if (!redisConfigured() || !widgets.length) return;
+  const now = new Date();
+  const keys = [];
+  for (const w of widgets) { const k = viewKeys(w.widgetId || '-', now); keys.push(k.allTime, k.month); }
+
+  const chunks = [];
+  for (let i = 0; i < keys.length; i += VIEW_KEYS_PER_CALL) chunks.push(keys.slice(i, i + VIEW_KEYS_PER_CALL));
+  const settled = await Promise.all(chunks.map(c => mget(c).catch(() => [])));
+
+  // Rebuild one flat array aligned with `keys`. A chunk that failed or came back
+  // short contributes nulls, so a partial Redis answer leaves those widgets at
+  // zero rather than shifting every later widget's count onto the wrong row.
+  const vals = [];
+  settled.forEach((got, ci) => {
+    const want = chunks[ci].length;
+    for (let j = 0; j < want; j++) vals.push(Array.isArray(got) && j < got.length ? got[j] : null);
+  });
+  if (!vals.some(v => v !== null && v !== undefined)) return;
+
+  widgets.forEach((w, i) => {
+    const all = Number(vals[i * 2]) || 0;
+    const month = Number(vals[i * 2 + 1]) || 0;
+    w.views = Math.max(Number(w.views) || 0, all);
+    w.viewsMonth = month;
+  });
 }
 
 // Test surface — pure scope-formula logic, no network.

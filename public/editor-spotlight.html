@@ -187,6 +187,24 @@
     .preset[aria-pressed="true"] { border-color: var(--ink); }
     .preset-inner { width: 100%; height: 100%; display: grid; grid-template-columns: 1fr 1fr; }
 
+    /* layout presets */
+    .layout-presets { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .layout-preset {
+      display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+      padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+      cursor: pointer; font-family: inherit; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .layout-preset:hover { border-color: var(--border-strong); }
+    .layout-preset[aria-pressed="true"] { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-tint, rgba(8,145,178,.12)); }
+    .layout-preset-art { flex: 0 0 64px; width: 64px; height: 44px; color: var(--sub); }
+    .layout-preset[aria-pressed="true"] .layout-preset-art { color: var(--brand); }
+    .layout-preset-art svg { width: 100%; height: 100%; display: block; }
+    .layout-preset-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .layout-preset-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .layout-preset-help { font-size: 11px; line-height: 1.4; color: var(--sub); }
+    .toggle-row.is-na { opacity: .45; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
     /* slider */
     .slider-row { display: flex; align-items: center; gap: 10px; }
     .slider { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
@@ -518,6 +536,36 @@
           <!-- Theme moved to preview toolbar (consistent with other editors) -->
 
           <div class="section" data-open="true">
+            <button class="section-head" data-section>Layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="layout-presets" role="group" aria-label="Layout" id="layoutPresets">
+                <button type="button" class="layout-preset" data-layout-preset="full" aria-pressed="true">
+                  <span class="layout-preset-art" aria-hidden="true"><svg viewBox="0 0 64 44" fill="none"><rect x="2" y="2" width="60" height="16" rx="3" fill="currentColor" opacity=".9"/><rect x="6" y="14" width="52" height="6" rx="2" fill="currentColor" opacity=".35"/><rect x="2" y="24" width="38" height="18" rx="3" fill="currentColor" opacity=".25"/><rect x="44" y="24" width="18" height="18" rx="3" fill="currentColor" opacity=".45"/></svg></span>
+                  <span class="layout-preset-text"><span class="layout-preset-name">Full guide</span><span class="layout-preset-help">The whole destination page: photo hero, climate chart, highlights, events and a side column with the practical reads.</span></span>
+                </button>
+                <button type="button" class="layout-preset" data-layout-preset="strip" aria-pressed="false">
+                  <span class="layout-preset-art" aria-hidden="true"><svg viewBox="0 0 64 44" fill="none"><rect x="2" y="4" width="24" height="5" rx="2" fill="currentColor" opacity=".9"/><rect x="34" y="4" width="28" height="5" rx="2.5" fill="currentColor" opacity=".35"/><rect x="2" y="14" width="60" height="10" rx="3" fill="currentColor" opacity=".25"/><rect x="2" y="28" width="60" height="12" rx="3" fill="currentColor" opacity=".45"/></svg></span>
+                  <span class="layout-preset-text"><span class="layout-preset-name">Essentials strip</span><span class="layout-preset-help">A band to sit under your own hero: facts, best months, Best For, Good to know and an enquiry line. No photo.</span></span>
+                </button>
+                <button type="button" class="layout-preset" data-layout-preset="card" aria-pressed="false">
+                  <span class="layout-preset-art" aria-hidden="true"><svg viewBox="0 0 64 44" fill="none"><rect x="18" y="2" width="28" height="16" rx="3" fill="currentColor" opacity=".9"/><rect x="18" y="21" width="28" height="4" rx="2" fill="currentColor" opacity=".35"/><rect x="18" y="28" width="28" height="6" rx="2" fill="currentColor" opacity=".25"/><rect x="18" y="36" width="28" height="6" rx="3" fill="currentColor" opacity=".45"/></svg></span>
+                  <span class="layout-preset-text"><span class="layout-preset-name">Card</span><span class="layout-preset-help">A compact card for a sidebar or a grid of destinations: photo, facts, best months and the enquiry button.</span></span>
+                </button>
+              </div>
+              <div class="field" id="layoutColumnsField">
+                <label class="field-label" for="layoutMode">Columns on wide pages</label>
+                <select class="select" id="layoutMode">
+                  <option value="auto">Side column once the widget has 900px of width</option>
+                  <option value="stacked">One column at every width</option>
+                </select>
+              </div>
+              <div class="field-help">Choosing a preset also sets the sections in the Settings tab to match. You can still switch any section on or off afterwards.</div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
             <button class="section-head" data-section>Colours
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
@@ -543,6 +591,19 @@
                 <div class="presets" id="presets">
                   <!-- injected by JS -->
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Hero photo
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="heroImageUrl">Your own photo (optional)</label>
+                <input class="input" id="heroImageUrl" type="url" maxlength="500" placeholder="https://yoursite.com/images/greece.jpg" />
+                <div class="field-help">Leave blank to use the Luna photo for this destination. Paste an image URL from your own site, your CDN or a Duda asset to use that instead; the photo credit line is then hidden. Landscape, 1600px wide or more, looks best.</div>
               </div>
             </div>
           </div>
@@ -893,6 +954,8 @@
     function defaultConfig() {
       return {
         theme: 'light',
+        layout: 'auto',
+        heroImageUrl: '',
         brandColor: '#1B2B5B',
         accentColor: '#00B4D8',
         radius: 16,
@@ -1104,18 +1167,63 @@
       { key: 'paired',     label: 'Pairs well with', help: 'Sibling destinations to combine, from the Best Paired With links.' },
       { key: 'cta',        label: 'Call to action',  help: 'Your brandable enquire button at the bottom.' },
     ];
+    // Layout presets. Picking one sets config.layout and the section map to
+    // match; the toggles stay editable afterwards. A compact layout only
+    // renders the sections listed in LAYOUT_SECTIONS, so the other toggles are
+    // shown dimmed while that layout is selected.
+    const LAYOUT_PRESETS = {
+      full:  { layout: 'auto',  sections: { hero: true, tags: true, climate: true, facts: true, planning: true, highlights: true, events: true, paired: true, cta: true } },
+      strip: { layout: 'strip', sections: { hero: false, tags: true, climate: true, facts: true, planning: true, highlights: false, events: false, paired: false, cta: true } },
+      card:  { layout: 'card',  sections: { hero: true, tags: true, climate: true, facts: true, planning: false, highlights: false, events: false, paired: false, cta: true } },
+    };
+    const LAYOUT_SECTIONS = {
+      strip: ['tags', 'climate', 'facts', 'planning', 'cta'],
+      card:  ['hero', 'tags', 'climate', 'facts', 'planning', 'cta'],
+    };
+    // Does this sections map match the preset's exactly?
+    function sectionsMatch(sections, presetKey) {
+      const want = LAYOUT_PRESETS[presetKey].sections;
+      const have = sections || {};
+      return Object.keys(want).every(k => !!have[k] === want[k]);
+    }
+    // Which preset is genuinely applied, or '' for a hand-built config. Reading
+    // the layout alone was wrong: every saved config predating the presets has
+    // no layout key, hydrates to 'auto', and would claim "Full guide" however
+    // its sections were actually set.
+    function presetOf(c) {
+      const key = c.layout === 'strip' ? 'strip' : c.layout === 'card' ? 'card' : 'full';
+      return sectionsMatch(c.sections, key) ? key : '';
+    }
+    // The columns choice belongs to the full guide, so remember it across a trip
+    // through a compact layout instead of inferring it from the current value.
+    let lastColumns = 'auto';
+
+    // Repaint just the preset chips from the CURRENT sections. Without this a
+    // manual section toggle left the previously-applied preset still showing as
+    // selected, so clicking it looked like a no-op while actually re-applying
+    // every section — the trap that could push switched-off blocks back onto a
+    // client's live page.
+    function refreshPresetChips() {
+      const preset = presetOf(state.config);
+      document.querySelectorAll('[data-layout-preset]').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-layout-preset') === preset ? 'true' : 'false');
+      });
+    }
+
     function renderSectionToggles() {
       const wrap = document.getElementById('sectionTogglesWrap');
       wrap.innerHTML = '';
       SECTION_TOGGLES.forEach(s => {
         const row = document.createElement('div');
         row.className = 'toggle-row';
+        row.setAttribute('data-section-row', s.key);
         row.innerHTML = `
           <div>
             <div class="toggle-label">${s.label}</div>
             <div class="toggle-help">${s.help}</div>
           </div>
           <button type="button" class="toggle" data-section-toggle="${s.key}" role="switch" aria-checked="true"></button>
+          <span class="sr-only" id="na-help-${s.key}" data-na-help></span>
         `;
         wrap.appendChild(row);
       });
@@ -1124,6 +1232,7 @@
           const key = btn.getAttribute('data-section-toggle');
           state.config.sections[key] = !state.config.sections[key];
           btn.setAttribute('aria-checked', state.config.sections[key] ? 'true' : 'false');
+          refreshPresetChips();
           onConfigChange();
         });
       });
@@ -1723,6 +1832,34 @@
                     && p.accent.toLowerCase() === c.accentColor.toLowerCase());
         btn.setAttribute('aria-pressed', match ? 'true' : 'false');
       });
+      // Layout presets + columns sub-option (full guide only)
+      const preset = presetOf(c);
+      document.querySelectorAll('[data-layout-preset]').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.getAttribute('data-layout-preset') === preset ? 'true' : 'false');
+      });
+      document.getElementById('layoutColumnsField').hidden = !(c.layout === 'auto' || c.layout === 'stacked');
+      if (c.layout === 'auto' || c.layout === 'stacked') lastColumns = c.layout;
+      document.getElementById('layoutMode').value = c.layout === 'stacked' ? 'stacked' : 'auto';
+      const honoured = LAYOUT_SECTIONS[c.layout] || null;
+      document.querySelectorAll('[data-section-row]').forEach(row => {
+        const k = row.getAttribute('data-section-row');
+        const na = !!honoured && honoured.indexOf(k) === -1;
+        row.classList.toggle('is-na', na);
+        // The explanation has to reach a screen reader too, so it lives in a
+        // hidden span the switch points at — a title on this non-interactive
+        // row is announced to nobody.
+        const why = na ? 'Not shown in the ' + (c.layout === 'strip' ? 'Essentials strip' : 'Card') + ' layout' : '';
+        row.title = why;
+        const btn = row.querySelector('[data-section-toggle]');
+        const help = row.querySelector('[data-na-help]');
+        if (help) help.textContent = why;
+        if (btn) {
+          if (why) btn.setAttribute('aria-describedby', 'na-help-' + k);
+          else btn.removeAttribute('aria-describedby');
+        }
+      });
+      // Own hero photo
+      document.getElementById('heroImageUrl').value = c.heroImageUrl || '';
       // Radius
       document.getElementById('radius').value = c.radius;
       document.getElementById('radiusVal').textContent = c.radius + 'px';
@@ -1828,6 +1965,36 @@
     }
     bindColour('brandColor', 'brandHex', 'brandColor');
     bindColour('accentColor', 'accentHex', 'accentColor');
+
+    // Layout presets
+    document.querySelectorAll('[data-layout-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-layout-preset');
+        const p = LAYOUT_PRESETS[key];
+        if (!p) return;
+        // Re-clicking the preset that is already applied must change nothing.
+        // Without this, a stray second click silently switched every section
+        // back on and the next save pushed them to the client's live page.
+        if (presetOf(state.config) === key) return;
+        // Full guide restores the columns choice the agent last made, rather
+        // than inferring it from a layout value a compact preset overwrote.
+        state.config.layout = (key === 'full') ? lastColumns : p.layout;
+        state.config.sections = Object.assign({}, state.config.sections, p.sections);
+        hydrateUI();
+        onConfigChange();
+      });
+    });
+    document.getElementById('layoutMode').addEventListener('change', (e) => {
+      state.config.layout = e.target.value === 'stacked' ? 'stacked' : 'auto';
+      lastColumns = state.config.layout;
+      onConfigChange();
+    });
+
+    // Own hero photo
+    document.getElementById('heroImageUrl').addEventListener('input', (e) => {
+      state.config.heroImageUrl = e.target.value.trim();
+      onConfigChange();
+    });
 
     // Radius
     document.getElementById('radius').addEventListener('input', (e) => {

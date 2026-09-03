@@ -9,7 +9,7 @@
 <style>
   /* Per-editor styles — attraction-specific UI inside the sidebar */
   .field-hint { font-size: 11px; color: var(--tgse-muted); margin-top: 4px; }
-  .input, .textarea {
+  .input, .textarea, .select {
     width: 100%; padding: 8px 10px; height: 34px;
     border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm, 6px);
     background: var(--tgse-panel); color: var(--tgse-ink); font-family: inherit; font-size: 13px;
@@ -17,6 +17,10 @@
   }
   .input:focus { border-color: var(--tgse-brand); box-shadow: 0 0 0 3px var(--tgse-brand-tint); }
   .input::placeholder { color: var(--tgse-muted); }
+  .select { cursor: pointer; appearance: none; padding-right: 28px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+  }
   .at-help { font-size: 12px; line-height: 1.5; color: var(--tgse-ink-2); }
   .at-help code { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--tgse-bg-card); padding: 1px 5px; border-radius: 4px; }
 
@@ -206,6 +210,14 @@
               <label class="tgse-field-label">Accent colour</label>
               <input type="color" id="accent-color" class="tgse-color-input" value="#00B4D8">
             </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="layout-mode">Layout</label>
+              <select id="layout-mode" class="select">
+                <option value="auto">Auto (side column on wide pages)</option>
+                <option value="stacked">Stacked (one column everywhere)</option>
+              </select>
+              <div class="at-help" style="margin-top:6px;">Auto moves the insider tips, nearby attractions and the enquiry panel into a side column once the widget has 900px of width. Stacked keeps one column at every width.</div>
+            </div>
           </div>
         </div>
 
@@ -343,6 +355,7 @@
       attraction: selectedAttraction ? { recordId: selectedAttraction.recordId || '' } : null,
       brandColor: document.getElementById('brand-color').value,
       accentColor: document.getElementById('accent-color').value,
+      layout: document.getElementById('layout-mode').value === 'stacked' ? 'stacked' : 'auto',
       heroImageUrl: document.getElementById('hero-url').value.trim(),
       sections,
       cta: {
@@ -364,6 +377,7 @@
     { const cv = document.getElementById('content-voice'); if (cv) cv.value = cfg.contentVoice || ''; }
     if (cfg.brandColor)  document.getElementById('brand-color').value = cfg.brandColor;
     if (cfg.accentColor) document.getElementById('accent-color').value = cfg.accentColor;
+    document.getElementById('layout-mode').value = cfg.layout === 'stacked' ? 'stacked' : 'auto';
     document.getElementById('hero-url').value = cfg.heroImageUrl || '';
     const s = cfg.sections || {};
     document.querySelectorAll('[data-section]').forEach(cb => {
