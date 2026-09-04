@@ -80,6 +80,7 @@
     "test:enquiry-email-editor": "node test/enquiry-email-editor-smoke.mjs",
     "test:editor-email-popup": "node test/editor-email-popup-smoke.mjs",
     "test:welcome-email-editor": "node test/welcome-email-editor-smoke.mjs",
+    "test:appointment-email-editor": "node test/appointment-email-editor-smoke.mjs",
     "test:worldmap-departures": "node test/worldmap-departure-filter-smoke.mjs",
     "test:worldmap-header-stacking": "node test/worldmap-header-stacking-smoke.mjs",
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",

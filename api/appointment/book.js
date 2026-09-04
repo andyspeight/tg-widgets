@@ -17,6 +17,7 @@ import { getAccessToken, getZoomAccessToken, saveBooking, placeHold, releaseHold
 import { getProvider } from '../_lib/calendar/providers.js';
 import { createMeeting as zoomCreateMeeting } from '../_lib/calendar/zoom.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
+import { normaliseAppointmentEmails } from '../../public/_appointment-email-template.js';
 import { normaliseReminders } from '../_lib/calendar/reminders.js';
 import { dispatchLead } from '../_lib/routing/router.js';
 import { checkRateLimit } from '../_lib/auth/ratelimit.js';
@@ -242,6 +243,11 @@ export default async function handler(req, res) {
     // the widget config.
     company: String(config.company || '').slice(0, 80),
     accent: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(config.accent || '')) ? config.accent : '',
+    // The client's own email wording travels with the booking for the same
+    // reason the branding does: reschedule, reminder and cancel all fire later
+    // (the reminder from a cron) and must not depend on re-reading the widget
+    // config, which may have changed or gone by then.
+    emails: normaliseAppointmentEmails(config.emails),
     // The reminder plan travels with the booking too, so the cron can decide
     // due-ness without re-reading widget config. smsReminder is the widget's
     // opt-in; the cron additionally requires platform Twilio config + a phone.

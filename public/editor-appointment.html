@@ -254,8 +254,9 @@
           </div>
           <div class="tgse-section-body">
             <div class="field"><label class="field-label">Submit button label</label><input type="text" class="input" id="btnlabel-input" maxlength="40" placeholder="Confirm booking"></div>
-            <div class="field"><label class="field-label">Confirmation title</label><input type="text" class="input" id="success-title" maxlength="80" placeholder="You are booked in"></div>
-            <div class="field"><label class="field-label">Confirmation message</label><textarea class="input" id="success-body" maxlength="220" placeholder="We have your time and will be in touch to confirm."></textarea></div>
+            <div class="field"><label class="field-label">On-screen title after booking</label><input type="text" class="input" id="success-title" maxlength="80" placeholder="You are booked in"></div>
+            <div class="field"><label class="field-label">On-screen message after booking</label><textarea class="input" id="success-body" maxlength="220" placeholder="We have your time and will be in touch to confirm."></textarea></div>
+            <span class="field-hint">These two show on the page straight after booking. They do NOT appear in the confirmation email — that is written under Customer emails.</span>
             <div class="field"><label class="field-label">Meeting location / link (optional)</label><input type="text" class="input" id="location-input" maxlength="120" placeholder="Phone call, video link or address"></div>
             <div class="field"><div class="switch-row"><span class="switch-row-label">Show Add to Calendar buttons</span><button type="button" class="switch is-on" id="add-cal" aria-pressed="true"></button></div></div>
           </div>
@@ -345,11 +346,13 @@
         <div class="tgse-section" id="reminders-section">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="tgse-section-label">Reminder emails</span>
+            <span class="tgse-section-label">Customer emails</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
-            <div class="row-2">
+            <span class="field-hint" style="display:block;margin-bottom:10px">Your customer gets four emails across a booking. Write your own wording for any of them, or leave them on ours. Each opens with a live preview of exactly what lands in their inbox.</span>
+            <div id="appt-email-cards"></div>
+            <div class="row-2" style="margin-top:14px">
               <div><span class="mini-label">First reminder</span><select class="select" id="rem-1"></select></div>
               <div><span class="mini-label">Second reminder</span><select class="select" id="rem-2"></select></div>
             </div>
@@ -449,6 +452,15 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<!-- Shared email popup — the one popup every editor uses to write an email -->
+<script src="/editor-email-popup.js"></script>
+<!-- The REAL appointment email renderer, handed to the classic editor script
+     below so the preview is the email api/_lib/calendar/mail.js sends. -->
+<script type="module">
+  import { renderAppointmentEmail, APPOINTMENT_EMAIL_TAGS, APPOINTMENT_EMAIL_KINDS }
+    from '/_appointment-email-template.js';
+  window.TGAppointmentEmail = { renderAppointmentEmail, APPOINTMENT_EMAIL_TAGS, APPOINTMENT_EMAIL_KINDS };
+</script>
 <script src="/widget-appointment.js"></script>
 <script src="/editor-tour.js"></script>
 <script src="/tour-appointment.js"></script>
@@ -495,6 +507,8 @@
     dailyCap: 0,
     reminders: [24],
     smsReminders: false,
+    // Client-authored wording for the four CUSTOMER emails. Blank means ours.
+    emails: {},
     timeFormat: '12',
     displayMode: 'inline',
     launcherLabel: '',
@@ -682,6 +696,7 @@
     document.getElementById('location-input').value = C.location || '';
     document.getElementById('consent-input').value = C.consentText || '';
     document.getElementById('submit-url').value = C.submitUrl || '';
+    apptRenderCards();
     document.getElementById('lead-input').value = C.minNoticeHours; document.getElementById('lead-val').textContent = C.minNoticeHours + ' hrs';
     document.getElementById('days-input').value = C.dateRangeDays; document.getElementById('days-val').textContent = C.dateRangeDays + ' days';
     document.getElementById('cap-input').value = C.dailyCap || 0; document.getElementById('cap-val').textContent = C.dailyCap ? (C.dailyCap + '/day') : 'Off';
@@ -730,6 +745,131 @@
   })();
 
   // ── Text inputs ──
+  // ── Customer emails: the shared popup ────────────────────────────────────
+  // This widget sends the customer four emails across a booking's life, and
+  // until Sep 2026 a client could not change a word of any of them — every
+  // travel firm sent byte-identical copy in our voice under their own name.
+  // Each is previewed here through public/_appointment-email-template.js, the
+  // same module api/_lib/calendar/mail.js sends with, so the preview cannot
+  // drift. The four AGENCY notifications are deliberately not editable: their
+  // bodies are generated readouts of the booking, not copy.
+  const APPT_EMAIL_LABELS = {
+    confirmation: 'Booking confirmation',
+    rescheduled: 'Booking moved',
+    reminder: 'Reminder before the appointment',
+    cancelled: 'Booking cancelled',
+  };
+  const APPT_EMAIL_HINTS = {
+    confirmation: 'Sent the moment they book. Your words replace our opening lines; the meeting details, the join button and the calendar invite are added for you.',
+    rescheduled: 'Sent when the time changes, with the new details and an updated calendar invite.',
+    reminder: 'Sent before the appointment, at the times set below.',
+    cancelled: 'Sent when the booking is cancelled. This one carries no details card, so say what you need to here.',
+  };
+
+  function apptEmails() {
+    if (!C.emails || typeof C.emails !== 'object') C.emails = {};
+    return C.emails;
+  }
+  function apptRead(kind) {
+    const t = apptEmails()[kind] || {};
+    return { subject: t.subject || '', body: t.body || '' };
+  }
+  function apptWrite(kind, field, value) {
+    const e = apptEmails();
+    if (!e[kind]) e[kind] = { subject: '', body: '' };
+    e[kind][field] = value;
+    shell.markDirty();
+  }
+  function apptHasCustom(kind) {
+    const t = apptRead(kind);
+    return !!(t.subject.trim() || t.body.trim());
+  }
+
+  // A realistic booking, shaped exactly like the one book.js stamps, so the
+  // preview exercises the same code path a real send does.
+  function apptSampleBooking(kind) {
+    const ev = (C.eventTypes && C.eventTypes[0]) || {};
+    const start = new Date(Date.now() + 6 * 86400000);
+    start.setUTCHours(9, 0, 0, 0);
+    const mins = ev.mins || 30;
+    return {
+      ref: 'AP-1042',
+      eventLabel: ev.label || 'Appointment',
+      durationMins: mins,
+      mode: ev.mode || 'callback',
+      startISO: start.toISOString(),
+      endISO: new Date(start.getTime() + mins * 60000).toISOString(),
+      visitorTimezone: C.timezone || 'Europe/London',
+      hostTimezone: C.timezone || 'Europe/London',
+      invitee: { name: 'Sarah Jones', email: 'sarah@example.com', phone: '07700 900123' },
+      company: C.company || 'our travel team',
+      accent: hexOk(C.accent) ? C.accent : '#0891B2',
+      location: C.location || '',
+      meetingUrl: (ev.mode === 'video') ? 'https://meet.example.com/abc-defg-hij' : '',
+      emails: { [kind]: apptRead(kind) },
+    };
+  }
+
+  function apptRenderCards() {
+    const mount = document.getElementById('appt-email-cards');
+    if (!mount || !window.TGEmailPopup) return;
+    mount.textContent = '';
+    Object.keys(APPT_EMAIL_LABELS).forEach((kind) => {
+      mount.appendChild(window.TGEmailPopup.card({
+        title: APPT_EMAIL_LABELS[kind],
+        status: apptHasCustom(kind) ? 'Your own wording' : 'Using our standard wording',
+        isCustom: apptHasCustom(kind),
+        onEdit: () => openApptEmailPopup(kind),
+      }));
+    });
+  }
+
+  function openApptEmailPopup(startKind) {
+    if (!window.TGEmailPopup || !window.TGAppointmentEmail) return;
+    const T = window.TGAppointmentEmail;
+    window.TGEmailPopup.open({
+      startKey: startKind,
+      onClose: apptRenderCards,
+      emails: Object.keys(APPT_EMAIL_LABELS).map((kind) => ({
+        key: kind,
+        label: APPT_EMAIL_LABELS[kind],
+        tabLabel: kind === 'confirmation' ? 'Confirmation'
+          : kind === 'rescheduled' ? 'Moved'
+          : kind === 'reminder' ? 'Reminder' : 'Cancelled',
+        from: () => C.company || 'our travel team',
+        to: 'sarah@example.com (the person who booked)',
+        tags: T.APPOINTMENT_EMAIL_TAGS,
+        fields: [
+          { key: 'subject', type: 'text', label: 'Subject', maxlength: 200,
+            placeholder: 'Leave blank to use ours', tagsAfter: true },
+          { key: 'body', type: 'textarea', label: 'Message', grow: true,
+            placeholder: 'Leave blank to use our standard wording.',
+            hint: APPT_EMAIL_HINTS[kind] },
+        ],
+        read: () => apptRead(kind),
+        write: (field, value) => apptWrite(kind, field, value),
+        render: () => {
+          const out = T.renderAppointmentEmail(kind, apptSampleBooking(kind), {
+            manageUrl: 'https://example.com/manage-booking?token=sample',
+          });
+          const note = apptHasCustom(kind)
+            ? 'Preview uses a sample booking. Tags are filled per real booking; the details and calendar invite are added for you.'
+            : 'You are previewing our standard wording, filled with a sample booking. Start typing to replace it with your own.';
+          return { subject: out.subject, html: out.html, note: note };
+        },
+        reset: {
+          label: 'Use our standard wording',
+          isSet: () => apptHasCustom(kind),
+          run: (applied) => {
+            delete apptEmails()[kind];
+            shell.markDirty();
+            applied();
+          },
+        },
+      })),
+    });
+  }
+
   function wireText(id, key) { document.getElementById(id).addEventListener('input', (e) => { C[key] = e.target.value; shell.markDirty(); render(); }); }
   wireText('heading-input','heading'); wireText('subheading-input','subheading'); wireText('company-input','company');
   wireText('btnlabel-input','buttonLabel'); wireText('success-title','successTitle'); wireText('success-body','successBody');
