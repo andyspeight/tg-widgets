@@ -1,90 +1,128 @@
 /**
- * My Booking editor — the "Reminder emails" admin section (Andy/Lapland, Aug 2026).
+ * My Booking editor — the reminder email POPUP editor (Andy, Sep 2026:
+ * "the area to add your own text / edit is way too small - it needs to be
+ * rendered as a full pop-up where you can edit the content and see it as it
+ * would appear in the email that is sent").
  *
- * Clients write their own balance reminder wording per stage (interim / final)
- * in the My Booking editor, with clickable merge-tag chips and a live sample
- * preview. This is a source guard: the section is a template string inside the
- * editor's inline IIFE (booted through the shell's cookie SSO), so it has no
- * cheap DOM unit test — we assert the markup, the config default, the binding,
- * the load path and the chip/preview wiring are all present and consistent.
+ * Clients write their balance reminder wording per stage (interim / final) in
+ * a full-screen popup: subject + merge-tag chips + a big message area on the
+ * left, and a live preview of the REAL email on the right. The preview is
+ * faithful by construction: the renderer moved to
+ * public/_reminder-email-template.js so the editor imports the exact module
+ * the send worker uses (api/_lib/payment-reminder-email.js is now a re-export
+ * shim — the same pattern as booking-pdf.js ↔ _pdf-template.js).
  *
- * The load-bearing check is the CROSS GUARD: every merge tag the editor offers
- * as a chip must be one the server renderer actually fills. If someone adds a
- * chip here without teaching payment-reminder-email.js the tag, this fails —
- * so a client can never be handed a tag that renders literally in a real email.
+ * The editor page boots through the shell's cookie SSO inside an inline
+ * module, so it has no cheap DOM unit test — the editor checks are source
+ * guards. The renderer checks are FUNCTIONAL: we import both module paths and
+ * assert they are the same object, and render a template containing every
+ * offered chip to prove each one merges.
  *
  * Run: node test/reminder-email-editor-smoke.mjs   (npm run test:reminder-email-editor)
  */
 import { readFileSync } from 'node:fs';
 
 const EDITOR = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
-const RENDERER = readFileSync(new URL('../api/_lib/payment-reminder-email.js', import.meta.url), 'utf8');
+const RENDERER = readFileSync(new URL('../public/_reminder-email-template.js', import.meta.url), 'utf8');
+const SHIM = readFileSync(new URL('../api/_lib/payment-reminder-email.js', import.meta.url), 'utf8');
 
 let passed = 0, failed = 0;
 const ok = (name, cond) => { if (cond) { passed++; console.log('  ✓ ' + name); } else { failed++; console.error('  ✗ ' + name); } };
 
-console.log('The Reminder emails section is present in the editor');
+console.log('One renderer, shared by the send worker and the editor preview');
 {
-  ok('an accordion section with data-section="reminder-emails" exists', /data-section="reminder-emails"/.test(EDITOR));
-  ok('it is titled "Reminder emails"', /Reminder emails<\/h3>/.test(EDITOR));
-  ok('the interim subject + body fields exist', /id="re-interim-subject"/.test(EDITOR) && /id="re-interim-body"/.test(EDITOR));
-  ok('the final subject + body fields exist', /id="re-final-subject"/.test(EDITOR) && /id="re-final-body"/.test(EDITOR));
-  ok('each stage has a live preview element', /id="re-interim-preview"/.test(EDITOR) && /id="re-final-preview"/.test(EDITOR));
-  ok('the subject inputs are length-capped (maxlength 200, matches server)', /id="re-interim-subject"[^>]*maxlength="200"/.test(EDITOR));
+  ok('the renderer lives in public/ (importable by the editor page)', /export function renderReminderEmail\(/.test(RENDERER));
+  ok('api/_lib/payment-reminder-email.js is a re-export shim of it', /export \* from '\.\.\/\.\.\/public\/_reminder-email-template\.js';/.test(SHIM));
+  ok('the cron worker still imports through the stable api/_lib path',
+    /from '\.\.\/_lib\/payment-reminder-email\.js'/.test(readFileSync(new URL('../api/cron/payment-reminders.js', import.meta.url), 'utf8')));
+  ok('the renderer stays runtime-neutral (no Node/DOM imports, previewable in the browser)',
+    !/^import /m.test(RENDERER) && !/require\(/.test(RENDERER) && !/\bdocument\./.test(RENDERER));
+  const shimMod = await import('../api/_lib/payment-reminder-email.js');
+  const pubMod = await import('../public/_reminder-email-template.js');
+  ok('FUNCTIONAL: both import paths resolve to the same function (zero drift possible)',
+    shimMod.renderReminderEmail === pubMod.renderReminderEmail && typeof pubMod.renderReminderEmail === 'function');
 }
 
-console.log('The config carries a reminderEmails default so a fresh widget is well-formed');
+console.log('The sidebar section is now two stage cards that open the popup');
+{
+  ok('the Reminder emails accordion section is still there', /data-section="reminder-emails"/.test(EDITOR) && /Reminder emails<\/h3>/.test(EDITOR));
+  ok('each stage has a card with an Edit email button',
+    /class="rem-edit-btn" data-stage="interim"/.test(EDITOR) && /class="rem-edit-btn" data-stage="final"/.test(EDITOR));
+  ok('each card shows whether the client wording is in use',
+    /id="rem-status-interim"/.test(EDITOR) && /id="rem-status-final"/.test(EDITOR) && /Your own wording/.test(EDITOR) && /Using our standard wording/.test(EDITOR));
+  ok('the old cramped inline fields are gone', !/id="re-interim-subject"/.test(EDITOR) && !/id="re-final-body"/.test(EDITOR));
+  ok('load repopulates the cards from the saved config (remRenderStatus on load)',
+    /reEnsure\(\);\s*\n\s*remRenderStatus\(\);/.test(EDITOR));
+}
+
+console.log('The popup: full editor on the left, the real email on the right');
+{
+  ok('a full-size popup exists and is a labelled dialog',
+    /id="rem-modal"/.test(EDITOR) && /role="dialog" aria-modal="true" aria-labelledby="rem-modal-title"/.test(EDITOR));
+  ok('it has interim/final stage tabs', /class="rem-stage is-active" role="tab" data-stage="interim"/.test(EDITOR) && /data-stage="final"/.test(EDITOR));
+  ok('subject input is length-capped to match the server (200)', /id="rem-subject" maxlength="200"/.test(EDITOR));
+  ok('the message area grows to fill the popup (no more 8-row box)', /class="field rem-msg"/.test(EDITOR) && /\.rem-edit-pane \.rem-msg textarea \{ flex: 1;/.test(EDITOR));
+  ok('the preview renders in a SANDBOXED iframe via srcdoc (no scripts, no CSS bleed)',
+    /<iframe id="rem-frame" title="Email preview" sandbox="">/.test(EDITOR) && /getElementById\('rem-frame'\)\.srcdoc = out\.html/.test(EDITOR));
+  ok('an envelope bar shows the live From + Subject', /id="rem-env-from"/.test(EDITOR) && /id="rem-env-subject"/.test(EDITOR) && /\.textContent = out\.subject/.test(EDITOR));
+  ok('the editor imports the shared renderer module', /import \{ renderReminderEmail \} from '\/_reminder-email-template\.js';/.test(EDITOR));
+  ok('the preview calls the REAL renderer', /const out = renderReminderEmail\(\{/.test(EDITOR));
+  ok('a blank message previews the standard wording (template: null → built-in email)',
+    /template: remHasCustom\(remStage\) \? \{ subject: t\.subject, body: t\.body \} : null/.test(EDITOR));
+  ok('the sample due date is computed in the future (never the overdue variant)', /Date\.now\(\) \+ 42 \* 86400000/.test(EDITOR));
+  ok('the pay button only previews when a valid https booking page is set (matches the send path)',
+    /payUrl: hasPage \? pageUrl\.replace\(\/#\.\*\$\/, ''\) \+ '#tg-pay=ST-24189' : null/.test(EDITOR));
+  ok('the popup closes on Done, the X, the backdrop and Escape',
+    /getElementById\('rem-done'\)\.addEventListener\('click', remClose\)/.test(EDITOR)
+    && /getElementById\('rem-close'\)\.addEventListener\('click', remClose\)/.test(EDITOR)
+    && /if \(e\.target === e\.currentTarget\) remClose\(\)/.test(EDITOR)
+    && /e\.key !== 'Escape'/.test(EDITOR));
+}
+
+console.log('Edits persist into state.config.reminderEmails and mark the editor dirty');
 {
   ok('reminderEmails default has interim + final subject/body',
     /reminderEmails:\s*\{\s*interim:\s*\{\s*subject:\s*''\s*,\s*body:\s*''\s*\}\s*,\s*final:\s*\{\s*subject:\s*''\s*,\s*body:\s*''\s*\}\s*\}/.test(EDITOR));
-}
-
-console.log('Editing a field persists into state.config.reminderEmails, and load repopulates it');
-{
-  ok('the four fields are bound in one forEach',
-    /\['re-interim-subject',\s*'re-interim-body',\s*'re-final-subject',\s*'re-final-body'\]\.forEach/.test(EDITOR));
-  ok('input writes state.config.reminderEmails[stage][part]',
-    /state\.config\.reminderEmails\[parts\[1\]\]\[parts\[2\]\]\s*=\s*el\.value/.test(EDITOR));
-  ok('editing marks the editor dirty', /window\.tgse\.markDirty\(\)/.test(EDITOR));
-  ok('load repopulates the interim subject', /getElementById\('re-interim-subject'\)\.value\s*=\s*state\.config\.reminderEmails\.interim\.subject/.test(EDITOR));
-  ok('load repopulates the final body', /getElementById\('re-final-body'\)\.value\s*=\s*state\.config\.reminderEmails\.final\.body/.test(EDITOR));
   ok('reEnsure() backfills a missing reminderEmails object', /function reEnsure\(\)/.test(EDITOR) && /state\.config\.reminderEmails\s*=\s*\{\}/.test(EDITOR));
-}
-
-console.log('The merge-tag chips insert at the cursor and the preview fills sample values');
-{
-  ok('chips are wired to insert their tag', /querySelectorAll\('\.re-tag'\)\.forEach/.test(EDITOR));
-  ok('insertion splices the tag into the focused field', /el\.value\.slice\(0,\s*s\)\s*\+\s*tag\s*\+\s*el\.value\.slice\(e\)/.test(EDITOR));
-  ok('a sample-value preview renderer exists', /function reRenderPreview\(\)/.test(EDITOR));
-  ok('preview falls back to a "standard wording" note when blank',
-    /Using our standard interim reminder wording\./.test(EDITOR) && /Using our standard final reminder wording\./.test(EDITOR));
-  ok('the editor preview uses the SAME tag syntax as the server (\\{\\s*([a-zA-Z]+)\\s*\\})',
-    /\/\\\{\\s\*\(\[a-zA-Z\]\+\)\\s\*\\\}\/g/.test(EDITOR));
+  ok('typing writes state.config.reminderEmails[stage][part]', /state\.config\.reminderEmails\[remStage\]\[part\] = el\.value/.test(EDITOR));
+  ok('editing marks the editor dirty', /window\.tgse\.markDirty\(\)/.test(EDITOR));
+  ok('chips splice the tag into the focused field and re-fire input',
+    /querySelectorAll\('\.re-tag'\)\.forEach/.test(EDITOR)
+    && /el\.value\.slice\(0,\s*s\)\s*\+\s*tag\s*\+\s*el\.value\.slice\(e\)/.test(EDITOR)
+    && /el\.dispatchEvent\(new Event\('input'\)\)/.test(EDITOR));
+  ok('"Use our standard wording" asks before wiping the client copy',
+    /getElementById\('rem-reset'\)/.test(EDITOR) && /showConfirm\('Use our standard wording\?'/.test(EDITOR));
 }
 
 // ── CROSS GUARD ──────────────────────────────────────────────────────────────
-// Every tag the editor offers must be one the renderer fills. Derive the
-// renderer's supported set from its mergeVars object, and the editor's offered
-// set from the chip data-tag attributes, then assert offered ⊆ supported.
-console.log('Every tag the editor offers is one the server renderer fills');
+// Every tag the popup offers must be one the renderer fills. Derive the
+// renderer's supported set from its mergeVars object and the editor's offered
+// set from the chip data-tag attributes, then assert offered ⊆ supported —
+// and prove it FUNCTIONALLY by rendering a body containing every chip.
+console.log('Every tag the popup offers is one the renderer fills');
 {
   const mv = RENDERER.slice(RENDERER.indexOf('const mergeVars = {'));
   const block = mv.slice(0, mv.indexOf('};') + 1);
   const supported = new Set((block.match(/([a-zA-Z]+)\s*:/g) || []).map(s => s.replace(/\s*:$/, '').toLowerCase()));
   ok('renderer exposes the core tags', ['firstname', 'amount', 'duedate', 'balance', 'bookingref', 'agencyname', 'agencyphone', 'instalmentnumber', 'instalmenttotal'].every(k => supported.has(k)));
 
-  const offered = [...EDITOR.matchAll(/class="re-tag"\s+data-tag="\{([a-zA-Z]+)\}"/g)].map(m => m[1].toLowerCase());
-  ok('the editor offers a set of chips', offered.length >= 8);
-  const orphan = offered.filter(t => !supported.has(t));
+  const offered = [...EDITOR.matchAll(/class="re-tag"\s+data-tag="\{([a-zA-Z]+)\}"/g)].map(m => m[1]);
+  ok('the popup offers a set of chips', offered.length >= 8);
+  const orphan = offered.filter(t => !supported.has(t.toLowerCase()));
   ok('no offered chip is unknown to the renderer (offered ⊆ supported)' + (orphan.length ? ' — orphan: ' + orphan.join(', ') : ''), orphan.length === 0);
 
-  // ...and the editor's own sample-preview must have a value for every chip, so
-  // the preview never shows an unmerged {tag} to the client.
-  const sv = EDITOR.slice(EDITOR.indexOf('function reSampleVars()'));
-  const svBlock = sv.slice(0, sv.indexOf('};') + 1);
-  const sampled = new Set((svBlock.match(/([a-zA-Z]+)\s*:/g) || []).map(s => s.replace(/\s*:$/, '').toLowerCase()));
-  const unSampled = offered.filter(t => !sampled.has(t));
-  ok('every offered chip has a preview sample value' + (unSampled.length ? ' — missing: ' + unSampled.join(', ') : ''), unSampled.length === 0);
+  const { renderReminderEmail } = await import('../public/_reminder-email-template.js');
+  const body = offered.map(t => `${t}: {${t}}`).join('\n');
+  const out = renderReminderEmail({
+    agency: { name: 'Lapland Travel', supportPhone: '01202 000000', supportEmail: 'help@example.com' },
+    customerFirstName: 'Sarah', orderRef: 'ST-24189',
+    charge: { amount: 350, currency: 'GBP', total: 2050, paid: 850, outstanding: 1200, isInstalment: true, remainingAmount: 850 },
+    dueDateIso: '2099-11-15', payUrl: 'https://example.com/my-booking#tg-pay=ST-24189',
+    template: { subject: 'Hi {firstName}', body }, instalment: { number: 1, total: 3 }, chase: false,
+  });
+  const unmerged = offered.filter(t => new RegExp('\\{' + t + '\\}').test(out.html));
+  ok('FUNCTIONAL: every chip merges to a value in the rendered email' + (unmerged.length ? ' — literal: ' + unmerged.join(', ') : ''), unmerged.length === 0);
+  ok('FUNCTIONAL: the subject merges too and the shell adds the pay button', /Hi Sarah/.test(out.subject) && /Pay my balance/.test(out.html));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

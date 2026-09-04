@@ -659,7 +659,7 @@ state.brandingWidget = null;
 const libSrc = readFileSync(new URL('../api/_lib/payment-reminders.js', import.meta.url), 'utf8');
 ok(/OR\(\{Status\}='Accepted',\{Status\}='Fetched'/.test(libSrc), 'queue formula drains Accepted/Fetched rows');
 ok(/REMINDER_TYPES = \[[^\]]*'BalanceChase'/.test(libSrc) && /value\.dueDate \|\| 'none'/.test(libSrc), 'BalanceChase is an accepted type; natural key stored for audit');
-const emailSrc = readFileSync(new URL('../api/_lib/payment-reminder-email.js', import.meta.url), 'utf8');
+const emailSrc = readFileSync(new URL('../public/_reminder-email-template.js', import.meta.url), 'utf8');
 ok(/isPastDate/.test(emailSrc) && /overdue/i.test(emailSrc), 'email renderer has the overdue chaser path');
 const mbEditor2 = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
 ok(!/id="reminder-count"/.test(mbEditor2) && !/id="reminder-gap"/.test(mbEditor2), 'the count/gap schedule controls are gone (cadence is caller-driven)');
