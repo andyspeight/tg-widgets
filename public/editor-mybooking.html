@@ -642,7 +642,7 @@
   <script src="/tour-mybooking.js"></script>
 <script type="module">
 import { renderPdfHtml } from '/_pdf-template.js';
-import { renderEmailHtml } from '/_email-template.js';
+import { renderBookingEmail } from '/_booking-email-template.js';
 import { renderReminderEmail } from '/_reminder-email-template.js';
 import { renderCancellationEmail } from '/_cancellation-email-template.js';
 
@@ -1159,7 +1159,25 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
   }
   function renderEmailPreview() {
     try {
-      const html = renderEmailHtml(MOCK_ORDER, _previewOpts());
+      // The REAL renderer api/booking-email.js sends with (via the api/_lib
+      // shim). This preview used to run a separate, preview-only template that
+      // had drifted from it in subject, structure and length, so a client was
+      // shown an email we never send. One module now, so it cannot happen again.
+      const { html } = renderBookingEmail({
+        order: MOCK_ORDER,
+        brand: {
+          name: state.config.brand?.name || '',
+          logoUrl: '',
+          footerLine: '',
+        },
+        colors: state.config.colors || {},
+        supportEmail: state.config.support?.email || '',
+        supportPhone: state.config.support?.phone || '',
+        // Only a fallback for when no item carries a booking reference. The
+        // sample order does, so the preview shows the same ref a real one would.
+        orderRef: '',
+        baseUrl: location.origin,
+      });
       _writeIframe('email-iframe', html);
     } catch (e) {
       console.error('Email preview error:', e);
