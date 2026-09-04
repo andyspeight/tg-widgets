@@ -539,3 +539,45 @@ maxWidth on a replica.
 
 Re-shoot `roadmap-page-preview.jpg` whenever the /roadmap page changes
 enough to make the thumbnail stale.
+
+## June booking flow mockup, 4 Sep 2026
+
+Andy sent the screenshot he had promised for the June row: a client-branded
+accommodation results page (search bar, filter sidebar, two hotel cards with
+prices). It replaces the Appointment Scheduler stand-in that was sitting in
+the June mockup frame, which never matched that card's headline anyway.
+
+Built on branch `june-booking-mockup` (id `zfci6ee5k`, from main). NOT merged
+and NOT published: waiting on Andy.
+
+What changed on `/roadmap`, June row `k9HCs5C4g`:
+
+- Screenshot frame `dDmIS9Cxx`: fill swapped to
+  `Y4OYDiESp4wOIgwtNgCN4yrvmTY.jpg`, `aspectRatio` 1.33 -> 1.6.
+- Caption `XDvQ3NC7_`: "The Appointment Scheduler on a client site" ->
+  "Live search results on a client site".
+- Blurb `EXJBKVxba`: tightened, it used to say "search" twice. Now "A full
+  search and booking journey on your own website, so customers compare and
+  book with you instead of being sent somewhere else."
+
+The crop, and why it is 1.6 rather than the 4:3 every other mockup uses. The
+source was 1585x1010 (ratio 1.569). The page header is full bleed while the
+search content is inset, so ANY 4:3 crop clips the client logo on the left
+and the menu on the right, which reads as a mistake rather than a viewport.
+Fitting the frame to the source instead keeps everything intact. Final crop
+box `(12, 35, 1572, 1010)` = 1560x975 = exactly 1.6: it drops the placeholder
+contact bar at the top ("+44 (0) 1234 56789", "mymail@mailservice.com", not
+something to put on a public page) and keeps the whole header, search bar,
+filters and both result cards. At the 400px display width it still reads as a
+booking results page, and on Tablet, where the mockup goes full width, it is
+genuinely legible. Source kept at `scratchpad/mock/june-booking.jpg`.
+
+Verified with screenshots at all three breakpoints. Checked the Paximum logo
+again while in there: it is the correct "paximum, Global Travel Marketplace"
+mark, not the old Paxium one.
+
+Getting a pasted screenshot out of a Claude Code session: it is never written
+to disk. It lives as a base64 image block in
+`/root/.claude/projects/<project>/<session>.jsonl`. Walk the JSONL, pick the
+last record whose message content has a `{"type":"image"}` part, and
+base64-decode `source.data`.
