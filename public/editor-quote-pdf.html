@@ -246,6 +246,18 @@
 
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+            <span class="tgse-section-label">Covering email</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="qp-help" style="margin-bottom:10px">The email your quote PDF arrives in. It is branded from the same logo and colours as the quote itself. Write your own wording or leave it on ours.</div>
+            <div id="quote-email-card"></div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
             <span class="tgse-section-label">Travelify connection</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -322,11 +334,21 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<!-- Shared email popup — the one popup every editor uses to write an email -->
+<script src="/editor-email-popup.js"></script>
+<!-- The REAL covering-email renderer, handed to the classic editor script below
+     so the preview is the email api/quote-pdf.js sends. -->
+<script type="module">
+  import { renderQuoteEmail, QUOTE_EMAIL_TAGS } from '/_quote-email-template.js';
+  window.TGQuoteEmail = { renderQuoteEmail, QUOTE_EMAIL_TAGS };
+</script>
 <script>
   const DEFAULTS = {
     brandName:'', tagline:'', logoUrl:'', supportEmail:'', supportPhone:'',
     showContact:true,
     attachments:[],
+    // The client's own covering-email wording. Blank means our standard copy.
+    email:{ subject:'', body:'' },
     colors:{ topBar:'#111D3E', hero:'#1B2B5B', accent:'#00B4D8', labels:'#0096B7', titles:'#1B2B5B', text:'#0F172A', link:'#0096B7' },
     button:{ bg:'#00B4D8', text:'#FFFFFF' },
     align:'left',
@@ -378,7 +400,91 @@
     $('m-foot').innerHTML = '<strong>'+escAttr(name)+'</strong>' + footParts;
   }
 
+  // ── Covering email: the shared popup ─────────────────────────────────────
+  // The quote PDF used to arrive in three unstyled <p> tags hardcoded on the
+  // server — the plainest email in the suite carrying the best-designed
+  // document we produce. It now renders from the SAME brand kit as the PDF,
+  // through public/_quote-email-template.js, the very module api/quote-pdf.js
+  // sends with, so this preview cannot drift from what the customer opens.
+  function quoteEmailCfg() {
+    if (!C.email || typeof C.email !== 'object') C.email = { subject: '', body: '' };
+    return C.email;
+  }
+  function quoteEmailHasCustom() {
+    const t = quoteEmailCfg();
+    return !!(String(t.subject || '').trim() || String(t.body || '').trim());
+  }
+  // The same brand shape buildRenderOpts() forwards to the server renderer, so
+  // the preview themes exactly as the sent email does.
+  function quoteEmailBrand() {
+    return {
+      name: C.brandName || '',
+      tagline: C.tagline || '',
+      logoUrl: C.logoUrl || '',
+      supportEmail: C.supportEmail || '',
+      supportPhone: C.supportPhone || '',
+      showContact: C.showContact !== false,
+      colors: C.colors || {},
+    };
+  }
+
+  function renderQuoteEmailCard() {
+    const mount = document.getElementById('quote-email-card');
+    if (!mount || !window.TGEmailPopup) return;
+    mount.textContent = '';
+    mount.appendChild(window.TGEmailPopup.card({
+      title: 'Quote email',
+      status: quoteEmailHasCustom() ? 'Your own wording' : 'Using our standard wording',
+      isCustom: quoteEmailHasCustom(),
+      onEdit: openQuoteEmailPopup,
+    }));
+  }
+
+  function openQuoteEmailPopup() {
+    if (!window.TGEmailPopup || !window.TGQuoteEmail) return;
+    const T = window.TGQuoteEmail;
+    window.TGEmailPopup.open({
+      onClose: renderQuoteEmailCard,
+      emails: [{
+        key: 'quote',
+        label: 'Quote email',
+        from: () => C.brandName || 'Your travel team',
+        to: 'sarah@example.com (the customer)',
+        tags: T.QUOTE_EMAIL_TAGS,
+        fields: [
+          { key: 'subject', type: 'text', label: 'Subject', maxlength: 200,
+            placeholder: 'Your quote: Maldives, 10 nights', tagsAfter: true },
+          { key: 'body', type: 'textarea', label: 'Message', grow: true,
+            placeholder: 'Leave blank to use our standard wording.',
+            hint: 'Your words replace our message. Your branding, the attachment card and your contact details are added for you. A blank line starts a new paragraph.' },
+        ],
+        read: () => ({ subject: quoteEmailCfg().subject || '', body: quoteEmailCfg().body || '' }),
+        write: (field, value) => { quoteEmailCfg()[field] = value; shell.markDirty(); },
+        render: (v) => {
+          const out = T.renderQuoteEmail({
+            brand: quoteEmailBrand(),
+            quoteTitle: 'Maldives, 10 nights',
+            leadName: 'Sarah Jones',
+            filename: 'quote-maldives.pdf',
+            extraCount: (C.attachments || []).length,
+            template: v,
+          });
+          const note = quoteEmailHasCustom()
+            ? 'Preview uses a sample quote. Tags are filled per real quote; the attachment card and your contact details are added for you.'
+            : 'You are previewing our standard wording, filled with a sample quote. Start typing to replace it with your own.';
+          return { subject: out.subject, html: out.html, note: note };
+        },
+        reset: {
+          label: 'Use our standard wording',
+          isSet: quoteEmailHasCustom,
+          run: (applied) => { C.email = { subject: '', body: '' }; shell.markDirty(); applied(); },
+        },
+      }],
+    });
+  }
+
   function applyToUI() {
+    renderQuoteEmailCard();
     $('brandName').value = C.brandName||''; $('tagline').value = C.tagline||'';
     $('supportEmail').value = C.supportEmail||''; $('supportPhone').value = C.supportPhone||'';
     const showC = C.showContact !== false;
