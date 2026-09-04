@@ -207,7 +207,7 @@
   .modal-actions .ok:hover { background: var(--primary-light); }
   .modal-actions .ok.danger { background: var(--error); border-color: var(--error); }
 
-  /* ===== Reminder email popup editor ===== */
+  /* ===== Reminder email cards (the popup itself is /editor-email-popup.js) ===== */
   .rem-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-2); margin-bottom: 10px; }
   .rem-card-title { font-size: 13px; font-weight: 600; color: var(--text); }
   .rem-card-status { font-size: 11px; color: var(--text-3); margin-top: 2px; }
@@ -215,40 +215,6 @@
   .rem-edit-btn { flex-shrink: 0; height: 32px; padding: 0 14px; font-size: 12px; font-weight: 600; color: var(--primary); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; transition: all .15s; }
   .rem-edit-btn:hover { border-color: var(--accent); color: var(--text); }
 
-  .rem-modal .modal-card { max-width: 1240px; height: min(860px, calc(100vh - 48px)); display: flex; flex-direction: column; padding: 0; overflow: hidden; }
-  .rem-head { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .rem-head h2 { margin: 0; font-size: 15px; }
-  .rem-stages { display: flex; gap: 4px; background: var(--bg-3); padding: 3px; border-radius: 10px; }
-  .rem-stage { font-size: 12px; font-weight: 600; padding: 7px 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text-2); cursor: pointer; transition: all .15s; }
-  .rem-stage.is-active { background: var(--bg); color: var(--text); box-shadow: var(--shadow-sm); }
-  .rem-close { margin-left: auto; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg); color: var(--text-2); font-size: 18px; line-height: 1; cursor: pointer; }
-  .rem-close:hover { color: var(--text); border-color: var(--accent); }
-  .rem-body { flex: 1; display: flex; min-height: 0; }
-  .rem-edit-pane { width: 400px; flex: 0 0 400px; display: flex; flex-direction: column; padding: 18px 20px; border-right: 1px solid var(--border); overflow-y: auto; }
-  .rem-edit-pane .rem-msg { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-bottom: 8px; }
-  .rem-edit-pane .rem-msg textarea { flex: 1; min-height: 220px; }
-  .rem-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 12px; }
-  .re-tag { font-size: 11px; font-weight: 600; padding: 4px 9px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-2); color: var(--text-2); cursor: pointer; transition: all .15s; }
-  .re-tag:hover { border-color: var(--accent); color: var(--text); }
-  .rem-reset { align-self: flex-start; margin-top: 4px; padding: 0; border: 0; background: none; font-size: 12px; font-weight: 600; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-  .rem-reset:hover { color: var(--error); }
-  .rem-preview-pane { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-3); }
-  .rem-envelope { padding: 10px 20px; background: var(--bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .rem-env-row { display: flex; gap: 10px; padding: 2px 0; font-size: 12px; color: var(--text); min-width: 0; }
-  .rem-env-row > span:first-child { width: 52px; flex-shrink: 0; color: var(--text-3); }
-  .rem-env-row strong { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rem-preview-pane iframe { flex: 1; width: 100%; border: 0; background: #f1f5f9; }
-  .rem-foot { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; }
-  .rem-note { flex: 1; font-size: 12px; color: var(--text-2); line-height: 1.4; }
-  .rem-foot .ok { height: 38px; padding: 0 22px; font-size: 13px; font-weight: 600; border-radius: var(--radius-md); background: var(--primary); border: 1px solid var(--primary); color: #fff; cursor: pointer; }
-  .rem-foot .ok:hover { background: var(--primary-light); }
-  @media (max-width: 900px) {
-    .rem-body { flex-direction: column; overflow-y: auto; }
-    .rem-edit-pane { width: auto; flex: none; border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
-    .rem-edit-pane .rem-msg textarea { min-height: 160px; }
-    .rem-preview-pane { flex: none; min-height: 520px; }
-    .rem-preview-pane iframe { min-height: 420px; }
-  }
 </style>
 </head>
 <body>
@@ -665,61 +631,10 @@
   </div>
 </div>
 
-<!-- REMINDER EMAIL POPUP EDITOR -->
-<div class="modal rem-modal" id="rem-modal" hidden>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rem-modal-title">
-    <div class="rem-head">
-      <h2 id="rem-modal-title">Reminder email</h2>
-      <div class="rem-stages" role="tablist" aria-label="Which email">
-        <button type="button" class="rem-stage is-active" role="tab" data-stage="interim" aria-selected="true">Interim / instalment</button>
-        <button type="button" class="rem-stage" role="tab" data-stage="final" aria-selected="false">Final balance</button>
-        <button type="button" class="rem-stage" role="tab" data-stage="cancellation" aria-selected="false">Cancellation</button>
-      </div>
-      <button type="button" class="rem-close" id="rem-close" aria-label="Close">&times;</button>
-    </div>
-    <div class="rem-body">
-      <div class="rem-edit-pane">
-        <div class="field" id="rem-subject-field">
-          <label for="rem-subject">Subject</label>
-          <input type="text" id="rem-subject" maxlength="200" placeholder="Your payment of {amount} is due">
-        </div>
-        <div class="field" id="rem-tags-label" style="margin-bottom:6px;"><label>Tags (click to drop one in, we fill it per booking)</label></div>
-        <div class="rem-tags" id="rem-tags">
-          <button type="button" class="re-tag" data-tag="{firstName}">First name</button>
-          <button type="button" class="re-tag" data-tag="{amount}">Amount due</button>
-          <button type="button" class="re-tag" data-tag="{dueDate}">Due date</button>
-          <button type="button" class="re-tag" data-tag="{balance}">Total balance</button>
-          <button type="button" class="re-tag" data-tag="{bookingRef}">Booking ref</button>
-          <button type="button" class="re-tag" data-tag="{agencyName}">Company name</button>
-          <button type="button" class="re-tag" data-tag="{agencyPhone}">Phone</button>
-          <button type="button" class="re-tag" data-tag="{instalmentNumber}">Instalment no.</button>
-          <button type="button" class="re-tag" data-tag="{instalmentTotal}">Instalment total</button>
-        </div>
-        <div class="field rem-msg">
-          <label for="rem-body">Message</label>
-          <textarea id="rem-body" placeholder="Hello {firstName}&#10;&#10;This is a friendly reminder that the payment of {amount} for your booking is due on {dueDate}."></textarea>
-        </div>
-        <div class="field-help">Leave the message blank to send our standard wording, shown in the preview. A blank line starts a new paragraph. The &ldquo;Pay my balance&rdquo; button, your branding and the footer are added for you.</div>
-        <button type="button" class="rem-reset" id="rem-reset">Use our standard wording</button>
-      </div>
-      <div class="rem-preview-pane">
-        <div class="rem-envelope">
-          <div class="rem-env-row"><span>From</span><strong id="rem-env-from">Your Travel Co</strong></div>
-          <div class="rem-env-row"><span>To</span><span>sarah@example.com (sample booking)</span></div>
-          <div class="rem-env-row"><span>Subject</span><strong id="rem-env-subject"></strong></div>
-        </div>
-        <iframe id="rem-frame" title="Email preview" sandbox=""></iframe>
-      </div>
-    </div>
-    <div class="rem-foot">
-      <span class="rem-note" id="rem-note"></span>
-      <button type="button" class="ok" id="rem-done">Done</button>
-    </div>
-  </div>
-</div>
-
 <!-- Shell behaviour first — exposes window.tgse -->
 <script src="/editor-shell.js"></script>
+<!-- Shared email popup — the one popup every editor uses to write an email -->
+<script src="/editor-email-popup.js"></script>
 <script src="/widget-mybooking.js"></script>
 
   <!-- Guided setup tour (reusable engine + step list) -->
@@ -989,18 +904,31 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
   });
 
-  // ===== Customer emails: popup editor with a live email preview =====
+  // ===== Customer emails: written in the shared popup =====
   // Three emails this widget can send a customer carry client-editable wording:
   // the two balance reminders and the cancellation confirmation. Each is
   // previewed through the SAME module that sends it —
   // public/_reminder-email-template.js and public/_cancellation-email-template.js,
   // both re-exported into api/_lib — so a preview can never drift from the real
   // email. Leaving the message blank previews our standard wording, which is
-  // genuinely what goes out. The preview renders into a sandboxed srcdoc
-  // iframe: no scripts, no parent CSS bleed.
+  // genuinely what goes out.
+  //
+  // The popup chrome itself lives in /editor-email-popup.js and is shared with
+  // every other editor, so all of them look and behave identically. This file
+  // only says WHAT the emails are.
   const REM_ORDER = ['interim', 'final', 'cancellation'];
-  let remStage = 'interim';
-  let remLastField = null;
+
+  const REM_TAGS = [
+    { tag: '{firstName}', label: 'First name' },
+    { tag: '{amount}', label: 'Amount due' },
+    { tag: '{dueDate}', label: 'Due date' },
+    { tag: '{balance}', label: 'Total balance' },
+    { tag: '{bookingRef}', label: 'Booking ref' },
+    { tag: '{agencyName}', label: 'Company name' },
+    { tag: '{agencyPhone}', label: 'Phone' },
+    { tag: '{instalmentNumber}', label: 'Instalment no.' },
+    { tag: '{instalmentTotal}', label: 'Instalment total' },
+  ];
 
   function reEnsure() {
     if (!state.config.reminderEmails || typeof state.config.reminderEmails !== 'object') state.config.reminderEmails = {};
@@ -1071,35 +999,62 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     return { subject: out.subject, html: out.html, note: note };
   }
 
-  // One descriptor per editable email: where its copy lives, and how to draw it.
-  const REM_EMAILS = {
-    interim: {
-      label: 'Interim / instalment reminder', hasSubject: true, hasTags: true,
-      read: function () { reEnsure(); return state.config.reminderEmails.interim; },
-      write: function (part, v) { reEnsure(); state.config.reminderEmails.interim[part] = v; },
-      clear: function () { reEnsure(); state.config.reminderEmails.interim = { subject: '', body: '' }; },
-      preview: function (t) { return remReminderPreview('interim', t.subject || '', t.body || ''); },
-    },
-    final: {
-      label: 'Final balance reminder', hasSubject: true, hasTags: true,
-      read: function () { reEnsure(); return state.config.reminderEmails.final; },
-      write: function (part, v) { reEnsure(); state.config.reminderEmails.final[part] = v; },
-      clear: function () { reEnsure(); state.config.reminderEmails.final = { subject: '', body: '' }; },
-      preview: function (t) { return remReminderPreview('final', t.subject || '', t.body || ''); },
-    },
-    cancellation: {
-      // The renderer writes this email's subject itself and fills no merge tags
-      // (it escapes and paragraph-splits the prose), so both controls are hidden.
-      label: 'Cancellation confirmation', hasSubject: false, hasTags: false,
-      read: function () { return { subject: '', body: String(state.config.cancelEmailMessage || '') }; },
-      write: function (part, v) { if (part === 'body') state.config.cancelEmailMessage = v; },
-      clear: function () { state.config.cancelEmailMessage = ''; },
-      preview: function (t) { return remCancellationPreview(t.body || ''); },
-    },
-  };
+  function remMarkDirty() {
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+  }
+
+  // One descriptor per editable email, in the shape the shared popup expects.
+  function remEmail(stage) {
+    const reminder = stage !== 'cancellation';
+    const label = stage === 'interim' ? 'Interim / instalment reminder'
+      : stage === 'final' ? 'Final balance reminder'
+      : 'Cancellation confirmation';
+    const read = reminder
+      ? () => { reEnsure(); return state.config.reminderEmails[stage]; }
+      : () => ({ subject: '', body: String(state.config.cancelEmailMessage || '') });
+    return {
+      key: stage,
+      label: label,
+      tabLabel: stage === 'interim' ? 'Interim / instalment' : stage === 'final' ? 'Final balance' : 'Cancellation',
+      from: () => remAgency().name,
+      to: 'sarah@example.com (sample booking)',
+      // The cancellation renderer writes its own subject and fills no merge
+      // tags, so it offers neither rather than showing controls that do nothing.
+      tags: reminder ? REM_TAGS : [],
+      fields: reminder ? [
+        { key: 'subject', type: 'text', label: 'Subject', maxlength: 200, placeholder: 'Your payment of {amount} is due', tagsAfter: true },
+        { key: 'body', type: 'textarea', label: 'Message', grow: true,
+          placeholder: 'Hello {firstName}\n\nThis is a friendly reminder that the payment of {amount} for your booking is due on {dueDate}.',
+          hint: 'Leave the message blank to send our standard wording, shown in the preview. A blank line starts a new paragraph. The "Pay my balance" button, your branding and the footer are added for you.' },
+      ] : [
+        { key: 'body', type: 'textarea', label: 'Message', grow: true,
+          placeholder: 'Leave blank to use our standard confirmation wording.',
+          hint: 'Leave blank to send our standard wording, shown in the preview. A blank line starts a new paragraph. The subject line, your branding and the reference table are added for you.' },
+      ],
+      read: read,
+      write: (key, value) => {
+        if (reminder) { reEnsure(); state.config.reminderEmails[stage][key] = value; }
+        else if (key === 'body') state.config.cancelEmailMessage = value;
+        remMarkDirty();
+      },
+      render: (v) => reminder
+        ? remReminderPreview(stage, v.subject || '', v.body || '')
+        : remCancellationPreview(v.body || ''),
+      reset: {
+        label: 'Use our standard wording',
+        isSet: () => { const t = read(); return !!((t.subject || '').trim() || (t.body || '').trim()); },
+        run: (applied) => showConfirm('Use our standard wording?', 'Your own wording for this email will be removed.', () => {
+          if (reminder) { reEnsure(); state.config.reminderEmails[stage] = { subject: '', body: '' }; }
+          else state.config.cancelEmailMessage = '';
+          remMarkDirty();
+          applied();
+        }),
+      },
+    };
+  }
 
   function remHasCustom(stage) {
-    const t = REM_EMAILS[stage].read();
+    const t = remEmail(stage).read();
     return !!(t.body && t.body.trim());
   }
   // Sidebar cards: which emails carry the client's own wording.
@@ -1112,84 +1067,15 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       el.classList.toggle('is-custom', custom);
     });
   }
-  function remRenderPreview() {
-    const def = REM_EMAILS[remStage];
-    const out = def.preview(def.read());
-    document.getElementById('rem-env-from').textContent = remAgency().name;
-    document.getElementById('rem-env-subject').textContent = out.subject;
-    document.getElementById('rem-frame').srcdoc = out.html;
-    document.getElementById('rem-note').textContent = out.note;
-  }
   function remOpen(stage) {
-    const def = REM_EMAILS[stage];
-    if (!def) return;
-    remStage = stage;
-    const t = def.read();
-    document.querySelectorAll('.rem-stage').forEach((b) => {
-      const on = b.dataset.stage === stage;
-      b.classList.toggle('is-active', on);
-      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    if (!window.TGEmailPopup) return;
+    window.TGEmailPopup.open({
+      startKey: stage,
+      emails: REM_ORDER.map(remEmail),
+      onClose: remRenderStatus,
     });
-    document.getElementById('rem-modal-title').textContent = def.label;
-    document.getElementById('rem-subject-field').hidden = !def.hasSubject;
-    document.getElementById('rem-tags-label').hidden = !def.hasTags;
-    document.getElementById('rem-tags').hidden = !def.hasTags;
-    document.getElementById('rem-subject').value = t.subject || '';
-    document.getElementById('rem-body').value = t.body || '';
-    remLastField = null;
-    document.getElementById('rem-modal').hidden = false;
-    remRenderPreview();
-    document.getElementById('rem-body').focus();
-  }
-  function remClose() {
-    document.getElementById('rem-modal').hidden = true;
-    remRenderStatus();
   }
   document.querySelectorAll('.rem-edit-btn').forEach((b) => b.addEventListener('click', () => remOpen(b.dataset.stage)));
-  document.querySelectorAll('.rem-stage').forEach((b) => b.addEventListener('click', () => remOpen(b.dataset.stage)));
-  document.getElementById('rem-close').addEventListener('click', remClose);
-  document.getElementById('rem-done').addEventListener('click', remClose);
-  document.getElementById('rem-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) remClose(); });
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (!document.getElementById('confirm-modal').hidden) return; // confirm stacks on top
-    if (!document.getElementById('rem-modal').hidden) remClose();
-  });
-  [['rem-subject', 'subject'], ['rem-body', 'body']].forEach(([id, part]) => {
-    const el = document.getElementById(id);
-    el.addEventListener('focus', () => { remLastField = el; });
-    el.addEventListener('input', () => {
-      REM_EMAILS[remStage].write(part, el.value);
-      remRenderPreview();
-      if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
-    });
-  });
-  document.querySelectorAll('.re-tag').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const tag = chip.getAttribute('data-tag') || '';
-      const el = remLastField || document.getElementById('rem-body');
-      if (!el) return;
-      const s = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
-      const e = typeof el.selectionEnd === 'number' ? el.selectionEnd : el.value.length;
-      el.value = el.value.slice(0, s) + tag + el.value.slice(e);
-      el.focus();
-      const pos = s + tag.length;
-      try { el.setSelectionRange(pos, pos); } catch (err) { /* not selectable */ }
-      el.dispatchEvent(new Event('input'));
-    });
-  });
-  document.getElementById('rem-reset').addEventListener('click', () => {
-    const def = REM_EMAILS[remStage];
-    const t = def.read();
-    if (!(t.subject || '').trim() && !(t.body || '').trim()) return;
-    showConfirm('Use our standard wording?', 'Your own wording for this email will be removed.', () => {
-      def.clear();
-      document.getElementById('rem-subject').value = '';
-      document.getElementById('rem-body').value = '';
-      remRenderPreview();
-      if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
-    });
-  });
   remRenderStatus();
 
   // ===== Brand =====
