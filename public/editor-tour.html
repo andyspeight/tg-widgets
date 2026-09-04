@@ -148,6 +148,15 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<!-- Shared lead-email settings: the team notification and the welcome email.
+     Both were always sendable by this widget (it hands leads to dispatchLead)
+     but there was no UI to configure either. -->
+<script src="/editor-email-popup.js"></script>
+<script src="/editor-lead-emails.js"></script>
+<script type="module">
+  import { renderWelcomeEmail, welcomeCtaIsUsable } from '/_welcome-email-template.js';
+  window.TGWelcomeEmail = { renderWelcomeEmail, welcomeCtaIsUsable };
+</script>
 <script src="/widget-tour.js"></script>
 <script>
 /* ============================================================================
@@ -384,6 +393,19 @@
     return sec;
   }
 
+  // Created once and reused, so rebuilding the sidebar does not remount the
+  // lead-email settings (which would refetch and lose in-flight edits).
+  const leadEmailHost = document.createElement('div');
+  let leadEmails = null;
+  function mountLeadEmails() {
+    if (leadEmails || !window.TGLeadEmails) return;
+    leadEmails = window.TGLeadEmails.mount({
+      mount: leadEmailHost,
+      widgetType: 'tour',
+      getBrandName: () => (C && C.tour && C.tour.agencyName) || '',
+    });
+  }
+
   // ── Build the whole form from C (called at boot + after load) ──
   function buildForm() {
     const root = $('tb-build');
@@ -532,6 +554,13 @@
     }));
 
     // Design
+    // The two emails this widget can already send. The host element is created
+    // once and re-appended on every rebuild, so the component keeps its loaded
+    // state instead of re-fetching on each keystroke elsewhere in the form.
+    root.append(section('Emails to send', 'What goes out when someone sends an enquiry.', false, (b) => {
+      b.append(leadEmailHost);
+    }));
+
     root.append(section('Design', 'Brand the page to match the agency site.', false, (b) => {
       const d = C.design;
       b.append(mk('div', { class: 'row2' },
@@ -663,6 +692,8 @@
     scriptFile: 'widget-tour-card.js',
     getConfig: () => C,
     setConfig: (c) => { C = deepMerge(starter(), c); buildForm(); renderPreview(); },
+    onAfterSave: () => { mountLeadEmails(); if (leadEmails) leadEmails.reload(); },
+
     onLoginSuccess: () => loadFromUrl(),
   });
 
@@ -698,7 +729,7 @@
       .then(d => {
         if (d && d.config) C = deepMerge(starter(), d.config);
         if (d && d.name) $('name-input').value = d.name;
-        buildForm(); renderPreview();
+        buildForm(); renderPreview(); mountLeadEmails();
       })
       .catch(() => { tgse.toast('Failed to load tour', 'err'); buildForm(); renderPreview(); });
   }

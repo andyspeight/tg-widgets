@@ -363,6 +363,17 @@
 
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+            <span class="tgse-section-label">Emails to send</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div id="lead-emails"></div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
             <span class="tgse-section-label">Payments</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -447,6 +458,15 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<!-- Shared lead-email settings: the team notification and the welcome email.
+     Both were always sendable by this widget (it hands leads to dispatchLead)
+     but there was no UI to configure either. -->
+<script src="/editor-email-popup.js"></script>
+<script src="/editor-lead-emails.js"></script>
+<script type="module">
+  import { renderWelcomeEmail, welcomeCtaIsUsable } from '/_welcome-email-template.js';
+  window.TGWelcomeEmail = { renderWelcomeEmail, welcomeCtaIsUsable };
+</script>
 <script src="/widget-trips.js"></script>
 <script src="/widget-trips-page.js"></script>
 
@@ -524,6 +544,8 @@
     onTemplates: () => tgse.toast('Templates coming soon for Group Trips', 'ok'),
     onThemeToggle: (isDark) => { C.design.theme = isDark ? 'dark' : 'light'; render(); },
     onDesignMode: () => {},
+    onAfterSave: () => { mountLeadEmails(); if (leadEmails) leadEmails.reload(); },
+
     onLoginSuccess: () => loadFromUrl(),
   });
 
@@ -752,9 +774,20 @@
       .then(d => {
         if (d && d.config) { resetContentForLoad(); C = deepMerge(C, d.config); }
         if (d && d.name) document.getElementById('name-input').value = d.name;
-        syncUIFromState(); render();
+        syncUIFromState(); render(); mountLeadEmails();
       })
       .catch(() => { tgse.toast('Failed to load widget', 'err'); syncUIFromState(); render(); });
+  }
+
+  // The two emails this widget can already send, in the shared settings block.
+  let leadEmails = null;
+  function mountLeadEmails() {
+    if (leadEmails || !window.TGLeadEmails) return;
+    leadEmails = window.TGLeadEmails.mount({
+      mount: document.getElementById('lead-emails'),
+      widgetType: 'trips',
+      getBrandName: () => (C && C.brandName) || '',
+    });
   }
 
   // Boot — wait for shell auth to resolve; never call isLoggedIn() synchronously
