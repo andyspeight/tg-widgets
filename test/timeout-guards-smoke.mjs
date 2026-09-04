@@ -22,6 +22,9 @@ const STRICT_FILES = [
   'api/airport-content.js', 'api/attraction-content.js', 'api/events-content.js',
   'api/attraction-search.js', 'api/airport-search.js', 'api/destination-search.js',
   'api/offer-draft.js', 'api/faq-translate.js', 'api/enquiry-translate.js',
+  // The destination-card family (Top 10 list, Inspirator deck and its lead
+  // intake). Added 4 Sep 2026 with those widgets.
+  'api/destination-list.js', 'api/destination-deck.js', 'api/inspirator-lead.js',
 ];
 for (const f of STRICT_FILES) {
   const src = read(f);
@@ -60,10 +63,17 @@ ok(/signal:\s*AbortSignal\.timeout\(WRITE_TIMEOUT_MS\)/.test(submit),
 
 // The three content widgets guard their fetch with a 9s AbortController so a
 // hung upstream reaches the error state instead of an eternal loading skeleton.
-for (const f of ['public/widget-attraction.js', 'public/widget-airport.js', 'public/widget-spotlight.js']) {
+for (const f of ['public/widget-attraction.js', 'public/widget-airport.js', 'public/widget-spotlight.js',
+                 'public/widget-top10.js', 'public/widget-inspirator.js']) {
   const src = read(f);
-  ok(/ctrl\.abort\(\), 9000/.test(src) && /signal: ctrl\.signal/.test(src),
-    `${f}: content fetch has a 9s abort guard`);
+  // Match the guard by SHAPE, not by one spelling of it. The old pattern was
+  // the literal `ctrl.abort(), 9000`, which only matches the arrow shorthand;
+  // widget-airport.js writes the same guard as
+  // `setTimeout(function () { ctrl.abort(); }, 9000)` and was reported failing
+  // for months while being entirely correct. (4 Sep 2026.)
+  const guarded = /setTimeout\([\s\S]{0,60}?ctrl\.abort\(\)[\s\S]{0,20}?,\s*9000\)/.test(src)
+    && /signal:\s*ctrl\.signal/.test(src);
+  ok(guarded, `${f}: content fetch has a 9s abort guard`);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

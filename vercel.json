@@ -206,6 +206,10 @@
       "destination": "/demo-top10.html"
     },
     {
+      "source": "/demo-inspirator",
+      "destination": "/demo-inspirator.html"
+    },
+    {
       "source": "/demo-reviews",
       "destination": "/demo-reviews.html"
     },
@@ -424,6 +428,10 @@
     {
       "source": "/editor-top10",
       "destination": "/editor-top10.html"
+    },
+    {
+      "source": "/editor-inspirator",
+      "destination": "/editor-inspirator.html"
     },
     {
       "source": "/editor-reviews",
@@ -1493,6 +1501,23 @@
     },
     {
       "source": "/widget-top10.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-inspirator.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

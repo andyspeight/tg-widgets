@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspirator Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Destinations</span><span>Offers</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Inspirator</h1>
+  <p class="lede">
+    For the customer who cannot answer "where do you want to go?" but can answer "do you like the
+    look of this?". They swipe through real destinations, keep the ones they like, and the agent
+    receives a shortlist with the taste behind it rather than an email address and a blank box.
+    Drag a card, use the buttons, or press the left and right arrow keys.
+  </p>
+
+  <div class="controls">
+    <strong>Deck</strong>
+    <button type="button" data-src="resort" aria-pressed="true">Resorts</button>
+    <button type="button" data-src="city">Cities</button>
+    <button type="button" data-src="country">Countries</button>
+    <button type="button" data-src="resort,city">Mixed</button>
+  </div>
+
+  <div class="controls">
+    <strong>Narrow to</strong>
+    <button type="button" data-tag="" aria-pressed="true">Everything</button>
+    <button type="button" data-tag="Beach">Beach</button>
+    <button type="button" data-tag="Families">Families</button>
+    <button type="button" data-tag="Winter Sun">Winter sun</button>
+    <button type="button" data-tag="Honeymoons">Honeymoons</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="page" id="page" style="max-width:560px">
+    <div data-tg-widget="inspirator" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>No prices, and no search.</b> Offers are cache-only across the suite, so a swipe deck can
+    never run a live availability search — one per card would be thousands a week. The deck is
+    destination content, and the shortlist goes to a human who quotes it. The enquiry lands in the
+    same lead router as every other form in the suite, so it reaches the agency's inbox, sheet,
+    webhook or CRM exactly like a contact form does, but with the destinations and the inferred
+    taste already attached.
+  </p>
+
+</div>
+
+<script src="/widget-inspirator.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  var state = { src: 'resort', tag: '', theme: 'light' };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return {
+      levels: state.src.split(','),
+      tags: state.tag ? [state.tag] : [],
+      deckSize: 12,
+      theme: state.theme,
+      headline: 'Not sure where to go?',
+      intro: 'Swipe through a few ideas and keep the ones you like. We will turn your shortlist into a proper suggestion.',
+      resultBody: 'Send it over and one of our team will come back with somewhere that fits.',
+      privacyUrl: '/privacy',
+    };
+  }
+
+  function snippet() {
+    var shown = { levels: state.src.split(','), deckSize: 12 };
+    if (state.tag) shown.tags = [state.tag];
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="inspirator"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-inspirator.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) {
+            nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          }
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGInspiratorWidget) { setTimeout(boot, 40); return; }
+    widget = new window.TGInspiratorWidget(mount, config());
+    group('src', 'src');
+    group('tag', 'tag');
+    group('theme', 'theme');
+    snippet();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

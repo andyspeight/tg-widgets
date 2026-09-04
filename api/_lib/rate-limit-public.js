@@ -77,6 +77,14 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_TRIP_AVAIL_PER_MIN', 60), seconds: 60 },
         { name: 'h', max: envInt('RL_TRIP_AVAIL_PER_HR', 1200), seconds: 3600 },
       ];
+    // Inspirator shortlist enquiry — a public lead write. Tighter than popup:
+    // a visitor swipes a deck once and sends one shortlist, so a second
+    // submission in the same minute is almost certainly not a person.
+    case 'inspirator-lead':
+      return [
+        { name: 'm', max: envInt('RL_INSPIRATOR_PER_MIN', 8), seconds: 60 },
+        { name: 'h', max: envInt('RL_INSPIRATOR_PER_HR', 60), seconds: 3600 },
+      ];
     default:
       return null;
   }

@@ -604,8 +604,14 @@
     async _load() {
       const url = this._listUrl();
       if (!url) { this.items = []; this._render(); return; }
+      // A 9s abort budget, matching the rest of the content family. Without it
+      // a hung upstream leaves the visitor on the loading skeleton forever
+      // instead of reaching the error state. Guarded by test:timeout-guards.
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 9000) : null;
       try {
-        const res = await fetch(url, { credentials: 'omit' });
+        const res = await fetch(url,
+          Object.assign({ credentials: 'omit' }, ctrl ? { signal: ctrl.signal } : {}));
         if (!res.ok) throw new Error('List fetch failed (' + res.status + ')');
         const data = await res.json();
         if (this.destroyed) return;
@@ -619,6 +625,8 @@
         console.error('[TG Top 10] ' + (err && err.message ? err.message : err));
         this.error = true;
         this.items = [];
+      } finally {
+        if (timer) clearTimeout(timer);
       }
       this._render();
     }

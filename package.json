@@ -172,7 +172,10 @@
     "test:destination-photos": "node test/destination-photos-smoke.mjs",
     "test:top10-list": "node test/top10-list-smoke.mjs",
     "test:top10-render": "node test/widget-top10-render.test.mjs",
-    "test:top10": "npm run test:top10-list && npm run test:top10-render"
+    "test:top10": "npm run test:top10-list && npm run test:top10-render",
+    "test:inspirator-deck": "node test/inspirator-deck-smoke.mjs",
+    "test:inspirator-render": "node test/widget-inspirator-render.test.mjs",
+    "test:inspirator": "npm run test:inspirator-deck && npm run test:inspirator-render"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

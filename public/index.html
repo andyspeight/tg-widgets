@@ -487,6 +487,21 @@ const WIDGETS = [
     access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'inspirator',
+    name: 'Inspirator',
+    airtableType: 'Inspirator',
+    description: 'Swipe-to-discover holiday ideas for the customer who cannot answer "where do you want to go?" but can answer "do you like the look of this?". They swipe real destinations, keep the ones they like, and you receive a shortlist with the taste behind it rather than an email address and a blank box. Filter the deck by level and by what it is good for. No prices, no live search.',
+    category: 'Lead Gen',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<rect x="3" y="4" width="13" height="16" rx="2"/><path d="M19 7v11a2 2 0 0 1-2 2"/><path d="M8 11h5M8 15h3"/>'},
+    color: '#F0518A',
+    editorUrl: '/editor-inspirator',
+    demoUrl: '/demo-inspirator',
+    widgetTag: 'inspirator',
+    scriptFile: 'widget-inspirator.js',
+    access: { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'weather',
     name: 'Weather',
     airtableType: 'Weather',
@@ -2463,6 +2478,55 @@ function loadMiniPreview(w) {
          attribution:'',tags:[],flightTime:'',bestMonths:'May to Dec'},
       ],
     });
+  }
+
+  if (w.id === 'inspirator') {
+    container.innerHTML = `
+      <div style="
+        width:700px;height:340px;background:#FFFFFF;border-radius:16px;
+        font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+        overflow:hidden;display:flex;align-items:center;gap:28px;
+        padding:0 34px;box-sizing:border-box;">
+        <div style="position:relative;width:210px;height:280px;flex:none;">
+          <div style="position:absolute;inset:0;top:18px;transform:scale(.91);border-radius:18px;background:#E2E8F0;"></div>
+          <div style="position:absolute;inset:0;top:9px;transform:scale(.955);border-radius:18px;background:#CBD5E1;"></div>
+          <div style="
+            position:absolute;inset:0;border-radius:18px;overflow:hidden;
+            background:linear-gradient(150deg,#1B2B5B 0%,#00B4D8 100%);
+            box-shadow:0 18px 40px -16px rgba(27,43,91,.45);">
+            <div style="
+              position:absolute;inset:0;
+              background:linear-gradient(to top,rgba(6,10,20,.9) 0%,rgba(6,10,20,.2) 55%,transparent 100%);"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;padding:16px;color:#fff;">
+              <div style="font-size:10px;font-weight:650;letter-spacing:.09em;text-transform:uppercase;opacity:.82;">Greek Islands</div>
+              <div style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:3px;">Santorini</div>
+              <div style="font-size:12px;opacity:.9;margin-top:5px;line-height:1.4;">Whitewashed villages on the rim of a drowned volcano.</div>
+            </div>
+            <div style="
+              position:absolute;top:16px;left:14px;padding:5px 12px;border-radius:8px;
+              border:3px solid #34D399;color:#34D399;font-size:12px;font-weight:800;
+              letter-spacing:.1em;text-transform:uppercase;transform:rotate(-11deg);">Save</div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:26px;font-weight:700;color:#0F172A;letter-spacing:-.02em;">Not sure where to go?</div>
+          <div style="font-size:14px;color:#475569;margin-top:9px;line-height:1.55;max-width:330px;">
+            Swipe through a few ideas and keep the ones you like. We turn your shortlist into a proper suggestion.
+          </div>
+          <div style="display:flex;gap:12px;margin-top:20px;align-items:center;">
+            <div style="width:52px;height:52px;border-radius:50%;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;color:#E4573D;">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </div>
+            <div style="width:38px;height:38px;border-radius:50%;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;color:#64748B;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3.5 13a9 9 0 1 0 2.1-5.7L3 10"/></svg>
+            </div>
+            <div style="width:52px;height:52px;border-radius:50%;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;color:#0E9F6E;">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return;
   }
 
   if (w.id === 'airport') {

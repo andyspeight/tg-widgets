@@ -34,6 +34,11 @@ export const KNOWN_WIDGETS = [
   // form fill. The meeting details (ref, type, start/end, timezones, join
   // link) ride in lead.custom; the travel.* block stays empty.
   'appointment',
+  // Inspirator — a swipe-to-discover shortlist. The destinations the visitor
+  // kept map to travel.destinations and the taste inferred from their Best For
+  // tags maps to travel.interests, so the agent receives intent, not just an
+  // email address. Swipe counts ride in custom.
+  'inspirator',
 ];
 
 export const KNOWN_DESTINATIONS = [

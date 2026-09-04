@@ -429,6 +429,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Event Menu',
   'Venue Guide',
   'Top 10 Destinations',
+  'Inspirator',
 ];
 
 // Per-plan widget count limits, keyed by widgetType.
@@ -457,6 +458,7 @@ const PLAN_WIDGET_LIMITS = {
   'Airport Spotlight':     { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Attraction Spotlight':  { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Top 10 Destinations':   { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Inspirator':            { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
   'Weather':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Prayer Times':          { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'Currency Converter':    { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
@@ -560,6 +562,8 @@ const WIDGET_TYPE_ALIASES = {
   'top10':                 'Top 10 Destinations',
   'top-10':                'Top 10 Destinations',
   'top10-destinations':    'Top 10 Destinations',
+  'inspirator':            'Inspirator',
+  'inspiration':           'Inspirator',
   'weather':           'Weather',
   'prayer':            'Prayer Times',
   'prayer-times':      'Prayer Times',
