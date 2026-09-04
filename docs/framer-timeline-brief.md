@@ -502,8 +502,17 @@ merge consumed it, and the page keeps its node ids (page `JblnZB_PD`).
 
 He then asked for a banner on the HOME page, in the gap between the hero and
 the "One platform, every supplier you need" section, to send people to the
-new page. Built on a NEW branch `home-roadmap-banner` (id `abbduxbdm`, from
-main). Not merged, not published.
+new page. Built on a new branch `home-roadmap-banner` (id `abbduxbdm`, from main) and
+MERGED INTO MAIN on Andy's word the same evening. The merge was verified on
+main: active branch back to `main`, the branch consumed (only `main` remains),
+"Roadmap Banner" `YkvDT2HNv` sitting at index 1 between Hero and Supplier
+Marquee, and screenshots of main at Desktop and Phone showing it intact.
+Publishing is Andy's, not Claude's.
+
+Note on the merge call: `framer.agent.mergeBranch("main")` returns UNDEFINED,
+not a result object. A script that logs `JSON.stringify(res).slice(...)`
+throws AFTER the merge has already happened, which reads like a failure but
+is not. Verify state rather than trusting the throw.
 
 Home page is `augiA20Il`; breakpoints Desktop `WQLkyLRf1`, Tablet
 `VupmqOTdF`, Phone `KWaNhfmwl`. Its desktop sections in order: Hero
