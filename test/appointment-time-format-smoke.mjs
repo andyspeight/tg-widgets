@@ -41,7 +41,9 @@ function sliceBalanced(src, fromIdx) {
 function ex(src, sig) { const at = src.indexOf(sig); if (at < 0) throw new Error('not found: ' + sig); return sig + sliceBalanced(src, at + sig.length); }
 
 const url = (p) => new URL('../' + p, import.meta.url);
-const mail = readFileSync(url('api/_lib/calendar/mail.js'), 'utf8');
+// whenString and timeLine moved to the shared renderer (Sep 2026) so the
+// Appointment editor can preview the real emails; mail.js re-exports whenString.
+const mail = readFileSync(url('public/_appointment-email-template.js'), 'utf8');
 
 // ── Behavioural: the real whenString ─────────────────────────────────────────
 // eslint-disable-next-line no-eval
@@ -60,7 +62,8 @@ ok(/at 12:00pm$/.test(whenString('2026-07-17T12:00:00+02:00', 'Europe/Paris')), 
 // ── Source guard: no formatter in the suite still uses the fragile hour12 ─────
 // The buggy signature was `minute: '2-digit', hour12: true` (any spacing/quotes).
 const FILES = {
-  'api/_lib/calendar/mail.js': 2,
+  'public/_appointment-email-template.js': 2,
+  'api/_lib/calendar/mail.js': 0,
   'public/widget-appointment.js': 1,
   'public/book-appointment.html': 1,
   'public/appointment-share.html': 2,
