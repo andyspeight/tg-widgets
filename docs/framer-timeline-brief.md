@@ -768,10 +768,51 @@ wide screenshot, which is exactly the 4:3 the frame wants. Uploaded as
 `roadmap-page-preview-v2.jpg` and set on `QIuL2sWyi`. Do this whenever the top
 of the roadmap page changes.
 
-### Flag for Andy
+### The widget number, corrected
 
-The article says Travelgenix offers "over 100 integrated widgets" and onboarded
-"over 100 new travel clients in 2026". Our own pages say 61 embeddable widgets.
-The press card and the home strip deliberately quote only the headline and do
-not repeat either figure, but the discrepancy is worth a word with the
-publication.
+I first read the article's "over 100 integrated widgets" as an overstatement
+against our 61. It is the opposite. Andy: "We shipped 61 new widgets in the
+period, we have over 150." So 61 is NEW widgets shipped May to September, and
+the suite as a whole is over 150. The publication undercounted.
+
+This means the roadmap hero stat card was underselling, because "61 embeddable
+widgets" reads as the whole suite. The label is now "new widgets". The number,
+which Andy told me not to touch, is unchanged.
+
+## Press logo and the widget label, 4 Sep 2026
+
+Same branch, `press-coverage-ttw` (`a9wlptvxr`). Still not merged.
+
+**The publication logo joined the "As featured in" row.** That row is a SECOND
+code component, `PressLogos.tsx` (`codeFile/G5BHE7e`), sitting inside the Press
+Hero at "Featured In" `OP_JxcRqp`. It holds a `LOGOS` array of
+`{ src, alt, h }` where `src` is a base64 data URI and `h` is the rendered
+height in px, laid out as a centred wrapping flex row. So the press page has
+its coverage in `PressGrid.tsx` and its mastheads in `PressLogos.tsx`, and a
+new publication needs adding to BOTH.
+
+Existing heights: Travel Weekly 24, Travolution 33, TTG Media 43. The Travel
+and Tour World lockup went in at 40 first and its secondary line was mush, so
+it is 48. Source:
+`https://www.travelandtourworld.com/wp-content/themes/TTW.v3.0/images/TTW-Logo.svg`
+(783x310, CorelDRAW), base64 encoded straight in, no rasterising. The other
+entries are SVG data URIs too, so this matches. Verified at all three press
+breakpoints, Desktop `s0AA3Wi0w`, `OdfdP5IFR` and `JQ5BJM1mU`; the row wraps
+and TTW takes its own line on the smallest.
+
+Getting a masthead when the publisher blocks bots: their own homepage HTML with
+a desktop browser `User-Agent`, then grep the `<img>` tags and any absolute URL
+containing "logo". Both an SVG and a PNG turned up; the PNG carried a lot of
+dead white space on the right, the SVG was already tight.
+
+**The roadmap stat card label.** `H99Xgr6ry` changed from "embeddable widgets"
+to "new widgets" via `replaceText`, so the card now reads
+"5 months of shipping | 2,212 updates shipped | 61 new widgets". Andy's rule
+that the numbers in that card do not change still holds; this was the label
+misrepresenting what the number counts.
+
+**The banner thumbnail, again.** Changing the stat label changed the top of
+`/roadmap`, so `QIuL2sWyi` was re-shot a second time as
+`roadmap-page-preview-v3.jpg`. Any edit to the top of that page means a
+re-shoot; it is cheap, and a thumbnail that contradicts the page it links to is
+worse than no thumbnail.
