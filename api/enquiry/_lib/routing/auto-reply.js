@@ -38,6 +38,8 @@ const F = {
   accentColour:      'fldD113UMPvDR4zOL',
   routingEmailTo:    'fldlu1HcErBfp2wh2',
   autoReplyHTML:     'fldTocc7Yd5IurXVl',
+  autoReplyMessage:  'fld1mtgr6TXZj192p',
+  autoReplySubject:  'fldN5C4L7TyUAWjxI',
   thankYouMessage:   'fldiB3PkfcsHRKEWd',
   routingLunaChat:   'fldrnewg30EV3xMzY',
 };
@@ -109,6 +111,10 @@ function buildTokens({ form, payload, reference, submissionId }) {
     buttonColour: form.fields[F.buttonColour] || '#1B2B5B',
     accentColour: form.fields[F.accentColour] || '#00B4D8',
     lunaChatEnabled: !!form.fields[F.routingLunaChat],
+    // The client's own message, written as prose in the editor's email popup.
+    // The default template escapes and paragraph-splits it in place of our
+    // built-in "what happens next" steps. Blank means our standard wording.
+    customMessage: (form.fields[F.autoReplyMessage] || '').replace(/\{firstName\}/g, f.first_name || ''),
   };
 }
 
@@ -161,7 +167,17 @@ export default async function sendAutoReply(ctx) {
     ? renderTemplate(customHtml, tokens)
     : renderDefaultAutoReplyEmail(tokens);
 
-  const subject = `Your enquiry ${reference} — we've got it`;
+  // The client can write their own subject in the editor; {token} placeholders
+  // are filled from the same map as the body. Ours is the fallback. Subject
+  // lines are plain text, so tokens go in RAW rather than HTML-escaped —
+  // escaping here would put &#39; into the customer's inbox.
+  const customSubject = (form.fields[F.autoReplySubject] || '').trim();
+  const subject = customSubject
+    ? customSubject.replace(/\{(\w+)\}/g, (m, key) => {
+        const value = tokens[key];
+        return value === undefined || value === null ? '' : String(value);
+      }).slice(0, 200).trim() || `Your enquiry ${reference} — we've got it`
+    : `Your enquiry ${reference} — we've got it`;
 
   // Build the from identity. The travel agent's business name (their Client
   // Name in the form config) so the customer's inbox shows "From: Travelaire"

@@ -77,6 +77,7 @@
     "test:payment-reminders": "node test/payment-reminders-smoke.mjs",
     "test:reminder-email-custom": "node test/reminder-email-custom-smoke.mjs",
     "test:reminder-email-editor": "node test/reminder-email-editor-smoke.mjs",
+    "test:enquiry-email-editor": "node test/enquiry-email-editor-smoke.mjs",
     "test:worldmap-departures": "node test/worldmap-departure-filter-smoke.mjs",
     "test:worldmap-header-stacking": "node test/worldmap-header-stacking-smoke.mjs",
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",

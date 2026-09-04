@@ -76,6 +76,8 @@ const EF = {
   routingAutoReply:    'fldmqrE0BG0xuWTMx',
   emailTemplateHTML:   'fldmboZUbr73kiuyJ',
   autoReplyHTML:       'fldTocc7Yd5IurXVl',
+  autoReplyMessage:    'fld1mtgr6TXZj192p',
+  autoReplySubject:    'fldN5C4L7TyUAWjxI',
   routingWebhook:      'fldH7rQpSid6uqw0p',
   webhookURL:          'fldNyUqKUUDElxrGS',
   webhookSecret:       'fldcoECqbqhWSj7eW',
