@@ -547,8 +547,14 @@ accommodation results page (search bar, filter sidebar, two hotel cards with
 prices). It replaces the Appointment Scheduler stand-in that was sitting in
 the June mockup frame, which never matched that card's headline anyway.
 
-Built on branch `june-booking-mockup` (id `zfci6ee5k`, from main). NOT merged
-and NOT published: waiting on Andy.
+Built on branch `june-booking-mockup` (id `zfci6ee5k`, from main) and MERGED
+INTO MAIN on Andy's word ("all ok, as it is please merge") on 4 Sep. Verified
+on main: active branch back to `main`, the branch consumed (only `main`
+remains), the June frame carrying the new asset at aspectRatio 1.6 with the new
+caption and blurb, and a screenshot of main showing the row. The home page
+still reads Hero, Roadmap Banner, Supplier Marquee, so the banner survived the
+merge. NOT PUBLISHED: main now holds both the banner and this, and one
+publish from Andy puts them live together.
 
 What changed on `/roadmap`, June row `k9HCs5C4g`:
 
