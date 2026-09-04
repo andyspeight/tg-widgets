@@ -558,9 +558,12 @@
             <div class="toggle-row"><span>Online cancellation<small>Let customers cancel a product from the widget — they see the policy and charges before confirming.</small></span><button class="switch on" data-display="showCancel" type="button"></button></div>
             <div class="toggle-row"><span>Send cancellation email<small>Email the traveller a confirmation when they cancel a product. Turn off if you'd rather handle this yourself.</small></span><button class="switch on" data-display="cancelEmail" type="button"></button></div>
             <div class="toggle-row"><span>Online amendments<small>Let customers send a change request from the widget. It notifies the team. The booking isn't changed automatically.</small></span><button class="switch on" data-display="showAmend" type="button"></button></div>
-            <div class="field">
-              <label>Cancellation email message</label>
-              <textarea id="copy-cancel-email-msg" rows="4" placeholder="Leave blank to use the default confirmation wording.">We're writing to confirm that your booking has been cancelled as requested. If any refund is due it will be processed in line with the cancellation policy. If you didn't request this or have any questions, please get in touch.</textarea>
+            <div class="rem-card">
+              <div class="rem-card-info">
+                <div class="rem-card-title">Cancellation confirmation email</div>
+                <div class="rem-card-status" id="rem-status-cancellation">Using our standard wording</div>
+              </div>
+              <button type="button" class="rem-edit-btn" data-stage="cancellation">Edit email</button>
             </div>
             <div class="toggle-row"><span>Balance payment<small>Let customers pay their outstanding balance or next instalment from the widget.</small></span><button class="switch on" data-display="showPayBalance" type="button"></button></div>
             <div class="toggle-row"><span>Local fees</span><button class="switch on" data-display="showLocalFees" type="button"></button></div>
@@ -667,20 +670,21 @@
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="rem-modal-title">
     <div class="rem-head">
       <h2 id="rem-modal-title">Reminder email</h2>
-      <div class="rem-stages" role="tablist" aria-label="Reminder email stage">
+      <div class="rem-stages" role="tablist" aria-label="Which email">
         <button type="button" class="rem-stage is-active" role="tab" data-stage="interim" aria-selected="true">Interim / instalment</button>
         <button type="button" class="rem-stage" role="tab" data-stage="final" aria-selected="false">Final balance</button>
+        <button type="button" class="rem-stage" role="tab" data-stage="cancellation" aria-selected="false">Cancellation</button>
       </div>
       <button type="button" class="rem-close" id="rem-close" aria-label="Close">&times;</button>
     </div>
     <div class="rem-body">
       <div class="rem-edit-pane">
-        <div class="field">
+        <div class="field" id="rem-subject-field">
           <label for="rem-subject">Subject</label>
           <input type="text" id="rem-subject" maxlength="200" placeholder="Your payment of {amount} is due">
         </div>
-        <div class="field" style="margin-bottom:6px;"><label>Tags (click to drop one in, we fill it per booking)</label></div>
-        <div class="rem-tags">
+        <div class="field" id="rem-tags-label" style="margin-bottom:6px;"><label>Tags (click to drop one in, we fill it per booking)</label></div>
+        <div class="rem-tags" id="rem-tags">
           <button type="button" class="re-tag" data-tag="{firstName}">First name</button>
           <button type="button" class="re-tag" data-tag="{amount}">Amount due</button>
           <button type="button" class="re-tag" data-tag="{dueDate}">Due date</button>
@@ -725,6 +729,7 @@
 import { renderPdfHtml } from '/_pdf-template.js';
 import { renderEmailHtml } from '/_email-template.js';
 import { renderReminderEmail } from '/_reminder-email-template.js';
+import { renderCancellationEmail } from '/_cancellation-email-template.js';
 
 (function() {
   'use strict';
@@ -756,6 +761,7 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
       pageUrl: '',
       reminders: { enabled: false },
       reminderEmails: { interim: { subject: '', body: '' }, final: { subject: '', body: '' } },
+      cancelEmailMessage: '',
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
     },
@@ -958,7 +964,7 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
   });
 
   // ===== Copy fields =====
-  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone', 'page-url', 'copy-cancel-email-msg'].forEach(id => {
+  ['copy-title', 'copy-subtitle', 'copy-subtitle-short', 'copy-eyebrow', 'support-email', 'support-phone', 'page-url'].forEach(id => {
     const el = document.getElementById(id);
     el.addEventListener('input', () => {
       if (id === 'copy-title') state.config.title = el.value;
@@ -968,7 +974,6 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
       else if (id === 'support-email') state.config.support.email = el.value;
       else if (id === 'support-phone') state.config.support.phone = el.value;
       else if (id === 'page-url') state.config.pageUrl = el.value.trim();
-      else if (id === 'copy-cancel-email-msg') state.config.cancelEmailMessage = el.value;
       schedulePreview();
     });
   });
@@ -984,37 +989,122 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
     if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
   });
 
-  // ===== Reminder emails: popup editor with a live email preview =====
-  // The popup edits state.config.reminderEmails[stage] and previews it through
-  // renderReminderEmail — the exact module the send worker uses (re-exported to
-  // api/_lib) — so what the client sees IS the email that goes out, including
-  // our standard wording when the message is left blank. The preview renders
-  // into a sandboxed srcdoc iframe: no scripts, no parent CSS bleed.
-  const REM_STAGES = {
-    interim: {
-      charge: { amount: 350, currency: 'GBP', total: 2050, paid: 850, outstanding: 1200, isInstalment: true, remainingAmount: 850 },
-      instalment: { number: 1, total: 3 },
-    },
-    final: {
-      charge: { amount: 1200, currency: 'GBP', total: 2050, paid: 850, outstanding: 1200 },
-      instalment: null,
-    },
-  };
+  // ===== Customer emails: popup editor with a live email preview =====
+  // Three emails this widget can send a customer carry client-editable wording:
+  // the two balance reminders and the cancellation confirmation. Each is
+  // previewed through the SAME module that sends it —
+  // public/_reminder-email-template.js and public/_cancellation-email-template.js,
+  // both re-exported into api/_lib — so a preview can never drift from the real
+  // email. Leaving the message blank previews our standard wording, which is
+  // genuinely what goes out. The preview renders into a sandboxed srcdoc
+  // iframe: no scripts, no parent CSS bleed.
+  const REM_ORDER = ['interim', 'final', 'cancellation'];
   let remStage = 'interim';
   let remLastField = null;
+
   function reEnsure() {
     if (!state.config.reminderEmails || typeof state.config.reminderEmails !== 'object') state.config.reminderEmails = {};
     if (!state.config.reminderEmails.interim) state.config.reminderEmails.interim = { subject: '', body: '' };
     if (!state.config.reminderEmails.final) state.config.reminderEmails.final = { subject: '', body: '' };
   }
+  // Mirrors what the servers actually resolve: cancel-product.js reads
+  // brand.name / colors.primary / support.* straight off the saved config.
+  function remAgency() {
+    return {
+      name: (state.config.brand && state.config.brand.name) || 'Your Travel Co',
+      supportEmail: (state.config.support && state.config.support.email) || '',
+      supportPhone: (state.config.support && state.config.support.phone) || '',
+    };
+  }
+
+  function remReminderPreview(stage, subject, body) {
+    const s = stage === 'final'
+      ? { charge: { amount: 1200, currency: 'GBP', total: 2050, paid: 850, outstanding: 1200 }, instalment: null }
+      : { charge: { amount: 350, currency: 'GBP', total: 2050, paid: 850, outstanding: 1200, isInstalment: true, remainingAmount: 850 }, instalment: { number: 1, total: 3 } };
+    const a = remAgency();
+    const pageUrl = String(state.config.pageUrl || '').trim();
+    const hasPage = /^https:\/\/[^\s]+$/i.test(pageUrl);
+    // A sample due date safely in the future, so the preview never shows the
+    // overdue wording (that only appears on real past-due chasers).
+    const dueDateIso = new Date(Date.now() + 42 * 86400000).toISOString().slice(0, 10);
+    const out = renderReminderEmail({
+      agency: a,
+      customerFirstName: 'Sarah',
+      orderRef: 'ST-24189',
+      charge: s.charge,
+      dueDateIso: dueDateIso,
+      payUrl: hasPage ? pageUrl.replace(/#.*$/, '') + '#tg-pay=ST-24189' : null,
+      template: body.trim() ? { subject: subject, body: body } : null,
+      instalment: s.instalment,
+      chase: false,
+    });
+    let note;
+    if (!body.trim() && subject.trim()) note = 'A subject on its own is not used. Add a message to send your own wording; until then we send our standard email, shown here.';
+    else if (!body.trim()) note = 'You are previewing our standard wording, filled with a sample booking. Start typing a message to replace it with your own.';
+    else if (!hasPage) note = 'Add your Booking page URL in Settings to include the "Pay my balance" button in this email.';
+    else note = 'Preview uses a sample booking. Tags are filled per real booking; the button and footer are added for you.';
+    return { subject: out.subject, html: out.html, note: note };
+  }
+
+  function remCancellationPreview(body) {
+    const a = remAgency();
+    const out = renderCancellationEmail({
+      brand: {
+        name: a.name,
+        logoUrl: '',
+        footerLine: '',
+        primary: (state.config.colors && state.config.colors.primary) || '',
+      },
+      customerName: 'Sarah',
+      productLabel: 'Accommodation',
+      bookingReference: 'ST-24189',
+      cancellationReference: 'CXL-90412',
+      message: body,
+      supportEmail: a.supportEmail,
+      supportPhone: a.supportPhone,
+    });
+    const off = state.config.display && state.config.display.cancelEmail === false;
+    let note;
+    if (off) note = 'This email is switched off. Turn "Send cancellation email" back on for your customers to receive it.';
+    else if (!body.trim()) note = 'You are previewing our standard wording, filled with a sample cancellation. Start typing to replace it with your own.';
+    else note = 'Preview uses a sample cancellation. The subject line, your branding and the reference table are added for you.';
+    return { subject: out.subject, html: out.html, note: note };
+  }
+
+  // One descriptor per editable email: where its copy lives, and how to draw it.
+  const REM_EMAILS = {
+    interim: {
+      label: 'Interim / instalment reminder', hasSubject: true, hasTags: true,
+      read: function () { reEnsure(); return state.config.reminderEmails.interim; },
+      write: function (part, v) { reEnsure(); state.config.reminderEmails.interim[part] = v; },
+      clear: function () { reEnsure(); state.config.reminderEmails.interim = { subject: '', body: '' }; },
+      preview: function (t) { return remReminderPreview('interim', t.subject || '', t.body || ''); },
+    },
+    final: {
+      label: 'Final balance reminder', hasSubject: true, hasTags: true,
+      read: function () { reEnsure(); return state.config.reminderEmails.final; },
+      write: function (part, v) { reEnsure(); state.config.reminderEmails.final[part] = v; },
+      clear: function () { reEnsure(); state.config.reminderEmails.final = { subject: '', body: '' }; },
+      preview: function (t) { return remReminderPreview('final', t.subject || '', t.body || ''); },
+    },
+    cancellation: {
+      // The renderer writes this email's subject itself and fills no merge tags
+      // (it escapes and paragraph-splits the prose), so both controls are hidden.
+      label: 'Cancellation confirmation', hasSubject: false, hasTags: false,
+      read: function () { return { subject: '', body: String(state.config.cancelEmailMessage || '') }; },
+      write: function (part, v) { if (part === 'body') state.config.cancelEmailMessage = v; },
+      clear: function () { state.config.cancelEmailMessage = ''; },
+      preview: function (t) { return remCancellationPreview(t.body || ''); },
+    },
+  };
+
   function remHasCustom(stage) {
-    reEnsure();
-    const t = state.config.reminderEmails[stage];
+    const t = REM_EMAILS[stage].read();
     return !!(t.body && t.body.trim());
   }
-  // Sidebar cards: which stages carry the client's own wording.
+  // Sidebar cards: which emails carry the client's own wording.
   function remRenderStatus() {
-    ['interim', 'final'].forEach((stage) => {
+    REM_ORDER.forEach((stage) => {
       const el = document.getElementById('rem-status-' + stage);
       if (!el) return;
       const custom = remHasCustom(stage);
@@ -1023,53 +1113,27 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
     });
   }
   function remRenderPreview() {
-    reEnsure();
-    const t = state.config.reminderEmails[remStage];
-    const s = REM_STAGES[remStage];
-    const brandName = (state.config.brand && state.config.brand.name) || 'Your Travel Co';
-    const pageUrl = String(state.config.pageUrl || '').trim();
-    const hasPage = /^https:\/\/[^\s]+$/i.test(pageUrl);
-    // A sample due date safely in the future, so the preview never shows the
-    // overdue wording (that only appears on real past-due chasers).
-    const dueDateIso = new Date(Date.now() + 42 * 86400000).toISOString().slice(0, 10);
-    const out = renderReminderEmail({
-      agency: {
-        name: brandName,
-        supportEmail: (state.config.support && state.config.support.email) || '',
-        supportPhone: (state.config.support && state.config.support.phone) || '',
-      },
-      customerFirstName: 'Sarah',
-      orderRef: 'ST-24189',
-      charge: s.charge,
-      dueDateIso: dueDateIso,
-      payUrl: hasPage ? pageUrl.replace(/#.*$/, '') + '#tg-pay=ST-24189' : null,
-      template: remHasCustom(remStage) ? { subject: t.subject, body: t.body } : null,
-      instalment: s.instalment,
-      chase: false,
-    });
-    document.getElementById('rem-env-from').textContent = brandName;
+    const def = REM_EMAILS[remStage];
+    const out = def.preview(def.read());
+    document.getElementById('rem-env-from').textContent = remAgency().name;
     document.getElementById('rem-env-subject').textContent = out.subject;
     document.getElementById('rem-frame').srcdoc = out.html;
-    const note = document.getElementById('rem-note');
-    if (!remHasCustom(remStage) && (t.subject || '').trim()) {
-      note.textContent = 'A subject on its own is not used. Add a message to send your own wording; until then we send our standard email, shown here.';
-    } else if (!remHasCustom(remStage)) {
-      note.textContent = 'You are previewing our standard wording, filled with a sample booking. Start typing a message to replace it with your own.';
-    } else if (!hasPage) {
-      note.textContent = 'Add your Booking page URL in Settings to include the "Pay my balance" button in this email.';
-    } else {
-      note.textContent = 'Preview uses a sample booking. Tags are filled per real booking; the button and footer are added for you.';
-    }
+    document.getElementById('rem-note').textContent = out.note;
   }
   function remOpen(stage) {
+    const def = REM_EMAILS[stage];
+    if (!def) return;
     remStage = stage;
-    reEnsure();
-    const t = state.config.reminderEmails[stage];
+    const t = def.read();
     document.querySelectorAll('.rem-stage').forEach((b) => {
       const on = b.dataset.stage === stage;
       b.classList.toggle('is-active', on);
       b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
+    document.getElementById('rem-modal-title').textContent = def.label;
+    document.getElementById('rem-subject-field').hidden = !def.hasSubject;
+    document.getElementById('rem-tags-label').hidden = !def.hasTags;
+    document.getElementById('rem-tags').hidden = !def.hasTags;
     document.getElementById('rem-subject').value = t.subject || '';
     document.getElementById('rem-body').value = t.body || '';
     remLastField = null;
@@ -1095,8 +1159,7 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
     const el = document.getElementById(id);
     el.addEventListener('focus', () => { remLastField = el; });
     el.addEventListener('input', () => {
-      reEnsure();
-      state.config.reminderEmails[remStage][part] = el.value;
+      REM_EMAILS[remStage].write(part, el.value);
       remRenderPreview();
       if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
     });
@@ -1116,11 +1179,11 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
     });
   });
   document.getElementById('rem-reset').addEventListener('click', () => {
-    reEnsure();
-    const t = state.config.reminderEmails[remStage];
+    const def = REM_EMAILS[remStage];
+    const t = def.read();
     if (!(t.subject || '').trim() && !(t.body || '').trim()) return;
-    showConfirm('Use our standard wording?', 'Your own subject and message for this email will be removed.', () => {
-      state.config.reminderEmails[remStage] = { subject: '', body: '' };
+    showConfirm('Use our standard wording?', 'Your own wording for this email will be removed.', () => {
+      def.clear();
       document.getElementById('rem-subject').value = '';
       document.getElementById('rem-body').value = '';
       remRenderPreview();
@@ -1398,7 +1461,6 @@ import { renderReminderEmail } from '/_reminder-email-template.js';
       document.getElementById('reminder-enabled').value = state.config.reminders?.enabled ? 'on' : 'off';
       reEnsure();
       remRenderStatus();
-      document.getElementById('copy-cancel-email-msg').value = state.config.cancelEmailMessage || '';
       document.getElementById('brand-name').value = state.config.brand?.name || '';
       // Layout tile
       document.querySelectorAll('.layout-tile').forEach(t => t.classList.toggle('active', t.dataset.layout === state.config.layout));
