@@ -83,84 +83,67 @@ console.log('The cancellation confirmation email is on the same popup, not a lon
   ok('the cramped rows="4" cancellation textarea is GONE', !/id="copy-cancel-email-msg"/.test(EDITOR));
   ok('...and nothing still tries to read or write that dead element (would throw on load)',
     !/copy-cancel-email-msg/.test(EDITOR));
-  ok('it has its own sidebar card and popup tab',
+  ok('it has its own sidebar card and its own tab in the popup',
     /class="rem-edit-btn" data-stage="cancellation"/.test(EDITOR)
-    && /class="rem-stage" role="tab" data-stage="cancellation"/.test(EDITOR)
-    && /id="rem-status-cancellation"/.test(EDITOR));
+    && /id="rem-status-cancellation"/.test(EDITOR)
+    && /const REM_ORDER = \['interim', 'final', 'cancellation'\]/.test(EDITOR));
   ok('the editor imports the shared cancellation renderer',
     /import \{ renderCancellationEmail \} from '\/_cancellation-email-template\.js';/.test(EDITOR));
   ok('its copy still reads and writes state.config.cancelEmailMessage (config shape unchanged)',
     /body: String\(state\.config\.cancelEmailMessage \|\| ''\)/.test(EDITOR)
-    && /if \(part === 'body'\) state\.config\.cancelEmailMessage = v;/.test(EDITOR));
-  ok('subject + merge-tag controls are HIDDEN for it (the renderer writes the subject and fills no tags)',
-    /hasSubject: false, hasTags: false/.test(EDITOR)
-    && /getElementById\('rem-subject-field'\)\.hidden = !def\.hasSubject/.test(EDITOR)
-    && /getElementById\('rem-tags'\)\.hidden = !def\.hasTags/.test(EDITOR));
+    && /else if \(key === 'body'\) state\.config\.cancelEmailMessage = value;/.test(EDITOR));
+  ok('it offers NO subject and NO tags (the renderer writes the subject and fills no tags)',
+    /tags: reminder \? REM_TAGS : \[\]/.test(EDITOR)
+    && /fields: reminder \? \[/.test(EDITOR));
   ok('the preview warns when the client has the email switched off',
     /display\.cancelEmail === false/.test(EDITOR) && /This email is switched off/.test(EDITOR));
   ok('the preview mirrors what the server resolves (brand name, primary colour, support details)',
     /primary: \(state\.config\.colors && state\.config\.colors\.primary\) \|\| ''/.test(EDITOR));
 }
 
-console.log('One popup drives every editable email, so they cannot diverge in UX');
+// The popup CHROME (layout, tabs, sandboxed preview, envelope bar, every close
+// path) now lives in public/editor-email-popup.js and is covered by
+// test/editor-email-popup-smoke.mjs. What matters here is that this editor
+// hands that shared component the right emails.
+console.log('The editor hands the shared popup its three emails');
 {
-  ok('a descriptor map declares each email', /const REM_EMAILS = \{/.test(EDITOR) && /const REM_ORDER = \['interim', 'final', 'cancellation'\]/.test(EDITOR));
-  ok('the popup title, tabs and status cards are all driven from it',
-    /getElementById\('rem-modal-title'\)\.textContent = def\.label/.test(EDITOR)
-    && /REM_ORDER\.forEach/.test(EDITOR));
-  ok('typing routes through the descriptor rather than a hardcoded config path',
-    /REM_EMAILS\[remStage\]\.write\(part, el\.value\)/.test(EDITOR));
-  ok('reset routes through the descriptor too', /const def = REM_EMAILS\[remStage\];\s*\n\s*const t = def\.read\(\);/.test(EDITOR));
-  ok('an unknown stage cannot open a broken popup', /const def = REM_EMAILS\[stage\];\s*\n\s*if \(!def\) return;/.test(EDITOR));
-}
-
-console.log('The popup: full editor on the left, the real email on the right');
-{
-  ok('a full-size popup exists and is a labelled dialog',
-    /id="rem-modal"/.test(EDITOR) && /role="dialog" aria-modal="true" aria-labelledby="rem-modal-title"/.test(EDITOR));
-  ok('it has interim/final stage tabs', /class="rem-stage is-active" role="tab" data-stage="interim"/.test(EDITOR) && /data-stage="final"/.test(EDITOR));
-  ok('subject input is length-capped to match the server (200)', /id="rem-subject" maxlength="200"/.test(EDITOR));
-  ok('the message area grows to fill the popup (no more 8-row box)', /class="field rem-msg"/.test(EDITOR) && /\.rem-edit-pane \.rem-msg textarea \{ flex: 1;/.test(EDITOR));
-  ok('the preview renders in a SANDBOXED iframe via srcdoc (no scripts, no CSS bleed)',
-    /<iframe id="rem-frame" title="Email preview" sandbox="">/.test(EDITOR) && /getElementById\('rem-frame'\)\.srcdoc = out\.html/.test(EDITOR));
-  ok('an envelope bar shows the live From + Subject', /id="rem-env-from"/.test(EDITOR) && /id="rem-env-subject"/.test(EDITOR) && /\.textContent = out\.subject/.test(EDITOR));
-  ok('the editor imports the shared renderer module', /import \{ renderReminderEmail \} from '\/_reminder-email-template\.js';/.test(EDITOR));
-  ok('the preview calls the REAL renderer', /const out = renderReminderEmail\(\{/.test(EDITOR));
+  ok('it loads the shared popup component', /<script src="\/editor-email-popup\.js"><\/script>/.test(EDITOR));
+  ok('...and carries no popup chrome of its own any more',
+    !/rem-modal/.test(EDITOR) && !/rem-env-row/.test(EDITOR) && !/id="rem-frame"/.test(EDITOR));
+  ok('opening passes all three emails, with the clicked one as the start tab',
+    /window\.TGEmailPopup\.open\(\{/.test(EDITOR)
+    && /startKey: stage/.test(EDITOR)
+    && /emails: REM_ORDER\.map\(remEmail\)/.test(EDITOR));
+  ok('closing refreshes the sidebar cards', /onClose: remRenderStatus/.test(EDITOR));
+  ok('one descriptor builder serves all three emails', /function remEmail\(stage\)/.test(EDITOR));
+  ok('the subject is capped at 200 to match the server', /maxlength: 200/.test(EDITOR));
+  ok('the message field is the one that grows to fill the popup',
+    /key: 'body', type: 'textarea', label: 'Message', grow: true/.test(EDITOR));
+  ok('the preview calls the REAL renderers',
+    /renderReminderEmail\(\{/.test(EDITOR) && /renderCancellationEmail\(\{/.test(EDITOR));
   ok('a blank message previews the standard wording (template: null → built-in email)',
     /template: body\.trim\(\) \? \{ subject: subject, body: body \} : null/.test(EDITOR));
-  ok('the sample due date is computed in the future (never the overdue variant)', /Date\.now\(\) \+ 42 \* 86400000/.test(EDITOR));
+  ok('the sample due date is computed in the future (never the overdue variant)',
+    /Date\.now\(\) \+ 42 \* 86400000/.test(EDITOR));
   ok('the pay button only previews when a valid https booking page is set (matches the send path)',
     /payUrl: hasPage \? pageUrl\.replace\(\/#\.\*\$\/, ''\) \+ '#tg-pay=ST-24189' : null/.test(EDITOR));
-  ok('the popup closes on Done, the X, the backdrop and Escape',
-    /getElementById\('rem-done'\)\.addEventListener\('click', remClose\)/.test(EDITOR)
-    && /getElementById\('rem-close'\)\.addEventListener\('click', remClose\)/.test(EDITOR)
-    && /if \(e\.target === e\.currentTarget\) remClose\(\)/.test(EDITOR)
-    && /e\.key !== 'Escape'/.test(EDITOR));
 }
 
-console.log('Edits persist into state.config.reminderEmails and mark the editor dirty');
+console.log('Edits persist into the config and mark the editor dirty');
 {
   ok('reminderEmails default has interim + final subject/body',
     /reminderEmails:\s*\{\s*interim:\s*\{\s*subject:\s*''\s*,\s*body:\s*''\s*\}\s*,\s*final:\s*\{\s*subject:\s*''\s*,\s*body:\s*''\s*\}\s*\}/.test(EDITOR));
-  ok('reEnsure() backfills a missing reminderEmails object', /function reEnsure\(\)/.test(EDITOR) && /state\.config\.reminderEmails\s*=\s*\{\}/.test(EDITOR));
-  ok('typing lands in state.config.reminderEmails[stage][part] via the descriptor',
-    /REM_EMAILS\[remStage\]\.write\(part, el\.value\)/.test(EDITOR)
-    && /write: function \(part, v\) \{ reEnsure\(\); state\.config\.reminderEmails\.interim\[part\] = v; \}/.test(EDITOR)
-    && /write: function \(part, v\) \{ reEnsure\(\); state\.config\.reminderEmails\.final\[part\] = v; \}/.test(EDITOR));
+  ok('reEnsure() backfills a missing reminderEmails object',
+    /function reEnsure\(\)/.test(EDITOR) && /state\.config\.reminderEmails\s*=\s*\{\}/.test(EDITOR));
+  ok('a reminder write lands in state.config.reminderEmails[stage][field]',
+    /if \(reminder\) \{ reEnsure\(\); state\.config\.reminderEmails\[stage\]\[key\] = value; \}/.test(EDITOR));
   ok('editing marks the editor dirty', /window\.tgse\.markDirty\(\)/.test(EDITOR));
-  ok('chips splice the tag into the focused field and re-fire input',
-    /querySelectorAll\('\.re-tag'\)\.forEach/.test(EDITOR)
-    && /el\.value\.slice\(0,\s*s\)\s*\+\s*tag\s*\+\s*el\.value\.slice\(e\)/.test(EDITOR)
-    && /el\.dispatchEvent\(new Event\('input'\)\)/.test(EDITOR));
   ok('"Use our standard wording" asks before wiping the client copy',
-    /getElementById\('rem-reset'\)/.test(EDITOR) && /showConfirm\('Use our standard wording\?'/.test(EDITOR));
+    /reset: \{/.test(EDITOR) && /showConfirm\('Use our standard wording\?'/.test(EDITOR));
+  ok('...and only offers itself when something has been written', /isSet: \(\) => \{ const t = read\(\);/.test(EDITOR));
 }
 
-// ── CROSS GUARD ──────────────────────────────────────────────────────────────
-// Every tag the popup offers must be one the renderer fills. Derive the
-// renderer's supported set from its mergeVars object and the editor's offered
-// set from the chip data-tag attributes, then assert offered ⊆ supported —
-// and prove it FUNCTIONALLY by rendering a body containing every chip.
+
 console.log('Every tag the popup offers is one the renderer fills');
 {
   const mv = RENDERER.slice(RENDERER.indexOf('const mergeVars = {'));
@@ -168,7 +151,8 @@ console.log('Every tag the popup offers is one the renderer fills');
   const supported = new Set((block.match(/([a-zA-Z]+)\s*:/g) || []).map(s => s.replace(/\s*:$/, '').toLowerCase()));
   ok('renderer exposes the core tags', ['firstname', 'amount', 'duedate', 'balance', 'bookingref', 'agencyname', 'agencyphone', 'instalmentnumber', 'instalmenttotal'].every(k => supported.has(k)));
 
-  const offered = [...EDITOR.matchAll(/class="re-tag"\s+data-tag="\{([a-zA-Z]+)\}"/g)].map(m => m[1]);
+  // Chips are declared in the REM_TAGS descriptor now, not in editor markup.
+  const offered = [...EDITOR.matchAll(/\{ tag: '\{([a-zA-Z]+)\}', label:/g)].map(m => m[1]);
   ok('the popup offers a set of chips', offered.length >= 8);
   const orphan = offered.filter(t => !supported.has(t.toLowerCase()));
   ok('no offered chip is unknown to the renderer (offered ⊆ supported)' + (orphan.length ? ' — orphan: ' + orphan.join(', ') : ''), orphan.length === 0);

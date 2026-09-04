@@ -118,23 +118,26 @@ console.log('The editor: cards and a popup, not two four-row boxes');
     && /openEmailPopup\(cfg, save, 'agent'\)/.test(EDITOR));
   ok('each card says whether the client wording is in use',
     /Using our standard wording/.test(EDITOR) && /Your own wording/.test(EDITOR) && /Your own HTML/.test(EDITOR));
-  ok('the popup renders the REAL email into a SANDBOXED iframe',
-    /<iframe title="Email preview" sandbox="">/.test(EDITOR)
-    && /\.eml-preview iframe'\)\.srcdoc = out\.html/.test(EDITOR));
-  ok('the renderers reach the classic editor script through a module shim',
-    /import \{ renderDefaultAgentEmail \} from '\/_enquiry-agent-email\.js';/.test(EDITOR)
-    && /window\.TGEnquiryEmailTemplates = \{ renderDefaultAgentEmail, renderDefaultAutoReplyEmail \};/.test(EDITOR));
-  ok('an envelope bar shows From, To and the live Subject',
-    /data-env-from/.test(EDITOR) && /data-env-to/.test(EDITOR) && /data-env-subject/.test(EDITOR));
-  ok('the team notification hides prose + subject (its body is a generated readout)',
-    /prose: false/.test(EDITOR) && /\[data-prose-field\]'\)\.hidden = !def\.prose/.test(EDITOR));
-  ok('raw HTML survives as an advanced override behind a disclosure',
-    /class="eml-adv"/.test(EDITOR) && /Advanced: replace the whole email with your own HTML/.test(EDITOR));
-  ok('the popup closes on Done, the X, the backdrop and Escape',
-    /\.eml-close'\)\.addEventListener\('click', close\)/.test(EDITOR)
-    && /\.eml-done'\)\.addEventListener\('click', close\)/.test(EDITOR)
-    && /if \(e\.target === overlay\) close\(\)/.test(EDITOR)
-    && /if \(e\.key === 'Escape'\) close\(\)/.test(EDITOR));
+  // The popup CHROME (sandboxed preview, envelope bar, tabs, every close path)
+  // now lives in public/editor-email-popup.js and is covered by
+  // test/editor-email-popup-smoke.mjs — one component, one place to test it.
+  ok('it loads the shared popup component and opens it',
+    /<script src="\/editor-email-popup\.js"><\/script>/.test(EDITOR) && /window\.TGEmailPopup\.open\(\{/.test(EDITOR));
+  ok('...and carries no popup chrome of its own any more',
+    !/eml-overlay/.test(EDITOR) && !/eml-modal/.test(EDITOR) && !/data-env-from/.test(EDITOR));
+  ok('its sidebar cards come from the shared component too',
+    /window\.TGEmailPopup\.card\(\{ title: title, status: statusText, isCustom: isCustom, onEdit: onEdit \}\)/.test(EDITOR));
+  ok('both emails are handed over, with the clicked one as the start tab',
+    /\['customer', 'agent'\]\.map\(/.test(EDITOR) && /startKey: defs\[startTab\] \? startTab : 'customer'/.test(EDITOR));
+  ok('closing refreshes the sidebar cards', /onClose: renderInspector/.test(EDITOR));
+  ok('the team notification is given no prose or subject field (its body is a generated readout)',
+    /prose: false/.test(EDITOR) && /fields: def\.prose \? \[/.test(EDITOR));
+  ok('raw HTML survives as an advanced override',
+    /type: 'advanced', label: def\.advLabel/.test(EDITOR) && /Advanced: replace the whole email with your own HTML/.test(EDITOR));
+  ok('the customer email keeps its subject, tags and growing message box',
+    /key: 'subject', type: 'text', label: 'Subject', maxlength: 200/.test(EDITOR)
+    && /tags: def\.prose \? EML_TAGS : \[\]/.test(EDITOR)
+    && /grow: true/.test(EDITOR));
   ok('saving is debounced so a keystroke does not repaint the palette',
     /emlDefs\(cfg, debounce\(save, 250\)\)/.test(EDITOR));
   ok('the preview warns when the customer email is switched off',
