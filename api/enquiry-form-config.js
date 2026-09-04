@@ -147,6 +147,8 @@ const EF = {
   routingAutoReply:    'fldmqrE0BG0xuWTMx',
   emailTemplateHTML:   'fldmboZUbr73kiuyJ',
   autoReplyHTML:       'fldTocc7Yd5IurXVl',
+  autoReplyMessage:    'fld1mtgr6TXZj192p',
+  autoReplySubject:    'fldN5C4L7TyUAWjxI',
   routingWebhook:      'fldH7rQpSid6uqw0p',
   webhookURL:          'fldNyUqKUUDElxrGS',
   webhookSecret:       'fldcoECqbqhWSj7eW',
@@ -411,6 +413,10 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
     if (r.email.autoReply !== undefined)     fields[EF.routingAutoReply] = safeBool(r.email.autoReply);
     if (r.email.templateHTML !== undefined)  fields[EF.emailTemplateHTML] = safeStr(r.email.templateHTML, 100000);
     if (r.email.autoReplyHTML !== undefined) fields[EF.autoReplyHTML] = safeStr(r.email.autoReplyHTML, 100000);
+    // Plain-prose wording + subject for the customer confirmation. Capped to
+    // match the renderer's appetite: this is a message, not a document.
+    if (r.email.autoReplyMessage !== undefined) fields[EF.autoReplyMessage] = safeStr(r.email.autoReplyMessage, 8000);
+    if (r.email.autoReplySubject !== undefined) fields[EF.autoReplySubject] = safeStr(r.email.autoReplySubject, 200);
   }
   if (r.webhook !== undefined) {
     fields[EF.routingWebhook] = safeBool(r.webhook.enabled);
@@ -494,6 +500,8 @@ function readEnquiryFormRecord(record) {
         autoReply: !!f[EF.routingAutoReply],
         templateHTML: f[EF.emailTemplateHTML] || '',
         autoReplyHTML: f[EF.autoReplyHTML] || '',
+        autoReplyMessage: f[EF.autoReplyMessage] || '',
+        autoReplySubject: f[EF.autoReplySubject] || '',
       },
       webhook: {
         enabled: !!f[EF.routingWebhook],

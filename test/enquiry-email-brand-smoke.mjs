@@ -126,7 +126,10 @@ ok(/resolveFromIdentity\(agentBrandName, ownerEmail\)/.test(emailSrc), 'agent em
 // agent's own owner-scoped inbox, never airtable.com.
 ok(/inbox-enquiry\?id=/.test(emailSrc), 'agent email links to the client-scoped enquiry inbox');
 ok(!/airtable\.com\/\$\{[^}]*TG_ENQUIRIES/.test(emailSrc), 'agent email no longer links to the raw internal Airtable base');
-const agentTplSrc = readFileSync(new URL('../api/enquiry/_lib/routing/_templates/agent-email.js', import.meta.url), 'utf8');
+// The renderer moved to public/ (Sep 2026) so the editor previews the exact
+// module that sends; api/enquiry/_lib/routing/_templates/agent-email.js is now
+// a re-export shim, so read the real source here.
+const agentTplSrc = readFileSync(new URL('../public/_enquiry-agent-email.js', import.meta.url), 'utf8');
 ok(!/view this enquiry in Airtable/.test(agentTplSrc) && /view this enquiry in your inbox/.test(agentTplSrc), 'the link text no longer says "in Airtable"');
 
 const enquirySrc = readFileSync(new URL('../public/widget-enquiry.js', import.meta.url), 'utf8');

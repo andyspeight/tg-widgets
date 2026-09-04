@@ -259,7 +259,7 @@ ok(/contactpref: renderContactPref/.test(code), 'contactpref is registered in RE
 ok(/fields\.contact_preference = selected\.slice\(\)/.test(code), 'contactpref submits contact_preference');
 ok(/f\.contact_preference !== undefined/.test(readFileSync(new URL('../api/enquiry/submit.js', import.meta.url), 'utf8')), 'server validates contact_preference');
 ok(/contactPreference: contactPrefStr/.test(readFileSync(new URL('../api/enquiry/_lib/routing/email.js', import.meta.url), 'utf8')), 'agent email carries the contact preference');
-ok(/Preferred contact', t\.contactPreference/.test(readFileSync(new URL('../api/enquiry/_lib/routing/_templates/agent-email.js', import.meta.url), 'utf8')), 'the email template shows a Preferred contact row');
+ok(/Preferred contact', t\.contactPreference/.test(readFileSync(new URL('../public/_enquiry-agent-email.js', import.meta.url), 'utf8')), 'the email template shows a Preferred contact row');
 ok(/id: 'contactpref'/.test(editor) && /field\.type === 'contactpref'/.test(editor) && /case 'contactpref':/.test(editor), 'editor has the contactpref palette entry, inspector and preview');
 
 // ── #8 Branched thank-you + link/paragraph formatting ────────────────────────

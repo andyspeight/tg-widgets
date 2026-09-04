@@ -2335,6 +2335,75 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .spin { animation: spin 1s linear infinite; }
+
+    /* ===== Email popup editor (Sep 2026) =====
+       Same shape as the My Booking email popup: write on the left, see the
+       real email on the right. Replaces two four-row textareas that asked a
+       non-technical client to hand-write HTML blind. */
+    .eml-card { display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:12px 14px; border:1px solid var(--border,#E2E8F0); border-radius:10px;
+      background:var(--panel-2,#F8FAFC); margin-bottom:10px; }
+    .eml-card-title { font-size:13px; font-weight:600; color:var(--ink,#0F172A); }
+    .eml-card-status { font-size:11px; color:var(--ink-3,#94A3B8); margin-top:2px; }
+    .eml-card-status.is-custom { color:#10B981; font-weight:600; }
+    .eml-edit-btn { flex-shrink:0; height:32px; padding:0 14px; font:inherit; font-size:12px; font-weight:600;
+      color:#0891B2; background:#fff; border:1px solid var(--border,#E2E8F0); border-radius:8px; cursor:pointer; }
+    .eml-edit-btn:hover { border-color:#0891B2; color:#0F172A; }
+
+    .eml-overlay { position:fixed; inset:0; background:rgba(15,23,42,.6); backdrop-filter:blur(4px);
+      z-index:400; display:flex; align-items:center; justify-content:center; padding:24px;
+      opacity:0; transition:opacity .2s; }
+    .eml-overlay.is-open { opacity:1; }
+    .eml-modal { width:100%; max-width:1240px; height:min(860px, calc(100vh - 48px));
+      background:#fff; border-radius:16px; overflow:hidden; display:flex; flex-direction:column;
+      box-shadow:0 20px 25px rgba(15,23,42,.14); transform:translateY(8px); transition:transform .2s; }
+    .eml-overlay.is-open .eml-modal { transform:none; }
+    .eml-head { display:flex; align-items:center; gap:16px; padding:14px 20px;
+      border-bottom:1px solid var(--border,#E2E8F0); flex-shrink:0; }
+    .eml-head h2 { margin:0; font-size:15px; font-weight:600; letter-spacing:-.01em; }
+    .eml-tabs { display:flex; gap:4px; background:#F1F5F9; padding:3px; border-radius:10px; }
+    .eml-tab { font:inherit; font-size:12px; font-weight:600; padding:7px 14px; border:0; border-radius:8px;
+      background:transparent; color:var(--ink-2,#475569); cursor:pointer; }
+    .eml-tab.is-active { background:#fff; color:var(--ink,#0F172A); box-shadow:0 1px 2px rgba(15,23,42,.06); }
+    .eml-close { margin-left:auto; width:32px; height:32px; border:1px solid var(--border,#E2E8F0);
+      border-radius:8px; background:#fff; color:var(--ink-2,#475569); font-size:18px; line-height:1; cursor:pointer; }
+    .eml-close:hover { color:var(--ink,#0F172A); border-color:#0891B2; }
+    .eml-body { flex:1; display:flex; min-height:0; }
+    .eml-pane { width:400px; flex:0 0 400px; display:flex; flex-direction:column; gap:10px;
+      padding:18px 20px; border-right:1px solid var(--border,#E2E8F0); overflow-y:auto; }
+    .eml-pane label.field-label { display:block; font-size:12px; font-weight:500;
+      color:var(--ink-2,#475569); margin-bottom:4px; }
+    .eml-pane input[type=text], .eml-pane textarea { width:100%; font:inherit; font-size:13px;
+      padding:8px 10px; color:var(--ink,#0F172A); background:#fff;
+      border:1px solid var(--border,#E2E8F0); border-radius:6px; outline:none; }
+    .eml-pane input[type=text]:focus, .eml-pane textarea:focus { border-color:#0891B2; box-shadow:0 0 0 3px rgba(8,145,178,.12); }
+    .eml-msg { flex:1; display:flex; flex-direction:column; min-height:0; }
+    .eml-msg textarea { flex:1; min-height:200px; resize:vertical; line-height:1.5; }
+    .eml-tags { display:flex; flex-wrap:wrap; gap:6px; }
+    .eml-tag { font:inherit; font-size:11px; font-weight:600; padding:4px 9px; border:1px solid var(--border,#E2E8F0);
+      border-radius:20px; background:var(--panel-2,#F8FAFC); color:var(--ink-2,#475569); cursor:pointer; }
+    .eml-tag:hover { border-color:#0891B2; color:var(--ink,#0F172A); }
+    .eml-note { font-size:11px; color:var(--ink-3,#94A3B8); line-height:1.45; margin:0; }
+    .eml-adv > summary { font-size:12px; font-weight:600; color:var(--ink-2,#475569); cursor:pointer; padding:6px 0; }
+    .eml-adv textarea { font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11px; min-height:120px; }
+    .eml-preview { flex:1; display:flex; flex-direction:column; min-width:0; background:#F1F5F9; }
+    .eml-env { padding:10px 20px; background:#fff; border-bottom:1px solid var(--border,#E2E8F0); flex-shrink:0; }
+    .eml-env-row { display:flex; gap:10px; padding:2px 0; font-size:12px; color:var(--ink,#0F172A); min-width:0; }
+    .eml-env-row > span:first-child { width:52px; flex-shrink:0; color:var(--ink-3,#94A3B8); }
+    .eml-env-row strong { font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .eml-preview iframe { flex:1; width:100%; border:0; background:#F1F5F9; }
+    .eml-foot { display:flex; align-items:center; gap:12px; padding:12px 20px;
+      border-top:1px solid var(--border,#E2E8F0); flex-shrink:0; }
+    .eml-foot .eml-hint { flex:1; font-size:12px; color:var(--ink-2,#475569); line-height:1.4; margin:0; }
+    .eml-done { height:38px; padding:0 22px; font:inherit; font-size:13px; font-weight:600; border-radius:8px;
+      background:#0891B2; border:1px solid #0891B2; color:#fff; cursor:pointer; }
+    .eml-done:hover { background:#0E7490; }
+    @media (max-width: 900px) {
+      .eml-body { flex-direction:column; overflow-y:auto; }
+      .eml-pane { width:auto; flex:none; border-right:0; border-bottom:1px solid var(--border,#E2E8F0); overflow:visible; }
+      .eml-preview { flex:none; min-height:520px; }
+      .eml-preview iframe { min-height:420px; }
+    }
   </style>
 </head>
 <body>
@@ -2523,6 +2592,15 @@
   <script src="/editor-shell.js"></script>
   <!-- Guided tour engine (adds tgse.tour + tgse.tourLauncher). Used by Enquiry Pro mode. -->
   <script src="/editor-tour.js"></script>
+
+  <!-- The two REAL email renderers, imported as ES modules and handed to the
+       editor script below (which is a classic script and cannot import).
+       Same modules the server sends with, so the popup preview cannot drift. -->
+  <script type="module">
+    import { renderDefaultAgentEmail } from '/_enquiry-agent-email.js';
+    import { renderDefaultAutoReplyEmail } from '/_enquiry-autoreply-email.js';
+    window.TGEnquiryEmailTemplates = { renderDefaultAgentEmail, renderDefaultAutoReplyEmail };
+  </script>
 
   <script>
   (function () {
@@ -3059,7 +3137,7 @@
         accentColour: '#00B4D8',
         theme: 'light',
         routing: {
-          email:         { enabled: true,  to: '',  autoReply: true, templateHTML: '', autoReplyHTML: '' },
+          email:         { enabled: true,  to: '',  autoReply: true, templateHTML: '', autoReplyHTML: '', autoReplyMessage: '', autoReplySubject: '' },
           googleSheets:  { enabled: false, sheetId: '', tab: '' },
           airtable:      { enabled: false, baseId: '', tableId: '', hasPAT: false, fieldMap: '{}' },
           webhook:       { enabled: false, url: '', hasSecret: false },
@@ -5439,6 +5517,280 @@
       else if (dest.id === 'lunaWork')      renderLunaWorkInspector(body, routingConfig, saveRouting);
     }
 
+
+    // ===== Email popup editor (Sep 2026) ==================================
+    // Andy, after the My Booking work: "upgrade them to the same email set up
+    // / edit". Both enquiry emails are now written in a full popup with the
+    // REAL email rendered live beside them, through the same modules the
+    // server sends with (window.TGEnquiryEmailTemplates, loaded as ES modules
+    // above). Previously the only editing surface was a four-row box asking a
+    // travel agent to hand-write raw HTML, with no preview, no subject field,
+    // and a hint that documented the wrong placeholder syntax.
+    const EML_TAGS = [
+      { tag: '{firstName}',    label: 'First name' },
+      { tag: '{fullName}',     label: 'Full name' },
+      { tag: '{reference}',    label: 'Reference' },
+      { tag: '{clientName}',   label: 'Your company' },
+      { tag: '{destinations}', label: 'Destination' },
+      { tag: '{dates}',        label: 'Dates' },
+      { tag: '{travellers}',   label: 'Travellers' },
+      { tag: '{budget}',       label: 'Budget' },
+    ];
+
+    // A realistic sample submission, shaped exactly like the token maps that
+    // email.js and auto-reply.js build at send time.
+    function emlSampleTokens(cfg) {
+      const brand = (state && state.form && state.form.clientName) || 'Your Travel Company';
+      return {
+        reference: 'EF-1042', submissionId: 'recSAMPLE0000001',
+        clientName: brand, formName: (state && state.form && state.form.name) || 'Holiday enquiry',
+        firstName: 'Sarah', lastName: 'Jones', fullName: 'Sarah Jones',
+        email: 'sarah.jones@example.com', phone: '07700 900123',
+        destinations: 'Hersonissos (Crete, Greece)', departureAirport: 'Manchester',
+        dates: '2027-05-14 to 2027-05-21', duration: '7 nights',
+        travellers: '2 adults, 1 child', rooms: '1 room', flightsIncluded: 'Yes',
+        budget: '£1,400 per person', stars: '4-star', boardBasis: 'All inclusive',
+        style: '4-star · All inclusive', interests: 'Beaches, Food and wine',
+        contactPreference: 'Email', marketingConsent: 'Yes',
+        notes: 'Ideally somewhere quiet, and a room with a sea view if possible.',
+        submittedAt: '14/03/2027, 10:24:11', sourceUrl: 'https://example.com/enquiry',
+        submissionUrl: 'https://id.travelify.io/inbox-enquiry?id=recSAMPLE0000001',
+        thankYouMessage: (cfg && cfg.thankYouMessage) || 'Thanks Sarah — we’re on it.',
+        buttonColour: (state && state.form && state.form.buttonColour) || '#1B2B5B',
+        accentColour: (state && state.form && state.form.accentColour) || '#00B4D8',
+        lunaChatEnabled: false,
+      };
+    }
+
+    // The same {token} substitution the two senders use. Single braces — the
+    // old editor hint said {{fieldName}}, which never matched anything and so
+    // shipped literal braces to real customers.
+    function emlFillTokens(html, tokens, escapeValues) {
+      return String(html || '').replace(/\{(\w+)\}/g, (_, key) => {
+        const value = tokens[key];
+        if (value === undefined || value === null) return '';
+        const str = String(value);
+        return escapeValues
+          ? str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+               .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+          : str;
+      });
+    }
+
+    // One descriptor per editable email: what it is, where its copy lives and
+    // how to render it. Mirrors REM_EMAILS in the My Booking editor.
+    function emlDefs(cfg, save) {
+      const T = window.TGEnquiryEmailTemplates || {};
+      return {
+        customer: {
+          label: 'Customer confirmation',
+          to: 'sarah.jones@example.com (the visitor)',
+          prose: true,
+          proseLabel: 'Message',
+          proseHint: 'Replaces our built-in "what happens next" steps. Your hero, the recap of what they told us and the sign-off stay. Leave blank for our standard wording. A blank line starts a new paragraph.',
+          advLabel: 'Advanced: replace the whole email with your own HTML',
+          readSubject: () => cfg.autoReplySubject || '',
+          writeSubject: (v) => { cfg.autoReplySubject = v; save(); },
+          readProse: () => cfg.autoReplyMessage || '',
+          writeProse: (v) => { cfg.autoReplyMessage = v; save(); },
+          readAdv: () => cfg.autoReplyHTML || '',
+          writeAdv: (v) => { cfg.autoReplyHTML = v; save(); },
+          render: () => {
+            const tokens = emlSampleTokens(cfg);
+            tokens.customMessage = emlFillTokens(cfg.autoReplyMessage || '', tokens, false);
+            const adv = (cfg.autoReplyHTML || '').trim();
+            const html = adv
+              ? emlFillTokens(adv, tokens, true)
+              : (T.renderDefaultAutoReplyEmail ? T.renderDefaultAutoReplyEmail(tokens) : '');
+            const subject = (cfg.autoReplySubject || '').trim()
+              ? emlFillTokens(cfg.autoReplySubject, tokens, false).slice(0, 200)
+              : 'Your enquiry ' + tokens.reference + ' — we’ve got it';
+            let note;
+            if (adv) note = 'Your own HTML is replacing the whole email, so the message box above is ignored.';
+            else if ((cfg.autoReplyMessage || '').trim()) note = 'Preview uses a sample enquiry. Tags are filled per real submission.';
+            else note = 'You are previewing our standard wording, filled with a sample enquiry. Start typing a message to replace it with your own.';
+            if (!cfg.autoReply) note = 'This email is switched off. Turn "Send customer a confirmation" back on for customers to receive it.';
+            return { subject: subject, html: html, note: note };
+          },
+        },
+        agent: {
+          label: 'Team notification',
+          to: (cfg.to || '').split(/[\n,;]/).map(x => x.trim()).filter(Boolean)[0] || 'your team',
+          prose: false,
+          advLabel: 'Advanced: replace the whole email with your own HTML',
+          readSubject: () => '',
+          writeSubject: () => {},
+          readProse: () => '',
+          writeProse: () => {},
+          readAdv: () => cfg.templateHTML || '',
+          writeAdv: (v) => { cfg.templateHTML = v; save(); },
+          render: () => {
+            const tokens = emlSampleTokens(cfg);
+            const adv = (cfg.templateHTML || '').trim();
+            const html = adv
+              ? emlFillTokens(adv, tokens, true)
+              : (T.renderDefaultAgentEmail ? T.renderDefaultAgentEmail(tokens) : '');
+            return {
+              subject: 'New enquiry ' + tokens.reference + ' — ' + tokens.fullName + ' · ' + tokens.destinations,
+              html: html,
+              note: adv
+                ? 'Your own HTML is replacing the whole email.'
+                : 'This one goes to your own team, so it is a straight readout of the enquiry. Its wording is not editable, but you can replace it entirely below.',
+            };
+          },
+        },
+      };
+    }
+
+    function openEmailPopup(cfg, save, startTab) {
+      // Persisting on every keystroke would re-run markDirtyAndSync and repaint
+      // the destination palette per character. The preview redraws immediately,
+      // the save settles — same trade the old labelledTextarea made.
+      const defs = emlDefs(cfg, debounce(save, 250));
+      let tab = defs[startTab] ? startTab : 'customer';
+      let lastField = null;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'eml-overlay';
+      overlay.innerHTML =
+        '<div class="eml-modal" role="dialog" aria-modal="true" aria-labelledby="eml-title">' +
+          '<div class="eml-head">' +
+            '<h2 id="eml-title">Customer confirmation</h2>' +
+            '<div class="eml-tabs" role="tablist" aria-label="Which email">' +
+              '<button type="button" class="eml-tab is-active" role="tab" data-tab="customer" aria-selected="true">Customer confirmation</button>' +
+              '<button type="button" class="eml-tab" role="tab" data-tab="agent" aria-selected="false">Team notification</button>' +
+            '</div>' +
+            '<button type="button" class="eml-close" aria-label="Close">&times;</button>' +
+          '</div>' +
+          '<div class="eml-body">' +
+            '<div class="eml-pane">' +
+              '<div data-subject-field><label class="field-label" for="eml-subject">Subject</label>' +
+                '<input type="text" id="eml-subject" maxlength="200" placeholder="Your enquiry {reference} — we’ve got it"></div>' +
+              '<div data-tags-wrap><label class="field-label">Tags (click to drop one in, we fill it per enquiry)</label>' +
+                '<div class="eml-tags"></div></div>' +
+              '<div class="eml-msg" data-prose-field><label class="field-label" for="eml-body">Message</label>' +
+                '<textarea id="eml-body"></textarea></div>' +
+              '<p class="eml-note" data-prose-hint></p>' +
+              '<details class="eml-adv"><summary></summary>' +
+                '<textarea data-adv maxlength="100000" placeholder="Leave blank to use the template above."></textarea>' +
+                '<p class="eml-note">For developers. This replaces the entire email, including your branding. Use single-brace {tokens}.</p>' +
+              '</details>' +
+            '</div>' +
+            '<div class="eml-preview">' +
+              '<div class="eml-env">' +
+                '<div class="eml-env-row"><span>From</span><strong data-env-from></strong></div>' +
+                '<div class="eml-env-row"><span>To</span><span data-env-to></span></div>' +
+                '<div class="eml-env-row"><span>Subject</span><strong data-env-subject></strong></div>' +
+              '</div>' +
+              '<iframe title="Email preview" sandbox=""></iframe>' +
+            '</div>' +
+          '</div>' +
+          '<div class="eml-foot"><p class="eml-hint" data-note></p>' +
+            '<button type="button" class="eml-done">Done</button></div>' +
+        '</div>';
+      document.body.appendChild(overlay);
+
+      const q = (sel) => overlay.querySelector(sel);
+      const subjectEl = q('#eml-subject');
+      const bodyEl = q('#eml-body');
+      const advEl = q('[data-adv]');
+
+      EML_TAGS.forEach((t) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'eml-tag'; b.textContent = t.label;
+        b.setAttribute('data-tag', t.tag);
+        b.addEventListener('click', () => {
+          const el = lastField || bodyEl;
+          const s = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
+          const e = typeof el.selectionEnd === 'number' ? el.selectionEnd : el.value.length;
+          el.value = el.value.slice(0, s) + t.tag + el.value.slice(e);
+          el.focus();
+          const pos = s + t.tag.length;
+          try { el.setSelectionRange(pos, pos); } catch (err) { /* not selectable */ }
+          el.dispatchEvent(new Event('input'));
+        });
+        q('.eml-tags').appendChild(b);
+      });
+
+      function draw() {
+        const def = defs[tab];
+        const out = def.render();
+        q('[data-env-from]').textContent = (state && state.form && state.form.clientName) || 'Your Travel Company';
+        q('[data-env-to]').textContent = def.to;
+        q('[data-env-subject]').textContent = out.subject;
+        q('.eml-preview iframe').srcdoc = out.html;
+        q('[data-note]').textContent = out.note;
+      }
+
+      function selectTab(next) {
+        tab = next;
+        const def = defs[tab];
+        overlay.querySelectorAll('.eml-tab').forEach((b) => {
+          const on = b.getAttribute('data-tab') === tab;
+          b.classList.toggle('is-active', on);
+          b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        q('#eml-title').textContent = def.label;
+        // The team notification has no prose or subject of its own: its body is
+        // a generated readout and its subject is built from the enquiry.
+        q('[data-subject-field]').hidden = !def.prose;
+        q('[data-tags-wrap]').hidden = !def.prose;
+        q('[data-prose-field]').hidden = !def.prose;
+        q('[data-prose-hint]').hidden = !def.prose;
+        q('[data-prose-hint]').textContent = def.proseHint || '';
+        q('.eml-adv > summary').textContent = def.advLabel;
+        subjectEl.value = def.readSubject();
+        bodyEl.value = def.readProse();
+        advEl.value = def.readAdv();
+        lastField = null;
+        draw();
+      }
+
+      subjectEl.addEventListener('focus', () => { lastField = subjectEl; });
+      bodyEl.addEventListener('focus', () => { lastField = bodyEl; });
+      subjectEl.addEventListener('input', () => { defs[tab].writeSubject(subjectEl.value); draw(); });
+      bodyEl.addEventListener('input', () => { defs[tab].writeProse(bodyEl.value); draw(); });
+      advEl.addEventListener('input', () => { defs[tab].writeAdv(advEl.value); draw(); });
+      overlay.querySelectorAll('.eml-tab').forEach((b) => {
+        b.addEventListener('click', () => selectTab(b.getAttribute('data-tab')));
+      });
+
+      function close() {
+        overlay.classList.remove('is-open');
+        document.removeEventListener('keydown', onKey);
+        setTimeout(() => overlay.remove(), 200);
+        renderInspector();
+      }
+      function onKey(e) { if (e.key === 'Escape') close(); }
+      q('.eml-close').addEventListener('click', close);
+      q('.eml-done').addEventListener('click', close);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      document.addEventListener('keydown', onKey);
+
+      selectTab(tab);
+      requestAnimationFrame(() => overlay.classList.add('is-open'));
+      bodyEl.focus();
+    }
+
+    // A sidebar card per email: what it is, whether the client's own wording is
+    // in use, and the button that opens the popup.
+    function emailCard(title, statusText, isCustom, onEdit) {
+      const card = document.createElement('div');
+      card.className = 'eml-card';
+      const info = document.createElement('div');
+      const t = document.createElement('div');
+      t.className = 'eml-card-title'; t.textContent = title;
+      const st = document.createElement('div');
+      st.className = 'eml-card-status' + (isCustom ? ' is-custom' : '');
+      st.textContent = statusText;
+      info.appendChild(t); info.appendChild(st);
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'eml-edit-btn'; btn.textContent = 'Edit email';
+      btn.addEventListener('click', onEdit);
+      card.appendChild(info); card.appendChild(btn);
+      return card;
+    }
+
     // ── Email inspector ──
     // Agent notification every time a submission lands, plus optional
     // auto-reply to the customer.
@@ -5466,33 +5818,37 @@
         })
       ]));
 
-      // Optional custom HTML templates (advanced)
-      const templatesSec = section('Custom templates', [
-        labelledTextarea({
-          label: 'Agent notification HTML (optional)',
-          value: cfg.templateHTML || '',
-          placeholder: 'Leave blank to use the default Travelgenix template.',
-          rows: 4,
-          maxlength: 100000,
-          hint: 'Advanced — override the default agent email template with your own HTML. Use {{fieldName}} placeholders.',
-          onInput: (v) => { cfg.templateHTML = v; save(); }
-        })
-      ]);
-      body.appendChild(templatesSec);
+      // Both emails are written in the popup now: a full editing pane with the
+      // real email rendered live beside it. The old surface here was two
+      // four-row boxes asking a travel agent to hand-write raw HTML blind, and
+      // their hint documented {{fieldName}} placeholders that the senders never
+      // matched (both use single braces), so anyone who followed our own
+      // instructions shipped literal braces to a customer.
+      const emlNote = document.createElement('p');
+      emlNote.className = 'insp-note';
+      emlNote.textContent = 'Each email opens in a full editor with a live preview of exactly what lands in the inbox.';
 
-      if (cfg.autoReply) {
-        body.appendChild(section('Customer email', [
-          labelledTextarea({
-            label: 'Auto-reply HTML (optional)',
-            value: cfg.autoReplyHTML || '',
-            placeholder: 'Leave blank to use the default auto-reply template.',
-            rows: 4,
-            maxlength: 100000,
-            hint: 'Override the customer auto-reply template. Same {{fieldName}} placeholders as the agent template.',
-            onInput: (v) => { cfg.autoReplyHTML = v; save(); }
-          })
-        ]));
-      }
+      const customerStatus = !cfg.autoReply
+        ? 'Switched off'
+        : ((cfg.autoReplyHTML || '').trim()
+            ? 'Your own HTML'
+            : ((cfg.autoReplyMessage || '').trim() ? 'Your own wording' : 'Using our standard wording'));
+
+      body.appendChild(section('Email wording', [
+        emailCard(
+          'Customer confirmation',
+          customerStatus,
+          !!((cfg.autoReplyHTML || '').trim() || (cfg.autoReplyMessage || '').trim()),
+          () => openEmailPopup(cfg, save, 'customer')
+        ),
+        emailCard(
+          'Team notification',
+          (cfg.templateHTML || '').trim() ? 'Your own HTML' : 'Using our standard layout',
+          !!(cfg.templateHTML || '').trim(),
+          () => openEmailPopup(cfg, save, 'agent')
+        ),
+        emlNote,
+      ]));
     }
 
     // ── Google Sheets inspector ──
