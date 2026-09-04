@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top 10 Destinations Editor — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/editor-shell.css">
+<link rel="stylesheet" href="/editor-events-kit.css">
+<style>
+  /* Per-editor styles only. Everything else comes from the shell + the kit. */
+
+  /* ── The ranked list ──────────────────────────────────────────────────
+     Reordering is up/down buttons rather than drag and drop: it is fully
+     keyboard operable, it works on a touchpad, and the rank is the whole
+     point of this widget so it has to be exact rather than approximate. */
+  .rank-list { display: flex; flex-direction: column; gap: 6px; }
+  .rank-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 9px; border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-md); background: var(--tgse-panel);
+  }
+  .rank-num {
+    flex: none; width: 22px; text-align: right;
+    font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+    color: var(--tgse-brand);
+  }
+  .rank-thumb {
+    flex: none; width: 38px; height: 30px; border-radius: var(--tgse-radius-sm);
+    object-fit: cover; background: var(--tgse-panel-3); display: block;
+  }
+  .rank-thumb--none {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--tgse-muted); font-size: 10px;
+  }
+  .rank-body { flex: 1; min-width: 0; }
+  .rank-name {
+    font-size: 12.5px; font-weight: 550; color: var(--tgse-ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .rank-meta { font-size: 11px; color: var(--tgse-ink-3); text-transform: capitalize; }
+  .rank-btns { flex: none; display: flex; gap: 2px; }
+  .rank-btns button {
+    width: 24px; height: 24px; padding: 0; border: 1px solid var(--tgse-border);
+    border-radius: var(--tgse-radius-sm); background: var(--tgse-panel);
+    color: var(--tgse-ink-2); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .rank-btns button:hover:not(:disabled) { background: var(--tgse-hover); color: var(--tgse-ink); }
+  .rank-btns button:disabled { opacity: .35; cursor: default; }
+  .rank-btns button:focus-visible { outline: 2px solid var(--tgse-brand); outline-offset: 1px; }
+  .rank-btns svg { width: 13px; height: 13px; }
+  .rank-btns .is-danger:hover:not(:disabled) { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+
+  /* A reference that no longer resolves. Shown rather than silently dropped,
+     so the agent can see WHY their list is nine long. */
+  .rank-item.is-missing { border-color: var(--tgse-warning); background: color-mix(in srgb, var(--tgse-warning) 8%, transparent); }
+  .rank-item.is-missing .rank-name { color: var(--tgse-warning); }
+
+  .list-count { font-size: 11.5px; color: var(--tgse-ink-3); margin: 8px 0 0; }
+  .list-count strong { color: var(--tgse-ink); font-weight: 600; }
+
+  .tpl-card.is-current { border-color: var(--tgse-brand); background: var(--tgse-brand-tint); }
+  .tpl-level {
+    display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 999px;
+    background: var(--tgse-panel-3); color: var(--tgse-ink-3);
+    font-size: 10.5px; font-weight: 600; text-transform: capitalize;
+  }
+</style>
+</head>
+<body>
+
+<div class="tgse-app">
+
+  <aside class="tgse-sidebar">
+
+    <div class="tgse-crumb">
+      <a href="/" id="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to dashboard
+      </a>
+    </div>
+
+    <div class="tgse-id">
+      <span class="tgse-id-tile" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h10M4 18h7"/><path d="M18 15l3 3-3 3"/><path d="M21 18h-6"/><circle cx="19" cy="6" r="3"/></svg>
+      </span>
+      <div class="tgse-id-meta">
+        <div class="tgse-id-name">Top 10 Destinations</div>
+        <div class="tgse-id-type">Widget editor</div>
+      </div>
+    </div>
+
+    <div class="tgse-actions">
+      <button class="tgse-btn" id="btn-templates" title="Ready-made lists">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Ready-made lists
+        <span class="tgse-kbd">T</span>
+      </button>
+    </div>
+
+    <div class="tgse-name">
+      <input type="text" id="name-input" placeholder="Untitled widget" maxlength="80">
+      <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <span id="save-label">Save</span>
+      </button>
+    </div>
+
+    <nav class="tgse-tabs" role="tablist">
+      <button data-tab="content" role="tab" aria-selected="true">Content</button>
+      <button data-tab="design" role="tab" aria-selected="false">Design</button>
+      <button data-tab="settings" role="tab" aria-selected="false">Settings</button>
+    </nav>
+
+    <div class="tgse-body" id="sb-body">
+
+      <!-- ===== CONTENT ===== -->
+      <div class="tgse-panel is-active" data-tab="content">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h10M4 18h7"/><circle cx="19" cy="6" r="3"/></svg>
+            <span class="tgse-section-label">The list</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Your ten, in order</label>
+              <div class="rank-list" id="rank-list"></div>
+              <p class="list-count" id="list-count"></p>
+              <p class="field-help">
+                The order is yours. Nothing in the destination database ranks one place above
+                another, so this list says exactly what you put in it.
+              </p>
+            </div>
+
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-search">Add a destination</label>
+              <input class="input" type="search" id="f-search" placeholder="Santorini, Algarve, Costa Rica…" autocomplete="off">
+              <div class="results" id="results" role="listbox" aria-label="Destination search results"></div>
+            </div>
+
+            <div class="tgse-field">
+              <label class="tgse-field-label">Start from a ready-made list</label>
+              <div class="tpl-list" id="preset-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Heading</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-title">Title</label>
+              <input class="input" type="text" id="f-title" maxlength="90" placeholder="Top 10 Beach Escapes">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-subtitle">Subtitle</label>
+              <textarea class="textarea" id="f-subtitle" maxlength="220" placeholder="One line on who this list is for."></textarea>
+              <p class="field-help">Leave both blank to use the wording that comes with a ready-made list.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span class="tgse-section-label">Call to action</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="toggle-row">
+              <div><div class="toggle-label">Show a call to action</div>
+                <div class="toggle-sub">A line of copy and a button under the list</div></div>
+              <button class="switch" id="t-cta" type="button" role="switch" aria-checked="false" aria-label="Show a call to action"></button>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-ctatext">Copy</label>
+              <textarea class="textarea" id="f-ctatext" maxlength="200" placeholder="Not sure which one is right for you?"></textarea>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-ctalabel">Button label</label>
+              <input class="input" type="text" id="f-ctalabel" maxlength="40" placeholder="Talk to us">
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-ctaurl">Button link</label>
+              <input class="input" type="text" id="f-ctaurl" maxlength="300" placeholder="/contact">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== DESIGN ===== -->
+      <div class="tgse-panel" data-tab="design">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+            <span class="tgse-section-label">Layout</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <div class="seg" id="seg-layout" role="group" aria-label="Layout">
+                <button type="button" data-v="list" aria-pressed="true">List</button>
+                <button type="button" data-v="grid" aria-pressed="false">Grid</button>
+                <button type="button" data-v="feature" aria-pressed="false">Feature</button>
+              </div>
+              <p class="field-help" id="layout-help">Ranked rows. The most compact, and the one that reads best in a page column.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span class="tgse-section-label">What to show</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body" id="toggle-wrap">
+            <div class="toggle-row"><div><div class="toggle-label">Rank numbers</div></div>
+              <button class="switch is-on" data-k="showRank" type="button" role="switch" aria-checked="true" aria-label="Show rank numbers"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Photos</div></div>
+              <button class="switch is-on" data-k="showPhoto" type="button" role="switch" aria-checked="true" aria-label="Show photos"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Taglines</div></div>
+              <button class="switch is-on" data-k="showTagline" type="button" role="switch" aria-checked="true" aria-label="Show taglines"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Best for chips</div></div>
+              <button class="switch is-on" data-k="showTags" type="button" role="switch" aria-checked="true" aria-label="Show best for chips"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Best months</div>
+              <div class="toggle-sub">Read from the climate data</div></div>
+              <button class="switch is-on" data-k="showBestMonths" type="button" role="switch" aria-checked="true" aria-label="Show best months"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Flight time from the UK</div></div>
+              <button class="switch is-on" data-k="showFlightTime" type="button" role="switch" aria-checked="true" aria-label="Show flight time"></button></div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            <span class="tgse-section-label">Colours</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-brand">Brand colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-brand-sw" value="#1B2B5B" aria-label="Brand colour swatch">
+                <input class="input" type="text" id="f-brand" value="#1B2B5B" maxlength="7" spellcheck="false">
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-accent">Accent colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-accent-sw" value="#00B4D8" aria-label="Accent colour swatch">
+                <input class="input" type="text" id="f-accent" value="#00B4D8" maxlength="7" spellcheck="false">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <span class="tgse-section-label">Typography</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label">Font family</label>
+              <div id="fontPickerMount"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SETTINGS ===== -->
+      <div class="tgse-panel" data-tab="settings">
+
+        <div class="tgse-section is-open">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>
+            <span class="tgse-section-label">Links</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-linkpattern">Link each entry to</label>
+              <input class="input" type="text" id="f-linkpattern" maxlength="200" placeholder="/destinations/{{slug}}">
+              <p class="field-help">
+                Your own URL pattern. Use <code>{{slug}}</code> for the destination's slug, and
+                <code>{{name}}</code> or <code>{{level}}</code> if you need them. Leave blank and
+                the entries are not links.
+              </p>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Open links in</label>
+              <div class="seg" id="seg-target" role="group" aria-label="Link target">
+                <button type="button" data-v="same" aria-pressed="true">Same tab</button>
+                <button type="button" data-v="new" aria-pressed="false">New tab</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            <span class="tgse-section-label">How many</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-max">Entries shown</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-max" min="3" max="12" step="1" value="10">
+                <span class="slider-val" id="f-max-val">10</span>
+              </div>
+              <p class="field-help">Ten is the point, but a sidebar sometimes only has room for five.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <section class="tgse-preview">
+    <div class="tgse-toolbar">
+      <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+      <span class="tgse-spacer"></span>
+      <div class="tgse-vp">
+        <button data-vp="desktop" class="is-active" title="Desktop" aria-label="Desktop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </button>
+        <button data-vp="tablet" title="Tablet" aria-label="Tablet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-vp="mobile" title="Mobile" aria-label="Mobile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+      <div class="tgse-divider"></div>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme">Theme</button>
+      <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed">Get embed code</button>
+    </div>
+    <div class="tgse-canvas">
+      <div class="tgse-frame" data-vp="desktop" id="pv-frame">
+        <div class="pv-stage pv-stage--wide" id="pv-stage">
+          <div id="mount"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="/editor-shell.js"></script>
+<script src="/widget-top10.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── Config ────────────────────────────────────────────────────────────
+  // Mirrors DEFAULTS in widget-top10.js. `items` holds REFERENCES only
+  // (level + recordId, plus slug/name as human-readable labels). The content
+  // itself is never stored here: it is hydrated live, so an editorial fix in
+  // the Destination Content base reaches every embedded list.
+  var C = {
+    title: '', subtitle: '', listId: '', items: [],
+    layout: 'list', maxItems: 10,
+    showRank: true, showPhoto: true, showTagline: true,
+    showTags: true, showBestMonths: true, showFlightTime: true,
+    linkPattern: '', linkTarget: 'same',
+    ctaEnabled: false, ctaText: '', ctaLabel: 'Talk to us', ctaUrl: '',
+    theme: 'light', brandColour: '#1B2B5B', accentColour: '#00B4D8',
+    fontFamily: 'Inter',
+  };
+
+  var widget = null;
+  var presets = [];
+  var cards = [];             // hydrated cards, keyed positionally to C.items
+  var hydrateSeq = 0;         // guards against an out-of-order hydrate response
+  var refocus = null;         // id of the control to restore focus to after a list redraw
+
+  var LAYOUT_HELP = {
+    list: 'Ranked rows. The most compact, and the one that reads best in a page column.',
+    grid: 'Photo cards in a responsive grid. Best across the full width of a page.',
+    feature: 'A lead card for number one, then the rest as rows. Good for a hero pick.',
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ── Preview ───────────────────────────────────────────────────────────
+  function previewConfig() {
+    var cfg = Object.assign({}, C);
+    // Hand the widget the hydrated cards directly so the preview does not need
+    // a saved widget id and does not refetch on every keystroke.
+    cfg.__items = cards.filter(Boolean);
+    return cfg;
+  }
+
+  function render() {
+    var mount = $('mount');
+    if (!mount) return;
+    if (widget) { try { widget.destroy(); } catch (e) { /* noop */ } }
+    mount.innerHTML = '';
+    var host = document.createElement('div');
+    mount.appendChild(host);
+    widget = new window.TGTop10Widget(host, previewConfig());
+  }
+
+  // ── Hydration ─────────────────────────────────────────────────────────
+  // POSTs the reference list and gets back card data for the preview AND for
+  // the sidebar's own labels. Anything that does not come back is a reference
+  // that no longer resolves, and is shown as such rather than quietly dropped.
+  function hydrate() {
+    var refs = C.items.filter(function (i) { return i && i.level && i.recordId; });
+    if (!refs.length) { cards = []; drawList(); render(); return; }
+
+    var seq = ++hydrateSeq;
+    fetch('/api/destination-list', {
+      method: 'POST',
+      headers: tgse.authHeaders(),
+      body: JSON.stringify({ items: refs.map(function (i) {
+        return { level: i.level, recordId: i.recordId };
+      }) }),
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (seq !== hydrateSeq) return;          // a newer request has overtaken this one
+        var byId = {};
+        (d && d.items ? d.items : []).forEach(function (c) { byId[c.level + ':' + c.recordId] = c; });
+        // Keep cards positionally aligned with C.items so a missing entry is
+        // visible in the sidebar at the right rank.
+        cards = C.items.map(function (i) { return byId[i.level + ':' + i.recordId] || null; });
+        // Sync the stored labels from the live record, so a renamed destination
+        // does not leave a stale name sitting in the saved config.
+        C.items.forEach(function (i, n) {
+          var c = cards[n];
+          if (c) { i.name = c.name; i.slug = c.slug; }
+        });
+        // Re-rank the hydrated cards so the widget numbers them 1..n after any drop.
+        var rank = 0;
+        cards.forEach(function (c) { if (c) c.rank = ++rank; });
+        drawList();
+        render();
+      })
+      .catch(function () {
+        if (seq !== hydrateSeq) return;
+        tgse.toast('Could not load the destination details', 'err');
+        drawList();
+        render();
+      });
+  }
+
+  // ── The ranked list ───────────────────────────────────────────────────
+  var ICON_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>';
+  var ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  var ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+  function drawList() {
+    var wrap = $('rank-list');
+    if (!wrap) return;
+
+    if (!C.items.length) {
+      wrap.innerHTML = '<p class="results-note">No destinations yet. Pick a ready-made list below, '
+        + 'or search for a destination to start your own.</p>';
+      $('list-count').textContent = '';
+      return;
+    }
+
+    wrap.innerHTML = C.items.map(function (item, n) {
+      var card = cards[n];
+      var missing = cards.length > 0 && !card;
+      var thumb;
+      if (card && card.image) {
+        thumb = '<img class="rank-thumb" src="' + esc(card.image) + '" alt="" loading="lazy">';
+      } else {
+        thumb = '<span class="rank-thumb rank-thumb--none" aria-hidden="true">'
+          + (missing ? '!' : '—') + '</span>';
+      }
+      var name = card ? card.name : (item.name || item.recordId);
+      var meta = missing ? 'No longer in the content base' : (card ? (card.region || card.level) : item.level);
+
+      return '<div class="rank-item' + (missing ? ' is-missing' : '') + '">'
+        + '<span class="rank-num">' + (n + 1) + '</span>'
+        + thumb
+        + '<span class="rank-body"><span class="rank-name">' + esc(name) + '</span>'
+        + '<span class="rank-meta">' + esc(meta) + '</span></span>'
+        + '<span class="rank-btns">'
+        + '<button type="button" id="mv-up-' + n + '" data-mv="' + n + '" data-dir="-1" '
+        + (n === 0 ? 'disabled ' : '') + 'aria-label="Move ' + esc(name) + ' up">' + ICON_UP + '</button>'
+        + '<button type="button" id="mv-dn-' + n + '" data-mv="' + n + '" data-dir="1" '
+        + (n === C.items.length - 1 ? 'disabled ' : '') + 'aria-label="Move ' + esc(name) + ' down">' + ICON_DOWN + '</button>'
+        + '<button type="button" class="is-danger" data-rm="' + n + '" '
+        + 'aria-label="Remove ' + esc(name) + '">' + ICON_X + '</button>'
+        + '</span></div>';
+    }).join('');
+
+    var shown = Math.min(C.items.length, C.maxItems);
+    $('list-count').innerHTML = '<strong>' + C.items.length + '</strong> in the list, '
+      + '<strong>' + shown + '</strong> shown.'
+      + (C.items.length > C.maxItems ? ' Raise "Entries shown" in Settings to show them all.' : '');
+
+    // Restore focus after the redraw so a repeated move stays on the keyboard
+    // or under the pointer. This runs off a real user action, never a passive
+    // re-render, so it cannot steal the caret from another field.
+    if (refocus) {
+      var btn = $(refocus);
+      if (btn && !btn.disabled) btn.focus();
+      refocus = null;
+    }
+  }
+
+  function moveItem(n, dir) {
+    var to = n + dir;
+    if (to < 0 || to >= C.items.length) return;
+    var tmp = C.items[n]; C.items[n] = C.items[to]; C.items[to] = tmp;
+    var ctmp = cards[n]; cards[n] = cards[to]; cards[to] = ctmp;
+    var rank = 0;
+    cards.forEach(function (c) { if (c) c.rank = ++rank; });
+    // Once an agent reorders, the list is theirs, not the preset's.
+    C.listId = '';
+    refocus = (dir < 0 ? 'mv-up-' : 'mv-dn-') + to;
+    shell.markDirty();
+    drawList();
+    drawPresets();
+    render();
+  }
+
+  function removeItem(n) {
+    C.items.splice(n, 1);
+    cards.splice(n, 1);
+    var rank = 0;
+    cards.forEach(function (c) { if (c) c.rank = ++rank; });
+    C.listId = '';
+    shell.markDirty();
+    drawList();
+    drawPresets();
+    render();
+  }
+
+  function addItem(ref) {
+    if (C.items.length >= 12) { tgse.toast('Twelve is the maximum', 'err'); return; }
+    var dup = C.items.some(function (i) {
+      return i.level === ref.level && i.recordId === ref.recordId;
+    });
+    if (dup) { tgse.toast(ref.name + ' is already in the list', 'err'); return; }
+    C.items.push(ref);
+    C.listId = '';
+    shell.markDirty();
+    drawPresets();
+    hydrate();
+  }
+
+  $('rank-list').addEventListener('click', function (e) {
+    var mv = e.target.closest('[data-mv]');
+    if (mv) { moveItem(parseInt(mv.getAttribute('data-mv'), 10), parseInt(mv.getAttribute('data-dir'), 10)); return; }
+    var rm = e.target.closest('[data-rm]');
+    if (rm) { removeItem(parseInt(rm.getAttribute('data-rm'), 10)); }
+  });
+
+  // ── Ready-made lists ──────────────────────────────────────────────────
+  function drawPresets() {
+    var wrap = $('preset-list');
+    if (!wrap) return;
+    if (!presets.length) {
+      wrap.innerHTML = '<p class="results-note">Ready-made lists are unavailable right now.</p>';
+      return;
+    }
+    wrap.innerHTML = presets.map(function (p) {
+      return '<button type="button" class="tpl-card' + (C.listId === p.id ? ' is-current' : '') + '" '
+        + 'data-preset="' + esc(p.id) + '">'
+        + '<span class="tpl-name">' + esc(p.title) + '</span>'
+        + '<span class="tpl-desc">' + esc(p.subtitle) + '</span>'
+        + '<span class="tpl-level">' + esc(p.level) + 's · ' + p.count + '</span>'
+        + '</button>';
+    }).join('');
+  }
+
+  function applyPreset(id) {
+    var p = presets.find(function (x) { return x.id === id; });
+    if (!p) return;
+    if (C.items.length && !window.confirm('Replace the current ' + C.items.length
+      + ' entries with "' + p.title + '"?')) return;
+
+    fetch('/api/destination-list?list=' + encodeURIComponent(id))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.items) { tgse.toast('Could not load that list', 'err'); return; }
+        C.items = d.items.map(function (c) {
+          return { level: c.level, recordId: c.recordId, slug: c.slug, name: c.name };
+        });
+        cards = d.items.slice();
+        C.listId = id;
+        // Only fill the heading if the agent has not written their own.
+        if (!C.title) { C.title = d.title || ''; $('f-title').value = C.title; }
+        if (!C.subtitle) { C.subtitle = d.subtitle || ''; $('f-subtitle').value = C.subtitle; }
+        shell.markDirty();
+        drawList();
+        drawPresets();
+        render();
+        tgse.toast('Loaded "' + p.title + '"', 'ok');
+      })
+      .catch(function () { tgse.toast('Could not load that list', 'err'); });
+  }
+
+  $('preset-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-preset]');
+    if (btn) applyPreset(btn.getAttribute('data-preset'));
+  });
+
+  // ── Destination search ────────────────────────────────────────────────
+  var searchTimer = null;
+  var LEVEL_COLOUR = { country: '#1B2B5B', city: '#0891B2', resort: '#00B4D8' };
+
+  function runSearch(q) {
+    var box = $('results');
+    if (!q || q.length < 2) { box.innerHTML = ''; return; }
+    fetch('/api/destination-search?q=' + encodeURIComponent(q), { headers: tgse.authHeaders() })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var rs = (d && d.results) ? d.results : [];
+        if (!rs.length) { box.innerHTML = '<p class="results-note">Nothing found for that.</p>'; return; }
+        box.innerHTML = rs.slice(0, 20).map(function (r, i) {
+          var col = LEVEL_COLOUR[r.level] || '#64748B';
+          return '<button type="button" class="result" data-i="' + i + '">'
+            + '<span class="result-badge" style="background:' + col + ';color:#fff">'
+            + esc(r.level.charAt(0).toUpperCase()) + '</span>'
+            + '<span class="result-body"><span class="result-name">' + esc(r.name) + '</span>'
+            + '<span class="result-meta">' + esc(r.country || r.level) + '</span></span>'
+            + '</button>';
+        }).join('');
+        box.__results = rs;
+      })
+      .catch(function () { box.innerHTML = '<p class="results-note">Search is unavailable right now.</p>'; });
+  }
+
+  $('f-search').addEventListener('input', function (e) {
+    clearTimeout(searchTimer);
+    var q = e.target.value.trim();
+    searchTimer = setTimeout(function () { runSearch(q); }, 220);
+  });
+
+  $('results').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-i]');
+    if (!btn) return;
+    var rs = $('results').__results || [];
+    var r = rs[parseInt(btn.getAttribute('data-i'), 10)];
+    if (!r) return;
+    addItem({ level: r.level, recordId: r.recordId, name: r.name, slug: '' });
+    $('results').innerHTML = '';
+    $('f-search').value = '';
+  });
+
+  // ── Field wiring ──────────────────────────────────────────────────────
+  function bindText(id, key, opts) {
+    var el = $(id);
+    if (!el) return;
+    el.addEventListener('input', function () {
+      C[key] = el.value;
+      shell.markDirty();
+      if (opts && opts.rerender !== false) render();
+    });
+  }
+
+  bindText('f-title', 'title');
+  bindText('f-subtitle', 'subtitle');
+  bindText('f-ctatext', 'ctaText');
+  bindText('f-ctalabel', 'ctaLabel');
+  bindText('f-ctaurl', 'ctaUrl');
+  bindText('f-linkpattern', 'linkPattern');
+
+  function bindColour(hexId, swId, key) {
+    var hex = $(hexId), sw = $(swId);
+    hex.addEventListener('input', function () {
+      var v = hex.value.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(v)) { C[key] = v; sw.value = v; shell.markDirty(); render(); }
+    });
+    sw.addEventListener('input', function () {
+      C[key] = sw.value; hex.value = sw.value; shell.markDirty(); render();
+    });
+  }
+  bindColour('f-brand', 'f-brand-sw', 'brandColour');
+  bindColour('f-accent', 'f-accent-sw', 'accentColour');
+
+  function bindSeg(wrapId, key, after) {
+    var wrap = $(wrapId);
+    wrap.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-v]');
+      if (!btn) return;
+      C[key] = btn.getAttribute('data-v');
+      Array.prototype.forEach.call(wrap.querySelectorAll('[data-v]'), function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      shell.markDirty();
+      if (after) after();
+      render();
+    });
+  }
+  bindSeg('seg-layout', 'layout', function () { $('layout-help').textContent = LAYOUT_HELP[C.layout] || ''; });
+  bindSeg('seg-target', 'linkTarget');
+
+  $('toggle-wrap').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-k]');
+    if (!btn) return;
+    var k = btn.getAttribute('data-k');
+    C[k] = !C[k];
+    btn.classList.toggle('is-on', C[k]);
+    btn.setAttribute('aria-checked', String(C[k]));
+    shell.markDirty();
+    render();
+  });
+
+  $('t-cta').addEventListener('click', function () {
+    C.ctaEnabled = !C.ctaEnabled;
+    $('t-cta').classList.toggle('is-on', C.ctaEnabled);
+    $('t-cta').setAttribute('aria-checked', String(C.ctaEnabled));
+    shell.markDirty();
+    render();
+  });
+
+  $('f-max').addEventListener('input', function () {
+    C.maxItems = parseInt($('f-max').value, 10) || 10;
+    $('f-max-val').textContent = C.maxItems;
+    shell.markDirty();
+    drawList();
+    render();
+  });
+
+  // ── Reflect a loaded config into the controls ─────────────────────────
+  function syncControls() {
+    $('f-title').value = C.title || '';
+    $('f-subtitle').value = C.subtitle || '';
+    $('f-ctatext').value = C.ctaText || '';
+    $('f-ctalabel').value = C.ctaLabel || '';
+    $('f-ctaurl').value = C.ctaUrl || '';
+    $('f-linkpattern').value = C.linkPattern || '';
+    $('f-brand').value = C.brandColour; $('f-brand-sw').value = C.brandColour;
+    $('f-accent').value = C.accentColour; $('f-accent-sw').value = C.accentColour;
+    $('f-max').value = C.maxItems; $('f-max-val').textContent = C.maxItems;
+
+    Array.prototype.forEach.call(document.querySelectorAll('#seg-layout [data-v]'), function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === C.layout));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#seg-target [data-v]'), function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === C.linkTarget));
+    });
+    $('layout-help').textContent = LAYOUT_HELP[C.layout] || '';
+
+    Array.prototype.forEach.call(document.querySelectorAll('#toggle-wrap [data-k]'), function (b) {
+      var on = !!C[b.getAttribute('data-k')];
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-checked', String(on));
+    });
+    $('t-cta').classList.toggle('is-on', !!C.ctaEnabled);
+    $('t-cta').setAttribute('aria-checked', String(!!C.ctaEnabled));
+  }
+
+  // ── Shell ─────────────────────────────────────────────────────────────
+  var shell = tgse.init({
+    widgetType: 'Top 10 Destinations',
+    widgetTag: 'top10',
+    scriptFile: 'widget-top10.js',
+
+    // __items is hydrated content, never configuration. Stripping it here is
+    // what keeps the "references, never a snapshot" contract true on save.
+    getConfig: function () {
+      var out = Object.assign({}, C);
+      delete out.__items;
+      delete out.widgetId;
+      return out;
+    },
+    setConfig: function (c) {
+      C = Object.assign({}, C, c);
+      syncControls();
+      hydrate();
+    },
+
+    fontPickerEl: '#fontPickerMount',
+    onFontChange: function (f) { C.fontFamily = f; shell.markDirty(); render(); },
+
+    onTemplates: function () {
+      var panel = document.querySelector('.tgse-tabs [data-tab="content"]');
+      if (panel) panel.click();
+      var sec = $('preset-list');
+      if (sec) sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    },
+    onThemeToggle: function (isDark) {
+      C.theme = isDark ? 'dark' : 'light';
+      shell.markDirty();
+      render();
+    },
+    onLoginSuccess: function () { loadFromUrl(); },
+  });
+
+  function loadFromUrl() {
+    // The preset catalogue is public and static, so fetch it regardless.
+    fetch('/api/destination-list?catalogue=1')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { presets = (d && d.lists) ? d.lists : []; drawPresets(); })
+      .catch(function () { drawPresets(); });
+
+    var wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { syncControls(); drawList(); render(); return; }
+
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d && d.config) C = Object.assign({}, C, d.config);
+        if (d && d.name) $('name-input').value = d.name;
+        if (!Array.isArray(C.items)) C.items = [];
+        syncControls();
+        drawList();
+        hydrate();
+      })
+      .catch(function () { tgse.toast('Failed to load widget', 'err'); });
+  }
+
+  // Boot. Never call tgse.isLoggedIn() synchronously here: the shell's cookie
+  // auth check is async and a sync call causes a blank-page race for SSO users.
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      window.tgse.onReady(function () { if (tgse.isLoggedIn()) loadFromUrl(); });
+    } else if (tgse.isLoggedIn()) {
+      loadFromUrl();
+    }
+  });
+
+  var nameEl = $('name-input');
+  if (nameEl) nameEl.addEventListener('input', function () { shell.markDirty(); });
+})();
+</script>
+
+</body>
+</html>

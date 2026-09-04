@@ -169,7 +169,10 @@
     "test:weather-transparent": "node test/weather-transparent-root-smoke.mjs",
     "test:balance-due": "node test/balance-due-schedule-smoke.mjs",
     "test:widget-views": "node test/widget-views-smoke.mjs",
-    "test:destination-photos": "node test/destination-photos-smoke.mjs"
+    "test:destination-photos": "node test/destination-photos-smoke.mjs",
+    "test:top10-list": "node test/top10-list-smoke.mjs",
+    "test:top10-render": "node test/widget-top10-render.test.mjs",
+    "test:top10": "npm run test:top10-list && npm run test:top10-render"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

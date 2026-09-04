@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top 10 Destinations Demo — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/demo-events-kit.css">
+</head>
+<body>
+<div class="demo-shell">
+
+  <header class="demo-header">
+    <div class="demo-brand">
+      <span class="demo-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+      </span>
+      <span>
+        <span class="demo-name">Northgate Travel</span>
+        <span class="demo-sub">Demo client site</span>
+      </span>
+    </div>
+    <nav class="demo-nav"><span>Holidays</span><span>Destinations</span><span>Offers</span><span>Contact</span></nav>
+  </header>
+
+  <h1>Top 10 Destinations</h1>
+  <p class="lede">
+    A ready-made ranked list, drawn live from our destination content base. Every agency starts
+    from one of eight curated lists and can reorder it, swap entries or rewrite the heading in
+    the editor. The photos, taglines, best months and flight times are never copied into the
+    widget, they are read live, so a correction to the content base reaches every embedded list.
+  </p>
+
+  <div class="controls">
+    <strong>List</strong>
+    <button type="button" data-src="beach-escapes" aria-pressed="true">Beach escapes</button>
+    <button type="button" data-src="family-resorts">Family resorts</button>
+    <button type="button" data-src="winter-sun">Winter sun</button>
+    <button type="button" data-src="city-breaks">City breaks</button>
+    <button type="button" data-src="honeymoons">Honeymoons</button>
+    <button type="button" data-src="wildlife">Wildlife</button>
+  </div>
+
+  <div class="controls">
+    <strong>Layout</strong>
+    <button type="button" data-layout="list" aria-pressed="true">List</button>
+    <button type="button" data-layout="grid">Grid</button>
+    <button type="button" data-layout="feature">Feature</button>
+    <strong style="margin-left:12px">Theme</strong>
+    <button type="button" data-theme="light" aria-pressed="true">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+
+  <div class="controls">
+    <strong>Show</strong>
+    <button type="button" data-part="showRank" aria-pressed="true">Rank</button>
+    <button type="button" data-part="showPhoto" aria-pressed="true">Photos</button>
+    <button type="button" data-part="showTagline" aria-pressed="true">Taglines</button>
+    <button type="button" data-part="showTags" aria-pressed="true">Best for</button>
+    <button type="button" data-part="showBestMonths" aria-pressed="true">Best months</button>
+    <button type="button" data-part="showFlightTime" aria-pressed="true">Flight time</button>
+  </div>
+
+  <div class="page" id="page" style="max-width:860px">
+    <div data-tg-widget="top10" id="mount"></div>
+  </div>
+
+  <div class="snippet">
+    <h2>Embed code</h2>
+    <pre id="snippet"></pre>
+  </div>
+
+  <p class="note">
+    <b>The ranking is editorial, and it says so.</b> Nothing in the destination database ranks one
+    place above another, so this widget never pretends to compute a Top 10. It renders the order
+    it is given, which is either the curated order we ship or the order the agency dragged the
+    entries into. Each entry can link straight through to the agency's own destination page using
+    their URL pattern, so the list feeds their site rather than leading away from it.
+  </p>
+
+</div>
+
+<script src="/widget-top10.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  var state = {
+    src: 'beach-escapes',
+    layout: 'list',
+    theme: 'light',
+    parts: {
+      showRank: true, showPhoto: true, showTagline: true,
+      showTags: true, showBestMonths: true, showFlightTime: true,
+    },
+  };
+  var widget = null;
+  var mount = document.getElementById('mount');
+  var page = document.getElementById('page');
+
+  function config() {
+    return {
+      listId: state.src,
+      // Left blank so the curated list's own title and subtitle come through
+      // from the API. An agency that types their own wording overrides them.
+      title: '',
+      subtitle: '',
+      layout: state.layout,
+      theme: state.theme,
+      showRank: state.parts.showRank,
+      showPhoto: state.parts.showPhoto,
+      showTagline: state.parts.showTagline,
+      showTags: state.parts.showTags,
+      showBestMonths: state.parts.showBestMonths,
+      showFlightTime: state.parts.showFlightTime,
+      linkPattern: '/destinations/{{slug}}',
+      ctaEnabled: true,
+      ctaText: 'Not sure which one is right for you? Our team has been to most of them.',
+      ctaLabel: 'Talk to us',
+      ctaUrl: '/contact',
+    };
+  }
+
+  function snippet() {
+    var shown = { listId: state.src, layout: state.layout, linkPattern: '/destinations/{{slug}}' };
+    document.getElementById('snippet').textContent =
+      '<div data-tg-widget="top10"\n     data-tg-config=\'' + JSON.stringify(shown) + '\'></div>\n'
+      + '<script src="https://tg-widgets.vercel.app/widget-top10.js" defer><\/script>';
+  }
+
+  function apply() {
+    page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
+    if (widget) widget.update(config());
+    snippet();
+  }
+
+  function group(attr, key) {
+    var nodes = document.querySelectorAll('[data-' + attr + ']');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state[key] = btn.getAttribute('data-' + attr);
+          for (var j = 0; j < nodes.length; j++) {
+            nodes[j].setAttribute('aria-pressed', String(nodes[j] === btn));
+          }
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function toggles() {
+    var nodes = document.querySelectorAll('[data-part]');
+    for (var i = 0; i < nodes.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var k = btn.getAttribute('data-part');
+          state.parts[k] = !state.parts[k];
+          btn.setAttribute('aria-pressed', String(state.parts[k]));
+          apply();
+        });
+      }(nodes[i]));
+    }
+  }
+
+  function boot() {
+    if (!window.TGTop10Widget) { setTimeout(boot, 40); return; }
+    widget = new window.TGTop10Widget(mount, config());
+    group('src', 'src');
+    group('layout', 'layout');
+    group('theme', 'theme');
+    toggles();
+    snippet();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

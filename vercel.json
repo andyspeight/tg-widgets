@@ -202,6 +202,10 @@
       "destination": "/demo-attraction.html"
     },
     {
+      "source": "/demo-top10",
+      "destination": "/demo-top10.html"
+    },
+    {
       "source": "/demo-reviews",
       "destination": "/demo-reviews.html"
     },
@@ -416,6 +420,10 @@
     {
       "source": "/editor-attraction",
       "destination": "/editor-attraction.html"
+    },
+    {
+      "source": "/editor-top10",
+      "destination": "/editor-top10.html"
     },
     {
       "source": "/editor-reviews",
@@ -1468,6 +1476,23 @@
     },
     {
       "source": "/widget-hours.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-top10.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

@@ -472,6 +472,21 @@ const WIDGETS = [
     access: { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'top10',
+    name: 'Top 10 Destinations',
+    airtableType: 'Top 10 Destinations',
+    description: 'A ranked list of destinations, ready to embed. Start from one of eight curated lists — beaches, family resorts, winter sun, city breaks, honeymoons, all-inclusive, wildlife, luxury — then reorder, swap or rewrite it as your own. Photos, taglines, best months and flight times are read live from the Travelgenix destination content database, so a content fix reaches every list without a re-save.',
+    category: 'Content',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M4 6h9M4 12h9M4 18h6"/><circle cx="18.5" cy="6" r="2.5"/><path d="M17 15.5l1.5-1.5v5"/>'},
+    color: '#0891B2',
+    editorUrl: '/editor-top10',
+    demoUrl: '/demo-top10',
+    widgetTag: 'top10',
+    scriptFile: 'widget-top10.js',
+    access: { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'weather',
     name: 'Weather',
     airtableType: 'Weather',
@@ -2421,6 +2436,32 @@ function loadMiniPreview(w) {
         facts:{flightTime:'3h 45m',timeZone:'GMT+2',currency:'Euro (€)',language:'Greek',voltage:'230V / Type C & F'},
         highlights:[],bestForTags:[],events:[],
       },
+    });
+  }
+
+  if (w.id === 'top10' && window.TGTop10Widget) {
+    // Fed inline via __items so the dashboard tile never calls the list API.
+    new window.TGTop10Widget(el, {
+      title:'Top 10 Beach Escapes', subtitle:'',
+      layout:'list', theme:'light',
+      brandColour:'#1B2B5B', accentColour:w.color,
+      showRank:true, showPhoto:true, showTagline:true,
+      showTags:false, showBestMonths:true, showFlightTime:false,
+      linkPattern:'', ctaEnabled:false, maxItems:3,
+      __items:[
+        {rank:1,level:'resort',recordId:'',slug:'grace-bay',name:'Grace Bay',region:'Turks & Caicos',
+         tagline:'Three miles of powder sand and water the colour of glass.',
+         image:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=70',
+         attribution:'',tags:[],flightTime:'',bestMonths:'Nov to Apr'},
+        {rank:2,level:'resort',recordId:'',slug:'male-atoll-resorts',name:'Male Atoll Resorts',region:'Maldives',
+         tagline:'Overwater villas and a reef that starts at the bottom of the steps.',
+         image:'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=400&q=70',
+         attribution:'',tags:[],flightTime:'',bestMonths:'Jan to Apr'},
+        {rank:3,level:'resort',recordId:'',slug:'le-morne',name:'Le Morne',region:'Mauritius',
+         tagline:'A basalt mountain at your back and the Indian Ocean in front.',
+         image:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=70',
+         attribution:'',tags:[],flightTime:'',bestMonths:'May to Dec'},
+      ],
     });
   }
 
@@ -4569,6 +4610,7 @@ bootstrapCookieAuth().then((ok) => {
 <script src="/widget-spinwheel.js"></script>
 <script src="/widget-loader.js"></script>
 <script src="/widget-appointment.js"></script>
+<script src="/widget-top10.js"></script>
 
 <!-- Staff act-as-client switcher (self-gating: only renders for Travelgenix staff) -->
 <script defer src="/staff-switcher.js"></script>
