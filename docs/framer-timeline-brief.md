@@ -587,3 +587,102 @@ to disk. It lives as a base64 image block in
 `/root/.claude/projects/<project>/<session>.jsonl`. Walk the JSONL, pick the
 last record whose message content has a `{"type":"image"}` part, and
 base64-decode `source.data`.
+
+## Feedback pass, 4 Sep 2026
+
+Andy brought outside feedback on the live page. He agreed pink for Luna, told
+me to LEAVE THE HERO STAT CARD ALONE ("don't change the metrics in the main
+banner, this is about the work we have done, we already talked about
+connectivity on other pages"), and set the page's essence: "it is all about
+what we have done and what we are going to do next".
+
+Built on branch `roadmap-feedback-pass` (id `oenbang6c`, from main). NOT merged
+and NOT published: waiting on Andy.
+
+### What went in
+
+**Category accents on the eight release cards.** A 4px top edge in the full
+colour for scanning, plus a tinted pill naming the category above the headline.
+Three categories, using the three colours already in the hero brand bar. There
+is no purple in the Travelgenix palette, so Luna took pink rather than the
+purple the feedback asked for.
+
+- Teal `#00B4D8`, tint `rgba(0,180,216,0.12)`, "Booking tools": May
+  `goJjpG46m`, June `DSfmqUvRR`, Quick Quote `yQFmFM4Xw`.
+- Pink `#E81070`, tint `rgba(232,16,112,0.10)`, "Luna and AI": Luna Chat
+  `vH0nknYVN`, Luna Travel App `dA81vZwGu`, Luna Marketing `NjLVujuFk`, Luna
+  Trips `rXQukP2Ah`.
+- Yellow `#F8B810`, tint `rgba(248,184,16,0.20)`, "Suppliers and rates": the
+  Contracting Engine `tnRLUCMD0`.
+
+The "also in" cards are deliberately unchipped; they are the mixed bucket and
+their own "Also in July" label already does the job.
+
+Accessibility note that shaped the design: teal on white is about 2.3:1 and
+yellow about 1.9:1, so category names could NOT be set in their own colour.
+The tint carries the category, the label text stays navy, and the solid colour
+lives on the 4px edge where contrast does not apply.
+
+Edge nodes: `vPpBhwWiD` `w6yLIbjUO` `parDphoRf` `N6cSHeRWt` `LaOCa1bTS`
+`S2M3gnv7Y` `FTiX1ECoA` `R3RUmIYHB`. Chips: `FwqGHpzq4` `dG90A7QkI`
+`vZqYOs9ys` `nUMEum04Q` `hPowWh2YL` `ohXIkFQZE` `mte74nFp6` `txtKUZ6XJ`.
+
+**September as a "Just shipped" spotlight.** New header row `npZpk0kQq`
+(space-between) holding `JtIe2z4hy` (the month heading `Wz9Mbe4zT` moved into
+it, plus the pink pill `E3LElmI7p`) and a "Book a demo" frame link `fv3w9gGHe`
+to /contact. The three September cards took a lifted surface: fill `#FFFAFC`,
+border `1px solid rgba(232,16,112,0.20)`, shadow
+`0px 16px 40px 0px rgba(27,43,91,0.10)`.
+
+**A month jump row** `weSFeIKSV`, inside the Timeline section at index 1, under
+the centred intro and centred to match it. Label `euimrx5oT` plus five frame
+links: `RDv9yMxr5` `Rw4J6sA97` `u2BCFh_q0` `g3GREo_tj` `HGnj01wBq`. This is the
+non-sticky substitute for the sticky month control the feedback wanted, and it
+needs no code component.
+
+**A "Coming next" band** `HAi718quR`, in the desktop breakpoint at index 2,
+between the Timeline and the closing CTA. Off White fill, the three-colour
+brand bar `ORJUosWEO`, heading `cOtm2u21o` "Coming next" and body `OPseMVLht`
+"More automation, more supplier tools and more ways to keep customers moving.
+We update this page as we ship." No specific promises, because the earlier
+Now/Next/Later lanes were deleted precisely for being unreviewed. This band is
+where Andy's own list goes when he has one.
+
+**Copy for the new essence.** Hero intro `n7IhuuecV` now reads "Everything we
+have shipped since the start of May 2026, month by month, and what we are
+working on next." Page metadata description updated to match.
+
+### How to do in-page anchors in Framer
+
+Set `scrollTargetEnabled="true"` and `elementId="<id>"` on the TARGET node,
+then point the link at the page path plus the hash: `link.href="/roadmap#may-2026"`.
+The five month rows carry `may-2026`, `june-2026`, `july-2026`, `august-2026`,
+`september-2026`. The rule lives in the installed skill at
+`~/.claude/skills/framer/projects/<projectId>/prompt/how-projects-work.md` around
+line 711, which is worth grepping before assuming a capability is missing.
+
+Related gotcha: a `RichTextNode` carrying `link.href` MUST also carry a
+`linkStylePreset`. Both the jump chips and the September demo link avoid that
+by putting `link.href` on the wrapping FRAME, with plain text inside.
+
+### What was pushed back on, and why
+
+- **Category filters.** Twenty releases over five months is not a feed. Filters
+  need a code component, need maintaining every month, and filtering to
+  Suppliers would leave two months on screen. The category labels give the
+  scanning benefit without the machinery.
+- **Expandable "also in" details.** Needs variants or a code component and
+  hides content from skimmers and from search.
+- **A scroll-linked active month.** Needs real scroll state, so a code
+  component. Not worth it against the rest.
+- **"What this means for you" on every card.** Repeated twenty times it becomes
+  filler; the outcome belongs in the blurb where a card has one.
+- **The email signup.** Wanted, but it needs a Brevo list, consent wording and
+  API wiring. Its own job, not a design pass.
+
+### Two DSL errors worth remembering
+
+- `gap` is REJECTED when `stackDistribution` is `space-between`, `space-around`
+  or `space-evenly`. To stack such a row on a small breakpoint, change the
+  distribution to `start` AND set the gap in the same command.
+- `paddingRight` cannot be applied to a `RichTextNode`. Pad the wrapper.
