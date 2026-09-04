@@ -53,6 +53,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
+import { renderQuoteEmail, normaliseQuoteEmail } from '../public/_quote-email-template.js';
 import { generateQuotePdf, pdfFilename, fetchAttachmentBuffers } from '../generate-pdf.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
@@ -215,6 +216,9 @@ function buildRenderOpts(config) {
         .map(a => ({ url: a.url, name: (a.name && String(a.name).slice(0, 120)) || 'document.pdf' }))
     : [];
   return {
+    // The client's own covering-email wording, written in the editor's email
+    // popup. Blank means our standard wording.
+    email: c.email,
     brand: {
       name: c.brandName,
       tagline: c.tagline,
@@ -420,14 +424,25 @@ async function emailQuotePdf(doc, pdfBuffer, extraAttachments, opts) {
     });
   }
 
+  // The covering email is branded from the SAME kit as the PDF it carries, and
+  // the client can write their own subject and message. It used to be three
+  // unstyled <p> tags hardcoded here, which made the best-designed document we
+  // produce arrive in the plainest email we send.
+  const { subject, html, text } = renderQuoteEmail({
+    brand: (opts && opts.brand) || {},
+    quoteTitle: title,
+    leadName: lead === 'there' ? '' : lead,
+    filename,
+    extraCount: attachments.length - 1,
+    template: normaliseQuoteEmail(opts && opts.email),
+  });
+
   await sg.send({
     to,
     from: { email: fromEmail, name: fromName },
-    subject: `Your quote: ${title}`,
-    text: `Hi ${lead},\n\nPlease find your quote "${title}" attached as a PDF.\n\nKind regards,\n${fromName}`,
-    html: `<p>Hi ${escapeHtml(lead)},</p>` +
-          `<p>Please find your quote &ldquo;${escapeHtml(title)}&rdquo; attached as a PDF.</p>` +
-          `<p>Kind regards,<br>${escapeHtml(fromName)}</p>`,
+    subject,
+    text,
+    html,
     attachments,
   });
 
