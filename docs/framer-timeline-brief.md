@@ -781,7 +781,11 @@ which Andy told me not to touch, is unchanged.
 
 ## Press logo and the widget label, 4 Sep 2026
 
-Same branch, `press-coverage-ttw` (`a9wlptvxr`). Still not merged.
+Same branch, `press-coverage-ttw` (`a9wlptvxr`), MERGED INTO MAIN on Andy's
+word the same evening. Verified on main: the branch consumed (only `main`
+remains), `PressGrid.tsx` carrying the article, `PressLogos.tsx` carrying the
+masthead at h 48, the home Press Strip `eEZr6_ADD` in place, the stat label
+reading "new widgets" and the banner thumbnail on v3. Publishing is Andy's.
 
 **The publication logo joined the "As featured in" row.** That row is a SECOND
 code component, `PressLogos.tsx` (`codeFile/G5BHE7e`), sitting inside the Press
