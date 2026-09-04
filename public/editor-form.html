@@ -334,10 +334,10 @@
           <div class="tgse-section-body">
             <p class="fld-help" style="margin-top:0">
               Answers are saved to your submissions inbox as soon as the form is
-              live. To also send them to a Google Sheet, an email address, your
-              mailing list or a webhook, open the Routing panel from the
-              dashboard for this widget.
+              live. Set the two emails below to tell your team straight away and
+              to welcome the person who filled it in.
             </p>
+            <div id="lead-emails"></div>
           </div>
         </div>
       </div>
@@ -379,6 +379,15 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<!-- Shared lead-email settings: the team notification and the welcome email.
+     Both were always sendable by this widget (it hands leads to dispatchLead)
+     but there was no UI to configure either. -->
+<script src="/editor-email-popup.js"></script>
+<script src="/editor-lead-emails.js"></script>
+<script type="module">
+  import { renderWelcomeEmail, welcomeCtaIsUsable } from '/_welcome-email-template.js';
+  window.TGWelcomeEmail = { renderWelcomeEmail, welcomeCtaIsUsable };
+</script>
 <script src="/widget-form.js"></script>
 <script>
 (function () {
@@ -1080,9 +1089,12 @@
       var t = $('cfgTheme'); if (t) t.value = C.theme;
       changed();
     },
+    onAfterSave: function () { if (leadEmails) leadEmails.reload(); },
+
     onLoginSuccess: function () { boot(); }
   });
 
+  var leadEmails = null;
   function boot() {
     buildAddMenu();
     wireQuestionList();
@@ -1090,6 +1102,13 @@
     wireSettings();
     hydrate();
     mountPreview();
+    if (window.TGLeadEmails) {
+      leadEmails = window.TGLeadEmails.mount({
+        mount: document.getElementById('lead-emails'),
+        widgetType: 'form',
+        getBrandName: function () { return (C && C.brandName) || ''; },
+      });
+    }
   }
 
   // Boot only once auth has resolved — a synchronous isLoggedIn() here races

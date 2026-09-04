@@ -83,6 +83,7 @@
     "test:appointment-email-editor": "node test/appointment-email-editor-smoke.mjs",
     "test:booking-email-drift": "node test/booking-email-drift-smoke.mjs",
     "test:quote-email-editor": "node test/quote-email-editor-smoke.mjs",
+    "test:lead-emails-editor": "node test/lead-emails-editor-smoke.mjs",
     "test:worldmap-departures": "node test/worldmap-departure-filter-smoke.mjs",
     "test:worldmap-header-stacking": "node test/worldmap-header-stacking-smoke.mjs",
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",

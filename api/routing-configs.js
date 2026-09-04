@@ -95,6 +95,12 @@ const WIDGET_DISPLAY_NAMES = {
   'quiz':                 'Quiz',
   'calculator':           'Calculator',
   'booking-confirmation': 'Booking Confirmation',
+  // Sep 2026: these three already handed their leads to dispatchLead, so they
+  // could always send the team notification and the welcome email — but their
+  // editors had no UI to configure either, so no client could. They do now.
+  'form':                 'Custom Form',
+  'tour':                 'Tour Itinerary',
+  'trips':                'Group Trips',
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────────
