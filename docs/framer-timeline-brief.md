@@ -686,3 +686,92 @@ by putting `link.href` on the wrapping FRAME, with plain text inside.
   or `space-evenly`. To stack such a row on a small breakpoint, change the
   distribution to `start` AND set the gap in the same command.
 - `paddingRight` cannot be applied to a `RichTextNode`. Pad the wrapper.
+
+## Press coverage and the home news strip, 4 Sep 2026
+
+The feedback pass was merged to main on Andy's word and verified (branch
+consumed, only `main` left, the jump row, Just shipped pill and Coming next
+band all present on main). He then asked for the new Travel and Tour World
+piece on the press page and a signal on the home page that there is new
+coverage.
+
+Built on branch `press-coverage-ttw` (id `a9wlptvxr`, from main). NOT merged
+and NOT published: waiting on Andy.
+
+The article: "Travelgenix Enters New Digital Era as AI Platform Attracts
+Growing Travel Businesses", Travel And Tour World, 3 September 2026, by Binoy
+Mehera. https://www.travelandtourworld.com/news/article/2srzgjiwb2kg/
+
+### The press page is a code component, not canvas
+
+`/press` `TCU6Co554` has four sections: Press Hero `fSbso1hJp`, Awards
+`sPZK2WVn2`, Coverage `qxODebG_v`, Press Contact `sW0uHXtzp`. The coverage
+list is NOT canvas nodes. It is a code component, `PressGrid.tsx`
+(`codeFile/M04rb6R`), holding an `ARTICLES` array of
+`{source, date, title, summary, url, img, logo?, tag?}`, newest first. The
+source filter pills are derived from the data, so adding a new publication
+adds its pill automatically. It now reads "All coverage 15" with a new
+"Travel and Tour World 1".
+
+How to edit a code file from the agent:
+
+```js
+const file = await framer.getCodeFile("codeFile/M04rb6R")  // or "PressGrid.tsx"
+const updated = await file.setFileContent(newSource)       // creates a new version
+console.log(await updated.typecheck())                     // [] when clean
+```
+
+The insert guards on the exact marker `const ARTICLES: Article[] = [\n`, throws
+if it is missing or not unique, and skips entirely if the article URL is
+already in the file, so a re-run cannot duplicate the entry.
+
+Copy written for the card, in the house voice rather than the publication's:
+title in sentence case to match the other entries, and the summary avoids
+repeating the article's figures.
+
+### Getting the article and its image
+
+`curl` returns 403 to a default user agent, and Framer's own screenshot service
+returns "Failed to capture screenshot" for this host. Two things that DID work:
+
+- `WebFetch` for the text, headline, author and date.
+- `curl` with a normal desktop browser `User-Agent` for the HTML, then reading
+  `og:image` out of the meta tags. The lead image came from
+  `https://www.travelandtourworld.com/wp-content/uploads/2026/09/Travelgenix.jpg`
+  (1200x750) and was uploaded as `press-travel-and-tour-world-sep-2026.jpg`.
+  Using the publication's own lead image matches what every other card on the
+  page already does.
+
+### The home page news strip
+
+The home page section `YkvDT2HNv` (still named "Roadmap Banner") now holds two
+things, so its gap went from 0 to 14px. Under the navy roadmap card sits a slim
+white press strip `eEZr6_ADD`, the whole row linking to `/press`: a teal
+"IN THE PRESS" pill `ERBcvsny8` with a Lucide Newspaper icon (matching the
+press page's own COVERAGE eyebrow), the headline `VWN__nNmO`, the source
+`YnEpx4xAP` and an arrow `lvchUKvr4`.
+
+This was chosen over a second banner or a hero announcement pill. The hero
+already carries an eyebrow badge with the pink Live Dot, and a second navy
+banner beside the first would have diluted both. One section, two pieces of
+news, the press line visually subordinate to the product one.
+
+Breakpoints: Tablet hides the source so the headline gets the room, Phone
+stacks the strip vertically and hides the arrow. `visible="false"` is the way
+to hide a node in one variant only.
+
+### The banner preview was re-shot
+
+The roadmap banner's thumbnail still showed the old hero intro line. Fresh
+capture of `/roadmap` desktop on main, cropped to the top 900px of the 1200px
+wide screenshot, which is exactly the 4:3 the frame wants. Uploaded as
+`roadmap-page-preview-v2.jpg` and set on `QIuL2sWyi`. Do this whenever the top
+of the roadmap page changes.
+
+### Flag for Andy
+
+The article says Travelgenix offers "over 100 integrated widgets" and onboarded
+"over 100 new travel clients in 2026". Our own pages say 61 embeddable widgets.
+The press card and the home strip deliberately quote only the headline and do
+not repeat either figure, but the discrepancy is worth a word with the
+publication.
