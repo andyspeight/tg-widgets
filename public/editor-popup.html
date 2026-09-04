@@ -849,6 +849,14 @@
 </div>
 
 <script src="/editor-shell.js"></script>
+<!-- Shared email popup — the one popup every editor uses to write an email -->
+<script src="/editor-email-popup.js"></script>
+<!-- The REAL welcome-email renderer, handed to the classic editor script below
+     so the preview is the email api/_lib/destinations/auto-reply.js sends. -->
+<script type="module">
+  import { renderWelcomeEmail, welcomeCtaIsUsable } from '/_welcome-email-template.js';
+  window.TGWelcomeEmail = { renderWelcomeEmail, welcomeCtaIsUsable };
+</script>
 
 <!-- The popup widget — used to render the live preview -->
 <script src="/widget-popup.js"></script>
@@ -2011,6 +2019,7 @@
       ],
     },
     'auto-reply': {
+      emailPopup: true,
       name: 'Welcome email',
       icon: ICON_WELCOME,
       colour: '#00B4D8',
@@ -2421,6 +2430,7 @@
     const $body = document.getElementById('dest-config-body');
     $body.innerHTML = renderConfigFields(rc, dest);
     bindConfigFields(rc, dest);
+    mountWelcomeEmailCard(dest);
     document.getElementById('dest-config-overlay').classList.add('is-open');
     document.getElementById('dest-test-btn').disabled = false;
     document.getElementById('dest-save-btn').disabled = false;
@@ -2460,6 +2470,15 @@
           <strong>Credentials saved.</strong> Leave the credential fields below blank to keep them. Fill them in to replace.
         </div>
       `);
+    }
+
+    // The welcome email is written in the shared popup (the same one My Booking
+    // and Enquiry use), with the real email previewed live beside it. The raw
+    // fields stay below in a disclosure: they are what collectConfigModal()
+    // reads on save, and a power user can still edit them directly.
+    if (dest.emailPopup) {
+      parts.push('<div id="welcome-card-mount"></div>');
+      parts.push('<details class="welcome-raw"><summary style="font-size:12px;font-weight:600;color:var(--tgse-ink-2,#475569);cursor:pointer;padding:6px 0;">Edit the fields individually</summary>');
     }
 
     for (const f of dest.fields) {
@@ -2507,6 +2526,8 @@
         }
       }
     }
+
+    if (dest.emailPopup) parts.push('</details>');
 
     parts.push(`
       <div class="toggle-row" style="margin-top:14px">
@@ -2575,6 +2596,103 @@
         }
       });
     }
+  }
+
+  // ── Welcome email: the shared popup ──────────────────────────────────────
+  // Reads and writes the very inputs collectConfigModal() collects, so saving is
+  // unchanged; the popup is simply a far better way to fill them in than six
+  // blind boxes. The preview comes from public/_welcome-email-template.js, the
+  // same module api/_lib/destinations/auto-reply.js sends with.
+  const WELCOME_TAGS = [
+    { tag: '{firstName}', label: 'First name' },
+    { tag: '{fromName}', label: 'Your company' },
+  ];
+  const WELCOME_KEYS = ['fromName', 'subject', 'headline', 'body', 'ctaLabel', 'ctaUrl'];
+
+  function welcomeInput(key) {
+    return document.querySelector('#dest-config-body [data-config-key="' + key + '"]');
+  }
+  function welcomeRead() {
+    const out = {};
+    WELCOME_KEYS.forEach((k) => { const el = welcomeInput(k); out[k] = el ? el.value : ''; });
+    return out;
+  }
+  function welcomeWrite(key, value) {
+    const el = welcomeInput(key);
+    if (!el) return;
+    el.value = value;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function welcomeHasCustom() {
+    const v = welcomeRead();
+    return !!(String(v.subject || '').trim() || String(v.headline || '').trim() || String(v.body || '').trim());
+  }
+
+  function mountWelcomeEmailCard(dest) {
+    const mount = document.getElementById('welcome-card-mount');
+    if (!dest || !dest.emailPopup || !mount || !window.TGEmailPopup) return;
+    const render = () => {
+      mount.textContent = '';
+      mount.appendChild(window.TGEmailPopup.card({
+        title: 'Welcome email',
+        status: welcomeHasCustom() ? 'Your own wording' : 'Using our standard wording',
+        isCustom: welcomeHasCustom(),
+        onEdit: openWelcomeEmailPopup,
+      }));
+    };
+    render();
+    mount._refresh = render;
+  }
+
+  function openWelcomeEmailPopup() {
+    if (!window.TGEmailPopup || !window.TGWelcomeEmail) return;
+    window.TGEmailPopup.open({
+      onClose: () => {
+        const mount = document.getElementById('welcome-card-mount');
+        if (mount && mount._refresh) mount._refresh();
+      },
+      emails: [{
+        key: 'welcome',
+        label: 'Welcome email',
+        from: () => welcomeRead().fromName || 'Travelgenix',
+        to: 'sarah@example.com (whoever signs up)',
+        tags: WELCOME_TAGS,
+        fields: [
+          { key: 'fromName', type: 'text', label: 'From name', maxlength: 80,
+            placeholder: 'Travelgenix', hint: 'The name this email comes from. Leave blank and it comes from Travelgenix.' },
+          { key: 'subject', type: 'text', label: 'Subject', maxlength: 200,
+            placeholder: 'You are in. Welcome to Travelgenix.' },
+          { key: 'headline', type: 'text', label: 'Headline', maxlength: 120,
+            placeholder: 'You are on the list', tagsAfter: true },
+          { key: 'body', type: 'textarea', label: 'Message', grow: true,
+            placeholder: 'Leave blank to use our friendly default.',
+            hint: 'One line per paragraph. Leave blank to send our standard welcome, shown in the preview.' },
+          { key: 'ctaLabel', type: 'text', label: 'Button text', maxlength: 40, placeholder: 'Browse destinations' },
+          { key: 'ctaUrl', type: 'text', label: 'Button link', placeholder: 'https://yourwebsite.com',
+            hint: 'A button needs BOTH text and a link starting with https://, or it is left out.' },
+        ],
+        read: welcomeRead,
+        write: welcomeWrite,
+        render: (v) => {
+          const out = window.TGWelcomeEmail.renderWelcomeEmail(v, { contact: { firstName: 'Sarah' } });
+          const wantsButton = String(v.ctaLabel || '').trim() || String(v.ctaUrl || '').trim();
+          const usable = window.TGWelcomeEmail.welcomeCtaIsUsable(v.ctaLabel, v.ctaUrl);
+          let note;
+          if (wantsButton && !usable) note = 'The button needs BOTH text and a link starting with https:// — until then it is left out, as shown.';
+          else if (!welcomeHasCustom()) note = 'You are previewing our standard welcome, filled with a sample signup. Start typing to replace it with your own.';
+          else note = 'Preview uses a sample signup. Tags are filled per real subscriber.';
+          return { subject: out.subject, html: out.html, note: note };
+        },
+        reset: {
+          label: 'Use our standard wording',
+          isSet: welcomeHasCustom,
+          run: (applied) => {
+            ['subject', 'headline', 'body', 'ctaLabel', 'ctaUrl'].forEach((k) => welcomeWrite(k, ''));
+            applied();
+          },
+        },
+      }],
+    });
   }
 
   function collectConfigModal() {
