@@ -30,40 +30,16 @@ import { getRecord } from './_lib/auth/airtable.js';
 import { USERS, CLIENTS } from './_lib/auth/schema.js';
 import { isStaffEmail } from './_lib/auth/staff.js';
 import { normalisePlanValue, resolveClientPlan } from './_lib/auth/plan.js';
+// ONE plan map for the suite. This file used to carry its own copy, which
+// drifted (My Booking locked on Spark and Boost here, unlimited there; the
+// Loader and thirty newer types missing altogether). A copy is gated by the
+// same table as a new widget (Andy, 8 Sep 2026).
+import { PLAN_WIDGET_LIMITS, canonicalisePlan } from './widget-config.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 
-const PLAN_ALIASES = {
-  'spark': 'Spark', 'spark plan': 'Spark',
-  'boost': 'Boost', 'boost plan': 'Boost',
-  'ignite': 'Ignite', 'ignite plan': 'Ignite',
-  'bespoke': 'Bespoke', 'bespoke plan': 'Bespoke', 'enterprise': 'Bespoke',
-};
-
-const PLAN_WIDGET_LIMITS = {
-  'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
-  'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Google Reviews':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Testimonials':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Destination Spotlight': { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
-  'Airport Spotlight':     { Spark: 0, Boost: 5, Ignite: -1, Bespoke: -1 },
-  'Weather':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Enquiry Form':          { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
-  'My Booking':            { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Text FX':               { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Logo Showcase':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Travel Offers':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Popup':                 { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Event Calendar':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Social Share':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'WhatsApp Chat':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Opening Hours':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Newsletter Signup':     { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Contact Card':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-};
 
 /**
  * Hydrate email + plan from user/client records when JWT is incomplete.
@@ -94,12 +70,6 @@ async function hydrateLegacyUserFields(user) {
   } catch (err) {
     console.warn('[widget-copy] hydrate plan failed:', err.message);
   }
-}
-
-function canonicalisePlan(raw) {
-  if (!raw) return null;
-  const key = String(raw).trim().toLowerCase();
-  return PLAN_ALIASES[key] || (raw[0].toUpperCase() + raw.slice(1).toLowerCase());
 }
 
 async function throwAirtableError(opName, resp) {
@@ -257,11 +227,18 @@ export default async function handler(req, res) {
       });
     }
 
-    // Plan-limit check — a copy counts against the user's per-type quota.
-    // Skip this check for unlimited types entirely.
+    // Plan check, the same table as a new widget. 0 = not on this plan,
+    // -1 = unlimited (every available widget, Andy's rule), a positive count
+    // would still be enforced if a row ever carried one. Unknown plan or
+    // unknown type falls through, as widget-config's entitlement gate does.
     const userPlan = canonicalisePlan(user.plan);
     const limits = userPlan ? PLAN_WIDGET_LIMITS[sourceType] : null;
     const planLimit = limits ? limits[userPlan] : null;
+    if (planLimit === 0) {
+      return res.status(403).json({
+        error: `The ${sourceType} widget is not included in your plan. Please upgrade to use this widget.`
+      });
+    }
     if (planLimit !== null && planLimit !== -1 && planLimit !== undefined) {
       const currentCount = await countWidgetsOfType(headers, baseId, ownerClause, sourceType);
       if (currentCount >= planLimit) {
