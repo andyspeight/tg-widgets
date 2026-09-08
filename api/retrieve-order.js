@@ -30,6 +30,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
+import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -1025,18 +1026,13 @@ function trimOrder(raw) {
   // having to re-walk the items array on the front end.
   const summary = computeSummary(items);
 
-  // Order-level voucher / promo. Travelify carries the discount at the TOP
-  // level (NOT in item prices) as a signed voucherValue — negative means money
-  // off. Surface it so the widget/PDF/email can show it as a deduction line and
-  // net it off the balance. Only surfaced when it actually reduces the total.
-  const voucherValue = (typeof raw.voucherValue === 'number' && raw.voucherValue < 0)
-    ? Math.round(raw.voucherValue * 100) / 100
-    : 0;
-  const voucher = voucherValue ? {
-    code: safeStr(raw.voucherCode, 60),
-    name: safeStr(raw.voucherName, 120),
-    value: voucherValue,
-  } : null;
+  // What the booking still owes, computed ONCE here from the raw order by the
+  // shared calculation (api/_lib/order-money.js) and attached as `money`: the
+  // widget, the PDF and the confirmation email all read it, none of them does
+  // its own sums. Vouchers come from vouchers[] (or the order-level voucher
+  // fields when the list is empty) and leave here with MASKED codes only; the
+  // raw code never reaches the browser.
+  const money = moneyOf(raw, moneyOptsFromEnv());
 
   return {
     id: safeNum(raw.id),
@@ -1050,7 +1046,7 @@ function trimOrder(raw) {
     created: safeStr(raw.created, 30),
     items,
     summary,
-    voucher,
+    money,
     // Order-level payment state (where balance/instalments actually live).
     paidToDate: computePaidToDate(raw),
     depositOption: trimDepositOption(raw.depositOption),

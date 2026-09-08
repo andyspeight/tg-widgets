@@ -101,17 +101,24 @@ console.log('A part-payment request is still validated and capped at outstanding
   ok('a valid part payment is honoured', decideCharge(REF(), 50, NOW).amount === 50);
 }
 
-console.log('The My Booking widget mirrors the same schedule logic');
+console.log('The My Booking widget runs the SAME schedule logic (a verbatim copy of the shared core)');
 {
+  // Since 8 Sep 2026 the widget no longer mirrors decideCharge by hand: both
+  // run public/_order-money.js (the widget carries a verbatim copy, held in
+  // step by test/order-money-drift-smoke.mjs). These checks pin the behaviour
+  // the old mirror guaranteed, on the shared code as it sits in the widget.
   const w = readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8');
-  ok('widget buildSchedule reads depositOption.initialAmount as a due-now entry',
-    /function buildSchedule\(order\)[\s\S]*?Number\(dep\.initialAmount\)[\s\S]*?isInitial: true/.test(w));
-  ok('widget reconciles payments earliest-first (settle then unpaid remainder)',
-    /const settle = Math\.min\(e\.amount, left\)[\s\S]*?const unpaid = /.test(w));
-  ok('widget computeNextDue aggregates everything due on or before today',
-    /e\.isInitial \|\| \(e\.dueDate && e\.dueDate\.slice\(0, 10\) <= today\)/.test(w));
-  ok('widget schedule display shows the initial payment as a "Due now" row',
-    /b\.isInitial \? \(c\.labels\?\.dueNow \|\| 'Due now'\)/.test(w));
+  ok('widget carries the shared core', /\/\/ >>> order-money core[\s\S]*?\/\/ <<< order-money core/.test(w));
+  ok('the schedule reads depositOption.initialAmount as a due-now entry',
+    /toMinor\(sched\.initialAmount, digits\)[\s\S]*?isInitial: true/.test(w));
+  ok('payments (and voucher credit) settle the earliest entries first',
+    /let left = paidM \+ creditM;[\s\S]*?const settle = Math\.min\(e\.amountM, left\);[\s\S]*?const unpaidM = e\.amountM - settle;/.test(w));
+  ok('everything due on or before today is aggregated as due now',
+    /e\.isInitial \|\| \(!!e\.dueDate && e\.dueDate\.slice\(0, 10\) <= today\)/.test(w));
+  ok('the schedule display shows the initial payment as a "Due now" row',
+    /b\.isInitial \? \(c\.labels\?\.dueNow \|\| c\.t\('dueNow'\)\)/.test(w));
+  ok('the pay button reads the shared figures, not its own sums',
+    /const money = orderMoney\(order\);\s*const outstanding = money\.outstanding;/.test(w) && !/function computeOutstanding\(/.test(w) && !/function reconcileSchedule\(order\)/.test(w));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

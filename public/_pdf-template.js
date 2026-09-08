@@ -19,6 +19,8 @@
 
 // ----- Helpers -----
 
+import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
+
 const escapeHtml = (s) => {
   if (s == null) return '';
   return String(s)
@@ -662,59 +664,18 @@ export function renderPdfHtml(order, opts = {}) {
     : (accom?.pricing?.price ?? accomItem?.price ?? null);
   const currency = accom?.pricing?.currency || accomItem?.currency || flightItems[0]?.currency || extraItems[0]?.currency || order.currency || 'GBP';
 
-  // Order-level voucher/promo discount (signed, negative; not in item prices).
-  // Net it off so the balance and the instalment reconciliation match
-  // Travelify's own schedule.
-  const voucherVal = (order.voucher && typeof order.voucher.value === 'number') ? order.voucher.value : 0;
-  const netTotalCost = (totalCost != null) ? Math.round((totalCost + voucherVal) * 100) / 100 : null;
-
-  // Payment state — the authoritative balance is total − payments taken, NOT
-  // the depositOption.breakdown sum (Travelify leaves the schedule in place
-  // after a payment). The breakdown is used only for due dates / instalment
-  // rows, and only when a balance genuinely remains.
-  const orderDep = order.depositOption;
-  const orderBreakdown = (orderDep && Array.isArray(orderDep.breakdown)) ? orderDep.breakdown : [];
-  let depositPaid = null, balance = null, balanceDueDate = null, instalments = [];
-
-  if (typeof order.paidToDate === 'number') {
-    if (order.paidToDate > 0) depositPaid = Math.round(order.paidToDate * 100) / 100;
-    const outstanding = (netTotalCost != null)
-      ? Math.max(0, Math.round((netTotalCost - order.paidToDate) * 100) / 100)
-      : null;
-    if (outstanding && outstanding > 0) {
-      balance = outstanding;
-      if (orderBreakdown.length) {
-        // The breakdown is the original PLAN (Travelify leaves it unchanged
-        // after payments are taken), so reconcile: payments settle the
-        // earliest entries first, leaving the TAIL of the plan that sums to
-        // the outstanding. Walk from the latest entry backwards, capping the
-        // boundary entry if a payment part-covered it.
-        const sortedPlan = orderBreakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity));
-        let need = outstanding;
-        const remainingSched = [];
-        for (let i = sortedPlan.length - 1; i >= 0 && need > 0.004; i--) {
-          const amt = Number(sortedPlan[i].amount) || 0;
-          if (amt > 0) {
-            const take = Math.min(amt, need);
-            remainingSched.unshift({ amount: Math.round(take * 100) / 100, dueDate: sortedPlan[i].dueDate });
-            need = Math.round((need - take) * 100) / 100;
-          }
-        }
-        balanceDueDate = remainingSched[0]?.dueDate || sortedPlan[0]?.dueDate || null;
-        instalments = remainingSched.length > 1 ? remainingSched : [];
-      }
-    }
-  } else {
-    // Legacy fallback when the order carries no order-level payment data.
-    const depositOption =
-      (accom?.pricing?.depositOptions || []).find((d) => Array.isArray(d.breakdown) && d.breakdown.length > 0) ||
-      (accom?.pricing?.depositOptions || [])[0] ||
-      null;
-    depositPaid = depositOption?.amount ?? null;
-    balance = netTotalCost != null && depositPaid != null ? Math.round((netTotalCost - depositPaid) * 100) / 100 : null;
-    balanceDueDate = depositOption?.dueDate || null;
-    instalments = depositOption?.breakdown || [];
-  }
+  // Payment state from the ONE shared calculation (public/_order-money.js):
+  // /api/booking-pdf attaches it to the order as `money`, computed from the
+  // raw Travelify order, so the PDF shows the same figures as the page and
+  // the email. Vouchers arrive here already masked. A sample order with no
+  // money block is computed by the same code.
+  const money = moneyOf(order);
+  const depositPaid = money.paid > 0 ? money.paid : null;
+  const balance = money.balance > 0 ? money.balance : null;
+  const firstDated = money.schedule.find((e) => e.dueDate) || null;
+  const balanceDueDate = balance != null ? (firstDated ? firstDated.dueDate : null) : null;
+  const instalments = (balance != null && money.schedule.length > 1) ? money.schedule : [];
+  const statusLine = paymentStatusMessage(money, formatMoney);
 
   const isRefundable = !!accom?.pricing?.isRefundable;
   const refundability = accom?.pricing?.refundability || null;
@@ -1534,24 +1495,24 @@ export function renderPdfHtml(order, opts = {}) {
             <span class="label" style="color:#94A3B8; padding-left:12px;">— Extras</span>
             <span class="value num" style="color:#475569;">${escapeHtml(formatMoney(extrasProdItems.reduce((a, i) => a + (typeof i.price === 'number' ? i.price : 0), 0), currency))}</span>
           </div>` : ''}
-          ${voucherVal ? `
-          <div class="pdf-pay-row">
-            <span class="label">${escapeHtml(order.voucher?.name || order.voucher?.code || 'Voucher')}</span>
-            <span class="value paid num">– ${escapeHtml(formatMoney(Math.abs(voucherVal), currency))}</span>
-          </div>` : ''}
           ${depositPaid != null ? `
           <div class="pdf-pay-row">
             <span class="label">Paid so far</span>
             <span class="value paid num">– ${escapeHtml(formatMoney(depositPaid, currency))}</span>
           </div>` : ''}
-          ${balance != null && balance > 0 ? `
+          ${money.vouchers.map((v) => `
+          <div class="pdf-pay-row">
+            <span class="label">${escapeHtml(voucherLabel(v))}</span>
+            <span class="value paid num">${escapeHtml(formatMoney(-v.credit, currency))}</span>
+          </div>`).join('')}
+          ${money.status !== 'none' ? `
           <div class="pdf-pay-row">
             <span class="label">Balance remaining${balanceDueDate ? ` (due by ${escapeHtml(formatDateShort(balanceDueDate))})` : ''}</span>
-            <span class="value due num">${escapeHtml(formatMoney(balance, currency))}</span>
+            <span class="value ${balance != null ? 'due' : 'paid'} num">${escapeHtml(formatMoney(money.balance, currency))}</span>
           </div>` : ''}
           <div class="pdf-pay-row total">
-            <span class="label">${escapeHtml(resolveTotalLabel(order.items))}</span>
-            <span class="value num">${escapeHtml(formatMoney(totalCost, currency))}</span>
+            <span class="label">${escapeHtml(MONEY_STRINGS.amountPayableNow)}</span>
+            <span class="value num">${escapeHtml(formatMoney(money.payable, currency))}</span>
           </div>
         </div>
         ${instalments.length > 0 ? `
@@ -1559,7 +1520,7 @@ export function renderPdfHtml(order, opts = {}) {
           <div class="pdf-pay-box-title">Instalment Plan</div>
           ${instalments.map((b) => `
             <div class="pdf-instalment">
-              <span class="date num">${escapeHtml(formatDateShort(b.dueDate))}</span>
+              <span class="date num">${escapeHtml(b.isInitial ? MONEY_STRINGS.dueNow : formatDateShort(b.dueDate))}</span>
               <span class="amt num">${escapeHtml(formatMoney(b.amount, currency))}</span>
             </div>
           `).join('')}
@@ -1567,9 +1528,7 @@ export function renderPdfHtml(order, opts = {}) {
         <div class="pdf-pay-box">
           <div class="pdf-pay-box-title">Payment</div>
           <p style="font-size:12px; color:var(--text-2); line-height:1.55; margin:0;">
-            ${balance != null && balance > 0
-              ? `Your booking is secured.${depositPaid != null ? ' Your deposit has been received.' : ''} Any remaining balance is due before travel.`
-              : (depositPaid != null ? 'Your booking is paid in full. Thank you.' : 'Your booking is fully secured.')}
+            ${escapeHtml(statusLine || 'Your booking is fully secured.')}
           </p>
         </div>`}
       </div>

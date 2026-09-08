@@ -288,6 +288,9 @@ export function renderReminderEmail({ agency, customerFirstName, orderRef, charg
   let rows = '';
   if (Number.isFinite(charge.total) && charge.total > 0) rows += costRow('Total holiday cost', formatMoney(charge.total, charge.currency));
   if (Number.isFinite(charge.paid) && charge.paid > 0) rows += costRow('Paid so far', formatMoney(charge.paid, charge.currency));
+  // Gift voucher credit already applied (decideCharge carries it from the
+  // shared calculation), shown as a deduction like the page, PDF and email.
+  if (Number.isFinite(charge.voucherCredit) && charge.voucherCredit > 0) rows += costRow('Voucher credit', formatMoney(-charge.voucherCredit, charge.currency));
   rows += costRow(charge.isInstalment ? 'Due now' : 'Balance due', money, { bold: true, topBorder: rows !== '' });
   if (dueLong) rows += costRow(overdue ? 'Was due' : 'Due by', dueLong);
 

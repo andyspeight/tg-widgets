@@ -89,6 +89,8 @@
     "test:quote-shape": "node test/quote-shape-smoke.mjs",
     "test:quote-location-weather": "node test/quote-location-weather-smoke.mjs",
     "test:quote-logo": "node test/quote-logo-smoke.mjs",
+    "test:order-money": "node test/order-money-smoke.mjs",
+    "test:order-money-drift": "node test/order-money-drift-smoke.mjs",
     "test:lead-emails-editor": "node test/lead-emails-editor-smoke.mjs",
     "test:worldmap-departures": "node test/worldmap-departure-filter-smoke.mjs",
     "test:worldmap-header-stacking": "node test/worldmap-header-stacking-smoke.mjs",

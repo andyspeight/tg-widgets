@@ -28,6 +28,7 @@
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { renderPdfHtml } from '../public/_pdf-template.js';
+import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
@@ -603,6 +604,9 @@ function trimOrder(raw) {
     currency: safeStr(raw.currency, 10), created: safeStr(raw.created, 30),
     items, summary: computeSummary(items),
     paidToDate, depositOption,
+    // The shared calculation, from the raw order: the PDF reads it, so its
+    // figures match the page and the email. Masked voucher codes only.
+    money: moneyOf(raw, moneyOptsFromEnv()),
   };
 }
 

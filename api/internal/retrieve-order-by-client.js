@@ -36,6 +36,7 @@
  */
 
 import crypto from 'node:crypto';
+import { moneyOf, moneyOptsFromEnv } from '../_lib/order-money.js';
 import { lookupClientCredentialsByRecordId } from '../_auth.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from '../_lib/travelify-items.js';
 
@@ -812,7 +813,9 @@ function trimOrder(raw) {
   // having to re-walk the items array on the front end.
   const summary = computeSummary(items);
 
+  const money = moneyOf(raw, moneyOptsFromEnv()); // the shared calculation, see api/retrieve-order.js
   return {
+    money,
     id: safeNum(raw.id),
     status: safeStr(raw.status, 30),
     customerTitle: safeStr(raw.customerTitle, 30),
