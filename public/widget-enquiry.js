@@ -38,7 +38,7 @@
 (function () {
   'use strict';
 
-  var WIDGET_VERSION = '1.1.16';
+  var WIDGET_VERSION = '1.1.17';
   var VISITOR_ID_KEY = 'tg_visitor_id_v1';
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -118,6 +118,11 @@
       returnOn: 'Return on',
       flexAria: 'Flexible by a week either side',
       flexLabel: "I'm flexible by a week either side",
+      notes_required: 'Please add a few words here.',
+      duration_otherNights: 'How many nights?',
+      duration_nightsRequired: 'Please enter the number of nights.',
+      budget_total: 'Approximate total for {n} travellers: {amount}',
+      budget_totalOne: 'Approximate total for 1 traveller: {amount}',
       date_required: 'Please choose a departure date.',
       interests_required: 'Please pick at least one option.',
       date_returnAfter: 'Return date must be after departure.',
@@ -142,7 +147,7 @@
       infantsSub: 'Under 2',
       trav_required: 'At least one adult required.',
       // Budget field
-      label_budget: 'Approximate total budget',
+      label_budget: 'Approximate budget per person',
       budgetAria: 'Budget per person',
       budget_amountAria: '{amount} per person',
       perPerson: 'per person',
@@ -264,6 +269,11 @@
       returnOn: 'Retour le',
       flexAria: 'Flexible d’une semaine de part et d’autre',
       flexLabel: 'Je suis flexible d’une semaine de part et d’autre',
+      notes_required: 'Veuillez ajouter quelques mots ici.',
+      duration_otherNights: 'Combien de nuits ?',
+      duration_nightsRequired: 'Veuillez indiquer le nombre de nuits.',
+      budget_total: 'Total approximatif pour {n} voyageurs : {amount}',
+      budget_totalOne: 'Total approximatif pour 1 voyageur : {amount}',
       date_required: 'Veuillez choisir une date de départ.',
       interests_required: 'Veuillez choisir au moins une option.',
       date_returnAfter: 'La date de retour doit être après le départ.',
@@ -285,7 +295,7 @@
       infants: 'Bébés',
       infantsSub: 'Moins de 2 ans',
       trav_required: 'Au moins un adulte est requis.',
-      label_budget: 'Budget total approximatif',
+      label_budget: 'Budget approximatif par personne',
       budgetAria: 'Budget par personne',
       budget_amountAria: '{amount} par personne',
       perPerson: 'par personne',
@@ -392,6 +402,11 @@
       returnOn: 'Rückflug am',
       flexAria: 'Flexibel um eine Woche in beide Richtungen',
       flexLabel: 'Ich bin um eine Woche in beide Richtungen flexibel',
+      notes_required: 'Bitte fügen Sie hier ein paar Worte hinzu.',
+      duration_otherNights: 'Wie viele Nächte?',
+      duration_nightsRequired: 'Bitte geben Sie die Anzahl der Nächte an.',
+      budget_total: 'Ungefähre Gesamtsumme für {n} Reisende: {amount}',
+      budget_totalOne: 'Ungefähre Gesamtsumme für 1 Reisenden: {amount}',
       date_required: 'Bitte wählen Sie ein Abflugdatum.',
       interests_required: 'Bitte wählen Sie mindestens eine Option.',
       date_returnAfter: 'Das Rückflugdatum muss nach dem Hinflug liegen.',
@@ -413,7 +428,7 @@
       infants: 'Kleinkinder',
       infantsSub: 'Unter 2',
       trav_required: 'Mindestens ein Erwachsener erforderlich.',
-      label_budget: 'Ungefähres Gesamtbudget',
+      label_budget: 'Ungefähres Budget pro Person',
       budgetAria: 'Budget pro Person',
       budget_amountAria: '{amount} pro Person',
       perPerson: 'pro Person',
@@ -520,6 +535,11 @@
       returnOn: 'Regreso el',
       flexAria: 'Flexible una semana arriba o abajo',
       flexLabel: 'Soy flexible una semana arriba o abajo',
+      notes_required: 'Por favor, añade unas palabras aquí.',
+      duration_otherNights: '¿Cuántas noches?',
+      duration_nightsRequired: 'Por favor, indica el número de noches.',
+      budget_total: 'Total aproximado para {n} viajeros: {amount}',
+      budget_totalOne: 'Total aproximado para 1 viajero: {amount}',
       date_required: 'Elige una fecha de salida.',
       interests_required: 'Elige al menos una opción.',
       date_returnAfter: 'La fecha de regreso debe ser posterior a la de salida.',
@@ -541,7 +561,7 @@
       infants: 'Bebés',
       infantsSub: 'Menos de 2',
       trav_required: 'Se requiere al menos un adulto.',
-      label_budget: 'Presupuesto total aproximado',
+      label_budget: 'Presupuesto aproximado por persona',
       budgetAria: 'Presupuesto por persona',
       budget_amountAria: '{amount} por persona',
       perPerson: 'por persona',
@@ -648,6 +668,11 @@
       returnOn: 'Ritorno il',
       flexAria: 'Flessibile di una settimana in entrambe le direzioni',
       flexLabel: 'Sono flessibile di una settimana in entrambe le direzioni',
+      notes_required: 'Per favore aggiungi qualche parola qui.',
+      duration_otherNights: 'Quante notti?',
+      duration_nightsRequired: 'Per favore indica il numero di notti.',
+      budget_total: 'Totale approssimativo per {n} viaggiatori: {amount}',
+      budget_totalOne: 'Totale approssimativo per 1 viaggiatore: {amount}',
       date_required: 'Scegli una data di partenza.',
       interests_required: 'Scegli almeno un\'opzione.',
       date_returnAfter: 'La data di ritorno deve essere successiva alla partenza.',
@@ -669,7 +694,7 @@
       infants: 'Neonati',
       infantsSub: 'Sotto i 2 anni',
       trav_required: 'È richiesto almeno un adulto.',
-      label_budget: 'Budget totale approssimativo',
+      label_budget: 'Budget approssimativo a persona',
       budgetAria: 'Budget a persona',
       budget_amountAria: '{amount} a persona',
       perPerson: 'a persona',
@@ -776,6 +801,11 @@
       returnOn: 'Întoarcere pe',
       flexAria: 'Flexibil cu o săptămână în plus sau în minus',
       flexLabel: 'Sunt flexibil cu o săptămână în plus sau în minus',
+      notes_required: 'Vă rugăm să adăugați câteva cuvinte aici.',
+      duration_otherNights: 'Câte nopți?',
+      duration_nightsRequired: 'Vă rugăm să introduceți numărul de nopți.',
+      budget_total: 'Total aproximativ pentru {n} călători: {amount}',
+      budget_totalOne: 'Total aproximativ pentru 1 călător: {amount}',
       date_required: 'Alegeți o dată de plecare.',
       interests_required: 'Alegeți cel puțin o opțiune.',
       date_returnAfter: 'Data întoarcerii trebuie să fie după plecare.',
@@ -797,7 +827,7 @@
       infants: 'Bebeluși',
       infantsSub: 'Sub 2 ani',
       trav_required: 'Este necesar cel puțin un adult.',
-      label_budget: 'Buget total aproximativ',
+      label_budget: 'Buget aproximativ de persoană',
       budgetAria: 'Buget de persoană',
       budget_amountAria: '{amount} de persoană',
       perPerson: 'de persoană',
@@ -1219,7 +1249,7 @@
       { id: 'travel_dates',      type: 'daterange',         label: 'Travel dates',               required: true,  visible: true },
       { id: 'duration',          type: 'duration',          label: 'Duration',                   required: false, visible: true },
       { id: 'travellers',        type: 'travellers',        label: "Who's travelling?",          required: true,  visible: true },
-      { id: 'budget_pp',         type: 'budget',            label: 'Approximate total budget',   required: false, visible: true },
+      { id: 'budget_pp',         type: 'budget',            label: 'Approximate budget per person', required: false, visible: true },
       { id: 'stars',             type: 'stars',             label: 'Star rating preference',     required: false, visible: true },
       { id: 'board',             type: 'board',             label: 'Board basis',                required: false, visible: true },
       { id: 'interests',         type: 'interests',         label: 'Interests',                  required: false, visible: true },
@@ -1418,14 +1448,20 @@
       '.tg-flex-toggle input:focus-visible ~ .tg-flex-track{box-shadow:0 0 0 3px ' + accent + '33}',
       '.tg-budget-display{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}',
       '.tg-budget-amount{font-size:24px;font-weight:700;color:' + accent + ';font-variant-numeric:tabular-nums}',
-      '.tg-budget-pp{font-size:13px;color:' + c.textSecondary + '}',
+      '.tg-budget-pp{font-size:14px;font-weight:600;color:' + c.textSecondary + '}',
+      '.tg-budget-total{margin-top:10px;font-size:13px;font-weight:600;color:' + c.textSecondary + ';font-variant-numeric:tabular-nums}',
+      '.tg-duration-other{margin-top:12px;max-width:220px}',
+      '.tg-date-single{max-width:280px}',
       '.tg-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:' + c.bgTile + ';border-radius:999px;outline:none;margin:0}',
       '.tg-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;background:' + accent + ';border-radius:50%;cursor:pointer;border:3px solid ' + c.bg + ';box-shadow:0 2px 6px rgba(15,23,42,.15);transition:transform .15s}',
       '.tg-range::-webkit-slider-thumb:hover{transform:scale(1.1)}',
       '.tg-range::-moz-range-thumb{width:22px;height:22px;background:' + accent + ';border-radius:50%;cursor:pointer;border:3px solid ' + c.bg + ';box-shadow:0 2px 6px rgba(15,23,42,.15)}',
       '.tg-range:focus{outline:none}',
       '.tg-range:focus::-webkit-slider-thumb{box-shadow:0 0 0 4px ' + accent + '33,0 2px 6px rgba(15,23,42,.15)}',
-      '.tg-budget-markers{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:' + c.textTertiary + ';font-variant-numeric:tabular-nums}',
+      '.tg-budget-markers{position:relative;height:16px;margin-top:8px;font-size:11px;color:' + c.textTertiary + ';font-variant-numeric:tabular-nums}',
+      '.tg-budget-markers span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}',
+      '.tg-budget-markers span:first-child{transform:none}',
+      '.tg-budget-markers span:last-child{transform:translateX(-100%)}',
       '.tg-star-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}',
       '@media(max-width:700px){.tg-star-grid{grid-template-columns:repeat(2,1fr)}}',
       '@media(max-width:420px){.tg-star-grid{grid-template-columns:1fr}}',
@@ -2153,6 +2189,13 @@
   function renderDateRange(instance, fieldSpec, t) {
     t = t || makeT(null);
     var shell = createFieldShell(instance, null);
+    // Per-form options (both off by default, so every other form is unchanged):
+    //   options.mode === 'single'  → one departure date box, no return date
+    //                                (pair with a Duration field for the length)
+    //   options.flex === false     → no "flexible by a week" switch
+    var dOpts = fieldSpec.options || {};
+    var single = dOpts.mode === 'single';
+    var showFlex = dOpts.flex !== false;
     var today = new Date();
     var minDate = today.toISOString().slice(0, 10);
     var departId = 'tg-' + instance + '-depart'; var returnId = 'tg-' + instance + '-return';
@@ -2165,11 +2208,15 @@
       if (depart.value) { ret.min = depart.value; if (ret.value && ret.value < depart.value) ret.value = ''; }
     });
 
-    shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
-      el('div', {}, [el('label', { class: 'tg-label', for: departId, text: t('departOn') }), depart]),
-      el('div', {}, [el('label', { class: 'tg-label', for: returnId, text: t('returnOn') }), ret])
-    ]));
-    shell.fieldNode.appendChild(el('label', { class: 'tg-flex-toggle' }, [flexInput, flexTrack, el('span', { text: t('flexLabel') })]));
+    if (single) {
+      shell.fieldNode.appendChild(el('div', { class: 'tg-date-single' }, [el('label', { class: 'tg-label', for: departId, text: t('departOn') }), depart]));
+    } else {
+      shell.fieldNode.appendChild(el('div', { class: 'tg-row' }, [
+        el('div', {}, [el('label', { class: 'tg-label', for: departId, text: t('departOn') }), depart]),
+        el('div', {}, [el('label', { class: 'tg-label', for: returnId, text: t('returnOn') }), ret])
+      ]));
+    }
+    if (showFlex) shell.fieldNode.appendChild(el('label', { class: 'tg-flex-toggle' }, [flexInput, flexTrack, el('span', { text: t('flexLabel') })]));
     shell.fieldNode.appendChild(shell.errorNode);
 
     return {
@@ -2178,20 +2225,20 @@
       writeTo: function (fields) {
         // Only include dates that are actually set — a null used to be sent
         // for a blank return date and the server 400'd the whole submission.
-        var td = { flexible: !!flexInput.checked };
+        var td = { flexible: showFlex && !!flexInput.checked };
         if (depart.value) td.depart = depart.value;
-        if (ret.value) td['return'] = ret.value;
+        if (!single && ret.value) td['return'] = ret.value;
         fields.travel_dates = td;
       },
       validate: function () {
         if (fieldSpec.required === false) return null;
         if (!depart.value) return t('date_required');
-        if (ret.value && ret.value < depart.value) return t('date_returnAfter');
+        if (!single && ret.value && ret.value < depart.value) return t('date_returnAfter');
         return null;
       },
       showError: function (msg) { shell.show(msg); depart.setAttribute('aria-invalid', 'true'); },
       clearError: function () { shell.clear(); depart.removeAttribute('aria-invalid'); ret.removeAttribute('aria-invalid'); },
-      focus: function () { (depart.value ? ret : depart).focus(); }
+      focus: function () { (!single && depart.value ? ret : depart).focus(); }
     };
   }
 
@@ -2224,9 +2271,20 @@
     var options = normaliseDurationOptions(fieldSpec) ||
       [{ nights: 3, custom: null }, { nights: 5, custom: null }, { nights: 7, custom: null }, { nights: 10, custom: null }, { nights: 14, custom: null }];
     // Display: a night count is localised "{n} nights"; a custom option shows verbatim.
+    // A custom option that just says "Other" (in any of the six languages)
+    // reveals a number box for the nights, submitted as duration.nights like a
+    // fixed option; left blank it is submitted as the label, as before.
+    var OTHER_RE = /^(other|something else|autre|andere|otro|otra|altro|altele|altul)$/i;
     options = options.map(function (o) {
-      return { nights: o.nights, custom: o.custom, label: (o.nights != null ? t('duration_nights', { n: o.nights }) : o.custom) };
+      return { nights: o.nights, custom: o.custom, askNights: (o.nights == null && OTHER_RE.test(String(o.custom || '').trim())), label: (o.nights != null ? t('duration_nights', { n: o.nights }) : o.custom) };
     });
+    var nightsId = 'tg-' + instance + '-' + (fieldSpec.id || 'duration') + '-nights';
+    var nightsInput = el('input', { id: nightsId, class: 'tg-input tg-duration-nights', type: 'number', min: '1', max: '90', step: '1', inputmode: 'numeric', placeholder: '8', oninput: function () { shell.clear(); nightsInput.removeAttribute('aria-invalid'); } });
+    var nightsWrap = el('div', { class: 'tg-duration-other', style: { display: 'none' } }, [
+      el('label', { class: 'tg-label', for: nightsId, text: t('duration_otherNights') }),
+      nightsInput
+    ]);
+    function otherNights() { var n = parseInt(nightsInput.value, 10); return (n >= 1 && n <= 90) ? n : null; }
     // Pre-select 7 nights when present (unchanged for the built-in set), else the first.
     var selectedIdx = 0;
     for (var si = 0; si < options.length; si++) { if (options[si].nights === 7) { selectedIdx = si; break; } }
@@ -2238,12 +2296,16 @@
         b.classList.toggle('is-active', match);
         b.setAttribute('aria-pressed', match ? 'true' : 'false');
       });
+      nightsWrap.style.display = (options[idx] && options[idx].askNights) ? '' : 'none';
+      shell.clear();
     }
     options.forEach(function (o, idx) {
       var btn = el('button', { class: 'tg-pill' + (idx === selectedIdx ? ' is-active' : ''), type: 'button', 'data-idx': String(idx), 'aria-pressed': (idx === selectedIdx ? 'true' : 'false'), text: o.label, onclick: function () { setActive(idx); } });
       buttons.push(btn);
     });
     shell.fieldNode.appendChild(el('div', { class: 'tg-chips', role: 'group', 'aria-labelledby': shell.labelId, 'aria-label': t('duration_options') }, buttons));
+    shell.fieldNode.appendChild(nightsWrap);
+    nightsWrap.style.display = (options[selectedIdx] && options[selectedIdx].askNights) ? '' : 'none';
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'duration',
@@ -2251,12 +2313,17 @@
       writeTo: function (fields) {
         var o = options[selectedIdx];
         if (!o) { fields.duration = {}; return; }
+        if (o.askNights && otherNights() != null) { fields.duration = { nights: otherNights() }; return; }
         fields.duration = (o.nights != null) ? { nights: o.nights } : { custom: String(o.custom).slice(0, 64) };
       },
-      validate: function () { return null; },
-      showError: function (msg) { shell.show(msg); },
-      clearError: function () { shell.clear(); },
-      focus: function () { if (buttons[0]) buttons[0].focus(); }
+      validate: function () {
+        var o = options[selectedIdx];
+        if (fieldSpec.required !== false && o && o.askNights && otherNights() == null) return t('duration_nightsRequired');
+        return null;
+      },
+      showError: function (msg) { shell.show(msg); if (options[selectedIdx] && options[selectedIdx].askNights) nightsInput.setAttribute('aria-invalid', 'true'); },
+      clearError: function () { shell.clear(); nightsInput.removeAttribute('aria-invalid'); },
+      focus: function () { if (options[selectedIdx] && options[selectedIdx].askNights) nightsInput.focus(); else if (buttons[0]) buttons[0].focus(); }
     };
   }
 
@@ -2264,6 +2331,15 @@
     t = t || makeT(null);
     var shell = createFieldShell(instance, fieldSpec.label || t('label_travellers'));
     var values = { adults: 2, children: 0, infants: 0, childAges: [] };
+    // options.adultMinAge === 18 → adults are 18 and over and child ages run to
+    // 17 (adult-only resorts such as Sandals; Free From Travel, 8 Sep 2026).
+    // The default stays 16 / 15. The localised age lines are reused with the
+    // number swapped, so every language follows without a second string.
+    var adultMin = (fieldSpec.options && String(fieldSpec.options.adultMinAge) === '18') ? 18 : 16;
+    var childMax = adultMin - 1;
+    function ageText(str, from, to) { return from === to ? str : String(str).replace(new RegExp('(^|\\D)' + from + '(?!\\d)'), '$1' + to); }
+    var countSubs = [];
+    function notifyCount() { var n = values.adults + values.children; countSubs.forEach(function (fn) { try { fn(n); } catch (e) { /* a subscriber must not break the field */ } }); }
     var childAgesPanel = el('div', { class: 'tg-child-ages', style: { display: 'none' }, role: 'group', 'aria-label': t('childAgesAria') }, [
       el('p', { class: 'tg-child-ages-title', text: t('childAgesTitle') }),
       el('div', { class: 'tg-child-ages-grid' })
@@ -2274,8 +2350,8 @@
       agesGrid.innerHTML = '';
       for (var i = 0; i < values.children; i++) {
         var sel = el('select', { 'data-idx': String(i), onchange: (function (idx) { return function (e) { values.childAges[idx] = parseInt(e.target.value, 10); }; })(i) });
-        for (var age = 2; age <= 15; age++) {
-          var optText = (age === 2) ? t('ageYoungest', { age: age }) : (age === 15) ? t('ageOldest', { age: age }) : String(age);
+        for (var age = 2; age <= childMax; age++) {
+          var optText = (age === 2) ? t('ageYoungest', { age: age }) : (age === childMax) ? t('ageOldest', { age: age }) : String(age);
           var opt = el('option', { value: String(age), text: optText });
           if (values.childAges[i] === age) opt.selected = true;
           sel.appendChild(opt);
@@ -2301,6 +2377,7 @@
         plusBtn.setAttribute('aria-label', t('increase', { label: label, n: values[key] }));
         if (key === 'children') renderChildAges();
         if (key === 'adults') shell.clear();
+        if (key !== 'infants') notifyCount();
       }
       var minusBtn = el('button', { class: 'tg-step-btn', type: 'button', onclick: function () { if (values[key] > min) { values[key]--; update(); } } }, [svg(ICONS.minus, { size: 14 })]);
       var plusBtn = el('button', { class: 'tg-step-btn', type: 'button', onclick: function () { if (values[key] < max) { values[key]++; update(); } } }, [svg(ICONS.plus, { size: 14 })]);
@@ -2311,8 +2388,8 @@
       ]);
     }
 
-    shell.fieldNode.appendChild(stepperRow(t('adults'), t('adultsSub'), 'adults', 1, 9));
-    shell.fieldNode.appendChild(stepperRow(t('children'), t('childrenSub'), 'children', 0, 6));
+    shell.fieldNode.appendChild(stepperRow(t('adults'), ageText(t('adultsSub'), 16, adultMin), 'adults', 1, 9));
+    shell.fieldNode.appendChild(stepperRow(t('children'), ageText(t('childrenSub'), 15, childMax), 'children', 0, 6));
     shell.fieldNode.appendChild(stepperRow(t('infants'), t('infantsSub'), 'infants', 0, 3));
     shell.fieldNode.appendChild(childAgesPanel);
     shell.fieldNode.appendChild(shell.errorNode);
@@ -2329,13 +2406,22 @@
       },
       showError: function (msg) { shell.show(msg); },
       clearError: function () { shell.clear(); },
-      focus: function () { shell.fieldNode.querySelector('.tg-step-btn').focus(); }
+      focus: function () { shell.fieldNode.querySelector('.tg-step-btn').focus(); },
+      getCount: function () { return values.adults + values.children; },
+      subscribe: function (fn) { if (typeof fn === 'function') countSubs.push(fn); }
     };
   }
 
   function renderBudget(instance, fieldSpec, t) {
     t = t || makeT(null);
-    var shell = createFieldShell(instance, fieldSpec.label || t('label_budget'));
+    // The slider has always been PER PERSON, but the default title said "total
+    // budget" and the "per person" note was small, so the two read as a
+    // mismatch (Free From Travel, 8 Sep 2026). The title now says per person;
+    // a saved label that still carries the old default wording is treated as
+    // the default so it follows (and localises). An agent's own title stays.
+    var savedLabel = (fieldSpec.label === 'Approximate total budget') ? '' : fieldSpec.label;
+    var shell = createFieldShell(instance, savedLabel || t('label_budget'));
+    var travellerCount = 0;
     function sliderToBudget(v) {
       if (v < 25) return 250 + (v / 25) * (1500 - 250);
       if (v < 50) return 1500 + ((v - 25) / 25) * (3000 - 1500);
@@ -2345,6 +2431,16 @@
     var amountEl = el('span', { class: 'tg-budget-amount', 'aria-live': 'polite', text: '£3,000' });
     var range = el('input', { class: 'tg-range', type: 'range', min: '0', max: '100', value: '45', 'aria-label': t('budgetAria'), 'aria-valuemin': '250', 'aria-valuemax': '10000', 'aria-valuenow': '3000', 'aria-valuetext': t('budget_amountAria', { amount: '£3,000' }) });
     var currentBudget = 3000;
+    // Approximate total = per-person amount x travellers (adults and children;
+    // infants left out). Fed by the travellers field when the form has one
+    // (wired after all fields are built); hidden otherwise.
+    var totalEl = el('div', { class: 'tg-budget-total', 'aria-live': 'polite', style: { display: 'none' } });
+    function renderTotal() {
+      if (!travellerCount) { totalEl.style.display = 'none'; totalEl.textContent = ''; return; }
+      var total = '£' + (currentBudget * travellerCount).toLocaleString('en-GB') + (currentBudget >= 10000 ? '+' : '');
+      totalEl.textContent = t(travellerCount === 1 ? 'budget_totalOne' : 'budget_total', { n: travellerCount, amount: total });
+      totalEl.style.display = '';
+    }
     function update() {
       var v = parseInt(range.value, 10);
       currentBudget = Math.round(sliderToBudget(v) / 50) * 50;
@@ -2354,13 +2450,23 @@
       amountEl.textContent = displayText;
       range.setAttribute('aria-valuenow', String(currentBudget));
       range.setAttribute('aria-valuetext', t('budget_amountAria', { amount: displayText }));
+      renderTotal();
     }
     range.addEventListener('input', update);
     shell.fieldNode.appendChild(el('div', { class: 'tg-budget-display' }, [amountEl, el('span', { class: 'tg-budget-pp', text: t('perPerson') })]));
     shell.fieldNode.appendChild(range);
+    // Markers sit at the slider's real breakpoints (the scale is piecewise:
+    // £1.5k at a quarter, £3k at half, £5k at three quarters, £10k+ at the
+    // end). They used to be spread evenly, so the thumb under "£1.5k" read
+    // about £2,050 and the last marker claimed a £5k ceiling on a £10k scale.
     shell.fieldNode.appendChild(el('div', { class: 'tg-budget-markers', 'aria-hidden': 'true' }, [
-      el('span', { text: '£250' }), el('span', { text: '£1.5k' }), el('span', { text: '£3k' }), el('span', { text: '£5k+' })
+      el('span', { style: { left: '0%' }, text: '£250' }),
+      el('span', { style: { left: '25%' }, text: '£1.5k' }),
+      el('span', { style: { left: '50%' }, text: '£3k' }),
+      el('span', { style: { left: '75%' }, text: '£5k' }),
+      el('span', { style: { left: '100%' }, text: '£10k+' })
     ]));
+    shell.fieldNode.appendChild(totalEl);
     shell.fieldNode.appendChild(shell.errorNode);
     return {
       type: 'budget',
@@ -2369,7 +2475,8 @@
       validate: function () { return null; },
       showError: function (msg) { shell.show(msg); },
       clearError: function () { shell.clear(); },
-      focus: function () { range.focus(); }
+      focus: function () { range.focus(); },
+      setTravellers: function (n) { travellerCount = Math.max(0, n | 0); renderTotal(); }
     };
   }
 
@@ -2609,11 +2716,15 @@
 
   function renderNotes(instance, fieldSpec, t) {
     t = t || makeT(null);
-    var shell = createFieldShell(instance, fieldSpec.label || t('label_notes'), [' ', el('span', { class: 'tg-opt', text: t('optional') })]);
+    // A notes field honours `required`. It used to read as optional whatever
+    // the editor said: Free From Travel set "Dietary restrictions" to mandatory
+    // and the form still showed "(optional)" and accepted it blank (8 Sep 2026).
+    var isRequired = fieldSpec.required === true;
+    var shell = createFieldShell(instance, fieldSpec.label || t('label_notes'), isRequired ? null : [' ', el('span', { class: 'tg-opt', text: t('optional') })]);
     // Per-field DOM id so a form can carry more than one notes field without
     // duplicate ids (the id falls back to 'notes' for the default field).
     var textareaId = 'tg-' + instance + '-' + (fieldSpec.id || 'notes');
-    var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': t('notesAria'), placeholder: (fieldSpec.options && fieldSpec.options.placeholder) || fieldSpec.placeholder || t('notes_ph'), maxlength: '2000' });
+    var textarea = el('textarea', { id: textareaId, class: 'tg-textarea', 'aria-label': t('notesAria'), 'aria-describedby': shell.errorId, placeholder: (fieldSpec.options && fieldSpec.options.placeholder) || fieldSpec.placeholder || t('notes_ph'), maxlength: '2000', oninput: function () { shell.clear(); textarea.removeAttribute('aria-invalid'); } });
     var labelEl = shell.fieldNode.querySelector('.tg-label');
     if (labelEl) labelEl.setAttribute('for', textareaId);
     shell.fieldNode.appendChild(textarea);
@@ -2630,9 +2741,9 @@
         if (!fields.__notes__) fields.__notes__ = [];
         fields.__notes__.push({ label: fieldSpec.label || t('label_notes'), value: v });
       },
-      validate: function () { return null; },
-      showError: function (msg) { shell.show(msg); },
-      clearError: function () { shell.clear(); },
+      validate: function () { return (isRequired && !textarea.value.trim()) ? t('notes_required') : null; },
+      showError: function (msg) { shell.show(msg); textarea.setAttribute('aria-invalid', 'true'); },
+      clearError: function () { shell.clear(); textarea.removeAttribute('aria-invalid'); },
       focus: function () { textarea.focus(); }
     };
   }
@@ -3021,6 +3132,20 @@
       }
       apply(flightsInst.getValue());
       flightsInst.subscribe(apply);
+    })();
+
+    // Travellers → budget total. The budget field shows "Approximate total for
+    // N travellers" from its per-person amount when the form also has a
+    // travellers field; the count follows the steppers live.
+    (function wireBudgetTotal() {
+      var travInst = null, budgetInst = null;
+      for (var i = 0; i < fields.length; i++) {
+        if (fields[i].type === 'travellers' && typeof fields[i].subscribe === 'function') travInst = fields[i];
+        else if (fields[i].type === 'budget' && typeof fields[i].setTravellers === 'function') budgetInst = fields[i];
+      }
+      if (!travInst || !budgetInst) return;
+      budgetInst.setTravellers(travInst.getCount());
+      travInst.subscribe(function (n) { budgetInst.setTravellers(n); });
     })();
 
     // Progress indicator (multi-step only). Rendered BEFORE the first section
@@ -3606,7 +3731,12 @@
     if (isRich) {
       var blocks = message.split(/\n{2,}/).map(function (s) { return s.trim(); }).filter(Boolean);
       var headline = blocks.length ? blocks.shift() : '';
-      tyKids.push(el('h2', { text: headline }));
+      // The headline is linkified too: an agent's "Grab a time that suits you:
+      // https://calendly.com/..." sat in the first block and was drawn as plain
+      // text while only the paragraphs below got real links (8 Sep 2026).
+      var headlineEl = el('h2', {});
+      linkifyInto(headlineEl, headline);
+      tyKids.push(headlineEl);
       blocks.forEach(function (blk) { tyKids.push(makeRichParagraph(blk)); });
     } else {
       tyKids.push(el('h2', { text: message }));

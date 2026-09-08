@@ -2862,7 +2862,7 @@
       { id: 'travellers',  name: 'Travellers',         desc: 'Adults, children, infants + ages',       category: 'Core',        icon: ICONS.users,    defaultLabel: "Who's travelling?",          defaultRequired: true,  defaultOptions: {} },
       // ── Details ──
       { id: 'duration',    name: 'Duration',           desc: 'Nights — pill selector',                 category: 'Details',     icon: ICONS.clock,    defaultLabel: 'Duration',                   defaultRequired: false, defaultOptions: {} },
-      { id: 'budget',      name: 'Budget',             desc: 'Slider, per-person amount',              category: 'Details',     icon: ICONS.pound,    defaultLabel: 'Approximate total budget',   defaultRequired: false, defaultOptions: {} },
+      { id: 'budget',      name: 'Budget',             desc: 'Slider, per-person amount',              category: 'Details',     icon: ICONS.pound,    defaultLabel: 'Approximate budget per person',   defaultRequired: false, defaultOptions: {} },
       { id: 'stars',       name: 'Star rating',        desc: '3 / 4 / 5 star preference cards',        category: 'Details',     icon: ICONS.star,     defaultLabel: 'Star rating preference',     defaultRequired: false, defaultOptions: {} },
       { id: 'board',       name: 'Board basis',        desc: 'RO / BB / HB / FB / AI segmented',       category: 'Details',     icon: ICONS.utensils, defaultLabel: 'Board basis',                defaultRequired: false, defaultOptions: {} },
       { id: 'interests',   name: 'Interests',          desc: 'Beach, city, culture etc — multiselect', category: 'Details',     icon: ICONS.heart,    defaultLabel: 'Interests',                  defaultRequired: false, defaultOptions: {} },
@@ -3120,7 +3120,7 @@
         { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true, step: 1 },
         { id: 'duration',          type: 'duration',     label: 'Duration',                   required: false, visible: true, step: 1 },
         { id: 'travellers',        type: 'travellers',   label: "Who's travelling?",          required: true,  visible: true, step: 1 },
-        { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true, step: 1 },
+        { id: 'budget_pp',         type: 'budget',       label: 'Approximate budget per person',   required: false, visible: true, step: 1 },
         { id: 'stars',             type: 'stars',        label: 'Star rating preference',     required: false, visible: true, step: 1 },
         { id: 'board',             type: 'board',        label: 'Board basis',                required: false, visible: true, step: 1 },
         { id: 'interests',         type: 'interests',    label: 'Interests',                  required: false, visible: true, step: 1 },
@@ -7323,7 +7323,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
             { id: 'travel_dates',      type: 'daterange',    label: 'Travel dates',               required: true,  visible: true },
             { id: 'duration',          type: 'duration',     label: 'Duration',                   required: false, visible: true },
             { id: 'travellers',        type: 'travellers',   label: "Who's travelling?",          required: true,  visible: true },
-            { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Approximate budget per person',   required: false, visible: true },
             { id: 'stars',             type: 'stars',        label: 'Star rating preference',     required: false, visible: true },
             { id: 'board',             type: 'board',        label: 'Board basis',                required: false, visible: true },
             { id: 'interests',         type: 'interests',    label: 'Interests',                  required: false, visible: true },
@@ -7349,7 +7349,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
             { id: 'travel_dates',      type: 'daterange',    label: 'When would you like to sail?', required: true,  visible: true },
             { id: 'duration',          type: 'duration',     label: 'Cruise length',              required: true,  visible: true },
             { id: 'travellers',        type: 'travellers',   label: "Who's cruising?",            required: true,  visible: true },
-            { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Approximate budget per person',   required: false, visible: true },
             { id: 'interests',         type: 'interests',    label: 'Cabin preference & interests', required: false, visible: true },
             { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
             { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
@@ -7393,7 +7393,7 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
           cfg.fieldsJSON = JSON.stringify([
             { id: 'destination',       type: 'destination',  label: 'Where would you like to go?', required: true,  visible: true },
             { id: 'travel_dates',      type: 'daterange',    label: 'When?',                      required: false, visible: true },
-            { id: 'budget_pp',         type: 'budget',       label: 'Approximate total budget',   required: false, visible: true },
+            { id: 'budget_pp',         type: 'budget',       label: 'Approximate budget per person',   required: false, visible: true },
             { id: 'name',              type: 'name',         label: 'Your name',                  required: true,  visible: true },
             { id: 'contact',           type: 'contact',      label: 'How to reach you',           required: true,  visible: true },
             { id: 'notes',             type: 'notes',        label: 'Tell us what matters most',  required: false, visible: true },
@@ -8030,6 +8030,38 @@ X-Travelgenix-Signature: t=1234567890,v1=a1b2c3...
               else field.choices = lines.map(l => ({ value: l, label: l }));
               saveField();
             }
+          })
+        ]);
+      }
+
+      if (field.type === 'daterange') {
+        return section('Dates', [
+          toggleRow({
+            label: 'Ask for a departure date only',
+            sub: 'Off = departure and return dates. On = one date box. Pair it with a Duration field for the length of the trip.',
+            checked: field.options.mode === 'single',
+            onChange: (v) => { if (v) field.options.mode = 'single'; else delete field.options.mode; saveField(); }
+          }),
+          toggleRow({
+            label: 'Show the "flexible by a week" switch',
+            sub: 'On by default. Turn it off when a Duration field already covers how loose the dates are.',
+            checked: field.options.flex !== false,
+            onChange: (v) => { if (v) delete field.options.flex; else field.options.flex = false; saveField(); }
+          })
+        ]);
+      }
+
+      if (field.type === 'travellers') {
+        return section('Ages', [
+          labelledSelect({
+            label: 'Adults are aged',
+            value: String(field.options.adultMinAge) === '18' ? '18' : '16',
+            options: [
+              { value: '16', label: '16 and over (children 2 to 15)' },
+              { value: '18', label: '18 and over (children 2 to 17)' }
+            ],
+            hint: 'Pick 18 and over for adult-only resorts such as Sandals. Child ages run up to the year below.',
+            onChange: (v) => { if (v === '18') field.options.adultMinAge = 18; else delete field.options.adultMinAge; saveField(); }
           })
         ]);
       }
