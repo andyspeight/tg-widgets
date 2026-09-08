@@ -211,7 +211,7 @@
 
   function styles() {
     return '' +
-      ':host{all:initial;display:block}' +
+      ':host{all:initial;display:block;width:100%;min-width:0;}:host::before{content:"";display:block;width:280px;max-width:100%;height:0;}' +
       '*,*::before,*::after{box-sizing:border-box}' +
       '.prism-shell{container-type:inline-size;width:100%;display:block}' +
       '.prism{position:relative;width:100%;aspect-ratio:1010/352;' +

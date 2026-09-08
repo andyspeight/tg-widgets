@@ -1454,7 +1454,7 @@
     var radius = clamp(c.radius, 0, 24, 12);
     var font = fontStack(c.fontFamily);
     var kit = kitRoot(kitCfg || {}, { accent: '#00B4D8', radius: 12 });
-    return ':host{all:initial;display:block;}'
+    return ':host{all:initial;display:block;width:100%;min-width:0;}:host::before{content:"";display:block;width:280px;max-width:100%;height:0;}'
       + '*,*::before,*::after{box-sizing:border-box;}'
       // the events panel: the menu beside it on a desktop, under the button on a phone
       + '.tgmn-root{container-type:inline-size;}'
