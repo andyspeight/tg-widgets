@@ -430,10 +430,13 @@ const ALLOWED_WIDGET_TYPES = [
   'Venue Guide',
 ];
 
-// Per-plan widget count limits, keyed by widgetType.
+// Per-plan widget availability, keyed by widgetType.
 //   -1       = unlimited
 //    0       = widget type not available on this plan
 //   positive = max number of widgets of this type this plan can create
+//              (no longer used: Andy's rule, 8 Sep 2026, is that a widget
+//              available on a plan is unlimited there; the count path is
+//              kept so a future row could carry one, but none does)
 // KEEP IN SYNC with the WIDGETS array in public/index.html. If these drift,
 // the dashboard will show one limit while the API enforces another.
 const PLAN_WIDGET_LIMITS = {
@@ -448,30 +451,30 @@ const PLAN_WIDGET_LIMITS = {
   'Ticket Search':           { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Club Picker':             { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Next Event':              { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Pricing Table':         { Spark: 1, Boost: 5, Ignite: -1, Bespoke: -1 },
-  'FAQ':                   { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Google Reviews':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Pricing Table':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'FAQ':                   { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Google Reviews':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Testimonials':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Destination Spotlight': { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Airport Spotlight':     { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Destination Spotlight': { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Airport Spotlight':     { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Attraction Spotlight':  { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Weather':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Prayer Times':          { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Currency Converter':    { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'World Clock':           { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Flight Time':           { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Stats Counter':         { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Spin Wheel':            { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Weather':               { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Prayer Times':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Currency Converter':    { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'World Clock':           { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Flight Time':           { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Stats Counter':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Spin Wheel':            { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Enquiry Form':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Form':                  { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Form':                  { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'My Booking':            { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Quote PDF':             { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Quote PDF':             { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Text FX':               { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Logo Showcase':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Offers':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Popup':                 { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Popup':                 { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Event Calendar':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Event Calendar':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Social Share':          { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'WhatsApp Chat':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Opening Hours':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
@@ -481,33 +484,34 @@ const PLAN_WIDGET_LIMITS = {
   // by default on Spark, Boost, Ignite and Bespoke (Spark row added 3 Jul 2026).
   // This row still said Spark: 0 and refused the save with "not included in
   // your plan" while the dashboard showed it as included (Andy, 8 Sep 2026).
-  // Andy's rule, same day: a widget available on a plan is unlimited there.
+  // Andy's rule, same day, now applied to EVERY row: a widget available on
+  // a plan is unlimited there.
   'Loader':                { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  'Maps':                  { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'YouTube':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'RSS Feed':              { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Back to Top':           { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Announcement Bar':      { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Maps':                  { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'YouTube':               { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'RSS Feed':              { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Back to Top':           { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Announcement Bar':      { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Appointment':           { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Carousel':              { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Team Showcase':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Carousel':              { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Team Showcase':         { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'World Map':             { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Results AI':     { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  'Special Offers':        { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
-  'Prism':                 { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
-  // Compliance widget — one per site is the norm, so every plan gets it.
-  'Cookie Consent':        { Spark: 1, Boost: 1, Ignite: -1, Bespoke: -1 },
+  'Special Offers':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
+  'Prism':                 { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  // Compliance widget: every plan gets it.
+  'Cookie Consent':        { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   // Opened to Boost 9 Jul 2026 to widen the creator base (was Ignite/Bespoke only).
-  'Smart Section':         { Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 },
+  'Smart Section':         { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   // Self-serve signature builder. Premium-only positioning (locked 8 Jul 2026),
   // same tiering as Smart Section: no teaser on Spark or Boost.
   'Email Signature':       { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
-  // Group booking engine with Stripe deposits. Tiering locked 26 Jul 2026:
-  // one trip on Boost as the taster, unlimited from Ignite.
-  'Group Trips':           { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  // Group booking engine with Stripe deposits. From Boost (26 Jul 2026);
+  // unlimited wherever available (Andy, 8 Sep 2026).
+  'Group Trips':           { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   // Rich multi-day escorted tour (separate, premium sibling of Group Trips).
-  // Same tiering as Group Trips: one on Boost, unlimited from Ignite.
-  'Escorted Tour':         { Spark: 0, Boost: 1, Ignite: -1, Bespoke: -1 },
+  // Same tiering as Group Trips: from Boost, unlimited wherever available.
+  'Escorted Tour':         { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
 };
 
 // Canonical plan names recognised by PLAN_WIDGET_LIMITS lookups.

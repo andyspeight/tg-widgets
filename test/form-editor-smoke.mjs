@@ -150,11 +150,11 @@ ok(/function tidyLogic\(q\)/.test(ED) && /delete q\.logic;/.test(ED), 'an emptie
 
 // ── Registration (the 5 places + vercel) ─────────────────────────────────────
 ok(/'Form',/.test(CFG), "'Form' is in ALLOWED_WIDGET_TYPES");
-ok(/'Form':\s+\{ Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 \}/.test(CFG), 'plan limits are set (premium draw, locked on Spark)');
+ok(/'Form':\s+\{ Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 \}/.test(CFG), 'plan limits are set (premium draw, locked on Spark, unlimited from Boost)');
 ok(/'form':\s+'Form'/.test(CFG), 'the tag maps to the type');
 ok(/id: 'form',/.test(INDEX) && /airtableType: 'Form'/.test(INDEX), 'the dashboard registry has a Form entry');
 ok(/editorUrl: '\/editor-form'/.test(INDEX) && /demoUrl: '\/demo-form'/.test(INDEX), 'the registry points at the editor + demo');
-ok(/access: \{ Spark: 0, Boost: 3, Ignite: -1, Bespoke: -1 \}/.test(INDEX), 'registry access matches PLAN_WIDGET_LIMITS');
+ok(/access: \{ Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 \}/.test(INDEX), 'registry access matches PLAN_WIDGET_LIMITS');
 ok(/if \(w\.id === 'form'\) \{/.test(INDEX), 'the dashboard has a mini-preview branch');
 // A static mock, so the tile never mounts a live widget or fetches a config.
 const branch = INDEX.slice(INDEX.indexOf("if (w.id === 'form') {"), INDEX.indexOf("if (w.id === 'enquirypro') {"));

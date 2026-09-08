@@ -139,7 +139,10 @@ first mount and on passive re-renders. (The Enquiry / Enquiry Pro bug, 23 Jul
   — `widgetType` must match the Airtable WidgetType option exactly.
 
 **Plan tiers.** Exactly four, Title Case: `Spark`, `Boost`, `Ignite`,
-`Bespoke`. In limit maps: `-1` unlimited, `0` locked, positive = max count.
+`Bespoke`. In limit maps: `-1` unlimited, `0` locked. A widget available on a
+plan is UNLIMITED there (Andy, 8 Sep 2026): never put a positive count in a
+plan map. `npm run test:plan-limits-drift` enforces this and keeps the API map
+and the dashboard registry in step.
 
 **Adding a new widget type — update FIVE places** (also documented at the top
 of `api/widget-config.js`):

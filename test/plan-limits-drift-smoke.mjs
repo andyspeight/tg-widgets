@@ -17,8 +17,10 @@
  *      agree on inclusion per plan: 0 on one side and non-zero on the other is
  *      the exact shape of the Loader bug. Counts may differ (-1 vs 3 is a
  *      display nuance the dashboard already sources from the catalogue feed).
- *   3. The Loader itself is UNLIMITED on every plan. Andy's rule (8 Sep 2026):
- *      a widget that is available on a plan is unlimited there.
+ *   3. No row on either side carries a positive count. Andy's rule (8 Sep
+ *      2026): a widget that is available on a plan is unlimited there, so
+ *      every value is -1 or 0.
+ *   4. The Loader itself (the bug that started this) is unlimited everywhere.
  *
  * Run: node test/plan-limits-drift-smoke.mjs  (npm run test:plan-limits-drift)
  */
@@ -26,6 +28,7 @@ import { readFileSync } from 'node:fs';
 
 const API = readFileSync(new URL('../api/widget-config.js', import.meta.url), 'utf8');
 const HTML = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+const COPY = readFileSync(new URL('../api/widget-copy.js', import.meta.url), 'utf8');
 
 const PLANS = ['Spark', 'Boost', 'Ignite', 'Bespoke'];
 let passed = 0, failed = 0;
@@ -118,6 +121,31 @@ console.log('The API and the dashboard agree on which plans include each live wi
   // cannot be saved under that type at all. Reported, not failed, because a
   // card can legitimately share its editor with another type.
   if (unknown.length) console.log('  ℹ live registry types with no API row: ' + unknown.map((r) => r.type).join(', '));
+}
+
+console.log('Available means unlimited: no positive count anywhere (Andy, 8 Sep 2026)');
+{
+  const apiCounts = Object.entries(limits)
+    .flatMap(([t, row]) => PLANS.filter((p) => row[p] > 0).map((p) => `${t} on ${p}: ${row[p]}`));
+  ok('the API map has no positive count', apiCounts.length === 0, apiCounts.join('\n      '));
+  const dashCounts = registry
+    .flatMap((r) => PLANS.filter((p) => r.access[p] > 0).map((p) => `${r.type} on ${p}: ${r.access[p]}`));
+  ok('the dashboard registry has no positive count', dashCounts.length === 0, dashCounts.join('\n      '));
+  const every = registry.filter((r) => r.status === 'live' && limits[r.type]);
+  const valueDrift = every.flatMap((r) => PLANS.filter((p) => limits[r.type][p] !== r.access[p])
+    .map((p) => `${r.type} on ${p}: API ${limits[r.type][p]} vs dashboard ${r.access[p]}`));
+  ok('with only -1 and 0 in play, the API and the dashboard now agree on every value',
+    valueDrift.length === 0, valueDrift.join('\n      '));
+}
+
+console.log('There is ONE plan map: the copy endpoint reads it rather than carrying its own');
+{
+  ok('api/widget-copy.js imports PLAN_WIDGET_LIMITS and canonicalisePlan from widget-config.js',
+    /import \{ PLAN_WIDGET_LIMITS, canonicalisePlan \} from '\.\/widget-config\.js';/.test(COPY));
+  ok('api/widget-copy.js declares no plan map of its own',
+    !/const PLAN_WIDGET_LIMITS\s*=/.test(COPY) && !/const PLAN_ALIASES\s*=/.test(COPY));
+  ok('a locked type is refused on copy with the same wording as a new widget',
+    /planLimit === 0[\s\S]*?is not included in your plan/.test(COPY));
 }
 
 console.log('The Loader is unlimited on every plan (catalogue: Spark, Boost, Ignite, Bespoke; Andy: available means unlimited)');
