@@ -389,11 +389,11 @@ server.close();
   ok(/airtableType:\s*'Group Trips'/.test(indexHtml), 'plumbing: registry entry declares airtableType Group Trips');
   ok(/id:\s*'trips'/.test(indexHtml), 'plumbing: registry entry id trips');
   ok(indexHtml.includes('<script src="/widget-trips.js"></script>'), 'plumbing: dashboard loads widget-trips.js');
-  const accessMatch = indexHtml.match(/id:\s*'trips'[\s\S]{0,900}?access:\s*\{\s*Spark:\s*0,\s*Boost:\s*1,\s*Ignite:\s*-1,\s*Bespoke:\s*-1\s*\}/);
+  const accessMatch = indexHtml.match(/id:\s*'trips'[\s\S]{0,900}?access:\s*\{\s*Spark:\s*0,\s*Boost:\s*-1,\s*Ignite:\s*-1,\s*Bespoke:\s*-1\s*\}/);
   ok(!!accessMatch, 'plumbing: registry access is Spark 0 / Boost 1 / Ignite ∞ / Bespoke ∞');
 
   ok(/'Group Trips',/.test(widgetConfig), 'plumbing: Group Trips in ALLOWED_WIDGET_TYPES');
-  ok(/'Group Trips':\s*\{\s*Spark:\s*0,\s*Boost:\s*1,\s*Ignite:\s*-1,\s*Bespoke:\s*-1\s*\}/.test(widgetConfig),
+  ok(/'Group Trips':\s*\{\s*Spark:\s*0,\s*Boost:\s*-1,\s*Ignite:\s*-1,\s*Bespoke:\s*-1\s*\}/.test(widgetConfig),
     'plumbing: PLAN_WIDGET_LIMITS matches the registry access field');
 
   const rw = vercel.rewrites || [];

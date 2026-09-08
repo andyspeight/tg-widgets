@@ -300,7 +300,7 @@ server.close();
   ok(/airtableType:\s*'Escorted Tour'/.test(indexHtml), 'plumbing: registry entry declares airtableType Escorted Tour');
   ok(indexHtml.includes('<script src="/widget-tour.js"></script>'), 'plumbing: dashboard loads widget-tour.js');
   ok(/'Escorted Tour',/.test(widgetConfig), 'plumbing: Escorted Tour in ALLOWED_WIDGET_TYPES');
-  ok(/'Escorted Tour':\s*\{\s*Spark:\s*0,\s*Boost:\s*1,\s*Ignite:\s*-1,\s*Bespoke:\s*-1\s*\}/.test(widgetConfig), 'plumbing: PLAN_WIDGET_LIMITS matches registry access');
+  ok(/'Escorted Tour':\s*\{\s*Spark:\s*0,\s*Boost:\s*-1,\s*Ignite:\s*-1,\s*Bespoke:\s*-1\s*\}/.test(widgetConfig), 'plumbing: PLAN_WIDGET_LIMITS matches registry access');
   const rw = vercel.rewrites || [];
   ok(rw.some(r => r.source === '/editor-tour' && r.destination === '/editor-tour.html'), 'plumbing: /editor-tour rewrite');
   ok(rw.some(r => r.source === '/demo-tour' && r.destination === '/demo-tour.html'), 'plumbing: /demo-tour rewrite');
