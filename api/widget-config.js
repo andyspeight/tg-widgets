@@ -832,8 +832,11 @@ export default async function handler(req, res) {
         // directly, so it never needs the API key — inject the AppID alone.
         // Event Tickets is the same case: it builds ticket deeplinks against
         // the client's own application and never calls Travelify itself.
+        // Event Menu joined the list on 8 Sep 2026: with no page address set it
+        // lists events with Book buttons beside the menu, the same deeplinks as
+        // Event Tickets, so it needs the owning client's AppID like the rest.
         const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'World Map', 'Event Tickets',
-          'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month'];
+          'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month', 'Event Menu'];
         // Resolve the client's Travelify credentials from the widget's AUTHORITATIVE
         // owning account (ClientRecordId), NOT the creator's email. One person can
         // own several client accounts under the same email (staff acting-as, a

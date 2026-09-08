@@ -14,6 +14,10 @@
   .pv-stage .menu-col { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
   .pv-stage .menu-col > * { min-width: 0; }
   .pv-stage .menu-col.is-drawer { grid-template-columns: 1fr; }
+  /* With the events panel inside the widget it owns the whole stage; the page
+     mock beside it would be a second, fake results column. */
+  .pv-stage .menu-col.is-full { grid-template-columns: 1fr; }
+  .pv-stage .menu-col.is-full .pv-mock { display: none; }
   .pv-mock { border: 1px solid var(--tgse-border, #e3e8ee); border-radius: 14px; padding: 20px; background: #fff; }
   .pv-mock .band { height: 120px; border-radius: 10px; margin-bottom: 14px;
     background: linear-gradient(135deg, #dbe6f0, #eef2f6); }
@@ -77,19 +81,20 @@
         <div class="tgse-section is-open">
           <div class="tgse-section-head">
             <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
-            <span class="tgse-section-label">Where the menu links to</span>
+            <span class="tgse-section-label">Where a choice goes</span>
             <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="tgse-section-body">
             <div class="tgse-field">
-              <label class="tgse-field-label" for="f-pattern">Your page address</label>
+              <label class="tgse-field-label" for="f-pattern">Your page address (optional)</label>
               <input class="input" type="text" id="f-pattern" spellcheck="false" maxlength="200"
-                     placeholder="/tickets/{type}/{slug}">
+                     placeholder="Leave blank to show events inside the widget">
               <div class="field-help">
-                Use <code>{type}</code> for competition, team, venue or performer,
-                <code>{slug}</code> for the key and <code>{name}</code> for the readable name.
-                Leave it blank and each row fires a <code>tg:eventmenu:select</code> event
-                on the container instead, for a developer to handle.
+                Leave it blank and choosing anything in the menu lists its events right here in the
+                widget, with Book buttons. No other pages or widgets needed. If you already have a page
+                per competition, enter its address with <code>{type}</code> for competition, team, venue
+                or performer, <code>{slug}</code> for the key and <code>{name}</code> for the readable
+                name, and each row goes there instead.
               </div>
             </div>
             <div class="tgse-field">
@@ -99,6 +104,88 @@
             <div class="toggle-row">
               <div><div class="toggle-label">Open in a new tab</div></div>
               <button class="switch" id="t-newtab" type="button" role="switch" aria-checked="false" aria-label="Open links in a new tab"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tgse-section is-open" id="sec-results">
+          <div class="tgse-section-head">
+            <svg class="tgse-section-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v14"/></svg>
+            <span class="tgse-section-label">The events panel</span>
+            <svg class="tgse-section-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="tgse-section-body">
+            <div class="field-help" style="margin-bottom:12px">
+              Shown beside the menu on a desktop and under the Browse events button on a phone. The cards
+              and Book buttons are the same as the Event Tickets widget.
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Before anything is chosen</label>
+              <div class="seg" id="f-start" role="group" aria-label="Before anything is chosen">
+                <button type="button" data-v="browse" aria-pressed="true">What's on</button>
+                <button type="button" data-v="none" aria-pressed="false">A prompt to choose</button>
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">Cards</label>
+              <div class="seg" id="f-rlayout" role="group" aria-label="Card layout">
+                <button type="button" data-v="list" aria-pressed="true">List</button>
+                <button type="button" data-v="cards" aria-pressed="false">Grid</button>
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-limit">Events to show</label>
+              <div class="slider-wrap">
+                <input type="range" id="f-limit" min="3" max="30" step="1" value="12">
+                <span class="slider-val" id="v-limit">12</span>
+              </div>
+            </div>
+            <div class="toggle-row"><div><div class="toggle-label">Kick-off time</div></div>
+              <button class="switch is-on" id="t-time" type="button" role="switch" aria-checked="true" aria-label="Show the time"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Venue</div></div>
+              <button class="switch is-on" id="t-venue" type="button" role="switch" aria-checked="true" aria-label="Show the venue"></button></div>
+            <div class="toggle-row"><div><div class="toggle-label">Competition</div></div>
+              <button class="switch is-on" id="t-comp" type="button" role="switch" aria-checked="true" aria-label="Show the competition"></button></div>
+            <div class="tgse-field">
+              <label class="tgse-field-label">What customers can book</label>
+              <div id="book-opts"></div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-booklabel">Button label</label>
+              <input class="input" type="text" id="f-booklabel" maxlength="24" placeholder="Book">
+              <div class="field-help">Used when there is one option. With several, each names itself.</div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-btntext">Book button text colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-btntext-swatch" aria-label="Pick the Book button text colour">
+                <input class="input" type="text" id="f-btntext" maxlength="7" spellcheck="false" placeholder="Auto">
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-pkgbg">Package button colour</label>
+              <div class="colour-row">
+                <input type="color" id="f-pkgbg-swatch" aria-label="Pick package button colour">
+                <input class="input" type="text" id="f-pkgbg" maxlength="7" spellcheck="false" placeholder="Auto">
+              </div>
+              <div class="field-help">Fills the + Hotel and + Flight &amp; hotel buttons. Leave blank for the standard outline look.</div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-pkgtext">Package button text</label>
+              <div class="colour-row">
+                <input type="color" id="f-pkgtext-swatch" aria-label="Pick package button text colour">
+                <input class="input" type="text" id="f-pkgtext" maxlength="7" spellcheck="false" placeholder="Auto">
+              </div>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-currency">Prices in</label>
+              <select class="input" id="f-currency">
+                <option value="GBP">GBP</option><option value="EUR">EUR</option><option value="USD">USD</option>
+              </select>
+            </div>
+            <div class="tgse-field">
+              <label class="tgse-field-label" for="f-adults">Adults per booking</label>
+              <input class="input" type="number" id="f-adults" min="1" max="9" step="1" value="2">
             </div>
           </div>
         </div>
@@ -294,8 +381,8 @@
               <div class="field-help">
                 Every row fires <code>tg:eventmenu:select</code> on the container, carrying
                 <code>type</code>, <code>key</code>, <code>name</code> and <code>href</code>.
-                Calling <code>preventDefault()</code> stops the navigation, so the menu can drive an
-                in-page view instead of a page load. The instance also exposes
+                Calling <code>preventDefault()</code> stops both the page load and the widget's own
+                events panel, so your script can take the choice. The instance also exposes
                 <code>open()</code>, <code>close()</code> and <code>update(config)</code>.
               </div>
             </div>
@@ -369,8 +456,23 @@
     triggerLabel: 'Browse events',
     groupBy: 'category',
     sections: ['competitions'],
-    linkPattern: '/tickets/{type}/{slug}',
+    linkPattern: '',
     newTab: false,
+    startWith: 'browse',
+    limit: 12,
+    daysAhead: 365,
+    resultsLayout: 'list',
+    showTime: true,
+    showVenue: true,
+    showCompetition: true,
+    bookLabel: 'Book',
+    bookingKinds: ['ticket'],
+    packageBgColor: '',
+    packageTextColor: '',
+    bookTextColor: '',
+    currency: 'GBP',
+    adults: 2,
+    emptyText: '',
     showSearch: true,
     showCounts: true,
     showCountries: true,
@@ -420,6 +522,7 @@
     // The preview stage drops its second column when the menu is a drawer,
     // because a drawer button beside a page mock reads as a stray button.
     $('menu-col').classList.toggle('is-drawer', C.layout === 'drawer');
+    $('menu-col').classList.toggle('is-full', !(C.linkPattern || '').trim());
     $('wrap-below').hidden = C.layout !== 'auto';
     example();
     if (widget) { widget.update(C); return; }
@@ -434,8 +537,10 @@
       ? pat.replace(/\{type\}/g, 'competition')
            .replace(/\{slug\}/g, 'english-premier-league')
            .replace(/\{name\}/g, 'premier-league')
-      : 'No link. Each row fires tg:eventmenu:select instead.';
+      : 'Events show inside the widget, beside the menu.';
     $('pattern-eg').textContent = out;
+    // The panel's settings only matter while the panel is what a choice opens.
+    $('sec-results').hidden = !!pat;
   }
 
   var TEMPLATES = [
@@ -520,6 +625,21 @@
     c.colour('f-accent-swatch', 'f-accent', 'accent');
     c.colour('f-trigtext-swatch', 'f-trigtext', 'triggerTextColor');
 
+    c.seg('f-start', 'startWith');
+    c.seg('f-rlayout', 'resultsLayout');
+    c.slider('f-limit', 'v-limit', 'limit');
+    c.toggle('t-time', 'showTime');
+    c.toggle('t-venue', 'showVenue');
+    c.toggle('t-comp', 'showCompetition');
+    c.text('f-booklabel', 'bookLabel');
+    K.bookingOptions('book-opts', function () { return C.bookingKinds; },
+      function (kinds) { C.bookingKinds = kinds; changed(); });
+    c.colourOpt('f-btntext-swatch', 'f-btntext', 'bookTextColor');
+    c.colourOpt('f-pkgbg-swatch', 'f-pkgbg', 'packageBgColor');
+    c.colourOpt('f-pkgtext-swatch', 'f-pkgtext', 'packageTextColor');
+    c.select('f-currency', 'currency');
+    c.number('f-adults', 'adults');
+
     c.toggle('t-newtab', 'newTab');
     c.toggle('t-search', 'showSearch');
     c.toggle('t-counts', 'showCounts');
@@ -542,6 +662,19 @@
     c.sliderSync('f-radius', 'v-radius', C.radius, function (v) { return v + 'px'; });
     c.colourSync('f-accent-swatch', 'f-accent', C.accent);
     c.colourSync('f-trigtext-swatch', 'f-trigtext', C.triggerTextColor);
+    c.segSync('f-start', C.startWith || 'browse');
+    c.segSync('f-rlayout', C.resultsLayout || 'list');
+    c.sliderSync('f-limit', 'v-limit', C.limit);
+    c.toggleSync('t-time', C.showTime !== false);
+    c.toggleSync('t-venue', C.showVenue !== false);
+    c.toggleSync('t-comp', C.showCompetition !== false);
+    $('f-booklabel').value = C.bookLabel || '';
+    c.colourOptSync('f-btntext-swatch', 'f-btntext', C.bookTextColor);
+    c.colourOptSync('f-pkgbg-swatch', 'f-pkgbg', C.packageBgColor);
+    c.colourOptSync('f-pkgtext-swatch', 'f-pkgtext', C.packageTextColor);
+    $('f-currency').value = C.currency || 'GBP';
+    $('f-adults').value = C.adults || 2;
+
     c.toggleSync('t-newtab', C.newTab);
     c.toggleSync('t-search', C.showSearch);
     c.toggleSync('t-counts', C.showCounts);

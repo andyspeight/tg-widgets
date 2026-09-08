@@ -117,6 +117,7 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  // >>> events booking kit (verbatim copy lives in public/widget-eventmenu.js)
   /** Only ever emit a link we recognise. Everything else becomes empty. */
   function safeUrl(u) {
     var s = String(u == null ? '' : u).trim();
@@ -582,8 +583,22 @@
     return '';
   }
 
-  function styles(cfg) {
-    var accent = safeColour(cfg.accent, DEFAULTS.accent);
+  // ── Shared with the Event Menu (verbatim, see test/events-kit-drift-smoke) ──
+  //
+  // Everything from safeUrl above to listHtml below is the events booking
+  // kit: the card with its Book buttons, the departure airport chooser, the
+  // stay calendar, the feed query and the styles they need. The Event Menu
+  // lists events beside its menu with this exact code, copied verbatim
+  // because a widget is one file on a customer's site and cannot import. Edit
+  // it here, copy the block there, and the drift test holds them together.
+
+  /**
+   * The .tgtk-root token block for a config: accent, button ink, radius, font
+   * and the optional package button colours. `fb` carries the widget's own
+   * default accent and radius.
+   */
+  function kitRoot(cfg, fb) {
+    var accent = safeColour(cfg.accent, fb.accent);
     var btnText = safeColour(cfg.bookTextColor, inkOn(accent));
     // QA ask: the package buttons take their own colours when set; blank
     // keeps the standard outline look. Text defaults to whichever ink
@@ -596,12 +611,11 @@
         + 'color:' + (pkgInk || inkOn(pkgBg)) + ';}'
         + (pkgBg ? '.tgtk-btn.tgtk-btn-pkg:hover{background:' + pkgBg + ';filter:brightness(.93);}' : '')
       : '';
-    var radius = clampInt(cfg.radius, 0, 28, DEFAULTS.radius);
+    var radius = clampInt(cfg.radius, 0, 28, fb.radius);
     var font = safeFont(cfg.fontFamily);
     var stack = (font ? '"' + font + '", ' : '')
       + "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-
-    return ':host{all:initial;display:block;}'
+    var root = ''
       // container-type makes the breakpoint below a @container query rather than
       // @media. A widget sits in whatever column the client gives it, and a
       // viewport query cannot see that the column is 240px wide on a 1500px
@@ -620,145 +634,104 @@
       + '.tgtk-root[data-theme="dark"]{'
       + '--tgtk-bg:#0F172A;--tgtk-bg2:#1E293B;--tgtk-bg3:#334155;'
       + '--tgtk-border:#334155;--tgtk-text:#F8FAFC;--tgtk-sub:#CBD5E1;--tgtk-mute:#94A3B8;'
-      + '--tgtk-on-accent:' + btnText + ';}'
-
-      + '.tgtk-head{margin:0 0 16px;}'
-      + '.tgtk-h{margin:0;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;}'
-      + '.tgtk-sub{margin:4px 0 0;font-size:15px;color:var(--tgtk-sub);}'
-
-      // Visitor Home/Away filter (segmented, shown only when a team has both).
-      + '.tgtk-hafilter{display:inline-flex;margin:0 0 12px;border:1px solid var(--tgtk-border);'
-      + 'border-radius:calc(var(--tgtk-radius) - 4px);overflow:hidden;background:var(--tgtk-bg);}'
-      + '.tgtk-hf{padding:0 14px;min-height:36px;font:inherit;font-size:12.5px;font-weight:600;'
-      + 'color:var(--tgtk-sub);background:transparent;border:0;border-right:1px solid var(--tgtk-border);'
-      + 'cursor:pointer;white-space:nowrap;transition:background .15s ease-out,color .15s ease-out;}'
-      + '.tgtk-hf:last-child{border-right:0;}'
-      + '.tgtk-hf:hover{color:var(--tgtk-text);}'
-      + '.tgtk-hf.is-on{background:var(--tgtk-accent);color:var(--tgtk-on-accent);}'
-      + '.tgtk-hf:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:-2px;}'
-
-      + '.tgtk-list{display:flex;flex-direction:column;gap:8px;}'
-      + '.tgtk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}'
-
-      + '.tgtk-card{background:var(--tgtk-bg);border:1px solid var(--tgtk-border);'
-      + 'border-radius:var(--tgtk-radius);padding:14px;display:grid;gap:14px;align-items:center;'
-      + 'grid-template-columns:64px minmax(0,1fr) auto;transition:border-color .2s ease-out,box-shadow .2s ease-out;}'
-      + '.tgtk-card:hover{border-color:var(--tgtk-accent);}'
-
-      + '.tgtk-grid .tgtk-card{grid-template-columns:1fr;align-items:stretch;gap:10px;}'
-      + '.tgtk-grid .tgtk-date{width:64px;}'
-
-      + '.tgtk-compact .tgtk-card{grid-template-columns:minmax(0,1fr) auto;padding:10px 12px;gap:10px;}'
-      + '.tgtk-compact .tgtk-date{display:none;}'
-      + '.tgtk-compact .tgtk-title{font-size:15px;}'
-
-      + '.tgtk-date{text-align:center;padding:6px 0;background:var(--tgtk-bg3);'
-      + 'border-radius:calc(var(--tgtk-radius) - 4px);line-height:1.15;font-variant-numeric:tabular-nums;}'
-      + '.tgtk-dow{display:block;font-size:11px;font-weight:600;text-transform:uppercase;'
-      + 'letter-spacing:.06em;color:var(--tgtk-mute);}'
-      + '.tgtk-day{display:block;font-size:22px;font-weight:700;}'
-      + '.tgtk-mon{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tgtk-sub);}'
-
-      + '.tgtk-main{min-width:0;}'
-      + '.tgtk-title{margin:0 0 2px;font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:anywhere;}'
-      + '.tgtk-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--tgtk-sub);}'
-      + '.tgtk-meta svg{width:14px;height:14px;flex:none;color:var(--tgtk-mute);vertical-align:-2px;}'
-      + '.tgtk-meta span{display:inline-flex;align-items:center;gap:4px;}'
-      + '.tgtk-dot{color:var(--tgtk-mute);}'
-      + '.tgtk-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;'
-      + 'background:var(--tgtk-bg3);color:var(--tgtk-sub);font-size:11px;font-weight:500;white-space:nowrap;}'
-
-      + '.tgtk-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}'
-      + '.tgtk-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;'
-      + 'min-height:44px;padding:0 16px;border-radius:calc(var(--tgtk-radius) - 4px);'
-      + 'border:1px solid transparent;background:var(--tgtk-accent);color:var(--tgtk-on-accent);'
-      + 'font:inherit;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;'
-      + 'transition:filter .16s ease-out,transform .12s ease-out;}'
-      + '.tgtk-btn{font-weight:700;letter-spacing:.01em;'
-      + 'box-shadow:0 2px 6px color-mix(in srgb,var(--tgtk-accent) 34%,transparent);'
-      + 'transition:transform .16s ease-out,box-shadow .16s ease-out,filter .16s ease-out;}'
-      + '.tgtk-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
-      + 'box-shadow:0 7px 18px color-mix(in srgb,var(--tgtk-accent) 44%,transparent);}'
-      + '.tgtk-btn:active{transform:translateY(0) scale(.98);}'
-      + '.tgtk-btn svg{width:21px;height:21px;}'
-      + '.tgtk-btn2{background:var(--tgtk-bg);border-color:var(--tgtk-border);color:var(--tgtk-text);box-shadow:none;}'
-      + '.tgtk-btn2:hover{background:var(--tgtk-bg3);filter:none;transform:translateY(-1px);'
-      + 'border-color:var(--tgtk-accent);box-shadow:0 4px 10px rgba(15,23,42,.08);}'
-      + '.tgtk-btn:focus-visible,.tgtk-more:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:2px;}'
-
-      + '.tgtk-state{padding:32px 20px;text-align:center;color:var(--tgtk-sub);'
-      + 'background:var(--tgtk-bg);border:1px dashed var(--tgtk-border);border-radius:var(--tgtk-radius);}'
-      + '.tgtk-state svg{width:26px;height:26px;color:var(--tgtk-mute);margin-bottom:6px;}'
-      + '.tgtk-state p{margin:0;}'
-
-      + '.tgtk-skel{height:78px;border-radius:var(--tgtk-radius);'
-      + 'background:linear-gradient(90deg,var(--tgtk-bg3) 25%,var(--tgtk-bg2) 50%,var(--tgtk-bg3) 75%);'
-      + 'background-size:200% 100%;animation:tgtk-sh 1.4s ease-in-out infinite;}'
-      + '@keyframes tgtk-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}'
-
-      + '.tgtk-more{display:block;margin:14px auto 0;background:none;border:0;padding:8px 12px;'
-      + 'font:inherit;font-size:13px;font-weight:600;color:var(--tgtk-accent);cursor:pointer;}'
-
-      + '@container (max-width:520px){'
-      + '.tgtk-card{grid-template-columns:56px minmax(0,1fr);row-gap:10px;}'
-      + '.tgtk-actions{grid-column:1/-1;}'
-      + '.tgtk-btn{flex:1 1 auto;}'
-      + '.tgtk-compact .tgtk-card{grid-template-columns:minmax(0,1fr);}'
-      + '}'
-
-      + '@media (prefers-reduced-motion:reduce){'
-      + '.tgtk-root *{animation-duration:.01ms !important;animation-iteration-count:1 !important;'
-      + 'transition-duration:.01ms !important;}}'
-      + pkgCss;
+      + '--tgtk-on-accent:' + btnText + ';}';
+    return { root: root, pkg: pkgCss };
   }
 
-  // ── The widget ────────────────────────────────────────────────────────────
+  /** The list, card, button, state and skeleton rules. Static. */
+  var KIT_CSS = ''
+    // Visitor Home/Away filter (segmented, shown only when a team has both).
+    + '.tgtk-hafilter{display:inline-flex;margin:0 0 12px;border:1px solid var(--tgtk-border);'
+    + 'border-radius:calc(var(--tgtk-radius) - 4px);overflow:hidden;background:var(--tgtk-bg);}'
+    + '.tgtk-hf{padding:0 14px;min-height:36px;font:inherit;font-size:12.5px;font-weight:600;'
+    + 'color:var(--tgtk-sub);background:transparent;border:0;border-right:1px solid var(--tgtk-border);'
+    + 'cursor:pointer;white-space:nowrap;transition:background .15s ease-out,color .15s ease-out;}'
+    + '.tgtk-hf:last-child{border-right:0;}'
+    + '.tgtk-hf:hover{color:var(--tgtk-text);}'
+    + '.tgtk-hf.is-on{background:var(--tgtk-accent);color:var(--tgtk-on-accent);}'
+    + '.tgtk-hf:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:-2px;}'
 
-  function TGTicketsWidget(container, config) {
-    this.el = container;
-    this.cfg = Object.assign({}, DEFAULTS, config || {});
-    this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
-    flyInit(this);
-    stayInit(this);
-    this.events = null;
-    this.total = 0;
-    this.error = null;
-    this.loading = true;
-    this._side = 'all';           // visitor Home/Away filter (client-side)
-    this._reqId = 0;
-    // Delegated: the shadow root survives each innerHTML re-render, so one
-    // listener here keeps the Home/Away toggle working without re-binding.
-    var self = this;
-    this.shadow.addEventListener('click', function (e) {
-      var hf = e.target && e.target.closest ? e.target.closest('.tgtk-hf') : null;
-      if (!hf) return;
-      var side = hf.getAttribute('data-side') || 'all';
-      if (self._side !== side) { self._side = side; self._render(); }
-    });
-    this._render();
-    this._load();
-  }
+    + '.tgtk-list{display:flex;flex-direction:column;gap:8px;}'
+    + '.tgtk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}'
 
-  TGTicketsWidget.prototype._theme = function () {
-    var t = this.cfg.theme;
-    if (t === 'dark') return 'dark';
-    if (t === 'auto') {
-      try {
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      } catch (e) { return 'light'; }
-    }
-    return 'light';
-  };
+    + '.tgtk-card{background:var(--tgtk-bg);border:1px solid var(--tgtk-border);'
+    + 'border-radius:var(--tgtk-radius);padding:14px;display:grid;gap:14px;align-items:center;'
+    + 'grid-template-columns:64px minmax(0,1fr) auto;transition:border-color .2s ease-out,box-shadow .2s ease-out;}'
+    + '.tgtk-card:hover{border-color:var(--tgtk-accent);}'
 
-  /** Turn the source setting into the API call it means. */
-  TGTicketsWidget.prototype._query = function () {
-    var c = this.cfg;
+    + '.tgtk-grid .tgtk-card{grid-template-columns:1fr;align-items:stretch;gap:10px;}'
+    + '.tgtk-grid .tgtk-date{width:64px;}'
+
+    + '.tgtk-compact .tgtk-card{grid-template-columns:minmax(0,1fr) auto;padding:10px 12px;gap:10px;}'
+    + '.tgtk-compact .tgtk-date{display:none;}'
+    + '.tgtk-compact .tgtk-title{font-size:15px;}'
+
+    + '.tgtk-date{text-align:center;padding:6px 0;background:var(--tgtk-bg3);'
+    + 'border-radius:calc(var(--tgtk-radius) - 4px);line-height:1.15;font-variant-numeric:tabular-nums;}'
+    + '.tgtk-dow{display:block;font-size:11px;font-weight:600;text-transform:uppercase;'
+    + 'letter-spacing:.06em;color:var(--tgtk-mute);}'
+    + '.tgtk-day{display:block;font-size:22px;font-weight:700;}'
+    + '.tgtk-mon{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tgtk-sub);}'
+
+    + '.tgtk-main{min-width:0;}'
+    + '.tgtk-title{margin:0 0 2px;font-size:16px;font-weight:600;line-height:1.35;overflow-wrap:anywhere;}'
+    + '.tgtk-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--tgtk-sub);}'
+    + '.tgtk-meta svg{width:14px;height:14px;flex:none;color:var(--tgtk-mute);vertical-align:-2px;}'
+    + '.tgtk-meta span{display:inline-flex;align-items:center;gap:4px;}'
+    + '.tgtk-dot{color:var(--tgtk-mute);}'
+    + '.tgtk-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;'
+    + 'background:var(--tgtk-bg3);color:var(--tgtk-sub);font-size:11px;font-weight:500;white-space:nowrap;}'
+
+    + '.tgtk-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}'
+    + '.tgtk-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;'
+    + 'min-height:44px;padding:0 16px;border-radius:calc(var(--tgtk-radius) - 4px);'
+    + 'border:1px solid transparent;background:var(--tgtk-accent);color:var(--tgtk-on-accent);'
+    + 'font:inherit;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap;'
+    + 'transition:filter .16s ease-out,transform .12s ease-out;}'
+    + '.tgtk-btn{font-weight:700;letter-spacing:.01em;'
+    + 'box-shadow:0 2px 6px color-mix(in srgb,var(--tgtk-accent) 34%,transparent);'
+    + 'transition:transform .16s ease-out,box-shadow .16s ease-out,filter .16s ease-out;}'
+    + '.tgtk-btn:hover{transform:translateY(-1px);filter:brightness(1.05);'
+    + 'box-shadow:0 7px 18px color-mix(in srgb,var(--tgtk-accent) 44%,transparent);}'
+    + '.tgtk-btn:active{transform:translateY(0) scale(.98);}'
+    + '.tgtk-btn svg{width:21px;height:21px;}'
+    + '.tgtk-btn2{background:var(--tgtk-bg);border-color:var(--tgtk-border);color:var(--tgtk-text);box-shadow:none;}'
+    + '.tgtk-btn2:hover{background:var(--tgtk-bg3);filter:none;transform:translateY(-1px);'
+    + 'border-color:var(--tgtk-accent);box-shadow:0 4px 10px rgba(15,23,42,.08);}'
+    + '.tgtk-btn:focus-visible,.tgtk-more:focus-visible{outline:2px solid var(--tgtk-accent);outline-offset:2px;}'
+
+    + '.tgtk-state{padding:32px 20px;text-align:center;color:var(--tgtk-sub);'
+    + 'background:var(--tgtk-bg);border:1px dashed var(--tgtk-border);border-radius:var(--tgtk-radius);}'
+    + '.tgtk-state svg{width:26px;height:26px;color:var(--tgtk-mute);margin-bottom:6px;}'
+    + '.tgtk-state p{margin:0;}'
+
+    + '.tgtk-skel{height:78px;border-radius:var(--tgtk-radius);'
+    + 'background:linear-gradient(90deg,var(--tgtk-bg3) 25%,var(--tgtk-bg2) 50%,var(--tgtk-bg3) 75%);'
+    + 'background-size:200% 100%;animation:tgtk-sh 1.4s ease-in-out infinite;}'
+    + '@keyframes tgtk-sh{0%{background-position:200% 0}100%{background-position:-200% 0}}'
+
+    + '.tgtk-more{display:block;margin:14px auto 0;background:none;border:0;padding:8px 12px;'
+    + 'font:inherit;font-size:13px;font-weight:600;color:var(--tgtk-accent);cursor:pointer;}'
+
+    + '@container (max-width:520px){'
+    + '.tgtk-card{grid-template-columns:56px minmax(0,1fr);row-gap:10px;}'
+    + '.tgtk-actions{grid-column:1/-1;}'
+    + '.tgtk-btn{flex:1 1 auto;}'
+    + '.tgtk-compact .tgtk-card{grid-template-columns:minmax(0,1fr);}'
+    + '}'
+
+    + '@media (prefers-reduced-motion:reduce){'
+    + '.tgtk-root *{animation-duration:.01ms !important;animation-iteration-count:1 !important;'
+    + 'transition-duration:.01ms !important;}}';
+
+  /** The feed call a source means, with the booking kinds and the client's AppID. */
+  function feedQuery(c, source) {
     var q = {
-      limit: String(clampInt(c.limit, 1, 100, DEFAULTS.limit)),
+      limit: String(clampInt(c.limit, 1, 100, 6)),
       from: localToday(0),
-      to: localToday(clampInt(c.daysAhead, 1, 730, DEFAULTS.daysAhead)),
+      to: localToday(clampInt(c.daysAhead, 1, 730, 365)),
       currency: c.currency,
-      adults: String(clampInt(c.adults, 1, 20, DEFAULTS.adults)),
+      adults: String(clampInt(c.adults, 1, 20, 2)),
     };
     if (c.appId) q.appId = c.appId;
     var kinds = Array.isArray(c.bookingKinds) ? c.bookingKinds.filter(Boolean) : [];
@@ -768,12 +741,13 @@
     // kind, so the API builds zero options for it.
     q.booking = kinds.length ? kinds.join(',') : 'none';
 
-    var v = String(c.sourceValue || '').trim();
-    switch (c.sourceType) {
+    var src = source || {};
+    var v = String(src.value || '').trim();
+    switch (src.type) {
       case 'team':
         q.view = 'team'; q.key = v;
-        if (c.side === 'home' || c.side === 'away') q.side = c.side;
-        if (c.competition) q.competition = c.competition;
+        if (src.side === 'home' || src.side === 'away') q.side = src.side;
+        if (src.competition) q.competition = src.competition;
         break;
       case 'venue':      q.view = 'venue'; q.key = v; break;
       case 'performer':  q.view = 'performer'; q.key = v; break;
@@ -784,66 +758,38 @@
       default:           q.view = 'competition'; q.slug = v; break;
     }
     return q;
-  };
+  }
 
   /** Sources that mean nothing without a value chosen. */
   function needsValue(t) {
     return t === 'competition' || t === 'team' || t === 'venue' || t === 'performer' || t === 'category';
   }
 
-  TGTicketsWidget.prototype._load = function () {
-    var self = this;
-    var mine = ++this._reqId;
-    this._side = 'all';           // a fresh query starts on "All games"
-
-    // No source picked yet. That is a half-finished embed, not an outage, so
-    // it must not call the API (which would 400) and must not shout an error
-    // at a visitor. Editors sit in this state every time someone hits Change.
-    if (needsValue(this.cfg.sourceType) && !String(this.cfg.sourceValue || '').trim()) {
-      this.events = [];
-      this.total = 0;
-      this.error = 'unset';
-      this.loading = false;
-      this._render();
-      return;
-    }
-
-    var q = this._query();
+  function feedUrl(q) {
     var parts = [];
     for (var k in q) {
       if (Object.prototype.hasOwnProperty.call(q, k) && q[k] !== '' && q[k] != null) {
         parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(q[k]));
       }
     }
-    var url = FEED_API + (parts.length ? '?' + parts.join('&') : '');
+    return FEED_API + (parts.length ? '?' + parts.join('&') : '');
+  }
 
-    this.loading = true;
-    this.error = null;
-    this._render();
-
-    fetch(url, { headers: { Accept: 'application/json' } })
+  /** The events a query returns, or a rejection named not-found / request-failed. */
+  function fetchEvents(q) {
+    return fetch(feedUrl(q), { headers: { Accept: 'application/json' } })
       .then(function (r) {
         if (!r.ok) throw new Error(r.status === 404 ? 'not-found' : 'request-failed');
         return r.json();
       })
       .then(function (data) {
-        if (mine !== self._reqId) return;      // a later load won
-        self.events = Array.isArray(data.events) ? data.events : [];
-        self.total = data.total || self.events.length;
-        self.loading = false;
-        self._render();
-      })
-      .catch(function (err) {
-        if (mine !== self._reqId) return;
-        self.events = [];
-        self.error = err && err.message === 'not-found' ? 'not-found' : 'failed';
-        self.loading = false;
-        self._render();
+        var events = Array.isArray(data.events) ? data.events : [];
+        return { events: events, total: data.total || events.length };
       });
-  };
+  }
 
-  TGTicketsWidget.prototype._cardHtml = function (ev) {
-    var c = this.cfg;
+  /** One event as a card: date, title, the meta line and its Book buttons. */
+  function cardHtml(c, ev) {
     var p = dateParts(ev.startDate);
     var title = esc(ev.title || 'Event') + (ev.phase ? ' <span class="tgtk-chip">' + esc(ev.phase) + '</span>' : '');
 
@@ -925,26 +871,30 @@
       + '<div class="tgtk-meta">' + meta.join('') + '</div></div>'
       + (actions ? '<div class="tgtk-actions">' + actions + '</div>' : '')
       + '</article>';
-  };
+  }
 
-  TGTicketsWidget.prototype._bodyHtml = function () {
-    var c = this.cfg;
+  /**
+   * The list for a load state: skeleton while loading, a calm state for an
+   * unset or missing source, the Home/Away filter for a team, then the cards.
+   * `st` is { loading, error, events, side, sourceType, sourceValue }.
+   */
+  function listHtml(c, st) {
 
-    if (this.loading) {
-      var n = Math.min(clampInt(c.limit, 1, 100, DEFAULTS.limit), 4);
+    if (st.loading) {
+      var n = Math.min(clampInt(c.limit, 1, 100, 6), 4);
       var rows = '';
       for (var i = 0; i < n; i++) rows += '<div class="tgtk-skel"></div>';
       return '<div class="tgtk-list" aria-busy="true">' + rows + '</div>';
     }
 
-    if (this.error) {
+    if (st.error) {
       // Only a genuine failure gets the warning icon. A source that is unset or
       // no longer in the feed is configuration, and reads as a calm empty slot.
-      if (this.error === 'unset') {
+      if (st.error === 'unset') {
         return '<div class="tgtk-state" role="status">' + icon('cal')
           + '<p>' + esc('Choose what to show and the events will appear here.') + '</p></div>';
       }
-      if (this.error === 'not-found') {
+      if (st.error === 'not-found') {
         return '<div class="tgtk-state" role="status">' + icon('cal')
           + '<p>' + esc(c.emptyText || 'Nothing to show here just yet.') + '</p></div>';
       }
@@ -952,25 +902,24 @@
         + '<p>' + esc('Events could not be loaded. Please try again shortly.') + '</p></div>';
     }
 
-    if (!this.events || !this.events.length) {
+    if (!st.events || !st.events.length) {
       return '<div class="tgtk-state" role="status">' + icon('cal')
         + '<p>' + esc(c.emptyText || 'No upcoming events to show.') + '</p></div>';
     }
 
-    var self = this;
-    var evs = this.events;
+    var evs = st.events;
     var filterHtml = '';
     // Home/Away filter — only when sourced by a team and there is a real split
     // (both home AND away games loaded).
-    if (c.sourceType === 'team') {
-      var tk = String(c.sourceValue || '').trim();
+    if (st.sourceType === 'team') {
+      var tk = String(st.sourceValue || '').trim();
       var homeN = 0, awayN = 0;
       for (var i = 0; i < evs.length; i++) {
         var s = sideOf(evs[i], tk);
         if (s === 'home') homeN++; else if (s === 'away') awayN++;
       }
       if (homeN > 0 && awayN > 0) {
-        var sv = (this._side === 'home' || this._side === 'away') ? this._side : 'all';
+        var sv = (st.side === 'home' || st.side === 'away') ? st.side : 'all';
         var hf = function (v, label, on) {
           return '<button type="button" class="tgtk-hf' + (on ? ' is-on' : '') + '" data-side="' + v + '"'
             + ' aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
@@ -984,10 +933,117 @@
         else if (sv === 'away') evs = evs.filter(function (e) { return sideOf(e, tk) === 'away'; });
       }
     }
-    var cards = evs.map(function (ev) { return self._cardHtml(ev); }).join('');
+    var cards = evs.map(function (ev) { return cardHtml(c, ev); }).join('');
     var cls = c.layout === 'cards' ? 'tgtk-grid' : 'tgtk-list';
     return filterHtml + '<div class="' + cls + '">' + cards + '</div>';
+  }
+  // <<< events booking kit
+
+  function styles(cfg) {
+    var kit = kitRoot(cfg, { accent: DEFAULTS.accent, radius: DEFAULTS.radius });
+    return ':host{all:initial;display:block;}'
+      + kit.root
+      + '.tgtk-head{margin:0 0 16px;}'
+      + '.tgtk-h{margin:0;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;}'
+      + '.tgtk-sub{margin:4px 0 0;font-size:15px;color:var(--tgtk-sub);}'
+      + KIT_CSS
+      + kit.pkg;
+  }
+
+  // ── The widget ────────────────────────────────────────────────────────────
+
+  function TGTicketsWidget(container, config) {
+    this.el = container;
+    this.cfg = Object.assign({}, DEFAULTS, config || {});
+    this.shadow = container.shadowRoot || container.attachShadow({ mode: 'open' });
+    flyInit(this);
+    stayInit(this);
+    this.events = null;
+    this.total = 0;
+    this.error = null;
+    this.loading = true;
+    this._side = 'all';           // visitor Home/Away filter (client-side)
+    this._reqId = 0;
+    // Delegated: the shadow root survives each innerHTML re-render, so one
+    // listener here keeps the Home/Away toggle working without re-binding.
+    var self = this;
+    this.shadow.addEventListener('click', function (e) {
+      var hf = e.target && e.target.closest ? e.target.closest('.tgtk-hf') : null;
+      if (!hf) return;
+      var side = hf.getAttribute('data-side') || 'all';
+      if (self._side !== side) { self._side = side; self._render(); }
+    });
+    this._render();
+    this._load();
+  }
+
+  TGTicketsWidget.prototype._theme = function () {
+    var t = this.cfg.theme;
+    if (t === 'dark') return 'dark';
+    if (t === 'auto') {
+      try {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      } catch (e) { return 'light'; }
+    }
+    return 'light';
   };
+
+  /** Turn the source setting into the API call it means. */
+  TGTicketsWidget.prototype._query = function () {
+    var c = this.cfg;
+    return feedQuery(c, { type: c.sourceType, value: c.sourceValue, side: c.side, competition: c.competition });
+  };
+
+  TGTicketsWidget.prototype._load = function () {
+    var self = this;
+    var mine = ++this._reqId;
+    this._side = 'all';           // a fresh query starts on "All games"
+
+    // No source picked yet. That is a half-finished embed, not an outage, so
+    // it must not call the API (which would 400) and must not shout an error
+    // at a visitor. Editors sit in this state every time someone hits Change.
+    if (needsValue(this.cfg.sourceType) && !String(this.cfg.sourceValue || '').trim()) {
+      this.events = [];
+      this.total = 0;
+      this.error = 'unset';
+      this.loading = false;
+      this._render();
+      return;
+    }
+
+    this.loading = true;
+    this.error = null;
+    this._render();
+
+    fetchEvents(this._query())
+      .then(function (got) {
+        if (mine !== self._reqId) return;      // a later load won
+        self.events = got.events;
+        self.total = got.total;
+        self.loading = false;
+        self._render();
+      })
+      .catch(function (err) {
+        if (mine !== self._reqId) return;
+        self.events = [];
+        self.error = err && err.message === 'not-found' ? 'not-found' : 'failed';
+        self.loading = false;
+        self._render();
+      });
+  };
+
+  TGTicketsWidget.prototype._cardHtml = function (ev) { return cardHtml(this.cfg, ev); };
+
+  TGTicketsWidget.prototype._bodyHtml = function () {
+    return listHtml(this.cfg, {
+      loading: this.loading, error: this.error, events: this.events, side: this._side,
+      sourceType: this.cfg.sourceType, sourceValue: this.cfg.sourceValue,
+    });
+  };
+
+
+
+
 
   TGTicketsWidget.prototype._render = function () {
     var c = this.cfg;
