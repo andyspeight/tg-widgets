@@ -162,6 +162,15 @@ Design guidance, not legal advice.
   B2B, and a privacy notice at the point of collection. So: one consent line on
   the review screen, privacy link and unsubscribe in the first email, and the
   Contact's `Marketing Opt-In` set from what was actually said.
+- **WhatsApp cost is not the issue, the plan and the template are.** Meta
+  bills per delivered template message since 1 July 2025. A "good to meet you
+  at WTM" first message counts as a marketing template. The UK marketing base
+  rate was about 4p early in 2026 and rose on 1 July 2026 to roughly 6 US
+  cents before the provider's markup. Two hundred contacts from a show is a
+  few pounds. Brevo sells WhatsApp as pay-as-you-go credits with no setup fee,
+  but only on its Professional or Enterprise plans, and every template needs
+  Meta approval first, so the sender, the plan and the template have to be
+  sorted weeks before the show, not the day before.
 - **A human confirms before anything sends.** One "great to meet you, Dave" to
   a Sarah does real damage on a show floor.
 
@@ -173,9 +182,24 @@ Design guidance, not legal advice.
   complements it: business cards, people met off-stand, and the follow-up
   automation. Phase 3 imports the Lead Manager export into the same pipeline
   so every WTM lead ends up in Luna Desk.
-- **TravelTech Show is run by Clarion Events.** Whether their exhibitor
-  package includes a badge scanner, and what it exports, is still to be
-  checked (see research list).
+- **What the WTM Lead Manager export contains** (from RX's own guidance,
+  found via search on 8 Sep 2026): per scanned badge, the name, company, job
+  title, email, phone number(s) and company address the visitor gave at
+  registration, plus your notes and the answers to your custom qualifying
+  questions. Leads download as CSV or XLSX from the Lead Manager tile in the
+  Exhibitor Portal, arrive by email at the end of each show day, and stay
+  available for 20 days after the show. Logins are emailed to the stand's
+  portal admin about a week before. So the Phase 3 importer is a CSV mapper
+  into `quickAddPerson()` with source Event and a "WTM 2026 badge scan"
+  Activity, run within 20 days of the show.
+- **TravelTech Show is run by Clarion Events and its official app is
+  ExpoPlatform**, the same platform behind the co-located Business Travel Show
+  Europe app. Business Travel Show's exhibitor pages describe the platform as
+  the place to "arrange meetings, chat with attendees, and collect leads".
+  Whether that includes badge scanning on the stand, and what it exports,
+  could not be confirmed from outside the exhibitor portal. Ask Clarion when
+  the 2027 stand is booked. Either way it exports a spreadsheet, and the same
+  CSV importer handles it.
 
 ## VoxBulk: what was found and what was not
 
@@ -198,8 +222,13 @@ providers Travelgenix has contracts with: Brevo (transactional SMS at
 1:1 email in Luna Desk, and Twilio SMS already wired in tg-widgets. Current
 recommendation: not as the foundation for this app. If Andy likes their
 pricing for outbound campaigns, that is a separate marketing purchasing
-decision. The desktop session should read the site and confirm or overturn
-this.
+decision.
+
+**Second pass, later on 8 Sep 2026, same sandbox.** The site was still
+blocked, and a `site:voxbulk.com` search returns no indexed pages at all, so
+there is nothing public to compare. Decision recorded as **no, not as the
+foundation**. If Andy wants a like-for-like on campaign pricing, paste the
+site's pricing and features text into a chat and it takes ten minutes.
 
 ## Phases and dates
 
@@ -224,23 +253,33 @@ this.
 3. Are we exhibiting at WTM 2026 with a stand, and therefore getting Lead
    Manager logins? And at TravelTech Show 2027?
 4. How many staff are attending, and do they all already log in to Luna Desk?
-5. VoxBulk: yes or no once the site has been read.
+5. VoxBulk is recorded as no. Only reopen it if Andy pastes their pricing and wants a campaign-cost comparison.
 
-## Research still to do (desktop session, web access)
+## Research: done and still open
 
-- Read voxbulk.com properly: channels, pricing per message, API or not,
-  GDPR processor terms, sender ID rules for UK SMS. Compare like for like
-  with Brevo SMS and WhatsApp pricing.
-- Clarion's exhibitor lead capture for TravelTech Show 2027: is there an app,
-  what does it export, and is it in the package.
-- Brevo WhatsApp: current template approval turnaround, marketing versus
-  utility category pricing in the UK, and whether Travelgenix's Brevo account
-  already has a WhatsApp sender.
+Done on 8 Sep 2026 (second pass, search snippets only, most sites blocked
+from the sandbox):
+
+- VoxBulk: no public content reachable or indexed. Decision: no (above).
+- WTM Lead Manager export: fields, formats, daily email and the 20-day window
+  are recorded above.
+- TravelTech Show: organiser Clarion, app ExpoPlatform, lead collection via
+  the platform confirmed in general terms, badge scanning on the stand not
+  confirmed.
+- WhatsApp cost: Meta per-message billing, UK marketing rate and the Brevo
+  plan requirement recorded above.
+
+Still open, needs a real browser or an account login:
+
+- Which Brevo plan the Travelgenix account is on, and whether it already has
+  a WhatsApp sender connected. WhatsApp needs Professional or Enterprise.
+- Template approval turnaround with Brevo today, so the "met at WTM" template
+  is approved before 3 Nov 2026.
+- Clarion: is badge scanning in the TravelTech Show 2027 exhibitor package,
+  and what does the ExpoPlatform lead export look like.
 - iOS 26 PWA camera behaviour in standalone mode: confirm on a real iPhone
   early, because WebKit has a history of `getUserMedia` failing in
   home-screen apps.
-- Whether WTM Lead Manager exports CSV with the fields we need (name, company,
-  email, phone, answers to custom questions).
 
 ## Things that will bite
 
@@ -276,3 +315,11 @@ No changes to `tg-crm-b2b` yet. It was cloned read-only for the survey.
 - Infobip on WhatsApp opt-in: https://www.infobip.com/docs/whatsapp/compliance/user-opt-ins
 - PWA on iOS in 2026: https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide
 - STRICH on iOS PWA camera access: https://kb.strich.io/article/29-camera-access-issues-in-ios-pwa
+- RX Lead Manager app: https://rxglobal.com/RX-lead-manager-app and the exhibitor guide https://rxglobal.com/sites/default/files/2025-01/How%20to%20use%20Lead%20Manager%20App%20exhibitor%20guide.pdf
+- RX Lead Manager legal notice: https://legal.rxglobal.com/en-us/LeadManagerApp.html
+- TravelTech Show official app (ExpoPlatform): https://traveltech-show.com/visit/show-app
+- Business Travel Show Europe exhibitor page: https://www.businesstravelshoweurope.com/exhibit
+- Brevo WhatsApp countries and pricing: https://help.brevo.com/hc/en-us/articles/4416961286674-Supported-countries-and-pricing-for-WhatsApp-messages
+- Brevo WhatsApp pricing update, 1 July 2026: https://www.brevo.com/releases/whatsapp-pricing-update/
+- Meta WhatsApp Business Platform pricing: https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing
+- WhatsApp UK pricing guide 2026: https://payperwa.com/blog/whatsapp-business-api-pricing-uk-2026
