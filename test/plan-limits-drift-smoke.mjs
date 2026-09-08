@@ -17,7 +17,8 @@
  *      agree on inclusion per plan: 0 on one side and non-zero on the other is
  *      the exact shape of the Loader bug. Counts may differ (-1 vs 3 is a
  *      display nuance the dashboard already sources from the catalogue feed).
- *   3. The Loader itself is on every plan, matching the catalogue.
+ *   3. The Loader itself is UNLIMITED on every plan. Andy's rule (8 Sep 2026):
+ *      a widget that is available on a plan is unlimited there.
  *
  * Run: node test/plan-limits-drift-smoke.mjs  (npm run test:plan-limits-drift)
  */
@@ -119,15 +120,15 @@ console.log('The API and the dashboard agree on which plans include each live wi
   if (unknown.length) console.log('  ℹ live registry types with no API row: ' + unknown.map((r) => r.type).join(', '));
 }
 
-console.log('The Loader is on every plan (Package Catalogue: Spark, Boost, Ignite, Bespoke)');
+console.log('The Loader is unlimited on every plan (catalogue: Spark, Boost, Ignite, Bespoke; Andy: available means unlimited)');
 {
   const row = limits['Loader'];
   ok('the API has a Loader row', !!row);
-  ok('the API includes the Loader on every plan',
-    !!row && PLANS.every((p) => row[p] !== 0), row ? JSON.stringify(row) : 'no row');
+  ok('the API has the Loader unlimited on every plan',
+    !!row && PLANS.every((p) => row[p] === -1), row ? JSON.stringify(row) : 'no row');
   const card = registry.find((r) => r.type === 'Loader');
-  ok('the dashboard includes the Loader on every plan',
-    !!card && PLANS.every((p) => card.access[p] !== 0), card ? JSON.stringify(card.access) : 'no card');
+  ok('the dashboard has the Loader unlimited on every plan',
+    !!card && PLANS.every((p) => card.access[p] === -1), card ? JSON.stringify(card.access) : 'no card');
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
