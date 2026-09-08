@@ -12,6 +12,8 @@
  * SendGrid docs: https://docs.sendgrid.com/api-reference/mail-send/mail-send
  */
 
+import { canSendFrom } from '../../../_lib/sendgrid.js';
+
 const SENDGRID_API_KEY    = process.env.SENDGRID_API_KEY;
 const SENDGRID_FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'noreply@travelify.io';
 const FROM_NAME_FALLBACK  = process.env.SENDGRID_FROM_NAME_FALLBACK || 'Travelgenix';
@@ -45,52 +47,11 @@ export function buildFromField(displayName) {
 // spam — so the domain is verified before use and anything unverified falls
 // back to the platform sender silently.
 //
-// Sources, in order:
-//   1. TG_AUTHENTICATED_SENDER_DOMAINS — comma-separated env allowlist,
-//      checked first so this works even when the API key lacks the Sender
-//      Authentication read scope.
-//   2. GET /v3/whitelabel/domains — SendGrid's own list of authenticated
-//      domains (valid entries only), cached in-module for 10 minutes.
+// The check itself (env allowlist, then SendGrid's own authenticated-domain
+// list, cached) lives in api/_lib/sendgrid.js since 8 Sep 2026 so the Quote
+// PDF widget shares one answer with the forms. This module keeps its
+// resolveFromIdentity signature; only the lookup moved.
 // ---------------------------------------------------------------------------
-
-const DOMAIN_CACHE_TTL_MS = 10 * 60 * 1000;
-let domainCache = { at: 0, domains: null };
-
-function envSenderDomains() {
-  return String(process.env.TG_AUTHENTICATED_SENDER_DOMAINS || '')
-    .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-}
-
-async function fetchAuthenticatedDomains() {
-  const now = Date.now();
-  if (domainCache.domains && now - domainCache.at < DOMAIN_CACHE_TTL_MS) return domainCache.domains;
-  if (!SENDGRID_API_KEY) return [];
-  try {
-    const r = await fetch('https://api.sendgrid.com/v3/whitelabel/domains?limit=100', {
-      headers: { Authorization: `Bearer ${SENDGRID_API_KEY}` },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const list = await r.json();
-    const domains = (Array.isArray(list) ? list : [])
-      .filter(d => d && d.valid)
-      .map(d => String(d.domain || '').toLowerCase())
-      .filter(Boolean);
-    domainCache = { at: now, domains };
-    return domains;
-  } catch (err) {
-    // Key without the read scope, network blip, etc. Cache the empty answer
-    // too, so a broken key warns once per instance per TTL, not once per send.
-    console.warn('[sendgrid] authenticated-domain lookup failed (platform sender used):', err.message);
-    domainCache = { at: now, domains: [] };
-    return [];
-  }
-}
-
-function domainOf(email) {
-  const m = /^[^@\s]+@([^@\s]+\.[^@\s]+)$/.exec(String(email || '').trim().toLowerCase());
-  return m ? m[1] : null;
-}
 
 /**
  * Resolve the full From identity for a client-branded email. Uses
@@ -100,11 +61,7 @@ function domainOf(email) {
  */
 export async function resolveFromIdentity(displayName, preferredEmail) {
   const base = buildFromField(displayName);
-  const domain = domainOf(preferredEmail);
-  if (!domain) return base;
-  const matches = (list) => list.some(d => domain === d || domain.endsWith('.' + d));
-  const ok = matches(envSenderDomains()) || matches(await fetchAuthenticatedDomains());
-  if (!ok) return base;
+  if (!(await canSendFrom(preferredEmail))) return base;
   return { ...base, email: String(preferredEmail).trim() };
 }
 

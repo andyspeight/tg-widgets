@@ -22,11 +22,15 @@
 //   - SENDGRID_FROM_EMAIL         (verified sender, e.g. noreply@travelify.io)
 //   - SENDGRID_FROM_NAME_FALLBACK (fallback display name, e.g. 'Travelgenix')
 //
-//  We deliberately ALWAYS send from SENDGRID_FROM_EMAIL (a domain we control
-//  with SPF/DKIM aligned) and use Reply-To for the agent's actual address.
-//  This keeps deliverability high — if we tried to spoof a "from" address on
-//  a domain we don't control, every major provider would mark it as spam or
-//  flat-out refuse it.
+//  We send from SENDGRID_FROM_EMAIL (a domain we control with SPF/DKIM
+//  aligned) and use Reply-To for the agent's actual address. The ONE exception
+//  is a client whose own domain is authenticated in this SendGrid account
+//  (DKIM + return-path CNAMEs on their DNS): canSendFrom() below says yes for
+//  those, and the caller may then use the client's address as the From. Never
+//  send "from" a domain that is not authenticated — every major provider
+//  checks the client's own DMARC and would mark it as spam or refuse it.
+//  (Andy's call, 20 Jul 2026, first applied to the Enquiry widget; the check
+//  was lifted here on 8 Sep 2026 so the Quote PDF widget shares it.)
 // =============================================================================
 
 const SENDGRID_ENDPOINT = 'https://api.sendgrid.com/v3/mail/send';
@@ -53,6 +57,87 @@ export function buildFromField(displayName) {
   const { fromEmail, fromNameFallback } = getEnv();
   const safeName = (displayName || fromNameFallback).replace(/[<>"]/g, '').trim() || fromNameFallback;
   return { email: fromEmail, name: safeName };
+}
+
+// ---------------------------------------------------------------------------
+// Client-domain sending.
+//
+// A client's domain counts as authenticated when EITHER
+//   1. TG_AUTHENTICATED_SENDER_DOMAINS (comma-separated env allowlist) names
+//      it — checked first, so this works even when the API key lacks the
+//      Sender Authentication read scope; or
+//   2. SendGrid's own GET /v3/whitelabel/domains lists it as valid — cached
+//      in-module for 10 minutes so a burst of sends is one lookup.
+// Anything else is NOT authenticated and the platform sender must be used.
+// ---------------------------------------------------------------------------
+
+const DOMAIN_CACHE_TTL_MS = 10 * 60 * 1000;
+let domainCache = { at: 0, domains: null };
+
+/** The platform's verified sender address, for display and fallbacks. */
+export function platformSenderEmail() {
+  return process.env.SENDGRID_FROM_EMAIL || 'noreply@travelify.io';
+}
+
+/** The domain part of an email address, lower-cased, or null. */
+export function domainOf(email) {
+  const m = /^[^@\s]+@([^@\s]+\.[^@\s]+)$/.exec(String(email || '').trim().toLowerCase());
+  return m ? m[1] : null;
+}
+
+function envSenderDomains() {
+  return String(process.env.TG_AUTHENTICATED_SENDER_DOMAINS || '')
+    .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+}
+
+export async function fetchAuthenticatedDomains() {
+  const now = Date.now();
+  if (domainCache.domains && now - domainCache.at < DOMAIN_CACHE_TTL_MS) return domainCache.domains;
+  const apiKey = process.env.SENDGRID_API_KEY;
+  if (!apiKey) return [];
+  try {
+    const r = await fetch('https://api.sendgrid.com/v3/whitelabel/domains?limit=100', {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const list = await r.json();
+    const domains = (Array.isArray(list) ? list : [])
+      .filter(d => d && d.valid)
+      .map(d => String(d.domain || '').toLowerCase())
+      .filter(Boolean);
+    domainCache = { at: now, domains };
+    return domains;
+  } catch (err) {
+    // Key without the read scope, network blip, etc. Cache the empty answer
+    // too, so a broken key warns once per instance per TTL, not once per send.
+    console.warn('[sendgrid] authenticated-domain lookup failed (platform sender used):', err.message);
+    domainCache = { at: now, domains: [] };
+    return [];
+  }
+}
+
+/**
+ * May we send FROM this address? True only when its domain (or a parent
+ * domain) is authenticated in this SendGrid account. Never throws.
+ */
+export async function canSendFrom(email) {
+  const domain = domainOf(email);
+  if (!domain) return false;
+  const matches = (list) => list.some(d => domain === d || domain.endsWith('.' + d));
+  if (matches(envSenderDomains())) return true;
+  return matches(await fetchAuthenticatedDomains());
+}
+
+/**
+ * Resolve the From identity for a client-branded email: the client's own
+ * address when its domain is authenticated, otherwise the platform sender.
+ * The display name behaves exactly like buildFromField.
+ */
+export async function resolveSender(displayName, preferredEmail) {
+  const base = buildFromField(displayName);
+  if (!(await canSendFrom(preferredEmail))) return base;
+  return { ...base, email: String(preferredEmail).trim() };
 }
 
 /**

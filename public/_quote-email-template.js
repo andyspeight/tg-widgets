@@ -97,7 +97,21 @@ export function normaliseQuoteEmail(raw) {
   const t = (raw && typeof raw === 'object') ? raw : {};
   const subject = typeof t.subject === 'string' ? t.subject.trim().slice(0, 200) : '';
   const body = typeof t.body === 'string' ? t.body.trim().slice(0, 4000) : '';
-  return (subject || body) ? { subject, body } : {};
+  const replyTo = isEmailAddress(t.replyTo) ? String(t.replyTo).trim().toLowerCase() : '';
+  const out = (subject || body) ? { subject, body } : {};
+  if (replyTo) out.replyTo = replyTo;
+  return out;
+}
+
+/**
+ * A plain email address, the only shape a Reply-To may take. Shared by the
+ * editor (to decide whether to check the sending address) and the sender (to
+ * decide whether to set the header), so the two can never disagree.
+ */
+export function isEmailAddress(v) {
+  if (typeof v !== 'string') return false;
+  const s = v.trim();
+  return s.length > 0 && s.length <= 120 && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(s);
 }
 
 /**

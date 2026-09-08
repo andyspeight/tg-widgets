@@ -252,6 +252,11 @@
           </div>
           <div class="tgse-section-body">
             <div class="qp-help" style="margin-bottom:10px">The email your quote PDF arrives in. It is branded from the same logo and colours as the quote itself. Write your own wording or leave it on ours.</div>
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label" for="replyTo">Replies go to</label>
+              <input type="email" id="replyTo" maxlength="120" placeholder="hello@yourco.com" autocomplete="off">
+              <div class="qp-help" id="sender-hint">Checking how your quotes will be sent…</div>
+            </div>
             <div id="quote-email-card"></div>
           </div>
         </div>
@@ -339,8 +344,8 @@
 <!-- The REAL covering-email renderer, handed to the classic editor script below
      so the preview is the email api/quote-pdf.js sends. -->
 <script type="module">
-  import { renderQuoteEmail, QUOTE_EMAIL_TAGS } from '/_quote-email-template.js';
-  window.TGQuoteEmail = { renderQuoteEmail, QUOTE_EMAIL_TAGS };
+  import { renderQuoteEmail, QUOTE_EMAIL_TAGS, isEmailAddress } from '/_quote-email-template.js';
+  window.TGQuoteEmail = { renderQuoteEmail, QUOTE_EMAIL_TAGS, isEmailAddress };
 </script>
 <script>
   const DEFAULTS = {
@@ -348,7 +353,9 @@
     showContact:true,
     attachments:[],
     // The client's own covering-email wording. Blank means our standard copy.
-    email:{ subject:'', body:'' },
+    // replyTo is where replies to the quote email land; blank means the
+    // support email above, then the account email.
+    email:{ subject:'', body:'', replyTo:'' },
     colors:{ topBar:'#111D3E', hero:'#1B2B5B', accent:'#00B4D8', labels:'#0096B7', titles:'#1B2B5B', text:'#0F172A', link:'#0096B7' },
     button:{ bg:'#00B4D8', text:'#FFFFFF' },
     align:'left',
@@ -407,7 +414,7 @@
   // through public/_quote-email-template.js, the very module api/quote-pdf.js
   // sends with, so this preview cannot drift from what the customer opens.
   function quoteEmailCfg() {
-    if (!C.email || typeof C.email !== 'object') C.email = { subject: '', body: '' };
+    if (!C.email || typeof C.email !== 'object') C.email = { subject: '', body: '', replyTo: '' };
     return C.email;
   }
   function quoteEmailHasCustom() {
@@ -440,6 +447,57 @@
     }));
   }
 
+  // --- who the quote email is sent from ---
+  // Asks the server whether the reply-to domain is authenticated with SendGrid
+  // (the same canSendFrom check the sender runs). The answer decides the
+  // wording under the field AND the From line in the email popup, so what the
+  // client reads is what their customer receives. Replies always go to the
+  // client; the From ADDRESS is theirs only when their domain is authenticated.
+  let senderInfo = { from: '', ownDomain: false };
+  let senderTimer = null;
+  const looksLikeEmail = (v) => (window.TGQuoteEmail && window.TGQuoteEmail.isEmailAddress)
+    ? window.TGQuoteEmail.isEmailAddress(v)
+    : /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(String(v || '').trim());
+  function effectiveReplyTo() { return String(quoteEmailCfg().replyTo || C.supportEmail || '').trim(); }
+  function senderFromLine() {
+    const name = C.brandName || 'Your travel team';
+    return senderInfo.from ? (name + ' <' + senderInfo.from + '>') : name;
+  }
+  function renderSenderHint(state) {
+    const el = $('sender-hint'); if (!el) return;
+    const addr = effectiveReplyTo();
+    if (!addr) { el.textContent = 'Leave this blank and replies go to your support email, or to your account email if that is blank too.'; return; }
+    if (!looksLikeEmail(addr)) { el.textContent = 'Enter a full email address, like hello@yourco.com.'; return; }
+    if (state === 'checking') { el.textContent = 'Checking how your quotes will be sent\u2026'; return; }
+    if (state === 'error') { el.textContent = 'We could not check your sending address just now. Replies will still go to ' + addr + '.'; return; }
+    if (senderInfo.ownDomain) {
+      el.textContent = 'Your quotes will be sent from ' + addr + '. Your domain is authenticated with us, so they go out from your own address and replies come straight back to you.';
+      return;
+    }
+    el.textContent = 'Your quotes will be sent from ' + (senderInfo.from || 'noreply@travelify.io') + ' in your name, and replies will go to ' + addr + '. To send from your own address, ask us to authenticate your domain. It takes three DNS records and a few minutes.';
+  }
+  function refreshSenderStatus() {
+    if (senderTimer) clearTimeout(senderTimer);
+    senderTimer = setTimeout(async () => {
+      const input = $('replyTo');
+      if (input) input.placeholder = C.supportEmail ? C.supportEmail : 'hello@yourco.com';
+      const addr = effectiveReplyTo();
+      if (!addr || !looksLikeEmail(addr)) { senderInfo = { from: '', ownDomain: false }; renderSenderHint(); return; }
+      renderSenderHint('checking');
+      try {
+        const r = await fetch('/api/sender-identity?email=' + encodeURIComponent(addr), { credentials: 'include' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const d = await r.json();
+        if (addr !== effectiveReplyTo()) return; // typed on: a newer check is coming
+        senderInfo = { from: String(d.from || ''), ownDomain: !!d.ownDomain };
+        renderSenderHint();
+      } catch (e) {
+        senderInfo = { from: '', ownDomain: false };
+        renderSenderHint('error');
+      }
+    }, 400);
+  }
+
   function openQuoteEmailPopup() {
     if (!window.TGEmailPopup || !window.TGQuoteEmail) return;
     const T = window.TGQuoteEmail;
@@ -448,7 +506,7 @@
       emails: [{
         key: 'quote',
         label: 'Quote email',
-        from: () => C.brandName || 'Your travel team',
+        from: senderFromLine,
         to: 'sarah@example.com (the customer)',
         tags: T.QUOTE_EMAIL_TAGS,
         fields: [
@@ -477,7 +535,7 @@
         reset: {
           label: 'Use our standard wording',
           isSet: quoteEmailHasCustom,
-          run: (applied) => { C.email = { subject: '', body: '' }; shell.markDirty(); applied(); },
+          run: (applied) => { C.email = { subject: '', body: '', replyTo: quoteEmailCfg().replyTo || '' }; shell.markDirty(); applied(); },
         },
       }],
     });
@@ -485,6 +543,8 @@
 
   function applyToUI() {
     renderQuoteEmailCard();
+    $('replyTo').value = quoteEmailCfg().replyTo || '';
+    refreshSenderStatus();
     $('brandName').value = C.brandName||''; $('tagline').value = C.tagline||'';
     $('supportEmail').value = C.supportEmail||''; $('supportPhone').value = C.supportPhone||'';
     const showC = C.showContact !== false;
@@ -518,6 +578,8 @@
   // --- field bindings ---
   [['brandName','brandName'],['tagline','tagline'],['supportEmail','supportEmail'],['supportPhone','supportPhone']]
     .forEach(([id,key]) => $(id).addEventListener('input', e => { C[key] = e.target.value; render(); shell.markDirty(); }));
+  $('replyTo').addEventListener('input', e => { quoteEmailCfg().replyTo = e.target.value.trim(); shell.markDirty(); refreshSenderStatus(); });
+  $('supportEmail').addEventListener('input', refreshSenderStatus); // the fallback address changed
   document.querySelectorAll('input[type="color"]').forEach(inp =>
     inp.addEventListener('input', e => {
       const el = e.target; const val = el.value;
