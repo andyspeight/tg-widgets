@@ -45,7 +45,9 @@
  *
  * Env vars:
  *   Email:    SENDGRID_API_KEY, SENDGRID_FROM_EMAIL (verified sender),
- *             SENDGRID_FROM_NAME_FALLBACK (optional, default "Travelgenix").
+ *             SENDGRID_FROM_NAME_FALLBACK (optional, default "Travelgenix"),
+ *             TG_AUTHENTICATED_SENDER_DOMAINS (optional allowlist of client
+ *             domains that may appear as the From address; see _lib/sendgrid).
  *             QUOTE_PDF_FROM_EMAIL / QUOTE_PDF_FROM_NAME override if set.
  *   Travelify: none needed for the demo — App 250 demo credentials are used
  *             directly (mirrors booking-pdf.js). Real clients will resolve via
@@ -53,7 +55,8 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
-import { renderQuoteEmail, normaliseQuoteEmail } from '../public/_quote-email-template.js';
+import { renderQuoteEmail, normaliseQuoteEmail, isEmailAddress } from '../public/_quote-email-template.js';
+import { canSendFrom } from './_lib/sendgrid.js';
 import { generateQuotePdf, pdfFilename, fetchAttachmentBuffers } from '../generate-pdf.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
@@ -306,7 +309,13 @@ async function resolveContext(widgetId) {
   let config = {};
   try { config = JSON.parse(widget.fields?.Config || '{}'); } catch { config = {}; }
 
-  return { appId: creds.appId, apiKey: creds.apiKey, opts: buildRenderOpts(config) };
+  const opts = buildRenderOpts(config);
+  // Where replies go when the client has set nothing in the editor: the
+  // account-level FromEmail staff can set on the Widgets record (the same
+  // Reply-To the booking emails use), then the account email. Read here,
+  // applied in resolveQuoteReplyTo after the client's own settings.
+  opts.replyToFallbacks = [widget.fields?.FromEmail, widget.fields?.ClientEmail];
+  return { appId: creds.appId, apiKey: creds.apiKey, opts };
 }
 
 // ----- Server-fetch (Travelify hotlist) -----
@@ -362,12 +371,33 @@ function escapeHtml(s) {
 // The customer-facing quote email goes out under the CLIENT's company name (the
 // widget's configured brandName), so the recipient sees their own travel agent
 // rather than the Travelgenix platform — the same stance the appointment emails
-// take with companyOf(). The verified sender ADDRESS never changes (SendGrid
-// requires it); only the display name does. Fall back to the env sender name,
-// then the generic default, when a widget carries no brand name (e.g. the demo).
+// take with companyOf(). The From ADDRESS is the platform sender unless the
+// client's own domain is authenticated in SendGrid, in which case the email is
+// sent from their reply-to address (canSendFrom, the same check the Enquiry
+// widget has used since 20 Jul 2026). Replies always go to the client, never to
+// our noreply address: see resolveQuoteReplyTo. Fall back to the env sender
+// name, then the generic default, when a widget carries no brand name (e.g. the
+// demo).
 function quoteFromName(opts) {
   const brandName = opts && opts.brand && opts.brand.name && String(opts.brand.name).trim();
   return brandName || process.env.QUOTE_PDF_FROM_NAME || process.env.SENDGRID_FROM_NAME_FALLBACK || 'Travelgenix';
+}
+
+// Where replies to the quote email go. The client's own "Replies go to"
+// setting from the editor wins, then the support email shown on the PDF, then
+// the record-level fallbacks resolveContext supplied. Anything that is not a
+// plain address is skipped. Null means no Reply-To header, which in practice is
+// only the demo widget. Before 8 Sep 2026 no Reply-To was set at all, so a
+// customer who hit Reply wrote to noreply@travelify.io.
+function resolveQuoteReplyTo(opts) {
+  const own = normaliseQuoteEmail(opts && opts.email).replyTo;
+  const cands = [own, opts && opts.brand && opts.brand.supportEmail]
+    .concat(Array.isArray(opts && opts.replyToFallbacks) ? opts.replyToFallbacks : []);
+  for (const c of cands) {
+    const v = String(c || '').trim().toLowerCase();
+    if (isEmailAddress(v)) return v;
+  }
+  return null;
 }
 
 async function emailQuotePdf(doc, pdfBuffer, extraAttachments, opts) {
@@ -437,16 +467,27 @@ async function emailQuotePdf(doc, pdfBuffer, extraAttachments, opts) {
     template: normaliseQuoteEmail(opts && opts.email),
   });
 
-  await sg.send({
+  // Replies go to the client, never to our noreply address. Where the client's
+  // domain is authenticated with SendGrid the email is sent FROM that address
+  // too; otherwise from the platform sender in the client's name.
+  const replyTo = resolveQuoteReplyTo(opts);
+  const sendFromOwn = !!(replyTo && await canSendFrom(replyTo));
+  const message = {
     to,
-    from: { email: fromEmail, name: fromName },
+    from: { email: sendFromOwn ? replyTo : fromEmail, name: fromName },
     subject,
     text,
     html,
     attachments,
-  });
+  };
+  if (replyTo) message.replyTo = { email: replyTo, name: fromName };
 
-  return { to, bytes: pdfBuffer.length, sent: true, extraAttachments: extras.length };
+  await sg.send(message);
+
+  return {
+    to, bytes: pdfBuffer.length, sent: true, extraAttachments: extras.length,
+    from: message.from.email, replyTo: replyTo || null,
+  };
 }
 
 // ----- Handler -----

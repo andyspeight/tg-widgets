@@ -29,14 +29,14 @@ console.log('One renderer, shared by the sender and the editor preview');
 {
   ok('the renderer lives in public/', /export function renderQuoteEmail\(/.test(TPL));
   ok('the sender composes through it',
-    /import \{ renderQuoteEmail, normaliseQuoteEmail \} from '\.\.\/public\/_quote-email-template\.js';/.test(SENDER)
+    /import \{ renderQuoteEmail, normaliseQuoteEmail, isEmailAddress \} from '\.\.\/public\/_quote-email-template\.js';/.test(SENDER)
     && /const \{ subject, html, text \} = renderQuoteEmail\(\{/.test(SENDER));
   ok('the three hardcoded <p> tags are GONE',
     !/<p>Hi \$\{escapeHtml\(lead\)\},<\/p>/.test(SENDER)
     && !/Please find your quote &ldquo;/.test(SENDER)
     && !/Kind regards,<br>/.test(SENDER));
   ok('the send still carries the attachments it always did',
-    /attachments,\n  \}\);/.test(SENDER) && /disposition: 'attachment'/.test(SENDER));
+    /attachments,\n  \};\n  if \(replyTo\) message\.replyTo/.test(SENDER) && /await sg\.send\(message\);/.test(SENDER) && /disposition: 'attachment'/.test(SENDER));
   // Strip comments first: the header explains that there is no Buffer here, and
   // a naive word match would flag that prose as if it were code.
   const CODE = TPL.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
@@ -109,10 +109,10 @@ console.log('The editor writes it, previewed through the same module');
 {
   ok('a Covering email section exists in Settings',
     /<span class="tgse-section-label">Covering email<\/span>/.test(EDITOR) && /id="quote-email-card"/.test(EDITOR));
-  ok('the config carries an email slot', /email:\{ subject:'', body:'' \}/.test(EDITOR));
+  ok('the config carries an email slot', /email:\{ subject:'', body:'', replyTo:'' \}/.test(EDITOR));
   ok('the editor loads the shared popup and the real renderer',
     /<script src="\/editor-email-popup\.js"><\/script>/.test(EDITOR)
-    && /window\.TGQuoteEmail = \{ renderQuoteEmail, QUOTE_EMAIL_TAGS \};/.test(EDITOR));
+    && /window\.TGQuoteEmail = \{ renderQuoteEmail, QUOTE_EMAIL_TAGS, isEmailAddress \};/.test(EDITOR));
   ok('a card opens the popup', /window\.TGEmailPopup\.card\(\{/.test(EDITOR) && /onEdit: openQuoteEmailPopup/.test(EDITOR));
   ok('the preview goes through the shared renderer', /T\.renderQuoteEmail\(\{/.test(EDITOR));
   ok('it previews with the SAME brand shape the server forwards',
@@ -124,7 +124,7 @@ console.log('The editor writes it, previewed through the same module');
   ok('editing marks the editor dirty', /quoteEmailCfg\(\)\[field\] = value; shell\.markDirty\(\);/.test(EDITOR));
   ok('the card refreshes on close and when config loads',
     /onClose: renderQuoteEmailCard/.test(EDITOR) && /function applyToUI\(\) \{\s*\n\s*renderQuoteEmailCard\(\);/.test(EDITOR));
-  ok('reset clears back to our wording', /C\.email = \{ subject: '', body: '' \}; shell\.markDirty\(\);/.test(EDITOR));
+  ok('reset clears back to our wording', /C\.email = \{ subject: '', body: '', replyTo: quoteEmailCfg\(\)\.replyTo \|\| '' \}; shell\.markDirty\(\);/.test(EDITOR));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
