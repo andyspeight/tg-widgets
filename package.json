@@ -90,6 +90,7 @@
     "test:widget-list-scope": "node test/widget-list-scope-smoke.mjs",
     "test:widget-appid": "node test/widget-appid-injection-smoke.mjs",
     "test:clubpicker-selector": "node test/clubpicker-selector-smoke.mjs",
+    "test:clubpicker-wording": "node test/clubpicker-wording-smoke.mjs",
     "test:event-home-away": "node test/event-home-away-smoke.mjs",
     "test:event-book-button": "node test/event-book-button-smoke.mjs",
     "test:eventmenu-fixes": "node test/eventmenu-fixes-smoke.mjs",

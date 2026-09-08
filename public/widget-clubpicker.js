@@ -55,6 +55,7 @@
     heading: '',
     subheading: '',
     prompt: 'Pick a badge to see their fixtures',
+    dropdownPrompt: '',        // '' = the standard line for this kind of grid (dropdownPromptFor)
     selectorMode: 'grid',      // grid | dropdown | both
     columns: 0,                // 0 = auto-fill
     showBadges: true,
@@ -980,6 +981,18 @@
       + '</div>' + body + '</section>';
   };
 
+  /**
+   * The dropdown's placeholder line. The grid prompt ("Pick a badge...") is
+   * written for a wall of badges and read wrongly on a <select>, which is what
+   * a client saw in Sep 2026, so the dropdown carries its own wording: the
+   * client's, or this standard line for the kind of thing being chosen.
+   */
+  function dropdownPromptFor(gridOf) {
+    return gridOf === 'performer' ? 'Choose an act to see their tour dates'
+      : gridOf === 'venue' ? 'Choose a venue to see what is on'
+        : 'Choose a team to see their fixtures';
+  }
+
   TGClubPickerWidget.prototype._noun = function () {
     return this.cfg.gridOf === 'performer' ? 'artists' : this.cfg.gridOf === 'venue' ? 'venues' : 'clubs';
   };
@@ -995,7 +1008,8 @@
   TGClubPickerWidget.prototype._selectHtml = function () {
     var c = this.cfg;
     var self = this;
-    var placeholder = c.prompt || ('Choose a ' + this._noun().replace(/s$/, ''));
+    var own = typeof c.dropdownPrompt === 'string' ? c.dropdownPrompt.trim().slice(0, 80) : '';
+    var placeholder = own || dropdownPromptFor(c.gridOf);
     var opts = '<option value="" disabled' + (this.openKey ? '' : ' selected') + '>' + esc(placeholder) + '</option>';
     opts += (this.entities || []).map(function (x) {
       var label = x.name + (c.showCounts ? ' (' + self._countLabel(x) + ')' : '');
@@ -1165,6 +1179,8 @@
   }
 
   window.TGClubPickerWidget = TGClubPickerWidget;
+
+  TGClubPickerWidget.dropdownPromptFor = dropdownPromptFor;
   window.__TG_CLUBPICKER_VERSION__ = VERSION;
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

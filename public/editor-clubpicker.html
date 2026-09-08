@@ -113,9 +113,14 @@
               <label class="tgse-field-label" for="f-subheading">Subtitle</label>
               <input class="input" type="text" id="f-subheading" maxlength="140" placeholder="Optional">
             </div>
-            <div class="tgse-field">
+            <div class="tgse-field" id="grid-prompt-field">
               <label class="tgse-field-label" for="f-prompt">Prompt above the grid</label>
               <input class="input" type="text" id="f-prompt" maxlength="80" placeholder="Pick a badge to see their fixtures">
+            </div>
+            <div class="tgse-field" id="dropdown-prompt-field">
+              <label class="tgse-field-label" for="f-dropdownPrompt">Prompt in the dropdown</label>
+              <input class="input" type="text" id="f-dropdownPrompt" maxlength="80" placeholder="Choose a team to see their fixtures">
+              <div class="field-help">Leave blank for the standard line for this kind of grid.</div>
             </div>
           </div>
         </div>
@@ -367,6 +372,7 @@
     heading: 'Premier League',
     subheading: '',
     prompt: 'Pick a badge to see their fixtures',
+    dropdownPrompt: '',
     columns: 0,
     showBadges: true,
     showHomeVenue: true,
@@ -411,6 +417,21 @@
   });
 
   function changed() { shell.markDirty(); render(); }
+
+  /** Does the title currently mirror the competition, rather than the client's own words? */
+  function headingFollowsCompetition(c) {
+    var h = String(c.heading || '').trim();
+    return !h || h === 'Premier League' || h === String(c.competitionLabel || '').trim();
+  }
+
+  /** Show the prompt fields that apply to the chosen selector mode, with the standard dropdown line as the placeholder. */
+  function syncPromptUi() {
+    var mode = C.selectorMode === 'dropdown' || C.selectorMode === 'both' ? C.selectorMode : 'grid';
+    $('grid-prompt-field').style.display = mode === 'dropdown' ? 'none' : '';
+    $('dropdown-prompt-field').style.display = mode === 'grid' ? 'none' : '';
+    var std = window.TGClubPickerWidget && window.TGClubPickerWidget.dropdownPromptFor;
+    if (std) $('f-dropdownPrompt').placeholder = std(C.gridOf);
+  }
 
   function render() {
     var host = $('widget-mount');
@@ -457,23 +478,30 @@
       getValue: function () { return C.competition; },
       getLabel: function () { return C.competitionLabel; },
       onPick: function (v, l) {
+        // Decide BEFORE the label changes: the title follows the competition
+        // while it still mirrors one (blank, the starter default, or the label
+        // of the competition being replaced). A title the client typed stays.
+        // Before 8 Sep 2026 only a blank or "Premier League" title followed,
+        // so the second pick onwards left it stuck on the first competition.
+        var follows = headingFollowsCompetition(C);
         C.competition = v;
         C.competitionLabel = l;
-        if (!C.heading || C.heading === 'Premier League') { C.heading = l; $('f-heading').value = l; }
+        if (follows) { C.heading = l; $('f-heading').value = l; }
         changed();
       },
       onClear: function () { C.competition = ''; C.competitionLabel = ''; changed(); },
       pickedId: 'picked-host', searchId: 'f-search', resultsId: 'results',
     });
 
-    c.seg('f-gridof', 'gridOf', function () { syncSourceUi(); });
-    c.seg('f-selector', 'selectorMode');
+    c.seg('f-gridof', 'gridOf', function () { syncSourceUi(); syncPromptUi(); });
+    c.seg('f-selector', 'selectorMode', function () { syncPromptUi(); });
     c.seg('f-side', 'side');
     c.select('f-category', 'category');
 
     c.text('f-heading', 'heading');
     c.text('f-subheading', 'subheading');
     c.text('f-prompt', 'prompt');
+    c.text('f-dropdownPrompt', 'dropdownPrompt');
     c.text('f-booklabel', 'bookLabel');
 
     c.slider('f-max', 'v-max', 'maxEntities');
@@ -509,6 +537,8 @@
     $('f-heading').value = C.heading || '';
     $('f-subheading').value = C.subheading || '';
     $('f-prompt').value = C.prompt || '';
+    $('f-dropdownPrompt').value = C.dropdownPrompt || '';
+    syncPromptUi();
     $('f-booklabel').value = C.bookLabel || '';
     c.sliderSync('f-max', 'v-max', C.maxEntities);
     c.sliderSync('f-elimit', 'v-elimit', C.eventLimit);
