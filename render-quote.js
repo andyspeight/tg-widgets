@@ -408,6 +408,15 @@ function renderDetailRow(label, value) {
 //               nights, startDate, endDate, summary, itinerary[{day,port,description}]
 //   flights     airline, origin, destination, cabinClass, departureDate,
 //               returnDate, outboundFlightNumber, returnFlightNumber
+//   locations   locationName, overview/overviewHtml, sellingAngle(Html),
+//               visaNotes(Html), localCurrency, monthOfTravel (1 to 12),
+//               imagePreview, weatherAverages[12] each { month, monthName,
+//               avgtempC, avgtempF, avgmaxtempC, avgmaxtempF,
+//               avgdailyrainfallMM, avgdailyrainfallInches, avgdrydays,
+//               avgraindays, avgsnowdays, avguvindex, avgsunhour }
+//               (confirmed on a live quote through /api/admin/quote-shape,
+//               8 Sep 2026; before that the card read high/temp, which do
+//               not exist, so every month printed blank)
 //
 // Legacy quotes (no quoteDocument) arrive via normaliseItem with `productType`
 // ('Accommodation'/'DynamicPackage') and the older accommodation field names
@@ -655,14 +664,49 @@ function renderLocationCard(item) {
   if (month >= 1 && month <= 12) metaParts.push(`Travelling in <strong>${MONTHS[month]}</strong>`);
 
   const weather = Array.isArray(item.weatherAverages) ? item.weatherAverages.filter(Boolean) : [];
-  const weatherHtml = weather.length
-    ? `<div class="loc-weather">${weather.map(w => {
+  const num = (v) => (v === null || v === undefined || v === '' || isNaN(Number(v))) ? null : Number(v);
+
+  // The travel month's figures, the same four the online quote page shows
+  // under "Average weather in <month>": average and maximum temperature in
+  // both scales, hours of sun, rainfall. Travelify's entries (confirmed 8 Sep
+  // 2026) carry avgtempC/F, avgmaxtempC/F, avgsunhour and
+  // avgdailyrainfallInches/MM; the older high/temp names stay as fallbacks in
+  // the strip below so nothing that once rendered stops rendering.
+  const forMonth = (month >= 1 && month <= 12)
+    ? weather.find(w => w && Number(w.month) === month) || null
+    : null;
+  const tempPair = (c, f) => {
+    const cc = num(c), ff = num(f);
+    return [cc != null ? `${cc}&deg;C` : '', ff != null ? `${ff}&deg;F` : ''].filter(Boolean).join(' / ');
+  };
+  let weatherHtml = '';
+  if (forMonth) {
+    const sun = num(forMonth.avgsunhour);
+    const rainIn = num(forMonth.avgdailyrainfallInches);
+    const rainMm = num(forMonth.avgdailyrainfallMM);
+    const facts = [
+      ['Average temperature', tempPair(forMonth.avgtempC, forMonth.avgtempF)],
+      ['Average max temperature', tempPair(forMonth.avgmaxtempC, forMonth.avgmaxtempF)],
+      ['Average hours of sun', sun != null ? esc(String(sun)) : ''],
+      ['Average rainfall', rainIn != null ? esc(String(rainIn)) + ' in' : (rainMm != null ? esc(String(rainMm)) + ' mm' : '')],
+    ].filter(([, v]) => v);
+    if (facts.length) {
+      weatherHtml = `<div class="loc-block"><div class="loc-block-label">Average weather in ${MONTHS[month]}</div>
+      <div class="loc-weather-month">${facts.map(([label, value]) =>
+        `<div class="lwm-cell"><div class="lwm-label">${esc(label)}</div><div class="lwm-value">${value}</div></div>`).join('')}</div>
+    </div>`;
+    }
+  }
+  if (!weatherHtml && weather.length) {
+    // No travel month, or no entry for it: the year at a glance, daytime highs.
+    weatherHtml = `<div class="loc-weather">${weather.map(w => {
         const m = Number(w && w.month);
-        const label = (m >= 1 && m <= 12) ? MONTHS[m].slice(0, 3) : esc(w && w.label || '');
-        const temp = (w && (w.high != null || w.temp != null)) ? esc(String(w.high != null ? w.high : w.temp)) + '&deg;' : '';
+        const label = (m >= 1 && m <= 12) ? MONTHS[m].slice(0, 3) : esc((w && (w.monthName || w.label)) || '');
+        const hi = num(w && [w.avgmaxtempC, w.high, w.avgtempC, w.temp].find(v => num(v) != null));
+        const temp = hi != null ? `${hi}&deg;` : '';
         return `<div class="loc-weather-cell"><div class="lw-month">${label}</div><div class="lw-temp">${temp}</div></div>`;
-      }).join('')}</div>`
-    : '';
+      }).join('')}</div>`;
+  }
 
   return `
   <section class="info-card">
@@ -1106,6 +1150,10 @@ function renderQuoteHTML(input, opts) {
   .loc-meta strong{color:var(--ink);}
   .loc-block{font-size:13px;color:var(--ink);line-height:1.55;margin-top:10px;break-inside:avoid;}
   .loc-block-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--labels);font-weight:700;margin-bottom:3px;}
+  .loc-weather-month{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:8px;}
+  .lwm-cell{padding:8px 10px;background:var(--bg2);border-radius:8px;break-inside:avoid;}
+  .lwm-label{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--slate);font-weight:600;}
+  .lwm-value{font-size:15px;font-weight:700;color:var(--titles);margin-top:2px;}
   .loc-weather{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
   .loc-weather-cell{flex:1;min-width:48px;text-align:center;padding:6px 4px;background:var(--bg2);border-radius:8px;}
   .lw-month{font-size:10px;text-transform:uppercase;color:var(--slate);font-weight:600;}
