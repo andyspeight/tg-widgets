@@ -27,7 +27,7 @@
   if (window.TravelgenixWidgets.travelResultsAi) return;
   window.TravelgenixWidgets.travelResultsAi = true;
 
-  var VERSION = '1.10.4';
+  var VERSION = '1.11.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (header, controls, fact/board labels, fallback states).
@@ -55,6 +55,7 @@
       oneOption: 'One option for this search.', yourOption: 'Your option',
       justOne: 'There’s just one option for this search:',
       resultsReady: 'Results ready — ask me anything.',
+      fallbackNote: 'Quick picks while the assistant is unavailable.',
       suggested: 'Suggested {count} option{plural}.',
       suggestionsReady: '{count} suggestion{plural} ready.',
       closestMatches: 'Here are the closest matches I can see:',
@@ -110,6 +111,7 @@
       oneOption: 'Une option pour cette recherche.', yourOption: 'Votre option',
       justOne: 'Il n’y a qu’une seule option pour cette recherche :',
       resultsReady: 'Résultats prêts — posez-moi vos questions.',
+      fallbackNote: 'Sélection rapide, l’assistant est momentanément indisponible.',
       suggested: '{count} option{plural} suggérée{plural}.',
       suggestionsReady: '{count} suggestion{plural} prête{plural}.',
       closestMatches: 'Voici les options les plus proches que je vois :',
@@ -157,6 +159,7 @@
       oneOption: 'Eine Option für diese Suche.', yourOption: 'Ihre Option',
       justOne: 'Es gibt nur eine Option für diese Suche:',
       resultsReady: 'Ergebnisse bereit — fragen Sie mich alles.',
+      fallbackNote: 'Schnellauswahl, der Assistent ist gerade nicht verfügbar.',
       suggested: '{count} Optionen vorgeschlagen.',
       suggestionsReady: '{count} Vorschläge bereit.',
       closestMatches: 'Hier sind die nächstgelegenen Treffer, die ich sehe:',
@@ -204,6 +207,7 @@
       oneOption: 'Una opción para esta búsqueda.', yourOption: 'Tu opción',
       justOne: 'Solo hay una opción para esta búsqueda:',
       resultsReady: 'Resultados listos — pregúntame lo que quieras.',
+      fallbackNote: 'Selección rápida mientras el asistente no está disponible.',
       suggested: '{count} opción{plural} sugerida{plural}.',
       suggestionsReady: '{count} sugerencia{plural} lista{plural}.',
       closestMatches: 'Estas son las opciones más parecidas que veo:',
@@ -251,6 +255,7 @@
       oneOption: 'Un’opzione per questa ricerca.', yourOption: 'La tua opzione',
       justOne: 'C’è una sola opzione per questa ricerca:',
       resultsReady: 'Risultati pronti — chiedimi qualsiasi cosa.',
+      fallbackNote: 'Selezione rapida, l’assistente al momento non è disponibile.',
       suggested: '{count} opzione{plural} suggerita{plural}.',
       suggestionsReady: '{count} suggerimento{plural} pronto{plural}.',
       closestMatches: 'Ecco le opzioni più simili che vedo:',
@@ -298,6 +303,7 @@
       oneOption: 'O singură opțiune pentru această căutare.', yourOption: 'Opțiunea ta',
       justOne: 'Există o singură opțiune pentru această căutare:',
       resultsReady: 'Rezultate gata — întreabă-mă orice.',
+      fallbackNote: 'Selecție rapidă cât timp asistentul nu este disponibil.',
       suggested: '{count} opțiune{plural} sugerată{plural}.',
       suggestionsReady: '{count} sugestie{plural} gata.',
       closestMatches: 'Iată cele mai apropiate opțiuni pe care le văd:',
@@ -515,6 +521,9 @@
       }
     }
     T = makeT(CFG);
+    // Kept for the endpoint payload (the origin gate) and for failure alerts,
+    // which carried a blank widget id before 8 Sep 2026.
+    CFG._widgetId = id ? String(id).slice(0, 64) : '';
     if (id) {
       fetch(configApi() + '?id=' + encodeURIComponent(id))
         .then(function (r) { return r.ok ? r.json() : null; })
@@ -701,7 +710,8 @@
   function callEndpoint(message, cands) {
     var payload = {
       version: 1, searchSession: activeSession, criteria: trimCriteria(),
-      shortlist: cands.map(compact)
+      shortlist: cands.map(compact),
+      widgetId: CFG._widgetId || undefined, lang: T.lang || undefined
     };
     if (message) { payload.message = message; payload.history = history.slice(-8); }
     // Fail-safe timeout: a stalled connection (slow proxy, cold-start where the
@@ -909,13 +919,27 @@
     els.body.scrollTop = node ? Math.max(0, node.offsetTop - 14) : 0;
   }
 
-  function renderRecs(reply, recs, append) {
+  // source: 'ai' | 'fallback' | 'local' (single option / preview). The rule
+  // engine wore the same card as the AI with no label until 8 Sep 2026, so
+  // nobody could tell which had answered; now the panel says so, and every
+  // event carries the source.
+  function renderRecs(reply, recs, append, source) {
+    source = source || 'ai';
     if (!append) clearBody();
     var startNode = reply ? addBubble('assistant', reply) : null;
+    if (source === 'fallback') {
+      var fn = document.createElement('div'); fn.className = 'fbnote'; fn.textContent = T('fallbackNote');
+      els.body.appendChild(fn); if (!startNode) startNode = fn;
+    }
     if (!recs.length) {
       var sl = stateLine(T('noClearMatches'));
       els.body.appendChild(sl);
-      setFootEnabled(true); scrollToTopOf(startNode || sl); return;
+      setFootEnabled(true);
+      // Still reveal: a visitor who can see the panel can ask for something
+      // else, whereas a hidden panel just never appears.
+      if (!append) { renderChips(); revealNow(); }
+      track('recommendations', { count: 0, refine: !!append, source: source });
+      scrollToTopOf(startNode || sl); return;
     }
     recs.forEach(function (r) {
       var s = r.s;
@@ -961,7 +985,7 @@
     els.body.appendChild(act);
     setFootEnabled(true);
     if (!append) { renderChips(); revealNow(); }
-    track('recommendations', { count: recs.length, refine: !!append });
+    track('recommendations', { count: recs.length, refine: !!append, source: source });
     announce(T('suggestionsReady', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
     scrollToTopOf(startNode);
   }
@@ -1031,6 +1055,9 @@
       els.body.appendChild(stateLine(T('noPropertiesBody')));
       setFootEnabled(false);
       announce(T('noPropertiesAnnounce'));
+      // Nothing to compare, nothing to show: stays hidden in 'suggestions'
+      // mode, and says so, instead of vanishing without a trace.
+      if (awaitingReveal) track('hidden', { reason: 'no_results' });
       return;
     }
     if (summaries.length === 1) {
@@ -1038,15 +1065,24 @@
       var single = [{ rid: only.rid, category: T('yourOption'), reason: safeReason(only), s: only }];
       currentRecs = single;
       setSub(T('oneOption'));
-      renderRecs(T('justOne'), single);
+      renderRecs(T('justOne'), single, false, 'local');
       return;
     }
 
     var cands = candidatesFor('');
+    if (!cands.length) {
+      // Results, but none with a usable price: nothing for the model to rank,
+      // so do not call it (that was a 400 and a false alert). Show the panel
+      // with a plain line so the visitor can still ask.
+      setSub(T('nothingToCompare'));
+      track('fallback', { reason: 'no_candidates' });
+      renderRecs('', [], false, 'fallback');
+      return;
+    }
     if (PREVIEW) {
       var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
       setSub(T('suggested', { count: precs.length, plural: precs.length === 1 ? '' : 's' }));
-      renderRecs(introLine(), precs);
+      renderRecs(introLine(), precs, false, 'local');
       return;
     }
     // Cached analysis for this search? Render without spending another call.
@@ -1063,19 +1099,30 @@
     callEndpoint('', cands).then(function (data) {
       if (payload.searchSession !== activeSession) return; // stale guard
       var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
-      if (!recs.length) { recs = fallbackRecs(cands, CFG.maxRecs); data = { reply: '' }; }
-      else { writeRecCache(payload.searchSession, data.reply, data.recommendations); }
+      var source = 'ai';
+      if (!recs.length) {
+        track('fallback', { reason: 'no_valid_picks' });
+        recs = fallbackRecs(cands, CFG.maxRecs); data = { reply: '' }; source = 'fallback';
+      } else { writeRecCache(payload.searchSession, data.reply, data.recommendations); }
       setSub(T('suggested', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
       currentRecs = recs;
-      renderRecs(data.reply || introLine(), recs);
+      renderRecs(data.reply || introLine(), recs, false, source);
     }).catch(function (e) {
       if (payload.searchSession !== activeSession) return;
       console.warn('[trai] endpoint failed, using fallback', e);
       reportEndpointFailure(e);
+      track('fallback', { reason: fallbackReason(e) });
       var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
       setSub(T('suggested', { count: recs.length, plural: recs.length === 1 ? '' : 's' }));
-      renderRecs(introLine(), recs);
+      renderRecs(introLine(), recs, false, 'fallback');
     });
+  }
+  // Why the rule engine answered instead of the AI, for the analytics event.
+  function fallbackReason(e) {
+    var m = String((e && e.message) || '');
+    if (/^HTTP \d/.test(m)) return m.replace(/\s+/g, '_').toLowerCase();
+    if (/abort/i.test(m)) return 'timeout';
+    return 'network';
   }
 
   function sendMessage() {
@@ -1091,23 +1138,31 @@
       if (els.body.contains(thinking)) els.body.removeChild(thinking);
       var precs = fallbackRecs(cands, CFG.maxRecs); currentRecs = precs;
       history.push({ role: 'assistant', content: 'preview' });
-      renderRecs(T('closestMatches'), precs, true);
+      renderRecs(T('closestMatches'), precs, true, 'local');
+      return;
+    }
+    if (!cands.length) {
+      if (els.body.contains(thinking)) els.body.removeChild(thinking);
+      track('fallback', { reason: 'no_candidates', refine: true });
+      renderRecs('', [], true, 'fallback');
       return;
     }
     callEndpoint(msg, cands).then(function (data) {
       if (!els.body.contains(thinking)) return;
       els.body.removeChild(thinking);
       var recs = mapRecs(data.recommendations, cands, CFG.maxRecs);
-      if (!recs.length) recs = fallbackRecs(cands, CFG.maxRecs);
+      var source = 'ai';
+      if (!recs.length) { track('fallback', { reason: 'no_valid_picks', refine: true }); recs = fallbackRecs(cands, CFG.maxRecs); source = 'fallback'; }
       currentRecs = recs;
       history.push({ role: 'assistant', content: data.reply || T('someOptions') });
-      renderRecs(data.reply || T('optionsMatch'), recs, true);
+      renderRecs(data.reply || T('optionsMatch'), recs, true, source);
     }).catch(function (e) {
       if (els.body.contains(thinking)) els.body.removeChild(thinking);
       console.warn('[trai] refine failed, using fallback', e);
       reportEndpointFailure(e);
+      track('fallback', { reason: fallbackReason(e), refine: true });
       var recs = fallbackRecs(cands, CFG.maxRecs); currentRecs = recs;
-      renderRecs(T('closestMatches'), recs, true);
+      renderRecs(T('closestMatches'), recs, true, 'fallback');
     });
   }
 
@@ -1117,7 +1172,13 @@
       .map(function (r) {
         var s = byRid[r.rid];
         var reason = r.reason || '';
-        if (CFG.verifyClaims) reason = cleanReason(reason, s);
+        if (CFG.verifyClaims) {
+          var cleaned = cleanReason(reason, s);
+          // Counted, so the checker's over-corrections show up in analytics
+          // instead of quietly turning good answers into bland ones.
+          if (String(cleaned).trim() !== String(reason).trim()) track('reason_replaced', { rid: r.rid });
+          reason = cleaned;
+        }
         return { rid: r.rid, category: r.category || T('catSuggested'), reason: reason, s: s };
       });
   }
@@ -1227,12 +1288,20 @@
   }
 
   // ---- event wiring ----
-  var pendingAppear = null;
+  var pendingAppear = null, loadReported = false;
   function onReady(ev, t) {
     if (CFG.enabled === false) return;
     var p = ev && ev.detail;
     if (!p || typeof p !== 'object' || !Array.isArray(p.results) || !p.criteria) return;
     if (t) { activeKind = t.kind; activeView = t.view; }
+    // One heartbeat per page the moment the widget actually has results to
+    // work with: the widget-log sink counts it as a view per widget id, which
+    // is the first usage signal this widget has ever sent.
+    if (!loadReported) { loadReported = true; report('load', 'results-ready', t ? t.kind : 'accommodation'); }
+    // The last results payload, kept on the namespace so a real one can be
+    // copied off a live results page as a test fixture (Phase 0 of the 7 Sep
+    // review). It is the page's own data; nothing leaves the page.
+    try { window.TravelgenixWidgets.travelResultsAiLastPayload = p; } catch (e) {}
     // Appearance timing: show as soon as the results are ready, or hold back for
     // a configured number of seconds. A fresh results event cancels a pending one.
     if (pendingAppear) { clearTimeout(pendingAppear); pendingAppear = null; }
@@ -1391,6 +1460,7 @@
     '.dot.think{animation:tgp 1.4s infinite}' +
     '@keyframes tgp{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--teal) 50%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}' +
     '@media(prefers-reduced-motion:reduce){.dot.think{animation:none}}' +
+    '.fbnote{font-size:.74rem;color:var(--ink-3);padding:0 2px;margin:-3px 0 0}' +
     '.bub{max-width:92%;padding:9px 12px;border-radius:11px;font-size:.86rem;line-height:1.45;border:1px solid var(--bd);background:var(--card)}' +
     '.bub.a{color:var(--ink-2);background:var(--bub-a-bg);border-color:var(--bub-a-bd);align-self:flex-start}' +
     '.bub.u{color:#fff;background:var(--navy);border-color:var(--navy);align-self:flex-end}' +

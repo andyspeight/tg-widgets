@@ -57,12 +57,18 @@ async function run(aiResponder) {
   window.eval(WIDGET);
   window.dispatchEvent(new window.CustomEvent('tg:travel-results-v4:accommodation-results-ready', { detail: SAMPLE }));
   await new Promise((r) => setTimeout(r, 300));
-  return logs;
+  // Since 8 Sep 2026 the widget also sends ONE 'load' heartbeat per page the
+  // moment results arrive (the sink counts it as a view). Only error events
+  // are alerts, so that is what the checks below count.
+  heartbeats = logs.filter((l) => l.event === 'load').length;
+  return logs.filter((l) => l.event === 'error');
 }
+let heartbeats = 0;
 
 // ── A non-2xx endpoint response → exactly one alert, tagged + detailed ────────
 let logs = await run(() => Promise.resolve({ ok: false, status: 502, json: async () => ({ error: 'AI service unavailable' }) }));
 ok(logs.length === 1, `HTTP 502 → exactly one widget-log alert (got ${logs.length})`);
+ok(heartbeats === 1, `one load heartbeat alongside it (got ${heartbeats})`);
 if (logs[0]) {
   ok(logs[0].widget === 'travel-results-ai', 'alert tagged widget:"travel-results-ai"');
   ok(logs[0].event === 'error', 'alert event is "error"');
