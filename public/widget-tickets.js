@@ -941,7 +941,7 @@
 
   function styles(cfg) {
     var kit = kitRoot(cfg, { accent: DEFAULTS.accent, radius: DEFAULTS.radius });
-    return ':host{all:initial;display:block;}'
+    return ':host{all:initial;display:block;width:100%;min-width:0;}:host::before{content:"";display:block;width:280px;max-width:100%;height:0;}'
       + kit.root
       + '.tgtk-head{margin:0 0 16px;}'
       + '.tgtk-h{margin:0;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;}'

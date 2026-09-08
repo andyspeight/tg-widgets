@@ -599,7 +599,7 @@
       : '';
     var radius = clamp(c.radius, 0, 28, DEFAULTS.radius);
     var font = safeFont(c.fontFamily);
-    return ':host{all:initial;display:block;}'
+    return ':host{all:initial;display:block;width:100%;min-width:0;}:host::before{content:"";display:block;width:280px;max-width:100%;height:0;}'
       + '*,*::before,*::after{box-sizing:border-box;}'
       // container-type makes the breakpoint below a @container query rather
       // than @media: the widget sits in whatever column the client gives it.

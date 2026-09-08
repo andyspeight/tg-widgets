@@ -567,7 +567,7 @@
     var stack = (font ? '"' + font + '", ' : '')
       + "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
-    return ':host{all:initial;display:block;}'
+    return ':host{all:initial;display:block;width:100%;min-width:0;}:host::before{content:"";display:block;width:280px;max-width:100%;height:0;}'
       // container-type makes the breakpoint below a @container query rather than
       // @media. A widget sits in whatever column the client gives it, and a
       // viewport query cannot see that the column is 240px wide on a 1500px
