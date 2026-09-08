@@ -36,14 +36,15 @@ console.log('The PDF gives the logo a bigger box, and a size the client chose');
   ok('large', JSON.stringify(boxOf(pdf('large'))) === JSON.stringify({ h: 84, w: 420 }));
   ok('an unknown value falls back to medium', JSON.stringify(boxOf(pdf('huge'))) === JSON.stringify({ h: 60, w: 320 }));
   ok('the logo still renders in the top bar', pdf('medium').includes('class="brand-logo"'));
+  ok('the logo keeps its own shape inside the column flexbox (no stretch)', /\.brand-logo\{[^}]*align-self:flex-start;flex:0 0 auto;object-fit:contain;\}/.test(pdf('medium')));
 }
 
 console.log('\nThe covering email carries the same choice');
 {
   const em = (logoSize) => renderQuoteEmail({ brand: { name: 'Travel Wizards', logoUrl: LOGO, logoSize }, quoteTitle: 'Dubai' }).html;
-  ok('medium by default, 44px tall', /height="44" style="display:block;height:44px;max-width:280px/.test(em(undefined)));
-  ok('small 30px', /height="30" style="display:block;height:30px;max-width:200px/.test(em('small')));
-  ok('large 60px', /height="60" style="display:block;height:60px;max-width:340px/.test(em('large')));
+  ok('medium by default, 44px tall', /height="44" style="display:block;height:auto;max-height:44px;max-width:280px/.test(em(undefined)));
+  ok('small 30px', /height="30" style="display:block;height:auto;max-height:30px;max-width:200px/.test(em('small')));
+  ok('large 60px', /height="60" style="display:block;height:auto;max-height:60px;max-width:340px/.test(em('large')));
 }
 
 console.log('\nThe endpoint forwards it and the editor offers it');

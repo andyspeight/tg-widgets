@@ -1064,7 +1064,12 @@ function renderQuoteHTML(input, opts) {
   }
   .brand-id{display:flex;flex-direction:column;gap:2px;}
   .brand-name{font-size:18px;font-weight:700;color:var(--brand-ink);letter-spacing:-0.01em;}
-  .brand-logo{max-height:${LOGO_SIZES[brand.logoSize].h}px;max-width:${LOGO_SIZES[brand.logoSize].w}px;width:auto;height:auto;display:block;}
+  /* The logo sits in a column flexbox (.brand-id), whose default align-items:stretch
+     widens a flex item to the column. On an <img> that breaks the aspect ratio: Just
+     Sardinia's grape mark came out three times too wide (8 Sep 2026). The old 220x44 box
+     happened to match their padded 500x100 upload, which is why it only showed once the
+     uploader started trimming. align-self keeps the image at its own size. */
+  .brand-logo{max-height:${LOGO_SIZES[brand.logoSize].h}px;max-width:${LOGO_SIZES[brand.logoSize].w}px;width:auto;height:auto;display:block;align-self:flex-start;flex:0 0 auto;object-fit:contain;}
   .brand-tag{font-size:12px;color:var(--brand-muted);}
   .brand-meta{text-align:right;font-size:12px;color:var(--brand-muted);line-height:1.5;}
   .brand-meta strong{color:var(--brand-ink);}
