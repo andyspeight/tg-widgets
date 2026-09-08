@@ -957,7 +957,7 @@ const WIDGETS = [
     id: 'eventmenu',
     name: 'Event Menu',
     airtableType: 'Event Menu',  // matches Airtable WidgetType singleSelect option
-    description: 'A sidebar or drawer menu of every competition, club, venue and artist, linking into your own pages.',
+    description: 'A sidebar or drawer menu of every competition, club, venue and artist, with their events listed beside it, or linking into your own pages.',
     category: 'Events',
     status: 'live',
     icon: {viewBox:'0 0 24 24', paths:'M4 6h16M4 12h16M4 18h16'},
@@ -3271,7 +3271,8 @@ function loadMiniPreview(w) {
     // The card is 200px and centres what it holds, so a menu with eighteen
     // collapsed sports underneath it shows its middle rather than its top.
     // One sport, flat, three rows: about 300px scaled to 165px, which fits.
-    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'none', onlyCategories:['football'], sections:['competitions'], maxPerGroup:3, showSearch:true, radius:10, accent:'#12B886' });
+    // A page address keeps the card to the menu alone; the events panel would not fit a 200px card.
+    new window.TGEventMenuWidget(el, { layout:'sidebar', heading:'Browse events', groupBy:'none', onlyCategories:['football'], sections:['competitions'], maxPerGroup:3, showSearch:true, radius:10, accent:'#12B886', linkPattern:'/tickets/{type}/{slug}' });
   }
 
   if (w.id === 'venueguide' && window.TGVenueGuideWidget) {

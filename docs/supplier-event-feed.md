@@ -336,12 +336,12 @@ shell and a demo on the 250 account.
 | `clubpicker` | Club Picker | "Pick your team." A badge grid of clubs, grounds or artists that opens their fixtures. |
 | `ticketsearch` | Ticket Search | "I know what I want." One box over everything: Wembley returns the ground, the football and the concerts; Arsenal returns home and away. |
 | `ticketmonth` | Ticket Month | "I am free that weekend." A month grid with events on their dates and a day panel underneath. |
-| `eventmenu` | Event Menu | Navigation for a whole ticket section: a sidebar on a desktop, a drawer on a phone. |
+| `eventmenu` | Event Menu | Navigation for a whole ticket section: a sidebar on a desktop, a drawer on a phone. Since 8 Sep 2026 it lists the chosen competition's, club's, venue's or artist's events beside the menu (the Event Tickets cards and Book buttons, verbatim) unless the client gives it their own page address. |
 
-Five of them build Travelify deeplinks, so `api/widget-config.js` injects the
+All of them build Travelify deeplinks, so `api/widget-config.js` injects the
 client's AppID into their saved config server-side (`NEEDS_APP_ID`). Event Menu
-does not: it links into the client's own pages and has no business holding an
-AppID.
+joined that list on 8 Sep 2026, when it gained its own events panel; before
+that it only linked into the client's pages.
 
 ### What the editors share
 
@@ -352,16 +352,35 @@ API declares, control binders, and a modal that remembers `.is-open`. It cut
 each editor from roughly 880 lines to 250. It is not a second shell and
 duplicates nothing `editor-shell.js` already does.
 
-### Event Menu links into the client's site
+### Event Menu: the events panel, or the client's own pages
 
-The menu takes one pattern, `/tickets/{type}/{slug}` by default, with `{type}`,
-`{slug}` and `{name}` as tokens, and marks the row matching the address the
-visitor is on. The pattern is validated before it reaches an href: site
-relative, hash or absolute http(s) only, so a `javascript:` pattern turns the
-row into a plain button rather than a link. Where a client has no pages yet
-every row fires `tg:eventmenu:select` on the container carrying type, key, name
-and href, and `preventDefault()` stops the navigation, so the same menu can
-drive an in-page view.
+Andy, 8 Sep 2026: "at the moment the event menu widget is just a link to other
+pages, which is very time-consuming to set up." So the page address is now
+optional and blank by default. Blank, a chosen competition, club, venue or
+artist lists its upcoming events inside the widget: beside the menu in sidebar
+mode, under the Browse events button in drawer mode (the drawer closes on the
+choice). Before anything is chosen the panel shows what's on across the menu's
+sports (`startWith: 'browse'`), or a prompt (`'none'`). The panel is the Event
+Tickets widget's own card, list, query, departure airport chooser and stay
+calendar, carried VERBATIM as the "events booking kit" block between
+`// >>> events booking kit` and `// <<< events booking kit` in both
+`widget-tickets.js` and `widget-eventmenu.js`; `test/events-kit-drift-smoke.mjs`
+fails the moment the two differ. Edit the block in the Tickets widget, copy it
+to the menu, run the drift test. The panel's settings (`limit`, `daysAhead`,
+`resultsLayout`, `showTime` / `showVenue` / `showCompetition`, `bookLabel`,
+`bookingKinds`, package colours, `currency`, `adults`) use the Tickets keys.
+
+With a page address set (`/tickets/{type}/{slug}` and the like, with `{type}`,
+`{slug}` and `{name}` as tokens) every row links there instead and the row
+matching the visitor's address is marked. The pattern is validated before it
+reaches an href: site relative, hash or absolute http(s) only, so a
+`javascript:` pattern turns the row into a plain button rather than a link.
+Either way every row fires `tg:eventmenu:select` on the container carrying
+type, key, name and href first; `preventDefault()` stops both the navigation
+and the in-widget panel, so a client's own script can take the choice.
+
+The three Event Menu widgets that existed before 8 Sep 2026 all carry the old
+default address explicitly and keep linking to pages until it is cleared.
 
 ### Breakpoints are container queries, not media queries
 

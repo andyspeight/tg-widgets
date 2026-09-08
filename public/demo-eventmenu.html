@@ -49,8 +49,9 @@
   <h1>Event Menu</h1>
   <p class="lede">
     The navigation for a whole ticket section. Categories, competitions, clubs, grounds and artists,
-    as a sidebar on a desktop and a drawer on a phone. It links into the client's own pages, not ours,
-    using one pattern they set once.
+    as a sidebar on a desktop and a drawer on a phone. Choose anything and its events list beside the
+    menu, with Book buttons, so a client needs no other page. A client who has pages of their own gives
+    the menu their address pattern instead.
   </p>
 
   <div class="controls">
@@ -61,6 +62,12 @@
     <button type="button" data-group="category" aria-pressed="true">Sport</button>
     <button type="button" data-group="country">Country</button>
     <button type="button" data-group="none">Flat list</button>
+  </div>
+
+  <div class="controls">
+    <strong>A choice opens</strong>
+    <button type="button" data-goes="panel" aria-pressed="true">Events in the widget</button>
+    <button type="button" data-goes="pages" aria-pressed="false">Your own pages</button>
   </div>
 
   <div class="controls">
@@ -77,7 +84,7 @@
   <div class="page" id="page">
     <div class="cols" id="cols">
       <div data-tg-widget="eventmenu" id="mount"></div>
-      <div class="fake">
+      <div class="fake" id="fake">
         <div class="band"></div>
         <h3>Football tickets</h3>
         <p>
@@ -97,10 +104,10 @@
   </div>
 
   <p class="note">
-    <b>The menu never leaves the client's site.</b> Every row is built from their own link pattern,
-    <code>/tickets/{type}/{slug}</code> by default, and the row for the page you are already on is
-    marked. Where a client has no pages yet, each row fires a
-    <code>tg:eventmenu:select</code> event instead, which is what this demo is listening to.
+    <b>The menu never leaves the client's site.</b> With no page address the events open inside the
+    widget. With one, every row is built from that pattern, <code>/tickets/{type}/{slug}</code> here,
+    and the row for the page you are already on is marked. Either way each row fires a
+    <code>tg:eventmenu:select</code> event first, which is what this demo listens to in pages mode.
   </p>
 
 </div>
@@ -110,7 +117,7 @@
 (function () {
   'use strict';
   var state = {
-    layout: 'sidebar', group: 'category', theme: 'light',
+    layout: 'sidebar', group: 'category', theme: 'light', goes: 'panel',
     sections: { competitions: true, teams: false, venues: false, performers: false },
   };
   var widget = null;
@@ -128,7 +135,9 @@
       layout: state.layout,
       groupBy: state.group,
       sections: sections(),
-      linkPattern: '/tickets/{type}/{slug}',
+      linkPattern: state.goes === 'pages' ? '/tickets/{type}/{slug}' : '',
+      appId: '250',
+      bookingKinds: ['ticket', 'ticket-hotel', 'ticket-flight-hotel'],
       theme: state.theme,
       accent: '#00B4D8',
       maxPerGroup: 8,
@@ -147,7 +156,10 @@
 
   function apply() {
     page.className = 'page' + (state.theme === 'dark' ? ' dark' : '');
-    cols.className = 'cols' + (state.layout === 'drawer' ? ' stack' : '');
+    // In panel mode the widget holds its own results column, so the stand-in page goes.
+    var panel = state.goes !== 'pages';
+    cols.className = 'cols' + ((state.layout === 'drawer' || panel) ? ' stack' : '');
+    document.getElementById('fake').hidden = panel;
     if (widget) widget.update(config());
     snippet();
   }
@@ -185,6 +197,7 @@
   // The demo has no /tickets pages, so it intercepts. A real client would let
   // the link through and this handler would not exist.
   mount.addEventListener('tg:eventmenu:select', function (e) {
+    if (state.goes !== 'pages') return; // the widget's own panel takes it
     e.preventDefault();
     var d = e.detail;
     var box = document.getElementById('picked');
@@ -200,7 +213,7 @@
   function boot() {
     if (!window.TGEventMenuWidget) { setTimeout(boot, 40); return; }
     widget = new window.TGEventMenuWidget(mount, config());
-    group('layout', 'layout'); group('group', 'group'); group('theme', 'theme');
+    group('layout', 'layout'); group('group', 'group'); group('theme', 'theme'); group('goes', 'goes');
     toggles();
     apply();
   }
