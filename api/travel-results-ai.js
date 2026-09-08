@@ -10,7 +10,15 @@
  *
  * Env: ANTHROPIC_API_KEY (required, already set in tg-widgets).
  *      UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN (optional, rate limiting).
- *      TRAI_ALLOWED_ORIGINS (optional, comma-separated extra origins).
+ *      TRAI_ALLOWED_ORIGINS (optional, comma-separated extra demo origins).
+ *      TRAI_MODEL / TRAI_TEMPERATURE (optional overrides; defaults below).
+ *      AIRTABLE_PAT (the widget gate reads the Widgets + Clients tables).
+ *
+ * Origin policy (8 Sep 2026): demo origins (travelify.io, traveldemo.site,
+ * vercel.app, TRAI_ALLOWED_ORIGINS) pass as before. Any other origin must send
+ * a valid Travel Results AI widget id whose client's plan includes the widget
+ * (gateWidget). Refusals are answered 403 WITH the CORS header so the widget
+ * can read them, alert, and show its fallback honestly.
  *
  * Security: see travelgenix-security skill. All payload + message text is
  * treated as untrusted and only ever placed in the user role, never the system
@@ -18,8 +26,25 @@
  */
 'use strict';
 
-const MODEL = 'claude-sonnet-4-6';
+import { findOneByField } from './_lib/auth/airtable.js';
+import { resolveClientPlan } from './_lib/auth/plan.js';
+import { PLAN_WIDGET_LIMITS, canonicalisePlan } from './widget-config.js';
+
+// Model and temperature can change without a deploy. Temperature is LOW on
+// purpose (stability pass, 8 Sep 2026): at the default of 1.0 the same
+// shortlist gave different picks on two runs, which read as "hit and miss".
+const MODEL = process.env.TRAI_MODEL || 'claude-sonnet-4-6';
+const TEMPERATURE = (() => {
+  const t = parseFloat(process.env.TRAI_TEMPERATURE);
+  return Number.isFinite(t) && t >= 0 && t <= 1 ? t : 0.2;
+})();
 const MAX_TOKENS = 700;
+// The widget gives up at 18s. One attempt may take 12s; a second is tried only
+// when the first failed fast (busy model, 5xx, network) and enough budget
+// remains, so the server never keeps working on a call nobody is waiting for.
+const ATTEMPT_TIMEOUT_MS = 12000;
+const TOTAL_BUDGET_MS = 17000;
+const RETRY_MIN_REMAINING_MS = 5000;
 const MAX_SHORTLIST = 40;
 const MAX_MESSAGE = 500;
 const MAX_HISTORY = 8;
@@ -37,6 +62,50 @@ function resolveOrigin(origin) {
     host === 'traveldemo.site' || host.endsWith('.traveldemo.site') ||
     host.endsWith('.vercel.app');            // staging / demos
   return ok ? origin : null;
+}
+
+// ---- Widget gate ------------------------------------------------------------
+// A call from anywhere other than the static demo origins must carry a valid
+// Travel Results AI widget id whose owning client's plan includes the widget,
+// judged by the SAME table the save-time gate uses. Lookup failures and
+// legacy widgets with no owning client FAIL OPEN (mirrors widget-config);
+// an unknown id, the wrong widget type or a plan that excludes the widget
+// FAIL CLOSED. Verdicts are cached for ten minutes per instance.
+const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
+const WF = { widgetId: 'fldxRWtizMv3Y57Ep', type: 'fldTmwmW7ZNOfxMsS', clientRecordId: 'fldXaQVeJuIJ51KY4' };
+const WIDGET_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+const GATE_TTL_MS = 10 * 60 * 1000;
+const gateCache = new Map();
+
+function selectName(v) { return (v && typeof v === 'object') ? String(v.name || '') : String(v || ''); }
+
+export async function gateWidget(widgetId) {
+  if (!widgetId) return { ok: false, reason: 'no_id' };
+  if (!WIDGET_ID_RE.test(widgetId)) return { ok: false, reason: 'bad_id' };
+  const hit = gateCache.get(widgetId);
+  if (hit && Date.now() - hit.at < GATE_TTL_MS) return hit.verdict;
+  let verdict;
+  try {
+    const rec = await findOneByField(WIDGETS_TABLE, WF.widgetId, widgetId);
+    if (!rec) verdict = { ok: false, reason: 'not_found' };
+    else if (selectName(rec.fields[WF.type]) !== 'Travel Results AI') verdict = { ok: false, reason: 'wrong_type' };
+    else {
+      const clientId = String(rec.fields[WF.clientRecordId] || '').trim();
+      if (!clientId) verdict = { ok: true, reason: 'ok_unverified', note: 'no owning client on record' };
+      else {
+        const plan = canonicalisePlan(await resolveClientPlan(clientId));
+        if (!plan) verdict = { ok: true, reason: 'ok_unverified', note: 'no plan resolved', clientId };
+        else {
+          const limit = (PLAN_WIDGET_LIMITS['Travel Results AI'] || {})[plan];
+          verdict = limit === 0 ? { ok: false, reason: 'not_on_plan', plan, clientId } : { ok: true, reason: 'ok', plan, clientId };
+        }
+      }
+    }
+  } catch (e) {
+    verdict = { ok: true, reason: 'ok_unverified', note: 'lookup failed: ' + String((e && e.message) || e).slice(0, 120) };
+  }
+  gateCache.set(widgetId, { at: Date.now(), verdict });
+  return verdict;
 }
 
 function setCors(res, origin) {
@@ -115,18 +184,75 @@ function safeJson(text) {
 }
 
 // ---- Handler ----------------------------------------------------------------
+// One attempt, one retry, inside the budget. Returns { res, attempts, last }.
+async function callModel(apiKey, payload) {
+  const started = Date.now();
+  let attempts = 0, last = null;
+  while (attempts < 2) {
+    attempts++;
+    const remaining = TOTAL_BUDGET_MS - (Date.now() - started);
+    if (remaining <= 0) break;
+    try {
+      const ar = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(Math.min(ATTEMPT_TIMEOUT_MS, remaining))
+      });
+      if (ar.ok) return { res: ar, attempts, last };
+      const t = await ar.text().catch(() => '');
+      last = { status: ar.status, text: t.slice(0, 300) };
+      const retryable = ar.status === 429 || ar.status === 529 || ar.status >= 500;
+      if (!retryable) break;
+    } catch (e) {
+      last = { status: 0, text: String((e && e.name) || e).slice(0, 120) };
+    }
+    const left = TOTAL_BUDGET_MS - (Date.now() - started);
+    if (attempts >= 2 || left < RETRY_MIN_REMAINING_MS) break;
+    await new Promise(r => setTimeout(r, Math.min(800, left / 4)));
+  }
+  return { res: null, attempts, last };
+}
+
+// One structured line per call, so usage and quality can be read from the
+// logs: how many were sent, how many came back, how many survived the rid
+// check, how long it took, and where the fallback would have kicked in.
+function logCall(fields) {
+  try { console.log('[trai] ' + JSON.stringify(fields)); } catch (e) { /* never throw */ }
+}
+
 export default async function handler(req, res) {
-  const origin = resolveOrigin(req.headers.origin);
+  const rawOrigin = String(req.headers.origin || '');
+  const staticOrigin = resolveOrigin(rawOrigin);
 
-  if (req.method === 'OPTIONS') { setCors(res, origin); return res.status(204).end(); }
-  setCors(res, origin);
-
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (req.headers.origin && !origin) return res.status(403).json({ error: 'Origin not allowed' });
+  // The preflight only asks whether the POST may be sent; the POST decides.
+  // Echoing the origin here is what lets a client's own domain reach the
+  // widget check below instead of being refused invisibly by the browser.
+  if (req.method === 'OPTIONS') { setCors(res, rawOrigin || null); return res.status(204).end(); }
+  if (req.method !== 'POST') { setCors(res, staticOrigin); return res.status(405).json({ error: 'Method not allowed' }); }
 
   let body = req.body;
-  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ error: 'Invalid JSON' }); } }
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { setCors(res, staticOrigin); return res.status(400).json({ error: 'Invalid JSON' }); } }
   body = body || {};
+
+  const widgetId = (typeof body.widgetId === 'string' && WIDGET_ID_RE.test(body.widgetId)) ? body.widgetId : '';
+  const lang = typeof body.lang === 'string' ? body.lang.slice(0, 8) : '';
+  const t0 = Date.now();
+
+  // Origin policy: a demo origin passes as before; anything else (a client's
+  // own domain, or no Origin at all) needs a widget id that passes the gate.
+  // A refusal still carries the CORS header so the widget can READ the 403,
+  // alert on it, and show its fallback honestly, instead of a silent block.
+  let gate = null;
+  if (!staticOrigin) {
+    gate = await gateWidget(widgetId);
+    if (!gate.ok) {
+      setCors(res, rawOrigin || null);
+      logCall({ ok: false, reason: 'refused', code: gate.reason, origin: rawOrigin || '(none)', widgetId: widgetId || '(none)', plan: gate.plan || '' });
+      return res.status(403).json({ error: 'Origin not allowed for this widget', code: gate.reason });
+    }
+  }
+  setCors(res, rawOrigin || null);
 
   const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
   const session = typeof body.searchSession === 'string' ? body.searchSession.slice(0, 120) : '';
@@ -157,34 +283,34 @@ export default async function handler(req, res) {
     + 'Search data (JSON):\n' + dataBlock;
   const messages = history.concat([{ role: 'user', content: userContent }]);
 
+  const base = { widgetId: widgetId || '(none)', origin: rawOrigin || '(none)', gate: gate ? gate.reason : 'static', kind: criteria.searchType || 'accommodation', refine: !!message, shortlist: shortlist.length, lang, model: MODEL, temperature: TEMPERATURE };
+
   try {
-    const ar = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: [{ type: 'text', text: buildSystem(), cache_control: { type: 'ephemeral' } }],
-        messages: messages
-      })
+    const { res: ar, attempts, last } = await callModel(apiKey, {
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      temperature: TEMPERATURE,
+      system: [{ type: 'text', text: buildSystem(), cache_control: { type: 'ephemeral' } }],
+      messages: messages
     });
 
-    if (!ar.ok) {
-      const t = await ar.text().catch(() => '');
-      console.error('[trai] anthropic error', ar.status, t.slice(0, 300));
+    if (!ar) {
+      console.error('[trai] anthropic error', last && last.status, last && last.text);
+      logCall(Object.assign(base, { ok: false, reason: 'model', status: last && last.status, attempts, ms: Date.now() - t0 }));
       return res.status(502).json({ error: 'AI service unavailable' });
     }
 
     const data = await ar.json();
     const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
     const parsed = safeJson(text);
-    if (!parsed) { console.error('[trai] could not parse model output'); return res.status(502).json({ error: 'AI response error' }); }
+    if (!parsed) {
+      console.error('[trai] could not parse model output');
+      logCall(Object.assign(base, { ok: false, reason: 'parse', attempts, ms: Date.now() - t0, stop: data.stop_reason }));
+      return res.status(502).json({ error: 'AI response error' });
+    }
 
-    const recommendations = (Array.isArray(parsed.recommendations) ? parsed.recommendations : [])
+    const returned = Array.isArray(parsed.recommendations) ? parsed.recommendations : [];
+    const recommendations = returned
       .filter(r => r && validRids.has(String(r.rid)))
       .slice(0, 6)
       .map(r => ({
@@ -194,10 +320,13 @@ export default async function handler(req, res) {
       }));
 
     const reply = typeof parsed.reply === 'string' ? parsed.reply.slice(0, 600) : '';
+    const usage = data.usage || {};
+    logCall(Object.assign(base, { ok: true, returned: returned.length, valid: recommendations.length, attempts, ms: Date.now() - t0, stop: data.stop_reason, inTok: usage.input_tokens, outTok: usage.output_tokens }));
 
     return res.status(200).json({ version: 1, searchSession: session, reply, recommendations });
   } catch (e) {
     console.error('[trai] handler error', e);
+    logCall(Object.assign(base, { ok: false, reason: 'error', ms: Date.now() - t0, detail: String((e && e.message) || e).slice(0, 120) }));
     return res.status(500).json({ error: 'Internal error' });
   }
 };

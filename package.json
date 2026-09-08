@@ -59,6 +59,8 @@
     "test:enquirypro-focus": "node test/enquirypro-focus-smoke.mjs",
     "test:offers-proxy-timeout": "node test/offers-proxy-timeout-smoke.mjs",
     "test:trai-alert": "node test/trai-endpoint-alert-smoke.mjs",
+    "test:trai-stability": "node test/trai-stability-smoke.mjs",
+    "test:trai-endpoint": "node test/trai-endpoint-smoke.mjs",
     "test:rss-cors": "node test/rss-feed-cors-smoke.mjs",
     "test:reviews-google": "node test/reviews-google-smoke.mjs",
     "test:reviews-widget-live": "node test/reviews-widget-live-smoke.mjs",

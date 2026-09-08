@@ -1343,3 +1343,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Service temporarily unavailable' });
   }
 }
+
+// Exported for api/travel-results-ai.js, which gates its runtime calls on the
+// same table the save-time gate uses (8 Sep 2026). Additive; nothing else here
+// changes.
+export { PLAN_WIDGET_LIMITS, canonicalisePlan };
