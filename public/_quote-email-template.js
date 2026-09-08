@@ -38,6 +38,10 @@ export function escapeHtml(v) {
 const hex = (v, fallback) => (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(String(v || '').trim()) ? String(v).trim() : fallback);
 const httpsOnly = (v) => (/^https:\/\/[^\s]+$/i.test(String(v || '').trim()) ? String(v).trim() : '');
 
+// Logo heights for the email, by the editor's Logo size choice. Email clients
+// dislike tall headers, so these sit below the PDF's boxes but keep the ratio.
+const LOGO_EMAIL = { small: { h: 30, w: 200 }, medium: { h: 44, w: 280 }, large: { h: 60, w: 340 } };
+
 /** The same brand shape the PDF renderer consumes, defaulted the same way. */
 function resolveBrand(brand) {
   const b = (brand && typeof brand === 'object') ? brand : {};
@@ -50,6 +54,7 @@ function resolveBrand(brand) {
     name: String(b.name || '').trim() || 'Your travel team',
     tagline: String(b.tagline || '').trim(),
     logoUrl: httpsOnly(b.logoUrl),
+    logoSize: LOGO_EMAIL[b.logoSize] ? b.logoSize : 'medium',
     supportEmail: showContact ? String(b.supportEmail || '').trim() : '',
     supportPhone: showContact ? String(b.supportPhone || '').trim() : '',
     topBar: hex(c.topBar, DEFAULTS.topBar),
@@ -151,7 +156,7 @@ export function renderQuoteEmail(p) {
     : defaultBody.map(l => `<p style="margin:0 0 16px;font-family:${FONT};font-size:15px;line-height:1.65;color:${brand.text}">${escapeHtml(l)}</p>`).join('');
 
   const header = brand.logoUrl
-    ? `<img src="${escapeHtml(brand.logoUrl)}" alt="${escapeHtml(brand.name)}" height="34" style="display:block;height:34px;max-width:220px;border:0">`
+    ? `<img src="${escapeHtml(brand.logoUrl)}" alt="${escapeHtml(brand.name)}" height="${LOGO_EMAIL[brand.logoSize].h}" style="display:block;height:${LOGO_EMAIL[brand.logoSize].h}px;max-width:${LOGO_EMAIL[brand.logoSize].w}px;border:0">`
     : `<span style="font-family:${FONT};font-size:17px;font-weight:700;letter-spacing:-0.01em;color:#FFFFFF">${escapeHtml(brand.name)}</span>`;
   const taglineHtml = brand.tagline
     ? `<div style="font-family:${FONT};font-size:12px;color:rgba(255,255,255,0.72);padding-top:5px">${escapeHtml(brand.tagline)}</div>`

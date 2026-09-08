@@ -38,7 +38,7 @@
   .qp-logo-drop .qp-drop-sub { font-size:11px; color:var(--tgse-ink-3); margin-top:2px; }
   .qp-logo-preview { display:none; align-items:center; gap:12px; padding:12px; border:1px solid var(--tgse-border); border-radius:10px; background:var(--tgse-panel); }
   .qp-logo-preview.show { display:flex; }
-  .qp-logo-preview img { max-height:44px; max-width:120px; border-radius:4px; flex-shrink:0; }
+  .qp-logo-preview img { max-height:44px; max-width:140px; border-radius:6px; flex-shrink:0; padding:6px; background:#111D3E; }
   .qp-logo-preview .qp-logo-meta { flex:1; min-width:0; font-size:11px; color:var(--tgse-ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .qp-logo-preview .qp-logo-remove { font-size:12px; color:#EF4444; background:none; border:1px solid var(--tgse-border); border-radius:6px; padding:5px 10px; cursor:pointer; flex-shrink:0; }
   .qp-logo-preview .qp-logo-remove:hover { border-color:#EF4444; background:rgba(239,68,68,.05); }
@@ -159,7 +159,16 @@
                 <div class="qp-logo-meta" id="logo-meta"></div>
                 <button type="button" class="qp-logo-remove" id="logo-remove">Remove</button>
               </div>
-              <div class="qp-help">Shown at the top of every quote. Replaces the company name when set.</div>
+              <div class="qp-help">Shown at the top of every quote. Replaces the company name when set. The thumbnail shows it on your top bar colour, so a logo that vanishes there will vanish on the quote too.</div>
+            </div>
+            <div class="tgse-field qp-field">
+              <label class="tgse-field-label">Logo size</label>
+              <div class="qp-seg" id="logosize-seg">
+                <button type="button" data-size="small">Small</button>
+                <button type="button" data-size="medium" class="is-on">Medium</button>
+                <button type="button" data-size="large">Large</button>
+              </div>
+              <div class="qp-help">How big the logo sits in the top bar of the quote and in the covering email.</div>
             </div>
             <div class="tgse-field qp-field">
               <label class="tgse-field-label">Company name</label>
@@ -349,7 +358,7 @@
 </script>
 <script>
   const DEFAULTS = {
-    brandName:'', tagline:'', logoUrl:'', supportEmail:'', supportPhone:'',
+    brandName:'', tagline:'', logoUrl:'', logoSize:'medium', supportEmail:'', supportPhone:'',
     showContact:true,
     attachments:[],
     // The client's own covering-email wording. Blank means our standard copy.
@@ -363,6 +372,42 @@
   let C = JSON.parse(JSON.stringify(DEFAULTS));
 
   const $ = (id) => document.getElementById(id);
+  // Logo box in the mock preview, per size; the PDF and the email carry their
+  // own maps with the same three names (LOGO_SIZES in render-quote.js,
+  // LOGO_EMAIL in _quote-email-template.js).
+  const LOGO_MOCK = { small: { h: 34, w: 170 }, medium: { h: 52, w: 260 }, large: { h: 72, w: 340 } };
+
+  // The tight box around a logo's visible mark. Logos arrive with a lot of
+  // empty canvas around them (a square file with a wide wordmark in the
+  // middle), and a fixed-height box then shows a sliver of mark: the Travel
+  // Wizards report of 8 Sep 2026. Background is judged from the four corners:
+  // all transparent, or all near-white on an opaque image. Anything else (a
+  // photo, a coloured tile) is left alone. Pure, so it can be tested without
+  // a canvas. Returns null when there is nothing to trim to.
+  function logoTrimBox(data, w, h) {
+    if (!data || !w || !h) return null;
+    const at = (x, y) => (y * w + x) * 4;
+    const corners = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+    const transparent = corners.every((i) => data[i + 3] < 16);
+    const white = !transparent && corners.every((i) => data[i + 3] > 240 && data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240);
+    if (!transparent && !white) return null;
+    const isBg = transparent
+      ? (i) => data[i + 3] < 16
+      : (i) => data[i] > 240 && data[i + 1] > 240 && data[i + 2] > 240;
+    let top = h, left = w, right = -1, bottom = -1;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (isBg(at(x, y))) continue;
+        if (y < top) top = y; if (y > bottom) bottom = y;
+        if (x < left) left = x; if (x > right) right = x;
+      }
+    }
+    if (right < 0) return null;
+    const pad = Math.round(Math.max(w, h) * 0.02);
+    const x0 = Math.max(0, left - pad), y0 = Math.max(0, top - pad);
+    const x1 = Math.min(w, right + pad + 1), y1 = Math.min(h, bottom + pad + 1);
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
   const isHex = (v) => typeof v==='string' && /^#[0-9a-fA-F]{6}$/.test(v.trim());
   const isUsableLogo = (v) => typeof v==='string' && (/^https:\/\//.test(v) || (/^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/i.test(v) && v.length<=700000));
   const escAttr = (s) => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
@@ -396,7 +441,8 @@
     const email = showC ? (C.supportEmail || '').trim() : '';
     const tagHtml = tag ? '<div class="m-tag">'+escAttr(tag)+'</div>' : '';
     const left = $('m-left');
-    if (isUsableLogo(C.logoUrl)) left.innerHTML = '<img class="m-logo" src="'+escAttr(C.logoUrl)+'" alt="'+escAttr(name)+'">'+tagHtml;
+    const lsz = LOGO_MOCK[C.logoSize] ? C.logoSize : 'medium';
+    if (isUsableLogo(C.logoUrl)) left.innerHTML = '<img class="m-logo" style="max-height:'+LOGO_MOCK[lsz].h+'px;max-width:'+LOGO_MOCK[lsz].w+'px" src="'+escAttr(C.logoUrl)+'" alt="'+escAttr(name)+'">'+tagHtml;
     else left.innerHTML = '<div class="m-name">'+escAttr(name)+'</div>'+tagHtml;
     // Contact block — only when shown and something is entered
     $('m-right').innerHTML = (phone || email)
@@ -428,6 +474,7 @@
       name: C.brandName || '',
       tagline: C.tagline || '',
       logoUrl: C.logoUrl || '',
+      logoSize: C.logoSize || 'medium',
       supportEmail: C.supportEmail || '',
       supportPhone: C.supportPhone || '',
       showContact: C.showContact !== false,
@@ -569,6 +616,12 @@
     const has = isUsableLogo(C.logoUrl);
     $('logo-drop').style.display = has ? 'none' : 'block';
     $('logo-preview').classList.toggle('show', has);
+    // The thumbnail sits on the real top-bar colour: a navy logo on a navy bar
+    // disappears here first, not on a client's quote.
+    const bar = C.colors && typeof C.colors.topBar === 'string' && /^#[0-9a-f]{6}$/i.test(C.colors.topBar) ? C.colors.topBar : DEFAULTS.colors.topBar;
+    $('logo-thumb').style.background = bar;
+    const lsz = LOGO_MOCK[C.logoSize] ? C.logoSize : 'medium';
+    document.querySelectorAll('#logosize-seg button').forEach(x => x.classList.toggle('is-on', x.dataset.size === lsz));
     if (has) {
       $('logo-thumb').src = C.logoUrl;
       if (!$('logo-meta').textContent) $('logo-meta').textContent = 'Logo uploaded';
@@ -589,12 +642,19 @@
         $('hex-' + (el.dataset.bkey === 'bg' ? 'btnBg' : 'btnText')).textContent = val.toUpperCase();
       } else {
         C.colors[el.dataset.key] = val;
+        if (el.dataset.key === 'topBar') renderLogoState();
         $('hex-' + el.dataset.key).textContent = val.toUpperCase();
       }
       render(); shell.markDirty();
     }));
 
   // --- button alignment segmented control ---
+  document.querySelectorAll('#logosize-seg button').forEach(b =>
+    b.addEventListener('click', () => {
+      C.logoSize = LOGO_MOCK[b.dataset.size] ? b.dataset.size : 'medium';
+      document.querySelectorAll('#logosize-seg button').forEach(x => x.classList.toggle('is-on', x === b));
+      render(); shell.markDirty();
+    }));
   document.querySelectorAll('#align-seg button').forEach(b =>
     b.addEventListener('click', () => {
       C.align = b.dataset.align;
@@ -628,21 +688,33 @@
         // caller's error toast fires instead of hanging silently.
         try {
           const MAX = 480;
+          const WORK = 1600;
           // SVGs often report no intrinsic size — fall back to a sensible box.
           let w = img.naturalWidth || img.width || 0;
           let h = img.naturalHeight || img.height || 0;
           if (!w && !h) { w = 400; h = 400; }
           else if (!w) { w = h; }
           else if (!h) { h = w; }
-          if (w > MAX || h > MAX) {
-            const s = Math.min(MAX / w, MAX / h);
-            w = Math.round(w * s); h = Math.round(h * s);
-          }
+          // Pass 1: draw at (capped) natural size and trim the empty canvas
+          // around the mark, so the logo fills the box it is given later.
+          let ww = w, wh = h;
+          if (ww > WORK || wh > WORK) { const s0 = Math.min(WORK / ww, WORK / wh); ww = Math.round(ww * s0); wh = Math.round(wh * s0); }
+          const work = document.createElement('canvas');
+          work.width = ww; work.height = wh;
+          const wctx = work.getContext('2d');
+          wctx.clearRect(0, 0, ww, wh);
+          wctx.drawImage(img, 0, 0, ww, wh);
+          let box = null;
+          try { box = logoTrimBox(wctx.getImageData(0, 0, ww, wh).data, ww, wh); } catch { box = null; }
+          if (!box || box.w < 4 || box.h < 4) box = { x: 0, y: 0, w: ww, h: wh };
+          // Pass 2: scale the trimmed region to the upload size.
+          let ow = box.w, oh = box.h;
+          if (ow > MAX || oh > MAX) { const s1 = Math.min(MAX / ow, MAX / oh); ow = Math.round(ow * s1); oh = Math.round(oh * s1); }
           const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
+          canvas.width = ow; canvas.height = oh;
           const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, w, h);
-          ctx.drawImage(img, 0, 0, w, h);
+          ctx.clearRect(0, 0, ow, oh);
+          ctx.drawImage(work, box.x, box.y, box.w, box.h, 0, 0, ow, oh);
           resolve(canvas.toDataURL('image/png'));
         } catch {
           reject(new Error('Could not process that image'));

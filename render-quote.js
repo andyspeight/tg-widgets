@@ -905,6 +905,12 @@ function isUsableLogo(v) {
   return false;
 }
 
+// Logo box sizes, chosen in the editor (Logo & identity > Logo size). The old
+// fixed 44px box made a wide wordmark unreadable on an A4 top bar (Travel
+// Wizards, 8 Sep 2026); medium is now the default and the client can go
+// larger. The covering email and the editor preview carry the same choice.
+const LOGO_SIZES = { small: { h: 40, w: 220 }, medium: { h: 60, w: 320 }, large: { h: 84, w: 420 } };
+
 function resolveBrand(opts) {
   const b = (opts && opts.brand) || {};
   const c = b.colors || {};
@@ -945,6 +951,7 @@ function resolveBrand(opts) {
     tagline: (b.tagline && String(b.tagline).trim()) || '',
     logoUrl: (typeof b.logoUrl === 'string' && isUsableLogo(b.logoUrl.trim()))
       ? b.logoUrl.trim() : '',
+    logoSize: LOGO_SIZES[b.logoSize] ? b.logoSize : 'medium',
     supportEmail: (b.supportEmail && String(b.supportEmail).trim()) || '',
     supportPhone: (b.supportPhone && String(b.supportPhone).trim()) || '',
     // Contact visibility (Aug 2026): a client can hide phone + email everywhere on
@@ -1057,7 +1064,7 @@ function renderQuoteHTML(input, opts) {
   }
   .brand-id{display:flex;flex-direction:column;gap:2px;}
   .brand-name{font-size:18px;font-weight:700;color:var(--brand-ink);letter-spacing:-0.01em;}
-  .brand-logo{max-height:44px;max-width:220px;width:auto;height:auto;display:block;}
+  .brand-logo{max-height:${LOGO_SIZES[brand.logoSize].h}px;max-width:${LOGO_SIZES[brand.logoSize].w}px;width:auto;height:auto;display:block;}
   .brand-tag{font-size:12px;color:var(--brand-muted);}
   .brand-meta{text-align:right;font-size:12px;color:var(--brand-muted);line-height:1.5;}
   .brand-meta strong{color:var(--brand-ink);}
