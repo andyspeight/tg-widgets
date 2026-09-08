@@ -566,4 +566,6 @@ export default async function handler(req, res) {
 }
 
 // Exposed for tests.
-export { validate, fetchQuoteDocument, quoteFromName, emailAllowed };
+// resolveContext + scrubCosts are exported for api/admin/quote-shape.js, the
+// staff-only inspector that shows what a Travelify quote actually carries.
+export { validate, fetchQuoteDocument, quoteFromName, emailAllowed, resolveContext, scrubCosts };
