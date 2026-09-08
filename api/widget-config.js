@@ -481,7 +481,8 @@ const PLAN_WIDGET_LIMITS = {
   // by default on Spark, Boost, Ignite and Bespoke (Spark row added 3 Jul 2026).
   // This row still said Spark: 0 and refused the save with "not included in
   // your plan" while the dashboard showed it as included (Andy, 8 Sep 2026).
-  'Loader':                { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
+  // Andy's rule, same day: a widget available on a plan is unlimited there.
+  'Loader':                { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Maps':                  { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'YouTube':               { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
   'RSS Feed':              { Spark: 1, Boost: 3, Ignite: -1, Bespoke: -1 },
