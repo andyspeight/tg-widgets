@@ -44,6 +44,8 @@
 // One font stack used everywhere. -apple-system maps to SF Pro on macOS/iOS,
 // BlinkMacSystemFont keeps Chrome on Mac happy, Segoe UI is Windows, Roboto
 // is Android. Each is a clean professional UI font on its native platform.
+import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
+
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
 function escapeHtml(str) {
@@ -193,79 +195,25 @@ function buildFlightLine(route) {
 }
 
 function buildPaymentInfo(order) {
-  const accItem = order.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
-  const summary = order.summary || {};
-  const pricing = accItem?.accommodation?.pricing;
-  const currency = pricing?.currency || order.currency || 'GBP';
-
-  const total = (typeof summary.totalPrice === 'number' && summary.totalPrice > 0)
-    ? summary.totalPrice
-    : (pricing?.memberPrice ?? pricing?.price ?? accItem?.price ?? 0);
-
-  if (!total) return null;
-
-  // Order-level voucher/promo discount (signed, negative; not in item prices).
-  // Net it off so the balance matches Travelify's own schedule.
-  const voucherVal = (order.voucher && typeof order.voucher.value === 'number') ? order.voucher.value : 0;
-  const netTotal = Math.round((total + voucherVal) * 100) / 100;
-
-  const result = {
-    total,
-    voucher: order.voucher || null,
-    currency,
-    depositPaid: null,   // rendered as "Paid so far"
-    balanceDue: null,    // rendered as "Balance remaining"
-    balanceDueDate: null,
+  // From the ONE shared calculation (public/_order-money.js). The order
+  // reaches this renderer from /api/retrieve-order with `money` attached,
+  // computed from the raw Travelify order, so the email shows the same
+  // figures as the page and the PDF. Vouchers arrive already masked.
+  const money = moneyOf(order);
+  if (money.status === 'none' && !(money.total > 0)) return null;
+  const firstDated = money.schedule.find((e) => e.dueDate) || null;
+  return {
+    money,
+    total: money.total,
+    vouchers: money.vouchers,
+    currency: money.currency,
+    depositPaid: money.paid > 0 ? money.paid : null,   // rendered as "Paid so far"
+    balanceDue: money.balance,                          // rendered as "Balance remaining"
+    balanceDueDate: money.balance > 0 && firstDated ? firstDated.dueDate : null,
+    payable: money.payable,
+    paidInFull: money.settled && money.applied,
+    statusLine: paymentStatusMessage(money, formatMoney),
   };
-
-  // Order-level truth: "Paid so far" = payments taken; "Balance remaining" =
-  // total − paid. The depositOption.breakdown is only a schedule (Travelify
-  // leaves it after a payment), so we use it ONLY for the next due date.
-  const dep = order.depositOption;
-  const paid = typeof order.paidToDate === 'number' ? order.paidToDate : null;
-  if (paid != null) {
-    if (paid > 0) result.depositPaid = Math.round(paid * 100) / 100;
-    const outstanding = Math.max(0, Math.round((netTotal - paid) * 100) / 100);
-    if (outstanding > 0) {
-      result.balanceDue = outstanding;
-      if (dep && Array.isArray(dep.breakdown) && dep.breakdown.length) {
-        // The breakdown is the original PLAN (Travelify leaves it unchanged
-        // after payments are taken), so the next due date comes from the
-        // RECONCILED remaining schedule: payments settle the earliest entries
-        // first, so the remaining entries are the tail of the plan summing to
-        // the outstanding. Walk from the latest entry backwards until the
-        // outstanding is covered; the first kept entry is the next one due.
-        const sorted = dep.breakdown.slice().sort((a, b) => (Date.parse(a.dueDate) || Infinity) - (Date.parse(b.dueDate) || Infinity));
-        let need = outstanding, nextDue = null;
-        for (let i = sorted.length - 1; i >= 0 && need > 0.004; i--) {
-          const amt = Number(sorted[i].amount) || 0;
-          if (amt > 0) { nextDue = sorted[i].dueDate || nextDue; need = Math.round((need - Math.min(amt, need)) * 100) / 100; }
-        }
-        result.balanceDueDate = nextDue || sorted[0]?.dueDate || null;
-      }
-    }
-  } else {
-    // Legacy fallback: no order-level payment data — use the hotel deposit.
-    const depositOpts = pricing?.depositOptions || [];
-    const standardDep = depositOpts.find(d => !d.installments) || depositOpts[0] || null;
-    if (standardDep) {
-      result.depositPaid = standardDep.amount;
-      const balanceLine = standardDep.breakdown?.[0];
-      if (balanceLine) {
-        result.balanceDue = balanceLine.amount;
-        result.balanceDueDate = balanceLine.dueDate;
-      }
-    }
-  }
-
-  // Clear "settled" signal for the cost summary when nothing is outstanding.
-  result.paidInFull = result.depositPaid != null
-    && result.depositPaid > 0
-    && (result.balanceDue == null || result.balanceDue <= 0)
-    && typeof netTotal === 'number' && netTotal > 0
-    && Math.round((netTotal - result.depositPaid) * 100) / 100 <= 0;
-
-  return result;
 }
 
 /**
@@ -542,59 +490,70 @@ export function renderBookingEmail(opts) {
       </tr>
     `);
 
-    if (payment.voucher && typeof payment.voucher.value === 'number' && payment.voucher.value < 0) {
-      const vLabel = payment.voucher.name || payment.voucher.code || 'Voucher';
+    // Rows in the order the shared calculation defines: payments received,
+    // each voucher as a credit, the balance, then what is payable now.
+    if (payment.depositPaid != null) {
       rows.push(`
         <tr>
           <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;font:400 15px/1.6 ${FONT};color:#64748b;">
-            ${escapeHtml(vLabel)}
-          </td>
-          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;font:600 15px/1.6 ${FONT};color:#10b981;">
-            – ${escapeHtml(formatMoney(Math.abs(payment.voucher.value), payment.currency))}
-          </td>
-        </tr>
-      `);
-    }
-
-    if (payment.depositPaid != null) {
-      const isLast = (payment.balanceDue == null || payment.balanceDue <= 0) && !payment.paidInFull;
-      const borderStyle = isLast ? '' : 'border-bottom:1px solid #e2e8f0;';
-      const amtColor = payment.paidInFull ? '#10b981' : '#0f172a';
-      rows.push(`
-        <tr>
-          <td style="padding:12px 0;${borderStyle}font:400 15px/1.6 ${FONT};color:#64748b;">
             Paid so far
           </td>
-          <td style="padding:12px 0;${borderStyle}text-align:right;font:600 15px/1.6 ${FONT};color:${amtColor};">
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;font:600 15px/1.6 ${FONT};color:#0f172a;">
             ${escapeHtml(formatMoney(payment.depositPaid, payment.currency))}
           </td>
         </tr>
       `);
     }
 
-    if (payment.paidInFull) {
-      // Settled status — green is permitted for status indicators. Green
-      // Unicode bullet (not a CSS span) for Outlook reliability.
+    for (const v of payment.vouchers) {
       rows.push(`
         <tr>
-          <td colspan="2" style="padding:14px 0 2px;text-align:center;font:700 14px/1.5 ${FONT};color:#10b981;">
-            <span style="color:#10b981;font-size:16px;">&#9679;</span>&nbsp; Paid in full — thank you
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;font:400 15px/1.6 ${FONT};color:#64748b;">
+            ${escapeHtml(voucherLabel(v))}
+          </td>
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;font:600 15px/1.6 ${FONT};color:#10b981;">
+            ${escapeHtml(formatMoney(-v.credit, payment.currency))}
           </td>
         </tr>
       `);
     }
 
-    if (payment.balanceDue != null && payment.balanceDue > 0) {
+    if (payment.money.status !== 'none') {
       const dueLabel = payment.balanceDueDate
         ? `Balance remaining (due by ${formatShortDate(payment.balanceDueDate)})`
         : 'Balance remaining';
+      const balColor = payment.balanceDue > 0 ? '#0f172a' : '#10b981';
       rows.push(`
         <tr>
-          <td style="padding:12px 0;font:400 15px/1.6 ${FONT};color:#64748b;">
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;font:400 15px/1.6 ${FONT};color:#64748b;">
             ${escapeHtml(dueLabel)}
           </td>
-          <td style="padding:12px 0;text-align:right;font:600 15px/1.6 ${FONT};color:#0f172a;">
+          <td style="padding:12px 0;border-bottom:1px solid #e2e8f0;text-align:right;font:600 15px/1.6 ${FONT};color:${balColor};">
             ${escapeHtml(formatMoney(payment.balanceDue, payment.currency))}
+          </td>
+        </tr>
+      `);
+    }
+
+    rows.push(`
+      <tr>
+        <td style="padding:12px 0;font:700 15px/1.6 ${FONT};color:#0f172a;">
+          ${escapeHtml(MONEY_STRINGS.amountPayableNow)}
+        </td>
+        <td style="padding:12px 0;text-align:right;font:700 16px/1.4 ${FONT};color:#0f172a;">
+          ${escapeHtml(formatMoney(payment.payable, payment.currency))}
+        </td>
+      </tr>
+    `);
+
+    if (payment.statusLine && payment.money.status !== 'open') {
+      // Settled or part paid: say so in words. Green is permitted for a
+      // status indicator; a Unicode bullet (not a CSS span) for Outlook.
+      const settled = payment.money.settled;
+      rows.push(`
+        <tr>
+          <td colspan="2" style="padding:14px 0 2px;text-align:center;font:${settled ? '700 14px' : '400 13px'}/1.5 ${FONT};color:${settled ? '#10b981' : '#64748b'};">
+            ${settled ? '<span style="color:#10b981;font-size:16px;">&#9679;</span>&nbsp; ' : ''}${escapeHtml(payment.statusLine)}
           </td>
         </tr>
       `);
@@ -824,18 +783,20 @@ export function renderBookingEmail(opts) {
   if (payment) {
     textParts.push('', '─── Payment ───', '');
     textParts.push(`${resolveTotalLabel(order?.items)}: ${formatMoney(payment.total, payment.currency)}`);
-    if (payment.voucher && typeof payment.voucher.value === 'number' && payment.voucher.value < 0) {
-      textParts.push(`${payment.voucher.name || payment.voucher.code || 'Voucher'}: - ${formatMoney(Math.abs(payment.voucher.value), payment.currency)}`);
-    }
     if (payment.depositPaid != null) {
       textParts.push(`Paid so far: ${formatMoney(payment.depositPaid, payment.currency)}`);
     }
-    if (payment.balanceDue != null && payment.balanceDue > 0) {
+    for (const v of payment.vouchers) {
+      textParts.push(`${voucherLabel(v)}: ${formatMoney(-v.credit, payment.currency)}`);
+    }
+    if (payment.money.status !== 'none') {
       const dueLabel = payment.balanceDueDate
         ? `Balance remaining (due by ${formatShortDate(payment.balanceDueDate)})`
         : 'Balance remaining';
       textParts.push(`${dueLabel}: ${formatMoney(payment.balanceDue, payment.currency)}`);
     }
+    textParts.push(`${MONEY_STRINGS.amountPayableNow}: ${formatMoney(payment.payable, payment.currency)}`);
+    if (payment.statusLine && payment.money.status !== 'open') textParts.push(payment.statusLine);
 
     // On-arrival fees in plain-text fallback. Same rules as HTML: prefer
     // itemised payAtLocation, fall back to inResortFees total.

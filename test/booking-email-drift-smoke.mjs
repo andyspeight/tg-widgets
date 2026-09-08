@@ -42,8 +42,11 @@ console.log('There is exactly one booking-confirmation renderer');
     /export \* from '\.\.\/\.\.\/public\/_booking-email-template\.js';/.test(SHIM));
   ok('the sender still imports through the stable api/_lib path',
     /import \{ renderBookingEmail \} from '\.\/_lib\/booking-email-template\.js';/.test(SENDER));
+  // The only imports allowed are other runtime-neutral public modules
+  // (./_order-money.js, the shared money calculation, 8 Sep 2026); never a
+  // Node built-in or anything under api/.
   ok('the renderer is runtime-neutral, which is why the editor can preview it',
-    !/^import /m.test(TPL) && !/require\(/.test(TPL) && !/\bdocument\./.test(TPL)
+    !/^import [^\n]*from '(?!\.\/_[a-z-]+\.js')/m.test(TPL) && !/require\(/.test(TPL) && !/\bdocument\./.test(TPL)
     && !/process\.env/.test(TPL) && !/\bBuffer\b/.test(TPL));
 
   const shimMod = await import('../api/_lib/booking-email-template.js');
