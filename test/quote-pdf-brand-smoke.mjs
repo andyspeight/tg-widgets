@@ -44,8 +44,11 @@ const renderer = readFileSync(new URL('../render-quote.js', import.meta.url), 'u
 
 // eslint-disable-next-line no-eval
 const buildRenderOpts = eval('(' + ex(api, 'function buildRenderOpts(config)') + ')');
+// resolveBrand reads the module-level LOGO_SIZES map (the Logo size choice,
+// 8 Sep 2026), so the eval carries that constant along with the function.
+const logoSizes = (renderer.match(/const LOGO_SIZES = \{[^\n]*\};/) || [''])[0];
 // eslint-disable-next-line no-eval
-const resolveBrand = eval('(' + ex(renderer, 'function resolveBrand(opts)') + ')');
+const resolveBrand = eval('(() => { ' + logoSizes + ' return ' + ex(renderer, 'function resolveBrand(opts)') + '; })()');
 
 // End-to-end: a saved config → the colours the renderer will actually paint.
 const resolve = (config) => resolveBrand(buildRenderOpts(config)).colors;

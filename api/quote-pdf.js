@@ -226,6 +226,7 @@ function buildRenderOpts(config) {
       name: c.brandName,
       tagline: c.tagline,
       logoUrl: c.logoUrl,
+      logoSize: c.logoSize,
       supportEmail: c.supportEmail,
       supportPhone: c.supportPhone,
       // Contact visibility toggle — forwarded so resolveBrand() can hide phone +
