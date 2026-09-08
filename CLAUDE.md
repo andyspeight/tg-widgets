@@ -50,6 +50,14 @@ Owner: Andy Speight, CEO, Travelgenix.
   `docs/tg-sites-speed-and-visibility.md` (the analysis behind the performance
   work) and `docs/duda-gap-analysis.md` (the platform comparison).
 
+- **Show Lead Scanner** (staff app for WTM and the TravelTech Show: scan a
+  business card, file it into Luna Desk, mirror to a Google Sheet, send the
+  first follow-up): `docs/show-lead-scanner-handover.md` (Airtable record
+  `recBhuqwABacT7fg3`). Read it the moment a
+  session mentions business cards, trade shows, WTM, TravelTech Show or lead
+  scanning. It carries the locked decisions, the recommendation to build inside
+  `tg-crm-b2b` rather than here, and the research still open.
+
 - **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
   BUILT and switchable in the editor: nine movement recipes with three strengths,
   six reveal styles, the background and hover effects, and which recipes collide
