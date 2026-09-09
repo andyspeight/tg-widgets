@@ -557,7 +557,7 @@
     if (!key) { this.data = null; this.error = false; this._render(); return; }
 
     var q = FEED_API + '?view=venue&key=' + encodeURIComponent(key)
-      + '&limit=' + clamp(c.eventLimit, 1, 12, 4)
+      + '&limit=' + clamp(c.eventLimit, 1, 100, 4)
       + '&currency=' + encodeURIComponent(/^[A-Z]{3}$/.test(c.currency) ? c.currency : 'GBP')
       + '&adults=' + clamp(c.adults, 1, 9, 2)
       + '&booking=' + encodeURIComponent(
@@ -772,7 +772,7 @@
     }
 
     if (c.showEvents) {
-      var evs = (this.data.events || []).slice(0, clamp(c.eventLimit, 1, 12, 4));
+      var evs = (this.data.events || []).slice(0, clamp(c.eventLimit, 1, 100, 4));
       if (evs.length) {
         out += '<div class="tgvg-events"><h3 class="tgvg-events-h">What&#39;s on here</h3>';
         for (var i = 0; i < evs.length; i++) {

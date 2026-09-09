@@ -713,7 +713,7 @@
 
     var q = {
       view: 'search', q: term.trim(),
-      limit: String(clampInt(c.eventLimit, 1, 50, 10)),
+      limit: String(clampInt(c.eventLimit, 1, 100, 10)),
       currency: c.currency,
       adults: String(clampInt(c.adults, 1, 20, 2)),
     };
@@ -766,7 +766,7 @@
     this._filter = { type: type, key: key, label: label };
     var q = {
       view: view,
-      limit: String(clampInt(c.eventLimit, 1, 50, 10)),
+      limit: String(clampInt(c.eventLimit, 1, 100, 10)),
       from: localToday(0),
       to: localToday(clampInt(c.daysAhead, 1, 730, 365)),
       currency: c.currency,

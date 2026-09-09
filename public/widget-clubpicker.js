@@ -799,7 +799,7 @@
 
     var q = {
       view: view, key: key,
-      limit: String(clampInt(c.eventLimit, 1, 50, 8)),
+      limit: String(clampInt(c.eventLimit, 1, 100, 8)),
       from: localToday(0),
       to: localToday(clampInt(c.daysAhead, 1, 730, 365)),
       currency: c.currency,
