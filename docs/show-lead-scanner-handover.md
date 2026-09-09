@@ -10,6 +10,10 @@ Started 8 Sep 2026 (Claude Code on the web, session on branch
 `claude/staff-show-pwa-card-scan-yng47h`). This first session was research and
 scoping only. No product code has been written yet.
 
+A third session on 9 Sep 2026 (Claude Code on the web, same branch) finished
+the VoxBulk research with the site fully readable. The decision is final and
+sits under "Third pass" in the VoxBulk section below.
+
 ## What Andy asked for (8 Sep 2026)
 
 "A PWA app for all of our staff attending a show, that scans business cards,
@@ -30,7 +34,9 @@ be researched as a possible messaging provider, excluding its AI dialling.
    when the contact said yes on the spot and the app recorded that.
 4. Andy will pick this doc up in the desktop Claude session, which has web
    access, to finish the VoxBulk research and anything else listed under
-   "Research still to do".
+   "Research still to do". (The VoxBulk part was done on 9 Sep 2026 from
+   Claude Code on the web instead, because the network was open on that run.
+   The other open items still need the desktop session or an account login.)
 
 ## Recommendation: build it inside Luna Desk, not as a separate PWA
 
@@ -230,6 +236,119 @@ there is nothing public to compare. Decision recorded as **no, not as the
 foundation**. If Andy wants a like-for-like on campaign pricing, paste the
 site's pricing and features text into a chat and it takes ten minutes.
 
+### Third pass, 9 Sep 2026: the site read in full, decision final
+
+**What was read this time.** The network was open on this run, so: the home
+page and every page linked from it (Expo, Smart Business Card, WhatsApp
+Surveys, Customer Feedback, Recruitment, Pricing, Contact, Demo, Blog, News,
+Help, FAQ, Legal, Legal and policies, Terms, Privacy, Cookies, GDPR and the
+DPA), the machine-readable feeds the site publishes for crawlers (`llms.txt`,
+the live price catalogue at `/frontpage/catalog.json`, the FAQ feed, the help
+article feed and the product visibility registry), Companies House for both
+company numbers that appear on the site, and the ICO register. There is no
+About page, no API page and no developer documentation: `/about`, `/api`,
+`/docs`, `/developers` and `/features` all serve the empty app shell.
+
+**The first two passes had the wrong premise.** VoxBulk is not a bulk SMS or
+WhatsApp provider and does not sell messaging as a service. There is no SMS
+product anywhere on the site, no send API and no API documentation. It is a
+five-product SaaS dashboard, UK-built, self-serve, sign in with email or
+Google:
+
+- **VoxBulk Expo.** The reverse of our scanner. The visitor scans the
+  exhibitor's booth QR on their own phone, answers qualifying questions on
+  WhatsApp (any language) or a short English web form, can photograph their
+  business card to fill the contact fields, gets the catalogue or price list
+  sent back, and lands in VoxBulk's dashboard scored Hot, Warm or Cold by
+  deterministic rules. The way out is a CSV or Excel export. One package is
+  one booth QR and the booth switches off when the window ends. Live GBP
+  prices on 9 Sep 2026: £49 for one day, £99 for three days, £149 for seven.
+  WTM is three days, so £99.
+- **Smart Business Card.** The same flow as a per-rep digital business card:
+  one QR per rep, the prospect scans and chats on WhatsApp or web, card photo
+  OCR fills the fields, each rep sees only their own leads and managers see
+  everyone's. £4 per rep per month or £38.40 a year, with 15 free preview
+  runs before buying a seat.
+- **WhatsApp Surveys and AI interviews** on one shared plan (pay as you go,
+  Starter £59, Pro £129, Business £249 a month), billed per recipient send.
+- **Customer Feedback**, one QR per location, at £25, £99 or £175 a month.
+- **Recruitment automation** (CV scoring and AI voice interviews). Out of
+  scope for us, as Andy said on 8 Sep.
+
+**How their WhatsApp actually works.** Messages travel over the WhatsApp
+Business API on VoxBulk-managed numbers ("or your connected profile where
+enabled"). Every conversation is visitor-initiated: the visitor scans and
+messages them, never the other way round, and templates need approval on their
+side too (their survey help article says "ensure WhatsApp templates are
+approved"). There is no way to send our own "good to meet you" message from a
+Travelgenix number through VoxBulk, and no email to leads at all. A visitor
+messaging VoxBulk's number is an opt-in to that number, not to ours, so it
+would not let Brevo send either. Integrations are a HubSpot CRM connector,
+booking calendars (Calendly, Google Calendar, Microsoft 365, Cal.com, HubSpot
+Meetings, Zoho Bookings) and a Zoho Recruit import. The FAQ mentions "API push
+into ATS or HRIS" and the recruitment page says "we connect to anything with a
+REST API or webhook", but nothing is documented, and Airtable, Google Sheets,
+Zapier and outbound webhooks appear nowhere. Lead data sits in UK and EU data
+centres and, by default, is anonymised or deleted after 90 days (call
+recordings after 30). Sub-processors are not named.
+
+**The company, corrected.** VOXBULK LTD is company 17096983, incorporated on
+17 March 2026 as micro greenia LTD and renamed VoxBulk on 27 May 2026. Sole
+director and secretary Nabil Ayache. The Northolt address in the first pass is
+his correspondence address; the registered office is 128 City Road, London
+EC1V 2NX. Confirmation statement filed 8 Sep 2026, first accounts due
+17 Dec 2027. The ICO registration quoted on the site, ZC229415, is genuine:
+Voxbulk Ltd, Tier 1, registered 23 Aug 2026, expiring 22 Aug 2027. But the
+terms, privacy policy, DPA and legal page all give the company number as
+15466735, which Companies House lists as MENASIM LTD (incorporated 5 Feb 2024,
+director Qusay Ajez, a telecoms SIC code). So the DPA a customer accepts at
+signup names a counterparty that is not VoxBulk Ltd. Whether that is a related
+business or a copy-paste error, it would need fixing before anyone at
+Travelgenix signed. Terms last updated 25 July 2026. Blog posts run from 3 May
+to 9 Sep 2026 and the newsroom has one item (2 July 2026). Still nothing
+third-party: no reviews, no LinkedIn page, no press. Their own blog post
+comparing QR capture with badge scanning served an empty body on 9 Sep 2026.
+
+**Against what we already have.**
+
+| Need | VoxBulk | Already in hand |
+|---|---|---|
+| First follow-up by email, from the person who met them | Not offered. No email to leads. | Gmail in Luna Desk: the `send-template` route, signature, tracking, Activity, drip sequence. |
+| WhatsApp "good to meet you" after a recorded yes, from our number | Not offered. Inbound only, on their number, no send API. | Brevo WhatsApp: our sender, our approved template, one call from Luna Desk. Needs Professional or Enterprise. |
+| SMS | No SMS product. | Brevo transactional SMS. Twilio REST already in tg-widgets (`api/_lib/calendar/sms.js`, dark-launched behind env vars). |
+| Business card OCR | Yes, inside their flow. | Building: `api/scan` with Claude vision, a confidence per field. |
+| Contact, Company, Deal and Activity in Luna Desk | No. Their dashboard, CSV out, HubSpot connector only. | Direct write through `quickAddPerson()`. |
+| Row in the show's Google Sheet | No. Manual CSV export. | Sheets writer ported from tg-widgets. |
+| Dedupe before saving | No. | Pre-insert lookup by email and phone. |
+| Consent record for WhatsApp | Yes, and well shaped: time, channel, prompt shown, answer, exportable. | Our toggle stores time, show and who asked. |
+| Where the lead lives | Their tenant, 90 days, then anonymised. | Luna Desk, for as long as we like. |
+
+**Decision: no, final.** Three reasons.
+
+1. It is not a messaging provider. There is nothing to put against Brevo SMS,
+   Brevo WhatsApp, Gmail or Twilio, because VoxBulk does not send email or SMS
+   and its WhatsApp is inbound on its own numbers.
+2. It is a rival capture flow, not a component. The lead lands in their
+   dashboard, comes out as a CSV and is anonymised after 90 days. That is the
+   opposite of "straight into Luna Desk".
+3. The paperwork is not ready. The DPA and terms name the wrong company, the
+   ICO registration is seventeen days old and there is still no third-party
+   footprint.
+
+**Two things worth keeping from the read.** First, their consent proof shape
+(time, channel, prompt shown, answer) is better than ours. The WhatsApp toggle
+should store the prompt text the staff member read out as well as the time,
+the show and the asker, and it should export with the Contact. Second, "stand
+too busy, scan this" is a sound idea for a visitor who cannot reach a staff
+member, and it does not need VoxBulk: a QR on the stand pointing at a Luna Desk
+form (or an Enquiry widget routed into Luna Desk) is an afternoon's work and
+lands in the same pipeline. Phase 2 candidate.
+
+**Reopen trigger.** None needed for this project. If Andy ever wants a
+visitor-led QR at a show without building one, a £99 three-day Expo package
+plus the Phase 3 CSV importer would do it, once they have fixed the company
+number on the DPA. That is a purchasing call, not an architecture question.
+
 ## Phases and dates
 
 | Phase | Scope | Target |
@@ -253,7 +372,9 @@ site's pricing and features text into a chat and it takes ten minutes.
 3. Are we exhibiting at WTM 2026 with a stand, and therefore getting Lead
    Manager logins? And at TravelTech Show 2027?
 4. How many staff are attending, and do they all already log in to Luna Desk?
-5. VoxBulk is recorded as no. Only reopen it if Andy pastes their pricing and wants a campaign-cost comparison.
+5. Closed on 9 Sep 2026: VoxBulk is no, final, with the site read in full
+   (third pass above). Nothing for Andy to decide. A £99 Expo package would be
+   an optional purchase, not something this project needs.
 
 ## Research: done and still open
 
@@ -268,6 +389,12 @@ from the sandbox):
   confirmed.
 - WhatsApp cost: Meta per-message billing, UK marketing rate and the Brevo
   plan requirement recorded above.
+
+Done on 9 Sep 2026 (third pass, full site read, network open):
+
+- VoxBulk: closed as no, final. It is a QR lead-capture dashboard, not a
+  messaging provider; prices, integrations, retention, company records and
+  the wrong company number on its DPA are all recorded in the third pass.
 
 Still open, needs a real browser or an account login:
 
@@ -303,6 +430,13 @@ Still open, needs a real browser or an account login:
 
 No changes to `tg-crm-b2b` yet. It was cloned read-only for the survey.
 
+## Files touched (9 Sep 2026)
+
+- `docs/show-lead-scanner-handover.md` (third pass on VoxBulk, open question
+  5 closed, research list and sources updated)
+
+Still nothing in `tg-crm-b2b`.
+
 ## Sources used in the 8 Sep 2026 research
 
 - WTM London Lead Manager: https://www.wtm.com/london/en-gb/exhibit/lead-manager.html
@@ -323,3 +457,26 @@ No changes to `tg-crm-b2b` yet. It was cloned read-only for the survey.
 - Brevo WhatsApp pricing update, 1 July 2026: https://www.brevo.com/releases/whatsapp-pricing-update/
 - Meta WhatsApp Business Platform pricing: https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing
 - WhatsApp UK pricing guide 2026: https://payperwa.com/blog/whatsapp-business-api-pricing-uk-2026
+
+## Sources used in the 9 Sep 2026 third pass
+
+- VoxBulk site, read in full on 9 Sep 2026: https://voxbulk.com/ plus
+  `/expo`, `/smart-card`, `/surveys`, `/feedback`, `/recruitment`, `/pricing`,
+  `/contact`, `/demo`, `/blog`, `/news`, `/help`, `/faq`, `/legal`,
+  `/legal-policies`, `/terms`, `/privacy`, `/cookies`, `/gdpr`, `/dpa` and
+  `/whatsapp-surveys-vs-email-surveys`
+- VoxBulk crawler feeds: https://voxbulk.com/llms.txt,
+  https://voxbulk.com/frontpage/catalog.json (live prices),
+  https://voxbulk.com/frontpage/faq, https://voxbulk.com/frontpage/help/articles,
+  https://voxbulk.com/frontpage/product-visibility, https://voxbulk.com/robots.txt
+  and https://voxbulk.com/sitemap.xml
+- Companies House, VOXBULK LTD 17096983 (overview, officers, persons with
+  significant control, filing history):
+  https://find-and-update.company-information.service.gov.uk/company/17096983
+- Companies House, MENASIM LTD 15466735 (the number printed on VoxBulk's
+  terms, privacy policy, DPA and legal page):
+  https://find-and-update.company-information.service.gov.uk/company/15466735
+- ICO register of fee payers, Voxbulk Ltd ZC229415:
+  https://ico.org.uk/ESDWebPages/Entry/ZC229415
+- tg-widgets, for what is already wired: `api/_lib/calendar/sms.js` (Twilio)
+  and `api/_lib/destinations/brevo.js` (Brevo contacts upsert)
