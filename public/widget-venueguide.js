@@ -184,7 +184,7 @@
     w.shadow.addEventListener('click', function (e) {
       var t = e.target;
       var btn = t && t.closest ? t.closest('[data-fly]') : null;
-      if (btn) { flyOpen(w, btn); return; }
+      if (btn) { stayOpen(w, btn); return; } // dates first, then the chooser
       if (w._fly && (!e.composedPath || e.composedPath().indexOf(w._fly.box) === -1)) flyClose(w);
     });
   }
@@ -199,11 +199,11 @@
     if (f.btn && f.btn.isConnected) try { f.btn.focus(); } catch (e) { /* gone */ }
   }
 
-  function flyOpen(w, btn) {
+  function flyOpen(w, btn, tplOverride) {
     if (w._fly && w._fly.btn === btn) { flyClose(w); return; }
     flyClose(w);
     stayClose(w);
-    var tpl = String(btn.getAttribute('data-fly') || '');
+    var tpl = tplOverride || String(btn.getAttribute('data-fly') || '');
     if (!FLY_TPL_OK.test(tpl)) return;
     var root = w.shadow.querySelector('.tgvg-root');
     if (!root) return;
@@ -315,9 +315,12 @@
   // opens a small calendar anchored to itself: pick check-in, pick check-out,
   // and the booking opens with fr, to and dur rewritten to that stay. The
   // stay must cover the event night; arrive up to a week before, leave up to
-  // two weeks after. Only the Travelify booking host is ever opened.
+  // two weeks after. Only the Travelify booking host is ever opened. The
+  // flight package opens this calendar first, preselected to a two-night
+  // stay from the event day, then hands the dates to the airport chooser.
   var STAY_BEFORE = 7;
   var STAY_AFTER = 14;
+  var STAY_PKG_NIGHTS = 2; // the flight package preselects this many nights
   var STAY_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
   var STAY_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
@@ -343,6 +346,7 @@
       var t = e.target;
       var btn = t && t.closest ? t.closest('[data-stay]') : null;
       if (btn) { stayOpen(w, btn); return; }
+      if (t && t.closest && t.closest('[data-fly]')) return; // flyInit routes that click
       if (w._stayUi && (!e.composedPath || e.composedPath().indexOf(w._stayUi.box) === -1)) stayClose(w);
     });
   }
@@ -362,6 +366,8 @@
     stayClose(w);
     flyClose(w);
     var url = String(btn.getAttribute('data-stay') || '');
+    var pkg = !url; // a flight button carries a template; the chooser follows
+    if (pkg) url = String(btn.getAttribute('data-fly') || '');
     if (!FLY_TPL_OK.test(url)) return;
     var fr = /[?&]fr=(\d{4}-\d{2}-\d{2})/.exec(url);
     var eventDay = fr && stayParse(fr[1]);
@@ -391,7 +397,8 @@
       box.style.top = (br.bottom - rr.top + 6) + 'px';
     }
 
-    var state = { box: box, btn: btn, checkIn: null,
+    var state = { box: box, btn: btn, checkIn: pkg ? eventDay : null,
+      checkOut: pkg ? stayShift(eventDay, STAY_PKG_NIGHTS) : null,
       view: new Date(eventDay.getFullYear(), eventDay.getMonth(), 1), onKey: null, onDoc: null };
     w._stayUi = state;
 
@@ -410,6 +417,23 @@
       if (!FLY_TPL_OK.test(finalUrl)) return;
       stayClose(w);
       window.open(finalUrl, '_blank', 'noopener');
+    }
+
+    function goPkg() {
+      var nights = Math.round((state.checkOut - state.checkIn) / 86400000);
+      if (nights < 1 || nights > STAY_BEFORE + STAY_AFTER) return;
+      var u;
+      try { u = new URL(url); } catch (e) { return; }
+      u.searchParams.set('fr', stayIso(state.checkIn));
+      u.searchParams.set('to', stayIso(state.checkOut));
+      u.searchParams.set('dur', String(nights));
+      var tpl = u.toString();
+      if (!FLY_TPL_OK.test(tpl)) return;
+      stayClose(w);
+      // Deferred a tick: the click that pressed this button is still
+      // bubbling, and the widget's own outside-click checks would close a
+      // chooser opened during the same dispatch.
+      setTimeout(function () { flyOpen(w, btn, tpl); }, 0);
     }
 
     function draw() {
@@ -434,15 +458,20 @@
         var ok = state.checkIn ? (canOut(d) || canIn(d)) : canIn(d);
         var cls = 'tgvg-stay-day';
         if (+d === +eventDay) cls += ' is-event';
-        if (state.checkIn && +d === +state.checkIn) cls += ' is-pick';
-        else if (state.checkIn && d > state.checkIn && d <= eventDay) cls += ' is-span';
+        if (state.checkIn && (+d === +state.checkIn || (state.checkOut && +d === +state.checkOut))) cls += ' is-pick';
+        else if (state.checkIn && d > state.checkIn && d <= (state.checkOut || eventDay)) cls += ' is-span';
         html += ok
           ? '<button type="button" class="' + cls + '" data-d="' + stayIso(d) + '">' + day + '</button>'
           : '<span class="' + cls + ' is-off">' + day + '</span>';
       }
-      html += '</div><div class="tgvg-fly-note">' + esc(state.checkIn
-        ? 'Check-in ' + stayLabel(state.checkIn) + '. Now pick your check-out day.'
-        : 'Pick your check-in day. The event night is ringed.') + '</div>';
+      var nights = pkg ? Math.round((state.checkOut - state.checkIn) / 86400000) : 0;
+      html += '</div><div class="tgvg-fly-note">' + esc(pkg
+        ? stayLabel(state.checkIn) + ' to ' + stayLabel(state.checkOut) + '. Change the days, or carry on.'
+        : (state.checkIn
+          ? 'Check-in ' + stayLabel(state.checkIn) + '. Now pick your check-out day.'
+          : 'Pick your check-in day. The event night is ringed.')) + '</div>'
+        + (pkg ? '<button type="button" class="tgvg-stay-go">Choose airport &middot; '
+          + nights + (nights === 1 ? ' night' : ' nights') + '</button>' : '');
       box.innerHTML = html;
     }
 
@@ -454,10 +483,17 @@
         draw();
         return;
       }
+      var goBtn = e.target && e.target.closest ? e.target.closest('.tgvg-stay-go') : null;
+      if (goBtn) { goPkg(); return; }
       var cell = e.target && e.target.closest ? e.target.closest('[data-d]') : null;
       if (!cell) return;
       var d = stayParse(cell.getAttribute('data-d'));
       if (!d) return;
+      if (pkg) {
+        if (canOut(d)) { state.checkOut = d; draw(); return; }
+        if (canIn(d)) { state.checkIn = d; draw(); }
+        return;
+      }
       if (state.checkIn && canOut(d)) { go(d); return; }
       if (canIn(d)) { state.checkIn = d; draw(); }
     });
@@ -493,7 +529,12 @@
     + '.tgvg-root[data-theme="dark"] .tgvg-stay-day:hover{background:rgba(255,255,255,.09)}'
     + '.tgvg-root[data-theme="dark"] .tgvg-stay-day.is-off:hover{background:none}'
     + '.tgvg-root[data-theme="dark"] .tgvg-stay-day.is-pick{background:#e8eef4;color:#16202c}'
-    + '.tgvg-root[data-theme="dark"] .tgvg-stay-day.is-span{background:rgba(255,255,255,.1)}';
+    + '.tgvg-root[data-theme="dark"] .tgvg-stay-day.is-span{background:rgba(255,255,255,.1)}'
+    + '.tgvg-stay-go{display:block;width:100%;margin-top:8px;padding:9px 10px;border:0;border-radius:8px;'
+    + 'font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:#1a2733;color:#fff}'
+    + '.tgvg-stay-go:hover{filter:brightness(1.15)}'
+    + '.tgvg-root[data-theme="dark"] .tgvg-stay-go{background:#e8eef4;color:#16202c}'
+    + '.tgvg-root[data-theme="dark"] .tgvg-stay-go:hover{filter:brightness(.93)}';
 
   var FLY_CSS = '.tgvg-root{position:relative}'
     + 'button.tgvg-btn{appearance:none;-webkit-appearance:none;margin:0;border:0}'

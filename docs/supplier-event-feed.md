@@ -318,6 +318,20 @@ into all six widgets) and once in events-explorer.js for the dashboard
 pages. A caller that already knows the airport can pass `&org=LGW` to the
 feed and get finished `ready` links instead.
 
+Since 9 Sep 2026 the flight button asks for the STAY first (Andy: add the
+stay calendar to the flight package, default 2 nights). Clicking "+ Flight
+& hotel" opens the same stay calendar, preselected to a two-night stay
+starting on the event day — change either end, or carry on — and its
+Choose airport button hands the dates to the chooser, which rewrites `fr`,
+`to` and `dur` on the template before substituting `org`. Multi-night
+`TicketAccommodationFlight` links (2 nights from the event day, 2 nights
+arriving the day before, a 5-night span) were probe-verified 302 on both
+apps before shipping — the fourth run recorded in
+`scripts/probe-flight-deeplink.js`. The server template keeps its verified
+`dur=1` base; every link a visitor opens carries their chosen stay.
+`test/flight-stay-stamp-smoke.mjs` guards the stamp across all seven
+widget files, the explorer and its stylesheet.
+
 Widgets offer the kinds in `cfg.bookingKinds` (default ticket only — the
 agent turns the package on per widget in the editor, where it is now live
 instead of greyed).

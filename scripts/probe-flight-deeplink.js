@@ -19,6 +19,12 @@
  * dur=nights, a 3-night case spanning the event) 302d on both apps, so the
  * stay calendar shipped verified.
  *
+ * Fourth run, 9 Sep 2026: multi-night TicketAccommodationFlight (the shape
+ * the stay calendar on the flight package emits) 302d on both apps in all
+ * four cases: 2 nights from the event day on 384 and 250, 2 nights arriving
+ * the day before, and a 5-night span. Ran as api/dev-flight-stay-probe.js on
+ * the branch preview, deleted after the run.
+ *
  * The three cases: our built link on Andy's app (the example's own account),
  * the same link on the demo 250 app the demos run on, and the __ORG__
  * placeholder form as a control (expected to fail — surfaces must always

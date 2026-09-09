@@ -336,6 +336,7 @@
   // to a week before, leave up to two weeks after.
   var STAY_BEFORE = 7;
   var STAY_AFTER = 14;
+  var STAY_PKG_NIGHTS = 2; // the flight package preselects this many nights
   var STAY_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
   var STAY_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
@@ -361,7 +362,7 @@
     if (s.btn && s.btn.isConnected) try { s.btn.focus(); } catch (e) { /* gone */ }
   }
 
-  function stayPicker(btn, url) {
+  function stayPicker(btn, url, pkg) {
     if (stayState && stayState.btn === btn) { stayClose(); return; }
     stayClose();
     flyClose();
@@ -390,7 +391,8 @@
       box.style.top = (br.bottom + window.pageYOffset + 6) + 'px';
     }
 
-    var state = { box: box, btn: btn, checkIn: null,
+    var state = { box: box, btn: btn, checkIn: pkg ? eventDay : null,
+      checkOut: pkg ? stayShift(eventDay, STAY_PKG_NIGHTS) : null,
       view: new Date(eventDay.getFullYear(), eventDay.getMonth(), 1) };
     stayState = state;
 
@@ -409,6 +411,20 @@
       if (!FLY_TPL_OK.test(finalUrl)) return;
       stayClose();
       window.open(finalUrl, '_blank', 'noopener');
+    }
+
+    function goPkg() {
+      var nights = Math.round((state.checkOut - state.checkIn) / 86400000);
+      if (nights < 1 || nights > STAY_BEFORE + STAY_AFTER) return;
+      var u;
+      try { u = new URL(url); } catch (e) { return; }
+      u.searchParams.set('fr', stayIso(state.checkIn));
+      u.searchParams.set('to', stayIso(state.checkOut));
+      u.searchParams.set('dur', String(nights));
+      var tpl = u.toString();
+      if (!FLY_TPL_OK.test(tpl)) return;
+      stayClose();
+      flyPicker(btn, tpl);
     }
 
     function draw() {
@@ -443,11 +459,16 @@
           var ok = state.checkIn ? (canOut(d) || canIn(d)) : canIn(d);
           var cls = 'ev-stay-day'
             + (+d === +eventDay ? ' is-event' : '')
-            + (state.checkIn && +d === +state.checkIn ? ' is-pick'
-              : (state.checkIn && d > state.checkIn && d <= eventDay ? ' is-span' : ''));
+            + (state.checkIn && (+d === +state.checkIn || (state.checkOut && +d === +state.checkOut)) ? ' is-pick'
+              : (state.checkIn && d > state.checkIn && d <= (state.checkOut || eventDay) ? ' is-span' : ''));
           if (!ok) { grid.appendChild(el('span', { class: cls + ' is-off', text: String(d.getDate()) })); return; }
           var cell = el('button', { class: cls, type: 'button', text: String(d.getDate()) });
           cell.addEventListener('click', function () {
+            if (pkg) {
+              if (canOut(d)) { state.checkOut = d; draw(); return; }
+              if (canIn(d)) { state.checkIn = d; draw(); }
+              return;
+            }
             if (state.checkIn && canOut(d)) { go(d); return; }
             if (canIn(d)) { state.checkIn = d; draw(); }
           });
@@ -455,9 +476,18 @@
         }(new Date(y, mo, day)));
       }
       box.appendChild(grid);
-      box.appendChild(el('div', { class: 'ev-fly-note', text: state.checkIn
-        ? 'Check-in ' + formatDate(stayIso(state.checkIn)) + '. Now pick your check-out day.'
-        : 'Pick your check-in day. The event night is ringed.' }));
+      box.appendChild(el('div', { class: 'ev-fly-note', text: pkg
+        ? formatDate(stayIso(state.checkIn)) + ' to ' + formatDate(stayIso(state.checkOut)) + '. Change the days, or carry on.'
+        : (state.checkIn
+          ? 'Check-in ' + formatDate(stayIso(state.checkIn)) + '. Now pick your check-out day.'
+          : 'Pick your check-in day. The event night is ringed.') }));
+      if (pkg) {
+        var nights = Math.round((state.checkOut - state.checkIn) / 86400000);
+        var goBtn = el('button', { class: 'ev-stay-go', type: 'button',
+          text: 'Choose airport \u00b7 ' + nights + (nights === 1 ? ' night' : ' nights') });
+        goBtn.addEventListener('click', goPkg);
+        box.appendChild(goBtn);
+      }
     }
 
     state.onKey = function (e) { if (e.key === 'Escape') stayClose(); };
@@ -562,7 +592,7 @@
         title: o.label || o.short,
         'aria-label': (o.label || o.short) + ': ' + titleText,
       }, [o.short || o.label, icon('plane')]);
-      flyBtn.addEventListener('click', function () { flyPicker(flyBtn, tpl); });
+      flyBtn.addEventListener('click', function () { stayPicker(flyBtn, tpl, true); }); // dates first, then the chooser
       actions.push(flyBtn);
     });
 
