@@ -6,7 +6,9 @@
     "widgetType": "Special Offers",
     "written": "2026-09-10",
     "source": "Brief from Andy Speight, 10 Sep 2026. Hotel, route and destination detail researched and verified. See content/travelaire/README.md for the assumptions and for the fields deliberately left blank (photos, map coordinates, and the travel period on offer four).",
-    "importAs": "POST /api/saved-offers with body { offers: [ ...the offers array below...] }, or upload offers-sep-2026.csv through Special Offers > Import."
+    "importAs": "POST /api/saved-offers with body { offers: [ ...the offers array below...] }, or upload offers-sep-2026.csv through Special Offers > Import.",
+    "agencyName": "Halal World Travel",
+    "website": "https://www.halalworldtravel.com/"
   },
   "offers": [
     {

@@ -46,6 +46,7 @@
     "test:offers-cache-only": "node test/offers-cache-only-smoke.mjs",
     "test:offers-atol": "node test/offers-atol-seller-smoke.mjs",
     "test:travelaire-offers": "node tests/travelaire-offers.cjs",
+    "test:offer-enquiry-routing": "node test/offer-enquiry-widget-routing-smoke.mjs",
     "build:travelaire-offers": "node scripts/build-offer-csv.cjs content/travelaire/offers-sep-2026.json content/travelaire/offers-sep-2026.csv",
     "test:offers-child-ages": "node test/offers-child-ages-smoke.mjs",
     "test:offers-currency-eur": "node test/offers-currency-eur-smoke.mjs",
