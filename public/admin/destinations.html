@@ -203,6 +203,29 @@ a.nm:hover span{text-decoration:underline}
 @media (max-width:1100px){ .jv-figs{grid-template-columns:repeat(2,1fr)} .jv-fig:nth-child(3){border-left:0} .jv-fig:nth-child(n+3){border-top:1px solid var(--bd2)} }
 @media (max-width:760px){ .jv-figs{grid-template-columns:1fr} .jv-fig{border-left:0;border-top:1px solid var(--bd2)} .jv-fig:first-child{border-top:0} .jv-actions{margin-left:0;width:100%} .jv-actions .btn{width:100%;justify-content:center} }
 
+/* ---------- the runner ---------- */
+.run{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bd2)}
+.run-l{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
+.run-l b{font-weight:700}
+.run-actions{display:flex;gap:8px;flex-wrap:wrap}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--t4);border-top-color:var(--br);animation:sp .8s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.money{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--bd2);font-size:12px;color:var(--mt);flex-wrap:wrap}
+.money .bar{height:6px;width:150px;border-radius:3px;background:var(--t4);overflow:hidden;flex:none}
+.money .bar i{display:block;height:100%;background:var(--t1)}
+.money .bar i.hot{background:var(--warn)}
+.money .bar i.full{background:var(--dn)}
+.money input{width:76px;min-height:30px;padding:0 8px;border:1px solid var(--bd);border-radius:var(--r2);background:var(--sf);color:var(--tx);font-family:var(--mono);font-size:12px}
+.btn-do{border-color:var(--ok);color:var(--ok);background:var(--ok-bg);font-weight:700}
+.btn-do:hover{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn-row{min-height:30px;padding:0 10px;font-size:12px}
+.btn-stop{border-color:var(--dn);color:var(--dn);background:var(--dn-bg)}
+.btn-stop:hover{background:var(--dn);color:#fff;border-color:var(--dn)}
+.held-row{font-size:12px;color:var(--mt)}
+.held-why{color:var(--dn)}
+.rowstate{font-size:11px;font-weight:700;color:var(--mt);white-space:nowrap}
+.rowstate.saved{color:var(--ok)} .rowstate.held{color:var(--dn)} .rowstate.queued{color:var(--bk)}
+
 /* ---------- states ---------- */
 .msg{padding:56px 24px;text-align:center}
 .msg svg{width:32px;height:32px;color:var(--fa);margin-bottom:12px}
@@ -330,6 +353,14 @@ a.nm:hover span{text-decoration:underline}
             </a>
           </div>
         </div>
+        <div class="run" id="run">
+          <div class="run-l" id="run-l"></div>
+          <div class="run-actions">
+            <button class="btn btn-do" id="jv-doall">Fill all of these</button>
+            <button class="btn btn-stop" id="jv-stop" hidden>Stop</button>
+          </div>
+        </div>
+        <div class="money" id="money"></div>
         <div class="jv-figs" id="jv-figs"></div>
         <div class="jv-prog">
           <div class="jv-prog-top"><span id="jv-prog-l"></span><span id="jv-prog-r" class="num"></span></div>
@@ -353,7 +384,7 @@ a.nm:hover span{text-decoration:underline}
         </div>
         <div class="scroll"><table class="tbl">
           <thead><tr>
-            <th>Place</th><th>Type</th><th>This field</th><th>Also needs</th><th class="r">Done</th>
+            <th>Place</th><th>This field</th><th>Also needs</th><th class="r">Done</th><th class="r">Fill</th>
           </tr></thead>
           <tbody id="jv-rows"></tbody>
         </table></div>
@@ -366,6 +397,7 @@ a.nm:hover span{text-decoration:underline}
         <button class="tab" role="tab" id="tab-fields" aria-controls="pane-fields" aria-selected="false">Every gap</button>
         <button class="tab" role="tab" id="tab-cont"   aria-controls="pane-cont"   aria-selected="false">By continent</button>
         <button class="tab" role="tab" id="tab-broken" aria-controls="pane-broken" aria-selected="false">To correct<span class="pill" id="n-broken">0</span></button>
+        <button class="tab" role="tab" id="tab-held" aria-controls="pane-held" aria-selected="false">Held aside<span class="pill" id="n-held">0</span></button>
         <button class="tab" role="tab" id="tab-recent" aria-controls="pane-recent" aria-selected="false">Recently added</button>
       </div>
 
@@ -433,6 +465,17 @@ a.nm:hover span{text-decoration:underline}
         <div class="scroll"><table class="tbl">
           <thead><tr><th>Place</th><th>Type</th><th>Fields to correct</th></tr></thead>
           <tbody id="broken"></tbody>
+        </table></div>
+      </div>
+
+      <div class="pane" id="pane-held" role="tabpanel" aria-labelledby="tab-held">
+        <div class="filters">
+          <div class="f-count" style="margin-left:0">The runner could not finish these on its own. Each says why. Nothing was saved for any of them.</div>
+          <button class="btn btn-row" id="held-clear">Clear this list</button>
+        </div>
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Place</th><th>Field</th><th>Why it stopped</th><th class="r">When</th></tr></thead>
+          <tbody id="held"></tbody>
         </table></div>
       </div>
 
@@ -559,14 +602,22 @@ a.nm:hover span{text-decoration:underline}
       (D.cached ? ' (cached — press Rescan for a fresh read)' : '') + '.';
   }
 
+  /* Two different things used to share one word. The scheduled jobs that used
+     to write to this base overnight are still off, and stay off. The runner is
+     something else: it only ever does what you queue. Say the second, because
+     that is the one that changes while you watch. */
   function renderStatus() {
-    var a = D.automation || {};
-    var el = $('status'); el.hidden = false;
-    el.className = 'status' + (a.paused ? ' is-paused' : '');
-    $('status-txt').textContent = a.paused ? 'Automation paused' : 'Automation running';
-    $('status-sub').textContent = a.paused
-      ? 'Nothing has written to this data since ' + esc(a.since) + '. Only you are changing it.'
-      : 'Background jobs may write to this data while you work.';
+    var el = $('status');
+    el.hidden = false;
+    var busy = R && R.pending > 0;
+    el.className = 'status' + (busy ? '' : ' is-paused');
+    if (busy) {
+      $('status-txt').textContent = 'Filling now';
+      $('status-sub').textContent = n(R.pending) + ' in the queue. Anything that passes both checks saves itself, anything that does not is held for you.';
+    } else {
+      $('status-txt').textContent = 'Nothing running';
+      $('status-sub').textContent = 'Nothing writes to this data unless you press a button. The old nightly jobs are still switched off.';
+    }
   }
 
   function renderKpis() {
@@ -906,12 +957,14 @@ a.nm:hover span{text-decoration:underline}
     $('browse').hidden = true;
     $('jobview').hidden = false;
     renderJobView();
+    refreshRun();
     $('jobview').scrollIntoView({ behavior: 'smooth', block: 'start' });
     $('jv-back').focus({ preventScroll: true });
     $('live').textContent = 'Opened the ' + job.label + ' job.';
   }
 
   function closeJob() {
+    if (poll) { clearInterval(poll); poll = null; }
     job = null;
     $('jobview').hidden = true;
     $('browse').hidden = false;
@@ -1009,11 +1062,24 @@ a.nm:hover span{text-decoration:underline}
         : '<span class="chip">Blank</span>';
       var alsoTag = kind === 'near' ? ' <span class="rowtag near">Only this left</span>' : '';
       return '<tr><td>' + nameCell(r) + '</td>' +
-        '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
         '<td>' + thisField + alsoTag + '</td>' +
         '<td>' + jobAlsoCell(r) + '</td>' +
-        '<td class="r">' + doneCell(r) + '</td></tr>';
+        '<td class="r">' + doneCell(r) + '</td>' +
+        '<td class="r">' + fillCell(r) + '</td></tr>';
     }).join('');
+
+    Array.prototype.forEach.call($('jv-rows').querySelectorAll('[data-fill]'), function (b) {
+      b.addEventListener('click', function () { queueWork([b.dataset.fill], 'record'); });
+    });
+  }
+
+  /* One record, one field. The same queue as "do all", just a batch of one. */
+  function fillCell(r) {
+    var st = rowState[r.id];
+    if (st === 'queued') return '<span class="rowstate queued">Queued</span>';
+    if (st === 'saved') return '<span class="rowstate saved">Saved</span>';
+    if (st === 'held') return '<span class="rowstate held">Held</span>';
+    return '<button class="btn btn-row" data-fill="' + esc(r.id) + '">Fill</button>';
   }
 
   function jobAlsoCell(r) {
@@ -1039,6 +1105,150 @@ a.nm:hover span{text-decoration:underline}
   });
   $('jv-show').addEventListener('change', function (e) { jobState.show = e.target.value; renderJobRows(); });
   $('jv-export').addEventListener('click', function () { exportRows(jobRecords(), job.label); });
+
+
+  /* ---------------- the runner ----------------
+     Andy's ask: identify the issues, report them, then fill them on a button
+     press, per record and in bulk. The buttons do not do the work; they queue
+     it, and a worker drains the queue. So the page's job here is to say
+     truthfully what is queued, what has been done, what it cost, and what got
+     held — and to keep saying it while the work runs. */
+
+  var R = null;                 // last runner status
+  var poll = null;              // the ticker, only while there is work
+  var rowState = {};            // recordId -> 'queued'|'saved'|'held', for the Fill column
+
+  function money(u) { return '$' + Number(u || 0).toFixed(2); }
+
+  function fillApi(payload) {
+    return fetch('/api/admin/destinations-fill', {
+      method: payload ? 'POST' : 'GET',
+      credentials: 'include',
+      headers: payload ? { 'content-type': 'application/json' } : undefined,
+      body: payload ? JSON.stringify(payload) : undefined,
+    }).then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error(j && j.error ? j.error : 'Request failed (' + r.status + ')');
+        return j;
+      });
+    });
+  }
+
+  function applyStatus(st) {
+    R = st;
+    renderRun();
+    renderHeld();
+    // Keep polling only while there is something to watch.
+    if (st.pending > 0 && !poll) poll = setInterval(refreshRun, 4000);
+    if (st.pending === 0 && poll) { clearInterval(poll); poll = null; }
+  }
+
+  function refreshRun() {
+    fillApi(null).then(applyStatus).catch(function () { /* transient, keep the last state */ });
+  }
+
+  function renderRun() {
+    if (!job || !R) return;
+    var l = $('run-l');
+    var st = R.run || {};
+    var busy = R.pending > 0 && R.settings && R.settings.running;
+
+    var bits = [];
+    if (busy) {
+      bits.push('<span class="spin"></span><b>Filling these now.</b>');
+      bits.push('<span>' + n(R.pending) + ' left in the queue.</span>');
+    } else if (R.pending > 0) {
+      bits.push('<b>Paused with ' + n(R.pending) + ' left.</b>');
+    } else {
+      bits.push('<b>Nothing running.</b>');
+    }
+    if (R.savedToday || R.heldToday) {
+      bits.push('<span>Today: ' + n(R.savedToday) + ' saved, ' + n(R.heldToday) + ' held.</span>');
+    }
+    if (st.note) bits.push('<span style="color:var(--warn)">' + esc(st.note) + '</span>');
+    l.innerHTML = bits.join(' ');
+
+    $('jv-stop').hidden = !(R.pending > 0);
+    $('jv-doall').disabled = busy;
+
+    var b = R.budget || {};
+    var used = b.capUsd ? Math.min(100, Math.round((b.spentUsd / b.capUsd) * 100)) : 0;
+    var cls = used >= 100 ? 'full' : used >= 75 ? 'hot' : '';
+    $('money').innerHTML =
+      '<span>Spent today</span>' +
+      '<span class="num" style="font-weight:700;color:var(--tx)">' + money(b.spentUsd) + '</span>' +
+      '<div class="bar"><i class="' + cls + '" style="width:' + used + '%"></i></div>' +
+      '<span>of a daily cap of</span>' +
+      '<input id="cap" type="number" min="0" step="1" value="' + Number(b.capUsd || 0) + '" aria-label="Daily spend cap in US dollars">' +
+      '<span>· about ' + money(b.perItemUsd) + ' a field, so ' + n(b.itemsAffordable) + ' more today</span>' +
+      (b.roomForPaidWork ? '' : '<span style="color:var(--warn);font-weight:700">Budget spent. Raise the cap or wait for tomorrow.</span>');
+
+    $('cap').addEventListener('change', function (e) {
+      fillApi({ action: 'settings', capUsd: Number(e.target.value) }).then(applyStatus).catch(function (err) {
+        $('live').textContent = String(err.message || err);
+      });
+    });
+  }
+
+  function renderHeld() {
+    if (!R) return;
+    $('n-held').textContent = n(R.heldCount || 0);
+    var rows = R.held || [];
+    if (!rows.length) {
+      $('held').innerHTML = emptyRow(4, 'Nothing held',
+        'When the runner cannot finish something on its own it lands here with the reason.');
+      return;
+    }
+    $('held').innerHTML = rows.map(function (h) {
+      return '<tr><td class="nm">' + esc(h.place || '') + '</td>' +
+        '<td>' + esc(h.field || '') + '</td>' +
+        '<td class="held-why">' + esc(h.reason || '') + '</td>' +
+        '<td class="r held-row">' + esc(new Date(h.at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })) + '</td></tr>';
+    }).join('');
+  }
+
+  function queueWork(recordIds, label) {
+    if (!job || !recordIds.length) return;
+    recordIds.forEach(function (id) { rowState[id] = 'queued'; });
+    renderJobRows();
+    fillApi({ action: 'queue', type: job.type, fieldIdx: job.idx, recordIds: recordIds })
+      .then(function (st) {
+        applyStatus(st);
+        $('live').textContent = 'Queued ' + n(st.queued) + ' ' + esc(label) + '.';
+      })
+      .catch(function (err) {
+        recordIds.forEach(function (id) { delete rowState[id]; });
+        renderJobRows();
+        $('live').textContent = String(err.message || err);
+        window.alert(String(err.message || err));
+      });
+  }
+
+  $('jv-doall').addEventListener('click', function () {
+    var rows = jobRecords();
+    var plan = R && R.budget ? R.budget : {};
+    var paid = job && job.field && !/URL Slug|Time Zone|Currency|Language|Voltage|Region|Flight Time/.test(job.field.label);
+    var cost = paid ? (plan.perItemUsd || 0) * rows.length : 0;
+    var msg = 'Fill ' + n(rows.length) + ' records for ' + job.label + '?\n\n' +
+      (cost > 0
+        ? 'Estimated cost about ' + money(cost) + '. Anything that passes both checks saves itself; anything that does not is held for you.'
+        : 'This one costs nothing: the answers come from records we already hold.');
+    if (!window.confirm(msg)) return;
+    queueWork(rows.map(function (r) { return r.id; }), 'records');
+  });
+
+  $('jv-stop').addEventListener('click', function () {
+    if (!window.confirm('Stop the runner and empty the queue? Anything already saved stays saved.')) return;
+    fillApi({ action: 'stop' }).then(function (st) {
+      rowState = {}; applyStatus(st); renderJobRows();
+      $('live').textContent = 'Runner stopped.';
+    });
+  });
+
+  $('held-clear').addEventListener('click', function () {
+    fillApi({ action: 'clearHeld' }).then(applyStatus);
+  });
+
 
   /* ---------------- filters ---------------- */
   var timer = null;

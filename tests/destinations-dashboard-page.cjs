@@ -123,9 +123,24 @@ async function payload(mod) {
       .on('jsdomError', e => errors.push(e.message))
       .on('error', (...a) => errors.push(a.join(' '))),
     beforeParse(win) {
-      win.fetch = () => Promise.resolve({
-        ok: true, status: 200, json: () => Promise.resolve(data),
-      });
+      win.__queued = [];
+      win.fetch = (url, opts) => {
+        if (String(url).includes('destinations-fill')) {
+          if (opts && opts.body) win.__queued.push(JSON.parse(opts.body));
+          return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({
+            settings: { capUsd: 10, running: false },
+            budget: { capUsd: 10, spentUsd: 2.5, remainingUsd: 7.5, perItemUsd: 0.0253,
+                      roomForPaidWork: true, itemsAffordable: 296 },
+            pending: 0, run: {}, heldCount: 1, savedToday: 7, heldToday: 1,
+            held: [{ place: 'Oia', field: 'Overview', reason: 'nothing supports the Roman aqueduct',
+                     at: '2026-09-10T14:00:00.000Z' }],
+            recent: [], queued: (opts && opts.body ? JSON.parse(opts.body).recordIds || [] : []).length,
+          }) });
+        }
+        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(data) });
+      };
+      win.confirm = () => true;
+      win.alert = () => {};
       win.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
       let lastBlob = null;
       win.URL.createObjectURL = (b) => { lastBlob = b; return 'blob:mock'; };
@@ -162,11 +177,12 @@ async function payload(mod) {
   });
 
   console.log('\nAutomation status');
-  t('the paused state is announced', () => {
+  t('the strip says whether anything is running right now', () => {
     assert.strictEqual($('status').hidden, false);
-    assert.match(txt('status-txt'), /paused/i);
+    assert.match(txt('status-txt'), /Nothing running|Filling now/);
   });
-  t('the pause carries its date and reason', () => assert.match(txt('status-sub'), /2026-09-10/));
+  t('it makes clear nothing writes without a button press', () =>
+    assert.match(txt('status-sub'), /unless you press a button|queue/));
 
   console.log('\nContent types');
   t('one row per content type', () => assert.strictEqual($('types').querySelectorAll('.trow').length, 5));
@@ -403,7 +419,7 @@ async function payload(mod) {
   });
 
   t('the ones to correct are listed before the rest', () => {
-    const tags = [...$('jv-rows').querySelectorAll('tr td:nth-child(3)')].map(c => c.textContent.trim());
+    const tags = [...$('jv-rows').querySelectorAll('tr td:nth-child(2)')].map(c => c.textContent.trim());
     const firstPlain = tags.findIndex(x => !x.startsWith('To correct'));
     const lastFix = tags.map((x, i) => x.startsWith('To correct') ? i : -1).filter(i => i >= 0).pop();
     if (firstPlain !== -1 && lastFix !== undefined) {
@@ -414,16 +430,16 @@ async function payload(mod) {
   t('a row says whether this field is blank or wrong, and what else is needed', () => {
     const row = $('jv-rows').querySelector('tr');
     const cells = row.querySelectorAll('td');
-    assert.match(cells[2].textContent, /Blank|To correct/);
-    assert.ok(cells[3].textContent.trim().length > 0, 'the "also needs" cell should say something');
-    assert.ok(!cells[3].textContent.includes(job0.label),
+    assert.match(cells[1].textContent, /Blank|To correct/);
+    assert.ok(cells[2].textContent.trim().length > 0, 'the "also needs" cell should say something');
+    assert.ok(!cells[2].textContent.includes(job0.label),
       'the field being worked is named in the header; repeating it per row is noise');
   });
 
   t('the batch can be narrowed to just the ones to correct', () => {
     $('jv-show').value = 'fix';
     $('jv-show').dispatchEvent(new win.Event('change'));
-    const tags = [...$('jv-rows').querySelectorAll('tr td:nth-child(3)')].map(c => c.textContent.trim());
+    const tags = [...$('jv-rows').querySelectorAll('tr td:nth-child(2)')].map(c => c.textContent.trim());
     if (tags.length) assert.ok(tags.every(x => x.startsWith('To correct')), `leaked: ${[...new Set(tags)]}`);
     $('jv-show').value = ''; $('jv-show').dispatchEvent(new win.Event('change'));
   });
@@ -499,6 +515,70 @@ async function payload(mod) {
     assert.strictEqual(pcts.length, 5);
     assert.ok(pcts.every(p => /^\d+%$/.test(p)), `expected percentages, got ${pcts}`);
   });
+
+
+  console.log('\nThe runner');
+
+  // The runner state arrives over fetch, so open the job and let it land before
+  // asserting on it — otherwise these test an empty strip.
+  $('jobs').querySelector('[data-job]').dispatchEvent(new win.Event('click', { bubbles: true }));
+  await new Promise(r => setTimeout(r, 120));
+
+  t('opening a job shows what the runner is doing and what it has spent', () => {
+    assert.match($('run-l').textContent, /Nothing running|Filling|Paused/);
+    assert.match($('money').textContent, /Spent today/);
+    assert.match($('money').textContent, /daily cap/);
+  });
+
+  t('the daily cap is editable from the page', () => {
+    const cap = $('cap');
+    assert.ok(cap, 'the cap should be an input, not a fixed number');
+    assert.strictEqual(Number(cap.value), 10);
+  });
+
+  t('every row offers to fill just that record', () => {
+    const rows = $('jv-rows').querySelectorAll('tr').length;
+    assert.strictEqual($('jv-rows').querySelectorAll('[data-fill]').length, rows,
+      'each row needs its own button, per Andy');
+  });
+
+  t('there is a do-all button at the top', () => {
+    assert.ok($('jv-doall'), 'expected a fill-all control');
+    assert.match($('jv-doall').textContent, /Fill all/);
+  });
+
+  t('filling one record queues exactly that record and that field', () => {
+    win.__queued.length = 0;
+    const btn = $('jv-rows').querySelector('[data-fill]');
+    const id = btn.dataset.fill;
+    btn.dispatchEvent(new win.Event('click', { bubbles: true }));
+    const sent = win.__queued.filter(q => q.action === 'queue');
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(sent[0].recordIds, [id]);
+    assert.strictEqual(sent[0].type, job0.type);
+    assert.strictEqual(sent[0].fieldIdx, job0.idx);
+  });
+
+  t('a queued row stops offering the button and says so', () => {
+    assert.match($('jv-rows').querySelector('tr td:last-child').textContent, /Queued/);
+  });
+
+  t('do-all queues the whole batch after a confirmation', () => {
+    win.__queued.length = 0;
+    $('jv-doall').dispatchEvent(new win.Event('click', { bubbles: true }));
+    const sent = win.__queued.filter(q => q.action === 'queue');
+    assert.strictEqual(sent.length, 1);
+    const expected = data.records.filter(r =>
+      r.type === job0.type && (r.missing.includes(job0.idx) || r.broken.includes(job0.idx))).length;
+    assert.strictEqual(sent[0].recordIds.length, expected);
+  });
+
+  t('held items are listed with the reason they stopped', () => {
+    assert.strictEqual(Number(txt('n-held').replace(/[^0-9]/g, '')), 1);
+    assert.match($('held').textContent, /Oia/);
+    assert.match($('held').textContent, /Roman aqueduct/);
+  });
+
 
   await Promise.all(pending);
 
