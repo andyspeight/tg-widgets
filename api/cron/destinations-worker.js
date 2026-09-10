@@ -75,20 +75,46 @@ export default async function handler(req, res) {
   const results = [];
   let spent = 0;
 
-  const items = await claim(BATCH, workerId);
+  // Claim more than we will work. Anything the runner cannot fill costs
+  // nothing to discard, so a run can clear a lot of dead queue and still do a
+  // full batch of real work. Without this, 498 items queued for a field with no
+  // fixer would take two hours to drain at four a minute, writing the same
+  // sentence into the held list five hundred times on the way.
+  const items = await claim(BATCH * 8, workerId);
   await setRunState({ state: 'working', pending, batch: items.length }).catch(() => {});
 
+  let worked = 0;
   for (const item of items) {
-    if (Date.now() - started > TIME_BUDGET_MS) { await release(item.id); break; }
+    if (Date.now() - started > TIME_BUDGET_MS) { await release(item.id); continue; }
 
     const spec = typeOf(item.type);
     if (!spec) {
-      results.push(await complete(item.id, { result: 'held', reason: 'unknown content type', place: item.recordId }));
+      results.push(await complete(item.id, { result: 'skipped', reason: 'unknown content type', place: item.recordId }));
       continue;
     }
 
     const field = spec.fields[item.fieldIdx];
-    const paid = field ? fillPlanFor(field).kind === 'write' : false;
+    const plan = field ? fillPlanFor(field) : null;
+
+    // Drop what this runner has no fixer for, quietly. It is not "held" — held
+    // means a person needs to look, and there is nothing here to look at.
+    if (!plan || plan.kind === 'fact' || plan.kind === 'manual') {
+      results.push(await complete(item.id, {
+        result: 'skipped',
+        place: item.recordId,
+        field: field ? field.label : 'field ' + item.fieldIdx,
+        reason: plan && plan.kind === 'fact'
+          ? 'needs two independent sources to agree, and that fixer is not built yet'
+          : 'not a field the runner writes',
+      }));
+      continue;
+    }
+
+    // Past here is real work, and real work is rationed.
+    if (worked >= BATCH) { await release(item.id); continue; }
+    worked++;
+
+    const paid = plan.kind === 'write';
 
     // Check the money before starting, not after spending it.
     let allowPaid = true;
@@ -143,12 +169,13 @@ export default async function handler(req, res) {
   const left = await pendingCount().catch(() => 0);
   const saved = results.filter(r => r.result === 'saved').length;
   const held = results.filter(r => r.result === 'held').length;
+  const skipped = results.filter(r => r.result === 'skipped').length;
   await setRunState({
     state: left ? 'working' : 'idle',
     pending: left, lastBatch: results.length, saved, held,
   }).catch(() => {});
 
-  console.log('[destinations-worker]', JSON.stringify({ took: results.length, saved, held, spentUsd: +spent.toFixed(4), left }));
+  console.log('[destinations-worker]', JSON.stringify({ took: results.length, saved, held, skipped, spentUsd: +spent.toFixed(4), left }));
 
-  return done({ ok: true, processed: results.length, saved, held, spentUsd: +spent.toFixed(4), pending: left });
+  return done({ ok: true, processed: results.length, saved, held, skipped, spentUsd: +spent.toFixed(4), pending: left });
 }
