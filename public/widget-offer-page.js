@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.6';
+  const VERSION = '0.4.7';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -85,16 +85,17 @@
       travellers: 'Travellers', traveller1: '1 traveller', travellers2: '2 travellers',
       adultsChildren: '2 adults + children', travellers3plus: '3+ travellers',
       messagePlaceholder: 'Anything else we should know? (dates, room type, questions)',
-      trustLine: 'No payment taken now. A travel expert replies within one working hour.',
+      replyDefault: 'We will be in touch shortly.',
+      trustLine: 'No payment taken now. {reply}',
       readyWhenYouAre: 'Ready when you are',
       ctaCopy: 'Talk to a travel expert and we will hold this price while you decide.',
       likeTheLook: 'Like the look of it?',
-      enqBandCopy: 'Send us a quick enquiry and a travel expert will be in touch within one working hour. No payment now.',
+      enqBandCopy: 'Send us a quick enquiry. {reply} No payment now.',
       offerRef: 'Offer ref', poweredBy: 'Powered by Travelgenix',
       bookByPrefix: 'Book by', endsToday: 'Offer ends today',
       endsIn: 'Offer ends in {days}d {hours}h {mins}m',
       enquirySent: 'Enquiry sent',
-      thanksName: 'Thanks {name}. A travel expert will be in touch within one working hour.',
+      thanksName: 'Thanks {name}. {reply}',
       openPhoto: 'Open photo {n}', video: 'Video',
       closePhoto: 'Close photo viewer', prevPhoto: 'Previous photo', nextPhoto: 'Next photo',
       photoAlt: '{title}, photo {n} of {total}',
@@ -121,16 +122,17 @@
       travellers: 'Voyageurs', traveller1: '1 voyageur', travellers2: '2 voyageurs',
       adultsChildren: '2 adultes + enfants', travellers3plus: '3 voyageurs ou plus',
       messagePlaceholder: 'Autre chose à nous signaler ? (dates, type de chambre, questions)',
-      trustLine: 'Aucun paiement maintenant. Un expert voyages vous répond sous une heure ouvrée.',
+      replyDefault: 'Nous vous recontacterons très vite.',
+      trustLine: 'Aucun paiement maintenant. {reply}',
       readyWhenYouAre: 'Prêt quand vous l’êtes',
       ctaCopy: 'Parlez à un expert voyages et nous bloquerons ce prix le temps de votre décision.',
       likeTheLook: 'Cela vous plaît ?',
-      enqBandCopy: 'Envoyez-nous une demande rapide et un expert voyages vous contactera sous une heure ouvrée. Aucun paiement maintenant.',
+      enqBandCopy: 'Envoyez-nous une demande rapide. {reply} Aucun paiement maintenant.',
       offerRef: 'Réf. offre', poweredBy: 'Propulsé par Travelgenix',
       bookByPrefix: 'Réserver avant le', endsToday: 'L’offre se termine aujourd’hui',
       endsIn: 'L’offre se termine dans {days}j {hours}h {mins}min',
       enquirySent: 'Demande envoyée',
-      thanksName: 'Merci {name}. Un expert voyages vous contactera sous une heure ouvrée.',
+      thanksName: 'Merci {name}. {reply}',
       openPhoto: 'Ouvrir la photo {n}', video: 'Vidéo',
       closePhoto: 'Fermer la visionneuse', prevPhoto: 'Photo précédente', nextPhoto: 'Photo suivante',
       photoAlt: '{title}, photo {n} sur {total}',
@@ -157,16 +159,17 @@
       travellers: 'Reisende', traveller1: '1 Reisender', travellers2: '2 Reisende',
       adultsChildren: '2 Erwachsene + Kinder', travellers3plus: '3+ Reisende',
       messagePlaceholder: 'Sonst noch etwas, das wir wissen sollten? (Daten, Zimmertyp, Fragen)',
-      trustLine: 'Jetzt keine Zahlung. Ein Reiseexperte antwortet innerhalb einer Arbeitsstunde.',
+      replyDefault: 'Wir melden uns in Kürze bei Ihnen.',
+      trustLine: 'Jetzt keine Zahlung. {reply}',
       readyWhenYouAre: 'Bereit, wenn Sie es sind',
       ctaCopy: 'Sprechen Sie mit einem Reiseexperten und wir halten diesen Preis, während Sie entscheiden.',
       likeTheLook: 'Gefällt es Ihnen?',
-      enqBandCopy: 'Senden Sie uns eine kurze Anfrage und ein Reiseexperte meldet sich innerhalb einer Arbeitsstunde. Jetzt keine Zahlung.',
+      enqBandCopy: 'Senden Sie uns eine kurze Anfrage. {reply} Jetzt keine Zahlung.',
       offerRef: 'Angebotsref.', poweredBy: 'Bereitgestellt von Travelgenix',
       bookByPrefix: 'Buchen bis', endsToday: 'Das Angebot endet heute',
       endsIn: 'Das Angebot endet in {days}T {hours}Std {mins}Min',
       enquirySent: 'Anfrage gesendet',
-      thanksName: 'Danke {name}. Ein Reiseexperte meldet sich innerhalb einer Arbeitsstunde.',
+      thanksName: 'Danke {name}. {reply}',
       openPhoto: 'Foto {n} öffnen', video: 'Video',
       closePhoto: 'Fotoansicht schließen', prevPhoto: 'Vorheriges Foto', nextPhoto: 'Nächstes Foto',
       photoAlt: '{title}, Foto {n} von {total}',
@@ -193,16 +196,17 @@
       travellers: 'Viajeros', traveller1: '1 viajero', travellers2: '2 viajeros',
       adultsChildren: '2 adultos + niños', travellers3plus: '3 o más viajeros',
       messagePlaceholder: '¿Algo más que debamos saber? (fechas, tipo de habitación, preguntas)',
-      trustLine: 'Ningún pago ahora. Un experto en viajes responde en una hora laborable.',
+      replyDefault: 'Nos pondremos en contacto contigo en breve.',
+      trustLine: 'Ningún pago ahora. {reply}',
       readyWhenYouAre: 'Cuando quieras',
       ctaCopy: 'Habla con un experto en viajes y mantendremos este precio mientras decides.',
       likeTheLook: '¿Te gusta lo que ves?',
-      enqBandCopy: 'Envíanos una consulta rápida y un experto en viajes te contactará en una hora laborable. Sin pago ahora.',
+      enqBandCopy: 'Envíanos una consulta rápida. {reply} Sin pago ahora.',
       offerRef: 'Ref. oferta', poweredBy: 'Con tecnología de Travelgenix',
       bookByPrefix: 'Reserva antes del', endsToday: 'La oferta termina hoy',
       endsIn: 'La oferta termina en {days}d {hours}h {mins}min',
       enquirySent: 'Consulta enviada',
-      thanksName: 'Gracias {name}. Un experto en viajes te contactará en una hora laborable.',
+      thanksName: 'Gracias {name}. {reply}',
       openPhoto: 'Abrir foto {n}', video: 'Vídeo',
       closePhoto: 'Cerrar el visor de fotos', prevPhoto: 'Foto anterior', nextPhoto: 'Foto siguiente',
       photoAlt: '{title}, foto {n} de {total}',
@@ -229,16 +233,17 @@
       travellers: 'Viaggiatori', traveller1: '1 viaggiatore', travellers2: '2 viaggiatori',
       adultsChildren: '2 adulti + bambini', travellers3plus: '3 o più viaggiatori',
       messagePlaceholder: 'Altro che dovremmo sapere? (date, tipo di camera, domande)',
-      trustLine: 'Nessun pagamento ora. Un esperto di viaggi risponde entro un’ora lavorativa.',
+      replyDefault: 'Ti ricontatteremo a breve.',
+      trustLine: 'Nessun pagamento ora. {reply}',
       readyWhenYouAre: 'Quando vuoi',
       ctaCopy: 'Parla con un esperto di viaggi e bloccheremo questo prezzo mentre decidi.',
       likeTheLook: 'Ti piace?',
-      enqBandCopy: 'Inviaci una richiesta veloce e un esperto di viaggi ti contatterà entro un’ora lavorativa. Nessun pagamento ora.',
+      enqBandCopy: 'Inviaci una richiesta veloce. {reply} Nessun pagamento ora.',
       offerRef: 'Rif. offerta', poweredBy: 'Realizzato con Travelgenix',
       bookByPrefix: 'Prenota entro il', endsToday: 'L’offerta termina oggi',
       endsIn: 'L’offerta termina tra {days}g {hours}h {mins}min',
       enquirySent: 'Richiesta inviata',
-      thanksName: 'Grazie {name}. Un esperto di viaggi ti contatterà entro un’ora lavorativa.',
+      thanksName: 'Grazie {name}. {reply}',
       openPhoto: 'Apri foto {n}', video: 'Video',
       closePhoto: 'Chiudi il visualizzatore', prevPhoto: 'Foto precedente', nextPhoto: 'Foto successiva',
       photoAlt: '{title}, foto {n} di {total}',
@@ -265,16 +270,17 @@
       travellers: 'Călători', traveller1: '1 călător', travellers2: '2 călători',
       adultsChildren: '2 adulți + copii', travellers3plus: '3+ călători',
       messagePlaceholder: 'Altceva ce ar trebui să știm? (date, tip de cameră, întrebări)',
-      trustLine: 'Nicio plată acum. Un expert în călătorii răspunde în maximum o oră lucrătoare.',
+      replyDefault: 'Te vom contacta în curând.',
+      trustLine: 'Nicio plată acum. {reply}',
       readyWhenYouAre: 'Când ești pregătit',
       ctaCopy: 'Vorbește cu un expert în călătorii și vom păstra acest preț cât timp te decizi.',
       likeTheLook: 'Îți place?',
-      enqBandCopy: 'Trimite-ne o solicitare rapidă și un expert în călătorii te va contacta în maximum o oră lucrătoare. Nicio plată acum.',
+      enqBandCopy: 'Trimite-ne o solicitare rapidă. {reply} Nicio plată acum.',
       offerRef: 'Ref. ofertă', poweredBy: 'Susținut de Travelgenix',
       bookByPrefix: 'Rezervă până la', endsToday: 'Oferta se încheie astăzi',
       endsIn: 'Oferta se încheie în {days}z {hours}h {mins}min',
       enquirySent: 'Solicitare trimisă',
-      thanksName: 'Mulțumim {name}. Un expert în călătorii te va contacta în maximum o oră lucrătoare.',
+      thanksName: 'Mulțumim {name}. {reply}',
       openPhoto: 'Deschide fotografia {n}', video: 'Video',
       closePhoto: 'Închide vizualizatorul', prevPhoto: 'Fotografia anterioară', nextPhoto: 'Fotografia următoare',
       photoAlt: '{title}, fotografia {n} din {total}',
@@ -836,6 +842,11 @@
         radius: typeof c.radius === 'number' ? c.radius : 18,
         currency: c.currency || '',
         agencyName: c.agencyName || '',
+        // The agency's own reply promise, shown under the send button, in the
+        // enquiry band and on the thank-you. Blank falls back to replyDefault.
+        // This is the agency speaking, so like every other author string it is
+        // NEVER translated — it drops into all three places as written.
+        replyPromise: (typeof c.replyPromise === 'string') ? c.replyPromise.slice(0, 120).trim() : '',
         offerId: c.offerId || '',                    // stored offer id, for routing the enquiry
         // Public widget id, set by loadConfigFromApi on a remote mount. An offer
         // authored in a widget's config has no feed record, so this is the only
@@ -846,6 +857,10 @@
         offer: o
       };
     }
+
+    // The reply promise shown in all three enquiry spots: the agency's own
+    // words when they set one, else the localised default.
+    _reply() { return this.cfg.replyPromise || this.t('replyDefault'); }
 
     /**
      * Layer-2 content overlay. The author writes the offer once in the source
@@ -1085,7 +1100,7 @@
       const trustBits = [];
       if (d.atol) trustBits.push('ATOL protected');
       if (d.abta) trustBits.push('ABTA member');
-      const trust = '<p class="tgop-trust">' + esc(t('trustLine'))
+      const trust = '<p class="tgop-trust">' + esc(t('trustLine', { reply: this._reply() }))
         + (trustBits.length ? '<br>🔒 <b>' + esc(trustBits.join(' · ')) + '</b>' : '') + '</p>';
       return '<form class="tgop-form" novalidate>'
           + '<div class="tgop-form-h">' + esc(t('enquireAbout')) + '</div>'
@@ -1434,7 +1449,7 @@
         html = fBar + fHero + fFacts
           + '<div class="tgop-wrap tgop-editorial">' + fAbout + fContent + fIncludes + fExcludes + fGallery + fVideo + fMap + fDetail + fNotes + '</div>'
           + '<div class="tgop-enqband"><div class="tgop-wrap tgop-enqband-inner">'
-            + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">' + esc(t('likeTheLook')) + '</h2><p>' + esc(t('enqBandCopy')) + '</p></div>'
+            + '<div class="tgop-enqband-copy"><h2 class="tgop-h2">' + esc(t('likeTheLook')) + '</h2><p>' + esc(t('enqBandCopy', { reply: this._reply() })) + '</p></div>'
             + '<div class="tgop-enqband-card">' + this._bookCard(d) + '</div>'
           + '</div></div>'
           + fCta + fFooter + fLightbox;
@@ -1738,7 +1753,7 @@
       const card = form.closest('.tgop-book');
       form.outerHTML =
         '<div class="tgop-enq-success"><div class="tick">' + I.check + '</div>'
-        + '<h4>' + esc(this.t('enquirySent')) + '</h4><p>' + esc(this.t('thanksName', { name: detail.enquiry.name.split(' ')[0] })) + '</p></div>';
+        + '<h4>' + esc(this.t('enquirySent')) + '</h4><p>' + esc(this.t('thanksName', { name: detail.enquiry.name.split(' ')[0], reply: this._reply() })) + '</p></div>';
       void card;
     }
 
