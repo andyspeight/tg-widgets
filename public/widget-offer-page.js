@@ -29,7 +29,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.4.5';
+  const VERSION = '0.4.6';
 
   // Resolve the API base off THIS script's origin. The widget is hosted on
   // widgets.travelify.io and embedded on customer sites, so a relative
@@ -837,6 +837,10 @@
         currency: c.currency || '',
         agencyName: c.agencyName || '',
         offerId: c.offerId || '',                    // stored offer id, for routing the enquiry
+        // Public widget id, set by loadConfigFromApi on a remote mount. An offer
+        // authored in a widget's config has no feed record, so this is the only
+        // handle the enquiry endpoint has for resolving who owns it.
+        widgetId: c._widgetId || c.widgetId || '',
         client: typeof c.client === 'string' ? c.client : '',  // feed key for the "More deals" strip
         enquiryEndpoint: c.enquiryEndpoint || (SCRIPT_BASE + 'api/offer-enquiry'),
         offer: o
@@ -1721,6 +1725,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             offerId: this.cfg.offerId,
+            widgetId: this.cfg.widgetId,
             name: detail.enquiry.name, email: detail.enquiry.email, phone: detail.enquiry.phone,
             month: detail.enquiry.month, travellers: detail.enquiry.travellers, message: detail.enquiry.message,
             offerTitle: d.title, offerReference: d.reference || '',

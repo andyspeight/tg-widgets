@@ -23,10 +23,19 @@
  */
 import crypto from 'crypto';
 import { configured, getJson, setJson, zadd } from './_redis.js';
+import { sanitiseForFormula } from './_auth.js';
 
 const FROM = process.env.CONTACT_FROM || 'info@travelgenix.io';
 const FALLBACK_TO = process.env.CONTACT_TO || 'info@travelgenix.io';
 const ID_RE = /^[A-Za-z0-9_-]{6,40}$/;
+const WIDGET_ID_RE = /^tgw_[A-Za-z0-9_]{1,60}$/;
+
+// Widgets table, for offers that live in a widget's saved config rather than in
+// the saved-offers feed (a hand-built page embedded by widget id). Mirrors
+// api/trip-enquiry.js, which resolves its recipient the same way.
+const WIDGETS_BASE_ID = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
+const WIDGETS_PAT = process.env.AIRTABLE_KEY;
+const WIDGETS_TABLE_ID = 'tblVAThVqAjqtria2';
 
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const clean = (s) => String(s == null ? '' : s).replace(/[\u0000-\u001F\u007F]/g, '').trim();
@@ -44,6 +53,60 @@ function rateLimited(ip) {
   HITS.set(ip, arr);
   if (HITS.size > 5000) HITS.clear(); // crude memory cap
   return arr.length > max;
+}
+
+/**
+ * Resolve an offer that lives in a widget's SAVED CONFIG rather than in the
+ * saved-offers feed, so a page embedded by widget id routes its enquiries to
+ * the agency that owns it instead of falling back to CONTACT_TO.
+ *
+ * Only the widget id crosses the wire; the title, reference and recipient are
+ * all read from Airtable here, so this stays as closed as the stored-offer
+ * path and cannot be used as an open relay. Returns null on any miss, which
+ * leaves the caller's existing fallback untouched.
+ */
+const widgetCache = new Map();
+async function resolveWidgetOffer(widgetId) {
+  if (!widgetId || !WIDGETS_PAT) return null;
+  if (widgetCache.has(widgetId)) return widgetCache.get(widgetId);
+  try {
+    const formula = encodeURIComponent(`{WidgetID} = '${sanitiseForFormula(widgetId)}'`);
+    const url = `https://api.airtable.com/v0/${WIDGETS_BASE_ID}/${WIDGETS_TABLE_ID}?filterByFormula=${formula}&maxRecords=1`;
+    const resp = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${WIDGETS_PAT}` },
+      signal: AbortSignal.timeout(8000)
+    });
+    // Don't cache a transient Airtable failure (429/5xx) as "not found".
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const record = data.records && data.records[0];
+    if (!record) { widgetCache.set(widgetId, null); return null; }
+
+    const fields = record.fields || {};
+    let title = '', reference = '', enquiryEmail = '';
+    try {
+      const cfg = JSON.parse(fields.Config || '{}');
+      const offer = (cfg && typeof cfg.offer === 'object' && cfg.offer) || {};
+      const f = (offer.fields && typeof offer.fields === 'object') ? offer.fields : {};
+      if (typeof f.title === 'string') title = clean(f.title).slice(0, 200);
+      if (typeof f.reference === 'string') reference = clean(f.reference).slice(0, 60);
+      if (typeof f.enquiryEmail === 'string' && emailOK(clean(f.enquiryEmail))) enquiryEmail = clean(f.enquiryEmail);
+    } catch { /* config unparseable — the client email below still routes the lead */ }
+
+    // The offer's own enquiry email wins; the widget's owning client is the
+    // backstop, so a config without one still reaches the agency.
+    if (!enquiryEmail) {
+      const owner = clean(fields.ClientEmail || fields['Client Email'] || '');
+      if (emailOK(owner)) enquiryEmail = owner;
+    }
+
+    const widget = { title, reference, enquiryEmail };
+    widgetCache.set(widgetId, widget);
+    return widget;
+  } catch (err) {
+    console.error('[offer-enquiry] Widget lookup failed:', err.message);
+    return null;
+  }
 }
 
 async function sgSend(payload) {
@@ -101,6 +164,19 @@ export default async function handler(req, res) {
         ownerKey = rec.ownerKey || '';
       }
     } catch (e) { /* fall back to FALLBACK_TO */ }
+  }
+
+  // An offer built into a widget's config has no feed record, so the lookup
+  // above resolves nothing and the lead would land on CONTACT_TO instead of the
+  // agency. Resolve it from the widget id the same way, server-side.
+  const widgetId = WIDGET_ID_RE.test(String(body.widgetId || '')) ? String(body.widgetId) : '';
+  if (widgetId && recipient === FALLBACK_TO) {
+    const w = await resolveWidgetOffer(widgetId);
+    if (w) {
+      if (w.title) offerTitle = w.title;
+      if (w.reference) offerReference = w.reference;
+      if (w.enquiryEmail) recipient = w.enquiryEmail;
+    }
   }
   if (!offerTitle) offerTitle = 'a special offer';
 

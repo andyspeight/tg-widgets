@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.10';
+  const VERSION = '0.3.11';
 
   // Resolve the API base off THIS script's origin so a remote-config embed on a
   // customer domain does not fetch the customer's own '/api/...' (404 → blank).
@@ -1905,6 +1905,19 @@
       }
       return ok;
     }
+
+    /**
+     * Save the offer from OUTSIDE the form — same path as the form's own
+     * "Save offer" button, validation and all.
+     *
+     * The host editor puts a Save in its own header while the form is open,
+     * because the editor shell's top-bar Save persists the WIDGET config, not
+     * the offer. Pressing that one mid-form reported success while the offer
+     * (and any photo just uploaded) was never posted, which is how photos
+     * appeared to upload but not save. The host needs a public way in rather
+     * than reaching for _submit().
+     */
+    submit() { this._submit(); }
 
     _submit() {
       const offer = this._collect();

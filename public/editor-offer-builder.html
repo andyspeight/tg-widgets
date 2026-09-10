@@ -416,6 +416,11 @@
                 Offers
               </button>
               <h1 id="formTitle">New offer</h1>
+              <!-- The offer's own Save. The shell's top-bar Save persists the
+                   WIDGET config, not the offer, so it is hidden while this form
+                   is open and this one takes its place. -->
+              <div class="ws-spacer"></div>
+              <button class="btn primary sm" id="btn-save-offer">Save offer</button>
             </div>
             <div class="ws-body"><div class="form-panel"><div id="builderMount"></div></div></div>
           </div>
@@ -677,6 +682,24 @@
       renderCards();
     }
 
+    // The row thumbnail: the offer's cover photo when it has one, else the
+    // gradient placeholder. The URL is written into a style attribute, so it is
+    // whitelisted to a clean https URL first — quotes, brackets, whitespace and
+    // backslashes are all rejected rather than escaped, matching safePhotoUrl in
+    // widget-offer-builder.js. Anything else falls back to the placeholder.
+    function safeImg(u) {
+      u = String(u == null ? '' : u).trim();
+      if (!/^https:\/\//i.test(u)) return '';
+      if (/[\s"'()<>\\]/.test(u)) return '';
+      return u.length > 1000 ? '' : u;
+    }
+    function thumb(o) {
+      const url = safeImg(o && o.image);
+      return url
+        ? '<div class="offer-thumb" style="background-image:url(' + esc(url) + ')"></div>'
+        : '<div class="offer-thumb ph"></div>';
+    }
+
     function renderCards() {
       state.selected.clear(); // a fresh list always starts unselected
       $('offerCount').textContent = state.offers.length;
@@ -708,7 +731,7 @@
             + '<button class="btn sm danger" data-act="delete">Delete</button>';
         return '<div class="offer-row' + (trash ? ' trashed' : '') + '" data-id="' + esc(o.id) + '">'
           + '<label class="offer-check"><input type="checkbox" data-check="' + esc(o.id) + '" aria-label="Select offer" /></label>'
-          + '<div class="offer-thumb ph"></div>'
+          + thumb(o)
           + '<div class="offer-main"><div class="offer-title">' + (esc(o.title) || 'Untitled offer') + chip + '</div>'
           + '<div class="offer-meta">' + meta + '</div></div>'
           + '<div class="offer-actions">' + actions + '</div></div>';
@@ -1112,8 +1135,33 @@
         successBody: 'It is live in your offers list with its own shareable page.'
       });
       div.addEventListener('tg-offer-saved', function () { setTimeout(closeForm, 1200); });
+      // The shell's top-bar Save writes the WIDGET config (design, name) — not
+      // the offer. Left visible while this form is open it reports "Saved" for
+      // an offer that was never posted, which is how a just-uploaded photo
+      // looked like it saved and was gone on reopen (Andy, 10 Sep 2026). Hide it
+      // for the duration so the only Save on screen is the offer's own.
+      showShellSave(false);
     }
-    function closeForm() { state.previewOffer = null; $('formView').hidden = true; $('listView').hidden = false; loadOffers(); }
+    function closeForm() { showShellSave(true); state.previewOffer = null; $('formView').hidden = true; $('listView').hidden = false; loadOffers(); }
+    // Toggle the shell's save control. Visibility only — the shell still owns
+    // what the button does (editor-shell contract), we just take it off screen
+    // while it would act on the wrong object.
+    function showShellSave(show) {
+      const btn = document.getElementById('btn-save');
+      if (btn) btn.hidden = !show;
+    }
+    function saveOfferNow() { if (builder && typeof builder.submit === 'function') builder.submit(); }
+    $('btn-save-offer').addEventListener('click', saveOfferNow);
+    // Cmd/Ctrl+S reaches the shell's save the same way the button did, so while
+    // the form is open it has to mean "save this offer". Capture phase, because
+    // the shell binds its shortcut on document too.
+    document.addEventListener('keydown', function (e) {
+      if (!(e.metaKey || e.ctrlKey) || (e.key !== 's' && e.key !== 'S')) return;
+      if ($('formView').hidden) return;
+      e.preventDefault();
+      e.stopPropagation();
+      saveOfferNow();
+    }, true);
     $('btn-new').addEventListener('click', () => openForm(null));
     $('btn-back-list').addEventListener('click', closeForm);
 
