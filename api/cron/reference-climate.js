@@ -92,6 +92,7 @@
 
 import { readFileSync } from 'node:fs';
 import { runClimateFill } from '../reference/_climate.js';
+import { haltIfPaused } from '../_lib/destination-automation.js';
 
 /**
  * Authored Season values, keyed by record name. Read via `new URL(...)` so
@@ -118,6 +119,7 @@ export default async function handler(req, res) {
   const auth = req.headers['authorization'] || '';
   const secret = process.env.CRON_SECRET || '';
   if (!secret || auth !== `Bearer ${secret}`) { res.statusCode = 401; return res.end('Unauthorized'); }
+  if (haltIfPaused(res, 'cron/reference-climate')) return;
 
   // Sized against the 300s maxDuration in vercel.json. Each record costs two
   // round trips and one of them pulls thirty years of daily values, so this is

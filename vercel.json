@@ -131,10 +131,6 @@
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/reference-freshness",
-      "schedule": "0 4 * * *"
-    },
-    {
       "path": "/api/admin/backfill-enquiry-clients",
       "schedule": "23 * * * *"
     }

@@ -19,6 +19,7 @@ import { PRODUCTS } from '../_lib/auth/schema.js';
 import { jsonError } from '../_lib/auth/http.js';
 import { refConfigured } from './_ref.js';
 import { runFreshness } from './_freshness.js';
+import { haltIfPaused } from '../_lib/destination-automation.js';
 
 async function readBody(req) {
   if (req.body) {
@@ -42,6 +43,7 @@ export default async function handler(req, res) {
   if (!hasBrain && !isStaffEmail(ctx.email)) {
     return jsonError(res, 403, 'no_product_access', 'You do not have access to Luna Brain');
   }
+  if (haltIfPaused(res, 'reference/refresh')) return;
   if (!refConfigured() || !process.env.ANTHROPIC_API_KEY) {
     return jsonError(res, 500, 'not_configured', 'Reference freshness is not configured');
   }

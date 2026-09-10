@@ -50,11 +50,13 @@
  */
 
 import { runIdentityBackfill, runBreadthFill } from '../reference/_breadth_fill.js';
+import { haltIfPaused } from '../_lib/destination-automation.js';
 
 export default async function handler(req, res) {
   const auth = req.headers['authorization'] || '';
   const secret = process.env.CRON_SECRET || '';
   if (!secret || auth !== `Bearer ${secret}`) { res.statusCode = 401; return res.end('Unauthorized'); }
+  if (haltIfPaused(res, 'cron/reference-identity')) return;
 
   // Sized against the 300s maxDuration in vercel.json, not against ambition.
   // Both passes are sequential and each record costs one SPARQL round trip, so

@@ -11,11 +11,13 @@
  */
 
 import { runFreshness } from '../reference/_freshness.js';
+import { haltIfPaused } from '../_lib/destination-automation.js';
 
 export default async function handler(req, res) {
   const auth = req.headers['authorization'] || '';
   const secret = process.env.CRON_SECRET || '';
   if (!secret || auth !== `Bearer ${secret}`) { res.statusCode = 401; return res.end('Unauthorized'); }
+  if (haltIfPaused(res, 'cron/reference-freshness')) return;
   if (!process.env.ANTHROPIC_API_KEY) { res.statusCode = 500; return res.end('ANTHROPIC_API_KEY not set'); }
 
   const ttlDays = parseInt(process.env.BRAIN_FRESHNESS_TTL_DAYS || '60', 10);
