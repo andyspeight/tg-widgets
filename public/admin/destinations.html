@@ -86,7 +86,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .kpi-v.ok{color:var(--ok)} .kpi-v.warn{color:var(--warn)} .kpi-v.dn{color:var(--dn)}
 
 /* ---------- section heads ---------- */
-.sec{margin-bottom:28px}
+.sec{margin-bottom:28px;scroll-margin-top:72px}
 .sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .sec-h h2{font-size:16px;font-weight:700;letter-spacing:-.015em}
 .sec-h p{font-size:13px;color:var(--mt)}
@@ -140,10 +140,6 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .fld input{min-width:220px}
 .fld input:focus,.fld select:focus{border-color:var(--br);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--br) 15%,transparent)}
 .f-count{margin-left:auto;font-size:12px;color:var(--mt);padding-bottom:9px}
-.jobbar{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--bl);border-bottom:1px solid var(--bd2);font-size:13px;flex-wrap:wrap}
-.jobbar b{font-weight:700;color:var(--bk)}
-.jobbar button{margin-left:auto;font-size:12px;font-weight:600;color:var(--bk);background:none;border:0;padding:6px 8px;border-radius:var(--r1);text-decoration:underline}
-.jobbar button:hover{background:color-mix(in srgb,var(--br) 12%,transparent)}
 
 /* ---------- tables ---------- */
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
@@ -174,6 +170,38 @@ a.nm:hover span{text-decoration:underline}
 .mini i{display:block;height:100%;background:var(--t1)}
 .mini i.low{background:var(--warn)}
 .mini i.vlow{background:var(--dn)}
+
+/* ---------- job view: what am I working on, how far along, what is stuck ---------- */
+.jv-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--mt);padding:8px 10px;margin:0 0 10px -10px;border-radius:var(--r2);border:0;background:none}
+.jv-back:hover{color:var(--tx);background:var(--bd2)}
+.jv-back svg{width:14px;height:14px}
+.jv-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;padding:20px;border-bottom:1px solid var(--bd2)}
+.jv-head h2{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.jv-head p{font-size:13px;color:var(--mt);margin-top:4px;max-width:70ch}
+.jv-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.jv-figs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--bd2)}
+.jv-fig{padding:16px 20px;border-left:1px solid var(--bd2)}
+.jv-fig:first-child{border-left:0}
+.jv-fig-l{font-size:12px;font-weight:600;color:var(--mt)}
+.jv-fig-v{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:6px}
+.jv-fig-s{font-size:12px;color:var(--fa);margin-top:3px}
+.jv-fig-v.ok{color:var(--ok)} .jv-fig-v.warn{color:var(--warn)} .jv-fig-v.dn{color:var(--dn)}
+.jv-prog{padding:16px 20px;border-bottom:1px solid var(--bd2)}
+.jv-prog-top{display:flex;justify-content:space-between;font-size:12px;color:var(--mt);margin-bottom:6px}
+.jv-prog-bar{height:10px;border-radius:5px;background:var(--t4);overflow:hidden}
+.jv-prog-bar i{display:block;height:100%;background:var(--t1);transition:width .4s ease-out}
+.jv-note{display:flex;gap:10px;align-items:flex-start;padding:12px 20px;border-bottom:1px solid var(--bd2);font-size:13px;background:var(--sf2)}
+.jv-note svg{width:15px;height:15px;flex:none;margin-top:2px}
+.jv-note.warn{background:var(--warn-bg);color:var(--warn)}
+.jv-note.warn b{color:var(--warn)}
+.jv-note.ok{background:var(--ok-bg);color:var(--ok)}
+.jv-note.ok b{color:var(--ok)}
+.jv-filters{display:flex;gap:8px;padding:12px 20px;border-bottom:1px solid var(--bd2);flex-wrap:wrap;align-items:flex-end}
+.rowtag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:var(--r1);white-space:nowrap}
+.rowtag.fix{background:var(--dn-bg);color:var(--dn)}
+.rowtag.near{background:var(--ok-bg);color:var(--ok)}
+@media (max-width:1100px){ .jv-figs{grid-template-columns:repeat(2,1fr)} .jv-fig:nth-child(3){border-left:0} .jv-fig:nth-child(n+3){border-top:1px solid var(--bd2)} }
+@media (max-width:760px){ .jv-figs{grid-template-columns:1fr} .jv-fig{border-left:0;border-top:1px solid var(--bd2)} .jv-fig:first-child{border-top:0} .jv-actions{margin-left:0;width:100%} .jv-actions .btn{width:100%;justify-content:center} }
 
 /* ---------- states ---------- */
 .msg{padding:56px 24px;text-align:center}
@@ -281,7 +309,58 @@ a.nm:hover span{text-decoration:underline}
       <div class="panel" id="types"></div>
     </section>
 
-    <section class="sec">
+    <section class="sec" id="jobview" hidden>
+      <button class="jv-back" id="jv-back" type="button">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>All jobs
+      </button>
+      <div class="panel">
+        <div class="jv-head">
+          <div>
+            <h2 id="jv-title"></h2>
+            <p id="jv-what"></p>
+          </div>
+          <div class="jv-actions">
+            <button class="btn" id="jv-export">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Export this batch
+            </button>
+            <a class="btn" id="jv-table" target="_blank" rel="noopener noreferrer">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
+              Open the table
+            </a>
+          </div>
+        </div>
+        <div class="jv-figs" id="jv-figs"></div>
+        <div class="jv-prog">
+          <div class="jv-prog-top"><span id="jv-prog-l"></span><span id="jv-prog-r" class="num"></span></div>
+          <div class="jv-prog-bar" role="img" id="jv-prog-img"><i id="jv-prog-i" style="width:0%"></i></div>
+        </div>
+        <div class="jv-note" id="jv-note" hidden><span id="jv-note-i"></span><span id="jv-note-t"></span></div>
+        <div class="jv-filters">
+          <div class="fld">
+            <label for="jv-q">Search this batch</label>
+            <input id="jv-q" type="search" placeholder="Name or parent…" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label for="jv-show">Show</label>
+            <select id="jv-show">
+              <option value="">Everything outstanding</option>
+              <option value="fix">Only the ones to correct</option>
+              <option value="near">Only the quick wins</option>
+            </select>
+          </div>
+          <div class="f-count" id="jv-count"></div>
+        </div>
+        <div class="scroll"><table class="tbl">
+          <thead><tr>
+            <th>Place</th><th>Type</th><th>This field</th><th>Also needs</th><th class="r">Done</th>
+          </tr></thead>
+          <tbody id="jv-rows"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <section class="sec" id="browse">
       <div class="tabs" role="tablist" aria-label="Destination views">
         <button class="tab" role="tab" id="tab-queue"  aria-controls="pane-queue"  aria-selected="true">Places<span class="pill" id="n-queue">0</span></button>
         <button class="tab" role="tab" id="tab-fields" aria-controls="pane-fields" aria-selected="false">Every gap</button>
@@ -291,10 +370,6 @@ a.nm:hover span{text-decoration:underline}
       </div>
 
       <div class="pane on" id="pane-queue" role="tabpanel" aria-labelledby="tab-queue">
-        <div class="jobbar" id="jobbar" hidden>
-          <span id="jobbar-txt"></span>
-          <button id="jobbar-clear" type="button">Show everything again</button>
-        </div>
         <div class="filters">
           <div class="fld">
             <label for="q">Search</label>
@@ -326,7 +401,7 @@ a.nm:hover span{text-decoration:underline}
         </div>
         <div class="scroll"><table class="tbl">
           <thead><tr>
-            <th>Place</th><th>Type</th><th>State</th><th id="th-gaps">What it still needs</th><th class="r">Done</th>
+            <th>Place</th><th>Type</th><th>State</th><th>What it still needs</th><th class="r">Done</th>
           </tr></thead>
           <tbody id="queue"></tbody>
         </table></div>
@@ -383,6 +458,7 @@ a.nm:hover span{text-decoration:underline}
   var typeFilter = '';
   var job = null;                       // {type, idx, label} when a job is being worked
   var state = { q: '', tier: 'needs', group: '' };
+  var jobState = { q: '', show: '' };
   var QUEUE_CAP = 400;
   var JOBS_SHOWN = 6;
 
@@ -420,6 +496,7 @@ a.nm:hover span{text-decoration:underline}
   /* ---------------- states ---------------- */
   var ICON_WARN = '<svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
   var ICON_EMPTY = '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+  var ICON_TICK = '<svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>';
   var ICON_OUT = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>';
 
   function fatal(title, body, retry) {
@@ -566,12 +643,7 @@ a.nm:hover span{text-decoration:underline}
       b.addEventListener('click', function () {
         var parts = b.dataset.job.split(':');
         var t = typeOf(parts[0]);
-        job = { type: parts[0], idx: Number(parts[1]), label: t.fields[Number(parts[1])].label };
-        state.tier = ''; $('f-tier').value = '';
-        selectTab($('tab-queue'));
-        renderQueue();
-        $('pane-queue').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        $('live').textContent = 'Showing the ' + job.label + ' job.';
+        openJob(parts[0], Number(parts[1]));
       });
     });
   }
@@ -610,7 +682,6 @@ a.nm:hover span{text-decoration:underline}
     Array.prototype.forEach.call($('types').querySelectorAll('.trow'), function (b) {
       b.addEventListener('click', function () {
         typeFilter = (typeFilter === b.dataset.type) ? '' : b.dataset.type;
-        if (job && job.type !== typeFilter && typeFilter) job = null;
         renderJobs(); renderTypes(); renderGroupFilter(); renderQueue(); renderFields(); renderBroken();
         $('live').textContent = typeFilter ? ('Narrowed to ' + typeOf(typeFilter).label) : 'Showing everything.';
       });
@@ -633,10 +704,6 @@ a.nm:hover span{text-decoration:underline}
   }
 
   function matches(r) {
-    if (job) {
-      if (r.type !== job.type) return false;
-      if (r.missing.indexOf(job.idx) === -1 && r.broken.indexOf(job.idx) === -1) return false;
-    }
     if (typeFilter && r.type !== typeFilter) return false;
     if (state.group && r.group !== state.group) return false;
     if (state.tier === 'needs') { if (r.tier !== 'partial' && r.tier !== 'skeleton') return false; }
@@ -715,14 +782,6 @@ a.nm:hover span{text-decoration:underline}
   function renderQueue() {
     var rows = D.records.filter(matches);
     $('n-queue').textContent = n(rows.length);
-
-    var jb = $('jobbar');
-    if (job) {
-      jb.hidden = false;
-      $('jobbar-txt').innerHTML = 'Working on <b>' + esc(job.label) + '</b> for ' +
-        esc(TYPE_PLURAL[job.type]) + ' &mdash; ' + n(rows.length) + ' to fix.';
-    } else jb.hidden = true;
-    $('th-gaps').textContent = job ? 'Also needs' : 'What it still needs';
 
     $('q-count').textContent = rows.length > QUEUE_CAP
       ? 'Showing the first ' + n(QUEUE_CAP) + ' of ' + n(rows.length) + ' — export for the full list'
@@ -817,6 +876,170 @@ a.nm:hover span{text-decoration:underline}
     }).join('');
   }
 
+
+  /* ---------------- the job view ----------------
+     Andy pressed "Work on this" and landed on a filtered table with no header,
+     no sense of how far along the job was and nothing saying which records were
+     broken rather than blank. All four answers were already in the payload; none
+     of them were on the screen. This is that screen. */
+
+  function jobRecords() {
+    if (!job) return [];
+    return D.records.filter(function (r) {
+      return r.type === job.type &&
+        (r.missing.indexOf(job.idx) !== -1 || r.broken.indexOf(job.idx) !== -1);
+    });
+  }
+
+  function rowKind(r) {
+    if (r.broken.indexOf(job.idx) !== -1) return 'fix';                 // holds something unusable
+    if (r.missing.length + r.broken.length === 1) return 'near';        // this field is all that is left
+    return '';
+  }
+
+  function openJob(typeKey, idx) {
+    var t = typeOf(typeKey);
+    var f = t.fields[idx];
+    job = { type: typeKey, idx: idx, label: f.label, field: f, type_: t };
+    jobState = { q: '', show: '' };
+    $('jv-q').value = ''; $('jv-show').value = '';
+    $('browse').hidden = true;
+    $('jobview').hidden = false;
+    renderJobView();
+    $('jobview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('jv-back').focus({ preventScroll: true });
+    $('live').textContent = 'Opened the ' + job.label + ' job.';
+  }
+
+  function closeJob() {
+    job = null;
+    $('jobview').hidden = true;
+    $('browse').hidden = false;
+    $('browse').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('live').textContent = 'Back to all jobs.';
+  }
+
+  function renderJobView() {
+    var t = job.type_, f = job.field;
+    var rows = jobRecords();
+    var fix = rows.filter(function (r) { return rowKind(r) === 'fix'; });
+    var near = rows.filter(function (r) { return rowKind(r) === 'near'; });
+    var done = f.filled, total = t.count;
+
+    $('jv-title').textContent = f.label + ' · ' + t.label;
+    var what = [];
+    if (f.hint) what.push(f.hint + '.');
+    what.push(f.tier === 'core'
+      ? 'A page cannot go live without it.'
+      : 'Extra depth, once the basics are in.');
+    what.push('Part of ' + f.group + '.');
+    $('jv-what').textContent = what.join(' ');
+
+    var url = D.baseId ? 'https://airtable.com/' + D.baseId + '/' + t.tableId : null;
+    var tableBtn = $('jv-table');
+    if (url) { tableBtn.href = url; tableBtn.hidden = false; }
+    else tableBtn.hidden = true;
+
+    $('jv-figs').innerHTML = [
+      { l: 'Already done', v: n(done), cls: 'ok', s: pct(done, total) + '% of ' + n(total) + ' ' + TYPE_PLURAL[job.type] },
+      { l: 'Still to write', v: n(f.empty), cls: '', s: 'the field is blank' },
+      { l: 'To correct', v: n(f.invalid), cls: f.invalid ? 'dn' : '', s: 'something is there but unusable' },
+      { l: 'Quick wins', v: n(near.length), cls: near.length ? 'ok' : '', s: 'this is the only thing they still need' }
+    ].map(function (x) {
+      return '<div class="jv-fig"><div class="jv-fig-l">' + esc(x.l) + '</div>' +
+        '<div class="jv-fig-v num ' + x.cls + '">' + x.v + '</div>' +
+        '<div class="jv-fig-s">' + esc(x.s) + '</div></div>';
+    }).join('');
+
+    var p = pct(done, total);
+    $('jv-prog-l').textContent = n(done) + ' of ' + n(total) + ' have this field';
+    $('jv-prog-r').textContent = p + '%';
+    $('jv-prog-i').style.width = p + '%';
+    $('jv-prog-img').setAttribute('aria-label', n(done) + ' of ' + n(total) + ' done, ' + p + ' per cent');
+
+    // What needs a person, said once, above the list.
+    var note = $('jv-note');
+    if (f.invalid) {
+      note.hidden = false; note.className = 'jv-note warn';
+      $('jv-note-i').innerHTML = ICON_WARN;
+      $('jv-note-t').innerHTML = '<b>' + n(f.invalid) + ' need a look before anything else.</b> ' +
+        'They hold a value that cannot be used, so they need correcting rather than writing. ' +
+        'They are marked "to correct" and listed first.';
+    } else if (near.length) {
+      note.hidden = false; note.className = 'jv-note ok';
+      $('jv-note-i').innerHTML = ICON_TICK;
+      $('jv-note-t').innerHTML = '<b>' + n(near.length) + ' are one field from ready.</b> ' +
+        'Filling this one field finishes the record. Worth doing first.';
+    } else note.hidden = true;
+
+    renderJobRows();
+  }
+
+  function renderJobRows() {
+    var rows = jobRecords().filter(function (r) {
+      if (jobState.show && rowKind(r) !== jobState.show) return false;
+      if (jobState.q) {
+        var hay = (r.name + ' ' + (r.parent || '') + ' ' + (r.group || '')).toLowerCase();
+        if (hay.indexOf(jobState.q) === -1) return false;
+      }
+      return true;
+    });
+
+    // Correct first, then the ones a single field finishes, then the rest.
+    var rank = { fix: 0, near: 1, '': 2 };
+    rows.sort(function (a, b2) {
+      var d = rank[rowKind(a)] - rank[rowKind(b2)];
+      return d !== 0 ? d : b2.priority - a.priority;
+    });
+
+    $('jv-count').textContent = rows.length > QUEUE_CAP
+      ? 'Showing the first ' + n(QUEUE_CAP) + ' of ' + n(rows.length) + ' — export for the full batch'
+      : n(rows.length) + (rows.length === 1 ? ' place' : ' places');
+
+    if (!rows.length) {
+      $('jv-rows').innerHTML = emptyRow(5, 'Nothing here',
+        'Nothing in this batch matches that. Clear the search or the Show filter.');
+      return;
+    }
+
+    $('jv-rows').innerHTML = rows.slice(0, QUEUE_CAP).map(function (r) {
+      var kind = rowKind(r);
+      var thisField = kind === 'fix'
+        ? '<span class="rowtag fix">To correct</span>'
+        : '<span class="chip">Blank</span>';
+      var alsoTag = kind === 'near' ? ' <span class="rowtag near">Only this left</span>' : '';
+      return '<tr><td>' + nameCell(r) + '</td>' +
+        '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
+        '<td>' + thisField + alsoTag + '</td>' +
+        '<td>' + jobAlsoCell(r) + '</td>' +
+        '<td class="r">' + doneCell(r) + '</td></tr>';
+    }).join('');
+  }
+
+  function jobAlsoCell(r) {
+    if (r.tier === 'skeleton') return '<span class="chip none">Everything else too</span>';
+    var others = {};
+    r.broken.concat(r.missing).forEach(function (i) {
+      if (i === job.idx) return;
+      others[fieldAt(r.type, i).group] = true;
+    });
+    var keys = Object.keys(others);
+    if (!keys.length) return '<span class="chip none">Nothing else</span>';
+    return '<div class="gaps">' + keys.slice(0, 4).map(function (g) {
+      return '<span class="chip">' + esc(g) + '</span>';
+    }).join('') + (keys.length > 4 ? '<span class="chip">+' + (keys.length - 4) + '</span>' : '') + '</div>';
+  }
+
+  $('jv-back').addEventListener('click', closeJob);
+  var jvTimer = null;
+  $('jv-q').addEventListener('input', function (e) {
+    var v = e.target.value.trim().toLowerCase();
+    clearTimeout(jvTimer);
+    jvTimer = setTimeout(function () { jobState.q = v; renderJobRows(); }, 250);
+  });
+  $('jv-show').addEventListener('change', function (e) { jobState.show = e.target.value; renderJobRows(); });
+  $('jv-export').addEventListener('click', function () { exportRows(jobRecords(), job.label); });
+
   /* ---------------- filters ---------------- */
   var timer = null;
   $('q').addEventListener('input', function (e) {
@@ -826,11 +1049,6 @@ a.nm:hover span{text-decoration:underline}
   });
   $('f-tier').addEventListener('change', function (e) { state.tier = e.target.value; renderQueue(); });
   $('f-group').addEventListener('change', function (e) { state.group = e.target.value; renderQueue(); });
-  $('jobbar-clear').addEventListener('click', function () {
-    job = null; state.tier = 'needs'; $('f-tier').value = 'needs';
-    renderQueue();
-    $('live').textContent = 'Job cleared.';
-  });
 
   /* ---------------- tabs ---------------- */
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
@@ -855,9 +1073,7 @@ a.nm:hover span{text-decoration:underline}
   });
 
   /* ---------------- export ---------------- */
-  $('btn-export').addEventListener('click', function () {
-    if (!D) return;
-    var rows = D.records.filter(matches);
+  function exportRows(rows, label) {
     var head = ['Type', 'Place', 'Parent', 'Group', 'State', 'Done %', 'Essentials filled', 'Essentials total',
                 'Fields to correct', 'Fields missing', 'Airtable'];
     var lines = [head.join(',')];
@@ -870,22 +1086,27 @@ a.nm:hover span{text-decoration:underline}
         airtableUrl(r) || ''
       ];
       lines.push(cells.map(function (c) {
-        var s = String(c == null ? '' : c);
+        var v = String(c == null ? '' : c);
         // Neutralise spreadsheet formula injection: a leading =, +, - or @ is
         // executed by Excel and Sheets on open.
-        if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
-        return '"' + s.replace(/"/g, '""') + '"';
+        if (/^[=+\-@\t\r]/.test(v)) v = "'" + v;
+        return '"' + v.replace(/"/g, '""') + '"';
       }).join(','));
     });
-    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'destination-gaps-' + (job ? job.label.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' : '') +
+    a.download = 'destination-gaps-' +
+      (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' : '') +
       new Date().toISOString().slice(0, 10) + '.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     $('live').textContent = 'Exported ' + n(rows.length) + ' rows.';
+  }
+
+  $('btn-export').addEventListener('click', function () {
+    if (D) exportRows(D.records.filter(matches), '');
   });
 
   $('refresh').addEventListener('click', function () { load(true); });

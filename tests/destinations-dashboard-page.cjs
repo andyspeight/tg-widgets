@@ -343,48 +343,114 @@ async function payload(mod) {
     assert.strictEqual($('jobs').querySelectorAll('[data-job]').length, jobs);
   });
 
-  t('working a job filters the list to exactly the places missing that field', () => {
+  t('pressing Work on this opens a job view, not a scroll', () => {
     const btn = $('jobs').querySelector('[data-job]');
     const [typeKey, idxRaw] = btn.dataset.job.split(':');
     const idx = Number(idxRaw);
     job0 = { type: typeKey, idx, label: data.types.find(t => t.key === typeKey).fields[idx].label };
     btn.dispatchEvent(new win.Event('click', { bubbles: true }));
 
+    assert.strictEqual($('jobview').hidden, false, 'the job view should open');
+    assert.strictEqual($('browse').hidden, true, 'the browse tabs should stand aside');
+  });
+
+  // The four questions Andy asked after pressing the button.
+  t('it says WHAT it is working on', () => {
+    assert.ok($('jv-title').textContent.includes(job0.label), 'the field should be named');
+    const what = $('jv-what').textContent;
+    assert.ok(what.length > 20, `expected a description, got "${what}"`);
+    assert.match(what, /go live|depth/, 'should say whether it blocks publishing');
+  });
+
+  t('it says HOW FAR ALONG it is', () => {
+    const t0 = data.types.find(t => t.key === job0.type);
+    const f = t0.fields[job0.idx];
+    assert.match($('jv-prog-l').textContent, new RegExp(`${f.filled.toLocaleString('en-GB')} of`));
+    assert.match($('jv-prog-r').textContent, /^\d+%$/);
+    const w = parseFloat($('jv-prog-i').style.width);
+    assert.ok(w >= 0 && w <= 100, `bar width should be a percentage, got ${w}`);
+    assert.match($('jv-prog-img').getAttribute('aria-label'), /per cent/);
+  });
+
+  t('it says WHAT THE ISSUES ARE, separating blank from wrong', () => {
+    const t0 = data.types.find(t => t.key === job0.type);
+    const f = t0.fields[job0.idx];
+    const figs = [...$('jv-figs').querySelectorAll('.jv-fig')];
+    assert.strictEqual(figs.length, 4);
+    const byLabel = {};
+    figs.forEach(x => { byLabel[x.querySelector('.jv-fig-l').textContent.trim()] =
+      Number(x.querySelector('.jv-fig-v').textContent.replace(/[^0-9]/g, '')); });
+    assert.strictEqual(byLabel['Already done'], f.filled);
+    assert.strictEqual(byLabel['Still to write'], f.empty);
+    assert.strictEqual(byLabel['To correct'], f.invalid);
+    assert.ok('Quick wins' in byLabel);
+  });
+
+  t('it says WHAT NEEDS A LOOK, once, above the list', () => {
+    const t0 = data.types.find(t => t.key === job0.type);
+    const f = t0.fields[job0.idx];
+    if (f.invalid > 0) {
+      assert.strictEqual($('jv-note').hidden, false);
+      assert.match($('jv-note-t').textContent, /need a look before anything else/);
+    }
+  });
+
+  t('the batch holds exactly the records missing or breaking that field', () => {
     const expected = data.records.filter(r =>
-      r.type === typeKey && (r.missing.includes(idx) || r.broken.includes(idx))).length;
-    const shown = $('queue').querySelectorAll('tr').length;
-    assert.strictEqual(shown, Math.min(expected, 400), `expected ${expected} rows, got ${shown}`);
+      r.type === job0.type && (r.missing.includes(job0.idx) || r.broken.includes(job0.idx))).length;
     assert.ok(expected > 0, 'the job should have work in it');
+    assert.match($('jv-count').textContent, new RegExp(String(Math.min(expected, 400))));
   });
 
-  t('working a job says so, and the queue tab is brought forward', () => {
-    assert.strictEqual($('jobbar').hidden, false);
-    assert.match($('jobbar-txt').textContent, /Working on/);
-    assert.strictEqual($('tab-queue').getAttribute('aria-selected'), 'true');
+  t('the ones to correct are listed before the rest', () => {
+    const tags = [...$('jv-rows').querySelectorAll('tr td:nth-child(3)')].map(c => c.textContent.trim());
+    const firstPlain = tags.findIndex(x => !x.startsWith('To correct'));
+    const lastFix = tags.map((x, i) => x.startsWith('To correct') ? i : -1).filter(i => i >= 0).pop();
+    if (firstPlain !== -1 && lastFix !== undefined) {
+      assert.ok(lastFix < firstPlain, 'every "to correct" row should come first');
+    }
   });
 
-  t('inside a job the rows show what ELSE is needed, not the job name again', () => {
-    assert.strictEqual($('th-gaps').textContent, 'Also needs');
-    const cells = [...$('queue').querySelectorAll('tr')].map(r => r.querySelectorAll('td')[3]);
-    assert.ok(cells.length > 0);
-    cells.slice(0, 20).forEach(c => {
-      const chips = c.querySelectorAll('.chip').length;
-      assert.ok(chips >= 1 && chips <= 6, `expected 1-6 chips, got ${chips}`);
-      assert.ok(!c.textContent.includes(job0.label),
-        'the field being worked is already named in the bar above; repeating it per row is noise');
-      // an empty record says it in words rather than listing every group
-      const state = c.parentElement.querySelectorAll('td')[2].textContent.trim();
-      if (state === 'Not started') assert.match(c.textContent, /Everything else too/);
-    });
+  t('a row says whether this field is blank or wrong, and what else is needed', () => {
+    const row = $('jv-rows').querySelector('tr');
+    const cells = row.querySelectorAll('td');
+    assert.match(cells[2].textContent, /Blank|To correct/);
+    assert.ok(cells[3].textContent.trim().length > 0, 'the "also needs" cell should say something');
+    assert.ok(!cells[3].textContent.includes(job0.label),
+      'the field being worked is named in the header; repeating it per row is noise');
   });
 
+  t('the batch can be narrowed to just the ones to correct', () => {
+    $('jv-show').value = 'fix';
+    $('jv-show').dispatchEvent(new win.Event('change'));
+    const tags = [...$('jv-rows').querySelectorAll('tr td:nth-child(3)')].map(c => c.textContent.trim());
+    if (tags.length) assert.ok(tags.every(x => x.startsWith('To correct')), `leaked: ${[...new Set(tags)]}`);
+    $('jv-show').value = ''; $('jv-show').dispatchEvent(new win.Event('change'));
+  });
 
-  t('leaving a job restores the full list', () => {
-    const inJob = $('queue').querySelectorAll('tr').length;
-    $('jobbar-clear').dispatchEvent(new win.Event('click', { bubbles: true }));
-    assert.strictEqual($('jobbar').hidden, true);
-    assert.strictEqual($('th-gaps').textContent, 'What it still needs');
-    assert.ok($('queue').querySelectorAll('tr').length > inJob, 'should show more places again');
+  t('the batch links out to the whole table as well as each record', () => {
+    assert.match($('jv-table').getAttribute('href'), /^https:\/\/airtable\.com\/app[A-Za-z0-9]{14}\/tbl[A-Za-z0-9]{14}$/);
+    const rowLink = $('jv-rows').querySelector('a.nm');
+    assert.match(rowLink.getAttribute('href'), /\/rec/);
+  });
+
+  t('the batch exports on its own', () => {
+    $('jv-export').dispatchEvent(new win.Event('click', { bubbles: true }));
+    assert.ok(win.__lastBlob, 'a CSV should have been produced');
+  });
+
+  t('the way back is not tucked under the sticky bar', () => {
+    // jsdom has no layout, so assert the rule that prevents it: a section
+    // scrolled to the top must reserve the sticky bar's height.
+    const css = doc.querySelector('style').textContent;
+    assert.match(css, /\.sec\{[^}]*scroll-margin-top:\s*\d+px/,
+      'sections need scroll-margin-top or scrollIntoView hides the back button behind the bar');
+  });
+
+  t('All jobs takes you back', () => {
+    $('jv-back').dispatchEvent(new win.Event('click', { bubbles: true }));
+    assert.strictEqual($('jobview').hidden, true);
+    assert.strictEqual($('browse').hidden, false);
   });
 
   console.log('\nReadability');
