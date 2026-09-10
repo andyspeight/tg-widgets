@@ -27,8 +27,8 @@
  */
 
 import {
-  configured, zadd, zrangebyscore, zrem, setJson, getJson,
-  lpushCapped, lrange, incr, getString, setString, claimNxEx, del, keys,
+  configured, zrangebyscore, zrem, setJson, getJson,
+  lpushCapped, lrange, getString, setString, claimNxEx, del, pipeline, zcard,
 } from '../../_redis.js';
 import { estimateFieldUsd } from './_model.js';
 
@@ -132,19 +132,28 @@ export async function budgetState() {
  * @param {Array<{type,recordId,fieldIdx,priority}>} items
  */
 export async function enqueue(items) {
+  // One round trip per chunk, not one per record. Queueing 498 records as 498
+  // separate calls is what timed the endpoint out on 10 Sep; a chunked pipeline
+  // does the same work in three requests.
+  const CHUNK = 250;
   let added = 0;
-  for (const it of items) {
-    const id = itemId(it.type, it.recordId, it.fieldIdx);
-    // Higher priority first: the sorted set reads low-to-high, so negate.
-    await zadd(K.pending, -(Number(it.priority) || 0), id);
-    added++;
+  for (let i = 0; i < items.length; i += CHUNK) {
+    const slice = items.slice(i, i + CHUNK);
+    const cmds = slice.map(it => [
+      'ZADD', K.pending,
+      // Higher priority first: the sorted set reads low-to-high, so negate.
+      String(-(Number(it.priority) || 0)),
+      itemId(it.type, it.recordId, it.fieldIdx),
+    ]);
+    const out = await pipeline(cmds);
+    if (out === null) throw new Error('the queue could not be written to');
+    added += slice.length;
   }
   return added;
 }
 
 export async function pendingCount() {
-  const all = await zrangebyscore(K.pending, '-inf', '+inf').catch(() => []);
-  return Array.isArray(all) ? all.length : 0;
+  return await zcard(K.pending);
 }
 
 export async function peek(limit = 20) {
@@ -184,13 +193,17 @@ export async function release(id) {
   await del(K.lock(id)).catch(() => {});
 }
 
+/**
+ * Empty the queue. Stop has to be fast and has to work even when the queue is
+ * enormous, because a runaway queue is exactly when you press it: deleting the
+ * whole key in one command beats removing five hundred members one at a time.
+ */
 export async function clearQueue() {
+  const n = await zcard(K.pending);
   const all = await zrangebyscore(K.pending, '-inf', '+inf').catch(() => []);
-  for (const id of (all || [])) {
-    await zrem(K.pending, id).catch(() => {});
-    await del(K.lock(id)).catch(() => {});
-  }
-  return (all || []).length;
+  const cmds = [['DEL', K.pending]].concat((all || []).slice(0, 900).map(id => ['DEL', K.lock(id)]));
+  await pipeline(cmds);
+  return n;
 }
 
 const readLog = async (key, limit) => {

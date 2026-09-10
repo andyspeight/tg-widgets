@@ -111,7 +111,7 @@
       "maxDuration": 60
     },
     "api/admin/destinations-fill.js": {
-      "maxDuration": 30
+      "maxDuration": 60
     }
   },
   "crons": [

@@ -668,6 +668,15 @@ a.nm:hover span{text-decoration:underline}
     return out;
   }
 
+  /* What the runner can actually do today. Facts need two independent sources
+     to agree and that fixer is not built, so offering a button for them would
+     be offering to do nothing slowly. */
+  var FACT_FIELDS = /^(Climate |Lat$|Lng$|Latitude|Longitude|IATA Code|City Served|Country Text|Official Website|Wikipedia URL|Source \d URL|Verified Date)/;
+  var MANUAL_FIELDS = /^(Image URLs|Image Attribution|Hero Image URL|Best For Tags|Who Is It Best For|Best Paired)/;
+  function canFill(label) {
+    return !FACT_FIELDS.test(label) && !MANUAL_FIELDS.test(label);
+  }
+
   function renderJobs() {
     var jobs = allJobs().slice(0, JOBS_SHOWN);
     if (!jobs.length) {
@@ -682,6 +691,7 @@ a.nm:hover span{text-decoration:underline}
       else bits.push(j.group);
       if (j.tier === 'core') bits.push('needed before a page can go live');
       if (j.invalid) bits.push(n(j.invalid) + ' hold something unusable');
+      if (!canFill(j.label)) bits.push('the runner cannot fill this one yet');
       return '<div class="job">' +
         '<div><div class="job-t">' + esc(j.label) + ' &middot; ' + esc(TYPE_PLURAL[j.type]) + '</div>' +
           '<div class="job-s">' + esc(bits.join(' &middot; ')).replace(/&amp;middot;/g, '&middot;') + '</div></div>' +
@@ -1075,6 +1085,7 @@ a.nm:hover span{text-decoration:underline}
 
   /* One record, one field. The same queue as "do all", just a batch of one. */
   function fillCell(r) {
+    if (job && !canFill(job.label)) return '<span class="rowstate">—</span>';
     var st = rowState[r.id];
     if (st === 'queued') return '<span class="rowstate queued">Queued</span>';
     if (st === 'saved') return '<span class="rowstate saved">Saved</span>';
@@ -1127,8 +1138,21 @@ a.nm:hover span{text-decoration:underline}
       headers: payload ? { 'content-type': 'application/json' } : undefined,
       body: payload ? JSON.stringify(payload) : undefined,
     }).then(function (r) {
-      return r.json().then(function (j) {
-        if (!r.ok) throw new Error(j && j.error ? j.error : 'Request failed (' + r.status + ')');
+      // A gateway timeout returns an HTML or plain-text page, not JSON. Parsing
+      // it blindly is what turned a 30-second timeout into "Unexpected token
+      // 'A'" on Andy's screen. Read the text, then decide.
+      return r.text().then(function (body) {
+        var j = null;
+        try { j = JSON.parse(body); } catch (e) { /* not JSON, and that is the story */ }
+        if (!r.ok) {
+          if (j && j.error) throw new Error(j.error);
+          if (r.status === 504 || r.status === 502) {
+            throw new Error('The server took too long and gave up. Nothing was queued. ' +
+              'Try a smaller batch, or use the per-row Fill buttons.');
+          }
+          throw new Error('Request failed (' + r.status + '). ' + String(body).slice(0, 120));
+        }
+        if (!j) throw new Error('The server answered with something that was not readable.');
         return j;
       });
     });
@@ -1169,7 +1193,10 @@ a.nm:hover span{text-decoration:underline}
     l.innerHTML = bits.join(' ');
 
     $('jv-stop').hidden = !(R.pending > 0);
-    $('jv-doall').disabled = busy;
+    var fillable = canFill(job.label);
+    $('jv-doall').disabled = busy || !fillable;
+    $('jv-doall').title = fillable ? '' : 'The runner cannot fill this field yet';
+    $('jv-doall').textContent = fillable ? 'Fill all of these' : 'Cannot fill this yet';
 
     var b = R.budget || {};
     var used = b.capUsd ? Math.min(100, Math.round((b.spentUsd / b.capUsd) * 100)) : 0;

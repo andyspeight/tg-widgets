@@ -284,3 +284,49 @@ export async function setNxEx(key, value, ttlSeconds) {
     return false;
   }
 }
+
+/**
+ * Run many commands in ONE HTTP round trip (Upstash REST pipeline).
+ *
+ * Added 10 Sep 2026 after the destination filler timed out: queueing 498
+ * records did 498 sequential ZADDs, each its own request, which blew a 30
+ * second function budget and tripped Upstash's rate limit on the way. Every
+ * helper above is one call per command, which is right for the one-or-two-key
+ * work the rest of this repo does and wrong the moment a loop is involved.
+ *
+ * @param {Array<Array<string>>} commands e.g. [['ZADD','k','1','a'], ['DEL','x']]
+ * @returns {Promise<Array|null>} one entry per command, or null if unconfigured/failed
+ */
+export async function pipeline(commands) {
+  if (!configured()) return null;
+  if (!Array.isArray(commands) || !commands.length) return [];
+  try {
+    const res = await fetch(`${REDIS_URL}/pipeline`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${REDIS_TOKEN}`,
+        'content-type': 'application/json',
+      },
+      // Generous next to the per-read timeout: this call is doing the work of
+      // hundreds, so bounding it at 2.5s would guarantee the failure it exists
+      // to prevent.
+      signal: AbortSignal.timeout(15000),
+      body: JSON.stringify(commands.map(c => c.map(String))),
+    });
+    if (!res.ok) {
+      console.error('[redis] pipeline HTTP', res.status, 'for', commands.length, 'commands');
+      return null;
+    }
+    const j = await res.json();
+    return Array.isArray(j) ? j.map(x => (x && 'result' in x ? x.result : null)) : null;
+  } catch (e) {
+    console.error('[redis] pipeline error', e.message);
+    return null;
+  }
+}
+
+/** ZCARD — how many members, without dragging every member across the wire. */
+export async function zcard(key) {
+  const n = await callRedis('zcard', key);
+  return Number.isFinite(Number(n)) ? Number(n) : 0;
+}

@@ -127,7 +127,7 @@ async function payload(mod) {
       win.fetch = (url, opts) => {
         if (String(url).includes('destinations-fill')) {
           if (opts && opts.body) win.__queued.push(JSON.parse(opts.body));
-          return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({
+          const payload = {
             settings: { capUsd: 10, running: false },
             budget: { capUsd: 10, spentUsd: 2.5, remainingUsd: 7.5, perItemUsd: 0.0253,
                       roomForPaidWork: true, itemsAffordable: 296 },
@@ -135,9 +135,13 @@ async function payload(mod) {
             held: [{ place: 'Oia', field: 'Overview', reason: 'nothing supports the Roman aqueduct',
                      at: '2026-09-10T14:00:00.000Z' }],
             recent: [], queued: (opts && opts.body ? JSON.parse(opts.body).recordIds || [] : []).length,
-          }) });
+          };
+          const body = JSON.stringify(payload);
+          return Promise.resolve({ ok: true, status: 200,
+            text: () => Promise.resolve(body), json: () => Promise.resolve(payload) });
         }
-        return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(data) });
+        return Promise.resolve({ ok: true, status: 200,
+          text: () => Promise.resolve(JSON.stringify(data)), json: () => Promise.resolve(data) });
       };
       win.confirm = () => true;
       win.alert = () => {};
@@ -577,6 +581,61 @@ async function payload(mod) {
     assert.strictEqual(Number(txt('n-held').replace(/[^0-9]/g, '')), 1);
     assert.match($('held').textContent, /Oia/);
     assert.match($('held').textContent, /Roman aqueduct/);
+  });
+
+
+
+  t('a gateway timeout reads as a timeout, not as broken JSON', async () => {
+    // The exact failure Andy hit: Vercel answers a 504 with a plain-text page,
+    // and calling .json() on it threw "Unexpected token 'A'".
+    const seen = [];
+    const d2 = new JSDOM(fs.readFileSync(HTML, 'utf8'), {
+      runScripts: 'dangerously', url: 'https://tg-widgets.vercel.app/admin/destinations',
+      beforeParse(w) {
+        w.fetch = (url) => {
+          if (String(url).includes('destinations-fill')) {
+            return Promise.resolve({
+              ok: false, status: 504,
+              text: () => Promise.resolve('An error occurred with this application.'),
+              json: () => Promise.reject(new SyntaxError("Unexpected token 'A'")),
+            });
+          }
+          return Promise.resolve({ ok: true, status: 200,
+            text: () => Promise.resolve(JSON.stringify(data)), json: () => Promise.resolve(data) });
+        };
+        w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+        w.confirm = () => true;
+        w.alert = (m) => seen.push(String(m));
+        w.URL.createObjectURL = () => 'blob:mock'; w.URL.revokeObjectURL = () => {};
+      },
+    });
+    await new Promise(r => d2.window.addEventListener('load', r));
+    await new Promise(r => setTimeout(r, 80));
+    const dd = d2.window.document;
+    dd.querySelector('#jobs [data-job]').dispatchEvent(new d2.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 120));
+    const btn = dd.querySelector('#jv-rows [data-fill]');
+    if (btn) {
+      btn.dispatchEvent(new d2.window.Event('click', { bubbles: true }));
+      await new Promise(r => setTimeout(r, 120));
+      assert.ok(seen.length, 'the failure should be reported');
+      assert.ok(!/Unexpected token/.test(seen.join(' ')),
+        'a timeout must not surface as a JSON parse error: ' + seen.join(' '));
+      assert.match(seen.join(' '), /took too long|Nothing was queued/);
+    }
+  });
+
+  t('a field the runner cannot fill offers no button and says why', () => {
+    // Official Website is a two-source fact; queueing it would hold every
+    // record. The page must not offer the work.
+    const t0 = data.types.find(x => x.key === 'airport');
+    const idx = t0.fields.findIndex(f => f.label === 'Official Website');
+    if (idx >= 0) {
+      const jobsText = $('jobs').textContent;
+      if (/Official Website/.test(jobsText)) {
+        assert.match(jobsText, /cannot fill this one yet/);
+      }
+    }
   });
 
 

@@ -104,6 +104,17 @@ export default async function handler(req, res) {
           error: 'This field is not one the runner writes. ' + (plan.why || ''),
         });
       }
+      // Refuse work that could only ever be held. On 10 Sep this endpoint
+      // happily queued 498 airports for Official Website, a two-source fact
+      // whose fixer is not built, and the worker then held four a minute for
+      // an hour achieving nothing. Saying no here is the honest answer.
+      if (plan.kind === 'fact') {
+        return json(res, 400, {
+          error: field.label + ' is a fact that needs two independent sources to agree, ' +
+                 'and that fixer is not built yet. Queueing it would hold every record ' +
+                 'without filling any. Try a written field such as Overview or Tagline.',
+        });
+      }
 
       // The browser sends the record ids it is showing, so the queue matches
       // exactly what Andy was looking at when he pressed the button.
