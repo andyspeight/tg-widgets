@@ -140,8 +140,11 @@ export const TYPES = [
       F('fldxze1iXQRrJ0UZW', 'Events JSON', 'json', 'rich', 'Structured'),
       F('fldZQTVNuqRXHileW', 'Best For Tags', 'multi', 'core', 'Structured'),
       F('fldPSVfkYVAIhtNDp', 'Trip Duration Sweet Spot', 'multi', 'rich', 'Trip planning'),
-      F('fldLDQj6e1K4lq3tT', 'Lat', 'lat', 'core', 'Geo'),
-      F('fld2pa6AKkU6dIq7O', 'Lng', 'lng', 'core', 'Geo'),
+      // Latitude/Longitude, not the empty Lat/Lng duplicates. Scoring the
+      // duplicates made every one of the 285 cities fail two core fields, which
+      // is why this table read 0% ready on the first live scan (10 Sep 2026).
+      F('fldjk3yUCbVQRuxx8', 'Latitude', 'lat', 'core', 'Geo'),
+      F('fldNSlAA0Qb1akknz', 'Longitude', 'lng', 'core', 'Geo'),
       F('fldt3898YIanGbfzc', 'Image URLs', 'lines3', 'core', 'Media'),
       F('fldzdo1vtYbAvpt0v', 'Image Attribution', 'text', 'rich', 'Media'),
       F('fldFhKUCfLONw0acp', 'SEO Meta Title', 'text', 'core', 'SEO'),
@@ -182,8 +185,10 @@ export const TYPES = [
       F('fldUyjDhtoA43hdHv', 'Highlights JSON', 'json', 'core', 'Structured'),
       F('fldWRl0d0z1MY6DMq', 'Events JSON', 'json', 'rich', 'Structured'),
       F('fldTmH3gT1wT48PLn', 'Best For Tags', 'multi', 'core', 'Structured'),
-      F('flda4Fa7bBj6Nf850', 'Lat', 'lat', 'core', 'Geo'),
-      F('fldpXXwrWplV7DiKN', 'Lng', 'lng', 'core', 'Geo'),
+      // As on Cities: the data lives in Latitude/Longitude, and Lat/Lng are
+      // empty duplicates that made all 495 resorts unreachable.
+      F('fld4INRwIKWCG21RV', 'Latitude', 'lat', 'core', 'Geo'),
+      F('fldd8CwfdzCDhW68w', 'Longitude', 'lng', 'core', 'Geo'),
       F('fldBMns5p5ChZCriU', 'Image URLs', 'lines3', 'core', 'Media'),
       F('fldMn6hYB1o5OwJpN', 'Image Attribution', 'text', 'rich', 'Media'),
       F('fldg0iscgZqn3hjGm', 'SEO Meta Title', 'text', 'core', 'SEO'),
