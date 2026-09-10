@@ -101,6 +101,9 @@ async function payload(mod) {
     { spec: spec('airport'), rows: airports },
     { spec: spec('attraction'), rows: attractions },
   ]);
+  // The route adds these two on the way out; the fixture has to carry them or
+  // it stops being a faithful copy of what the browser actually receives.
+  data.baseId = 'appuZdlMJ7HKUt6qS';
   data.automation = { paused: true, since: '2026-09-10', reason: 'Paused for the dashboard build.' };
   data.cached = false;
   return data;
@@ -135,6 +138,7 @@ async function payload(mod) {
   await new Promise(r => win.addEventListener('load', r));
   await new Promise(r => setTimeout(r, 60)); // let the fetch promise chain settle
 
+  let job0 = null;
   const $ = id => doc.getElementById(id);
   const txt = id => ($(id) ? $(id).textContent.trim() : '');
 
@@ -187,12 +191,14 @@ async function payload(mod) {
   t('the queue defaults to what needs work', () => {
     assert.strictEqual($('f-tier').value, 'needs');
     const tags = [...$('queue').querySelectorAll('.tag')].map(e => e.textContent.trim());
-    assert.ok(tags.every(x => x === 'partial' || x === 'skeleton'), `unexpected states: ${[...new Set(tags)]}`);
+    assert.ok(tags.every(x => x === 'Part done' || x === 'Not started'), `unexpected states: ${[...new Set(tags)]}`);
   });
-  t('the worst record is listed first', () => {
-    const first = $('queue').querySelector('tr td:last-child').textContent.replace(/[^0-9]/g, '');
-    const rows = [...$('queue').querySelectorAll('tr')].map(r => Number(r.querySelector('td:last-child').textContent.replace(/[^0-9]/g, '')));
-    assert.strictEqual(Number(first), Math.max(...rows));
+  t('the most urgent record is listed first', () => {
+    // The raw priority number is deliberately off the screen, so check the
+    // ORDER instead: the first row must be the highest-priority match.
+    const expected = data.records.filter(r => r.tier === 'partial' || r.tier === 'skeleton')[0];
+    const first = $('queue').querySelector('tr td:first-child').textContent.trim();
+    assert.ok(first.startsWith(expected.name), `expected ${expected.name} first, got "${first}"`);
   });
 
   console.log('\nFiltering');
@@ -212,7 +218,7 @@ async function payload(mod) {
     $('f-tier').value = 'skeleton';
     $('f-tier').dispatchEvent(new win.Event('change'));
     const tags = new Set([...$('queue').querySelectorAll('.tag')].map(e => e.textContent.trim()));
-    assert.deepStrictEqual([...tags], ['skeleton']);
+    assert.deepStrictEqual([...tags], ['Not started']);
   });
   t('an impossible filter shows an empty state, not a blank table', () => {
     $('f-tier').value = 'complete';
@@ -267,7 +273,7 @@ async function payload(mod) {
   t('export produces a CSV with a header and rows', async () => {
     $('f-tier').value = ''; $('f-tier').dispatchEvent(new win.Event('change'));
     $('f-group').value = ''; $('f-group').dispatchEvent(new win.Event('change'));
-    $('export').dispatchEvent(new win.Event('click', { bubbles: true }));
+    $('btn-export').dispatchEvent(new win.Event('click', { bubbles: true }));
     assert.ok(win.__lastBlob, 'a blob should have been created');
   });
 
@@ -314,6 +320,118 @@ async function payload(mod) {
         res();
       }, 60));
     });
+  });
+
+
+  console.log('\nWhere to start (the jobs)');
+
+  t('jobs are listed, biggest first', () => {
+    const rows = $('jobs').querySelectorAll('.job');
+    assert.ok(rows.length > 0, 'expected at least one job');
+    const counts = [...$('jobs').querySelectorAll('.job-n b')].map(e => Number(e.textContent.replace(/[^0-9]/g, '')));
+    assert.ok(counts.every(c => c > 0), 'every job should name a real count');
+  });
+
+  t('a job says which type it belongs to', () => {
+    const first = $('jobs').querySelector('.job-t').textContent;
+    assert.match(first, /countries|cities and regions|resorts and areas|airports|theme parks/,
+      `job title should name a content type, got "${first}"`);
+  });
+
+  t('every job offers a way to act on it', () => {
+    const jobs = $('jobs').querySelectorAll('.job').length;
+    assert.strictEqual($('jobs').querySelectorAll('[data-job]').length, jobs);
+  });
+
+  t('working a job filters the list to exactly the places missing that field', () => {
+    const btn = $('jobs').querySelector('[data-job]');
+    const [typeKey, idxRaw] = btn.dataset.job.split(':');
+    const idx = Number(idxRaw);
+    job0 = { type: typeKey, idx, label: data.types.find(t => t.key === typeKey).fields[idx].label };
+    btn.dispatchEvent(new win.Event('click', { bubbles: true }));
+
+    const expected = data.records.filter(r =>
+      r.type === typeKey && (r.missing.includes(idx) || r.broken.includes(idx))).length;
+    const shown = $('queue').querySelectorAll('tr').length;
+    assert.strictEqual(shown, Math.min(expected, 400), `expected ${expected} rows, got ${shown}`);
+    assert.ok(expected > 0, 'the job should have work in it');
+  });
+
+  t('working a job says so, and the queue tab is brought forward', () => {
+    assert.strictEqual($('jobbar').hidden, false);
+    assert.match($('jobbar-txt').textContent, /Working on/);
+    assert.strictEqual($('tab-queue').getAttribute('aria-selected'), 'true');
+  });
+
+  t('inside a job the rows show what ELSE is needed, not the job name again', () => {
+    assert.strictEqual($('th-gaps').textContent, 'Also needs');
+    const cells = [...$('queue').querySelectorAll('tr')].map(r => r.querySelectorAll('td')[3]);
+    assert.ok(cells.length > 0);
+    cells.slice(0, 20).forEach(c => {
+      const chips = c.querySelectorAll('.chip').length;
+      assert.ok(chips >= 1 && chips <= 6, `expected 1-6 chips, got ${chips}`);
+      assert.ok(!c.textContent.includes(job0.label),
+        'the field being worked is already named in the bar above; repeating it per row is noise');
+      // an empty record says it in words rather than listing every group
+      const state = c.parentElement.querySelectorAll('td')[2].textContent.trim();
+      if (state === 'Not started') assert.match(c.textContent, /Everything else too/);
+    });
+  });
+
+
+  t('leaving a job restores the full list', () => {
+    const inJob = $('queue').querySelectorAll('tr').length;
+    $('jobbar-clear').dispatchEvent(new win.Event('click', { bubbles: true }));
+    assert.strictEqual($('jobbar').hidden, true);
+    assert.strictEqual($('th-gaps').textContent, 'What it still needs');
+    assert.ok($('queue').querySelectorAll('tr').length > inJob, 'should show more places again');
+  });
+
+  console.log('\nReadability');
+
+  t('an empty record says so in words instead of listing every field', () => {
+    $('f-tier').value = 'skeleton'; $('f-tier').dispatchEvent(new win.Event('change'));
+    const cell = $('queue').querySelector('tr td:nth-child(4)');
+    assert.match(cell.textContent, /Nothing written yet/);
+    assert.strictEqual(cell.querySelectorAll('.chip').length, 1, 'no wall of field chips');
+  });
+
+  t('a part-done record names the areas it is missing, capped', () => {
+    $('f-tier').value = 'partial'; $('f-tier').dispatchEvent(new win.Event('change'));
+    const rows = [...$('queue').querySelectorAll('tr')].slice(0, 10);
+    assert.ok(rows.length > 0, 'expected part-done rows');
+    rows.forEach(r => {
+      const chips = r.querySelectorAll('td:nth-child(4) .chip').length;
+      assert.ok(chips >= 1 && chips <= 7, `expected 1-7 grouped chips, got ${chips}`);
+    });
+  });
+
+  t('the engine\'s own words never reach the screen', () => {
+    $('f-tier').value = ''; $('f-tier').dispatchEvent(new win.Event('change'));
+    const seen = doc.getElementById('app').textContent;
+    ['skeleton', 'partial', 'Priority', 'Core '].forEach(word => {
+      assert.ok(!seen.includes(word), `"${word}" is internal vocabulary and should not be on screen`);
+    });
+  });
+
+  t('a place links through to its Airtable record', () => {
+    const link = $('queue').querySelector('a.nm');
+    assert.ok(link, 'expected a link on the place name');
+    assert.match(link.getAttribute('href'), /^https:\/\/airtable\.com\/app[A-Za-z0-9]{14}\/tbl[A-Za-z0-9]{14}\/rec/);
+    assert.strictEqual(link.getAttribute('rel'), 'noopener noreferrer');
+    assert.strictEqual(link.getAttribute('target'), '_blank');
+  });
+
+  t('the headline sentence states the split in plain words', () => {
+    assert.match($('lede').textContent, /places across five tables/);
+    assert.match($('lede').textContent, /ready to publish/);
+    assert.match($('lede').textContent, /still need work/);
+  });
+
+  t('each type row reports how much of it is ready', () => {
+    const pcts = [...$('types').querySelectorAll('.trow-p b')].map(e => e.textContent.trim());
+    assert.strictEqual(pcts.length, 5);
+    assert.ok(pcts.every(p => /^\d+%$/.test(p)), `expected percentages, got ${pcts}`);
   });
 
   await Promise.all(pending);

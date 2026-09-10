@@ -13,7 +13,7 @@
   --tx:#111827; --sb:#4B5563; --mt:#6B7280; --fa:#9CA3AF;
   --br:#0891B2; --bl:#ECFEFF; --bk:#0E7490; --ac:#7C3AED;
   --ok:#059669; --ok-bg:#ECFDF5; --dn:#DC2626; --dn-bg:#FEF2F2;
-  --warn:#D97706; --warn-bg:#FFFBEB; --info:#2563EB;
+  --warn:#D97706; --warn-bg:#FFFBEB;
   --t1:#0E7490; --t2:#22A7C4; --t3:#F0B429; --t4:#E5E7EB;
   --ft:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --mono:'JetBrains Mono','SF Mono',monospace;
@@ -25,13 +25,13 @@
   --tx:#F3F6FA; --sb:#B6C2D2; --mt:#8B99AC; --fa:#697788;
   --br:#22D3EE; --bl:#0B2F38; --bk:#67E8F9; --ac:#A78BFA;
   --ok:#34D399; --ok-bg:#0A2A20; --dn:#F87171; --dn-bg:#2C1416;
-  --warn:#FBBF24; --warn-bg:#2B2008; --info:#60A5FA;
-  --t1:#22D3EE; --t2:#0E7490; --t3:#B45309; --t4:#243044;
+  --warn:#FBBF24; --warn-bg:#2B2008;
+  --t1:#22D3EE; --t2:#1B8CA6; --t3:#B45309; --t4:#243044;
   --sh:0 1px 3px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{color-scheme:light}
-[data-theme="dark"] html,html[data-theme="dark"]{color-scheme:dark}
+html[data-theme="dark"]{color-scheme:dark}
 body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
@@ -55,13 +55,15 @@ button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .btn svg{width:14px;height:14px;flex:none}
 .btn-i{padding:0;width:36px;justify-content:center}
+.btn-go{border-color:var(--br);color:var(--bk);background:var(--bl)}
+.btn-go:hover{background:var(--br);color:#fff;border-color:var(--br)}
 .icon{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---------- shell ---------- */
 main{max-width:1440px;margin:0 auto;padding:24px}
 .head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 .head h1{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
-.head p{font-size:14px;color:var(--mt);margin-top:4px;max-width:62ch}
+.head p{font-size:14px;color:var(--mt);margin-top:4px;max-width:64ch}
 .head-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 
 /* ---------- status strip ---------- */
@@ -72,25 +74,36 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .status-txt{font-size:13px;font-weight:600}
 .status-sub{font-size:13px;color:var(--mt);font-weight:400}
 
-/* ---------- KPI row: one panel, divided ---------- */
+/* ---------- figures ---------- */
 .panel{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r3);box-shadow:var(--sh)}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:24px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:28px}
 .kpi{padding:18px 20px;border-left:1px solid var(--bd2)}
 .kpi:first-child{border-left:0}
-.kpi-l{font-size:12px;font-weight:600;color:var(--mt);letter-spacing:.01em;display:flex;align-items:center;gap:6px}
+.kpi-l{font-size:12px;font-weight:600;color:var(--mt);display:flex;align-items:center;gap:6px}
 .kpi-l svg{width:13px;height:13px;color:var(--fa)}
 .kpi-v{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:8px}
 .kpi-s{font-size:12px;color:var(--fa);margin-top:4px}
 .kpi-v.ok{color:var(--ok)} .kpi-v.warn{color:var(--warn)} .kpi-v.dn{color:var(--dn)}
 
-/* ---------- section ---------- */
-.sec{margin-bottom:24px}
-.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap}
-.sec-h h2{font-size:15px;font-weight:700;letter-spacing:-.01em}
+/* ---------- section heads ---------- */
+.sec{margin-bottom:28px}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.sec-h h2{font-size:16px;font-weight:700;letter-spacing:-.015em}
 .sec-h p{font-size:13px;color:var(--mt)}
 
+/* ---------- jobs: the lead ---------- */
+.job{display:grid;grid-template-columns:1fr 150px 110px;gap:20px;align-items:center;padding:14px 20px;border-top:1px solid var(--bd2)}
+.job:first-of-type{border-top:0}
+.job:hover{background:var(--sf2)}
+.job-t{font-size:14px;font-weight:600}
+.job-s{font-size:13px;color:var(--mt);margin-top:2px}
+.job-n{font-size:13px;color:var(--mt);text-align:right}
+.job-n b{display:block;font-size:19px;font-weight:800;color:var(--tx);letter-spacing:-.02em}
+.job-go{justify-self:end}
+.job-none{padding:28px 20px;text-align:center;color:var(--mt);font-size:13px}
+
 /* ---------- type rows ---------- */
-.trow{display:grid;grid-template-columns:minmax(150px,1.4fr) 68px minmax(180px,3fr) 74px;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid var(--bd2);width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;transition:background .15s}
+.trow{display:grid;grid-template-columns:minmax(160px,1.3fr) 64px minmax(180px,3fr) 92px;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid var(--bd2);width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;transition:background .15s}
 .trow:first-of-type{border-top:0}
 .trow:hover{background:var(--sf2)}
 .trow[aria-pressed="true"]{background:var(--bl)}
@@ -98,7 +111,8 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .trow-n{display:block;font-size:14px;font-weight:600}
 .trow-s{display:block;font-size:12px;color:var(--fa);margin-top:2px}
 .trow-c{font-size:17px;font-weight:700;text-align:right}
-.trow-p{font-size:13px;font-weight:700;text-align:right}
+.trow-p{font-size:13px;text-align:right;color:var(--mt)}
+.trow-p b{display:block;font-size:15px;font-weight:700;color:var(--tx)}
 
 /* ---------- stacked bar ---------- */
 .stack{display:flex;height:22px;border-radius:var(--r1);overflow:hidden;background:var(--t4);gap:1px}
@@ -109,7 +123,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .legend i{width:10px;height:10px;border-radius:3px;flex:none}
 
 /* ---------- tabs ---------- */
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--bd);margin-bottom:0;overflow-x:auto;padding-bottom:0}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--bd);overflow-x:auto}
 .tab{padding:10px 14px;border:0;background:none;font-size:13px;font-weight:600;color:var(--mt);border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
 .tab:hover{color:var(--tx)}
 .tab[aria-selected="true"]{color:var(--bk);border-bottom-color:var(--br)}
@@ -126,28 +140,37 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .fld input{min-width:220px}
 .fld input:focus,.fld select:focus{border-color:var(--br);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--br) 15%,transparent)}
 .f-count{margin-left:auto;font-size:12px;color:var(--mt);padding-bottom:9px}
+.jobbar{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--bl);border-bottom:1px solid var(--bd2);font-size:13px;flex-wrap:wrap}
+.jobbar b{font-weight:700;color:var(--bk)}
+.jobbar button{margin-left:auto;font-size:12px;font-weight:600;color:var(--bk);background:none;border:0;padding:6px 8px;border-radius:var(--r1);text-decoration:underline}
+.jobbar button:hover{background:color-mix(in srgb,var(--br) 12%,transparent)}
 
 /* ---------- tables ---------- */
 .tbl{width:100%;border-collapse:collapse;font-size:13px}
 .tbl th{text-align:left;font-size:11px;font-weight:700;color:var(--mt);letter-spacing:.03em;text-transform:uppercase;padding:10px 20px;border-bottom:1px solid var(--bd2);white-space:nowrap;background:var(--sf2);position:sticky;top:0;z-index:1}
-.tbl td{padding:11px 20px;border-bottom:1px solid var(--bd2);vertical-align:top}
+.tbl td{padding:11px 20px;border-bottom:1px solid var(--bd2);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:0}
 .tbl tbody tr:hover{background:var(--sf2)}
 .tbl .r{text-align:right}
-.scroll{max-height:640px;overflow:auto;border-radius:0 0 var(--r3) var(--r3)}
-.nm{font-weight:600}
+.scroll{max-height:660px;overflow:auto;border-radius:0 0 var(--r3) var(--r3)}
+.nm{font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.nm svg{width:12px;height:12px;color:var(--fa);opacity:.45;transition:opacity .15s,color .15s}
+a.nm:hover{color:var(--bk)}
+a.nm:hover svg{opacity:1;color:var(--bk)}
+a.nm:hover span{text-decoration:underline}
 .pa{font-size:12px;color:var(--fa);margin-top:1px}
-.miss{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;max-width:640px}
-.chip{font-size:11px;font-weight:500;padding:2px 7px;border-radius:var(--r1);background:var(--bg);color:var(--sb);border:1px solid var(--bd)}
+.gaps{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:11px;font-weight:500;padding:2px 8px;border-radius:var(--r1);background:var(--bg);color:var(--sb);border:1px solid var(--bd);white-space:nowrap}
 .chip.bad{background:var(--dn-bg);color:var(--dn);border-color:color-mix(in srgb,var(--dn) 30%,transparent)}
-.chip.more{background:none;border-style:dashed;color:var(--fa)}
-.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.chip.none{background:none;border:0;color:var(--fa);font-style:italic;padding-left:0}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .tag::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
 .tag.complete{background:var(--ok-bg);color:var(--ok)}
 .tag.ready{background:var(--bl);color:var(--bk)}
 .tag.partial{background:var(--warn-bg);color:var(--warn)}
 .tag.skeleton{background:var(--dn-bg);color:var(--dn)}
-.mini{height:6px;border-radius:3px;background:var(--t4);overflow:hidden;min-width:60px}
+.bar2{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.mini{height:6px;width:56px;border-radius:3px;background:var(--t4);overflow:hidden;flex:none}
 .mini i{display:block;height:100%;background:var(--t1)}
 .mini i.low{background:var(--warn)}
 .mini i.vlow{background:var(--dn)}
@@ -156,7 +179,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .msg{padding:56px 24px;text-align:center}
 .msg svg{width:32px;height:32px;color:var(--fa);margin-bottom:12px}
 .msg h3{font-size:15px;font-weight:700;margin-bottom:4px}
-.msg p{font-size:13px;color:var(--mt);max-width:44ch;margin:0 auto 16px}
+.msg p{font-size:13px;color:var(--mt);max-width:46ch;margin:0 auto 16px}
 .sk{background:linear-gradient(90deg,var(--bd2) 25%,var(--bd) 37%,var(--bd2) 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;border-radius:var(--r1)}
 @keyframes sh{0%{background-position:100% 50%}100%{background-position:0 50%}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
@@ -173,7 +196,10 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   .kpis{grid-template-columns:1fr}
   .kpi{border-left:0;border-top:1px solid var(--bd2)}
   .kpi:first-child{border-top:0}
-  .trow{grid-template-columns:1fr 60px;gap:8px 12px}
+  .job{grid-template-columns:1fr auto;gap:10px 14px}
+  .job-go{grid-column:1/-1;justify-self:stretch}
+  .job-go .btn{width:100%;justify-content:center}
+  .trow{grid-template-columns:1fr 72px;gap:8px 12px}
   .trow .stack-wrap{grid-column:1/-1}
   .trow-p{grid-column:2;text-align:right}
   .tbl th,.tbl td{padding:10px 12px}
@@ -210,13 +236,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   <div class="head">
     <div>
       <h1>Destination content</h1>
-      <p>Every country, city, resort, airport and attraction we hold, scored on whether it is genuinely usable. Sorted by what is worth fixing first.</p>
-    </div>
-    <div class="head-actions">
-      <button class="btn" id="export">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        Export queue as CSV
-      </button>
+      <p id="lede">Every place we hold, and what each one is still missing.</p>
     </div>
   </div>
 
@@ -247,35 +267,47 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 
     <section class="sec">
       <div class="sec-h">
-        <h2>Coverage by content type</h2>
-        <p>Select a type to filter everything below it.</p>
+        <h2>Where to start</h2>
+        <p>The same field missing across many places. One job, one batch.</p>
+      </div>
+      <div class="panel" id="jobs"></div>
+    </section>
+
+    <section class="sec">
+      <div class="sec-h">
+        <h2>What we hold</h2>
+        <p>Select a type to narrow everything below it.</p>
       </div>
       <div class="panel" id="types"></div>
     </section>
 
     <section class="sec">
       <div class="tabs" role="tablist" aria-label="Destination views">
-        <button class="tab" role="tab" id="tab-queue"  aria-controls="pane-queue"  aria-selected="true">Work queue<span class="pill" id="n-queue">0</span></button>
-        <button class="tab" role="tab" id="tab-fields" aria-controls="pane-fields" aria-selected="false">Field gaps</button>
+        <button class="tab" role="tab" id="tab-queue"  aria-controls="pane-queue"  aria-selected="true">Places<span class="pill" id="n-queue">0</span></button>
+        <button class="tab" role="tab" id="tab-fields" aria-controls="pane-fields" aria-selected="false">Every gap</button>
         <button class="tab" role="tab" id="tab-cont"   aria-controls="pane-cont"   aria-selected="false">By continent</button>
-        <button class="tab" role="tab" id="tab-broken" aria-controls="pane-broken" aria-selected="false">Broken values<span class="pill" id="n-broken">0</span></button>
+        <button class="tab" role="tab" id="tab-broken" aria-controls="pane-broken" aria-selected="false">To correct<span class="pill" id="n-broken">0</span></button>
         <button class="tab" role="tab" id="tab-recent" aria-controls="pane-recent" aria-selected="false">Recently added</button>
       </div>
 
       <div class="pane on" id="pane-queue" role="tabpanel" aria-labelledby="tab-queue">
+        <div class="jobbar" id="jobbar" hidden>
+          <span id="jobbar-txt"></span>
+          <button id="jobbar-clear" type="button">Show everything again</button>
+        </div>
         <div class="filters">
           <div class="fld">
             <label for="q">Search</label>
             <input id="q" type="search" placeholder="Country, city, resort, airport…" autocomplete="off">
           </div>
           <div class="fld">
-            <label for="f-tier">Completeness</label>
+            <label for="f-tier">Show</label>
             <select id="f-tier">
-              <option value="needs">Needs work</option>
+              <option value="needs">Places that need work</option>
               <option value="">Everything</option>
-              <option value="skeleton">Skeleton only</option>
-              <option value="partial">Partial only</option>
-              <option value="ready">Ready</option>
+              <option value="skeleton">Nothing written yet</option>
+              <option value="partial">Part done</option>
+              <option value="ready">Ready to publish</option>
               <option value="complete">Complete</option>
             </select>
           </div>
@@ -283,12 +315,18 @@ main{max-width:1440px;margin:0 auto;padding:24px}
             <label for="f-group">Continent or country</label>
             <select id="f-group"><option value="">Everywhere</option></select>
           </div>
+          <div class="fld">
+            <label for="btn-export" class="sr">Export</label>
+            <button class="btn" id="btn-export">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Export this list
+            </button>
+          </div>
           <div class="f-count" id="q-count"></div>
         </div>
         <div class="scroll"><table class="tbl">
           <thead><tr>
-            <th>Place</th><th>Type</th><th>State</th>
-            <th class="r">Core</th><th class="r">Score</th><th class="r">Priority</th>
+            <th>Place</th><th>Type</th><th>State</th><th id="th-gaps">What it still needs</th><th class="r">Done</th>
           </tr></thead>
           <tbody id="queue"></tbody>
         </table></div>
@@ -298,8 +336,8 @@ main{max-width:1440px;margin:0 auto;padding:24px}
         <div class="filters"><div class="f-count" id="fld-note" style="margin-left:0"></div></div>
         <div class="scroll"><table class="tbl">
           <thead><tr>
-            <th>Field</th><th>Group</th><th>Tier</th><th style="width:180px">Fill</th>
-            <th class="r">Filled</th><th class="r">Broken</th><th class="r">Empty</th>
+            <th>Field</th><th>Part of</th><th>Needed for</th><th style="width:170px">Filled in</th>
+            <th class="r">Missing</th><th class="r">Wrong</th>
           </tr></thead>
           <tbody id="fields"></tbody>
         </table></div>
@@ -309,29 +347,29 @@ main{max-width:1440px;margin:0 auto;padding:24px}
         <div class="scroll"><table class="tbl">
           <thead><tr>
             <th>Continent</th><th class="r">Places</th><th class="r">Countries</th>
-            <th class="r">Cities</th><th class="r">Resorts</th><th style="width:200px">Average completeness</th>
+            <th class="r">Cities</th><th class="r">Resorts</th><th style="width:190px">Average completeness</th>
           </tr></thead>
           <tbody id="cont"></tbody>
         </table></div>
       </div>
 
       <div class="pane" id="pane-broken" role="tabpanel" aria-labelledby="tab-broken">
-        <div class="filters"><div class="f-count" style="margin-left:0">Values that are present but unusable. These need correcting, not writing.</div></div>
+        <div class="filters"><div class="f-count" style="margin-left:0">These fields hold something, but it cannot be used. A correction each, not a rewrite.</div></div>
         <div class="scroll"><table class="tbl">
-          <thead><tr><th>Place</th><th>Type</th><th>Unusable fields</th></tr></thead>
+          <thead><tr><th>Place</th><th>Type</th><th>Fields to correct</th></tr></thead>
           <tbody id="broken"></tbody>
         </table></div>
       </div>
 
       <div class="pane" id="pane-recent" role="tabpanel" aria-labelledby="tab-recent">
         <div class="scroll"><table class="tbl">
-          <thead><tr><th>Place</th><th>Type</th><th>State</th><th class="r">Score</th><th class="r">Added</th></tr></thead>
+          <thead><tr><th>Place</th><th>Type</th><th>State</th><th class="r">Done</th><th class="r">Added</th></tr></thead>
           <tbody id="recent"></tbody>
         </table></div>
       </div>
     </section>
 
-    <p style="font-size:12px;color:var(--fa);margin-top:-8px" id="foot"></p>
+    <p style="font-size:12px;color:var(--fa);margin-top:-12px" id="foot"></p>
   </div>
 </main>
 
@@ -341,10 +379,12 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 (function () {
   'use strict';
 
-  var D = null;              // the dashboard payload
-  var typeFilter = '';       // '' = all types
+  var D = null;
+  var typeFilter = '';
+  var job = null;                       // {type, idx, label} when a job is being worked
   var state = { q: '', tier: 'needs', group: '' };
-  var QUEUE_CAP = 400;       // rows rendered at once; the CSV export carries the lot
+  var QUEUE_CAP = 400;
+  var JOBS_SHOWN = 6;
 
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) {
@@ -354,6 +394,11 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   }
   function n(v) { return Number(v || 0).toLocaleString('en-GB'); }
   function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
+
+  // Plain words. "skeleton" and "partial" are the engine's names, never the screen's.
+  var STATE_WORD = { complete: 'Complete', ready: 'Ready', partial: 'Part done', skeleton: 'Not started' };
+  var TYPE_NAME = { country: 'Country', city: 'City', resort: 'Resort', airport: 'Airport', attraction: 'Attraction' };
+  var TYPE_PLURAL = { country: 'countries', city: 'cities and regions', resort: 'resorts and areas', airport: 'airports', attraction: 'theme parks and attractions' };
 
   /* ---------------- theme ---------------- */
   var SUN = '<path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="5"/>';
@@ -375,15 +420,12 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   /* ---------------- states ---------------- */
   var ICON_WARN = '<svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
   var ICON_EMPTY = '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+  var ICON_OUT = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>';
 
   function fatal(title, body, retry) {
-    $('boot').hidden = true;
-    $('app').hidden = true;
-    var el = $('fatal');
-    el.hidden = false;
-    el.className = 'panel';
-    el.innerHTML = '<div class="msg">' + ICON_WARN +
-      '<h3>' + esc(title) + '</h3><p>' + esc(body) + '</p>' +
+    $('boot').hidden = true; $('app').hidden = true;
+    var el = $('fatal'); el.hidden = false; el.className = 'panel';
+    el.innerHTML = '<div class="msg">' + ICON_WARN + '<h3>' + esc(title) + '</h3><p>' + esc(body) + '</p>' +
       (retry ? '<button class="btn" id="retry" style="margin:0 auto">Try again</button>' : '') + '</div>';
     if (retry) $('retry').addEventListener('click', function () { load(false); });
   }
@@ -410,67 +452,61 @@ main{max-width:1440px;margin:0 auto;padding:24px}
       })
       .then(function (data) {
         if (!data) return;
-        D = data;
-        render();
-        $('boot').hidden = true;
-        $('app').hidden = false;
+        D = data; render();
+        $('boot').hidden = true; $('app').hidden = false;
         $('live').textContent = 'Loaded ' + n(D.totals.records) + ' destination records.';
       })
-      .catch(function (err) {
-        fatal('Could not load the destination data', String(err.message || err), true);
-      })
+      .catch(function (err) { fatal('Could not load the destination data', String(err.message || err), true); })
       .then(function () { btn.disabled = false; });
   }
 
-  /* ---------------- render ---------------- */
   function typeOf(key) {
     for (var i = 0; i < D.types.length; i++) if (D.types[i].key === key) return D.types[i];
     return null;
   }
+  function airtableUrl(rec) {
+    var t = typeOf(rec.type);
+    if (!D.baseId || !t) return null;
+    return 'https://airtable.com/' + D.baseId + '/' + t.tableId + '/' + rec.id;
+  }
 
+  /* ---------------- render ---------------- */
   function render() {
-    renderStatus();
-    renderKpis();
-    renderTypes();
-    renderGroupFilter();
-    renderQueue();
-    renderFields();
-    renderContinents();
-    renderBroken();
-    renderRecent();
+    renderStatus(); renderKpis(); renderJobs(); renderTypes();
+    renderGroupFilter(); renderQueue(); renderFields(); renderContinents(); renderBroken(); renderRecent();
     var when = new Date(D.generatedAt);
-    $('foot').textContent = 'Scanned ' + n(D.totals.records) + ' records across ' + D.types.length +
-      ' tables at ' + when.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) +
+    $('lede').textContent = n(D.totals.records) + ' places across five tables. ' +
+      n(D.totals.complete + D.totals.ready) + ' are ready to publish, ' +
+      n(D.totals.partial + D.totals.skeleton) + ' still need work.';
+    $('foot').textContent = 'Scanned at ' + when.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) +
       (D.cached ? ' (cached — press Rescan for a fresh read)' : '') + '.';
   }
 
   function renderStatus() {
     var a = D.automation || {};
-    var el = $('status');
-    el.hidden = false;
+    var el = $('status'); el.hidden = false;
     el.className = 'status' + (a.paused ? ' is-paused' : '');
     $('status-txt').textContent = a.paused ? 'Automation paused' : 'Automation running';
     $('status-sub').textContent = a.paused
-      ? 'No background job has written to this data since ' + esc(a.since) + '. ' + esc(a.reason || '')
+      ? 'Nothing has written to this data since ' + esc(a.since) + '. Only you are changing it.'
       : 'Background jobs may write to this data while you work.';
   }
 
   function renderKpis() {
     var t = D.totals;
-    var usable = t.complete + t.ready;
-    var needs = t.partial + t.skeleton;
+    var ready = t.complete + t.ready;
     var kpis = [
-      { l: 'Places in the library', v: n(t.records),
-        s: D.types.map(function (x) { return n(x.count) + ' ' + x.label.toLowerCase(); }).join(' · '),
+      { l: 'Places we hold', v: n(t.records),
+        s: D.types.map(function (x) { return n(x.count) + ' ' + TYPE_PLURAL[x.key]; }).join(' · '),
         icon: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/>' },
-      { l: 'Ready to publish', v: n(usable), cls: 'ok',
-        s: pct(usable, t.records) + '% hold every field a client site needs',
+      { l: 'Ready to publish', v: n(ready), cls: 'ok',
+        s: pct(ready, t.records) + '% of everything we hold',
         icon: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>' },
-      { l: 'Needs work', v: n(needs), cls: needs > usable ? 'warn' : '',
-        s: n(t.skeleton) + ' are barely more than a name',
+      { l: 'Still need writing', v: n(t.partial + t.skeleton), cls: 'warn',
+        s: n(t.skeleton) + ' have nothing written at all',
         icon: '<path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>' },
-      { l: 'Broken values', v: n(t.broken), cls: t.broken ? 'dn' : '',
-        s: 'Present but unusable — a correction, not a rewrite',
+      { l: 'Need correcting', v: n(t.broken), cls: t.broken ? 'dn' : '',
+        s: 'Something is there but it is wrong',
         icon: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>' }
     ];
     $('kpis').innerHTML = kpis.map(function (k) {
@@ -480,46 +516,103 @@ main{max-width:1440px;margin:0 auto;padding:24px}
     }).join('');
   }
 
+  /* The lead. One field missing across many places is one batch of work — far
+     more useful than the same record listed once per missing field. */
+  function allJobs() {
+    var out = [];
+    D.types.forEach(function (t) {
+      if (!t.count) return;
+      if (typeFilter && t.key !== typeFilter) return;
+      t.fields.forEach(function (f, idx) {
+        var gap = f.empty + f.invalid;
+        if (!gap) return;
+        out.push({
+          type: t.key, idx: idx, label: f.label, group: f.group, tier: f.tier,
+          hint: f.hint || '', gap: gap, invalid: f.invalid, total: t.count, pct: pct(gap, t.count),
+        });
+      });
+    });
+    // What a client site cannot publish without comes first, then sheer volume.
+    out.sort(function (a, b) {
+      if ((a.tier === 'core') !== (b.tier === 'core')) return a.tier === 'core' ? -1 : 1;
+      return b.gap - a.gap;
+    });
+    return out;
+  }
+
+  function renderJobs() {
+    var jobs = allJobs().slice(0, JOBS_SHOWN);
+    if (!jobs.length) {
+      $('jobs').innerHTML = '<div class="job-none">Nothing missing anywhere. Every field is filled on every record.</div>';
+      return;
+    }
+    $('jobs').innerHTML = jobs.map(function (j) {
+      // Describe the field itself. A tier sentence repeated down six rows is
+      // the sameness problem all over again.
+      var bits = [];
+      if (j.hint) bits.push(j.hint);
+      else bits.push(j.group);
+      if (j.tier === 'core') bits.push('needed before a page can go live');
+      if (j.invalid) bits.push(n(j.invalid) + ' hold something unusable');
+      return '<div class="job">' +
+        '<div><div class="job-t">' + esc(j.label) + ' &middot; ' + esc(TYPE_PLURAL[j.type]) + '</div>' +
+          '<div class="job-s">' + esc(bits.join(' &middot; ')).replace(/&amp;middot;/g, '&middot;') + '</div></div>' +
+        '<div class="job-n"><b class="num">' + n(j.gap) + '</b>of ' + n(j.total) + ' missing it</div>' +
+        '<div class="job-go"><button class="btn btn-go" data-job="' + esc(j.type) + ':' + j.idx + '">Work on this</button></div>' +
+      '</div>';
+    }).join('');
+
+    Array.prototype.forEach.call($('jobs').querySelectorAll('[data-job]'), function (b) {
+      b.addEventListener('click', function () {
+        var parts = b.dataset.job.split(':');
+        var t = typeOf(parts[0]);
+        job = { type: parts[0], idx: Number(parts[1]), label: t.fields[Number(parts[1])].label };
+        state.tier = ''; $('f-tier').value = '';
+        selectTab($('tab-queue'));
+        renderQueue();
+        $('pane-queue').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('live').textContent = 'Showing the ' + job.label + ' job.';
+      });
+    });
+  }
+
   function stack(t) {
     var total = t.count || 1;
-    var parts = [
-      ['s1', t.tiers.complete, 'Complete'],
-      ['s2', t.tiers.ready, 'Ready'],
-      ['s3', t.tiers.partial, 'Partial'],
-      ['s4', t.tiers.skeleton, 'Skeleton']
-    ];
-    return '<div class="stack" role="img" aria-label="' + esc(parts.map(function (p) {
-      return p[1] + ' ' + p[2].toLowerCase();
-    }).join(', ')) + '">' + parts.map(function (p) {
-      return p[1] ? '<i class="' + p[0] + '" style="width:' + ((p[1] / total) * 100) + '%"></i>' : '';
-    }).join('') + '</div>';
+    var parts = [['s1', t.tiers.complete, 'complete'], ['s2', t.tiers.ready, 'ready'],
+                 ['s3', t.tiers.partial, 'part done'], ['s4', t.tiers.skeleton, 'not started']];
+    return '<div class="stack" role="img" aria-label="' +
+      esc(parts.map(function (p) { return p[1] + ' ' + p[2]; }).join(', ')) + '">' +
+      parts.map(function (p) {
+        return p[1] ? '<i class="' + p[0] + '" style="width:' + ((p[1] / total) * 100) + '%"></i>' : '';
+      }).join('') + '</div>';
   }
 
   function renderTypes() {
     var html = D.types.map(function (t) {
       var on = typeFilter === t.key;
+      var ready = t.tiers.complete + t.tiers.ready;
       return '<button class="trow" data-type="' + esc(t.key) + '" aria-pressed="' + on + '">' +
         '<span><span class="trow-n">' + esc(t.label) + '</span>' +
-          '<span class="trow-s">' + n(t.tiers.complete + t.tiers.ready) + ' ready · ' +
-          n(t.tiers.partial + t.tiers.skeleton) + ' to do' +
-          (t.hasEvidence ? ' · ' + n(t.verified) + ' verified' : '') + '</span></span>' +
+          '<span class="trow-s">' + n(ready) + ' ready &middot; ' + n(t.count - ready) + ' to do' +
+          (t.hasEvidence ? ' &middot; ' + n(t.verified) + ' verified' : '') + '</span></span>' +
         '<span class="trow-c num">' + n(t.count) + '</span>' +
         '<span class="stack-wrap">' + stack(t) + '</span>' +
-        '<span class="trow-p num">' + t.avgScore + '%</span>' +
+        '<span class="trow-p"><b class="num">' + pct(ready, t.count) + '%</b>ready</span>' +
       '</button>';
     }).join('');
     html += '<div class="legend">' +
-      '<span><i class="s1"></i>Complete — every field, including depth</span>' +
-      '<span><i class="s2"></i>Ready — every field a client site needs</span>' +
-      '<span><i class="s3"></i>Partial</span>' +
-      '<span><i class="s4"></i>Skeleton — a name and little else</span></div>';
+      '<span><i class="s1"></i>Complete &mdash; every field, including the extras</span>' +
+      '<span><i class="s2"></i>Ready &mdash; everything a page needs</span>' +
+      '<span><i class="s3"></i>Part done</span>' +
+      '<span><i class="s4"></i>Not started</span></div>';
     $('types').innerHTML = html;
 
     Array.prototype.forEach.call($('types').querySelectorAll('.trow'), function (b) {
       b.addEventListener('click', function () {
         typeFilter = (typeFilter === b.dataset.type) ? '' : b.dataset.type;
-        renderTypes(); renderGroupFilter(); renderQueue(); renderFields(); renderBroken();
-        $('live').textContent = typeFilter ? ('Filtered to ' + typeOf(typeFilter).label) : 'Showing all content types.';
+        if (job && job.type !== typeFilter && typeFilter) job = null;
+        renderJobs(); renderTypes(); renderGroupFilter(); renderQueue(); renderFields(); renderBroken();
+        $('live').textContent = typeFilter ? ('Narrowed to ' + typeOf(typeFilter).label) : 'Showing everything.';
       });
     });
   }
@@ -532,8 +625,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
     var groups = {};
     visibleRecords().forEach(function (r) { if (r.group) groups[r.group] = (groups[r.group] || 0) + 1; });
     var keys = Object.keys(groups).sort();
-    var sel = $('f-group');
-    var keep = state.group;
+    var sel = $('f-group'), keep = state.group;
     sel.innerHTML = '<option value="">Everywhere</option>' + keys.map(function (k) {
       return '<option value="' + esc(k) + '">' + esc(k) + ' (' + groups[k] + ')</option>';
     }).join('');
@@ -541,6 +633,10 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   }
 
   function matches(r) {
+    if (job) {
+      if (r.type !== job.type) return false;
+      if (r.missing.indexOf(job.idx) === -1 && r.broken.indexOf(job.idx) === -1) return false;
+    }
     if (typeFilter && r.type !== typeFilter) return false;
     if (state.group && r.group !== state.group) return false;
     if (state.tier === 'needs') { if (r.tier !== 'partial' && r.tier !== 'skeleton') return false; }
@@ -552,76 +648,126 @@ main{max-width:1440px;margin:0 auto;padding:24px}
     return true;
   }
 
-  function fieldLabel(typeKey, idx) {
+  function fieldAt(typeKey, idx) {
     var t = typeOf(typeKey);
-    return t && t.fields[idx] ? t.fields[idx].label : 'Field ' + idx;
+    return (t && t.fields[idx]) || { label: 'Field ' + idx, group: '' };
   }
 
-  function chips(r, cap) {
+  /* A record with nothing in it lists the same thirty field names as every other
+     empty record, which reads as noise. Say it once, in words; name the groups
+     when a record is genuinely part done; name the field when a job is open. */
+  function gapsCell(r) {
+    if (job) {
+      // The bar above already says which field is being worked, so naming it
+      // again on all 118 rows tells you nothing. Show what ELSE this record
+      // needs, so you can finish it while you have it open.
+      // A record with nothing in it "also needs" every group, which is six
+      // identical chips saying less than two words would.
+      if (r.tier === 'skeleton') return '<span class="chip none">Everything else too</span>';
+      var others = {};
+      r.broken.concat(r.missing).forEach(function (i) {
+        if (i === job.idx) return;
+        others[fieldAt(r.type, i).group] = true;
+      });
+      var keys = Object.keys(others);
+      if (!keys.length) return '<span class="chip none">Only this</span>';
+      return '<div class="gaps">' + keys.slice(0, 5).map(function (g) {
+        return '<span class="chip">' + esc(g) + '</span>';
+      }).join('') + (keys.length > 5 ? '<span class="chip">+' + (keys.length - 5) + '</span>' : '') + '</div>';
+    }
+    if (r.tier === 'skeleton') {
+      return '<span class="chip none">Nothing written yet</span>';
+    }
     var out = [];
-    r.broken.forEach(function (i) { out.push('<span class="chip bad" title="Present but unusable">' + esc(fieldLabel(r.type, i)) + '</span>'); });
-    r.missing.forEach(function (i) { out.push('<span class="chip">' + esc(fieldLabel(r.type, i)) + '</span>'); });
-    var shown = out.slice(0, cap);
-    if (out.length > cap) shown.push('<span class="chip more">+' + (out.length - cap) + ' more</span>');
-    return shown.length ? '<div class="miss">' + shown.join('') + '</div>' : '';
+    if (r.broken.length) {
+      var bg = {};
+      r.broken.forEach(function (i) { bg[fieldAt(r.type, i).group] = true; });
+      Object.keys(bg).forEach(function (g) { out.push('<span class="chip bad">' + esc(g) + ' &mdash; to correct</span>'); });
+    }
+    var seen = {};
+    r.missing.forEach(function (i) {
+      var f = fieldAt(r.type, i);
+      if (seen[f.group]) return;
+      seen[f.group] = true;
+      out.push('<span class="chip">' + esc(f.group) + '</span>');
+    });
+    if (!out.length) return '<span class="chip none">Nothing missing</span>';
+    return '<div class="gaps">' + out.slice(0, 6).join('') +
+      (out.length > 6 ? '<span class="chip">+' + (out.length - 6) + '</span>' : '') + '</div>';
   }
 
-  var TYPE_NAME = { country: 'Country', city: 'City', resort: 'Resort', airport: 'Airport', attraction: 'Attraction' };
+  function doneCell(r) {
+    var cls = r.score < 34 ? 'vlow' : r.score < 67 ? 'low' : '';
+    return '<div class="bar2"><div class="mini"><i class="' + cls + '" style="width:' + r.score + '%"></i></div>' +
+      '<span class="num" style="min-width:34px;text-align:right">' + r.score + '%</span></div>';
+  }
+
+  function nameCell(r) {
+    var url = airtableUrl(r);
+    var inner = '<span>' + esc(r.name) + '</span>' + (url ? ICON_OUT : '');
+    var sub = r.parent ? '<div class="pa">' + esc(r.parent) + '</div>'
+            : (r.group ? '<div class="pa">' + esc(r.group) + '</div>' : '');
+    if (!url) return '<div class="nm">' + esc(r.name) + '</div>' + sub;
+    return '<a class="nm" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" ' +
+      'title="Open ' + esc(r.name) + ' in Airtable">' + inner + '</a>' + sub;
+  }
 
   function renderQueue() {
     var rows = D.records.filter(matches);
     $('n-queue').textContent = n(rows.length);
+
+    var jb = $('jobbar');
+    if (job) {
+      jb.hidden = false;
+      $('jobbar-txt').innerHTML = 'Working on <b>' + esc(job.label) + '</b> for ' +
+        esc(TYPE_PLURAL[job.type]) + ' &mdash; ' + n(rows.length) + ' to fix.';
+    } else jb.hidden = true;
+    $('th-gaps').textContent = job ? 'Also needs' : 'What it still needs';
+
     $('q-count').textContent = rows.length > QUEUE_CAP
-      ? 'Showing the top ' + n(QUEUE_CAP) + ' of ' + n(rows.length) + ' — export for the full list'
+      ? 'Showing the first ' + n(QUEUE_CAP) + ' of ' + n(rows.length) + ' — export for the full list'
       : n(rows.length) + (rows.length === 1 ? ' place' : ' places');
 
     if (!rows.length) {
-      $('queue').innerHTML = emptyRow(6, 'Nothing matches those filters',
-        'Widen the completeness filter or clear the search to see more.');
+      $('queue').innerHTML = emptyRow(5, 'Nothing matches',
+        'Widen the Show filter, clear the search, or come out of the job you are working on.');
       return;
     }
 
     $('queue').innerHTML = rows.slice(0, QUEUE_CAP).map(function (r) {
-      return '<tr><td>' +
-          '<div class="nm">' + esc(r.name) + '</div>' +
-          (r.parent ? '<div class="pa">' + esc(r.parent) + '</div>' : (r.group ? '<div class="pa">' + esc(r.group) + '</div>' : '')) +
-          chips(r, 6) +
-        '</td>' +
+      return '<tr><td>' + nameCell(r) + '</td>' +
         '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
-        '<td><span class="tag ' + esc(r.tier) + '">' + esc(r.tier) + '</span></td>' +
-        '<td class="r num">' + r.core[0] + '/' + r.core[1] + '</td>' +
-        '<td class="r num">' + r.score + '%</td>' +
-        '<td class="r num">' + n(r.priority) + '</td></tr>';
+        '<td><span class="tag ' + esc(r.tier) + '">' + esc(STATE_WORD[r.tier] || r.tier) + '</span></td>' +
+        '<td>' + gapsCell(r) + '</td>' +
+        '<td class="r">' + doneCell(r) + '</td></tr>';
     }).join('');
   }
 
   function renderFields() {
     var types = typeFilter ? [typeOf(typeFilter)] : D.types;
     $('fld-note').textContent = typeFilter
-      ? 'Fill rates across ' + n(typeOf(typeFilter).count) + ' ' + typeOf(typeFilter).label.toLowerCase() + ', worst first.'
-      : 'Fill rates across every table, worst first. Select a content type above to narrow this.';
+      ? 'Every field on ' + n(typeOf(typeFilter).count) + ' ' + TYPE_PLURAL[typeFilter] + ', emptiest first.'
+      : 'Every field on every table, emptiest first. Select a type above to narrow it.';
 
     var rows = [];
     types.forEach(function (t) {
-      t.fields.forEach(function (f) {
-        rows.push({ t: t, f: f, pc: pct(f.filled, t.count) });
-      });
+      t.fields.forEach(function (f) { rows.push({ t: t, f: f, pc: pct(f.filled, t.count) }); });
     });
     rows.sort(function (a, b) { return a.pc - b.pc || b.f.empty - a.f.empty; });
 
-    if (!rows.length) { $('fields').innerHTML = emptyRow(7, 'No fields to show', 'Select a content type above.'); return; }
+    if (!rows.length) { $('fields').innerHTML = emptyRow(6, 'No fields to show', 'Select a content type above.'); return; }
 
     $('fields').innerHTML = rows.map(function (row) {
       var cls = row.pc < 34 ? 'vlow' : row.pc < 67 ? 'low' : '';
       return '<tr><td><div class="nm">' + esc(row.f.label) + '</div>' +
           (typeFilter ? '' : '<div class="pa">' + esc(row.t.label) + '</div>') + '</td>' +
         '<td>' + esc(row.f.group) + '</td>' +
-        '<td>' + (row.f.tier === 'core' ? '<span class="tag ready">core</span>' : '<span class="chip">depth</span>') + '</td>' +
-        '<td><div class="mini"><i class="' + cls + '" style="width:' + row.pc + '%"></i></div>' +
-          '<div class="pa num">' + row.pc + '%</div></td>' +
-        '<td class="r num">' + n(row.f.filled) + '</td>' +
-        '<td class="r num" style="color:' + (row.f.invalid ? 'var(--dn)' : 'inherit') + '">' + n(row.f.invalid) + '</td>' +
-        '<td class="r num">' + n(row.f.empty) + '</td></tr>';
+        '<td>' + (row.f.tier === 'core' ? '<span class="tag ready">Publishing</span>'
+                                        : '<span class="chip">Extra depth</span>') + '</td>' +
+        '<td><div class="bar2" style="justify-content:flex-start"><div class="mini"><i class="' + cls +
+          '" style="width:' + row.pc + '%"></i></div><span class="num">' + row.pc + '%</span></div></td>' +
+        '<td class="r num">' + n(row.f.empty) + '</td>' +
+        '<td class="r num" style="color:' + (row.f.invalid ? 'var(--dn)' : 'inherit') + '">' + n(row.f.invalid) + '</td></tr>';
     }).join('');
   }
 
@@ -637,8 +783,8 @@ main{max-width:1440px;margin:0 auto;padding:24px}
         '<td class="r num">' + n(c.byType.country || 0) + '</td>' +
         '<td class="r num">' + n(c.byType.city || 0) + '</td>' +
         '<td class="r num">' + n(c.byType.resort || 0) + '</td>' +
-        '<td><div class="mini"><i class="' + cls + '" style="width:' + c.avgScore + '%"></i></div>' +
-          '<div class="pa num">' + c.avgScore + '%</div></td></tr>';
+        '<td><div class="bar2" style="justify-content:flex-start"><div class="mini"><i class="' + cls +
+          '" style="width:' + c.avgScore + '%"></i></div><span class="num">' + c.avgScore + '%</span></div></td></tr>';
     }).join('');
   }
 
@@ -647,16 +793,15 @@ main{max-width:1440px;margin:0 auto;padding:24px}
       .sort(function (a, b) { return b.broken.length - a.broken.length; });
     $('n-broken').textContent = n(rows.length);
     if (!rows.length) {
-      $('broken').innerHTML = emptyRow(3, 'Nothing unusable here',
-        'Every value that is present parses correctly. Blanks show in the work queue instead.');
+      $('broken').innerHTML = emptyRow(3, 'Nothing to correct',
+        'Every value that is filled in can be used. Blank fields show in Places instead.');
       return;
     }
     $('broken').innerHTML = rows.slice(0, QUEUE_CAP).map(function (r) {
-      return '<tr><td><div class="nm">' + esc(r.name) + '</div>' +
-          (r.parent ? '<div class="pa">' + esc(r.parent) + '</div>' : '') + '</td>' +
+      return '<tr><td>' + nameCell(r) + '</td>' +
         '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
-        '<td><div class="miss">' + r.broken.map(function (i) {
-          return '<span class="chip bad">' + esc(fieldLabel(r.type, i)) + '</span>';
+        '<td><div class="gaps">' + r.broken.map(function (i) {
+          return '<span class="chip bad">' + esc(fieldAt(r.type, i).label) + '</span>';
         }).join('') + '</div></td></tr>';
     }).join('');
   }
@@ -666,7 +811,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
     $('recent').innerHTML = D.recent.map(function (r) {
       return '<tr><td class="nm">' + esc(r.name) + '</td>' +
         '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
-        '<td><span class="tag ' + esc(r.tier) + '">' + esc(r.tier) + '</span></td>' +
+        '<td><span class="tag ' + esc(r.tier) + '">' + esc(STATE_WORD[r.tier] || r.tier) + '</span></td>' +
         '<td class="r num">' + r.score + '%</td>' +
         '<td class="r num">' + new Date(r.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td></tr>';
     }).join('');
@@ -681,6 +826,11 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   });
   $('f-tier').addEventListener('change', function (e) { state.tier = e.target.value; renderQueue(); });
   $('f-group').addEventListener('change', function (e) { state.group = e.target.value; renderQueue(); });
+  $('jobbar-clear').addEventListener('click', function () {
+    job = null; state.tier = 'needs'; $('f-tier').value = 'needs';
+    renderQueue();
+    $('live').textContent = 'Job cleared.';
+  });
 
   /* ---------------- tabs ---------------- */
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
@@ -705,22 +855,24 @@ main{max-width:1440px;margin:0 auto;padding:24px}
   });
 
   /* ---------------- export ---------------- */
-  $('export').addEventListener('click', function () {
+  $('btn-export').addEventListener('click', function () {
     if (!D) return;
     var rows = D.records.filter(matches);
-    var head = ['Type', 'Place', 'Parent', 'Group', 'State', 'Score', 'Core filled', 'Core total', 'Priority', 'Unusable fields', 'Missing fields'];
+    var head = ['Type', 'Place', 'Parent', 'Group', 'State', 'Done %', 'Essentials filled', 'Essentials total',
+                'Fields to correct', 'Fields missing', 'Airtable'];
     var lines = [head.join(',')];
     rows.forEach(function (r) {
       var cells = [
-        TYPE_NAME[r.type] || r.type, r.name, r.parent || '', r.group || '', r.tier,
-        r.score, r.core[0], r.core[1], r.priority,
-        r.broken.map(function (i) { return fieldLabel(r.type, i); }).join('; '),
-        r.missing.map(function (i) { return fieldLabel(r.type, i); }).join('; ')
+        TYPE_NAME[r.type] || r.type, r.name, r.parent || '', r.group || '', STATE_WORD[r.tier] || r.tier,
+        r.score, r.core[0], r.core[1],
+        r.broken.map(function (i) { return fieldAt(r.type, i).label; }).join('; '),
+        r.missing.map(function (i) { return fieldAt(r.type, i).label; }).join('; '),
+        airtableUrl(r) || ''
       ];
       lines.push(cells.map(function (c) {
         var s = String(c == null ? '' : c);
-        // Neutralise spreadsheet formula injection: a leading =, +, - or @ in a
-        // cell is executed by Excel and Sheets on open.
+        // Neutralise spreadsheet formula injection: a leading =, +, - or @ is
+        // executed by Excel and Sheets on open.
         if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
         return '"' + s.replace(/"/g, '""') + '"';
       }).join(','));
@@ -729,7 +881,8 @@ main{max-width:1440px;margin:0 auto;padding:24px}
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'destination-gaps-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.download = 'destination-gaps-' + (job ? job.label.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' : '') +
+      new Date().toISOString().slice(0, 10) + '.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     $('live').textContent = 'Exported ' + n(rows.length) + ' rows.';

@@ -20,6 +20,43 @@
  * Field specs — the definition of "complete" for each content type.
  * ------------------------------------------------------------------ */
 
+/**
+ * Plain-English hints for the fields whose Airtable name does not explain
+ * itself. Keyed by label because the same field appears on several tables, so
+ * one entry covers Countries, Cities and Resorts at once. A field whose name
+ * already says what it is (Overview, Parking, City Served) needs no entry and
+ * falls back to its group.
+ *
+ * These exist for the dashboard: "Highlights JSON" tells an engineer what to
+ * write and tells nobody else anything.
+ */
+export const FIELD_HINTS = {
+  'URL Slug': 'The web address segment, e.g. costa-del-sol',
+  'Hero Intro': 'Two or three opening sentences',
+  'Tagline': 'A short editorial hook, 40 to 70 characters',
+  'Climate Temps': 'Twelve monthly high temperatures',
+  'Climate Rainfall': 'Twelve monthly rainfall figures',
+  'Climate Season': 'Twelve months marked best, shoulder or off',
+  'Highlights JSON': 'Three to six highlight cards',
+  'Events JSON': 'Annual events and festivals',
+  'Best For Tags': 'Who the place suits, as tags',
+  'Who Is It Best For': 'Who the place suits',
+  'Trip Duration Sweet Spot': 'How long people typically go for',
+  'Voltage And Plug': 'Voltage and plug type',
+  'Image URLs': 'Three image links',
+  'Image Attribution': 'Photographer credits for the images',
+  'Terminals & Airlines': 'Which terminal each airline flies from',
+  'Distance & Drive Time': 'How far from the city, and how long by car',
+  'Source 1 URL': 'The first of two sources the record is checked against',
+  'Source 2 URL': 'The second, independent source',
+  'Verified Date': 'When the record was last checked against its sources',
+  'Country Text': 'The country name in plain text',
+  'IATA Code': 'The three-letter airport code',
+  'City Served': 'The city or town the airport serves',
+  'Star Attractions': 'The signature rides or draws',
+  'Days Needed': 'How many days to see it properly',
+};
+
 const F = (id, label, kind, tier, group) => ({ id, label, kind, tier, group });
 
 export const TYPES = [
@@ -428,6 +465,7 @@ export function aggregate(scanned) {
     const statusTally = {};
     const fieldStats = spec.fields.map(f => ({
       label: f.label, group: f.group, tier: f.tier, kind: f.kind,
+      hint: FIELD_HINTS[f.label] || '',
       filled: 0, empty: 0, invalid: 0,
     }));
     let scoreSum = 0;
