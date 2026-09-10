@@ -23,8 +23,6 @@ All prices are per person based on two people sharing, as briefed.
   tags, images } ] }`.
 - `offers-sep-2026.csv` is generated from the JSON, in the exact Special Offers
   import template. Do not hand-edit it; edit the JSON and rebuild.
-- `widget-rows.json` is the Airtable Widgets payload for the four live offer
-  pages, with the widget and record ids they were created under.
 
 ```
 npm run build:travelaire-offers   # JSON to CSV
@@ -37,58 +35,43 @@ server-side whitelist in `api/saved-offers.js` unchanged (field pattern, the
 5,000 character field cap, the 48KB record cap). It also holds the no-em-dash
 brand rule.
 
-## They are live in the account
+## Getting them into the account
 
-Created 10 September 2026 in the Airtable Widgets table (`tblVAThVqAjqtria2`),
-owned by client record `recWGiXycDnxd8Zsh`, Status Active. Each row carries the
-whole offer in its Config, so `widget-offer-page.js` renders a complete offer
-page from the widget id alone. Same pattern as the two GLOBAL TRAVEL SOLUTION
-Escorted Tour rows from August 2026: the trip lives in the config, not in a
-feed, so publishing one needs no signed-in session.
+Import `offers-sep-2026.csv` through the editor:
 
-| Offer | Widget ID | Airtable record |
-|-------|-----------|-----------------|
-| Red Sea and Umrah | `tgw_1789049614480_w2swqe` | recmbQo6yNzficvnm |
-| Qatar | `tgw_1789049614481_g7i4oi` | recYA7CQDyjAz82FR |
-| Doha, Madinah and Makkah | `tgw_1789049614482_1w84nb` | recOhe9SOOSqaNK79 |
-| Zanzibar | `tgw_1789049614483_aa8yuh` | reccSyBeZf8iDD0zp |
+1. Sign in at `https://tg-widgets.vercel.app` as staff.
+2. **Switch client to Halal World Travel first.** Offers save against whichever
+   client the session is on, and the staff switcher reissues the session with
+   the new client id (`api/auth/switch-client.js`), so this decides where they
+   land.
+3. Open **Special Offers** (`/editor-offer-builder`).
+4. **Import**, upload the CSV, **Import 4 offers**.
 
-Embed code, one per offer:
+Every row has a blank Offer ID, so each one creates a new offer and nothing
+existing can be overwritten.
 
-```html
-<div data-tg-widget="offer-page" data-tg-id="tgw_1789049614480_w2swqe"></div>
-<script src="https://tg-widgets.vercel.app/widget-offer-page.js" defer></script>
-```
+Once imported they behave natively: editable in the builder workspace, each with
+its own page at `/offer/<slug>-<id>`, picked up by the Special Offers grid, and
+enquiries routed to `info@halalworldtravel.com` from the stored `enquiryEmail`.
 
-Verified end to end on 10 September 2026: the deployed widget script was run
-against the four live configs fetched from `/api/widget-config`, and all four
-mount with every section present (About this holiday, Itinerary, Highlights,
-the country section, What's included, The detail), the enquiry form, the
-client's navy and bronze branding and the ATOL badge. No console errors.
+### Why there is a manual step, and one approach that did not work
 
-`npm run build:travelaire-offers && node scripts/build-offer-widgets.cjs
-content/travelaire/offers-sep-2026.json content/travelaire/widget-rows.json`
-regenerates the payloads if an offer changes. Writing them to Airtable stays a
-separate, deliberate step so a rebuild never touches a live client account.
+Offers live in per-client Redis (`offers:idx:c:<clientId>`) and the only way in
+is `POST /api/saved-offers`, behind `requireAuth`. That accepts a Bearer JWT or
+the `tg_session` cookie and nothing else, both signed with `TG_SESSION_SECRET`
+(`api/_auth.js:217`). There is no API-key or service path, so an agent with
+Airtable access alone cannot seed a client's feed. The import is the route.
 
-### Enquiry routing
-
-An offer held in a widget config has no record in the saved-offers feed, so the
-enquiry endpoint used to fall through to `CONTACT_TO` and land the lead with
-Travelgenix rather than the client. `api/offer-enquiry.js` now resolves the
-recipient from the widget's own config server-side, the way `api/trip-enquiry.js`
-does, and the page posts its widget id. Held by
-`npm run test:offer-enquiry-routing`, including that a browser-supplied address
-is still never honoured. This ships on the next deploy of `main`; until then the
-phone number and the offer email on the page work as normal.
-
-### The offers grid
-
-The Special Offers grid reads its cards from the saved-offers feed, which is
-per-client Redis written only through an authenticated save. To put these four
-in a grid as well, sign in, switch client to Halal World Travel, open Special
-Offers and import `offers-sep-2026.csv`. The four pages above are unaffected
-either way.
+On 10 Sep 2026 this was first attempted by copying the GLOBAL TRAVEL SOLUTION
+pattern: one Widgets row per trip with the whole thing authored in the row's
+Config, which is how the two Escorted Tour rows from Aug 2026 work. That does
+not carry over. Escorted Tour is one trip per widget authored in config, but
+Special Offers is a pool of offers in the client's feed plus a grid that
+displays them, and the builder loads its workspace from `/api/saved-offers`
+(`public/editor-offer-builder.html:648`) without ever reading the widget config.
+So the four rows rendered standalone pages but showed as empty shells in the
+editor, and they were deleted the same day. Do not repeat it: for anything in
+the Special Offers family, the feed is the only home.
 
 ## Assumptions, and the fields left blank on purpose
 
