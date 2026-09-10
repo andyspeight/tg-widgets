@@ -271,9 +271,15 @@ function isLiveOffer(offer) {
 
 function summarise(rec) {
   const f = (rec.offer && rec.offer.fields) || {};
+  const imgs = (rec.offer && Array.isArray(rec.offer.images)) ? rec.offer.images : [];
   return {
     id: rec.id,
     title: f.title || '',
+    // Cover photo ONLY (one URL, not the whole gallery) so the offers list can
+    // show a real thumbnail. Without it the list drew a gradient placeholder for
+    // every offer, saved photos included, so adding a photo and returning to the
+    // list looked exactly like the photo had been lost (Andy, 10 Sep 2026).
+    image: (typeof imgs[0] === 'string' ? imgs[0] : (f.image || '')) || '',
     price: f.price || '',
     currency: (rec.offer && rec.offer.currency) || '',
     showFrom: f.showFrom || '',

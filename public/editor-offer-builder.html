@@ -682,6 +682,24 @@
       renderCards();
     }
 
+    // The row thumbnail: the offer's cover photo when it has one, else the
+    // gradient placeholder. The URL is written into a style attribute, so it is
+    // whitelisted to a clean https URL first — quotes, brackets, whitespace and
+    // backslashes are all rejected rather than escaped, matching safePhotoUrl in
+    // widget-offer-builder.js. Anything else falls back to the placeholder.
+    function safeImg(u) {
+      u = String(u == null ? '' : u).trim();
+      if (!/^https:\/\//i.test(u)) return '';
+      if (/[\s"'()<>\\]/.test(u)) return '';
+      return u.length > 1000 ? '' : u;
+    }
+    function thumb(o) {
+      const url = safeImg(o && o.image);
+      return url
+        ? '<div class="offer-thumb" style="background-image:url(' + esc(url) + ')"></div>'
+        : '<div class="offer-thumb ph"></div>';
+    }
+
     function renderCards() {
       state.selected.clear(); // a fresh list always starts unselected
       $('offerCount').textContent = state.offers.length;
@@ -713,7 +731,7 @@
             + '<button class="btn sm danger" data-act="delete">Delete</button>';
         return '<div class="offer-row' + (trash ? ' trashed' : '') + '" data-id="' + esc(o.id) + '">'
           + '<label class="offer-check"><input type="checkbox" data-check="' + esc(o.id) + '" aria-label="Select offer" /></label>'
-          + '<div class="offer-thumb ph"></div>'
+          + thumb(o)
           + '<div class="offer-main"><div class="offer-title">' + (esc(o.title) || 'Untitled offer') + chip + '</div>'
           + '<div class="offer-meta">' + meta + '</div></div>'
           + '<div class="offer-actions">' + actions + '</div></div>';
