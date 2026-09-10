@@ -25,7 +25,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.0';
+  const VERSION = '0.3.1';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -126,13 +126,21 @@
     .tgog-sub { font-size: 14px; color: var(--tgog-sub); margin: 4px 0 0; }
 
     /* Vertical cards → responsive grid. Other layouts → full-width stack. */
-    .tgog-items { display: grid; gap: 20px; }
-    /* auto-fit (not auto-fill) collapses the empty phantom columns that left a
-       short row of cards packed to the left on a wide page; the 380px cap
-       matches the card's own max-width so tracks never stretch past a card, and
-       justify-content centres the row as a group. Explicit cols-N below still
-       fill the width. */
-    .tgog-items.grid { grid-template-columns: repeat(auto-fit, minmax(300px, 380px)); justify-content: center; }
+    .tgog-items { display: grid; gap: 12px; }
+    /* Tracks are 1fr, so a row of cards FILLS the container. The old 380px cap
+       froze every track at a card's own max-width and centred the leftovers, so
+       on a 1400px page you got three 380px cards and 110px of dead space each
+       side, and with cols-N the card sat left in a much wider track leaving a
+       gaping hole between columns (Andy, 10 Sep 2026). auto-fit still collapses
+       the phantom columns of a short row. The cards are told to fill their
+       track too, via the fluid flag set where the grid builds each card. */
+    .tgog-items.grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    /* A FULL row fills the container. A short one would otherwise stretch two
+       cards to ~690px on a wide page, so each card is bounded and centred in its
+       track. The bound never bites on a full row: four across at 1440 is ~339px
+       and three is ~456px, both under it. .grid is vertical cards only (see
+       gridCls), so the full-width stack layouts are untouched. */
+    .tgog-items.grid > * { width: 100%; max-width: 460px; margin-inline: auto; }
     .tgog-items.grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
     .tgog-items.grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
     .tgog-items.grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -397,10 +405,11 @@
             // Cruise is one design: a cruise page template implies cruise cards,
             // so the two never drift apart even on a hand-written embed.
             layout: cfg.template === 'cruise' ? 'cruise' : cfg.layout,
-            // In the carousel WE size each slot from the measured row, so the
-            // card must fill it — its usual 380px vertical cap would leave the
-            // slack as ugly gaps between cards on wide pages.
-            fluid: cfg.display === 'carousel',
+            // WE size the slot in both displays now: the carousel measures the
+            // row, and the grid gives every track 1fr. Either way the card must
+            // fill its slot, because the vertical card's own 380px cap would
+            // leave the slack as gaps between the cards on a wide page.
+            fluid: true,
             theme: cfg.theme,
             accentColor: cfg.accentColor,
             brandColor: cfg.brandColor,
