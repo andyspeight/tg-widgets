@@ -184,7 +184,9 @@
     "test:balance-due": "node test/balance-due-schedule-smoke.mjs",
     "test:widget-views": "node test/widget-views-smoke.mjs",
     "test:destination-photos": "node test/destination-photos-smoke.mjs",
-    "test:plan-limits-drift": "node test/plan-limits-drift-smoke.mjs"
+    "test:plan-limits-drift": "node test/plan-limits-drift-smoke.mjs",
+    "test:destinations-coverage": "node tests/destinations-coverage.cjs",
+    "test:destinations-dashboard": "node tests/destinations-dashboard-page.cjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

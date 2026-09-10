@@ -103,6 +103,9 @@
     },
     "api/admin/destination-photos.js": {
       "maxDuration": 60
+    },
+    "api/admin/destinations-dashboard.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
@@ -179,6 +182,10 @@
     {
       "source": "/admin/logos",
       "destination": "/admin/logo-library.html"
+    },
+    {
+      "source": "/admin/destinations",
+      "destination": "/admin/destinations.html"
     },
     {
       "source": "/brain",

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Destination content — Travelgenix admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Travelgenix admin — light default, dark always available.
+   Density 7: figures are grouped by rule and divider, not by floating cards. */
+:root{
+  --bg:#F7F8FA; --sf:#FFF; --sf2:#FBFCFD; --bd:#E5E7EB; --bd2:#F1F3F5;
+  --tx:#111827; --sb:#4B5563; --mt:#6B7280; --fa:#9CA3AF;
+  --br:#0891B2; --bl:#ECFEFF; --bk:#0E7490; --ac:#7C3AED;
+  --ok:#059669; --ok-bg:#ECFDF5; --dn:#DC2626; --dn-bg:#FEF2F2;
+  --warn:#D97706; --warn-bg:#FFFBEB; --info:#2563EB;
+  --t1:#0E7490; --t2:#22A7C4; --t3:#F0B429; --t4:#E5E7EB;
+  --ft:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono','SF Mono',monospace;
+  --sh:0 1px 3px rgba(16,24,40,.06),0 1px 2px rgba(16,24,40,.04);
+  --r1:6px; --r2:8px; --r3:12px;
+}
+[data-theme="dark"]{
+  --bg:#0B1220; --sf:#111A2B; --sf2:#0F1727; --bd:#243044; --bd2:#1A2537;
+  --tx:#F3F6FA; --sb:#B6C2D2; --mt:#8B99AC; --fa:#697788;
+  --br:#22D3EE; --bl:#0B2F38; --bk:#67E8F9; --ac:#A78BFA;
+  --ok:#34D399; --ok-bg:#0A2A20; --dn:#F87171; --dn-bg:#2C1416;
+  --warn:#FBBF24; --warn-bg:#2B2008; --info:#60A5FA;
+  --t1:#22D3EE; --t2:#0E7490; --t3:#B45309; --t4:#243044;
+  --sh:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:light}
+[data-theme="dark"] html,html[data-theme="dark"]{color-scheme:dark}
+body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--br);outline-offset:2px;border-radius:var(--r1)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.skip{position:absolute;left:-9999px;top:0;background:var(--sf);padding:8px 16px;z-index:100}
+.skip:focus{left:8px;top:8px}
+
+/* ---------- top bar ---------- */
+.bar{background:var(--sf);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:20}
+.bar-in{max-width:1440px;margin:0 auto;padding:0 24px;min-height:56px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--mt);padding:8px 10px;margin-left:-10px;border-radius:var(--r2)}
+.back:hover{color:var(--tx);background:var(--bg)}
+.back svg{width:14px;height:14px}
+.bar-title{font-size:14px;font-weight:700;letter-spacing:-.01em}
+.bar-title span{color:var(--fa);font-weight:500}
+.bar-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:var(--r2);border:1px solid var(--bd);background:var(--sf);font-size:13px;font-weight:600;color:var(--sb);transition:border-color .15s,color .15s,background .15s,transform .1s}
+.btn:hover{color:var(--tx);border-color:var(--fa);background:var(--bg)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn svg{width:14px;height:14px;flex:none}
+.btn-i{padding:0;width:36px;justify-content:center}
+.icon{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- shell ---------- */
+main{max-width:1440px;margin:0 auto;padding:24px}
+.head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.head h1{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.2}
+.head p{font-size:14px;color:var(--mt);margin-top:4px;max-width:62ch}
+.head-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- status strip ---------- */
+.status{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--r3);border:1px solid var(--bd);background:var(--sf);margin-bottom:16px;flex-wrap:wrap}
+.status.is-paused{border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:var(--warn-bg)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.status.is-paused .dot{background:var(--warn)}
+.status-txt{font-size:13px;font-weight:600}
+.status-sub{font-size:13px;color:var(--mt);font-weight:400}
+
+/* ---------- KPI row: one panel, divided ---------- */
+.panel{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r3);box-shadow:var(--sh)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:24px}
+.kpi{padding:18px 20px;border-left:1px solid var(--bd2)}
+.kpi:first-child{border-left:0}
+.kpi-l{font-size:12px;font-weight:600;color:var(--mt);letter-spacing:.01em;display:flex;align-items:center;gap:6px}
+.kpi-l svg{width:13px;height:13px;color:var(--fa)}
+.kpi-v{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:8px}
+.kpi-s{font-size:12px;color:var(--fa);margin-top:4px}
+.kpi-v.ok{color:var(--ok)} .kpi-v.warn{color:var(--warn)} .kpi-v.dn{color:var(--dn)}
+
+/* ---------- section ---------- */
+.sec{margin-bottom:24px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.sec-h h2{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.sec-h p{font-size:13px;color:var(--mt)}
+
+/* ---------- type rows ---------- */
+.trow{display:grid;grid-template-columns:minmax(150px,1.4fr) 68px minmax(180px,3fr) 74px;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid var(--bd2);width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;transition:background .15s}
+.trow:first-of-type{border-top:0}
+.trow:hover{background:var(--sf2)}
+.trow[aria-pressed="true"]{background:var(--bl)}
+.trow[aria-pressed="true"] .trow-n{color:var(--bk)}
+.trow-n{display:block;font-size:14px;font-weight:600}
+.trow-s{display:block;font-size:12px;color:var(--fa);margin-top:2px}
+.trow-c{font-size:17px;font-weight:700;text-align:right}
+.trow-p{font-size:13px;font-weight:700;text-align:right}
+
+/* ---------- stacked bar ---------- */
+.stack{display:flex;height:22px;border-radius:var(--r1);overflow:hidden;background:var(--t4);gap:1px}
+.stack i{display:block;height:100%;min-width:0}
+.s1{background:var(--t1)} .s2{background:var(--t2)} .s3{background:var(--t3)} .s4{background:var(--t4)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mt);padding:12px 20px;border-top:1px solid var(--bd2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--bd);margin-bottom:0;overflow-x:auto;padding-bottom:0}
+.tab{padding:10px 14px;border:0;background:none;font-size:13px;font-weight:600;color:var(--mt);border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
+.tab:hover{color:var(--tx)}
+.tab[aria-selected="true"]{color:var(--bk);border-bottom-color:var(--br)}
+.tab .pill{margin-left:6px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--bg);color:var(--mt)}
+.tab[aria-selected="true"] .pill{background:var(--bl);color:var(--bk)}
+.pane{display:none;border:1px solid var(--bd);border-top:0;border-radius:0 0 var(--r3) var(--r3);background:var(--sf);box-shadow:var(--sh)}
+.pane.on{display:block}
+
+/* ---------- filters ---------- */
+.filters{display:flex;gap:8px;padding:14px 20px;border-bottom:1px solid var(--bd2);flex-wrap:wrap;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:12px;font-weight:600;color:var(--mt)}
+.fld input,.fld select{min-height:36px;padding:0 10px;border:1px solid var(--bd);border-radius:var(--r2);background:var(--sf);color:var(--tx);font-family:inherit;font-size:13px;min-width:0}
+.fld input{min-width:220px}
+.fld input:focus,.fld select:focus{border-color:var(--br);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--br) 15%,transparent)}
+.f-count{margin-left:auto;font-size:12px;color:var(--mt);padding-bottom:9px}
+
+/* ---------- tables ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;font-weight:700;color:var(--mt);letter-spacing:.03em;text-transform:uppercase;padding:10px 20px;border-bottom:1px solid var(--bd2);white-space:nowrap;background:var(--sf2);position:sticky;top:0;z-index:1}
+.tbl td{padding:11px 20px;border-bottom:1px solid var(--bd2);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr:hover{background:var(--sf2)}
+.tbl .r{text-align:right}
+.scroll{max-height:640px;overflow:auto;border-radius:0 0 var(--r3) var(--r3)}
+.nm{font-weight:600}
+.pa{font-size:12px;color:var(--fa);margin-top:1px}
+.miss{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;max-width:640px}
+.chip{font-size:11px;font-weight:500;padding:2px 7px;border-radius:var(--r1);background:var(--bg);color:var(--sb);border:1px solid var(--bd)}
+.chip.bad{background:var(--dn-bg);color:var(--dn);border-color:color-mix(in srgb,var(--dn) 30%,transparent)}
+.chip.more{background:none;border-style:dashed;color:var(--fa)}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.tag::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.tag.complete{background:var(--ok-bg);color:var(--ok)}
+.tag.ready{background:var(--bl);color:var(--bk)}
+.tag.partial{background:var(--warn-bg);color:var(--warn)}
+.tag.skeleton{background:var(--dn-bg);color:var(--dn)}
+.mini{height:6px;border-radius:3px;background:var(--t4);overflow:hidden;min-width:60px}
+.mini i{display:block;height:100%;background:var(--t1)}
+.mini i.low{background:var(--warn)}
+.mini i.vlow{background:var(--dn)}
+
+/* ---------- states ---------- */
+.msg{padding:56px 24px;text-align:center}
+.msg svg{width:32px;height:32px;color:var(--fa);margin-bottom:12px}
+.msg h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.msg p{font-size:13px;color:var(--mt);max-width:44ch;margin:0 auto 16px}
+.sk{background:linear-gradient(90deg,var(--bd2) 25%,var(--bd) 37%,var(--bd2) 63%);background-size:400% 100%;animation:sh 1.4s ease infinite;border-radius:var(--r1)}
+@keyframes sh{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+@media (max-width:1100px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi:nth-child(3){border-left:0}
+  .kpi:nth-child(n+3){border-top:1px solid var(--bd2)}
+}
+@media (max-width:760px){
+  main{padding:16px}
+  .bar-in{padding:0 16px}
+  .head h1{font-size:21px}
+  .kpis{grid-template-columns:1fr}
+  .kpi{border-left:0;border-top:1px solid var(--bd2)}
+  .kpi:first-child{border-top:0}
+  .trow{grid-template-columns:1fr 60px;gap:8px 12px}
+  .trow .stack-wrap{grid-column:1/-1}
+  .trow-p{grid-column:2;text-align:right}
+  .tbl th,.tbl td{padding:10px 12px}
+  .fld input{min-width:0;width:100%}
+  .fld{flex:1 1 100%}
+  .head-actions{margin-left:0;width:100%}
+  .head-actions .btn{width:100%;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<div class="bar">
+  <div class="bar-in">
+    <a class="back" href="/admin"><svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Admin</a>
+    <div class="bar-title">Destination content <span>· Luna</span></div>
+    <div class="bar-right">
+      <button class="btn btn-i" id="theme" aria-label="Switch to dark mode" title="Switch theme">
+        <svg class="icon" viewBox="0 0 24 24" id="theme-icon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="btn" id="refresh">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Rescan
+      </button>
+    </div>
+  </div>
+</div>
+
+<main id="main">
+  <div class="head">
+    <div>
+      <h1>Destination content</h1>
+      <p>Every country, city, resort, airport and attraction we hold, scored on whether it is genuinely usable. Sorted by what is worth fixing first.</p>
+    </div>
+    <div class="head-actions">
+      <button class="btn" id="export">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export queue as CSV
+      </button>
+    </div>
+  </div>
+
+  <div class="status" id="status" hidden>
+    <span class="dot"></span>
+    <span class="status-txt" id="status-txt"></span>
+    <span class="status-sub" id="status-sub"></span>
+  </div>
+
+  <div id="boot">
+    <div class="panel kpis">
+      <div class="kpi"><div class="sk" style="height:12px;width:70%"></div><div class="sk" style="height:30px;width:50%;margin-top:10px"></div></div>
+      <div class="kpi"><div class="sk" style="height:12px;width:70%"></div><div class="sk" style="height:30px;width:50%;margin-top:10px"></div></div>
+      <div class="kpi"><div class="sk" style="height:12px;width:70%"></div><div class="sk" style="height:30px;width:50%;margin-top:10px"></div></div>
+      <div class="kpi"><div class="sk" style="height:12px;width:70%"></div><div class="sk" style="height:30px;width:50%;margin-top:10px"></div></div>
+    </div>
+    <div class="panel" style="padding:20px">
+      <div class="sk" style="height:22px;margin-bottom:14px"></div>
+      <div class="sk" style="height:22px;margin-bottom:14px"></div>
+      <div class="sk" style="height:22px;width:80%"></div>
+    </div>
+  </div>
+
+  <div id="fatal" hidden></div>
+
+  <div id="app" hidden>
+    <div class="panel kpis" id="kpis"></div>
+
+    <section class="sec">
+      <div class="sec-h">
+        <h2>Coverage by content type</h2>
+        <p>Select a type to filter everything below it.</p>
+      </div>
+      <div class="panel" id="types"></div>
+    </section>
+
+    <section class="sec">
+      <div class="tabs" role="tablist" aria-label="Destination views">
+        <button class="tab" role="tab" id="tab-queue"  aria-controls="pane-queue"  aria-selected="true">Work queue<span class="pill" id="n-queue">0</span></button>
+        <button class="tab" role="tab" id="tab-fields" aria-controls="pane-fields" aria-selected="false">Field gaps</button>
+        <button class="tab" role="tab" id="tab-cont"   aria-controls="pane-cont"   aria-selected="false">By continent</button>
+        <button class="tab" role="tab" id="tab-broken" aria-controls="pane-broken" aria-selected="false">Broken values<span class="pill" id="n-broken">0</span></button>
+        <button class="tab" role="tab" id="tab-recent" aria-controls="pane-recent" aria-selected="false">Recently added</button>
+      </div>
+
+      <div class="pane on" id="pane-queue" role="tabpanel" aria-labelledby="tab-queue">
+        <div class="filters">
+          <div class="fld">
+            <label for="q">Search</label>
+            <input id="q" type="search" placeholder="Country, city, resort, airport…" autocomplete="off">
+          </div>
+          <div class="fld">
+            <label for="f-tier">Completeness</label>
+            <select id="f-tier">
+              <option value="needs">Needs work</option>
+              <option value="">Everything</option>
+              <option value="skeleton">Skeleton only</option>
+              <option value="partial">Partial only</option>
+              <option value="ready">Ready</option>
+              <option value="complete">Complete</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label for="f-group">Continent or country</label>
+            <select id="f-group"><option value="">Everywhere</option></select>
+          </div>
+          <div class="f-count" id="q-count"></div>
+        </div>
+        <div class="scroll"><table class="tbl">
+          <thead><tr>
+            <th>Place</th><th>Type</th><th>State</th>
+            <th class="r">Core</th><th class="r">Score</th><th class="r">Priority</th>
+          </tr></thead>
+          <tbody id="queue"></tbody>
+        </table></div>
+      </div>
+
+      <div class="pane" id="pane-fields" role="tabpanel" aria-labelledby="tab-fields">
+        <div class="filters"><div class="f-count" id="fld-note" style="margin-left:0"></div></div>
+        <div class="scroll"><table class="tbl">
+          <thead><tr>
+            <th>Field</th><th>Group</th><th>Tier</th><th style="width:180px">Fill</th>
+            <th class="r">Filled</th><th class="r">Broken</th><th class="r">Empty</th>
+          </tr></thead>
+          <tbody id="fields"></tbody>
+        </table></div>
+      </div>
+
+      <div class="pane" id="pane-cont" role="tabpanel" aria-labelledby="tab-cont">
+        <div class="scroll"><table class="tbl">
+          <thead><tr>
+            <th>Continent</th><th class="r">Places</th><th class="r">Countries</th>
+            <th class="r">Cities</th><th class="r">Resorts</th><th style="width:200px">Average completeness</th>
+          </tr></thead>
+          <tbody id="cont"></tbody>
+        </table></div>
+      </div>
+
+      <div class="pane" id="pane-broken" role="tabpanel" aria-labelledby="tab-broken">
+        <div class="filters"><div class="f-count" style="margin-left:0">Values that are present but unusable. These need correcting, not writing.</div></div>
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Place</th><th>Type</th><th>Unusable fields</th></tr></thead>
+          <tbody id="broken"></tbody>
+        </table></div>
+      </div>
+
+      <div class="pane" id="pane-recent" role="tabpanel" aria-labelledby="tab-recent">
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Place</th><th>Type</th><th>State</th><th class="r">Score</th><th class="r">Added</th></tr></thead>
+          <tbody id="recent"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <p style="font-size:12px;color:var(--fa);margin-top:-8px" id="foot"></p>
+  </div>
+</main>
+
+<div class="sr" id="live" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var D = null;              // the dashboard payload
+  var typeFilter = '';       // '' = all types
+  var state = { q: '', tier: 'needs', group: '' };
+  var QUEUE_CAP = 400;       // rows rendered at once; the CSV export carries the lot
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function n(v) { return Number(v || 0).toLocaleString('en-GB'); }
+  function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
+
+  /* ---------------- theme ---------------- */
+  var SUN = '<path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="5"/>';
+  var MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    $('theme-icon').innerHTML = t === 'dark' ? SUN : MOON;
+    $('theme').setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('tg-admin-theme'); } catch (e) {}
+  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  $('theme').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('tg-admin-theme', next); } catch (e) {}
+  });
+
+  /* ---------------- states ---------------- */
+  var ICON_WARN = '<svg class="icon" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
+  var ICON_EMPTY = '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+
+  function fatal(title, body, retry) {
+    $('boot').hidden = true;
+    $('app').hidden = true;
+    var el = $('fatal');
+    el.hidden = false;
+    el.className = 'panel';
+    el.innerHTML = '<div class="msg">' + ICON_WARN +
+      '<h3>' + esc(title) + '</h3><p>' + esc(body) + '</p>' +
+      (retry ? '<button class="btn" id="retry" style="margin:0 auto">Try again</button>' : '') + '</div>';
+    if (retry) $('retry').addEventListener('click', function () { load(false); });
+  }
+  function emptyRow(cols, title, body) {
+    return '<tr><td colspan="' + cols + '"><div class="msg">' + ICON_EMPTY +
+      '<h3>' + esc(title) + '</h3><p>' + esc(body) + '</p></div></td></tr>';
+  }
+
+  /* ---------------- load ---------------- */
+  function load(force) {
+    var btn = $('refresh');
+    btn.disabled = true;
+    if (!D) { $('boot').hidden = false; $('app').hidden = true; }
+    $('fatal').hidden = true;
+
+    fetch('/api/admin/destinations-dashboard' + (force ? '?refresh=1' : ''), { credentials: 'include' })
+      .then(function (r) {
+        if (r.status === 401) { location.href = '/signin.html?redirect=' + encodeURIComponent('/admin/destinations'); return null; }
+        if (r.status === 403) { fatal('Admin access required', 'Your account is not on the admin allow-list for this dashboard.', false); return null; }
+        return r.json().then(function (j) {
+          if (!r.ok) throw new Error(j && j.error ? j.error : 'Request failed (' + r.status + ')');
+          return j;
+        });
+      })
+      .then(function (data) {
+        if (!data) return;
+        D = data;
+        render();
+        $('boot').hidden = true;
+        $('app').hidden = false;
+        $('live').textContent = 'Loaded ' + n(D.totals.records) + ' destination records.';
+      })
+      .catch(function (err) {
+        fatal('Could not load the destination data', String(err.message || err), true);
+      })
+      .then(function () { btn.disabled = false; });
+  }
+
+  /* ---------------- render ---------------- */
+  function typeOf(key) {
+    for (var i = 0; i < D.types.length; i++) if (D.types[i].key === key) return D.types[i];
+    return null;
+  }
+
+  function render() {
+    renderStatus();
+    renderKpis();
+    renderTypes();
+    renderGroupFilter();
+    renderQueue();
+    renderFields();
+    renderContinents();
+    renderBroken();
+    renderRecent();
+    var when = new Date(D.generatedAt);
+    $('foot').textContent = 'Scanned ' + n(D.totals.records) + ' records across ' + D.types.length +
+      ' tables at ' + when.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) +
+      (D.cached ? ' (cached — press Rescan for a fresh read)' : '') + '.';
+  }
+
+  function renderStatus() {
+    var a = D.automation || {};
+    var el = $('status');
+    el.hidden = false;
+    el.className = 'status' + (a.paused ? ' is-paused' : '');
+    $('status-txt').textContent = a.paused ? 'Automation paused' : 'Automation running';
+    $('status-sub').textContent = a.paused
+      ? 'No background job has written to this data since ' + esc(a.since) + '. ' + esc(a.reason || '')
+      : 'Background jobs may write to this data while you work.';
+  }
+
+  function renderKpis() {
+    var t = D.totals;
+    var usable = t.complete + t.ready;
+    var needs = t.partial + t.skeleton;
+    var kpis = [
+      { l: 'Places in the library', v: n(t.records),
+        s: D.types.map(function (x) { return n(x.count) + ' ' + x.label.toLowerCase(); }).join(' · '),
+        icon: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/>' },
+      { l: 'Ready to publish', v: n(usable), cls: 'ok',
+        s: pct(usable, t.records) + '% hold every field a client site needs',
+        icon: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>' },
+      { l: 'Needs work', v: n(needs), cls: needs > usable ? 'warn' : '',
+        s: n(t.skeleton) + ' are barely more than a name',
+        icon: '<path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>' },
+      { l: 'Broken values', v: n(t.broken), cls: t.broken ? 'dn' : '',
+        s: 'Present but unusable — a correction, not a rewrite',
+        icon: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/>' }
+    ];
+    $('kpis').innerHTML = kpis.map(function (k) {
+      return '<div class="kpi"><div class="kpi-l"><svg class="icon" viewBox="0 0 24 24">' + k.icon + '</svg>' + esc(k.l) + '</div>' +
+        '<div class="kpi-v num ' + (k.cls || '') + '">' + k.v + '</div>' +
+        '<div class="kpi-s">' + esc(k.s) + '</div></div>';
+    }).join('');
+  }
+
+  function stack(t) {
+    var total = t.count || 1;
+    var parts = [
+      ['s1', t.tiers.complete, 'Complete'],
+      ['s2', t.tiers.ready, 'Ready'],
+      ['s3', t.tiers.partial, 'Partial'],
+      ['s4', t.tiers.skeleton, 'Skeleton']
+    ];
+    return '<div class="stack" role="img" aria-label="' + esc(parts.map(function (p) {
+      return p[1] + ' ' + p[2].toLowerCase();
+    }).join(', ')) + '">' + parts.map(function (p) {
+      return p[1] ? '<i class="' + p[0] + '" style="width:' + ((p[1] / total) * 100) + '%"></i>' : '';
+    }).join('') + '</div>';
+  }
+
+  function renderTypes() {
+    var html = D.types.map(function (t) {
+      var on = typeFilter === t.key;
+      return '<button class="trow" data-type="' + esc(t.key) + '" aria-pressed="' + on + '">' +
+        '<span><span class="trow-n">' + esc(t.label) + '</span>' +
+          '<span class="trow-s">' + n(t.tiers.complete + t.tiers.ready) + ' ready · ' +
+          n(t.tiers.partial + t.tiers.skeleton) + ' to do' +
+          (t.hasEvidence ? ' · ' + n(t.verified) + ' verified' : '') + '</span></span>' +
+        '<span class="trow-c num">' + n(t.count) + '</span>' +
+        '<span class="stack-wrap">' + stack(t) + '</span>' +
+        '<span class="trow-p num">' + t.avgScore + '%</span>' +
+      '</button>';
+    }).join('');
+    html += '<div class="legend">' +
+      '<span><i class="s1"></i>Complete — every field, including depth</span>' +
+      '<span><i class="s2"></i>Ready — every field a client site needs</span>' +
+      '<span><i class="s3"></i>Partial</span>' +
+      '<span><i class="s4"></i>Skeleton — a name and little else</span></div>';
+    $('types').innerHTML = html;
+
+    Array.prototype.forEach.call($('types').querySelectorAll('.trow'), function (b) {
+      b.addEventListener('click', function () {
+        typeFilter = (typeFilter === b.dataset.type) ? '' : b.dataset.type;
+        renderTypes(); renderGroupFilter(); renderQueue(); renderFields(); renderBroken();
+        $('live').textContent = typeFilter ? ('Filtered to ' + typeOf(typeFilter).label) : 'Showing all content types.';
+      });
+    });
+  }
+
+  function visibleRecords() {
+    return D.records.filter(function (r) { return !typeFilter || r.type === typeFilter; });
+  }
+
+  function renderGroupFilter() {
+    var groups = {};
+    visibleRecords().forEach(function (r) { if (r.group) groups[r.group] = (groups[r.group] || 0) + 1; });
+    var keys = Object.keys(groups).sort();
+    var sel = $('f-group');
+    var keep = state.group;
+    sel.innerHTML = '<option value="">Everywhere</option>' + keys.map(function (k) {
+      return '<option value="' + esc(k) + '">' + esc(k) + ' (' + groups[k] + ')</option>';
+    }).join('');
+    if (keys.indexOf(keep) >= 0) sel.value = keep; else { state.group = ''; sel.value = ''; }
+  }
+
+  function matches(r) {
+    if (typeFilter && r.type !== typeFilter) return false;
+    if (state.group && r.group !== state.group) return false;
+    if (state.tier === 'needs') { if (r.tier !== 'partial' && r.tier !== 'skeleton') return false; }
+    else if (state.tier && r.tier !== state.tier) return false;
+    if (state.q) {
+      var hay = (r.name + ' ' + (r.parent || '') + ' ' + (r.group || '')).toLowerCase();
+      if (hay.indexOf(state.q) === -1) return false;
+    }
+    return true;
+  }
+
+  function fieldLabel(typeKey, idx) {
+    var t = typeOf(typeKey);
+    return t && t.fields[idx] ? t.fields[idx].label : 'Field ' + idx;
+  }
+
+  function chips(r, cap) {
+    var out = [];
+    r.broken.forEach(function (i) { out.push('<span class="chip bad" title="Present but unusable">' + esc(fieldLabel(r.type, i)) + '</span>'); });
+    r.missing.forEach(function (i) { out.push('<span class="chip">' + esc(fieldLabel(r.type, i)) + '</span>'); });
+    var shown = out.slice(0, cap);
+    if (out.length > cap) shown.push('<span class="chip more">+' + (out.length - cap) + ' more</span>');
+    return shown.length ? '<div class="miss">' + shown.join('') + '</div>' : '';
+  }
+
+  var TYPE_NAME = { country: 'Country', city: 'City', resort: 'Resort', airport: 'Airport', attraction: 'Attraction' };
+
+  function renderQueue() {
+    var rows = D.records.filter(matches);
+    $('n-queue').textContent = n(rows.length);
+    $('q-count').textContent = rows.length > QUEUE_CAP
+      ? 'Showing the top ' + n(QUEUE_CAP) + ' of ' + n(rows.length) + ' — export for the full list'
+      : n(rows.length) + (rows.length === 1 ? ' place' : ' places');
+
+    if (!rows.length) {
+      $('queue').innerHTML = emptyRow(6, 'Nothing matches those filters',
+        'Widen the completeness filter or clear the search to see more.');
+      return;
+    }
+
+    $('queue').innerHTML = rows.slice(0, QUEUE_CAP).map(function (r) {
+      return '<tr><td>' +
+          '<div class="nm">' + esc(r.name) + '</div>' +
+          (r.parent ? '<div class="pa">' + esc(r.parent) + '</div>' : (r.group ? '<div class="pa">' + esc(r.group) + '</div>' : '')) +
+          chips(r, 6) +
+        '</td>' +
+        '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
+        '<td><span class="tag ' + esc(r.tier) + '">' + esc(r.tier) + '</span></td>' +
+        '<td class="r num">' + r.core[0] + '/' + r.core[1] + '</td>' +
+        '<td class="r num">' + r.score + '%</td>' +
+        '<td class="r num">' + n(r.priority) + '</td></tr>';
+    }).join('');
+  }
+
+  function renderFields() {
+    var types = typeFilter ? [typeOf(typeFilter)] : D.types;
+    $('fld-note').textContent = typeFilter
+      ? 'Fill rates across ' + n(typeOf(typeFilter).count) + ' ' + typeOf(typeFilter).label.toLowerCase() + ', worst first.'
+      : 'Fill rates across every table, worst first. Select a content type above to narrow this.';
+
+    var rows = [];
+    types.forEach(function (t) {
+      t.fields.forEach(function (f) {
+        rows.push({ t: t, f: f, pc: pct(f.filled, t.count) });
+      });
+    });
+    rows.sort(function (a, b) { return a.pc - b.pc || b.f.empty - a.f.empty; });
+
+    if (!rows.length) { $('fields').innerHTML = emptyRow(7, 'No fields to show', 'Select a content type above.'); return; }
+
+    $('fields').innerHTML = rows.map(function (row) {
+      var cls = row.pc < 34 ? 'vlow' : row.pc < 67 ? 'low' : '';
+      return '<tr><td><div class="nm">' + esc(row.f.label) + '</div>' +
+          (typeFilter ? '' : '<div class="pa">' + esc(row.t.label) + '</div>') + '</td>' +
+        '<td>' + esc(row.f.group) + '</td>' +
+        '<td>' + (row.f.tier === 'core' ? '<span class="tag ready">core</span>' : '<span class="chip">depth</span>') + '</td>' +
+        '<td><div class="mini"><i class="' + cls + '" style="width:' + row.pc + '%"></i></div>' +
+          '<div class="pa num">' + row.pc + '%</div></td>' +
+        '<td class="r num">' + n(row.f.filled) + '</td>' +
+        '<td class="r num" style="color:' + (row.f.invalid ? 'var(--dn)' : 'inherit') + '">' + n(row.f.invalid) + '</td>' +
+        '<td class="r num">' + n(row.f.empty) + '</td></tr>';
+    }).join('');
+  }
+
+  function renderContinents() {
+    if (!D.continents.length) {
+      $('cont').innerHTML = emptyRow(6, 'No continent data', 'Countries need a Continent before this view can group them.');
+      return;
+    }
+    $('cont').innerHTML = D.continents.map(function (c) {
+      var cls = c.avgScore < 34 ? 'vlow' : c.avgScore < 67 ? 'low' : '';
+      return '<tr><td class="nm">' + esc(c.name) + '</td>' +
+        '<td class="r num">' + n(c.count) + '</td>' +
+        '<td class="r num">' + n(c.byType.country || 0) + '</td>' +
+        '<td class="r num">' + n(c.byType.city || 0) + '</td>' +
+        '<td class="r num">' + n(c.byType.resort || 0) + '</td>' +
+        '<td><div class="mini"><i class="' + cls + '" style="width:' + c.avgScore + '%"></i></div>' +
+          '<div class="pa num">' + c.avgScore + '%</div></td></tr>';
+    }).join('');
+  }
+
+  function renderBroken() {
+    var rows = visibleRecords().filter(function (r) { return r.broken.length; })
+      .sort(function (a, b) { return b.broken.length - a.broken.length; });
+    $('n-broken').textContent = n(rows.length);
+    if (!rows.length) {
+      $('broken').innerHTML = emptyRow(3, 'Nothing unusable here',
+        'Every value that is present parses correctly. Blanks show in the work queue instead.');
+      return;
+    }
+    $('broken').innerHTML = rows.slice(0, QUEUE_CAP).map(function (r) {
+      return '<tr><td><div class="nm">' + esc(r.name) + '</div>' +
+          (r.parent ? '<div class="pa">' + esc(r.parent) + '</div>' : '') + '</td>' +
+        '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
+        '<td><div class="miss">' + r.broken.map(function (i) {
+          return '<span class="chip bad">' + esc(fieldLabel(r.type, i)) + '</span>';
+        }).join('') + '</div></td></tr>';
+    }).join('');
+  }
+
+  function renderRecent() {
+    if (!D.recent.length) { $('recent').innerHTML = emptyRow(5, 'Nothing added yet', 'New records will appear here.'); return; }
+    $('recent').innerHTML = D.recent.map(function (r) {
+      return '<tr><td class="nm">' + esc(r.name) + '</td>' +
+        '<td>' + esc(TYPE_NAME[r.type] || r.type) + '</td>' +
+        '<td><span class="tag ' + esc(r.tier) + '">' + esc(r.tier) + '</span></td>' +
+        '<td class="r num">' + r.score + '%</td>' +
+        '<td class="r num">' + new Date(r.created).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + '</td></tr>';
+    }).join('');
+  }
+
+  /* ---------------- filters ---------------- */
+  var timer = null;
+  $('q').addEventListener('input', function (e) {
+    var v = e.target.value.trim().toLowerCase();
+    clearTimeout(timer);
+    timer = setTimeout(function () { state.q = v; renderQueue(); }, 250);
+  });
+  $('f-tier').addEventListener('change', function (e) { state.tier = e.target.value; renderQueue(); });
+  $('f-group').addEventListener('change', function (e) { state.group = e.target.value; renderQueue(); });
+
+  /* ---------------- tabs ---------------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function selectTab(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      $(t.getAttribute('aria-controls')).classList.toggle('on', on);
+    });
+  }
+  tabs.forEach(function (tab, i) {
+    tab.tabIndex = i === 0 ? 0 : -1;
+    tab.addEventListener('click', function () { selectTab(tab); });
+    tab.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      var next = tabs[(i + d + tabs.length) % tabs.length];
+      next.focus(); selectTab(next);
+    });
+  });
+
+  /* ---------------- export ---------------- */
+  $('export').addEventListener('click', function () {
+    if (!D) return;
+    var rows = D.records.filter(matches);
+    var head = ['Type', 'Place', 'Parent', 'Group', 'State', 'Score', 'Core filled', 'Core total', 'Priority', 'Unusable fields', 'Missing fields'];
+    var lines = [head.join(',')];
+    rows.forEach(function (r) {
+      var cells = [
+        TYPE_NAME[r.type] || r.type, r.name, r.parent || '', r.group || '', r.tier,
+        r.score, r.core[0], r.core[1], r.priority,
+        r.broken.map(function (i) { return fieldLabel(r.type, i); }).join('; '),
+        r.missing.map(function (i) { return fieldLabel(r.type, i); }).join('; ')
+      ];
+      lines.push(cells.map(function (c) {
+        var s = String(c == null ? '' : c);
+        // Neutralise spreadsheet formula injection: a leading =, +, - or @ in a
+        // cell is executed by Excel and Sheets on open.
+        if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+        return '"' + s.replace(/"/g, '""') + '"';
+      }).join(','));
+    });
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'destination-gaps-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    $('live').textContent = 'Exported ' + n(rows.length) + ' rows.';
+  });
+
+  $('refresh').addEventListener('click', function () { load(true); });
+
+  load(false);
+})();
+</script>
+</body>
+</html>
