@@ -30,6 +30,10 @@
   --sh:0 1px 3px rgba(0,0,0,.4);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* Any author display rule beats the browser's own [hidden] rule, so .btn's
+   inline-flex was quietly keeping Stop on screen with nothing running. Every
+   el.hidden = true in this page depends on this line. */
+[hidden]{display:none!important}
 html{color-scheme:light}
 html[data-theme="dark"]{color-scheme:dark}
 body{font-family:var(--ft);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
@@ -101,6 +105,15 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .job-n b{display:block;font-size:19px;font-weight:800;color:var(--tx);letter-spacing:-.02em}
 .job-go{justify-self:end}
 .job-none{padding:28px 20px;text-align:center;color:var(--mt);font-size:13px}
+.next{padding:20px 22px;display:grid;grid-template-columns:1fr auto;gap:4px 24px;align-items:center;border-color:var(--ok)}
+.next-l{grid-column:1;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ok)}
+.next-t{grid-column:1;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.next-s{grid-column:1;font-size:13px;color:var(--mt);max-width:74ch;line-height:1.55;margin-top:4px}
+.next-go{grid-column:2;grid-row:1/4;align-self:center;white-space:nowrap}
+.job-h{padding:11px 20px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mt);background:var(--sf2);border-top:1px solid var(--bd2)}
+.job-h:first-child{border-top:0}
+.job.is-off:hover{background:transparent}
+.job.is-off .job-t{color:var(--mt)}
 
 /* ---------- type rows ---------- */
 .trow{display:grid;grid-template-columns:minmax(160px,1.3fr) 64px minmax(180px,3fr) 92px;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid var(--bd2);width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;transition:background .15s}
@@ -250,6 +263,9 @@ a.nm:hover span{text-decoration:underline}
   .job{grid-template-columns:1fr auto;gap:10px 14px}
   .job-go{grid-column:1/-1;justify-self:stretch}
   .job-go .btn{width:100%;justify-content:center}
+  .next{grid-template-columns:1fr}
+  .next-go{grid-column:1;grid-row:auto;margin-top:14px}
+  .next-go .btn{width:100%;justify-content:center}
   .trow{grid-template-columns:1fr 72px;gap:8px 12px}
   .trow .stack-wrap{grid-column:1/-1}
   .trow-p{grid-column:2;text-align:right}
@@ -319,8 +335,9 @@ a.nm:hover span{text-decoration:underline}
     <section class="sec">
       <div class="sec-h">
         <h2>Where to start</h2>
-        <p>The same field missing across many places. One job, one batch.</p>
+        <p>The same field missing across many places is one job.</p>
       </div>
+      <div class="panel next" id="next" hidden></div>
       <div class="panel" id="jobs"></div>
     </section>
 
@@ -575,6 +592,10 @@ a.nm:hover span{text-decoration:underline}
         D = data; render();
         $('boot').hidden = true; $('app').hidden = false;
         $('live').textContent = 'Loaded ' + n(D.totals.records) + ' destination records.';
+        // The runner's state, so the recommendation at the top can quote a
+        // real price rather than making one up. Failing is silent on purpose:
+        // no queue configured is not a reason to withhold the whole page.
+        refreshRun();
       })
       .catch(function (err) { fatal('Could not load the destination data', String(err.message || err), true); })
       .then(function () { btn.disabled = false; });
@@ -592,7 +613,7 @@ a.nm:hover span{text-decoration:underline}
 
   /* ---------------- render ---------------- */
   function render() {
-    renderStatus(); renderKpis(); renderJobs(); renderTypes();
+    renderStatus(); renderKpis(); renderNext(); renderJobs(); renderTypes();
     renderGroupFilter(); renderQueue(); renderFields(); renderContinents(); renderBroken(); renderRecent();
     var when = new Date(D.generatedAt);
     $('lede').textContent = n(D.totals.records) + ' places across five tables. ' +
@@ -673,32 +694,105 @@ a.nm:hover span{text-decoration:underline}
      be offering to do nothing slowly. */
   var FACT_FIELDS = /^(Climate |Lat$|Lng$|Latitude|Longitude|IATA Code|City Served|Country Text|Official Website|Wikipedia URL|Source \d URL|Verified Date)/;
   var MANUAL_FIELDS = /^(Image URLs|Image Attribution|Hero Image URL|Best For Tags|Who Is It Best For|Best Paired)/;
+  /* Worked out from records we already hold, so no model and no money. */
+  var FREE_FIELDS = /^(URL Slug|Time Zone|Currency|Language|Voltage And Plug|Region|Flight Time From UK)/;
+
   function canFill(label) {
     return !FACT_FIELDS.test(label) && !MANUAL_FIELDS.test(label);
   }
+  function isFree(label) { return FREE_FIELDS.test(label); }
+  function blockedWhy(label) {
+    return MANUAL_FIELDS.test(label)
+      ? 'a person chooses these, the runner will never write them'
+      : 'needs two independent sources to agree, and that checker is not built yet';
+  }
+
+  /* The one thing to do now. On 10 Sep the three biggest jobs were all ones
+     the runner cannot touch, so the first thing Andy could press led nowhere.
+     The runner is a writer, so writing comes first, then what a page cannot go
+     live without, then sheer volume. */
+  function bestJob() {
+    var open = allJobs().filter(function (j) { return canFill(j.label); });
+    open.sort(function (a, b) {
+      var ae = a.group === 'Editorial', be = b.group === 'Editorial';
+      if (ae !== be) return ae ? -1 : 1;
+      if ((a.tier === 'core') !== (b.tier === 'core')) return a.tier === 'core' ? -1 : 1;
+      return b.gap - a.gap;
+    });
+    return open[0] || null;
+  }
+
+  function renderNext() {
+    var el = $('next'), j = bestJob();
+    if (!j) { el.hidden = true; return; }
+    el.hidden = false;
+
+    var per = (R && R.budget && R.budget.perItemUsd) || 0;
+    var free = isFree(j.label);
+    var price = free
+      ? 'It costs nothing: the answers come from records we already hold.'
+      : per
+        ? 'It costs about ' + money(per * j.gap) + ' and runs on its own.'
+        : 'It runs on its own once you start it.';
+
+    // The plain-English hint reads far better than the column name. "Write
+    // three to six highlight cards" is a sentence. "Write the Highlights JSON"
+    // is a database field. The column name still gets said, underneath.
+    var what = j.hint
+      ? j.hint.charAt(0).toLowerCase() + j.hint.slice(1)
+      : 'the ' + j.label;
+
+    el.innerHTML =
+      '<div class="next-l">Do this next</div>' +
+      '<div class="next-t">' + (free ? 'Work out ' : 'Write ') +
+        esc(what) + ' for ' + n(j.gap) + ' ' + esc(TYPE_PLURAL[j.type]) + '</div>' +
+      '<div class="next-s">That is the <b>' + esc(j.label) + '</b> field. ' + esc(price) +
+        ' Every answer is checked twice before it saves. Anything doubtful is held for you ' +
+        'to read rather than written, and nothing already filled is touched. You will see ' +
+        'the whole list before anything starts.</div>' +
+      '<div class="next-go"><button class="btn btn-do" id="next-go">Show me this job</button></div>';
+
+    $('next-go').addEventListener('click', function () { openJob(j.type, j.idx); });
+  }
 
   function renderJobs() {
-    var jobs = allJobs().slice(0, JOBS_SHOWN);
-    if (!jobs.length) {
+    var all = allJobs();
+    if (!all.length) {
       $('jobs').innerHTML = '<div class="job-none">Nothing missing anywhere. Every field is filled on every record.</div>';
       return;
     }
-    $('jobs').innerHTML = jobs.map(function (j) {
-      // Describe the field itself. A tier sentence repeated down six rows is
-      // the sameness problem all over again.
+    var open = all.filter(function (j) { return canFill(j.label); }).slice(0, JOBS_SHOWN);
+    var shut = all.filter(function (j) { return !canFill(j.label); }).slice(0, JOBS_SHOWN);
+
+    // Describe the field itself. A tier sentence repeated down six rows is
+    // the sameness problem all over again.
+    function row(j, off) {
       var bits = [];
-      if (j.hint) bits.push(j.hint);
-      else bits.push(j.group);
-      if (j.tier === 'core') bits.push('needed before a page can go live');
-      if (j.invalid) bits.push(n(j.invalid) + ' hold something unusable');
-      if (!canFill(j.label)) bits.push('the runner cannot fill this one yet');
-      return '<div class="job">' +
-        '<div><div class="job-t">' + esc(j.label) + ' &middot; ' + esc(TYPE_PLURAL[j.type]) + '</div>' +
-          '<div class="job-s">' + esc(bits.join(' &middot; ')).replace(/&amp;middot;/g, '&middot;') + '</div></div>' +
+      bits.push(j.hint || j.group);
+      if (off) bits.push(blockedWhy(j.label));
+      else {
+        if (j.tier === 'core') bits.push('needed before a page can go live');
+        if (j.invalid) bits.push(n(j.invalid) + ' hold something unusable');
+      }
+      return '<div class="job' + (off ? ' is-off' : '') + '">' +
+        '<div><div class="job-t">' + esc(j.label) + ' · ' + esc(TYPE_PLURAL[j.type]) + '</div>' +
+          '<div class="job-s">' + esc(bits.join(' · ')) + '</div></div>' +
         '<div class="job-n"><b class="num">' + n(j.gap) + '</b>of ' + n(j.total) + ' missing it</div>' +
-        '<div class="job-go"><button class="btn btn-go" data-job="' + esc(j.type) + ':' + j.idx + '">Work on this</button></div>' +
-      '</div>';
-    }).join('');
+        '<div class="job-go">' + (off ? '' :
+          '<button class="btn btn-go" data-job="' + esc(j.type) + ':' + j.idx + '">Work on this</button>') +
+        '</div></div>';
+    }
+
+    var html = '';
+    if (open.length) {
+      html += '<div class="job-h">The runner can do these now</div>' +
+        open.map(function (j) { return row(j, false); }).join('');
+    }
+    if (shut.length) {
+      html += '<div class="job-h">The runner cannot do these</div>' +
+        shut.map(function (j) { return row(j, true); }).join('');
+    }
+    $('jobs').innerHTML = html;
 
     Array.prototype.forEach.call($('jobs').querySelectorAll('[data-job]'), function (b) {
       b.addEventListener('click', function () {
@@ -1162,6 +1256,9 @@ a.nm:hover span{text-decoration:underline}
     R = st;
     renderRun();
     renderHeld();
+    // Not while a job is open: polling would rebuild the button under the
+    // cursor every four seconds, and the panel is scrolled away anyway.
+    if (D) { renderStatus(); if (!job) renderNext(); }
     // Keep polling only while there is something to watch.
     if (st.pending > 0 && !poll) poll = setInterval(refreshRun, 4000);
     if (st.pending === 0 && poll) { clearInterval(poll); poll = null; }
@@ -1176,6 +1273,9 @@ a.nm:hover span{text-decoration:underline}
     var l = $('run-l');
     var st = R.run || {};
     var busy = R.pending > 0 && R.settings && R.settings.running;
+    var b = R.budget || {};
+    var fillable = canFill(job.label);
+    var count = jobRecords().length;
 
     var bits = [];
     if (busy) {
@@ -1183,8 +1283,14 @@ a.nm:hover span{text-decoration:underline}
       bits.push('<span>' + n(R.pending) + ' left in the queue.</span>');
     } else if (R.pending > 0) {
       bits.push('<b>Paused with ' + n(R.pending) + ' left.</b>');
+    } else if (!fillable) {
+      bits.push('<b>This one cannot be filled yet.</b>');
+      bits.push('<span>' + esc(blockedWhy(job.label).replace(/^./, function (c) { return c.toUpperCase(); })) +
+        '. Export the list if you want to work through it by hand.</span>');
     } else {
       bits.push('<b>Nothing running.</b>');
+      bits.push('<span>Press the button and it works through them a few at a time, ' +
+        'saving what passes and holding what does not. You can close this tab.</span>');
     }
     if (R.savedToday || R.heldToday) {
       bits.push('<span>Today: ' + n(R.savedToday) + ' saved, ' + n(R.heldToday) + ' held.</span>');
@@ -1193,12 +1299,14 @@ a.nm:hover span{text-decoration:underline}
     l.innerHTML = bits.join(' ');
 
     $('jv-stop').hidden = !(R.pending > 0);
-    var fillable = canFill(job.label);
     $('jv-doall').disabled = busy || !fillable;
     $('jv-doall').title = fillable ? '' : 'The runner cannot fill this field yet';
-    $('jv-doall').textContent = fillable ? 'Fill all of these' : 'Cannot fill this yet';
+    // Say what the button will do, and what it will cost, before it is pressed.
+    $('jv-doall').textContent = !fillable ? 'Cannot fill this yet'
+      : busy ? 'Filling now…'
+      : 'Fill all ' + n(count) + (isFree(job.label) || !b.perItemUsd
+          ? '' : ' · about ' + money(b.perItemUsd * count));
 
-    var b = R.budget || {};
     var used = b.capUsd ? Math.min(100, Math.round((b.spentUsd / b.capUsd) * 100)) : 0;
     var cls = used >= 100 ? 'full' : used >= 75 ? 'hot' : '';
     $('money').innerHTML =
@@ -1254,12 +1362,12 @@ a.nm:hover span{text-decoration:underline}
   $('jv-doall').addEventListener('click', function () {
     var rows = jobRecords();
     var plan = R && R.budget ? R.budget : {};
-    var paid = job && job.field && !/URL Slug|Time Zone|Currency|Language|Voltage|Region|Flight Time/.test(job.field.label);
-    var cost = paid ? (plan.perItemUsd || 0) * rows.length : 0;
+    var cost = isFree(job.label) ? 0 : (plan.perItemUsd || 0) * rows.length;
     var msg = 'Fill ' + n(rows.length) + ' records for ' + job.label + '?\n\n' +
       (cost > 0
         ? 'Estimated cost about ' + money(cost) + '. Anything that passes both checks saves itself; anything that does not is held for you.'
-        : 'This one costs nothing: the answers come from records we already hold.');
+        : 'This one costs nothing: the answers come from records we already hold.') +
+      '\n\nNothing already filled is touched, and you can stop it at any point.';
     if (!window.confirm(msg)) return;
     queueWork(rows.map(function (r) { return r.id; }), 'records');
   });

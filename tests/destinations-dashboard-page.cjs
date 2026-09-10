@@ -123,6 +123,9 @@ async function payload(mod) {
       .on('jsdomError', e => errors.push(e.message))
       .on('error', (...a) => errors.push(a.join(' '))),
     beforeParse(win) {
+      // jsdom has no layout, so scrollIntoView throws. Stub it, or a real
+      // page error gets lost in the noise of one that does not matter.
+      win.Element.prototype.scrollIntoView = function () {};
       win.__queued = [];
       win.fetch = (url, opts) => {
         if (String(url).includes('destinations-fill')) {
@@ -329,6 +332,7 @@ async function payload(mod) {
       runScripts: 'dangerously', url: 'https://tg-widgets.vercel.app/admin/destinations',
       beforeParse(w) {
         w.fetch = () => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve(hostile) });
+        w.Element.prototype.scrollIntoView = function () {};
         w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
         w.URL.createObjectURL = () => 'blob:mock'; w.URL.revokeObjectURL = () => {};
       },
@@ -342,6 +346,56 @@ async function payload(mod) {
     });
   });
 
+
+  console.log('\nKnowing what to do');
+
+  /* Andy's words on 10 Sep, looking at the finished page: "I'm on the page,
+     but I've no idea what I'm supposed to be doing." The page listed six jobs
+     and the first three were ones the runner cannot touch, each wearing the
+     same blue button. These tests exist so that cannot come back. */
+
+  t('hidden really hides, even on a button', () => {
+    // .btn sets display:inline-flex, and an author rule beats the browser's
+    // own [hidden]{display:none}. Without an explicit override, Stop sat on
+    // screen with nothing running, which is what Andy was looking at.
+    const probe = doc.createElement('button');
+    probe.className = 'btn';
+    probe.hidden = true;
+    doc.body.appendChild(probe);
+    assert.strictEqual(win.getComputedStyle(probe).display, 'none',
+      'a hidden .btn must not be displayed');
+    probe.remove();
+  });
+
+  t('the page names one thing to do next', () => {
+    assert.strictEqual($('next').hidden, false, 'the recommendation should be shown');
+    const title = $('next').querySelector('.next-t').textContent;
+    assert.ok(/\d/.test(title), 'it should say how many places: ' + title);
+    assert.ok($('next').querySelector('#next-go'), 'it needs a button to act on');
+  });
+
+  t('what it recommends is work the runner can actually do', () => {
+    const title = $('next').querySelector('.next-t').textContent;
+    assert.ok(!/Official Website|Image URLs|IATA|Latitude|Longitude|Wikipedia/.test(title),
+      'a two-source fact or a photograph is a dead end, not a recommendation: ' + title);
+  });
+
+  t('the recommendation says what will happen, not just what to press', () => {
+    const s = $('next').querySelector('.next-s').textContent;
+    assert.match(s, /checked twice/, 'it should say the answers are checked');
+    assert.match(s, /held for you/, 'it should say what happens to a doubtful answer');
+    assert.match(s, /nothing already filled is touched/i, 'it should say what is safe');
+  });
+
+  t('the recommendation is one of the jobs offered below it', () => {
+    const title = $('next').querySelector('.next-t').textContent;
+    const open = [...$('jobs').querySelectorAll('.job:not(.is-off) .job-t')]
+      .map(e => e.textContent.split(' · ')[0]);
+    assert.ok(open.length, 'expected runnable jobs');
+    const s = $('next').querySelector('.next-s').textContent;
+    assert.ok(open.some(l => s.includes(l)),
+      'the panel should name the field it means, and it should be runnable: ' + title);
+  });
 
   console.log('\nWhere to start (the jobs)');
 
@@ -358,9 +412,25 @@ async function payload(mod) {
       `job title should name a content type, got "${first}"`);
   });
 
-  t('every job offers a way to act on it', () => {
-    const jobs = $('jobs').querySelectorAll('.job').length;
-    assert.strictEqual($('jobs').querySelectorAll('[data-job]').length, jobs);
+  t('a job the runner can do offers a button, one it cannot never does', () => {
+    const rows = [...$('jobs').querySelectorAll('.job')];
+    assert.ok(rows.length, 'expected at least one job');
+    const on = rows.filter(r => !r.classList.contains('is-off'));
+    const off = rows.filter(r => r.classList.contains('is-off'));
+    assert.ok(on.length, 'expected work the runner can do');
+    assert.ok(off.length, 'the fixture leaves two-source facts blank, so expected blocked jobs');
+    on.forEach(r => assert.ok(r.querySelector('[data-job]'),
+      'runnable work needs a button: ' + r.querySelector('.job-t').textContent));
+    off.forEach(r => assert.strictEqual(r.querySelector('[data-job]'), null,
+      'work that cannot run must not offer a button: ' + r.querySelector('.job-t').textContent));
+  });
+
+  t('work that can be done is listed before work that cannot', () => {
+    const kinds = [...$('jobs').querySelectorAll('.job')].map(r => r.classList.contains('is-off'));
+    const firstOff = kinds.indexOf(true);
+    const lastOn = kinds.lastIndexOf(false);
+    assert.ok(firstOff === -1 || firstOff > lastOn,
+      'a dead end must never be the first thing offered');
   });
 
   t('pressing Work on this opens a job view, not a scroll', () => {
@@ -604,6 +674,7 @@ async function payload(mod) {
             text: () => Promise.resolve(JSON.stringify(data)), json: () => Promise.resolve(data) });
         };
         w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+        w.Element.prototype.scrollIntoView = function () {};
         w.confirm = () => true;
         w.alert = (m) => seen.push(String(m));
         w.URL.createObjectURL = () => 'blob:mock'; w.URL.revokeObjectURL = () => {};
@@ -615,27 +686,27 @@ async function payload(mod) {
     dd.querySelector('#jobs [data-job]').dispatchEvent(new d2.window.Event('click', { bubbles: true }));
     await new Promise(r => setTimeout(r, 120));
     const btn = dd.querySelector('#jv-rows [data-fill]');
-    if (btn) {
-      btn.dispatchEvent(new d2.window.Event('click', { bubbles: true }));
-      await new Promise(r => setTimeout(r, 120));
-      assert.ok(seen.length, 'the failure should be reported');
-      assert.ok(!/Unexpected token/.test(seen.join(' ')),
-        'a timeout must not surface as a JSON parse error: ' + seen.join(' '));
-      assert.match(seen.join(' '), /took too long|Nothing was queued/);
-    }
+    // Not "if (btn)". The jobs list only offers work the runner can do, so a
+    // Fill button must be there. Guarding this was how it passed without ever
+    // asserting anything.
+    assert.ok(btn, 'the opened job should offer a Fill button to click');
+    btn.dispatchEvent(new d2.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 120));
+    assert.ok(seen.length, 'the failure should be reported');
+    assert.ok(!/Unexpected token/.test(seen.join(' ')),
+      'a timeout must not surface as a JSON parse error: ' + seen.join(' '));
+    assert.match(seen.join(' '), /took too long|Nothing was queued/);
   });
 
   t('a field the runner cannot fill offers no button and says why', () => {
     // Official Website is a two-source fact; queueing it would hold every
     // record. The page must not offer the work.
-    const t0 = data.types.find(x => x.key === 'airport');
-    const idx = t0.fields.findIndex(f => f.label === 'Official Website');
-    if (idx >= 0) {
-      const jobsText = $('jobs').textContent;
-      if (/Official Website/.test(jobsText)) {
-        assert.match(jobsText, /cannot fill this one yet/);
-      }
-    }
+    const row = [...$('jobs').querySelectorAll('.job')]
+      .find(r => /Official Website/.test(r.querySelector('.job-t').textContent));
+    assert.ok(row, 'the fixture leaves Official Website blank, so it should be listed');
+    assert.ok(row.classList.contains('is-off'), 'it belongs in the blocked group');
+    assert.strictEqual(row.querySelector('[data-job]'), null, 'it must offer no button');
+    assert.match(row.textContent, /two independent sources/, 'it must say why');
   });
 
 
