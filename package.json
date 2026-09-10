@@ -50,6 +50,7 @@
     "test:offer-save-target": "node test/offer-builder-save-target-smoke.mjs",
     "test:offer-list-thumb": "node test/offer-list-thumbnail-smoke.mjs",
     "test:offers-grid-fill": "node test/offers-grid-fill-smoke.mjs",
+    "test:offer-reply": "node test/offer-reply-promise-smoke.mjs",
     "build:travelaire-offers": "node scripts/build-offer-csv.cjs content/travelaire/offers-sep-2026.json content/travelaire/offers-sep-2026.csv",
     "test:offers-child-ages": "node test/offers-child-ages-smoke.mjs",
     "test:offers-currency-eur": "node test/offers-currency-eur-smoke.mjs",

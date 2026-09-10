@@ -25,7 +25,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.1';
+  const VERSION = '0.3.2';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -291,6 +291,8 @@
         subheading: c.subheading || '',
         max: typeof c.max === 'number' ? c.max : 0,
         emptyText: c.emptyText || this.t('empty'),
+        // The agency's own reply promise, carried through to each offer page.
+        replyPromise: (typeof c.replyPromise === 'string') ? c.replyPromise.slice(0, 120).trim() : '',
         offerPage: c.offerPage || '',           // override the offer-page base if needed
         ctaText: c.ctaText || this.t('viewDeal'),
         offers: Array.isArray(c.offers) ? c.offers : null   // inline (demo/preview)
@@ -309,6 +311,9 @@
       // Carry the feed key so the offer page can show a few of the client's other
       // offers (the cruise template's "More deals" strip). Public feed key.
       if (this.cfg.client) q.push('client=' + encodeURIComponent(this.cfg.client));
+      // The agency's reply promise, so the offer page says the same thing the
+      // client set here rather than a built-in default.
+      if (this.cfg.replyPromise) q.push('reply=' + encodeURIComponent(this.cfg.replyPromise));
       return q.length ? base + '?' + q.join('&') : base;
     }
 

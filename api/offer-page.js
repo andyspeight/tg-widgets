@@ -10,7 +10,7 @@
  *
  * Query: ?id=<savedId>  → load the stored offer (the production share link)
  *        ?data=<b64url> → an inline offer (throwaway preview link)
- *        plus optional template / theme / accent / agency passthrough.
+ *        plus optional template / theme / accent / agency / reply passthrough.
  *
  * To save the client a second round trip, the resolved offer is embedded as inert
  * JSON (<script type="application/json">) and the bootstrap reads it; if it is
@@ -209,6 +209,10 @@ export default async function handler(req, res) {
     theme: q.theme === 'dark' ? 'dark' : 'light',
     accentColor: typeof q.accent === 'string' ? q.accent.slice(0, 32) : '',
     agencyName: typeof q.agency === 'string' ? q.agency.slice(0, 80) : '',
+    // The agency's own reply promise, set on their Special Offers widget and
+    // carried here by the card link. Plain sentence, length-capped; the widget
+    // escapes it at render like every other author string.
+    replyPromise: typeof q.reply === 'string' ? q.reply.slice(0, 120) : '',
     // The client's public feed key — lets the page fetch a few of their other
     // offers for the "More deals" strip (cruise template). Public, non-secret
     // (the grid embed already carries it). Restricted to safe key characters.
