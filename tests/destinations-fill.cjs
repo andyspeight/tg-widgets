@@ -45,10 +45,37 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
       assert.strictEqual(p.how.from, 'country');
     });
   });
-  t('climate and coordinates need two sources, not a model', () => {
-    ['Climate Temps', 'Climate Season', 'Latitude', 'Lng', 'IATA Code'].forEach(l => {
-      assert.strictEqual(fillPlanFor(F(l, 'csv12')).kind, 'fact', l + ' should be a fact');
+  /* 'fact' means two independent sources can settle it AND the fixer exists.
+     It does not mean "could be settled in principle": that distinction is the
+     whole reason 498 airports were queued for Official Website on 10 Sep and
+     held every one. So the content type is part of the question. */
+
+  t('an airport fact the two datasets cover is runnable work', () => {
+    ['Latitude', 'Longitude', 'Country Text', 'City Served',
+     'Official Website', 'Wikipedia URL', 'Source 1 URL', 'Verified Date'].forEach(l => {
+      assert.strictEqual(fillPlanFor(F(l, 'text'), 'airport').kind, 'fact',
+        l + ' on an airport should be two-source work');
     });
+  });
+
+  t('the same field on a resort is not, because neither source knows it', () => {
+    ['Latitude', 'Longitude', 'Official Website'].forEach(l => {
+      const p = fillPlanFor(F(l, 'text'), 'resort');
+      assert.strictEqual(p.kind, 'source', l + ' on a resort has no fixer');
+      assert.match(p.why, /not built yet/);
+    });
+  });
+
+  t('climate has no fixer wired to the queue, so it is not offered', () => {
+    ['Climate Temps', 'Climate Season', 'Climate Rainfall'].forEach(l => {
+      assert.strictEqual(fillPlanFor(F(l, 'csv12'), 'airport').kind, 'source',
+        l + ' must not be offered until its fixer is wired up');
+    });
+  });
+
+  t('an IATA code is never invented, because everything is keyed on it', () => {
+    assert.strictEqual(fillPlanFor(F('IATA Code', 'iata'), 'airport').kind, 'source',
+      'both sources are looked up BY the code, so it cannot be derived from them');
   });
   t('prose is written', () => {
     ['Overview', 'Hero Intro', 'Tagline', 'Highlights JSON'].forEach(l => {

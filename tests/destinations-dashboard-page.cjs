@@ -107,7 +107,7 @@ async function payload(mod) {
   // it, so a fixture without it would test a page nobody is served.
   const { fillPlanFor } = await import(
     pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'fill', '_registry.js')).href);
-  for (const t0 of data.types) for (const f of t0.fields) f.plan = fillPlanFor(f).kind;
+  for (const t0 of data.types) for (const f of t0.fields) f.plan = fillPlanFor(f, t0.key).kind;
   data.baseId = 'appuZdlMJ7HKUt6qS';
   data.automation = { paused: true, since: '2026-09-10', reason: 'Paused for the dashboard build.' };
   data.cached = false;
@@ -707,9 +707,13 @@ async function payload(mod) {
     // Official Website is a two-source fact; queueing it would hold every
     // record. The page must not offer the work.
     const air = data.types.find(x => x.key === 'airport');
+    const term = air.fields.find(f => f.label === 'Terminals & Airlines');
+    assert.ok(term, 'the airport spec should carry Terminals & Airlines');
+    assert.strictEqual(term.plan, 'source',
+      'the field that cost $4.14 twice must never be offered as writable');
+    // And the one the two open datasets DO settle is runnable work.
     const site = air.fields.find(f => f.label === 'Official Website');
-    assert.ok(site, 'the airport spec should carry Official Website');
-    assert.strictEqual(site.plan, 'fact', 'a two-source fact, not something to write');
+    assert.strictEqual(site.plan, 'fact', 'two sources can settle an airport website');
 
     // And every blocked row the page actually draws has to behave: no button,
     // and a stated reason. There are more of these than fit, so check them all.

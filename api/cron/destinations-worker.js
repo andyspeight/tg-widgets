@@ -34,6 +34,7 @@ import {
   recordSpendUsd, setRunState, pendingCount, noteOutcome, FAIL_STREAK,
 } from '../_lib/fill/_queue.js';
 import { fillPlanFor } from '../_lib/fill/_registry.js';
+import { warmAirports } from '../_lib/fill/_source.js';
 import { runItem } from '../_lib/fill/_run.js';
 import { readRecord, writeField, shapeRecord } from '../_lib/fill/_airtable.js';
 
@@ -83,6 +84,27 @@ export default async function handler(req, res) {
   const items = await claim(BATCH * 8, workerId);
   await setRunState({ state: 'working', pending, batch: items.length }).catch(() => {});
 
+  // Two-source facts are looked up by IATA code, and the code is on the record.
+  // So read the airport records first, then ask both sources about the whole
+  // batch in one request each, rather than downloading a 13MB dataset and
+  // querying Wikidata thirty-two separate times. The records are kept so the
+  // loop below does not read them twice.
+  const seen = new Map();
+  const codes = [];
+  for (const item of items) {
+    const spec = typeOf(item.type);
+    if (!spec || spec.key !== 'airport') continue;
+    const field = spec.fields[item.fieldIdx];
+    if (!field || fillPlanFor(field, item.type).kind !== 'fact') continue;
+    if (seen.has(item.recordId)) continue;
+    const raw = await readRecord(spec.tableId, item.recordId).catch(() => null);
+    seen.set(item.recordId, raw);
+    const rec = shapeRecord({ raw, spec });
+    const iata = rec && rec.values && rec.values['IATA Code'];
+    if (iata) codes.push(String(iata));
+  }
+  if (codes.length) await warmAirports(codes).catch(() => {});
+
   let worked = 0;
   for (const item of items) {
     if (Date.now() - started > TIME_BUDGET_MS) { await release(item.id); continue; }
@@ -94,29 +116,30 @@ export default async function handler(req, res) {
     }
 
     const field = spec.fields[item.fieldIdx];
-    const plan = field ? fillPlanFor(field) : null;
+    const plan = field ? fillPlanFor(field, item.type) : null;
 
     // Drop what this runner has no fixer for, quietly. It is not "held" — held
     // means a person needs to look, and there is nothing here to look at.
-    if (!plan || plan.kind === 'fact' || plan.kind === 'manual' || plan.kind === 'source') {
+    if (!plan || plan.kind === 'manual' || plan.kind === 'source') {
       results.push(await complete(item.id, {
         result: 'skipped',
         place: item.recordId,
         field: field ? field.label : 'field ' + item.fieldIdx,
-        reason: plan && plan.kind === 'fact'
-          ? 'needs two independent sources to agree, and that fixer is not built yet'
-          : plan && plan.kind === 'source'
-            ? (plan.why || 'this needs a source we do not hold')
-            : 'not a field the runner writes',
+        reason: plan && plan.kind === 'source'
+          ? (plan.why || 'this needs a source we do not hold')
+          : 'not a field the runner writes',
       }));
       continue;
     }
 
-    // Past here is real work, and real work is rationed.
-    if (worked >= BATCH) { await release(item.id); continue; }
-    worked++;
-
+    // Only PAID work is rationed. A two-source fact costs nothing but a cache
+    // read, so throttling it to four a minute would leave 600 airports taking
+    // two and a half hours for no reason.
     const paid = plan.kind === 'write';
+    if (paid) {
+      if (worked >= BATCH) { await release(item.id); continue; }
+      worked++;
+    }
 
     // Check the money before starting, not after spending it.
     let allowPaid = true;
@@ -135,7 +158,7 @@ export default async function handler(req, res) {
 
     let outcome;
     try {
-      const raw = await readRecord(spec.tableId, item.recordId);
+      const raw = seen.has(item.recordId) ? seen.get(item.recordId) : await readRecord(spec.tableId, item.recordId);
       const record = shapeRecord({ raw, spec });
 
       // Ancestors, for inheritance and for the writer's context. The

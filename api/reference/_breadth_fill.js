@@ -208,6 +208,11 @@ export function parseOurAirports(csvText, iata) {
       // a record. Never written to Airtable, and never used for identity.
       type: cells[col('type')] || '',
       scheduledService: cells[col('scheduled_service')] || '',
+      // The two link columns. OurAirports carries both, which makes it an
+      // independent second opinion on Wikidata's P856 and its enwiki sitelink,
+      // and those are the two fields most missing from the airports table.
+      site: cells[col('home_link')] || '',
+      wiki: cells[col('wikipedia_link')] || '',
       source: OURAIRPORTS_CSV,
     };
   }

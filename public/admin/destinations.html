@@ -703,11 +703,11 @@ a.nm:hover span{text-decoration:underline}
     var f = t && t.fields[idx];
     return (f && f.plan) || 'write';
   }
-  function canFillPlan(plan) { return plan === 'derive' || plan === 'write'; }
-  function isFreePlan(plan) { return plan === 'derive'; }
+  function canFillPlan(plan) { return plan === 'derive' || plan === 'write' || plan === 'fact'; }
+  /* Derived and two-source work make no model call, so they cost nothing. */
+  function isFreePlan(plan) { return plan === 'derive' || plan === 'fact'; }
   function blockedWhy(plan) {
     if (plan === 'manual') return 'a person chooses these, the runner will never write them';
-    if (plan === 'fact') return 'needs two independent sources to agree, and that checker is not built yet';
     return 'this is a fact about the place, and we hold no source for it';
   }
   /* The open job, by its plan rather than its name. */

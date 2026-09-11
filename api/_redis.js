@@ -330,3 +330,13 @@ export async function zcard(key) {
   const n = await callRedis('zcard', key);
   return Number.isFinite(Number(n)) ? Number(n) : 0;
 }
+
+/**
+ * JSON with an expiry. setJson has no TTL, and a cache that never goes stale is
+ * a cache that is wrong forever the first time an upstream source changes.
+ */
+export async function setJsonEx(key, valueObject, ttlSeconds) {
+  if (!configured()) return false;
+  const out = await pipeline([['SET', key, JSON.stringify(valueObject), 'EX', String(Math.max(1, Math.floor(ttlSeconds)))]]);
+  return out !== null;
+}

@@ -30,6 +30,8 @@
  * order makes the expensive step both cheaper and better grounded.
  */
 
+import { hasAirportFixer } from './_source.js';
+
 /** Fields whose value is already in the database, and where to get it. */
 const DERIVE = {
   // Computed from the record's own name.
@@ -150,15 +152,47 @@ const WRITE = new Set([
 ]);
 
 /**
+ * Which two-source fixers are actually BUILT, per content type.
+ *
+ * A fact with no fixer is not work the runner can do, and calling it 'fact'
+ * anyway is how 498 airports got queued for Official Website on 10 Sep and held
+ * every one. So the question is never "could two sources settle this in
+ * principle" but "can we settle it today".
+ *
+ * airports  OurAirports against Wikidata, keyed on the IATA code the record
+ *           already carries. Built, and measured. See _source.js.
+ * climate   Open-Meteo against NASA POWER. The engine exists as a whole-table
+ *           batch job and is not wired to the queue.
+ * anything
+ * else      a city or a resort has no IATA code, so neither source can be
+ *           looked up for it at all.
+ */
+function fixerExists(label, typeKey) {
+  return typeKey === 'airport' && hasAirportFixer(label);
+}
+
+/**
  * Classify one field.
+ *
+ * The content type matters: Latitude on an airport is two open datasets away,
+ * and Latitude on a resort is a research job nobody has automated.
+ *
  * @returns {{kind:'derive'|'fact'|'write'|'source'|'manual', how?:object, brief?:string}}
  */
-export function fillPlanFor(field) {
+export function fillPlanFor(field, typeKey) {
   const label = field && field.label;
   if (!label || NEVER.has(label)) return { kind: 'manual', why: 'not a field the runner writes' };
   if (MANUAL.has(label)) return { kind: 'manual', why: 'a person chooses this' };
   if (DERIVE[label]) return { kind: 'derive', how: DERIVE[label] };
-  if (FACT[label]) return { kind: 'fact', how: FACT[label] };
+  if (FACT[label]) {
+    if (fixerExists(label, typeKey)) return { kind: 'fact', how: FACT[label], via: FACT[label].via };
+    return {
+      kind: 'source',
+      why: typeKey && typeKey !== 'airport'
+        ? 'two independent sources could settle this, but the fixer for a ' + typeKey + ' is not built yet'
+        : 'two independent sources could settle this, but that fixer is not built yet',
+    };
+  }
   if (field.kind === 'link') return { kind: 'manual', why: 'links are set by hand' };
   if (WRITE.has(label)) return { kind: 'write', brief: BRIEF[label] || '' };
   return {
@@ -174,8 +208,8 @@ export function fillPlanFor(field) {
  * fixer nobody has wired up yet. Both would queue and hold every record, which
  * is the exact failure this whole file now exists to prevent.
  */
-export function isAutomatable(field) {
-  const kind = fillPlanFor(field).kind;
+export function isAutomatable(field, typeKey) {
+  const kind = fillPlanFor(field, typeKey).kind;
   return kind === 'derive' || kind === 'write';
 }
 
@@ -186,8 +220,8 @@ export function isAutomatable(field) {
  * for: it is the difference between "a model wrote it" and "a model wrote it
  * and two separate reads could not fault it".
  */
-export function estimatePence(field) {
-  const plan = fillPlanFor(field);
+export function estimatePence(field, typeKey) {
+  const plan = fillPlanFor(field, typeKey);
   return plan.kind === 'write' ? 3 : 0;
 }
 

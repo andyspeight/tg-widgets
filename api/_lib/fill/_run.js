@@ -24,6 +24,7 @@ import { fillPlanFor, hasEnoughToWriteFrom } from './_registry.js';
 import { derive, ancestorsOf } from './_derive.js';
 import { writeField, buildEvidence } from './_write.js';
 import { gate } from './_gate.js';
+import { sourceAirportField } from './_source.js';
 import { callModel, GATE_MODEL } from './_model.js';
 
 /** The gate's verifier, wired to the cheap model, tallying its own spend. */
@@ -45,7 +46,7 @@ function makeAsk(spend) {
  *   allowPaid whether the budget has room for a model call
  * @returns {Promise<{result:'saved'|'held'|'skipped', ...}>}
  */
-export async function runItem({ item, spec, record, byId, writeBack, allowPaid = true }) {
+export async function runItem({ item, spec, record, byId, writeBack, allowPaid = true, nowIso }) {
   const field = spec.fields[item.fieldIdx];
   const spend = { usd: 0 };
   const base = {
@@ -64,7 +65,7 @@ export async function runItem({ item, spec, record, byId, writeBack, allowPaid =
     return { ...base, result: 'skipped', reason: 'already filled since the scan', costUsd: 0 };
   }
 
-  const plan = fillPlanFor(field);
+  const plan = fillPlanFor(field, spec.key);
   if (plan.kind === 'manual') {
     return { ...base, result: 'held', reason: plan.why || 'this field is not one the runner writes', costUsd: 0 };
   }
@@ -80,17 +81,16 @@ export async function runItem({ item, spec, record, byId, writeBack, allowPaid =
     evidence = d.evidence;
 
   } else if (plan.kind === 'fact') {
-    // The two-source engines this repo already runs (Open-Meteo against NASA
-    // POWER for climate, OurAirports against Wikidata for airport identity) are
-    // batch jobs over a whole table, not per-field lookups. Wiring them item by
-    // item is its own piece of work, so until then a factual gap is reported
-    // honestly rather than guessed at by a model that would happily oblige.
-    return {
-      ...base,
-      result: 'held',
-      reason: 'this needs two independent sources to agree, and the source fixer for it is not wired up yet',
-      costUsd: 0,
-    };
+    // Two independent open datasets, no model, no cost. The pair is fetched
+    // once for the whole batch by the worker, so this is a cache read.
+    const f = sourceAirportField({
+      field,
+      iata: record.values && record.values['IATA Code'],
+      nowIso,
+    });
+    if (!f.ok) return { ...base, result: 'held', reason: f.why, costUsd: 0 };
+    value = f.value;
+    evidence = f.evidence;
 
   } else if (plan.kind === 'source') {
     return {

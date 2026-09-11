@@ -99,27 +99,17 @@ export default async function handler(req, res) {
       const field = spec.fields[fieldIdx];
       if (!field) return json(res, 400, { error: 'unknown field' });
 
-      const plan = fillPlanFor(field);
+      const plan = fillPlanFor(field, spec.key);
       if (plan.kind === 'manual') {
         return json(res, 400, {
           error: 'This field is not one the runner writes. ' + (plan.why || ''),
         });
       }
-      // Refuse work that could only ever be held. On 10 Sep this endpoint
-      // happily queued 498 airports for Official Website, a two-source fact
-      // whose fixer is not built, and the worker then held four a minute for
-      // an hour achieving nothing. Saying no here is the honest answer.
-      if (plan.kind === 'fact') {
-        return json(res, 400, {
-          error: field.label + ' is a fact that needs two independent sources to agree, ' +
-                 'and that fixer is not built yet. Queueing it would hold every record ' +
-                 'without filling any. Try a written field such as Overview or Tagline.',
-        });
-      }
-      // On 11 Sep this endpoint queued Terminals & Airlines over 375 airports,
-      // twice, because anything unclassified used to default to "a model writes
-      // it". Every one was held and $4.14 went with it. A field that needs a
-      // source we do not hold is refused here, in the same breath as a fact.
+      // Refuse work that could only ever be held. This endpoint queued 498
+      // airports for Official Website on 10 Sep and 375 for Terminals &
+      // Airlines on 11 Sep, and held every one of both. The first now has a
+      // fixer and runs; the second never will, because no source we hold knows
+      // which terminal an airline uses. Saying no is the honest answer.
       if (plan.kind === 'source') {
         return json(res, 400, {
           error: field.label + ' is a fact about the place rather than something that can be ' +

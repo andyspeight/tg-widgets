@@ -232,6 +232,12 @@ export const TYPES = [
       F('fldIPVLmhkvQR39Dz', 'Recommended Arrival Time', 'prose', 'rich', 'Facilities'),
       F('fld4wWA0oIapvQjUX', 'Hero Image URL', 'url', 'rich', 'Media'),
       F('fldkrScmky7HhnD0r', 'Official Website', 'url', 'core', 'Evidence'),
+      // Missing from this spec until 11 Sep 2026, so the dashboard never
+      // counted it, while records created in May carried it all along. Found
+      // by the test that checks every field the two-source fixer claims to
+      // cover is really a field on the table. Depth rather than core: it
+      // supports the record, a page does not wait on it.
+      F('fldRqtt44nsacJCwq', 'Wikipedia URL', 'url', 'rich', 'Evidence'),
       F('fldEVfcn75Tm0u0Es', 'Source 1 URL', 'url', 'core', 'Evidence'),
       F('flds3csPG5slNZgKX', 'Source 2 URL', 'url', 'core', 'Evidence'),
       F('fldRCo83Wz1AFZXwP', 'Verified Date', 'date', 'core', 'Evidence'),

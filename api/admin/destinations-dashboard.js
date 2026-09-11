@@ -79,7 +79,7 @@ async function buildDashboard() {
   // this for itself with a regex over field names, which is how a page ends up
   // offering a button the endpoint then refuses. One answer, one source.
   for (const t of data.types) {
-    for (const f of t.fields) f.plan = fillPlanFor(f).kind;
+    for (const f of t.fields) f.plan = fillPlanFor(f, t.key).kind;
   }
 
   return {
