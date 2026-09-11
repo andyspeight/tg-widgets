@@ -164,6 +164,9 @@ function dayLabel(d) {
 }
 const fmtTime = (d) => new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true }).format(d).replace(/\s/g, '');
 
+// The server decides WHAT belongs in this list and WHOSE it is: the signed-in
+// person's Travelgenix appointments, not every event in their calendar and
+// never a colleague's. See api/appointment/agenda.js. This just draws it.
 function renderAgenda() {
   setChrome('full');
   $('view').classList.remove('no-pad');
@@ -174,7 +177,7 @@ function renderAgenda() {
 
   let events = agenda.connected ? (agenda.events || []) : [];
   if (!agenda.connected) {
-    html += '<div class="hint-card"><b>No calendar connected.</b> Connect your own Google or Microsoft calendar in the scheduler editor and your whole diary shows here. Everyone connects their own, so you only ever see yours. Until then this lists your scheduler bookings only.</div>';
+    html += '<div class="hint-card"><b>No calendar connected.</b> Your appointments show here either way. Connect your own Google or Microsoft calendar in the scheduler editor and the times you offer will also skip whatever else is in your diary. Everyone connects their own, and nobody sees anyone else\'s.</div>';
     events = (bookings || []).map((b) => ({
       title: (b.eventLabel || 'Appointment') + (b.name ? ' — ' + b.name : ''),
       startISO: b.startISO, endISO: b.endISO, allDay: false, tg: true,
