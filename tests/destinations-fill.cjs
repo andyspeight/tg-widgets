@@ -28,7 +28,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
 (async () => {
   const { slugify, derive, ancestorsOf } = await load('_derive.js');
   const { fillPlanFor, isAutomatable, estimatePence, hasEnoughToWriteFrom } = await load('_registry.js');
-  const { gate, shapeCheck, styleBreaches } = await load('_gate.js');
+  const { gate, shapeCheck, styleBreaches, formatBreaches } = await load('_gate.js');
 
   const F = (label, kind, tier) => ({ label, kind, tier: tier || 'core' });
 
@@ -270,6 +270,58 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   });
   t('a real value passes shape', () => {
     assert.strictEqual(shapeCheck({ value: okText, field: prose }).ok, true);
+  });
+
+  console.log('\nThe gate: the shape the brief promised');
+
+  /* 11 Sep 2026. A Tagline is a text field, and "filled" for a text field means
+     non-empty, so nothing stopped a two-hundred-character tagline saving itself
+     into a slot that sits beside the place name on a client site. A rule told
+     to a model and not checked is not a rule. */
+
+  const TAG = F('Tagline', 'text');
+  const GOOD = 'Where forest gives way to bog, and bog gives way to sea';
+
+  t('the tagline Estonia actually got is accepted', () => {
+    const r = shapeCheck({ value: GOOD, field: TAG, place: 'Estonia' });
+    assert.strictEqual(r.ok, true, r.why);
+    assert.ok(GOOD.length >= 40 && GOOD.length <= 70, 'and it is in range: ' + GOOD.length);
+  });
+
+  t('a tagline far over the limit is refused, with the count', () => {
+    const r = shapeCheck({ value: 'A line that runs on and on '.repeat(8), field: TAG, place: 'Estonia' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /at most 70/);
+  });
+
+  t('a tagline too short to be a line is refused', () => {
+    const r = shapeCheck({ value: 'Sun and sea', field: TAG, place: 'Estonia' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /at least 40/);
+  });
+
+  t('a tagline that ends with a full stop is refused, as the brief says', () => {
+    const r = shapeCheck({ value: GOOD + '.', field: TAG, place: 'Estonia' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /full stop/);
+  });
+
+  t('a tagline that repeats the place name is refused', () => {
+    const r = shapeCheck({ value: 'Estonia, where forest gives way to bog and then sea', field: TAG, place: 'Estonia' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /place name/);
+  });
+
+  t('a name inside a longer word is not a repeat', () => {
+    assert.deepStrictEqual(
+      formatBreaches('Where the cormorants gather on the bog margins at dusk', { noPlaceName: true }, 'Cor'),
+      [], 'matching on a word boundary, not a substring');
+  });
+
+  t('the format rules only apply where a brief promised one', () => {
+    const long = 'A sentence with enough substance in it to read as real content, not a stub at all.';
+    assert.strictEqual(shapeCheck({ value: long, field: F('Overview', 'prose'), place: 'Estonia' }).ok, true,
+      'an Overview has no character limit, so it must not inherit the Tagline rules');
   });
 
   console.log('\nThe gate: house style');

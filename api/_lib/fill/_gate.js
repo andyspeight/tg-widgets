@@ -39,6 +39,7 @@
  */
 
 import { checkValue } from '../destination-coverage.js';
+import { formatFor } from './_registry.js';
 
 /** Claims that are expensive to get wrong. Present = the bar goes up. */
 const HIGH_RISK = /\b(price|prices|cost|costs|£|\$|€|free entry|visa|vaccinat|malaria|safe|unsafe|crime|opening hours|open daily|closed on|refund|ATOL|ABTA|guarantee)\b/i;
@@ -60,7 +61,7 @@ export function styleBreaches(text) {
  * Layer 0. Cheap, deterministic, no model.
  * @returns {{ok:boolean, why?:string}}
  */
-export function shapeCheck({ value, field }) {
+export function shapeCheck({ value, field, place }) {
   if (value == null || String(value).trim() === '') {
     return { ok: false, why: 'the fixer returned nothing' };
   }
@@ -75,7 +76,41 @@ export function shapeCheck({ value, field }) {
   }
   const breaches = styleBreaches(typeof value === 'string' ? value : '');
   if (breaches.length) return { ok: false, why: 'house style: ' + breaches.join(', ') };
+
+  const fmt = formatFor(field.label);
+  if (fmt) {
+    const bad = formatBreaches(String(value).trim(), fmt, place);
+    if (bad.length) return { ok: false, why: bad.join(', ') };
+  }
   return { ok: true };
+}
+
+/**
+ * The shape the brief promised. Pure.
+ *
+ * "filled" for a text field means non-empty, so a two-hundred-character tagline
+ * would have saved itself into a slot that sits beside the place name on a
+ * client site. A rule told to a model and not checked is not a rule.
+ */
+export function formatBreaches(text, fmt, place) {
+  const out = [];
+  if (fmt.min && text.length < fmt.min) {
+    out.push('it is ' + text.length + ' characters and the brief asks for at least ' + fmt.min);
+  }
+  if (fmt.max && text.length > fmt.max) {
+    out.push('it is ' + text.length + ' characters and the brief allows at most ' + fmt.max);
+  }
+  if (fmt.noTrailingStop && /[.!?]$/.test(text)) {
+    out.push('it ends with a full stop and the brief says not to');
+  }
+  if (fmt.noPlaceName && place) {
+    // The name sits next to this on the page, so repeating it wastes the line.
+    const name = String(place).trim();
+    if (name.length > 2 && new RegExp('\\b' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(text)) {
+      out.push('it uses the place name, which already appears beside it');
+    }
+  }
+  return out;
 }
 
 /* ------------------------------------------------------------------ *
@@ -118,7 +153,7 @@ function parseJson(text) {
 export async function gate({ value, field, kind, evidence, place, ask }) {
   const checks = {};
 
-  const shape = shapeCheck({ value, field });
+  const shape = shapeCheck({ value, field, place });
   checks.shape = shape.ok ? 'pass' : 'fail';
   if (!shape.ok) return { save: false, reason: shape.why, risk: 'low', checks };
 

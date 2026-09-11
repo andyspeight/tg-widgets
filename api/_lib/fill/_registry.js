@@ -86,7 +86,13 @@ const MANUAL = new Set([
 const BRIEF = {
   'Tagline':
     'One evocative line of 40 to 70 characters. Never use the place name. No full stop. ' +
-    'Editorial, in the register of a good travel magazine, not sales copy.',
+    'Editorial, in the register of a good travel magazine, not sales copy. ' +
+    // 11 Sep 2026: asked to be evocative, it reached for a poetic specific the
+    // facts did not carry. Serbia got "medieval stone" when the only site in
+    // evidence is Roman, and the grounding check rightly refused it. Evoke what
+    // is there.
+    'Build the image ONLY from the facts you are given, and name nothing they do not. ' +
+    'If the facts are thin, evoke the general character rather than inventing a detail.',
   'Hero Intro':
     'Two or three sentences that open the page. Concrete and specific to this place. ' +
     'No throat-clearing and no "nestled".',
@@ -116,6 +122,23 @@ const BRIEF = {
   'Nearby Excursions': 'Day trips worth the journey, with rough travel times.',
   'What Makes It Special': 'The one thing that would make someone choose here over the next place along the coast.',
 };
+
+/**
+ * The format a field's brief promises, enforced rather than hoped for.
+ *
+ * A Tagline is a text field, and "filled" for a text field means non-empty, so
+ * nothing stopped a two-hundred-character tagline saving itself into a slot
+ * that sits beside the place name on a client site. If the brief states a
+ * shape, the gate checks it: telling a model a rule and not enforcing it is
+ * the same as having no rule.
+ */
+const FORMAT = {
+  'Tagline': { min: 40, max: 70, noTrailingStop: true, noPlaceName: true },
+  'SEO Meta Title': { max: 60 },
+  'SEO Meta Description': { max: 155 },
+};
+
+export function formatFor(label) { return FORMAT[label] || null; }
 
 /** Fields the runner must never touch, whatever their state. */
 const NEVER = new Set(['Status']);
@@ -277,4 +300,4 @@ export function hasEnoughToWriteFrom({ rec, ancestors }) {
  */
 export const MIN_EVIDENCE_CHARS = 60;
 
-export const KINDS = { DERIVE, FACT, MANUAL, WRITE, BRIEF, NEVER };
+export const KINDS = { DERIVE, FACT, MANUAL, WRITE, BRIEF, NEVER, FORMAT };
