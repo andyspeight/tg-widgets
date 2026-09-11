@@ -31,6 +31,7 @@
     "test:appointment-availability": "node test/appointment-availability-smoke.mjs",
     "test:appointment-calendar-owner": "node test/appointment-calendar-owner-smoke.mjs",
     "test:appointment-agenda-scope": "node test/appointment-agenda-scope-smoke.mjs",
+    "test:extension-personal-scope": "node test/extension-personal-scope-smoke.mjs",
     "test:enquiry-luna-comingsoon": "node test/enquiry-luna-comingsoon-smoke.mjs",
     "test:enquiry-luna-work": "node test/enquiry-luna-work-smoke.mjs",
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
