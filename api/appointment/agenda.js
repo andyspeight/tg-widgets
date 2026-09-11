@@ -1,9 +1,16 @@
 /**
  * GET /api/appointment/agenda?days=N
- * Auth required. The signed-in client's CALENDAR diary for the window ahead
+ * Auth required. The signed-in USER's own CALENDAR diary for the window ahead
  * (default 14 days, max 31): real events from their connected Google or
  * Microsoft calendar, normalised and soonest-first. Scheduler bookings appear
  * here naturally because every booking is inserted into that calendar.
+ *
+ * It is the caller's OWN calendar, never a colleague's. This used to read the
+ * one connection held per client, so a second admin on the same client opened
+ * the extension and was shown the first one's whole diary (reported 11 Sep
+ * 2026). Passing ctx.email means a connection is only ever returned to the
+ * person it belongs to; someone with none of their own gets the honest
+ * not-connected answer rather than somebody else's meetings.
  *
  * Powers the browser extension's "Coming up" view. When no calendar is
  * connected it says so honestly ({ connected: false }) and the caller falls
@@ -22,7 +29,7 @@ export default async function handler(req, res) {
   const days = Math.max(1, Math.min(31, Number((req.query || {}).days) || 14));
 
   let tok = null;
-  try { tok = await getAccessToken(ctx.clientRecordId); } catch (e) { tok = null; }
+  try { tok = await getAccessToken(ctx.clientRecordId, ctx.email); } catch (e) { tok = null; }
   if (!tok) return res.status(200).json({ ok: true, connected: false, events: [] });
 
   try {

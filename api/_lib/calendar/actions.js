@@ -17,7 +17,9 @@ export async function cancelBooking(booking) {
   if (booking.status === 'cancelled') return { ok: true, booking };
   try {
     if (booking.providerEventId) {
-      const tok = await getAccessToken(booking.clientRecordId);
+      // booking.clientEmail is the scheduler's owner, recorded when the booking
+      // was made, so a cancel reaches the same calendar the event was put into.
+      const tok = await getAccessToken(booking.clientRecordId, booking.clientEmail);
       if (tok) await getProvider(tok.provider).deleteEvent(tok.accessToken, tok.calendarId, booking.providerEventId);
     }
   } catch (e) { console.error('[actions.cancel]', e.message); }
@@ -62,7 +64,7 @@ export async function rescheduleBooking(booking, newStart, opts) {
   if (!held) return { ok: false, status: 409, error: 'Someone just took that time. Please pick another.' };
 
   try {
-    const tok = await getAccessToken(booking.clientRecordId);
+    const tok = await getAccessToken(booking.clientRecordId, booking.clientEmail);
     if (tok) {
       const provider = getProvider(tok.provider);
       const busy = await provider.freeBusy(tok.accessToken, tok.calendarId, newStart, endISO);

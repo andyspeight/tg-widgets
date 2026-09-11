@@ -161,9 +161,47 @@ These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
 ## Honest limits (post-Monday)
 
 - Google and Outlook/Microsoft are both supported (behind the provider
-  registry in `api/_lib/calendar/providers.js`). A client connects one
-  calendar; the connection records which provider.
-- One availability schedule per client (the widget config), not per calendar.
+  registry in `api/_lib/calendar/providers.js`). The connection records which
+  provider.
+- One availability schedule per widget (the widget config), not per calendar.
+
+## Whose calendar is it (11 Sep 2026)
+
+A calendar belongs to a PERSON. Each user connects their own, and the
+connection is stored against their email (`apt:cal:u:<email>`). Nobody is ever
+shown a colleague's diary, and connecting yours cannot take over theirs.
+
+Before this, there was one connection per CLIENT. Every person on an agency
+account shared it, so the second admin on a client opened the extension and was
+shown the first one's whole diary. Had they connected their own it would have
+REPLACED it, and the first person's bookings would then have been written into
+the second person's calendar.
+
+What resolves to whose calendar:
+
+| Path | Whose calendar | Why |
+|---|---|---|
+| `GET /api/appointment/agenda` | the signed-in user's | it is their diary |
+| `GET /api/calendar/status` | the signed-in user's | "connected" means yours |
+| `POST /api/calendar/disconnect` | the signed-in user's | never a colleague's |
+| `GET /api/appointment/availability` | the scheduler owner's | their real free/busy |
+| `POST /api/appointment/book` | the scheduler owner's | the meeting is theirs |
+| cancel / reschedule | the booking's own | the calendar it went into |
+
+The scheduler owner is the widget row's `ClientEmail`, which is also what
+`?scope=self` matches on for `/api/widget-list` and `/api/appointment/list`.
+
+`apt:cal:<clientRecordId>` survives as the agency default, claimed by whoever
+connects first and never taken from them, so a scheduler whose owner has
+connected nothing still works. It is only ever handed back to the person it
+belongs to.
+
+A connection made before owners were recorded carries no owner, so it is
+matched on the address of the Google or Microsoft account itself. Anyone who
+connected the calendar of the account they sign in with keeps working with no
+reconnection. Anyone who connected a different account reconnects once.
+
+Guarded by `npm run test:appointment-calendar-owner`.
 
 ## Added 21 Aug 2026 (Calendly gap, Tier 1)
 

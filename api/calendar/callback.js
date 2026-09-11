@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       : await saveConnection(st.clientRecordId, {
         provider: st.provider || 'google', email, calendarId: 'primary',
         refreshToken: tok.refresh_token, scope: tok.scope || '',
-      });
+      }, st.ownerEmail || '');
     return back(res, ret, ok ? 'connected' : 'error', param);
   } catch (e) {
     console.error('[calendar/callback]', e.message);

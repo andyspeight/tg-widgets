@@ -82,7 +82,13 @@ async function listAs({ email, recordId, clientId, query }) {
     headers: { authorization: `Bearer ${token}`, origin: 'https://widgets.travelify.io' },
     socket: { remoteAddress: '10.0.0.1' },
   }, res);
-  return { res, formula: decodeURIComponent((state.lastListUrl.match(/filterByFormula=([^&]*)/) || [])[1] || '') };
+  // The URL is built with URLSearchParams, which writes a space as "+", so the
+  // inverse has to put spaces back before decodeURIComponent. Without it the
+  // formula read as "...,+LOWER(..." and an assertion that spelt the formula
+  // with its normal spaces failed against code that was perfectly correct.
+  // (Found 11 Sep 2026.)
+  const raw = (state.lastListUrl.match(/filterByFormula=([^&]*)/) || [])[1] || '';
+  return { res, formula: decodeURIComponent(raw.replace(/\+/g, ' ')) };
 }
 
 // ── THE INCIDENT: client account set up under a STAFF email ──────────────────

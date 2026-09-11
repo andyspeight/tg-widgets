@@ -61,7 +61,14 @@ export default async function handler(req, res) {
   const host = resolveHost(req);
   const redirectUri = `https://${host}/api/calendar/callback`;
 
-  const state = signState({ clientRecordId: ctx.clientRecordId, provider: providerName, redirectUri, ret });
+  // ownerEmail rides in the signed state so the callback can record WHOSE
+  // calendar this is. Without it every person in an agency shared one
+  // connection, and the second admin on a client was shown the first one's
+  // diary (11 Sep 2026).
+  const state = signState({
+    clientRecordId: ctx.clientRecordId, ownerEmail: ctx.email || '',
+    provider: providerName, redirectUri, ret,
+  });
   // One line per attempt: if a provider ever refuses the URI again, the exact
   // string we sent is in the log instead of only on the user's screen.
   console.log('[calendar/connect] provider=' + providerName + ' redirect_uri=' + redirectUri);

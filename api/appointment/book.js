@@ -191,7 +191,9 @@ export default async function handler(req, res) {
   // If connected, re-check free/busy then create the event.
   let providerEventId = '', calendarLink = '', connected = false, providerName = '';
   try {
-    const tok = await getAccessToken(w.clientRecordId);
+    // Into the calendar of the person the scheduler belongs to (w.clientEmail),
+    // so a colleague connecting theirs can never divert someone else's bookings.
+    const tok = await getAccessToken(w.clientRecordId, w.clientEmail);
     if (tok) {
       connected = true;
       providerName = tok.provider || 'google';

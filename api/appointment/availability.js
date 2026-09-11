@@ -38,7 +38,10 @@ export default async function handler(req, res) {
 
   let connected = false;
   try {
-    const tok = await getAccessToken(w.clientRecordId);
+    // The widget owner's calendar, not just the agency's: w.clientEmail is the
+    // person the scheduler belongs to, so their real commitments are what block
+    // out the times offered to a visitor.
+    const tok = await getAccessToken(w.clientRecordId, w.clientEmail);
     if (tok) {
       connected = true;
       if (slots.length) {

@@ -29,6 +29,7 @@
     "extension:screenshot": "node scripts/extension-screenshot.mjs",
     "test:extension-store-ready": "node test/extension-store-ready-smoke.mjs",
     "test:appointment-availability": "node test/appointment-availability-smoke.mjs",
+    "test:appointment-calendar-owner": "node test/appointment-calendar-owner-smoke.mjs",
     "test:enquiry-luna-comingsoon": "node test/enquiry-luna-comingsoon-smoke.mjs",
     "test:enquiry-luna-work": "node test/enquiry-luna-work-smoke.mjs",
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
