@@ -112,6 +112,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .next-go{grid-column:2;grid-row:1/4;align-self:center;white-space:nowrap}
 .job-h{padding:11px 20px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mt);background:var(--sf2);border-top:1px solid var(--bd2)}
 .job-h:first-child{border-top:0}
+.job-h-n{font-weight:600;letter-spacing:0;text-transform:none;opacity:.75}
 .job.is-off:hover{background:transparent}
 .job.is-off .job-t{color:var(--mt)}
 
@@ -677,6 +678,7 @@ a.nm:hover span{text-decoration:underline}
         if (!gap) return;
         out.push({
           type: t.key, idx: idx, label: f.label, group: f.group, tier: f.tier,
+          plan: f.plan || 'write',
           hint: f.hint || '', gap: gap, invalid: f.invalid, total: t.count, pct: pct(gap, t.count),
         });
       });
@@ -692,27 +694,31 @@ a.nm:hover span{text-decoration:underline}
   /* What the runner can actually do today. Facts need two independent sources
      to agree and that fixer is not built, so offering a button for them would
      be offering to do nothing slowly. */
-  var FACT_FIELDS = /^(Climate |Lat$|Lng$|Latitude|Longitude|IATA Code|City Served|Country Text|Official Website|Wikipedia URL|Source \d URL|Verified Date)/;
-  var MANUAL_FIELDS = /^(Image URLs|Image Attribution|Hero Image URL|Best For Tags|Who Is It Best For|Best Paired)/;
-  /* Worked out from records we already hold, so no model and no money. */
-  var FREE_FIELDS = /^(URL Slug|Time Zone|Currency|Language|Voltage And Plug|Region|Flight Time From UK)/;
-
-  function canFill(label) {
-    return !FACT_FIELDS.test(label) && !MANUAL_FIELDS.test(label);
+  /* The server says what kind of work each gap is, in the payload. The page
+     used to work it out for itself with a regex over field names, and on
+     11 Sep that drift let it offer Terminals & Airlines on 375 airports, which
+     the runner then held every one of. One answer, decided in one place. */
+  function planOf(typeKey, idx) {
+    var t = typeOf(typeKey);
+    var f = t && t.fields[idx];
+    return (f && f.plan) || 'write';
   }
-  function isFree(label) { return FREE_FIELDS.test(label); }
-  function blockedWhy(label) {
-    return MANUAL_FIELDS.test(label)
-      ? 'a person chooses these, the runner will never write them'
-      : 'needs two independent sources to agree, and that checker is not built yet';
+  function canFillPlan(plan) { return plan === 'derive' || plan === 'write'; }
+  function isFreePlan(plan) { return plan === 'derive'; }
+  function blockedWhy(plan) {
+    if (plan === 'manual') return 'a person chooses these, the runner will never write them';
+    if (plan === 'fact') return 'needs two independent sources to agree, and that checker is not built yet';
+    return 'this is a fact about the place, and we hold no source for it';
   }
+  /* The open job, by its plan rather than its name. */
+  function jobPlan() { return job ? planOf(job.type, job.idx) : 'write'; }
 
   /* The one thing to do now. On 10 Sep the three biggest jobs were all ones
      the runner cannot touch, so the first thing Andy could press led nowhere.
      The runner is a writer, so writing comes first, then what a page cannot go
      live without, then sheer volume. */
   function bestJob() {
-    var open = allJobs().filter(function (j) { return canFill(j.label); });
+    var open = allJobs().filter(function (j) { return canFillPlan(j.plan); });
     open.sort(function (a, b) {
       var ae = a.group === 'Editorial', be = b.group === 'Editorial';
       if (ae !== be) return ae ? -1 : 1;
@@ -728,7 +734,7 @@ a.nm:hover span{text-decoration:underline}
     el.hidden = false;
 
     var per = (R && R.budget && R.budget.perItemUsd) || 0;
-    var free = isFree(j.label);
+    var free = isFreePlan(j.plan);
     var price = free
       ? 'It costs nothing: the answers come from records we already hold.'
       : per
@@ -761,15 +767,15 @@ a.nm:hover span{text-decoration:underline}
       $('jobs').innerHTML = '<div class="job-none">Nothing missing anywhere. Every field is filled on every record.</div>';
       return;
     }
-    var open = all.filter(function (j) { return canFill(j.label); }).slice(0, JOBS_SHOWN);
-    var shut = all.filter(function (j) { return !canFill(j.label); }).slice(0, JOBS_SHOWN);
+    var open = all.filter(function (j) { return canFillPlan(j.plan); }).slice(0, JOBS_SHOWN);
+    var shut = all.filter(function (j) { return !canFillPlan(j.plan); }).slice(0, JOBS_SHOWN);
 
     // Describe the field itself. A tier sentence repeated down six rows is
     // the sameness problem all over again.
     function row(j, off) {
       var bits = [];
       bits.push(j.hint || j.group);
-      if (off) bits.push(blockedWhy(j.label));
+      if (off) bits.push(blockedWhy(j.plan));
       else {
         if (j.tier === 'core') bits.push('needed before a page can go live');
         if (j.invalid) bits.push(n(j.invalid) + ' hold something unusable');
@@ -783,13 +789,25 @@ a.nm:hover span{text-decoration:underline}
         '</div></div>';
     }
 
+    // Say how many there are in total, not just how many are shown. Most of
+    // the library needs a source rather than a writer, and hiding that behind
+    // a list of six would be the same dishonesty in a quieter form.
+    function head(label, shown, total) {
+      return '<div class="job-h">' + esc(label) +
+        (total > shown ? ' <span class="job-h-n">' + n(shown) + ' of ' + n(total) + '</span>' : '') +
+        '</div>';
+    }
+
+    var allOpen = all.filter(function (j) { return canFillPlan(j.plan); }).length;
+    var allShut = all.length - allOpen;
+
     var html = '';
     if (open.length) {
-      html += '<div class="job-h">The runner can do these now</div>' +
+      html += head('The runner can do these now', open.length, allOpen) +
         open.map(function (j) { return row(j, false); }).join('');
     }
     if (shut.length) {
-      html += '<div class="job-h">The runner cannot do these</div>' +
+      html += head('These need a source, or a person', shut.length, allShut) +
         shut.map(function (j) { return row(j, true); }).join('');
     }
     $('jobs').innerHTML = html;
@@ -1179,7 +1197,7 @@ a.nm:hover span{text-decoration:underline}
 
   /* One record, one field. The same queue as "do all", just a batch of one. */
   function fillCell(r) {
-    if (job && !canFill(job.label)) return '<span class="rowstate">—</span>';
+    if (job && !canFillPlan(jobPlan())) return '<span class="rowstate">—</span>';
     var st = rowState[r.id];
     if (st === 'queued') return '<span class="rowstate queued">Queued</span>';
     if (st === 'saved') return '<span class="rowstate saved">Saved</span>';
@@ -1274,7 +1292,7 @@ a.nm:hover span{text-decoration:underline}
     var st = R.run || {};
     var busy = R.pending > 0 && R.settings && R.settings.running;
     var b = R.budget || {};
-    var fillable = canFill(job.label);
+    var fillable = canFillPlan(jobPlan());
     var count = jobRecords().length;
 
     var bits = [];
@@ -1285,8 +1303,16 @@ a.nm:hover span{text-decoration:underline}
       bits.push('<b>Paused with ' + n(R.pending) + ' left.</b>');
     } else if (!fillable) {
       bits.push('<b>This one cannot be filled yet.</b>');
-      bits.push('<span>' + esc(blockedWhy(job.label).replace(/^./, function (c) { return c.toUpperCase(); })) +
+      bits.push('<span>' + esc(blockedWhy(jobPlan()).replace(/^./, function (c) { return c.toUpperCase(); })) +
         '. Export the list if you want to work through it by hand.</span>');
+    } else if (R.savedToday === 0 && R.heldToday > 0) {
+      // The failure Andy hit twice: the job ran to the end, saved nothing, and
+      // the page said nothing except that it was no longer running. Zero saved
+      // with anything held is a failed run, and it gets said as one.
+      bits.push('<b style="color:var(--dn)">This saved nothing.</b>');
+      bits.push('<span>' + n(R.heldToday) + ' were held and none were written.' +
+        (R.topHeldReason ? ' Mostly because ' + esc(R.topHeldReason.reason) + '.' : '') +
+        ' Nothing was changed in Airtable.</span>');
     } else {
       bits.push('<b>Nothing running.</b>');
       bits.push('<span>Press the button and it works through them a few at a time, ' +
@@ -1304,7 +1330,7 @@ a.nm:hover span{text-decoration:underline}
     // Say what the button will do, and what it will cost, before it is pressed.
     $('jv-doall').textContent = !fillable ? 'Cannot fill this yet'
       : busy ? 'Filling now…'
-      : 'Fill all ' + n(count) + (isFree(job.label) || !b.perItemUsd
+      : 'Fill all ' + n(count) + (isFreePlan(jobPlan()) || !b.perItemUsd
           ? '' : ' · about ' + money(b.perItemUsd * count));
 
     var used = b.capUsd ? Math.min(100, Math.round((b.spentUsd / b.capUsd) * 100)) : 0;
@@ -1362,7 +1388,7 @@ a.nm:hover span{text-decoration:underline}
   $('jv-doall').addEventListener('click', function () {
     var rows = jobRecords();
     var plan = R && R.budget ? R.budget : {};
-    var cost = isFree(job.label) ? 0 : (plan.perItemUsd || 0) * rows.length;
+    var cost = isFreePlan(jobPlan()) ? 0 : (plan.perItemUsd || 0) * rows.length;
     var msg = 'Fill ' + n(rows.length) + ' records for ' + job.label + '?\n\n' +
       (cost > 0
         ? 'Estimated cost about ' + money(cost) + '. Anything that passes both checks saves itself; anything that does not is held for you.'

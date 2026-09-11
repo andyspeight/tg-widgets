@@ -23,6 +23,7 @@ import { fillPlanFor, estimatePence } from '../_lib/fill/_registry.js';
 import { estimateFieldUsd } from '../_lib/fill/_model.js';
 import {
   queueConfigured, enqueue, queueStatus, clearQueue, setSettings, clearHeld, budgetState,
+  resetFailStreak,
 } from '../_lib/fill/_queue.js';
 
 const MAX_QUEUE = 2000;   // one press should not be able to queue the whole library
@@ -115,6 +116,18 @@ export default async function handler(req, res) {
                  'without filling any. Try a written field such as Overview or Tagline.',
         });
       }
+      // On 11 Sep this endpoint queued Terminals & Airlines over 375 airports,
+      // twice, because anything unclassified used to default to "a model writes
+      // it". Every one was held and $4.14 went with it. A field that needs a
+      // source we do not hold is refused here, in the same breath as a fact.
+      if (plan.kind === 'source') {
+        return json(res, 400, {
+          error: field.label + ' is a fact about the place rather than something that can be ' +
+                 'written from what we hold, and we have no source for it. Filling it would ' +
+                 'mean a model inventing it, so the runner will not. Overview and Tagline are ' +
+                 'the fields it can genuinely write.',
+        });
+      }
 
       // The browser sends the record ids it is showing, so the queue matches
       // exactly what Andy was looking at when he pressed the button.
@@ -130,6 +143,9 @@ export default async function handler(req, res) {
       }));
 
       const added = await enqueue(items);
+      // A fresh press is a fresh start: whatever stopped the last run, the
+      // circuit breaker should not hold this one against it.
+      await resetFailStreak();
       await setSettings({ running: true });
 
       const perItem = plan.kind === 'write' ? estimateFieldUsd() : 0;

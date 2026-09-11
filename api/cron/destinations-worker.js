@@ -30,8 +30,8 @@
 
 import { TYPES } from '../_lib/destination-coverage.js';
 import {
-  queueConfigured, claim, complete, release, getSettings, budgetState,
-  recordSpendUsd, setRunState, pendingCount,
+  queueConfigured, claim, complete, release, getSettings, setSettings, budgetState,
+  recordSpendUsd, setRunState, pendingCount, noteOutcome, FAIL_STREAK,
 } from '../_lib/fill/_queue.js';
 import { fillPlanFor } from '../_lib/fill/_registry.js';
 import { runItem } from '../_lib/fill/_run.js';
@@ -98,14 +98,16 @@ export default async function handler(req, res) {
 
     // Drop what this runner has no fixer for, quietly. It is not "held" — held
     // means a person needs to look, and there is nothing here to look at.
-    if (!plan || plan.kind === 'fact' || plan.kind === 'manual') {
+    if (!plan || plan.kind === 'fact' || plan.kind === 'manual' || plan.kind === 'source') {
       results.push(await complete(item.id, {
         result: 'skipped',
         place: item.recordId,
         field: field ? field.label : 'field ' + item.fieldIdx,
         reason: plan && plan.kind === 'fact'
           ? 'needs two independent sources to agree, and that fixer is not built yet'
-          : 'not a field the runner writes',
+          : plan && plan.kind === 'source'
+            ? (plan.why || 'this needs a source we do not hold')
+            : 'not a field the runner writes',
       }));
       continue;
     }
@@ -162,6 +164,26 @@ export default async function handler(req, res) {
 
     spent += outcome.costUsd || 0;
     results.push(await complete(item.id, outcome));
+
+    // THE CIRCUIT BREAKER. On 11 Sep Andy ran a 375-record job twice. Every
+    // single item was held for the same reason, it took two hours a time, and
+    // it cost $4.14 to learn nothing. A run that is failing wholesale is not
+    // working, so stop it and say so rather than grinding to the end of the
+    // queue. The queue is left intact: he decides whether to resume.
+    const streak = await noteOutcome(outcome.result === 'saved');
+    if (streak >= FAIL_STREAK) {
+      await setSettings({ running: false });
+      await setRunState({
+        state: 'stopped',
+        pending: await pendingCount().catch(() => 0),
+        note: 'Stopped itself: the last ' + streak + ' in a row were held and none saved. ' +
+              'Last reason was "' + String(outcome.reason || 'not given') + '".',
+        stoppedBecause: 'nothing was saving',
+        lastReason: String(outcome.reason || ''),
+      }).catch(() => {});
+      console.log('[destinations-worker] circuit breaker', JSON.stringify({ streak, reason: outcome.reason }));
+      break;
+    }
   }
 
   if (spent > 0) await recordSpendUsd(spent).catch(() => {});

@@ -40,7 +40,12 @@ const K = {
   runstate: 'dfill:runstate',
   lock: id => 'dfill:lock:' + id,
   spend: day => 'dfill:spend:' + day,
+  streak: 'dfill:failstreak',
+  tally: day => 'dfill:tally:' + day,
 };
+
+/** How many held in a row, with nothing saved, before the worker gives up. */
+export const FAIL_STREAK = 10;
 
 const LOG_CAP = 500;
 const HELD_CAP = 500;
@@ -214,6 +219,35 @@ const readLog = async (key, limit) => {
 export const recentDone = (limit = 50) => readLog(K.done, limit);
 export const heldAside = (limit = 100) => readLog(K.held, limit);
 
+/**
+ * Count a real outcome, and return the current run of consecutive failures.
+ *
+ * A save resets the run to zero. Anything else adds one. The worker stops when
+ * this reaches FAIL_STREAK, which is the difference between learning a job
+ * cannot run for a few pence and learning it for $4.14 over two hours.
+ */
+export async function noteOutcome(saved) {
+  const day = today();
+  const tally = (await getJson(K.tally(day)).catch(() => null)) || { saved: 0, held: 0 };
+  if (saved) tally.saved += 1; else tally.held += 1;
+  await setJson(K.tally(day), tally).catch(() => {});
+
+  if (saved) { await setString(K.streak, '0').catch(() => {}); return 0; }
+  const now = Number(await getString(K.streak).catch(() => 0)) || 0;
+  const next = now + 1;
+  await setString(K.streak, String(next)).catch(() => {});
+  return next;
+}
+
+/** A fresh press of a button is a fresh start, whatever went before. */
+export async function resetFailStreak() {
+  await setString(K.streak, '0').catch(() => {});
+}
+
+export async function todayTally() {
+  return (await getJson(K.tally(today())).catch(() => null)) || { saved: 0, held: 0 };
+}
+
 export async function clearHeld() {
   await del(K.held).catch(() => {});
 }
@@ -224,7 +258,13 @@ export async function clearHeld() {
 
 export async function setRunState(patch) {
   const now = (await getJson(K.runstate).catch(() => null)) || {};
-  const next = { ...now, ...patch, at: new Date().toISOString() };
+  // A patch that does not carry a note CLEARS the old one. Merging it forward
+  // meant "the runner is switched off" sat in orange on Andy's screen long
+  // after the runner had finished, describing a moment that had passed.
+  const carried = Object.prototype.hasOwnProperty.call(patch, 'note')
+    ? now
+    : { ...now, note: '', stoppedBecause: '', lastReason: '' };
+  const next = { ...carried, ...patch, at: new Date().toISOString() };
   await setJson(K.runstate, next);
   return next;
 }
@@ -235,11 +275,21 @@ export async function getRunState() {
 
 /** Everything the dashboard needs in one read. */
 export async function queueStatus() {
-  const [settings, budget, pending, run, held, done] = await Promise.all([
+  const [settings, budget, pending, run, held, done, tally] = await Promise.all([
     getSettings(), budgetState(), pendingCount(), getRunState(),
-    heldAside(100), recentDone(50),
+    heldAside(100), recentDone(50), todayTally(),
   ]);
-  const doneToday = done.filter(d => (d.at || '').slice(0, 10) === today());
+
+  // The most common reason, so the page can say WHY a run saved nothing
+  // instead of only that it did.
+  const heldToday = held.filter(h => (h.at || '').slice(0, 10) === today());
+  const byReason = {};
+  for (const h of heldToday) {
+    const r = String(h.reason || 'not given').slice(0, 120);
+    byReason[r] = (byReason[r] || 0) + 1;
+  }
+  const top = Object.entries(byReason).sort((a, b) => b[1] - a[1])[0];
+
   return {
     settings,
     budget,
@@ -248,8 +298,11 @@ export async function queueStatus() {
     heldCount: held.length,
     held: held.slice(0, 50),
     recent: done.slice(0, 25),
-    savedToday: doneToday.filter(d => d.result === 'saved').length,
-    heldToday: doneToday.filter(d => d.result === 'held').length,
+    // Real counters. These used to be read off the last 50 log entries, so
+    // they could never exceed 50 and were not today's totals at all.
+    savedToday: tally.saved || 0,
+    heldToday: tally.held || 0,
+    topHeldReason: top ? { reason: top[0], count: top[1] } : null,
   };
 }
 

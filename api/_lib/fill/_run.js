@@ -20,7 +20,7 @@
  */
 
 import { checkValue } from '../destination-coverage.js';
-import { fillPlanFor } from './_registry.js';
+import { fillPlanFor, hasEnoughToWriteFrom } from './_registry.js';
 import { derive, ancestorsOf } from './_derive.js';
 import { writeField, buildEvidence } from './_write.js';
 import { gate } from './_gate.js';
@@ -92,10 +92,23 @@ export async function runItem({ item, spec, record, byId, writeBack, allowPaid =
       costUsd: 0,
     };
 
+  } else if (plan.kind === 'source') {
+    return {
+      ...base,
+      result: 'held',
+      reason: plan.why || 'this needs a source we do not hold',
+      costUsd: 0,
+    };
+
   } else {
     if (!allowPaid) {
       return { ...base, result: 'held', reason: 'the day\'s budget is spent, so this waits for tomorrow', costUsd: 0, retryable: true };
     }
+    // Check there is something to write FROM before paying to write. An empty
+    // record can only produce a refusal or an invention, and both cost money.
+    const enough = hasEnoughToWriteFrom({ rec: record, ancestors });
+    if (!enough.ok) return { ...base, result: 'held', reason: enough.why, costUsd: 0 };
+
     const w = await writeField({ field, brief: plan.brief, rec: record, ancestors, type: spec });
     spend.usd += w.costUsd || 0;
     if (!w.ok) return { ...base, result: 'held', reason: w.why, costUsd: spend.usd };

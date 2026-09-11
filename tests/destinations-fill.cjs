@@ -27,7 +27,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
 
 (async () => {
   const { slugify, derive, ancestorsOf } = await load('_derive.js');
-  const { fillPlanFor, isAutomatable, estimatePence } = await load('_registry.js');
+  const { fillPlanFor, isAutomatable, estimatePence, hasEnoughToWriteFrom } = await load('_registry.js');
   const { gate, shapeCheck, styleBreaches } = await load('_gate.js');
 
   const F = (label, kind, tier) => ({ label, kind, tier: tier || 'core' });
@@ -73,6 +73,80 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   t('strict-format fields carry a brief so the shape is not left to chance', () => {
     assert.match(fillPlanFor(F('Highlights JSON', 'json')).brief, /JSON array/);
     assert.match(fillPlanFor(F('Tagline', 'text')).brief, /40 to 70/);
+  });
+
+  /* 11 Sep 2026. Andy ran Terminals & Airlines over 375 airports, twice. Every
+     item was held, $4.14 went, nothing was written. The cause was this file:
+     anything not explicitly classified fell through to "a model writes it", so
+     operational facts about named airports were handed to a writer with no
+     source. The default is closed now, and these tests hold it closed. */
+
+  t('an operational fact about a place is never handed to a writer', () => {
+    ['Terminals & Airlines', 'Parking', 'Lounges', 'Drop-off & Pick-up',
+     'Special Assistance', 'Recommended Arrival Time', 'Getting There By Train',
+     'Distance & Drive Time', 'Airport Hotels', 'Tickets and Prices'].forEach(l => {
+      const p = fillPlanFor(F(l, 'prose'));
+      assert.strictEqual(p.kind, 'source',
+        l + ' is a fact we hold no source for, so it must not be written: got ' + p.kind);
+    });
+  });
+
+  t('an unknown field fails closed rather than defaulting to written', () => {
+    const p = fillPlanFor(F('Some Field Nobody Has Classified', 'prose'));
+    assert.strictEqual(p.kind, 'source', 'the default must be closed');
+    assert.match(p.why, /fact about the place/);
+  });
+
+  t('a field needing a source costs nothing, because it never runs', () => {
+    assert.strictEqual(estimatePence(F('Terminals & Airlines', 'prose')), 0);
+    assert.strictEqual(isAutomatable(F('Terminals & Airlines', 'prose')), false,
+      'queueing it would hold every record, so it is not something the runner can attempt');
+    assert.strictEqual(isAutomatable(F('IATA Code', 'iata')), false,
+      'a fact whose fixer is not built is not automatable either');
+    assert.strictEqual(isAutomatable(F('Overview', 'prose')), true);
+    assert.strictEqual(isAutomatable(F('URL Slug', 'text')), true);
+  });
+
+  t('what the runner writes is interpretation, never a new fact', () => {
+    // The allow-list is small on purpose. If this grows, every addition has to
+    // be answerable: could it be written from what the record already holds?
+    ['Overview', 'Tagline', 'Hero Intro', 'Highlights JSON',
+     'Character and Vibe', 'What Makes It Special'].forEach(l => {
+      assert.strictEqual(fillPlanFor(F(l, 'prose')).kind, 'write', l + ' should be written');
+    });
+  });
+
+  console.log('\nIs there anything to write from');
+
+  const bare = { name: 'Some Airport', values: { 'Country Text': 'ES' } };
+  const rich = { name: 'Nerja', values: {
+    'Country Text': 'Spain', 'Airport Role': 'Regional', 'Region': 'Andalusia',
+    'Best Time to Visit': 'May to October', 'Tagline': 'Where the mountains meet the sea' } };
+  const parentWithProse = [{ name: 'Spain', values: {
+    Overview: 'Spain runs from the green, wet north through the high central plateau to the ' +
+              'dry south, and the coast changes character every hundred miles or so.' } }];
+
+  t('an almost empty record is refused before any money is spent', () => {
+    const r = hasEnoughToWriteFrom({ rec: bare, ancestors: [] });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /facts need filling first/);
+  });
+  t('a record with real content can be written from', () => {
+    assert.strictEqual(hasEnoughToWriteFrom({ rec: rich, ancestors: [] }).ok, true);
+  });
+  t('a bare record inherits enough from a parent that has prose', () => {
+    assert.strictEqual(hasEnoughToWriteFrom({ rec: bare, ancestors: parentWithProse }).ok, true);
+  });
+  t('a parent with only short values is not enough', () => {
+    const thin = [{ name: 'Spain', values: { Overview: 'Sunny.' } }];
+    assert.strictEqual(hasEnoughToWriteFrom({ rec: bare, ancestors: thin }).ok, false);
+  });
+  t('bookkeeping fields do not count as something to write from', () => {
+    const admin = { name: 'X', values: {
+      'Status': 'Live', 'URL Slug': 'x', 'Verified Date': '2026-01-01',
+      'Source 1 URL': 'https://a.test', 'Source 2 URL': 'https://b.test' } };
+    assert.strictEqual(hasEnoughToWriteFrom({ rec: admin, ancestors: [] }).ok, false,
+      'five admin fields are not evidence about a place');
   });
 
   /* ---------------------------------------------------------------- */

@@ -101,8 +101,13 @@ async function payload(mod) {
     { spec: spec('airport'), rows: airports },
     { spec: spec('attraction'), rows: attractions },
   ]);
-  // The route adds these two on the way out; the fixture has to carry them or
-  // it stops being a faithful copy of what the browser actually receives.
+  // The route adds these on the way out; the fixture has to carry them or it
+  // stops being a faithful copy of what the browser actually receives. The
+  // per-field plan is the important one: the page decides what to offer from
+  // it, so a fixture without it would test a page nobody is served.
+  const { fillPlanFor } = await import(
+    pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'fill', '_registry.js')).href);
+  for (const t0 of data.types) for (const f of t0.fields) f.plan = fillPlanFor(f).kind;
   data.baseId = 'appuZdlMJ7HKUt6qS';
   data.automation = { paused: true, since: '2026-09-10', reason: 'Paused for the dashboard build.' };
   data.cached = false;
@@ -701,12 +706,30 @@ async function payload(mod) {
   t('a field the runner cannot fill offers no button and says why', () => {
     // Official Website is a two-source fact; queueing it would hold every
     // record. The page must not offer the work.
-    const row = [...$('jobs').querySelectorAll('.job')]
-      .find(r => /Official Website/.test(r.querySelector('.job-t').textContent));
-    assert.ok(row, 'the fixture leaves Official Website blank, so it should be listed');
-    assert.ok(row.classList.contains('is-off'), 'it belongs in the blocked group');
-    assert.strictEqual(row.querySelector('[data-job]'), null, 'it must offer no button');
-    assert.match(row.textContent, /two independent sources/, 'it must say why');
+    const air = data.types.find(x => x.key === 'airport');
+    const site = air.fields.find(f => f.label === 'Official Website');
+    assert.ok(site, 'the airport spec should carry Official Website');
+    assert.strictEqual(site.plan, 'fact', 'a two-source fact, not something to write');
+
+    // And every blocked row the page actually draws has to behave: no button,
+    // and a stated reason. There are more of these than fit, so check them all.
+    const off = [...$('jobs').querySelectorAll('.job.is-off')];
+    assert.ok(off.length, 'expected blocked jobs to be listed');
+    off.forEach(r => {
+      assert.strictEqual(r.querySelector('[data-job]'), null,
+        'no button: ' + r.querySelector('.job-t').textContent);
+      assert.match(r.textContent, /source|two independent sources|a person chooses/,
+        'must say why: ' + r.querySelector('.job-t').textContent);
+    });
+  });
+
+  t('the jobs list says how many there are, not just how many it shows', () => {
+    const heads = [...$('jobs').querySelectorAll('.job-h')];
+    assert.ok(heads.length >= 2, 'expected both groups');
+    const blocked = heads[heads.length - 1].textContent;
+    assert.match(blocked, /\d+ of \d+/,
+      'most of the library needs a source, and hiding that behind six rows is the ' +
+      'same dishonesty in a quieter form: ' + blocked);
   });
 
 

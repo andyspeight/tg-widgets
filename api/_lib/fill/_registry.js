@@ -119,8 +119,39 @@ const BRIEF = {
 const NEVER = new Set(['Status']);
 
 /**
+ * THE ALLOW-LIST. A field is written by a model ONLY if it is named here.
+ *
+ * This used to be the default, and that was the single worst decision in this
+ * runner. On 11 Sep 2026 Andy ran Terminals & Airlines over 375 airports, twice.
+ * Every item was held, $4.14 was spent, and nothing was written. The field asks
+ * which terminal each airline flies from. That is an operational fact about a
+ * named airport, and we hold no source for it, so the writer either refused or
+ * invented and the gate refused for it. Correct behaviour, two hours late and
+ * four dollars in.
+ *
+ * The same trap was sitting under Parking, Lounges, Drop-off & Pick-up,
+ * Special Assistance, Recommended Arrival Time, Getting There By Train and a
+ * dozen more: all facts, all defaulting to "a model writes it".
+ *
+ * So the default is now closed, like every other decision in this system. What
+ * belongs here is INTERPRETATION of facts we already hold, never a new fact.
+ * If filling a field correctly would require looking something up, it does not
+ * belong here however well a model could fake it.
+ */
+const WRITE = new Set([
+  'Overview',                 // what the place is, from what we hold about it
+  'Tagline',
+  'Hero Intro',
+  'Character and Vibe',
+  'What Makes It Special',
+  'Highlights JSON',
+  'SEO Meta Title',
+  'SEO Meta Description',
+]);
+
+/**
  * Classify one field.
- * @returns {{kind:'derive'|'fact'|'write'|'manual', how?:object, brief?:string}}
+ * @returns {{kind:'derive'|'fact'|'write'|'source'|'manual', how?:object, brief?:string}}
  */
 export function fillPlanFor(field) {
   const label = field && field.label;
@@ -129,12 +160,23 @@ export function fillPlanFor(field) {
   if (DERIVE[label]) return { kind: 'derive', how: DERIVE[label] };
   if (FACT[label]) return { kind: 'fact', how: FACT[label] };
   if (field.kind === 'link') return { kind: 'manual', why: 'links are set by hand' };
-  return { kind: 'write', brief: BRIEF[label] || '' };
+  if (WRITE.has(label)) return { kind: 'write', brief: BRIEF[label] || '' };
+  return {
+    kind: 'source',
+    why: 'this is a fact about the place, not something that can be written from what we hold',
+  };
 }
 
-/** Everything the runner can attempt without a person. */
+/**
+ * Can the runner actually attempt this today?
+ *
+ * 'source' and 'fact' both mean no: one has no source at all, the other has a
+ * fixer nobody has wired up yet. Both would queue and hold every record, which
+ * is the exact failure this whole file now exists to prevent.
+ */
 export function isAutomatable(field) {
-  return fillPlanFor(field).kind !== 'manual';
+  const kind = fillPlanFor(field).kind;
+  return kind === 'derive' || kind === 'write';
 }
 
 /**
@@ -146,9 +188,38 @@ export function isAutomatable(field) {
  */
 export function estimatePence(field) {
   const plan = fillPlanFor(field);
-  if (plan.kind === 'derive' || plan.kind === 'fact') return 0;
-  if (plan.kind === 'manual') return 0;
-  return 3;
+  return plan.kind === 'write' ? 3 : 0;
 }
 
-export const KINDS = { DERIVE, FACT, MANUAL, BRIEF, NEVER };
+/**
+ * Is there enough on this record to write from?
+ *
+ * The writer's evidence is the record's own values plus its parents. An airport
+ * record holding a name and a country code gives it nothing, so it can only
+ * refuse or invent, and either way we pay for the attempt. This is the check
+ * that makes an empty record free instead of three pence, and it is the reason
+ * the order of work is facts first, editorial second.
+ *
+ * @returns {{ok:true} | {ok:false, why:string}}
+ */
+export function hasEnoughToWriteFrom({ rec, ancestors }) {
+  const SKIP = new Set(['Status', 'URL Slug', 'Verified Date', 'Source 1 URL', 'Source 2 URL']);
+  const substantive = Object.entries((rec && rec.values) || {})
+    .filter(([label, v]) => !SKIP.has(label) && v != null && String(v).trim().length >= 3);
+
+  if (substantive.length >= 4) return { ok: true };
+
+  // A parent with real content is evidence too: a resort can be written from
+  // its country's overview even when its own row is bare.
+  const parentProse = (ancestors || []).some(a =>
+    ['Overview', 'Character and Vibe', 'Best Time to Visit']
+      .some(l => a.values && String(a.values[l] || '').trim().length >= 80));
+  if (parentProse) return { ok: true };
+
+  return {
+    ok: false,
+    why: 'there is almost nothing on this record to write from, so the facts need filling first',
+  };
+}
+
+export const KINDS = { DERIVE, FACT, MANUAL, WRITE, BRIEF, NEVER };

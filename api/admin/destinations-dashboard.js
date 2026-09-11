@@ -31,6 +31,7 @@ import { requireAdmin, setAdminCors } from './_guard.js';
 import { getJson, setJson, configured as redisConfigured } from '../_redis.js';
 import { destinationAutomationPaused, PAUSE_NOTE } from '../_lib/destination-automation.js';
 import { TYPES, fieldIdsFor, aggregate } from '../_lib/destination-coverage.js';
+import { fillPlanFor } from '../_lib/fill/_registry.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const BASE_ID = process.env.REFERENCE_BASE_ID || 'appuZdlMJ7HKUt6qS';
@@ -72,8 +73,17 @@ async function buildDashboard() {
     rows: await listAll(spec.tableId, fieldIdsFor(spec)),
   })));
 
+  const data = aggregate(scanned);
+
+  // Say what kind of work each gap needs, once, here. The page used to decide
+  // this for itself with a regex over field names, which is how a page ends up
+  // offering a button the endpoint then refuses. One answer, one source.
+  for (const t of data.types) {
+    for (const f of t.fields) f.plan = fillPlanFor(f).kind;
+  }
+
   return {
-    ...aggregate(scanned),
+    ...data,
     baseId: BASE_ID,
     automation: {
       paused: destinationAutomationPaused(),
