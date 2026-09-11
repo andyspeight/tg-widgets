@@ -280,9 +280,18 @@ function renderActingAs(name) {
 async function load() {
   showLoading(tab === 'meetings' ? 'Loading your meetings…' : 'Loading your diary…');
 
+  // MY schedulers, not the agency's. This panel used to ask for the client's
+  // whole widget list and merge the caller's own on top, so two people working
+  // in one agency account each saw the other's meeting types on the first
+  // screen the panel opens. That was reported three times as "it is showing my
+  // meetings" (11 Sep 2026) and it is the Meetings tab, not the diary.
+  //
+  // The server also recognises this extension by its Sec-Fetch-Site header and
+  // scopes to the caller either way, so a copy installed before this build is
+  // fixed too. Asking explicitly means the panel does not depend on that.
   let widgets;
   try {
-    const r = await fetch(API + '/api/widget-list', { credentials: 'include' });
+    const r = await fetch(API + '/api/widget-list?scope=self', { credentials: 'include' });
     if (r.status === 401 || r.status === 403) { showSignedOut(); return; }
     if (!r.ok) throw new Error('HTTP ' + r.status);
     widgets = await r.json();
@@ -290,26 +299,6 @@ async function load() {
     showError('Could not reach Travelgenix. Check your connection and try again.');
     return;
   }
-
-  // This is a PERSONAL tool, so it must also show the signed-in user's OWN
-  // schedulers even while they work inside a client account — the shared
-  // dashboard session scopes /api/widget-list to the active client, which
-  // otherwise hides a staff member's own booking pages. ?scope=self returns the
-  // caller's own-email widgets regardless of active client. Additive and
-  // fail-soft: it can only ADD the user's schedulers back, and a failure here
-  // never removes what the primary list already found.
-  let mine = [];
-  try {
-    const rm = await fetch(API + '/api/widget-list?scope=self', { credentials: 'include' });
-    if (rm.ok) mine = await rm.json();
-  } catch (e) { /* keep the primary list */ }
-
-  const merged = Array.isArray(widgets) ? widgets.slice() : [];
-  const seen = new Set(merged.map((w) => w && w.widgetId));
-  for (const w of (Array.isArray(mine) ? mine : [])) {
-    if (w && w.widgetId && !seen.has(w.widgetId)) { seen.add(w.widgetId); merged.push(w); }
-  }
-  widgets = merged;
 
   loadIdentity();  // non-blocking
   loadActingAs();  // non-blocking staff safety net

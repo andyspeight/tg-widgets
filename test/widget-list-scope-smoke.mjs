@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 /**
  * Widget list scoping — the client-isolation logic behind the dashboard.
  *
@@ -72,14 +73,16 @@ function mockRes() {
     end() { return this; },
   };
 }
-async function listAs({ email, recordId, clientId, query }) {
+async function listAs({ email, recordId, clientId, query, headers }) {
   const token = createToken({ email, recordId, clientId });
   const res = mockRes();
   state.lastListUrl = '';
   await handler({
     method: 'GET',
     query: query || {},
-    headers: { authorization: `Bearer ${token}`, origin: 'https://widgets.travelify.io' },
+    headers: Object.assign(
+      { authorization: `Bearer ${token}`, origin: 'https://widgets.travelify.io' },
+      headers || {}),
     socket: { remoteAddress: '10.0.0.1' },
   }, res);
   // The URL is built with URLSearchParams, which writes a space as "+", so the
@@ -178,6 +181,58 @@ state.users.recLONE0000000001 = { email: 'solo@example.com', clients: [] };
   const res = mockRes();
   await handler({ method: 'GET', headers: {}, socket: {} }, res);
   ok(res.statusCode === 401, 'unauthenticated → 401');
+}
+
+// ── THE BROWSER EXTENSION IS A PERSONAL TOOL (11 Sep 2026) ──────────────────
+// The scheduler panel's first screen listed every Appointment scheduler in the
+// CLIENT, so two people working in one agency account each saw the other's
+// meeting types. Reported three times as "it is showing my meetings", and it
+// was never the diary.
+//
+// Fixing the panel alone only helps someone who reinstalls, and three updates
+// had already gone out, so the server recognises the extension itself. Chrome
+// sends NO Origin and NO Referer for an extension's fetch to a host it holds
+// permission for (verified in Chromium, not assumed). Sec-Fetch-Site is the
+// marker the browser controls and page script cannot forge.
+const EXTENSION = { 'sec-fetch-site': 'none', 'sec-fetch-dest': 'empty' };
+const DASHBOARD = { 'sec-fetch-site': 'same-origin', 'sec-fetch-dest': 'empty' };
+const TYPED_IN_BAR = { 'sec-fetch-site': 'none', 'sec-fetch-dest': 'document' };
+
+state.users.recANDYSPEIGHT001 = { email: 'andy.speight@agendas.group', clients: [OTHERCLIENT] };
+state.clients[OTHERCLIENT] = 'andy.speight@agendas.group';
+{
+  const own = `LOWER({ClientEmail})='andy.speight@agendas.group'`;
+
+  const ext = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDYSPEIGHT001', clientId: OTHERCLIENT, headers: EXTENSION });
+  ok(ext.formula === own, 'extension: scoped to the caller alone, so a colleague\'s schedulers cannot appear');
+
+  const dash = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDYSPEIGHT001', clientId: OTHERCLIENT, headers: DASHBOARD });
+  ok(dash.formula.includes(`{ClientRecordId}='${OTHERCLIENT}'`) && dash.formula !== own,
+    'dashboard: unchanged, still the whole client');
+
+  const typed = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDYSPEIGHT001', clientId: OTHERCLIENT, headers: TYPED_IN_BAR });
+  ok(typed.formula !== own, 'a URL typed into the address bar is not mistaken for the extension');
+
+  const plain = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDYSPEIGHT001', clientId: OTHERCLIENT });
+  ok(plain.formula !== own, 'a caller sending no Sec-Fetch headers keeps the default');
+
+  const optOut = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDYSPEIGHT001', clientId: OTHERCLIENT, headers: EXTENSION, query: { scope: 'client' } });
+  ok(optOut.formula !== own, '?scope=client lets the extension ask for the whole account on purpose');
+
+  const asked = await listAs({ email: 'andy.speight@agendas.group', recordId: 'recANDYSPEIGHT001', clientId: OTHERCLIENT, headers: DASHBOARD, query: { scope: 'self' } });
+  ok(asked.formula === own, '?scope=self still works on its own, whatever the headers say');
+
+  // The header can only ever NARROW what a caller sees.
+  ok(!ext.formula.includes(OTHERCLIENT),
+    'the extension path grants no client-wide visibility at all');
+}
+
+// The panel must actually ask, so it does not depend on the header rule.
+{
+  const panel = readFileSync(new URL('../extension/scheduler-companion/panel.js', import.meta.url), 'utf8');
+  ok(/widget-list\?scope=self/.test(panel), 'the panel asks for its own schedulers');
+  ok(!/['"]\/api\/widget-list['"]|widget-list['"], \{/.test(panel.replace(/widget-list\?scope=self/g, '')),
+    'and no longer asks for the whole client list as well');
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

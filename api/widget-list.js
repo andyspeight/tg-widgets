@@ -186,10 +186,40 @@ export default async function handler(req, res) {
   if (!applyRateLimit(res, `list:${user.email}`, RATE_LIMITS.widgetRead)) return;
 
   const userEmailLower = user.email.toLowerCase();
-  // The personal scheduler companion requests ?scope=self to get the caller's
-  // OWN widgets regardless of the active client (see buildScopeFormula). Every
-  // other caller (the dashboard) omits it and keeps the strict per-client scope.
-  const selfScope = !!(req.query && req.query.scope === 'self');
+  // The personal scheduler companion gets the caller's OWN widgets regardless
+  // of the active client (see buildScopeFormula). The dashboard keeps the
+  // strict per-client scope.
+  //
+  // WHY A HEADER AND NOT JUST ?scope=self (11 Sep 2026). The panel's first
+  // screen is its Meetings tab, which listed every Appointment scheduler in the
+  // CLIENT. Two people who work in the same agency account therefore each saw
+  // the other's meeting types, reported three times as "it is showing my
+  // meetings". Asking the panel to send ?scope=self fixes it, but only for
+  // someone who reinstalls, and by then three updates had already been handed
+  // out. So the server recognises the extension itself and every copy already
+  // installed is fixed on its next refresh.
+  //
+  // Chrome sends NO Origin and NO Referer for an extension's fetch to a host it
+  // holds permission for. Verified in Chromium here rather than assumed, from
+  // both the service worker and an extension page. What it does send is
+  // Sec-Fetch-Site, which the browser controls and page script cannot forge:
+  //
+  //   the extension          Sec-Fetch-Site: none        Sec-Fetch-Dest: empty
+  //   our own dashboard      Sec-Fetch-Site: same-origin Sec-Fetch-Dest: empty
+  //   a URL typed in the bar Sec-Fetch-Site: none        Sec-Fetch-Dest: document
+  //
+  // So "none" plus "empty" is a fetch that came from no web page at all. A
+  // non-browser client (curl, a server) sends neither header, reads as
+  // undefined, and keeps the default. If this ever misfires the effect is a
+  // caller seeing FEWER widgets, never someone else's.
+  //
+  // ?scope=client is the explicit opt-out, for a caller that really does want
+  // the whole account.
+  const h = req.headers || {};
+  const fromExtension = String(h['sec-fetch-site'] || '').toLowerCase() === 'none'
+    && String(h['sec-fetch-dest'] || '').toLowerCase() === 'empty';
+  const askedScope = String((req.query && req.query.scope) || '').toLowerCase();
+  const selfScope = askedScope === 'self' || (fromExtension && askedScope !== 'client');
   const activeClientId =
     (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId))
       ? user.clientId
