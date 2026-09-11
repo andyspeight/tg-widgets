@@ -36,6 +36,7 @@ const CONNECT = readFileSync(new URL('../api/calendar/connect.js', import.meta.u
 const SHARED = readFileSync(new URL('../api/auth/google/_shared.js', import.meta.url), 'utf8');
 const GOOGLE = readFileSync(new URL('../api/_lib/calendar/google.js', import.meta.url), 'utf8');
 const EDITOR = readFileSync(new URL('../public/editor-appointment.html', import.meta.url), 'utf8');
+const SETUP_DOC = readFileSync(new URL('../CALENDAR-OAUTH.md', import.meta.url), 'utf8');
 
 console.log('The list itself');
 {
@@ -101,6 +102,16 @@ console.log('The console list is written down where someone can copy it');
   }
   ok('it says the URIs belong to the CALENDAR client, not the sign-in one',
     /calendar client's "Authorized redirect URIs"/.test(GOOGLE));
+
+  // CALENDAR-OAUTH.md is the page someone actually follows when creating the
+  // OAuth client. It listed only two hosts, written before id.travelify.io
+  // existed, which is how the missing URI went unnoticed for three weeks.
+  for (const h of APP_HOSTS) {
+    ok('CALENDAR-OAUTH.md lists https://' + h + '/api/calendar/callback',
+      SETUP_DOC.includes('https://' + h + '/api/calendar/callback'));
+  }
+  ok('the setup doc warns against reusing the sign-in client',
+    /GOOGLE_CLIENT_ID` must not be the\s*\n?\s*same value as `GOOGLE_SIGNIN_CLIENT_ID/.test(SETUP_DOC));
 }
 
 console.log('A calendar client that is really the sign-in client is named, not bounced');

@@ -55,11 +55,31 @@ double-booking guard. Set Redis for the full suite.
    `calendar.events` and `calendar.readonly`, plus `openid` and `email`.
    While testing, add the agent emails as test users (or publish the app).
 3. Credentials → Create credentials → OAuth client ID → Web application.
-4. Authorized redirect URIs — add one per host you test on:
+4. Authorized redirect URIs — add ALL THREE, exactly, with no trailing slash:
+   - `https://id.travelify.io/api/calendar/callback`
    - `https://widgets.travelify.io/api/calendar/callback`
    - `https://tg-widgets.vercel.app/api/calendar/callback`
-   - the current Vercel preview URL's `/api/calendar/callback`
+
+   These are the hosts the dashboard and editors are served on, and they are
+   the list in `api/_lib/app-hosts.js`. Google refuses any redirect URI that is
+   not registered character for character, and it refuses it before the consent
+   screen, so the agent sees Google's own "Access blocked … Error 400:
+   redirect_uri_mismatch" and we get nothing we can catch or explain.
+
+   > This step used to list only the first two, because `id.travelify.io` did
+   > not exist when the scheduler was built. It became an alias on 21 Aug 2026
+   > and is where agents now open their editors, so a client connecting Google
+   > Calendar from there was blocked (11 Sep 2026). If you add a host to
+   > `app-hosts.js`, add its callback URI here and in the console the same day.
+   > `npm run test:calendar-oauth-host` fails if the code and this file drift.
+
 5. Copy the client id and secret into the Vercel env vars above.
+
+   Use a client of its OWN for the calendar. `GOOGLE_CLIENT_ID` must not be the
+   same value as `GOOGLE_SIGNIN_CLIENT_ID` (the "Continue with Google" client):
+   that one carries the sign-in callbacks, not the calendar ones, so every
+   connection would fail with the same `redirect_uri_mismatch`. The connect
+   endpoint now detects this and says so rather than sending anyone to Google.
 
 ## Outlook / Microsoft 365 setup (optional second provider)
 
@@ -69,8 +89,10 @@ Connect button for each provider whose credentials are set.
 1. Azure Portal → App registrations → New registration. Supported account
    types: "Accounts in any organizational directory and personal Microsoft
    accounts" (so work and personal both connect).
-2. Redirect URI (Web): `https://<your-host>/api/calendar/callback` — add one
-   per host, same as Google.
+2. Redirect URI (Web): add one per host, the same three as Google:
+   `https://id.travelify.io/api/calendar/callback`,
+   `https://widgets.travelify.io/api/calendar/callback`,
+   `https://tg-widgets.vercel.app/api/calendar/callback`.
 3. API permissions → Microsoft Graph → Delegated → `Calendars.ReadWrite`
    (and `offline_access`, `openid`, `email`). Grant admin consent if required.
 4. Certificates & secrets → new client secret. Copy the value.
@@ -179,3 +201,25 @@ These all rely on `UPSTASH_*`. Without Redis they no-op cleanly.
   `/api/calendar/status`'s new `sms` flag). Texts ride the email reminder
   cadence, UK numbers are normalised to E.164 and anything ambiguous is
   skipped rather than guessed. Until the env vars exist everything no-ops.
+
+## Added 11 Sep 2026 — where the redirect URI comes from
+
+A client setting up the scheduler was stopped by Google with "Error 400:
+redirect_uri_mismatch" when connecting their account.
+
+`/api/calendar/connect` used to build the redirect URI from the raw `Host`
+header, so it was whichever host the editor happened to be open on. We serve
+three, and Vercel also answers on generated preview hostnames, and every one of
+them has to be registered against the calendar OAuth client or the request is
+refused outright. The sign-in flow kept a private allow-list of the three; the
+calendar flow had none, and nothing held the two in step.
+
+Now `api/_lib/app-hosts.js` is the one list both read. `resolveHost()` prefers
+the proxy's `x-forwarded-host`, normalises a comma chain, a port and case, and
+falls back to the primary host for anything it does not recognise, so a preview
+deployment round-trips through a URI Google knows rather than one it has never
+seen. The connect logs the exact `redirect_uri` it sent, and a setup problem on
+our side now returns the agent to the editor with a readable message instead of
+a raw JSON body (connect is a full-page navigation, not a fetch).
+
+Guarded by `npm run test:calendar-oauth-host`.
