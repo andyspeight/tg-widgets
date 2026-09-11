@@ -46,7 +46,11 @@ async function payload(mod) {
     url: 'https://a.test', date: '2026-08-14', iata: 'LHR', lat: 37.9838, lng: 23.7275,
   };
   const CONTINENTS = ['Europe', 'Asia', 'Caribbean', 'Africa', 'North America', 'Oceania', 'South America', 'Middle East'];
-  const pad = (p, i) => (p + String(i)).padEnd(17, '0').slice(0, 17);
+  /* Airtable ids are 17 characters. Padding the index on the RIGHT collided:
+     recCo4, recCo40 and recCo400 all became recCo400000000000, so the fixture
+     held duplicate ids and anything counting by record id was quietly wrong.
+     Pad on the left instead, which cannot collide. */
+  const pad = (p, i) => p + String(i).padStart(17 - p.length, '0');
 
   // fill 0 = name only, 1 = core, 2 = everything, 3 = everything but one value broken
   function make(id, key, fill, extra) {
@@ -108,6 +112,10 @@ async function payload(mod) {
   const { fillPlanFor } = await import(
     pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'fill', '_registry.js')).href);
   for (const t0 of data.types) for (const f of t0.fields) f.plan = fillPlanFor(f, t0.key).kind;
+  const ids = data.records.map(r => r.id);
+  if (new Set(ids).size !== ids.length) {
+    throw new Error('the fixture generated duplicate record ids, so nothing counting by id can be trusted');
+  }
   data.baseId = 'appuZdlMJ7HKUt6qS';
   data.automation = { paused: true, since: '2026-09-10', reason: 'Paused for the dashboard build.' };
   data.cached = false;
@@ -628,6 +636,17 @@ async function payload(mod) {
      morning hid the failure. A run has to be reported as a run. */
 
   t('a run that saved nothing says so, whatever else happened today', async () => {
+    // The records the Hero Intro job will actually queue, so the stub can seed
+    // holds those records already had before this run starts.
+    const co = data.types.find(x => x.key === 'country');
+    const heroIdx = co.fields.findIndex(f => f.label === 'Hero Intro');
+    assert.ok(heroIdx >= 0, 'countries should carry Hero Intro');
+    const heroGaps = data.records
+      .filter(r => r.type === 'country' &&
+        (r.missing.indexOf(heroIdx) !== -1 || r.broken.indexOf(heroIdx) !== -1))
+      .map(r => r.id);
+    assert.ok(heroGaps.length >= 3, 'expected at least three countries needing one');
+
     const d3 = new JSDOM(fs.readFileSync(HTML, 'utf8'), {
       runScripts: 'dangerously',
       url: 'https://tg-widgets.vercel.app/admin/destinations',
@@ -635,11 +654,15 @@ async function payload(mod) {
       beforeParse(w) {
         w.Element.prototype.scrollIntoView = function () {};
         const now = new Date().toISOString();
+        // Three holds already on the books for these records, from earlier
+        // attempts. They must not be counted as part of the run about to start.
+        w.__pressed = false;
+        w.__old = heroGaps.slice(0, 3);
         w.fetch = (url, opts) => {
           if (String(url).includes('destinations-fill')) {
             if (opts && opts.body) {
               const b = JSON.parse(opts.body);
-              if (b.recordIds) w.__queuedIds = b.recordIds;
+              if (b.recordIds) { w.__queuedIds = b.recordIds; w.__pressed = true; }
             }
             const p = {
               settings: { capUsd: 10, running: false },
@@ -652,10 +675,14 @@ async function payload(mod) {
               saved: [{ place: 'Innsbruck', field: 'Wikipedia URL', type: 'airport',
                         recordId: 'recAi0000000000000', value: 'https://en.wikipedia.org/wiki/X',
                         reason: 'two independent sources agreed', at: '2026-09-11T09:00:00.000Z' }],
-              held: (w.__queuedIds || []).slice(0, 3).map((id, i) => ({
-                place: ['Estonia', 'Serbia', 'Ethiopia'][i], field: 'Hero Intro', type: 'country',
-                recordId: id,
-                reason: 'there is almost nothing on this record to write from', at: now })),
+              // Newest first, as Redis returns them. Before the press there are
+              // three old holds; after it, two more on top of those.
+              held: w.__old.flatMap((id, i) => {
+                const mk = why => ({ place: ['Estonia', 'Serbia', 'Ethiopia'][i],
+                  field: 'Hero Intro', type: 'country', recordId: id, reason: why, at: now });
+                const was = [mk('there is almost nothing on this record to write from')];
+                return (w.__pressed && i < 2) ? [mk('nothing supports the claim it made'), ...was] : was;
+              }),
               recent: [],
             };
             const body = JSON.stringify(p);
@@ -678,9 +705,11 @@ async function payload(mod) {
     // field, so it needs the list expanded first.
     const more = dd.getElementById('jobs-more');
     if (more) more.dispatchEvent(new d3.window.Event('click', { bubbles: true }));
+    // Hero Intro exists on countries AND on resorts, and resorts rank higher.
+    // Matching the label alone opened the wrong job.
     const heroRow = [...dd.querySelectorAll('#jobs .job:not(.is-off)')]
-      .find(r => /Hero Intro/.test(r.querySelector('.job-t').textContent));
-    assert.ok(heroRow, 'the fixture should offer a Hero Intro job');
+      .find(r => /Hero Intro · countries/i.test(r.querySelector('.job-t').textContent));
+    assert.ok(heroRow, 'the fixture should offer a Hero Intro job on countries');
     heroRow.querySelector('[data-job]').dispatchEvent(new d3.window.Event('click', { bubbles: true }));
     await new Promise(r => setTimeout(r, 100));
     assert.match(dd.getElementById('jv-title').textContent, /Hero Intro/);
@@ -691,8 +720,24 @@ async function payload(mod) {
     const bar = dd.getElementById('run-l').textContent;
     assert.match(bar, /saved nothing/i,
       'one save this morning must not hide three holds this afternoon: ' + bar);
-    assert.match(bar, /nothing on this record to write from/i, 'and it should say why');
     assert.ok(!/Nothing running\./.test(bar), 'a failed run is not "nothing running"');
+
+    // Only THIS press. Three earlier holds on the same records were being added
+    // in, so a run of three reported eight held.
+    assert.match(bar, /All 2 were held/,
+      'the tally must exclude holds those records already had: ' + bar);
+    assert.match(bar, /nothing supports the claim/i,
+      'and the reason should be this run\'s, not the old one: ' + bar);
+
+    // A row that was Queued must become Held once it has been held. A record
+    // the run has no outcome for yet is correctly still Queued, so check the
+    // three that were actually held rather than the whole list.
+    const rows = [...dd.querySelectorAll('#jv-rows tr')];
+    const held = rows.filter(r => /Held/.test(r.textContent));
+    assert.strictEqual(held.length, 3,
+      'the three held records must stop saying Queued, got ' + held.length);
+    assert.match(held[0].textContent, /nothing supports the claim|nothing on this record/,
+      'and the row should say why without opening another tab');
   });
 
   console.log('\nSeeing it all without opening Airtable');

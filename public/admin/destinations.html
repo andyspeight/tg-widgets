@@ -1285,22 +1285,36 @@ a.nm:hover span{text-decoration:underline}
      Matching on a timestamp instead compares the browser's clock against the
      server's, and any skew between them silently reports a run as having done
      nothing. The record ids are exact and cannot drift. */
+  /* Entries in a log belonging to the records this run asked for. */
+  function countForRun(list) {
+    if (!thisRun || !list) return 0;
+    return (list || []).filter(runMatch).length;
+  }
+
+  /* Hero Intro exists on countries and on resorts, so the label alone is not
+     enough to tell one run's results from another's. */
+  function runMatch(d) {
+    if (!thisRun) return false;
+    if (d.field !== thisRun.field) return false;
+    if (d.type && thisRun.type && d.type !== thisRun.type) return false;
+    return !!d.recordId && thisRun.ids.indexOf(d.recordId) !== -1;
+  }
+
   function runTally() {
-    if (!R || !thisRun || !job || thisRun.field !== job.label) return null;
-    var asked = {};
-    thisRun.ids.forEach(function (id) { asked[id] = true; });
-    var mine = function (d) {
-      return d.field === thisRun.field && d.recordId && asked[d.recordId];
-    };
-    var saved = (R.saved || []).filter(mine);
-    var held = (R.held || []).filter(mine);
+    if (!R || !thisRun || !job || thisRun.field !== job.label || thisRun.type !== job.type) return null;
+    var heldNow = (R.held || []).filter(runMatch);
+    var savedNow = (R.saved || []).filter(runMatch);
+    // Only what this press produced. The logs are newest first, so the new
+    // entries are the ones at the front.
+    var held = Math.max(0, heldNow.length - (thisRun.heldBefore || 0));
+    var saved = Math.max(0, savedNow.length - (thisRun.savedBefore || 0));
     var why = {};
-    held.forEach(function (h) {
+    heldNow.slice(0, held).forEach(function (h) {
       var k = String(h.reason || 'not given');
       why[k] = (why[k] || 0) + 1;
     });
     var top = Object.keys(why).sort(function (a, b) { return why[b] - why[a]; })[0] || '';
-    return { asked: thisRun.asked, saved: saved.length, held: held.length, topReason: top };
+    return { asked: thisRun.asked, saved: saved, held: held, topReason: top };
   }
 
   function heldReasonFor(recordId) {
@@ -1325,7 +1339,11 @@ a.nm:hover span{text-decoration:underline}
       }
     });
     (R.held || []).forEach(function (h) {
-      if (h.field === job.label && h.recordId && !rowState[h.recordId]) {
+      // Not "only if blank". A row is Queued the moment the button is pressed,
+      // so refusing to overwrite that left Estonia and Ethiopia reading Queued
+      // long after they had been held. A save still wins over a hold.
+      if (h.field === job.label && h.recordId &&
+          rowState[h.recordId] !== 'saved' && rowState[h.recordId] !== 'held') {
         rowState[h.recordId] = 'held'; changed = true;
       }
     });
@@ -1448,7 +1466,11 @@ a.nm:hover span{text-decoration:underline}
           // The field moved in the fresh scan only if the spec changed, but the
           // counts on it certainly did.
           var t = typeOf(job.type);
-          if (t && t.fields[job.idx]) { job.field = t.fields[job.idx]; job.type_ = t; renderJobView(); }
+          if (t && t.fields[job.idx]) {
+            job.field = t.fields[job.idx]; job.type_ = t;
+            renderJobView();
+            renderRun();          // or the button keeps the count it had before
+          }
         }
         $('live').textContent = 'Numbers updated.';
       })
@@ -1588,7 +1610,12 @@ a.nm:hover span{text-decoration:underline}
 
   function queueWork(recordIds, label) {
     if (!job || !recordIds.length) return;
-    thisRun = { field: job.label, ids: recordIds.slice(), asked: recordIds.length };
+    // Count from here, not from the beginning of time. The held list keeps
+    // every attempt, so Estonia's three earlier holds were being added to this
+    // run's two and reported as eight on a run of three.
+    thisRun = { field: job.label, type: job.type, ids: recordIds.slice(), asked: recordIds.length };
+    thisRun.heldBefore = countForRun(R && R.held);
+    thisRun.savedBefore = countForRun(R && R.saved);
     recordIds.forEach(function (id) { rowState[id] = 'queued'; });
     renderJobRows();
     fillApi({ action: 'queue', type: job.type, fieldIdx: job.idx, recordIds: recordIds })
