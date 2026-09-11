@@ -1344,8 +1344,8 @@
     const p = new URLSearchParams(location.search);
     const cal = p.get('calendar'), zm = p.get('zoom');
     if (!cal && !zm) return;
-    const map = { connected: ['Calendar connected', 'ok'], error: ['Could not connect the calendar', 'err'], denied: ['Calendar connection cancelled', 'err'], norefresh: ['Please remove access in Google then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'] };
-    const zmap = { connected: ['Zoom connected — video bookings now create Zoom meetings', 'ok'], error: ['Could not connect Zoom', 'err'], denied: ['Zoom connection cancelled', 'err'], norefresh: ['Please remove the app in Zoom then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'] };
+    const map = { connected: ['Calendar connected', 'ok'], error: ['Could not connect the calendar', 'err'], denied: ['Calendar connection cancelled', 'err'], norefresh: ['Please remove access in Google then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'], notsetup: ['Calendar connections are not set up on our side yet. Please let Travelgenix know.', 'err'] };
+    const zmap = { connected: ['Zoom connected — video bookings now create Zoom meetings', 'ok'], error: ['Could not connect Zoom', 'err'], denied: ['Zoom connection cancelled', 'err'], norefresh: ['Please remove the app in Zoom then reconnect', 'err'], nostore: ['Booking storage is not configured', 'err'], notsetup: ['Zoom connections are not set up on our side yet. Please let Travelgenix know.', 'err'] };
     const m = cal ? map[cal] : zmap[zm];
     if (m && window.tgse) tgse.toast(m[0], m[1]);
     const u = new URL(location); u.searchParams.delete('calendar'); u.searchParams.delete('zoom'); history.replaceState(null, '', u);

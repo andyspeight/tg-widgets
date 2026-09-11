@@ -8,10 +8,22 @@
  * Env required (set in Vercel):
  *   GOOGLE_CLIENT_ID
  *   GOOGLE_CLIENT_SECRET
- * The redirect URI is derived from the request host by the endpoints, so it
- * does not need an env var, but every redirect URI you use must be added to
- * the OAuth client's "Authorized redirect URIs" in the Google Cloud console:
- *   https://<your-host>/api/calendar/callback
+ * These belong to the CALENDAR OAuth client, which is deliberately a different
+ * client from sign-in's GOOGLE_SIGNIN_CLIENT_ID (see api/auth/google/_shared.js
+ * for why). Pointing them at the sign-in client is the same failure as a
+ * missing host: that client carries no calendar callback, so Google answers
+ * "Error 400: redirect_uri_mismatch". configError() below catches it.
+ *
+ * The redirect URI is built from the shared host list (api/_lib/app-hosts.js),
+ * so it needs no env var — but EVERY one of these must be listed under the
+ * calendar client's "Authorized redirect URIs" in the Google Cloud console,
+ * exactly, with no trailing slash:
+ *   https://id.travelify.io/api/calendar/callback
+ *   https://widgets.travelify.io/api/calendar/callback
+ *   https://tg-widgets.vercel.app/api/calendar/callback
+ * Missing one is invisible until a client on that host tries to connect and is
+ * stopped at Google's own error page (11 Sep 2026). Guarded by
+ * `npm run test:calendar-oauth-host`.
  *
  * Scopes: openid + email (to label the connection) and calendar.events +
  * calendar.readonly (to read free/busy and create the booking event).
@@ -32,6 +44,19 @@ const CAL_BASE = 'https://www.googleapis.com/calendar/v3';
 
 export function configured() {
   return !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+}
+
+/**
+ * A named reason the connection cannot work, or null when it can. Separate
+ * from configured(): the credentials can be present and still be the wrong
+ * ones. Checked by /api/calendar/connect before the browser leaves for Google,
+ * so a setup mistake reads as our error rather than Google's.
+ */
+export function configError() {
+  if (!configured()) return 'not_configured';
+  const signin = process.env.GOOGLE_SIGNIN_CLIENT_ID || '';
+  if (signin && signin === process.env.GOOGLE_CLIENT_ID) return 'same_client_as_signin';
+  return null;
 }
 
 export function authUrl(state, redirectUri) {
