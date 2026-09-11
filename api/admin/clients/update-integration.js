@@ -16,7 +16,11 @@
  * Body:
  *   { id: 'recXXX', travelifyAppId: '250', travelifySiteId: '250', apiKey: 'A41D...650D' }
  *
- * Any field omitted is left unchanged. Pass an empty string to clear a field.
+ * Any field omitted is left unchanged. An EMPTY STRING IS ALSO IGNORED — it
+ * used to clear the field, which made accidental data loss trivially easy
+ * (see the note by the validation block). To clear deliberately, name the
+ * field in clearFields:
+ *   { id: 'recXXX', travelifyAppId: '', clearFields: ['travelifyAppId'] }
  */
 
 import { requireAuth, requireProductAccess } from '../../_lib/auth/middleware.js';
@@ -64,21 +68,39 @@ export default async function handler(req, res) {
     return jsonError(res, 400, 'invalid_id', 'id must be a valid record id');
   }
 
-  // Only validate fields that were actually supplied. undefined => leave
-  // the field unchanged. '' => clear the field.
+  // Only validate fields that were actually supplied. undefined => leave the
+  // field unchanged.
+  //
+  // An EMPTY STRING NO LONGER CLEARS. It used to, and the client-detail form
+  // posts all three fields on every save — so any save made while the App ID
+  // box was empty silently wiped it. A stale tab was enough: if the page was
+  // rendered before the App ID was set, saving the panel wrote '' over it.
+  // Losing that field breaks booking retrieval for every traveller of that
+  // agency, and it fails as a plain "we couldn't find your booking", so nobody
+  // notices for days. It is also self-propagating: SSO looks the client up BY
+  // App ID, so once blank the next sign-in creates a DUPLICATE client record
+  // for the same Travelify app.
+  //
+  // Clearing is still possible, but it now has to be asked for by name via
+  // clearFields, so it can never be the accidental outcome of saving a form.
+  const clearFields = Array.isArray(body.clearFields) ? body.clearFields : [];
+  const wantsClear = (name) => clearFields.includes(name);
+
   const errors = [];
   const updates = {};
 
   if (body.travelifyAppId !== undefined) {
     const v = String(body.travelifyAppId).trim();
     if (v && !NUMERIC_ID_RE.test(v)) errors.push('travelifyAppId must be numeric, up to 10 digits');
-    updates[CLIENTS.fields.travelifyAppId] = v;
+    if (v) updates[CLIENTS.fields.travelifyAppId] = v;
+    else if (wantsClear('travelifyAppId')) updates[CLIENTS.fields.travelifyAppId] = '';
   }
 
   if (body.travelifySiteId !== undefined) {
     const v = String(body.travelifySiteId).trim();
     if (v && !NUMERIC_ID_RE.test(v)) errors.push('travelifySiteId must be numeric, up to 10 digits');
-    updates[CLIENTS.fields.travelifySiteId] = v;
+    if (v) updates[CLIENTS.fields.travelifySiteId] = v;
+    else if (wantsClear('travelifySiteId')) updates[CLIENTS.fields.travelifySiteId] = '';
   }
 
   if (body.apiKey !== undefined) {
@@ -86,7 +108,8 @@ export default async function handler(req, res) {
     if (v && !UUID_RE.test(v)) {
       errors.push('apiKey must be a UUID like A41D180E-CBFE-4E30-A47D-FAAB424A650D');
     }
-    updates[CLIENTS.fields.apiKey] = v;
+    if (v) updates[CLIENTS.fields.apiKey] = v;
+    else if (wantsClear('apiKey')) updates[CLIENTS.fields.apiKey] = '';
   }
 
   if (Object.keys(updates).length === 0) {
