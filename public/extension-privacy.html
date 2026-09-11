@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Travelgenix Scheduler extension — privacy</title>
+<meta name="description" content="What the Travelgenix Scheduler browser extension accesses, what it stores and who it shares with." />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F1F5F9;color:#0F172A;padding:48px 18px;line-height:1.6}
+  .wrap{width:100%;max-width:760px;margin:0 auto}
+  .card{background:#fff;border:1px solid rgba(15,23,42,.1);border-radius:16px;padding:32px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 14px 44px rgba(15,23,42,.07)}
+  .badge{width:46px;height:46px;border-radius:12px;background:rgba(8,145,178,.14);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .badge svg{width:23px;height:23px;fill:none;stroke:#0891B2;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  h1{font-size:24px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+  .sub{font-size:14px;opacity:.7;margin-bottom:26px}
+  h2{font-size:16px;font-weight:700;margin:26px 0 8px}
+  p{font-size:15px;margin-bottom:10px}
+  ul{margin:0 0 10px 20px;font-size:15px}
+  li{margin-bottom:6px}
+  .lead{font-size:16px;font-weight:600;background:rgba(8,145,178,.09);padding:14px 16px;border-radius:11px;margin-bottom:8px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;background:rgba(15,23,42,.06);padding:1px 6px;border-radius:5px}
+  a{color:#0891B2;font-weight:600}
+  footer{font-size:13px;opacity:.65;margin-top:28px;padding-top:16px;border-top:1px solid rgba(15,23,42,.1)}
+  @media (prefers-color-scheme: dark){
+    body{background:#0B1220;color:#F1F5F9}
+    .card{background:#111A2B;border-color:rgba(255,255,255,.1)}
+    code{background:rgba(255,255,255,.09)}
+    footer{border-top-color:rgba(255,255,255,.12)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <h1>Travelgenix Scheduler</h1>
+    <p class="sub">Privacy policy for the browser extension. Last updated 11 September 2026.</p>
+
+    <p class="lead">The extension stores nothing, sends nothing to anyone else and shows you only your own Travelgenix account, using the session you are already signed in with.</p>
+
+    <h2>What it shows you</h2>
+    <p>When you open the side panel it asks Travelgenix for two things, and displays them:</p>
+    <ul>
+      <li>Your appointment schedulers and their meeting types, so it can offer a booking link and the pick-a-time flow for each.</li>
+      <li>Your booked appointments for the next fourteen days, for the Coming up view.</li>
+    </ul>
+    <p>It reads these as you. The extension holds no credentials of its own. It relies on the <code>tg_session</code> cookie your browser already has from signing in to the Travelgenix dashboard. If you are not signed in, the panel shows a sign-in prompt and nothing else.</p>
+
+    <h2>What it stores</h2>
+    <p>Nothing. There is no extension storage, no cache and no local database. Close the panel and nothing of yours remains in the extension. It asks for no storage permission, which you can confirm on its Chrome Web Store listing.</p>
+
+    <h2>Who it shares with</h2>
+    <p>Nobody. The extension talks to Travelgenix and to no one else. There is no analytics, no tracking, no advertising and no third-party service of any kind. Nothing is sold, and nothing is used to build a profile of you.</p>
+
+    <h2>Gmail</h2>
+    <p>If you use Gmail, the extension adds a calendar button next to Send in a compose window. Its only job is to put a booking link, or a list of times you chose, into the message you are writing, at your cursor.</p>
+    <p>It does not read your emails. It does not read your contacts, your subject lines or anything you have typed. It looks for exactly two things on the page, the message body and the Send button, so it knows where the button goes and where to insert. If Google ever moves them the button simply does not appear, and Gmail is unaffected.</p>
+
+    <h2>The permissions it asks for</h2>
+    <ul>
+      <li><strong>Side panel.</strong> To open the drawer when you click the toolbar icon. This is the whole of the interface.</li>
+      <li><strong>Access to widgets.travelify.io and id.travelify.io.</strong> To fetch your schedulers and your diary as you, and to show the pick-a-time page. These are Travelgenix's own addresses.</li>
+      <li><strong>Gmail.</strong> To place the compose button, as described above. It runs on <code>mail.google.com</code> and on no other site.</li>
+    </ul>
+    <p>It asks for no permission to read your browsing, no permission to run on other websites and no permission to store data.</p>
+
+    <h2>Your data at Travelgenix</h2>
+    <p>The appointments and schedulers shown in the panel live in your Travelgenix account, and are covered by your existing agreement with us. The extension is only a window onto them. Removing the extension removes that window and changes nothing in your account.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy, or about anything the extension does, go to <a href="mailto:support@travelgenix.io">support@travelgenix.io</a>.</p>
+
+    <footer>Travelgenix is a trading name of Agendas Group. This policy covers the Travelgenix Scheduler browser extension only.</footer>
+  </div>
+</div>
+</body>
+</html>

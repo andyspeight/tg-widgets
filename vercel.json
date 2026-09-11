@@ -530,6 +530,10 @@
       "destination": "/book-appointment.html"
     },
     {
+      "source": "/extension-privacy",
+      "destination": "/extension-privacy.html"
+    },
+    {
       "source": "/editor-carousel",
       "destination": "/editor-carousel.html"
     },

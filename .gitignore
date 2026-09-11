@@ -20,3 +20,6 @@ tg-sites/tools/coastwise-seed/font-stmts/
 # Ad hoc browser-check screenshots, written to the repo root by the widget
 # harness. Never part of a change.
 /shot-*.png
+
+# Chrome Web Store upload packages (npm run extension:package)
+build/
