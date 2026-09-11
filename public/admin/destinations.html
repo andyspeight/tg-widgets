@@ -114,6 +114,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .job-h:first-child{border-top:0}
 .job-h-n{font-weight:600;letter-spacing:0;text-transform:none;opacity:.75}
 .job-more{padding:12px 20px;border-top:1px solid var(--bd2);text-align:center}
+.row-why{font-size:12px;color:var(--mt);margin-top:3px;max-width:34ch;margin-left:auto;text-align:right;line-height:1.4}
 .job.is-off:hover{background:transparent}
 .job.is-off .job-t{color:var(--mt)}
 
@@ -416,6 +417,7 @@ a.nm:hover span{text-decoration:underline}
         <button class="tab" role="tab" id="tab-fields" aria-controls="pane-fields" aria-selected="false">Every gap</button>
         <button class="tab" role="tab" id="tab-cont"   aria-controls="pane-cont"   aria-selected="false">By continent</button>
         <button class="tab" role="tab" id="tab-broken" aria-controls="pane-broken" aria-selected="false">To correct<span class="pill" id="n-broken">0</span></button>
+        <button class="tab" role="tab" id="tab-saved" aria-controls="pane-saved" aria-selected="false">Just saved<span class="pill" id="n-saved">0</span></button>
         <button class="tab" role="tab" id="tab-held" aria-controls="pane-held" aria-selected="false">Held aside<span class="pill" id="n-held">0</span></button>
         <button class="tab" role="tab" id="tab-recent" aria-controls="pane-recent" aria-selected="false">Recently added</button>
       </div>
@@ -484,6 +486,16 @@ a.nm:hover span{text-decoration:underline}
         <div class="scroll"><table class="tbl">
           <thead><tr><th>Place</th><th>Type</th><th>Fields to correct</th></tr></thead>
           <tbody id="broken"></tbody>
+        </table></div>
+      </div>
+
+      <div class="pane" id="pane-saved" role="tabpanel" aria-labelledby="tab-saved">
+        <div class="filters">
+          <div class="f-count" style="margin-left:0">Everything the runner has written, most recent first. The value is what actually went into the record.</div>
+        </div>
+        <div class="scroll"><table class="tbl">
+          <thead><tr><th>Place</th><th>Field</th><th>What it wrote</th><th>How it knew</th><th class="r">When</th></tr></thead>
+          <tbody id="saved"></tbody>
         </table></div>
       </div>
 
@@ -1253,9 +1265,56 @@ a.nm:hover span{text-decoration:underline}
     if (job && !canFillPlan(jobPlan())) return '<span class="rowstate">—</span>';
     var st = rowState[r.id];
     if (st === 'queued') return '<span class="rowstate queued">Queued</span>';
-    if (st === 'saved') return '<span class="rowstate saved">Saved</span>';
-    if (st === 'held') return '<span class="rowstate held">Held</span>';
+    if (st === 'saved') {
+      // Show what landed, not just that something did.
+      var wrote = savedValueFor(r.id);
+      return wrote ? valueCell(wrote) : '<span class="rowstate saved">Saved</span>';
+    }
+    if (st === 'held') {
+      var why = heldReasonFor(r.id);
+      return '<span class="rowstate held"' + (why ? ' title="' + esc(why) + '"' : '') + '>Held</span>' +
+        (why ? '<div class="row-why">' + esc(why) + '</div>' : '');
+    }
     return '<button class="btn btn-row" data-fill="' + esc(r.id) + '">Fill</button>';
+  }
+
+  function heldReasonFor(recordId) {
+    if (!R || !R.held || !job) return '';
+    for (var i = 0; i < R.held.length; i++) {
+      var h = R.held[i];
+      if (h.recordId === recordId && h.field === job.label) return h.reason || '';
+    }
+    return '';
+  }
+
+  /* Bring the open job's rows up to date with what actually happened.
+     queueWork marks a row Queued and nothing ever marked it anything else, so
+     Innsbruck sat reading "Queued" long after it had been written. The done
+     and held logs are the truth, so read them back. */
+  function reconcileRows() {
+    if (!job || !R) return;
+    var changed = false;
+    (R.saved || []).forEach(function (d) {
+      if (d.field === job.label && d.recordId && rowState[d.recordId] !== 'saved') {
+        rowState[d.recordId] = 'saved'; changed = true;
+      }
+    });
+    (R.held || []).forEach(function (h) {
+      if (h.field === job.label && h.recordId && !rowState[h.recordId]) {
+        rowState[h.recordId] = 'held'; changed = true;
+      }
+    });
+    if (changed) renderJobRows();
+  }
+
+  /* The value this run wrote for one record, if the status has caught up. */
+  function savedValueFor(recordId) {
+    if (!R || !R.saved || !job) return '';
+    for (var i = 0; i < R.saved.length; i++) {
+      var d = R.saved[i];
+      if (d.recordId === recordId && d.field === job.label) return d.value;
+    }
+    return '';
   }
 
   function jobAlsoCell(r) {
@@ -1327,6 +1386,8 @@ a.nm:hover span{text-decoration:underline}
     R = st;
     renderRun();
     renderHeld();
+    renderSaved();
+    reconcileRows();
     // Not while a job is open: polling would rebuild the button under the
     // cursor every four seconds, and the panel is scrolled away anyway.
     if (D) { renderStatus(); if (!job) renderNext(); }
@@ -1402,6 +1463,45 @@ a.nm:hover span{text-decoration:underline}
         $('live').textContent = String(err.message || err);
       });
     });
+  }
+
+  /* A link when the value is one, plain text otherwise. Nothing reaches
+     innerHTML unescaped, and only http and https are ever made clickable. */
+  function valueCell(v) {
+    var str = v == null ? '' : String(v);
+    if (!str) return '<span class="rowstate">&mdash;</span>';
+    if (/^https?:\/\//i.test(str)) {
+      return '<a class="nm" href="' + esc(str) + '" target="_blank" rel="noopener noreferrer">' +
+        esc(str.replace(/^https?:\/\//i, '').slice(0, 70)) + '</a>';
+    }
+    return '<span class="nm">' + esc(str.length > 90 ? str.slice(0, 90) + '…' : str) + '</span>';
+  }
+
+  /* What it actually wrote. Andy asked to see everything here rather than open
+     Airtable, and "1 saved" without the value is not seeing anything. */
+  function renderSaved() {
+    if (!R) return;
+    var rows = R.saved || [];
+    $('n-saved').textContent = n(R.savedToday || rows.length || 0);
+    if (!rows.length) {
+      $('saved').innerHTML = emptyRow(5, 'Nothing written yet',
+        'Every value the runner writes appears here, with what it wrote and how it knew.');
+      return;
+    }
+    $('saved').innerHTML = rows.map(function (d) {
+      var url = D && D.baseId && d.type && typeOf(d.type) && d.recordId
+        ? 'https://airtable.com/' + D.baseId + '/' + typeOf(d.type).tableId + '/' + d.recordId
+        : null;
+      var place = url
+        ? '<a class="nm" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(d.place || '') + '</a>'
+        : '<span class="nm">' + esc(d.place || '') + '</span>';
+      return '<tr><td>' + place + '</td>' +
+        '<td>' + esc(d.field || '') + '</td>' +
+        '<td>' + valueCell(d.value) + '</td>' +
+        '<td class="held-why">' + esc(d.reason || '') +
+          (d.risk === 'high' ? ' <span class="rowtag fix">worth a look</span>' : '') + '</td>' +
+        '<td class="r held-row">' + esc(new Date(d.at).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })) + '</td></tr>';
+    }).join('');
   }
 
   function renderHeld() {

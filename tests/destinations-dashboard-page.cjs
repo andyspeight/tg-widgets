@@ -141,7 +141,17 @@ async function payload(mod) {
                       roomForPaidWork: true, itemsAffordable: 296 },
             pending: 0, run: {}, heldCount: 1, savedToday: 7, heldToday: 1,
             held: [{ place: 'Oia', field: 'Overview', reason: 'nothing supports the Roman aqueduct',
-                     at: '2026-09-10T14:00:00.000Z' }],
+                     recordId: 'recAi1000000000000', at: '2026-09-10T14:00:00.000Z' }],
+            saved: [{ place: 'Innsbruck', field: 'Wikipedia URL', type: 'airport',
+                      recordId: 'recAi0000000000000',
+                      value: 'https://en.wikipedia.org/wiki/Innsbruck_Airport',
+                      reason: 'two independent sources agreed', risk: 'low',
+                      at: '2026-09-11T14:00:00.000Z' },
+                     { place: 'Oia', field: 'Overview', type: 'resort',
+                       recordId: 'recRe0000000000000',
+                       value: 'A town of white houses stacked down a caldera wall.',
+                       reason: 'both checks passed, but it makes a claim worth spot-checking',
+                       risk: 'high', at: '2026-09-11T13:00:00.000Z' }],
             recent: [], queued: (opts && opts.body ? JSON.parse(opts.body).recordIds || [] : []).length,
           };
           const body = JSON.stringify(payload);
@@ -608,6 +618,42 @@ async function payload(mod) {
     const t0 = data.types.find(x => x.key === typeKey);
     assert.ok(t0, 'unknown type: ' + typeKey);
     assert.ok(t0.fields[Number(idxRaw)], 'no field at index ' + idxRaw + ' on ' + typeKey);
+    $('tab-queue').dispatchEvent(new win.Event('click', { bubbles: true }));
+  });
+
+  console.log('\nSeeing it all without opening Airtable');
+
+  /* Andy, after the first real save: "I want to be able to see everything from
+     this dashboard, not have to go to Airtable." A count of saves with no
+     values in it is not seeing anything. */
+
+  t('the page shows what was actually written, not just that something was', () => {
+    $('tab-saved').dispatchEvent(new win.Event('click', { bubbles: true }));
+    const text = $('saved').textContent;
+    assert.match(text, /Innsbruck/, 'the place');
+    assert.match(text, /Wikipedia URL/, 'the field');
+    assert.match(text, /Innsbruck_Airport/, 'and the value it wrote');
+    assert.match(text, /two independent sources agreed/, 'and how it knew');
+  });
+
+  t('a written link is clickable, and only ever http or https', () => {
+    const a = $('saved').querySelector('a[href^="https://en.wikipedia.org"]');
+    assert.ok(a, 'a URL it wrote should be openable from here');
+    assert.strictEqual(a.getAttribute('rel'), 'noopener noreferrer');
+    [...$('saved').querySelectorAll('a')].forEach(x => {
+      assert.match(x.getAttribute('href'), /^https?:\/\//, 'no javascript: or data: links');
+    });
+  });
+
+  t('a value worth spot-checking is marked as such', () => {
+    const rows = [...$('saved').querySelectorAll('tr')];
+    const risky = rows.find(r => /Oia/.test(r.textContent));
+    assert.ok(risky, 'expected the high-risk row');
+    assert.match(risky.textContent, /worth a look/);
+  });
+
+  t('the saved tab carries a count', () => {
+    assert.strictEqual(txt('n-saved'), '7');
     $('tab-queue').dispatchEvent(new win.Event('click', { bubbles: true }));
   });
 

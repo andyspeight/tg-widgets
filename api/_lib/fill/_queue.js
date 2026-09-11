@@ -277,7 +277,7 @@ export async function getRunState() {
 export async function queueStatus() {
   const [settings, budget, pending, run, held, done, tally] = await Promise.all([
     getSettings(), budgetState(), pendingCount(), getRunState(),
-    heldAside(100), recentDone(50), todayTally(),
+    heldAside(100), recentDone(300), todayTally(),
   ]);
 
   // The most common reason, so the page can say WHY a run saved nothing
@@ -298,6 +298,10 @@ export async function queueStatus() {
     heldCount: held.length,
     held: held.slice(0, 50),
     recent: done.slice(0, 25),
+    // What it actually wrote, so the dashboard can show the values without
+    // anyone opening Airtable. Read deep enough that a run full of skips does
+    // not crowd the saves out of the window.
+    saved: done.filter(d => d.result === 'saved').slice(0, 100),
     // Real counters. These used to be read off the last 50 log entries, so
     // they could never exceed 50 and were not today's totals at all.
     savedToday: tally.saved || 0,
