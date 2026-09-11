@@ -44,8 +44,16 @@ const dayA = onDate(slotsA, weekdayKey);
 ok(dayA.length === 4, 'override day gets exactly the override slots (19:00-21:00 / 30min = 4, got ' + dayA.length + ')');
 ok(dayA.every(s => hm(s.startISO) >= '19:00'), 'no weekly 9-5 slots leak onto the overridden date');
 ok(dayA.some(s => hm(s.startISO) === '19:00'), 'override starts at its own first time');
-const otherWeekday = onDate(slotsA, slotsA.map(s => hostDateKey(s.startISO, TZ)).find(k => k !== weekdayKey && weekdayOfKey(k) >= 1 && weekdayOfKey(k) <= 5));
-ok(otherWeekday.some(s => hm(s.startISO) === '09:00'), 'every other weekday still follows the weekly pattern');
+// Compare against a weekday that is safely in the FUTURE. Today is no good:
+// the generator quite rightly drops times that have already been and gone, so
+// on any run after 09:00 today's first slot is 09:30 and this read as a
+// failure of the weekly pattern. It was a clock bug in the test, not in the
+// product, and it turned the appointment suite red every afternoon. (Found
+// 11 Sep 2026, running at 09:28.)
+const otherWeekday = onDate(slotsA, slotsA.map(s => hostDateKey(s.startISO, TZ))
+  .find(k => k !== weekdayKey && k > keyAhead(1) && weekdayOfKey(k) >= 1 && weekdayOfKey(k) <= 5));
+ok(otherWeekday.length > 0 && otherWeekday.some(s => hm(s.startISO) === '09:00'),
+  'every other weekday still follows the weekly pattern');
 
 // ── Override opens an otherwise-closed day (Saturday) ──
 const cfgB = Object.assign({}, base, { dateOverrides: { [satKey]: [['10:00', '12:00']] } });
