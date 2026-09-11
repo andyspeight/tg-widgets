@@ -14,6 +14,7 @@
  */
 
 import { setNxEx, getString, del } from '../../_redis.js';
+import { APP_HOSTS, PRIMARY_HOST, resolveHost } from '../../_lib/app-hosts.js';
 
 export const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 export const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -22,11 +23,13 @@ export const SIGNIN_PATH = '/signin.html';
 export const DEFAULT_REDIRECT = '/dashboard.html';
 const SAFE_NEXT_PREFIXES = ['/home.html', '/admin', '/dashboard.html'];
 
-// Hosts we serve sign-in on. The OAuth redirect URI is rebuilt from the
-// request host so each host round-trips to itself; every one of these must
-// also be registered as an authorised redirect URI in the Google console.
-const ALLOWED_HOSTS = ['id.travelify.io', 'widgets.travelify.io', 'tg-widgets.vercel.app'];
-const PRIMARY_HOST = 'id.travelify.io';
+// Hosts we serve sign-in on now come from api/_lib/app-hosts.js, the ONE list
+// every OAuth flow reads. The redirect URI is rebuilt from the request host so
+// each host round-trips to itself; every one of them must also be registered
+// as an authorised redirect URI on the SIGN-IN Google client. This list used to
+// live here privately, which let the calendar flow drift away from it (11 Sep
+// 2026 — see app-hosts.js).
+export { APP_HOSTS as ALLOWED_HOSTS, PRIMARY_HOST };
 
 // Sign-in uses its OWN OAuth client, deliberately separate from the calendar
 // integration's GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (api/_lib/calendar/
@@ -43,8 +46,7 @@ export function googleConfig() {
 }
 
 export function requestHost(req) {
-  const h = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase();
-  return ALLOWED_HOSTS.includes(h) ? h : PRIMARY_HOST;
+  return resolveHost(req);
 }
 
 export function redirectUri(req) {

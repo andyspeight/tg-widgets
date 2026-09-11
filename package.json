@@ -24,6 +24,7 @@
     "test:enquiry-options": "node test/enquiry-options-smoke.mjs",
     "test:enquiry-field-options": "node test/enquiry-field-options-smoke.mjs",
     "test:enquiry-freefrom": "node test/enquiry-freefrom-smoke.mjs",
+    "test:calendar-oauth-host": "node test/calendar-oauth-host-smoke.mjs",
     "test:enquiry-luna-comingsoon": "node test/enquiry-luna-comingsoon-smoke.mjs",
     "test:enquiry-luna-work": "node test/enquiry-luna-work-smoke.mjs",
     "test:quote-pdf": "node test/quote-pdf-brand-smoke.mjs",
