@@ -44,6 +44,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   const {
     agreedFields, siteHost, wikiKey, reconcileWikidata,
     warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor,
+    wikiTitle, mergeWikiAnswer, articleUrl,
   } = await load('_source.js');
 
   const F = label => ({ label, kind: 'text' });
@@ -153,6 +154,110 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     const { agreed, why } = agreedFields(OA.LHR, { ...WD.LHR, city: '', ambiguousCity: true });
     assert.strictEqual(agreed.city, undefined);
     assert.match(why.city, /several places/);
+  });
+
+  console.log('\nOne title is not one article');
+
+  /* 11 Sep 2026. OurAirports says "Taipei Songshan Airport" and Wikidata says
+     "Songshan Airport". Those are the same page, one redirecting to the other,
+     and holding them was refusing about one airport in ten over a disagreement
+     that did not exist. Resolving the redirect does not lower the bar: two
+     sources still have to be pointing at the same article. */
+
+  t('a title is read off the URL, underscores and escapes and all', () => {
+    assert.strictEqual(wikiTitle('https://en.wikipedia.org/wiki/Heathrow_Airport'), 'Heathrow Airport');
+    assert.strictEqual(
+      wikiTitle('https://en.wikipedia.org/wiki/Manuel_Crescencio_Rej%C3%B3n_International_Airport'),
+      'Manuel Crescencio Rejón International Airport');
+    assert.strictEqual(wikiTitle('https://example.com/wiki/X'), '', 'only Wikipedia');
+  });
+
+  t('a redirect is followed to the page it lands on', () => {
+    const answer = {
+      query: {
+        redirects: [{ from: 'Taipei Songshan Airport', to: 'Songshan Airport' }],
+        pages: { 322418: { pageid: 322418, title: 'Songshan Airport' } },
+      },
+    };
+    const out = mergeWikiAnswer(answer, ['Taipei Songshan Airport', 'Songshan Airport'], new Map());
+    assert.strictEqual(out.get('Taipei Songshan Airport').pageid, 322418);
+    assert.strictEqual(out.get('Songshan Airport').pageid, 322418,
+      'both titles land on one page, so the two sources agree');
+  });
+
+  t('a title normalised and THEN redirected is still followed', () => {
+    const answer = {
+      query: {
+        normalized: [{ from: 'songshan airport', to: 'Songshan airport' }],
+        redirects: [{ from: 'Songshan airport', to: 'Songshan Airport' }],
+        pages: { 322418: { pageid: 322418, title: 'Songshan Airport' } },
+      },
+    };
+    const out = mergeWikiAnswer(answer, ['songshan airport'], new Map());
+    assert.strictEqual(out.get('songshan airport').pageid, 322418);
+  });
+
+  t('a title with no article is not resolved to anything', () => {
+    const answer = { query: { pages: { '-1': { title: 'No Such Airport Anywhere' } } } };
+    const out = mergeWikiAnswer(answer, ['No Such Airport Anywhere'], new Map());
+    assert.strictEqual(out.get('No Such Airport Anywhere'), undefined,
+      'a missing page is reported as pageid -1 and must not count');
+  });
+
+  t('the canonical article URL is built from the page it resolved to', () => {
+    assert.strictEqual(articleUrl('Songshan Airport'), 'https://en.wikipedia.org/wiki/Songshan_Airport');
+    assert.match(articleUrl('Mérida International Airport'), /M%C3%A9rida_International_Airport$/);
+  });
+
+  await at('two titles on one page are written, as the canonical URL', async () => {
+    _resetSourceCache();
+    const oa = { ...OA.INN, wiki: 'https://en.wikipedia.org/wiki/Taipei_Songshan_Airport' };
+    const wd = { ...WD.INN, wiki: 'https://en.wikipedia.org/wiki/Songshan_Airport' };
+    await warmAirports(['INN'], {
+      cacheGet: async () => null, cacheSet: async () => {},
+      ourAirports: async () => ({ reachable: true, map: new Map([['INN', oa]]) }),
+      wikidata: async () => ({ reachable: true, map: new Map([['INN', wd]]) }),
+      resolveWiki: async () => new Map([
+        ['Taipei Songshan Airport', { pageid: 322418, title: 'Songshan Airport' }],
+        ['Songshan Airport', { pageid: 322418, title: 'Songshan Airport' }],
+      ]),
+    });
+    const r = sourceAirportField({ field: F('Wikipedia URL'), iata: 'INN' });
+    assert.strictEqual(r.ok, true, r.why);
+    assert.strictEqual(r.value, 'https://en.wikipedia.org/wiki/Songshan_Airport');
+  });
+
+  await at('two titles on two different pages are still held', async () => {
+    _resetSourceCache();
+    const oa = { ...OA.INN, wiki: 'https://en.wikipedia.org/wiki/Innsbruck_Airport' };
+    const wd = { ...WD.INN, wiki: 'https://en.wikipedia.org/wiki/Innsbruck' };
+    await warmAirports(['INN'], {
+      cacheGet: async () => null, cacheSet: async () => {},
+      ourAirports: async () => ({ reachable: true, map: new Map([['INN', oa]]) }),
+      wikidata: async () => ({ reachable: true, map: new Map([['INN', wd]]) }),
+      resolveWiki: async () => new Map([
+        ['Innsbruck Airport', { pageid: 1, title: 'Innsbruck Airport' }],
+        ['Innsbruck', { pageid: 2, title: 'Innsbruck' }],
+      ]),
+    });
+    const r = sourceAirportField({ field: F('Wikipedia URL'), iata: 'INN' });
+    assert.strictEqual(r.ok, false, 'an airport and its city are two articles, not one');
+    assert.match(r.why, /two different articles/);
+  });
+
+  await at('a resolver that cannot answer leaves the field held, not guessed', async () => {
+    _resetSourceCache();
+    const oa = { ...OA.INN, wiki: 'https://en.wikipedia.org/wiki/Taipei_Songshan_Airport' };
+    const wd = { ...WD.INN, wiki: 'https://en.wikipedia.org/wiki/Songshan_Airport' };
+    await warmAirports(['INN'], {
+      cacheGet: async () => null, cacheSet: async () => {},
+      ourAirports: async () => ({ reachable: true, map: new Map([['INN', oa]]) }),
+      wikidata: async () => ({ reachable: true, map: new Map([['INN', wd]]) }),
+      resolveWiki: async () => new Map(),          // Wikipedia did not answer
+    });
+    const r = sourceAirportField({ field: F('Wikipedia URL'), iata: 'INN' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /different articles/);
   });
 
   console.log('\nURL folding');

@@ -25,8 +25,10 @@
  *     record already carries, so a record without one cannot be verified at all.
  *
  * MEASURED YIELD over 40 real records from the base, 11 Sep 2026:
- *   coordinates 40/40, country 38/40, Wikipedia URL 35/40,
+ *   coordinates 40/40, country 38/40, Wikipedia URL 40/40,
  *   official website 18/40, city served 11/40.
+ * Wikipedia URL was 36/40 until redirects were resolved: every one of the four
+ * misses was one article under two names, not two articles.
  * The website misses are genuine disagreements between two real sites. The city
  * misses are Wikidata answering a different question: P131 gives the
  * administrative area (Heathrow sits in the London Borough of Hillingdon), not
@@ -43,6 +45,7 @@ import { getJson, setJsonEx, configured as redisConfigured } from '../../_redis.
 
 const OURAIRPORTS_CSV = 'https://davidmegginson.github.io/ourairports-data/airports.csv';
 const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
+const WIKIPEDIA_API = 'https://en.wikipedia.org/w/api.php';
 const COORD_TOLERANCE_KM = 50;
 const UA = 'LunaBrain/1.0 (+https://travelify.io)';
 const CACHE_KEY = iata => 'dfill:src:air:' + iata;
@@ -78,6 +81,16 @@ export function siteHost(url) {
   try {
     const h = new URL(String(url).trim()).hostname.toLowerCase();
     return h.replace(/^www\./, '');
+  } catch { return ''; }
+}
+
+/** The article title from an en.wikipedia URL, spaces not underscores. Pure. */
+export function wikiTitle(url) {
+  try {
+    const u = new URL(String(url).trim());
+    if (!/^en\.wikipedia\.org$/i.test(u.hostname)) return '';
+    const m = /^\/wiki\/(.+)$/.exec(u.pathname);
+    return m ? decodeURIComponent(m[1]).replace(/_/g, ' ') : '';
   } catch { return ''; }
 }
 
@@ -120,6 +133,8 @@ function countryName(iso) {
 export function agreedFields(oa, wd) {
   const agreed = {};
   const why = {};
+  // Values the sources may yet agree on, once something is resolved.
+  const pending = {};
   const note = (key, value, reason) => {
     if (value !== undefined && value !== null && value !== '') agreed[key] = value;
     else why[key] = reason;
@@ -171,7 +186,18 @@ export function agreedFields(oa, wd) {
     !oaWiki || !wdWiki ? 'only one source has a Wikipedia article'
       : 'they name different articles');
 
-  return { agreed, why };
+  // Two DIFFERENT TITLES are not necessarily two different articles. One nearly
+  // always redirects to the other: OurAirports says Taipei Songshan Airport and
+  // Wikidata says Songshan Airport, and Wikipedia resolves both to one page. On
+  // 11 Sep that artefact was holding 1 in 10 airports for a disagreement that
+  // did not exist. Ask Wikipedia which page each title lands on, and if it is
+  // the same page the two sources agree.
+  if (!wikiAgree && oaWiki && wdWiki) {
+    const a = wikiTitle(oa.wiki), b = wikiTitle(wd.wiki);
+    if (a && b) pending.wiki = [a, b];
+  }
+
+  return { agreed, why, pending };
 }
 
 /* ------------------------------------------------------------------ *
@@ -329,6 +355,63 @@ async function wikidata(iatas, fetchImpl) {
   } finally { clearTimeout(t); }
 }
 
+/**
+ * Ask Wikipedia which page each title actually lands on, following redirects.
+ * @returns {Promise<Map<string, {pageid:number, title:string}>>} keyed by the title asked for
+ */
+async function resolveWikiTitles(titles, fetchImpl) {
+  const want = [...new Set(titles.filter(Boolean))];
+  const out = new Map();
+  // Anonymous callers may ask about 50 titles at a time.
+  for (let i = 0; i < want.length; i += 40) {
+    const chunk = want.slice(i, i + 40);
+    const url = WIKIPEDIA_API + '?action=query&redirects=1&format=json&origin=*&titles=' +
+      encodeURIComponent(chunk.join('|'));
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 20000);
+    try {
+      const r = await (fetchImpl || fetch)(url, { signal: ctrl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } });
+      if (!r || !r.ok) continue;
+      mergeWikiAnswer(await r.json(), chunk, out);
+    } catch { /* leave them unresolved; they simply stay held */ }
+    finally { clearTimeout(t); }
+  }
+  return out;
+}
+
+/**
+ * Fold one API answer into the title -> page map. Pure, so the redirect logic
+ * is testable without the network.
+ */
+export function mergeWikiAnswer(json, asked, out) {
+  const q = (json && json.query) || {};
+  const alias = new Map();                       // what we asked -> what it became
+  for (const n of q.normalized || []) alias.set(n.from, n.to);
+  for (const r of q.redirects || []) alias.set(r.from, r.to);
+
+  const byTitle = new Map();
+  for (const pid of Object.keys(q.pages || {})) {
+    const page = q.pages[pid];
+    if (!page || !page.title || Number(pid) < 0) continue;   // -1 is "no such page"
+    byTitle.set(page.title, { pageid: Number(pid), title: page.title });
+  }
+
+  for (const title of asked) {
+    // A title can be normalised and THEN redirected, so follow the chain.
+    let cur = title;
+    for (let hop = 0; hop < 4 && alias.has(cur); hop++) cur = alias.get(cur);
+    const hit = byTitle.get(cur);
+    if (hit) out.set(title, hit);
+  }
+  return out;
+}
+
+/** The canonical article URL for a resolved page. Pure. */
+export function articleUrl(title) {
+  return 'https://en.wikipedia.org/wiki/' + encodeURIComponent(String(title).replace(/ /g, '_'))
+    .replace(/%2F/g, '/').replace(/%3A/g, ':');
+}
+
 /* ------------------------------------------------------------------ *
  * The batch warm, and the per-field answer
  * ------------------------------------------------------------------ */
@@ -389,14 +472,47 @@ export async function warmAirports(iataList, deps = {}) {
       if (!cv.verified) {
         pair = { ok: false, reason: 'the two sources do not agree this is the same airport: ' + cv.conflicts.join(', ') };
       } else {
-        const { agreed, why } = agreedFields(oa, wd);
+        const { agreed, why, pending } = agreedFields(oa, wd);
         pair = {
-          ok: true, agreed, why,
+          ok: true, agreed, why, pending,
           sources: { one: OURAIRPORTS_CSV, two: wd.entity || 'https://www.wikidata.org/' },
         };
       }
     }
     _pairs.set(iata, pair);
+  }
+
+  // ONE TITLE IS NOT ONE ARTICLE. Where the two sources named different
+  // Wikipedia titles, ask Wikipedia which page each lands on. Nearly always it
+  // is the same page under a redirect, and holding those was refusing about one
+  // airport in ten over a disagreement that did not exist. This resolves the
+  // artefact; it does not lower the bar. Two sources still have to be pointing
+  // at the same article.
+  const titles = [];
+  for (const iata of missing) {
+    const p = _pairs.get(iata);
+    if (p && p.ok && p.pending && p.pending.wiki) titles.push(p.pending.wiki[0], p.pending.wiki[1]);
+  }
+  if (titles.length) {
+    const resolved = await (deps.resolveWiki || resolveWikiTitles)(titles, deps.fetchImpl);
+    for (const iata of missing) {
+      const p = _pairs.get(iata);
+      if (!p || !p.ok || !p.pending || !p.pending.wiki) continue;
+      const a = resolved.get(p.pending.wiki[0]);
+      const b = resolved.get(p.pending.wiki[1]);
+      if (a && b && a.pageid === b.pageid) {
+        p.agreed.wiki = articleUrl(a.title);
+        delete p.why.wiki;
+      } else if (a && b) {
+        p.why.wiki = 'they name two different articles, not one under another name';
+      }
+      delete p.pending;
+    }
+  }
+
+  for (const iata of missing) {
+    const pair = _pairs.get(iata);
+    if (!pair) continue;
     // A settled verdict is cached, agreement or not: re-asking a source that
     // has never heard of a code, once a minute, helps nobody. A transient
     // failure never reaches here, so it is never cached.
