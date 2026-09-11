@@ -720,6 +720,12 @@ a.nm:hover span{text-decoration:underline}
   function bestJob() {
     var open = allJobs().filter(function (j) { return canFillPlan(j.plan); });
     open.sort(function (a, b) {
+      // Free before paid. Not thrift: it is the order the runner itself
+      // believes in. A record with its facts filled gives the writer something
+      // to write from, and a record without them is refused before it costs
+      // anything. So facts first, editorial second.
+      var af = isFreePlan(a.plan), bf = isFreePlan(b.plan);
+      if (af !== bf) return af ? -1 : 1;
       var ae = a.group === 'Editorial', be = b.group === 'Editorial';
       if (ae !== be) return ae ? -1 : 1;
       if ((a.tier === 'core') !== (b.tier === 'core')) return a.tier === 'core' ? -1 : 1;
@@ -735,11 +741,17 @@ a.nm:hover span{text-decoration:underline}
 
     var per = (R && R.budget && R.budget.perItemUsd) || 0;
     var free = isFreePlan(j.plan);
-    var price = free
-      ? 'It costs nothing: the answers come from records we already hold.'
-      : per
-        ? 'It costs about ' + money(per * j.gap) + ' and runs on its own.'
-        : 'It runs on its own once you start it.';
+    // Three different kinds of free, and saying the wrong one is a lie about
+    // where the answer came from. A derived value is worked out from what we
+    // already hold. A fact is two outside datasets agreeing.
+    var price = j.plan === 'fact'
+      ? 'It costs nothing: two independent public datasets have to give the same ' +
+        'answer, and anything they disagree on is left for you.'
+      : free
+        ? 'It costs nothing: the answers come from records we already hold.'
+        : per
+          ? 'It costs about ' + money(per * j.gap) + ' and runs on its own.'
+          : 'It runs on its own once you start it.';
 
     // The plain-English hint reads far better than the column name. "Write
     // three to six highlight cards" is a sentence. "Write the Highlights JSON"
@@ -747,15 +759,16 @@ a.nm:hover span{text-decoration:underline}
     var what = j.hint
       ? j.hint.charAt(0).toLowerCase() + j.hint.slice(1)
       : 'the ' + j.label;
+    var verb = j.plan === 'fact' ? 'Verify ' : j.plan === 'derive' ? 'Work out ' : 'Write ';
 
     el.innerHTML =
       '<div class="next-l">Do this next</div>' +
-      '<div class="next-t">' + (free ? 'Work out ' : 'Write ') +
+      '<div class="next-t">' + verb +
         esc(what) + ' for ' + n(j.gap) + ' ' + esc(TYPE_PLURAL[j.type]) + '</div>' +
       '<div class="next-s">That is the <b>' + esc(j.label) + '</b> field. ' + esc(price) +
-        ' Every answer is checked twice before it saves. Anything doubtful is held for you ' +
-        'to read rather than written, and nothing already filled is touched. You will see ' +
-        'the whole list before anything starts.</div>' +
+        (free ? ' ' : ' Every answer is checked twice before it saves. ') +
+        'Anything doubtful is held for you to read rather than written, and nothing already ' +
+        'filled is touched. You will see the whole list before anything starts.</div>' +
       '<div class="next-go"><button class="btn btn-do" id="next-go">Show me this job</button></div>';
 
     $('next-go').addEventListener('click', function () { openJob(j.type, j.idx); });

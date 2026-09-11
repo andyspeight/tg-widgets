@@ -379,6 +379,23 @@ async function payload(mod) {
     assert.ok($('next').querySelector('#next-go'), 'it needs a button to act on');
   });
 
+  t('it recommends free work before work that costs money', () => {
+    // Facts first, editorial second, which is the order the runner itself
+    // enforces: a record with nothing on it is refused before it costs
+    // anything, so filling the facts is what makes the writing possible.
+    const s = $('next').querySelector('.next-s').textContent;
+    assert.match(s, /costs nothing/,
+      'with free verified work outstanding, that is what to do next: ' + s.slice(0, 120));
+    // And it must say where a free answer actually comes from. Two outside
+    // datasets agreeing is not "records we already hold".
+    const title = $('next').querySelector('.next-t').textContent;
+    if (/^Verify/.test(title)) {
+      assert.match(s, /two independent public datasets/,
+        'a two-source check must not claim the answer came from our own records');
+      assert.ok(!/records we already hold/.test(s));
+    }
+  });
+
   t('what it recommends is work the runner can actually do', () => {
     const title = $('next').querySelector('.next-t').textContent;
     assert.ok(!/Official Website|Image URLs|IATA|Latitude|Longitude|Wikipedia/.test(title),
@@ -387,7 +404,8 @@ async function payload(mod) {
 
   t('the recommendation says what will happen, not just what to press', () => {
     const s = $('next').querySelector('.next-s').textContent;
-    assert.match(s, /checked twice/, 'it should say the answers are checked');
+    assert.match(s, /checked twice|two independent public datasets|records we already hold/,
+      'it should say where the answer comes from and that it is checked');
     assert.match(s, /held for you/, 'it should say what happens to a doubtful answer');
     assert.match(s, /nothing already filled is touched/i, 'it should say what is safe');
   });
