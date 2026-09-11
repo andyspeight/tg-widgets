@@ -24,13 +24,21 @@ showing its name, its length and which scheduler it belongs to. Per card:
 
 A search box appears once you have more than four meeting types.
 
-**Coming up tab.** Your next two weeks of booked appointments at a glance, with
-a link through to `/bookings` to reschedule or cancel.
+**Coming up tab.** Your next two weeks at a glance, with a link through to
+`/bookings` to reschedule or cancel.
+
+It is YOUR diary. The events come from the calendar you connected yourself
+(`/api/appointment/agenda`), and the scheduler bookings come from schedulers
+you own (`/api/appointment/list?scope=self`). Until 11 Sep 2026 a calendar was
+held once per client, so a second admin on an agency account opened this panel
+and was shown the first one's whole diary. Both ends are now scoped to the
+person, and connecting your calendar can no longer take over a colleague's. See
+the ownership table in `CALENDAR-OAUTH.md`.
 
 **Header.** Refresh, a link to your meetings, and a link to the dashboard. The
 signed-in account is shown underneath. Staff acting as a client get a standing
-warning strip, because the diary below then belongs to that client and not to
-them.
+warning strip, because the schedulers listed then belong to that client and not
+to them.
 
 ## Gmail compose button
 

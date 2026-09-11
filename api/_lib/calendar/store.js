@@ -5,10 +5,27 @@
  * rest with the shared AES helper (api/_crypto.js, key TG_ENCRYPTION_KEY).
  *
  * Keys:
- *   apt:cal:<clientRecordId>      → connection { provider, email, calendarId, refreshTokenEnc, scope, connectedAt }
+ *   apt:cal:u:<ownerEmail>       → that PERSON's connection (the one that matters)
+ *   apt:cal:<clientRecordId>     → the agency default, set by whoever connected first
  *   apt:booking:<ref>            → booking record
  *   apt:manage:<manageToken>     → ref (string)
  *   apt:hold:<clientRecordId>:<startISO> → ref (double-booking guard, even without a connected calendar)
+ *
+ * WHO A CALENDAR BELONGS TO (11 Sep 2026). There used to be one connection per
+ * CLIENT, so every person in an agency shared it. Andy connected his Google
+ * Calendar and Jess, a second admin on the same client, opened the extension
+ * and was shown his diary. Worse was waiting: had she connected hers, it would
+ * have replaced his, and his own bookings would have started landing in her
+ * calendar.
+ *
+ * A calendar belongs to a PERSON, so it is now keyed by their email. The client
+ * key stays as the agency default for a widget whose owner has not connected
+ * one of their own, and a second person connecting no longer overwrites it.
+ *
+ * Pass ownerEmail on every read that has a person in hand: the signed-in user
+ * for their own diary, the widget's ClientEmail for a booking. With an
+ * ownerEmail the agency default is only ever returned to the person it belongs
+ * to, so nobody is shown a calendar that is not theirs.
  *
  * If Redis is not configured every read returns null and every write returns
  * false, so callers degrade gracefully (the widget falls back to its
@@ -22,7 +39,29 @@ import { getProvider } from './providers.js';
 
 export function storageReady() { return redisConfigured(); }
 
+const normEmail = (v) => String(v == null ? '' : v).toLowerCase().trim();
 const connKey = (clientId) => 'apt:cal:' + clientId;
+const userConnKey = (email) => 'apt:cal:u:' + normEmail(email);
+
+/**
+ * Is this connection this person's? The recorded owner decides it. A
+ * connection saved before owners were recorded has none, so fall back to the
+ * address of the Google or Microsoft account itself: someone who connected the
+ * calendar of the account they sign in with keeps working without reconnecting,
+ * and nobody else is handed it.
+ */
+function ownsConnection(conn, ownerEmail) {
+  const who = normEmail(ownerEmail);
+  if (!conn || !who) return false;
+  const recorded = normEmail(conn.ownerEmail);
+  if (recorded) return recorded === who;
+  return normEmail(conn.email) === who;
+}
+
+function liveConn(rec) {
+  if (!rec || rec.revoked || !rec.refreshTokenEnc) return null;
+  return rec;
+}
 const bookingKey = (ref) => 'apt:booking:' + ref;
 const manageKey = (token) => 'apt:manage:' + token;
 const holdKey = (clientId, startISO) => 'apt:hold:' + clientId + ':' + startISO;
@@ -31,42 +70,83 @@ const ALL_INDEX = 'apt:index:all';
 const dayCountKey = (clientId, dayKey) => 'apt:count:' + clientId + ':' + dayKey;
 
 // ── Connections ────────────────────────────────────────────
-export async function saveConnection(clientId, conn) {
-  if (!clientId) return false;
+export async function saveConnection(clientId, conn, ownerEmail) {
+  const owner = normEmail(ownerEmail || conn.ownerEmail);
+  if (!clientId && !owner) return false;
   const rec = {
     provider: conn.provider || 'google',
     email: conn.email || '',
+    ownerEmail: owner,
     calendarId: conn.calendarId || 'primary',
     refreshTokenEnc: conn.refreshToken ? encrypt(conn.refreshToken) : (conn.refreshTokenEnc || ''),
     scope: conn.scope || '',
     connectedAt: conn.connectedAt || new Date().toISOString(),
   };
-  return setJson(connKey(clientId), rec);
+
+  // The person's own connection is the one that matters.
+  let ok = true;
+  if (owner) ok = await setJson(userConnKey(owner), rec);
+
+  // The agency default is claimed by the first person to connect and is never
+  // taken from them by the next. Without this, the second person in an agency
+  // would silently redirect the first person's bookings into their calendar.
+  if (clientId) {
+    const existing = liveConn(await getJson(connKey(clientId)));
+    if (!existing || !owner || ownsConnection(existing, owner)) {
+      const okClient = await setJson(connKey(clientId), rec);
+      if (!owner) ok = okClient;
+    }
+  }
+  return ok;
 }
 
-export async function getConnection(clientId) {
+/**
+ * The calendar to use for this person. With an ownerEmail: their own
+ * connection, or the agency default when it is theirs, and otherwise nothing.
+ * Without one, the agency default, which is what the older callers expect.
+ */
+export async function getConnection(clientId, ownerEmail) {
+  const owner = normEmail(ownerEmail);
+  if (owner) {
+    const mine = liveConn(await getJson(userConnKey(owner)));
+    if (mine) return mine;
+  }
   if (!clientId) return null;
-  const rec = await getJson(connKey(clientId));
-  if (!rec || rec.revoked || !rec.refreshTokenEnc) return null;
-  return rec;
+  const shared = liveConn(await getJson(connKey(clientId)));
+  if (!shared) return null;
+  if (owner && !ownsConnection(shared, owner)) return null;
+  return shared;
 }
 
-export async function deleteConnection(clientId) {
-  if (!clientId) return false;
-  return setJson(connKey(clientId), { revoked: true, revokedAt: new Date().toISOString() });
+export async function deleteConnection(clientId, ownerEmail) {
+  const owner = normEmail(ownerEmail);
+  const gone = { revoked: true, revokedAt: new Date().toISOString() };
+  let ok = true;
+  if (owner) ok = await setJson(userConnKey(owner), gone);
+  // Only clear the agency default if it is this person's to clear.
+  if (clientId) {
+    const shared = liveConn(await getJson(connKey(clientId)));
+    if (shared && (!owner || ownsConnection(shared, owner))) {
+      const okClient = await setJson(connKey(clientId), gone);
+      if (!owner) ok = okClient;
+    }
+  }
+  return ok;
 }
 
-export async function isConnected(clientId) {
-  const c = await getConnection(clientId);
+export async function isConnected(clientId, ownerEmail) {
+  const c = await getConnection(clientId, ownerEmail);
   return !!c;
 }
 
 /**
- * Resolve a usable access token for a client's connected calendar.
- * Returns { accessToken, calendarId, email, provider } or null.
+ * Resolve a usable access token for a connected calendar. Pass ownerEmail so
+ * the token can only ever be the right person's: the signed-in user for their
+ * own diary, the widget's ClientEmail for availability and bookings.
+ * Returns { accessToken, calendarId, email, ownerEmail, provider } or null.
  */
-export async function getAccessToken(clientId) {
-  const conn = await getConnection(clientId);
+export async function getAccessToken(clientId, ownerEmail) {
+  const conn = await getConnection(clientId, ownerEmail);
   if (!conn) return null;
   let refreshToken;
   try { refreshToken = decrypt(conn.refreshTokenEnc); } catch (e) { return null; }
@@ -74,7 +154,7 @@ export async function getAccessToken(clientId) {
     const provider = getProvider(conn.provider);
     const tok = await provider.refresh(refreshToken);
     if (!tok || !tok.access_token) return null;
-    return { accessToken: tok.access_token, calendarId: conn.calendarId, email: conn.email, provider: conn.provider || 'google' };
+    return { accessToken: tok.access_token, calendarId: conn.calendarId, email: conn.email, ownerEmail: conn.ownerEmail || '', provider: conn.provider || 'google' };
   } catch (e) { return null; }
 }
 

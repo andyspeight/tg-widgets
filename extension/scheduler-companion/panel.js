@@ -174,7 +174,7 @@ function renderAgenda() {
 
   let events = agenda.connected ? (agenda.events || []) : [];
   if (!agenda.connected) {
-    html += '<div class="hint-card"><b>No calendar connected.</b> Connect Google or Microsoft in the scheduler editor and your whole diary shows here. Until then this lists scheduler bookings only.</div>';
+    html += '<div class="hint-card"><b>No calendar connected.</b> Connect your own Google or Microsoft calendar in the scheduler editor and your whole diary shows here. Everyone connects their own, so you only ever see yours. Until then this lists your scheduler bookings only.</div>';
     events = (bookings || []).map((b) => ({
       title: (b.eventLabel || 'Appointment') + (b.name ? ' — ' + b.name : ''),
       startISO: b.startISO, endISO: b.endISO, allDay: false, tg: true,
@@ -335,9 +335,12 @@ async function load() {
   meetings = flat;
 
   // Diary + scheduler bookings for the agenda tab (fail-soft, in parallel).
+  // scope=self, because this panel is one person's diary. Without it the list
+  // is the whole agency's and a colleague's meetings showed up in it (reported
+  // 11 Sep 2026). The agenda is already the caller's own calendar server-side.
   const [agendaRes, listRes] = await Promise.all([
     fetch(API + '/api/appointment/agenda?days=14', { credentials: 'include' }).then((r) => r.ok ? r.json() : null).catch(() => null),
-    fetch(API + '/api/appointment/list?days=14', { credentials: 'include' }).then((r) => r.ok ? r.json() : null).catch(() => null),
+    fetch(API + '/api/appointment/list?days=14&scope=self', { credentials: 'include' }).then((r) => r.ok ? r.json() : null).catch(() => null),
   ]);
   agenda = agendaRes && agendaRes.ok !== false ? agendaRes : { connected: false, events: [] };
   bookings = listRes && Array.isArray(listRes.bookings)

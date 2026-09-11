@@ -1,7 +1,15 @@
 /**
- * GET /api/appointment/list?from=&to=&days=
- * Auth required. Returns the signed-in client's bookings in a time window
- * (default: now .. +60 days), newest-soonest first. Read-only agency view.
+ * GET /api/appointment/list?from=&to=&days=&scope=
+ * Auth required. Returns bookings in a time window (default: now .. +60 days),
+ * soonest first. Read-only.
+ *
+ * By default this is the agency view: every booking for the client, which is
+ * what the bookings page wants. ?scope=self narrows it to schedulers the
+ * CALLER owns, which is what a personal tool wants — the browser extension
+ * asks for it, so one person's panel no longer lists a colleague's meetings
+ * (reported 11 Sep 2026). It mirrors ?scope=self on /api/widget-list, and
+ * matches on the same field: the widget's ClientEmail, recorded on every
+ * booking when it is made.
  */
 import { requireAuth } from '../_lib/auth/middleware.js';
 import { listBookings, storageReady } from '../_lib/calendar/store.js';
@@ -30,9 +38,15 @@ export default async function handler(req, res) {
   const days = Math.max(1, Math.min(180, Number(q.days) || 60));
   const toMs = q.to && Number.isFinite(Date.parse(q.to)) ? Date.parse(q.to) : (fromMs + days * 86400000);
 
+  const self = String(q.scope || '').toLowerCase() === 'self';
+  const me = String(ctx.email || '').toLowerCase().trim();
+
   try {
-    const bookings = await listBookings(ctx.clientRecordId, fromMs, toMs);
-    return res.status(200).json({ ok: true, storage: true, bookings: bookings.map(view) });
+    let bookings = await listBookings(ctx.clientRecordId, fromMs, toMs);
+    // Fail CLOSED: asked for my own and we cannot tell who I am, show none
+    // rather than everyone's.
+    if (self) bookings = me ? bookings.filter((b) => String(b.clientEmail || '').toLowerCase().trim() === me) : [];
+    return res.status(200).json({ ok: true, storage: true, scope: self ? 'self' : 'client', bookings: bookings.map(view) });
   } catch (e) {
     return res.status(500).json({ error: 'Could not load bookings' });
   }
