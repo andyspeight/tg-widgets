@@ -11,6 +11,20 @@ do it. See the note at the end for the one thing that went with it.
 
 ## What the panel does
 
+**Whose schedulers.** Yours, not the agency's. The panel used to ask for the
+client's whole widget list and merge your own on top, so two people working in
+one agency account each saw the other's meeting types on the first screen this
+panel opens. Reported three times as "it is showing my meetings" (11 Sep 2026),
+and it was the Meetings tab, never the diary. The panel now asks for
+`?scope=self`, AND the server recognises this extension by its `Sec-Fetch-Site`
+header and scopes to the caller either way, so a copy installed before 0.5.4 is
+fixed too.
+
+Chrome sends no `Origin` and no `Referer` for an extension's fetch to a host it
+holds permission for. That was verified in Chromium rather than assumed, which
+is why the header rule uses `Sec-Fetch-Site: none` with `Sec-Fetch-Dest: empty`:
+the browser sets both, and page script cannot forge them.
+
 **Meetings tab.** One card per meeting type across all your schedulers, each
 showing its name, its length and which scheduler it belongs to. Per card:
 

@@ -1,7 +1,7 @@
 # Chrome Web Store listing — Travelgenix Scheduler
 
 Everything the submission form asks for, written out ready to paste. Work down
-it in order. Written 11 Sep 2026 for v0.5.3.
+it in order. Written 11 Sep 2026 for v0.5.4.
 
 Upload at <https://chrome.google.com/webstore/devconsole>. There is a one-off
 $5 developer registration fee, payable once per Google account, not per
@@ -13,7 +13,7 @@ extension. The same package and copy work for Microsoft Edge's store.
 
 | You need | Where it is |
 |---|---|
-| The upload package | `build/scheduler-companion-0.5.3.zip`, from `npm run extension:package` |
+| The upload package | `build/scheduler-companion-0.5.4.zip`, from `npm run extension:package` |
 | The screenshot (1280x800) | `build/store-screenshot-1280x800.png`, from `npm run extension:screenshot` |
 | The 128px icon | Already inside the package. The store reads it automatically |
 | The privacy policy URL | <https://widgets.travelify.io/extension-privacy> |
@@ -30,7 +30,7 @@ Upload the zip. Everything on this page comes from `manifest.json` and needs no
 editing:
 
 - **Name**: Travelgenix Scheduler
-- **Version**: 0.5.3
+- **Version**: 0.5.4
 
 ---
 
