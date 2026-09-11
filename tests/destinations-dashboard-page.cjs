@@ -621,6 +621,80 @@ async function payload(mod) {
     $('tab-queue').dispatchEvent(new win.Event('click', { bubbles: true }));
   });
 
+  console.log('\nReporting on the run you just started');
+
+  /* 11 Sep 2026. Andy filled three Hero Intros. All three were held, and the
+     run bar said "Today: 1 saved, 6 held" because one unrelated save that
+     morning hid the failure. A run has to be reported as a run. */
+
+  t('a run that saved nothing says so, whatever else happened today', async () => {
+    const d3 = new JSDOM(fs.readFileSync(HTML, 'utf8'), {
+      runScripts: 'dangerously',
+      url: 'https://tg-widgets.vercel.app/admin/destinations',
+      virtualConsole: new (require('jsdom').VirtualConsole)(),
+      beforeParse(w) {
+        w.Element.prototype.scrollIntoView = function () {};
+        const now = new Date().toISOString();
+        w.fetch = (url, opts) => {
+          if (String(url).includes('destinations-fill')) {
+            if (opts && opts.body) {
+              const b = JSON.parse(opts.body);
+              if (b.recordIds) w.__queuedIds = b.recordIds;
+            }
+            const p = {
+              settings: { capUsd: 10, running: false },
+              budget: { capUsd: 10, spentUsd: 4.14, remainingUsd: 5.86, perItemUsd: 0.0253,
+                        roomForPaidWork: true, itemsAffordable: 231 },
+              pending: 0, run: {},
+              // One save earlier today, on a different field. It must not mask
+              // the three holds from the run just started.
+              savedToday: 1, heldToday: 6, heldCount: 3,
+              saved: [{ place: 'Innsbruck', field: 'Wikipedia URL', type: 'airport',
+                        recordId: 'recAi0000000000000', value: 'https://en.wikipedia.org/wiki/X',
+                        reason: 'two independent sources agreed', at: '2026-09-11T09:00:00.000Z' }],
+              held: (w.__queuedIds || []).slice(0, 3).map((id, i) => ({
+                place: ['Estonia', 'Serbia', 'Ethiopia'][i], field: 'Hero Intro', type: 'country',
+                recordId: id,
+                reason: 'there is almost nothing on this record to write from', at: now })),
+              recent: [],
+            };
+            const body = JSON.stringify(p);
+            return Promise.resolve({ ok: true, status: 200,
+              text: () => Promise.resolve(body), json: () => Promise.resolve(p) });
+          }
+          return Promise.resolve({ ok: true, status: 200,
+            text: () => Promise.resolve(JSON.stringify(data)), json: () => Promise.resolve(data) });
+        };
+        w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+        w.confirm = () => true; w.alert = () => {};
+        w.URL.createObjectURL = () => 'blob:mock'; w.URL.revokeObjectURL = () => {};
+      },
+    });
+    await new Promise(r => d3.window.addEventListener('load', r));
+    await new Promise(r => setTimeout(r, 80));
+    const dd = d3.window.document;
+
+    // Open the Hero Intro job specifically, the way Andy did. It is a depth
+    // field, so it needs the list expanded first.
+    const more = dd.getElementById('jobs-more');
+    if (more) more.dispatchEvent(new d3.window.Event('click', { bubbles: true }));
+    const heroRow = [...dd.querySelectorAll('#jobs .job:not(.is-off)')]
+      .find(r => /Hero Intro/.test(r.querySelector('.job-t').textContent));
+    assert.ok(heroRow, 'the fixture should offer a Hero Intro job');
+    heroRow.querySelector('[data-job]').dispatchEvent(new d3.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 100));
+    assert.match(dd.getElementById('jv-title').textContent, /Hero Intro/);
+    const doAll = dd.getElementById('jv-doall');
+    doAll.dispatchEvent(new d3.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 200));
+
+    const bar = dd.getElementById('run-l').textContent;
+    assert.match(bar, /saved nothing/i,
+      'one save this morning must not hide three holds this afternoon: ' + bar);
+    assert.match(bar, /nothing on this record to write from/i, 'and it should say why');
+    assert.ok(!/Nothing running\./.test(bar), 'a failed run is not "nothing running"');
+  });
+
   console.log('\nSeeing it all without opening Airtable');
 
   /* Andy, after the first real save: "I want to be able to see everything from

@@ -237,11 +237,21 @@ export function estimatePence(field, typeKey) {
  * @returns {{ok:true} | {ok:false, why:string}}
  */
 export function hasEnoughToWriteFrom({ rec, ancestors }) {
-  const SKIP = new Set(['Status', 'URL Slug', 'Verified Date', 'Source 1 URL', 'Source 2 URL']);
-  const substantive = Object.entries((rec && rec.values) || {})
-    .filter(([label, v]) => !SKIP.has(label) && v != null && String(v).trim().length >= 3);
+  // Bookkeeping, not evidence about the place.
+  const SKIP = new Set(['Status', 'URL Slug', 'Verified Date', 'Source 1 URL',
+                        'Source 2 URL', 'Official Website', 'Wikipedia URL']);
 
-  if (substantive.length >= 4) return { ok: true };
+  // HOW MUCH IS THERE, not how many boxes are ticked. Counting filled fields
+  // was the first attempt and it was simply the wrong measure: on 11 Sep it
+  // refused to write a Hero Intro for Estonia, Serbia and Ethiopia, each of
+  // which carries a two-hundred-word Overview and nothing else. One rich field
+  // scored lower than four containing a currency code and a plug type, which
+  // is backwards. Characters of real content is the honest proxy for "is there
+  // something here to write from".
+  const chars = Object.entries((rec && rec.values) || {})
+    .filter(([label, v]) => !SKIP.has(label) && v != null)
+    .reduce((sum, [, v]) => sum + String(v).trim().length, 0);
+  if (chars >= MIN_EVIDENCE_CHARS) return { ok: true };
 
   // A parent with real content is evidence too: a resort can be written from
   // its country's overview even when its own row is bare.
@@ -255,5 +265,16 @@ export function hasEnoughToWriteFrom({ rec, ancestors }) {
     why: 'there is almost nothing on this record to write from, so the facts need filling first',
   };
 }
+
+/**
+ * Where "a few identifiers" stops and "some description" starts.
+ *
+ * Not a quality bar, and not precise. The gate judges the output; this only
+ * stops an attempt that is certainly wasted. It has to separate two real
+ * cases: a country carrying one long overview and nothing else (passes), and a
+ * record holding a time zone, a currency, a language and a plug type, which is
+ * seventeen characters saying nothing about what a place is like (fails).
+ */
+export const MIN_EVIDENCE_CHARS = 60;
 
 export const KINDS = { DERIVE, FACT, MANUAL, WRITE, BRIEF, NEVER };

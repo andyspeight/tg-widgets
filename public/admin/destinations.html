@@ -536,6 +536,9 @@ a.nm:hover span{text-decoration:underline}
   var QUEUE_CAP = 400;
   var JOBS_SHOWN = 6;
   var jobsExpanded = false;
+  /* What the last press of a Fill button asked for, so the page can report on
+     THAT run rather than on the day's totals. */
+  var thisRun = null;
 
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) {
@@ -1278,6 +1281,28 @@ a.nm:hover span{text-decoration:underline}
     return '<button class="btn btn-row" data-fill="' + esc(r.id) + '">Fill</button>';
   }
 
+  /* Saves and holds for the records THIS press asked for.
+     Matching on a timestamp instead compares the browser's clock against the
+     server's, and any skew between them silently reports a run as having done
+     nothing. The record ids are exact and cannot drift. */
+  function runTally() {
+    if (!R || !thisRun || !job || thisRun.field !== job.label) return null;
+    var asked = {};
+    thisRun.ids.forEach(function (id) { asked[id] = true; });
+    var mine = function (d) {
+      return d.field === thisRun.field && d.recordId && asked[d.recordId];
+    };
+    var saved = (R.saved || []).filter(mine);
+    var held = (R.held || []).filter(mine);
+    var why = {};
+    held.forEach(function (h) {
+      var k = String(h.reason || 'not given');
+      why[k] = (why[k] || 0) + 1;
+    });
+    var top = Object.keys(why).sort(function (a, b) { return why[b] - why[a]; })[0] || '';
+    return { asked: thisRun.asked, saved: saved.length, held: held.length, topReason: top };
+  }
+
   function heldReasonFor(recordId) {
     if (!R || !R.held || !job) return '';
     for (var i = 0; i < R.held.length; i++) {
@@ -1393,7 +1418,42 @@ a.nm:hover span{text-decoration:underline}
     if (D) { renderStatus(); if (!job) renderNext(); }
     // Keep polling only while there is something to watch.
     if (st.pending > 0 && !poll) poll = setInterval(refreshRun, 4000);
-    if (st.pending === 0 && poll) { clearInterval(poll); poll = null; }
+    if (st.pending === 0 && poll) {
+      clearInterval(poll); poll = null;
+      // The gap counts come from the scan, which is up to ten minutes old, so
+      // a finished run left the button still saying "Fill all 3" however many
+      // it had just written. Re-scan once, quietly, when a run that actually
+      // saved something finishes.
+      var done = runTally();
+      if (done && done.saved) rescanAfterRun();
+    }
+  }
+
+  /* A quiet reload of the scan, keeping the open job where it is. */
+  var rescanning = false;
+  function rescanAfterRun() {
+    if (rescanning) return;
+    rescanning = true;
+    $('live').textContent = 'Bringing the numbers up to date.';
+    fetch('/api/admin/destinations-dashboard?refresh=1', { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (fresh) {
+        if (!fresh || !fresh.types) return;
+        D = fresh;
+        renderStatus(); renderKpis(); renderTypes();
+        if (!job) renderNext();
+        renderJobs(); renderGroupFilter(); renderQueue();
+        renderFields(); renderContinents(); renderBroken(); renderRecent();
+        if (job) {
+          // The field moved in the fresh scan only if the spec changed, but the
+          // counts on it certainly did.
+          var t = typeOf(job.type);
+          if (t && t.fields[job.idx]) { job.field = t.fields[job.idx]; job.type_ = t; renderJobView(); }
+        }
+        $('live').textContent = 'Numbers updated.';
+      })
+      .catch(function () { /* the next Rescan will do it */ })
+      .then(function () { rescanning = false; });
   }
 
   function refreshRun() {
@@ -1408,6 +1468,7 @@ a.nm:hover span{text-decoration:underline}
     var b = R.budget || {};
     var fillable = canFillPlan(jobPlan());
     var count = jobRecords().length;
+    var tally = runTally();
 
     var bits = [];
     if (busy) {
@@ -1419,14 +1480,18 @@ a.nm:hover span{text-decoration:underline}
       bits.push('<b>This one cannot be filled yet.</b>');
       bits.push('<span>' + esc(blockedWhy(jobPlan()).replace(/^./, function (c) { return c.toUpperCase(); })) +
         '. Export the list if you want to work through it by hand.</span>');
-    } else if (R.savedToday === 0 && R.heldToday > 0) {
-      // The failure Andy hit twice: the job ran to the end, saved nothing, and
-      // the page said nothing except that it was no longer running. Zero saved
-      // with anything held is a failed run, and it gets said as one.
-      bits.push('<b style="color:var(--dn)">This saved nothing.</b>');
-      bits.push('<span>' + n(R.heldToday) + ' were held and none were written.' +
-        (R.topHeldReason ? ' Mostly because ' + esc(R.topHeldReason.reason) + '.' : '') +
+    } else if (tally && tally.held && !tally.saved) {
+      // A run that finished having written nothing is a failed run and says so.
+      // This used to be measured across the whole day, so one save this morning
+      // hid three holds this afternoon.
+      bits.push('<b style="color:var(--dn)">That run saved nothing.</b>');
+      bits.push('<span>All ' + n(tally.held) + ' were held.' +
+        (tally.topReason ? ' ' + esc(tally.topReason.replace(/^./, function (c) { return c.toUpperCase(); })) + '.' : '') +
         ' Nothing was changed in Airtable.</span>');
+    } else if (tally && tally.saved) {
+      bits.push('<b style="color:var(--ok)">That run saved ' + n(tally.saved) + '.</b>');
+      if (tally.held) bits.push('<span>' + n(tally.held) + ' held, listed under Held aside.</span>');
+      bits.push('<span>Open Just saved to read what it wrote.</span>');
     } else {
       bits.push('<b>Nothing running.</b>');
       bits.push('<span>Press the button and it works through them a few at a time, ' +
@@ -1523,6 +1588,7 @@ a.nm:hover span{text-decoration:underline}
 
   function queueWork(recordIds, label) {
     if (!job || !recordIds.length) return;
+    thisRun = { field: job.label, ids: recordIds.slice(), asked: recordIds.length };
     recordIds.forEach(function (id) { rowState[id] = 'queued'; });
     renderJobRows();
     fillApi({ action: 'queue', type: job.type, fieldIdx: job.idx, recordIds: recordIds })

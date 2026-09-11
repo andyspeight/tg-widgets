@@ -161,6 +161,36 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   t('a record with real content can be written from', () => {
     assert.strictEqual(hasEnoughToWriteFrom({ rec: rich, ancestors: [] }).ok, true);
   });
+
+  /* 11 Sep 2026. The first version counted FILLED FIELDS, so Estonia, Serbia
+     and Ethiopia were refused a Hero Intro despite each carrying a
+     two-hundred-word Overview: one rich field scored lower than four holding a
+     currency code. How much is there, not how many boxes are ticked. */
+
+  t('one long overview is enough on its own', () => {
+    const estonia = { name: 'Estonia', values: { Overview:
+      'Estonia brings together forested landscapes, bogs, islands and cultural traditions. ' +
+      'More than half of its territory is forested, no point is more than ten kilometres from ' +
+      'a bog, and the country has 2,317 islands. Wildlife preserves make up a quarter of it.' } };
+    const r = hasEnoughToWriteFrom({ rec: estonia, ancestors: [] });
+    assert.strictEqual(r.ok, true,
+      'a record with a real paragraph on it has plenty to write two sentences from');
+  });
+
+  t('a handful of one-word fields is still not enough', () => {
+    const thin = { name: 'Somewhere', values: {
+      'Time Zone': 'GMT +1', 'Currency': 'Euro', 'Language': 'German', 'Voltage And Plug': 'C' } };
+    assert.strictEqual(hasEnoughToWriteFrom({ rec: thin, ancestors: [] }).ok, false,
+      'a currency and a plug type say nothing about what a place is like');
+  });
+
+  t('a link the runner wrote itself is not evidence about the place', () => {
+    const linksOnly = { name: 'X', values: {
+      'Official Website': 'https://www.example-airport-with-a-very-long-name.com/en/home/index',
+      'Wikipedia URL': 'https://en.wikipedia.org/wiki/Some_Airport_With_A_Long_Name_Indeed' } };
+    assert.strictEqual(hasEnoughToWriteFrom({ rec: linksOnly, ancestors: [] }).ok, false,
+      'two long URLs are plenty of characters and no information');
+  });
   t('a bare record inherits enough from a parent that has prose', () => {
     assert.strictEqual(hasEnoughToWriteFrom({ rec: bare, ancestors: parentWithProse }).ok, true);
   });
