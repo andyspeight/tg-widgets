@@ -6,7 +6,6 @@
     "ignoreRules": [],
     "ignoreFiles": [
       "api/**",
-      "chrome-extension/**",
       "extension/**",
       "lib/**",
       "public/**",

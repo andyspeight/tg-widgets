@@ -4,6 +4,14 @@
   --border: #E2E8F0; --bg: #F8FAFC; --card: #FFFFFF;
 }
 * { box-sizing: border-box; }
+/* The panel hides and shows four things with the `hidden` attribute (the back
+   arrow, the acting-as strip, the account strip and the tab bar). `hidden` is
+   only `display:none` from the browser's own stylesheet, so ANY class rule with
+   a display beats it — and every one of those four has one. The result: an
+   empty amber bar under the header for every user, a back arrow on a screen
+   with nothing to go back to, and tabs on the signed-out screen. This one line
+   restores the attribute's meaning (11 Sep 2026). */
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   margin: 0; display: flex; flex-direction: column;
