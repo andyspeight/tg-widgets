@@ -30,6 +30,11 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   const ctx = await requireAuth(req, res);
   if (!ctx) return;
+  // One person's bookings are never cacheable. Without this the response
+  // carried an ETag and revalidated as 304, so a browser kept showing the body
+  // it had fetched BEFORE a fix shipped. Seen in the runtime log on 11 Sep 2026
+  // while chasing exactly that.
+  res.setHeader('Cache-Control', 'private, no-store');
   if (!storageReady()) return res.status(200).json({ ok: true, bookings: [], storage: false });
 
   const q = req.query || {};
