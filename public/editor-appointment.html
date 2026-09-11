@@ -669,7 +669,7 @@
   function renderAvailability() {
     const wrap = document.getElementById('avail-list');
     wrap.innerHTML = WD.map(([k, label]) => {
-      const ranges = C.availability[k] || C.availability[Number(k)] || [];
+      const ranges = C.availability[k] || [];
       const on = ranges.length > 0;
       const rowsHtml = ranges.map((r, ri) => `<span class="av-times" data-range="${ri}">
         <select data-av-f="start">${hourOpts(r[0])}</select> to <select data-av-f="end">${hourOpts(r[1])}</select>
@@ -966,33 +966,41 @@
     const del = e.target.closest('[data-del-range]');
     if (tog) {
       const k = tog.getAttribute('data-av-toggle');
-      if (C.availability[k] || C.availability[Number(k)]) {
+      if (C.availability[k]) {
         if (availDayCount() <= 1) { tgse.toast('Keep at least one day available, or no one can ever book', 'err'); return; }
-        delete C.availability[k]; delete C.availability[Number(k)];
+        delete C.availability[k];
       }
       else C.availability[k] = [['09:00', '17:00']];
       renderAvailability(); shell.markDirty(); render(); return;
     }
     if (add) {
       const k = add.getAttribute('data-add-range');
-      const cur = C.availability[k] || C.availability[Number(k)] || [];
-      C.availability[k] = cur.concat([['13:00', '17:00']]); delete C.availability[Number(k)];
+      const cur = C.availability[k] || [];
+      C.availability[k] = cur.concat([['13:00', '17:00']]);
       renderAvailability(); shell.markDirty(); render(); return;
     }
     if (del) {
       const block = del.closest('[data-wd]'); const k = block.getAttribute('data-wd');
       const ri = +del.getAttribute('data-del-range');
-      const cur = (C.availability[k] || C.availability[Number(k)] || []).slice();
+      const cur = (C.availability[k] || []).slice();
       if (cur.length <= 1 && availDayCount() <= 1) { tgse.toast('Keep at least one time range, or no one can ever book', 'err'); return; }
       cur.splice(ri, 1);
-      if (cur.length) C.availability[k] = cur; else { delete C.availability[k]; delete C.availability[Number(k)]; }
+      if (cur.length) C.availability[k] = cur; else { delete C.availability[k]; }
       renderAvailability(); shell.markDirty(); render();
     }
   });
+  // NOTE ON THE KEYS (11 Sep 2026). data-wd is a string, and C.availability is
+  // keyed by weekday number. An earlier attempt to be safe about that wrote the
+  // day and then ran `delete C.availability[Number(k)]` — but an object property
+  // is ALWAYS a string, so obj[1] and obj['1'] are one and the same. That line
+  // deleted the very day it had just written. Changing a time, or adding a second
+  // range, silently wiped that day; a client set her hours, saved, and got
+  // Mon-Fri 9 to 5 back every time. Address the day by the string once and only
+  // once. Guarded by npm run test:appointment-availability.
   document.getElementById('avail-list').addEventListener('change', (e) => {
     const block = e.target.closest('[data-wd]'); if (!block || !e.target.getAttribute('data-av-f')) return;
     const k = block.getAttribute('data-wd');
-    C.availability[k] = readDayRanges(block); delete C.availability[Number(k)];
+    C.availability[k] = readDayRanges(block);
     shell.markDirty(); render();
   });
 
