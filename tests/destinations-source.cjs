@@ -133,10 +133,15 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     assert.ok(agreedFields(oa, wd).agreed.wiki, 'percent-encoding is not a disagreement');
   });
 
-  t('different article titles are a hold, even when one redirects to the other', () => {
+  t('two different titles are not agreement on their own, but are worth resolving', () => {
+    // agreedFields cannot know that one redirects to the other, so it holds and
+    // hands the pair on. warmAirports asks Wikipedia and may then agree.
     const oa = { ...OA.INN, wiki: 'https://en.wikipedia.org/wiki/Taipei_Songshan_Airport' };
     const wd = { ...WD.INN, wiki: 'https://en.wikipedia.org/wiki/Songshan_Airport' };
-    assert.strictEqual(agreedFields(oa, wd).agreed.wiki, undefined);
+    const r = agreedFields(oa, wd);
+    assert.strictEqual(r.agreed.wiki, undefined, 'not agreed yet');
+    assert.deepStrictEqual(r.pending.wiki, ['Taipei Songshan Airport', 'Songshan Airport'],
+      'and handed on to be resolved rather than dropped');
   });
 
   t('a city both sources name the same way is written', () => {
