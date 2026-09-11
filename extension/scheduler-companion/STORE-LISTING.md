@@ -1,7 +1,7 @@
 # Chrome Web Store listing — Travelgenix Scheduler
 
 Everything the submission form asks for, written out ready to paste. Work down
-it in order. Written 11 Sep 2026 for v0.5.2.
+it in order. Written 11 Sep 2026 for v0.5.3.
 
 Upload at <https://chrome.google.com/webstore/devconsole>. There is a one-off
 $5 developer registration fee, payable once per Google account, not per
@@ -13,7 +13,7 @@ extension. The same package and copy work for Microsoft Edge's store.
 
 | You need | Where it is |
 |---|---|
-| The upload package | `build/scheduler-companion-0.5.2.zip`, from `npm run extension:package` |
+| The upload package | `build/scheduler-companion-0.5.3.zip`, from `npm run extension:package` |
 | The screenshot (1280x800) | `build/store-screenshot-1280x800.png`, from `npm run extension:screenshot` |
 | The 128px icon | Already inside the package. The store reads it automatically |
 | The privacy policy URL | <https://widgets.travelify.io/extension-privacy> |
@@ -30,7 +30,7 @@ Upload the zip. Everything on this page comes from `manifest.json` and needs no
 editing:
 
 - **Name**: Travelgenix Scheduler
-- **Version**: 0.5.2
+- **Version**: 0.5.3
 
 ---
 
@@ -55,7 +55,7 @@ WHAT YOU CAN DO
 
 • Share times that suit. Tick the slots you want to offer, edit the opening and closing lines, and you get a tidy list in which every time is a one-click booking link. Whoever you send it to picks one and it is booked. The rest stay free.
 
-• See what is coming up. Your next two weeks of appointments at a glance, with a link through to reschedule or cancel.
+• See what is coming up. Your next two weeks of appointments at a glance, with a link through to reschedule or cancel. It lists your bookings, not the rest of your diary.
 
 • Write straight into Gmail. A calendar button appears beside Send in every compose window. Drop in a booking link, or pick times and insert them, without leaving the message or losing your place in it.
 

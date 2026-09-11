@@ -27,13 +27,22 @@ A search box appears once you have more than four meeting types.
 **Coming up tab.** Your next two weeks at a glance, with a link through to
 `/bookings` to reschedule or cancel.
 
-It is YOUR diary. The events come from the calendar you connected yourself
-(`/api/appointment/agenda`), and the scheduler bookings come from schedulers
-you own (`/api/appointment/list?scope=self`). Until 11 Sep 2026 a calendar was
-held once per client, so a second admin on an agency account opened this panel
-and was shown the first one's whole diary. Both ends are now scoped to the
-person, and connecting your calendar can no longer take over a colleague's. See
-the ownership table in `CALENDAR-OAUTH.md`.
+It is YOUR appointments, and only yours. Two separate faults were reported as
+one on 11 Sep 2026 and both are fixed server-side, so the behaviour is the same
+whichever build of this extension someone has installed:
+
+- **Whose.** A calendar connection was held once per client, so a second admin
+  on an agency account was shown the first one's calendar. Connections are now
+  keyed to a person. See the ownership table in `CALENDAR-OAUTH.md`.
+- **What.** The diary returned every event in that calendar, so a private
+  commitment, or a meeting a colleague had invited you to, was listed in a
+  booking tool. `/api/appointment/agenda` now returns only the events that ARE
+  your Travelgenix bookings, matched on the provider event id recorded when
+  each was made. `?scope=all` still returns the lot.
+
+Your calendar is still read, and that has not changed: it is what keeps the
+times you offer clear of your real commitments, in
+`/api/appointment/availability`. It was never a reason to list them here.
 
 **Header.** Refresh, a link to your meetings, and a link to the dashboard. The
 signed-in account is shown underneath. Staff acting as a client get a standing
