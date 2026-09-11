@@ -113,6 +113,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .job-h{padding:11px 20px;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mt);background:var(--sf2);border-top:1px solid var(--bd2)}
 .job-h:first-child{border-top:0}
 .job-h-n{font-weight:600;letter-spacing:0;text-transform:none;opacity:.75}
+.job-more{padding:12px 20px;border-top:1px solid var(--bd2);text-align:center}
 .job.is-off:hover{background:transparent}
 .job.is-off .job-t{color:var(--mt)}
 
@@ -462,7 +463,7 @@ a.nm:hover span{text-decoration:underline}
         <div class="scroll"><table class="tbl">
           <thead><tr>
             <th>Field</th><th>Part of</th><th>Needed for</th><th style="width:170px">Filled in</th>
-            <th class="r">Missing</th><th class="r">Wrong</th>
+            <th class="r">Missing</th><th class="r">Wrong</th><th class="r">Work</th>
           </tr></thead>
           <tbody id="fields"></tbody>
         </table></div>
@@ -522,6 +523,7 @@ a.nm:hover span{text-decoration:underline}
   var jobState = { q: '', show: '' };
   var QUEUE_CAP = 400;
   var JOBS_SHOWN = 6;
+  var jobsExpanded = false;
 
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) {
@@ -780,8 +782,11 @@ a.nm:hover span{text-decoration:underline}
       $('jobs').innerHTML = '<div class="job-none">Nothing missing anywhere. Every field is filled on every record.</div>';
       return;
     }
-    var open = all.filter(function (j) { return canFillPlan(j.plan); }).slice(0, JOBS_SHOWN);
-    var shut = all.filter(function (j) { return !canFillPlan(j.plan); }).slice(0, JOBS_SHOWN);
+    var allOpenJobs = all.filter(function (j) { return canFillPlan(j.plan); });
+    var allShutJobs = all.filter(function (j) { return !canFillPlan(j.plan); });
+    var cap = jobsExpanded ? 200 : JOBS_SHOWN;
+    var open = allOpenJobs.slice(0, cap);
+    var shut = allShutJobs.slice(0, JOBS_SHOWN);
 
     // Describe the field itself. A tier sentence repeated down six rows is
     // the sameness problem all over again.
@@ -811,19 +816,33 @@ a.nm:hover span{text-decoration:underline}
         '</div>';
     }
 
-    var allOpen = all.filter(function (j) { return canFillPlan(j.plan); }).length;
-    var allShut = all.length - allOpen;
+    var allOpen = allOpenJobs.length;
+    var allShut = allShutJobs.length;
 
     var html = '';
     if (open.length) {
       html += head('The runner can do these now', open.length, allOpen) +
         open.map(function (j) { return row(j, false); }).join('');
+      // Six of fifty-three, with no way to reach the other forty-seven, is how
+      // a job I told Andy to press turned out not to be on the page at all.
+      if (allOpen > JOBS_SHOWN) {
+        html += '<div class="job-more"><button class="btn" id="jobs-more">' +
+          (jobsExpanded ? 'Show fewer' : 'Show all ' + n(allOpen) + ' jobs') + '</button></div>';
+      }
     }
     if (shut.length) {
       html += head('These need a source, or a person', shut.length, allShut) +
         shut.map(function (j) { return row(j, true); }).join('');
     }
     $('jobs').innerHTML = html;
+
+    if ($('jobs-more')) {
+      $('jobs-more').addEventListener('click', function () {
+        jobsExpanded = !jobsExpanded;
+        renderJobs();
+        $('live').textContent = jobsExpanded ? 'Showing every job.' : 'Showing the biggest jobs.';
+      });
+    }
 
     Array.prototype.forEach.call($('jobs').querySelectorAll('[data-job]'), function (b) {
       b.addEventListener('click', function () {
@@ -996,11 +1015,11 @@ a.nm:hover span{text-decoration:underline}
 
     var rows = [];
     types.forEach(function (t) {
-      t.fields.forEach(function (f) { rows.push({ t: t, f: f, pc: pct(f.filled, t.count) }); });
+      t.fields.forEach(function (f, i) { rows.push({ t: t, f: f, idx: i, pc: pct(f.filled, t.count) }); });
     });
     rows.sort(function (a, b) { return a.pc - b.pc || b.f.empty - a.f.empty; });
 
-    if (!rows.length) { $('fields').innerHTML = emptyRow(6, 'No fields to show', 'Select a content type above.'); return; }
+    if (!rows.length) { $('fields').innerHTML = emptyRow(7, 'No fields to show', 'Select a content type above.'); return; }
 
     $('fields').innerHTML = rows.map(function (row) {
       var cls = row.pc < 34 ? 'vlow' : row.pc < 67 ? 'low' : '';
@@ -1012,8 +1031,29 @@ a.nm:hover span{text-decoration:underline}
         '<td><div class="bar2" style="justify-content:flex-start"><div class="mini"><i class="' + cls +
           '" style="width:' + row.pc + '%"></i></div><span class="num">' + row.pc + '%</span></div></td>' +
         '<td class="r num">' + n(row.f.empty) + '</td>' +
-        '<td class="r num" style="color:' + (row.f.invalid ? 'var(--dn)' : 'inherit') + '">' + n(row.f.invalid) + '</td></tr>';
+        '<td class="r num" style="color:' + (row.f.invalid ? 'var(--dn)' : 'inherit') + '">' + n(row.f.invalid) + '</td>' +
+        '<td class="r">' + gapAction(row) + '</td></tr>';
     }).join('');
+
+    Array.prototype.forEach.call($('fields').querySelectorAll('[data-open]'), function (b) {
+      b.addEventListener('click', function () {
+        var parts = b.dataset.open.split(':');
+        openJob(parts[0], Number(parts[1]));
+      });
+    });
+  }
+
+  /* Where to start shows the biggest handful. This table is the index of ALL
+     of them, so it is the only place a job outside that handful can be
+     reached. It had no button at all until 11 Sep, which is why Andy could not
+     find the one I had told him to press. */
+  function gapAction(row) {
+    var plan = row.f.plan || 'write';
+    if (!row.f.empty && !row.f.invalid) return '<span class="rowstate">Done</span>';
+    if (!canFillPlan(plan)) {
+      return '<span class="rowstate" title="' + esc(blockedWhy(plan)) + '">&mdash;</span>';
+    }
+    return '<button class="btn btn-row" data-open="' + esc(row.t.key) + ':' + row.idx + '">Work on this</button>';
   }
 
   function renderContinents() {

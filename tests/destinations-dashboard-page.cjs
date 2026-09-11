@@ -448,6 +448,35 @@ async function payload(mod) {
       'work that cannot run must not offer a button: ' + r.querySelector('.job-t').textContent));
   });
 
+  /* 11 Sep 2026. I told Andy to press "Wikipedia URL on airports". It was not
+     on the page: the list shows the biggest six of fifty-three, sorted with
+     core fields first, and a depth field never reaches the top. There was no
+     way to see the rest and no button anywhere else. Every job has to be
+     reachable or the ranking decides what he is allowed to do. */
+
+  t('every job can be reached, not just the biggest handful', () => {
+    const shown = $('jobs').querySelectorAll('.job:not(.is-off)').length;
+    const more = $('jobs-more');
+    assert.ok(more, 'with more runnable jobs than fit, there must be a way to see them');
+
+    more.dispatchEvent(new win.Event('click', { bubbles: true }));
+    const after = $('jobs').querySelectorAll('.job:not(.is-off)').length;
+    assert.ok(after > shown, 'expanding should show more: ' + shown + ' then ' + after);
+
+    $('jobs-more').dispatchEvent(new win.Event('click', { bubbles: true }));
+    assert.strictEqual($('jobs').querySelectorAll('.job:not(.is-off)').length, shown,
+      'and it should collapse again');
+  });
+
+  t('a depth field is reachable even though it never tops the list', () => {
+    // Wikipedia URL is exactly the case that was unreachable.
+    $('jobs-more').dispatchEvent(new win.Event('click', { bubbles: true }));
+    const labels = [...$('jobs').querySelectorAll('.job:not(.is-off) .job-t')].map(e => e.textContent);
+    assert.ok(labels.some(l => /Wikipedia URL/.test(l)),
+      'the job I sent Andy to press has to actually be on the page');
+    $('jobs-more').dispatchEvent(new win.Event('click', { bubbles: true }));
+  });
+
   t('work that can be done is listed before work that cannot', () => {
     const kinds = [...$('jobs').querySelectorAll('.job')].map(r => r.classList.contains('is-off'));
     const firstOff = kinds.indexOf(true);
@@ -564,6 +593,22 @@ async function payload(mod) {
     $('jv-back').dispatchEvent(new win.Event('click', { bubbles: true }));
     assert.strictEqual($('jobview').hidden, true);
     assert.strictEqual($('browse').hidden, false);
+  });
+
+  t('the Every gap table offers a button on every job that can run', () => {
+    $('tab-fields').dispatchEvent(new win.Event('click', { bubbles: true }));
+    const rows = [...$('fields').querySelectorAll('tr')];
+    assert.ok(rows.length > 20, 'this table is the index of every field');
+
+    const buttons = $('fields').querySelectorAll('[data-open]');
+    assert.ok(buttons.length > 0, 'a table listing every gap and offering none of them is a dead end');
+
+    // The button has to name a real field on a real type, or it opens nothing.
+    const [typeKey, idxRaw] = buttons[0].dataset.open.split(':');
+    const t0 = data.types.find(x => x.key === typeKey);
+    assert.ok(t0, 'unknown type: ' + typeKey);
+    assert.ok(t0.fields[Number(idxRaw)], 'no field at index ' + idxRaw + ' on ' + typeKey);
+    $('tab-queue').dispatchEvent(new win.Event('click', { bubbles: true }));
   });
 
   console.log('\nReadability');
