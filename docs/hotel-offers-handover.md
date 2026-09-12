@@ -153,9 +153,10 @@ Done, including the parts that are usually manual:
 - `vercel.json`: three rewrites, one header block, and the nightly cron at
   02:30 UTC, well away from the map cron's ten-minute rotation.
 
-**Plan access: Spark locked, Boost and above unlimited.** Unlike Travel Offers,
-which reads a cache we fill for everyone anyway, every property on a Hotel
-Offers widget costs its own Travelify search every night.
+**Plan access: Ignite and Bespoke only** (Andy, 12 Sep 2026). Spark and Boost
+are locked. Unlike Travel Offers, which reads a cache we fill for everyone
+anyway, every property on a Hotel Offers widget costs its own Travelify search
+every night.
 
 ## Volume
 

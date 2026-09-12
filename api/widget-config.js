@@ -473,10 +473,11 @@ const PLAN_WIDGET_LIMITS = {
   'Text FX':               { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Logo Showcase':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Offers':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
-  // Gated above Spark: unlike Travel Offers, which reads a cache we fill for
-  // everyone anyway, every property named on a Hotel Offers widget costs its
-  // own Travelify search every night, under that client's own application.
-  'Hotel Offers':          { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
+  // Ignite and above (Andy, 12 Sep 2026). Unlike Travel Offers, which reads a
+  // cache we fill for everyone anyway, every property named on a Hotel Offers
+  // widget costs its own Travelify search every night, under that client's own
+  // application.
+  'Hotel Offers':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Popup':                 { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Event Calendar':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
