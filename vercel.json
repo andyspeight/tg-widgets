@@ -146,6 +146,10 @@
     {
       "path": "/api/cron/destinations-worker",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/refresh-tti-offers",
+      "schedule": "30 2 * * *"
     }
   ],
   "redirects": [
@@ -568,6 +572,18 @@
     {
       "source": "/editor-offers",
       "destination": "/editor-offers.html"
+    },
+    {
+      "source": "/widget-hotel-offers.js",
+      "destination": "/widget-offers.js"
+    },
+    {
+      "source": "/editor-hotel-offers",
+      "destination": "/editor-hotel-offers.html"
+    },
+    {
+      "source": "/demo-hotel-offers",
+      "destination": "/demo-hotel-offers.html"
     },
     {
       "source": "/editor-textfx",
@@ -1369,6 +1385,23 @@
     },
     {
       "source": "/widget-offers.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-hotel-offers.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

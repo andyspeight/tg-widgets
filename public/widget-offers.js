@@ -1,12 +1,21 @@
 /**
- * Travelgenix Travel Offers Widget v1.19.0
+ * Travelgenix Travel Offers Widget v1.20.0
  * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
  * cache. A visitor's browser never triggers a Travelify search; the only live
  * search left is the one Travelify runs when a visitor clicks an offer.
  *
+ * This file is the engine behind TWO widget types. Travel Offers scopes its
+ * offers by PLACE; Hotel Offers scopes them by PROPERTY, from a list of
+ * Travelify TTI codes the client enters. Everything after the fetch is shared,
+ * so /widget-hotel-offers.js is a vercel rewrite onto this same file rather
+ * than a fork that would need every future template fix applied twice.
+ *
  * Usage:
  *   <div data-tg-widget="offers" data-tg-id="YOUR_WIDGET_ID"></div>
  *   <script src="https://tg-widgets.vercel.app/widget-offers.js"></script>
+ *
+ *   <div data-tg-widget="hotel-offers" data-tg-id="YOUR_WIDGET_ID"></div>
+ *   <script src="https://tg-widgets.vercel.app/widget-hotel-offers.js"></script>
  *
  * Travelify Offers API is public — credentials are safe to expose per Travelify devs.
  *
@@ -20,6 +29,21 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.20.0 (12 Sep 2026) — Hotel Offers: the same engine, scoped by property:
+ *     • A config carrying `ttiCodes` reads the per-property cache pool
+ *       (/api/cached-offers?tti=...&appId=...) instead of the country pool, and
+ *       its codes REPLACE the destination filter rather than joining it — a
+ *       widget that named twelve hotels must never fall back to showing a
+ *       country. The App ID rides along because the pool is filled under each
+ *       client's own Travelify application, so two agencies asking about one
+ *       hotel see their own contracted rates.
+ *     • Auto-init now also claims [data-tg-widget="hotel-offers"], and
+ *       window.TGHotelOffersWidget aliases the same class. No second file: a
+ *       fork would mean fixing every future template bug twice.
+ *     • Codes are read from rows of { code, name, ctry }, a plain string array,
+ *       or pasted text. Only the code matters here; the name exists because the
+ *       nightly cron can also try Travelify's documented loct=Property anchor,
+ *       which names a hotel rather than coding it.
  *   v1.19.0 (10 Aug 2026) — Child ages in the pax popover (valid family deeplinks):
  *     • The "Travellers" popover now asks for each child's age when a visitor adds
  *       children. Picking N children shows N age selectors (2 to 15).
@@ -241,8 +265,42 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.19.0';
+  const VERSION = '1.20.0';
   const CACHE_PREFIX = 'tgo_cache_';
+
+  // ── Hotel Offers: the property list ────────────────────────────────────
+  // The Hotel Offers widget is this same engine pointed at a different pool.
+  // Rather than naming places, the client names PROPERTIES by their Travelify
+  // TTI code, which the nightly cron turns into a per-property offer cache.
+  //
+  // The editor saves rows of { code, name, ctry } so the cron can also try the
+  // documented loct=Property anchor, which names a hotel rather than coding it.
+  // A widget saved as plain strings, or as pasted text, still reads correctly —
+  // only the code matters on this side. Canonicalisation must stay identical to
+  // canonTti in api/cached-offers.js and api/cron/refresh-tti-offers.js: this
+  // builds the key those two write and read, so any difference is a total miss.
+  function canonTti(token) {
+    const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^TTI:/, '');
+    return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
+  }
+  function ttiCodesOf(cfg) {
+    const raw = cfg && cfg.ttiCodes;
+    if (!raw) return [];
+    const rows = Array.isArray(raw) ? raw : String(raw).split(/[\r\n;]+/);
+    const out = [];
+    const seen = Object.create(null);
+    for (const row of rows) {
+      const token = (row && typeof row === 'object')
+        ? (row.code || row.tti || row.uniqueRef)
+        : String(row || '').split(',')[0];
+      const c = canonTti(token);
+      if (!c || seen[c]) continue;
+      seen[c] = true;
+      out.push(c);
+      if (out.length >= 100) break; // matches the cron and the endpoint cap
+    }
+    return out;
+  }
 
   // Telemetry: report a one-time load heartbeat and any failure to
   // /api/widget-log so we hear about a broken embed before the client does.
@@ -6676,7 +6734,21 @@
         ? payload.packageType
         : (payload.type || 'Packages');
       q.set('type', type);
-      if (Array.isArray(payload.destinations) && payload.destinations.length) q.set('destinations', payload.destinations.join(','));
+      // Hotel Offers: the widget names PROPERTIES by their Travelify TTI code
+      // instead of naming places, so the codes replace the destination scope
+      // entirely. The per-property pool is filled under the owning client's own
+      // Travelify application (their contracted rates), so the App ID rides
+      // along and is part of which pool gets read.
+      const ttiCodes = ttiCodesOf(this.cfg);
+      if (ttiCodes.length) {
+        q.set('tti', ttiCodes.join(','));
+        // No App ID means no pool to name. Send the codes anyway and let the
+        // endpoint answer an honest miss rather than silently widening this
+        // widget to every offer in the country.
+        if (this.cfg.appId) q.set('appId', String(this.cfg.appId));
+      } else if (Array.isArray(payload.destinations) && payload.destinations.length) {
+        q.set('destinations', payload.destinations.join(','));
+      }
       // Origins. The departure board sets a SINGULAR `origin` once it has
       // detected the visitor's airport, and that airport REPLACES the
       // configured origins rather than joining them. The cache treats origins
@@ -10081,7 +10153,13 @@
   }
 
   async function init() {
-    const containers = document.querySelectorAll('[data-tg-widget="offers"]');
+    // Two widget TYPES, one engine. Travel Offers scopes by place, Hotel Offers
+    // scopes by property (a TTI code list), and everything downstream of the
+    // fetch — six templates, the popup engine, dedupe, currency — is identical,
+    // so forking the file would mean fixing every future template bug twice.
+    // /widget-hotel-offers.js is a vercel rewrite onto this same file, which
+    // keeps the one-div-one-script embed contract intact and injects no script.
+    const containers = document.querySelectorAll('[data-tg-widget="offers"], [data-tg-widget="hotel-offers"]');
     for (const el of containers) {
       if (el._tgInitialised) continue;
       el._tgInitialised = true;
@@ -10116,6 +10194,11 @@
   if (typeof window !== 'undefined') {
     window.TGOffersWidget = TGOffersWidget;
     window.TGOffersWidget.version = VERSION;
+    // Hotel Offers is the same class under the name its editor and the
+    // dashboard mini-preview look for. An alias, not a subclass: the two widget
+    // types differ only in the config they are handed.
+    window.TGHotelOffersWidget = TGOffersWidget;
+    window.__TG_OFFERS_VERSION__ = VERSION;
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {

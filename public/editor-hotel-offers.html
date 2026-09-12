@@ -1,0 +1,3661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Hotel Offers Widget Editor · Travelgenix</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/editor-shell.css">
+
+  <style>
+    :root {
+      --bg: #F8FAFC; --panel: #FFFFFF; --panel-2: #F8FAFC;
+      --ink: #0F172A; --sub: #475569; --muted: #94A3B8;
+      --border: #E2E8F0; --border-strong: #CBD5E1; --hover: #F1F5F9;
+      --brand: #1B2B5B; --brand-soft: rgba(27,43,91,.10);
+      --accent: #00B4D8; --accent-soft: rgba(0,180,216,.12);
+      --success: #10B981; --danger: #EF4444; --warning: #F59E0B;
+      --radius-sm: 6px; --radius: 8px; --radius-lg: 12px; --radius-xl: 16px;
+      --shadow-xs: 0 1px 2px rgba(15,23,42,.04);
+      --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+      --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+      --shadow-lg: 0 10px 24px rgba(15,23,42,.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--panel-2); color: var(--ink); font-size: 14px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+
+    .sidebar-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+    .section {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden;
+    }
+    .section-head {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; background: var(--panel); border: 0;
+      font-size: 13px; font-weight: 600; color: var(--ink);
+      cursor: pointer; text-align: left;
+    }
+    .section-head:hover { background: var(--hover); }
+    .section-head-chev { transition: transform 0.15s ease; color: var(--muted); }
+    .section[data-open="false"] .section-head-chev { transform: rotate(-90deg); }
+    .section[data-open="false"] .section-body { display: none; }
+    .section-body { padding: 4px 14px 14px; border-top: 1px solid var(--border); }
+
+    .field { margin-top: 12px; }
+    .field:first-child { margin-top: 0; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; }
+    .field-help { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    /* Field callout — inline notice/warning inside an inspector field.
+       Used to flag config issues like "Split needs a wider layout".
+       Less alarming than an error, more visible than a help line. */
+    .field-callout {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ink);
+    }
+    .field-callout svg {
+      flex-shrink: 0;
+      color: #B45309;
+      margin-top: 1px;
+    }
+    .field-callout-body { flex: 1; }
+    .field-callout-action {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 5px 10px;
+      background: var(--panel);
+      border: 1px solid var(--border-strong, var(--border));
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .field-callout-action:hover {
+      background: var(--panel-2);
+      border-color: var(--accent, #00B4D8);
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .field-row:first-child { margin-top: 0; }
+    .field-row .field { margin-top: 0; }
+
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: var(--radius); font-size: 13px;
+      background: var(--panel); color: var(--ink); font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    textarea { resize: vertical; min-height: 64px; }
+
+    .colour-row { display: flex; gap: 8px; align-items: center; }
+    .colour-swatch {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      cursor: pointer; overflow: hidden; position: relative; flex-shrink: 0;
+    }
+    .colour-swatch input[type="color"] {
+      position: absolute; inset: -4px;
+      width: calc(100% + 8px); height: calc(100% + 8px);
+      border: 0; cursor: pointer; padding: 0;
+    }
+    .colour-hex {
+      flex: 1;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      text-transform: uppercase;
+    }
+
+    .slider-row { display: flex; gap: 12px; align-items: center; }
+    .slider {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 4px; background: var(--border); border-radius: 2px; outline: none;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; background: var(--accent);
+      border-radius: 50%; cursor: pointer; box-shadow: var(--shadow-sm);
+    }
+    .slider::-moz-range-thumb {
+      width: 16px; height: 16px; background: var(--accent);
+      border-radius: 50%; cursor: pointer; border: 0;
+    }
+    .slider-value {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px; color: var(--sub); min-width: 40px; text-align: right;
+    }
+
+    .segmented {
+      display: flex; background: var(--panel-2);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 2px; gap: 2px;
+    }
+    .segmented button {
+      flex: 1; background: none; border: 0; padding: 6px 10px;
+      font-size: 12px; font-weight: 500; color: var(--sub);
+      border-radius: 6px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .segmented button:hover { color: var(--ink); }
+    .segmented button[aria-pressed="true"] {
+      background: var(--panel); color: var(--ink); box-shadow: var(--shadow-xs);
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Position picker — 3x3 grid showing each viewport position as a
+       clickable cell. The centre cell is a label (since "centred" is
+       a separate layout, not a position option). Selected cell is
+       highlighted with the brand colour.
+       ───────────────────────────────────────────────────────────────── */
+    .position-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 56px);
+      gap: 4px;
+      padding: 6px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 240px;
+    }
+    .pos-btn {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      padding: 0;
+    }
+    .pos-btn::after {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 9px;
+      background: var(--sub);
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .pos-btn[data-popup-pos="top-left"]::after { top: 6px; left: 6px; }
+    .pos-btn[data-popup-pos="top-center"]::after { top: 6px; left: 50%; transform: translateX(-50%); }
+    .pos-btn[data-popup-pos="top-right"]::after { top: 6px; right: 6px; }
+    .pos-btn[data-popup-pos="left-center"]::after { left: 6px; top: 50%; transform: translateY(-50%); }
+    .pos-btn[data-popup-pos="right-center"]::after { right: 6px; top: 50%; transform: translateY(-50%); }
+    .pos-btn[data-popup-pos="bottom-left"]::after { bottom: 6px; left: 6px; }
+    .pos-btn[data-popup-pos="bottom-center"]::after { bottom: 6px; left: 50%; transform: translateX(-50%); }
+    .pos-btn[data-popup-pos="bottom-right"]::after { bottom: 6px; right: 6px; }
+    .pos-btn:hover {
+      border-color: var(--accent, #00B4D8);
+    }
+    .pos-btn:hover::after {
+      background: var(--accent, #00B4D8);
+    }
+    .pos-btn[aria-pressed="true"] {
+      background: rgba(0, 180, 216, 0.08);
+      border-color: var(--accent, #00B4D8);
+    }
+    .pos-btn[aria-pressed="true"]::after {
+      background: var(--accent, #00B4D8);
+    }
+    .pos-center-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.3;
+      padding: 4px;
+      border: 1px dashed var(--border-strong, var(--border));
+      border-radius: 6px;
+      background: transparent;
+    }
+
+    /* ─────────────────────────────────────────────────────────────────
+       Template grid — visual card grid replacing the segmented control
+       for the top-level template picker. Scales to N templates without
+       overcrowding because rows wrap naturally. Each card has a tiny
+       SVG preview of its layout so users pick by shape, not just label.
+       ───────────────────────────────────────────────────────────────── */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .template-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      text-align: left;
+      font-family: inherit;
+    }
+    .template-card:hover {
+      border-color: var(--accent);
+      background: var(--panel);
+    }
+    .template-card[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--panel);
+      box-shadow: 0 0 0 2px rgba(0, 180, 216, 0.15);
+    }
+    .template-card[aria-pressed="true"]::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 7l2.5 2.5L10.5 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-size: contain;
+    }
+    .template-card .preview {
+      aspect-ratio: 16 / 9;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .template-card[aria-pressed="true"] .preview {
+      background: var(--panel-2);
+    }
+    .template-card .preview svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Preview shape colours — use design tokens so they theme correctly */
+    .template-card .preview .shape {
+      fill: var(--border);
+      transition: fill 0.15s;
+    }
+    .template-card .preview .shape-strong {
+      fill: var(--muted);
+      transition: fill 0.15s;
+    }
+    .template-card[aria-pressed="true"] .preview .shape-strong {
+      fill: var(--accent);
+    }
+    .template-card .preview .line {
+      stroke: var(--border);
+      stroke-width: 1;
+      fill: none;
+    }
+    .template-card .label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.005em;
+    }
+    .template-card .sublabel {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; gap: 12px;
+    }
+    .toggle-row + .toggle-row { border-top: 1px solid var(--border); }
+    .toggle-label { flex: 1; font-size: 13px; color: var(--ink); cursor: pointer; }
+    .toggle-help { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .toggle-group-heading {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 14px 0 4px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .toggle-group-heading:first-child {
+      border-top: 0;
+      margin-top: 0;
+      padding-top: 4px;
+    }
+    /* When a heading immediately follows a toggle-row, the toggle-row's bottom
+       border becomes redundant — the heading's top border takes over. */
+    .toggle-row:has(+ .toggle-group-heading) { border-bottom: 0; }
+
+    /* Dedupe breakdown panel — fed by tgo:dataLoaded event */
+    .breakdown-panel {
+      margin-top: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 11px;
+    }
+    .breakdown-panel.is-empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 14px 12px;
+    }
+    .breakdown-panel-title {
+      font-size: 10px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+    }
+    .breakdown-list { display: flex; flex-direction: column; gap: 2px; }
+    .breakdown-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0; border-bottom: 1px dashed var(--border);
+      font-size: 12px;
+    }
+    .breakdown-row:last-child { border-bottom: 0; }
+    .breakdown-row.active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .breakdown-strategy { color: var(--ink); }
+    .breakdown-row.active .breakdown-strategy { color: var(--accent); }
+    .breakdown-count {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums;
+      color: var(--sub); font-weight: 600;
+    }
+    .breakdown-row.active .breakdown-count { color: var(--accent); }
+    .breakdown-raw {
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+      display: flex; justify-content: space-between;
+    }
+    .breakdown-raw strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+    /* True-availability strip — fed by the editor's own fan-out probe, not
+       the widget's capped sample. Sits at the top of the dedupe panel. */
+    .breakdown-avail {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 6px 8px; margin-bottom: 8px;
+      background: rgba(0,180,216,.08); border: 1px solid rgba(0,180,216,.25);
+      border-radius: 8px; font-size: 12px; color: var(--ink);
+    }
+    .breakdown-avail em { font-style: normal; color: var(--muted); font-size: 10px; }
+    .breakdown-avail strong {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-variant-numeric: tabular-nums; font-size: 14px; color: var(--accent);
+    }
+    .breakdown-avail .avail-note { display: block; font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+    /* Viewport-aware preview */
+    .preview-stage {
+      transition: max-width 0.25s ease;
+      margin: 0 auto;
+      position: relative;
+    }
+    /* Desktop: cap at a generous but bounded width to prevent widgets in
+       carousel mode from stretching to fill arbitrarily wide canvas areas.
+       1280px matches the most common content max-width for live sites. */
+    .preview-stage[data-vp="desktop"] { max-width: 1280px; }
+    .preview-stage[data-vp="tablet"]  { max-width: 768px; }
+    .preview-stage[data-vp="mobile"]  { max-width: 380px; }
+    @media (prefers-reduced-motion: reduce) {
+      .preview-stage { transition: none; }
+    }
+
+    /* Faux-site mockup — shown behind popups so users see real context.
+       Also acts as the containing block for fixed-position popup chassis,
+       so position:fixed resolves to this faux-site instead of the viewport. */
+    .faux-site {
+      position: relative;
+      transform: translateZ(0);  /* creates containing block for fixed-pos children */
+      isolation: isolate;
+      background: linear-gradient(180deg, #fafbfc 0%, #f0f4f8 100%);
+      border: 1px solid var(--border, #E2E8F0);
+      border-radius: 12px;
+      padding: 0;
+      margin-bottom: 16px;
+      overflow: hidden;
+      min-height: 820px;
+      width: 100%;
+      pointer-events: none;
+      user-select: none;
+    }
+    /* When popup template is selected, preview-stage drops its desktop max-width
+       so the faux-site spans the full canvas. The popup chassis fills the
+       widened faux-site and feels properly proportioned. */
+    .preview-stage.popup-active[data-vp="desktop"] { max-width: none; }
+    .preview-stage.popup-active { padding: 16px; }
+    .faux-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border, #E2E8F0);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+    }
+    .faux-logo {
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text, #0F172A);
+      font-size: 14px;
+    }
+    .faux-nav-links {
+      display: flex;
+      gap: 22px;
+      color: var(--muted, #64748B);
+      font-size: 12px;
+    }
+    .faux-hero {
+      padding: 40px 28px 28px;
+    }
+    .faux-h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text, #0F172A);
+      margin: 0 0 8px;
+    }
+    .faux-p {
+      color: var(--muted, #64748B);
+      font-size: 13px;
+      margin: 0 0 18px;
+      max-width: 480px;
+    }
+    .faux-search {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px 10px 16px;
+      background: white;
+      border: 1px solid var(--border, #E2E8F0);
+      border-radius: 999px;
+      box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.05);
+    }
+    .faux-search-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid #94A3B8;
+      flex-shrink: 0;
+    }
+    .faux-search-text {
+      font-size: 12px;
+      color: var(--muted, #94A3B8);
+      padding-right: 32px;
+    }
+    .faux-search-btn {
+      background: var(--accent, #00B4D8);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+    .faux-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 28px 24px;
+    }
+    .faux-card {
+      height: 100px;
+      background: white;
+      border: 1px solid var(--border, #E2E8F0);
+      border-radius: 10px;
+    }
+    .faux-content {
+      padding: 16px 28px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .faux-line {
+      height: 8px;
+      background: rgba(15, 23, 42, 0.05);
+      border-radius: 4px;
+      width: 100%;
+    }
+    .faux-line.short { width: 60%; }
+    .faux-line.med { width: 80%; }
+
+    /* Mount inside the faux-site (for popup template). Sits absolute over
+       the faux-site content; popup chassis renders with position:fixed which
+       resolves to the faux-site (because .faux-site has transform:translateZ(0)
+       creating a containing block). */
+    #previewMountPopup {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    #previewMountPopup * {
+      pointer-events: auto;
+    }
+    .switch {
+      width: 36px; height: 20px;
+      background: var(--border-strong); border-radius: 999px;
+      position: relative; cursor: pointer; transition: background 0.15s;
+      flex-shrink: 0; border: 0; padding: 0;
+    }
+    .switch::after {
+      content: ''; position: absolute;
+      top: 2px; left: 2px; width: 16px; height: 16px;
+      background: white; border-radius: 50%;
+      transition: left 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .switch[aria-pressed="true"] { background: var(--accent); }
+    .switch[aria-pressed="true"]::after { left: 18px; }
+
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 4px; padding: 6px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      min-height: 38px; background: var(--panel);
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--accent-soft); color: var(--accent);
+      padding: 3px 8px; border-radius: 6px;
+      font-size: 12px; font-weight: 500;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .chip button {
+      background: none; border: 0; padding: 0; color: inherit;
+      opacity: 0.5; cursor: pointer; font-size: 14px; line-height: 1;
+    }
+    .chip button:hover { opacity: 1; }
+    .chips-input {
+      flex: 1; min-width: 80px; border: 0;
+      padding: 4px 6px; font-size: 12px; outline: none; background: none;
+    }
+
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px);
+      z-index: 100; display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: var(--panel); border-radius: var(--radius-xl);
+      max-width: 560px; width: calc(100% - 32px); max-height: 85vh;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title { font-size: 15px; font-weight: 600; }
+    .modal-close {
+      background: none; border: 0; padding: 4px;
+      color: var(--muted); cursor: pointer; border-radius: 6px;
+    }
+    .modal-close:hover { background: var(--hover); color: var(--ink); }
+    .modal-body { padding: 20px; overflow-y: auto; }
+
+    .embed-code {
+      background: #0F172A; color: #E2E8F0;
+      border-radius: var(--radius); padding: 12px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-all;
+      position: relative;
+    }
+    .embed-copy {
+      position: absolute; top: 8px; right: 8px;
+      padding: 4px 10px; background: rgba(255,255,255,0.1);
+      border: 0; color: white; border-radius: 6px;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+    }
+    .embed-copy:hover { background: rgba(255,255,255,0.2); }
+
+    .preview-stage { padding: 24px; min-height: 100%; }
+
+    .templates-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .template-card {
+      padding: 14px; border: 1px solid var(--border);
+      border-radius: var(--radius-lg); cursor: pointer;
+      background: var(--panel); transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .template-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+    .template-card-title { font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+    .template-card-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+    .ai-suggest-grid { display: grid; gap: 8px; }
+    .ai-suggest {
+      padding: 12px; border: 1px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; background: var(--panel);
+      transition: border-color 0.15s; font-size: 13px;
+    }
+    .ai-suggest:hover { border-color: var(--accent); background: var(--accent-soft); }
+  </style>
+</head>
+<body>
+
+  <!-- Login overlay is now handled by the shell. -->
+
+  <div class="tgse-app" id="editor" hidden>
+
+    <aside class="tgse-sidebar">
+
+      <div class="tgse-crumb">
+        <a href="/" id="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to dashboard
+        </a>
+      </div>
+
+      <div class="tgse-id">
+        <span class="tgse-id-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v10H3z"/><path d="M7 3v4M17 3v4"/><path d="M3 11h18"/></svg>
+        </span>
+        <div class="tgse-id-meta">
+          <div class="tgse-id-name">Travel Offers</div>
+          <div class="tgse-id-type" id="topbarSub">New widget</div>
+        </div>
+      </div>
+
+      <div class="tgse-actions">
+        <button class="tgse-btn" id="btn-templates" title="Templates">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Templates
+          <span class="tgse-kbd">T</span>
+        </button>
+        <button class="tgse-btn tgse-btn--ai" id="btn-ai" title="AI builder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.7L18.6 9.6l-4.7 1.9L12 16.2 10.1 11.5 5.4 9.6 10.1 7.7z"/><path d="M5 16l.8 2.2 2.2.8-2.2.8L5 22l-.8-2.2L2 19l2.2-.8z"/></svg>
+          AI builder
+          <span class="tgse-kbd">A</span>
+        </button>
+      </div>
+
+      <div class="tgse-name">
+        <input type="text" id="name-input" placeholder="Widget name" maxlength="100">
+        <button class="tgse-btn tgse-btn--primary" id="btn-save" title="Save (⌘S)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span id="save-label">Save</span>
+        </button>
+      </div>
+
+      <nav class="tgse-tabs" role="tablist">
+        <button id="tabContent" data-tab="content" role="tab" aria-selected="true">Content</button>
+        <button id="tabDesign" data-tab="design" role="tab" aria-selected="false">Design</button>
+        <button id="tabSettings" data-tab="settings" role="tab" aria-selected="false">Settings</button>
+      </nav>
+
+      <div class="sidebar-body">
+
+        <!-- ================ CONTENT TAB ================ -->
+        <div id="panelContent">
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Layout template
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Template</label>
+                <div class="template-grid" id="templateGrid" role="radiogroup" aria-label="Template">
+                  <!-- Cards: three rectangles in a row -->
+                  <button type="button" class="template-card" data-template="cards" aria-pressed="true" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <rect class="shape" x="4" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape" x="29" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="54" y="10" width="22" height="25" rx="2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Cards</div>
+                      <div class="sublabel">Grid, carousel or list</div>
+                    </div>
+                  </button>
+
+                  <!-- Magazine: hero banner on top, banner row, then 3-up with pull-quote in middle -->
+                  <button type="button" class="template-card" data-template="magazine" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Hero -->
+                        <rect class="shape-strong" x="4" y="3" width="72" height="14" rx="2"/>
+                        <!-- Banner row -->
+                        <rect class="shape" x="4" y="20" width="72" height="8" rx="2"/>
+                        <!-- 3-up with quote in middle -->
+                        <rect class="shape" x="4" y="31" width="22" height="11" rx="2"/>
+                        <rect class="shape-strong" x="29" y="31" width="22" height="11" rx="2" opacity="0.6"/>
+                        <rect class="shape" x="54" y="31" width="22" height="11" rx="2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Magazine</div>
+                      <div class="sublabel">Hero with editorial mosaic</div>
+                    </div>
+                  </button>
+
+                  <!-- Departure board: stacked rows with darker leftmost segment (time column) -->
+                  <button type="button" class="template-card" data-template="departure-board" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Header bar -->
+                        <rect class="shape" x="4" y="4" width="72" height="6" rx="1"/>
+                        <!-- Five rows: time column (strong) + body (subtle) -->
+                        <rect class="shape-strong" x="4" y="13" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="13" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="20" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="20" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="27" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="27" width="56" height="5" rx="1"/>
+                        <rect class="shape-strong" x="4" y="34" width="14" height="5" rx="1"/>
+                        <rect class="shape" x="20" y="34" width="56" height="5" rx="1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Departure board</div>
+                      <div class="sublabel">Live airport-style fares</div>
+                    </div>
+                  </button>
+
+                  <!-- Boarding pass: two pass shapes with perforation -->
+                  <button type="button" class="template-card" data-template="boarding-pass" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Left pass: main + stub -->
+                        <rect class="shape" x="4" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="27" y="10" width="9" height="25" rx="2"/>
+                        <line x1="26" y1="11" x2="26" y2="34" class="line" stroke-dasharray="1,1"/>
+                        <!-- Right pass: main + stub -->
+                        <rect class="shape" x="44" y="10" width="22" height="25" rx="2"/>
+                        <rect class="shape-strong" x="67" y="10" width="9" height="25" rx="2"/>
+                        <line x1="66" y1="11" x2="66" y2="34" class="line" stroke-dasharray="1,1"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Boarding pass</div>
+                      <div class="sublabel">Flights as paper passes</div>
+                    </div>
+                  </button>
+
+                  <!-- Ticker: horizontal row of pills suggesting marquee crawl -->
+                  <button type="button" class="template-card" data-template="ticker" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- "Live deals" label badge on the left, accent strong -->
+                        <rect class="shape-strong" x="2" y="17" width="16" height="11" rx="2"/>
+                        <!-- Row of pills crawling — first one half-cut suggests motion -->
+                        <rect class="shape" x="-2" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="22" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="38" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="54" y="19" width="14" height="7" rx="2"/>
+                        <rect class="shape" x="70" y="19" width="14" height="7" rx="2"/>
+                        <!-- Subtle motion dots on the right edge to imply it keeps going -->
+                        <circle class="shape" cx="78" cy="22.5" r="0.6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Ticker</div>
+                      <div class="sublabel">Marquee crawl of offers</div>
+                    </div>
+                  </button>
+                  <button type="button" class="template-card" data-template="popup" role="radio">
+                    <div class="preview" aria-hidden="true">
+                      <svg viewBox="0 0 80 45" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Faint background "page" suggesting a host site -->
+                        <rect class="shape" x="3" y="6" width="74" height="33" rx="2" opacity="0.25"/>
+                        <line class="line" x1="9" y1="13" x2="38" y2="13"/>
+                        <line class="line" x1="9" y1="17" x2="32" y2="17"/>
+                        <line class="line" x1="9" y1="22" x2="40" y2="22"/>
+                        <!-- The popup card itself, bottom-right slide-in style, accented to draw the eye -->
+                        <rect class="shape-strong" x="46" y="22" width="29" height="15" rx="2.5"/>
+                        <!-- Tiny content bars inside the popup card -->
+                        <rect class="shape" x="49" y="25" width="9" height="2" rx="0.5" opacity="0.6"/>
+                        <rect class="shape" x="49" y="29" width="14" height="2.5" rx="0.5" opacity="0.6"/>
+                        <rect class="shape" x="49" y="33" width="6" height="2" rx="0.5" opacity="0.6"/>
+                        <!-- Pulse dot bottom-right of popup -->
+                        <circle class="shape" cx="71" cy="34" r="1.2"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="label">Popup</div>
+                      <div class="sublabel">Slide-in, modal or banner</div>
+                    </div>
+                  </button>
+                </div>
+                <div class="field-help" style="margin-top: 8px;"><strong>Cards</strong> works for hotels, flights, and packages. <strong>Magazine</strong> features a hero offer with an editorial mosaic below. <strong>Departure board</strong> and <strong>Boarding pass</strong> are flights only. <strong>Ticker</strong> is a compact horizontal crawl, ideal for site headers and footers. <strong>Popup</strong> shows offers in a slide-in panel, modal or banner triggered by visitor behaviour.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="departure-board" hidden>
+            <button class="section-head" data-section>Departure airport
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row">
+                <span class="toggle-label">Auto-detect from visitor location
+                  <div class="toggle-help">Looks up the visitor's nearest UK airport via IP geolocation. Falls back to the default below.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAutoDetect" aria-pressed="true"></button>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label class="field-label" for="cfgBoardDefaultAirport">Default / fallback airport</label>
+                <select id="cfgBoardDefaultAirport"></select>
+                <div class="field-help">Used when auto-detect is off, when geolocation fails, or for non-UK visitors.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Allow visitor to switch airport
+                  <div class="toggle-help">Adds a tap-to-change menu to the header so visitors can pick a different nearby airport.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAllowSwitcher" aria-pressed="true"></button>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label class="field-label">Date window</label>
+                <div class="segmented" id="cfgBoardDateRangeSeg">
+                  <button type="button" data-range="14">14 days</button>
+                  <button type="button" data-range="30" aria-pressed="true">30 days</button>
+                  <button type="button" data-range="60">60 days</button>
+                  <button type="button" data-range="90">90 days</button>
+                </div>
+                <div class="field-help">How far ahead to look for cheap fares.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine ticker popup">
+            <button class="section-head" data-section>Offer type
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgType">What to fetch</label>
+                <select id="cfgType">
+                  <option value="Accommodation">Accommodation only</option>
+                  <option value="Flights">Flights only</option>
+                  <option value="DynamicPackages">Dynamic packages (Flight + Hotel)</option>
+                  <option value="PackageHolidays">Package holidays (operator)</option>
+                  <option value="BothPackages">Both package types</option>
+                  <option value="Any">Mixed (everything)</option>
+                </select>
+                <div class="field-help">Each type returns a different card layout.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Your properties
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Hotel list</label>
+                <textarea class="textarea" id="cfgTtiCodes" rows="8" spellcheck="false"
+                  placeholder="TTI:10946397, Vida Beach Resort Umm Al Quwain, AE&#10;TTI:76853197, Cocobay Resort, AG"></textarea>
+                <div class="field-help">
+                  One hotel per line: the Travelify property code, then optionally the hotel
+                  name and its two-letter country code. Paste straight from a spreadsheet.
+                  Codes work with or without the <code>TTI:</code> prefix. Up to 100 hotels.
+                  <strong>Add the name where you have it</strong> — it is how Travelify's own
+                  documented property lookup finds the hotel.
+                </div>
+                <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
+              </div>
+              <div class="field" id="originField">
+                <label class="field-label">Origins (flights/packages)</label>
+                <div class="chips" id="originChips">
+                  <input class="chips-input" id="originInput" placeholder="LGW, MAN, GB…" />
+                </div>
+                <div class="field-help">Airport IATAs or country codes for departure points.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Filters
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field" id="boardField">
+                <label class="field-label" for="cfgBoard">Board basis</label>
+                <select id="cfgBoard">
+                  <option value="">Any</option>
+                  <option value="RoomOnly">Room Only</option>
+                  <option value="BedAndBreakfast">B&amp;B</option>
+                  <option value="HalfBoard">Half Board</option>
+                  <option value="FullBoard">Full Board</option>
+                  <option value="AllInclusive">All Inclusive</option>
+                  <option value="AllInclusivePlus">All Inclusive Plus</option>
+                </select>
+              </div>
+              <div class="field" id="ratingField">
+                <label class="field-label" for="cfgRating">Min star rating</label>
+                <input id="cfgRating" type="number" min="0" max="5" step="0.5" value="0" />
+                <div class="field-help">Hotel-only. 0 = any rating.</div>
+              </div>
+              <div class="field" id="cabinField">
+                <label class="field-label" for="cfgCabin">Cabin class</label>
+                <select id="cfgCabin">
+                  <option value="">Any</option>
+                  <option value="Economy">Economy</option>
+                  <option value="PremiumEconomy">Premium Economy</option>
+                  <option value="Business">Business</option>
+                  <option value="First">First</option>
+                </select>
+                <div class="field-help">Flights and packages only.</div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgBudgetMin">Min budget (£pp)</label>
+                  <input id="cfgBudgetMin" type="number" min="0" value="0" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgBudgetMax">Max budget (£pp)</label>
+                  <input id="cfgBudgetMax" type="number" min="0" value="2000" />
+                </div>
+              </div>
+              <div class="field-row" id="durationRow">
+                <div class="field">
+                  <label class="field-label" for="cfgDurationMin">Min nights</label>
+                  <input id="cfgDurationMin" type="number" min="0" value="0" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgDurationMax">Max nights</label>
+                  <input id="cfgDurationMax" type="number" min="0" value="14" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Deal links
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-row">
+                <span class="toggle-label">Link each deal to its exact property
+                  <div class="toggle-help">When on, clicking a deal searches that specific hotel on your booking site. When off, it searches the deal's destination with matching dates, board and rating (the current behaviour). Deals without a property reference always fall back to the destination search.</div>
+                </span>
+                <button type="button" class="switch" id="cfgPropertyLinks" aria-pressed="false"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Date window &amp; sorting
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgDatesMin">From (days ahead)</label>
+                  <input id="cfgDatesMin" type="number" min="0" value="7" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgDatesMax">To (days ahead)</label>
+                  <input id="cfgDatesMax" type="number" min="0" value="180" />
+                </div>
+              </div>
+              <div class="field-help">Rolling window starting from today.</div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgMaxOffers">Max offers from API</label>
+                  <input id="cfgMaxOffers" type="number" min="1" max="250" value="100" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgSort">Sort</label>
+                  <select id="cfgSort">
+                    <option value="price:asc">Price (low to high)</option>
+                    <option value="price:desc">Price (high to low)</option>
+                    <option value="random">Random</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-help">How many offers the widget pulls per page load (supplier maximum 250 per request). This caps what visitors see, not what exists — the dedupe panel's "Available offers" shows the true count for your filters.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================ DESIGN TAB ================ -->
+        <div id="panelDesign" hidden>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Colours
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Brand colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch"><input type="color" id="brandColor" value="#1B2B5B" /></label>
+                  <input class="colour-hex" id="brandHex" maxlength="7" value="#1B2B5B" />
+                </div>
+                <div class="field-help">Reserved for future tier styling.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Accent colour</label>
+                <div class="colour-row">
+                  <label class="colour-swatch"><input type="color" id="accentColor" value="#00B4D8" /></label>
+                  <input class="colour-hex" id="accentHex" maxlength="7" value="#00B4D8" />
+                </div>
+                <div class="field-help">Used for IATA codes, CTAs, badges.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Shape &amp; type
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Card corner radius</label>
+                <div class="slider-row">
+                  <input class="slider" id="radius" type="range" min="0" max="24" value="14" />
+                  <span class="slider-value" id="radiusVal">14px</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Font family</label>
+                <div id="fontPickerMount"></div>
+                <div class="field-help">Applied to all text in the widget.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards">
+            <button class="section-head" data-section>Layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Layout style</label>
+                <div class="segmented" id="layoutSeg">
+                  <button type="button" data-layout="grid" aria-pressed="true">Grid</button>
+                  <button type="button" data-layout="carousel">Carousel</button>
+                  <button type="button" data-layout="list">List</button>
+                </div>
+                <div class="field-help"><strong>Grid</strong> stacks all offers. <strong>Carousel</strong> rotates through them with arrows and swipe. <strong>List</strong> renders compact horizontal rows — ideal for scanning lots of properties fast.</div>
+              </div>
+
+              <!-- Grid-only -->
+              <div class="field" data-when-layout="grid">
+                <label class="field-label">Columns</label>
+                <div class="segmented" id="columnsSeg">
+                  <button type="button" data-cols="auto" aria-pressed="true">Auto</button>
+                  <button type="button" data-cols="2">2</button>
+                  <button type="button" data-cols="3">3</button>
+                  <button type="button" data-cols="4">4</button>
+                </div>
+              </div>
+
+              <!-- Carousel-only -->
+              <div class="field" data-when-layout="carousel" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Auto-rotate
+                    <div class="toggle-help">Off by default — pauses on hover and touch when on</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgCarouselAutoplay" aria-pressed="false"></button>
+                </label>
+              </div>
+              <div class="field" data-when-layout="carousel" data-when-autoplay="true" hidden>
+                <label class="field-label" for="cfgCarouselInterval">Rotate every</label>
+                <select id="cfgCarouselInterval">
+                  <option value="4">4 seconds</option>
+                  <option value="6" selected>6 seconds</option>
+                  <option value="8">8 seconds</option>
+                  <option value="10">10 seconds</option>
+                </select>
+              </div>
+
+              <!-- List-only -->
+              <div class="field" data-when-layout="list" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Show meta row
+                    <div class="toggle-help">Stars, location, nights, board basis, schedule. Turn off for a stripped-back list.</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgListShowMeta" aria-pressed="true"></button>
+                </label>
+              </div>
+              <div class="field" data-when-layout="list" hidden>
+                <label class="toggle-row" style="padding: 0; border: 0;">
+                  <span class="toggle-label">Show tag chips
+                    <div class="toggle-help">Up to four amenity or trip-type tags below each row.</div>
+                  </span>
+                  <button type="button" class="switch" id="cfgListShowAmenities" aria-pressed="true"></button>
+                </label>
+              </div>
+
+              <div class="field">
+                <label class="field-label">Card density</label>
+                <div class="segmented" id="densitySeg">
+                  <button type="button" data-density="compact">Compact</button>
+                  <button type="button" data-density="standard" aria-pressed="true">Standard</button>
+                  <button type="button" data-density="detailed">Detailed</button>
+                </div>
+                <div class="field-help"><strong>Compact</strong>, <strong>Standard</strong> and <strong>Detailed</strong> control how wide each card is — they don't switch fields on or off. Use the toggles below to choose what's displayed.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="departure-board" hidden>
+            <button class="section-head" data-section>Departure board theme &amp; behaviour
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Look</label>
+                <div class="segmented" id="boardThemeSeg">
+                  <button type="button" data-board-theme="dark" aria-pressed="true">Dark (classic)</button>
+                  <button type="button" data-board-theme="light">Light</button>
+                </div>
+                <div class="field-help"><strong>Dark</strong> evokes a real airport board — best for hero sections. <strong>Light</strong> blends into bright marketing pages.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Split-flap animation
+                  <div class="toggle-help">Subtle character flicker on each refresh. Honours reduced-motion preferences.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAnimate" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Auto-refresh
+                  <div class="toggle-help">Re-fetches fares on a timer. Always refreshes when the visitor returns to the tab.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardAutoRefresh" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-board-autorefresh="true">
+                <label class="field-label" for="cfgBoardRefreshSeconds">Refresh every</label>
+                <select id="cfgBoardRefreshSeconds">
+                  <option value="120">2 minutes</option>
+                  <option value="300" selected>5 minutes</option>
+                  <option value="600">10 minutes</option>
+                  <option value="1800">30 minutes</option>
+                </select>
+              </div>
+
+              <div class="toggle-group-heading" style="margin-top: 16px;">Status pills</div>
+              <div class="field-help" style="margin-bottom: 8px;">One pill per row maximum, picked by priority. <strong>Cheapest</strong>, <strong>Today</strong> and <strong>This week</strong> are always on. The three below are optional.</div>
+              <div class="toggle-row">
+                <span class="toggle-label">Tomorrow pill
+                  <div class="toggle-help">Orange pill for flights departing in 24-48 hours.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowTomorrow" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Going soon pill
+                  <div class="toggle-help">Teal pill for flights departing within the next N days. Threshold below.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowGoingSoon" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-board-going-soon="true">
+                <label class="field-label" for="cfgBoardGoingSoonDays">Going soon threshold</label>
+                <select id="cfgBoardGoingSoonDays">
+                  <option value="7">Within 7 days</option>
+                  <option value="14" selected>Within 14 days</option>
+                  <option value="21">Within 21 days</option>
+                  <option value="30">Within 30 days</option>
+                </select>
+                <div class="field-help">Luxury operators may want a tighter window (7 days), budget specialists looser (21–30 days). Default is 14.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Premium cabin pill
+                  <div class="toggle-help">Purple pill for Business and First class fares.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardShowPremiumCabin" aria-pressed="true"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════ Magazine template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="magazine" hidden>
+            <button class="section-head" data-section>Magazine layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Hero offer selection</label>
+                <select id="cfgMagazineHeroStrategy">
+                  <option value="discount" selected>Biggest discount</option>
+                  <option value="featured">Featured (falls back to discount)</option>
+                  <option value="cheapest">Cheapest</option>
+                  <option value="first">First returned</option>
+                </select>
+                <div class="field-help"><strong>Biggest discount</strong> picks the offer with the largest "was vs now" saving. <strong>Featured</strong> picks the first offer with featured=true if any (falls back to biggest discount). <strong>Cheapest</strong> uses the lowest price. <strong>First</strong> uses whatever Travelify returned first.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Feature spotlight</label>
+                <div class="segmented" id="magazineFeatureEverySeg">
+                  <button type="button" data-feature-every="0">Off</button>
+                  <button type="button" data-feature-every="3">Every 3rd</button>
+                  <button type="button" data-feature-every="4" aria-pressed="true">Every 4th</button>
+                  <button type="button" data-feature-every="5">Every 5th</button>
+                </div>
+                <div class="field-help">Every Nth banner gets the feature treatment — taller image, larger headline, more body copy. Like the cover stories in a print magazine. Set to <strong>Off</strong> for uniform banners throughout.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Editorial dividers
+                  <div class="toggle-help">Small caps text between sections (e.g. "8 more handpicked stays") for editorial feel.</div>
+                </span>
+                <button type="button" class="switch" id="cfgMagazineShowDividers" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top: 6px;">Below the hero, every offer is rendered as a full-width banner card. Banners alternate sides — image left, image right, image left — for visual rhythm. On mobile, all banners collapse to single column with image on top.</div>
+            </div>
+          </div>
+
+          <!-- ═══════ Boarding-pass template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="boarding-pass" hidden>
+            <button class="section-head" data-section>Boarding pass layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Passes per row</label>
+                <div class="segmented" id="boardingPassColumnsSeg">
+                  <button type="button" data-bp-cols="1">1</button>
+                  <button type="button" data-bp-cols="2" aria-pressed="true">2</button>
+                </div>
+                <div class="field-help">Two columns on desktop, falls back to one on mobile regardless. Set 1 for a tighter, more vertical look on full-width sections.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show barcode strip
+                  <div class="toggle-help">Decorative barcode on the stub. Turn off for a cleaner pass shape.</div>
+                </span>
+                <button type="button" class="switch" id="cfgBoardingPassShowBarcode" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top:6px;">Boarding pass is flights only — accommodation and package filters are ignored when this template is active. Use the same flight filters as cards (origin, cabin class, dates).</div>
+            </div>
+          </div>
+
+          <!-- ═══════ Ticker template options ═══════ -->
+          <div class="section" data-open="true" data-when-template="ticker" hidden>
+            <button class="section-head" data-section>Ticker layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label">Visual style</label>
+                <div class="segmented" id="tickerStyleSeg">
+                  <button type="button" data-ticker-style="pills" aria-pressed="true">Pills</button>
+                  <button type="button" data-ticker-style="ribbon">Ribbon</button>
+                </div>
+                <div class="field-help"><strong>Pills</strong> shows offers as discrete card pills with hover states — works on most sites. <strong>Ribbon</strong> is a continuous strip with diamond separators, like an airport flight info display.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Speed</label>
+                <div class="segmented" id="tickerSpeedSeg">
+                  <button type="button" data-ticker-speed="slow">Slow</button>
+                  <button type="button" data-ticker-speed="medium" aria-pressed="true">Medium</button>
+                  <button type="button" data-ticker-speed="fast">Fast</button>
+                </div>
+                <div class="field-help">How fast the ticker crawls. <strong>Medium</strong> (80s loop) is a comfortable reading pace. <strong>Slow</strong> may feel static; <strong>Fast</strong> is decorative motion rather than readable info.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show label badge
+                  <div class="toggle-help">"Live deals" stamp on the left edge with a green pulse indicator.</div>
+                </span>
+                <button type="button" class="switch" id="cfgTickerShowLabel" aria-pressed="true"></button>
+              </div>
+              <div class="field" data-when-ticker-show-label="true">
+                <label class="field-label" for="cfgTickerLabel">Label text</label>
+                <input type="text" id="cfgTickerLabel" maxlength="20" placeholder="Live deals" />
+                <div class="field-help">Short text — keep under 20 characters. Examples: "Live deals", "Flight deals", "This week's offers".</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Pause on hover
+                  <div class="toggle-help">Visitor hovers anywhere on the ticker, the crawl pauses so they can read or click. Recommended on.</div>
+                </span>
+                <button type="button" class="switch" id="cfgTickerPauseOnHover" aria-pressed="true"></button>
+              </div>
+              <div class="field-help" style="margin-top:6px;">The ticker shows offers as a horizontal marquee — best placed in a site header, footer band, or between content sections. Works for accommodation, flights, and packages. The ticker honours <em>prefers-reduced-motion</em> and falls back to a static snapshot for visitors who've turned animations off.</div>
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════════════════════════════
+               POPUP TEMPLATE — behaviour, layout, triggers, frequency
+               Only visible when template === 'popup'.
+               ════════════════════════════════════════════════════════ -->
+          <div class="section" data-open="true" data-when-template="popup" hidden>
+            <button class="section-head" data-section>Popup layout
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupLayout">Where the popup appears</label>
+                <select id="cfgPopupLayout">
+                  <option value="slide-in">Slide-in panel (corner)</option>
+                  <option value="centered">Centered modal (overlay)</option>
+                  <option value="floating-card">Floating card (corner, no backdrop)</option>
+                  <option value="top-bar">Top banner (full width)</option>
+                  <option value="bottom-bar">Bottom banner (full width)</option>
+                  <option value="side-drawer">Side drawer (full height)</option>
+                  <option value="fullscreen">Fullscreen takeover</option>
+                  <option value="inline">Inline (renders in place)</option>
+                </select>
+                <div class="field-help"><strong>Slide-in</strong> is the friendliest default — sits in a corner, dismissible. <strong>Centered modal</strong> is more disruptive but higher attention. <strong>Top/bottom banner</strong> shows offers as a strip across the page. <strong>Floating card</strong> shows a single offer at a time, ideal for the rotating "ambient deals" effect. <strong>Side drawer</strong> takes a full vertical edge.</div>
+              </div>
+              <div class="field" id="popupPositionField" data-when-popup-layout="slide-in floating-card">
+                <label class="field-label">Position</label>
+                <div class="position-picker" id="popupPositionPicker" role="radiogroup" aria-label="Popup position">
+                  <button type="button" class="pos-btn" data-popup-pos="top-left" aria-label="Top left" title="Top left"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="top-center" aria-label="Top centre" title="Top centre"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="top-right" aria-label="Top right" title="Top right"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="left-center" aria-label="Left centre" title="Left centre"></button>
+                  <span class="pos-center-label" aria-hidden="true">use<br>centered<br>layout</span>
+                  <button type="button" class="pos-btn" data-popup-pos="right-center" aria-label="Right centre" title="Right centre"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="bottom-left" aria-label="Bottom left" title="Bottom left"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="bottom-center" aria-label="Bottom centre" title="Bottom centre"></button>
+                  <button type="button" class="pos-btn" data-popup-pos="bottom-right" aria-label="Bottom right" title="Bottom right" aria-pressed="true"></button>
+                </div>
+                <div class="field-help">Click any of the 8 positions. <strong>Bottom-right</strong> is the convention — sits where users expect the popup to appear without blocking key content. For dead-centre, switch the layout to <strong>centered</strong>.</div>
+              </div>
+              <div class="field" id="popupSideDrawerField" data-when-popup-layout="side-drawer">
+                <label class="field-label">Side</label>
+                <div class="segmented" id="popupSideDrawerSeg">
+                  <button type="button" data-popup-side="left">Left</button>
+                  <button type="button" data-popup-side="right" aria-pressed="true">Right</button>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupRenderMode">Internal render mode</label>
+                <select id="cfgPopupRenderMode">
+                  <option value="auto">Auto — picks based on layout (recommended)</option>
+                  <option value="compact">Compact — multi-card list</option>
+                  <option value="single">Single — one offer with hero image</option>
+                  <option value="mini">Mini — text-only banner pills</option>
+                  <option value="carousel">Carousel — swipeable cards with dots</option>
+                  <option value="split">Split — image left, details right</option>
+                  <option value="countdown">Countdown — featured offer + timer</option>
+                </select>
+                <div class="field-help"><strong>Auto</strong> picks a sensible mode for each layout. <strong>Carousel</strong> works best in slide-in / centered. <strong>Split</strong> needs a wide layout (centered or fullscreen) — falls back to single if too narrow. <strong>Countdown</strong> is for time-bound campaigns with a deadline.</div>
+              </div>
+              <!-- Inline warning shown when Split is picked but the current
+                   layout is too narrow. Visibility driven by JS in
+                   updatePopupRenderModeVisibility. -->
+              <div class="field" id="popupSplitFallbackNotice" hidden>
+                <div class="field-callout">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div class="field-callout-body">
+                    <strong>Split needs Centered or Fullscreen layout.</strong> The current layout is too narrow for two columns, so the popup will render as <strong>single</strong> mode instead.
+                    <button type="button" class="field-callout-action" id="popupSplitFixLayoutBtn">Switch to Centered</button>
+                  </div>
+                </div>
+              </div>
+              <div class="field" data-when-popup-render-mode="compact">
+                <label class="field-label">Compact arrangement</label>
+                <div class="segmented" id="popupCompactLayoutSeg">
+                  <button type="button" data-popup-compact-layout="stacked" aria-pressed="true">Stacked</button>
+                  <button type="button" data-popup-compact-layout="grid">Grid</button>
+                  <button type="button" data-popup-compact-layout="hero-list">Hero + list</button>
+                </div>
+                <div class="field-help"><strong>Stacked</strong> shows offers as full-width image-left rows — readable, dense. <strong>Grid</strong> arranges them as 2-column image-top tiles — more visual, fewer offers fit. <strong>Hero + list</strong> features the first offer with a big image, the rest as compact text rows — best for "today's best deal + 3 alternatives".</div>
+              </div>
+              <div class="field" data-when-popup-render-mode="countdown">
+                <label class="field-label" for="cfgPopupCountdownEnd">Countdown ends</label>
+                <input type="datetime-local" id="cfgPopupCountdownEnd" />
+                <div class="field-help">Date and time the deal expires. Timer ticks down to this. Once passed, the popup gracefully falls back to the single-offer view.</div>
+              </div>
+              <div class="field" data-when-popup-render-mode="countdown">
+                <label class="field-label" for="cfgPopupCountdownCaption">Timer caption</label>
+                <input type="text" id="cfgPopupCountdownCaption" placeholder="Offers end in" maxlength="60" />
+                <div class="field-help">Small text shown above the timer digits. Defaults to "Offers end in".</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="popup" hidden>
+            <button class="section-head" data-section>When the popup fires
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupTrigger">Trigger</label>
+                <select id="cfgPopupTrigger">
+                  <option value="load">On page load</option>
+                  <option value="time">After time delay</option>
+                  <option value="scroll">After scroll percentage</option>
+                  <option value="exit-intent">On exit intent (mouse leaves page)</option>
+                  <option value="click">On click of a specific element</option>
+                  <option value="inactivity">After inactivity</option>
+                  <option value="pageviews">After N pageviews in this session</option>
+                </select>
+                <div class="field-help"><strong>On load</strong> with a 5-10 second delay is the friendliest. <strong>Exit intent</strong> catches the visitor as they leave — high attention, can feel pushy. <strong>Scroll</strong> means they're already engaged. <strong>Click</strong> is for explicit "Show me deals" buttons.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="load time">
+                <label class="field-label" for="cfgPopupTriggerDelay">Delay (milliseconds)</label>
+                <input type="number" id="cfgPopupTriggerDelay" min="0" step="500" placeholder="5000" />
+                <div class="field-help">5000ms (5 seconds) is the standard. Anything under 2 seconds feels rude. Above 30 seconds and most visitors will have left.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="scroll">
+                <label class="field-label" for="cfgPopupTriggerScrollPercent">Scroll percentage</label>
+                <input type="number" id="cfgPopupTriggerScrollPercent" min="1" max="100" step="5" placeholder="50" />
+                <div class="field-help">Fires when the visitor has scrolled this far down the page. 50% is engaged, 75% is committed.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="inactivity">
+                <label class="field-label" for="cfgPopupTriggerInactivitySeconds">Seconds of inactivity</label>
+                <input type="number" id="cfgPopupTriggerInactivitySeconds" min="5" step="5" placeholder="30" />
+                <div class="field-help">Fires after N seconds with no mouse / keyboard / scroll / touch activity. Catches visitors who've stalled.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="pageviews">
+                <label class="field-label" for="cfgPopupTriggerPageviews">Pageviews required</label>
+                <input type="number" id="cfgPopupTriggerPageviews" min="1" step="1" placeholder="2" />
+                <div class="field-help">Fires once the visitor has viewed this many pages in their session. 2-3 means they're actually browsing.</div>
+              </div>
+              <div class="field" data-when-popup-trigger="click">
+                <label class="field-label" for="cfgPopupTriggerSelector">CSS selector to listen on</label>
+                <input type="text" id="cfgPopupTriggerSelector" placeholder=".deals-button, #show-offers" />
+                <div class="field-help">Any click on an element matching this selector opens the popup. Use a class or ID — keep it simple. Example: <code>.show-deals</code> or <code>#header-deals-link</code>.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="popup" hidden>
+            <button class="section-head" data-section>How often to show
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupFrequency">Frequency</label>
+                <select id="cfgPopupFrequency">
+                  <option value="session">Once per session</option>
+                  <option value="visitor">Once per visitor (ever)</option>
+                  <option value="every-visit">Every visit</option>
+                  <option value="every-n-days">Once every N days</option>
+                </select>
+                <div class="field-help"><strong>Once per session</strong> is the polite default. <strong>Every visit</strong> is aggressive and only suits true offer-led sites. <strong>Once per visitor</strong> is for major announcements you only want shown once.</div>
+              </div>
+              <div class="field" data-when-popup-frequency="every-n-days">
+                <label class="field-label" for="cfgPopupFrequencyDays">Days between shows</label>
+                <input type="number" id="cfgPopupFrequencyDays" min="1" step="1" placeholder="7" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupSuppressAfterDismissDays">Suppress after dismiss (days)</label>
+                <input type="number" id="cfgPopupSuppressAfterDismissDays" min="0" step="1" placeholder="0" />
+                <div class="field-help">If the visitor dismisses the popup, don't show it again for this many days. <strong>0</strong> means no extra suppression on top of the frequency rule. <strong>7</strong> gives them a clear week's break.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupSuppressAfterConversionDays">Suppress after click (days)</label>
+                <input type="number" id="cfgPopupSuppressAfterConversionDays" min="0" step="1" placeholder="30" />
+                <div class="field-help">If the visitor clicks an offer (a "conversion"), don't show the popup again for this many days. The default 30 means we don't pester someone who already engaged.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="popup" hidden>
+            <button class="section-head" data-section>Page &amp; device targeting
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupPageInclude">Show only on these pages</label>
+                <input type="text" id="cfgPopupPageInclude" placeholder="/deals, /destinations/*, /offers/*" />
+                <div class="field-help">Comma-separated list. Supports <code>*</code> wildcards. Leave empty to show on every page. Example: <code>/destinations/*</code> matches any destination page.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupPageExclude">Don't show on these pages</label>
+                <input type="text" id="cfgPopupPageExclude" placeholder="/checkout, /booking/*" />
+                <div class="field-help">Same syntax as above. Common: exclude <code>/checkout</code> and <code>/booking/*</code> so you don't distract visitors who are already buying.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">Show on devices</label>
+                <div class="toggle-row">
+                  <span class="toggle-label">Desktop</span>
+                  <button type="button" class="switch" id="cfgPopupDeviceDesktop" aria-pressed="true"></button>
+                </div>
+                <div class="toggle-row">
+                  <span class="toggle-label">Tablet</span>
+                  <button type="button" class="switch" id="cfgPopupDeviceTablet" aria-pressed="true"></button>
+                </div>
+                <div class="toggle-row">
+                  <span class="toggle-label">Mobile</span>
+                  <button type="button" class="switch" id="cfgPopupDeviceMobile" aria-pressed="true"></button>
+                </div>
+                <div class="field-help">Mobile popups are riskier — small screens mean even a slide-in feels like an interruption. Consider mobile-off if your popup is centered or fullscreen.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="popup" hidden>
+            <button class="section-head" data-section>Content &amp; behaviour
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPopupHeading">Heading text</label>
+                <input type="text" id="cfgPopupHeading" maxlength="40" placeholder="Live deals" />
+                <div class="field-help">Short label shown at the top of the popup. Examples: "Live deals", "Today's offers", "Hand-picked".</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show pulse indicator
+                  <div class="toggle-help">Green pulsing dot next to the heading — communicates "live" / "real-time".</div>
+                </span>
+                <button type="button" class="switch" id="cfgPopupShowPulse" aria-pressed="true"></button>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupMaxRender">Maximum offers to show in popup</label>
+                <input type="number" id="cfgPopupMaxRender" min="1" max="20" step="1" placeholder="6" />
+                <div class="field-help">How many offers actually render inside the popup. Separate from the main "Max offers from API" — that controls how many come back from Travelify. This caps how many fit in the popup itself. <strong>6</strong> is comfortable for a slide-in panel; <strong>3</strong> feels premium for a centred modal; <strong>1</strong> for a floating card with rotation.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupRotateInterval">Auto-rotate interval (ms)</label>
+                <input type="number" id="cfgPopupRotateInterval" min="0" step="1000" placeholder="8000" />
+                <div class="field-help">For the floating-card layout (single-offer mode), how often to switch to the next offer. <strong>0</strong> disables rotation. <strong>8000</strong> (8 seconds) feels natural. Honours <em>prefers-reduced-motion</em> automatically.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupFooterText">Footer text (optional)</label>
+                <input type="text" id="cfgPopupFooterText" maxlength="60" placeholder="3 of 12 deals shown" />
+                <div class="field-help">Shown at the bottom of the compact card list. Only displays if both this and the footer CTA are filled in.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupFooterCtaText">Footer CTA text (optional)</label>
+                <input type="text" id="cfgPopupFooterCtaText" maxlength="20" placeholder="View all" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupFooterCtaUrl">Footer CTA URL</label>
+                <input type="text" id="cfgPopupFooterCtaUrl" placeholder="/deals" />
+                <div class="field-help">Where the footer CTA button links to. Usually your full deals page.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show close button</span>
+                <button type="button" class="switch" id="cfgPopupShowCloseButton" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Close on Escape key</span>
+                <button type="button" class="switch" id="cfgPopupCloseOnEscape" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Close on backdrop click
+                  <div class="toggle-help">Visitor clicks the dimmed background — popup closes. Only applies to centered, fullscreen, side-drawer.</div>
+                </span>
+                <button type="button" class="switch" id="cfgPopupCloseOnBackdropClick" aria-pressed="true"></button>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Show backdrop overlay
+                  <div class="toggle-help">Dimmed background behind the popup. Off means the popup floats over the page without dimming. Slide-in / floating-card / banners ignore this.</div>
+                </span>
+                <button type="button" class="switch" id="cfgPopupOverlay" aria-pressed="true"></button>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgPopupOverlayOpacity">Backdrop opacity (%)</label>
+                <input type="number" id="cfgPopupOverlayOpacity" min="0" max="100" step="5" placeholder="60" />
+                <div class="field-help">How dark the backdrop is. 60% is comfortable. Below 30% feels weak; above 80% feels heavy.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="true" data-when-template="cards magazine boarding-pass ticker popup">
+            <button class="section-head" data-section>Price display
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgPriceDisplay">How prices are shown</label>
+                <select id="cfgPriceDisplay">
+                  <option value="auto" selected>Auto (per person if available, else total)</option>
+                  <option value="total">Total</option>
+                  <option value="perPerson">Per person</option>
+                  <option value="perNight">Per night</option>
+                  <option value="perPersonPerNight">Per person, per night</option>
+                </select>
+                <div class="field-help">Per-night options need accommodation nights — they fall back gracefully on flight-only offers.</div>
+              </div>
+              <div class="field">
+                <label class="field-label" for="cfgDisplayCurrency">Display currency</label>
+                <select id="cfgDisplayCurrency"></select>
+                <div class="field-help">Prices are converted from GBP to this currency at live exchange rates.</div>
+              </div>
+              <div class="toggle-row">
+                <span class="toggle-label">Let visitors switch currency
+                  <div class="toggle-help">Adds a currency picker above the offers so a visitor can choose their own.</div>
+                </span>
+                <button type="button" class="switch" id="cfgShowCurrencySwitcher" aria-pressed="false"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false" data-when-template="cards">
+            <button class="section-head" data-section>Show on cards
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="toggle-group-heading">Universal</div>
+              <div class="toggle-row"><span class="toggle-label">Property type tag</span><button class="switch" id="showPropertyType" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Hotel chain</span><button class="switch" id="showChain" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Location (city, country)</span><button class="switch" id="showLocation" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Property summary</span><button class="switch" id="showSummary" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Stay details panel<div class="toggle-help">Check-in, nights, board, travellers</div></span><button class="switch" id="showStayDetails" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Amenities</span><button class="switch" id="showAmenities" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">TripAdvisor reviews</span><button class="switch" id="showReviews" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Refundability</span><button class="switch" id="showRefundability" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Variant count badge<div class="toggle-help">"+5 more" pill when dedupe collapsed alternatives</div></span><button class="switch" id="showVariantCount" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Lead-in price pill</span><button class="switch" id="showLeadInPill" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Strikethrough was-price</span><button class="switch" id="showWasPrice" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">"Based on N sharing" line<div class="toggle-help">Tap-to-edit pax popover next to price</div></span><button class="switch" id="showPaxBasis" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Flights</div>
+              <div class="toggle-row"><span class="toggle-label">Flight destination image</span><button class="switch" id="showFlightImage" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Flight schedule details</span><button class="switch" id="showFlightSchedule" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Duration / trip type</span><button class="switch" id="showFlightDuration" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Cabin class</span><button class="switch" id="showCabinClass" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Packages</div>
+              <div class="toggle-row"><span class="toggle-label">Package summary panel<div class="toggle-help">Flight + hotel + travellers</div></span><button class="switch" id="showPackageSummary" aria-pressed="true"></button></div>
+              <div class="toggle-row"><span class="toggle-label">Operator strip<div class="toggle-help">Package Holiday operator + ATOL badge</div></span><button class="switch" id="showPackageOperator" aria-pressed="true"></button></div>
+
+              <div class="toggle-group-heading">Footer</div>
+              <div class="toggle-row"><span class="toggle-label">"Powered by Travelgenix" footer</span><button class="switch" id="showPoweredBy"></button></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================ SETTINGS TAB ================ -->
+        <div id="panelSettings" hidden>
+
+          <div class="section" data-open="true">
+            <button class="section-head" data-section>Deduplication
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgDedupe">Strategy</label>
+                <select id="cfgDedupe">
+                  <option value="none">None — show every variant</option>
+                  <option value="hotel" selected>One per hotel (cheapest wins)</option>
+                  <option value="hotel-board">One per hotel + board basis</option>
+                  <option value="hotel-duration">One per hotel + duration</option>
+                  <option value="hotel-departure">One per hotel + departure date</option>
+                  <option value="route">One per flight route</option>
+                  <option value="route-carrier">One per route + carrier</option>
+                </select>
+                <div class="field-help">The widget always pulls everything from Travelify (no upstream dedupe), then applies your rule client-side.</div>
+                <div class="breakdown-panel is-empty" id="breakdownPanel">
+                  Load a preview to see how each strategy affects offer counts.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Cache
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgCache">Cache duration (minutes)</label>
+                <input id="cfgCache" type="number" min="0" max="240" value="15" />
+                <div class="field-help">0 = always fresh on every page load. 15 mins recommended. Cached per-visitor in their browser session.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Empty state
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgEmptyBehaviour">If no offers match</label>
+                <select id="cfgEmptyBehaviour">
+                  <option value="show" selected>Show friendly empty state</option>
+                  <option value="hide">Hide widget entirely</option>
+                </select>
+              </div>
+              <div id="emptyDetailsWrap">
+                <div class="field">
+                  <label class="field-label" for="cfgEmptyHeading">Heading</label>
+                  <input id="cfgEmptyHeading" type="text" value="No offers available right now" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgEmptyBody">Body text</label>
+                  <textarea id="cfgEmptyBody" rows="2">We couldn't find any matching offers. Check back soon, or try our search.</textarea>
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label class="field-label" for="cfgEmptyCtaText">CTA text (optional)</label>
+                    <input id="cfgEmptyCtaText" type="text" placeholder="Search now" />
+                  </div>
+                  <div class="field">
+                    <label class="field-label" for="cfgEmptyCtaUrl">CTA URL (optional)</label>
+                    <input id="cfgEmptyCtaUrl" type="text" placeholder="https://..." />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section" data-open="false">
+            <button class="section-head" data-section>Travelify credentials
+              <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="section-body">
+              <div class="field-help">Your Travelify Offers credentials are stored at your Travelgenix account level — same set used across all your widgets. To update them, contact support.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </aside>
+
+    <section class="tgse-preview">
+      <div class="tgse-toolbar">
+        <span class="tgse-status"><span class="tgse-status-dot"></span> Live preview</span>
+        <span class="tgse-spacer"></span>
+
+        <div class="tgse-vp" role="group" aria-label="Viewport">
+          <button class="is-on" data-vp="desktop" id="vpDesktop" title="Desktop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+          <button data-vp="tablet" id="vpTablet" title="Tablet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+          <button data-vp="mobile" id="vpMobile" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 18h.01"/></svg></button>
+        </div>
+
+        <div class="tgse-divider"></div>
+
+        <button class="tgse-btn tgse-btn--sm tgse-btn--ghost" id="btn-theme" title="Toggle widget theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          Theme
+        </button>
+        <button class="tgse-btn tgse-btn--sm tgse-btn--primary" id="btn-embed" title="Get embed code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Get embed code
+        </button>
+      </div>
+
+      <div class="tgse-canvas">
+        <div class="preview-stage" id="previewStage" data-vp="desktop">
+          <!-- Faux-site mockup — only visible when the popup template is
+               selected. Gives popups a realistic host-site context so the
+               user sees what visitors will actually see. The previewMount
+               lives INSIDE the faux-site when popup is active so the
+               position:fixed popup chassis is contained within the faux-site
+               (via transform:translateZ(0) on .faux-site creating a
+               containing block for fixed-position descendants). -->
+          <div id="previewFauxSite" class="faux-site" hidden>
+            <div class="faux-nav">
+              <span class="faux-logo">Travel Co.</span>
+              <span class="faux-nav-links">
+                <span>Holidays</span>
+                <span>Destinations</span>
+                <span>Deals</span>
+                <span>About</span>
+              </span>
+            </div>
+            <div class="faux-hero">
+              <h2 class="faux-h2">Your next great escape</h2>
+              <p class="faux-p">Hand-picked offers from over 200 trusted operators. ATOL protected.</p>
+              <div class="faux-search">
+                <span class="faux-search-icon"></span>
+                <span class="faux-search-text">Where would you like to go?</span>
+                <span class="faux-search-btn">Search</span>
+              </div>
+            </div>
+            <div class="faux-cards">
+              <div class="faux-card"></div>
+              <div class="faux-card"></div>
+              <div class="faux-card"></div>
+            </div>
+            <div class="faux-content">
+              <div class="faux-line"></div>
+              <div class="faux-line short"></div>
+              <div class="faux-line"></div>
+              <div class="faux-line"></div>
+              <div class="faux-line med"></div>
+            </div>
+            <!-- Mount lives inside the faux-site for popup template only -->
+            <div id="previewMountPopup"></div>
+          </div>
+          <!-- Mount for inline templates (cards, magazine, board, boarding-pass, ticker) -->
+          <div id="previewMount"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- AI Modal -->
+  <div class="modal-backdrop" id="aiModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">AI suggestions</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Pick a starting point and the AI will configure the widget for you.</div>
+        <div class="ai-suggest-grid" id="aiSuggestGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates Modal -->
+  <div class="modal-backdrop" id="templatesModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Templates</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="templates-grid" id="templatesGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Embed Modal -->
+  <div class="modal-backdrop" id="embedModal" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">Embed code</div>
+        <button class="modal-close" data-close aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:12px;">Paste this into any HTML page on your site. Save the widget first if you haven't already.</div>
+        <div class="embed-code" id="embedCode">Save the widget first to generate the embed code.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/widget-offers.js"></script>
+  <script src="/editor-shell.js"></script>
+
+  <!-- Guided setup tour (reusable engine + step list) -->
+  <script src="/editor-tour.js"></script>
+  <script src="/tour-hotel-offers.js"></script>
+
+  <script>
+    /* ============================================================
+       State + helpers
+       ============================================================ */
+    const API_CONFIG = '/api/widget-config';
+    const API_AI = '/api/widget-ai';
+    const WIDGET_TYPE = 'Hotel Offers';
+
+    const TG_TRAVELIFY_APPID = '250';
+    const TG_TRAVELIFY_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const widgetIdFromUrl = urlParams.get('id');
+
+    function defaultConfig() {
+      return {
+        // Template — picks the visual layout. 'cards' is the existing
+        // grid/carousel render. 'departure-board' is the airport-style
+        // table. Default 'cards' keeps existing widgets identical.
+        template: 'cards',
+        type: 'Accommodation',
+        // The property list. Rows of { code, name, ctry } — the cron can then
+        // also try Travelify's documented loct=Property anchor, which names a
+        // hotel rather than coding it. `destinations` stays present and empty:
+        // the engine prefers ttiCodes and ignores it, and keeping the key means
+        // every shared template and filter below behaves unchanged.
+        ttiCodes: [],
+        destinations: [], origins: [],
+        boardBases: [], cabinClasses: [],
+        ratingMin: 0, budgetMin: 0, budgetMax: 2000,
+        durationMin: 0, durationMax: 14,
+        DatesMin: 7, DatesMax: 180,
+        maxOffers: 100, sort: 'price:asc',
+        columns: 'auto', density: 'standard', theme: 'light',
+        brandColor: '#1B2B5B', accentColor: '#00B4D8',
+        radius: 14, fontFamily: '',
+        priceDisplay: 'auto',
+        displayCurrency: 'GBP',
+        showCurrencySwitcher: false,
+        layout: 'grid',
+        carouselAutoplay: false,
+        carouselInterval: 6,
+        // Departure-board template config (used only when template='departure-board')
+        boardTheme: 'dark',
+        boardDefaultAirport: 'LHR',
+        boardAutoDetect: true,
+        boardAllowSwitcher: true,
+        boardAnimate: true,
+        boardAutoRefresh: true,
+        boardRefreshSeconds: 300,
+        boardDateRange: 30,
+        // Departure-board status pill config
+        boardShowTomorrow: true,
+        boardShowGoingSoon: true,
+        boardGoingSoonDays: 14,
+        boardShowPremiumCabin: true,
+        // List-layout config (used when template='cards' AND layout='list')
+        listShowMeta: true,
+        listShowAmenities: true,
+        // Magazine template config (used only when template='magazine')
+        // Stacked-banner layout — every offer below the hero is a banner card,
+        // alternating sides. Every Nth banner is a feature spotlight.
+        magazineHeroStrategy: 'discount',
+        magazineShowDividers: true,
+        magazineFeatureEvery: 4,
+        // Boarding-pass template config (used only when template='boarding-pass')
+        boardingPassColumns: 2,
+        boardingPassShowBarcode: true,
+        // Ticker template config (used only when template='ticker')
+        tickerStyle: 'pills',
+        tickerSpeed: 'medium',
+        tickerLabel: 'Live deals',
+        tickerShowLabel: true,
+        tickerPauseOnHover: true,
+        // Popup template config (used only when template='popup')
+        popupLayout: 'slide-in',
+        popupPosition: 'bottom-right',
+        popupSideDrawerSide: 'right',
+        popupTrigger: 'load',
+        popupTriggerDelay: 5000,
+        popupTriggerScrollPercent: 50,
+        popupTriggerInactivitySeconds: 30,
+        popupTriggerPageviews: 2,
+        popupTriggerSelector: '',
+        popupFrequency: 'session',
+        popupFrequencyDays: 7,
+        popupSuppressAfterDismissDays: 0,
+        popupSuppressAfterConversionDays: 30,
+        popupPageInclude: [],
+        popupPageExclude: [],
+        popupDevices: { desktop: true, tablet: true, mobile: true },
+        popupCloseOnEscape: true,
+        popupCloseOnBackdropClick: true,
+        popupShowCloseButton: true,
+        popupOverlay: true,
+        popupOverlayOpacity: 60,
+        popupHeading: 'Live deals',
+        popupShowPulse: true,
+        popupFooterText: '',
+        popupFooterCtaText: '',
+        popupFooterCtaUrl: '',
+        popupRenderMode: 'auto',
+        popupRotateInterval: 8000,
+        popupMaxRender: 6,
+        popupCompactLayout: 'stacked',
+        popupCountdownEnd: '',
+        popupCountdownCaption: '',
+        show: {
+          // Universal
+          propertyType: true, chain: true, location: true,
+          summary: true, stayDetails: true, amenities: true,
+          reviews: true, refundability: true,
+          variantCount: true, leadInPill: true, wasPrice: true,
+          paxBasis: true,
+          // Flights
+          flightImage: true, flightSchedule: true,
+          flightDuration: true, cabinClass: true,
+          // Packages
+          packageSummary: true, packageOperator: true,
+          // Footer
+          poweredBy: false,
+        },
+        dedupeStrategy: 'hotel',
+        cacheMinutes: 15,
+        emptyBehaviour: 'show',
+        emptyHeading: 'No offers available right now',
+        emptyBody: "We couldn't find any matching offers. Check back soon, or try our search.",
+        emptyCtaText: '', emptyCtaUrl: '',
+      };
+    }
+
+    let state = {
+      widgetId: widgetIdFromUrl || null,
+      airtableRecordId: null,
+      name: '',
+      config: defaultConfig(),
+      dirty: false,
+    };
+
+    let previewWidget = null;
+    let previewTimer = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    /* ============================================================
+       Tab switching (driven by shell's onTabChange)
+       ============================================================ */
+    function setTab(name) {
+      const map = { content: 'tabContent', design: 'tabDesign', settings: 'tabSettings' };
+      const panelMap = { content: 'panelContent', design: 'panelDesign', settings: 'panelSettings' };
+      Object.entries(map).forEach(([k, id]) => {
+        const btn = $(id);
+        if (btn) btn.setAttribute('aria-selected', k === name ? 'true' : 'false');
+      });
+      Object.entries(panelMap).forEach(([k, id]) => {
+        const p = $(id);
+        if (p) p.hidden = k !== name;
+      });
+    }
+
+    /* ============================================================
+       Section collapse/expand
+       ============================================================ */
+    document.addEventListener('click', (e) => {
+      const head = e.target.closest('[data-section]');
+      if (!head) return;
+      const section = head.closest('.section');
+      const open = section.getAttribute('data-open') === 'true';
+      section.setAttribute('data-open', open ? 'false' : 'true');
+    });
+
+    /* ============================================================
+       Chips
+       ============================================================ */
+    function renderChips(container, list, onRemove) {
+      container.querySelectorAll('.chip').forEach(c => c.remove());
+      const input = container.querySelector('.chips-input');
+      list.forEach((val, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = '<span></span><button type="button" aria-label="Remove">×</button>';
+        chip.querySelector('span').textContent = val;
+        chip.querySelector('button').addEventListener('click', () => onRemove(i));
+        container.insertBefore(chip, input);
+      });
+    }
+
+    /* ============================================================
+       The property list
+       ------------------------------------------------------------
+       One hotel per line: code, optional name, optional country. The name
+       matters more than it looks — Travelify's own documented way to pin a
+       property (loct=Property) names the hotel rather than coding it, so a
+       row that carries a name gives the nightly sweep a second way in.
+
+       Canonicalisation must stay identical to canonTti in
+       api/_lib/offers/tti.js, api/cached-offers.js and widget-offers.js: the
+       cron writes the key the widget reads, so any difference is a total miss.
+       ============================================================ */
+    function canonTti(token) {
+      const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^TTI:/, '');
+      return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
+    }
+    function parseTtiText(text) {
+      const rows = [];
+      const seen = Object.create(null);
+      const bad = [];
+      for (const line of String(text || '').split(/[\r\n;]+/)) {
+        if (!line.trim()) continue;
+        const parts = line.split(',');
+        const code = canonTti(parts[0]);
+        if (!code) { bad.push(line.trim().slice(0, 40)); continue; }
+        if (seen[code]) continue;
+        seen[code] = true;
+        const ctry = String(parts[2] || '').trim().toUpperCase();
+        rows.push({
+          code,
+          name: String(parts[1] || '').replace(/[<>"]/g, '').trim().slice(0, 120),
+          ctry: /^[A-Z]{2}$/.test(ctry) ? ctry : '',
+        });
+        if (rows.length >= 100) break;
+      }
+      return { rows, bad };
+    }
+    function ttiRowsOf(cfg) {
+      const raw = (cfg && cfg.ttiCodes) || [];
+      if (Array.isArray(raw)) {
+        return raw.map((r) => (r && typeof r === 'object')
+          ? { code: canonTti(r.code), name: r.name || '', ctry: r.ctry || '' }
+          : { code: canonTti(r), name: '', ctry: '' }).filter((r) => r.code);
+      }
+      return parseTtiText(raw).rows;
+    }
+    function ttiCodesOf(cfg) { return ttiRowsOf(cfg).map((r) => r.code); }
+    function ttiTextOf(cfg) {
+      return ttiRowsOf(cfg)
+        .map((r) => ['TTI:' + r.code, r.name, r.ctry].filter(Boolean).join(', '))
+        .join('\n');
+    }
+    function paintTtiSummary(bad) {
+      const el = $('ttiSummary');
+      if (!el) return;
+      const rows = ttiRowsOf(state.config);
+      const named = rows.filter((r) => r.name).length;
+      if (!rows.length) {
+        el.innerHTML = 'No hotels yet. The widget stays empty until you add at least one.';
+        return;
+      }
+      const parts = [rows.length + (rows.length === 1 ? ' hotel' : ' hotels')];
+      if (named < rows.length) {
+        parts.push((rows.length - named) + ' without a name');
+      }
+      let html = esc(parts.join(' · '));
+      if (bad && bad.length) {
+        html += '<br><span style="color:var(--tgse-warning)">Skipped ' + bad.length
+          + (bad.length === 1 ? ' line that is not a code: ' : ' lines that are not codes: ')
+          + esc(bad.slice(0, 3).join(' / ')) + '</span>';
+      }
+      el.innerHTML = html;
+    }
+    function wireTtiCodes() {
+      const ta = $('cfgTtiCodes');
+      if (!ta) return;
+      const apply = () => {
+        const { rows, bad } = parseTtiText(ta.value);
+        state.config.ttiCodes = rows;
+        paintTtiSummary(bad);
+        markDirtyAndPreview();
+      };
+      // Never re-render the textarea from here. The preview re-renders on every
+      // keystroke, and rewriting the field under the cursor is exactly the
+      // focus-stealing the suite's render rules forbid.
+      ta.addEventListener('input', apply);
+      ta.addEventListener('blur', apply);
+      paintTtiSummary();
+    }
+
+    function wireChips(containerId, inputId, listKey) {
+      const container = $(containerId);
+      const input = $(inputId);
+      const refresh = () => renderChips(container, state.config[listKey], (i) => {
+        state.config[listKey].splice(i, 1);
+        refresh();
+        markDirtyAndPreview();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const val = input.value.trim().toUpperCase();
+          if (val && !state.config[listKey].includes(val)) {
+            state.config[listKey].push(val);
+            refresh();
+            markDirtyAndPreview();
+          }
+          input.value = '';
+        } else if (e.key === 'Backspace' && !input.value && state.config[listKey].length) {
+          state.config[listKey].pop();
+          refresh();
+          markDirtyAndPreview();
+        }
+      });
+      input.addEventListener('blur', () => {
+        const val = input.value.trim().toUpperCase();
+        if (val && !state.config[listKey].includes(val)) {
+          state.config[listKey].push(val);
+          refresh();
+          markDirtyAndPreview();
+          input.value = '';
+        }
+      });
+      container.addEventListener('click', (e) => {
+        if (e.target === container) input.focus();
+      });
+      return refresh;
+    }
+
+    let refreshDestChips, refreshOriginChips;
+
+    /* ============================================================
+       Hydrate UI from state.config
+       ============================================================ */
+    // Currencies offered in the display-currency picker (mirrors the widget +
+    // /api/fx-rates allowlist). The widget converts cached GBP prices to this.
+    const CURRENCY_LIST = [['GBP', 'British Pound'], ['EUR', 'Euro'], ['USD', 'US Dollar'],
+      ['AUD', 'Australian Dollar'], ['CAD', 'Canadian Dollar'], ['NZD', 'New Zealand Dollar'],
+      ['CHF', 'Swiss Franc'], ['JPY', 'Japanese Yen'], ['SEK', 'Swedish Krona'], ['NOK', 'Norwegian Krone'],
+      ['DKK', 'Danish Krone'], ['PLN', 'Polish Zloty'], ['CZK', 'Czech Koruna'], ['HUF', 'Hungarian Forint'],
+      ['RON', 'Romanian Leu'], ['BGN', 'Bulgarian Lev'], ['ISK', 'Icelandic Krona'], ['ZAR', 'South African Rand'],
+      ['SGD', 'Singapore Dollar'], ['HKD', 'Hong Kong Dollar'], ['THB', 'Thai Baht'], ['INR', 'Indian Rupee'],
+      ['CNY', 'Chinese Yuan'], ['TRY', 'Turkish Lira'], ['MXN', 'Mexican Peso'], ['BRL', 'Brazilian Real'],
+      ['ILS', 'Israeli Shekel'], ['IDR', 'Indonesian Rupiah'], ['KRW', 'South Korean Won'],
+      ['MYR', 'Malaysian Ringgit'], ['PHP', 'Philippine Peso']];
+    function ensureCurrencyOptions() {
+      const sel = document.getElementById('cfgDisplayCurrency');
+      if (!sel || sel.options.length) return;
+      sel.innerHTML = CURRENCY_LIST.map(([code, name]) => '<option value="' + code + '">' + code + ' · ' + name + '</option>').join('');
+    }
+
+    function hydrateUI() {
+      const c = state.config;
+      $('name-input').value = state.name || '';
+
+      // Template picker
+      document.querySelectorAll('#templateGrid .template-card').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.template === (c.template || 'cards') ? 'true' : 'false');
+      });
+
+      // Departure-board fields
+      populateBoardAirportPicker();
+      $('cfgBoardDefaultAirport').value = c.boardDefaultAirport || 'LHR';
+      $('cfgBoardAutoDetect').setAttribute('aria-pressed', c.boardAutoDetect !== false ? 'true' : 'false');
+      $('cfgBoardAllowSwitcher').setAttribute('aria-pressed', c.boardAllowSwitcher !== false ? 'true' : 'false');
+      $('cfgPropertyLinks').setAttribute('aria-pressed', c.propertyDeeplinks === true ? 'true' : 'false');
+      document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(c.boardDateRange || 30) === b.dataset.range ? 'true' : 'false');
+      });
+      document.querySelectorAll('#boardThemeSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.boardTheme === (c.boardTheme || 'dark') ? 'true' : 'false');
+      });
+      $('cfgBoardAnimate').setAttribute('aria-pressed', c.boardAnimate !== false ? 'true' : 'false');
+      $('cfgBoardAutoRefresh').setAttribute('aria-pressed', c.boardAutoRefresh !== false ? 'true' : 'false');
+      $('cfgBoardRefreshSeconds').value = String(c.boardRefreshSeconds || 300);
+      // Status pill toggles
+      $('cfgBoardShowTomorrow').setAttribute('aria-pressed', c.boardShowTomorrow !== false ? 'true' : 'false');
+      $('cfgBoardShowGoingSoon').setAttribute('aria-pressed', c.boardShowGoingSoon !== false ? 'true' : 'false');
+      $('cfgBoardGoingSoonDays').value = String(c.boardGoingSoonDays || 14);
+      $('cfgBoardShowPremiumCabin').setAttribute('aria-pressed', c.boardShowPremiumCabin !== false ? 'true' : 'false');
+
+      $('cfgType').value = c.type || 'Accommodation';
+      const ttiTa = $('cfgTtiCodes');
+      if (ttiTa && document.activeElement !== ttiTa) ttiTa.value = ttiTextOf(state.config);
+      paintTtiSummary();
+      refreshOriginChips && refreshOriginChips();
+      $('cfgBoard').value = (c.boardBases && c.boardBases[0]) || '';
+      $('cfgCabin').value = (c.cabinClasses && c.cabinClasses[0]) || '';
+      $('cfgRating').value = c.ratingMin || 0;
+      $('cfgBudgetMin').value = c.budgetMin || 0;
+      $('cfgBudgetMax').value = c.budgetMax || 2000;
+      $('cfgDurationMin').value = c.durationMin || 0;
+      $('cfgDurationMax').value = c.durationMax || 14;
+      $('cfgDatesMin').value = c.DatesMin || 7;
+      $('cfgDatesMax').value = c.DatesMax || 180;
+      $('cfgMaxOffers').value = c.maxOffers || 100;
+      $('cfgSort').value = c.sort || 'price:asc';
+
+      $('brandColor').value = c.brandColor || '#1B2B5B';
+      $('brandHex').value = c.brandColor || '#1B2B5B';
+      $('accentColor').value = c.accentColor || '#00B4D8';
+      $('accentHex').value = c.accentColor || '#00B4D8';
+      $('radius').value = c.radius != null ? c.radius : 14;
+      $('radiusVal').textContent = ($('radius').value) + 'px';
+
+      document.querySelectorAll('#columnsSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.cols === (c.columns || 'auto') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#densitySeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.density === (c.density || 'standard') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#layoutSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.layout === (c.layout || 'grid') ? 'true' : 'false');
+      });
+      $('cfgCarouselAutoplay').setAttribute('aria-pressed', c.carouselAutoplay ? 'true' : 'false');
+      $('cfgCarouselInterval').value = String(c.carouselInterval || 6);
+
+      // List-layout fields
+      $('cfgListShowMeta').setAttribute('aria-pressed', c.listShowMeta !== false ? 'true' : 'false');
+      $('cfgListShowAmenities').setAttribute('aria-pressed', c.listShowAmenities !== false ? 'true' : 'false');
+
+      // Magazine template fields
+      $('cfgMagazineHeroStrategy').value = c.magazineHeroStrategy || 'discount';
+      const featureEvery = typeof c.magazineFeatureEvery === 'number' ? c.magazineFeatureEvery : 4;
+      document.querySelectorAll('#magazineFeatureEverySeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(featureEvery) === b.dataset.featureEvery ? 'true' : 'false');
+      });
+      $('cfgMagazineShowDividers').setAttribute('aria-pressed', c.magazineShowDividers !== false ? 'true' : 'false');
+
+      // Boarding-pass template fields
+      document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', String(c.boardingPassColumns || 2) === b.dataset.bpCols ? 'true' : 'false');
+      });
+      $('cfgBoardingPassShowBarcode').setAttribute('aria-pressed', c.boardingPassShowBarcode !== false ? 'true' : 'false');
+
+      // Ticker template fields
+      document.querySelectorAll('#tickerStyleSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.tickerStyle === (c.tickerStyle || 'pills') ? 'true' : 'false');
+      });
+      document.querySelectorAll('#tickerSpeedSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.tickerSpeed === (c.tickerSpeed || 'medium') ? 'true' : 'false');
+      });
+      $('cfgTickerShowLabel').setAttribute('aria-pressed', c.tickerShowLabel !== false ? 'true' : 'false');
+      $('cfgTickerLabel').value = c.tickerLabel || 'Live deals';
+      $('cfgTickerPauseOnHover').setAttribute('aria-pressed', c.tickerPauseOnHover !== false ? 'true' : 'false');
+
+      // Popup template fields
+      $('cfgPopupLayout').value = c.popupLayout || 'slide-in';
+      const popupPos = c.popupPosition || 'bottom-right';
+      document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.popupPos === popupPos ? 'true' : 'false');
+      });
+      document.querySelectorAll('#popupSideDrawerSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.popupSide === (c.popupSideDrawerSide || 'right') ? 'true' : 'false');
+      });
+      $('cfgPopupRenderMode').value = c.popupRenderMode || 'auto';
+      const compactLayout = c.popupCompactLayout || 'stacked';
+      document.querySelectorAll('#popupCompactLayoutSeg button').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.popupCompactLayout === compactLayout ? 'true' : 'false');
+      });
+      $('cfgPopupTrigger').value = c.popupTrigger || 'load';
+      $('cfgPopupTriggerDelay').value = c.popupTriggerDelay != null ? c.popupTriggerDelay : 5000;
+      $('cfgPopupTriggerScrollPercent').value = c.popupTriggerScrollPercent != null ? c.popupTriggerScrollPercent : 50;
+      $('cfgPopupTriggerInactivitySeconds').value = c.popupTriggerInactivitySeconds != null ? c.popupTriggerInactivitySeconds : 30;
+      $('cfgPopupTriggerPageviews').value = c.popupTriggerPageviews != null ? c.popupTriggerPageviews : 2;
+      $('cfgPopupTriggerSelector').value = c.popupTriggerSelector || '';
+      $('cfgPopupFrequency').value = c.popupFrequency || 'session';
+      $('cfgPopupFrequencyDays').value = c.popupFrequencyDays != null ? c.popupFrequencyDays : 7;
+      $('cfgPopupSuppressAfterDismissDays').value = c.popupSuppressAfterDismissDays != null ? c.popupSuppressAfterDismissDays : 0;
+      $('cfgPopupSuppressAfterConversionDays').value = c.popupSuppressAfterConversionDays != null ? c.popupSuppressAfterConversionDays : 30;
+      $('cfgPopupPageInclude').value = (c.popupPageInclude || []).join(', ');
+      $('cfgPopupPageExclude').value = (c.popupPageExclude || []).join(', ');
+      const devs = c.popupDevices || { desktop: true, tablet: true, mobile: true };
+      $('cfgPopupDeviceDesktop').setAttribute('aria-pressed', devs.desktop !== false ? 'true' : 'false');
+      $('cfgPopupDeviceTablet').setAttribute('aria-pressed', devs.tablet !== false ? 'true' : 'false');
+      $('cfgPopupDeviceMobile').setAttribute('aria-pressed', devs.mobile !== false ? 'true' : 'false');
+      $('cfgPopupHeading').value = c.popupHeading || 'Live deals';
+      $('cfgPopupShowPulse').setAttribute('aria-pressed', c.popupShowPulse !== false ? 'true' : 'false');
+      $('cfgPopupRotateInterval').value = c.popupRotateInterval != null ? c.popupRotateInterval : 8000;
+      $('cfgPopupMaxRender').value = c.popupMaxRender != null ? c.popupMaxRender : 6;
+      $('cfgPopupFooterText').value = c.popupFooterText || '';
+      $('cfgPopupFooterCtaText').value = c.popupFooterCtaText || '';
+      $('cfgPopupFooterCtaUrl').value = c.popupFooterCtaUrl || '';
+      $('cfgPopupShowCloseButton').setAttribute('aria-pressed', c.popupShowCloseButton !== false ? 'true' : 'false');
+      $('cfgPopupCloseOnEscape').setAttribute('aria-pressed', c.popupCloseOnEscape !== false ? 'true' : 'false');
+      $('cfgPopupCloseOnBackdropClick').setAttribute('aria-pressed', c.popupCloseOnBackdropClick !== false ? 'true' : 'false');
+      $('cfgPopupOverlay').setAttribute('aria-pressed', c.popupOverlay !== false ? 'true' : 'false');
+      $('cfgPopupOverlayOpacity').value = c.popupOverlayOpacity != null ? c.popupOverlayOpacity : 60;
+      // Countdown render-mode-specific fields
+      $('cfgPopupCountdownEnd').value = c.popupCountdownEnd || '';
+      $('cfgPopupCountdownCaption').value = c.popupCountdownCaption || '';
+      updatePopupLayoutVisibility();
+      updatePopupTriggerVisibility();
+      updatePopupFrequencyVisibility();
+      updatePopupRenderModeVisibility();
+
+      // Apply conditional visibility for layout-specific fields
+      updateLayoutVisibility();
+
+      const show = c.show || {};
+      const toggleMap = {
+        showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
+        showSummary: 'summary', showStayDetails: 'stayDetails',
+        showAmenities: 'amenities', showReviews: 'reviews', showRefundability: 'refundability',
+        showVariantCount: 'variantCount', showLeadInPill: 'leadInPill',
+        showWasPrice: 'wasPrice', showPaxBasis: 'paxBasis',
+        showFlightImage: 'flightImage', showFlightSchedule: 'flightSchedule',
+        showFlightDuration: 'flightDuration', showCabinClass: 'cabinClass',
+        showPackageSummary: 'packageSummary', showPackageOperator: 'packageOperator',
+        showPoweredBy: 'poweredBy',
+      };
+      Object.entries(toggleMap).forEach(([id, key]) => {
+        const el = $(id);
+        if (el) el.setAttribute('aria-pressed', show[key] ? 'true' : 'false');
+      });
+
+      $('cfgPriceDisplay').value = c.priceDisplay || 'auto';
+      ensureCurrencyOptions();
+      $('cfgDisplayCurrency').value = c.displayCurrency || 'GBP';
+      $('cfgShowCurrencySwitcher').setAttribute('aria-pressed', c.showCurrencySwitcher === true ? 'true' : 'false');
+
+      $('cfgDedupe').value = c.dedupeStrategy || 'hotel';
+      $('cfgCache').value = c.cacheMinutes != null ? c.cacheMinutes : 15;
+      $('cfgEmptyBehaviour').value = c.emptyBehaviour || 'show';
+      $('cfgEmptyHeading').value = c.emptyHeading || '';
+      $('cfgEmptyBody').value = c.emptyBody || '';
+      $('cfgEmptyCtaText').value = c.emptyCtaText || '';
+      $('cfgEmptyCtaUrl').value = c.emptyCtaUrl || '';
+
+      updateConditionalVisibility();
+      updateTemplateVisibility();
+      updateBoardAutoRefreshVisibility();
+      updateBoardGoingSoonVisibility();
+      updateTickerLabelVisibility();
+      updateEmptyDetailsVisibility();
+    }
+
+    /* ============================================================
+       Departure-board UK airport list (mirrors widget JS)
+       ============================================================ */
+    const UK_AIRPORTS_EDITOR = [
+      { code: 'LHR', city: 'London', name: 'Heathrow' },
+      { code: 'LGW', city: 'London', name: 'Gatwick' },
+      { code: 'STN', city: 'London', name: 'Stansted' },
+      { code: 'LTN', city: 'London', name: 'Luton' },
+      { code: 'LCY', city: 'London', name: 'City' },
+      { code: 'SEN', city: 'Southend', name: 'Southend' },
+      { code: 'MAN', city: 'Manchester', name: 'Manchester' },
+      { code: 'BHX', city: 'Birmingham', name: 'Birmingham' },
+      { code: 'EMA', city: 'Nottingham', name: 'East Midlands' },
+      { code: 'EDI', city: 'Edinburgh', name: 'Edinburgh' },
+      { code: 'GLA', city: 'Glasgow', name: 'Glasgow' },
+      { code: 'PIK', city: 'Glasgow', name: 'Prestwick' },
+      { code: 'NCL', city: 'Newcastle', name: 'Newcastle' },
+      { code: 'LBA', city: 'Leeds', name: 'Leeds Bradford' },
+      { code: 'BRS', city: 'Bristol', name: 'Bristol' },
+      { code: 'CWL', city: 'Cardiff', name: 'Cardiff' },
+      { code: 'LPL', city: 'Liverpool', name: 'Liverpool' },
+      { code: 'BFS', city: 'Belfast', name: 'Belfast Intl' },
+      { code: 'BHD', city: 'Belfast', name: 'Belfast City' },
+      { code: 'ABZ', city: 'Aberdeen', name: 'Aberdeen' },
+      { code: 'INV', city: 'Inverness', name: 'Inverness' },
+      { code: 'SOU', city: 'Southampton', name: 'Southampton' },
+      { code: 'EXT', city: 'Exeter', name: 'Exeter' },
+      { code: 'BOH', city: 'Bournemouth', name: 'Bournemouth' },
+      { code: 'NWI', city: 'Norwich', name: 'Norwich' },
+      { code: 'HUY', city: 'Hull', name: 'Humberside' },
+      { code: 'DUB', city: 'Dublin', name: 'Dublin' },
+      { code: 'ORK', city: 'Cork', name: 'Cork' },
+      { code: 'JER', city: 'Jersey', name: 'Jersey' },
+      { code: 'GCI', city: 'Guernsey', name: 'Guernsey' },
+    ];
+
+    function populateBoardAirportPicker() {
+      const sel = $('cfgBoardDefaultAirport');
+      if (!sel || sel.options.length > 0) return;
+      let html = '';
+      for (const a of UK_AIRPORTS_EDITOR) {
+        html += '<option value="' + a.code + '">' + a.city + ' — ' + a.name + ' (' + a.code + ')</option>';
+      }
+      sel.innerHTML = html;
+    }
+
+    function updateTemplateVisibility() {
+      const t = state.config.template || 'cards';
+      document.querySelectorAll('[data-when-template]').forEach(el => {
+        // Support multi-value lists: data-when-template="cards magazine"
+        // means show when current template is either cards OR magazine.
+        const tokens = (el.dataset.whenTemplate || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(t) : el.dataset.whenTemplate !== t;
+      });
+      // Faux-site mockup — only show when popup template is active
+      const fauxSite = document.getElementById('previewFauxSite');
+      if (fauxSite) fauxSite.hidden = (t !== 'popup');
+      // Preview stage gets the popup-active modifier so it widens to fill canvas
+      const stage = document.getElementById('previewStage');
+      if (stage) stage.classList.toggle('popup-active', t === 'popup');
+    }
+
+    function updateBoardAutoRefreshVisibility() {
+      const on = !!state.config.boardAutoRefresh;
+      document.querySelectorAll('[data-when-board-autorefresh]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateBoardGoingSoonVisibility() {
+      const on = state.config.boardShowGoingSoon !== false;
+      document.querySelectorAll('[data-when-board-going-soon]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    function updateTickerLabelVisibility() {
+      const on = state.config.tickerShowLabel !== false;
+      document.querySelectorAll('[data-when-ticker-show-label]').forEach(el => {
+        el.hidden = !on;
+      });
+    }
+
+    // Show / hide popup-layout-conditional fields (corner position, side-drawer side)
+    function updatePopupLayoutVisibility() {
+      const layout = state.config.popupLayout || 'slide-in';
+      document.querySelectorAll('[data-when-popup-layout]').forEach(el => {
+        const tokens = (el.dataset.whenPopupLayout || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(layout) : el.dataset.whenPopupLayout !== layout;
+      });
+    }
+
+    // Show / hide popup-trigger-conditional fields (delay, scroll %, inactivity, pageviews, selector)
+    function updatePopupTriggerVisibility() {
+      const trigger = state.config.popupTrigger || 'load';
+      document.querySelectorAll('[data-when-popup-trigger]').forEach(el => {
+        const tokens = (el.dataset.whenPopupTrigger || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(trigger) : el.dataset.whenPopupTrigger !== trigger;
+      });
+    }
+
+    // Show / hide popup-render-mode-conditional fields (compact arrangement,
+    // countdown end date, etc). When 'auto' is selected, infer the actual
+    // render mode based on the layout, since fields like "compact arrangement"
+    // are only relevant when the resolved render mode is 'compact'.
+    // Also handles the split-fallback warning callout: shown when the user
+    // has explicitly picked Split but the current layout is too narrow.
+    function updatePopupRenderModeVisibility() {
+      const rawMode = state.config.popupRenderMode || 'auto';
+      const layout = state.config.popupLayout || 'slide-in';
+      let mode = rawMode;
+      if (mode === 'auto') {
+        if (layout === 'top-bar' || layout === 'bottom-bar') mode = 'mini';
+        else if (layout === 'floating-card') mode = 'single';
+        else mode = 'compact';
+      }
+      // Mirror the widget's fallback rule: split only renders in centered/fullscreen.
+      // We use the resolved mode (post-fallback) to drive conditional fields, so
+      // the user sees fields appropriate to what's actually rendering.
+      let resolvedMode = mode;
+      if (mode === 'split' && !['centered', 'fullscreen'].includes(layout)) {
+        resolvedMode = 'single';
+      }
+      document.querySelectorAll('[data-when-popup-render-mode]').forEach(el => {
+        const tokens = (el.dataset.whenPopupRenderMode || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(resolvedMode) : el.dataset.whenPopupRenderMode !== resolvedMode;
+      });
+      // Split fallback notice — visible only when the user explicitly chose
+      // split AND the current layout doesn't support it.
+      const splitNotice = document.getElementById('popupSplitFallbackNotice');
+      if (splitNotice) {
+        splitNotice.hidden = !(rawMode === 'split' && !['centered', 'fullscreen'].includes(layout));
+      }
+    }
+
+    // Show / hide popup-frequency-conditional fields (days input only when every-n-days)
+    function updatePopupFrequencyVisibility() {
+      const freq = state.config.popupFrequency || 'session';
+      document.querySelectorAll('[data-when-popup-frequency]').forEach(el => {
+        const tokens = (el.dataset.whenPopupFrequency || '').split(/\s+/).filter(Boolean);
+        el.hidden = tokens.length ? !tokens.includes(freq) : el.dataset.whenPopupFrequency !== freq;
+      });
+    }
+
+    function updateConditionalVisibility() {
+      const t = state.config.type || 'Accommodation';
+      const isFlightLike = ['Flights', 'DynamicPackages', 'PackageHolidays', 'BothPackages', 'Any'].includes(t);
+      const isAccLike = ['Accommodation', 'DynamicPackages', 'PackageHolidays', 'BothPackages', 'Any'].includes(t);
+      $('originField').style.display = isFlightLike ? '' : 'none';
+      $('boardField').style.display = isAccLike ? '' : 'none';
+      $('durationRow').style.display = isAccLike ? '' : 'none';
+      // Cabin class is flight-only — hiding it when type is Accommodation removes
+      // confusion about a filter that the API would silently ignore.
+      $('cabinField').style.display = isFlightLike ? '' : 'none';
+      // Star rating is accommodation-only.
+      $('ratingField').style.display = isAccLike ? '' : 'none';
+    }
+
+    function updateEmptyDetailsVisibility() {
+      $('emptyDetailsWrap').style.display = state.config.emptyBehaviour === 'hide' ? 'none' : '';
+    }
+
+    /* ============================================================
+       Mark dirty + schedule preview
+       ============================================================ */
+    function markDirtyAndPreview() {
+      state.dirty = true;
+      if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+      schedulePreview();
+    }
+
+    /* ============================================================
+       True availability probe
+       The widget's single fetch is capped by its "Max offers" setting and by
+       Travelify's 250-per-request ceiling, so the dedupe panel's raw count is
+       a SAMPLE, not availability. This probe measures what is really out
+       there for the current filters: one request per configured destination
+       (each gets its own 250 allowance — the same trick the world-map cron
+       uses per airport), offers deduped by id across requests. A request
+       that returns exactly 250 has hit the supplier's ceiling, so the total
+       is reported as a floor ("1,240+"). Results are cached per filter
+       combination, so cosmetic edits (colours, layout) never re-probe.
+       ============================================================ */
+    let availability = null;             // null | {loading} | {total, exact, unavailable, ...}
+    let availabilitySeq = 0;             // stale-response guard
+    let availabilityTimer = null;
+    const availabilityCache = new Map(); // filter-key → result
+    // One cache read per probe now, so there is no fan-out to cap. Kept only as
+    // the maxOffers the base payload carries.
+    const AVAIL_CEILING = 250;
+
+    function availabilityBasePayload() {
+      const c = state.config;
+      // Mirror the widget's _buildPayload type mapping (keep in sync).
+      let apiType = c.type, packageType = null;
+      if (apiType === 'DynamicPackages') { apiType = 'Packages'; packageType = 'DynamicPackages'; }
+      else if (apiType === 'PackageHolidays') { apiType = 'Packages'; packageType = 'PackageHolidays'; }
+      else if (apiType === 'BothPackages') { apiType = 'Packages'; packageType = 'Any'; }
+      if (c.template === 'departure-board' || c.template === 'boarding-pass') { apiType = 'Flights'; packageType = null; }
+      const p = {
+        type: apiType, deduping: 'None',
+        currency: c.currency, language: c.language, nationality: c.nationality,
+        maxOffers: AVAIL_CEILING, rollingDates: true,
+        DatesMin: c.DatesMin, DatesMax: c.DatesMax,
+        sort: 'price:asc', pricingByType: 'Person',
+      };
+      if (packageType) p.packageType = packageType;
+      if (c.budgetMin) p.budgetMin = c.budgetMin;
+      if (c.budgetMax) p.budgetMax = c.budgetMax;
+      if (c.ratingMin) p.ratingMin = c.ratingMin;
+      if (c.durationMin) p.durationMin = c.durationMin;
+      if (c.durationMax) p.durationMax = c.durationMax;
+      if (c.origins && c.origins.length) p.origins = c.origins;
+      if (c.boardBases && c.boardBases.length) p.boardBases = c.boardBases;
+      if (c.cabinClasses && c.cabinClasses.length) p.cabinClasses = c.cabinClasses;
+      return p;
+    }
+
+    function availabilityHtml() {
+      const escA = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      if (!availability) return '';
+      if (availability.loading) {
+        return '<div class="breakdown-avail" id="availStrip"><span>Available offers</span><strong>counting…</strong></div>';
+      }
+      // The cache could not be reached. Say so plainly rather than showing a
+      // zero, which would read as "your filters match nothing" and send an
+      // agent off loosening settings that were never the problem.
+      if (availability.unavailable) {
+        return '<div class="breakdown-avail" id="availStrip">'
+          + '<span>Available offers<span class="avail-note">could not reach the offer cache just now, so this count is unknown</span></span>'
+          + '<strong>—</strong></div>';
+      }
+      const n = availability.total.toLocaleString('en-GB') + (availability.plus ? '+' : '');
+      const detail = availability.perDest.map((d) => d.code + ': ' + d.n + (d.capped ? '+' : '')).join(' · ');
+      const notes = [];
+      // Every count is now an exact read of the pool the live widget draws
+      // from, so the note says what the number MEANS rather than hedging it.
+      if (availability.exact) {
+        notes.push(availability.total > 0
+          ? 'exact count from the offer cache, which is what your widget shows'
+          : 'nothing in the offer cache matches these filters yet, so the widget will show its empty message');
+      }
+      return '<div class="breakdown-avail" id="availStrip" title="' + escA(detail) + '">'
+        + '<span>Available offers' + (notes.length ? '<span class="avail-note">' + escA(notes.join(' · ')) + '</span>' : '') + '</span>'
+        + '<strong>' + escA(n) + '</strong></div>';
+    }
+
+    function paintAvailability() {
+      const strip = $('availStrip');
+      if (!strip) return; // panel not rendered yet — next tgo:dataLoaded includes us
+      strip.outerHTML = availabilityHtml();
+    }
+
+    async function runAvailabilityProbe() {
+      const base = availabilityBasePayload();
+      const codes = ttiCodesOf(state.config);
+      const key = JSON.stringify([codes, base, state.config.template]);
+      if (availabilityCache.has(key)) {
+        availability = availabilityCache.get(key);
+        paintAvailability();
+        return;
+      }
+      const seq = ++availabilitySeq;
+      availability = { loading: true };
+      paintAvailability();
+
+      // ── The Travelgenix offer cache, and ONLY the cache ────────────
+      // One cheap GET returns the EXACT number of cached offers matching the
+      // filters (totalMatched counts before slicing).
+      //
+      // This used to fall through to a live /api/offers fan-out, one request
+      // per destination, whenever the cache came back empty. Both reasons for
+      // that are gone as of 30 Jul 2026. The widget itself is cache-only now,
+      // so a live count would describe a pool the visitor's widget can never
+      // read — it would tell an agent "you have 400 offers" about a widget
+      // that shows none. And the fan-out was its own hazard: adding a few
+      // destinations fired enough live lookups to trip the public rate limit
+      // and lock a client's own live site out for an hour (23 Jul 2026).
+      //
+      // So the number in the strip is now simply the truth: how many offers
+      // this widget can actually show, right now, from the cache it reads.
+      // Zero is a real and useful answer, not a reason to go looking elsewhere.
+      const q = new URLSearchParams();
+      q.set('type', base.packageType && base.packageType !== 'Any' ? base.packageType : base.type);
+      // Scope by PROPERTY, exactly as the widget does. Sending destinations
+      // as well would have the strip count a pool the widget never reads.
+      if (codes.length) {
+        q.set('tti', codes.join(','));
+        if (state.config.appId) q.set('appId', String(state.config.appId));
+      }
+      if (base.origins && base.origins.length) q.set('origins', base.origins.join(','));
+      if (base.cabinClasses && base.cabinClasses.length) q.set('cabinClasses', base.cabinClasses.join(','));
+      if (base.budgetMin) q.set('budgetMin', base.budgetMin);
+      if (base.budgetMax) q.set('budgetMax', base.budgetMax);
+      // Mirror the widget's query exactly, or the strip promises a pool the
+      // widget does not draw from. The flight templates ask for offers with a
+      // real flight leg, and drop the hotel-shaped filters that cannot describe
+      // a flight row (see _needsFlightRows / _cachedOffersQuery in the widget).
+      const flightRows = state.config.template === 'departure-board' || state.config.template === 'boarding-pass';
+      if (flightRows) {
+        q.set('hasFlight', '1');
+      } else {
+        if (base.boardBases && base.boardBases.length) q.set('boardBases', base.boardBases.join(','));
+        if (base.ratingMin) q.set('ratingMin', base.ratingMin);
+        if (base.durationMin) q.set('durationMin', base.durationMin);
+        if (base.durationMax) q.set('durationMax', base.durationMax);
+      }
+      if (base.DatesMin != null) q.set('DatesMin', base.DatesMin);
+      if (base.DatesMax != null) q.set('DatesMax', base.DatesMax);
+      q.set('maxOffers', '1');
+
+      try {
+        const r = await fetch('/api/cached-offers?' + q.toString(), { headers: { 'Accept': 'application/json', 'X-TG-Preview': '1' } });
+        const d = await r.json();
+        if (seq !== availabilitySeq) return;
+        // `degraded` means the cache could not answer, which is a very
+        // different thing to tell an agent than "you have no offers". Only a
+        // real, confident zero gets cached as a result.
+        if (d && d.success && !d.degraded && Number.isFinite(d.totalMatched)) {
+          availability = { total: d.totalMatched, exact: true, perDest: [], failed: 0, plus: false };
+          availabilityCache.set(key, availability);
+        } else {
+          availability = { total: 0, exact: false, unavailable: true, perDest: [], failed: 0, plus: false };
+        }
+      } catch (e) {
+        if (seq !== availabilitySeq) return;
+        availability = { total: 0, exact: false, unavailable: true, perDest: [], failed: 0, plus: false };
+      }
+      paintAvailability();
+    }
+
+    function scheduleAvailabilityProbe() {
+      clearTimeout(availabilityTimer);
+      // Longer debounce so a run of quick edits coalesces into one probe instead
+      // of a fan-out per keystroke — the probe is exempt from the public limit
+      // now, but it still hits the upstream service, so stay polite.
+      availabilityTimer = setTimeout(runAvailabilityProbe, 1500);
+    }
+
+    /* Show / hide layout-specific fields. Grid-only fields (Columns) hide when
+       layout = carousel. Carousel-only fields (autoplay toggle, interval select)
+       hide when layout = grid. The interval select also requires autoplay = on. */
+    function updateLayoutVisibility() {
+      const layout = state.config.layout || 'grid';
+      const autoplay = !!state.config.carouselAutoplay;
+      document.querySelectorAll('[data-when-layout]').forEach((el) => {
+        const want = el.getAttribute('data-when-layout');
+        const wantAutoplay = el.getAttribute('data-when-autoplay');
+        let visible = (want === layout);
+        if (visible && wantAutoplay === 'true') visible = autoplay;
+        el.hidden = !visible;
+      });
+    }
+
+    function schedulePreview() {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(renderPreview, 300);
+    }
+
+    function renderPreview() {
+      const isPopup = state.config.template === 'popup';
+      // Use the faux-site mount for popup template, normal mount for others
+      const mount = isPopup ? $('previewMountPopup') : $('previewMount');
+      // Clear both mounts to prevent double-render when switching templates
+      const otherMount = isPopup ? $('previewMount') : $('previewMountPopup');
+      if (otherMount) otherMount.innerHTML = '';
+      if (!mount) return;
+      mount.innerHTML = '';
+      const cfg = JSON.parse(JSON.stringify(state.config));
+      cfg.appId = TG_TRAVELIFY_APPID;
+      cfg.apiKey = TG_TRAVELIFY_KEY;
+      cfg.cacheMinutes = 0;
+      // Editor-only preview flag. The widget reads this to skip eligibility,
+      // frequency and trigger logic for popup template, opening immediately
+      // with the saved layout. Faux-site mockup wraps the mount so popup
+      // overlays a realistic host-site context.
+      cfg._preview = true;
+      const div = document.createElement('div');
+      div.setAttribute('data-tg-widget', 'offers');
+      mount.appendChild(div);
+      previewWidget = new window.TGOffersWidget(div, cfg);
+      // Re-measure true availability. Cached per filter combination, so
+      // cosmetic re-renders (colours, layout) cost no network calls.
+      scheduleAvailabilityProbe();
+    }
+
+    /* ============================================================
+       Wire all inputs
+       ============================================================ */
+    function wireInputs() {
+      $('name-input').addEventListener('input', (e) => {
+        state.name = e.target.value;
+        state.dirty = true;
+        if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+      });
+
+      const fieldMap = {
+        cfgType: 'type', cfgBoard: 'boardBasis_singleton', cfgCabin: 'cabinClass_singleton',
+        cfgRating: 'ratingMin', cfgBudgetMin: 'budgetMin', cfgBudgetMax: 'budgetMax',
+        cfgDurationMin: 'durationMin', cfgDurationMax: 'durationMax',
+        cfgDatesMin: 'DatesMin', cfgDatesMax: 'DatesMax',
+        cfgMaxOffers: 'maxOffers', cfgSort: 'sort',
+        cfgDedupe: 'dedupeStrategy', cfgCache: 'cacheMinutes',
+        cfgEmptyBehaviour: 'emptyBehaviour',
+        cfgEmptyHeading: 'emptyHeading', cfgEmptyBody: 'emptyBody',
+        cfgEmptyCtaText: 'emptyCtaText', cfgEmptyCtaUrl: 'emptyCtaUrl',
+        cfgPriceDisplay: 'priceDisplay',
+        cfgDisplayCurrency: 'displayCurrency',
+      };
+      Object.entries(fieldMap).forEach(([id, key]) => {
+        const el = $(id);
+        if (!el) return;
+        const handler = () => {
+          const raw = el.value;
+          if (key === 'boardBasis_singleton') {
+            state.config.boardBases = raw ? [raw] : [];
+          } else if (key === 'cabinClass_singleton') {
+            state.config.cabinClasses = raw ? [raw] : [];
+          } else if (el.type === 'number') {
+            state.config[key] = parseFloat(raw) || 0;
+          } else {
+            state.config[key] = raw;
+          }
+          if (key === 'type') updateConditionalVisibility();
+          if (key === 'emptyBehaviour') updateEmptyDetailsVisibility();
+          markDirtyAndPreview();
+        };
+        el.addEventListener('change', handler);
+        if (el.type === 'text' || el.type === 'number' || el.tagName === 'TEXTAREA') {
+          el.addEventListener('input', () => {
+            clearTimeout(el._t);
+            el._t = setTimeout(handler, 250);
+          });
+        }
+      });
+
+      function wireColour(pickerId, hexId, configKey) {
+        const picker = $(pickerId);
+        const hex = $(hexId);
+        picker.addEventListener('input', () => {
+          state.config[configKey] = picker.value.toUpperCase();
+          hex.value = picker.value.toUpperCase();
+          markDirtyAndPreview();
+        });
+        hex.addEventListener('input', () => {
+          if (/^#[0-9A-Fa-f]{6}$/.test(hex.value)) {
+            picker.value = hex.value;
+            state.config[configKey] = hex.value.toUpperCase();
+            markDirtyAndPreview();
+          }
+        });
+      }
+      wireColour('brandColor', 'brandHex', 'brandColor');
+      wireColour('accentColor', 'accentHex', 'accentColor');
+
+      $('radius').addEventListener('input', () => {
+        const v = parseInt($('radius').value);
+        state.config.radius = v;
+        $('radiusVal').textContent = v + 'px';
+        markDirtyAndPreview();
+      });
+
+      document.querySelectorAll('#columnsSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.columns = b.dataset.cols;
+          document.querySelectorAll('#columnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#densitySeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.density = b.dataset.density;
+          document.querySelectorAll('#densitySeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#layoutSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.layout = b.dataset.layout;
+          document.querySelectorAll('#layoutSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          updateLayoutVisibility();
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgCarouselAutoplay').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.carouselAutoplay = next;
+        updateLayoutVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgCarouselInterval').addEventListener('change', () => {
+        state.config.carouselInterval = parseInt($('cfgCarouselInterval').value, 10) || 6;
+        markDirtyAndPreview();
+      });
+
+      // ── Template picker ──────────────────────────────────────────
+      // Switches between Cards (default), Magazine, Departure board,
+      // Boarding pass, Ticker, and Popup. updateTemplateVisibility()
+      // shows/hides the right sidebar sections.
+      document.querySelectorAll('#templateGrid .template-card').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.template = b.dataset.template;
+          document.querySelectorAll('#templateGrid .template-card').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          updateTemplateVisibility();
+          // Refresh popup-internal conditionals so the right trigger/layout
+          // fields are visible if the user just selected Popup.
+          updatePopupLayoutVisibility();
+          updatePopupTriggerVisibility();
+          updatePopupFrequencyVisibility();
+          updatePopupRenderModeVisibility();
+          markDirtyAndPreview();
+        });
+      });
+
+      // ── Departure-board fields ───────────────────────────────────
+      $('cfgBoardDefaultAirport').addEventListener('change', () => {
+        state.config.boardDefaultAirport = $('cfgBoardDefaultAirport').value;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardAutoDetect').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAutoDetect = next;
+        markDirtyAndPreview();
+      });
+      $('cfgPropertyLinks').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.propertyDeeplinks = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardAllowSwitcher').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAllowSwitcher = next;
+        markDirtyAndPreview();
+      });
+      $('cfgShowCurrencySwitcher').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.showCurrencySwitcher = next;
+        markDirtyAndPreview();
+      });
+      document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.range, 10);
+          state.config.boardDateRange = v;
+          document.querySelectorAll('#cfgBoardDateRangeSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#boardThemeSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.boardTheme = b.dataset.boardTheme;
+          document.querySelectorAll('#boardThemeSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgBoardAnimate').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAnimate = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardAutoRefresh').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardAutoRefresh = next;
+        updateBoardAutoRefreshVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgBoardRefreshSeconds').addEventListener('change', () => {
+        state.config.boardRefreshSeconds = parseInt($('cfgBoardRefreshSeconds').value, 10) || 300;
+        markDirtyAndPreview();
+      });
+      // Status pill toggles
+      $('cfgBoardShowTomorrow').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowTomorrow = next;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardShowGoingSoon').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowGoingSoon = next;
+        updateBoardGoingSoonVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgBoardGoingSoonDays').addEventListener('change', () => {
+        state.config.boardGoingSoonDays = parseInt($('cfgBoardGoingSoonDays').value, 10) || 14;
+        markDirtyAndPreview();
+      });
+      $('cfgBoardShowPremiumCabin').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardShowPremiumCabin = next;
+        markDirtyAndPreview();
+      });
+
+      // ── List-layout fields ────────────────────────────────────────
+      $('cfgListShowMeta').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.listShowMeta = next;
+        markDirtyAndPreview();
+      });
+      $('cfgListShowAmenities').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.listShowAmenities = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Magazine template fields ─────────────────────────────────
+      $('cfgMagazineHeroStrategy').addEventListener('change', () => {
+        state.config.magazineHeroStrategy = $('cfgMagazineHeroStrategy').value;
+        markDirtyAndPreview();
+      });
+      document.querySelectorAll('#magazineFeatureEverySeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.featureEvery, 10);
+          state.config.magazineFeatureEvery = v;
+          document.querySelectorAll('#magazineFeatureEverySeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgMagazineShowDividers').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.magazineShowDividers = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Boarding-pass template fields ────────────────────────────
+      document.querySelectorAll('#boardingPassColumnsSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          const v = parseInt(b.dataset.bpCols, 10);
+          state.config.boardingPassColumns = v;
+          document.querySelectorAll('#boardingPassColumnsSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgBoardingPassShowBarcode').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.boardingPassShowBarcode = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Ticker template fields ───────────────────────────────────
+      document.querySelectorAll('#tickerStyleSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.tickerStyle = b.dataset.tickerStyle;
+          document.querySelectorAll('#tickerStyleSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#tickerSpeedSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.tickerSpeed = b.dataset.tickerSpeed;
+          document.querySelectorAll('#tickerSpeedSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      $('cfgTickerShowLabel').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.tickerShowLabel = next;
+        updateTickerLabelVisibility();
+        markDirtyAndPreview();
+      });
+      $('cfgTickerLabel').addEventListener('input', () => {
+        // Slight debounce so we don't re-render on every keystroke
+        clearTimeout($('cfgTickerLabel')._t);
+        $('cfgTickerLabel')._t = setTimeout(() => {
+          state.config.tickerLabel = $('cfgTickerLabel').value || 'Live deals';
+          markDirtyAndPreview();
+        }, 250);
+      });
+      $('cfgTickerPauseOnHover').addEventListener('click', (ev) => {
+        const btn = ev.currentTarget;
+        const next = btn.getAttribute('aria-pressed') !== 'true';
+        btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+        state.config.tickerPauseOnHover = next;
+        markDirtyAndPreview();
+      });
+
+      // ── Popup template fields ─────────────────────────────────
+      // Helpers for the various popup inputs
+      function bindPopupSelect(id, key, after) {
+        $(id).addEventListener('change', () => {
+          state.config[key] = $(id).value;
+          if (after) after();
+          markDirtyAndPreview();
+        });
+      }
+      function bindPopupNumber(id, key, defaultVal) {
+        $(id).addEventListener('input', () => {
+          const v = parseInt($(id).value, 10);
+          state.config[key] = isNaN(v) ? defaultVal : v;
+          markDirtyAndPreview();
+        });
+      }
+      function bindPopupText(id, key, defaultVal) {
+        $(id).addEventListener('input', () => {
+          clearTimeout($(id)._t);
+          $(id)._t = setTimeout(() => {
+            state.config[key] = $(id).value || defaultVal;
+            markDirtyAndPreview();
+          }, 250);
+        });
+      }
+      function bindPopupSwitch(id, key, after) {
+        $(id).addEventListener('click', (ev) => {
+          const btn = ev.currentTarget;
+          const next = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.config[key] = next;
+          if (after) after();
+          markDirtyAndPreview();
+        });
+      }
+
+      // Warn when the client has just switched off the last way a visitor could
+      // dismiss the popup. Backdrop-click only counts as an escape when the
+      // current layout actually paints a backdrop (centered / fullscreen /
+      // side-drawer with the overlay on). The widget enforces a hard floor too
+      // (it force-shows the close button), but flag it here so the client knows.
+      function warnIfNoPopupDismissPath() {
+        const c = state.config;
+        const layout = c.popupLayout || 'slide-in';
+        const hasBackdrop = ['centered', 'fullscreen', 'side-drawer'].indexOf(layout) !== -1 && c.popupOverlay !== false;
+        const backdropCloses = hasBackdrop && c.popupCloseOnBackdropClick !== false;
+        const hasClose = c.popupShowCloseButton !== false;
+        const hasEscape = c.popupCloseOnEscape !== false;
+        if (!hasClose && !hasEscape && !backdropCloses) {
+          if (window.tgse && window.tgse.toast) {
+            window.tgse.toast('Visitors need a way to close the popup. The close button will stay on until you enable Escape or backdrop click.', 'error');
+          }
+        }
+      }
+      function bindPopupList(id, key) {
+        $(id).addEventListener('input', () => {
+          clearTimeout($(id)._t);
+          $(id)._t = setTimeout(() => {
+            const raw = $(id).value || '';
+            state.config[key] = raw.split(',').map(s => s.trim()).filter(Boolean);
+            markDirtyAndPreview();
+          }, 250);
+        });
+      }
+      function bindPopupDeviceSwitch(id, deviceKey) {
+        $(id).addEventListener('click', (ev) => {
+          const btn = ev.currentTarget;
+          const next = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.config.popupDevices = state.config.popupDevices || { desktop: true, tablet: true, mobile: true };
+          state.config.popupDevices[deviceKey] = next;
+          markDirtyAndPreview();
+        });
+      }
+
+      bindPopupSelect('cfgPopupLayout', 'popupLayout', () => {
+        updatePopupLayoutVisibility();
+        updatePopupRenderModeVisibility();
+        // Switching to a backdrop-less layout can remove the only escape path.
+        warnIfNoPopupDismissPath();
+      });
+      // Position picker — 3x3 visual grid for slide-in / floating-card layouts
+      document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.popupPosition = b.dataset.popupPos;
+          document.querySelectorAll('#popupPositionPicker .pos-btn').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      document.querySelectorAll('#popupSideDrawerSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.popupSideDrawerSide = b.dataset.popupSide;
+          document.querySelectorAll('#popupSideDrawerSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      bindPopupSelect('cfgPopupRenderMode', 'popupRenderMode', updatePopupRenderModeVisibility);
+      // "Switch to Centered" quick-fix in the split fallback warning callout.
+      // Updates layout to centered, refreshes layout dropdown + visibility,
+      // and re-renders the preview so the user instantly sees split working.
+      const splitFixBtn = document.getElementById('popupSplitFixLayoutBtn');
+      if (splitFixBtn) {
+        splitFixBtn.addEventListener('click', () => {
+          state.config.popupLayout = 'centered';
+          $('cfgPopupLayout').value = 'centered';
+          updatePopupLayoutVisibility();
+          updatePopupRenderModeVisibility();
+          markDirtyAndPreview();
+        });
+      }
+      // Compact-arrangement segmented control
+      document.querySelectorAll('#popupCompactLayoutSeg button').forEach(b => {
+        b.addEventListener('click', () => {
+          state.config.popupCompactLayout = b.dataset.popupCompactLayout;
+          document.querySelectorAll('#popupCompactLayoutSeg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          markDirtyAndPreview();
+        });
+      });
+      // Countdown render-mode-specific fields
+      $('cfgPopupCountdownEnd').addEventListener('input', () => {
+        state.config.popupCountdownEnd = $('cfgPopupCountdownEnd').value;
+        markDirtyAndPreview();
+      });
+      $('cfgPopupCountdownCaption').addEventListener('input', () => {
+        state.config.popupCountdownCaption = $('cfgPopupCountdownCaption').value;
+        markDirtyAndPreview();
+      });
+      bindPopupSelect('cfgPopupTrigger', 'popupTrigger', updatePopupTriggerVisibility);
+      bindPopupNumber('cfgPopupTriggerDelay', 'popupTriggerDelay', 5000);
+      bindPopupNumber('cfgPopupTriggerScrollPercent', 'popupTriggerScrollPercent', 50);
+      bindPopupNumber('cfgPopupTriggerInactivitySeconds', 'popupTriggerInactivitySeconds', 30);
+      bindPopupNumber('cfgPopupTriggerPageviews', 'popupTriggerPageviews', 2);
+      bindPopupText('cfgPopupTriggerSelector', 'popupTriggerSelector', '');
+      bindPopupSelect('cfgPopupFrequency', 'popupFrequency', updatePopupFrequencyVisibility);
+      bindPopupNumber('cfgPopupFrequencyDays', 'popupFrequencyDays', 7);
+      bindPopupNumber('cfgPopupSuppressAfterDismissDays', 'popupSuppressAfterDismissDays', 0);
+      bindPopupNumber('cfgPopupSuppressAfterConversionDays', 'popupSuppressAfterConversionDays', 30);
+      bindPopupList('cfgPopupPageInclude', 'popupPageInclude');
+      bindPopupList('cfgPopupPageExclude', 'popupPageExclude');
+      bindPopupDeviceSwitch('cfgPopupDeviceDesktop', 'desktop');
+      bindPopupDeviceSwitch('cfgPopupDeviceTablet', 'tablet');
+      bindPopupDeviceSwitch('cfgPopupDeviceMobile', 'mobile');
+      bindPopupText('cfgPopupHeading', 'popupHeading', 'Live deals');
+      bindPopupSwitch('cfgPopupShowPulse', 'popupShowPulse');
+      bindPopupNumber('cfgPopupRotateInterval', 'popupRotateInterval', 8000);
+      bindPopupNumber('cfgPopupMaxRender', 'popupMaxRender', 6);
+      bindPopupText('cfgPopupFooterText', 'popupFooterText', '');
+      bindPopupText('cfgPopupFooterCtaText', 'popupFooterCtaText', '');
+      bindPopupText('cfgPopupFooterCtaUrl', 'popupFooterCtaUrl', '');
+      bindPopupSwitch('cfgPopupShowCloseButton', 'popupShowCloseButton', warnIfNoPopupDismissPath);
+      bindPopupSwitch('cfgPopupCloseOnEscape', 'popupCloseOnEscape', warnIfNoPopupDismissPath);
+      bindPopupSwitch('cfgPopupCloseOnBackdropClick', 'popupCloseOnBackdropClick', warnIfNoPopupDismissPath);
+      bindPopupSwitch('cfgPopupOverlay', 'popupOverlay', warnIfNoPopupDismissPath);
+      bindPopupNumber('cfgPopupOverlayOpacity', 'popupOverlayOpacity', 60);
+
+      const toggleMap = {
+        showPropertyType: 'propertyType', showChain: 'chain', showLocation: 'location',
+        showSummary: 'summary', showStayDetails: 'stayDetails',
+        showAmenities: 'amenities', showReviews: 'reviews', showRefundability: 'refundability',
+        showVariantCount: 'variantCount', showLeadInPill: 'leadInPill',
+        showWasPrice: 'wasPrice', showPaxBasis: 'paxBasis',
+        showFlightImage: 'flightImage', showFlightSchedule: 'flightSchedule',
+        showFlightDuration: 'flightDuration', showCabinClass: 'cabinClass',
+        showPackageSummary: 'packageSummary', showPackageOperator: 'packageOperator',
+        showPoweredBy: 'poweredBy',
+      };
+      Object.entries(toggleMap).forEach(([id, key]) => {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener('click', () => {
+          const next = el.getAttribute('aria-pressed') !== 'true';
+          el.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.config.show = state.config.show || {};
+          state.config.show[key] = next;
+          markDirtyAndPreview();
+        });
+      });
+
+      // ── Viewport switcher (issue #11) ────────────────────────
+      // The shell renders the buttons; we wire the actual width change here.
+      // CSS handles the transition via .preview-stage[data-vp="..."].
+      document.querySelectorAll('.tgse-vp button[data-vp]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const vp = btn.getAttribute('data-vp');
+          document.querySelectorAll('.tgse-vp button[data-vp]').forEach(b => b.classList.toggle('is-on', b === btn));
+          const stage = $('previewStage');
+          if (stage) stage.setAttribute('data-vp', vp);
+        });
+      });
+
+      // ── Dedupe breakdown panel (issue #10) ──────────────────
+      // The widget fires `tgo:dataLoaded` after every fetch with the offer
+      // counts that each strategy WOULD produce on the same raw data. We listen
+      // on the previewMount because the event bubbles from the shadow root.
+      const STRATEGY_LABELS = {
+        'none': 'None — every variant',
+        'hotel': 'Per hotel',
+        'hotel-board': 'Per hotel + board',
+        'hotel-duration': 'Per hotel + duration',
+        'hotel-departure': 'Per hotel + departure',
+        'route': 'Per flight route',
+        'route-carrier': 'Per route + carrier',
+      };
+      const previewMount = $('previewMount');
+      if (previewMount) {
+        previewMount.addEventListener('tgo:dataLoaded', (ev) => {
+          const panel = $('breakdownPanel');
+          if (!panel) return;
+          const detail = ev.detail || {};
+          const breakdown = detail.breakdown || {};
+          const raw = detail.rawCount || 0;
+          const active = state.config.dedupeStrategy || 'hotel';
+
+          if (raw === 0) {
+            panel.className = 'breakdown-panel is-empty';
+            // Two very different problems, so say which one it is. "Loosen your
+            // filters" is unhelpful advice when the filters were never at fault.
+            panel.innerHTML = availabilityHtml() + (detail.degraded
+              ? 'The offer cache could not be reached, so the preview is empty. This is our end, not your settings — try again shortly.'
+              : 'No cached prices for these hotels match the current filters. Check the property codes, widen the dates or budget, or wait for tonight\'s refresh — the hotel cache is filled overnight, not on demand.');
+            return;
+          }
+
+          let html = '<div class="breakdown-panel-title">Dedupe preview</div>';
+          html += availabilityHtml();
+          html += '<div class="breakdown-list">';
+          Object.entries(STRATEGY_LABELS).forEach(([key, label]) => {
+            const count = breakdown[key];
+            const isActive = key === active;
+            html += '<div class="breakdown-row' + (isActive ? ' active' : '') + '">'
+              + '<span class="breakdown-strategy">' + label + '</span>'
+              + '<span class="breakdown-count">' + (count != null ? count : '—') + '</span>'
+              + '</div>';
+          });
+          html += '</div>';
+          // The widget's fetch is capped by its Max offers setting — label it
+          // as the sample it is, so it can't be read as availability (the
+          // strip above shows that). Every widget is served from the offer
+          // cache now; 'session' means this render reused the visitor-side
+          // cache the client's own Cache minutes setting created.
+          const srcLabel = detail.source === 'session' ? ' · reused this session' : ' · served from the offer cache';
+          html += '<div class="breakdown-raw">'
+            + '<span>Widget sample (Max offers setting)' + srcLabel + '</span><strong>' + raw + ' offers</strong>'
+            + '</div>';
+          panel.className = 'breakdown-panel';
+          panel.innerHTML = html;
+        });
+      }
+    }
+
+    /* ============================================================
+       Modals
+       ============================================================ */
+    function openModal(id) { $(id).hidden = false; }
+    function closeModal(id) { $(id).hidden = true; }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close]') || e.target.closest('[data-close]')) {
+        const modal = e.target.closest('.modal-backdrop');
+        if (modal) modal.hidden = true;
+      } else if (e.target.classList.contains('modal-backdrop')) {
+        e.target.hidden = true;
+      }
+    });
+
+    /* ============================================================
+       Embed code
+       ============================================================ */
+    function renderEmbed() {
+      const box = $('embedCode');
+      if (!state.widgetId) {
+        box.textContent = 'Save the widget first to generate the embed code.';
+        return;
+      }
+      const code = '<div data-tg-widget="offers" data-tg-id="' + state.widgetId + '"></div>\n'
+        + '<script src="https://tg-widgets.vercel.app/widget-hotel-offers.js"><\/script>';
+      box.innerHTML = '';
+      const text = document.createElement('span');
+      text.textContent = code;
+      box.appendChild(text);
+      const btn = document.createElement('button');
+      btn.className = 'embed-copy';
+      btn.textContent = 'Copy';
+      btn.onclick = () => {
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        });
+      };
+      box.appendChild(btn);
+    }
+
+    /* ============================================================
+       Templates
+       ============================================================ */
+    // Layout presets only. A destination filter would be dead config here —
+    // the property list IS the scope — so these change how the client's own
+    // hotels are presented, never which hotels are shown.
+    const TEMPLATES = [
+      {
+        name: 'Hotel grid',
+        desc: 'Your properties as cards, cheapest first, one card per hotel',
+        config: { template: 'cards', layout: 'grid', type: 'Accommodation', dedupeStrategy: 'hotel', density: 'standard', columns: 'auto' },
+      },
+      {
+        name: 'Hotel list',
+        desc: 'A wider row per hotel with room and board detail',
+        config: { template: 'cards', layout: 'list', type: 'Accommodation', dedupeStrategy: 'hotel', listShowMeta: true, listShowAmenities: true },
+      },
+      {
+        name: 'Package holidays to your hotels',
+        desc: 'Flight and hotel together, departing the UK',
+        config: { template: 'cards', type: 'BothPackages', origins: ['GB'], dedupeStrategy: 'hotel', density: 'detailed' },
+      },
+      {
+        name: 'Magazine feature',
+        desc: 'A hero property, then alternating banners — good for a small, curated list',
+        config: { template: 'magazine', type: 'Accommodation', dedupeStrategy: 'hotel', magazineHeroStrategy: 'discount', magazineFeatureEvery: 4, magazineShowDividers: true },
+      },
+      {
+        name: 'Price ticker',
+        desc: 'A single scrolling strip of live prices for your hotels',
+        config: { template: 'ticker', type: 'Accommodation', dedupeStrategy: 'hotel', tickerStyle: 'pills', tickerSpeed: 'medium', tickerLabel: 'Our hotels', tickerShowLabel: true },
+      },
+      {
+        name: 'Offer popup',
+        desc: 'Your best current hotel price, as a slide-in',
+        config: { template: 'popup', type: 'Accommodation', dedupeStrategy: 'hotel', popupLayout: 'slide-in', popupPosition: 'bottom-right', popupTrigger: 'load', popupTriggerDelay: 5000, popupHeading: 'Our hotels' },
+      },
+    ];
+
+    function renderTemplates() {
+      const grid = $('templatesGrid');
+      grid.innerHTML = '';
+      TEMPLATES.forEach((t) => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        card.innerHTML = '<div class="template-card-title"></div><div class="template-card-desc"></div>';
+        card.querySelector('.template-card-title').textContent = t.name;
+        card.querySelector('.template-card-desc').textContent = t.desc;
+        card.addEventListener('click', () => {
+          state.config = Object.assign(defaultConfig(), t.config);
+          state.dirty = true;
+          if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+          hydrateUI();
+          renderPreview();
+          closeModal('templatesModal');
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    /* ============================================================
+       AI suggestions
+       ============================================================ */
+    const AI_SUGGESTS = [
+      'Show my hotels as a list with board basis and star rating',
+      'Make it a magazine layout with a big hero property',
+      'Only show all-inclusive stays under £900 per person',
+      'Turn this into a slide-in popup with our best price',
+      'Show flight and hotel packages departing the UK',
+    ];
+
+    function renderAiSuggestions() {
+      const grid = $('aiSuggestGrid');
+      grid.innerHTML = '';
+      AI_SUGGESTS.forEach((prompt) => {
+        const card = document.createElement('div');
+        card.className = 'ai-suggest';
+        card.textContent = prompt;
+        card.addEventListener('click', async () => {
+          const original = card.textContent;
+          card.textContent = 'Thinking…';
+          try {
+            const res = await fetch(API_AI, {
+              method: 'POST',
+              headers: window.tgse.authHeaders(),
+              body: JSON.stringify({
+                widgetType: WIDGET_TYPE,
+                prompt: prompt,
+                currentConfig: state.config,
+              }),
+            });
+            if (res.status === 401) { window.tgse.showLogin(); return; }
+            const data = await res.json();
+            if (data.config) {
+              state.config = Object.assign(defaultConfig(), state.config, data.config);
+              state.dirty = true;
+              if (window.tgse && window.tgse.setSaveState) window.tgse.setSaveState('dirty');
+              hydrateUI();
+              renderPreview();
+              closeModal('aiModal');
+            } else {
+              card.textContent = original;
+              window.tgse.toast && window.tgse.toast('AI did not return a config — try a more specific prompt', 'error');
+            }
+          } catch (err) {
+            card.textContent = original;
+            window.tgse.toast && window.tgse.toast('AI request failed: ' + err.message, 'error');
+          }
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    /* ============================================================
+       Load widget by ID
+       ============================================================ */
+    async function loadWidget(id) {
+      try {
+        const res = await fetch(API_CONFIG + '?id=' + encodeURIComponent(id));
+        if (!res.ok) throw new Error('Load failed (' + res.status + ')');
+        const data = await res.json();
+        if (data.config) {
+          state.config = Object.assign(defaultConfig(), data.config);
+        }
+        if (data.name) state.name = data.name;
+        if (data.recordId) state.airtableRecordId = data.recordId;
+        state.widgetId = id;
+        $('topbarSub').textContent = id;
+        hydrateUI();
+        renderPreview();
+        renderEmbed();
+      } catch (err) {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Failed to load widget: ' + err.message, 'error');
+      }
+    }
+
+    /* ============================================================
+       Boot — once shell is initialised + user is logged in
+       ============================================================ */
+    function boot() {
+      $('editor').hidden = false;
+
+      wireTtiCodes();
+      refreshOriginChips = wireChips('originChips', 'originInput', 'origins');
+
+      wireInputs();
+      renderTemplates();
+      renderAiSuggestions();
+      if (typeof window.initOffersTour === 'function') window.initOffersTour();
+
+      const fontMount = $('fontPickerMount');
+      if (fontMount && window.tgse && window.tgse.mountFontPicker) {
+        window.tgse.mountFontPicker(fontMount, state.config.fontFamily || 'Inter', (font) => {
+          state.config.fontFamily = font;
+          markDirtyAndPreview();
+        });
+      }
+
+      if (state.widgetId) {
+        loadWidget(state.widgetId);
+      } else {
+        hydrateUI();
+        renderPreview();
+        renderEmbed();
+      }
+    }
+
+    /* ============================================================
+       Hand off to the shell
+       ============================================================ */
+    window.tgse.init({
+      widgetType: WIDGET_TYPE,
+      widgetTag: 'hotel-offers',
+      scriptFile: 'widget-hotel-offers.js',
+
+      getConfig: () => {
+        // Strip Travelify creds — they're account-level, never persisted on the widget config
+        const out = JSON.parse(JSON.stringify(state.config));
+        delete out.appId;
+        delete out.apiKey;
+        return out;
+      },
+      setConfig: (c) => {
+        if (c && typeof c === 'object') Object.assign(state.config, c);
+        hydrateUI();
+        renderPreview();
+      },
+
+      onAIBuild: () => openModal('aiModal'),
+      onTemplates: () => openModal('templatesModal'),
+      onThemeToggle: () => {
+        state.config.theme = state.config.theme === 'dark' ? 'light' : 'dark';
+        markDirtyAndPreview();
+      },
+      onTabChange: (tabName) => setTab(tabName),
+      onLoginSuccess: () => boot(),
+
+      onAfterSave: (d) => {
+        state.dirty = false;
+        if (d && d.widgetId) state.widgetId = d.widgetId;
+        if (d && d.recordId) state.airtableRecordId = d.recordId;
+        $('topbarSub').textContent = state.widgetId || 'Saved';
+        renderEmbed();
+      },
+    });
+
+    // Embed button explicit wire — opens our modal (in case shell doesn't have an onEmbed hook)
+    $('btn-embed').addEventListener('click', (e) => {
+      e.preventDefault();
+      renderEmbed();
+      openModal('embedModal');
+    });
+
+    if (window.tgse && typeof window.tgse.onReady === 'function') {
+      // v1.1 shell — wait for cookie auth to resolve before deciding
+      // whether to boot or stay hidden. Prevents the blank-page race
+      // where a signed-in user lands on the editor before /api/auth/me
+      // has settled, isLoggedIn() returns false, and the editor never
+      // boots (the #editor surface starts hidden and only boot() unhides it).
+      window.tgse.onReady(() => {
+        if (window.tgse.isLoggedIn()) {
+          boot();
+        }
+        // else: shell shows login overlay, we'll boot via onLoginSuccess
+      });
+    } else {
+      // Defensive fallback: older shell without onReady support.
+      if (window.tgse && window.tgse.isLoggedIn && window.tgse.isLoggedIn()) {
+        boot();
+      }
+      // else shell shows login overlay, we'll boot via onLoginSuccess
+    }
+  </script>
+
+</body>
+</html>

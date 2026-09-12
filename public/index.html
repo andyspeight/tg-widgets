@@ -1000,6 +1000,22 @@ const WIDGETS = [
     access: { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   },
   {
+    id: 'hotel-offers',
+    reportsViews: true,
+    name: 'Hotel Offers',
+    airtableType: 'Hotel Offers',
+    description: 'Your own hotels, priced live. Paste the Travelify property codes for the properties you sell and the widget shows real cached prices for those hotels and nothing else. Refreshed overnight under your own Travelify account, so the price on the card is the price on the click. Every Travel Offers layout and setting is available.',
+    category: 'Bookings',
+    status: 'live',
+    icon: {viewBox:'0 0 24 24', paths:'<path d="M3 21h18"/><path d="M5 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16"/><path d="M15 9h3a1 1 0 0 1 1 1v11"/><path d="M8 8h2M8 12h2M8 16h2"/>'},
+    color: '#0E7490',
+    editorUrl: '/editor-hotel-offers',
+    demoUrl: '/demo-hotel-offers',
+    widgetTag: 'hotel-offers',
+    scriptFile: 'widget-hotel-offers.js',
+    access: { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
+  },
+  {
     id: 'special-offers',
     name: 'Special Offers',
     airtableType: 'Special Offers',
@@ -3288,7 +3304,9 @@ function loadMiniPreview(w) {
     });
   }
 
-  if (w.id === 'offers') {
+  // Hotel Offers renders through the same engine, so the tile shows the same
+  // cards. What differs is the source of the offers, which a tile cannot show.
+  if (w.id === 'offers' || w.id === 'hotel-offers') {
     container.innerHTML = `
       <div style="
         width: 700px;

@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hotel Offers · Travelgenix Widget Suite</title>
+<style>
+  :root {
+    --tg-bg: #F7F9FB;
+    --tg-surface: #FFFFFF;
+    --tg-border: #E2E8F0;
+    --tg-text: #0F172A;
+    --tg-sub: #475569;
+    --tg-muted: #94A3B8;
+    --tg-brand: #1B2B5B;
+    --tg-accent: #00B4D8;
+    --tg-accent-hover: #0096B7;
+    --tg-accent-soft: #E0F4FA;
+  }
+  [data-theme="dark"] {
+    --tg-bg: #0B1220;
+    --tg-surface: #111B2E;
+    --tg-border: #1E293B;
+    --tg-text: #F1F5F9;
+    --tg-sub: #94A3B8;
+    --tg-muted: #64748B;
+    --tg-brand: #4A6FE0;
+    --tg-accent: #38BDF8;
+    --tg-accent-soft: rgba(56, 189, 248, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--tg-bg);
+    color: var(--tg-text);
+    line-height: 1.5;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* Topbar */
+  .topbar {
+    background: var(--tg-surface);
+    border-bottom: 1px solid var(--tg-border);
+    padding: 12px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .topbar-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: var(--tg-text); font-weight: 700;
+  }
+  .brand-mark {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--tg-brand), var(--tg-accent));
+    border-radius: 8px;
+  }
+  .pill {
+    padding: 4px 10px; background: var(--tg-accent-soft); color: var(--tg-accent);
+    border-radius: 999px; font-size: 12px; font-weight: 600;
+  }
+  .topbar-spacer { flex: 1; }
+  .topbar-link {
+    color: var(--tg-sub); text-decoration: none; font-size: 14px;
+    padding: 6px 12px; border-radius: 6px;
+  }
+  .topbar-link:hover { background: var(--tg-bg); color: var(--tg-text); }
+  .theme-toggle {
+    background: none; border: 1px solid var(--tg-border); color: var(--tg-text);
+    width: 36px; height: 36px; border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .theme-toggle:hover { background: var(--tg-bg); }
+
+  .wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  h1 {
+    font-size: 32px; font-weight: 800; margin: 0 0 8px;
+    letter-spacing: -0.5px;
+  }
+  .lede {
+    color: var(--tg-sub); font-size: 16px; max-width: 760px;
+    margin: 0 0 24px; line-height: 1.6;
+  }
+
+  /* Demo controls — primary row (always visible) */
+  .controls {
+    background: var(--tg-surface);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+  /* Subordinate row — template-specific options */
+  .controls-sub {
+    background: var(--tg-surface);
+    border: 1px solid var(--tg-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: end;
+  }
+  .controls-sub[hidden] { display: none; }
+  .controls-sub-label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    color: var(--tg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    margin-bottom: -4px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field[hidden] { display: none; }
+  label {
+    font-size: 11px; color: var(--tg-sub); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  select, input {
+    padding: 8px 10px;
+    border: 1px solid var(--tg-border);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--tg-surface);
+    color: var(--tg-text);
+    font-family: inherit;
+  }
+  select:focus, input:focus {
+    outline: 2px solid var(--tg-accent);
+    outline-offset: 1px;
+    border-color: var(--tg-accent);
+  }
+  /* Toggle switch (mirrors the editor's tap target) */
+  .toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 38px; height: 22px;
+    background: var(--tg-border);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+  .toggle:checked { background: var(--tg-accent); }
+  .toggle:checked::after { transform: translateX(16px); }
+  .toggle-label-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+  }
+  .toggle-label-row label { margin: 0; }
+
+  /* Stage */
+  .stage-label {
+    font-size: 11px;
+    color: var(--tg-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .stage {
+    background: var(--tg-bg);
+    border: 1px solid var(--tg-border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 32px;
+    transition: background 0.2s;
+  }
+  [data-theme="dark"] .stage {
+    background: #050B17;
+  }
+
+  /* Footer */
+  .foot {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--tg-muted);
+  }
+  .foot a { color: inherit; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark"></span>
+      <span>Travelgenix</span>
+    </a>
+    <span class="pill">Hotel Offers · Demo</span>
+    <div class="topbar-spacer"></div>
+    <a class="topbar-link" href="/editor-offers">Open editor →</a>
+    <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Hotel Offers</h1>
+  <p class="lede">
+    Your own hotels, priced live. You list the properties you sell by their Travelify code, and the
+    widget shows real prices for those hotels and nothing else. Every Travel Offers layout is
+    available: Cards (Grid, Carousel or List), Magazine, a scrolling ticker, or a popup. The
+    flight-only templates are not, because a flight has no hotel to pin.
+  </p>
+  <p class="lede" style="font-size:.95rem;opacity:.8">
+    Prices are refreshed overnight under your own Travelify account, so the price on the card is
+    the price the visitor gets when they click. Nothing a visitor does triggers a search. That
+    also means a hotel with no cached price simply does not appear, and this demo shows the empty
+    state until a real account's properties have been swept.
+  </p>
+
+  <!-- ─── Primary controls — always visible ─────────────────────── -->
+  <div class="controls">
+    <div class="field">
+      <label for="ctrlTemplate">Template</label>
+      <select id="ctrlTemplate">
+        <option value="cards" selected>Cards</option>
+        <option value="magazine">Magazine</option>
+        <option value="departure-board">Departure board</option>
+        <option value="boarding-pass">Boarding pass</option>
+        <option value="ticker">Ticker</option>
+        <option value="popup">Popup</option>
+      </select>
+    </div>
+    <div class="field" id="fieldLayout">
+      <label for="ctrlLayout">Layout (Cards only)</label>
+      <select id="ctrlLayout">
+        <option value="grid" selected>Grid</option>
+        <option value="carousel">Carousel</option>
+        <option value="list">List</option>
+      </select>
+    </div>
+    <div class="field" id="fieldType">
+      <label for="ctrlType">Offer type</label>
+      <select id="ctrlType">
+        <option value="Accommodation" selected>Accommodation</option>
+        <option value="Flights">Flights</option>
+        <option value="DynamicPackages">Dynamic packages (Flight + Hotel)</option>
+        <option value="PackageHolidays">Package holidays</option>
+        <option value="BothPackages">Both package types</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlTti">Your hotels (Travelify property codes)</label>
+      <input id="ctrlTti" type="text" value="TTI:10946397, TTI:76853197"
+        placeholder="TTI:10946397, TTI:76853197" />
+    </div>
+    <div class="field">
+      <label for="ctrlOrigin">Origin (flights/packages)</label>
+      <input id="ctrlOrigin" type="text" value="GB" />
+    </div>
+    <div class="field">
+      <label for="ctrlDedupe">Dedupe strategy</label>
+      <select id="ctrlDedupe">
+        <option value="none">None (show everything)</option>
+        <option value="hotel" selected>One per hotel</option>
+        <option value="hotel-board">Per hotel + board</option>
+        <option value="hotel-duration">Per hotel + duration</option>
+        <option value="hotel-departure">Per hotel + departure</option>
+        <option value="route">Per route</option>
+        <option value="route-carrier">Per route + carrier</option>
+      </select>
+    </div>
+    <div class="field" id="fieldDensity">
+      <label for="ctrlDensity">Card density</label>
+      <select id="ctrlDensity">
+        <option value="compact">Compact</option>
+        <option value="standard" selected>Standard</option>
+        <option value="detailed">Detailed</option>
+      </select>
+    </div>
+    <div class="field" id="fieldCols">
+      <label for="ctrlCols">Columns (Grid only)</label>
+      <select id="ctrlCols">
+        <option value="auto" selected>Auto-fit</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ─── Magazine-specific controls ─────────────────────────────── -->
+  <div class="controls-sub" id="subMagazine" hidden>
+    <div class="controls-sub-label">Magazine options</div>
+    <div class="field">
+      <label for="ctrlMagHero">Hero offer</label>
+      <select id="ctrlMagHero">
+        <option value="discount" selected>Biggest discount</option>
+        <option value="featured">Featured (fallback to discount)</option>
+        <option value="cheapest">Cheapest</option>
+        <option value="first">First returned</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlMagCols">Sub-grid columns</label>
+      <select id="ctrlMagCols">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ─── Boarding-pass-specific controls ────────────────────────── -->
+  <div class="controls-sub" id="subBoardingPass" hidden>
+    <div class="controls-sub-label">Boarding pass options</div>
+    <div class="field">
+      <label for="ctrlBpCols">Passes per row</label>
+      <select id="ctrlBpCols">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlBpBarcode">Show barcode</label>
+        <input class="toggle" type="checkbox" id="ctrlBpBarcode" checked />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Ticker specific controls ───────────────────────────────── -->
+  <div class="controls-sub" id="subTicker" hidden>
+    <div class="controls-sub-label">Ticker options</div>
+    <div class="field">
+      <label for="ctrlTickerStyle">Visual style</label>
+      <select id="ctrlTickerStyle">
+        <option value="pills" selected>Pills</option>
+        <option value="ribbon">Ribbon</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlTickerSpeed">Speed</label>
+      <select id="ctrlTickerSpeed">
+        <option value="slow">Slow (120s)</option>
+        <option value="medium" selected>Medium (80s)</option>
+        <option value="fast">Fast (50s)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlTickerLabel">Label text</label>
+      <input id="ctrlTickerLabel" type="text" value="Live deals" maxlength="20" />
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlTickerShowLabel">Show label</label>
+        <input class="toggle" type="checkbox" id="ctrlTickerShowLabel" checked />
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlTickerPauseOnHover">Pause on hover</label>
+        <input class="toggle" type="checkbox" id="ctrlTickerPauseOnHover" checked />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Popup specific controls ────────────────────────────────── -->
+  <div class="controls-sub" id="subPopup" hidden>
+    <div class="controls-sub-label">Popup options</div>
+    <div class="field">
+      <label for="ctrlPopupLayout">Layout</label>
+      <select id="ctrlPopupLayout">
+        <option value="slide-in" selected>Slide-in panel</option>
+        <option value="centered">Centered modal</option>
+        <option value="floating-card">Floating card</option>
+        <option value="top-bar">Top banner</option>
+        <option value="bottom-bar">Bottom banner</option>
+        <option value="side-drawer">Side drawer</option>
+        <option value="fullscreen">Fullscreen</option>
+        <option value="inline">Inline</option>
+      </select>
+    </div>
+    <div class="field" id="fieldPopupPosition">
+      <label for="ctrlPopupPosition">Corner</label>
+      <select id="ctrlPopupPosition">
+        <option value="bottom-right" selected>Bottom right</option>
+        <option value="bottom-left">Bottom left</option>
+        <option value="top-right">Top right</option>
+        <option value="top-left">Top left</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlPopupRenderMode">Render mode</label>
+      <select id="ctrlPopupRenderMode">
+        <option value="auto" selected>Auto</option>
+        <option value="compact">Compact (cards)</option>
+        <option value="single">Single (hero)</option>
+        <option value="mini">Mini (banner pills)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlPopupTrigger">Trigger</label>
+      <select id="ctrlPopupTrigger">
+        <option value="load" selected>On page load</option>
+        <option value="time">After time delay</option>
+        <option value="scroll">After scroll %</option>
+        <option value="exit-intent">Exit intent</option>
+        <option value="inactivity">After inactivity</option>
+      </select>
+    </div>
+    <div class="field" id="fieldPopupDelay">
+      <label for="ctrlPopupDelay">Delay (ms)</label>
+      <input id="ctrlPopupDelay" type="number" min="0" step="500" value="3000" />
+    </div>
+    <div class="field" id="fieldPopupScroll" hidden>
+      <label for="ctrlPopupScroll">Scroll %</label>
+      <input id="ctrlPopupScroll" type="number" min="1" max="100" step="5" value="50" />
+    </div>
+    <div class="field" id="fieldPopupInactivity" hidden>
+      <label for="ctrlPopupInactivity">Inactivity (s)</label>
+      <input id="ctrlPopupInactivity" type="number" min="5" step="5" value="30" />
+    </div>
+    <div class="field">
+      <label for="ctrlPopupHeading">Heading</label>
+      <input id="ctrlPopupHeading" type="text" value="Live deals" maxlength="40" />
+    </div>
+    <div class="field">
+      <label for="ctrlPopupMaxRender">Max offers in popup</label>
+      <input id="ctrlPopupMaxRender" type="number" min="1" max="20" step="1" value="6" />
+    </div>
+    <div class="field">
+      <label for="ctrlPopupRotate">Rotate every (ms)</label>
+      <input id="ctrlPopupRotate" type="number" min="0" step="1000" value="8000" />
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlPopupShowPulse">Show pulse</label>
+        <input class="toggle" type="checkbox" id="ctrlPopupShowPulse" checked />
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlPopupCloseBtn">Close button</label>
+        <input class="toggle" type="checkbox" id="ctrlPopupCloseBtn" checked />
+      </div>
+    </div>
+    <div class="field">
+      <button type="button" id="ctrlPopupReset" style="width:100%;font-size:11px;padding:8px 12px;background:#fff;border:1px solid #cbd5e1;color:#475569;border-radius:6px;cursor:pointer;font-weight:500;">Reset frequency &amp; show again</button>
+    </div>
+  </div>
+
+  <!-- ─── List-layout specific controls ──────────────────────────── -->
+  <div class="controls-sub" id="subList" hidden>
+    <div class="controls-sub-label">List layout options</div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlListMeta">Show meta row</label>
+        <input class="toggle" type="checkbox" id="ctrlListMeta" checked />
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlListAmenities">Show tag chips</label>
+        <input class="toggle" type="checkbox" id="ctrlListAmenities" checked />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Departure-board specific controls ──────────────────────── -->
+  <div class="controls-sub" id="subDepartureBoard" hidden>
+    <div class="controls-sub-label">Departure board options</div>
+    <div class="field">
+      <label for="ctrlBoardTheme">Theme</label>
+      <select id="ctrlBoardTheme">
+        <option value="dark" selected>Dark (classic)</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlBoardAirport">Default airport</label>
+      <select id="ctrlBoardAirport">
+        <option value="LHR" selected>LHR · Heathrow</option>
+        <option value="LGW">LGW · Gatwick</option>
+        <option value="STN">STN · Stansted</option>
+        <option value="MAN">MAN · Manchester</option>
+        <option value="BHX">BHX · Birmingham</option>
+        <option value="EDI">EDI · Edinburgh</option>
+        <option value="GLA">GLA · Glasgow</option>
+        <option value="BRS">BRS · Bristol</option>
+        <option value="DUB">DUB · Dublin</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="ctrlBoardRange">Date range</label>
+      <select id="ctrlBoardRange">
+        <option value="14">14 days</option>
+        <option value="30" selected>30 days</option>
+        <option value="60">60 days</option>
+        <option value="90">90 days</option>
+      </select>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlBoardAnimate">Split-flap animation</label>
+        <input class="toggle" type="checkbox" id="ctrlBoardAnimate" checked />
+      </div>
+    </div>
+    <div class="field">
+      <div class="toggle-label-row">
+        <label for="ctrlBoardSound">Click sound</label>
+        <input class="toggle" type="checkbox" id="ctrlBoardSound" />
+      </div>
+    </div>
+  </div>
+
+  <div class="stage-label" id="stageLabel">Live preview · Travelify offers cache · AppId 250</div>
+  <div class="stage">
+    <div id="widgetMount"></div>
+  </div>
+</main>
+
+<footer class="foot">
+  Travelgenix Widget Suite · <a href="/">All widgets</a>
+</footer>
+
+<script src="/widget-hotel-offers.js"></script>
+<script>
+  /* ───────────────────────────────────────────────────────────────
+     Theme toggle — applies to host page AND propagates to widget
+     ─────────────────────────────────────────────────────────────── */
+  const themeBtn = document.getElementById('themeBtn');
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+  }
+  themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    rebuild();
+  });
+  applyTheme('light');
+
+  /* ───────────────────────────────────────────────────────────────
+     Conditional control visibility based on template + layout.
+     Mirrors the editor's data-when-template / data-when-layout system,
+     just lighter-weight (we know all the IDs up front).
+     ─────────────────────────────────────────────────────────────── */
+  function $(id) { return document.getElementById(id); }
+
+  function updateVisibility() {
+    const tmpl = $('ctrlTemplate').value;
+    const layout = $('ctrlLayout').value;
+
+    const isCards = tmpl === 'cards';
+    const isMagazine = tmpl === 'magazine';
+    const isDepartureBoard = tmpl === 'departure-board';
+    const isBoardingPass = tmpl === 'boarding-pass';
+    const isTicker = tmpl === 'ticker';
+    const isPopup = tmpl === 'popup';
+
+    // Layout selector — only relevant for cards
+    $('fieldLayout').hidden = !isCards;
+
+    // Offer type — relevant for cards, magazine, ticker, popup.
+    // Departure-board and boarding-pass force flights regardless.
+    $('fieldType').hidden = isDepartureBoard || isBoardingPass;
+
+    // Density — only meaningful for cards
+    $('fieldDensity').hidden = !isCards;
+
+    // Columns — grid layout only, inside cards template
+    $('fieldCols').hidden = !(isCards && layout === 'grid');
+
+    // Subordinate option panels
+    $('subMagazine').hidden = !isMagazine;
+    $('subBoardingPass').hidden = !isBoardingPass;
+    $('subList').hidden = !(isCards && layout === 'list');
+    $('subDepartureBoard').hidden = !isDepartureBoard;
+    $('subTicker').hidden = !isTicker;
+    $('subPopup').hidden = !isPopup;
+
+    // Popup conditional fields (within subPopup)
+    if (isPopup) {
+      const popupLayout = $('ctrlPopupLayout').value;
+      $('fieldPopupPosition').hidden = !(popupLayout === 'slide-in' || popupLayout === 'floating-card');
+      const trig = $('ctrlPopupTrigger').value;
+      $('fieldPopupDelay').hidden = !(trig === 'load' || trig === 'time');
+      $('fieldPopupScroll').hidden = !(trig === 'scroll');
+      $('fieldPopupInactivity').hidden = !(trig === 'inactivity');
+    }
+
+    // Stage label reflects the active template
+    const labels = {
+      'cards': 'Cards template · ' + layout + ' layout',
+      'magazine': 'Magazine template · hero + banners',
+      'departure-board': 'Departure board template · live fares',
+      'boarding-pass': 'Boarding pass template · flights only',
+      'ticker': 'Ticker template · marquee crawl',
+      'popup': 'Popup template · ' + $('ctrlPopupLayout').value,
+    };
+    $('stageLabel').textContent = 'Live preview · ' + (labels[tmpl] || tmpl);
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     Build a fresh config from current control values
+     ─────────────────────────────────────────────────────────────── */
+  const mount = document.getElementById('widgetMount');
+
+  function parseList(s) {
+    return (s || '').split(',').map(x => x.trim()).filter(Boolean);
+  }
+
+  function buildConfig() {
+    const tmpl = $('ctrlTemplate').value;
+    const layout = $('ctrlLayout').value;
+
+    return {
+      // Travelify test creds — public, safe to embed
+      appId: '250',
+      apiKey: 'A41D180E-CBFE-4E30-A47D-FAAB424A650D',
+
+      // Template + layout
+      template: tmpl,
+      layout: layout,
+
+      // Core filters
+      type: $('ctrlType').value,
+      // The property list replaces the destination scope entirely. These are
+      // the only hotels the widget will ever show.
+      ttiCodes: parseList($('ctrlTti').value).map((code) => ({ code })),
+      destinations: [],
+      origins: parseList($('ctrlOrigin').value),
+      dedupeStrategy: $('ctrlDedupe').value,
+      density: $('ctrlDensity').value,
+      columns: $('ctrlCols').value,
+      theme: document.documentElement.getAttribute('data-theme'),
+      maxOffers: 100,
+      DatesMin: 7,
+      DatesMax: 180,
+      cacheMinutes: 0,  // No cache in demo so changes are instant
+      sort: 'price:asc',
+
+      // Magazine options (read regardless — widget ignores when not magazine)
+      magazineHeroStrategy: $('ctrlMagHero').value,
+      magazineColumns: parseInt($('ctrlMagCols').value, 10) || 3,
+
+      // Boarding-pass options
+      boardingPassColumns: parseInt($('ctrlBpCols').value, 10) || 2,
+      boardingPassShowBarcode: $('ctrlBpBarcode').checked,
+
+      // List options
+      listShowMeta: $('ctrlListMeta').checked,
+      listShowAmenities: $('ctrlListAmenities').checked,
+
+      // Departure-board options
+      boardTheme: $('ctrlBoardTheme').value,
+      boardDefaultAirport: $('ctrlBoardAirport').value,
+      boardDateRange: parseInt($('ctrlBoardRange').value, 10) || 30,
+      boardAnimate: $('ctrlBoardAnimate').checked,
+      boardSound: $('ctrlBoardSound').checked,
+      // Auto-detect off in demo so the airport picker is the source of truth
+      boardAutoDetect: false,
+      boardAllowSwitcher: true,
+      boardAutoRefresh: false,
+
+      // Ticker options
+      tickerStyle: $('ctrlTickerStyle').value,
+      tickerSpeed: $('ctrlTickerSpeed').value,
+      tickerLabel: $('ctrlTickerLabel').value || 'Live deals',
+      tickerShowLabel: $('ctrlTickerShowLabel').checked,
+      tickerPauseOnHover: $('ctrlTickerPauseOnHover').checked,
+
+      // Popup options — read regardless, widget only uses when template==='popup'.
+      // The demo deliberately uses 'every-visit' frequency and no suppression so
+      // every config change triggers the popup again. In production these would
+      // default to session frequency with sensible suppression.
+      popupLayout: $('ctrlPopupLayout').value,
+      popupPosition: $('ctrlPopupPosition').value,
+      popupRenderMode: $('ctrlPopupRenderMode').value,
+      popupTrigger: $('ctrlPopupTrigger').value,
+      popupTriggerDelay: parseInt($('ctrlPopupDelay').value, 10) || 3000,
+      popupTriggerScrollPercent: parseInt($('ctrlPopupScroll').value, 10) || 50,
+      popupTriggerInactivitySeconds: parseInt($('ctrlPopupInactivity').value, 10) || 30,
+      popupHeading: $('ctrlPopupHeading').value || 'Live deals',
+      popupShowPulse: $('ctrlPopupShowPulse').checked,
+      popupShowCloseButton: $('ctrlPopupCloseBtn').checked,
+      popupRotateInterval: parseInt($('ctrlPopupRotate').value, 10) || 0,
+      popupMaxRender: parseInt($('ctrlPopupMaxRender').value, 10) || 6,
+      // Force every-visit so demo tweaks always re-fire
+      popupFrequency: 'every-visit',
+      popupSuppressAfterDismissDays: 0,
+      popupSuppressAfterConversionDays: 0,
+    };
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     Rebuild the widget on any control change
+     ─────────────────────────────────────────────────────────────── */
+  function rebuild() {
+    updateVisibility();
+    mount.innerHTML = '';
+    const div = document.createElement('div');
+    mount.appendChild(div);
+    // Construct directly — the demo rebuilds on every control change. Do NOT set
+    // data-tg-widget on this div: the script's auto-initialiser (which runs on
+    // DOMContentLoaded) would then grab it and call attachShadow a second time,
+    // which throws NotSupportedError ("The operation is not supported").
+    // Hotel Offers is the same engine under a second name — see
+    // widget-offers.js. Either global constructs it.
+    new window.TGHotelOffersWidget(div, buildConfig());
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     Wire every control. Selects + checkboxes rebuild on change;
+     text inputs debounce so typing doesn't fire dozens of fetches.
+     ─────────────────────────────────────────────────────────────── */
+  document.querySelectorAll('.controls select, .controls-sub select, .controls-sub input[type="checkbox"]').forEach(el => {
+    el.addEventListener('change', rebuild);
+  });
+  document.querySelectorAll('.controls input[type="text"], .controls input[type="number"], .controls-sub input[type="text"], .controls-sub input[type="number"]').forEach(el => {
+    el.addEventListener('input', () => {
+      clearTimeout(el._t);
+      el._t = setTimeout(rebuild, 400);
+    });
+  });
+
+  // Reset button for popup demo — clears stored frequency state for this
+  // widget so the popup fires again. Useful when you want to retest after
+  // dismissing it.
+  $('ctrlPopupReset').addEventListener('click', () => {
+    try {
+      // Clear any tgop_ prefixed sessionStorage / localStorage keys
+      for (const storage of [window.sessionStorage, window.localStorage]) {
+        const keys = [];
+        for (let i = 0; i < storage.length; i++) {
+          const k = storage.key(i);
+          if (k && k.startsWith('tgop_')) keys.push(k);
+        }
+        keys.forEach(k => storage.removeItem(k));
+      }
+    } catch {}
+    rebuild();
+  });
+
+  // Initial render
+  rebuild();
+</script>
+</body>
+</html>

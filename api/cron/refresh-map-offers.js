@@ -381,7 +381,7 @@ function withinNightsRange(o) {
 function passesDurationRule(o) {
   return (o.type === 'Flights') ? true : withinNightsRange(o);
 }
-function normaliseOffers(rawArray, sweepTypeId = 'Packages', drops = null, fallbackCC = null) {
+export function normaliseOffers(rawArray, sweepTypeId = 'Packages', drops = null, fallbackCC = null) {
   if (!Array.isArray(rawArray)) return [];
   const out = [];
   for (const o of rawArray) {
@@ -603,7 +603,7 @@ function updateCountryOffers(existingOffers, freshOffers, now = new Date()) {
  *  carries a dozen null flight fields, and each country key must stay
  *  inside Upstash's per-request write limit. Zeros and falses are kept
  *  (stops: 0 and direct: false are meaningful). */
-function compactOffer(o) {
+export function compactOffer(o) {
   const out = {};
   for (const k of Object.keys(o)) {
     if (o[k] !== null && o[k] !== undefined) out[k] = o[k];
@@ -717,7 +717,7 @@ async function maintainStoredOffers(now, sweptCCs = new Set()) {
 }
 
 // ── Airtable ────────────────────────────────────────────────────────────────
-async function airtableList(tableId, params = {}) {
+export async function airtableList(tableId, params = {}) {
   const PAT = process.env.AIRTABLE_PAT;
   if (!PAT) throw new Error('AIRTABLE_PAT not set');
   const qs = new URLSearchParams(params).toString();
@@ -826,7 +826,7 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
     customerUserAgent: 'Travelgenix-WorldMapCron/1.0',
   };
 }
-async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retries = 1) {
+export async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retries = 1) {
   let last;
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt) await new Promise(r => setTimeout(r, 500));

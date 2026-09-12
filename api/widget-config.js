@@ -395,6 +395,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Text FX',
   'Logo Showcase',
   'Travel Offers',
+  'Hotel Offers',
   'Popup',
   'Countdown Timer',
   'Event Calendar',
@@ -472,6 +473,10 @@ const PLAN_WIDGET_LIMITS = {
   'Text FX':               { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Logo Showcase':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Offers':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
+  // Gated above Spark: unlike Travel Offers, which reads a cache we fill for
+  // everyone anyway, every property named on a Hotel Offers widget costs its
+  // own Travelify search every night, under that client's own application.
+  'Hotel Offers':          { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Popup':                 { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Event Calendar':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
@@ -611,6 +616,8 @@ const WIDGET_TYPE_ALIASES = {
   'logo-showcase':     'Logo Showcase',
   'offers':            'Travel Offers',
   'travel-offers':     'Travel Offers',
+  'hotel-offers':      'Hotel Offers',
+  'hotels':            'Hotel Offers',
   'popup':             'Popup',
   'countdown':         'Countdown Timer',
   'countdown-timer':   'Countdown Timer',
@@ -844,7 +851,11 @@ export default async function handler(req, res) {
         // Event Menu joined the list on 8 Sep 2026: with no page address set it
         // lists events with Book buttons beside the menu, the same deeplinks as
         // Event Tickets, so it needs the owning client's AppID like the rest.
-        const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'World Map', 'Event Tickets',
+        // Hotel Offers needs it twice over: for the booking deeplink like the rest,
+        // AND because its offer cache is keyed by App ID (each client's properties
+        // are swept under their own Travelify application, at their own rates), so
+        // without it the widget cannot name the pool to read.
+        const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'Hotel Offers', 'World Map', 'Event Tickets',
           'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month', 'Event Menu'];
         // Resolve the client's Travelify credentials from the widget's AUTHORITATIVE
         // owning account (ClientRecordId), NOT the creator's email. One person can
@@ -862,8 +873,11 @@ export default async function handler(req, res) {
                         || (clientEmail ? await lookupClientCredentialsByEmail(clientEmail) : null);
             if (creds) {
               config.appId = creds.appId;
-              if (widgetType === 'Travel Offers') {
-                config.apiKey = creds.apiKey;
+              if (widgetType === 'Travel Offers' || widgetType === 'Hotel Offers') {
+                // Travel Offers keeps the API key for legacy reasons. Hotel Offers is
+                // cache-only from birth and never calls Travelify from the browser, so
+                // it is not given one.
+                if (widgetType === 'Travel Offers') config.apiKey = creds.apiKey;
                 // The owning client's own agency name (trading name, else account
                 // name). A Dynamic Package is assembled and sold by the agent —
                 // our client — under THEIR ATOL, and carries no operator name in

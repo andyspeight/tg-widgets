@@ -17,6 +17,13 @@
  * Query params (all optional):
  *   type          Accommodation | Flights | Packages | DynamicPackages |
  *                 PackageHolidays | BothPackages   (default Packages family)
+ *   tti           CSV of Travelify property codes (Hotel Offers widget). When
+ *                 present the read switches from the country pool to the
+ *                 per-property pool and `destinations` is ignored — the named
+ *                 properties ARE the scope. Requires `appId`, because the
+ *                 property pool is filled under each client's own Travelify
+ *                 application (see TTI_PREFIX below)
+ *   appId         the widget's Travelify App ID. Only read in `tti` mode
  *   destinations  CSV of 3-letter airport IATA and/or 2-letter country codes
  *   origins       CSV of 3-letter departure-airport IATA codes and/or 2-letter
  *                 market codes (GB, IE). A market means "departing that
@@ -54,9 +61,47 @@ const countryKey = (cc) => `${COUNTRY_PREFIX}${cc}`;
 // (see the cron's storeCountryOffers) so the packages key the world map reads
 // keeps its exact product. This endpoint reads both.
 const extraCountryKey = (cc) => `offers:extra:${cc}`;
+// Hotel Offers (TTI) pool. A client names specific PROPERTIES by their
+// Travelify TTI code instead of naming places, and the nightly cron
+// (api/cron/refresh-tti-offers.js) fills one key per property per client.
+//
+// Keyed by App ID as well as code because the sweep runs under each client's
+// OWN Travelify application: two agencies asking about the same hotel get
+// their own contracted rates, and a shared key would serve one client the
+// other's prices. The click-through deeplink opens the client's own app, so a
+// shared key would also mean the teaser price and the booking price disagree.
+const TTI_PREFIX = 'offers:tti:';
+const ttiKey = (appId, code) => `${TTI_PREFIX}${appId}:${code}`;
+// How many properties one widget may ask for in a single read. Each code is
+// its own Redis key, so this bounds the fan-out of one request.
+const MAX_TTI_CODES = 100;
 
 const MAX_OFFERS_CAP = 500;
 const DEFAULT_MAX = 100;
+
+/** Canonicalise a Travelify property reference to the bare code we key on.
+ *  The feed hands back accommodation.uniqueRef already 'TTI:'-prefixed while
+ *  an agent pastes the bare code, so both spellings normalise to one form and
+ *  a widget configured either way reads the same key. Returns '' when the
+ *  token is not a usable code — callers MUST treat that as a cache miss, never
+ *  as "no filter", or a widget scoped to twelve hotels would show the world. */
+function canonTti(token) {
+  const up = String(token || '').trim().toUpperCase().replace(/^TTI:/, '');
+  return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
+}
+
+/** Parse the `tti` CSV param. Same contract as csv(): an unusable token
+ *  invalidates the whole query rather than silently dropping a filter. */
+function parseTtiCodes(v, cap = MAX_TTI_CODES) {
+  const rawTokens = String(v || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const codes = [];
+  let invalid = rawTokens.length > cap;
+  for (const tok of rawTokens.slice(0, cap)) {
+    const c = canonTti(tok);
+    if (c) codes.push(c); else invalid = true;
+  }
+  return { codes: Array.from(new Set(codes)), invalid };
+}
 
 /** Parse a CSV param, validating every token. Returns { tokens, invalid } —
  *  callers MUST treat invalid tokens as a cache miss, never as "no filter":
@@ -315,6 +360,11 @@ export default async function handler(req, res) {
   const startedAt = Date.now();
   const q = req.query || {};
   const widgetId = q.widgetId ? String(q.widgetId).slice(0, 120) : '';
+  // Both offer widgets read this endpoint. Attribute the row to the one that
+  // actually asked, so a Hotel Offers cache miss is visible as its own signal
+  // rather than hiding inside the Travel Offers hit rate.
+  const servedWidgetType = (q.tti != null && String(q.tti).trim() !== '')
+    ? 'Hotel Offers' : 'Travel Offers';
 
   // Send the response then log telemetry (after the bytes are flushed, so no
   // client-visible latency). cacheHit reflects whether the cache actually
@@ -326,7 +376,7 @@ export default async function handler(req, res) {
     await logWidgetEvent(req, {
       event: 'cached-offers',
       widgetId,
-      widgetType: 'Travel Offers',
+      widgetType: servedWidgetType,
       status,
       cacheHit: status === 200 ? (Number(jsonBody?.totalMatched) > 0) : null,
       latencyMs: Date.now() - startedAt,
@@ -353,11 +403,26 @@ export default async function handler(req, res) {
   }
 
   try {
+    // ── Hotel Offers (TTI) mode ────────────────────────────────────────────
+    // The widget named PROPERTIES rather than places. That replaces the
+    // destination scope entirely: the codes are the scope, so `destinations`
+    // is not consulted and the per-offer destination gate is skipped below.
+    const ttiMode = q.tti != null && String(q.tti).trim() !== '';
+    const tti = ttiMode ? parseTtiCodes(q.tti) : { codes: [], invalid: false };
+    // App IDs are numeric in Travelify. An unusable one cannot name a pool, and
+    // guessing a default would serve another client's contracted rates.
+    const ttiAppId = /^\d{1,10}$/.test(String(q.appId || '').trim())
+      ? String(q.appId).trim() : '';
+    if (ttiMode && (tti.invalid || !tti.codes.length || !ttiAppId)) {
+      res.setHeader('Cache-Control', 'no-store');
+      return done(200, { success: true, source: 'cache', totalMatched: 0, data: [], unresolvedFilters: true });
+    }
+
     // Destinations may be 2-3 letter codes OR free-text place names — a name is
     // resolved against the cache's own airport index below (self-heals configs
     // saved as "Orlando" instead of "MCO"). A name that resolves to nothing is
     // an honest miss, never a widened filter.
-    const dest = parseDestinations(q.destinations);
+    const dest = ttiMode ? { codes: [], names: [], invalid: false } : parseDestinations(q.destinations);
     // Origins accept 3-letter airport IATAs AND 2-letter country codes (the
     // editor documents both and its presets use 'GB'). A country origin means
     // "departing that country" and is answered from the offer's departure
@@ -452,15 +517,25 @@ export default async function handler(req, res) {
         }
       }
     }
-    let ccList;
-    if (targetCCs.size) {
-      ccList = Array.from(targetCCs);
+    // Which Redis keys this read draws from, as one group per place (or, in
+    // TTI mode, per property). A group is read together and its offers pooled,
+    // which is what lets a country contribute both its packages key and its
+    // accommodation/flights key without the filter loop knowing the difference.
+    let keyGroups;
+    if (ttiMode) {
+      // One key per property, under this client's own application. No
+      // "read everything" branch here: a Hotel Offers widget that resolved no
+      // codes was already answered as a miss above.
+      keyGroups = tti.codes.map((code) => [ttiKey(ttiAppId, code)]);
+    } else if (targetCCs.size) {
+      keyGroups = Array.from(targetCCs).map((cc) => [countryKey(cc), extraCountryKey(cc)]);
     } else if (!hasDestFilter) {
-      ccList = (await keys(`${COUNTRY_PREFIX}*`))
+      keyGroups = (await keys(`${COUNTRY_PREFIX}*`))
         .map((k) => String(k).slice(COUNTRY_PREFIX.length).toUpperCase())
-        .filter((cc) => /^[A-Z]{2}$/.test(cc));
+        .filter((cc) => /^[A-Z]{2}$/.test(cc))
+        .map((cc) => [countryKey(cc), extraCountryKey(cc)]);
     } else {
-      ccList = []; // destinations were given but none resolved — no matches
+      keyGroups = []; // destinations were given but none resolved — no matches
     }
 
     // ── Load + filter ───────────────────────────────────────────────────────
@@ -473,21 +548,18 @@ export default async function handler(req, res) {
     const matched = [];
     let newestRefresh = null;
 
-    // Bounded concurrency over the country keys (same idiom as the cron).
+    // Bounded concurrency over the key groups (same idiom as the cron).
     let i = 0;
-    const workers = Array.from({ length: Math.min(8, ccList.length || 1) }, async () => {
-      while (i < ccList.length) {
-        const cc = ccList[i++];
-        const [packagesStored, extraStored] = await Promise.all([
-          getJson(countryKey(cc)),
-          getJson(extraCountryKey(cc)),
-        ]);
-        const pools = [packagesStored, extraStored].filter(s => s && Array.isArray(s.offers));
+    const workers = Array.from({ length: Math.min(8, keyGroups.length || 1) }, async () => {
+      while (i < keyGroups.length) {
+        const group = keyGroups[i++];
+        const stored = await Promise.all(group.map((k) => getJson(k)));
+        const pools = stored.filter(s => s && Array.isArray(s.offers));
         if (!pools.length) continue;
         for (const s of pools) {
           if (s.refreshedAt && (!newestRefresh || s.refreshedAt > newestRefresh)) newestRefresh = s.refreshedAt;
         }
-        const allOffers = pools.length === 1 ? pools[0].offers : pools[0].offers.concat(pools[1].offers);
+        const allOffers = pools.length === 1 ? pools[0].offers : pools.flatMap((s) => s.offers);
         for (const o of allOffers) {
           if (!o || !matchesType(o)) continue;
           if (!isServable(o, now)) continue;
