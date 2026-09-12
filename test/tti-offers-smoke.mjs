@@ -1,12 +1,12 @@
 /**
- * Hotel Offers (TTI) smoke tests.
+ * TTI Offers smoke tests.
  *
- * The Hotel Offers widget is the Travel Offers engine scoped to a list of
+ * The TTI Offers widget is the Travel Offers engine scoped to a list of
  * Travelify property codes instead of a list of places. Three files have to
  * agree on exactly one thing for it to work at all — how a pasted TTI code
  * becomes a Redis key — so that agreement is what most of this file checks.
  *
- * Run: npm run test:hotel-offers
+ * Run: npm run test:tti-offers
  */
 
 import { readFileSync } from 'node:fs';
@@ -28,9 +28,9 @@ const TTI_LIB = readFileSync(new URL('../api/_lib/offers/tti.js', import.meta.ur
 const VERCEL = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
 const WIDGET_CONFIG = readFileSync(new URL('../api/widget-config.js', import.meta.url), 'utf8');
 const DASHBOARD = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
-const EDITOR = readFileSync(new URL('../public/editor-hotel-offers.html', import.meta.url), 'utf8');
-const DEMO = readFileSync(new URL('../public/demo-hotel-offers.html', import.meta.url), 'utf8');
-const TOUR = readFileSync(new URL('../public/tour-hotel-offers.js', import.meta.url), 'utf8');
+const EDITOR = readFileSync(new URL('../public/editor-tti-offers.html', import.meta.url), 'utf8');
+const DEMO = readFileSync(new URL('../public/demo-tti-offers.html', import.meta.url), 'utf8');
+const TOUR = readFileSync(new URL('../public/tour-tti-offers.js', import.meta.url), 'utf8');
 
 let passed = 0;
 const failures = [];
@@ -43,7 +43,7 @@ function test(name, fn) {
 // The cron WRITES offers:tti:{appId}:{code}; the endpoint READS it; the widget
 // asks for {code}. All three canonicalise the pasted token themselves, so a
 // difference in any one of them is not a bug that degrades — it is a total,
-// silent miss on every Hotel Offers widget in the estate.
+// silent miss on every TTI Offers widget in the estate.
 
 test('the TTI code regex is identical in all three files', () => {
   const RE = /\^\[A-Z0-9\]\[A-Z0-9\._-\]\{0,31\}\$/;
@@ -311,8 +311,8 @@ test('the TTI pool is keyed by App ID so clients cannot be served each others ra
   assert.ok(/const ttiKey = \(appId, code\) => `\$\{TTI_PREFIX\}\$\{appId\}:\$\{code\}`/.test(CRON));
 });
 
-test('Hotel Offers reads are attributed to their own widget type', () => {
-  assert.ok(/servedWidgetType/.test(CACHED) && /'Hotel Offers' : 'Travel Offers'/.test(CACHED));
+test('TTI Offers reads are attributed to their own widget type', () => {
+  assert.ok(/servedWidgetType/.test(CACHED) && /'TTI Offers' : 'Travel Offers'/.test(CACHED));
 });
 
 // ── The widget ─────────────────────────────────────────────────────────────
@@ -327,8 +327,8 @@ test('the engine sends tti and appId, and omits destinations, when codes are set
 });
 
 test('the engine auto-inits on both widget tags and aliases the class', () => {
-  assert.ok(/\[data-tg-widget="offers"\], \[data-tg-widget="hotel-offers"\]/.test(WIDGET));
-  assert.ok(/window\.TGHotelOffersWidget = TGOffersWidget/.test(WIDGET));
+  assert.ok(/\[data-tg-widget="offers"\], \[data-tg-widget="tti-offers"\]/.test(WIDGET));
+  assert.ok(/window\.TGTtiOffersWidget = TGOffersWidget/.test(WIDGET));
 });
 
 test('the cache-only rule still holds on the new path', () => {
@@ -342,22 +342,22 @@ test('the cache-only rule still holds on the new path', () => {
 
 // ── Registration ───────────────────────────────────────────────────────────
 
-test('Hotel Offers is registered everywhere a widget type has to be', () => {
-  assert.ok(/'Hotel Offers'/.test(WIDGET_CONFIG), 'missing from ALLOWED_WIDGET_TYPES');
+test('TTI Offers is registered everywhere a widget type has to be', () => {
+  assert.ok(/'TTI Offers'/.test(WIDGET_CONFIG), 'missing from ALLOWED_WIDGET_TYPES');
   assert.ok(
-    /'Hotel Offers':\s*\{[^}]*Spark[^}]*\}/.test(WIDGET_CONFIG),
+    /'TTI Offers':\s*\{[^}]*Spark[^}]*\}/.test(WIDGET_CONFIG),
     'missing from PLAN_WIDGET_LIMITS',
   );
   assert.ok(
-    /NEEDS_APP_ID = \[[^\]]*'Hotel Offers'/.test(WIDGET_CONFIG),
-    'Hotel Offers must receive the owning client App ID, or its cache key cannot be built',
+    /NEEDS_APP_ID = \[[^\]]*'TTI Offers'/.test(WIDGET_CONFIG),
+    'TTI Offers must receive the owning client App ID, or its cache key cannot be built',
   );
-  assert.ok(/airtableType: 'Hotel Offers'/.test(DASHBOARD), 'missing from the dashboard registry');
+  assert.ok(/airtableType: 'TTI Offers'/.test(DASHBOARD), 'missing from the dashboard registry');
 });
 
 test('the plan map and the dashboard registry agree', () => {
-  const api = /'Hotel Offers':\s*\{([^}]*)\}/.exec(WIDGET_CONFIG);
-  const reg = /airtableType: 'Hotel Offers'[\s\S]*?access: \{([^}]*)\}/.exec(DASHBOARD);
+  const api = /'TTI Offers':\s*\{([^}]*)\}/.exec(WIDGET_CONFIG);
+  const reg = /airtableType: 'TTI Offers'[\s\S]*?access: \{([^}]*)\}/.exec(DASHBOARD);
   assert.ok(api && reg, 'could not read both plan maps');
   const norm = (s) => s.replace(/\s|'/g, '').split(',').filter(Boolean).sort().join('|');
   assert.equal(norm(api[1]), norm(reg[1]),
@@ -366,7 +366,7 @@ test('the plan map and the dashboard registry agree', () => {
 
 test('a widget available on a plan is unlimited there', () => {
   // Andy, 8 Sep 2026: never a positive count in a plan map.
-  const api = /'Hotel Offers':\s*\{([^}]*)\}/.exec(WIDGET_CONFIG);
+  const api = /'TTI Offers':\s*\{([^}]*)\}/.exec(WIDGET_CONFIG);
   for (const pair of api[1].split(',')) {
     if (!pair.trim()) continue;
     const v = Number(pair.split(':')[1]);
@@ -377,13 +377,13 @@ test('a widget available on a plan is unlimited there', () => {
 test('vercel.json serves the widget, the editor and the demo', () => {
   const rewrites = VERCEL.rewrites || [];
   const has = (src) => rewrites.some((r) => r.source === src);
-  assert.ok(has('/editor-hotel-offers'), 'missing editor rewrite — the clean URL would 404');
-  assert.ok(has('/demo-hotel-offers'), 'missing demo rewrite');
+  assert.ok(has('/editor-tti-offers'), 'missing editor rewrite — the clean URL would 404');
+  assert.ok(has('/demo-tti-offers'), 'missing demo rewrite');
   assert.ok(
-    rewrites.some((r) => r.source === '/widget-hotel-offers.js' && r.destination === '/widget-offers.js'),
+    rewrites.some((r) => r.source === '/widget-tti-offers.js' && r.destination === '/widget-offers.js'),
     'the widget script must rewrite onto the shared engine',
   );
-  const headers = (VERCEL.headers || []).find((h) => h.source === '/widget-hotel-offers.js');
+  const headers = (VERCEL.headers || []).find((h) => h.source === '/widget-tti-offers.js');
   assert.ok(headers, 'missing CORS/cache headers for the widget script');
   const keys = headers.headers.map((h) => h.key);
   assert.ok(keys.includes('Access-Control-Allow-Origin'), 'widget script must be CORS-open');
@@ -397,11 +397,11 @@ test('the nightly sweep is scheduled', () => {
 
 // ── The editor ─────────────────────────────────────────────────────────────
 
-test('the editor saves as Hotel Offers and embeds the right script', () => {
-  assert.ok(/const WIDGET_TYPE = 'Hotel Offers';/.test(EDITOR));
-  assert.ok(/widgetTag: 'hotel-offers'/.test(EDITOR));
-  assert.ok(/scriptFile: 'widget-hotel-offers\.js'/.test(EDITOR));
-  assert.ok(/widget-hotel-offers\.js"><\\\/script>/.test(EDITOR), 'embed snippet must name the new script');
+test('the editor saves as TTI Offers and embeds the right script', () => {
+  assert.ok(/const WIDGET_TYPE = 'TTI Offers';/.test(EDITOR));
+  assert.ok(/widgetTag: 'tti-offers'/.test(EDITOR));
+  assert.ok(/scriptFile: 'widget-tti-offers\.js'/.test(EDITOR));
+  assert.ok(/widget-tti-offers\.js"><\\\/script>/.test(EDITOR), 'embed snippet must name the new script');
 });
 
 test('the editor canonicalises TTI codes the same way as everything else', () => {
@@ -440,8 +440,8 @@ test('the editor templates are layout presets, not dead destination filters', ()
 // ── The demo and the tour ──────────────────────────────────────────────────
 
 test('the demo mounts the shared engine and loads the rewritten script', () => {
-  assert.ok(/widget-hotel-offers\.js/.test(DEMO));
-  assert.ok(/new window\.TGHotelOffersWidget\(/.test(DEMO));
+  assert.ok(/widget-tti-offers\.js/.test(DEMO));
+  assert.ok(/new window\.TGTtiOffersWidget\(/.test(DEMO));
   assert.ok(/ttiCodes:/.test(DEMO) && !/ctrlDest/.test(DEMO));
 });
 
@@ -450,14 +450,14 @@ test('the tour points at the property list, not the retired destination input', 
   assert.ok(!/#destInput/.test(TOUR));
   assert.ok(/openSectionByTitle\('Your properties'\)/.test(TOUR));
   // Its own id, so dismissing one tour does not silently dismiss the other.
-  assert.ok(/'hotel-offers'/.test(TOUR) && !/tourLauncher\(\{ id: 'offers'/.test(TOUR));
+  assert.ok(/'tti-offers'/.test(TOUR) && !/tourLauncher\(\{ id: 'offers'/.test(TOUR));
 });
 
 // ── Report ─────────────────────────────────────────────────────────────────
 
 if (failures.length) {
-  console.error(`\nhotel-offers: ${passed} passed, ${failures.length} FAILED\n`);
+  console.error(`\ntti-offers: ${passed} passed, ${failures.length} FAILED\n`);
   for (const f of failures) console.error('  ✗ ' + f);
   process.exit(1);
 }
-console.log(`hotel-offers: ${passed} passed`);
+console.log(`tti-offers: ${passed} passed`);

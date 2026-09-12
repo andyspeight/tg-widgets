@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Hotel Offers Widget Editor · Travelgenix</title>
+  <title>TTI Offers Widget Editor · Travelgenix</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1889,7 +1889,7 @@
 
   <!-- Guided setup tour (reusable engine + step list) -->
   <script src="/editor-tour.js"></script>
-  <script src="/tour-hotel-offers.js"></script>
+  <script src="/tour-tti-offers.js"></script>
 
   <script>
     /* ============================================================
@@ -1897,7 +1897,7 @@
        ============================================================ */
     const API_CONFIG = '/api/widget-config';
     const API_AI = '/api/widget-ai';
-    const WIDGET_TYPE = 'Hotel Offers';
+    const WIDGET_TYPE = 'TTI Offers';
 
     const TG_TRAVELIFY_APPID = '250';
     const TG_TRAVELIFY_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
@@ -3423,7 +3423,7 @@
         return;
       }
       const code = '<div data-tg-widget="offers" data-tg-id="' + state.widgetId + '"></div>\n'
-        + '<script src="https://tg-widgets.vercel.app/widget-hotel-offers.js"><\/script>';
+        + '<script src="https://tg-widgets.vercel.app/widget-tti-offers.js"><\/script>';
       box.innerHTML = '';
       const text = document.createElement('span');
       text.textContent = code;
@@ -3612,8 +3612,8 @@
        ============================================================ */
     window.tgse.init({
       widgetType: WIDGET_TYPE,
-      widgetTag: 'hotel-offers',
-      scriptFile: 'widget-hotel-offers.js',
+      widgetTag: 'tti-offers',
+      scriptFile: 'widget-tti-offers.js',
 
       getConfig: () => {
         // Strip Travelify creds — they're account-level, never persisted on the widget config

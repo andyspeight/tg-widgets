@@ -17,7 +17,7 @@
  * Query params (all optional):
  *   type          Accommodation | Flights | Packages | DynamicPackages |
  *                 PackageHolidays | BothPackages   (default Packages family)
- *   tti           CSV of Travelify property codes (Hotel Offers widget). When
+ *   tti           CSV of Travelify property codes (TTI Offers widget). When
  *                 present the read switches from the country pool to the
  *                 per-property pool and `destinations` is ignored — the named
  *                 properties ARE the scope. Requires `appId`, because the
@@ -61,7 +61,7 @@ const countryKey = (cc) => `${COUNTRY_PREFIX}${cc}`;
 // (see the cron's storeCountryOffers) so the packages key the world map reads
 // keeps its exact product. This endpoint reads both.
 const extraCountryKey = (cc) => `offers:extra:${cc}`;
-// Hotel Offers (TTI) pool. A client names specific PROPERTIES by their
+// TTI Offers pool. A client names specific PROPERTIES by their
 // Travelify TTI code instead of naming places, and the nightly cron
 // (api/cron/refresh-tti-offers.js) fills one key per property per client.
 //
@@ -361,10 +361,10 @@ export default async function handler(req, res) {
   const q = req.query || {};
   const widgetId = q.widgetId ? String(q.widgetId).slice(0, 120) : '';
   // Both offer widgets read this endpoint. Attribute the row to the one that
-  // actually asked, so a Hotel Offers cache miss is visible as its own signal
+  // actually asked, so a TTI Offers cache miss is visible as its own signal
   // rather than hiding inside the Travel Offers hit rate.
   const servedWidgetType = (q.tti != null && String(q.tti).trim() !== '')
-    ? 'Hotel Offers' : 'Travel Offers';
+    ? 'TTI Offers' : 'Travel Offers';
 
   // Send the response then log telemetry (after the bytes are flushed, so no
   // client-visible latency). cacheHit reflects whether the cache actually
@@ -403,7 +403,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ── Hotel Offers (TTI) mode ────────────────────────────────────────────
+    // ── TTI Offers mode ────────────────────────────────────────────
     // The widget named PROPERTIES rather than places. That replaces the
     // destination scope entirely: the codes are the scope, so `destinations`
     // is not consulted and the per-offer destination gate is skipped below.
@@ -524,7 +524,7 @@ export default async function handler(req, res) {
     let keyGroups;
     if (ttiMode) {
       // One key per property, under this client's own application. No
-      // "read everything" branch here: a Hotel Offers widget that resolved no
+      // "read everything" branch here: a TTI Offers widget that resolved no
       // codes was already answered as a miss above.
       keyGroups = tti.codes.map((code) => [ttiKey(ttiAppId, code)]);
     } else if (targetCCs.size) {

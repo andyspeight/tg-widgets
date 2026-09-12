@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Hotel Offers · Travelgenix Widget Suite</title>
+<title>TTI Offers · Travelgenix Widget Suite</title>
 <style>
   :root {
     --tg-bg: #F7F9FB;
@@ -218,7 +218,7 @@
       <span class="brand-mark"></span>
       <span>Travelgenix</span>
     </a>
-    <span class="pill">Hotel Offers · Demo</span>
+    <span class="pill">TTI Offers · Demo</span>
     <div class="topbar-spacer"></div>
     <a class="topbar-link" href="/editor-offers">Open editor →</a>
     <button class="theme-toggle" id="themeBtn" title="Toggle theme">🌙</button>
@@ -226,7 +226,7 @@
 </header>
 
 <main class="wrap">
-  <h1>Hotel Offers</h1>
+  <h1>TTI Offers</h1>
   <p class="lede">
     Your own hotels, priced live. You list the properties you sell by their Travelify code, and the
     widget shows real prices for those hotels and nothing else. Every Travel Offers layout is
@@ -545,7 +545,7 @@
   Travelgenix Widget Suite · <a href="/">All widgets</a>
 </footer>
 
-<script src="/widget-hotel-offers.js"></script>
+<script src="/widget-tti-offers.js"></script>
 <script>
   /* ───────────────────────────────────────────────────────────────
      Theme toggle — applies to host page AND propagates to widget
@@ -727,9 +727,9 @@
     // data-tg-widget on this div: the script's auto-initialiser (which runs on
     // DOMContentLoaded) would then grab it and call attachShadow a second time,
     // which throws NotSupportedError ("The operation is not supported").
-    // Hotel Offers is the same engine under a second name — see
+    // TTI Offers is the same engine under a second name — see
     // widget-offers.js. Either global constructs it.
-    new window.TGHotelOffersWidget(div, buildConfig());
+    new window.TGTtiOffersWidget(div, buildConfig());
   }
 
   /* ───────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 /**
- * Vercel Cron — refresh Hotel Offers (TTI property sweep).
+ * Vercel Cron — refresh the TTI Offers property sweep.
  *
  * WHAT IT DOES
- *   1. Reads every live Hotel Offers widget from the Widgets table and pulls
+ *   1. Reads every live TTI Offers widget from the Widgets table and pulls
  *      the TTI property codes out of each one's saved config.
  *   2. Resolves the OWNING client's Travelify App ID for each widget, then
  *      folds the whole roster into a deduped set of (appId, code) pairs — two
@@ -86,7 +86,7 @@ import {
 
 // ── Config ────────────────────────────────────────────────────────────────
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2'; // Widgets (appAYzWZxvK6qlwXK)
-const WIDGET_TYPE = 'Hotel Offers';
+const WIDGET_TYPE = 'TTI Offers';
 
 const TTI_PREFIX = 'offers:tti:';
 const ttiKey = (appId, code) => `${TTI_PREFIX}${appId}:${code}`;
@@ -112,7 +112,7 @@ import {
   offerIsProperty,
 } from '../_lib/offers/tti.js';
 
-/** Read every live Hotel Offers widget and fold it into deduped work items.
+/** Read every live TTI Offers widget and fold it into deduped work items.
  *  One item per (appId, code): the same hotel on two widgets of one account is
  *  one search, the same hotel on two different accounts is one search each
  *  because their contracted rates — and therefore their cached prices — differ. */

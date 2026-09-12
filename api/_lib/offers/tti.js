@@ -1,5 +1,5 @@
 /**
- * Hotel Offers (TTI) — the pure logic, kept free of Airtable and Redis.
+ * TTI Offers — the pure logic, kept free of Airtable and Redis.
  *
  * Everything here is a plain function over plain data: how a pasted Travelify
  * property code becomes the key the cache is stored under, what search one
@@ -146,7 +146,7 @@ export function codesFromConfig(config) {
   return out;
 }
 
-/** The search shape one widget implies, clamped to sane bounds. A Hotel Offers
+/** The search shape one widget implies, clamped to sane bounds. A TTI Offers
  *  widget carries the SAME config keys as Travel Offers (it is the same engine),
  *  so this reads the fields that already exist rather than inventing new ones. */
 export function searchFromConfig(config) {
@@ -247,7 +247,7 @@ export function buildTtiPayload(appId, prop, search, override = null) {
     DatesMax: search.DatesMax,
     sort: 'price:asc',
     pricingByType: 'Person',
-    customerUserAgent: 'Travelgenix-HotelOffersCron/1.0',
+    customerUserAgent: 'Travelgenix-TtiOffersCron/1.0',
     ...(search.origins && search.origins.length ? { origins: search.origins } : {}),
     ...anchor,
   };

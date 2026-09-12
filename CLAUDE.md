@@ -32,8 +32,8 @@ Owner: Andy Speight, CEO, Travelgenix.
   `recCKQZ4ucnuef2Ii`).
 - **Email Signature**: `docs/email-signature-handover.md` (Airtable record
   `recYKgvuON4dFQWfa`).
-- **Hotel Offers** (the TTI property-scoped offers widget, and the one open
-  question blocking it): `docs/hotel-offers-handover.md`. Read it before any
+- **TTI Offers** (the TTI property-scoped offers widget, and the one open
+  question blocking it): `docs/tti-offers-handover.md`. Read it before any
   work on TTI codes, the per-property offer cache, or the nightly sweep.
 - **Event Tickets widget family** (the supplier event feed and the six ticket
   widgets built on it): `docs/supplier-event-feed.md` (Airtable record
@@ -84,7 +84,7 @@ Session Summary, Decisions Locked, Files Touched, Blockers).
 **Offers are cache-only.** A visitor's browser must NEVER trigger a Travelify
 search. Every offer widget reads `GET /api/cached-offers` and nothing else; the
 cache is filled on our own schedule by `api/cron/refresh-map-offers.js` and
-`api/cron/refresh-tti-offers.js` (the Hotel Offers per-property sweep), which
+`api/cron/refresh-tti-offers.js` (the TTI Offers per-property sweep), which
 are the only things that may call `/api/offers`. The one live search left in the
 product is the one Travelify runs when a visitor CLICKS an offer. Do not add a
 "just fall back to live if the cache is empty" path — that is the exact

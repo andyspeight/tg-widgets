@@ -574,16 +574,16 @@
       "destination": "/editor-offers.html"
     },
     {
-      "source": "/widget-hotel-offers.js",
+      "source": "/widget-tti-offers.js",
       "destination": "/widget-offers.js"
     },
     {
-      "source": "/editor-hotel-offers",
-      "destination": "/editor-hotel-offers.html"
+      "source": "/editor-tti-offers",
+      "destination": "/editor-tti-offers.html"
     },
     {
-      "source": "/demo-hotel-offers",
-      "destination": "/demo-hotel-offers.html"
+      "source": "/demo-tti-offers",
+      "destination": "/demo-tti-offers.html"
     },
     {
       "source": "/editor-textfx",
@@ -1401,7 +1401,7 @@
       ]
     },
     {
-      "source": "/widget-hotel-offers.js",
+      "source": "/widget-tti-offers.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",

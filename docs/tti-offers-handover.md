@@ -1,4 +1,4 @@
-# Hotel Offers — project handover
+# TTI Offers — project handover
 
 **Status:** built, deployed, and waiting on one answer from Travelify before it
 can show a single price. Started 12 Sep 2026.
@@ -131,19 +131,19 @@ for plenty and stored none, which is that failure's signature.
 ## Architecture
 
 **One engine, two widget types.** `public/widget-offers.js` serves both. Travel
-Offers scopes by place; Hotel Offers scopes by property. Everything after the
+Offers scopes by place; TTI Offers scopes by property. Everything after the
 fetch — six templates, the popup engine, seven dedupe strategies, the currency
 layer — is identical, so a fork would mean fixing every future template bug
-twice. `/widget-hotel-offers.js` is a `vercel.json` rewrite onto the same file,
+twice. `/widget-tti-offers.js` is a `vercel.json` rewrite onto the same file,
 which keeps the one-div-one-script embed contract and injects no script. The
-engine auto-inits on both tags and exposes `window.TGHotelOffersWidget` as an
+engine auto-inits on both tags and exposes `window.TGTtiOffersWidget` as an
 alias of the same class.
 
 The seam is one function, `_cachedOffersQuery`. A config carrying `ttiCodes`
 sends `tti` and `appId` and **does not send `destinations`** — a widget that
 named twelve hotels must never fall back to showing a country.
 
-**This is its own cache, not the main one.** The Hotel Offers pool lives under
+**This is its own cache, not the main one.** The TTI Offers pool lives under
 `offers:tti:` and touches nothing in the country pool (`offers:packages:{CC}`,
 `offers:extra:{CC}`, `map:offers:v1`) that Travel Offers and the world map read.
 Filling one never fills or disturbs the other. The world map cron gained four
@@ -172,10 +172,10 @@ resolve, rather than any single part of it.
 
 **Canonicalisation is the load-bearing invariant.** `canonTti` appears in four
 places — `api/_lib/offers/tti.js`, `api/cached-offers.js`,
-`public/widget-offers.js` and `public/editor-hotel-offers.html`. The cron writes
+`public/widget-offers.js` and `public/editor-tti-offers.html`. The cron writes
 the key the widget reads, so a difference in any one of them is not a bug that
-degrades, it is a total silent miss on every Hotel Offers widget in the estate.
-`npm run test:hotel-offers` asserts all four carry the same pattern.
+degrades, it is a total silent miss on every TTI Offers widget in the estate.
+`npm run test:tti-offers` asserts all four carry the same pattern.
 
 ---
 
@@ -184,12 +184,12 @@ degrades, it is a total silent miss on every Hotel Offers widget in the estate.
 | File | What it does |
 | --- | --- |
 | `api/_lib/offers/tti.js` | The pure logic: code canonicalisation, the property list parser, the search shape, the payload builder, the verify gate. Dependency-free so it is testable. |
-| `api/cron/refresh-tti-offers.js` | The nightly job and the probe. Reads Hotel Offers widgets from Airtable, resolves each owning account's App ID, sweeps, verifies, stores. |
+| `api/cron/refresh-tti-offers.js` | The nightly job and the probe. Reads TTI Offers widgets from Airtable, resolves each owning account's App ID, sweeps, verifies, stores. |
 | `api/cached-offers.js` | Gained a `tti=` + `appId=` mode that reads the per-property pool instead of the country pool. |
 | `public/widget-offers.js` | v1.20.0. The TTI branch, the second tag, the alias global. |
-| `public/editor-hotel-offers.html` | The editor. The destination chips became a property list; templates are layout-only presets. |
-| `public/demo-hotel-offers.html`, `public/tour-hotel-offers.js` | Demo page and guided tour. |
-| `test/hotel-offers-smoke.mjs` | 37 tests. `npm run test:hotel-offers`. |
+| `public/editor-tti-offers.html` | The editor. The destination chips became a property list; templates are layout-only presets. |
+| `public/demo-tti-offers.html`, `public/tour-tti-offers.js` | Demo page and guided tour. |
+| `test/tti-offers-smoke.mjs` | 37 tests. `npm run test:tti-offers`. |
 
 The world map cron gained four `export` keywords and nothing else. Its parser is
 imported rather than copied, so both jobs write one cache shape and
@@ -201,18 +201,18 @@ had.
 Done, including the parts that are usually manual:
 
 - `ALLOWED_WIDGET_TYPES`, `PLAN_WIDGET_LIMITS` and `NEEDS_APP_ID` in
-  `api/widget-config.js`. Hotel Offers receives the App ID because its cache key
+  `api/widget-config.js`. TTI Offers receives the App ID because its cache key
   is built from it, and `agencyName` because it renders the same Dynamic Package
   cards. It is **not** given an API key: it is cache-only from birth.
 - Dashboard registry entry in `public/index.html`, sharing the offers tile mock.
-- Airtable `WidgetType` option `Hotel Offers` (`selGpC0zS9myl4OT4`), added via a
+- Airtable `WidgetType` option `TTI Offers` (`selGpC0zS9myl4OT4`), added via a
   typecast write rather than by hand, plus a Widget Catalogue Status record.
 - `vercel.json`: three rewrites, one header block, and the nightly cron at
   02:30 UTC, well away from the map cron's ten-minute rotation.
 
 **Plan access: Ignite and Bespoke only** (Andy, 12 Sep 2026). Spark and Boost
 are locked. Unlike Travel Offers, which reads a cache we fill for everyone
-anyway, every property on a Hotel Offers widget costs its own Travelify search
+anyway, every property on a TTI Offers widget costs its own Travelify search
 every night.
 
 ## Volume

@@ -5,17 +5,17 @@
  * search left is the one Travelify runs when a visitor clicks an offer.
  *
  * This file is the engine behind TWO widget types. Travel Offers scopes its
- * offers by PLACE; Hotel Offers scopes them by PROPERTY, from a list of
+ * offers by PLACE; TTI Offers scopes them by PROPERTY, from a list of
  * Travelify TTI codes the client enters. Everything after the fetch is shared,
- * so /widget-hotel-offers.js is a vercel rewrite onto this same file rather
+ * so /widget-tti-offers.js is a vercel rewrite onto this same file rather
  * than a fork that would need every future template fix applied twice.
  *
  * Usage:
  *   <div data-tg-widget="offers" data-tg-id="YOUR_WIDGET_ID"></div>
  *   <script src="https://tg-widgets.vercel.app/widget-offers.js"></script>
  *
- *   <div data-tg-widget="hotel-offers" data-tg-id="YOUR_WIDGET_ID"></div>
- *   <script src="https://tg-widgets.vercel.app/widget-hotel-offers.js"></script>
+ *   <div data-tg-widget="tti-offers" data-tg-id="YOUR_WIDGET_ID"></div>
+ *   <script src="https://tg-widgets.vercel.app/widget-tti-offers.js"></script>
  *
  * Travelify Offers API is public — credentials are safe to expose per Travelify devs.
  *
@@ -29,7 +29,7 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.20.0 (12 Sep 2026) — Hotel Offers: the same engine, scoped by property:
+ *   v1.20.0 (12 Sep 2026) — TTI Offers: the same engine, scoped by property:
  *     • A config carrying `ttiCodes` reads the per-property cache pool
  *       (/api/cached-offers?tti=...&appId=...) instead of the country pool, and
  *       its codes REPLACE the destination filter rather than joining it — a
@@ -37,8 +37,8 @@
  *       country. The App ID rides along because the pool is filled under each
  *       client's own Travelify application, so two agencies asking about one
  *       hotel see their own contracted rates.
- *     • Auto-init now also claims [data-tg-widget="hotel-offers"], and
- *       window.TGHotelOffersWidget aliases the same class. No second file: a
+ *     • Auto-init now also claims [data-tg-widget="tti-offers"], and
+ *       window.TGTtiOffersWidget aliases the same class. No second file: a
  *       fork would mean fixing every future template bug twice.
  *     • Codes are read from rows of { code, name, ctry }, a plain string array,
  *       or pasted text. Only the code matters here; the name exists because the
@@ -268,8 +268,8 @@
   const VERSION = '1.20.0';
   const CACHE_PREFIX = 'tgo_cache_';
 
-  // ── Hotel Offers: the property list ────────────────────────────────────
-  // The Hotel Offers widget is this same engine pointed at a different pool.
+  // ── TTI Offers: the property list ────────────────────────────────────
+  // The TTI Offers widget is this same engine pointed at a different pool.
   // Rather than naming places, the client names PROPERTIES by their Travelify
   // TTI code, which the nightly cron turns into a per-property offer cache.
   //
@@ -6734,14 +6734,14 @@
         ? payload.packageType
         : (payload.type || 'Packages');
       q.set('type', type);
-      // Hotel Offers: the widget names PROPERTIES by their Travelify TTI code
+      // TTI Offers: the widget names PROPERTIES by their Travelify TTI code
       // instead of naming places, so the codes replace the destination scope
       // entirely. The per-property pool is filled under the owning client's own
       // Travelify application (their contracted rates), so the App ID rides
       // along and is part of which pool gets read.
       const ttiCodes = ttiCodesOf(this.cfg);
       if (ttiCodes.length) {
-        // Hotel Offers carries two product types and no others (Andy, 12 Sep
+        // TTI Offers carries two product types and no others (Andy, 12 Sep
         // 2026): the hotel on its own, or a dynamic package assembled around
         // it. A flight has no hotel to pin, and an operator package holiday is
         // a pre-bundled product whose hotel is not inventory we can anchor on,
@@ -10162,13 +10162,13 @@
   }
 
   async function init() {
-    // Two widget TYPES, one engine. Travel Offers scopes by place, Hotel Offers
+    // Two widget TYPES, one engine. Travel Offers scopes by place, TTI Offers
     // scopes by property (a TTI code list), and everything downstream of the
     // fetch — six templates, the popup engine, dedupe, currency — is identical,
     // so forking the file would mean fixing every future template bug twice.
-    // /widget-hotel-offers.js is a vercel rewrite onto this same file, which
+    // /widget-tti-offers.js is a vercel rewrite onto this same file, which
     // keeps the one-div-one-script embed contract intact and injects no script.
-    const containers = document.querySelectorAll('[data-tg-widget="offers"], [data-tg-widget="hotel-offers"]');
+    const containers = document.querySelectorAll('[data-tg-widget="offers"], [data-tg-widget="tti-offers"]');
     for (const el of containers) {
       if (el._tgInitialised) continue;
       el._tgInitialised = true;
@@ -10203,10 +10203,10 @@
   if (typeof window !== 'undefined') {
     window.TGOffersWidget = TGOffersWidget;
     window.TGOffersWidget.version = VERSION;
-    // Hotel Offers is the same class under the name its editor and the
+    // TTI Offers is the same class under the name its editor and the
     // dashboard mini-preview look for. An alias, not a subclass: the two widget
     // types differ only in the config they are handed.
-    window.TGHotelOffersWidget = TGOffersWidget;
+    window.TGTtiOffersWidget = TGOffersWidget;
     window.__TG_OFFERS_VERSION__ = VERSION;
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);

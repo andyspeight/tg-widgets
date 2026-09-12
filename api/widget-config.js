@@ -395,7 +395,7 @@ const ALLOWED_WIDGET_TYPES = [
   'Text FX',
   'Logo Showcase',
   'Travel Offers',
-  'Hotel Offers',
+  'TTI Offers',
   'Popup',
   'Countdown Timer',
   'Event Calendar',
@@ -474,10 +474,10 @@ const PLAN_WIDGET_LIMITS = {
   'Logo Showcase':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Travel Offers':         { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   // Ignite and above (Andy, 12 Sep 2026). Unlike Travel Offers, which reads a
-  // cache we fill for everyone anyway, every property named on a Hotel Offers
+  // cache we fill for everyone anyway, every property named on a TTI Offers
   // widget costs its own Travelify search every night, under that client's own
   // application.
-  'Hotel Offers':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  'TTI Offers':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Popup':                 { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Event Calendar':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
@@ -617,8 +617,8 @@ const WIDGET_TYPE_ALIASES = {
   'logo-showcase':     'Logo Showcase',
   'offers':            'Travel Offers',
   'travel-offers':     'Travel Offers',
-  'hotel-offers':      'Hotel Offers',
-  'hotels':            'Hotel Offers',
+  'tti-offers':      'TTI Offers',
+  'hotels':            'TTI Offers',
   'popup':             'Popup',
   'countdown':         'Countdown Timer',
   'countdown-timer':   'Countdown Timer',
@@ -852,11 +852,11 @@ export default async function handler(req, res) {
         // Event Menu joined the list on 8 Sep 2026: with no page address set it
         // lists events with Book buttons beside the menu, the same deeplinks as
         // Event Tickets, so it needs the owning client's AppID like the rest.
-        // Hotel Offers needs it twice over: for the booking deeplink like the rest,
+        // TTI Offers needs it twice over: for the booking deeplink like the rest,
         // AND because its offer cache is keyed by App ID (each client's properties
         // are swept under their own Travelify application, at their own rates), so
         // without it the widget cannot name the pool to read.
-        const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'Hotel Offers', 'World Map', 'Event Tickets',
+        const NEEDS_APP_ID = ['Venue Guide', 'Travel Offers', 'TTI Offers', 'World Map', 'Event Tickets',
           'Next Event', 'Club Picker', 'Ticket Search', 'Ticket Month', 'Event Menu'];
         // Resolve the client's Travelify credentials from the widget's AUTHORITATIVE
         // owning account (ClientRecordId), NOT the creator's email. One person can
@@ -874,8 +874,8 @@ export default async function handler(req, res) {
                         || (clientEmail ? await lookupClientCredentialsByEmail(clientEmail) : null);
             if (creds) {
               config.appId = creds.appId;
-              if (widgetType === 'Travel Offers' || widgetType === 'Hotel Offers') {
-                // Travel Offers keeps the API key for legacy reasons. Hotel Offers is
+              if (widgetType === 'Travel Offers' || widgetType === 'TTI Offers') {
+                // Travel Offers keeps the API key for legacy reasons. TTI Offers is
                 // cache-only from birth and never calls Travelify from the browser, so
                 // it is not given one.
                 if (widgetType === 'Travel Offers') config.apiKey = creds.apiKey;

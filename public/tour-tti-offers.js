@@ -1,7 +1,7 @@
 /* ============================================================================
-   Hotel Offers — guided setup tour  v1.0.0  (ADAPTIVE)
+   TTI Offers — guided setup tour  v1.0.0  (ADAPTIVE)
    ----------------------------------------------------------------------------
-   Walkthrough for the Hotel Offers editor. Identical in shape to the Travel
+   Walkthrough for the TTI Offers editor. Identical in shape to the Travel
    Offers tour, because it is the same engine and the same six display styles;
    only the scoping step differs, because this widget is scoped by PROPERTY
    rather than by place. This editor is unlike the others:
@@ -181,13 +181,13 @@
   var _api = null;
   function launch() {
     if (!window.tgse || typeof window.tgse.tour !== 'function') {
-      console.warn('[hotel-offers-tour] tgse.tour not available — load editor-tour.js');
+      console.warn('[tti-offers-tour] tgse.tour not available — load editor-tour.js');
       return;
     }
     if (_api && typeof _api.finish === 'function') { try { _api.finish(false); } catch (e) {} }
     // Steps are built fresh at launch so the style-aware step reflects the
     // template that is active right now (it may have changed since page load).
-    _api = window.tgse.tour({ id: 'hotel-offers', welcome: WELCOME, done: DONE, steps: buildSteps() });
+    _api = window.tgse.tour({ id: 'tti-offers', welcome: WELCOME, done: DONE, steps: buildSteps() });
     _api.start();
     return _api;
   }
@@ -197,11 +197,11 @@
     if (_booted) return;
     _booted = true;
     if (!window.tgse || typeof window.tgse.tourLauncher !== 'function') {
-      console.warn('[hotel-offers-tour] tgse.tourLauncher not available');
+      console.warn('[tti-offers-tour] tgse.tourLauncher not available');
       return;
     }
-    window.tgse.tourLauncher({ id: 'hotel-offers', label: 'Show me how', onClick: launch });
-    if (!window.tgse.isTourDismissed || !window.tgse.isTourDismissed('hotel-offers')) {
+    window.tgse.tourLauncher({ id: 'tti-offers', label: 'Show me how', onClick: launch });
+    if (!window.tgse.isTourDismissed || !window.tgse.isTourDismissed('tti-offers')) {
       setTimeout(launch, 650);
     }
   };
