@@ -18,6 +18,7 @@ import {
   searchFromConfig,
   buildTtiPayload,
   offerIsProperty,
+  PROBE_CANDIDATES,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -72,7 +73,7 @@ test('canonTti rejects anything that could escape the key namespace', () => {
 
 test('codesFromConfig reads the three shapes an editor or a paste can produce', () => {
   const asObjects = codesFromConfig({ ttiCodes: [{ code: 'TTI:111', name: 'Hotel One', ctry: 'es' }] });
-  assert.deepEqual(asObjects, [{ code: '111', name: 'Hotel One', ctry: 'ES' }]);
+  assert.deepEqual(asObjects, [{ code: '111', name: 'Hotel One', ctry: 'ES', lat: null, lng: null }]);
 
   const asStrings = codesFromConfig({ ttiCodes: ['TTI:222', '333'] });
   assert.deepEqual(asStrings.map((p) => p.code), ['222', '333']);
@@ -81,8 +82,8 @@ test('codesFromConfig reads the three shapes an editor or a paste can produce', 
   // column order of our own hotel spreadsheets.
   const asText = codesFromConfig({ ttiCodes: 'TTI:444, Vida Beach Resort, AE\nTTI:555, Cocobay Resort, AG' });
   assert.deepEqual(asText, [
-    { code: '444', name: 'Vida Beach Resort', ctry: 'AE' },
-    { code: '555', name: 'Cocobay Resort', ctry: 'AG' },
+    { code: '444', name: 'Vida Beach Resort', ctry: 'AE', lat: null, lng: null },
+    { code: '555', name: 'Cocobay Resort', ctry: 'AG', lat: null, lng: null },
   ]);
 });
 
@@ -207,6 +208,56 @@ test("the documented loct=Property shape needs the hotel's name", () => {
   // Without a name there is nothing to anchor on, and a nameless ask would come
   // back as the whole country. Skip, do not guess.
   assert.equal(buildTtiPayload('250', { code: '111' }, searchFromConfig({}), spec), null);
+});
+
+test('the deeplink anchor carries every part a live Travelify link carries', () => {
+  // "Build the cache using the DP deep links" in feed terms: the same anchor
+  // their own generator emits — name, loct=Property, country, coordinates with
+  // a 1km radius, AND refn=TTI: together, not any single part of it.
+  const p = buildTtiPayload(
+    '250',
+    { code: '10946397', name: 'Vida Beach Resort', ctry: 'AE', lat: 25.55, lng: 55.55 },
+    searchFromConfig({ type: 'DynamicPackages', origins: ['LGW'] }),
+    { shape: 'deeplink' },
+  );
+  assert.equal(p.loc, 'Vida Beach Resort');
+  assert.equal(p.loct, 'Property');
+  assert.equal(p.ctry, 'AE');
+  assert.equal(p.lat, 25.55);
+  assert.equal(p.lng, 55.55);
+  assert.equal(p.rad, 1);
+  assert.equal(p.refn, 'TTI:10946397');
+  assert.deepEqual(p.origins, ['LGW']);
+  assert.equal(p.packageType, 'DynamicPackages');
+});
+
+test('the deeplink anchor is the first thing the probe tries', () => {
+  assert.equal(PROBE_CANDIDATES[0].shape, 'deeplink',
+    'the proven live-link combination should be tested before any single-part guess');
+});
+
+test('a dynamic package carries a departure point, a hotel does not', () => {
+  // A DP deep link carries org. Without one the package ask has no departure
+  // and comes back wrong or empty. Several origins stay ONE request, so this
+  // cannot multiply the nightly budget.
+  const dp = searchFromConfig({ type: 'DynamicPackages', origins: ['LGW', 'man', 'GB', 'nope!'] });
+  assert.deepEqual(dp.origins, ['LGW', 'MAN', 'GB'], 'origins normalise and junk is dropped');
+  const acc = searchFromConfig({ type: 'Accommodation', origins: ['LGW'] });
+  assert.deepEqual(acc.origins, [], 'a hotel on its own has no departure point');
+  const built = buildTtiPayload('250', { code: '1' }, dp, { param: 'refn', array: false, prefixed: true });
+  assert.deepEqual(built.origins, ['LGW', 'MAN', 'GB']);
+  assert.ok(!('origins' in buildTtiPayload('250', { code: '1' }, acc,
+    { param: 'refn', array: false, prefixed: true })));
+});
+
+test('coordinates are parsed and bounded, from a row or a pasted line', () => {
+  const [row] = codesFromConfig({ ttiCodes: 'TTI:1, Cocobay Resort, AG, 17.053795, -61.894452' });
+  assert.equal(row.lat, 17.053795);
+  assert.equal(row.lng, -61.894452);
+  // A mis-pasted column must not travel upstream as a location.
+  const [bad] = codesFromConfig({ ttiCodes: [{ code: '2', lat: 999, lng: 'north' }] });
+  assert.equal(bad.lat, null);
+  assert.equal(bad.lng, null);
 });
 
 test('a payload without a code is never built', () => {

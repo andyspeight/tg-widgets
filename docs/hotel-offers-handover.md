@@ -143,16 +143,32 @@ The seam is one function, `_cachedOffersQuery`. A config carrying `ttiCodes`
 sends `tti` and `appId` and **does not send `destinations`** — a widget that
 named twelve hotels must never fall back to showing a country.
 
+**This is its own cache, not the main one.** The Hotel Offers pool lives under
+`offers:tti:` and touches nothing in the country pool (`offers:packages:{CC}`,
+`offers:extra:{CC}`, `map:offers:v1`) that Travel Offers and the world map read.
+Filling one never fills or disturbs the other. The world map cron gained four
+`export` keywords and no behaviour change.
+
 **Cache keys.** `offers:tti:{appId}:{code}`. Keyed by App ID as well as code
 because each client's properties are swept under their own Travelify
 application: two agencies asking about one hotel get their own contracted rates,
 and a shared key would make the teaser price and the booking price disagree.
 
-**The property list.** Rows of `{ code, name, ctry }`. The editor accepts one
-hotel per line, comma-separated, which is the column order of our own hotel
-spreadsheets, so an agent pastes straight from one. Codes work with or without
-the `TTI:` prefix. The name is optional but matters: it is what the documented
-`loct=Property` anchor needs.
+**The property list.** Rows of `{ code, name, ctry, lat, lng }`. The editor
+accepts one hotel per line, comma-separated, which is the column order our own
+hotel spreadsheets already keep (HalalHotelsAE, the Adult Only Hotels database),
+so an agent pastes straight from one. Only the code is required and it works
+with or without the `TTI:` prefix. The rest are what the anchor is built from.
+
+**The sweep asks the way a DP deep link asks.** The nightly payload mirrors a
+dynamic-package deep link parameter for parameter: the package type, the
+departure points (`origins`, several in one request so they cannot multiply the
+budget), and the property anchor. The first candidate the probe tries is the
+WHOLE anchor a live Travelify link carries, verified against one their own
+generator produced on 22 Jul 2026: `loc` the hotel name, `loct=Property`,
+`ctry`, `lat`/`lng` with `rad=1`, and `refn=TTI:{code}` together. That
+combination is the likeliest to work precisely because it is the one proven to
+resolve, rather than any single part of it.
 
 **Canonicalisation is the load-bearing invariant.** `canonTti` appears in four
 places — `api/_lib/offers/tti.js`, `api/cached-offers.js`,

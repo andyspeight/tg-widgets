@@ -916,13 +916,14 @@
               <div class="field">
                 <label class="field-label">Hotel list</label>
                 <textarea class="textarea" id="cfgTtiCodes" rows="8" spellcheck="false"
-                  placeholder="TTI:10946397, Vida Beach Resort Umm Al Quwain, AE&#10;TTI:76853197, Cocobay Resort, AG"></textarea>
+                  placeholder="TTI:10946397, Vida Beach Resort Umm Al Quwain, AE, 25.5527, 55.5531&#10;TTI:76853197, Cocobay Resort, AG, 17.053795, -61.894452"></textarea>
                 <div class="field-help">
-                  One hotel per line: the Travelify property code, then optionally the hotel
-                  name and its two-letter country code. Paste straight from a spreadsheet.
-                  Codes work with or without the <code>TTI:</code> prefix. Up to 100 hotels.
-                  <strong>Add the name where you have it</strong> — it is how Travelify's own
-                  documented property lookup finds the hotel.
+                  One hotel per line, in the order your spreadsheet already keeps them:
+                  code, name, country, latitude, longitude. Only the code is required, and
+                  it works with or without the <code>TTI:</code> prefix. Up to 100 hotels.
+                  <strong>Include the name and coordinates where you have them.</strong>
+                  A Travelify deep link pins a property with all of them together, and the
+                  overnight price lookup uses the same anchor.
                 </div>
                 <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
               </div>
@@ -2105,10 +2106,16 @@
         if (seen[code]) continue;
         seen[code] = true;
         const ctry = String(parts[2] || '').trim().toUpperCase();
+        const coord = (v, limit) => {
+          const n = Number(String(v == null ? '' : v).trim());
+          return (Number.isFinite(n) && n !== 0 && Math.abs(n) <= limit) ? n : null;
+        };
         rows.push({
           code,
           name: String(parts[1] || '').replace(/[<>"]/g, '').trim().slice(0, 120),
           ctry: /^[A-Z]{2}$/.test(ctry) ? ctry : '',
+          lat: coord(parts[3], 90),
+          lng: coord(parts[4], 180),
         });
         if (rows.length >= 100) break;
       }
@@ -2118,15 +2125,18 @@
       const raw = (cfg && cfg.ttiCodes) || [];
       if (Array.isArray(raw)) {
         return raw.map((r) => (r && typeof r === 'object')
-          ? { code: canonTti(r.code), name: r.name || '', ctry: r.ctry || '' }
-          : { code: canonTti(r), name: '', ctry: '' }).filter((r) => r.code);
+          ? { code: canonTti(r.code), name: r.name || '', ctry: r.ctry || '',
+              lat: r.lat ?? null, lng: r.lng ?? null }
+          : { code: canonTti(r), name: '', ctry: '', lat: null, lng: null }).filter((r) => r.code);
       }
       return parseTtiText(raw).rows;
     }
     function ttiCodesOf(cfg) { return ttiRowsOf(cfg).map((r) => r.code); }
     function ttiTextOf(cfg) {
       return ttiRowsOf(cfg)
-        .map((r) => ['TTI:' + r.code, r.name, r.ctry].filter(Boolean).join(', '))
+        .map((r) => ['TTI:' + r.code, r.name, r.ctry,
+          r.lat != null ? r.lat : '', r.lng != null ? r.lng : '']
+          .join(', ').replace(/(?:,\s*)+$/, ''))
         .join('\n');
     }
     function paintTtiSummary(bad) {
@@ -2141,6 +2151,10 @@
       const parts = [rows.length + (rows.length === 1 ? ' hotel' : ' hotels')];
       if (named < rows.length) {
         parts.push((rows.length - named) + ' without a name');
+      }
+      const pinned = rows.filter((r) => r.lat != null && r.lng != null).length;
+      if (pinned < rows.length) {
+        parts.push((rows.length - pinned) + ' without coordinates');
       }
       let html = esc(parts.join(' · '));
       if (bad && bad.length) {

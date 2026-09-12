@@ -28,6 +28,14 @@ export const PROBE_CANDIDATES = [
   // country. It needs the hotel's name, which is why the editor accepts one
   // beside each code. Tried first because it is the only candidate with a
   // published source behind it.
+  // The WHOLE anchor a real Travelify deep link carries, verified against a
+  // live link their own generator produced (22 Jul 2026): the property name,
+  // loct=Property, its coordinates with a 1km radius, AND refn=TTI:{code}
+  // together. This is what "use the DP deep link" means in feed terms, and it
+  // is the likeliest candidate precisely because it is the combination proven
+  // to resolve rather than any single part of it.
+  { shape: 'deeplink' },
+  // The same anchor reduced to what the documentation alone defines.
   { shape: 'loct' },
   // Our own undocumented-but-proven deeplink spelling.
   { param: 'refn', array: false, prefixed: true },
@@ -81,6 +89,12 @@ export function cleanName(v) {
   }
   return out.trim().slice(0, 120);
 }
+/** A coordinate, or null. Bounded so a mis-pasted column cannot travel
+ *  upstream as a location. */
+export function cleanCoord(v, limit) {
+  const n = Number(String(v == null ? '' : v).trim());
+  return (Number.isFinite(n) && n !== 0 && Math.abs(n) <= limit) ? n : null;
+}
 export function cleanCtry(v) {
   const up = String(v == null ? '' : v).trim().toUpperCase();
   return /^[A-Z]{2}$/.test(up) ? up : '';
@@ -109,20 +123,24 @@ export function codesFromConfig(config) {
   const out = [];
   const seen = new Set();
   for (const row of rows) {
-    let code, name, ctry;
+    let code, name, ctry, lat, lng;
     if (row && typeof row === 'object') {
       code = canonTti(row.code || row.tti || row.uniqueRef);
       name = cleanName(row.name);
       ctry = cleanCtry(row.ctry || row.countryCode);
+      lat = cleanCoord(row.lat ?? row.latitude, 90);
+      lng = cleanCoord(row.lng ?? row.longitude, 180);
     } else {
       const parts = String(row || '').split(',');
       code = canonTti(parts[0]);
       name = cleanName(parts[1]);
       ctry = cleanCtry(parts[2]);
+      lat = cleanCoord(parts[3], 90);
+      lng = cleanCoord(parts[4], 180);
     }
     if (!code || seen.has(code)) continue;
     seen.add(code);
-    out.push({ code, name, ctry });
+    out.push({ code, name, ctry, lat, lng });
     if (out.length >= MAX_CODES_PER_WIDGET) break;
   }
   return out;
@@ -154,9 +172,20 @@ export function searchFromConfig(config) {
   // country pool. `packageType` is what narrows the upstream ask to DP.
   const t = String(c.type || 'Accommodation');
   const type = (t === 'Accommodation') ? 'Accommodation' : 'Packages';
+  // A dynamic package needs a departure point, exactly as a DP deep link
+  // carries org. Sent as an array so several origins stay ONE request rather
+  // than multiplying the nightly budget. Meaningless for a hotel on its own,
+  // so omitted there.
+  const origins = (type === 'Packages' && Array.isArray(c.origins))
+    ? c.origins
+      .map((o) => String(o || '').trim().toUpperCase())
+      .filter((o) => /^[A-Z]{2,3}$/.test(o))
+      .slice(0, 12)
+    : [];
   return {
     type,
     packageType: type === 'Packages' ? 'DynamicPackages' : null,
+    origins,
     currency: /^[A-Z]{3}$/.test(String(c.currency || '')) ? c.currency : 'GBP',
     nationality: /^[A-Z]{2}$/.test(String(c.nationality || '')) ? c.nationality : 'GB',
     DatesMin: n(c.DatesMin, DEFAULT_DATES_MIN, 0, 700),
@@ -172,6 +201,8 @@ export function buildTtiPayload(appId, prop, search, override = null) {
   const code = typeof prop === 'string' ? prop : (prop && prop.code);
   const name = (prop && prop.name) || '';
   const ctry = (prop && prop.ctry) || '';
+  const lat = (prop && prop.lat != null) ? prop.lat : null;
+  const lng = (prop && prop.lng != null) ? prop.lng : null;
   const spec = override || (PROPERTY_PARAM === 'loct'
     ? { shape: 'loct' }
     : (PROPERTY_PARAM
@@ -181,12 +212,27 @@ export function buildTtiPayload(appId, prop, search, override = null) {
   // The documented shape names the property by NAME, so without one there is
   // nothing to send. Returning null makes the caller skip rather than fire a
   // search that would come back as the whole city.
-  if (spec.shape === 'loct' && !name) return null;
-  if (spec.shape !== 'loct' && !spec.param) return null;
+  // Both name-based anchors need a name. Without one there is nothing to
+  // anchor on, and a nameless ask would come back as the whole country, so
+  // skip rather than guess.
+  if ((spec.shape === 'loct' || spec.shape === 'deeplink') && !name) return null;
+  if (!spec.shape && !spec.param) return null;
   const value = spec.prefixed ? 'TTI:' + code : code;
-  const anchor = spec.shape === 'loct'
-    ? { loc: name, loct: 'Property', ...(ctry ? { ctry } : {}) }
-    : { [spec.param]: spec.array ? [value] : value };
+  let anchor;
+  if (spec.shape === 'deeplink') {
+    // Every part of the anchor a live Travelify deep link carries, together.
+    anchor = {
+      loc: name,
+      loct: 'Property',
+      ...(ctry ? { ctry } : {}),
+      ...(lat != null && lng != null ? { lat, lng, rad: 1 } : {}),
+      refn: 'TTI:' + code,
+    };
+  } else if (spec.shape === 'loct') {
+    anchor = { loc: name, loct: 'Property', ...(ctry ? { ctry } : {}) };
+  } else {
+    anchor = { [spec.param]: spec.array ? [value] : value };
+  }
   const payload = {
     appId: String(appId),
     type: search.type,
@@ -202,6 +248,7 @@ export function buildTtiPayload(appId, prop, search, override = null) {
     sort: 'price:asc',
     pricingByType: 'Person',
     customerUserAgent: 'Travelgenix-HotelOffersCron/1.0',
+    ...(search.origins && search.origins.length ? { origins: search.origins } : {}),
     ...anchor,
   };
   return payload;
