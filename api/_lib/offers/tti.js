@@ -137,14 +137,26 @@ export function searchFromConfig(config) {
     const x = Number(v);
     return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
   };
-  // Accommodation and the package family are the only types a property anchor
-  // can describe. A flight has no hotel, so a Flights widget would be asking
-  // for something a TTI code cannot scope.
+  // Two product types only: the hotel on its own, or a dynamic package built
+  // around it (Andy, 12 Sep 2026).
+  //
+  // A flight has no hotel, so a TTI code cannot scope one. An OPERATOR package
+  // holiday is a pre-bundled product the operator assembles and prices as a
+  // whole — the hotel inside it is not inventory we can anchor on, so asking
+  // for one by property code is asking the wrong question. What is left is
+  // Accommodation and DynamicPackages, which are both assembled around a
+  // specific property.
+  //
+  // `type` is the PAYLOAD type and doubles as the sweepTypeId that
+  // normaliseOffers stamps onto the stored offer, so it must stay the family
+  // name 'Packages': api/cached-offers.js sorts a dynamic package from an
+  // operator one with packageKindOf at READ time, exactly as it does for the
+  // country pool. `packageType` is what narrows the upstream ask to DP.
   const t = String(c.type || 'Accommodation');
   const type = (t === 'Accommodation') ? 'Accommodation' : 'Packages';
   return {
     type,
-    packageType: type === 'Packages' ? 'Any' : null,
+    packageType: type === 'Packages' ? 'DynamicPackages' : null,
     currency: /^[A-Z]{3}$/.test(String(c.currency || '')) ? c.currency : 'GBP',
     nationality: /^[A-Z]{2}$/.test(String(c.nationality || '')) ? c.nationality : 'GB',
     DatesMin: n(c.DatesMin, DEFAULT_DATES_MIN, 0, 700),

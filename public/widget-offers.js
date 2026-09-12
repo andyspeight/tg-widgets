@@ -6741,7 +6741,16 @@
       // along and is part of which pool gets read.
       const ttiCodes = ttiCodesOf(this.cfg);
       if (ttiCodes.length) {
+        // Hotel Offers carries two product types and no others (Andy, 12 Sep
+        // 2026): the hotel on its own, or a dynamic package assembled around
+        // it. A flight has no hotel to pin, and an operator package holiday is
+        // a pre-bundled product whose hotel is not inventory we can anchor on,
+        // so neither is ever swept and neither can be in the pool. Coerce here
+        // rather than trust the config: a hand-edited or legacy type would
+        // otherwise ask the cache for something it will never hold, and the
+        // widget would sit empty with nothing saying why.
         q.set('tti', ttiCodes.join(','));
+        if (type !== 'Accommodation') q.set('type', 'DynamicPackages');
         // No App ID means no pool to name. Send the codes anyway and let the
         // endpoint answer an honest miss rather than silently widening this
         // widget to every offer in the country.

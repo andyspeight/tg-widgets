@@ -181,20 +181,32 @@ export async function collectWork() {
       const k = `${appId}:${p.code}`;
       const existing = work.get(k);
       if (!existing) {
-        work.set(k, { appId, code: p.code, name: p.name, ctry: p.ctry, search: { ...search } });
+        work.set(k, {
+          appId, code: p.code, name: p.name, ctry: p.ctry,
+          // One property, one cache key, but possibly two asks. A hotel-only
+          // widget and a dynamic-package widget want genuinely different
+          // products from the same property, and neither ask is a superset of
+          // the other, so we sweep each type this account actually asked for
+          // and merge both into the key. The read side already separates them
+          // by type, the same way it does for the country pool.
+          //
+          // Demand-driven, so the common case (one widget, one type) is still
+          // one request. Only an account running both kinds pays for both.
+          searches: [{ ...search }],
+        });
       } else {
         // One widget naming the hotel benefits every widget on the account
         // that only pasted its code — the documented anchor needs a name.
         if (!existing.name && p.name) existing.name = p.name;
         if (!existing.ctry && p.ctry) existing.ctry = p.ctry;
-        existing.search.DatesMin = Math.min(existing.search.DatesMin, search.DatesMin);
-        existing.search.DatesMax = Math.max(existing.search.DatesMax, search.DatesMax);
-        // A package ask is a superset of what an accommodation ask needs from
-        // the property, so the broader one wins rather than one clobbering
-        // the other on read order.
-        if (existing.search.type !== search.type) {
-          existing.search.type = 'Packages';
-          existing.search.packageType = 'Any';
+        const same = existing.searches.find((sr) => sr.type === search.type);
+        if (same) {
+          // Same product, different window: the wider one wins so neither
+          // widget is starved of the dates it asked for.
+          same.DatesMin = Math.min(same.DatesMin, search.DatesMin);
+          same.DatesMax = Math.max(same.DatesMax, search.DatesMax);
+        } else {
+          existing.searches.push({ ...search });
         }
       }
     }
@@ -202,17 +214,38 @@ export async function collectWork() {
   return { work: Array.from(work.values()), widgets: rows.length, skipped };
 }
 
-/** Fetch, normalise and verify one property's offers. Returns null on a failed
- *  request so the caller can leave the existing key alone. */
-async function fetchProperty(item, override = null) {
-  const payload = buildTtiPayload(item.appId, item, item.search, override);
+/** Fetch, normalise and verify one property's offers for ONE product type.
+ *  Returns null on a failed request so the caller can leave the key alone. */
+async function fetchProperty(item, search, override = null) {
+  const payload = buildTtiPayload(item.appId, item, search, override);
   if (!payload) return null;
   const res = await callOffersProxy(payload, PER_REQUEST_TIMEOUT_MS, 1);
   if (!res || !res.ok) return null;
   const raw = (res.data && (res.data.data || res.data.offers)) || [];
-  const parsed = normaliseOffers(Array.isArray(raw) ? raw : [], item.search.type);
+  // search.type is the FAMILY name ('Accommodation' or 'Packages') and is what
+  // gets stamped onto the stored offer, so cached-offers.js can tell a dynamic
+  // package from an operator one with packageKindOf at read time — exactly as
+  // it does for the country pool. The ask was already narrowed to DP by
+  // search.packageType.
+  const parsed = normaliseOffers(Array.isArray(raw) ? raw : [], search.type);
   const verified = parsed.filter((o) => offerIsProperty(o, item.code));
   return { returned: Array.isArray(raw) ? raw.length : 0, parsed: parsed.length, verified };
+}
+
+/** Sweep every product type one property was asked for, and pool the results.
+ *  Returns null only when EVERY request failed — a partial failure still
+ *  stores what did come back, because a hotel-only widget should not go blank
+ *  because the package request timed out. */
+async function fetchPropertyAllTypes(item) {
+  const results = await Promise.all(item.searches.map((sr) => fetchProperty(item, sr)));
+  const ok = results.filter(Boolean);
+  if (!ok.length) return null;
+  return {
+    returned: ok.reduce((n, r) => n + r.returned, 0),
+    parsed: ok.reduce((n, r) => n + r.parsed, 0),
+    verified: ok.flatMap((r) => r.verified),
+    partial: ok.length < results.length,
+  };
 }
 
 /** Store one property's offers, cheapest first. A run that verified nothing
@@ -221,7 +254,17 @@ async function fetchProperty(item, override = null) {
  *  honest answer. A FAILED request never reaches here. */
 async function storeProperty(item, offers, nowIso) {
   const price = (o) => (Number.isFinite(o.pricePP) ? o.pricePP : (Number.isFinite(o.price) ? o.price : Infinity));
-  const sorted = offers.slice().sort((a, b) => price(a) - price(b));
+  // Both product types share one key, so dedupe on the same composite the
+  // country pool merges on before sorting.
+  const seen = new Set();
+  const unique = [];
+  for (const o of offers) {
+    const k = `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    unique.push(o);
+  }
+  const sorted = unique.sort((a, b) => price(a) - price(b));
   const compact = sorted.map(compactOffer);
   const ok = await setJson(ttiKey(item.appId, item.code), { offers: compact, refreshedAt: nowIso });
   return { ok, stored: ok ? compact.length : 0 };
@@ -231,7 +274,7 @@ async function storeProperty(item, offers, nowIso) {
  *  candidate spelling plus an unscoped control, and reports what came back.
  *  Writes nothing. */
 async function runProbe(appId, prop, search) {
-  const item = { appId, ...prop, search };
+  const item = { appId, ...prop };
   // The control is a parameter Travelify certainly does not know. It is
   // ignored, so what comes back is what an UNSCOPED search returns — the
   // baseline every candidate is judged against.
@@ -243,7 +286,7 @@ async function runProbe(appId, prop, search) {
   const controlParsed = normaliseOffers(Array.isArray(controlRaw) ? controlRaw : [], search.type);
   const results = [];
   for (const cand of PROBE_CANDIDATES) {
-    const r = await fetchProperty(item, cand);
+    const r = await fetchProperty(item, search, cand);
     const label = cand.shape === 'loct'
       ? 'loct=Property + loc/ctry (the documented shape)'
       : cand.param;
@@ -340,17 +383,33 @@ export default async function handler(req, res) {
       });
     }
 
-    const queue = work.slice(0, MAX_REQUESTS_PER_RUN);
+    // The ceiling counts REQUESTS, and a property asked for as both a hotel and
+    // a dynamic package is two. Fill the queue by request budget, not by
+    // property count, or an account running both kinds would quietly double it.
+    const queue = [];
+    let budget = MAX_REQUESTS_PER_RUN;
+    for (const item of work) {
+      if (budget < item.searches.length) break;
+      budget -= item.searches.length;
+      queue.push(item);
+    }
     const truncated = work.length - queue.length;
     const nowIso = new Date().toISOString();
-    const stats = { requested: queue.length, ok: 0, failed: 0, empty: 0, offersStored: 0, dropped: 0 };
+    // properties = cache keys touched. requests = upstream calls, which is the
+    // number that costs us Travelify capacity, and the two differ whenever an
+    // account runs both a hotel and a dynamic-package widget on one property.
+    const stats = {
+      properties: queue.length,
+      requests: queue.reduce((n, it) => n + it.searches.length, 0),
+      ok: 0, failed: 0, partial: 0, empty: 0, offersStored: 0, dropped: 0,
+    };
     const failures = [];
 
     let i = 0;
     const workers = Array.from({ length: Math.min(REQUEST_CONCURRENCY, queue.length || 1) }, async () => {
       while (i < queue.length) {
         const item = queue[i++];
-        const r = await fetchProperty(item);
+        const r = await fetchPropertyAllTypes(item);
         if (r === null) {
           // Request failed. Leave the existing key alone — the read side's
           // staleness guard retires it if this keeps happening.
@@ -358,6 +417,7 @@ export default async function handler(req, res) {
           if (failures.length < 20) failures.push(`${item.appId}:${item.code}`);
           continue;
         }
+        if (r.partial) stats.partial++;
         stats.dropped += Math.max(0, r.parsed - r.verified.length);
         const w = await storeProperty(item, r.verified, nowIso);
         if (!w.ok) { stats.failed++; continue; }
@@ -374,11 +434,11 @@ export default async function handler(req, res) {
     // A sweep that stored nothing at all, having asked for plenty, is the
     // signature of a param Travelify is ignoring — say so rather than
     // reporting a cheerful zero.
-    const suspectParam = stats.requested > 0 && stats.offersStored === 0 && stats.dropped > 0;
+    const suspectParam = stats.requests > 0 && stats.offersStored === 0 && stats.dropped > 0;
 
     return res.status(200).json({
       ok: true,
-      swept: stats.requested,
+      swept: stats.properties,
       widgets,
       properties: work.length,
       ...stats,

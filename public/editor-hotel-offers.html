@@ -896,14 +896,14 @@
               <div class="field">
                 <label class="field-label" for="cfgType">What to fetch</label>
                 <select id="cfgType">
-                  <option value="Accommodation">Accommodation only</option>
-                  <option value="Flights">Flights only</option>
-                  <option value="DynamicPackages">Dynamic packages (Flight + Hotel)</option>
-                  <option value="PackageHolidays">Package holidays (operator)</option>
-                  <option value="BothPackages">Both package types</option>
-                  <option value="Any">Mixed (everything)</option>
+                  <option value="Accommodation">The hotel on its own</option>
+                  <option value="DynamicPackages">Flight + hotel (dynamic package)</option>
                 </select>
-                <div class="field-help">Each type returns a different card layout.</div>
+                <div class="field-help">
+                  Two choices, because a property code pins a hotel. A flight has no hotel
+                  to pin, and an operator package holiday is sold as a whole bundle rather
+                  than assembled around a property you choose.
+                </div>
               </div>
             </div>
           </div>
@@ -2258,7 +2258,10 @@
       $('cfgBoardGoingSoonDays').value = String(c.boardGoingSoonDays || 14);
       $('cfgBoardShowPremiumCabin').setAttribute('aria-pressed', c.boardShowPremiumCabin !== false ? 'true' : 'false');
 
-      $('cfgType').value = c.type || 'Accommodation';
+      // Only two types exist here, so anything else (a legacy config, a
+      // template copied from Travel Offers) settles on the package option
+      // rather than leaving the select blank.
+      $('cfgType').value = (c.type === 'Accommodation') ? 'Accommodation' : 'DynamicPackages';
       const ttiTa = $('cfgTtiCodes');
       if (ttiTa && document.activeElement !== ttiTa) ttiTa.value = ttiTextOf(state.config);
       paintTtiSummary();
@@ -3441,9 +3444,9 @@
         config: { template: 'cards', layout: 'list', type: 'Accommodation', dedupeStrategy: 'hotel', listShowMeta: true, listShowAmenities: true },
       },
       {
-        name: 'Package holidays to your hotels',
-        desc: 'Flight and hotel together, departing the UK',
-        config: { template: 'cards', type: 'BothPackages', origins: ['GB'], dedupeStrategy: 'hotel', density: 'detailed' },
+        name: 'Flight + hotel to your hotels',
+        desc: 'A dynamic package built around each property, departing the UK',
+        config: { template: 'cards', type: 'DynamicPackages', origins: ['GB'], dedupeStrategy: 'hotel', density: 'detailed' },
       },
       {
         name: 'Magazine feature',
@@ -3491,7 +3494,7 @@
       'Make it a magazine layout with a big hero property',
       'Only show all-inclusive stays under £900 per person',
       'Turn this into a slide-in popup with our best price',
-      'Show flight and hotel packages departing the UK',
+      'Show flight and hotel dynamic packages departing the UK',
     ];
 
     function renderAiSuggestions() {

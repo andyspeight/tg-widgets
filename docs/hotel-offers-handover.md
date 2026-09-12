@@ -72,6 +72,47 @@ cache-only rule exists to prevent.
 
 ---
 
+## Two product types, and only two
+
+**The hotel on its own, or a dynamic package built around it** (Andy, 12 Sep
+2026). Nothing else is offered in the editor, swept by the cron, or accepted by
+the widget.
+
+- **Flights** are out because a flight has no hotel to pin. A TTI code cannot
+  scope one.
+- **Operator package holidays** are out because an operator assembles and prices
+  the bundle as a whole. The hotel inside it is not inventory we can anchor on,
+  so asking for one by property code is asking the wrong question.
+
+Three places enforce it, deliberately, because a config can arrive from a legacy
+save or a hand edit rather than from the picker:
+
+- `searchFromConfig` narrows the upstream ask with `packageType:
+  'DynamicPackages'`, never `Any`, which is what would let operator packages in.
+- The engine coerces any non-Accommodation type to `DynamicPackages` before it
+  asks the cache, so a stale config gets an honest answer rather than an
+  unexplained empty widget.
+- The editor and demo pickers offer the two values and no others.
+
+**One subtlety worth not breaking.** The swept `type` stays the FAMILY name
+`Packages`, because `normaliseOffers` stamps it onto the stored offer and
+`cached-offers.js` separates a dynamic package from an operator one with
+`packageKindOf` at read time, exactly as it does for the country pool. Stamping
+`DynamicPackages` on the stored offer would make every cached package invisible.
+`packageType` on the payload is what does the narrowing. There is a test for
+this.
+
+**One property, one key, up to two requests.** A hotel-only widget and a
+dynamic-package widget want genuinely different products from the same property,
+and neither ask is a superset of the other, so the cron sweeps each type the
+account actually asked for and pools both into the one key. Demand-driven, so
+the common case is still one request per property. The per-run ceiling counts
+requests rather than properties, so an account running both kinds cannot quietly
+double the budget. A partial failure still stores what came back, so a hotel
+widget does not go blank because the package request timed out.
+
+---
+
 ## The verify gate (do not remove)
 
 Travelify ignores parameters it does not recognise rather than erroring. A wrong
@@ -160,9 +201,12 @@ every night.
 
 ## Volume
 
-Roughly (properties × accounts) requests per night. Capped at 100 properties per
-widget and 1,500 requests per run, so a pasted spreadsheet cannot become an
-unbounded bill. A run that hits the ceiling reports `truncated`.
+Roughly (properties × accounts × the product types they asked for) requests per
+night, which for most accounts is one request per property. Capped at 100
+properties per widget and 1,500 requests per run, so a pasted spreadsheet cannot
+become an unbounded bill. A run that hits the ceiling reports `truncated`, and
+the run stats separate `properties` (cache keys touched) from `requests` (what
+actually costs us Travelify capacity).
 
 ## Next steps
 

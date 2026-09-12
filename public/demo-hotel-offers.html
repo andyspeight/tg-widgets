@@ -231,7 +231,9 @@
     Your own hotels, priced live. You list the properties you sell by their Travelify code, and the
     widget shows real prices for those hotels and nothing else. Every Travel Offers layout is
     available: Cards (Grid, Carousel or List), Magazine, a scrolling ticker, or a popup. The
-    flight-only templates are not, because a flight has no hotel to pin.
+    flight-only templates are not, because a flight has no hotel to pin. Nor are
+    operator package holidays: those are sold as a whole bundle rather than
+    assembled around a property you chose.
   </p>
   <p class="lede" style="font-size:.95rem;opacity:.8">
     Prices are refreshed overnight under your own Travelify account, so the price on the card is
@@ -264,11 +266,8 @@
     <div class="field" id="fieldType">
       <label for="ctrlType">Offer type</label>
       <select id="ctrlType">
-        <option value="Accommodation" selected>Accommodation</option>
-        <option value="Flights">Flights</option>
-        <option value="DynamicPackages">Dynamic packages (Flight + Hotel)</option>
-        <option value="PackageHolidays">Package holidays</option>
-        <option value="BothPackages">Both package types</option>
+        <option value="Accommodation" selected>The hotel on its own</option>
+        <option value="DynamicPackages">Flight + hotel (dynamic package)</option>
       </select>
     </div>
     <div class="field">

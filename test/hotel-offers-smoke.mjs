@@ -109,12 +109,58 @@ test('an empty or unreadable config yields no work rather than a broad search', 
 
 // ── The search shape one widget implies ────────────────────────────────────
 
-test('searchFromConfig maps a flight-only type onto packages', () => {
-  // A TTI code names a hotel. A flight has no hotel, so a Flights widget is
-  // asking for something a property anchor cannot describe.
-  assert.equal(searchFromConfig({ type: 'Flights' }).type, 'Packages');
-  assert.equal(searchFromConfig({ type: 'Accommodation' }).type, 'Accommodation');
+test('only the hotel and the dynamic package are ever swept', () => {
+  // Andy, 12 Sep 2026. A flight has no hotel to pin, and an operator package
+  // holiday is a pre-bundled product whose hotel is not inventory we can
+  // anchor on. Whatever a config says, the ask narrows to those two.
+  for (const t of ['Flights', 'DynamicPackages', 'PackageHolidays', 'BothPackages', 'Any', 'nonsense']) {
+    const sr = searchFromConfig({ type: t });
+    if (sr.type === 'Accommodation') continue;
+    assert.equal(sr.type, 'Packages', `${t} should sweep the packages family`);
+    assert.equal(sr.packageType, 'DynamicPackages',
+      `${t} must narrow to dynamic packages, never to Any (which lets operator packages in)`);
+  }
+  const acc = searchFromConfig({ type: 'Accommodation' });
+  assert.equal(acc.type, 'Accommodation');
+  assert.equal(acc.packageType, null);
+});
+
+test('the swept type stays the FAMILY name so the read side can sort DP from operator', () => {
+  // normaliseOffers stamps search.type onto the stored offer, and
+  // cached-offers.js expects the packages family there — it separates a
+  // dynamic package from an operator one with packageKindOf at read time.
+  // Stamping 'DynamicPackages' would make every stored package invisible.
   assert.equal(searchFromConfig({ type: 'DynamicPackages' }).type, 'Packages');
+  assert.ok(
+    /normaliseOffers\(Array\.isArray\(raw\) \? raw : \[\], search\.type\)/.test(CRON),
+    'the parser must be stamped with the family type, not the narrowed one',
+  );
+});
+
+test('a property asked for as both types is swept as both, and pooled', () => {
+  assert.ok(/item\.searches\.map\(\(sr\) => fetchProperty\(item, sr\)\)/.test(CRON),
+    'each product type a property was asked for needs its own request');
+  assert.ok(/verified: ok\.flatMap\(\(r\) => r\.verified\)/.test(CRON),
+    'both types share one cache key, so their offers pool');
+  assert.ok(/if \(budget < item\.searches\.length\) break;/.test(CRON),
+    'the per-run ceiling must count requests, not properties');
+});
+
+test('the engine never asks the cache for a type the sweep cannot store', () => {
+  assert.ok(
+    /if \(type !== 'Accommodation'\) q\.set\('type', 'DynamicPackages'\)/.test(WIDGET),
+    'a legacy or hand-edited type must be coerced, not trusted',
+  );
+});
+
+test('the editor and demo offer only the two supported types', () => {
+  for (const [label, src] of [['editor', EDITOR], ['demo', DEMO]]) {
+    const sel = /<select id="c(?:fg|trl)Type">([\s\S]*?)<\/select>/.exec(src);
+    assert.ok(sel, `${label}: type picker not found`);
+    const values = [...sel[1].matchAll(/value="([^"]+)"/g)].map((m) => m[1]).sort();
+    assert.deepEqual(values, ['Accommodation', 'DynamicPackages'],
+      `${label} offers types the sweep never stores`);
+  }
 });
 
 test('searchFromConfig clamps the date window and falls back to sane defaults', () => {
@@ -224,7 +270,7 @@ test('the engine sends tti and appId, and omits destinations, when codes are set
   assert.ok(/q\.set\('tti', ttiCodes\.join\(','\)\)/.test(WIDGET));
   assert.ok(/q\.set\('appId', String\(this\.cfg\.appId\)\)/.test(WIDGET));
   assert.ok(
-    /if \(ttiCodes\.length\) \{[\s\S]{0,600}\} else if \(Array\.isArray\(payload\.destinations\)/.test(WIDGET),
+    /if \(ttiCodes\.length\) \{[\s\S]{0,1500}\} else if \(Array\.isArray\(payload\.destinations\)/.test(WIDGET),
     'a TTI widget must not also send a destination filter',
   );
 });
