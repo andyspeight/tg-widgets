@@ -77,6 +77,15 @@ export function limitsFor(event) {
         { name: 'm', max: envInt('RL_TRIP_AVAIL_PER_MIN', 60), seconds: 60 },
         { name: 'h', max: envInt('RL_TRIP_AVAIL_PER_HR', 1200), seconds: 3600 },
       ];
+    // TTI Offers "Test" button. The one path in the product where an agent
+    // action fires LIVE Travelify searches, so it is the tightest limit here:
+    // a few deliberate clicks a minute, not a way to sweep inventory. The
+    // endpoint caps codes per click as well, so these windows bound clicks.
+    case 'tti-test':
+      return [
+        { name: 'm', max: envInt('RL_TTI_TEST_PER_MIN', 4), seconds: 60 },
+        { name: 'h', max: envInt('RL_TTI_TEST_PER_HR', 40), seconds: 3600 },
+      ];
     default:
       return null;
   }
@@ -183,8 +192,12 @@ export async function evaluatePublicRateLimit(req, res, { event, widgetId } = {}
   // Our own editor/preview never counts against the public limit (read paths).
   // Lead WRITES (popup-lead, trip-enquiry) keep full protection regardless —
   // the preview signal is host-supplied and must never relax an abuse limit on
-  // a write path.
-  const NO_PREVIEW_RELAX = event === 'popup-lead' || event === 'trip-enquiry';
+  // a write path. tti-test is on that list for the same reason and one more:
+  // it is CALLED from the editor, so relaxing on the preview signal would
+  // disable its limit entirely, and it is the only agent action that spends
+  // real Travelify searches.
+  const NO_PREVIEW_RELAX = event === 'popup-lead' || event === 'trip-enquiry'
+    || event === 'tti-test';
   if (!NO_PREVIEW_RELAX && isTrustedPreviewRequest(req)) {
     return { allowed: true, ip, widgetId: wid, preview: true };
   }
