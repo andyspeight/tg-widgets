@@ -609,6 +609,21 @@ happens twice for the same property. Capped at `MAX_LOCATE` and deadline
 checked, because it spends a real search. With coordinates, Tenerife resolves to
 TFS with TFN offered alongside.
 
+### The country on the row is a hint; the supplier's answer is a fact
+
+A hotel in Tenerife entered with `ctry=GB` searched British airports, so the
+nearest was **Newquay at 2,620km** — correctly computed and entirely wrong,
+which is what made it look like a distance bug rather than a country one (Andy,
+14 Sep 2026). Both callers now take the country from the PROPERTY once they have
+it: the test route from the located search result, the sweep from the cached
+offer. The agent is told their row disagrees, because the typed country is what
+every other search for that property uses until it is corrected.
+
+**An airport the agent typed is the answer, full stop.** The locate step used to
+be queued on missing coordinates alone, so a row carrying an explicit Fly into
+was located anyway and the computed airport replaced the typed one. Typing TFS
+changed nothing at all, which is the worst way for an override to fail.
+
 ### Known gaps on the package card
 
 - **No carrier, stops or flight times.** We cache the accommodation result and

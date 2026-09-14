@@ -350,7 +350,27 @@ async function fetchPropertyAllTypes(item) {
   // country's hub. Both are honest, and the editor shows an agent which it is
   // so they can pin a better one.
   if (!item.arrival) {
-    item.arrival = resolveArrivalAirport({ dst: item.dst, lat: item.lat, lng: item.lng, ctry: item.ctry });
+    let { lat, lng } = item;
+    // WHAT WE MEASURED LAST NIGHT BEATS WHAT SOMEBODY TYPED.
+    //
+    // The row carries whatever country an agent entered, and a hotel in
+    // Tenerife typed as GB resolved to Newquay — correctly computed, entirely
+    // wrong (Andy, 14 Sep 2026). The cached offer for this very property holds
+    // the supplier's own coordinates and country, so read them: one Redis get
+    // against a key this job is about to overwrite anyway.
+    if (!item.dst && !(Number.isFinite(lat) && Number.isFinite(lng))) {
+      try {
+        const cached = await getJson(ttiKey(item.appId, item.code));
+        const hit = (cached && Array.isArray(cached.offers) ? cached.offers : [])
+          .find((o) => Number.isFinite(o.resortLat) && Number.isFinite(o.resortLng));
+        if (hit) {
+          lat = hit.resortLat; lng = hit.resortLng;
+          const found = cleanCtry(hit.countryCode || '');
+          if (found) item.ctry = found;
+        }
+      } catch { /* a cache miss only costs precision, never the sweep */ }
+    }
+    item.arrival = resolveArrivalAirport({ dst: item.dst, lat, lng, ctry: item.ctry });
   }
   const asks = [];
   for (const sr of item.searches) {
