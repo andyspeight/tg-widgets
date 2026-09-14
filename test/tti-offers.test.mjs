@@ -1468,3 +1468,48 @@ test('the package options are declared before the search that reads them', () =>
   const isDp = handler.indexOf('const isDp =');
   assert.ok(isDp > 0 && isDp < search, 'and so must isDp');
 });
+
+/* ============================================================
+   End to end: a stored package really does become a flight card
+   ============================================================ */
+
+test('a stored TTI package survives the wire shape as a real flight', () => {
+  // THE CENTRAL CLAIM of the package fix, run rather than argued. The writer
+  // sets type/packageType/origin; cached-offers.js reshapes that into what the
+  // card actually reads. If those two ever disagree the card silently draws a
+  // hotel, which is exactly the bug this replaced.
+  //
+  // toRawShape is not exported (it is an internal of the endpoint), so it is
+  // lifted out and run with its one import stubbed.
+  const at = CACHED.indexOf('function toRawShape(');
+  assert.notEqual(at, -1);
+  let depth = 0; let end = -1;
+  for (let i = CACHED.indexOf('{', at); i < CACHED.length; i++) {
+    if (CACHED[i] === '{') depth++;
+    else if (CACHED[i] === '}' && --depth === 0) { end = i + 1; break; }
+  }
+  assert.notEqual(end, -1);
+  // eslint-disable-next-line no-new-func
+  const toRawShape = new Function('marketOfAirport', 'money',
+    `${CACHED.slice(at, end)}; return toRawShape;`)(() => 'GB', (n) => `£${n}`);
+
+  const result = { name: 'Hilton Bournemouth', isAvailable: true, uniqueRef: 'TTI:58612582',
+    rid: 9, pricing: { total: 861, currency: 'GBP' }, media: [{ url: 'https://x/1.jpg' }],
+    location: { name: 'Bournemouth', countryCode: 'GB', latitude: 50.72, longitude: -1.87 },
+    units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z', boardBasis: 'BedAndBreakfast' }] };
+
+  const pkg = toRawShape(normaliseAccommodationResult(result, { origin: 'ABZ' }).offer);
+  assert.equal(pkg.type, 'Packages', 'the card branches on this');
+  assert.equal(pkg.packageType, 'DynamicPackages', 'getPackageType reads it for the badge');
+  assert.ok(pkg.flight, 'THE POINT: a package must arrive with a flight block');
+  assert.equal(pkg.flight.origin.iataCode, 'ABZ', 'and the card renders this as the from-airport');
+  assert.ok(pkg.accommodation, 'with the hotel alongside it, as a package card expects');
+  assert.equal(pkg.accommodation.name, 'Hilton Bournemouth');
+
+  // A hotel-only offer must NOT grow a flight, or every plain TTI card would
+  // claim a departure it does not have.
+  const hotel = toRawShape(normaliseAccommodationResult(result, {}).offer);
+  assert.equal(hotel.type, 'Accommodation');
+  assert.ok(!hotel.flight, 'a hotel on its own has no flight');
+  assert.ok(hotel.accommodation);
+});
