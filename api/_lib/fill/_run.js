@@ -111,7 +111,11 @@ export async function runItem({ item, spec, record, byId, writeBack, allowPaid =
       iata: record.values && record.values['IATA Code'],
       nowIso,
     });
-    if (!f.ok) return { ...base, result: 'held', reason: f.why, costUsd: 0 };
+    if (!f.ok) {
+      // Unreachable is not a verdict. Without this the queue item is spent and
+      // the airport is filed as held, having never been looked at.
+      return { ...base, result: 'held', reason: f.why, costUsd: 0, retryable: !!f.transient };
+    }
     value = f.value;
     evidence = f.evidence;
 

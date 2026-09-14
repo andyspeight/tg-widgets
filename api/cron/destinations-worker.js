@@ -125,6 +125,7 @@ export default async function handler(req, res) {
   if (codes.length) await warmAirports(codes).catch(() => {});
 
   let worked = 0;
+  let retried = 0;                       // put back, not decided
   for (const item of items) {
     if (Date.now() - started > TIME_BUDGET_MS) { await release(item.id); continue; }
 
@@ -205,6 +206,20 @@ export default async function handler(req, res) {
     }
 
     spent += outcome.costUsd || 0;
+
+    // A SOURCE THAT DID NOT ANSWER HAS DECIDED NOTHING. Put the record back and
+    // move on, rather than spending the queue item on a verdict we never got.
+    // On 14 Sep 2026 the first two ticks of the Official Website run held 64
+    // airports between them because the 13MB dataset had not finished
+    // downloading on a cold container. Every one was filed as held and dropped
+    // from the queue, and the dashboard showed two minutes of nothing saving
+    // for work that had never actually been looked at.
+    if (outcome.retryable) {
+      await release(item.id);
+      retried++;
+      continue;
+    }
+
     results.push(await complete(item.id, outcome));
 
     // THE CIRCUIT BREAKER. On 11 Sep Andy ran a 375-record job twice. Every
@@ -234,12 +249,16 @@ export default async function handler(req, res) {
   const saved = results.filter(r => r.result === 'saved').length;
   const held = results.filter(r => r.result === 'held').length;
   const skipped = results.filter(r => r.result === 'skipped').length;
-  await setRunState({
+  await setRunState(retried ? {
     state: left ? 'working' : 'idle',
-    pending: left, lastBatch: results.length, saved, held,
+    pending: left, lastBatch: results.length, saved, held, retried,
+    note: retried + ' went back in the queue because a source did not answer, so they are still to do',
+  } : {
+    state: left ? 'working' : 'idle',
+    pending: left, lastBatch: results.length, saved, held, retried,
   }).catch(() => {});
 
-  console.log('[destinations-worker]', JSON.stringify({ took: results.length, saved, held, skipped, spentUsd: +spent.toFixed(4), left }));
+  console.log('[destinations-worker]', JSON.stringify({ took: results.length, saved, held, skipped, retried, spentUsd: +spent.toFixed(4), left }));
 
-  return done({ ok: true, processed: results.length, saved, held, skipped, spentUsd: +spent.toFixed(4), pending: left });
+  return done({ ok: true, processed: results.length, saved, held, skipped, retried, spentUsd: +spent.toFixed(4), pending: left });
 }

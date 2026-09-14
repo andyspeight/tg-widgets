@@ -626,8 +626,10 @@ export function sourceAirportField({ field, iata, nowIso }) {
     return { ok: false, why: 'this record has no IATA code, and both sources are looked up by it' };
   }
   const pair = _pairs.get(code);
-  if (!pair) return { ok: false, why: 'the two sources could not be reached for ' + code };
-  if (!pair.ok) return { ok: false, why: pair.reason };
+  if (!pair) return { ok: false, transient: true, why: 'the two sources could not be reached for ' + code };
+  // A source that did not answer has decided nothing. Say so, so the caller can
+  // put the record back in the queue rather than record a verdict it never got.
+  if (!pair.ok) return { ok: false, why: pair.reason, transient: !!pair.transient };
 
   const both = 'OurAirports and Wikidata agree, looked up by IATA code ' + code + '.';
 

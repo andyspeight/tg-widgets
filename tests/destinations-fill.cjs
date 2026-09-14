@@ -710,6 +710,32 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     });
   });
 
+  t('a source that did not answer is put back, not recorded as a verdict', async () => {
+    const src = await load('_source.js');
+    src._resetSourceCache();
+    // Both sources unreachable: the dataset download failed on a cold start.
+    await src.warmAirports(['AAA'], {
+      ourAirports: async () => ({ reachable: false, reason: 'the OurAirports dataset could not be downloaded', map: new Map() }),
+      wikidata: async () => ({ reachable: true, map: new Map() }),
+    });
+    const out = src.sourceAirportField({ field: { label: 'Official Website' }, iata: 'AAA' });
+    assert.strictEqual(out.ok, false);
+    assert.strictEqual(out.transient, true,
+      'unreachable is not the same answer as "the two sources disagree"');
+  });
+
+  t('a real disagreement is a verdict, and is not retried forever', async () => {
+    const src = await load('_source.js');
+    src._resetSourceCache();
+    await src.warmAirports(['BBB'], {
+      ourAirports: async () => ({ reachable: true, map: new Map() }),
+      wikidata: async () => ({ reachable: true, map: new Map() }),
+    });
+    const out = src.sourceAirportField({ field: { label: 'Official Website' }, iata: 'BBB' });
+    assert.strictEqual(out.ok, false);
+    assert.ok(!out.transient, 'a settled answer must not go back in the queue');
+  });
+
   await Promise.all(pending);
   globalThis.fetch = realFetch;
   if (realKey === undefined) delete process.env.ANTHROPIC_API_KEY;
