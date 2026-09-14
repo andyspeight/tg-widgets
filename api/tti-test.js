@@ -39,7 +39,7 @@ import {
   buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
-import { resolveArrivalAirport } from './_lib/offers/arrival-airport.js';
+import { resolveArrivalAirport, airportLabel } from './_lib/offers/arrival-airport.js';
 import { setJson, getJson } from './_redis.js';
 
 // A live search per property, so this is deliberately small.
@@ -58,6 +58,10 @@ const MAX_SEARCHES = 6;
 // Departure airports per test run. More than this and a single click on Test
 // is running a small sweep.
 const MAX_ORIGINS = 3;
+// Properties we will spend a search on just to find out where they are. Only
+// ever needed once per property: the search fills the cache on the way past.
+const MAX_LOCATE = 2;
+const LOCATE_POLLS = 4;
 
 const ttiKey = (appId, code) => `offers:tti:${appId}:${code}`;
 
@@ -200,6 +204,8 @@ export default async function handler(req, res) {
   // Bournemouth" is a reasonable call an agent should be able to see and
   // override rather than discover from a price.
   const arrivals = new Map();
+  const unplaced = [];
+  let locateSearches = 0;
   if (isDp) {
     await Promise.all(rows.map(async (row, idx) => {
       let { lat, lng } = row;
@@ -213,7 +219,33 @@ export default async function handler(req, res) {
       }
       const got = resolveArrivalAirport({ dst: row.dst, lat, lng, ctry: row.ctry });
       if (got) arrivals.set(idx, got);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) unplaced.push(idx);
     }));
+
+    // LOCATE, rather than fly to the capital.
+    //
+    // A country hub is a fair answer for a mainland hotel and a bad one for an
+    // island: a property in Santa Cruz de Tenerife resolves to MADRID on the
+    // country alone, and a package that lands 1,700km from the hotel is worse
+    // than no package. So a property we cannot place gets ONE cheap
+    // accommodation search first, purely to read its coordinates — the same
+    // search the hotel-only widget runs, and it fills the cache on the way past
+    // so this never happens twice for the same property.
+    for (const idx of unplaced.slice(0, MAX_LOCATE)) {
+      if (Date.now() - startedAt > DEADLINE_MS) break;
+      const row = rows[idx];
+      const probe = buildAccommodationCriteria(row, search);
+      if (!probe) continue;
+      locateSearches++;
+      const r = await runSearch(creds, probe, { maxPolls: LOCATE_POLLS, pick: 'accommodationResults' });
+      const mine = r.ok ? (r.results || []).filter((x) => resultIsProperty(x, row.code)) : [];
+      const loc = mine.length && mine[0].location ? mine[0].location : null;
+      const lat = cleanCoord(loc && (loc.latitude ?? loc.lat), 90);
+      const lng = cleanCoord(loc && (loc.longitude ?? loc.lng), 180);
+      if (lat == null || lng == null) continue;
+      const got = resolveArrivalAirport({ lat, lng, ctry: row.ctry });
+      if (got) arrivals.set(idx, { ...got, source: got.source + '-located' });
+    }
   }
 
   // ONE SEARCH PER DEPARTURE AIRPORT.
@@ -245,7 +277,7 @@ export default async function handler(req, res) {
         unsearchable.set(idx, 'Add the two-letter country for this hotel, so we know where to look.');
         continue;
       }
-      jobs.push({ idx, row, origin, criteria });
+      jobs.push({ idx, row, origin, criteria, arrival });
     }
   }
   const dropped = Math.max(0, jobs.length - MAX_SEARCHES);
@@ -325,10 +357,22 @@ export default async function handler(req, res) {
       }
 
       for (const one of mine) {
+        const legs = (job.criteria.FlightSearchCriteria || {}).Legs || [];
+        const guests = job.criteria.AccommodationSearchCriteria.Rooms[0].Guests || [];
         const n = normaliseAccommodationResult(one, {
           ctry: job.row.ctry, lat: job.row.lat, lng: job.row.lng,
           locationName: job.row.locationName, currency: job.criteria.Currency,
           checkinDate: job.criteria.AccommodationSearchCriteria.CheckinDate,
+          // WHO THE PRICE IS FOR, from the party we actually searched for.
+          adults: guests.filter((g) => g.Type === 'Adult').length,
+          children: guests.filter((g) => g.Type === 'Child').length,
+          infants: guests.filter((g) => g.Type === 'Infant').length,
+          // The other end of the flight, and the dates. The card's flight line
+          // needs BOTH airports or it draws nothing at all.
+          ...(job.arrival ? { destination: job.arrival.code, destinationName: job.arrival.name } : {}),
+          ...(job.origin ? { originName: airportLabel(job.origin) } : {}),
+          ...(legs[0] ? { outboundDate: legs[0].DepartDate } : {}),
+          ...(legs[1] ? { returnDate: legs[1].DepartDate } : {}),
           // A package price belongs to the airport it flies from. This is what
           // makes the stored offer a real package downstream: cached-offers
           // builds a flight block from it, the card draws the Flight + Hotel
@@ -419,7 +463,7 @@ export default async function handler(req, res) {
     tested: rows.length,
     found,
     cached: results.filter((r) => r && r.cached).length,
-    searches: jobs.length,
+    searches: jobs.length + locateSearches,
     ...(isDp ? { airports: useOrigins } : {}),
     ...(dropped ? {
       dropped,

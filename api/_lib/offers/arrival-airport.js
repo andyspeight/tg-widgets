@@ -194,3 +194,13 @@ export function resolveArrivalAirport({ dst, lat, lng, ctry } = {}) {
   if (haveSpot) return { ...nearestOf(list), source: 'nearest-anywhere' };
   return null;
 }
+
+/** The human name for an airport code, or null. Used so a cached offer can
+ *  carry "Glasgow" alongside "GLA" — the card shows the code, but the name is
+ *  what a visitor recognises, and it costs nothing to store. */
+export function airportLabel(code) {
+  const want = String(code || '').trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(want)) return null;
+  const hit = arrivalAirports().find((x) => x[0] === want);
+  return hit ? hit[1] : null;
+}

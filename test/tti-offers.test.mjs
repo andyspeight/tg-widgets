@@ -1141,8 +1141,13 @@ test('a missing booking url is not reported as a fault', () => {
   // The widget builds its own click-through from the property reference and
   // the coordinates, so a cached offer without a url is normal. Reporting it
   // sent Andy looking for a field that was never needed.
+  // Complete now includes a board basis: a card without one looks like a hotel
+  // that has no board, which is not a thing, so it is reported like any other
+  // gap. The point of THIS test is that a missing `url` is not a gap.
   const r = { isAvailable: true, name: 'Hilton Bournemouth', pricing: { total: 756 },
-              location: { name: 'Bournemouth' }, units: [{ nights: 7 }], media: [{ url: 'https://x/1.jpg' }] };
+              location: { name: 'Bournemouth' },
+              units: [{ nights: 7, boardBasis: 'BedAndBreakfast' }],
+              media: [{ url: 'https://x/1.jpg' }] };
   const { offer, unmapped } = normaliseAccommodationResult(r, {});
   assert.equal(offer.url, null);
   assert.deepEqual(unmapped, [], 'a complete offer with no url must report nothing');
@@ -1785,4 +1790,95 @@ test('a row with no coordinates is not a hotel in the Atlantic', () => {
   // the one call site that was not doing it.
   assert.ok(/lat: cleanCoord\(row\.lat, 90\), lng: cleanCoord\(row\.lng, 180\)/.test(TEST_API));
   assert.ok(!/lat: Number\(row\.lat\)/.test(TEST_API), 'Number(null) is 0, and 0 is a place');
+});
+
+/* ============================================================
+   What the card can actually say about a package
+   ============================================================ */
+
+/** Push a normalised offer through the endpoint's own reshaper, so these
+ *  assertions are about what the CARD receives, not what we stored. */
+function wireShape(offer) {
+  const at = CACHED.indexOf('function toRawShape(');
+  let depth = 0; let end = -1;
+  for (let i = CACHED.indexOf('{', at); i < CACHED.length; i++) {
+    if (CACHED[i] === '{') depth++;
+    else if (CACHED[i] === '}' && --depth === 0) { end = i + 1; break; }
+  }
+  // eslint-disable-next-line no-new-func
+  return new Function('marketOfAirport', 'money',
+    `${CACHED.slice(at, end)}; return toRawShape;`)(() => 'GB', (n) => `£${n}`)(offer);
+}
+
+const PKG_RESULT = {
+  name: 'Iberostar Heritage Grand Mencey', isAvailable: true, uniqueRef: 'TTI:9', rid: 3,
+  rating: 5, chain: 'Iberostar Hotels & Resorts',
+  pricing: { total: 857, currency: 'GBP' }, media: [{ url: 'https://x/1.jpg' }],
+  location: { name: 'Santa Cruz', countryCode: 'ES', latitude: 28.46, longitude: -16.25 },
+  units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z', boardBasis: 'AllInclusive' }],
+};
+
+test('a package card can say who the price is for', () => {
+  // The card prints paxString(o) and falls back to the bare word "Travellers"
+  // when it cannot. Andy, 14 Sep 2026: "It doesnt say how many travellers it's
+  // based on" — a total price for an unstated number of people.
+  const wire = wireShape(normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'GLA', destination: 'TFS', adults: 2, children: 1, infants: 0 }).offer);
+  assert.equal(wire.adults, 2);
+  assert.equal(wire.children, 1);
+  // cached-offers only forwards finite numbers, so zero must survive as zero
+  // rather than being dropped and read as unknown.
+  assert.equal(wire.infants, 0);
+});
+
+test('a package card can say where it flies from AND to', () => {
+  // The flight line is `fromCode -> toCode` and is skipped ENTIRELY unless both
+  // ends are known. The origin was being stored and the arrival was not, so the
+  // whole line vanished and the card never said where it flew from at all.
+  const wire = wireShape(normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'GLA', originName: 'Glasgow', destination: 'TFS', destinationName: 'Tenerife South',
+      outboundDate: '2026-10-14T00:00:00Z', returnDate: '2026-10-21T00:00:00Z' }).offer);
+  assert.ok(wire.flight, 'a package must arrive with a flight block');
+  assert.equal(wire.flight.origin.iataCode, 'GLA');
+  assert.equal(wire.flight.origin.name, 'Glasgow');
+  assert.equal(wire.flight.destination.iataCode, 'TFS', 'both ends, or the card draws nothing');
+  // The dates the card renders as "Departs ... Returns ...".
+  assert.equal(wire.flight.outboundDate, '2026-10-14T00:00:00Z');
+  assert.equal(wire.flight.returnDate, '2026-10-21T00:00:00Z');
+});
+
+test('a package card can say the board basis', () => {
+  const wire = wireShape(normaliseAccommodationResult(PKG_RESULT, { origin: 'GLA', destination: 'TFS' }).offer);
+  assert.equal(wire.accommodation.boardBasis, 'AllInclusive');
+
+  // And when the supplier does not send one, it is REPORTED rather than
+  // silently dropped — a card with no board reads as a hotel that has none.
+  const noBoard = { ...PKG_RESULT, units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z' }] };
+  assert.ok(normaliseAccommodationResult(noBoard, {}).unmapped.includes('boardBasis'));
+});
+
+test('a hotel we cannot place is located before its package is priced', () => {
+  // A country hub is a fair answer for a mainland hotel and a bad one for an
+  // island: Santa Cruz de Tenerife resolves to MADRID on the country alone,
+  // 1,700km from the bed. So an unplaced property gets one cheap accommodation
+  // search first, purely to read its coordinates.
+  assert.equal(resolveArrivalAirport({ ctry: 'ES' }).code, 'MAD', 'the country alone gives the capital');
+  const placed = resolveArrivalAirport({ lat: 28.4636, lng: -16.2518, ctry: 'ES' });
+  assert.equal(placed.code, 'TFS', 'knowing where it is gives the island');
+  assert.equal(placed.alt.code, 'TFN', 'with the closer island airport offered');
+
+  assert.ok(/for \(const idx of unplaced\.slice\(0, MAX_LOCATE\)\)/.test(TEST_API));
+  assert.ok(/-located/.test(TEST_API), 'and the panel must say the answer was measured, not assumed');
+  // Bounded: this spends a real search, so it is capped and deadline-checked.
+  assert.ok(/const MAX_LOCATE = \d/.test(TEST_API));
+  assert.ok(/if \(Date\.now\(\) - startedAt > DEADLINE_MS\) break;/.test(TEST_API));
+});
+
+test('the nightly sweep stores everything the Test button stores', () => {
+  // A refresh that dropped any of these would quietly undo the cards the Test
+  // button produced — the widget would look right tonight and wrong tomorrow.
+  for (const field of ['adults:', 'children:', 'infants:', 'originName: airportLabel(origin)',
+    'destination: item.arrival.code', 'outboundDate: legs[0].DepartDate', 'returnDate: legs[1].DepartDate']) {
+    assert.ok(CRON.includes(field), `the sweep must carry ${field}`);
+  }
 });
