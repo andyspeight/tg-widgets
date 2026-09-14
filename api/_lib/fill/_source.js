@@ -59,8 +59,11 @@ const UA = 'LunaBrain/1.0 (+https://travelify.io)';
  *   v3  the third opinion on official websites, same day. Every one of the 291
  *       airports still missing one already carries a v2 verdict saying the two
  *       sources disagreed, and those would have been served straight back.
+ *   v4  the article corroborating a site only OurAirports had, same day again.
+ *       The 217 left after v3 all carry a verdict saying only one source had
+ *       one, which is exactly the case v4 reopens.
  */
-const CACHE_KEY = iata => 'dfill:src:air:v3:' + iata;
+const CACHE_KEY = iata => 'dfill:src:air:v4:' + iata;
 /* Thirty days. Coordinates do not move, but an airport can gain a website, and
    a cached "the sources disagree" that never expires is wrong forever. */
 const CACHE_TTL = 60 * 60 * 24 * 30;
@@ -255,11 +258,25 @@ export function agreedFields(oa, wd) {
   // http://www.x.com/ by one and https://x.com by the other.
   const oaHost = siteHost(oa.site), wdHost = siteHost(wd.site);
   const siteAgree = sameSite(oaHost, wdHost);
-  // Both have one and they differ. A third opinion can settle it, so the
-  // question is held open rather than closed. warmAirports asks the airport's
-  // own Wikipedia article, which is where this becomes two of three.
-  if (!siteAgree && oaHost && wdHost && wd.wiki) {
-    pending.site = { oa: oa.site, wd: wd.site, article: wd.wiki };
+  // The airport's own Wikipedia article is asked in two cases, and refused in a
+  // third. warmAirports does the asking.
+  if (!siteAgree && wd.wiki) {
+    if (oaHost && wdHost) {
+      // Both have one and they differ. The article breaks the tie, two of three.
+      pending.site = { both: true, oa: oa.site, wd: wd.site, article: wd.wiki };
+    } else if (oaHost && !wdHost) {
+      // Only OurAirports has one, and the article can corroborate it. An
+      // aviation dataset and an encyclopaedia are separate projects with
+      // separate contributors, so that is two independent sources.
+      //
+      // THE MIRROR CASE IS DELIBERATELY MISSING. When only Wikidata has a site,
+      // its own Wikipedia article agreeing proves very little: the two are
+      // sister projects that import from each other constantly, and P856 is
+      // routinely lifted from the infobox it would be checked against. It would
+      // have been worth about 15 more airports in a sample of 100 and it would
+      // have made "two independent sources agree" mean less than it says.
+      pending.site = { both: false, oa: oa.site, wd: '', article: wd.wiki };
+    }
   }
   note('site', siteAgree ? tidyUrl(oa.site, wd.site) : '',
     !oaHost || !wdHost ? 'only one source has an official website'
@@ -732,17 +749,20 @@ export async function warmAirports(iataList, deps = {}) {
       const wt = text.get(wikiTitle(t.article));
       const third = wt ? localSiteFromWikitext(wt) : { url: '', why: 'the article could not be read' };
       const h = siteHost(third.url), ho = siteHost(t.oa), hw = siteHost(t.wd);
-      const backs = sameSite(h, ho) ? t.oa : sameSite(h, hw) ? t.wd : '';
+      const backs = sameSite(h, ho) ? t.oa : (hw && sameSite(h, hw)) ? t.wd : '';
       if (backs) {
         p.agreed.site = tidyUrl(backs, third.url);
         p.brokeTieOn = p.brokeTieOn || {};
-        p.brokeTieOn.site = t.article;
+        p.brokeTieOn.site = { article: t.article, both: !!t.both };
         delete p.why.site;
-      } else if (h) {
-        p.why.site = 'all three sources name a different site: ' + ho + ', ' + hw + ' and ' + h;
+      } else if (t.both) {
+        p.why.site = h
+          ? 'all three sources name a different site: ' + ho + ', ' + hw + ' and ' + h
+          : 'they point at different sites, ' + ho + ' and ' + hw + ', and ' + third.why;
       } else {
-        p.why.site = 'they point at different sites, ' + ho + ' and ' + hw +
-          ', and ' + third.why;
+        p.why.site = h
+          ? 'only OurAirports has an official website and the article names another: ' + ho + ' against ' + h
+          : 'only one source has an official website, and ' + third.why;
       }
       delete p.pending.site;
     }
@@ -801,10 +821,15 @@ export function sourceAirportField({ field, iata, nowIso }) {
   // never be mistaken later for one the first two sources agreed on outright.
   const tie = pair.brokeTieOn && pair.brokeTieOn[key];
   if (tie) {
-    return { ok: true, value, evidence:
-      'OurAirports and Wikidata named different sites for IATA code ' + code +
-      '. The Wikipedia article ' + tie + ' states ' + JSON.stringify(value) +
-      ', which settles it two to one.' };
+    const article = typeof tie === 'string' ? tie : tie.article;
+    const wasTie = typeof tie === 'string' ? true : !!tie.both;
+    return { ok: true, value, evidence: wasTie
+      ? 'OurAirports and Wikidata named different sites for IATA code ' + code +
+        '. The Wikipedia article ' + article + ' states ' + JSON.stringify(value) +
+        ', which settles it two to one.'
+      : 'Only OurAirports had a website for IATA code ' + code +
+        '. The Wikipedia article ' + article + ' independently states ' +
+        JSON.stringify(value) + ', so two sources agree.' };
   }
   return { ok: true, value, evidence: both + ' Both give ' + JSON.stringify(value) + '.' };
 }

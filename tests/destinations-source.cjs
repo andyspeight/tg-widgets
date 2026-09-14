@@ -652,6 +652,59 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     assert.ok(!sameSite('', 'x.com'));
   });
 
+  /* ---------------------------------------------------------------- */
+  console.log('\nThe article corroborating a site only one source had');
+
+  const soloOA = { ...OA.MUC, site: 'https://www.munich-airport.de/' };
+  const soloWD = { ...WD.MUC, site: '' };          // Wikidata has none
+  const solo = (wikitext, oa, wd) => ({
+    cacheGet: async () => null, cacheSet: async () => {},
+    ourAirports: async () => ({ reachable: true, map: new Map([['MUC', oa || soloOA]]) }),
+    wikidata: async () => ({ reachable: true, map: new Map([['MUC', wd || soloWD]]) }),
+    resolveArticles: async () => new Map([['Munich Airport', wikitext]]),
+  });
+
+  await at('OurAirports plus the article is two independent sources', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], solo('| website = {{URL|www.munich-airport.de}}'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, true, r.why);
+    assert.match(r.value, /munich-airport\.de/);
+    assert.match(r.evidence, /Only OurAirports had a website/);
+    assert.match(r.evidence, /two sources agree/);
+    assert.doesNotMatch(r.evidence, /two to one/, 'this is corroboration, not a tie-break');
+  });
+
+  /* THE ONE WE CHOSE NOT TO DO. Wikidata and its own Wikipedia article are
+     sister projects that import from each other, so one backing the other is
+     not two independent sources however much it looks like it. */
+  await at('Wikidata plus its own article is refused, however well they agree', async () => {
+    _resetSourceCache();
+    const oaNone = { ...OA.MUC, site: '' };
+    const wdOnly = { ...WD.MUC, site: 'https://www.munich-airport.de' };
+    await warmAirports(['MUC'], solo('| website = {{URL|www.munich-airport.de}}', oaNone, wdOnly));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, false,
+      'two sister projects agreeing is not the two independent sources this column promises');
+    assert.match(r.why, /only one source/);
+  });
+
+  await at('an article naming a different site corroborates nothing', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], solo('| website = {{URL|www.somewhere-else.de}}'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /names another/);
+  });
+
+  await at('an article taking its website from Wikidata corroborates nothing either', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], solo('| website = {{Official URL}}'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /from Wikidata/);
+  });
+
   await Promise.all(pending);
   console.log(`\n${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
