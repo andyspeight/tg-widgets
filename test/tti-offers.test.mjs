@@ -1882,3 +1882,48 @@ test('the nightly sweep stores everything the Test button stores', () => {
     assert.ok(CRON.includes(field), `the sweep must carry ${field}`);
   }
 });
+
+test('an airport the agent typed is the answer, and nothing overrides it', () => {
+  // Andy put TFS in the Fly into box and the card still said Newquay. The row
+  // had no coordinates, so it was queued for the locate step REGARDLESS of the
+  // override, and the computed answer then replaced the typed one. An override
+  // that silently changes nothing is the worst way for one to fail.
+  assert.ok(/if \(!row\.dst && \(!Number\.isFinite\(lat\) \|\| !Number\.isFinite\(lng\)\)\) unplaced\.push\(idx\)/.test(TEST_API),
+    'a row carrying an explicit airport must never be queued for locating');
+  // And the resolver itself still short-circuits on a given code.
+  assert.equal(resolveArrivalAirport({ dst: 'TFS', lat: 50.72, lng: -1.87, ctry: 'GB' }).code, 'TFS',
+    'a typed code beats coordinates that say otherwise');
+});
+
+test('where the supplier says the hotel is beats where the row says it is', () => {
+  // A hotel in Tenerife entered as ctry=GB searched British airports, so the
+  // nearest was Newquay at 2,620km — correctly computed and entirely wrong,
+  // which is what made it look like a distance bug rather than a country one.
+  const asTyped = resolveArrivalAirport({ lat: 28.4636, lng: -16.2518, ctry: 'GB' });
+  assert.equal(asTyped.code, 'NQY', 'the reported symptom, reproduced');
+  assert.ok(asTyped.km > 2000);
+
+  const asFound = resolveArrivalAirport({ lat: 28.4636, lng: -16.2518, ctry: 'ES' });
+  assert.equal(asFound.code, 'TFS');
+  assert.ok(asFound.km < 100, 'and the right country puts it on the island');
+
+  // Both callers take the country from the property, not from the row.
+  assert.ok(/const found = cleanCtry\(loc\.countryCode/.test(TEST_API));
+  assert.ok(/row\.ctry = found;/.test(TEST_API), 'and use it for the searches that follow');
+  assert.ok(/const found = cleanCtry\(hit\.countryCode/.test(CRON));
+  assert.ok(/if \(found\) item\.ctry = found;/.test(CRON));
+
+  // And the agent is told their row is wrong rather than it being papered over:
+  // the typed country is what every other search for this property uses.
+  assert.ok(/countryWas: rows\[idx\]\.ctryTyped/.test(TEST_API));
+  assert.ok(/This hotel is in/.test(EDITOR));
+  assert.ok(/Change the country on the row/.test(EDITOR));
+});
+
+test('the panel always explains the airport it chose', () => {
+  // The '-located' suffix was not in the reason lookup, so the panel printed an
+  // airport and 2,620km with no explanation of either.
+  assert.ok(/rawWhy\.replace\(\/-located\$\/, ''\)/.test(EDITOR),
+    'the suffix must be stripped before the reason is looked up');
+  assert.ok(/after looking the hotel up/.test(EDITOR), 'and reported in its own right');
+});

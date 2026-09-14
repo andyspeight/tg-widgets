@@ -219,7 +219,14 @@ export default async function handler(req, res) {
       }
       const got = resolveArrivalAirport({ dst: row.dst, lat, lng, ctry: row.ctry });
       if (got) arrivals.set(idx, got);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) unplaced.push(idx);
+      // AN AIRPORT THE AGENT TYPED IS THE ANSWER, FULL STOP.
+      //
+      // `unplaced` used to be filled on coordinates alone, so a row carrying an
+      // explicit Fly into was still sent to the locate step below, which then
+      // overwrote the agent's own choice with a computed one. Typing TFS
+      // changed nothing at all, which is the worst way for an override to fail
+      // (Andy, 14 Sep 2026).
+      if (!row.dst && (!Number.isFinite(lat) || !Number.isFinite(lng))) unplaced.push(idx);
     }));
 
     // LOCATE, rather than fly to the capital.
@@ -243,6 +250,20 @@ export default async function handler(req, res) {
       const lat = cleanCoord(loc && (loc.latitude ?? loc.lat), 90);
       const lng = cleanCoord(loc && (loc.longitude ?? loc.lng), 180);
       if (lat == null || lng == null) continue;
+
+      // MEASURED BEATS TYPED.
+      //
+      // The country now comes from the PROPERTY, not from the row. A hotel in
+      // Tenerife entered with ctry=GB was searched for airports in Great
+      // Britain, so the nearest was Newquay — 2,620km away, and correctly
+      // computed, which is what made it look like a distance bug rather than a
+      // country one (Andy, 14 Sep 2026). The agent's two letters are a hint;
+      // the supplier's own answer about where its hotel is, is a fact.
+      const found = cleanCtry(loc.countryCode || loc.country || loc.countryISO || '');
+      if (found && found !== row.ctry) {
+        row.ctryTyped = row.ctry;
+        row.ctry = found;          // the DP criteria below use the real one too
+      }
       const got = resolveArrivalAirport({ lat, lng, ctry: row.ctry });
       if (got) arrivals.set(idx, { ...got, source: got.source + '-located' });
     }
@@ -441,6 +462,10 @@ export default async function handler(req, res) {
         flyInto: (arrivals.get(idx) || {}).code || null,
         flyIntoName: (arrivals.get(idx) || {}).name || null,
         flyIntoWhy: (arrivals.get(idx) || {}).source || null,
+        // The row says one country and the supplier says another. Worth saying
+        // out loud: the typed one is what every OTHER search for this property
+        // will use until it is corrected.
+        ...(rows[idx].ctryTyped ? { countryWas: rows[idx].ctryTyped, countryIs: rows[idx].ctry } : {}),
         flyIntoKm: (arrivals.get(idx) || {}).km ?? null,
         // A nearby bigger airport, offered rather than chosen. A small airport
         // has thin routes, so this is the one-box fix when a package comes

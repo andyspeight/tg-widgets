@@ -2543,18 +2543,33 @@
             // WHICH AIRPORT IT FLIES INTO, and why we picked it. An agent
             // who can see this can correct it; one who cannot would only find
             // out from a price that looked odd.
+            // THE ROW IS WRONG, and that is worth saying before anything else:
+            // the typed country is what every other search for this property
+            // uses, so leaving it hides the next surprise.
+            if (r.countryIs && r.countryWas) {
+              text += '<br><span style="color:var(--tgse-warning)">This hotel is in <strong>'
+                    + esc(r.countryIs) + '</strong>, but the row says <strong>' + esc(r.countryWas)
+                    + '</strong>. We used ' + esc(r.countryIs) + ' for this test. '
+                    + 'Change the country on the row so the nightly refresh matches.</span>';
+            }
             if (r.flyInto) {
+              // The '-located' suffix means we went and found the hotel first.
+              // Stripped before the lookup, or the reason came back blank and
+              // the panel showed an airport with no explanation at all.
+              const rawWhy = String(r.flyIntoWhy || '');
+              const located = rawWhy.endsWith('-located');
               const why = { given: 'you set this',
                             'nearest-in-country': 'the nearest airport to the hotel',
                             'nearest-hub': 'the nearest big airport to the hotel',
                             'country-hub': 'the country\u2019s main airport, because we do not know '
                                          + 'exactly where this hotel is yet',
-                            'nearest-anywhere': 'the nearest airport' }[r.flyIntoWhy] || '';
+                            'nearest-anywhere': 'the nearest airport' }[rawWhy.replace(/-located$/, '')] || '';
               text += '<br><span style="color:var(--tgse-ink-3)">Flying into <strong>'
                     + esc(r.flyInto) + '</strong>'
                     + (r.flyIntoName ? ' (' + esc(r.flyIntoName) + ')' : '')
                     + (Number.isFinite(r.flyIntoKm) ? ', ' + r.flyIntoKm + 'km from the hotel' : '')
                     + (why ? ' \u2014 ' + esc(why) : '')
+                    + (located ? ', after looking the hotel up' : '')
                     + '.';
               // The bigger airport nearby. Named here because a small airport
               // with no route from a given city is the likeliest reason a
