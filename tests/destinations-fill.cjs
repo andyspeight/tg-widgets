@@ -73,6 +73,35 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     });
   });
 
+  /* 14 Sep 2026. Andy pressed Flight Time From UK on countries. All three were
+     held saying "no parent record holds this yet", and they never could have
+     been anything else: a country sits at the top of the hierarchy. Airports
+     and attractions carry no parent link either. Inheritance needs an ancestor,
+     so the plan depends on the type, not just the field name. */
+
+  t('inheritance is only a plan where there is something above to inherit from', () => {
+    ['Flight Time From UK', 'Region', 'Time Zone', 'Currency', 'Language', 'Voltage And Plug']
+      .forEach(l => {
+        ['country', 'airport', 'attraction'].forEach(type => {
+          const p = fillPlanFor(F(l, 'text'), type);
+          assert.strictEqual(p.kind, 'source',
+            l + ' on a ' + type + ' has no parent to inherit from: got ' + p.kind);
+          assert.match(p.why, /no parent record/);
+        });
+        ['city', 'resort'].forEach(type => {
+          assert.strictEqual(fillPlanFor(F(l, 'text'), type).kind, 'derive',
+            l + ' on a ' + type + ' does have an ancestor');
+        });
+      });
+  });
+
+  t('a slug comes from the record\'s own name, so it works at the top too', () => {
+    ['country', 'airport', 'attraction', 'city', 'resort'].forEach(type => {
+      assert.strictEqual(fillPlanFor(F('URL Slug', 'text'), type).kind, 'derive',
+        'a slug needs no parent');
+    });
+  });
+
   t('an IATA code is never invented, because everything is keyed on it', () => {
     assert.strictEqual(fillPlanFor(F('IATA Code', 'iata'), 'airport').kind, 'source',
       'both sources are looked up BY the code, so it cannot be derived from them');

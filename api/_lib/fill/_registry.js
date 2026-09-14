@@ -32,6 +32,20 @@
 
 import { hasAirportFixer } from './_source.js';
 
+/**
+ * Which types have somewhere to inherit FROM.
+ *
+ * A resort sits in a city, a city sits in a country. A country sits at the top,
+ * and airports and attractions carry no parent link at all. So "inherit it from
+ * the country" is not a plan for those three, it is a guaranteed hold.
+ *
+ * 14 Sep 2026: Andy pressed Flight Time From UK on countries and all three were
+ * held saying "no parent record holds this yet". They never could have been
+ * anything else. Same bug as the FACT one, one layer along: a field's plan
+ * depends on the TYPE it is on, not only on its name.
+ */
+const INHERITS_FROM_ABOVE = new Set(['city', 'resort']);
+
 /** Fields whose value is already in the database, and where to get it. */
 const DERIVE = {
   // Computed from the record's own name.
@@ -206,7 +220,19 @@ export function fillPlanFor(field, typeKey) {
   const label = field && field.label;
   if (!label || NEVER.has(label)) return { kind: 'manual', why: 'not a field the runner writes' };
   if (MANUAL.has(label)) return { kind: 'manual', why: 'a person chooses this' };
-  if (DERIVE[label]) return { kind: 'derive', how: DERIVE[label] };
+  if (DERIVE[label]) {
+    const how = DERIVE[label];
+    // Computed from the record's own name, so it works anywhere.
+    if (how.from === 'slug') return { kind: 'derive', how };
+    // Everything else is inheritance, and inheritance needs an ancestor.
+    if (typeKey && !INHERITS_FROM_ABOVE.has(typeKey)) {
+      return {
+        kind: 'source',
+        why: 'a ' + typeKey + ' has no parent record to inherit this from, so it needs a source',
+      };
+    }
+    return { kind: 'derive', how };
+  }
   if (FACT[label]) {
     if (fixerExists(label, typeKey)) return { kind: 'fact', how: FACT[label], via: FACT[label].via };
     return {
@@ -300,4 +326,4 @@ export function hasEnoughToWriteFrom({ rec, ancestors }) {
  */
 export const MIN_EVIDENCE_CHARS = 60;
 
-export const KINDS = { DERIVE, FACT, MANUAL, WRITE, BRIEF, NEVER, FORMAT };
+export const KINDS = { DERIVE, FACT, MANUAL, WRITE, BRIEF, NEVER, FORMAT, INHERITS_FROM_ABOVE };
