@@ -35,7 +35,7 @@ import { requireAuth, setCors } from './_auth.js';
 import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } from './_auth.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
-  canonTti, cleanCtry, cleanIp, parseDeeplink, buildAccommodationCriteria,
+  canonTti, cleanCtry, cleanCoord, cleanIp, parseDeeplink, buildAccommodationCriteria,
   buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
@@ -77,7 +77,13 @@ function rowsFrom(body) {
     seen.add(code);
     out.push({
       code,
-      lat: Number(row.lat), lng: Number(row.lng),
+      // cleanCoord, NOT Number(). The editor sends lat: null for a row with no
+      // coordinates — NaN does not survive JSON — and Number(null) is 0, which
+      // is finite, in range, and a real place in the Atlantic. That is how a
+      // Bournemouth hotel came to be 5,629km from Cornwall and fly into
+      // Newquay (Andy, 14 Sep 2026). cleanCoord has rejected zero since the
+      // day this file was written; this one call site was not using it.
+      lat: cleanCoord(row.lat, 90), lng: cleanCoord(row.lng, 180),
       radius: Number(row.radius) || undefined,
       locationName: row.locationName || row.loc || '',
       locationType: row.locationType || 'City',
@@ -158,7 +164,7 @@ export default async function handler(req, res) {
   // read before its declaration is a ReferenceError, not undefined — so the
   // whole route 500'd and the browser got Vercel's plain-text error page
   // instead of JSON ("Unexpected token 'A', \"A server e\"...").
-  const isDp = body.type === 'DynamicPackages';
+  const isDp = String(body.type || 'Accommodation') !== 'Accommodation';
   const origins = Array.isArray(body.origins) ? body.origins : [];
   if (isDp && !origins.length) {
     return res.status(400).json({

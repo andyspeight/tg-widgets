@@ -28,6 +28,7 @@ import {
   cleanIp,
   buildDynamicPackageCriteria,
   dpOrigins,
+  cleanCoord,
   MIN_DP_LEAD_DAYS,
 } from '../api/_lib/offers/tti.js';
 
@@ -177,14 +178,18 @@ test('a property asked for as both types is swept as both, and pooled', () => {
 
 test('the engine never asks the cache for a type the sweep cannot store', () => {
   // The sweep stores exactly two types and the widget may ask for exactly
-  // those two. This was pinned to 'Accommodation' for a day while packages
-  // were stored under the wrong type; now both sides name the same thing, the
-  // rule is that the widget asks for what it was configured as — and that the
-  // coercion admits nothing else.
-  assert.ok(/q\.set\('type', String\(this\.cfg\.type\) === 'DynamicPackages' \? 'DynamicPackages' : 'Accommodation'\)/.test(WIDGET),
-    'the TTI branch must ask for its configured type, coerced to the two that exist');
+  // those two. The RULE, shared by the widget, both editor call sites and the
+  // server's own searchFromConfig: a widget is selling a package unless its
+  // type is exactly 'Accommodation'.
+  //
+  // Asserted as behaviour rather than as a spelling. Earlier versions of this
+  // test matched a literal source string, so it broke on every refactor while
+  // failing to notice a THIRD call site that was hard-coded (the read-back).
+  assert.ok(/String\(this\.cfg\.type \|\| 'Accommodation'\) !== 'Accommodation'/.test(WIDGET),
+    'the TTI branch must treat anything that is not Accommodation as a package');
+  assert.ok(!/=== 'DynamicPackages' \? 'DynamicPackages'/.test(WIDGET),
+    "matching the literal 'DynamicPackages' hides a config saved as 'Packages'");
 });
-
 test('the editor and demo offer only the two supported types', () => {
   for (const [label, src] of [['editor', EDITOR], ['demo', DEMO]]) {
     const sel = /<select id="c(?:fg|trl)Type">([\s\S]*?)<\/select>/.exec(src);
@@ -1086,23 +1091,39 @@ test('a hotel search is cached as Accommodation, whatever the widget is set to',
 });
 
 test('the widget asks the cache for the type the sweep actually writes', () => {
-  // The three places that must agree on one answer, or a full cache reads as
-  // an empty one: what the sweep STORES, what the widget ASKS FOR, and what
-  // the editor's own strip counts. They have disagreed twice now, and each
-  // time it looked exactly like a supplier with no availability.
-  const writes = ["'Packages'", "'Accommodation'"];
-  for (const t of writes) assert.ok(TTI_SRC.includes(t), `the sweep must be able to store ${t}`);
-
-  const asks = /String\(\w+(?:\.\w+)*\.type\) === 'DynamicPackages' \? 'DynamicPackages' : 'Accommodation'/;
-  assert.ok(asks.test(WIDGET), 'the widget asks for its configured type');
-  assert.ok(asks.test(EDITOR), 'and the editor strip must mirror it exactly');
-
-  // And a DynamicPackages ask must be satisfiable by what the sweep writes:
-  // 'Packages' plus a packageType, which is what typePredicate requires.
+  // The four places that must agree on one answer, or a full cache reads as an
+  // empty one: what the sweep STORES, what the widget ASKS FOR, what the
+  // editor's preview strip counts, and what its read-back check reads.
+  //
+  // They have now drifted three times. The third was the read-back, which kept
+  // `type: 'Accommodation'` and so reported "the cache write did not land"
+  // about a write that had landed perfectly (Andy, 14 Sep 2026). This test used
+  // to check that ONE call site agreed, which is not the invariant.
+  for (const t of ["'Packages'", "'Accommodation'"]) {
+    assert.ok(TTI_SRC.includes(t), `the sweep must be able to store ${t}`);
+  }
   assert.ok(/packageType: 'DynamicPackages'/.test(TTI_SRC),
     "a 'Packages' offer with no packageType reads as an operator package");
-});
 
+  // The editor states the rule once and uses it everywhere.
+  const editorScript = EDITOR.slice(EDITOR.indexOf('<script src="/editor-shell.js"'));
+  const decl = /const isPackageConfig = \(cfg\) =>([^;]+);/.exec(editorScript);
+  assert.ok(decl, 'the editor must define the rule in one place');
+  // eslint-disable-next-line no-new-func
+  const isPackageConfig = new Function('cfg', `return ${decl[1]};`);
+  assert.equal(isPackageConfig({ type: 'DynamicPackages' }), true);
+  assert.equal(isPackageConfig({ type: 'Packages' }), true, "a legacy 'Packages' config is a package");
+  assert.equal(isPackageConfig({ type: 'Accommodation' }), false);
+  assert.equal(isPackageConfig({}), false, 'and no type at all is the hotel on its own');
+  assert.equal(isPackageConfig(null), false);
+
+  // EVERY use, not just one: the rows' Fly into box, the preview strip and the
+  // read-back. Three call sites plus the declaration.
+  assert.ok((editorScript.match(/isPackageConfig\(/g) || []).length >= 3,
+    'the rows, the preview strip and the read-back must all use the shared rule');
+  assert.ok(!/type: 'Accommodation' \}/.test(editorScript),
+    'no call site may hard-code the type it asks the cache for');
+});
 test('the coordinates are stored under the names the cache read rebuilds from', () => {
   // api/cached-offers.js builds accommodation.destination from resortLat and
   // resortLng, and the widget's own deeplink builder needs that destination to
@@ -1338,7 +1359,11 @@ test('the widget asks for the type it was configured as, not a hard-coded one', 
   // sweep stored packages under the wrong type. The write side is fixed, so
   // the read side must stop lying about what it wants or a DP widget can
   // never see a DP offer.
-  assert.ok(/q\.set\('type', String\(this\.cfg\.type\) === 'DynamicPackages' \? 'DynamicPackages' : 'Accommodation'\)/.test(WIDGET));
+  const branch = WIDGET.slice(WIDGET.indexOf("q.set('tti', ttiCodes.join(','))"));
+  assert.ok(/String\(this\.cfg\.type \|\| 'Accommodation'\) !== 'Accommodation'/.test(branch.slice(0, 2000)),
+    'the TTI branch must derive the type from the config');
+  assert.ok(!/q\.set\('type', 'Accommodation'\)/.test(branch.slice(0, 2000)),
+    'and never pin it to one value');
 });
 
 test('one card per hotel is the dedupe that already exists, not a second one', () => {
@@ -1364,7 +1389,8 @@ test('a package with no departure airport is refused, not downgraded', () => {
 });
 
 test('the test endpoint runs the package search for a package widget', () => {
-  assert.ok(/const isDp = body\.type === 'DynamicPackages'/.test(TEST_API));
+  assert.ok(/const isDp = String\(body\.type \|\| 'Accommodation'\) !== 'Accommodation'/.test(TEST_API),
+    'the same package rule the widget and the editor use');
   assert.ok(/buildDynamicPackageCriteria\(row, \{ \.\.\.search, origin, destination: arrival\.code \}\)/.test(TEST_API),
     'one search per departure airport, into a resolved arrival airport');
   assert.ok(/const useOrigins = isDp \? dpOrigins\(search, MAX_ORIGINS\)/.test(TEST_API));
@@ -1734,4 +1760,29 @@ test('a package never departs in the past, whatever the widget is set to', () =>
   const hotel = buildAccommodationCriteria({ code: 'TTI:1', ctry: 'GB' },
     { customerIp: '1.2.3.4', leadDays: 0 }, now);
   assert.equal(hotel.AccommodationSearchCriteria.CheckinDate, '2026-09-14T00:00:00Z');
+});
+
+test('a row with no coordinates is not a hotel in the Atlantic', () => {
+  // (0,0) is a real place in the Gulf of Guinea, and everything upstream turns
+  // a missing coordinate into it: the editor sends lat: null because NaN does
+  // not survive JSON, and Number(null) is 0 — finite, in range, and wrong.
+  // A Bournemouth hotel therefore resolved to Newquay, 5,629km away, which is
+  // exactly the distance from null island to Cornwall (Andy, 14 Sep 2026).
+  assert.equal(cleanCoord(null, 90), null, 'cleanCoord has always rejected zero');
+  assert.equal(cleanCoord(0, 90), null);
+  assert.equal(cleanCoord('', 90), null);
+  assert.equal(cleanCoord(50.72, 90), 50.72);
+
+  // The resolver refuses it too, whoever calls it and however the zero arrived.
+  assert.equal(resolveArrivalAirport({ lat: 0, lng: 0, ctry: 'GB' }).source, 'country-hub',
+    'null island must fall back to the country, not pick the nearest airport to it');
+  assert.equal(resolveArrivalAirport({ lat: 0, lng: 0 }), null);
+  assert.equal(resolveArrivalAirport({ lat: 999, lng: 999, ctry: 'GB' }).source, 'country-hub');
+  // And a real position still works.
+  assert.equal(resolveArrivalAirport({ lat: 50.72, lng: -1.87, ctry: 'GB' }).code, 'BOH');
+
+  // The test endpoint must clean coordinates rather than coerce them, which is
+  // the one call site that was not doing it.
+  assert.ok(/lat: cleanCoord\(row\.lat, 90\), lng: cleanCoord\(row\.lng, 180\)/.test(TEST_API));
+  assert.ok(!/lat: Number\(row\.lat\)/.test(TEST_API), 'Number(null) is 0, and 0 is a place');
 });
