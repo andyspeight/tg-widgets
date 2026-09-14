@@ -2355,6 +2355,72 @@
       });
     }
 
+    /* Read the cache back exactly as the widget does, then again with no
+       filters at all, and report the difference.
+
+       Three answers, and they need three different fixes:
+         nothing in the pool     the write did not land, or landed under a
+                                 different App ID
+         in the pool, not visible  a filter on this widget is excluding it —
+                                 named, so it can be turned off rather than
+                                 guessed at
+         visible                 the data is fine and the problem is rendering
+
+       Without this the panel could only say "cached", which was true and
+       useless while the preview stayed empty. */
+    async function readBackCheck(out) {
+      const codes = syncTtiConfig().map((r) => r.code);
+      if (!codes.length || !out) return;
+      const base = { tti: codes.join(','), appId: appIdForPreview(), type: 'Accommodation' };
+      const ask = async (extra) => {
+        const q = new URLSearchParams({ ...base, ...extra });
+        try {
+          const r = await fetch('/api/cached-offers?' + q.toString(), { headers: { Accept: 'application/json' } });
+          const j = await r.json();
+          return Number.isFinite(j && j.totalMatched) ? j.totalMatched
+               : (j && Array.isArray(j.data) ? j.data.length : null);
+        } catch (e) { return null; }
+      };
+
+      const c = state.config || {};
+      const filters = {};
+      const named = [];
+      const add = (key, val, label) => {
+        if (val === undefined || val === null || val === '' || (Array.isArray(val) && !val.length)) return;
+        filters[key] = Array.isArray(val) ? val.join(',') : String(val);
+        named.push(label);
+      };
+      add('boardBases', c.boardBases, 'board basis');
+      add('ratingMin', c.ratingMin, 'star rating');
+      add('durationMin', c.durationMin, 'minimum nights');
+      add('durationMax', c.durationMax, 'maximum nights');
+      add('budgetMin', c.budgetMin, 'minimum price');
+      add('budgetMax', c.budgetMax, 'maximum price');
+      add('DatesMin', c.DatesMin, 'earliest date');
+      add('DatesMax', c.DatesMax, 'latest date');
+
+      const [pooled, visible] = await Promise.all([ask({}), ask(filters)]);
+      let msg;
+      if (pooled === null) {
+        msg = '<span style="color:var(--tgse-warning)">Could not read the cache back just now, '
+            + 'so we cannot tell whether the widget will see this.</span>';
+      } else if (pooled === 0) {
+        msg = '<span style="color:var(--tgse-danger)">Nothing is in the pool for these codes. '
+            + 'The search found offers but the cache write did not land, or it landed under a '
+            + 'different Travelify application. Send us this.</span>';
+      } else if (visible === 0) {
+        msg = '<span style="color:var(--tgse-warning)"><strong>' + pooled + ' in your cache, but your '
+            + 'widget can see none of them.</strong> The filters on this widget are excluding it'
+            + (named.length ? ': ' + esc(named.join(', ')) : '')
+            + '. Loosen or clear those and the offer will appear.</span>';
+      } else {
+        msg = '<strong>' + visible + (visible === 1 ? ' offer' : ' offers')
+            + ' your widget can see.</strong> The preview below is drawing from exactly this.';
+      }
+      out.innerHTML += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
+        + msg + '</div>';
+    }
+
     /* ---- The Test button ------------------------------------------------
        Runs the codes against Travelify for real, through /api/tti-test, so an
        agent finds out now whether a code returns anything rather than from an
@@ -2470,6 +2536,12 @@
                + '<br>Send us this and we will map the missing bits exactly.</div>';
         }
         out.innerHTML = head + lines.join('') + diag;
+        // CLOSE THE LOOP. "We cached it" and "the widget can see it" are two
+        // different claims, and the gap between them has cost several rounds:
+        // a cache full of offers the widget filters straight back out looks
+        // identical to an empty cache. So read it back the way the widget
+        // reads it, and say which of the two failed.
+        if (d.found) readBackCheck(out);
         // A successful test just filled the cache, so redraw with real offers.
         if (d.found) markDirtyAndPreview();
       } catch (err) {

@@ -1115,3 +1115,21 @@ test('a hotel with no photos still produces a renderable offer', () => {
   assert.ok(/cssBgUrl\(img\)/.test(WIDGET));
   assert.ok(/if \(!url\) return '';/.test(WIDGET), 'no url means no background, not a broken card');
 });
+
+test('the test panel says whether the WIDGET can see what was cached', () => {
+  // "We cached it" and "the widget can see it" are two different claims, and
+  // the gap between them cost several rounds on 14 Sep 2026: a cache full of
+  // offers the widget filters straight back out looks identical to an empty
+  // cache, and the panel could only say "cached", which was true and useless.
+  assert.ok(/async function readBackCheck/.test(EDITOR));
+  assert.ok(/if \(d\.found\) readBackCheck\(out\)/.test(EDITOR), 'it must run after a successful test');
+  // It asks TWICE: once unfiltered, once with the widget's own filters, so the
+  // answer separates "not in the pool" from "filtered out of view".
+  assert.ok(/const \[pooled, visible\] = await Promise\.all/.test(EDITOR));
+  assert.ok(/Nothing is in the pool for these codes/.test(EDITOR));
+  assert.ok(/widget can see none of them/.test(EDITOR));
+  // And it NAMES the filters, so they can be turned off rather than guessed at.
+  for (const f of ['board basis', 'star rating', 'minimum nights', 'latest date']) {
+    assert.ok(EDITOR.includes(f), `the excluded-by filter list is missing ${f}`);
+  }
+});
