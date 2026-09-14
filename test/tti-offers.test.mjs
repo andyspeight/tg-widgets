@@ -23,6 +23,8 @@ import {
   buildTtiPayload,
   offerIsProperty,
   PROBE_CANDIDATES,
+  buildAccommodationCriteria, resultIsProperty,
+  parseDeeplink, rowIsSearchable, normaliseAccommodationResult,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -435,16 +437,6 @@ test('the editor canonicalises TTI codes the same way as everything else', () =>
   assert.ok(!/\^TTI:/.test(EDITOR), 'no TTI-only strip may remain anywhere in the editor');
 });
 
-test('the deep link probe reports what it got rather than assuming', () => {
-  // Andy's position is that the deep link is the only correct way to run this
-  // search. Rather than argue it, the server follows one and reports the
-  // status, redirects, content type and whether the body is machine readable.
-  assert.ok(/export function deeplinkFor/.test(TEST_API), 'it must build a real deep link');
-  assert.ok(/refn', 'TTI:' \+ prop\.code/.test(TEST_API), 'pinned the same way his working links are');
-  assert.ok(/redirect: 'manual'/.test(TEST_API), 'the redirect chain is the interesting part');
-  assert.ok(/out\.isJson = true/.test(TEST_API), 'and whether anything machine readable comes back');
-  assert.ok(/d\.deeplink/.test(EDITOR), 'the editor has to show the answer');
-});
 
 test('the editor has no dead destination controls left behind', () => {
   assert.ok(!/destChips|destInput/.test(EDITOR), 'retired destination chips must be gone');
@@ -452,24 +444,7 @@ test('the editor has no dead destination controls left behind', () => {
   assert.ok(/id="ttiRows"/.test(EDITOR), 'the property row list is missing');
 });
 
-test('a hotel is two fields, the code and the country', () => {
-  // Andy, 14 Sep 2026. Nothing else is asked for: the code picks the hotel and
-  // the country is the area the sweep searches before the pin narrows it.
-  // The inputs are built in JS, not markup, so assert on what actually runs.
-  assert.ok(/code\.placeholder = 'TTI code/.test(EDITOR), 'code input missing');
-  assert.ok(/ctry\.className = 'input tti-ctry'/.test(EDITOR), 'country input missing');
-  assert.ok(/ctry\.maxLength = 2/.test(EDITOR), 'the country field should hold two letters');
-  assert.ok(/\.tti-row \{ display: grid; grid-template-columns: 1fr 84px 28px/.test(EDITOR),
-    'both fields sit on one row');
-});
 
-test('only rows with BOTH a code and a country reach the saved config', () => {
-  assert.ok(
-    /if \(!code \|\| !ctry \|\| seen\[code\]\) continue;/.test(EDITOR),
-    'a half-typed row must be held back from the save rather than saved broken',
-  );
-  assert.ok(/rows need/.test(EDITOR), 'the agent has to be told which rows are not ready');
-});
 
 test('the editor availability strip counts the property pool, not a place', () => {
   assert.ok(/q\.set\('tti', codes\.join\(','\)\)/.test(EDITOR));
@@ -492,19 +467,7 @@ test('the editor never rebuilds the property rows while one is focused', () => {
 
 // ── The Test button ────────────────────────────────────────────────────────
 
-test('the test endpoint resolves the App ID server-side, never from the body', () => {
-  // A client must not be able to test against another client's Travelify
-  // application: the rates that come back are commercially theirs.
-  assert.ok(/async function appIdForCaller\(user\)/.test(TEST_API));
-  assert.ok(!/body\.appId|rows\.appId/.test(TEST_API), 'the App ID must never come off the request');
-});
 
-test('the test endpoint is capped and authenticated', () => {
-  assert.ok(/const auth = requireAuth\(req\);/.test(TEST_API), 'must be authenticated');
-  assert.ok(/const MAX_CODES = \d+;/.test(TEST_API), 'one click must not fan out');
-  assert.ok(/rows\.slice\(0, MAX_CODES\)/.test(TEST_API), 'the cap must actually be applied');
-  assert.ok(/evaluatePublicRateLimit\(req, res, \{ event: 'tti-test' \}\)/.test(TEST_API));
-});
 
 test('the test endpoint keeps its rate limit even though the editor calls it', () => {
   // It is the only agent action that spends live Travelify searches, so the
@@ -516,32 +479,8 @@ test('the test endpoint keeps its rate limit even though the editor calls it', (
   );
 });
 
-test('an unmatched search reports what it DID get, not just that it failed', () => {
-  // "Nothing matched" is a dead end on its own: it cannot tell a wrong code
-  // from a pin Travelify ignored. These three numbers separate the causes.
-  assert.ok(/withRef: refs\.length/.test(TEST_API), 'how many offers carried a reference at all');
-  assert.ok(/sampleRefs: \[\.\.\.new Set\(refs\)\]/.test(TEST_API), 'what those references look like');
-  assert.ok(/sampleHotels:/.test(TEST_API), 'and what the search actually returned');
-  assert.ok(/came back for that country/.test(EDITOR), 'the editor has to show it');
-});
 
-test('the ignored-pin verdict fires on a single code', () => {
-  // The first person to try this tests one hotel. Making them add a second
-  // before we say what we can already see is no help to anyone.
-  assert.ok(
-    /pinLooksIgnored: found === 0\s*&& results\.length > 0/.test(TEST_API),
-    'one code is enough to recognise the pattern',
-  );
-  assert.ok(
-    /r\.status === 'area-only' && r\.withRef > 20/.test(TEST_API),
-    'and it must rest on offers that DO carry references, or a wrong code reads the same',
-  );
-});
 
-test('a code with no country is refused rather than searched worldwide', () => {
-  assert.ok(/status: 'no-country'/.test(TEST_API));
-  assert.ok(/if \(!prop\.ctry\)/.test(TEST_API), 'the check must happen before any request is fired');
-});
 
 test('the editor templates are layout presets, not dead destination filters', () => {
   const block = /const TEMPLATES = \[([\s\S]*?)\n    \];/.exec(EDITOR);
@@ -648,16 +587,6 @@ test('the Test button cannot sit on its progress message forever', () => {
   assert.ok(/clearTimeout\(giveUp\)/.test(EDITOR), 'and be cleared when the answer arrives');
 });
 
-test('the test route declares a duration longer than its own timeout', () => {
-  // An undeclared route gets Vercel's default, which was SHORTER than this
-  // endpoint's own timeout, so the platform killed the function mid-flight and
-  // returned an empty-bodied gateway response instead of per-code results.
-  const fn = (VERCEL.functions || {})['api/tti-test.js'];
-  assert.ok(fn, 'api/tti-test.js needs a functions entry, or it gets the default');
-  const own = Number(/const TIMEOUT_MS = (\d+);/.exec(TEST_API)[1]);
-  assert.ok(fn.maxDuration * 1000 > own,
-    `maxDuration ${fn.maxDuration}s must exceed the endpoint's own ${own / 1000}s budget`);
-});
 
 // ── The demo and the tour ──────────────────────────────────────────────────
 
@@ -686,48 +615,228 @@ test('the tour points at the property list, not the retired destination input', 
    The pin probe: answering "why was my hotel not found?"
    ============================================================ */
 
-test('the pin probe runs an unpinned control before any candidate', () => {
-  // Without the control the probe cannot tell "the pin was ignored" from
-  // "the pin worked and this hotel has no availability". They need opposite
-  // fixes, so guessing between them is worse than not reporting at all.
-  const fn = TEST_API.slice(TEST_API.indexOf('async function probePin'));
-  const body = fn.slice(0, fn.indexOf('\nexport default'));
-  assert.ok(/\[\{ shape: 'none' \}\]\.concat\(/.test(body),
-    'the unpinned control must be first in the order, not appended after the candidates');
-  assert.ok(/pinIgnored/.test(body), 'and the verdict it exists to produce must be reported');
-  assert.ok(/c\.param === 'refn' && c\.prefixed/.test(body),
-    'the spelling already tried in the main pass must not be paid for twice');
+
+
+
+
+/* ============================================================
+   The real search criteria (worked example from Andy, 14 Sep 2026)
+   ============================================================ */
+
+const AT = { code: '58612582', lat: 50.71993, lng: -1.874885,
+             locationName: 'Bournemouth, Dorset, United Kingdom', ctry: 'GB' };
+const NOW = new Date('2026-09-14T10:00:00Z');
+
+test('the criteria match the shape Travelify actually documented', () => {
+  const b = buildAccommodationCriteria(AT, {}, NOW);
+  assert.equal(b.SearchType, 'Accommodation');
+  assert.equal(b.Environment, 'Website');
+  assert.equal(b.DistanceUnit, 'Miles');
+  assert.equal(b.TripType, 'Unspecified');
+  const a = b.AccommodationSearchCriteria;
+  assert.equal(a.Latitude, 50.71993);
+  assert.equal(a.Longitude, -1.874885);
+  assert.equal(a.LocationType, 'City');
+  assert.equal(a.LocationCountry, 'GB');
+  assert.equal(a.BoardBasis, 'Any');
+  assert.equal(a.PropertyType, 'Any');
+  assert.equal(a.RefundableOnly, false);
+  assert.deepEqual(a.Rooms, [{ TypePreference: 'Any', Guests: [{ Type: 'Adult' }, { Type: 'Adult' }] }]);
 });
 
-test('the pin probe cannot hold the function open', () => {
-  const fn = TEST_API.slice(TEST_API.indexOf('async function probePin'));
-  const body = fn.slice(0, fn.indexOf('\nexport default'));
-  assert.ok(/Date\.now\(\) - startedAt > PROBE_DEADLINE_MS/.test(body), 'it must watch the clock');
-  assert.ok(/slice\(0, PROBE_MAX_CANDIDATES\)/.test(body), 'and cap how many it will try');
-  assert.ok(/mine > 0 && spec\.shape !== 'none'/.test(body),
-    'and stop as soon as one candidate actually finds the property');
-  // The whole probe must still fit inside the route's declared maxDuration.
-  const dl = Number(/PROBE_DEADLINE_MS = (\d+)/.exec(TEST_API)[1]);
-  const each = Number(/PROBE_TIMEOUT_MS = (\d+)/.exec(TEST_API)[1]);
-  const maxDur = VERCEL.functions['api/tti-test.js'].maxDuration * 1000;
-  assert.ok(dl + each <= maxDur,
-    `the probe can run to ${dl + each}ms but the route is killed at ${maxDur}ms`);
+test('Ref is the pin, and every spelling of a code produces the same one', () => {
+  // The whole widget turns on this one field. The old path asked for a
+  // country's worth of offers and sieved them, which could never find one
+  // named hotel among the 250 cheapest in Great Britain.
+  const ref = (code) => buildAccommodationCriteria({ ...AT, code }, {}, NOW)
+    .AccommodationSearchCriteria.Ref;
+  assert.equal(ref('58612582'), 'TTI:58612582');
+  assert.equal(ref('TTI:58612582'), 'TTI:58612582');
+  assert.equal(ref('ID:58612582'), 'TTI:58612582');
+  assert.equal(ref(' tti:58612582 '), 'TTI:58612582');
 });
 
-test('the probe only ever costs requests on the path that has no answer', () => {
-  // One property per click, and only when the ordinary search already failed
-  // to find it. A probe that ran on every code would turn the Test button into
-  // the fan-out the cache-only rule exists to prevent.
-  assert.ok(/const firstMiss = props\.find\(/.test(TEST_API));
-  assert.ok(/if \(firstMiss && body\.probeDeeplink !== false\)/.test(TEST_API));
-  assert.ok(/await probePin\(appId, firstMiss, search, startedAt\)/.test(TEST_API),
-    'exactly one property is probed, and only when it was not found');
+test('no coordinates means NO SEARCH, not a broader one', () => {
+  // A criteria object missing its coordinates is not a wider search, it is a
+  // wrong one. Firing it would spend Travelify capacity on somewhere nobody
+  // asked about. Measured 14 Sep 2026: a country with no coordinates is
+  // rejected outright by the service anyway.
+  assert.equal(buildAccommodationCriteria({ code: '58612582', ctry: 'GB' }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ code: '58612582', lat: 50.7 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, code: '' }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, lat: 91 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, lng: -181 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria(null, {}, NOW), null);
 });
 
-test('the editor explains the probe rather than dumping it', () => {
-  assert.ok(/d\.pinProbe/.test(EDITOR), 'the editor must read the probe');
-  assert.ok(/ignoring the hotel pin/.test(EDITOR), 'and say plainly when the pin was ignored');
-  assert.ok(/Your code is almost certainly fine/.test(EDITOR),
-    'so the agent is not left thinking they typed the code wrong');
-  assert.ok(/q\.winner/.test(EDITOR), 'and name the spelling that worked when one does');
+test('the stay is a month out and a week long, as the deeplinks already ask', () => {
+  const a = buildAccommodationCriteria(AT, {}, NOW).AccommodationSearchCriteria;
+  assert.equal(a.CheckinDate, '2026-10-14T00:00:00Z', '30 days from 14 Sep');
+  assert.equal(a.CheckoutDate, '2026-10-21T00:00:00Z', 'seven nights later');
+  // Both must be midnight UTC in the exact format the example uses.
+  for (const d of [a.CheckinDate, a.CheckoutDate]) {
+    assert.match(d, /^\d{4}-\d{2}-\d{2}T00:00:00Z$/);
+  }
+});
+
+test('the stay window is configurable and clamped to something sane', () => {
+  const a = buildAccommodationCriteria(AT, { leadDays: 90, nights: 3 }, NOW).AccommodationSearchCriteria;
+  assert.equal(a.CheckinDate, '2026-12-13T00:00:00Z');
+  assert.equal(a.CheckoutDate, '2026-12-16T00:00:00Z');
+  const silly = buildAccommodationCriteria(AT, { leadDays: 9999, nights: 999 }, NOW).AccommodationSearchCriteria;
+  assert.ok(silly.CheckinDate < silly.CheckoutDate);
+  assert.equal(buildAccommodationCriteria(AT, { radius: 9999 }, NOW).AccommodationSearchCriteria.Radius, 100);
+});
+
+test('occupancy carries children and infants with their ages', () => {
+  const a = buildAccommodationCriteria(AT, { adults: 2, childAges: [7, 1] }, NOW).AccommodationSearchCriteria;
+  assert.deepEqual(a.Rooms[0].Guests, [
+    { Type: 'Adult' }, { Type: 'Adult' },
+    { Type: 'Child', Age: 7 },
+    { Type: 'Infant', Age: 1 },
+  ]);
+});
+
+test('the verify gate reads whichever field the result carries the ref in', () => {
+  // The booking API names this differently from the offers feed, and a gate
+  // that silently matched nothing would empty every widget rather than fail.
+  for (const shape of [
+    { uniqueRef: 'TTI:58612582' },
+    { accommodationUniqueRef: '58612582' },
+    { Ref: 'ID:58612582' },
+    { accommodation: { uniqueRef: 'TTI:58612582' } },
+  ]) {
+    assert.equal(resultIsProperty(shape, '58612582'), true, JSON.stringify(shape));
+  }
+  assert.equal(resultIsProperty({ uniqueRef: 'TTI:99999999' }, '58612582'), false);
+  assert.equal(resultIsProperty({}, '58612582'), false);
+  assert.equal(resultIsProperty({ uniqueRef: 'TTI:58612582' }, ''), false);
+});
+
+/* ============================================================
+   The Test button, rebuilt on the booking API
+   ============================================================ */
+
+test('a deeplink fills in a whole hotel row', () => {
+  // The agents already have working deeplinks. A working link carries every
+  // field the criteria need, so pasting one cannot describe a search Travelify
+  // would turn away — it came from one that works.
+  const row = parseDeeplink('https://dl.tvllnk.com/deeplink/250?st=Accommodation'
+    + '&loc=Bournemouth%2C+Dorset%2C+United+Kingdom&loct=City&ctry=GB'
+    + '&lat=50.71993&lng=-1.874885&rad=18&refn=TTI%3A58612582&adt=2');
+  assert.equal(row.code, '58612582');
+  assert.equal(row.lat, 50.71993);
+  assert.equal(row.lng, -1.874885);
+  assert.equal(row.locationName, 'Bournemouth, Dorset, United Kingdom');
+  assert.equal(row.ctry, 'GB');
+  assert.equal(row.appId, '250');
+  // Deeplinks carry km, the search criteria want miles.
+  assert.equal(row.radius, 11, '18km is 11 miles, which is what the worked example uses');
+  assert.ok(rowIsSearchable(row));
+});
+
+test('a deeplink without a property is not a hotel row', () => {
+  for (const bad of ['', 'not a url', 'https://example.com/?refn=TTI:1',
+                     'https://dl.tvllnk.com/deeplink/250?st=Accommodation&ctry=GB']) {
+    assert.equal(parseDeeplink(bad), null, String(bad));
+  }
+});
+
+test('a row with a code but no coordinates is not searchable', () => {
+  // Measured 14 Sep 2026: a country with no coordinates is refused outright.
+  // So this is not a broader search, it is one that would be turned away.
+  assert.equal(rowIsSearchable({ code: '58612582', ctry: 'GB' }), false);
+  assert.equal(rowIsSearchable({ code: '58612582', lat: 50.7, lng: -1.87 }), true);
+});
+
+test('the test endpoint runs the real search and never the old feed', () => {
+  assert.ok(/from '\.\/_lib\/offers\/travelify-search\.js'/.test(TEST_API),
+    'it must use the booking API client');
+  assert.ok(/runSearch\(creds, criteria/.test(TEST_API));
+  // Match the CALL, not the word: the header comment explains why the feed
+  // was abandoned, and an assertion that trips on its own documentation is a
+  // bad assertion.
+  assert.ok(!/^import .*refresh-map-offers/m.test(TEST_API),
+    'the test endpoint must not import the offers-feed cron any more');
+  assert.ok(!/callOffersProxy\(/.test(TEST_API),
+    'the offers feed must not be called from the test endpoint');
+  assert.ok(/pick: 'accommodationResults'/.test(TEST_API));
+});
+
+test('a successful test leaves a real cached offer behind', () => {
+  // "It says it found something" and "the widget shows something" were two
+  // different questions all week. The test collapses them into one.
+  assert.ok(/setJson\(ttiKey\(creds\.appId, row\.code\)/.test(TEST_API));
+  assert.ok(/offers: normalised, refreshedAt/.test(TEST_API));
+  assert.ok(/offers:tti:\$\{appId\}:\$\{code\}/.test(TEST_API),
+    'it must write the key api/cached-offers.js reads');
+});
+
+test('credentials are resolved server-side, never taken from the request', () => {
+  // A client must never be able to test against another client's application:
+  // the rates that come back are commercially theirs.
+  assert.ok(/lookupClientCredentialsByRecordId|lookupClientCredentialsByEmail/.test(TEST_API));
+  assert.ok(!/body\.appId|body\.apiKey/.test(TEST_API));
+});
+
+test('the test endpoint stays capped, authenticated and inside its route budget', () => {
+  assert.ok(/requireAuth\(req\)/.test(TEST_API));
+  assert.ok(/evaluatePublicRateLimit/.test(TEST_API));
+  const max = Number(/MAX_CODES = (\d+)/.exec(TEST_API)[1]);
+  assert.ok(max <= 10, 'one click must not become a bulk search');
+  const deadline = Number(/DEADLINE_MS = (\d+)/.exec(TEST_API)[1]);
+  const route = VERCEL.functions['api/tti-test.js'].maxDuration * 1000;
+  assert.ok(deadline < route, `it stops starting work at ${deadline}ms, inside the ${route}ms route`);
+});
+
+test('a row without a location is refused rather than widened', () => {
+  assert.ok(/status: 'incomplete'/.test(TEST_API));
+  assert.ok(/if \(!criteria\)/.test(TEST_API), 'a null criteria must stop that row');
+});
+
+test('an offer with no price is never cached', () => {
+  // The card would render a hotel with a blank price and a live booking link
+  // behind it, which is worse than showing nothing.
+  const n = normaliseAccommodationResult({ name: 'The Grand', uniqueRef: 'TTI:1' });
+  assert.equal(n, null);
+  const ok = normaliseAccommodationResult({ name: 'The Grand', uniqueRef: 'TTI:1', price: 420 });
+  assert.equal(ok.offer.price, 420);
+});
+
+test('the normaliser reports what it could not find', () => {
+  // The result shape had not been seen when this was written. A cache quietly
+  // full of nulls looks identical to a supplier with thin content, so the
+  // guesses report themselves rather than failing silently.
+  const n = normaliseAccommodationResult({ price: 420 });
+  assert.ok(n.unmapped.includes('hotel'), 'a nameless result must say so');
+  assert.ok(n.unmapped.includes('image'));
+  assert.ok(n.unmapped.includes('url'));
+  const full = normaliseAccommodationResult({
+    name: 'The Grand', price: 420, image: { url: 'https://x/i.jpg' }, deeplinkUrl: 'https://x/b',
+  });
+  assert.deepEqual(full.unmapped, [], 'a complete result reports no gaps');
+  assert.equal(full.offer.hotel, 'The Grand');
+  assert.equal(full.offer.image, 'https://x/i.jpg');
+});
+
+test('the editor collects a place, and shows a row that has not got one', () => {
+  assert.ok(/function rowHasPlace/.test(EDITOR), 'readiness must rest on coordinates');
+  assert.ok(/function parseTtiDeeplink/.test(EDITOR), 'the editor parses links client-side too');
+  assert.ok(/Needs a location/.test(EDITOR), 'an incomplete row must say what it needs');
+  assert.ok(/ttiPasteAdd/.test(EDITOR));
+  // Pasting a link for a hotel already typed in completes that row rather than
+  // adding a duplicate.
+  assert.ok(/ttiRows\.find\(r => canonTti\(r\.code\) === parsed\.code\)/.test(EDITOR));
+});
+
+test('the editor and the server parse a deeplink the same way', () => {
+  // A difference here shows up as a row the server rejects after the editor
+  // accepted it, which is the worst place to find out.
+  for (const src of [['editor', EDITOR], ['lib', TTI_LIB]]) {
+    const [label, text] = src;
+    assert.ok(/tvllnk/.test(text), `${label}: must only accept Travelify links`);
+    assert.ok(/refn/.test(text), `${label}: must read the code from refn`);
+    assert.ok(/0\.621371/.test(text), `${label}: must convert the radius from km to miles`);
+    assert.ok(/lat/.test(text) && /lng/.test(text), `${label}: must read the coordinates`);
+  }
 });
