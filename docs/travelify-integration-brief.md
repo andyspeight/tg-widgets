@@ -9,8 +9,9 @@ Everything in your spec is built. This brief is what you need to consume it,
 plus two things we would like your answer on and answers to the open assumptions
 you listed.
 
-Nothing is live yet. The one thing standing between here and live is the shared
-API key, covered under "Go live checklist" at the end.
+The endpoints are deployed. The one thing standing between here and working is
+the shared API key, which we will generate and send to you. See "Go live
+checklist" at the end.
 
 ## Base URL
 
@@ -32,8 +33,9 @@ X-Api-Key: <the shared secret>
 ```
 
 One secret for the whole integration, not per user and not per application, as
-you specified. We compare it in constant time. A missing, malformed or
-unrecognised key returns `401` and no widget data.
+you specified. We generate it and send it to you, since it is our side doing the
+validating. We compare it in constant time. A missing, malformed or unrecognised
+key returns `401` and no widget data.
 
 Once your key validates we trust the caller, so you may request any Application
 ID. We still check that the application exists.
@@ -363,13 +365,20 @@ would solve better than multiple categories per widget.
 
 ## Go live checklist
 
-1. **Generate the shared secret and send it to us securely.** We will hold it in
-   our Vercel environment, you in your Azure Key Vault. Until it is set our
-   endpoints return `500` by design, because they refuse rather than fall open.
-2. We deploy. The endpoints and the preview images go live together.
+1. **We generate the shared secret and send it to you securely.** It is our API
+   validating it, so we issue it rather than asking you to. You hold it in your
+   Azure Key Vault, we hold it in our Vercel environment. Tell us the secure
+   channel you would like it sent through.
+2. Both endpoints and all the preview images are already deployed, on production
+   and on preview. Until the key is in place they return `500` by design,
+   because they refuse rather than fall open. No redeploy is needed once it is
+   set, so they start working the moment it lands.
 3. You point a test call at a real Application ID for a client who has signed
-   into the widget platform before, and confirm both shapes.
-4. You confirm the 404 behaviour in your UI, per item 2 above.
+   into the widget platform before, and confirm both shapes. A `404` there means
+   that client has not been through the SSO yet, which is expected rather than a
+   fault.
+4. You confirm the 404 behaviour in your UI, per the second item under "Two
+   things we need from you" above.
 5. Let us know on the category question whenever suits.
 
 Any questions, or anything in the shapes you want changed, just say. Adding
