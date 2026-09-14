@@ -352,14 +352,27 @@ The Referer is not decoration. Token auth 401s without one, and
 widgets already use are the ones the sweep uses, resolved per client exactly as
 `/api/offers` and `api/_lib/travelify.js` already resolve them.
 
-### What the editor collects
+### What the editor collects: a code and a country
 
-An accommodation search takes lat/long plus a radius, OR a resolved location id.
-A country code on its own is not enough. There is a location autocomplete
-endpoint (`GET /autocomplete`) intended for search boxes, which means the city
-can be resolved for the agent rather than typed. So the editor can stay close to
-the two-field ideal: the agent enters a TTI code and a place, the place resolves
-through autocomplete, and we store the id or the coordinates alongside the code.
+Two fields per hotel, as Andy specified from the start.
+
+This was briefly built to demand coordinates, which was a mistake worth writing
+down. The evidence for it was a `406` from a DEEPLINK carrying `ctry` and no
+coordinates. That is a different surface from this API, and the requirement was
+never tested here. `Ref` pins the property — so the property IS the location,
+and the country only says which part of the world to look in. The worked example
+carries coordinates because it came from somebody searching a town in a UI, not
+because the field is mandatory.
+
+So `buildAccommodationCriteria` sends what it has. A code and a country is a
+complete ask. Coordinates are omitted entirely when absent (omitted, not zeroed
+— 0,0 is a real place in the Atlantic) and narrow the search when a row has
+them. If the service does turn out to need them it will say so, and the error
+reaches the agent verbatim rather than being pre-empted by a guess.
+
+The editor also takes a pasted deeplink as an OPTIONAL extra: a working link
+carries the code, the country and the exact coordinates, so pasting one fills a
+row and narrows it to the town. Nobody has to.
 
 ### Still to confirm
 

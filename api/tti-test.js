@@ -141,7 +141,7 @@ export default async function handler(req, res) {
         // Never fall back to a broader search. A row without coordinates is
         // not a wider question, it is a different one.
         results[idx] = { code: row.code, status: 'incomplete',
-          detail: 'Add the location for this hotel. Pasting its deeplink fills it in.' };
+          detail: 'Add the two-letter country for this hotel, so we know where to look.' };
         continue;
       }
       if (Date.now() - startedAt > DEADLINE_MS) {

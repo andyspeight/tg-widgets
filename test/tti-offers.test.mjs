@@ -656,17 +656,40 @@ test('Ref is the pin, and every spelling of a code produces the same one', () =>
   assert.equal(ref(' tti:58612582 '), 'TTI:58612582');
 });
 
-test('no coordinates means NO SEARCH, not a broader one', () => {
-  // A criteria object missing its coordinates is not a wider search, it is a
-  // wrong one. Firing it would spend Travelify capacity on somewhere nobody
-  // asked about. Measured 14 Sep 2026: a country with no coordinates is
-  // rejected outright by the service anyway.
-  assert.equal(buildAccommodationCriteria({ code: '58612582', ctry: 'GB' }, {}, NOW), null);
-  assert.equal(buildAccommodationCriteria({ code: '58612582', lat: 50.7 }, {}, NOW), null);
+test('a code and a country is a complete search on its own', () => {
+  // Ref pins the property, so the property IS the location and the country
+  // only says which part of the world. Coordinates were required here once,
+  // on the strength of a 406 from a DEEPLINK carrying ctry and no coordinates
+  // — a different surface from this API, and never tested against it. That
+  // assumption made the editor ask for something it may not need.
+  const a = buildAccommodationCriteria({ code: 'TTI:58612582', ctry: 'GB' }, {}, NOW)
+    .AccommodationSearchCriteria;
+  assert.equal(a.Ref, 'TTI:58612582');
+  assert.equal(a.LocationCountry, 'GB');
+  // Absent, not zeroed. 0,0 is a real place in the Atlantic.
+  assert.equal('Latitude' in a, false);
+  assert.equal('Longitude' in a, false);
+  assert.equal('Radius' in a, false);
+});
+
+test('coordinates narrow the search when a row has them', () => {
+  const a = buildAccommodationCriteria(AT, {}, NOW).AccommodationSearchCriteria;
+  assert.equal(a.Latitude, 50.71993);
+  assert.equal(a.Longitude, -1.874885);
+  assert.equal(a.Radius, 11);
+  assert.equal(a.LocationName, 'Bournemouth, Dorset, United Kingdom');
+});
+
+test('a search with no code and no area at all is refused', () => {
+  // Somewhere to look is still required. An unscoped worldwide search is not
+  // a broader question, it is a meaningless one.
   assert.equal(buildAccommodationCriteria({ ...AT, code: '' }, {}, NOW), null);
-  assert.equal(buildAccommodationCriteria({ ...AT, lat: 91 }, {}, NOW), null);
-  assert.equal(buildAccommodationCriteria({ ...AT, lng: -181 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ code: '58612582' }, {}, NOW), null);
   assert.equal(buildAccommodationCriteria(null, {}, NOW), null);
+  // Out-of-range coordinates fall back to the country rather than being sent.
+  const bad = buildAccommodationCriteria({ code: '58612582', ctry: 'GB', lat: 91, lng: 0 }, {}, NOW);
+  assert.equal('Latitude' in bad.AccommodationSearchCriteria, false);
+  assert.equal(bad.AccommodationSearchCriteria.LocationCountry, 'GB');
 });
 
 test('the stay is a month out and a week long, as the deeplinks already ask', () => {
@@ -742,11 +765,11 @@ test('a deeplink without a property is not a hotel row', () => {
   }
 });
 
-test('a row with a code but no coordinates is not searchable', () => {
-  // Measured 14 Sep 2026: a country with no coordinates is refused outright.
-  // So this is not a broader search, it is one that would be turned away.
-  assert.equal(rowIsSearchable({ code: '58612582', ctry: 'GB' }), false);
+test('a row is searchable with a country, with coordinates, or with both', () => {
+  assert.equal(rowIsSearchable({ code: '58612582', ctry: 'GB' }), true);
   assert.equal(rowIsSearchable({ code: '58612582', lat: 50.7, lng: -1.87 }), true);
+  assert.equal(rowIsSearchable({ code: '58612582' }), false, 'somewhere to look is still needed');
+  assert.equal(rowIsSearchable({ ctry: 'GB' }), false, 'and so is a code');
 });
 
 test('the test endpoint runs the real search and never the old feed', () => {
@@ -819,11 +842,13 @@ test('the normaliser reports what it could not find', () => {
   assert.equal(full.offer.image, 'https://x/i.jpg');
 });
 
-test('the editor collects a place, and shows a row that has not got one', () => {
-  assert.ok(/function rowHasPlace/.test(EDITOR), 'readiness must rest on coordinates');
-  assert.ok(/function parseTtiDeeplink/.test(EDITOR), 'the editor parses links client-side too');
-  assert.ok(/Needs a location/.test(EDITOR), 'an incomplete row must say what it needs');
-  assert.ok(/ttiPasteAdd/.test(EDITOR));
+test('the editor asks for a code and a country, and takes coordinates as a bonus', () => {
+  assert.ok(/function rowHasPlace/.test(EDITOR));
+  assert.ok(/canonCtry\(r && r\.ctry\) \|\| rowHasCoords\(r\)/.test(EDITOR),
+    'a country alone must make a row ready');
+  assert.ok(/Add the country/.test(EDITOR), 'a row missing its country must say so');
+  assert.ok(/function parseTtiDeeplink/.test(EDITOR), 'the paste box stays, as an optional extra');
+  assert.ok(/Paste deeplinks \(optional\)/.test(EDITOR), 'and must read as optional');
   // Pasting a link for a hotel already typed in completes that row rather than
   // adding a duplicate.
   assert.ok(/ttiRows\.find\(r => canonTti\(r\.code\) === parsed\.code\)/.test(EDITOR));
