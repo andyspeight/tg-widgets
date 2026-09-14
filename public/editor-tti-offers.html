@@ -916,14 +916,19 @@
               <div class="field">
                 <label class="field-label">Hotel list</label>
                 <textarea class="textarea" id="cfgTtiCodes" rows="8" spellcheck="false"
-                  placeholder="TTI:10946397, Vida Beach Resort Umm Al Quwain, AE, 25.5527, 55.5531&#10;TTI:76853197, Cocobay Resort, AG, 17.053795, -61.894452"></textarea>
+                  placeholder="TTI:12345, Dubai, AE, 25.0490889376, 55.1180329667&#10;TTI:76853197, Antigua, AG, 17.053795, -61.894452"></textarea>
                 <div class="field-help">
-                  One hotel per line, in the order your spreadsheet already keeps them:
-                  code, name, country, latitude, longitude. Only the code is required, and
-                  it works with or without the <code>TTI:</code> prefix. Up to 100 hotels.
-                  <strong>Include the name and coordinates where you have them.</strong>
-                  A Travelify deep link pins a property with all of them together, and the
-                  overnight price lookup uses the same anchor.
+                  One hotel per line: the Travelify property code, then <strong>where it
+                  is</strong> — the city or resort, the two-letter country, and its
+                  latitude and longitude. Codes work with or without the
+                  <code>TTI:</code> prefix. Up to 100 hotels.
+                  <br><br>
+                  The code picks the hotel. The location tells us where to look for it,
+                  the same way a Travelify deep link searches the city and pins the
+                  property inside it. <strong>A row with a code and nothing else is
+                  skipped</strong>, because searching the whole world for one hotel is
+                  not something we will do. Any one of city, country or coordinates is
+                  enough, and coordinates are the most reliable.
                 </div>
                 <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
               </div>
@@ -2143,20 +2148,25 @@
       const el = $('ttiSummary');
       if (!el) return;
       const rows = ttiRowsOf(state.config);
-      const named = rows.filter((r) => r.name).length;
       if (!rows.length) {
         el.innerHTML = 'No hotels yet. The widget stays empty until you add at least one.';
         return;
       }
-      const parts = [rows.length + (rows.length === 1 ? ' hotel' : ' hotels')];
-      if (named < rows.length) {
-        parts.push((rows.length - named) + ' without a name');
-      }
+      const hasArea = (r) => !!(r.name || r.ctry || (r.lat != null && r.lng != null));
+      const located = rows.filter(hasArea).length;
       const pinned = rows.filter((r) => r.lat != null && r.lng != null).length;
-      if (pinned < rows.length) {
-        parts.push((rows.length - pinned) + ' without coordinates');
-      }
+      const parts = [rows.length + (rows.length === 1 ? ' hotel' : ' hotels')];
+      if (pinned < located) parts.push((located - pinned) + ' without coordinates');
       let html = esc(parts.join(' · '));
+      // A row with no location cannot be searched for, so say so here rather
+      // than letting it silently produce nothing overnight.
+      if (located < rows.length) {
+        html += '<br><span style="color:var(--tgse-warning)">'
+          + (rows.length - located)
+          + (rows.length - located === 1 ? ' row has' : ' rows have')
+          + ' a code but no location, so ' + (rows.length - located === 1 ? 'it' : 'they')
+          + ' will be skipped. Add a city, a country or coordinates.</span>';
+      }
       if (bad && bad.length) {
         html += '<br><span style="color:var(--tgse-warning)">Skipped ' + bad.length
           + (bad.length === 1 ? ' line that is not a code: ' : ' lines that are not codes: ')

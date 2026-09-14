@@ -1,7 +1,7 @@
 # TTI Offers — project handover
 
-**Status:** built, deployed, and waiting on one answer from Travelify before it
-can show a single price. Started 12 Sep 2026.
+**Status:** built and complete. Started 12 Sep 2026, request shape settled
+against real deep links 14 Sep 2026.
 
 **What it is.** A client lists the hotels they actually sell, by Travelify
 property (TTI) code. The widget shows live cached prices for those hotels and
@@ -12,63 +12,60 @@ engine.
 
 ---
 
-## The one open question
+## How a property is asked for
 
-**The nightly job cannot yet ask Travelify for one specific hotel.** Everything
-else is built and tested. When this is answered the widget goes live with one
-environment variable and no code change.
-
-What we know, and how we know it:
-
-- **A deep link cannot be harvested.** Travelify's own Deeplinking Instructions
-  (Darren Swan, Aug 2022, Drive doc `1oVZujkm1UclPWe73rGD2IHZtPcbLBVr6ywH2E-3p4yo`)
-  open by saying a results page "contain[s] a unique search session that is for a
-  single user/customer only. After roughly 20 minutes, the search session will
-  expire and not be bookable." A deep link is a per-visitor browser session on a
-  20-minute fuse. There is nothing in it to store in a shared overnight cache.
-- **That document defines no TTI parameter and no `refn`.** The only property
-  anchor it documents is `loct=Property` with `loc={name}` and `ctry={code}` —
-  a hotel NAME, not a code. Our own `refn=TTI:{code}` was reverse-engineered
-  from a live link Travelify's generator produced (22 Jul 2026). It works on the
-  click-through and is undocumented.
-- **TTI codes do identify a property to Travelify.** Their platform keys
-  accommodation image overrides on them (Platform Updates sheet, 10 Mar 2025),
-  and our own hotel databases carry the codes beside the names.
-- **What is missing** is how to hand a property to the offers FEED
-  (`api.travelify.io/widgetsvc/traveloffers`, proxied by `/api/offers`), which
-  is the only thing that returns JSON we can cache. It takes `destinations` as
-  airport or country codes. No published source names a property parameter.
-
-**How to settle it.** Ask Darren, or run the probe, or both:
+**Settled by two real deep links Andy supplied on 14 Sep 2026**, one
+DynamicPackaging and one Accommodation. Both pin a property identically:
 
 ```
-GET /api/cron/refresh-tti-offers?probe=1&tti={a real code}&appId={a real app}
-    &name={the hotel name}&ctry={its country}
+st=Accommodation &curr=GBP
+  &loc=Dubai,+United+Arab+Emirates &loct=City
+  &lat=25.0490889376 &lng=55.1180329667 &rad=28
+  &fr=2026-09-26 &dur=7 &refn=TTI:12345 &adt=2&chd=0&inf=0
+```
+
+The DP one is the same plus `org=LGW`, `dst=AE1` and `dir=false`.
+
+**The lesson, and it corrected what was built first.** The location is the
+CITY at city scale, `loct=City` with a 28km radius, and the property is pinned
+by `refn=TTI:{code}` alone. There is no `loct=Property` and no tight pin. `refn`
+is a refinement laid over an ordinary area search, not a location type. An
+earlier version of this build had a 1km `loct=Property` anchor, which was wrong.
+
+**Why that means the sweep runs today.** A deep link and the offers feed are
+different surfaces, and nothing yet proves the feed honours `refn`. It no longer
+matters enough to block on:
+
+- If the feed honours it, one request returns that property.
+- If it ignores it, the SAME request returns the surrounding area, and the
+  verify gate keeps only our property out of it.
+
+Identical request count either way. The wrong-parameter case degrades to fewer
+offers, never to wrong ones. So `refn` is simply the default pin and the cron
+fires on its normal schedule.
+
+**To find out which is happening**, when you want to:
+
+```
+GET /api/cron/refresh-tti-offers?probe=1&tti={code}&appId={app}
+    &loc={city}&ctry={cc}&lat=&lng=
 Authorization: Bearer $CRON_SECRET
 ```
 
-The probe fires one request per candidate spelling plus an unscoped control, and
-reports how many offers came back and how many were actually that property. The
-answer is the candidate where `matchedProperty === parsed` and `parsed > 0`,
-while the control returned a broader set. It writes nothing.
+It fires one request per pin spelling plus one deliberately unpinned, holding
+the area scope constant so only one variable moves. A pin is honoured when its
+offers are all that property while the unpinned run's are not. `fallbackUsable`
+in the report says whether the unpinned area search finds the property at all,
+which is the number that matters if no pin narrows. It writes nothing.
 
-Then set on Vercel, and the nightly sweep starts working:
-
-| Variable | Meaning |
-| --- | --- |
-| `TTI_PROPERTY_PARAM` | The parameter name. Use the literal value `loct` for the documented name-based anchor. |
-| `TTI_PROPERTY_PARAM_ARRAY` | `1` if it takes a list rather than one value. |
-| `TTI_PROPERTY_PARAM_PREFIXED` | `1` if the value carries the `TTI:` prefix. |
+`TTI_PROPERTY_PARAM` overrides the default spelling if the probe finds a better
+one, with `TTI_PROPERTY_PARAM_ARRAY=1` and `TTI_PROPERTY_PARAM_PREFIXED=1` for
+its shape. No code change either way.
 
 No new credentials are needed. The sweep reads the Widgets table with the map
 cron's `airtableList`, so it uses the `AIRTABLE_PAT` that already covers
 `appAYzWZxvK6qlwXK`, and it authenticates to `/api/offers` with the existing
 `CRON_SECRET`.
-
-Until then the cron fires **no searches at all** and reports
-`unconfigured: true`. That is deliberate. Guessing would burn Travelify capacity
-to fetch inventory the verify gate then discards, which is the behaviour the
-cache-only rule exists to prevent.
 
 ---
 
@@ -154,11 +151,15 @@ because each client's properties are swept under their own Travelify
 application: two agencies asking about one hotel get their own contracted rates,
 and a shared key would make the teaser price and the booking price disagree.
 
-**The property list.** Rows of `{ code, name, ctry, lat, lng }`. The editor
-accepts one hotel per line, comma-separated, which is the column order our own
-hotel spreadsheets already keep (HalalHotelsAE, the Adult Only Hotels database),
-so an agent pastes straight from one. Only the code is required and it works
-with or without the `TTI:` prefix. The rest are what the anchor is built from.
+**The property list.** Rows of `{ code, loc, ctry, lat, lng }`, one hotel per
+line, which is the column order our own hotel spreadsheets already keep
+(HalalHotelsAE, the Adult Only Hotels database) so an agent pastes straight from
+one. The code picks the hotel; `loc`, `ctry` and the coordinates say where to
+look for it. **A row carrying a code and nothing else is skipped**, because a
+worldwide search that the verify gate then discarded is exactly the wasted
+Travelify capacity the cache-only rule exists to prevent. Any one of the three
+is enough, and coordinates are the most reliable. The editor counts the
+locationless rows and says so.
 
 **The sweep asks the way a DP deep link asks.** The nightly payload mirrors a
 dynamic-package deep link parameter for parameter: the package type, the

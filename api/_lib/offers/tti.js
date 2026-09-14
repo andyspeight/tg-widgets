@@ -23,21 +23,7 @@ export const PROPERTY_PARAM_IS_ARRAY = String(process.env.TTI_PROPERTY_PARAM_ARR
 export const PROPERTY_PARAM_PREFIXED = String(process.env.TTI_PROPERTY_PARAM_PREFIXED || '') === '1';
 
 export const PROBE_CANDIDATES = [
-  // The one shape Travelify actually DOCUMENTS for pinning a property, lifted
-  // from the Deeplinking Instructions: loct=Property with a location name and
-  // country. It needs the hotel's name, which is why the editor accepts one
-  // beside each code. Tried first because it is the only candidate with a
-  // published source behind it.
-  // The WHOLE anchor a real Travelify deep link carries, verified against a
-  // live link their own generator produced (22 Jul 2026): the property name,
-  // loct=Property, its coordinates with a 1km radius, AND refn=TTI:{code}
-  // together. This is what "use the DP deep link" means in feed terms, and it
-  // is the likeliest candidate precisely because it is the combination proven
-  // to resolve rather than any single part of it.
-  { shape: 'deeplink' },
-  // The same anchor reduced to what the documentation alone defines.
-  { shape: 'loct' },
-  // Our own undocumented-but-proven deeplink spelling.
+  // The spelling the real deep links use, prefixed exactly as they write it.
   { param: 'refn', array: false, prefixed: true },
   { param: 'refn', array: false, prefixed: false },
   // The name the feed itself uses when it hands the code BACK to us.
@@ -48,10 +34,14 @@ export const PROBE_CANDIDATES = [
   { param: 'propertyRef', array: false, prefixed: false },
   { param: 'hotelCodes', array: true, prefixed: false },
   { param: 'establishmentCode', array: false, prefixed: false },
-  // Andy's hunch, and cheap to test: our own validation is what rejects
-  // non-IATA destination tokens today, not Travelify's.
-  { param: 'destinations', array: true, prefixed: true },
+  // No pin at all: the area search on its own. This is the control AND the
+  // fallback. If it returns the surrounding area while a pinned candidate
+  // returns only our property, that candidate is honoured. If nothing narrows,
+  // this is still what the sweep runs on, because the verify gate makes an
+  // area search correct — just less complete.
+  { shape: 'none' },
 ];
+
 
 
 // One property does not need a 250-offer band — it has as many rates as it has,
@@ -68,6 +58,10 @@ export const PER_REQUEST_TIMEOUT_MS = 10000;
 
 // Departure advance window, in days from today. Wide by default for the same
 // reason the map cron's is: a narrow window is why long-haul came back empty.
+// The area radius, in km. The real deep links use 28 around a city centre.
+// Wide enough that a property is genuinely inside it, tight enough that a
+// cheapest-first slice of 60 still has room for it.
+export const DEFAULT_RADIUS_KM = 28;
 const DEFAULT_DATES_MIN = 1;
 const DEFAULT_DATES_MAX = 700;
 
@@ -188,6 +182,7 @@ export function searchFromConfig(config) {
     origins,
     currency: /^[A-Z]{3}$/.test(String(c.currency || '')) ? c.currency : 'GBP',
     nationality: /^[A-Z]{2}$/.test(String(c.nationality || '')) ? c.nationality : 'GB',
+    radiusKm: n(c.ttiRadiusKm, DEFAULT_RADIUS_KM, 1, 200),
     DatesMin: n(c.DatesMin, DEFAULT_DATES_MIN, 0, 700),
     DatesMax: n(c.DatesMax, DEFAULT_DATES_MAX, 1, 700),
   };
@@ -197,43 +192,67 @@ export function searchFromConfig(config) {
  *  `override` lets the probe swap in a candidate spelling without touching the
  *  configured one. Returns null when no property parameter is known at all —
  *  the caller must then fire nothing, never a broad unscoped search. */
+/** Build the upstream payload for one property.
+ *
+ *  SHAPE TAKEN FROM TWO REAL DEEP LINKS (Andy, 14 Sep 2026). Both a
+ *  DynamicPackaging and an Accommodation link pin a property like this:
+ *
+ *    st=Accommodation &loc=Dubai,+United+Arab+Emirates &loct=City
+ *      &lat=25.049 &lng=55.118 &rad=28 &fr=... &dur=7 &refn=TTI:12345 &adt=2
+ *
+ *  The lesson, and it corrects what this file assumed before: the location is
+ *  the CITY, at city scale (loct=City, a 28km radius), and the property is
+ *  pinned by refn=TTI:{code} ALONE. There is no loct=Property and no 1km pin.
+ *  refn is a refinement laid over an ordinary area search, not a location type.
+ *
+ *  Which is what makes the sweep safe to run before anyone has confirmed the
+ *  FEED honours refn. If it does, one tight request returns that property. If
+ *  it is ignored, the same request returns the surrounding area and the verify
+ *  gate keeps only our property out of it. Same request count either way, and
+ *  the wrong-parameter case degrades to fewer offers rather than wrong ones.
+ *
+ *  `override` lets the probe swap the PIN for a candidate spelling while the
+ *  scope stays fixed, so the two variables do not move at once. */
 export function buildTtiPayload(appId, prop, search, override = null) {
   const code = typeof prop === 'string' ? prop : (prop && prop.code);
-  const name = (prop && prop.name) || '';
+  // The location NAME is a city or resort, not the hotel — that is what
+  // loct=City means. `name` is accepted as an alias for configs saved earlier.
+  const loc = (prop && (prop.loc || prop.name)) || '';
   const ctry = (prop && prop.ctry) || '';
   const lat = (prop && prop.lat != null) ? prop.lat : null;
   const lng = (prop && prop.lng != null) ? prop.lng : null;
-  const spec = override || (PROPERTY_PARAM === 'loct'
-    ? { shape: 'loct' }
-    : (PROPERTY_PARAM
-      ? { param: PROPERTY_PARAM, array: PROPERTY_PARAM_IS_ARRAY, prefixed: PROPERTY_PARAM_PREFIXED }
-      : null));
-  if (!code || !spec) return null;
-  // The documented shape names the property by NAME, so without one there is
-  // nothing to send. Returning null makes the caller skip rather than fire a
-  // search that would come back as the whole city.
-  // Both name-based anchors need a name. Without one there is nothing to
-  // anchor on, and a nameless ask would come back as the whole country, so
-  // skip rather than guess.
-  if ((spec.shape === 'loct' || spec.shape === 'deeplink') && !name) return null;
-  if (!spec.shape && !spec.param) return null;
-  const value = spec.prefixed ? 'TTI:' + code : code;
-  let anchor;
-  if (spec.shape === 'deeplink') {
-    // Every part of the anchor a live Travelify deep link carries, together.
-    anchor = {
-      loc: name,
-      loct: 'Property',
-      ...(ctry ? { ctry } : {}),
-      ...(lat != null && lng != null ? { lat, lng, rad: 1 } : {}),
-      refn: 'TTI:' + code,
-    };
-  } else if (spec.shape === 'loct') {
-    anchor = { loc: name, loct: 'Property', ...(ctry ? { ctry } : {}) };
+  if (!code) return null;
+
+  // Some area to search in. Without one this would be a worldwide search that
+  // the verify gate then threw almost all of away, which is exactly the kind of
+  // wasted Travelify capacity the cache-only rule exists to prevent. Skip
+  // instead, and the editor tells the agent which row is short of detail.
+  const hasCoords = lat != null && lng != null;
+  if (!loc && !ctry && !hasCoords) return null;
+  const scope = {
+    ...(loc ? { loc, loct: 'City' } : {}),
+    ...(hasCoords ? { lat, lng, rad: search.radiusKm || DEFAULT_RADIUS_KM } : {}),
+    // The feed's own name for a destination scope, alongside the deep link's.
+    ...(ctry ? { destinations: [ctry] } : {}),
+  };
+
+  // The pin. Default is the spelling the real deep links use.
+  const spec = override || (PROPERTY_PARAM
+    ? { param: PROPERTY_PARAM, array: PROPERTY_PARAM_IS_ARRAY, prefixed: PROPERTY_PARAM_PREFIXED }
+    : { param: 'refn', array: false, prefixed: true });
+  let pin;
+  if (spec.shape === 'none') {
+    // Deliberately unpinned: the probe's control, and the honest fallback if
+    // no pin is ever honoured. The verify gate does the narrowing instead.
+    pin = {};
+  } else if (!spec.param) {
+    return null;
   } else {
-    anchor = { [spec.param]: spec.array ? [value] : value };
+    const value = spec.prefixed ? 'TTI:' + code : code;
+    pin = { [spec.param]: spec.array ? [value] : value };
   }
-  const payload = {
+
+  return {
     appId: String(appId),
     type: search.type,
     ...(search.packageType ? { packageType: search.packageType } : {}),
@@ -248,10 +267,11 @@ export function buildTtiPayload(appId, prop, search, override = null) {
     sort: 'price:asc',
     pricingByType: 'Person',
     customerUserAgent: 'Travelgenix-TtiOffersCron/1.0',
+    // A dynamic package needs a departure point, as org does on the DP link.
     ...(search.origins && search.origins.length ? { origins: search.origins } : {}),
-    ...anchor,
+    ...scope,
+    ...pin,
   };
-  return payload;
 }
 
 /** THE VERIFY GATE. Does this normalised offer actually belong to the property

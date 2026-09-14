@@ -20,33 +20,31 @@
  *      retires it if the failure persists, so a bad night degrades to empty
  *      rather than to stale.
  *
- * THE OPEN QUESTION (read this before debugging an empty sweep)
- *   What a DEEP LINK cannot do, settled by Travelify's own documentation. The
- *   Deeplinking Instructions (Darren Swan, Aug 2022) open with: a results page
- *   "contain[s] a unique search session that is for a single user/customer only.
- *   After roughly 20 minutes, the search session will expire and not be
- *   bookable". A deep link is therefore a per-visitor, self-expiring browser
- *   session — there is nothing in it to harvest into a shared overnight cache,
- *   and building one on top of it would be building on a 20-minute fuse.
+ * HOW A PROPERTY IS ASKED FOR (read this before debugging an empty sweep)
+ *   Taken from two real deep links Andy supplied, 14 Sep 2026, one
+ *   DynamicPackaging and one Accommodation. Both pin a property the same way:
  *
- *   What that document DOES define for pinning a property is loct=Property
- *   alongside loc={name} and ctry={code}. It defines no TTI parameter and no
- *   refn at all; our own refn=TTI:{code} came from reverse-engineering a live
- *   link Travelify's generator produced (22 Jul 2026) and is undocumented.
- *   So TTI codes are proven to identify a property to Travelify — their own
- *   platform keys accommodation image overrides on them — but no published
- *   source says how to hand one to the offers FEED, which is what this job
- *   needs. Until that is settled TTI_PROPERTY_PARAM stays unset and this cron
- *   fires NO searches: burning search capacity on a guess is exactly what the
- *   cache-only rule exists to prevent.
+ *     st=Accommodation &loc=Dubai,+United+Arab+Emirates &loct=City
+ *       &lat=25.049 &lng=55.118 &rad=28 &fr=... &dur=7 &refn=TTI:12345 &adt=2
  *
- *   To settle it: GET this route with ?probe=1&tti={a real code}&appId={an app}
- *   (add &name= and &ctry= to include the documented loct=Property shape). The
- *   probe sends one request per candidate spelling plus an unscoped control,
- *   and reports how many offers came back and how many carried the requested
- *   property. The winner is the candidate whose offers are ALL that property
- *   while the control's are not. Set TTI_PROPERTY_PARAM to its name and the
- *   nightly sweep starts working with no code change.
+ *   So the location is the CITY at city scale, and the property is pinned by
+ *   refn=TTI:{code} alone. There is no loct=Property and no tight pin — refn is
+ *   a refinement laid over an ordinary area search. buildTtiPayload mirrors it.
+ *
+ *   That is also why this job can run before anyone has confirmed the FEED
+ *   honours refn, which is a different surface from the deep link. If it does,
+ *   one request returns that property. If it is ignored, the SAME request
+ *   returns the surrounding area and the verify gate keeps only our property
+ *   out of it. Identical request count either way, and the wrong-parameter case
+ *   degrades to fewer offers rather than to wrong ones.
+ *
+ *   To confirm which is happening: GET this route with
+ *   ?probe=1&tti={code}&appId={app}&name={city}&ctry={cc}&lat=&lng=. It fires
+ *   one request per pin spelling plus one deliberately unpinned, holding the
+ *   area scope constant so only one variable moves, and reports how many offers
+ *   came back and how many were actually that property. A pin is honoured when
+ *   its offers are ALL that property while the unpinned run's are not.
+ *   TTI_PROPERTY_PARAM then overrides the default spelling, no code change.
  *
  * THE VERIFY GATE (never remove)
  *   Travelify ignores parameters it does not recognise rather than erroring. A
@@ -275,55 +273,54 @@ async function storeProperty(item, offers, nowIso) {
  *  Writes nothing. */
 async function runProbe(appId, prop, search) {
   const item = { appId, ...prop };
-  // The control is a parameter Travelify certainly does not know. It is
-  // ignored, so what comes back is what an UNSCOPED search returns — the
-  // baseline every candidate is judged against.
-  const control = await callOffersProxy(
-    buildTtiPayload(appId, prop, search, { param: '_tgProbeControl', array: false, prefixed: false }),
-    PER_REQUEST_TIMEOUT_MS, 0,
-  );
-  const controlRaw = (control && control.ok && control.data && (control.data.data || control.data.offers)) || [];
-  const controlParsed = normaliseOffers(Array.isArray(controlRaw) ? controlRaw : [], search.type);
   const results = [];
+  // Every candidate runs against the SAME area scope, so the only thing moving
+  // between them is the pin. One of them is deliberately unpinned, and that one
+  // is the baseline the others are read against.
   for (const cand of PROBE_CANDIDATES) {
     const r = await fetchProperty(item, search, cand);
-    const label = cand.shape === 'loct'
-      ? 'loct=Property + loc/ctry (the documented shape)'
-      : cand.param;
-    if (r === null && cand.shape === 'loct' && !prop.name) {
-      results.push({ param: label, shape: 'not tried', skipped: 'needs &name= — the documented anchor names the property, it does not code it' });
-      continue;
-    }
+    const unpinned = cand.shape === 'none';
     results.push({
-      param: label,
-      shape: cand.shape === 'loct'
-        ? 'name + country'
+      pin: unpinned ? '(none — the area search on its own)' : cand.param,
+      shape: unpinned
+        ? 'control, and the fallback the sweep runs on if nothing narrows'
         : (cand.array ? 'array' : 'single') + (cand.prefixed ? ', TTI: prefixed' : ', bare code'),
       requestFailed: r === null,
       returned: r ? r.returned : 0,
       parsed: r ? r.parsed : 0,
       matchedProperty: r ? r.verified.length : 0,
-      // The signal: a spelling that WORKS returns only the asked-for property.
-      // A spelling Travelify ignored returns the same broad set as the control.
-      looksScoped: !!(r && r.parsed > 0 && r.verified.length === r.parsed),
+      // A pin that is HONOURED returns only the asked-for property. A pin
+      // Travelify ignored returns the same broad area as the unpinned run.
+      looksHonoured: !unpinned && !!(r && r.parsed > 0 && r.verified.length === r.parsed),
     });
   }
+  const control = results.find((r) => r.pin.startsWith('(none'));
+  const honoured = results.filter((r) => r.looksHonoured);
   return {
     code: prop.code,
-    name: prop.name || null,
+    loc: prop.loc || prop.name || null,
     appId,
-    control: {
-      note: 'an unrecognised param. Travelify ignores it, so this is what an UNSCOPED search returns',
-      returned: Array.isArray(controlRaw) ? controlRaw.length : 0,
-      parsed: controlParsed.length,
-      matchedProperty: controlParsed.filter((o) => offerIsProperty(o, prop.code)).length,
+    scope: {
+      note: 'held constant across every candidate, mirroring the real deep links',
+      loc: prop.loc || prop.name || null,
+      ctry: prop.ctry || null,
+      lat: prop.lat ?? null,
+      lng: prop.lng ?? null,
+      rad: search.radiusKm,
     },
     candidates: results,
-    verdict: results.filter((r) => r.looksScoped).map((r) => `${r.param} (${r.shape})`),
-    howToRead: 'A candidate with matchedProperty === parsed AND parsed > 0, where the '
-      + 'control returned a broader set, is the parameter. Set TTI_PROPERTY_PARAM to its '
-      + 'name on Vercel (plus TTI_PROPERTY_PARAM_ARRAY=1 and/or '
-      + 'TTI_PROPERTY_PARAM_PREFIXED=1 to match its shape) and the nightly sweep runs.',
+    verdict: honoured.length
+      ? honoured.map((r) => `${r.pin} (${r.shape})`)
+      : ['no pin narrowed the result. The sweep still works: the area search '
+         + 'plus the verify gate keeps only this property, just less completely.'],
+    // The one number that says whether the fallback alone is good enough.
+    fallbackUsable: !!(control && control.matchedProperty > 0),
+    howToRead: 'A candidate whose matchedProperty equals its parsed count, while the '
+      + 'unpinned control returned a broader set, is a pin Travelify honours. Set '
+      + 'TTI_PROPERTY_PARAM to its name on Vercel (plus TTI_PROPERTY_PARAM_ARRAY=1 '
+      + 'and/or TTI_PROPERTY_PARAM_PREFIXED=1 to match its shape). If none narrows '
+      + 'but fallbackUsable is true, leave it as it is: the default refn pin costs '
+      + 'nothing extra and the verify gate is doing the work.',
   };
 }
 
@@ -354,34 +351,31 @@ export default async function handler(req, res) {
         });
       }
       const search = searchFromConfig({ type: q.type || 'Accommodation' });
-      const report = await runProbe(
-        appId,
-        { code, name: cleanName(q.name), ctry: cleanCtry(q.ctry) },
-        search,
-      );
+      const num = (v, limit) => {
+        const n = Number(String(v == null ? '' : v).trim());
+        return (Number.isFinite(n) && n !== 0 && Math.abs(n) <= limit) ? n : null;
+      };
+      const prop = {
+        code,
+        loc: cleanName(q.loc || q.name),
+        ctry: cleanCtry(q.ctry),
+        lat: num(q.lat, 90),
+        lng: num(q.lng, 180),
+      };
+      if (!prop.loc && !prop.ctry && prop.lat == null) {
+        return res.status(400).json({
+          ok: false,
+          error: 'the probe needs an area to search in as well as the code: add '
+               + '&loc={city} and/or &ctry={cc} and/or &lat=&lng=. Without one every '
+               + 'candidate would be a worldwide search and none of them comparable.',
+        });
+      }
+      const report = await runProbe(appId, prop, search);
       return res.status(200).json({ ok: true, probe: true, ...report, ms: Date.now() - startedAt });
     }
 
     // ── Sweep ─────────────────────────────────────────────────────────────
     const { work, widgets, skipped } = await collectWork();
-
-    // No property parameter means no honest way to ask for one hotel. Firing a
-    // broad search per code would burn Travelify capacity to fill the cache
-    // with inventory the verify gate then discards, so we do not fire at all.
-    if (!PROPERTY_PARAM) {
-      return res.status(200).json({
-        ok: true,
-        swept: 0,
-        widgets,
-        properties: work.length,
-        skipped,
-        unconfigured: true,
-        note: 'TTI_PROPERTY_PARAM is not set, so no searches were fired. Run this route '
-            + 'with ?probe=1&tti={code}&appId={app} to find the parameter that scopes a '
-            + 'traveloffers search to one property, then set it on Vercel.',
-        ms: Date.now() - startedAt,
-      });
-    }
 
     // The ceiling counts REQUESTS, and a property asked for as both a hotel and
     // a dynamic package is two. Fill the queue by request budget, not by
@@ -446,8 +440,10 @@ export default async function handler(req, res) {
       failures: failures.length ? failures : undefined,
       skipped: skipped.length ? skipped : undefined,
       suspectParam: suspectParam
-        ? `every offer returned under '${PROPERTY_PARAM}' was for a different property, `
-          + 'so the parameter is probably being ignored. Re-run with ?probe=1 to re-check it.'
+        ? `every offer returned under the '${PROPERTY_PARAM || 'refn'}' pin was for a `
+          + 'different property, so either the pin is ignored AND the area searched is too '
+          + 'wide for these hotels to surface in, or the codes are wrong. Re-run with '
+          + '?probe=1 to see which, and narrow the area with coordinates if it is the former.'
         : undefined,
       ms: Date.now() - startedAt,
     });

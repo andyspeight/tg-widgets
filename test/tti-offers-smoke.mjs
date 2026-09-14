@@ -173,96 +173,109 @@ test('searchFromConfig clamps the date window and falls back to sane defaults', 
 });
 
 // ── Building the upstream ask ──────────────────────────────────────────────
+// The shape comes from two real deep links (Andy, 14 Sep 2026): a city-scale
+// area search (loct=City, a 28km radius) with the property pinned by
+// refn=TTI:{code} alone. Not loct=Property, and not a tight pin.
 
-test('no configured property parameter means NO search is built', () => {
-  // The whole point: until Travelify names the parameter, this job must fire
-  // nothing rather than fire a broad search per code and bin the results.
-  assert.equal(process.env.TTI_PROPERTY_PARAM, undefined, 'test env must leave the param unset');
-  assert.equal(buildTtiPayload('250', { code: '111', name: 'Hotel One' }, searchFromConfig({})), null);
-});
+const DUBAI = {
+  code: '12345',
+  loc: 'Dubai, United Arab Emirates',
+  ctry: 'AE',
+  lat: 25.0490889376,
+  lng: 55.1180329667,
+};
 
-test('an overridden parameter builds a single-value ask', () => {
-  const p = buildTtiPayload('250', { code: '111' }, searchFromConfig({}),
-    { param: 'refn', array: false, prefixed: true });
-  assert.equal(p.refn, 'TTI:111');
-  assert.equal(p.appId, '250');
+test('the accommodation ask mirrors the real accommodation deep link', () => {
+  const p = buildTtiPayload('100', DUBAI, searchFromConfig({ type: 'Accommodation' }));
   assert.equal(p.type, 'Accommodation');
-  assert.equal(p.sort, 'price:asc');
-  assert.ok(!('destinations' in p), 'a property ask must never carry a destination scope');
+  assert.equal(p.loc, 'Dubai, United Arab Emirates');
+  assert.equal(p.loct, 'City', 'the area is a CITY, not the property');
+  assert.equal(p.lat, 25.0490889376);
+  assert.equal(p.lng, 55.1180329667);
+  assert.equal(p.rad, 28);
+  assert.equal(p.refn, 'TTI:12345', 'the property is pinned by refn alone');
+  assert.equal(p.curr, undefined);
+  assert.equal(p.currency, 'GBP');
+  assert.ok(!('origins' in p), 'a hotel on its own has no departure point');
 });
 
-test('an array-shaped parameter and a bare-code shape are both buildable', () => {
-  const arr = buildTtiPayload('250', { code: '111' }, searchFromConfig({}),
-    { param: 'uniqueRefs', array: true, prefixed: false });
-  assert.deepEqual(arr.uniqueRefs, ['111']);
-});
-
-test("the documented loct=Property shape needs the hotel's name", () => {
-  const spec = { shape: 'loct' };
-  const withName = buildTtiPayload('250', { code: '111', name: 'Vida Beach Resort', ctry: 'AE' },
-    searchFromConfig({}), spec);
-  assert.equal(withName.loct, 'Property');
-  assert.equal(withName.loc, 'Vida Beach Resort');
-  assert.equal(withName.ctry, 'AE');
-
-  // Without a name there is nothing to anchor on, and a nameless ask would come
-  // back as the whole country. Skip, do not guess.
-  assert.equal(buildTtiPayload('250', { code: '111' }, searchFromConfig({}), spec), null);
-});
-
-test('the deeplink anchor carries every part a live Travelify link carries', () => {
-  // "Build the cache using the DP deep links" in feed terms: the same anchor
-  // their own generator emits — name, loct=Property, country, coordinates with
-  // a 1km radius, AND refn=TTI: together, not any single part of it.
-  const p = buildTtiPayload(
-    '250',
-    { code: '10946397', name: 'Vida Beach Resort', ctry: 'AE', lat: 25.55, lng: 55.55 },
-    searchFromConfig({ type: 'DynamicPackages', origins: ['LGW'] }),
-    { shape: 'deeplink' },
-  );
-  assert.equal(p.loc, 'Vida Beach Resort');
-  assert.equal(p.loct, 'Property');
-  assert.equal(p.ctry, 'AE');
-  assert.equal(p.lat, 25.55);
-  assert.equal(p.lng, 55.55);
-  assert.equal(p.rad, 1);
-  assert.equal(p.refn, 'TTI:10946397');
-  assert.deepEqual(p.origins, ['LGW']);
+test('the dynamic package ask adds a departure point and nothing else', () => {
+  const p = buildTtiPayload('100', DUBAI,
+    searchFromConfig({ type: 'DynamicPackages', origins: ['LGW'] }));
+  assert.equal(p.type, 'Packages');
   assert.equal(p.packageType, 'DynamicPackages');
+  assert.deepEqual(p.origins, ['LGW'], 'org on the deep link, origins on the feed');
+  assert.equal(p.loct, 'City');
+  assert.equal(p.refn, 'TTI:12345');
 });
 
-test('the deeplink anchor is the first thing the probe tries', () => {
-  assert.equal(PROBE_CANDIDATES[0].shape, 'deeplink',
-    'the proven live-link combination should be tested before any single-part guess');
+test('refn is the default pin, so the sweep runs without configuration', () => {
+  // The whole point of the 14 Sep change: an area search plus the verify gate
+  // is correct whether or not the feed honours refn, so there is nothing to
+  // wait for. TTI_PROPERTY_PARAM only overrides the spelling.
+  assert.equal(process.env.TTI_PROPERTY_PARAM, undefined, 'test env must leave it unset');
+  const p = buildTtiPayload('100', DUBAI, searchFromConfig({}));
+  assert.ok(p, 'a payload must be built with no env var set');
+  assert.equal(p.refn, 'TTI:12345');
+});
+
+test('an ask with no area at all is never built', () => {
+  // A worldwide search that the verify gate then threw away is exactly the
+  // wasted Travelify capacity the cache-only rule exists to prevent.
+  assert.equal(buildTtiPayload('100', { code: '12345' }, searchFromConfig({})), null);
+  // Any ONE of the three is enough to scope it.
+  assert.ok(buildTtiPayload('100', { code: '1', ctry: 'AE' }, searchFromConfig({})));
+  assert.ok(buildTtiPayload('100', { code: '1', loc: 'Dubai' }, searchFromConfig({})));
+  assert.ok(buildTtiPayload('100', { code: '1', lat: 25, lng: 55 }, searchFromConfig({})));
+});
+
+test('a payload without a code is never built', () => {
+  assert.equal(buildTtiPayload('100', { ...DUBAI, code: '' }, searchFromConfig({})), null);
+});
+
+test('an overridden pin changes only the pin, never the area', () => {
+  const base = buildTtiPayload('100', DUBAI, searchFromConfig({}));
+  const arr = buildTtiPayload('100', DUBAI, searchFromConfig({}),
+    { param: 'uniqueRefs', array: true, prefixed: false });
+  assert.deepEqual(arr.uniqueRefs, ['12345']);
+  assert.ok(!('refn' in arr), 'the default pin must be replaced, not joined');
+  for (const k of ['loc', 'loct', 'lat', 'lng', 'rad', 'destinations']) {
+    assert.deepEqual(arr[k], base[k], `${k} must be held constant across candidates`);
+  }
+});
+
+test('the unpinned candidate is a real ask, and it is the control', () => {
+  const none = buildTtiPayload('100', DUBAI, searchFromConfig({}), { shape: 'none' });
+  assert.ok(none, 'the control must still be a valid search');
+  assert.ok(!('refn' in none), 'the control carries no pin at all');
+  assert.equal(none.loct, 'City', 'but keeps the same area');
+  assert.ok(PROBE_CANDIDATES.some((c) => c.shape === 'none'),
+    'the probe needs an unpinned run to read the others against');
+  assert.equal(PROBE_CANDIDATES[0].param, 'refn',
+    'the spelling the real links use should be tried first');
+});
+
+test('the search radius is the real links 28km, and is clamped', () => {
+  assert.equal(searchFromConfig({}).radiusKm, 28);
+  assert.equal(searchFromConfig({ ttiRadiusKm: 5 }).radiusKm, 5);
+  assert.equal(searchFromConfig({ ttiRadiusKm: 9999 }).radiusKm, 200);
+  assert.equal(searchFromConfig({ ttiRadiusKm: 0 }).radiusKm, 1);
 });
 
 test('a dynamic package carries a departure point, a hotel does not', () => {
-  // A DP deep link carries org. Without one the package ask has no departure
-  // and comes back wrong or empty. Several origins stay ONE request, so this
-  // cannot multiply the nightly budget.
   const dp = searchFromConfig({ type: 'DynamicPackages', origins: ['LGW', 'man', 'GB', 'nope!'] });
   assert.deepEqual(dp.origins, ['LGW', 'MAN', 'GB'], 'origins normalise and junk is dropped');
-  const acc = searchFromConfig({ type: 'Accommodation', origins: ['LGW'] });
-  assert.deepEqual(acc.origins, [], 'a hotel on its own has no departure point');
-  const built = buildTtiPayload('250', { code: '1' }, dp, { param: 'refn', array: false, prefixed: true });
-  assert.deepEqual(built.origins, ['LGW', 'MAN', 'GB']);
-  assert.ok(!('origins' in buildTtiPayload('250', { code: '1' }, acc,
-    { param: 'refn', array: false, prefixed: true })));
+  assert.deepEqual(searchFromConfig({ type: 'Accommodation', origins: ['LGW'] }).origins, []);
 });
 
 test('coordinates are parsed and bounded, from a row or a pasted line', () => {
-  const [row] = codesFromConfig({ ttiCodes: 'TTI:1, Cocobay Resort, AG, 17.053795, -61.894452' });
-  assert.equal(row.lat, 17.053795);
-  assert.equal(row.lng, -61.894452);
+  const [row] = codesFromConfig({ ttiCodes: 'TTI:1, Dubai, AE, 25.049, 55.118' });
+  assert.equal(row.lat, 25.049);
+  assert.equal(row.lng, 55.118);
   // A mis-pasted column must not travel upstream as a location.
   const [bad] = codesFromConfig({ ttiCodes: [{ code: '2', lat: 999, lng: 'north' }] });
   assert.equal(bad.lat, null);
   assert.equal(bad.lng, null);
-});
-
-test('a payload without a code is never built', () => {
-  assert.equal(buildTtiPayload('250', { code: '' }, searchFromConfig({}),
-    { param: 'refn', array: false, prefixed: false }), null);
 });
 
 // ── The verify gate ────────────────────────────────────────────────────────
