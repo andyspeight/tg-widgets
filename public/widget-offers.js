@@ -287,6 +287,26 @@
     const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^[A-Z]+:/, '');
     return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
   }
+  /** Is this a TTI Offers widget?
+   *
+   *  It has to be answerable when the code list is EMPTY, which is the whole
+   *  point: a TTI widget with no usable codes must show nothing, never fall
+   *  through to the destination pool. Before this existed, an empty list made
+   *  the widget indistinguishable from a plain Offers widget, so it quietly
+   *  drew a country's worth of offers under a heading promising a handful of
+   *  chosen hotels (Andy, 14 Sep 2026: "it is showing lots of random offers").
+   *
+   *  Two signals, either is enough: the element claims the tti-offers tag, or
+   *  the config carries a ttiCodes key at all. The editor always writes that
+   *  key, even when the list is empty, so a saved TTI config is always
+   *  recognisable. A plain Offers config has never had it. */
+  function isTtiWidget(cfg, el) {
+    if (cfg && Object.prototype.hasOwnProperty.call(cfg, 'ttiCodes')) return true;
+    try {
+      return !!(el && el.getAttribute && el.getAttribute('data-tg-widget') === 'tti-offers');
+    } catch (e) { return false; }
+  }
+
   function ttiCodesOf(cfg) {
     const raw = cfg && cfg.ttiCodes;
     if (!raw) return [];
@@ -5902,6 +5922,9 @@
     constructor(container, config) {
       this.el = container;
       this.cfg = this._defaults(config);
+      // Decided once, from the element AND the config, because the element is
+      // gone from later code paths and the code list can legitimately be empty.
+      this._isTti = isTtiWidget(config, container);
       // UI language: honour an explicit author `language`/`lang`/`locale`, else
       // fall back to the viewer's browser locale. The cfg.language default of
       // 'en' (used for the data request) must NOT pin the UI to English, so we
@@ -6629,6 +6652,20 @@
      *                 because nothing else will
      */
     async _fetchFromCache(payload, ck, ttlMs) {
+      // A TTI widget names PROPERTIES. With no usable codes there is no pool to
+      // read, and the one thing it must never do is widen to the destination
+      // scope — a widget that promises twelve chosen hotels showing a country's
+      // worth of unrelated offers is worse than an empty one, because it looks
+      // like it is working. Same rule as the cache-only fallback removed on
+      // 30 Jul 2026: an empty answer is an answer.
+      if (this._isTti && !ttiCodesOf(this.cfg).length) {
+        this.rawOffers = [];
+        this._availableTotal = 0;
+        this._offersSource = 'cache';
+        this._showEmpty();
+        this._fireDataLoaded();
+        return;
+      }
       try {
         // Retried: with no live fallback behind it, a single dropped request on
         // a flaky mobile connection is now the difference between a full widget
@@ -6759,7 +6796,12 @@
         // endpoint answer an honest miss rather than silently widening this
         // widget to every offer in the country.
         if (this.cfg.appId) q.set('appId', String(this.cfg.appId));
-      } else if (Array.isArray(payload.destinations) && payload.destinations.length) {
+      } else if (!this._isTti && Array.isArray(payload.destinations) && payload.destinations.length) {
+        // Guarded on _isTti as well as on the codes: a TTI widget must never
+        // ask for a destination pool, whatever else its config carries. Its
+        // templates can leave destinations behind from a preset, and one of
+        // those reaching the cache is exactly how the widget ends up showing
+        // hotels nobody chose.
         q.set('destinations', payload.destinations.join(','));
       }
       // Origins. The departure board sets a SINGULAR `origin` once it has
