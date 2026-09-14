@@ -536,67 +536,93 @@ const asNum = (v) => {
 
 /** One accommodation result -> the shape api/cached-offers.js already serves.
  *
- *  Deliberately NOT clever. Every field it could not find is listed in
- *  `unmapped`, because a cache quietly full of nulls looks identical to a
- *  supplier with thin content and would send the next person debugging the
- *  wrong thing entirely. */
+ *  The real field names, confirmed from a live result (Andy, 14 Sep 2026):
+ *
+ *    rid resultType isAvailable availabilityError pricing priority uniqueID
+ *    uniqueRef propertyType name chain rating location descriptions amenities
+ *    features media isRoomAlloc isGroupedUnits units optionalExtras
+ *
+ *  So `media` is the gallery, `uniqueRef` is the pin we matched on, `name` is
+ *  the hotel, `location` carries the place and the stay details sit on `units`.
+ *  The first version of this function guessed at image/images/thumbnail and
+ *  found none of them, which is why every card came back without a photo.
+ *
+ *  Anything still unrecognised goes in `unmapped` rather than becoming a silent
+ *  null: a cache quietly full of nulls looks exactly like a supplier with thin
+ *  content, and sends the next person debugging the wrong thing. */
 export function normaliseAccommodationResult(r, ctx = {}) {
   if (!r || typeof r !== 'object') return null;
+  // A result the supplier has marked unavailable is not an offer. Caching one
+  // puts a price and a booking link on a card that cannot be booked, and the
+  // visitor finds out at the payment page. That is the worst failure this
+  // widget has, so it is refused here rather than filtered later.
+  if (r.isAvailable === false) return null;
+
   const unmapped = [];
-  const get = (name, paths) => {
-    const v = pick(r, paths);
-    if (v === undefined) unmapped.push(name);
-    return v;
-  };
 
   const price = asNum(pick(r, [
-    'pricing.total', 'pricing.price', 'price.total', 'price.amount',
-    'totalPrice', 'price', 'Price', 'leadInPrice',
+    'pricing.total', 'pricing.price', 'pricing.totalPrice', 'pricing.amount',
+    'pricing.grossPrice', 'pricing.leadInPrice',
   ]));
   const pricePP = asNum(pick(r, [
-    'pricing.perPerson', 'pricing.pricePerPerson', 'price.perPerson',
-    'pricePerPerson', 'perPerson',
+    'pricing.perPerson', 'pricing.pricePerPerson', 'pricing.pricePP', 'pricing.perPersonPrice',
   ]));
   // No price is not an offer. Never cache one: the card would render a hotel
   // with a blank price and a live booking link behind it.
   if (price == null && pricePP == null) return null;
 
-  const hotel = get('hotel', ['name', 'Name', 'accommodation.name', 'property.name', 'hotelName']);
-  const ref = pick(r, ['uniqueRef', 'accommodationUniqueRef', 'ref', 'Ref',
-                       'propertyRef', 'accommodation.uniqueRef']);
+  // THE GALLERY. Every hotel has photos and they live in `media`. Kept as a
+  // small list rather than one frame: on this widget every card is a hotel the
+  // client picked by hand, so it earns more than a single thumbnail.
+  const media = Array.isArray(r.media) ? r.media : [];
+  const images = [];
+  for (const m of media) {
+    const u = typeof m === 'string' ? m : (m && (m.url || m.href || m.src));
+    if (typeof u === 'string' && /^https?:\/\//.test(u) && images.indexOf(u) === -1) images.push(u);
+    if (images.length >= 6) break;
+  }
+  if (!images.length) unmapped.push('media');
 
+  const loc = r.location || {};
   const offer = {
     type: ctx.type === 'DynamicPackages' ? 'Packages' : 'Accommodation',
     price: price != null ? price : pricePP,
     pricePP: pricePP != null ? pricePP : null,
-    currency: pick(r, ['pricing.currency', 'price.currency', 'currency']) || ctx.currency || 'GBP',
-    hotel: hotel != null ? String(hotel).slice(0, 160) : null,
+    currency: pick(r, ['pricing.currency', 'pricing.currencyCode']) || ctx.currency || 'GBP',
+    hotel: r.name ? String(r.name).slice(0, 160) : null,
     resort: (() => {
-      const v = pick(r, ['resort.name', 'destination.name', 'location.name', 'city', 'resort']);
+      const v = pick(loc, ['name', 'resort', 'city', 'area', 'town', 'region']);
       return v ? String(v).slice(0, 120) : (ctx.locationName || null);
     })(),
-    countryCode: cleanCtry(pick(r, ['countryCode', 'country.code', 'location.countryCode']) || ctx.ctry || ''),
-    lat: asNum(pick(r, ['latitude', 'lat', 'location.latitude'])) ?? (ctx.lat ?? null),
-    lng: asNum(pick(r, ['longitude', 'lng', 'location.longitude'])) ?? (ctx.lng ?? null),
-    rating: asNum(pick(r, ['rating', 'starRating', 'stars', 'Rating'])),
-    reviewRating: asNum(pick(r, ['reviewRating', 'review.rating', 'guestRating'])),
-    reviewCount: asNum(pick(r, ['reviewCount', 'review.count', 'reviews'])),
-    boardBasis: pick(r, ['boardBasis', 'BoardBasis', 'board']) || null,
-    nights: asNum(pick(r, ['nights', 'Nights', 'duration'])) ?? (ctx.nights ?? null),
-    checkinDate: pick(r, ['checkinDate', 'CheckinDate', 'checkIn', 'startDate']) || ctx.checkinDate || null,
-    propertyType: pick(r, ['propertyType', 'PropertyType']) || null,
-    image: pick(r, ['image.url', 'images.0.url', 'images.0', 'imageUrl', 'thumbnail']) || null,
-    url: pick(r, ['deeplinkUrl', 'url', 'bookingUrl', 'link']) || null,
-    accommodationUniqueRef: ref ? String(ref).slice(0, 64) : null,
-    refundability: pick(r, ['refundability', 'Refundability']) || null,
-    adults: asNum(pick(r, ['adults', 'Adults'])) ?? (ctx.adults ?? null),
+    countryCode: cleanCtry(pick(loc, ['countryCode', 'country', 'countryISO']) || ctx.ctry || ''),
+    lat: asNum(pick(loc, ['latitude', 'lat'])) != null ? asNum(pick(loc, ['latitude', 'lat'])) : (ctx.lat != null ? ctx.lat : null),
+    lng: asNum(pick(loc, ['longitude', 'lng', 'lon'])) != null ? asNum(pick(loc, ['longitude', 'lng', 'lon'])) : (ctx.lng != null ? ctx.lng : null),
+    rating: asNum(r.rating),
+    boardBasis: pick(r, ['units.0.boardBasis', 'boardBasis', 'pricing.boardBasis']) || null,
+    nights: asNum(pick(r, ['units.0.nights', 'nights', 'pricing.nights'])),
+    checkinDate: pick(r, ['units.0.checkinDate', 'checkinDate']) || ctx.checkinDate || null,
+    propertyType: r.propertyType || null,
+    chain: r.chain || null,
+    image: images[0] || null,
+    // Only when there is more than one, so a single-photo hotel costs no extra
+    // bytes in a cache key that has a size ceiling.
+    images: images.length > 1 ? images : undefined,
+    // The click-through. Per result the API gives `rid`; the bookable URL
+    // belongs to the SESSION that produced it, so the caller supplies it rather
+    // than the parser inventing one.
+    rid: r.rid != null ? String(r.rid) : null,
+    url: ctx.deeplinkUrl || null,
+    // Bookable / Affiliate / EnquiryOnly. An Affiliate result hands the visitor
+    // to somebody else rather than booking here, so the card has to know.
+    resultType: r.resultType || null,
+    accommodationUniqueRef: r.uniqueRef ? String(r.uniqueRef).slice(0, 64) : null,
+    refundability: pick(r, ['units.0.refundability', 'refundability']) || null,
     fetchedAt: new Date().toISOString(),
   };
 
-  // Only report gaps that actually matter to a rendered card.
-  for (const [name, v] of [['price', offer.price], ['hotel', offer.hotel],
-                           ['image', offer.image], ['url', offer.url]]) {
-    if (v == null && !unmapped.includes(name)) unmapped.push(name);
+  // Only the gaps that actually show on a rendered card.
+  for (const [name, v] of [['hotel', offer.hotel], ['nights', offer.nights], ['url', offer.url]]) {
+    if (v == null && unmapped.indexOf(name) === -1) unmapped.push(name);
   }
   return { offer, unmapped };
 }

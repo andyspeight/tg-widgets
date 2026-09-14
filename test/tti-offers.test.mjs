@@ -823,27 +823,24 @@ test('a row without a location is refused rather than widened', () => {
 
 test('an offer with no price is never cached', () => {
   // The card would render a hotel with a blank price and a live booking link
-  // behind it, which is worse than showing nothing.
-  const n = normaliseAccommodationResult({ name: 'The Grand', uniqueRef: 'TTI:1' });
-  assert.equal(n, null);
-  const ok = normaliseAccommodationResult({ name: 'The Grand', uniqueRef: 'TTI:1', price: 420 });
+  // behind it, which is worse than showing nothing. Price lives on `pricing`,
+  // confirmed from a live result.
+  assert.equal(normaliseAccommodationResult({ name: 'The Grand', uniqueRef: 'TTI:1' }), null);
+  assert.equal(normaliseAccommodationResult({ name: 'The Grand', pricing: {} }), null);
+  const ok = normaliseAccommodationResult({ name: 'The Grand', uniqueRef: 'TTI:1',
+    pricing: { total: 420 } });
   assert.equal(ok.offer.price, 420);
 });
 
 test('the normaliser reports what it could not find', () => {
-  // The result shape had not been seen when this was written. A cache quietly
-  // full of nulls looks identical to a supplier with thin content, so the
-  // guesses report themselves rather than failing silently.
-  const n = normaliseAccommodationResult({ price: 420 });
-  assert.ok(n.unmapped.includes('hotel'), 'a nameless result must say so');
-  assert.ok(n.unmapped.includes('image'));
-  assert.ok(n.unmapped.includes('url'));
-  const full = normaliseAccommodationResult({
-    name: 'The Grand', price: 420, image: { url: 'https://x/i.jpg' }, deeplinkUrl: 'https://x/b',
-  });
-  assert.deepEqual(full.unmapped, [], 'a complete result reports no gaps');
-  assert.equal(full.offer.hotel, 'The Grand');
-  assert.equal(full.offer.image, 'https://x/i.jpg');
+  // A cache quietly full of nulls looks identical to a supplier with thin
+  // content, and sends the next person debugging the wrong thing. So a gap is
+  // named rather than left silent.
+  const thin = normaliseAccommodationResult({ pricing: { total: 420 } }, {});
+  assert.ok(thin.unmapped.includes('hotel'), 'a nameless result must say so');
+  assert.ok(thin.unmapped.includes('media'), 'and one with no photo');
+  assert.ok(thin.unmapped.includes('nights'), 'and one with no stay length');
+  assert.ok(thin.unmapped.includes('url'), 'and one with nowhere to click');
 });
 
 test('the editor asks for a code and a country, and takes coordinates as a bonus', () => {
@@ -976,4 +973,74 @@ test('the editor exposes how prices are shown', () => {
   }
   assert.ok(/cfgPriceDisplay: 'priceDisplay'/.test(EDITOR), 'and it must be wired to the config');
   assert.ok(/priceDisplay: 'auto'/.test(EDITOR), 'with a default');
+});
+
+/* ============================================================
+   The real result shape (confirmed from a live search, 14 Sep 2026)
+   ============================================================ */
+
+const LIVE = {
+  rid: 42, resultType: 'Bookable', isAvailable: true, uniqueRef: 'TTI:58612582',
+  name: 'The Grand', rating: 4, propertyType: 'Hotel', chain: 'Independent',
+  pricing: { total: 640, perPerson: 320, currency: 'GBP' },
+  location: { name: 'Bournemouth', countryCode: 'GB', latitude: 50.72, longitude: -1.87 },
+  media: [{ url: 'https://x/1.jpg' }, { url: 'https://x/2.jpg' }, { url: 'https://x/3.jpg' }],
+  units: [{ boardBasis: 'BedAndBreakfast', nights: 7, checkinDate: '2026-10-14T00:00:00Z' }],
+};
+
+test('images come from media, which is where they actually are', () => {
+  // The first version guessed image/images/thumbnail and found none of them,
+  // so every card rendered without a photo while every hotel had several.
+  const { offer, unmapped } = normaliseAccommodationResult(LIVE, {});
+  assert.equal(offer.image, 'https://x/1.jpg');
+  assert.deepEqual(offer.images, ['https://x/1.jpg', 'https://x/2.jpg', 'https://x/3.jpg']);
+  assert.ok(!unmapped.includes('media'));
+});
+
+test('a single photo costs no gallery, and no photos is reported', () => {
+  // The cache key has a size ceiling, so a one-photo hotel must not carry a
+  // one-item array as well.
+  const one = normaliseAccommodationResult({ ...LIVE, media: [{ url: 'https://x/1.jpg' }] }, {});
+  assert.equal(one.offer.image, 'https://x/1.jpg');
+  assert.equal(one.offer.images, undefined);
+  const none = normaliseAccommodationResult({ ...LIVE, media: [] }, {});
+  assert.equal(none.offer.image, null);
+  assert.ok(none.unmapped.includes('media'), 'a hotel with no photo must say so, not look fine');
+});
+
+test('the whole live result maps with nothing left over', () => {
+  const { offer, unmapped } = normaliseAccommodationResult(LIVE, { deeplinkUrl: 'https://dl.tvllnk.com/x' });
+  assert.equal(offer.hotel, 'The Grand');
+  assert.equal(offer.resort, 'Bournemouth');
+  assert.equal(offer.countryCode, 'GB');
+  assert.equal(offer.price, 640);
+  assert.equal(offer.pricePP, 320);
+  assert.equal(offer.rating, 4);
+  assert.equal(offer.boardBasis, 'BedAndBreakfast', 'the stay details sit on units[0]');
+  assert.equal(offer.nights, 7);
+  assert.equal(offer.checkinDate, '2026-10-14T00:00:00Z');
+  assert.equal(offer.accommodationUniqueRef, 'TTI:58612582');
+  assert.equal(offer.rid, '42');
+  assert.equal(offer.resultType, 'Bookable');
+  assert.deepEqual(unmapped, [], 'a complete result must report no gaps');
+});
+
+test('an unavailable result is never cached', () => {
+  // Caching one puts a price and a booking link on a card that cannot be
+  // booked, and the visitor finds that out at the payment page. It is the
+  // worst failure this widget has, so it is refused at the parser.
+  assert.equal(normaliseAccommodationResult({ ...LIVE, isAvailable: false }, {}), null);
+  // isAvailable absent is not the same as false — an older shape must still map.
+  const { isAvailable, ...noFlag } = LIVE;
+  assert.ok(normaliseAccommodationResult(noFlag, {}).offer);
+});
+
+test('the booking link comes from the session, not invented per result', () => {
+  const withUrl = normaliseAccommodationResult(LIVE, { deeplinkUrl: 'https://dl.tvllnk.com/x' });
+  assert.equal(withUrl.offer.url, 'https://dl.tvllnk.com/x');
+  const without = normaliseAccommodationResult(LIVE, {});
+  assert.equal(without.offer.url, null);
+  assert.ok(without.unmapped.includes('url'), 'a card with nowhere to click must say so');
+  assert.ok(/r\.data && \(r\.data\.deeplinkUrl \|\| r\.data\.shareUrl\)/.test(TEST_API),
+    'the test endpoint must pass the session URL through');
 });
