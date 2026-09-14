@@ -62,6 +62,10 @@ const MAX_ORIGINS = 3;
 // ever needed once per property: the search fills the cache on the way past.
 const MAX_LOCATE = 2;
 const LOCATE_POLLS = 4;
+// The raw exchange handed back for support. One property's request and its
+// first matching result, capped: enough to answer "what did you send and what
+// came back" without turning every test response into a payload dump.
+const RAW_MAX_BYTES = 96 * 1024;
 
 const ttiKey = (appId, code) => `offers:tti:${appId}:${code}`;
 
@@ -307,6 +311,11 @@ export default async function handler(req, res) {
   // Per hotel, gathered across however many airports it was searched from.
   const perRow = rows.map(() => ({ offers: [], gaps: new Set(), tried: [], failures: [], polls: 0, areaResults: 0, flights: 0 }));
   let shape = null;
+  // THE EXCHANGE, VERBATIM. Captured from the first job that returns our
+  // property, so a question for Travelify can be answered without spending
+  // another live search to go and fetch it. Nothing secret travels in here:
+  // the API key lives in an Authorization header and never in the body.
+  let raw = null;
 
   let i = 0;
   const workers = Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, async () => {
@@ -340,6 +349,38 @@ export default async function handler(req, res) {
       acc.flights += r.alsoCount || 0;
 
       const mine = (r.results || []).filter((x) => resultIsProperty(x, job.row.code));
+      if (!raw && mine.length) {
+        const candidate = {
+          note: 'The request we sent to POST https://api.travelify.io/search, and the first '
+              + 'result that came back for this property. Credentials travel in a header and '
+              + 'are not included.',
+          code: job.row.code,
+          request: job.criteria,
+          searchSession: r.session || null,
+          polls: r.polls,
+          complete: r.complete,
+          accommodationResult: mine[0],
+          flightResultCount: r.alsoCount || 0,
+          flightResult: r.alsoFirst || null,
+        };
+        // A supplier can return a very large result. Rather than truncate the
+        // JSON into something unparseable, drop the biggest optional parts and
+        // say which were dropped, so what is handed over is always valid JSON.
+        let text = JSON.stringify(candidate);
+        if (text.length > RAW_MAX_BYTES) {
+          const trimmed = { ...candidate.accommodationResult };
+          const dropped = [];
+          for (const k of ['descriptions', 'amenities', 'features', 'units', 'optionalExtras', 'media']) {
+            if (trimmed[k] !== undefined && text.length > RAW_MAX_BYTES) {
+              delete trimmed[k]; dropped.push(k);
+              text = JSON.stringify({ ...candidate, accommodationResult: trimmed });
+            }
+          }
+          candidate.accommodationResult = trimmed;
+          candidate.droppedForSize = dropped;
+        }
+        raw = candidate;
+      }
       // Record the raw shape ONCE, from whatever came back, so a normaliser
       // built on guesses can be corrected against reality rather than argued
       // about. Keys only — never the full payload.
@@ -497,6 +538,7 @@ export default async function handler(req, res) {
     } : {}),
     elapsedMs: Date.now() - startedAt,
     shape,
+    raw,
     results,
   });
 }

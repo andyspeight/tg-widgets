@@ -2003,3 +2003,30 @@ test('the review score is mapped, since the card already renders it', () => {
   assert.deepEqual(unmapped, []);
   assert.deepEqual(none.unmapped, []);
 });
+
+test('the full Travelify exchange comes back without spending another search', () => {
+  // Andy, 14 Sep 2026: "Can you please send me the full Travelify response?"
+  // Every test is a real search that costs real capacity, so the exchange is
+  // captured during the run rather than fetched again afterwards.
+  assert.ok(/request: job\.criteria/.test(TEST_API), 'what we sent');
+  assert.ok(/accommodationResult: mine\[0\]/.test(TEST_API), 'and what came back');
+  assert.ok(/flightResult: r\.alsoFirst \|\| null/.test(TEST_API),
+    'including the flight half, which was only being counted');
+  assert.ok(/searchSession: r\.session/.test(TEST_API), 'and the session, so it can be traced');
+
+  // Nothing secret is in it: the key travels in a header, never in the body.
+  assert.ok(!/apiKey|Authorization/.test(
+    TEST_API.slice(TEST_API.indexOf('const candidate = {'), TEST_API.indexOf('raw = candidate;'))),
+  'the raw block must never reach for a credential');
+  assert.ok(/Credentials travel in a header and /.test(TEST_API), 'and must say so');
+
+  // A huge result is TRIMMED to valid JSON, never truncated into broken JSON —
+  // the whole point is that it can be handed to somebody else.
+  assert.ok(/droppedForSize/.test(TEST_API));
+  assert.ok(/const RAW_MAX_BYTES = 96 \* 1024/.test(TEST_API));
+
+  // And it is handed over as a file, not as a wall of text in a side panel.
+  assert.ok(/Copy to clipboard/.test(EDITOR));
+  assert.ok(/dl\.download = 'travelify-'/.test(EDITOR));
+  assert.ok(/The full Travelify exchange/.test(EDITOR));
+});

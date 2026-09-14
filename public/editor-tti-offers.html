@@ -2320,6 +2320,54 @@
      * already cached — only a re-test can. Without saying so, the agent changes
      * a setting, watches the card sit on the old number, and reasonably
      * concludes the setting does nothing (Andy, 14 Sep 2026). */
+    /* The request we sent and the answer that came back, ready to send on.
+       Buttons, not a wall of JSON: nobody reads 40KB in a side panel, and what
+       is actually wanted is the thing in an email to support. */
+    function renderRawExchange(out, raw) {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px solid var(--border)';
+      const text = JSON.stringify(raw, null, 2);
+      const kb = Math.max(1, Math.round(text.length / 1024));
+
+      const label = document.createElement('div');
+      label.style.cssText = 'font-size:12px;color:var(--tgse-ink-3);margin-bottom:6px';
+      label.innerHTML = '<strong>The full Travelify exchange</strong> (' + kb + 'KB) \u2014 the search '
+        + 'we sent and the first result that came back for '
+        + '<span class="tti-test-code">' + esc(raw.code || '') + '</span>. '
+        + 'Credentials are sent in a header and are not in here.'
+        + (raw.droppedForSize && raw.droppedForSize.length
+          ? '<br>Trimmed to fit: ' + esc(raw.droppedForSize.join(', ')) + '.' : '');
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+
+      const copy = document.createElement('button');
+      copy.type = 'button';
+      copy.className = 'btn';
+      copy.textContent = 'Copy to clipboard';
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          copy.textContent = 'Copied';
+        } catch (e) {
+          // A blocked clipboard is not a dead end: select it so it can be
+          // copied by hand rather than leaving the agent with nothing.
+          copy.textContent = 'Could not copy \u2014 use Download';
+        }
+        setTimeout(() => { copy.textContent = 'Copy to clipboard'; }, 2500);
+      });
+
+      const dl = document.createElement('a');
+      dl.className = 'btn';
+      dl.textContent = 'Download JSON';
+      dl.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+      dl.download = 'travelify-' + (raw.code || 'result') + '.json';
+
+      row.appendChild(copy); row.appendChild(dl);
+      wrap.appendChild(label); wrap.appendChild(row);
+      out.appendChild(wrap);
+    }
+
     function paintSearchDrift() {
       const el = $('ttiTestOut');
       if (!el || el.hidden || testedFingerprint === null) return;
@@ -2724,6 +2772,10 @@
                + '<br>Send us this and we will map the missing bits exactly.</div>';
         }
         out.innerHTML = head + lines.join('') + diag;
+        // THE EXCHANGE, FOR TRAVELIFY. Built as real buttons rather than more
+        // text: this is a file to send to somebody, and the whole point is that
+        // it can be handed over without spending another live search to get it.
+        if (d.raw) renderRawExchange(out, d.raw);
         paintSearchDrift();
         // CLOSE THE LOOP. "We cached it" and "the widget can see it" are two
         // different claims, and the gap between them has cost several rounds:
