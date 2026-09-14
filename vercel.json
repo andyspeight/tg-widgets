@@ -115,6 +115,9 @@
     },
     "api/admin/destinations-fill.js": {
       "maxDuration": 60
+    },
+    "api/dev-tti-deeplink-probe.js": {
+      "maxDuration": 60
     }
   },
   "crons": [
