@@ -303,69 +303,92 @@ become an unbounded bill. A run that hits the ceiling reports `truncated`, and
 the run stats separate `properties` (cache keys touched) from `requests` (what
 actually costs us Travelify capacity).
 
-## The deeplink is the search (14 Sep 2026)
+## How this should actually be built (14 Sep 2026, from the API docs)
 
-Andy said three times that the deeplink IS the search: run it, capture the
-response, cache that. Three times the answer here was that a deeplink only opens
-a page for a human and has nothing cacheable in it. That was an assumption that
-had never been measured, and it was wrong.
+Andy supplied the Travelify API documentation and it settles the design. Two
+things were wrong before it arrived, and one of them was a plain bug.
 
-Verified against the live service, using the method
-`scripts/probe-flight-deeplink.js` established (the build sandbox cannot reach
-Travelify, so a throwaway endpoint runs on a branch preview and is fetched
-through the Vercel tooling; the probe has since been deleted):
+**The bug: the search session was being split.** A session is returned as
+`{searchId}/{searchKey}` — an integer, a slash, then a guid — and the whole
+thing goes into the path. The probe took the integer and threw the guid away,
+so `GET /search/40767552` answered "Unrecognised API method". The correct call
+was always `GET /search/40767552/{guid}`. The docs list this exact mistake as a
+common pitfall. Nothing was blocked, nothing was undocumented, and the endpoint
+had been answering correctly the whole time.
 
-- **A deeplink runs a live search and returns a search session.** Following one
-  redirects to the client's results page with a `searchSession` handle in the
-  URL. The search has been done by the time the redirect comes back.
-- **`refn` is honoured.** The same search with and without the pin produced
-  different sessions, so a TTI code genuinely narrows it rather than being
-  ignored.
-- **A country on its own is not a valid search.** A country code with no city and
-  no coordinates is rejected outright, on two different apps. Every one of
-  Andy's working links carries the city name, `loct=City`, latitude, longitude
-  and a radius.
+**The design: the nightly job does not need a deeplink at all.** `POST /search`
+opens a search session directly, server to server. The deeplink is how a
+VISITOR reaches a booking funnel, and it stays exactly where it is for the click
+through on an offer card. The sweep just calls the API.
 
-### What that changes
+### The flow the sweep should use
+
+    POST /search                        -> returns searchSession "{id}/{key}"
+    GET  /search/{id}/{key}?reloadAll=true&version=4
+                                        -> poll until completed >= total
+
+Rules that matter, all from the docs:
+
+- Poll at least 1 second apart, 30 polls maximum. Hitting it harder returns
+  nothing faster.
+- Each poll returns only NEW results since the last one. Pass `reloadAll=true`
+  on the first poll to get everything collected so far.
+- Always check `success` in the body. A 200 with `success: false` is a failure
+  and the reason is in `errors[]`.
+- Accommodation results come back in `accommodationResults`.
+- `417` means a supplier-side business error (sold out, unavailable), not a bug
+  in our request.
+
+### Authentication
+
+Two schemes. The sweep is server to server, so it wants **Basic**:
+
+    Authorization: Basic base64(ApplicationID:PrivateAPIKey)
+
+The public **Token** scheme (`Token ApplicationID:PublicAPIKey`) is for widgets,
+requires a `Referer` header, and cannot reach private endpoints. Note that
+`api/_lib/travelify.js` already calls this API successfully with Token auth plus
+an `Origin` header, so there is a working pattern in the repo to copy from — but
+a nightly job with no browser context should use Basic and a private key. That
+key does not exist in our environment yet.
+
+### What the editor collects
+
+An accommodation search takes lat/long plus a radius, OR a resolved location id.
+A country code on its own is not enough. There is a location autocomplete
+endpoint (`GET /autocomplete`) intended for search boxes, which means the city
+can be resolved for the agent rather than typed. So the editor can stay close to
+the two-field ideal: the agent enters a TTI code and a place, the place resolves
+through autocomplete, and we store the id or the coordinates alongside the code.
+
+### Still to confirm
+
+One thing the index does not spell out: **which field on the accommodation
+search criteria scopes a search to a single property by its TTI code.** The
+deeplink spells it `refn=TTI:{code}`. The API equivalent needs to come from the
+accommodation journey page or the OpenAPI schema.
+
+### What gets rebuilt
 
 `api/cron/refresh-tti-offers.js` and `api/tti-test.js` are both built on
-`widgetsvc/traveloffers` with `refn` added and a whole country as the area. That
-is the wrong source, and a bad query besides: 250 offers for a country sorted
-cheapest-first will essentially never contain one named hotel. Both should be
-rebuilt on the deeplink: run it per hotel, take the session, read that session's
-results, write them into our cache keyed by TTI code. The cache shape, the widget
-and the editor layout are all unaffected — only the fetch changes.
-
-**The two-field editor has to change too.** A TTI code and a two-letter country
-cannot build a search Travelify will accept. Three options, Andy's call:
-
-1. Add a city field. Simplest, more typing per hotel.
-2. Resolve the city and coordinates from the TTI code, if a property lookup
-   exists. Best experience, depends on an endpoint being available.
-3. Let the agent paste the working deeplink and parse the code, city and
-   coordinates out of it. Least typing, and it cannot produce an invalid search.
-
-### Blocked on one answer from Travelify
-
-Reading a session's results needs the documented path for it. Working that out
-from the shipped front-end code was stopped deliberately: probing an
-undocumented API by dissecting its JavaScript is indistinguishable from
-attacking it, whoever owns it, and Claude Code's safety classifier stopped the
-attempt twice. Ask instead:
-
-> A deeplink returns a `searchSession` id. What is the documented endpoint to
-> read that session's results, and does server-to-server use need an auth
-> header or is the session id enough?
-
-One answer unblocks the rebuild.
+`widgetsvc/traveloffers` with a whole country as the area, which is the wrong
+service and a bad query besides: 250 offers for a country sorted cheapest-first
+will essentially never contain one named hotel. Both move to `POST /search` plus
+polling. The cache shape, the widget and the editor layout are unaffected — only
+the fetch changes.
 
 ## Next steps
 
-1. **Ask Travelify the question above.** This supersedes everything else: the
-   feed the current code is built on is the wrong source, and the deeplink that
-   replaces it needs one documented endpoint.
-2. **Decide what the editor collects**, per the three options above. A code and a
-   country is not enough.
+1. **Get the accommodation search criteria field that scopes to one property**,
+   from the accommodation journey page or the OpenAPI schema. It is the last
+   unknown before the rebuild.
+2. **Get a Travelify PRIVATE API key into the environment** for the nightly job.
+   Server-to-server calls use Basic auth with the private key; the public key
+   the widgets use cannot do this.
+3. **Rebuild the cron and the test endpoint on `POST /search` plus polling**,
+   and drop the `widgetsvc/traveloffers` path for TTI Offers.
+4. **Wire the editor's place field to `GET /autocomplete`** so the agent enters
+   a TTI code and a place, and we store the resolved id or coordinates.
    If it reports `pinIgnored`, that is a conversation with Travelify rather than
    a code change: a country-wide search sorted cheapest-first, capped at 250,
    will essentially never contain one named hotel, so the widget cannot be
