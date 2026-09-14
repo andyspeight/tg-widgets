@@ -29,9 +29,13 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
- *   v1.21.0 (14 Sep 2026) — dynamic packages: a package is priced per
- *     departure airport, so one hotel can cache several offers. They fold to
- *     one card each, cheapest kept, with departureAirports listing the rest.
+ *   v1.21.0 (14 Sep 2026) — dynamic packages on TTI Offers. A package is now
+ *     stored as a package (type 'Packages' + packageType + a departure airport
+ *     in `origin`), so the existing package card, the Flight + Hotel badge and
+ *     the existing `hotel` dedupe all work on it unchanged. The TTI branch
+ *     asks the cache for its CONFIGURED type again rather than a hard-coded
+ *     'Accommodation', which was a patch for the write side storing the
+ *     wrong type.
  *   v1.20.1 (14 Sep 2026) — canonTti strips ANY reference namespace, not just
  *                          TTI:. Travelify also returns ID: references, and the
  *                          old strip rejected those, so such a hotel could never
@@ -325,51 +329,6 @@
       seen[c] = true;
       out.push(c);
       if (out.length >= 100) break; // matches the cron and the endpoint cap
-    }
-    return out;
-  }
-
-  /** ONE CARD PER HOTEL.
-   *
-   *  A package is priced per departure airport — Travelify's flight criteria
-   *  take legs and a leg has a single origin — so a widget offering Aberdeen,
-   *  Glasgow and Edinburgh caches three offers for the same hotel on the same
-   *  dates. That is right in the cache: three real, different prices. It is
-   *  wrong on the page, where it reads as three hotels and a client who picked
-   *  four properties sees twelve cards.
-   *
-   *  So fold to the cheapest per property, and keep the count so a card can
-   *  say the price is the best of several airports rather than the only one.
-   *  Hotel-only offers have no departure airport and fall through untouched. */
-  function foldTtiByProperty(offers) {
-    const list = Array.isArray(offers) ? offers : [];
-    if (!list.some(function (o) { return o && o.departureAirport; })) return list;
-    const best = Object.create(null);
-    const order = [];
-    const out = [];
-    for (const o of list) {
-      if (!o) continue;
-      const key = o.accommodationUniqueRef || o.hotel || o.id;
-      if (!key) { out.push(o); continue; }
-      const price = Number.isFinite(o.price) ? o.price : Infinity;
-      const held = best[key];
-      if (!held) {
-        best[key] = { offer: o, price: price, airports: o.departureAirport ? [o.departureAirport] : [] };
-        order.push(key);
-        continue;
-      }
-      if (o.departureAirport && held.airports.indexOf(o.departureAirport) === -1) {
-        held.airports.push(o.departureAirport);
-      }
-      if (price < held.price) { held.offer = o; held.price = price; }
-    }
-    for (const key of order) {
-      const held = best[key];
-      // Copied rather than mutated: the raw list may be a cached array shared
-      // with another render, and a widget must not rewrite what it was handed.
-      out.push(held.airports.length > 1
-        ? Object.assign({}, held.offer, { departureAirports: held.airports.slice() })
-        : held.offer);
     }
     return out;
   }
@@ -6767,17 +6726,8 @@
         const data = await parseJsonResponse(res, 'Offers cache');
 
         if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
-          this.rawOffers = gateSuppliers(
-            this._isTti ? foldTtiByProperty(data.data) : data.data,
-            this.cfg.supplierFilter,
-          );
-          // The server counts cache rows; the TTI fold counts CARDS, and on a
-          // package those differ by however many airports priced each hotel.
-          // Using the server's number would promise more offers than the
-          // widget can draw.
-          this._availableTotal = this._isTti
-            ? this.rawOffers.length
-            : (Number.isFinite(data.totalMatched) ? data.totalMatched : data.data.length);
+          this.rawOffers = gateSuppliers(data.data, this.cfg.supplierFilter);
+          this._availableTotal = Number.isFinite(data.totalMatched) ? data.totalMatched : data.data.length;
           if (ttlMs > 0) cacheSet(ck, this.rawOffers);
           this._renderOffers();
           this._fireDataLoaded();
@@ -6859,18 +6809,22 @@
         // otherwise ask the cache for something it will never hold, and the
         // widget would sit empty with nothing saying why.
         q.set('tti', ttiCodes.join(','));
-        // ALWAYS Accommodation, and deliberately not the configured type.
+        // The type this widget was actually configured as, coerced to the two
+        // TTI Offers has and no others (Andy, 12 Sep 2026): the hotel on its
+        // own, or a dynamic package assembled around it.
         //
-        // This is the SHELF the pool is stored on, not a claim about what the
-        // price covers. Both searches — the hotel on its own and the dynamic
-        // package around it — return their property in accommodationResults
-        // and are cached under that one type, because a TTI key holds one
-        // hotel and the widget reads the whole key. Asking for
-        // DynamicPackages matched nothing while the cache was full, and the
+        // This was hard-coded to 'Accommodation' for a day, because the sweep
+        // stored every TTI offer under that type and asking for
+        // DynamicPackages matched nothing while the cache was full — the
         // widget sat empty with no way to tell that from a hotel with no
-        // availability (14 Sep 2026). A package offer says so for itself:
-        // includesFlights and departureAirport ride on the offer.
-        q.set('type', 'Accommodation');
+        // availability (14 Sep 2026). The real fault was on the WRITE side:
+        // a package is now stored as a package (type 'Packages',
+        // packageType 'DynamicPackages', a departure airport in `origin`), so
+        // both sides name the same thing again and the card can draw a flight.
+        //
+        // Coerced rather than trusted: a hand-edited or legacy type would
+        // otherwise ask the cache for something it will never hold.
+        q.set('type', String(this.cfg.type) === 'DynamicPackages' ? 'DynamicPackages' : 'Accommodation');
         // No App ID means no pool to name. Send the codes anyway and let the
         // endpoint answer an honest miss rather than silently widening this
         // widget to every offer in the country.

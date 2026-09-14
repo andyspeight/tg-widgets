@@ -292,9 +292,10 @@ async function fetchProperty(item, search, origin = null) {
       locationName: item.locationName,
       currency: criteria.Currency,
       checkinDate: criteria.AccommodationSearchCriteria.CheckinDate,
-      // Which airport this price flies from. Without it, three airports would
-      // merge into one pile and the cheapest would be shown as THE price.
-      ...(origin ? { departureAirport: origin, includesFlights: true } : {}),
+      // Which airport this price flies from, under the name the rest of the
+      // product uses. It is what turns this into a real package downstream:
+      // a flight block, the Flight + Hotel badge, and the dedupe key below.
+      ...(origin ? { origin } : {}),
       deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
     });
     if (n && n.offer) verified.push(n.offer);
@@ -342,10 +343,10 @@ async function storeProperty(item, offers, nowIso) {
   const seen = new Set();
   const unique = [];
   for (const o of offers) {
-    // departureAirport is part of the identity: the same hotel on the same
-    // dates from Aberdeen and from Glasgow is two offers at two prices, and
-    // without this the second one would be thrown away as a duplicate.
-    const k = `${o.id}|${o.origin || ''}|${o.departureAirport || ''}|${o.type || 'Packages'}`;
+    // `origin` was already in this key, and now carries the departure airport:
+    // the same hotel on the same dates from Aberdeen and from Glasgow is two
+    // offers at two prices, and both are kept.
+    const k = `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
     if (seen.has(k)) continue;
     seen.add(k);
     unique.push(o);

@@ -279,9 +279,12 @@ export default async function handler(req, res) {
           ctry: job.row.ctry, lat: job.row.lat, lng: job.row.lng,
           locationName: job.row.locationName, currency: job.criteria.Currency,
           checkinDate: job.criteria.AccommodationSearchCriteria.CheckinDate,
-          // A package price belongs to the airport it flies from. Without this
-          // the cheapest of three airports would be shown as THE price.
-          ...(job.origin ? { departureAirport: job.origin, includesFlights: true } : {}),
+          // A package price belongs to the airport it flies from. This is what
+          // makes the stored offer a real package downstream: cached-offers
+          // builds a flight block from it, the card draws the Flight + Hotel
+          // badge and the departure code, and the widget's own hotel dedupe
+          // folds three airports into one card.
+          ...(job.origin ? { origin: job.origin } : {}),
           // The bookable link belongs to the SESSION, not to the result, so it
           // comes from the response rather than being built here.
           deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
@@ -323,7 +326,7 @@ export default async function handler(req, res) {
     // times at whatever each supplier happened to quote.
     const best = new Map();
     for (const o of acc.offers) {
-      const k = (o.departureAirport || '') + '|' + (o.checkinDate || '');
+      const k = (o.origin || '') + '|' + (o.checkinDate || '');
       const cur = best.get(k);
       if (!cur || o.price < cur.price) best.set(k, o);
     }
@@ -345,7 +348,7 @@ export default async function handler(req, res) {
         // hotel price under a package heading, which is the exact thing Andy
         // reported, so it is said out loud rather than left to be assumed.
         flightResults: acc.flights,
-        pricedFrom: offers.map((o) => o.departureAirport).filter(Boolean),
+        pricedFrom: offers.map((o) => o.origin).filter(Boolean),
       } : {}),
       ...(acc.failures.length ? { notes: acc.failures } : {}),
       ...(acc.gaps.size ? { unmapped: [...acc.gaps] } : {}),
