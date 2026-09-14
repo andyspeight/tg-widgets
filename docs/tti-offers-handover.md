@@ -374,12 +374,15 @@ The editor also takes a pasted deeplink as an OPTIONAL extra: a working link
 carries the code, the country and the exact coordinates, so pasting one fills a
 row and narrows it to the town. Nobody has to.
 
-### Still to confirm
+### It works, end to end (14 Sep 2026)
 
-One thing the index does not spell out: **which field on the accommodation
-search criteria scopes a search to a single property by its TTI code.** The
-deeplink spells it `refn=TTI:{code}`. The API equivalent needs to come from the
-accommodation journey page or the OpenAPI schema.
+Andy ran a real test and got a real cached offer rendering in the widget:
+**Hilton Bournemouth, £861, 7 nights from 14 October, with its photos.**
+
+The field that scopes a search to one property is `Ref` on
+`AccommodationSearchCriteria`, carrying `TTI:{code}` — the same value the
+deeplink spells `refn`. And a code plus a country is enough: coordinates are
+optional and only narrow it.
 
 ### The search client
 
@@ -401,33 +404,67 @@ it encodes are the ones that fail silently rather than loudly:
   and stops at once. A 417 is flagged as supplier-side so a sweep does not keep
   retrying a sold-out property.
 
-### What gets rebuilt
+### What is built, and the one thing that is not
 
-`api/cron/refresh-tti-offers.js` and `api/tti-test.js` are both built on
-`widgetsvc/traveloffers` with a whole country as the area, which is the wrong
-service and a bad query besides: 250 offers for a country sorted cheapest-first
-will essentially never contain one named hotel. Both move to `POST /search` plus
-polling. The cache shape, the widget and the editor layout are unaffected — only
-the fetch changes.
+Built and proven on the live service: the search client, the criteria builder,
+the result normaliser, the per-property cache write, the editor, and the widget
+read path.
+
+**`api/cron/refresh-tti-offers.js` is STILL on the old `widgetsvc/traveloffers`
+path.** It is the last piece, and it is not harmless while it waits: it writes
+the same keys the Test button writes, so the first nightly run would OVERWRITE
+a good cache with the country-wide sieve that never found the property. Either
+move it over or stop it before it next runs.
+
+It needs one decision that the Test button did not: a nightly job has no agent,
+so no customer address, and `CustomerIP` is required. The options are a value
+configured per deployment, the server's own egress address, or whatever
+Travelify considers correct for server-to-server use.
+
+### Things that failed quietly, and are now guarded
+
+Every one of these looked like a different bug from the outside, and all of them
+cost a round trip. They are the reason the tests are shaped the way they are.
+
+- **`_defaults()` is a whitelist.** It rebuilds the widget config from named
+  keys and silently drops the rest. `ttiCodes` was not on the list, so the
+  widget did not know which hotels it had. That produced BOTH "it is showing
+  lots of random offers" (no codes, so the query fell through to the destination
+  branch) and "No offers available right now" (no codes, once that fallback was
+  closed). A test now asserts every key the TTI path reads is one `_defaults`
+  keeps.
+- **The cached `type` must match what the widget asks for.** The sweep runs an
+  Accommodation search; labelling the result from the widget's configured type
+  cached a hotel-only offer as `Packages`, and the read filters on that field
+  exactly.
+- **A cached offer needs an `id`.** The read dedupes on `id|origin|type`, so
+  offers without one all key identically and a twelve-hotel widget collapses to
+  a single card.
+- **Coordinates are stored as `resortLat`/`resortLng` too**, because that is
+  what the read rebuilds `accommodation.destination` from, and the widget's own
+  deeplink builder needs it to pin the property on a click.
+- **The editor previews against the CLIENT's App ID**, not the demo 250 the
+  plain Offers editor hardcodes. This cache is keyed by App ID; that one is
+  keyed by country, which is why the copy was harmless there and silent here.
+- **Editor pages carry `Cache-Control: no-cache`.** A stale editor reports bugs
+  that were already fixed.
 
 ## Next steps
 
-1. **Get the accommodation search criteria field that scopes to one property**,
-   from the accommodation journey page or the OpenAPI schema. It is the last
-   unknown before the rebuild.
-2. **Rebuild the cron and the test endpoint** on `api/_lib/offers/travelify-search.js`,
-   dropping the `widgetsvc/traveloffers` path for TTI Offers. The transport is
-   built and tested; only `buildAccommodationCriteria` is waiting on step 1.
-4. **Wire the editor's place field to `GET /autocomplete`** so the agent enters
-   a TTI code and a place, and we store the resolved id or coordinates.
-   If it reports `pinIgnored`, that is a conversation with Travelify rather than
-   a code change: a country-wide search sorted cheapest-first, capped at 250,
-   will essentially never contain one named hotel, so the widget cannot be
-   correct until either the pin is honoured or the input carries enough to
-   narrow the area (a city, or coordinates).
-2. Watch the first full sweep: `tti:offers:lastSweepStats` carries per-run
-   tallies, and `suspectParam` flags a parameter being ignored.
-3. Decide whether a hotel with no availability should stay hidden (current
-   behaviour, and what Andy chose on 12 Sep 2026) or show an enquire state. The
-   second is a different product and needs a card state designing across all
-   templates.
+1. **Move the cron onto `api/_lib/offers/travelify-search.js`**, or disable it
+   until then. As it stands its first run overwrites good cached offers with
+   the old country-wide result. This is the only urgent item.
+2. **Decide the cron's `CustomerIP`**, per the note above. It cannot run
+   without one.
+3. **Dynamic packaging.** The editor offers it and nothing supports it yet: a
+   DP search needs `flightSearchCriteria` alongside the accommodation criteria,
+   and both selection objects at every later stage. Until it is built, both the
+   widget and the sweep speak Accommodation only.
+4. **Decide what "from" means.** Every search is one stay — currently 30 days
+   out, 7 nights, matching the `frd=30&dur=7` the existing deeplinks use. A
+   true from-price across a spread of dates multiplies the nightly search count
+   by however many dates are probed, so it is a budget decision rather than a
+   code one.
+5. **A hotel with no availability stays hidden** (Andy, 12 Sep 2026). An
+   enquire state is a different product and needs a card state designing across
+   every template.
