@@ -31,6 +31,12 @@ import {
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
+import { resolveArrivalAirport, arrivalAirports } from '../api/_lib/offers/arrival-airport.js';
+
+/** Just the two fields a caller acts on, so a distance tweak does not break
+ *  an assertion about which airport was chosen. */
+const pick = (r) => (r ? { code: r.code, source: r.source } : r);
+
 const TTI_SRC = readFileSync(new URL('../api/_lib/offers/tti.js', import.meta.url), 'utf8');
 const CACHED = readFileSync(new URL('../api/cached-offers.js', import.meta.url), 'utf8');
 const CRON = readFileSync(new URL('../api/cron/refresh-tti-offers.js', import.meta.url), 'utf8');
@@ -1207,7 +1213,7 @@ test('a package is a different search, not a label on the hotel one', () => {
   // Andy selected DP and got hotel-only details under a package heading
   // (14 Sep 2026), because only the accommodation criteria were ever built.
   const c = buildDynamicPackageCriteria({ code: 'TTI:58612582', ctry: 'GB' },
-    { customerIp: '195.162.100.165', origins: ['LGW'] }, NOW);
+    { customerIp: '195.162.100.165', origins: ['LGW'], destination: 'BOH' }, NOW);
   assert.equal(c.SearchType, 'DynamicPackaging');
   assert.ok(c.FlightSearchCriteria, 'the flight half must be sent');
   assert.ok(c.AccommodationSearchCriteria, 'alongside the hotel half');
@@ -1224,33 +1230,30 @@ test('the flight is a journey of legs, which is what Travelify asked for', () =>
   //   "FlightSearchCriteria - Legs: You must specify at least one flight leg;
   //    FlightSearchCriteria - Passengers: You must specify at least one passenger"
   const c = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
-    { customerIp: '1.2.3.4', origins: ['LGW'], adults: 2 }, NOW);
+    { customerIp: '1.2.3.4', origins: ['LGW'], destination: 'BOH', adults: 2 }, NOW);
   const f = c.FlightSearchCriteria;
   assert.ok(Array.isArray(f.Legs) && f.Legs.length >= 1, 'at least one flight leg');
   assert.ok(Array.isArray(f.Passengers) && f.Passengers.length >= 1, 'at least one passenger');
   assert.ok(!('Origins' in f), 'the flat shape the API rejected must be gone');
+  assert.equal(f.Legs[0].DestinationCode, 'BOH', 'a real airport, never a country code');
   assert.ok(!('DepartDate' in f) && !('ReturnDate' in f));
   assert.equal(f.DirectOnly, false, 'dir=false on the deeplink');
 
   // Out on the check-in, back on the check-out. Different dates would price a
   // package nobody asked for: a flight that lands after the room is given up.
   assert.equal(f.Legs.length, 2, 'a return trip is two legs');
-  assert.equal(f.Legs[0].Origin, 'LGW');
+  assert.equal(f.Legs[0].OriginCode, 'LGW');
   assert.equal(f.Legs[0].DepartureDate, c.AccommodationSearchCriteria.CheckinDate);
-  assert.equal(f.Legs[1].Destination, 'LGW', 'and home again');
+  assert.equal(f.Legs[1].DestinationCode, 'LGW', 'and home again');
   assert.equal(f.Legs[1].DepartureDate, c.AccommodationSearchCriteria.CheckoutDate);
 
-  // Each value is sent under every plausible spelling, because Travelify named
-  // the containers and not their contents, and it ignores fields it does not
-  // recognise. An alias carrying a DIFFERENT value would be a real bug — it
-  // would mean the answer depended on which name the API happened to read.
+  // THE FIELD NAMES ARE MEASURED. The round before this sent every plausible
+  // spelling at once; Travelify then validated exactly two by name
+  // (Legs[0].DestinationCode, Legs[1].OriginCode), which is the service saying
+  // which it reads. The guesses are deleted, and must stay deleted.
   for (const [i, leg] of f.Legs.entries()) {
-    assert.equal(new Set([leg.Origin, leg.OriginCode, leg.From]).size, 1,
-      `leg ${i}: every origin alias must carry the same value`);
-    assert.equal(new Set([leg.Destination, leg.DestinationCode, leg.To]).size, 1,
-      `leg ${i}: every destination alias must carry the same value`);
-    assert.equal(new Set([leg.DepartureDate, leg.DepartDate, leg.Date]).size, 1,
-      `leg ${i}: every date alias must carry the same value`);
+    assert.deepEqual(Object.keys(leg).sort(), ['DepartureDate', 'DestinationCode', 'OriginCode'],
+      `leg ${i}: only the field names Travelify named itself`);
   }
 
   // The party on the plane is the party in the room. Two adults in the hotel
@@ -1263,14 +1266,14 @@ test('one departure airport per search, because a leg carries one origin', () =>
   // Several airports is several QUESTIONS. Sending only the first while the
   // agent picked three would quote a price from an airport nobody asked about.
   const c = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
-    { customerIp: '1.2.3.4', origins: ['ABZ', 'GLA', 'EDI'] }, NOW);
-  assert.equal(c.FlightSearchCriteria.Legs[0].Origin, 'ABZ');
+    { customerIp: '1.2.3.4', origins: ['ABZ', 'GLA', 'EDI'], destination: 'BOH' }, NOW);
+  assert.equal(c.FlightSearchCriteria.Legs[0].OriginCode, 'ABZ');
   assert.equal(c.FlightSearchCriteria.Legs.length, 2, 'two legs, not one per airport');
 
   // An explicit origin wins over the list, which is how the caller walks it.
   const g = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
-    { customerIp: '1.2.3.4', origins: ['ABZ', 'GLA', 'EDI'], origin: 'GLA' }, NOW);
-  assert.equal(g.FlightSearchCriteria.Legs[0].Origin, 'GLA');
+    { customerIp: '1.2.3.4', origins: ['ABZ', 'GLA', 'EDI'], origin: 'GLA', destination: 'BOH' }, NOW);
+  assert.equal(g.FlightSearchCriteria.Legs[0].OriginCode, 'GLA');
 
   // And the caller is given the list to walk, cleaned, deduped and capped:
   // every airport is a search, and a nightly sweep pays for each one.
@@ -1359,8 +1362,8 @@ test('a package with no departure airport is refused, not downgraded', () => {
 
 test('the test endpoint runs the package search for a package widget', () => {
   assert.ok(/const isDp = body\.type === 'DynamicPackages'/.test(TEST_API));
-  assert.ok(/buildDynamicPackageCriteria\(row, \{ \.\.\.search, origin \}\)/.test(TEST_API),
-    'and one search per departure airport, because a leg carries one origin');
+  assert.ok(/buildDynamicPackageCriteria\(row, \{ \.\.\.search, origin, destination: arrival\.code \}\)/.test(TEST_API),
+    'one search per departure airport, into a resolved arrival airport');
   assert.ok(/const useOrigins = isDp \? dpOrigins\(search, MAX_ORIGINS\)/.test(TEST_API));
   assert.ok(!/dp_not_supported/.test(TEST_API), 'it is supported now');
   assert.ok(/<option value="DynamicPackages">/.test(EDITOR), 'and the option is selectable');
@@ -1512,4 +1515,125 @@ test('a stored TTI package survives the wire shape as a real flight', () => {
   assert.equal(hotel.type, 'Accommodation');
   assert.ok(!hotel.flight, 'a hotel on its own has no flight');
   assert.ok(hotel.accommodation);
+});
+
+/* ============================================================
+   Where a package flies into
+   ============================================================ */
+
+test('a country code is never sent as an airport, because it is not one', () => {
+  // Travelify, 14 Sep 2026, by name:
+  //   Legs[0] - DestinationCode: Unrecognised 3-letter airport/city code: GB
+  // The fix is not to send a better country, it is to resolve a real airport.
+  assert.equal(buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', origin: 'ABZ', destination: 'GB' }, NOW), null,
+    'a two-letter country must be refused, not passed through');
+  assert.equal(buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', origin: 'ABZ' }, NOW), null,
+    'and no destination at all means no package, never a blind search');
+});
+
+test('the arrival airport is resolved from what the row actually knows', () => {
+  // Cheapest honest source first. None of these spends a search.
+  assert.deepEqual(
+    pick(resolveArrivalAirport({ dst: 'ae1', ctry: 'AE' })),
+    { code: 'AE1', source: 'given' },
+    'a pinned code or a deeplink dst wins outright, in Travelify’s own code space');
+
+  // A hotel we can place goes to its nearest MAJOR, in its own country.
+  assert.deepEqual(
+    pick(resolveArrivalAirport({ lat: 50.72, lng: -1.87, ctry: 'GB' })),
+    { code: 'BRS', source: 'nearest-in-country' },
+    'Hilton Bournemouth is nearest Bristol of the majors');
+  assert.deepEqual(
+    pick(resolveArrivalAirport({ lat: 25.049, lng: 55.118, ctry: 'AE' })),
+    { code: 'DXB', source: 'nearest-in-country' });
+
+  // A property we have never placed still gets a real, sane answer.
+  assert.deepEqual(
+    pick(resolveArrivalAirport({ ctry: 'GB' })),
+    { code: 'LHR', source: 'country-hub' },
+    'the busiest hub, and the panel says that is why');
+
+  // And nothing at all is NULL, not a guess.
+  assert.equal(resolveArrivalAirport({}), null);
+  assert.equal(resolveArrivalAirport({ ctry: 'ZZ' }), null);
+});
+
+test('the country wins over raw distance, because a package must land in it', () => {
+  // A hotel on the Côte d'Azur is closer to an Italian airport than to a
+  // French one often enough to matter, and a package that lands in the wrong
+  // country is wrong in a way a price cannot show.
+  const nice = resolveArrivalAirport({ lat: 43.70, lng: 7.27, ctry: 'FR' });
+  assert.equal(arrivalAirports().find((a) => a[0] === nice.code)[2], 'FR');
+  // Only a country with no major airport of its own falls through.
+  const andorra = resolveArrivalAirport({ lat: 42.51, lng: 1.52, ctry: 'AD' });
+  assert.equal(andorra.source, 'nearest-anywhere');
+  assert.ok(andorra.code);
+});
+
+test('a pasted DP deeplink brings its own arrival airport', () => {
+  // Andy's DP link carries dst=AE1, which is exactly what DestinationCode
+  // wants. Re-deriving it when the link already said so would be worse.
+  const p = parseDeeplink('https://dl.tvllnk.com/deeplink/250?st=DynamicPackaging'
+    + '&refn=TTI:58612582&ctry=AE&dst=AE1&org=LGW&loc=Dubai&loct=City');
+  assert.equal(p.dst, 'AE1');
+  assert.equal(p.type, 'DynamicPackages');
+  // An accommodation link has no dst and must not invent one.
+  const a = parseDeeplink('https://dl.tvllnk.com/deeplink/250?st=Accommodation&refn=TTI:1&ctry=GB');
+  assert.ok(!('dst' in a));
+});
+
+test('a pinned arrival airport survives the round trip to the sweep', () => {
+  // The agent overriding our choice is the whole point of the box. Dropping it
+  // on save would silently put the package back on whatever we resolved.
+  const rows = codesFromConfig({ ttiCodes: [{ code: '58612582', ctry: 'GB', dst: 'boh' }] });
+  assert.equal(rows[0].dst, 'BOH', 'and normalised on the way through');
+  assert.ok(!('dst' in codesFromConfig({ ttiCodes: [{ code: '1', ctry: 'GB' }] })[0]));
+  // Junk is dropped rather than sent upstream to be rejected.
+  assert.ok(!('dst' in codesFromConfig({ ttiCodes: [{ code: '1', ctry: 'GB', dst: 'x' }] })[0]));
+
+  assert.ok(/dst: p\.dst \|\| ''/.test(CRON), 'the sweep must carry it');
+  assert.ok(/resolveArrivalAirport\(\{ dst: item\.dst/.test(CRON), 'and resolve from it');
+  assert.ok(/\{ dst: String\(r\.dst\)/.test(EDITOR), 'and the editor must save it');
+});
+
+test('the test panel says which airport it chose, and why', () => {
+  // "We chose Bristol for a hotel in Bournemouth" is a reasonable call an
+  // agent should be able to see and correct, not discover from an odd price.
+  assert.ok(/flyInto: \(arrivals\.get\(idx\) \|\| \{\}\)\.code/.test(TEST_API));
+  assert.ok(/flyIntoWhy: \(arrivals\.get\(idx\) \|\| \{\}\)\.source/.test(TEST_API));
+  assert.ok(/Flying into/.test(EDITOR));
+  assert.ok(/Put an airport code in the Fly into box/.test(EDITOR),
+    'and say how to override it');
+  // Resolving must cost no search: it reads the cache this property already
+  // filled, never a fresh lookup.
+  assert.ok(/await getJson\(ttiKey\(creds\.appId, row\.code\)\)/.test(TEST_API));
+});
+
+test('the airport list actually ships with the functions that read it', () => {
+  // A data file read through new URL(..., import.meta.url) is only bundled if
+  // Vercel's tracer finds it, and this repo's convention is to say so
+  // explicitly rather than rely on that. Without it resolveArrivalAirport
+  // returns null in production, every package is refused, and it looks like a
+  // supplier problem — the file loads fine in every local test, which is
+  // exactly what makes this class of bug expensive.
+  const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
+  for (const fn of ['api/tti-test.js', 'api/cron/refresh-tti-offers.js']) {
+    const cfg = vercel.functions[fn];
+    assert.ok(cfg, `${fn} has no functions entry`);
+    assert.ok(String(cfg.includeFiles || '').includes('api/_data/airports.json'),
+      `${fn} reads the airport list and must bundle it`);
+  }
+});
+
+test('a package that cannot name an arrival airport is refused, not guessed', () => {
+  // The safe direction if the list ever fails to load: no search, and a
+  // message that tells the agent what to do. Never a search into nowhere, and
+  // never a country code we already know it rejects.
+  assert.ok(/if \(isDp && !arrival\)/.test(TEST_API));
+  assert.ok(/could not work out which airport/.test(TEST_API));
+  assert.ok(/list load failed/.test(
+    readFileSync(new URL('../api/_lib/offers/arrival-airport.js', import.meta.url), 'utf8')),
+  'and a missing list logs rather than throwing');
 });

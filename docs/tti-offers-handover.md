@@ -436,27 +436,59 @@ All of it, and the nightly sweep is on the same path as the Test button.
   auth and the whole accommodation half are accepted, and
   `SearchType: 'DynamicPackaging'` is understood.
 
-  **The leg field names are sent under several spellings at once.** Travelify
-  named the two containers, not their contents, and the docs page that would
-  settle it is not reachable from the build sandbox. But the same rejection
-  showed that the service reports what is MISSING and ignores what it does not
-  recognise — the flat `Origins`, `DepartDate`, `ReturnDate` and
-  `DestinationCountry` in that first attempt drew no complaint at all. So each
-  value goes under every plausible name (`Origin`/`OriginCode`/`From`,
-  `Destination`/`DestinationCode`/`To`, `DepartureDate`/`DepartDate`/`Date`),
-  all carrying the identical value. Whichever one the API reads, it reads the
-  right thing.
+  **The field names are now MEASURED, not guessed.** The round before this sent
+  every plausible spelling at once — safe, because the service reports what is
+  missing and ignores what it does not recognise. Travelify then validated
+  exactly two by name, which is it telling us which ones it reads:
 
-  This is CALIBRATION, not the finished shape. **Once a DP search is confirmed
-  working, ask Darren which names are real and delete the rest.** A test
-  asserts every alias in a leg carries the same value, because an alias with a
-  different value would make the answer depend on which name the API happened
-  to read.
+      Legs[0] - DestinationCode: Unrecognised 3-letter airport/city code: GB
+      Legs[1] - OriginCode: The field OriginCode must be a string with a
+                minimum length of 3 and a maximum length of 11
 
-  A leg's destination is the hotel's COUNTRY: the accommodation half already
-  pins the exact property, so a country is the only destination we can state
-  truthfully. `Passengers` mirrors the room's `Guests` (`[{Type:'Adult'}]`),
-  which is the proven shape, and `Adult` is in the documented TravellerTypes.
+  So a leg is `{ OriginCode, DestinationCode, DepartureDate }` and the guesses
+  are deleted. `Passengers` mirrors the room's `Guests` (`[{Type:'Adult'}]`),
+  the proven shape, and `Adult` is in the documented TravellerTypes.
+
+### A package needs an airport to fly INTO, and a TTI row has no airport
+
+The same rejection carried the other half of the answer: **a country is not a
+place a plane lands.** `GB` was refused outright. But a TTI row is a property
+code and a country — an agent never types an airport — so the arrival airport
+has to be resolved. `api/_lib/offers/arrival-airport.js` does it, and **spends
+no search**:
+
+1. a code the agent pinned in the row's **Fly into** box, or a pasted DP
+   deeplink's own `dst` (Andy's read `dst=AE1`, which is exactly this field);
+2. coordinates already on the row, from a pasted deeplink;
+3. coordinates in **this property's own cache** — free, and already there for
+   any hotel that has been tested once, which is the common case;
+4. the country's busiest hub, for a property we have never seen.
+
+Nothing left means **no package**, not a search into nowhere.
+
+**The list is the curated majors** in `api/_data/airports.json`, 106 airports
+with coordinates, deliberately not the 3,242-airport departures list beside it.
+That file's own header says why: an arrival needs a hub with hotels and inbound
+flights, and a package into a regional strip with no inbound schedule returns
+nothing — which looks exactly like a hotel with no availability.
+
+**Same country beats raw distance.** A hotel on the Côte d'Azur is nearer an
+Italian airport than a French one often enough to matter, and landing in the
+wrong country is wrong in a way a price cannot show. Only a country with no
+major airport of its own falls through to nearest-anywhere.
+
+**The choice is shown, and overridable.** The Test panel names the airport and
+why it was picked ("nearest major airport to the hotel", "the country's main
+airport, because we do not know exactly where this hotel is yet"), because
+*we chose Bristol for a hotel in Bournemouth* is a reasonable call an agent
+should be able to see and correct — not discover from a price that looks odd.
+The **Fly into** box on each row is that override, and it only appears on a
+package widget.
+
+**Both functions that read the list declare it in `vercel.json`
+(`includeFiles`).** A file read through `new URL(..., import.meta.url)` only
+ships if Vercel's tracer finds it, and it loads fine in every local test —
+which is what makes that class of bug expensive. A test pins it.
 
 - **A package is stored AS a package, in the fields the product already uses.**
   `type: 'Packages'`, `packageType: 'DynamicPackages'`, and the departure
@@ -548,8 +580,10 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 
 1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
    should start running. Until then it skips, safely.
-2. **Trim the leg aliases** once a DP search is confirmed working and Darren
-   has said which field names are real (see the flight-criteria note above).
+2. **Add BOH, SOU and their like to the arrival list** if clients sell hotels
+   the curated 106 place badly. Bournemouth currently resolves to Bristol at
+   95km, which is right by distance and may not be the airport the client
+   sells. The Fly into box is the per-hotel escape hatch in the meantime.
 3. **Decide what "from" means.** Every search is one stay, currently 30 days out
    and 7 nights, matching the `frd=30&dur=7` the deeplinks use. A true from-price
    across a spread of dates multiplies the nightly search count by however many

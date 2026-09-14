@@ -76,6 +76,7 @@ import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } fro
 // is how the shape drifts, and api/cached-offers.js rebuilds BOTH pools with a
 // single toRawShape that is the exact inverse of this one parser.
 import { runSearch } from '../_lib/offers/travelify-search.js';
+import { resolveArrivalAirport } from '../_lib/offers/arrival-airport.js';
 import {
   normaliseOffers,
   callOffersProxy,
@@ -211,6 +212,9 @@ export async function collectWork() {
         work.set(k, {
           appId, apiKey: creds.apiKey, code: p.code, name: p.name, ctry: p.ctry,
           lat: p.lat, lng: p.lng, radius: p.radius, locationName: p.locationName || p.name,
+          // The arrival airport an agent pinned, if any. Resolved to a real
+          // code later, once per property.
+          dst: p.dst || '',
           // One property, one cache key, but possibly two asks. A hotel-only
           // widget and a dynamic-package widget want genuinely different
           // products from the same property, and neither ask is a superset of
@@ -227,6 +231,10 @@ export async function collectWork() {
         // that only pasted its code — the documented anchor needs a name.
         if (!existing.name && p.name) existing.name = p.name;
         if (!existing.ctry && p.ctry) existing.ctry = p.ctry;
+        if (!existing.dst && p.dst) existing.dst = p.dst;
+        if (!Number.isFinite(existing.lat) && Number.isFinite(p.lat)) {
+          existing.lat = p.lat; existing.lng = p.lng;
+        }
         const same = existing.searches.find((sr) => sr.type === search.type);
         if (same) {
           // Same product, different window: the wider one wins so neither
@@ -267,6 +275,11 @@ async function fetchProperty(item, search, origin = null) {
   const opts = {
     ...search, customerIp: CUSTOMER_IP, customerUserAgent: 'Travelgenix-TtiOffersCron/1.0',
     ...(origin ? { origin } : {}),
+    // Where the package lands. Resolved from whatever the row knows — a
+    // pinned code, a pasted deeplink's coordinates, otherwise the country's
+    // hub. A leg will not take a country code, so without this there is no
+    // package and fetchProperty returns null rather than searching blind.
+    ...(isDp ? { destination: (item.arrival && item.arrival.code) || '' } : {}),
   };
   const criteria = isDp
     ? buildDynamicPackageCriteria(item, opts)
@@ -314,6 +327,17 @@ async function fetchProperty(item, search, origin = null) {
  *  three prices. Capped at CRON_MAX_ORIGINS, because this multiplies the
  *  nightly bill by every airport a client adds. */
 async function fetchPropertyAllTypes(item) {
+  // Resolved once per property rather than once per airport: the arrival
+  // airport depends on the HOTEL, not on where the visitor flies from.
+  //
+  // The sweep has no cache read of its own for this: it uses what the row
+  // carries. A property whose widget was built from a pasted deeplink has
+  // coordinates and gets its nearest major; one with only a country gets that
+  // country's hub. Both are honest, and the editor shows an agent which it is
+  // so they can pin a better one.
+  if (!item.arrival) {
+    item.arrival = resolveArrivalAirport({ dst: item.dst, lat: item.lat, lng: item.lng, ctry: item.ctry });
+  }
   const asks = [];
   for (const sr of item.searches) {
     if (sr.type === 'Accommodation') { asks.push([sr, null]); continue; }

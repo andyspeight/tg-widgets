@@ -122,14 +122,20 @@ export function codesFromConfig(config) {
   }
   const out = [];
   const seen = new Set();
+  // An arrival airport an agent pinned, or one a pasted deeplink carried. A
+  // package's flight legs need a real airport code, and this is the only place
+  // a human can say which one.
+  const dstOf = (v) => (/^[A-Za-z0-9]{3,11}$/.test(String(v || '').trim())
+    ? String(v).trim().toUpperCase() : '');
   for (const row of rows) {
-    let code, name, ctry, lat, lng;
+    let code, name, ctry, lat, lng, dst;
     if (row && typeof row === 'object') {
       code = canonTti(row.code || row.tti || row.uniqueRef);
       name = cleanName(row.name);
       ctry = cleanCtry(row.ctry || row.countryCode);
       lat = cleanCoord(row.lat ?? row.latitude, 90);
       lng = cleanCoord(row.lng ?? row.longitude, 180);
+      dst = dstOf(row.dst);
     } else {
       const parts = String(row || '').split(',');
       code = canonTti(parts[0]);
@@ -137,10 +143,11 @@ export function codesFromConfig(config) {
       ctry = cleanCtry(parts[2]);
       lat = cleanCoord(parts[3], 90);
       lng = cleanCoord(parts[4], 180);
+      dst = dstOf(parts[5]);
     }
     if (!code || seen.has(code)) continue;
     seen.add(code);
-    out.push({ code, name, ctry, lat, lng });
+    out.push({ code, name, ctry, lat, lng, ...(dst ? { dst } : {}) });
     if (out.length >= MAX_CODES_PER_WIDGET) break;
   }
   return out;
@@ -488,6 +495,11 @@ export function parseDeeplink(url) {
     ...(Number.isFinite(lng) && lng >= -180 && lng <= 180 ? { lng } : {}),
     // Deeplinks carry the radius in km; the search criteria want miles.
     ...(Number.isFinite(rad) && rad > 0 ? { radius: Math.max(1, Math.round(rad * 0.621371)) } : {}),
+    // The arrival airport, straight from the link. A DP deep link carries
+    // `dst` (Andy's read `dst=AE1`), which is exactly the code a flight leg's
+    // DestinationCode wants — so a pasted link needs nothing resolved.
+    ...(/^[A-Za-z0-9]{3,11}$/.test(String(q.get('dst') || '').trim())
+      ? { dst: String(q.get('dst')).trim().toUpperCase() } : {}),
     // st=DynamicPackaging on a DP link, Accommodation otherwise.
     type: /^dynamic/i.test(String(q.get('st') || '')) ? 'DynamicPackages' : 'Accommodation',
   };
@@ -719,40 +731,32 @@ export function buildDynamicPackageCriteria(prop, search = {}, now = new Date())
   const origin = String(search.origin || origins[0] || '').trim().toUpperCase();
   if (!/^[A-Z]{3}$/.test(origin)) return null;
 
+  // WHERE IT LANDS. A leg needs a real airport at both ends, and the caller
+  // resolves it — see api/_lib/offers/arrival-airport.js. Sending the hotel's
+  // COUNTRY was the previous attempt, and Travelify rejected it by name:
+  //
+  //   Legs[0] - DestinationCode: Unrecognised 3-letter airport/city code: GB
+  //
+  // A country is not a place a plane lands. No arrival airport means no
+  // package, so this refuses rather than inventing somewhere to fly to.
+  const dest = String(search.destination || '').trim().toUpperCase();
+  if (!/^[A-Z0-9]{3,11}$/.test(dest)) return null;
+
   const acc = base.AccommodationSearchCriteria;
-  // Travelify's own words on the first attempt (14 Sep 2026): "Legs: You must
-  // specify at least one flight leg; Passengers: You must specify at least one
-  // passenger". So the flight half is a JOURNEY — a list of legs — not the flat
-  // origin/date pair that was guessed first, and the party travels as
-  // Passengers rather than riding along on the room.
+  // THE FIELD NAMES ARE MEASURED, not guessed. The first attempt sent each
+  // value under every plausible spelling at once, because Travelify reports
+  // what is missing and ignores what it does not recognise. It then validated
+  // exactly two of them by name — Legs[0].DestinationCode, Legs[1].OriginCode —
+  // which is the service telling us which spellings it actually reads. The
+  // rest are deleted.
   //
-  // WHY EACH LEG CARRIES THE SAME VALUE UNDER SEVERAL NAMES.
-  //
-  // Travelify named the two containers, not the fields inside them, and the
-  // docs page that would settle it is not reachable from here. But the same
-  // rejection told us something useful in passing: the first attempt ALSO sent
-  // Origins, DepartDate, ReturnDate, DestinationCountry and DirectOnly, and the
-  // service said nothing about any of them. It reports what is MISSING, and
-  // ignores what it does not recognise.
-  //
-  // So each value is sent under every plausible spelling, all carrying the
-  // identical value. Whichever one the API reads, it reads the right thing, and
-  // there is no spelling left to be wrong about. The alternative was shipping
-  // one guess and asking Andy to run the test again for each name it rejected.
-  //
-  // This is a CALIBRATION measure, not the finished shape. Once a DP search is
-  // confirmed working, ask Darren which names are real and delete the rest —
-  // there is a note in the handover. Adding an alias is safe; adding one with a
-  // DIFFERENT value would not be, which is what `leg()` below prevents.
-  const leg = (from, to, date) => ({
-    Origin: from, OriginCode: from, From: from,
-    ...(to ? { Destination: to, DestinationCode: to, To: to } : {}),
-    DepartureDate: date, DepartDate: date, Date: date,
-  });
-  // The hotel's COUNTRY is the only destination we can state truthfully: the
-  // accommodation half already pins the exact property, so the flight has to
-  // reach the right country rather than a specific airport we do not hold.
-  const dest = acc.LocationCountry || '';
+  // `Legs` and `Passengers` were named the same way, one round earlier:
+  // "Legs: You must specify at least one flight leg; Passengers: You must
+  // specify at least one passenger". So the flight half is a JOURNEY, and the
+  // party travels as Passengers rather than riding along on the room.
+  const leg = (from, to, date) => ({ OriginCode: from, DestinationCode: to, DepartureDate: date });
+  // Out on the check-in and back on the check-out, so the flight brackets the
+  // stay rather than pricing a trip nobody asked for.
   const legs = [leg(origin, dest, acc.CheckinDate), leg(dest, origin, acc.CheckoutDate)];
 
   // Mirrors the Guests shape on the room, which is the naming this API uses

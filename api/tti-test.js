@@ -39,7 +39,8 @@ import {
   buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
-import { setJson } from './_redis.js';
+import { resolveArrivalAirport } from './_lib/offers/arrival-airport.js';
+import { setJson, getJson } from './_redis.js';
 
 // A live search per property, so this is deliberately small.
 const MAX_CODES = 5;
@@ -81,6 +82,9 @@ function rowsFrom(body) {
       locationName: row.locationName || row.loc || '',
       locationType: row.locationType || 'City',
       ctry: cleanCtry(row.ctry || row.countryCode || ''),
+      // The arrival airport, when the agent pinned one or a pasted deeplink
+      // carried `dst`. Everything else is resolved below.
+      dst: String(row.dst || '').trim().toUpperCase(),
     });
   };
   for (const raw of (Array.isArray(body.deeplinks) ? body.deeplinks : [])) {
@@ -172,6 +176,40 @@ export default async function handler(req, res) {
     customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
   };
 
+  // WHERE EACH PACKAGE FLIES INTO.
+  //
+  // A leg needs a real airport at both ends. Travelify rejected the hotel's
+  // country by name ("Unrecognised 3-letter airport/city code: GB"), and a TTI
+  // row carries a property code and a country, never an airport. So it is
+  // resolved here, cheapest source first, and NO SEARCH IS SPENT doing it:
+  //
+  //   1. a code the agent pinned, or a pasted deeplink's own `dst`
+  //   2. coordinates already on the row, from a pasted deeplink
+  //   3. coordinates in THIS property's cache — free, and already there for
+  //      any hotel that has been tested once, which is the common case
+  //   4. the country's busiest hub, for a property we have never seen
+  //
+  // Each step is a fact rather than a guess, and the answer is reported back
+  // with HOW it was decided, because "we chose Bristol for a hotel in
+  // Bournemouth" is a reasonable call an agent should be able to see and
+  // override rather than discover from a price.
+  const arrivals = new Map();
+  if (isDp) {
+    await Promise.all(rows.map(async (row, idx) => {
+      let { lat, lng } = row;
+      if (!row.dst && !(Number.isFinite(lat) && Number.isFinite(lng))) {
+        try {
+          const cached = await getJson(ttiKey(creds.appId, row.code));
+          const hit = (cached && Array.isArray(cached.offers) ? cached.offers : [])
+            .find((o) => Number.isFinite(o.resortLat) && Number.isFinite(o.resortLng));
+          if (hit) { lat = hit.resortLat; lng = hit.resortLng; }
+        } catch { /* a cache miss is not a failure, it just costs precision */ }
+      }
+      const got = resolveArrivalAirport({ dst: row.dst, lat, lng, ctry: row.ctry });
+      if (got) arrivals.set(idx, got);
+    }));
+  }
+
   // ONE SEARCH PER DEPARTURE AIRPORT.
   //
   // Travelify's flight criteria take Legs, and a leg has a single origin. So
@@ -186,8 +224,14 @@ export default async function handler(req, res) {
   for (const origin of useOrigins) {
     for (let idx = 0; idx < rows.length; idx++) {
       const row = rows[idx];
+      const arrival = arrivals.get(idx);
+      if (isDp && !arrival) {
+        unsearchable.set(idx, 'We could not work out which airport this package should fly into. '
+          + 'Add the country, or type an arrival airport for this hotel.');
+        continue;
+      }
       const criteria = isDp
-        ? buildDynamicPackageCriteria(row, { ...search, origin })
+        ? buildDynamicPackageCriteria(row, { ...search, origin, destination: arrival.code })
         : buildAccommodationCriteria(row, search);
       if (!criteria) {
         // Never fall back to a broader search. A row without a country is not
@@ -344,6 +388,9 @@ export default async function handler(req, res) {
       polls: acc.polls,
       ...(isDp ? {
         airports: acc.tried,
+        flyInto: (arrivals.get(idx) || {}).code || null,
+        flyIntoName: (arrivals.get(idx) || {}).name || null,
+        flyIntoWhy: (arrivals.get(idx) || {}).source || null,
         // What the price actually covers. A package that found no flights is a
         // hotel price under a package heading, which is the exact thing Andy
         // reported, so it is said out loud rather than left to be assumed.
