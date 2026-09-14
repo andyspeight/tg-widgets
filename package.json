@@ -53,6 +53,7 @@
     "test:offers-cache-namematch": "node test/offers-cache-namematch-smoke.mjs",
     "test:offers-cache-only": "node test/offers-cache-only-smoke.mjs",
     "test:tti-offers": "node --test test/tti-offers.test.mjs",
+    "test:travelify-search": "node --test test/travelify-search.test.mjs",
     "test:offers-atol": "node test/offers-atol-seller-smoke.mjs",
     "test:travelaire-offers": "node tests/travelaire-offers.cjs",
     "test:offer-enquiry-routing": "node test/offer-enquiry-widget-routing-smoke.mjs",

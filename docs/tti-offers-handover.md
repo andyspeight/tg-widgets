@@ -339,18 +339,18 @@ Rules that matter, all from the docs:
 - `417` means a supplier-side business error (sold out, unavailable), not a bug
   in our request.
 
-### Authentication
+### Authentication (settled, Andy 14 Sep 2026)
 
-Two schemes. The sweep is server to server, so it wants **Basic**:
+**Token auth with the existing PUBLIC key.** No private key, and none needs to
+be added to the environment:
 
-    Authorization: Basic base64(ApplicationID:PrivateAPIKey)
+    Authorization: Token {ApplicationID}:{PublicAPIKey}
+    Referer: https://localhost/
 
-The public **Token** scheme (`Token ApplicationID:PublicAPIKey`) is for widgets,
-requires a `Referer` header, and cannot reach private endpoints. Note that
-`api/_lib/travelify.js` already calls this API successfully with Token auth plus
-an `Origin` header, so there is a working pattern in the repo to copy from — but
-a nightly job with no browser context should use Basic and a private key. That
-key does not exist in our environment yet.
+The Referer is not decoration. Token auth 401s without one, and
+`https://localhost/` is the value to send. The same public credentials the
+widgets already use are the ones the sweep uses, resolved per client exactly as
+`/api/offers` and `api/_lib/travelify.js` already resolve them.
 
 ### What the editor collects
 
@@ -368,6 +368,26 @@ search criteria scopes a search to a single property by its TTI code.** The
 deeplink spells it `refn=TTI:{code}`. The API equivalent needs to come from the
 accommodation journey page or the OpenAPI schema.
 
+### The search client
+
+`api/_lib/offers/travelify-search.js` carries the transport, with 16 tests
+(`npm run test:travelify-search`). It exists as its own module because the rules
+it encodes are the ones that fail silently rather than loudly:
+
+- **A session is one path segment.** `{searchId}/{searchKey}` goes into the URL
+  whole. Splitting it is what cost 14 Sep 2026.
+- **Results accumulate.** Each poll returns only what is NEW since the last one,
+  so taking the final poll as the answer would cache a fraction of the search
+  and look like a thin hotel rather than a bug.
+- **`success: false` on a 200 is a failure.** Reading the status code alone is
+  the easiest way to mis-read this API.
+- **A partial result is still a result.** Running out of polls keeps what
+  arrived, because a sweep that discarded it would cache nothing on a busy
+  night. `complete` says whether it finished.
+- A mid-flight poll failure is survivable and retried; an expired session is not
+  and stops at once. A 417 is flagged as supplier-side so a sweep does not keep
+  retrying a sold-out property.
+
 ### What gets rebuilt
 
 `api/cron/refresh-tti-offers.js` and `api/tti-test.js` are both built on
@@ -382,11 +402,9 @@ the fetch changes.
 1. **Get the accommodation search criteria field that scopes to one property**,
    from the accommodation journey page or the OpenAPI schema. It is the last
    unknown before the rebuild.
-2. **Get a Travelify PRIVATE API key into the environment** for the nightly job.
-   Server-to-server calls use Basic auth with the private key; the public key
-   the widgets use cannot do this.
-3. **Rebuild the cron and the test endpoint on `POST /search` plus polling**,
-   and drop the `widgetsvc/traveloffers` path for TTI Offers.
+2. **Rebuild the cron and the test endpoint** on `api/_lib/offers/travelify-search.js`,
+   dropping the `widgetsvc/traveloffers` path for TTI Offers. The transport is
+   built and tested; only `buildAccommodationCriteria` is waiting on step 1.
 4. **Wire the editor's place field to `GET /autocomplete`** so the agent enters
    a TTI code and a place, and we store the resolved id or coordinates.
    If it reports `pinIgnored`, that is a conversation with Travelify rather than
