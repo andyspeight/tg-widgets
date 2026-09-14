@@ -1,106 +1,110 @@
 /**
- * TEMPORARY — TTI deeplink response probe. Delete after the run.
+ * TEMPORARY — TTI deeplink probe, round 2. Delete after the run.
  *
- * Andy (14 Sep 2026): "there is no other call - you need to do a full live
- * search using the deeplink, and capture the response and then add that to the
- * cache". He is right and I had been arguing from an assumption instead of a
- * measurement, so this measures it.
+ * Round 1 (14 Sep 2026) settled the argument. A deeplink 302s to:
+ *   https://www.traveldemo.site/results#/search/searchSession=40767448/BAB28492-...
+ * So the deeplink RUNS A LIVE SEARCH and hands back a search session id. Andy
+ * has been saying exactly this and I kept answering that it was just a page.
  *
- * scripts/probe-flight-deeplink.js already established that a deeplink 302s
- * into the Travelify results funnel. What it never captured is what sits at the
- * END of that chain, which is the only thing that decides whether a nightly job
- * can read offers out of it. So this follows every hop to the last page and
- * reports:
+ * What is still missing is the call that reads a session's results. The results
+ * page is a Duda site whose JS does the polling, so this round digs it out:
+ *   - captures the session id and guid from the redirect
+ *   - unescapes the page payload and lists every travelify.io URL in it
+ *   - lists the JS bundles the page loads, fetches a few, and greps them for
+ *     the API paths they call
  *
- *   - the whole redirect chain, so we can see where the funnel lands
- *   - the final content type and size
- *   - whether the body is JSON
- *   - a generous slice of the body, enough to tell a rendered results page from
- *     an empty application shell
- *   - every script/src and every API-looking URL in the page
- *
- * That last one is the prize. If the results page is a JS app that fetches its
- * results from somewhere, that fetch is the call the sweep should be making,
- * and the deeplink is how we learn its shape.
- *
- * Runs on a branch preview only. Fetch it, read it, delete the file.
+ * That gives us the endpoint the browser uses, which is the endpoint the
+ * nightly sweep should use.
  */
 
 const BASE = 'https://dl.tvllnk.com/deeplink/';
+const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+         + '(KHTML, like Gecko) Chrome/128.0 Safari/537.36';
 
-// The shape is taken from the two real links Andy supplied on 14 Sep: an area
-// search at CITY scale with the property pinned by refn alone.
 function link(appId, params) {
   const q = new URLSearchParams({
-    st: 'Accommodation',
-    curr: 'GBP',
-    nat: 'GB',
-    frd: '30',
-    dur: '7',
-    adt: '2', chd: '0', inf: '0',
-    ...params,
+    st: 'Accommodation', curr: 'GBP', nat: 'GB', frd: '30', dur: '7',
+    adt: '2', chd: '0', inf: '0', ...params,
   });
   return BASE + appId + '?' + q.toString();
 }
-
 const DUBAI = { loc: 'Dubai, United Arab Emirates', loct: 'City', lat: '25.049', lng: '55.118', rad: '28' };
 
 const CASES = [
-  // Controls: does a plain city search render results at all, on each app?
   ['250-dubai-nopin', link('250', DUBAI)],
-  ['384-dubai-nopin', link('384', DUBAI)],
-  // The same search PINNED, which is the shape the sweep would use.
   ['250-dubai-refn', link('250', { ...DUBAI, refn: 'TTI:10946397' })],
-  // Andy's own hotel, the one that keeps coming back area-only.
   ['250-gb-andys-code', link('250', { ctry: 'GB', refn: 'TTI:58612582' })],
   ['384-gb-andys-code', link('384', { ctry: 'GB', refn: 'TTI:58612582' })],
 ];
 
-const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
-         + '(KHTML, like Gecko) Chrome/128.0 Safari/537.36';
+const get = (url, accept) => fetch(url, {
+  redirect: 'manual',
+  headers: { 'User-Agent': UA, Accept: accept || '*/*' },
+  signal: AbortSignal.timeout(15000),
+});
 
-async function probe(url) {
-  const out = { hops: [] };
-  let current = url;
-  for (let hop = 0; hop < 8; hop++) {
-    const r = await fetch(current, {
-      redirect: 'manual',
-      headers: { 'User-Agent': UA, Accept: 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8' },
-      signal: AbortSignal.timeout(20000),
-    });
-    const loc = r.headers.get('location');
-    out.hops.push({ status: r.status, url: current.slice(0, 300), location: loc ? loc.slice(0, 300) : null });
-    if (loc && r.status >= 300 && r.status < 400) { current = new URL(loc, current).toString(); continue; }
+/** Pull the session out of the funnel URL the deeplink redirects to. */
+function sessionOf(loc) {
+  const m = /searchSession=([^/#?&]+)\/([^/#?&]+)/.exec(loc || '');
+  return m ? { searchSession: m[1], guid: m[2] } : null;
+}
 
-    const body = await r.text();
-    out.finalUrl = current;
-    out.status = r.status;
-    out.contentType = r.headers.get('content-type') || null;
-    out.bytes = body.length;
-    try { JSON.parse(body); out.isJson = true; } catch { out.isJson = false; }
-
-    // Enough to tell a rendered page from a shell.
-    out.head = body.slice(0, 3000);
-    // Every script the page loads, and anything that looks like a data call.
-    out.scripts = [...new Set([...body.matchAll(/<script[^>]+src=["']([^"']+)["']/gi)].map((m) => m[1]))].slice(0, 25);
-    out.apiish = [...new Set([...body.matchAll(/["'`](https?:\/\/[^"'`\s]*(?:api|search|offer|avail)[^"'`\s]*)["'`]/gi)].map((m) => m[1]))].slice(0, 25);
-    // Does the page already contain prices or hotel-shaped content?
-    out.hasPriceMarkup = /(£|&pound;|GBP)\s?\d{2,}/.test(body);
-    out.mentionsNoResults = /no results|no availability|nothing found|no hotels/i.test(body);
-    return out;
-  }
-  out.error = 'too many redirects';
-  return out;
+/** URLs hide inside JSON-escaped HTML, so unescape before matching. */
+function urlsIn(body, re) {
+  const flat = body.replace(/\\\//g, '/').replace(/\\u002[fF]/g, '/');
+  return [...new Set([...flat.matchAll(re)].map((m) => m[0]))];
 }
 
 export default async function handler(req, res) {
   const only = String((req.query && req.query.only) || '');
+  const wantBundles = String((req.query && req.query.bundles) || '') === '1';
   const rows = {};
+
   for (const [name, url] of CASES) {
     if (only && name !== only) continue;
-    try { rows[name] = { url, ...(await probe(url)) }; }
-    catch (e) { rows[name] = { url, error: String(e && e.message).slice(0, 200) }; }
+    try {
+      const r = await get(url, 'text/html');
+      const loc = r.headers.get('location');
+      const row = { status: r.status, location: loc };
+      row.session = sessionOf(loc);
+      rows[name] = row;
+    } catch (e) { rows[name] = { error: String(e && e.message).slice(0, 200) }; }
   }
+
+  // Dig the API out of the results page, once, using whichever session we got.
+  let api = null;
+  const first = Object.values(rows).find((x) => x && x.location);
+  if (first && wantBundles) {
+    api = {};
+    try {
+      const pageUrl = first.location.split('#')[0];
+      const pr = await get(pageUrl, 'text/html');
+      const body = await pr.text();
+      api.pageStatus = pr.status;
+      api.pageBytes = body.length;
+      api.travelifyUrls = urlsIn(body, /https?:\/\/[a-z0-9.-]*travelify\.io[^"'\\\s<>)]*/gi).slice(0, 40);
+      api.tvllnkUrls = urlsIn(body, /https?:\/\/[a-z0-9.-]*tvllnk\.com[^"'\\\s<>)]*/gi).slice(0, 20);
+      const js = urlsIn(body, /https?:\/\/[^"'\\\s<>)]+\.js(?:\?[^"'\\\s<>)]*)?/gi);
+      api.jsBundles = js.slice(0, 30);
+
+      // Fetch the most likely bundles and grep them for the paths they call.
+      const likely = js.filter((u) => /travelify|search|result|widget|engine|booking/i.test(u)).slice(0, 4);
+      api.grepped = [];
+      for (const u of likely) {
+        try {
+          const br = await get(u, '*/*');
+          const t = await br.text();
+          api.grepped.push({
+            url: u.slice(0, 200), bytes: t.length,
+            travelify: urlsIn(t, /https?:\/\/[a-z0-9.-]*travelify\.io[^"'`\\\s<>)]*/gi).slice(0, 25),
+            paths: urlsIn(t, /["'`]\/(?:api|widgetsvc|search|results|session)[a-zA-Z0-9/_{}$.-]*/gi).slice(0, 25),
+            mentionsSession: /searchSession/i.test(t),
+          });
+        } catch (e) { api.grepped.push({ url: u.slice(0, 200), error: String(e && e.message).slice(0, 120) }); }
+      }
+    } catch (e) { api.error = String(e && e.message).slice(0, 200); }
+  }
+
   res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ ranAt: new Date().toISOString(), rows });
+  res.status(200).json({ ranAt: new Date().toISOString(), rows, api });
 }
