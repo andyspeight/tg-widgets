@@ -2238,6 +2238,7 @@
             radius: Number(r.radius) || undefined,
             locationName: r.locationName || r.loc || '',
             locationType: r.locationType || 'City',
+            dst: String(r.dst || '').toUpperCase(),
           });
         } else {
           // Legacy "code,name,country" rows from before coordinates were
@@ -2265,6 +2266,7 @@
           lat: Number(r.lat), lng: Number(r.lng),
           ...(Number(r.radius) ? { radius: Number(r.radius) } : {}),
           ...(r.locationName ? { locationName: String(r.locationName).slice(0, 200) } : {}),
+          ...(/^[A-Z0-9]{3,11}$/.test(String(r.dst || '')) ? { dst: String(r.dst) } : {}),
           locationType: r.locationType || 'City',
         });
       }
@@ -2328,6 +2330,31 @@
           place.style.color = 'var(--tgse-warning)';
           place.textContent = 'Add the country';
         }
+        // WHERE THE PACKAGE FLIES INTO. Only on a package widget, because a
+        // hotel on its own never boards a plane and the field would be noise.
+        //
+        // Optional: we work it out from the hotel's position, or the country's
+        // hub when we have nothing better, and the Test panel says which it
+        // chose. This is the override for when that choice is wrong — a hotel
+        // in Bournemouth resolves to Bristol, which is right by distance and
+        // may still not be the airport the client sells.
+        const isPkg = String(state.config.type) === 'DynamicPackages';
+        let dst = null;
+        if (isPkg) {
+          dst = document.createElement('input');
+          dst.className = 'input tti-ctry';
+          dst.type = 'text';
+          dst.maxLength = 11;
+          dst.placeholder = 'Fly into';
+          dst.value = row.dst || '';
+          dst.title = 'Arrival airport for this hotel. Leave blank and we will work it out.';
+          dst.setAttribute('aria-label', 'Arrival airport, hotel ' + (i + 1));
+          dst.addEventListener('input', () => {
+            row.dst = dst.value.trim().toUpperCase();
+            paintTtiSummary(); markDirtyAndPreview();
+          });
+        }
+
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'tti-del';
@@ -2344,7 +2371,9 @@
           markDirtyAndPreview();
         });
 
-        wrap.appendChild(code); wrap.appendChild(ctry); wrap.appendChild(place); wrap.appendChild(del);
+        wrap.appendChild(code); wrap.appendChild(ctry);
+        if (dst) wrap.appendChild(dst);
+        wrap.appendChild(place); wrap.appendChild(del);
         host.appendChild(wrap);
       });
     }
@@ -2483,6 +2512,21 @@
             // alternative is a number on screen that could be from any of
             // them, which is how a Glasgow price gets quoted to somebody
             // flying from Aberdeen.
+            // WHICH AIRPORT IT FLIES INTO, and why we picked it. An agent
+            // who can see this can correct it; one who cannot would only find
+            // out from a price that looked odd.
+            if (r.flyInto) {
+              const why = { given: 'you set this',
+                            'nearest-in-country': 'nearest major airport to the hotel',
+                            'country-hub': 'the country\u2019s main airport, because we do not know '
+                                         + 'exactly where this hotel is yet',
+                            'nearest-anywhere': 'nearest major airport' }[r.flyIntoWhy] || '';
+              text += '<br><span style="color:var(--tgse-ink-3)">Flying into <strong>'
+                    + esc(r.flyInto) + '</strong>'
+                    + (r.flyIntoName ? ' (' + esc(r.flyIntoName) + ')' : '')
+                    + (why ? ' \u2014 ' + esc(why) : '')
+                    + '. Not right? Put an airport code in the Fly into box for this hotel.</span>';
+            }
             if (r.pricedFrom && r.pricedFrom.length) {
               text += '<br><span style="color:var(--tgse-ink-3)">Priced from '
                     + esc(r.pricedFrom.join(', '))
@@ -3342,7 +3386,13 @@
           } else {
             state.config[key] = raw;
           }
-          if (key === 'type') updateConditionalVisibility();
+          if (key === 'type') {
+            updateConditionalVisibility();
+            // The rows gain or lose their Fly into box with the product type.
+            // Safe here and nowhere near a keystroke: this is a <select>
+            // change, so no field the agent is typing into gets redrawn.
+            renderTtiRows();
+          }
           if (key === 'emptyBehaviour') updateEmptyDetailsVisibility();
           markDirtyAndPreview();
         };
