@@ -53,6 +53,7 @@
 
 import { setJson, getJson, setString, getString, keys, del, configured } from '../_redis.js';
 import { MARKET_AIRPORTS, marketOfAirport } from '../_lib/offers/markets.js';
+import { createPacer, createCircuit, parseRetryAfter } from '../_lib/offers/throttle.js';
 
 // ── Config ────────────────────────────────────────────────────────────────
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
@@ -62,6 +63,30 @@ const SELF_ORIGIN = 'https://tg-widgets.vercel.app';
 const DEMO_APP_ID = '250';
 
 const PER_REQUEST_TIMEOUT_MS = 10000;
+
+// Ceiling on how fast we ask Travelify for anything, across the whole run.
+//
+// A sweep is thousands of live searches; at concurrency six with no ceiling it
+// went out in bursts, and Travelify answered a share of them 429. The monitor's
+// own probe shares the account, so it saw the same 429 and emailed an alert —
+// several times a day since late July. Pacing spreads the same work evenly
+// instead of firing it as fast as responses come back.
+//
+// 60/min is deliberately close to the rate the rotation already averaged, so
+// this removes the bursts without cutting throughput. Travelify have not told
+// us their actual limit; when they do, set OFFERS_MAX_RPM to it. Lower it any
+// time from Vercel env without a deploy.
+const MAX_REQUESTS_PER_MIN = (() => {
+  const n = parseInt(process.env.OFFERS_MAX_RPM || '', 10);
+  return Number.isFinite(n) && n > 0 ? n : 60;
+})();
+
+// Module scope, not per-run: a warm instance carrying an open circuit into the
+// next invocation is correct. If Travelify told us to wait two minutes, that
+// instruction outlives the run that received it.
+const pacer = createPacer({ perMinute: MAX_REQUESTS_PER_MIN });
+const circuit = createCircuit({ defaultCooloffMs: 60000 });
+
 const REQUEST_CONCURRENCY = 6;     // parallel proxy calls within a country
                                    // (raised from 4 when types × markets grew
                                    // the per-country request count)
@@ -829,7 +854,14 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
 async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retries = 1) {
   let last;
   for (let attempt = 0; attempt <= retries; attempt++) {
+    // Already told to back off — do not spend the request. Every job left in
+    // the run returns here immediately, so a throttled sweep ends quickly
+    // instead of grinding on collecting more 429s.
+    if (circuit.open()) {
+      return { ok: false, status: 429, rateLimited: true, skipped: true, error: 'rate limited — backing off' };
+    }
     if (attempt) await new Promise(r => setTimeout(r, 500));
+    await pacer.take();
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -849,6 +881,17 @@ async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retr
         signal: controller.signal,
       });
       clearTimeout(t);
+      // 429 is the one status a retry cannot help: the supplier has just told
+      // us we are asking too often, so asking again in 500ms is the same
+      // question. Honour the wait it names, and stop the run.
+      if (res.status === 429) {
+        const retryAfterMs = parseRetryAfter(res.headers && res.headers.get ? res.headers.get('retry-after') : null);
+        circuit.trip(retryAfterMs);
+        console.warn('[map-cron] Travelify returned 429 — backing off for '
+          + Math.round(circuit.remainingMs() / 1000) + 's'
+          + (retryAfterMs === null ? ' (no Retry-After header)' : ' (Retry-After honoured)'));
+        return { ok: false, status: 429, rateLimited: true, error: 'rate limited by supplier' };
+      }
       if (!res.ok) { last = { ok: false, status: res.status }; continue; } // retryable
       const data = await res.json();
       if (data && data.success === false) {
@@ -935,7 +978,12 @@ async function sweepCountry(row) {
   }
   const codeResults = await pooled(jobs, async ({ code, market, cur, sweepType, flightOrigin }) => {
     const raw = await callOffersProxy(buildPayload(row, code, market, sweepType, flightOrigin, cur));
-    if (!raw.ok) return { code, market: market.id, cur, type: sweepType.id, origin: flightOrigin || undefined, ok: false, error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
+    // Carry the back-off flags through: a request the supplier refused, or
+    // one we chose not to send because it had just refused another, is not
+    // the same as the feed failing and must not be tallied as one.
+    if (!raw.ok) return { code, market: market.id, cur, type: sweepType.id, origin: flightOrigin || undefined, ok: false,
+      ...(raw.rateLimited ? { rateLimited: true } : {}), ...(raw.skipped ? { skipped: true } : {}),
+      error: raw.error || `HTTP ${raw.status}`, count: 0, fetched: 0, dropped: null, offers: [] };
     const arr = raw.data && Array.isArray(raw.data.data) ? raw.data.data : [];
     const dropped = { noPrice: 0, noDest: 0, duration: 0, durNoNights: 0, durOutOfRange: 0, nonGBP: 0 };
     // The country fallback applies to the non-map types only: the world map's
@@ -1040,7 +1088,7 @@ async function sweepCountry(row) {
 function aggregateSweepStats(perCountry) {
   const perType = {};
   const bucket = (type) => perType[type] || (perType[type] = {
-    requests: 0, failed: 0, fetched: 0, kept: 0, keptEUR: 0, unique: 0,
+    requests: 0, failed: 0, skipped: 0, rateLimited: 0, fetched: 0, kept: 0, keptEUR: 0, unique: 0,
     dropped: { noPrice: 0, noDest: 0, duration: 0, durNoNights: 0, durOutOfRange: 0, nonGBP: 0 },
   });
   for (const p of perCountry || []) {
@@ -1048,6 +1096,10 @@ function aggregateSweepStats(perCountry) {
       if (!r || !r.type) continue;
       const t = bucket(r.type);
       t.requests++;
+      // A request we deliberately did not send (the supplier told us to back
+      // off) is not a failure of the feed, and must not be read as one.
+      if (r.skipped) { t.skipped = (t.skipped || 0) + 1; continue; }
+      if (r.rateLimited) { t.rateLimited = (t.rateLimited || 0) + 1; continue; }
       if (!r.ok) { t.failed++; continue; }
       t.fetched += r.fetched || 0;
       t.kept += r.count || 0;
@@ -1377,8 +1429,13 @@ export default async function handler(req, res) {
     let skippedFresh = 0;
     let processed = 0;
     let budgetExhausted = false;
+    let throttled = false;
     for (const row of slice) {
       if (Date.now() - startedAt > SWEEP_TIME_BUDGET_MS) { budgetExhausted = true; break; }
+      // Told to back off. Stop the slice here rather than walking the rest of
+      // it turning every job into a no-op: the cursor does not advance past
+      // what we swept, so the next run picks these countries up.
+      if (circuit.open()) { throttled = true; break; }
       processed++;
       const rowCC = ((row.fields || {}).CountryCode || '').trim().toUpperCase();
       // Interval gate: on a normal (rotating) run, skip any country whose
@@ -1427,9 +1484,15 @@ export default async function handler(req, res) {
         at: now.toISOString(),
         mode: full ? 'full' : 'hourly',
         ...(budgetExhausted ? { partial: true } : {}),
+        ...(throttled ? { throttled: true } : {}),
         sweptCountries: sweptCount,
         targetCountries: slice.length,
         perType: sweepStats,
+        // What the run spent and whether the supplier pushed back. The Cache
+        // tab reads this: requests per type is the COST side of the
+        // fetched/kept numbers beside it, and the only way to see which
+        // product is worth what it costs to sweep.
+        throttle: { ...pacer.stats(), ...circuit.stats() },
       });
       for (const [t, s] of Object.entries(sweepStats)) {
         console.log(`[map-cron] sweep ${t}: ${s.fetched} fetched → ${s.kept} kept` +
