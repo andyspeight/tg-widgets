@@ -140,7 +140,12 @@ export function resolveArrivalAirport({ dst, lat, lng, ctry } = {}) {
   const country = String(ctry || '').trim().toUpperCase();
   const inCountry = country ? list.filter((a) => a[2] === country) : [];
   const majorsHere = country ? majorAirports().filter((a) => a[2] === country) : [];
-  const haveSpot = Number.isFinite(lat) && Number.isFinite(lng);
+  // NEVER Number.isFinite alone: zero is finite, and (0,0) is a real place in
+  // the Gulf of Guinea. A row that simply has no coordinates arrives here as
+  // 0,0 the moment anything upstream does Number(null), and the nearest
+  // airport to null island is Cornwall — which is exactly what happened.
+  const haveSpot = Number.isFinite(lat) && Number.isFinite(lng)
+    && !(lat === 0 && lng === 0) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
 
   const nearestOf = (pool) => {
     let best = null;

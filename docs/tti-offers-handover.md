@@ -520,6 +520,26 @@ Italian airport than a French one often enough to matter, and landing in the
 wrong country is wrong in a way a price cannot show. Only a country with no
 airport of its own in the list falls through to nearest-anywhere.
 
+**(0,0) is a real place, and everything upstream turns a missing coordinate
+into it.** The editor sends `lat: null` for a row with no coordinates — `NaN`
+does not survive JSON — and `Number(null)` is **0**: finite, in range, and in
+the Gulf of Guinea. A Bournemouth hotel therefore resolved to Newquay, 5,629km
+away, which is exactly the distance from null island to Cornwall (Andy,
+14 Sep 2026). `cleanCoord` has rejected zero since the day it was written; one
+call site in `api/tti-test.js` was using raw `Number()`. The resolver now
+refuses (0,0) as well, whoever calls it.
+
+**A widget is selling a package unless its type is exactly `'Accommodation'`.**
+One rule, in `isPackageConfig` in the editor and mirrored in the widget and the
+test route, matching `searchFromConfig` on the server. Testing for the literal
+`'DynamicPackages'` treats a config saved as `'Packages'` as hotel-only while
+the type select still displays Dynamic packaging.
+
+**The hotel rows are a fixed 3-column grid.** A package widget adds a fourth
+control (Fly into), so the row takes `.has-dst` and a fourth column. Without it
+the new input was laid into the 28px delete-button cell and read as no box at
+all.
+
 **The choice is shown, and overridable.** The Test panel names the airport, how
 far it is from the hotel, why it was picked, and the bigger alternative if
 there is one. The **Fly into** box on each row is the override, saved with the

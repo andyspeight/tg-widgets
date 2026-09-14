@@ -6824,7 +6824,12 @@
         //
         // Coerced rather than trusted: a hand-edited or legacy type would
         // otherwise ask the cache for something it will never hold.
-        q.set('type', String(this.cfg.type) === 'DynamicPackages' ? 'DynamicPackages' : 'Accommodation');
+        // Anything that is not exactly 'Accommodation' is a package, which is
+        // how the server's searchFromConfig and the editor's type select both
+        // read it. Matching the literal 'DynamicPackages' would treat a config
+        // saved as 'Packages' as hotel-only and hide its whole cache.
+        q.set('type', String(this.cfg.type || 'Accommodation') !== 'Accommodation'
+          ? 'DynamicPackages' : 'Accommodation');
         // No App ID means no pool to name. Send the codes anyway and let the
         // endpoint answer an honest miss rather than silently widening this
         // widget to every offer in the country.

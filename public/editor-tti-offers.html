@@ -44,6 +44,18 @@
     /* ---- TTI property rows -------------------------------------------- */
     .tti-rows { display: flex; flex-direction: column; gap: 6px; }
     .tti-row { display: grid; grid-template-columns: 1fr 84px 28px; gap: 6px; align-items: center; }
+    /* A package widget carries a fourth control, the arrival airport. The
+       columns are fixed, so without this the new input was laid into the 28px
+       delete-button cell and read as no box at all (Andy, 14 Sep 2026:
+       "it mentions a fly in to box, but there isnt one in the editor"). */
+    .tti-row.has-dst { grid-template-columns: 1fr 84px 84px 28px; }
+    /* The location hint gets its own full-width line rather than a cell, so it
+       cannot push the delete button onto a row of its own. */
+    .tti-row .tti-place {
+      grid-column: 1 / -1; min-width: 0; font-size: 12px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tgse-ink-3);
+    }
+    .tti-row .tti-place:empty { display: none; }
     .tti-row .input { margin: 0; }
     .tti-row .tti-ctry { text-transform: uppercase; }
     .tti-row.is-bad .input { border-color: var(--tgse-danger); }
@@ -1960,6 +1972,15 @@
     let ttiAppId = '';
     const appIdForPreview = () => ttiAppId || TG_TRAVELIFY_DEMO_APPID;
 
+    /** Is this widget selling a package rather than the hotel on its own?
+     *
+     *  Anything that is not exactly 'Accommodation', which is how the type
+     *  select and the server's own searchFromConfig both read it. Testing for
+     *  the literal 'DynamicPackages' instead would quietly treat a config
+     *  saved as 'Packages' as hotel-only, while the select still displayed
+     *  Dynamic packaging. */
+    const isPackageConfig = (cfg) => String((cfg || {}).type || 'Accommodation') !== 'Accommodation';
+
     /* Ask once, on boot. A failure is not fatal: the preview falls back to the
        demo pool and simply shows nothing, which is the honest outcome. */
     async function loadTtiAppId() {
@@ -2321,8 +2342,7 @@
         // deeplink brought them, so the agent can see the row is more precise
         // than the two fields suggest.
         const place = document.createElement('div');
-        place.style.cssText = 'flex:1 1 auto;min-width:0;font-size:12px;align-self:center;'
-          + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tgse-ink-3)';
+        place.className = 'tti-place';
         if (rowHasCoords(row)) {
           place.textContent = row.locationName || (Number(row.lat).toFixed(3) + ', ' + Number(row.lng).toFixed(3));
           place.title = place.textContent;
@@ -2338,7 +2358,7 @@
         // chose. This is the override for when that choice is wrong — a hotel
         // in Bournemouth resolves to Bristol, which is right by distance and
         // may still not be the airport the client sells.
-        const isPkg = String(state.config.type) === 'DynamicPackages';
+        const isPkg = isPackageConfig(state.config);
         let dst = null;
         if (isPkg) {
           dst = document.createElement('input');
@@ -2372,8 +2392,8 @@
         });
 
         wrap.appendChild(code); wrap.appendChild(ctry);
-        if (dst) wrap.appendChild(dst);
-        wrap.appendChild(place); wrap.appendChild(del);
+        if (dst) { wrap.classList.add('has-dst'); wrap.appendChild(dst); }
+        wrap.appendChild(del); wrap.appendChild(place);
         host.appendChild(wrap);
       });
     }
@@ -2394,7 +2414,15 @@
     async function readBackCheck(out) {
       const codes = syncTtiConfig().map((r) => r.code);
       if (!codes.length || !out) return;
-      const base = { tti: codes.join(','), appId: appIdForPreview(), type: 'Accommodation' };
+      // The SAME type the widget asks for. Hard-coded 'Accommodation' here
+      // meant a package widget read back an empty pool and the panel cried
+      // "the cache write did not land" while the write had landed perfectly
+      // (Andy, 14 Sep 2026). Every place that names a type must name the same
+      // one, and a test now checks all of them rather than just one.
+      const base = {
+        tti: codes.join(','), appId: appIdForPreview(),
+        type: isPackageConfig(state.config) ? 'DynamicPackages' : 'Accommodation',
+      };
       const ask = async (extra) => {
         const q = new URLSearchParams({ ...base, ...extra });
         try {
@@ -3259,7 +3287,7 @@
         // these two drift the strip counts a different pool from the one the
         // widget draws, which is the most misleading thing this panel can do:
         // it would promise offers that never appear.
-        q.set('type', String(base.type) === 'DynamicPackages' ? 'DynamicPackages' : 'Accommodation');
+        q.set('type', isPackageConfig(base) ? 'DynamicPackages' : 'Accommodation');
       }
       if (base.origins && base.origins.length) q.set('origins', base.origins.join(','));
       if (base.cabinClasses && base.cabinClasses.length) q.set('cabinClasses', base.cabinClasses.join(','));
