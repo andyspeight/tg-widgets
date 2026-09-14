@@ -4,6 +4,7 @@
 answer from Travelify.
 **Started:** 14 Sep 2026
 **Spec:** "Widget platform integration API specification", supplied by Travelify.
+**Airtable record:** `recm4J71rCjUs9MU2`
 
 ## What this is
 
