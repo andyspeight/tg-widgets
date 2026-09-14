@@ -466,24 +466,47 @@ no search**:
 
 Nothing left means **no package**, not a search into nowhere.
 
-**The list is the curated majors** in `api/_data/airports.json`, 106 airports
-with coordinates, deliberately not the 3,242-airport departures list beside it.
-That file's own header says why: an arrival needs a hub with hotels and inbound
-flights, and a package into a regional strip with no inbound schedule returns
-nothing — which looks exactly like a hotel with no availability.
+**The list is `api/_data/airports-arrivals.json`** — every large or medium
+airport worldwide with scheduled service and an IATA code, *with coordinates*,
+from OurAirports. Built on 14 Sep 2026 for this job, because neither existing
+list could do it: `airports-departures.json` has 3,242 airports and no
+coordinates, `airports.json` has coordinates and only 106 majors. So a hotel in
+Bournemouth resolved to **Bristol, 95km away**, while Bournemouth Airport sat in
+neither usable list (Andy: *"why is it choosing Bristol when there is an airport
+in Bournemouth?"*). That was a gap in the data, not a judgement about the
+airport. Rebuild with `scripts/build-arrival-airports.mjs` — the sandbox reaches
+`raw.githubusercontent.com` but not the `github.io` mirror, and the script
+refuses to write a list that has shrunk or lost a curated major.
+
+**The curated majors are still loaded, for the one thing OurAirports lacks.**
+It has no passenger numbers, so "large airport" is a runway-and-service
+classification, and its ordering is alphabetical inside that. Two real bugs
+came from trusting it alone:
+
+- Dubai resolved to **DWC** (Al Maktoum, 18km, near-empty) over **DXB** (34km).
+- Great Britain with no coordinates resolved to **ABZ**, because Aberdeen sorts
+  first alphabetically among GB large airports.
+
+So `airports.json` supplies *which airports are real hubs* and *a country's
+main airport*, and a hub within `HUB_BONUS_KM` (50km) of the genuinely nearest
+airport wins. Bournemouth keeps BOH at 7km because Bristol is far outside that
+window; Dubai takes DXB because it is only 16km further than DWC.
+
+**A nearby bigger airport is offered, never substituted.** A small airport has
+thin routes, and a package from Aberdeen to Bournemouth may simply not exist
+while Aberdeen to Gatwick does. That is a real supplier answer rather than a
+bug, so the panel names the alternative and the agent switches with one box.
+Choosing it for them would quote a package from an airport nobody asked about.
 
 **Same country beats raw distance.** A hotel on the Côte d'Azur is nearer an
 Italian airport than a French one often enough to matter, and landing in the
 wrong country is wrong in a way a price cannot show. Only a country with no
-major airport of its own falls through to nearest-anywhere.
+airport of its own in the list falls through to nearest-anywhere.
 
-**The choice is shown, and overridable.** The Test panel names the airport and
-why it was picked ("nearest major airport to the hotel", "the country's main
-airport, because we do not know exactly where this hotel is yet"), because
-*we chose Bristol for a hotel in Bournemouth* is a reasonable call an agent
-should be able to see and correct — not discover from a price that looks odd.
-The **Fly into** box on each row is that override, and it only appears on a
-package widget.
+**The choice is shown, and overridable.** The Test panel names the airport, how
+far it is from the hotel, why it was picked, and the bigger alternative if
+there is one. The **Fly into** box on each row is the override, saved with the
+config and carried into the nightly sweep. It only appears on a package widget.
 
 **Both functions that read the list declare it in `vercel.json`
 (`includeFiles`).** A file read through `new URL(..., import.meta.url)` only
@@ -580,10 +603,11 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 
 1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
    should start running. Until then it skips, safely.
-2. **Add BOH, SOU and their like to the arrival list** if clients sell hotels
-   the curated 106 place badly. Bournemouth currently resolves to Bristol at
-   95km, which is right by distance and may not be the airport the client
-   sells. The Fly into box is the per-hotel escape hatch in the meantime.
+2. **Watch what thin routes do.** A hotel now flies into its own local airport
+   where one exists, which is right, but a package from a distant city to a
+   small field may return nothing. The panel names the bigger alternative and
+   the Fly into box switches to it. If that turns out to be common, the rule to
+   revisit is `HUB_BONUS_KM` in `api/_lib/offers/arrival-airport.js`.
 3. **Decide what "from" means.** Every search is one stay, currently 30 days out
    and 7 nights, matching the `frd=30&dur=7` the deeplinks use. A true from-price
    across a spread of dates multiplies the nightly search count by however many

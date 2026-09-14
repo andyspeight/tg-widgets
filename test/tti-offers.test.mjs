@@ -31,7 +31,9 @@ import {
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
-import { resolveArrivalAirport, arrivalAirports } from '../api/_lib/offers/arrival-airport.js';
+import {
+  resolveArrivalAirport, arrivalAirports, majorAirports, HUB_BONUS_KM,
+} from '../api/_lib/offers/arrival-airport.js';
 
 /** Just the two fields a caller acts on, so a distance tweak does not break
  *  an assertion about which airport was chosen. */
@@ -1533,38 +1535,81 @@ test('a country code is never sent as an airport, because it is not one', () => 
     'and no destination at all means no package, never a blind search');
 });
 
+test('a hotel flies into its OWN local airport, not a big one 95km away', () => {
+  // Andy, 14 Sep 2026: "why is it choosing Bristol when there is an airport in
+  // Bournemouth?" It was choosing Bristol because BOH was not a candidate at
+  // all — the list with coordinates held 106 majors and the list with 3,242
+  // airports held no coordinates. A gap in the data, not a judgement about the
+  // airport, so the data was rebuilt.
+  const boh = resolveArrivalAirport({ lat: 50.72, lng: -1.87, ctry: 'GB' });
+  assert.equal(boh.code, 'BOH');
+  assert.ok(boh.km <= 15, `BOH should be minutes from the hotel, got ${boh.km}km`);
+  // And the big one is OFFERED, because a small airport has thin routes and
+  // that is the likeliest reason a package comes back empty.
+  assert.equal(boh.alt.code, 'BRS');
+  assert.ok(boh.alt.km > boh.km);
+});
+
+test('a real hub beats a near-empty airport that happens to be closer', () => {
+  // OurAirports classifies by runway and service, not passengers: Al Maktoum
+  // is a "large airport" 18km from Dubai and Dubai International is 34km, so
+  // raw distance picks the near-empty one. The curated majors carry the thing
+  // OurAirports does not — which airports are real hubs.
+  const dxb = resolveArrivalAirport({ lat: 25.049, lng: 55.118, ctry: 'AE' });
+  assert.equal(dxb.code, 'DXB');
+  assert.equal(dxb.source, 'nearest-hub');
+  assert.equal(dxb.alt.code, 'DWC', 'and the closer one is still offered');
+
+  // The bonus is bounded, or every hotel would fly into a capital: Bournemouth
+  // keeps BOH because Bristol is far outside it.
+  assert.ok(HUB_BONUS_KM > 0 && HUB_BONUS_KM <= 80);
+  assert.equal(resolveArrivalAirport({ lat: 50.72, lng: -1.87, ctry: 'GB' }).code, 'BOH');
+});
+
 test('the arrival airport is resolved from what the row actually knows', () => {
   // Cheapest honest source first. None of these spends a search.
   assert.deepEqual(
     pick(resolveArrivalAirport({ dst: 'ae1', ctry: 'AE' })),
     { code: 'AE1', source: 'given' },
-    'a pinned code or a deeplink dst wins outright, in Travelify’s own code space');
+    'a pinned code or a deeplink dst wins outright, in Travelify own code space');
 
-  // A hotel we can place goes to its nearest MAJOR, in its own country.
-  assert.deepEqual(
-    pick(resolveArrivalAirport({ lat: 50.72, lng: -1.87, ctry: 'GB' })),
-    { code: 'BRS', source: 'nearest-in-country' },
-    'Hilton Bournemouth is nearest Bristol of the majors');
-  assert.deepEqual(
-    pick(resolveArrivalAirport({ lat: 25.049, lng: 55.118, ctry: 'AE' })),
-    { code: 'DXB', source: 'nearest-in-country' });
-
-  // A property we have never placed still gets a real, sane answer.
+  // A property we have never placed still gets its country's MAIN airport.
+  // Not its alphabetically-first one: the arrivals list is alphabetical inside
+  // each size class, which made Aberdeen the hub for Great Britain until the
+  // curated importance ordering was brought back for exactly this step.
   assert.deepEqual(
     pick(resolveArrivalAirport({ ctry: 'GB' })),
-    { code: 'LHR', source: 'country-hub' },
-    'the busiest hub, and the panel says that is why');
+    { code: 'LHR', source: 'country-hub' });
+  assert.deepEqual(
+    pick(resolveArrivalAirport({ ctry: 'MT' })),
+    { code: 'MLA', source: 'country-hub' });
 
   // And nothing at all is NULL, not a guess.
   assert.equal(resolveArrivalAirport({}), null);
   assert.equal(resolveArrivalAirport({ ctry: 'ZZ' }), null);
 });
 
+test('the arrivals list is whole, and has what the majors list has', () => {
+  // A silently truncated or mis-parsed rebuild would send every package to the
+  // wrong airport, which looks like a supplier problem rather than a data one.
+  const list = arrivalAirports();
+  assert.ok(list.length > 2000 && list.length < 5000, `suspicious size: ${list.length}`);
+  const codes = new Set(list.map((a) => a[0]));
+  for (const c of ['BOH', 'SOU', 'LHR', 'JFK', 'DXB', 'BRS']) assert.ok(codes.has(c), `missing ${c}`);
+  // Every curated major must survive, or the hub logic loses its candidates.
+  for (const m of majorAirports()) assert.ok(codes.has(m[0]), `arrivals list lost ${m[0]}`);
+  // Coordinates are the whole reason this file exists.
+  for (const a of list) {
+    assert.ok(Number.isFinite(a[3]) && Math.abs(a[3]) <= 90, `${a[0]} latitude`);
+    assert.ok(Number.isFinite(a[4]) && Math.abs(a[4]) <= 180, `${a[0]} longitude`);
+  }
+});
 test('the country wins over raw distance, because a package must land in it', () => {
   // A hotel on the Côte d'Azur is closer to an Italian airport than to a
   // French one often enough to matter, and a package that lands in the wrong
   // country is wrong in a way a price cannot show.
   const nice = resolveArrivalAirport({ lat: 43.70, lng: 7.27, ctry: 'FR' });
+  assert.equal(nice.code, 'NCE');
   assert.equal(arrivalAirports().find((a) => a[0] === nice.code)[2], 'FR');
   // Only a country with no major airport of its own falls through.
   const andorra = resolveArrivalAirport({ lat: 42.51, lng: 1.52, ctry: 'AD' });
@@ -1622,8 +1667,12 @@ test('the airport list actually ships with the functions that read it', () => {
   for (const fn of ['api/tti-test.js', 'api/cron/refresh-tti-offers.js']) {
     const cfg = vercel.functions[fn];
     assert.ok(cfg, `${fn} has no functions entry`);
-    assert.ok(String(cfg.includeFiles || '').includes('api/_data/airports.json'),
-      `${fn} reads the airport list and must bundle it`);
+    assert.ok(/api\/_data\/airports\*?\.json/.test(String(cfg.includeFiles || '')),
+      `${fn} reads the airport lists and must bundle them`);
+    // Both files, because each carries something the other does not:
+    // coordinates for every airport, and which ones are real hubs.
+    assert.ok(String(cfg.includeFiles).includes('*'),
+      `${fn} must bundle airports.json AND airports-arrivals.json`);
   }
 });
 
