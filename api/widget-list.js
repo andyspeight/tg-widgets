@@ -341,4 +341,8 @@ async function attachViews(widgets) {
 }
 
 // Test surface — pure scope-formula logic, no network.
+// The Travelify My Widgets endpoint counts the same rows this dashboard lists,
+// so it reuses this builder rather than restating the isolation rule.
+export { buildScopeFormula };
+
 export const _test = { buildScopeFormula };

@@ -38,6 +38,12 @@ Owner: Andy Speight, CEO, Travelgenix.
 - **Event Tickets widget family** (the supplier event feed and the six ticket
   widgets built on it): `docs/supplier-event-feed.md` (Airtable record
   `recdVmyNz4nCXltMc`).
+- **Travelify widget platform integration** (the two read APIs and the SSO deep
+  link that merge our widgets into Travelify's own Widget Directory and My
+  Widgets): `docs/travelify-widget-integration.md`. Read it before touching
+  anything under `api/v1/`, the generated widget registry, the public category
+  map or `public/previews/`. Airtable record `recm4J71rCjUs9MU2`.
+
 - **The Duda element audit (tg-sites)**: `docs/duda-element-audit.md`. Read it
   the moment a session mentions Duda, "the next list", or elements. It carries
   what has been checked, what was built, what Andy has asked to skip, and the

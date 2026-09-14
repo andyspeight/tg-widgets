@@ -27,26 +27,22 @@ import {
   RATE_LIMITS,
   setCors,
 } from './_auth.js';
-
-const AIRTABLE_API = 'https://api.airtable.com/v0';
-const BASE_ID = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
-const TABLE_ID = 'tblJHOJlt63QmuxEq'; // Widget Catalogue Status
-
-// Field IDs (returnFieldsByFieldId=true so we read/write by id, not name)
-const F = {
-  widgetId:  'fldAF01jPEeJSpGFr',
-  widgetName:'fldpgCvfHwifQw71g',
-  status:    'flddYY41TmQRi2ZFr',
-  updatedBy: 'fldtKguATp94LqYNL',
-  updatedAt: 'fldiRO4yh7eCzViIf',
-};
+// Table shape and the status read live in _lib so the Travelify directory
+// endpoints read exactly the same rows this dashboard overlay does.
+import {
+  AIRTABLE_API,
+  BASE_ID,
+  CATALOGUE_TABLE as TABLE_ID,
+  CATALOGUE_FIELDS as F,
+  VALID_STATUSES,
+  catalogueHeaders as airtableHeaders,
+  fetchAllStatuses,
+} from './_lib/widget-catalogue-status.js';
 
 // Users table — to resolve a session recordId back to an email when the
 // token doesn't carry one (cookie-auth path).
 const USERS_TABLE = 'tblIpeQeZmF7CM7OJ';
 const USER_EMAIL_FIELD = 'fldSQLKBfsAcVS2s3';
-
-const VALID_STATUSES = ['live', 'coming-soon'];
 
 // Staff domains. Anyone signed in under one of these sees every widget as live
 // on the dashboard AND may change widget statuses. Keep this list tight — it is
@@ -59,13 +55,6 @@ function isStaffEmail(email) {
   if (at === -1) return false;
   const domain = email.slice(at + 1).toLowerCase().trim();
   return STAFF_DOMAINS.includes(domain);
-}
-
-function airtableHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.AIRTABLE_KEY}`,
-    'Content-Type': 'application/json',
-  };
 }
 
 // Resolve the authenticated user's email. Prefer the email already on the
@@ -89,34 +78,6 @@ async function resolveAuthedEmail(user) {
   } catch {
     return null;
   }
-}
-
-// Fetch all status rows → { statuses, recordsById }. statuses maps widgetId to
-// 'live'/'coming-soon'; recordsById maps widgetId to the Airtable record id for
-// writes. Paginates defensively though the table is tiny.
-async function fetchAllStatuses() {
-  const statuses = {};
-  const recordsById = {};
-  let offset;
-  do {
-    let url = `${AIRTABLE_API}/${BASE_ID}/${TABLE_ID}`
-      + `?returnFieldsByFieldId=true&pageSize=100`;
-    if (offset) url += `&offset=${encodeURIComponent(offset)}`;
-    const resp = await fetch(url, { headers: airtableHeaders() });
-    if (!resp.ok) {
-      throw new Error(`Airtable read failed (${resp.status})`);
-    }
-    const data = await resp.json();
-    for (const rec of data.records || []) {
-      const wid = rec.fields?.[F.widgetId];
-      if (!wid) continue;
-      const st = rec.fields?.[F.status];
-      statuses[wid] = VALID_STATUSES.includes(st) ? st : 'live';
-      recordsById[wid] = rec.id;
-    }
-    offset = data.offset;
-  } while (offset);
-  return { statuses, recordsById };
 }
 
 export default async function handler(req, res) {
