@@ -935,6 +935,22 @@
             </button>
             <div class="section-body">
               <div class="field">
+                <label class="field-label">Paste your Travelify deeplinks</label>
+                <textarea class="input" id="ttiPaste" rows="3"
+                  placeholder="https://dl.tvllnk.com/deeplink/250?st=Accommodation&#38;loc=Bournemouth...&#38;refn=TTI:58612582"
+                  aria-label="Paste Travelify deeplinks, one per line"></textarea>
+                <div class="tti-row-actions" style="margin-top:6px">
+                  <button type="button" class="btn btn-secondary btn-sm" id="ttiPasteAdd">Add these hotels</button>
+                </div>
+                <div class="field-help">
+                  One link per line. A working deeplink already carries everything a
+                  search needs, so pasting one fills in the hotel, the town and its
+                  coordinates in a single go. It is also the quickest way to be sure a
+                  hotel will return results, because the link is one you know works.
+                </div>
+              </div>
+
+              <div class="field">
                 <label class="field-label">Your hotels</label>
                 <div class="tti-rows" id="ttiRows"></div>
                 <div class="tti-row-actions">
@@ -942,10 +958,10 @@
                   <button type="button" class="btn btn-secondary btn-sm" id="ttiTest">Test these codes</button>
                 </div>
                 <div class="field-help">
-                  The Travelify property code and the two-letter country it is in.
-                  Codes work with or without the <code>TTI:</code> prefix. Up to 100
-                  hotels. The code picks the hotel, the country tells us where to look
-                  for it, so a row needs both.
+                  Each hotel needs its code and the place to search around it. A
+                  country on its own is not enough: Travelify turns those searches
+                  away, so a row without coordinates is never sent. Codes work with or
+                  without the <code>TTI:</code> prefix. Up to 100 hotels.
                 </div>
                 <div class="tti-test-out" id="ttiTestOut" hidden></div>
                 <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
@@ -2129,6 +2145,39 @@
       const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^[A-Z]+:/, '');
       return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
     }
+    /* A row can only be searched if it carries a real place. Travelify rejects
+       a country with no coordinates outright, so a row without them is not a
+       broader search, it is one that will be turned away. */
+    function rowHasPlace(r) {
+      const lat = Number(r && r.lat), lng = Number(r && r.lng);
+      return Number.isFinite(lat) && Number.isFinite(lng)
+        && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    }
+
+    /* Pull a hotel out of a Travelify deeplink. Mirrors parseDeeplink in
+       api/_lib/offers/tti.js — the server re-parses whatever this produces, so
+       a difference here shows up as a rejected row rather than a bad search. */
+    function parseTtiDeeplink(url) {
+      let u;
+      try { u = new URL(String(url || '').trim()); } catch (e) { return null; }
+      if (!/(^|\.)tvllnk\.com$/i.test(u.hostname)) return null;
+      const q = u.searchParams;
+      const code = canonTti(q.get('refn'));
+      if (!code) return null;
+      const lat = Number(q.get('lat')), lng = Number(q.get('lng')), rad = Number(q.get('rad'));
+      const row = {
+        code,
+        ctry: canonCtry(q.get('ctry') || ''),
+        locationName: (q.get('loc') || '').trim().slice(0, 200),
+        locationType: q.get('loct') || 'City',
+      };
+      if (Number.isFinite(lat) && lat >= -90 && lat <= 90) row.lat = lat;
+      if (Number.isFinite(lng) && lng >= -180 && lng <= 180) row.lng = lng;
+      // Deeplinks give the radius in km, the search wants miles.
+      if (Number.isFinite(rad) && rad > 0) row.radius = Math.max(1, Math.round(rad * 0.621371));
+      return row;
+    }
+
     function canonCtry(v) {
       const up = String(v == null ? '' : v).trim().toUpperCase();
       return /^[A-Z]{2}$/.test(up) ? up : '';
@@ -2145,8 +2194,18 @@
       const out = [];
       for (const r of list) {
         if (r && typeof r === 'object') {
-          out.push({ code: String(r.code || r.tti || '').replace(/^[A-Z]+:/i, ''), ctry: r.ctry || r.countryCode || '' });
+          out.push({
+            code: String(r.code || r.tti || '').replace(/^[A-Z]+:/i, ''),
+            ctry: r.ctry || r.countryCode || '',
+            lat: Number(r.lat), lng: Number(r.lng),
+            radius: Number(r.radius) || undefined,
+            locationName: r.locationName || r.loc || '',
+            locationType: r.locationType || 'City',
+          });
         } else {
+          // Legacy "code,name,country" rows from before coordinates were
+          // required. They load so nothing is lost, but they will show as
+          // needing a location until a deeplink is pasted for them.
           const parts = String(r || '').split(',');
           if (!String(parts[0] || '').trim()) continue;
           out.push({ code: String(parts[0]).trim().replace(/^[A-Z]+:/i, ''), ctry: String(parts[2] || '').trim() });
@@ -2162,10 +2221,15 @@
       const out = [];
       for (const r of ttiRows) {
         const code = canonTti(r.code);
-        const ctry = canonCtry(r.ctry);
-        if (!code || !ctry || seen[code]) continue;
+        if (!code || seen[code] || !rowHasPlace(r)) continue;
         seen[code] = true;
-        out.push({ code, ctry });
+        out.push({
+          code, ctry: canonCtry(r.ctry),
+          lat: Number(r.lat), lng: Number(r.lng),
+          ...(Number(r.radius) ? { radius: Number(r.radius) } : {}),
+          ...(r.locationName ? { locationName: String(r.locationName).slice(0, 200) } : {}),
+          locationType: r.locationType || 'City',
+        });
       }
       state.config.ttiCodes = out;
       return out;
@@ -2175,7 +2239,7 @@
       const el = $('ttiSummary');
       if (!el) return;
       const ready = syncTtiConfig().length;
-      const incomplete = ttiRows.filter(r => (r.code || r.ctry) && !(canonTti(r.code) && canonCtry(r.ctry))).length;
+      const incomplete = ttiRows.filter(r => (r.code || r.locationName) && !(canonTti(r.code) && rowHasPlace(r))).length;
       if (!ready && !incomplete) {
         el.innerHTML = 'No hotels yet. The widget stays empty until you add at least one.';
         return;
@@ -2183,8 +2247,8 @@
       let html = esc(ready + (ready === 1 ? ' hotel ready' : ' hotels ready'));
       if (incomplete) {
         html += '<br><span style="color:var(--tgse-warning)">' + incomplete
-          + (incomplete === 1 ? ' row needs' : ' rows need')
-          + ' both a code and a two-letter country before it will be saved.</span>';
+          + (incomplete === 1 ? ' row still needs' : ' rows still need')
+          + ' a location. Paste that hotel\'s deeplink above and it will fill in.</span>';
       }
       el.innerHTML = html;
     }
@@ -2206,13 +2270,18 @@
         code.placeholder = 'TTI code, e.g. 12345';
         code.value = row.code || '';
         code.setAttribute('aria-label', 'Travelify property code, hotel ' + (i + 1));
-        const ctry = document.createElement('input');
-        ctry.className = 'input tti-ctry';
-        ctry.type = 'text';
-        ctry.maxLength = 2;
-        ctry.placeholder = 'AE';
-        ctry.value = row.ctry || '';
-        ctry.setAttribute('aria-label', 'Country code, hotel ' + (i + 1));
+        const place = document.createElement('div');
+        place.style.cssText = 'flex:1 1 auto;min-width:0;font-size:12px;align-self:center;'
+          + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        if (rowHasPlace(row)) {
+          place.style.color = 'var(--tgse-ink-3)';
+          place.textContent = (row.locationName || 'Location set')
+            + ' \u00b7 ' + Number(row.lat).toFixed(3) + ', ' + Number(row.lng).toFixed(3);
+          place.title = place.textContent;
+        } else {
+          place.style.color = 'var(--tgse-warning)';
+          place.textContent = 'Needs a location \u2014 paste this hotel\'s deeplink above';
+        }
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'tti-del';
@@ -2221,7 +2290,6 @@
         del.setAttribute('aria-label', 'Remove hotel ' + (i + 1));
 
         code.addEventListener('input', () => { row.code = code.value; paintTtiSummary(); markDirtyAndPreview(); });
-        ctry.addEventListener('input', () => { row.ctry = ctry.value; paintTtiSummary(); markDirtyAndPreview(); });
         del.addEventListener('click', () => {
           ttiRows.splice(i, 1);
           renderTtiRows();
@@ -2229,7 +2297,7 @@
           markDirtyAndPreview();
         });
 
-        wrap.appendChild(code); wrap.appendChild(ctry); wrap.appendChild(del);
+        wrap.appendChild(code); wrap.appendChild(place); wrap.appendChild(del);
         host.appendChild(wrap);
       });
     }
@@ -2247,7 +2315,8 @@
       const rows = syncTtiConfig();
       if (!rows.length) {
         out.hidden = false;
-        out.innerHTML = '<span style="color:var(--tgse-warning)">Add a code and a country first.</span>';
+        out.innerHTML = '<span style="color:var(--tgse-warning)">Add a hotel first. Pasting a '
+          + 'deeplink above is the quickest way.</span>';
         return;
       }
       const label = btn.textContent;
@@ -2273,108 +2342,53 @@
           out.innerHTML = '<span style="color:var(--tgse-danger)">' + esc(d.error || 'The test could not run.') + '</span>';
           return;
         }
-        const dot = { found: 'tti-ok', 'area-only': 'tti-warn', empty: 'tti-warn', 'no-country': 'tti-warn', failed: 'tti-err' };
+        const dot = { found: 'tti-ok', 'not-in-results': 'tti-warn', 'no-price': 'tti-warn',
+                      incomplete: 'tti-warn', skipped: 'tti-warn', failed: 'tti-err' };
+        const money = (n, cur) => (cur === 'EUR' ? '\u20ac' : cur === 'USD' ? '$' : '\u00a3') + Math.round(n);
         const lines = (d.results || []).map((r) => {
           let text;
           if (r.status === 'found') {
-            const price = Number.isFinite(r.fromPrice)
-              ? ' from ' + (r.currency === 'EUR' ? '\u20ac' : '\u00a3') + Math.round(r.fromPrice)
-              : '';
-            text = esc(r.hotel || 'Found') + (r.resort ? ', ' + esc(r.resort) : '') + esc(price)
-                 + ' \u00b7 ' + r.offers + (r.offers === 1 ? ' offer' : ' offers');
+            const price = Number.isFinite(r.fromPrice) ? ' from ' + money(r.fromPrice, r.currency) : '';
+            const nights = Number.isFinite(r.nights) ? ' \u00b7 ' + r.nights + (r.nights === 1 ? ' night' : ' nights') : '';
+            const when = r.checkinDate ? ' from ' + String(r.checkinDate).slice(0, 10) : '';
+            text = '<strong>' + esc(r.hotel || 'Found') + '</strong>' + esc(price) + esc(nights) + esc(when)
+                 + '<br><span style="color:var(--tgse-ink-3)">'
+                 + r.offers + (r.offers === 1 ? ' offer' : ' offers')
+                 + (r.cached ? ' cached, so the preview below is showing real prices'
+                             : ' found, but the cache write did not go through')
+                 + (r.image ? ' \u00b7 with a photo' : ' \u00b7 no photo from the supplier')
+                 + '</span>';
+            // A field the normaliser could not find is a named gap, not a
+            // blank card. Surfaced because a cache full of nulls looks exactly
+            // like a supplier with thin content.
+            if (r.unmapped && r.unmapped.length) {
+              text += '<br><span style="color:var(--tgse-warning)">Came back without: '
+                    + esc(r.unmapped.join(', ')) + '. Send us this and we will map them.</span>';
+            }
           } else {
             text = esc(r.detail || r.status);
-            // Show what DID come back. Without it "nothing matched" is a dead
-            // end: you cannot tell a wrong code from a pin Travelify ignored.
-            if (r.status === 'area-only') {
-              const bits = [];
-              bits.push(r.areaOffers + ' offers came back for that country, '
-                + r.withRef + ' carrying a property reference');
-              if (r.sampleHotels && r.sampleHotels.length) {
-                bits.push('such as ' + r.sampleHotels.join(', '));
-              }
-              if (r.sampleRefs && r.sampleRefs.length) {
-                bits.push('references look like ' + r.sampleRefs.slice(0, 3).join(', '));
-              }
-              text += '<br><span style="color:var(--tgse-ink-3)">' + esc(bits.join('. ')) + '.</span>';
+            if (r.status === 'not-in-results' && r.areaResults) {
+              text += '<br><span style="color:var(--tgse-ink-3)">'
+                    + r.areaResults + ' other properties came back for that area'
+                    + (r.complete ? '' : ', and the search had not finished settling')
+                    + '. Either the code belongs to a different town, or the hotel has no '
+                    + 'availability for those dates.</span>';
             }
           }
           return '<div class="tti-test-row"><span class="tti-test-dot ' + (dot[r.status] || 'tti-warn') + '"></span>'
                + '<span><span class="tti-test-code">' + esc(r.code) + '</span> \u2014 ' + text + '</span></div>';
         });
-        let head = '<div style="margin-bottom:6px"><strong>' + d.found + ' of ' + d.tested + '</strong> found.</div>';
-        if (d.truncated) {
-          head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">Only the first 10 were tested, to keep '
-                + 'this from turning into a bulk search. The other ' + d.truncated + ' still save fine.</div>';
+
+        let head = '<div style="margin-bottom:6px"><strong>' + d.found + ' of ' + d.tested + '</strong> found'
+                 + (d.cached ? ', ' + d.cached + ' cached' : '') + '.</div>';
+        if (d.found) {
+          head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">These are real searches and the '
+                + 'results are now in your cache, so the widget will show them straight away. The nightly '
+                + 'job refreshes them from here on.</div>';
         }
-        if (d.pinLooksIgnored) {
-          head += '<div style="color:var(--tgse-warning);margin-bottom:6px">Every search came back as the '
-                + 'surrounding country rather than the hotel, and the offers DO carry property references. '
-                + 'That is what it looks like when Travelify ignores the property pin on the offers feed, '
-                + 'rather than when a code is wrong. If you have checked the code in Travelify, it is '
-                + 'the second one. Send us this result.</div>';
-        }
-        // What the DEEP LINK returned, when the feed could not find the
-        // property. This is the question that keeps coming up, so show the
-        // answer rather than describing it.
-        let dl = '';
-        if (d.deeplink) {
-          const k = d.deeplink;
-          const bits = [];
-          if (k.error) {
-            bits.push('could not be fetched: ' + k.error);
-          } else {
-            const last = (k.hops && k.hops.length) ? k.hops[k.hops.length - 1] : null;
-            bits.push('returned ' + (last ? last.status : '?')
-              + (k.hops && k.hops.length > 1 ? ' after ' + (k.hops.length - 1) + ' redirect(s)' : ''));
-            if (k.contentType) bits.push('content type ' + k.contentType.split(';')[0]);
-            bits.push(k.isJson ? 'the body IS machine readable JSON'
-                               : 'the body is NOT JSON (' + k.bytes + ' bytes)');
-          }
-          dl = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
-             + '<strong>The deep link for this hotel</strong><br>'
-             + '<span style="color:var(--tgse-ink-3)">' + esc(bits.join('. ')) + '.</span>'
-             + (k.bodyStarts ? '<br><span class="tti-test-code" style="color:var(--tgse-ink-3);'
-                 + 'display:block;margin-top:4px;word-break:break-all">'
-                 + esc(k.bodyStarts.slice(0, 200)) + '</span>' : '')
-             + '<br><a href="' + esc(k.url) + '" target="_blank" rel="noopener"'
-             + ' style="color:var(--tgse-brand)">Open it yourself</a></div>';
-        }
-        // WHY it could not be found. The most useful thing on the whole
-        // panel when a code comes back area-only, so it goes above the deep
-        // link rather than below it.
-        let pp = '';
-        if (d.pinProbe && d.pinProbe.tried && d.pinProbe.tried.length) {
-          const q = d.pinProbe;
-          const rows = q.tried.map(function (t) {
-            const what = t.failed ? 'did not answer (' + t.failed + ')'
-              : t.offers + ' offer' + (t.offers === 1 ? '' : 's') + ' back, '
-                + (t.mine ? t.mine + ' of them this hotel' : 'none of them this hotel');
-            return '<div style="margin-top:3px">&bull; asking by <strong>' + esc(t.label)
-                 + '</strong>: ' + esc(what) + '</div>';
-          }).join('');
-          let verdict;
-          if (q.winner) {
-            verdict = 'Asking by <strong>' + esc(q.winner) + '</strong> found it. '
-                    + 'Send us this result and we will switch the nightly job to that, '
-                    + 'which will fix every code in this list at once.';
-          } else if (q.pinIgnored) {
-            verdict = 'Every version came back with exactly the same offers, so Travelify '
-                    + 'is ignoring the hotel pin and searching the whole country instead. '
-                    + 'Your code is almost certainly fine. This one is ours to sort out '
-                    + 'with Travelify, so please send us this result.';
-          } else {
-            verdict = 'No way of asking found this hotel. Either the code belongs to a '
-                    + 'different country, or the hotel has no availability at all right now.';
-          }
-          pp = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
-             + '<strong>Why ' + esc(q.code) + ' could not be found</strong>'
-             + '<div style="color:var(--tgse-ink-3);margin-top:4px">We asked Travelify for it '
-             + 'several different ways:</div>'
-             + '<div style="color:var(--tgse-ink-3)">' + rows + '</div>'
-             + '<div style="margin-top:6px">' + verdict + '</div></div>';
-        }
-        out.innerHTML = head + lines.join('') + pp + dl;
+        out.innerHTML = head + lines.join('');
+        // A successful test just filled the cache, so redraw with real offers.
+        if (d.found) markDirtyAndPreview();
       } catch (err) {
         const why = (err && err.name === 'AbortError')
           ? 'The search took too long to come back. Travelify can be slow on a '
@@ -2389,6 +2403,48 @@
     }
 
     function wireTtiCodes() {
+      const pasteAdd = $('ttiPasteAdd');
+      if (pasteAdd) {
+        pasteAdd.addEventListener('click', () => {
+          const box = $('ttiPaste');
+          const out = $('ttiTestOut');
+          if (!box) return;
+          const lines = String(box.value || '').split(/[\r\n]+/).map(x => x.trim()).filter(Boolean);
+          let added = 0, updated = 0, bad = 0;
+          for (const line of lines) {
+            const parsed = parseTtiDeeplink(line);
+            if (!parsed) { bad++; continue; }
+            // A code already in the list gets its location filled in rather
+            // than a second row: pasting the deeplink for a hotel you typed
+            // earlier should complete that row, not duplicate it.
+            const existing = ttiRows.find(r => canonTti(r.code) === parsed.code);
+            if (existing) { Object.assign(existing, parsed); updated++; continue; }
+            if (ttiRows.length >= TTI_MAX) break;
+            // Drop the blank starter row rather than leaving a gap above.
+            if (ttiRows.length === 1 && !canonTti(ttiRows[0].code)) ttiRows.length = 0;
+            ttiRows.push(parsed); added++;
+          }
+          if (added || updated) {
+            box.value = '';
+            renderTtiRows();
+            paintTtiSummary();
+            markDirtyAndPreview();
+          }
+          if (out) {
+            const bits = [];
+            if (added) bits.push(added + (added === 1 ? ' hotel added' : ' hotels added'));
+            if (updated) bits.push(updated + (updated === 1 ? ' row completed' : ' rows completed'));
+            out.hidden = false;
+            out.innerHTML = bits.length
+              ? esc(bits.join(', ')) + '. Press Test to check them against Travelify.'
+              : '<span style="color:var(--tgse-warning)">'
+                + (bad ? 'That did not look like a Travelify deeplink. It should start '
+                       + 'https://dl.tvllnk.com/deeplink/ and carry a refn= code.'
+                       : 'Nothing to add.') + '</span>';
+          }
+        });
+      }
+
       const add = $('ttiAdd');
       if (add) {
         add.addEventListener('click', () => {

@@ -401,3 +401,143 @@ export function resultIsProperty(result, code) {
   ];
   return candidates.some((c) => c && canonTti(c) === want);
 }
+
+/** Pull a property row out of a Travelify deeplink.
+ *
+ *  The agents already have working deeplinks — that is how this whole thing
+ *  started — and a working link carries every field the search criteria need:
+ *  the code as `refn`, the area as `loc`/`lat`/`lng`/`rad`, the country as
+ *  `ctry`. So let them paste one rather than typing coordinates, and the row
+ *  cannot describe a search Travelify would reject, because it came from one
+ *  that works.
+ *
+ *  Returns null for anything that is not a deeplink carrying a property. */
+export function parseDeeplink(url) {
+  let u;
+  try { u = new URL(String(url || '').trim()); } catch { return null; }
+  if (!/(^|\.)tvllnk\.com$/i.test(u.hostname)) return null;
+  const q = u.searchParams;
+
+  const code = canonTti(q.get('refn'));
+  if (!code) return null;
+
+  const lat = Number(q.get('lat'));
+  const lng = Number(q.get('lng'));
+  const rad = Number(q.get('rad'));
+  const appId = (/\/deeplink\/(\d{1,10})/.exec(u.pathname) || [])[1] || '';
+
+  return {
+    code,
+    appId,
+    locationName: cleanName(q.get('loc') || ''),
+    locationType: q.get('loct') === 'City' ? 'City' : (q.get('loct') || 'City'),
+    ctry: cleanCtry(q.get('ctry') || ''),
+    ...(Number.isFinite(lat) && lat >= -90 && lat <= 90 ? { lat } : {}),
+    ...(Number.isFinite(lng) && lng >= -180 && lng <= 180 ? { lng } : {}),
+    // Deeplinks carry the radius in km; the search criteria want miles.
+    ...(Number.isFinite(rad) && rad > 0 ? { radius: Math.max(1, Math.round(rad * 0.621371)) } : {}),
+    // st=DynamicPackaging on a DP link, Accommodation otherwise.
+    type: /^dynamic/i.test(String(q.get('st') || '')) ? 'DynamicPackages' : 'Accommodation',
+  };
+}
+
+/** Is this row complete enough to search with? The editor uses this to show a
+ *  row as ready or short of detail, and the sweep uses it to skip rather than
+ *  fire a search that cannot be scoped. */
+export function rowIsSearchable(row) {
+  return !!buildAccommodationCriteria(row, {}, new Date());
+}
+
+/* ============================================================
+   Booking-API results -> the cached offer shape
+   ============================================================ */
+
+/** Read a value from whichever spelling a result happens to use.
+ *  The booking API and the offers feed name the same things differently, and
+ *  the exact result shape has not been seen yet — so rather than guess once and
+ *  be silently wrong, try the plausible spellings and REPORT what was not
+ *  found. `normaliseAccommodationResult` returns that report alongside the
+ *  offer so a wrong guess shows up as a named gap instead of a blank card. */
+function pick(obj, paths) {
+  for (const path of paths) {
+    let v = obj;
+    for (const part of path.split('.')) {
+      if (v == null) break;
+      v = v[part];
+    }
+    if (v !== undefined && v !== null && v !== '') return v;
+  }
+  return undefined;
+}
+
+const asNum = (v) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
+
+/** One accommodation result -> the shape api/cached-offers.js already serves.
+ *
+ *  Deliberately NOT clever. Every field it could not find is listed in
+ *  `unmapped`, because a cache quietly full of nulls looks identical to a
+ *  supplier with thin content and would send the next person debugging the
+ *  wrong thing entirely. */
+export function normaliseAccommodationResult(r, ctx = {}) {
+  if (!r || typeof r !== 'object') return null;
+  const unmapped = [];
+  const get = (name, paths) => {
+    const v = pick(r, paths);
+    if (v === undefined) unmapped.push(name);
+    return v;
+  };
+
+  const price = asNum(pick(r, [
+    'pricing.total', 'pricing.price', 'price.total', 'price.amount',
+    'totalPrice', 'price', 'Price', 'leadInPrice',
+  ]));
+  const pricePP = asNum(pick(r, [
+    'pricing.perPerson', 'pricing.pricePerPerson', 'price.perPerson',
+    'pricePerPerson', 'perPerson',
+  ]));
+  // No price is not an offer. Never cache one: the card would render a hotel
+  // with a blank price and a live booking link behind it.
+  if (price == null && pricePP == null) return null;
+
+  const hotel = get('hotel', ['name', 'Name', 'accommodation.name', 'property.name', 'hotelName']);
+  const ref = pick(r, ['uniqueRef', 'accommodationUniqueRef', 'ref', 'Ref',
+                       'propertyRef', 'accommodation.uniqueRef']);
+
+  const offer = {
+    type: ctx.type === 'DynamicPackages' ? 'Packages' : 'Accommodation',
+    price: price != null ? price : pricePP,
+    pricePP: pricePP != null ? pricePP : null,
+    currency: pick(r, ['pricing.currency', 'price.currency', 'currency']) || ctx.currency || 'GBP',
+    hotel: hotel != null ? String(hotel).slice(0, 160) : null,
+    resort: (() => {
+      const v = pick(r, ['resort.name', 'destination.name', 'location.name', 'city', 'resort']);
+      return v ? String(v).slice(0, 120) : (ctx.locationName || null);
+    })(),
+    countryCode: cleanCtry(pick(r, ['countryCode', 'country.code', 'location.countryCode']) || ctx.ctry || ''),
+    lat: asNum(pick(r, ['latitude', 'lat', 'location.latitude'])) ?? (ctx.lat ?? null),
+    lng: asNum(pick(r, ['longitude', 'lng', 'location.longitude'])) ?? (ctx.lng ?? null),
+    rating: asNum(pick(r, ['rating', 'starRating', 'stars', 'Rating'])),
+    reviewRating: asNum(pick(r, ['reviewRating', 'review.rating', 'guestRating'])),
+    reviewCount: asNum(pick(r, ['reviewCount', 'review.count', 'reviews'])),
+    boardBasis: pick(r, ['boardBasis', 'BoardBasis', 'board']) || null,
+    nights: asNum(pick(r, ['nights', 'Nights', 'duration'])) ?? (ctx.nights ?? null),
+    checkinDate: pick(r, ['checkinDate', 'CheckinDate', 'checkIn', 'startDate']) || ctx.checkinDate || null,
+    propertyType: pick(r, ['propertyType', 'PropertyType']) || null,
+    image: pick(r, ['image.url', 'images.0.url', 'images.0', 'imageUrl', 'thumbnail']) || null,
+    url: pick(r, ['deeplinkUrl', 'url', 'bookingUrl', 'link']) || null,
+    accommodationUniqueRef: ref ? String(ref).slice(0, 64) : null,
+    refundability: pick(r, ['refundability', 'Refundability']) || null,
+    adults: asNum(pick(r, ['adults', 'Adults'])) ?? (ctx.adults ?? null),
+    fetchedAt: new Date().toISOString(),
+  };
+
+  // Only report gaps that actually matter to a rendered card.
+  for (const [name, v] of [['price', offer.price], ['hotel', offer.hotel],
+                           ['image', offer.image], ['url', offer.url]]) {
+    if (v == null && !unmapped.includes(name)) unmapped.push(name);
+  }
+  return { offer, unmapped };
+}
