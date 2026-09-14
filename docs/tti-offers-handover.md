@@ -575,6 +575,53 @@ which is what makes that class of bug expensive. A test pins it.
   the sweep stores, what the widget asks for, and what the editor's preview
   strip counts. They have drifted twice. A test now pins all three together.
 
+### What a package card needs, and where each piece comes from
+
+The card template already draws all of this. Everything below was a MISSING
+FIELD, not a missing feature — the first real package rendered with the bare
+word "Travellers", no departure airport and no board basis (Andy, 14 Sep 2026).
+
+| What the card shows | Field on the cached offer | Where it comes from |
+|---|---|---|
+| "2 adults" | `adults` / `children` / `infants` | the Guests we actually searched for |
+| "GLA → TFS" | `origin` **and** `airport` | the departure airport and the resolved arrival |
+| "Departs … Returns …" | `outboundDate` / `returnDate` | the two flight legs |
+| "7 nights · All Inclusive" | `nights` / `boardBasis` | `units[0]` on the result |
+
+**The flight line needs BOTH ends.** It is `fromCode → toCode` and is skipped
+entirely unless both are known, so storing only `origin` meant the card never
+said where it flew from at all.
+
+**A missing board basis is reported.** `unmapped` now names it, because a card
+with no board reads as a hotel that has none. The first real package came back
+without one while its `units[0]` did carry nights and a check-in date, so the
+field is either absent on that shape or named differently; the normaliser looks
+in six places and says so when it still cannot find it.
+
+### An island hotel must not fly to the capital
+
+A country hub is a fair answer for a mainland property and a bad one for an
+island: a hotel in Santa Cruz de Tenerife resolves to **MAD** on the country
+alone, 1,700km from the bed. So a DP row we cannot place gets ONE cheap
+accommodation search first, purely to read its coordinates — the same search the
+hotel-only widget runs, and it fills the cache on the way past so this never
+happens twice for the same property. Capped at `MAX_LOCATE` and deadline
+checked, because it spends a real search. With coordinates, Tenerife resolves to
+TFS with TFN offered alongside.
+
+### Known gaps on the package card
+
+- **No carrier, stops or flight times.** We cache the accommodation result and
+  only COUNT `flightResults`; nothing from the flight itself is stored. The card
+  supports all three, so this is a storage decision rather than a template one.
+- **The location line prints a country CODE** ("Santa Cruz, ES"). That is
+  pre-existing behaviour across five templates of the main Offers widget, so
+  changing it touches every client's cards, not just TTI. Andy's call.
+- **The ATOL badge is unconditional on package cards** (by design, 10 Aug 2026:
+  every flight-inclusive package is ATOL protected). Worth confirming the
+  selling agent holds an ATOL before a TTI package widget goes live — Travelify's
+  own docs say UK sellers must.
+
 ### The cron will not run without a customer address
 
 `TTI_CUSTOMER_IP` on the deployment. Every Travelify search requires one and a

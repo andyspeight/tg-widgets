@@ -76,7 +76,7 @@ import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } fro
 // is how the shape drifts, and api/cached-offers.js rebuilds BOTH pools with a
 // single toRawShape that is the exact inverse of this one parser.
 import { runSearch } from '../_lib/offers/travelify-search.js';
-import { resolveArrivalAirport } from '../_lib/offers/arrival-airport.js';
+import { resolveArrivalAirport, airportLabel } from '../_lib/offers/arrival-airport.js';
 import {
   normaliseOffers,
   callOffersProxy,
@@ -300,15 +300,29 @@ async function fetchProperty(item, search, origin = null) {
   const verified = [];
   for (const one of results) {
     if (!resultIsProperty(one, item.code)) continue;
+    const legs = (criteria.FlightSearchCriteria || {}).Legs || [];
+    const guests = criteria.AccommodationSearchCriteria.Rooms[0].Guests || [];
     const n = normaliseAccommodationResult(one, {
       ctry: item.ctry, lat: item.lat, lng: item.lng,
       locationName: item.locationName,
       currency: criteria.Currency,
       checkinDate: criteria.AccommodationSearchCriteria.CheckinDate,
+      // The party the price is for. The card prints "2 adults" from this and
+      // falls back to the bare word "Travellers" without it, so a nightly
+      // refresh that dropped it would quietly undo the cards the Test button
+      // produced.
+      adults: guests.filter((g) => g.Type === 'Adult').length,
+      children: guests.filter((g) => g.Type === 'Child').length,
+      infants: guests.filter((g) => g.Type === 'Infant').length,
       // Which airport this price flies from, under the name the rest of the
       // product uses. It is what turns this into a real package downstream:
       // a flight block, the Flight + Hotel badge, and the dedupe key below.
-      ...(origin ? { origin } : {}),
+      ...(origin ? { origin, originName: airportLabel(origin) } : {}),
+      // And where it lands, plus the dates. The card's flight line needs BOTH
+      // ends or it draws nothing at all.
+      ...(isDp && item.arrival ? { destination: item.arrival.code, destinationName: item.arrival.name } : {}),
+      ...(legs[0] ? { outboundDate: legs[0].DepartDate } : {}),
+      ...(legs[1] ? { returnDate: legs[1].DepartDate } : {}),
       deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
     });
     if (n && n.offer) verified.push(n.offer);

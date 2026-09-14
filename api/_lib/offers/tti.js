@@ -626,6 +626,16 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // cached-offers.js keys `hasFlight` off exactly this, and builds
     // flight.origin.iataCode from it.
     ...(ctx.origin ? { origin: ctx.origin } : {}),
+    ...(ctx.originName ? { originName: ctx.originName } : {}),
+    // WHERE IT LANDS, and the dates it flies. The card's flight line is
+    // `fromCode -> toCode` and it is skipped ENTIRELY unless both ends are
+    // known, which is why a package showed no departure airport at all even
+    // though the origin was stored. The arrival airport was resolved before
+    // the search; storing it costs nothing and completes the line.
+    ...(ctx.destination ? { airport: ctx.destination } : {}),
+    ...(ctx.destinationName ? { airportName: ctx.destinationName } : {}),
+    ...(ctx.outboundDate ? { outboundDate: ctx.outboundDate } : {}),
+    ...(ctx.returnDate ? { returnDate: ctx.returnDate } : {}),
     price: price != null ? price : pricePP,
     pricePP: pricePP != null ? pricePP : null,
     currency: pick(r, ['pricing.currency', 'pricing.currencyCode']) || ctx.currency || 'GBP',
@@ -645,7 +655,23 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     resortLat: lat != null ? lat : (ctx.lat != null ? ctx.lat : null),
     resortLng: lng != null ? lng : (ctx.lng != null ? ctx.lng : null),
     rating: asNum(r.rating),
-    boardBasis: pick(r, ['units.0.boardBasis', 'boardBasis', 'pricing.boardBasis']) || null,
+    // WHO THE PRICE IS FOR. api/cached-offers.js passes these straight through
+    // and the card builds "2 adults" from them; without them it printed the
+    // bare word "Travellers" and a price for nobody in particular (Andy,
+    // 14 Sep 2026). Taken from the criteria we actually sent, not guessed.
+    adults: Number.isFinite(ctx.adults) ? ctx.adults : null,
+    children: Number.isFinite(ctx.children) ? ctx.children : null,
+    infants: Number.isFinite(ctx.infants) ? ctx.infants : null,
+    boardBasis: pick(r, [
+      'units.0.boardBasis', 'boardBasis', 'pricing.boardBasis',
+      // Seen empty on a real package result whose units[0] DID carry nights
+      // and checkinDate (Andy, 14 Sep 2026), so the field is either absent or
+      // named differently on that shape. These are the other plausible homes;
+      // if it is still missing the offer says so in `unmapped` rather than the
+      // card quietly dropping a line the agent expects.
+      'units.0.board', 'units.0.mealPlan', 'units.0.boardType',
+      'units.0.rates.0.boardBasis', 'mealPlan', 'board',
+    ]) || null,
     nights: asNum(pick(r, ['units.0.nights', 'nights', 'pricing.nights'])),
     checkinDate: pick(r, ['units.0.checkinDate', 'checkinDate']) || ctx.checkinDate || null,
     propertyType: r.propertyType || null,
@@ -681,7 +707,10 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   // click-through from the property reference and coordinates (offersDeeplink),
   // so a cached offer without a url is normal rather than broken, and reporting
   // it sent Andy looking for a missing field that was never needed.
-  for (const [name, v] of [['hotel', offer.hotel], ['nights', offer.nights]]) {
+  for (const [name, v] of [['hotel', offer.hotel], ['nights', offer.nights],
+    // A card without a board basis looks like a hotel that has none, which is
+    // not a thing. Reported so it can be chased rather than absorbed.
+    ['boardBasis', offer.boardBasis]]) {
     if (v == null && unmapped.indexOf(name) === -1) unmapped.push(name);
   }
   return { offer, unmapped };
