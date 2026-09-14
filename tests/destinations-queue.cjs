@@ -121,6 +121,27 @@ globalThis.fetch = async (url, opts = {}) => {
     assert.strictEqual(after.note, '', 'an old orange line describing a past moment is worse than none');
   });
 
+  console.log('\nCounting a run bigger than the lists');
+
+  await t('the day counters are not capped, even though the lists are', async () => {
+    store.clear();
+    // A real morning: 157 saved and 402 held, both past the list caps.
+    for (let i = 0; i < 157; i++) await q.noteOutcome(true, false);
+    for (let i = 0; i < 402; i++) await q.noteOutcome(false, false);
+
+    const tally = await q.todayTally();
+    assert.strictEqual(tally.saved, 157);
+    assert.strictEqual(tally.held, 402);
+
+    const st = await q.queueStatus();
+    assert.strictEqual(st.savedToday, 157,
+      'the dashboard counts a run from this, so capping it reports the cap as the result');
+    assert.strictEqual(st.heldToday, 402);
+    // The lists stay capped on purpose, which is exactly why the count above
+    // cannot be derived from them. A run of 157 read as "saved 100".
+    assert.ok((st.saved || []).length <= 100, 'the saved list is a sample, not a total');
+  });
+
   console.log(`\n${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
 })();

@@ -1304,12 +1304,25 @@ a.nm:hover span{text-decoration:underline}
     if (!R || !thisRun || !job || thisRun.field !== job.label || thisRun.type !== job.type) return null;
     var heldNow = (R.held || []).filter(runMatch);
     var savedNow = (R.saved || []).filter(runMatch);
-    // Only what this press produced. The logs are newest first, so the new
-    // entries are the ones at the front.
-    var held = Math.max(0, heldNow.length - (thisRun.heldBefore || 0));
-    var saved = Math.max(0, savedNow.length - (thisRun.savedBefore || 0));
+    // TWO SIGNALS, AND THE LARGER IS THE HONEST ONE.
+    //
+    // The lists are matched to this run's own records, which is what keeps one
+    // unrelated save this morning from hiding three holds this afternoon. But
+    // the server caps them for size, so a run bigger than the cap can only ever
+    // report the cap: on 14 Sep 2026 a run that filled 157 airports said it
+    // saved 100, which is the cap exactly, and read as the job having stalled.
+    //
+    // The day counters are uncapped but not scoped to a field, so they are read
+    // as a delta from the moment the button was pressed. Neither can overstate
+    // the run, and each covers the other's blind spot, so take the larger.
+    var listSaved = Math.max(0, savedNow.length - (thisRun.savedBefore || 0));
+    var listHeld = Math.max(0, heldNow.length - (thisRun.heldBefore || 0));
+    var saved = Math.max(listSaved, (R.savedToday || 0) - (thisRun.savedTodayBefore || 0));
+    var held = Math.max(listHeld, (R.heldToday || 0) - (thisRun.heldTodayBefore || 0));
+    // The reasons can only be read from what the list actually holds.
+    var seenHeld = Math.min(held, listHeld);
     var why = {};
-    heldNow.slice(0, held).forEach(function (h) {
+    heldNow.slice(0, seenHeld).forEach(function (h) {
       var k = String(h.reason || 'not given');
       why[k] = (why[k] || 0) + 1;
     });
@@ -1616,6 +1629,8 @@ a.nm:hover span{text-decoration:underline}
     thisRun = { field: job.label, type: job.type, ids: recordIds.slice(), asked: recordIds.length };
     thisRun.heldBefore = countForRun(R && R.held);
     thisRun.savedBefore = countForRun(R && R.saved);
+    thisRun.savedTodayBefore = (R && R.savedToday) || 0;
+    thisRun.heldTodayBefore = (R && R.heldToday) || 0;
     recordIds.forEach(function (id) { rowState[id] = 'queued'; });
     renderJobRows();
     fillApi({ action: 'queue', type: job.type, fieldIdx: job.idx, recordIds: recordIds })

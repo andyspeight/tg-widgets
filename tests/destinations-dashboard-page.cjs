@@ -744,6 +744,85 @@ async function payload(mod) {
       'and the row should say why without opening another tab');
   });
 
+  /* 14 Sep 2026. Official Website filled 157 airports and the bar said it saved
+     100, which is exactly the length the server caps the saved list at. It read
+     as the job having stalled half way. */
+
+  t('a run bigger than the server\'s list still reports its real size', async () => {
+    const ap = data.types.find(x => x.key === 'airport');
+    const siteIdx = ap.fields.findIndex(f => f.label === 'Official Website');
+    assert.ok(siteIdx >= 0, 'airports should carry Official Website');
+    const gaps = data.records
+      .filter(r => r.type === 'airport' &&
+        (r.missing.indexOf(siteIdx) !== -1 || r.broken.indexOf(siteIdx) !== -1))
+      .map(r => r.id);
+    assert.ok(gaps.length > 100, 'this test needs a job bigger than the 100 cap');
+
+    const SAVED = 157;
+    const d4 = new JSDOM(fs.readFileSync(HTML, 'utf8'), {
+      runScripts: 'dangerously',
+      url: 'https://tg-widgets.vercel.app/admin/destinations',
+      virtualConsole: new (require('jsdom').VirtualConsole)(),
+      beforeParse(w) {
+        w.Element.prototype.scrollIntoView = function () {};
+        w.__pressed = false;
+        w.fetch = (url, opts) => {
+          if (String(url).includes('destinations-fill')) {
+            if (opts && opts.body) {
+              const b = JSON.parse(opts.body);
+              if (b.recordIds) w.__pressed = true;
+            }
+            const now = new Date().toISOString();
+            // The server caps the saved list at 100 however many actually saved.
+            const list = w.__pressed
+              ? gaps.slice(0, 100).map((id, i) => ({
+                  place: 'Airport ' + i, field: 'Official Website', type: 'airport',
+                  recordId: id, value: 'https://a' + i + '.test', at: now,
+                  reason: 'two independent sources agreed' }))
+              : [];
+            const p = {
+              settings: { capUsd: 10, running: false },
+              budget: { capUsd: 10, spentUsd: 0, remainingUsd: 10, perItemUsd: 0.05,
+                        roomForPaidWork: true, itemsAffordable: 200 },
+              pending: 0, run: {},
+              // The uncapped counters move by the real amount.
+              savedToday: w.__pressed ? SAVED : 0,
+              heldToday: w.__pressed ? 291 : 0,
+              heldCount: 0, held: [], saved: list, recent: [],
+            };
+            const body = JSON.stringify(p);
+            return Promise.resolve({ ok: true, status: 200,
+              text: () => Promise.resolve(body), json: () => Promise.resolve(p) });
+          }
+          return Promise.resolve({ ok: true, status: 200,
+            text: () => Promise.resolve(JSON.stringify(data)), json: () => Promise.resolve(data) });
+        };
+        w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+        w.confirm = () => true; w.alert = () => {};
+        w.URL.createObjectURL = () => 'blob:mock'; w.URL.revokeObjectURL = () => {};
+      },
+    });
+    await new Promise(r => d4.window.addEventListener('load', r));
+    await new Promise(r => setTimeout(r, 80));
+    const dd = d4.window.document;
+
+    const more = dd.getElementById('jobs-more');
+    if (more) more.dispatchEvent(new d4.window.Event('click', { bubbles: true }));
+    const row = [...dd.querySelectorAll('#jobs .job:not(.is-off)')]
+      .find(r => /Official Website · airports/i.test(r.querySelector('.job-t').textContent));
+    assert.ok(row, 'the fixture should offer Official Website on airports');
+    row.querySelector('[data-job]').dispatchEvent(new d4.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 100));
+    const doAll = dd.getElementById('jv-doall');
+    doAll.dispatchEvent(new d4.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 200));
+
+    const bar = dd.getElementById('run-l').textContent;
+    assert.match(bar, new RegExp('saved ' + SAVED),
+      'the list caps at 100, so counting from it alone reports the cap: ' + bar);
+    assert.ok(!/saved 100\b/.test(bar), 'reporting the cap as the result is the bug');
+  });
+
   console.log('\nSeeing it all without opening Airtable');
 
   /* Andy, after the first real save: "I want to be able to see everything from
