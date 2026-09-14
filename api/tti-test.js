@@ -35,7 +35,7 @@ import { requireAuth, setCors } from './_auth.js';
 import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } from './_auth.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
-  canonTti, cleanCtry, parseDeeplink, buildAccommodationCriteria,
+  canonTti, cleanCtry, cleanIp, parseDeeplink, buildAccommodationCriteria,
   resultIsProperty, normaliseAccommodationResult,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
@@ -121,9 +121,26 @@ export default async function handler(req, res) {
     });
   }
 
+  // Travelify requires a CustomerIP and refuses the search without one. The
+  // agent pressing the button IS the customer here, so their own address is
+  // the honest value — never a fabricated one, because the field feeds geo and
+  // fraud checks and a wrong IP puts the search in the wrong market.
+  const customerIp = cleanIp(
+    (typeof req.headers['x-forwarded-for'] === 'string'
+      ? req.headers['x-forwarded-for'].split(',')[0].trim() : '')
+    || (req.socket && req.socket.remoteAddress) || '',
+  );
+  if (!customerIp) {
+    return res.status(400).json({
+      error: 'We could not read your IP address, and Travelify will not run a search '
+           + 'without one. Try again, and tell us if it keeps happening.',
+    });
+  }
+
   const search = {
     currency: body.currency, nationality: body.nationality,
     leadDays: body.leadDays, nights: body.nights, adults: body.adults,
+    customerIp,
     customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
   };
   const type = body.type === 'DynamicPackages' ? 'DynamicPackages' : 'Accommodation';

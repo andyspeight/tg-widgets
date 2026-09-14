@@ -25,6 +25,7 @@ import {
   PROBE_CANDIDATES,
   buildAccommodationCriteria, resultIsProperty,
   parseDeeplink, rowIsSearchable, normaliseAccommodationResult,
+  cleanIp,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -626,9 +627,12 @@ test('the tour points at the property list, not the retired destination input', 
 const AT = { code: '58612582', lat: 50.71993, lng: -1.874885,
              locationName: 'Bournemouth, Dorset, United Kingdom', ctry: 'GB' };
 const NOW = new Date('2026-09-14T10:00:00Z');
+// CustomerIP is a property of the REQUEST, so every criteria fixture carries
+// one. Travelify refuses a search without it.
+const IP = { customerIp: '195.162.100.165' };
 
 test('the criteria match the shape Travelify actually documented', () => {
-  const b = buildAccommodationCriteria(AT, {}, NOW);
+  const b = buildAccommodationCriteria(AT, IP, NOW);
   assert.equal(b.SearchType, 'Accommodation');
   assert.equal(b.Environment, 'Website');
   assert.equal(b.DistanceUnit, 'Miles');
@@ -648,7 +652,7 @@ test('Ref is the pin, and every spelling of a code produces the same one', () =>
   // The whole widget turns on this one field. The old path asked for a
   // country's worth of offers and sieved them, which could never find one
   // named hotel among the 250 cheapest in Great Britain.
-  const ref = (code) => buildAccommodationCriteria({ ...AT, code }, {}, NOW)
+  const ref = (code) => buildAccommodationCriteria({ ...AT, code }, IP, NOW)
     .AccommodationSearchCriteria.Ref;
   assert.equal(ref('58612582'), 'TTI:58612582');
   assert.equal(ref('TTI:58612582'), 'TTI:58612582');
@@ -662,7 +666,7 @@ test('a code and a country is a complete search on its own', () => {
   // on the strength of a 406 from a DEEPLINK carrying ctry and no coordinates
   // — a different surface from this API, and never tested against it. That
   // assumption made the editor ask for something it may not need.
-  const a = buildAccommodationCriteria({ code: 'TTI:58612582', ctry: 'GB' }, {}, NOW)
+  const a = buildAccommodationCriteria({ code: 'TTI:58612582', ctry: 'GB' }, IP, NOW)
     .AccommodationSearchCriteria;
   assert.equal(a.Ref, 'TTI:58612582');
   assert.equal(a.LocationCountry, 'GB');
@@ -673,7 +677,7 @@ test('a code and a country is a complete search on its own', () => {
 });
 
 test('coordinates narrow the search when a row has them', () => {
-  const a = buildAccommodationCriteria(AT, {}, NOW).AccommodationSearchCriteria;
+  const a = buildAccommodationCriteria(AT, IP, NOW).AccommodationSearchCriteria;
   assert.equal(a.Latitude, 50.71993);
   assert.equal(a.Longitude, -1.874885);
   assert.equal(a.Radius, 11);
@@ -683,17 +687,17 @@ test('coordinates narrow the search when a row has them', () => {
 test('a search with no code and no area at all is refused', () => {
   // Somewhere to look is still required. An unscoped worldwide search is not
   // a broader question, it is a meaningless one.
-  assert.equal(buildAccommodationCriteria({ ...AT, code: '' }, {}, NOW), null);
-  assert.equal(buildAccommodationCriteria({ code: '58612582' }, {}, NOW), null);
-  assert.equal(buildAccommodationCriteria(null, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, code: '' }, IP, NOW), null);
+  assert.equal(buildAccommodationCriteria({ code: '58612582' }, IP, NOW), null);
+  assert.equal(buildAccommodationCriteria(null, IP, NOW), null);
   // Out-of-range coordinates fall back to the country rather than being sent.
-  const bad = buildAccommodationCriteria({ code: '58612582', ctry: 'GB', lat: 91, lng: 0 }, {}, NOW);
+  const bad = buildAccommodationCriteria({ code: '58612582', ctry: 'GB', lat: 91, lng: 0 }, IP, NOW);
   assert.equal('Latitude' in bad.AccommodationSearchCriteria, false);
   assert.equal(bad.AccommodationSearchCriteria.LocationCountry, 'GB');
 });
 
 test('the stay is a month out and a week long, as the deeplinks already ask', () => {
-  const a = buildAccommodationCriteria(AT, {}, NOW).AccommodationSearchCriteria;
+  const a = buildAccommodationCriteria(AT, IP, NOW).AccommodationSearchCriteria;
   assert.equal(a.CheckinDate, '2026-10-14T00:00:00Z', '30 days from 14 Sep');
   assert.equal(a.CheckoutDate, '2026-10-21T00:00:00Z', 'seven nights later');
   // Both must be midnight UTC in the exact format the example uses.
@@ -703,16 +707,16 @@ test('the stay is a month out and a week long, as the deeplinks already ask', ()
 });
 
 test('the stay window is configurable and clamped to something sane', () => {
-  const a = buildAccommodationCriteria(AT, { leadDays: 90, nights: 3 }, NOW).AccommodationSearchCriteria;
+  const a = buildAccommodationCriteria(AT, { ...IP, ...{ leadDays: 90, nights: 3 } }, NOW).AccommodationSearchCriteria;
   assert.equal(a.CheckinDate, '2026-12-13T00:00:00Z');
   assert.equal(a.CheckoutDate, '2026-12-16T00:00:00Z');
-  const silly = buildAccommodationCriteria(AT, { leadDays: 9999, nights: 999 }, NOW).AccommodationSearchCriteria;
+  const silly = buildAccommodationCriteria(AT, { ...IP, ...{ leadDays: 9999, nights: 999 } }, NOW).AccommodationSearchCriteria;
   assert.ok(silly.CheckinDate < silly.CheckoutDate);
-  assert.equal(buildAccommodationCriteria(AT, { radius: 9999 }, NOW).AccommodationSearchCriteria.Radius, 100);
+  assert.equal(buildAccommodationCriteria(AT, { ...IP, ...{ radius: 9999 } }, NOW).AccommodationSearchCriteria.Radius, 100);
 });
 
 test('occupancy carries children and infants with their ages', () => {
-  const a = buildAccommodationCriteria(AT, { adults: 2, childAges: [7, 1] }, NOW).AccommodationSearchCriteria;
+  const a = buildAccommodationCriteria(AT, { ...IP, ...{ adults: 2, childAges: [7, 1] } }, NOW).AccommodationSearchCriteria;
   assert.deepEqual(a.Rooms[0].Guests, [
     { Type: 'Adult' }, { Type: 'Adult' },
     { Type: 'Child', Age: 7 },
@@ -877,4 +881,38 @@ test('editor pages are never served stale', () => {
   const cc = block.headers.find((x) => x.key === 'Cache-Control');
   assert.ok(cc, 'editor pages must set Cache-Control');
   assert.match(cc.value, /no-cache/);
+});
+
+test('CustomerIP is required, and never invented', () => {
+  // Travelify's own words, 14 Sep 2026: "You must specify the customer IP
+  // address (IPv4 or IPv6 supported)". It feeds geo and fraud checks, so a
+  // made-up address is worse than none — it would run the search in the wrong
+  // market and quietly return the wrong prices.
+  assert.equal(buildAccommodationCriteria({ code: '58612582', ctry: 'GB' }, {}, NOW), null,
+    'no IP means no search, rather than a request sent to be refused');
+  assert.equal(buildAccommodationCriteria({ code: '58612582', ctry: 'GB' },
+    { customerIp: 'nonsense' }, NOW), null, 'and neither does a bogus one');
+  const c = buildAccommodationCriteria({ code: '58612582', ctry: 'GB' },
+    { customerIp: '195.162.100.165' }, NOW);
+  assert.equal(c.CustomerIP, '195.162.100.165');
+});
+
+test('an IP address is validated, not just passed through', () => {
+  assert.equal(cleanIp('195.162.100.165'), '195.162.100.165');
+  // Vercel hands back the mapped form behind a proxy, and it has to survive.
+  assert.equal(cleanIp('::ffff:195.162.100.165'), '195.162.100.165');
+  assert.equal(cleanIp('2a00:1450:4009:81f::200e'), '2a00:1450:4009:81f::200e');
+  for (const bad of ['', null, undefined, 'unknown', '999.1.1.1', '1.2.3',
+                     '::ffff:999.1.1.1', 'not an ip', '1.2.3.4.5']) {
+    assert.equal(cleanIp(bad), '', `${bad} must not pass as an address`);
+  }
+});
+
+test('the test endpoint uses the agent\'s real address', () => {
+  assert.ok(/x-forwarded-for/.test(TEST_API), 'it must read the caller address');
+  assert.ok(/customerIp,/.test(TEST_API), 'and pass it into the criteria');
+  // If it cannot read one it says so, rather than sending a search it knows
+  // will be refused or, worse, making an address up.
+  assert.ok(/could not read your IP address/.test(TEST_API));
+  assert.ok(!/CustomerIP: '\d/.test(TTI_LIB), 'no hardcoded address anywhere');
 });
