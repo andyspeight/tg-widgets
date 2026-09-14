@@ -23,6 +23,7 @@ import {
   buildTtiPayload,
   offerIsProperty,
   PROBE_CANDIDATES,
+  buildAccommodationCriteria, resultIsProperty,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -730,4 +731,98 @@ test('the editor explains the probe rather than dumping it', () => {
   assert.ok(/Your code is almost certainly fine/.test(EDITOR),
     'so the agent is not left thinking they typed the code wrong');
   assert.ok(/q\.winner/.test(EDITOR), 'and name the spelling that worked when one does');
+});
+
+/* ============================================================
+   The real search criteria (worked example from Andy, 14 Sep 2026)
+   ============================================================ */
+
+const AT = { code: '58612582', lat: 50.71993, lng: -1.874885,
+             locationName: 'Bournemouth, Dorset, United Kingdom', ctry: 'GB' };
+const NOW = new Date('2026-09-14T10:00:00Z');
+
+test('the criteria match the shape Travelify actually documented', () => {
+  const b = buildAccommodationCriteria(AT, {}, NOW);
+  assert.equal(b.SearchType, 'Accommodation');
+  assert.equal(b.Environment, 'Website');
+  assert.equal(b.DistanceUnit, 'Miles');
+  assert.equal(b.TripType, 'Unspecified');
+  const a = b.AccommodationSearchCriteria;
+  assert.equal(a.Latitude, 50.71993);
+  assert.equal(a.Longitude, -1.874885);
+  assert.equal(a.LocationType, 'City');
+  assert.equal(a.LocationCountry, 'GB');
+  assert.equal(a.BoardBasis, 'Any');
+  assert.equal(a.PropertyType, 'Any');
+  assert.equal(a.RefundableOnly, false);
+  assert.deepEqual(a.Rooms, [{ TypePreference: 'Any', Guests: [{ Type: 'Adult' }, { Type: 'Adult' }] }]);
+});
+
+test('Ref is the pin, and every spelling of a code produces the same one', () => {
+  // The whole widget turns on this one field. The old path asked for a
+  // country's worth of offers and sieved them, which could never find one
+  // named hotel among the 250 cheapest in Great Britain.
+  const ref = (code) => buildAccommodationCriteria({ ...AT, code }, {}, NOW)
+    .AccommodationSearchCriteria.Ref;
+  assert.equal(ref('58612582'), 'TTI:58612582');
+  assert.equal(ref('TTI:58612582'), 'TTI:58612582');
+  assert.equal(ref('ID:58612582'), 'TTI:58612582');
+  assert.equal(ref(' tti:58612582 '), 'TTI:58612582');
+});
+
+test('no coordinates means NO SEARCH, not a broader one', () => {
+  // A criteria object missing its coordinates is not a wider search, it is a
+  // wrong one. Firing it would spend Travelify capacity on somewhere nobody
+  // asked about. Measured 14 Sep 2026: a country with no coordinates is
+  // rejected outright by the service anyway.
+  assert.equal(buildAccommodationCriteria({ code: '58612582', ctry: 'GB' }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ code: '58612582', lat: 50.7 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, code: '' }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, lat: 91 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria({ ...AT, lng: -181 }, {}, NOW), null);
+  assert.equal(buildAccommodationCriteria(null, {}, NOW), null);
+});
+
+test('the stay is a month out and a week long, as the deeplinks already ask', () => {
+  const a = buildAccommodationCriteria(AT, {}, NOW).AccommodationSearchCriteria;
+  assert.equal(a.CheckinDate, '2026-10-14T00:00:00Z', '30 days from 14 Sep');
+  assert.equal(a.CheckoutDate, '2026-10-21T00:00:00Z', 'seven nights later');
+  // Both must be midnight UTC in the exact format the example uses.
+  for (const d of [a.CheckinDate, a.CheckoutDate]) {
+    assert.match(d, /^\d{4}-\d{2}-\d{2}T00:00:00Z$/);
+  }
+});
+
+test('the stay window is configurable and clamped to something sane', () => {
+  const a = buildAccommodationCriteria(AT, { leadDays: 90, nights: 3 }, NOW).AccommodationSearchCriteria;
+  assert.equal(a.CheckinDate, '2026-12-13T00:00:00Z');
+  assert.equal(a.CheckoutDate, '2026-12-16T00:00:00Z');
+  const silly = buildAccommodationCriteria(AT, { leadDays: 9999, nights: 999 }, NOW).AccommodationSearchCriteria;
+  assert.ok(silly.CheckinDate < silly.CheckoutDate);
+  assert.equal(buildAccommodationCriteria(AT, { radius: 9999 }, NOW).AccommodationSearchCriteria.Radius, 100);
+});
+
+test('occupancy carries children and infants with their ages', () => {
+  const a = buildAccommodationCriteria(AT, { adults: 2, childAges: [7, 1] }, NOW).AccommodationSearchCriteria;
+  assert.deepEqual(a.Rooms[0].Guests, [
+    { Type: 'Adult' }, { Type: 'Adult' },
+    { Type: 'Child', Age: 7 },
+    { Type: 'Infant', Age: 1 },
+  ]);
+});
+
+test('the verify gate reads whichever field the result carries the ref in', () => {
+  // The booking API names this differently from the offers feed, and a gate
+  // that silently matched nothing would empty every widget rather than fail.
+  for (const shape of [
+    { uniqueRef: 'TTI:58612582' },
+    { accommodationUniqueRef: '58612582' },
+    { Ref: 'ID:58612582' },
+    { accommodation: { uniqueRef: 'TTI:58612582' } },
+  ]) {
+    assert.equal(resultIsProperty(shape, '58612582'), true, JSON.stringify(shape));
+  }
+  assert.equal(resultIsProperty({ uniqueRef: 'TTI:99999999' }, '58612582'), false);
+  assert.equal(resultIsProperty({}, '58612582'), false);
+  assert.equal(resultIsProperty({ uniqueRef: 'TTI:58612582' }, ''), false);
 });

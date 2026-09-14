@@ -289,3 +289,115 @@ export function offerIsProperty(offer, code) {
   return canonTti(offer && offer.accommodationUniqueRef) === code;
 }
 
+
+/* ============================================================
+   The real search criteria (Andy supplied a worked example, 14 Sep 2026)
+   ============================================================ */
+
+// Defaults taken from the deeplinks the agents already use: a stay starting a
+// month out, a week long, two adults. `frd=30&dur=7&adt=2` in deeplink spelling.
+export const DEFAULT_LEAD_DAYS = 30;
+export const DEFAULT_NIGHTS = 7;
+export const DEFAULT_RADIUS_MILES = 11;
+
+/** Midnight UTC, N days from `now`, in the format the API expects. */
+function isoDay(now, plusDays) {
+  const d = new Date(now.getTime());
+  d.setUTCDate(d.getUTCDate() + plusDays);
+  d.setUTCHours(0, 0, 0, 0);
+  return d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+const num = (v, dflt, lo, hi) => {
+  const x = Number(v);
+  return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
+};
+
+/** The body for `POST /search`, scoped to ONE property.
+ *
+ *  `Ref` is the field that does the scoping — `TTI:{code}`, the same value the
+ *  deeplink carries as `refn`. That single field is what this whole widget was
+ *  missing: the old path asked `widgetsvc/traveloffers` for a country's worth of
+ *  offers and then sieved them, which could never find one named hotel in the
+ *  250 cheapest results for Great Britain.
+ *
+ *  Returns null when there is not enough to search with. That matters more than
+ *  it looks: a criteria object missing its coordinates is not a broader search,
+ *  it is a wrong one, and firing it would burn Travelify capacity to produce
+ *  results for somewhere nobody asked about. The caller reports the row as
+ *  incomplete instead.
+ *
+ *  `now` is injectable so the dates are testable. */
+export function buildAccommodationCriteria(prop, search = {}, now = new Date()) {
+  const code = canonTti(prop && (prop.code || prop.tti));
+  const lat = Number(prop && prop.lat);
+  const lng = Number(prop && prop.lng);
+  // Coordinates are not optional. An accommodation search is an AREA search
+  // with the property pinned inside it; without an area there is nothing to
+  // pin it to, and a country code alone is rejected outright (measured 14 Sep).
+  if (!code) return null;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+
+  const leadDays = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
+  const nights = num(search.nights, DEFAULT_NIGHTS, 1, 28);
+  const adults = num(search.adults, 2, 1, 9);
+  const children = Array.isArray(search.childAges) ? search.childAges.slice(0, 8) : [];
+
+  const guests = [];
+  for (let i = 0; i < adults; i++) guests.push({ Type: 'Adult' });
+  for (const age of children) {
+    const a = num(age, null, 0, 17);
+    if (a === null) continue;
+    guests.push(a < 2 ? { Type: 'Infant', Age: a } : { Type: 'Child', Age: a });
+  }
+
+  return {
+    Environment: 'Website',
+    SearchType: 'Accommodation',
+    Language: search.language || 'en',
+    Locale: search.locale || 'en',
+    Currency: /^[A-Z]{3}$/.test(String(search.currency || '')) ? search.currency : 'GBP',
+    DistanceUnit: 'Miles',
+    Nationality: /^[A-Z]{2}$/.test(String(search.nationality || '')) ? search.nationality : 'GB',
+    CustomerUserAgent: search.customerUserAgent || 'Travelgenix-TtiOffersCron/1.0',
+    CustomerCountry: /^[A-Z]{2}$/.test(String(search.customerCountry || '')) ? search.customerCountry : 'GB',
+    TripType: 'Unspecified',
+    AccommodationSearchCriteria: {
+      Latitude: lat,
+      Longitude: lng,
+      Radius: num(prop.radius ?? search.radius, DEFAULT_RADIUS_MILES, 1, 100),
+      LocationType: prop.locationType || 'City',
+      ...(prop.locationName ? { LocationName: String(prop.locationName).slice(0, 200) } : {}),
+      ...(cleanCtry(prop.ctry || prop.locationCountry) ? { LocationCountry: cleanCtry(prop.ctry || prop.locationCountry) } : {}),
+      // THE PIN. Always prefixed, always canonical, so a code typed as
+      // ID:58612582, TTI:58612582 or 58612582 all ask the same question.
+      Ref: 'TTI:' + code,
+      CheckinDate: isoDay(now, leadDays),
+      CheckoutDate: isoDay(now, leadDays + nights),
+      BoardBasis: 'Any',
+      PropertyType: 'Any',
+      MinStarRating: 1.0,
+      RefundableOnly: false,
+      Rooms: [{ TypePreference: 'Any', Guests: guests }],
+    },
+  };
+}
+
+/** Does this offer belong to the property we asked for?
+ *  Kept separate from offerIsProperty because the booking API names the field
+ *  differently from the offers feed, and a gate that silently matched nothing
+ *  would empty every widget rather than fail loudly. */
+export function resultIsProperty(result, code) {
+  const want = canonTti(code);
+  if (!want) return false;
+  const candidates = [
+    result && result.uniqueRef,
+    result && result.accommodationUniqueRef,
+    result && result.ref,
+    result && result.Ref,
+    result && result.propertyRef,
+    result && result.accommodation && result.accommodation.uniqueRef,
+  ];
+  return candidates.some((c) => c && canonTti(c) === want);
+}

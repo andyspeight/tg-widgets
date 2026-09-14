@@ -31,11 +31,10 @@
  *   Referer header — which the docs make mandatory for Token auth, and without
  *   which the API answers 401. No private key is needed and none is held.
  *
- * WHAT IS NOT HERE YET
- *   `buildAccommodationCriteria` is a stub. The one field still to confirm is
- *   the one that scopes an accommodation search to a single property by its TTI
- *   code — the deeplink spells it `refn=TTI:{code}`. Everything either side of
- *   that is finished and tested.
+ * WHAT TO SEND
+ *   The criteria live in api/_lib/offers/tti.js as `buildAccommodationCriteria`.
+ *   This module is the transport and knows nothing about properties: what to
+ *   ask lives there, how to ask it lives here.
  */
 
 export const TRAVELIFY_API = 'https://api.travelify.io';
