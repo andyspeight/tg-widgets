@@ -308,6 +308,30 @@ function isoDay(now, plusDays) {
   return d.toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
+/** A plausible IPv4 or IPv6 address, or ''.
+ *
+ *  Travelify REQUIRES CustomerIP and rejects a search without one — measured
+ *  14 Sep 2026, the API's own words: "You must specify the customer IP address
+ *  (IPv4 or IPv6 supported)". It is used for geo and fraud checks, so a wrong
+ *  one is worse than none: it would put the search in the wrong market. Hence
+ *  a real value from the caller, never a fabricated one. */
+export function cleanIp(v) {
+  const t = String(v || '').trim();
+  if (!t || t === 'unknown') return '';
+  // IPv4, each octet 0-255.
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(t)) {
+    return t.split('.').every((o) => Number(o) <= 255) ? t : '';
+  }
+  // The ::ffff: mapped form first — it contains dots, so the hex-only test
+  // below would reject it, and this is the form a proxied request often
+  // arrives in.
+  const mapped = /^::ffff:((\d{1,3}\.){3}\d{1,3})$/i.exec(t);
+  if (mapped) return cleanIp(mapped[1]);
+  // Plain IPv6.
+  if (t.includes(':') && /^[0-9A-Fa-f:]{2,45}$/.test(t)) return t;
+  return '';
+}
+
 const num = (v, dflt, lo, hi) => {
   const x = Number(v);
   return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
@@ -353,6 +377,11 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
   // worldwide search is not a broader question, it is a meaningless one.
   if (!hasCoords && !ctry) return null;
 
+  // Travelify refuses a search with no CustomerIP, so a criteria object
+  // without one is not worth sending. Returning null here means the caller
+  // reports "we have no IP for you" rather than burning a request to be told.
+  if (!cleanIp(search.customerIp)) return null;
+
   const leadDays = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
   const nights = num(search.nights, DEFAULT_NIGHTS, 1, 28);
   const adults = num(search.adults, 2, 1, 9);
@@ -374,6 +403,8 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
     Currency: /^[A-Z]{3}$/.test(String(search.currency || '')) ? search.currency : 'GBP',
     DistanceUnit: 'Miles',
     Nationality: /^[A-Z]{2}$/.test(String(search.nationality || '')) ? search.nationality : 'GB',
+    // Required. The search is refused outright without it.
+    CustomerIP: cleanIp(search.customerIp),
     CustomerUserAgent: search.customerUserAgent || 'Travelgenix-TtiOffersCron/1.0',
     CustomerCountry: /^[A-Z]{2}$/.test(String(search.customerCountry || '')) ? search.customerCountry : 'GB',
     TripType: 'Unspecified',
@@ -459,11 +490,21 @@ export function parseDeeplink(url) {
   };
 }
 
-/** Is this row complete enough to search with? The editor uses this to show a
- *  row as ready or short of detail, and the sweep uses it to skip rather than
- *  fire a search that cannot be scoped. */
+/** Is this ROW complete enough to search with?
+ *
+ *  Deliberately does not go through buildAccommodationCriteria: that also needs
+ *  a CustomerIP, which is a property of the REQUEST, not of the hotel the agent
+ *  typed in. Routing readiness through it made every row report as unsearchable
+ *  the moment CustomerIP became required, which is the wrong answer to the
+ *  question the editor is asking. */
 export function rowIsSearchable(row) {
-  return !!buildAccommodationCriteria(row, {}, new Date());
+  const code = canonTti(row && (row.code || row.tti));
+  if (!code) return false;
+  const lat = Number(row && row.lat);
+  const lng = Number(row && row.lng);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng)
+    && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  return hasCoords || !!cleanCtry(row.ctry || row.locationCountry);
 }
 
 /* ============================================================
