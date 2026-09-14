@@ -1,81 +1,58 @@
 /**
- * TEMPORARY — TTI deeplink probe, round 4. Delete after the run.
+ * TEMPORARY — TTI deeplink probe, round 5. Delete after the run.
  *
- * The chain, all measured on 14 Sep 2026:
- *   1. deeplink 302s to /results#/search/searchSession={id}/{guid}
- *      -> the deeplink RUNS A LIVE SEARCH and hands back a session handle
- *   2. the results page loads travelify-elements-v2.4.min.js, which is only a
- *      LOADER. It reads every <* class="travelify-widget" widgetid="..."> on the
- *      page and calls:
- *        GET https://api.travelify.io/elements/2?wids={ids}
- *      which returns { success, styles: [...], scripts2: { url: isModule } } —
- *      a manifest of the real engine's stylesheets and scripts.
+ * The chain so far, every step measured on 14 Sep 2026:
+ *   1. deeplink -> 302 -> /results#/search/searchSession={id}/{guid}
+ *   2. results page -> travelify-elements-v2.4.min.js (a loader)
+ *   3. loader -> GET api.travelify.io/elements/2?wids=18777,9161,9162,9934
+ *      -> manifest of the real engine scripts
+ *   4. the engine is travel-results-v4/travel-results-widget.js (344KB), and it
+ *      builds the path:  `search/${encodeURIComponent(this.searchSessionId)}`
  *
- * So the results engine is behind elements/2. This round walks that: pull the
- * widget ids off the results page, fetch the manifest, then grep the engine
- * scripts for the endpoint that reads a searchSession.
- *
- * Output kept deliberately small — ids, script urls, and matching paths only.
+ * Missing: the BASE that path hangs off. The file holds no absolute
+ * travelify.io URL, so the base is configured rather than hardcoded. This round
+ * greps context windows around the call sites to find it.
  */
 
-const API = 'https://api.travelify.io';
+const ENGINE = 'https://static.travelify.io/widgets/travel-results-v4/travel-results-widget.js';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
          + '(KHTML, like Gecko) Chrome/128.0 Safari/537.36';
-const get = (url) => fetch(url, {
-  redirect: 'follow', headers: { 'User-Agent': UA, Accept: '*/*' },
-  signal: AbortSignal.timeout(15000),
-});
-const unescape_ = (s) => s.replace(/\\\//g, '/').replace(/\\u002[fF]/g, '/').replace(/\\"/g, '"');
+
+/** Context windows around each match, deduped, so we can read the call site. */
+function windows(text, re, pad, max) {
+  const seen = new Set(); const out = [];
+  for (const m of text.matchAll(re)) {
+    const a = Math.max(0, m.index - pad);
+    const s = text.slice(a, m.index + m[0].length + pad).replace(/\s+/g, ' ');
+    const k = s.slice(0, 60);
+    if (seen.has(k)) continue;
+    seen.add(k); out.push(s);
+    if (out.length >= max) break;
+  }
+  return out;
+}
 
 export default async function handler(req, res) {
-  const out = { ranAt: new Date().toISOString() };
-  const page = String((req.query && req.query.page) || 'https://www.traveldemo.site/results');
-
+  const url = String((req.query && req.query.url) || ENGINE);
+  const out = { ranAt: new Date().toISOString(), url };
   try {
-    // 1. The widget ids on the results page.
-    const pr = await get(page);
-    const body = unescape_(await pr.text());
-    out.pageStatus = pr.status;
-    const ids = [...new Set([...body.matchAll(/widgetid=["']([^"']+)["']/gi)].map((m) => m[1]))];
-    out.widgetIds = ids.slice(0, 20);
+    const r = await fetch(url, {
+      redirect: 'follow', headers: { 'User-Agent': UA, Accept: '*/*' },
+      signal: AbortSignal.timeout(20000),
+    });
+    const t = await r.text();
+    out.status = r.status; out.bytes = t.length;
 
-    if (!ids.length) {
-      // Fall back: show what class names are present so we can find the hook.
-      out.travelifyClasses = [...new Set([...body.matchAll(/class=["']([^"']*travelify[^"']*)["']/gi)].map((m) => m[1]))].slice(0, 15);
-      res.setHeader('Cache-Control', 'no-store');
-      return res.status(200).json(out);
-    }
-
-    // 2. The manifest.
-    const mUrl = API + '/elements/2?wids=' + encodeURIComponent(ids.slice().sort().join(','));
-    out.manifestUrl = mUrl;
-    const mr = await get(mUrl);
-    const mt = await mr.text();
-    out.manifestStatus = mr.status;
-    let manifest = null;
-    try { manifest = JSON.parse(mt); } catch { out.manifestRaw = mt.slice(0, 600); }
-    if (manifest) {
-      out.styles = (manifest.styles || []).slice(0, 10);
-      out.scripts = Object.keys(manifest.scripts2 || {}).slice(0, 15);
-      if (manifest.errorMessage) out.manifestError = manifest.errorMessage;
-    }
-
-    // 3. Grep the engine scripts for the call that reads a session.
-    out.engine = [];
-    for (const s of (out.scripts || []).slice(0, 6)) {
-      try {
-        const sr = await get(s);
-        const t = await sr.text();
-        const hits = (re, n) => [...new Set([...t.matchAll(re)].map((m) => m[0]))].slice(0, n);
-        out.engine.push({
-          url: s.slice(0, 160), bytes: t.length,
-          // Absolute Travelify URLs, and the relative paths it builds.
-          travelifyUrls: hits(/https?:\/\/[a-z0-9.-]*travelify\.io[^"'`\s<>)]*/gi, 15),
-          sessionPaths: hits(/["'`][^"'`\s]{0,40}(?:searchSession|SearchSession|sessionId)[^"'`\s]{0,60}["'`]/g, 15),
-          searchPaths: hits(/["'`]\/(?:search|results?|offers?|availability|avail|session|widgetsvc)[a-zA-Z0-9/_{}$.?=&-]*["'`]/gi, 20),
-        });
-      } catch (e) { out.engine.push({ url: s.slice(0, 160), error: String(e && e.message).slice(0, 120) }); }
-    }
+    // The call site itself.
+    out.searchCall = windows(t, /search\/\$\{encodeURIComponent\(this\.searchSessionId\)\}/g, 320, 3);
+    // Where the base comes from.
+    out.apiBase = windows(t, /(?:apiUrl|apiBase|baseUrl|serviceUrl|apiEndpoint|endpointUrl|svcUrl)\s*[=:]/gi, 160, 10);
+    // Any https literal at all, in case the base is built from parts.
+    out.httpsLiterals = [...new Set([...t.matchAll(/https?:\/\/[a-z0-9.-]+[^"'`\s<>)]{0,60}/gi)].map((m) => m[0]))].slice(0, 25);
+    // How it fetches.
+    out.fetchSites = windows(t, /\b(?:fetch|axios\.get|\$\.ajax|XMLHttpRequest)\s*\(/g, 200, 6);
+    // widgetsvc is the surface we already know about.
+    out.widgetsvc = windows(t, /widgetsvc/gi, 200, 6);
   } catch (e) { out.error = String(e && e.message).slice(0, 300); }
 
   res.setHeader('Cache-Control', 'no-store');
