@@ -591,7 +591,112 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   });
 
 
+  /* ---------------------------------------------------------------- */
+  console.log('\nThe model call, and what it really costs');
+
+  // These pin the bug that lost Andy an afternoon on 14 Sep 2026. The models
+  // think by default, thinking is billed as output, and it is spent out of the
+  // same max_tokens ceiling as the answer. The budgets had been sized for
+  // models that did not think, so the whole allowance went on reasoning and the
+  // run reported a careful sounding refusal instead of a starved call.
+  const { callModel, BUDGET, costUsd } = await load('_model.js');
+  const { writeField: writeOne } = await load('_write.js');
+
+  const realFetch = globalThis.fetch;
+  const realKey = process.env.ANTHROPIC_API_KEY;
+  process.env.ANTHROPIC_API_KEY = 'test-key';
+
+  /** Capture the request body, reply with whatever the test wants. */
+  function stubModel(reply) {
+    const seen = {};
+    globalThis.fetch = async (_url, opts) => {
+      Object.assign(seen, JSON.parse(opts.body));
+      return { ok: true, json: async () => reply };
+    };
+    return seen;
+  }
+  const answered = (text, extra) => Object.assign({
+    content: [{ type: 'text', text }],
+    stop_reason: 'end_turn',
+    usage: { input_tokens: 1000, output_tokens: 500 },
+  }, extra || {});
+
+  t('the call says out loud that it wants thinking, rather than inheriting it', async () => {
+    const seen = stubModel(answered('Nerja'));
+    await callModel({ model: 'claude-opus-5', system: 's', user: 'u' });
+    assert.deepStrictEqual(seen.thinking, { type: 'adaptive' });
+  });
+
+  t('effort is what controls the bill, so it is always sent', async () => {
+    const seen = stubModel(answered('Nerja'));
+    await callModel({ model: 'claude-opus-5', system: 's', user: 'u', effort: 'low' });
+    assert.strictEqual(seen.output_config.effort, 'low');
+  });
+
+  t('the gate checks cheaply but is given room to finish its sentence', () => {
+    assert.strictEqual(BUDGET.gate.effort, 'low');
+    assert.ok(BUDGET.gate.maxTokens >= 2000,
+      'a 400 token gate ran out mid-verdict and reported it as a refusal');
+  });
+
+  t('the writer is given room for its thinking as well as its answer', () => {
+    assert.ok(BUDGET.writeProse.maxTokens >= 4000, 'prose needs room to think');
+    assert.ok(BUDGET.writeJson.maxTokens >= BUDGET.writeProse.maxTokens,
+      'JSON carries more structure, so it gets at least as much room');
+  });
+
+  t('running out of room while thinking says so, rather than "no text"', async () => {
+    stubModel({ content: [{ type: 'thinking', thinking: '' }], stop_reason: 'max_tokens',
+                usage: { input_tokens: 1000, output_tokens: 1400 } });
+    await assert.rejects(
+      callModel({ model: 'claude-opus-5', system: 's', user: 'u', maxTokens: 1400 }),
+      /allowance thinking/);
+  });
+
+  t('an answer cut off part way through is held, not passed to the gate', async () => {
+    stubModel(answered('Half a sen', { stop_reason: 'max_tokens' }));
+    await assert.rejects(callModel({ model: 'claude-opus-5', system: 's', user: 'u' }),
+      /ran out of room/);
+  });
+
+  t('a call that failed still reports what it spent', async () => {
+    stubModel({ content: [{ type: 'thinking', thinking: '' }], stop_reason: 'max_tokens',
+                usage: { input_tokens: 1000, output_tokens: 1400 } });
+    const err = await callModel({ model: 'claude-opus-5', system: 's', user: 'u' })
+      .then(() => null, e => e);
+    assert.ok(err, 'it should have thrown');
+    assert.strictEqual(err.costUsd, costUsd('claude-opus-5',
+      { input_tokens: 1000, output_tokens: 1400 }));
+    assert.ok(err.costUsd > 0, 'showing $0.00 for a paid call is how this stayed hidden');
+  });
+
+  t('a writer that fails hands the real cost back, not a nought', async () => {
+    stubModel({ content: [], stop_reason: 'max_tokens',
+                usage: { input_tokens: 1000, output_tokens: 900 } });
+    const out = await writeOne({
+      field: { label: 'Tagline', kind: 'text' }, brief: 'b',
+      rec: { name: 'Nerja', values: { Overview: 'x' } }, ancestors: [],
+      type: { singular: 'resort' },
+    });
+    assert.strictEqual(out.ok, false);
+    assert.ok(out.costUsd > 0, 'the tokens were burned whether or not text came back');
+  });
+
+  t('the writer asks for the budget that matches the field it is writing', async () => {
+    const seen = stubModel(answered('{"items":[]}'));
+    await writeOne({
+      field: { label: 'Highlights JSON', kind: 'json' }, brief: 'b',
+      rec: { name: 'Estonia', values: { Overview: 'x' } }, ancestors: [],
+      type: { singular: 'country' },
+    });
+    assert.strictEqual(seen.max_tokens, BUDGET.writeJson.maxTokens);
+    assert.strictEqual(seen.output_config.effort, BUDGET.writeJson.effort);
+  });
+
   await Promise.all(pending);
+  globalThis.fetch = realFetch;
+  if (realKey === undefined) delete process.env.ANTHROPIC_API_KEY;
+  else process.env.ANTHROPIC_API_KEY = realKey;
   console.log(`\n${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
 })();

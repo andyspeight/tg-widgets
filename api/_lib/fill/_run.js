@@ -25,14 +25,37 @@ import { derive, ancestorsOf } from './_derive.js';
 import { writeField, buildEvidence } from './_write.js';
 import { gate } from './_gate.js';
 import { sourceAirportField } from './_source.js';
-import { callModel, GATE_MODEL } from './_model.js';
+import { callModel, GATE_MODEL, BUDGET } from './_model.js';
 
-/** The gate's verifier, wired to the cheap model, tallying its own spend. */
+/**
+ * The gate's verifier, wired to the cheap model, tallying its own spend.
+ *
+ * It runs at low effort on a generous ceiling. The check is a short read of
+ * short copy against a short list of facts, so it does not need to think hard,
+ * but it does need room to finish its sentence. On 400 tokens it was running
+ * out mid-verdict and the run reported "the grounding check did not answer
+ * clearly", which sounded like caution and was really a truncated reply.
+ *
+ * A call that throws is added to the spend on the way past. The tokens were
+ * burned whether or not a verdict came back.
+ */
 function makeAsk(spend) {
   return async ({ system, user, temperature }) => {
-    const out = await callModel({ model: GATE_MODEL, system, user, temperature, maxTokens: 400 });
-    spend.usd += out.costUsd;
-    return out.text;
+    try {
+      const out = await callModel({
+        model: GATE_MODEL,
+        system,
+        user,
+        temperature,
+        maxTokens: BUDGET.gate.maxTokens,
+        effort: BUDGET.gate.effort,
+      });
+      spend.usd += out.costUsd;
+      return out.text;
+    } catch (err) {
+      spend.usd += err.costUsd || 0;
+      throw err;
+    }
   };
 }
 

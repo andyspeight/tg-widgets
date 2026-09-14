@@ -108,7 +108,7 @@
       "maxDuration": 60
     },
     "api/cron/destinations-worker.js": {
-      "maxDuration": 60
+      "maxDuration": 300
     },
     "api/admin/destinations-fill.js": {
       "maxDuration": 60

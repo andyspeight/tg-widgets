@@ -20,7 +20,7 @@
  * him a client.
  */
 
-import { callModel, WRITER_MODEL } from './_model.js';
+import { callModel, WRITER_MODEL, BUDGET } from './_model.js';
 
 const VOICE = [
   'You write destination content for Travelgenix, whose customers are UK travel agents and their clients.',
@@ -94,16 +94,23 @@ export async function writeField({ field, brief, rec, ancestors, type }) {
     field.kind === 'prose' ? 'Prose, not a bulleted list.' : '',
   ].filter(Boolean).join('\n');
 
+  // JSON fields carry more structure to hold in mind, so they get the larger
+  // allowance. Both cover the model's thinking as well as its answer.
+  const budget = field.kind === 'json' ? BUDGET.writeJson : BUDGET.writeProse;
+
   let out;
   try {
     out = await callModel({
       model: WRITER_MODEL,
       system: VOICE,
       user: 'FACTS\n' + evidence + '\n\n' + instruction,
-      maxTokens: field.kind === 'json' ? 1400 : 900,
+      maxTokens: budget.maxTokens,
+      effort: budget.effort,
     });
   } catch (err) {
-    return { ok: false, why: String(err.message || err), costUsd: 0 };
+    // A failed call is still a paid call. Pass the real figure back so the day's
+    // spend reflects what was actually spent.
+    return { ok: false, why: String(err.message || err), costUsd: err.costUsd || 0 };
   }
 
   const value = out.text.trim();

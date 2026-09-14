@@ -31,6 +31,7 @@
  */
 
 import { hasAirportFixer } from './_source.js';
+import { estimateFieldUsd } from './_model.js';
 
 /**
  * Which types have somewhere to inherit FROM.
@@ -271,8 +272,17 @@ export function isAutomatable(field, typeKey) {
  */
 export function estimatePence(field, typeKey) {
   const plan = fillPlanFor(field, typeKey);
-  return plan.kind === 'write' ? 3 : 0;
+  return plan.kind === 'write' ? Math.ceil(estimateFieldUsd() * USD_TO_PENCE) : 0;
 }
+
+/**
+ * Roughly what a dollar is in pence. It only has to be close: this figure is
+ * shown to Andy so he can decide whether a job is worth pressing, and the real
+ * cap is enforced in dollars against measured token counts in _queue.js. It is
+ * named rather than buried so nobody mistakes it for an exchange rate we trade
+ * on.
+ */
+const USD_TO_PENCE = 79;
 
 /**
  * Is there enough on this record to write from?

@@ -39,7 +39,11 @@ import { runItem } from '../_lib/fill/_run.js';
 import { readRecord, writeField, shapeRecord } from '../_lib/fill/_airtable.js';
 
 const BATCH = parseInt(process.env.DFILL_BATCH || '4', 10);
-const TIME_BUDGET_MS = 45000;          // leave room under the function's ceiling
+// Leave room under the function's ceiling (300s in vercel.json) for the item
+// already in flight to finish. A paid item is three model calls and they think
+// now, so one can take well over a minute. Starting an item we cannot finish
+// pays for the writing and then loses it when the function is killed.
+const TIME_BUDGET_MS = 180000;
 
 const typeOf = key => TYPES.find(t => t.key === key);
 

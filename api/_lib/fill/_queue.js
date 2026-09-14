@@ -49,7 +49,11 @@ export const FAIL_STREAK = 10;
 
 const LOG_CAP = 500;
 const HELD_CAP = 500;
-const LOCK_SECONDS = 180;
+// Longer than the worker's whole invocation can run (see destinations-worker's
+// TIME_BUDGET_MS). The cron fires every minute and a slow run now outlives the
+// next tick, so a lock that expires mid-item would let a second worker claim it
+// and pay to write the same field twice.
+const LOCK_SECONDS = 600;
 const DEFAULT_CAP_USD = 10;
 
 export function queueConfigured() { return configured(); }
