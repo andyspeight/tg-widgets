@@ -691,6 +691,10 @@ export function normaliseAccommodationResult(r, ctx = {}) {
    Dynamic packaging: a flight and this hotel, priced together
    ============================================================ */
 
+/** The earliest a package may depart. One day, because a flight has to leave
+ *  in the future and the accommodation half must agree with it. */
+export const MIN_DP_LEAD_DAYS = 1;
+
 /** The body for a DYNAMIC PACKAGE search around one property.
  *
  *  The hotel half is IDENTICAL to the accommodation search — same Ref, same
@@ -714,7 +718,22 @@ export function normaliseAccommodationResult(r, ctx = {}) {
  *  than quietly searching for a hotel and calling it one. That mislabelling is
  *  exactly what Andy hit when the option was first offered. */
 export function buildDynamicPackageCriteria(prop, search = {}, now = new Date()) {
-  const base = buildAccommodationCriteria(prop, search, now);
+  // A FLIGHT CANNOT LEAVE IN THE PAST, and a hotel can be booked for tonight.
+  //
+  // leadDays clamps to [0, 330], and 0 means today at 00:00 UTC — which is
+  // behind us for all but the first instant of the day. The accommodation
+  // search takes that happily; Travelify refuses the whole package for it
+  // ("DepartDate: Date must be set and not be in the past"), so a widget with
+  // a zero lead would fail every night with an error that reads like the one
+  // caused by a misnamed field, and nothing would say which it was.
+  //
+  // Floored for the WHOLE search rather than just the flight: moving the
+  // departure to tomorrow while the room still checks in today would price a
+  // package that does not hang together.
+  const lead = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
+  const base = buildAccommodationCriteria(
+    prop, { ...search, leadDays: Math.max(MIN_DP_LEAD_DAYS, lead) }, now,
+  );
   if (!base) return null;
 
   // The departure airport. Without one there is no flight and therefore no
@@ -743,18 +762,28 @@ export function buildDynamicPackageCriteria(prop, search = {}, now = new Date())
   if (!/^[A-Z0-9]{3,11}$/.test(dest)) return null;
 
   const acc = base.AccommodationSearchCriteria;
-  // THE FIELD NAMES ARE MEASURED, not guessed. The first attempt sent each
-  // value under every plausible spelling at once, because Travelify reports
-  // what is missing and ignores what it does not recognise. It then validated
-  // exactly two of them by name — Legs[0].DestinationCode, Legs[1].OriginCode —
-  // which is the service telling us which spellings it actually reads. The
-  // rest are deleted.
+  // EVERY FIELD NAME HERE HAS BEEN QUOTED BACK AT US BY TRAVELIFY.
+  //
+  // That is the bar, and it was set by getting it wrong. The alias round sent
+  // each value under every plausible spelling at once; the reply named
+  // Legs[0].DestinationCode and Legs[1].OriginCode. Those two were then
+  // confirmed — but the reply said nothing about the date, because one of the
+  // three date aliases happened to be right and the field never errored.
+  // Silence is not confirmation. Trimming the date to `DepartureDate` on
+  // house-style reasoning threw away the alias that was working, and the next
+  // round said so:
+  //
+  //   Legs[0] - DepartDate: Date must be set and not be in the past
+  //
+  // "Must be set" because the field we sent was called something else. So the
+  // date is `DepartDate`, and the rule is now explicit: only delete a spelling
+  // the service has named, never one it merely did not complain about.
   //
   // `Legs` and `Passengers` were named the same way, one round earlier:
   // "Legs: You must specify at least one flight leg; Passengers: You must
   // specify at least one passenger". So the flight half is a JOURNEY, and the
   // party travels as Passengers rather than riding along on the room.
-  const leg = (from, to, date) => ({ OriginCode: from, DestinationCode: to, DepartureDate: date });
+  const leg = (from, to, date) => ({ OriginCode: from, DestinationCode: to, DepartDate: date });
   // Out on the check-in and back on the check-out, so the flight brackets the
   // stay rather than pricing a trip nobody asked for.
   const legs = [leg(origin, dest, acc.CheckinDate), leg(dest, origin, acc.CheckoutDate)];

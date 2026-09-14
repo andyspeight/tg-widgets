@@ -28,6 +28,7 @@ import {
   cleanIp,
   buildDynamicPackageCriteria,
   dpOrigins,
+  MIN_DP_LEAD_DAYS,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -1245,17 +1246,17 @@ test('the flight is a journey of legs, which is what Travelify asked for', () =>
   // package nobody asked for: a flight that lands after the room is given up.
   assert.equal(f.Legs.length, 2, 'a return trip is two legs');
   assert.equal(f.Legs[0].OriginCode, 'LGW');
-  assert.equal(f.Legs[0].DepartureDate, c.AccommodationSearchCriteria.CheckinDate);
+  assert.equal(f.Legs[0].DepartDate, c.AccommodationSearchCriteria.CheckinDate);
   assert.equal(f.Legs[1].DestinationCode, 'LGW', 'and home again');
-  assert.equal(f.Legs[1].DepartureDate, c.AccommodationSearchCriteria.CheckoutDate);
+  assert.equal(f.Legs[1].DepartDate, c.AccommodationSearchCriteria.CheckoutDate);
 
   // THE FIELD NAMES ARE MEASURED. The round before this sent every plausible
   // spelling at once; Travelify then validated exactly two by name
   // (Legs[0].DestinationCode, Legs[1].OriginCode), which is the service saying
   // which it reads. The guesses are deleted, and must stay deleted.
   for (const [i, leg] of f.Legs.entries()) {
-    assert.deepEqual(Object.keys(leg).sort(), ['DepartureDate', 'DestinationCode', 'OriginCode'],
-      `leg ${i}: only the field names Travelify named itself`);
+    assert.deepEqual(Object.keys(leg).sort(), ['DepartDate', 'DestinationCode', 'OriginCode'],
+      `leg ${i}: only the field names Travelify has quoted back at us`);
   }
 
   // The party on the plane is the party in the room. Two adults in the hotel
@@ -1685,4 +1686,52 @@ test('a package that cannot name an arrival airport is refused, not guessed', ()
   assert.ok(/list load failed/.test(
     readFileSync(new URL('../api/_lib/offers/arrival-airport.js', import.meta.url), 'utf8')),
   'and a missing list logs rather than throwing');
+});
+
+test('every leg field name is one Travelify has quoted back at us', () => {
+  // THE RULE, and it was learned by breaking it. The alias round sent each
+  // value under several spellings; the reply named Legs[0].DestinationCode and
+  // Legs[1].OriginCode, so those two were confirmed. It said nothing about the
+  // date — because one of the three date aliases was right and the field never
+  // errored. Silence is not confirmation. Trimming the date to 'DepartureDate'
+  // on house-style reasoning deleted the alias that was doing the work, and the
+  // next round said so by name:
+  //
+  //   Legs[0] - DepartDate: Date must be set and not be in the past
+  //
+  // So the set below is exactly the three names the service has quoted. Adding
+  // to it needs an error message naming the field, not an argument from style.
+  const NAMED_BY_TRAVELIFY = ['DepartDate', 'DestinationCode', 'OriginCode'];
+  const src = readFileSync(new URL('../api/_lib/offers/tti.js', import.meta.url), 'utf8');
+  const leg = /const leg = \([^)]*\) => \(\{([^}]*)\}\)/.exec(src);
+  assert.ok(leg, 'the leg builder must be findable');
+  const fields = [...leg[1].matchAll(/(\w+):/g)].map((m) => m[1]).sort();
+  assert.deepEqual(fields, NAMED_BY_TRAVELIFY,
+    'a leg field the service has never named is a guess, however plausible');
+});
+
+test('a package never departs in the past, whatever the widget is set to', () => {
+  // leadDays clamps to [0, 330], and 0 is today at 00:00 UTC — behind us for
+  // all but the first instant of the day. A hotel takes that happily; Travelify
+  // refuses the whole package for it, with the SAME message a misnamed field
+  // produces, so the cause would be indistinguishable from the bug above.
+  const now = new Date('2026-09-14T13:00:00Z');
+  for (const leadDays of [0, 1, 30]) {
+    const c = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+      { customerIp: '1.2.3.4', origin: 'GLA', destination: 'BOH', leadDays }, now);
+    const legs = c.FlightSearchCriteria.Legs;
+    assert.ok(new Date(legs[0].DepartDate) > now, `leadDays ${leadDays} departs in the past`);
+    assert.ok(new Date(legs[1].DepartDate) > new Date(legs[0].DepartDate), 'and comes back after');
+    // The room and the flight must agree, or the package prices a stay the
+    // traveller cannot reach.
+    assert.equal(legs[0].DepartDate, c.AccommodationSearchCriteria.CheckinDate);
+    assert.equal(legs[1].DepartDate, c.AccommodationSearchCriteria.CheckoutDate);
+  }
+  assert.equal(MIN_DP_LEAD_DAYS, 1);
+
+  // And a HOTEL on its own keeps same-day booking, which is a real thing to
+  // sell. The floor belongs to the flight, not to the product.
+  const hotel = buildAccommodationCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', leadDays: 0 }, now);
+  assert.equal(hotel.AccommodationSearchCriteria.CheckinDate, '2026-09-14T00:00:00Z');
 });
