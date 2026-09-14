@@ -158,10 +158,27 @@ export default async function handler(req, res) {
           currency: cheapest.currency || 'GBP',
         };
       } else if (parsed.length) {
+        // The interesting failure, and the one that needs evidence rather than
+        // a guess. Three numbers separate the three possible causes:
+        //   withRef 0          the feed does not return uniqueRef on this
+        //                      product at all, so the verify gate can never
+        //                      match and the fault is OURS
+        //   refs look foreign  it returns a different identifier shape, so our
+        //                      canonicalisation is wrong — also ours
+        //   refs look like TTI codes but none is the one asked for
+        //                      the pin was ignored and this is a plain area
+        //                      search, which is Travelify's behaviour to
+        //                      confirm, not our bug
+        const refs = parsed.map((o) => o.accommodationUniqueRef).filter(Boolean);
         results[idx] = {
           code: prop.code, status: 'area-only', areaOffers: parsed.length,
-          detail: 'The search worked but nothing came back for this property. '
-                + 'Check the code and the country.',
+          withRef: refs.length,
+          sampleRefs: [...new Set(refs)].slice(0, 5),
+          sampleHotels: [...new Set(parsed.map((o) => o.hotel).filter(Boolean))].slice(0, 3),
+          detail: refs.length
+            ? 'The search worked but none of what came back was this property.'
+            : 'The search worked, but none of the offers carried a property reference '
+              + 'at all, so there was nothing to match the code against.',
         };
       } else {
         results[idx] = { code: prop.code, status: 'empty',
@@ -178,9 +195,13 @@ export default async function handler(req, res) {
     found,
     // Every code coming back area-only, with a healthy area count, is the
     // signature of the feed ignoring the refn pin rather than of bad codes.
+    // True when the shape of the answer says the pin was ignored rather than
+    // that the codes are wrong. Deliberately fires on a SINGLE code too: the
+    // first person to try this will test one hotel, and making them add a
+    // second before we will tell them what we can already see is no help.
     pinLooksIgnored: found === 0
-      && results.length > 1
-      && results.every((r) => r.status === 'area-only' && r.areaOffers > 20),
+      && results.length > 0
+      && results.every((r) => r.status === 'area-only' && r.withRef > 20),
     truncated: rows.length > MAX_CODES ? rows.length - MAX_CODES : undefined,
     results,
   });
