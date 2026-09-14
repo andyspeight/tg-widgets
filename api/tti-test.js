@@ -38,13 +38,21 @@
 import { requireAuth, setCors } from './_auth.js';
 import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } from './_auth.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
-import { canonTti, cleanCtry, searchFromConfig, buildTtiPayload, offerIsProperty } from './_lib/offers/tti.js';
+import { canonTti, cleanCtry, searchFromConfig, buildTtiPayload, offerIsProperty,
+  PROBE_CANDIDATES } from './_lib/offers/tti.js';
 import { normaliseOffers, callOffersProxy } from './cron/refresh-map-offers.js';
 
 // One click, a handful of codes. Enough to check a list is sane without
 // becoming a way to sweep inventory.
 const MAX_CODES = 10;
+const DEEPLINK_BASE = 'https://dl.tvllnk.com/deeplink/';
 const CONCURRENCY = 2;
+// The pin probe is a diagnostic, not the main job, so it gets its own tighter
+// budget: a few candidates, a short timeout each, and a hard wall-clock wall it
+// will not cross whatever is left to try.
+const PROBE_MAX_CANDIDATES = 5;
+const PROBE_TIMEOUT_MS = 9000;
+const PROBE_DEADLINE_MS = 38000;
 // Must stay comfortably INSIDE the maxDuration vercel.json gives this route
 // (60s). It was 12s against an undeclared route, which meant Vercel's own
 // default cut in first: the platform kills the function mid-flight and returns
@@ -65,7 +73,119 @@ async function appIdForCaller(user) {
   return /^\d{1,10}$/.test(appId) ? appId : '';
 }
 
+/** Build the deep link for one property, in the shape Andy's own working links
+ *  use: an area search with the property pinned by refn. */
+export function deeplinkFor(appId, prop, search) {
+  const q = new URLSearchParams();
+  q.set('st', search.type === 'Accommodation' ? 'Accommodation' : 'DynamicPackaging');
+  q.set('curr', search.currency);
+  q.set('nat', search.nationality);
+  if (prop.loc) { q.set('loc', prop.loc); q.set('loct', 'City'); }
+  else if (prop.ctry) { q.set('ctry', prop.ctry); }
+  if (prop.lat != null && prop.lng != null) {
+    q.set('lat', String(prop.lat)); q.set('lng', String(prop.lng));
+    q.set('rad', String(search.radiusKm || 28));
+  }
+  q.set('frd', '30');
+  q.set('dur', '7');
+  q.set('refn', 'TTI:' + prop.code);
+  q.set('adt', '2'); q.set('chd', '0'); q.set('inf', '0');
+  return DEEPLINK_BASE + encodeURIComponent(appId) + '?' + q.toString();
+}
+
+/** Fetch that deep link SERVER-SIDE and report what actually comes back.
+ *
+ *  Andy's position is that the deep link is the only correct way to run this
+ *  search, and he knows Travelify better than this code does. Rather than argue
+ *  the point a third time, measure it: follow the link, and report the status,
+ *  the redirect chain, the content type, and whether any of it is machine
+ *  readable. If there is a session or a JSON surface behind it, this finds it.
+ *  If it is an HTML application shell, that is now evidence rather than a claim.
+ *
+ *  Diagnostic only. Nothing in the product reads offers this way. */
+async function probeDeeplink(url) {
+  const out = { url, hops: [] };
+  try {
+    let current = url;
+    for (let hop = 0; hop < 4; hop++) {
+      const r = await fetch(current, {
+        redirect: 'manual',
+        headers: { 'User-Agent': 'Travelgenix-TtiTest/1.0', Accept: '*/*' },
+        signal: AbortSignal.timeout(12000),
+      });
+      const loc = r.headers.get('location');
+      out.hops.push({ status: r.status, contentType: r.headers.get('content-type') || null, location: loc });
+      if (loc && r.status >= 300 && r.status < 400) {
+        current = new URL(loc, current).toString();
+        continue;
+      }
+      const body = await r.text();
+      out.finalUrl = current;
+      out.contentType = r.headers.get('content-type') || null;
+      out.bytes = body.length;
+      try { JSON.parse(body); out.isJson = true; } catch { out.isJson = false; }
+      // Enough of the body to recognise an app shell, an error, or a payload.
+      out.bodyStarts = body.slice(0, 300).replace(/\s+/g, ' ').trim();
+      return out;
+    }
+    out.error = 'too many redirects';
+    return out;
+  } catch (e) {
+    out.error = (e && e.name === 'TimeoutError') ? 'timed out after 12s' : (e && e.message) || 'failed';
+    return out;
+  }
+}
+
+/** Why one property could not be found: is the pin ignored, or is the code wrong?
+ *
+ *  THE EVIDENCE THAT SEPARATES THEM. A pinned search and an UNPINNED one are
+ *  fired at the same property in the same area. If both return the same
+ *  surrounding area, refn did nothing and the property is simply not in the
+ *  cheapest slice of a whole country — our ask is wrong, not the code. If the
+ *  pinned one returns dramatically less, the pin IS honoured and the code is
+ *  the thing to look at. Then the remaining spellings are tried in case one of
+ *  them is the parameter the feed actually wants.
+ *
+ *  This is the open question in docs/tti-offers-handover.md, moved from a
+ *  document nobody can run to the button the agent is already pressing. If a
+ *  candidate wins here, set TTI_PROPERTY_PARAM on Vercel to its name and the
+ *  sweep uses it that night: no code change.
+ *
+ *  Bounded and diagnostic: one property per click, at most PROBE_MAX_CANDIDATES
+ *  extra requests, and it stops at the deadline rather than holding the
+ *  function open. */
+async function probePin(appId, prop, search, startedAt) {
+  const tried = [];
+  // The control first. It is the cheapest and the most informative single
+  // request in the whole endpoint.
+  const order = [{ shape: 'none' }].concat(
+    PROBE_CANDIDATES.filter((c) => c.param && !(c.param === 'refn' && c.prefixed)),
+  );
+  for (const spec of order.slice(0, PROBE_MAX_CANDIDATES)) {
+    if (Date.now() - startedAt > PROBE_DEADLINE_MS) break;
+    const payload = buildTtiPayload(appId, prop, search, spec);
+    if (!payload) continue;
+    const r = await callOffersProxy(payload, PROBE_TIMEOUT_MS, 0);
+    const label = spec.shape === 'none' ? 'no pin at all'
+      : spec.param + (spec.prefixed ? ' (TTI: prefixed)' : '') + (spec.array ? ' (as a list)' : '');
+    if (!r || !r.ok) { tried.push({ label, failed: (r && r.error) || 'no answer' }); continue; }
+    const raw = (r.data && (r.data.data || r.data.offers)) || [];
+    const parsed = normaliseOffers(Array.isArray(raw) ? raw : [], search.type);
+    const mine = parsed.filter((o) => offerIsProperty(o, prop.code)).length;
+    tried.push({ label, offers: parsed.length, mine, unpinned: spec.shape === 'none' });
+    // A candidate that finds the property is the answer. Stop paying for more.
+    if (mine > 0 && spec.shape !== 'none') return { code: prop.code, tried, winner: label };
+  }
+  const control = tried.find((t) => t.unpinned);
+  const pinned = tried.filter((t) => !t.unpinned && typeof t.offers === 'number');
+  // Same breadth pinned and unpinned means nothing narrowed the search.
+  const pinIgnored = !!control && typeof control.offers === 'number' && pinned.length > 0
+    && pinned.every((t) => t.offers === control.offers);
+  return { code: prop.code, tried, winner: null, pinIgnored };
+}
+
 export default async function handler(req, res) {
+  const startedAt = Date.now();
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
@@ -188,6 +308,19 @@ export default async function handler(req, res) {
   });
   await Promise.all(workers);
 
+  // When the feed could not find the property, follow the DEEP LINK for the
+  // first such code and report what it returns. One extra request per click,
+  // not per code, and only on the path where we already have no answer.
+  let deeplink;
+  let pinProbe;
+  const firstMiss = props.find((_, n) => results[n] && results[n].status === 'area-only');
+  if (firstMiss && body.probeDeeplink !== false) {
+    deeplink = await probeDeeplink(deeplinkFor(appId, firstMiss, search));
+    // And find out WHY the feed could not find it, which is the question the
+    // deep link on its own cannot answer.
+    pinProbe = await probePin(appId, firstMiss, search, startedAt);
+  }
+
   const found = results.filter((r) => r.status === 'found').length;
   return res.status(200).json({
     ok: true,
@@ -203,6 +336,8 @@ export default async function handler(req, res) {
       && results.length > 0
       && results.every((r) => r.status === 'area-only' && r.withRef > 20),
     truncated: rows.length > MAX_CODES ? rows.length - MAX_CODES : undefined,
+    deeplink,
+    pinProbe,
     results,
   });
 }

@@ -49,21 +49,31 @@ test('the TTI code regex is identical in all three files', () => {
   for (const [label, src] of [['widget', WIDGET], ['cached-offers', CACHED], ['tti lib', TTI_LIB]]) {
     assert.ok(RE.test(src), `${label} does not carry the shared TTI code pattern`);
     assert.ok(
-      /replace\(\/\^TTI:\/, ''\)/.test(src),
-      `${label} does not strip the TTI: prefix, so a prefixed and a bare code would key differently`,
+      /replace\(\/\^\[A-Z\]\+:\/, ''\)/.test(src),
+      `${label} does not strip the reference namespace, so a prefixed and a bare code would key differently`,
     );
   }
 });
 
-test('canonTti folds the prefixed and bare spellings together', () => {
+test('canonTti folds every reference namespace onto the bare code', () => {
   assert.equal(canonTti('TTI:10946397'), '10946397');
   assert.equal(canonTti('10946397'), '10946397');
   assert.equal(canonTti(' tti:76853197 '), '76853197');
   assert.equal(canonTti('ABC-123.4'), 'ABC-123.4');
+  // Travelify does not only use TTI. A live GB search returned ID:30924133
+  // alongside TTI: references (14 Sep 2026), and the old TTI-only strip
+  // rejected those outright: a hotel whose reference came back under ID:
+  // could never match, and the test reported it as "not this property".
+  assert.equal(canonTti('ID:30924133'), '30924133');
+  assert.equal(canonTti('ID:58612582'), canonTti('TTI:58612582'),
+    'the same property must key the same whichever namespace it arrives under');
 });
 
 test('canonTti rejects anything that could escape the key namespace', () => {
-  for (const bad of ['', null, undefined, 'a b', 'x:y', '../../etc', 'a/b', '*', 'TTI:', '#1', 'a'.repeat(33)]) {
+  // Note 'x:y' is no longer here: any LETTERS: prefix is now stripped, so it
+  // reads as the code 'Y'. The key segment is still validated by the pattern
+  // below, which is what actually keeps the namespace safe.
+  for (const bad of ['', null, undefined, 'a b', '../../etc', 'a/b', '*', 'TTI:', 'ID:', '#1', ':::', 'a'.repeat(33)]) {
     assert.equal(canonTti(bad), '', `expected ${JSON.stringify(bad)} to be rejected`);
   }
 });
@@ -419,7 +429,21 @@ test('the editor saves as TTI Offers and embeds the right script', () => {
 test('the editor canonicalises TTI codes the same way as everything else', () => {
   const RE = /\^\[A-Z0-9\]\[A-Z0-9\._-\]\{0,31\}\$/;
   assert.ok(RE.test(EDITOR), 'the editor must use the shared code pattern');
-  assert.ok(/replace\(\/\^TTI:\/, ''\)/.test(EDITOR));
+  assert.ok(/replace\(\/\^\[A-Z\]\+:\/, ''\)/.test(EDITOR));
+  // The editor also strips the namespace when reading a saved config back,
+  // or a hotel saved as ID: would show a mangled code in its input.
+  assert.ok(!/\^TTI:/.test(EDITOR), 'no TTI-only strip may remain anywhere in the editor');
+});
+
+test('the deep link probe reports what it got rather than assuming', () => {
+  // Andy's position is that the deep link is the only correct way to run this
+  // search. Rather than argue it, the server follows one and reports the
+  // status, redirects, content type and whether the body is machine readable.
+  assert.ok(/export function deeplinkFor/.test(TEST_API), 'it must build a real deep link');
+  assert.ok(/refn', 'TTI:' \+ prop\.code/.test(TEST_API), 'pinned the same way his working links are');
+  assert.ok(/redirect: 'manual'/.test(TEST_API), 'the redirect chain is the interesting part');
+  assert.ok(/out\.isJson = true/.test(TEST_API), 'and whether anything machine readable comes back');
+  assert.ok(/d\.deeplink/.test(EDITOR), 'the editor has to show the answer');
 });
 
 test('the editor has no dead destination controls left behind', () => {
@@ -656,4 +680,54 @@ test('the tour points at the property list, not the retired destination input', 
   assert.ok(/openSectionByTitle\('Your properties'\)/.test(TOUR));
   // Its own id, so dismissing one tour does not silently dismiss the other.
   assert.ok(/'tti-offers'/.test(TOUR) && !/tourLauncher\(\{ id: 'offers'/.test(TOUR));
+});
+
+/* ============================================================
+   The pin probe: answering "why was my hotel not found?"
+   ============================================================ */
+
+test('the pin probe runs an unpinned control before any candidate', () => {
+  // Without the control the probe cannot tell "the pin was ignored" from
+  // "the pin worked and this hotel has no availability". They need opposite
+  // fixes, so guessing between them is worse than not reporting at all.
+  const fn = TEST_API.slice(TEST_API.indexOf('async function probePin'));
+  const body = fn.slice(0, fn.indexOf('\nexport default'));
+  assert.ok(/\[\{ shape: 'none' \}\]\.concat\(/.test(body),
+    'the unpinned control must be first in the order, not appended after the candidates');
+  assert.ok(/pinIgnored/.test(body), 'and the verdict it exists to produce must be reported');
+  assert.ok(/c\.param === 'refn' && c\.prefixed/.test(body),
+    'the spelling already tried in the main pass must not be paid for twice');
+});
+
+test('the pin probe cannot hold the function open', () => {
+  const fn = TEST_API.slice(TEST_API.indexOf('async function probePin'));
+  const body = fn.slice(0, fn.indexOf('\nexport default'));
+  assert.ok(/Date\.now\(\) - startedAt > PROBE_DEADLINE_MS/.test(body), 'it must watch the clock');
+  assert.ok(/slice\(0, PROBE_MAX_CANDIDATES\)/.test(body), 'and cap how many it will try');
+  assert.ok(/mine > 0 && spec\.shape !== 'none'/.test(body),
+    'and stop as soon as one candidate actually finds the property');
+  // The whole probe must still fit inside the route's declared maxDuration.
+  const dl = Number(/PROBE_DEADLINE_MS = (\d+)/.exec(TEST_API)[1]);
+  const each = Number(/PROBE_TIMEOUT_MS = (\d+)/.exec(TEST_API)[1]);
+  const maxDur = VERCEL.functions['api/tti-test.js'].maxDuration * 1000;
+  assert.ok(dl + each <= maxDur,
+    `the probe can run to ${dl + each}ms but the route is killed at ${maxDur}ms`);
+});
+
+test('the probe only ever costs requests on the path that has no answer', () => {
+  // One property per click, and only when the ordinary search already failed
+  // to find it. A probe that ran on every code would turn the Test button into
+  // the fan-out the cache-only rule exists to prevent.
+  assert.ok(/const firstMiss = props\.find\(/.test(TEST_API));
+  assert.ok(/if \(firstMiss && body\.probeDeeplink !== false\)/.test(TEST_API));
+  assert.ok(/await probePin\(appId, firstMiss, search, startedAt\)/.test(TEST_API),
+    'exactly one property is probed, and only when it was not found');
+});
+
+test('the editor explains the probe rather than dumping it', () => {
+  assert.ok(/d\.pinProbe/.test(EDITOR), 'the editor must read the probe');
+  assert.ok(/ignoring the hotel pin/.test(EDITOR), 'and say plainly when the pin was ignored');
+  assert.ok(/Your code is almost certainly fine/.test(EDITOR),
+    'so the agent is not left thinking they typed the code wrong');
+  assert.ok(/q\.winner/.test(EDITOR), 'and name the spelling that worked when one does');
 });
