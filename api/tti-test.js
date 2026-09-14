@@ -137,18 +137,16 @@ export default async function handler(req, res) {
     });
   }
 
-  const search = {
-    currency: body.currency, nationality: body.nationality,
-    leadDays: body.leadDays, nights: body.nights, adults: body.adults,
-    origins, cabinClass: body.cabinClass, directOnly: body.directOnly === true,
-    customerIp,
-    customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
-  };
   // A dynamic package is a DIFFERENT SEARCH, not a label on this one: it sends
   // flight criteria alongside the hotel and prices the two together. Running
   // the hotel search and calling it a package is what produced hotel-only
   // prices under a package heading (Andy, 14 Sep 2026), so the two paths are
   // kept apart here rather than coerced into one.
+  //
+  // Declared BEFORE `search`, which reads `origins`. It was below, and a const
+  // read before its declaration is a ReferenceError, not undefined — so the
+  // whole route 500'd and the browser got Vercel's plain-text error page
+  // instead of JSON ("Unexpected token 'A', \"A server e\"...").
   const isDp = body.type === 'DynamicPackages';
   const type = isDp ? 'DynamicPackages' : 'Accommodation';
   const origins = Array.isArray(body.origins) ? body.origins : [];
@@ -159,6 +157,14 @@ export default async function handler(req, res) {
       code: 'dp_needs_origin',
     });
   }
+
+  const search = {
+    currency: body.currency, nationality: body.nationality,
+    leadDays: body.leadDays, nights: body.nights, adults: body.adults,
+    origins, cabinClass: body.cabinClass, directOnly: body.directOnly === true,
+    customerIp,
+    customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
+  };
   const results = new Array(rows.length);
   let shape = null;
 

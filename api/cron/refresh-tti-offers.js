@@ -75,6 +75,7 @@ import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } fro
 // cron's, imported rather than copied. Two normalisers writing one cache shape
 // is how the shape drifts, and api/cached-offers.js rebuilds BOTH pools with a
 // single toRawShape that is the exact inverse of this one parser.
+import { runSearch } from '../_lib/offers/travelify-search.js';
 import {
   normaliseOffers,
   callOffersProxy,
@@ -85,6 +86,21 @@ import {
 // ── Config ────────────────────────────────────────────────────────────────
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2'; // Widgets (appAYzWZxvK6qlwXK)
 const WIDGET_TYPE = 'TTI Offers';
+
+// The customer address every Travelify search requires. A cron has no visitor,
+// so there is nobody's address to send, and one MUST NOT be invented: the field
+// feeds geo and fraud checks, so a wrong value runs the whole sweep in the wrong
+// market and caches the wrong prices. Set TTI_CUSTOMER_IP on the deployment to
+// the address these searches should be attributed to.
+//
+// Unset, the sweep does NOTHING and says so. That is deliberate and it is the
+// safe direction: the cache keeps whatever is in it rather than being refreshed
+// from a search that would be priced for the wrong place.
+const CUSTOMER_IP = cleanIp(process.env.TTI_CUSTOMER_IP || '');
+// Polls per property. The documented ceiling is 30 at a second apart; a search
+// scoped to one property settles long before that, and a nightly run has many
+// properties to get through.
+const CRON_MAX_POLLS = 10;
 
 const TTI_PREFIX = 'offers:tti:';
 const ttiKey = (appId, code) => `${TTI_PREFIX}${appId}:${code}`;
@@ -107,6 +123,11 @@ import {
   codesFromConfig,
   searchFromConfig,
   buildTtiPayload,
+  buildAccommodationCriteria,
+  buildDynamicPackageCriteria,
+  normaliseAccommodationResult,
+  resultIsProperty,
+  cleanIp,
   offerIsProperty,
 } from '../_lib/offers/tti.js';
 
@@ -154,19 +175,21 @@ export async function collectWork() {
     const cacheKey = clientRecordId || clientEmail;
     if (!cacheKey) { skipped.push({ widget: f.WidgetID || row.id, why: 'no owning account' }); continue; }
 
-    let appId = appIdCache.get(cacheKey);
-    if (appId === undefined) {
+    // The whole credentials now, not just the App ID: the booking API uses
+    // Token auth, so the key travels with every search.
+    let creds = appIdCache.get(cacheKey);
+    if (creds === undefined) {
       try {
-        const creds = (clientRecordId ? await lookupClientCredentialsByRecordId(clientRecordId) : null)
-                   || (clientEmail ? await lookupClientCredentialsByEmail(clientEmail) : null);
-        appId = creds && creds.appId ? String(creds.appId).trim() : null;
+        creds = (clientRecordId ? await lookupClientCredentialsByRecordId(clientRecordId) : null)
+             || (clientEmail ? await lookupClientCredentialsByEmail(clientEmail) : null);
       } catch (e) {
-        appId = null;
+        creds = null;
       }
-      appIdCache.set(cacheKey, appId);
+      appIdCache.set(cacheKey, creds);
     }
-    if (!appId || !/^\d{1,10}$/.test(appId)) {
-      skipped.push({ widget: f.WidgetID || row.id, why: 'no Travelify App ID on the owning account' });
+    const appId = creds && creds.appId ? String(creds.appId).trim() : '';
+    if (!appId || !/^\d{1,10}$/.test(appId) || !(creds && creds.apiKey)) {
+      skipped.push({ widget: f.WidgetID || row.id, why: 'no Travelify credentials on the owning account' });
       continue;
     }
 
@@ -180,7 +203,8 @@ export async function collectWork() {
       const existing = work.get(k);
       if (!existing) {
         work.set(k, {
-          appId, code: p.code, name: p.name, ctry: p.ctry,
+          appId, apiKey: creds.apiKey, code: p.code, name: p.name, ctry: p.ctry,
+          lat: p.lat, lng: p.lng, radius: p.radius, locationName: p.locationName || p.name,
           // One property, one cache key, but possibly two asks. A hotel-only
           // widget and a dynamic-package widget want genuinely different
           // products from the same property, and neither ask is a superset of
@@ -214,20 +238,50 @@ export async function collectWork() {
 
 /** Fetch, normalise and verify one property's offers for ONE product type.
  *  Returns null on a failed request so the caller can leave the key alone. */
-async function fetchProperty(item, search, override = null) {
-  const payload = buildTtiPayload(item.appId, item, search, override);
-  if (!payload) return null;
-  const res = await callOffersProxy(payload, PER_REQUEST_TIMEOUT_MS, 1);
-  if (!res || !res.ok) return null;
-  const raw = (res.data && (res.data.data || res.data.offers)) || [];
-  // search.type is the FAMILY name ('Accommodation' or 'Packages') and is what
-  // gets stamped onto the stored offer, so cached-offers.js can tell a dynamic
-  // package from an operator one with packageKindOf at read time — exactly as
-  // it does for the country pool. The ask was already narrowed to DP by
-  // search.packageType.
-  const parsed = normaliseOffers(Array.isArray(raw) ? raw : [], search.type);
-  const verified = parsed.filter((o) => offerIsProperty(o, item.code));
-  return { returned: Array.isArray(raw) ? raw.length : 0, parsed: parsed.length, verified };
+/** One property, one real search.
+ *
+ *  REBUILT on the booking API (14 Sep 2026). This used to ask
+ *  widgetsvc/traveloffers for a country's worth of offers and sieve them for
+ *  one hotel, which could never work: 250 offers for Great Britain sorted
+ *  cheapest-first will not contain one named property. It now runs the same
+ *  search the editor's Test button runs, which is proven — Andy watched it
+ *  cache a real Hilton Bournemouth offer and render it.
+ *
+ *  A package is a DIFFERENT search rather than a label: it sends flight
+ *  criteria alongside the hotel and prices the two together. Asking for one and
+ *  storing the other is what put hotel-only prices under a package heading. */
+async function fetchProperty(item, search) {
+  const isDp = search.type !== 'Accommodation';
+  const opts = { ...search, customerIp: CUSTOMER_IP, customerUserAgent: 'Travelgenix-TtiOffersCron/1.0' };
+  const criteria = isDp
+    ? buildDynamicPackageCriteria(item, opts)
+    : buildAccommodationCriteria(item, opts);
+  // No criteria means the row cannot be searched — no area, or a package with
+  // no departure airport. Skipping is right; a broader search would spend
+  // Travelify capacity on somewhere nobody asked about.
+  if (!criteria) return null;
+
+  const r = await runSearch({ appId: item.appId, apiKey: item.apiKey }, criteria, {
+    maxPolls: CRON_MAX_POLLS,
+    pick: 'accommodationResults',
+  });
+  if (!r.ok) return null;
+
+  const results = r.results || [];
+  const verified = [];
+  for (const one of results) {
+    if (!resultIsProperty(one, item.code)) continue;
+    const n = normaliseAccommodationResult(one, {
+      type: isDp ? 'DynamicPackages' : 'Accommodation',
+      ctry: item.ctry, lat: item.lat, lng: item.lng,
+      locationName: item.locationName,
+      currency: criteria.Currency,
+      checkinDate: criteria.AccommodationSearchCriteria.CheckinDate,
+      deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
+    });
+    if (n && n.offer) verified.push(n.offer);
+  }
+  return { returned: results.length, parsed: results.length, verified };
 }
 
 /** Sweep every product type one property was asked for, and pool the results.
@@ -332,6 +386,25 @@ export default async function handler(req, res) {
   }
   if (!configured()) {
     return res.status(503).json({ ok: false, error: 'Redis not configured — nothing to refresh into' });
+  }
+  // No customer address, no sweep. Every Travelify search requires one and a
+  // cron has no visitor to take it from, so it comes from TTI_CUSTOMER_IP. It
+  // must never be invented: the field feeds geo and fraud checks, and a wrong
+  // one runs the whole sweep in the wrong market and caches prices for the
+  // wrong place — which looks exactly like working.
+  //
+  // Refusing leaves the cache as it is. That is the safe direction: a widget
+  // keeps yesterday's real offers rather than being refreshed with wrong ones,
+  // and the read side's own staleness guard retires them if this persists.
+  if (!CUSTOMER_IP) {
+    console.warn('[tti-cron] TTI_CUSTOMER_IP is not set — sweep skipped, cache left untouched');
+    return res.status(200).json({
+      ok: false,
+      skipped: 'no-customer-ip',
+      error: 'TTI_CUSTOMER_IP is not set on this deployment. Every Travelify search needs a '
+           + 'customer address and a cron has no visitor to take one from. Nothing was '
+           + 'written, so existing cached offers are untouched.',
+    });
   }
 
   const q = req.query || {};

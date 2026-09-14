@@ -139,16 +139,15 @@ test('only the hotel and the dynamic package are ever swept', () => {
   assert.equal(acc.packageType, null);
 });
 
-test('the swept type stays the FAMILY name so the read side can sort DP from operator', () => {
-  // normaliseOffers stamps search.type onto the stored offer, and
-  // cached-offers.js expects the packages family there — it separates a
-  // dynamic package from an operator one with packageKindOf at read time.
-  // Stamping 'DynamicPackages' would make every stored package invisible.
-  assert.equal(searchFromConfig({ type: 'DynamicPackages' }).type, 'Packages');
-  assert.ok(
-    /normaliseOffers\(Array\.isArray\(raw\) \? raw : \[\], search\.type\)/.test(CRON),
-    'the parser must be stamped with the family type, not the narrowed one',
-  );
+test('the cron asks for a package as a package, not a relabelled hotel', () => {
+  // A dynamic package sends flight criteria alongside the hotel and prices the
+  // two together. Running the hotel search and stamping it a package is what
+  // put hotel-only prices under a package heading (Andy, 14 Sep 2026).
+  assert.ok(/const isDp = search\.type !== 'Accommodation'/.test(CRON));
+  assert.ok(/isDp\s*\n?\s*\? buildDynamicPackageCriteria\(item, opts\)/.test(CRON.replace(/\r/g, '')),
+    'a package widget must get the package search');
+  assert.ok(/type: isDp \? 'DynamicPackages' : 'Accommodation'/.test(CRON),
+    'and the stored offer must say which it actually was');
 });
 
 test('a property asked for as both types is swept as both, and pooled', () => {
@@ -306,10 +305,10 @@ test('only offers for the requested property survive the verify gate', () => {
 });
 
 test('the verify gate is wired into the fetch path, not merely defined', () => {
-  assert.ok(
-    /const verified = parsed\.filter\(\(o\) => offerIsProperty\(o, item\.code\)\)/.test(CRON),
-    'fetchProperty must filter every parsed offer through the verify gate',
-  );
+  // Every result is checked against the property that was asked for before it
+  // is kept. Without this the sweep would cache whatever the area returned.
+  assert.ok(/if \(!resultIsProperty\(one, item\.code\)\) continue;/.test(CRON),
+    'fetchProperty must filter every result through the verify gate');
   assert.ok(/storeProperty\(item, r\.verified/.test(CRON), 'only verified offers may be stored');
 });
 
@@ -1261,4 +1260,66 @@ test('no control is declared twice in the editor markup', () => {
   const seen = new Set(); const dupes = new Set();
   for (const id of ids) { if (seen.has(id)) dupes.add(id); seen.add(id); }
   assert.deepEqual([...dupes], [], `duplicated ids: ${[...dupes].join(', ')}`);
+});
+
+/* ============================================================
+   The nightly sweep
+   ============================================================ */
+
+test('the cron runs the same search the Test button does', () => {
+  // It was still asking widgetsvc/traveloffers for a country's worth of offers
+  // and sieving them for one hotel — the query that never found Andy's
+  // property. Since it writes the SAME cache keys the Test button writes, its
+  // next run would have replaced a working offer with nothing.
+  assert.ok(/from '\.\.\/_lib\/offers\/travelify-search\.js'/.test(CRON));
+  assert.ok(/runSearch\(\{ appId: item\.appId, apiKey: item\.apiKey \}/.test(CRON));
+  assert.ok(/buildAccommodationCriteria\(item, opts\)/.test(CRON));
+  assert.ok(/buildDynamicPackageCriteria\(item, opts\)/.test(CRON));
+  assert.ok(/normaliseAccommodationResult\(one/.test(CRON));
+});
+
+test('the cron carries the API key, not just the App ID', () => {
+  // Token auth needs both. Caching only the App ID would have made every
+  // search unauthenticated.
+  assert.ok(/apiKey: creds\.apiKey/.test(CRON));
+  assert.ok(/!\(creds && creds\.apiKey\)/.test(CRON), 'a client with no key must be skipped');
+});
+
+test('no customer address means NO SWEEP, and the cache is left alone', () => {
+  // A cron has no visitor, so there is no address to take. Inventing one runs
+  // the whole sweep in the wrong market and caches prices for the wrong place,
+  // which looks exactly like working. Refusing leaves yesterday's real offers
+  // in place, which is the safe direction.
+  assert.ok(/const CUSTOMER_IP = cleanIp\(process\.env\.TTI_CUSTOMER_IP/.test(CRON));
+  assert.ok(/if \(!CUSTOMER_IP\) \{/.test(CRON));
+  assert.ok(/skipped: 'no-customer-ip'/.test(CRON));
+  // And it must refuse before anything is SWEPT — compared against the call
+  // site, not the helper's definition, which sits above the handler.
+  const gate = CRON.indexOf("skipped: 'no-customer-ip'");
+  const call = CRON.indexOf('await storeProperty(item');
+  assert.ok(gate !== -1 && call !== -1 && gate < call,
+    'the refusal must come before the sweep writes anything');
+  assert.ok(!/CUSTOMER_IP = '\d/.test(CRON), 'no fabricated address anywhere');
+});
+
+test('the package options are declared before the search that reads them', () => {
+  // Andy got "Unexpected token 'A', \"A server e\"..." — Vercel's plain-text
+  // 500 page reaching a caller expecting JSON. The cause: the `search` object
+  // read `origins` fourteen lines above `const origins = ...`. A const read
+  // before its declaration is a ReferenceError, not undefined, so the whole
+  // route threw. node --check does not catch it.
+  //
+  // This asserts the specific ordering rather than trying to detect the class:
+  // a general use-before-define check needs scope analysis, which a regex
+  // cannot do — several attempts here produced only false positives. That job
+  // belongs to a linter rule (no-use-before-define), not to a bespoke scanner
+  // that would cry wolf for whoever reads it next.
+  const handler = TEST_API.slice(TEST_API.indexOf('export default async function handler'));
+  const origins = handler.indexOf('const origins =');
+  const search = handler.indexOf('const search = {');
+  assert.ok(origins > 0 && search > 0, 'both declarations must be found');
+  assert.ok(origins < search,
+    'origins must be declared before the search object that reads it, or the route 500s');
+  const isDp = handler.indexOf('const isDp =');
+  assert.ok(isDp > 0 && isDp < search, 'and so must isDp');
 });
