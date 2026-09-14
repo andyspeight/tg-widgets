@@ -999,7 +999,21 @@
       // Irish euro offers captured this sweep — the win the euro sweep exists for.
       const eurPart = (Number.isFinite(s.keptEUR) && s.keptEUR > 0)
         ? ` <span style="color:#15803D" title="Irish euro offers captured and kept this sweep (not dropped). This is the euro inventory the Irish market sweep was added to catch.">incl. ${s.keptEUR.toLocaleString('en-GB')} Irish €</span>` : '';
-      return `<span style="white-space:nowrap" title="Fetched = returned across every request (each destination is asked per market and currency). Unique = distinct offers after the copies merge — this is what lands in the store.">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${uniquePart}${eurPart}${gap}</span>`;
+      // COST, beside the yield. Requests is what this product spent of the
+      // supplier's rate limit; per-offer is what each stored offer cost us to
+      // find. Flights fan out to every departure airport, so they can be the
+      // overwhelming majority of the spend while contributing very little —
+      // which is exactly what this line exists to make visible.
+      const landed = (Number.isFinite(s.unique) && s.unique > 0) ? s.unique : (s.kept || 0);
+      const perOffer = landed > 0 ? (s.requests / landed) : null;
+      const costPart = s.requests
+        ? ` <span style="color:var(--muted)" title="Requests this product sent to Travelify in this sweep, and how many requests each offer that landed in the store cost us. This is the rate-limit budget the product spends.">· <b>${s.requests.toLocaleString('en-GB')}</b> requests${perOffer === null ? '' : ` (${perOffer >= 10 ? Math.round(perOffer) : perOffer.toFixed(1)} per offer kept)`}</span>`
+        : '';
+      const heldBack = (s.rateLimited || 0) + (s.skipped || 0);
+      const throttlePart = heldBack
+        ? ` <span style="color:var(--err)" title="Requests the supplier refused with HTTP 429, plus the ones we then chose not to send while backing off.">· ${heldBack.toLocaleString('en-GB')} rate limited</span>`
+        : '';
+      return `<span style="white-space:nowrap" title="Fetched = returned across every request (each destination is asked per market and currency). Unique = distinct offers after the copies merge — this is what lands in the store.">${esc(label)} <b style="color:var(--text)">${(s.fetched || 0).toLocaleString('en-GB')}</b> fetched → <b style="color:var(--text)">${(s.kept || 0).toLocaleString('en-GB')}</b> kept${uniquePart}${eurPart}${gap}${costPart}${throttlePart}</span>`;
     };
     const parts = [part('Packages', 'Packages'), part('Accommodation', 'Hotels'), part('Flights', 'Flights')].filter(Boolean);
     if (!parts.length) return '';
