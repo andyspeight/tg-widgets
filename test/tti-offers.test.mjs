@@ -26,6 +26,7 @@ import {
   buildAccommodationCriteria, resultIsProperty,
   parseDeeplink, rowIsSearchable, normaliseAccommodationResult,
   cleanIp,
+  buildDynamicPackageCriteria,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -1185,23 +1186,49 @@ test('cached offers carry a stable id, so a multi-hotel widget is not one card',
    Dynamic packaging is not built, and says so
    ============================================================ */
 
-test('the DP option is disabled rather than silently wrong', () => {
-  // Andy selected it and got hotel-only details under a package heading
-  // (14 Sep 2026). buildAccommodationCriteria only sends SearchType
-  // Accommodation — a package needs flightSearchCriteria alongside it and
-  // prices the two together — so the option looked like it worked and did not.
-  assert.ok(/<option value="DynamicPackages" disabled>/.test(EDITOR),
-    'the option must be disabled until the package search exists');
-  assert.ok(/not switched on yet/.test(EDITOR), 'and the editor must say why');
+test('a package is a different search, not a label on the hotel one', () => {
+  // Andy selected DP and got hotel-only details under a package heading
+  // (14 Sep 2026), because only the accommodation criteria were ever built.
+  const c = buildDynamicPackageCriteria({ code: 'TTI:58612582', ctry: 'GB' },
+    { customerIp: '195.162.100.165', origins: ['LGW'] }, NOW);
+  assert.equal(c.SearchType, 'DynamicPackaging');
+  assert.ok(c.FlightSearchCriteria, 'the flight half must be sent');
+  assert.ok(c.AccommodationSearchCriteria, 'alongside the hotel half');
+  // The hotel half is IDENTICAL to a plain accommodation search: same pin,
+  // same area, same dates. Only the flight is new.
+  const a = buildAccommodationCriteria({ code: 'TTI:58612582', ctry: 'GB' },
+    { customerIp: '195.162.100.165' }, NOW);
+  assert.deepEqual(c.AccommodationSearchCriteria, a.AccommodationSearchCriteria);
 });
 
-test('the test endpoint refuses a DP request rather than coercing it', () => {
-  // Silently running an Accommodation search for a DP widget is how the wrong
-  // prices end up cached under the right-looking label.
-  assert.ok(/dp_not_supported/.test(TEST_API));
-  assert.ok(/body\.type === 'DynamicPackages'/.test(TEST_API));
-  assert.ok(/const type = 'Accommodation';/.test(TEST_API),
-    'and there must be no branch that quietly labels it otherwise');
+test('the flight brackets the stay, and comes from the deeplink params', () => {
+  // Andy's DP deeplink is the accommodation one plus org, dst and dir.
+  const c = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', origins: ['LGW', 'LHR'] }, NOW);
+  const f = c.FlightSearchCriteria;
+  assert.deepEqual(f.Origins, ['LGW', 'LHR'], 'several airports stay ONE search');
+  assert.equal(f.DirectOnly, false, 'dir=false on the deeplink');
+  // Out on the check-in, back on the check-out: different dates would price a
+  // package nobody asked for.
+  assert.equal(f.DepartDate, c.AccommodationSearchCriteria.CheckinDate);
+  assert.equal(f.ReturnDate, c.AccommodationSearchCriteria.CheckoutDate);
+});
+
+test('a package with no departure airport is refused, not downgraded', () => {
+  // Falling back to a hotel search is exactly the mislabelling this replaces.
+  assert.equal(buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4' }, NOW), null);
+  assert.equal(buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', origins: ['nonsense'] }, NOW), null);
+  assert.ok(/dp_needs_origin/.test(TEST_API), 'and the endpoint must say which is missing');
+});
+
+test('the test endpoint runs the package search for a package widget', () => {
+  assert.ok(/const isDp = body\.type === 'DynamicPackages'/.test(TEST_API));
+  assert.ok(/buildDynamicPackageCriteria\(row, search\)/.test(TEST_API));
+  assert.ok(!/dp_not_supported/.test(TEST_API), 'it is supported now');
+  assert.ok(/<option value="DynamicPackages">/.test(EDITOR), 'and the option is selectable');
+  assert.ok(/needs a departure airport/.test(EDITOR), 'with the real requirement stated');
 });
 
 test('the guided tour matches the editor it is describing', () => {

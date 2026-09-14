@@ -657,3 +657,65 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   }
   return { offer, unmapped };
 }
+
+/* ============================================================
+   Dynamic packaging: a flight and this hotel, priced together
+   ============================================================ */
+
+/** The body for a DYNAMIC PACKAGE search around one property.
+ *
+ *  Andy supplied the DP deeplink on 14 Sep 2026 and it is the accommodation
+ *  one plus three things: `org` the departure airport, `dst` the destination,
+ *  and `dir` whether to insist on direct flights. The API docs say the search
+ *  sends `flightSearchCriteria` and `accommodationSearchCriteria` together and
+ *  returns both result arrays.
+ *
+ *  So the hotel half is IDENTICAL to the accommodation search — same Ref, same
+ *  area, same dates — and the flight half is new. The flight field names here
+ *  are taken from the deeplink and the naming the accommodation criteria use;
+ *  where one is wrong the service says so by name, which is how CustomerIP was
+ *  settled this morning. Better a request the API corrects in one click than
+ *  another round of asking.
+ *
+ *  A DP with no departure point is not a package, so it returns null rather
+ *  than quietly searching for a hotel and calling it one. That mislabelling is
+ *  exactly what Andy hit when the option was first offered. */
+export function buildDynamicPackageCriteria(prop, search = {}, now = new Date()) {
+  const base = buildAccommodationCriteria(prop, search, now);
+  if (!base) return null;
+
+  // The departure airport. Without one there is no flight and therefore no
+  // package — the caller must report that rather than fall back to a hotel.
+  const origins = (Array.isArray(search.origins) ? search.origins : [])
+    .map((o) => String(o || '').trim().toUpperCase())
+    .filter((o) => /^[A-Z]{3}$/.test(o))
+    .slice(0, 6);
+  if (!origins.length) return null;
+
+  const acc = base.AccommodationSearchCriteria;
+  return {
+    ...base,
+    SearchType: 'DynamicPackaging',
+    FlightSearchCriteria: {
+      // `org` on the deeplink. Sent as a list so several departure airports
+      // stay ONE search rather than multiplying the nightly budget, the same
+      // reasoning the old sweep used for origins.
+      Origins: origins,
+      // `dst` on the deeplink is Travelify's own destination id, which we do
+      // not hold. The hotel's own country is what we can say truthfully, and
+      // the accommodation half already pins the exact property, so the flight
+      // only has to land in the right place.
+      ...(acc.LocationCountry ? { DestinationCountry: acc.LocationCountry } : {}),
+      ...(Number.isFinite(acc.Latitude) ? { Latitude: acc.Latitude, Longitude: acc.Longitude } : {}),
+      // The flight brackets the stay: out on the check-in, back on the
+      // check-out. Sending different dates would price a package nobody asked
+      // for.
+      DepartDate: acc.CheckinDate,
+      ReturnDate: acc.CheckoutDate,
+      CabinClass: /^(Economy|PremiumEconomy|Business|First)$/.test(String(search.cabinClass || ''))
+        ? search.cabinClass : 'Any',
+      // `dir=false` on the deeplink: do not insist on direct.
+      DirectOnly: search.directOnly === true,
+    },
+  };
+}
