@@ -13,6 +13,9 @@
     "api/cached-offers.js": {
       "maxDuration": 30
     },
+    "api/tti-test.js": {
+      "maxDuration": 60
+    },
     "api/v1/payment-reminders.js": {
       "maxDuration": 30
     },

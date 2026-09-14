@@ -2057,6 +2057,16 @@
     let previewTimer = null;
 
     function $(id) { return document.getElementById(id); }
+    /* HTML-escape anything going into innerHTML. This editor had no such helper
+       and six call sites assumed one, so every one of them threw
+       "esc is not defined" — including the one inside the catch block, which is
+       why the Test button froze on its own progress message instead of showing
+       an error. The shell has escapeHtml but keeps it private to its closure. */
+    function esc(v) {
+      return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
     /* ============================================================
        Tab switching (driven by shell's onTabChange)
@@ -2245,11 +2255,17 @@
       btn.textContent = 'Testing\u2026';
       out.hidden = false;
       out.innerHTML = 'Searching Travelify for each hotel\u2026';
+      // Whatever the server does, the button comes back. A live search can be
+      // slow and a platform timeout can return nothing at all, so the UI owns
+      // its own deadline rather than trusting the response to arrive.
+      const ctl = new AbortController();
+      const giveUp = setTimeout(() => ctl.abort(), 45000);
       try {
         const res = await fetch('/api/tti-test', {
           method: 'POST',
           headers: window.tgse.authHeaders(),
           body: JSON.stringify({ rows, type: state.config.type }),
+          signal: ctl.signal,
         });
         if (res.status === 401) { window.tgse.showLogin(); return; }
         const d = await res.json();
@@ -2284,8 +2300,13 @@
         }
         out.innerHTML = head + lines.join('');
       } catch (err) {
-        out.innerHTML = '<span style="color:var(--tgse-danger)">Test failed: ' + esc(err.message) + '</span>';
+        const why = (err && err.name === 'AbortError')
+          ? 'The search took too long to come back. Travelify can be slow on a '
+            + 'wide area, so try again, or try one code at a time.'
+          : 'Test failed: ' + (err && err.message ? err.message : 'unknown error');
+        out.innerHTML = '<span style="color:var(--tgse-danger)">' + esc(why) + '</span>';
       } finally {
+        clearTimeout(giveUp);
         btn.disabled = false;
         btn.textContent = label;
       }

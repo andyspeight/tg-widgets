@@ -166,6 +166,23 @@ writes them now. Because the area is a whole country rather than a city,
 if the pin is honoured, and the pool the verify gate has to find the property in
 if it is not.
 
+**The Test button froze on its first real use, 14 Sep 2026, and the cause is
+worth remembering.** `esc()` was called six times in an editor that never
+defined it and does not inherit one (the shell's `escapeHtml` is private to its
+closure). So the render threw, the catch block threw again while trying to
+report the throw, and the output sat on its own progress message with no error
+anywhere. Every test passed throughout, because they read source text and can
+only confirm a call is PRESENT, never that its target exists. There is now a
+test that scans the editor's inline script for called names that are never
+defined, and a second test that removes `esc` to prove the first one still bites.
+
+Two related fixes went in alongside it. `api/tti-test.js` had no `functions`
+entry in `vercel.json`, so it got Vercel's default duration, which was shorter
+than its own 12s timeout: the platform would kill the function mid-flight and
+return an empty-bodied gateway response rather than per-code results. It now
+declares 60s and its own budget sits inside that. And the browser keeps its own
+45s deadline, so the button always comes back whatever the server does.
+
 **The Test button** (`POST /api/tti-test`) runs the codes against Travelify for
 real, so an agent learns now whether a code returns anything instead of from an
 empty widget the next morning. It reports, per code: `found` with the hotel name
