@@ -6045,6 +6045,17 @@
         agencyName: typeof c.agencyName === 'string' ? c.agencyName : '',
 
         type: c.type || 'Accommodation',
+        // THE PROPERTY LIST. _defaults is a whitelist, and this key was missing
+        // from it, so this.cfg.ttiCodes was undefined no matter what the config
+        // carried. Everything downstream reads it off this.cfg, so a TTI widget
+        // with twelve hotels behaved exactly like one with none.
+        //
+        // That single omission produced BOTH symptoms Andy reported on
+        // 14 Sep 2026: with no codes the query fell through to the destination
+        // branch and drew "lots of random offers", and once that fallback was
+        // closed off it drew nothing at all. The guard was right; the list was
+        // never reaching it.
+        ttiCodes: (Array.isArray(c.ttiCodes) || typeof c.ttiCodes === 'string') ? c.ttiCodes : [],
         origins: Array.isArray(c.origins) ? c.origins : [],
         destinations: Array.isArray(c.destinations) ? c.destinations : [],
         boardBases: Array.isArray(c.boardBases) ? c.boardBases : [],

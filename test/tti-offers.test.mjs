@@ -1133,3 +1133,50 @@ test('the test panel says whether the WIDGET can see what was cached', () => {
     assert.ok(EDITOR.includes(f), `the excluded-by filter list is missing ${f}`);
   }
 });
+
+/* ============================================================
+   The config must survive the widget's own defaults
+   ============================================================ */
+
+test('_defaults carries ttiCodes through, or the widget forgets its hotels', () => {
+  // THE ROOT CAUSE of both symptoms reported on 14 Sep 2026. _defaults is a
+  // WHITELIST — it rebuilds the config from named keys — and ttiCodes was not
+  // one of them. So this.cfg.ttiCodes was undefined however many hotels the
+  // config carried, and everything downstream reads it off this.cfg.
+  //
+  // With no codes the query fell through to the destination branch and drew
+  // "lots of random offers"; once that fallback was closed off it drew nothing
+  // at all. Two different-looking bugs, one missing line.
+  const body = WIDGET.slice(WIDGET.indexOf('_defaults(c) {'));
+  const defaults = body.slice(0, body.indexOf('\n    }'));
+  assert.ok(/ttiCodes:/.test(defaults),
+    '_defaults must name ttiCodes, because it discards every key it does not');
+  // A string list is a legitimate shape too — ttiCodesOf splits it.
+  assert.ok(/Array\.isArray\(c\.ttiCodes\) \|\| typeof c\.ttiCodes === 'string'/.test(defaults));
+});
+
+test('every key the TTI path reads is one _defaults keeps', () => {
+  // Guards the same class of bug for the rest of the path rather than just the
+  // one instance that bit us.
+  const body = WIDGET.slice(WIDGET.indexOf('_defaults(c) {'));
+  const defaults = body.slice(0, body.indexOf('\n    }'));
+  for (const key of ['ttiCodes', 'appId', 'type', 'destinations', 'supplierFilter']) {
+    assert.ok(new RegExp('\\b' + key + ':').test(defaults), `_defaults drops ${key}`);
+  }
+});
+
+test('cached offers carry a stable id, so a multi-hotel widget is not one card', () => {
+  // api/cached-offers.js dedupes on `id|origin|type`. With no id every offer
+  // keys identically and all but the first are discarded, which would collapse
+  // a twelve-hotel widget to a single card.
+  const mk = (ref, rid) => normaliseAccommodationResult({
+    isAvailable: true, uniqueRef: ref, rid, name: 'H', pricing: { total: 100 },
+    location: { name: 'X' }, units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z' }],
+  }, {}).offer;
+  const a = mk('TTI:111', 1);
+  const b = mk('TTI:222', 2);
+  assert.ok(a.id && b.id, 'both must have an id');
+  assert.notEqual(a.id, b.id, 'two different properties must not dedupe into one');
+  // The same property at two prices in one search must stay distinct too.
+  assert.notEqual(mk('TTI:111', 1).id, mk('TTI:111', 2).id);
+});

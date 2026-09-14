@@ -629,6 +629,14 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // belongs to the SESSION that produced it, so the caller supplies it rather
     // than the parser inventing one.
     rid: r.rid != null ? String(r.rid) : null,
+    // A stable identity. api/cached-offers.js dedupes on `id|origin|type`, so
+    // offers with no id all key identically and every one after the first is
+    // thrown away — which would have collapsed a twelve-hotel widget to a
+    // single card. rid is per result within a search; the property and the
+    // stay make it unique across searches.
+    id: 'tti:' + (r.uniqueRef ? String(r.uniqueRef).replace(/^[A-Za-z]+:/, '') : 'x')
+      + ':' + (r.rid != null ? r.rid : 'x')
+      + ':' + (pick(r, ['units.0.checkinDate', 'checkinDate']) || ctx.checkinDate || 'x'),
     url: ctx.deeplinkUrl || null,
     // Bookable / Affiliate / EnquiryOnly. An Affiliate result hands the visitor
     // to somebody else rather than booking here, so the card has to know.
