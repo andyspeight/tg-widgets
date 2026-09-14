@@ -449,6 +449,111 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     });
   });
 
+  /* ---------------------------------------------------------------- */
+  console.log('\nTerritories, and airports that share a code');
+
+  // Ten airports were held on 14 Sep 2026 saying "they disagree: TC against
+  // GB". Neither source was wrong. OurAirports records the ISO territory an
+  // airport sits in, Wikidata's P17 records the sovereign state, and both are
+  // true of Providenciales. Checked against the live sources on the day.
+  const terr = (oaCc, sovereign, chain) => ({
+    ...WD.LHR, countryCode: sovereign, isoCodes: new Set([sovereign, ...chain]),
+  });
+
+  t('a dependent territory is not a disagreement', () => {
+    const cases = [
+      ['TC', 'GB', 'Turks and Caicos Islands'],
+      ['VG', 'GB', 'British Virgin Islands'],
+      ['PR', 'US', 'Puerto Rico'],
+      ['GU', 'US', 'Guam'],
+      ['GP', 'FR', 'Guadeloupe'],
+      ['MO', 'CN', 'Macau'],
+      ['PF', 'FR', 'French Polynesia'],
+    ];
+    for (const [code, sovereign, name] of cases) {
+      const { agreed } = agreedFields({ ...OA.LHR, country: code },
+        terr(code, sovereign, [code]));
+      assert.strictEqual(agreed.country, name,
+        code + ' inside ' + sovereign + ' should agree, and read as ' + name);
+    }
+  });
+
+  t('the territory has to be one Wikidata actually places it in', () => {
+    // Not "anything under the same flag". Wikidata never says this airport is
+    // in Bermuda, so nothing is written.
+    const { agreed, why } = agreedFields({ ...OA.LHR, country: 'BM' },
+      terr('BM', 'GB', ['TC']));
+    assert.strictEqual(agreed.country, undefined);
+    assert.match(why.country, /BM against/);
+  });
+
+  t('two sources naming genuinely different countries are still held', () => {
+    const { agreed, why } = agreedFields(OA.LHR,
+      { ...WD.LHR, countryCode: 'IE', isoCodes: new Set(['IE']) });
+    assert.strictEqual(agreed.country, undefined);
+    assert.match(why.country, /GB against IE/);
+  });
+
+  t('an airport with no territory above it is unchanged', () => {
+    assert.strictEqual(agreedFields(OA.LHR, WD.LHR).agreed.country, 'United Kingdom');
+    assert.strictEqual(agreedFields(OA.MUC, WD.MUC).agreed.country, 'Germany');
+  });
+
+  t('names are written the way the table already writes them', () => {
+    const name = cc => agreedFields({ ...OA.LHR, country: cc },
+      terr(cc, cc, [cc])).agreed.country;
+    assert.strictEqual(name('US'), 'USA');            // not United States
+    assert.strictEqual(name('AE'), 'UAE');            // not United Arab Emirates
+    assert.strictEqual(name('HK'), 'Hong Kong');      // not Hong Kong SAR China
+    assert.strictEqual(name('AG'), 'Antigua and Barbuda');  // not an ampersand
+    assert.strictEqual(name('LC'), 'St Lucia');       // UK English drops the stop
+    assert.strictEqual(name('VI'), 'US Virgin Islands');
+  });
+
+  t('the query asks Wikidata which territory it places the airport in', () => {
+    const q = sparqlFor(['PLS']);
+    assert.match(q, /P131\*/, 'without the chain only the sovereign state comes back');
+    assert.match(q, /\?terr/);
+  });
+
+  // Faa'a: PPT is on both the civil airport and the airbase half a kilometre
+  // away, so two entities carry the code and every field was being discarded as
+  // ambiguous.
+  const binding = (iata, entity, coord, iso) => ({
+    iata: { value: iata }, airport: { value: entity },
+    coord: { value: coord }, iso: { value: iso },
+  });
+  const results = rows => ({ results: { bindings: rows } });
+
+  t('one airport recorded twice at the same spot is one place', () => {
+    const m = reconcileWikidata(results([
+      binding('PPT', 'http://www.wikidata.org/entity/Q1049719', 'Point(-149.611388 -17.556666)', 'FR'),
+      binding('PPT', 'http://www.wikidata.org/entity/Q2886489', 'Point(-149.607 -17.5532)', 'FR'),
+    ]), ['PPT']);
+    const wd = m.get('PPT');
+    assert.ok(Number.isFinite(wd.lat), 'half a kilometre apart is the same airport');
+    assert.ok(Math.abs(wd.lat + 17.55) < 0.1);
+  });
+
+  t('two airports genuinely far apart stay ambiguous', () => {
+    const m = reconcileWikidata(results([
+      binding('XXX', 'http://www.wikidata.org/entity/Q1', 'Point(0 51)', 'GB'),
+      binding('XXX', 'http://www.wikidata.org/entity/Q2', 'Point(10 45)', 'FR'),
+    ]), ['XXX']);
+    assert.ok(!Number.isFinite(m.get('XXX').lat),
+      'a real code clash must not be resolved by picking one');
+  });
+
+  t('every ISO code Wikidata places it in is carried through', () => {
+    const m = reconcileWikidata(results([
+      { iata: { value: 'PLS' }, iso: { value: 'GB' }, terr: { value: 'TC' } },
+      { iata: { value: 'PLS' }, iso: { value: 'GB' }, terr: { value: 'GB' } },
+    ]), ['PLS']);
+    const wd = m.get('PLS');
+    assert.strictEqual(wd.countryCode, 'GB');
+    assert.deepStrictEqual([...wd.isoCodes].sort(), ['GB', 'TC']);
+  });
+
   await Promise.all(pending);
   console.log(`\n${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);

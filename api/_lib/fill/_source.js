@@ -48,7 +48,14 @@ const WIKIDATA_SPARQL = 'https://query.wikidata.org/sparql';
 const WIKIPEDIA_API = 'https://en.wikipedia.org/w/api.php';
 const COORD_TOLERANCE_KM = 50;
 const UA = 'LunaBrain/1.0 (+https://travelify.io)';
-const CACHE_KEY = iata => 'dfill:src:air:' + iata;
+/**
+ * BUMP THE VERSION WHENEVER THE COMPARISON RULES CHANGE. A cached pair is a
+ * verdict, not raw data, so a verdict reached under the old rules would go on
+ * being served for thirty days after the rules improved. v2 is the territory
+ * rule of 14 Sep 2026: without the bump, the ten airports held that morning
+ * would have stayed held until October while the code that fixed them sat live.
+ */
+const CACHE_KEY = iata => 'dfill:src:air:v2:' + iata;
 /* Thirty days. Coordinates do not move, but an airport can gain a website, and
    a cached "the sources disagree" that never expires is wrong forever. */
 const CACHE_TTL = 60 * 60 * 24 * 30;
@@ -114,13 +121,44 @@ function tidyUrl(a, b) {
   return pick.replace(/\/+$/, '');
 }
 
+/**
+ * How this column already spells things, where the standard list disagrees.
+ *
+ * The names come from Intl's region list, which is CLDR. CLDR is right and also
+ * not what a UK travel agent writes: it gives "United States", "United Arab
+ * Emirates" and "Macao SAR China" where the 590 airports already in the table
+ * say USA, UAE and Hong Kong. Writing the CLDR spelling would put a second
+ * convention into a column that already has one, which is the thing the country
+ * rule below is careful to avoid.
+ *
+ * This is a rendering of a verified code, not a claim about the place. The fact
+ * is the ISO code both sources agreed on. How it is spelled in English is house
+ * style, and the house style here is the one Andy's own records set.
+ */
+const COUNTRY_NAME = {
+  US: 'USA',
+  AE: 'UAE',
+  MO: 'Macau',
+  VC: 'St Vincent and the Grenadines',
+};
+
 let _regionNames = null;
 function countryName(iso) {
+  const code = String(iso || '').toUpperCase();
+  if (!code) return '';
+  if (COUNTRY_NAME[code]) return COUNTRY_NAME[code];
   if (!_regionNames) {
     try { _regionNames = new Intl.DisplayNames(['en'], { type: 'region' }); }
     catch { _regionNames = { of: c => c }; }
   }
-  try { return _regionNames.of(String(iso).toUpperCase()) || ''; } catch { return ''; }
+  let name;
+  try { name = _regionNames.of(code) || ''; } catch { return ''; }
+  return name
+    .replace(/\s+SAR\s+China$/i, '')   // Hong Kong SAR China -> Hong Kong
+    .replace(/\bU\.S\./g, 'US')        // U.S. Virgin Islands -> US Virgin Islands
+    .replace(/\bSt\./g, 'St')           // UK English drops the stop
+    .replace(/\s*&\s*/g, ' and ')      // Turks & Caicos -> Turks and Caicos
+    .trim();
 }
 
 /**
@@ -154,12 +192,31 @@ export function agreedFields(oa, wd) {
   // code, not a third claim: the table already holds names rather than codes on
   // every record a person entered, and a column with both conventions in it is
   // no use to anyone.
+  //
+  // A DEPENDENT TERRITORY IS NOT A DISAGREEMENT. This blocked ten airports on
+  // 14 Sep 2026 with "they disagree: TC against GB" and nine others like it.
+  // Neither source was wrong. They were answering different questions:
+  // OurAirports records the ISO 3166-1 territory an airport sits in (TC, PR,
+  // GU, VG, VI, GP, MO, PF), and Wikidata's P17 records the sovereign state it
+  // belongs to (GB, US, FR, CN). Both true of Providenciales.
+  //
+  // So the comparison is against every ISO code Wikidata places the airport
+  // inside, its P131 chain as well as P17. Wikidata independently says
+  // Providenciales is in Turks and Caicos, so writing that is still two sources
+  // agreeing rather than a preference for one of them. An airport with no
+  // territory above it is unaffected: for Heathrow both answers are GB.
+  //
+  // The territory is also the answer the product needs. Nobody sells a holiday
+  // to "United Kingdom" meaning Providenciales.
   const oaCc = String(oa.country || '').toUpperCase();
   const wdCc = String(wd.countryCode || '').toUpperCase();
-  const ccAgree = !!oaCc && oaCc === wdCc;
+  const wdAll = wd.isoCodes instanceof Set && wd.isoCodes.size
+    ? wd.isoCodes
+    : new Set([wdCc].filter(Boolean));
+  const ccAgree = !!oaCc && wdAll.has(oaCc);
   note('country', ccAgree ? countryName(oaCc) : '',
-    !oaCc || !wdCc ? 'only one source names a country'
-      : 'they disagree: ' + oaCc + ' against ' + wdCc);
+    !oaCc || !wdAll.size ? 'only one source names a country'
+      : 'they disagree: ' + oaCc + ' against ' + [...wdAll].sort().join(' or '));
 
   // City served. Strict, and it misses often on purpose: Wikidata's P131 is the
   // administrative area, which is not the question being asked.
@@ -268,6 +325,21 @@ async function ourAirports(iatas, fetchImpl) {
  * than one distinct value across those rows is ambiguous, and ambiguous is
  * treated as not corroborated rather than resolved by picking the first.
  */
+/** "Point(lon lat)" as numbers, or null. */
+function parsePoint(wkt) {
+  const m = /Point\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/.exec(wkt || '');
+  return m ? { lon: parseFloat(m[1]), lat: parseFloat(m[2]) } : null;
+}
+
+/** Are all of these the same place, within the tolerance used everywhere else? */
+function onePlace(points) {
+  for (let i = 1; i < points.length; i++) {
+    const d = haversineKm(points[0].lat, points[0].lon, points[i].lat, points[i].lon);
+    if (d == null || d > COORD_TOLERANCE_KM) return false;
+  }
+  return true;
+}
+
 export function reconcileWikidata(json, iatas) {
   const rows = (json && json.results && json.results.bindings) || [];
   const acc = new Map();
@@ -276,12 +348,13 @@ export function reconcileWikidata(json, iatas) {
     const iata = g('iata').toUpperCase();
     if (!iata) continue;
     const cur = acc.get(iata) || {
-      entities: new Set(), names: new Set(), isos: new Set(),
+      entities: new Set(), names: new Set(), isos: new Set(), terrs: new Set(),
       cities: new Set(), sites: new Set(), arts: new Set(), coords: new Set(),
     };
     if (g('airport')) cur.entities.add(g('airport'));
     if (g('airportLabel')) cur.names.add(g('airportLabel'));
     if (g('iso')) cur.isos.add(g('iso').toUpperCase());
+    if (g('terr')) cur.terrs.add(g('terr').toUpperCase());
     if (g('placeLabel')) cur.cities.add(g('placeLabel'));
     if (g('site')) cur.sites.add(g('site'));
     if (g('article')) cur.arts.add(g('article'));
@@ -294,17 +367,26 @@ export function reconcileWikidata(json, iatas) {
   for (const iata of iatas) {
     const a = acc.get(String(iata).toUpperCase());
     if (!a) continue;
+    // Coordinates. One IATA code can belong to more than one Wikidata entity
+    // when a civil airport and a co-located air base are recorded separately,
+    // as at Faa'a, where PPT is on both the airport and the airbase half a
+    // kilometre away. Points that all sit inside the same tolerance are
+    // describing one place, so they are treated as one rather than discarded as
+    // ambiguous. Points genuinely far apart stay ambiguous and the record is
+    // held, which is the case this strictness was there for.
     let lat, lon;
-    const c = only(a.coords);
-    if (c) {
-      const m = /Point\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/.exec(c);
-      if (m) { lon = parseFloat(m[1]); lat = parseFloat(m[2]); }
-    }
+    const points = [...a.coords].map(parsePoint).filter(Boolean);
+    if (points.length && onePlace(points)) { lat = points[0].lat; lon = points[0].lon; }
+
     out.set(String(iata).toUpperCase(), {
       iata: String(iata).toUpperCase(),
       entity: only(a.entities).replace('http://www.wikidata.org/entity/', 'https://www.wikidata.org/wiki/'),
       name: only(a.names),
       countryCode: only(a.isos),
+      // Every ISO 3166-1 code Wikidata places this airport inside, sovereign
+      // state and dependent territory alike. See the country rule in
+      // agreedFields for why both are needed.
+      isoCodes: new Set([...a.isos, ...a.terrs]),
       city: only(a.cities),
       ambiguousCity: a.cities.size > 1,
       site: only(a.sites),
@@ -321,11 +403,12 @@ export function sparqlFor(iatas) {
     .filter(c => c.length === 3)
     .map(c => '"' + c + '"')
     .join(' ');
-  return `SELECT ?iata ?airport ?airportLabel ?iso ?placeLabel ?coord ?site ?article WHERE {
+  return `SELECT ?iata ?airport ?airportLabel ?iso ?terr ?placeLabel ?coord ?site ?article WHERE {
   VALUES ?iata { ${values} }
   ?airport wdt:P238 ?iata.
   OPTIONAL { ?airport wdt:P17 ?country. OPTIONAL { ?country wdt:P297 ?iso. } }
   OPTIONAL { ?airport wdt:P131 ?place. }
+  OPTIONAL { ?airport wdt:P131* ?admin. ?admin wdt:P297 ?terr. }
   OPTIONAL { ?airport wdt:P625 ?coord. }
   OPTIONAL { ?airport wdt:P856 ?site. }
   OPTIONAL { ?article schema:about ?airport ; schema:isPartOf <https://en.wikipedia.org/> . }
