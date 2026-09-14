@@ -415,9 +415,13 @@ async function payload(mod) {
   });
 
   t('what it recommends is work the runner can actually do', () => {
+    // This list used to include the two-source facts, back when no airport fixer
+    // existed and every one of them was a dead end. They are now the best free
+    // work on the board, so only the genuinely unrunnable stay barred: a
+    // photograph nobody has taken, and a code no dataset will hand us.
     const title = $('next').querySelector('.next-t').textContent;
-    assert.ok(!/Official Website|Image URLs|IATA|Latitude|Longitude|Wikipedia/.test(title),
-      'a two-source fact or a photograph is a dead end, not a recommendation: ' + title);
+    assert.ok(!/Image URLs|IATA/.test(title),
+      'a photograph or a code we cannot source is a dead end, not a recommendation: ' + title);
   });
 
   t('the recommendation says what will happen, not just what to press', () => {

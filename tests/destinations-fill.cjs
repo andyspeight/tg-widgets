@@ -51,7 +51,9 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
      held every one. So the content type is part of the question. */
 
   t('an airport fact the two datasets cover is runnable work', () => {
-    ['Latitude', 'Longitude', 'Country Text', 'City Served',
+    // City Served used to be on this list. It is not any more: see the test
+    // further down. The two sources answer different questions there.
+    ['Latitude', 'Longitude', 'Country Text',
      'Official Website', 'Wikipedia URL', 'Source 1 URL', 'Verified Date'].forEach(l => {
       assert.strictEqual(fillPlanFor(F(l, 'text'), 'airport').kind, 'fact',
         l + ' on an airport should be two-source work');
@@ -691,6 +693,21 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     });
     assert.strictEqual(seen.max_tokens, BUDGET.writeJson.maxTokens);
     assert.strictEqual(seen.output_config.effort, BUDGET.writeJson.effort);
+  });
+
+  t('a field the two sources cannot settle says so, rather than offering a job', () => {
+    // City Served on an airport: OurAirports names the city served, Wikidata the
+    // district it stands in. Zero of 100 of Andy's blank records agreed.
+    const p = fillPlanFor(F('City Served', 'text'), 'airport');
+    assert.strictEqual(p.kind, 'source', 'offering this would produce 362 holds and nothing else');
+    assert.match(p.why, /different questions/);
+    assert.doesNotMatch(p.why, /not built yet/, 'it is built, it just cannot answer this');
+  });
+
+  t('the airport fixer still runs for the fields it can settle', () => {
+    ['Country Text', 'Official Website', 'Wikipedia URL', 'Latitude'].forEach(l => {
+      assert.strictEqual(fillPlanFor(F(l, 'text'), 'airport').kind, 'fact', l);
+    });
   });
 
   await Promise.all(pending);

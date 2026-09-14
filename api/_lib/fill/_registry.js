@@ -217,6 +217,25 @@ function fixerExists(label, typeKey) {
  *
  * @returns {{kind:'derive'|'fact'|'write'|'source'|'manual', how?:object, brief?:string}}
  */
+/**
+ * Where the two sources we hold cannot settle the question, however well the
+ * fixer is written. This is not "not built yet". It is a different answer, and
+ * saying so saves Andy pressing a button that can only ever hold.
+ *
+ * City Served on an airport is the case that taught us. OurAirports records the
+ * city an airport SERVES and Wikidata's P131 records the district it SITS IN,
+ * and for any airport worth flying to those differ: Dublin sits in Fingal,
+ * Vienna in Schwechat, Rome in Fiumicino, Stockholm Arlanda in Sigtuna. Measured
+ * on 14 Sep 2026 against 100 of Andy's own blank records, the agreement rate was
+ * zero, so the job would have produced 362 holds and nothing else.
+ */
+const NO_SECOND_SOURCE = {
+  'airport:City Served':
+    'the two sources answer different questions here, one naming the city an airport '
+    + 'serves and the other the district it stands in, so Dublin reads as Fingal and '
+    + 'Rome as Fiumicino. This one needs a person or a third source',
+};
+
 export function fillPlanFor(field, typeKey) {
   const label = field && field.label;
   if (!label || NEVER.has(label)) return { kind: 'manual', why: 'not a field the runner writes' };
@@ -235,6 +254,8 @@ export function fillPlanFor(field, typeKey) {
     return { kind: 'derive', how };
   }
   if (FACT[label]) {
+    const blocked = NO_SECOND_SOURCE[typeKey + ':' + label];
+    if (blocked) return { kind: 'source', why: blocked };
     if (fixerExists(label, typeKey)) return { kind: 'fact', how: FACT[label], via: FACT[label].via };
     return {
       kind: 'source',
