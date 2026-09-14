@@ -1970,7 +1970,25 @@
        The real one is fetched on boot into ttiAppId. */
     const TG_TRAVELIFY_DEMO_APPID = '250';
     let ttiAppId = '';
+    /* Changes whenever the cache behind the preview has been replaced, so the
+       card cannot be served an edge copy from before the change. */
+    let previewNonce = String(Date.now());
+
     const appIdForPreview = () => ttiAppId || TG_TRAVELIFY_DEMO_APPID;
+
+    /* WHAT THE PRICE ACTUALLY DEPENDS ON.
+     *
+     * These settings change the SEARCH, not the filter. Offers are cache-only:
+     * the widget reads what the last search stored, so changing the party size
+     * or the length of stay cannot move a cached price and the card sits on the
+     * old one (Andy, 14 Sep 2026: "no matter what you put in the price never
+     * changes"). Only a re-test re-prices. Everything else — board basis, star
+     * rating, budget — filters the pool that is already there, and takes effect
+     * straight away. */
+    const SEARCH_FIELDS = ['type', 'adults', 'childAges', 'nights', 'DatesMin', 'DatesMax',
+      'currency', 'nationality', 'origins', 'cabinClasses', 'directOnly', 'ttiRadiusKm'];
+    const searchFingerprint = (c) => JSON.stringify(SEARCH_FIELDS.map((k) => (c || {})[k] ?? null));
+    let testedFingerprint = null;
 
     /** Is this widget selling a package rather than the hotel on its own?
      *
@@ -2295,6 +2313,31 @@
       return out;
     }
 
+    /* WHY THE PRICE DOES NOT MOVE.
+     *
+     * Offers are cache-only. The party size, the length of stay and the date
+     * window decide what we SEARCH for, so they cannot change a price that is
+     * already cached — only a re-test can. Without saying so, the agent changes
+     * a setting, watches the card sit on the old number, and reasonably
+     * concludes the setting does nothing (Andy, 14 Sep 2026). */
+    function paintSearchDrift() {
+      const el = $('ttiTestOut');
+      if (!el || el.hidden || testedFingerprint === null) return;
+      const existing = el.querySelector('#ttiDrift');
+      if (existing) existing.remove();
+      if (searchFingerprint(state.config) === testedFingerprint) return;
+      const note = document.createElement('div');
+      note.id = 'ttiDrift';
+      note.style.cssText = 'margin-top:10px;padding:8px;border-radius:6px;'
+        + 'background:var(--tgse-warning-bg,#fff8e6);color:var(--tgse-ink-2);font-size:12px;line-height:1.5';
+      note.innerHTML = '<strong>These prices are from the last test.</strong><br>'
+        + 'You have changed a setting that decides what we search for \u2014 the travellers, '
+        + 'the length of stay or the dates. Cached prices cannot change on their own, so press '
+        + '<strong>Test these codes</strong> again to re-price. Board basis, star rating and budget '
+        + 'are different: those filter what is already here and apply straight away.';
+      el.appendChild(note);
+    }
+
     function paintTtiSummary() {
       const el = $('ttiSummary');
       if (!el) return;
@@ -2420,7 +2463,7 @@
       // (Andy, 14 Sep 2026). Every place that names a type must name the same
       // one, and a test now checks all of them rather than just one.
       const base = {
-        tti: codes.join(','), appId: appIdForPreview(),
+        tti: codes.join(','), appId: appIdForPreview(), _: previewNonce,
         type: isPackageConfig(state.config) ? 'DynamicPackages' : 'Accommodation',
       };
       const ask = async (extra) => {
@@ -2575,10 +2618,17 @@
               // with no route from a given city is the likeliest reason a
               // package comes back empty, and this is the one-box fix.
               if (r.flyIntoAlt && r.flyIntoAlt.code) {
-                text += ' A bigger airport nearby is <strong>' + esc(r.flyIntoAlt.code) + '</strong>'
-                      + (r.flyIntoAlt.name ? ' (' + esc(r.flyIntoAlt.name) + ')' : '')
-                      + (Number.isFinite(r.flyIntoAlt.km) ? ', ' + r.flyIntoAlt.km + 'km' : '')
-                      + ', which may have more flights.';
+                // Say which it IS. Calling Tenerife Norte "a bigger airport
+                // nearby" when it was the small one 48km closer was wrong twice
+                // over and made the whole line untrustworthy.
+                const alt = r.flyIntoAlt;
+                text += (alt.why === 'closer'
+                  ? ' A smaller airport closer to the hotel is <strong>'
+                  : ' A bigger airport nearby is <strong>')
+                      + esc(alt.code) + '</strong>'
+                      + (alt.name ? ' (' + esc(alt.name) + ')' : '')
+                      + (Number.isFinite(alt.km) ? ', ' + alt.km + 'km' : '')
+                      + (alt.why === 'closer' ? '.' : ', which may have more flights.');
               }
               text += ' Put an airport code in the Fly into box to change it.</span>';
             }
@@ -2622,6 +2672,8 @@
                + '<span><span class="tti-test-code">' + esc(r.code) + '</span> \u2014 ' + text + '</span></div>';
         });
 
+        testedFingerprint = searchFingerprint(state.config);
+        previewNonce = String(Date.now());
         let head = '<div style="margin-bottom:6px"><strong>' + d.found + ' of ' + d.tested + '</strong> found'
                  + (d.cached ? ', ' + d.cached + ' cached' : '')
                  // A package costs one search per departure airport, so the
@@ -2650,7 +2702,10 @@
             // Those are different questions and only the second one can be
             // taken to Travelify, so show the actual address and let it be
             // opened.
-            const first = d.shape.imagePaths[0];
+            // Prefer a real gallery path. The walker also finds things like
+            // review.imageUrl, which is a TripAdvisor rating badge — offering
+            // that as "the first image" sends the wrong URL to Travelify.
+            const first = d.shape.imagePaths.find((x) => /^media\b/.test(x.path)) || d.shape.imagePaths[0];
             if (first && first.url) {
               bits.push('<strong>First image URL:</strong> '
                 + '<a href="' + esc(first.url) + '" target="_blank" rel="noopener" '
@@ -2669,6 +2724,7 @@
                + '<br>Send us this and we will map the missing bits exactly.</div>';
         }
         out.innerHTML = head + lines.join('') + diag;
+        paintSearchDrift();
         // CLOSE THE LOOP. "We cached it" and "the widget can see it" are two
         // different claims, and the gap between them has cost several rounds:
         // a cache full of offers the widget filters straight back out looks
@@ -3386,6 +3442,10 @@
       cfg.appId = appIdForPreview();
       cfg.apiKey = TG_TRAVELIFY_KEY;
       cfg.cacheMinutes = 0;
+      // Bypass the CDN as well as the browser. /api/cached-offers is edge
+      // cached for two minutes, which meant the card kept drawing the offers
+      // from BEFORE the test that had just replaced them.
+      cfg.previewNonce = previewNonce;
       // Editor-only preview flag. The widget reads this to skip eligibility,
       // frequency and trigger logic for popup template, opening immediately
       // with the saved layout. Faux-site mockup wraps the mount so popup
@@ -3449,6 +3509,7 @@
             renderTtiRows();
           }
           if (key === 'emptyBehaviour') updateEmptyDetailsVisibility();
+          paintSearchDrift();
           markDirtyAndPreview();
         };
         el.addEventListener('change', handler);

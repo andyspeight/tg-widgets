@@ -169,11 +169,13 @@ export function resolveArrivalAirport({ dst, lat, lng, ctry } = {}) {
     return {
       ...chosen,
       source: hubWins ? 'nearest-hub' : 'nearest-in-country',
-      // The alternative is OFFERED, never substituted. A medium airport has
-      // thin routes, and a package from Aberdeen to Bournemouth may simply not
-      // exist while Aberdeen to Gatwick does — a real supplier answer the agent
-      // can act on with one box, rather than one we quietly decide for them.
-      ...(other && other.code !== chosen.code ? { alt: other } : {}),
+      // The alternative is OFFERED, never substituted. But it must be
+      // described correctly: when the hub won, the other one is CLOSER and
+      // smaller; when the nearest won, it is BIGGER and further. Calling
+      // Tenerife Norte "a bigger airport nearby" when it is the small one 48km
+      // closer was wrong on both counts (Andy, 14 Sep 2026).
+      ...(other && other.code !== chosen.code
+        ? { alt: { ...other, why: hubWins ? 'closer' : 'bigger' } } : {}),
     };
   }
 

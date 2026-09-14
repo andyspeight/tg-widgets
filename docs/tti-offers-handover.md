@@ -624,6 +624,30 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### The editor must show the cache as it is NOW
+
+`/api/cached-offers` answers `s-maxage=120, stale-while-revalidate=300`. That is
+right for visitors and wrong for the one person who has just replaced the data:
+after a Test the panel read fresh results while the card beside it drew a CDN
+copy from before them, so the text said Tenerife and the card said Newquay
+(Andy, 14 Sep 2026). The editor sets `previewNonce` on the preview config and
+`_` on its own read-back; the widget forwards it as a query param. **Only the
+editor ever sets it**, so a live widget leaves the edge cache alone.
+
+### Why a cached price does not move
+
+Andy, 14 Sep 2026: *"no matter what you put in the price never changes."* True,
+and unavoidable. Offers are cache-only, so:
+
+- **Travellers, nights, the date window, origins, currency** decide what we
+  SEARCH for. They cannot re-price what is already cached — only a re-test can.
+- **Board basis, star rating, budget, duration** filter the pool that is already
+  there, and take effect immediately.
+
+The editor fingerprints the first group at test time and shows a notice when it
+drifts, because without one the agent changes a setting, watches the card sit on
+the old number, and reasonably concludes the setting does nothing.
+
 ### Known gaps on the package card
 
 - **No carrier, stops or flight times.** We cache the accommodation result and

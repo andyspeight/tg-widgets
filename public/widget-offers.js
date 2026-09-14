@@ -6211,6 +6211,7 @@
 
         dedupeStrategy: c.dedupeStrategy || 'hotel',
         cacheMinutes: typeof c.cacheMinutes === 'number' ? c.cacheMinutes : 15,
+        previewNonce: c.previewNonce || '',
         emptyBehaviour: c.emptyBehaviour || 'show',
         // Author-configurable; blank falls back to the localised default at render.
         emptyHeading: c.emptyHeading || '',
@@ -6860,6 +6861,17 @@
       // the board then throws away, and it draws an empty board while the cache
       // holds hundreds of usable ones.
       if (this._needsFlightRows()) q.set('hasFlight', '1');
+      // AN EDITOR PREVIEW MUST SEE THE CACHE AS IT IS NOW.
+      //
+      // /api/cached-offers answers with s-maxage=120, stale-while-revalidate=300,
+      // which is right for visitors and wrong for the one person who just
+      // changed the data. After a Test the panel read fresh results while the
+      // card beside it drew a CDN copy from before them — it said the package
+      // flew into Tenerife and showed Newquay (Andy, 14 Sep 2026).
+      //
+      // Only the editor ever sets this, so a live widget keeps the edge cache
+      // exactly as it is.
+      if (this.cfg.previewNonce) q.set('_', String(this.cfg.previewNonce).slice(0, 32));
       // A departure board's rows are FLIGHTS: time, route, carrier, stops,
       // fare. Board basis, star rating and nights describe a hotel, so they
       // cannot describe anything on that board — sending them only shrinks the
