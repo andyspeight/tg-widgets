@@ -51,11 +51,16 @@ const UA = 'LunaBrain/1.0 (+https://travelify.io)';
 /**
  * BUMP THE VERSION WHENEVER THE COMPARISON RULES CHANGE. A cached pair is a
  * verdict, not raw data, so a verdict reached under the old rules would go on
- * being served for thirty days after the rules improved. v2 is the territory
- * rule of 14 Sep 2026: without the bump, the ten airports held that morning
- * would have stayed held until October while the code that fixed them sat live.
+ * being served for thirty days after the rules improved.
+ *
+ *   v2  the territory rule, 14 Sep 2026. Without the bump the ten airports held
+ *       that morning would have stayed held until October while the code that
+ *       fixed them sat live.
+ *   v3  the third opinion on official websites, same day. Every one of the 291
+ *       airports still missing one already carries a v2 verdict saying the two
+ *       sources disagreed, and those would have been served straight back.
  */
-const CACHE_KEY = iata => 'dfill:src:air:v2:' + iata;
+const CACHE_KEY = iata => 'dfill:src:air:v3:' + iata;
 /* Thirty days. Coordinates do not move, but an airport can gain a website, and
    a cached "the sources disagree" that never expires is wrong forever. */
 const CACHE_TTL = 60 * 60 * 24 * 30;
@@ -141,6 +146,22 @@ const COUNTRY_NAME = {
   MO: 'Macau',
   VC: 'St Vincent and the Grenadines',
 };
+
+/**
+ * The same site, or one sitting under the other. Bari's airport is written
+ * aeroportidipuglia.it by one source and bari.airports.aeroportidipuglia.it by
+ * another, and those are the same place.
+ *
+ * Deliberately NOT a registrable-domain comparison. Doing that properly needs a
+ * public suffix list, and doing it naively by taking the last two labels makes
+ * rac.co.rw and kenyaairports.co.ke both "co.rw" and "co.ke", which would match
+ * unrelated sites under the same country code and quietly break the one rule
+ * this whole file exists to keep.
+ */
+export function sameSite(a, b) {
+  if (!a || !b) return false;
+  return a === b || a.endsWith('.' + b) || b.endsWith('.' + a);
+}
 
 let _regionNames = null;
 function countryName(iso) {
@@ -233,7 +254,13 @@ export function agreedFields(oa, wd) {
   // Official website. Compared by host, because the same site is written
   // http://www.x.com/ by one and https://x.com by the other.
   const oaHost = siteHost(oa.site), wdHost = siteHost(wd.site);
-  const siteAgree = !!oaHost && oaHost === wdHost;
+  const siteAgree = sameSite(oaHost, wdHost);
+  // Both have one and they differ. A third opinion can settle it, so the
+  // question is held open rather than closed. warmAirports asks the airport's
+  // own Wikipedia article, which is where this becomes two of three.
+  if (!siteAgree && oaHost && wdHost && wd.wiki) {
+    pending.site = { oa: oa.site, wd: wd.site, article: wd.wiki };
+  }
   note('site', siteAgree ? tidyUrl(oa.site, wd.site) : '',
     !oaHost || !wdHost ? 'only one source has an official website'
       : 'they point at different sites: ' + oaHost + ' and ' + wdHost);
@@ -467,6 +494,89 @@ async function resolveWikiTitles(titles, fetchImpl) {
 }
 
 /**
+ * The website an article STATES ITSELF, from its infobox wikitext. Pure.
+ *
+ * THE TEMPLATE CHECK IS THE WHOLE POINT. Many airport articles write
+ * "| website = {{Official URL}}", and that template reads the value straight
+ * out of Wikidata. Taking it would be Wikidata agreeing with Wikidata, dressed
+ * up as a third source, and it would put a single-sourced value into a column
+ * whose entire promise is that two independent sources agreed. Measured on
+ * 14 Sep 2026 it was one article in twenty-three, so the trap is real and rare,
+ * which is the worst combination: rare enough to miss, real enough to matter.
+ *
+ * Only a literal URL written into the article counts.
+ */
+export function localSiteFromWikitext(wikitext) {
+  const m = /^[ \t]*\|[ \t]*website[ \t]*=[ \t]*(.*)$/im.exec(wikitext || '');
+  if (!m) return { url: '', why: 'the article lists no website' };
+  const v = m[1].trim();
+  if (!v) return { url: '', why: 'the article lists no website' };
+  if (/^\{\{\s*(official url|official website|url)\s*\}\}$/i.test(v)) {
+    return { url: '', why: 'the article takes its website from Wikidata, so it is not a third opinion' };
+  }
+  // {{URL|x}}, {{URL|url=x}}, {{Official website|url=x}}, [https://x text], or a bare URL.
+  const first = re => {
+    const x = re.exec(v);
+    return x ? String(x[1]).replace(/^\s*(?:url|1)\s*=\s*/i, '').trim() : '';
+  };
+  let u = first(/\{\{\s*(?:URL|official website)\s*\|\s*([^|}]+)/i)
+       || first(/\[\s*(https?:\/\/[^\s\]]+)/i)
+       || first(/^(https?:\/\/\S+)/i);
+  if (!u) return { url: '', why: 'the article states its website in a form we cannot read' };
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/\//, '');
+  try { new URL(u); } catch { return { url: '', why: 'the article states an unusable website' }; }
+  return { url: u, why: '' };
+}
+
+/**
+ * Lead-section wikitext for a batch of articles, keyed by the title asked for.
+ *
+ * Section 0 only, because the infobox lives there and a full airport article is
+ * several hundred kilobytes. Twenty titles came back in about seventeen.
+ */
+async function resolveArticleSites(articleUrls, fetchImpl) {
+  const titles = [...new Set(articleUrls.map(wikiTitle).filter(Boolean))];
+  const out = new Map();
+  for (let i = 0; i < titles.length; i += 20) {
+    const chunk = titles.slice(i, i + 20);
+    const url = WIKIPEDIA_API + '?action=query&format=json&formatversion=2&redirects=1' +
+      '&prop=revisions&rvprop=content&rvslots=main&rvsection=0&origin=*&titles=' +
+      encodeURIComponent(chunk.join('|'));
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 20000);
+    try {
+      const r = await (fetchImpl || fetch)(url, { signal: ctrl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } });
+      if (!r || !r.ok) continue;
+      mergeArticleText(await r.json(), chunk, out);
+    } catch { /* unresolved titles simply leave the record held */ }
+    finally { clearTimeout(t); }
+  }
+  return out;
+}
+
+/**
+ * Fold one wikitext answer back onto the titles asked for, following the
+ * normalisation and redirects the API reports. Pure.
+ */
+export function mergeArticleText(json, asked, out) {
+  const q = (json && json.query) || {};
+  const norm = new Map((q.normalized || []).map(n => [n.from, n.to]));
+  const red = new Map((q.redirects || []).map(n => [n.from, n.to]));
+  const byTitle = new Map((q.pages || []).map(p => [
+    p.title,
+    (p.revisions && p.revisions[0] && p.revisions[0].slots &&
+     p.revisions[0].slots.main && p.revisions[0].slots.main.content) || '',
+  ]));
+  for (const t of asked) {
+    let k = norm.get(t) || t;
+    k = red.get(k) || k;
+    const text = byTitle.get(k);
+    if (text) out.set(t, text);
+  }
+  return out;
+}
+
+/**
  * Fold one API answer into the title -> page map. Pure, so the redirect logic
  * is testable without the network.
  */
@@ -593,13 +703,55 @@ export async function warmAirports(iataList, deps = {}) {
       } else if (a && b) {
         p.why.wiki = 'they name two different articles, not one under another name';
       }
-      delete p.pending;
+      delete p.pending.wiki;
+    }
+  }
+
+  // THE THIRD OPINION, and the only place this file asks for one.
+  //
+  // Where both sources have an official website and the two differ, the
+  // airport's own Wikipedia article is asked to break the tie. Two of three
+  // agreeing is still two independent sources agreeing, which is the rule, so
+  // long as the third really is independent. Measured over 23 real clashes on
+  // 14 Sep 2026 it backed OurAirports 4 times and Wikidata 11, and named a
+  // different site again 5 times, so it is genuinely its own opinion rather
+  // than a copy of either. It settled 15 of the 22 it could see.
+  //
+  // Only a website written into the article counts. See localSiteFromWikitext
+  // for why a template that reads Wikidata is refused rather than trusted.
+  const ties = missing.filter(i => {
+    const p = _pairs.get(i);
+    return p && p.ok && p.pending && p.pending.site;
+  });
+  if (ties.length) {
+    const text = await (deps.resolveArticles || resolveArticleSites)(
+      ties.map(i => _pairs.get(i).pending.site.article), deps.fetchImpl);
+    for (const iata of ties) {
+      const p = _pairs.get(iata);
+      const t = p.pending.site;
+      const wt = text.get(wikiTitle(t.article));
+      const third = wt ? localSiteFromWikitext(wt) : { url: '', why: 'the article could not be read' };
+      const h = siteHost(third.url), ho = siteHost(t.oa), hw = siteHost(t.wd);
+      const backs = sameSite(h, ho) ? t.oa : sameSite(h, hw) ? t.wd : '';
+      if (backs) {
+        p.agreed.site = tidyUrl(backs, third.url);
+        p.brokeTieOn = p.brokeTieOn || {};
+        p.brokeTieOn.site = t.article;
+        delete p.why.site;
+      } else if (h) {
+        p.why.site = 'all three sources name a different site: ' + ho + ', ' + hw + ' and ' + h;
+      } else {
+        p.why.site = 'they point at different sites, ' + ho + ' and ' + hw +
+          ', and ' + third.why;
+      }
+      delete p.pending.site;
     }
   }
 
   for (const iata of missing) {
     const pair = _pairs.get(iata);
     if (!pair) continue;
+    if (pair.pending && !Object.keys(pair.pending).length) delete pair.pending;
     // A settled verdict is cached, agreement or not: re-asking a source that
     // has never heard of a code, once a minute, helps nobody. A transient
     // failure never reaches here, so it is never cached.
@@ -644,6 +796,15 @@ export function sourceAirportField({ field, iata, nowIso }) {
   const value = pair.agreed[key];
   if (value === undefined || value === null || value === '') {
     return { ok: false, why: (pair.why && pair.why[key]) || 'the two sources do not agree on it' };
+  }
+  // Say which two of the three agreed, so a value settled by a tie-break can
+  // never be mistaken later for one the first two sources agreed on outright.
+  const tie = pair.brokeTieOn && pair.brokeTieOn[key];
+  if (tie) {
+    return { ok: true, value, evidence:
+      'OurAirports and Wikidata named different sites for IATA code ' + code +
+      '. The Wikipedia article ' + tie + ' states ' + JSON.stringify(value) +
+      ', which settles it two to one.' };
   }
   return { ok: true, value, evidence: both + ' Both give ' + JSON.stringify(value) + '.' };
 }

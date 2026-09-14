@@ -42,7 +42,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
 
 (async () => {
   const {
-    agreedFields, siteHost, wikiKey, reconcileWikidata,
+    agreedFields, siteHost, wikiKey, reconcileWikidata, localSiteFromWikitext, sameSite,
     warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor,
     wikiTitle, mergeWikiAnswer, articleUrl,
   } = await load('_source.js');
@@ -319,6 +319,9 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     cacheSet: async (iata, pair) => { CACHE.set(iata, pair); },
     ourAirports: async (codes) => new Map(codes.filter(c => OA[c]).map(c => [c, OA[c]])),
     wikidata: async (codes) => new Map(codes.filter(c => WD[c]).map(c => [c, WD[c]])),
+    // No article text. Without this the tie-break reaches the live Wikipedia
+    // API, and a test suite that touches the network is not a test suite.
+    resolveArticles: async () => new Map(),
   };
 
   _resetSourceCache();
@@ -552,6 +555,101 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     const wd = m.get('PLS');
     assert.strictEqual(wd.countryCode, 'GB');
     assert.deepStrictEqual([...wd.isoCodes].sort(), ['GB', 'TC']);
+  });
+
+  /* ---------------------------------------------------------------- */
+  console.log('\nThe third opinion, when two sources name different sites');
+
+  const ARTICLE = 'https://en.wikipedia.org/wiki/Munich_Airport';
+  const clash = (wikitext) => ({
+    cacheGet: async () => null, cacheSet: async () => {},
+    ourAirports: async () => ({ reachable: true, map: new Map([['MUC', OA.MUC]]) }),
+    wikidata: async () => ({ reachable: true, map: new Map([['MUC', WD.MUC]]) }),
+    resolveArticles: async () => new Map([['Munich Airport', wikitext]]),
+  });
+
+  await at('the article backing one of the two settles it, two to one', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], clash('| website = {{URL|www.munich-airport.de}}'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, true, r.why);
+    assert.match(r.value, /munich-airport\.de/);
+    assert.match(r.evidence, /settles it two to one/);
+    assert.match(r.evidence, /Munich_Airport/, 'the third source has to be named');
+  });
+
+  await at('it can back OurAirports just as readily', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], clash('| website = [https://www.munich-airport.com/ Munich]'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, true, r.why);
+    assert.match(r.value, /munich-airport\.com/);
+  });
+
+  /* THE ONE THAT MATTERS. {{Official URL}} reads the value out of Wikidata, so
+     taking it would be Wikidata agreeing with itself and a single-sourced value
+     written into a column that promises two. */
+  await at('an article that takes its website from Wikidata is refused', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], clash('| website = {{Official URL}}'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, false, 'Wikidata agreeing with Wikidata is not two sources');
+    assert.match(r.why, /from Wikidata/);
+  });
+
+  await at('three different answers settle nothing', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], clash('| website = {{URL|www.somewhere-else.de}}'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /all three sources name a different site/);
+  });
+
+  await at('an article with no website leaves it held, and says so', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], clash('| website =\n| iata = MUC'));
+    const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
+    assert.strictEqual(r.ok, false);
+    assert.match(r.why, /lists no website/);
+  });
+
+  await at('breaking the site tie does not disturb the other fields', async () => {
+    _resetSourceCache();
+    await warmAirports(['MUC'], clash('| website = {{URL|www.munich-airport.de}}'));
+    const lat = sourceAirportField({ field: F('Latitude'), iata: 'MUC' });
+    assert.strictEqual(lat.ok, true, lat.why);
+    assert.match(lat.evidence, /OurAirports and Wikidata agree/,
+      'a field the first two agreed on must not be relabelled as a tie-break');
+  });
+
+  t('a website written into the article is read, however it is wrapped', () => {
+    const cases = [
+      ['| website = {{URL|www.x.com}}', 'https://www.x.com'],
+      ['| website = {{URL|url=http://x.com/a}}', 'http://x.com/a'],
+      ['| website = {{Official website |url=http://x.com/a |name=X}}', 'http://x.com/a'],
+      ['| website = [https://x.com/a X]', 'https://x.com/a'],
+      ['| website = https://x.com/a', 'https://x.com/a'],
+    ];
+    for (const [wt, want] of cases) {
+      assert.strictEqual(localSiteFromWikitext(wt).url, want, wt);
+    }
+  });
+
+  t('anything that resolves from Wikidata reads as no third opinion', () => {
+    ['{{Official URL}}', '{{Official website}}', '{{URL}}'].forEach(v => {
+      const out = localSiteFromWikitext('| website = ' + v);
+      assert.strictEqual(out.url, '', v + ' comes from Wikidata');
+      assert.match(out.why, /from Wikidata/);
+    });
+  });
+
+  t('a site sitting under another is the same site, and unrelated ones are not', () => {
+    assert.ok(sameSite('bari.airports.aeroportidipuglia.it', 'aeroportidipuglia.it'));
+    assert.ok(sameSite('x.com', 'x.com'));
+    assert.ok(!sameSite('rac.co.rw', 'kenyaairports.co.ke'),
+      'two country-code domains must never be folded together');
+    assert.ok(!sameSite('swedavia.se', 'swedavia.com'));
+    assert.ok(!sameSite('', 'x.com'));
   });
 
   await Promise.all(pending);
