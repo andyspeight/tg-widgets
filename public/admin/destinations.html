@@ -1523,6 +1523,14 @@ a.nm:hover span{text-decoration:underline}
       bits.push('<span>All ' + n(tally.held) + ' were held.' +
         (tally.topReason ? ' ' + esc(tally.topReason.replace(/^./, function (c) { return c.toUpperCase(); })) + '.' : '') +
         ' Nothing was changed in Airtable.</span>');
+      // A run where every record came back with an answer has nothing left to
+      // give. Saying so stops the obvious next move, which is to press the same
+      // button again and wait for a different result. Andy did exactly that
+      // twice on 14 Sep 2026, because the button still read "Fill all 182".
+      if (tally.asked && tally.held >= tally.asked) {
+        bits.push('<span>Every one of them has been looked at and settled, so pressing again gives the same answer. ' +
+          'This job has gone as far as the sources can take it.</span>');
+      }
     } else if (tally && tally.saved) {
       bits.push('<b style="color:var(--ok)">That run saved ' + n(tally.saved) + '.</b>');
       if (tally.held) bits.push('<span>' + n(tally.held) + ' held, listed under Held aside.</span>');

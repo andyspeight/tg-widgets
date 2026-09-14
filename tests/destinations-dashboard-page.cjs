@@ -726,6 +726,11 @@ async function payload(mod) {
       'one save this morning must not hide three holds this afternoon: ' + bar);
     assert.ok(!/Nothing running\./.test(bar), 'a failed run is not "nothing running"');
 
+    // Two of the three came back. The third has no outcome yet, so the job is
+    // NOT finished and must not be described as such.
+    assert.ok(!/gone as far as the sources can take it/i.test(bar),
+      'a partial run must not be reported as exhausted: ' + bar);
+
     // Only THIS press. Three earlier holds on the same records were being added
     // in, so a run of three reported eight held.
     assert.match(bar, /All 2 were held/,
@@ -1047,6 +1052,80 @@ async function payload(mod) {
       'same dishonesty in a quieter form: ' + blocked);
   });
 
+
+  /* 14 Sep 2026, twice. Official Website ran out of airports it could settle,
+     and the button still said "Fill all 182", so the obvious next move was to
+     press it again and get the identical 182 holds. */
+
+  t('a run where every record settled says the job is finished', async () => {
+    const ap = data.types.find(x => x.key === 'airport');
+    const idx = ap.fields.findIndex(f => f.label === 'Official Website');
+    const gaps = data.records
+      .filter(r => r.type === 'airport' &&
+        (r.missing.indexOf(idx) !== -1 || r.broken.indexOf(idx) !== -1))
+      .map(r => r.id);
+    assert.ok(gaps.length, 'expected airports missing a website');
+
+    const d5 = new JSDOM(fs.readFileSync(HTML, 'utf8'), {
+      runScripts: 'dangerously',
+      url: 'https://tg-widgets.vercel.app/admin/destinations',
+      virtualConsole: new (require('jsdom').VirtualConsole)(),
+      beforeParse(w) {
+        w.Element.prototype.scrollIntoView = function () {};
+        w.__pressed = false;
+        w.fetch = (url, opts) => {
+          if (String(url).includes('destinations-fill')) {
+            if (opts && opts.body) {
+              const b = JSON.parse(opts.body);
+              if (b.recordIds) { w.__asked = b.recordIds; w.__pressed = true; }
+            }
+            const now = new Date().toISOString();
+            const asked = w.__asked || [];
+            const p = {
+              settings: { capUsd: 10, running: false },
+              budget: { capUsd: 10, spentUsd: 0, remainingUsd: 10, perItemUsd: 0.05,
+                        roomForPaidWork: true, itemsAffordable: 200 },
+              pending: 0, run: {},
+              savedToday: 0,
+              heldToday: w.__pressed ? asked.length : 0,
+              heldCount: w.__pressed ? asked.length : 0,
+              // Every record asked for came back held, and settled.
+              held: w.__pressed ? asked.map((id, i) => ({
+                place: 'Airport ' + i, field: 'Official Website', type: 'airport',
+                recordId: id, at: now,
+                reason: 'only one source has an official website' })) : [],
+              saved: [], recent: [],
+            };
+            const body = JSON.stringify(p);
+            return Promise.resolve({ ok: true, status: 200,
+              text: () => Promise.resolve(body), json: () => Promise.resolve(p) });
+          }
+          return Promise.resolve({ ok: true, status: 200,
+            text: () => Promise.resolve(JSON.stringify(data)), json: () => Promise.resolve(data) });
+        };
+        w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+        w.confirm = () => true; w.alert = () => {};
+        w.URL.createObjectURL = () => 'blob:mock'; w.URL.revokeObjectURL = () => {};
+      },
+    });
+    await new Promise(r => d5.window.addEventListener('load', r));
+    await new Promise(r => setTimeout(r, 80));
+    const dd = d5.window.document;
+    const more = dd.getElementById('jobs-more');
+    if (more) more.dispatchEvent(new d5.window.Event('click', { bubbles: true }));
+    const row = [...dd.querySelectorAll('#jobs .job:not(.is-off)')]
+      .find(r => /Official Website · airports/i.test(r.querySelector('.job-t').textContent));
+    assert.ok(row, 'the fixture should offer Official Website on airports');
+    row.querySelector('[data-job]').dispatchEvent(new d5.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 100));
+    dd.getElementById('jv-doall').dispatchEvent(new d5.window.Event('click', { bubbles: true }));
+    await new Promise(r => setTimeout(r, 200));
+
+    const bar = dd.getElementById('run-l').textContent;
+    assert.match(bar, /saved nothing/i, bar);
+    assert.match(bar, /gone as far as the sources can take it/i,
+      'pressing the same button again is the obvious next move unless the page says not to: ' + bar);
+  });
 
   await Promise.all(pending);
 
