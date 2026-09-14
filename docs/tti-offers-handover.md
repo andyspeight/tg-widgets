@@ -404,22 +404,54 @@ it encodes are the ones that fail silently rather than loudly:
   and stops at once. A 417 is flagged as supplier-side so a sweep does not keep
   retrying a sold-out property.
 
-### What is built, and the one thing that is not
+### What is built
 
-Built and proven on the live service: the search client, the criteria builder,
-the result normaliser, the per-property cache write, the editor, and the widget
-read path.
+All of it, and the nightly sweep is on the same path as the Test button.
 
-**`api/cron/refresh-tti-offers.js` is STILL on the old `widgetsvc/traveloffers`
-path.** It is the last piece, and it is not harmless while it waits: it writes
-the same keys the Test button writes, so the first nightly run would OVERWRITE
-a good cache with the country-wide sieve that never found the property. Either
-move it over or stop it before it next runs.
+- The search client, the criteria builder, the result normaliser, the
+  per-property cache write, the editor, the widget read path. Proven: Andy
+  watched a real Hilton Bournemouth offer cache and render.
+- `api/cron/refresh-tti-offers.js` now runs that same search. It carries the
+  API key as well as the App ID, because Token auth needs both.
+- Dynamic packaging, built from the DP deeplink Andy supplied (`org`, `dst`,
+  `dir`) plus the docs. The hotel half is IDENTICAL to a plain accommodation
+  search — a test compares the two objects — and only the flight half is new.
+  Its field names are INFERRED, not taken from a worked example, so the first
+  real DP test either works or gets Travelify's own words about a field. That
+  is the loop that settled `CustomerIP`.
 
-It needs one decision that the Test button did not: a nightly job has no agent,
-so no customer address, and `CustomerIP` is required. The options are a value
-configured per deployment, the server's own egress address, or whatever
-Travelify considers correct for server-to-server use.
+### The cron will not run without a customer address
+
+`TTI_CUSTOMER_IP` on the deployment. Every Travelify search requires one and a
+cron has no visitor to take it from.
+
+**It is never invented.** The field feeds geo and fraud checks, so a wrong value
+runs the whole sweep in the wrong market and caches prices for the wrong place —
+which looks exactly like working. Unset, the sweep writes nothing and says why,
+so the cache keeps whatever is in it. That is the safe direction, and it is why
+the widget was not at risk the night it went live.
+
+Worth asking Travelify what address they want for server-to-server searches,
+since it decides which market the prices come back in.
+
+### Who can have it
+
+**Not sold on any plan.** Every tier is 0 in `PLAN_WIDGET_LIMITS` and in the
+dashboard registry. The only way in is a DIRECT GRANT: an enabled Client
+Entitlements row sourced `Add-On` or `Manual Override`.
+
+That mechanism already existed and was only wired for contracting. Widgets now
+honour it in both places that decide — `resolveEntitlements` for the dashboard
+and the save gate in `api/widget-config.js` — so the two agree about who can
+create what. A `Package Default` row is deliberately NOT an override: it only
+mirrors the plan, and a stale one would keep granting a widget after the package
+stopped including it.
+
+MT Holidays (`recO0O3LMBvScaPb0`) holds the only grant. Catalogue item
+`widget-tti-offers` (`rec6S3tManU6YoTKj`), active, in no package.
+
+When it goes on sale: set the tiers and add it to the package in Control. The
+grant keeps working either way.
 
 ### Things that failed quietly, and are now guarded
 
@@ -451,20 +483,15 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 
 ## Next steps
 
-1. **Move the cron onto `api/_lib/offers/travelify-search.js`**, or disable it
-   until then. As it stands its first run overwrites good cached offers with
-   the old country-wide result. This is the only urgent item.
-2. **Decide the cron's `CustomerIP`**, per the note above. It cannot run
-   without one.
-3. **Dynamic packaging.** The editor offers it and nothing supports it yet: a
-   DP search needs `flightSearchCriteria` alongside the accommodation criteria,
-   and both selection objects at every later stage. Until it is built, both the
-   widget and the sweep speak Accommodation only.
-4. **Decide what "from" means.** Every search is one stay — currently 30 days
-   out, 7 nights, matching the `frd=30&dur=7` the existing deeplinks use. A
-   true from-price across a spread of dates multiplies the nightly search count
-   by however many dates are probed, so it is a budget decision rather than a
-   code one.
-5. **A hotel with no availability stays hidden** (Andy, 12 Sep 2026). An
-   enquire state is a different product and needs a card state designing across
-   every template.
+1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
+   should start running. Until then it skips, safely.
+2. **Test a dynamic package.** The flight field names are inferred; the first
+   real test either works or names the field Travelify wants.
+3. **Decide what "from" means.** Every search is one stay, currently 30 days out
+   and 7 nights, matching the `frd=30&dur=7` the deeplinks use. A true from-price
+   across a spread of dates multiplies the nightly search count by however many
+   dates are probed, so it is a budget decision rather than a code one.
+4. **A hotel with no availability stays hidden** (Andy, 12 Sep 2026). An enquire
+   state is a different product and needs a card state across every template.
+5. **The old `Hotel Offers` WidgetType option** is still in Airtable, unused.
+   The API cannot remove a select option, so it needs deleting by hand.
