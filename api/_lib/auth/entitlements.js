@@ -87,10 +87,21 @@ export function resolveEntitlements({
   const entitledSlugs = new Set();
   const entitledCodeSet = new Set();
   const entitledContractingCodes = new Set();
+  // Widgets granted to THIS client directly rather than by their package: a
+  // row whose source is Add-On or Manual Override. The plan pass below cannot
+  // see these — that is the point of them — so they are folded in afterwards,
+  // exactly as contracting already is.
+  const entitledAddOnCodes = new Set();
   for (const ent of entitlements) {
     const linked = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
     if (!linked.includes(clientRecordId)) continue;
     if (!ent.fields[CLIENT_ENTITLEMENTS.fields.enabled]) continue;
+    const source = selectName(ent.fields[CLIENT_ENTITLEMENTS.fields.source]);
+    // A Package Default row only mirrors the plan, so it must NOT act as an
+    // override — otherwise a stale row would keep granting a widget after the
+    // client's package stopped including it.
+    const isDirectGrant = source === CLIENT_ENTITLEMENTS.sources.ADD_ON
+                       || source === CLIENT_ENTITLEMENTS.sources.MANUAL_OVERRIDE;
     const cats = ent.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
     for (const cId of cats) {
       const slug = slugByCatalogueId.get(cId);
@@ -99,6 +110,7 @@ export function resolveEntitlements({
       if (code) {
         entitledCodeSet.add(code);
         if (contractingCatalogueIds.has(cId)) entitledContractingCodes.add(code);
+        else if (isDirectGrant) entitledAddOnCodes.add(code);
       }
     }
   }
@@ -141,6 +153,11 @@ export function resolveEntitlements({
   // active code so this is a no-op for them, and a client with contracting
   // switched off gets nothing here and is still refused, exactly as intended.
   for (const code of entitledContractingCodes) widgetCodes.add(code);
+  // And the same for a widget granted to this client alone. This is how a
+  // product reaches ONE client before it is sold on any plan: the catalogue
+  // item is active, no package includes it, and a single Add-On row opens it
+  // for them. Staff already hold every active code, so this is a no-op there.
+  for (const code of entitledAddOnCodes) widgetCodes.add(code);
   const entitledWidgetCodes = Array.from(widgetCodes);
 
   // Launchpad slugs. Travelgenix staff in their OWN account see every active

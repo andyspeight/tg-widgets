@@ -119,7 +119,15 @@
         tab: 'content',
         target: '#ttiRows',
         title: 'List your hotels',
-        body: 'Two things per hotel: its Travelify property code, and the two-letter country it is in. The code picks the hotel, the country tells us where to look for it. These are the only hotels the widget will ever show. Press Test to check the codes return real prices before you save, then we refresh them overnight so the card a visitor sees is a real price, not a guess.',
+        body: 'Two things per hotel: its Travelify property code, and the two-letter country it is in. The code picks the hotel, the country says which part of the world to look in. These are the only hotels this widget will ever show. If you already have a working deeplink for a hotel you can paste it above instead and it fills both in, plus the exact coordinates, which narrows the search to that town.',
+        placement: 'right',
+        beforeShow: function () { openSectionByTitle('Your properties'); }
+      },
+      {
+        tab: 'content',
+        target: '#ttiTest',
+        title: 'Check them before you save',
+        body: 'Test runs a real Travelify search for each hotel and caches what comes back, so the preview below fills with real prices straight away. It also tells you if a code returns nothing, which is far better found now than from an empty widget tomorrow. After this the overnight job keeps them fresh.',
         placement: 'right',
         beforeShow: function () { openSectionByTitle('Your properties'); }
       },
@@ -127,7 +135,7 @@
         tab: 'content',
         target: '#cfgBoard',
         title: 'Then filter and sort',
-        body: 'Narrow by board basis, star rating, price or trip length, set how far ahead to look, and choose the order. Show your customers exactly the kind of deals you want front and centre.',
+        body: 'Narrow by board basis, star rating, price or trip length, set how far ahead to look, and choose the order. Worth knowing: these filter the hotels you listed, they never add others, so a tight filter can empty the widget rather than widen it.',
         placement: 'right',
         beforeShow: function () { openSectionByTitle('Filters'); }
       },
@@ -141,6 +149,14 @@
       },
       {
         tab: 'design',
+        target: '#cfgPriceDisplay',
+        title: 'Decide what the price means',
+        body: 'Total, per person, per night, or per person per night. Whichever you pick, the small line under each price says which, so a visitor is never left guessing what they are looking at.',
+        placement: 'right',
+        beforeShow: function () { openSectionByTitle('Price display'); }
+      },
+      {
+        tab: 'design',
         target: '#brandColor',
         title: 'Match your brand',
         body: 'Set your brand and accent colours so the offers feel like part of your site. The accent is used for prices, codes and call-to-action buttons.',
@@ -150,7 +166,7 @@
       {
         target: '.tgse-preview',
         title: 'See it come together',
-        body: 'The preview shows your offers in the style you chose. Until your destinations pull through live deals it may sit empty, that is normal, and you control exactly what shows when none match.',
+        body: 'The preview shows your hotels in the style you chose. It draws from the same cache your live widget reads, so what you see here is what a visitor sees. If it is empty, press Test above to fill it.',
         placement: 'left',
         spotlightPadding: 6
       },

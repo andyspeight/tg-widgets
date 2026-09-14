@@ -1180,3 +1180,58 @@ test('cached offers carry a stable id, so a multi-hotel widget is not one card',
   // The same property at two prices in one search must stay distinct too.
   assert.notEqual(mk('TTI:111', 1).id, mk('TTI:111', 2).id);
 });
+
+/* ============================================================
+   Dynamic packaging is not built, and says so
+   ============================================================ */
+
+test('the DP option is disabled rather than silently wrong', () => {
+  // Andy selected it and got hotel-only details under a package heading
+  // (14 Sep 2026). buildAccommodationCriteria only sends SearchType
+  // Accommodation — a package needs flightSearchCriteria alongside it and
+  // prices the two together — so the option looked like it worked and did not.
+  assert.ok(/<option value="DynamicPackages" disabled>/.test(EDITOR),
+    'the option must be disabled until the package search exists');
+  assert.ok(/not switched on yet/.test(EDITOR), 'and the editor must say why');
+});
+
+test('the test endpoint refuses a DP request rather than coercing it', () => {
+  // Silently running an Accommodation search for a DP widget is how the wrong
+  // prices end up cached under the right-looking label.
+  assert.ok(/dp_not_supported/.test(TEST_API));
+  assert.ok(/body\.type === 'DynamicPackages'/.test(TEST_API));
+  assert.ok(/const type = 'Accommodation';/.test(TEST_API),
+    'and there must be no branch that quietly labels it otherwise');
+});
+
+test('the guided tour matches the editor it is describing', () => {
+  // A tour that points at a control which has moved or gone is worse than no
+  // tour: it breaks mid-walkthrough on a client's first run.
+  const TOUR = readFileSync(new URL('../public/tour-tti-offers.js', import.meta.url), 'utf8');
+  for (const id of [...TOUR.matchAll(/target: '#([A-Za-z0-9_-]+)'/g)].map((m) => m[1])) {
+    assert.ok(EDITOR.includes('id="' + id + '"'), `the tour points at #${id}, which the editor does not have`);
+  }
+  for (const title of [...TOUR.matchAll(/openSectionByTitle\('([^']+)'\)/g)].map((m) => m[1])) {
+    assert.ok(EDITOR.includes('data-section>' + title), `the tour opens "${title}", which is not a section`);
+  }
+  // And it must cover the two controls added today.
+  assert.ok(/#ttiTest/.test(TOUR), 'the tour must show the Test button');
+  assert.ok(/#cfgPriceDisplay/.test(TOUR), 'and how prices are shown');
+});
+
+test('no control is declared twice in the editor markup', () => {
+  // A duplicated id means the second one is never read or written, so the
+  // setting silently does nothing. One slipped in with the pricing control:
+  // the select already existed and a second copy was added above it, so only
+  // the first was ever wired.
+  //
+  // Scoped to the STATIC markup. The scripts below it build HTML in template
+  // strings, and a function returning one of three mutually exclusive branches
+  // legitimately names the same id in each.
+  const markup = EDITOR.slice(0, EDITOR.indexOf('<script src="/editor-shell.js"'));
+  assert.ok(markup.length > 1000, 'the markup boundary must be found');
+  const ids = [...markup.matchAll(/\sid="([A-Za-z0-9_-]+)"/g)].map((m) => m[1]);
+  const seen = new Set(); const dupes = new Set();
+  for (const id of ids) { if (seen.has(id)) dupes.add(id); seen.add(id); }
+  assert.deepEqual([...dupes], [], `duplicated ids: ${[...dupes].join(', ')}`);
+});
