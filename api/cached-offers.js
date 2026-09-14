@@ -86,7 +86,7 @@ const DEFAULT_MAX = 100;
  *  token is not a usable code — callers MUST treat that as a cache miss, never
  *  as "no filter", or a widget scoped to twelve hotels would show the world. */
 function canonTti(token) {
-  const up = String(token || '').trim().toUpperCase().replace(/^TTI:/, '');
+  const up = String(token || '').trim().toUpperCase().replace(/^[A-Z]+:/, '');
   return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
 }
 

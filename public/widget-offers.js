@@ -1,5 +1,5 @@
 /**
- * Travelgenix Travel Offers Widget v1.20.0
+ * Travelgenix Travel Offers Widget v1.20.1
  * Self-contained, embeddable widget served ENTIRELY from the Travelgenix offer
  * cache. A visitor's browser never triggers a Travelify search; the only live
  * search left is the one Travelify runs when a visitor clicks an offer.
@@ -29,6 +29,10 @@
  *   - BothPackages:   send packageType:'Any' (omitting returns DynamicPackages only)
  *
  * Changelog:
+ *   v1.20.1 (14 Sep 2026) — canonTti strips ANY reference namespace, not just
+ *                          TTI:. Travelify also returns ID: references, and the
+ *                          old strip rejected those, so such a hotel could never
+ *                          match the key the cron wrote.
  *   v1.20.0 (12 Sep 2026) — TTI Offers: the same engine, scoped by property:
  *     • A config carrying `ttiCodes` reads the per-property cache pool
  *       (/api/cached-offers?tti=...&appId=...) instead of the country pool, and
@@ -265,7 +269,7 @@
   // time to the viewer's chosen currency. Edge-cached, so this is near-free.
   const FX_RATES_URL = API_BASE.replace('/widget-config', '/fx-rates');
   const WIDGET_LOG_URL = API_BASE.replace('/widget-config', '/widget-log');
-  const VERSION = '1.20.0';
+  const VERSION = '1.20.1';
   const CACHE_PREFIX = 'tgo_cache_';
 
   // ── TTI Offers: the property list ────────────────────────────────────
@@ -280,7 +284,7 @@
   // canonTti in api/cached-offers.js and api/cron/refresh-tti-offers.js: this
   // builds the key those two write and read, so any difference is a total miss.
   function canonTti(token) {
-    const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^TTI:/, '');
+    const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^[A-Z]+:/, '');
     return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
   }
   function ttiCodesOf(cfg) {

@@ -204,12 +204,41 @@ the response says so in `pinLooksIgnored`.
 **The sweep asks the way a DP deep link asks.** The nightly payload mirrors a
 dynamic-package deep link parameter for parameter: the package type, the
 departure points (`origins`, several in one request so they cannot multiply the
-budget), and the property anchor. The first candidate the probe tries is the
-WHOLE anchor a live Travelify link carries, verified against one their own
-generator produced on 22 Jul 2026: `loc` the hotel name, `loct=Property`,
-`ctry`, `lat`/`lng` with `rad=1`, and `refn=TTI:{code}` together. That
-combination is the likeliest to work precisely because it is the one proven to
-resolve, rather than any single part of it.
+budget), and the property anchor.
+
+The anchor's shape was CORRECTED on 14 Sep 2026 by two real deep links Andy
+supplied, one DP and one accommodation-only. Both pin a property like this:
+
+    st=Accommodation &loc=Dubai,+United+Arab+Emirates &loct=City
+      &lat=25.049 &lng=55.118 &rad=28 &dur=7 &refn=TTI:12345 &adt=2
+
+The location is the CITY at city scale, and the property is pinned by
+`refn=TTI:{code}` alone. There is no `loct=Property` and no 1km pin: `refn` is a
+refinement laid over an ordinary area search, not a location type. An earlier
+draft of this document described the opposite, from a link read on 22 Jul 2026,
+and `buildTtiPayload` was built to it. If you find `loct=Property` written
+anywhere, it is stale.
+
+**The Test button now says WHY, not just that it failed.** `area-only` was an
+honest answer and a useless one: it left the agent assuming they had mistyped
+the code. When the ordinary search cannot find a property, `/api/tti-test` runs
+two extra diagnostics on that ONE property, and the editor puts both in plain
+English:
+
+- `pinProbe` re-asks for the same hotel several ways — first with NO pin at all
+  as the control, then each remaining spelling in `PROBE_CANDIDATES`. If every
+  version returns exactly the same offers, `refn` did nothing and the answer is
+  `pinIgnored`: the feed searched the whole country and the hotel simply was not
+  in the cheapest slice that came back. If one spelling finds the property, it
+  is named as the `winner`, which is the answer to the open question above —
+  set `TTI_PROPERTY_PARAM` to it and the sweep uses it that night with no code
+  change. Bounded: one property per click, at most five extra requests, a 9s
+  timeout each and a 38s wall it will not cross.
+- `deeplink` follows the actual deep link for that hotel server-side and reports
+  the status, the redirect chain, the content type and whether the body is
+  machine readable. Andy's position (14 Sep 2026) is that the deep link is the
+  only correct way to run this search; this measures it rather than arguing it.
+  Diagnostic only — nothing in the product reads offers through a deep link.
 
 **Canonicalisation is the load-bearing invariant.** `canonTti` appears in four
 places — `api/_lib/offers/tti.js`, `api/cached-offers.js`,
@@ -217,6 +246,14 @@ places — `api/_lib/offers/tti.js`, `api/cached-offers.js`,
 the key the widget reads, so a difference in any one of them is not a bug that
 degrades, it is a total silent miss on every TTI Offers widget in the estate.
 `npm run test:tti-offers` asserts all four carry the same pattern.
+
+It strips ANY `LETTERS:` namespace, not just `TTI:`. A live GB search on
+14 Sep 2026 returned `ID:30924133` alongside `TTI:` references, and the earlier
+`TTI:`-only strip rejected those outright: a hotel whose reference came back
+under a different namespace could never match the verify gate, and the Test
+button reported it as "not this property". The key segment is still validated by
+the `^[A-Z0-9][A-Z0-9._-]{0,31}$` pattern, which is what actually keeps the
+Redis namespace safe.
 
 ---
 
@@ -230,7 +267,8 @@ degrades, it is a total silent miss on every TTI Offers widget in the estate.
 | `public/widget-offers.js` | v1.20.0. The TTI branch, the second tag, the alias global. |
 | `public/editor-tti-offers.html` | The editor. The destination chips became a property list; templates are layout-only presets. |
 | `public/demo-tti-offers.html`, `public/tour-tti-offers.js` | Demo page and guided tour. |
-| `test/tti-offers.test.mjs` | 37 tests. `npm run test:tti-offers`. |
+| `api/tti-test.js` | The editor's Test button. Checks a list of codes live, and when one cannot be found runs the pin probe and the deep link probe to say why. |
+| `test/tti-offers.test.mjs` | 65 tests. `npm run test:tti-offers`. |
 
 The world map cron gained four `export` keywords and nothing else. Its parser is
 imported rather than copied, so both jobs write one cache shape and
@@ -267,8 +305,15 @@ actually costs us Travelify capacity).
 
 ## Next steps
 
-1. Get the property parameter from Travelify, or run the probe against a real
-   account, and set `TTI_PROPERTY_PARAM`.
+1. Get the property parameter from Travelify, or press **Test these codes** in
+   the editor against a real account with a code that is not found: the pin
+   probe names the winning spelling if there is one, or reports `pinIgnored` if
+   the feed honours no pin at all. Then set `TTI_PROPERTY_PARAM`.
+   If it reports `pinIgnored`, that is a conversation with Travelify rather than
+   a code change: a country-wide search sorted cheapest-first, capped at 250,
+   will essentially never contain one named hotel, so the widget cannot be
+   correct until either the pin is honoured or the input carries enough to
+   narrow the area (a city, or coordinates).
 2. Watch the first full sweep: `tti:offers:lastSweepStats` carries per-run
    tallies, and `suspectParam` flags a parameter being ignored.
 3. Decide whether a hotel with no availability should stay hidden (current

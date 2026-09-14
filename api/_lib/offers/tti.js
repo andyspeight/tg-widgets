@@ -75,7 +75,7 @@ const DEFAULT_DATES_MAX = 700;
  *  Must stay identical to canonTti in api/cached-offers.js — the cron writes
  *  the key the widget reads, so a difference here is a silent total miss. */
 export function canonTti(token) {
-  const up = String(token || '').trim().toUpperCase().replace(/^TTI:/, '');
+  const up = String(token || '').trim().toUpperCase().replace(/^[A-Z]+:/, '');
   return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
 }
 

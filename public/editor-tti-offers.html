@@ -2126,7 +2126,7 @@
        ============================================================ */
     const TTI_MAX = 100;
     function canonTti(token) {
-      const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^TTI:/, '');
+      const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^[A-Z]+:/, '');
       return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
     }
     function canonCtry(v) {
@@ -2145,11 +2145,11 @@
       const out = [];
       for (const r of list) {
         if (r && typeof r === 'object') {
-          out.push({ code: String(r.code || r.tti || '').replace(/^TTI:/i, ''), ctry: r.ctry || r.countryCode || '' });
+          out.push({ code: String(r.code || r.tti || '').replace(/^[A-Z]+:/i, ''), ctry: r.ctry || r.countryCode || '' });
         } else {
           const parts = String(r || '').split(',');
           if (!String(parts[0] || '').trim()) continue;
-          out.push({ code: String(parts[0]).trim().replace(/^TTI:/i, ''), ctry: String(parts[2] || '').trim() });
+          out.push({ code: String(parts[0]).trim().replace(/^[A-Z]+:/i, ''), ctry: String(parts[2] || '').trim() });
         }
       }
       return out.slice(0, TTI_MAX);
@@ -2314,7 +2314,67 @@
                 + 'rather than when a code is wrong. If you have checked the code in Travelify, it is '
                 + 'the second one. Send us this result.</div>';
         }
-        out.innerHTML = head + lines.join('');
+        // What the DEEP LINK returned, when the feed could not find the
+        // property. This is the question that keeps coming up, so show the
+        // answer rather than describing it.
+        let dl = '';
+        if (d.deeplink) {
+          const k = d.deeplink;
+          const bits = [];
+          if (k.error) {
+            bits.push('could not be fetched: ' + k.error);
+          } else {
+            const last = (k.hops && k.hops.length) ? k.hops[k.hops.length - 1] : null;
+            bits.push('returned ' + (last ? last.status : '?')
+              + (k.hops && k.hops.length > 1 ? ' after ' + (k.hops.length - 1) + ' redirect(s)' : ''));
+            if (k.contentType) bits.push('content type ' + k.contentType.split(';')[0]);
+            bits.push(k.isJson ? 'the body IS machine readable JSON'
+                               : 'the body is NOT JSON (' + k.bytes + ' bytes)');
+          }
+          dl = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
+             + '<strong>The deep link for this hotel</strong><br>'
+             + '<span style="color:var(--tgse-ink-3)">' + esc(bits.join('. ')) + '.</span>'
+             + (k.bodyStarts ? '<br><span class="tti-test-code" style="color:var(--tgse-ink-3);'
+                 + 'display:block;margin-top:4px;word-break:break-all">'
+                 + esc(k.bodyStarts.slice(0, 200)) + '</span>' : '')
+             + '<br><a href="' + esc(k.url) + '" target="_blank" rel="noopener"'
+             + ' style="color:var(--tgse-brand)">Open it yourself</a></div>';
+        }
+        // WHY it could not be found. The most useful thing on the whole
+        // panel when a code comes back area-only, so it goes above the deep
+        // link rather than below it.
+        let pp = '';
+        if (d.pinProbe && d.pinProbe.tried && d.pinProbe.tried.length) {
+          const q = d.pinProbe;
+          const rows = q.tried.map(function (t) {
+            const what = t.failed ? 'did not answer (' + t.failed + ')'
+              : t.offers + ' offer' + (t.offers === 1 ? '' : 's') + ' back, '
+                + (t.mine ? t.mine + ' of them this hotel' : 'none of them this hotel');
+            return '<div style="margin-top:3px">&bull; asking by <strong>' + esc(t.label)
+                 + '</strong>: ' + esc(what) + '</div>';
+          }).join('');
+          let verdict;
+          if (q.winner) {
+            verdict = 'Asking by <strong>' + esc(q.winner) + '</strong> found it. '
+                    + 'Send us this result and we will switch the nightly job to that, '
+                    + 'which will fix every code in this list at once.';
+          } else if (q.pinIgnored) {
+            verdict = 'Every version came back with exactly the same offers, so Travelify '
+                    + 'is ignoring the hotel pin and searching the whole country instead. '
+                    + 'Your code is almost certainly fine. This one is ours to sort out '
+                    + 'with Travelify, so please send us this result.';
+          } else {
+            verdict = 'No way of asking found this hotel. Either the code belongs to a '
+                    + 'different country, or the hotel has no availability at all right now.';
+          }
+          pp = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
+             + '<strong>Why ' + esc(q.code) + ' could not be found</strong>'
+             + '<div style="color:var(--tgse-ink-3);margin-top:4px">We asked Travelify for it '
+             + 'several different ways:</div>'
+             + '<div style="color:var(--tgse-ink-3)">' + rows + '</div>'
+             + '<div style="margin-top:6px">' + verdict + '</div></div>';
+        }
+        out.innerHTML = head + lines.join('') + pp + dl;
       } catch (err) {
         const why = (err && err.name === 'AbortError')
           ? 'The search took too long to come back. Travelify can be slow on a '
