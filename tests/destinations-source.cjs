@@ -43,7 +43,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
 (async () => {
   const {
     agreedFields, siteHost, wikiKey, reconcileWikidata, localSiteFromWikitext, sameSite,
-    warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor,
+    warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor, wikipediaIntro,
     wikiTitle, mergeWikiAnswer, articleUrl,
   } = await load('_source.js');
 
@@ -703,6 +703,43 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     const r = sourceAirportField({ field: F('Official Website'), iata: 'MUC' });
     assert.strictEqual(r.ok, false);
     assert.match(r.why, /from Wikidata/);
+  });
+
+  console.log('\nReading the opening section of an article');
+
+  const extract = text => async () => ({
+    ok: true,
+    json: async () => ({ query: { pages: [{ title: 'Kigali International Airport', extract: text }] } }),
+  });
+
+  await at('the lead section comes back as plain text', async () => {
+    const out = await wikipediaIntro(
+      'https://en.wikipedia.org/wiki/Kigali_International_Airport',
+      extract('Kigali International Airport   is the primary\n  airport serving Kigali.'));
+    assert.strictEqual(out.ok, true, out.why);
+    assert.strictEqual(out.text, 'Kigali International Airport is the primary airport serving Kigali.',
+      'whitespace is folded so the writer gets a clean brief');
+    assert.match(out.source, /Kigali_International_Airport/, 'it has to say where it came from');
+  });
+
+  await at('a record with no article asks for nothing', async () => {
+    let called = false;
+    const out = await wikipediaIntro('', async () => { called = true; });
+    assert.strictEqual(out.ok, false);
+    assert.strictEqual(called, false, 'no URL means no request');
+  });
+
+  await at('an empty article is not evidence', async () => {
+    const out = await wikipediaIntro('https://en.wikipedia.org/wiki/X', extract(''));
+    assert.strictEqual(out.ok, false);
+    assert.match(out.why, /no opening section/);
+  });
+
+  await at('Wikipedia not answering leaves the record as bare as it was', async () => {
+    const out = await wikipediaIntro('https://en.wikipedia.org/wiki/X',
+      async () => ({ ok: false, status: 503 }));
+    assert.strictEqual(out.ok, false);
+    assert.match(out.why, /503/);
   });
 
   await Promise.all(pending);

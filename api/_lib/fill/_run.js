@@ -24,7 +24,7 @@ import { fillPlanFor, hasEnoughToWriteFrom } from './_registry.js';
 import { derive, ancestorsOf } from './_derive.js';
 import { writeField, buildEvidence } from './_write.js';
 import { gate } from './_gate.js';
-import { sourceAirportField } from './_source.js';
+import { sourceAirportField, wikipediaIntro } from './_source.js';
 import { callModel, GATE_MODEL, BUDGET } from './_model.js';
 
 /**
@@ -131,12 +131,25 @@ export async function runItem({ item, spec, record, byId, writeBack, allowPaid =
     if (!allowPaid) {
       return { ...base, result: 'held', reason: 'the day\'s budget is spent, so this waits for tomorrow', costUsd: 0, retryable: true };
     }
+    // FETCH BEFORE JUDGING WHETHER THERE IS ENOUGH. A published source about
+    // this exact record is evidence, so the floor has to be able to see it.
+    // Without it an airport carries about 23 characters the writer can use,
+    // against a floor of 60, and every Overview is refused before a model is
+    // ever called. Failing to fetch is not fatal: the record is simply as bare
+    // as it was and the floor says so, for free, as it does today.
+    let research = null;
+    const article = record.values && record.values['Wikipedia URL'];
+    if (article) {
+      const got = await wikipediaIntro(article).catch(() => null);
+      if (got && got.ok) research = got;
+    }
+
     // Check there is something to write FROM before paying to write. An empty
     // record can only produce a refusal or an invention, and both cost money.
-    const enough = hasEnoughToWriteFrom({ rec: record, ancestors });
+    const enough = hasEnoughToWriteFrom({ rec: record, ancestors, research });
     if (!enough.ok) return { ...base, result: 'held', reason: enough.why, costUsd: 0 };
 
-    const w = await writeField({ field, brief: plan.brief, rec: record, ancestors, type: spec });
+    const w = await writeField({ field, brief: plan.brief, rec: record, ancestors, type: spec, research });
     spend.usd += w.costUsd || 0;
     if (!w.ok) return { ...base, result: 'held', reason: w.why, costUsd: spend.usd };
     value = w.value;

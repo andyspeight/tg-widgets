@@ -626,6 +626,45 @@ export function articleUrl(title) {
     .replace(/%2F/g, '/').replace(/%3A/g, ':');
 }
 
+/**
+ * The opening section of a Wikipedia article, as plain text.
+ *
+ * WHY THE WRITER NEEDS THIS. An airport record holds about 23 characters the
+ * writer can use: a three-letter code, a country, two coordinates. The floor
+ * for writing anything at all is 60, so every Overview was refused before a
+ * model was ever called. Measured on 14 Sep 2026 the article intro averages 883
+ * characters of real, cited, third-party fact, and we already hold the article
+ * URL for 567 of the 600 airports.
+ *
+ * It is EVIDENCE, not copy. The gate still checks every claim in the written
+ * value against what was handed to it, so a sentence that strays beyond the
+ * article is held exactly as it is today. The bar does not move; the record
+ * simply stops being empty.
+ *
+ * exintro gives the lead section only, explaintext strips the markup, so this
+ * is a few hundred bytes rather than the several hundred kilobytes a full
+ * article would cost.
+ */
+export async function wikipediaIntro(articleUrl, fetchImpl) {
+  const title = wikiTitle(articleUrl);
+  if (!title) return { ok: false, why: 'no Wikipedia article on this record' };
+  const url = WIKIPEDIA_API + '?action=query&format=json&formatversion=2&redirects=1' +
+    '&prop=extracts&exintro=1&explaintext=1&origin=*&titles=' + encodeURIComponent(title);
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await (fetchImpl || fetch)(url, { signal: ctrl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } });
+    if (!r || !r.ok) return { ok: false, why: 'Wikipedia answered ' + (r ? r.status : 'nothing') };
+    const j = await r.json();
+    const page = ((j && j.query && j.query.pages) || [])[0];
+    const text = String((page && page.extract) || '').replace(/\s+/g, ' ').trim();
+    if (!text) return { ok: false, why: 'the article has no opening section' };
+    return { ok: true, text, source: articleUrl };
+  } catch (err) {
+    return { ok: false, why: 'Wikipedia could not be reached: ' + String(err.message || err) };
+  } finally { clearTimeout(t); }
+}
+
 /* ------------------------------------------------------------------ *
  * The batch warm, and the per-field answer
  * ------------------------------------------------------------------ */

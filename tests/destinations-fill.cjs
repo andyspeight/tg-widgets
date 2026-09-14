@@ -29,6 +29,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   const { slugify, derive, ancestorsOf } = await load('_derive.js');
   const { fillPlanFor, isAutomatable, estimatePence, hasEnoughToWriteFrom } = await load('_registry.js');
   const { gate, shapeCheck, styleBreaches, formatBreaches } = await load('_gate.js');
+  const { buildEvidence } = await load('_write.js');
 
   const F = (label, kind, tier) => ({ label, kind, tier: tier || 'core' });
 
@@ -816,6 +817,56 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     });
     assert.strictEqual(out.ok, false);
     assert.match(out.why, /no parent/);
+  });
+
+  /* 14 Sep 2026. Overview on airports held every time and stopped the runner
+     twice. An airport record carries about 23 characters the writer can use
+     against a floor of 60, and airports have no parent to inherit prose from.
+     The article we already hold for 567 of the 600 averages 883. */
+
+  const BARE_AIRPORT = {
+    name: 'Kigali International Airport',
+    values: { 'IATA Code': 'KGL', 'Country Text': 'RW', 'Latitude': -1.96863 },
+  };
+  const ARTICLE = {
+    ok: true,
+    source: 'https://en.wikipedia.org/wiki/Kigali_International_Airport',
+    text: 'Kigali International Airport is the primary international airport serving '
+        + 'Kigali, the capital of Rwanda. Four airlines are based there, including '
+        + 'RwandAir, the flag carrier of Rwanda.',
+  };
+
+  t('a bare airport is still refused when we hold no source for it', () => {
+    const out = hasEnoughToWriteFrom({ rec: BARE_AIRPORT, ancestors: [] });
+    assert.strictEqual(out.ok, false, 'nothing to write from is still nothing');
+    assert.match(out.why, /almost nothing on this record/);
+  });
+
+  t('a published source about the record is evidence, and lifts the floor', () => {
+    const out = hasEnoughToWriteFrom({ rec: BARE_AIRPORT, ancestors: [], research: ARTICLE });
+    assert.strictEqual(out.ok, true, 'an article about this exact airport is something to write from');
+  });
+
+  t('a source too thin to be worth anything does not lift it', () => {
+    const out = hasEnoughToWriteFrom({
+      rec: BARE_AIRPORT, ancestors: [], research: { ok: true, text: 'An airport.' },
+    });
+    assert.strictEqual(out.ok, false, 'eleven characters is not a brief');
+  });
+
+  t('the source is named in the evidence, so the gate can check against it', () => {
+    const ev = buildEvidence({
+      rec: BARE_AIRPORT, ancestors: [], type: { singular: 'airport' }, research: ARTICLE,
+    });
+    assert.match(ev, /From https:\/\/en\.wikipedia\.org\/wiki\/Kigali_International_Airport:/,
+      'the writer must see where the facts came from');
+    assert.match(ev, /flag carrier of Rwanda/, 'and the facts themselves');
+  });
+
+  t('a record with no source reads exactly as it did before', () => {
+    const ev = buildEvidence({ rec: BARE_AIRPORT, ancestors: [], type: { singular: 'airport' } });
+    assert.doesNotMatch(ev, /From http/);
+    assert.match(ev, /Kigali International Airport/);
   });
 
   await Promise.all(pending);

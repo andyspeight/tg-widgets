@@ -207,7 +207,7 @@ export const TYPES = [
     fields: [
       F('fldcS9uu4NWMVaIVP', 'IATA Code', 'iata', 'core', 'Identity'),
       F('fldgrJ2uFjzPcAxUx', 'City Served', 'text', 'core', 'Identity'),
-      F('fldjARk52dZi7TGGc', 'Country Text', 'text', 'core', 'Identity'),
+      F('fldjARk52dZi7TGGc', 'Country Text', 'countryname', 'core', 'Identity'),
       F('fldUSTC6kdgXNgKfI', 'Airport Role', 'select', 'core', 'Identity'),
       F('fldZNl5eveKEDN2Xu', 'Airport Type', 'select', 'rich', 'Identity'),
       F('fldXZKuycZOgJScSj', 'Latitude', 'lat', 'core', 'Geo'),
@@ -376,6 +376,26 @@ export function checkValue(value, kind) {
       const s = selName(value).trim();
       if (!s) return 'empty';
       return Number.isFinite(new Date(s).getTime()) ? 'filled' : 'invalid';
+    }
+
+    /**
+     * A country NAME, not a country code.
+     *
+     * The airports bulk-added on 26 and 27 Aug 2026 carry "CN", "RW", "MX" in
+     * this column while the ones entered by hand in May carry China, Rwanda,
+     * Mexico. Both are non-empty, so both scored as filled and roughly 370
+     * records sat counted as done while rendering "CN" on the page.
+     *
+     * Broken rather than empty is the honest reading: there IS something there,
+     * it just cannot be used. It also routes them to the two-source fixer,
+     * which already agrees the ISO code across OurAirports and Wikidata and
+     * writes the house spelling of the name. No country is two letters, so this
+     * cannot catch a real one.
+     */
+    case 'countryname': {
+      const s = selName(value).trim();
+      if (!s) return 'empty';
+      return /^[A-Za-z]{2}$/.test(s) ? 'invalid' : 'filled';
     }
 
     case 'iata': {

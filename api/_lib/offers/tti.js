@@ -289,3 +289,314 @@ export function offerIsProperty(offer, code) {
   return canonTti(offer && offer.accommodationUniqueRef) === code;
 }
 
+
+/* ============================================================
+   The real search criteria (Andy supplied a worked example, 14 Sep 2026)
+   ============================================================ */
+
+// Defaults taken from the deeplinks the agents already use: a stay starting a
+// month out, a week long, two adults. `frd=30&dur=7&adt=2` in deeplink spelling.
+export const DEFAULT_LEAD_DAYS = 30;
+export const DEFAULT_NIGHTS = 7;
+export const DEFAULT_RADIUS_MILES = 11;
+
+/** Midnight UTC, N days from `now`, in the format the API expects. */
+function isoDay(now, plusDays) {
+  const d = new Date(now.getTime());
+  d.setUTCDate(d.getUTCDate() + plusDays);
+  d.setUTCHours(0, 0, 0, 0);
+  return d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/** A plausible IPv4 or IPv6 address, or ''.
+ *
+ *  Travelify REQUIRES CustomerIP and rejects a search without one — measured
+ *  14 Sep 2026, the API's own words: "You must specify the customer IP address
+ *  (IPv4 or IPv6 supported)". It is used for geo and fraud checks, so a wrong
+ *  one is worse than none: it would put the search in the wrong market. Hence
+ *  a real value from the caller, never a fabricated one. */
+export function cleanIp(v) {
+  const t = String(v || '').trim();
+  if (!t || t === 'unknown') return '';
+  // IPv4, each octet 0-255.
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(t)) {
+    return t.split('.').every((o) => Number(o) <= 255) ? t : '';
+  }
+  // The ::ffff: mapped form first — it contains dots, so the hex-only test
+  // below would reject it, and this is the form a proxied request often
+  // arrives in.
+  const mapped = /^::ffff:((\d{1,3}\.){3}\d{1,3})$/i.exec(t);
+  if (mapped) return cleanIp(mapped[1]);
+  // Plain IPv6.
+  if (t.includes(':') && /^[0-9A-Fa-f:]{2,45}$/.test(t)) return t;
+  return '';
+}
+
+const num = (v, dflt, lo, hi) => {
+  const x = Number(v);
+  return Number.isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
+};
+
+/** The body for `POST /search`, scoped to ONE property.
+ *
+ *  `Ref` is what does the scoping — `TTI:{code}`, the same value the deeplink
+ *  carries as `refn`. That single field is the whole point: the old path asked
+ *  `widgetsvc/traveloffers` for a country's worth of offers and sieved them,
+ *  which could never find one named hotel among the 250 cheapest in Great
+ *  Britain.
+ *
+ *  COORDINATES ARE OPTIONAL, and this matters.
+ *
+ *  An earlier version of this function demanded them. That was wrong, and wrong
+ *  in an expensive way: it rested on a 406 from a DEEPLINK carrying `ctry` and
+ *  no coordinates — a different surface from this API entirely — and was never
+ *  tested here. If `Ref` pins the property then the property IS the location,
+ *  and a country is enough to say which one. The worked example carried
+ *  coordinates because it came from somebody searching a town in a UI, not
+ *  because the field is mandatory.
+ *
+ *  So: send what we have. A code and a country is a valid ask. Coordinates
+ *  narrow it when a row has them, which is strictly better but never required.
+ *  If the service does need them it will say so, and the error reaches the
+ *  agent verbatim instead of being pre-empted by a guess.
+ *
+ *  Returns null only when there is genuinely nothing to search: no code, or no
+ *  idea where in the world to look.
+ *
+ *  `now` is injectable so the dates are testable. */
+export function buildAccommodationCriteria(prop, search = {}, now = new Date()) {
+  const code = canonTti(prop && (prop.code || prop.tti));
+  if (!code) return null;
+
+  const lat = Number(prop.lat);
+  const lng = Number(prop.lng);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng)
+    && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  const ctry = cleanCtry(prop.ctry || prop.locationCountry);
+  // One or the other. Without either there is no area at all, and an unscoped
+  // worldwide search is not a broader question, it is a meaningless one.
+  if (!hasCoords && !ctry) return null;
+
+  // Travelify refuses a search with no CustomerIP, so a criteria object
+  // without one is not worth sending. Returning null here means the caller
+  // reports "we have no IP for you" rather than burning a request to be told.
+  if (!cleanIp(search.customerIp)) return null;
+
+  const leadDays = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
+  const nights = num(search.nights, DEFAULT_NIGHTS, 1, 28);
+  const adults = num(search.adults, 2, 1, 9);
+  const children = Array.isArray(search.childAges) ? search.childAges.slice(0, 8) : [];
+
+  const guests = [];
+  for (let i = 0; i < adults; i++) guests.push({ Type: 'Adult' });
+  for (const age of children) {
+    const a = num(age, null, 0, 17);
+    if (a === null) continue;
+    guests.push(a < 2 ? { Type: 'Infant', Age: a } : { Type: 'Child', Age: a });
+  }
+
+  return {
+    Environment: 'Website',
+    SearchType: 'Accommodation',
+    Language: search.language || 'en',
+    Locale: search.locale || 'en',
+    Currency: /^[A-Z]{3}$/.test(String(search.currency || '')) ? search.currency : 'GBP',
+    DistanceUnit: 'Miles',
+    Nationality: /^[A-Z]{2}$/.test(String(search.nationality || '')) ? search.nationality : 'GB',
+    // Required. The search is refused outright without it.
+    CustomerIP: cleanIp(search.customerIp),
+    CustomerUserAgent: search.customerUserAgent || 'Travelgenix-TtiOffersCron/1.0',
+    CustomerCountry: /^[A-Z]{2}$/.test(String(search.customerCountry || '')) ? search.customerCountry : 'GB',
+    TripType: 'Unspecified',
+    AccommodationSearchCriteria: {
+      // Only sent when the row actually has them. An omitted field is not the
+      // same as a zero, and 0,0 is a real place in the Atlantic.
+      ...(hasCoords ? {
+        Latitude: lat,
+        Longitude: lng,
+        Radius: num(prop.radius ?? search.radius, DEFAULT_RADIUS_MILES, 1, 100),
+        LocationType: prop.locationType || 'City',
+        ...(prop.locationName ? { LocationName: String(prop.locationName).slice(0, 200) } : {}),
+      } : {}),
+      ...(ctry ? { LocationCountry: ctry } : {}),
+      // THE PIN. Always prefixed, always canonical, so a code typed as
+      // ID:58612582, TTI:58612582 or 58612582 all ask the same question.
+      Ref: 'TTI:' + code,
+      CheckinDate: isoDay(now, leadDays),
+      CheckoutDate: isoDay(now, leadDays + nights),
+      BoardBasis: 'Any',
+      PropertyType: 'Any',
+      MinStarRating: 1.0,
+      RefundableOnly: false,
+      Rooms: [{ TypePreference: 'Any', Guests: guests }],
+    },
+  };
+}
+
+/** Does this offer belong to the property we asked for?
+ *  Kept separate from offerIsProperty because the booking API names the field
+ *  differently from the offers feed, and a gate that silently matched nothing
+ *  would empty every widget rather than fail loudly. */
+export function resultIsProperty(result, code) {
+  const want = canonTti(code);
+  if (!want) return false;
+  const candidates = [
+    result && result.uniqueRef,
+    result && result.accommodationUniqueRef,
+    result && result.ref,
+    result && result.Ref,
+    result && result.propertyRef,
+    result && result.accommodation && result.accommodation.uniqueRef,
+  ];
+  return candidates.some((c) => c && canonTti(c) === want);
+}
+
+/** Pull a property row out of a Travelify deeplink.
+ *
+ *  The agents already have working deeplinks — that is how this whole thing
+ *  started — and a working link carries every field the search criteria need:
+ *  the code as `refn`, the area as `loc`/`lat`/`lng`/`rad`, the country as
+ *  `ctry`. So let them paste one rather than typing coordinates, and the row
+ *  cannot describe a search Travelify would reject, because it came from one
+ *  that works.
+ *
+ *  Returns null for anything that is not a deeplink carrying a property. */
+export function parseDeeplink(url) {
+  let u;
+  try { u = new URL(String(url || '').trim()); } catch { return null; }
+  if (!/(^|\.)tvllnk\.com$/i.test(u.hostname)) return null;
+  const q = u.searchParams;
+
+  const code = canonTti(q.get('refn'));
+  if (!code) return null;
+
+  const lat = Number(q.get('lat'));
+  const lng = Number(q.get('lng'));
+  const rad = Number(q.get('rad'));
+  const appId = (/\/deeplink\/(\d{1,10})/.exec(u.pathname) || [])[1] || '';
+
+  return {
+    code,
+    appId,
+    locationName: cleanName(q.get('loc') || ''),
+    locationType: q.get('loct') === 'City' ? 'City' : (q.get('loct') || 'City'),
+    ctry: cleanCtry(q.get('ctry') || ''),
+    ...(Number.isFinite(lat) && lat >= -90 && lat <= 90 ? { lat } : {}),
+    ...(Number.isFinite(lng) && lng >= -180 && lng <= 180 ? { lng } : {}),
+    // Deeplinks carry the radius in km; the search criteria want miles.
+    ...(Number.isFinite(rad) && rad > 0 ? { radius: Math.max(1, Math.round(rad * 0.621371)) } : {}),
+    // st=DynamicPackaging on a DP link, Accommodation otherwise.
+    type: /^dynamic/i.test(String(q.get('st') || '')) ? 'DynamicPackages' : 'Accommodation',
+  };
+}
+
+/** Is this ROW complete enough to search with?
+ *
+ *  Deliberately does not go through buildAccommodationCriteria: that also needs
+ *  a CustomerIP, which is a property of the REQUEST, not of the hotel the agent
+ *  typed in. Routing readiness through it made every row report as unsearchable
+ *  the moment CustomerIP became required, which is the wrong answer to the
+ *  question the editor is asking. */
+export function rowIsSearchable(row) {
+  const code = canonTti(row && (row.code || row.tti));
+  if (!code) return false;
+  const lat = Number(row && row.lat);
+  const lng = Number(row && row.lng);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng)
+    && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  return hasCoords || !!cleanCtry(row.ctry || row.locationCountry);
+}
+
+/* ============================================================
+   Booking-API results -> the cached offer shape
+   ============================================================ */
+
+/** Read a value from whichever spelling a result happens to use.
+ *  The booking API and the offers feed name the same things differently, and
+ *  the exact result shape has not been seen yet — so rather than guess once and
+ *  be silently wrong, try the plausible spellings and REPORT what was not
+ *  found. `normaliseAccommodationResult` returns that report alongside the
+ *  offer so a wrong guess shows up as a named gap instead of a blank card. */
+function pick(obj, paths) {
+  for (const path of paths) {
+    let v = obj;
+    for (const part of path.split('.')) {
+      if (v == null) break;
+      v = v[part];
+    }
+    if (v !== undefined && v !== null && v !== '') return v;
+  }
+  return undefined;
+}
+
+const asNum = (v) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
+
+/** One accommodation result -> the shape api/cached-offers.js already serves.
+ *
+ *  Deliberately NOT clever. Every field it could not find is listed in
+ *  `unmapped`, because a cache quietly full of nulls looks identical to a
+ *  supplier with thin content and would send the next person debugging the
+ *  wrong thing entirely. */
+export function normaliseAccommodationResult(r, ctx = {}) {
+  if (!r || typeof r !== 'object') return null;
+  const unmapped = [];
+  const get = (name, paths) => {
+    const v = pick(r, paths);
+    if (v === undefined) unmapped.push(name);
+    return v;
+  };
+
+  const price = asNum(pick(r, [
+    'pricing.total', 'pricing.price', 'price.total', 'price.amount',
+    'totalPrice', 'price', 'Price', 'leadInPrice',
+  ]));
+  const pricePP = asNum(pick(r, [
+    'pricing.perPerson', 'pricing.pricePerPerson', 'price.perPerson',
+    'pricePerPerson', 'perPerson',
+  ]));
+  // No price is not an offer. Never cache one: the card would render a hotel
+  // with a blank price and a live booking link behind it.
+  if (price == null && pricePP == null) return null;
+
+  const hotel = get('hotel', ['name', 'Name', 'accommodation.name', 'property.name', 'hotelName']);
+  const ref = pick(r, ['uniqueRef', 'accommodationUniqueRef', 'ref', 'Ref',
+                       'propertyRef', 'accommodation.uniqueRef']);
+
+  const offer = {
+    type: ctx.type === 'DynamicPackages' ? 'Packages' : 'Accommodation',
+    price: price != null ? price : pricePP,
+    pricePP: pricePP != null ? pricePP : null,
+    currency: pick(r, ['pricing.currency', 'price.currency', 'currency']) || ctx.currency || 'GBP',
+    hotel: hotel != null ? String(hotel).slice(0, 160) : null,
+    resort: (() => {
+      const v = pick(r, ['resort.name', 'destination.name', 'location.name', 'city', 'resort']);
+      return v ? String(v).slice(0, 120) : (ctx.locationName || null);
+    })(),
+    countryCode: cleanCtry(pick(r, ['countryCode', 'country.code', 'location.countryCode']) || ctx.ctry || ''),
+    lat: asNum(pick(r, ['latitude', 'lat', 'location.latitude'])) ?? (ctx.lat ?? null),
+    lng: asNum(pick(r, ['longitude', 'lng', 'location.longitude'])) ?? (ctx.lng ?? null),
+    rating: asNum(pick(r, ['rating', 'starRating', 'stars', 'Rating'])),
+    reviewRating: asNum(pick(r, ['reviewRating', 'review.rating', 'guestRating'])),
+    reviewCount: asNum(pick(r, ['reviewCount', 'review.count', 'reviews'])),
+    boardBasis: pick(r, ['boardBasis', 'BoardBasis', 'board']) || null,
+    nights: asNum(pick(r, ['nights', 'Nights', 'duration'])) ?? (ctx.nights ?? null),
+    checkinDate: pick(r, ['checkinDate', 'CheckinDate', 'checkIn', 'startDate']) || ctx.checkinDate || null,
+    propertyType: pick(r, ['propertyType', 'PropertyType']) || null,
+    image: pick(r, ['image.url', 'images.0.url', 'images.0', 'imageUrl', 'thumbnail']) || null,
+    url: pick(r, ['deeplinkUrl', 'url', 'bookingUrl', 'link']) || null,
+    accommodationUniqueRef: ref ? String(ref).slice(0, 64) : null,
+    refundability: pick(r, ['refundability', 'Refundability']) || null,
+    adults: asNum(pick(r, ['adults', 'Adults'])) ?? (ctx.adults ?? null),
+    fetchedAt: new Date().toISOString(),
+  };
+
+  // Only report gaps that actually matter to a rendered card.
+  for (const [name, v] of [['price', offer.price], ['hotel', offer.hotel],
+                           ['image', offer.image], ['url', offer.url]]) {
+    if (v == null && !unmapped.includes(name)) unmapped.push(name);
+  }
+  return { offer, unmapped };
+}
