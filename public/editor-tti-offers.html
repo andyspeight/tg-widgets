@@ -2687,14 +2687,16 @@
                         ? ' (tried ' + esc(r.airports.join(', ')) + ')' : '')
                     + '. The widget shows one card per hotel at the best of these.</span>';
             }
-            // THE PACKAGE CHECK. A package search that returned no flights has
-            // handed back a hotel price under a package heading, which is the
-            // exact thing Andy reported. Better said out loud here than found
-            // on a live site.
-            if (r.flightResults === 0) {
-              text += '<br><span style="color:var(--tgse-warning)">No flights came back with it, so '
-                    + 'this price may be the hotel on its own. Tell us and we will take it to '
-                    + 'Travelify with the search we sent.</span>';
+            // SHOW THE PRICE AS A SUM. A package that cannot be broken into a
+            // flight and a hotel is a package in name only, and the identical
+            // £857 from three different airports is what that looked like.
+            if (Number.isFinite(r.flightPrice) && Number.isFinite(r.hotelPrice)) {
+              text += '<br><span style="color:var(--tgse-ink-3)">Hotel ' + esc(money(r.hotelPrice, r.currency))
+                    + ' + flight ' + esc(money(r.flightPrice, r.currency))
+                    + ' = ' + esc(money(r.fromPrice, r.currency))
+                    + (r.flightResults > 0 ? ', cheapest of ' + r.flightResults
+                       + (r.flightResults === 1 ? ' flight' : ' flights') : '')
+                    + '.</span>';
             } else if (r.flightResults > 0) {
               text += '<br><span style="color:var(--tgse-ink-3)">' + r.flightResults
                     + (r.flightResults === 1 ? ' flight' : ' flights') + ' priced with it.</span>';

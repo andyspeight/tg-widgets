@@ -601,6 +601,14 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   const loc = r.location || {};
   const lat = asNum(pick(loc, ['latitude', 'lat']));
   const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
+  // A PACKAGE PRICE IS THE FLIGHT PLUS THE HOTEL.
+  //
+  // ctx.flight is supplied only on a dynamic package search. Without it the
+  // number below is the accommodation alone, which is exactly what was being
+  // cached under a Flight + Hotel badge.
+  const fl = ctx.flight || null;
+  const total = (price != null ? price : pricePP) + (fl ? fl.price : 0);
+
   const offer = {
     // A package is stored AS A PACKAGE, in the platform's own fields.
     //
@@ -636,8 +644,23 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     ...(ctx.destinationName ? { airportName: ctx.destinationName } : {}),
     ...(ctx.outboundDate ? { outboundDate: ctx.outboundDate } : {}),
     ...(ctx.returnDate ? { returnDate: ctx.returnDate } : {}),
-    price: price != null ? price : pricePP,
-    pricePP: pricePP != null ? pricePP : null,
+    // The flight itself, under the names api/cached-offers.js already rebuilds
+    // raw.flight from. The card draws carrier and stops and had nothing to draw.
+    ...(fl && fl.carrier ? { carrier: fl.carrier } : {}),
+    ...(fl && fl.carrierCode ? { carrierCode: fl.carrierCode } : {}),
+    ...(fl && typeof fl.direct === 'boolean' ? { direct: fl.direct } : {}),
+    ...(fl && Number.isFinite(fl.stops) ? { stops: fl.stops } : {}),
+    ...(fl && Number.isFinite(fl.duration) ? { duration: fl.duration } : {}),
+    ...(fl && fl.flightNumber ? { flightNumber: fl.flightNumber } : {}),
+    ...(fl && fl.cabinClass ? { cabinClass: fl.cabinClass } : {}),
+    ...(fl && Number.isFinite(fl.sid) ? { flightSid: fl.sid } : {}),
+    price: total,
+    // The two halves, kept so a price can be explained rather than asserted.
+    ...(fl ? { hotelPrice: price != null ? price : pricePP, flightPrice: fl.price } : {}),
+    // Per person is the ACCOMMODATION's own figure and does not describe a
+    // package, so it is dropped once a flight is in the total rather than
+    // quietly under-reporting it.
+    pricePP: (!fl && pricePP != null) ? pricePP : null,
     currency: pick(r, ['pricing.currency', 'pricing.currencyCode']) || ctx.currency || 'GBP',
     hotel: r.name ? String(r.name).slice(0, 160) : null,
     resort: (() => {
@@ -725,6 +748,69 @@ export function normaliseAccommodationResult(r, ctx = {}) {
 /* ============================================================
    Dynamic packaging: a flight and this hotel, priced together
    ============================================================ */
+
+/** One FLIGHT result from a dynamic package search, reduced to the fields the
+ *  card already draws and the one field the price depends on.
+ *
+ *  WHY THIS EXISTS. A dynamic package prices the two halves separately and
+ *  returns them in separate arrays: `accommodationResults` carries the HOTEL
+ *  price and `flightResults` carries the flight. We were caching the
+ *  accommodation price as the package price, so the same hotel came back at
+ *  £857 from Gatwick, £857 from Manchester, and £857 on a search that returned
+ *  no flights at all (Andy, 14 Sep 2026: "I have just changed the departure
+ *  airport ... and it still says the same price"). Three identical answers is
+ *  what a hotel-only price looks like.
+ *
+ *  The field names are picks rather than certainties, because no worked flight
+ *  result has been seen. Anything unmapped is REPORTED, and a flight with no
+ *  readable price is not usable — see `cheapestFlight`. */
+export function normaliseFlightResult(f) {
+  if (!f || typeof f !== 'object') return null;
+  const price = asNum(pick(f, [
+    'pricing.total', 'pricing.price', 'pricing.amount', 'pricing.grossPrice',
+    'pricing.totalPrice', 'pricing.leadInPrice', 'price.total', 'totalPrice', 'price',
+  ]));
+  if (price == null) return null;
+  const legs = Array.isArray(f.legs) ? f.legs : (Array.isArray(f.Legs) ? f.Legs : []);
+  const out = {
+    price,
+    currency: pick(f, ['pricing.currency', 'pricing.currencyCode', 'currency']) || null,
+    carrier: pick(f, ['carrier.name', 'carrierName', 'airline.name', 'airline', 'marketingCarrier.name']) || null,
+    carrierCode: pick(f, ['carrier.code', 'carrierCode', 'airline.code', 'marketingCarrier.code']) || null,
+    stops: asNum(pick(f, ['stops', 'numberOfStops', 'legs.0.stops'])),
+    duration: asNum(pick(f, ['duration', 'totalDuration', 'legs.0.duration'])),
+    flightNumber: pick(f, ['flightNumber', 'legs.0.flightNumber', 'segments.0.flightNumber']) || null,
+    cabinClass: pick(f, ['cabinClass', 'legs.0.cabinClass', 'segments.0.cabinClass']) || null,
+    outboundDate: pick(f, ['legs.0.departureDate', 'legs.0.departsAt', 'outboundDate', 'departureDate']) || null,
+    returnDate: pick(f, ['legs.1.departureDate', 'legs.1.departsAt', 'returnDate']) || null,
+    sid: asNum(pick(f, ['sid', 'supplierId', 'supplier.id'])),
+    legCount: legs.length || null,
+  };
+  // Direct is a claim, not a default: `false` and "we could not tell" are
+  // different, and a card that says Direct when it does not know is worse than
+  // one that says nothing.
+  const direct = pick(f, ['direct', 'isDirect', 'nonStop']);
+  if (typeof direct === 'boolean') out.direct = direct;
+  else if (Number.isFinite(out.stops)) out.direct = out.stops === 0;
+  return out;
+}
+
+/** The cheapest usable flight from a package search, and what could not be read
+ *  from it. A package's "from" price is its cheapest flight plus this hotel. */
+export function cheapestFlight(results) {
+  const list = Array.isArray(results) ? results : [];
+  let best = null;
+  for (const one of list) {
+    const f = normaliseFlightResult(one);
+    if (f && (!best || f.price < best.price)) best = f;
+  }
+  if (!best) return { flight: null, unmapped: list.length ? ['flight.pricing'] : [] };
+  const gaps = [];
+  for (const [name, v] of [['flight.carrier', best.carrier], ['flight.stops', best.stops]]) {
+    if (v == null) gaps.push(name);
+  }
+  return { flight: best, unmapped: gaps };
+}
 
 /** The earliest a package may depart. One day, because a flight has to leave
  *  in the future and the accommodation half must agree with it. */

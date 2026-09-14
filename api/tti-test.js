@@ -37,6 +37,7 @@ import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
   canonTti, cleanCtry, cleanCoord, cleanIp, parseDeeplink, buildAccommodationCriteria,
   buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
+  cheapestFlight,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
 import { resolveArrivalAirport, airportLabel } from './_lib/offers/arrival-airport.js';
@@ -349,6 +350,23 @@ export default async function handler(req, res) {
       acc.flights += r.alsoCount || 0;
 
       const mine = (r.results || []).filter((x) => resultIsProperty(x, job.row.code));
+      // THE FLIGHT HALF OF THE PRICE.
+      //
+      // A dynamic package prices the two halves separately. Without this the
+      // number cached is the HOTEL's, which is why the same property came back
+      // at £857 from Gatwick, £857 from Manchester and £857 on a search that
+      // found no flights at all.
+      const { flight, unmapped: flightGaps } = isDp
+        ? cheapestFlight(r.alsoResults) : { flight: null, unmapped: [] };
+      if (isDp && !flight) {
+        // No flight, no package. Caching the hotel price under a Flight +
+        // Hotel badge is the original bug this widget was built to avoid.
+        acc.failures.push(`${label}: ${(r.alsoCount || 0)
+          ? 'flights came back but none carried a price we could read.'
+          : 'no flights came back for this route, so there is no package to price.'}`);
+        continue;
+      }
+      for (const g of flightGaps) acc.gaps.add(g);
       if (!raw && mine.length) {
         const candidate = {
           note: 'The request we sent to POST https://api.travelify.io/search, and the first '
@@ -435,6 +453,8 @@ export default async function handler(req, res) {
           ...(job.origin ? { originName: airportLabel(job.origin) } : {}),
           ...(legs[0] ? { outboundDate: legs[0].DepartDate } : {}),
           ...(legs[1] ? { returnDate: legs[1].DepartDate } : {}),
+          // The priced flight itself. Its absence was already refused above.
+          ...(flight ? { flight } : {}),
           // A package price belongs to the airport it flies from. This is what
           // makes the stored offer a real package downstream: cached-offers
           // builds a flight block from it, the card draws the Flight + Hotel
@@ -495,6 +515,8 @@ export default async function handler(req, res) {
     return {
       code: row.code, status: 'found', offers: offers.length, cached: !!wrote,
       hotel: cheapest.hotel, fromPrice: cheapest.price, currency: cheapest.currency,
+      ...(Number.isFinite(cheapest.flightPrice)
+        ? { hotelPrice: cheapest.hotelPrice, flightPrice: cheapest.flightPrice } : {}),
       checkinDate: cheapest.checkinDate, nights: cheapest.nights,
       image: cheapest.image ? true : false,
       polls: acc.polls,

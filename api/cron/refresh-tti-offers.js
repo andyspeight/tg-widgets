@@ -132,6 +132,7 @@ import {
   buildAccommodationCriteria,
   buildDynamicPackageCriteria,
   dpOrigins,
+  cheapestFlight,
   normaliseAccommodationResult,
   resultIsProperty,
   cleanIp,
@@ -297,6 +298,11 @@ async function fetchProperty(item, search, origin = null) {
   if (!r.ok) return null;
 
   const results = r.results || [];
+  // A package is priced from the cheapest flight PLUS the hotel. No flight
+  // means no package, and the night is left without one for this origin rather
+  // than caching a hotel price behind a Flight + Hotel badge.
+  const { flight } = isDp ? cheapestFlight(r.alsoResults) : { flight: null };
+  if (isDp && !flight) return { returned: results.length, parsed: 0, verified: [], flights: r.alsoCount || 0 };
   const verified = [];
   for (const one of results) {
     if (!resultIsProperty(one, item.code)) continue;
@@ -323,6 +329,7 @@ async function fetchProperty(item, search, origin = null) {
       ...(isDp && item.arrival ? { destination: item.arrival.code, destinationName: item.arrival.name } : {}),
       ...(legs[0] ? { outboundDate: legs[0].DepartDate } : {}),
       ...(legs[1] ? { returnDate: legs[1].DepartDate } : {}),
+      ...(flight ? { flight } : {}),
       deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
     });
     if (n && n.offer) verified.push(n.offer);

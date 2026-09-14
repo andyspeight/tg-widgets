@@ -150,10 +150,12 @@ export async function pollResults(creds, session, opts = {}) {
 
   const collected = [];
   let alsoCount = 0;
-  // ONE example of the second array, kept rather than only counted, so a
-  // support question about the flight half can be answered without spending
-  // another search to go and fetch it.
-  let alsoFirst = null;
+  // The second array, KEPT rather than only counted. A dynamic package prices
+  // the flight and the hotel separately and returns them in separate arrays, so
+  // counting the flights told us the search worked while leaving the price it
+  // produced out of the answer entirely.
+  const alsoResults = [];
+  const alsoMax = opts.alsoMax || 200;
   let polls = 0;
   let complete = false;
   let last = null;
@@ -178,7 +180,7 @@ export async function pollResults(creds, session, opts = {}) {
       const extra = r.data && r.data[also];
       if (Array.isArray(extra)) {
         alsoCount += extra.length;
-        if (!alsoFirst && extra.length) alsoFirst = extra[0];
+        for (const one of extra) { if (alsoResults.length < alsoMax) alsoResults.push(one); }
       }
     }
     const total = Number(r.data && r.data.total);
@@ -187,11 +189,11 @@ export async function pollResults(creds, session, opts = {}) {
   }
 
   if (!collected.length && last && !last.ok) {
-    return { ok: false, error: last.error, polls, results: [], complete, alsoCount, alsoFirst };
+    return { ok: false, error: last.error, polls, results: [], complete, alsoCount, alsoResults };
   }
   // Running out of polls is not an error: partial results are still results,
   // and a sweep that threw them away would cache nothing on a busy night.
-  return { ok: true, results: collected, polls, complete, alsoCount, alsoFirst, data: last && last.data };
+  return { ok: true, results: collected, polls, complete, alsoCount, alsoResults, data: last && last.data };
 }
 
 /** Open a search and poll it out in one call. */
