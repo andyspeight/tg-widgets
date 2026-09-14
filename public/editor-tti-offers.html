@@ -2478,6 +2478,30 @@
                              : ' found, but the cache write did not go through')
                  + (r.image ? ' \u00b7 with a photo' : ' \u00b7 no photo from the supplier')
                  + '</span>';
+            // A PACKAGE is priced per departure airport, so say which one this
+            // price is from, and how many airports were actually tried. The
+            // alternative is a number on screen that could be from any of
+            // them, which is how a Glasgow price gets quoted to somebody
+            // flying from Aberdeen.
+            if (r.pricedFrom && r.pricedFrom.length) {
+              text += '<br><span style="color:var(--tgse-ink-3)">Priced from '
+                    + esc(r.pricedFrom.join(', '))
+                    + (r.airports && r.airports.length > r.pricedFrom.length
+                        ? ' (tried ' + esc(r.airports.join(', ')) + ')' : '')
+                    + '. The widget shows one card per hotel at the best of these.</span>';
+            }
+            // THE PACKAGE CHECK. A package search that returned no flights has
+            // handed back a hotel price under a package heading, which is the
+            // exact thing Andy reported. Better said out loud here than found
+            // on a live site.
+            if (r.flightResults === 0) {
+              text += '<br><span style="color:var(--tgse-warning)">No flights came back with it, so '
+                    + 'this price may be the hotel on its own. Tell us and we will take it to '
+                    + 'Travelify with the search we sent.</span>';
+            } else if (r.flightResults > 0) {
+              text += '<br><span style="color:var(--tgse-ink-3)">' + r.flightResults
+                    + (r.flightResults === 1 ? ' flight' : ' flights') + ' priced with it.</span>';
+            }
             // A field the normaliser could not find is a named gap, not a
             // blank card. Surfaced because a cache full of nulls looks exactly
             // like a supplier with thin content.
@@ -2500,7 +2524,15 @@
         });
 
         let head = '<div style="margin-bottom:6px"><strong>' + d.found + ' of ' + d.tested + '</strong> found'
-                 + (d.cached ? ', ' + d.cached + ' cached' : '') + '.</div>';
+                 + (d.cached ? ', ' + d.cached + ' cached' : '')
+                 // A package costs one search per departure airport, so the
+                 // search count and the hotel count are different numbers and
+                 // the agent should be able to see both.
+                 + (d.searches && d.searches !== d.tested ? ' \u00b7 ' + d.searches + ' searches' : '')
+                 + '.</div>';
+        if (d.droppedNote) {
+          head += '<div style="color:var(--tgse-warning);margin-bottom:6px">' + esc(d.droppedNote) + '</div>';
+        }
         if (d.found) {
           head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">These are real searches and the '
                 + 'results are now in your cache, so the widget will show them straight away. The nightly '

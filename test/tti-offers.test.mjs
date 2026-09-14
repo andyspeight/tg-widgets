@@ -27,6 +27,7 @@ import {
   parseDeeplink, rowIsSearchable, normaliseAccommodationResult,
   cleanIp,
   buildDynamicPackageCriteria,
+  dpOrigins,
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
@@ -146,13 +147,18 @@ test('the cron asks for a package as a package, not a relabelled hotel', () => {
   assert.ok(/const isDp = search\.type !== 'Accommodation'/.test(CRON));
   assert.ok(/isDp\s*\n?\s*\? buildDynamicPackageCriteria\(item, opts\)/.test(CRON.replace(/\r/g, '')),
     'a package widget must get the package search');
-  assert.ok(/type: isDp \? 'DynamicPackages' : 'Accommodation'/.test(CRON),
-    'and the stored offer must say which it actually was');
+  // What the price COVERS travels on the offer, not in its shelf label: the
+  // cache key is per property and both searches return a property, so a stored
+  // 'DynamicPackages' type matched nothing the widget ever asked for.
+  assert.ok(/departureAirport: origin, includesFlights: true/.test(CRON),
+    'a package offer must carry the airport it flies from');
 });
 
 test('a property asked for as both types is swept as both, and pooled', () => {
-  assert.ok(/item\.searches\.map\(\(sr\) => fetchProperty\(item, sr\)\)/.test(CRON),
+  assert.ok(/asks\.map\(\(\[sr, origin\]\) => fetchProperty\(item, sr, origin\)\)/.test(CRON),
     'each product type a property was asked for needs its own request');
+  assert.ok(/for \(const origin of dpOrigins\(sr, CRON_MAX_ORIGINS\)\) asks\.push/.test(CRON),
+    'and a package needs one per departure airport');
   assert.ok(/verified: ok\.flatMap\(\(r\) => r\.verified\)/.test(CRON),
     'both types share one cache key, so their offers pool');
   assert.ok(/if \(budget < item\.searches\.length\) break;/.test(CRON),
@@ -780,7 +786,7 @@ test('a row is searchable with a country, with coordinates, or with both', () =>
 test('the test endpoint runs the real search and never the old feed', () => {
   assert.ok(/from '\.\/_lib\/offers\/travelify-search\.js'/.test(TEST_API),
     'it must use the booking API client');
-  assert.ok(/runSearch\(creds, criteria/.test(TEST_API));
+  assert.ok(/runSearch\(creds, job\.criteria/.test(TEST_API));
   // Match the CALL, not the word: the header comment explains why the feed
   // was abandoned, and an assertion that trips on its own documentation is a
   // bad assertion.
@@ -795,7 +801,7 @@ test('a successful test leaves a real cached offer behind', () => {
   // "It says it found something" and "the widget shows something" were two
   // different questions all week. The test collapses them into one.
   assert.ok(/setJson\(ttiKey\(creds\.appId, row\.code\)/.test(TEST_API));
-  assert.ok(/offers: normalised, refreshedAt/.test(TEST_API));
+  assert.ok(/offers, refreshedAt: new Date\(\)\.toISOString\(\)/.test(TEST_API));
   assert.ok(/offers:tti:\$\{appId\}:\$\{code\}/.test(TEST_API),
     'it must write the key api/cached-offers.js reads');
 });
@@ -1200,17 +1206,71 @@ test('a package is a different search, not a label on the hotel one', () => {
   assert.deepEqual(c.AccommodationSearchCriteria, a.AccommodationSearchCriteria);
 });
 
-test('the flight brackets the stay, and comes from the deeplink params', () => {
-  // Andy's DP deeplink is the accommodation one plus org, dst and dir.
+test('the flight is a journey of legs, which is what Travelify asked for', () => {
+  // The first attempt sent a flat Origins/DepartDate/ReturnDate lifted from
+  // the deeplink, and the service answered by name (Andy, 14 Sep 2026):
+  //   "FlightSearchCriteria - Legs: You must specify at least one flight leg;
+  //    FlightSearchCriteria - Passengers: You must specify at least one passenger"
   const c = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
-    { customerIp: '1.2.3.4', origins: ['LGW', 'LHR'] }, NOW);
+    { customerIp: '1.2.3.4', origins: ['LGW'], adults: 2 }, NOW);
   const f = c.FlightSearchCriteria;
-  assert.deepEqual(f.Origins, ['LGW', 'LHR'], 'several airports stay ONE search');
+  assert.ok(Array.isArray(f.Legs) && f.Legs.length >= 1, 'at least one flight leg');
+  assert.ok(Array.isArray(f.Passengers) && f.Passengers.length >= 1, 'at least one passenger');
+  assert.ok(!('Origins' in f), 'the flat shape the API rejected must be gone');
+  assert.ok(!('DepartDate' in f) && !('ReturnDate' in f));
   assert.equal(f.DirectOnly, false, 'dir=false on the deeplink');
-  // Out on the check-in, back on the check-out: different dates would price a
-  // package nobody asked for.
-  assert.equal(f.DepartDate, c.AccommodationSearchCriteria.CheckinDate);
-  assert.equal(f.ReturnDate, c.AccommodationSearchCriteria.CheckoutDate);
+
+  // Out on the check-in, back on the check-out. Different dates would price a
+  // package nobody asked for: a flight that lands after the room is given up.
+  assert.equal(f.Legs.length, 2, 'a return trip is two legs');
+  assert.equal(f.Legs[0].Origin, 'LGW');
+  assert.equal(f.Legs[0].DepartureDate, c.AccommodationSearchCriteria.CheckinDate);
+  assert.equal(f.Legs[1].Destination, 'LGW', 'and home again');
+  assert.equal(f.Legs[1].DepartureDate, c.AccommodationSearchCriteria.CheckoutDate);
+
+  // The party on the plane is the party in the room. Two adults in the hotel
+  // and one on the flight is a price for a holiday nobody booked.
+  assert.equal(f.Passengers.length, c.AccommodationSearchCriteria.Rooms[0].Guests.length);
+  assert.deepEqual(f.Passengers, [{ Type: 'Adult' }, { Type: 'Adult' }]);
+});
+
+test('one departure airport per search, because a leg carries one origin', () => {
+  // Several airports is several QUESTIONS. Sending only the first while the
+  // agent picked three would quote a price from an airport nobody asked about.
+  const c = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', origins: ['ABZ', 'GLA', 'EDI'] }, NOW);
+  assert.equal(c.FlightSearchCriteria.Legs[0].Origin, 'ABZ');
+  assert.equal(c.FlightSearchCriteria.Legs.length, 2, 'two legs, not one per airport');
+
+  // An explicit origin wins over the list, which is how the caller walks it.
+  const g = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'GB' },
+    { customerIp: '1.2.3.4', origins: ['ABZ', 'GLA', 'EDI'], origin: 'GLA' }, NOW);
+  assert.equal(g.FlightSearchCriteria.Legs[0].Origin, 'GLA');
+
+  // And the caller is given the list to walk, cleaned, deduped and capped:
+  // every airport is a search, and a nightly sweep pays for each one.
+  assert.deepEqual(dpOrigins({ origins: [' abz ', 'GLA', 'abz', 'nope', 'EDI', 'LGW'] }), ['ABZ', 'GLA', 'EDI']);
+  assert.deepEqual(dpOrigins({ origins: ['ABZ', 'GLA'] }, 1), ['ABZ']);
+  assert.deepEqual(dpOrigins({}), []);
+});
+
+test('a package price says which airport it flies from', () => {
+  // Three airports are three real prices. Showing the cheapest as THE price
+  // sells a Glasgow package to somebody flying from Aberdeen.
+  const r = { name: 'H', isAvailable: true, uniqueRef: 'TTI:1', rid: 9,
+    pricing: { total: 861, currency: 'GBP' }, media: [], location: {},
+    units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z' }] };
+  const dp = normaliseAccommodationResult(r, { departureAirport: 'ABZ', includesFlights: true });
+  assert.equal(dp.offer.departureAirport, 'ABZ');
+  assert.equal(dp.offer.includesFlights, true);
+  // A hotel on its own must not claim either.
+  const hotel = normaliseAccommodationResult(r, {});
+  assert.ok(!('departureAirport' in hotel.offer));
+  assert.ok(!('includesFlights' in hotel.offer));
+  // Both sit on the SAME shelf, because a TTI key holds one property and the
+  // widget reads the whole key.
+  assert.equal(dp.offer.type, 'Accommodation');
+  assert.equal(hotel.offer.type, 'Accommodation');
 });
 
 test('a package with no departure airport is refused, not downgraded', () => {
@@ -1224,7 +1284,9 @@ test('a package with no departure airport is refused, not downgraded', () => {
 
 test('the test endpoint runs the package search for a package widget', () => {
   assert.ok(/const isDp = body\.type === 'DynamicPackages'/.test(TEST_API));
-  assert.ok(/buildDynamicPackageCriteria\(row, search\)/.test(TEST_API));
+  assert.ok(/buildDynamicPackageCriteria\(row, \{ \.\.\.search, origin \}\)/.test(TEST_API),
+    'and one search per departure airport, because a leg carries one origin');
+  assert.ok(/const useOrigins = isDp \? dpOrigins\(search, MAX_ORIGINS\)/.test(TEST_API));
   assert.ok(!/dp_not_supported/.test(TEST_API), 'it is supported now');
   assert.ok(/<option value="DynamicPackages">/.test(EDITOR), 'and the option is selectable');
   assert.ok(/needs a departure airport/.test(EDITOR), 'with the real requirement stated');
@@ -1260,6 +1322,83 @@ test('no control is declared twice in the editor markup', () => {
   const seen = new Set(); const dupes = new Set();
   for (const id of ids) { if (seen.has(id)) dupes.add(id); seen.add(id); }
   assert.deepEqual([...dupes], [], `duplicated ids: ${[...dupes].join(', ')}`);
+});
+
+/* ============================================================
+   One card per hotel, however many airports priced it
+   ============================================================ */
+
+/** Lift one function out of the widget IIFE so it can be run rather than
+ *  pattern-matched. A regex over source proves the code is spelled a certain
+ *  way; this proves it does the right thing. */
+function liftFromWidget(name) {
+  const at = WIDGET.indexOf(`function ${name}(`);
+  assert.notEqual(at, -1, `${name} is not in the widget`);
+  let depth = 0; let end = -1;
+  for (let i = WIDGET.indexOf('{', at); i < WIDGET.length; i++) {
+    if (WIDGET[i] === '{') depth++;
+    else if (WIDGET[i] === '}' && --depth === 0) { end = i + 1; break; }
+  }
+  assert.notEqual(end, -1, `${name} has no closing brace`);
+  // eslint-disable-next-line no-new-func
+  return new Function(`${WIDGET.slice(at, end)}; return ${name};`)();
+}
+
+test('a hotel priced from three airports is ONE card, at the best price', () => {
+  const fold = liftFromWidget('foldTtiByProperty');
+  const at = (airport, price) => ({
+    id: `tti:1:${airport}`, accommodationUniqueRef: 'TTI:1', hotel: 'Hilton',
+    price, departureAirport: airport, includesFlights: true,
+  });
+  const out = fold([at('ABZ', 980), at('GLA', 861), at('EDI', 905)]);
+  assert.equal(out.length, 1, 'one hotel is one card, not three');
+  assert.equal(out[0].price, 861, 'and the price shown is the best one found');
+  assert.equal(out[0].departureAirport, 'GLA');
+  assert.deepEqual(out[0].departureAirports, ['ABZ', 'GLA', 'EDI'],
+    'with the other airports kept, so the card can say there is a choice');
+});
+
+test('the fold leaves hotel-only offers exactly as they were', () => {
+  // No package, no folding: two genuinely different hotels must stay two cards,
+  // and a widget showing one property over several dates must keep them all.
+  const fold = liftFromWidget('foldTtiByProperty');
+  const rows = [
+    { id: 'a', accommodationUniqueRef: 'TTI:1', hotel: 'Hilton', price: 500 },
+    { id: 'b', accommodationUniqueRef: 'TTI:1', hotel: 'Hilton', price: 620 },
+    { id: 'c', accommodationUniqueRef: 'TTI:2', hotel: 'Marriott', price: 400 },
+  ];
+  const out = fold(rows);
+  assert.equal(out.length, 3);
+  assert.strictEqual(out[0], rows[0], 'untouched, not rebuilt');
+  assert.deepEqual(fold([]), []);
+  assert.deepEqual(fold(null), []);
+});
+
+test('the fold never rewrites the array it was handed', () => {
+  // rawOffers can come straight out of the session cache and be shared with
+  // another render. Mutating an offer in place would leak a departure airport
+  // list into a widget that never asked for packages.
+  const fold = liftFromWidget('foldTtiByProperty');
+  const rows = [
+    { id: 'a', accommodationUniqueRef: 'TTI:1', price: 900, departureAirport: 'ABZ' },
+    { id: 'b', accommodationUniqueRef: 'TTI:1', price: 800, departureAirport: 'GLA' },
+  ];
+  const before = JSON.stringify(rows);
+  fold(rows);
+  assert.equal(JSON.stringify(rows), before, 'the input must be unchanged');
+});
+
+test('the widget folds only its own offers, and only on the TTI branch', () => {
+  assert.ok(/this\._isTti \? foldTtiByProperty\(data\.data\) : data\.data/.test(WIDGET),
+    'the country pool must not be folded — two hotels there are two cards');
+});
+
+test('the poller counts the flights that came back with a package', () => {
+  // "0 flights" and "this is a hotel-only price" look identical on a card, so
+  // the number is measured rather than assumed.
+  assert.ok(/also: 'flightResults'/.test(TEST_API), 'the test button must count them');
+  assert.ok(/also: 'flightResults'/.test(CRON), 'and so must the sweep');
+  assert.ok(/flightResults: acc\.flights/.test(TEST_API), 'and report the count back');
 });
 
 /* ============================================================

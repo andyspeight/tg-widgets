@@ -203,8 +203,15 @@ the response says so in `pinLooksIgnored`.
 
 **The sweep asks the way a DP deep link asks.** The nightly payload mirrors a
 dynamic-package deep link parameter for parameter: the package type, the
-departure points (`origins`, several in one request so they cannot multiply the
-budget), and the property anchor.
+departure point, and the property anchor.
+
+One correction to that mirroring, measured on 14 Sep 2026: a deep link carries
+`org` as a list, but the API does NOT. Its flight criteria take `Legs`, a leg
+carries a single origin, so **a package is one search per departure airport**.
+Three airports is three searches and three prices, not one wider question. That
+is a straight multiplier on the nightly bill, which is why both callers cap it
+(`MAX_ORIGINS` = 3 in the test button, `CRON_MAX_ORIGINS` = 3 in the sweep) and
+why `dpOrigins()` exists to hand out the capped, deduped list.
 
 The anchor's shape was CORRECTED on 14 Sep 2026 by two real deep links Andy
 supplied, one DP and one accommodation-only. Both pin a property like this:
@@ -404,22 +411,83 @@ it encodes are the ones that fail silently rather than loudly:
   and stops at once. A 417 is flagged as supplier-side so a sweep does not keep
   retrying a sold-out property.
 
-### What is built, and the one thing that is not
+### What is built
 
-Built and proven on the live service: the search client, the criteria builder,
-the result normaliser, the per-property cache write, the editor, and the widget
-read path.
+All of it, and the nightly sweep is on the same path as the Test button.
 
-**`api/cron/refresh-tti-offers.js` is STILL on the old `widgetsvc/traveloffers`
-path.** It is the last piece, and it is not harmless while it waits: it writes
-the same keys the Test button writes, so the first nightly run would OVERWRITE
-a good cache with the country-wide sieve that never found the property. Either
-move it over or stop it before it next runs.
+- The search client, the criteria builder, the result normaliser, the
+  per-property cache write, the editor, the widget read path. Proven: Andy
+  watched a real Hilton Bournemouth offer cache and render.
+- `api/cron/refresh-tti-offers.js` now runs that same search. It carries the
+  API key as well as the App ID, because Token auth needs both.
+- Dynamic packaging. The hotel half is IDENTICAL to a plain accommodation
+  search — a test compares the two objects — and only the flight half is new.
 
-It needs one decision that the Test button did not: a nightly job has no agent,
-so no customer address, and `CustomerIP` is required. The options are a value
-configured per deployment, the server's own egress address, or whatever
-Travelify considers correct for server-to-server use.
+  The first attempt sent a flat `Origins` / `DepartDate` / `ReturnDate` lifted
+  from the deeplink, and Travelify corrected it by name, which is the same loop
+  that settled `CustomerIP`:
+
+      FlightSearchCriteria - Legs: You must specify at least one flight leg
+      FlightSearchCriteria - Passengers: You must specify at least one passenger
+
+  So the flight is a JOURNEY. Two legs bracket the stay (out on the check-in,
+  back on the check-out) and the passengers mirror the room's `Guests`. What
+  that answer confirmed on the way past: the request reaches Travelify, the
+  auth and the whole accommodation half are accepted, and
+  `SearchType: 'DynamicPackaging'` is understood.
+
+  **Still inferred, and say so if it bites:** the field names INSIDE a leg
+  (`Origin` / `Destination` / `DepartureDate`) and the `Passengers` shape.
+  Travelify named the two containers, not their contents. A leg's destination
+  is the hotel's COUNTRY, because the accommodation half already pins the exact
+  property and a country is the only destination we can state truthfully.
+
+- **What a package price covers travels on the offer, not in its type.** A TTI
+  offer is always cached as `type: 'Accommodation'` — that is the shelf, since
+  the key holds one property and the widget reads the whole key. A package
+  carries `includesFlights: true` and `departureAirport`, and the test panel
+  reports how many flights came back, because "no flights" and "a hotel price
+  under a package heading" look identical on a card.
+
+- **One card per hotel** (`foldTtiByProperty`, widget v1.21.0). Three airports
+  cache three offers for one hotel, which is right in the cache and wrong on
+  the page. The widget folds them to the cheapest and keeps the rest in
+  `departureAirports`. Not yet rendered: no template shows the departure
+  airport on a card, so a visitor sees the best price without being told which
+  airport it flies from. That is the next honest gap on the package path.
+
+### The cron will not run without a customer address
+
+`TTI_CUSTOMER_IP` on the deployment. Every Travelify search requires one and a
+cron has no visitor to take it from.
+
+**It is never invented.** The field feeds geo and fraud checks, so a wrong value
+runs the whole sweep in the wrong market and caches prices for the wrong place —
+which looks exactly like working. Unset, the sweep writes nothing and says why,
+so the cache keeps whatever is in it. That is the safe direction, and it is why
+the widget was not at risk the night it went live.
+
+Worth asking Travelify what address they want for server-to-server searches,
+since it decides which market the prices come back in.
+
+### Who can have it
+
+**Not sold on any plan.** Every tier is 0 in `PLAN_WIDGET_LIMITS` and in the
+dashboard registry. The only way in is a DIRECT GRANT: an enabled Client
+Entitlements row sourced `Add-On` or `Manual Override`.
+
+That mechanism already existed and was only wired for contracting. Widgets now
+honour it in both places that decide — `resolveEntitlements` for the dashboard
+and the save gate in `api/widget-config.js` — so the two agree about who can
+create what. A `Package Default` row is deliberately NOT an override: it only
+mirrors the plan, and a stale one would keep granting a widget after the package
+stopped including it.
+
+MT Holidays (`recO0O3LMBvScaPb0`) holds the only grant. Catalogue item
+`widget-tti-offers` (`rec6S3tManU6YoTKj`), active, in no package.
+
+When it goes on sale: set the tiers and add it to the package in Control. The
+grant keeps working either way.
 
 ### Things that failed quietly, and are now guarded
 
@@ -451,20 +519,16 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 
 ## Next steps
 
-1. **Move the cron onto `api/_lib/offers/travelify-search.js`**, or disable it
-   until then. As it stands its first run overwrites good cached offers with
-   the old country-wide result. This is the only urgent item.
-2. **Decide the cron's `CustomerIP`**, per the note above. It cannot run
-   without one.
-3. **Dynamic packaging.** The editor offers it and nothing supports it yet: a
-   DP search needs `flightSearchCriteria` alongside the accommodation criteria,
-   and both selection objects at every later stage. Until it is built, both the
-   widget and the sweep speak Accommodation only.
-4. **Decide what "from" means.** Every search is one stay — currently 30 days
-   out, 7 nights, matching the `frd=30&dur=7` the existing deeplinks use. A
-   true from-price across a spread of dates multiplies the nightly search count
-   by however many dates are probed, so it is a budget decision rather than a
-   code one.
-5. **A hotel with no availability stays hidden** (Andy, 12 Sep 2026). An
-   enquire state is a different product and needs a card state designing across
-   every template.
+1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
+   should start running. Until then it skips, safely.
+2. **Show the departure airport on a card.** A package price belongs to one
+   airport and no template says which. The data is there (`departureAirport`,
+   `departureAirports`); it needs a line in each card template.
+3. **Decide what "from" means.** Every search is one stay, currently 30 days out
+   and 7 nights, matching the `frd=30&dur=7` the deeplinks use. A true from-price
+   across a spread of dates multiplies the nightly search count by however many
+   dates are probed, so it is a budget decision rather than a code one.
+4. **A hotel with no availability stays hidden** (Andy, 12 Sep 2026). An enquire
+   state is a different product and needs a card state across every template.
+5. **The old `Hotel Offers` WidgetType option** is still in Airtable, unused.
+   The API cannot remove a select option, so it needs deleting by hand.

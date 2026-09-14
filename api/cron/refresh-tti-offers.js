@@ -101,6 +101,11 @@ const CUSTOMER_IP = cleanIp(process.env.TTI_CUSTOMER_IP || '');
 // scoped to one property settles long before that, and a nightly run has many
 // properties to get through.
 const CRON_MAX_POLLS = 10;
+// Departure airports swept per package property per night. Travelify prices
+// ONE origin per search, so this is a straight multiplier on the nightly bill:
+// a widget offering six airports would otherwise cost six searches a night for
+// every hotel on it. Three is enough to give a visitor a real choice.
+const CRON_MAX_ORIGINS = 3;
 
 const TTI_PREFIX = 'offers:tti:';
 const ttiKey = (appId, code) => `${TTI_PREFIX}${appId}:${code}`;
@@ -125,6 +130,7 @@ import {
   buildTtiPayload,
   buildAccommodationCriteria,
   buildDynamicPackageCriteria,
+  dpOrigins,
   normaliseAccommodationResult,
   resultIsProperty,
   cleanIp,
@@ -227,6 +233,12 @@ export async function collectWork() {
           // widget is starved of the dates it asked for.
           same.DatesMin = Math.min(same.DatesMin, search.DatesMin);
           same.DatesMax = Math.max(same.DatesMax, search.DatesMax);
+          // And the union of the airports, so the second widget's departure
+          // points are not silently dropped by the first widget getting there
+          // first. dpOrigins caps what is actually swept.
+          for (const o of (search.origins || [])) {
+            if (!same.origins.includes(o)) same.origins.push(o);
+          }
         } else {
           existing.searches.push({ ...search });
         }
@@ -250,9 +262,12 @@ export async function collectWork() {
  *  A package is a DIFFERENT search rather than a label: it sends flight
  *  criteria alongside the hotel and prices the two together. Asking for one and
  *  storing the other is what put hotel-only prices under a package heading. */
-async function fetchProperty(item, search) {
+async function fetchProperty(item, search, origin = null) {
   const isDp = search.type !== 'Accommodation';
-  const opts = { ...search, customerIp: CUSTOMER_IP, customerUserAgent: 'Travelgenix-TtiOffersCron/1.0' };
+  const opts = {
+    ...search, customerIp: CUSTOMER_IP, customerUserAgent: 'Travelgenix-TtiOffersCron/1.0',
+    ...(origin ? { origin } : {}),
+  };
   const criteria = isDp
     ? buildDynamicPackageCriteria(item, opts)
     : buildAccommodationCriteria(item, opts);
@@ -264,6 +279,7 @@ async function fetchProperty(item, search) {
   const r = await runSearch({ appId: item.appId, apiKey: item.apiKey }, criteria, {
     maxPolls: CRON_MAX_POLLS,
     pick: 'accommodationResults',
+    ...(isDp ? { also: 'flightResults' } : {}),
   });
   if (!r.ok) return null;
 
@@ -272,30 +288,45 @@ async function fetchProperty(item, search) {
   for (const one of results) {
     if (!resultIsProperty(one, item.code)) continue;
     const n = normaliseAccommodationResult(one, {
-      type: isDp ? 'DynamicPackages' : 'Accommodation',
       ctry: item.ctry, lat: item.lat, lng: item.lng,
       locationName: item.locationName,
       currency: criteria.Currency,
       checkinDate: criteria.AccommodationSearchCriteria.CheckinDate,
+      // Which airport this price flies from. Without it, three airports would
+      // merge into one pile and the cheapest would be shown as THE price.
+      ...(origin ? { departureAirport: origin, includesFlights: true } : {}),
       deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
     });
     if (n && n.offer) verified.push(n.offer);
   }
-  return { returned: results.length, parsed: results.length, verified };
+  return { returned: results.length, parsed: results.length, verified, flights: r.alsoCount || 0 };
 }
 
 /** Sweep every product type one property was asked for, and pool the results.
  *  Returns null only when EVERY request failed — a partial failure still
  *  stores what did come back, because a hotel-only widget should not go blank
- *  because the package request timed out. */
+ *  because the package request timed out.
+ *
+ *  A PACKAGE IS ONE SEARCH PER DEPARTURE AIRPORT, not one search carrying a
+ *  list. Travelify's flight criteria take Legs and a leg has a single origin,
+ *  so a widget offering Aberdeen, Glasgow and Edinburgh is three searches and
+ *  three prices. Capped at CRON_MAX_ORIGINS, because this multiplies the
+ *  nightly bill by every airport a client adds. */
 async function fetchPropertyAllTypes(item) {
-  const results = await Promise.all(item.searches.map((sr) => fetchProperty(item, sr)));
+  const asks = [];
+  for (const sr of item.searches) {
+    if (sr.type === 'Accommodation') { asks.push([sr, null]); continue; }
+    for (const origin of dpOrigins(sr, CRON_MAX_ORIGINS)) asks.push([sr, origin]);
+  }
+  const results = await Promise.all(asks.map(([sr, origin]) => fetchProperty(item, sr, origin)));
   const ok = results.filter(Boolean);
   if (!ok.length) return null;
   return {
     returned: ok.reduce((n, r) => n + r.returned, 0),
     parsed: ok.reduce((n, r) => n + r.parsed, 0),
     verified: ok.flatMap((r) => r.verified),
+    searches: asks.length,
+    flights: ok.reduce((n, r) => n + (r.flights || 0), 0),
     partial: ok.length < results.length,
   };
 }
@@ -311,7 +342,10 @@ async function storeProperty(item, offers, nowIso) {
   const seen = new Set();
   const unique = [];
   for (const o of offers) {
-    const k = `${o.id}|${o.origin || ''}|${o.type || 'Packages'}`;
+    // departureAirport is part of the identity: the same hotel on the same
+    // dates from Aberdeen and from Glasgow is two offers at two prices, and
+    // without this the second one would be thrown away as a duplicate.
+    const k = `${o.id}|${o.origin || ''}|${o.departureAirport || ''}|${o.type || 'Packages'}`;
     if (seen.has(k)) continue;
     seen.add(k);
     unique.push(o);

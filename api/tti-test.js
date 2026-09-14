@@ -36,7 +36,7 @@ import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } fro
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
   canonTti, cleanCtry, cleanIp, parseDeeplink, buildAccommodationCriteria,
-  buildDynamicPackageCriteria, resultIsProperty, normaliseAccommodationResult,
+  buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
 import { setJson } from './_redis.js';
@@ -50,6 +50,13 @@ const MAX_POLLS = 8;
 // Stop starting new work past this, so a slow supplier cannot run the function
 // into the platform's own timeout and return an empty body to the browser.
 const DEADLINE_MS = 42000;
+// Searches, not hotels. A package prices ONE departure airport at a time, so
+// three airports across two hotels is six searches and the old per-hotel cap
+// counted it as two. This is the number that actually costs money and time.
+const MAX_SEARCHES = 6;
+// Departure airports per test run. More than this and a single click on Test
+// is running a small sweep.
+const MAX_ORIGINS = 3;
 
 const ttiKey = (appId, code) => `offers:tti:${appId}:${code}`;
 
@@ -148,7 +155,6 @@ export default async function handler(req, res) {
   // whole route 500'd and the browser got Vercel's plain-text error page
   // instead of JSON ("Unexpected token 'A', \"A server e\"...").
   const isDp = body.type === 'DynamicPackages';
-  const type = isDp ? 'DynamicPackages' : 'Accommodation';
   const origins = Array.isArray(body.origins) ? body.origins : [];
   if (isDp && !origins.length) {
     return res.status(400).json({
@@ -165,42 +171,72 @@ export default async function handler(req, res) {
     customerIp,
     customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
   };
-  const results = new Array(rows.length);
+
+  // ONE SEARCH PER DEPARTURE AIRPORT.
+  //
+  // Travelify's flight criteria take Legs, and a leg has a single origin. So
+  // "ABZ, GLA, EDI" is three questions, not one wider one, and a hotel tested
+  // from three airports costs three searches. Ordered by airport rank so every
+  // hotel is tried from the FIRST airport before any hotel is tried from the
+  // second: "does this package at all" matters more than "which airport is
+  // cheapest", and the cap below bites the second question first.
+  const useOrigins = isDp ? dpOrigins(search, MAX_ORIGINS) : [null];
+  const jobs = [];
+  const unsearchable = new Map();
+  for (const origin of useOrigins) {
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      const criteria = isDp
+        ? buildDynamicPackageCriteria(row, { ...search, origin })
+        : buildAccommodationCriteria(row, search);
+      if (!criteria) {
+        // Never fall back to a broader search. A row without a country is not
+        // a wider question, it is a different one.
+        unsearchable.set(idx, 'Add the two-letter country for this hotel, so we know where to look.');
+        continue;
+      }
+      jobs.push({ idx, row, origin, criteria });
+    }
+  }
+  const dropped = Math.max(0, jobs.length - MAX_SEARCHES);
+  jobs.length = Math.min(jobs.length, MAX_SEARCHES);
+
+  // Per hotel, gathered across however many airports it was searched from.
+  const perRow = rows.map(() => ({ offers: [], gaps: new Set(), tried: [], failures: [], polls: 0, areaResults: 0, flights: 0 }));
   let shape = null;
 
   let i = 0;
-  const workers = Array.from({ length: Math.min(CONCURRENCY, rows.length) }, async () => {
-    while (i < rows.length) {
-      const idx = i++;
-      const row = rows[idx];
+  const workers = Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, async () => {
+    while (i < jobs.length) {
+      const job = jobs[i++];
+      const acc = perRow[job.idx];
+      const label = job.origin ? `${job.row.code} from ${job.origin}` : job.row.code;
 
-      const criteria = isDp
-        ? buildDynamicPackageCriteria(row, search)
-        : buildAccommodationCriteria(row, search);
-      if (!criteria) {
-        // Never fall back to a broader search. A row without coordinates is
-        // not a wider question, it is a different one.
-        results[idx] = { code: row.code, status: 'incomplete',
-          detail: 'Add the two-letter country for this hotel, so we know where to look.' };
-        continue;
-      }
       if (Date.now() - startedAt > DEADLINE_MS) {
-        results[idx] = { code: row.code, status: 'skipped',
-          detail: 'Ran out of time this round. Test fewer hotels at once.' };
+        acc.failures.push(`${label}: ran out of time this round. Test fewer hotels, or fewer airports, at once.`);
         continue;
       }
 
       // Both product types return their properties in accommodationResults —
-      // on a package that row carries the combined price, with the flight
-      // alongside in flightResults.
-      const r = await runSearch(creds, criteria, { maxPolls: MAX_POLLS, pick: 'accommodationResults' });
+      // on a package that row carries the property, with the flights alongside
+      // in flightResults. `also` counts those, because "0 flights came back"
+      // and "this is a hotel-only price" look identical on a card.
+      const r = await runSearch(creds, job.criteria, {
+        maxPolls: MAX_POLLS,
+        pick: 'accommodationResults',
+        ...(isDp ? { also: 'flightResults' } : {}),
+      });
+      acc.tried.push(job.origin || 'hotel-only');
       if (!r.ok) {
-        results[idx] = { code: row.code, status: 'failed', detail: r.error,
-          ...(r.supplierError ? { supplierError: true } : {}) };
+        acc.failures.push(`${label}: ${r.error}`);
+        if (r.supplierError) acc.supplierError = true;
         continue;
       }
+      acc.polls += r.polls || 0;
+      acc.areaResults += (r.results || []).length;
+      acc.flights += r.alsoCount || 0;
 
-      const mine = (r.results || []).filter((x) => resultIsProperty(x, row.code));
+      const mine = (r.results || []).filter((x) => resultIsProperty(x, job.row.code));
       // Record the raw shape ONCE, from whatever came back, so a normaliser
       // built on guesses can be corrected against reality rather than argued
       // about. Keys only — never the full payload.
@@ -232,55 +268,89 @@ export default async function handler(req, res) {
       }
 
       if (!mine.length) {
-        results[idx] = {
-          code: row.code, status: 'not-in-results',
-          areaResults: r.results.length, complete: r.complete, polls: r.polls,
-          detail: r.results.length
-            ? 'The search ran but this property was not among the results.'
-            : 'The search ran and returned nothing at all for those dates.',
-        };
+        acc.failures.push(`${label}: ${(r.results || []).length
+          ? 'the search ran but this property was not among the results.'
+          : 'the search ran and returned nothing at all for those dates.'}`);
         continue;
       }
 
-      const normalised = [];
-      const gaps = new Set();
       for (const one of mine) {
         const n = normaliseAccommodationResult(one, {
-          type, ctry: row.ctry, lat: row.lat, lng: row.lng,
-          locationName: row.locationName, currency: criteria.Currency,
-          checkinDate: criteria.AccommodationSearchCriteria.CheckinDate,
+          ctry: job.row.ctry, lat: job.row.lat, lng: job.row.lng,
+          locationName: job.row.locationName, currency: job.criteria.Currency,
+          checkinDate: job.criteria.AccommodationSearchCriteria.CheckinDate,
+          // A package price belongs to the airport it flies from. Without this
+          // the cheapest of three airports would be shown as THE price.
+          ...(job.origin ? { departureAirport: job.origin, includesFlights: true } : {}),
           // The bookable link belongs to the SESSION, not to the result, so it
           // comes from the response rather than being built here.
           deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
         });
         if (!n) continue;
-        normalised.push(n.offer);
-        for (const g of n.unmapped) gaps.add(g);
+        acc.offers.push(n.offer);
+        for (const g of n.unmapped) acc.gaps.add(g);
       }
-
-      if (!normalised.length) {
-        results[idx] = { code: row.code, status: 'no-price', found: mine.length,
-          detail: 'Found the property but no usable price came back, so nothing was cached.' };
-        continue;
-      }
-
-      const cheapest = normalised.reduce((a, b) => (b.price < a.price ? b : a));
-      const wrote = await setJson(ttiKey(creds.appId, row.code), {
-        offers: normalised, refreshedAt: new Date().toISOString(),
-      });
-
-      results[idx] = {
-        code: row.code, status: 'found', offers: normalised.length,
-        cached: !!wrote,
-        hotel: cheapest.hotel, fromPrice: cheapest.price, currency: cheapest.currency,
-        checkinDate: cheapest.checkinDate, nights: cheapest.nights,
-        image: cheapest.image ? true : false,
-        polls: r.polls, complete: r.complete,
-        ...(gaps.size ? { unmapped: [...gaps] } : {}),
-      };
     }
   });
   await Promise.all(workers);
+
+  const results = await Promise.all(rows.map(async (row, idx) => {
+    if (unsearchable.has(idx)) {
+      return { code: row.code, status: 'incomplete', detail: unsearchable.get(idx) };
+    }
+    const acc = perRow[idx];
+    if (!acc.tried.length) {
+      return { code: row.code, status: 'skipped',
+        detail: acc.failures[0] || 'Not reached this round. Test fewer hotels, or fewer airports, at once.' };
+    }
+    if (!acc.offers.length) {
+      return {
+        code: row.code,
+        // A search that RAN and found nothing is not a failed search: the
+        // property has no availability, which is an amber answer, not a red
+        // one. Only a request that never completed is a failure. `polls` is
+        // the honest test of which happened.
+        status: acc.polls ? 'not-in-results' : 'failed',
+        detail: acc.failures.join(' ') || 'Nothing usable came back, so nothing was cached.',
+        areaResults: acc.areaResults, polls: acc.polls,
+        ...(isDp ? { airports: acc.tried, flightResults: acc.flights } : {}),
+        ...(acc.supplierError ? { supplierError: true } : {}),
+      };
+    }
+
+    // One offer per hotel per airport, cheapest kept. Three airports should
+    // give a visitor three prices to choose between, not the same hotel three
+    // times at whatever each supplier happened to quote.
+    const best = new Map();
+    for (const o of acc.offers) {
+      const k = (o.departureAirport || '') + '|' + (o.checkinDate || '');
+      const cur = best.get(k);
+      if (!cur || o.price < cur.price) best.set(k, o);
+    }
+    const offers = [...best.values()].sort((a, b) => a.price - b.price);
+    const cheapest = offers[0];
+    const wrote = await setJson(ttiKey(creds.appId, row.code), {
+      offers, refreshedAt: new Date().toISOString(),
+    });
+
+    return {
+      code: row.code, status: 'found', offers: offers.length, cached: !!wrote,
+      hotel: cheapest.hotel, fromPrice: cheapest.price, currency: cheapest.currency,
+      checkinDate: cheapest.checkinDate, nights: cheapest.nights,
+      image: cheapest.image ? true : false,
+      polls: acc.polls,
+      ...(isDp ? {
+        airports: acc.tried,
+        // What the price actually covers. A package that found no flights is a
+        // hotel price under a package heading, which is the exact thing Andy
+        // reported, so it is said out loud rather than left to be assumed.
+        flightResults: acc.flights,
+        pricedFrom: offers.map((o) => o.departureAirport).filter(Boolean),
+      } : {}),
+      ...(acc.failures.length ? { notes: acc.failures } : {}),
+      ...(acc.gaps.size ? { unmapped: [...acc.gaps] } : {}),
+    };
+  }));
 
   const found = results.filter((r) => r && r.status === 'found').length;
   return res.status(200).json({
@@ -288,6 +358,13 @@ export default async function handler(req, res) {
     tested: rows.length,
     found,
     cached: results.filter((r) => r && r.cached).length,
+    searches: jobs.length,
+    ...(isDp ? { airports: useOrigins } : {}),
+    ...(dropped ? {
+      dropped,
+      droppedNote: `${dropped} search${dropped === 1 ? '' : 'es'} skipped to stay inside one click. `
+        + 'Test fewer hotels, or fewer departure airports, at a time.',
+    } : {}),
     elapsedMs: Date.now() - startedAt,
     shape,
     results,
