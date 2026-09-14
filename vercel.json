@@ -146,6 +146,10 @@
     {
       "path": "/api/cron/destinations-worker",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/refresh-tti-offers",
+      "schedule": "30 2 * * *"
     }
   ],
   "redirects": [
@@ -568,6 +572,18 @@
     {
       "source": "/editor-offers",
       "destination": "/editor-offers.html"
+    },
+    {
+      "source": "/widget-tti-offers.js",
+      "destination": "/widget-offers.js"
+    },
+    {
+      "source": "/editor-tti-offers",
+      "destination": "/editor-tti-offers.html"
+    },
+    {
+      "source": "/demo-tti-offers",
+      "destination": "/demo-tti-offers.html"
     },
     {
       "source": "/editor-textfx",
@@ -1369,6 +1385,23 @@
     },
     {
       "source": "/widget-offers.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/widget-tti-offers.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
