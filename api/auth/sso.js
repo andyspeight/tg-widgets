@@ -1,5 +1,12 @@
 /**
- * GET /api/auth/sso?ssotoken=<JWT>&next=<path>
+ * GET /api/auth/sso?ssotoken=<JWT>&next=<path>&widgetId=<slug>
+ *
+ * ?widgetId (optional, added 14 Sep 2026) deep links the signed-in user
+ * straight to that widget's editor instead of the dashboard, so Travelify's
+ * Widget Directory can click through to a specific widget. It is resolved
+ * ONLY against the internal widget registry — an arbitrary path can never
+ * reach the Location header through it — and an unknown or out-of-plan value
+ * falls back to the dashboard rather than failing the sign-in.
  *
  * Single sign-on endpoint for the main Travelify platform. The platform
  * mints an HS256-signed JWT containing the user and company identity, and
@@ -59,6 +66,9 @@ import { getRequestIp, getUserAgent } from '../_lib/auth/http.js';
 import { resolveUserPermissions } from '../_lib/auth/permissions.js';
 import { logAuthEvent } from '../_lib/auth/audit.js';
 import { revokeAllUserSessions } from '../_lib/auth/sessions.js';
+import { normalisePlanValue } from '../_lib/auth/plan.js';
+import { WIDGETS_BY_ID } from '../_lib/widget-registry.js';
+import { isInPlan } from '../_lib/v1/widget-view.js';
 
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
@@ -181,6 +191,44 @@ function safeNext(rawNext) {
   return ok ? rawNext : DEFAULT_REDIRECT;
 }
 
+/**
+ * Where an optional ?widgetId should land the user.
+ *
+ * Returns an internal editor path, or null to mean "use the normal target".
+ * Null is the answer for anything we are not certain about: a missing value, a
+ * malformed slug, a widget we do not have, or one this client's plan does not
+ * include. A stale link in Travelify's directory must never block a sign-in.
+ *
+ * Open-redirect safety: the path returned is the registry's own editorUrl for
+ * a matched widget. Nothing from the query string is ever echoed into it.
+ *
+ * Andy's call (14 Sep 2026): the deep link starts a NEW widget of that type,
+ * which is what /editor-<tag> with no ?id= does.
+ */
+async function widgetDeepLink(rawWidgetId, clientRec) {
+  const raw = Array.isArray(rawWidgetId) ? rawWidgetId[0] : rawWidgetId;
+  if (!isStringLike(raw)) return null;
+
+  const id = raw.trim().toLowerCase();
+  if (!/^[a-z0-9-]{1,40}$/.test(id)) return null;
+
+  const widget = WIDGETS_BY_ID[id];
+  if (!widget || !widget.editorUrl || !widget.editorUrl.startsWith('/')) return null;
+
+  // Same plan rule the directory endpoint filters on, so a link Travelify
+  // showed keeps working and one it never should have shown does not.
+  // Mirrors resolveClientPlan() without re-fetching the client we already hold.
+  const fields = clientRec?.fields || {};
+  let plan = await normalisePlanValue(fields[CLIENTS.fields.plan]);
+  if (!plan) plan = await normalisePlanValue(fields[CLIENTS.fields.package]);
+  if (!isInPlan(widget, plan)) {
+    console.log('[sso] widgetId', id, 'not in plan', plan || 'unresolved', '— using default target');
+    return null;
+  }
+
+  return widget.editorUrl;
+}
+
 function isStringLike(v) { return typeof v === 'string' && v.length > 0; }
 function isValidEmailStrict(s) {
   return typeof s === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 254;
@@ -221,6 +269,11 @@ async function claimTokenJti(tokenHash, ttlSeconds) {
 }
 
 // ─── Main handler ───────────────────────────────────────────────────
+
+// Exported for tests — the redirect-target rules are the open-redirect surface
+// of this endpoint, so they are pinned directly rather than only through a
+// full sign-in.
+export const _test = { widgetDeepLink, safeNext };
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -901,7 +954,10 @@ export default async function handler(req, res) {
       },
     }).catch(() => {});
 
-    return redirectTo(res, safeNext(req.query?.next));
+    // A widget deep link wins over ?next=, being the more specific intent.
+    // Both fall back to the dashboard.
+    const deepLink = await widgetDeepLink(req.query?.widgetId, clientRec);
+    return redirectTo(res, deepLink || safeNext(req.query?.next));
   } catch (err) {
     console.error('[sso] unexpected error:', err);
     logAuthEvent({

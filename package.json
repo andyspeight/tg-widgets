@@ -205,7 +205,13 @@
     "test:destinations-dashboard": "node tests/destinations-dashboard-page.cjs",
     "test:destinations-fill": "node tests/destinations-fill.cjs",
     "test:destinations-source": "node tests/destinations-source.cjs",
-    "test:offers-rate-limit": "node test/offers-rate-limit-smoke.mjs"
+    "test:offers-rate-limit": "node test/offers-rate-limit-smoke.mjs",
+    "build:widget-registry": "node scripts/build-widget-registry.mjs",
+    "build:widget-previews": "node scripts/generate-widget-previews.mjs",
+    "test:widget-registry-drift": "node scripts/build-widget-registry.mjs --check",
+    "test:travelify-registry": "node test/travelify-widget-registry-smoke.mjs",
+    "test:travelify-api": "node test/travelify-platform-api-smoke.mjs",
+    "test:travelify": "node test/travelify-widget-registry-smoke.mjs && node test/travelify-platform-api-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
