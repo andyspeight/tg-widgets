@@ -36,7 +36,7 @@ import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } fro
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
   canonTti, cleanCtry, cleanIp, parseDeeplink, buildAccommodationCriteria,
-  resultIsProperty, normaliseAccommodationResult,
+  buildDynamicPackageCriteria, resultIsProperty, normaliseAccommodationResult,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
 import { setJson } from './_redis.js';
@@ -140,24 +140,25 @@ export default async function handler(req, res) {
   const search = {
     currency: body.currency, nationality: body.nationality,
     leadDays: body.leadDays, nights: body.nights, adults: body.adults,
+    origins, cabinClass: body.cabinClass, directOnly: body.directOnly === true,
     customerIp,
     customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
   };
-  // Accommodation only, for now, and said out loud rather than silently
-  // coerced. A dynamic package needs flightSearchCriteria alongside the
-  // accommodation criteria and prices the two together; running a hotel search
-  // and labelling it a package would hand back hotel-only prices under a
-  // package heading (Andy hit exactly that, 14 Sep 2026).
-  if (body.type === 'DynamicPackages') {
+  // A dynamic package is a DIFFERENT SEARCH, not a label on this one: it sends
+  // flight criteria alongside the hotel and prices the two together. Running
+  // the hotel search and calling it a package is what produced hotel-only
+  // prices under a package heading (Andy, 14 Sep 2026), so the two paths are
+  // kept apart here rather than coerced into one.
+  const isDp = body.type === 'DynamicPackages';
+  const type = isDp ? 'DynamicPackages' : 'Accommodation';
+  const origins = Array.isArray(body.origins) ? body.origins : [];
+  if (isDp && !origins.length) {
     return res.status(400).json({
-      error: 'Flight + hotel packages are not switched on yet. A package is a different '
-           + 'search that prices the flight and the hotel together, and running the hotel '
-           + 'search alone would give you hotel-only prices under a package heading. '
-           + 'Switch this widget to "The hotel on its own" to test it.',
-      code: 'dp_not_supported',
+      error: 'A flight + hotel package needs a departure airport. Add at least one to '
+           + 'Origins, or switch this widget to "The hotel on its own".',
+      code: 'dp_needs_origin',
     });
   }
-  const type = 'Accommodation';
   const results = new Array(rows.length);
   let shape = null;
 
@@ -167,7 +168,9 @@ export default async function handler(req, res) {
       const idx = i++;
       const row = rows[idx];
 
-      const criteria = buildAccommodationCriteria(row, search);
+      const criteria = isDp
+        ? buildDynamicPackageCriteria(row, search)
+        : buildAccommodationCriteria(row, search);
       if (!criteria) {
         // Never fall back to a broader search. A row without coordinates is
         // not a wider question, it is a different one.
@@ -181,6 +184,9 @@ export default async function handler(req, res) {
         continue;
       }
 
+      // Both product types return their properties in accommodationResults —
+      // on a package that row carries the combined price, with the flight
+      // alongside in flightResults.
       const r = await runSearch(creds, criteria, { maxPolls: MAX_POLLS, pick: 'accommodationResults' });
       if (!r.ok) {
         results[idx] = { code: row.code, status: 'failed', detail: r.error,

@@ -918,19 +918,18 @@
                 <label class="field-label" for="cfgType">What to fetch</label>
                 <select id="cfgType">
                   <option value="Accommodation">The hotel on its own</option>
-                  <option value="DynamicPackages" disabled>Flight + hotel (dynamic package) — coming soon</option>
+                  <option value="DynamicPackages">Flight + hotel (dynamic package)</option>
                 </select>
                 <div class="field-help">
                   Two choices, because a property code pins a hotel. A flight has no hotel
                   to pin, and an operator package holiday is sold as a whole bundle rather
                   than assembled around a property you choose.
                   <br><br>
-                  <strong>Flight + hotel is not switched on yet.</strong> A dynamic package
-                  is a different search: it needs a departure point and flight criteria
-                  alongside the hotel, and it prices the two together. Choosing it today
-                  would quietly give you hotel-only prices under a package heading, so it
-                  is disabled until the package search is built rather than left to look
-                  like it works.
+                  <strong>Flight + hotel needs a departure airport.</strong> A package is a
+                  different search: it prices the flight and the hotel together, so it has
+                  to know where the flight leaves from. Add at least one airport under
+                  Origins below, or the test will tell you it is missing rather than
+                  quietly pricing the hotel on its own.
                 </div>
               </div>
             </div>
@@ -2446,7 +2445,15 @@
         const res = await fetch('/api/tti-test', {
           method: 'POST',
           headers: window.tgse.authHeaders(),
-          body: JSON.stringify({ rows, type: state.config.type }),
+          // Origins ride along: a package search cannot be built without a
+          // departure airport, and the endpoint says so by name rather than
+          // pricing the hotel on its own.
+          body: JSON.stringify({
+            rows,
+            type: state.config.type,
+            origins: state.config.origins || [],
+            cabinClass: (state.config.cabinClasses || [])[0],
+          }),
           signal: ctl.signal,
         });
         if (res.status === 401) { window.tgse.showLogin(); return; }
