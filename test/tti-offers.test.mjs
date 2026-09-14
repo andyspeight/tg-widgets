@@ -31,6 +31,7 @@ import {
 } from '../api/_lib/offers/tti.js';
 
 const WIDGET = readFileSync(new URL('../public/widget-offers.js', import.meta.url), 'utf8');
+const TTI_SRC = readFileSync(new URL('../api/_lib/offers/tti.js', import.meta.url), 'utf8');
 const CACHED = readFileSync(new URL('../api/cached-offers.js', import.meta.url), 'utf8');
 const CRON = readFileSync(new URL('../api/cron/refresh-tti-offers.js', import.meta.url), 'utf8');
 const TTI_LIB = readFileSync(new URL('../api/_lib/offers/tti.js', import.meta.url), 'utf8');
@@ -150,7 +151,7 @@ test('the cron asks for a package as a package, not a relabelled hotel', () => {
   // What the price COVERS travels on the offer, not in its shelf label: the
   // cache key is per property and both searches return a property, so a stored
   // 'DynamicPackages' type matched nothing the widget ever asked for.
-  assert.ok(/departureAirport: origin, includesFlights: true/.test(CRON),
+  assert.ok(/\.\.\.\(origin \? \{ origin \} : \{\}\)/.test(CRON),
     'a package offer must carry the airport it flies from');
 });
 
@@ -166,11 +167,13 @@ test('a property asked for as both types is swept as both, and pooled', () => {
 });
 
 test('the engine never asks the cache for a type the sweep cannot store', () => {
-  // The sweep runs an ACCOMMODATION search and nothing else — a dynamic
-  // package needs flightSearchCriteria alongside it and is not built yet — so
-  // asking for any other type matches nothing while the cache is full.
-  assert.ok(/q\.set\('type', 'Accommodation'\);/.test(WIDGET),
-    'the TTI branch must ask for the only type this pool can hold');
+  // The sweep stores exactly two types and the widget may ask for exactly
+  // those two. This was pinned to 'Accommodation' for a day while packages
+  // were stored under the wrong type; now both sides name the same thing, the
+  // rule is that the widget asks for what it was configured as — and that the
+  // coercion admits nothing else.
+  assert.ok(/q\.set\('type', String\(this\.cfg\.type\) === 'DynamicPackages' \? 'DynamicPackages' : 'Accommodation'\)/.test(WIDGET),
+    'the TTI branch must ask for its configured type, coerced to the two that exist');
 });
 
 test('the editor and demo offer only the two supported types', () => {
@@ -1074,12 +1077,21 @@ test('a hotel search is cached as Accommodation, whatever the widget is set to',
 });
 
 test('the widget asks the cache for the type the sweep actually writes', () => {
-  assert.ok(/q\.set\('type', 'Accommodation'\);/.test(WIDGET));
-  assert.ok(!/if \(type !== 'Accommodation'\) q\.set\('type', 'DynamicPackages'\)/.test(WIDGET),
-    'asking for a type nothing in this pool can have matched nothing while the cache was full');
-  // And the editor strip must mirror it, or it promises a pool the widget
-  // cannot draw from.
-  assert.ok(/q\.set\('type', 'Accommodation'\);/.test(EDITOR));
+  // The three places that must agree on one answer, or a full cache reads as
+  // an empty one: what the sweep STORES, what the widget ASKS FOR, and what
+  // the editor's own strip counts. They have disagreed twice now, and each
+  // time it looked exactly like a supplier with no availability.
+  const writes = ["'Packages'", "'Accommodation'"];
+  for (const t of writes) assert.ok(TTI_SRC.includes(t), `the sweep must be able to store ${t}`);
+
+  const asks = /String\(\w+(?:\.\w+)*\.type\) === 'DynamicPackages' \? 'DynamicPackages' : 'Accommodation'/;
+  assert.ok(asks.test(WIDGET), 'the widget asks for its configured type');
+  assert.ok(asks.test(EDITOR), 'and the editor strip must mirror it exactly');
+
+  // And a DynamicPackages ask must be satisfiable by what the sweep writes:
+  // 'Packages' plus a packageType, which is what typePredicate requires.
+  assert.ok(/packageType: 'DynamicPackages'/.test(TTI_SRC),
+    "a 'Packages' offer with no packageType reads as an operator package");
 });
 
 test('the coordinates are stored under the names the cache read rebuilds from', () => {
@@ -1228,6 +1240,19 @@ test('the flight is a journey of legs, which is what Travelify asked for', () =>
   assert.equal(f.Legs[1].Destination, 'LGW', 'and home again');
   assert.equal(f.Legs[1].DepartureDate, c.AccommodationSearchCriteria.CheckoutDate);
 
+  // Each value is sent under every plausible spelling, because Travelify named
+  // the containers and not their contents, and it ignores fields it does not
+  // recognise. An alias carrying a DIFFERENT value would be a real bug — it
+  // would mean the answer depended on which name the API happened to read.
+  for (const [i, leg] of f.Legs.entries()) {
+    assert.equal(new Set([leg.Origin, leg.OriginCode, leg.From]).size, 1,
+      `leg ${i}: every origin alias must carry the same value`);
+    assert.equal(new Set([leg.Destination, leg.DestinationCode, leg.To]).size, 1,
+      `leg ${i}: every destination alias must carry the same value`);
+    assert.equal(new Set([leg.DepartureDate, leg.DepartDate, leg.Date]).size, 1,
+      `leg ${i}: every date alias must carry the same value`);
+  }
+
   // The party on the plane is the party in the room. Two adults in the hotel
   // and one on the flight is a price for a holiday nobody booked.
   assert.equal(f.Passengers.length, c.AccommodationSearchCriteria.Rooms[0].Guests.length);
@@ -1254,23 +1279,73 @@ test('one departure airport per search, because a leg carries one origin', () =>
   assert.deepEqual(dpOrigins({}), []);
 });
 
-test('a package price says which airport it flies from', () => {
-  // Three airports are three real prices. Showing the cheapest as THE price
-  // sells a Glasgow package to somebody flying from Aberdeen.
+test('a package is stored AS a package, in the fields the product already uses', () => {
+  // Not a bespoke shape. These three fields are what the whole read path is
+  // built on, and using them is what makes the card draw a flight without a
+  // line of new template code. The first attempt invented departureAirport and
+  // includesFlights on an 'Accommodation' offer, which nothing downstream could
+  // recognise as a package.
   const r = { name: 'H', isAvailable: true, uniqueRef: 'TTI:1', rid: 9,
     pricing: { total: 861, currency: 'GBP' }, media: [], location: {},
     units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z' }] };
-  const dp = normaliseAccommodationResult(r, { departureAirport: 'ABZ', includesFlights: true });
-  assert.equal(dp.offer.departureAirport, 'ABZ');
-  assert.equal(dp.offer.includesFlights, true);
-  // A hotel on its own must not claim either.
-  const hotel = normaliseAccommodationResult(r, {});
-  assert.ok(!('departureAirport' in hotel.offer));
-  assert.ok(!('includesFlights' in hotel.offer));
-  // Both sit on the SAME shelf, because a TTI key holds one property and the
-  // widget reads the whole key.
-  assert.equal(dp.offer.type, 'Accommodation');
-  assert.equal(hotel.offer.type, 'Accommodation');
+
+  const dp = normaliseAccommodationResult(r, { origin: 'ABZ' }).offer;
+  assert.equal(dp.type, 'Packages', 'the family cached-offers filters on');
+  assert.equal(dp.packageType, 'DynamicPackages', 'what packageKindOf reads');
+  assert.equal(dp.origin, 'ABZ', 'what hasFlight and flight.origin.iataCode read');
+  assert.ok(!('departureAirport' in dp), 'no second name for the same thing');
+  assert.ok(!('includesFlights' in dp), 'implied by the type, not restated');
+
+  // A hotel on its own claims none of it.
+  const hotel = normaliseAccommodationResult(r, {}).offer;
+  assert.equal(hotel.type, 'Accommodation');
+  assert.ok(!('packageType' in hotel));
+  assert.ok(!('origin' in hotel));
+});
+
+test('a stored package satisfies the read side that has to find it', () => {
+  // The exact predicates in api/cached-offers.js, applied to a real stored
+  // offer. These two files disagreeing is what hid a full cache behind an
+  // empty preview, and a test that only checks the writer cannot catch it.
+  const dp = normaliseAccommodationResult(
+    { name: 'H', isAvailable: true, uniqueRef: 'TTI:1', rid: 9,
+      pricing: { total: 861, currency: 'GBP' }, media: [], location: {},
+      units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z' }] },
+    { origin: 'ABZ' },
+  ).offer;
+
+  // typePredicate('DynamicPackages')
+  assert.ok((dp.type || 'Packages') === 'Packages' && dp.packageType === 'DynamicPackages');
+  // hasFlight — the gate that decides whether a flight block is built at all
+  assert.ok(!!(dp.origin || dp.airport || dp.carrier || dp.outboundDate),
+    'without this there is no flight on the card');
+
+  // And the reader must actually carry those fields, rather than having been
+  // written to read something else.
+  assert.ok(/const hasFlight = !!\(o\.origin/.test(CACHED));
+  assert.ok(/origin: o\.origin \? \{ iataCode: o\.origin/.test(CACHED));
+  assert.ok(/packageKindOf\(o\) === 'DynamicPackages'/.test(CACHED));
+});
+
+test('the widget asks for the type it was configured as, not a hard-coded one', () => {
+  // Hard-coding 'Accommodation' was the patch for a write-side fault: the
+  // sweep stored packages under the wrong type. The write side is fixed, so
+  // the read side must stop lying about what it wants or a DP widget can
+  // never see a DP offer.
+  assert.ok(/q\.set\('type', String\(this\.cfg\.type\) === 'DynamicPackages' \? 'DynamicPackages' : 'Accommodation'\)/.test(WIDGET));
+});
+
+test('one card per hotel is the dedupe that already exists, not a second one', () => {
+  // Three airports cache three offers for one hotel. The platform has folded
+  // that since long before TTI: strategy 'hotel' groups on name + country,
+  // keeps the cheapest, and counts the rest into the "+N more" affordance.
+  // A bespoke fold alongside it was dead code written against the stored
+  // shape rather than the wire shape, so it silently did nothing.
+  assert.ok(!/foldTtiByProperty/.test(WIDGET), 'the duplicate must be gone');
+  assert.ok(/dedupeStrategy: c\.dedupeStrategy \|\| 'hotel'/.test(WIDGET),
+    'and the default that does the job must still be the default');
+  assert.ok(/case 'hotel': return hotelKey/.test(WIDGET));
+  assert.ok(/_variantCount/.test(WIDGET), 'with the count the card shows');
 });
 
 test('a package with no departure airport is refused, not downgraded', () => {
@@ -1322,75 +1397,6 @@ test('no control is declared twice in the editor markup', () => {
   const seen = new Set(); const dupes = new Set();
   for (const id of ids) { if (seen.has(id)) dupes.add(id); seen.add(id); }
   assert.deepEqual([...dupes], [], `duplicated ids: ${[...dupes].join(', ')}`);
-});
-
-/* ============================================================
-   One card per hotel, however many airports priced it
-   ============================================================ */
-
-/** Lift one function out of the widget IIFE so it can be run rather than
- *  pattern-matched. A regex over source proves the code is spelled a certain
- *  way; this proves it does the right thing. */
-function liftFromWidget(name) {
-  const at = WIDGET.indexOf(`function ${name}(`);
-  assert.notEqual(at, -1, `${name} is not in the widget`);
-  let depth = 0; let end = -1;
-  for (let i = WIDGET.indexOf('{', at); i < WIDGET.length; i++) {
-    if (WIDGET[i] === '{') depth++;
-    else if (WIDGET[i] === '}' && --depth === 0) { end = i + 1; break; }
-  }
-  assert.notEqual(end, -1, `${name} has no closing brace`);
-  // eslint-disable-next-line no-new-func
-  return new Function(`${WIDGET.slice(at, end)}; return ${name};`)();
-}
-
-test('a hotel priced from three airports is ONE card, at the best price', () => {
-  const fold = liftFromWidget('foldTtiByProperty');
-  const at = (airport, price) => ({
-    id: `tti:1:${airport}`, accommodationUniqueRef: 'TTI:1', hotel: 'Hilton',
-    price, departureAirport: airport, includesFlights: true,
-  });
-  const out = fold([at('ABZ', 980), at('GLA', 861), at('EDI', 905)]);
-  assert.equal(out.length, 1, 'one hotel is one card, not three');
-  assert.equal(out[0].price, 861, 'and the price shown is the best one found');
-  assert.equal(out[0].departureAirport, 'GLA');
-  assert.deepEqual(out[0].departureAirports, ['ABZ', 'GLA', 'EDI'],
-    'with the other airports kept, so the card can say there is a choice');
-});
-
-test('the fold leaves hotel-only offers exactly as they were', () => {
-  // No package, no folding: two genuinely different hotels must stay two cards,
-  // and a widget showing one property over several dates must keep them all.
-  const fold = liftFromWidget('foldTtiByProperty');
-  const rows = [
-    { id: 'a', accommodationUniqueRef: 'TTI:1', hotel: 'Hilton', price: 500 },
-    { id: 'b', accommodationUniqueRef: 'TTI:1', hotel: 'Hilton', price: 620 },
-    { id: 'c', accommodationUniqueRef: 'TTI:2', hotel: 'Marriott', price: 400 },
-  ];
-  const out = fold(rows);
-  assert.equal(out.length, 3);
-  assert.strictEqual(out[0], rows[0], 'untouched, not rebuilt');
-  assert.deepEqual(fold([]), []);
-  assert.deepEqual(fold(null), []);
-});
-
-test('the fold never rewrites the array it was handed', () => {
-  // rawOffers can come straight out of the session cache and be shared with
-  // another render. Mutating an offer in place would leak a departure airport
-  // list into a widget that never asked for packages.
-  const fold = liftFromWidget('foldTtiByProperty');
-  const rows = [
-    { id: 'a', accommodationUniqueRef: 'TTI:1', price: 900, departureAirport: 'ABZ' },
-    { id: 'b', accommodationUniqueRef: 'TTI:1', price: 800, departureAirport: 'GLA' },
-  ];
-  const before = JSON.stringify(rows);
-  fold(rows);
-  assert.equal(JSON.stringify(rows), before, 'the input must be unchanged');
-});
-
-test('the widget folds only its own offers, and only on the TTI branch', () => {
-  assert.ok(/this\._isTti \? foldTtiByProperty\(data\.data\) : data\.data/.test(WIDGET),
-    'the country pool must not be folded — two hotels there are two cards');
 });
 
 test('the poller counts the flights that came back with a package', () => {

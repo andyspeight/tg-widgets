@@ -436,25 +436,52 @@ All of it, and the nightly sweep is on the same path as the Test button.
   auth and the whole accommodation half are accepted, and
   `SearchType: 'DynamicPackaging'` is understood.
 
-  **Still inferred, and say so if it bites:** the field names INSIDE a leg
-  (`Origin` / `Destination` / `DepartureDate`) and the `Passengers` shape.
-  Travelify named the two containers, not their contents. A leg's destination
-  is the hotel's COUNTRY, because the accommodation half already pins the exact
-  property and a country is the only destination we can state truthfully.
+  **The leg field names are sent under several spellings at once.** Travelify
+  named the two containers, not their contents, and the docs page that would
+  settle it is not reachable from the build sandbox. But the same rejection
+  showed that the service reports what is MISSING and ignores what it does not
+  recognise — the flat `Origins`, `DepartDate`, `ReturnDate` and
+  `DestinationCountry` in that first attempt drew no complaint at all. So each
+  value goes under every plausible name (`Origin`/`OriginCode`/`From`,
+  `Destination`/`DestinationCode`/`To`, `DepartureDate`/`DepartDate`/`Date`),
+  all carrying the identical value. Whichever one the API reads, it reads the
+  right thing.
 
-- **What a package price covers travels on the offer, not in its type.** A TTI
-  offer is always cached as `type: 'Accommodation'` — that is the shelf, since
-  the key holds one property and the widget reads the whole key. A package
-  carries `includesFlights: true` and `departureAirport`, and the test panel
-  reports how many flights came back, because "no flights" and "a hotel price
-  under a package heading" look identical on a card.
+  This is CALIBRATION, not the finished shape. **Once a DP search is confirmed
+  working, ask Darren which names are real and delete the rest.** A test
+  asserts every alias in a leg carries the same value, because an alias with a
+  different value would make the answer depend on which name the API happened
+  to read.
 
-- **One card per hotel** (`foldTtiByProperty`, widget v1.21.0). Three airports
-  cache three offers for one hotel, which is right in the cache and wrong on
-  the page. The widget folds them to the cheapest and keeps the rest in
-  `departureAirports`. Not yet rendered: no template shows the departure
-  airport on a card, so a visitor sees the best price without being told which
-  airport it flies from. That is the next honest gap on the package path.
+  A leg's destination is the hotel's COUNTRY: the accommodation half already
+  pins the exact property, so a country is the only destination we can state
+  truthfully. `Passengers` mirrors the room's `Guests` (`[{Type:'Adult'}]`),
+  which is the proven shape, and `Adult` is in the documented TravellerTypes.
+
+- **A package is stored AS a package, in the fields the product already uses.**
+  `type: 'Packages'`, `packageType: 'DynamicPackages'`, and the departure
+  airport in `origin`. Nothing bespoke. That one decision is what makes the
+  rest work with no new code:
+
+  - `cached-offers.js` keys `hasFlight` off `origin` and builds a real
+    `flight.origin.iataCode` block from it;
+  - `typePredicate('DynamicPackages')` matches it;
+  - the existing package card draws the **Flight + Hotel** badge and the
+    departure code;
+  - the widget's existing `hotel` dedupe (already the default) folds one hotel
+    priced from three airports into one card, cheapest kept, with the "+2 more"
+    count the card already renders.
+
+  The first attempt instead invented `includesFlights` and `departureAirport`
+  on an `'Accommodation'` offer and hand-wrote a fold to go with it. Nothing
+  downstream could recognise that as a package, so it rendered as a hotel with
+  an unexplained price — and the hand-written fold was dead code, because it
+  was written against the STORED shape while the widget sees the WIRE shape.
+  Deleted. Use the platform's fields.
+
+- **Three places must agree on the type, or a full cache reads as empty.** What
+  the sweep stores, what the widget asks for, and what the editor's preview
+  strip counts. They have drifted twice. A test now pins all three together.
 
 ### The cron will not run without a customer address
 
@@ -521,9 +548,8 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 
 1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
    should start running. Until then it skips, safely.
-2. **Show the departure airport on a card.** A package price belongs to one
-   airport and no template says which. The data is there (`departureAirport`,
-   `departureAirports`); it needs a line in each card template.
+2. **Trim the leg aliases** once a DP search is confirmed working and Darren
+   has said which field names are real (see the flight-criteria note above).
 3. **Decide what "from" means.** Every search is one stay, currently 30 days out
    and 7 nights, matching the `frd=30&dur=7` the deeplinks use. A true from-price
    across a spread of dates multiplies the nightly search count by however many

@@ -590,16 +590,30 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   const lat = asNum(pick(loc, ['latitude', 'lat']));
   const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
   const offer = {
-    // ALWAYS 'Accommodation', on a package too.
+    // A package is stored AS A PACKAGE, in the platform's own fields.
     //
-    // This is the SHELF the offer is cached on, not a claim about what is in
-    // the price: every TTI result is a property, and both search types return
-    // theirs in accommodationResults. api/cached-offers.js filters on exactly
-    // this field and the TTI widget always asks for 'Accommodation', so
-    // labelling a package 'Packages' hid a full cache behind an empty preview
-    // (14 Sep 2026). What the price INCLUDES is carried by includesFlights and
-    // departureAirport below, where a card can read it.
-    type: 'Accommodation',
+    // Not a bespoke shape. `type: 'Packages'` + `packageType` + `origin` is
+    // what every other offer in this product uses, and the whole read path is
+    // already built on it: api/cached-offers.js turns `origin` into a real
+    // flight block, typePredicate('DynamicPackages') matches it, the card
+    // draws the Flight + Hotel badge and the departure code, and the widget's
+    // existing `hotel` dedupe collapses one hotel priced from three airports
+    // into one card with "+2 more". None of that needed writing.
+    //
+    // The earlier attempt stored every TTI offer as 'Accommodation' and hung
+    // includesFlights/departureAirport off it. That parted company with the
+    // read side — a package that nothing downstream could recognise AS a
+    // package, so it rendered as a hotel with an unexplained price.
+    type: ctx.origin ? 'Packages' : 'Accommodation',
+    // What KIND of package, which is what packageKindOf reads to tell a
+    // dynamic package from an operator one. Without it the read side falls
+    // back to comparing supplier ids we do not have, and calls this a package
+    // holiday.
+    ...(ctx.origin ? { packageType: 'DynamicPackages' } : {}),
+    // The departure airport, under the name the rest of the product uses.
+    // cached-offers.js keys `hasFlight` off exactly this, and builds
+    // flight.origin.iataCode from it.
+    ...(ctx.origin ? { origin: ctx.origin } : {}),
     price: price != null ? price : pricePP,
     pricePP: pricePP != null ? pricePP : null,
     currency: pick(r, ['pricing.currency', 'pricing.currencyCode']) || ctx.currency || 'GBP',
@@ -644,12 +658,6 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // Bookable / Affiliate / EnquiryOnly. An Affiliate result hands the visitor
     // to somebody else rather than booking here, so the card has to know.
     resultType: r.resultType || null,
-    // Which airport this price flies from, on a package. A package quoted from
-    // Aberdeen and one quoted from Gatwick are different offers at different
-    // prices, so the card has to be able to say which it is showing rather
-    // than presenting whichever was cheapest as if it were universal.
-    ...(ctx.departureAirport ? { departureAirport: ctx.departureAirport } : {}),
-    ...(ctx.includesFlights ? { includesFlights: true } : {}),
     accommodationUniqueRef: r.uniqueRef ? String(r.uniqueRef).slice(0, 64) : null,
     refundability: pick(r, ['units.0.refundability', 'refundability']) || null,
     fetchedAt: new Date().toISOString(),
@@ -717,22 +725,35 @@ export function buildDynamicPackageCriteria(prop, search = {}, now = new Date())
   // passenger". So the flight half is a JOURNEY — a list of legs — not the flat
   // origin/date pair that was guessed first, and the party travels as
   // Passengers rather than riding along on the room.
-  const legs = [
-    {
-      Origin: origin,
-      // The hotel's country. A leg wants somewhere to land and this is the
-      // only destination we can state truthfully: the accommodation half
-      // already pins the exact property, so the flight has to reach the right
-      // country rather than a specific airport we do not hold.
-      ...(acc.LocationCountry ? { Destination: acc.LocationCountry } : {}),
-      DepartureDate: acc.CheckinDate,
-    },
-    {
-      ...(acc.LocationCountry ? { Origin: acc.LocationCountry } : {}),
-      Destination: origin,
-      DepartureDate: acc.CheckoutDate,
-    },
-  ];
+  //
+  // WHY EACH LEG CARRIES THE SAME VALUE UNDER SEVERAL NAMES.
+  //
+  // Travelify named the two containers, not the fields inside them, and the
+  // docs page that would settle it is not reachable from here. But the same
+  // rejection told us something useful in passing: the first attempt ALSO sent
+  // Origins, DepartDate, ReturnDate, DestinationCountry and DirectOnly, and the
+  // service said nothing about any of them. It reports what is MISSING, and
+  // ignores what it does not recognise.
+  //
+  // So each value is sent under every plausible spelling, all carrying the
+  // identical value. Whichever one the API reads, it reads the right thing, and
+  // there is no spelling left to be wrong about. The alternative was shipping
+  // one guess and asking Andy to run the test again for each name it rejected.
+  //
+  // This is a CALIBRATION measure, not the finished shape. Once a DP search is
+  // confirmed working, ask Darren which names are real and delete the rest —
+  // there is a note in the handover. Adding an alias is safe; adding one with a
+  // DIFFERENT value would not be, which is what `leg()` below prevents.
+  const leg = (from, to, date) => ({
+    Origin: from, OriginCode: from, From: from,
+    ...(to ? { Destination: to, DestinationCode: to, To: to } : {}),
+    DepartureDate: date, DepartDate: date, Date: date,
+  });
+  // The hotel's COUNTRY is the only destination we can state truthfully: the
+  // accommodation half already pins the exact property, so the flight has to
+  // reach the right country rather than a specific airport we do not hold.
+  const dest = acc.LocationCountry || '';
+  const legs = [leg(origin, dest, acc.CheckinDate), leg(dest, origin, acc.CheckoutDate)];
 
   // Mirrors the Guests shape on the room, which is the naming this API uses
   // for the same idea elsewhere.
