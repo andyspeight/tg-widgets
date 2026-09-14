@@ -865,3 +865,16 @@ test('the editor and the server parse a deeplink the same way', () => {
     assert.ok(/lat/.test(text) && /lng/.test(text), `${label}: must read the coordinates`);
   }
 });
+
+test('editor pages are never served stale', () => {
+  // 14 Sep 2026: a fix was merged, deployed and live, and Andy still saw the
+  // old editor — so he reported a bug that no longer existed and we lost a
+  // round trip to it. An editor that lies about its own version is worse than
+  // a slow one, so it revalidates on every load. no-cache rather than
+  // no-store: a 304 is allowed, so a 200KB page is not re-sent unchanged.
+  const block = VERCEL.headers.find((h) => /editor/.test(h.source || ''));
+  assert.ok(block, 'the editor pages must have a header block');
+  const cc = block.headers.find((x) => x.key === 'Cache-Control');
+  assert.ok(cc, 'editor pages must set Cache-Control');
+  assert.match(cc.value, /no-cache/);
+});
