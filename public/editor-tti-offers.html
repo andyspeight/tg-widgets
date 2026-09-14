@@ -2447,6 +2447,18 @@
           if (d.shape.imagePaths && d.shape.imagePaths.length) {
             bits.push('<strong>Images are here:</strong> '
               + d.shape.imagePaths.map(x => '<span class="tti-test-code">' + esc(x.path) + '</span>').join(', '));
+            // The PATH says the field exists; the URL says whether it loads.
+            // Those are different questions and only the second one can be
+            // taken to Travelify, so show the actual address and let it be
+            // opened.
+            const first = d.shape.imagePaths[0];
+            if (first && first.url) {
+              bits.push('<strong>First image URL:</strong> '
+                + '<a href="' + esc(first.url) + '" target="_blank" rel="noopener" '
+                + 'class="tti-test-code" style="color:var(--tgse-brand)">' + esc(first.url) + '</a>'
+                + '<br>Open it. If it loads, the photo is fine and the card will show it. '
+                + 'If it does not, that is the thing to raise with Travelify.');
+            }
           }
           if (d.shape.resultKeys) {
             bits.push('<strong>Fields on the result:</strong> <span class="tti-test-code">'
