@@ -1927,3 +1927,79 @@ test('the panel always explains the airport it chose', () => {
     'the suffix must be stripped before the reason is looked up');
   assert.ok(/after looking the hotel up/.test(EDITOR), 'and reported in its own right');
 });
+
+/* ============================================================
+   The editor must show the agent the truth, not a cached copy
+   ============================================================ */
+
+test('a preview is never served the cache from before the test', () => {
+  // /api/cached-offers answers with s-maxage=120, stale-while-revalidate=300 —
+  // right for visitors, wrong for the one person who just replaced the data.
+  // The panel read fresh results from the test while the card beside it drew a
+  // CDN copy from before them: the text said Tenerife and the card said
+  // Newquay (Andy, 14 Sep 2026).
+  assert.ok(/s-maxage=120, stale-while-revalidate=300/.test(CACHED),
+    'the edge cache this works around must still exist for visitors');
+  assert.ok(/if \(this\.cfg\.previewNonce\) q\.set\('_', String\(this\.cfg\.previewNonce\)/.test(WIDGET));
+  assert.ok(/previewNonce: c\.previewNonce \|\| ''/.test(WIDGET),
+    'and it must survive the config whitelist, like ttiCodes had to');
+  // Only ever the editor, so a live widget keeps the edge cache untouched.
+  assert.ok(/cfg\.previewNonce = previewNonce;/.test(EDITOR));
+  assert.ok(/previewNonce = String\(Date\.now\(\)\)/.test(EDITOR), 'and it changes after each test');
+  // The read-back reads through the same edge cache and needs the same escape.
+  assert.ok(/appId: appIdForPreview\(\), _: previewNonce/.test(EDITOR));
+});
+
+test('the agent is told why a cached price will not move', () => {
+  // "No matter what you put in the price never changes" (Andy, 14 Sep 2026).
+  // True, and unavoidable: offers are cache-only, so the party size and the
+  // length of stay decide what we SEARCH for and cannot re-price what is
+  // already stored. Said out loud, or the setting looks broken.
+  assert.ok(/const SEARCH_FIELDS = \[/.test(EDITOR));
+  for (const f of ["'adults'", "'nights'", "'DatesMin'", "'origins'", "'type'"]) {
+    assert.ok(EDITOR.includes(f), `${f} changes the search and must be fingerprinted`);
+  }
+  assert.ok(/These prices are from the last test\./.test(EDITOR));
+  assert.ok(/Test these codes<\/strong> again to re-price/.test(EDITOR));
+  // And it must NOT claim the filters are stale, because those apply at once.
+  assert.ok(/those filter what is already here and apply straight away/.test(EDITOR));
+});
+
+test('the alternative airport is described as what it actually is', () => {
+  // "A bigger airport nearby is TFN, 9km" — TFN is the SMALL one, 48km closer.
+  // Wrong twice over, which made the whole line untrustworthy.
+  const tenerife = resolveArrivalAirport({ lat: 28.4636, lng: -16.2518, ctry: 'ES' });
+  assert.equal(tenerife.code, 'TFS');
+  assert.equal(tenerife.alt.code, 'TFN');
+  assert.equal(tenerife.alt.why, 'closer', 'the hub won, so the other one is the closer small field');
+  assert.ok(tenerife.alt.km < tenerife.km);
+
+  const bournemouth = resolveArrivalAirport({ lat: 50.72, lng: -1.87, ctry: 'GB' });
+  assert.equal(bournemouth.alt.why, 'bigger', 'the local field won, so the other one is the bigger hub');
+  assert.ok(bournemouth.alt.km > bournemouth.km);
+
+  assert.ok(/A smaller airport closer to the hotel is/.test(EDITOR));
+  assert.ok(/A bigger airport nearby is/.test(EDITOR));
+});
+
+test('the image diagnostic offers a photo, not a rating badge', () => {
+  // It reported https://static.travelify.io/icons/tripadvisor-4.5.svg as the
+  // first image, because review.imageUrl is image-shaped and comes first. That
+  // is the wrong URL to take to Travelify.
+  assert.ok(/d\.shape\.imagePaths\.find\(\(x\) => \/\^media\\b\/\.test\(x\.path\)\)/.test(EDITOR));
+});
+
+test('the review score is mapped, since the card already renders it', () => {
+  const r = { name: 'H', isAvailable: true, uniqueRef: 'TTI:1', rid: 1, pricing: { total: 857 },
+    media: [{ url: 'https://x/1.jpg' }], location: {},
+    units: [{ nights: 7, boardBasis: 'AllInclusive' }],
+    review: { rating: 4.5, count: 1280 } };
+  const { offer, unmapped } = normaliseAccommodationResult(r, {});
+  assert.equal(offer.reviewRating, 4.5);
+  assert.equal(offer.reviewCount, 1280);
+  // Optional: a supplier without one is not a gap.
+  const none = normaliseAccommodationResult({ ...r, review: undefined }, {});
+  assert.equal(none.offer.reviewRating, null);
+  assert.deepEqual(unmapped, []);
+  assert.deepEqual(none.unmapped, []);
+});

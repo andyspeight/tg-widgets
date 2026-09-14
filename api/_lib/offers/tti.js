@@ -655,6 +655,12 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     resortLat: lat != null ? lat : (ctx.lat != null ? ctx.lat : null),
     resortLng: lng != null ? lng : (ctx.lng != null ? ctx.lng : null),
     rating: asNum(r.rating),
+    // The review score, which the card already renders beside the star rating.
+    // `review` turned up in the real result's field list (Andy, 14 Sep 2026)
+    // and was going unused. Optional, so a supplier without one costs nothing
+    // and it is not reported as a gap.
+    reviewRating: asNum(pick(r, ['review.rating', 'review.score', 'review.value', 'reviewRating'])),
+    reviewCount: asNum(pick(r, ['review.count', 'review.numReviews', 'review.reviewCount', 'review.total', 'reviewCount'])),
     // WHO THE PRICE IS FOR. api/cached-offers.js passes these straight through
     // and the card builds "2 adults" from them; without them it printed the
     // bare word "Travellers" and a price for nobody in particular (Andy,
