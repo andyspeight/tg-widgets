@@ -126,6 +126,7 @@ export default async function handler(req, res) {
 
   let worked = 0;
   let retried = 0;                       // put back, not decided
+  let stoppedItself = false;             // the breaker tripped, and said why
   for (const item of items) {
     if (Date.now() - started > TIME_BUDGET_MS) { await release(item.id); continue; }
 
@@ -239,6 +240,7 @@ export default async function handler(req, res) {
         lastReason: String(outcome.reason || ''),
       }).catch(() => {});
       console.log('[destinations-worker] circuit breaker', JSON.stringify({ streak, reason: outcome.reason }));
+      stoppedItself = true;
       break;
     }
   }
@@ -249,14 +251,26 @@ export default async function handler(req, res) {
   const saved = results.filter(r => r.result === 'saved').length;
   const held = results.filter(r => r.result === 'held').length;
   const skipped = results.filter(r => r.result === 'skipped').length;
-  await setRunState(retried ? {
-    state: left ? 'working' : 'idle',
-    pending: left, lastBatch: results.length, saved, held, retried,
-    note: retried + ' went back in the queue because a source did not answer, so they are still to do',
-  } : {
-    state: left ? 'working' : 'idle',
-    pending: left, lastBatch: results.length, saved, held, retried,
-  }).catch(() => {});
+  // THE SUMMARY MUST NOT TALK OVER THE BREAKER EITHER. setRunState clears the
+  // note when a patch omits one, so this write landed a few milliseconds after
+  // the breaker's explanation and wiped it, in the same tick. The cross-tick
+  // guard added earlier then found stoppedBecause already gone and wrote the
+  // generic line. Andy saw "the runner is switched off" again on 14 Sep and the
+  // sentence that would have told him why had been destroyed twice over.
+  const summary = { state: left ? 'working' : 'idle', pending: left, lastBatch: results.length, saved, held, retried };
+  if (!stoppedItself) {
+    if (retried) summary.note = retried + ' went back in the queue because a source did not answer, so they are still to do';
+    await setRunState(summary).catch(() => {});
+  } else {
+    const said = await getRunState().catch(() => ({}));
+    await setRunState({
+      ...summary,
+      state: 'stopped',
+      note: said.note || 'the runner stopped itself',
+      stoppedBecause: said.stoppedBecause || 'nothing was saving',
+      lastReason: said.lastReason || '',
+    }).catch(() => {});
+  }
 
   console.log('[destinations-worker]', JSON.stringify({ took: results.length, saved, held, skipped, retried, spentUsd: +spent.toFixed(4), left }));
 

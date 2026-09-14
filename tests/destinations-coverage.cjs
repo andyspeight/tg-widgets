@@ -247,6 +247,35 @@ function t(name, fn) {
     assert.strictEqual(airports.count, 0);
     assert.strictEqual(airports.avgScore, 0);
   });
+  /* 14 Sep 2026. The airports bulk-added on 26 and 27 Aug carry "CN", "RW",
+     "MX" in Country Text where the May ones carry China, Rwanda, Mexico. Both
+     are non-empty, so roughly 370 records scored as done while rendering a
+     two-letter code on the page. */
+
+  t('a country code in the country name column is broken, not filled', () => {
+    ['CN', 'RW', 'mx', 'Gb'].forEach(v => {
+      assert.strictEqual(checkValue(v, 'countryname'), 'invalid',
+        v + ' is a code, not a name a page can show');
+    });
+  });
+
+  t('a real country name is filled, however it is spelled', () => {
+    ['China', 'United Kingdom', 'USA', 'UAE', 'Turks and Caicos Islands']
+      .forEach(v => assert.strictEqual(checkValue(v, 'countryname'), 'filled', v));
+  });
+
+  t('an empty country name is still empty, not broken', () => {
+    [null, '', '   '].forEach(v =>
+      assert.strictEqual(checkValue(v, 'countryname'), 'empty'));
+  });
+
+  t('the airports table uses that check, or none of this applies', () => {
+    const ap = TYPES.find(t => t.key === 'airport');
+    const f = ap.fields.find(x => x.label === 'Country Text');
+    assert.ok(f, 'airports should carry Country Text');
+    assert.strictEqual(f.kind, 'countryname');
+  });
+
 
   console.log(`\n${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
