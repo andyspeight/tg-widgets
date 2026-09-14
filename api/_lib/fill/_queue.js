@@ -226,11 +226,24 @@ export const heldAside = (limit = 100) => readLog(K.held, limit);
 /**
  * Count a real outcome, and return the current run of consecutive failures.
  *
- * A save resets the run to zero. Anything else adds one. The worker stops when
+ * A save resets the run to zero. A PAID failure adds one. The worker stops when
  * this reaches FAIL_STREAK, which is the difference between learning a job
  * cannot run for a few pence and learning it for $4.14 over two hours.
+ *
+ * ONLY PAID WORK COUNTS, and that is the whole point of the guard. It exists to
+ * stop money burning with nothing to show, so a free two-source fact that could
+ * not be corroborated has nothing for it to protect. Counting those stopped the
+ * runner constantly: Official Website can only be verified for about a fifth of
+ * airports, because 40% have no website in either source and another 37% have
+ * one in only one of them. A hold is the normal, correct and free outcome
+ * there, so ten in a row says nothing is wrong. On 14 Sep 2026 that switched
+ * the whole runner off at 69 saved with 360 still queued, and every later job
+ * would have done nothing until it was switched back on.
+ *
+ * A free failure is neutral rather than a reset: it neither accuses a paid run
+ * nor forgives one that is already failing.
  */
-export async function noteOutcome(saved) {
+export async function noteOutcome(saved, paid = true) {
   const day = today();
   const tally = (await getJson(K.tally(day)).catch(() => null)) || { saved: 0, held: 0 };
   if (saved) tally.saved += 1; else tally.held += 1;
@@ -238,6 +251,7 @@ export async function noteOutcome(saved) {
 
   if (saved) { await setString(K.streak, '0').catch(() => {}); return 0; }
   const now = Number(await getString(K.streak).catch(() => 0)) || 0;
+  if (!paid) return now;
   const next = now + 1;
   await setString(K.streak, String(next)).catch(() => {});
   return next;

@@ -31,7 +31,7 @@
 import { TYPES } from '../_lib/destination-coverage.js';
 import {
   queueConfigured, claim, complete, release, getSettings, setSettings, budgetState,
-  recordSpendUsd, setRunState, pendingCount, noteOutcome, FAIL_STREAK,
+  recordSpendUsd, setRunState, getRunState, pendingCount, noteOutcome, FAIL_STREAK,
 } from '../_lib/fill/_queue.js';
 import { fillPlanFor } from '../_lib/fill/_registry.js';
 import { warmAirports } from '../_lib/fill/_source.js';
@@ -72,7 +72,22 @@ export default async function handler(req, res) {
 
   const settings = await getSettings();
   if (!settings.running) {
-    await setRunState({ state: 'stopped', pending, note: 'the runner is switched off' }).catch(() => {});
+    // DO NOT TALK OVER THE CIRCUIT BREAKER. When the breaker stops a run it
+    // writes down exactly what happened and which reason came last. This tick
+    // runs a minute later, finds the runner off, and used to replace that with
+    // "the runner is switched off", so the explanation survived for under sixty
+    // seconds and every look after that found a line saying nothing. Andy asked
+    // what it meant on 14 Sep 2026 and the honest answer was that the message
+    // which would have told him had already been overwritten.
+    const prev = await getRunState().catch(() => ({}));
+    await setRunState(prev.stoppedBecause
+      ? {
+          state: 'stopped', pending,
+          note: prev.note || 'the runner stopped itself',
+          stoppedBecause: prev.stoppedBecause,
+          lastReason: prev.lastReason || '',
+        }
+      : { state: 'stopped', pending, note: 'the runner is switched off' }).catch(() => {});
     return done({ ok: true, stopped: true, pending });
   }
   const started = Date.now();
@@ -197,7 +212,7 @@ export default async function handler(req, res) {
     // it cost $4.14 to learn nothing. A run that is failing wholesale is not
     // working, so stop it and say so rather than grinding to the end of the
     // queue. The queue is left intact: he decides whether to resume.
-    const streak = await noteOutcome(outcome.result === 'saved');
+    const streak = await noteOutcome(outcome.result === 'saved', paid);
     if (streak >= FAIL_STREAK) {
       await setSettings({ running: false });
       await setRunState({
