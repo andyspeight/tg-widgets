@@ -214,9 +214,13 @@ export function agreedFields(oa, wd) {
     ? wd.isoCodes
     : new Set([wdCc].filter(Boolean));
   const ccAgree = !!oaCc && wdAll.has(oaCc);
+  // Say it in place names. "they disagree: TC against GB" is true and unreadable,
+  // and it was the reason a real hold could not be understood from the dashboard.
+  const named = c => countryName(c) || c;
   note('country', ccAgree ? countryName(oaCc) : '',
     !oaCc || !wdAll.size ? 'only one source names a country'
-      : 'they disagree: ' + oaCc + ' against ' + [...wdAll].sort().join(' or '));
+      : 'they disagree: one source says ' + named(oaCc) + ', the other says ' +
+        [...wdAll].sort().map(named).join(' or '));
 
   // City served. Strict, and it misses often on purpose: Wikidata's P131 is the
   // administrative area, which is not the question being asked.

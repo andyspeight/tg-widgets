@@ -105,7 +105,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   t('countries that disagree leave the field blank', () => {
     const { agreed, why } = agreedFields(OA.LHR, { ...WD.LHR, countryCode: 'IE' });
     assert.strictEqual(agreed.country, undefined);
-    assert.match(why.country, /GB against IE/);
+    assert.match(why.country, /United Kingdom.*Ireland/);
   });
 
   t('the same site written two ways still counts as agreement', () => {
@@ -484,14 +484,14 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     const { agreed, why } = agreedFields({ ...OA.LHR, country: 'BM' },
       terr('BM', 'GB', ['TC']));
     assert.strictEqual(agreed.country, undefined);
-    assert.match(why.country, /BM against/);
+    assert.match(why.country, /Bermuda.*Turks and Caicos/);
   });
 
   t('two sources naming genuinely different countries are still held', () => {
     const { agreed, why } = agreedFields(OA.LHR,
       { ...WD.LHR, countryCode: 'IE', isoCodes: new Set(['IE']) });
     assert.strictEqual(agreed.country, undefined);
-    assert.match(why.country, /GB against IE/);
+    assert.match(why.country, /United Kingdom.*Ireland/);
   });
 
   t('an airport with no territory above it is unchanged', () => {
