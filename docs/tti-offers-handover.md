@@ -436,18 +436,35 @@ All of it, and the nightly sweep is on the same path as the Test button.
   auth and the whole accommodation half are accepted, and
   `SearchType: 'DynamicPackaging'` is understood.
 
-  **The field names are now MEASURED, not guessed.** The round before this sent
-  every plausible spelling at once — safe, because the service reports what is
-  missing and ignores what it does not recognise. Travelify then validated
-  exactly two by name, which is it telling us which ones it reads:
+  **Every field name here has been quoted back at us by Travelify.** That is
+  the bar, and it was set by getting it wrong. The alias round sent each value
+  under every plausible spelling at once — safe, because the service reports
+  what is missing and ignores what it does not recognise. The reply named two:
 
       Legs[0] - DestinationCode: Unrecognised 3-letter airport/city code: GB
-      Legs[1] - OriginCode: The field OriginCode must be a string with a
-                minimum length of 3 and a maximum length of 11
+      Legs[1] - OriginCode: must be a string, min length 3, max length 11
 
-  So a leg is `{ OriginCode, DestinationCode, DepartureDate }` and the guesses
-  are deleted. `Passengers` mirrors the room's `Guests` (`[{Type:'Adult'}]`),
-  the proven shape, and `Adult` is in the documented TravellerTypes.
+  It said nothing about the date, because one of the three date aliases was
+  right and the field never errored. **Silence is not confirmation.** Trimming
+  the date to `DepartureDate` on house-style reasoning deleted the alias that
+  was doing the work, and the next round said so by name:
+
+      Legs[0] - DepartDate: Date must be set and not be in the past
+
+  So a leg is `{ OriginCode, DestinationCode, DepartDate }`, and the rule is:
+  **only delete a spelling the service has named, never one it merely did not
+  complain about.** A test reads the leg builder and fails if it grows a field
+  outside that set. `Passengers` mirrors the room's `Guests`
+  (`[{Type:'Adult'}]`) and has drawn no complaint since it was added.
+
+  **A package never departs in the past.** `leadDays` clamps to `[0, 330]` and
+  0 means today at 00:00 UTC, which is behind us for all but the first instant
+  of the day. A hotel search takes that happily — same-day booking is a real
+  thing to sell — but Travelify refuses the whole package for it, with the
+  *same message* a misnamed field produces. So a package floors the lead at
+  `MIN_DP_LEAD_DAYS` (1) for the whole search, room included, since moving the
+  flight to tomorrow while the room checks in today would price a package that
+  does not hang together.
 
 ### A package needs an airport to fly INTO, and a TTI row has no airport
 
