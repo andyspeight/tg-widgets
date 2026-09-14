@@ -223,6 +223,9 @@ export default async function handler(req, res) {
           type, ctry: row.ctry, lat: row.lat, lng: row.lng,
           locationName: row.locationName, currency: criteria.Currency,
           checkinDate: criteria.AccommodationSearchCriteria.CheckinDate,
+          // The bookable link belongs to the SESSION, not to the result, so it
+          // comes from the response rather than being built here.
+          deeplinkUrl: (r.data && (r.data.deeplinkUrl || r.data.shareUrl)) || null,
         });
         if (!n) continue;
         normalised.push(n.offer);
