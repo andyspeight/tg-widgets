@@ -44,7 +44,7 @@ const VOICE = [
 ].join('\n');
 
 /** The facts we hold, as the writer sees them. Also the gate's evidence. */
-export function buildEvidence({ rec, ancestors, type }) {
+export function buildEvidence({ rec, ancestors, type, research }) {
   const lines = [];
   lines.push(type.singular.replace(/^\w/, c => c.toUpperCase()) + ': ' + rec.name);
   if (ancestors && ancestors.length) {
@@ -77,6 +77,15 @@ export function buildEvidence({ rec, ancestors, type }) {
     }
   }
 
+  // A published source about this exact record, where we hold one. Named, so
+  // the writer treats it as evidence to work from rather than background it
+  // half-remembers, and so the gate has the same text to check the result
+  // against. See wikipediaIntro in _source.js for why this exists.
+  if (research && research.text) {
+    lines.push('', 'From ' + (research.source || 'a published source about it') + ':');
+    lines.push(research.text.length > 2000 ? research.text.slice(0, 2000) + '…' : research.text);
+  }
+
   return lines.join('\n');
 }
 
@@ -84,8 +93,8 @@ export function buildEvidence({ rec, ancestors, type }) {
  * Write one field.
  * @returns {{ok:true, value:string, evidence:string, costUsd:number} | {ok:false, why:string, costUsd:number}}
  */
-export async function writeField({ field, brief, rec, ancestors, type }) {
-  const evidence = buildEvidence({ rec, ancestors, type });
+export async function writeField({ field, brief, rec, ancestors, type, research }) {
+  const evidence = buildEvidence({ rec, ancestors, type, research });
 
   const instruction = [
     'FIELD TO WRITE: ' + field.label,

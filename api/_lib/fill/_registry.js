@@ -344,7 +344,12 @@ const USD_TO_PENCE = 79;
  *
  * @returns {{ok:true} | {ok:false, why:string}}
  */
-export function hasEnoughToWriteFrom({ rec, ancestors }) {
+export function hasEnoughToWriteFrom({ rec, ancestors, research }) {
+  // A published source about this exact record is evidence, and usually far
+  // more of it than the record itself carries. See wikipediaIntro in _source.js.
+  if (research && String(research.text || '').trim().length >= MIN_EVIDENCE_CHARS) {
+    return { ok: true };
+  }
   // Bookkeeping, not evidence about the place.
   const SKIP = new Set(['Status', 'URL Slug', 'Verified Date', 'Source 1 URL',
                         'Source 2 URL', 'Official Website', 'Wikipedia URL']);
