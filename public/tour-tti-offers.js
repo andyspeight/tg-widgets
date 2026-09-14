@@ -117,9 +117,9 @@
       },
       {
         tab: 'content',
-        target: '#cfgTtiCodes',
+        target: '#ttiRows',
         title: 'List your hotels',
-        body: 'Paste the Travelify property code for each hotel you sell, one per line, and add the hotel name and country where you have them. These are the only hotels the widget will ever show. We look up live prices for them overnight, so the card a visitor sees is a real price, not a guess.',
+        body: 'Two things per hotel: its Travelify property code, and the two-letter country it is in. The code picks the hotel, the country tells us where to look for it. These are the only hotels the widget will ever show. Press Test to check the codes return real prices before you save, then we refresh them overnight so the card a visitor sees is a real price, not a guess.',
         placement: 'right',
         beforeShow: function () { openSectionByTitle('Your properties'); }
       },

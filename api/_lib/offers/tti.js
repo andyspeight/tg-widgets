@@ -44,9 +44,15 @@ export const PROBE_CANDIDATES = [
 
 
 
-// One property does not need a 250-offer band — it has as many rates as it has,
-// and a smaller ask comes back inside the per-request timeout more reliably.
-export const MAX_OFFERS_PER_PROPERTY = 60;
+// The standard band, because the area we search is now a whole COUNTRY (Andy,
+// 14 Sep 2026: the agent enters a code and a country, nothing else). If the feed
+// honours the refn pin this is just a ceiling and costs nothing, because only
+// that property comes back. If it ignores the pin, a country's worth of offers
+// sorted cheapest-first is what the verify gate has to find the property in, so
+// a thin band would lose hotels that are simply not among the cheapest 60.
+// Not raised further: a 1,000-offer accommodation ask does not return inside the
+// per-request timeout (proven in the map cron's sweep logs, Aug 2026).
+export const MAX_OFFERS_PER_PROPERTY = 250;
 // Cap per widget so one pasted spreadsheet cannot turn into a thousand searches
 // a night. Kept in step with the editor's own cap and the read side's.
 export const MAX_CODES_PER_WIDGET = 100;

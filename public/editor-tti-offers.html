@@ -41,6 +41,27 @@
       background: var(--panel); border: 1px solid var(--border);
       border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden;
     }
+    /* ---- TTI property rows -------------------------------------------- */
+    .tti-rows { display: flex; flex-direction: column; gap: 6px; }
+    .tti-row { display: grid; grid-template-columns: 1fr 84px 28px; gap: 6px; align-items: center; }
+    .tti-row .input { margin: 0; }
+    .tti-row .tti-ctry { text-transform: uppercase; }
+    .tti-row.is-bad .input { border-color: var(--tgse-danger); }
+    .tti-del {
+      border: 1px solid var(--border); background: var(--panel); color: var(--muted);
+      border-radius: var(--tgse-radius-sm); height: 32px; cursor: pointer; font-size: 15px;
+      line-height: 1; padding: 0;
+    }
+    .tti-del:hover { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+    .tti-row-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .tti-test-out { margin-top: 10px; font-size: 12px; line-height: 1.5; }
+    .tti-test-row { display: flex; gap: 6px; align-items: baseline; padding: 3px 0; }
+    .tti-test-dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; }
+    .tti-ok    { background: var(--tgse-success); }
+    .tti-warn  { background: var(--tgse-warning); }
+    .tti-err   { background: var(--tgse-danger); }
+    .tti-test-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
     .section-head {
       width: 100%; display: flex; align-items: center; justify-content: space-between;
       padding: 12px 14px; background: var(--panel); border: 0;
@@ -914,22 +935,19 @@
             </button>
             <div class="section-body">
               <div class="field">
-                <label class="field-label">Hotel list</label>
-                <textarea class="textarea" id="cfgTtiCodes" rows="8" spellcheck="false"
-                  placeholder="TTI:12345, Dubai, AE, 25.0490889376, 55.1180329667&#10;TTI:76853197, Antigua, AG, 17.053795, -61.894452"></textarea>
-                <div class="field-help">
-                  One hotel per line: the Travelify property code, then <strong>where it
-                  is</strong> — the city or resort, the two-letter country, and its
-                  latitude and longitude. Codes work with or without the
-                  <code>TTI:</code> prefix. Up to 100 hotels.
-                  <br><br>
-                  The code picks the hotel. The location tells us where to look for it,
-                  the same way a Travelify deep link searches the city and pins the
-                  property inside it. <strong>A row with a code and nothing else is
-                  skipped</strong>, because searching the whole world for one hotel is
-                  not something we will do. Any one of city, country or coordinates is
-                  enough, and coordinates are the most reliable.
+                <label class="field-label">Your hotels</label>
+                <div class="tti-rows" id="ttiRows"></div>
+                <div class="tti-row-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" id="ttiAdd">+ Add hotel</button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="ttiTest">Test these codes</button>
                 </div>
+                <div class="field-help">
+                  The Travelify property code and the two-letter country it is in.
+                  Codes work with or without the <code>TTI:</code> prefix. Up to 100
+                  hotels. The code picks the hotel, the country tells us where to look
+                  for it, so a row needs both.
+                </div>
+                <div class="tti-test-out" id="ttiTestOut" hidden></div>
                 <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
               </div>
               <div class="field" id="originField">
@@ -2086,108 +2104,210 @@
     /* ============================================================
        The property list
        ------------------------------------------------------------
-       One hotel per line: code, optional name, optional country. The name
-       matters more than it looks — Travelify's own documented way to pin a
-       property (loct=Property) names the hotel rather than coding it, so a
-       row that carries a name gives the nightly sweep a second way in.
+       Two fields per hotel and nothing else (Andy, 14 Sep 2026): the Travelify
+       property code, and the country it is in. The code picks the hotel; the
+       country is the area the nightly sweep searches before the refn pin
+       narrows it to that property. A row needs both, because a code with no
+       country would mean searching the world for one hotel.
 
        Canonicalisation must stay identical to canonTti in
        api/_lib/offers/tti.js, api/cached-offers.js and widget-offers.js: the
        cron writes the key the widget reads, so any difference is a total miss.
        ============================================================ */
+    const TTI_MAX = 100;
     function canonTti(token) {
       const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^TTI:/, '');
       return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
     }
-    function parseTtiText(text) {
-      const rows = [];
-      const seen = Object.create(null);
-      const bad = [];
-      for (const line of String(text || '').split(/[\r\n;]+/)) {
-        if (!line.trim()) continue;
-        const parts = line.split(',');
-        const code = canonTti(parts[0]);
-        if (!code) { bad.push(line.trim().slice(0, 40)); continue; }
-        if (seen[code]) continue;
-        seen[code] = true;
-        const ctry = String(parts[2] || '').trim().toUpperCase();
-        const coord = (v, limit) => {
-          const n = Number(String(v == null ? '' : v).trim());
-          return (Number.isFinite(n) && n !== 0 && Math.abs(n) <= limit) ? n : null;
-        };
-        rows.push({
-          code,
-          name: String(parts[1] || '').replace(/[<>"]/g, '').trim().slice(0, 120),
-          ctry: /^[A-Z]{2}$/.test(ctry) ? ctry : '',
-          lat: coord(parts[3], 90),
-          lng: coord(parts[4], 180),
-        });
-        if (rows.length >= 100) break;
-      }
-      return { rows, bad };
+    function canonCtry(v) {
+      const up = String(v == null ? '' : v).trim().toUpperCase();
+      return /^[A-Z]{2}$/.test(up) ? up : '';
     }
-    function ttiRowsOf(cfg) {
+
+    /* Rows as the agent is editing them, INCLUDING half-typed ones. Kept
+       separate from the saved config so a row stays on screen while it is
+       still incomplete, instead of vanishing the moment it fails validation. */
+    let ttiRows = [];
+
+    function ttiRowsFromConfig(cfg) {
       const raw = (cfg && cfg.ttiCodes) || [];
-      if (Array.isArray(raw)) {
-        return raw.map((r) => (r && typeof r === 'object')
-          ? { code: canonTti(r.code), name: r.name || '', ctry: r.ctry || '',
-              lat: r.lat ?? null, lng: r.lng ?? null }
-          : { code: canonTti(r), name: '', ctry: '', lat: null, lng: null }).filter((r) => r.code);
+      const list = Array.isArray(raw) ? raw : String(raw).split(/[\r\n;]+/);
+      const out = [];
+      for (const r of list) {
+        if (r && typeof r === 'object') {
+          out.push({ code: String(r.code || r.tti || '').replace(/^TTI:/i, ''), ctry: r.ctry || r.countryCode || '' });
+        } else {
+          const parts = String(r || '').split(',');
+          if (!String(parts[0] || '').trim()) continue;
+          out.push({ code: String(parts[0]).trim().replace(/^TTI:/i, ''), ctry: String(parts[2] || '').trim() });
+        }
       }
-      return parseTtiText(raw).rows;
+      return out.slice(0, TTI_MAX);
     }
-    function ttiCodesOf(cfg) { return ttiRowsOf(cfg).map((r) => r.code); }
-    function ttiTextOf(cfg) {
-      return ttiRowsOf(cfg)
-        .map((r) => ['TTI:' + r.code, r.name, r.ctry,
-          r.lat != null ? r.lat : '', r.lng != null ? r.lng : '']
-          .join(', ').replace(/(?:,\s*)+$/, ''))
-        .join('\n');
+
+    /* Only complete rows reach the config. A half-typed row is not an error,
+       it is just not ready, so it stays in the editor and out of the save. */
+    function syncTtiConfig() {
+      const seen = Object.create(null);
+      const out = [];
+      for (const r of ttiRows) {
+        const code = canonTti(r.code);
+        const ctry = canonCtry(r.ctry);
+        if (!code || !ctry || seen[code]) continue;
+        seen[code] = true;
+        out.push({ code, ctry });
+      }
+      state.config.ttiCodes = out;
+      return out;
     }
-    function paintTtiSummary(bad) {
+
+    function paintTtiSummary() {
       const el = $('ttiSummary');
       if (!el) return;
-      const rows = ttiRowsOf(state.config);
-      if (!rows.length) {
+      const ready = syncTtiConfig().length;
+      const incomplete = ttiRows.filter(r => (r.code || r.ctry) && !(canonTti(r.code) && canonCtry(r.ctry))).length;
+      if (!ready && !incomplete) {
         el.innerHTML = 'No hotels yet. The widget stays empty until you add at least one.';
         return;
       }
-      const hasArea = (r) => !!(r.name || r.ctry || (r.lat != null && r.lng != null));
-      const located = rows.filter(hasArea).length;
-      const pinned = rows.filter((r) => r.lat != null && r.lng != null).length;
-      const parts = [rows.length + (rows.length === 1 ? ' hotel' : ' hotels')];
-      if (pinned < located) parts.push((located - pinned) + ' without coordinates');
-      let html = esc(parts.join(' · '));
-      // A row with no location cannot be searched for, so say so here rather
-      // than letting it silently produce nothing overnight.
-      if (located < rows.length) {
-        html += '<br><span style="color:var(--tgse-warning)">'
-          + (rows.length - located)
-          + (rows.length - located === 1 ? ' row has' : ' rows have')
-          + ' a code but no location, so ' + (rows.length - located === 1 ? 'it' : 'they')
-          + ' will be skipped. Add a city, a country or coordinates.</span>';
-      }
-      if (bad && bad.length) {
-        html += '<br><span style="color:var(--tgse-warning)">Skipped ' + bad.length
-          + (bad.length === 1 ? ' line that is not a code: ' : ' lines that are not codes: ')
-          + esc(bad.slice(0, 3).join(' / ')) + '</span>';
+      let html = esc(ready + (ready === 1 ? ' hotel ready' : ' hotels ready'));
+      if (incomplete) {
+        html += '<br><span style="color:var(--tgse-warning)">' + incomplete
+          + (incomplete === 1 ? ' row needs' : ' rows need')
+          + ' both a code and a two-letter country before it will be saved.</span>';
       }
       el.innerHTML = html;
     }
+
+    /* Rebuild the row inputs. Never called from a keystroke handler — redrawing
+       the field the agent is typing into would take the cursor with it, which
+       is the focus-stealing the suite's render rules forbid. */
+    function renderTtiRows() {
+      const host = $('ttiRows');
+      if (!host) return;
+      host.innerHTML = '';
+      if (!ttiRows.length) ttiRows.push({ code: '', ctry: '' });
+      ttiRows.forEach((row, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'tti-row';
+        const code = document.createElement('input');
+        code.className = 'input';
+        code.type = 'text';
+        code.placeholder = 'TTI code, e.g. 12345';
+        code.value = row.code || '';
+        code.setAttribute('aria-label', 'Travelify property code, hotel ' + (i + 1));
+        const ctry = document.createElement('input');
+        ctry.className = 'input tti-ctry';
+        ctry.type = 'text';
+        ctry.maxLength = 2;
+        ctry.placeholder = 'AE';
+        ctry.value = row.ctry || '';
+        ctry.setAttribute('aria-label', 'Country code, hotel ' + (i + 1));
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'tti-del';
+        del.textContent = '\u00d7';
+        del.title = 'Remove this hotel';
+        del.setAttribute('aria-label', 'Remove hotel ' + (i + 1));
+
+        code.addEventListener('input', () => { row.code = code.value; paintTtiSummary(); markDirtyAndPreview(); });
+        ctry.addEventListener('input', () => { row.ctry = ctry.value; paintTtiSummary(); markDirtyAndPreview(); });
+        del.addEventListener('click', () => {
+          ttiRows.splice(i, 1);
+          renderTtiRows();
+          paintTtiSummary();
+          markDirtyAndPreview();
+        });
+
+        wrap.appendChild(code); wrap.appendChild(ctry); wrap.appendChild(del);
+        host.appendChild(wrap);
+      });
+    }
+
+    /* ---- The Test button ------------------------------------------------
+       Runs the codes against Travelify for real, through /api/tti-test, so an
+       agent finds out now whether a code returns anything rather than from an
+       empty widget tomorrow morning. The endpoint caps how many codes one
+       click can test and is rate limited: it is the only place in the product
+       where an agent action spends live Travelify searches. */
+    async function runTtiTest() {
+      const btn = $('ttiTest');
+      const out = $('ttiTestOut');
+      if (!btn || !out) return;
+      const rows = syncTtiConfig();
+      if (!rows.length) {
+        out.hidden = false;
+        out.innerHTML = '<span style="color:var(--tgse-warning)">Add a code and a country first.</span>';
+        return;
+      }
+      const label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Testing\u2026';
+      out.hidden = false;
+      out.innerHTML = 'Searching Travelify for each hotel\u2026';
+      try {
+        const res = await fetch('/api/tti-test', {
+          method: 'POST',
+          headers: window.tgse.authHeaders(),
+          body: JSON.stringify({ rows, type: state.config.type }),
+        });
+        if (res.status === 401) { window.tgse.showLogin(); return; }
+        const d = await res.json();
+        if (!res.ok || d.error) {
+          out.innerHTML = '<span style="color:var(--tgse-danger)">' + esc(d.error || 'The test could not run.') + '</span>';
+          return;
+        }
+        const dot = { found: 'tti-ok', 'area-only': 'tti-warn', empty: 'tti-warn', 'no-country': 'tti-warn', failed: 'tti-err' };
+        const lines = (d.results || []).map((r) => {
+          let text;
+          if (r.status === 'found') {
+            const price = Number.isFinite(r.fromPrice)
+              ? ' from ' + (r.currency === 'EUR' ? '\u20ac' : '\u00a3') + Math.round(r.fromPrice)
+              : '';
+            text = esc(r.hotel || 'Found') + (r.resort ? ', ' + esc(r.resort) : '') + esc(price)
+                 + ' \u00b7 ' + r.offers + (r.offers === 1 ? ' offer' : ' offers');
+          } else {
+            text = esc(r.detail || r.status);
+          }
+          return '<div class="tti-test-row"><span class="tti-test-dot ' + (dot[r.status] || 'tti-warn') + '"></span>'
+               + '<span><span class="tti-test-code">' + esc(r.code) + '</span> \u2014 ' + text + '</span></div>';
+        });
+        let head = '<div style="margin-bottom:6px"><strong>' + d.found + ' of ' + d.tested + '</strong> found.</div>';
+        if (d.truncated) {
+          head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">Only the first 10 were tested, to keep '
+                + 'this from turning into a bulk search. The other ' + d.truncated + ' still save fine.</div>';
+        }
+        if (d.pinLooksIgnored) {
+          head += '<div style="color:var(--tgse-warning);margin-bottom:6px">Every search returned the surrounding '
+                + 'country rather than the hotel. Either these codes are wrong, or Travelify is ignoring the '
+                + 'property pin. Worth telling us if the codes are definitely right.</div>';
+        }
+        out.innerHTML = head + lines.join('');
+      } catch (err) {
+        out.innerHTML = '<span style="color:var(--tgse-danger)">Test failed: ' + esc(err.message) + '</span>';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    }
+
     function wireTtiCodes() {
-      const ta = $('cfgTtiCodes');
-      if (!ta) return;
-      const apply = () => {
-        const { rows, bad } = parseTtiText(ta.value);
-        state.config.ttiCodes = rows;
-        paintTtiSummary(bad);
-        markDirtyAndPreview();
-      };
-      // Never re-render the textarea from here. The preview re-renders on every
-      // keystroke, and rewriting the field under the cursor is exactly the
-      // focus-stealing the suite's render rules forbid.
-      ta.addEventListener('input', apply);
-      ta.addEventListener('blur', apply);
+      const add = $('ttiAdd');
+      if (add) {
+        add.addEventListener('click', () => {
+          if (ttiRows.length >= TTI_MAX) return;
+          ttiRows.push({ code: '', ctry: '' });
+          renderTtiRows();
+          paintTtiSummary();
+          // Adding a row is a real user action, so moving focus into it is the
+          // helpful kind rather than the kind that steals a cursor on render.
+          const inputs = $('ttiRows').querySelectorAll('.tti-row .input');
+          if (inputs.length) inputs[inputs.length - 2].focus();
+        });
+      }
+      const test = $('ttiTest');
+      if (test) test.addEventListener('click', runTtiTest);
+      renderTtiRows();
       paintTtiSummary();
     }
 
@@ -2286,8 +2406,14 @@
       // template copied from Travel Offers) settles on the package option
       // rather than leaving the select blank.
       $('cfgType').value = (c.type === 'Accommodation') ? 'Accommodation' : 'DynamicPackages';
-      const ttiTa = $('cfgTtiCodes');
-      if (ttiTa && document.activeElement !== ttiTa) ttiTa.value = ttiTextOf(state.config);
+      // Rebuild the rows from the loaded config, unless the agent is typing in
+      // one right now: redrawing the field under the cursor would take it away.
+      const host = $('ttiRows');
+      const typing = host && host.contains(document.activeElement);
+      if (host && !typing) {
+        ttiRows = ttiRowsFromConfig(state.config);
+        renderTtiRows();
+      }
       paintTtiSummary();
       refreshOriginChips && refreshOriginChips();
       $('cfgBoard').value = (c.boardBases && c.boardBases[0]) || '';
@@ -2696,7 +2822,7 @@
 
     async function runAvailabilityProbe() {
       const base = availabilityBasePayload();
-      const codes = ttiCodesOf(state.config);
+      const codes = syncTtiConfig().map((r) => r.code);
       const key = JSON.stringify([codes, base, state.config.template]);
       if (availabilityCache.has(key)) {
         availability = availabilityCache.get(key);

@@ -35,6 +35,8 @@ const DASHBOARD = readFileSync(new URL('../public/index.html', import.meta.url),
 const EDITOR = readFileSync(new URL('../public/editor-tti-offers.html', import.meta.url), 'utf8');
 const DEMO = readFileSync(new URL('../public/demo-tti-offers.html', import.meta.url), 'utf8');
 const TOUR = readFileSync(new URL('../public/tour-tti-offers.js', import.meta.url), 'utf8');
+const TEST_API = readFileSync(new URL('../api/tti-test.js', import.meta.url), 'utf8');
+const RATELIMIT = readFileSync(new URL('../api/_lib/rate-limit-public.js', import.meta.url), 'utf8');
 
 // ── The one invariant that matters most ────────────────────────────────────
 // The cron WRITES offers:tti:{appId}:{code}; the endpoint READS it; the widget
@@ -422,7 +424,27 @@ test('the editor canonicalises TTI codes the same way as everything else', () =>
 
 test('the editor has no dead destination controls left behind', () => {
   assert.ok(!/destChips|destInput/.test(EDITOR), 'retired destination chips must be gone');
-  assert.ok(/id="cfgTtiCodes"/.test(EDITOR), 'the property list field is missing');
+  assert.ok(!/cfgTtiCodes|ttiTextOf|ttiCodesOf/.test(EDITOR), 'the retired textarea helpers must be gone');
+  assert.ok(/id="ttiRows"/.test(EDITOR), 'the property row list is missing');
+});
+
+test('a hotel is two fields, the code and the country', () => {
+  // Andy, 14 Sep 2026. Nothing else is asked for: the code picks the hotel and
+  // the country is the area the sweep searches before the pin narrows it.
+  // The inputs are built in JS, not markup, so assert on what actually runs.
+  assert.ok(/code\.placeholder = 'TTI code/.test(EDITOR), 'code input missing');
+  assert.ok(/ctry\.className = 'input tti-ctry'/.test(EDITOR), 'country input missing');
+  assert.ok(/ctry\.maxLength = 2/.test(EDITOR), 'the country field should hold two letters');
+  assert.ok(/\.tti-row \{ display: grid; grid-template-columns: 1fr 84px 28px/.test(EDITOR),
+    'both fields sit on one row');
+});
+
+test('only rows with BOTH a code and a country reach the saved config', () => {
+  assert.ok(
+    /if \(!code \|\| !ctry \|\| seen\[code\]\) continue;/.test(EDITOR),
+    'a half-typed row must be held back from the save rather than saved broken',
+  );
+  assert.ok(/rows need/.test(EDITOR), 'the agent has to be told which rows are not ready');
 });
 
 test('the editor availability strip counts the property pool, not a place', () => {
@@ -431,13 +453,48 @@ test('the editor availability strip counts the property pool, not a place', () =
     'counting a destination pool would promise offers the widget never reads');
 });
 
-test('the editor never rewrites the property field while it is focused', () => {
-  // The preview re-renders on every keystroke. Rewriting the textarea under the
+test('the editor never rebuilds the property rows while one is focused', () => {
+  // The preview re-renders on every keystroke. Rebuilding the inputs under the
   // cursor is the focus-stealing the suite's render rules forbid.
   assert.ok(
-    /document\.activeElement !== ttiTa/.test(EDITOR),
-    'hydration must skip the field the agent is typing into',
+    /host\.contains\(document\.activeElement\)/.test(EDITOR),
+    'hydration must skip the rows while the agent is typing in one',
   );
+  assert.ok(
+    !/renderTtiRows\(\);\s*\}\);\s*code\.addEventListener/.test(EDITOR),
+    'a keystroke handler must not redraw the row it is typing into',
+  );
+});
+
+// ── The Test button ────────────────────────────────────────────────────────
+
+test('the test endpoint resolves the App ID server-side, never from the body', () => {
+  // A client must not be able to test against another client's Travelify
+  // application: the rates that come back are commercially theirs.
+  assert.ok(/async function appIdForCaller\(user\)/.test(TEST_API));
+  assert.ok(!/body\.appId|rows\.appId/.test(TEST_API), 'the App ID must never come off the request');
+});
+
+test('the test endpoint is capped and authenticated', () => {
+  assert.ok(/const auth = requireAuth\(req\);/.test(TEST_API), 'must be authenticated');
+  assert.ok(/const MAX_CODES = \d+;/.test(TEST_API), 'one click must not fan out');
+  assert.ok(/rows\.slice\(0, MAX_CODES\)/.test(TEST_API), 'the cap must actually be applied');
+  assert.ok(/evaluatePublicRateLimit\(req, res, \{ event: 'tti-test' \}\)/.test(TEST_API));
+});
+
+test('the test endpoint keeps its rate limit even though the editor calls it', () => {
+  // It is the only agent action that spends live Travelify searches, so the
+  // trusted-preview relax must not switch its limit off.
+  assert.ok(/case 'tti-test':/.test(RATELIMIT), 'tti-test needs its own window, not the null default');
+  assert.ok(
+    /NO_PREVIEW_RELAX = event === 'popup-lead' \|\| event === 'trip-enquiry'[\s\S]{0,80}event === 'tti-test'/.test(RATELIMIT),
+    'the editor-preview relax must not apply to a live-search path',
+  );
+});
+
+test('a code with no country is refused rather than searched worldwide', () => {
+  assert.ok(/status: 'no-country'/.test(TEST_API));
+  assert.ok(/if \(!prop\.ctry\)/.test(TEST_API), 'the check must happen before any request is fired');
 });
 
 test('the editor templates are layout presets, not dead destination filters', () => {
@@ -449,6 +506,13 @@ test('the editor templates are layout presets, not dead destination filters', ()
 
 // ── The demo and the tour ──────────────────────────────────────────────────
 
+test('the demo links to its OWN editor, not the Travel Offers one', () => {
+  // The demo page was cloned from demo-offers.html and kept its editor link,
+  // so "Open editor" took you to the wrong widget entirely.
+  assert.ok(/href="\/editor-tti-offers"/.test(DEMO), 'the editor link must point at this widget');
+  assert.ok(!/href="\/editor-offers"/.test(DEMO), 'the inherited Travel Offers link must be gone');
+});
+
 test('the demo mounts the shared engine and loads the rewritten script', () => {
   assert.ok(/widget-tti-offers\.js/.test(DEMO));
   assert.ok(/new window\.TGTtiOffersWidget\(/.test(DEMO));
@@ -456,7 +520,7 @@ test('the demo mounts the shared engine and loads the rewritten script', () => {
 });
 
 test('the tour points at the property list, not the retired destination input', () => {
-  assert.ok(/#cfgTtiCodes/.test(TOUR));
+  assert.ok(/#ttiRows/.test(TOUR));
   assert.ok(!/#destInput/.test(TOUR));
   assert.ok(/openSectionByTitle\('Your properties'\)/.test(TOUR));
   // Its own id, so dismissing one tour does not silently dismiss the other.

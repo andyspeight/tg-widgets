@@ -151,15 +151,38 @@ because each client's properties are swept under their own Travelify
 application: two agencies asking about one hotel get their own contracted rates,
 and a shared key would make the teaser price and the booking price disagree.
 
-**The property list.** Rows of `{ code, loc, ctry, lat, lng }`, one hotel per
-line, which is the column order our own hotel spreadsheets already keep
-(HalalHotelsAE, the Adult Only Hotels database) so an agent pastes straight from
-one. The code picks the hotel; `loc`, `ctry` and the coordinates say where to
-look for it. **A row carrying a code and nothing else is skipped**, because a
-worldwide search that the verify gate then discarded is exactly the wasted
-Travelify capacity the cache-only rule exists to prevent. Any one of the three
-is enough, and coordinates are the most reliable. The editor counts the
-locationless rows and says so.
+**The property list is two fields** (Andy, 14 Sep 2026): the Travelify property
+code, and the two-letter country. Nothing else is asked for. The code picks the
+hotel; the country is the area the sweep searches before the `refn` pin narrows
+it. Each hotel is one row of two inputs in the editor, and **a row without both
+is held back from the save**, because a worldwide search the verify gate then
+discarded is exactly the wasted Travelify capacity the cache-only rule exists to
+prevent.
+
+`buildTtiPayload` still accepts `loc`, `lat` and `lng` and will use them when
+present, so a config saved before this change keeps its tighter area. Nothing
+writes them now. Because the area is a whole country rather than a city,
+`MAX_OFFERS_PER_PROPERTY` is the standard 250 band: a ceiling that costs nothing
+if the pin is honoured, and the pool the verify gate has to find the property in
+if it is not.
+
+**The Test button** (`POST /api/tti-test`) runs the codes against Travelify for
+real, so an agent learns now whether a code returns anything instead of from an
+empty widget the next morning. It reports, per code: `found` with the hotel name
+and a from-price, `area-only` when the search worked but nothing was that
+property, `empty`, or `failed`.
+
+This is the one place in the product where an agent action spends live Travelify
+searches, so it is fenced: authenticated, at most 10 codes a click, low
+concurrency, a short timeout, and its own tight rate limit which the
+trusted-preview relax deliberately does NOT apply to (it is called from the
+editor, so relaxing there would switch the limit off). The App ID is resolved
+server-side from the caller's own account and never read off the request body,
+so nobody can test against another client's application and see their rates.
+
+It also answers the open `refn` question as a side effect: if every code comes
+back `area-only` with a healthy area count, the feed is ignoring the pin, and
+the response says so in `pinLooksIgnored`.
 
 **The sweep asks the way a DP deep link asks.** The nightly payload mirrors a
 dynamic-package deep link parameter for parameter: the package type, the
