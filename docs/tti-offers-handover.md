@@ -190,7 +190,7 @@ degrades, it is a total silent miss on every TTI Offers widget in the estate.
 | `public/widget-offers.js` | v1.20.0. The TTI branch, the second tag, the alias global. |
 | `public/editor-tti-offers.html` | The editor. The destination chips became a property list; templates are layout-only presets. |
 | `public/demo-tti-offers.html`, `public/tour-tti-offers.js` | Demo page and guided tour. |
-| `test/tti-offers-smoke.mjs` | 37 tests. `npm run test:tti-offers`. |
+| `test/tti-offers.test.mjs` | 37 tests. `npm run test:tti-offers`. |
 
 The world map cron gained four `export` keywords and nothing else. Its parser is
 imported rather than copied, so both jobs write one cache shape and

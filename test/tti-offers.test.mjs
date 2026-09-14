@@ -6,9 +6,13 @@
  * agree on exactly one thing for it to work at all — how a pasted TTI code
  * becomes a Redis key — so that agreement is what most of this file checks.
  *
- * Run: npm run test:tti-offers
+ * Run: npm run test:tti-offers, or as part of `node --test test/*.test.mjs`,
+ * which is what CI runs. This suite belongs in CI: unlike the *-smoke.mjs
+ * files beside it, it makes no network calls and spends no API budget. It
+ * reads source files and exercises pure functions, nothing more.
  */
 
+import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
@@ -31,13 +35,6 @@ const DASHBOARD = readFileSync(new URL('../public/index.html', import.meta.url),
 const EDITOR = readFileSync(new URL('../public/editor-tti-offers.html', import.meta.url), 'utf8');
 const DEMO = readFileSync(new URL('../public/demo-tti-offers.html', import.meta.url), 'utf8');
 const TOUR = readFileSync(new URL('../public/tour-tti-offers.js', import.meta.url), 'utf8');
-
-let passed = 0;
-const failures = [];
-function test(name, fn) {
-  try { fn(); passed++; }
-  catch (err) { failures.push(`${name}\n    ${err.message}`); }
-}
 
 // ── The one invariant that matters most ────────────────────────────────────
 // The cron WRITES offers:tti:{appId}:{code}; the endpoint READS it; the widget
@@ -465,12 +462,3 @@ test('the tour points at the property list, not the retired destination input', 
   // Its own id, so dismissing one tour does not silently dismiss the other.
   assert.ok(/'tti-offers'/.test(TOUR) && !/tourLauncher\(\{ id: 'offers'/.test(TOUR));
 });
-
-// ── Report ─────────────────────────────────────────────────────────────────
-
-if (failures.length) {
-  console.error(`\ntti-offers: ${passed} passed, ${failures.length} FAILED\n`);
-  for (const f of failures) console.error('  ✗ ' + f);
-  process.exit(1);
-}
-console.log(`tti-offers: ${passed} passed`);
