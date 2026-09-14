@@ -173,9 +173,12 @@ export function searchFromConfig(config) {
   const t = String(c.type || 'Accommodation');
   const type = (t === 'Accommodation') ? 'Accommodation' : 'Packages';
   // A dynamic package needs a departure point, exactly as a DP deep link
-  // carries org. Sent as an array so several origins stay ONE request rather
-  // than multiplying the nightly budget. Meaningless for a hotel on its own,
-  // so omitted there.
+  // carries org. Kept as a list because the agent may offer several, but be
+  // clear what that costs: Travelify prices ONE departure airport per search
+  // (its flight criteria take Legs, and a leg has a single origin), so three
+  // airports is three searches per property per night, not one. `dpOrigins`
+  // is where that budget is capped. Meaningless for a hotel on its own, so
+  // omitted there.
   const origins = (type === 'Packages' && Array.isArray(c.origins))
     ? c.origins
       .map((o) => String(o || '').trim().toUpperCase())
@@ -587,15 +590,15 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   const lat = asNum(pick(loc, ['latitude', 'lat']));
   const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
   const offer = {
-    // ALWAYS Accommodation, because that is what was searched.
+    // ALWAYS 'Accommodation', on a package too.
     //
-    // buildAccommodationCriteria only ever sends SearchType: 'Accommodation'
-    // — a dynamic package needs flightSearchCriteria alongside it and is not
-    // built yet. Labelling the result from the WIDGET's configured type stored
-    // a hotel-only offer as 'Packages', and api/cached-offers.js filters on
-    // exactly that field, so the widget asked for DynamicPackages, the cache
-    // held Accommodation, and the preview came back empty with a full cache
-    // sitting behind it (14 Sep 2026).
+    // This is the SHELF the offer is cached on, not a claim about what is in
+    // the price: every TTI result is a property, and both search types return
+    // theirs in accommodationResults. api/cached-offers.js filters on exactly
+    // this field and the TTI widget always asks for 'Accommodation', so
+    // labelling a package 'Packages' hid a full cache behind an empty preview
+    // (14 Sep 2026). What the price INCLUDES is carried by includesFlights and
+    // departureAirport below, where a card can read it.
     type: 'Accommodation',
     price: price != null ? price : pricePP,
     pricePP: pricePP != null ? pricePP : null,
@@ -641,6 +644,12 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // Bookable / Affiliate / EnquiryOnly. An Affiliate result hands the visitor
     // to somebody else rather than booking here, so the card has to know.
     resultType: r.resultType || null,
+    // Which airport this price flies from, on a package. A package quoted from
+    // Aberdeen and one quoted from Gatwick are different offers at different
+    // prices, so the card has to be able to say which it is showing rather
+    // than presenting whichever was cheapest as if it were universal.
+    ...(ctx.departureAirport ? { departureAirport: ctx.departureAirport } : {}),
+    ...(ctx.includesFlights ? { includesFlights: true } : {}),
     accommodationUniqueRef: r.uniqueRef ? String(r.uniqueRef).slice(0, 64) : null,
     refundability: pick(r, ['units.0.refundability', 'refundability']) || null,
     fetchedAt: new Date().toISOString(),
@@ -664,18 +673,22 @@ export function normaliseAccommodationResult(r, ctx = {}) {
 
 /** The body for a DYNAMIC PACKAGE search around one property.
  *
- *  Andy supplied the DP deeplink on 14 Sep 2026 and it is the accommodation
- *  one plus three things: `org` the departure airport, `dst` the destination,
- *  and `dir` whether to insist on direct flights. The API docs say the search
- *  sends `flightSearchCriteria` and `accommodationSearchCriteria` together and
- *  returns both result arrays.
+ *  The hotel half is IDENTICAL to the accommodation search — same Ref, same
+ *  area, same dates. Only the flight half is new, and its shape came from
+ *  Travelify rather than from a guess: the first attempt sent a flat
+ *  origin/date pair and the service answered, by name (14 Sep 2026),
  *
- *  So the hotel half is IDENTICAL to the accommodation search — same Ref, same
- *  area, same dates — and the flight half is new. The flight field names here
- *  are taken from the deeplink and the naming the accommodation criteria use;
- *  where one is wrong the service says so by name, which is how CustomerIP was
- *  settled this morning. Better a request the API corrects in one click than
- *  another round of asking.
+ *    "FlightSearchCriteria - Legs: You must specify at least one flight leg;
+ *     FlightSearchCriteria - Passengers: You must specify at least one passenger"
+ *
+ *  So the flight is a JOURNEY — an ordered list of legs — and the party
+ *  travels as Passengers rather than riding along on the room. Two legs for a
+ *  return trip, bracketing the stay.
+ *
+ *  STILL INFERRED, and marked as such: the field names INSIDE a leg
+ *  (Origin / Destination / DepartureDate) and the Passenger shape. Travelify
+ *  named the two containers, not their contents. If one is wrong the service
+ *  will say so by name again, the same way this round was settled.
  *
  *  A DP with no departure point is not a package, so it returns null rather
  *  than quietly searching for a hotel and calling it one. That mislabelling is
@@ -686,36 +699,66 @@ export function buildDynamicPackageCriteria(prop, search = {}, now = new Date())
 
   // The departure airport. Without one there is no flight and therefore no
   // package — the caller must report that rather than fall back to a hotel.
+  //
+  // ONE origin per search. A Leg carries a single origin, so several departure
+  // airports are several searches rather than one wider one, and the caller
+  // decides how many it is willing to spend. Sending only the first while the
+  // agent picked three would quote a price from an airport they did not ask
+  // about, which is the quiet kind of wrong this widget keeps having to avoid.
   const origins = (Array.isArray(search.origins) ? search.origins : [])
     .map((o) => String(o || '').trim().toUpperCase())
-    .filter((o) => /^[A-Z]{3}$/.test(o))
-    .slice(0, 6);
-  if (!origins.length) return null;
+    .filter((o) => /^[A-Z]{3}$/.test(o));
+  const origin = String(search.origin || origins[0] || '').trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(origin)) return null;
 
   const acc = base.AccommodationSearchCriteria;
+  // Travelify's own words on the first attempt (14 Sep 2026): "Legs: You must
+  // specify at least one flight leg; Passengers: You must specify at least one
+  // passenger". So the flight half is a JOURNEY — a list of legs — not the flat
+  // origin/date pair that was guessed first, and the party travels as
+  // Passengers rather than riding along on the room.
+  const legs = [
+    {
+      Origin: origin,
+      // The hotel's country. A leg wants somewhere to land and this is the
+      // only destination we can state truthfully: the accommodation half
+      // already pins the exact property, so the flight has to reach the right
+      // country rather than a specific airport we do not hold.
+      ...(acc.LocationCountry ? { Destination: acc.LocationCountry } : {}),
+      DepartureDate: acc.CheckinDate,
+    },
+    {
+      ...(acc.LocationCountry ? { Origin: acc.LocationCountry } : {}),
+      Destination: origin,
+      DepartureDate: acc.CheckoutDate,
+    },
+  ];
+
+  // Mirrors the Guests shape on the room, which is the naming this API uses
+  // for the same idea elsewhere.
+  const passengers = (acc.Rooms[0].Guests || []).map((g) => ({ Type: g.Type, ...(g.Age != null ? { Age: g.Age } : {}) }));
+
   return {
     ...base,
     SearchType: 'DynamicPackaging',
     FlightSearchCriteria: {
-      // `org` on the deeplink. Sent as a list so several departure airports
-      // stay ONE search rather than multiplying the nightly budget, the same
-      // reasoning the old sweep used for origins.
-      Origins: origins,
-      // `dst` on the deeplink is Travelify's own destination id, which we do
-      // not hold. The hotel's own country is what we can say truthfully, and
-      // the accommodation half already pins the exact property, so the flight
-      // only has to land in the right place.
-      ...(acc.LocationCountry ? { DestinationCountry: acc.LocationCountry } : {}),
-      ...(Number.isFinite(acc.Latitude) ? { Latitude: acc.Latitude, Longitude: acc.Longitude } : {}),
-      // The flight brackets the stay: out on the check-in, back on the
-      // check-out. Sending different dates would price a package nobody asked
-      // for.
-      DepartDate: acc.CheckinDate,
-      ReturnDate: acc.CheckoutDate,
+      Legs: legs,
+      Passengers: passengers,
       CabinClass: /^(Economy|PremiumEconomy|Business|First)$/.test(String(search.cabinClass || ''))
         ? search.cabinClass : 'Any',
       // `dir=false` on the deeplink: do not insist on direct.
       DirectOnly: search.directOnly === true,
     },
   };
+}
+
+/** Every departure airport a DP widget asked for, cleaned. The caller runs one
+ *  search per entry, because a Leg carries a single origin. Capped, because a
+ *  nightly sweep pays for each one on every property. */
+export function dpOrigins(search = {}, cap = 3) {
+  return (Array.isArray(search.origins) ? search.origins : [])
+    .map((o) => String(o || '').trim().toUpperCase())
+    .filter((o) => /^[A-Z]{3}$/.test(o))
+    .filter((o, i, a) => a.indexOf(o) === i)
+    .slice(0, cap);
 }

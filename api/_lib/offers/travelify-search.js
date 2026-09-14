@@ -136,14 +136,20 @@ export async function startSearch(creds, criteria, opts = {}) {
  *
  *  `pick` says which result array to collect (e.g. 'accommodationResults'), so
  *  the same loop serves accommodation and dynamic packaging without branching.
+ *  `also` names a SECOND array to count as it goes — on a package search the
+ *  flights arrive in their own array, and knowing how many came back is the
+ *  difference between "the package half worked" and "we got a hotel again".
+ *  Counted rather than kept, because nothing downstream renders a flight yet.
  *  `sleep` is injectable purely so tests do not wait real seconds. */
 export async function pollResults(creds, session, opts = {}) {
   const pick = opts.pick || 'accommodationResults';
+  const also = opts.also || null;
   const maxPolls = Math.min(opts.maxPolls || DEFAULT_MAX_POLLS, MAX_POLLS);
   const wait = opts.sleep || ((ms) => new Promise((r) => setTimeout(r, ms)));
   const headers = searchHeaders(creds.appId, creds.apiKey);
 
   const collected = [];
+  let alsoCount = 0;
   let polls = 0;
   let complete = false;
   let last = null;
@@ -164,17 +170,21 @@ export async function pollResults(creds, session, opts = {}) {
     last = r;
     const arr = r.data && r.data[pick];
     if (Array.isArray(arr) && arr.length) collected.push(...arr);
+    if (also) {
+      const extra = r.data && r.data[also];
+      if (Array.isArray(extra)) alsoCount += extra.length;
+    }
     const total = Number(r.data && r.data.total);
     const done = Number(r.data && r.data.completed);
     if (Number.isFinite(total) && Number.isFinite(done) && done >= total) { complete = true; break; }
   }
 
   if (!collected.length && last && !last.ok) {
-    return { ok: false, error: last.error, polls, results: [], complete };
+    return { ok: false, error: last.error, polls, results: [], complete, alsoCount };
   }
   // Running out of polls is not an error: partial results are still results,
   // and a sweep that threw them away would cache nothing on a busy night.
-  return { ok: true, results: collected, polls, complete, data: last && last.data };
+  return { ok: true, results: collected, polls, complete, alsoCount, data: last && last.data };
 }
 
 /** Open a search and poll it out in one call. */

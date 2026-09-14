@@ -203,8 +203,15 @@ the response says so in `pinLooksIgnored`.
 
 **The sweep asks the way a DP deep link asks.** The nightly payload mirrors a
 dynamic-package deep link parameter for parameter: the package type, the
-departure points (`origins`, several in one request so they cannot multiply the
-budget), and the property anchor.
+departure point, and the property anchor.
+
+One correction to that mirroring, measured on 14 Sep 2026: a deep link carries
+`org` as a list, but the API does NOT. Its flight criteria take `Legs`, a leg
+carries a single origin, so **a package is one search per departure airport**.
+Three airports is three searches and three prices, not one wider question. That
+is a straight multiplier on the nightly bill, which is why both callers cap it
+(`MAX_ORIGINS` = 3 in the test button, `CRON_MAX_ORIGINS` = 3 in the sweep) and
+why `dpOrigins()` exists to hand out the capped, deduped list.
 
 The anchor's shape was CORRECTED on 14 Sep 2026 by two real deep links Andy
 supplied, one DP and one accommodation-only. Both pin a property like this:
@@ -413,12 +420,41 @@ All of it, and the nightly sweep is on the same path as the Test button.
   watched a real Hilton Bournemouth offer cache and render.
 - `api/cron/refresh-tti-offers.js` now runs that same search. It carries the
   API key as well as the App ID, because Token auth needs both.
-- Dynamic packaging, built from the DP deeplink Andy supplied (`org`, `dst`,
-  `dir`) plus the docs. The hotel half is IDENTICAL to a plain accommodation
+- Dynamic packaging. The hotel half is IDENTICAL to a plain accommodation
   search — a test compares the two objects — and only the flight half is new.
-  Its field names are INFERRED, not taken from a worked example, so the first
-  real DP test either works or gets Travelify's own words about a field. That
-  is the loop that settled `CustomerIP`.
+
+  The first attempt sent a flat `Origins` / `DepartDate` / `ReturnDate` lifted
+  from the deeplink, and Travelify corrected it by name, which is the same loop
+  that settled `CustomerIP`:
+
+      FlightSearchCriteria - Legs: You must specify at least one flight leg
+      FlightSearchCriteria - Passengers: You must specify at least one passenger
+
+  So the flight is a JOURNEY. Two legs bracket the stay (out on the check-in,
+  back on the check-out) and the passengers mirror the room's `Guests`. What
+  that answer confirmed on the way past: the request reaches Travelify, the
+  auth and the whole accommodation half are accepted, and
+  `SearchType: 'DynamicPackaging'` is understood.
+
+  **Still inferred, and say so if it bites:** the field names INSIDE a leg
+  (`Origin` / `Destination` / `DepartureDate`) and the `Passengers` shape.
+  Travelify named the two containers, not their contents. A leg's destination
+  is the hotel's COUNTRY, because the accommodation half already pins the exact
+  property and a country is the only destination we can state truthfully.
+
+- **What a package price covers travels on the offer, not in its type.** A TTI
+  offer is always cached as `type: 'Accommodation'` — that is the shelf, since
+  the key holds one property and the widget reads the whole key. A package
+  carries `includesFlights: true` and `departureAirport`, and the test panel
+  reports how many flights came back, because "no flights" and "a hotel price
+  under a package heading" look identical on a card.
+
+- **One card per hotel** (`foldTtiByProperty`, widget v1.21.0). Three airports
+  cache three offers for one hotel, which is right in the cache and wrong on
+  the page. The widget folds them to the cheapest and keeps the rest in
+  `departureAirports`. Not yet rendered: no template shows the departure
+  airport on a card, so a visitor sees the best price without being told which
+  airport it flies from. That is the next honest gap on the package path.
 
 ### The cron will not run without a customer address
 
@@ -485,8 +521,9 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 
 1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
    should start running. Until then it skips, safely.
-2. **Test a dynamic package.** The flight field names are inferred; the first
-   real test either works or names the field Travelify wants.
+2. **Show the departure airport on a card.** A package price belongs to one
+   airport and no template says which. The data is there (`departureAirport`,
+   `departureAirports`); it needs a line in each card template.
 3. **Decide what "from" means.** Every search is one stay, currently 30 days out
    and 7 nights, matching the `frd=30&dur=7` the deeplinks use. A true from-price
    across a spread of dates multiplies the nightly search count by however many

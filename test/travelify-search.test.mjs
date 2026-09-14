@@ -182,3 +182,31 @@ test('a non-JSON answer is reported rather than parsed into nonsense', async () 
   assert.equal(r.ok, false);
   assert.match(r.error, /non-JSON/);
 });
+
+test('a package search counts the flights alongside the properties', () => {
+  // A package returns two arrays. The properties are what gets cached, but
+  // "no flights came back" is the difference between a package price and a
+  // hotel price under a package heading — the exact thing that has to be
+  // visible rather than assumed. Counted, not kept: nothing renders a flight.
+  const stub = stubFetch([
+    { body: { success: true, total: 2, completed: 1, accommodationResults: [{ rid: 1 }], flightResults: [{ id: 'f1' }, { id: 'f2' }] } },
+    { body: { success: true, total: 2, completed: 2, accommodationResults: [{ rid: 2 }], flightResults: [{ id: 'f3' }] } },
+  ]);
+  return pollResults(CREDS, SESSION, { sleep: noSleep, also: 'flightResults' }).then((r) => {
+    assert.equal(stub.length, 2);
+    assert.equal(r.ok, true);
+    assert.equal(r.results.length, 2, 'the properties are still what is collected');
+    assert.equal(r.alsoCount, 3, 'and the flights accumulate across polls, like everything else');
+  });
+});
+
+test('a search that is not asked to count flights reports none', () => {
+  // The accommodation path must not suddenly grow a flight count it never
+  // asked for, and must never read the second array by accident.
+  stubFetch([
+    { body: { success: true, total: 1, completed: 1, accommodationResults: [{ rid: 1 }], flightResults: [{ id: 'f1' }] } },
+  ]);
+  return pollResults(CREDS, SESSION, { sleep: noSleep }).then((r) => {
+    assert.equal(r.alsoCount, 0);
+  });
+});
