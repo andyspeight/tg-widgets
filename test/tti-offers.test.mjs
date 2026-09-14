@@ -160,10 +160,11 @@ test('a property asked for as both types is swept as both, and pooled', () => {
 });
 
 test('the engine never asks the cache for a type the sweep cannot store', () => {
-  assert.ok(
-    /if \(type !== 'Accommodation'\) q\.set\('type', 'DynamicPackages'\)/.test(WIDGET),
-    'a legacy or hand-edited type must be coerced, not trusted',
-  );
+  // The sweep runs an ACCOMMODATION search and nothing else — a dynamic
+  // package needs flightSearchCriteria alongside it and is not built yet — so
+  // asking for any other type matches nothing while the cache is full.
+  assert.ok(/q\.set\('type', 'Accommodation'\);/.test(WIDGET),
+    'the TTI branch must ask for the only type this pool can hold');
 });
 
 test('the editor and demo offer only the two supported types', () => {
@@ -346,7 +347,7 @@ test('the engine sends tti and appId, and omits destinations, when codes are set
   assert.ok(/q\.set\('tti', ttiCodes\.join\(','\)\)/.test(WIDGET));
   assert.ok(/q\.set\('appId', String\(this\.cfg\.appId\)\)/.test(WIDGET));
   assert.ok(
-    /if \(ttiCodes\.length\) \{[\s\S]{0,1500}\} else if \(!this\._isTti && Array\.isArray\(payload\.destinations\)/.test(WIDGET),
+    /if \(ttiCodes\.length\) \{[\s\S]{0,2600}\} else if \(!this\._isTti && Array\.isArray\(payload\.destinations\)/.test(WIDGET),
     'destinations must stay in the else-branch, and be refused for a TTI widget outright',
   );
 });
@@ -840,7 +841,9 @@ test('the normaliser reports what it could not find', () => {
   assert.ok(thin.unmapped.includes('hotel'), 'a nameless result must say so');
   assert.ok(thin.unmapped.includes('media'), 'and one with no photo');
   assert.ok(thin.unmapped.includes('nights'), 'and one with no stay length');
-  assert.ok(thin.unmapped.includes('url'), 'and one with nowhere to click');
+  // NOT url: the widget builds its own click-through, so a cached offer
+  // without one is normal rather than broken.
+  assert.ok(!thin.unmapped.includes('url'));
 });
 
 test('the editor asks for a code and a country, and takes coordinates as a bonus', () => {
@@ -1035,12 +1038,80 @@ test('an unavailable result is never cached', () => {
   assert.ok(normaliseAccommodationResult(noFlag, {}).offer);
 });
 
-test('the booking link comes from the session, not invented per result', () => {
+test('a session url is carried when there is one, and not required', () => {
   const withUrl = normaliseAccommodationResult(LIVE, { deeplinkUrl: 'https://dl.tvllnk.com/x' });
   assert.equal(withUrl.offer.url, 'https://dl.tvllnk.com/x');
   const without = normaliseAccommodationResult(LIVE, {});
   assert.equal(without.offer.url, null);
-  assert.ok(without.unmapped.includes('url'), 'a card with nowhere to click must say so');
+  // The widget builds its own click-through from the property reference and
+  // the coordinates, so this is a bonus rather than a requirement.
+  assert.ok(!without.unmapped.includes('url'));
   assert.ok(/r\.data && \(r\.data\.deeplinkUrl \|\| r\.data\.shareUrl\)/.test(TEST_API),
-    'the test endpoint must pass the session URL through');
+    'the test endpoint must still pass one through when the API gives one');
+});
+
+/* ============================================================
+   The cached type must match the type the widget asks for
+   ============================================================ */
+
+test('a hotel search is cached as Accommodation, whatever the widget is set to', () => {
+  // The empty-preview bug of 14 Sep 2026. buildAccommodationCriteria only ever
+  // sends SearchType Accommodation, but the result was labelled from the
+  // WIDGET's configured type — so a widget set to dynamic packaging cached a
+  // hotel-only offer as 'Packages'. api/cached-offers.js filters on exactly
+  // that field, so the widget asked for DynamicPackages, the cache held
+  // Accommodation, and the preview came back empty with a full cache behind it.
+  const r = { isAvailable: true, name: 'Hilton Bournemouth', pricing: { total: 756 },
+              location: { name: 'Bournemouth' }, units: [{ nights: 7 }] };
+  assert.equal(normaliseAccommodationResult(r, { type: 'DynamicPackages' }).offer.type, 'Accommodation');
+  assert.equal(normaliseAccommodationResult(r, {}).offer.type, 'Accommodation');
+});
+
+test('the widget asks the cache for the type the sweep actually writes', () => {
+  assert.ok(/q\.set\('type', 'Accommodation'\);/.test(WIDGET));
+  assert.ok(!/if \(type !== 'Accommodation'\) q\.set\('type', 'DynamicPackages'\)/.test(WIDGET),
+    'asking for a type nothing in this pool can have matched nothing while the cache was full');
+  // And the editor strip must mirror it, or it promises a pool the widget
+  // cannot draw from.
+  assert.ok(/q\.set\('type', 'Accommodation'\);/.test(EDITOR));
+});
+
+test('the coordinates are stored under the names the cache read rebuilds from', () => {
+  // api/cached-offers.js builds accommodation.destination from resortLat and
+  // resortLng, and the widget's own deeplink builder needs that destination to
+  // pin the property on a click. Without them every card fell back to '#'.
+  const r = { isAvailable: true, name: 'Hilton Bournemouth', pricing: { total: 756 },
+              location: { name: 'Bournemouth', latitude: 50.72, longitude: -1.87 },
+              units: [{ nights: 7 }] };
+  const { offer } = normaliseAccommodationResult(r, {});
+  assert.equal(offer.resortLat, 50.72);
+  assert.equal(offer.resortLng, -1.87);
+  assert.equal(offer.lat, 50.72, 'and the plain names stay, for the map widget');
+});
+
+test('a missing booking url is not reported as a fault', () => {
+  // The widget builds its own click-through from the property reference and
+  // the coordinates, so a cached offer without a url is normal. Reporting it
+  // sent Andy looking for a field that was never needed.
+  const r = { isAvailable: true, name: 'Hilton Bournemouth', pricing: { total: 756 },
+              location: { name: 'Bournemouth' }, units: [{ nights: 7 }], media: [{ url: 'https://x/1.jpg' }] };
+  const { offer, unmapped } = normaliseAccommodationResult(r, {});
+  assert.equal(offer.url, null);
+  assert.deepEqual(unmapped, [], 'a complete offer with no url must report nothing');
+});
+
+test('a hotel with no photos still produces a renderable offer', () => {
+  // Andy, 14 Sep 2026: "There are no images returned, but the offer should
+  // render anyway". A card with no photo is a card, not a failure.
+  const r = { isAvailable: true, name: 'Hilton Bournemouth', pricing: { total: 756 },
+              location: { name: 'Bournemouth' }, units: [{ nights: 7 }], media: [] };
+  const { offer, unmapped } = normaliseAccommodationResult(r, {});
+  assert.ok(offer, 'it must still be an offer');
+  assert.equal(offer.image, null);
+  assert.equal(offer.hotel, 'Hilton Bournemouth');
+  assert.equal(offer.price, 756);
+  assert.ok(unmapped.includes('media'), 'and it must say the photo is genuinely absent');
+  // The renderer must not depend on an image existing.
+  assert.ok(/cssBgUrl\(img\)/.test(WIDGET));
+  assert.ok(/if \(!url\) return '';/.test(WIDGET), 'no url means no background, not a broken card');
 });

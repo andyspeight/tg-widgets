@@ -584,8 +584,19 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   if (!images.length) unmapped.push('media');
 
   const loc = r.location || {};
+  const lat = asNum(pick(loc, ['latitude', 'lat']));
+  const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
   const offer = {
-    type: ctx.type === 'DynamicPackages' ? 'Packages' : 'Accommodation',
+    // ALWAYS Accommodation, because that is what was searched.
+    //
+    // buildAccommodationCriteria only ever sends SearchType: 'Accommodation'
+    // — a dynamic package needs flightSearchCriteria alongside it and is not
+    // built yet. Labelling the result from the WIDGET's configured type stored
+    // a hotel-only offer as 'Packages', and api/cached-offers.js filters on
+    // exactly that field, so the widget asked for DynamicPackages, the cache
+    // held Accommodation, and the preview came back empty with a full cache
+    // sitting behind it (14 Sep 2026).
+    type: 'Accommodation',
     price: price != null ? price : pricePP,
     pricePP: pricePP != null ? pricePP : null,
     currency: pick(r, ['pricing.currency', 'pricing.currencyCode']) || ctx.currency || 'GBP',
@@ -595,8 +606,15 @@ export function normaliseAccommodationResult(r, ctx = {}) {
       return v ? String(v).slice(0, 120) : (ctx.locationName || null);
     })(),
     countryCode: cleanCtry(pick(loc, ['countryCode', 'country', 'countryISO']) || ctx.ctry || ''),
-    lat: asNum(pick(loc, ['latitude', 'lat'])) != null ? asNum(pick(loc, ['latitude', 'lat'])) : (ctx.lat != null ? ctx.lat : null),
-    lng: asNum(pick(loc, ['longitude', 'lng', 'lon'])) != null ? asNum(pick(loc, ['longitude', 'lng', 'lon'])) : (ctx.lng != null ? ctx.lng : null),
+    lat: lat != null ? lat : (ctx.lat != null ? ctx.lat : null),
+    lng: lng != null ? lng : (ctx.lng != null ? ctx.lng : null),
+    // The SAME coordinates again under the names api/cached-offers.js rebuilds
+    // accommodation.destination from. It reads resortLat/resortLng, and the
+    // widget's own deeplink builder needs that destination to pin the property
+    // on a click. Without these the click-through could not be built and every
+    // card fell back to '#'.
+    resortLat: lat != null ? lat : (ctx.lat != null ? ctx.lat : null),
+    resortLng: lng != null ? lng : (ctx.lng != null ? ctx.lng : null),
     rating: asNum(r.rating),
     boardBasis: pick(r, ['units.0.boardBasis', 'boardBasis', 'pricing.boardBasis']) || null,
     nights: asNum(pick(r, ['units.0.nights', 'nights', 'pricing.nights'])),
@@ -621,7 +639,12 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   };
 
   // Only the gaps that actually show on a rendered card.
-  for (const [name, v] of [['hotel', offer.hotel], ['nights', offer.nights], ['url', offer.url]]) {
+  //
+  // `url` is deliberately NOT one of them. The widget builds its own
+  // click-through from the property reference and coordinates (offersDeeplink),
+  // so a cached offer without a url is normal rather than broken, and reporting
+  // it sent Andy looking for a missing field that was never needed.
+  for (const [name, v] of [['hotel', offer.hotel], ['nights', offer.nights]]) {
     if (v == null && unmapped.indexOf(name) === -1) unmapped.push(name);
   }
   return { offer, unmapped };
