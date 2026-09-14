@@ -28,6 +28,7 @@ import {
   cleanIp,
   buildDynamicPackageCriteria,
   dpOrigins,
+  cheapestFlight,
   cleanCoord,
   MIN_DP_LEAD_DAYS,
 } from '../api/_lib/offers/tti.js';
@@ -2002,4 +2003,111 @@ test('the review score is mapped, since the card already renders it', () => {
   assert.equal(none.offer.reviewRating, null);
   assert.deepEqual(unmapped, []);
   assert.deepEqual(none.unmapped, []);
+});
+
+test('the full Travelify exchange comes back without spending another search', () => {
+  // Andy, 14 Sep 2026: "Can you please send me the full Travelify response?"
+  // Every test is a real search that costs real capacity, so the exchange is
+  // captured during the run rather than fetched again afterwards.
+  assert.ok(/request: job\.criteria/.test(TEST_API), 'what we sent');
+  assert.ok(/accommodationResult: mine\[0\]/.test(TEST_API), 'and what came back');
+  assert.ok(/flightResult: r\.alsoFirst \|\| null/.test(TEST_API),
+    'including the flight half, which was only being counted');
+  assert.ok(/searchSession: r\.session/.test(TEST_API), 'and the session, so it can be traced');
+
+  // Nothing secret is in it: the key travels in a header, never in the body.
+  assert.ok(!/apiKey|Authorization/.test(
+    TEST_API.slice(TEST_API.indexOf('const candidate = {'), TEST_API.indexOf('raw = candidate;'))),
+  'the raw block must never reach for a credential');
+  assert.ok(/Credentials travel in a header and /.test(TEST_API), 'and must say so');
+
+  // A huge result is TRIMMED to valid JSON, never truncated into broken JSON —
+  // the whole point is that it can be handed to somebody else.
+  assert.ok(/droppedForSize/.test(TEST_API));
+  assert.ok(/const RAW_MAX_BYTES = 96 \* 1024/.test(TEST_API));
+
+  // And it is handed over as a file, not as a wall of text in a side panel.
+  assert.ok(/Copy to clipboard/.test(EDITOR));
+  assert.ok(/dl\.download = 'travelify-'/.test(EDITOR));
+  assert.ok(/The full Travelify exchange/.test(EDITOR));
+});
+
+/* ============================================================
+   A package price is the flight PLUS the hotel
+   ============================================================ */
+
+const FLIGHTS = [
+  { pricing: { total: 349, currency: 'GBP' }, carrier: { name: 'BA', code: 'BA' }, stops: 1 },
+  { pricing: { total: 212, currency: 'GBP' }, carrier: { name: 'Jet2', code: 'LS' }, stops: 0, duration: 280 },
+];
+
+test('the same hotel from three airports is not the same price', () => {
+  // Andy, 14 Sep 2026: "I have just changed the departure airport, so there
+  // should have been nothing in the cache, and it still says the same price."
+  // £857 from Gatwick, £857 from Manchester, and £857 on a search that found no
+  // flights at all. Three identical answers is what a hotel-only price looks
+  // like — because accommodationResults carries the HOTEL price and the flight
+  // is priced separately in flightResults.
+  const hotelOnly = normaliseAccommodationResult(PKG_RESULT, {}).offer;
+  assert.equal(hotelOnly.price, 857, 'the accommodation half on its own');
+
+  const { flight } = cheapestFlight(FLIGHTS);
+  assert.equal(flight.price, 212, 'the cheapest flight, not the first');
+  const pkg = normaliseAccommodationResult(PKG_RESULT, { origin: 'MAN', destination: 'TFS', flight }).offer;
+  assert.equal(pkg.price, 1069, 'the package is the sum of both halves');
+  assert.equal(pkg.hotelPrice, 857);
+  assert.equal(pkg.flightPrice, 212);
+
+  // A dearer flight must move the price, which is the whole complaint.
+  const { flight: dearer } = cheapestFlight([FLIGHTS[0]]);
+  assert.equal(normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'MAN', destination: 'TFS', flight: dearer }).offer.price, 1206);
+});
+
+test('a package with no flight is not cached as one', () => {
+  // Caching the hotel price behind a Flight + Hotel badge is the original bug
+  // this widget was built to avoid, and it is exactly what "no flights came
+  // back, price unchanged" was.
+  assert.deepEqual(cheapestFlight([]), { flight: null, unmapped: [] });
+  // Flights that came back but carry no readable price are also not a package.
+  const unpriced = cheapestFlight([{ carrier: { name: 'BA' } }]);
+  assert.equal(unpriced.flight, null);
+  assert.deepEqual(unpriced.unmapped, ['flight.pricing'], 'and it says which half failed');
+
+  assert.ok(/if \(isDp && !flight\) \{/.test(TEST_API), 'the test route must refuse it');
+  assert.ok(/no package to price/.test(TEST_API));
+  assert.ok(/if \(isDp && !flight\) return \{/.test(CRON), 'and so must the sweep');
+});
+
+test('the flight the price came from travels with the offer', () => {
+  // The card draws carrier, stops and direct and had nothing to draw, because
+  // the flight result was only ever counted.
+  const { flight } = cheapestFlight(FLIGHTS);
+  const wire = wireShape(normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'MAN', destination: 'TFS', flight }).offer);
+  assert.equal(wire.flight.carrier.name, 'Jet2');
+  assert.equal(wire.flight.carrier.code, 'LS');
+  assert.equal(wire.flight.direct, true);
+  assert.equal(wire.flight.stops, 0);
+  assert.equal(wire.flight.duration, 280);
+
+  // "Direct" is a claim, not a default: not knowing and knowing it is not
+  // direct are different, and a card must not assert the first as the second.
+  const vague = cheapestFlight([{ pricing: { total: 100 } }]).flight;
+  assert.ok(!('direct' in vague), 'no stops information means no direct claim');
+});
+
+test('per person is dropped once a flight is in the total', () => {
+  // pricePP is the accommodation's own per-person figure. Left in place beside
+  // a package total it under-reports the price of the thing being sold.
+  const r = { ...PKG_RESULT, pricing: { total: 857, perPerson: 428.5, currency: 'GBP' } };
+  assert.equal(normaliseAccommodationResult(r, {}).offer.pricePP, 428.5, 'a hotel keeps it');
+  const { flight } = cheapestFlight(FLIGHTS);
+  assert.equal(normaliseAccommodationResult(r, { origin: 'MAN', flight }).offer.pricePP, null);
+});
+
+test('the panel shows the price as a sum, not as an assertion', () => {
+  assert.ok(/Hotel ' \+ esc\(money\(r\.hotelPrice/.test(EDITOR));
+  assert.ok(/\+ flight /.test(EDITOR));
+  assert.ok(/cheapest of /.test(EDITOR));
 });

@@ -624,6 +624,38 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### A PACKAGE PRICE IS THE FLIGHT PLUS THE HOTEL
+
+The single most important thing on this page, and it was wrong for most of a
+day. **A dynamic package prices the two halves separately** and returns them in
+separate arrays: `accommodationResults` carries the HOTEL price, `flightResults`
+carries the flight. We cached the accommodation price as the package price.
+
+The symptom was unmistakable once it appeared (Andy, 14 Sep 2026): the same
+property at **£857 from Gatwick, £857 from Manchester, and £857 on a search that
+returned no flights at all**. Three identical answers is what a hotel-only price
+looks like, and it is the exact mislabelling this widget was built to avoid.
+
+So:
+
+- `cheapestFlight(flightResults)` picks the cheapest usable flight;
+- the offer's `price` is that flight **plus** the hotel, with `hotelPrice` and
+  `flightPrice` kept alongside so a price can be explained rather than asserted;
+- `pricePP` is DROPPED on a package — it is the accommodation's own per-person
+  figure and under-reports the thing being sold;
+- the flight's carrier, stops, duration and direct flag travel with the offer,
+  under the names `cached-offers.js` already rebuilds `raw.flight` from, so the
+  card finally has something to draw;
+- **no flight means no package.** Both the test route and the sweep refuse to
+  store one, rather than caching a hotel price behind a Flight + Hotel badge.
+
+`direct` is a claim, not a default: "we could not tell" and "it is not direct"
+are different, and only a real boolean or a real stop count sets it.
+
+The flight field names are picks, not certainties — no worked flight result has
+been seen. Anything unreadable is reported, and a flight with no readable price
+is not usable at all, which is the safe direction.
+
 ### The editor must show the cache as it is NOW
 
 `/api/cached-offers` answers `s-maxage=120, stale-while-revalidate=300`. That is

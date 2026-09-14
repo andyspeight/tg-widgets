@@ -37,6 +37,7 @@ import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
   canonTti, cleanCtry, cleanCoord, cleanIp, parseDeeplink, buildAccommodationCriteria,
   buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
+  cheapestFlight,
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
 import { resolveArrivalAirport, airportLabel } from './_lib/offers/arrival-airport.js';
@@ -62,6 +63,10 @@ const MAX_ORIGINS = 3;
 // ever needed once per property: the search fills the cache on the way past.
 const MAX_LOCATE = 2;
 const LOCATE_POLLS = 4;
+// The raw exchange handed back for support. One property's request and its
+// first matching result, capped: enough to answer "what did you send and what
+// came back" without turning every test response into a payload dump.
+const RAW_MAX_BYTES = 96 * 1024;
 
 const ttiKey = (appId, code) => `offers:tti:${appId}:${code}`;
 
@@ -307,6 +312,11 @@ export default async function handler(req, res) {
   // Per hotel, gathered across however many airports it was searched from.
   const perRow = rows.map(() => ({ offers: [], gaps: new Set(), tried: [], failures: [], polls: 0, areaResults: 0, flights: 0 }));
   let shape = null;
+  // THE EXCHANGE, VERBATIM. Captured from the first job that returns our
+  // property, so a question for Travelify can be answered without spending
+  // another live search to go and fetch it. Nothing secret travels in here:
+  // the API key lives in an Authorization header and never in the body.
+  let raw = null;
 
   let i = 0;
   const workers = Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, async () => {
@@ -340,6 +350,55 @@ export default async function handler(req, res) {
       acc.flights += r.alsoCount || 0;
 
       const mine = (r.results || []).filter((x) => resultIsProperty(x, job.row.code));
+      // THE FLIGHT HALF OF THE PRICE.
+      //
+      // A dynamic package prices the two halves separately. Without this the
+      // number cached is the HOTEL's, which is why the same property came back
+      // at £857 from Gatwick, £857 from Manchester and £857 on a search that
+      // found no flights at all.
+      const { flight, unmapped: flightGaps } = isDp
+        ? cheapestFlight(r.alsoResults) : { flight: null, unmapped: [] };
+      if (isDp && !flight) {
+        // No flight, no package. Caching the hotel price under a Flight +
+        // Hotel badge is the original bug this widget was built to avoid.
+        acc.failures.push(`${label}: ${(r.alsoCount || 0)
+          ? 'flights came back but none carried a price we could read.'
+          : 'no flights came back for this route, so there is no package to price.'}`);
+        continue;
+      }
+      for (const g of flightGaps) acc.gaps.add(g);
+      if (!raw && mine.length) {
+        const candidate = {
+          note: 'The request we sent to POST https://api.travelify.io/search, and the first '
+              + 'result that came back for this property. Credentials travel in a header and '
+              + 'are not included.',
+          code: job.row.code,
+          request: job.criteria,
+          searchSession: r.session || null,
+          polls: r.polls,
+          complete: r.complete,
+          accommodationResult: mine[0],
+          flightResultCount: r.alsoCount || 0,
+          flightResult: r.alsoFirst || null,
+        };
+        // A supplier can return a very large result. Rather than truncate the
+        // JSON into something unparseable, drop the biggest optional parts and
+        // say which were dropped, so what is handed over is always valid JSON.
+        let text = JSON.stringify(candidate);
+        if (text.length > RAW_MAX_BYTES) {
+          const trimmed = { ...candidate.accommodationResult };
+          const dropped = [];
+          for (const k of ['descriptions', 'amenities', 'features', 'units', 'optionalExtras', 'media']) {
+            if (trimmed[k] !== undefined && text.length > RAW_MAX_BYTES) {
+              delete trimmed[k]; dropped.push(k);
+              text = JSON.stringify({ ...candidate, accommodationResult: trimmed });
+            }
+          }
+          candidate.accommodationResult = trimmed;
+          candidate.droppedForSize = dropped;
+        }
+        raw = candidate;
+      }
       // Record the raw shape ONCE, from whatever came back, so a normaliser
       // built on guesses can be corrected against reality rather than argued
       // about. Keys only — never the full payload.
@@ -394,6 +453,8 @@ export default async function handler(req, res) {
           ...(job.origin ? { originName: airportLabel(job.origin) } : {}),
           ...(legs[0] ? { outboundDate: legs[0].DepartDate } : {}),
           ...(legs[1] ? { returnDate: legs[1].DepartDate } : {}),
+          // The priced flight itself. Its absence was already refused above.
+          ...(flight ? { flight } : {}),
           // A package price belongs to the airport it flies from. This is what
           // makes the stored offer a real package downstream: cached-offers
           // builds a flight block from it, the card draws the Flight + Hotel
@@ -454,6 +515,8 @@ export default async function handler(req, res) {
     return {
       code: row.code, status: 'found', offers: offers.length, cached: !!wrote,
       hotel: cheapest.hotel, fromPrice: cheapest.price, currency: cheapest.currency,
+      ...(Number.isFinite(cheapest.flightPrice)
+        ? { hotelPrice: cheapest.hotelPrice, flightPrice: cheapest.flightPrice } : {}),
       checkinDate: cheapest.checkinDate, nights: cheapest.nights,
       image: cheapest.image ? true : false,
       polls: acc.polls,
@@ -497,6 +560,7 @@ export default async function handler(req, res) {
     } : {}),
     elapsedMs: Date.now() - startedAt,
     shape,
+    raw,
     results,
   });
 }
