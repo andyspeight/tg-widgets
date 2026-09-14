@@ -2284,6 +2284,20 @@
                  + ' \u00b7 ' + r.offers + (r.offers === 1 ? ' offer' : ' offers');
           } else {
             text = esc(r.detail || r.status);
+            // Show what DID come back. Without it "nothing matched" is a dead
+            // end: you cannot tell a wrong code from a pin Travelify ignored.
+            if (r.status === 'area-only') {
+              const bits = [];
+              bits.push(r.areaOffers + ' offers came back for that country, '
+                + r.withRef + ' carrying a property reference');
+              if (r.sampleHotels && r.sampleHotels.length) {
+                bits.push('such as ' + r.sampleHotels.join(', '));
+              }
+              if (r.sampleRefs && r.sampleRefs.length) {
+                bits.push('references look like ' + r.sampleRefs.slice(0, 3).join(', '));
+              }
+              text += '<br><span style="color:var(--tgse-ink-3)">' + esc(bits.join('. ')) + '.</span>';
+            }
           }
           return '<div class="tti-test-row"><span class="tti-test-dot ' + (dot[r.status] || 'tti-warn') + '"></span>'
                + '<span><span class="tti-test-code">' + esc(r.code) + '</span> \u2014 ' + text + '</span></div>';
@@ -2294,9 +2308,11 @@
                 + 'this from turning into a bulk search. The other ' + d.truncated + ' still save fine.</div>';
         }
         if (d.pinLooksIgnored) {
-          head += '<div style="color:var(--tgse-warning);margin-bottom:6px">Every search returned the surrounding '
-                + 'country rather than the hotel. Either these codes are wrong, or Travelify is ignoring the '
-                + 'property pin. Worth telling us if the codes are definitely right.</div>';
+          head += '<div style="color:var(--tgse-warning);margin-bottom:6px">Every search came back as the '
+                + 'surrounding country rather than the hotel, and the offers DO carry property references. '
+                + 'That is what it looks like when Travelify ignores the property pin on the offers feed, '
+                + 'rather than when a code is wrong. If you have checked the code in Travelify, it is '
+                + 'the second one. Send us this result.</div>';
         }
         out.innerHTML = head + lines.join('');
       } catch (err) {

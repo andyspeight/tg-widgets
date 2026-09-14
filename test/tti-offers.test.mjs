@@ -492,6 +492,28 @@ test('the test endpoint keeps its rate limit even though the editor calls it', (
   );
 });
 
+test('an unmatched search reports what it DID get, not just that it failed', () => {
+  // "Nothing matched" is a dead end on its own: it cannot tell a wrong code
+  // from a pin Travelify ignored. These three numbers separate the causes.
+  assert.ok(/withRef: refs\.length/.test(TEST_API), 'how many offers carried a reference at all');
+  assert.ok(/sampleRefs: \[\.\.\.new Set\(refs\)\]/.test(TEST_API), 'what those references look like');
+  assert.ok(/sampleHotels:/.test(TEST_API), 'and what the search actually returned');
+  assert.ok(/came back for that country/.test(EDITOR), 'the editor has to show it');
+});
+
+test('the ignored-pin verdict fires on a single code', () => {
+  // The first person to try this tests one hotel. Making them add a second
+  // before we say what we can already see is no help to anyone.
+  assert.ok(
+    /pinLooksIgnored: found === 0\s*&& results\.length > 0/.test(TEST_API),
+    'one code is enough to recognise the pattern',
+  );
+  assert.ok(
+    /r\.status === 'area-only' && r\.withRef > 20/.test(TEST_API),
+    'and it must rest on offers that DO carry references, or a wrong code reads the same',
+  );
+});
+
 test('a code with no country is refused rather than searched worldwide', () => {
   assert.ok(/status: 'no-country'/.test(TEST_API));
   assert.ok(/if \(!prop\.ctry\)/.test(TEST_API), 'the check must happen before any request is fired');
