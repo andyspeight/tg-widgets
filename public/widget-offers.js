@@ -6791,7 +6791,16 @@
         // otherwise ask the cache for something it will never hold, and the
         // widget would sit empty with nothing saying why.
         q.set('tti', ttiCodes.join(','));
-        if (type !== 'Accommodation') q.set('type', 'DynamicPackages');
+        // ALWAYS Accommodation, and deliberately not the configured type.
+        //
+        // The per-property sweep runs an ACCOMMODATION search: a dynamic
+        // package needs flightSearchCriteria alongside the accommodation
+        // criteria and is not built yet, so nothing of any other type is ever
+        // in this pool. Asking for DynamicPackages therefore matched nothing
+        // while the cache was full, and the widget sat empty with no way to
+        // tell that from a hotel with no availability (14 Sep 2026). When DP
+        // lands, this becomes a real branch again.
+        q.set('type', 'Accommodation');
         // No App ID means no pool to name. Send the codes anyway and let the
         // endpoint answer an honest miss rather than silently widening this
         // widget to every offer in the country.

@@ -3081,6 +3081,10 @@
       if (codes.length) {
         q.set('tti', codes.join(','));
         q.set('appId', appIdForPreview());
+        // Mirror the widget exactly: the sweep only ever caches Accommodation
+        // for now, so asking for anything else counts a pool that does not
+        // exist and the strip would promise offers the widget cannot draw.
+        q.set('type', 'Accommodation');
       }
       if (base.origins && base.origins.length) q.set('origins', base.origins.join(','));
       if (base.cabinClasses && base.cabinClasses.length) q.set('cabinClasses', base.cabinClasses.join(','));
