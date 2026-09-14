@@ -143,7 +143,21 @@ export default async function handler(req, res) {
     customerIp,
     customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
   };
-  const type = body.type === 'DynamicPackages' ? 'DynamicPackages' : 'Accommodation';
+  // Accommodation only, for now, and said out loud rather than silently
+  // coerced. A dynamic package needs flightSearchCriteria alongside the
+  // accommodation criteria and prices the two together; running a hotel search
+  // and labelling it a package would hand back hotel-only prices under a
+  // package heading (Andy hit exactly that, 14 Sep 2026).
+  if (body.type === 'DynamicPackages') {
+    return res.status(400).json({
+      error: 'Flight + hotel packages are not switched on yet. A package is a different '
+           + 'search that prices the flight and the hotel together, and running the hotel '
+           + 'search alone would give you hotel-only prices under a package heading. '
+           + 'Switch this widget to "The hotel on its own" to test it.',
+      code: 'dp_not_supported',
+    });
+  }
+  const type = 'Accommodation';
   const results = new Array(rows.length);
   let shape = null;
 

@@ -477,7 +477,13 @@ const PLAN_WIDGET_LIMITS = {
   // cache we fill for everyone anyway, every property named on a TTI Offers
   // widget costs its own Travelify search every night, under that client's own
   // application.
-  'TTI Offers':          { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
+  // NOT SOLD ON ANY PLAN YET (Andy, 14 Sep 2026). Every tier is 0, so the only
+  // way in is a DIRECT GRANT: an enabled Client Entitlements row sourced Add-On
+  // or Manual Override, which the gate above honours and which skips this map
+  // entirely. That is how MTHolidays has it while nobody else does. When it goes
+  // on sale, set the tiers here and add it to the package in Control; the
+  // grant keeps working either way.
+  'TTI Offers':          { Spark: 0, Boost: 0, Ignite: 0, Bespoke: 0 },
   'Popup':                 { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Event Calendar':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
@@ -1139,6 +1145,13 @@ export default async function handler(req, res) {
       // the owning client has not been granted. Staff bypass. Anything we can't
       // confidently match, or any lookup failure, FAILS OPEN — we never block a
       // legitimate create over an Airtable hiccup or a naming mismatch.
+      // Set when this client holds a DIRECT grant for the widget — an enabled
+      // Client Entitlements row sourced Add-On or Manual Override. That is how
+      // a product reaches ONE client before it is sold on any plan, so it must
+      // also skip the plan-limit check below: a widget no package includes has
+      // every plan limit at 0, and the grant would be pointless if that still
+      // refused it.
+      let grantedDirectly = false;
       try {
         const email = (user.email || '').toLowerCase();
         const at = email.lastIndexOf('@');
@@ -1155,17 +1168,35 @@ export default async function handler(req, res) {
           // to an ACTIVE catalogue item that the client's package does not
           // include. No package resolved, no match, or any lookup failure
           // FAILS OPEN (handled by the surrounding catch).
-          const [catalogue, packageCatalogue, clientRec] = await Promise.all([
+          const [catalogue, packageCatalogue, clientRec, clientEntitlements] = await Promise.all([
             listAllRecords(CATALOGUE.tableId),
             listAllRecords(PACKAGE_CATALOGUE.tableId),
             getRecord(CLIENTS.tableId, clientId).catch(() => null),
+            listAllRecords(CLIENT_ENTITLEMENTS.tableId).catch(() => []),
           ]);
           const typeLc = safeType.toLowerCase();
           const catItem = catalogue.find(
             (c) => String(c.fields[CATALOGUE.fields.productName] || '').toLowerCase() === typeLc
           );
           const clientPkgId = clientRec ? (clientRec.fields[CLIENTS.fields.package] || [])[0] : null;
-          if (catItem && !!catItem.fields[CATALOGUE.fields.active] && clientPkgId) {
+          // A direct grant for THIS client on THIS item, checked before the
+          // package because it is deliberately the thing that overrides it.
+          // Mirrors resolveEntitlements, so the dashboard and the save gate
+          // agree about who can create what.
+          if (catItem) {
+            grantedDirectly = clientEntitlements.some((ent) => {
+              if (!ent.fields[CLIENT_ENTITLEMENTS.fields.enabled]) return false;
+              const src = ent.fields[CLIENT_ENTITLEMENTS.fields.source];
+              const srcName = (src && typeof src === 'object') ? src.name : src;
+              if (srcName !== CLIENT_ENTITLEMENTS.sources.ADD_ON
+                  && srcName !== CLIENT_ENTITLEMENTS.sources.MANUAL_OVERRIDE) return false;
+              const clients = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
+              const cats = ent.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
+              return clients.includes(clientId) && cats.includes(catItem.id);
+            });
+          }
+
+          if (!grantedDirectly && catItem && !!catItem.fields[CATALOGUE.fields.active] && clientPkgId) {
             const includedInPlan = packageCatalogue.some((row) => {
               if (!row.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) return false;
               const pkgs = row.fields[PACKAGE_CATALOGUE.fields.package] || [];
@@ -1210,12 +1241,16 @@ export default async function handler(req, res) {
         console.error('[widget-config] Plan', canonicalPlan, 'missing from limits for', safeType);
         return res.status(403).json({ error: 'Your plan does not support widget creation. Contact support.' });
       }
-      if (planLimit === 0) {
+      if (planLimit === 0 && !grantedDirectly) {
         return res.status(403).json({
           error: `The ${safeType} widget is not included in your plan. Please upgrade to use this widget.`
         });
       }
-      if (planLimit > 0) {
+      // A direct grant is unlimited by definition: it is a deliberate, per
+      // client decision made in Control, not a plan allowance to be counted.
+      if (grantedDirectly) {
+        console.log(`[widget-config] create allowed by direct entitlement type=${safeType}`);
+      } else if (planLimit > 0) {
         let existingCount;
         try {
           existingCount = await countUserWidgetsOfType(user.email, safeType, headers, AIRTABLE_BASE_ID);
