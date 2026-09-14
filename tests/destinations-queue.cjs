@@ -86,6 +86,16 @@ globalThis.fetch = async (url, opts = {}) => {
     assert.strictEqual(tally.held, 2, 'free holds are not counted against the run, but Andy still sees them');
   });
 
+  await t('a write refused before any model call does not trip it either', async () => {
+    await q.resetFailStreak();
+    let streak = 0;
+    // The evidence floor turns these away for nothing. Editorial work that was
+    // never actually charged for is not money burning.
+    for (let i = 0; i < 200; i++) streak = await q.noteOutcome(false, false);
+    assert.strictEqual(streak, 0,
+      'stopping a free run at ten leaves the rest of the queue in limbo for no reason');
+  });
+
   console.log('\nWhat the dashboard is told after it stops');
 
   await t('a deliberate stop reads as a deliberate stop', async () => {

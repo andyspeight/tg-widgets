@@ -228,7 +228,14 @@ export default async function handler(req, res) {
     // it cost $4.14 to learn nothing. A run that is failing wholesale is not
     // working, so stop it and say so rather than grinding to the end of the
     // queue. The queue is left intact: he decides whether to resume.
-    const streak = await noteOutcome(outcome.result === 'saved', paid);
+    // WHAT IT ACTUALLY SPENT, not what kind of work it was. `paid` above means
+    // "a model MIGHT be called", and the evidence floor refuses long before one
+    // is, for nothing. On 14 Sep the queue's least-complete-first order put the
+    // 33 airports with no Wikipedia article at the front of the Overview job,
+    // all of them correctly held for free, and the breaker stopped the run
+    // after ten of them without a penny being spent. Four presses just to get
+    // past the records the runner had already dismissed.
+    const streak = await noteOutcome(outcome.result === 'saved', (outcome.costUsd || 0) > 0);
     if (streak >= FAIL_STREAK) {
       await setSettings({ running: false });
       await setRunState({
