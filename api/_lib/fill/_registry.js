@@ -250,9 +250,23 @@ const NO_SECOND_SOURCE = {
     + 'Rome as Fiumicino. This one needs a person or a third source',
 };
 
+/**
+ * Fields whose plan depends on the level they sit on rather than the name.
+ *
+ * A resort's region is built from its city (see _derive.js). A city's and a
+ * country's are not built from anything we hold: the city half needs the
+ * sub-national area, which no record carries, and a country sits at the top.
+ * Those stay manual, which is why Region is still in MANUAL below.
+ */
+const BY_TYPE = {
+  'resort:Region': { kind: 'derive', how: { from: 'regionCrumb' } },
+};
+
 export function fillPlanFor(field, typeKey) {
   const label = field && field.label;
   if (!label || NEVER.has(label)) return { kind: 'manual', why: 'not a field the runner writes' };
+  const byType = BY_TYPE[typeKey + ':' + label];
+  if (byType) return byType;
   if (MANUAL.has(label)) return { kind: 'manual', why: 'a person chooses this' };
   if (DERIVE[label]) {
     const how = DERIVE[label];

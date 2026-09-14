@@ -19,6 +19,9 @@
  * The web address segment for a name.
  * Accents are folded rather than stripped so Málaga becomes malaga, not mlaga.
  */
+/** The editorial separator used across the brand, as in "Bora Bora · Society Islands". */
+const SEPARATOR = /\s*[\u00b7\u2027\u2022]\s*/;
+
 export function slugify(name) {
   const s = String(name == null ? '' : name)
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')      // fold accents
@@ -64,6 +67,40 @@ export function derive({ field, how, rec, byId }) {
     const slug = slugify(rec.name);
     if (!slug) return { ok: false, why: 'the record has no name to build a slug from' };
     return { ok: true, value: slug, evidence: 'Built from the record name "' + rec.name + '".' };
+  }
+
+  /**
+   * A resort's region is a breadcrumb, not an inheritance: the city it sits in,
+   * then the area that city sits in. Confirmed by Andy on 14 Sep 2026 and
+   * matching all twelve resorts that already carry one.
+   *
+   *   city    Bora Bora   region "Society Islands · South Pacific"
+   *   resort  on it       region "Bora Bora · Society Islands"
+   *
+   * So it takes the parent's NAME and the head of the parent's own region. It
+   * never copies the parent's region wholesale, which is what the old rule did
+   * and what would have put the country's answer on 483 resorts.
+   */
+  if (how.from === 'regionCrumb') {
+    const parent = ancestorsOf(rec, byId || new Map())[0];
+    if (!parent || !parent.name) {
+      return { ok: false, why: 'this record has no parent to place it against' };
+    }
+    const above = String((parent.values && parent.values.Region) || '').trim();
+    if (!above) {
+      return {
+        ok: false,
+        why: 'the region for ' + parent.name + ' has to be set first, because this one is built from it',
+      };
+    }
+    const head = above.split(SEPARATOR)[0].trim();
+    if (!head) return { ok: false, why: 'the region for ' + parent.name + ' is not in the expected shape' };
+    return {
+      ok: true,
+      value: parent.name + ' · ' + head,
+      evidence: 'Built from ' + parent.name + ', which this record sits inside, and its region "' + above + '".',
+      inheritedFrom: parent.id,
+    };
   }
 
   // Inherited: take the nearest ancestor that actually holds a usable value.

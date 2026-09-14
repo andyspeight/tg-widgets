@@ -739,22 +739,83 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   });
 
   t('a region is never handed down from the parent', () => {
-    // The same place reads three different ways, so inheriting one level's
-    // answer onto another writes something coarse at best and wrong at worst:
+    // The same place reads three different ways, so copying one level's answer
+    // onto another writes something coarse at best and wrong at worst:
     //   country  French Polynesia   South Pacific · Polynesia
     //   city     Bora Bora          Society Islands · South Pacific
     //   resort   on Bora Bora       Bora Bora · Society Islands
-    ['country', 'city', 'resort'].forEach(k => {
+    ['country', 'city'].forEach(k => {
       const p = fillPlanFor(F('Region', 'text'), k);
       assert.strictEqual(p.kind, 'manual',
-        'Region on a ' + k + ' must not be inherited: it would have filled 762 records wrongly');
+        'Region on a ' + k + ' is not built from anything we hold');
     });
+    // A resort's IS built, but from the city's name rather than its value.
+    const r = fillPlanFor(F('Region', 'text'), 'resort');
+    assert.strictEqual(r.kind, 'derive');
+    assert.strictEqual(r.how.from, 'regionCrumb',
+      'it must not use the plain parent inheritance that copies the value across');
   });
 
   t('the fields that really are inherited still are', () => {
     ['Time Zone', 'Currency', 'Language', 'Voltage And Plug', 'Flight Time From UK'].forEach(l => {
       assert.strictEqual(fillPlanFor(F(l, 'text'), 'city').kind, 'derive', l);
     });
+  });
+
+  /* Andy confirmed the shape on 14 Sep 2026: a resort's region is the city it
+     sits in, then the area that city sits in. These are the six real cities
+     that carry one and the twelve real resorts beneath them. */
+
+  t('a resort region is built from its city, not copied from it', () => {
+    const CITIES = {
+      "Savai'i":    'Samoa · South Pacific',
+      'Upolu':      'Samoa · South Pacific',
+      'Tahiti':     'Society Islands · South Pacific',
+      'Bora Bora':  'Society Islands · South Pacific',
+      'Moorea':     'Society Islands · South Pacific',
+      'Rangiroa':   'Tuamotu Atolls · South Pacific',
+    };
+    const WANT = {
+      "Savai'i":   "Savai'i · Samoa",
+      'Upolu':     'Upolu · Samoa',
+      'Tahiti':    'Tahiti · Society Islands',
+      'Bora Bora': 'Bora Bora · Society Islands',
+      'Moorea':    'Moorea · Society Islands',
+      'Rangiroa':  'Rangiroa · Tuamotu Atolls',
+    };
+    Object.keys(CITIES).forEach(city => {
+      const byId = new Map([['recCity', {
+        id: 'recCity', name: city, type: 'city', values: { Region: CITIES[city] },
+      }]]);
+      const out = derive({
+        field: F('Region', 'text'), how: { from: 'regionCrumb' },
+        rec: { id: 'recR', name: 'A resort', parentId: 'recCity', values: {} }, byId,
+      });
+      assert.strictEqual(out.ok, true, city + ': ' + out.why);
+      assert.strictEqual(out.value, WANT[city],
+        'a resort on ' + city + ' should read ' + WANT[city]);
+      assert.notStrictEqual(out.value, CITIES[city],
+        'copying the city\'s own region wholesale is the bug this replaced');
+    });
+  });
+
+  t('a resort whose city has no region waits, and names what is missing', () => {
+    const byId = new Map([['recCity', { id: 'recCity', name: 'Nerja', type: 'city', values: {} }]]);
+    const out = derive({
+      field: F('Region', 'text'), how: { from: 'regionCrumb' },
+      rec: { id: 'recR', name: 'A resort', parentId: 'recCity', values: {} }, byId,
+    });
+    assert.strictEqual(out.ok, false);
+    assert.match(out.why, /Nerja/, 'it should say which record has to be filled first');
+  });
+
+  t('a resort with no city at all is held rather than guessed', () => {
+    const out = derive({
+      field: F('Region', 'text'), how: { from: 'regionCrumb' },
+      rec: { id: 'recR', name: 'A resort', values: {} }, byId: new Map(),
+    });
+    assert.strictEqual(out.ok, false);
+    assert.match(out.why, /no parent/);
   });
 
   await Promise.all(pending);
