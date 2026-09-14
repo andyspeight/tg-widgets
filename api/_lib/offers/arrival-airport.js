@@ -11,13 +11,29 @@
  * airport, and a TTI row carries a property code and a country — never an
  * airport. This module is where that gap is closed.
  *
- * THE LIST. api/_data/airports.json, 106 curated majors with coordinates, and
- * deliberately not the 3,242-airport departures list beside it. That file's own
- * header says why: "the package's dst and the venue fact sheets stay on the
- * curated majors in airports.json, because an arrival needs a hub with hotels
- * and inbound flights." A package into a regional strip with no inbound
- * schedule returns nothing, which looks exactly like a hotel with no
- * availability.
+ * THE LIST. api/_data/airports-arrivals.json — every large or medium airport
+ * worldwide with scheduled service and an IATA code, with coordinates, from
+ * OurAirports. Scheduled service is the filter that matters: it is what makes
+ * an airport somewhere a package can actually land.
+ *
+ * It was built for this job because neither existing list could do it. The
+ * departures list has 3,242 airports and no coordinates; the curated majors
+ * have coordinates and only 106 airports. So a hotel in Bournemouth resolved
+ * to BRISTOL, 95km away, while Bournemouth Airport sat in neither usable list
+ * (Andy, 14 Sep 2026: "why is it choosing Bristol when there is an airport in
+ * Bournemouth?"). The answer was that BOH was not a candidate at all, which is
+ * a gap in the data rather than a judgement about the airport — so the data
+ * was fixed. Rebuild with scripts/build-arrival-airports.mjs.
+ *
+ * A NEARBY BIGGER AIRPORT IS OFFERED, NOT CHOSEN. The nearest airport is the
+ * honest answer to "where does this hotel's package fly into", but a medium
+ * airport has thin routes, and a package from Aberdeen to Bournemouth may
+ * simply not exist while Aberdeen to Gatwick does. That is a real supplier
+ * answer rather than a bug, so it is not papered over: the nearest LARGE
+ * airport in the same country comes back alongside as `alt`, the editor shows
+ * it, and the agent can switch with one box. Choosing it for them would quote
+ * a package from an airport nobody asked about, which is the quiet kind of
+ * wrong this widget keeps having to avoid.
  *
  * SAME COUNTRY FIRST. The nearest airport to a hotel in Nice is in Italy often
  * enough to matter, and a package that lands in another country is wrong in a
@@ -28,14 +44,15 @@
 
 import { readFileSync } from 'node:fs';
 
-// [iata, name, countryCode, lat, lng], ordered busiest-first within a country.
+// [iata, label, countryCode, lat, lng, isLarge], large first then medium,
+// alphabetical within each — so a country's first entry is its biggest airport.
 let AIRPORTS = null;
 
 export function arrivalAirports() {
   if (AIRPORTS) return AIRPORTS;
   AIRPORTS = [];
   try {
-    const url = new URL('../../_data/airports.json', import.meta.url);
+    const url = new URL('../../_data/airports-arrivals.json', import.meta.url);
     AIRPORTS = JSON.parse(readFileSync(url, 'utf8')).airports || [];
   } catch (err) {
     // Never throw: a package that cannot name an arrival airport is refused
@@ -44,6 +61,37 @@ export function arrivalAirports() {
   }
   return AIRPORTS;
 }
+
+/**
+ * The 106 curated majors, IN IMPORTANCE ORDER, which is the one thing
+ * OurAirports does not give us. It has no passenger numbers, so "large
+ * airport" is a runway-and-service classification: Al Maktoum is a large
+ * airport 18km from central Dubai and Dubai International is 34km, and pure
+ * distance picks the near-empty one. Alphabetical order inside that
+ * classification is worse still — it made Aberdeen the hub for Great Britain.
+ *
+ * So this list stays, for the two jobs it is genuinely good at: naming a
+ * country's main airport, and telling us which nearby airports are real hubs.
+ */
+let MAJORS = null;
+
+export function majorAirports() {
+  if (MAJORS) return MAJORS;
+  MAJORS = [];
+  try {
+    const url = new URL('../../_data/airports.json', import.meta.url);
+    MAJORS = JSON.parse(readFileSync(url, 'utf8')).airports || [];
+  } catch (err) {
+    console.error('[offers/arrival-airport] majors load failed:', err && err.message);
+  }
+  return MAJORS;
+}
+
+/** How much further a real hub may be before the genuinely nearest airport
+ *  wins. Dubai: DWC 18km vs DXB 34km, so the hub takes it. Bournemouth: BOH
+ *  7km vs BRS 94km, so the local airport keeps it, which is the answer an
+ *  agent selling Bournemouth expects. */
+export const HUB_BONUS_KM = 50;
 
 /** Great-circle distance in km. Good enough to rank airports; this is not
  *  navigation. */
@@ -91,24 +139,53 @@ export function resolveArrivalAirport({ dst, lat, lng, ctry } = {}) {
   if (!list.length) return null;
   const country = String(ctry || '').trim().toUpperCase();
   const inCountry = country ? list.filter((a) => a[2] === country) : [];
+  const majorsHere = country ? majorAirports().filter((a) => a[2] === country) : [];
   const haveSpot = Number.isFinite(lat) && Number.isFinite(lng);
 
-  const nearestOf = (pool, source) => {
+  const nearestOf = (pool) => {
     let best = null;
     for (const a of pool) {
       const km = haversineKm(lat, lng, a[3], a[4]);
-      // Strictly less-than, so the earlier (busier) airport keeps a tie.
-      if (!best || km < best.km) best = { code: a[0], name: a[1], km: Math.round(km), source };
+      // Strictly less-than, so the earlier (bigger) airport keeps a tie.
+      if (!best || km < best.km) best = { code: a[0], name: a[1], km: Math.round(km) };
     }
     return best;
   };
 
-  if (haveSpot && inCountry.length) return nearestOf(inCountry, 'nearest-in-country');
-  // The list is busiest-first within a country, so the first entry is the hub.
+  if (haveSpot && inCountry.length) {
+    const near = nearestOf(inCountry);
+    const hub = majorsHere.length ? nearestOf(majorsHere) : null;
+    // A real hub that is barely further away wins: more routes, more chance
+    // the package exists at all. Further than that and the local airport is
+    // the honest answer to "where does this hotel fly into".
+    const hubWins = hub && hub.code !== near.code && hub.km <= near.km + HUB_BONUS_KM;
+    const chosen = hubWins ? hub : near;
+    const other = hubWins ? near : hub;
+    return {
+      ...chosen,
+      source: hubWins ? 'nearest-hub' : 'nearest-in-country',
+      // The alternative is OFFERED, never substituted. A medium airport has
+      // thin routes, and a package from Aberdeen to Bournemouth may simply not
+      // exist while Aberdeen to Gatwick does — a real supplier answer the agent
+      // can act on with one box, rather than one we quietly decide for them.
+      ...(other && other.code !== chosen.code ? { alt: other } : {}),
+    };
+  }
+
+  // No coordinates: the country's MAIN airport, which is the first curated
+  // entry because that list is ordered by importance. The arrivals list is
+  // alphabetical within its size classes, so its first entry would be a
+  // different and much worse answer.
+  if (majorsHere.length) {
+    const a = majorsHere[0];
+    return { code: a[0], name: a[1], km: null, source: 'country-hub' };
+  }
+  // A country with no curated major still has airports; take its biggest,
+  // which is where the large-first ordering of the arrivals list earns its keep.
   if (inCountry.length) {
     const a = inCountry[0];
     return { code: a[0], name: a[1], km: null, source: 'country-hub' };
   }
-  if (haveSpot) return nearestOf(list, 'nearest-anywhere');
+  if (haveSpot) return { ...nearestOf(list), source: 'nearest-anywhere' };
   return null;
 }

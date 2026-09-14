@@ -2517,15 +2517,27 @@
             // out from a price that looked odd.
             if (r.flyInto) {
               const why = { given: 'you set this',
-                            'nearest-in-country': 'nearest major airport to the hotel',
+                            'nearest-in-country': 'the nearest airport to the hotel',
+                            'nearest-hub': 'the nearest big airport to the hotel',
                             'country-hub': 'the country\u2019s main airport, because we do not know '
                                          + 'exactly where this hotel is yet',
-                            'nearest-anywhere': 'nearest major airport' }[r.flyIntoWhy] || '';
+                            'nearest-anywhere': 'the nearest airport' }[r.flyIntoWhy] || '';
               text += '<br><span style="color:var(--tgse-ink-3)">Flying into <strong>'
                     + esc(r.flyInto) + '</strong>'
                     + (r.flyIntoName ? ' (' + esc(r.flyIntoName) + ')' : '')
+                    + (Number.isFinite(r.flyIntoKm) ? ', ' + r.flyIntoKm + 'km from the hotel' : '')
                     + (why ? ' \u2014 ' + esc(why) : '')
-                    + '. Not right? Put an airport code in the Fly into box for this hotel.</span>';
+                    + '.';
+              // The bigger airport nearby. Named here because a small airport
+              // with no route from a given city is the likeliest reason a
+              // package comes back empty, and this is the one-box fix.
+              if (r.flyIntoAlt && r.flyIntoAlt.code) {
+                text += ' A bigger airport nearby is <strong>' + esc(r.flyIntoAlt.code) + '</strong>'
+                      + (r.flyIntoAlt.name ? ' (' + esc(r.flyIntoAlt.name) + ')' : '')
+                      + (Number.isFinite(r.flyIntoAlt.km) ? ', ' + r.flyIntoAlt.km + 'km' : '')
+                      + ', which may have more flights.';
+              }
+              text += ' Put an airport code in the Fly into box to change it.</span>';
             }
             if (r.pricedFrom && r.pricedFrom.length) {
               text += '<br><span style="color:var(--tgse-ink-3)">Priced from '

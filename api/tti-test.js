@@ -391,6 +391,11 @@ export default async function handler(req, res) {
         flyInto: (arrivals.get(idx) || {}).code || null,
         flyIntoName: (arrivals.get(idx) || {}).name || null,
         flyIntoWhy: (arrivals.get(idx) || {}).source || null,
+        flyIntoKm: (arrivals.get(idx) || {}).km ?? null,
+        // A nearby bigger airport, offered rather than chosen. A small airport
+        // has thin routes, so this is the one-box fix when a package comes
+        // back empty from a local field but would exist from a hub.
+        flyIntoAlt: (arrivals.get(idx) || {}).alt || null,
         // What the price actually covers. A package that found no flights is a
         // hotel price under a package heading, which is the exact thing Andy
         // reported, so it is said out loud rather than left to be assumed.

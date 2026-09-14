@@ -15,10 +15,10 @@
     },
     "api/tti-test.js": {
       "maxDuration": 60,
-      "includeFiles": "api/_data/airports.json"
+      "includeFiles": "api/_data/airports*.json"
     },
     "api/cron/refresh-tti-offers.js": {
-      "includeFiles": "api/_data/airports.json"
+      "includeFiles": "api/_data/airports*.json"
     },
     "api/v1/payment-reminders.js": {
       "maxDuration": 30
