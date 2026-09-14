@@ -1666,6 +1666,22 @@
                 <div class="field-help">Per-night options need accommodation nights — they fall back gracefully on flight-only offers.</div>
               </div>
               <div class="field">
+                <label class="field-label" for="cfgPriceDisplay">How prices are shown</label>
+                <select id="cfgPriceDisplay">
+                  <option value="auto" selected>Auto (per person if available, else total)</option>
+                  <option value="total">Total</option>
+                  <option value="perPerson">Per person</option>
+                  <option value="perNight">Per night</option>
+                  <option value="perPersonPerNight">Per person, per night</option>
+                </select>
+                <div class="field-help">
+                  What the big number on each card means. The small line underneath says
+                  which, so a visitor is never guessing. Per-night needs the stay length,
+                  which every accommodation offer carries; if one somehow does not, that
+                  card falls back to the total rather than showing nothing.
+                </div>
+              </div>
+              <div class="field">
                 <label class="field-label" for="cfgDisplayCurrency">Display currency</label>
                 <select id="cfgDisplayCurrency"></select>
                 <div class="field-help">Prices are converted from GBP to this currency at live exchange rates.</div>
@@ -1939,7 +1955,29 @@
     const API_AI = '/api/widget-ai';
     const WIDGET_TYPE = 'TTI Offers';
 
-    const TG_TRAVELIFY_APPID = '250';
+    /* The DEMO application, and only a fallback. Copied here from the plain
+       Offers editor, where it is harmless because that cache is keyed by
+       country. This cache is keyed by App ID, so previewing against 250 reads
+       the demo pool rather than this client's — which is why a widget whose
+       codes had just been cached still looked empty (Andy, 14 Sep 2026).
+       The real one is fetched on boot into ttiAppId. */
+    const TG_TRAVELIFY_DEMO_APPID = '250';
+    let ttiAppId = '';
+    const appIdForPreview = () => ttiAppId || TG_TRAVELIFY_DEMO_APPID;
+
+    /* Ask once, on boot. A failure is not fatal: the preview falls back to the
+       demo pool and simply shows nothing, which is the honest outcome. */
+    async function loadTtiAppId() {
+      try {
+        const res = await fetch('/api/tti-appid', { headers: window.tgse.authHeaders() });
+        if (!res.ok) return;
+        const d = await res.json();
+        if (d && d.appId) {
+          ttiAppId = String(d.appId);
+          markDirtyAndPreview();
+        }
+      } catch (e) { /* preview falls back, nothing to say to the agent */ }
+    }
     const TG_TRAVELIFY_KEY = 'A41D180E-CBFE-4E30-A47D-FAAB424A650D';
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -1967,6 +2005,7 @@
         columns: 'auto', density: 'standard', theme: 'light',
         brandColor: '#1B2B5B', accentColor: '#00B4D8',
         radius: 14, fontFamily: '',
+        priceDisplay: 'auto',
         priceDisplay: 'auto',
         displayCurrency: 'GBP',
         showCurrencySwitcher: false,
@@ -2399,7 +2438,26 @@
                 + 'results are now in your cache, so the widget will show them straight away. The nightly '
                 + 'job refreshes them from here on.</div>';
         }
-        out.innerHTML = head + lines.join('');
+        // When something came back that we could not map, show WHERE it
+        // actually lives. Guessing a field name again would cost another round
+        // trip, and the answer is sitting in the response.
+        let diag = '';
+        if (d.shape && (d.shape.imagePaths || d.results.some(r => r.unmapped && r.unmapped.length))) {
+          const bits = [];
+          if (d.shape.imagePaths && d.shape.imagePaths.length) {
+            bits.push('<strong>Images are here:</strong> '
+              + d.shape.imagePaths.map(x => '<span class="tti-test-code">' + esc(x.path) + '</span>').join(', '));
+          }
+          if (d.shape.resultKeys) {
+            bits.push('<strong>Fields on the result:</strong> <span class="tti-test-code">'
+              + esc(d.shape.resultKeys.join(', ')) + '</span>');
+          }
+          diag = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);'
+               + 'color:var(--tgse-ink-3);word-break:break-word">'
+               + bits.join('<br>')
+               + '<br>Send us this and we will map the missing bits exactly.</div>';
+        }
+        out.innerHTML = head + lines.join('') + diag;
         // A successful test just filled the cache, so redraw with real offers.
         if (d.found) markDirtyAndPreview();
       } catch (err) {
@@ -2714,6 +2772,7 @@
 
       $('cfgPriceDisplay').value = c.priceDisplay || 'auto';
       ensureCurrencyOptions();
+      $('cfgPriceDisplay').value = c.priceDisplay || 'auto';
       $('cfgDisplayCurrency').value = c.displayCurrency || 'GBP';
       $('cfgShowCurrencySwitcher').setAttribute('aria-pressed', c.showCurrencySwitcher === true ? 'true' : 'false');
 
@@ -3021,7 +3080,7 @@
       // as well would have the strip count a pool the widget never reads.
       if (codes.length) {
         q.set('tti', codes.join(','));
-        if (state.config.appId) q.set('appId', String(state.config.appId));
+        q.set('appId', appIdForPreview());
       }
       if (base.origins && base.origins.length) q.set('origins', base.origins.join(','));
       if (base.cabinClasses && base.cabinClasses.length) q.set('cabinClasses', base.cabinClasses.join(','));
@@ -3102,7 +3161,7 @@
       if (!mount) return;
       mount.innerHTML = '';
       const cfg = JSON.parse(JSON.stringify(state.config));
-      cfg.appId = TG_TRAVELIFY_APPID;
+      cfg.appId = appIdForPreview();
       cfg.apiKey = TG_TRAVELIFY_KEY;
       cfg.cacheMinutes = 0;
       // Editor-only preview flag. The widget reads this to skip eligibility,
@@ -3111,7 +3170,10 @@
       // overlays a realistic host-site context.
       cfg._preview = true;
       const div = document.createElement('div');
-      div.setAttribute('data-tg-widget', 'offers');
+      // The tti-offers tag, not 'offers'. The widget reads it to know it is a
+      // property-scoped widget even when the code list is empty, which is what
+      // stops an empty list falling through to a country's worth of offers.
+      div.setAttribute('data-tg-widget', 'tti-offers');
       mount.appendChild(div);
       previewWidget = new window.TGOffersWidget(div, cfg);
       // Re-measure true availability. Cached per filter combination, so
@@ -3139,6 +3201,7 @@
         cfgEmptyBehaviour: 'emptyBehaviour',
         cfgEmptyHeading: 'emptyHeading', cfgEmptyBody: 'emptyBody',
         cfgEmptyCtaText: 'emptyCtaText', cfgEmptyCtaUrl: 'emptyCtaUrl',
+        cfgPriceDisplay: 'priceDisplay',
         cfgPriceDisplay: 'priceDisplay',
         cfgDisplayCurrency: 'displayCurrency',
       };
@@ -3883,6 +3946,11 @@
        ============================================================ */
     function boot() {
       $('editor').hidden = false;
+
+      // The per-property cache is keyed by App ID, so the preview cannot read
+      // the right pool until this comes back. Deliberately not awaited: the
+      // editor draws immediately and the preview refreshes when it lands.
+      loadTtiAppId();
 
       wireTtiCodes();
       refreshOriginChips = wireChips('originChips', 'originInput', 'origins');

@@ -346,8 +346,8 @@ test('the engine sends tti and appId, and omits destinations, when codes are set
   assert.ok(/q\.set\('tti', ttiCodes\.join\(','\)\)/.test(WIDGET));
   assert.ok(/q\.set\('appId', String\(this\.cfg\.appId\)\)/.test(WIDGET));
   assert.ok(
-    /if \(ttiCodes\.length\) \{[\s\S]{0,1500}\} else if \(Array\.isArray\(payload\.destinations\)/.test(WIDGET),
-    'a TTI widget must not also send a destination filter',
+    /if \(ttiCodes\.length\) \{[\s\S]{0,1500}\} else if \(!this\._isTti && Array\.isArray\(payload\.destinations\)/.test(WIDGET),
+    'destinations must stay in the else-branch, and be refused for a TTI widget outright',
   );
 });
 
@@ -915,4 +915,65 @@ test('the test endpoint uses the agent\'s real address', () => {
   // will be refused or, worse, making an address up.
   assert.ok(/could not read your IP address/.test(TEST_API));
   assert.ok(!/CustomerIP: '\d/.test(TTI_LIB), 'no hardcoded address anywhere');
+});
+
+/* ============================================================
+   A TTI widget must never widen to the destination pool
+   ============================================================ */
+
+test('a TTI widget is recognisable when its code list is EMPTY', () => {
+  // The failure this prevents: with no codes, a TTI widget looked exactly like
+  // a plain Offers widget, so it drew a country's worth of offers under a
+  // heading promising a handful of chosen hotels. Andy, 14 Sep 2026: "it is
+  // showing lots of random offers".
+  assert.ok(/function isTtiWidget/.test(WIDGET));
+  assert.ok(/hasOwnProperty\.call\(cfg, 'ttiCodes'\)/.test(WIDGET),
+    'the config key alone must identify a TTI widget, empty list or not');
+  assert.ok(/data-tg-widget'\) === 'tti-offers'/.test(WIDGET),
+    'and so must the element tag');
+  assert.ok(/this\._isTti = isTtiWidget\(config, container\)/.test(WIDGET),
+    'decided once in the constructor, while the element is still to hand');
+});
+
+test('no codes means an empty widget, never a country', () => {
+  assert.ok(/if \(this\._isTti && !ttiCodesOf\(this\.cfg\)\.length\)/.test(WIDGET),
+    'the fetch must be skipped entirely');
+  // And the query builder refuses too, so a template preset leaving
+  // destinations behind cannot reach the cache by another route.
+  assert.ok(/} else if \(!this\._isTti && Array\.isArray\(payload\.destinations\)/.test(WIDGET));
+});
+
+test('the editor previews against the client own App ID, not the demo one', () => {
+  // This cache is keyed by App ID. The plain Offers editor hardcodes the demo
+  // application harmlessly, because that cache is keyed by country; copied
+  // here it pointed every client's preview at the demo pool, so codes that had
+  // just been cached still previewed as empty.
+  assert.ok(/\/api\/tti-appid/.test(EDITOR), 'the editor must ask for its own App ID');
+  assert.ok(/appIdForPreview\(\)/.test(EDITOR));
+  assert.ok(!/cfg\.appId = TG_TRAVELIFY_DEMO_APPID/.test(EDITOR),
+    'the demo App ID must not be assigned directly');
+  assert.ok(/data-tg-widget', 'tti-offers'/.test(EDITOR),
+    'the preview element must claim the tti-offers tag');
+});
+
+test('the App ID endpoint returns the App ID and never the key', () => {
+  const src = readFileSync(new URL('../api/tti-appid.js', import.meta.url), 'utf8');
+  assert.ok(/requireAuth\(req\)/.test(src), 'it must be authenticated');
+  assert.ok(/appId: creds && creds\.appId/.test(src));
+  assert.ok(!/apiKey/.test(src), 'the API key must never leave the server');
+  assert.ok(/Cache-Control', 'no-store'/.test(src),
+    'credentials can be connected mid-session, so a stale miss must not stick');
+});
+
+test('the editor exposes how prices are shown', () => {
+  // The engine has supported priceDisplay all along; this editor simply never
+  // offered the control, so every TTI widget was stuck on auto.
+  assert.ok(/id="cfgPriceDisplay"/.test(EDITOR));
+  for (const mode of ['auto', 'total', 'perPerson', 'perNight', 'perPersonPerNight']) {
+    assert.ok(new RegExp('value="' + mode + '"').test(EDITOR), `missing the ${mode} option`);
+    assert.ok(new RegExp("'" + mode + "'", 'i').test(WIDGET) || new RegExp(mode.toLowerCase()).test(WIDGET),
+      `the engine must understand ${mode}`);
+  }
+  assert.ok(/cfgPriceDisplay: 'priceDisplay'/.test(EDITOR), 'and it must be wired to the config');
+  assert.ok(/priceDisplay: 'auto'/.test(EDITOR), 'with a default');
 });

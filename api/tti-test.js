@@ -179,7 +179,30 @@ export default async function handler(req, res) {
       // built on guesses can be corrected against reality rather than argued
       // about. Keys only — never the full payload.
       if (!shape && r.results && r.results.length) {
-        shape = { resultKeys: Object.keys(r.results[0]).slice(0, 60), matched: mine.length };
+        // Prefer OUR property's result: the fields on the hotel the agent
+        // actually asked about are the ones worth mapping.
+        const sample = mine[0] || r.results[0];
+        shape = { resultKeys: Object.keys(sample).slice(0, 60), matched: mine.length };
+        // Hunt for anything image-shaped, wherever it sits. Andy, 14 Sep 2026:
+        // "every hotel has images" — so a card with no photo means the field is
+        // somewhere this normaliser is not looking, and guessing again would
+        // waste another round trip. Report the paths instead.
+        const found = [];
+        const walk = (v, path, depth) => {
+          if (found.length >= 8 || depth > 3 || v == null) return;
+          if (typeof v === 'string') {
+            if (/\.(?:jpe?g|png|webp|avif|gif)(?:[?#]|$)/i.test(v) || /(?:image|photo|thumb|media)/i.test(path)) {
+              if (/^https?:\/\//.test(v)) found.push({ path, url: v.slice(0, 160) });
+            }
+            return;
+          }
+          if (Array.isArray(v)) { v.slice(0, 3).forEach((x, n) => walk(x, path + '[' + n + ']', depth + 1)); return; }
+          if (typeof v === 'object') {
+            for (const k of Object.keys(v).slice(0, 40)) walk(v[k], path ? path + '.' + k : k, depth + 1);
+          }
+        };
+        walk(sample, '', 0);
+        if (found.length) shape.imagePaths = found;
       }
 
       if (!mine.length) {
