@@ -82,7 +82,9 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
      so the plan depends on the type, not just the field name. */
 
   t('inheritance is only a plan where there is something above to inherit from', () => {
-    ['Flight Time From UK', 'Region', 'Time Zone', 'Currency', 'Language', 'Voltage And Plug']
+    // Region used to be on this list. It is not inherited at all: see the test
+    // further down for what it actually is.
+    ['Flight Time From UK', 'Time Zone', 'Currency', 'Language', 'Voltage And Plug']
       .forEach(l => {
         ['country', 'airport', 'attraction'].forEach(type => {
           const p = fillPlanFor(F(l, 'text'), type);
@@ -734,6 +736,25 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     const out = src.sourceAirportField({ field: { label: 'Official Website' }, iata: 'BBB' });
     assert.strictEqual(out.ok, false);
     assert.ok(!out.transient, 'a settled answer must not go back in the queue');
+  });
+
+  t('a region is never handed down from the parent', () => {
+    // The same place reads three different ways, so inheriting one level's
+    // answer onto another writes something coarse at best and wrong at worst:
+    //   country  French Polynesia   South Pacific · Polynesia
+    //   city     Bora Bora          Society Islands · South Pacific
+    //   resort   on Bora Bora       Bora Bora · Society Islands
+    ['country', 'city', 'resort'].forEach(k => {
+      const p = fillPlanFor(F('Region', 'text'), k);
+      assert.strictEqual(p.kind, 'manual',
+        'Region on a ' + k + ' must not be inherited: it would have filled 762 records wrongly');
+    });
+  });
+
+  t('the fields that really are inherited still are', () => {
+    ['Time Zone', 'Currency', 'Language', 'Voltage And Plug', 'Flight Time From UK'].forEach(l => {
+      assert.strictEqual(fillPlanFor(F(l, 'text'), 'city').kind, 'derive', l);
+    });
   });
 
   await Promise.all(pending);

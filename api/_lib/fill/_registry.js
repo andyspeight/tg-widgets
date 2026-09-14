@@ -57,7 +57,6 @@ const DERIVE = {
   'Language': { from: 'country' },
   'Voltage And Plug': { from: 'country' },
   // Inherited from whichever ancestor has it.
-  'Region': { from: 'parent' },
   'Flight Time From UK': { from: 'parent' },
 };
 
@@ -82,6 +81,21 @@ const FACT = {
 
 /** Fields we will not guess at. */
 const MANUAL = new Set([
+  // REGION IS NOT INHERITED, WHICH IS HOW IT LOOKED AND IS NOT WHAT IT IS.
+  // It was set to come down from the parent. Andy asked on 14 Sep 2026 why a
+  // country would need a region at all, and checking the records that already
+  // have one settled it. The same place reads three different ways:
+  //
+  //   country  French Polynesia   South Pacific · Polynesia
+  //   city     Bora Bora          Society Islands · South Pacific
+  //   resort   on Bora Bora       Bora Bora · Society Islands
+  //
+  // It is a breadcrumb of where THIS record sits, and it shifts at every level.
+  // Handing a country's value down would have written "South Pacific ·
+  // Polynesia" onto 279 cities and 483 resorts, which is coarse at city level
+  // and simply wrong at resort level. Blank is recoverable. Filled and wrong
+  // looks finished, and nobody goes back to it.
+  'Region',
   'Image URLs',           // photography is chosen, not generated
   'Image Attribution',    // follows the photograph
   'Hero Image URL',
