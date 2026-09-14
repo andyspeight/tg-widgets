@@ -504,6 +504,115 @@ test('the editor templates are layout presets, not dead destination filters', ()
     'a destination filter in a property-scoped widget is config that does nothing');
 });
 
+// ── Every function the editor calls must exist ─────────────────────────────
+// The one class of bug the rest of this file cannot see. These tests read
+// source text, so they happily confirm that a call is PRESENT while the thing
+// it calls was never defined. That shipped: esc() was called six times in an
+// editor that had no such helper, including inside the catch block, so the
+// Test button threw, then threw again while reporting the throw, and froze on
+// its own progress message with no error anywhere.
+
+function inlineScriptOf(html) {
+  const blocks = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  const raw = blocks.reduce((a, b) => (b.length > a.length ? b : a), '');
+  // Comments and strings are full of prose like "the config (see above)", which
+  // looks exactly like a call, so neither can be scanned for real ones.
+  return raw
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ')
+    .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
+    .replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
+    .replace(/`(?:[^`\\]|\\.)*`/g, '``');
+}
+
+const BROWSER_GLOBALS = new Set([
+  'async', 'if', 'for', 'while', 'switch', 'catch', 'return', 'typeof', 'function', 'await', 'new',
+  'do', 'else', 'try', 'throw', 'delete', 'void', 'in', 'of', 'case', 'yield', 'with', 'super',
+  'this', 'constructor',
+  'Object', 'Array', 'String', 'Number', 'Boolean', 'Math', 'JSON', 'Date', 'RegExp', 'Map', 'Set',
+  'WeakMap', 'Promise', 'Error', 'Symbol', 'BigInt', 'Proxy', 'Reflect', 'Intl',
+  'parseInt', 'parseFloat', 'isNaN', 'isFinite', 'encodeURIComponent', 'decodeURIComponent',
+  'encodeURI', 'decodeURI', 'structuredClone', 'queueMicrotask', 'btoa', 'atob',
+  'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'requestAnimationFrame',
+  'cancelAnimationFrame', 'fetch', 'alert', 'confirm', 'prompt', 'console', 'document', 'window',
+  'navigator', 'location', 'history', 'localStorage', 'sessionStorage', 'CustomEvent', 'Event',
+  'URL', 'URLSearchParams', 'FormData', 'Blob', 'File', 'FileReader', 'Image', 'AbortController',
+  'IntersectionObserver', 'MutationObserver', 'ResizeObserver', 'Node', 'Element', 'HTMLElement',
+  'DOMParser', 'TextEncoder', 'TextDecoder', 'getComputedStyle', 'matchMedia', 'CSS',
+]);
+
+function undefinedCalls(html) {
+  const src = inlineScriptOf(html);
+  const defined = new Set();
+  for (const re of [
+    /\bfunction\s+([A-Za-z_$][\w$]*)/g,
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g,
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*(?:\s*,\s*[A-Za-z_$][\w$]*)+)/g,
+    /\bclass\s+([A-Za-z_$][\w$]*)/g,
+  ]) {
+    for (const m of src.matchAll(re)) for (const n of m[1].split(',')) defined.add(n.trim());
+  }
+  // Parameters and loop/catch bindings, so a callback is not mistaken for a
+  // missing function. Coarse on purpose: over-collecting here only costs us a
+  // missed warning, while under-collecting would cry wolf on every handler.
+  for (const m of src.matchAll(/\(([^()]{0,200})\)\s*=>/g)) {
+    for (const n of m[1].matchAll(/[A-Za-z_$][\w$]*/g)) defined.add(n[0]);
+  }
+  for (const m of src.matchAll(/function\s*[A-Za-z_$\w]*\s*\(([^()]{0,300})\)/g)) {
+    for (const n of m[1].matchAll(/[A-Za-z_$][\w$]*/g)) defined.add(n[0]);
+  }
+  for (const m of src.matchAll(/\bcatch\s*\(\s*([A-Za-z_$][\w$]*)/g)) defined.add(m[1]);
+  for (const m of src.matchAll(/\bfor\s*\(\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g)) defined.add(m[1]);
+
+  const missing = new Set();
+  // A bare NAME( — not preceded by a dot, so not a method call on something.
+  for (const m of src.matchAll(/(^|[^.\w$'"`])([A-Za-z_$][\w$]*)\s*\(/g)) {
+    const n = m[2];
+    if (!defined.has(n) && !BROWSER_GLOBALS.has(n)) missing.add(n);
+  }
+  return [...missing];
+}
+
+test('every function the editor calls is actually defined', () => {
+  assert.deepEqual(undefinedCalls(EDITOR), [],
+    'the editor calls something that does not exist, which throws at runtime');
+});
+
+test('the detector really would catch a missing helper', () => {
+  // A test that cannot fail is worse than no test, and this one is heuristic
+  // enough to be worth proving. Take the helper out and it must complain.
+  const without = EDITOR.replace(/ {4}function esc\(v\) \{[\s\S]*?\n {4}\}\n/, '');
+  assert.notEqual(without, EDITOR, 'esc() should be defined in the editor');
+  assert.ok(undefinedCalls(without).includes('esc'), 'removing esc must be detected');
+});
+
+test('esc is defined before anything calls it, and escapes the dangerous characters', () => {
+  assert.ok(/function esc\(v\)/.test(EDITOR), 'the editor must define its own esc');
+  for (const ch of ['&amp;', '&lt;', '&gt;', '&quot;', '&#39;']) {
+    assert.ok(EDITOR.includes(ch), `esc must produce ${ch}`);
+  }
+});
+
+test('the Test button cannot sit on its progress message forever', () => {
+  // The server can be slow, and a platform timeout returns nothing at all, so
+  // the UI owns its own deadline rather than trusting a response to arrive.
+  assert.ok(/new AbortController\(\)/.test(EDITOR), 'the request needs an abort signal');
+  assert.ok(/setTimeout\(\(\) => ctl\.abort\(\)/.test(EDITOR), 'and a deadline that fires it');
+  assert.ok(/err\.name === 'AbortError'/.test(EDITOR), 'a timeout must read as a timeout');
+  assert.ok(/clearTimeout\(giveUp\)/.test(EDITOR), 'and be cleared when the answer arrives');
+});
+
+test('the test route declares a duration longer than its own timeout', () => {
+  // An undeclared route gets Vercel's default, which was SHORTER than this
+  // endpoint's own timeout, so the platform killed the function mid-flight and
+  // returned an empty-bodied gateway response instead of per-code results.
+  const fn = (VERCEL.functions || {})['api/tti-test.js'];
+  assert.ok(fn, 'api/tti-test.js needs a functions entry, or it gets the default');
+  const own = Number(/const TIMEOUT_MS = (\d+);/.exec(TEST_API)[1]);
+  assert.ok(fn.maxDuration * 1000 > own,
+    `maxDuration ${fn.maxDuration}s must exceed the endpoint's own ${own / 1000}s budget`);
+});
+
 // ── The demo and the tour ──────────────────────────────────────────────────
 
 test('the demo links to its OWN editor, not the Travel Offers one', () => {

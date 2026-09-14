@@ -45,7 +45,15 @@ import { normaliseOffers, callOffersProxy } from './cron/refresh-map-offers.js';
 // becoming a way to sweep inventory.
 const MAX_CODES = 10;
 const CONCURRENCY = 2;
-const TIMEOUT_MS = 12000;
+// Must stay comfortably INSIDE the maxDuration vercel.json gives this route
+// (60s). It was 12s against an undeclared route, which meant Vercel's own
+// default cut in first: the platform kills the function mid-flight and returns
+// an empty-bodied gateway response, so the caller gets nothing to parse rather
+// than an honest per-code result. Same trap /api/offers documents at its own
+// UPSTREAM_TIMEOUT_MS. Worst case here is ceil(10/2) x 20s = 100s, so the
+// function can still be cut on a full slate of slow codes; each code that DID
+// answer is reported, and the browser has its own deadline besides.
+const TIMEOUT_MS = 20000;
 
 /** The caller's own Travelify App ID. Never taken from the request body: that
  *  would let one client test against another client's application, and the
