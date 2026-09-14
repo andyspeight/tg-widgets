@@ -935,7 +935,7 @@
             </button>
             <div class="section-body">
               <div class="field">
-                <label class="field-label">Paste your Travelify deeplinks</label>
+                <label class="field-label">Paste deeplinks (optional)</label>
                 <textarea class="input" id="ttiPaste" rows="3"
                   placeholder="https://dl.tvllnk.com/deeplink/250?st=Accommodation&#38;loc=Bournemouth...&#38;refn=TTI:58612582"
                   aria-label="Paste Travelify deeplinks, one per line"></textarea>
@@ -943,10 +943,11 @@
                   <button type="button" class="btn btn-secondary btn-sm" id="ttiPasteAdd">Add these hotels</button>
                 </div>
                 <div class="field-help">
-                  One link per line. A working deeplink already carries everything a
-                  search needs, so pasting one fills in the hotel, the town and its
-                  coordinates in a single go. It is also the quickest way to be sure a
-                  hotel will return results, because the link is one you know works.
+                  Optional. If you already have a working deeplink for a hotel, pasting
+                  it fills in the code, the country and the exact coordinates in one go,
+                  which narrows the search to that town rather than the whole country.
+                  One link per line. You do not need this: a code and a country is
+                  enough on its own.
                 </div>
               </div>
 
@@ -958,10 +959,10 @@
                   <button type="button" class="btn btn-secondary btn-sm" id="ttiTest">Test these codes</button>
                 </div>
                 <div class="field-help">
-                  Each hotel needs its code and the place to search around it. A
-                  country on its own is not enough: Travelify turns those searches
-                  away, so a row without coordinates is never sent. Codes work with or
-                  without the <code>TTI:</code> prefix. Up to 100 hotels.
+                  The Travelify property code and the two-letter country it is in.
+                  The code is what picks the hotel, the country says which part of the
+                  world to look in. Codes work with or without the <code>TTI:</code>
+                  prefix. Up to 100 hotels.
                 </div>
                 <div class="tti-test-out" id="ttiTestOut" hidden></div>
                 <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
@@ -2145,13 +2146,16 @@
       const up = String(token == null ? '' : token).trim().toUpperCase().replace(/^[A-Z]+:/, '');
       return /^[A-Z0-9][A-Z0-9._-]{0,31}$/.test(up) ? up : '';
     }
-    /* A row can only be searched if it carries a real place. Travelify rejects
-       a country with no coordinates outright, so a row without them is not a
-       broader search, it is one that will be turned away. */
-    function rowHasPlace(r) {
+    /* A row needs a code and somewhere to look: a country is enough, because
+       the code itself pins the property. Coordinates narrow it further when a
+       pasted deeplink supplied them, but they are never required. */
+    function rowHasCoords(r) {
       const lat = Number(r && r.lat), lng = Number(r && r.lng);
       return Number.isFinite(lat) && Number.isFinite(lng)
         && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    }
+    function rowHasPlace(r) {
+      return !!canonCtry(r && r.ctry) || rowHasCoords(r);
     }
 
     /* Pull a hotel out of a Travelify deeplink. Mirrors parseDeeplink in
@@ -2239,7 +2243,7 @@
       const el = $('ttiSummary');
       if (!el) return;
       const ready = syncTtiConfig().length;
-      const incomplete = ttiRows.filter(r => (r.code || r.locationName) && !(canonTti(r.code) && rowHasPlace(r))).length;
+      const incomplete = ttiRows.filter(r => (r.code || r.ctry) && !(canonTti(r.code) && rowHasPlace(r))).length;
       if (!ready && !incomplete) {
         el.innerHTML = 'No hotels yet. The widget stays empty until you add at least one.';
         return;
@@ -2247,8 +2251,8 @@
       let html = esc(ready + (ready === 1 ? ' hotel ready' : ' hotels ready'));
       if (incomplete) {
         html += '<br><span style="color:var(--tgse-warning)">' + incomplete
-          + (incomplete === 1 ? ' row still needs' : ' rows still need')
-          + ' a location. Paste that hotel\'s deeplink above and it will fill in.</span>';
+          + (incomplete === 1 ? ' row needs' : ' rows need')
+          + ' both a code and a two-letter country before it will be saved.</span>';
       }
       el.innerHTML = html;
     }
@@ -2270,17 +2274,26 @@
         code.placeholder = 'TTI code, e.g. 12345';
         code.value = row.code || '';
         code.setAttribute('aria-label', 'Travelify property code, hotel ' + (i + 1));
+        const ctry = document.createElement('input');
+        ctry.className = 'input tti-ctry';
+        ctry.type = 'text';
+        ctry.maxLength = 2;
+        ctry.placeholder = 'GB';
+        ctry.value = row.ctry || '';
+        ctry.setAttribute('aria-label', 'Country code, hotel ' + (i + 1));
+
+        // Coordinates are a bonus, not a requirement. Shown when a pasted
+        // deeplink brought them, so the agent can see the row is more precise
+        // than the two fields suggest.
         const place = document.createElement('div');
         place.style.cssText = 'flex:1 1 auto;min-width:0;font-size:12px;align-self:center;'
-          + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-        if (rowHasPlace(row)) {
-          place.style.color = 'var(--tgse-ink-3)';
-          place.textContent = (row.locationName || 'Location set')
-            + ' \u00b7 ' + Number(row.lat).toFixed(3) + ', ' + Number(row.lng).toFixed(3);
+          + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tgse-ink-3)';
+        if (rowHasCoords(row)) {
+          place.textContent = row.locationName || (Number(row.lat).toFixed(3) + ', ' + Number(row.lng).toFixed(3));
           place.title = place.textContent;
-        } else {
+        } else if (canonTti(row.code) && !canonCtry(row.ctry)) {
           place.style.color = 'var(--tgse-warning)';
-          place.textContent = 'Needs a location \u2014 paste this hotel\'s deeplink above';
+          place.textContent = 'Add the country';
         }
         const del = document.createElement('button');
         del.type = 'button';
@@ -2290,6 +2303,7 @@
         del.setAttribute('aria-label', 'Remove hotel ' + (i + 1));
 
         code.addEventListener('input', () => { row.code = code.value; paintTtiSummary(); markDirtyAndPreview(); });
+        ctry.addEventListener('input', () => { row.ctry = ctry.value; paintTtiSummary(); markDirtyAndPreview(); });
         del.addEventListener('click', () => {
           ttiRows.splice(i, 1);
           renderTtiRows();
@@ -2297,7 +2311,7 @@
           markDirtyAndPreview();
         });
 
-        wrap.appendChild(code); wrap.appendChild(place); wrap.appendChild(del);
+        wrap.appendChild(code); wrap.appendChild(ctry); wrap.appendChild(place); wrap.appendChild(del);
         host.appendChild(wrap);
       });
     }
@@ -2315,8 +2329,7 @@
       const rows = syncTtiConfig();
       if (!rows.length) {
         out.hidden = false;
-        out.innerHTML = '<span style="color:var(--tgse-warning)">Add a hotel first. Pasting a '
-          + 'deeplink above is the quickest way.</span>';
+        out.innerHTML = '<span style="color:var(--tgse-warning)">Add a code and a country first.</span>';
         return;
       }
       const label = btn.textContent;

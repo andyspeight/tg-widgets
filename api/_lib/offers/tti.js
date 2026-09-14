@@ -315,29 +315,43 @@ const num = (v, dflt, lo, hi) => {
 
 /** The body for `POST /search`, scoped to ONE property.
  *
- *  `Ref` is the field that does the scoping — `TTI:{code}`, the same value the
- *  deeplink carries as `refn`. That single field is what this whole widget was
- *  missing: the old path asked `widgetsvc/traveloffers` for a country's worth of
- *  offers and then sieved them, which could never find one named hotel in the
- *  250 cheapest results for Great Britain.
+ *  `Ref` is what does the scoping — `TTI:{code}`, the same value the deeplink
+ *  carries as `refn`. That single field is the whole point: the old path asked
+ *  `widgetsvc/traveloffers` for a country's worth of offers and sieved them,
+ *  which could never find one named hotel among the 250 cheapest in Great
+ *  Britain.
  *
- *  Returns null when there is not enough to search with. That matters more than
- *  it looks: a criteria object missing its coordinates is not a broader search,
- *  it is a wrong one, and firing it would burn Travelify capacity to produce
- *  results for somewhere nobody asked about. The caller reports the row as
- *  incomplete instead.
+ *  COORDINATES ARE OPTIONAL, and this matters.
+ *
+ *  An earlier version of this function demanded them. That was wrong, and wrong
+ *  in an expensive way: it rested on a 406 from a DEEPLINK carrying `ctry` and
+ *  no coordinates — a different surface from this API entirely — and was never
+ *  tested here. If `Ref` pins the property then the property IS the location,
+ *  and a country is enough to say which one. The worked example carried
+ *  coordinates because it came from somebody searching a town in a UI, not
+ *  because the field is mandatory.
+ *
+ *  So: send what we have. A code and a country is a valid ask. Coordinates
+ *  narrow it when a row has them, which is strictly better but never required.
+ *  If the service does need them it will say so, and the error reaches the
+ *  agent verbatim instead of being pre-empted by a guess.
+ *
+ *  Returns null only when there is genuinely nothing to search: no code, or no
+ *  idea where in the world to look.
  *
  *  `now` is injectable so the dates are testable. */
 export function buildAccommodationCriteria(prop, search = {}, now = new Date()) {
   const code = canonTti(prop && (prop.code || prop.tti));
-  const lat = Number(prop && prop.lat);
-  const lng = Number(prop && prop.lng);
-  // Coordinates are not optional. An accommodation search is an AREA search
-  // with the property pinned inside it; without an area there is nothing to
-  // pin it to, and a country code alone is rejected outright (measured 14 Sep).
   if (!code) return null;
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+
+  const lat = Number(prop.lat);
+  const lng = Number(prop.lng);
+  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng)
+    && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  const ctry = cleanCtry(prop.ctry || prop.locationCountry);
+  // One or the other. Without either there is no area at all, and an unscoped
+  // worldwide search is not a broader question, it is a meaningless one.
+  if (!hasCoords && !ctry) return null;
 
   const leadDays = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
   const nights = num(search.nights, DEFAULT_NIGHTS, 1, 28);
@@ -364,12 +378,16 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
     CustomerCountry: /^[A-Z]{2}$/.test(String(search.customerCountry || '')) ? search.customerCountry : 'GB',
     TripType: 'Unspecified',
     AccommodationSearchCriteria: {
-      Latitude: lat,
-      Longitude: lng,
-      Radius: num(prop.radius ?? search.radius, DEFAULT_RADIUS_MILES, 1, 100),
-      LocationType: prop.locationType || 'City',
-      ...(prop.locationName ? { LocationName: String(prop.locationName).slice(0, 200) } : {}),
-      ...(cleanCtry(prop.ctry || prop.locationCountry) ? { LocationCountry: cleanCtry(prop.ctry || prop.locationCountry) } : {}),
+      // Only sent when the row actually has them. An omitted field is not the
+      // same as a zero, and 0,0 is a real place in the Atlantic.
+      ...(hasCoords ? {
+        Latitude: lat,
+        Longitude: lng,
+        Radius: num(prop.radius ?? search.radius, DEFAULT_RADIUS_MILES, 1, 100),
+        LocationType: prop.locationType || 'City',
+        ...(prop.locationName ? { LocationName: String(prop.locationName).slice(0, 200) } : {}),
+      } : {}),
+      ...(ctry ? { LocationCountry: ctry } : {}),
       // THE PIN. Always prefixed, always canonical, so a code typed as
       // ID:58612582, TTI:58612582 or 58612582 all ask the same question.
       Ref: 'TTI:' + code,
