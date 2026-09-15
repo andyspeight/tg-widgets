@@ -20,7 +20,7 @@
 // ----- Helpers -----
 
 import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
-import { listStays } from './_order-stays.js';
+import { listStays, bookingMoment, stayNights, stayCheckout } from './_order-stays.js';
 
 const escapeHtml = (s) => {
   if (s == null) return '';
@@ -53,10 +53,15 @@ const currencySymbol = (code) => {
   }
 };
 
+// Dates are read as the wall clock wrote them (bookingMoment) and printed in
+// UTC, so the document says the supplier's own date whatever the machine
+// rendering it thinks the time is. It used to parse a value like
+// "2026-09-26T00:00:00" in the runtime's LOCAL zone, which is only correct
+// because Vercel runs on UTC. The My Booking widget, running the same code in
+// a British browser, printed the check-out a day early (ET121109, 15 Sep 2026).
 const formatDate = (iso, opts = {}) => {
-  if (!iso) return '—';
-  const d = new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso);
-  if (Number.isNaN(d.getTime())) return '—';
+  const d = bookingMoment(iso);
+  if (!d) return '—';
   const day = opts.includeWeekday
     ? d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' }) + ' '
     : '';
@@ -69,25 +74,11 @@ const formatDate = (iso, opts = {}) => {
 };
 
 const formatDateShort = (iso) => {
-  if (!iso) return '—';
-  const d = new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso);
-  if (Number.isNaN(d.getTime())) return '—';
+  const d = bookingMoment(iso);
+  if (!d) return '—';
   return d.toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
   });
-};
-
-const computeNights = (startDate, duration) => {
-  if (Number.isFinite(duration) && duration > 0) return duration;
-  return null;
-};
-
-const computeCheckout = (startDate, nights) => {
-  if (!startDate || !Number.isFinite(nights)) return null;
-  const d = new Date(startDate.length === 10 ? startDate + 'T00:00:00Z' : startDate);
-  if (Number.isNaN(d.getTime())) return null;
-  d.setUTCDate(d.getUTCDate() + nights);
-  return d.toISOString().slice(0, 10);
 };
 
 // Render star rating as inline SVG, not Unicode characters.
@@ -159,9 +150,8 @@ const pickHeroImage = (media) => {
 // local times as UTC so we read UTC components — same convention used by
 // the widget. Mismatching this would shift printed clock times by hours.
 const fmtTimeUtc = (iso) => {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
+  const d = bookingMoment(iso);
+  if (!d) return '';
   const hh = String(d.getUTCHours()).padStart(2, '0');
   const mm = String(d.getUTCMinutes()).padStart(2, '0');
   return hh + ':' + mm;
@@ -710,8 +700,11 @@ export function renderPdfHtml(order, opts = {}) {
   })();
 
   const startDate = primary?.checkin ?? (accomItem?.startDate || (accom?.units?.[0]?.checkin) || null);
-  const nights = primary ? primary.nights : computeNights(startDate, accomItem?.duration ?? accom?.units?.[0]?.nights);
-  const checkout = primary ? primary.checkout : (nights ? computeCheckout(startDate, nights) : null);
+  // The fallback path is for a booking with no stay the selector recognises.
+  // It asks the shared module the same two questions rather than keeping a
+  // second copy of the arithmetic, which is how the check-out drifted before.
+  const nights = primary ? primary.nights : stayNights(accomItem, accom);
+  const checkout = primary ? primary.checkout : (nights ? stayCheckout(startDate, nights) : null);
 
   const unit = primary?.unit ?? (accom?.units?.[0] || null);
   const rate = primary?.rate ?? (unit?.rates?.[0] || null);

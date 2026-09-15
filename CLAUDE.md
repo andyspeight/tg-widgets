@@ -119,6 +119,21 @@ Shadow DOM with `:host{all:initial}` — the ONE deliberate exception is Smart
 Section, which wraps light-DOM user content. Storage keys are prefixed
 (popup `tgp_`, rule engine `tgsr_`), JSON-encoded, try/catch-safe.
 
+**A booking date is a calendar date, not an instant** (15 Sep 2026, Exclusively
+Travel ET121109). Travelify writes a check-in as `2026-09-26T00:00:00`: a date
+wearing a time, with no zone on it. `new Date()` parses that in the READER's
+timezone, so the same code is right on a UTC server and a day out in a British
+browser. The My Booking page said a six-night stay from 26 Sept checked out on
+1 Oct while the PDF said 2 Oct. Read such a value with `bookingMoment()` from
+`public/_order-stays.js` (it returns a Date whose UTC fields are the numbers in
+the string) and print it with `timeZone: 'UTC'`; count days forward with
+`stayCheckout()`, never with `new Date(x).getTime() + n * 86400000` or a local
+parse followed by UTC arithmetic. Times behave the same way: Travelify dresses
+airport-local times as UTC, so a 14:00 flight printed 13:00 in British Summer
+Time. Guarded by `npm run test:booking-dates-tz`, which re-runs the widget, the
+PDF and the email in four timezones. Fixtures must use the shape the supplier
+really sends: tidy `2026-09-26` strings in the old fixtures are what hid this.
+
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or
 `scrollIntoView()` (nor autofocus) as part of drawing itself. Those belong ONLY

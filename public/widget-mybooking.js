@@ -1940,11 +1940,19 @@
     }
     return labels.totalCost || (c && c.t ? c.t('totalCost') : 'Total cost');
   }
+  // A booking date is read as the wall clock wrote it, on every device.
+  // bookingMoment (see the order-stays core above) hands back a Date whose UTC
+  // fields are the numbers in the string, so pinning the display to UTC prints
+  // the supplier's own date. Without the pin, a customer in New York opening
+  // this page saw a check-out of 1 Oct where the paperwork said 2 Oct, because
+  // a date-only value is midnight UTC and their evening is the day before.
   function fmtDate(iso, opts) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '';
-    return d.toLocaleDateString('en-GB', opts || { day: 'numeric', month: 'short', year: 'numeric' });
+    const d = bookingMoment(iso);
+    if (!d) return '';
+    return d.toLocaleDateString('en-GB', Object.assign(
+      { timeZone: 'UTC' },
+      opts || { day: 'numeric', month: 'short', year: 'numeric' },
+    ));
   }
   function fmtDayMonth(iso) {
     return fmtDate(iso, { day: 'numeric', month: 'short' });
@@ -1986,10 +1994,14 @@
     if (Object.prototype.hasOwnProperty.call(BOARD_LABELS, v)) return BOARD_LABELS[v];
     return v; // fall back to raw rather than invent a value
   }
+  // Travelify dresses airport-local times as UTC, so the UTC components ARE
+  // the clock the traveller reads at the gate. That only held while the value
+  // was parsed as UTC: new Date('2026-10-02T14:00:00') is parsed in the
+  // READER's timezone, so a 14:00 flight printed 13:00 in British Summer Time
+  // and 18:00 in New York (15 Sep 2026, found alongside ET121109).
   function fmtTime(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return '';
+    const d = bookingMoment(iso);
+    if (!d) return '';
     const hh = String(d.getUTCHours()).padStart(2, '0');
     const mm = String(d.getUTCMinutes()).padStart(2, '0');
     return hh + ':' + mm;
@@ -3921,10 +3933,62 @@
     return null;
   }
 
-  /** Check-out as YYYY-MM-DD, counted forward from check-in. Null when unknown. */
+  /**
+   * The calendar day inside a booking date, as YYYY-MM-DD. Empty when there
+   * isn't one.
+   *
+   * Travelify writes a check-in as "2026-09-26T00:00:00": a date wearing a time,
+   * with no timezone on it. That is a WALL CLOCK value, not an instant. The hotel
+   * expects the guest on the 26th whatever a reader's device thinks the time is,
+   * so the day is read off the string rather than through a Date.
+   */
+  function stayDay(value) {
+    const m = /^(\d{4}-\d{2}-\d{2})/.exec(String(value == null ? '' : value).trim());
+    return m ? m[1] : '';
+  }
+
+  /**
+   * A booking date or time as the wall clock says it, for anyone to format.
+   *
+   * Returns a Date whose UTC fields ARE the numbers written in the string, so
+   * formatting it with timeZone 'UTC' prints what the supplier wrote, on every
+   * device on earth. A value that carries a real zone ("...Z", "+03:00") is a
+   * genuine instant and is left alone.
+   *
+   * Why (15 Sep 2026, Exclusively Travel ET121109, reported by Andy). The
+   * booking's own My Booking page said six nights from 26 Sept checking out on
+   * 1 Oct, and the second stay 2 Oct to 4 Oct. Both a day early. The PDF, from
+   * the same calculation, said 2 Oct and 5 Oct and was right.
+   *
+   * new Date('2026-09-26T00:00:00') is parsed in the READER's timezone. In
+   * British Summer Time that is 23:00 on the 25th in UTC, so counting six days
+   * in UTC and reading the UTC date back lands on 1 Oct. On the server, where
+   * the clock is UTC, the same code is correct, which is exactly why the
+   * paperwork was right and the screen was wrong. Two other faults of the same
+   * family were found with it: a date-only value read a day early for anyone
+   * behind UTC (a customer in New York saw 1 Oct for 2026-10-02), and a flight
+   * time written as 14:00 printed as 13:00 in British Summer Time and 18:00 in
+   * New York.
+   */
+  function bookingMoment(value) {
+    const s = String(value == null ? '' : value).trim();
+    if (!s) return null;
+    const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?)?$/.exec(s);
+    const d = m
+      ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0)))
+      : new Date(s);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  /**
+   * Check-out as YYYY-MM-DD, counted forward from check-in in whole days. Null
+   * when unknown. Pure calendar arithmetic: no clock, no timezone, so it answers
+   * the same on a phone in Sydney and a server in Virginia.
+   */
   function stayCheckout(checkin, nights) {
-    if (!checkin || !Number.isFinite(nights)) return null;
-    const d = new Date(checkin.length === 10 ? checkin + 'T00:00:00Z' : checkin);
+    const day = stayDay(checkin);
+    if (!day || !Number.isFinite(nights)) return null;
+    const d = new Date(day + 'T00:00:00Z');
     if (Number.isNaN(d.getTime())) return null;
     d.setUTCDate(d.getUTCDate() + nights);
     return d.toISOString().slice(0, 10);
@@ -3940,7 +4004,7 @@
    *   item        the order item it came from
    *   accom       item.accommodation
    *   name        property name
-   *   checkin     YYYY-MM-DD (or whatever the feed carried)
+   *   checkin     YYYY-MM-DD, the calendar day, whatever shape the feed used
    *   nights      integer, or null
    *   checkout    YYYY-MM-DD, or null
    *   unit, rate  the first room and its first rate
@@ -3956,7 +4020,10 @@
       const accom = item.accommodation || null;
       if (!accom) continue;
       const unit = (accom.units && accom.units[0]) || null;
-      const checkin = item.startDate || (unit && unit.checkin) || null;
+      // The check-in is a calendar day, kept as YYYY-MM-DD however the feed
+      // dressed it, so every output gets one shape and nobody has to parse a
+      // date wearing a time for themselves.
+      const checkin = stayDay(item.startDate || (unit && unit.checkin) || '') || null;
       const nights = stayNights(item, accom);
       stays.push({
         item,
@@ -3977,7 +4044,7 @@
     // Soonest first, so the documents read in the order the trip happens. A stay
     // with no date keeps its position rather than jumping to the front.
     return stays
-      .map((s, i) => ({ s, i, t: s.checkin ? Date.parse(s.checkin.length === 10 ? s.checkin + 'T00:00:00Z' : s.checkin) : NaN }))
+      .map((s, i) => ({ s, i, t: s.checkin ? Date.parse(s.checkin + 'T00:00:00Z') : NaN }))
       .sort((a, b) => {
         if (Number.isNaN(a.t) && Number.isNaN(b.t)) return a.i - b.i;
         if (Number.isNaN(a.t)) return 1;
@@ -4156,10 +4223,11 @@
     const packageInfo = packageItem?.package || null;
 
     const acc = accItem?.accommodation;
-    const checkin = accItem?.startDate;
-    const nights = accItem?.duration || 0;
-    const checkoutMs = checkin ? new Date(checkin).getTime() + nights * 86400000 : null;
-    const checkout = checkoutMs ? new Date(checkoutMs).toISOString() : null;
+    const checkin = stays[0]?.checkin || accItem?.startDate || null;
+    // The old single-stay check-out worked itself out here, in milliseconds
+    // from a locally parsed date. Every card reads listStays now, so this is
+    // the last copy of that arithmetic and it is gone rather than left lying
+    // about waiting to be used again.
 
     const tripStart = summary.earliestStart || checkin;
     const days = daysUntil(tripStart);
