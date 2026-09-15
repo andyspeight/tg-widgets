@@ -588,12 +588,255 @@
       });
   }
 
+  // ── Arrival airports ──────────────────────────────────────────────────────
+
+  /**
+   * Per-widget arrival airports: the airport an agent wants their customers
+   * flown into for a given ground or club, instead of whichever is nearest.
+   *
+   * Why (Andy, 15 Sep 2026): "for each team we automatically choose the closest
+   * airport ... when clients are coming from overseas there is quite often no
+   * direct flight to the closest airport". Liverpool's nearest airport is
+   * Liverpool; most of Europe flies into Manchester, and cheaper.
+   *
+   * A row is { key, kind, label, iata, airportName }. `key` is a venue or club
+   * key exactly as the feed reports it, so the widget sends it straight
+   * through. A GROUND beats a CLUB, and a club applies only to its HOME
+   * fixtures, because an away trip goes to the other ground's city.
+   */
+  function arrivalAirports(hostId, getRows, setRows) {
+    var host = $(hostId);
+    if (!host) return;
+    var adding = false;
+
+    var rows = function () { return (getRows() || []).slice(); };
+    function commit(next) {
+      setRows(next.filter(function (r) { return r && r.key; }));
+      draw();
+    }
+
+    function note(text, cls) {
+      var d = document.createElement('div');
+      d.className = cls || 'arv-note';
+      d.textContent = text;
+      return d;
+    }
+
+    /** Search clubs and grounds together, so an agent types a name not a type. */
+    function pickSearch(onPick) {
+      var box = document.createElement('div');
+      box.className = 'arv-pick';
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'input';
+      input.placeholder = 'Search a club or a ground';
+      input.setAttribute('aria-label', 'Search a club or a ground');
+
+      var results = document.createElement('div');
+      results.className = 'arv-results';
+      var seq = 0;
+
+      function run(term) {
+        var mine = ++seq;
+        results.textContent = '';
+        if (!term || term.length < 2) { results.appendChild(note('Type at least two letters.')); return; }
+        results.appendChild(note('Searching…'));
+        Promise.all(['teams', 'venues'].map(function (view) {
+          return fetch(FEED + '?view=' + view + '&limit=8&q=' + encodeURIComponent(term))
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+              return ((d && d.items) || []).map(function (x) {
+                return { key: x.key, name: x.name, kind: view === 'teams' ? 'team' : 'venue' };
+              });
+            })
+            .catch(function () { return []; });
+        })).then(function (pair) {
+          if (mine !== seq) return;
+          var list = pair[0].concat(pair[1]).slice(0, 12);
+          results.textContent = '';
+          if (!list.length) { results.appendChild(note('Nothing matches that.')); return; }
+          var already = {};
+          rows().forEach(function (r) { already[r.key] = 1; });
+          list.forEach(function (x) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'arv-result';
+            b.disabled = !!already[x.key];
+            var nm = document.createElement('span');
+            nm.className = 'arv-result-name';
+            nm.textContent = x.name;
+            var tag = document.createElement('span');
+            tag.className = 'arv-tag';
+            tag.textContent = x.kind === 'venue' ? 'Ground' : 'Club';
+            b.appendChild(nm);
+            b.appendChild(tag);
+            if (already[x.key]) {
+              var done = document.createElement('span');
+              done.className = 'arv-tag';
+              done.textContent = 'Added';
+              b.appendChild(done);
+            }
+            b.addEventListener('click', function () { onPick(x); });
+            results.appendChild(b);
+          });
+        });
+      }
+
+      input.addEventListener('input', debounce(function () { run(input.value.trim()); }, 220));
+      box.appendChild(input);
+      box.appendChild(results);
+      setTimeout(function () { try { input.focus(); } catch (e) {} }, 0);
+      return box;
+    }
+
+    /** The airport cell. A three-letter code is accepted as typed. */
+    function airportField(row, onPick) {
+      var wrap = document.createElement('div');
+      wrap.className = 'arv-air';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'input arv-air-input';
+      input.placeholder = 'Airport or code';
+      input.value = row.iata ? (row.airportName ? row.airportName + ' (' + row.iata + ')' : row.iata) : '';
+      input.setAttribute('aria-label', 'Arrival airport for ' + (row.label || row.key));
+
+      var menu = document.createElement('div');
+      menu.className = 'arv-menu';
+      menu.hidden = true;
+      var seq = 0;
+
+      function close() { menu.hidden = true; menu.textContent = ''; }
+
+      function run(term) {
+        var mine = ++seq;
+        fetch(FEED + '?view=airports&limit=8&q=' + encodeURIComponent(term))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (mine !== seq) return;
+            var list = (d && (d.items || d.airports)) || [];
+            menu.textContent = '';
+            if (!list.length) { close(); return; }
+            list.slice(0, 8).forEach(function (a) {
+              var code = String(a.iata || a.code || '').toUpperCase();
+              var name = a.name || a.label || code;
+              if (!/^[A-Z]{3}$/.test(code)) return;
+              var b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'arv-menu-item';
+              b.textContent = name + ' (' + code + ')';
+              // mousedown, because blur would close the menu before a click.
+              b.addEventListener('mousedown', function (ev) {
+                ev.preventDefault();
+                input.value = name + ' (' + code + ')';
+                close();
+                onPick(code, name);
+              });
+              menu.appendChild(b);
+            });
+            menu.hidden = !menu.firstChild;
+          })
+          .catch(close);
+      }
+
+      input.addEventListener('input', debounce(function () {
+        var v = input.value.trim();
+        // Someone who knows the code should not have to wait for a list.
+        if (/^[A-Za-z]{3}$/.test(v)) { onPick(v.toUpperCase(), ''); close(); return; }
+        if (v.length < 2) { close(); return; }
+        run(v);
+      }, 220));
+      input.addEventListener('blur', function () { setTimeout(close, 140); });
+
+      wrap.appendChild(input);
+      wrap.appendChild(menu);
+      return wrap;
+    }
+
+    function draw() {
+      var list = rows();
+      host.textContent = '';
+
+      list.forEach(function (row, i) {
+        var line = document.createElement('div');
+        line.className = 'arv-row';
+
+        var who = document.createElement('div');
+        who.className = 'arv-who';
+        var nm = document.createElement('div');
+        nm.className = 'arv-who-name';
+        nm.textContent = row.label || row.key;
+        var kd = document.createElement('div');
+        kd.className = 'arv-who-kind';
+        kd.textContent = row.kind === 'venue' ? 'Ground' : 'Club, home games';
+        who.appendChild(nm);
+        who.appendChild(kd);
+
+        var air = airportField(row, function (code, name) {
+          var next = rows();
+          next[i] = { key: row.key, kind: row.kind, label: row.label, iata: code, airportName: name };
+          commit(next);
+        });
+
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'arv-del';
+        del.setAttribute('aria-label', 'Remove ' + (row.label || row.key));
+        del.textContent = '×';
+        del.addEventListener('click', function () {
+          var next = rows();
+          next.splice(i, 1);
+          commit(next);
+        });
+
+        line.appendChild(who);
+        line.appendChild(air);
+        line.appendChild(del);
+        host.appendChild(line);
+
+        if (!row.iata) {
+          host.appendChild(note('Pick an airport, or this ' + (row.kind === 'venue' ? 'ground' : 'club')
+            + ' keeps the nearest one.', 'arv-note arv-note-warn'));
+        }
+      });
+
+      if (adding) {
+        host.appendChild(pickSearch(function (picked) {
+          adding = false;
+          var next = rows();
+          if (!next.some(function (r) { return r.key === picked.key; })) {
+            next.push({ key: picked.key, kind: picked.kind, label: picked.name, iata: '', airportName: '' });
+          }
+          setRows(next);
+          draw();
+        }));
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'btn btn-sm arv-add';
+        cancel.textContent = 'Cancel';
+        cancel.addEventListener('click', function () { adding = false; draw(); });
+        host.appendChild(cancel);
+        return;
+      }
+
+      var add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'btn btn-sm arv-add';
+      add.textContent = list.length ? 'Add another club or ground' : 'Add a club or ground';
+      add.addEventListener('click', function () { adding = true; draw(); });
+      host.appendChild(add);
+    }
+
+    draw();
+  }
+
   global.TGEditorKit = {
     FEED: FEED,
     index: index,
     controls: controls,
     sourcePicker: sourcePicker,
     bookingOptions: bookingOptions,
+    arrivalAirports: arrivalAirports,
     modal: modal,
     closeModal: closeModal,
     templates: templates,

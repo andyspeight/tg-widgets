@@ -292,6 +292,23 @@ app 250 alike (`scripts/probe-flight-deeplink.js` is the record).
 each fixture to its own city. No airport near enough means the package is
 simply not offered (`status: 'no-airport'`).
 
+An agent can override it per widget (15 Sep 2026). The airport nearest a
+ground is not always the one with the direct flights: Liverpool's nearest is
+Liverpool, and most of Europe flies into Manchester on a cheaper fare. The
+widgets send `dst=liverpool:MAN,anfield:LBA`, keys being venue or team keys
+exactly as the feed reports them, capped at 40 pairs. A GROUND beats a CLUB,
+because the ground is where the match is; a CLUB applies to its HOME fixtures
+only, because an away trip goes to the other ground's city. Anything without
+an override keeps the nearest airport. Set in every events editor under
+Booking, which only shows the field when the flight package is ticked
+(`TGEditorKit.arrivalAirports`). Guarded by
+`npm run test:events-arrival-airport`.
+
+`view=airports` gained `?q=` and `?limit=` for that editor control. With no
+`q` it returns the full list under `airports` exactly as before, so the
+widgets' own chooser is untouched; with one it returns `items` of
+`{iata, name, country}`, exact code first.
+
 `org` is the one thing neither the feed nor the config can know, so the
 builder returns a `urlTemplate` with `__ORG__` where the code goes and
 `status: 'needs-origin'`. Each surface renders that option as a button that

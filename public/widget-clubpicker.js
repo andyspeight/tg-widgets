@@ -28,6 +28,32 @@
 (function () {
   'use strict';
 
+  /**
+   * The arrival airports this widget overrides, as the feed's compact wire
+   * format: "liverpool:MAN,anfield:LBA". An agent sets these because the
+   * airport nearest a ground is not always the one with the direct flights
+   * (Andy, 15 Sep 2026: Liverpool's nearest is Liverpool, but most of Europe
+   * flies into Manchester). Venue keys win over club keys, and a club key only
+   * applies to its HOME fixtures. Empty config sends nothing and the feed
+   * carries on picking the nearest airport.
+   */
+  function airportOverrideParam(c) {
+    var rows = (c && Array.isArray(c.arrivalAirports)) ? c.arrivalAirports : [];
+    var seen = {};
+    var out = [];
+    for (var i = 0; i < rows.length && out.length < 40; i++) {
+      var r = rows[i] || {};
+      var key = String(r.key || '').trim().toLowerCase();
+      var iata = String(r.iata || '').trim().toUpperCase();
+      if (!key || !/^[a-z0-9-]+$/.test(key) || !/^[A-Z]{3}$/.test(iata)) continue;
+      if (seen[key]) continue;
+      seen[key] = 1;
+      out.push(key + ':' + iata);
+    }
+    return out.join(',');
+  }
+
+
   var VERSION = '1.1.0';
 
   function resolveOrigin() {
@@ -853,6 +879,9 @@
     // default of every ready kind - the exact opposite. 'none' is not a
     // kind, so the API builds zero options for it.
     q.booking = kinds.length ? kinds.join(',') : 'none';
+    // The arrival airports this widget overrides, if any.
+    var dstMap = airportOverrideParam(c);
+    if (dstMap) q.dst = dstMap;
     if (view === 'team') {
       if (c.side === 'home' || c.side === 'away') q.side = c.side;
       if (c.competition) q.competition = c.competition;

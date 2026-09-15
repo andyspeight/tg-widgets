@@ -151,3 +151,29 @@
 /* The shell already ships this, but a per-editor stylesheet can out-specify
    it, and [hidden] losing to a class is a bug that hides nothing. */
 [hidden] { display: none !important; }
+
+/* ── Arrival airports ──────────────────────────────────────────────────────
+   The airport an agent wants customers flown into for a ground or a club,
+   instead of whichever is nearest. Only shown when the flight package is on. */
+.arv-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto; gap: 8px; align-items: start; margin-bottom: 8px; }
+.arv-who-name { font-size: 13px; font-weight: 600; color: var(--tgse-ink); line-height: 1.3; }
+.arv-who-kind { font-size: 11px; color: var(--tgse-ink-3); margin-top: 1px; }
+.arv-air { position: relative; }
+.arv-air-input { width: 100%; }
+.arv-menu { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 3px); background: var(--tgse-panel); border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); box-shadow: var(--tgse-shadow-lg); max-height: 210px; overflow: auto; }
+.arv-menu-item { display: block; width: 100%; text-align: left; background: none; border: 0; font: inherit; font-size: 12.5px; color: var(--tgse-ink); padding: 7px 10px; cursor: pointer; }
+.arv-menu-item:hover { background: var(--tgse-hover); }
+.arv-del { background: none; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-sm); color: var(--tgse-ink-3); font: inherit; font-size: 15px; line-height: 1; padding: 6px 9px; cursor: pointer; }
+.arv-del:hover { color: var(--tgse-danger); border-color: var(--tgse-danger); }
+.arv-add { margin-top: 2px; }
+.arv-note { font-size: 11.5px; color: var(--tgse-ink-3); margin: -4px 0 8px; }
+.arv-note-warn { color: var(--tgse-warning); }
+.arv-pick { margin-bottom: 8px; }
+.arv-results { margin-top: 6px; max-height: 190px; overflow: auto; border: 1px solid var(--tgse-border); border-radius: var(--tgse-radius-md); }
+.arv-result { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--tgse-border); font: inherit; font-size: 12.5px; color: var(--tgse-ink); padding: 8px 10px; cursor: pointer; }
+.arv-result:last-child { border-bottom: 0; }
+.arv-result:hover:not(:disabled) { background: var(--tgse-hover); }
+.arv-result:disabled { opacity: .55; cursor: default; }
+.arv-result-name { flex: 1 1 auto; min-width: 0; }
+.arv-tag { flex: 0 0 auto; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--tgse-ink-3); background: var(--tgse-hover); border-radius: 999px; padding: 2px 7px; }
+@media (max-width: 420px) { .arv-row { grid-template-columns: 1fr; } }
