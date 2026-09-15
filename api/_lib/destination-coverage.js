@@ -207,6 +207,38 @@ export const TYPES = [
     groupByField: 'fldjARk52dZi7TGGc', // Country Text
     verifiedField: 'fldRCo83Wz1AFZXwP',
     fields: [
+      /* TIERS HERE WERE RE-CUT ON 15 SEP 2026, and the reason is worth keeping.
+         Each group used to nominate one prose field as core: Terminals & Airlines
+         for Editorial, Distance & Drive Time for Getting there, Parking for
+         Facilities. That is a fair shape for a hand-written airport guide, but
+         none of the three has a fixer and none is coming: they are facts about a
+         building that no pair of open datasets agrees on. So the dashboard was
+         asking 600 records for three things the runner can never supply, and
+         reporting 16% however many times Andy pressed fill.
+
+         They are depth, not identity, so they are rich now. Core is what makes an
+         airport record publishable for a database that answers questions and
+         looks up transfer times: which airport it is, which city and country it
+         serves, where it sits, a short overview, where to read more, and the two
+         sources it was checked against. Overview stays core. It is the one of the
+         four that the runner CAN write, and every other record type treats
+         Overview as core.
+
+         Honest about what this buys TODAY: nothing. Measured before and after on
+         all 600 records, "ready" stays at 113. Only five records were blocked by
+         the three fields alone, and all five hold a Parking note of 37 characters
+         ("Limited parking outside the terminal.") which trips the 40-character
+         prose floor, and a broken field vetoes "ready" whatever its tier. The
+         other 375 are missing City Served, Airport Role and Overview as well, so
+         freeing the three frees nobody.
+
+         That is the point rather than a disappointment. The number was never
+         going to move by re-labelling: the real blockers are City Served (362
+         blank, withdrawn because the two sources answer different questions) and
+         Airport Role (375 blank, derivable from Country Text but not yet
+         derived). What this change buys is that the dashboard stops demanding
+         three things the runner has no route to, so the gap it reports is a gap
+         somebody can actually close. */
       F('fldcS9uu4NWMVaIVP', 'IATA Code', 'iata', 'core', 'Identity'),
       F('fldgrJ2uFjzPcAxUx', 'City Served', 'text', 'core', 'Identity'),
       F('fldjARk52dZi7TGGc', 'Country Text', 'countryname', 'core', 'Identity'),
@@ -216,16 +248,16 @@ export const TYPES = [
       F('fldRG7pc5iPJPzhEI', 'Longitude', 'lng', 'core', 'Geo'),
       F('fldmRELkLWrUGL5Ss', 'Overview', 'prose', 'core', 'Editorial'),
       F('fldxsl1xMOzqVZ73f', 'Tagline', 'text', 'rich', 'Editorial'),
-      F('fldoJm0H4vTRLuJlL', 'Terminals & Airlines', 'prose', 'core', 'Editorial'),
+      F('fldoJm0H4vTRLuJlL', 'Terminals & Airlines', 'prose', 'rich', 'Editorial'),
       F('fldrf2gm0skVmW7bX', 'Useful Tips', 'prose', 'rich', 'Editorial'),
       F('flda3DUGpxz2m54Lx', 'Quirks & Local Tips', 'prose', 'rich', 'Editorial'),
-      F('fldk6vN66c33umyEP', 'Distance & Drive Time', 'prose', 'core', 'Getting there'),
+      F('fldk6vN66c33umyEP', 'Distance & Drive Time', 'prose', 'rich', 'Getting there'),
       F('fldRVYMNcYeBJJ4vC', 'Getting There By Car', 'prose', 'rich', 'Getting there'),
       F('fld9lb4Zzp40PsVmq', 'Getting There By Train', 'prose', 'rich', 'Getting there'),
       F('fldv9urpL8JP6PmCw', 'Getting There By Coach', 'prose', 'rich', 'Getting there'),
       F('flduHqBj7hcAvIVjs', 'Taxi & Rideshare', 'prose', 'rich', 'Getting there'),
       F('fldKSgegnHPllWRIJ', 'Drop-off & Pick-up', 'prose', 'rich', 'Getting there'),
-      F('fldoKcDvovYdGvxqy', 'Parking', 'prose', 'core', 'Facilities'),
+      F('fldoKcDvovYdGvxqy', 'Parking', 'prose', 'rich', 'Facilities'),
       F('fldkq66823wiLYMoK', 'Lounges', 'prose', 'rich', 'Facilities'),
       F('fldhYDGrBJC6DL9og', 'Eating & Shopping', 'prose', 'rich', 'Facilities'),
       F('fldVzj8DMHrKbeSzO', 'Family Facilities', 'prose', 'rich', 'Facilities'),

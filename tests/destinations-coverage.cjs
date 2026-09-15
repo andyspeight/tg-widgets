@@ -270,6 +270,45 @@ function t(name, fn) {
       assert.strictEqual(checkValue(v, 'countryname'), 'empty'));
   });
 
+  /* 15 Sep 2026. The airport tiers were re-cut because the dashboard was asking
+     for three prose fields no fixer can supply, and so reported 16% whatever was
+     run. These pin the new shape: core is what makes a record publishable, and
+     nothing sits in core that the runner has no route to. */
+
+  t('the three unfillable prose fields are depth, not core', () => {
+    const ap = TYPES.find(t => t.key === 'airport');
+    for (const label of ['Terminals & Airlines', 'Distance & Drive Time', 'Parking']) {
+      const f = ap.fields.find(x => x.label === label);
+      assert.ok(f, label + ' should still be on the airport spec');
+      assert.strictEqual(f.tier, 'rich', label + ' has no fixer, so it cannot be core');
+    }
+  });
+
+  t('Overview stays core, because the runner can write it', () => {
+    const ap = TYPES.find(t => t.key === 'airport');
+    assert.strictEqual(ap.fields.find(x => x.label === 'Overview').tier, 'core');
+  });
+
+  t('every other type still treats Overview as core', () => {
+    // The reason Overview was kept: demoting it would make airports the odd one
+    // out, and it buys nothing (118 either way on the live data).
+    for (const key of ['country', 'city', 'resort']) {
+      const spec = TYPES.find(t => t.key === key);
+      const ov = spec.fields.find(x => x.label === 'Overview');
+      if (ov) assert.strictEqual(ov.tier, 'core', key + ' Overview should be core');
+    }
+  });
+
+  t('what is left in airport core is identity, geo, a summary and evidence', () => {
+    const ap = TYPES.find(t => t.key === 'airport');
+    const core = ap.fields.filter(f => f.tier === 'core').map(f => f.label).sort();
+    assert.deepStrictEqual(core, [
+      'Airport Role', 'City Served', 'Country Text', 'IATA Code', 'Latitude',
+      'Longitude', 'Official Website', 'Overview', 'Source 1 URL', 'Source 2 URL',
+      'Verified Date',
+    ]);
+  });
+
   t('the airports table uses that check, or none of this applies', () => {
     const ap = TYPES.find(t => t.key === 'airport');
     const f = ap.fields.find(x => x.label === 'Country Text');
