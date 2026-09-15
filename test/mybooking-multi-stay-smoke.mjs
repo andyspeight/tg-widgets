@@ -55,8 +55,12 @@ const base = {
   summary: { totalPrice: 1158, hasAccommodation: true, travellers: [{ type: 'Lead', title: 'Mrs', firstname: 'Gemma', surname: 'Whitaker' }] },
 };
 const TWO = Object.assign({}, base, { items: [
-  stay(1, 'Lambis Studios', 'Lindos', '2026-09-26', 6, 772, 'Suite'),
-  stay(2, 'Anthos Apartments', 'Pefkos', '2026-10-02', 3, 386, 'Studio'),
+  // Dates as Travelify sends them: a date wearing a time, with no zone. The
+  // tidy '2026-09-26' this suite used at first is not what arrives, and the
+  // difference hid a day's error on the screen for a week (see
+  // test/booking-dates-timezone-smoke.mjs).
+  stay(1, 'Lambis Studios', 'Lindos', '2026-09-26T00:00:00', 6, 772, 'Suite'),
+  stay(2, 'Anthos Apartments', 'Pefkos', '2026-10-02T00:00:00', 3, 386, 'Studio'),
 ] });
 const ONE = Object.assign({}, base, { items: [stay(1, 'Lambis Studios', 'Lindos', '2026-09-26', 6, 1158, 'Suite')] });
 

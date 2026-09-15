@@ -187,6 +187,7 @@
     "test:offer-card-image-grid": "node test/offer-card-image-grid-smoke.mjs",
     "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs",
     "test:mybooking-multi-stay": "node test/mybooking-multi-stay-smoke.mjs",
+    "test:booking-dates-tz": "node test/booking-dates-timezone-smoke.mjs",
     "test:order-stays-drift": "node test/order-stays-drift-smoke.mjs",
     "test:booking-pdf-page-numbers": "node test/booking-pdf-page-numbers-smoke.mjs",
     "test:dashboard-required-tier": "node test/dashboard-required-tier-smoke.mjs",

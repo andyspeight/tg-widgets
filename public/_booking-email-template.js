@@ -45,7 +45,7 @@
 // BlinkMacSystemFont keeps Chrome on Mac happy, Segoe UI is Windows, Roboto
 // is Android. Each is a clean professional UI font on its native platform.
 import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
-import { listStays } from './_order-stays.js';
+import { listStays, bookingMoment, stayCheckout } from './_order-stays.js';
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
@@ -59,15 +59,17 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Read as the wall clock wrote it, printed in UTC, so an email says the
+// supplier's own date wherever it is rendered (see bookingMoment).
 function formatShortDate(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
+  const d = bookingMoment(iso);
+  if (!d) return '';
   try {
     return d.toLocaleDateString('en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: 'UTC',
     });
   } catch {
     return iso;
@@ -79,9 +81,8 @@ function formatShortDate(iso) {
  * UTC components so we don't apply a second shift via the local Node server.
  */
 function formatTime(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
+  const d = bookingMoment(iso);
+  if (!d) return '';
   const hh = String(d.getUTCHours()).padStart(2, '0');
   const mm = String(d.getUTCMinutes()).padStart(2, '0');
   return `${hh}:${mm}`;
@@ -137,12 +138,10 @@ function resolveTotalLabel(items) {
   return 'Total cost';
 }
 
+// One place counts days forward from a booking date, and it is the shared one.
 function addDays(iso, days) {
   if (!iso || typeof days !== 'number') return '';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '';
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
+  return stayCheckout(iso, days) || '';
 }
 
 /**
