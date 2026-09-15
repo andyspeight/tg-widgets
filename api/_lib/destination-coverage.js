@@ -474,6 +474,7 @@ export function scoreRecord(rec, spec) {
   const missing = [];   // field indices that are empty
   const broken = [];    // field indices that hold something unusable
   const states = [];    // per-field state, reused for the fill-rate tally
+  let brokenCore = 0;   // of those, the ones a page actually needs
 
   spec.fields.forEach((f, idx) => {
     const state = checkValue(rec.fields[f.id], f.kind);
@@ -484,6 +485,7 @@ export function scoreRecord(rec, spec) {
       if (isCore) coreFilled++; else richFilled++;
     } else if (state === 'invalid') {
       broken.push(idx);
+      if (isCore) brokenCore++;
     } else {
       missing.push(idx);
     }
@@ -494,12 +496,34 @@ export function scoreRecord(rec, spec) {
   const weighted = (coreFilled * 2 + richFilled) / ((coreTotal * 2 + richTotal) || 1);
   const score = Math.round(weighted * 100);
 
+  /* ONLY A BROKEN CORE FIELD STOPS A RECORD BEING READY (15 Sep 2026).
+   *
+   * This used to read `broken.length === 0`, so anything unusable anywhere
+   * vetoed "ready", however deep in the record it sat. Five island airports
+   * were held off the list because their Parking note reads "Limited parking
+   * outside the terminal." — 37 characters against a 40-character prose floor,
+   * and the complete truth for an airstrip with a gravel car park.
+   *
+   * "Ready" answers one question: can this page go out. Core is the definition
+   * of what a page needs, so a broken CORE field is a real veto and still is. A
+   * broken rich field means some depth needs a correction, which is a different
+   * question and already has its own answer: the record stays out of
+   * "complete", the field is counted against the fill rate, and it is listed on
+   * the To correct tab. Nothing is hidden by this, it is just reported under
+   * the heading it belongs to.
+   *
+   * Measured across all 1,541 records before changing it: 35 move, every one of
+   * them from partial to ready, and none can move the other way. 21 airports
+   * (mostly a one-line Drop-off or Lounges note), 4 countries, 5 cities and 5
+   * resorts, the last fourteen of those held by an Events JSON whose month tag
+   * still contradicts its own description. Library ready goes 444 to 479.
+   */
   let tier;
-  if (coreFilled === coreTotal && broken.length === 0) tier = richFilled === richTotal ? 'complete' : 'ready';
+  if (coreFilled === coreTotal && brokenCore === 0) tier = richFilled === richTotal ? 'complete' : 'ready';
   else if (coreFilled + richFilled <= 2) tier = 'skeleton';
   else tier = 'partial';
 
-  return { score, tier, coreTotal, coreFilled, richTotal, richFilled, missing, broken, states };
+  return { score, tier, coreTotal, coreFilled, richTotal, richFilled, missing, broken, brokenCore, states };
 }
 
 function emptyTally() { return { complete: 0, ready: 0, partial: 0, skeleton: 0 }; }

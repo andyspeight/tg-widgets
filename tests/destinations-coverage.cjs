@@ -309,6 +309,59 @@ function t(name, fn) {
     ]);
   });
 
+  /* WHAT STOPS A RECORD BEING READY, 15 Sep 2026. Only a broken CORE field.
+     A broken rich field means some depth needs a correction, which is a
+     different question from whether the page can go out, and it already has
+     its own answers: no "complete", a lower fill rate, and a line on the To
+     correct tab. Five island airports were held off the list by a Parking note
+     of 37 characters that was the complete truth. */
+
+  t('a broken core field still stops a record being ready', () => {
+    const sp = spec('resort');
+    const core = sp.fields.find(f => f.tier === 'core' && f.kind === 'prose');
+    const fill = everyField('resort');
+    fill[core.label] = 'too short';          // prose under the floor reads as broken
+    const s2 = scoreRecord(rec('r1', 'resort', fill), sp);
+    assert.ok(s2.broken.length, 'the field should read as broken');
+    assert.strictEqual(s2.brokenCore, 1);
+    assert.notStrictEqual(s2.tier, 'ready');
+    assert.notStrictEqual(s2.tier, 'complete');
+  });
+
+  t('a broken rich field does not', () => {
+    const sp = spec('resort');
+    const rich = sp.fields.find(f => f.tier === 'rich' && f.kind === 'prose');
+    const fill = everyField('resort');
+    fill[rich.label] = 'too short';
+    const s2 = scoreRecord(rec('r1', 'resort', fill), sp);
+    assert.ok(s2.broken.length, 'the field should still read as broken');
+    assert.strictEqual(s2.brokenCore, 0);
+    assert.strictEqual(s2.tier, 'ready', 'the page can still go out');
+  });
+
+  t('but a broken rich field does keep a record out of complete', () => {
+    // Nothing is hidden. "Complete" means every field including the extras, and
+    // a field holding a stub is not one of them.
+    const sp = spec('resort');
+    const rich = sp.fields.find(f => f.tier === 'rich' && f.kind === 'prose');
+    const fill = everyField('resort');
+    fill[rich.label] = 'too short';
+    assert.strictEqual(scoreRecord(rec('r1', 'resort', fill), sp).tier, 'ready');
+    assert.strictEqual(scoreRecord(rec('r2', 'resort', everyField('resort')), sp).tier, 'complete');
+  });
+
+  t('a broken rich field is still counted and still reported', () => {
+    const sp = spec('resort');
+    const rich = sp.fields.find(f => f.tier === 'rich' && f.kind === 'prose');
+    const fill = everyField('resort');
+    fill[rich.label] = 'too short';
+    const out = aggregate([{ spec: sp, rows: [rec('r1', 'resort', fill)] }]);
+    const t0 = out.types.find(x => x.key === 'resort');
+    const stat = t0.fields.find(f => f.label === rich.label);
+    assert.strictEqual(stat.invalid, 1, 'it must still show on the To correct tab');
+    assert.ok(t0.fillRate < 100, 'and it must still count against the fill rate');
+  });
+
   /* THE FILL RATE, 15 Sep 2026. The tier count is all-or-nothing, so a table
      whose last gaps sit in fields with no fixer reports the same percentage
      however much real work lands. Airports read "16% ready" through a day of
