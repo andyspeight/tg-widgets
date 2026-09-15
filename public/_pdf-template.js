@@ -20,6 +20,7 @@
 // ----- Helpers -----
 
 import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
+import { listStays } from './_order-stays.js';
 
 const escapeHtml = (s) => {
   if (s == null) return '';
@@ -595,11 +596,17 @@ export function renderPdfHtml(order, opts = {}) {
   // Derive a darker primary for the gradient ramp
   const primaryDark = shiftHex(colors.primary, -18);
 
-  // First accommodation item is the v1 case. Packages bundle hotel + flights
-  // and expose item.accommodation directly (populated server-side by
-  // trimPackages), so widening the find here also picks them up.
-  const accomItem = (order.items || []).find((it) => it?.product === 'Accommodation' || it?.product === 'Packages') || (order.items || [])[0] || null;
-  const accom = accomItem?.accommodation || null;
+  // EVERY stay, not just the first. A booking can move the traveller between
+  // properties (six nights at one hotel, three at another), and until 15 Sep
+  // 2026 this was a .find() that kept the first and silently dropped the rest,
+  // while the total still covered them all. Selection lives in
+  // ./_order-stays.js so the page, the PDF and the email cannot drift again.
+  const stays = listStays(order);
+  // The primary stay is the one the cover page, the hero image and the running
+  // page header refer to. Everything that is genuinely per-stay loops instead.
+  const primary = stays[0] || null;
+  const accomItem = primary?.item || (order.items || []).find((it) => it?.product === 'Accommodation' || it?.product === 'Packages') || (order.items || [])[0] || null;
+  const accom = primary?.accom || accomItem?.accommodation || null;
 
   // Multi-product items. The PDF mirrors the widget: hotel on top, flights
   // and extras as their own sections below the trip overview. Packages also
@@ -648,14 +655,27 @@ export function renderPdfHtml(order, opts = {}) {
   const propertyName = accom?.name || '—';
   const city = accom?.location?.city || '';
   const country = accom?.location?.country || '';
-  const locationLine = [city, country].filter(Boolean).join(', ');
+  // The Destination row describes the WHOLE trip. A twin-centre booking that
+  // said only "Lindos" was describing the first hotel, not where the customer
+  // is going.
+  const locationLine = (() => {
+    const seen = [];
+    for (const st of stays) {
+      const c = st.accom?.location?.city;
+      if (c && seen.indexOf(c) === -1) seen.push(c);
+    }
+    if (seen.length === 0) return [city, country].filter(Boolean).join(', ');
+    const places = seen.length === 1 ? seen[0]
+      : seen.slice(0, -1).join(', ') + ' and ' + seen[seen.length - 1];
+    return [places, country].filter(Boolean).join(', ');
+  })();
 
-  const startDate = accomItem?.startDate || (accom?.units?.[0]?.checkin) || null;
-  const nights = computeNights(startDate, accomItem?.duration ?? accom?.units?.[0]?.nights);
-  const checkout = nights ? computeCheckout(startDate, nights) : null;
+  const startDate = primary?.checkin ?? (accomItem?.startDate || (accom?.units?.[0]?.checkin) || null);
+  const nights = primary ? primary.nights : computeNights(startDate, accomItem?.duration ?? accom?.units?.[0]?.nights);
+  const checkout = primary ? primary.checkout : (nights ? computeCheckout(startDate, nights) : null);
 
-  const unit = accom?.units?.[0] || null;
-  const rate = unit?.rates?.[0] || null;
+  const unit = primary?.unit ?? (accom?.units?.[0] || null);
+  const rate = primary?.rate ?? (unit?.rates?.[0] || null);
 
   // Total cost prefers the multi-product summary. For hotel-only orders the
   // summary is missing or single-product, so we fall back to the hotel price.
@@ -705,8 +725,30 @@ export function renderPdfHtml(order, opts = {}) {
   const hotelDesc = accom ? pickHotelDescription(accom.descriptions) : null;
   const amenities = (accom?.amenities || []).slice(0, 12);
 
+  /** The "Your Hotel" write-up for ONE property. */
+  const stayDetail = (st) => {
+    const a = st?.accom;
+    if (!a) return null;
+    const desc = pickHotelDescription(a.descriptions);
+    const amen = (a.amenities || []).slice(0, 12);
+    if (!desc && amen.length === 0) return null;
+    const starsN = Number.isFinite(a.rating) ? Math.max(0, Math.min(5, Math.round(a.rating))) : 0;
+    return {
+      name: a.name || '—',
+      city: a.location?.city || '',
+      sub: [
+        [a.location?.address1, a.location?.city, a.location?.state].filter(Boolean).join(', '),
+        [a.propertyType, starsN ? `${starsN}-star` : null].filter(Boolean).join(' · '),
+      ].filter(Boolean).join(' · '),
+      desc, amen,
+      nights: st.nights,
+      checkin: st.checkin,
+    };
+  };
+  const stayDetails = stays.map(stayDetail).filter(Boolean);
+
   // Decide whether to render page 2
-  const hasHotelDetail = !!(hotelDesc || amenities.length > 0);
+  const hasHotelDetail = stayDetails.length > 0 || !!(hotelDesc || amenities.length > 0);
 
   // Pre-compute small bits used inline
   const refBarBookedDate = formatDateShort(order.created);
@@ -723,28 +765,59 @@ export function renderPdfHtml(order, opts = {}) {
   //      text, e.g. "Check-out time: 10:00".
   // When neither is present we hide the time rather than print a made-up one.
   const TIME_RE = /\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?/;
-  let checkinTime = '';
-  let checkoutTime = '';
-  for (const info of (accom?.descriptions || [])) {
-    const title = info?.title || '';
-    const txt = info?.text || '';
-    // 1) Label/value: title identifies the field, text is just the time.
-    if (!checkinTime && /check[\s-]?in/i.test(title) && txt.trim().length <= 20) {
-      const m = txt.match(TIME_RE); if (m) checkinTime = m[0];
+  // Per PROPERTY, not per booking: on a two-hotel trip each has its own hours.
+  const stayTimes = (a) => {
+    let inT = '', outT = '';
+    for (const info of (a?.descriptions || [])) {
+      const title = info?.title || '';
+      const txt = info?.text || '';
+      // 1) Label/value: title identifies the field, text is just the time.
+      if (!inT && /check[\s-]?in/i.test(title) && txt.trim().length <= 20) {
+        const m = txt.match(TIME_RE); if (m) inT = m[0];
+      }
+      if (!outT && /check[\s-]?out/i.test(title) && txt.trim().length <= 20) {
+        const m = txt.match(TIME_RE); if (m) outT = m[0];
+      }
+      // 2) Prose: the time is embedded in the text beside the label.
+      if (!inT) {
+        const m = txt.match(/Check[\s-]?in\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+        if (m) inT = m[1];
+      }
+      if (!outT) {
+        const m = txt.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
+        if (m) outT = m[1];
+      }
     }
-    if (!checkoutTime && /check[\s-]?out/i.test(title) && txt.trim().length <= 20) {
-      const m = txt.match(TIME_RE); if (m) checkoutTime = m[0];
-    }
-    // 2) Prose: the time is embedded in the text beside the label.
-    if (!checkinTime) {
-      const m = txt.match(/Check[\s-]?in\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
-      if (m) checkinTime = m[1];
-    }
-    if (!checkoutTime) {
-      const m = txt.match(/Check[\s-]?out\s+(?:hour|time)?\s*[:\-]?\s*(\d{1,2}:\d{2}(?:\s*-\s*\d{1,2}:\d{2})?)/i);
-      if (m) checkoutTime = m[1];
-    }
-  }
+    return { inT, outT };
+  };
+  const { inT: checkinTime, outT: checkoutTime } = stayTimes(accom);
+
+  /**
+   * The rows that describe ONE stay. Used on its own for a single-property
+   * booking (identical markup to before) and once per property when the trip
+   * moves between them.
+   */
+  const stayRows = (st) => {
+    if (!st || !st.accom) return '';
+    const a = st.accom;
+    const starsN = Number.isFinite(a.rating) ? Math.max(0, Math.min(5, Math.round(a.rating))) : 0;
+    const typeLine = [a.propertyType, starsN ? `${starsN}-star` : null].filter(Boolean).join(' · ');
+    const addr = [a.location?.address1, a.location?.city, a.location?.state].filter(Boolean).join(', ');
+    const { inT, outT } = stayTimes(a);
+    const inFmt = st.checkin ? formatDate(st.checkin, { includeWeekday: true }) : '—';
+    const outFmt = st.checkout ? formatDate(st.checkout, { includeWeekday: true }) : '—';
+    const u = st.unit;
+    return `
+        <dt>Accommodation</dt>
+        <dd>${escapeHtml(a.name || '—')}${typeLine ? ` · ${escapeHtml(typeLine)}` : ''}</dd>
+        ${addr ? `<dt>Address</dt><dd>${escapeHtml(addr)}</dd>` : ''}
+        <dt>Check-in</dt>
+        <dd class="num">${escapeHtml(inFmt)}${inT ? ` &nbsp;·&nbsp; from ${escapeHtml(inT)}` : ''}</dd>
+        <dt>Check-out</dt>
+        <dd class="num">${escapeHtml(outFmt)}${outT ? ` &nbsp;·&nbsp; by ${escapeHtml(outT)}` : ''}</dd>
+        ${st.nights ? `<dt>Duration</dt><dd class="num">${st.nights} night${st.nights === 1 ? '' : 's'}</dd>` : ''}
+        ${u ? `<dt>Room type</dt><dd>${escapeHtml([(u.roomType && u.roomType !== 'Unknown') ? u.roomType : u.name, st.rate?.board].filter(Boolean).join(' · '))}</dd>` : ''}`;
+  };
 
   // Policies cards are hotel concepts: the cancellation summary reads the
   // hotel's refundability and the check-in/out card shows hotel hours. They
@@ -1077,6 +1150,26 @@ export function renderPdfHtml(order, opts = {}) {
   }
   .pdf-kv dt:last-of-type, .pdf-kv dd:last-of-type { border-bottom: none; }
 
+  /* A booking that moves the traveller between properties gets one labelled
+     group per stay. A single-stay booking never renders these. */
+  .pdf-stay + .pdf-stay { margin-top: 14px; }
+  .pdf-stay-head {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 9px 0 7px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 2px;
+  }
+  .pdf-stay-step {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--primary);
+    background: var(--bg-2);
+    border-radius: 999px;
+    padding: 3px 9px;
+    white-space: nowrap;
+  }
+  .pdf-stay-name { font-size: 14px; font-weight: 700; color: var(--text); }
+  .pdf-stay-when { font-size: 11.5px; color: var(--text-2); margin-left: auto; white-space: nowrap; }
+
   /* PAY */
   .pdf-pay {
     display: grid;
@@ -1375,20 +1468,19 @@ export function renderPdfHtml(order, opts = {}) {
       <div class="pdf-section-title">Your Trip</div>
       <dl class="pdf-kv">
         ${locationLine ? `<dt>Destination</dt><dd>${escapeHtml(locationLine)}</dd>` : ''}
-        ${accom ? `
-        <dt>Accommodation</dt>
-        <dd>${escapeHtml(propertyName)}${propertyTypeLine ? ` · ${escapeHtml(propertyTypeLine)}` : ''}</dd>
-        ${addressLine ? `<dt>Address</dt><dd>${escapeHtml(addressLine)}</dd>` : ''}
-        <dt>Check-in</dt>
-        <dd class="num">${escapeHtml(checkinFmt)}${checkinTime ? ` &nbsp;·&nbsp; from ${escapeHtml(checkinTime)}` : ''}</dd>
-        <dt>Check-out</dt>
-        <dd class="num">${escapeHtml(checkoutFmt)}${checkoutTime ? ` &nbsp;·&nbsp; by ${escapeHtml(checkoutTime)}` : ''}</dd>
-        ${nights ? `<dt>Duration</dt><dd class="num">${nights} night${nights === 1 ? '' : 's'}</dd>` : ''}
-        ${unit ? `<dt>Room type</dt><dd>${escapeHtml([(unit.roomType && unit.roomType !== 'Unknown') ? unit.roomType : unit.name, rate?.board].filter(Boolean).join(' · '))}</dd>` : ''}
-        ` : ''}
+        ${stays.length === 1 ? stayRows(stays[0]) : ''}
         ${leadGuestName ? `<dt>Lead guest</dt><dd>${escapeHtml(leadGuestName)}</dd>` : ''}
         ${specialRequests ? `<dt>Special requests</dt><dd style="font-style:italic; color:var(--text-2);">${escapeHtml(specialRequests)}</dd>` : ''}
       </dl>
+      ${stays.length > 1 ? stays.map((st, i) => `
+      <div class="pdf-stay">
+        <div class="pdf-stay-head">
+          <span class="pdf-stay-step">Stay ${i + 1} of ${stays.length}</span>
+          <span class="pdf-stay-name">${escapeHtml(st.name || 'Accommodation')}</span>
+          ${st.nights ? `<span class="pdf-stay-when num">${st.nights} night${st.nights === 1 ? '' : 's'}</span>` : ''}
+        </div>
+        <dl class="pdf-kv">${stayRows(st)}</dl>
+      </div>`).join('') : ''}
     </div>
 
     ${flightItems.length > 0 ? `
@@ -1654,15 +1746,22 @@ ${hasHotelDetail ? `
   <div class="pdf-body">
 
     <div class="pdf-section">
-      <div class="pdf-section-title">Your Hotel</div>
-      <h2 class="pdf-hotel-h1">${escapeHtml(propertyName)}${city ? `, ${escapeHtml(city)}` : ''}</h2>
-      <p class="pdf-hotel-sub">${escapeHtml([addressLine, propertyTypeLine].filter(Boolean).join(' · '))}</p>
-      ${hotelDesc ? `<p class="pdf-hotel-desc">${escapeHtml(hotelDesc)}</p>` : ''}
-
-      ${amenities.length > 0 ? `
-      <div class="pdf-amenities">
-        ${amenities.map((a) => `<div class="pdf-amenity">${escapeHtml(a)}</div>`).join('')}
-      </div>` : ''}
+      <div class="pdf-section-title">${stayDetails.length > 1 ? 'Your Hotels' : 'Your Hotel'}</div>
+      ${stayDetails.map((h, i) => `
+      <div class="pdf-stay">
+        ${stayDetails.length > 1 ? `
+        <div class="pdf-stay-head">
+          <span class="pdf-stay-step">Stay ${i + 1} of ${stayDetails.length}</span>
+          ${h.checkin ? `<span class="pdf-stay-when num">${escapeHtml(formatDateShort(h.checkin))}${h.nights ? ` · ${h.nights} night${h.nights === 1 ? '' : 's'}` : ''}</span>` : ''}
+        </div>` : ''}
+        <h2 class="pdf-hotel-h1">${escapeHtml(h.name)}${h.city ? `, ${escapeHtml(h.city)}` : ''}</h2>
+        ${h.sub ? `<p class="pdf-hotel-sub">${escapeHtml(h.sub)}</p>` : ''}
+        ${h.desc ? `<p class="pdf-hotel-desc">${escapeHtml(h.desc)}</p>` : ''}
+        ${h.amen.length > 0 ? `
+        <div class="pdf-amenities">
+          ${h.amen.map((a) => `<div class="pdf-amenity">${escapeHtml(a)}</div>`).join('')}
+        </div>` : ''}
+      </div>`).join('')}
     </div>
 
     <div class="pdf-section">

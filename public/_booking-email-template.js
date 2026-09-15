@@ -45,6 +45,7 @@
 // BlinkMacSystemFont keeps Chrome on Mac happy, Segoe UI is Windows, Roboto
 // is Android. Each is a clean professional UI font on its native platform.
 import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
+import { listStays } from './_order-stays.js';
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
@@ -254,7 +255,11 @@ export function renderBookingEmail(opts) {
   const logoUrl = brand?.logoUrl;
   const footerLine = brand?.footerLine;
 
-  const accItem = order?.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
+  // EVERY stay. A trip that moves between properties used to lose all but the
+  // first here, the same one-word fault as the PDF and the widget carried
+  // (ET121109, 15 Sep 2026). Selection is shared: ./_order-stays.js.
+  const stays = listStays(order);
+  const accItem = stays[0]?.item || order?.items?.find(i => i.product === 'Accommodation' || i.product === 'Packages');
   const flightItem = order?.items?.find(i => i.product === 'Flights' || i.product === 'Packages');
   const extraItem = order?.items?.find(i => i.product === 'AirportExtras');
   const transferItem = order?.items?.find(i => i.product === 'Transfers');
@@ -345,18 +350,36 @@ export function renderBookingEmail(opts) {
     summaryRows.push({ label: 'Destination', value: dest });
   }
 
-  if (hotelName) {
-    summaryRows.push({ label: 'Accommodation', value: hotelName });
-  }
+  // One Accommodation / Your stay pair per property, numbered when there is
+  // more than one so the reader can see the trip move.
+  if (stays.length > 1) {
+    stays.forEach((st, i) => {
+      const label = `Stay ${i + 1} of ${stays.length}`;
+      if (st.name) summaryRows.push({ label, value: st.name });
+      if (st.checkin) {
+        const inShort = formatShortDate(st.checkin);
+        const outShort = st.checkout ? formatShortDate(st.checkout) : '';
+        const nLabel = st.nights > 0 ? ` · ${st.nights} ${st.nights === 1 ? 'night' : 'nights'}` : '';
+        summaryRows.push({
+          label: 'Dates',
+          value: outShort ? `${inShort} → ${outShort}${nLabel}` : `${inShort}${nLabel}`,
+        });
+      }
+    });
+  } else {
+    if (hotelName) {
+      summaryRows.push({ label: 'Accommodation', value: hotelName });
+    }
 
-  if (checkin) {
-    const checkinShort = formatShortDate(checkin);
-    const checkoutShort = checkout ? formatShortDate(checkout) : '';
-    const nightsLabel = nights > 0 ? ` · ${nights} ${nights === 1 ? 'night' : 'nights'}` : '';
-    const value = checkoutShort
-      ? `${checkinShort} → ${checkoutShort}${nightsLabel}`
-      : `${checkinShort}${nightsLabel}`;
-    summaryRows.push({ label: 'Your stay', value });
+    if (checkin) {
+      const checkinShort = formatShortDate(checkin);
+      const checkoutShort = checkout ? formatShortDate(checkout) : '';
+      const nightsLabel = nights > 0 ? ` · ${nights} ${nights === 1 ? 'night' : 'nights'}` : '';
+      const value = checkoutShort
+        ? `${checkinShort} → ${checkoutShort}${nightsLabel}`
+        : `${checkinShort}${nightsLabel}`;
+      summaryRows.push({ label: 'Your stay', value });
+    }
   }
 
   if (flightItem?.flights?.routes?.length) {
