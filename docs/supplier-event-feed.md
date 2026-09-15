@@ -190,6 +190,46 @@ rather than the shared widgetRead one: a browsing UI with a typeahead is
 chattier than a widget boot, and responses are CDN-cached for an hour so in
 production most requests never reach the function.
 
+### What order a list comes back in (15 Sep 2026)
+
+Andy, on the event listers: *"When listing teams (for example, the Premier
+League), the teams should be in alphabetical order."* Then, when that shipped:
+*"The AtoZ have you done that for all sports, leagues etc."*
+
+Two separate questions, and it is worth keeping them apart:
+
+- **Which rows survive a limit** is decided by how busy each one is. A menu
+  asking for twenty-four popular clubs wants the twenty-four busiest.
+- **What order they are read in** is A to Z, because a visitor is looking for
+  their own club, not for the busiest one.
+
+So `?view=teams&category=football&limit=24` is the busiest twenty-four football
+clubs, listed A to Z. A whole competition is a closed set well inside the limit,
+so it is simply every club A to Z. An open directory with nothing narrowing it
+keeps its ranking, or a "popular clubs" menu across every team on earth opens
+with AB Argir. `?sort=name` and `?sort=events` force either, and the response
+says which it used.
+
+The first version of this sorted the pool BEFORE the cut, which answered both
+questions with the alphabet: a football-only Event Menu's Popular clubs came
+back as 1899 Hoffenheim, Aarhus on a single fixture and AC Omonia on none.
+Corrected the same day. `npm run test:events-team-order` guards it.
+
+A to Z itself is `byName`, eight lines carried by three runtimes that cannot
+import from one another: `api/events-feed.js`, `public/editor-events-kit.js` and
+`public/widget-eventmenu.js`, between `// >>> a to z` and `// <<< a to z`.
+`npm run test:events-az-drift` fails the moment they differ. It is
+accent-insensitive (Bayern München files under M), case-insensitive and
+number-aware (2. Bundesliga before 10th), and reads a name OR a label so clubs,
+grounds, artists, sports and leagues all sort with the same rule.
+
+Where it applies now: a competition's clubs, any directory narrowed to a sport
+or a competition, the Club Picker's grid, the Event Menu's leagues and its
+popular clubs, grounds and artists, every editor's sport dropdown and the
+editors' league picker. The one deliberate exception is the Event Menu's sport
+HEADINGS, which stay busiest first so a football menu opens on Football rather
+than on American Football.
+
 The snapshot drops anything the registries already hold and the API rehydrates
 it from the entity key on the way out. That is what gives every page one
 spelling per club: the feed writes "Arsenal" on one row and "Arsenal FC" on the

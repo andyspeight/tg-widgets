@@ -12,9 +12,15 @@
  * all: Ipswich, Leeds, Forest, Sunderland, Brentford.
  *
  * So a narrowed list goes A to Z and an open one keeps its ranking, and
- * ?sort=name / ?sort=events force either. A to Z orders the whole list before
- * the page limit trims it, so asking for it never hands back the busiest few
- * rearranged.
+ * ?sort=name / ?sort=events force either.
+ *
+ * TWO SEPARATE QUESTIONS, and the first version of this answered them with one
+ * line. WHICH rows survive the limit is decided by how busy each one is. What
+ * ORDER they are then read in is A to Z. Sorting the pool before the cut
+ * answered both with the alphabet, so the Event Menu's Popular clubs section on
+ * a football-only menu came back as the clubs nearest the front of the
+ * alphabet: 1899 Hoffenheim, Aarhus on one fixture, AC Omonia on none. That is
+ * what the "a narrowed page is the busiest, read A to Z" block below guards.
  *
  * Runs against the REAL snapshot in api/_data, so it is the clubs a visitor
  * actually sees.
@@ -77,11 +83,42 @@ console.log('An open directory keeps its ranking, or a popular-clubs menu breaks
 console.log('Either order can be asked for outright');
 {
   const az = await ask({ view: 'teams', limit: '5', sort: 'name' });
-  ok('?sort=name gives a TRUE A to Z, ordered before the limit trims it',
-    az.body.sort === 'name' && isAZ(az.body.items.map((t) => t.name)),
+  ok('?sort=name reads A to Z', az.body.sort === 'name' && isAZ(az.body.items.map((t) => t.name)),
     az.body.items.map((t) => t.name).join(', '));
   const ranked = await ask({ view: 'teams', competition: PL, limit: '5', sort: 'events' });
   ok('?sort=events overrides the narrowed default', ranked.body.sort === 'events', ranked.body.sort);
+}
+
+console.log('A narrowed PAGE is the busiest clubs, read A to Z');
+{
+  // This is the Event Menu's Popular clubs section on a football-only menu.
+  const page = await ask({ view: 'teams', category: 'football', limit: '24' });
+  const names = page.body.items.map((t) => t.name);
+  ok('it is ordered A to Z', page.body.sort === 'name' && isAZ(names), names.slice(0, 4).join(', '));
+  ok('it is a page of a much longer list', page.body.total > 500, String(page.body.total));
+
+  const full = await ask({ view: 'teams', category: 'football', limit: '500', sort: 'events' });
+  const busiest = full.body.items.slice(0, 24).map((t) => t.name).sort();
+  ok('and it holds the busiest 24 football clubs, not the first 24 alphabetically',
+    JSON.stringify(names.slice().sort()) === JSON.stringify(busiest),
+    'got: ' + names.slice(0, 4).join(', '));
+  ok('so no club with a single fixture is standing at the front',
+    page.body.items.every((t) => (t.events || 0) > 1), String(page.body.items[0].events));
+
+  // The case Andy asked about is a closed set, so it is untouched by the cut.
+  const pl = await ask({ view: 'teams', competition: PL, limit: '200' });
+  ok('a whole competition still lists every club A to Z',
+    pl.body.items.length === pl.body.total && isAZ(pl.body.items.map((t) => t.name)),
+    pl.body.items.length + ' of ' + pl.body.total);
+}
+
+console.log('A sport-narrowed grid of grounds reads A to Z too');
+{
+  const v = await ask({ view: 'venues', category: 'football', limit: '40', sort: 'name' });
+  const names = v.body.items.map((x) => x.name);
+  ok('the Club Picker grid is alphabetical', v.body.sort === 'name' && isAZ(names), names.slice(0, 3).join(', '));
+  ok('and every ground in it is a football ground',
+    v.body.items.every((x) => (x.categories || []).includes('football')), String(v.body.items.length));
 }
 
 console.log('Nothing else changed shape');

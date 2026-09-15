@@ -1311,6 +1311,25 @@
     return String(text || '').toLowerCase().indexOf(term) !== -1;
   }
 
+  /**
+   * A to Z by name, the way a reader expects it: accent-insensitive, so Bayern
+   * München files under M for München and not after Z, and case-insensitive, so
+   * "AFC Bournemouth" and "Athletic Club" sit together. Clubs, grounds and
+   * artists carry a name; sports and leagues carry a label, so both are read.
+   *
+   * Byte for byte the comparator in api/events-feed.js and the one in
+   * public/editor-events-kit.js, because a widget is a single script on a
+   * customer's site and cannot import. test/events-az-drift-smoke.mjs fails the
+   * moment the three differ.
+   */
+  // >>> a to z
+  function byName(a, b) {
+    var an = (a && (a.name || a.label)) || '';
+    var bn = (b && (b.name || b.label)) || '';
+    return String(an).localeCompare(String(bn), 'en', { sensitivity: 'base', numeric: true });
+  }
+  // <<< a to z
+
   TGEventMenuWidget.prototype._item = function (type, key, name, meta, count) {
     var href = this._href(type, key, name);
     var active = href
@@ -1340,7 +1359,7 @@
       it.categoryLabel = c.categoryLabel;
       it.country = c.country || 'Worldwide';
       return it;
-    });
+    }).sort(byName);
   };
 
   /** Competitions arranged under headings, or one flat list. */
@@ -1417,7 +1436,11 @@
       return true;
     })
       .map(function (s) {
-        var items = s.src.filter(function (x) {
+        // WHICH ones are shown is still popularity: these lists are the
+        // busiest twenty-four, either from the index or from a per-sport call.
+        // The ORDER they are read in is A to Z, because a visitor is looking
+        // for their own club, not for the busiest one.
+        var items = s.src.slice().sort(byName).filter(function (x) {
           if (term && !matches(term, x.name)) return false;
           // A football-only menu was listing the Arizona Diamondbacks, because
           // the sport restriction was applied to competitions and nothing else.

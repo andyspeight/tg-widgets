@@ -810,10 +810,23 @@
   TGClubPickerWidget.prototype._gridQuery = function () {
     var c = this.cfg;
     var view = c.gridOf === 'performer' ? 'performers' : c.gridOf === 'venue' ? 'venues' : 'teams';
-    var q = { view: view, limit: String(clampInt(c.maxEntities, 1, 200, 40)) };
+    // A to Z (15 Sep 2026). This grid is a list a visitor reads to find their
+    // own club or their own ground, so it is ordered by name. The feed still
+    // decides WHICH ones make the cut by how busy each is, so a grid of forty
+    // is the forty worth showing, listed the way someone looks them up.
+    var q = { view: view, limit: String(clampInt(c.maxEntities, 1, 200, 40)), sort: 'name' };
     // Only the team directory can be narrowed by competition; the others have
     // no competition to be narrowed by.
     if (c.gridOf === 'team' && c.competition) q.competition = c.competition;
+    // A sport narrows GROUNDS at the feed, not here. It used to be filtered in
+    // the browser, which quietly thinned the grid: asking for forty venues and
+    // keeping the football ones left about six.
+    //
+    // Artists are not narrowed at all. They carry no sport of their own (all
+    // 117 of them are entertainment), so the old browser-side filter matched a
+    // field that was never there and an artist grid with a sport chosen came
+    // back empty. Every artist now shows, which is the honest answer.
+    if (c.gridOf === 'venue' && c.category) q.category = c.category;
     return q;
   };
 
@@ -838,14 +851,6 @@
       .then(function (d) {
         if (mine !== self._gridReq) return;
         var items = (d && d.items) || [];
-        // A category filter on artists or venues is applied client-side: the
-        // directory endpoints do not take one, and the alternative is a second
-        // round trip for a filter most embeds will not use.
-        if (self.cfg.category && self.cfg.gridOf !== 'team') {
-          items = items.filter(function (x) {
-            return (x.categories || []).indexOf(self.cfg.category) !== -1;
-          });
-        }
         self.entities = items;
         self.gridState = items.length ? 'ready' : 'empty';
         self._render();
