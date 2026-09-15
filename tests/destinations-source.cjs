@@ -43,7 +43,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
 (async () => {
   const {
     agreedFields, siteHost, wikiKey, reconcileWikidata, localSiteFromWikitext, sameSite,
-    warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor, wikipediaIntro, placeHead,
+    warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor, wikipediaIntro, placeHead, usableArticleText,
     wikiTitle, mergeWikiAnswer, articleUrl,
   } = await load('_source.js');
 
@@ -782,6 +782,60 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
       { ...OA.LHR, city: 'Ferno' }, { ...WD.LHR, city: 'Milan' });
     assert.strictEqual(agreed.city, undefined);
     assert.match(why.city, /Ferno against Milan/);
+  });
+
+  console.log('\nHow much of an article is worth carrying');
+
+  // A miniature airport article in the shape Wikipedia's plain-text extract uses.
+  const WIKI_ARTICLE = [
+    'Someplace Airport is a public airport 13 miles north of the city.',
+    '',
+    '== History ==',
+    'Construction started in 1965. ' + 'The concourse was demolished in 2009 and the contractor laid asphalt. '.repeat(40),
+    '',
+    '== Ground transportation ==',
+    'The Route 1 bus connects the airport to downtown, with connections to the monorail.',
+    '',
+    '== Accidents and incidents ==',
+    'On 4 October 1971 a plane was hijacked and the aircraft was destroyed on landing.',
+    '',
+    '== External links ==',
+    'Resources for this airport: AirNav, SkyVector aeronautical chart, FAA delay information.',
+  ].join('\n');
+
+  t('the lead alone is not what comes back', () => {
+    // It asked for exintro=1 until 15 Sep 2026. Measured across the 333 airports
+    // with an article and no Overview, the median lead is 664 characters against
+    // a brief asking for 150 to 200 words of output.
+    const out = usableArticleText(WIKI_ARTICLE);
+    assert.ok(out.length > 200, 'the body is the point');
+    assert.match(out, /^Someplace Airport is a public airport/, 'the lead still comes first');
+  });
+  t('a section the brief asked for beats a long history', () => {
+    // Taking the article in its own order filled the whole allowance at
+    // Jacksonville with the demolition of Concourse B.
+    const out = usableArticleText(WIKI_ARTICLE, 600);
+    assert.match(out, /Route 1 bus/, 'ground transport is what a traveller needs');
+    assert.ok(out.indexOf('Route 1') < out.indexOf('Construction started') || out.indexOf('Construction started') === -1,
+      'history comes after, or not at all');
+  });
+  t('accidents and external links are not background about a place', () => {
+    const out = usableArticleText(WIKI_ARTICLE);
+    assert.doesNotMatch(out, /hijacked/, 'true, and the last thing to write an overview from');
+    assert.doesNotMatch(out, /SkyVector/, 'apparatus rather than content');
+  });
+  t('nothing in means nothing out', () => {
+    assert.strictEqual(usableArticleText(''), '');
+    assert.strictEqual(usableArticleText(null), '');
+  });
+  t('an article with no sections is still its lead', () => {
+    assert.strictEqual(usableArticleText('Just a lead and no headings at all.'),
+      'Just a lead and no headings at all.');
+  });
+  t('the allowance is never blown', () => {
+    const out = usableArticleText(WIKI_ARTICLE, 300);
+    assert.ok(out.length <= 301, 'got ' + out.length);
+    assert.match(out, /…$/, 'a trim says it trimmed');
   });
 
   await Promise.all(pending);

@@ -672,11 +672,101 @@ export function articleUrl(title) {
  * is a few hundred bytes rather than the several hundred kilobytes a full
  * article would cost.
  */
+/**
+ * Sections that are not background about the place.
+ *
+ * "Accidents and incidents" is the one that matters. It is factual, it is often
+ * the longest section on an airport article, and it is the last thing that
+ * should feed a paragraph a travel agent reads to a customer. The rest are
+ * apparatus rather than content, and the external links section in particular
+ * arrives as a run of chart and weather services that reads like prose to a
+ * machine and like nothing at all to a person.
+ */
+const SKIP_SECTION = /^\s*(references?|external links?|see also|further reading|notes|bibliography|gallery|citations|sources|accidents?(?: and incidents?)?|incidents?(?: and accidents?)?|in popular culture)\s*$/i;
+
+/** How much of an article is worth carrying. buildEvidence trims to 2,000. */
+const MAX_BACKGROUND = 2400;
+
+/**
+ * Which sections earn their place first.
+ *
+ * ORDER MATTERS MORE THAN LENGTH. Taking the article in its own order filled the
+ * whole allowance at Jacksonville with the History section, which runs to the
+ * demolition of Concourse B in 2009 and the contractor who laid the asphalt.
+ * True, sourced, and no use at all to somebody deciding where to land. The
+ * brief asks what the place is, who goes and why, and what it feels like, so
+ * the sections that answer that go in first and History takes what is left.
+ */
+const SECTION_RANK = [
+  [/^(facilities|terminals?|infrastructure|the airport|overview|description)/i, 1],
+  [/^(ground transport|transport|transportation|access|getting (there|here)|public transport)/i, 2],
+  [/^(statistics|passenger traffic|traffic|usage)/i, 3],
+  [/^(airlines? and destinations?|destinations?|airlines?|routes?)/i, 4],
+  [/^(operations?|services|amenities|lounges?|parking)/i, 5],
+  [/^history/i, 9],
+];
+const rankOf = (name) => {
+  for (const [re, n] of SECTION_RANK) if (re.test(name)) return n;
+  return 6;
+};
+
+/**
+ * The usable prose of an article: the lead, plus the sections that describe the
+ * place, minus the apparatus.
+ *
+ * WHY NOT JUST THE LEAD. This asked for exintro=1 until 15 Sep 2026 and the
+ * lead alone is not enough to write from. Measured across the 333 airports that
+ * have an article and no Overview, the median lead is 664 characters, about 110
+ * words, against a brief asking for 150 to 200 words of output. A writer given
+ * less evidence than the length of its answer can only pad or invent.
+ *
+ * The body is where the answer was the whole time. Jacksonville's lead is 262
+ * characters; its article is 13,203, and the part the lead leaves out is the
+ * part the brief asks for: the terminal layout, the Route 1 bus to downtown,
+ * 7.6 million passengers in 2024. Across a sample the body ran six to fifty
+ * times the lead.
+ *
+ * Pure. Exported for the test.
+ */
+export function usableArticleText(extract, max = MAX_BACKGROUND) {
+  const whole = String(extract || '');
+  if (!whole.trim()) return '';
+  // Plain-text extracts mark top-level sections as "== Heading ==" on their own
+  // line. The first chunk is the lead, which has no heading.
+  const parts = whole.split(/\n==[^=\n][^\n]*==\n/g);
+  const heads = whole.match(/\n==([^=\n][^\n]*)==\n/g) || [];
+  const lead = String(parts[0] || '').trim();
+  const sections = [];
+  for (let i = 0; i < heads.length; i++) {
+    const name = heads[i].replace(/^\n==|==\n$/g, '').trim();
+    if (SKIP_SECTION.test(name)) continue;
+    const body = String(parts[i + 1] || '')
+      // Sub-headings carry no content of their own and read as noise once the
+      // tables under them have been dropped by the plain-text conversion.
+      .replace(/===+[^\n]*===+/g, ' ')
+      .trim();
+    if (body.length < 40) continue;
+    sections.push({ rank: rankOf(name), at: i, text: name + '. ' + body });
+  }
+  sections.sort((a, b) => a.rank - b.rank || a.at - b.at);
+
+  // Fill the allowance a section at a time, so a long History cannot crowd out
+  // a short Ground transportation that the brief actually asked for.
+  const one = (t) => String(t).replace(/\s+/g, ' ').trim();
+  let text = one(lead);
+  for (const sec of sections) {
+    if (text.length >= max) break;
+    const next = (text ? text + ' ' : '') + one(sec.text);
+    text = next.length > max ? next.slice(0, max).replace(/\s+\S*$/, '') + '…' : next;
+  }
+  return text;
+}
+
 export async function wikipediaIntro(articleUrl, fetchImpl) {
   const title = wikiTitle(articleUrl);
   if (!title) return { ok: false, why: 'no Wikipedia article on this record' };
   const url = WIKIPEDIA_API + '?action=query&format=json&formatversion=2&redirects=1' +
-    '&prop=extracts&exintro=1&explaintext=1&origin=*&titles=' + encodeURIComponent(title);
+    '&prop=extracts&explaintext=1&origin=*&titles=' + encodeURIComponent(title);
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 15000);
   try {
@@ -684,7 +774,7 @@ export async function wikipediaIntro(articleUrl, fetchImpl) {
     if (!r || !r.ok) return { ok: false, why: 'Wikipedia answered ' + (r ? r.status : 'nothing') };
     const j = await r.json();
     const page = ((j && j.query && j.query.pages) || [])[0];
-    const text = String((page && page.extract) || '').replace(/\s+/g, ' ').trim();
+    const text = usableArticleText((page && page.extract) || '');
     if (!text) return { ok: false, why: 'the article has no opening section' };
     return { ok: true, text, source: articleUrl };
   } catch (err) {
