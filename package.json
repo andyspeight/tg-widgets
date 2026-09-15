@@ -120,6 +120,7 @@
     "test:event-book-button": "node test/event-book-button-smoke.mjs",
     "test:eventmenu-fixes": "node test/eventmenu-fixes-smoke.mjs",
     "test:eventmenu-results": "node test/eventmenu-results-smoke.mjs",
+    "test:events-team-order": "node test/events-team-order-smoke.mjs",
     "test:events-kit-drift": "node test/events-kit-drift-smoke.mjs",
     "test:family-host-width": "node test/family-host-width-smoke.mjs",
     "test:widget-actas-legacy": "node test/widget-actas-legacy-owner-smoke.mjs",

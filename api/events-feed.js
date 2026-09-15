@@ -400,6 +400,15 @@ function page(snap, rows, q, appId, opts = {}) {
   };
 }
 
+/**
+ * A to Z by name, the way a reader expects it: accent-insensitive, so Bayern
+ * München files under M for München and not after Z, and case-insensitive, so
+ * "AFC Bournemouth" and "Athletic Club" sit together.
+ */
+const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'en', {
+  sensitivity: 'base', numeric: true,
+});
+
 /** Case- and accent-insensitive contains, for the search boxes. */
 function matcher(term) {
   const needle = term.normalize('NFD').replace(/[\u0300-\u036F]/g, '').toLowerCase();
@@ -496,7 +505,7 @@ export default function handler(req, res) {
       const rows = windowRows(snap.byCompetition.get(slug) || [], str(q.from, 10), str(q.to, 10));
       const teams = snap.teams
         .filter((t) => t.competitions.includes(slug))
-        .sort((a, b) => (a.name < b.name ? -1 : 1));
+        .sort(byName);
       res.status(200).json({ meta, competition: comp, teams, ...page(snap, rows, q, appId, linkOpts) });
       return;
     }
@@ -570,8 +579,30 @@ export default function handler(req, res) {
       if (cats.length) {
         out = out.filter((x) => (x.categories || []).some((c) => cats.includes(c)));
       }
+      // ORDER (15 Sep 2026, Andy: "when listing teams, for example the Premier
+      // League, the teams should be in alphabetical order"). The snapshot is
+      // ranked by how many fixtures each side has, which is what makes an
+      // unfiltered "popular clubs" menu useful: A to Z across every team on
+      // earth opens with AB Argir. Narrowed to ONE competition it is a closed
+      // set of twenty-odd clubs, all of them shown, and ranking them by fixture
+      // count reads as no order at all. So a narrowed list goes A to Z and an
+      // open one keeps its ranking. ?sort=name or ?sort=events overrides either.
+      //
+      // A to Z means A to Z: the whole list is ordered BEFORE the page limit
+      // trims it, so asking for it never hands back the busiest few rearranged.
+      // A competition is a closed set well inside the limit, so nothing is lost
+      // there either way.
+      const sortAsked = str(q.sort, 10).toLowerCase();
+      const narrowed = (view === 'teams' && KEY_RE.test(compFilter)) || cats.length > 0;
+      const alphabetical = sortAsked === 'name' || (sortAsked !== 'events' && narrowed);
+      if (alphabetical) out = out.slice().sort(byName);
+
       const size = intIn(q.limit, 1, 500, 200);
-      res.status(200).json({ meta, total: out.length, limit: size, items: out.slice(0, size) });
+      res.status(200).json({
+        meta, total: out.length, limit: size,
+        sort: alphabetical ? 'name' : 'events',
+        items: out.slice(0, size),
+      });
       return;
     }
 
