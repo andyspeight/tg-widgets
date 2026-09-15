@@ -113,6 +113,31 @@ The same review added three LAYOUT shapes that do not move and so are not
 listed here: bento and featured grids on Cards and the Collection loop, and the
 gallery mosaic. See `docs/react-bits-review.md`.
 
+## Backdrops: an atmosphere behind a section with no photograph (15 Sep 2026)
+
+A section's **Backdrop** select, in the Motion group beside the animated
+gradient. Six, each CSS over gradients or an SVG mask in the section's own two
+colours (the gradient colours if set, otherwise the theme accent and brand, and
+white on the dark and brand bands), no canvas and no script:
+
+| Backdrop | What moves | Reading |
+|---|---|---|
+| Aurora | Two pools of light drifting across the top, on 26s and 37s | The Nordics |
+| Light rays | Soft shafts from above, turning five degrees each way over 48s | Sun through water or cloud |
+| Waves | Two rows of water along the foot, drifting past each other | The coast |
+| Drifting specks | Two layers of soft dots falling at different speeds | Snow for ski, stars for a desert night |
+| Map contours | Contour lines drifting a little over a minute | The map every travel site has |
+| Grain | Nothing: a two-colour wash under film grain | The editorial page |
+
+Rules that hold for all six: never emitted for a section with a background
+picture or film (the background recipes own that picture); still on the
+editing canvas (`data-backdrop-still`), the eye shows it moving; every
+animation inside the reduced-motion guard, so a visitor who asked for less
+gets the same atmosphere holding; only transform animates, on the layers, so
+nothing repaints the words. Six pictureless presets wear one (the dark CTA
+panel, the stats band, the newsletter, the one big quote, the reassurance
+strip, the statement) and the picker hints at it. `tests/backdrops.test.ts`.
+
 ---
 
 ## Two rules that hold across all of it

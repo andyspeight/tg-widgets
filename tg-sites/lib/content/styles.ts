@@ -600,6 +600,40 @@ export function normaliseRevealStyle(value: unknown): RevealStyle {
 }
 
 /**
+ * BACKDROPS (React Bits review, 15 Sep 2026): an atmosphere behind a section
+ * that has no photograph. A call to action, a stats band, a newsletter panel,
+ * a banner: exactly the sections with no picture, and until now a flat colour
+ * or one gradient. Each of these is CSS over gradients or an inline SVG mask,
+ * in the section's own two colours, no canvas and no script, and each stands
+ * still for anyone who asked for less motion (the same backdrop, holding).
+ *
+ * Every one has a travel reading, which is the rule for anything that moves:
+ * aurora is the Nordics, rays are sun through water or cloud, waves are the
+ * coast, drifting specks are snow for ski and stars for a desert night,
+ * contours are the map every travel site has, grain is the editorial page.
+ * The shader backgrounds in the library (silk, plasma, iridescence) are not
+ * here on purpose: the one WebGL slot a page has is the sea's.
+ */
+export const BACKDROP_CHOICES = [
+  { value: 'none', label: 'None' },
+  { value: 'aurora', label: 'Aurora' },
+  { value: 'rays', label: 'Light rays' },
+  { value: 'waves', label: 'Waves' },
+  { value: 'drift', label: 'Drifting specks' },
+  { value: 'contours', label: 'Map contours' },
+  { value: 'grain', label: 'Grain' },
+] as const;
+
+export type Backdrop = Exclude<(typeof BACKDROP_CHOICES)[number]['value'], 'none'>;
+
+/** A stored backdrop, or nothing for none and for anything off the list. */
+export function normaliseBackdrop(value: unknown): Backdrop | undefined {
+  return typeof value === 'string' && value !== 'none' && BACKDROP_CHOICES.some((choice) => choice.value === value)
+    ? (value as Backdrop)
+    : undefined;
+}
+
+/**
  * The named seas the cinematic recipe (A1) can wear, each a water body colour (deep and
  * shallow, mixed by the light in the shader), a horizon/sky-reflection colour the sea
  * dissolves into, and a sun angle in degrees. Tuned in a browser 31 Aug 2026 so each

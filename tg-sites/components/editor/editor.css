@@ -3499,6 +3499,11 @@ body[data-tg-dragging] .ed-drag-handle { pointer-events: none; }
 .ed-thumb--preset rect[data-tone='ground'] { fill: none; }
 .ed-thumb--preset[data-section='subtle'] rect[data-tone='ground'] { fill: var(--ed-sunken); }
 .ed-thumb--preset[data-section='dark'] rect[data-tone='ground'] { fill: var(--ed-primary); }
+/* The atmosphere hint on a preset that wears a backdrop: soft pools of the accent,
+   white on the two coloured bands where the accent would vanish. */
+.ed-thumb--preset [data-tone='backdrop'] { fill: var(--ed-accent); opacity: 0.22; }
+.ed-thumb--preset[data-section='dark'] [data-tone='backdrop'],
+.ed-thumb--preset[data-section='accent'] [data-tone='backdrop'] { fill: #ffffff; opacity: 0.18; }
 .ed-thumb--preset[data-section='accent'] rect[data-tone='ground'] {
   /* A wash, not the accent at full strength. Colour highlights, it does not
      shout: a thumbnail in flat teal drowns the shapes it is meant to show. */

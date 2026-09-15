@@ -116,7 +116,7 @@ export function LayoutThumb({ layout }: { layout: Layout }) {
  * front: the section's own background, any card panels, then the content.
  */
 export function PresetThumb({ preset }: { preset: SectionPreset }) {
-  const { tone, panels, bars, background } = presetThumb(preset);
+  const { tone, panels, bars, background, backdrop } = presetThumb(preset);
 
   /*
    * A clip id unique to this preset AND this bar, because every thumbnail on the
@@ -153,6 +153,19 @@ export function PresetThumb({ preset }: { preset: SectionPreset }) {
           height={68}
           preserveAspectRatio="xMidYMid slice"
         />
+      )}
+
+      {/*
+        The atmosphere hint, for a preset whose section wears a backdrop: two soft
+        pools of light across the top of the band, one shape for every backdrop.
+        At thumbnail size aurora and rays and waves are all "there is something
+        behind this", and that is the thing worth saying before a client picks it.
+      */}
+      {backdrop && (
+        <g data-tone="backdrop" data-backdrop={backdrop}>
+          <ellipse cx={28} cy={6} rx={36} ry={15} />
+          <ellipse cx={74} cy={2} rx={30} ry={12} />
+        </g>
       )}
 
       {panels.map((panel, index) => (

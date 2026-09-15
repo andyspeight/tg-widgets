@@ -130,6 +130,8 @@ export function buildPresetSection(preset: SectionPreset): Section {
     paddingY: preset.section?.paddingY ?? DEFAULT_SECTION_PADDING,
     minHeight: preset.section?.minHeight ?? 0,
     ...(preset.section?.alignY ? { alignY: preset.section.alignY } : {}),
+    // The atmosphere behind a pictureless section, when the preset wears one.
+    ...(preset.section?.backdrop ? { backdrop: preset.section.backdrop } : {}),
     // The scrim strength over a background. 60 is what it was fixed at.
     overlay: 60,
     box: { ...EMPTY_BOX },
@@ -283,6 +285,12 @@ export interface ThumbModel {
    * than a flat dark band.
    */
   background?: string;
+  /**
+   * The atmosphere the preset's section wears (aurora, rays, waves, drift,
+   * contours, grain), so the picker can hint at it: a section drawn as a flat
+   * band would preview as less than the section a client then adds.
+   */
+  backdrop?: Section['backdrop'];
 }
 
 /** How tall each block draws, and how many lines it becomes. */
@@ -550,6 +558,7 @@ export function presetThumb(preset: SectionPreset, gap = 0.05): ThumbModel {
     // The whole-section photograph, for the over-photo heroes. Only a hero's, so
     // a tinted text section never quietly grows a background picture.
     background: isHero ? preset.section?.backgroundQuery : undefined,
+    ...(preset.section?.backdrop ? { backdrop: preset.section.backdrop } : {}),
   };
 }
 

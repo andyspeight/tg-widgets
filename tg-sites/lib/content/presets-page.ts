@@ -2502,7 +2502,11 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'dark', paddingY: 80 },
+    // Aurora behind the dark panel: the first of the backdrops from the React
+    // Bits review (15 Sep 2026), so the pictureless call to action arrives
+    // dressed rather than as a flat navy band. The client swaps or removes it
+    // in the Motion group.
+    section: { tone: 'dark', paddingY: 80, backdrop: 'aurora' },
   },
 
   {
@@ -2562,7 +2566,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'subtle', width: 'narrow' },
+    section: { tone: 'subtle', width: 'narrow', backdrop: 'waves' },
   },
 
   {
@@ -2582,7 +2586,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { width: 'narrow' },
+    section: { width: 'narrow', backdrop: 'grain' },
   },
 
   /*
@@ -2832,7 +2836,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { width: 'narrow', paddingY: 80, tone: 'subtle' },
+    section: { width: 'narrow', paddingY: 80, tone: 'subtle', backdrop: 'drift' },
   },
 
   {
@@ -4035,7 +4039,7 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'accent', paddingY: 72 },
+    section: { tone: 'accent', paddingY: 72, backdrop: 'rays' },
   },
 
   /*
@@ -4664,6 +4668,6 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { tone: 'subtle', paddingY: 32 },
+    section: { tone: 'subtle', paddingY: 32, backdrop: 'contours' },
   },
 ];

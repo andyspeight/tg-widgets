@@ -48,6 +48,7 @@ import {
   type Tier,
 } from '../../lib/content/responsive';
 import {
+  BACKDROP_CHOICES,
   clearTextSizing,
   FONT_SIZES,
   FONT_SIZE_GROUPS,
@@ -56,6 +57,7 @@ import {
   LINE_HEIGHTS,
   MOTION_CHOICES,
   MOTION_INTENSITIES,
+  normaliseBackdrop,
   normaliseLetterSpacing,
   normaliseLineHeight,
   normaliseRevealStyle,
@@ -1882,6 +1884,31 @@ function SectionFields({
               />
             </div>
           )}
+        </div>
+        <div className="ed-field">
+          <label className="ed-label" htmlFor={`ed-backdrop-${index}`}>
+            Backdrop
+          </label>
+          <select
+            id={`ed-backdrop-${index}`}
+            className="ed-select"
+            value={normaliseBackdrop(section.backdrop) ?? 'none'}
+            onChange={(event) =>
+              set({ backdrop: normaliseBackdrop(event.target.value) }, `sec:${index}:backdrop`)
+            }
+          >
+            {BACKDROP_CHOICES.map((choice) => (
+              <option key={choice.value} value={choice.value}>
+                {choice.label}
+              </option>
+            ))}
+          </select>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            An atmosphere behind a section with no photograph: aurora, light rays, waves,
+            drifting specks, map contours or grain, in the gradient colours above or your
+            brand colours. It holds still here while you edit and for anyone who prefers
+            less motion; press the eye to see it move. A background picture hides it.
+          </p>
         </div>
         <div className="ed-field">
           <label className="ed-toggle">

@@ -36,6 +36,7 @@ import { escapeHtml } from './sanitise';
 import { hasInnerColumns } from './inner-columns';
 import {
   COLOUR_TOKENS,
+  normaliseBackdrop,
   normaliseLetterSpacing,
   normaliseLineHeight,
   normaliseRevealStyle,
@@ -1080,6 +1081,17 @@ export const SectionSchema = z.object({
   gradientFrom: z.unknown().transform(safeColour).optional(),
   /** The second gradient colour. Blank follows the theme brand. */
   gradientTo: z.unknown().transform(safeColour).optional(),
+  /**
+   * An atmosphere behind a section that has no photograph (React Bits review,
+   * 15 Sep 2026): aurora, light rays, waves, drifting specks, map contours or
+   * grain, drawn in the gradient colours above or the theme's accent and brand.
+   * Pure CSS in globals.css, still for anyone who prefers less motion and on the
+   * editing canvas, and never emitted for a section with a background picture
+   * or film, so the two can never animate one background. Normalised to the
+   * closed BACKDROP_CHOICES list; absent means none, so no stored section
+   * changes shape.
+   */
+  backdrop: z.unknown().transform(normaliseBackdrop).optional(),
   /**
    * Slide this section up under the section or the header above it, by this many
    * pixels, so the two overlap. The look every travel site opens with is the

@@ -36,7 +36,14 @@ the deck still dealing under reduced motion for the same reason, and a mosaic
 rhythm leaving holes. The lesson is the one `tools/preview-presets.mjs` was
 written for: a value that is right and draws wrong is only found by looking.
 
-Next: slices 2 to 5 in the review's order, Backdrops first. Elementor gap #2
+**Slice 2, Backdrops, shipped the same afternoon.** A `backdrop` on the section
+(aurora, light rays, waves, drifting specks, map contours, grain), CSS only, in
+the section's own colours, never with a photograph, still on the canvas and
+under reduced motion; six pictureless presets wear one. `tests/backdrops.test.ts`
+and a Chromium check of all six on all four tones. Full detail in
+`docs/motion-engine.md` under Backdrops.
+
+Next: slices 3 to 5 in the review's order, Words arriving first. Elementor gap #2
 (form actions) is parked behind them by Andy's choice on 15 Sep.
 
 ---

@@ -211,6 +211,13 @@ export interface SectionPreset {
      */
     backgroundQuery?: string;
     /**
+     * An atmosphere behind a section with no photograph (aurora, rays, waves,
+     * drifting specks, contours, grain; see BACKDROP_CHOICES in styles.ts).
+     * The pictureless presets wear one so a client sees the section dressed
+     * rather than as a flat colour, and swaps or removes it in the Motion group.
+     */
+    backdrop?: Section['backdrop'];
+    /**
      * A floor on the section's height, for the heroes that should feel like a
      * curtain rather than a strip. Without it every full-bleed photo hero was
      * exactly as tall as its words plus padding, which is the single cheapest

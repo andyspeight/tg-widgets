@@ -42,7 +42,8 @@ What we learn is a vocabulary, and five of its words are missing from ours:
    and shipped 15 Sep 2026**, see the note at the end of section 1.
 2. **Backdrops.** A section without a photograph is a flat colour or one gradient.
    Aurora, light rays, soft waves, drifting particles, contour lines and grain give a
-   call to action or a stats band an atmosphere without a picture.
+   call to action or a stats band an atmosphere without a picture. **Built and
+   shipped 15 Sep 2026**, see the note at the end of section 2.
 3. **Words arriving.** The one thing on a hero that never moves is the headline. Word
    by word, letter by letter, line by line, a word that takes turns, an outlined
    display style.
@@ -183,6 +184,16 @@ Acid Squares, Grid Scan have no travel reading. Silk, Iridescence, Plasma, Orb,
 Prism, Liquid Ether, Ferrofluid, Galaxy, Light Tunnel are shader canvases, and the
 one tier-2 slot a page has is the sea's (`docs/motion-engine.md`, the per-page cap).
 
+**Built 15 Sep 2026, the same day as the shapes.** A `backdrop` on the section
+(`BACKDROP_CHOICES` in `styles.ts`, the select in the editor's Motion group beside
+the animated gradient), six atmospheres in `globals.css` as one element with two
+pseudo-element layers, the colours from the section's gradient pair or the theme,
+white on the dark and brand bands. Never emitted for a section with a picture or a
+film; still on the canvas and under reduced motion. Six pictureless presets wear
+one and the picker hints at it. `tests/backdrops.test.ts`, and a Chromium check of
+all six on all four tones, moving, holding under reduced motion, and under the
+words.
+
 ### 3. Words arriving: the headline is the one thing that never moves
 
 React Bits: Split Text, Blur Text, Masked Heading, Text Type, Rotating Text, Text
@@ -302,7 +313,7 @@ vitest, next build) and each carrying its own tests, presets and docs update.
    and the loop gets the same two grid shapes. **SHIPPED 15 Sep 2026.**
 2. **Backdrops** (six, a section setting, the pictureless presets updated). The
    biggest lift per line of CSS in the whole review: every flat panel on every client
-   site gets an atmosphere.
+   site gets an atmosphere. **SHIPPED 15 Sep 2026.**
 3. **Words arriving** (heading arrive, turns and outlined; text scroll reveal). The
    heroes stop being still, and the rotating destination word is the one effect here
    that is more travel than it is web.

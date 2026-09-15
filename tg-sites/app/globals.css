@@ -399,6 +399,269 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
   100% { background-position: 0% 50%; }
 }
 
+/* ------------------------------------------------------------------ */
+/* Backdrops: an atmosphere behind a section with no photograph        */
+/* ------------------------------------------------------------------ */
+
+/*
+ * React Bits review, 15 Sep 2026. Its largest category is backgrounds, thirty
+ * of them shader canvases, and the read was that a section of ours with no
+ * picture (the call to action, the stats band, the newsletter, the banner) was
+ * a flat colour or one gradient. These are six atmospheres for exactly those
+ * sections, each with a travel reading (aurora for the Nordics, rays for sun
+ * through water, waves for the coast, specks for snow or stars, contours for
+ * the map, grain for the editorial page), each CSS over gradients or an inline
+ * SVG mask, no canvas and no script.
+ *
+ * THE COLOURS ARE THE SECTION'S OWN: the two gradient colours when the client
+ * set them, otherwise the theme's accent and brand, and on the two coloured
+ * bands (dark, brand) white and the accent instead, where the accent would
+ * vanish into itself. Everything is drawn at a low alpha over the section's
+ * tone, so the words keep the contrast the tone gave them.
+ *
+ * ONE ELEMENT, TWO PSEUDO-ELEMENTS, three layers. The element clips, and the
+ * layers that move are oversized so a drift never shows an edge. Only
+ * transform and opacity animate (the taste skill's rule), on the layers rather
+ * than on the section, so nothing here repaints the words.
+ *
+ * STILL WHERE IT SHOULD BE. Every animation sits inside no-preference, so a
+ * visitor who asked for less motion gets the same atmosphere holding, and the
+ * editing canvas marks the section data-backdrop-still so a client can select
+ * what is on it without the ground moving under the pointer. The render never
+ * emits a backdrop for a section with a background picture or film, so the
+ * background recipes and this can never animate one background.
+ */
+.tgs-section[data-backdrop] {
+  --tgs-bd-a: var(--tgs-sgrad-a, var(--tgs-accent));
+  --tgs-bd-b: var(--tgs-sgrad-b, var(--tgs-primary));
+}
+/*
+ * On the two coloured bands the light comes from the client's own light text
+ * colour rather than a hard white, so a warm dark band gets warm light (and so
+ * the branding suite, which refuses a hex fallback the theme never sets, stays
+ * satisfied for the right reason).
+ */
+.tgs-section[data-backdrop][data-tone='dark'] {
+  --tgs-bd-a: var(--tgs-sgrad-a, var(--tgs-text-invert));
+  --tgs-bd-b: var(--tgs-sgrad-b, var(--tgs-accent));
+}
+.tgs-section[data-backdrop][data-tone='accent'] {
+  --tgs-bd-a: var(--tgs-sgrad-a, var(--tgs-on-primary));
+  --tgs-bd-b: var(--tgs-sgrad-b, var(--tgs-accent));
+}
+.tgs-section__backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.tgs-section__backdrop::before,
+.tgs-section__backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- Aurora: light drifting across the top of the frame ---- */
+.tgs-section[data-backdrop='aurora'] .tgs-section__backdrop {
+  background:
+    radial-gradient(60% 55% at 20% 0%, color-mix(in srgb, var(--tgs-bd-a) 30%, transparent) 0%, transparent 70%),
+    radial-gradient(50% 45% at 78% 8%, color-mix(in srgb, var(--tgs-bd-b) 26%, transparent) 0%, transparent 70%);
+}
+.tgs-section[data-backdrop='aurora'] .tgs-section__backdrop::before {
+  inset: -25% -10%;
+  background: radial-gradient(42% 55% at 50% 12%, color-mix(in srgb, var(--tgs-bd-a) 28%, transparent) 0%, transparent 70%);
+}
+.tgs-section[data-backdrop='aurora'] .tgs-section__backdrop::after {
+  inset: -25% -10%;
+  background: radial-gradient(38% 48% at 32% 22%, color-mix(in srgb, var(--tgs-bd-b) 22%, transparent) 0%, transparent 70%);
+}
+
+/* ---- Light rays: soft shafts from above, turning slowly ---- */
+.tgs-section[data-backdrop='rays'] .tgs-section__backdrop::before {
+  inset: -60% -30%;
+  transform-origin: 50% 0%;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 0%,
+    transparent 0deg 7deg,
+    color-mix(in srgb, var(--tgs-bd-a) 13%, transparent) 7deg 10deg,
+    transparent 10deg 18deg,
+    color-mix(in srgb, var(--tgs-bd-a) 7%, transparent) 18deg 21deg,
+    transparent 21deg 30deg
+  );
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 90%);
+  mask-image: linear-gradient(180deg, #000 30%, transparent 90%);
+}
+.tgs-section[data-backdrop='rays'] .tgs-section__backdrop::after {
+  background: radial-gradient(55% 40% at 50% 0%, color-mix(in srgb, var(--tgs-bd-a) 22%, transparent) 0%, transparent 70%);
+}
+
+/*
+ * ---- Waves: two rows of water along the foot, drifting past each other ----
+ *
+ * A wave is an SVG mask over a plain colour rather than a picture, so it is
+ * drawn in the section's own colour and stays a mask at any size. The tile is
+ * one wavelength and each layer is wider than the section by a whole number
+ * of tiles, so the loop lands on a seam that is not there.
+ */
+.tgs-section[data-backdrop='waves'] .tgs-section__backdrop::before,
+.tgs-section[data-backdrop='waves'] .tgs-section__backdrop::after {
+  inset: auto auto 0 0;
+  height: 46%;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 80' preserveAspectRatio='none'%3E%3Cpath d='M0 40C60 8 100 8 160 40S260 72 320 40V80H0Z' fill='%23000'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 80' preserveAspectRatio='none'%3E%3Cpath d='M0 40C60 8 100 8 160 40S260 72 320 40V80H0Z' fill='%23000'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+  -webkit-mask-position: 0 100%;
+  mask-position: 0 100%;
+}
+.tgs-section[data-backdrop='waves'] .tgs-section__backdrop::before {
+  width: calc(100% + 640px);
+  background: color-mix(in srgb, var(--tgs-bd-a) 14%, transparent);
+  -webkit-mask-size: 320px 100%;
+  mask-size: 320px 100%;
+}
+.tgs-section[data-backdrop='waves'] .tgs-section__backdrop::after {
+  width: calc(100% + 440px);
+  height: 30%;
+  background: color-mix(in srgb, var(--tgs-bd-b) 14%, transparent);
+  -webkit-mask-size: 220px 100%;
+  mask-size: 220px 100%;
+}
+
+/*
+ * ---- Drifting specks: snow on a ski page, stars on a desert one ----
+ *
+ * Two tiles of soft dots at different sizes and speeds, each falling by exactly
+ * its own tile height per loop so the loop is seamless. The layers reach above
+ * the section by one tile so the fall starts off screen.
+ */
+.tgs-section[data-backdrop='drift'] .tgs-section__backdrop::before,
+.tgs-section[data-backdrop='drift'] .tgs-section__backdrop::after {
+  background-repeat: repeat;
+}
+.tgs-section[data-backdrop='drift'] .tgs-section__backdrop::before {
+  inset: -300px 0 0 0;
+  background-image:
+    radial-gradient(circle at 14px 22px, color-mix(in srgb, var(--tgs-bd-a) 60%, transparent) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 92px 74px, color-mix(in srgb, var(--tgs-bd-a) 45%, transparent) 0 1.3px, transparent 2.2px),
+    radial-gradient(circle at 168px 128px, color-mix(in srgb, var(--tgs-bd-b) 55%, transparent) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 236px 36px, color-mix(in srgb, var(--tgs-bd-a) 50%, transparent) 0 1.4px, transparent 2.3px),
+    radial-gradient(circle at 262px 214px, color-mix(in srgb, var(--tgs-bd-b) 45%, transparent) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 58px 258px, color-mix(in srgb, var(--tgs-bd-a) 55%, transparent) 0 1.7px, transparent 2.7px),
+    radial-gradient(circle at 196px 286px, color-mix(in srgb, var(--tgs-bd-a) 40%, transparent) 0 1.1px, transparent 1.9px);
+  background-size: 300px 300px;
+}
+.tgs-section[data-backdrop='drift'] .tgs-section__backdrop::after {
+  inset: -260px 0 0 0;
+  background-image:
+    radial-gradient(circle at 40px 50px, color-mix(in srgb, var(--tgs-bd-b) 40%, transparent) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 130px 12px, color-mix(in srgb, var(--tgs-bd-a) 38%, transparent) 0 0.9px, transparent 1.7px),
+    radial-gradient(circle at 210px 96px, color-mix(in srgb, var(--tgs-bd-a) 42%, transparent) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 24px 170px, color-mix(in srgb, var(--tgs-bd-b) 36%, transparent) 0 0.9px, transparent 1.6px),
+    radial-gradient(circle at 150px 222px, color-mix(in srgb, var(--tgs-bd-a) 40%, transparent) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 236px 190px, color-mix(in srgb, var(--tgs-bd-b) 34%, transparent) 0 0.8px, transparent 1.5px);
+  background-size: 260px 260px;
+}
+
+/* ---- Map contours: the lines of the map every travel site has ---- */
+.tgs-section[data-backdrop='contours'] .tgs-section__backdrop::before {
+  inset: -15%;
+  background:
+    repeating-radial-gradient(ellipse 55% 42% at 28% 62%, transparent 0 26px, color-mix(in srgb, var(--tgs-bd-a) 13%, transparent) 26px 27.5px),
+    repeating-radial-gradient(ellipse 48% 60% at 78% 30%, transparent 0 32px, color-mix(in srgb, var(--tgs-bd-b) 10%, transparent) 32px 33.5px);
+  -webkit-mask-image: radial-gradient(75% 75% at 50% 50%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(75% 75% at 50% 50%, #000 35%, transparent 100%);
+}
+
+/*
+ * ---- Grain: a soft two-colour wash under film grain, holding still ----
+ *
+ * The one backdrop that never moves; the grain IS the atmosphere. Multiplied
+ * onto a light section and screened onto a dark one, so it reads as texture on
+ * both rather than as a grey haze.
+ */
+.tgs-section[data-backdrop='grain'] .tgs-section__backdrop {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tgs-bd-a) 18%, transparent) 0%,
+    transparent 55%,
+    color-mix(in srgb, var(--tgs-bd-b) 16%, transparent) 100%
+  );
+}
+.tgs-section[data-backdrop='grain'] .tgs-section__backdrop::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+}
+.tgs-section[data-backdrop='grain'][data-tone='dark'] .tgs-section__backdrop::before,
+.tgs-section[data-backdrop='grain'][data-tone='accent'] .tgs-section__backdrop::before {
+  opacity: 0.12;
+  mix-blend-mode: screen;
+}
+
+/*
+ * THE MOVEMENT, all of it behind the guard and none of it on the editing
+ * canvas. Periods no multiple of one another where two layers share a
+ * backdrop, so they never fall into step.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-backdrop='aurora']:not([data-backdrop-still]) .tgs-section__backdrop::before {
+    animation: tgs-bd-aurora-a 26s ease-in-out infinite alternate;
+  }
+  .tgs-section[data-backdrop='aurora']:not([data-backdrop-still]) .tgs-section__backdrop::after {
+    animation: tgs-bd-aurora-b 37s ease-in-out infinite alternate;
+  }
+  .tgs-section[data-backdrop='rays']:not([data-backdrop-still]) .tgs-section__backdrop::before {
+    animation: tgs-bd-rays 48s ease-in-out infinite alternate;
+  }
+  .tgs-section[data-backdrop='waves']:not([data-backdrop-still]) .tgs-section__backdrop::before {
+    animation: tgs-bd-waves-a 22s linear infinite;
+  }
+  .tgs-section[data-backdrop='waves']:not([data-backdrop-still]) .tgs-section__backdrop::after {
+    animation: tgs-bd-waves-b 31s linear infinite reverse;
+  }
+  .tgs-section[data-backdrop='drift']:not([data-backdrop-still]) .tgs-section__backdrop::before {
+    animation: tgs-bd-drift-a 28s linear infinite;
+  }
+  .tgs-section[data-backdrop='drift']:not([data-backdrop-still]) .tgs-section__backdrop::after {
+    animation: tgs-bd-drift-b 41s linear infinite;
+  }
+  .tgs-section[data-backdrop='contours']:not([data-backdrop-still]) .tgs-section__backdrop::before {
+    animation: tgs-bd-contours 60s ease-in-out infinite alternate;
+  }
+}
+@keyframes tgs-bd-aurora-a {
+  from { transform: translate3d(-6%, 0, 0) scale(1); }
+  to { transform: translate3d(8%, 4%, 0) scale(1.12); }
+}
+@keyframes tgs-bd-aurora-b {
+  from { transform: translate3d(6%, 2%, 0) scale(1.08); }
+  to { transform: translate3d(-8%, -2%, 0) scale(0.96); }
+}
+@keyframes tgs-bd-rays {
+  from { transform: rotate(-5deg); }
+  to { transform: rotate(5deg); }
+}
+@keyframes tgs-bd-waves-a {
+  to { transform: translate3d(-640px, 0, 0); }
+}
+@keyframes tgs-bd-waves-b {
+  to { transform: translate3d(-440px, 0, 0); }
+}
+@keyframes tgs-bd-drift-a {
+  to { transform: translate3d(0, 300px, 0); }
+}
+@keyframes tgs-bd-drift-b {
+  to { transform: translate3d(0, 260px, 0); }
+}
+@keyframes tgs-bd-contours {
+  from { transform: translate3d(-2%, -1%, 0); }
+  to { transform: translate3d(2%, 1.5%, 0); }
+}
+
 /*
  * Vertical space is a number now, not one of six names, so a section can be
  * dragged taller. It rides on a custom property for the same reason column

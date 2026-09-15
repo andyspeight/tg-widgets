@@ -425,6 +425,16 @@ export function SectionRenderer({
     ...bgExtra,
   ].slice(0, 8);
   const bgShow = !video && bgImages.length > 1;
+  /*
+   * THE BACKDROP IS FOR A SECTION WITH NO PHOTOGRAPH (React Bits review, 15 Sep
+   * 2026). With a picture or a film behind the section it is not emitted at all,
+   * rather than drawn over the photograph: the background recipes move that
+   * picture, and two things animating one background is the bug the motion
+   * model resolves everywhere else. Still on the editing canvas, the way the
+   * postcard deck is, so a client sees the atmosphere and can still select what
+   * is on it; the eye (Preview) and the published page run it.
+   */
+  const backdrop = !video && bgImages.length === 0 ? section.backdrop : undefined;
 
   /*
    * THE SECTION'S MOTION RECIPE, and the one rule that keeps it from fighting what
@@ -508,6 +518,8 @@ export function SectionRenderer({
       {...(anchor ? { id: anchor } : {})}
       data-tone={section.tone}
       data-gradient={section.gradient ? '' : undefined}
+      data-backdrop={backdrop}
+      data-backdrop-still={backdrop && editable ? '' : undefined}
       data-width={section.width}
       /*
        * The reveal is OFF while editing and on for the published page and the
@@ -791,6 +803,13 @@ export function SectionRenderer({
           ) : null}
         </video>
       )}
+
+      {/*
+        The atmosphere, as one element with two pseudo-elements for its layers,
+        under the content the way the background picture is. Decorative, so hidden
+        from a reader; the stylesheet keys everything off data-backdrop above.
+      */}
+      {backdrop && <div className="tgs-section__backdrop" aria-hidden="true" />}
 
       {(bgImages.length > 0 || video) && <div className="tgs-section__scrim" aria-hidden="true" />}
 
