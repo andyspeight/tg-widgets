@@ -20,6 +20,7 @@
  * Run: node test/events-az-drift-smoke.mjs   (npm run test:events-az-drift)
  */
 import { readFileSync } from 'node:fs';
+import { JSDOM } from 'jsdom';
 
 const R = (p) => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 let passed = 0, failed = 0;
@@ -117,6 +118,57 @@ console.log('The lists that read A to Z say so');
   ok('and lets the feed narrow grounds to a sport', /q\.category = c\.category;/.test(picker));
   ok('the browser-side sport filter that emptied the artist grid is gone',
     !/indexOf\(self\.cfg\.category\) !== -1/.test(picker));
+}
+
+console.log('The Event Menu\'s own headings read A to Z');
+{
+  // 15 Sep 2026, Andy: "yes change the sport headings to alphabetical too".
+  // Sports were listed busiest first. Mounted for real, because the order a
+  // visitor sees is built at render time out of the competitions, not read off
+  // the index.
+  const INDEX = {
+    categories: [{ label: 'Football', slug: 'football', events: 5879 },
+      { label: 'Rugby', slug: 'rugby', events: 99 }],
+    competitions: [
+      { slug: 'epl', label: 'Premier League', country: 'England', category: 'football', categoryLabel: 'Football', events: 3000 },
+      { slug: 'laliga', label: 'La Liga', country: 'Spain', category: 'football', categoryLabel: 'Football', events: 2879 },
+      { slug: 'nhl', label: 'NHL', country: 'USA', category: 'ice-hockey', categoryLabel: 'Ice Hockey', events: 818 },
+      { slug: 'six', label: 'Six Nations', country: '', category: 'rugby', categoryLabel: 'Rugby', events: 15 },
+      { slug: 'con', label: 'Concerts', country: '', category: 'entertainment', categoryLabel: 'Entertainment', events: 982 },
+      { slug: 'odd', label: 'Odds and ends', country: '', category: 'unclassified', categoryLabel: 'Unclassified', events: 9 },
+    ],
+  };
+  const dom = new JSDOM('<!doctype html><html><body></body></html>',
+    { runScripts: 'dangerously', pretendToBeVisual: true, url: 'https://client.test/tickets' });
+  const { window } = dom;
+  window.requestAnimationFrame = (cb) => setTimeout(() => cb(0), 0);
+  window.fetch = async (u) => (/[?&]view=/.test(String(u))
+    ? { ok: true, status: 200, json: async () => ({ items: [], events: [], total: 0 }) }
+    : { ok: true, status: 200, json: async () => INDEX });
+  const tag = window.document.createElement('script');
+  tag.textContent = FILES['public/widget-eventmenu.js'];
+  window.document.body.appendChild(tag);
+
+  const el = window.document.createElement('div');
+  window.document.body.appendChild(el);
+  const w = new window.TGEventMenuWidget(el, { appId: '250', linkPattern: '', groupBy: 'category',
+    sections: ['competitions'], openFirstGroup: true, startWith: 'none' });
+  await new Promise((r) => setTimeout(r, 60));
+
+  const headings = w._groups().map((g) => g.label);
+  ok('the sports read A to Z', headings.join(' | ') === 'Entertainment | Football | Ice Hockey | Rugby | Unclassified',
+    headings.join(' | '));
+  ok('the catch-all is last, not filed under U',
+    headings[headings.length - 1] === 'Unclassified');
+  // The real snapshot's proportions: football 5,879 events, entertainment
+  // 1,108 in one big concerts listing. Biggest counts EVENTS, not rows, or a
+  // sport with one busy league loses to a sport with two quiet ones.
+  ok('and the busiest sport is still the one that opens, not the first alphabetically',
+    Object.keys(w.openGroups || {}).join(',') === 'football', Object.keys(w.openGroups || {}).join(','));
+  ok('the leagues inside a heading read A to Z too',
+    w._groups()[1].items.map((x) => x.name).join(' | ') === 'La Liga | Premier League');
+  ok('nothing ranks the headings by fixture count any more',
+    !/rank\[slugify\(cat\.label\)/.test(FILES['public/widget-eventmenu.js']));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

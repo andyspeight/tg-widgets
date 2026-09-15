@@ -223,12 +223,17 @@ accent-insensitive (Bayern München files under M), case-insensitive and
 number-aware (2. Bundesliga before 10th), and reads a name OR a label so clubs,
 grounds, artists, sports and leagues all sort with the same rule.
 
-Where it applies now: a competition's clubs, any directory narrowed to a sport
-or a competition, the Club Picker's grid, the Event Menu's leagues and its
-popular clubs, grounds and artists, every editor's sport dropdown and the
-editors' league picker. The one deliberate exception is the Event Menu's sport
-HEADINGS, which stay busiest first so a football menu opens on Football rather
-than on American Football.
+Where it applies: a competition's clubs, any directory narrowed to a sport or a
+competition, the Club Picker's grid, the Event Menu's leagues, its popular
+clubs, grounds and artists, and its sport and country HEADINGS, every editor's
+sport dropdown and the editors' league picker. Catch-all headings (Worldwide,
+Other, Unclassified) go last rather than being filed under their letter,
+because nobody looks for them by letter.
+
+Headings were the one exception for a few hours, ranked busiest first so a
+menu opened on Football. Andy, same day: *"yes change the sport headings to
+alphabetical too"*. Which group is OPEN is decided separately, by size, so a
+football client's menu still opens on Football and not on American Football.
 
 The snapshot drops anything the registries already hold and the API rehydrates
 it from the entity key on the way out. That is what gives every page one
