@@ -101,9 +101,9 @@ export function BlockRenderer({
   const body = (() => {
     switch (block.type) {
       case 'heading':
-        return <HeadingBlock props={props} editingHost={editingHost} />;
+        return <HeadingBlock props={props} editingHost={editingHost} editing={editable} />;
       case 'text':
-        return <TextBlock props={props} editingHost={editingHost} />;
+        return <TextBlock props={props} editingHost={editingHost} editing={editable} />;
       case 'quote':
         return <QuoteBlock props={props} editingHost={editingHost} />;
       case 'list':

@@ -46,7 +46,8 @@ What we learn is a vocabulary, and five of its words are missing from ours:
    shipped 15 Sep 2026**, see the note at the end of section 2.
 3. **Words arriving.** The one thing on a hero that never moves is the headline. Word
    by word, letter by letter, line by line, a word that takes turns, an outlined
-   display style.
+   display style. **Built and shipped 15 Sep 2026**, with the pointer effects Andy
+   asked for the same day; see the note at the end of section 3.
 4. **Under the pointer.** Spotlight, tilt and glare on cards; a sheen and a magnetic
    pull on buttons. Our hover vocabulary is lift, zoom and tint.
 5. **Menus.** A pill that marks the current page, and a full-screen staggered menu
@@ -233,6 +234,25 @@ Decrypted, Scrambled, Glitch, ASCII, Fuzzy, Falling, Split Flap, Warp, Particle,
 Depth, Fold and Echo Text have no travel reading. Circular Text and Curved Loop are
 badge shapes rather than headings; a maybe for a "since 1987" roundel, later.
 
+**Built 15 Sep 2026.** What shipped differs from the plan above in two honest
+places. *Line by line* went: a true line mask needs the script to measure lines,
+so the mask became *word by word, rising out of a line*, each word out of its own
+mask, which reads the same and costs nothing. And Andy asked the same day for
+"some mouse interaction when the pointer goes over a word or a sentence when it is
+an H1 or large text", so the heading also gained **Under the pointer**: the word
+lifts and takes the accent, a frame finds the word and the rest fall back (True
+Focus), or the words near the pointer swell (Variable Proximity, size and colour
+rather than weight, since a client's face may not be variable). Mouse only. What
+shipped: `lib/content/words.ts` (the split, on the server, over sanitised markup,
+tags untouched), the Heading's *The words arrive*, *Words that take turns*, *Under
+the pointer* and *Outlined letters*, the Text block's *Word by word as you scroll*,
+`setUpArrive` and `setUpProximity` in `tg-motion.js`, three presets, and
+`tests/words.test.ts`. Checked in Chromium through the real renderer with the
+script: the words arrive once seen and stand without the script and under reduced
+motion, the turning word turns, all three pointer effects answer the mouse, an
+arrived word still lifts (the fill-mode trap, caught), the statement reads on the
+scroll timeline, and a phone binds none of it.
+
 ### 4. Under the pointer: cards and buttons
 
 React Bits: Spotlight Card, Tilted Card, Glare Hover, Border Glow, Star Border,
@@ -316,7 +336,8 @@ vitest, next build) and each carrying its own tests, presets and docs update.
    site gets an atmosphere. **SHIPPED 15 Sep 2026.**
 3. **Words arriving** (heading arrive, turns and outlined; text scroll reveal). The
    heroes stop being still, and the rotating destination word is the one effect here
-   that is more travel than it is web.
+   that is more travel than it is web. **SHIPPED 15 Sep 2026**, with the heading's
+   pointer effects brought forward from slice 4.
 4. **Under the pointer** (spotlight, tilt, glare; button sheen, magnetic, trace).
    Finish, not structure, so it comes after the three that change what a page IS.
 5. **Menus** (pill and underline sweep; full-screen and cards behind the burger).

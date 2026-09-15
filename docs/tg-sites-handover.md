@@ -43,8 +43,21 @@ under reduced motion; six pictureless presets wear one. `tests/backdrops.test.ts
 and a Chromium check of all six on all four tones. Full detail in
 `docs/motion-engine.md` under Backdrops.
 
-Next: slices 3 to 5 in the review's order, Words arriving first. Elementor gap #2
-(form actions) is parked behind them by Andy's choice on 15 Sep.
+**Slice 3, Words, shipped the same evening.** `lib/content/words.ts` splits a
+heading's sanitised markup into word (or letter) spans on the server. The
+Heading gains *The words arrive* (four ways), *Words that take turns* (the
+`{{turn}}` marker and a list), *Under the pointer* (lift, focus frame, swell;
+Andy's ask that day) and *Outlined letters*; Text gains *Word by word as you
+scroll*. `tg-motion.js` 1.2.0 carries `setUpArrive` and `setUpProximity`, and
+`needsMotionScript` now walks the blocks. Not with the animated gradient
+(background-clip: text would paint moving words clear). Three presets dressed
+(`hero-big-title`, new `hero-turning-word`, `text-statement`).
+`tests/words.test.ts`, and a Chromium check with the script, without it, under
+reduced motion and on a phone. Detail in `docs/motion-engine.md` under Words.
+
+Next: slice 4 Under the pointer for CARDS and BUTTONS (spotlight, tilt, glare;
+sheen, magnetic, trace), then slice 5 Menus. Elementor gap #2 (form actions) is
+parked behind them by Andy's choice on 15 Sep.
 
 ---
 

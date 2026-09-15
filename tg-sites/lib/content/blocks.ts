@@ -341,11 +341,39 @@ export const BLOCKS: readonly BlockDefinition[] = [
      * off. Only the block default, so it reaches a heading a client adds, not the
      * headings already stored in a page.
      */
-    defaults: { html: 'A new heading', level: 'h2', style: 'h2', align: 'left', shadow: 'none', fluid: true },
+    defaults: {
+      html: 'A new heading',
+      level: 'h2',
+      style: 'h2',
+      align: 'left',
+      shadow: 'none',
+      fluid: true,
+      arrive: 'none',
+      hover: 'none',
+      turns: '',
+      outlined: false,
+    },
     summarise: (props) =>
       firstWords(stripTags(asString(props.html)), 6) || asString(props.text) || 'Heading',
     fields: [
       { kind: 'richtext', key: 'html', label: 'Text' },
+      {
+        /*
+         * WORDS THAT TAKE TURNS (React Bits review, 15 Sep 2026, Rotating Text).
+         * "Holidays to Greece", where Greece gives way to Italy, then Portugal.
+         * For a travel headline this is the strongest text effect in the
+         * library, because the words are destinations. Typed here one per line;
+         * placed where {{turn}} sits in the text above, or after it when there
+         * is no marker. Keyframes, no script, the same device the slideshow uses,
+         * and still on the canvas so the sentence can be edited.
+         */
+        kind: 'textarea',
+        key: 'turns',
+        label: 'Words that take turns',
+        rows: 3,
+        max: 240,
+        help: 'One per line, up to six: Greece, Italy, Portugal. Type {{turn}} in the text where they should go, or leave it out and they follow the heading. It holds on the first word for anyone who prefers less motion.',
+      },
       {
         kind: 'colour',
         key: 'textColour',
@@ -400,6 +428,67 @@ export const BLOCKS: readonly BlockDefinition[] = [
         help: 'A shadow behind the heading, so it stays readable over a picture.',
       },
       {
+        /*
+         * HOW THE WORDS ARRIVE (React Bits review, 15 Sep 2026: Split Text, Blur
+         * Text, Masked Heading). A section's reveal moves the whole block; this
+         * moves the words, one after another, the first time the heading scrolls
+         * into view. The render wraps each word (or letter) in a span, the
+         * stylesheet staggers them, and public/tg-motion.js marks the heading
+         * when it is seen. The content never depends on the script: the words
+         * are only hidden once the script has confirmed it can bring them back,
+         * the same promise the reveal fallback keeps. Nothing happens on the
+         * editing canvas, and nothing for anyone who prefers less motion.
+         */
+        kind: 'select',
+        key: 'arrive',
+        label: 'The words arrive',
+        group: 'effects',
+        options: [
+          { value: 'none', label: 'All at once' },
+          { value: 'words', label: 'Word by word' },
+          { value: 'words-blur', label: 'Word by word, from a blur' },
+          { value: 'words-mask', label: 'Word by word, rising out of a line' },
+          { value: 'letters', label: 'Letter by letter' },
+        ],
+        help: 'On the live site, the first time the heading comes into view. Press the eye to see it.',
+      },
+      {
+        /*
+         * UNDER THE POINTER (Andy, 15 Sep 2026: "some mouse interaction when the
+         * pointer goes over a word or a sentence when it is an H1 or large
+         * text"). Three from the library: the word under the pointer lifts and
+         * takes the accent (Glare and Spotlight, at word size), a frame finds the
+         * word under the pointer and the rest fall back (True Focus), and the
+         * words near the pointer swell as it passes (Variable Proximity, without
+         * the variable font it needs, so size and colour rather than weight).
+         * Mouse only: a phone has no pointer to be near, so it pays nothing.
+         */
+        kind: 'select',
+        key: 'hover',
+        label: 'Under the pointer',
+        group: 'effects',
+        options: [
+          { value: 'none', label: 'Nothing' },
+          { value: 'lift', label: 'The word lifts and takes the accent' },
+          { value: 'focus', label: 'A frame finds the word, the rest fall back' },
+          { value: 'proximity', label: 'Words near the pointer swell' },
+        ],
+        help: 'Best on a large heading. Mouse only, and held still for anyone who prefers less motion.',
+      },
+      {
+        /*
+         * OUTLINED (Stroke Text). A display-size outlined word over a photograph
+         * is a whole editorial register the heading could not reach. The stroke
+         * is drawn in the heading's own colour with the fill made clear, so the
+         * theme's colour still decides what it looks like.
+         */
+        kind: 'toggle',
+        key: 'outlined',
+        label: 'Outlined letters',
+        group: 'effects',
+        help: 'Draws the letters as an outline in the heading colour with nothing inside. Best at the largest sizes.',
+      },
+      {
         kind: 'toggle',
         key: 'gradient',
         label: 'Animated gradient',
@@ -433,10 +522,31 @@ export const BLOCKS: readonly BlockDefinition[] = [
       align: 'left',
       size: 'm',
       shadow: 'none',
+      arrive: 'none',
     },
     summarise: (props) => firstWords(stripTags(asString(props.html)), 6) || 'Text',
     fields: [
       { kind: 'richtext', key: 'html', label: 'Content' },
+      {
+        /*
+         * WORD BY WORD AS YOU SCROLL (React Bits review, 15 Sep 2026, Scroll
+         * Reveal). The words of a statement go from faint to solid as the reader
+         * moves down, so a paragraph reads itself at the reader's pace. Driven by
+         * the page scroll on a view timeline, pure CSS, and only where the
+         * browser has one (Chromium and Safari 26); everywhere else the words
+         * are simply solid, which is the finished paragraph. For the statement
+         * presets, and any paragraph set large.
+         */
+        kind: 'select',
+        key: 'arrive',
+        label: 'The words arrive',
+        group: 'effects',
+        options: [
+          { value: 'none', label: 'All at once' },
+          { value: 'scroll', label: 'Word by word as you scroll' },
+        ],
+        help: 'Words go from faint to solid as a visitor scrolls down to them. Best on a large statement. Press the eye to see it.',
+      },
       {
         kind: 'select',
         key: 'size',

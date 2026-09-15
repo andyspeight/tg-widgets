@@ -9029,3 +9029,212 @@ select.tgs-form__control option { color: initial; }
 /* The worked example the editor canvas shows, because there is no address to
    build a real trail from while a page is being designed. */
 .tgs-crumbs--block[data-sample='true'] { opacity: 0.75; }
+
+/* ------------------------------------------------------------------ */
+/* Words: arriving, taking turns, under the pointer, outlined          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * React Bits review, 15 Sep 2026, slice 3. lib/content/words.ts wraps each word
+ * of a heading (or each letter, or the words of a statement) in its own span,
+ * counted with --i, and these rules do the rest. Four things, one structure:
+ *
+ *   .tgs-w   a word, inline-block so it can move; .tgs-wi its inner, which is
+ *            what moves when the outer clips (the rise out of a line)
+ *   .tgs-l   a letter, in the letter-by-letter arrival
+ *   .tgs-turn  the turning word: its words stacked in one inline grid cell
+ *
+ * THE WORDS ARE HIDDEN ONLY ONCE THE SCRIPT HAS PROMISED TO SHOW THEM.
+ * public/tg-motion.js marks a heading data-arrive-fb when it has an observer to
+ * watch it with, and data-seen when it comes into view. No script, no observer,
+ * reduced motion: the words stand as they always did. Until seen the animation is
+ * paused at its first frame, the hidden one; seen, it runs, each word a step
+ * behind the last, the step capped so a long heading never trails its section.
+ * The fill is BACKWARDS, not both: once a word has arrived its natural style
+ * takes over, so the pointer effects below still move it.
+ *
+ * The custom properties here are deliberately not --tgs- ones: they are
+ * counters and distances, and the block catalogue reads --tgs- as tokens.
+ */
+.tgs-w,
+.tgs-l,
+.tgs-wi { display: inline-block; }
+
+/* ---- Arriving ---- */
+@media (prefers-reduced-motion: no-preference) {
+  [data-arrive][data-arrive-fb] .tgs-w {
+    animation: tgs-arrive-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards paused;
+    animation-delay: calc(min(var(--i, 0), 24) * 60ms);
+  }
+  [data-arrive='words-blur'][data-arrive-fb] .tgs-w { animation-name: tgs-arrive-blur; }
+  /*
+   * Rising out of a line: the outer word clips, the inner one rises. The clip box
+   * is padded below and pulled back by the same amount, or a tight display face
+   * loses its descenders (lesson 2 in the motion catalogue, paid for already).
+   */
+  [data-arrive='words-mask'][data-arrive-fb] .tgs-w {
+    animation: none;
+    overflow: hidden;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+  [data-arrive='words-mask'][data-arrive-fb] .tgs-wi {
+    animation: tgs-arrive-mask 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards paused;
+    animation-delay: calc(min(var(--i, 0), 24) * 70ms);
+  }
+  [data-arrive='letters'][data-arrive-fb] .tgs-w { animation: none; }
+  [data-arrive='letters'][data-arrive-fb] .tgs-l {
+    animation: tgs-arrive-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards paused;
+    animation-delay: calc(min(var(--i, 0), 60) * 35ms);
+  }
+  [data-arrive][data-arrive-fb][data-seen] .tgs-w,
+  [data-arrive][data-arrive-fb][data-seen] .tgs-wi,
+  [data-arrive][data-arrive-fb][data-seen] .tgs-l { animation-play-state: running; }
+}
+@keyframes tgs-arrive-rise {
+  from { opacity: 0; transform: translateY(0.5em); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tgs-arrive-blur {
+  from { opacity: 0; filter: blur(8px); transform: translateY(0.2em); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+@keyframes tgs-arrive-mask {
+  from { transform: translateY(110%); }
+  to { transform: none; }
+}
+
+/*
+ * ---- A statement, word by word as you scroll ----
+ *
+ * Every word gets its own slice of the BLOCK's view timeline: the first words
+ * turn solid as the block enters, the last as it has nearly arrived, so the
+ * paragraph reads itself at the reader's pace. --p is the word's place in the
+ * block, 0 to 1, from the count the render put on the block as --n. Only where
+ * the browser has a view timeline (Chromium, Safari 26); elsewhere the words are
+ * simply solid, the finished paragraph, and the base rule never hides them.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .tgs-text[data-arrive='scroll'] {
+      view-timeline-name: --words;
+      view-timeline-axis: block;
+    }
+    .tgs-text[data-arrive='scroll'] .tgs-w {
+      --p: calc(var(--i, 0) / max(var(--n, 1), 1));
+      animation: tgs-arrive-solid linear both;
+      animation-timeline: --words;
+      animation-range: entry calc(5% + var(--p) * 55%) entry calc(30% + var(--p) * 55%);
+    }
+  }
+}
+@keyframes tgs-arrive-solid {
+  from { opacity: 0.18; }
+  to { opacity: 1; }
+}
+
+/*
+ * ---- The turning word ----
+ *
+ * "Holidays to Greece", where Greece gives way to Italy, then Portugal. The words
+ * share one inline grid cell, so the heading is as wide as its longest word and
+ * never jumps; each word rises in, holds, and lifts out on its share of a cycle
+ * of 2.6 seconds a word, on keyframes per count the way the slideshow does it.
+ * The first word is the one a reader without motion gets, and the one the
+ * editing canvas shows (data-turn-still), so the sentence can always be read.
+ */
+.tgs-turn { display: inline-grid; vertical-align: baseline; }
+.tgs-turn__word {
+  grid-area: 1 / 1;
+  width: 100%;
+  /* Start, not inherit: the cell is as wide as the longest word, and a short
+     word centred in it left a hole in the middle of a centred sentence
+     ("Holidays to    Italy", seen in the browser check). Against the start the
+     sentence reads on, and the slack sits after the word, where a line's own
+     ragged edge already is. */
+  text-align: start;
+  opacity: 0;
+}
+.tgs-turn__word:first-child { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-heading:not([data-turn-still]) .tgs-turn__word {
+    animation: tgs-turn-2 calc(var(--n, 2) * 2.6s) ease-in-out infinite both;
+    animation-delay: calc(var(--i, 0) * 2.6s);
+  }
+  .tgs-heading:not([data-turn-still]) .tgs-turn[data-count='3'] .tgs-turn__word { animation-name: tgs-turn-3; }
+  .tgs-heading:not([data-turn-still]) .tgs-turn[data-count='4'] .tgs-turn__word { animation-name: tgs-turn-4; }
+  .tgs-heading:not([data-turn-still]) .tgs-turn[data-count='5'] .tgs-turn__word { animation-name: tgs-turn-5; }
+  .tgs-heading:not([data-turn-still]) .tgs-turn[data-count='6'] .tgs-turn__word { animation-name: tgs-turn-6; }
+}
+@keyframes tgs-turn-2 {
+  0% { opacity: 0; transform: translateY(0.4em); }
+  5%, 43% { opacity: 1; transform: none; }
+  50%, 100% { opacity: 0; transform: translateY(-0.4em); }
+}
+@keyframes tgs-turn-3 {
+  0% { opacity: 0; transform: translateY(0.4em); }
+  3.333%, 28.667% { opacity: 1; transform: none; }
+  33.333%, 100% { opacity: 0; transform: translateY(-0.4em); }
+}
+@keyframes tgs-turn-4 {
+  0% { opacity: 0; transform: translateY(0.4em); }
+  2.5%, 21.5% { opacity: 1; transform: none; }
+  25%, 100% { opacity: 0; transform: translateY(-0.4em); }
+}
+@keyframes tgs-turn-5 {
+  0% { opacity: 0; transform: translateY(0.4em); }
+  2%, 17.2% { opacity: 1; transform: none; }
+  20%, 100% { opacity: 0; transform: translateY(-0.4em); }
+}
+@keyframes tgs-turn-6 {
+  0% { opacity: 0; transform: translateY(0.4em); }
+  1.667%, 14.333% { opacity: 1; transform: none; }
+  16.667%, 100% { opacity: 0; transform: translateY(-0.4em); }
+}
+
+/*
+ * ---- Under the pointer ----
+ *
+ * Andy, 15 Sep 2026: some mouse interaction when the pointer goes over a word
+ * in a large heading. Three, all mouse only, behind (hover: hover) and
+ * (pointer: fine) so a phone never carries a rule it cannot use, and behind the
+ * reduced-motion guard like the section's own hover effects: the word under the
+ * pointer lifts and takes the accent; a frame finds the word and the rest fall
+ * back (the library's True Focus); the words near the pointer swell, from the
+ * --near the script writes on each (Variable Proximity, without the variable
+ * font it wants, so size and colour do the work rather than weight).
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tgs-heading[data-hover] .tgs-w {
+    transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.28s ease, opacity 0.28s ease;
+  }
+  .tgs-heading[data-hover='lift'] .tgs-w:hover {
+    transform: translateY(-0.12em);
+    color: var(--tgs-accent);
+  }
+  .tgs-heading[data-hover='focus']:hover .tgs-w { opacity: 0.42; }
+  .tgs-heading[data-hover='focus'] .tgs-w:hover {
+    opacity: 1;
+    outline: 2px solid var(--tgs-accent);
+    outline-offset: 0.1em;
+    border-radius: 0.15em;
+  }
+  .tgs-heading[data-hover='proximity'] .tgs-w {
+    transition: transform 0.12s linear, color 0.12s linear;
+    transform: translateY(calc(var(--near, 0) * -0.14em)) scale(calc(1 + var(--near, 0) * 0.1));
+    color: color-mix(in srgb, var(--tgs-accent) calc(var(--near, 0) * 100%), currentColor);
+  }
+}
+
+/*
+ * ---- Outlined ----
+ *
+ * The letters drawn as a line in the heading's own colour with nothing inside.
+ * text-fill-color rather than color, so currentColor (and so the stroke) keeps
+ * the heading colour the theme or the client gave it.
+ */
+.tgs-heading[data-outlined] {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.035em currentColor;
+  paint-order: stroke fill;
+}

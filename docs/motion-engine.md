@@ -113,6 +113,53 @@ The same review added three LAYOUT shapes that do not move and so are not
 listed here: bento and featured grids on Cards and the Collection loop, and the
 gallery mosaic. See `docs/react-bits-review.md`.
 
+## Words: arriving, taking turns, under the pointer (15 Sep 2026)
+
+The third slice of the React Bits review, on the **Heading** block's Effects
+group and one setting on **Text**. `lib/content/words.ts` wraps each word (or
+letter) of the sanitised markup in its own span on the server; the stylesheet
+and `public/tg-motion.js` do the rest.
+
+**The words arrive** (Heading): *All at once* | *Word by word* | *Word by word,
+from a blur* | *Word by word, rising out of a line* | *Letter by letter*. The
+first time the heading scrolls into view, each piece a step behind the last.
+Time-based CSS, so it plays on every browser; the script (`setUpArrive`, an
+IntersectionObserver) only says WHEN. The content never depends on it: words are
+hidden only once the script has marked the heading (`data-arrive-fb`), the same
+promise the reveal fallback keeps, so no script means the words simply stand.
+Past 120 letters a heading arrives by word. A page with an arriving heading
+pulls `tg-motion.js` (`needsMotionScript` now walks the blocks).
+
+**Words that take turns** (Heading): a list of words, one per line, that take
+turns where `{{turn}}` sits in the text (or after it). "Holidays to Greece",
+then Italy, then Portugal, 2.6 seconds a word, on keyframes per count like the
+slideshow, no script. The words share one inline grid cell so the heading never
+jumps. Still on the canvas and under reduced motion, on the first word.
+
+**Under the pointer** (Heading; Andy's ask, 15 Sep): *The word lifts and takes
+the accent* | *A frame finds the word, the rest fall back* | *Words near the
+pointer swell*. Mouse only, behind `(hover: hover) and (pointer: fine)`, and
+behind the reduced-motion guard like the section hover effects. The swell is the
+one that needs the script (`setUpProximity` writes `--near`, 0 to 1, on each
+word, rAF-throttled, measured once per entry); the other two are CSS.
+
+**Outlined letters** (Heading): a stroke in the heading colour with a clear
+fill, through `-webkit-text-fill-color` so `currentColor` keeps the theme's
+colour. Still.
+
+**Word by word as you scroll** (Text): the words of a statement go from faint to
+solid as the reader scrolls to it, each word its own slice of the block's view
+timeline. Chromium and Safari 26; elsewhere the words are simply solid.
+
+**Not with the animated gradient.** That paints the gradient through the
+heading's own glyphs, and a word that moves is composited outside that clip, so
+it would paint clear. A gradient heading keeps its words whole and its turning
+word still. The render enforces it; nothing goes blank.
+
+Three presets use them: `hero-big-title` (letters, and the swell),
+`hero-turning-word` (new: the turning destination), `text-statement` (the
+scroll reveal). `tests/words.test.ts`.
+
 ## Backdrops: an atmosphere behind a section with no photograph (15 Sep 2026)
 
 A section's **Backdrop** select, in the Motion group beside the animated

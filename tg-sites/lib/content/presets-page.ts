@@ -999,7 +999,15 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
     rows: [
       {
         widths: [1],
-        columns: [[{ type: 'heading', props: { html: 'This is a title', level: 'h2', style: 'h1' } }]],
+        columns: [[
+          {
+            type: 'heading',
+            // The loud title arrives letter by letter and swells under the
+            // pointer (React Bits review, 15 Sep 2026): the one hero in the
+            // library whose whole design is its type, so the type is what moves.
+            props: { html: 'This is a title', level: 'h2', style: 'h1', arrive: 'letters', hover: 'proximity' },
+          },
+        ]],
       },
       {
         widths: [1],
@@ -1007,6 +1015,58 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
       },
     ],
     section: { paddingY: 72 },
+  },
+
+  {
+    /*
+     * The turning word (React Bits review, 15 Sep 2026, Rotating Text): the
+     * destination in the title changes every few seconds. For a travel headline
+     * this is the strongest text effect in the library, because the words are
+     * places. The marker in the text is where they go; the client edits the list.
+     */
+    id: 'hero-turning-word',
+    category: 'hero',
+    label: 'A title with a word that takes turns',
+    description: 'Holidays to Greece, then Italy, then Portugal: the destination in the title changes every few seconds.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'heading',
+              props: {
+                html: 'Holidays to {{turn}}',
+                level: 'h2',
+                style: 'h1',
+                turns: 'Greece\nItaly\nPortugal\nCroatia',
+                arrive: 'words',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line on how you choose the places you send people, then the button.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [
+                  { label: 'Find a holiday', href: '', variant: 'primary' },
+                  { label: 'Talk to us', href: '', variant: 'ghost' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+    section: { paddingY: 96 },
   },
 
   {
@@ -1537,6 +1597,9 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
                   '<p>This is the text area for this paragraph. Make it the sentence you '
                   + 'would say first if you only had one.</p>',
                 size: 'l',
+                // The statement reads itself at the reader's pace (React Bits
+                // review, 15 Sep 2026, Scroll Reveal): words solid as they scroll to it.
+                arrive: 'scroll',
                 ...CENTRED,
               },
             },

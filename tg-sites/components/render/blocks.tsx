@@ -13,6 +13,7 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import { escapeHtml, safeUrl, sanitiseHtml } from '../../lib/content/sanitise';
+import { LETTERS_CAP, parseTurns, plainText, splitWords, withTurns } from '../../lib/content/words';
 import { fluidiseInlineSizes } from '../../lib/content/fluid-text';
 import { burgerMode, hasBurger, showsRow } from '../../lib/content/burger';
 import { copyrightLine } from '../../lib/content/copyright';
@@ -150,10 +151,17 @@ const LEGACY_SIZE_TO_STYLE = { xl: 'h1', l: 'h2', m: 'h3', s: 'h4' } as const;
 export function HeadingBlock({
   props,
   editingHost = false,
+  editing = false,
 }: {
   props: Props;
   /** See TextBlock. A heading is typed in place too, it just holds no markup. */
   editingHost?: boolean;
+  /**
+   * True on the editor canvas. The words are not split there (nothing arrives
+   * and nothing answers the pointer while somebody is building the page), and
+   * a turning word holds on its first word so the sentence can be read.
+   */
+  editing?: boolean;
 }): ReactElement {
   // The TAG. Still h2 to h4 only: the page title owns the single h1, and a
   // client must not be able to make a second one or skip a level.
@@ -230,12 +238,45 @@ export function HeadingBlock({
     );
   }
 
+  /*
+   * THE WORDS (React Bits review, 15 Sep 2026, slice 3). How they arrive, what
+   * they do under the pointer, whether one of them takes turns, and whether the
+   * letters are outlined. See lib/content/words.ts for the split itself.
+   *
+   * NOT WITH THE ANIMATED GRADIENT. That paints the heading's gradient through
+   * its own glyphs (background-clip: text), and a word that moves is composited
+   * on its own, outside that clip, so it would paint clear. A gradient heading
+   * keeps its words whole and its turning word still; the two effects are each
+   * other's off switch rather than a heading that goes blank.
+   */
+  const arrive = oneOf(props, 'arrive', ['none', 'words', 'words-blur', 'words-mask', 'letters'] as const, 'none');
+  const hover = oneOf(props, 'hover', ['none', 'lift', 'focus', 'proximity'] as const, 'none');
+  const outlined = bool(props, 'outlined', false);
+  const gradient = bool(props, 'gradient', false);
+  const turns = parseTurns(props.turns);
+  const wordsOn = !editing && !gradient && (arrive !== 'none' || hover !== 'none');
+  const words = plainText(html || 'Heading');
+  // A wall of letters is a wall of spans: past the cap a heading arrives by word.
+  const mode = arrive === 'letters' && words.length <= LETTERS_CAP ? 'letters' : 'words';
+  const arriving = !wordsOn || arrive === 'none' ? undefined : arrive === 'letters' && mode !== 'letters' ? 'words' : arrive;
+  let body = wordsOn ? splitWords(html || 'Heading', mode).html : html || 'Heading';
+  body = withTurns(body, turns);
+  // Letters are announced one by one by some readers; the plain words go on the
+  // heading itself and the split copy is hidden from them.
+  if (arriving === 'letters') body = `<span aria-hidden="true">${body}</span>`;
+  const turning = turns.length >= 2;
+
   return (
     <Tag
       className="tgs-heading"
       data-style={style}
       data-shadow={shadow === 'none' ? undefined : shadow}
-      dangerouslySetInnerHTML={{ __html: html || 'Heading' }}
+      data-arrive={arriving}
+      data-hover={wordsOn && hover !== 'none' ? hover : undefined}
+      data-outlined={outlined ? '' : undefined}
+      data-turn-still={turning && (editing || gradient) ? '' : undefined}
+      aria-label={arriving === 'letters' ? words : undefined}
+      dangerouslySetInnerHTML={{ __html: body }}
     />
   );
 }
@@ -243,8 +284,11 @@ export function HeadingBlock({
 export function TextBlock({
   props,
   editingHost = false,
+  editing = false,
 }: {
   props: Props;
+  /** True on the editor canvas, where the words are never split (see HeadingBlock). */
+  editing?: boolean;
   /**
    * Render the shell and NOTHING inside it, because the editor is about to take
    * this element over and type in it.
@@ -285,12 +329,23 @@ export function TextBlock({
     );
   }
 
+  /*
+   * WORD BY WORD AS YOU SCROLL (React Bits review, 15 Sep 2026, Scroll Reveal):
+   * each word wrapped and counted, so the stylesheet can hand every one its own
+   * slice of the block's view timeline. The count rides on the block as --n.
+   * Pure CSS, Chromium and Safari 26; elsewhere the words are simply solid.
+   */
+  const arrive = oneOf(props, 'arrive', ['none', 'scroll'] as const, 'none');
+  const split = !editing && arrive === 'scroll' ? splitWords(html) : null;
+
   return (
     <div
       className="tgs-text"
       data-size={size}
       data-heading-shadow={headingShadow}
-      dangerouslySetInnerHTML={{ __html: html }}
+      data-arrive={split ? 'scroll' : undefined}
+      style={split ? ({ '--n': String(split.count) } as CSSProperties) : undefined}
+      dangerouslySetInnerHTML={{ __html: split ? split.html : html }}
     />
   );
 }

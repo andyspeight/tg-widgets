@@ -49,15 +49,21 @@
  * to stop it (WCAG 2.2.2) and hovering is not reachable from a keyboard, which is why
  * focus counts too: tab into a card and the drift stops.
  *
+ * AND THE WORDS (15 Sep 2026, the React Bits review). A heading whose words arrive
+ * needs to be told when it is seen (setUpArrive, an IntersectionObserver, every
+ * browser), and a heading whose words swell near the pointer needs to be told where
+ * the pointer is (setUpProximity, mouse only). Both keep the same promise: with no
+ * script the words stand exactly as they always did.
+ *
  * CSP-CLEAN, like everything else here. No inline handlers, no injected script, no
  * eval, no innerHTML. It only ever reads the data- attributes the renderer wrote.
  *
- * @version 1.1.0
+ * @version 1.2.0
  */
 (function () {
   'use strict';
 
-  var VERSION = '1.1.0';
+  var VERSION = '1.2.0';
 
   /* Nothing here runs for a visitor who asked for less movement. Not a reduced
      amount: none, and no rAF loop is ever started. The CSS rail is already a
@@ -292,7 +298,115 @@
     apply(); /* set the starting positions before the first scroll */
   }
 
+  /*
+   * WORDS ARRIVING (React Bits review, 15 Sep 2026). A heading marked data-arrive
+   * has each word wrapped by the render and staggered by the stylesheet; what the
+   * stylesheet cannot know is WHEN the heading is seen. So this marks each one
+   * data-arrive-fb, which is what lets the CSS hide its words at all, and data-seen
+   * the moment it comes into view, which runs them. The same promise as the reveal
+   * fallback above: no observer, nothing is ever marked, and the words stand as they
+   * always did. Runs on every browser, since the whole thing is time-based CSS once
+   * the moment is known; the scroll timeline has no part in it.
+   */
+  function setUpArrive() {
+    if (!('IntersectionObserver' in window)) return;
+
+    var heads = document.querySelectorAll('[data-arrive]');
+    if (!heads.length) return;
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        for (var i = 0; i < entries.length; i += 1) {
+          if (entries[i].isIntersecting) {
+            entries[i].target.setAttribute('data-seen', '1');
+            io.unobserve(entries[i].target);
+          }
+        }
+      },
+      { threshold: 0.2 },
+    );
+
+    for (var h = 0; h < heads.length; h += 1) {
+      if (heads[h].getAttribute('data-arrive-fb') === '1') continue;
+      /* A statement's scroll reveal is pure CSS on the view timeline and needs no
+         marking; only the time-based arrivals do. */
+      if (heads[h].getAttribute('data-arrive') === 'scroll') continue;
+      heads[h].setAttribute('data-arrive-fb', '1');
+      io.observe(heads[h]);
+    }
+  }
+
+  /*
+   * WORDS NEAR THE POINTER SWELL (Andy, 15 Sep 2026, and the library's Variable
+   * Proximity). For a heading marked data-hover='proximity', every word is told how
+   * near the pointer is, 0 to 1, as --near, and the stylesheet does the rest (a lift,
+   * a little scale, the accent creeping in). Word boxes are measured once when the
+   * pointer enters and again after a scroll, not on every move; the moves themselves
+   * are rAF-throttled. Mouse only: behind (hover: hover) and (pointer: fine), so a
+   * phone never runs a frame of it, and reduced motion never gets this far.
+   */
+  var NEAR_RADIUS = 150;
+
+  function setUpProximity() {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    var heads = document.querySelectorAll("[data-hover='proximity']");
+    for (var h = 0; h < heads.length; h += 1) {
+      if (heads[h].getAttribute('data-hover-live') === '1') continue;
+      heads[h].setAttribute('data-hover-live', '1');
+      bindProximity(heads[h]);
+    }
+  }
+
+  function bindProximity(head) {
+    var words = head.querySelectorAll('.tgs-w');
+    if (!words.length) return;
+    var boxes = null;
+    var raf = 0;
+    var px = 0;
+    var py = 0;
+
+    function measure() {
+      boxes = [];
+      for (var i = 0; i < words.length; i += 1) {
+        var r = words[i].getBoundingClientRect();
+        boxes.push({ el: words[i], x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      }
+    }
+
+    function apply() {
+      raf = 0;
+      if (!boxes) measure();
+      for (var i = 0; i < boxes.length; i += 1) {
+        var dx = px - boxes[i].x;
+        var dy = py - boxes[i].y;
+        var near = 1 - Math.sqrt(dx * dx + dy * dy) / NEAR_RADIUS;
+        near = near < 0 ? 0 : near > 1 ? 1 : near;
+        /* Eased, so the swell is soft at the edge of its reach rather than a cliff. */
+        boxes[i].el.style.setProperty('--near', (near * near).toFixed(3));
+      }
+    }
+
+    function rest() {
+      boxes = null;
+      for (var i = 0; i < words.length; i += 1) words[i].style.removeProperty('--near');
+    }
+
+    head.addEventListener('pointerenter', measure);
+    head.addEventListener('pointermove', function (event) {
+      px = event.clientX;
+      py = event.clientY;
+      if (!raf) raf = window.requestAnimationFrame(apply);
+    });
+    head.addEventListener('pointerleave', rest);
+    window.addEventListener('scroll', function () { boxes = null; }, { passive: true });
+    window.addEventListener('resize', function () { boxes = null; }, { passive: true });
+  }
+
   function init() {
+    setUpArrive();
+    setUpProximity();
+
     var rails = document.querySelectorAll("[data-motion='A3'] .tgs-cards");
     for (var i = 0; i < rails.length; i += 1) {
       var track = rails[i];

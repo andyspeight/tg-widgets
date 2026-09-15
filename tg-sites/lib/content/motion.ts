@@ -19,8 +19,13 @@
  * it". Ken Burns, the gradient and the ambient recipes are time-based CSS that plays
  * everywhere, so they never appear here.
  *
- * Motion lives on the SECTION, so unlike the slideshow walk this never has to reach
- * into rows, columns and blocks.
+ * Motion lived on the SECTION until 15 Sep 2026, so this never had to reach into
+ * rows, columns and blocks. THE WORDS CHANGED THAT (React Bits review, slice 3): a
+ * heading whose words arrive needs the script to say when it has been seen, and a
+ * heading whose words swell near the pointer needs it to say where the pointer is.
+ * Both are properties of a BLOCK, so the walk now goes down to the blocks, and into
+ * the columns a container, grid or loop carries, the same shape the slideshow walk
+ * has always had. Still the narrow question: a page with none of this ships nothing.
  */
 
 import { MOTION_SCRIPT_RECIPES, type MotionRecipe } from './schema';
@@ -29,11 +34,45 @@ import { MOTION_SCRIPT_RECIPES, type MotionRecipe } from './schema';
 export type Tree = { sections?: unknown } | null | undefined;
 
 /** A section-shaped thing, as it arrives from stored JSON. */
-type LooseSection = { motion?: { recipe?: unknown } | null; reveal?: unknown; parallax?: unknown };
+type LooseSection = {
+  motion?: { recipe?: unknown } | null;
+  reveal?: unknown;
+  parallax?: unknown;
+  rows?: unknown;
+};
+
+/** A block-shaped thing, as stored. Its props may carry inner columns. */
+type LooseBlock = { type?: unknown; props?: { arrive?: unknown; hover?: unknown; columns?: unknown } | null };
 
 /**
- * True when any section in the tree needs tg-motion.js: an A3 recipe, or a reveal or a
- * parallax (which need the script only as a fallback where scroll timelines are absent).
+ * True when a heading in these blocks (or in the columns nested inside them) has
+ * words that arrive, or words that answer the pointer's distance. A text block's
+ * scroll reveal is pure CSS and never counts.
+ */
+function blocksNeedScript(blocks: unknown): boolean {
+  if (!Array.isArray(blocks)) return false;
+  return blocks.some((raw) => {
+    if (!raw || typeof raw !== 'object') return false;
+    const block = raw as LooseBlock;
+    const props = block.props && typeof block.props === 'object' ? block.props : {};
+    if (block.type === 'heading') {
+      if (typeof props.arrive === 'string' && props.arrive !== 'none') return true;
+      if (props.hover === 'proximity') return true;
+    }
+    return columnsNeedScript(props.columns);
+  });
+}
+
+function columnsNeedScript(columns: unknown): boolean {
+  if (!Array.isArray(columns)) return false;
+  return columns.some((column) =>
+    !!column && typeof column === 'object' && blocksNeedScript((column as { blocks?: unknown }).blocks));
+}
+
+/**
+ * True when any section in the tree needs tg-motion.js: an A3 recipe, a reveal or a
+ * parallax (which need the script only as a fallback where scroll timelines are
+ * absent), or a heading whose words arrive or answer the pointer.
  *
  * Reads the stored shape defensively rather than assuming a parsed Page, because the
  * routes that assemble a document hand this whatever came out of the database.
@@ -47,6 +86,10 @@ export function needsMotionScript(tree: Tree): boolean {
     const section = raw as LooseSection;
     // Reveal or parallax pull the fallback. Both are stored as true when on.
     if (section.reveal === true || section.parallax === true) return true;
+    if (Array.isArray(section.rows)
+      && section.rows.some((row) => !!row && typeof row === 'object' && columnsNeedScript((row as { columns?: unknown }).columns))) {
+      return true;
+    }
     const motion = section.motion;
     if (!motion || typeof motion !== 'object') return false;
     const recipe = (motion as { recipe?: unknown }).recipe;
