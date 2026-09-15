@@ -559,6 +559,45 @@ function shiftHex(hex, percent) {
  *   display?: { showCancellation?: boolean }  // widget display toggles
  * }
  */
+/**
+ * The footer Chromium stamps on EVERY sheet of the printed PDF, with the real
+ * page number and the real total.
+ *
+ * Why this is not in the document body (15 Sep 2026). The body footer is
+ * absolutely positioned inside a section, so it prints once per SECTION rather
+ * than once per sheet, and it has no way of knowing how many sheets there will
+ * be. It carried a hardcoded "Page 1 of 2" and "Page 2 of 2", which was already
+ * wrong on a three-page confirmation before a second hotel pushed it to four.
+ *
+ * Chromium replaces pageNumber and totalPages at print time, which is the only
+ * place the counts are known. Two rules of its footer templates: styles must be
+ * inline, because the document's stylesheet is not applied here, and the size
+ * must be stated or it renders at a default that is too small to read. It draws
+ * inside the @page bottom margin, so that margin has to leave room for it.
+ *
+ * Strings arrive escaped; this is assembled server-side from the same widget
+ * record the document uses.
+ */
+export function renderPdfFooterTemplate(opts = {}) {
+  const brandName = escapeHtml(String(opts.brandName || '').trim());
+  const orderRef = escapeHtml(String(opts.orderRef || '').trim());
+  const supportEmail = escapeHtml(String(opts.supportEmail || '').trim());
+  const ref = orderRef ? `Booking ${orderRef} &middot; ` : '';
+  return `<div style="width:100%; box-sizing:border-box; padding:0 12.7mm;
+    font-family:'Inter',-apple-system,'Segoe UI',sans-serif; font-size:8px;
+    color:#94A3B8; letter-spacing:.02em; -webkit-print-color-adjust:exact;">
+    <div style="display:flex; justify-content:space-between; align-items:center;
+      border-top:1px solid #E2E8F0; padding-top:6px;">
+      <span>${brandName}</span>
+      <span>${ref}Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+      <span>${supportEmail}</span>
+    </div>
+  </div>`;
+}
+
+/** Chromium prints its own date header unless it is given an empty one. */
+export const PDF_HEADER_TEMPLATE = '<div style="display:none"></div>';
+
 export function renderPdfHtml(order, opts = {}) {
   const issuedAt = opts.issuedAt || new Date().toISOString();
   const brandName = (opts.brandName || '').trim();         // empty = no brand row
@@ -1332,6 +1371,15 @@ export function renderPdfHtml(order, opts = {}) {
     display: flex; justify-content: space-between;
     font-size: 10px; color: var(--text-3); letter-spacing: .02em;
   }
+  /* ON SCREEN ONLY. This footer is pinned to the bottom of its SECTION, not to
+     each sheet of paper, so when a section runs over a page it lands mid-
+     document. It also cannot know the page count, which is why it used to
+     print a hardcoded "Page 1 of 2" on a document that ran to three or four
+     (15 Sep 2026). In print, Chromium stamps the real footer on every sheet
+     with true numbers (renderPdfFooterTemplate below, wired up in
+     api/booking-pdf.js), so this one steps aside. The editor's preview is an
+     iframe on screen and keeps it. */
+  @media print { .pdf-footer { display: none !important; } }
   .pdf-footer-brand { font-weight: 700; color: var(--text-2); letter-spacing: -.01em; }
 
   /* PAGE 2 HEADER */
@@ -1728,7 +1776,7 @@ export function renderPdfHtml(order, opts = {}) {
 
   <div class="pdf-footer">
     <span class="pdf-footer-brand">${hasBrand ? escapeHtml(brandName) : ''}</span>
-    <span class="num">Booking ${escapeHtml(orderRef)}${hasHotelDetail ? ' · Page 1 of 2' : ''}</span>
+    <span class="num">Booking ${escapeHtml(orderRef)}</span>
     <span>${escapeHtml(supportEmail || '')}</span>
   </div>
 
@@ -1805,7 +1853,7 @@ ${hasHotelDetail ? `
 
   <div class="pdf-footer">
     <span class="pdf-footer-brand">${hasBrand ? escapeHtml(brandName) : ''}</span>
-    <span class="num">Booking ${escapeHtml(orderRef)} · Page 2 of 2</span>
+    <span class="num">Booking ${escapeHtml(orderRef)}</span>
     <span>${escapeHtml(supportEmail || '')}</span>
   </div>
 
