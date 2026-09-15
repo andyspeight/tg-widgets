@@ -55,9 +55,28 @@ scroll*. `tg-motion.js` 1.2.0 carries `setUpArrive` and `setUpProximity`, and
 `tests/words.test.ts`, and a Chromium check with the script, without it, under
 reduced motion and on a phone. Detail in `docs/motion-engine.md` under Words.
 
-Next: slice 4 Under the pointer for CARDS and BUTTONS (spotlight, tilt, glare;
-sheen, magnetic, trace), then slice 5 Menus. Elementor gap #2 (form actions) is
-parked behind them by Andy's choice on 15 Sep.
+**Slice 4, Under the pointer for cards and buttons, shipped the same night.**
+Three section toggles beside lift, zoom and tint (spotlight, tilt, glare) and an
+`effect` on the Button and the Buttons row (sheen, magnetic, trace). Mouse only,
+still under reduced motion, nothing on the canvas, every layer lets the click
+through. `tg-motion.js` 1.3.0 (`setUpCardPointer`, `setUpMagnets`); the script is
+pulled only for the spotlight, the tilt and a magnet. Three presets dressed
+(`features-bento-destinations`, `hero-cards-below`, `hero-turning-word`).
+`tests/pointer.test.ts`, and a Chromium check with the script, without it, under
+reduced motion and on a phone. Detail in `docs/motion-engine.md` under Cards and
+buttons under the pointer.
+
+A question Andy asked that day, worth keeping: "why can't I just move my mouse
+over the words?" Because nothing moves on the editing canvas, by design: the
+canvas reads a heading's markup back and saves it, so the word spans cannot be
+added there, and a card that leans or a button that slides would slide away from
+the person selecting it. The pointer effects work on the published page and in
+the editor's Preview (the eye), and nowhere else.
+
+Next: slice 5 Menus (pill and underline sweep styles; full-screen and cards
+behind the burger). Elementor gap #2 (form actions) is parked behind it by
+Andy's choice on 15 Sep. None of the four shipped slices has yet been looked at
+by Andy in the live editor.
 
 ---
 

@@ -1025,6 +1025,19 @@ export const SectionSchema = z.object({
    */
   hoverTint: z.boolean().optional(),
   /**
+   * Three more under the pointer (React Bits review, 15 Sep 2026, slice 4), all
+   * off by default and optional, so no stored section changes shape, and all
+   * mouse only, behind (hover: hover) and (pointer: fine) in globals.css.
+   *
+   * A soft light that follows the pointer across a card (Spotlight Card): the
+   * script writes where the pointer is on the card, the stylesheet draws the light.
+   */
+  hoverSpotlight: z.boolean().optional(),
+  /** Cards lean a few degrees toward the pointer (Tilted Card). Same script, same guard. */
+  hoverTilt: z.boolean().optional(),
+  /** A sheen sweeps across a card's picture as the pointer arrives (Glare Hover). Pure CSS. */
+  hoverGlare: z.boolean().optional(),
+  /**
    * Drift this section's single background picture slower than the content as it
    * scrolls, for depth. Off by default and optional, so no stored section changes
    * shape. Pure CSS in globals.css, and the render only turns it on for a still

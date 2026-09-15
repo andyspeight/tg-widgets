@@ -55,15 +55,20 @@
  * the pointer is (setUpProximity, mouse only). Both keep the same promise: with no
  * script the words stand exactly as they always did.
  *
+ * AND THE CARDS AND BUTTONS (the same day, slice 4). A card in a spotlight or tilt
+ * section is told where the pointer is on it (setUpCardPointer) and a magnetic
+ * button is told which way to lean (setUpMagnets). Mouse only; with no script the
+ * spotlight sits at the centre and the buttons stay put.
+ *
  * CSP-CLEAN, like everything else here. No inline handlers, no injected script, no
  * eval, no innerHTML. It only ever reads the data- attributes the renderer wrote.
  *
- * @version 1.2.0
+ * @version 1.3.0
  */
 (function () {
   'use strict';
 
-  var VERSION = '1.2.0';
+  var VERSION = '1.3.0';
 
   /* Nothing here runs for a visitor who asked for less movement. Not a reduced
      amount: none, and no rAF loop is ever started. The CSS rail is already a
@@ -403,9 +408,97 @@
     window.addEventListener('resize', function () { boxes = null; }, { passive: true });
   }
 
+  /*
+   * A CARD UNDER THE POINTER (React Bits review, 15 Sep 2026, slice 4). In a section
+   * marked data-hover-spotlight or data-hover-tilt, every card is told where the
+   * pointer is on it: --mx and --my as percentages, which the spotlight's gradient
+   * reads, and --rx and --ry as the few degrees of lean the tilt reads. The card's
+   * box is measured once when the pointer enters (a tilted card's rect would move
+   * under every read) and again after a scroll. Mouse only, same gate as the words.
+   */
+  var TILT_DEG = 7;
+
+  function setUpCardPointer() {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    var cards = document.querySelectorAll('[data-hover-spotlight] .tgs-card, [data-hover-tilt] .tgs-card');
+    for (var c = 0; c < cards.length; c += 1) {
+      if (cards[c].getAttribute('data-pointer-live') === '1') continue;
+      cards[c].setAttribute('data-pointer-live', '1');
+      bindCardPointer(cards[c]);
+    }
+  }
+
+  function bindCardPointer(card) {
+    var box = null;
+
+    function measure() {
+      var r = card.getBoundingClientRect();
+      box = { left: r.left, top: r.top, width: r.width || 1, height: r.height || 1 };
+    }
+
+    card.addEventListener('pointerenter', measure);
+    card.addEventListener('pointermove', function (event) {
+      if (!box) measure();
+      var x = (event.clientX - box.left) / box.width;
+      var y = (event.clientY - box.top) / box.height;
+      x = x < 0 ? 0 : x > 1 ? 1 : x;
+      y = y < 0 ? 0 : y > 1 ? 1 : y;
+      card.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+      card.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+      /* Lean toward the pointer: right of centre turns the right edge away. */
+      card.style.setProperty('--ry', ((x - 0.5) * 2 * TILT_DEG).toFixed(2) + 'deg');
+      card.style.setProperty('--rx', ((0.5 - y) * 2 * TILT_DEG).toFixed(2) + 'deg');
+    });
+    card.addEventListener('pointerleave', function () {
+      box = null;
+      card.style.removeProperty('--mx');
+      card.style.removeProperty('--my');
+      card.style.removeProperty('--rx');
+      card.style.removeProperty('--ry');
+    });
+    window.addEventListener('scroll', function () { box = null; }, { passive: true });
+  }
+
+  /*
+   * A MAGNETIC BUTTON (the same slice). While the pointer is over it the button
+   * slides a little toward the pointer, up to MAGNET_REACH pixels, and springs
+   * back when it leaves; the stylesheet does the easing. Mouse only.
+   */
+  var MAGNET_REACH = 8;
+
+  function setUpMagnets() {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    var buttons = document.querySelectorAll(".tgs-button[data-effect='magnetic']");
+    for (var b = 0; b < buttons.length; b += 1) {
+      if (buttons[b].getAttribute('data-pointer-live') === '1') continue;
+      buttons[b].setAttribute('data-pointer-live', '1');
+      bindMagnet(buttons[b]);
+    }
+  }
+
+  function bindMagnet(button) {
+    button.addEventListener('pointermove', function (event) {
+      var r = button.getBoundingClientRect();
+      var dx = (event.clientX - (r.left + r.width / 2)) / (r.width / 2);
+      var dy = (event.clientY - (r.top + r.height / 2)) / (r.height / 2);
+      dx = dx < -1 ? -1 : dx > 1 ? 1 : dx;
+      dy = dy < -1 ? -1 : dy > 1 ? 1 : dy;
+      button.style.setProperty('--px', (dx * MAGNET_REACH).toFixed(1) + 'px');
+      button.style.setProperty('--py', (dy * MAGNET_REACH).toFixed(1) + 'px');
+    });
+    button.addEventListener('pointerleave', function () {
+      button.style.removeProperty('--px');
+      button.style.removeProperty('--py');
+    });
+  }
+
   function init() {
     setUpArrive();
     setUpProximity();
+    setUpCardPointer();
+    setUpMagnets();
 
     var rails = document.querySelectorAll("[data-motion='A3'] .tgs-cards");
     for (var i = 0; i < rails.length; i += 1) {

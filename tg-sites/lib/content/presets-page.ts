@@ -553,7 +553,8 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
-    section: { paddingY: 80 },
+    // A sheen across each trip's picture as the pointer arrives (slice 4, glare).
+    section: { paddingY: 80, hoverGlare: true },
   },
 
   {
@@ -1056,6 +1057,9 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
               type: 'button-group',
               props: {
                 align: 'centre',
+                // A sheen across the buttons as the pointer arrives (slice 4),
+                // the quiet one, on the hero whose title already moves.
+                effect: 'sheen',
                 buttons: [
                   { label: 'Find a holiday', href: '', variant: 'primary' },
                   { label: 'Talk to us', href: '', variant: 'ghost' },
@@ -2213,6 +2217,9 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         ],
       },
     ],
+    // A spotlight follows the pointer across the bento (slice 4), the effect that
+    // suits an overlay grid best: a light on the picture, not a lean of the card.
+    section: { hoverSpotlight: true },
   },
 
   {

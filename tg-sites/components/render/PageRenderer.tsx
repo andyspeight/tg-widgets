@@ -562,6 +562,14 @@ export function SectionRenderer({
        */
       data-hover-tint={section.hoverTint && !editable ? '' : undefined}
       /*
+       * A spotlight that follows the pointer, a tilt toward it, a sheen across the
+       * picture (React Bits review, 15 Sep 2026). Same `editable` gate as the three
+       * above; the first two need tg-motion.js to say where the pointer is.
+       */
+      data-hover-spotlight={section.hoverSpotlight && !editable ? '' : undefined}
+      data-hover-tilt={section.hoverTilt && !editable ? '' : undefined}
+      data-hover-glare={section.hoverGlare && !editable ? '' : undefined}
+      /*
        * Parallax drifts a still background picture on scroll. Only when there is one
        * still picture (not the cycling background, not a video) and not while editing,
        * so it never fights the canvas. The drift itself is pure CSS in globals.css.

@@ -1553,6 +1553,79 @@ html[data-theme='dark']:has(.tgs-page[style*='--tgs-d-surface']) {
 }
 
 /*
+ * THREE MORE UNDER THE POINTER (React Bits review, 15 Sep 2026, slice 4:
+ * Spotlight Card, Tilted Card, Glare Hover). All three are mouse only, behind
+ * (hover: hover) and (pointer: fine), so a phone carries no rule it cannot use,
+ * and the two that move sit behind the reduced-motion guard like the lift and
+ * the zoom. pointer-events: none on every layer, for the reason the tint gives:
+ * the whole card is usually a link.
+ *
+ * THE SPOTLIGHT: a soft pool of the accent that follows the pointer across the
+ * card. public/tg-motion.js writes where the pointer is on the card (--mx, --my,
+ * as percentages) and this draws the light there; with no script the pool sits
+ * at the centre and still lights on hover, which is a finished effect rather
+ * than a broken one. The card's own ::after is the tint's, so this is ::before.
+ */
+.tgs-section[data-hover-spotlight] .tgs-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--tgs-accent) 26%, transparent) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tgs-section[data-hover-spotlight] .tgs-card:hover::before { opacity: 1; }
+}
+
+/*
+ * THE TILT: the card leans a few degrees toward the pointer, from the --rx and
+ * --ry the script writes, and eases back when it leaves. With the lift on as
+ * well, the lifted card keeps its lean: the combined rule below outranks the
+ * lift's own hover transform, which would otherwise flatten it.
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-hover-tilt] .tgs-card {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.18s ease-out, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .tgs-section[data-hover-tilt][data-hover-lift] .tgs-card:hover {
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-4px);
+  }
+}
+
+/*
+ * THE GLARE: a sheen sweeping across the card's picture as the pointer arrives,
+ * on the frame's own ::before (its ::after is the overlay design's wash). Parked
+ * off to the left and only moved behind the two guards, so a phone and a visitor
+ * who asked for less motion simply never see it.
+ */
+.tgs-section[data-hover-glare] .tgs-card__frame::before {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.38) 50%, transparent 58%);
+  transform: translateX(-70%);
+  pointer-events: none;
+  z-index: 1;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tgs-section[data-hover-glare] .tgs-card__frame::before {
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .tgs-section[data-hover-glare] .tgs-card:hover .tgs-card__frame::before {
+    transform: translateX(70%);
+  }
+}
+
+/*
  * PARALLAX BACKGROUND (Andy, 11 Aug 2026). A section marked data-parallax drifts its
  * single background picture slower than the content as the section crosses the screen,
  * for a sense of depth. The picture is grown a little and slid on a view() timeline, so
@@ -3736,6 +3809,85 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
  * gets a cream button rather than a white one that looks like a hole.
  */
 .tgs-section[data-tone='accent'] .tgs-button[data-variant='primary'] { background: var(--tgs-surface); color: var(--tgs-primary); }
+
+/*
+ * A BUTTON UNDER THE POINTER (React Bits review, 15 Sep 2026, slice 4). Three,
+ * from the button's data-effect, all mouse only and all held still for anyone
+ * who prefers less motion:
+ *
+ *   sheen     a sweep of light across the button as the pointer arrives (Glare
+ *             Hover), on its ::after, the button clipping it
+ *   magnetic  the button slides a few pixels toward the pointer and springs
+ *             back (Magnet); the script writes --px and --py, this only eases
+ *   trace     a short line of light running round the edge (Star Border, turned
+ *             well down: a ring, not a glow). Drawn on ::before as a 2px frame
+ *             cut with a mask, its angle a registered property so it can turn.
+ *             Where @property is unknown the ring simply stands, which is fine.
+ */
+.tgs-button[data-effect='sheen'] {
+  position: relative;
+  overflow: hidden;
+}
+.tgs-button[data-effect='sheen']::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.32) 50%, transparent 58%);
+  transform: translateX(-70%);
+  pointer-events: none;
+}
+@property --trace {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.tgs-button[data-effect='trace'] {
+  position: relative;
+  isolation: isolate;
+}
+.tgs-button[data-effect='trace']::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  padding: 2px;
+  border-radius: inherit;
+  z-index: -1;
+  background: conic-gradient(
+    from var(--trace),
+    transparent 0deg 240deg,
+    color-mix(in srgb, var(--tgs-accent) 85%, transparent) 320deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tgs-button[data-effect='trace']:hover::before,
+  .tgs-button[data-effect='trace']:focus-visible::before { opacity: 1; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tgs-button[data-effect='sheen']::after {
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .tgs-button[data-effect='sheen']:hover::after { transform: translateX(70%); }
+  .tgs-button[data-effect='magnetic'] {
+    transform: translate(var(--px, 0px), var(--py, 0px));
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), background-color 0.15s ease,
+      border-color 0.15s ease, color 0.15s ease;
+  }
+  .tgs-button[data-effect='trace']:hover::before,
+  .tgs-button[data-effect='trace']:focus-visible::before {
+    animation: tgs-trace 1.6s linear infinite;
+  }
+}
+@keyframes tgs-trace {
+  to { --trace: 360deg; }
+}
 
 /* Quote */
 .tgs-quote { margin: 0; }

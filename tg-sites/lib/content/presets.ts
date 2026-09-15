@@ -132,6 +132,10 @@ export function buildPresetSection(preset: SectionPreset): Section {
     ...(preset.section?.alignY ? { alignY: preset.section.alignY } : {}),
     // The atmosphere behind a pictureless section, when the preset wears one.
     ...(preset.section?.backdrop ? { backdrop: preset.section.backdrop } : {}),
+    // What the cards do under the pointer, when the preset asks for something.
+    ...(preset.section?.hoverSpotlight ? { hoverSpotlight: true } : {}),
+    ...(preset.section?.hoverTilt ? { hoverTilt: true } : {}),
+    ...(preset.section?.hoverGlare ? { hoverGlare: true } : {}),
     // The scrim strength over a background. 60 is what it was fixed at.
     overlay: 60,
     box: { ...EMPTY_BOX },

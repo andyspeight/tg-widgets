@@ -49,7 +49,8 @@ What we learn is a vocabulary, and five of its words are missing from ours:
    display style. **Built and shipped 15 Sep 2026**, with the pointer effects Andy
    asked for the same day; see the note at the end of section 3.
 4. **Under the pointer.** Spotlight, tilt and glare on cards; a sheen and a magnetic
-   pull on buttons. Our hover vocabulary is lift, zoom and tint.
+   pull on buttons. Our hover vocabulary is lift, zoom and tint. **Built and
+   shipped 15 Sep 2026**, see the note at the end of section 4.
 5. **Menus.** A pill that marks the current page, and a full-screen staggered menu
    behind the burger, the two header treatments a luxury client notices.
 
@@ -277,6 +278,27 @@ and no effect of their own.
   above motion 5) | *Trace* (a line of light running round the edge, the Star Border
   turned well down, because a neon glow is on the forbidden list).
 
+**Built 15 Sep 2026.** As planned, with one addition: the trace shows for the
+keyboard too (`:focus-visible`), so the one effect that can stand still is not a
+mouse-only signal. Three section toggles (`hoverSpotlight`, `hoverTilt`,
+`hoverGlare`) beside lift, zoom and tint, gated on not editing like the tint;
+`effect` on the Button and the Buttons row (none, sheen, magnetic, trace), one
+effect for the whole row, dropped on the canvas. `tg-motion.js` 1.3.0 carries
+`setUpCardPointer` (writes `--mx --my` and `--rx --ry` on the card, measured once
+per entry) and `setUpMagnets` (`--px --py`, 8px reach); `needsMotionScript` pulls
+the script only for the spotlight, the tilt and a magnet. Every layer is
+`pointer-events: none` (the whole card is usually a link), every mover sits behind
+the mouse guard and the reduced-motion guard, and with no script the spotlight
+sits lit at the centre. Three presets dressed (`features-bento-destinations`
+spotlight, `hero-cards-below` glare, `hero-turning-word` sheen).
+`tests/pointer.test.ts`, and a Chromium check through the real renderer: the
+spotlight follows the pointer and lets the click through, the tilt leans and
+settles and keeps its lean with the lift, the glare and the sheen sweep, the
+magnet pulls and springs back, the trace turns; nothing moves under reduced
+motion, nothing binds on a phone, nothing overflows at 390. The one bug that check
+found and the source tests could not: the spotlight had been dressed onto the
+wrong preset.
+
 Skipped: every cursor effect (Splash, Blob, Target, Ghost, Swarm, Glow Cursor,
 Crosshair, Cursor Grid, Image Trail, Pixel Trail, Ribbons, Magnet Lines, Strands,
 Antigravity, Cubes). The taste skill is direct about custom cursors: an accessibility
@@ -340,6 +362,7 @@ vitest, next build) and each carrying its own tests, presets and docs update.
    pointer effects brought forward from slice 4.
 4. **Under the pointer** (spotlight, tilt, glare; button sheen, magnetic, trace).
    Finish, not structure, so it comes after the three that change what a page IS.
+   **SHIPPED 15 Sep 2026.**
 5. **Menus** (pill and underline sweep; full-screen and cards behind the burger).
 
 Standing rules that apply to every slice and are not up for re-deciding: no library,

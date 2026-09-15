@@ -2086,7 +2086,11 @@ export function SliderBlock({ props }: { props: Props }): ReactElement {
 // Actions
 // ---------------------------------------------------------------------------
 
-function renderButton(button: Props, key: number): ReactElement | null {
+/** What a button does under the pointer. Nothing on the canvas, where nothing should move. */
+type ButtonEffect = 'none' | 'sheen' | 'magnetic' | 'trace';
+const BUTTON_EFFECTS = ['none', 'sheen', 'magnetic', 'trace'] as const;
+
+function renderButton(button: Props, key: number, effect: ButtonEffect = 'none'): ReactElement | null {
   const label = str(button, 'label');
   if (!label) return null;
 
@@ -2136,6 +2140,7 @@ function renderButton(button: Props, key: number): ReactElement | null {
       className="tgs-button"
       data-variant={variant}
       data-size={size}
+      data-effect={effect === 'none' ? undefined : effect}
       href={href}
       style={Object.keys(style).length ? style : undefined}
       {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
@@ -3118,13 +3123,22 @@ export function TagsBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
-export function ButtonBlock({ props }: { props: Props }): ReactElement {
-  return <div className="tgs-buttons">{renderButton(props, 0)}</div>;
+/*
+ * UNDER THE POINTER (React Bits review, 15 Sep 2026, slice 4): a sheen, a pull
+ * toward the pointer, or a line of light round the edge. Read from the closed
+ * list, and never on the editing canvas, where a button that slides toward the
+ * pointer would slide away from the person trying to select it.
+ */
+export function ButtonBlock({ props, editing = false }: { props: Props; editing?: boolean }): ReactElement {
+  const effect = editing ? 'none' : oneOf(props, 'effect', BUTTON_EFFECTS, 'none');
+  return <div className="tgs-buttons">{renderButton(props, 0, effect)}</div>;
 }
 
-export function ButtonGroupBlock({ props }: { props: Props }): ReactElement {
+export function ButtonGroupBlock({ props, editing = false }: { props: Props; editing?: boolean }): ReactElement {
   const buttons = list(props, 'buttons');
-  return <div className="tgs-buttons">{buttons.map(renderButton)}</div>;
+  // One effect for the row, on the group, so the buttons answer the pointer alike.
+  const effect = editing ? 'none' : oneOf(props, 'effect', BUTTON_EFFECTS, 'none');
+  return <div className="tgs-buttons">{buttons.map((button, index) => renderButton(button, index, effect))}</div>;
 }
 
 /**

@@ -160,6 +160,53 @@ Three presets use them: `hero-big-title` (letters, and the swell),
 `hero-turning-word` (new: the turning destination), `text-statement` (the
 scroll reveal). `tests/words.test.ts`.
 
+## Cards and buttons under the pointer (15 Sep 2026)
+
+The fourth slice of the React Bits review. Three more toggles in the section's
+Motion group, beside the lift, the zoom and the tint, and one select on the
+**Button** and the **Buttons** row. All mouse only, behind `(hover: hover) and
+(pointer: fine)`, so a phone carries nothing it cannot use; everything that
+moves is behind the reduced-motion guard as well; nothing runs on the editing
+canvas (the section flags are gated on not editing like the tint, and a
+button's effect is dropped there, because a button that slides toward the
+pointer slides away from the person trying to select it). Every layer is
+`pointer-events: none`, the lesson the tint paid for: the whole card is usually
+a link.
+
+**Spotlight** (section): a soft pool of the accent follows the pointer across
+each card. `setUpCardPointer` in `tg-motion.js` writes `--mx` and `--my` (as
+percentages of the card) and the stylesheet draws a radial gradient there on
+the card's `::before`. With no script the pool sits at the centre and still
+lights on hover: a finished effect, not a broken one. It only fades, so it
+stays under reduced motion like the tint.
+
+**Tilt toward the pointer** (section): each card leans up to seven degrees
+toward the pointer (`--rx` and `--ry` from the same listener, behind
+`perspective(900px)`) and eases back when it leaves. The card's box is measured
+once on entry and again after a scroll, never per move, because a tilted card's
+rect moves under every read. With the lift on as well, a combined rule keeps
+the lean and adds the 4px rise, or the lift's own transform would flatten it.
+Held still under reduced motion.
+
+**Glare** (section): a sheen sweeps across each card's picture as the pointer
+arrives, on the frame's `::before`, parked off to the left and only moved behind
+both guards. Pure CSS.
+
+**Under the pointer** (Button and Buttons row, one effect for the whole row):
+*Nothing* | *A sheen sweeps across it* (CSS, the button clips it) | *It pulls
+toward the pointer* (`setUpMagnets` writes `--px` and `--py`, up to 8px toward
+the pointer, and clears them on leave; the stylesheet eases) | *A line of light
+runs round it* (a 2px conic ring on `::before`, cut with a mask, its angle a
+registered `@property` so it can turn; the Star Border turned well down, a ring
+and not a glow). The ring shows for the keyboard too (`:focus-visible`); it
+turns only where motion is welcome.
+
+A page pulls `tg-motion.js` (1.3.0) only for the spotlight, the tilt or a
+magnetic button; the glare, the sheen and the trace are CSS and pull nothing.
+Three presets use them: `features-bento-destinations` (spotlight),
+`hero-cards-below` (glare), `hero-turning-word` (a sheen on its buttons).
+`tests/pointer.test.ts`.
+
 ## Backdrops: an atmosphere behind a section with no photograph (15 Sep 2026)
 
 A section's **Backdrop** select, in the Motion group beside the animated

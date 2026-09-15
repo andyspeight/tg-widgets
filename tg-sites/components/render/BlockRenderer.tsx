@@ -167,9 +167,9 @@ export function BlockRenderer({
       case 'tags':
         return <TagsBlock props={props} />;
       case 'button':
-        return <ButtonBlock props={props} />;
+        return <ButtonBlock props={props} editing={editable} />;
       case 'button-group':
-        return <ButtonGroupBlock props={props} />;
+        return <ButtonGroupBlock props={props} editing={editable} />;
       case 'nav':
         return <NavBlock props={props} />;
       /*

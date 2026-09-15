@@ -38,16 +38,22 @@ type LooseSection = {
   motion?: { recipe?: unknown } | null;
   reveal?: unknown;
   parallax?: unknown;
+  hoverSpotlight?: unknown;
+  hoverTilt?: unknown;
   rows?: unknown;
 };
 
 /** A block-shaped thing, as stored. Its props may carry inner columns. */
-type LooseBlock = { type?: unknown; props?: { arrive?: unknown; hover?: unknown; columns?: unknown } | null };
+type LooseBlock = {
+  type?: unknown;
+  props?: { arrive?: unknown; hover?: unknown; effect?: unknown; columns?: unknown } | null;
+};
 
 /**
  * True when a heading in these blocks (or in the columns nested inside them) has
- * words that arrive, or words that answer the pointer's distance. A text block's
- * scroll reveal is pure CSS and never counts.
+ * words that arrive, or words that answer the pointer's distance, or a button is
+ * magnetic (the script moves it toward the pointer). A text block's scroll reveal
+ * and a button's sheen or trace are pure CSS and never count.
  */
 function blocksNeedScript(blocks: unknown): boolean {
   if (!Array.isArray(blocks)) return false;
@@ -59,6 +65,7 @@ function blocksNeedScript(blocks: unknown): boolean {
       if (typeof props.arrive === 'string' && props.arrive !== 'none') return true;
       if (props.hover === 'proximity') return true;
     }
+    if ((block.type === 'button' || block.type === 'button-group') && props.effect === 'magnetic') return true;
     return columnsNeedScript(props.columns);
   });
 }
@@ -86,6 +93,8 @@ export function needsMotionScript(tree: Tree): boolean {
     const section = raw as LooseSection;
     // Reveal or parallax pull the fallback. Both are stored as true when on.
     if (section.reveal === true || section.parallax === true) return true;
+    // The spotlight and the tilt need the script to say where the pointer is on a card.
+    if (section.hoverSpotlight === true || section.hoverTilt === true) return true;
     if (Array.isArray(section.rows)
       && section.rows.some((row) => !!row && typeof row === 'object' && columnsNeedScript((row as { columns?: unknown }).columns))) {
       return true;

@@ -282,6 +282,14 @@ const SHADOW_OPTIONS: SelectOption[] = [
   { value: 'strong', label: 'Strong' },
 ];
 
+/** A button under the pointer (React Bits review, 15 Sep 2026): a sheen, a pull, a line of light. */
+const BUTTON_EFFECT_OPTIONS = [
+  { value: 'none', label: 'Nothing' },
+  { value: 'sheen', label: 'A sheen sweeps across it' },
+  { value: 'magnetic', label: 'It pulls toward the pointer' },
+  { value: 'trace', label: 'A line of light runs round it' },
+];
+
 const SPACING_OPTIONS: SelectOption[] = [
   { value: 'none', label: 'None' },
   { value: 'xs', label: 'Extra small' },
@@ -2612,6 +2620,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       align: 'left',
       newTab: false,
       outline: false,
+      effect: 'none',
     },
     summarise: (props) => asString(props.label) || 'Button',
     fields: [
@@ -2642,6 +2651,22 @@ export const BLOCKS: readonly BlockDefinition[] = [
       { kind: 'toggle', key: 'outline', label: 'Outlined', group: 'colours', help: 'Draw the button colour as an outline round clear space, not a fill.' },
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS, group: 'layout' },
       { kind: 'toggle', key: 'newTab', label: 'Open in a new tab' },
+      {
+        /*
+         * UNDER THE POINTER (React Bits review, 15 Sep 2026, slice 4). A sheen
+         * sweeping across the button (Glare Hover), a pull toward the pointer
+         * (Magnet, the physical feedback the taste skill asks for), or a line of
+         * light running round the edge (Star Border, turned well down: a neon
+         * glow is on the forbidden list). Mouse only, still for anyone who
+         * prefers less motion, and nothing on the editing canvas.
+         */
+        kind: 'select',
+        key: 'effect',
+        label: 'Under the pointer',
+        group: 'effects',
+        options: BUTTON_EFFECT_OPTIONS,
+        help: 'Mouse only. The magnetic pull needs the small motion script; the other two are pure stylesheet.',
+      },
     ],
   },
   {
@@ -2653,6 +2678,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
     description: 'Two or more buttons side by side.',
     defaults: {
       align: 'left',
+      effect: 'none',
       buttons: [
         { label: 'Enquire', href: '', variant: 'primary', newTab: false },
         { label: 'Read more', href: '', variant: 'secondary', newTab: false },
@@ -2664,6 +2690,16 @@ export const BLOCKS: readonly BlockDefinition[] = [
     },
     fields: [
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
+      {
+        // One effect for the whole row: two buttons side by side answering the
+        // pointer differently is not a design anybody asked for.
+        kind: 'select',
+        key: 'effect',
+        label: 'Under the pointer',
+        group: 'effects',
+        options: BUTTON_EFFECT_OPTIONS,
+        help: 'For every button in the row. Mouse only, and nothing on the editing canvas.',
+      },
       {
         kind: 'repeater',
         key: 'buttons',

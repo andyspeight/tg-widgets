@@ -310,7 +310,7 @@ describe('tg-motion.js', () => {
     const reduced = script.indexOf('if (REDUCED && REDUCED.matches) return;');
     expect(reduced).toBeGreaterThan(-1);
     expect(reduced).toBeLessThan(script.indexOf('function setUpArrive'));
-    expect(script).toContain("var VERSION = '1.2.0';");
+    expect(script).toContain("var VERSION = '1.3.0';");
   });
 
   it('is pulled onto a page by an arriving heading or a proximity heading, and by nothing else new', () => {

@@ -1858,6 +1858,54 @@ function SectionFields({
           <label className="ed-toggle">
             <input
               type="checkbox"
+              checked={section.hoverSpotlight === true}
+              onChange={(event) =>
+                set({ hoverSpotlight: event.target.checked || undefined }, `sec:${index}:hoverSpotlight`)
+              }
+            />
+            <span>Spotlight</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            A soft pool of your accent colour follows the pointer across each card. Mouse only;
+            a phone never sees it.
+          </p>
+        </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.hoverTilt === true}
+              onChange={(event) =>
+                set({ hoverTilt: event.target.checked || undefined }, `sec:${index}:hoverTilt`)
+              }
+            />
+            <span>Tilt toward the pointer</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            Each card leans a few degrees toward the pointer and settles back when it leaves.
+            Mouse only, and held still for anyone who prefers less motion.
+          </p>
+        </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
+              checked={section.hoverGlare === true}
+              onChange={(event) =>
+                set({ hoverGlare: event.target.checked || undefined }, `sec:${index}:hoverGlare`)
+              }
+            />
+            <span>Glare</span>
+          </label>
+          <p className="ed-help" style={{ marginTop: 6 }}>
+            A sheen sweeps across each card&apos;s picture as the pointer arrives. Mouse only, and
+            held still for anyone who prefers less motion.
+          </p>
+        </div>
+        <div className="ed-field">
+          <label className="ed-toggle">
+            <input
+              type="checkbox"
               checked={section.gradient === true}
               onChange={(event) =>
                 set({ gradient: event.target.checked || undefined }, `sec:${index}:gradient`)

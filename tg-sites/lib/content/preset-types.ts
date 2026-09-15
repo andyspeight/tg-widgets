@@ -218,6 +218,15 @@ export interface SectionPreset {
      */
     backdrop?: Section['backdrop'];
     /**
+     * What the section's cards do under the pointer (React Bits review, 15 Sep
+     * 2026, slice 4): a spotlight that follows it, a lean toward it, a sheen
+     * across the picture. The picker cannot draw a hover, so these only travel
+     * into the built section; a client turns them off in the Motion group.
+     */
+    hoverSpotlight?: boolean;
+    hoverTilt?: boolean;
+    hoverGlare?: boolean;
+    /**
      * A floor on the section's height, for the heroes that should feel like a
      * curtain rather than a strip. Without it every full-bleed photo hero was
      * exactly as tall as its words plus padding, which is the single cheapest
