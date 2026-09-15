@@ -664,7 +664,7 @@ describe('the editor draws the same cards the site does', () => {
     expect(canvas).toContain('const shown = useMemo(() => fillListings(page, listings');
     // The render draws shownForVisitor, a further display copy of `shown` (the
     // Preview-as filter), so both fills stay off the saved tree.
-    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages)');
+    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages, currentPath)');
     // The editable state is still the unfilled page.
     expect(canvas).not.toMatch(/setPage\(\s*shown/);
   });

@@ -207,6 +207,58 @@ Three presets use them: `features-bento-destinations` (spotlight),
 `hero-cards-below` (glare), `hero-turning-word` (a sheen on its buttons).
 `tests/pointer.test.ts`.
 
+## Menus: how a link looks, and what the burger opens (15 Sep 2026)
+
+The fifth and last slice of the React Bits review, on the **Menu** block. Two
+new settings, and one thing the menu now knows that it never did.
+
+**The current page.** `fillNavFolders` in `lib/content/nav.ts`, which already
+fills a folder link with its pages at the render boundary, now also takes the
+address of the page being drawn and marks the link to it `current`. The block
+renders that as `aria-current="page"`, so a screen reader says "current page"
+on it, and the two styles below mark it. The site route, the standalone preview
+and the editor canvas all pass the address (the editor works it out with the
+site's own `livePaths`), so a client sees the mark while editing.
+
+**Link style**: *Plain* | *Pill* (every link in a rounded field; the current
+page washed in the brand colour, the link under the pointer in a lighter wash;
+on a dark or accent bar the wash is the band's own border tint, the pair the
+dropdown's hover already uses) | *Underline sweep* (a two-pixel line in the
+link's own colour that draws in from the left under the pointer, leaves to the
+right, and stays under the current page; the origin swap does the sweep, and
+only the transition sits behind the reduced-motion guard). Both CSS. Inside a
+burger's list the underline is dropped, where a full-width line reads as a
+rule, and the current page takes the brand colour instead.
+
+**Behind the button**: *A panel under the bar* (what it always opened) | *The
+whole screen* (the stacked list becomes a fixed overlay over the viewport, the
+links at display size, `clamp(2rem, 6vw, 4rem)`, arriving one a beat behind the
+last; a folder's pages beneath at reading size; the burger that opened it stays
+where it was as a cross, above the overlay; the page beneath stops scrolling
+through a `:has()` on `html`; the header rises for the stacking reason the
+always-on panel documents) | *Cards* (the links as a grid of cards, each
+folder's pages beneath its card, the same panel otherwise).
+
+**The focus concern, answered.** The always-on burger's note in `globals.css`
+and `tests/burger.test.ts` recorded why a full-screen overlay was not chosen
+in August: without a script nothing stops Tab wandering behind it. So the full
+screen brings `setUpFullMenu` in `tg-motion.js` (1.4.0) with it: while one is
+open, everything outside its header is `inert`, Escape closes it and hands
+focus back to the button. It is wired BEFORE the script's reduced-motion return,
+because it is the keyboard and not motion. With no script the overlay still
+opens and closes from its cross. A full-screen menu is the only menu setting
+that pulls the script.
+
+**Never on the editing canvas.** The canvas is not an iframe: it sits inside the
+editor's own page, through Preview too, so a fixed overlay there would cover
+the tools. The block reads the canvas flag (`editorCanvas`) and opens the panel
+instead; the standalone preview and the site show the real thing. The default
+panel a menu gets without asking is still the absolute one, and still not fixed.
+
+Three presets: `header-cta-bar` (pills), `header-dark-bar` (the underline),
+and new `header-logo-full-menu` (the logo alone and an always-on burger that
+opens the whole screen, the luxury and editorial header). `tests/menus.test.ts`.
+
 ## Backdrops: an atmosphere behind a section with no photograph (15 Sep 2026)
 
 A section's **Backdrop** select, in the Motion group beside the animated

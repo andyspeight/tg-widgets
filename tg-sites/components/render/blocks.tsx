@@ -3376,6 +3376,12 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
       const href = safeUrl(str(item, 'href'), CONTACT_OK) || '#';
       const newTab = bool(item, 'newTab');
       /*
+       * The link to the page being drawn, marked by fillNavFolders (lib/content/
+       * nav.ts) from the route's address, never by the block: a screen reader
+       * says "current page" on it and the pill and underline styles mark it.
+       */
+      const current = bool(item, 'current');
+      /*
        * The pages inside a folder, injected by fillNavFolders (lib/content/nav.ts)
        * before this ever renders. A plain link has none; a link that points at a
        * folder carries the pages filed inside it, and becomes a dropdown.
@@ -3396,6 +3402,7 @@ function navLinks(items: Props[], keyPrefix: string): ReactElement[] {
         <a
           className="tgs-nav__link"
           href={href}
+          aria-current={current ? 'page' : undefined}
           {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
           {drawable && <ContentIcon name={icon} className="tgs-nav__icon" />}
@@ -3507,11 +3514,22 @@ const NAV_FONT_VALUES = new Set(FONT_CHOICES.map((choice) => choice.value));
 const NAV_SIZE_VALUES = new Set(FONT_SIZES.map((size) => size.value));
 const NAV_WEIGHTS = new Set(['400', '500', '600', '700']);
 
-export function NavBlock({ props }: { props: Props }): ReactElement {
+export function NavBlock({ props, editing = false }: { props: Props; editing?: boolean }): ReactElement {
   const items = list(props, 'items');
   const layout = oneOf(props, 'layout', ['row', 'column'] as const, 'row');
   const align = oneOf(props, 'align', ALIGNS, 'left');
   const gap = oneOf(props, 'gap', ['none', 'xs', 's', 'm', 'l', 'xl'] as const, 'm');
+  /*
+   * HOW A LINK LOOKS (React Bits review, 15 Sep 2026, slice 5): plain, a pill, or
+   * an underline that sweeps in. And WHAT THE BURGER OPENS: the panel under the
+   * bar, the whole screen, or cards. The full screen is a fixed overlay, and the
+   * editing canvas sits inside the editor's own page, so there it falls back to
+   * the panel: a client sees the real thing in Preview and on the site. `editing`
+   * is the canvas flag (editorCanvas), true through Preview too, for that reason.
+   */
+  const style = oneOf(props, 'style', ['plain', 'pill', 'underline'] as const, 'plain');
+  const wanted = oneOf(props, 'panel', ['panel', 'full', 'cards'] as const, 'panel');
+  const panel = editing && wanted === 'full' ? 'panel' : wanted;
   /*
    * WHEN THE LINKS GO BEHIND A BUTTON: never, on phones, or at every width.
    *
@@ -3550,9 +3568,11 @@ export function NavBlock({ props }: { props: Props }): ReactElement {
       data-align={align}
       data-gap={gap}
       data-uppercase={uppercase ? 'true' : undefined}
+      data-style={style === 'plain' ? undefined : style}
       /* The mode, so the stylesheet can tell an always-burger from a phone one
          without a second class per state. */
       data-burger={burger}
+      data-panel={hasBurger(burger) && panel !== 'panel' ? panel : undefined}
       style={hasNavStyle ? navStyle : undefined}
     >
       {showsRow(burger) && (

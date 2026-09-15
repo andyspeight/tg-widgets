@@ -46,14 +46,16 @@ type LooseSection = {
 /** A block-shaped thing, as stored. Its props may carry inner columns. */
 type LooseBlock = {
   type?: unknown;
-  props?: { arrive?: unknown; hover?: unknown; effect?: unknown; columns?: unknown } | null;
+  props?: { arrive?: unknown; hover?: unknown; effect?: unknown; panel?: unknown; columns?: unknown } | null;
 };
 
 /**
  * True when a heading in these blocks (or in the columns nested inside them) has
  * words that arrive, or words that answer the pointer's distance, or a button is
- * magnetic (the script moves it toward the pointer). A text block's scroll reveal
- * and a button's sheen or trace are pure CSS and never count.
+ * magnetic (the script moves it toward the pointer), or a menu opens the whole
+ * screen (the script makes the page beneath inert and closes it on Escape). A
+ * text block's scroll reveal, a button's sheen or trace and a menu's pill,
+ * underline or cards are pure CSS and never count.
  */
 function blocksNeedScript(blocks: unknown): boolean {
   if (!Array.isArray(blocks)) return false;
@@ -66,6 +68,7 @@ function blocksNeedScript(blocks: unknown): boolean {
       if (props.hover === 'proximity') return true;
     }
     if ((block.type === 'button' || block.type === 'button-group') && props.effect === 'magnetic') return true;
+    if (block.type === 'nav' && props.panel === 'full') return true;
     return columnsNeedScript(props.columns);
   });
 }

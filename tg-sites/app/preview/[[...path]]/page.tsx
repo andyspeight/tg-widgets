@@ -236,7 +236,7 @@ export default async function PublishedPage({ params }: Params) {
           would put an overflow ancestor between a sticky header and the
           document, which is what stops sticky sticking. */}
       <RegionRenderer
-        region={fillNavRegion(found.regions.header, found.navPages)}
+        region={fillNavRegion(found.regions.header, found.navPages, (path ?? []).join('/'))}
         theme={theme}
         // See-through when the page opens with a section pulled up under it, so
         // the preview shows the picture behind the header the way the site will.
@@ -251,7 +251,7 @@ export default async function PublishedPage({ params }: Params) {
           genuine trail to build. */}
       <PageRenderer
         page={fillBreadcrumbs(
-          fillNavFolders(found.page.content, found.navPages),
+          fillNavFolders(found.page.content, found.navPages, (path ?? []).join('/')),
           (path ?? []).join('/'),
           found.page.title,
         )}
@@ -261,7 +261,7 @@ export default async function PublishedPage({ params }: Params) {
       />
 
       <RegionRenderer
-        region={fillNavRegion(found.regions.footer, found.navPages)}
+        region={fillNavRegion(found.regions.footer, found.navPages, (path ?? []).join('/'))}
         theme={theme}
         prepared={prepared}
         sizes={imageSizes}

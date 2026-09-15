@@ -626,7 +626,7 @@ export default async function SitePage({ params, searchParams }: Params) {
         /* A Menu link that points at a folder is filled with the pages inside it
            here, the same place the Cards block's collection is filled: the block
            stays a plain component that never reads the page list. */
-        region={fillNavRegion(found.regions.header, found.navPages)}
+        region={fillNavRegion(found.regions.header, found.navPages, currentPath)}
         theme={theme}
         /*
           The header goes see-through when the page opens with a section pulled up
@@ -666,7 +666,7 @@ export default async function SitePage({ params, searchParams }: Params) {
       {found.page ? (
         <PageRenderer
           page={fillBreadcrumbs(
-            fillNavFolders(found.page.content, found.navPages),
+            fillNavFolders(found.page.content, found.navPages, currentPath),
             currentPath,
             pageTitle,
           )}
@@ -694,7 +694,7 @@ export default async function SitePage({ params, searchParams }: Params) {
 
       {showChrome && (
         <RegionRenderer
-          region={fillNavRegion(found.regions.footer, found.navPages)}
+          region={fillNavRegion(found.regions.footer, found.navPages, currentPath)}
           theme={theme}
           prepared={prepared}
           sizes={imageSizes}

@@ -139,6 +139,13 @@ interface Props {
    */
   navPages?: readonly NavPage[];
   /**
+   * The address of the page being edited, so a Menu link to it is marked as the
+   * current page on the canvas the way the site marks it (aria-current, and the
+   * pill and underline styles). Null for a region or an item, which have no
+   * address of their own.
+   */
+  currentPath?: string | null;
+  /**
    * Blocks that carry an open comment, so the canvas can pin a marker on each.
    * `path` is the block's data-path (already resolved from the stable anchor id),
    * `threadId` the thread to open, `count` how many threads sit on that block.
@@ -255,6 +262,7 @@ export function Canvas({
   chromeFooter = null,
   onActivateRegion,
   navPages = [],
+  currentPath = null,
   commentPins = [],
   onOpenComment,
   preparedSeed,
@@ -1017,7 +1025,7 @@ export function Canvas({
              the render boundary so the tree the editor holds and saves is
              untouched. Both are non-structural, so neither changes a data-path
              the editing handlers resolve against. */
-          page={fillNavFolders(shownForVisitor, navPages)}
+          page={fillNavFolders(shownForVisitor, navPages, currentPath)}
           editable={!preview}
           editingPath={preview ? null : editingPath}
           /*
@@ -1091,7 +1099,7 @@ export function Canvas({
     return (
       <ChromeBand
         // Its Menu folders filled for the band, the same as the framed tree.
-        page={fillNavFolders(content, navPages)}
+        page={fillNavFolders(content, navPages, currentPath)}
         tree={pos}
         theme={theme}
         preview={preview}

@@ -246,7 +246,7 @@ describe('tg-motion.js', () => {
     expect(init).toContain('setUpCardPointer();');
     expect(init).toContain('setUpMagnets();');
     expect(script.indexOf('if (REDUCED && REDUCED.matches) return;')).toBeLessThan(script.indexOf('function setUpCardPointer()'));
-    expect(script).toContain("var VERSION = '1.3.0';");
+    expect(script).toContain("var VERSION = '1.4.0';");
   });
 
   it('is pulled onto a page by a spotlight, a tilt or a magnet, and by nothing else new', () => {

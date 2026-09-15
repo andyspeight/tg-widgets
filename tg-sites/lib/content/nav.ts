@@ -124,20 +124,32 @@ export function navFolders(pages: readonly NavPage[]): Map<string, NavChild[]> {
 }
 
 /**
- * A tree with its Menu blocks' folder links filled in.
+ * A tree with its Menu blocks' folder links filled in, and the link to the page
+ * being drawn marked as the current one.
  *
- * Returns the SAME tree when nothing is a folder, so the common case, a menu of
- * plain links, costs one walk and no allocation. Walks section, row, column,
- * block exactly as fillListings does, so the two treat the tree the same way.
- * Each matched item gains a `children` array the Menu block renders as a
- * dropdown; every other item is returned untouched.
+ * Returns the SAME tree when nothing is a folder and no link is current, so the
+ * common case, a menu of plain links on a page it does not link to, costs one
+ * walk and no allocation. Walks section, row, column, block exactly as
+ * fillListings does, so the two treat the tree the same way. Each matched item
+ * gains a `children` array the Menu block renders as a dropdown; every other
+ * item is returned untouched.
+ *
+ * THE CURRENT PAGE (15 Sep 2026, the React Bits menus slice). Given the address
+ * of the page being drawn, the item whose href is that address gains
+ * `current: true`, which the Menu block renders as aria-current="page": a screen
+ * reader says "current page" on it, and the pill and underline-sweep styles mark
+ * it. Same-site paths only, through navItemPath, so an external link or an
+ * anchor is never current. Decided here for the reason the folders are: the
+ * block is a plain component that never learns where it is being drawn.
  */
 export function fillNavFolders<T extends { sections: Section[] }>(
   tree: T,
   pages: readonly NavPage[],
+  currentPath?: string | null,
 ): T {
   const folders = navFolders(pages);
-  if (folders.size === 0) return tree;
+  const here = typeof currentPath === 'string' ? normalisePath(currentPath) : null;
+  if (folders.size === 0 && here === null) return tree;
 
   let touched = false;
 
@@ -158,9 +170,14 @@ export function fillNavFolders<T extends { sections: Section[] }>(
             const path = navItemPath(href);
             if (path === null) return item;
             const children = folders.get(path);
-            if (!children) return item;
+            const current = here !== null && path === here;
+            if (!children && !current) return item;
             itemTouched = true;
-            return { ...(item as Record<string, unknown>), children };
+            return {
+              ...(item as Record<string, unknown>),
+              ...(children ? { children } : {}),
+              ...(current ? { current: true } : {}),
+            };
           });
 
           if (!itemTouched) return block;
@@ -178,6 +195,7 @@ export function fillNavFolders<T extends { sections: Section[] }>(
 export function fillNavRegion<T extends { sections: Section[] }>(
   region: T | null,
   pages: readonly NavPage[],
+  currentPath?: string | null,
 ): T | null {
-  return region ? fillNavFolders(region, pages) : null;
+  return region ? fillNavFolders(region, pages, currentPath) : null;
 }

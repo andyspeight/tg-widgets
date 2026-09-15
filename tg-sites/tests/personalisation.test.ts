@@ -152,6 +152,6 @@ describe('Preview as lets a client check an audience in the editor', () => {
     // and editing (no profile) shows every section so a hidden one stays
     // selectable. The renderer draws the filtered tree.
     expect(canvas).toContain('previewAs ? { ...shown, sections: personaliseSections(shown.sections, previewAs) } : shown');
-    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages)');
+    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages, currentPath)');
   });
 });

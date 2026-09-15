@@ -36,6 +36,7 @@ import { listPageCommentsAction, openCommentCountAction } from '../../app/action
 import { PublishHistory } from './PublishHistory';
 import { PublishSiteDialog } from '../ui/PublishSiteDialog';
 import type { NavPage } from '../../lib/content/nav';
+import { livePaths } from '../../lib/content/paths';
 import type { Page, RegionName, Section } from '../../lib/content/schema';
 import { parsePage } from '../../lib/content/schema';
 import { pageAsRegion, REGION_TITLES } from '../../lib/content/region-page';
@@ -772,6 +773,17 @@ export function EditorShell({
         published: true,
       })),
     [pages],
+  );
+
+  /*
+   * The address of the page being edited, from the same path rules the site
+   * uses, so a Menu link to this page is marked current on the canvas exactly
+   * as it will be on the site (React Bits menus slice, 15 Sep 2026). A region
+   * or an item has no address of its own, and the lookup simply finds nothing.
+   */
+  const currentPath = useMemo<string | null>(
+    () => livePaths(navPages.map((entry) => ({ id: entry.id, parentId: entry.parentId, slug: entry.slug, published: true }))).get(pageId) ?? null,
+    [navPages, pageId],
   );
 
   /**
@@ -2557,8 +2569,10 @@ export function EditorShell({
         chromePage={activeTree === 'page' ? null : otherContent.page}
         chromeFooter={activeTree === 'footer' ? null : otherContent.footer}
         onActivateRegion={activateTree}
-        // So a Menu link to a folder shows its dropdown on the canvas too.
+        // So a Menu link to a folder shows its dropdown on the canvas too, and
+        // the link to this page is marked as the current one.
         navPages={navPages}
+        currentPath={currentPath}
         // A pin on every block that carries an open comment; clicking it opens
         // the Comments panel on that thread.
         commentPins={commentPins}

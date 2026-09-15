@@ -73,10 +73,25 @@ added there, and a card that leans or a button that slides would slide away from
 the person selecting it. The pointer effects work on the published page and in
 the editor's Preview (the eye), and nowhere else.
 
-Next: slice 5 Menus (pill and underline sweep styles; full-screen and cards
-behind the burger). Elementor gap #2 (form actions) is parked behind it by
-Andy's choice on 15 Sep. None of the four shipped slices has yet been looked at
-by Andy in the live editor.
+**Slice 5, Menus, shipped the same night, and the review is complete.** The
+Menu block gains a link `style` (plain, pill, underline sweep) and a `panel`
+behind the burger (the panel under the bar, the whole screen, cards). Under
+it, one thing no menu had before: the CURRENT PAGE, marked by `fillNavFolders`
+from the route's address and rendered as `aria-current="page"`, which the
+site, the standalone preview and the editor canvas all now pass. The full
+screen is a fixed overlay, links at display size cascading in, and it carries
+the answer to the August focus concern with it: `tg-motion.js` 1.4.0 makes the
+page beneath inert and closes it on Escape, before the script's reduced-motion
+return. Never on the editing canvas, which is not an iframe; there it opens as
+the panel. Three header presets (`header-cta-bar` pills, `header-dark-bar`
+underline, new `header-logo-full-menu`). `tests/menus.test.ts`, and a
+Chromium check with the script, without it, under reduced motion and on a
+phone. Detail in `docs/motion-engine.md` under Menus.
+
+Next: Andy to look at the five slices in the live editor (Preview, the eye, or
+the published page; the pointer and word effects and the full-screen menu never
+run on the editing canvas). Then Elementor gap #2 (form actions), parked behind
+the React Bits slices by Andy's choice on 15 Sep.
 
 ---
 

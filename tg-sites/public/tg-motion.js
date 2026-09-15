@@ -60,17 +60,93 @@
  * button is told which way to lean (setUpMagnets). Mouse only; with no script the
  * spotlight sits at the centre and the buttons stay put.
  *
+ * AND THE FULL-SCREEN MENU (the same day, slice 5). A menu that opens over the
+ * whole screen is a fixed overlay with the page still beneath it, and without a
+ * script nothing stops the Tab key wandering behind it. So while one is open
+ * this makes everything outside its header inert and closes it on Escape
+ * (setUpFullMenu). With no script it still opens and closes from its own button.
+ *
+ * NOT BEHIND THE REDUCED-MOTION RETURN, unlike everything else here: this is not
+ * motion, it is the keyboard, and a visitor who asked for less movement is owed
+ * it the same. So it is wired up before that return, and it is the one thing
+ * that is.
+ *
  * CSP-CLEAN, like everything else here. No inline handlers, no injected script, no
  * eval, no innerHTML. It only ever reads the data- attributes the renderer wrote.
  *
- * @version 1.3.0
+ * @version 1.4.0
  */
 (function () {
   'use strict';
 
-  var VERSION = '1.3.0';
+  var VERSION = '1.4.0';
 
-  /* Nothing here runs for a visitor who asked for less movement. Not a reduced
+  /*
+   * THE FULL-SCREEN MENU IS MADE ESCAPABLE FIRST, before the reduced-motion
+   * return below, because it is not motion (see the header note). Everything
+   * outside the menu's own header is made inert while it is open, so Tab and a
+   * screen reader stay inside the overlay, and Escape closes it and hands focus
+   * back to the button that opened it.
+   */
+  function setUpFullMenu() {
+    var menus = document.querySelectorAll("[data-panel='full'] > .tgs-nav__disclosure");
+    for (var m = 0; m < menus.length; m += 1) {
+      if (menus[m].getAttribute('data-menu-live') === '1') continue;
+      menus[m].setAttribute('data-menu-live', '1');
+      bindFullMenu(menus[m]);
+    }
+  }
+
+  function bindFullMenu(details) {
+    var header = details.closest('.tgs-region') || details.closest('.tgs-page') || details.parentNode;
+    var made = [];
+
+    function quieten() {
+      /* Every sibling of the header, and of each of its ancestors up to the body:
+         the classic way to leave one subtree live and nothing else. */
+      var node = header;
+      while (node && node !== document.body && node.parentNode) {
+        var kin = node.parentNode.children;
+        for (var k = 0; k < kin.length; k += 1) {
+          if (kin[k] !== node && !kin[k].hasAttribute('inert')) {
+            kin[k].setAttribute('inert', '');
+            made.push(kin[k]);
+          }
+        }
+        node = node.parentNode;
+      }
+    }
+
+    function restore() {
+      for (var i = 0; i < made.length; i += 1) made[i].removeAttribute('inert');
+      made = [];
+    }
+
+    function onKey(event) {
+      if (event.key !== 'Escape' || !details.open) return;
+      details.open = false;
+      var summary = details.querySelector('summary');
+      if (summary && summary.focus) summary.focus();
+    }
+
+    details.addEventListener('toggle', function () {
+      if (details.open) {
+        quieten();
+        document.addEventListener('keydown', onKey);
+      } else {
+        restore();
+        document.removeEventListener('keydown', onKey);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setUpFullMenu);
+  } else {
+    setUpFullMenu();
+  }
+
+  /* Nothing below runs for a visitor who asked for less movement. Not a reduced
      amount: none, and no rAF loop is ever started. The CSS rail is already a
      finished, swipeable carousel without it. */
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');

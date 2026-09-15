@@ -5982,6 +5982,243 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 
 /*
+ * ---------------------------------------------------------------------------
+ * HOW A LINK LOOKS (React Bits review, 15 Sep 2026, slice 5: Pill Nav and the
+ * underline sweep every editorial header draws). Two link styles on the menu,
+ * both CSS, both marking the page the visitor is on through aria-current="page",
+ * which lib/content/nav.ts sets from the route's address.
+ *
+ * THE PILL: every link sits in a rounded field; the one for the current page is
+ * washed in the brand colour, and a link under the pointer takes a lighter wash.
+ * The wash is a mix of the brand colour on a light band and the band's own
+ * border tint on a dark or accent one, the same pair the dropdown's hover uses,
+ * so a pill never flashes a light patch on a dark bar.
+ * ---------------------------------------------------------------------------
+ */
+.tgs-nav[data-style='pill'] .tgs-nav__link {
+  padding: 0.42em 0.95em;
+  border-radius: 999px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.tgs-nav[data-style='pill'] .tgs-nav__link:hover {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--tgs-primary) 10%, transparent);
+}
+.tgs-nav[data-style='pill'] .tgs-nav__link[aria-current='page'] {
+  background: color-mix(in srgb, var(--tgs-primary) 16%, transparent);
+  color: var(--tgs-primary);
+}
+.tgs-section[data-tone='dark'] .tgs-nav[data-style='pill'] .tgs-nav__link:hover,
+.tgs-section[data-tone='dark'] .tgs-nav[data-style='pill'] .tgs-nav__link[aria-current='page'] {
+  background: var(--tgs-on-dark-border);
+  color: inherit;
+}
+.tgs-section[data-tone='accent'] .tgs-nav[data-style='pill'] .tgs-nav__link:hover,
+.tgs-section[data-tone='accent'] .tgs-nav[data-style='pill'] .tgs-nav__link[aria-current='page'] {
+  background: var(--tgs-on-primary-border);
+  color: inherit;
+}
+/* Inside a burger's list the links are blocks, so the pill keeps its inset
+   rather than the stacked list's bare padding. Later than the stacked rules on
+   purpose: equal specificity, and this one has to win. */
+.tgs-nav[data-style='pill'] .tgs-nav__list--stacked .tgs-nav__link { padding: 0.5em 0.95em; }
+
+/*
+ * THE UNDERLINE SWEEP: a two-pixel line in the link's own colour that draws in
+ * from the left as the pointer arrives, leaves to the right as it goes, and
+ * stays under the current page. The origin swap is the whole trick: at rest the
+ * line is scaled to nothing from the right, so shrinking back reads as leaving
+ * that way. Only the transition sits behind the reduced-motion guard: with less
+ * motion asked for, the line simply is or is not there.
+ */
+.tgs-nav[data-style='underline'] .tgs-nav__link {
+  position: relative;
+  text-decoration: none;
+}
+.tgs-nav[data-style='underline'] .tgs-nav__link:hover { text-decoration: none; }
+.tgs-nav[data-style='underline'] .tgs-nav__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.2em;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+}
+.tgs-nav[data-style='underline'] .tgs-nav__link:hover::after,
+.tgs-nav[data-style='underline'] .tgs-nav__link:focus-visible::after,
+.tgs-nav[data-style='underline'] .tgs-nav__link[aria-current='page']::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+/* Not inside a burger's list, where the links are full-width blocks and a line
+   the width of the panel is a rule, not an underline. The current page shows in
+   the brand colour there instead. */
+.tgs-nav[data-style='underline'] .tgs-nav__list--stacked .tgs-nav__link::after { display: none; }
+.tgs-nav[data-style='underline'] .tgs-nav__list--stacked .tgs-nav__link[aria-current='page'] { color: var(--tgs-primary); }
+.tgs-section[data-tone='dark'] .tgs-nav[data-style='underline'] .tgs-nav__list--stacked .tgs-nav__link[aria-current='page'],
+.tgs-section[data-tone='accent'] .tgs-nav[data-style='underline'] .tgs-nav__list--stacked .tgs-nav__link[aria-current='page'] {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-nav[data-style='underline'] .tgs-nav__link::after {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/*
+ * ---------------------------------------------------------------------------
+ * WHAT THE BURGER OPENS (the same slice: Staggered Menu and Card Nav). The
+ * panel under the bar is the default and is the rules above. Two more, keyed on
+ * data-panel, which the renderer writes only when there is a burger to open
+ * them, and never writes as 'full' on the editing canvas (see NavBlock).
+ *
+ * THE WHOLE SCREEN. The stacked list becomes a fixed overlay over the viewport,
+ * the links at display size arriving one after another, the treatment every
+ * luxury and editorial header uses. The burger that opened it stays exactly
+ * where it was, as a cross, above the overlay: the control that opened it is
+ * the control that closes it. The page beneath stops scrolling while it is
+ * open (the :has() on html), and public/tg-motion.js makes the page beneath
+ * inert and closes the menu on Escape, so the keyboard cannot wander behind it.
+ * That script is the answer to the focus concern the always-on burger's note
+ * above records: without it the overlay still opens and closes, and a visitor
+ * who tabs past the last link lands on the page beneath, which the note calls
+ * ordinary rather than a fault. The header rises while it is open for the same
+ * stacking reason the always-on panel documents.
+ * ---------------------------------------------------------------------------
+ */
+.tgs-region[data-region='header']:has(.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open]) {
+  z-index: 40;
+}
+html:has(.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open]) { overflow: hidden; }
+
+.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  margin: 0;
+  /* Room for the bar the cross still sits in, then the links from there down. */
+  padding: calc(var(--tgs-space-xl) * 2) var(--tgs-space-xl) var(--tgs-space-xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.15em;
+  background: var(--tgs-surface);
+  color: var(--tgs-text);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  max-height: none;
+  overflow-y: auto;
+  animation: none;
+}
+.tgs-nav[data-panel='full'][data-align='centre'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked { align-items: center; text-align: center; }
+.tgs-nav[data-panel='full'][data-align='right'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked { align-items: flex-end; text-align: right; }
+.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] > .tgs-nav__burger {
+  position: relative;
+  z-index: 61;
+}
+/* Display size on the link itself, not its item, so a folder's pages beneath
+   it keep a reading size rather than inheriting a headline's. */
+.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item > .tgs-nav__link {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 600;
+  line-height: 1.08;
+  padding: 0.12em 0;
+  letter-spacing: -0.01em;
+}
+.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__submenu {
+  padding: 0.2em 0 0.6em 0.15em;
+}
+.tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__sublink {
+  font-size: 1.1rem;
+  padding: 0.25em 0;
+}
+.tgs-section[data-tone='dark'] .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  background: var(--tgs-surface-dark);
+}
+.tgs-section[data-tone='accent'] .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  background: var(--tgs-primary);
+}
+
+/* The overlay fades up and the links cascade in, one a beat behind the last
+   (twelve links at most, so twelve beats). Only where motion is welcome; with
+   less asked for, the menu is simply open. */
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+    animation: tgs-nav-full-in 0.3s ease-out;
+  }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item {
+    animation: tgs-nav-cascade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(2) { animation-delay: 55ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(3) { animation-delay: 110ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(4) { animation-delay: 165ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(5) { animation-delay: 220ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(6) { animation-delay: 275ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(7) { animation-delay: 330ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(8) { animation-delay: 385ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(9) { animation-delay: 440ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(10) { animation-delay: 495ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(11) { animation-delay: 550ms; }
+  .tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:nth-child(12) { animation-delay: 605ms; }
+}
+@keyframes tgs-nav-full-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes tgs-nav-cascade {
+  from { opacity: 0; transform: translateY(0.5em); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/*
+ * CARDS. The links in the panel laid out as a grid of cards, each folder's pages
+ * beneath its card, which is the Card Nav reading of a menu: a small site map
+ * rather than a list. The same panel as before otherwise, so the always-on
+ * burger's placement, tone and entrance all hold; only the list inside changes.
+ */
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: var(--tgs-space-s);
+  align-items: stretch;
+  /* A card reads from its start edge whatever side the bar's menu sits on;
+     right-aligned words in a card looked like a mistake in the browser. */
+  text-align: start;
+}
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item {
+  padding: var(--tgs-space-m);
+  border: 1px solid var(--tgs-border);
+  border-radius: var(--tgs-radius-md);
+  transition: border-color 0.15s ease;
+}
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:hover,
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:focus-within {
+  border-color: var(--tgs-primary);
+}
+.tgs-section[data-tone='dark'] .tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:hover,
+.tgs-section[data-tone='accent'] .tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item:hover {
+  border-color: currentColor;
+}
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item > .tgs-nav__link {
+  font-weight: 600;
+  padding: 0 0 var(--tgs-space-xs);
+}
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__submenu {
+  padding: 0;
+}
+.tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__sublink {
+  padding: 0.2em 0;
+  white-space: normal;
+}
+
+/*
  * FOLDERS FILL DROPDOWNS, WITH NO JAVASCRIPT (Andy, 15 Aug 2026).
  *
  * A Menu link that points at a folder keeps being a real link to that page, and

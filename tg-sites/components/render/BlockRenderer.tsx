@@ -170,8 +170,13 @@ export function BlockRenderer({
         return <ButtonBlock props={props} editing={editable} />;
       case 'button-group':
         return <ButtonGroupBlock props={props} editing={editable} />;
+      /*
+       * `editorCanvas`, not `editable`: the menu's full-screen panel is a fixed
+       * overlay, and the canvas sits inside the editor's page through Preview
+       * too, so there it opens as the ordinary panel instead. See NavBlock.
+       */
       case 'nav':
-        return <NavBlock props={props} />;
+        return <NavBlock props={props} editing={editorCanvas} />;
       /*
        * `editable` tells the search box to render as a div with a read-only
        * field rather than a live form, so typing a query on the canvas cannot

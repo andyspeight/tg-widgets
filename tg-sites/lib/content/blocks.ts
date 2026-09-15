@@ -2838,7 +2838,9 @@ export const BLOCKS: readonly BlockDefinition[] = [
       layout: 'row',
       align: 'left',
       gap: 'm',
+      style: 'plain',
       collapse: 'phone',
+      panel: 'panel',
       uppercase: false,
       items: [
         { label: 'Home', href: '/', newTab: false },
@@ -2883,6 +2885,25 @@ export const BLOCKS: readonly BlockDefinition[] = [
       { kind: 'select', key: 'align', label: 'Alignment', options: ALIGN_OPTIONS },
       { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
       /*
+       * HOW A LINK LOOKS, AND HOW IT MARKS THE PAGE YOU ARE ON (React Bits review,
+       * 15 Sep 2026, slice 5: Pill Nav, and the underline every editorial header
+       * draws). Plain is what every menu was. The pill sits the current page's
+       * link in a soft pill and washes a link under the pointer; the underline
+       * sweeps in from the left under the pointer and stays under the current
+       * page. Both CSS, both marking aria-current, which the route sets.
+       */
+      {
+        kind: 'select',
+        key: 'style',
+        label: 'Link style',
+        options: [
+          { value: 'plain', label: 'Plain' },
+          { value: 'pill', label: 'Pill' },
+          { value: 'underline', label: 'Underline sweep' },
+        ],
+        help: 'Pill and underline both mark the page a visitor is on.',
+      },
+      /*
        * THE BURGER, AND WHEN IT APPEARS (Andy, 20 Aug 2026, from the Duda list).
        *
        * This was a toggle until that date, which could say "on phones" or "not
@@ -2906,6 +2927,28 @@ export const BLOCKS: readonly BlockDefinition[] = [
         help:
           'On phones tucks the links behind a button where they will not fit. '
           + 'Always keeps them behind it at every width, which suits a header that is mostly logo.',
+      },
+      /*
+       * WHAT THE BUTTON OPENS (the same slice: Staggered Menu and Card Nav). The
+       * panel under the bar is what it always opened. Full screen covers the
+       * page with the links at display size, arriving one after another, the
+       * treatment every luxury and editorial header uses; while it is open the
+       * page beneath is made inert and Escape closes it (public/tg-motion.js),
+       * so the keyboard cannot wander behind it. Cards lays the links out as
+       * cards, each folder's pages beneath its card. On the editing canvas full
+       * screen opens as the panel, because the canvas sits inside the editor
+       * and a fixed overlay would cover the tools.
+       */
+      {
+        kind: 'select',
+        key: 'panel',
+        label: 'Behind the button',
+        options: [
+          { value: 'panel', label: 'A panel under the bar' },
+          { value: 'full', label: 'The whole screen' },
+          { value: 'cards', label: 'Cards' },
+        ],
+        help: 'Full screen shows on the published site and in Preview; on the canvas it opens as the panel.',
       },
       /*
        * The type of the links, so a header menu can match the brand rather than

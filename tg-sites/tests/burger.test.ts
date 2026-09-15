@@ -244,14 +244,20 @@ describe('the always-on burger', () => {
   });
 
   /*
-   * NOT position: fixed, and this is the assertion that stops somebody
-   * "improving" it into a full-screen overlay six months from now.
+   * NOT position: fixed, for the DEFAULT panel. This assertion was written to
+   * stop somebody "improving" it into a full-screen overlay, and the reason was
+   * focus, not layout: without a script nothing traps focus inside an overlay,
+   * so tabbing past the last link lands on content the visitor cannot see. An
+   * earlier version of this comment claimed fixed could not reach the viewport
+   * from inside a container-type element; that was measured on 21 Aug 2026 and
+   * is false.
    *
-   * THE REASON IS FOCUS, not layout. Without a script nothing traps focus inside
-   * an overlay, so tabbing past the last link lands on content the visitor
-   * cannot see. An earlier version of this comment claimed fixed could not reach
-   * the viewport from inside a container-type element; that was measured on
-   * 21 Aug 2026 and is false. The assertion stands, the reasoning is corrected.
+   * SINCE 15 SEP 2026 (React Bits slice 5) a full-screen menu EXISTS, as the
+   * menu's own choice (panel: 'full', its rules keyed on data-panel), and it
+   * carries the answer to the focus concern with it: public/tg-motion.js makes
+   * the page beneath inert while it is open and closes it on Escape. The default
+   * panel a menu gets without asking is still this one, and still not fixed.
+   * tests/menus.test.ts pins the full-screen rules and the script.
    */
   it('never tries to escape to the viewport with position: fixed', () => {
     const panel = css.slice(

@@ -616,6 +616,32 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
    * Headers
    */
   {
+    /*
+     * THE LOGO ALONE, AND A MENU OVER THE WHOLE SCREEN (React Bits review, 15 Sep
+     * 2026, slice 5: the Staggered Menu). The bar is the logo and one button at
+     * every width, and the button opens the links at display size over the page,
+     * arriving one after another. The header every luxury and editorial site has,
+     * which the always-on burger could ask for since 20 Aug and could only open as
+     * a panel until today.
+     */
+    id: 'header-logo-full-menu',
+    category: 'header',
+    label: 'Logo and a full-screen menu',
+    description: 'Just your logo and one button. Press it and the links fill the screen, one after another.',
+    rows: [
+      {
+        widths: [3, 1],
+        gap: 24,
+        align: 'centre',
+        columns: [
+          [{ type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } }],
+          [{ type: 'nav', props: { items: LINKS, collapse: 'always', panel: 'full', ...MENU_RIGHT } }],
+        ],
+      },
+    ],
+    section: { paddingY: 16, width: 'wide' },
+  },
+  {
     id: 'header-cta-bar',
     category: 'header',
     label: 'Bar with a button',
@@ -627,7 +653,9 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         align: 'centre',
         columns: [
           [{ type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } }],
-          [{ type: 'nav', props: { items: LINKS, ...MENU_RIGHT } }],
+          // The pill links (React Bits slice 5): the page you are on sits in a
+          // soft pill of the brand colour, the one under the pointer in a lighter one.
+          [{ type: 'nav', props: { items: LINKS, style: 'pill', ...MENU_RIGHT } }],
           [{ type: 'button', props: { label: 'Enquire', href: '/contact', variant: 'primary', align: 'right' } }],
         ],
       },
@@ -688,7 +716,9 @@ export const REGION_PRESETS: readonly SectionPreset[] = [
         align: 'centre',
         columns: [
           [{ type: 'image', props: { ratio: 'auto', fit: 'contain', radius: 'none', alt: 'Your logo', href: '/' } }],
-          [{ type: 'nav', props: { items: LINKS, ...MENU_RIGHT } }],
+          // The underline sweep (slice 5): a line draws in under the link the
+          // pointer is on and stays under the page you are on. Reads well on a dark bar.
+          [{ type: 'nav', props: { items: LINKS, style: 'underline', ...MENU_RIGHT } }],
           [{ type: 'button', props: { label: 'Enquire', href: '/contact', variant: 'primary', align: 'right' } }],
         ],
       },

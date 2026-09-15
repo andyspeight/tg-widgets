@@ -3321,7 +3321,10 @@
       "description": "The links across your header, or down your footer.",
       "variants": [
         "row",
-        "column"
+        "column",
+        "plain",
+        "pill",
+        "underline"
       ],
       "props": [
         {
@@ -3393,6 +3396,18 @@
           "default": "m"
         },
         {
+          "name": "style",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "plain",
+            "pill",
+            "underline"
+          ],
+          "default": "plain"
+        },
+        {
           "name": "collapse",
           "type": "enum",
           "role": "config",
@@ -3403,6 +3418,18 @@
             "always"
           ],
           "default": "phone"
+        },
+        {
+          "name": "panel",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "panel",
+            "full",
+            "cards"
+          ],
+          "default": "panel"
         },
         {
           "name": "linkFont",
@@ -3476,6 +3503,8 @@
       "tokensUsed": [
         "colour.border",
         "colour.border-strong",
+        "colour.on-dark-border",
+        "colour.on-primary-border",
         "colour.pad",
         "colour.pad-r",
         "colour.pb",
@@ -3498,10 +3527,22 @@
         "colours": [
           ".tgs-nav[data-burger='always'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked: rgb(0 0 0 / 12%)"
         ],
-        "spacing": []
+        "spacing": [
+          ".tgs-nav[data-style='pill'] .tgs-nav__link: 0.42em",
+          ".tgs-nav[data-style='pill'] .tgs-nav__link: 0.95em",
+          ".tgs-nav[data-style='pill'] .tgs-nav__list--stacked .tgs-nav__link: 0.5em",
+          ".tgs-nav[data-style='pill'] .tgs-nav__list--stacked .tgs-nav__link: 0.95em",
+          ".tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked: 0.15em",
+          ".tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked > .tgs-nav__item > .tgs-nav__link: 0.12em",
+          ".tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__submenu: 0.2em",
+          ".tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__submenu: 0.6em",
+          ".tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__submenu: 0.15em",
+          ".tgs-nav[data-panel='full'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__sublink: 0.25em",
+          ".tgs-nav[data-panel='cards'] .tgs-nav__disclosure[open] .tgs-nav__list--stacked .tgs-nav__sublink: 0.2em"
+        ]
       },
-      "cssRules": 23,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3510",
+      "cssRules": 68,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3517",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3600,7 +3641,7 @@
         ]
       },
       "cssRules": 18,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3631",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3651",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3732,7 +3773,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3711",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3731",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3849,7 +3890,7 @@
         "spacing": []
       },
       "cssRules": 42,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3800",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3820",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3964,7 +4005,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3901",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3921",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4049,7 +4090,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3969",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3989",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4385,7 +4426,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4045",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4065",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4427,7 +4468,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4909",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4929",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4510,7 +4551,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4592",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4612",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4624,7 +4665,7 @@
         ]
       },
       "cssRules": 33,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4639",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4659",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4843,7 +4884,7 @@
         "spacing": []
       },
       "cssRules": 32,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4170",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4190",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4958,7 +4999,7 @@
         "spacing": []
       },
       "cssRules": 34,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4310",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4330",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5049,7 +5090,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4392",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4412",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5138,7 +5179,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4475",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4495",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5226,7 +5267,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4542",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4562",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5324,7 +5365,7 @@
         "spacing": []
       },
       "cssRules": 31,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4724",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4744",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5409,7 +5450,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4838",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4858",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5585,7 +5626,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4931",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4951",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5628,7 +5669,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4987",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:5007",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]

@@ -309,8 +309,8 @@ describe('the editor canvas fills the menu at the render boundary', () => {
      * `shownForVisitor` is a further display copy of it (the Preview-as filter),
      * so the render draws that; still never the saved tree.
      */
-    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages)');
-    expect(canvas).toContain('fillNavFolders(content, navPages)');
+    expect(canvas).toContain('fillNavFolders(shownForVisitor, navPages, currentPath)');
+    expect(canvas).toContain('fillNavFolders(content, navPages, currentPath)');
     expect(canvas).toContain('const shown = useMemo(() => fillListings(page, listings');
   });
 });

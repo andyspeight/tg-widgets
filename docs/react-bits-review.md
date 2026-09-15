@@ -52,7 +52,8 @@ What we learn is a vocabulary, and five of its words are missing from ours:
    pull on buttons. Our hover vocabulary is lift, zoom and tint. **Built and
    shipped 15 Sep 2026**, see the note at the end of section 4.
 5. **Menus.** A pill that marks the current page, and a full-screen staggered menu
-   behind the burger, the two header treatments a luxury client notices.
+   behind the burger, the two header treatments a luxury client notices. **Built
+   and shipped 15 Sep 2026**, see the note at the end of section 5.
 
 Everything else in the library, and it is the majority, is either something we
 already have under a different name or something with no travel reading at all. Both
@@ -326,6 +327,31 @@ or always, and sets the link font, size, weight, colour and case
 Gooey Nav and Bubble Menu are SVG filter tricks that read as playful software; Dock
 is a macOS quotation; Flowing Menu and Line Sidebar are portfolio furniture. Parked.
 
+**Built 15 Sep 2026.** As planned, plus one thing the plan assumed and the menu
+did not have: the CURRENT PAGE. Neither the pill nor the underline means anything
+without it, and no menu link had ever carried `aria-current`. So `fillNavFolders`
+(which already fills folder dropdowns at the render boundary) now takes the
+address of the page being drawn and marks the link to it, and the site route, the
+standalone preview and the editor canvas all pass it. `style` on the Menu (plain,
+pill, underline), `panel` behind the burger (panel, full, cards). The full screen
+is a fixed overlay with the links at display size cascading in, and it carries
+the answer to the August note that ruled a full-screen menu out on focus grounds:
+`tg-motion.js` 1.4.0 makes the page beneath inert while it is open and closes it
+on Escape, wired before the script's reduced-motion return because it is the
+keyboard, not motion. Never on the editing canvas (not an iframe; a fixed overlay
+would cover the editor), where it opens as the panel. Three presets
+(`header-cta-bar` pills, `header-dark-bar` underline, new `header-logo-full-menu`).
+`tests/menus.test.ts`, and a Chromium check through the real renderer and the
+real script: the current page is marked and both styles show it and answer the
+pointer; the full screen covers the viewport, cascades, locks the page, makes it
+inert, keeps its cross on top, closes on Escape with focus back on the button,
+and Tab stays inside it; the cards are a grid with each folder's pages beneath;
+the plain panel is unchanged; with no script the full screen still opens and
+closes; under reduced motion nothing cascades and the keyboard help still runs;
+a phone opens the full screen from its burger with no overflow. One thing the
+browser caught that the source could not: right-aligned words inside the cards,
+from the bar's own alignment, which read as a mistake.
+
 ---
 
 ## Skipped outright, so the list is not re-reviewed
@@ -364,6 +390,8 @@ vitest, next build) and each carrying its own tests, presets and docs update.
    Finish, not structure, so it comes after the three that change what a page IS.
    **SHIPPED 15 Sep 2026.**
 5. **Menus** (pill and underline sweep; full-screen and cards behind the burger).
+   **SHIPPED 15 Sep 2026**, with the current page marked on every menu, which
+   nothing had done before. All five slices are live.
 
 Standing rules that apply to every slice and are not up for re-deciding: no library,
 ever; tier 0 unless CSS genuinely cannot, then a few lines in `tg-motion.js` behind
