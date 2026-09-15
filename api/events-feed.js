@@ -272,7 +272,7 @@ function teamName(snap, key) {
  * Expand a short snapshot row into a full event, filling in every display name
  * from the registries and attaching a booking deeplink.
  */
-function expand(snap, ev, appId, currency, adults, bookingKinds, origin) {
+function expand(snap, ev, appId, currency, adults, bookingKinds, origin, airportOverrides) {
   const home = teamName(snap, ev.hk);
   const away = teamName(snap, ev.ak);
   const performer = ev.pk ? (snap.performerByKey.get(ev.pk) || {}).name || null : null;
@@ -320,10 +320,11 @@ function expand(snap, ev, appId, currency, adults, bookingKinds, origin) {
   };
 
   const target = { sources, startDate: ev.dt, title, geo: eventGeo().get(ev.i) || venueGeo().get(ev.vk) || null };
-  // The flight leg lands at the airport nearest THIS event's anchor, so a
+  // The flight leg lands at the airport this widget has named for the venue or
+  // the home club, and otherwise the one nearest THIS event's anchor, so a
   // merged venue key's fixtures each fly to their own city.
   const destAirport = (bookingKinds || []).includes('ticket-flight-hotel')
-    ? nearestAirport(target.geo)
+    ? destinationAirport(ev, target.geo, airportOverrides)
     : null;
   const link = buildEventDeeplink(target, { appId, currency, adults });
   out.booking = {
@@ -396,8 +397,63 @@ function page(snap, rows, q, appId, opts = {}) {
     total: sorted.length,
     offset,
     limit: size,
-    events: sorted.slice(offset, offset + size).map((e) => expand(snap, e, appId, opts.currency, opts.adults, opts.bookingKinds, opts.origin)),
+    events: sorted.slice(offset, offset + size).map((e) => expand(snap, e, appId, opts.currency, opts.adults, opts.bookingKinds, opts.origin, opts.airportOverrides)),
   };
+}
+
+/**
+ * Arrival airport overrides, per widget, read off the query string.
+ *
+ * Why (15 Sep 2026, Andy). The flight leg lands at the airport nearest the
+ * venue, which is right for most of the country and wrong for the places
+ * people actually fly to. Liverpool's nearest airport is Liverpool, but a
+ * visitor coming from most of Europe has no direct flight there and would be
+ * routed through Manchester anyway, on a cheaper fare. So an agent can name
+ * the airport THEY want their customers flown into, per venue or per club.
+ *
+ * Wire format is compact because it rides a public query string that also has
+ * to cache well: `dst=liverpool-fc:MAN,anfield:MAN`. Keys are venue or team
+ * keys exactly as the feed reports them. Unknown keys are harmless; a
+ * malformed pair is dropped rather than failing the request.
+ *
+ * Capped at 40 pairs, which is more clubs than any one widget lists, and keeps
+ * the URL inside what proxies and CDNs handle comfortably.
+ */
+function parseAirportOverrides(raw) {
+  const out = new Map();
+  if (!raw) return out;
+  for (const pair of String(raw).split(',')) {
+    const i = pair.indexOf(':');
+    if (i < 1) continue;
+    const key = pair.slice(0, i).trim().toLowerCase();
+    const iata = pair.slice(i + 1).trim().toUpperCase();
+    if (!KEY_RE.test(key) || !/^[A-Z]{3}$/.test(iata)) continue;
+    if (!out.has(key)) out.set(key, iata);
+    if (out.size >= 40) break;
+  }
+  return out;
+}
+
+/**
+ * The airport this event's flight leg should land at.
+ *
+ * The VENUE wins over the club, because the venue is where the match actually
+ * is: an agent who has said "anything at Anfield flies into Manchester" means
+ * it whoever is playing. Then the HOME club, because that is whose ground it
+ * is. Never the away club: Liverpool playing at Arsenal is a trip to London,
+ * and flying that customer to Manchester would be worse than the default.
+ *
+ * Falls through to the nearest airport, which is what every widget got before
+ * any of this and what one with no overrides still gets.
+ */
+function destinationAirport(ev, geo, overrides) {
+  if (overrides && overrides.size) {
+    const venueKey = String(ev.vk || '').toLowerCase();
+    if (venueKey && overrides.has(venueKey)) return overrides.get(venueKey);
+    const homeKey = String(ev.hk || '').toLowerCase();
+    if (homeKey && overrides.has(homeKey)) return overrides.get(homeKey);
+  }
+  return nearestAirport(geo);
 }
 
 /**
@@ -457,7 +513,9 @@ export default function handler(req, res) {
     // surfaces' airport chooser to finish.
     const orgRaw = str(q.org, 3).toUpperCase();
     const origin = /^[A-Z]{3}$/.test(orgRaw) ? orgRaw : null;
-    const linkOpts = { currency, adults, bookingKinds, origin };
+    // Per-widget arrival airports, so an agent can fly Anfield into Manchester.
+    const airportOverrides = parseAirportOverrides(str(q.dst, 600));
+    const linkOpts = { currency, adults, bookingKinds, origin, airportOverrides };
 
     const meta = {
       generatedAt: snap.generatedAt,
@@ -492,7 +550,25 @@ export default function handler(req, res) {
     // The departure chooser's menu: every scheduled-service airport worldwide
     // as [iata, label, country], large first so the majors rank on top.
     if (view === 'airports') {
-      res.status(200).json({ airports: departureAirports() });
+      // The whole list by default, which is what the widgets' airport chooser
+      // has always fetched once and cached. ?q= searches it server-side so the
+      // editors can offer a type-ahead without shipping three thousand rows
+      // per keystroke; `items` is the searchable shape, `airports` the original
+      // one, and both are returned so no existing caller changes.
+      const all = departureAirports();
+      const term = str(q.q, 60);
+      if (!term) { res.status(200).json({ airports: all }); return; }
+      const hit = matcher(term);
+      const wanted = term.toUpperCase();
+      const found = all.filter(([iata, name, cc]) => iata === wanted || hit(name) || hit(cc || ''));
+      // An exact code first, then the larger airports the list already leads
+      // with, so a hub outranks a village strip of the same name.
+      found.sort((a, b) => (b[0] === wanted ? 1 : 0) - (a[0] === wanted ? 1 : 0));
+      const size = intIn(q.limit, 1, 50, 10);
+      res.status(200).json({
+        total: found.length,
+        items: found.slice(0, size).map(([iata, name, cc]) => ({ iata, name, country: cc || '' })),
+      });
       return;
     }
 

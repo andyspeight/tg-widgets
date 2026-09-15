@@ -259,6 +259,12 @@
             <div class="tgse-field">
               <label class="tgse-field-label">What customers can book</label>
               <div id="book-opts"></div>
+            </div>
+            <div class="tgse-field" id="arv-field" hidden>
+              <label class="tgse-field-label">Arrival airport</label>
+              <span class="tgse-field-hint">We fly customers into the airport nearest the ground. Name a different one for any club or ground where that is not the airport with the direct flights. A club's choice applies to its home games only.</span>
+              <div id="arv-airports"></div>
+            </div>
             <div class="tgse-field">
               <label class="tgse-field-label" for="f-pkgbg">Package button colour</label>
               <div class="colour-row">
@@ -385,6 +391,7 @@
     showTime: true,
     bookLabel: 'Book',
     bookingKinds: ['ticket'],
+    arrivalAirports: [],
     currency: 'GBP',
     adults: 2,
     theme: 'light',
@@ -520,8 +527,22 @@
     c.toggle('t-time', 'showTime');
     c.toggle('t-venue', 'showVenue');
 
+  /** Show the arrival airport field only when a flight is actually booked. */
+  function syncArrivalField() {
+    var el = document.getElementById('arv-field');
+    if (!el) return;
+    var kinds = Array.isArray(C.bookingKinds) ? C.bookingKinds : [];
+    el.hidden = kinds.indexOf('ticket-flight-hotel') === -1;
+  }
+
     K.bookingOptions('book-opts', function () { return C.bookingKinds; },
-      function (kinds) { C.bookingKinds = kinds; changed(); });
+      function (kinds) { C.bookingKinds = kinds; changed(); syncArrivalField(); });
+    // Which airport each ground or club flies into. Only relevant when the
+    // flight package is on, so the field follows the tick rather than sitting
+    // there asking a question that cannot matter.
+    K.arrivalAirports('arv-airports', function () { return C.arrivalAirports; },
+      function (rows) { C.arrivalAirports = rows; changed(); });
+    syncArrivalField();
     c.colourOpt('f-pkgbg-swatch', 'f-pkgbg', 'packageBgColor');
     c.colourOpt('f-pkgtext-swatch', 'f-pkgtext', 'packageTextColor');
 
