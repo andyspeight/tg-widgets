@@ -459,11 +459,22 @@ function destinationAirport(ev, geo, overrides) {
 /**
  * A to Z by name, the way a reader expects it: accent-insensitive, so Bayern
  * München files under M for München and not after Z, and case-insensitive, so
- * "AFC Bournemouth" and "Athletic Club" sit together.
+ * "AFC Bournemouth" and "Athletic Club" sit together. Clubs, grounds and
+ * artists carry a name; sports and leagues carry a label, so both are read.
+ *
+ * The same eight lines are carried by public/editor-events-kit.js (every
+ * editor's sport and league lists) and public/widget-eventmenu.js (the menu a
+ * visitor browses), because neither can import from the server. They are held
+ * byte for byte in step by test/events-az-drift-smoke.mjs. One A to Z, one
+ * place it is defined.
  */
-const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'en', {
-  sensitivity: 'base', numeric: true,
-});
+// >>> a to z
+function byName(a, b) {
+  var an = (a && (a.name || a.label)) || '';
+  var bn = (b && (b.name || b.label)) || '';
+  return String(an).localeCompare(String(bn), 'en', { sensitivity: 'base', numeric: true });
+}
+// <<< a to z
 
 /** Case- and accent-insensitive contains, for the search boxes. */
 function matcher(term) {
@@ -664,20 +675,27 @@ export default function handler(req, res) {
       // count reads as no order at all. So a narrowed list goes A to Z and an
       // open one keeps its ranking. ?sort=name or ?sort=events overrides either.
       //
-      // A to Z means A to Z: the whole list is ordered BEFORE the page limit
-      // trims it, so asking for it never hands back the busiest few rearranged.
-      // A competition is a closed set well inside the limit, so nothing is lost
-      // there either way.
+      // TWO SEPARATE QUESTIONS, and the first version of this answered them
+      // with one line. WHICH rows survive the limit is decided by how busy each
+      // one is. What ORDER they are then read in is A to Z. Sorting the whole
+      // pool before the cut answered both with the alphabet, so the Event
+      // Menu's Popular clubs section on a football-only menu
+      // (?view=teams&category=football&limit=24) came back as the twenty-four
+      // football clubs nearest the front of the alphabet: 1899 Hoffenheim,
+      // Aarhus on a single fixture, AC Omonia on none. Corrected the same day,
+      // an hour after it shipped. A competition is a closed set well inside the
+      // limit, so the case Andy asked about is unchanged either way.
       const sortAsked = str(q.sort, 10).toLowerCase();
       const narrowed = (view === 'teams' && KEY_RE.test(compFilter)) || cats.length > 0;
       const alphabetical = sortAsked === 'name' || (sortAsked !== 'events' && narrowed);
-      if (alphabetical) out = out.slice().sort(byName);
 
       const size = intIn(q.limit, 1, 500, 200);
+      let items = out.slice(0, size);
+      if (alphabetical) items = items.slice().sort(byName);
       res.status(200).json({
         meta, total: out.length, limit: size,
         sort: alphabetical ? 'name' : 'events',
-        items: out.slice(0, size),
+        items,
       });
       return;
     }

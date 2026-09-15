@@ -80,6 +80,43 @@
     return el;
   }
 
+  /**
+   * A to Z by name, the way a reader expects it: accent-insensitive, so Bayern
+   * München files under M for München and not after Z, and case-insensitive, so
+   * "AFC Bournemouth" and "Athletic Club" sit together. Clubs, grounds and
+   * artists carry a name; sports and leagues carry a label, so both are read.
+   *
+   * Byte for byte the comparator in api/events-feed.js and the one in
+   * public/widget-eventmenu.js, because a browser file cannot import from the
+   * server. test/events-az-drift-smoke.mjs fails the moment the three differ.
+   */
+  // >>> a to z
+  function byName(a, b) {
+    var an = (a && (a.name || a.label)) || '';
+    var bn = (b && (b.name || b.label)) || '';
+    return String(an).localeCompare(String(bn), 'en', { sensitivity: 'base', numeric: true });
+  }
+  // <<< a to z
+
+  /**
+   * Fill a sport dropdown, A to Z.
+   *
+   * Five editors had five copies of this, each listing the eighteen sports in
+   * the order the feed ranks them (Football, Entertainment, Ice Hockey, ...),
+   * which is a fine way to rank a menu and a poor way to find Rugby. One copy
+   * now, and it reads like a list of sports rather than a league table.
+   */
+  function sportOptions(sel, categories) {
+    var el = typeof sel === 'string' ? $(sel) : sel;
+    if (!el) return;
+    (categories || []).slice().sort(byName).forEach(function (cat) {
+      var o = document.createElement('option');
+      o.value = cat.slug;
+      o.textContent = cat.label + ' (' + cat.events + ')';
+      el.appendChild(o);
+    });
+  }
+
   function debounce(fn, ms) {
     var t = null;
     return function () {
@@ -297,9 +334,13 @@
           if (o.getType() !== 'competition') return;
           box.textContent = '';
           var t = term.trim().toLowerCase();
+          // The busiest forty that match, read A to Z. Ninety-eight leagues in
+          // fixture order is a list an agent scans twice looking for the
+          // Scottish Premiership; A to Z before the cut would simply hide every
+          // league past the letter F until they typed.
           var list = d.competitions.filter(function (c) {
             return !t || (c.label + ' ' + (c.country || '') + ' ' + (c.categoryLabel || '')).toLowerCase().indexOf(t) !== -1;
-          }).slice(0, 40);
+          }).slice(0, 40).sort(byName);
           if (!list.length) { box.appendChild(note('No competition matches that.')); return; }
           list.forEach(function (c) {
             box.appendChild(row(
@@ -847,5 +888,7 @@
     badgeEl: badgeEl,
     debounce: debounce,
     needsPicker: needsPicker,
+    byName: byName,
+    sportOptions: sportOptions,
   };
 }(window));

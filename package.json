@@ -121,6 +121,7 @@
     "test:eventmenu-fixes": "node test/eventmenu-fixes-smoke.mjs",
     "test:eventmenu-results": "node test/eventmenu-results-smoke.mjs",
     "test:events-team-order": "node test/events-team-order-smoke.mjs",
+    "test:events-az-drift": "node test/events-az-drift-smoke.mjs",
     "test:events-arrival-airport": "node test/events-arrival-airport-smoke.mjs",
     "test:events-kit-drift": "node test/events-kit-drift-smoke.mjs",
     "test:family-host-width": "node test/family-host-width-smoke.mjs",

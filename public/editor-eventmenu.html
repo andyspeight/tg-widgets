@@ -710,7 +710,10 @@
     wire: wire,
     prefetch: function () {
       return K.index().then(function (d) {
-        window.__tgCats = (d.categories || []).filter(function (x) { return x.slug !== 'unclassified'; });
+        // A to Z: eighteen sports in fixture order is a list an agent reads
+        // twice looking for Rugby.
+        window.__tgCats = (d.categories || []).filter(function (x) { return x.slug !== 'unclassified'; })
+          .sort(K.byName);
         categoryOpts(window.__tgCats);
       });
     },

@@ -533,14 +533,8 @@
     wire: wire,
     prefetch: function () {
       return K.index().then(function (d) {
-        var sel = $('f-category');
-        sel.textContent = '';
-        (d.categories || []).forEach(function (cat) {
-          var o = document.createElement('option');
-          o.value = cat.slug;
-          o.textContent = cat.label + ' (' + cat.events + ')';
-          sel.appendChild(o);
-        });
+        $('f-category').textContent = '';
+        K.sportOptions('f-category', d.categories);
       });
     },
     load: function () { K.loadSaved(C, function () { syncForm(); render(); }); },
