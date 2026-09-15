@@ -309,6 +309,66 @@ function t(name, fn) {
     ]);
   });
 
+  /* THE FILL RATE, 15 Sep 2026. The tier count is all-or-nothing, so a table
+     whose last gaps sit in fields with no fixer reports the same percentage
+     however much real work lands. Airports read "16% ready" through a day of
+     successful runs. The fill rate cannot do that, and these pin the property
+     that makes it useful: one more filled cell always moves it. */
+
+  t('a type reports how many of its cells are filled', () => {
+    const only = aggregate([{ spec: spec('resort'), rows: [
+      rec('recR1', 'resort', everyField('resort'), { name: 'Oia' }),
+    ] }]).types.find(x => x.key === 'resort');
+    assert.strictEqual(only.filledCells, only.cells, 'a record with everything is fully filled');
+    assert.strictEqual(only.fillRate, 100);
+  });
+
+  t('an empty table reports nought rather than dividing by zero', () => {
+    const none = aggregate([{ spec: spec('resort'), rows: [] }]).types.find(x => x.key === 'resort');
+    assert.strictEqual(none.fillRate, 0);
+    assert.strictEqual(none.cells, 0);
+  });
+
+  t('filling one more field always moves the fill rate', () => {
+    // This is the whole reason the number exists. Build a record that can never
+    // be "ready" because one core field stays blank, then fill a different
+    // field: the tier does not budge and the fill rate does.
+    const sp = spec('resort');
+    const core = sp.fields.filter(f => f.tier === 'core');
+    const blockedForever = core[0].label;   // stays empty in both runs
+    const justFilled = core[1].label;       // empty in the first, filled in the second
+
+    const build = (withExtra) => {
+      const fill = everyField('resort');
+      delete fill[blockedForever];
+      if (!withExtra) delete fill[justFilled];
+      return aggregate([{ spec: sp, rows: [rec('recR1', 'resort', fill, { name: 'Oia' })] }])
+        .types.find(x => x.key === 'resort');
+    };
+    const before = build(false), after = build(true);
+
+    assert.strictEqual(before.tiers.ready + before.tiers.complete, 0, 'not ready before');
+    assert.strictEqual(after.tiers.ready + after.tiers.complete, 0, 'still not ready after');
+    assert.ok(after.fillRate > before.fillRate,
+      'the fill rate must move even when the tier cannot: ' + before.fillRate + ' -> ' + after.fillRate);
+  });
+
+  t('the fill rate counts core and rich alike', () => {
+    // avgScore already weights core double. This one answers a different
+    // question, how much of the table is done, so it must not weight anything.
+    const sp = spec('resort');
+    const rich = sp.fields.find(f => f.tier === 'rich');
+    const core = sp.fields.find(f => f.tier === 'core');
+    const oneOnly = (label) => {
+      const fill = {};
+      fill[label] = everyField('resort')[label];
+      return aggregate([{ spec: sp, rows: [rec('recR1', 'resort', fill, { name: 'Oia' })] }])
+        .types.find(x => x.key === 'resort').filledCells;
+    };
+    assert.strictEqual(oneOnly(rich.label), oneOnly(core.label),
+      'one rich field filled should count the same as one core field');
+  });
+
   t('the airports table uses that check, or none of this applies', () => {
     const ap = TYPES.find(t => t.key === 'airport');
     const f = ap.fields.find(x => x.label === 'Country Text');

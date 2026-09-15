@@ -137,6 +137,7 @@ main{max-width:1440px;margin:0 auto;padding:24px}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mt);padding:12px 20px;border-top:1px solid var(--bd2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend .legend-note{flex-basis:100%;max-width:74ch;line-height:1.5;color:var(--mt)}
 
 /* ---------- tabs ---------- */
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--bd);overflow-x:auto}
@@ -883,20 +884,28 @@ a.nm:hover span{text-decoration:underline}
     var html = D.types.map(function (t) {
       var on = typeFilter === t.key;
       var ready = t.tiers.complete + t.tiers.ready;
+      // LEAD WITH THE FILL RATE, NOT THE TIER. A tier is all-or-nothing, so a
+      // table whose remaining gaps sit in fields with no fixer reads the same
+      // percentage however much real work lands. Airports sat on "16% ready"
+      // through a day of successful runs for exactly that reason. Every filled
+      // cell moves this number, so the headline now tracks the work.
       return '<button class="trow" data-type="' + esc(t.key) + '" aria-pressed="' + on + '">' +
         '<span><span class="trow-n">' + esc(t.label) + '</span>' +
-          '<span class="trow-s">' + n(ready) + ' ready &middot; ' + n(t.count - ready) + ' to do' +
+          '<span class="trow-s">' + n(t.filledCells) + ' of ' + n(t.cells) + ' fields filled' +
+          ' &middot; ' + n(ready) + ' records ready' +
           (t.hasEvidence ? ' &middot; ' + n(t.verified) + ' verified' : '') + '</span></span>' +
         '<span class="trow-c num">' + n(t.count) + '</span>' +
         '<span class="stack-wrap">' + stack(t) + '</span>' +
-        '<span class="trow-p"><b class="num">' + pct(ready, t.count) + '%</b>ready</span>' +
+        '<span class="trow-p"><b class="num">' + t.fillRate + '%</b>filled</span>' +
       '</button>';
     }).join('');
     html += '<div class="legend">' +
       '<span><i class="s1"></i>Complete &mdash; every field, including the extras</span>' +
       '<span><i class="s2"></i>Ready &mdash; everything a page needs</span>' +
       '<span><i class="s3"></i>Part done</span>' +
-      '<span><i class="s4"></i>Not started</span></div>';
+      '<span><i class="s4"></i>Not started</span>' +
+      '<span class="legend-note">The percentage counts fields filled, so it moves with every ' +
+      'run. The bar counts whole records, which only move when their last gap closes.</span></div>';
     $('types').innerHTML = html;
 
     Array.prototype.forEach.call($('types').querySelectorAll('.trow'), function (b) {

@@ -594,6 +594,27 @@ export function aggregate(scanned) {
       });
     }
 
+    /* HOW MUCH OF THE TABLE IS ACTUALLY FILLED, counted cell by cell.
+     *
+     * Added 15 Sep 2026 because the tier count is a bad progress measure for a
+     * table being filled one field at a time, and airports proved it. A tier is
+     * all-or-nothing: a record one field short of ready reads exactly the same
+     * as one with nothing in it. So Andy ran the filler repeatedly, watched real
+     * fields land, and saw "16% ready" every time, because the last gap on those
+     * records was a field with no fixer.
+     *
+     * This number cannot do that. Every cell filled moves it, which is the whole
+     * point of putting it on the front of the panel. It counts core and rich
+     * alike and deliberately does not weight them, because it answers "how much
+     * of this table is done" rather than "how good is this record" — avgScore
+     * already answers the second, with core worth double.
+     */
+    let cells = 0, filledCells = 0;
+    for (const f of fieldStats) {
+      cells += f.filled + f.empty + f.invalid;
+      filledCells += f.filled;
+    }
+
     types.push({
       key: spec.key,
       label: spec.label,
@@ -601,6 +622,9 @@ export function aggregate(scanned) {
       tableId: spec.tableId,
       count: rows.length,
       avgScore: rows.length ? Math.round(scoreSum / rows.length) : 0,
+      fillRate: cells ? Math.round((filledCells / cells) * 100) : 0,
+      cells,
+      filledCells,
       tiers: tally,
       statuses: statusTally,
       fields: fieldStats,

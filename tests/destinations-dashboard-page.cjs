@@ -905,10 +905,38 @@ async function payload(mod) {
     assert.match($('lede').textContent, /still need work/);
   });
 
-  t('each type row reports how much of it is ready', () => {
+  t('each type row leads with a percentage', () => {
     const pcts = [...$('types').querySelectorAll('.trow-p b')].map(e => e.textContent.trim());
     assert.strictEqual(pcts.length, 5);
     assert.ok(pcts.every(p => /^\d+%$/.test(p)), `expected percentages, got ${pcts}`);
+  });
+
+  /* 15 Sep 2026. The headline used to be the share of records at "ready", which
+     is all-or-nothing, so airports read 16% through a day of successful runs.
+     It is the fill rate now, because that moves whenever a field does. */
+
+  t('the headline percentage is the fill rate, not the share of ready records', () => {
+    const rows = [...$('types').querySelectorAll('.trow')];
+    rows.forEach(row => {
+      const key = row.dataset.type;
+      const t = data.types.find(x => x.key === key);
+      assert.strictEqual(row.querySelector('.trow-p b').textContent.trim(), t.fillRate + '%',
+        key + ' should lead with its fill rate');
+      assert.match(row.querySelector('.trow-p').textContent, /filled/);
+    });
+  });
+
+  t('a type row still says how many records are ready, underneath', () => {
+    const row = $('types').querySelector('.trow');
+    assert.match(row.querySelector('.trow-s').textContent, /fields filled/);
+    assert.match(row.querySelector('.trow-s').textContent, /records ready/);
+  });
+
+  t('the legend explains why the two numbers disagree', () => {
+    const note = $('types').querySelector('.legend-note');
+    assert.ok(note, 'the legend should carry a note about the difference');
+    assert.match(note.textContent, /moves with every run/);
+    assert.match(note.textContent, /whole records/);
   });
 
 
