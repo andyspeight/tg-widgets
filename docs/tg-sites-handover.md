@@ -100,6 +100,20 @@ courtesy email. `lib/settings/schema.ts` (`FormActionsSettings`,
 against a real local HTTP receiver that verifies the signature on the bytes it
 received. The contract for the other end is `docs/tg-sites-form-actions.md`.
 
+**The Duda visibility review, written the same night** (Andy: "review the Duda
+website and in particular their visibility tool for AI and SEO, the reporting
+they offer and how it all works, the display, and then we need to upgrade our
+version"). `docs/duda-visibility-review.md`: Duda measures OUTPUTS (a prompt set,
+a share-of-voice score, competitors, sentiment, crawler visits, a monthly
+white-labelled report, an add-on from about $19 a domain); we measure INPUTS
+(the audit and plumbing, which are ahead of theirs) and record nothing. Five
+slices proposed: A log who reads the site (crawlers and AI-referred visitors,
+no keys, a day), B ask the assistants monthly with a prompt set per site
+(Perplexity, ChatGPT, Gemini, Claude; Duda's score formula), C history, D the
+monthly report sent, E a miss becomes a page through the AI writer. duda.co is
+blocked from the session, so Duda's side is search snippets; distrust the price,
+the engine list and the cadence until read live. Awaiting Andy's go.
+
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen
 menu never run on the editing canvas), and to try the form actions against a

@@ -62,7 +62,9 @@ Owner: Andy Speight, CEO, Travelgenix.
   vocabulary the layouts are missing, what we already have under other names, and
   the five-slice build order) and `docs/tg-sites-form-actions.md` (15 Sep 2026: the
   webhook and Brevo contract for where an enquiry also goes, for whoever wires the
-  other end).
+  other end), and `docs/duda-visibility-review.md` (15 Sep 2026: Duda's AI
+  Visibility add-on against our Search and AI visibility screen, and the five
+  slices that close the gap).
 
 - **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
   BUILT and switchable in the editor: nine movement recipes with three strengths,
