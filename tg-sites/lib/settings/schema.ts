@@ -136,6 +136,88 @@ export const DEFAULT_COOKIE_CONSENT: CookieConsentSettings = {
 };
 
 // ---------------------------------------------------------------------------
+// Form actions: where an enquiry also goes (Elementor gap #2, 15 Sep 2026)
+// ---------------------------------------------------------------------------
+
+/**
+ * A form's enquiry is stored and emailed. These are the two further places it
+ * can be sent, both switched on PER FORM (the Form block's own toggles) and
+ * configured ONCE here, because the addresses and the keys belong to the site
+ * and a client should not paste an API key into every form.
+ *
+ * THE WEBHOOK is the general answer: Zapier, Make, n8n, a CRM's inbound hook,
+ * anything that takes a JSON POST. Signed with the secret when one is set
+ * (HMAC-SHA256 of the body, in X-TGS-Signature), so the receiver can tell our
+ * deliveries from anybody else's POST. BREVO is the one named integration,
+ * because it is the mailing list the agencies we work with actually use.
+ *
+ * THE KEY AND THE SECRET ARE THE CLIENT'S OWN, stored in the client-editable
+ * settings like the analytics id, and read on the server only: the submit route
+ * is the one reader, nothing renders them and nothing hands them to the AI.
+ */
+export interface FormActionsSettings {
+  /** Where an enquiry is POSTed as JSON, or null when there is nowhere. */
+  webhookUrl: string | null;
+  /** Signs each delivery. Blank means the deliveries go unsigned. */
+  webhookSecret: string;
+  /** The client's Brevo API key. Blank means Brevo is off. */
+  brevoApiKey: string;
+  /** The Brevo list a sender is added to, or null. */
+  brevoListId: number | null;
+}
+
+export const DEFAULT_FORM_ACTIONS: FormActionsSettings = {
+  webhookUrl: null,
+  webhookSecret: '',
+  brevoApiKey: '',
+  brevoListId: null,
+};
+
+/** Names that can only mean something inside our own network, or nobody's. */
+const PRIVATE_HOST = /^(localhost|.*\.(localhost|local|internal|home|lan|test|invalid))$/i;
+
+/**
+ * A webhook address, or null.
+ *
+ * https ONLY, and a real name rather than an address: the server will POST to
+ * whatever this says with a visitor's enquiry in the body, so it must never be
+ * pointed at something inside our own network (a database, the metadata service
+ * of the host, a neighbour). No IP literal, no name without a dot, no name that
+ * only resolves privately, no credentials in the URL. A client's Zapier or Make
+ * hook is a public https name and passes untouched.
+ */
+export function cleanWebhookUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const raw = value.trim();
+  if (!raw || raw.length > 500) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== 'https:') return null;
+  if (url.username || url.password) return null;
+  const host = url.hostname.toLowerCase();
+  if (!host.includes('.') || host.startsWith('[')) return null;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return null;
+  if (PRIVATE_HOST.test(host)) return null;
+  return url.toString();
+}
+
+/** A key or a secret: one token, no whitespace or control characters, capped. */
+function token(value: unknown, max: number): string {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\u0000-\u001f\u007f\s]/g, '').slice(0, max);
+}
+
+/** A Brevo list id: a positive whole number, typed or pasted, or null. */
+function listId(value: unknown): number | null {
+  const n = typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value.trim()) : NaN;
+  return Number.isInteger(n) && n > 0 && n < 1_000_000_000 ? n : null;
+}
+
+// ---------------------------------------------------------------------------
 // Images
 // ---------------------------------------------------------------------------
 
@@ -502,6 +584,24 @@ export const SiteSettingsSchema = z.object({
   noRightClick: z.unknown().transform((v) => v === true).catch(false),
 
   /**
+   * Where an enquiry also goes. See FormActionsSettings above. Total: a bad
+   * webhook address comes back null rather than failing the save, and the screen
+   * shows the null, which is the client's cue that it was refused.
+   */
+  formActions: z
+    .unknown()
+    .transform((value): FormActionsSettings => {
+      const o = value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+      return {
+        webhookUrl: cleanWebhookUrl(o.webhookUrl),
+        webhookSecret: token(o.webhookSecret, 200),
+        brevoApiKey: token(o.brevoApiKey, 200),
+        brevoListId: listId(o.brevoListId),
+      };
+    })
+    .catch({ ...DEFAULT_FORM_ACTIONS }),
+
+  /**
    * The site's language.
    *
    * Falls back rather than failing, because an unknown code is far more likely to
@@ -538,6 +638,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   socialImageUrl: null,
   touchIconUrl: null,
   noRightClick: false,
+  formActions: { ...DEFAULT_FORM_ACTIONS },
   locale: DEFAULT_LOCALE,
 };
 

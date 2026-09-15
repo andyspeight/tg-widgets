@@ -47,6 +47,7 @@ type Tab =
   | 'branding'
   | 'language'
   | 'widgets'
+  | 'forms'
   | 'activity'
   | 'domains'
   | 'code';
@@ -90,7 +91,7 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
    */
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get('tab');
-    const valid: Tab[] = ['company', 'contact', 'analytics', 'branding', 'language', 'widgets', 'activity', 'domains', 'code'];
+    const valid: Tab[] = ['company', 'contact', 'analytics', 'branding', 'language', 'widgets', 'forms', 'activity', 'domains', 'code'];
     if (wanted && (valid as string[]).includes(wanted)) setTab(wanted as Tab);
   }, []);
 
@@ -136,6 +137,10 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
     // A client choice, not a technical one, so it is not behind the owner gate,
     // the same reasoning that keeps the cookie banner and no-right-click off it.
     { id: 'widgets', label: 'Floating widgets' },
+    // Where an enquiry also goes: the webhook and the Brevo list (Elementor gap
+    // #2, 15 Sep 2026). A client choice about their own CRM and their own key,
+    // so not behind the owner gate either.
+    { id: 'forms', label: 'Forms' },
     // Activity is for everybody: seeing what happened to a site you belong to is
     // not a privilege, the same reasoning as the members screen, and the action
     // it reads is scoped to the caller's own tenant. It sits before the gated
@@ -798,6 +803,125 @@ export function SettingsEditor({ siteName, initial, canEditCode }: Props) {
             value={settings.floatingWidgets}
             onChange={(next) => set('floatingWidgets', next)}
           />
+        )}
+
+        {tab === 'forms' && (
+          <>
+            <section className="tv-group">
+              <h2 className="tv-group__title">Where enquiries also go</h2>
+              <p className="tv-note">
+                Every enquiry lands in Enquiries, and is emailed if the form asks.
+                Set an address or a Brevo list here, then turn either on per form,
+                in the form&apos;s own settings on the page. Both are extra copies:
+                if a hook is down, the enquiry is still in Enquiries.
+              </p>
+
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="fa-webhook">
+                  Webhook address
+                </label>
+                <input
+                  id="fa-webhook"
+                  className="tv-input"
+                  type="url"
+                  maxLength={500}
+                  value={settings.formActions.webhookUrl ?? ''}
+                  placeholder="https://hooks.zapier.com/hooks/catch/..."
+                  spellCheck={false}
+                  autoComplete="off"
+                  onChange={(event) =>
+                    set('formActions', { ...settings.formActions, webhookUrl: event.target.value || null })
+                  }
+                />
+                <p className="tv-field__help">
+                  We post each enquiry there as JSON: the form name, your site, the
+                  page, when it was sent, and the answers under the labels you gave
+                  the fields. Zapier, Make, n8n and most CRMs give you one of these.
+                  It has to start with https. If it comes back empty after saving,
+                  the address was refused.
+                </p>
+              </div>
+
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="fa-secret">
+                  Signing secret
+                </label>
+                <input
+                  id="fa-secret"
+                  className="tv-input"
+                  type="password"
+                  maxLength={200}
+                  value={settings.formActions.webhookSecret}
+                  autoComplete="new-password"
+                  spellCheck={false}
+                  onChange={(event) =>
+                    set('formActions', { ...settings.formActions, webhookSecret: event.target.value })
+                  }
+                />
+                <p className="tv-field__help">
+                  Optional. Any phrase you like. With one set, every delivery
+                  carries an X-TGS-Signature header your receiver can check, so it
+                  knows the post came from your site and not from anybody who
+                  guessed the address.
+                </p>
+              </div>
+            </section>
+
+            <section className="tv-group">
+              <h2 className="tv-group__title">Brevo</h2>
+              <p className="tv-note">
+                Add the person who sent a form to one of your Brevo lists. We use
+                the form&apos;s first email field, and a name field if there is one.
+              </p>
+
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="fa-brevo-key">
+                  API key
+                </label>
+                <input
+                  id="fa-brevo-key"
+                  className="tv-input"
+                  type="password"
+                  maxLength={200}
+                  value={settings.formActions.brevoApiKey}
+                  autoComplete="new-password"
+                  spellCheck={false}
+                  onChange={(event) =>
+                    set('formActions', { ...settings.formActions, brevoApiKey: event.target.value })
+                  }
+                />
+                <p className="tv-field__help">
+                  From Brevo, under SMTP and API, then API keys. It only ever leaves
+                  our server to reach Brevo; it is never on your site.
+                </p>
+              </div>
+
+              <div className="tv-field">
+                <label className="tv-field__label" htmlFor="fa-brevo-list">
+                  List ID
+                </label>
+                <input
+                  id="fa-brevo-list"
+                  className="tv-colour__hex"
+                  type="text"
+                  inputMode="numeric"
+                  value={settings.formActions.brevoListId ?? ''}
+                  placeholder="12"
+                  spellCheck={false}
+                  onChange={(event) =>
+                    set('formActions', {
+                      ...settings.formActions,
+                      brevoListId: (event.target.value.trim() ? Number(event.target.value) : null) as SiteSettings['formActions']['brevoListId'],
+                    })
+                  }
+                />
+                <p className="tv-field__help">
+                  The number in the list&apos;s address in Brevo. A sender who is
+                  already a contact is updated rather than duplicated.
+                </p>
+              </div>
+            </section>
+          </>
         )}
 
         {tab === 'activity' && <ActivityPanel />}

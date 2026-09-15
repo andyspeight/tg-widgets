@@ -26,6 +26,8 @@ function source(...parts: string[]): string {
 const FORM: FoundForm = {
   name: 'Enquiry',
   notifyEmail: 'owner@example.com',
+  sendWebhook: false,
+  addToBrevo: false,
   fields: [
     { kind: 'text', label: 'Name', required: true },
     { kind: 'email', label: 'Email', required: true },
@@ -103,6 +105,8 @@ describe('parseSubmission', () => {
     const form: FoundForm = {
       name: '',
       notifyEmail: '',
+      sendWebhook: false,
+      addToBrevo: false,
       fields: [
         { kind: 'text', label: 'Name', required: false },
         { kind: 'text', label: 'Name', required: false },
@@ -156,6 +160,8 @@ describe('findFormBlock', () => {
     props: {
       name: 'Charter',
       notifyEmail: 'x@example.com',
+      sendWebhook: false,
+      addToBrevo: false,
       fields: [{ kind: 'text', label: 'Name', required: true }],
     },
   };
@@ -165,6 +171,8 @@ describe('findFormBlock', () => {
     expect(found).toEqual({
       name: 'Charter',
       notifyEmail: 'x@example.com',
+      sendWebhook: false,
+      addToBrevo: false,
       fields: [{ kind: 'text', label: 'Name', required: true }],
     });
   });

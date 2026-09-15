@@ -107,6 +107,14 @@ Enquiries screen and retype it. A single webhook action, plus one or two named
 integrations, is a small build with an outsized effect on how the tool fits a
 working agency.
 
+**Built 15 Sep 2026.** A signed JSON webhook (HMAC-SHA256 in X-TGS-Signature,
+https to a public name only) and Brevo as the one named integration, both
+configured once in Settings, Forms and switched on per form on the Form block.
+After the store, best effort, never the visitor's problem. The contract for the
+other end is `docs/tg-sites-form-actions.md`; `lib/forms/actions.ts`,
+`tests/form-actions.test.ts`, and a check against a real local receiver that
+verifies the signature on the bytes it got.
+
 ### 3. No element can carry its own CSS or class
 
 Every block, column and section carries a shared box model, and it is a good one:
@@ -228,9 +236,9 @@ changes, not because Elementor's pricing page lists them.
    rendered. It closes the biggest Elementor gap, it is the same strategic move the
    Duda analysis pointed at from the SEO side, and it turns our best data from a
    fixed card into a design the client controls. Start here.
-2. **Form actions.** A webhook plus one or two named integrations. Small, and it is
-   the difference between a lead sitting on a dashboard and a lead landing in the
-   client's CRM.
+2. ~~**Form actions.** A webhook plus one or two named integrations.~~ **SHIPPED
+   (15 Sep 2026): a signed webhook and Brevo, once in Settings, Forms, switched on
+   per form. See `docs/tg-sites-form-actions.md`.**
 3. ~~**Expose the popup engine properly.**~~ **SHIPPED (1 Sep 2026): the popup panel
    now authors the full trigger vocabulary (load, delay, scroll, exit intent,
    inactivity, pageviews, a click on a named element) and a page rule (show on or

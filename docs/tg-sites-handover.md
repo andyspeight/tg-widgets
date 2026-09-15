@@ -88,10 +88,23 @@ underline, new `header-logo-full-menu`). `tests/menus.test.ts`, and a
 Chromium check with the script, without it, under reduced motion and on a
 phone. Detail in `docs/motion-engine.md` under Menus.
 
-Next: Andy to look at the five slices in the live editor (Preview, the eye, or
-the published page; the pointer and word effects and the full-screen menu never
-run on the editing canvas). Then Elementor gap #2 (form actions), parked behind
-the React Bits slices by Andy's choice on 15 Sep.
+**Elementor gap #2, form actions, shipped later the same night.** A form can
+now also POST each enquiry to a webhook (signed with HMAC-SHA256 when the site
+has a secret, https to a public name only, re-checked at send time) and add
+the sender to a Brevo list. The address, secret, key and list live once in
+Settings, Forms; the two switches are per form on the Form block. After the
+store, best effort, never the visitor's problem, the same stance as the
+courtesy email. `lib/settings/schema.ts` (`FormActionsSettings`,
+`cleanWebhookUrl`), `lib/forms/actions.ts` (pure, fetch as a parameter),
+`app/site/[host]/_form/route.ts`, `tests/form-actions.test.ts`, and a check
+against a real local HTTP receiver that verifies the signature on the bytes it
+received. The contract for the other end is `docs/tg-sites-form-actions.md`.
+
+Next: Andy to look at the five React Bits slices in the live editor (Preview,
+the eye, or the published page; the pointer and word effects and the full-screen
+menu never run on the editing canvas), and to try the form actions against a
+real Zapier or Make hook. Not built on purpose: a retry queue, a delivery status
+on the Enquiries screen, a second named integration.
 
 ---
 

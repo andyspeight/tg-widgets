@@ -26,6 +26,10 @@ export interface FoundForm {
   name: string;
   notifyEmail: string;
   fields: DeclaredField[];
+  /** Also POST the enquiry to the site's webhook (lib/forms/actions.ts). */
+  sendWebhook: boolean;
+  /** Also add the sender to the site's Brevo list. */
+  addToBrevo: boolean;
 }
 
 /** How a refusal should be answered: as if it worked, or as a visible error. */
@@ -99,6 +103,10 @@ export function findFormBlock(page: Page, blockId: string): FoundForm | null {
       name: asString(block.props.name).trim(),
       notifyEmail: asString(block.props.notifyEmail).trim(),
       fields: rawFields.slice(0, MAX_FIELDS).map(fieldFrom).filter((f): f is DeclaredField => f !== null),
+      // Strictly true, the same as every stored toggle: a form saved before the
+      // switches existed has neither and sends nowhere new.
+      sendWebhook: block.props.sendWebhook === true,
+      addToBrevo: block.props.addToBrevo === true,
     };
   }
   return null;

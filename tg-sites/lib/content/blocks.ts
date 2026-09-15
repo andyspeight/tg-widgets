@@ -4056,6 +4056,8 @@ export const BLOCKS: readonly BlockDefinition[] = [
       successTitle: 'Thank you',
       successBody: 'We have your message and will reply within one working day.',
       notifyEmail: '',
+      sendWebhook: false,
+      addToBrevo: false,
       align: 'left',
     },
     summarise: (props) => {
@@ -4118,6 +4120,24 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Email new enquiries to',
         max: 200,
         help: 'Leave empty to only collect them in Enquiries.',
+      },
+      /*
+       * WHERE ELSE AN ENQUIRY GOES (Elementor gap #2, 15 Sep 2026). Two switches
+       * per form; the addresses and keys live once, in Settings, Forms. Both are
+       * best effort after the enquiry is stored, the same stance as the email:
+       * a hook that is down loses nothing, because Enquiries is the record.
+       */
+      {
+        kind: 'toggle',
+        key: 'sendWebhook',
+        label: 'Also send it to your webhook',
+        help: 'Posts the enquiry as JSON to the address in Settings, Forms. Nothing is sent until one is there.',
+      },
+      {
+        kind: 'toggle',
+        key: 'addToBrevo',
+        label: 'Add the sender to your Brevo list',
+        help: 'Uses the first email field, and a name field if there is one. Needs your Brevo key and list in Settings, Forms.',
       },
       { kind: 'select', key: 'align', label: 'Alignment', group: 'layout', options: ALIGN_OPTIONS },
     ],

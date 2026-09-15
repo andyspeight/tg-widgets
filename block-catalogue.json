@@ -4841,6 +4841,20 @@
           "default": ""
         },
         {
+          "name": "sendWebhook",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "addToBrevo",
+          "type": "boolean",
+          "role": "config",
+          "required": false,
+          "default": false
+        },
+        {
           "name": "align",
           "type": "enum",
           "role": "config",

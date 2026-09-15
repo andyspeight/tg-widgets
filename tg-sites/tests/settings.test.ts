@@ -330,6 +330,8 @@ describe('staff settings are a different shape entirely', () => {
       'cookieConsent',
       'faviconUrl',
       'floatingWidgets',
+      // formActions on 15 Sep 2026: the webhook and the Brevo key, the client's own.
+      'formActions',
       'ga4Id',
       'gtmId',
       'locale',

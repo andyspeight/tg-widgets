@@ -22,12 +22,15 @@
  */
 
 import { headers } from 'next/headers';
+import { after } from 'next/server';
 
 import { getPublishedPage } from '../../../../lib/db/pages';
 import { resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { storeSubmission } from '../../../../lib/db/forms';
+import { getPublicSettings } from '../../../../lib/db/settings';
 import { findFormBlock, parseSubmission } from '../../../../lib/forms/submit';
 import { notifySubmission } from '../../../../lib/forms/notify';
+import { runFormActions } from '../../../../lib/forms/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,6 +103,35 @@ export async function POST(
   // floods, and a flood is not owed an explanation.
   if (stored) {
     await notifySubmission({ host, form: declared, pageTitle: page.title, data: parsed.data });
+
+    /*
+     * THE FORM ACTIONS (Elementor gap #2): the webhook and the Brevo list, when
+     * this form asked for either. Same stance as the email: after the store,
+     * best effort, never the visitor's problem. The settings are read only when
+     * a form asks, so an ordinary form costs no extra query, and through the
+     * public role, which may read them and nothing more.
+     *
+     * AFTER THE RESPONSE, not before it. A client's hook may take the full eight
+     * seconds to answer or to time out, and a visitor who has just pressed Send
+     * should not sit on a spinner for a receiver they have never heard of. So
+     * the redirect goes out first and the deliveries run in the same invocation
+     * afterwards (Next's after, which the platform keeps alive for). The email
+     * above stays awaited: it is quick, and it always was.
+     */
+    if (declared.sendWebhook || declared.addToBrevo) {
+      const context = {
+        host,
+        formName: declared.name,
+        pageTitle: page.title,
+        path: `/${path}`,
+        data: parsed.data,
+        sentAt: new Date().toISOString(),
+      };
+      after(async () => {
+        const settings = await getPublicSettings(tenantId);
+        await runFormActions({ settings: settings.formActions, form: declared, context });
+      });
+    }
   }
 
   return backTo(path, done);
