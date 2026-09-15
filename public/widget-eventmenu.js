@@ -1254,19 +1254,31 @@
         if (groups[i].items[j].active) { this.openGroups[groups[i].key] = true; return; }
       }
     }
-    // Otherwise the biggest, not the first. Grouped by sport those are the
-    // same thing, but grouped by country the list is alphabetical, so opening
-    // the first would greet everyone with Argentina and its one competition.
+    // Otherwise the biggest, not the first. Every heading list is alphabetical
+    // now (15 Sep 2026), so opening the first would greet a football client
+    // with American Football, and a country menu with Argentina and its one
+    // competition. Biggest means Football opens on a mixed menu without the
+    // headings having to be ranked.
     // Competitions are the primary navigation, so the open group is chosen from
     // them when there are any. Popular clubs holds two dozen rows and would
     // otherwise win on size alone and push the leagues out of sight.
     var pool = comps.length ? comps : groups;
+    var size = function (grp) {
+      // Biggest means the most EVENTS, not the most rows. Two sports with one
+      // competition each used to tie, and the tie fell to whichever came first,
+      // which since the headings went A to Z means whichever is nearer the
+      // front of the alphabet. A menu carrying one football league and one
+      // concert series should open on the football.
+      var events = 0;
+      for (var i = 0; i < grp.items.length; i++) events += Number(grp.items[i].count) || 0;
+      return events || grp.items.length;
+    };
     var best = null;
     for (var g = 0; g < pool.length; g++) {
       // Worldwide is the biggest country group and the least useful one to
       // greet someone with, so it only wins if it is all there is.
       if (pool[g].key === 'worldwide' && pool.length > 1) continue;
-      if (!best || pool[g].items.length > best.items.length) best = pool[g];
+      if (!best || size(pool[g]) > size(best)) best = pool[g];
     }
     if (!best && pool.length) best = pool[0];
     if (best) this.openGroups[best.key] = true;
@@ -1377,29 +1389,19 @@
       if (!map[key]) { map[key] = { key: key, label: label, items: [] }; order.push(key); }
       map[key].items.push(it);
     });
-    if (by === 'country') {
-      // Alphabetical, because that is how someone looks up their own country,
-      // with the global competitions last rather than filed under W.
-      order.sort(function (a, b) {
-        if (a === 'worldwide') return 1;
-        if (b === 'worldwide') return -1;
-        return map[a].label.localeCompare(map[b].label);
-      });
-    } else {
-      // The index lists categories busiest first, and that is the order a menu
-      // wants: Football has 5,704 events and Entertainment 1,174, so a menu
-      // that opened on Entertainment because it happened to appear first in the
-      // competition array would be leading with the wrong thing.
-      var rank = {};
-      ((this.data && this.data.categories) || []).forEach(function (cat, i) {
-        rank[slugify(cat.label) || cat.slug] = i;
-      });
-      order.sort(function (a, b) {
-        var ra = rank[a] == null ? 999 : rank[a];
-        var rb = rank[b] == null ? 999 : rank[b];
-        return ra - rb;
-      });
-    }
+    // A to Z either way (15 Sep 2026, Andy: "yes change the sport headings to
+    // alphabetical too"). Sports were listed busiest first, so a menu opened on
+    // Football and Entertainment and left Rugby near the bottom. That reads
+    // like a league table rather than a menu, and someone arriving already
+    // knows which sport they came for. The catch-alls go last rather than being
+    // filed under O or U or W, because nobody looks for them by letter.
+    var LAST = { worldwide: 1, other: 1, unclassified: 1 };
+    order.sort(function (a, b) {
+      var la = LAST[a] ? 1 : 0;
+      var lb = LAST[b] ? 1 : 0;
+      if (la !== lb) return la - lb;
+      return byName(map[a], map[b]);
+    });
     return order.map(function (k) { return map[k]; });
   };
 
