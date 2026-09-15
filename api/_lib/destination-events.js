@@ -160,11 +160,21 @@ export function tagCovers(value) {
   // written "Jun-Aug, Dec-Feb", and splitting on the comma and the hyphen at the
   // same time turned that into four loose months, quietly dropping July and
   // January: the Rwenzori trekking record claimed neither of its peak months.
-  const groups = raw.split(/\s*(?:,|\band\b|\bor\b|\/)\s*/i).filter(Boolean);
+  // "Mid-December to February" is one date, not a span from Mid to December.
+  const flat = raw.replace(/\b(early|mid|late)[-–]/gi, '$1 ');
+  const groups = flat.split(/\s*(?:,|\band\b|\bor\b|\/)\s*/i).filter(Boolean);
   const out = new Set();
   for (const g of groups) {
-    const parts = g.split(/\s*(?:[-–—]|\bto\b|\bthrough\b|\buntil\b)\s*/i).filter(Boolean);
-    const idx = parts.map(p => { const m = /([A-Za-z]+)/.exec(p); return m ? monthIndex(m[1]) : -1; });
+    const parts = g.split(/\s*(?:[-–—]|\bto\b|\bthrough\b|\buntil\b)\s*/i)
+      // "23 to 25 June" is a day range inside one month, so the bare 23 is not
+      // a missing month name, it is a day.
+      .filter(x => /[A-Za-z]/.test(x));
+      // The first WORD is not always the month: a Highlights entry writes its date
+    // as "Late October", and reading "Late" as the month threw the whole tag away.
+    const idx = parts.map(p => {
+      for (const w of String(p).match(/[A-Za-z]+/g) || []) { const i = monthIndex(w); if (i >= 0) return i; }
+      return -1;
+    });
     if (!idx.length || idx.some(i => i < 0)) return null;
     if (idx.length === 1) out.add(idx[0]);
     else if (idx.length === 2) for (const i of through(idx[0], idx[1])) out.add(i);
@@ -177,9 +187,12 @@ export function tagCovers(value) {
 // date in front of its description ("17 January. The patron saint of Menorca").
 // Only a date at the FRONT counts: a month in the middle of a sentence is
 // prose, and reading it as the event's date would be a guess.
+const QUAL = '(?:early|mid|late|the)[-\\s]+';
+const ONE_DATE = '(?:' + QUAL + ')?(?:\\d{1,2}(?:\\s*(?:to|-|–)\\s*\\d{1,2})?\\s+)?(?:' +
+  MONTHS.join('|') + ')';
 const LEADING_DATE = new RegExp(
-  '^\\s*((?:\\d{1,2}(?:\\s*(?:to|-|–)\\s*\\d{1,2})?\\s+)?(?:' + MONTHS.join('|') + ')' +
-  '(?:\\s*(?:to|-|–|and)\\s*(?:\\d{1,2}\\s+)?(?:' + MONTHS.join('|') + '))?)\\s*[.,–-]'
+  '^\\s*(' + ONE_DATE + '(?:\\s*(?:to|-|–|and|or|/)\\s*(?:' + ONE_DATE + '))?)' +
+  '(?:\\s*\\([^)]{0,40}\\))?\\s*[.,–-]', 'i'
 );
 
 /** The month on an entry, from whichever key or sentence actually holds it. */

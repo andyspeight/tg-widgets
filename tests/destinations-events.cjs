@@ -18,6 +18,8 @@ function t(name, fn) {
   catch (err) { fail++; console.error(`  FAIL  ${name}\n        ${err.message}`); }
 }
 const J = (v) => JSON.stringify(v);
+const ORDER = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let cov;   // set once tagCovers is imported: a tag as a readable list of months
 
 (async () => {
   const { parseEvents } = await import(
@@ -129,6 +131,7 @@ const J = (v) => JSON.stringify(v);
     await import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'destination-events.js')).href);
   const { checkValue } = await import(
     pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'destination-coverage.js')).href);
+  cov = (tag) => { const s = tagCovers(tag); return s ? [...s].sort((a, b) => a - b).map(i => ORDER[i]) : null; };
 
   console.log('\nReading a month range');
 
@@ -390,6 +393,70 @@ const J = (v) => JSON.stringify(v);
   });
   t('a closed span is still rebuilt', () => {
     assert.strictEqual(monthTagFromText('Late May to mid-June\'s SIFF is the largest film festival.'), 'May-Jun');
+  });
+
+
+  console.log('\nA date written into the front of a description');
+
+  t('a qualified leading date is still a date', () => {
+    // 23 Highlights entries reached the app undated because the reader wanted a
+    // bare month. "Late October to early November" is the same date with a
+    // qualifier on it.
+    const [a] = parseEvents(J([{ icon:'sun', title:'Belfast International Arts Festival',
+      description:'Late October to early November. Theatre, music and dance across the city.' }]));
+    assert.strictEqual(a.month, 'Late October to early November');
+    const [b] = parseEvents(J([{ icon:'sun', title:'Feria del Rosario',
+      description:"Early October. Fuengirola's biggest fiesta, a week of flamenco." }]));
+    assert.strictEqual(b.month, 'Early October');
+  });
+  t('a bracketed aside after the date does not hide it', () => {
+    const [e] = parseEvents(J([{ icon:'sun', title:'Maskanoo',
+      description:"26 December (Boxing Day). Providenciales' biggest street festival." }]));
+    assert.strictEqual(e.month, '26 December');
+  });
+  t('a slash joins two halves of a date', () => {
+    const [e] = parseEvents(J([{ icon:'sun', title:'Flower Festival',
+      description:'Late April / early May. The streets fill with flower carpets.' }]));
+    assert.strictEqual(e.month, 'Late April / early May');
+  });
+  t('prose that merely mentions a month is still not a date', () => {
+    const [e] = parseEvents(J([{ icon:'sun', title:'Mating displays',
+      description:'Blue-footed booby courtship dances peak May to June on Espanola.' }]));
+    assert.strictEqual(e.month, '');
+  });
+
+  console.log('\nReading a tag that was never written in the house shape');
+
+  t('a qualifier in front of the month is not the month', () => {
+    // 52 tag shapes in the library read as nothing at all, because the first
+    // word was taken as the month and the first word was "Late".
+    assert.deepStrictEqual(cov('Late October to early November'), ['Oct', 'Nov']);
+    assert.deepStrictEqual(cov('Mid-April'), ['Apr']);
+    assert.deepStrictEqual(cov('Third Sunday of July'), ['Jul']);
+    assert.deepStrictEqual(cov('Full moon in November'), ['Nov']);
+  });
+  t('a day range does not need a month of its own', () => {
+    assert.deepStrictEqual(cov('23 to 25 June'), ['Jun']);
+    assert.deepStrictEqual(cov('13-15 April'), ['Apr']);
+  });
+  t('a hyphen inside Mid-December is not a span', () => {
+    assert.deepStrictEqual(cov('Mid-December to February'), ['Jan', 'Feb', 'Dec']);
+    assert.deepStrictEqual(cov('June to mid-September'), ['Jun', 'Jul', 'Aug', 'Sep']);
+  });
+  t('a season with two halves keeps both of them whole', () => {
+    // Split on the comma and the hyphen at once and "Jun-Aug, Dec-Feb" loses
+    // the July and the January it exists to claim.
+    assert.deepStrictEqual(cov('Jun-Aug, Dec-Feb'), ['Jan', 'Feb', 'Jun', 'Jul', 'Aug', 'Dec']);
+    assert.deepStrictEqual(cov('Apr-Jun, Sep-Oct'), ['Apr', 'May', 'Jun', 'Sep', 'Oct']);
+  });
+  t('two separate months stay two separate months', () => {
+    // Ibiza's opening and closing parties are May and October, not the summer
+    // in between.
+    assert.deepStrictEqual(cov('May, Oct'), ['May', 'Oct']);
+  });
+  t('a tag that is not months at all still reads as nothing', () => {
+    assert.strictEqual(tagCovers('Jun-Xyz'), null);
+    assert.strictEqual(tagCovers('whenever'), null);
   });
 
   console.log(`\n  ${pass} passed, ${fail} failed\n`);
