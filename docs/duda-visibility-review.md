@@ -192,6 +192,45 @@ Each is shippable alone and each makes the next one better.
 
 ### Slice A. Who is reading the site (no keys, one day)
 
+**Built, 15 Sep 2026.** Migration `0034_page_visits.sql` (table
+`page_visits`: tenant, UTC day, path, kind, source, count; the public site's
+only privilege is executing `public.record_visit`, the app role reads and never
+writes, `public.prune_page_visits` keeps ninety days), `lib/visits/classify.ts`
+(pure: user agent and referer in, a kind and a source out), `lib/visits/
+summary.ts` (the thirty-day window, zero-filled, with the thirty before it for
+the change chips), `lib/visits/chart.ts` (the chart arithmetic: clean ticks,
+five axis labels, bar shares), `lib/db/visits.ts`, the count in the site
+route's `after()` with the headers read before it (a Server Component's
+`after()` may not touch the request), `app/api/cron/housekeeping/route.ts` at
+04:30 UTC, and the "Who is reading your site" panel on /seo
+(`components/seo/VisitCharts.tsx`): four tiles washed in their series colour,
+each with its own thirty-day sparkline and the change on the month before as a
+pill; a roster of the ten AI engines we can name, the ones that have found the
+site first with their visits and last-seen day, the rest dashed and "Not yet"
+(the Duda crawler-tracking display, answered per engine at a glance); a donut of
+who read the pages with the total in the middle; thirty stacked daily columns
+that rise in on load, with a hover tooltip and a table behind "See the numbers";
+crawlers by name tagged AI or Search with the day last seen; the assistants
+people arrived from; and the pages each group read most. Andy's first reaction
+to the plain version was "it's a bit boring", which is what the roster, the
+donut, the washes, the sparklines and the movement answer. No script: every
+chart is HTML, CSS and small inline SVG, so the phone gets real text, not a
+shrunken picture. Three series colours validated for light and dark; the two
+movements sit inside a prefers-reduced-motion guard. What differs from
+the proposal below: FOUR kinds, not three, because monitors and link previews
+need counting so they stay OUT of the people number (`bot`, never named on the
+screen); the source is the product a client would recognise (three OpenAI
+fetchers are all "ChatGPT"); Google-Extended and Applebot-Extended are dropped
+because they are robots.txt names with no fetcher of their own (Google's AI
+reads through Googlebot, so it counts as search); and Google's AI Overviews
+cannot be told from ordinary Google search by referer, so they are not claimed.
+Forty-three tests in `tests/visits.test.ts`; the browser smoke rendered the
+panel at 1280, 390 and in the dark theme. The prune runs only once CRON_SECRET
+is set in Vercel (the same secret reference-sync waits on); until then the table
+simply grows past ninety days, which is harmless.
+
+The original proposal, kept for the record:
+
 Log every request to a published page, aggregated per day, as one of three
 kinds: an AI crawler (matched on user agent against the same list
 `lib/seo/robots.ts` already names: GPTBot, OAI-SearchBot, ChatGPT-User,

@@ -1662,6 +1662,13 @@ describe('nothing queries round the side', () => {
       join('lib', 'db', 'reference.ts'),
       join('lib', 'db', 'tenants.ts'), // resolve_tenant, before a tenant is known
       join('lib', 'db', 'users.ts'), // withLogin and withUser, likewise
+      /*
+       * The nightly prune of the page-visit tally, which runs across every
+       * site at once through a definer function, so there is no tenant to
+       * scope it to. Added on purpose on 15 Sep 2026; see the note at the top
+       * of lib/db/visits.ts and db/migrations/0034_page_visits.sql.
+       */
+      join('lib', 'db', 'visits.ts'),
       join('lib', 'db', 'withTenant.ts'), // withTenant and withPublicTenant
     ]);
   });

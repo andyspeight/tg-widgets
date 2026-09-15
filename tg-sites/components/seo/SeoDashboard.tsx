@@ -26,6 +26,8 @@
 import Link from 'next/link';
 
 import { type Finding, type Severity, tally } from '../../lib/seo/audit';
+import type { VisitSummary } from '../../lib/visits/summary';
+import { ReadersPanel } from './VisitCharts';
 
 export interface PageReport {
   id: string;
@@ -197,6 +199,7 @@ export function SeoDashboard({
   siteFindings,
   redirects,
   pages,
+  visits,
 }: {
   siteName: string;
   siteUrl: string | null;
@@ -204,6 +207,8 @@ export function SeoDashboard({
   /** How many old addresses are still being forwarded. */
   redirects: number;
   pages: PageReport[];
+  /** Who has been reading the site. Absent when the tally could not be read. */
+  visits?: VisitSummary | null;
 }) {
   const published = pages.filter((page) => page.published);
   const unpublished = pages.filter((page) => !page.published);
@@ -302,6 +307,9 @@ export function SeoDashboard({
           <StatTile icon="check" value={`${readyPages}/${published.length || 0}`} label="Pages ready" tone={readyPages === published.length && published.length > 0 ? 'good' : undefined} />
         </div>
       </section>
+
+      {/* Who is reading the site: the charts. The visual a client comes for. */}
+      {visits && <ReadersPanel summary={visits} />}
 
       {/* The work, worst first, one button each. Or the reward for having none. */}
       <section className="seo2-panel">

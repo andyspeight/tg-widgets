@@ -1,6 +1,8 @@
 import { cache } from 'react';
 import { carriesOwnBanner } from '../../../../lib/content/collection-layout';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { after } from 'next/server';
 import { notFound, permanentRedirect } from 'next/navigation';
 
 import { Breadcrumb } from '../../../../components/render/Breadcrumb';
@@ -44,6 +46,8 @@ import { CardsBlock } from '../../../../components/render/blocks';
 import { getPublicSettings } from '../../../../lib/db/settings';
 import { personaliseSections } from '../../../../lib/content/personalise';
 import { readVisitorSignals } from '../../../../lib/site/visitor-signals';
+import { recordVisit } from '../../../../lib/db/visits';
+import { classifyVisit, cleanVisitPath } from '../../../../lib/visits/classify';
 import { getPublicTheme } from '../../../../lib/db/theme';
 import { getPublicTenantSlug, resolveTenantByHostname } from '../../../../lib/db/tenants';
 import { socialMetas } from '../../../../lib/settings/head';
@@ -411,6 +415,31 @@ export default async function SitePage({ params, searchParams }: Params) {
         }
       : rawFound.entry,
   };
+
+  /*
+   * WHO IS READING THIS PAGE (the Duda visibility review, slice A, 15 Sep 2026).
+   * One count per request, sorted into a person, a person sent by an AI
+   * assistant, a named crawler or some other robot, from the user agent and the
+   * referer and nothing else: no IP, no cookie, nothing about anybody, so the
+   * consent banner is untouched. The headers are read HERE, because a Server
+   * Component's after() may not touch the request; the count itself runs AFTER
+   * the response, so a visitor never waits on a tally, and best effort, so a
+   * count that fails is not a page that fails. The summary is
+   * lib/visits/summary.ts; the screen is /seo.
+   */
+  const requestHeaders = await headers();
+  const reader = classifyVisit({
+    userAgent: requestHeaders.get('user-agent'),
+    referer: requestHeaders.get('referer'),
+  });
+  const readPath = cleanVisitPath(`/${(path ?? []).join('/')}`);
+  after(async () => {
+    try {
+      await recordVisit(found.tenantId, { ...reader, path: readPath });
+    } catch {
+      // A tally is never worth a stack trace in a visitor's request log.
+    }
+  });
 
   /*
    * Dark mode is OPT IN: a page turns dark only when it actually carries a Light

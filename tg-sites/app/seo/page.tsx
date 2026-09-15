@@ -13,7 +13,9 @@ import { listPagesForAudit } from '../../lib/db/pages';
 import { countRedirects } from '../../lib/db/redirects';
 import { getSettings } from '../../lib/db/settings';
 import { getTenant, siteUrl } from '../../lib/db/tenants';
+import { listVisitRows } from '../../lib/db/visits';
 import { auditPage, auditSite } from '../../lib/seo/audit';
+import { summariseVisits, type VisitSummary } from '../../lib/visits/summary';
 
 export const metadata: Metadata = {
   title: 'Search and AI visibility · Travelgenix Sites',
@@ -85,12 +87,24 @@ export default async function SeoPage() {
     );
   }
 
-  const [tenant, url, settings, pages, redirects] = await Promise.all([
+  const [tenant, url, settings, pages, redirects, visits] = await Promise.all([
     getTenant(site.tenantId),
     siteUrl(site.tenantId),
     getSettings(site.tenantId),
     listPagesForAudit(site.tenantId),
     countRedirects(site.tenantId),
+    /*
+     * The tally is best effort on the way in and on the way out: a database
+     * without the page_visits table yet shows the rest of the screen rather
+     * than nothing. Sixty days fetched so the thirty-day window has the thirty
+     * before it to compare with.
+     */
+    listVisitRows(site.tenantId, 60)
+      .then((rows): VisitSummary | null => summariseVisits(rows, new Date(), 30))
+      .catch((error: unknown) => {
+        console.error('[seo] visits', error instanceof Error ? error.message : String(error));
+        return null;
+      }),
   ]);
 
   const published = pages.filter((page) => page.published);
@@ -120,6 +134,7 @@ export default async function SeoPage() {
         siteFindings={auditSite(settings, published.length)}
         redirects={redirects}
         pages={reports}
+        visits={visits}
       />
     </div>
   );

@@ -112,7 +112,32 @@ no keys, a day), B ask the assistants monthly with a prompt set per site
 (Perplexity, ChatGPT, Gemini, Claude; Duda's score formula), C history, D the
 monthly report sent, E a miss becomes a page through the AI writer. duda.co is
 blocked from the session, so Duda's side is search snippets; distrust the price,
-the engine list and the cadence until read live. Awaiting Andy's go.
+the engine list and the cadence until read live.
+
+**Slice A of that upgrade is built and live (15 Sep 2026, late).** Andy: "Let's
+start the build. I'd like to end up with a dashboard for the client with lots of
+charts and tools to show results. People want visuals, they don't want to read."
+Every request to a published page is now counted (`page_visits`, migration
+0034: per tenant, UTC day, path, kind and source, counts only, nothing about
+anybody, so the consent banner is untouched) as a person, a person sent by an AI
+assistant, a named crawler (ChatGPT, Perplexity, Claude, Google, Bing and the
+rest, tagged AI or Search) or some other robot, from the user agent and referer
+alone, after the response in the site route's `after()`. The /seo screen
+gained "Who is reading your site": four tinted tiles with sparklines and the
+change on the month before, a roster of the ten AI engines showing which have
+found the site and which are still to come, a donut of who read the pages,
+thirty stacked daily columns that rise in with a hover tooltip and a table view,
+crawlers by name with the day last seen, the assistants people arrived from, and
+the pages each group read most. All HTML, CSS and inline SVG, no script, dark
+theme included. Andy's first look at the plain version was "it's a bit boring";
+the roster, donut, washes, sparklines and movement are the answer, and the
+bar for the rest of the dashboard. `docs/duda-visibility-review.md` slice A has the full "Built" note.
+The nightly prune (`/api/cron/housekeeping`, 04:30 UTC, ninety days) waits on
+CRON_SECRET like reference-sync does; until then the table grows, harmlessly.
+The tally is also the visitor number the monthly report has been missing, not
+yet wired into it. Next slices in order: B ask the assistants (needs
+OPENAI_API_KEY and CRON_SECRET in Vercel, and a Perplexity key), C history, D
+the monthly report sent, E a miss becomes a page.
 
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen

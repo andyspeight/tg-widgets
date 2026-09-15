@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/reference-sync",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/housekeeping",
+      "schedule": "30 4 * * *"
     }
   ]
 }
