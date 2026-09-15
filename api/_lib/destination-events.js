@@ -53,14 +53,80 @@ function through(a, b) {
 // "Maré" and "Marbella", which read as March, and case matters because "may"
 // and "march" are ordinary verbs while every real month in this copy is
 // capitalised.
+//
+// FULL NAMES ONLY, because this reads prose rather than tags. A scan of all
+// 2,589 events found seven short forms in the descriptions and every one was
+// the Spanish or Portuguese word for sea: Avenida do Mar, Semana del Mar, Viña
+// del Mar. Not one was a month. Reading them as March is what had Carnaval da
+// Madeira, whose description names no month at all, reported as disagreeing
+// with itself. Tags still accept short forms; that is tagCovers, below.
 const MONTH_RE = new RegExp(
-  '(?<![\\p{L}\\p{N}])(' + MONTHS.join('|') + '|' + ABBR.join('|') + '|Sept)(?![\\p{L}\\p{N}])',
+  '(?<![\\p{L}\\p{N}])(' + MONTHS.join('|') + ')(?![\\p{L}\\p{N}])',
   'gu'
 );
 
+// Feasts on a fixed date. These say which month as plainly as the month name
+// does, and the copy leans on them constantly: a dozen Christmas markets say
+// "from late November through Christmas Eve" and name no second month at all.
+// Only the Gregorian ones are here, and only where the date does not move.
+// Anything that moves is MOVABLE_FEAST, further down, and still waits for a
+// person.
+const FIXED_FEASTS = [
+  { re: "New Year(?:'s)? Day", month: 0 },
+  { re: 'Twelfth Night|Epiphany|Three Kings', month: 0 },
+  // Bare "New Year" could be the 31st or the 1st. December is the half that is
+  // certain, and under-claiming by a day beats over-claiming a month.
+  { re: "Christmas(?: Eve| Day)?|Christmastide|Boxing Day|Hogmanay|New Year(?:'s)?(?: Eve)?", month: 11 },
+];
+
+// Somebody else's new year. A capitalised word in front of "New Year" means it
+// belongs to another calendar: Chinese New Year, Lunar New Year, Mwaka Kogwa
+// New Year, Sinhala and Tamil New Year. So it is not December and it does not
+// sit still. This reads a signal in the writing rather than keeping a list of
+// cultures, which is the only version of this that stays right.
+const OTHER_NEW_YEAR = /[\p{Lu}][\p{L}]*(?:[-'\u2019][\p{L}]+)*\s+New Year/u;
+
+// A feast only says WHEN if the sentence is using it to say when. "on Boxing
+// Day" and "through Christmas Eve" are dates. "Orthodox Christmas", "Bali's New
+// Year" and "a Persian-origin New Year festival" are names, and three records
+// proved it: Tbilisi's Orthodox Christmas is 7 January, Nyepi is in March and
+// Mwaka Kogwa is in July. All three would have been overwritten with December
+// by a rule that took the feast word on its own. So a feast needs a cue or a
+// range word in front of it, where a plain month does not.
+// A date with a start and no finish. See the note in monthTagFromText.
+const OPEN_START = /\b(?:from|starting|starts?|opens?|opening|begins?|beginning|since|runs? from)\b\W*(?:early|mid|late|the)?\W*$/i;
+
+const FEAST_CUE = /(?:\b(?:in|on|at|of|from|to|through|thru|until|till|into|over|across|before|after|around|by|each|every|runs?|held|begins?|starts?|ends?|falls?|celebrat\w*|marks?)\b\W*(?:the|a|an)?\W*)$/i;
+
+const FIXED_FEAST_RE = new RegExp(
+  '(?<![\\p{L}\\p{N}])(' + FIXED_FEASTS.map(f => f.re).join('|') + ')(?![\\p{L}\\p{N}])', 'gu');
+
+/** Every month a piece of prose points at, in the order it points at them. */
+function monthHits(s) {
+  const hits = [];
+  let m;
+  MONTH_RE.lastIndex = 0;
+  while ((m = MONTH_RE.exec(s))) {
+    const i = monthIndex(m[1]);
+    if (i >= 0) hits.push({ i, start: m.index, end: m.index + m[0].length, feast: false });
+  }
+  FIXED_FEAST_RE.lastIndex = 0;
+  while ((m = FIXED_FEAST_RE.exec(s))) {
+    const before = s.slice(Math.max(0, m.index - 30), m.index);
+    if (!FEAST_CUE.test(before)) continue;
+    if (/New Year/.test(m[1]) &&
+        OTHER_NEW_YEAR.test(before.slice(-24) + m[0])) continue;
+    const f = FIXED_FEASTS.find(x => new RegExp('^(?:' + x.re + ')$').test(m[1]));
+    if (f) hits.push({ i: f.month, start: m.index, end: m.index + m[0].length, feast: true });
+  }
+  return hits.sort((a, b) => a.start - b.start);
+}
+
 // The words that turn two month names into a span. "late June through early
 // September" covers July, so an entry tagged Jul is not in disagreement.
-const RANGE_JOIN = /^[\s,]*(?:-|–|—|to|through|thru|until|till|into)[\s,]*(?:early|mid|late|the)?[\s,]*$/i;
+// The trailing hyphen matters. Without it "late November to mid-January" reads
+// as two unrelated dates, because the gap being tested is " to mid-".
+const RANGE_JOIN = /^[\s,]*(?:-|–|—|to|through|thru|until|till|into)[\s,]*(?:early|mid|late|the)?[-\s,]*$/i;
 
 /**
  * The months a piece of prose can be read as covering, and the ones it names
@@ -68,13 +134,7 @@ const RANGE_JOIN = /^[\s,]*(?:-|–|—|to|through|thru|until|till|into)[\s,]*(?
  */
 export function monthsNamedIn(text) {
   const s = String(text || '');
-  const hits = [];
-  let m;
-  MONTH_RE.lastIndex = 0;
-  while ((m = MONTH_RE.exec(s))) {
-    const i = monthIndex(m[1]);
-    if (i >= 0) hits.push({ i, start: m.index, end: m.index + m[0].length });
-  }
+  const hits = monthHits(s);
   const covered = new Set(hits.map(h => h.i));
   for (let k = 0; k + 1 < hits.length; k++) {
     const between = s.slice(hits[k].end, hits[k + 1].start);
@@ -96,12 +156,21 @@ export function tagCovers(value) {
   if (/^(year[-\s]?round|monthly|varies|variable|various|all year|ongoing|any|seasonal)/i.test(raw)) {
     return new Set(through(0, 11));
   }
-  const parts = raw.split(/\s*(?:[-–—/]|\bor\b|\band\b|,|\bto\b|\bthrough\b)\s*/i).filter(Boolean);
-  const idx = parts.map(p => { const m = /([A-Za-z]+)/.exec(p); return m ? monthIndex(m[1]) : -1; });
-  if (!idx.length || idx.some(i => i < 0)) return null;
-  if (idx.length === 1) return new Set([idx[0]]);
-  if (idx.length === 2 && /[-–—]|\bto\b|\bthrough\b/i.test(raw)) return new Set(through(idx[0], idx[1]));
-  return new Set(idx);
+  // Split into groups first, then read each group. A season with two halves is
+  // written "Jun-Aug, Dec-Feb", and splitting on the comma and the hyphen at the
+  // same time turned that into four loose months, quietly dropping July and
+  // January: the Rwenzori trekking record claimed neither of its peak months.
+  const groups = raw.split(/\s*(?:,|\band\b|\bor\b|\/)\s*/i).filter(Boolean);
+  const out = new Set();
+  for (const g of groups) {
+    const parts = g.split(/\s*(?:[-–—]|\bto\b|\bthrough\b|\buntil\b)\s*/i).filter(Boolean);
+    const idx = parts.map(p => { const m = /([A-Za-z]+)/.exec(p); return m ? monthIndex(m[1]) : -1; });
+    if (!idx.length || idx.some(i => i < 0)) return null;
+    if (idx.length === 1) out.add(idx[0]);
+    else if (idx.length === 2) for (const i of through(idx[0], idx[1])) out.add(i);
+    else for (const i of idx) out.add(i);
+  }
+  return out.size ? out : null;
 }
 
 // A Highlights-shaped entry carries no month key, but it was written with the
@@ -195,19 +264,33 @@ export function eventProblems(str) {
 // season is not telling us when it runs.
 const DATE_CUE = /(?:\b(?:in|on|of|at|each|every|from|through|thru|until|till|during|across|over|runs?|ran|held|begins?|starts?|ends?|opens?|closes?|takes? place|returns?|falls?|late|early|mid|first|second|third|fourth|fifth|last|penultimate|weekend|weekends|week|weeks|days?|nights?|month|months|season)\b\W*|\d{1,2}\s*(?:(?:to|-|–|and)\s*\d{1,2}\s*)?)$/i;
 
+// A month can also be the event's date by sitting in front of it: "Hokitika's
+// March Wildfoods Festival", "The September Berber tribal festival", "the
+// November full moon". Reading all 2,589 descriptions turned up 336 months
+// with no cue word in front and almost every one was a date written this way.
+// The single exception in the whole library is Trinidad's Road March, a music
+// competition rather than a month, and it survives this because the word in
+// front of it is neither "the" nor a possessive nor the start of a sentence.
+const OWNED_BY = /(?:^|[.!?:;—–]\s+|\b(?:the|this|that|its|their|his|her|our|annual|traditional|biennial|biannual|yearly|peak|famous)\s+|['’]s\s+)$/i;
+
 // A wider join than the one the audit uses. "late March or early April" is a
 // fair Mar-Apr, and "across October and November" is a fair Oct-Nov, so both
 // span when we are BUILDING a tag rather than checking one. The whole gap
 // between the two month names has to match, so prose in between ("October,
 // with the smaller version each September") is still two separate dates.
-const SPAN_JOIN = /^[\s,&]*(?:-|–|—|to|through|thru|until|till|into|or|and|&|,)[\s,&]*(?:early|mid|late|the|into)?[\s,&]*$/i;
+const SPAN_JOIN = /^[\s,&]*(?:-|–|—|to|through|thru|until|till|into|or|and|&|,)(?:\s+(?:to|into))?[\s,&]*(?:early|mid|late|the|into)?[-\s,&]*$/i;
 
-// Feasts that name no month, or name a different one each year. A description
-// that leans on one of these is not telling us when the thing happens, so the
-// record keeps the tag it has and waits for a person. This is what stops
-// Berlin's "late November through Christmas Eve" being retagged to November,
-// which would be a worse answer than the December it already carries.
-const MOVABLE_FEAST = /\b(?:Christmas|Christmastide|New Year(?:'s)?|Hogmanay|Easter|Holy Week|Lent|Ash Wednesday|Pentecost|Ramadan|Eid|Hajj|Diwali|Deepavali|Hanukkah|Chanukah|Yom Kippur|Rosh Hashanah|Passover|Thanksgiving|Lunar New Year|Islamic calendar|lunar calendar)\b/i;
+// Feasts that land on a different month depending on the year. A description
+// that leans on one of these is dating one year rather than the event, so the
+// record keeps the tag it has and waits for a person. Diwali is the clearest
+// case in the library: Chamarel's text says late October, which was true in
+// 2025, and the tag says November, which is true in 2026. Neither half is
+// wrong enough to overwrite the other from here.
+//
+// Christmas and the Gregorian New Year used to sit in this list and no longer
+// do. They do not move, so they are read as the months they are, in
+// FIXED_FEASTS above. OTHER_NEW_YEAR keeps everybody else's new year here.
+const MOVABLE_FEAST = /\b(?:Easter|Holy Week|Semana Santa|Lent|Ash Wednesday|Shrove|Pentecost|Ascension|Ramadan|Eid|Hajj|Diwali|Deepavali|Hanukkah|Chanukah|Yom Kippur|Rosh Hashanah|Passover|Thanksgiving|Islamic calendar|lunar calendar|lunar month)\b/i;
 
 /**
  * The month tag a description supports, or null where it does not support one.
@@ -227,22 +310,21 @@ const MOVABLE_FEAST = /\b(?:Christmas|Christmastide|New Year(?:'s)?|Hogmanay|Eas
  */
 export function monthTagFromText(text) {
   const s = String(text || '');
-  const hits = [];
-  let m;
-  MONTH_RE.lastIndex = 0;
-  while ((m = MONTH_RE.exec(s))) {
-    const i = monthIndex(m[1]);
-    if (i >= 0) hits.push({ i, start: m.index, end: m.index + m[0].length });
-  }
+  const hits = monthHits(s);
   if (!hits.length) return null;
 
   // A month written as one half of "April-June" is a date by construction, so
-  // it needs no cue in front of it.
+  // it needs no cue in front of it. Nor does Christmas Eve, which is a date and
+  // nothing else.
   const inRange = new Set();
   for (let k = 0; k + 1 < hits.length; k++) {
     if (SPAN_JOIN.test(s.slice(hits[k].end, hits[k + 1].start))) { inRange.add(k); inRange.add(k + 1); }
   }
-  const dated = hits.filter((h, k) => inRange.has(k) || DATE_CUE.test(s.slice(Math.max(0, h.start - 26), h.start)));
+  const dated = hits.filter((h, k) => {
+    if (h.feast || inRange.has(k)) return true;   // feasts were cued in monthHits
+    const before = s.slice(Math.max(0, h.start - 30), h.start);
+    return DATE_CUE.test(before.slice(-26)) || OWNED_BY.test(before);
+  });
   if (!dated.length) return null;
 
   // Group the dated mentions into spans, then require exactly one group. Two
@@ -258,6 +340,14 @@ export function monthTagFromText(text) {
   if (distinct.length !== 1) return null;
 
   const g = groups[0];
+
+  // "Christmas markets from late November" says when the thing STARTS and
+  // nothing about when it stops. Read as a single month that is November, and
+  // three country records tagged December would have been narrowed to November,
+  // losing the month the market is most famous for. An open start cannot
+  // justify taking a month away, so it waits for a person instead.
+  if (g.length === 1 && OPEN_START.test(s.slice(Math.max(0, g[0].start - 30), g[0].start))) return null;
+
   const months = [...new Set(g.map(h => h.i))];
   if (months.length === 1) return ABBR[months[0]];
   return ABBR[months[0]] + '-' + ABBR[months[months.length - 1]];
@@ -281,7 +371,8 @@ export function proposedRetag(entry) {
   if (!named.length) return null;              // nothing to rebuild from
   if ([...covered].some(i => tag.has(i))) return null;  // already agrees
 
-  if (MOVABLE_FEAST.test(blob)) return null;   // the text names a feast, not a month
+  // The text dates a feast that moves, so it dates one year and not the event.
+  if (MOVABLE_FEAST.test(blob) || OTHER_NEW_YEAR.test(blob)) return null;
 
   const next = monthTagFromText(blob);
   if (!next || next === was) return null;

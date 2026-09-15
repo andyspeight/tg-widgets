@@ -279,10 +279,10 @@ const J = (v) => JSON.stringify(v);
     assert.strictEqual(proposedRetag({ month:'Dec', name:'X', description:'From late November through early January.' }), null);
   });
   t('a description leaning on a movable feast is left alone', () => {
-    // "late November through Christmas Eve" names only November, so rebuilding
-    // from it would replace December with something worse.
-    assert.strictEqual(proposedRetag({ month:'Dec', name:'Berlin Christmas markets',
-      description:'Markets across the city from late November through Christmas Eve.' }), null);
+    // Diwali moves between October and November, so a description naming one of
+    // them is dating a year rather than the event.
+    assert.strictEqual(proposedRetag({ month:'Nov', name:'Diwali in Grand Bassin',
+      description:'The Hindu Festival of Lights in late October turns the sacred lake into a sea of diyas.' }), null);
   });
   t('a description with no month is left alone', () => {
     assert.strictEqual(proposedRetag({ month:'Jun', name:'X', description:'A festival with no date in it at all.' }), null);
@@ -307,6 +307,89 @@ const J = (v) => JSON.stringify(v);
   t('retagging fixes the record the dashboard was flagging', () => {
     const fixed = JSON.stringify([{ ...RETAG, month: proposedRetag(RETAG).next }]);
     assert.strictEqual(checkValue(fixed, 'events'), 'filled');
+  });
+
+
+  console.log('\nFeasts that do not move, and feasts that do');
+
+  t('Christmas Eve closes a span that started in November', () => {
+    // Berlin. The tag said December and the text said November, and the two
+    // only agree once Christmas Eve is read as the date it is.
+    const { covered } = monthsNamedIn('80+ markets from late November through Christmas Eve.');
+    assert.deepStrictEqual([...covered].sort((a, b) => a - b), [10, 11]);
+  });
+  t("New Year's Day closes a span into January", () => {
+    const { covered } = monthsNamedIn('Markets from late November through New Year\'s Day.');
+    assert.deepStrictEqual([...covered].sort((a, b) => a - b), [0, 10, 11]);
+  });
+  t('a bare New Year claims only the December half', () => {
+    // It could be the 31st or the 1st. Under-claiming a day beats over-claiming
+    // a month.
+    assert.strictEqual(monthTagFromText('Lights from mid-November through to New Year.'), 'Nov-Dec');
+  });
+  t('Boxing Day is a date on its own', () => {
+    assert.strictEqual(monthTagFromText('The street carnival on Boxing Day sees masked dancers parade.'), 'Dec');
+  });
+  t('Orthodox Christmas is not December', () => {
+    // Tbilisi holds this on 7 January and the tag says so. Reading the name as
+    // a date would have overwritten a correct tag.
+    assert.strictEqual(proposedRetag({ month:'7 January', name:'Christmas (Old Calendar)',
+      description:'Orthodox Christmas with the Alilo procession through the old town.' }), null);
+  });
+  t("somebody else's new year is not December", () => {
+    // Nyepi is in March and Mwaka Kogwa is in July. Both call themselves a new
+    // year, and a capitalised word in front of the phrase is what says so.
+    assert.strictEqual(proposedRetag({ month:'Mar', name:'Nyepi (Day of Silence)',
+      description:"Bali's New Year. The whole island shuts down for 24 hours." }), null);
+    assert.strictEqual(proposedRetag({ month:'Jul', name:'Mwaka Kogwa',
+      description:'A four-day Persian-origin New Year festival in Makunduchi.' }), null);
+  });
+  t('a named month still beats a movable feast in the same sentence', () => {
+    // Chinese New Year moves, but "late January or early February" covers the
+    // whole of where it moves to, so the text is honest and May is not.
+    const { covered } = monthsNamedIn('The Chinatown festival in late January or early February.');
+    assert.ok(covered.has(0) && covered.has(1));
+  });
+
+  console.log('\nReading a month that has no cue word in front of it');
+
+  t('a month in front of the event is the date', () => {
+    // "Hokitika's March Wildfoods Festival" was tagged November. A scan of all
+    // 2,589 descriptions found 336 months written this way and one exception.
+    assert.strictEqual(monthTagFromText("Hokitika's March Wildfoods Festival serves whitebait fritters."), 'Mar');
+    assert.strictEqual(monthTagFromText('The September Berber tribal festival in the Middle Atlas.'), 'Sep');
+    assert.strictEqual(monthTagFromText('The Delta celebrates the November full moon at Tra Vinh.'), 'Nov');
+  });
+  t("Trinidad's Road March is not a month", () => {
+    // The one exception in the library. The word in front of it is neither
+    // "the" nor a possessive nor the start of a sentence.
+    assert.strictEqual(monthTagFromText('Soca music, Road March competition and the J\'Ouvert parade.'), null);
+  });
+  t('a short month name in prose is not a month', () => {
+    // All seven short forms in the library are the word for sea: Avenida do
+    // Mar, Semana del Mar, Viña del Mar. Not one is March.
+    assert.deepStrictEqual(monthsNamedIn("Costumes lining the Avenida do Mar.").named, []);
+    assert.strictEqual(proposedRetag({ month:'Feb', name:'Carnaval da Madeira',
+      description:"Funchal's carnival runs over two weeks along the Avenida do Mar." }), null);
+  });
+
+  console.log('\nA start with no finish');
+
+  t('a hyphen after early, mid or late still makes a span', () => {
+    // "late November to mid-January" was reading as two unrelated dates,
+    // because the gap being tested was " to mid-".
+    const { covered } = monthsNamedIn('From late November to mid-January the canals are lit.');
+    assert.deepStrictEqual([...covered].sort((a, b) => a - b), [0, 10, 11]);
+    assert.strictEqual(monthTagFromText('The late-July to early-August national festival.'), 'Jul-Aug');
+  });
+  t('a start with no finish cannot take a month away', () => {
+    // "Christmas markets from late November" would have narrowed three country
+    // records from December to November, losing the month they are known for.
+    assert.strictEqual(proposedRetag({ month:'Dec', name:'Krakow Christmas Market',
+      description:'Six weeks of wooden stalls fill Rynek Glowny from late November with pierogi.' }), null);
+  });
+  t('a closed span is still rebuilt', () => {
+    assert.strictEqual(monthTagFromText('Late May to mid-June\'s SIFF is the largest film festival.'), 'May-Jun');
   });
 
   console.log(`\n  ${pass} passed, ${fail} failed\n`);
