@@ -43,7 +43,7 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
 (async () => {
   const {
     agreedFields, siteHost, wikiKey, reconcileWikidata, localSiteFromWikitext, sameSite,
-    warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor, wikipediaIntro,
+    warmAirports, sourceAirportField, _resetSourceCache, AIRPORT_SOURCED, sparqlFor, wikipediaIntro, placeHead,
     wikiTitle, mergeWikiAnswer, articleUrl,
   } = await load('_source.js');
 
@@ -287,12 +287,12 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
   console.log('\nReading Wikidata, which does not answer once per airport');
 
   t('several rows for one airport collapse to one answer', () => {
-    // Beijing Daxing sits across three administrative areas, so P131 returns
-    // three rows. Everything else on them is identical.
+    // An airport can serve more than one place, so P931 returns a row each.
+    // Everything else on them is identical.
     const b = (place) => ({
       iata: { value: 'PKX' }, airport: { value: 'http://www.wikidata.org/entity/Q7062090' },
       airportLabel: { value: 'Beijing Daxing International Airport' },
-      iso: { value: 'CN' }, placeLabel: { value: place },
+      iso: { value: 'CN' }, servedLabel: { value: place },
       coord: { value: 'Point(116.410556 39.509167)' },
       site: { value: 'https://www.bdia.com.cn/' },
       article: { value: 'https://en.wikipedia.org/wiki/Beijing_Daxing_International_Airport' },
@@ -740,6 +740,48 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
       async () => ({ ok: false, status: 503 }));
     assert.strictEqual(out.ok, false);
     assert.match(out.why, /503/);
+  });
+
+  console.log('\nAsking the question the field is actually putting');
+
+  t('the query asks which city an airport serves, not which area it sits in', () => {
+    // P131 is "located in the administrative territorial entity" and P931 is
+    // "place served by transport hub". Asking the first is why this field
+    // reported zero agreement across 100 records for a fortnight.
+    const q = sparqlFor(['LHR']);
+    assert.match(q, /wdt:P931/, 'it has to ask for the place served');
+    assert.doesNotMatch(q, /wdt:P131 \?place/, 'the area it stands in is a different question');
+  });
+  t('an unlabelled Wikidata entity is not a place name', () => {
+    // Some come back as a bare Q-id when there is no English label, and
+    // "Q81046" is not something to put in front of a traveller.
+    const out = reconcileWikidata({ results: { bindings: [{ iata: { value: 'XXX' },
+      airport: { value: 'http://www.wikidata.org/entity/Q1' },
+      servedLabel: { value: 'Q81046' } }] } }, ['XXX']);
+    assert.strictEqual(out.get('XXX').city, '');
+  });
+  t('a province written after the city is not part of the city', () => {
+    // OurAirports qualifies its municipality: "Pisa (PI)", "Kuta, Badung",
+    // "Cincinnati / Covington". The city is the head of the string.
+    assert.strictEqual(placeHead('Pisa (PI)'), 'Pisa');
+    assert.strictEqual(placeHead('Kuta, Badung'), 'Kuta');
+    assert.strictEqual(placeHead('Cincinnati / Covington'), 'Cincinnati');
+    assert.strictEqual(placeHead('Port of Spain'), 'Port of Spain');
+    assert.strictEqual(placeHead(''), '');
+  });
+  t('the two sources now settle a city they used to argue about', () => {
+    const { agreed, why } = agreedFields(
+      { ...OA.LHR, city: 'Moscow, Moscow Oblast' }, { ...WD.LHR, city: 'Moscow' });
+    assert.strictEqual(agreed.city, 'Moscow');
+    assert.strictEqual(why.city, undefined);
+  });
+  t('a real disagreement is still a hold', () => {
+    // Malpensa is Ferno to OurAirports and Milan to Wikidata. Both are true
+    // sentences about different things, so nobody wins and the record waits.
+    const { agreed, why } = agreedFields(
+      { ...OA.LHR, city: 'Ferno' }, { ...WD.LHR, city: 'Milan' });
+    assert.strictEqual(agreed.city, undefined);
+    assert.match(why.city, /Ferno against Milan/);
   });
 
   await Promise.all(pending);

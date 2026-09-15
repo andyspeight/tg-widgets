@@ -698,13 +698,12 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
     assert.strictEqual(seen.output_config.effort, BUDGET.writeJson.effort);
   });
 
-  t('a field the two sources cannot settle says so, rather than offering a job', () => {
-    // City Served on an airport: OurAirports names the city served, Wikidata the
-    // district it stands in. Zero of 100 of Andy's blank records agreed.
-    const p = fillPlanFor(F('City Served', 'text'), 'airport');
-    assert.strictEqual(p.kind, 'source', 'offering this would produce 362 holds and nothing else');
-    assert.match(p.why, /different questions/);
-    assert.doesNotMatch(p.why, /not built yet/, 'it is built, it just cannot answer this');
+  t('City Served is a job the two sources can do after all', () => {
+    // It was listed as unanswerable on 14 Sep 2026, measured at zero agreement.
+    // The measure was right and the conclusion was wrong: the fixer was asking
+    // Wikidata which area the airport STANDS IN. Asked which city it SERVES,
+    // the two sources agreed on 302 of 362 the next day.
+    assert.strictEqual(fillPlanFor(F('City Served', 'text'), 'airport').kind, 'fact');
   });
 
   t('the airport fixer still runs for the fields it can settle', () => {

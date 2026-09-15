@@ -7,7 +7,7 @@
  *
  *   OurAirports open dataset (CSV)   name, municipality, ISO country, lat/lon,
  *                                    home_link, wikipedia_link
- *   Wikidata (SPARQL, keyed on P238) label, P17/P297 country, P131 place,
+ *   Wikidata (SPARQL, keyed on P238) label, P17/P297 country, P931 place served,
  *                                    P625 coordinates, P856 site, enwiki article
  *
  * They are genuinely independent: different maintainers, different editing
@@ -29,10 +29,19 @@
  *   official website 18/40, city served 11/40.
  * Wikipedia URL was 36/40 until redirects were resolved: every one of the four
  * misses was one article under two names, not two articles.
- * The website misses are genuine disagreements between two real sites. The city
- * misses are Wikidata answering a different question: P131 gives the
- * administrative area (Heathrow sits in the London Borough of Hillingdon), not
- * the city the airport serves. Both are left blank rather than guessed.
+ * The website misses are genuine disagreements between two real sites.
+ *
+ * CITY SERVED was the one this could not do, and the reason was the question
+ * rather than the sources. It asked Wikidata for P131, the administrative area
+ * an airport STANDS IN, so Heathrow came back as the London Borough of
+ * Hillingdon and Brussels as Zaventem, and the honest verdict was always "they
+ * disagree". Wikidata has a property for the question actually being asked,
+ * P931, "place served by transport hub". Asked that one, on 15 Sep 2026, the
+ * two sources agreed on 302 of the 362 airports that held no answer at all, and
+ * against the 238 a person had already filled in they contradicted the record
+ * seven times, every one of them island-or-capital wording rather than a wrong
+ * place. The 60 that still hold are real disagreements worth holding: Malpensa
+ * is Ferno to one and Milan to the other.
  *
  * COST: nothing. No model is involved at any point.
  *
@@ -90,6 +99,15 @@ export function hasAirportFixer(label) {
  * Pure comparison rules. One per field, each answering the same
  * question: did BOTH sources see this, and do they agree?
  * ------------------------------------------------------------------ */
+
+/**
+ * The city at the head of an OurAirports municipality. It writes the province or
+ * the district after the name, so "Pisa (PI)", "Kuta, Badung" and "Cincinnati /
+ * Covington" all name their city first and qualify it afterwards. Pure.
+ */
+export function placeHead(value) {
+  return String(value || '').replace(/\s*\([^)]*\)\s*$/, '').split(/\s*[,/]\s*/)[0].trim();
+}
 
 /** The registrable host, lower-cased and without www. Pure. */
 export function siteHost(url) {
@@ -246,13 +264,22 @@ export function agreedFields(oa, wd) {
       : 'they disagree: one source says ' + named(oaCc) + ', the other says ' +
         [...wdAll].sort().map(named).join(' or '));
 
-  // City served. Strict, and it misses often on purpose: Wikidata's P131 is the
-  // administrative area, which is not the question being asked.
-  const cityAgree = !!oa.city && !!wd.city && normalizeName(oa.city) === normalizeName(wd.city);
-  note('city', cityAgree ? oa.city : '',
+  // City served. This used to ask Wikidata for P131, which is the administrative
+  // area an airport STANDS IN, and then report honestly that the two sources
+  // never agreed. They never agreed because they were being asked different
+  // questions: P131 says Dublin airport is in Fingal and Brussels is in
+  // Zaventem. Wikidata has a property for the actual question, P931, "place
+  // served by transport hub", and asked that one the two sources agree on 302
+  // of the 362 airports that had no answer at all. Checked first against 238
+  // values a person had set by hand: where both sources agreed, they contradicted
+  // the record seven times and all seven were island-or-capital wording rather
+  // than a wrong place.
+  const oaCity = placeHead(oa.city);
+  const cityAgree = !!oaCity && !!wd.city && normalizeName(oaCity) === normalizeName(wd.city);
+  note('city', cityAgree ? oaCity : '',
     wd.ambiguousCity ? 'Wikidata lists several places for it'
-      : !oa.city || !wd.city ? 'only one source names a place'
-        : 'they disagree: ' + oa.city + ' against ' + wd.city);
+      : !oaCity || !wd.city ? 'only one source names a place'
+        : 'they disagree: ' + oaCity + ' against ' + wd.city);
 
   // Official website. Compared by host, because the same site is written
   // http://www.x.com/ by one and https://x.com by the other.
@@ -368,8 +395,8 @@ async function ourAirports(iatas, fetchImpl) {
 /**
  * One SPARQL call for the whole batch, grouped back by IATA. Pure.
  *
- * A single airport can return several rows, because P131 often holds more than
- * one administrative area: Beijing Daxing sits across three. A field with more
+ * A single airport can return several rows, because an airport can serve more
+ * than one place: Basel Mulhouse serves three countries' cities. A field with more
  * than one distinct value across those rows is ambiguous, and ambiguous is
  * treated as not corroborated rather than resolved by picking the first.
  */
@@ -403,7 +430,7 @@ export function reconcileWikidata(json, iatas) {
     if (g('airportLabel')) cur.names.add(g('airportLabel'));
     if (g('iso')) cur.isos.add(g('iso').toUpperCase());
     if (g('terr')) cur.terrs.add(g('terr').toUpperCase());
-    if (g('placeLabel')) cur.cities.add(g('placeLabel'));
+    if (g('servedLabel') && !/^Q\d+$/.test(g('servedLabel'))) cur.cities.add(g('servedLabel'));
     if (g('site')) cur.sites.add(g('site'));
     if (g('article')) cur.arts.add(g('article'));
     if (g('coord')) cur.coords.add(g('coord'));
@@ -451,11 +478,11 @@ export function sparqlFor(iatas) {
     .filter(c => c.length === 3)
     .map(c => '"' + c + '"')
     .join(' ');
-  return `SELECT ?iata ?airport ?airportLabel ?iso ?terr ?placeLabel ?coord ?site ?article WHERE {
+  return `SELECT ?iata ?airport ?airportLabel ?iso ?terr ?servedLabel ?coord ?site ?article WHERE {
   VALUES ?iata { ${values} }
   ?airport wdt:P238 ?iata.
   OPTIONAL { ?airport wdt:P17 ?country. OPTIONAL { ?country wdt:P297 ?iso. } }
-  OPTIONAL { ?airport wdt:P131 ?place. }
+  OPTIONAL { ?airport wdt:P931 ?served. }
   OPTIONAL { ?airport wdt:P131* ?admin. ?admin wdt:P297 ?terr. }
   OPTIONAL { ?airport wdt:P625 ?coord. }
   OPTIONAL { ?airport wdt:P856 ?site. }

@@ -236,19 +236,20 @@ function fixerExists(label, typeKey) {
  * fixer is written. This is not "not built yet". It is a different answer, and
  * saying so saves Andy pressing a button that can only ever hold.
  *
- * City Served on an airport is the case that taught us. OurAirports records the
- * city an airport SERVES and Wikidata's P131 records the district it SITS IN,
- * and for any airport worth flying to those differ: Dublin sits in Fingal,
- * Vienna in Schwechat, Rome in Fiumicino, Stockholm Arlanda in Sigtuna. Measured
- * on 14 Sep 2026 against 100 of Andy's own blank records, the agreement rate was
- * zero, so the job would have produced 362 holds and nothing else.
+ * Nothing is in here at the moment, and the entry that used to be is worth
+ * keeping as a warning. City Served on an airport was listed as unanswerable on
+ * 14 Sep 2026, measured at zero agreement across 100 blank records. The measure
+ * was right and the conclusion was wrong: the fixer was asking Wikidata for
+ * P131, the area an airport STANDS IN, when the field asks which city it SERVES.
+ * Wikidata has a property for that, P931. Asked the right question the next day
+ * the two sources agreed on 302 of 362.
+ *
+ * So before anything goes in here, check that both sources were asked the
+ * question the field is actually putting. "The sources cannot settle this" and
+ * "we asked the wrong thing" look identical from the outside, and only one of
+ * them is true.
  */
-const NO_SECOND_SOURCE = {
-  'airport:City Served':
-    'the two sources answer different questions here, one naming the city an airport '
-    + 'serves and the other the district it stands in, so Dublin reads as Fingal and '
-    + 'Rome as Fiumicino. This one needs a person or a third source',
-};
+const NO_SECOND_SOURCE = {};
 
 /**
  * Fields whose plan depends on the level they sit on rather than the name.
