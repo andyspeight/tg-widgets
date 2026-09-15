@@ -16,6 +16,8 @@
  * Tests: npm run test:destinations-coverage
  */
 
+import { eventProblems } from './destination-events.js';
+
 /* ------------------------------------------------------------------ *
  * Field specs — the definition of "complete" for each content type.
  * ------------------------------------------------------------------ */
@@ -90,7 +92,7 @@ export const TYPES = [
       F('fldJNzwIVJEHrHZZr', 'Climate Rainfall', 'csv12', 'rich', 'Climate'),
       F('fldqx5p1U0siNtvYy', 'Climate Season', 'csv12', 'core', 'Climate'),
       F('fldOFmB8E9rDvgQEZ', 'Highlights JSON', 'json', 'core', 'Structured'),
-      F('fldylxHJYE7PtQ86s', 'Events JSON', 'json', 'rich', 'Structured'),
+      F('fldylxHJYE7PtQ86s', 'Events JSON', 'events', 'rich', 'Structured'),
       F('fldC5ZvX1hitoxWY6', 'Best For Tags', 'multi', 'core', 'Structured'),
       F('fldJOZeflKobE2o9g', 'Price Band UK', 'select', 'rich', 'Trip planning'),
       F('fld3JLyT3MsMGWVT4', 'Booking Lead Time', 'select', 'rich', 'Trip planning'),
@@ -137,7 +139,7 @@ export const TYPES = [
       F('fldl296lX37f8stws', 'Climate Rainfall', 'csv12', 'rich', 'Climate'),
       F('fldHwvHjSwkpEgFa2', 'Climate Season', 'csv12', 'core', 'Climate'),
       F('fld1moM61DARrsBwr', 'Highlights JSON', 'json', 'core', 'Structured'),
-      F('fldxze1iXQRrJ0UZW', 'Events JSON', 'json', 'rich', 'Structured'),
+      F('fldxze1iXQRrJ0UZW', 'Events JSON', 'events', 'rich', 'Structured'),
       F('fldZQTVNuqRXHileW', 'Best For Tags', 'multi', 'core', 'Structured'),
       F('fldPSVfkYVAIhtNDp', 'Trip Duration Sweet Spot', 'multi', 'rich', 'Trip planning'),
       // Latitude/Longitude, not the empty Lat/Lng duplicates. Scoring the
@@ -183,7 +185,7 @@ export const TYPES = [
       F('fldCuW6FzzetUe0tV', 'Climate Rainfall', 'csv12', 'rich', 'Climate'),
       F('fld5RyPuxYdFFIFhb', 'Climate Season', 'csv12', 'core', 'Climate'),
       F('fldUyjDhtoA43hdHv', 'Highlights JSON', 'json', 'core', 'Structured'),
-      F('fldWRl0d0z1MY6DMq', 'Events JSON', 'json', 'rich', 'Structured'),
+      F('fldWRl0d0z1MY6DMq', 'Events JSON', 'events', 'rich', 'Structured'),
       F('fldTmH3gT1wT48PLn', 'Best For Tags', 'multi', 'core', 'Structured'),
       // As on Cities: the data lives in Latitude/Longitude, and Lat/Lng are
       // empty duplicates that made all 495 resorts unreachable.
@@ -351,6 +353,19 @@ export function checkValue(value, kind) {
       } catch {
         return 'invalid';
       }
+    }
+
+    // Events get their own check rather than sharing the plain JSON one. A
+    // non-empty array is not the same as a usable list: an entry with no name
+    // never reaches the app, one with no month shows undated, and one whose tag
+    // contradicts its own description sends a traveller to the wrong month.
+    // Scoring those as 'filled' is how 39 records came to read as finished
+    // while the app served either nothing or an undated list, and how Orlando
+    // came to offer a May visitor a one-off that happened in 2025.
+    case 'events': {
+      const s = selName(value).trim();
+      if (!s) return 'empty';
+      return eventProblems(s).length ? 'invalid' : 'filled';
     }
 
     case 'csv12': {

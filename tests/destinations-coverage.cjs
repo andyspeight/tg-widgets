@@ -125,6 +125,7 @@ function t(name, fn) {
       text: 'Filled', prose: 'A sentence long enough to count as genuine content rather than a stub.',
       select: 'Live', multi: ['Beach'], link: ['recParent1234567'],
       json: '[{"icon":"beach","title":"T","description":"D"}]',
+      events: '[{"month":"May","name":"Feria","description":"Horses and sherry in early May."}]',
       csv12: '11,11,13,16,20,24,26,27,24,20,16,13',
       lines3: 'https://a.test/1.jpg\nhttps://a.test/2.jpg\nhttps://a.test/3.jpg',
       url: 'https://a.test', date: '2026-08-14', iata: 'LHR', lat: 37.9838, lng: 23.7275,

@@ -121,6 +121,106 @@ const J = (v) => JSON.stringify(v);
     assert.deepStrictEqual(parseEvents(J(['just a string', null, 42])), []);
   });
 
+  // --------------------------------------------------------------------
+  // What the dashboard sees. Same field, same verdict, so the tool cannot
+  // report a record as finished while the app serves nothing.
+  // --------------------------------------------------------------------
+  const { eventProblems, monthsNamedIn, tagCovers } =
+    await import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'destination-events.js')).href);
+  const { checkValue } = await import(
+    pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'destination-coverage.js')).href);
+
+  console.log('\nReading a month range');
+
+  t('a single month covers only itself', () => {
+    assert.deepStrictEqual([...tagCovers('May')], [4]);
+  });
+  t('a range covers everything between its ends', () => {
+    assert.deepStrictEqual([...tagCovers('Jul-Aug')].sort((a, b) => a - b), [6, 7]);
+  });
+  t('a range that wraps the year end still counts forwards', () => {
+    assert.deepStrictEqual([...tagCovers('Nov-Feb')], [10, 11, 0, 1]);
+  });
+  t('year-round covers all twelve', () => {
+    assert.strictEqual(tagCovers('Year-round').size, 12);
+  });
+  t('a moving feast covers every month rather than contradicting one', () => {
+    // "Variable (Islamic calendar)" is the honest answer for Eid. Reading it as
+    // all twelve means it can never be flagged as disagreeing with its text.
+    assert.strictEqual(tagCovers('Variable (Islamic calendar)').size, 12);
+  });
+  t('a month field holding something else entirely reads as no months', () => {
+    assert.strictEqual(tagCovers('see website'), null);
+  });
+  t('an accented word is not mistaken for a month', () => {
+    // The ASCII word boundary fired inside "Maré" and read it as March, which
+    // flagged a perfectly good August festival as being tagged wrong.
+    assert.deepStrictEqual(monthsNamedIn('Festival Maré de Agosto on Santa Maria').named, []);
+  });
+  t('a lowercase verb is not mistaken for a month', () => {
+    assert.deepStrictEqual(monthsNamedIn('visitors may march up the hill').named, []);
+  });
+  t('prose that names a span covers the months inside it', () => {
+    const { covered } = monthsNamedIn('runs from late June through early September');
+    assert.ok(covered.has(6), 'July should sit inside June to September');
+  });
+  t('two months with prose between them are not a span', () => {
+    const { covered } = monthsNamedIn('in early October, and the smaller version each September');
+    assert.ok(!covered.has(7), 'August must not be swallowed by two unrelated months');
+  });
+
+  console.log('\nWhat counts as a problem');
+
+  t('a sound events list has nothing wrong with it', () => {
+    assert.deepStrictEqual(eventProblems(J([{ month: 'May', name: 'Feria', description: 'Horses in early May.' }])), []);
+  });
+  t('a tag that contradicts its own description is a problem', () => {
+    // Andy's example. Tagged February, text says mid-January, so a February
+    // traveller is sent to something that finished six weeks earlier.
+    const p = eventProblems(J([{ month: 'Feb', name: 'Art Deco Weekend', description: 'The three-day festival in mid-January on Ocean Drive.' }]));
+    assert.strictEqual(p.length, 1);
+    assert.match(p[0], /tagged Feb but its own description says January/);
+  });
+  t('a tag inside a span the text names is not a problem', () => {
+    assert.deepStrictEqual(eventProblems(J([{ month: 'Dec', name: 'Winter Wonders', description: 'Six weeks from late November through early January.' }])), []);
+  });
+  t('an entry with no name is reported as dropped', () => {
+    assert.match(eventProblems(J([{ month: 'May', description: 'No name.' }]))[0], /no name, so it is dropped/);
+  });
+  t('an entry with no month anywhere is reported as undated', () => {
+    assert.match(eventProblems(J([{ name: 'Whenever', description: 'A festival with no date.' }]))[0], /no month, so it shows undated/);
+  });
+  t('a month we cannot parse is accepted rather than called wrong', () => {
+    // "Variable (Islamic calendar)" is the honest answer for a moving feast.
+    assert.deepStrictEqual(eventProblems(J([{ month: 'Variable (Islamic calendar)', name: 'Eid', description: 'Dates move each year.' }])), []);
+  });
+  t('broken JSON is reported, not swallowed', () => {
+    assert.match(eventProblems('{not json')[0], /not valid JSON/);
+  });
+  t('an empty array is reported', () => {
+    assert.match(eventProblems('[]')[0], /empty/);
+  });
+
+  console.log('\nThe dashboard reaches the same verdict');
+
+  t('a sound events field reads as filled', () => {
+    assert.strictEqual(checkValue(J([{ month: 'May', name: 'Feria', description: 'Horses in early May.' }]), 'events'), 'filled');
+  });
+  t('a self-contradicting events field reads as needing a correction', () => {
+    assert.strictEqual(checkValue(J([{ month: 'Feb', name: 'X', description: 'The festival in mid-January.' }]), 'events'), 'invalid');
+  });
+  t('a Highlights-shaped events field reads as filled now the month is recovered', () => {
+    assert.strictEqual(checkValue(J([{ icon: 'star', title: 'Sant Antoni', description: '17 January. Bonfires and horses.' }]), 'events'), 'filled');
+  });
+  t('an events field that would serve nothing does not read as filled', () => {
+    // A non-empty JSON array used to score as done. This is how 39 records
+    // told the dashboard they were finished while the app served nothing.
+    assert.strictEqual(checkValue(J([{ icon: 'star', description: 'No name and no month.' }]), 'events'), 'invalid');
+  });
+  t('a blank events field is still simply empty', () => {
+    assert.strictEqual(checkValue('', 'events'), 'empty');
+  });
+
   console.log(`\n  ${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
 })();

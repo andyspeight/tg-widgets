@@ -51,6 +51,7 @@
  */
 
 import { setCors, applyRateLimit, RATE_LIMITS, requireAuth } from './_auth.js';
+import { readEvents } from './_lib/destination-events.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 
@@ -291,50 +292,24 @@ function parseHighlights(str) {
   }).filter(h => h && h.title);
 }
 
-// The month sentence a Highlights-shaped entry opens with. Those entries carry
-// no month key at all, but they were written with the date in front of the
-// description ("17 January. The patron saint of Menorca..."), so the month is
-// there to be read rather than guessed at.
-const LEADING_DATE = /^\s*((?:\d{1,2}(?:\s*(?:to|-|\u2013)\s*\d{1,2})?\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December)(?:\s*(?:to|-|\u2013|and)\s*(?:\d{1,2}\s+)?(?:January|February|March|April|May|June|July|August|September|October|November|December))?)\s*[.,\u2013-]/;
-
 /**
- * Read the events array off a record.
+ * The events on a record, sanitised for the wire.
  *
- * THIS READER IS DELIBERATELY FORGIVING, and the reason is worth writing down.
- * The Events JSON field holds three shapes, not one. The contract is
- * {month, name, description}, but two batches were written to other shapes: 15
- * resort records carry the Highlights shape {icon, title, description}, and 24
- * city records put the month under "period" or "date". A reader that only knew
- * the contract dropped every one of those 45 title-shaped events on the floor
- * and served the other 84 with no month against them. The content was written,
- * checked and paid for, and a traveller never saw a line of it.
+ * The structural read lives in _lib/destination-events.js because the admin
+ * dashboard has to reach the same verdict about the same field. That file
+ * explains why the field holds three shapes; this one only escapes what it
+ * returns and caps the lengths.
  *
- * So each field is read from the keys it has actually been found under, newest
- * contract first. Accepting an alias costs nothing and is not the same as
- * inventing a value: everything below comes off the record, and an entry with
- * no usable title still returns nothing.
+ * The month cap is 40 rather than 20 because "Late November to early January"
+ * is 30 characters and a perfectly good answer. At 20 it reached travellers as
+ * "Late November to ea", and 37 records read like that.
  */
 export function parseEvents(str) {
-  if (typeof str !== 'string' || !str.trim()) return [];
-  let arr;
-  try { arr = JSON.parse(str); } catch { return []; }
-  if (!Array.isArray(arr)) return [];
-  return arr.slice(0, 6).map(e => {
-    if (!e || typeof e !== 'object') return null;
-    const description = txt(e.description, 280);
-    // "Late November to early January" is 30 characters and a perfectly good
-    // answer. The old 20-character cap cut it to "Late November to ea".
-    let month = txt(e.month ?? e.period ?? e.date, 40);
-    if (!month) {
-      const lead = LEADING_DATE.exec(description);
-      if (lead) month = txt(lead[1], 40);
-    }
-    return {
-      month,
-      name: txt(e.name || e.title, 80),
-      description,
-    };
-  }).filter(e => e && e.name);
+  return readEvents(str).map(e => ({
+    month: txt(e.month, 40),
+    name: txt(e.name, 80),
+    description: txt(e.description, 280),
+  })).filter(e => e.name);
 }
 
 function parseBestForTags(value) {
