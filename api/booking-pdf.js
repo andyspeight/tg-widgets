@@ -27,7 +27,7 @@
  */
 
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
-import { renderPdfHtml } from '../public/_pdf-template.js';
+import { renderPdfHtml, renderPdfFooterTemplate, PDF_HEADER_TEMPLATE } from '../public/_pdf-template.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
 
@@ -827,6 +827,19 @@ export default async function handler(req, res) {
     const pdfRaw = await page.pdf({
       format: 'A4', printBackground: true,
       preferCSSPageSize: true,
+      // The real page number on every sheet. The document's own footer is
+      // pinned inside a section, so it printed once per SECTION and carried a
+      // hardcoded "Page 1 of 2" that was wrong the moment anything ran over
+      // (15 Sep 2026). Only Chromium knows the page count at print time, so it
+      // draws the footer, into the @page bottom margin, and the body one hides
+      // itself under print media.
+      displayHeaderFooter: true,
+      headerTemplate: PDF_HEADER_TEMPLATE,
+      footerTemplate: renderPdfFooterTemplate({
+        brandName: pdfBrandName,
+        orderRef,
+        supportEmail: widgetSettings?.support?.email || '',
+      }),
     });
     await browser.close();
     browser = null;

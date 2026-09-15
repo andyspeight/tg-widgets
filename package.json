@@ -185,6 +185,7 @@
     "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs",
     "test:mybooking-multi-stay": "node test/mybooking-multi-stay-smoke.mjs",
     "test:order-stays-drift": "node test/order-stays-drift-smoke.mjs",
+    "test:booking-pdf-page-numbers": "node test/booking-pdf-page-numbers-smoke.mjs",
     "test:dashboard-required-tier": "node test/dashboard-required-tier-smoke.mjs",
     "test:offer-promos-excludes": "node test/offer-promos-excludes-smoke.mjs",
     "test:offer-roundtrip": "node test/offer-roundtrip-smoke.mjs",
