@@ -221,6 +221,94 @@ const J = (v) => JSON.stringify(v);
     assert.strictEqual(checkValue('', 'events'), 'empty');
   });
 
+  // --------------------------------------------------------------------
+  // Rebuilding a tag from the description under it. Andy's call, 15 Sep 2026.
+  // The bar is that every month written back was already in the record.
+  // --------------------------------------------------------------------
+  const { monthTagFromText, proposedRetag } = await import(
+    pathToFileURL(path.join(__dirname, '..', 'api', '_lib', 'destination-events.js')).href);
+
+  console.log('\nReading a date out of a description');
+
+  t('one month in a date position', () => {
+    assert.strictEqual(monthTagFromText('The three-day festival in mid-January on Ocean Drive.'), 'Jan');
+  });
+  t('a day number in front of a month is a date', () => {
+    assert.strictEqual(monthTagFromText('18 February celebrates the 1965 independence from Britain.'), 'Feb');
+  });
+  t('a day range in front of a month is a date', () => {
+    assert.strictEqual(monthTagFromText('The spring festival of 22-24 April celebrates the Reconquista.'), 'Apr');
+  });
+  t('a hyphenated month range needs no cue in front of it', () => {
+    assert.strictEqual(monthTagFromText('The traditional April-June Almadraba tuna harvest.'), 'Apr-Jun');
+  });
+  t('"or" between two months is a range', () => {
+    assert.strictEqual(monthTagFromText('Three days of late March or early April at the stadium.'), 'Mar-Apr');
+  });
+  t('"and" between two months is a range', () => {
+    // "across October and November" is Oct-Nov. Narrowing it to October would
+    // be true but less use to somebody deciding when to go.
+    assert.strictEqual(monthTagFromText('The olive harvest runs across October and November.'), 'Oct-Nov');
+  });
+  t('a span written out in full is a range', () => {
+    assert.strictEqual(monthTagFromText('Runs from late June through early September in the Arsenal.'), 'Jun-Sep');
+  });
+  t('a year with no month yields nothing', () => {
+    assert.strictEqual(monthTagFromText('Celebrates the 1276 Reconquista with 5,000 residents in costume.'), null);
+  });
+  t('two unrelated dates in one description yield nothing', () => {
+    // A contest in October with a smaller version each September is two
+    // answers, and picking one of them would be a guess.
+    assert.strictEqual(monthTagFromText('The contest in early October, with the smaller version each September.'), null);
+  });
+  t('a month that is only part of a name yields nothing', () => {
+    assert.strictEqual(monthTagFromText('Festival Mare de Agosto on Santa Maria island, at Praia Formosa.'), null);
+  });
+
+  console.log('\nProposing a retag');
+
+  const RETAG = { month: 'Feb', name: 'Art Deco Weekend', description: 'The three-day festival in mid-January on Ocean Drive.' };
+
+  t('a contradicted tag is rebuilt from its own text', () => {
+    assert.deepStrictEqual(proposedRetag(RETAG), { key:'month', was:'Feb', next:'Jan', name:'Art Deco Weekend' });
+  });
+  t('a tag that already agrees is left alone', () => {
+    assert.strictEqual(proposedRetag({ month:'Jan', name:'X', description:'The festival in mid-January.' }), null);
+  });
+  t('a tag inside a span the text names is left alone', () => {
+    assert.strictEqual(proposedRetag({ month:'Dec', name:'X', description:'From late November through early January.' }), null);
+  });
+  t('a description leaning on a movable feast is left alone', () => {
+    // "late November through Christmas Eve" names only November, so rebuilding
+    // from it would replace December with something worse.
+    assert.strictEqual(proposedRetag({ month:'Dec', name:'Berlin Christmas markets',
+      description:'Markets across the city from late November through Christmas Eve.' }), null);
+  });
+  t('a description with no month is left alone', () => {
+    assert.strictEqual(proposedRetag({ month:'Jun', name:'X', description:'A festival with no date in it at all.' }), null);
+  });
+  t('an entry with no month tag is left alone', () => {
+    // Undated entries are a different problem and are not this job.
+    assert.strictEqual(proposedRetag({ name:'X', description:'The festival in mid-January.' }), null);
+  });
+  t('a month field that is not a month is left alone', () => {
+    assert.strictEqual(proposedRetag({ month:'Variable (Islamic calendar)', name:'Eid', description:'Falls in March this year.' }), null);
+  });
+  t('the retag is written to whichever key held the month', () => {
+    const p = proposedRetag({ period:'Feb', name:'X', description:'The festival in mid-January.' });
+    assert.strictEqual(p.key, 'period');
+    assert.strictEqual(p.next, 'Jan');
+  });
+  t('a rebuilt tag always agrees with the text it came from', () => {
+    // The guard that stops a future change writing a fresh contradiction.
+    const p = proposedRetag(RETAG);
+    assert.deepStrictEqual(eventProblems(JSON.stringify([{ ...RETAG, month: p.next }])), []);
+  });
+  t('retagging fixes the record the dashboard was flagging', () => {
+    const fixed = JSON.stringify([{ ...RETAG, month: proposedRetag(RETAG).next }]);
+    assert.strictEqual(checkValue(fixed, 'events'), 'filled');
+  });
+
   console.log(`\n  ${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
 })();
