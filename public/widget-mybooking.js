@@ -2430,6 +2430,8 @@
     .tgm-stay h3 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; margin: 0 0 16px; color: var(--tgm-text); letter-spacing: -.01em; }
     .tgm-stay h3 svg { color: var(--tgm-accent); }
     .tgm-stay h3 .tgm-stay-meta { margin-left: auto; font-size: 13px; font-weight: 400; color: var(--tgm-text-3); }
+    /* Only shown when a trip moves between properties: "1/2", "2/2". */
+    .tgm-stay h3 .tgm-stay-step { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--tgm-primary); background: var(--tgm-bg-2, rgba(0,0,0,.04)); border-radius: 999px; padding: 2px 8px; margin-left: 8px; }
     .tgm-stay-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
     .tgm-stay-cell { padding: 0 16px; border-right: 1px solid var(--tgm-border-light); }
     .tgm-stay-cell:first-child { padding-left: 0; }
@@ -2661,6 +2663,7 @@
     .tgm-root.tgm-narrow .tgm-stay { padding: 16px; }
     .tgm-root.tgm-narrow .tgm-stay h3 { font-size: 15px; flex-wrap: wrap; }
     .tgm-root.tgm-narrow .tgm-stay h3 .tgm-stay-meta { margin-left: 0; flex-basis: 100%; margin-top: 2px; font-size: 12px; }
+    .tgm-stay + .tgm-stay { margin-top: 14px; }
     .tgm-root.tgm-narrow .tgm-stay-grid { grid-template-columns: 1fr 1fr; gap: 14px 12px; }
     .tgm-root.tgm-narrow .tgm-stay-cell { padding: 0; border-right: none; }
     .tgm-root.tgm-narrow .tgm-stay-cell:nth-child(odd) { border-right: 1px solid var(--tgm-border-light); padding-right: 12px; }
@@ -3902,6 +3905,99 @@
   }
   // <<< order-money core
 
+  // >>> order-stays core (verbatim copy lives in public/widget-mybooking.js)
+  /** Products that put a roof over someone's head for the night. */
+  const STAY_PRODUCTS = ['Accommodation', 'Packages'];
+
+  const isStayProduct = (p) => STAY_PRODUCTS.indexOf(p) !== -1;
+
+  /** Nights: the item's own duration wins, then the room's. Null when unknown. */
+  function stayNights(item, accom) {
+    const d = item && item.duration;
+    if (Number.isFinite(d) && d > 0) return d;
+    const u = accom && accom.units && accom.units[0];
+    const n = u && u.nights;
+    if (Number.isFinite(n) && n > 0) return n;
+    return null;
+  }
+
+  /** Check-out as YYYY-MM-DD, counted forward from check-in. Null when unknown. */
+  function stayCheckout(checkin, nights) {
+    if (!checkin || !Number.isFinite(nights)) return null;
+    const d = new Date(checkin.length === 10 ? checkin + 'T00:00:00Z' : checkin);
+    if (Number.isNaN(d.getTime())) return null;
+    d.setUTCDate(d.getUTCDate() + nights);
+    return d.toISOString().slice(0, 10);
+  }
+
+  /**
+   * Every stay in the booking, in the order the traveller reaches them.
+   *
+   * Returns an array of plain facts. No formatting and no markup: each document
+   * words and styles its own, which is why this can be shared by a PDF, an HTML
+   * email and a widget that all look nothing like each other.
+   *
+   *   item        the order item it came from
+   *   accom       item.accommodation
+   *   name        property name
+   *   checkin     YYYY-MM-DD (or whatever the feed carried)
+   *   nights      integer, or null
+   *   checkout    YYYY-MM-DD, or null
+   *   unit, rate  the first room and its first rate
+   *   price       this stay's own price, or null
+   *   currency    this stay's currency, or ''
+   *   isPackage   true when the stay arrived inside a package item
+   */
+  function listStays(order) {
+    const items = (order && Array.isArray(order.items)) ? order.items : [];
+    const stays = [];
+    for (const item of items) {
+      if (!item || !isStayProduct(item.product)) continue;
+      const accom = item.accommodation || null;
+      if (!accom) continue;
+      const unit = (accom.units && accom.units[0]) || null;
+      const checkin = item.startDate || (unit && unit.checkin) || null;
+      const nights = stayNights(item, accom);
+      stays.push({
+        item,
+        accom,
+        name: accom.name || '',
+        checkin,
+        nights,
+        checkout: nights ? stayCheckout(checkin, nights) : null,
+        unit,
+        rate: (unit && unit.rates && unit.rates[0]) || null,
+        price: (accom.pricing && typeof accom.pricing.price === 'number')
+          ? accom.pricing.price
+          : (typeof item.price === 'number' ? item.price : null),
+        currency: (accom.pricing && accom.pricing.currency) || item.currency || '',
+        isPackage: item.product === 'Packages',
+      });
+    }
+    // Soonest first, so the documents read in the order the trip happens. A stay
+    // with no date keeps its position rather than jumping to the front.
+    return stays
+      .map((s, i) => ({ s, i, t: s.checkin ? Date.parse(s.checkin.length === 10 ? s.checkin + 'T00:00:00Z' : s.checkin) : NaN }))
+      .sort((a, b) => {
+        if (Number.isNaN(a.t) && Number.isNaN(b.t)) return a.i - b.i;
+        if (Number.isNaN(a.t)) return 1;
+        if (Number.isNaN(b.t)) return -1;
+        return a.t - b.t || a.i - b.i;
+      })
+      .map((w) => w.s);
+  }
+
+  /** The representative stay: the one a cover page or a subject line refers to. */
+  function primaryStay(order) {
+    return listStays(order)[0] || null;
+  }
+
+  /** True when the booking moves the traveller between properties. */
+  function isMultiStay(order) {
+    return listStays(order).length > 1;
+  }
+  // <<< order-stays core
+
   function orderMoney(order) { return moneyOf(order); }
 
   // The "Pay balance / Pay next payment" CTA inside the Payment section.
@@ -3956,11 +4052,98 @@
       </div>`;
   }
 
+  /**
+   * One accommodation card. A booking can hold several — six nights at one
+   * hotel and then three at another — and until 15 Sep 2026 this markup was
+   * inlined once against the FIRST stay only, so every later stay vanished
+   * from the page while the total still covered it (ET121109). Flights,
+   * transfers and the rest were already per-item; accommodation is now too.
+   * Selection is shared with the PDF and the email: see _order-stays.js.
+   */
+  function renderStayCard(st, index, total, c) {
+    if (!st) return '';
+    const acc = st.accom;
+    const checkin = st.checkin;
+    const checkout = st.checkout;
+    const nights = st.nights || 0;
+    // This stay's own room rate. It used to come from the enclosing render,
+    // which meant the first stay's board basis on every card.
+    const rate = st.rate || acc?.units?.[0]?.rates?.[0] || null;
+    if (!(checkin || checkout || nights || acc?.units?.[0])) return '';
+    const stepLabel = total > 1 ? `${index + 1}/${total}` : '';
+    return `
+        <div class="tgm-stay">
+          <h3>${svg(IC.bed)}${esc(c.labels?.accommodation || c.t('accommodation'))}${
+            stepLabel ? `<span class="tgm-stay-step">${esc(stepLabel)}</span>` : ''
+          }${
+            acc?.name ? `<span class="tgm-stay-meta">${esc(acc.name)}</span>` : ''
+          }</h3>
+
+          <div class="tgm-stay-grid">
+            ${checkin ? `
+            <div class="tgm-stay-cell">
+              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkin || c.t('checkin'))}</div>
+              <div class="tgm-stay-value">${esc(fmtDayMonth(checkin))}</div>
+              <div class="tgm-stay-sub">${esc(fmtWeekday(checkin))} · ${esc(fmtYear(checkin))}</div>
+            </div>` : ''}
+            ${checkout ? `
+            <div class="tgm-stay-cell">
+              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkout || c.t('checkout'))}</div>
+              <div class="tgm-stay-value">${esc(fmtDayMonth(checkout))}</div>
+              <div class="tgm-stay-sub">${esc(fmtWeekday(checkout))} · ${esc(fmtYear(checkout))}</div>
+            </div>` : ''}
+            ${nights ? `
+            <div class="tgm-stay-cell">
+              <div class="tgm-stay-label">${svg(IC.moon)}${esc(c.labels?.nights || c.t('nights'))}</div>
+              <div class="tgm-stay-value">${nights}</div>
+              <div class="tgm-stay-sub">${esc(nights === 1 ? ('1 ' + c.t('night')) : (nights === 7 ? c.t('week') : (nights + ' ' + c.t('nightsPlural'))))}</div>
+            </div>` : ''}
+            ${acc?.units?.[0] ? (() => {
+              // Room display policy: prefer the supplier's full room name
+              // (e.g. "8 BED MIXED DORM (for 1 people)") which Travelify
+              // returns in units[].name. Fall back to roomType ONLY if it is
+              // a real value — Travelify returns the literal string "Unknown"
+              // when the supplier hasn't categorised the room. NEVER invent a
+              // default (no "Deluxe", no "Standard"). If we have nothing real
+              // to show, hide the cell entirely.
+              const u = acc.units[0];
+              const roomLabel =
+                u?.name
+                || (u?.roomType && u.roomType.toLowerCase() !== 'unknown' ? u.roomType : null);
+              if (!roomLabel) return '';
+              const boardLabel = fmtBoard(rate?.board);
+              // Guest count is the room's WHOLE party: adults + children. It used
+              // to show sleepsAdults alone, so a 2-adult 2-child room read "2
+              // guests" and dropped the children (YTG75824, Aug 2026). Both counts
+              // come from the room's own occupancy (units[].sleepsAdults /
+              // sleepsChildren), so a multi-room booking still totals per room.
+              const roomGuests = (u?.sleepsAdults != null || u?.sleepsChildren != null)
+                ? (u.sleepsAdults || 0) + (u.sleepsChildren || 0)
+                : null;
+              const guestsBit = (roomGuests != null)
+                ? `${roomGuests} ${esc(roomGuests === 1 ? c.t('guest') : c.t('guests'))}`
+                : '';
+              const subParts = [boardLabel, guestsBit].filter(Boolean);
+              return `
+                <div class="tgm-stay-cell">
+                  <div class="tgm-stay-label">${svg(IC.user)}${esc(c.labels?.room || c.t('room'))}</div>
+                  <div class="tgm-stay-value">${esc(roomLabel)}</div>
+                  ${subParts.length ? `<div class="tgm-stay-sub">${esc(subParts.join(' · '))}</div>` : ''}
+                </div>
+              `;
+            })() : ''}
+          </div>
+        </div>
+    `;
+  }
+
   function renderFound(order, c, lookup) {
     const items = order.items || [];
     const summary = order.summary || {};
 
-    const accItem = items.find(i => i.product === 'Accommodation' || i.product === 'Packages') || null;
+    // EVERY stay, not just the first (see _order-stays.js and renderStayCard).
+    const stays = listStays(order);
+    const accItem = stays[0]?.item || items.find(i => i.product === 'Accommodation' || i.product === 'Packages') || null;
     const flightItems = items.filter(i => i.product === 'Flights' || i.product === 'Packages');
     const extraItems = items.filter(i => i.product === 'AirportExtras');
     const transferItems = items.filter(i => i.product === 'Transfers');
@@ -4205,67 +4388,7 @@
         <div data-tgm-modal-mount></div>
         ` : ''}
 
-        ${(checkin || checkout || nights || acc?.units?.[0]) ? `
-        <div class="tgm-stay">
-          <h3>${svg(IC.bed)}${esc(c.labels?.accommodation || c.t('accommodation'))}${
-            acc?.name ? `<span class="tgm-stay-meta">${esc(acc.name)}</span>` : ''
-          }</h3>
-          <div class="tgm-stay-grid">
-            ${checkin ? `
-            <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkin || c.t('checkin'))}</div>
-              <div class="tgm-stay-value">${esc(fmtDayMonth(checkin))}</div>
-              <div class="tgm-stay-sub">${esc(fmtWeekday(checkin))} · ${esc(fmtYear(checkin))}</div>
-            </div>` : ''}
-            ${checkout ? `
-            <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.cal)}${esc(c.labels?.checkout || c.t('checkout'))}</div>
-              <div class="tgm-stay-value">${esc(fmtDayMonth(checkout))}</div>
-              <div class="tgm-stay-sub">${esc(fmtWeekday(checkout))} · ${esc(fmtYear(checkout))}</div>
-            </div>` : ''}
-            ${nights ? `
-            <div class="tgm-stay-cell">
-              <div class="tgm-stay-label">${svg(IC.moon)}${esc(c.labels?.nights || c.t('nights'))}</div>
-              <div class="tgm-stay-value">${nights}</div>
-              <div class="tgm-stay-sub">${esc(nights === 1 ? ('1 ' + c.t('night')) : (nights === 7 ? c.t('week') : (nights + ' ' + c.t('nightsPlural'))))}</div>
-            </div>` : ''}
-            ${acc?.units?.[0] ? (() => {
-              // Room display policy: prefer the supplier's full room name
-              // (e.g. "8 BED MIXED DORM (for 1 people)") which Travelify
-              // returns in units[].name. Fall back to roomType ONLY if it is
-              // a real value — Travelify returns the literal string "Unknown"
-              // when the supplier hasn't categorised the room. NEVER invent a
-              // default (no "Deluxe", no "Standard"). If we have nothing real
-              // to show, hide the cell entirely.
-              const u = acc.units[0];
-              const roomLabel =
-                u?.name
-                || (u?.roomType && u.roomType.toLowerCase() !== 'unknown' ? u.roomType : null);
-              if (!roomLabel) return '';
-              const boardLabel = fmtBoard(rate?.board);
-              // Guest count is the room's WHOLE party: adults + children. It used
-              // to show sleepsAdults alone, so a 2-adult 2-child room read "2
-              // guests" and dropped the children (YTG75824, Aug 2026). Both counts
-              // come from the room's own occupancy (units[].sleepsAdults /
-              // sleepsChildren), so a multi-room booking still totals per room.
-              const roomGuests = (u?.sleepsAdults != null || u?.sleepsChildren != null)
-                ? (u.sleepsAdults || 0) + (u.sleepsChildren || 0)
-                : null;
-              const guestsBit = (roomGuests != null)
-                ? `${roomGuests} ${esc(roomGuests === 1 ? c.t('guest') : c.t('guests'))}`
-                : '';
-              const subParts = [boardLabel, guestsBit].filter(Boolean);
-              return `
-                <div class="tgm-stay-cell">
-                  <div class="tgm-stay-label">${svg(IC.user)}${esc(c.labels?.room || c.t('room'))}</div>
-                  <div class="tgm-stay-value">${esc(roomLabel)}</div>
-                  ${subParts.length ? `<div class="tgm-stay-sub">${esc(subParts.join(' · '))}</div>` : ''}
-                </div>
-              `;
-            })() : ''}
-          </div>
-        </div>
-        ` : ''}
+        ${stays.map((st, i) => renderStayCard(st, i, stays.length, c)).join('')}
 
         ${flightItems.map(fItem => renderFlightCard(fItem, c)).join('')}
 
