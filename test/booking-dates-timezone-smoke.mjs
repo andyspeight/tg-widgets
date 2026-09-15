@@ -19,6 +19,12 @@
  * flight time written as 14:00 printed 13:00 in British Summer Time and 18:00
  * in New York.
  *
+ * A second client hit the same thing the same day: Your Ticket Genie, seven
+ * nights at Universal's Cabana Bay Beach Resort from Wed 21 Oct, shown checking
+ * out Tue 27 Oct instead of Wed 28 Oct. That stay runs through the weekend the
+ * British clocks go back, so it is kept here as its own case: the arithmetic is
+ * calendar days now and a clock change cannot reach it.
+ *
  * So this suite re-runs itself in four timezones and asserts the same answers
  * in each, from the shared calculation, the REAL widget rendered in jsdom, and
  * the REAL PDF and email templates.
@@ -139,6 +145,57 @@ console.log('The widget prints what the supplier wrote');
   ok('the check-in is still 26 Sept', /26 Sept/.test(html));
   ok('the weekday matches the date it is printed beside', /Fri/.test(html) && /Sat/.test(html));
   ok('a 14:00 flight prints as 14:00', /14:00/.test(html) && !/13:00/.test(html) && !/18:00/.test(html));
+}
+
+console.log('The second client, through the weekend the clocks go back');
+{
+  // Your Ticket Genie, reported 15 Sep 2026: "exactly the same issue on another
+  // booking with a different client". Check-in Wed 21 Oct, seven nights, shown
+  // checking out Tue 27 Oct. British clocks go back on Sunday 25 Oct 2026, in
+  // the middle of the stay.
+  const YTG = {
+    id: 64099001, status: 'Confirmed', customerTitle: 'Mrs', customerFirstname: 'Katherine',
+    customerSurname: 'GHIO', customerEmail: 'k.ghio@example.com', bookingReference: 'YTG44021',
+    created: '2026-08-02T00:00:00', currency: 'GBP',
+    summary: { totalPrice: 721.73, hasAccommodation: true,
+      travellers: [{ type: 'Lead', title: 'Mrs', firstname: 'Katherine', surname: 'GHIO' }] },
+    items: [{
+      id: 1, status: 'Confirmed', product: 'Accommodation', bookingReference: 'YTG44021',
+      price: 721.73, currency: 'GBP', startDate: '2026-10-21T00:00:00', duration: 7,
+      accommodation: {
+        name: "Universal's Cabana Bay Beach Resort", propertyType: 'Hotel', rating: 3,
+        location: { address1: '6550 Adventure Way', city: 'Orlando', state: 'FL', country: 'US' },
+        units: [{ name: 'Standard Quadruple room', roomType: 'Standard Quadruple',
+          checkin: '2026-10-21T00:00:00', nights: 7, rates: [{ board: 'RoomOnly' }],
+          sleepsAdults: 2, sleepsChildren: 2 }],
+        pricing: { price: 721.73, currency: 'GBP', isRefundable: false },
+        guests: [{ type: 'Lead', title: 'Mrs', firstname: 'Katherine', surname: 'GHIO' }], media: [],
+      },
+    }],
+  };
+  const st = listStays(YTG)[0];
+  ok('seven nights from 21 Oct check out on 28 Oct', st.checkout === '2026-10-28', st.checkout);
+  ok('the check-in is a Wednesday and so is the check-out',
+    new Date(st.checkin + 'T00:00:00Z').getUTCDay() === 3 && new Date(st.checkout + 'T00:00:00Z').getUTCDay() === 3);
+
+  const dom = new JSDOM('<!doctype html><html><body><div id="host"></div></body></html>',
+    { runScripts: 'outside-only', url: 'https://yourticketgenie.com/my-booking', pretendToBeVisual: true });
+  const { window } = dom;
+  window.requestAnimationFrame = (cb) => window.setTimeout(() => cb(0), 0);
+  if (!window.matchMedia) window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+  window.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+  window.eval(readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8'));
+  const host = window.document.getElementById('host');
+  const inst = new window.TGMyBookingWidget(host, {});
+  inst.lookup = { email: YTG.customerEmail, date: '2026-10-21', ref: 'YTG44021' };
+  inst.state = { stage: 'found', order: YTG, error: null };
+  inst._render();
+  const html = host.shadowRoot.innerHTML;
+  ok('the page says 28 Oct, not 27 Oct', /28 Oct/.test(html) && !/>27 Oct</.test(html));
+  ok('and still says seven nights', /7/.test(html) && /1 week|7 nights/.test(html));
+
+  const pdf = renderPdfHtml(YTG, { brandName: 'Your Ticket Genie' });
+  ok('the PDF agrees', /28 October 2026/.test(pdf) && !/27 October 2026/.test(pdf));
 }
 
 console.log('The paperwork says the same as the screen');
