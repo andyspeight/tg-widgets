@@ -22,6 +22,9 @@
 /** The editorial separator used across the brand, as in "Bora Bora · Society Islands". */
 const SEPARATOR = /\s*[\u00b7\u2027\u2022]\s*/;
 
+/** The country names that mean "home" for a UK travel agency. */
+const UK_COUNTRY = /^(?:the\s+)?(?:united kingdom|u\.?k\.?|great britain|britain|england|scotland|wales|northern ireland)$/i;
+
 export function slugify(name) {
   const s = String(name == null ? '' : name)
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')      // fold accents
@@ -100,6 +103,40 @@ export function derive({ field, how, rec, byId }) {
       value: parent.name + ' · ' + head,
       evidence: 'Built from ' + parent.name + ', which this record sits inside, and its region "' + above + '".',
       inheritedFrom: parent.id,
+    };
+  }
+
+  // Which side of the journey an airport sits on. Not a fact about the building,
+  // which is why no pair of open datasets settles it, but a fact about our own
+  // customers: a UK airport is where they fly from and everywhere else is where
+  // they fly to. The country is already on the record, so the answer is too.
+  //
+  // VERIFIED RATHER THAN ASSUMED (15 Sep 2026). Cross-tabulated against the 225
+  // airports where a person had already set the role: all 24 whose Country Text
+  // reads "United Kingdom" are UK Origin, and all 201 others are Overseas
+  // destination. Not one contradiction. This rule reproduces what a person did
+  // 225 times out of 225, which is why it is safe to run on the other 375.
+  //
+  // The select also offers "Destination" and "Both", left over from an earlier
+  // shape. No record uses either and no person chose either, so this never
+  // writes them. An airport that genuinely serves both roles stays a person's
+  // call, and they can simply overwrite what this fills in.
+  if (how.from === 'ukOrigin') {
+    const country = String((rec.values && rec.values['Country Text']) || '').trim();
+    if (!country) {
+      return { ok: false, why: 'the country has to be filled first, because the role is read from it' };
+    }
+    // The Aug bulk import left two-letter ISO codes in some of these. A code is
+    // not an answer, and guessing from one would be how a wrong role gets in.
+    if (/^[A-Za-z]{2}$/.test(country)) {
+      return { ok: false, why: '"' + country + '" is a country code rather than a country name, so that needs fixing first' };
+    }
+    const home = UK_COUNTRY.test(country);
+    return {
+      ok: true,
+      value: home ? 'UK Origin' : 'Overseas destination',
+      evidence: 'Read from the country on this record, which says ' + country + '. ' +
+        (home ? 'A UK airport is one our customers fly from.' : 'Anywhere outside the UK is one they fly to.'),
     };
   }
 

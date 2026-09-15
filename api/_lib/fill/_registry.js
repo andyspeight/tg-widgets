@@ -260,6 +260,9 @@ const NO_SECOND_SOURCE = {
  */
 const BY_TYPE = {
   'resort:Region': { kind: 'derive', how: { from: 'regionCrumb' } },
+  // Airport Role reads off Country Text, which we hold on all 600. See the
+  // ukOrigin rule in _derive.js for the cross-check that made it safe to run.
+  'airport:Airport Role': { kind: 'derive', how: { from: 'ukOrigin' } },
 };
 
 export function fillPlanFor(field, typeKey) {

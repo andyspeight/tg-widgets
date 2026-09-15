@@ -757,6 +757,96 @@ const load = f => import(pathToFileURL(path.join(__dirname, '..', 'api', '_lib',
       'it must not use the plain parent inheritance that copies the value across');
   });
 
+  /* AIRPORT ROLE, 15 Sep 2026. Which side of the journey an airport sits on is
+     not a fact about the building, which is why no pair of datasets settles it.
+     It is a fact about our customers, and the country is already on the record.
+     Cross-checked before building: of the 225 airports where a person had set
+     the role, all 24 with Country Text "United Kingdom" are UK Origin and all
+     201 others are Overseas destination. No contradictions. */
+
+  t('an airport role is derived, not left to a source that will never answer', () => {
+    const p = fillPlanFor(F('Airport Role', 'select'), 'airport');
+    assert.strictEqual(p.kind, 'derive');
+    assert.strictEqual(p.how.from, 'ukOrigin');
+  });
+
+  t('a UK airport is where our customers fly from', () => {
+    const out = derive({
+      field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+      rec: { name: 'Manchester', values: { 'Country Text': 'United Kingdom' } }, byId: new Map(),
+    });
+    assert.ok(out.ok);
+    assert.strictEqual(out.value, 'UK Origin');
+  });
+
+  t('the home nations count as the UK', () => {
+    for (const country of ['Scotland', 'Wales', 'England', 'Northern Ireland', 'Great Britain']) {
+      const out = derive({
+        field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+        rec: { name: 'X', values: { 'Country Text': country } }, byId: new Map(),
+      });
+      assert.strictEqual(out.value, 'UK Origin', country + ' should read as home');
+    }
+  });
+
+  t('anywhere else is where they fly to', () => {
+    for (const country of ['Spain', 'Turkey', 'United Arab Emirates', 'Ireland']) {
+      const out = derive({
+        field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+        rec: { name: 'X', values: { 'Country Text': country } }, byId: new Map(),
+      });
+      assert.strictEqual(out.value, 'Overseas destination', country + ' is overseas');
+    }
+  });
+
+  t('the evidence names the country it was read from', () => {
+    const out = derive({
+      field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+      rec: { name: 'Dalaman', values: { 'Country Text': 'Turkey' } }, byId: new Map(),
+    });
+    assert.match(out.evidence, /Turkey/);
+  });
+
+  t('no country means no answer, rather than a guess at overseas', () => {
+    for (const country of ['', '   ', undefined]) {
+      const out = derive({
+        field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+        rec: { name: 'X', values: { 'Country Text': country } }, byId: new Map(),
+      });
+      assert.strictEqual(out.ok, false);
+      assert.match(out.why, /country has to be filled first/);
+    }
+  });
+
+  t('a two-letter code is refused rather than read as overseas', () => {
+    // The Aug bulk import left ISO codes in Country Text on about 370 records.
+    // "GB" means the United Kingdom, so treating a code as "not the UK" would
+    // write exactly the wrong role onto the airports we fly out of.
+    for (const code of ['GB', 'US', 'ES']) {
+      const out = derive({
+        field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+        rec: { name: 'X', values: { 'Country Text': code } }, byId: new Map(),
+      });
+      assert.strictEqual(out.ok, false, code + ' should be refused');
+      assert.match(out.why, /country code rather than a country name/);
+    }
+  });
+
+  t('it only ever writes the two values a person actually chose', () => {
+    // The select also offers "Destination" and "Both" from an earlier shape.
+    // No record uses either, so neither is ever written and "Both" stays a
+    // person's call.
+    const seen = new Set();
+    for (const country of ['United Kingdom', 'Scotland', 'Spain', 'Japan', 'Peru']) {
+      const out = derive({
+        field: F('Airport Role', 'select'), how: { from: 'ukOrigin' },
+        rec: { name: 'X', values: { 'Country Text': country } }, byId: new Map(),
+      });
+      if (out.ok) seen.add(out.value);
+    }
+    assert.deepStrictEqual([...seen].sort(), ['Overseas destination', 'UK Origin']);
+  });
+
   t('the fields that really are inherited still are', () => {
     ['Time Zone', 'Currency', 'Language', 'Voltage And Plug', 'Flight Time From UK'].forEach(l => {
       assert.strictEqual(fillPlanFor(F(l, 'text'), 'city').kind, 'derive', l);
