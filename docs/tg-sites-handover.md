@@ -18,6 +18,29 @@ Airtable project record: base `appj9tksreHOwkhYg`, table `tblpyhPNhiQg3XkkT`.
 
 ---
 
+## Latest: the React Bits review and the shapes slice (15 Sep 2026)
+
+Andy: "the layouts, etc are fairly basic. Review reactbits.dev and see what we
+can learn." The review is `docs/react-bits-review.md`: 171 effects read against
+what the engine already has, five words missing from our vocabulary (shapes,
+backdrops, words arriving, under the pointer, menus), ninety-odd components
+skipped by reason, and a five-slice build order. Nothing imported, directions
+only, the Scrolltide rule.
+
+**Slice 1, Shapes, shipped the same day.** A `shape` on Cards and the Collection
+loop (even, bento, featured), three gallery layouts (mosaic, wall, deck), four
+presets, `tests/shapes.test.ts`, and a Chromium check through the real renderer
+at 1280 and 390 and under reduced motion. Three bugs were found by that check and
+not by the source tests: a phone reset losing to the desktop rules on specificity,
+the deck still dealing under reduced motion for the same reason, and a mosaic
+rhythm leaving holes. The lesson is the one `tools/preview-presets.mjs` was
+written for: a value that is right and draws wrong is only found by looking.
+
+Next: slices 2 to 5 in the review's order, Backdrops first. Elementor gap #2
+(form actions) is parked behind them by Andy's choice on 15 Sep.
+
+---
+
 ## Latest: editor AI + client-site compliance (28 Aug 2026, fifth session)
 
 All merged to `main` and live on `travelgenixsites.com` (tg-sites-shell

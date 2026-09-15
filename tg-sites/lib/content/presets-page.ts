@@ -1142,6 +1142,52 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
   },
 
   {
+    /*
+     * The photo wall (React Bits review, 15 Sep 2026): a centred opener over
+     * rows of pictures drifting past in opposite directions, the wall every
+     * Instagram-led travel brand puts under its name. The hero fallback
+     * photographs the wall from the palette, ten frames, two rows of five.
+     */
+    id: 'hero-photo-wall',
+    category: 'hero',
+    label: 'Opener over a wall of pictures',
+    description: 'A centred title and buttons, then rows of pictures drifting past beneath.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Add your medium length title here', level: 'h2', style: 'h1', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line under the title, then the places your travellers came back from.</p>',
+                size: 'l',
+                ...CENTRED,
+              },
+            },
+            {
+              type: 'button-group',
+              props: {
+                align: 'centre',
+                buttons: [
+                  { label: 'Find a holiday', href: '', variant: 'primary' },
+                  { label: 'Talk to us', href: '', variant: 'ghost' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'gallery', props: { layout: 'wall', gap: 's', radius: 'sm', lightbox: false } }]],
+      },
+    ],
+    section: { paddingY: 80 },
+  },
+
+  {
     id: 'hero-image-textarea',
     category: 'hero',
     label: 'Picture left, title and a text block right',
@@ -2048,6 +2094,65 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
   },
 
   {
+    /*
+     * The bento (React Bits review, 15 Sep 2026): the first destination big,
+     * two beside it, three below. Words on the pictures, because a bento of
+     * photographs with the names on them is the magazine spread the shape
+     * comes from, and SIX cards so the grid closes on a full row: a two-by-two,
+     * two stacked beside it, then a row of three. Five left the last row a card
+     * short, seen in the browser check. Same photo suffix contract as the cards
+     * preset above.
+     */
+    id: 'features-bento-destinations',
+    category: 'features',
+    label: 'A bento of destinations',
+    description: 'One destination big, the rest packed round it, the names on the pictures.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Where to next', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>One line on how you choose the places you send people.</p>',
+                ...CENTRED,
+              },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [
+          [
+            {
+              type: 'cards',
+              photo: 'coast landscape',
+              props: {
+                columns: '3',
+                shape: 'bento',
+                design: 'overlay',
+                style: 'plain',
+                gap: 's',
+                items: [
+                  { src: '', alt: '', label: 'Greece', title: 'Island hopping, planned properly', body: 'Seven nights across three islands, with the ferries booked for you.', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Italy', title: 'The Amalfi coast, slowly', body: '', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Portugal', title: 'Lisbon and the Algarve', body: '', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Spain', title: 'Andalusia by train', body: '', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Croatia', title: 'Split to Dubrovnik by sea', body: '', linkLabel: 'See the trip', linkHref: '' },
+                  { src: '', alt: '', label: 'Malta', title: 'Valletta, three nights', body: '', linkLabel: 'See the trip', linkHref: '' },
+                ],
+              },
+            },
+          ],
+        ],
+      },
+    ],
+  },
+
+  {
     id: 'features-two-rows-alternating',
     category: 'features',
     label: 'Two features, alternating',
@@ -2605,6 +2710,63 @@ export const PAGE_PRESETS: readonly SectionPreset[] = [
         columns: [
           [{ type: 'image', props: { ratio: '3/4', radius: 'lg', caption: 'The first one.' } }],
           [{ type: 'image', props: { ratio: '3/4', radius: 'lg', caption: 'The second one.' } }],
+        ],
+      },
+    ],
+  },
+
+  /*
+   * Two from the React Bits review, 15 Sep 2026. The mosaic is the titled grid
+   * with some pictures bigger; the deck is postcards beside words. Both draw
+   * from the gallery palette, eight frames and four.
+   */
+  {
+    id: 'gallery-mosaic',
+    category: 'gallery',
+    label: 'A mosaic, some pictures bigger',
+    description: 'A title over a mosaic of pictures, some two cells wide, the rest packed round them.',
+    rows: [
+      {
+        widths: [1],
+        columns: [
+          [
+            { type: 'heading', props: { html: 'The trip, in pictures', style: 'h2', ...CENTRED } },
+            {
+              type: 'text',
+              props: { html: '<p>One line saying whose pictures these are.</p>', ...CENTRED },
+            },
+          ],
+        ],
+      },
+      {
+        widths: [1],
+        columns: [[{ type: 'gallery', props: { layout: 'mosaic', columns: '3', gap: 's' } }]],
+      },
+    ],
+  },
+
+  {
+    id: 'gallery-deck-beside-words',
+    category: 'gallery',
+    label: 'Postcards beside words',
+    description: 'A title and a paragraph on the left, a fanned deck of postcards on the right that deals itself.',
+    rows: [
+      {
+        widths: [1, 1],
+        gap: 48,
+        align: 'centre',
+        columns: [
+          [
+            { type: 'heading', props: { html: 'Postcards from last season', style: 'h2' } },
+            {
+              type: 'text',
+              props: {
+                html: '<p>A short paragraph on where these were taken, so the pictures are not left to explain themselves.</p>',
+              },
+            },
+            { type: 'button', props: { label: 'See more', variant: 'ghost' } },
+          ],
+          [{ type: 'gallery', props: { layout: 'deck', radius: 'sm' } }],
         ],
       },
     ],

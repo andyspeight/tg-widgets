@@ -99,6 +99,19 @@ both run.
 - Slider: tilt.
 - Logo strip: scrolls by itself, pausing on hover.
 - Cards: the link underline sweeps in.
+- Gallery, **a wall of drifting rows** (15 Sep 2026, from the React Bits review):
+  the rail's marquee stacked two or three deep, alternate rows running the other
+  way, each on its own period so they never fall into step. Holds under the
+  pointer and under keyboard focus; a wrapped grid with the copies gone under
+  reduced motion. Pure CSS.
+- Gallery, **a deck of postcards** (15 Sep 2026): up to eight pictures fanned,
+  the top one sliding off to the right and under the pile every 3.5 seconds, on
+  keyframes the way Shifting images is. Holds under the pointer; a still fan
+  under reduced motion and on the editing canvas. Pure CSS.
+
+The same review added three LAYOUT shapes that do not move and so are not
+listed here: bento and featured grids on Cards and the Collection loop, and the
+gallery mosaic. See `docs/react-bits-review.md`.
 
 ---
 

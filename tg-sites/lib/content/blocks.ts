@@ -1730,11 +1730,27 @@ export const BLOCKS: readonly BlockDefinition[] = [
       { kind: 'select', key: 'gap', label: 'Gap', options: SPACING_OPTIONS },
       { kind: 'select', key: 'radius', label: 'Corners', options: RADIUS_OPTIONS },
       /*
-       * TWO SHAPES, ONE ELEMENT (Andy, 21 Aug 2026, from Duda's Scrolling
-       * Gallery and Popup Gallery). Duda ships those as two more elements on top
-       * of its plain gallery. Ours are a setting each, because a picker with
-       * three galleries in it makes a client choose before they know what they
-       * want, and all three would share every other field anyway.
+       * FIVE SHAPES, ONE ELEMENT (Andy, 21 Aug 2026, from Duda's Scrolling
+       * Gallery and Popup Gallery; three more on 15 Sep 2026 from the React Bits
+       * review). Duda ships its galleries as separate elements. Ours are a
+       * setting each, because a picker with five galleries in it makes a client
+       * choose before they know what they want, and all five share every other
+       * field anyway.
+       *
+       * The three from the review, and what each is for:
+       * - mosaic: some pictures bigger, in a rhythm, the rest filling round them.
+       *   A designed mosaic rather than a masonry of natural heights, because
+       *   natural heights only settle once every picture has loaded and the page
+       *   would shift under the reader; this one is squares and doubles, so it is
+       *   fixed before a byte of picture arrives.
+       * - wall: rows of pictures drifting past in opposite directions, the
+       *   Instagram wall under an opener. It holds under the pointer, the same
+       *   as the rail, and stands still as a wrapped grid for anyone who asked
+       *   for less motion.
+       * - deck: postcards from the trip, fanned, the top one sliding to the back
+       *   every few seconds. Holds under the pointer; a click still opens the
+       *   picture. Built on keyframes the way Shifting images is, so it costs no
+       *   script. Up to eight are dealt.
        */
       {
         kind: 'select',
@@ -1742,9 +1758,12 @@ export const BLOCKS: readonly BlockDefinition[] = [
         label: 'Show as',
         options: [
           { value: 'grid', label: 'A grid' },
+          { value: 'mosaic', label: 'A mosaic, some pictures bigger' },
           { value: 'scroll', label: 'A rail that scrolls itself' },
+          { value: 'wall', label: 'A wall of drifting rows' },
+          { value: 'deck', label: 'A deck of postcards' },
         ],
-        help: 'The rail drifts along on its own and stops while somebody is looking at it.',
+        help: 'The rail, the wall and the deck move on their own on the live site and hold still while somebody is looking at them. Columns apply to the grid and the mosaic.',
       },
       {
         kind: 'toggle',
@@ -1805,6 +1824,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       facts: 2,
       design: 'stacked',
       columns: '3',
+      shape: 'even',
       gap: 'm',
       style: 'bordered',
       imagePosition: 'top',
@@ -2019,6 +2039,32 @@ export const BLOCKS: readonly BlockDefinition[] = [
           { value: '4', label: 'Four' },
         ],
         help: 'Fewer on a tablet and one on a phone, automatically.',
+      },
+      {
+        /*
+         * THE SHAPE OF THE GRID, as distinct from the shape of a card below.
+         *
+         * Every grid this block drew until 15 Sep 2026 was equal cells, and the
+         * equal three-card row is the single most common tell that a page was
+         * assembled rather than designed (the taste skill names it; the React
+         * Bits review, docs/react-bits-review.md, is where this came from). Two
+         * shapes break it without a second block: the first card bigger, the
+         * bento a magazine spread uses, or the first card across the whole row,
+         * which is a feature and then the rest. The first card is the one that
+         * grows because the order is the client's to set: put the trip you want
+         * noticed first and it is the big one. Pure CSS, and on a phone all three
+         * shapes collapse to the one column they always did.
+         */
+        kind: 'select',
+        key: 'shape',
+        label: 'Grid shape',
+        group: 'layout',
+        options: [
+          { value: 'even', label: 'Even, every card the same' },
+          { value: 'bento', label: 'Bento, the first card bigger' },
+          { value: 'featured', label: 'Featured, the first card across the top' },
+        ],
+        help: 'The first card is the one that grows, so put the trip you want noticed first. Does nothing on the list design.',
       },
       { kind: 'select', key: 'gap', label: 'Space between', options: SPACING_OPTIONS },
       {
@@ -3391,6 +3437,7 @@ export const BLOCKS: readonly BlockDefinition[] = [
       across: '3',
       acrossTablet: '2',
       acrossPhone: '1',
+      shape: 'even',
       gap: 16,
       align: 'stretch',
       linkWhole: true,
@@ -3452,6 +3499,25 @@ export const BLOCKS: readonly BlockDefinition[] = [
         group: 'layout',
         options: ACROSS_OPTIONS,
         help: 'One is usually right on a phone. Two suits small tiles.',
+      },
+      {
+        /*
+         * The same two grid shapes the Cards block offers (see its `shape`), on
+         * the loop's grid. A loop's card is the client's own design, so the big
+         * card here is simply WIDER (two tracks) rather than taller as well: the
+         * inner picture keeps the ratio the client gave it, and a cell two rows
+         * tall with a one-row picture in it would be mostly empty.
+         */
+        kind: 'select',
+        key: 'shape',
+        label: 'Grid shape',
+        group: 'layout',
+        options: [
+          { value: 'even', label: 'Even, every card the same' },
+          { value: 'bento', label: 'Bento, the first card twice as wide' },
+          { value: 'featured', label: 'Featured, the first card across the row' },
+        ],
+        help: 'The first entry in the order is the one that grows.',
       },
       {
         kind: 'number',

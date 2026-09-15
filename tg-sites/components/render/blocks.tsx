@@ -1230,19 +1230,51 @@ export function AudioBlock({ props }: { props: Props }): ReactElement {
   );
 }
 
+/** How many postcards a deck deals. Past eight the ones at the back are never seen. */
+const MAX_DECK = 8;
+/** Seconds each postcard spends on top of the deck. */
+const DECK_HOLD = 3.5;
+/**
+ * How long each row of the wall takes to drift its own width, none a multiple
+ * of another, so the rows never fall into step (the same reason the slow-frame
+ * recipe varies its durations: identical periods across a set is the tell).
+ */
+const WALL_DURATIONS = [58, 74, 66] as const;
+
+/**
+ * The wall's rows. Fewer than four pictures is one row (two rows of two would
+ * be two pairs, not a wall); up to ten is two, so the preset's ten frames are
+ * two rows of five; more is three.
+ */
+function wallRows<T>(items: T[]): T[][] {
+  const count = items.length < 4 ? 1 : items.length <= 10 ? 2 : 3;
+  const per = Math.ceil(items.length / count);
+  return Array.from({ length: count }, (_, row) => items.slice(row * per, (row + 1) * per))
+    .filter((row) => row.length > 0);
+}
+
 export function GalleryBlock({
   props,
   blockId,
+  editing = false,
 }: {
   props: Props;
   blockId: string;
+  /**
+   * True on the editor canvas. The deck holds still and fanned there, for the
+   * reason the shifting collage does: the canvas redraws on every keystroke
+   * and postcards sliding under the pointer fight the person trying to select
+   * one. The wall keeps drifting, as the rail always has.
+   */
+  editing?: boolean;
 }): ReactElement {
   const columns = oneOf(props, 'columns', ['2', '3', '4'] as const, '3');
-  const layout = oneOf(props, 'layout', ['grid', 'scroll'] as const, 'grid');
+  const layout = oneOf(props, 'layout', ['grid', 'mosaic', 'scroll', 'wall', 'deck'] as const, 'grid');
   const lightbox = bool(props, 'lightbox', true);
   const gap = str(props, 'gap', 'm');
   const radius = oneOf(props, 'radius', RADII, 'md');
-  const images = list(props, 'images')
+  type Tile = { src: string; alt: string; style: CSSProperties };
+  const images: Tile[] = list(props, 'images')
     // The tile's own focus point and adjustments travel with it, worked out
     // through the same helper the image block uses, so a tile can be focused
     // where it matters when the square crops a landscape or a portrait.
@@ -1251,9 +1283,7 @@ export function GalleryBlock({
       alt: str(image, 'alt'),
       style: pictureAdjustStyle(image),
     }))
-    .filter(
-      (image): image is { src: string; alt: string; style: CSSProperties } => !!image.src,
-    );
+    .filter((image): image is Tile => !!image.src);
 
   if (images.length === 0) {
     return <div className="tgs-placeholder">Add some images</div>;
@@ -1261,7 +1291,7 @@ export function GalleryBlock({
 
   const name = `tgs-lb-${blockId}`;
 
-  const tile = (image: { src: string; alt: string; style: CSSProperties }, index: number) => (
+  const tile = (image: Tile, index: number) => (
     <img
       src={image.src}
       alt={image.alt}
@@ -1279,13 +1309,34 @@ export function GalleryBlock({
    * same pictures, so a screen reader must not read the gallery twice. Same
    * device the logo strip uses, and the reduced-motion rule below drops the
    * copy entirely rather than leaving a silent duplicate on the page.
+   *
+   * ONE STRIP SERVES EVERY SHAPE. The grid and the mosaic draw it once; the rail
+   * draws it twice; the wall draws a SUBSET per row (with `offset` keeping each
+   * picture's lightbox id its own, since the ids are by position in the whole
+   * list); the deck hands each cell its place in the rotation. `tag` keeps the
+   * keys apart when a short wall row carries four copies rather than two.
    */
-  const strip = (copy: boolean) =>
-    images.map((image, index) => (
+  const strip = (copy: boolean, subset: Tile[] = images, offset = 0, tag = copy ? 'b' : 'a') =>
+    subset.map((image, at) => {
+      const index = offset + at;
+      return (
       <div
-        key={`${copy ? 'b' : 'a'}${index}`}
+        key={`${tag}${index}`}
         className="tgs-gallery__cell"
         data-radius={radius}
+        style={
+          layout === 'deck'
+            /*
+             * Where this postcard starts in the rotation: the first on top, the
+             * second just behind it, and so on, which a NEGATIVE delay gives at
+             * once rather than after a full cycle. Same device Shifting images
+             * uses, counted from the back so the first picture is the top one.
+             */
+            ? ({
+              animationDelay: `calc(-1 * ${subset.length - at} * var(--tgs-deck-cycle) / ${subset.length})`,
+            } as CSSProperties)
+            : undefined
+        }
         {...(copy ? { 'aria-hidden': true as const } : {})}
       >
         {lightbox && !copy ? (
@@ -1343,7 +1394,8 @@ export function GalleryBlock({
           tile(image, index)
         )}
       </div>
-    ));
+      );
+    });
 
   if (layout === 'scroll') {
     return (
@@ -1356,8 +1408,68 @@ export function GalleryBlock({
     );
   }
 
+  /*
+   * THE WALL: rows of the rail, drifting in alternate directions. Each row is
+   * the same marquee as the rail, so it inherits the rail's pause under the
+   * pointer and under keyboard focus, and its reduced-motion fallback to a
+   * wrapped grid with the copies gone. A short row (fewer than five pictures)
+   * carries four copies rather than two, or a three-picture row would show
+   * its seam every few seconds; the translate is half the track either way, so
+   * any even number of copies loops cleanly.
+   */
+  if (layout === 'wall') {
+    const rows = wallRows(images);
+    let offset = 0;
+    return (
+      <div className="tgs-gallery-marquee tgs-gallery--wall" data-gap={gap}>
+        {rows.map((row, at) => {
+          const start = offset;
+          offset += row.length;
+          const extra = row.length < 5 ? ['b', 'c', 'd'] : ['b'];
+          return (
+            <div
+              key={at}
+              className="tgs-gallery tgs-gallery--rail tgs-gallery__row"
+              data-gap={gap}
+              data-dir={at % 2 === 1 ? 'back' : undefined}
+              style={{ '--tgs-wall-dur': `${WALL_DURATIONS[at] ?? WALL_DURATIONS[0]}s` } as CSSProperties}
+            >
+              {strip(false, row, start)}
+              {extra.flatMap((tag) => strip(true, row, start, tag))}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  /*
+   * THE DECK: postcards fanned, the top one sliding to the back every few
+   * seconds, on keyframes the stylesheet holds for two to eight cards. Still
+   * and fanned on the canvas, with one picture, and for anyone who asked for
+   * less motion; every card is on screen the whole time, so nothing is hidden
+   * from a reader and a click on any of them still opens it.
+   */
+  if (layout === 'deck') {
+    const dealt = images.slice(0, MAX_DECK);
+    return (
+      <div
+        className="tgs-gallery tgs-gallery--deck"
+        data-count={dealt.length}
+        data-still={editing || dealt.length < 2 ? 'true' : undefined}
+        style={{ '--tgs-deck-cycle': `${dealt.length * DECK_HOLD}s` } as CSSProperties}
+      >
+        {strip(false, dealt)}
+      </div>
+    );
+  }
+
   return (
-    <div className="tgs-gallery" data-columns={columns} data-gap={gap}>
+    <div
+      className={layout === 'mosaic' ? 'tgs-gallery tgs-gallery--mosaic' : 'tgs-gallery'}
+      data-columns={columns}
+      data-gap={gap}
+    >
       {strip(false)}
     </div>
   );
@@ -1567,6 +1679,14 @@ export function CardsBlock({
    * drifted apart the first time somebody added a field.
    */
   const design = oneOf(props, 'design', ['stacked', 'overlay', 'index'] as const, 'stacked');
+  /*
+   * The GRID'S shape, as distinct from the card's: bento (the first card two
+   * cells wide and two tall) or featured (the first card across the whole row).
+   * The stylesheet does all of it from the one attribute, and the attribute is
+   * left off for the even grid every published site already has, so nothing
+   * live changes and a saved page from before the field carries no new markup.
+   */
+  const shape = oneOf(props, 'shape', ['even', 'bento', 'featured'] as const, 'even');
   const imagePosition = oneOf(props, 'imagePosition', ['top', 'left', 'none'] as const, 'top');
   const ratio = str(props, 'ratio', '4/3');
   const radius = oneOf(props, 'radius', RADII, 'md');
@@ -1642,6 +1762,7 @@ export function CardsBlock({
     <div
       className="tgs-cards"
       data-columns={columns}
+      data-shape={shape === 'even' ? undefined : shape}
       data-gap={gap}
       data-style={style}
       data-design={design}

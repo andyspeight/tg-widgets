@@ -39,10 +39,12 @@ function componentSource(name: string): string {
 // ---------------------------------------------------------------------------
 
 describe('the gallery', () => {
-  it('offers a grid and a self-scrolling rail, on one element', () => {
+  it('offers a grid, a mosaic, a self-scrolling rail, a wall and a deck, on one element', () => {
+    // Two from Duda (21 Aug 2026), three from the React Bits review (15 Sep
+    // 2026), and still one element: see tests/shapes.test.ts for the three.
     const layout = blockDefinition('gallery')!.fields.find((f) => f.key === 'layout') as
       { options: Array<{ value: string }> };
-    expect(layout.options.map((o) => o.value)).toEqual(['grid', 'scroll']);
+    expect(layout.options.map((o) => o.value)).toEqual(['grid', 'mosaic', 'scroll', 'wall', 'deck']);
     expect(defaultPropsFor('gallery').layout).toBe('grid');
   });
 

@@ -3594,6 +3594,43 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
   .tgs-gallery[data-columns='4'] { grid-template-columns: repeat(2, 1fr); }
 }
 
+/*
+ * THE MOSAIC (React Bits review, 15 Sep 2026): some pictures bigger, in a
+ * rhythm, the rest packed round them.
+ *
+ * A DESIGNED MOSAIC, NOT A MASONRY. A masonry of natural heights only settles
+ * once every picture has loaded and the page shifts under the reader while it
+ * does, which is the one thing this project's CLS of zero forbids. This one is
+ * squares and doubles on the same grid the plain gallery uses, so every cell's
+ * size is known before a byte of picture arrives.
+ *
+ * THE RHYTHM, measured rather than guessed (15 Sep 2026, in Chromium). The first
+ * picture of every twelve is two cells wide and two tall. The fifth of every
+ * twelve is one wide and two tall, but ONLY when at least three pictures follow
+ * it: a tall cell needs the cells after it to fill in beside its lower half, and
+ * with fewer than three it stood alone with a hole either side. `dense` lets the
+ * pictures after a span fill the holes before it. So six pictures are three rows
+ * of three exactly, eight are four rows exactly at two, three and four across,
+ * and any other count is ragged only on its last row, the way every grid is. An
+ * earlier cut repeated the double every six, which made the seventh picture a
+ * second double and left two rows of holes in an eight-picture gallery.
+ *
+ * The phone grid drops both spans so it is squares two across like the plain
+ * gallery.
+ */
+.tgs-gallery--mosaic { grid-auto-flow: dense; }
+.tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 1) { grid-column: span 2; grid-row: span 2; }
+.tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 5):not(:nth-last-child(-n + 3)) { grid-row: span 2; }
+/* The square rule above sizes the rows; the tall cell fills what the rows give it. */
+.tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 5):not(:nth-last-child(-n + 3)) img { aspect-ratio: auto; height: 100%; }
+.tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 5):not(:nth-last-child(-n + 3)) .tgs-gallery__open { height: 100%; }
+
+@container tgs-page (max-width: 767px) {
+  .tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 1),
+  .tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 5):not(:nth-last-child(-n + 3)) { grid-column: auto; grid-row: auto; }
+  .tgs-gallery--mosaic .tgs-gallery__cell:nth-child(12n + 5):not(:nth-last-child(-n + 3)) img { aspect-ratio: 1 / 1; height: auto; }
+}
+
 /* Divider and spacer */
 .tgs-divider { border: 0; border-top: 1px solid var(--tgs-border); }
 .tgs-divider[data-style='dashed'] { border-top-style: dashed; }
@@ -4078,6 +4115,102 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
      way to the card's own height so both sides of a wide card stay level. */
   flex: 0 0 40%;
   aspect-ratio: auto;
+}
+
+/* ------------------------------------------------------------------ */
+/* The grid's shape: bento and featured                                */
+/* ------------------------------------------------------------------ */
+
+/*
+ * React Bits review, 15 Sep 2026. Two shapes that break the equal grid without
+ * a second block, both from the ONE attribute the render writes only when the
+ * shape is not even, so every grid published before today carries no new
+ * markup and draws exactly as it did.
+ *
+ * BENTO: the first card two cells wide and two tall; the next cards stack
+ * beside it and the rest flow on below. Its picture GROWS to fill the two rows
+ * rather than keeping its ratio and leaving a hole under the words: flex-grow
+ * on the frame, which the ratio only sets a starting size for. Two across, a
+ * two-by-two card would be the whole grid, so there the first card is simply
+ * wide. Not on the list design, which is a column and has no grid to shape.
+ *
+ * FEATURED: the first card across the whole row. On the stacked design it
+ * turns sideways, picture beside words, or a 4:3 frame at eleven hundred
+ * pixels would be a wall; a minimum height gives that picture something to be
+ * tall against, since a card beside its own words is only as tall as the words.
+ * An overlay card is already a picture with words on it, so it simply widens.
+ *
+ * A PHONE PUTS EVERYTHING BACK. One column, every card the same, the featured
+ * card's picture back on top: the shapes are a desktop and tablet idea and the
+ * phone grid the client already trusts is unchanged.
+ */
+.tgs-cards[data-shape='bento']:not([data-design='index']) .tgs-card:first-child {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+.tgs-cards[data-shape='bento'][data-columns='2'] .tgs-card:first-child { grid-row: auto; }
+.tgs-cards[data-shape='bento']:not([data-design='index']) .tgs-card:first-child .tgs-card__frame {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tgs-cards[data-shape='featured']:not([data-design='index']) .tgs-card:first-child {
+  grid-column: 1 / -1;
+}
+.tgs-cards[data-shape='featured'][data-design='stacked'][data-image='top'] .tgs-card:first-child {
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 22rem;
+}
+.tgs-cards[data-shape='featured'][data-design='stacked'][data-image='top'] .tgs-card:first-child .tgs-card__frame {
+  flex: 0 0 55%;
+  aspect-ratio: auto;
+  border-radius: inherit;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+/* Room to breathe on the wide card, which the small ones do not have. */
+.tgs-cards[data-shape='featured'][data-design='stacked'] .tgs-card:first-child .tgs-card__body {
+  justify-content: center;
+}
+
+/*
+ * THE LOOP'S GRID, the same two shapes. The loop's card is the client's own
+ * design with its own picture ratio, so bento there is two tracks WIDE and not
+ * two tall (a cell two rows tall with a one-row picture in it would be mostly
+ * hole). The span custom property is the one .tgs-grid__cell already clamps to
+ * the tracks actually there, so a phone showing one across gets one.
+ */
+.tgs-loop[data-shape='bento'] .tgs-loop__cell:first-child { --tgs-span: 2; }
+.tgs-loop[data-shape='featured'] .tgs-loop__cell:first-child { grid-column: 1 / -1; }
+
+@container tgs-page (max-width: 767px) {
+  /*
+   * THE SAME SELECTORS AS THE DESKTOP RULES, or these lose. A container query
+   * does not change specificity (the cards' own phone rule a few screens up
+   * says so), and the desktop rules carry :not() and three attributes. A
+   * shorter reset here was measured doing nothing (15 Sep 2026): the first
+   * bento card still spanned two tracks of a one-track grid and the second
+   * card was squeezed to zero width. Only the featured stacked card had a
+   * min-height set above, so only it gets one taken away; an overlay card keeps
+   * the height the overlay design gives it.
+   */
+  .tgs-cards[data-shape='bento']:not([data-design='index']) .tgs-card:first-child,
+  .tgs-cards[data-shape='featured']:not([data-design='index']) .tgs-card:first-child {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .tgs-cards[data-shape='featured'][data-design='stacked'][data-image='top'] .tgs-card:first-child {
+    flex-direction: column;
+    min-height: 0;
+  }
+  .tgs-cards[data-shape='bento']:not([data-design='index']) .tgs-card:first-child .tgs-card__frame { flex: none; }
+  .tgs-cards[data-shape='featured'][data-design='stacked'][data-image='top'] .tgs-card:first-child .tgs-card__frame {
+    flex: none;
+    aspect-ratio: 16 / 9;
+    border-start-end-radius: inherit;
+    border-end-start-radius: 0;
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -6163,6 +6296,190 @@ html[data-theme='dark'] .tgs-toggle__knob { transform: translate(28px, -50%); }
 }
 @keyframes tgs-gallery-scroll {
   to { transform: translateX(-50%); }
+}
+
+/* ---- The wall ---- */
+
+/*
+ * React Bits review, 15 Sep 2026: rows of the rail, drifting in alternate
+ * directions, the Instagram wall under an opener. Each row IS a rail, so the
+ * pause under the pointer, the pause under keyboard focus and the reduced-motion
+ * fallback to a wrapped grid above all apply to it unchanged. What the wall adds
+ * is the stack of rows, a smaller tile so three rows fit on a screen, a
+ * direction per row and a duration per row that is no multiple of its
+ * neighbours', so the rows never fall into step.
+ */
+.tgs-gallery--wall { display: grid; gap: var(--tgs-space-s); }
+.tgs-gallery--wall[data-gap='none'] { gap: 0; }
+.tgs-gallery--wall[data-gap='xs']   { gap: var(--tgs-space-xs); }
+.tgs-gallery--wall[data-gap='m']    { gap: var(--tgs-space-m); }
+.tgs-gallery--wall[data-gap='l']    { gap: var(--tgs-space-l); }
+.tgs-gallery--wall[data-gap='xl']   { gap: var(--tgs-space-xl); }
+.tgs-gallery--wall .tgs-gallery__cell { width: clamp(150px, 21vw, 280px); }
+.tgs-gallery--wall .tgs-gallery__row[data-dir='back'] { animation-direction: reverse; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .tgs-gallery--wall .tgs-gallery__row { animation-duration: var(--tgs-wall-dur, 60s); }
+}
+
+/* ---- The deck ---- */
+
+/*
+ * React Bits review, 15 Sep 2026: postcards from the trip, fanned, the top one
+ * sliding off to the right and back under the pile every few seconds. Built the
+ * way the shifting collage (.tgs-shift, further down) is: the stylesheet owns
+ * the PLACES (front to back, each a
+ * position, a tilt and a size), every card walks through them offset by its
+ * share of the cycle, and the offset is a negative delay from the render so the
+ * fan is right from the first frame. z-index steps between places, which is what
+ * you want: a card slips under the pile as it comes back rather than fading
+ * through it.
+ *
+ * THE STAGE IS THE BLOCK'S BOX, 4:3, and the cards sit inset in it so the fan
+ * has room to lean. The stage CLIPS: the top card slides off to the right, and
+ * without the clip that slide reached past the page edge and gave a phone a
+ * sideways scroll for a moment every few seconds (seen in the browser check).
+ * Clipped, the card slides off the stage's edge and tucks under, which is the
+ * gesture anyway. The white edge is what separates one postcard from the next
+ * when both are photographs of the same beach.
+ */
+.tgs-gallery--deck {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-width: 36rem;
+  margin-inline: auto;
+}
+.tgs-gallery--deck .tgs-gallery__cell {
+  position: absolute;
+  inset: 7% 10%;
+  transform-origin: 50% 60%;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 22%);
+  outline: 4px solid var(--tgs-surface);
+  outline-offset: -1px;
+  animation: tgs-deck-3 var(--tgs-deck-cycle, 10.5s) infinite;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+.tgs-gallery--deck .tgs-gallery__cell img { aspect-ratio: auto; height: 100%; }
+.tgs-gallery--deck .tgs-gallery__open { height: 100%; }
+.tgs-gallery--deck[data-count='2'] .tgs-gallery__cell { animation-name: tgs-deck-2; }
+.tgs-gallery--deck[data-count='4'] .tgs-gallery__cell { animation-name: tgs-deck-4; }
+.tgs-gallery--deck[data-count='5'] .tgs-gallery__cell { animation-name: tgs-deck-5; }
+.tgs-gallery--deck[data-count='6'] .tgs-gallery__cell { animation-name: tgs-deck-6; }
+.tgs-gallery--deck[data-count='7'] .tgs-gallery__cell { animation-name: tgs-deck-7; }
+.tgs-gallery--deck[data-count='8'] .tgs-gallery__cell { animation-name: tgs-deck-8; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* It holds while somebody is looking at it, and while a keyboard is inside
+     it, or the card they are about to open would slide out from under them. */
+  .tgs-gallery--deck:hover .tgs-gallery__cell,
+  .tgs-gallery--deck:focus-within .tgs-gallery__cell { animation-play-state: paused; }
+}
+
+/*
+ * STILL, FANNED, AND STILL A DECK: the editor canvas, a single picture, and
+ * anyone who asked for less motion all get the arrangement, which is most of
+ * the design; only the dealing stops. Generated with the keyframes below from
+ * one list of places, so the fan at rest and the fan in motion cannot disagree.
+ */
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell { animation: none; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(1) { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(2) { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(3) { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(4) { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(5) { transform: translate(2%, 8%) rotate(2deg) scale(0.85); z-index: 5; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(6) { transform: translate(-1%, 9%) rotate(-1deg) scale(0.83); z-index: 4; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(7) { transform: translate(1%, 9%) rotate(1deg) scale(0.82); z-index: 3; }
+.tgs-gallery--deck[data-still='true'] .tgs-gallery__cell:nth-child(8) { transform: translate(0, 10%) rotate(0deg) scale(0.81); z-index: 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* [data-count] is here for specificity, not meaning: the per-count rule above
+     that picks the walk is three selectors deep, and a two-deep `animation: none`
+     lost to it (measured 15 Sep 2026, the deck still dealing under reduced
+     motion). Same depth, later in the file, wins. */
+  .tgs-gallery--deck[data-count] .tgs-gallery__cell { animation: none; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(1) { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(2) { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(3) { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(4) { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(5) { transform: translate(2%, 8%) rotate(2deg) scale(0.85); z-index: 5; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(6) { transform: translate(-1%, 9%) rotate(-1deg) scale(0.83); z-index: 4; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(7) { transform: translate(1%, 9%) rotate(1deg) scale(0.82); z-index: 3; }
+  .tgs-gallery--deck .tgs-gallery__cell:nth-child(8) { transform: translate(0, 10%) rotate(0deg) scale(0.81); z-index: 2; }
+}
+
+/*
+ * THE PLACES, WALKED. A card sits on top for its share of the cycle, flies off
+ * to the right in the last tenth of that share, lands at the back, then comes
+ * forward one place per share until it is on top again. Each place is held for
+ * most of its share and the move happens in the last fifth, so the deck is
+ * still while a visitor is looking at the top card. One keyframe set per count,
+ * because the shares are percentages of the cycle and CSS cannot compute a stop.
+ */
+@keyframes tgs-deck-2 {
+  0%, 40% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  46% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  50%, 90% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+}
+@keyframes tgs-deck-3 {
+  0%, 26.667% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  30.667% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  33.333%, 60% { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  66.667%, 93.333% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+}
+@keyframes tgs-deck-4 {
+  0%, 20% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  23% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  25%, 45% { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+  50%, 70% { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  75%, 95% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+}
+@keyframes tgs-deck-5 {
+  0%, 16% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  18.4% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  20%, 36% { transform: translate(2%, 8%) rotate(2deg) scale(0.85); z-index: 5; }
+  40%, 56% { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+  60%, 76% { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  80%, 96% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+}
+@keyframes tgs-deck-6 {
+  0%, 13.333% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  15.333% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  16.667%, 30% { transform: translate(-1%, 9%) rotate(-1deg) scale(0.83); z-index: 4; }
+  33.333%, 46.667% { transform: translate(2%, 8%) rotate(2deg) scale(0.85); z-index: 5; }
+  50%, 63.333% { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+  66.667%, 80% { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  83.333%, 96.667% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+}
+@keyframes tgs-deck-7 {
+  0%, 11.429% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  13.143% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  14.286%, 25.714% { transform: translate(1%, 9%) rotate(1deg) scale(0.82); z-index: 3; }
+  28.571%, 40% { transform: translate(-1%, 9%) rotate(-1deg) scale(0.83); z-index: 4; }
+  42.857%, 54.286% { transform: translate(2%, 8%) rotate(2deg) scale(0.85); z-index: 5; }
+  57.143%, 68.571% { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+  71.429%, 82.857% { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  85.714%, 97.143% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+}
+@keyframes tgs-deck-8 {
+  0%, 10% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
+  11.5% { transform: translate(72%, -6%) rotate(10deg) scale(1); z-index: 9; }
+  12.5%, 22.5% { transform: translate(0, 10%) rotate(0deg) scale(0.81); z-index: 2; }
+  25%, 35% { transform: translate(1%, 9%) rotate(1deg) scale(0.82); z-index: 3; }
+  37.5%, 47.5% { transform: translate(-1%, 9%) rotate(-1deg) scale(0.83); z-index: 4; }
+  50%, 60% { transform: translate(2%, 8%) rotate(2deg) scale(0.85); z-index: 5; }
+  62.5%, 72.5% { transform: translate(-2%, 7%) rotate(-2deg) scale(0.88); z-index: 6; }
+  75%, 85% { transform: translate(5%, 5%) rotate(4deg) scale(0.92); z-index: 7; }
+  87.5%, 97.5% { transform: translate(-5%, 3%) rotate(-5deg) scale(0.96); z-index: 8; }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); z-index: 9; }
 }
 
 /* ---- The lightbox ---- */

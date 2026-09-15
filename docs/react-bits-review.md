@@ -36,9 +36,10 @@ Commons Clause licence never comes into it, because no line of theirs reaches th
 
 What we learn is a vocabulary, and five of its words are missing from ours:
 
-1. **Shapes.** Every grid we draw is equal cells. Bento, masonry, a photo wall and a
-   fanned deck are the layouts a visitor reads as designed, and the equal
-   three-card row is the single most common AI tell in the taste skill.
+1. **Shapes.** Every grid we draw is equal cells. Bento, a mosaic, a photo wall and
+   a fanned deck are the layouts a visitor reads as designed, and the equal
+   three-card row is the single most common AI tell in the taste skill. **Built
+   and shipped 15 Sep 2026**, see the note at the end of section 1.
 2. **Backdrops.** A section without a photograph is a flat colour or one gradient.
    Aurora, light rays, soft waves, drifting particles, contour lines and grain give a
    call to action or a stats band an atmosphere without a picture.
@@ -115,21 +116,36 @@ is tier 0 throughout.
   *Featured* (the first card full width, the rest three across). A destinations grid
   where Greece is the big picture and Italy and Portugal sit beside it reads as a
   choice somebody made. On a phone all three collapse to one column, as now.
-- **Gallery gains three layouts:** *Masonry* (CSS columns, pictures at their own
-  heights, reading order kept), *Photo wall* (two or three rows drifting in opposite
+- **Gallery gains three layouts:** *Mosaic* (some pictures two cells wide or two
+  tall in a fixed rhythm, the rest packed round them; a designed mosaic rather than
+  React Bits' masonry of natural heights, because natural heights only settle once
+  every picture has loaded and the page shifts under the reader, which the project's
+  CLS of zero forbids), *Photo wall* (two or three rows drifting in opposite
   directions and pausing under the pointer, the Drift Wall, which is also the
   Instagram-wall hero we have a preset shape for in `hero-gallery-social`), and
   *Deck* (photographs fanned like postcards, the top one sliding to the back every few
-  seconds, tap to advance; the Stack and Bounce Cards, built the way Shifting images
-  already is, on keyframes). Postcards from the trip is the travel reading, and it is a
-  strong one.
+  seconds, holding under the pointer, a click still opening the picture; the Stack and
+  Bounce Cards, built the way Shifting images already is, on keyframes, so no script).
+  Postcards from the trip is the travel reading, and it is a strong one.
 - **Four designed presets** to put them in the picker, so a client meets them without
-  reading a menu: a bento destinations section, a masonry gallery, a photo-wall hero
+  reading a menu: a bento destinations section, a mosaic gallery, a photo-wall hero
   and a postcard deck beside words. Each drawn in the picker by `presetThumb` and
   photographed on insert like the rest (the 1 Sep doctrine in `presets-page.ts`).
 
 Rolling Gallery (a 3D cylinder of pictures) is possible in CSS but cramped on a
 phone; Circular and Dome galleries are WebGL. All three parked.
+
+**Built 15 Sep 2026, the same day.** `shape` (even, bento, featured) on the Cards
+block and the Collection loop; `layout` gains mosaic, wall and deck on the Gallery;
+four presets (`features-bento-destinations`, `gallery-mosaic`, `hero-photo-wall`,
+`gallery-deck-beside-words`), each photographed on insert with the frame count its
+shape needs; `tests/shapes.test.ts`. Checked in Chromium through the real renderer
+at 1280 and 390 and under reduced motion, which is how three bugs were found before
+they shipped: a phone reset that lost to the desktop rules on specificity (the
+second bento card was squeezed to zero width), the deck still dealing under reduced
+motion for the same reason, and a mosaic rhythm that repeated its double every six
+and left two rows of holes in an eight-picture gallery. All three are pinned in the
+test file with the measurement that found them.
 
 ### 2. Backdrops: a section without a photograph is a flat panel
 
@@ -281,9 +297,9 @@ not a travel site's.
 Five slices, each one commit, each gated the same way as everything else (tsc,
 vitest, next build) and each carrying its own tests, presets and docs update.
 
-1. **Shapes** (bento and featured cards, masonry, photo wall and deck galleries,
+1. **Shapes** (bento and featured cards, mosaic, photo wall and deck galleries,
    four presets). It is the literal answer to "the layouts are basic", it is all CSS,
-   and the bento reaches the Collection loop for free because the two share the grid.
+   and the loop gets the same two grid shapes. **SHIPPED 15 Sep 2026.**
 2. **Backdrops** (six, a section setting, the pictureless presets updated). The
    biggest lift per line of CSS in the whole review: every flat panel on every client
    site gets an atmosphere.

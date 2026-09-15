@@ -225,7 +225,16 @@ export function sectionPhotoTargets(
          */
         if (block.type === 'gallery') {
           const columns = block.props?.columns === '2' ? 2 : block.props?.columns === '4' ? 4 : 3;
-          const frames = columns === 2 ? 4 : columns;
+          /*
+           * The shapes from the React Bits review (15 Sep 2026) want their own
+           * counts: a mosaic fills its rows exactly at eight (one double, one
+           * tall, six squares), a wall needs two rows of five to read as a wall, and a deck
+           * is four postcards. One Pexels search returns 24, so every count here
+           * is one query.
+           */
+          const layout = block.props?.layout;
+          const frames =
+            layout === 'wall' ? 10 : layout === 'mosaic' ? 8 : layout === 'deck' ? 4 : columns === 2 ? 4 : columns;
           for (let frame = 0; frame < frames; frame += 1) {
             targets.push({
               query,

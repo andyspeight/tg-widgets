@@ -128,7 +128,7 @@ export function BlockRenderer({
       case 'video':
         return <VideoBlock props={props} />;
       case 'gallery':
-        return <GalleryBlock props={props} blockId={block.id} />;
+        return <GalleryBlock props={props} blockId={block.id} editing={editable} />;
       case 'before-after':
         return <BeforeAfterBlock props={props} />;
       case 'testimonials':

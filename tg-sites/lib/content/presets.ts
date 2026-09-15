@@ -616,9 +616,17 @@ function barsForBlock(
       return [{ width: columnWidth, height: RATIO_HEIGHT[ratio] ?? 0.2, tone: 'frame' }];
     }
 
-    /* A grid of pictures: one row of frames across the column. */
+    /*
+     * A grid of pictures: two rows of frames across the column. A deck is one
+     * postcard-sized frame instead, and a wall draws as rows of smaller frames,
+     * so the three shapes read as three thumbnails rather than one.
+     */
     case 'gallery': {
-      const across = Number(props.columns) || 3;
+      const layout = typeof props.layout === 'string' ? props.layout : 'grid';
+      if (layout === 'deck') {
+        return [{ width: columnWidth * 0.66, height: columnWidth * 0.66 * 0.72, tone: 'frame' as const }];
+      }
+      const across = layout === 'wall' ? 5 : Number(props.columns) || 3;
       const cell = columnWidth / across;
       return Array.from({ length: 2 }, () => ({
         width: columnWidth,

@@ -138,6 +138,16 @@ function loopLinkWhole(block: Block): boolean {
   return (block.props as { linkWhole?: unknown }).linkWhole !== false;
 }
 
+/**
+ * The loop's grid shape: bento (the first card two tracks wide) or featured (the
+ * first card across the row). Nothing for the even grid, so the attribute is
+ * absent and the markup of every loop published before the field is unchanged.
+ */
+function loopShape(block: Block): 'bento' | 'featured' | undefined {
+  const shape = (block.props as { shape?: unknown }).shape;
+  return shape === 'bento' || shape === 'featured' ? shape : undefined;
+}
+
 interface Editable {
   editable?: boolean;
   /**
@@ -1308,6 +1318,7 @@ function blockHost(
             gap={innerGap(block)}
             align={gridAlign(block)}
             linkWhole={loopLinkWhole(block)}
+            shape={loopShape(block)}
             editorCanvas={editorCanvas}
             prepared={prepared}
             sizes={sizes}
@@ -1478,6 +1489,7 @@ function InnerLoop({
   gap,
   align,
   linkWhole,
+  shape,
   editorCanvas = false,
   prepared,
   sizes,
@@ -1487,6 +1499,7 @@ function InnerLoop({
   gap: number;
   align: 'top' | 'centre' | 'bottom' | 'stretch';
   linkWhole: boolean;
+  shape?: 'bento' | 'featured';
   editorCanvas?: boolean;
   prepared?: PreparedMap;
   sizes?: ImageSizes;
@@ -1504,6 +1517,7 @@ function InnerLoop({
       style={style}
       data-align={align}
       data-whole={linkWhole ? 'true' : undefined}
+      data-shape={shape}
     >
       {cells.map((cell, inner) => {
         const blocks = Array.isArray(cell.blocks) ? cell.blocks : [];

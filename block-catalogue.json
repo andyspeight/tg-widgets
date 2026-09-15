@@ -535,7 +535,7 @@
         "spacing": []
       },
       "cssRules": 10,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1695",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1816",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -623,7 +623,7 @@
         "spacing": []
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1759",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1880",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -986,7 +986,7 @@
         "spacing": []
       },
       "cssRules": 48,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2104",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2225",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1107,7 +1107,7 @@
         "spacing": []
       },
       "cssRules": 10,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2213",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2334",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1213,7 +1213,7 @@
         ]
       },
       "cssRules": 47,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2338",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2459",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1361,7 +1361,7 @@
         ]
       },
       "cssRules": 19,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2449",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2570",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1488,7 +1488,7 @@
         "spacing": []
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2565",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2686",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1574,7 +1574,7 @@
         "spacing": []
       },
       "cssRules": 19,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2654",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2775",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1654,7 +1654,7 @@
         "spacing": []
       },
       "cssRules": 7,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2727",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2848",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1722,7 +1722,7 @@
         "spacing": []
       },
       "cssRules": 8,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2810",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:2931",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -1828,7 +1828,7 @@
         ]
       },
       "cssRules": 10,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2902",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3023",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2079,7 +2079,10 @@
       "description": "A grid of images, or a rail that scrolls itself. Click to see one big.",
       "variants": [
         "grid",
-        "scroll"
+        "mosaic",
+        "scroll",
+        "wall",
+        "deck"
       ],
       "props": [
         {
@@ -2130,7 +2133,10 @@
           "required": false,
           "options": [
             "grid",
-            "scroll"
+            "mosaic",
+            "scroll",
+            "wall",
+            "deck"
           ],
           "default": "grid"
         },
@@ -2161,16 +2167,24 @@
         }
       ],
       "classNames": [
+        "tgs-deck-cycle",
         "tgs-gallery",
+        "tgs-gallery--deck",
+        "tgs-gallery--mosaic",
         "tgs-gallery--rail",
+        "tgs-gallery--wall",
         "tgs-gallery-marquee",
         "tgs-lb-",
         "tgs-placeholder",
-        "tgs-sr-only"
+        "tgs-sr-only",
+        "tgs-wall-dur"
       ],
       "tokensUsed": [
         "colour.border-strong",
+        "colour.deck-cycle",
+        "colour.surface",
         "colour.surface-alt",
+        "colour.wall-dur",
         "radius.md",
         "space.l",
         "space.m",
@@ -2181,11 +2195,13 @@
         "type.text-s"
       ],
       "hardcoded": {
-        "colours": [],
+        "colours": [
+          ".tgs-gallery--deck .tgs-gallery__cell: rgb(0 0 0 / 22%)"
+        ],
         "spacing": []
       },
-      "cssRules": 44,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1233",
+      "cssRules": 89,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1256",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2196,6 +2212,9 @@
       "staffOnly": false,
       "description": "A grid of the same shape repeated: destinations, offers, the team.",
       "variants": [
+        "even",
+        "bento",
+        "featured",
         "plain",
         "bordered",
         "raised",
@@ -2342,6 +2361,18 @@
             "4"
           ],
           "default": "3"
+        },
+        {
+          "name": "shape",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "even",
+            "bento",
+            "featured"
+          ],
+          "default": "even"
         },
         {
           "name": "gap",
@@ -2493,8 +2524,8 @@
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 109,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1539",
+      "cssRules": 120,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1651",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2731,8 +2762,8 @@
           ".tgs-cards[data-design='index'] .tgs-card__label: 0.15em"
         ]
       },
-      "cssRules": 135,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:1852",
+      "cssRules": 146,
+      "sourcePath": "tg-sites/components/render/blocks.tsx:1973",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -2984,7 +3015,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2945",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3066",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3078,7 +3109,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2949",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3070",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3147,7 +3178,7 @@
         ]
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:2973",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3094",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3200,7 +3231,7 @@
         ]
       },
       "cssRules": 11,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3079",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3200",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3392,7 +3423,7 @@
         "spacing": []
       },
       "cssRules": 23,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3320",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3441",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3491,7 +3522,7 @@
         ]
       },
       "cssRules": 18,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3441",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3562",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3623,7 +3654,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3521",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3642",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3740,7 +3771,7 @@
         "spacing": []
       },
       "cssRules": 42,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3610",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3731",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3855,7 +3886,7 @@
         "spacing": []
       },
       "cssRules": 15,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3711",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3832",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -3940,7 +3971,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3779",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3900",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4086,7 +4117,11 @@
       "travelSpecific": false,
       "staffOnly": false,
       "description": "Design one card, repeated over a collection. Your shape, their data.",
-      "variants": [],
+      "variants": [
+        "even",
+        "bento",
+        "featured"
+      ],
       "props": [
         {
           "name": "collection",
@@ -4162,6 +4197,18 @@
           "default": "1"
         },
         {
+          "name": "shape",
+          "type": "enum",
+          "role": "config",
+          "required": false,
+          "options": [
+            "even",
+            "bento",
+            "featured"
+          ],
+          "default": "even"
+        },
+        {
           "name": "gap",
           "type": "number",
           "role": "config",
@@ -4199,7 +4246,7 @@
         "colours": [],
         "spacing": []
       },
-      "cssRules": 5,
+      "cssRules": 7,
       "sourcePath": "tg-sites/components/render/blocks.tsx",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
@@ -4260,7 +4307,7 @@
         "spacing": []
       },
       "cssRules": 9,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3855",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:3976",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4302,7 +4349,7 @@
         "spacing": []
       },
       "cssRules": 5,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4719",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4840",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4385,7 +4432,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4402",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4523",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4499,7 +4546,7 @@
         ]
       },
       "cssRules": 31,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4449",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4570",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4715,7 +4762,7 @@
         "spacing": []
       },
       "cssRules": 23,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:3980",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4101",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4827,7 +4874,7 @@
         "spacing": []
       },
       "cssRules": 25,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4120",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4241",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -4918,7 +4965,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4202",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4323",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5007,7 +5054,7 @@
         "spacing": []
       },
       "cssRules": 4,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4285",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4406",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5095,7 +5142,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4352",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4473",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5190,7 +5237,7 @@
         "spacing": []
       },
       "cssRules": 22,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4534",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4655",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5275,7 +5322,7 @@
         "spacing": []
       },
       "cssRules": 21,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4648",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4769",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5451,7 +5498,7 @@
         "spacing": []
       },
       "cssRules": 2,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4741",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4862",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     },
     {
@@ -5494,7 +5541,7 @@
         "spacing": []
       },
       "cssRules": 3,
-      "sourcePath": "tg-sites/components/render/blocks.tsx:4797",
+      "sourcePath": "tg-sites/components/render/blocks.tsx:4918",
       "registryPath": "tg-sites/lib/content/blocks.ts"
     }
   ]
