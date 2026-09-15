@@ -232,13 +232,63 @@ export function readEvents(str, max = 6) {
     .filter(e => e && e.name);
 }
 
+// A year sitting ON A DATE rather than a year something was founded in. The
+// library is full of the second kind ("marking Pakistan's 1947 independence",
+// "every May since 1913") and those are fine forever. The first kind rots: the
+// Milano Cortina Games were described in the present tense seven months after
+// the closing ceremony, the Dubai Air Show pointed at a November that had been,
+// and Pakistan's two Eids carried 2026 dates that had passed.
+const DATED_YEAR = new RegExp(
+  '(?:(' + MONTHS.join('|') + ')(?:\\s+\\d{1,2})?(?:\\s+(?:in|of))?\\s+(20\\d\\d))' +
+  '|(?:\\b(?:next|currently|upcoming|due|scheduled|through|until|till)\\b[^.]{0,36}?(20\\d\\d))', 'gi');
+
+// The year a thing STARTED is not a claim about when it happens next.
+const ORIGIN_YEAR = /\b(?:anniversar\w+|inscrib\w+|inscription|founded|established|since|first held|first staged|debut|launched|marking|commemorat\w+)\b/i;
+
+// Nor is a year the writing already puts in the past. "Cortina hosted the
+// February 2026 Games" and "most recently 12 December 2025" are both saying the
+// right thing, and a checker that cannot hear the tense would send a person to
+// fix copy that is already correct.
+const PAST_TENSE = /\b(?:hosted|ran|took place|was|were|closed|ended|finished|staged|won|drew|most recently|last held|last staged|previous\w*|until)\b/i;
+
+/** Every date this text pins to a year, as {year, month}. month is -1 if none. */
+function datedYears(text) {
+  const s = String(text || '');
+  const out = [];
+  let m;
+  DATED_YEAR.lastIndex = 0;
+  while ((m = DATED_YEAR.exec(s))) {
+    if (ORIGIN_YEAR.test(s.slice(Math.max(0, m.index - 40), m.index + m[0].length))) continue;
+    // The sentence the year sits in, so the tense can be heard.
+    const from = s.lastIndexOf('.', m.index) + 1;
+    const to = s.indexOf('.', m.index + m[0].length);
+    if (PAST_TENSE.test(s.slice(from, to < 0 ? s.length : to))) continue;
+    out.push({ year: Number(m[2] || m[3]), month: m[1] ? monthIndex(m[1]) : -1 });
+  }
+  return out;
+}
+
+/**
+ * The years in this text that have already been. A year before this one has
+ * gone whatever month it named. This year has gone only if the month it named
+ * has: in September, "the February 2026 Games" is over and "through 2026" is
+ * not. A date with no month is given the benefit of the doubt until the year
+ * turns, which is the reading that never cries wolf.
+ */
+function yearsGone(text, thisYear, thisMonth) {
+  const gone = datedYears(text).filter(d =>
+    d.year < thisYear || (d.year === thisYear && d.month >= 0 && d.month < thisMonth));
+  return [...new Set(gone.map(d => d.year))];
+}
+
 /**
  * What is wrong with this events array, in plain words, worst first.
  * An empty list means every entry reaches a traveller saying the same thing
  * twice. It does NOT mean the dates are right: only that the record agrees
  * with itself, which is the most a record can prove on its own.
  */
-export function eventProblems(str) {
+export function eventProblems(str, thisYear = new Date().getUTCFullYear(),
+                              thisMonth = new Date().getUTCMonth()) {
   if (typeof str !== 'string' || !str.trim()) return [];
   let arr;
   try { arr = JSON.parse(str); }
@@ -256,9 +306,16 @@ export function eventProblems(str) {
     const month = monthOf(e);
     if (!month) { problems.push(name + ' has no month, so it shows undated'); return; }
 
+    const blob = name + '. ' + String(e.description || '');
+    const stale = yearsGone(blob, thisYear, thisMonth);
+    if (stale.length) {
+      problems.push(name + ' is written around ' + stale.join(' and ') +
+        ', which has been and gone, so it needs the next date or the past tense');
+    }
+
     const tag = tagCovers(month);
     if (!tag) return; // "Variable (Islamic calendar)" is an honest answer, not an error
-    const { covered, named } = monthsNamedIn(name + '. ' + String(e.description || ''));
+    const { covered, named } = monthsNamedIn(blob);
     if (named.length && ![...covered].some(m => tag.has(m))) {
       problems.push(name + ' is tagged ' + month + ' but its own description says ' +
         named.map(m => MONTHS[m]).join(' and '));

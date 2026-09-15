@@ -459,6 +459,57 @@ let cov;   // set once tagCovers is imported: a tag as a readable list of months
     assert.strictEqual(tagCovers('whenever'), null);
   });
 
+
+  console.log('\nA date that has been and gone');
+
+  // September 2026, so February 2026 has happened and December 2026 has not.
+  const SEP26 = (arr) => eventProblems(J(arr), 2026, 8);
+
+  t('a finished event written as if it is coming is a problem', () => {
+    // The Milano Cortina Games closed on 22 February 2026 and the record still
+    // said Cortina hosts them, seven months later.
+    const [p] = SEP26([{ month:'Feb', name:'Winter Olympics',
+      description:'Cortina hosts the alpine and sliding events for the February 2026 Winter Games.' }]);
+    assert.match(p, /2026, which has been and gone/);
+  });
+  t('the same event in the past tense is fine', () => {
+    assert.deepStrictEqual(SEP26([{ month:'Feb', name:'Winter Olympics',
+      description:'Cortina hosted the alpine and sliding events at the February 2026 Winter Games.' }]), []);
+  });
+  t('a year still to come this year is fine', () => {
+    assert.deepStrictEqual(SEP26([{ month:'Dec', name:'Biennale',
+      description:'The next edition opens in December 2026 and runs for 110 days.' }]), []);
+  });
+  t('a founding year is not a date', () => {
+    // The library is full of these and every one of them is right forever.
+    assert.deepStrictEqual(SEP26([{ month:'Aug', name:'Independence Day',
+      description:"National holiday on 14 August marking Pakistan's 1947 independence." }]), []);
+    assert.deepStrictEqual(SEP26([{ month:'Jul', name:'George Town Heritage Celebrations',
+      description:'The UNESCO inscription anniversary on 7 July 2008 is marked each July.' }]), []);
+    assert.deepStrictEqual(SEP26([{ month:'May', name:'RHS Chelsea Flower Show',
+      description:'Held every May since 1913 in the grounds of the Royal Hospital Chelsea.' }]), []);
+  });
+  t('a past edition named as the last one is fine', () => {
+    assert.deepStrictEqual(SEP26([{ month:'Dec-Mar', name:'Kochi-Muziris Biennale',
+      description:'Takes over Fort Kochi every two years, most recently 12 December 2025 to 31 March 2026.' }]), []);
+  });
+  t('a stale year is reported before a wrong month', () => {
+    // Worst first: a date that has gone is more use to a person than a tag that
+    // disagrees, because fixing the date usually fixes the tag.
+    const p = SEP26([{ month:'Nov', name:'Dubai Air Show',
+      description:'The biennial show runs five days in November 2025 and 2027.' }]);
+    assert.strictEqual(p.length, 1);
+    assert.match(p[0], /2025, which has been and gone/);
+  });
+  t('a soft claim only goes stale when the year turns', () => {
+    const still = eventProblems(J([{ month:'Feb', name:'Northern Lights',
+      description:'Peak solar activity currently through 2026.' }]), 2026, 8);
+    assert.deepStrictEqual(still, []);
+    const gone = eventProblems(J([{ month:'Feb', name:'Northern Lights',
+      description:'Peak solar activity currently through 2026.' }]), 2027, 0);
+    assert.match(gone[0], /2026, which has been and gone/);
+  });
+
   console.log(`\n  ${pass} passed, ${fail} failed\n`);
   process.exit(fail ? 1 : 0);
 })();
