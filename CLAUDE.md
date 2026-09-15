@@ -57,7 +57,10 @@ Owner: Andy Speight, CEO, Travelgenix.
   order, the numbers you can quote, and a list of things that will bite you
   that is not derivable from the code. Its companions are
   `docs/tg-sites-speed-and-visibility.md` (the analysis behind the performance
-  work) and `docs/duda-gap-analysis.md` (the platform comparison).
+  work), `docs/duda-gap-analysis.md` and `docs/elementor-gap-analysis.md` (the
+  platform comparisons) and `docs/react-bits-review.md` (15 Sep 2026: the effects
+  vocabulary the layouts are missing, what we already have under other names, and
+  the five-slice build order).
 
 - **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
   BUILT and switchable in the editor: nine movement recipes with three strengths,
