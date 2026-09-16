@@ -104,6 +104,77 @@ pitch, and demands short copy discipline for ever after.
   replace the look, and mixing the old and the new would produce a compromise
   neither direction chose.
 
+
+## Second pass, 16 Sep 2026: execution rebuild
+
+Andy on v1: "nope, lets try again", and on what missed: execution, not
+direction. The two directions were right; the craft was not. Rebuilt in place
+at the same URL.
+
+### What was actually wrong, found by rendering the page
+
+The first version was published WITHOUT looking at it. Rendering it locally
+(Playwright, using the repo's own install, Chromium at
+`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`) showed three faults that
+a single look would have caught:
+
+1. **A browser frame around a browser frame.** The hero image was
+   `roadmap-jul3`, which is itself a browser-framed mockup cut from the roadmap
+   page. Wrapping it in my own frame gave two sets of traffic lights and two
+   URL bars, and it was the first thing on the page.
+2. **Borrowed page furniture.** That same source carried the roadmap marketing
+   page's floating pink chat bubble and a sub-nav strip ("Luna Chat / What it
+   does / Always on / ...") that had nothing to do with a homepage.
+3. **A caption burnt into the photo.** The coastal crop already had "Your next
+   escape, sorted" rendered into the pixels, so when the HTML drew the caption
+   too it appeared twice, overlapping.
+
+Two further bugs found on the rebuild's own first render:
+
+4. `#b .art img` and `#b .bleed img` matched EVERY image inside the tile,
+   including the ones inside the hand-built mock, stretching its 40px
+   thumbnails to full width and breaking the offer rows to one character per
+   line. Fixed by scoping to the direct child: `#b .art>img`, `#b .bleed>img`.
+   Worth remembering: a descendant selector inside a section wrapper will reach
+   into any component you nest there.
+5. The mock's site column did not fill the frame height, leaving dead white
+   below the photo. Fixed with a flex column and `flex:1` on the hero band.
+
+### The rule that came out of it
+
+**Never frame a screenshot that is already framed, and never trust a source
+image to be clean.** Every image now used is PURE product UI, cropped away from
+its own chrome and from any furniture belonging to the page it was cut from:
+
+- `widgets.jpg` from `may` (0,250,1200,890), catalogue only
+- `contracting.jpg` from `aug2` (40,192,1115,815), its own browser chrome
+  removed from the top and the floating bubble trimmed off the right
+- `map.jpg` from `alt-map` (140,140,1060,735)
+- `scheduler.jpg` from `jun` (310,335,895,815)
+- `booking.jpg` from the June booking flow crop, already clean
+- `coast.jpg` from `jul3` (40,128,777,528), stopping ABOVE the burnt-in caption
+
+### The hero is drawn, not screenshotted
+
+Both directions now open on a hand-built HTML product mock: a browser frame
+containing the Coast & Co Travel site with Luna open, the real conversation
+(Algarve in October under £700pp, Albufeira £649, Vilamoura £689), language
+switcher, typing indicator and input. It scales through one custom property
+(`--u`, a `clamp()` on the container font-size) with every internal dimension in
+`em`, so the whole mock resizes cleanly at any width. This removes the nested
+frame problem completely and is crisp at any size, which no screenshot would be.
+
+### Other craft fixes
+
+- The teal highlight on "Not their budgets." was a thin swash that read as a
+  stray underline. It is now a proper highlight block sitting behind the words.
+- Direction A's hero shot now breaks out wider than the text column, as Duda's
+  does, instead of sitting inside it.
+- Direction B's subhead was muted 19px body copy; Apple's sits close to the
+  headline in weight, so it is now 30px at weight 500.
+- Direction B presents imagery bare with a soft shadow, never framed, because
+  Apple never frames.
+
 ## Next steps
 
 1. Andy picks A or B, or the bits he wants from each.
