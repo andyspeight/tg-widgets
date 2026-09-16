@@ -3,8 +3,17 @@
  * Special Offers Grid — embeds a client's live hand-built offers (v0.3.0)
  *
  * Fetches a client's live offers from /api/saved-offers?client=<id> and renders
- * them as a grid of offer cards (reusing widget-offer-card.js). Each card links
- * to that offer's page (/offer?id=…), carrying the chosen page template + brand.
+ * them as a grid of offer cards (reusing widget-offer-card.js). An offer OPENS
+ * ON THE CLIENT'S OWN PAGE by default (16 Sep 2026, Andy, on halalworldtravel
+ * .com: "when the offer is clicked, it changes the domain to a widget domain
+ * (us) - this should not happen. We are the technology provider, not the
+ * story."). The card's link is a #offer/<slug>-<id> hash on the page the widget
+ * already sits on, so nothing about the address bar changes hosts; the grid
+ * hears the hash, loads widget-offer-page.js the same way it loads the card,
+ * and draws the whole offer in its own place with the client's header and
+ * footer still around it. Back, forward, a refresh and a shared link all work,
+ * because the hash IS the state. `offerOpen:"link"` restores the old behaviour
+ * of sending the visitor to our own /offer page.
  * Scheduling is respected twice over: the public feed only returns live offers,
  * and each card re-checks its own window and self-hides as a backstop.
  *
@@ -25,7 +34,7 @@
 (function () {
   'use strict';
 
-  const VERSION = '0.3.2';
+  const VERSION = '0.4.0';
 
   // ─── i18n ───────────────────────────────────────────────────
   // Fixed UI chrome only (the empty-state line and the default card CTA). The
@@ -106,6 +115,54 @@
     return _cardPromise;
   }
 
+  // The offer page itself, loaded only when a visitor actually opens an offer.
+  // Same shape as ensureCard: one promise, shared by every grid on the page, and
+  // a failure is not cached so a retry can retry.
+  let _pagePromise = null;
+  function ensureOfferPage() {
+    if (typeof window !== 'undefined' && window.TGOfferPageWidget) return Promise.resolve();
+    if (_pagePromise) return _pagePromise;
+    _pagePromise = new Promise(function (resolve, reject) {
+      const s = document.createElement('script');
+      s.src = SCRIPT_BASE + 'widget-offer-page.js';
+      s.async = true;
+      s.onload = resolve;
+      s.onerror = function () { _pagePromise = null; reject(new Error('offer-page-load-failed')); };
+      document.head.appendChild(s);
+    });
+    return _pagePromise;
+  }
+
+  // The hash an opened offer writes: #offer/<slug>-<id> on the client's OWN
+  // address. A hash needs nothing from their server, survives a refresh and can
+  // be shared, and the browser does not scroll for it because no element on the
+  // page carries that id.
+  const HASH_PREFIX = '#offer/';
+
+  // A page can carry several grids feeding off one pool of offers (a Cruise
+  // carousel and a Ski carousel, say), and an offer tagged both ways sits in
+  // both. Only the first grid to answer a hash opens it, or the visitor gets
+  // the same offer drawn twice down the page.
+  let _hashClaim = null;
+
+  // The id inside a #offer/<slug>-<id> hash. Ids are hyphen-free these days, so
+  // the last token is the id; the whole segment is tried too, which covers an id
+  // pasted with no slug in front of it. Mirrors idsFromSlugid in api/offer-page.js.
+  function idsFromHash(hash) {
+    const h = String(hash || '');
+    if (h.indexOf(HASH_PREFIX) !== 0) return [];
+    let seg = h.slice(HASH_PREFIX.length);
+    const cut = seg.search(/[?&#]/);
+    if (cut >= 0) seg = seg.slice(0, cut);
+    try { seg = decodeURIComponent(seg); } catch (e) { /* leave as written */ }
+    if (!seg) return [];
+    const out = [];
+    const dash = seg.lastIndexOf('-');
+    if (dash > 0 && dash < seg.length - 1) out.push(seg.slice(dash + 1));
+    if (out.indexOf(seg) === -1) out.push(seg);
+    return out;
+  }
+
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
@@ -113,6 +170,14 @@
   }
 
   const STYLES = `
+    /* An opened offer takes the grid's place, inside the same widget, so the
+       client's own header and footer stay exactly where they were. */
+    .tgog-offer { display: none; }
+    .tgog.is-offer > .tgog-head,
+    .tgog.is-offer > .tgog-items,
+    .tgog.is-offer > .tgog-car { display: none; }
+    .tgog.is-offer > .tgog-offer { display: block; }
+
     :host { all: initial; display: block; }
     * { box-sizing: border-box; }
     .tgog {
@@ -293,7 +358,16 @@
         emptyText: c.emptyText || this.t('empty'),
         // The agency's own reply promise, carried through to each offer page.
         replyPromise: (typeof c.replyPromise === 'string') ? c.replyPromise.slice(0, 120).trim() : '',
+        // WHERE AN OFFER OPENS. 'inline' (the default) draws it on the page the
+        // widget is already on. 'link' sends the visitor to our own /offer page,
+        // which is what every widget did before 16 Sep 2026. An explicit
+        // offerPage address still wins over both, for a client who has built
+        // their own offer page and wants the cards pointed at it.
+        offerOpen: c.offerOpen === 'link' ? 'link' : 'inline',
         offerPage: c.offerPage || '',           // override the offer-page base if needed
+        // This widget's own public id, forwarded to the offer page so an enquiry
+        // on an offer authored in a widget config still knows who owns it.
+        widgetId: c._widgetId || c.widgetId || '',
         ctaText: c.ctaText || this.t('viewDeal'),
         offers: Array.isArray(c.offers) ? c.offers : null   // inline (demo/preview)
       };
@@ -303,6 +377,11 @@
     // so the card appends &id=<offerId>.
     _offerPageBase() {
       if (this.cfg.offerPage) return this.cfg.offerPage;
+      // Opening in place needs no host, no query and no round trip: the card's
+      // href is a hash on the address the visitor is already reading. The card
+      // appends '/<slug>-<id>' to whatever base it is given, so '#offer' becomes
+      // '#offer/ten-nights-in-qatar-DT3C1C4EWhu0' and the domain never changes.
+      if (this.cfg.offerOpen !== 'link') return HASH_PREFIX.replace(/\/$/, '');
       let base = SCRIPT_BASE + 'offer';
       const q = [];
       if (this.cfg.template && this.cfg.template !== 'classic') q.push('template=' + encodeURIComponent(this.cfg.template));
@@ -369,7 +448,7 @@
           : '<div class="tgog-items ' + gridCls + '" data-items></div>';
       }
 
-      root.innerHTML = head + body;
+      root.innerHTML = head + body + '<div class="tgog-offer" data-offer></div>';
       this.shadow.innerHTML = '<style>' + STYLES + '</style>';
       this.shadow.appendChild(root);
       this.root = root;
@@ -394,6 +473,8 @@
       if (this.cfg.max > 0) items = items.slice(0, this.cfg.max);
       if (!items.length) { this._render('empty'); return; }
 
+      // Held so a hash can be answered later without another round trip.
+      this.items = items;
       this._render('ready');
       const holder = this.root.querySelector('[data-items]');
       const cfg = this.cfg;
@@ -427,7 +508,115 @@
           });
         });
         if (cfg.display === 'carousel') this._wireCarousel(items.length);
+        // The offers are now known, so a hash can be resolved to one of them:
+        // wire the listener, then honour a link someone arrived on.
+        this._wireOfferHash();
+        this._syncOfferHash(true);
       }).catch(() => { /* card script failed to load — leave skeletons cleared */ this._render('empty'); });
+    }
+
+    // ── Opening an offer in place ──────────────────────────────────────────
+    //
+    // The hash is the state, which is what makes back, forward, a refresh and a
+    // shared link all work without a line of routing: every one of them ends in
+    // a hashchange, and every hashchange is answered the same way.
+
+    _wireOfferHash() {
+      if (this._hashWired || this.cfg.offerOpen === 'link' || this.cfg.offerPage) return;
+      this._hashWired = true;
+      this._onHash = () => {
+        // A grid torn out of the page must not keep the listener alive.
+        if (!this.el || !this.el.isConnected) {
+          window.removeEventListener('hashchange', this._onHash);
+          return;
+        }
+        this._syncOfferHash(false);
+      };
+      window.addEventListener('hashchange', this._onHash);
+    }
+
+    /** Whatever the hash says, that is what is on screen. */
+    _syncOfferHash(firstMount) {
+      if (this.cfg.offerOpen === 'link' || this.cfg.offerPage) return;
+      let hash = '';
+      try { hash = window.location.hash || ''; } catch (e) { hash = ''; }
+      const ids = idsFromHash(hash);
+      const item = ids.length ? this._itemById(ids) : null;
+      if (!item) {
+        if (_hashClaim && _hashClaim.grid === this) _hashClaim = null;
+        this._closeOffer();
+        return;
+      }
+      if (_hashClaim && _hashClaim.hash === hash && _hashClaim.grid !== this) return;  // another grid has it
+      if (this._openId && this._openId === (item.id || '')) return;                    // already showing it
+      _hashClaim = { hash: hash, grid: this };
+      this._openOffer(item, firstMount);
+    }
+
+    /** The offer one of this grid's cards carries, by id. */
+    _itemById(ids) {
+      const items = this.items || [];
+      for (const cand of ids) {
+        for (const it of items) {
+          const id = it.id || (it.offer && it.offer.id) || '';
+          if (id && id === cand) return it;
+        }
+      }
+      return null;
+    }
+
+    _openOffer(item, firstMount) {
+      const offer = item.offer || item;
+      const id = item.id || offer.id || '';
+      this._openId = id;
+      ensureOfferPage().then(() => {
+        if (this._openId !== id) return;                 // the hash moved on while loading
+        const host = this.root && this.root.querySelector('[data-offer]');
+        if (!host) return;
+        host.textContent = '';
+        const mount = document.createElement('div');
+        host.appendChild(mount);
+        const cfg = this.cfg;
+        new window.TGOfferPageWidget(mount, {
+          lang: this.t.lang,
+          template: cfg.template,
+          theme: cfg.theme,
+          accentColor: cfg.accentColor,
+          brandColor: cfg.brandColor,
+          radius: cfg.radius,
+          currency: offer.currency || cfg.currency || '',
+          replyPromise: cfg.replyPromise,
+          client: cfg.client,
+          widgetId: cfg.widgetId,
+          offerId: id,
+          offer: offer,
+        });
+        this.root.classList.add('is-offer');
+        // Moving the page is allowed here because a person asked for it: they
+        // clicked a card, or they followed a link to this offer. On a first
+        // mount it only happens when the page has not been scrolled at all,
+        // which is the same thing the browser does for an ordinary anchor and
+        // keeps the widget-suite rule that drawing must never grab the page.
+        let atTop = true;
+        try { atTop = (window.pageYOffset || 0) < 4; } catch (e) { atTop = false; }
+        if (!firstMount || atTop) {
+          try { this.el.scrollIntoView({ block: 'start', behavior: firstMount ? 'auto' : 'smooth' }); } catch (e) { /* older browser */ }
+        }
+      }).catch(() => {
+        // The page script could not load: fall back to our own offer page
+        // rather than leaving a dead card.
+        this._openId = '';
+        try { window.location.href = SCRIPT_BASE + 'offer?id=' + encodeURIComponent(id); } catch (e) { /* noop */ }
+      });
+    }
+
+    _closeOffer() {
+      if (!this._openId) return;
+      this._openId = '';
+      if (!this.root) return;
+      this.root.classList.remove('is-offer');
+      const host = this.root.querySelector('[data-offer]');
+      if (host) host.textContent = '';
     }
 
     // Wire the carousel once the cards exist: explicit pixel widths per card
@@ -654,7 +843,13 @@
       if (id) {
         fetch(resolveApiBase() + 'api/widget-config?id=' + encodeURIComponent(id))
           .then((r) => (r.ok ? r.json() : null))
-          .then((d) => { new TGOffersGridWidget(el, (d && (d.config || d)) || {}); })
+          .then((d) => {
+            const config = (d && (d.config || d)) || {};
+            // The widget's own id, so an enquiry sent from an offer opened in
+            // place can still be traced back to this widget.
+            if (!config._widgetId) config._widgetId = id;
+            new TGOffersGridWidget(el, config);
+          })
           .catch(() => { new TGOffersGridWidget(el, {}); });
         continue;
       }

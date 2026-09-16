@@ -69,12 +69,20 @@ const bodyOf = (src, sig) => {
   return src.slice(open + 1, j);
 };
 const offerPageBase = new Function(bodyOf(grid, '_offerPageBase() {'));
-const urlFor = (cfg) => offerPageBase.call({ cfg: Object.assign({ template: 'classic', theme: 'light' }, cfg) });
+// The query-string link is the offerOpen:'link' path. Since 16 Sep 2026 an
+// offer opens on the client's own page by default, where the promise is handed
+// to the offer page as config instead of riding the URL (checked below).
+const urlFor = (cfg) => offerPageBase.call({ cfg: Object.assign({ template: 'classic', theme: 'light', offerOpen: 'link' }, cfg) });
 globalThis.SCRIPT_BASE = 'https://widgets.travelify.io/';
+globalThis.HASH_PREFIX = '#offer/';
 ok(urlFor({ replyPromise: 'We reply within 24 hours.' }).includes('reply=We%20reply%20within%2024%20hours.'),
   'the promise is encoded into the link');
 ok(!urlFor({}).includes('reply='), 'no promise set means no reply param');
 ok(!urlFor({ replyPromise: 'a&b=c' }).includes('&b=c&'), 'an ampersand cannot split the query string');
+ok(offerPageBase.call({ cfg: { template: 'classic', theme: 'light' } }) === '#offer',
+  'opening in place needs no query string at all');
+ok(/replyPromise: cfg\.replyPromise,/.test(grid),
+  'and the promise reaches an offer opened in place as config');
 
 // ── The offer page API whitelists and caps it ───────────────────
 ok(/replyPromise: typeof q\.reply === 'string' \? q\.reply\.slice\(0, 120\) : ''/.test(api),
