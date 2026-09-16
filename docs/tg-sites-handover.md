@@ -164,6 +164,28 @@ enquiries come from `readEnquiryDays` in `lib/db/report.ts` through the pure
 Results. The AI visibility panels (share of voice, the fifty questions, six
 months of history) are still to come with slices B and C.
 
+**The copilot review (16 Sep 2026, afternoon).** Andy sent a brief for an
+assistant panel in tg-sites, written against Duda's Copilot (in Duda's editor
+since 26 Aug 2026, charging credits since 3 Aug). Slice 0 is done:
+`docs/tg-sites-copilot-review.md` carries the research, an inventory of the AI
+the codebase already has (eleven server actions, sixteen prompt modules in
+`lib/ai/`, the `ai_usage` ledger from migration 0015, the capability presets,
+the editor's own history, the generated `block-catalogue.json`, llms.txt already
+served), a gap table, the eleven hard rules checked against the code, and the
+six-slice plan with the changes I would make (apply through the editor's history
+so there is one persistence path; scope roles by the capabilities that exist
+rather than a new lock model; the binding guard is the loop token, and it should
+also go in front of the existing section rewrite, which does not look for one
+today; extend `lib/ai/anthropic.ts` with a streaming tool call rather than adding
+the SDK; two cheap read tools in slice 1 for the results board and the
+enquiries). Three panel directions are on a canvas
+(https://claude.ai/artifact/JPhHqEGyaVSZ29RD8rSYnR): A the rail panel
+(recommended), B a command bar under the canvas, C a room of its own. Andy
+picks before any panel UI is built. Four questions are with him and do not
+block: the allowance per client, client access timing, the name ("Copilot" is
+Duda's word; a Luna name would fit) and `ANTHROPIC_API_KEY` on tg-sites-shell.
+Nothing in the codebase changed for this beyond the docs.
+
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen
 menu never run on the editing canvas), and to try the form actions against a
@@ -476,6 +498,11 @@ rested on a number that does not mean what it looks like.
 7. **Site-wide widgets panel, cookie consent first.** Compliance exposure.
 
 8. **Collections fed from an external source.**
+
+9. **The assistant panel (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
+   `docs/tg-sites-copilot-review.md`, once Andy has picked a panel direction
+   from the canvas and `ANTHROPIC_API_KEY` is on tg-sites-shell. Slice 1 is
+   Plan mode with read tools only and is useful on its own.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.

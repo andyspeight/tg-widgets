@@ -70,7 +70,11 @@ Owner: Andy Speight, CEO, Travelgenix.
   webhook and Brevo contract for where an enquiry also goes, for whoever wires the
   other end), and `docs/duda-visibility-review.md` (15 Sep 2026: Duda's AI
   Visibility add-on against our Search and AI visibility screen, and the five
-  slices that close the gap).
+  slices that close the gap), and `docs/tg-sites-copilot-review.md` (16 Sep 2026:
+  Duda Copilot against the AI tg-sites already has, the eleven hard rules checked
+  against the code, and the six-slice plan for an assistant panel; read it before
+  any copilot or assistant work, and note that Andy picks the panel direction
+  before any panel UI is built).
 
 - **The motion engine (tg-sites)**: `docs/motion-engine.md`. What is actually
   BUILT and switchable in the editor: nine movement recipes with three strengths,
