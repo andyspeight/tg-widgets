@@ -656,6 +656,31 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### One hotel is a block, not one long line
+
+The editor panel is about 300px wide. Four controls across it left the code
+field around 20px and pushed the delete button off the edge (Andy, 16 Sep 2026:
+*"with three fields you can't see them all"*). A hotel row is now:
+
+    [ property code .................... ] [x]
+    [ GB ] [ travel date ] [ fly into ]
+    (location hint, only when there is one)
+
+The three short fields **wrap**: on a wide panel they stay on one line, on a
+narrow one the arrival airport drops below. Each carries a `min-width`, because
+wrapping without one just moves the problem. Neither optional field has a
+visible label, so the help text above the list names both.
+
+### The editor had its own null island
+
+Every saved row reported its location as **0.000, 0.000**. `syncTtiConfig` wrote
+`lat: Number(r.lat)` for every row — `NaN`, which JSON stores as `null` — and
+the next load read `Number(null)`, which is **0**: finite, in range, and a real
+place in the Gulf of Guinea. Same bug as the server had, in the other half of
+the app. `coordOf` in the editor now mirrors `cleanCoord`, a test asserts the
+two agree, and coordinates are only written when they are real rather than a
+null being put in every row.
+
 ### Offers that travel on a specific date
 
 Andy, 16 Sep 2026: *"some of the offers will be travelling on specific dates."*

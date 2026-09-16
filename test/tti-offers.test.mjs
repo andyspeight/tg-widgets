@@ -2219,3 +2219,46 @@ test('a row date survives the round trip to the sweep', () => {
   assert.ok(!('checkin' in codesFromConfig({ ttiCodes: [{ code: '1', ctry: 'ES', checkin: 'soon' }] })[0]));
   assert.ok(/checkin: String\(r\.checkin\)/.test(EDITOR), 'and the editor must save it');
 });
+
+test('a hotel row is a block, not four controls fighting over 300px', () => {
+  // Andy, 16 Sep 2026: "with three fields you can't see them all". Four
+  // controls across a ~300px sidebar left the code field around 20px and
+  // pushed the delete button off the edge.
+  assert.ok(/\.tti-row \{ display: grid; grid-template-columns: 1fr 28px;/.test(EDITOR),
+    'the code gets a line of its own, with the delete button');
+  assert.ok(/\.tti-row \.tti-fields \{ grid-column: 1 \/ -1; display: flex; flex-wrap: wrap;/.test(EDITOR),
+    'and the short fields wrap rather than all shrinking');
+  // Each short field needs a floor, or wrapping just moves the problem.
+  for (const rule of [/\.tti-when \{ flex: 1 1 138px; min-width: 128px/, /\.tti-dst \{ flex: 1 1 96px; min-width: 88px/]) {
+    assert.ok(rule.test(EDITOR), `a field with no minimum width still collapses: ${rule}`);
+  }
+  // The fixed-column layout that caused it must be gone.
+  assert.ok(!/grid-template-columns: 1fr 72px 140px/.test(EDITOR));
+  assert.ok(!/\.tti-row\.has-dst/.test(EDITOR), 'no separate four-column variant to keep in step');
+  // And the help must name the two optional fields, since neither has a label.
+  assert.ok(/<strong>Travel date<\/strong> is optional/.test(EDITOR));
+  assert.ok(/<strong>Fly into<\/strong> is optional/.test(EDITOR));
+});
+
+test('the editor never reports a hotel as being at 0.000, 0.000', () => {
+  // Every saved row came back claiming null island (Andy, 16 Sep 2026).
+  // syncTtiConfig wrote `lat: Number(r.lat)` for every row — NaN, which JSON
+  // stores as null — and the next load read Number(null), which is 0: finite,
+  // in range, and a real place in the Gulf of Guinea.
+  const decl = /const coordOf = \(v, limit\) => \{([\s\S]*?)\n    \};/.exec(EDITOR);
+  assert.ok(decl, 'the editor must clean coordinates the way the server does');
+  // eslint-disable-next-line no-new-func
+  const coordOf = new Function('v', 'limit', decl[1]);
+  assert.equal(coordOf(null, 90), null);
+  assert.equal(coordOf(0, 90), null, 'zero is not a coordinate we were given');
+  assert.equal(coordOf(undefined, 90), null);
+  assert.equal(coordOf(999, 90), null);
+  assert.equal(coordOf(50.72, 90), 50.72);
+  // It must agree with cleanCoord, or the two sides disagree about the same row.
+  for (const v of [null, 0, '', 'x', 50.72, -1.87]) {
+    assert.equal(coordOf(v, 90), cleanCoord(v, 90), `coordOf and cleanCoord disagree on ${JSON.stringify(v)}`);
+  }
+  // And the nulls must stop being written in the first place.
+  assert.ok(/\.\.\.\(rowHasCoords\(r\) \? \{ lat: coordOf\(r\.lat, 90\)/.test(EDITOR));
+  assert.ok(!/lat: Number\(r\.lat\), lng: Number\(r\.lng\)/.test(EDITOR));
+});
