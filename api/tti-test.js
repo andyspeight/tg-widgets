@@ -42,7 +42,7 @@ import {
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
 import { resolveArrivalAirport, airportLabel } from './_lib/offers/arrival-airport.js';
-import { setJson, setJsonEx, getJson } from './_redis.js';
+import { setJson, setJsonEx, getJson, del } from './_redis.js';
 
 // A live search per property, so this is deliberately small.
 const MAX_CODES = 5;
@@ -159,6 +159,17 @@ export default async function handler(req, res) {
   const body = req.body || {};
   const rows = rowsFrom(body);
   if (!rows.length) return res.status(400).json({ error: 'No properties to test.' });
+  // Start from nothing for these hotels, on this account.
+  //
+  // Re-testing already replaces the offers key, so that half is automatic. What
+  // persists is the REMEMBERED POSITION (tti:geo), kept for a year so a locate
+  // search is spent once per property — which means a position learned during a
+  // bad run would be reused indefinitely. This is how to forget it.
+  //
+  // Scoped deliberately: only the codes in this request, only under the owner's
+  // App ID. There is no wider flush here and there should not be — this Redis
+  // holds the world map and every other client's offers.
+  const reset = body.reset === true;
 
   // SEARCH AS THE WIDGET'S OWNER, not as whoever is signed in looking at it.
   //
@@ -248,6 +259,13 @@ export default async function handler(req, res) {
   // with HOW it was decided, because "we chose Bristol for a hotel in
   // Bournemouth" is a reasonable call an agent should be able to see and
   // override rather than discover from a price.
+  if (reset) {
+    await Promise.all(rows.flatMap((row) => [
+      del(ttiKey(creds.appId, row.code)),
+      del(geoKey(creds.appId, row.code)),
+    ]));
+  }
+
   const arrivals = new Map();
   const unplaced = [];
   const unplaceable = new Map();
@@ -658,6 +676,7 @@ export default async function handler(req, res) {
     found,
     cached: results.filter((r) => r && r.cached).length,
     searches: jobs.length + locateSearches,
+    ...(reset ? { cleared: rows.length } : {}),
     ...(isDp ? { airports: useOrigins } : {}),
     ...(dropped ? {
       dropped,

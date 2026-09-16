@@ -983,6 +983,8 @@
                 <div class="tti-row-actions">
                   <button type="button" class="btn btn-secondary btn-sm" id="ttiAdd">+ Add hotel</button>
                   <button type="button" class="btn btn-secondary btn-sm" id="ttiTest">Test these codes</button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="ttiReset"
+                    title="Forget everything cached for these hotels on this account, then search again from nothing.">Clear cache &amp; test</button>
                 </div>
                 <div class="field-help">
                   Each hotel is a <strong>Travelify property code</strong> on the top line, then
@@ -2645,8 +2647,12 @@
        empty widget tomorrow morning. The endpoint caps how many codes one
        click can test and is rate limited: it is the only place in the product
        where an agent action spends live Travelify searches. */
-    async function runTtiTest() {
-      const btn = $('ttiTest');
+    async function runTtiTest(reset) {
+      // Busy on the button that was clicked, but BOTH go dead for the duration:
+      // two live runs at once would double the Travelify searches and race each
+      // other into the same cache keys.
+      const btn = $(reset ? 'ttiReset' : 'ttiTest');
+      const other = $(reset ? 'ttiTest' : 'ttiReset');
       const out = $('ttiTestOut');
       if (!btn || !out) return;
       const rows = syncTtiConfig();
@@ -2657,6 +2663,7 @@
       }
       const label = btn.textContent;
       btn.disabled = true;
+      if (other) other.disabled = true;
       btn.textContent = 'Testing\u2026';
       out.hidden = false;
       out.innerHTML = 'Searching Travelify for each hotel\u2026';
@@ -2677,6 +2684,7 @@
             // Which widget this is, so the search runs under its owner's
             // Travelify account rather than the signed-in session's.
             widgetId: state.widgetId || '',
+            ...(reset ? { reset: true } : {}),
             type: state.config.type,
             // The dates: a fixed departure for the whole widget, and the
             // rolling window for anything without one.
@@ -2842,6 +2850,11 @@
                     : '.')
                 + '</div>';
         }
+        if (d.cleared) {
+          head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">Cleared the cache and the '
+                + 'remembered locations for ' + d.cleared
+                + (d.cleared === 1 ? ' hotel' : ' hotels') + ' before searching.</div>';
+        }
         if (d.droppedNote) {
           head += '<div style="color:var(--tgse-warning);margin-bottom:6px">' + esc(d.droppedNote) + '</div>';
         }
@@ -2913,6 +2926,7 @@
       } finally {
         clearTimeout(giveUp);
         btn.disabled = false;
+        if (other) other.disabled = false;
         btn.textContent = label;
       }
     }
@@ -2974,7 +2988,17 @@
         });
       }
       const test = $('ttiTest');
-      if (test) test.addEventListener('click', runTtiTest);
+      if (test) test.addEventListener('click', () => runTtiTest(false));
+      const resetBtn = $('ttiReset');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          // Asked before it happens: it throws away real cached prices, and the
+          // searches to rebuild them cost Travelify capacity.
+          if (!window.confirm('Forget the cached offers and the remembered locations for these '
+            + 'hotels, then search again from nothing?')) return;
+          runTtiTest(true);
+        });
+      }
       renderTtiRows();
       paintTtiSummary();
     }

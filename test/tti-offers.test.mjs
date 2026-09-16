@@ -2609,3 +2609,40 @@ test('a price from a search that had not finished says so', () => {
   assert.ok(/\.\.\.\(acc\.incomplete \? \{ incomplete: true \} : \{\}\)/.test(TEST_API));
   assert.ok(/so a cheaper flight may exist/.test(EDITOR));
 });
+
+test('a cache reset is scoped to the hotels being tested, on their own account', () => {
+  // Re-testing already replaces the offers key, so that half is automatic. What
+  // persists is the REMEMBERED POSITION, kept a year so a locate search is
+  // spent once per property — which means a position learned during a bad run
+  // would be reused indefinitely. This is how to forget it.
+  assert.ok(/const reset = body\.reset === true;/.test(TEST_API));
+  assert.ok(/del\(ttiKey\(creds\.appId, row\.code\)\)/.test(TEST_API), 'the offers');
+  assert.ok(/del\(geoKey\(creds\.appId, row\.code\)\)/.test(TEST_API), 'and the remembered position');
+
+  // SCOPED, and it must stay scoped. This Redis holds the world map and every
+  // other client's offers; there is no wider flush here and there must not be.
+  assert.ok(/rows\.flatMap\(\(row\) =>/.test(TEST_API), 'only the codes in this request');
+  // Every delete is a single named key built from the owner's App ID and a code
+  // in the request. _redis.js does export keys(pattern), which would turn this
+  // into a wildcard wipe of a Redis shared with the world map and every other
+  // client, so the import must not reach for it.
+  const deletes = TEST_API.match(/\bdel\([^;\n]*/g) || [];
+  assert.equal(deletes.length, 2, 'two deletes, no more');
+  for (const d of deletes) {
+    assert.match(d, /^del\((tti|geo)Key\(creds\.appId, row\.code\)\),?$/);
+  }
+  const redisImport = (TEST_API.match(/import \{([^}]*)\} from '\.\/_redis\.js'/) || [, ''])[1];
+  assert.ok(!/\bkeys\b|\bscan\b/.test(redisImport), 'never a pattern or a flush');
+  // creds.appId is the resolved OWNER's, so a reset cannot reach another account.
+  assert.ok(/credentialsForWidget/.test(TEST_API));
+
+  // Destructive, so it is asked for and then reported rather than assumed.
+  assert.ok(/Forget the cached offers and the remembered locations/.test(EDITOR));
+  assert.ok(/window\.confirm\(/.test(EDITOR), 'confirmed before real prices are thrown away');
+  assert.ok(/Cleared the cache and the /.test(EDITOR), 'and said afterwards');
+  assert.ok(/id="ttiReset"/.test(EDITOR));
+  // One run at a time: two would double the live searches and race into the
+  // same keys, so the other button goes dead for the duration.
+  assert.ok(/if \(other\) other\.disabled = true;/.test(EDITOR));
+  assert.ok(/if \(other\) other\.disabled = false;/.test(EDITOR));
+});
