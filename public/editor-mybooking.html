@@ -444,6 +444,14 @@
               </select>
             </div>
             <div class="field-help">Turn on to email a customer when a balance is due on their booking. Reminders are sent when the booking system flags a balance, and stop automatically once it is paid. Off by default.</div>
+            <div class="field">
+              <label>Booking confirmation emails</label>
+              <select id="confirmation-enabled">
+                <option value="off" selected>Off</option>
+                <option value="on">On</option>
+              </select>
+            </div>
+            <div class="field-help">Turn on for us to email the customer their confirmation the moment a booking is made, with the A4 pack attached. Only switch this on once the confirmation has been turned off for you in Travelify, or your customer will get two. Build the email itself under Customer emails below. Off by default.</div>
           </div></div>
         </div>
 
@@ -687,7 +695,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       pageUrl: '',
       reminders: { enabled: false },
       reminderEmails: { interim: { subject: '', body: '' }, final: { subject: '', body: '' } },
-      confirmationEmail: { layout: [] },
+      confirmationEmail: { enabled: false, layout: [] },
       cancelEmailMessage: '',
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
@@ -916,6 +924,16 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
   });
 
+  // ===== Booking confirmation opt-in =====
+  // Per client (Andy, 16 Sep 2026: "Per client as the booking gets notified to
+  // us"). OFF unless switched on here, because Travelify still sends its own
+  // confirmation until each client is moved over, and the cost of getting the
+  // changeover wrong is a customer receiving two.
+  document.getElementById('confirmation-enabled').addEventListener('change', (e) => {
+    ceEnsure().enabled = e.target.value === 'on';
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+  });
+
   // ===== Customer emails: written in the shared popup =====
   // Three emails this widget can send a customer carry client-editable wording:
   // the two balance reminders and the cancellation confirmation. Each is
@@ -1013,6 +1031,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       state.config.confirmationEmail = { layout: [] };
     }
     if (!Array.isArray(state.config.confirmationEmail.layout)) state.config.confirmationEmail.layout = [];
+    if (typeof state.config.confirmationEmail.enabled !== 'boolean') state.config.confirmationEmail.enabled = false;
     return state.config.confirmationEmail;
   }
 
@@ -1028,9 +1047,14 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       layout: (layout && layout.length) ? layout : undefined,
       baseUrl: location.origin,
     });
-    const note = (layout && layout.length)
-      ? 'Preview uses a sample booking. Every block fills itself from the real one when it sends, and a block with nothing to show is left out.'
-      : 'You are previewing our standard layout, filled with a sample booking. Add a block below to build your own.';
+    let note;
+    if (!ceEnsure().enabled) {
+      note = 'This email is switched off. Turn "Booking confirmation emails" on in Settings for your customers to receive it.';
+    } else if (layout && layout.length) {
+      note = 'Preview uses a sample booking. Every block fills itself from the real one when it sends, and a block with nothing to show is left out.';
+    } else {
+      note = 'You are previewing our standard layout, filled with a sample booking. Add a block below to build your own.';
+    }
     return { subject: out.subject, html: out.html, note: note };
   }
 
@@ -1477,6 +1501,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
       document.getElementById('page-url').value = state.config.pageUrl || '';
       document.getElementById('reminder-enabled').value = state.config.reminders?.enabled ? 'on' : 'off';
+      document.getElementById('confirmation-enabled').value = state.config.confirmationEmail?.enabled ? 'on' : 'off';
       reEnsure();
       remRenderStatus();
       document.getElementById('brand-name').value = state.config.brand?.name || '';
