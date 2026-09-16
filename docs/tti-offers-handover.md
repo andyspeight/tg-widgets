@@ -656,6 +656,40 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### The result shape, MEASURED (16 Sep 2026)
+
+A real accommodation result, downloaded from the Test panel. Everything below is
+read from it rather than inferred, and the normaliser now reports nothing
+unmapped against it.
+
+**The board basis belongs to the RATE, not the result.** Eight units, each with
+up to three rates (BedAndBreakfast / HalfBoard / AllInclusive) at different
+prices, and `pricing.price` is the cheapest of all twenty. So there is no "board
+basis of the result": it belongs to whichever rate produced the headline number.
+`rateForHeadline()` matches on price rather than assuming `units[0].rates[0]`,
+which is self-verifying — a changed shape reports a gap instead of confidently
+showing All Inclusive on a card priced for bed and breakfast.
+
+| What the card shows | Real path | What was guessed |
+|---|---|---|
+| board basis | `units[].rates[].board` | `units[0].boardBasis` (never existed) |
+| check-in | `units[].checkin` | `units[0].checkinDate` (never existed) |
+| refundability | `pricing.refundability` | `units[0].refundability` |
+| review count | `review.reviews` | `review.count` |
+| room name | `units[].name` | not mapped at all |
+
+Two display facts from the same file: `chain` comes back as the literal string
+**"No chain"** when there isn't one, which printed as a line on the card; and
+the city comes back **shouting** (`"TENERIFE"`), which reads like an error
+message next to a country code. Both handled.
+
+**The flight half is still unmeasured.** `flightResultCount: 1` came back with
+`flightResult: null`, because `alsoFirst` was renamed when the poller started
+keeping the flights rather than counting them and the raw capture was not moved
+with it. Fixed, and the panel now reports `Fields on the flight:` the same way
+it reported the hotel's — which is precisely how the hotel half came to be
+mapped exactly rather than guessed.
+
 ### Every hotel that needs placing gets placed
 
 Andy, 16 Sep 2026: four hotels in Tenerife, one date, and two came back *"no

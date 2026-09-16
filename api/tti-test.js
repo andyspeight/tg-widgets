@@ -456,7 +456,13 @@ export default async function handler(req, res) {
           complete: r.complete,
           accommodationResult: mine[0],
           flightResultCount: r.alsoCount || 0,
-          flightResult: r.alsoFirst || null,
+          // ALL of them, not one. `alsoFirst` was renamed when the poller
+          // started keeping the flights rather than counting them, and this
+          // line was not moved with it — so the download said
+          // "flightResultCount: 1, flightResult: null" and the one thing it
+          // was added to provide was the one thing missing from it (Andy,
+          // 16 Sep 2026). Capped, because the trim below keeps it valid JSON.
+          flightResults: (r.alsoResults || []).slice(0, 5),
         };
         // A supplier can return a very large result. Rather than truncate the
         // JSON into something unparseable, drop the biggest optional parts and
@@ -504,6 +510,11 @@ export default async function handler(req, res) {
         };
         walk(sample, '', 0);
         if (found.length) shape.imagePaths = found;
+        // THE FLIGHT'S OWN FIELD NAMES. The accommodation shape was reported
+        // from the first run and is now fully mapped because of it; the flight
+        // never was, which is why its carrier and stops are still guesses.
+        const f0 = (r.alsoResults || [])[0];
+        if (f0 && typeof f0 === 'object') shape.flightKeys = Object.keys(f0).slice(0, 60);
       }
 
       if (!mine.length) {

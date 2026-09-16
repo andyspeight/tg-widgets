@@ -1023,7 +1023,8 @@ const LIVE = {
   pricing: { total: 640, perPerson: 320, currency: 'GBP' },
   location: { name: 'Bournemouth', countryCode: 'GB', latitude: 50.72, longitude: -1.87 },
   media: [{ url: 'https://x/1.jpg' }, { url: 'https://x/2.jpg' }, { url: 'https://x/3.jpg' }],
-  units: [{ boardBasis: 'BedAndBreakfast', nights: 7, checkinDate: '2026-10-14T00:00:00Z' }],
+  units: [{ nights: 7, checkin: '2026-10-14T00:00:00Z',
+    rates: [{ board: 'BedAndBreakfast', pricing: { price: 756 } }] }],
 };
 
 test('images come from media, which is where they actually are', () => {
@@ -1158,7 +1159,7 @@ test('a missing booking url is not reported as a fault', () => {
   // gap. The point of THIS test is that a missing `url` is not a gap.
   const r = { isAvailable: true, name: 'Hilton Bournemouth', pricing: { total: 756 },
               location: { name: 'Bournemouth' },
-              units: [{ nights: 7, boardBasis: 'BedAndBreakfast' }],
+              units: [{ nights: 7, rates: [{ board: 'BedAndBreakfast', pricing: { price: 756 } }] }],
               media: [{ url: 'https://x/1.jpg' }] };
   const { offer, unmapped } = normaliseAccommodationResult(r, {});
   assert.equal(offer.url, null);
@@ -1545,7 +1546,8 @@ test('a stored TTI package survives the wire shape as a real flight', () => {
   const result = { name: 'Hilton Bournemouth', isAvailable: true, uniqueRef: 'TTI:58612582',
     rid: 9, pricing: { total: 861, currency: 'GBP' }, media: [{ url: 'https://x/1.jpg' }],
     location: { name: 'Bournemouth', countryCode: 'GB', latitude: 50.72, longitude: -1.87 },
-    units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z', boardBasis: 'BedAndBreakfast' }] };
+    units: [{ nights: 7, checkin: '2026-10-14T00:00:00Z',
+      rates: [{ board: 'BedAndBreakfast', pricing: { price: 861 } }] }] };
 
   const pkg = toRawShape(normaliseAccommodationResult(result, { origin: 'ABZ' }).offer);
   assert.equal(pkg.type, 'Packages', 'the card branches on this');
@@ -1827,7 +1829,8 @@ const PKG_RESULT = {
   rating: 5, chain: 'Iberostar Hotels & Resorts',
   pricing: { total: 857, currency: 'GBP' }, media: [{ url: 'https://x/1.jpg' }],
   location: { name: 'Santa Cruz', countryCode: 'ES', latitude: 28.46, longitude: -16.25 },
-  units: [{ nights: 7, checkinDate: '2026-10-14T00:00:00Z', boardBasis: 'AllInclusive' }],
+  units: [{ nights: 7, checkin: '2026-10-14T00:00:00Z',
+    rates: [{ board: 'AllInclusive', pricing: { price: 857 } }] }],
 };
 
 test('a package card can say who the price is for', () => {
@@ -2007,7 +2010,7 @@ test('the image diagnostic offers a photo, not a rating badge', () => {
 test('the review score is mapped, since the card already renders it', () => {
   const r = { name: 'H', isAvailable: true, uniqueRef: 'TTI:1', rid: 1, pricing: { total: 857 },
     media: [{ url: 'https://x/1.jpg' }], location: {},
-    units: [{ nights: 7, boardBasis: 'AllInclusive' }],
+    units: [{ nights: 7, rates: [{ board: 'AllInclusive', pricing: { price: 857 } }] }],
     review: { rating: 4.5, count: 1280 } };
   const { offer, unmapped } = normaliseAccommodationResult(r, {});
   assert.equal(offer.reviewRating, 4.5);
@@ -2025,7 +2028,7 @@ test('the full Travelify exchange comes back without spending another search', (
   // captured during the run rather than fetched again afterwards.
   assert.ok(/request: job\.criteria/.test(TEST_API), 'what we sent');
   assert.ok(/accommodationResult: mine\[0\]/.test(TEST_API), 'and what came back');
-  assert.ok(/flightResult: r\.alsoFirst \|\| null/.test(TEST_API),
+  assert.ok(/flightResults: \(r\.alsoResults \|\| \[\]\)\.slice\(0, 5\)/.test(TEST_API),
     'including the flight half, which was only being counted');
   assert.ok(/searchSession: r\.session/.test(TEST_API), 'and the session, so it can be traced');
 
@@ -2378,4 +2381,88 @@ test('a package we could not place is refused, not flown to the capital', () => 
   // A hotel-only search is untouched: it never needed an airport.
   assert.equal(resolveArrivalAirport({ ctry: 'ES' }).source, 'country-hub',
     'the resolver still answers; it is the DP caller that refuses the guess');
+});
+
+/* ============================================================
+   Mapped from a real Travelify result, not from guesses
+   ============================================================ */
+
+test('the board basis belongs to the RATE the price came from', () => {
+  // A real result (Andy, 16 Sep 2026) has eight units, each with up to three
+  // rates — BedAndBreakfast, HalfBoard, AllInclusive — at different prices, and
+  // pricing.price is the cheapest of all twenty. "The board basis" is therefore
+  // not a field on the result: it belongs to whichever rate produced the
+  // headline number. We were looking on the UNIT, where it has never been.
+  const result = {
+    name: 'GF Isabel', isAvailable: true, uniqueRef: 'TTI:44904364', rid: 1,
+    pricing: { price: 934, currency: 'GBP', refundability: 'Refundable' },
+    media: [{ url: 'https://x/1.jpg' }], location: { city: 'TENERIFE', countryCode: 'ES' },
+    chain: 'No chain', rating: 4, review: { rating: 4.5, reviews: 5153 },
+    units: [{
+      name: 'Apartment with balcony', checkin: '2027-04-09T00:00:00Z', nights: 7,
+      rates: [
+        { board: 'BedAndBreakfast', pricing: { price: 934, refundability: 'Refundable' } },
+        { board: 'HalfBoard', pricing: { price: 1127 } },
+        { board: 'AllInclusive', pricing: { price: 1546 } },
+      ],
+    }],
+  };
+  const { offer, unmapped } = normaliseAccommodationResult(result, {});
+  assert.equal(offer.boardBasis, 'BedAndBreakfast',
+    'All Inclusive on a card priced for bed and breakfast is worse than no board at all');
+  assert.equal(offer.price, 934);
+  assert.equal(offer.roomName, 'Apartment with balcony');
+  assert.deepEqual(unmapped, [], 'and nothing is left to report');
+
+  // Matched on PRICE, not assumed to be rates[0]: self-verifying, so a changed
+  // shape reports a gap instead of confidently showing the wrong board.
+  const dearer = { ...result, pricing: { ...result.pricing, price: 1546 } };
+  assert.equal(normaliseAccommodationResult(dearer, {}).offer.boardBasis, 'AllInclusive');
+});
+
+test('the fields the guessed names never reached', () => {
+  const result = {
+    name: 'GF Isabel', isAvailable: true, uniqueRef: 'TTI:1', rid: 1,
+    pricing: { price: 934, currency: 'GBP', refundability: 'Refundable' },
+    media: [{ url: 'https://x/1.jpg' }],
+    location: { city: 'TENERIFE', countryCode: 'ES', latitude: 28.08, longitude: -16.73 },
+    chain: 'No chain', review: { rating: 4.5, reviews: 5153 },
+    units: [{ checkin: '2027-04-09T00:00:00Z', nights: 7, rates: [{ board: 'BedAndBreakfast', pricing: { price: 934 } }] }],
+  };
+  const { offer } = normaliseAccommodationResult(result, {});
+
+  // `checkin`, not `checkinDate`. The guessed name never existed, so this fell
+  // back to whatever the caller passed — right by luck, and wrong the moment
+  // the supplier returns different dates from the ones we asked for.
+  assert.equal(offer.checkinDate, '2027-04-09T00:00:00Z');
+  // On the pricing block. The card has a refundability line and had nothing.
+  assert.equal(offer.refundability, 'Refundable');
+  // review.reviews, not review.count.
+  assert.equal(offer.reviewCount, 5153);
+  assert.equal(offer.reviewRating, 4.5);
+  // "No chain" is the supplier saying there isn't one, not the name of one.
+  assert.equal(offer.chain, null);
+  assert.equal(normaliseAccommodationResult(
+    { ...result, chain: 'Iberostar Hotels & Resorts' }, {}).offer.chain, 'Iberostar Hotels & Resorts');
+  // Suppliers shout. "TENERIFE, ES" on a card reads like an error message.
+  assert.equal(offer.resort, 'Tenerife');
+  assert.equal(normaliseAccommodationResult(
+    { ...result, location: { ...result.location, city: 'La Laguna' } }, {}).offer.resort,
+  'La Laguna', 'a name that is not all capitals is left exactly as it is');
+});
+
+test('the download carries the flights it says it counted', () => {
+  // The exchange reported "flightResultCount: 1, flightResult: null" — the one
+  // thing it was added to provide was the one thing missing from it. `alsoFirst`
+  // was renamed when the poller started KEEPING the flights rather than counting
+  // them, and this line was not moved with it.
+  assert.ok(/flightResults: \(r\.alsoResults \|\| \[\]\)\.slice\(0, 5\)/.test(TEST_API));
+  assert.ok(!/r\.alsoFirst/.test(TEST_API), 'the renamed field must not be read anywhere');
+  assert.ok(!/alsoFirst/.test(readFileSync(new URL('../api/_lib/offers/travelify-search.js', import.meta.url), 'utf8')),
+    'nor still exist to be read');
+
+  // And the flight's field names are reported the way the hotel's were — which
+  // is how the hotel half came to be mapped exactly rather than guessed.
+  assert.ok(/shape\.flightKeys = Object\.keys\(f0\)/.test(TEST_API));
+  assert.ok(/Fields on the flight:/.test(EDITOR));
 });

@@ -2865,6 +2865,12 @@
             bits.push('<strong>Fields on the result:</strong> <span class="tti-test-code">'
               + esc(d.shape.resultKeys.join(', ')) + '</span>');
           }
+          // The flight's own field names. The hotel half was mapped exactly
+          // from this list on the first run; the flight half has never had one.
+          if (d.shape.flightKeys) {
+            bits.push('<strong>Fields on the flight:</strong> <span class="tti-test-code">'
+              + esc(d.shape.flightKeys.join(', ')) + '</span>');
+          }
           diag = '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);'
                + 'color:var(--tgse-ink-3);word-break:break-word">'
                + bits.join('<br>')

@@ -635,6 +635,32 @@ const asNum = (v) => {
  *  Anything still unrecognised goes in `unmapped` rather than becoming a silent
  *  null: a cache quietly full of nulls looks exactly like a supplier with thin
  *  content, and sends the next person debugging the wrong thing. */
+/** The rate the headline price actually belongs to.
+ *
+ *  A real result (Andy, 16 Sep 2026) has EIGHT units, each with up to three
+ *  rates — BedAndBreakfast, HalfBoard, AllInclusive — at different prices, and
+ *  `pricing.price` is the cheapest of all twenty. So "the board basis" is not a
+ *  field on the result at all: it belongs to whichever rate produced the
+ *  headline number, and naming any other one would put All Inclusive on a card
+ *  priced for bed and breakfast.
+ *
+ *  Matched on price rather than assumed to be units[0].rates[0]. That is
+ *  self-verifying: if the shape ever changes, this finds nothing and the offer
+ *  reports a gap, instead of confidently showing the wrong board. */
+export function rateForHeadline(r) {
+  const head = asNum(pick(r, ['pricing.total', 'pricing.price', 'pricing.amount']));
+  const units = Array.isArray(r && r.units) ? r.units : [];
+  let fallback = null;
+  for (const u of units) {
+    for (const rate of (Array.isArray(u && u.rates) ? u.rates : [])) {
+      const p = asNum(pick(rate, ['pricing.total', 'pricing.price', 'pricing.amount']));
+      if (!fallback) fallback = { unit: u, rate };
+      if (head != null && p != null && p === head) return { unit: u, rate };
+    }
+  }
+  return fallback;
+}
+
 export function normaliseAccommodationResult(r, ctx = {}) {
   if (!r || typeof r !== 'object') return null;
   // A result the supplier has marked unavailable is not an offer. Caching one
@@ -669,6 +695,10 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   if (!images.length) unmapped.push('media');
 
   const loc = r.location || {};
+  // The unit and rate behind the headline price — see rateForHeadline.
+  const head = rateForHeadline(r) || {};
+  const headUnit = head.unit || {};
+  const headRate = head.rate || {};
   const lat = asNum(pick(loc, ['latitude', 'lat']));
   const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
   // A PACKAGE PRICE IS THE FLIGHT PLUS THE HOTEL.
@@ -735,7 +765,14 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     hotel: r.name ? String(r.name).slice(0, 160) : null,
     resort: (() => {
       const v = pick(loc, ['name', 'resort', 'city', 'area', 'town', 'region']);
-      return v ? String(v).slice(0, 120) : (ctx.locationName || null);
+      if (!v) return ctx.locationName || null;
+      // Suppliers shout: the real result gives city as "TENERIFE". A card
+      // reading "TENERIFE, ES" looks like an error message. Title-cased only
+      // when it is ALL capitals, so "La Laguna" and "CIudad" are left alone.
+      const name = String(v).slice(0, 120);
+      return /[A-Z]/.test(name) && name === name.toUpperCase()
+        ? name.toLowerCase().replace(/(^|[\s'\-])([a-z])/g, (m, a, b) => a + b.toUpperCase())
+        : name;
     })(),
     countryCode: cleanCtry(pick(loc, ['countryCode', 'country', 'countryISO']) || ctx.ctry || ''),
     lat: lat != null ? lat : (ctx.lat != null ? ctx.lat : null),
@@ -753,7 +790,7 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // and was going unused. Optional, so a supplier without one costs nothing
     // and it is not reported as a gap.
     reviewRating: asNum(pick(r, ['review.rating', 'review.score', 'review.value', 'reviewRating'])),
-    reviewCount: asNum(pick(r, ['review.count', 'review.numReviews', 'review.reviewCount', 'review.total', 'reviewCount'])),
+    reviewCount: asNum(pick(r, ['review.reviews', 'review.count', 'review.numReviews', 'review.reviewCount', 'reviewCount'])),
     // WHO THE PRICE IS FOR. api/cached-offers.js passes these straight through
     // and the card builds "2 adults" from them; without them it printed the
     // bare word "Travellers" and a price for nobody in particular (Andy,
@@ -761,20 +798,25 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     adults: Number.isFinite(ctx.adults) ? ctx.adults : null,
     children: Number.isFinite(ctx.children) ? ctx.children : null,
     infants: Number.isFinite(ctx.infants) ? ctx.infants : null,
-    boardBasis: pick(r, [
-      'units.0.boardBasis', 'boardBasis', 'pricing.boardBasis',
-      // Seen empty on a real package result whose units[0] DID carry nights
-      // and checkinDate (Andy, 14 Sep 2026), so the field is either absent or
-      // named differently on that shape. These are the other plausible homes;
-      // if it is still missing the offer says so in `unmapped` rather than the
-      // card quietly dropping a line the agent expects.
-      'units.0.board', 'units.0.mealPlan', 'units.0.boardType',
-      'units.0.rates.0.boardBasis', 'mealPlan', 'board',
-    ]) || null,
-    nights: asNum(pick(r, ['units.0.nights', 'nights', 'pricing.nights'])),
-    checkinDate: pick(r, ['units.0.checkinDate', 'checkinDate']) || ctx.checkinDate || null,
+    // From the RATE the price belongs to. Confirmed against a real result:
+    // units[].rates[].board, and the headline price is the cheapest of twenty
+    // such rates. It was being looked for on the unit, where it has never been.
+    boardBasis: pick(headRate, ['board', 'boardBasis', 'mealPlan']) || null,
+    // Which room that price buys. Free, and the difference between "£934" and
+    // "£934, Apartment with balcony".
+    roomName: pick(headUnit, ['name', 'roomType']) || null,
+    nights: asNum(pick(headUnit, ['nights'])) ?? asNum(pick(r, ['units.0.nights', 'nights', 'pricing.nights'])),
+    // `checkin`, not `checkinDate`. The guessed name never existed, so this
+    // silently fell back to whatever the caller passed — right by luck, and
+    // wrong the moment the supplier returned different dates from the ones we
+    // asked for.
+    checkinDate: pick(headUnit, ['checkin', 'checkinDate'])
+      || pick(r, ['units.0.checkin', 'units.0.checkinDate', 'checkinDate']) || ctx.checkinDate || null,
     propertyType: r.propertyType || null,
-    chain: r.chain || null,
+    // "No chain" is the supplier's way of saying there isn't one. Printed
+    // verbatim it becomes a line on the card reading "No chain" under the
+    // hotel name.
+    chain: (r.chain && !/^no chain$/i.test(String(r.chain).trim())) ? r.chain : null,
     image: images[0] || null,
     // Only when there is more than one, so a single-photo hotel costs no extra
     // bytes in a cache key that has a size ceiling.
@@ -796,7 +838,10 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // to somebody else rather than booking here, so the card has to know.
     resultType: r.resultType || null,
     accommodationUniqueRef: r.uniqueRef ? String(r.uniqueRef).slice(0, 64) : null,
-    refundability: pick(r, ['units.0.refundability', 'refundability']) || null,
+    // On the PRICING block, where it was not being looked for. The card has a
+    // refundability line and has never had anything to put in it.
+    refundability: pick(headRate, ['pricing.refundability', 'refundability'])
+      || pick(r, ['pricing.refundability', 'units.0.refundability', 'refundability']) || null,
     fetchedAt: new Date().toISOString(),
   };
 
