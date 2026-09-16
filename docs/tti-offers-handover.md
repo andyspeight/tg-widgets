@@ -992,6 +992,117 @@ cost a round trip. They are the reason the tests are shaped the way they are.
 - **Editor pages carry `Cache-Control: no-cache`.** A stale editor reports bugs
   that were already fixed.
 
+## What a package price is, and what a search must carry (16 Sep 2026)
+
+Two facts that were each got wrong twice in one day, in both directions. They
+are written here with the evidence because reasoning about them from first
+principles produced the wrong answer every time. Change either one only against
+a fresh measurement, not against an argument.
+
+### A DP price is the room plus the flights
+
+A `DynamicPackaging` search returns the accommodation and the flight as two
+separately priced results, and **the holiday is the two added**. Each is priced
+for the WHOLE PARTY, not per person, so the per-person figure is the sum divided
+by the travellers (rounded to the penny — a real split lands on `.50`).
+
+Measured on GF Fañabe, `19179004`, INV–TFS, 9 Apr 2027: room £810, flight £848,
+holiday £1,658, £829 per person.
+
+Four independent readings agree, and all four were needed because the obvious
+one was wrong:
+
+1. **A per-person price ending in `.50` cannot come from this API.** Every price
+   in these responses is a whole pound — rooms 810, 934, 919, 1499; flight 848.
+   Andy's own worked example was £802.50 per person, and `(757 + 848) / 2` is
+   802.50 exactly. It can only be a halved odd total.
+2. **The board-basis gaps only work as room totals.** On one room type,
+   BedAndBreakfast to AllInclusive is £580. Over 7 nights that is £41 per person
+   per day for two people sharing, which is the going supplement. Read as per
+   person it is £83 a day, about double.
+3. **The headline equals the cheapest room rate exactly** (`units[0].rates[0]`).
+   A room rate is a room price.
+4. **Read as already-priced, the flight price is never used at all** — a number
+   Travelify searched for, priced and attached its own Package Deposit rule to,
+   silently discarded.
+
+Guarded by two tests in `test/tti-offers.test.mjs`, one of which reproduces the
+£802.50 to the half penny.
+
+### Travelify demands a search centre, even with a Ref
+
+`AccommodationSearchCriteria` must carry `Latitude`/`Longitude`. The `Ref` does
+not satisfy the validator and neither does `LocationCountry`. Omit them and
+every search is refused before it runs:
+
+```
+Search Criteria: You must specify an accommodation search location
+```
+
+So a row with no coordinates sends `Latitude: 0, Longitude: 0` with the default
+radius. **This is deliberate.** It looks exactly like the null-island bug that
+has bitten this widget twice elsewhere, and it is not one: the centre does not
+scope the answer, the `Ref` does. The same request returned GF Fañabe, in
+Tenerife, 2,234 miles from 0,0.
+
+Real coordinates are sent when the row has them, which is what pasting a
+deeplink is for. Treat 0,0 as a floor, not a preference.
+
+The reason this was not caught by tests: every real request carried
+`Latitude: 0`, because the row's `null` coordinate went through `Number()` and
+came out as zero, while the tests exercised a prop with the key *absent*
+(`Number(undefined)` is `NaN`). The tests were asserting a request shape the
+product never sends. If a test here disagrees with a captured exchange, believe
+the exchange.
+
+---
+
+## The editor saves what is on the screen (16 Sep 2026)
+
+`state.config.ttiCodes` is rebuilt by `syncTtiConfig()`, which for a long time
+only ran as a side effect of painting the summary panel. `getConfig()` — the one
+moment the config has to match the screen — simply cloned whatever
+`state.config` happened to hold, so a row edited by any path that did not
+repaint saved stale. Four hotels saved with no travel dates on them, the widget
+fell back to its rolling 7–180 day window, and it filtered its own cached 2027
+offers straight back out.
+
+The save now reads the rows itself, gated on `ttiRowsHydrated` so it can never
+rebuild from an empty array before the config has loaded (that would be a whole
+hotel list deleted by a save that landed early).
+
+Three smaller losses of typed data, fixed at the same time:
+
+- The date box committed on `change` alone. Which event a date field fires is
+  the browser's business; it commits on `input` too now.
+- Pasting a deeplink ran `Object.assign(existing, parsed)`, and `parsed` always
+  carries `ctry` — blank when the link has no `ctry=`. It wiped typed countries.
+  It fills in now, it never blanks.
+- **Add hotel** focused the new row by counting back two `.input` elements from
+  the end of the page. Right when a row was two boxes, wrong now it is four.
+
+---
+
+## Clearing the cache for a hotel
+
+The editor has **Clear cache & test** beside **Test these codes**. It forgets
+both `offers:tti:{appId}:{code}` and `tti:geo:{appId}:{code}` for the codes in
+the request, then searches from nothing.
+
+The remembered position is the point of it. It is kept a year so a locate search
+is spent once per property, which is right normally and exactly wrong after a
+bad run: a position learned while the arrival resolver was picking Newquay for a
+hotel in Tenerife would be reused for a year, and no amount of re-testing would
+shift it.
+
+**It is scoped and must stay scoped** — only those codes, only under the widget
+owner's App ID. This Redis holds the world map and every other client's offers.
+There is no pattern delete and no flush, and a test asserts both the two named
+deletes and that the `_redis.js` import does not reach for the exported
+`keys(pattern)`.
+
+---
+
 ## Next steps
 
 1. **Set `TTI_CUSTOMER_IP`** on the Vercel deployment when the nightly refresh
@@ -1009,3 +1120,9 @@ cost a round trip. They are the reason the tests are shaped the way they are.
    state is a different product and needs a card state across every template.
 5. **The old `Hotel Offers` WidgetType option** is still in Airtable, unused.
    The API cannot remove a select option, so it needs deleting by hand.
+6. **The DP poll cap.** A package search that has not settled reports so on the
+   card ("the search had not finished settling"), and its price may come down on
+   a re-test. `DP_MAX_POLLS` in `api/tti-test.js` is 12 against a 42s deadline
+   and a 45s client abort, so raising it trades a truer price for a risk of the
+   test returning nothing at all. Worth revisiting only if agents see the notice
+   often.
