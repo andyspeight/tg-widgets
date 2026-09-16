@@ -686,20 +686,24 @@ test('Ref is the pin, and every spelling of a code produces the same one', () =>
   assert.equal(ref(' tti:58612582 '), 'TTI:58612582');
 });
 
-test('a code and a country is a complete search on its own', () => {
+test('a code and a country is a complete search, but it still carries a centre', () => {
   // Ref pins the property, so the property IS the location and the country
-  // only says which part of the world. Coordinates were required here once,
-  // on the strength of a 406 from a DEEPLINK carrying ctry and no coordinates
-  // — a different surface from this API, and never tested against it. That
-  // assumption made the editor ask for something it may not need.
+  // only says which part of the world. That much held: a row with no
+  // coordinates does search successfully.
+  //
+  // What did not hold is the shape. This test used to assert the fields were
+  // absent, and nothing had ever sent that shape to Travelify — every real
+  // request carried Latitude 0 because the row's null coordinate went through
+  // Number(). When the fields were genuinely omitted, Travelify refused every
+  // search: "Search Criteria: You must specify an accommodation search
+  // location" (Andy, 16 Sep 2026, 0 of 4 found).
   const a = buildAccommodationCriteria({ code: 'TTI:58612582', ctry: 'GB' }, IP, NOW)
     .AccommodationSearchCriteria;
   assert.equal(a.Ref, 'TTI:58612582');
   assert.equal(a.LocationCountry, 'GB');
-  // Absent, not zeroed. 0,0 is a real place in the Atlantic.
-  assert.equal('Latitude' in a, false);
-  assert.equal('Longitude' in a, false);
-  assert.equal('Radius' in a, false);
+  assert.equal(a.Latitude, 0, 'a placeholder centre the validator accepts');
+  assert.equal(a.Longitude, 0);
+  assert.equal(a.Radius, 11);
 });
 
 test('coordinates narrow the search when a row has them', () => {
@@ -716,9 +720,10 @@ test('a search with no code and no area at all is refused', () => {
   assert.equal(buildAccommodationCriteria({ ...AT, code: '' }, IP, NOW), null);
   assert.equal(buildAccommodationCriteria({ code: '58612582' }, IP, NOW), null);
   assert.equal(buildAccommodationCriteria(null, IP, NOW), null);
-  // Out-of-range coordinates fall back to the country rather than being sent.
+  // Out-of-range coordinates are not sent as themselves: the row falls back to
+  // the country and the placeholder centre, rather than asking about 91°N.
   const bad = buildAccommodationCriteria({ code: '58612582', ctry: 'GB', lat: 91, lng: 0 }, IP, NOW);
-  assert.equal('Latitude' in bad.AccommodationSearchCriteria, false);
+  assert.equal(bad.AccommodationSearchCriteria.Latitude, 0);
   assert.equal(bad.AccommodationSearchCriteria.LocationCountry, 'GB');
 });
 
@@ -2743,31 +2748,41 @@ test('adding a hotel puts the cursor in the new hotel\'s code box', () => {
   assert.ok(!/inputs\[inputs\.length - 2\]\.focus\(\)/.test(EDITOR));
 });
 
-test('a hotel with no coordinates is not searched for in the Atlantic', () => {
-  // Andy's 9 Apr 2027 search went out as Latitude 0, Longitude 0, Radius 11 —
-  // an eleven-mile circle of open ocean, in the same request as a Ref pinning a
-  // hotel in Tenerife and a LocationCountry of ES. The guard used Number(),
-  // and Number(null) is 0: finite, in range, and a real place in the Gulf of
-  // Guinea. The same null island as the editor bug, on the way out this time.
+test('a search always carries a location, because Travelify refuses one without', () => {
+  // The obvious fix was wrong and cost a round: omitting Latitude/Longitude on
+  // a row with no coordinates got every search refused outright —
+  //
+  //   Search Criteria: You must specify an accommodation search location
+  //
+  // — 0 of 4 found, all four with that error (Andy, 16 Sep 2026). The Ref does
+  // not satisfy it and neither does LocationCountry. So a centre is mandatory,
+  // and 0,0 is the placeholder that gets a placeless row accepted.
   const base = { code: '19179004', ctry: 'ES', lat: null, lng: null };
   const search = { customerIp: '195.162.100.165', leadDays: 30, nights: 7, adults: 2 };
   const acc = buildAccommodationCriteria(base, search).AccommodationSearchCriteria;
-  assert.ok(!('Latitude' in acc), 'no coordinates means no Latitude, not a zero one');
-  assert.ok(!('Longitude' in acc));
-  assert.ok(!('Radius' in acc), 'and no radius around a place we did not name');
-  assert.equal(acc.Ref, 'TTI:19179004', 'the pin is what finds the hotel');
+  assert.equal(acc.Latitude, 0, 'a placeholder centre, not an omitted field');
+  assert.equal(acc.Longitude, 0);
+  assert.equal(acc.Radius, 11);
+  assert.equal(acc.LocationType, 'City');
+  // It does not scope the answer — the Ref does. The same request returned a
+  // hotel 2,234 miles from 0,0, which is the evidence that this is harmless.
+  assert.equal(acc.Ref, 'TTI:19179004');
   assert.equal(acc.LocationCountry, 'ES');
 
-  // Real coordinates still travel.
+  // Real coordinates are sent when the row has them. That is what pasting a
+  // deeplink is for, and it is a real improvement over the placeholder.
   const placed = buildAccommodationCriteria(
     { ...base, lat: 28.090122, lng: -16.735004 }, search).AccommodationSearchCriteria;
   assert.equal(placed.Latitude, 28.090122);
   assert.equal(placed.Longitude, -16.735004);
-  assert.equal(placed.Radius, 11);
 
-  // And a package inherits the same criteria, which is where it was seen.
+  // A package inherits the same criteria, which is where the break showed up.
   const dp = buildDynamicPackageCriteria(base,
     { ...search, origins: ['INV'], destination: 'TFS' }).AccommodationSearchCriteria;
-  assert.ok(!('Latitude' in dp));
-  assert.ok(!('Longitude' in dp));
+  assert.equal(dp.Latitude, 0);
+  assert.equal(dp.LocationCountry, 'ES');
+
+  // A row with neither a country nor coordinates is still refused outright: a
+  // placeholder centre is not a licence to search nowhere in particular.
+  assert.equal(buildAccommodationCriteria({ code: '19179004' }, search), null);
 });
