@@ -102,6 +102,11 @@ const CUSTOMER_IP = cleanIp(process.env.TTI_CUSTOMER_IP || '');
 // scoped to one property settles long before that, and a nightly run has many
 // properties to get through.
 const CRON_MAX_POLLS = 10;
+// A package settles more slowly than a hotel: the flight half is still
+// arriving. A real test run came back incomplete at 8 polls with a single
+// flight collected, so the cheapest one had not landed yet. The nightly job has
+// the time the editor does not.
+const CRON_DP_MAX_POLLS = 18;
 // Departure airports swept per package property per night. Travelify prices
 // ONE origin per search, so this is a straight multiplier on the nightly bill:
 // a widget offering six airports would otherwise cost six searches a night for
@@ -305,7 +310,7 @@ async function fetchProperty(item, search, origin = null) {
   if (!criteria) return null;
 
   const r = await runSearch({ appId: item.appId, apiKey: item.apiKey }, criteria, {
-    maxPolls: CRON_MAX_POLLS,
+    maxPolls: isDp ? CRON_DP_MAX_POLLS : CRON_MAX_POLLS,
     pick: 'accommodationResults',
     ...(isDp ? { also: 'flightResults' } : {}),
   });

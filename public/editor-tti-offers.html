@@ -2774,6 +2774,14 @@
             // SHOW THE PRICE AS A SUM. A package that cannot be broken into a
             // flight and a hotel is a package in name only, and the identical
             // £857 from three different airports is what that looked like.
+            // A PRICE FROM A SEARCH THAT HAD NOT FINISHED. Suppliers answer at
+            // their own pace, and a cheaper flight arriving after we stopped
+            // polling makes this a "from" price that is not the lowest one.
+            if (r.incomplete) {
+              text += '<br><span style="color:var(--tgse-warning)">The search had not finished '
+                    + 'settling when we stopped, so a cheaper flight may exist. Test again to '
+                    + 'see whether the price comes down.</span>';
+            }
             if (Number.isFinite(r.flightPrice) && Number.isFinite(r.hotelPrice)) {
               text += '<br><span style="color:var(--tgse-ink-3)">Hotel ' + esc(money(r.hotelPrice, r.currency))
                     + ' + flight ' + esc(money(r.flightPrice, r.currency))

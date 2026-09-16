@@ -656,6 +656,52 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### The flight shape, MEASURED (16 Sep 2026)
+
+A flight is **`routes[]`** — one per leg, tagged `Outbound` and `Inbound` — and
+each route is **`segments[]`**, one per hop. Everything a card shows lives on
+the first segment of the outbound route, not on the flight itself, which is why
+carrier and stops came back unmapped on every test until a real result arrived.
+
+| Field | Real path |
+|---|---|
+| carrier / code | `routes[0].segments[0].marketingCarrier.{name,code}` |
+| flight number | `…segments[0].flightNo` |
+| cabin class | `…segments[0].cabinClass` |
+| departs / arrives | `…segments[0].depart` / `.arrive` — **with a time** |
+| returns | the `Inbound` route's first segment `depart` |
+| duration | `routes[0].duration` |
+| price | `pricing.price` |
+
+**Stops are counted, not read.** A change of plane is another segment; a
+technical stop keeps the flight number and appears as `touchdowns`. Both are a
+stop to somebody choosing a holiday, and neither is reported as one. `direct` is
+set only when stops are actually known — "we could not tell" must never become
+"it is direct".
+
+**The flight's own times beat the criteria dates.** We ask for
+`2027-04-09T00:00:00Z`; the aeroplane leaves at 14:35. A departure board renders
+a time column, and 00:00 on every row reads as broken.
+
+### A package settles more slowly than a hotel
+
+The same file came back **`complete: false` at 8 polls with ONE flight
+collected**. So "cheapest of 1 flight" was our poll cap, not a thin route — and
+the cached price may not have been the cheapest on offer. The hotel half settles
+quickly; the flight half is still arriving.
+
+`DP_MAX_POLLS` is 12 in the editor (the route deadline is still the real guard)
+and `CRON_DP_MAX_POLLS` is 18 in the nightly job, which has the time the editor
+does not. Polling longer is not a guarantee, so **an unsettled price is
+labelled**: the panel says a cheaper flight may exist and invites a re-test.
+
+**Still unconfirmed:** whether `pricing.price` on the flight is the total for
+the party or per person. The accommodation price is clearly the room total — the
+unit sleeps two and the price is one number — and the flight is the same field
+name in the same search for the same two passengers, so total is the reading
+taken. If it turns out to be per person, every package is under-priced by the
+flight. One quote against a live booking settles it.
+
 ### The result shape, MEASURED (16 Sep 2026)
 
 A real accommodation result, downloaded from the Test panel. Everything below is

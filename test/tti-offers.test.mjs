@@ -2053,9 +2053,27 @@ test('the full Travelify exchange comes back without spending another search', (
    A package price is the flight PLUS the hotel
    ============================================================ */
 
+/** Real-shaped flights: routes[] tagged Outbound/Inbound, each with segments[].
+ *  Built to the measured shape, not to the one that was guessed — a fixture
+ *  that describes a world the supplier does not have proves nothing. */
+const flightOf = ({ price, code, name, flightNo, stops = 0, duration = 280 }) => ({
+  pricing: { price, currency: 'GBP', refundability: 'Refundable' },
+  routes: [
+    { direction: 'Outbound', duration,
+      segments: Array.from({ length: stops + 1 }, (_, i) => ({
+        origin: { iataCode: i ? 'XXX' : 'MAN' }, destination: { iataCode: 'TFS' },
+        depart: '2026-10-14T14:35:00Z', arrive: '2026-10-14T19:30:00Z', duration,
+        cabinClass: 'Economy', marketingCarrier: { code, name }, flightNo, touchdowns: 0,
+      })) },
+    { direction: 'Inbound', duration,
+      segments: [{ origin: { iataCode: 'TFS' }, destination: { iataCode: 'MAN' },
+        depart: '2026-10-21T09:00:00Z', arrive: '2026-10-21T13:45:00Z', duration,
+        cabinClass: 'Economy', marketingCarrier: { code, name }, flightNo, touchdowns: 0 }] },
+  ],
+});
 const FLIGHTS = [
-  { pricing: { total: 349, currency: 'GBP' }, carrier: { name: 'BA', code: 'BA' }, stops: 1 },
-  { pricing: { total: 212, currency: 'GBP' }, carrier: { name: 'Jet2', code: 'LS' }, stops: 0, duration: 280 },
+  flightOf({ price: 349, code: 'BA', name: 'BA', flightNo: 'BA1', stops: 1 }),
+  flightOf({ price: 212, code: 'LS', name: 'Jet2', flightNo: 'LS1', stops: 0, duration: 280 }),
 ];
 
 test('the same hotel from three airports is not the same price', () => {
@@ -2465,4 +2483,106 @@ test('the download carries the flights it says it counted', () => {
   // is how the hotel half came to be mapped exactly rather than guessed.
   assert.ok(/shape\.flightKeys = Object\.keys\(f0\)/.test(TEST_API));
   assert.ok(/Fields on the flight:/.test(EDITOR));
+});
+
+/* ============================================================
+   The flight, measured from a real one (16 Sep 2026)
+   ============================================================ */
+
+const REAL_FLIGHT = {
+  rid: '7296-0', resultType: 'Bookable', isAvailable: true,
+  pricing: { currency: 'GBP', price: 848, refundability: 'Refundable' },
+  fareType: 'Published', openJaw: false,
+  routes: [
+    { rid: '0', legID: 0, direction: 'Outbound', duration: 295,
+      segments: [{
+        origin: { iataCode: 'INV', name: 'Inverness, Scotland, UK (INV)', country: 'GB' },
+        destination: { iataCode: 'TFS', name: 'Tenerife South (TFS)', country: 'ES' },
+        depart: '2027-04-09T14:35:00Z', arrive: '2027-04-09T19:30:00Z', duration: 295,
+        cabinClass: 'Economy', operatingCarrier: { code: 'QS', name: 'Smartwings' },
+        marketingCarrier: { code: 'QS', name: 'Smartwings' }, flightNo: 'QS4499', touchdowns: 0,
+      }] },
+    { rid: '1', legID: 1, direction: 'Inbound', duration: 285,
+      segments: [{
+        origin: { iataCode: 'TFS' }, destination: { iataCode: 'INV' },
+        depart: '2027-04-16T09:00:00Z', arrive: '2027-04-16T13:45:00Z', duration: 285,
+        cabinClass: 'Economy', marketingCarrier: { code: 'QS', name: 'Smartwings' },
+        flightNo: 'QS4498', touchdowns: 0,
+      }] },
+  ],
+};
+
+test('a flight is routes and segments, not fields on the result', () => {
+  // Everything a card shows lives on the first segment of the OUTBOUND route,
+  // which is why carrier and stops came back unmapped on every test until a
+  // real flight result was in hand.
+  const { flight, unmapped } = cheapestFlight([REAL_FLIGHT]);
+  assert.deepEqual(unmapped, [], 'nothing left to guess');
+  assert.equal(flight.price, 848);
+  assert.equal(flight.carrier, 'Smartwings');
+  assert.equal(flight.carrierCode, 'QS');
+  assert.equal(flight.flightNumber, 'QS4499');
+  assert.equal(flight.cabinClass, 'Economy');
+  assert.equal(flight.duration, 295);
+  assert.equal(flight.refundability, 'Refundable');
+
+  // REAL TIMES, not the midnight dates we asked for. A departure board renders
+  // a time column; 00:00 on every row reads as broken.
+  assert.equal(flight.outboundDate, '2027-04-09T14:35:00Z');
+  assert.equal(flight.arrivalDate, '2027-04-09T19:30:00Z');
+  assert.equal(flight.returnDate, '2027-04-16T09:00:00Z', 'from the INBOUND route');
+});
+
+test('stops are counted, because they are not a field', () => {
+  // A change of plane is another segment; a technical stop keeps the flight
+  // number and shows as a touchdown. Both are a stop to somebody choosing a
+  // holiday, and neither is reported as one.
+  assert.equal(cheapestFlight([REAL_FLIGHT]).flight.stops, 0);
+  assert.equal(cheapestFlight([REAL_FLIGHT]).flight.direct, true);
+
+  const viaSomewhere = JSON.parse(JSON.stringify(REAL_FLIGHT));
+  viaSomewhere.routes[0].segments.push({ ...viaSomewhere.routes[0].segments[0], flightNo: 'QS4500' });
+  assert.equal(cheapestFlight([viaSomewhere]).flight.stops, 1, 'two segments is one change');
+  assert.equal(cheapestFlight([viaSomewhere]).flight.direct, false);
+
+  const technical = JSON.parse(JSON.stringify(REAL_FLIGHT));
+  technical.routes[0].segments[0].touchdowns = 1;
+  assert.equal(cheapestFlight([technical]).flight.stops, 1, 'a touchdown is a stop too');
+
+  // And "we could not tell" must never become "direct".
+  const vague = cheapestFlight([{ pricing: { price: 100 } }]).flight;
+  assert.equal(vague.stops, null);
+  assert.ok(!('direct' in vague), 'no route information means no direct claim');
+});
+
+test('the flight the price came from reaches the card', () => {
+  const { flight } = cheapestFlight([REAL_FLIGHT]);
+  const wire = wireShape(normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'INV', destination: 'TFS', flight }).offer);
+  assert.equal(wire.flight.carrier.name, 'Smartwings');
+  assert.equal(wire.flight.carrier.code, 'QS');
+  assert.equal(wire.flight.direct, true);
+  assert.equal(wire.flight.flightNumber, 'QS4499');
+  assert.equal(wire.flight.outboundDate, '2027-04-09T14:35:00Z');
+  assert.equal(wire.flight.returnDate, '2027-04-16T09:00:00Z');
+  assert.equal(wire.flight.duration, 295);
+  // The wire shape carries the price inside each product's pricing block, not
+  // at the top — both halves get the same package total.
+  assert.equal(wire.accommodation.pricing.price, 857 + 848, 'and it is still both halves');
+  assert.equal(wire.flight.pricing.price, 857 + 848);
+});
+
+test('a price from a search that had not finished says so', () => {
+  // The real run came back complete:false at 8 polls having collected ONE
+  // flight. "Cheapest of 1 flight" was our poll cap, not a thin route — so the
+  // cached price may not have been the cheapest on offer.
+  assert.ok(/const DP_MAX_POLLS = 12;/.test(TEST_API), 'a package settles more slowly');
+  assert.ok(/maxPolls: isDp \? DP_MAX_POLLS : MAX_POLLS/.test(TEST_API));
+  assert.ok(/const CRON_DP_MAX_POLLS = 18;/.test(CRON), 'and the nightly job has more time');
+  assert.ok(/maxPolls: isDp \? CRON_DP_MAX_POLLS : CRON_MAX_POLLS/.test(CRON));
+
+  // Polling longer is not a guarantee, so an unsettled price is LABELLED.
+  assert.ok(/if \(!r\.complete\) acc\.incomplete = true;/.test(TEST_API));
+  assert.ok(/\.\.\.\(acc\.incomplete \? \{ incomplete: true \} : \{\}\)/.test(TEST_API));
+  assert.ok(/so a cheaper flight may exist/.test(EDITOR));
 });
