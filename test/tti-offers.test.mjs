@@ -2076,32 +2076,53 @@ const FLIGHTS = [
   flightOf({ price: 212, code: 'LS', name: 'Jet2', flightNo: 'LS1', stops: 0, duration: 280 }),
 ];
 
-test('a package is already priced, per person, and nothing is added to it', () => {
-  // Andy, 16 Sep 2026: "If you are doing a DP search the price you get back is
-  // the total holiday price per person - you don't need to be adding anything
-  // together."
-  //
-  // The previous reading — hotel plus cheapest flight — was arrived at from
-  // evidence rather than from the product, and double-counted: it added a
-  // flight to a number that already contained one.
+test('a package is the room plus the flights, and the per-person share of that', () => {
+  // This field has been wrong twice in opposite directions, so it is settled on
+  // measurements from a real response rather than on reasoning. The room price
+  // is the ROOM, for everyone in it; the flight price is the FLIGHTS, for every
+  // passenger; the holiday is the two added.
   const { flight } = cheapestFlight(FLIGHTS);
   const pkg = normaliseAccommodationResult(PKG_RESULT,
     { origin: 'MAN', destination: 'TFS', flight, adults: 2 }).offer;
-  assert.equal(pkg.pricePP, 857, "Travelify's own per-person holiday price, untouched");
-  assert.equal(pkg.price, 1714, 'the total is that multiplied by the travellers, and nothing else');
-  assert.equal(pkg.pricedPax, 2, 'and it says how many it multiplied by');
-  assert.ok(!('flightPrice' in pkg), 'the flight is not a component to be summed');
-  assert.ok(!('hotelPrice' in pkg), 'and neither is the hotel');
+  assert.equal(pkg.price, 857 + 212, 'the room and the flights, added');
+  assert.equal(pkg.pricePP, 534.5, 'and each traveller carries a share of it');
+  assert.equal(pkg.pricedPax, 2, 'and it says how many it divided by');
 
-  // A DEARER FLIGHT MUST NOT MOVE IT. The package price already contains one.
+  // A DEARER FLIGHT MOVES IT. It is a component, so it has to.
   const { flight: dearer } = cheapestFlight([FLIGHTS[0]]);
   assert.equal(normaliseAccommodationResult(PKG_RESULT,
-    { origin: 'MAN', destination: 'TFS', flight: dearer, adults: 2 }).offer.price, 1714);
+    { origin: 'MAN', destination: 'TFS', flight: dearer, adults: 2 }).offer.price, 857 + 349);
 
-  // An infant holds neither a seat nor a bed, so it carries no holiday price.
-  assert.equal(normaliseAccommodationResult(PKG_RESULT,
-    { origin: 'MAN', destination: 'TFS', flight, adults: 2, children: 1, infants: 1 }).offer.price,
-  857 * 3);
+  // A child is in the room and on the plane, so both components already cover
+  // it: the total is unchanged and the share is split three ways.
+  const withChild = normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'MAN', destination: 'TFS', flight, adults: 2, children: 1, infants: 1 }).offer;
+  assert.equal(withChild.price, 1069, 'the components already priced the whole party');
+  assert.equal(withChild.pricedPax, 3);
+  assert.equal(withChild.pricePP, 356.33, 'to the penny, because money');
+});
+
+test("Andy's own worked example only comes out of adding the two", () => {
+  // "The price you should be getting back on the GF Fanabe is £802.50 per
+  // person for the flight and accommodation" (16 Sep 2026).
+  //
+  // £802.50 is the whole argument. Every price in these responses is a WHOLE
+  // POUND — room 810, 934, 919, 1499; flight 848 — so a per-person figure
+  // ending in .50 cannot be one the supplier quoted. It can only be a halved
+  // odd total, and (757 + 848) / 2 is 802.50 exactly.
+  const room = (n) => ({ ...PKG_RESULT, pricing: { total: n, currency: 'GBP' },
+    units: [{ nights: 7, checkin: '2027-04-09T00:00:00Z',
+      rates: [{ board: 'BedAndBreakfast', pricing: { price: n } }] }] });
+  const { flight } = cheapestFlight([REAL_FLIGHT]);
+  assert.equal(flight.price, 848, 'the flight Travelify actually returned');
+  const pkg = normaliseAccommodationResult(room(757),
+    { origin: 'INV', destination: 'TFS', flight, adults: 2 }).offer;
+  assert.equal(pkg.pricePP, 802.5, "Andy's number, to the half penny");
+  assert.equal(pkg.price, 1605);
+
+  // Read as already-priced, the same room comes out at £757 per person — £45.50
+  // under his figure — and the £848 flight is never used at all.
+  assert.notEqual(pkg.pricePP, 757);
 });
 test('a package with no flight is not cached as one', () => {
   // Caching the hotel price behind a Flight + Hotel badge is the original bug
@@ -2588,11 +2609,10 @@ test('the flight the price came from reaches the card', () => {
   assert.equal(wire.flight.returnDate, '2027-04-16T09:00:00Z');
   assert.equal(wire.flight.duration, 295);
   // The wire shape carries the price inside each product's pricing block, not
-  // at the top — both halves get the same package total.
-  // The package price is Travelify's own, per person, times the travellers —
-  // the flight's £212 is not added to it.
-  assert.equal(wire.accommodation.pricing.price, 857 * 2);
-  assert.equal(wire.flight.pricing.price, 857 * 2);
+  // at the top — both halves get the same package total, which is the room
+  // plus these flights.
+  assert.equal(wire.accommodation.pricing.price, 857 + 848);
+  assert.equal(wire.flight.pricing.price, 857 + 848);
 });
 
 test('a price from a search that had not finished says so', () => {
@@ -2721,4 +2741,33 @@ test('adding a hotel puts the cursor in the new hotel\'s code box', () => {
   // the cursor in the middle of the new row.
   assert.ok(/querySelectorAll\('\.tti-row \.tti-code'\)/.test(EDITOR));
   assert.ok(!/inputs\[inputs\.length - 2\]\.focus\(\)/.test(EDITOR));
+});
+
+test('a hotel with no coordinates is not searched for in the Atlantic', () => {
+  // Andy's 9 Apr 2027 search went out as Latitude 0, Longitude 0, Radius 11 —
+  // an eleven-mile circle of open ocean, in the same request as a Ref pinning a
+  // hotel in Tenerife and a LocationCountry of ES. The guard used Number(),
+  // and Number(null) is 0: finite, in range, and a real place in the Gulf of
+  // Guinea. The same null island as the editor bug, on the way out this time.
+  const base = { code: '19179004', ctry: 'ES', lat: null, lng: null };
+  const search = { customerIp: '195.162.100.165', leadDays: 30, nights: 7, adults: 2 };
+  const acc = buildAccommodationCriteria(base, search).AccommodationSearchCriteria;
+  assert.ok(!('Latitude' in acc), 'no coordinates means no Latitude, not a zero one');
+  assert.ok(!('Longitude' in acc));
+  assert.ok(!('Radius' in acc), 'and no radius around a place we did not name');
+  assert.equal(acc.Ref, 'TTI:19179004', 'the pin is what finds the hotel');
+  assert.equal(acc.LocationCountry, 'ES');
+
+  // Real coordinates still travel.
+  const placed = buildAccommodationCriteria(
+    { ...base, lat: 28.090122, lng: -16.735004 }, search).AccommodationSearchCriteria;
+  assert.equal(placed.Latitude, 28.090122);
+  assert.equal(placed.Longitude, -16.735004);
+  assert.equal(placed.Radius, 11);
+
+  // And a package inherits the same criteria, which is where it was seen.
+  const dp = buildDynamicPackageCriteria(base,
+    { ...search, origins: ['INV'], destination: 'TFS' }).AccommodationSearchCriteria;
+  assert.ok(!('Latitude' in dp));
+  assert.ok(!('Longitude' in dp));
 });
