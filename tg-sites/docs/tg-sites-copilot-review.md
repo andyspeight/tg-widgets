@@ -366,6 +366,15 @@ the brief's; the additions are marked.
   6 is a switch and a test pass rather than a build. Useful on its own: "What
   would you improve on this page?", "Turn this client email into a task list",
   "What did people ask about last week?"
+  **Built, 16 September 2026 (evening), foundations only:** `POST /api/assist`
+  streams a turn as newline-delimited JSON; `lib/ai/anthropic.ts` gained
+  `converse()` (streaming, tools, a cached system prompt, the parsing in
+  `lib/ai/stream.ts`); `lib/assist/` holds the brand constant, the price
+  table, the limits, the enquiry masking, the page outline, the tool registry
+  and its filter, the prompt, the runners and the service; migration
+  `0035_assist` (applied live) holds the ledger and the log, read through
+  `lib/db/assist.ts`. Build mode behaves as Plan until slice 2. The panel
+  waits for Andy's direction; the key waits for Vercel.
 - **Slice 2, Build mode on the page.** `propose_changes` for text, block
   settings and sections from the catalogue on the current page. Preview on
   the canvas, Apply, Undo, change history in the panel. **Changed:** apply

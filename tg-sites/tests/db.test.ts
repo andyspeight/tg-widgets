@@ -127,6 +127,70 @@ beforeEach(() => {
 
 // ---------------------------------------------------------------------------
 
+describe('the Luna Assist ledger (lib/db/assist.ts)', () => {
+  /*
+   * The claim counts and inserts in ONE statement inside the tenant
+   * transaction, like ai_usage's. What is pinned here is the ordering (set the
+   * tenant, then the one statement) and that a refusal is read off the row
+   * rather than thrown, with the reason the numbers point at.
+   */
+  it('claims a turn in one statement, after the tenant is set', async () => {
+    const { claimAssistTurn } = await import('../lib/db/assist');
+    respond('insert into public.assist_usage', [{ by_user: 3, by_site: 12, month_pence: 4.5, id: 'u-1' }]);
+
+    const claim = await claimAssistTurn(ALPHA, { userId: 'person-1', mode: 'plan', model: 'claude-sonnet-5', allowancePence: null });
+
+    expect(claim).toEqual({ allowed: true, id: 'u-1', reason: null, monthPence: 4.5 });
+    expect(log.map((s) => s.sql)[0]).toBe('BEGIN');
+    expect(log[1].sql).toContain('set_config');
+    expect(log[1].params).toEqual([ALPHA]);
+    const statement = log[2].sql;
+    expect(statement).toContain('insert into public.assist_usage');
+    expect(statement).toContain('by_user.n <');
+    expect(statement).toContain('by_site.n <');
+    expect(statement).toContain('month.pence +');
+    expect(log[3].sql).toBe('COMMIT');
+  });
+
+  it('reads a refusal off the counts, naming the floor that was hit', async () => {
+    const { claimAssistTurn } = await import('../lib/db/assist');
+    const { PER_USER_HOURLY } = await import('../lib/assist/limits');
+    respond('insert into public.assist_usage', [{ by_user: PER_USER_HOURLY, by_site: 50, month_pence: 0, id: null }]);
+
+    const claim = await claimAssistTurn(ALPHA, { userId: 'person-1', mode: 'plan', model: 'claude-sonnet-5', allowancePence: null });
+
+    expect(claim.allowed).toBe(false);
+    expect(claim.id).toBeNull();
+    expect(claim.reason).toBe('user');
+  });
+
+  it('calls a refusal with room on both counts an allowance refusal', async () => {
+    const { claimAssistTurn } = await import('../lib/db/assist');
+    respond('insert into public.assist_usage', [{ by_user: 1, by_site: 1, month_pence: 495, id: null }]);
+
+    const claim = await claimAssistTurn(ALPHA, { userId: 'person-1', mode: 'build', model: 'claude-sonnet-5', allowancePence: 500 });
+
+    expect(claim.reason).toBe('allowance');
+    expect(claim.monthPence).toBe(495);
+  });
+
+  it('reads the allowance from the tenant row and treats unset as unlimited', async () => {
+    const { readAssistAllowance } = await import('../lib/db/assist');
+    respond("staff_settings ->> 'assistAllowancePence'", [{ pence: null }]);
+    expect(await readAssistAllowance(ALPHA)).toBeNull();
+    respond("staff_settings ->> 'assistAllowancePence'", [{ pence: '500' }]);
+    expect(await readAssistAllowance(ALPHA)).toBe(500);
+  });
+
+  it('writes the log through the tenant transaction and never throws', async () => {
+    const { logAssist } = await import('../lib/db/assist');
+    await logAssist(ALPHA, { userId: 'person-1', usageId: 'u-1', pageId: null, mode: 'plan', kind: 'asked', detail: { tools: ['read_page'] } });
+    const insert = log.find((s) => s.sql.includes('insert into public.assist_log'));
+    expect(insert).toBeDefined();
+    expect(log[1].sql).toContain('set_config');
+  });
+});
+
 describe('withTenant', () => {
   it('sets the tenant as the very first statement inside the transaction', async () => {
     const { withTenant } = await import('../lib/db/withTenant');

@@ -187,6 +187,45 @@ anyway), access is for client and staff from slice 1, and the name is **Luna
 Assist** (one constant, `lib/assist/brand.ts`; code paths are `assist`).
 Still pending: `ANTHROPIC_API_KEY` on tg-sites-shell, and the panel direction.
 
+**Luna Assist slice 1, the foundations (16 Sep 2026, evening).** Everything
+under the panel, built before the panel because it is the same under every
+direction. `POST /api/assist` takes `{mode, message, pageId?, thread?}` and
+streams newline-delimited JSON: `{type:"text", delta}` lines while the answer
+is written, then `{type:"answer"}` or `{type:"question", question, options}`
+(the model asked one, with two to four options; the person's reply is the next
+request) or `{type:"error"}`; a refusal before the turn starts is a plain JSON
+status (503 no key, 401 no session, 403 no site, 400 bad body, 429 a limit).
+The order in the route is the safety and `tests/assist.test.ts` pins it: key,
+session and capabilities, body, the ledger claim, then the site and page are
+loaded, then the model. `lib/ai/anthropic.ts` gained `converse()` beside the
+untouched `ask()`: the same key and headers, streaming, tools, the system prompt
+marked as a cache breakpoint, the event stream parsed by the pure
+`lib/ai/stream.ts` (thinking blocks and signatures are kept so a tool loop can
+hand the turn back). `lib/assist/` is the rest: `brand.ts` (the name, once),
+`pricing.ts` (list prices pinned, 78p a dollar pinned, cost in pence),
+`limits.ts` (40 turns a person an hour per site, 300 a site a day, a monthly
+allowance in pence that is unset for everyone), `mask.ts` (the people removed
+from enquiries before the model reads them), `context.ts` (a page as a compact
+outline with ids kept and `[bound {{token}}]` on any block holding a loop
+token), `tools.ts` (six readers, and the filter by mode and capability that
+rule 4 and rule 7 come down to), `prompt.ts` (rules and mode in the system
+prompt, the site and page and request in the user turn inside named blocks
+with the tags stripped from values), `runners.ts` (read_page, read_site,
+read_catalogue, read_results, read_enquiries, all tenant-scoped and capped) and
+`service.ts` (one turn from claim to answer, at most five model calls, an
+unknown tool refused and logged, testable with fakes). Migration `0035_assist`
+is applied live: `assist_usage` (a row per turn, written before the call, tokens
+and pence after) and `assist_log` (events, never prompts or enquiry content),
+both RLS forced, read through `lib/db/assist.ts`. The allowance lives on the
+tenant row as `staff_settings.assistAllowancePence`; unset is unlimited. Build
+mode is accepted and behaves as Plan until slice 2 brings `propose_changes`.
+Things that will bite: prior turns are replayed as plain text only (no tool
+calls or results), so a long conversation does not carry every page it read;
+`ask_user` ends the turn; the per-person hourly count is per site, because the
+table is tenant-scoped; the route's `maxDuration` is 120 seconds for a turn of
+several calls. Not built yet: the panel (Andy picks), and nothing calls the
+route until it exists.
+
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen
 menu never run on the editing canvas), and to try the form actions against a
@@ -501,10 +540,10 @@ rested on a number that does not mean what it looks like.
 8. **Collections fed from an external source.**
 
 9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
-   `docs/tg-sites-copilot-review.md`. Slice 1's foundations (route, ledger,
-   context builder, read tools, Plan mode) do not need the panel direction;
-   the panel does, and Andy picks it from the canvas. `ANTHROPIC_API_KEY` on
-   tg-sites-shell before any of it is used live.
+   `docs/tg-sites-copilot-review.md`. Slice 1's foundations are built (the
+   route, the ledger, the outline, the read tools, Plan mode); the panel waits
+   for Andy's pick from the canvas, and `ANTHROPIC_API_KEY` on tg-sites-shell
+   before any of it is used live. Then slice 2, Build mode on the page.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.

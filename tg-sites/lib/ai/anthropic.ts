@@ -387,3 +387,158 @@ function readUsage(payload: unknown): { inputTokens: number; outputTokens: numbe
     outputTokens: count(usage?.output_tokens),
   };
 }
+
+// ---------------------------------------------------------------------------
+// A conversation with tools, streamed
+// ---------------------------------------------------------------------------
+
+/**
+ * WHY A SECOND ENTRY POINT AND NOT A THIRD MODULE. Luna Assist (lib/assist,
+ * 16 Sep 2026) holds a conversation: several turns, tools the model may call,
+ * an answer that streams to the person as it is written. `ask` above is one
+ * prompt and one answer and is left exactly as it was, because eleven actions
+ * depend on it behaving exactly as it does. This is the same key, the same
+ * endpoint, the same headers and the same error sentences, so that the notes
+ * at the top of this file about the key and about untrusted answers stay true
+ * for everything that talks to Anthropic.
+ *
+ * THE SYSTEM PROMPT IS CACHED. It is marked as a cache breakpoint, so a
+ * prefix that is the same for every site (the tools and the rules) is paid
+ * for once every few minutes rather than on every turn. Anything that differs
+ * per site goes in the messages, which is also where the brief's rule 5 wants
+ * it. The parsing is in lib/ai/stream.ts, which is pure and tested.
+ */
+
+import { assembleMessage, sseEvents, StreamError, type AssembledMessage, type RawBlock } from './stream';
+
+export type ConverseBlock = RawBlock | Record<string, unknown>;
+
+export interface ConverseMessage {
+  role: 'user' | 'assistant';
+  content: string | ConverseBlock[];
+}
+
+export interface ConverseTool {
+  name: string;
+  description: string;
+  input_schema: unknown;
+}
+
+export interface ConverseOptions {
+  /** Defaults to MODEL_BUILD (Sonnet): a conversation is a reasoning job. */
+  model?: string;
+  maxTokens?: number;
+  timeoutMs?: number;
+  effort?: AskOptions['effort'];
+  tools?: readonly ConverseTool[];
+  /** Text as it arrives, for the person waiting. */
+  onText?: (delta: string) => void;
+}
+
+export type ConverseAnswer = AssembledMessage;
+
+/** Room for a long answer plus the thinking that precedes it. */
+const CONVERSE_MAX_TOKENS = 6_000;
+
+const CONVERSE_TIMEOUT_MS = 70_000;
+
+/** A streamed body as chunks, whatever the runtime's ReadableStream can do. */
+async function* chunksOf(body: ReadableStream<Uint8Array>): AsyncGenerator<Uint8Array> {
+  const reader = body.getReader();
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) return;
+      if (value) yield value;
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+export async function converse(
+  system: string,
+  messages: readonly ConverseMessage[],
+  opts: ConverseOptions = {},
+): Promise<ConverseAnswer> {
+  const {
+    model = MODEL_BUILD,
+    maxTokens = CONVERSE_MAX_TOKENS,
+    timeoutMs = CONVERSE_TIMEOUT_MS,
+    effort,
+    tools = [],
+    onText,
+  } = opts;
+
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) {
+    throw new AiError('The assistant is not switched on for this site yet.');
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let response: Response;
+  try {
+    response = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': API_VERSION,
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        stream: true,
+        ...(effort ? { output_config: { effort } } : {}),
+        system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
+        ...(tools.length ? { tools } : {}),
+        messages,
+      }),
+      signal: controller.signal,
+      cache: 'no-store',
+    });
+  } catch (error) {
+    clearTimeout(timer);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new AiError('That took too long. Try again, or ask for something smaller.', { retryable: true });
+    }
+    console.error('[tg-sites] the assistant request could not be sent', error);
+    throw new AiError('Could not reach the assistant. Try again in a moment.', { retryable: true });
+  }
+
+  if (!response.ok || !response.body) {
+    clearTimeout(timer);
+    const body = await response.text().catch(() => '');
+    console.error(`[tg-sites] Anthropic returned ${response.status}`, body.slice(0, 500));
+    if (response.status === 429) {
+      throw new AiError('The assistant is busy right now. Try again in a moment.', { retryable: true });
+    }
+    if (response.status >= 500) {
+      throw new AiError('The assistant is having a moment. Try again shortly.', { retryable: true });
+    }
+    throw new AiError('The assistant could not answer that.');
+  }
+
+  try {
+    const answer = await assembleMessage(sseEvents(chunksOf(response.body)), onText);
+    if (answer.stopReason === 'refusal') {
+      throw new AiError('The assistant declined to answer that one.');
+    }
+    return answer;
+  } catch (error) {
+    if (error instanceof AiError) throw error;
+    if (error instanceof StreamError) {
+      console.error(`[tg-sites] the assistant stream reported ${error.kind}`, error.message);
+      throw new AiError('The assistant is having a moment. Try again shortly.', { retryable: true });
+    }
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new AiError('That took too long. Try again, or ask for something smaller.', { retryable: true });
+    }
+    console.error('[tg-sites] the assistant stream could not be read', error);
+    throw new AiError('The assistant came back with nothing. Try asking again.', { retryable: true });
+  } finally {
+    clearTimeout(timer);
+  }
+}
