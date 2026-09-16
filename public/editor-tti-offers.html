@@ -2305,6 +2305,11 @@
        separate from the saved config so a row stays on screen while it is
        still incomplete, instead of vanishing the moment it fails validation. */
     let ttiRows = [];
+    /* Have the rows been filled in from a config yet? The save rebuilds
+       ttiCodes from ttiRows, so before the first hydrate that would be
+       rebuilding from an empty array — which is a widget's whole hotel list
+       deleted by a save that happened to land early. */
+    let ttiRowsHydrated = false;
 
     function ttiRowsFromConfig(cfg) {
       const raw = (cfg && cfg.ttiCodes) || [];
@@ -2535,10 +2540,17 @@
         when.value = row.checkin || '';
         when.title = 'Travel date for this hotel. Leave blank to use the widget\u2019s date window.';
         when.setAttribute('aria-label', 'Travel date, hotel ' + (i + 1));
-        when.addEventListener('change', () => {
+        // On BOTH events. When a date field fires 'change' is up to the
+        // browser — a picked date, a typed one, one committed only on blur —
+        // and every other field in this row commits on 'input'. A date that
+        // reached the box but not the config is the same silent loss as not
+        // typing it, so it commits the moment it is a date.
+        const commitWhen = () => {
           row.checkin = when.value;
           paintTtiSummary(); paintSearchDrift(); markDirtyAndPreview();
-        });
+        };
+        when.addEventListener('change', commitWhen);
+        when.addEventListener('input', commitWhen);
 
         const del = document.createElement('button');
         del.type = 'button';
@@ -2947,7 +2959,15 @@
             // than a second row: pasting the deeplink for a hotel you typed
             // earlier should complete that row, not duplicate it.
             const existing = ttiRows.find(r => canonTti(r.code) === parsed.code);
-            if (existing) { Object.assign(existing, parsed); updated++; continue; }
+            if (existing) {
+              // Fill in, never blank. A deeplink that carries no ctry= must
+              // not wipe the country the agent typed, and it knows nothing at
+              // all about the travel date or the arrival airport.
+              for (const [k, v] of Object.entries(parsed)) {
+                if (v !== '' && v != null) existing[k] = v;
+              }
+              updated++; continue;
+            }
             if (ttiRows.length >= TTI_MAX) break;
             // Drop the blank starter row rather than leaving a gap above.
             if (ttiRows.length === 1 && !canonTti(ttiRows[0].code)) ttiRows.length = 0;
@@ -2983,8 +3003,11 @@
           paintTtiSummary();
           // Adding a row is a real user action, so moving focus into it is the
           // helpful kind rather than the kind that steals a cursor on render.
-          const inputs = $('ttiRows').querySelectorAll('.tti-row .input');
-          if (inputs.length) inputs[inputs.length - 2].focus();
+          // By class, not by counting back from the end: a row grew a date box
+          // and a Fly into box, and an offset tuned for two fields landed the
+          // cursor in the middle of the new row instead of its first box.
+          const codes = $('ttiRows').querySelectorAll('.tti-row .tti-code');
+          if (codes.length) codes[codes.length - 1].focus();
         });
       }
       const test = $('ttiTest');
@@ -3104,6 +3127,7 @@
       const typing = host && host.contains(document.activeElement);
       if (host && !typing) {
         ttiRows = ttiRowsFromConfig(state.config);
+        ttiRowsHydrated = true;
         renderTtiRows();
       }
       paintTtiSummary();
@@ -4473,6 +4497,16 @@
       scriptFile: 'widget-tti-offers.js',
 
       getConfig: () => {
+        // READ THE ROWS. DO NOT TRUST THAT SOMETHING ELSE DID.
+        //
+        // state.config.ttiCodes is written by syncTtiConfig, which until now
+        // only ran as a side effect of painting the summary panel. Any path
+        // that changed a row without repainting saved a config that lagged the
+        // boxes on screen — which is how four hotels saved with no travel
+        // dates on them and came back needing the dates typed again (Andy,
+        // 16 Sep 2026). The save is the one moment the config MUST match the
+        // screen, so the save is where the rows are read.
+        if (ttiRowsHydrated) syncTtiConfig();
         // Strip Travelify creds — they're account-level, never persisted on the widget config
         const out = JSON.parse(JSON.stringify(state.config));
         delete out.appId;
