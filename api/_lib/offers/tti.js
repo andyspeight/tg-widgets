@@ -742,8 +742,13 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     // the search; storing it costs nothing and completes the line.
     ...(ctx.destination ? { airport: ctx.destination } : {}),
     ...(ctx.destinationName ? { airportName: ctx.destinationName } : {}),
-    ...(ctx.outboundDate ? { outboundDate: ctx.outboundDate } : {}),
-    ...(ctx.returnDate ? { returnDate: ctx.returnDate } : {}),
+    // The FLIGHT's own times win over the midnight dates in the criteria: the
+    // aeroplane leaves at 14:35, not at 00:00, and the board renders a time.
+    ...((fl && fl.outboundDate) || ctx.outboundDate
+      ? { outboundDate: (fl && fl.outboundDate) || ctx.outboundDate } : {}),
+    ...((fl && fl.returnDate) || ctx.returnDate
+      ? { returnDate: (fl && fl.returnDate) || ctx.returnDate } : {}),
+    ...(fl && fl.arrivalDate ? { arrivalDate: fl.arrivalDate } : {}),
     // The flight itself, under the names api/cached-offers.js already rebuilds
     // raw.flight from. The card draws carrier and stops and had nothing to draw.
     ...(fl && fl.carrier ? { carrier: fl.carrier } : {}),
@@ -881,33 +886,57 @@ export function normaliseAccommodationResult(r, ctx = {}) {
  *  readable price is not usable — see `cheapestFlight`. */
 export function normaliseFlightResult(f) {
   if (!f || typeof f !== 'object') return null;
-  const price = asNum(pick(f, [
-    'pricing.total', 'pricing.price', 'pricing.amount', 'pricing.grossPrice',
-    'pricing.totalPrice', 'pricing.leadInPrice', 'price.total', 'totalPrice', 'price',
-  ]));
+  const price = asNum(pick(f, ['pricing.total', 'pricing.price', 'pricing.amount']));
   if (price == null) return null;
-  const legs = Array.isArray(f.legs) ? f.legs : (Array.isArray(f.Legs) ? f.Legs : []);
-  const out = {
-    price,
-    currency: pick(f, ['pricing.currency', 'pricing.currencyCode', 'currency']) || null,
-    carrier: pick(f, ['carrier.name', 'carrierName', 'airline.name', 'airline', 'marketingCarrier.name']) || null,
-    carrierCode: pick(f, ['carrier.code', 'carrierCode', 'airline.code', 'marketingCarrier.code']) || null,
-    stops: asNum(pick(f, ['stops', 'numberOfStops', 'legs.0.stops'])),
-    duration: asNum(pick(f, ['duration', 'totalDuration', 'legs.0.duration'])),
-    flightNumber: pick(f, ['flightNumber', 'legs.0.flightNumber', 'segments.0.flightNumber']) || null,
-    cabinClass: pick(f, ['cabinClass', 'legs.0.cabinClass', 'segments.0.cabinClass']) || null,
-    outboundDate: pick(f, ['legs.0.departureDate', 'legs.0.departsAt', 'outboundDate', 'departureDate']) || null,
-    returnDate: pick(f, ['legs.1.departureDate', 'legs.1.departsAt', 'returnDate']) || null,
-    sid: asNum(pick(f, ['sid', 'supplierId', 'supplier.id'])),
-    legCount: legs.length || null,
+
+  // MEASURED from a real flight result (Andy, 16 Sep 2026). A flight is
+  // routes[] — one per leg, tagged Outbound and Inbound — and each route is
+  // segments[], one per hop. Everything a card shows lives on the first segment
+  // of the outbound route, not on the flight itself, which is why carrier and
+  // stops came back unmapped on every test until now.
+  const routes = Array.isArray(f.routes) ? f.routes : [];
+  const outbound = routes.find((r) => r && r.direction === 'Outbound') || routes[0] || null;
+  const inbound = routes.find((r) => r && r.direction === 'Inbound')
+    || (routes.length > 1 ? routes[1] : null);
+  const firstSeg = (route) => {
+    const segs = route && Array.isArray(route.segments) ? route.segments : [];
+    return segs[0] || null;
   };
-  // Direct is a claim, not a default: `false` and "we could not tell" are
-  // different, and a card that says Direct when it does not know is worse than
-  // one that says nothing.
-  const direct = pick(f, ['direct', 'isDirect', 'nonStop']);
-  if (typeof direct === 'boolean') out.direct = direct;
-  else if (Number.isFinite(out.stops)) out.direct = out.stops === 0;
-  return out;
+  const seg = firstSeg(outbound);
+  const back = firstSeg(inbound);
+
+  // STOPS ARE COUNTED, not read. A change of plane is another segment; a
+  // technical stop keeps the flight number and shows as a touchdown. Both are
+  // a stop to somebody choosing a holiday, and neither is a field.
+  const legSegs = outbound && Array.isArray(outbound.segments) ? outbound.segments : [];
+  const stops = legSegs.length
+    ? (legSegs.length - 1) + legSegs.reduce((n, x) => n + (asNum(x && x.touchdowns) || 0), 0)
+    : null;
+
+  const carrier = seg ? (seg.marketingCarrier || seg.operatingCarrier || null) : null;
+  return {
+    price,
+    currency: pick(f, ['pricing.currency', 'pricing.currencyCode']) || null,
+    refundability: pick(f, ['pricing.refundability']) || null,
+    carrier: (carrier && carrier.name) || null,
+    carrierCode: (carrier && carrier.code) || null,
+    stops,
+    // Stops are known or they are not. "We could not tell" and "it is direct"
+    // are different claims, and a card must never make the second on the first.
+    ...(stops == null ? {} : { direct: stops === 0 }),
+    duration: asNum(outbound && outbound.duration) ?? asNum(seg && seg.duration),
+    flightNumber: (seg && (seg.flightNo || seg.flightNumber)) || null,
+    cabinClass: (seg && seg.cabinClass) || null,
+    // REAL TIMES, not the midnight dates we asked for. The criteria say
+    // "2027-04-09"; the aeroplane leaves at 14:35, and a departure board that
+    // renders 00:00 on every row reads as broken.
+    outboundDate: (seg && seg.depart) || null,
+    arrivalDate: (seg && seg.arrive) || null,
+    returnDate: (back && back.depart) || null,
+    origin: (seg && seg.origin && seg.origin.iataCode) || null,
+    destination: (seg && seg.destination && seg.destination.iataCode) || null,
+    legCount: routes.length || null,
+  };
 }
 
 /** The cheapest usable flight from a package search, and what could not be read
@@ -921,7 +950,8 @@ export function cheapestFlight(results) {
   }
   if (!best) return { flight: null, unmapped: list.length ? ['flight.pricing'] : [] };
   const gaps = [];
-  for (const [name, v] of [['flight.carrier', best.carrier], ['flight.stops', best.stops]]) {
+  for (const [name, v] of [['flight.carrier', best.carrier], ['flight.stops', best.stops],
+    ['flight.departureTime', best.outboundDate]]) {
     if (v == null) gaps.push(name);
   }
   return { flight: best, unmapped: gaps };

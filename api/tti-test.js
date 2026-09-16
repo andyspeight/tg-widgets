@@ -50,6 +50,13 @@ const CONCURRENCY = 2;
 // Polls per property. The documented ceiling is 30; a search scoped to one
 // property settles long before that, and the route dies at 60s.
 const MAX_POLLS = 8;
+// A PACKAGE SETTLES MORE SLOWLY, because the flight half is still arriving.
+//
+// A real run came back complete:false at 8 polls having collected ONE flight
+// (Andy, 16 Sep 2026) — so "cheapest of 1 flight" was our poll cap, not a thin
+// route, and the price we cached may not have been the cheapest on offer. The
+// documented ceiling is 30; the deadline below is still the real guard.
+const DP_MAX_POLLS = 12;
 // Stop starting new work past this, so a slow supplier cannot run the function
 // into the platform's own timeout and return an empty body to the browser.
 const DEADLINE_MS = 42000;
@@ -412,7 +419,7 @@ export default async function handler(req, res) {
       // in flightResults. `also` counts those, because "0 flights came back"
       // and "this is a hotel-only price" look identical on a card.
       const r = await runSearch(creds, job.criteria, {
-        maxPolls: MAX_POLLS,
+        maxPolls: isDp ? DP_MAX_POLLS : MAX_POLLS,
         pick: 'accommodationResults',
         ...(isDp ? { also: 'flightResults' } : {}),
       });
@@ -423,6 +430,9 @@ export default async function handler(req, res) {
         continue;
       }
       acc.polls += r.polls || 0;
+      // A search that ran out of polls may not have seen the cheapest flight
+      // yet. Tracked so the price can be labelled rather than trusted.
+      if (!r.complete) acc.incomplete = true;
       acc.areaResults += (r.results || []).length;
       acc.flights += r.alsoCount || 0;
 
@@ -608,6 +618,10 @@ export default async function handler(req, res) {
       checkinDate: cheapest.checkinDate, nights: cheapest.nights,
       image: cheapest.image ? true : false,
       polls: acc.polls,
+      // Said out loud: a price from a search that had not finished settling is
+      // a price that may drop. Presenting it as "from" without saying so is the
+      // quiet kind of wrong this widget keeps having to avoid.
+      ...(acc.incomplete ? { incomplete: true } : {}),
       searchedCheckin: fixedCheckin(rows[idx], search) || null,
       ...(isDp ? {
         airports: acc.tried,
