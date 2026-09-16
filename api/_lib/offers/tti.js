@@ -436,12 +436,9 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
   const code = canonTti(prop && (prop.code || prop.tti));
   if (!code) return null;
 
-  // cleanCoord, not Number(). Number(null) is 0, which is finite and in range,
-  // so a row with no coordinates passed this guard and we sent Travelify
-  // Latitude 0, Longitude 0 with an 11-mile radius — an area of open Atlantic,
-  // contradicting the Ref and the country in the same request (measured in
-  // Andy's own 9 Apr 2027 search, 16 Sep 2026). The comment below always said
-  // "only when the row actually has them"; now it is true.
+  // cleanCoord, not Number(): Number(null) is 0, which is finite and in range,
+  // so a placeless row used to look like a placed one. What is DONE about that
+  // is at the criteria below, and it is not what it looks like it should be.
   const lat = cleanCoord(prop.lat, 90);
   const lng = cleanCoord(prop.lng, 180);
   const hasCoords = lat != null && lng != null;
@@ -494,15 +491,28 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
     CustomerCountry: /^[A-Z]{2}$/.test(String(search.customerCountry || '')) ? search.customerCountry : 'GB',
     TripType: 'Unspecified',
     AccommodationSearchCriteria: {
-      // Only sent when the row actually has them. An omitted field is not the
-      // same as a zero, and 0,0 is a real place in the Atlantic.
-      ...(hasCoords ? {
-        Latitude: lat,
-        Longitude: lng,
-        Radius: num(prop.radius ?? search.radius, DEFAULT_RADIUS_MILES, 1, 100),
-        LocationType: prop.locationType || 'City',
-        ...(prop.locationName ? { LocationName: String(prop.locationName).slice(0, 200) } : {}),
-      } : {}),
+      // TRAVELIFY DEMANDS A LOCATION, EVEN WITH A REF PINNING THE PROPERTY.
+      //
+      // A placeless row was sending Latitude 0, Longitude 0 with an eleven-mile
+      // radius — open Atlantic, in the same request as a Ref for a hotel in
+      // Tenerife. Omitting the fields is the obvious fix and it is wrong:
+      // every search was then refused outright.
+      //
+      //   Search Criteria: You must specify an accommodation search location
+      //
+      // LocationCountry alone does not satisfy it (Andy, 16 Sep 2026: 0 of 4
+      // found, all four with that error). So a centre is MANDATORY, the Ref is
+      // what actually finds the hotel, and 0,0 is the placeholder that gets the
+      // request accepted. It demonstrably does not scope the answer: the same
+      // request returned GF Fanabe, in Tenerife, 2,234 miles from it.
+      //
+      // Real coordinates are sent when the row has them, which is what pasting
+      // a deeplink is for. This is a floor, not a preference.
+      Latitude: hasCoords ? lat : 0,
+      Longitude: hasCoords ? lng : 0,
+      Radius: num(prop.radius ?? search.radius, DEFAULT_RADIUS_MILES, 1, 100),
+      LocationType: prop.locationType || 'City',
+      ...(prop.locationName ? { LocationName: String(prop.locationName).slice(0, 200) } : {}),
       ...(ctry ? { LocationCountry: ctry } : {}),
       // THE PIN. Always prefixed, always canonical, so a code typed as
       // ID:58612582, TTI:58612582 or 58612582 all ask the same question.
