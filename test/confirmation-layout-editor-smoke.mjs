@@ -232,6 +232,37 @@ console.log('A block the client writes carries its own words');
     && !EMAIL_BLOCKS.find((b) => b.type === 'greeting').fields);
 }
 
+console.log('The merge-tag chips reach the blocks the client writes');
+{
+  // Found in a real browser: the chips are declared on the email but were only
+  // drawn under a field that asked for them, and the layout builder has no such
+  // field — so a client could not click a tag in at all. Then, drawn BELOW the
+  // list, they were painted over by it.
+  const window = page();
+  const { store } = openBuilder(window, [{ type: 'text', text: 'Hello ' }]);
+  await sleep(30);
+  const chips = [...window.document.querySelectorAll('.tgep-tag')];
+  ok('the chips are on screen', chips.length === TAGS.length, String(chips.length));
+  const wrap = window.document.querySelector('.tgep-field');
+  const chipRow = wrap.querySelector('.tgep-tags');
+  const list = wrap.querySelector('.tgep-blocks');
+  ok('above the list, not under it',
+    !!chipRow && !!list && (chipRow.compareDocumentPosition(list) & window.Node.DOCUMENT_POSITION_FOLLOWING) !== 0);
+  ok('the list does not claim the whole pane, which is what painted over them',
+    !wrap.classList.contains('is-grow'));
+
+  const field = rows(window)[0].querySelector('textarea');
+  field.focus();
+  field.dispatchEvent(new window.Event('focus', { bubbles: true }));
+  field.selectionStart = field.selectionEnd = field.value.length;
+  const ref = chips.find((c) => c.getAttribute('data-tag') === '{bookingRef}');
+  await click(ref);
+  ok('clicking one drops it in where the client was writing',
+    field.value === 'Hello {bookingRef}', field.value);
+  ok('and it is saved', String(store.layout[0].text) === 'Hello {bookingRef}');
+  ok('and the preview shows it filled in', /Hello ST-24189/.test(preview(window)));
+}
+
 console.log('Starting from our layout gives an editable copy');
 {
   const window = page();

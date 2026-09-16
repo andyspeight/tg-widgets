@@ -1153,7 +1153,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       tags: CONF_TAGS,
       fields: [
         { key: 'layout', type: 'blocks', label: 'What goes in the email, in order',
-          palette: EMAIL_BLOCKS,
+          palette: EMAIL_BLOCKS, tagsAfter: true,
           hint: 'Arrange the email however you like. Blocks marked "From the booking" fill themselves in, and any that has nothing to show on a booking is left out. Leave the list empty to send our standard layout.',
           reset: {
             label: 'Copy our standard layout in, so I can change it',

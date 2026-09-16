@@ -114,7 +114,8 @@
   .tgep-block-body { padding:0 10px 10px; display:flex; flex-direction:column; gap:6px; }
   .tgep-block-body input, .tgep-block-body textarea { width:100%; box-sizing:border-box;
     border:1px solid #E2E8F0; border-radius:6px; padding:7px 9px; font:inherit; font-size:12px; color:#0F172A; }
-  .tgep-block-body textarea { min-height:70px; resize:vertical; line-height:1.55; }
+  .tgep-blocks textarea { flex:none; min-height:70px; max-height:180px; resize:vertical; line-height:1.55; }
+  .tgep-block-body textarea { min-height:70px; max-height:180px; resize:vertical; line-height:1.55; }
   .tgep-block-note { font-size:11px; color:#94A3B8; line-height:1.45; margin:0 10px 10px; }
   .tgep-add { display:flex; gap:6px; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #F1F5F9; }
   .tgep-add select { flex:1; min-width:0; border:1px solid #E2E8F0; border-radius:6px; padding:7px 9px;
@@ -390,7 +391,7 @@
                   : block.type === 'button' ? 'View my booking'
                     : 'Hello {firstName}, we cannot wait for you to go.');
               input.setAttribute('aria-label', (info ? info.label : block.type) + ' ' + key);
-              input.addEventListener('focus', () => { if (multiline) lastField = input; });
+              input.addEventListener('focus', () => { lastField = input; });
               input.addEventListener('input', () => { block[key] = input.value; commit(); });
               body.appendChild(input);
             });
@@ -468,6 +469,28 @@
       paint();
     }
 
+    /** The merge-tag chips, as a block the caller can place. */
+    function tagRow() {
+      const tagWrap = document.createElement('div');
+      tagWrap.className = 'tgep-field';
+      const tl = document.createElement('label');
+      tl.textContent = 'Tags (click to drop one in, we fill it per send)';
+      tagWrap.appendChild(tl);
+      const row = document.createElement('div');
+      row.className = 'tgep-tags';
+      (current.tags || []).forEach((t) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tgep-tag';
+        b.textContent = t.label;
+        b.setAttribute('data-tag', t.tag);
+        b.addEventListener('click', () => insertTag(t.tag));
+        row.appendChild(b);
+      });
+      tagWrap.appendChild(row);
+      return tagWrap;
+    }
+
     function buildPane() {
       pane.textContent = '';
       lastField = null;
@@ -477,8 +500,13 @@
       (current.fields || []).forEach((f) => {
         // The layout builder owns its own markup — it is a list, not an input.
         if (f.type === 'blocks') {
+          // NOT is-grow: that rule gives one field the whole pane, which is
+          // right for the single big message box on the prose emails and wrong
+          // for a list. Here it made the list eat the height and draw over the
+          // tag chips below it. The wrapper sizes to its content and the pane
+          // scrolls, which is what a list of blocks needs.
           const wrap = document.createElement('div');
-          wrap.className = 'tgep-field is-grow';
+          wrap.className = 'tgep-field';
           const label = document.createElement('label');
           label.textContent = f.label;
           wrap.appendChild(label);
@@ -489,6 +517,10 @@
             hint.textContent = f.hint;
             wrap.appendChild(hint);
           }
+          // Chips ABOVE the list: a client scrolled to the bottom of a long
+          // layout should not have to scroll further to find them, and they
+          // drop into whichever box was last used.
+          if (f.tagsAfter !== false && (current.tags || []).length) wrap.appendChild(tagRow());
           buildBlocks(f, wrap, values);
           pane.appendChild(wrap);
           return;
@@ -538,26 +570,7 @@
 
         // Tag chips sit directly under the first field that accepts them, so
         // clicking one lands where the client is already writing.
-        if (f.tagsAfter && (current.tags || []).length) {
-          const tagWrap = document.createElement('div');
-          tagWrap.className = 'tgep-field';
-          const tl = document.createElement('label');
-          tl.textContent = 'Tags (click to drop one in, we fill it per send)';
-          tagWrap.appendChild(tl);
-          const tagRow = document.createElement('div');
-          tagRow.className = 'tgep-tags';
-          current.tags.forEach((t) => {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'tgep-tag';
-            b.textContent = t.label;
-            b.setAttribute('data-tag', t.tag);
-            b.addEventListener('click', () => insertTag(t.tag));
-            tagRow.appendChild(b);
-          });
-          tagWrap.appendChild(tagRow);
-          pane.appendChild(tagWrap);
-        }
+        if (f.tagsAfter && (current.tags || []).length) pane.appendChild(tagRow());
       });
 
       // "Use our standard wording" — the editor owns the confirm step and calls
