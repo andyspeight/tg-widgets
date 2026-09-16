@@ -14,6 +14,11 @@
  * less is a head start, not a shortcut: what is there fills the form in and the
  * customer supplies the rest.
  *
+ * Once the booking is open the three details come back OUT of the address bar
+ * (Andy, same day: "Yes please strip the details out of the URL after it
+ * opens"), because the link is the booking and it does not need to sit in
+ * history afterwards. Only the parameters we used are removed.
+ *
  * This drives the REAL widget in jsdom, mounted on a page at that real address,
  * and watches what it asks the server for — because the thing being claimed is
  * what happens when a customer clicks a link in their confirmation email.
@@ -171,6 +176,77 @@ console.log('It happens once, and Look up another booking still means what it sa
   await sleep(30);
   ok('a re-render does not bounce the customer back into the booking',
     w.state.stage === 'form' && retrieves(ctx.calls).length === 1);
+}
+
+console.log('The details come out of the address bar once the booking is up');
+{
+  const ctx = page(LIVE);
+  const w = await mount(ctx);
+  const after = new URL(ctx.window.location.href);
+  ok('the booking is open', w.state.stage === 'found');
+  ok('the reference is gone from the address', !after.searchParams.has('orderref'), after.search);
+  ok('the departure date is gone', !after.searchParams.has('depdate'), after.search);
+  ok('the email address is gone', !after.searchParams.has('emailaddr'), after.search);
+  ok('the client\'s own parameters survive',
+    after.searchParams.get('orderstatus') === 'Confirmed'
+    && after.searchParams.get('itemcount') === '1'
+    && after.searchParams.get('ordertotal') === 'A$148.79', after.search);
+  ok('and so does their path', after.pathname === '/orders', after.pathname);
+}
+
+console.log('It takes only what it used');
+{
+  // Every spelling it reads, plus a hash and a tracking parameter that are
+  // nothing to do with us.
+  const ctx = page('https://client.test/booking?utm_source=email&Reference=' + REF
+    + '&DepDate=' + DATE + '&EmailAddress=' + encodeURIComponent(EMAIL) + '&page=2#tg-pay');
+  const w = await mount(ctx);
+  const after = new URL(ctx.window.location.href);
+  ok('the booking opened', w.state.stage === 'found');
+  ok('all three spellings were removed whatever their case',
+    !/reference|depdate|emailaddress/i.test(after.search), after.search);
+  ok('the tracking parameter is left alone', after.searchParams.get('utm_source') === 'email');
+  ok('so is anything else the page was carrying', after.searchParams.get('page') === '2');
+  ok('and the hash survives, so #tg-pay still opens the payment card', after.hash === '#tg-pay');
+}
+
+console.log('A link that did not work is left in the address to retry');
+{
+  const ctx = page(LIVE, { found: false });
+  const w = await mount(ctx);
+  ok('the lookup failed', w.state.stage === 'notfound');
+  ok('the details are still in the address, so a refresh tries again',
+    new URL(ctx.window.location.href).searchParams.get('orderref') === REF);
+}
+
+console.log('Nothing else touches the address bar');
+{
+  const partial = page('https://tripgift.com/orders?orderref=' + REF + '&depdate=' + DATE);
+  await mount(partial);
+  ok('a partial link is left exactly as it arrived',
+    new URL(partial.window.location.href).searchParams.get('orderref') === REF);
+
+  // A customer typing into the form, on a page with no link at all.
+  const typed = page('https://tripgift.com/orders?utm_source=email');
+  const w = await mount(typed);
+  const form = w.shadow.querySelector('form');
+  w.shadow.querySelector('[name="email"]').value = EMAIL;
+  w.shadow.querySelector('[name="date"]').value = DATE;
+  w.shadow.querySelector('[name="ref"]').value = REF;
+  form.dispatchEvent(new typed.window.Event('submit', { bubbles: true, cancelable: true }));
+  await sleep(60);
+  ok('a typed lookup finds the booking', w.state.stage === 'found');
+  ok('and leaves the address bar alone',
+    new URL(typed.window.location.href).search === '?utm_source=email',
+    new URL(typed.window.location.href).search);
+}
+
+console.log('A browser that will not rewrite the address still shows the booking');
+{
+  const ctx = page(LIVE);
+  ctx.window.history.replaceState = () => { throw new Error('nope'); };
+  const w = await mount(ctx);
+  ok('the booking is on screen regardless', w.state.stage === 'found' && /The Rocks Hotel/.test(html(w)));
 }
 
 console.log('An ordinary page is untouched');

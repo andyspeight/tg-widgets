@@ -17,7 +17,9 @@
  *     shape is dropped rather than sent, so a broken link lands on the form
  *     and not on "we couldn't find that booking". The link grants nothing the
  *     form does not: it is the same lookup, and all three still have to match
- *     a real booking.
+ *     a real booking. Once the booking is open those three parameters are
+ *     removed from the address bar (replaceState, so Back does not return to
+ *     them); the client's own parameters, the path and the hash survive.
  *
  * v1.12.0 changes (8 Sep 2026):
  *   - Vouchers. The payment card reads the ONE shared calculation
@@ -275,6 +277,45 @@
       if (!ref && !date && !email) return null;
       return { ref, date, email, complete: !!(ref && date && email) };
     } catch (e) { return null; }
+  }
+
+  /**
+   * Take the three details back out of the address bar once the booking is on
+   * screen (16 Sep 2026, Andy: "Yes please strip the details out of the URL
+   * after it opens").
+   *
+   * The link IS the booking: anyone holding it can read the trip. It has to be
+   * that way for a one-click link to work at all, but it does not have to stay
+   * in the address bar afterwards, where it goes into history, gets copied out
+   * of the bar and rides along in a referrer. So once the booking is open the
+   * parameters we used are removed and nothing else is touched: the client's
+   * own parameters, the path and the hash all survive.
+   *
+   * replaceState, not pushState, so Back does not return to the address that
+   * carried the details. Best-effort: a browser that refuses (a sandboxed
+   * frame, a file:// page) leaves the booking on screen exactly as it is.
+   *
+   * The consequence, and it is the point: a refresh afterwards shows the form
+   * again, because the details are no longer in the address to read.
+   */
+  function stripBookingDeepLink() {
+    try {
+      if (!window.history || typeof window.history.replaceState !== 'function') return false;
+      const url = new URL(window.location.href);
+      const ours = [].concat(DEEP_FIELDS.ref, DEEP_FIELDS.date, DEEP_FIELDS.email);
+      let removed = false;
+      // Snapshot the keys first: deleting while iterating a live list skips.
+      for (const key of Array.from(url.searchParams.keys())) {
+        if (ours.indexOf(String(key).trim().toLowerCase()) !== -1) {
+          url.searchParams.delete(key);
+          removed = true;
+        }
+      }
+      if (!removed) return false;
+      const search = url.searchParams.toString();
+      window.history.replaceState(window.history.state, '', url.pathname + (search ? '?' + search : '') + url.hash);
+      return true;
+    } catch (e) { return false; }
   }
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -4941,7 +4982,7 @@
       // replace. A failure lands on the ordinary not-found screen, whose Try
       // again returns to a form already holding these details.
       if (deep && deep.complete && this.c.widgetId) {
-        this._lookupBooking({ email: deep.email, date: deep.date, ref: deep.ref });
+        this._lookupBooking({ email: deep.email, date: deep.date, ref: deep.ref }, { fromLink: true });
       }
       if (this._deepPay) {
         setTimeout(() => {
@@ -5270,7 +5311,8 @@
      * customer and a typing one get the same answer, the same errors and the
      * same pre-filled retry.
      */
-    async _lookupBooking({ email, date, ref }) {
+    async _lookupBooking({ email, date, ref }, opts) {
+      const fromLink = !!(opts && opts.fromLink);
       if (!email || !date || !ref) {
         this.state.error = this.t('fillAllFields');
         this._render();
@@ -5337,6 +5379,10 @@
 
         this.state = { stage: 'found', order: data.order, error: null };
         this._render();
+        // The booking is up, so the details have done their job and come out of
+        // the address bar. Only after success: a failed link is left in place so
+        // a refresh can retry it.
+        if (fromLink) stripBookingDeepLink();
         this._fireEvent('booking-loaded', { order: data.order });
       } catch (err) {
         this.state = { stage: 'form', order: null, error: this.t('genericError') };
