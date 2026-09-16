@@ -3,6 +3,22 @@
  * Self-contained, embeddable widget for retrieving and displaying confirmed bookings
  * Zero dependencies — works on any website via a single script tag
  *
+ * v1.13.0 changes (16 Sep 2026):
+ *   - A booking can be opened straight from a link. When the address carries
+ *     the reference, the departure date and the email address, the form is
+ *     skipped and the booking is fetched on load:
+ *
+ *       /orders?orderref=TG96472&depdate=2027-01-13&emailaddr=luke%40example.com
+ *
+ *     Common spellings of each are read (orderref / bookingref / reference,
+ *     depdate / departuredate / date, emailaddr / email), case-insensitively,
+ *     and anything else on the URL is ignored. A PARTIAL link fills in what it
+ *     carries and leaves the rest to the customer, and a value in the wrong
+ *     shape is dropped rather than sent, so a broken link lands on the form
+ *     and not on "we couldn't find that booking". The link grants nothing the
+ *     form does not: it is the same lookup, and all three still have to match
+ *     a real booking.
+ *
  * v1.12.0 changes (8 Sep 2026):
  *   - Vouchers. The payment card reads the ONE shared calculation
  *     (public/_order-money.js, attached by /api/retrieve-order as
@@ -192,7 +208,7 @@
   const API_PAY = (typeof window !== 'undefined' && window.__TG_PAY_API__) || (API_BASE + '/api/pay-balance');
   const API_AMEND = (typeof window !== 'undefined' && window.__TG_AMEND_API__) || (API_BASE + '/api/amend-order');
   const AMEND_MAX = 1000; // matches the server cap in /api/amend-order
-  const VERSION = '1.12.0';
+  const VERSION = '1.13.0';
 
   // ── Payment deep link ──
   // The balance reminder email links to the client's booking page with
@@ -206,6 +222,58 @@
       if (!m) return null;
       const raw = decodeURIComponent(m[1] || '').trim().toUpperCase();
       return { ref: /^[A-Z0-9_\-]{3,40}$/.test(raw) ? raw : '' };
+    } catch (e) { return null; }
+  }
+
+  /**
+   * A booking handed over in the address bar (16 Sep 2026, Andy: "if someone
+   * arrives with a URL containing all three details, can you please set it to
+   * bypass the form and just open the booking?").
+   *
+   * A client's own order system links a customer straight to their booking:
+   *
+   *   /orders?orderref=TG96472&depdate=2027-01-13&emailaddr=luke%40example.com
+   *
+   * Those are the same three details the form asks for, so arriving with all
+   * three is the customer having already answered the question. Anything less
+   * is not a shortcut, it is a head start: whatever IS there fills the form in
+   * and the customer supplies the rest. The link carries no more authority than
+   * the form does, because the lookup is the same one either way and still
+   * needs all three to match a real booking.
+   *
+   * Names differ between order systems, so a small set of spellings is read for
+   * each field, case-insensitively, first one wins. Extra parameters on the URL
+   * (orderstatus, itemcount, ordertotal in the link above) are ignored.
+   */
+  const DEEP_FIELDS = {
+    ref: ['orderref', 'order_ref', 'bookingref', 'booking_ref', 'bookingreference', 'reference', 'booking', 'ref'],
+    date: ['depdate', 'dep_date', 'departdate', 'depart_date', 'departuredate', 'departure_date', 'departure', 'date'],
+    email: ['emailaddr', 'emailaddress', 'email_address', 'email', 'e-mail'],
+  };
+  const DEEP_REF_RE = /^[A-Za-z0-9_-]{3,40}$/;
+  const DEEP_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;                 // what the date input speaks
+  const DEEP_EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
+
+  function readBookingDeepLink() {
+    try {
+      const params = new URLSearchParams(String(window.location.search || ''));
+      const raw = { ref: '', date: '', email: '' };
+      params.forEach((value, key) => {
+        const k = String(key).trim().toLowerCase();
+        for (const field of Object.keys(DEEP_FIELDS)) {
+          if (raw[field]) continue;                            // first spelling wins
+          if (DEEP_FIELDS[field].indexOf(k) !== -1) raw[field] = String(value || '').trim();
+        }
+      });
+      // Each field is kept only if it is the shape the form would have
+      // produced. A half-typed or mangled value is dropped rather than sent,
+      // so a broken link lands the customer on the form instead of on "we
+      // couldn't find that booking".
+      const ref = DEEP_REF_RE.test(raw.ref) ? raw.ref : '';
+      const date = DEEP_DATE_RE.test(raw.date) ? raw.date : '';
+      const email = DEEP_EMAIL_RE.test(raw.email) ? raw.email.slice(0, 254) : '';
+      if (!ref && !date && !email) return null;
+      return { ref, date, email, complete: !!(ref && date && email) };
     } catch (e) { return null; }
   }
 
@@ -4858,8 +4926,23 @@
       if (this._deepPay && this._deepPay.ref) {
         this._lastAttempt = { ref: this._deepPay.ref };
       }
+      // A booking named in the address bar. Whatever it carries fills the form
+      // in; all three means the customer has already answered the question, so
+      // the form is skipped and the booking is fetched straight away.
+      const deep = readBookingDeepLink();
+      if (deep) this._lastAttempt = Object.assign({}, this._lastAttempt, {
+        email: deep.email || (this._lastAttempt && this._lastAttempt.email) || '',
+        date: deep.date || (this._lastAttempt && this._lastAttempt.date) || '',
+        ref: deep.ref || (this._lastAttempt && this._lastAttempt.ref) || '',
+      });
       this._initNarrowObserver();    // sets _narrow before first render so no flash
       this._render();
+      // One-shot, after the first render so the loading state has something to
+      // replace. A failure lands on the ordinary not-found screen, whose Try
+      // again returns to a form already holding these details.
+      if (deep && deep.complete && this.c.widgetId) {
+        this._lookupBooking({ email: deep.email, date: deep.date, ref: deep.ref });
+      }
       if (this._deepPay) {
         setTimeout(() => {
           try { this.el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { /* older browsers */ }
@@ -5174,10 +5257,20 @@
 
     async _submit(form) {
       const data = new FormData(form);
-      const email = (data.get('email') || '').toString().trim();
-      const date = (data.get('date') || '').toString().trim();
-      const ref = (data.get('ref') || '').toString().trim();
+      return this._lookupBooking({
+        email: (data.get('email') || '').toString().trim(),
+        date: (data.get('date') || '').toString().trim(),
+        ref: (data.get('ref') || '').toString().trim(),
+      });
+    }
 
+    /**
+     * Find a booking from three details, however they arrived: typed into the
+     * form, or handed over in the address bar. ONE path, so a deep-linked
+     * customer and a typing one get the same answer, the same errors and the
+     * same pre-filled retry.
+     */
+    async _lookupBooking({ email, date, ref }) {
       if (!email || !date || !ref) {
         this.state.error = this.t('fillAllFields');
         this._render();
