@@ -701,13 +701,30 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   const headRate = head.rate || {};
   const lat = asNum(pick(loc, ['latitude', 'lat']));
   const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
-  // A PACKAGE PRICE IS THE FLIGHT PLUS THE HOTEL.
+  // A DYNAMIC PACKAGE IS ALREADY PRICED. DO NOT ADD ANYTHING TO IT.
   //
-  // ctx.flight is supplied only on a dynamic package search. Without it the
-  // number below is the accommodation alone, which is exactly what was being
-  // cached under a Flight + Hotel badge.
+  // Andy, 16 Sep 2026: "If you are doing a DP search the price you get back is
+  // the total holiday price per person - you don't need to be adding anything
+  // together." So on a package the result's own price IS the holiday, flight
+  // and hotel together, PER PERSON. The flightResults array describes the
+  // flight; it is not a component to be summed.
+  //
+  // The previous reading — hotel plus cheapest flight — was arrived at from the
+  // evidence rather than from the product, and it double-counted: it added a
+  // flight to a number that already contained one. Two wrong prices in a row on
+  // this field, in opposite directions, which is what happens when a commercial
+  // question is answered by inference instead of being asked.
   const fl = ctx.flight || null;
-  const total = (price != null ? price : pricePP) + (fl ? fl.price : 0);
+  // Paying travellers. An infant does not hold a seat or a bed, so it does not
+  // carry a per-person holiday price.
+  const payingPax = Math.max(1,
+    (Number.isFinite(ctx.adults) ? ctx.adults : 0) + (Number.isFinite(ctx.children) ? ctx.children : 0)
+    || 1);
+  const perPerson = fl ? (price != null ? price : pricePP) : pricePP;
+  // The only authoritative number on a package is the per-person one. The total
+  // is DERIVED from it, and labelled as such, so the two can be checked against
+  // each other rather than one being quietly presented as the other.
+  const total = fl ? (price != null ? price : pricePP) * payingPax : (price != null ? price : pricePP);
 
   const offer = {
     // A package is stored AS A PACKAGE, in the platform's own fields.
@@ -760,12 +777,11 @@ export function normaliseAccommodationResult(r, ctx = {}) {
     ...(fl && fl.cabinClass ? { cabinClass: fl.cabinClass } : {}),
     ...(fl && Number.isFinite(fl.sid) ? { flightSid: fl.sid } : {}),
     price: total,
-    // The two halves, kept so a price can be explained rather than asserted.
-    ...(fl ? { hotelPrice: price != null ? price : pricePP, flightPrice: fl.price } : {}),
-    // Per person is the ACCOMMODATION's own figure and does not describe a
-    // package, so it is dropped once a flight is in the total rather than
-    // quietly under-reporting it.
-    pricePP: (!fl && pricePP != null) ? pricePP : null,
+    // Travelify's own per-person holiday price on a package, untouched. The
+    // headline above is this multiplied by the paying travellers, which is the
+    // only arithmetic done to it.
+    pricePP: perPerson != null ? perPerson : null,
+    ...(fl ? { pricedPax: payingPax } : {}),
     currency: pick(r, ['pricing.currency', 'pricing.currencyCode']) || ctx.currency || 'GBP',
     hotel: r.name ? String(r.name).slice(0, 160) : null,
     resort: (() => {
@@ -856,6 +872,10 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   // click-through from the property reference and coordinates (offersDeeplink),
   // so a cached offer without a url is normal rather than broken, and reporting
   // it sent Andy looking for a missing field that was never needed.
+  // A package total is per-person times the travellers. Not knowing how many
+  // there are makes the total wrong by a factor, so it is reported rather than
+  // quietly defaulting to one. Both real callers pass it; this catches a third.
+  if (fl && !Number.isFinite(ctx.adults)) unmapped.push('travellers');
   for (const [name, v] of [['hotel', offer.hotel], ['nights', offer.nights],
     // A card without a board basis looks like a hotel that has none, which is
     // not a thing. Reported so it can be chased rather than absorbed.

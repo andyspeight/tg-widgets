@@ -864,37 +864,35 @@ every search this product has run went out at the default 30 days, whatever the
 editor said. `DatesMin` is the earliest date the widget wants, which is exactly
 what a lead time is.
 
-### A PACKAGE PRICE IS THE FLIGHT PLUS THE HOTEL
+### A PACKAGE IS ALREADY PRICED, PER PERSON
 
-The single most important thing on this page, and it was wrong for most of a
-day. **A dynamic package prices the two halves separately** and returns them in
-separate arrays: `accommodationResults` carries the HOTEL price, `flightResults`
-carries the flight. We cached the accommodation price as the package price.
+Andy, 16 Sep 2026: *"If you are doing a DP search the price you get back is the
+total holiday price per person — you don't need to be adding anything
+together."*
 
-The symptom was unmistakable once it appeared (Andy, 14 Sep 2026): the same
-property at **£857 from Gatwick, £857 from Manchester, and £857 on a search that
-returned no flights at all**. Three identical answers is what a hotel-only price
-looks like, and it is the exact mislabelling this widget was built to avoid.
+So on a dynamic package, `accommodationResult.pricing.price` **is the holiday**:
+flight and hotel, per person. `flightResults` describes the flight; it is not a
+component to be summed.
 
-So:
+- `pricePP` is Travelify's own number, untouched. It is the only authoritative
+  figure and the one an agent quotes.
+- `price` is that multiplied by the paying travellers, and nothing else. An
+  infant holds neither a seat nor a bed, so it carries no per-person price.
+- Not knowing the party size makes the total wrong **by a factor**, so it is
+  reported as `travellers` in `unmapped` rather than quietly defaulting to one.
+- A hotel-only search is untouched: its price is whatever the supplier returned
+  for the room.
 
-- `cheapestFlight(flightResults)` picks the cheapest usable flight;
-- the offer's `price` is that flight **plus** the hotel, with `hotelPrice` and
-  `flightPrice` kept alongside so a price can be explained rather than asserted;
-- `pricePP` is DROPPED on a package — it is the accommodation's own per-person
-  figure and under-reports the thing being sold;
-- the flight's carrier, stops, duration and direct flag travel with the offer,
-  under the names `cached-offers.js` already rebuilds `raw.flight` from, so the
-  card finally has something to draw;
-- **no flight means no package.** Both the test route and the sweep refuse to
-  store one, rather than caching a hotel price behind a Flight + Hotel badge.
+**This field has now been wrong twice, in opposite directions.** First the hotel
+price alone was cached as the package price. Then it was hotel plus cheapest
+flight, which double-counted — adding a flight to a number that already
+contained one. Both readings were inferred from evidence rather than asked
+about. A commercial question with a right answer somebody already knows should
+be asked, not deduced; the evidence was consistent with both wrong answers.
 
-`direct` is a claim, not a default: "we could not tell" and "it is not direct"
-are different, and only a real boolean or a real stop count sets it.
-
-The flight field names are picks, not certainties — no worked flight result has
-been seen. Anything unreadable is reported, and a flight with no readable price
-is not usable at all, which is the safe direction.
+The gate stays: **no flight means no package.** If `flightResults` is empty the
+offer is refused rather than cached, because a hotel-only price behind a Flight
++ Hotel badge is the original fault this widget exists to avoid.
 
 ### The editor must show the cache as it is NOW
 

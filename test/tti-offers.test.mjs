@@ -2076,29 +2076,33 @@ const FLIGHTS = [
   flightOf({ price: 212, code: 'LS', name: 'Jet2', flightNo: 'LS1', stops: 0, duration: 280 }),
 ];
 
-test('the same hotel from three airports is not the same price', () => {
-  // Andy, 14 Sep 2026: "I have just changed the departure airport, so there
-  // should have been nothing in the cache, and it still says the same price."
-  // £857 from Gatwick, £857 from Manchester, and £857 on a search that found no
-  // flights at all. Three identical answers is what a hotel-only price looks
-  // like — because accommodationResults carries the HOTEL price and the flight
-  // is priced separately in flightResults.
-  const hotelOnly = normaliseAccommodationResult(PKG_RESULT, {}).offer;
-  assert.equal(hotelOnly.price, 857, 'the accommodation half on its own');
-
+test('a package is already priced, per person, and nothing is added to it', () => {
+  // Andy, 16 Sep 2026: "If you are doing a DP search the price you get back is
+  // the total holiday price per person - you don't need to be adding anything
+  // together."
+  //
+  // The previous reading — hotel plus cheapest flight — was arrived at from
+  // evidence rather than from the product, and double-counted: it added a
+  // flight to a number that already contained one.
   const { flight } = cheapestFlight(FLIGHTS);
-  assert.equal(flight.price, 212, 'the cheapest flight, not the first');
-  const pkg = normaliseAccommodationResult(PKG_RESULT, { origin: 'MAN', destination: 'TFS', flight }).offer;
-  assert.equal(pkg.price, 1069, 'the package is the sum of both halves');
-  assert.equal(pkg.hotelPrice, 857);
-  assert.equal(pkg.flightPrice, 212);
+  const pkg = normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'MAN', destination: 'TFS', flight, adults: 2 }).offer;
+  assert.equal(pkg.pricePP, 857, "Travelify's own per-person holiday price, untouched");
+  assert.equal(pkg.price, 1714, 'the total is that multiplied by the travellers, and nothing else');
+  assert.equal(pkg.pricedPax, 2, 'and it says how many it multiplied by');
+  assert.ok(!('flightPrice' in pkg), 'the flight is not a component to be summed');
+  assert.ok(!('hotelPrice' in pkg), 'and neither is the hotel');
 
-  // A dearer flight must move the price, which is the whole complaint.
+  // A DEARER FLIGHT MUST NOT MOVE IT. The package price already contains one.
   const { flight: dearer } = cheapestFlight([FLIGHTS[0]]);
   assert.equal(normaliseAccommodationResult(PKG_RESULT,
-    { origin: 'MAN', destination: 'TFS', flight: dearer }).offer.price, 1206);
-});
+    { origin: 'MAN', destination: 'TFS', flight: dearer, adults: 2 }).offer.price, 1714);
 
+  // An infant holds neither a seat nor a bed, so it carries no holiday price.
+  assert.equal(normaliseAccommodationResult(PKG_RESULT,
+    { origin: 'MAN', destination: 'TFS', flight, adults: 2, children: 1, infants: 1 }).offer.price,
+  857 * 3);
+});
 test('a package with no flight is not cached as one', () => {
   // Caching the hotel price behind a Flight + Hotel badge is the original bug
   // this widget was built to avoid, and it is exactly what "no flights came
@@ -2132,19 +2136,36 @@ test('the flight the price came from travels with the offer', () => {
   assert.ok(!('direct' in vague), 'no stops information means no direct claim');
 });
 
-test('per person is dropped once a flight is in the total', () => {
-  // pricePP is the accommodation's own per-person figure. Left in place beside
-  // a package total it under-reports the price of the thing being sold.
+test('a hotel on its own keeps the shape it always had', () => {
+  // The per-person rule is scoped to DYNAMIC PACKAGES. A hotel-only search is
+  // unchanged: its price is whatever the supplier returned for the room.
   const r = { ...PKG_RESULT, pricing: { total: 857, perPerson: 428.5, currency: 'GBP' } };
-  assert.equal(normaliseAccommodationResult(r, {}).offer.pricePP, 428.5, 'a hotel keeps it');
-  const { flight } = cheapestFlight(FLIGHTS);
-  assert.equal(normaliseAccommodationResult(r, { origin: 'MAN', flight }).offer.pricePP, null);
+  const hotel = normaliseAccommodationResult(r, { adults: 2 }).offer;
+  assert.equal(hotel.price, 857);
+  assert.equal(hotel.pricePP, 428.5, "the supplier's own per-person figure, not a derived one");
+  assert.ok(!('pricedPax' in hotel), 'nothing was multiplied, so nothing is claimed');
+});
+test('the panel shows a package price the way it is actually sold', () => {
+  // Per person is the number Travelify returns and the number an agent quotes.
+  // The total is shown beside it so the two can be checked against each other,
+  // and against a real booking.
+  assert.ok(/esc\(money\(r\.pricePP, r\.currency\)\) \+ ' per person/.test(EDITOR));
+  assert.ok(/' for ' \+ r\.pricedPax/.test(EDITOR));
+  assert.ok(/flight and hotel together/.test(EDITOR));
+  // The sum must be gone: adding a flight to a price that already contains one
+  // is the mistake this replaced.
+  assert.ok(!/Hotel ' \+ esc\(money\(r\.hotelPrice/.test(EDITOR));
+  assert.ok(!/flightPrice/.test(EDITOR));
 });
 
-test('the panel shows the price as a sum, not as an assertion', () => {
-  assert.ok(/Hotel ' \+ esc\(money\(r\.hotelPrice/.test(EDITOR));
-  assert.ok(/\+ flight /.test(EDITOR));
-  assert.ok(/cheapest of /.test(EDITOR));
+test('a package total never silently assumes one traveller', () => {
+  // The total is per-person times the travellers, so not knowing how many makes
+  // it wrong by a factor rather than slightly wrong.
+  const { flight } = cheapestFlight(FLIGHTS);
+  const noPax = normaliseAccommodationResult(PKG_RESULT, { origin: 'MAN', flight });
+  assert.ok(noPax.unmapped.includes('travellers'));
+  const withPax = normaliseAccommodationResult(PKG_RESULT, { origin: 'MAN', flight, adults: 2 });
+  assert.ok(!withPax.unmapped.includes('travellers'));
 });
 
 /* ============================================================
@@ -2558,7 +2579,7 @@ test('stops are counted, because they are not a field', () => {
 test('the flight the price came from reaches the card', () => {
   const { flight } = cheapestFlight([REAL_FLIGHT]);
   const wire = wireShape(normaliseAccommodationResult(PKG_RESULT,
-    { origin: 'INV', destination: 'TFS', flight }).offer);
+    { origin: 'INV', destination: 'TFS', flight, adults: 2 }).offer);
   assert.equal(wire.flight.carrier.name, 'Smartwings');
   assert.equal(wire.flight.carrier.code, 'QS');
   assert.equal(wire.flight.direct, true);
@@ -2568,8 +2589,10 @@ test('the flight the price came from reaches the card', () => {
   assert.equal(wire.flight.duration, 295);
   // The wire shape carries the price inside each product's pricing block, not
   // at the top — both halves get the same package total.
-  assert.equal(wire.accommodation.pricing.price, 857 + 848, 'and it is still both halves');
-  assert.equal(wire.flight.pricing.price, 857 + 848);
+  // The package price is Travelify's own, per person, times the travellers —
+  // the flight's £212 is not added to it.
+  assert.equal(wire.accommodation.pricing.price, 857 * 2);
+  assert.equal(wire.flight.pricing.price, 857 * 2);
 });
 
 test('a price from a search that had not finished says so', () => {

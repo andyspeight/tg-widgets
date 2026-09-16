@@ -2782,12 +2782,18 @@
                     + 'settling when we stopped, so a cheaper flight may exist. Test again to '
                     + 'see whether the price comes down.</span>';
             }
-            if (Number.isFinite(r.flightPrice) && Number.isFinite(r.hotelPrice)) {
-              text += '<br><span style="color:var(--tgse-ink-3)">Hotel ' + esc(money(r.hotelPrice, r.currency))
-                    + ' + flight ' + esc(money(r.flightPrice, r.currency))
-                    + ' = ' + esc(money(r.fromPrice, r.currency))
-                    + (r.flightResults > 0 ? ', cheapest of ' + r.flightResults
-                       + (r.flightResults === 1 ? ' flight' : ' flights') : '')
+            // A PACKAGE IS ALREADY PRICED, PER PERSON. Travelify returns the
+            // whole holiday and nothing is added to it. Both figures are shown
+            // so the per-person price can be checked against a real quote, and
+            // the total against the per-person price.
+            if (Number.isFinite(r.pricePP) && Number.isFinite(r.pricedPax)) {
+              text += '<br><span style="color:var(--tgse-ink-3)"><strong>'
+                    + esc(money(r.pricePP, r.currency)) + ' per person</strong> \u2014 '
+                    + esc(money(r.fromPrice, r.currency)) + ' for ' + r.pricedPax
+                    + (r.pricedPax === 1 ? ' traveller' : ' travellers')
+                    + ', flight and hotel together'
+                    + (r.flightResults > 0 ? ', from ' + r.flightResults
+                       + (r.flightResults === 1 ? ' flight' : ' flights') + ' found' : '')
                     + '.</span>';
             } else if (r.flightResults > 0) {
               text += '<br><span style="color:var(--tgse-ink-3)">' + r.flightResults
