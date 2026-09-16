@@ -1,7 +1,8 @@
 # A copilot for Travelgenix Sites: the review
 
 **Written:** 16 September 2026, slice 0 of the copilot brief (the brief itself is
-dated the same day). **For:** whoever builds slices 1 to 6, and Andy.
+dated the same day). The assistant is called **Luna Assist** (Andy, the same
+afternoon); "copilot" below is the brief's word for the same thing. **For:** whoever builds slices 1 to 6, and Andy.
 **Project row:** Travelgenix Projects, "Travelgenix Sites (tg-sites)", record
 `recBOHfgv92HSocEu`. **Companions:** `docs/duda-visibility-review.md` (the same
 shape, for the visibility side), `docs/duda-gap-analysis.md` (the platform
@@ -287,7 +288,9 @@ is also where the changes I would make to the plan live, marked **Change**.
    pinned in code beside the model ids. A monthly allowance per tenant in
    pence, a reserve claimed before the call at the model's worst case, a hard
    stop at zero, fail closed when the table cannot be read. The existing daily
-   request cap stays as a second floor. Per-user limits are new.
+   request cap stays as a second floor. Per-user limits are new. Andy's answer
+   on 16 Sep: unlimited to start, so the allowance is unset and the ledger
+   counts pence for the day it is wanted.
 9. **Everything logged.** `copilot_log`: who, tenant, page, mode, the
    operations proposed, applied and undone, tokens and cost. Prompts and
    answers are not stored, in line with 0015; the operations are, and they
@@ -297,8 +300,8 @@ is also where the changes I would make to the plan live, marked **Change**.
     routes. The renderer role gains no privilege, no script is added, and the
     `app/site` tree is untouched by every slice.
 11. **Plain words in the panel.** The panel's copy goes through the same
-    review as the rest of the tool. **Change:** the assistant's name is one
-    constant so Andy's choice (section 9) is a one-line change.
+    review as the rest of the tool. The assistant is called Luna Assist
+    (Andy, 16 Sep), held in one constant so the name is a one-line change.
 
 ---
 
@@ -382,9 +385,9 @@ the brief's; the additions are marked.
 - **Slice 5, results hand-off.** "Fix this" on each `/results` fix list item
   opens the copilot with that item as context. When visibility slice B lands,
   the same hand-off for AI visibility suggestions.
-- **Slice 6, client access.** The client role gets the copilot with the
-  narrower toolset, a stricter allowance and the capability set respected.
-  Test it hardest.
+- **Slice 6, client hardening.** The client role has had the assistant
+  since slice 1; this slice is the adversarial pass on it: the narrower
+  toolset, the capability set and any allowance Andy sets, tested hardest.
 - **Later, not now:** an MCP server for tg-sites, voice input, collections,
   design import through the same operation layer.
 
@@ -422,20 +425,25 @@ panel UI is built.
 
 ---
 
-## 9. Questions for Andy (asked, not blocking)
+## 9. Questions for Andy, and his answers (16 September 2026)
 
-1. **Allowance and pricing.** What allowance is included per client per month,
-   and do heavy users pay for top-ups? The ledger is built regardless, in
-   pence, so any answer is a number in a settings row.
-2. **Client access timing.** Launch with staff only and add clients in slice
-   6, or pull client access forward? The role filter lands in slice 1 either
-   way.
-3. **The name.** "Copilot" is Duda's, GitHub's and Microsoft's word. A Luna
-   name fits the family (Luna Chat, Luna Work). One constant in code, so it
-   can change later.
-4. **Ops.** `ANTHROPIC_API_KEY` on tg-sites-shell in Vercel is needed before
-   slice 1 can be used live. Still pending from before: `OPENAI_API_KEY`
-   (images) and `CRON_SECRET` (the housekeeping cron).
+1. **Allowance and pricing.** Andy: **unlimited to start.** The ledger is
+   built anyway and every turn is costed in pence, so the number is there
+   when a cap is wanted. An unset allowance means unlimited; the per-site
+   daily request cap and the per-user limit stay as floors against abuse,
+   not as pricing.
+2. **Client access timing.** Andy: **client and staff.** The client role has
+   the assistant from slice 1, with the read-only toolset Plan mode carries,
+   and gains the capability-scoped writers as slice 2 lands them. Slice 6
+   becomes the hardening pass and the tests, not the first access.
+3. **The name.** Andy: **Luna Assist.** One constant in code
+   (`lib/assist/brand.ts`), the panel says it, the code paths are `assist`.
+4. **Ops.** Still pending: `ANTHROPIC_API_KEY` on tg-sites-shell in Vercel
+   before slice 1 can be used live, and `OPENAI_API_KEY` (images) and
+   `CRON_SECRET` (the housekeeping cron) from before.
+
+The panel direction (section 8) is still Andy's to pick. Slice 1's
+foundations do not depend on it, so they go first; the panel waits.
 
 ---
 

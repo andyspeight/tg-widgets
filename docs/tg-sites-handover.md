@@ -181,10 +181,11 @@ the SDK; two cheap read tools in slice 1 for the results board and the
 enquiries). Three panel directions are on a canvas
 (https://claude.ai/artifact/JPhHqEGyaVSZ29RD8rSYnR): A the rail panel
 (recommended), B a command bar under the canvas, C a room of its own. Andy
-picks before any panel UI is built. Four questions are with him and do not
-block: the allowance per client, client access timing, the name ("Copilot" is
-Duda's word; a Luna name would fit) and `ANTHROPIC_API_KEY` on tg-sites-shell.
-Nothing in the codebase changed for this beyond the docs.
+picks before any panel UI is built. Andy answered three of the four questions
+the same afternoon: the allowance is unlimited to start (the ledger counts pence
+anyway), access is for client and staff from slice 1, and the name is **Luna
+Assist** (one constant, `lib/assist/brand.ts`; code paths are `assist`).
+Still pending: `ANTHROPIC_API_KEY` on tg-sites-shell, and the panel direction.
 
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen
@@ -499,10 +500,11 @@ rested on a number that does not mean what it looks like.
 
 8. **Collections fed from an external source.**
 
-9. **The assistant panel (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
-   `docs/tg-sites-copilot-review.md`, once Andy has picked a panel direction
-   from the canvas and `ANTHROPIC_API_KEY` is on tg-sites-shell. Slice 1 is
-   Plan mode with read tools only and is useful on its own.
+9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
+   `docs/tg-sites-copilot-review.md`. Slice 1's foundations (route, ledger,
+   context builder, read tools, Plan mode) do not need the panel direction;
+   the panel does, and Andy picks it from the canvas. `ANTHROPIC_API_KEY` on
+   tg-sites-shell before any of it is used live.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.
