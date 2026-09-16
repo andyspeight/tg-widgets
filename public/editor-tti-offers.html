@@ -42,24 +42,25 @@
       border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden;
     }
     /* ---- TTI property rows -------------------------------------------- */
-    .tti-rows { display: flex; flex-direction: column; gap: 6px; }
-    .tti-row { display: grid; grid-template-columns: 1fr 72px 140px 28px; gap: 6px; align-items: center; }
-    /* A package widget carries a fourth control, the arrival airport. The
-       columns are fixed, so without this the new input was laid into the 28px
-       delete-button cell and read as no box at all (Andy, 14 Sep 2026:
-       "it mentions a fly in to box, but there isnt one in the editor"). */
-    .tti-row.has-dst { grid-template-columns: 1fr 72px 140px 80px 28px; }
-    .tti-row .tti-when { min-width: 0; }
-    /* Below this the four controls stop being a row and become a small block,
-       rather than each shrinking until none of them is usable. */
-    @media (max-width: 560px) {
-      .tti-row, .tti-row.has-dst { grid-template-columns: 1fr 1fr 28px; }
-      .tti-row .tti-when { grid-column: 1 / -1; }
-    }
+    .tti-rows { display: flex; flex-direction: column; gap: 14px; }
+    /* ONE HOTEL IS A SMALL BLOCK, NOT ONE LONG LINE.
+       The panel is about 300px wide. Four controls across it left the code
+       field around 20px and pushed the delete button off the edge (Andy,
+       16 Sep 2026: "with three fields you can't see them all"). So the code
+       gets a line of its own with the delete button, and the three shorter
+       fields sit under it and WRAP — on a wide panel they stay on one line, on
+       a narrow one the arrival airport drops below instead of everything
+       shrinking until none of them is usable. */
+    .tti-row { display: grid; grid-template-columns: 1fr 28px; gap: 6px; align-items: center; }
+    .tti-row .tti-fields { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+    .tti-row .tti-fields .input { margin: 0; }
+    .tti-row .tti-ctry { flex: 0 0 62px; width: 62px; }
+    .tti-row .tti-when { flex: 1 1 138px; min-width: 128px; }
+    .tti-row .tti-dst { flex: 1 1 96px; min-width: 88px; text-transform: uppercase; }
     /* The location hint gets its own full-width line rather than a cell, so it
        cannot push the delete button onto a row of its own. */
     .tti-row .tti-place {
-      grid-column: 1 / -1; min-width: 0; font-size: 12px;
+      grid-column: 1 / -1; min-width: 0; font-size: 12px; margin-top: -2px;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tgse-ink-3);
     }
     .tti-row .tti-place:empty { display: none; }
@@ -984,10 +985,14 @@
                   <button type="button" class="btn btn-secondary btn-sm" id="ttiTest">Test these codes</button>
                 </div>
                 <div class="field-help">
-                  The Travelify property code and the two-letter country it is in.
-                  The code is what picks the hotel, the country says which part of the
-                  world to look in. Codes work with or without the <code>TTI:</code>
-                  prefix. Up to 100 hotels.
+                  Each hotel is a <strong>Travelify property code</strong> on the top line, then
+                  the <strong>two-letter country</strong> it is in. The code picks the hotel; the
+                  country says which part of the world to look in. Codes work with or without the
+                  <code>TTI:</code> prefix. Up to 100 hotels.
+                  <br><strong>Travel date</strong> is optional: set it only for a hotel that
+                  travels on a specific day, and leave it blank for the date window above.
+                  <strong>Fly into</strong> is optional too, and only appears on a flight + hotel
+                  widget: leave it blank and we work out the nearest airport to the hotel.
                 </div>
                 <div class="tti-test-out" id="ttiTestOut" hidden></div>
                 <div class="field-help" id="ttiSummary" style="margin-top:8px;"></div>
@@ -2244,10 +2249,17 @@
     /* A row needs a code and somewhere to look: a country is enough, because
        the code itself pins the property. Coordinates narrow it further when a
        pasted deeplink supplied them, but they are never required. */
+    /* Mirrors cleanCoord on the server: a coordinate, or null. NEVER zero.
+       Number(null) is 0, and a saved row that carries lat: null comes back as
+       0,0 — which is finite, in range, and a real place in the Gulf of Guinea.
+       Every row was reporting its location as "0.000, 0.000" (Andy, 16 Sep
+       2026). */
+    const coordOf = (v, limit) => {
+      const n = Number(String(v == null ? '' : v).trim());
+      return (Number.isFinite(n) && n !== 0 && Math.abs(n) <= limit) ? n : null;
+    };
     function rowHasCoords(r) {
-      const lat = Number(r && r.lat), lng = Number(r && r.lng);
-      return Number.isFinite(lat) && Number.isFinite(lng)
-        && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+      return coordOf(r && r.lat, 90) != null && coordOf(r && r.lng, 180) != null;
     }
     function rowHasPlace(r) {
       return !!canonCtry(r && r.ctry) || rowHasCoords(r);
@@ -2296,7 +2308,7 @@
           out.push({
             code: String(r.code || r.tti || '').replace(/^[A-Z]+:/i, ''),
             ctry: r.ctry || r.countryCode || '',
-            lat: Number(r.lat), lng: Number(r.lng),
+            lat: coordOf(r.lat, 90), lng: coordOf(r.lng, 180),
             radius: Number(r.radius) || undefined,
             locationName: r.locationName || r.loc || '',
             locationType: r.locationType || 'City',
@@ -2327,7 +2339,9 @@
         seen[code] = true;
         out.push({
           code, ctry: canonCtry(r.ctry),
-          lat: Number(r.lat), lng: Number(r.lng),
+          // Only when they are real. Writing a null into every row is what
+          // came back as 0,0 on the next load.
+          ...(rowHasCoords(r) ? { lat: coordOf(r.lat, 90), lng: coordOf(r.lng, 180) } : {}),
           ...(Number(r.radius) ? { radius: Number(r.radius) } : {}),
           ...(r.locationName ? { locationName: String(r.locationName).slice(0, 200) } : {}),
           ...(/^[A-Z0-9]{3,11}$/.test(String(r.dst || '')) ? { dst: String(r.dst) } : {}),
@@ -2455,7 +2469,7 @@
         const wrap = document.createElement('div');
         wrap.className = 'tti-row';
         const code = document.createElement('input');
-        code.className = 'input';
+        code.className = 'input tti-code';
         code.type = 'text';
         code.placeholder = 'TTI code, e.g. 12345';
         code.value = row.code || '';
@@ -2492,7 +2506,7 @@
         let dst = null;
         if (isPkg) {
           dst = document.createElement('input');
-          dst.className = 'input tti-ctry';
+          dst.className = 'input tti-dst';
           dst.type = 'text';
           dst.maxLength = 11;
           dst.placeholder = 'Fly into';
@@ -2535,9 +2549,13 @@
           markDirtyAndPreview();
         });
 
-        wrap.appendChild(code); wrap.appendChild(ctry); wrap.appendChild(when);
-        if (dst) { wrap.classList.add('has-dst'); wrap.appendChild(dst); }
-        wrap.appendChild(del); wrap.appendChild(place);
+        const fields = document.createElement('div');
+        fields.className = 'tti-fields';
+        fields.appendChild(ctry); fields.appendChild(when);
+        if (dst) fields.appendChild(dst);
+
+        wrap.appendChild(code); wrap.appendChild(del);
+        wrap.appendChild(fields); wrap.appendChild(place);
         host.appendChild(wrap);
       });
     }
