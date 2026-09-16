@@ -436,10 +436,15 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
   const code = canonTti(prop && (prop.code || prop.tti));
   if (!code) return null;
 
-  const lat = Number(prop.lat);
-  const lng = Number(prop.lng);
-  const hasCoords = Number.isFinite(lat) && Number.isFinite(lng)
-    && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  // cleanCoord, not Number(). Number(null) is 0, which is finite and in range,
+  // so a row with no coordinates passed this guard and we sent Travelify
+  // Latitude 0, Longitude 0 with an 11-mile radius — an area of open Atlantic,
+  // contradicting the Ref and the country in the same request (measured in
+  // Andy's own 9 Apr 2027 search, 16 Sep 2026). The comment below always said
+  // "only when the row actually has them"; now it is true.
+  const lat = cleanCoord(prop.lat, 90);
+  const lng = cleanCoord(prop.lng, 180);
+  const hasCoords = lat != null && lng != null;
   const ctry = cleanCtry(prop.ctry || prop.locationCountry);
   // One or the other. Without either there is no area at all, and an unscoped
   // worldwide search is not a broader question, it is a meaningless one.
@@ -619,6 +624,11 @@ const asNum = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
+/** A share of a whole-party total, to the penny. Halving an odd number of
+ *  pounds gives a real .50, and floating point gives 802.5000000000001 for
+ *  other splits — a price is money, so it is rounded like money. */
+const round2 = (n) => Math.round(n * 100) / 100;
+
 /** One accommodation result -> the shape api/cached-offers.js already serves.
  *
  *  The real field names, confirmed from a live result (Andy, 14 Sep 2026):
@@ -701,30 +711,41 @@ export function normaliseAccommodationResult(r, ctx = {}) {
   const headRate = head.rate || {};
   const lat = asNum(pick(loc, ['latitude', 'lat']));
   const lng = asNum(pick(loc, ['longitude', 'lng', 'lon']));
-  // A DYNAMIC PACKAGE IS ALREADY PRICED. DO NOT ADD ANYTHING TO IT.
+  // A PACKAGE IS TWO PRICED COMPONENTS FOR THE WHOLE PARTY.
   //
-  // Andy, 16 Sep 2026: "If you are doing a DP search the price you get back is
-  // the total holiday price per person - you don't need to be adding anything
-  // together." So on a package the result's own price IS the holiday, flight
-  // and hotel together, PER PERSON. The flightResults array describes the
-  // flight; it is not a component to be summed.
+  // The room price is the ROOM, for everyone in it. The flight price is the
+  // FLIGHTS, for every passenger. The holiday is the two added, and the
+  // per-person figure is that divided by the travellers.
   //
-  // The previous reading — hotel plus cheapest flight — was arrived at from the
-  // evidence rather than from the product, and it double-counted: it added a
-  // flight to a number that already contained one. Two wrong prices in a row on
-  // this field, in opposite directions, which is what happens when a commercial
-  // question is answered by inference instead of being asked.
+  // This field has now been wrong twice in opposite directions, so it is
+  // settled on measurements from a real response rather than on reasoning
+  // (GF Fanabe, INV-TFS, 9 Apr 2027 — room 810, flight 848):
+  //
+  //  1. Andy's own worked example is £802.50 per person. Every price in these
+  //     responses is a whole pound, so a per-person figure ending in .50 can
+  //     only be a halved odd total: (757 + 848) / 2 = 802.50 exactly. It
+  //     cannot be a price the supplier quoted per person.
+  //  2. On one room type the gap from BedAndBreakfast to AllInclusive is £580.
+  //     Over 7 nights that is £41 per person per day as a room total for two,
+  //     the normal supplement; read as per-person it is £83 a day, about twice
+  //     the going rate.
+  //  3. The headline equals the cheapest ROOM RATE exactly (units[0].rates[0]).
+  //     A room rate is a room price.
+  //  4. Read as already-priced, the separately returned flight price is never
+  //     used at all — a number the supplier searched for, priced, and attached
+  //     its own deposit rule to, silently discarded.
   const fl = ctx.flight || null;
   // Paying travellers. An infant does not hold a seat or a bed, so it does not
-  // carry a per-person holiday price.
+  // carry a share of the holiday price.
   const payingPax = Math.max(1,
     (Number.isFinite(ctx.adults) ? ctx.adults : 0) + (Number.isFinite(ctx.children) ? ctx.children : 0)
     || 1);
-  const perPerson = fl ? (price != null ? price : pricePP) : pricePP;
-  // The only authoritative number on a package is the per-person one. The total
-  // is DERIVED from it, and labelled as such, so the two can be checked against
+  const room = price != null ? price : pricePP;
+  // The authoritative number on a package is the TOTAL. The per-person figure
+  // is derived from it and labelled as such, so the two can be checked against
   // each other rather than one being quietly presented as the other.
-  const total = fl ? (price != null ? price : pricePP) * payingPax : (price != null ? price : pricePP);
+  const total = fl && asNum(fl.price) != null ? room + asNum(fl.price) : room;
+  const perPerson = fl ? round2(total / payingPax) : pricePP;
 
   const offer = {
     // A package is stored AS A PACKAGE, in the platform's own fields.
