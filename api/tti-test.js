@@ -613,8 +613,11 @@ export default async function handler(req, res) {
     return {
       code: row.code, status: 'found', offers: offers.length, cached: !!wrote,
       hotel: cheapest.hotel, fromPrice: cheapest.price, currency: cheapest.currency,
-      ...(Number.isFinite(cheapest.flightPrice)
-        ? { hotelPrice: cheapest.hotelPrice, flightPrice: cheapest.flightPrice } : {}),
+      // The per-person holiday price Travelify returned, and the number of
+      // travellers the total was derived from. Reported separately so the two
+      // can be checked against each other.
+      ...(Number.isFinite(cheapest.pricePP) ? { pricePP: cheapest.pricePP } : {}),
+      ...(Number.isFinite(cheapest.pricedPax) ? { pricedPax: cheapest.pricedPax } : {}),
       checkinDate: cheapest.checkinDate, nights: cheapest.nights,
       image: cheapest.image ? true : false,
       polls: acc.polls,
