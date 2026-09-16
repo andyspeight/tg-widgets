@@ -32,6 +32,7 @@
  *   5xx → { error: 'server_error' | 'send_failed' | 'pdf_failed' | 'lookup_failed' }
  */
 
+import crypto from 'node:crypto';
 import { setCors, sanitiseForFormula } from './_auth.js';
 import { renderBookingEmail } from './_lib/booking-email-template.js';
 import { sendViaSendGrid, buildFromField, isValidEmail } from './_lib/sendgrid.js';
@@ -143,6 +144,30 @@ function internalHeaders(realIp) {
   return headers;
 }
 
+/**
+ * A trusted server-to-server caller — today the booking confirmation worker
+ * (api/cron/booking-confirmations.js), which sends one confirmation per new
+ * booking and would otherwise be throttled by the per-IP cap below: every one
+ * of its calls comes from the same Vercel egress address, so a client with
+ * four bookings in a minute would have one confirmation sent and three
+ * refused.
+ *
+ * Same shape as the bypass /api/retrieve-order has carried since Apr 2026:
+ * the key proves the caller is us, and X-TG-Real-IP then carries the identity
+ * the limit should actually count against. For a visitor-driven call that is
+ * the visitor's IP; for the worker there is no visitor, so it passes a
+ * per-application key and each client's bookings are counted separately.
+ */
+function isInternalCall(req) {
+  const expected = process.env.TG_INTERNAL_KEY || '';
+  const provided = req.headers['x-tg-internal-key'];
+  if (!expected || typeof provided !== 'string') return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 // ----- Response helpers -----
 
 function notFound(res) { return res.status(404).json({ error: 'not_found' }); }
@@ -155,8 +180,14 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const ip = getClientIp(req);
-  const ipLimit = rateLimit(`email:ip:${ip}`, 3);
+  const internal = isInternalCall(req);
+  const ip = (internal && typeof req.headers['x-tg-real-ip'] === 'string' && req.headers['x-tg-real-ip'])
+    ? String(req.headers['x-tg-real-ip']).slice(0, 80)
+    : getClientIp(req);
+  // A person emailing their own booking should not be doing it more than a few
+  // times a minute. A client's new bookings can arrive faster than that, so a
+  // trusted caller gets a cap that matches a busy morning rather than a person.
+  const ipLimit = rateLimit(`email:ip:${ip}`, internal ? 60 : 3);
   if (!ipLimit.ok) {
     return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: ipLimit.retryAfterMs });
   }
@@ -194,7 +225,7 @@ export default async function handler(req, res) {
   const message = validateMessage(body.message);
   if (message === null) return badRequest(res, 'invalid_message');
 
-  const widgetLimit = rateLimit(`email:ipw:${ip}:${widgetId}`, 10);
+  const widgetLimit = rateLimit(`email:ipw:${ip}:${widgetId}`, internal ? 60 : 10);
   if (!widgetLimit.ok) {
     return res.status(429).json({ error: 'too_many_attempts', retryAfterMs: widgetLimit.retryAfterMs });
   }
@@ -441,6 +472,10 @@ export default async function handler(req, res) {
       supportEmail,
       supportPhone,
       orderRef,
+      // The client's own arrangement of the email, built in the My Booking
+      // editor. Absent, empty or unrecognisable falls back to the built-in
+      // layout inside the renderer, so this email always has a body.
+      layout: widgetSettings?.confirmationEmail?.layout,
       // Origin for wrapping document links through /api/doc-redirect, which
       // launders the referrer so Travelify serves DOC/DOCX (not just PDFs).
       baseUrl: buildInternalUrl(req, ''),

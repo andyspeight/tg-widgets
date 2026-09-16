@@ -444,16 +444,31 @@
               </select>
             </div>
             <div class="field-help">Turn on to email a customer when a balance is due on their booking. Reminders are sent when the booking system flags a balance, and stop automatically once it is paid. Off by default.</div>
+            <div class="field">
+              <label>Booking confirmation emails</label>
+              <select id="confirmation-enabled">
+                <option value="off" selected>Off</option>
+                <option value="on">On</option>
+              </select>
+            </div>
+            <div class="field-help">Turn on for us to email the customer their confirmation the moment a booking is made, with the A4 pack attached. Only switch this on once the confirmation has been turned off for you in Travelify, or your customer will get two. Build the email itself under Customer emails below. Off by default.</div>
           </div></div>
         </div>
 
         <div class="section" data-section="reminder-emails">
           <div class="section-header">
-            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg> Reminder emails</h3>
+            <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg> Customer emails</h3>
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="section-body"><div class="section-body-inner">
-            <div class="field-help" style="margin-bottom:12px;">Write the balance reminder emails your customers get, or leave them on our standard wording. Each email opens in a full editor with a live preview of exactly what your customer receives.</div>
+            <div class="field-help" style="margin-bottom:12px;">The emails your customers get. Write your own wording, or build the confirmation from blocks, or leave any of them on our standard version. Each one opens in a full editor with a live preview of exactly what your customer receives.</div>
+            <div class="rem-card">
+              <div class="rem-card-info">
+                <div class="rem-card-title">Booking confirmation</div>
+                <div class="rem-card-status" id="rem-status-confirmation">Using our standard layout</div>
+              </div>
+              <button type="button" class="rem-edit-btn" data-stage="confirmation">Edit email</button>
+            </div>
             <div class="rem-card">
               <div class="rem-card-info">
                 <div class="rem-card-title">Interim / instalment reminder</div>
@@ -646,7 +661,7 @@
   <script src="/tour-mybooking.js"></script>
 <script type="module">
 import { renderPdfHtml } from '/_pdf-template.js';
-import { renderBookingEmail } from '/_booking-email-template.js';
+import { renderBookingEmail, EMAIL_BLOCKS, DEFAULT_EMAIL_LAYOUT } from '/_booking-email-template.js';
 import { renderReminderEmail } from '/_reminder-email-template.js';
 import { renderCancellationEmail } from '/_cancellation-email-template.js';
 
@@ -680,6 +695,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       pageUrl: '',
       reminders: { enabled: false },
       reminderEmails: { interim: { subject: '', body: '' }, final: { subject: '', body: '' } },
+      confirmationEmail: { enabled: false, layout: [] },
       cancelEmailMessage: '',
       display: { showActions: true, showFullImage: false, showDocuments: true, showFacilities: true, showHotelDescription: true, showCancellation: true, showCancel: true, cancelEmail: true, showAmend: true, showPayBalance: true, showLocalFees: true },
       lunaIntegration: { connected: false, clientName: '' },
@@ -908,6 +924,16 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
   });
 
+  // ===== Booking confirmation opt-in =====
+  // Per client (Andy, 16 Sep 2026: "Per client as the booking gets notified to
+  // us"). OFF unless switched on here, because Travelify still sends its own
+  // confirmation until each client is moved over, and the cost of getting the
+  // changeover wrong is a customer receiving two.
+  document.getElementById('confirmation-enabled').addEventListener('change', (e) => {
+    ceEnsure().enabled = e.target.value === 'on';
+    if (window.tgse && typeof window.tgse.markDirty === 'function') window.tgse.markDirty();
+  });
+
   // ===== Customer emails: written in the shared popup =====
   // Three emails this widget can send a customer carry client-editable wording:
   // the two balance reminders and the cancellation confirmation. Each is
@@ -920,7 +946,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
   // The popup chrome itself lives in /editor-email-popup.js and is shared with
   // every other editor, so all of them look and behave identically. This file
   // only says WHAT the emails are.
-  const REM_ORDER = ['interim', 'final', 'cancellation'];
+  const REM_ORDER = ['confirmation', 'interim', 'final', 'cancellation'];
 
   const REM_TAGS = [
     { tag: '{firstName}', label: 'First name' },
@@ -932,6 +958,24 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     { tag: '{agencyPhone}', label: 'Phone' },
     { tag: '{instalmentNumber}', label: 'Instalment no.' },
     { tag: '{instalmentTotal}', label: 'Instalment total' },
+  ];
+
+  // What a written block on the CONFIRMATION email can merge in. These are the
+  // keys public/_booking-email-template.js fills (mergeVars); adding one here
+  // without adding it there would offer a tag that renders as itself.
+  const CONF_TAGS = [
+    { tag: '{firstName}', label: 'First name' },
+    { tag: '{bookingRef}', label: 'Booking ref' },
+    { tag: '{destination}', label: 'Destination' },
+    { tag: '{hotel}', label: 'Accommodation' },
+    { tag: '{checkIn}', label: 'Check in' },
+    { tag: '{checkOut}', label: 'Check out' },
+    { tag: '{nights}', label: 'Nights' },
+    { tag: '{total}', label: 'Total cost' },
+    { tag: '{balance}', label: 'Balance due' },
+    { tag: '{agencyName}', label: 'Company name' },
+    { tag: '{agencyPhone}', label: 'Phone' },
+    { tag: '{agencyEmail}', label: 'Email' },
   ];
 
   function reEnsure() {
@@ -978,6 +1022,42 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     return { subject: out.subject, html: out.html, note: note };
   }
 
+  // The booking confirmation. Unlike the other three this email is a LAYOUT
+  // rather than a block of prose, so the preview is driven by the block list
+  // and rendered by the same module api/booking-email.js and the confirmation
+  // worker send with.
+  function ceEnsure() {
+    if (!state.config.confirmationEmail || typeof state.config.confirmationEmail !== 'object') {
+      state.config.confirmationEmail = { layout: [] };
+    }
+    if (!Array.isArray(state.config.confirmationEmail.layout)) state.config.confirmationEmail.layout = [];
+    if (typeof state.config.confirmationEmail.enabled !== 'boolean') state.config.confirmationEmail.enabled = false;
+    return state.config.confirmationEmail;
+  }
+
+  function remConfirmationPreview(layout) {
+    const a = remAgency();
+    const out = renderBookingEmail({
+      order: MOCK_ORDER,
+      brand: { name: a.name, logoUrl: '', footerLine: '' },
+      colors: state.config.colors || {},
+      supportEmail: a.supportEmail,
+      supportPhone: a.supportPhone,
+      orderRef: '',
+      layout: (layout && layout.length) ? layout : undefined,
+      baseUrl: location.origin,
+    });
+    let note;
+    if (!ceEnsure().enabled) {
+      note = 'This email is switched off. Turn "Booking confirmation emails" on in Settings for your customers to receive it.';
+    } else if (layout && layout.length) {
+      note = 'Preview uses a sample booking. Every block fills itself from the real one when it sends, and a block with nothing to show is left out.';
+    } else {
+      note = 'You are previewing our standard layout, filled with a sample booking. Add a block below to build your own.';
+    }
+    return { subject: out.subject, html: out.html, note: note };
+  }
+
   function remCancellationPreview(body) {
     const a = remAgency();
     const out = renderCancellationEmail({
@@ -1009,6 +1089,9 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
 
   // One descriptor per editable email, in the shape the shared popup expects.
   function remEmail(stage) {
+    // The confirmation is the one email built from blocks rather than prose,
+    // so it has its own descriptor rather than being bent through the others'.
+    if (stage === 'confirmation') return remConfirmationEmail();
     const reminder = stage !== 'cancellation';
     const label = stage === 'interim' ? 'Interim / instalment reminder'
       : stage === 'final' ? 'Final balance reminder'
@@ -1057,7 +1140,55 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     };
   }
 
+  function remConfirmationEmail() {
+    const read = () => ({ layout: ceEnsure().layout });
+    return {
+      key: 'confirmation',
+      label: 'Booking confirmation',
+      tabLabel: 'Confirmation',
+      from: () => remAgency().name,
+      to: 'sarah@example.com (sample booking)',
+      // Tags belong to the blocks the client writes, and the builder puts the
+      // cursor in one, so the chips work exactly as they do on the other emails.
+      tags: CONF_TAGS,
+      fields: [
+        { key: 'layout', type: 'blocks', label: 'What goes in the email, in order',
+          palette: EMAIL_BLOCKS, tagsAfter: true,
+          hint: 'Arrange the email however you like. Blocks marked "From the booking" fill themselves in, and any that has nothing to show on a booking is left out. Leave the list empty to send our standard layout.',
+          reset: {
+            label: 'Copy our standard layout in, so I can change it',
+            run: (applied) => showConfirm('Copy our standard layout in?',
+              'Your current layout will be replaced by a copy of ours, which you can then rearrange.',
+              () => {
+                ceEnsure().layout = DEFAULT_EMAIL_LAYOUT.map((b) => ({ type: b.type }));
+                remMarkDirty();
+                applied(ceEnsure().layout);
+              }),
+          } },
+      ],
+      read: read,
+      write: (key, value) => {
+        if (key === 'layout') ceEnsure().layout = Array.isArray(value) ? value : [];
+        remMarkDirty();
+        schedulePreview();
+      },
+      render: (v) => remConfirmationPreview(v.layout || []),
+      reset: {
+        label: 'Hand it back to us, and keep it up to date',
+        isSet: () => ceEnsure().layout.length > 0,
+        run: (applied) => showConfirm('Go back to our standard layout?',
+          'Your own layout will be removed, and this email follows ours from then on, including any improvements we make to it.', () => {
+            ceEnsure().layout = [];
+            remMarkDirty();
+            schedulePreview();
+            applied();
+          }),
+      },
+    };
+  }
+
   function remHasCustom(stage) {
+    if (stage === 'confirmation') return ceEnsure().layout.length > 0;
     const t = remEmail(stage).read();
     return !!(t.body && t.body.trim());
   }
@@ -1067,7 +1198,9 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       const el = document.getElementById('rem-status-' + stage);
       if (!el) return;
       const custom = remHasCustom(stage);
-      el.textContent = custom ? 'Your own wording' : 'Using our standard wording';
+      el.textContent = stage === 'confirmation'
+        ? (custom ? 'Your own layout' : 'Using our standard layout')
+        : (custom ? 'Your own wording' : 'Using our standard wording');
       el.classList.toggle('is-custom', custom);
     });
   }
@@ -1180,6 +1313,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
         // Only a fallback for when no item carries a booking reference. The
         // sample order does, so the preview shows the same ref a real one would.
         orderRef: '',
+        layout: state.config.confirmationEmail?.layout,
         baseUrl: location.origin,
       });
       _writeIframe('email-iframe', html);
@@ -1367,6 +1501,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       document.getElementById('support-phone').value = state.config.support?.phone || '';
       document.getElementById('page-url').value = state.config.pageUrl || '';
       document.getElementById('reminder-enabled').value = state.config.reminders?.enabled ? 'on' : 'off';
+      document.getElementById('confirmation-enabled').value = state.config.confirmationEmail?.enabled ? 'on' : 'off';
       reEnsure();
       remRenderStatus();
       document.getElementById('brand-name').value = state.config.brand?.name || '';

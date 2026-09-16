@@ -317,6 +317,28 @@ export async function fetchOrderByIdKey({ appId, apiKey }, orderId, orderKey) {
   return { ok: true, order: raw };
 }
 
+/**
+ * The old name. The resolver answers the same question for every email this
+ * pipeline sends, not just reminders, so it is now named for that; the
+ * reminder worker keeps importing the name it always has.
+ */
+export const resolveReminderBranding = resolveClientBranding;
+
+/**
+ * What the client's My Booking editor says about the booking confirmation:
+ * whether it is switched on for them, and the layout they built. A missing or
+ * malformed setting reads as OFF with no layout — a confirmation email is sent
+ * on our say-so, so it has to be opted into deliberately rather than by an
+ * empty object happening to look truthy.
+ */
+export function normaliseConfirmationSettings(raw) {
+  const c = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+  return {
+    enabled: c.enabled === true,
+    layout: Array.isArray(c.layout) ? c.layout : [],
+  };
+}
+
 // ── Phase 2: email sending support ───────────────────────────────────────────
 
 /**
@@ -460,13 +482,18 @@ export function normaliseReminderEmails(raw) {
   return (out.interim || out.final) ? out : null;
 }
 
-export async function resolveReminderBranding(application) {
+export async function resolveClientBranding(application) {
   const brand = {
     name: (application && application.clientName) || 'Your travel team',
     logoUrl: '', footerLine: '', replyTo: '',
     supportEmail: '', supportPhone: '', pageUrl: '',
     schedule: normaliseReminderSchedule(null),
     reminderEmails: null,
+    // For the booking confirmation (Sep 2026): the colours the client picked
+    // and the layout they built in the same editor. Left null when they have
+    // no My Booking widget, which the confirmation worker treats as "not set
+    // up" rather than guessing a layout.
+    widgetId: '', colors: null, confirmation: null,
   };
 
   const recordId = application && application.recordId;
@@ -498,6 +525,9 @@ export async function resolveReminderBranding(application) {
       brand.pageUrl = httpsOnly(cfg?.pageUrl);
       brand.schedule = normaliseReminderSchedule(cfg?.reminders);
       brand.reminderEmails = normaliseReminderEmails(cfg?.reminderEmails);
+      brand.widgetId = String(f.WidgetID || '').trim();
+      brand.colors = (cfg && typeof cfg.colors === 'object' && cfg.colors) || {};
+      brand.confirmation = normaliseConfirmationSettings(cfg?.confirmationEmail);
       return brand;
     }
   } catch (err) {

@@ -38,6 +38,12 @@ Owner: Andy Speight, CEO, Travelgenix.
 - **Event Tickets widget family** (the supplier event feed and the six ticket
   widgets built on it): `docs/supplier-event-feed.md` (Airtable record
   `recdVmyNz4nCXltMc`).
+- **Booking confirmation emails** (the Travelgenix webhook, the queue, the
+  worker and the block-built email we are taking over from Travelify):
+  `docs/booking-confirmation-emails.md`. Read it before touching
+  `api/v1/booking-webhook.js`, `api/cron/booking-confirmations.js` or the block
+  vocabulary in `public/_booking-email-template.js`.
+
 - **Travelify widget platform integration** (the two read APIs and the SSO deep
   link that merge our widgets into Travelify's own Widget Directory and My
   Widgets): `docs/travelify-widget-integration.md`. Read it before touching
