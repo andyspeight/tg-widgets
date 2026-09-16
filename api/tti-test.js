@@ -42,7 +42,7 @@ import {
 } from './_lib/offers/tti.js';
 import { runSearch } from './_lib/offers/travelify-search.js';
 import { resolveArrivalAirport, airportLabel } from './_lib/offers/arrival-airport.js';
-import { setJson, getJson } from './_redis.js';
+import { setJson, setJsonEx, getJson } from './_redis.js';
 
 // A live search per property, so this is deliberately small.
 const MAX_CODES = 5;
@@ -60,10 +60,24 @@ const MAX_SEARCHES = 6;
 // Departure airports per test run. More than this and a single click on Test
 // is running a small sweep.
 const MAX_ORIGINS = 3;
-// Properties we will spend a search on just to find out where they are. Only
-// ever needed once per property: the search fills the cache on the way past.
-const MAX_LOCATE = 2;
+// Locating is capped by the number of hotels a run may test, and NOT lower.
+//
+// It used to be 2. With four hotels in Tenerife on one date, the first two were
+// located and flew into TFS, and the other two fell back to the country's hub —
+// MADRID — so Travelify offered no flights to pair with a Canaries hotel and
+// they came back "no flights available". Andy, 16 Sep 2026: "which isnt
+// possible as all the hotels are in the same place". He was right.
+//
+// Worse than slow: an unplaced hotel prices no package, so nothing is cached,
+// so it is never placed on the next run either. Those two hotels were broken
+// permanently, not temporarily.
+const MAX_LOCATE = MAX_CODES;
 const LOCATE_POLLS = 4;
+// Where a property actually is, once we have paid a search to find out. Kept
+// for a year: a hotel does not move, and this is what stops the locate search
+// being spent again on every test.
+const GEO_TTL_S = 365 * 24 * 3600;
+const geoKey = (appId, code) => `tti:geo:${appId}:${code}`;
 // The raw exchange handed back for support. One property's request and its
 // first matching result, capped: enough to answer "what did you send and what
 // came back" without turning every test response into a payload dump.
@@ -229,6 +243,7 @@ export default async function handler(req, res) {
   // override rather than discover from a price.
   const arrivals = new Map();
   const unplaced = [];
+  const unplaceable = new Map();
   let locateSearches = 0;
   if (isDp) {
     await Promise.all(rows.map(async (row, idx) => {
@@ -239,6 +254,17 @@ export default async function handler(req, res) {
           const hit = (cached && Array.isArray(cached.offers) ? cached.offers : [])
             .find((o) => Number.isFinite(o.resortLat) && Number.isFinite(o.resortLng));
           if (hit) { lat = hit.resortLat; lng = hit.resortLng; }
+          // And the position we paid to find out last time. An offer is only
+          // cached when a package priced, so a hotel that has never priced one
+          // has no coordinates in the offers key — which is exactly the hotel
+          // that needs them.
+          if (!(Number.isFinite(lat) && Number.isFinite(lng))) {
+            const geo = await getJson(geoKey(creds.appId, row.code));
+            if (geo && Number.isFinite(geo.lat) && Number.isFinite(geo.lng)) {
+              lat = geo.lat; lng = geo.lng;
+              if (geo.ctry) row.ctry = geo.ctry;
+            }
+          }
         } catch { /* a cache miss is not a failure, it just costs precision */ }
       }
       const got = resolveArrivalAirport({ dst: row.dst, lat, lng, ctry: row.ctry });
@@ -262,18 +288,21 @@ export default async function handler(req, res) {
     // accommodation search first, purely to read its coordinates — the same
     // search the hotel-only widget runs, and it fills the cache on the way past
     // so this never happens twice for the same property.
-    for (const idx of unplaced.slice(0, MAX_LOCATE)) {
-      if (Date.now() - startedAt > DEADLINE_MS) break;
+    // In parallel: they are independent, and run one at a time five of them
+    // would eat the whole route budget before a single package was priced.
+    const toLocate = unplaced.slice(0, MAX_LOCATE);
+    await Promise.all(toLocate.map(async (idx) => {
+      if (Date.now() - startedAt > DEADLINE_MS) return;
       const row = rows[idx];
       const probe = buildAccommodationCriteria(row, search);
-      if (!probe) continue;
+      if (!probe) return;
       locateSearches++;
       const r = await runSearch(creds, probe, { maxPolls: LOCATE_POLLS, pick: 'accommodationResults' });
       const mine = r.ok ? (r.results || []).filter((x) => resultIsProperty(x, row.code)) : [];
       const loc = mine.length && mine[0].location ? mine[0].location : null;
       const lat = cleanCoord(loc && (loc.latitude ?? loc.lat), 90);
       const lng = cleanCoord(loc && (loc.longitude ?? loc.lng), 180);
-      if (lat == null || lng == null) continue;
+      if (lat == null || lng == null) return;
 
       // MEASURED BEATS TYPED.
       //
@@ -290,6 +319,28 @@ export default async function handler(req, res) {
       }
       const got = resolveArrivalAirport({ lat, lng, ctry: row.ctry });
       if (got) arrivals.set(idx, { ...got, source: got.source + '-located' });
+      // Remember it. A hotel does not move, and this is what stops the search
+      // being spent again on every test — and what makes the hotel that never
+      // prices a package still get placed, since nothing is cached for it.
+      await setJsonEx(geoKey(creds.appId, row.code),
+        { lat, lng, ctry: row.ctry, at: new Date().toISOString() }, GEO_TTL_S);
+    }));
+
+    // A PACKAGE WE COULD NOT PLACE IS REFUSED, NOT FLOWN TO THE CAPITAL.
+    //
+    // A country hub is a guess, and for Spain it is Madrid — which Travelify
+    // will not pair with a hotel in the Canaries, so the package comes back
+    // "no flights available". That is indistinguishable from a real supplier
+    // answer, which is how two of four identical hotels looked unavailable.
+    // Saying we could not place it is worse news and better information.
+    for (const idx of unplaced) {
+      const got = arrivals.get(idx);
+      if (got && !/-located$/.test(got.source) && got.source === 'country-hub') {
+        arrivals.delete(idx);
+        unplaceable.set(idx, 'We could not work out where this hotel is, so we cannot choose an '
+          + 'airport for its package. Put an airport code in the Fly into box for it, or try again '
+          + 'in a moment.');
+      }
     }
   }
 
@@ -309,8 +360,9 @@ export default async function handler(req, res) {
       const row = rows[idx];
       const arrival = arrivals.get(idx);
       if (isDp && !arrival) {
-        unsearchable.set(idx, 'We could not work out which airport this package should fly into. '
-          + 'Add the country, or type an arrival airport for this hotel.');
+        unsearchable.set(idx, unplaceable.get(idx)
+          || 'We could not work out which airport this package should fly into. '
+             + 'Add the country, or type an arrival airport for this hotel.');
         continue;
       }
       const criteria = isDp
