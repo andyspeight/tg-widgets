@@ -656,6 +656,36 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### Every hotel that needs placing gets placed
+
+Andy, 16 Sep 2026: four hotels in Tenerife, one date, and two came back *"no
+flights available"* — *"which isnt possible as all the hotels are in the same
+place"*. He was right: they were not the same search.
+
+`MAX_LOCATE` was **2**. Hotels three and four were never located, so they fell
+back to the country's hub — **Madrid** — and Travelify will not pair a Madrid
+flight with a Canaries hotel, so no flights came back. Two of four identical
+hotels looked unavailable.
+
+Worse than slow: an unplaced hotel prices no package, so nothing is cached, so
+it is never placed on the next run either. **Permanently broken, not
+temporarily.**
+
+Three changes:
+
+- `MAX_LOCATE` is now `MAX_CODES` — never lower than the number of hotels a run
+  may test — and the locates run in parallel, because five one at a time would
+  eat the route budget before a single package was priced.
+- The position is remembered in its own key, `tti:geo:{appId}:{code}`, for a
+  year. The offers key only holds coordinates when a package priced, which is
+  no use to the hotel that never priced one. Both the test route and the sweep
+  read it before spending a search.
+- **A package we could not place is refused, not flown to the capital.** A
+  country hub is a guess, and a wrong one returns "no flights available", which
+  is indistinguishable from a real supplier answer. Saying we could not place it
+  is worse news and better information, and it names the fix: put an airport in
+  Fly into.
+
 ### A test searches as the WIDGET'S OWNER
 
 Andy, 16 Sep 2026: *"When acting as it needs to use the owner of the App — in

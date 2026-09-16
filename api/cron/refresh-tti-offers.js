@@ -388,6 +388,17 @@ async function fetchPropertyAllTypes(item) {
           lat = hit.resortLat; lng = hit.resortLng;
           const found = cleanCtry(hit.countryCode || '');
           if (found) item.ctry = found;
+        } else {
+          // The position the Test button paid a search to find out. An offer is
+          // only cached when one priced, so a property that has never priced a
+          // package has no coordinates in the offers key — which is exactly the
+          // property that needs them.
+          const geo = await getJson(`tti:geo:${item.appId}:${item.code}`);
+          if (geo && Number.isFinite(geo.lat) && Number.isFinite(geo.lng)) {
+            lat = geo.lat; lng = geo.lng;
+            const found = cleanCtry(geo.ctry || '');
+            if (found) item.ctry = found;
+          }
         }
       } catch { /* a cache miss only costs precision, never the sweep */ }
     }

@@ -1879,11 +1879,14 @@ test('a hotel we cannot place is located before its package is priced', () => {
   assert.equal(placed.code, 'TFS', 'knowing where it is gives the island');
   assert.equal(placed.alt.code, 'TFN', 'with the closer island airport offered');
 
-  assert.ok(/for \(const idx of unplaced\.slice\(0, MAX_LOCATE\)\)/.test(TEST_API));
+  assert.ok(/const toLocate = unplaced\.slice\(0, MAX_LOCATE\);/.test(TEST_API));
   assert.ok(/-located/.test(TEST_API), 'and the panel must say the answer was measured, not assumed');
-  // Bounded: this spends a real search, so it is capped and deadline-checked.
-  assert.ok(/const MAX_LOCATE = \d/.test(TEST_API));
-  assert.ok(/if \(Date\.now\(\) - startedAt > DEADLINE_MS\) break;/.test(TEST_API));
+  // Still bounded — this spends real searches — but bounded by the number of
+  // hotels a run may test, never below it. A cap of 2 silently left hotels
+  // three and four flying to the wrong island.
+  assert.ok(/const MAX_LOCATE = MAX_CODES;/.test(TEST_API));
+  assert.ok(/if \(Date\.now\(\) - startedAt > DEADLINE_MS\) return;/.test(TEST_API),
+    'and still deadline-checked, per property, inside the parallel run');
 });
 
 test('the nightly sweep stores everything the Test button stores', () => {
@@ -2336,4 +2339,43 @@ test('an unsaved widget uses your own account, and says so', () => {
   assert.ok(/this widget has not been saved yet, so it used your own account/.test(EDITOR));
   assert.ok(/Searched '/.test(EDITOR), 'and the account is named on every test');
   assert.ok(/searchedAs: \{ appId: creds\.appId/.test(TEST_API));
+});
+
+test('every hotel that needs placing gets placed, not just the first two', () => {
+  // Andy, 16 Sep 2026: four hotels in Tenerife, one date, and two came back
+  // "no flights available" — "which isnt possible as all the hotels are in the
+  // same place". They were not the same search. MAX_LOCATE was 2, so hotels
+  // three and four were never located and fell back to the country's hub,
+  // MADRID, which Travelify will not pair with a Canaries hotel.
+  assert.ok(/const MAX_LOCATE = MAX_CODES;/.test(TEST_API),
+    'the cap must not be lower than the number of hotels a run may test');
+
+  // Worse than slow: an unplaced hotel prices no package, so nothing is cached,
+  // so it is never placed on the next run either. Permanently broken, not
+  // temporarily. The position is remembered in its own key for that reason.
+  assert.ok(/const geoKey = \(appId, code\) => `tti:geo:\$\{appId\}:\$\{code\}`/.test(TEST_API));
+  assert.ok(/await setJsonEx\(geoKey\(creds\.appId, row\.code\)/.test(TEST_API));
+  assert.ok(/const geo = await getJson\(geoKey\(creds\.appId, row\.code\)\)/.test(TEST_API),
+    'and read back before a search is spent finding it again');
+  assert.ok(/tti:geo:\$\{item\.appId\}:\$\{item\.code\}/.test(CRON), 'the sweep must use it too');
+
+  // Five searches one at a time would eat the route budget before a single
+  // package was priced.
+  assert.ok(/await Promise\.all\(toLocate\.map\(async \(idx\) => \{/.test(TEST_API));
+});
+
+test('a package we could not place is refused, not flown to the capital', () => {
+  // A country hub is a guess, and for Spain it is Madrid — which Travelify will
+  // not pair with a hotel in the Canaries, so the package returns "no flights
+  // available". That is indistinguishable from a real supplier answer, which is
+  // how two of four identical hotels came to look unavailable.
+  assert.ok(/got\.source === 'country-hub'/.test(TEST_API));
+  assert.ok(/arrivals\.delete\(idx\)/.test(TEST_API), 'the guess must be dropped, not searched');
+  assert.ok(/We could not work out where this hotel is/.test(TEST_API));
+  assert.ok(/Put an airport code in the Fly into box for it/.test(TEST_API),
+    'and the agent must be told what to do about it');
+
+  // A hotel-only search is untouched: it never needed an airport.
+  assert.equal(resolveArrivalAirport({ ctry: 'ES' }).source, 'country-hub',
+    'the resolver still answers; it is the DP caller that refuses the guess');
 });
