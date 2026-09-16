@@ -56,7 +56,8 @@ console.log('One renderer, shared by the send worker and the editor preview');
 
 console.log('The sidebar section is now stage cards that open the popup');
 {
-  ok('the Reminder emails accordion section is still there', /data-section="reminder-emails"/.test(EDITOR) && /Reminder emails<\/h3>/.test(EDITOR));
+  ok('the customer-emails accordion section is still there, whatever it is titled',
+    /data-section="reminder-emails"/.test(EDITOR) && /<\/svg> [A-Z][a-z]+ emails<\/h3>/.test(EDITOR));
   ok('each stage has a card with an Edit email button',
     /class="rem-edit-btn" data-stage="interim"/.test(EDITOR) && /class="rem-edit-btn" data-stage="final"/.test(EDITOR));
   ok('each card shows whether the client wording is in use',
@@ -86,7 +87,7 @@ console.log('The cancellation confirmation email is on the same popup, not a lon
   ok('it has its own sidebar card and its own tab in the popup',
     /class="rem-edit-btn" data-stage="cancellation"/.test(EDITOR)
     && /id="rem-status-cancellation"/.test(EDITOR)
-    && /const REM_ORDER = \['interim', 'final', 'cancellation'\]/.test(EDITOR));
+    && /const REM_ORDER = \[[^\]]*'cancellation'[^\]]*\]/.test(EDITOR));
   ok('the editor imports the shared cancellation renderer',
     /import \{ renderCancellationEmail \} from '\/_cancellation-email-template\.js';/.test(EDITOR));
   ok('its copy still reads and writes state.config.cancelEmailMessage (config shape unchanged)',
@@ -152,7 +153,14 @@ console.log('Every tag the popup offers is one the renderer fills');
   ok('renderer exposes the core tags', ['firstname', 'amount', 'duedate', 'balance', 'bookingref', 'agencyname', 'agencyphone', 'instalmentnumber', 'instalmenttotal'].every(k => supported.has(k)));
 
   // Chips are declared in the REM_TAGS descriptor now, not in editor markup.
-  const offered = [...EDITOR.matchAll(/\{ tag: '\{([a-zA-Z]+)\}', label:/g)].map(m => m[1]);
+  // Read REM_TAGS ONLY: the editor also declares CONF_TAGS for the booking
+  // confirmation, whose renderer is a different module with a different
+  // vocabulary, and which its own suite checks the same way.
+  const remBlock = (() => {
+    const from = EDITOR.slice(EDITOR.indexOf('const REM_TAGS = ['));
+    return from.slice(0, from.indexOf('];') + 2);
+  })();
+  const offered = [...remBlock.matchAll(/\{ tag: '\{([a-zA-Z]+)\}', label:/g)].map(m => m[1]);
   ok('the popup offers a set of chips', offered.length >= 8);
   const orphan = offered.filter(t => !supported.has(t.toLowerCase()));
   ok('no offered chip is unknown to the renderer (offered ⊆ supported)' + (orphan.length ? ' — orphan: ' + orphan.join(', ') : ''), orphan.length === 0);

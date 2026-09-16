@@ -441,6 +441,10 @@ export default async function handler(req, res) {
       supportEmail,
       supportPhone,
       orderRef,
+      // The client's own arrangement of the email, built in the My Booking
+      // editor. Absent, empty or unrecognisable falls back to the built-in
+      // layout inside the renderer, so this email always has a body.
+      layout: widgetSettings?.confirmationEmail?.layout,
       // Origin for wrapping document links through /api/doc-redirect, which
       // launders the referrer so Travelify serves DOC/DOCX (not just PDFs).
       baseUrl: buildInternalUrl(req, ''),

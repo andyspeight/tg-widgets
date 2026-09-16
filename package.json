@@ -102,6 +102,8 @@
     "test:welcome-email-editor": "node test/welcome-email-editor-smoke.mjs",
     "test:appointment-email-editor": "node test/appointment-email-editor-smoke.mjs",
     "test:booking-email-drift": "node test/booking-email-drift-smoke.mjs",
+    "test:confirmation-blocks": "node test/confirmation-blocks-smoke.mjs",
+    "test:confirmation-layout": "node test/confirmation-layout-editor-smoke.mjs",
     "test:quote-email-editor": "node test/quote-email-editor-smoke.mjs",
     "test:quote-sender": "node test/quote-sender-smoke.mjs",
     "test:quote-shape": "node test/quote-shape-smoke.mjs",

@@ -57,7 +57,11 @@ console.log('There is exactly one booking-confirmation renderer');
 
 console.log('The editor previews THAT renderer, with the same inputs the server uses');
 {
-  ok('the editor imports the shared module', /import \{ renderBookingEmail \} from '\/_booking-email-template\.js';/.test(EDITOR));
+  // Named imports, not the exact line: the editor also pulls the block palette
+  // out of the same module (Sep 2026). What matters is that renderBookingEmail
+  // comes from there and nowhere else.
+  ok('the editor imports the shared module',
+    /import \{([^}]*\brenderBookingEmail\b[^}]*)\} from '\/_booking-email-template\.js';/.test(EDITOR));
   ok('the email preview calls it', /const \{ html \} = renderBookingEmail\(\{/.test(EDITOR));
   ok('it passes the order, brand, colours and support details the server passes',
     /order: MOCK_ORDER,/.test(EDITOR) && /brand: \{/.test(EDITOR)

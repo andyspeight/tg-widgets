@@ -94,6 +94,37 @@
   .tgep-adv { border-top:1px solid #F1F5F9; padding-top:8px; }
   .tgep-adv > summary { font-size:12px; font-weight:600; color:#475569; cursor:pointer; padding:6px 0; }
   .tgep-adv textarea { font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11px; min-height:120px; }
+
+  /* Layout builder — the blocks that make up the email, in order. */
+  .tgep-blocks { display:flex; flex-direction:column; gap:6px; }
+  .tgep-block { border:1px solid #E2E8F0; border-radius:8px; background:#fff; }
+  .tgep-block.is-empty { border-style:dashed; }
+  .tgep-block-head { display:flex; align-items:center; gap:8px; padding:8px 8px 8px 10px; }
+  .tgep-block-name { flex:1; min-width:0; font-size:12px; font-weight:600; color:#0F172A;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tgep-block-kind { font-size:10px; font-weight:600; color:#0891B2; background:rgba(8,145,178,.09);
+    padding:2px 7px; border-radius:999px; letter-spacing:.02em; flex-shrink:0; }
+  .tgep-block-btns { display:flex; gap:2px; flex-shrink:0; }
+  .tgep-bbtn { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid #E2E8F0; border-radius:6px; background:#fff; color:#475569; cursor:pointer;
+    font:600 13px/1 -apple-system,sans-serif; padding:0; }
+  .tgep-bbtn:hover:not(:disabled) { background:#F1F5F9; color:#0F172A; }
+  .tgep-bbtn:disabled { opacity:.35; cursor:default; }
+  .tgep-bbtn.is-del:hover { background:#FEF2F2; border-color:#FCA5A5; color:#DC2626; }
+  .tgep-block-body { padding:0 10px 10px; display:flex; flex-direction:column; gap:6px; }
+  .tgep-block-body input, .tgep-block-body textarea { width:100%; box-sizing:border-box;
+    border:1px solid #E2E8F0; border-radius:6px; padding:7px 9px; font:inherit; font-size:12px; color:#0F172A; }
+  .tgep-block-body textarea { min-height:70px; resize:vertical; line-height:1.55; }
+  .tgep-block-note { font-size:11px; color:#94A3B8; line-height:1.45; margin:0 10px 10px; }
+  .tgep-add { display:flex; gap:6px; align-items:center; margin-top:10px; padding-top:10px; border-top:1px solid #F1F5F9; }
+  .tgep-add select { flex:1; min-width:0; border:1px solid #E2E8F0; border-radius:6px; padding:7px 9px;
+    font:inherit; font-size:12px; color:#0F172A; background:#fff; }
+  .tgep-add button { border:1px solid #0891B2; background:#0891B2; color:#fff; border-radius:6px;
+    padding:7px 14px; font:600 12px/1 inherit; cursor:pointer; flex-shrink:0; }
+  .tgep-add button:hover { background:#0E7490; }
+  .tgep-blocks-reset { background:none; border:0; padding:0; margin:8px 0 0; font:inherit; font-size:11px;
+    color:#64748B; text-decoration:underline; text-underline-offset:3px; cursor:pointer; align-self:flex-start; }
+  .tgep-blocks-reset:hover { color:#0F172A; }
   .tgep-preview { flex:1; display:flex; flex-direction:column; min-width:0; background:#F1F5F9; }
   .tgep-env { padding:10px 20px; background:#fff; border-bottom:1px solid #E2E8F0; flex-shrink:0; }
   .tgep-env-row { display:flex; gap:10px; padding:2px 0; font-size:12px; color:#0F172A; min-width:0; }
@@ -266,6 +297,177 @@
       el.dispatchEvent(new Event('input'));
     }
 
+    /**
+     * The layout builder: the email as an ordered list of blocks.
+     *
+     * Andy, 16 Sep 2026: "I want the email set up / editor to be very flexible
+     * so that the user can create their own email layout, and just add the
+     * data blocks with the booking information."
+     *
+     * Up and down rather than drag and drop, deliberately: it works on a phone,
+     * it works from the keyboard, and there is no drop target to miss. The
+     * palette comes from the RENDERER's own block list, passed in as
+     * `f.palette`, so the editor can never offer a block the email cannot draw.
+     */
+    function buildBlocks(f, host, values) {
+      const palette = Array.isArray(f.palette) ? f.palette : [];
+      const meta = (type) => palette.find((b) => b.type === type) || null;
+      const listEl = document.createElement('div');
+      listEl.className = 'tgep-blocks';
+      host.appendChild(listEl);
+
+      const readList = () => {
+        const raw = values[f.key];
+        return Array.isArray(raw) ? raw.map((b) => Object.assign({}, b)) : [];
+      };
+      let blocks = readList();
+
+      const commit = () => {
+        values[f.key] = blocks;
+        current.write(f.key, blocks.map((b) => Object.assign({}, b)));
+        if (typeof config.onChange === 'function') config.onChange();
+        draw();
+      };
+
+      function paint() {
+        listEl.textContent = '';
+        blocks.forEach((block, i) => {
+          const info = meta(block.type);
+          const row = document.createElement('div');
+          row.className = 'tgep-block';
+
+          const head = document.createElement('div');
+          head.className = 'tgep-block-head';
+          const name = document.createElement('span');
+          name.className = 'tgep-block-name';
+          name.textContent = info ? info.label : block.type;
+          head.appendChild(name);
+          if (info && info.kind === 'data') {
+            const chip = document.createElement('span');
+            chip.className = 'tgep-block-kind';
+            chip.textContent = 'From the booking';
+            head.appendChild(chip);
+          }
+
+          const btns = document.createElement('div');
+          btns.className = 'tgep-block-btns';
+          const mk = (label, title, disabled, fn, extra) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tgep-bbtn' + (extra ? ' ' + extra : '');
+            b.textContent = label;
+            b.title = title;
+            b.setAttribute('aria-label', title);
+            b.disabled = !!disabled;
+            b.addEventListener('click', fn);
+            return b;
+          };
+          btns.appendChild(mk('↑', 'Move up', i === 0, () => {
+            blocks.splice(i - 1, 0, blocks.splice(i, 1)[0]); commit(); paint();
+          }));
+          btns.appendChild(mk('↓', 'Move down', i === blocks.length - 1, () => {
+            blocks.splice(i + 1, 0, blocks.splice(i, 1)[0]); commit(); paint();
+          }));
+          btns.appendChild(mk('✕', 'Remove this block', false, () => {
+            blocks.splice(i, 1); commit(); paint();
+          }, 'is-del'));
+          head.appendChild(btns);
+          row.appendChild(head);
+
+          // A block the client writes carries its own fields.
+          const wants = (info && Array.isArray(info.fields)) ? info.fields : [];
+          if (wants.length) {
+            const body = document.createElement('div');
+            body.className = 'tgep-block-body';
+            wants.forEach((key) => {
+              const multiline = key === 'text' && block.type === 'text';
+              const input = document.createElement(multiline ? 'textarea' : 'input');
+              if (!multiline) input.type = 'text';
+              input.value = block[key] == null ? '' : String(block[key]);
+              input.placeholder = key === 'url'
+                ? 'https://...'
+                : (block.type === 'heading' ? 'Before you fly'
+                  : block.type === 'button' ? 'View my booking'
+                    : 'Hello {firstName}, we cannot wait for you to go.');
+              input.setAttribute('aria-label', (info ? info.label : block.type) + ' ' + key);
+              input.addEventListener('focus', () => { if (multiline) lastField = input; });
+              input.addEventListener('input', () => { block[key] = input.value; commit(); });
+              body.appendChild(input);
+            });
+            row.appendChild(body);
+          }
+
+          if (info && info.hint) {
+            const note = document.createElement('p');
+            note.className = 'tgep-block-note';
+            note.textContent = info.hint;
+            row.appendChild(note);
+          }
+          listEl.appendChild(row);
+        });
+
+        if (!blocks.length) {
+          const empty = document.createElement('div');
+          empty.className = 'tgep-block is-empty';
+          const p = document.createElement('p');
+          p.className = 'tgep-block-note';
+          p.style.margin = '10px';
+          p.textContent = 'No blocks yet, so your customers get our standard email. Add one below to build your own.';
+          empty.appendChild(p);
+          listEl.appendChild(empty);
+        }
+      }
+
+      const add = document.createElement('div');
+      add.className = 'tgep-add';
+      const sel = document.createElement('select');
+      sel.setAttribute('aria-label', 'Choose a block to add');
+      const groups = [
+        ['Booking information', palette.filter((b) => b.kind === 'data')],
+        ['Your own content', palette.filter((b) => b.kind === 'write')],
+      ];
+      groups.forEach(([label, items]) => {
+        if (!items.length) return;
+        const g = document.createElement('optgroup');
+        g.label = label;
+        items.forEach((b) => {
+          const o = document.createElement('option');
+          o.value = b.type;
+          o.textContent = b.label;
+          g.appendChild(o);
+        });
+        sel.appendChild(g);
+      });
+      const addBtn = document.createElement('button');
+      addBtn.type = 'button';
+      addBtn.textContent = 'Add block';
+      addBtn.addEventListener('click', () => {
+        if (!sel.value) return;
+        blocks.push({ type: sel.value });
+        commit(); paint();
+        const rows = listEl.querySelectorAll('.tgep-block');
+        const last = rows[rows.length - 1];
+        const field = last && last.querySelector('input, textarea');
+        if (field) field.focus();
+      });
+      add.appendChild(sel);
+      add.appendChild(addBtn);
+      host.appendChild(add);
+
+      if (f.reset && typeof f.reset.run === 'function') {
+        const back = document.createElement('button');
+        back.type = 'button';
+        back.className = 'tgep-blocks-reset';
+        back.textContent = f.reset.label || 'Start again from our standard layout';
+        back.addEventListener('click', () => {
+          f.reset.run((next) => { blocks = Array.isArray(next) ? next : []; commit(); paint(); });
+        });
+        host.appendChild(back);
+      }
+
+      paint();
+    }
+
     function buildPane() {
       pane.textContent = '';
       lastField = null;
@@ -273,6 +475,24 @@
       let firstEditable = null;
 
       (current.fields || []).forEach((f) => {
+        // The layout builder owns its own markup — it is a list, not an input.
+        if (f.type === 'blocks') {
+          const wrap = document.createElement('div');
+          wrap.className = 'tgep-field is-grow';
+          const label = document.createElement('label');
+          label.textContent = f.label;
+          wrap.appendChild(label);
+          if (f.hint) {
+            const hint = document.createElement('p');
+            hint.className = 'tgep-hint';
+            hint.style.margin = '0 0 8px';
+            hint.textContent = f.hint;
+            wrap.appendChild(hint);
+          }
+          buildBlocks(f, wrap, values);
+          pane.appendChild(wrap);
+          return;
+        }
         const isAdvanced = f.type === 'advanced';
         const host = isAdvanced ? document.createElement('details') : document.createElement('div');
         if (isAdvanced) {

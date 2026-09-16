@@ -49,6 +49,115 @@ import { listStays, bookingMoment, stayCheckout } from './_order-stays.js';
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
+
+// =============================================================================
+//  The block vocabulary
+//
+//  Andy, 16 Sep 2026: "I want the email set up / editor to be very flexible so
+//  that the user can create their own email layout, and just add the data
+//  blocks with the booking information."
+//
+//  So the email is no longer one fixed page. It is an ORDERED LIST OF BLOCKS.
+//  A client arranges them, writes their own words between them, and every
+//  block that carries booking information fills itself from the order.
+//
+//  This list is the single source of truth for what a block IS: the editor
+//  builds its palette from this export, and the renderer below draws from the
+//  same array, so a block can never exist in one and not the other.
+//
+//  kind: 'data'  — fills itself from the booking, nothing to write
+//        'write' — the client supplies the content
+//  fields        — what a 'write' block stores on itself
+// =============================================================================
+export const EMAIL_BLOCKS = [
+  { type: 'greeting',   kind: 'data',  label: 'Greeting',              hint: 'The confirmed badge, "Hi Sarah," and one line of welcome.' },
+  { type: 'summary',    kind: 'data',  label: 'Booking summary',       hint: 'Everything we know, in one card: reference, travellers, stay, flights and the rest.' },
+  { type: 'reference',  kind: 'data',  label: 'Booking reference',     hint: 'The reference on its own, with ATOL protection where it applies.' },
+  { type: 'travellers', kind: 'data',  label: 'Travellers',            hint: 'Who is going.' },
+  { type: 'stay',       kind: 'data',  label: 'Accommodation',         hint: 'Destination, property and dates. Every property on a multi-centre trip.' },
+  { type: 'flights',    kind: 'data',  label: 'Flights',               hint: 'Outbound and return.' },
+  { type: 'transfers',  kind: 'data',  label: 'Transfers',             hint: 'Pick-up, drop-off and times.' },
+  { type: 'carhire',    kind: 'data',  label: 'Car hire',              hint: 'Vehicle, pick-up and drop-off.' },
+  { type: 'tickets',    kind: 'data',  label: 'Tickets and attractions', hint: 'What is booked, when and where.' },
+  { type: 'extras',     kind: 'data',  label: 'Extras',                hint: 'Anything added after the booking was made.' },
+  { type: 'payment',    kind: 'data',  label: 'Cost and balance',      hint: 'Total, what is paid, what is left and when it is due.' },
+  { type: 'documents',  kind: 'data',  label: 'Documents',             hint: 'Links to every supplier document on the booking.' },
+  { type: 'pdfnote',    kind: 'data',  label: 'Booking pack note',     hint: 'The note telling the customer the A4 pack is attached.' },
+  { type: 'support',    kind: 'data',  label: 'Contact details',       hint: 'Your phone number and reply-to line.' },
+  { type: 'signoff',    kind: 'data',  label: 'Sign off',              hint: '"Have a wonderful trip" and your company name.' },
+  { type: 'message',    kind: 'data',  label: 'Customer note',         hint: 'The note a customer types when they email the booking to someone. Empty on a confirmation we send.' },
+  { type: 'text',       kind: 'write', label: 'Your own words',        fields: ['text'], hint: 'A paragraph or several. Merge tags are filled in.' },
+  { type: 'heading',    kind: 'write', label: 'Heading',               fields: ['text'] },
+  { type: 'button',     kind: 'write', label: 'Button',                fields: ['text', 'url'], hint: 'A link the customer can tap, such as your booking page.' },
+  { type: 'image',      kind: 'write', label: 'Image',                 fields: ['url'], hint: 'A banner across the width of the email. Must be an https address.' },
+  { type: 'divider',    kind: 'write', label: 'Divider',               fields: [] },
+];
+
+/**
+ * The built-in layout: what every confirmation email has looked like since the
+ * widget shipped. A client who never opens the layout builder gets exactly
+ * this, byte for byte, which is what `test:confirmation-blocks` holds us to.
+ */
+export const DEFAULT_EMAIL_LAYOUT = [
+  { type: 'greeting' },
+  { type: 'message' },
+  { type: 'summary' },
+  { type: 'documents' },
+  { type: 'payment' },
+  { type: 'pdfnote' },
+  { type: 'support' },
+  { type: 'signoff' },
+];
+
+const BLOCK_TYPES = new Set(EMAIL_BLOCKS.map(b => b.type));
+
+/**
+ * Read whatever the editor saved and hand back a layout we can render.
+ * A saved layout that is empty, not an array or made entirely of blocks we no
+ * longer have falls back to the built-in one — an email with no body is worse
+ * than an email in the old shape.
+ */
+export function normaliseLayout(layout) {
+  if (!Array.isArray(layout)) return DEFAULT_EMAIL_LAYOUT;
+  const clean = layout
+    .filter(b => b && typeof b === 'object' && BLOCK_TYPES.has(b.type))
+    .slice(0, 40);
+  return clean.length ? clean : DEFAULT_EMAIL_LAYOUT;
+}
+
+// Merge tags, same rules as the reminder and cancellation emails: case
+// insensitive, and an unknown tag is left alone so a typo shows up rather than
+// silently blanking a sentence.
+function applyMergeTags(text, vars) {
+  return String(text == null ? '' : text).replace(/\{\s*([a-zA-Z]+)\s*\}/g, (m, key) => {
+    const k = key.toLowerCase();
+    return Object.prototype.hasOwnProperty.call(vars, k) ? String(vars[k] == null ? '' : vars[k]) : m;
+  });
+}
+
+// Client prose to safe HTML. A blank line starts a paragraph, a single newline
+// is a line break, and everything is escaped: no client HTML reaches the email.
+function proseToHtml(text, colour) {
+  return String(text || '').replace(/\r\n/g, '\n').split(/\n{2,}/)
+    .map(b => b.trim()).filter(Boolean)
+    .map(b => `<p style="margin:0 0 12px 0;font:400 15px/1.6 ${FONT};color:${colour};">${escapeHtml(b).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+
+// Only https, and never a private or loopback host. Same rule the documents
+// list already applies to supplier URLs.
+function safeHttpsUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  let u;
+  try { u = new URL(value.trim()); } catch { return ''; }
+  if (u.protocol !== 'https:') return '';
+  const h = u.hostname.toLowerCase();
+  if (h === 'localhost' || h.endsWith('.localhost') || h === '127.0.0.1' || h === '::1') return '';
+  if (/^(10|127)\./.test(h) || /^192\.168\./.test(h) || /^169\.254\./.test(h)) return '';
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return '';
+  return u.toString();
+}
+
 function escapeHtml(str) {
   if (str == null) return '';
   return String(str)
@@ -246,6 +355,7 @@ export function renderBookingEmail(opts) {
     supportPhone,
     orderRef,
     baseUrl,
+    layout,
   } = opts;
 
   const primary = colors.primary || '#1B2B5B';
@@ -324,7 +434,7 @@ export function renderBookingEmail(opts) {
   const summaryRows = [];
 
   if (bookingReference) {
-    summaryRows.push({ label: 'Booking reference', value: bookingReference });
+    summaryRows.push({ group: 'reference', label: 'Booking reference', value: bookingReference });
   }
 
   // ATOL operator disclosure — required on any ATOL-protected package sale.
@@ -334,19 +444,19 @@ export function renderBookingEmail(opts) {
     const parts = [];
     if (packageInfo.atolProtected) parts.push('ATOL Protected');
     if (packageInfo.operator?.name) parts.push(`Operated by ${packageInfo.operator.name}`);
-    if (parts.length) summaryRows.push({ label: 'Holiday protection', value: parts.join(' · ') });
+    if (parts.length) summaryRows.push({ group: 'reference', label: 'Holiday protection', value: parts.join(' · ') });
   }
 
   if (travellers.length > 0) {
     const value = travellers.length === 1
       ? travellers[0]
       : `${travellers[0]} +${travellers.length - 1} other${travellers.length - 1 === 1 ? '' : 's'}`;
-    summaryRows.push({ label: travellers.length === 1 ? 'Lead guest' : 'Travellers', value });
+    summaryRows.push({ group: 'travellers', label: travellers.length === 1 ? 'Lead guest' : 'Travellers', value });
   }
 
   if (destinationCity) {
     const dest = destinationCountry ? `${destinationCity}, ${destinationCountry}` : destinationCity;
-    summaryRows.push({ label: 'Destination', value: dest });
+    summaryRows.push({ group: 'stay', label: 'Destination', value: dest });
   }
 
   // One Accommodation / Your stay pair per property, numbered when there is
@@ -354,12 +464,13 @@ export function renderBookingEmail(opts) {
   if (stays.length > 1) {
     stays.forEach((st, i) => {
       const label = `Stay ${i + 1} of ${stays.length}`;
-      if (st.name) summaryRows.push({ label, value: st.name });
+      if (st.name) summaryRows.push({ group: 'stay', label, value: st.name });
       if (st.checkin) {
         const inShort = formatShortDate(st.checkin);
         const outShort = st.checkout ? formatShortDate(st.checkout) : '';
         const nLabel = st.nights > 0 ? ` · ${st.nights} ${st.nights === 1 ? 'night' : 'nights'}` : '';
         summaryRows.push({
+          group: 'stay',
           label: 'Dates',
           value: outShort ? `${inShort} → ${outShort}${nLabel}` : `${inShort}${nLabel}`,
         });
@@ -367,7 +478,7 @@ export function renderBookingEmail(opts) {
     });
   } else {
     if (hotelName) {
-      summaryRows.push({ label: 'Accommodation', value: hotelName });
+      summaryRows.push({ group: 'stay', label: 'Accommodation', value: hotelName });
     }
 
     if (checkin) {
@@ -377,7 +488,7 @@ export function renderBookingEmail(opts) {
       const value = checkoutShort
         ? `${checkinShort} → ${checkoutShort}${nightsLabel}`
         : `${checkinShort}${nightsLabel}`;
-      summaryRows.push({ label: 'Your stay', value });
+      summaryRows.push({ group: 'stay', label: 'Your stay', value });
     }
   }
 
@@ -391,7 +502,7 @@ export function renderBookingEmail(opts) {
       const outDate = outbound.segments?.[0]?.depart
         ? formatShortDate(outbound.segments[0].depart) + ' · '
         : '';
-      summaryRows.push({ label: 'Outbound flight', value: `${outDate}${outboundLine}` });
+      summaryRows.push({ group: 'flights', label: 'Outbound flight', value: `${outDate}${outboundLine}` });
     }
 
     const returnRoute = flightItem.flights.routes.find(r =>
@@ -404,7 +515,7 @@ export function renderBookingEmail(opts) {
         const retDate = returnRoute.segments?.[0]?.depart
           ? formatShortDate(returnRoute.segments[0].depart) + ' · '
           : '';
-        summaryRows.push({ label: 'Return flight', value: `${retDate}${returnLine}` });
+        summaryRows.push({ group: 'flights', label: 'Return flight', value: `${retDate}${returnLine}` });
       }
     }
   }
@@ -423,6 +534,7 @@ export function renderBookingEmail(opts) {
     const outTime = tf.outPickup?.dateTime ? formatTime(tf.outPickup.dateTime) : '';
     const dateBit = [outDate, outTime].filter(Boolean).join(' · ');
     summaryRows.push({
+      group: 'transfers',
       label: tf.returnPickup?.dateTime ? 'Transfer (return)' : 'Transfer',
       value: dateBit ? `${dateBit} · ${route}` : route,
     });
@@ -441,6 +553,7 @@ export function renderBookingEmail(opts) {
     const bits = [pickupDate, pickupTime].filter(Boolean).join(' · ');
     const dur = (pickupDate && dropoffDate && pickupDate !== dropoffDate) ? ` → ${dropoffDate}` : '';
     summaryRows.push({
+      group: 'carhire',
       label: 'Car hire',
       value: `${vehicle}${bits ? ` · ${bits}${dur}` : ''}${where ? ` · ${where}` : ''}`,
     });
@@ -458,6 +571,7 @@ export function renderBookingEmail(opts) {
     const city = tk.location?.city || '';
     const bits = [schedDate, schedTime].filter(Boolean).join(' · ');
     summaryRows.push({
+      group: 'tickets',
       label: tk.ticketType || 'Tickets',
       value: `${name}${bits ? ` · ${bits}` : ''}${city ? ` · ${city}` : ''}`,
     });
@@ -472,6 +586,7 @@ export function renderBookingEmail(opts) {
         const namePart = e.name || g.name || 'Extra';
         const value = [namePart, e.description].filter(Boolean).join(' · ');
         summaryRows.push({
+          group: 'extras',
           label: g.name || g.type || 'Extra',
           value: (typeof e.qty === 'number' && e.qty > 1) ? `${value} · ×${e.qty}` : value,
         });
@@ -480,10 +595,18 @@ export function renderBookingEmail(opts) {
   }
 
   // Summary row HTML — every row uses the same body + caption sizes. No mono.
-  const summaryRowsHtml = summaryRows.map((row, idx) => {
-    const isLast = idx === summaryRows.length - 1;
-    const borderStyle = isLast ? '' : 'border-bottom:1px solid #e2e8f0;';
-    return `
+  // One booking card, given a set of rows and the label above it. The
+  // whole-booking "summary" block hands it every row; an individual data
+  // block (Flights, Your stay, Travellers ...) hands it only its own group's,
+  // which is the ONE difference between the built-in layout and a layout a
+  // client has arranged themselves. The card markup lives here rather than in
+  // the page assembly so both paths draw the identical card.
+  const summaryCard = (rows, title) => {
+    if (!rows || !rows.length) return '';
+    const body = rows.map((row, idx) => {
+      const isLast = idx === rows.length - 1;
+      const borderStyle = isLast ? '' : 'border-bottom:1px solid #e2e8f0;';
+      return `
       <tr>
         <td style="padding:12px 0;${borderStyle}width:38%;vertical-align:top;font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;">
           ${escapeHtml(row.label)}
@@ -493,7 +616,25 @@ export function renderBookingEmail(opts) {
         </td>
       </tr>
     `;
-  }).join('');
+    }).join('');
+    return `
+        <!-- Summary -->
+        <tr>
+          <td style="padding:8px 32px 24px 32px;">
+            <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;">${escapeHtml(title)}</div>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+              <tr>
+                <td style="padding:4px 24px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                    ${body}
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        `;
+  };
 
   // Payment block — same type system as summary, accent on the headline only.
   let paymentHtml = '';
@@ -869,6 +1010,164 @@ export function renderBookingEmail(opts) {
   const text = textParts.join('\n');
 
   // HTML body
+  // ── Blocks ────────────────────────────────────────────────────────────────
+  // Every part of the body, named. The page below is these in the order the
+  // layout gives, so "arrange your own email" and "the email we have always
+  // sent" are the same code path with a different list.
+
+  const greetingHtml = `
+        <!-- Greeting -->
+        <tr>
+          <td style="padding:32px 32px 16px 32px;">
+            <div style="display:inline-block;background:#10b981;color:#ffffff;padding:4px 12px;border-radius:9999px;font:600 12px/1.4 ${FONT};letter-spacing:.04em;text-transform:uppercase;">
+              ✓ Confirmed
+            </div>
+            <h1 style="margin:16px 0 0 0;font:700 22px/1.2 ${FONT};color:#0f172a;letter-spacing:-.01em;">
+              ${greeting}
+            </h1>
+            <p style="margin:8px 0 0 0;font:400 15px/1.6 ${FONT};color:#475569;">
+              Your booking is confirmed${destinationCity && acc ? ` and your ${escapeHtml(destinationCity)} trip is locked in` : ''}. The essentials are below — and the full A4 confirmation pack is attached as a PDF for your records.
+            </p>
+          </td>
+        </tr>
+        `;
+
+  const pdfNoteHtml = `
+        <!-- PDF callout -->
+        <tr>
+          <td style="padding:0 32px 24px 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="background:${escapeHtml(accent)}1a;border-left:4px solid ${escapeHtml(accent)};border-radius:8px;padding:16px 20px;">
+                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">📎 ${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
+                  <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        `;
+
+  const signOffHtml = `
+        <!-- Sign-off -->
+        <tr>
+          <td style="padding:24px 32px 32px 32px;">
+            <div style="font:400 15px/1.6 ${FONT};color:#0f172a;">
+              Have a wonderful trip,<br>
+              <strong style="font-weight:600;">— ${escapeHtml(brandName)}</strong>
+            </div>
+          </td>
+        </tr>
+        `;
+
+  // Rows belonging to one data block. The groups were stamped on each row as
+  // it was built, so a block never has to guess which rows are its own.
+  const rowsIn = (...groups) => summaryRows.filter(r => groups.includes(r.group));
+
+  // What a client's own words can merge in. Lower-cased keys: the tag itself
+  // is case insensitive.
+  const mergeVars = {
+    firstname: customerFirstName,
+    bookingref: bookingReference,
+    destination: destinationCity ? (destinationCountry ? `${destinationCity}, ${destinationCountry}` : destinationCity) : '',
+    hotel: hotelName,
+    checkin: checkin ? formatShortDate(checkin) : '',
+    checkout: checkout ? formatShortDate(checkout) : '',
+    nights: nights > 0 ? String(nights) : '',
+    total: payment ? formatMoney(payment.total, payment.currency) : '',
+    balance: payment && payment.balanceDue > 0 ? formatMoney(payment.balanceDue, payment.currency) : '',
+    agencyname: brandName,
+    agencyphone: supportPhone || '',
+    agencyemail: supportEmail || '',
+  };
+
+  const dataBlocks = {
+    greeting:   () => greetingHtml,
+    message:    () => messageHtml,
+    summary:    () => summaryCard(summaryRows, 'Your booking'),
+    reference:  () => summaryCard(rowsIn('reference'), 'Your booking'),
+    travellers: () => summaryCard(rowsIn('travellers'), 'Travellers'),
+    stay:       () => summaryCard(rowsIn('stay'), 'Your stay'),
+    flights:    () => summaryCard(rowsIn('flights'), 'Flights'),
+    transfers:  () => summaryCard(rowsIn('transfers'), 'Transfers'),
+    carhire:    () => summaryCard(rowsIn('carhire'), 'Car hire'),
+    tickets:    () => summaryCard(rowsIn('tickets'), 'Tickets and attractions'),
+    extras:     () => summaryCard(rowsIn('extras'), 'Extras'),
+    payment:    () => paymentHtml,
+    documents:  () => documentsHtml,
+    pdfnote:    () => pdfNoteHtml,
+    support:    () => supportHtml,
+    signoff:    () => signOffHtml,
+  };
+
+  function renderBlock(block) {
+    const built = dataBlocks[block.type];
+    if (built) return built();
+
+    // The client wrote this one.
+    const raw = typeof block.text === 'string' ? block.text : '';
+    const filled = applyMergeTags(raw, mergeVars);
+
+    if (block.type === 'text') {
+      const body = proseToHtml(filled, '#475569');
+      return body ? `
+        <tr><td style="padding:0 32px 12px 32px;">${body}</td></tr>
+        ` : '';
+    }
+    if (block.type === 'heading') {
+      if (!filled.trim()) return '';
+      return `
+        <tr>
+          <td style="padding:8px 32px 8px 32px;">
+            <div style="font:700 18px/1.3 ${FONT};color:#0f172a;letter-spacing:-.01em;">${escapeHtml(filled.trim())}</div>
+          </td>
+        </tr>
+        `;
+    }
+    if (block.type === 'button') {
+      const href = safeHttpsUrl(applyMergeTags(block.url, mergeVars));
+      const label = filled.trim() || 'View my booking';
+      if (!href) return '';
+      // Table-wrapped so Outlook draws the button rather than a bare link.
+      return `
+        <tr>
+          <td style="padding:8px 32px 20px 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="background:${escapeHtml(primary)};border-radius:8px;">
+                  <a href="${escapeHtml(href)}" style="display:inline-block;padding:13px 26px;font:600 15px/1 ${FONT};color:#ffffff;text-decoration:none;">${escapeHtml(label)}</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        `;
+    }
+    if (block.type === 'image') {
+      const src = safeHttpsUrl(block.url);
+      if (!src) return '';
+      return `
+        <tr>
+          <td style="padding:0 0 20px 0;">
+            <img src="${escapeHtml(src)}" alt="${escapeHtml(filled.trim() || brandName)}" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;">
+          </td>
+        </tr>
+        `;
+    }
+    if (block.type === 'divider') {
+      return `
+        <tr>
+          <td style="padding:4px 32px 20px 32px;">
+            <div style="height:1px;background:#e2e8f0;line-height:1px;font-size:1px;">&nbsp;</div>
+          </td>
+        </tr>
+        `;
+    }
+    return '';
+  }
+
+  const bodyHtml = normaliseLayout(layout).map(renderBlock).join('\n');
+
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -891,70 +1190,7 @@ export function renderBookingEmail(opts) {
           </td>
         </tr>
 
-        <!-- Greeting -->
-        <tr>
-          <td style="padding:32px 32px 16px 32px;">
-            <div style="display:inline-block;background:#10b981;color:#ffffff;padding:4px 12px;border-radius:9999px;font:600 12px/1.4 ${FONT};letter-spacing:.04em;text-transform:uppercase;">
-              ✓ Confirmed
-            </div>
-            <h1 style="margin:16px 0 0 0;font:700 22px/1.2 ${FONT};color:#0f172a;letter-spacing:-.01em;">
-              ${greeting}
-            </h1>
-            <p style="margin:8px 0 0 0;font:400 15px/1.6 ${FONT};color:#475569;">
-              Your booking is confirmed${destinationCity && acc ? ` and your ${escapeHtml(destinationCity)} trip is locked in` : ''}. The essentials are below — and the full A4 confirmation pack is attached as a PDF for your records.
-            </p>
-          </td>
-        </tr>
-
-        ${messageHtml}
-
-        ${summaryRows.length ? `
-        <!-- Summary -->
-        <tr>
-          <td style="padding:8px 32px 24px 32px;">
-            <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;">Your booking</div>
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
-              <tr>
-                <td style="padding:4px 24px;">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                    ${summaryRowsHtml}
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-        ` : ''}
-
-        ${documentsHtml}
-
-        ${paymentHtml}
-
-        <!-- PDF callout -->
-        <tr>
-          <td style="padding:0 32px 24px 32px;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-              <tr>
-                <td style="background:${escapeHtml(accent)}1a;border-left:4px solid ${escapeHtml(accent)};border-radius:8px;padding:16px 20px;">
-                  <div style="font:600 15px/1.6 ${FONT};color:#0f172a;margin-bottom:2px;">📎 ${safeDocs.length ? 'Booking pack and documents attached' : 'Full booking pack attached'}</div>
-                  <div style="font:400 15px/1.6 ${FONT};color:#475569;">Your A4 confirmation includes the room details, full flight breakdown, payment schedule, and important booking conditions.${safeDocs.length ? ' Supplier documents are attached where size allows — and always available via the links above.' : ''}</div>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-
-        ${supportHtml}
-
-        <!-- Sign-off -->
-        <tr>
-          <td style="padding:24px 32px 32px 32px;">
-            <div style="font:400 15px/1.6 ${FONT};color:#0f172a;">
-              Have a wonderful trip,<br>
-              <strong style="font-weight:600;">— ${escapeHtml(brandName)}</strong>
-            </div>
-          </td>
-        </tr>
+        ${bodyHtml}
 
         ${footerLine ? `
         <tr>
