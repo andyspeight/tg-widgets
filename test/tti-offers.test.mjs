@@ -2646,3 +2646,79 @@ test('a cache reset is scoped to the hotels being tested, on their own account',
   assert.ok(/if \(other\) other\.disabled = true;/.test(EDITOR));
   assert.ok(/if \(other\) other\.disabled = false;/.test(EDITOR));
 });
+
+test('what is in the boxes is what gets saved', () => {
+  // Andy's own widget, saved at 10:08 on 16 Sep 2026, came back as
+  // [{code, ctry, locationType}] — four hotels with no travel date on any of
+  // them, so the widget fell back to its rolling 7-180 day window and filtered
+  // its own cached 2027 offers straight back out. "You have to add the dates
+  // again to get the offers to display."
+  //
+  // state.config.ttiCodes is written by syncTtiConfig, and syncTtiConfig only
+  // ever ran as a side effect of painting the summary panel. The save trusted
+  // that a paint had happened since the last edit. THE SAVE READS THE ROWS.
+  const getCfg = /getConfig: \(\) => \{([\s\S]*?)\n      \},/.exec(EDITOR);
+  assert.ok(getCfg, 'the editor must hand a config to the shell');
+  assert.ok(/if \(ttiRowsHydrated\) syncTtiConfig\(\);/.test(getCfg[1]),
+    'the save rebuilds ttiCodes from the rows');
+  // But only once the rows hold a config. Rebuilding from an empty array is a
+  // widget's whole hotel list deleted by a save that landed before the load.
+  assert.ok(/let ttiRowsHydrated = false;/.test(EDITOR));
+  assert.ok(/ttiRows = ttiRowsFromConfig\(state\.config\);\n        ttiRowsHydrated = true;/.test(EDITOR));
+  // And it happens BEFORE the clone, or it rebuilds into an object nobody sends.
+  assert.ok(getCfg[1].indexOf('syncTtiConfig()') < getCfg[1].indexOf('JSON.parse'));
+
+  // A date commits on both events. Which one a date field fires is the
+  // browser's business, and every other box in the row commits on 'input'.
+  assert.ok(/when\.addEventListener\('change', commitWhen\);/.test(EDITOR));
+  assert.ok(/when\.addEventListener\('input', commitWhen\);/.test(EDITOR));
+});
+
+test('pasting a deeplink fills a row in and never blanks it', () => {
+  // The merge was Object.assign(existing, parsed), and parsed always carries
+  // ctry — as '' when the deeplink has no ctry= on it. So pasting the deeplink
+  // for a hotel whose country you had already typed wiped that country.
+  const decl = /function parseTtiDeeplink\(url\) \{([\s\S]*?)\n    \}/.exec(EDITOR);
+  assert.ok(decl, 'the editor must read Travelify deeplinks');
+  // eslint-disable-next-line no-new-func
+  const parse = new Function('canonTti', 'canonCtry', 'url', decl[1]);
+  const run = (url) => parse(
+    (v) => String(v || '').replace(/^[A-Z]+:/i, '').trim(),
+    (v) => (/^[A-Z]{2}$/.test(String(v || '').trim().toUpperCase())
+      ? String(v).trim().toUpperCase() : ''),
+    url);
+
+  const bare = run('https://dl.tvllnk.com/deeplink/?refn=44904364&loc=Costa%20Adeje');
+  assert.equal(bare.code, '44904364');
+  assert.equal(bare.ctry, '', 'no country on this link, so it carries a blank one');
+  assert.ok(!('checkin' in bare), 'a deeplink knows nothing about a travel date');
+  assert.ok(!('dst' in bare), 'nor about an arrival airport');
+
+  // Which is exactly why the merge has to skip the blanks.
+  const merge = (existing, parsed) => {
+    for (const [k, v] of Object.entries(parsed)) {
+      if (v !== '' && v != null) existing[k] = v;
+    }
+    return existing;
+  };
+  const row = { code: '44904364', ctry: 'ES', checkin: '2027-04-09', dst: 'TFS' };
+  const after = merge({ ...row }, bare);
+  assert.equal(after.ctry, 'ES', 'the typed country survives the paste');
+  assert.equal(after.checkin, '2027-04-09', 'and so does the travel date');
+  assert.equal(after.dst, 'TFS');
+  assert.equal(after.locationName, 'Costa Adeje', 'and the paste still fills in what it knows');
+  // A real country on the link still wins.
+  assert.equal(merge({ ...row }, run(
+    'https://dl.tvllnk.com/deeplink/?refn=44904364&ctry=GB')).ctry, 'GB');
+
+  assert.ok(/if \(v !== '' && v != null\) existing\[k\] = v;/.test(EDITOR));
+  assert.ok(!/Object\.assign\(existing, parsed\)/.test(EDITOR), 'the blanking merge is gone');
+});
+
+test('adding a hotel puts the cursor in the new hotel\'s code box', () => {
+  // The offset counted back from the end of every .input on the page, which
+  // was right when a row was two boxes. A row is now up to four, so it landed
+  // the cursor in the middle of the new row.
+  assert.ok(/querySelectorAll\('\.tti-row \.tti-code'\)/.test(EDITOR));
+  assert.ok(!/inputs\[inputs\.length - 2\]\.focus\(\)/.test(EDITOR));
+});
