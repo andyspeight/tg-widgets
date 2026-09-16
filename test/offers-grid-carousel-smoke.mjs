@@ -60,8 +60,28 @@ console.log('Source guards — the carousel is additive and safe');
     /function matchesFilter\(item, cfg\)/.test(GRID) && /filterTags\.indexOf\(String\(tags\[i\]\)\.trim\(\)\.toLowerCase\(\)\)/.test(GRID));
   ok('filter values are normalised once in _defaults',
     /filterType: String\(c\.filterType \|\| ''\)\.trim\(\)\.toLowerCase\(\)/.test(GRID));
-  ok('nothing in the wire path steals focus or scrolls the host page',
-    !/scrollIntoView/.test(GRID) && !/\.focus\(/.test(GRID));
+  // The rule is that DRAWING must never grab the host page; movement follows a
+  // real user action only. This used to be checked by banning scrollIntoView
+  // from the whole file, which was the same thing while the grid only ever drew
+  // cards. Since 16 Sep 2026 an offer opens inside the grid when a visitor
+  // clicks one, and that DOES move the page, on purpose. So the ban is now on
+  // the paths that draw, and the one scroll left has to be the user's.
+  const bodyOf = (sig) => {
+    const i = GRID.indexOf(sig);
+    if (i < 0) return '';
+    const open = GRID.indexOf('{', i);
+    let depth = 0, j = open;
+    for (; j < GRID.length; j++) { if (GRID[j] === '{') depth++; else if (GRID[j] === '}') { depth--; if (!depth) break; } }
+    return GRID.slice(open + 1, j);
+  };
+  const drawing = bodyOf('_wireCarousel(totalOffers) {') + bodyOf('_render(state) {') + bodyOf('_fill(list) {');
+  ok('nothing in the wire or draw path steals focus or scrolls the host page',
+    !/scrollIntoView/.test(drawing) && !/\.focus\(/.test(drawing));
+  ok('nothing anywhere in the grid steals focus', !/\.focus\(/.test(GRID));
+  ok('the only scroll is the one a visitor asked for, and it is gated',
+    (GRID.match(/scrollIntoView/g) || []).length === 1
+    && /_openOffer\(item, firstMount\)/.test(GRID)
+    && /if \(!firstMount \|\| atTop\) \{/.test(bodyOf('_openOffer(item, firstMount) {')));
   ok('the accent custom property only accepts a hex colour',
     /\/\^#\[0-9a-fA-F\]\{3,8\}\$\/\.test\(cfg\.accentColor\)/.test(GRID));
   ok('VERSION bumped to 0.2+', (() => {

@@ -341,12 +341,20 @@
             </div>
           </div>
           <div class="section" data-open="true">
-            <button class="section-head" data-section>Offer page web address
+            <button class="section-head" data-section>Where offers open
               <svg class="section-head-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="section-body">
+              <div class="field">
+                <label class="field-label" for="cfgOfferOpen">When a visitor clicks an offer</label>
+                <select id="cfgOfferOpen">
+                  <option value="inline">Open it on your own page</option>
+                  <option value="link">Open it on a Travelgenix page</option>
+                </select>
+                <div class="field-help">Your own page keeps the visitor on your website with your header and footer around the offer, and your web address never changes. Back, forward and a refresh all work, and the link can be shared. Choose the Travelgenix page only if you want each offer to have its own web address for sharing on social media, where the photo and price show in the preview.</div>
+              </div>
               <div class="field"><label class="field-label">Your domain</label><input type="text" id="cfgOfferBase" placeholder="offers.youragency.co.uk"></div>
-              <div class="field-help">Optional. Share offers on your own web address instead of tg-widgets.vercel.app. Point the domain at this app first (your account manager sets this up), then your share links and embed code use it automatically. Leave blank to use the default.</div>
+              <div class="field-help">Optional, and worth setting if you share offer links on social media. Point your own domain at this app first (your account manager sets this up), then the share links you copy from an offer use it instead of ours. Leave blank to use the default.</div>
             </div>
           </div>
         </div>
@@ -526,6 +534,10 @@
         // Blank means the widget's own localised default.
         replyPromise: '',
         offerBaseUrl: '',
+        // Where a visitor lands when they click an offer. 'inline' keeps them on
+        // the client's own page (16 Sep 2026, Andy: "we are the technology
+        // provider, not the story"); 'link' is the old Travelgenix page.
+        offerOpen: 'inline',
         // Display: 'grid' (classic) or 'carousel' (one swipeable row). The
         // filter shows only offers of one builder type and/or carrying a tag,
         // in either display — several typed embeds can share one offer pool.
@@ -1194,6 +1206,7 @@
       $('cfgEnquiryPhone').value = c.enquiryPhone;
       $('cfgReplyPromise').value = c.replyPromise || '';
       $('cfgOfferBase').value = c.offerBaseUrl || '';
+      $('cfgOfferOpen').value = c.offerOpen === 'link' ? 'link' : 'inline';
       $('cfgProtection').value = c.protection;
       { const h = $('cruiseHelp'); if (h) h.hidden = c.cardLayout !== 'cruise'; }
     }
@@ -1257,6 +1270,10 @@
       const col = { cfgAccent:'accentColor', cfgBrand:'brandColor' };
       Object.entries(col).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; renderCardPreview(); dirty(); }));
       $('cfgRadius').addEventListener('input', e => { const n=parseInt(e.target.value,10); state.config.radius=isNaN(n)?14:Math.max(0,Math.min(40,n)); renderCardPreview(); dirty(); });
+      $('cfgOfferOpen').addEventListener('change', (e) => {
+        state.config.offerOpen = e.target.value === 'link' ? 'link' : 'inline';
+        shell.markDirty(); renderPreview();
+      });
       const txt = { cfgEnquiryEmail:'enquiryEmail', cfgEnquiryPhone:'enquiryPhone', cfgOfferBase:'offerBaseUrl', cfgReplyPromise:'replyPromise' };
       Object.entries(txt).forEach(([id,k]) => $(id).addEventListener('input', e => { state.config[k]=e.target.value; dirty(); }));
       $('btn-theme').addEventListener('click', () => { state.config.theme = state.config.theme==='dark'?'light':'dark'; renderCardPreview(); dirty(); });
@@ -1283,6 +1300,9 @@
       }
       if (c.filterType) conf.filterType = c.filterType;
       if (Array.isArray(c.filterTags) && c.filterTags.length) conf.filterTags = c.filterTags;
+      // Opening on the client's own page is the default, so only the other
+      // choice needs saying in the snippet.
+      if (c.offerOpen === 'link') conf.offerOpen = 'link';
       // Loading the grid script from the white-label origin makes the grid's
       // offer links resolve to that domain too (it derives its base from its own
       // script src), so no extra config is needed for full white-labelling.

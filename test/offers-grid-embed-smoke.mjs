@@ -27,7 +27,13 @@ console.log('The grid handles the standard data-tg-id embed');
 {
   ok('it reads data-tg-id', /getAttribute\('data-tg-id'\)/.test(init));
   ok('it fetches the widget config by id', /fetch\(resolveApiBase\(\) \+ 'api\/widget-config\?id=' \+ encodeURIComponent\(id\)\)/.test(init));
-  ok('it mounts from the fetched config (config or root spread)', /new TGOffersGridWidget\(el, \(d && \(d\.config \|\| d\)\) \|\| \{\}\)/.test(init));
+  ok('it mounts from the fetched config (config or root spread)',
+    /const config = \(d && \(d\.config \|\| d\)\) \|\| \{\};/.test(init)
+    && /new TGOffersGridWidget\(el, config\)/.test(init));
+  // 16 Sep 2026: an offer opened in place sends its enquiry from inside this
+  // grid, so the grid has to know which widget it is.
+  ok('it forwards the widget id so an enquiry can be traced back',
+    /if \(!config\._widgetId\) config\._widgetId = id;/.test(init));
   ok('a fetch failure still mounts (empty) rather than throwing', /\.catch\(\(\) => \{ new TGOffersGridWidget\(el, \{\}\); \}\)/.test(init));
 }
 
