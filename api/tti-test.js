@@ -32,7 +32,7 @@
  */
 
 import { requireAuth, setCors } from './_auth.js';
-import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } from './_auth.js';
+import { credentialsForWidget } from './_lib/offers/widget-owner.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
   canonTti, cleanCtry, cleanCoord, cleanDate, cleanIp, fixedCheckin, parseDeeplink,
@@ -70,11 +70,6 @@ const LOCATE_POLLS = 4;
 const RAW_MAX_BYTES = 96 * 1024;
 
 const ttiKey = (appId, code) => `offers:tti:${appId}:${code}`;
-
-async function credsForCaller(user) {
-  return (user.clientId ? await lookupClientCredentialsByRecordId(user.clientId) : null)
-      || (user.email ? await lookupClientCredentialsByEmail(user.email) : null);
-}
 
 /** Accept either structured rows or pasted deeplinks, and canonicalise both
  *  into the one row shape the criteria builder wants. */
@@ -144,7 +139,20 @@ export default async function handler(req, res) {
   const rows = rowsFrom(body);
   if (!rows.length) return res.status(400).json({ error: 'No properties to test.' });
 
-  const creds = await credsForCaller(user);
+  // SEARCH AS THE WIDGET'S OWNER, not as whoever is signed in looking at it.
+  //
+  // Andy, 16 Sep 2026: "When acting as it needs to use the owner of the App —
+  // in this case MT Holidays." The cache key is offers:tti:{appId}:{code} and
+  // the live widget reads the OWNER's App ID, injected by widget-config.js from
+  // ClientRecordId. A test that searched under the session's account would
+  // write to a key the widget never reads — and price the offer at the wrong
+  // client's contracted rates, which is a commercial error, not a cosmetic one.
+  //
+  // Permission is checked against the same rule the save path uses, because
+  // the widget id now decides which credentials get spent.
+  const resolved = await credentialsForWidget({ widgetId: body.widgetId, user });
+  if (resolved.error) return res.status(403).json({ error: resolved.error });
+  const creds = resolved.creds;
   if (!creds) {
     return res.status(400).json({
       error: 'No Travelify credentials on your account, so there is nothing to search against. '
@@ -577,6 +585,10 @@ export default async function handler(req, res) {
         + 'Test fewer hotels, or fewer departure airports, at a time.',
     } : {}),
     elapsedMs: Date.now() - startedAt,
+    // WHOSE ACCOUNT THIS SEARCHED UNDER. Said out loud because a staff member
+    // acting for a client cannot otherwise tell, and the wrong one caches to a
+    // pool the widget cannot read.
+    searchedAs: { appId: creds.appId, owner: resolved.owner || null, from: resolved.source },
     shape,
     raw,
     results,

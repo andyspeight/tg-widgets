@@ -828,8 +828,18 @@ test('a successful test leaves a real cached offer behind', () => {
 test('credentials are resolved server-side, never taken from the request', () => {
   // A client must never be able to test against another client's application:
   // the rates that come back are commercially theirs.
-  assert.ok(/lookupClientCredentialsByRecordId|lookupClientCredentialsByEmail/.test(TEST_API));
-  assert.ok(!/body\.appId|body\.apiKey/.test(TEST_API));
+  //
+  // The request now names a WIDGET, which is a stronger position than naming an
+  // account — but only because that name is permission-checked before its
+  // credentials are spent. The lookup itself lives in widget-owner.js.
+  const OWNER = readFileSync(new URL('../api/_lib/offers/widget-owner.js', import.meta.url), 'utf8');
+  assert.ok(/lookupClientCredentialsByRecordId|lookupClientCredentialsByEmail/.test(OWNER));
+  assert.ok(/canModifyWidget/.test(OWNER), 'and the widget id is checked before it decides anything');
+  // Nothing about the account may come off the wire, in either file.
+  for (const [label, src] of [['the endpoint', TEST_API], ['the resolver', OWNER]]) {
+    assert.ok(!/body\.appId|body\.apiKey|query\.appId/.test(src),
+      `${label} must never take credentials from the request`);
+  }
 });
 
 test('the test endpoint stays capped, authenticated and inside its route budget', () => {
@@ -2261,4 +2271,69 @@ test('the editor never reports a hotel as being at 0.000, 0.000', () => {
   // And the nulls must stop being written in the first place.
   assert.ok(/\.\.\.\(rowHasCoords\(r\) \? \{ lat: coordOf\(r\.lat, 90\)/.test(EDITOR));
   assert.ok(!/lat: Number\(r\.lat\), lng: Number\(r\.lng\)/.test(EDITOR));
+});
+
+/* ============================================================
+   Whose Travelify account does a test search under?
+   ============================================================ */
+
+const OWNER_SRC = readFileSync(new URL('../api/_lib/offers/widget-owner.js', import.meta.url), 'utf8');
+const APPID_SRC = readFileSync(new URL('../api/tti-appid.js', import.meta.url), 'utf8');
+
+test('a test searches as the WIDGET OWNER, not as whoever is signed in', () => {
+  // Andy, 16 Sep 2026: "When acting as it needs to use the owner of the App —
+  // in this case MT Holidays." Not a preference: the cache key is
+  // offers:tti:{appId}:{code} and the live widget reads the OWNER's App ID, so
+  // a test under the session's account writes to a key the widget never reads,
+  // and prices the offer at the wrong client's contracted rates.
+  assert.ok(/credentialsForWidget\(\{ widgetId: body\.widgetId, user \}\)/.test(TEST_API));
+  assert.ok(!/lookupClientCredentialsByRecordId\(user\.clientId\)/.test(TEST_API),
+    'the session must no longer decide which account is searched');
+  assert.ok(/widgetId: state\.widgetId \|\| ''/.test(EDITOR), 'and the editor must send it');
+
+  // The preview resolves the same way, or it reads a different pool from the
+  // one the test just wrote and reports that the write did not land.
+  assert.ok(/credentialsForWidget\(\{/.test(APPID_SRC));
+  assert.ok(/widgetId=' \+ encodeURIComponent\(state\.widgetId\)/.test(EDITOR));
+
+  // And the three places that resolve an owner must use the SAME field.
+  for (const [label, src] of [['widget-owner', OWNER_SRC], ['widget-config', WIDGET_CONFIG], ['the sweep', CRON]]) {
+    assert.ok(/ClientRecordId/.test(src), `${label} must resolve the owner from ClientRecordId`);
+  }
+});
+
+test('the widget id decides which credentials get spent, so it is checked', () => {
+  // Resolving by widget id means anyone passing an id could otherwise spend
+  // another client's Travelify capacity and read their contracted rates.
+  assert.ok(/canModifyWidget\(record, \{/.test(OWNER_SRC), 'the same rule the save path enforces');
+  assert.ok(/sessionClientId: user\.clientId/.test(OWNER_SRC));
+  assert.ok(/if \(allowed !== true\)/.test(OWNER_SRC), 'and it must fail closed');
+  assert.ok(/return res\.status\(403\)\.json\(\{ error: resolved\.error \}\)/.test(TEST_API));
+  assert.ok(/^\s*export function canModifyWidget/m.test(WIDGET_CONFIG),
+    'reused rather than reimplemented: two ownership rules is one rule and a bug');
+});
+
+test('a lookup that could not be made never falls back to the session', () => {
+  // "We could not ask" and "there is no such widget" must not collapse into one
+  // value: the fallback for the second is the session's own account, which is
+  // exactly the wrong-client search this whole change removes.
+  assert.ok(/throw new Error\('Airtable not configured'\)/.test(OWNER_SRC));
+  assert.ok(/throw new Error\(`Airtable HTTP \$\{r\.status\}`\)/.test(OWNER_SRC));
+  assert.ok(/We could not check which account this widget belongs to/.test(OWNER_SRC));
+  // An owner with no Travelify application is refused too, for the same reason.
+  assert.ok(/has no Travelify application connected/.test(OWNER_SRC));
+  // The credentials must be the ones widget-config.js uses, or this reads a
+  // different base from the endpoint whose records it is reading.
+  assert.ok(/process\.env\.AIRTABLE_KEY/.test(OWNER_SRC));
+  assert.ok(/AIRTABLE_KEY/.test(WIDGET_CONFIG), 'same key name as the endpoint that writes these records');
+});
+
+test('an unsaved widget uses your own account, and says so', () => {
+  // A widget with no id yet can only belong to whoever is making it. That is
+  // the one honest use of the session — and the agent is told, because the
+  // account changes the moment they save.
+  assert.ok(/source: 'session'/.test(OWNER_SRC));
+  assert.ok(/this widget has not been saved yet, so it used your own account/.test(EDITOR));
+  assert.ok(/Searched '/.test(EDITOR), 'and the account is named on every test');
+  assert.ok(/searchedAs: \{ appId: creds\.appId/.test(TEST_API));
 });
