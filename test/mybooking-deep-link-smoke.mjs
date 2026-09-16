@@ -19,6 +19,12 @@
  * opens"), because the link is the booking and it does not need to sit in
  * history afterwards. Only the parameters we used are removed.
  *
+ * That cost the customer their refresh, so the tab remembers instead (Andy:
+ * "Can you set it to remember"). Only the three details, never the booking, in
+ * sessionStorage, keyed by widget id. A refresh here is a SECOND widget on a
+ * clean address sharing the first one's storage, which is exactly what a
+ * browser does.
+ *
  * This drives the REAL widget in jsdom, mounted on a page at that real address,
  * and watches what it asks the server for — because the thing being claimed is
  * what happens when a customer clicks a link in their confirmation email.
@@ -64,8 +70,22 @@ const ORDER = {
   }],
 };
 
+/** One tab's sessionStorage, shared across a "refresh" the way a browser does. */
+function makeStore() {
+  const map = new Map();
+  return {
+    getItem: (k) => (map.has(String(k)) ? map.get(String(k)) : null),
+    setItem: (k, v) => { map.set(String(k), String(v)); },
+    removeItem: (k) => { map.delete(String(k)); },
+    clear: () => map.clear(),
+    get length() { return map.size; },
+    key: (i) => Array.from(map.keys())[i] ?? null,
+    _map: map,
+  };
+}
+
 /** A client's page at a given address, with the real widget on it. */
-function page(url, { found = true } = {}) {
+function page(url, { found = true, store = null } = {}) {
   const dom = new JSDOM('<!doctype html><html><body><div id="host"></div></body></html>',
     { runScripts: 'outside-only', url, pretendToBeVisual: true });
   const { window } = dom;
@@ -77,8 +97,9 @@ function page(url, { found = true } = {}) {
     if (!found) return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
     return { ok: true, status: 200, json: async () => ({ order: ORDER }), text: async () => '' };
   };
+  if (store) Object.defineProperty(window, 'sessionStorage', { value: store, configurable: true });
   window.eval(WIDGET);
-  return { window, calls };
+  return { window, calls, store: store || window.sessionStorage };
 }
 const mount = async ({ window }, cfg) => {
   const host = window.document.getElementById('host');
@@ -247,6 +268,135 @@ console.log('A browser that will not rewrite the address still shows the booking
   ctx.window.history.replaceState = () => { throw new Error('nope'); };
   const w = await mount(ctx);
   ok('the booking is on screen regardless', w.state.stage === 'found' && /The Rocks Hotel/.test(html(w)));
+}
+
+console.log('The tab remembers, so a refresh still shows the booking');
+{
+  const store = makeStore();
+  const first = page(LIVE, { store });
+  const w1 = await mount(first);
+  ok('the link opened the booking', w1.state.stage === 'found');
+  ok('and the address was cleaned', !new URL(first.window.location.href).searchParams.has('orderref'));
+  ok('the three details are held for the tab, and nothing else is',
+    store.length === 1 && JSON.parse(store.key(0) && store.getItem(store.key(0)))
+    && Object.keys(JSON.parse(store.getItem(store.key(0)))).sort().join(',') === 'at,date,email,ref',
+    store.key(0) + ' = ' + store.getItem(store.key(0)));
+  ok('the booking itself is NOT stored', !/Rocks Hotel|Livsey/.test(store.getItem(store.key(0))));
+  ok('the key names the widget', store.key(0) === 'tgm_link_tgw_tripgift_1', store.key(0));
+
+  // The refresh: a new page at the cleaned address, same tab storage.
+  const after = page('https://tripgift.com/orders?orderstatus=Confirmed', { store });
+  const w2 = await mount(after);
+  ok('the booking comes back without the customer doing anything', w2.state.stage === 'found');
+  ok('it was looked up again rather than drawn from a stale copy',
+    retrieves(after.calls).length === 1
+    && retrieves(after.calls)[0].body.orderRef === REF);
+  ok('and the address is still clean',
+    new URL(after.window.location.href).search === '?orderstatus=Confirmed',
+    new URL(after.window.location.href).search);
+}
+
+console.log('Look up another booking means the tab forgets it');
+{
+  const store = makeStore();
+  const first = page(LIVE, { store });
+  const w = await mount(first);
+  w.shadow.querySelector('[data-tgm-newlookup]')
+    .dispatchEvent(new first.window.MouseEvent('click', { bubbles: true }));
+  await sleep(60);
+  ok('nothing is remembered any more', store.length === 0);
+
+  const after = page('https://tripgift.com/orders', { store });
+  const w2 = await mount(after);
+  ok('so a refresh shows the form, not the booking they just left',
+    w2.state.stage === 'form' && retrieves(after.calls).length === 0);
+}
+
+console.log('A booking that has gone stops being offered back');
+{
+  const store = makeStore();
+  const first = page(LIVE, { store });
+  await mount(first);
+  ok('it was remembered', store.length === 1);
+
+  // Cancelled since, so the next refresh gets a 404.
+  const gone = page('https://tripgift.com/orders', { store, found: false });
+  const w2 = await mount(gone);
+  ok('the refresh tried once and landed on not-found', w2.state.stage === 'notfound');
+  ok('and the tab forgot it rather than trying forever', store.length === 0);
+
+  const third = page('https://tripgift.com/orders', { store });
+  const w3 = await mount(third);
+  ok('the refresh after that is a plain form', w3.state.stage === 'form' && retrieves(third.calls).length === 0);
+}
+
+console.log('Only a link is remembered, and only for its own widget');
+{
+  const store = makeStore();
+  const typed = page('https://tripgift.com/orders', { store });
+  const w = await mount(typed);
+  const form = w.shadow.querySelector('form');
+  w.shadow.querySelector('[name="email"]').value = EMAIL;
+  w.shadow.querySelector('[name="date"]').value = DATE;
+  w.shadow.querySelector('[name="ref"]').value = REF;
+  form.dispatchEvent(new typed.window.Event('submit', { bubbles: true, cancelable: true }));
+  await sleep(60);
+  ok('a typed lookup found the booking', w.state.stage === 'found');
+  ok('and left nothing behind, exactly as before', store.length === 0);
+
+  // A link, then a DIFFERENT widget reading the same tab.
+  const linked = page(LIVE, { store });
+  await mount(linked);
+  const other = page('https://tripgift.com/orders', { store });
+  const w2 = await mount(other, { widgetId: 'tgw_someone_else' });
+  ok('another widget cannot read this one\'s memory',
+    w2.state.stage === 'form' && retrieves(other.calls).length === 0);
+}
+
+console.log('The address always wins over the memory');
+{
+  const store = makeStore();
+  const first = page(LIVE, { store });
+  await mount(first);
+
+  const OTHER_REF = 'TG55555';
+  const second = page('https://tripgift.com/orders?orderref=' + OTHER_REF
+    + '&depdate=' + DATE + '&emailaddr=' + encodeURIComponent(EMAIL), { store });
+  const w2 = await mount(second);
+  ok('a second link opens the booking it names, not the remembered one',
+    retrieves(second.calls).length === 1 && retrieves(second.calls)[0].body.orderRef === OTHER_REF,
+    JSON.stringify(retrieves(second.calls).map((c) => c.body.orderRef)));
+  ok('and that one is what the tab now remembers',
+    JSON.parse(store.getItem('tgm_link_tgw_tripgift_1')).ref === OTHER_REF);
+}
+
+console.log('A tab left open for days does not hand the booking over');
+{
+  const store = makeStore();
+  const first = page(LIVE, { store });
+  await mount(first);
+  const saved = JSON.parse(store.getItem('tgm_link_tgw_tripgift_1'));
+  saved.at = Date.now() - (13 * 60 * 60 * 1000);          // thirteen hours ago
+  store.setItem('tgm_link_tgw_tripgift_1', JSON.stringify(saved));
+
+  const after = page('https://tripgift.com/orders', { store });
+  const w2 = await mount(after);
+  ok('the stale memory is ignored', w2.state.stage === 'form' && retrieves(after.calls).length === 0);
+  ok('and cleared out', store.length === 0);
+}
+
+console.log('A browser with storage switched off still works');
+{
+  const dead = {
+    getItem() { throw new Error('denied'); },
+    setItem() { throw new Error('denied'); },
+    removeItem() { throw new Error('denied'); },
+    clear() {}, key() { return null; }, get length() { return 0; },
+  };
+  const ctx = page(LIVE, { store: dead });
+  const w = await mount(ctx);
+  ok('the link still opens the booking', w.state.stage === 'found');
+  ok('and the address is still cleaned', !new URL(ctx.window.location.href).searchParams.has('orderref'));
 }
 
 console.log('An ordinary page is untouched');
