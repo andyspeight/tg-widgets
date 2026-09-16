@@ -43,12 +43,19 @@
     }
     /* ---- TTI property rows -------------------------------------------- */
     .tti-rows { display: flex; flex-direction: column; gap: 6px; }
-    .tti-row { display: grid; grid-template-columns: 1fr 84px 28px; gap: 6px; align-items: center; }
+    .tti-row { display: grid; grid-template-columns: 1fr 72px 140px 28px; gap: 6px; align-items: center; }
     /* A package widget carries a fourth control, the arrival airport. The
        columns are fixed, so without this the new input was laid into the 28px
        delete-button cell and read as no box at all (Andy, 14 Sep 2026:
        "it mentions a fly in to box, but there isnt one in the editor"). */
-    .tti-row.has-dst { grid-template-columns: 1fr 84px 84px 28px; }
+    .tti-row.has-dst { grid-template-columns: 1fr 72px 140px 80px 28px; }
+    .tti-row .tti-when { min-width: 0; }
+    /* Below this the four controls stop being a row and become a small block,
+       rather than each shrinking until none of them is usable. */
+    @media (max-width: 560px) {
+      .tti-row, .tti-row.has-dst { grid-template-columns: 1fr 1fr 28px; }
+      .tti-row .tti-when { grid-column: 1 / -1; }
+    }
     /* The location hint gets its own full-width line rather than a cell, so it
        cannot push the delete button onto a row of its own. */
     .tti-row .tti-place {
@@ -1080,7 +1087,22 @@
                   <input id="cfgDatesMax" type="number" min="0" value="180" />
                 </div>
               </div>
-              <div class="field-help">Rolling window starting from today.</div>
+              <div class="field-help">Rolling window starting from today. Used for every hotel
+                that does not have a travel date of its own.</div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="cfgCheckinDate">Or travel on a set date</label>
+                  <input id="cfgCheckinDate" type="date" />
+                </div>
+                <div class="field">
+                  <label class="field-label" for="cfgNights">Nights</label>
+                  <input id="cfgNights" type="number" min="1" max="28" value="7" />
+                </div>
+              </div>
+              <div class="field-help">For a campaign that travels on one date \u2014 a half term or a
+                bank holiday. Leave it blank to keep the rolling window. A single hotel can override
+                it with its own date in the hotel list above. These settings change what we search
+                for, so press <strong>Test these codes</strong> after changing them.</div>
               <div class="field-row">
                 <div class="field">
                   <label class="field-label" for="cfgMaxOffers">Max offers from API</label>
@@ -1986,7 +2008,8 @@
      * rating, budget — filters the pool that is already there, and takes effect
      * straight away. */
     const SEARCH_FIELDS = ['type', 'adults', 'childAges', 'nights', 'DatesMin', 'DatesMax',
-      'currency', 'nationality', 'origins', 'cabinClasses', 'directOnly', 'ttiRadiusKm'];
+      'checkinDate', 'currency', 'nationality', 'origins', 'cabinClasses', 'directOnly',
+      'ttiRadiusKm', 'ttiCodes'];
     const searchFingerprint = (c) => JSON.stringify(SEARCH_FIELDS.map((k) => (c || {})[k] ?? null));
     let testedFingerprint = null;
 
@@ -2278,6 +2301,8 @@
             locationName: r.locationName || r.loc || '',
             locationType: r.locationType || 'City',
             dst: String(r.dst || '').toUpperCase(),
+            checkin: String(r.checkin || ''),
+            nights: Number(r.nights) || undefined,
           });
         } else {
           // Legacy "code,name,country" rows from before coordinates were
@@ -2306,6 +2331,8 @@
           ...(Number(r.radius) ? { radius: Number(r.radius) } : {}),
           ...(r.locationName ? { locationName: String(r.locationName).slice(0, 200) } : {}),
           ...(/^[A-Z0-9]{3,11}$/.test(String(r.dst || '')) ? { dst: String(r.dst) } : {}),
+          ...(/^\d{4}-\d{2}-\d{2}$/.test(String(r.checkin || '')) ? { checkin: String(r.checkin) } : {}),
+          ...(Number(r.nights) > 0 ? { nights: Math.round(Number(r.nights)) } : {}),
           locationType: r.locationType || 'City',
         });
       }
@@ -2396,6 +2423,18 @@
         return;
       }
       let html = esc(ready + (ready === 1 ? ' hotel ready' : ' hotels ready'));
+      // A travel date that has gone by cannot be searched, and the supplier's
+      // answer to it looks exactly like no availability. Caught here rather
+      // than after a wasted search.
+      const today = new Date().toISOString().slice(0, 10);
+      const past = ttiRows.filter(r => /^\d{4}-\d{2}-\d{2}$/.test(String(r.checkin || '')) && r.checkin <= today);
+      if (past.length) {
+        html += '<br><span style="color:var(--tgse-warning)">' + past.length
+          + (past.length === 1 ? ' hotel has a travel date that has passed'
+                               : ' hotels have travel dates that have passed')
+          + ' (' + esc(past.map(r => r.checkin).join(', ')) + '). Give them a new date, or clear '
+          + 'the date to use the window.</span>';
+      }
       if (incomplete) {
         html += '<br><span style="color:var(--tgse-warning)">' + incomplete
           + (incomplete === 1 ? ' row needs' : ' rows need')
@@ -2466,6 +2505,20 @@
           });
         }
 
+        // THIS HOTEL'S OWN TRAVEL DATE. "Some of the offers will be travelling
+        // on specific dates" (Andy, 16 Sep 2026) — so it is per hotel, not per
+        // widget, and blank means it follows the widget's rolling window.
+        const when = document.createElement('input');
+        when.className = 'input tti-when';
+        when.type = 'date';
+        when.value = row.checkin || '';
+        when.title = 'Travel date for this hotel. Leave blank to use the widget\u2019s date window.';
+        when.setAttribute('aria-label', 'Travel date, hotel ' + (i + 1));
+        when.addEventListener('change', () => {
+          row.checkin = when.value;
+          paintTtiSummary(); paintSearchDrift(); markDirtyAndPreview();
+        });
+
         const del = document.createElement('button');
         del.type = 'button';
         del.className = 'tti-del';
@@ -2482,7 +2535,7 @@
           markDirtyAndPreview();
         });
 
-        wrap.appendChild(code); wrap.appendChild(ctry);
+        wrap.appendChild(code); wrap.appendChild(ctry); wrap.appendChild(when);
         if (dst) { wrap.classList.add('has-dst'); wrap.appendChild(dst); }
         wrap.appendChild(del); wrap.appendChild(place);
         host.appendChild(wrap);
@@ -2599,6 +2652,11 @@
           body: JSON.stringify({
             rows,
             type: state.config.type,
+            // The dates: a fixed departure for the whole widget, and the
+            // rolling window for anything without one.
+            checkinDate: state.config.checkinDate || '',
+            nights: state.config.nights,
+            DatesMin: state.config.DatesMin,
             origins: state.config.origins || [],
             cabinClass: (state.config.cabinClasses || [])[0],
           }),
@@ -3105,6 +3163,8 @@
 
       $('cfgDedupe').value = c.dedupeStrategy || 'hotel';
       $('cfgCache').value = c.cacheMinutes != null ? c.cacheMinutes : 15;
+      $('cfgCheckinDate').value = c.checkinDate || '';
+      $('cfgNights').value = c.nights != null ? c.nights : 7;
       $('cfgEmptyBehaviour').value = c.emptyBehaviour || 'show';
       $('cfgEmptyHeading').value = c.emptyHeading || '';
       $('cfgEmptyBody').value = c.emptyBody || '';
@@ -3534,6 +3594,7 @@
         cfgDatesMin: 'DatesMin', cfgDatesMax: 'DatesMax',
         cfgMaxOffers: 'maxOffers', cfgSort: 'sort',
         cfgDedupe: 'dedupeStrategy', cfgCache: 'cacheMinutes',
+        cfgCheckinDate: 'checkinDate', cfgNights: 'nights',
         cfgEmptyBehaviour: 'emptyBehaviour',
         cfgEmptyHeading: 'emptyHeading', cfgEmptyBody: 'emptyBody',
         cfgEmptyCtaText: 'emptyCtaText', cfgEmptyCtaUrl: 'emptyCtaUrl',

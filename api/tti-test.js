@@ -35,7 +35,8 @@ import { requireAuth, setCors } from './_auth.js';
 import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } from './_auth.js';
 import { evaluatePublicRateLimit } from './_lib/rate-limit-public.js';
 import {
-  canonTti, cleanCtry, cleanCoord, cleanIp, parseDeeplink, buildAccommodationCriteria,
+  canonTti, cleanCtry, cleanCoord, cleanDate, cleanIp, fixedCheckin, parseDeeplink,
+  buildAccommodationCriteria,
   buildDynamicPackageCriteria, dpOrigins, resultIsProperty, normaliseAccommodationResult,
   cheapestFlight,
 } from './_lib/offers/tti.js';
@@ -100,6 +101,10 @@ function rowsFrom(body) {
       // The arrival airport, when the agent pinned one or a pasted deeplink
       // carried `dst`. Everything else is resolved below.
       dst: String(row.dst || '').trim().toUpperCase(),
+      // A departure this hotel actually travels on, and how long for. Blank
+      // means it follows the widget's rolling window.
+      checkin: cleanDate(row.checkin || row.checkinDate),
+      nights: Number(row.nights) > 0 ? Math.round(Number(row.nights)) : undefined,
     });
   };
   for (const raw of (Array.isArray(body.deeplinks) ? body.deeplinks : [])) {
@@ -187,6 +192,12 @@ export default async function handler(req, res) {
     currency: body.currency, nationality: body.nationality,
     leadDays: body.leadDays, nights: body.nights, adults: body.adults,
     origins, cabinClass: body.cabinClass, directOnly: body.directOnly === true,
+    // The widget's own dates: a fixed departure for the whole widget, and the
+    // rolling window for anything without one. DatesMin has never reached the
+    // search before now.
+    checkinDate: cleanDate(body.checkinDate),
+    nights: Number(body.nights) > 0 ? Math.round(Number(body.nights)) : undefined,
+    leadDays: Number.isFinite(Number(body.DatesMin)) ? Number(body.DatesMin) : undefined,
     customerIp,
     customerUserAgent: 'Travelgenix-TtiOffersTest/1.0',
   };
@@ -299,8 +310,14 @@ export default async function handler(req, res) {
         : buildAccommodationCriteria(row, search);
       if (!criteria) {
         // Never fall back to a broader search. A row without a country is not
-        // a wider question, it is a different one.
-        unsearchable.set(idx, 'Add the two-letter country for this hotel, so we know where to look.');
+        // a wider question, it is a different one — and a date that has passed
+        // is a third thing again, which must not be reported as a missing
+        // country or the agent goes looking in the wrong field.
+        const fixed = fixedCheckin(row, search);
+        unsearchable.set(idx, fixed
+          ? `The travel date on this hotel (${fixed}) has passed, so there is nothing to search for. `
+            + 'Give it a new date, or clear it to use the rolling window.'
+          : 'Add the two-letter country for this hotel, so we know where to look.');
         continue;
       }
       jobs.push({ idx, row, origin, criteria, arrival });
@@ -520,6 +537,7 @@ export default async function handler(req, res) {
       checkinDate: cheapest.checkinDate, nights: cheapest.nights,
       image: cheapest.image ? true : false,
       polls: acc.polls,
+      searchedCheckin: fixedCheckin(rows[idx], search) || null,
       ...(isDp ? {
         airports: acc.tried,
         flyInto: (arrivals.get(idx) || {}).code || null,
