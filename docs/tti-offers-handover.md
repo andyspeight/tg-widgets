@@ -656,6 +656,44 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### Offers that travel on a specific date
+
+Andy, 16 Sep 2026: *"some of the offers will be travelling on specific dates."*
+A rolling "30 days out" cannot express a half-term departure, so there are now
+three levels and the most specific wins:
+
+1. **A hotel's own date** (`checkin` on the row, with optional `nights`) — the
+   "some of the offers" case, one hotel pinned while the rest keep rolling.
+2. **The widget's date** (`checkinDate`) — a campaign that all travels together.
+3. **The rolling window** (`DatesMin`), for anything without either.
+
+**A date that has passed refuses the search.** The supplier's answer to a past
+date is nothing at all, which reads as no availability rather than as a stale
+row somebody needs to fix. The editor flags it before a search is spent, and the
+test route names the date rather than reporting a missing country.
+
+**A fixed date is never nudged.** The package lead-time floor exists because a
+rolling lead of 0 means today, which a flight cannot depart on. A date somebody
+typed is a commitment, and shifting it by a day to make a search pass would
+price a different holiday.
+
+**A pinned widget stops sending a rolling date filter.** `DatesMin`/`DatesMax`
+narrow the cache by days-from-today; the only offers in a pinned widget's cache
+ARE that date, so a window is at best redundant and at worst excludes the very
+offer the agent chose.
+
+**Two widgets can name one hotel on different dates.** They share a cache key,
+so the sweep merges searches on type AND departure — otherwise whichever widget
+loaded first would decide the date for both and the second one's offers would
+never exist.
+
+**And the rolling window finally reaches the search.**
+`buildAccommodationCriteria` has always read `leadDays`, and nothing ever set
+it: `searchFromConfig` emitted `DatesMin` and the builder never looked at it. So
+every search this product has run went out at the default 30 days, whatever the
+editor said. `DatesMin` is the earliest date the widget wants, which is exactly
+what a lead time is.
+
 ### A PACKAGE PRICE IS THE FLIGHT PLUS THE HOTEL
 
 The single most important thing on this page, and it was wrong for most of a

@@ -216,6 +216,10 @@ export async function collectWork() {
           // The arrival airport an agent pinned, if any. Resolved to a real
           // code later, once per property.
           dst: p.dst || '',
+          // A departure this hotel travels on, and how long for. Overrides the
+          // widget's window for this property only.
+          ...(p.checkin ? { checkin: p.checkin } : {}),
+          ...(p.nights ? { nights: p.nights } : {}),
           // One property, one cache key, but possibly two asks. A hotel-only
           // widget and a dynamic-package widget want genuinely different
           // products from the same property, and neither ask is a superset of
@@ -233,15 +237,25 @@ export async function collectWork() {
         if (!existing.name && p.name) existing.name = p.name;
         if (!existing.ctry && p.ctry) existing.ctry = p.ctry;
         if (!existing.dst && p.dst) existing.dst = p.dst;
+        if (!existing.checkin && p.checkin) { existing.checkin = p.checkin; existing.nights = p.nights; }
         if (!Number.isFinite(existing.lat) && Number.isFinite(p.lat)) {
           existing.lat = p.lat; existing.lng = p.lng;
         }
-        const same = existing.searches.find((sr) => sr.type === search.type);
+        // A FIXED DEPARTURE IS ITS OWN SEARCH, not a window to widen.
+        //
+        // Two widgets can name the same hotel on different dates — a half-term
+        // package and a January one — and neither is a superset of the other.
+        // Merging them on type alone would let whichever loaded first decide
+        // the date for both, so the second widget's offers would never exist.
+        // They share one cache key and the read side keeps both.
+        const same = existing.searches.find((sr) => sr.type === search.type
+          && (sr.checkinDate || '') === (search.checkinDate || ''));
         if (same) {
-          // Same product, different window: the wider one wins so neither
-          // widget is starved of the dates it asked for.
+          // Same product, same departure, different window: the wider one wins
+          // so neither widget is starved of the dates it asked for.
           same.DatesMin = Math.min(same.DatesMin, search.DatesMin);
           same.DatesMax = Math.max(same.DatesMax, search.DatesMax);
+          same.leadDays = Math.min(same.leadDays, search.leadDays);
           // And the union of the airports, so the second widget's departure
           // points are not silently dropped by the first widget getting there
           // first. dpOrigins caps what is actually swept.

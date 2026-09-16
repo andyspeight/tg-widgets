@@ -333,6 +333,16 @@
     return out;
   }
 
+  /** TTI rows that carry their own travel date. One is enough to mean this
+   *  widget is not on a rolling window any more. */
+  function ttiRowsWithDates(cfg) {
+    const raw = cfg && cfg.ttiCodes;
+    if (!Array.isArray(raw)) return [];
+    return raw.filter(function (r) {
+      return r && typeof r === 'object' && /^\d{4}-\d{2}-\d{2}/.test(String(r.checkin || ''));
+    });
+  }
+
   // Telemetry: report a one-time load heartbeat and any failure to
   // /api/widget-log so we hear about a broken embed before the client does.
   // Posts to our own API origin (connect-src), so a client site's script-src
@@ -6212,6 +6222,9 @@
         dedupeStrategy: c.dedupeStrategy || 'hotel',
         cacheMinutes: typeof c.cacheMinutes === 'number' ? c.cacheMinutes : 15,
         previewNonce: c.previewNonce || '',
+        // A fixed departure for the whole widget. Kept because the read path
+        // must know NOT to narrow the cache by a rolling date window.
+        checkinDate: c.checkinDate || '',
         emptyBehaviour: c.emptyBehaviour || 'show',
         // Author-configurable; blank falls back to the localised default at render.
         emptyHeading: c.emptyHeading || '',
@@ -6887,8 +6900,19 @@
       if (Array.isArray(payload.cabinClasses) && payload.cabinClasses.length) q.set('cabinClasses', payload.cabinClasses.join(','));
       if (payload.budgetMin) q.set('budgetMin', payload.budgetMin);
       if (payload.budgetMax) q.set('budgetMax', payload.budgetMax);
-      if (payload.DatesMin != null) q.set('DatesMin', payload.DatesMin);
-      if (payload.DatesMax != null) q.set('DatesMax', payload.DatesMax);
+      // A FIXED DEPARTURE IS NOT INSIDE A ROLLING WINDOW.
+      //
+      // DatesMin/DatesMax filter the cache by "days from today". When a TTI
+      // widget is pinned to a real date, the only offers in its cache ARE that
+      // date — so a window is at best redundant and at worst excludes the very
+      // offer the agent chose, blanking a widget that is working perfectly.
+      // The cache holds what we searched for; there is nothing to narrow.
+      const hasFixedDate = this._isTti && !!(this.cfg.checkinDate
+        || ttiRowsWithDates(this.cfg).length);
+      if (!hasFixedDate) {
+        if (payload.DatesMin != null) q.set('DatesMin', payload.DatesMin);
+        if (payload.DatesMax != null) q.set('DatesMax', payload.DatesMax);
+      }
       if (payload.sort) q.set('sort', payload.sort);
       if (payload.maxOffers) q.set('maxOffers', payload.maxOffers);
       // Attribution only — lets the cache endpoint tie traffic to this widget.

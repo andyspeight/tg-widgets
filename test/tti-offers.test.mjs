@@ -29,6 +29,7 @@ import {
   buildDynamicPackageCriteria,
   dpOrigins,
   cheapestFlight,
+  cleanDate,
   cleanCoord,
   MIN_DP_LEAD_DAYS,
 } from '../api/_lib/offers/tti.js';
@@ -2110,4 +2111,111 @@ test('the panel shows the price as a sum, not as an assertion', () => {
   assert.ok(/Hotel ' \+ esc\(money\(r\.hotelPrice/.test(EDITOR));
   assert.ok(/\+ flight /.test(EDITOR));
   assert.ok(/cheapest of /.test(EDITOR));
+});
+
+/* ============================================================
+   Offers that travel on a specific date
+   ============================================================ */
+
+const NOW_16 = new Date('2026-09-16T12:00:00Z');
+const checkinOf = (c) => (c ? c.AccommodationSearchCriteria.CheckinDate : null);
+const checkoutOf = (c) => (c ? c.AccommodationSearchCriteria.CheckoutDate : null);
+
+test('a hotel can travel on its own date, not just a rolling window', () => {
+  // Andy, 16 Sep 2026: "some of the offers will be travelling on specific
+  // dates". A rolling "30 days out" cannot express a half-term departure.
+  const rolling = buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES' }, IP, NOW_16);
+  assert.equal(checkinOf(rolling), '2026-10-16T00:00:00Z', 'the default window still works');
+
+  // The WIDGET can be pinned, for a campaign that all travels together.
+  const widget = buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES' },
+    { ...IP, checkinDate: '2026-12-20' }, NOW_16);
+  assert.equal(checkinOf(widget), '2026-12-20T00:00:00Z');
+
+  // And a ROW beats the widget, because "some" of the offers is the point.
+  const row = buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES', checkin: '2027-02-14' },
+    { ...IP, checkinDate: '2026-12-20' }, NOW_16);
+  assert.equal(checkinOf(row), '2027-02-14T00:00:00Z');
+
+  // A fixed departure usually carries its own duration.
+  const tenNights = buildAccommodationCriteria(
+    { code: 'TTI:1', ctry: 'ES', checkin: '2026-12-20', nights: 10 }, IP, NOW_16);
+  assert.equal(checkoutOf(tenNights), '2026-12-30T00:00:00Z');
+});
+
+test('a date that has passed is refused, not searched', () => {
+  // The supplier's answer to a date in the past is nothing at all, which reads
+  // as no availability rather than as a stale row somebody needs to fix.
+  assert.equal(buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES', checkin: '2026-01-05' }, IP, NOW_16), null);
+  assert.equal(buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES', checkin: '2026-09-16' }, IP, NOW_16),
+    null, 'today is not in the future either');
+  assert.ok(buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES', checkin: '2026-09-17' }, IP, NOW_16));
+
+  // And the caller must say WHICH thing is wrong: a passed date reported as a
+  // missing country sends the agent to the wrong field.
+  assert.ok(/has passed, so there is nothing to search for/.test(TEST_API));
+  assert.ok(/hotels have travel dates that have passed/.test(EDITOR),
+    'and the editor catches it before a search is spent');
+});
+
+test('a nonsense date is rejected rather than quietly moved', () => {
+  assert.equal(cleanDate('2026-02-31'), '', '31 February parses to 3 March; moving a departure is worse');
+  assert.equal(cleanDate('14/10/2026'), '');
+  assert.equal(cleanDate(''), '');
+  assert.equal(cleanDate('2026-10-14'), '2026-10-14');
+  assert.equal(cleanDate('2026-10-14T00:00:00Z'), '2026-10-14');
+});
+
+test('a package on a fixed date flies on that date, unnudged', () => {
+  // The lead-time floor exists because a rolling lead of 0 means today, which
+  // a flight cannot depart on. A date somebody typed is a commitment, and
+  // shifting it by a day to make the search pass prices a different holiday.
+  const dp = buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'ES', checkin: '2026-12-20' },
+    { ...IP, origin: 'MAN', destination: 'TFS' }, NOW_16);
+  assert.equal(dp.FlightSearchCriteria.Legs[0].DepartDate, '2026-12-20T00:00:00Z');
+  assert.equal(dp.FlightSearchCriteria.Legs[1].DepartDate, '2026-12-27T00:00:00Z');
+  assert.equal(dp.AccommodationSearchCriteria.CheckinDate, '2026-12-20T00:00:00Z');
+  // A past date is refused rather than floored forward into a valid one.
+  assert.equal(buildDynamicPackageCriteria({ code: 'TTI:1', ctry: 'ES', checkin: '2026-01-05' },
+    { ...IP, origin: 'MAN', destination: 'TFS' }, NOW_16), null);
+});
+
+test('the date window finally reaches the search', () => {
+  // buildAccommodationCriteria has always read `leadDays`, and nothing ever set
+  // it: searchFromConfig emitted DatesMin and the builder never looked. Every
+  // search this product has run went out at the default 30 days, whatever the
+  // editor said.
+  assert.equal(searchFromConfig({ DatesMin: 95 }).leadDays, 95);
+  assert.equal(searchFromConfig({}).leadDays, 1, 'and the default is the default window');
+  const far = buildAccommodationCriteria({ code: 'TTI:1', ctry: 'ES' },
+    { ...IP, leadDays: 95 }, NOW_16);
+  assert.equal(checkinOf(far), '2026-12-20T00:00:00Z');
+});
+
+test('a fixed-date widget does not filter its own offers away', () => {
+  // DatesMin/DatesMax narrow the cache by "days from today". The only offers in
+  // a pinned widget's cache ARE that date, so a window is at best redundant and
+  // at worst excludes the very offer the agent chose — blanking a widget that
+  // is working perfectly.
+  assert.ok(/const hasFixedDate = this\._isTti && !!\(this\.cfg\.checkinDate/.test(WIDGET));
+  assert.ok(/ttiRowsWithDates\(this\.cfg\)\.length\);\n\s+if \(!hasFixedDate\) \{/.test(WIDGET));
+  assert.ok(/checkinDate: c\.checkinDate \|\| ''/.test(WIDGET), 'and it must survive the whitelist');
+});
+
+test('two widgets on one hotel with different dates both get swept', () => {
+  // They share a cache key. Merging on product type alone would let whichever
+  // loaded first decide the date for both, so the second widget's offers would
+  // simply never exist.
+  assert.ok(/&& \(sr\.checkinDate \|\| ''\) === \(search\.checkinDate \|\| ''\)/.test(CRON));
+  assert.ok(/\.\.\.\(p\.checkin \? \{ checkin: p\.checkin \} : \{\}\)/.test(CRON));
+});
+
+test('a row date survives the round trip to the sweep', () => {
+  const rows = codesFromConfig({ ttiCodes: [{ code: '1', ctry: 'ES', checkin: '2026-12-20', nights: 10 }] });
+  assert.equal(rows[0].checkin, '2026-12-20');
+  assert.equal(rows[0].nights, 10);
+  assert.ok(!('checkin' in codesFromConfig({ ttiCodes: [{ code: '1', ctry: 'ES' }] })[0]));
+  // Junk is dropped rather than sent upstream to be rejected.
+  assert.ok(!('checkin' in codesFromConfig({ ttiCodes: [{ code: '1', ctry: 'ES', checkin: 'soon' }] })[0]));
+  assert.ok(/checkin: String\(r\.checkin\)/.test(EDITOR), 'and the editor must save it');
 });

@@ -95,6 +95,43 @@ export function cleanCoord(v, limit) {
   const n = Number(String(v == null ? '' : v).trim());
   return (Number.isFinite(n) && n !== 0 && Math.abs(n) <= limit) ? n : null;
 }
+/** A calendar day as YYYY-MM-DD, or ''. Accepts what a date input produces and
+ *  what a person types, and rejects anything it cannot read rather than
+ *  guessing — a misread date searches the wrong week and looks like thin
+ *  availability. */
+export function cleanDate(v) {
+  const raw = String(v == null ? '' : v).trim();
+  if (!raw) return '';
+  const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+  if (!iso) return '';
+  const [, y, m, d] = iso;
+  const dt = new Date(Date.UTC(+y, +m - 1, +d));
+  if (!Number.isFinite(dt.getTime())) return '';
+  // Round-trip it: 2026-02-31 parses to 3 March, and silently moving somebody's
+  // departure is worse than refusing it.
+  if (dt.getUTCFullYear() !== +y || dt.getUTCMonth() !== +m - 1 || dt.getUTCDate() !== +d) return '';
+  return `${y}-${m}-${d}`;
+}
+
+/** Midnight UTC on a YYYY-MM-DD, in the format the API expects. */
+export function isoOfDate(day, plusDays = 0) {
+  const clean = cleanDate(day);
+  if (!clean) return '';
+  const dt = new Date(clean + 'T00:00:00Z');
+  dt.setUTCDate(dt.getUTCDate() + plusDays);
+  return dt.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/** The fixed departure for one property, if it has one.
+ *
+ *  A ROW beats the widget: "some of the offers will be travelling on specific
+ *  dates" (Andy, 16 Sep 2026), so one hotel can be pinned to a date while the
+ *  rest of the widget keeps rolling. '' means no fixed date and the rolling
+ *  window applies. */
+export function fixedCheckin(prop, search = {}) {
+  return cleanDate(prop && prop.checkin) || cleanDate(search.checkinDate) || '';
+}
+
 export function cleanCtry(v) {
   const up = String(v == null ? '' : v).trim().toUpperCase();
   return /^[A-Z]{2}$/.test(up) ? up : '';
@@ -128,7 +165,7 @@ export function codesFromConfig(config) {
   const dstOf = (v) => (/^[A-Za-z0-9]{3,11}$/.test(String(v || '').trim())
     ? String(v).trim().toUpperCase() : '');
   for (const row of rows) {
-    let code, name, ctry, lat, lng, dst;
+    let code, name, ctry, lat, lng, dst, checkin, nights;
     if (row && typeof row === 'object') {
       code = canonTti(row.code || row.tti || row.uniqueRef);
       name = cleanName(row.name);
@@ -136,6 +173,10 @@ export function codesFromConfig(config) {
       lat = cleanCoord(row.lat ?? row.latitude, 90);
       lng = cleanCoord(row.lng ?? row.longitude, 180);
       dst = dstOf(row.dst);
+      // A departure this hotel actually travels on, and how long for. Blank
+      // means it follows the widget's rolling window.
+      checkin = cleanDate(row.checkin || row.checkinDate);
+      nights = cleanCoord(row.nights, 28);
     } else {
       const parts = String(row || '').split(',');
       code = canonTti(parts[0]);
@@ -144,10 +185,15 @@ export function codesFromConfig(config) {
       lat = cleanCoord(parts[3], 90);
       lng = cleanCoord(parts[4], 180);
       dst = dstOf(parts[5]);
+      checkin = cleanDate(parts[6]);
+      nights = cleanCoord(parts[7], 28);
     }
     if (!code || seen.has(code)) continue;
     seen.add(code);
-    out.push({ code, name, ctry, lat, lng, ...(dst ? { dst } : {}) });
+    out.push({ code, name, ctry, lat, lng,
+      ...(dst ? { dst } : {}),
+      ...(checkin ? { checkin } : {}),
+      ...(nights ? { nights: Math.round(nights) } : {}) });
     if (out.length >= MAX_CODES_PER_WIDGET) break;
   }
   return out;
@@ -201,6 +247,18 @@ export function searchFromConfig(config) {
     radiusKm: n(c.ttiRadiusKm, DEFAULT_RADIUS_KM, 1, 200),
     DatesMin: n(c.DatesMin, DEFAULT_DATES_MIN, 0, 700),
     DatesMax: n(c.DatesMax, DEFAULT_DATES_MAX, 1, 700),
+    // A fixed departure for the WHOLE widget — an October half-term campaign
+    // rather than "something about a month out". A row can still override it.
+    checkinDate: cleanDate(c.checkinDate),
+    nights: n(c.nights, DEFAULT_NIGHTS, 1, 28),
+    // THE ROLLING WINDOW FINALLY REACHES THE SEARCH.
+    //
+    // buildAccommodationCriteria reads `leadDays`, and nothing has ever set it:
+    // searchFromConfig emitted DatesMin and the builder never looked at it, so
+    // every search this product has run went out at the default 30 days
+    // whatever the editor said. DatesMin is the earliest date the widget wants,
+    // which is exactly what a lead time is.
+    leadDays: n(c.DatesMin, DEFAULT_DATES_MIN, 0, 330),
   };
 }
 
@@ -393,7 +451,19 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
   if (!cleanIp(search.customerIp)) return null;
 
   const leadDays = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
-  const nights = num(search.nights, DEFAULT_NIGHTS, 1, 28);
+  // A hotel's own night count beats the widget's: a fixed departure usually
+  // comes with a fixed duration, and the two travel together.
+  const nights = num(prop.nights ?? search.nights, DEFAULT_NIGHTS, 1, 28);
+
+  // A REAL DEPARTURE DATE, when the offer has one.
+  //
+  // "Some of the offers will be travelling on specific dates" (Andy, 16 Sep
+  // 2026). A rolling "30 days out" cannot express a half-term departure, and a
+  // date that has since passed must not be searched: the supplier answers with
+  // nothing and it reads as no availability rather than as a stale row. So a
+  // fixed date in the past refuses the whole search and the caller says why.
+  const fixed = fixedCheckin(prop, search);
+  if (fixed && isoOfDate(fixed) <= isoDay(now, 0)) return null;
   const adults = num(search.adults, 2, 1, 9);
   const children = Array.isArray(search.childAges) ? search.childAges.slice(0, 8) : [];
 
@@ -432,8 +502,8 @@ export function buildAccommodationCriteria(prop, search = {}, now = new Date()) 
       // THE PIN. Always prefixed, always canonical, so a code typed as
       // ID:58612582, TTI:58612582 or 58612582 all ask the same question.
       Ref: 'TTI:' + code,
-      CheckinDate: isoDay(now, leadDays),
-      CheckoutDate: isoDay(now, leadDays + nights),
+      CheckinDate: fixed ? isoOfDate(fixed) : isoDay(now, leadDays),
+      CheckoutDate: fixed ? isoOfDate(fixed, nights) : isoDay(now, leadDays + nights),
       BoardBasis: 'Any',
       PropertyType: 'Any',
       MinStarRating: 1.0,
@@ -851,10 +921,15 @@ export function buildDynamicPackageCriteria(prop, search = {}, now = new Date())
   // Floored for the WHOLE search rather than just the flight: moving the
   // departure to tomorrow while the room still checks in today would price a
   // package that does not hang together.
+  // A FIXED DATE IS NOT NUDGED. The floor exists because a rolling lead of 0
+  // means today, which a flight cannot depart on; a date somebody typed is a
+  // commitment, and moving it by a day to make the search pass would price a
+  // holiday they did not ask for. buildAccommodationCriteria already refuses
+  // one that has passed, which is the honest answer instead.
   const lead = num(search.leadDays, DEFAULT_LEAD_DAYS, 0, 330);
-  const base = buildAccommodationCriteria(
-    prop, { ...search, leadDays: Math.max(MIN_DP_LEAD_DAYS, lead) }, now,
-  );
+  const base = fixedCheckin(prop, search)
+    ? buildAccommodationCriteria(prop, search, now)
+    : buildAccommodationCriteria(prop, { ...search, leadDays: Math.max(MIN_DP_LEAD_DAYS, lead) }, now);
   if (!base) return null;
 
   // The departure airport. Without one there is no flight and therefore no
