@@ -550,7 +550,7 @@
             <div class="field-help" style="margin-top:14px;"><strong>Send a customer straight to their booking.</strong> Add the reference, the departure date and their email address to the address of the page this widget sits on, and the booking opens without them filling anything in:<br>
               <code style="display:inline-block;margin-top:6px;word-break:break-all;">?orderref=TG96472&amp;depdate=2027-01-13&amp;emailaddr=jo@example.com</code><br>
               Useful from your own confirmation emails or order system. The date is written the long way round (year first). Anything else on the address is ignored, and a link missing one of the three simply fills in what it has and asks the customer for the rest.<br>
-              Once the booking is on screen those three details are taken back out of the address bar, so they do not sit in the customer's history or get copied out by accident. Your own parameters stay where they are. It does mean a refresh brings back the lookup form, because the details are no longer in the address to read.</div>
+              Once the booking is on screen those three details are taken back out of the address bar, so they do not sit in the customer's history or get copied out by accident. Your own parameters stay where they are, and the booking survives a refresh: the browser tab remembers which booking it was showing until it is closed. Only the three details are held, never the booking, and the trip is fetched fresh each time so the balance is always current.</div>
           </div></div>
         </div>
 

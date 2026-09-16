@@ -19,7 +19,12 @@
  *     form does not: it is the same lookup, and all three still have to match
  *     a real booking. Once the booking is open those three parameters are
  *     removed from the address bar (replaceState, so Back does not return to
- *     them); the client's own parameters, the path and the hash survive.
+ *     them); the client's own parameters, the path and the hash survive. The
+ *     tab then remembers the three details (sessionStorage, keyed by widget id,
+ *     twelve hours) so a refresh re-opens the booking with the address still
+ *     clean. The booking itself is never stored: it is looked up again, so the
+ *     balance is current. Look up another booking forgets it, a booking that
+ *     has since gone forgets itself, and a typed lookup is never remembered.
  *
  * v1.12.0 changes (8 Sep 2026):
  *   - Vouchers. The payment card reads the ONE shared calculation
@@ -316,6 +321,66 @@
       window.history.replaceState(window.history.state, '', url.pathname + (search ? '?' + search : '') + url.hash);
       return true;
     } catch (e) { return false; }
+  }
+
+  /**
+   * Remember the booking for the rest of the visit (16 Sep 2026, Andy: "Can you
+   * set it to remember").
+   *
+   * Taking the details out of the address bar cost the customer their refresh:
+   * the address no longer knew which booking they were looking at. So the three
+   * details are held for the tab instead.
+   *
+   * WHAT IS AND IS NOT KEPT. Only the three lookup details, never the booking
+   * itself: no names, no prices, no addresses. On a refresh they are looked up
+   * again, so the customer sees a live balance rather than a stale copy, which
+   * is also what would have happened had the link stayed in the address.
+   *
+   * sessionStorage, so it dies with the tab rather than waiting on a shared
+   * computer for the next person, and it is keyed by widget id so one client's
+   * widget cannot read another's. Twelve hours caps a tab left open for days.
+   * Every access is wrapped: a browser with storage turned off simply does not
+   * remember, and nothing else changes.
+   *
+   * Only a LINK is remembered. Typing the details into the form leaves nothing
+   * behind, exactly as before.
+   */
+  const LINK_MEMORY_PREFIX = 'tgm_link_';
+  const LINK_MEMORY_MAX_AGE_MS = 12 * 60 * 60 * 1000;
+
+  function rememberBookingLink(widgetId, details) {
+    try {
+      if (!widgetId || !details) return false;
+      window.sessionStorage.setItem(LINK_MEMORY_PREFIX + widgetId, JSON.stringify({
+        ref: details.ref, date: details.date, email: details.email, at: Date.now(),
+      }));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function forgetBookingLink(widgetId) {
+    try { window.sessionStorage.removeItem(LINK_MEMORY_PREFIX + widgetId); return true; }
+    catch (e) { return false; }
+  }
+
+  function recallBookingLink(widgetId) {
+    try {
+      if (!widgetId) return null;
+      const raw = window.sessionStorage.getItem(LINK_MEMORY_PREFIX + widgetId);
+      if (!raw) return null;
+      const saved = JSON.parse(raw);
+      const at = saved && typeof saved.at === 'number' ? saved.at : 0;
+      // Re-checked on the way out as well as on the way in: what comes back
+      // from storage is no more trusted than what came off a URL.
+      const ref = saved && DEEP_REF_RE.test(String(saved.ref || '')) ? saved.ref : '';
+      const date = saved && DEEP_DATE_RE.test(String(saved.date || '')) ? saved.date : '';
+      const email = saved && DEEP_EMAIL_RE.test(String(saved.email || '')) ? saved.email : '';
+      if (!ref || !date || !email || !at || (Date.now() - at) > LINK_MEMORY_MAX_AGE_MS) {
+        forgetBookingLink(widgetId);
+        return null;
+      }
+      return { ref, date, email, complete: true, fromMemory: true };
+    } catch (e) { return null; }
   }
 
   // ─── i18n ───────────────────────────────────────────────────
@@ -4970,7 +5035,11 @@
       // A booking named in the address bar. Whatever it carries fills the form
       // in; all three means the customer has already answered the question, so
       // the form is skipped and the booking is fetched straight away.
-      const deep = readBookingDeepLink();
+      //
+      // Failing that, the booking this tab was already looking at. The address
+      // ALWAYS wins: a customer opening a second link is opening a second
+      // booking, and memory must not answer a question they did not ask.
+      const deep = readBookingDeepLink() || recallBookingLink(this.c.widgetId);
       if (deep) this._lastAttempt = Object.assign({}, this._lastAttempt, {
         email: deep.email || (this._lastAttempt && this._lastAttempt.email) || '',
         date: deep.date || (this._lastAttempt && this._lastAttempt.date) || '',
@@ -4982,7 +5051,8 @@
       // replace. A failure lands on the ordinary not-found screen, whose Try
       // again returns to a form already holding these details.
       if (deep && deep.complete && this.c.widgetId) {
-        this._lookupBooking({ email: deep.email, date: deep.date, ref: deep.ref }, { fromLink: true });
+        this._lookupBooking({ email: deep.email, date: deep.date, ref: deep.ref },
+          { fromLink: true, fromMemory: !!deep.fromMemory });
       }
       if (this._deepPay) {
         setTimeout(() => {
@@ -5289,6 +5359,10 @@
       const newLookupBtn = root.querySelector('[data-tgm-newlookup]');
       if (newLookupBtn) newLookupBtn.addEventListener('click', () => {
         this._discardPdfCache();
+        // The customer has finished with this booking, so the tab forgets it
+        // too. Without this, a refresh would put them straight back into the
+        // booking they just asked to leave.
+        forgetBookingLink(this.c.widgetId);
         this.lookup = null;
         this._lastAttempt = null;
         this.state = { stage: 'form', order: null, error: null };
@@ -5313,6 +5387,7 @@
      */
     async _lookupBooking({ email, date, ref }, opts) {
       const fromLink = !!(opts && opts.fromLink);
+      const fromMemory = !!(opts && opts.fromMemory);
       if (!email || !date || !ref) {
         this.state.error = this.t('fillAllFields');
         this._render();
@@ -5354,6 +5429,11 @@
           return;
         }
         if (res.status === 404) {
+          // Definitely not there any more (cancelled, or the reference
+          // changed), so stop offering it back on every refresh. A 429, a 500
+          // or a dropped connection below is NOT this: those are moments, and
+          // the booking is still worth remembering through them.
+          if (fromMemory) forgetBookingLink(this.c.widgetId);
           this.state = { stage: 'notfound', order: null, error: null };
           this._render();
           return;
@@ -5366,6 +5446,7 @@
 
         const data = await res.json();
         if (!data.order) {
+          if (fromMemory) forgetBookingLink(this.c.widgetId);
           this.state = { stage: 'notfound', order: null, error: null };
           this._render();
           return;
@@ -5381,8 +5462,12 @@
         this._render();
         // The booking is up, so the details have done their job and come out of
         // the address bar. Only after success: a failed link is left in place so
-        // a refresh can retry it.
-        if (fromLink) stripBookingDeepLink();
+        // a refresh can retry it. They are held for the tab instead, so the
+        // refresh the address bar used to answer is answered by the memory.
+        if (fromLink) {
+          stripBookingDeepLink();
+          rememberBookingLink(this.c.widgetId, { email, date, ref });
+        }
         this._fireEvent('booking-loaded', { order: data.order });
       } catch (err) {
         this.state = { stage: 'form', order: null, error: this.t('genericError') };
