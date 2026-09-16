@@ -34,7 +34,7 @@ import { normalisePlanValue, resolveClientPlan } from './_lib/auth/plan.js';
 // drifted (My Booking locked on Spark and Boost here, unlimited there; the
 // Loader and thirty newer types missing altogether). A copy is gated by the
 // same table as a new widget (Andy, 8 Sep 2026).
-import { PLAN_WIDGET_LIMITS, canonicalisePlan } from './widget-config.js';
+import { PLAN_WIDGET_LIMITS, canonicalisePlan, readControlAccess } from './widget-config.js';
 
 const AIRTABLE_API = 'https://api.airtable.com/v0';
 const TABLE_NAME = 'Widgets';
@@ -234,12 +234,27 @@ export default async function handler(req, res) {
     const userPlan = canonicalisePlan(user.plan);
     const limits = userPlan ? PLAN_WIDGET_LIMITS[sourceType] : null;
     const planLimit = limits ? limits[userPlan] : null;
+    // A DIRECT GRANT in Control beats the plan map here exactly as it does on
+    // create (16 Sep 2026). A widget sold to nobody reads 0 on every tier, so
+    // without this the client who was granted it could make one and then not
+    // duplicate it. Asked only when the map would otherwise refuse, so the
+    // ordinary copy pays for no extra lookups.
+    let grantedDirectly = false;
     if (planLimit === 0) {
+      const ownerClientId = typeof sourceFields.ClientRecordId === 'string' && sourceFields.ClientRecordId
+        ? sourceFields.ClientRecordId
+        : (typeof user.clientId === 'string' ? user.clientId : '');
+      const access = await readControlAccess(ownerClientId, sourceType);
+      grantedDirectly = access.grantedDirectly;
+    }
+    if (planLimit === 0 && !grantedDirectly) {
       return res.status(403).json({
         error: `The ${sourceType} widget is not included in your plan. Please upgrade to use this widget.`
       });
     }
-    if (planLimit !== null && planLimit !== -1 && planLimit !== undefined) {
+    // A direct grant is unlimited by definition, the same as on create: it is a
+    // per-client decision made in Control, not a plan allowance to be counted.
+    if (!grantedDirectly && planLimit !== null && planLimit !== -1 && planLimit !== undefined) {
       const currentCount = await countWidgetsOfType(headers, baseId, ownerClause, sourceType);
       if (currentCount >= planLimit) {
         return res.status(403).json({

@@ -231,6 +231,77 @@ async function supplierFilterForClient(clientId) {
 }
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+
+/**
+ * Does this client hold a DIRECT GRANT for this widget type?
+ *
+ * A direct grant is an enabled Client Entitlements row sourced Add-On or
+ * Manual Override. It is how a product reaches ONE client before it is sold on
+ * any plan, and it is deliberately stronger than the plan map: a widget no
+ * package includes reads 0 on every tier, so without this the grant would buy
+ * nothing.
+ *
+ * Pure: it is handed the rows and answers. The endpoints fetch, this decides,
+ * and /api/widget-copy asks the same question rather than keeping its own idea
+ * of who may have what (the drift that let a stale copy of the plan map gate
+ * the Duplicate button by different numbers, 8 Sep 2026).
+ */
+export function hasDirectGrant({ clientEntitlements, catalogueItemId, clientId }) {
+  if (!catalogueItemId || !clientId || !Array.isArray(clientEntitlements)) return false;
+  return clientEntitlements.some((ent) => {
+    if (!ent || !ent.fields) return false;
+    if (!ent.fields[CLIENT_ENTITLEMENTS.fields.enabled]) return false;
+    const src = ent.fields[CLIENT_ENTITLEMENTS.fields.source];
+    const srcName = (src && typeof src === 'object') ? src.name : src;
+    if (srcName !== CLIENT_ENTITLEMENTS.sources.ADD_ON
+        && srcName !== CLIENT_ENTITLEMENTS.sources.MANUAL_OVERRIDE) return false;
+    const clients = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
+    const cats = ent.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
+    return clients.includes(clientId) && cats.includes(catalogueItemId);
+  });
+}
+
+/**
+ * The Control answer to "may this client have this widget type", read live.
+ *
+ * Returns { grantedDirectly, catItem, includedInPlan } and NEVER throws: any
+ * lookup failure answers "don't know" and the caller fails open, because an
+ * Airtable hiccup must not stop a legitimate create.
+ */
+export async function readControlAccess(clientId, widgetType) {
+  const out = { grantedDirectly: false, catItem: null, includedInPlan: null };
+  if (!clientId || !REC_ID_RE.test(clientId)) return out;
+  try {
+    const [catalogue, packageCatalogue, clientRec, clientEntitlements] = await Promise.all([
+      listAllRecords(CATALOGUE.tableId),
+      listAllRecords(PACKAGE_CATALOGUE.tableId),
+      getRecord(CLIENTS.tableId, clientId).catch(() => null),
+      listAllRecords(CLIENT_ENTITLEMENTS.tableId).catch(() => []),
+    ]);
+    const typeLc = String(widgetType || '').toLowerCase();
+    out.catItem = catalogue.find(
+      (c) => c && c.fields && String(c.fields[CATALOGUE.fields.productName] || '').toLowerCase() === typeLc
+    ) || null;
+    out.grantedDirectly = hasDirectGrant({
+      clientEntitlements,
+      catalogueItemId: out.catItem ? out.catItem.id : null,
+      clientId,
+    });
+    const clientPkgId = (clientRec && clientRec.fields) ? (clientRec.fields[CLIENTS.fields.package] || [])[0] : null;
+    if (out.catItem && clientPkgId) {
+      out.includedInPlan = packageCatalogue.some((row) => {
+        if (!row || !row.fields) return false;
+        if (!row.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) return false;
+        const pkgs = row.fields[PACKAGE_CATALOGUE.fields.package] || [];
+        const cats = row.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [];
+        return pkgs.includes(clientPkgId) && cats.includes(out.catItem.id);
+      });
+    }
+  } catch (err) {
+    console.warn('[widget-config] Control access lookup failed (fail-open):', err?.message);
+  }
+  return out;
+}
 // Staff bypass the entitlement gate (they create widgets for demos/setup).
 // Keep in sync with STAFF_DOMAINS in the dashboard and /api/widget-catalogue.
 const ENTITLEMENT_STAFF_DOMAINS = ['travelgenix.io', 'travelgenix.com', 'agendas.group'];
@@ -1157,59 +1228,38 @@ export default async function handler(req, res) {
         const at = email.lastIndexOf('@');
         const domain = at === -1 ? '' : email.slice(at + 1);
         const isStaff = ENTITLEMENT_STAFF_DOMAINS.includes(domain);
-        const clientId = (typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId))
-          ? user.clientId
-          : null;
+        // The client the widget will actually BELONG to (it is stamped with
+        // ownerClientIdFromSession further down), falling back to the hydrated
+        // session client for a legacy token that carries no clientId claim.
+        // Asking Control about the same client the widget is stamped to means
+        // the check and the ownership can never disagree.
+        const clientId = ownerClientIdFromSession
+          || ((typeof user.clientId === 'string' && REC_ID_RE.test(user.clientId)) ? user.clientId : null);
 
-        if (!isStaff && clientId) {
-          // Access follows the client's PLAN via the Package Catalogue (the
-          // catalogue toggles), so Control is the single source of truth and
-          // staff change it live. A create is blocked only when the widget maps
-          // to an ACTIVE catalogue item that the client's package does not
-          // include. No package resolved, no match, or any lookup failure
-          // FAILS OPEN (handled by the surrounding catch).
-          const [catalogue, packageCatalogue, clientRec, clientEntitlements] = await Promise.all([
-            listAllRecords(CATALOGUE.tableId),
-            listAllRecords(PACKAGE_CATALOGUE.tableId),
-            getRecord(CLIENTS.tableId, clientId).catch(() => null),
-            listAllRecords(CLIENT_ENTITLEMENTS.tableId).catch(() => []),
-          ]);
-          const typeLc = safeType.toLowerCase();
-          const catItem = catalogue.find(
-            (c) => String(c.fields[CATALOGUE.fields.productName] || '').toLowerCase() === typeLc
-          );
-          const clientPkgId = clientRec ? (clientRec.fields[CLIENTS.fields.package] || [])[0] : null;
-          // A direct grant for THIS client on THIS item, checked before the
-          // package because it is deliberately the thing that overrides it.
-          // Mirrors resolveEntitlements, so the dashboard and the save gate
-          // agree about who can create what.
-          if (catItem) {
-            grantedDirectly = clientEntitlements.some((ent) => {
-              if (!ent.fields[CLIENT_ENTITLEMENTS.fields.enabled]) return false;
-              const src = ent.fields[CLIENT_ENTITLEMENTS.fields.source];
-              const srcName = (src && typeof src === 'object') ? src.name : src;
-              if (srcName !== CLIENT_ENTITLEMENTS.sources.ADD_ON
-                  && srcName !== CLIENT_ENTITLEMENTS.sources.MANUAL_OVERRIDE) return false;
-              const clients = ent.fields[CLIENT_ENTITLEMENTS.fields.client] || [];
-              const cats = ent.fields[CLIENT_ENTITLEMENTS.fields.catalogueItem] || [];
-              return clients.includes(clientId) && cats.includes(catItem.id);
-            });
-          }
+        if (clientId) {
+          // Control is read for STAFF TOO (16 Sep 2026, Andy, setting up TTI
+          // Offers for MT Holidays: "it is saying it's not part of their plan,
+          // but I have checked in control, and it is marked as available to
+          // them"). The staff bypass used to skip this whole block, which also
+          // skipped working out the DIRECT GRANT, and a widget sold to nobody
+          // reads 0 on every tier — so the plan check below refused the very
+          // person setting it up, while the client themselves could have saved
+          // it. A staff bypass has to be one-directional: it can only ever
+          // unblock, never take away what Control has granted.
+          const access = await readControlAccess(clientId, safeType);
+          grantedDirectly = access.grantedDirectly;
 
-          if (!grantedDirectly && catItem && !!catItem.fields[CATALOGUE.fields.active] && clientPkgId) {
-            const includedInPlan = packageCatalogue.some((row) => {
-              if (!row.fields[PACKAGE_CATALOGUE.fields.includedByDefault]) return false;
-              const pkgs = row.fields[PACKAGE_CATALOGUE.fields.package] || [];
-              const cats = row.fields[PACKAGE_CATALOGUE.fields.catalogueItem] || [];
-              return pkgs.includes(clientPkgId) && cats.includes(catItem.id);
+          // The BLOCK stays staff-exempt, and still only fires for an ACTIVE
+          // catalogue item the client's package does not include. No package
+          // resolved, no match, or any lookup failure FAILS OPEN.
+          if (!isStaff && !grantedDirectly && access.catItem
+              && !!access.catItem.fields[CATALOGUE.fields.active]
+              && access.includedInPlan === false) {
+            console.warn(`[widget-config] create blocked (not in plan) type=${safeType} client=${clientId}`);
+            return res.status(403).json({
+              error: `${safeType} isn't on your plan yet. Ask Travelgenix to add it, or upgrade your plan.`,
+              code: 'not_entitled',
             });
-            if (!includedInPlan) {
-              console.warn(`[widget-config] create blocked (not in plan) type=${safeType} client=${clientId} pkg=${clientPkgId}`);
-              return res.status(403).json({
-                error: `${safeType} isn't on your plan yet. Ask Travelgenix to add it, or upgrade your plan.`,
-                code: 'not_entitled',
-              });
-            }
           }
         }
       } catch (gateErr) {

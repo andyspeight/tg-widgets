@@ -12,6 +12,38 @@ engine.
 
 ---
 
+## How a client gets it (and the bug that stopped them, 16 Sep 2026)
+
+TTI Offers is sold on no package. Every tier in `PLAN_WIDGET_LIMITS` reads 0,
+so the ONLY way in is a direct grant: an enabled Client Entitlements row in
+Control sourced **Add-On** or **Manual Override**. MT Holidays
+(`recO0O3LMBvScaPb0`) holds exactly that against the catalogue item
+`rec6S3tManU6YoTKj` ("TTI Offers", active).
+
+Andy, setting it up for them: *"it is saying it's not part of their plan, but I
+have checked in control, and it is marked as available to them."* Control was
+right and the code was wrong. The entitlement gate in `api/widget-config.js`
+ran inside `if (!isStaff && clientId)`, so for a staff member the whole block
+was skipped, and with it the working out of the grant. `grantedDirectly` stayed
+false, the plan map said 0, and the save was refused. The client could have
+saved the widget that the person setting it up for them could not.
+
+The rule now: **a staff bypass is one-directional.** It can skip a block, never
+a grant. Control is read for everyone; only the refusal is staff-exempt. The
+same question is asked by the Duplicate button, which previously read the plan
+map alone and would have refused a copy of a widget the client had been granted.
+
+One place answers it, exported from `api/widget-config.js`:
+
+- `hasDirectGrant({ clientEntitlements, catalogueItemId, clientId })` — pure.
+- `readControlAccess(clientId, widgetType)` — the live read, never throws.
+
+Guarded by `npm run test:direct-grant`. When TTI Offers goes on sale, set the
+tiers in `PLAN_WIDGET_LIMITS` and add it to the package in Control; the grant
+keeps working either way.
+
+---
+
 ## How a property is asked for
 
 **Settled by two real deep links Andy supplied on 14 Sep 2026**, one
