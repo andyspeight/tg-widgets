@@ -196,11 +196,11 @@ export function sparkline(values: readonly number[], width = 120, height = 32): 
 }
 
 export interface TileView {
-  key: 'people' | 'assistant' | 'aiCrawler' | 'searchCrawler';
+  key: 'people' | 'assistant' | 'aiCrawler' | 'searchCrawler' | 'enquiries';
   label: string;
   value: number;
-  /** Which series colour the tile's mark wears. */
-  series: 1 | 2 | 3;
+  /** Which series colour the tile's mark wears; 0 is the neutral slate. */
+  series: 0 | 1 | 2 | 3;
   /** Null until a whole previous window exists to compare with. */
   delta: { label: string; direction: 'up' | 'down' | 'flat'; note: string } | null;
   note: string;

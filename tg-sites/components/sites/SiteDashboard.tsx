@@ -233,9 +233,9 @@ export function SiteDashboard({
               last publish would show somebody the state of their site as it was
               when they opened the dashboard.
             */}
-            <a className="sv-btn" href="/seo">
-              <Icon name="search" size={16} />
-              Being found
+            <a className="sv-btn" href="/results">
+              <Icon name="stats" size={16} />
+              Results
             </a>
 
             {/* What visitors sent through the site's forms. */}

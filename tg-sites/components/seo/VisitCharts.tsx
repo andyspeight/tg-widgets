@@ -1,12 +1,13 @@
 /**
- * Who is reading your site: the charts on the visibility screen.
+ * Who is reading your site: the chart parts of the results screen.
  *
  * The first slice of the Duda visibility upgrade (docs/duda-visibility-review.md,
  * 15 Sep 2026). Duda's headline finding is that AI crawler visits predict AI
- * recommendations, and this is the panel that shows a client whether those
+ * recommendations, and these are the pieces that show a client whether those
  * crawlers have come, alongside the people the site is for and the assistants
- * that sent them. It is the first visual on a screen that Andy wants to become
- * a dashboard of visuals, because people want to see results, not read them.
+ * that sent them. components/results/ResultsDashboard.tsx lays them out on the
+ * board (direction A of the mockups Andy chose on 16 Sep 2026), because people
+ * want to see results, not read them.
  *
  * A SERVER COMPONENT WITH NO SCRIPT, like the rest of the screen. Every chart is
  * plain HTML and CSS or a small inline SVG: a column is a flex stack of three
@@ -32,8 +33,7 @@
  * so there is nothing here about anybody, only how many.
  */
 
-import type { VisitSummary } from '../../lib/visits/summary';
-import { readersView, type BarView, type DailyView, type DonutView, type EngineView, type TileView } from '../../lib/visits/chart';
+import type { BarView, DailyView, DonutView, EngineView, TileView } from '../../lib/visits/chart';
 
 const SERIES = [
   { key: 'visitor', series: 1, label: 'People' },
@@ -43,7 +43,7 @@ const SERIES = [
 
 const number = (value: number) => value.toLocaleString('en-GB');
 
-function Tile({ tile }: { tile: TileView }) {
+export function Tile({ tile }: { tile: TileView }) {
   return (
     <div className="viz-tile" data-series={tile.series}>
       <span className="viz-tile__label">{tile.label}</span>
@@ -70,7 +70,7 @@ function Tile({ tile }: { tile: TileView }) {
   );
 }
 
-function Legend() {
+export function Legend() {
   return (
     <ul className="viz-legend" aria-label="Series">
       {SERIES.map((series) => (
@@ -84,7 +84,7 @@ function Legend() {
 }
 
 /** Which AI engines have found the site, and which are still to come. */
-function EngineRoster({ engines, seen }: { engines: EngineView[]; seen: number }) {
+export function EngineRoster({ engines, seen }: { engines: EngineView[]; seen: number }) {
   return (
     <figure className="viz-chart">
       <figcaption className="viz-chart__head">
@@ -113,7 +113,7 @@ function EngineRoster({ engines, seen }: { engines: EngineView[]; seen: number }
 }
 
 /** One ring, three slices: who read the pages. */
-function Donut({ donut }: { donut: DonutView }) {
+export function Donut({ donut }: { donut: DonutView }) {
   const size = 148;
   const centre = size / 2;
   return (
@@ -167,7 +167,7 @@ function Donut({ donut }: { donut: DonutView }) {
 }
 
 /** Thirty stacked columns, one a day, three series. */
-function DailyColumns({ daily, days }: { daily: DailyView; days: number }) {
+export function DailyColumns({ daily, days }: { daily: DailyView; days: number }) {
   return (
     <figure className="viz-chart viz-chart--wide">
       <figcaption className="viz-chart__head">
@@ -233,7 +233,7 @@ function DailyColumns({ daily, days }: { daily: DailyView; days: number }) {
 }
 
 /** Horizontal bars, one hue, the number beside every bar. */
-function Bars({
+export function Bars({
   title,
   sub,
   bars,
@@ -283,89 +283,5 @@ function Bars({
         </ol>
       )}
     </figure>
-  );
-}
-
-export function ReadersPanel({ summary }: { summary: VisitSummary }) {
-  const view = readersView(summary);
-  const started = summary.firstDay !== null;
-
-  return (
-    <section className="seo2-panel viz-readers" aria-label="Who is reading your site">
-      <div className="seo2-panel__head">
-        <div>
-          <h2 className="seo2-panel__title">Who is reading your site</h2>
-          <p className="viz-readers__sub">
-            {started ? view.range : 'Counting starts with the next visit.'}
-            {view.since ? ` · ${view.since}` : ''}
-          </p>
-        </div>
-      </div>
-
-      {!started ? (
-        <div className="viz-empty">
-          <p className="viz-empty__title">Nothing counted yet</p>
-          <p className="viz-empty__note">
-            From now on every visit to a published page is counted here: the people
-            reading it, the ones an AI assistant sent, and the crawlers behind ChatGPT,
-            Perplexity, Google and the rest. Numbers only, nothing about anybody.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="viz-tiles">
-            {view.tiles.map((tile) => (
-              <Tile key={tile.key} tile={tile} />
-            ))}
-          </div>
-
-          <div className="viz-pair viz-pair--lead">
-            <EngineRoster engines={view.engines} seen={view.enginesSeen} />
-            <Donut donut={view.donut} />
-          </div>
-
-          <DailyColumns daily={view.daily} days={summary.days} />
-
-          <div className="viz-pair">
-            <Bars
-              title="Crawlers by name"
-              sub="How often each engine read your pages."
-              bars={view.crawlers}
-              series={3}
-              unit="visits"
-              empty="No crawler has read the site in this window yet. The AI ones usually take a few days to find a new site."
-              showFamily
-            />
-            <Bars
-              title="Sent by an AI assistant"
-              sub="Where the people an assistant sent came from."
-              bars={view.assistants}
-              series={2}
-              unit="people"
-              empty="Nobody has arrived from an AI assistant yet. When one recommends you, it shows up here."
-            />
-          </div>
-
-          <div className="viz-pair">
-            <Bars
-              title="Pages people read most"
-              sub="Where your readers actually went."
-              bars={view.topVisited}
-              series={1}
-              unit="reads"
-              empty="No page has been read by a person in this window."
-            />
-            <Bars
-              title="Pages crawlers read most"
-              sub="What the engines are paying attention to."
-              bars={view.topCrawled}
-              series={3}
-              unit="visits"
-              empty="No page has been read by a crawler in this window."
-            />
-          </div>
-        </>
-      )}
-    </section>
   );
 }

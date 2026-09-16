@@ -56,6 +56,29 @@ export async function readMonthMetrics(tenantId: string, from: Date, to: Date): 
   });
 }
 
+/**
+ * Enquiries by UTC day over the last `days` days, for the results screen's
+ * tile and its sparkline. Twice the window is fetched so the screen can compare
+ * with the window before. Only days with an enquiry come back; the summariser
+ * zero-fills the rest.
+ */
+export async function readEnquiryDays(tenantId: string, days = 30): Promise<Array<{ day: string; count: number }>> {
+  const span = Math.max(1, Math.min(365, Math.floor(days))) * 2;
+  return withTenant(tenantId, async (tx) => {
+    const rows = await tx`
+      select (created_at at time zone 'utc')::date::text as day, count(*)::int as count
+      from public.form_submissions
+      where created_at >= (now() at time zone 'utc')::date - ${span}
+      group by 1
+      order by 1
+    `;
+    return rows.map((raw) => {
+      const row = raw as Record<string, unknown>;
+      return { day: String(row.day ?? ''), count: Number(row.count ?? 0) };
+    });
+  });
+}
+
 /** The full report for the shown month: its counts, the site's current totals,
  * and the month's enquiries to list. */
 export async function readMonthReport(tenantId: string, from: Date, to: Date): Promise<MonthReport> {

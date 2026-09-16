@@ -52,9 +52,9 @@ const LINKS: ReadonlyArray<{ href: string; label: string; title: string; icon: R
     ),
   },
   {
-    href: '/seo',
-    label: 'SEO',
-    title: 'AEO / SEO',
+    href: '/results',
+    label: 'Results',
+    title: 'Results',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
         <circle cx="11" cy="11" r="7" />

@@ -139,6 +139,31 @@ yet wired into it. Next slices in order: B ask the assistants (needs
 OPENAI_API_KEY and CRON_SECRET in Vercel, and a Perplexity key), C history, D
 the monthly report sent, E a miss becomes a page.
 
+**The results board (16 Sep 2026, early).** Andy: "Before we go any further I
+want to see a few mock ups of potential designs for the dashboard." Three
+directions on one canvas (https://claude.ai/artifact/L7SPgbjqB4nfSWqovvCMpq):
+A a bento board, B an editorial monthly story, C a dense command centre. He
+went with the recommendation, A with B's habit of a plain sentence beside each
+big number. Built as `/results` (`app/results/page.tsx`,
+`components/results/ResultsDashboard.tsx`, `results.css`): a twelve-column
+board of cards; two rings up top (site health from the audit, with its verdict
+sentence, and how many of the ten AI engines have found the site, with the
+search engines' visits in a line beneath); four tiles with sparklines and the
+change on the window before (people, sent by an AI assistant, AI crawler
+visits, enquiries, the last one neutral slate because it is not a reader
+series); day by day; the engine roster; who read the pages; sent by an AI
+assistant; fix these first (capped at four, the rest against the pages); working
+well; pages people and engines read most; crawlers by name; every published
+page. A 30 or 90 day window from a pill in the header (90 shows no change chips
+because the tally keeps 90 days, so there is no whole window before). The old
+`/seo` address forwards here permanently; `SeoDashboard.tsx` is gone, its
+audit, fix list, wins and per-page list live on the board; the chart parts in
+`components/seo/VisitCharts.tsx` are now exported building blocks, and the
+enquiries come from `readEnquiryDays` in `lib/db/report.ts` through the pure
+`lib/results/enquiries.ts`. The Site dashboard button and the editor rail say
+Results. The AI visibility panels (share of voice, the fifty questions, six
+months of history) are still to come with slices B and C.
+
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen
 menu never run on the editing canvas), and to try the form actions against a

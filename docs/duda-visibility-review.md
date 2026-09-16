@@ -229,6 +229,16 @@ panel at 1280, 390 and in the dark theme. The prune runs only once CRON_SECRET
 is set in Vercel (the same secret reference-sync waits on); until then the table
 simply grows past ninety days, which is harmless.
 
+**And the board it sits on (16 Sep 2026).** After three mockup directions
+(bento board, monthly story, command centre; canvas at
+https://claude.ai/artifact/L7SPgbjqB4nfSWqovvCMpq), Andy chose the bento board
+with the monthly story's plain sentences. It shipped as `/results`
+(`components/results/ResultsDashboard.tsx`), replacing the visibility screen:
+the audit's health ring and fix list, the readers' charts, the enquiries and the
+per-page list on one twelve-column board, with a 30 or 90 day window. Slices B
+and C will add the AI visibility ring, share of voice, the fifty questions and
+six months of history to the same board.
+
 The original proposal, kept for the record:
 
 Log every request to a published page, aggregated per day, as one of three

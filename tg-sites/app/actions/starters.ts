@@ -111,7 +111,7 @@ export async function applyStarterAction(
     // Every screen that lists pages, plus the report, which has just gone from
     // "nothing is published" to five drafts.
     revalidatePath('/sites');
-    revalidatePath('/seo');
+    revalidatePath('/results');
 
     return { ok: true, data: result };
   } catch (error) {

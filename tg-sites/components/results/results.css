@@ -1,0 +1,123 @@
+/*
+ * Results: the board. Layout only; the tokens, the chart styles (viz-*) and the
+ * issue, win and page lists (seo2-*) come from seo.css, which this file
+ * imports so the page pulls one stylesheet.
+ *
+ * Twelve columns, cards spanning three to twelve of them, the widths of the
+ * mockup Andy chose. Every card is the same surface (panel, hairline, 16px
+ * radius, the navy-tinted shadow), so the variety is in the sizes and what is
+ * inside, not in the boxes.
+ */
+
+@import '../seo/seo.css';
+
+.seo2.rs {
+  max-width: 1360px;
+  gap: var(--ed-6);
+}
+
+/* --- Header ---------------------------------------------------------------- */
+
+.rs-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--ed-6); flex-wrap: wrap; }
+.rs-head__text { display: flex; flex-direction: column; gap: var(--ed-2); }
+.rs-head__actions { display: flex; align-items: center; gap: var(--ed-3); flex-wrap: wrap; }
+
+.rs-range { display: inline-flex; padding: 4px; border: 1px solid var(--ed-line); border-radius: 10px; background: var(--ed-panel); }
+.rs-range a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--ed-4);
+  border-radius: 7px;
+  font-size: var(--ed-text-sm);
+  font-weight: 500;
+  color: var(--ed-ink-2);
+  text-decoration: none;
+}
+.rs-range a:hover { color: var(--ed-ink); }
+.rs-range a[aria-current='page'] { color: var(--ed-on-brand); background: var(--ed-primary); }
+.rs-range a:focus-visible { outline: 2px solid var(--ed-select); outline-offset: 2px; }
+
+/* --- The board ------------------------------------------------------------- */
+
+.rs-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--ed-4);
+}
+
+.rs-card {
+  grid-column: span 12;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  min-width: 0;
+  padding: var(--ed-6);
+  background: var(--ed-panel);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-xl);
+  box-shadow: 0 18px 40px -24px rgba(27, 43, 91, 0.14);
+}
+.rs-card[data-span='3'] { grid-column: span 3; }
+.rs-card[data-span='4'] { grid-column: span 4; }
+.rs-card[data-span='5'] { grid-column: span 5; }
+.rs-card[data-span='6'] { grid-column: span 6; }
+.rs-card[data-span='8'] { grid-column: span 8; }
+.rs-card[data-span='12'] { grid-column: span 12; }
+.rs-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--ed-4); }
+.rs-card__title { margin: 0; font-size: var(--ed-text-base); font-weight: 600; color: var(--ed-ink); }
+.rs-card__sub { margin: 2px 0 0; font-size: var(--ed-text-xs); color: var(--ed-ink-3); }
+.rs-card__more { margin: 0; font-size: var(--ed-text-xs); color: var(--ed-ink-3); }
+
+/* The hero: two rings, a sentence beside each. */
+.rs-hero__block { display: flex; align-items: center; gap: var(--ed-5); }
+.rs-hero__text { display: flex; flex-direction: column; gap: var(--ed-1); min-width: 0; }
+.rs-hero__lead { margin: 0; font-size: var(--ed-text-lg); font-weight: 600; line-height: 1.35; color: var(--ed-ink); text-wrap: pretty; }
+.rs-hero__note { margin: 0; font-size: var(--ed-text-sm); color: var(--ed-ink-2); line-height: 1.5; }
+.rs-hero__rule { border-top: 1px solid var(--ed-line-soft); }
+.seo2-score__ring[data-tone='engines'] .seo2-score__value { stroke: var(--viz-3); }
+
+/* The four tiles, two by two, filling the rest of the top row. */
+.rs-tiles {
+  grid-column: span 7;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ed-4);
+}
+.rs-tiles .viz-tile { padding: var(--ed-5); }
+
+/* Inside a card, a chart's own head is the card's head. */
+.rs-card > .viz-chart { gap: var(--ed-3); }
+.rs-card > .viz-chart > .viz-chart__head .viz-chart__title { font-size: var(--ed-text-base); }
+
+/* The fix list inside a card: tighter than on its own, the button on its own line. */
+.rs-issues .seo2-issue { grid-template-columns: auto 1fr; padding: var(--ed-3) 0; }
+.rs-issues .seo2-issue__btn { grid-column: 2; justify-self: start; margin-top: var(--ed-1); }
+
+/* A donut in a narrow card stacks its legend under the ring. */
+.rs-card[data-span='3'] .viz-donut { grid-template-columns: 1fr; justify-items: center; }
+.rs-card[data-span='3'] .viz-donut__legend { width: 100%; }
+
+/* --- Responsive ------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  .rs-card[data-span='3'], .rs-card[data-span='4'] { grid-column: span 6; }
+  .rs-card[data-span='5'], .rs-card[data-span='8'] { grid-column: span 12; }
+  .rs-tiles { grid-column: span 12; }
+}
+@media (max-width: 760px) {
+  .rs-card[data-span] { grid-column: span 12; }
+  .rs-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rs-head { align-items: flex-start; }
+  .rs-hero__block { align-items: flex-start; }
+}
+@media (max-width: 560px) {
+  .rs-tiles { gap: var(--ed-3); }
+  .rs-tiles .viz-tile { padding: var(--ed-3); }
+  .rs-hero__block { flex-direction: column; align-items: center; text-align: center; }
+  .rs-hero__text { align-items: center; }
+  .rs-head__actions { width: 100%; }
+  .rs-range { width: 100%; }
+  .rs-range a { flex: 1 1 0; justify-content: center; }
+  .rs-head__actions .sv-btn { width: 100%; }
+}

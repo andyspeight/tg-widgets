@@ -420,18 +420,18 @@ describe('the housekeeping cron', () => {
   });
 });
 
-describe('the dashboard panel keeps to the chart rules', () => {
+describe('the chart parts keep to the chart rules', () => {
   const panel = source('components', 'seo', 'VisitCharts.tsx');
   const css = source('components', 'seo', 'seo.css');
-  const dashboard = source('components', 'seo', 'SeoDashboard.tsx');
-  const page = source('app', 'seo', 'page.tsx');
+  const dashboard = source('components', 'results', 'ResultsDashboard.tsx');
+  const page = source('app', 'results', 'page.tsx');
 
-  it('is wired into the screen, best effort', () => {
-    expect(dashboard).toContain("import { ReadersPanel } from './VisitCharts';");
-    expect(dashboard).toContain('{visits && <ReadersPanel summary={visits} />}');
-    expect(page).toContain('listVisitRows(site.tenantId, 60)');
-    expect(page).toContain('summariseVisits(rows, new Date(), 30)');
-    expect(page).toMatch(/\.catch\([\s\S]*?return null;/);
+  it('is wired into the results board, best effort', () => {
+    expect(dashboard).toContain("import { Bars, DailyColumns, Donut, EngineRoster, Tile } from '../seo/VisitCharts';");
+    expect(dashboard).toContain('const view = readersView(visits);');
+    expect(page).toContain('listVisitRows(site.tenantId, days * 2)');
+    expect(page).toContain('summariseVisits(rows, now, days)');
+    expect(page).toMatch(/\.catch\([\s\S]*?return summariseVisits\(\[\], now, days\);/);
   });
 
   it('carries a roster, a donut, sparklines, a legend, a table view and no script', () => {
@@ -447,9 +447,9 @@ describe('the dashboard panel keeps to the chart rules', () => {
   });
 
   it('uses three validated series colours, with their own dark steps', () => {
-    expect(css).toMatch(/\.seo2 \{\s*--viz-1: #2a78d6;\s*--viz-2: #eb6834;\s*--viz-3: #1baf7a;/);
-    expect(css).toMatch(/\.sv-root\[data-theme='dark'\] \.seo2 \{\s*--viz-1: #3987e5;\s*--viz-2: #d95926;\s*--viz-3: #199e70;/);
-    expect(css).toMatch(/\.sv-root\[data-theme='system'\] \.seo2 \{\s*--viz-1: #3987e5;/);
+    expect(css).toMatch(/\.seo2 \{[^}]*--viz-1: #2a78d6;\s*--viz-2: #eb6834;\s*--viz-3: #1baf7a;/);
+    expect(css).toMatch(/\.sv-root\[data-theme='dark'\] \.seo2 \{[^}]*--viz-1: #3987e5;\s*--viz-2: #d95926;\s*--viz-3: #199e70;/);
+    expect(css).toMatch(/\.sv-root\[data-theme='system'\] \.seo2 \{[^}]*--viz-1: #3987e5;/);
   });
 
   it('moves only for somebody who has not asked for less', () => {
