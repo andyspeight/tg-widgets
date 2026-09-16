@@ -140,8 +140,14 @@ console.log('Available means unlimited: no positive count anywhere (Andy, 8 Sep 
 
 console.log('There is ONE plan map: the copy endpoint reads it rather than carrying its own');
 {
-  ok('api/widget-copy.js imports PLAN_WIDGET_LIMITS and canonicalisePlan from widget-config.js',
-    /import \{ PLAN_WIDGET_LIMITS, canonicalisePlan \} from '\.\/widget-config\.js';/.test(COPY));
+  // The list grew on 16 Sep 2026: the copy endpoint now also reads the shared
+  // ACCESS rule (readControlAccess), so a widget granted to one client in
+  // Control can be duplicated as well as created. What matters is that all of
+  // it comes from widget-config.js and none of it is re-derived here.
+  ok('api/widget-copy.js imports the plan map and the plan helper from widget-config.js',
+    /import \{[^}]*\bPLAN_WIDGET_LIMITS\b[^}]*\bcanonicalisePlan\b[^}]*\} from '\.\/widget-config\.js';/.test(COPY));
+  ok('and the access rule with them, rather than its own idea of who may copy what',
+    /import \{[^}]*\breadControlAccess\b[^}]*\} from '\.\/widget-config\.js';/.test(COPY));
   ok('api/widget-copy.js declares no plan map of its own',
     !/const PLAN_WIDGET_LIMITS\s*=/.test(COPY) && !/const PLAN_ALIASES\s*=/.test(COPY));
   ok('a locked type is refused on copy with the same wording as a new widget',
