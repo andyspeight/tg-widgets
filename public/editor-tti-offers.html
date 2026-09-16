@@ -2031,7 +2031,12 @@
        demo pool and simply shows nothing, which is the honest outcome. */
     async function loadTtiAppId() {
       try {
-        const res = await fetch('/api/tti-appid', { headers: window.tgse.authHeaders() });
+        // The widget's id, so the App ID resolves to its OWNER rather than to
+        // whoever is signed in. A staff member acting for a client would
+        // otherwise preview a different account's pool from the one the test
+        // wrote to, and be told the cache write did not land.
+        const wid = (state.widgetId ? '?widgetId=' + encodeURIComponent(state.widgetId) : '');
+        const res = await fetch('/api/tti-appid' + wid, { headers: window.tgse.authHeaders() });
         if (!res.ok) return;
         const d = await res.json();
         if (d && d.appId) {
@@ -2669,6 +2674,9 @@
           // pricing the hotel on its own.
           body: JSON.stringify({
             rows,
+            // Which widget this is, so the search runs under its owner's
+            // Travelify account rather than the signed-in session's.
+            widgetId: state.widgetId || '',
             type: state.config.type,
             // The dates: a fixed departure for the whole widget, and the
             // rolling window for anything without one.
@@ -2807,6 +2815,19 @@
                  // the agent should be able to see both.
                  + (d.searches && d.searches !== d.tested ? ' \u00b7 ' + d.searches + ' searches' : '')
                  + '.</div>';
+        // WHOSE ACCOUNT. A staff member acting for a client cannot otherwise
+        // tell, and the wrong one caches to a pool the widget cannot read.
+        if (d.searchedAs && d.searchedAs.appId) {
+          const sa = d.searchedAs;
+          head += '<div style="color:var(--tgse-ink-3);margin-bottom:6px">Searched '
+                + (sa.owner ? 'as <strong>' + esc(sa.owner) + '</strong> ' : '')
+                + 'on Travelify App ID <span class="tti-test-code">' + esc(String(sa.appId)) + '</span>'
+                + (sa.from === 'session'
+                    ? ' \u2014 this widget has not been saved yet, so it used your own account. '
+                      + 'Save it and test again to use the account it belongs to.'
+                    : '.')
+                + '</div>';
+        }
         if (d.droppedNote) {
           head += '<div style="color:var(--tgse-warning);margin-bottom:6px">' + esc(d.droppedNote) + '</div>';
         }
@@ -4416,6 +4437,10 @@
       },
       setConfig: (c) => {
         if (c && typeof c === 'object') Object.assign(state.config, c);
+        // Loading or saving a widget can change WHICH account it belongs to,
+        // and the App ID is resolved from that. Re-ask rather than keep the one
+        // resolved before the widget was known.
+        loadTtiAppId();
         hydrateUI();
         renderPreview();
       },

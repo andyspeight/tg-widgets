@@ -17,7 +17,7 @@
  */
 
 import { requireAuth, setCors } from './_auth.js';
-import { lookupClientCredentialsByRecordId, lookupClientCredentialsByEmail } from './_auth.js';
+import { credentialsForWidget } from './_lib/offers/widget-owner.js';
 
 export default async function handler(req, res) {
   setCors(res);
@@ -31,8 +31,15 @@ export default async function handler(req, res) {
   if (auth.error) return res.status(auth.status).json({ error: auth.error });
   const user = auth.user || {};
 
-  const creds = (user.clientId ? await lookupClientCredentialsByRecordId(user.clientId) : null)
-             || (user.email ? await lookupClientCredentialsByEmail(user.email) : null);
+  // The widget's OWNER, matching api/tti-test.js and the live widget. If the
+  // preview resolved a different App ID from the one the test wrote under, it
+  // would read an empty pool and report that the cache write did not land —
+  // about a write that landed perfectly.
+  const resolved = await credentialsForWidget({
+    widgetId: (req.query && req.query.widgetId) || '', user,
+  });
+  if (resolved.error) return res.status(403).json({ error: resolved.error });
+  const creds = resolved.creds;
 
   // Never cached: an account's credentials can be connected mid-session, and a
   // stale miss here would leave the editor previewing the wrong pool until a

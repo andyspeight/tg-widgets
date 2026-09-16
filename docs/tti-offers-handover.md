@@ -656,6 +656,41 @@ be queued on missing coordinates alone, so a row carrying an explicit Fly into
 was located anyway and the computed airport replaced the typed one. Typing TFS
 changed nothing at all, which is the worst way for an override to fail.
 
+### A test searches as the WIDGET'S OWNER
+
+Andy, 16 Sep 2026: *"When acting as it needs to use the owner of the App — in
+this case MT Holidays."* Not a preference — the only answer that works.
+
+Every other part of the product already resolves the owner from the widget's own
+`ClientRecordId`: `widget-config.js` injects `config.appId` from it, the nightly
+sweep runs under it, and the cache key is `offers:tti:{appId}:{code}`. A Test
+button that searched under the SESSION's account instead would write to a key
+the live widget never reads — the agent sees a price, the site shows nothing,
+and the panel reports that the cache write did not land. It would also price the
+offer at the wrong client's contracted rates, which is a commercial error rather
+than a cosmetic one.
+
+`api/_lib/offers/widget-owner.js` resolves it, and both `/api/tti-test` and
+`/api/tti-appid` use it — they must agree, or the preview reads a different pool
+from the one the test just wrote.
+
+**Permission is checked, not assumed.** Resolving by widget id means the widget
+id decides whose credentials get spent, so the caller must be entitled to that
+widget or anyone could burn another client's Travelify capacity and read their
+rates. `canModifyWidget` is reused rather than reimplemented: two ownership
+rules is one ownership rule and a bug waiting to be found.
+
+**A lookup that could not be made never falls back to the session.** "We could
+not ask" and "there is no such widget" must not collapse into one value, because
+the fallback for the second is the session's own account — precisely the
+wrong-client search this removes. Same for an owner whose account has no
+Travelify application: refused, not substituted.
+
+**An unsaved widget uses your own account, and says so.** A widget with no id
+can only belong to whoever is making it. The panel names the account on every
+test (*"Searched as MT Holidays on Travelify App ID 475"*), because a staff
+member acting for a client cannot otherwise tell.
+
 ### One hotel is a block, not one long line
 
 The editor panel is about 300px wide. Four controls across it left the code
