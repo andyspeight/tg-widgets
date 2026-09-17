@@ -191,6 +191,7 @@ function input(overrides: Partial<ServeInput> = {}): ServeInput {
     model: 'claude-sonnet-5',
     message: 'What would you improve on this page?',
     pageId: 'p2',
+    sectionId: null,
     thread: [],
     site: siteFixture(),
     page: outlinePage(pageFixture(), '/norway-fjords'),
@@ -620,6 +621,58 @@ describe('reading the event stream', () => {
 });
 
 // ---------------------------------------------------------------------------
+// What they are looking at
+// ---------------------------------------------------------------------------
+
+describe('the selected section', () => {
+  it('is marked in the outline, and only that one', () => {
+    const outline = outlinePage(pageFixture(), '/norway-fjords');
+    const { text } = renderOutline(outline, undefined, 's2');
+    expect(text).toContain('[section s2] Voyages (light) [selected]');
+    expect(text).toContain('[section s1] Hero (dark)');
+    expect(text).not.toContain('Hero (dark) [selected]');
+  });
+
+  it('is absent when nothing is selected, and ignored when it names no section here', () => {
+    const outline = outlinePage(pageFixture(), '/norway-fjords');
+    expect(renderOutline(outline).text).not.toContain('[selected]');
+    expect(renderOutline(outline, undefined, 's-nope').text).not.toContain('[selected]');
+  });
+
+  it('reaches the model as material, with the system prompt saying how to read it', () => {
+    const turn = contextTurn({
+      site: siteFixture(),
+      page: outlinePage(pageFixture(), '/norway-fjords'),
+      message: 'Tighten this',
+      selectedSectionId: 's1',
+    });
+    expect(turn).toContain('[section s1] Hero (dark) [selected]');
+
+    const system = systemPrompt('plan', toolsFor('plan', ALL));
+    expect(system).toContain('[selected]');
+    expect(system).not.toContain('Hero');
+  });
+
+  it('travels with the request, and never without its page', () => {
+    const withPage = assistRequest({ message: 'Tighten this', pageId: 'p2', sectionId: 's1', turns: [] });
+    expect(withPage.sectionId).toBe('s1');
+
+    const noPage = assistRequest({ message: 'About the site', pageId: null, sectionId: 's1', turns: [] });
+    expect(noPage.sectionId).toBeNull();
+
+    const noSection = assistRequest({ message: 'About the page', pageId: 'p2', turns: [] });
+    expect(noSection.sectionId).toBeNull();
+  });
+
+  it('is carried into the turn the model is given', async () => {
+    const h = harness([textAnswer('The hero is doing two jobs.')]);
+    await serveAssist(input({ sectionId: 's1', message: 'Tighten this' }), h.deps);
+    const first = h.calls[0].messages as Array<{ role: string; content: string }>;
+    expect(first[0].content).toContain('[selected]');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // The panel's own half
 // ---------------------------------------------------------------------------
 
@@ -756,6 +809,33 @@ describe('pins', () => {
     expect(sql).not.toMatch(/grant delete/);
   });
 
+  it('the sparkle is on the page and on the section, and both open the one panel', () => {
+    const shell = read('components/editor/EditorShell.tsx');
+    // One callback, handed to both surfaces, so there is one way in and one panel.
+    expect(shell).toContain('const openAssist = useCallback(');
+    expect(shell.match(/onAsk=\{openAssist\}/g)).toHaveLength(2);
+    // The section the assistant points at follows the selection, at any depth.
+    expect(shell).toContain('sectionId={assistSection?.id ?? null}');
+
+    const props = read('components/editor/Properties.tsx');
+    expect(props).toContain('onClick={onAsk}');
+    expect(props).toContain('<Icon name="sparkle"');
+    // It says which of the two it is asking about.
+    expect(props).toContain("'this section' : 'this page'");
+
+    const pill = read('components/editor/ItemToolbar.tsx');
+    expect(pill).toContain('onClick={onAsk}');
+    expect(pill).toContain('<Icon name="sparkle"');
+
+    const panel = read('components/assist/AssistPanel.tsx');
+    expect(panel).toContain('sectionId: useSection ? sectionId : null');
+  });
+
+  it('the route only accepts a section the page actually has', () => {
+    const route = read('app/api/assist/route.ts');
+    expect(route).toContain('page.sections.some((section) => section.id === body.sectionId)');
+  });
+
   it('the name is one constant, and nothing else spells it', () => {
     expect(ASSISTANT_NAME).toBe('Luna Assist');
     for (const file of [
@@ -766,6 +846,8 @@ describe('pins', () => {
       'components/assist/AssistPanel.tsx',
       'components/assist/AssistDrawer.tsx',
       'components/editor/Rail.tsx',
+      'components/editor/Properties.tsx',
+      'components/editor/ItemToolbar.tsx',
     ]) {
       expect(read(file), file).not.toContain("'Luna Assist'");
     }

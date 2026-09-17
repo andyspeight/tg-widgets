@@ -71,6 +71,7 @@ import { blockDefinition } from '../../lib/content/blocks';
 import { usePaletteDrop } from './usePaletteDrop';
 import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
+import { sectionNameAt } from '../../lib/content/naming';
 import { AssistPanel } from '../assist/AssistPanel';
 import { Rail } from './Rail';
 import { CommentsPanel } from './CommentsPanel';
@@ -724,6 +725,20 @@ export function EditorShell({
   );
 
   /*
+   * Opening Luna Assist from somewhere that is not the rail: the pill on the
+   * canvas and the properties head both call this. It shows the panel, unfolds
+   * the column if it was folded, and on a narrow screen brings that pane to the
+   * front, because on a phone the column is only shown when it is the chosen
+   * pane and the assistant would otherwise open out of sight.
+   */
+  const openAssist = useCallback(() => {
+    setRailPanel('assist');
+    setPanels((current) => ({ ...current, outline: true }));
+    setMobilePane('outline');
+  }, []);
+
+
+  /*
    * The number behind the rail's Comments badge: how many threads are open across
    * the whole site. Read once on mount, and again whenever the panel changes
    * something (it calls back through onCountChange), so the badge follows a
@@ -879,6 +894,16 @@ export function EditorShell({
   const [theme, setTheme] = useState<Theme>('light');
 
   const page = history.present;
+  /*
+   * Which section the assistant is looking at: the one the selection sits in,
+   * whatever depth it is at, so clicking a heading inside the hero points it at
+   * the hero. Null at page level, which is the question about the whole page.
+   */
+  const assistSection = useMemo(() => {
+    if (!selected || selected.kind === 'page') return null;
+    const section = page.sections[selected.section];
+    return section ? { id: section.id, label: sectionNameAt(page, selected.section) } : null;
+  }, [page, selected]);
 
   /**
    * FETCH ON MISS: the listing the canvas turns out to need.
@@ -2519,7 +2544,12 @@ export function EditorShell({
          * does. It reads and advises and cannot touch the page, which is why it
          * needs nothing from the editor here beyond knowing which page is open.
          */
-        <AssistPanel pageId={pageId} pageTitle={page.title} />
+        <AssistPanel
+          pageId={pageId}
+          pageTitle={page.title}
+          sectionId={assistSection?.id ?? null}
+          sectionLabel={assistSection?.label ?? null}
+        />
       ) : railPanel === 'pages' ? (
         <PagesPanel
           pages={pages}
@@ -2617,6 +2647,7 @@ export function EditorShell({
         onSelect={select}
         onCommit={commit}
         onBack={() => setMobilePane('canvas')}
+        onAsk={openAssist}
         viewport={viewport}
         region={region}
         regionFlags={regionFlags}
@@ -2663,6 +2694,7 @@ export function EditorShell({
           page={page}
           selected={selected}
           selectedKey={selectedKey}
+          onAsk={openAssist}
           editing={!!editing}
           newId={newId}
           open={optionsOpen}

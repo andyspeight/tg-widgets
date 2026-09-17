@@ -137,14 +137,24 @@ export function describeTools(names: readonly string[]): string {
 export function assistRequest(input: {
   message: string;
   pageId: string | null;
+  sectionId?: string | null;
   turns: readonly AssistTurn[];
-}): { mode: 'plan'; message: string; pageId: string | null; thread: PriorTurn[] } {
+}): {
+  mode: 'plan';
+  message: string;
+  pageId: string | null;
+  sectionId: string | null;
+  thread: PriorTurn[];
+} {
   return {
     // Slice 1 is Plan mode. The switch arrives with slice 2, when Build has
     // something to do that Plan does not.
     mode: 'plan',
     message: input.message.trim(),
     pageId: input.pageId,
+    /* A section without its page means nothing: the server looks the section
+       up inside the page, so sending one alone would only be dropped. */
+    sectionId: input.pageId ? (input.sectionId ?? null) : null,
     thread: trimThread(input.turns),
   };
 }

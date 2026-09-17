@@ -74,6 +74,13 @@ export interface AssistPanelProps {
   /** The page being edited, when there is one. */
   pageId?: string | null;
   pageTitle?: string | null;
+  /**
+   * The section the person has selected on the canvas, if any. It follows the
+   * selection, so clicking another section moves the chip with it: the panel
+   * shows what they are looking at rather than what they were looking at.
+   */
+  sectionId?: string | null;
+  sectionLabel?: string | null;
   /** The drawer's close button. Absent in the rail, which the rail icon folds. */
   onClose?: () => void;
   /** Overrides the openers, for a test or a harness. */
@@ -85,6 +92,8 @@ export function AssistPanel({
   siteName = null,
   pageId = null,
   pageTitle = null,
+  sectionId = null,
+  sectionLabel = null,
   onClose,
   prompts,
 }: AssistPanelProps) {
@@ -92,6 +101,7 @@ export function AssistPanel({
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [usePage, setUsePage] = useState(true);
+  const [useSection, setUseSection] = useState(true);
 
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -99,6 +109,12 @@ export function AssistPanel({
   const nextId = useRef(0);
   const turnsRef = useRef<AssistTurn[]>([]);
   turnsRef.current = turns;
+
+  /* Clicking another section is a new intent, so a chip switched off for the
+     last one does not stay off for this one. */
+  useEffect(() => {
+    setUseSection(true);
+  }, [sectionId]);
 
   /* A request in flight when the panel closes is a request nobody is waiting
      for. The server still finishes the turn and the ledger still records it,
@@ -143,7 +159,12 @@ export function AssistPanel({
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(
-            assistRequest({ message: text, pageId: usePage ? pageId : null, turns: history }),
+            assistRequest({
+              message: text,
+              pageId: usePage ? pageId : null,
+              sectionId: useSection ? sectionId : null,
+              turns: history,
+            }),
           ),
           signal: controller.signal,
         });
@@ -220,7 +241,7 @@ export function AssistPanel({
         setBusy(false);
       }
     },
-    [busy, pageId, patch, usePage],
+    [busy, pageId, patch, sectionId, usePage, useSection],
   );
 
   const openers = prompts ?? (variant === 'drawer' ? DRAWER_PROMPTS : RAIL_PROMPTS);
@@ -261,6 +282,20 @@ export function AssistPanel({
             {pageTitle || 'This page'}
             <span className="ed-assist__chip-x" aria-hidden="true">
               {usePage ? '×' : '+'}
+            </span>
+          </button>
+        )}
+        {pageId && usePage && sectionId && (
+          <button
+            type="button"
+            className="ed-assist__chip ed-assist__chip--button"
+            aria-pressed={useSection}
+            title={useSection ? 'Stop pointing it at this section' : 'Point it at this section again'}
+            onClick={() => setUseSection((on) => !on)}
+          >
+            {sectionLabel || 'This section'}
+            <span className="ed-assist__chip-x" aria-hidden="true">
+              {useSection ? '×' : '+'}
             </span>
           </button>
         )}
@@ -364,7 +399,13 @@ export function AssistPanel({
             className="ed-assist__input"
             rows={2}
             value={draft}
-            placeholder={pageId && usePage ? 'Ask about this page' : 'Ask about this site'}
+            placeholder={
+              pageId && usePage
+                ? sectionId && useSection
+                  ? `Ask about ${sectionLabel ? `the ${sectionLabel.toLowerCase()}` : 'this section'}`
+                  : 'Ask about this page'
+                : 'Ask about this site'
+            }
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey) {

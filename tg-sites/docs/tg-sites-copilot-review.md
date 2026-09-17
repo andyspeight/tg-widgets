@@ -450,10 +450,26 @@ out differently from the mockup, each on purpose:
 - **No money in the panel.** The mockup showed an allowance bar. The allowance
   is unlimited, so there is nothing true to draw. The ledger still counts every
   turn in pence, and a staff screen can show it when there is a number to show.
-- **Two context chips, not three.** The site and the page, and the page one can
-  be switched off to ask about the site as a whole. A "selected section" chip
-  waits for slice 2, when what is selected changes what the assistant can do
-  rather than only what it has read.
+- **Three context chips, after all.** The site, the page, and the section the
+  person has selected. This one was going to wait for slice 2, on the grounds
+  that a selection did not yet change what the assistant could do. Andy asked
+  for the sparkle to be on the page and on the section, which made the section
+  worth carrying now: it reaches the server, marks that section `[selected]` in
+  the outline the model reads, and the system prompt says that a question with
+  no subject ("tighten this") is about it. Both the page chip and the section
+  chip switch off.
+
+**The ways in, 17 September 2026.** Three, all opening the one panel:
+
+- **The rail icon**, which is the panel's home.
+- **The pill on the canvas**, first in the row and away from its destructive
+  end, on whatever you clicked.
+- **The properties head**, which says "about this section" when something is
+  selected and "about this page" when nothing is.
+
+None of them carries the context itself. The panel reads the selection from the
+editor, so the chip follows what you click, and a chip switched off comes back
+when you select something else, because a new selection is a new intent.
 
 ---
 

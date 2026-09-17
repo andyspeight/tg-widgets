@@ -67,6 +67,7 @@ import {
   REVEAL_STYLES,
   SEA_TONE_PRESETS,
 } from '../../lib/content/styles';
+import { ASSISTANT_NAME } from '../../lib/assist/brand';
 import { AudienceField } from './AudienceField';
 import { BoxPanel, ColourField, Measure, PaddingBox, ScreenScope } from './BoxControls';
 import { blockDefinition, type Field, type FieldGroup } from '../../lib/content/blocks';
@@ -144,6 +145,8 @@ interface Props {
   onSelect: (path: Path | null) => void;
   onCommit: (next: (current: Page) => Page, coalesceKey?: string) => void;
   onBack: () => void;
+  /** Opens Luna Assist, pointed at whatever is selected. Absent where there is no panel. */
+  onAsk?: () => void;
   /**
    * Set when this editor is on the site's header or footer rather than a page.
    *
@@ -317,6 +320,7 @@ export function Properties({
   onSelect,
   onCommit,
   onBack,
+  onAsk,
   region = null,
   regionFlags,
   onRegionFlags,
@@ -335,6 +339,26 @@ export function Properties({
         <span className="ed-panel-title">
           {selected ? headingFor(selected, page, region, isItem) : 'Settings'}
         </span>
+        {/*
+          The way into Luna Assist from whatever you are looking at. It opens the
+          panel on the other side of the canvas rather than answering here: there
+          is one home for the conversation, and a second one would be two places
+          to look for the same thread. What is selected travels with it, so this
+          button needs to say nothing about the section itself.
+        */}
+        {onAsk && (
+          <button
+            type="button"
+            className="ed-btn"
+            data-variant="ghost"
+            data-icon="true"
+            onClick={onAsk}
+            aria-label={`Ask ${ASSISTANT_NAME} about ${selected && selected.kind !== 'page' ? 'this section' : 'this page'}`}
+            title={`Ask ${ASSISTANT_NAME} about ${selected && selected.kind !== 'page' ? 'this section' : 'this page'}`}
+          >
+            <Icon name="sparkle" size={18} />
+          </button>
+        )}
         <button
           type="button"
           className="ed-btn"

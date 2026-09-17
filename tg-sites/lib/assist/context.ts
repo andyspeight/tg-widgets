@@ -193,8 +193,17 @@ function renderBlock(block: OutlineBlock, indent: string): string[] {
  * The outline as text for the model, inside the budget. Sections are whole or
  * absent: a section cut in half would read as a shorter section, which is a
  * lie about the page, where "and 4 more sections" is not.
+ *
+ * `selectedId` is the section the person has clicked in the editor, marked
+ * [selected] on its own line. That is the whole of what "this section" means
+ * when somebody types it: the mark is in the material, the system prompt says
+ * how to read it, and nothing about it is an instruction.
  */
-export function renderOutline(outline: PageOutline, budget = OUTLINE_BUDGET): { text: string; truncated: boolean } {
+export function renderOutline(
+  outline: PageOutline,
+  budget = OUTLINE_BUDGET,
+  selectedId: string | null = null,
+): { text: string; truncated: boolean } {
   const head = [
     `Page "${outline.title}" at ${outline.path || '/'}${outline.seo.noindex ? ' (hidden from search)' : ''}`,
     outline.seo.title ? `Search title: ${outline.seo.title}` : 'Search title: not set',
@@ -205,7 +214,8 @@ export function renderOutline(outline: PageOutline, budget = OUTLINE_BUDGET): { 
   let length = lines.join('\n').length;
   let shown = 0;
   for (const section of outline.sections) {
-    const block = [`[section ${section.id}] ${section.name || 'Untitled'} (${section.tone})`];
+    const mark = selectedId && section.id === selectedId ? ' [selected]' : '';
+    const block = [`[section ${section.id}] ${section.name || 'Untitled'} (${section.tone})${mark}`];
     for (const item of section.blocks) block.push(...renderBlock(item, '  '));
     const text = block.join('\n');
     if (shown > 0 && length + text.length + 1 > budget) break;

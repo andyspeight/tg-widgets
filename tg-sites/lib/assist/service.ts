@@ -48,6 +48,8 @@ export interface ServeInput {
   model: string;
   message: string;
   pageId: string | null;
+  /** The section the person has selected on the canvas, if any. */
+  sectionId: string | null;
   thread: readonly PriorTurn[];
   site: SiteContext;
   page: PageOutline | null;
@@ -120,14 +122,28 @@ export async function serveAssist(input: ServeInput, deps: ServeDeps): Promise<S
   const system = systemPrompt(input.mode, tools);
   const messages: ConverseMessage[] = [
     ...threadMessages(input.thread),
-    { role: 'user', content: contextTurn({ site: input.site, page: input.page, message: input.message }) },
+    {
+      role: 'user',
+      content: contextTurn({
+        site: input.site,
+        page: input.page,
+        message: input.message,
+        selectedSectionId: input.sectionId,
+      }),
+    },
   ];
 
   await deps.log({
     ...base,
     usageId,
     kind: 'asked',
-    detail: { tools: [...allowed], threadTurns: messages.length - 1, messageChars: input.message.length, hasPage: Boolean(input.page) },
+    detail: {
+      tools: [...allowed],
+      threadTurns: messages.length - 1,
+      messageChars: input.message.length,
+      hasPage: Boolean(input.page),
+      hasSection: Boolean(input.sectionId),
+    },
   });
 
   let usage = noUsage();

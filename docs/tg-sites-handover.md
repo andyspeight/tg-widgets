@@ -241,13 +241,24 @@ page and the results board" line. The styles are the `.ed-assist` block at the
 end of `components/editor/editor.css`, which the dashboard already loads
 through `sites.css`.
 
-What it does: openers that fill the box on a click, the site and page as chips
-(the page one switches off to ask about the whole site), the answer streaming
-in as text with its line breaks kept, questions drawn with their options so
-clicking one answers, and a plain sentence when the server refuses. What it
-deliberately does NOT have yet: a Plan and Build switch (Build has nothing to
-do that Plan does not until slice 2), any mention of money (the allowance is
-unlimited, so there is nothing true to show), and a selected-section chip.
+What it does: openers that fill the box on a click, the site, page and section
+as chips (each of the last two switches off), the answer streaming in as text
+with its line breaks kept, questions drawn with their options so clicking one
+answers, and a plain sentence when the server refuses. What it deliberately
+does NOT have yet: a Plan and Build switch (Build has nothing to do that Plan
+does not until slice 2) and any mention of money (the allowance is unlimited,
+so there is nothing true to show).
+
+**Three ways in (Andy, 17 Sep: "the sparkle should also be there on the page,
+and the section").** The rail icon, the pill on the canvas, and the properties
+head. All three call one `openAssist` in the shell; none of them carries the
+context. The panel reads the selection from the editor, so the section chip
+follows whatever you click, at any depth: selecting a heading inside the hero
+points it at the hero. A chip switched off comes back when you select something
+else, because a new selection is a new intent. The section is real, not a
+label: it goes to the route, which checks the page actually has it, and the
+outline the model reads marks it `[selected]` with the system prompt saying
+that a question with no subject is about it.
 
 Things that will bite here: the answer is rendered as TEXT and must stay that
 way, so no markdown renderer without a sanitiser; `editor.css` sets no global

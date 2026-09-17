@@ -42,6 +42,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { blockDefinition } from '../../lib/content/blocks';
 import type { FieldDef } from '../../lib/content/collection-fields';
 import type { ItemMeta } from '../../lib/content/collection-page';
+import { ASSISTANT_NAME } from '../../lib/assist/brand';
 import { itemActions, itemLabel, type ItemAction } from '../../lib/content/item-actions';
 import type { Page, RegionName } from '../../lib/content/schema';
 import { blockAtPath, type Path, type Reid } from '../../lib/content/tree';
@@ -98,6 +99,7 @@ export function ItemToolbar({
   onOpenChange,
   onAdd,
   onCommit,
+  onAsk,
   options,
 }: {
   page: Page;
@@ -106,6 +108,8 @@ export function ItemToolbar({
   /** True when the selected block is being typed into: Edit is then redundant. */
   editing: boolean;
   newId: Reid;
+  /** Opens Luna Assist on whatever this pill is attached to. */
+  onAsk?: () => void;
   /**
    * Whether the options popover is open. Held by the shell, NOT here, so the
    * right-hand pane can step aside while it is open and the screen never shows
@@ -280,6 +284,23 @@ export function ItemToolbar({
         aria-label={`${label} actions`}
       >
         <span className="ed-bar__label">{label}</span>
+        {/*
+          Luna Assist, first in the row and kept away from the destructive end
+          of it. The pill already knows what you clicked, and so does the panel,
+          so this only has to open the thing: what it is pointed at follows the
+          selection on its own.
+        */}
+        {onAsk && (
+          <button
+            type="button"
+            className="ed-bar__btn"
+            title={`Ask ${ASSISTANT_NAME} about this`}
+            aria-label={`Ask ${ASSISTANT_NAME} about ${label}`}
+            onClick={onAsk}
+          >
+            <Icon name="sparkle" size={16} />
+          </button>
+        )}
         {actions.map((action) => (
           <button
             key={action.id}

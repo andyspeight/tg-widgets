@@ -47,6 +47,8 @@ const BodySchema = z.object({
   mode: z.enum(['plan', 'build']).default('plan'),
   message: z.string().trim().min(1).max(MAX_MESSAGE),
   pageId: z.string().uuid().nullable().optional(),
+  /* A section id is ours, not a uuid: lib/content ids are short strings. */
+  sectionId: z.string().max(80).nullable().optional(),
   thread: z
     .array(z.object({ role: z.enum(['user', 'assistant']), text: z.string().max(20_000) }))
     .max(40)
@@ -138,11 +140,17 @@ export async function POST(request: Request): Promise<Response> {
   const site = await loadSite(tenantId);
   let page: PageOutline | null = null;
   let pageId: string | null = null;
+  let sectionId: string | null = null;
   if (body.pageId && site.pages.some((entry) => entry.id === body.pageId)) {
     const found = await getPage(tenantId, body.pageId);
     if (found) {
       pageId = found.id;
       page = outlinePage(found.content, site.pages.find((entry) => entry.id === found.id)?.path ?? '/');
+      /* A section the page does not have is dropped rather than refused: the
+         person moved on, or deleted it, and neither is worth an error. */
+      if (body.sectionId && page.sections.some((section) => section.id === body.sectionId)) {
+        sectionId = body.sectionId;
+      }
     }
   }
 
@@ -154,7 +162,7 @@ export async function POST(request: Request): Promise<Response> {
       };
       try {
         const result = await serveAssist(
-          { tenantId, userId, mode: body.mode, model, message: body.message, pageId, thread: body.thread, site, page, caps },
+          { tenantId, userId, mode: body.mode, model, message: body.message, pageId, sectionId, thread: body.thread, site, page, caps },
           {
             claim: async () => claim,
             converse: (system, messages, opts) => converse(system, messages, opts),
