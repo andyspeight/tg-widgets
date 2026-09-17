@@ -23,6 +23,14 @@
  * heading and may not restyle the section it sits in, without a second list
  * anywhere saying so.
  *
+ * SECTIONS ARE THE SAME DEAL. add_section names a design from the SAME library
+ * the Designed panel offers (lib/content/presets.ts), page-scoped, so the model
+ * cannot drop a footer into the middle of an About page and cannot invent a
+ * section that does not exist. move_section and remove_section name a section by
+ * the id the outline gave it. All three need the structure capability, which is
+ * the one the permissions screen already calls "Add, remove and move sections",
+ * so nothing new has to be granted and nothing new has to be explained.
+ *
  * PURE. A page in, a page out, no database and no network, so every rule above
  * is tested with a fixture.
  */
@@ -30,16 +38,43 @@
 import { toHtml, toText } from '../ai/copy';
 import type { Capability } from '../auth/permissions';
 import { blockDefinition, type Field } from '../content/blocks';
-import { parsePage, type Block, type Page } from '../content/schema';
-import { containerColumns, updateBlockProps, updateInnerBlockProps } from '../content/tree';
-import { tokensIn } from './context';
+import {
+  buildPresetSection,
+  presetBlocks,
+  presetById,
+  presetRoles,
+  PRESET_CATEGORIES,
+  SECTION_PRESETS,
+  type SectionPreset,
+} from '../content/presets';
+import { escapeHtml } from '../content/sanitise';
+import { parsePage, type Block, type Page, type Section } from '../content/schema';
+import {
+  addSection as insertSection,
+  containerColumns,
+  moveSection as reorderSection,
+  removeSection as dropSection,
+  updateBlockProps,
+  updateInnerBlockProps,
+} from '../content/tree';
+import { isBound, tokensIn } from './context';
 
 export type Operation =
   | { kind: 'set_text'; block: string; text: string; why?: string }
   | { kind: 'set_setting'; block: string; setting: string; value: string | number | boolean; why?: string }
-  | { kind: 'set_page_seo'; title?: string; description?: string; why?: string };
+  | { kind: 'set_page_seo'; title?: string; description?: string; why?: string }
+  | { kind: 'add_section'; preset: string; after?: string; heading?: string; text?: string; why?: string }
+  | { kind: 'move_section'; section: string; after?: string; why?: string }
+  | { kind: 'remove_section'; section: string; why?: string };
 
-export const OPERATION_KINDS = ['set_text', 'set_setting', 'set_page_seo'] as const;
+export const OPERATION_KINDS = [
+  'set_text',
+  'set_setting',
+  'set_page_seo',
+  'add_section',
+  'move_section',
+  'remove_section',
+] as const;
 
 /** One change, as the panel shows it and the change set records it. */
 export interface Change {
@@ -167,6 +202,172 @@ export function bindingRefusal(current: unknown, next: string): string | null {
   if (lost.length === 0) return null;
   return `That would replace ${lost.join(' ')} with fixed words. This value is filled from a collection for every item, so changing what it says means changing the collection, not this block.`;
 }
+
+// ---------------------------------------------------------------------------
+// Sections: the designed library, and where one goes
+// ---------------------------------------------------------------------------
+
+/*
+ * PAGE SCOPE ONLY. A header and a footer preset are the same shape as a page
+ * section, so nothing in the data stops a four-column footer landing halfway
+ * down an About page. The picker's answer to that is to offer only the
+ * categories that fit the screen (categoriesFor in lib/content/presets.ts) and
+ * this is the same answer for the assistant. It is also the list read_catalogue
+ * shows it, so what it is offered and what it may name are one list rather than
+ * two that can drift.
+ */
+const PAGE_CATEGORIES = new Set<string>(
+  PRESET_CATEGORIES.filter((entry) => entry.scope === 'page').map((entry) => entry.id),
+);
+
+/** Every designed section a page may be given, in library order. */
+export function pageSectionPresets(): SectionPreset[] {
+  return SECTION_PRESETS.filter((preset) => PAGE_CATEGORIES.has(preset.category));
+}
+
+function pagePreset(id: string): SectionPreset | null {
+  const preset = presetById(id.trim());
+  return preset && PAGE_CATEGORIES.has(preset.category) ? preset : null;
+}
+
+/** What a position means when it is not a section id: the top of the page. */
+const START = 'start';
+
+function findSection(page: Page, id: string): number {
+  return page.sections.findIndex((section) => section.id === id.trim());
+}
+
+function sectionBlocks(section: Section): Block[] {
+  return (section.rows ?? []).flatMap((row) => (row.columns ?? []).flatMap((column) => column.blocks ?? []));
+}
+
+/** What to call a section to somebody reading the proposal. */
+function sectionTitle(section: Section): string {
+  const named = typeof section.name === 'string' ? section.name.trim() : '';
+  if (named) return named;
+  /* Its own first words, which is what somebody would call it. A section with
+     no words at all is named by its id, so the line still points somewhere. */
+  for (const block of sectionBlocks(section)) {
+    for (const key of ['html', 'text', 'title', 'heading']) {
+      const words = plainOf((block.props as Record<string, unknown>)[key]);
+      if (words) return words.length > 48 ? `${words.slice(0, 47).trimEnd()}\u2026` : words;
+    }
+  }
+  return `Untitled section ${section.id}`;
+}
+
+/**
+ * Whether anything in this section is drawn from a collection.
+ *
+ * ASKED BLOCK BY BLOCK rather than by walking the whole section, because
+ * tokensIn stops at eight levels down and a loop's card sits below that when
+ * the walk starts at a section: sections, rows, columns, blocks, props,
+ * columns, blocks, props, and only then the token. From a block it is well
+ * inside the limit, and isBound is the same question the outline's [bound]
+ * mark answers, so there is one answer to it rather than two.
+ */
+function sectionIsBound(section: Section): boolean {
+  return sectionBlocks(section).some((block) => isBound(block));
+}
+
+/** What is in it, by block name, for the one operation that takes it away. */
+function sectionContents(section: Section): string {
+  const names: string[] = [];
+  for (const block of sectionBlocks(section)) {
+    const name = blockDefinition(block.type)?.label ?? block.type;
+    if (!names.includes(name)) names.push(name);
+    if (names.length >= 6) break;
+  }
+  return names.join(', ');
+}
+
+function ordinal(n: number): string {
+  const teens = n % 100;
+  if (teens >= 11 && teens <= 13) return `${n}th`;
+  const last = n % 10;
+  return `${n}${last === 1 ? 'st' : last === 2 ? 'nd' : last === 3 ? 'rd' : 'th'}`;
+}
+
+function badPosition(after: string): string {
+  return `There is no section called ${after} on this page. Name one by the id in the page outline, or say "start" for the top of the page.`;
+}
+
+/** Where a NEW section lands, from the id it should follow. */
+function placeIndex(page: Page, after: string | undefined): { index: number } | { error: string } {
+  const wanted = (after ?? '').trim();
+  if (!wanted) return { index: page.sections.length };
+  if (wanted.toLowerCase() === START) return { index: 0 };
+  const at = findSection(page, wanted);
+  return at < 0 ? { error: badPosition(wanted) } : { index: at + 1 };
+}
+
+/** The same position in words, for the person reading the change. */
+function placeWords(page: Page, after: string | undefined): string {
+  const wanted = (after ?? '').trim();
+  if (!wanted) return 'At the end of the page';
+  if (wanted.toLowerCase() === START) return 'At the top of the page';
+  const at = findSection(page, wanted);
+  return at < 0 ? 'At the end of the page' : `After \u201c${sectionTitle(page.sections[at])}\u201d`;
+}
+
+/**
+ * Where a section ALREADY on the page lands, in moveSection's terms.
+ *
+ * moveSection takes the section out of the list before putting it back, so a
+ * target that sits after it is one index lower by the time the insert happens.
+ * Getting this wrong moves a section one place short, which looks like the
+ * model misunderstanding rather than like arithmetic.
+ */
+function moveIndex(page: Page, from: number, after: string | undefined): { to: number } | { error: string } {
+  const wanted = (after ?? '').trim();
+  if (!wanted) return { to: page.sections.length - 1 };
+  if (wanted.toLowerCase() === START) return { to: 0 };
+  if (wanted === page.sections[from].id) {
+    return { error: 'A section cannot move after itself. Name the section it should follow, or say "start" for the top of the page.' };
+  }
+  const at = findSection(page, wanted);
+  if (at < 0) return { error: badPosition(wanted) };
+  return { to: at < from ? at + 1 : at };
+}
+
+/**
+ * The words a new section arrives with.
+ *
+ * A preset carries placeholder copy, which is right in the picker, where
+ * somebody is choosing a shape, and wrong here, where somebody has asked for a
+ * section ABOUT something. The preset's declared roles say which block is the
+ * title and which is the body (presetRoles), so the words go where the design
+ * meant them, and a preset whose built shape does not match its own block list
+ * is left with its own copy rather than filled by position.
+ *
+ * MUTATES A SECTION THIS MODULE JUST BUILT, the same as starters.ts does and
+ * for the same reason: rebuilding would mint a second set of ids.
+ */
+function fillSection(preset: SectionPreset, section: Section, heading?: string, text?: string): void {
+  const specs = presetBlocks(preset);
+  const built = sectionBlocks(section);
+  if (specs.length !== built.length) return;
+  const roles = presetRoles(preset);
+  const words = (heading ?? '').trim();
+  const body = (text ?? '').trim();
+  let bodyDone = false;
+  for (let i = 0; i < specs.length; i += 1) {
+    const role = roles.get(specs[i]);
+    const block = built[i];
+    /* A heading holds INLINE markup only (see the 'heading' mode in
+       sanitise.ts), so it gets escaped text rather than toHtml's paragraphs. */
+    if (words && role === 'title' && block.type === 'heading') {
+      block.props.html = escapeHtml(toText(words).slice(0, SECTION_HEADING_MAX));
+    }
+    if (body && !bodyDone && role === 'body' && block.type === 'text') {
+      block.props.html = toHtml(body.slice(0, MAX_TEXT));
+      bodyDone = true;
+    }
+  }
+}
+
+/** The longest heading a new section may arrive with. */
+const SECTION_HEADING_MAX = 200;
 
 // ---------------------------------------------------------------------------
 // The operations
@@ -320,6 +521,115 @@ function setPageSeo(page: Page, op: Extract<Operation, { kind: 'set_page_seo' }>
   };
 }
 
+function addSectionOp(page: Page, op: Extract<Operation, { kind: 'add_section' }>, caps: ReadonlySet<Capability>):
+  { page: Page; change: Change } | { error: string } {
+  if (!caps.has('structure')) return { error: 'You do not have permission to add sections to this site.' };
+
+  const preset = pagePreset(op.preset ?? '');
+  if (!preset) {
+    return { error: `There is no designed section called ${op.preset}. Call read_catalogue for "sections" and name one by its id.` };
+  }
+
+  const heading = (op.heading ?? '').trim();
+  const body = (op.text ?? '').trim();
+  /* The section is structure and the words in it are content, which are two
+     permissions. Refused rather than quietly dropped, because a section that
+     arrives saying something other than what was asked for is worse than one
+     that does not arrive. */
+  if ((heading || body) && !caps.has('content')) {
+    return { error: 'You do not have permission to edit the words on this site. Add the section without a heading or text and it will arrive with the design\u2019s own words.' };
+  }
+
+  const where = placeIndex(page, op.after);
+  if ('error' in where) return where;
+
+  const section = buildPresetSection(preset);
+  if (heading || body) fillSection(preset, section, heading, body);
+
+  const headed = heading ? `, headed \u201c${toText(heading).slice(0, 60)}\u201d` : '';
+  return {
+    page: insertSection(page, section, where.index),
+    change: {
+      kind: 'add_section',
+      label: `New section: ${preset.label}`,
+      before: '',
+      after: `${placeWords(page, op.after)}${headed}. ${preset.description}`,
+      why: (op.why ?? '').slice(0, 200),
+    },
+  };
+}
+
+function moveSectionOp(page: Page, op: Extract<Operation, { kind: 'move_section' }>, caps: ReadonlySet<Capability>):
+  { page: Page; change: Change } | { error: string } {
+  if (!caps.has('structure')) return { error: 'You do not have permission to move sections on this site.' };
+
+  const from = findSection(page, op.section ?? '');
+  if (from < 0) return { error: `There is no section called ${op.section} on this page.` };
+
+  const target = moveIndex(page, from, op.after);
+  if ('error' in target) return target;
+  if (target.to === from) return { error: `\u201c${sectionTitle(page.sections[from])}\u201d is already there.` };
+
+  const total = page.sections.length;
+  return {
+    page: reorderSection(page, from, target.to),
+    change: {
+      kind: 'move_section',
+      label: `Move section: ${sectionTitle(page.sections[from])}`,
+      before: `${ordinal(from + 1)} of ${total}`,
+      after: `${ordinal(target.to + 1)} of ${total}`,
+      why: (op.why ?? '').slice(0, 200),
+    },
+  };
+}
+
+function removeSectionOp(page: Page, op: Extract<Operation, { kind: 'remove_section' }>, caps: ReadonlySet<Capability>):
+  { page: Page; change: Change } | { error: string } {
+  if (!caps.has('structure')) return { error: 'You do not have permission to remove sections from this site.' };
+
+  const at = findSection(page, op.section ?? '');
+  if (at < 0) return { error: `There is no section called ${op.section} on this page.` };
+
+  const section = page.sections[at];
+  const contents = sectionContents(section);
+  /* A section holding a loop is a section holding a collection, and the person
+     is about to lose the whole arrangement rather than a paragraph. Said in the
+     change itself, where they read it before they apply it. */
+  const bound = sectionIsBound(section) ? ' It is filled from a collection.' : '';
+
+  return {
+    page: dropSection(page, at),
+    change: {
+      kind: 'remove_section',
+      label: `Remove section: ${sectionTitle(section)}`,
+      before: `${ordinal(at + 1)} of ${page.sections.length}. ${contents ? `Holds: ${contents}.` : 'Empty.'}${bound}`,
+      after: 'Gone from the page',
+      why: (op.why ?? '').slice(0, 200),
+    },
+  };
+}
+
+/** One operation, dispatched by its kind. Every branch answers the same shape. */
+function runOperation(page: Page, op: Operation, caps: ReadonlySet<Capability>):
+  { page: Page; change: Change } | { error: string } {
+  switch (op.kind) {
+    case 'set_text':
+      return setText(page, op, caps);
+    case 'set_setting':
+      return setSetting(page, op, caps);
+    case 'set_page_seo':
+      return setPageSeo(page, op, caps);
+    case 'add_section':
+      return addSectionOp(page, op, caps);
+    case 'move_section':
+      return moveSectionOp(page, op, caps);
+    case 'remove_section':
+      return removeSectionOp(page, op, caps);
+    default:
+      return { error: `There is no operation called ${String((op as { kind: string }).kind)}.` };
+  }
+}
+
 /**
  * Run the operations in order. A refused one does not stop the others: the
  * valid changes stand as the proposal and the refusals go back to the model,
@@ -338,14 +648,7 @@ export function applyOperations(
   const errors: string[] = [];
 
   for (const op of operations) {
-    const result =
-      op.kind === 'set_text'
-        ? setText(current, op, caps)
-        : op.kind === 'set_setting'
-          ? setSetting(current, op, caps)
-          : op.kind === 'set_page_seo'
-            ? setPageSeo(current, op, caps)
-            : { error: `There is no operation called ${String((op as { kind: string }).kind)}.` };
+    const result = runOperation(current, op, caps);
 
     if ('error' in result) {
       errors.push(result.error);
@@ -385,6 +688,30 @@ export function parseOperation(value: unknown): Operation | null {
     const description = typeof raw.description === 'string' ? raw.description : undefined;
     if (title === undefined && description === undefined) return null;
     return { kind: 'set_page_seo', title, description, why };
+  }
+  if (raw.kind === 'add_section') {
+    if (typeof raw.preset !== 'string' || !raw.preset.trim()) return null;
+    return {
+      kind: 'add_section',
+      preset: raw.preset,
+      after: typeof raw.after === 'string' ? raw.after : undefined,
+      heading: typeof raw.heading === 'string' ? raw.heading : undefined,
+      text: typeof raw.text === 'string' ? raw.text : undefined,
+      why,
+    };
+  }
+  if (raw.kind === 'move_section') {
+    if (typeof raw.section !== 'string' || !raw.section.trim()) return null;
+    return {
+      kind: 'move_section',
+      section: raw.section,
+      after: typeof raw.after === 'string' ? raw.after : undefined,
+      why,
+    };
+  }
+  if (raw.kind === 'remove_section') {
+    if (typeof raw.section !== 'string' || !raw.section.trim()) return null;
+    return { kind: 'remove_section', section: raw.section, why };
   }
   return null;
 }

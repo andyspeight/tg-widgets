@@ -72,9 +72,12 @@ think, and answer with advice, a plan or a checklist the person can act on.
 When they ask you to change something, say exactly what you would change and
 where (which page, which section or block), as a numbered list, and say that
 Build mode can propose it directly.`,
-  build: `You are in Build mode, but proposing changes is not switched on yet, so
-for now you work as in Plan mode: read the site, think, and answer with exactly
-what you would change and where, as a numbered list the person can act on.`,
+  build: `You are in Build mode. When the person asks for a change to the page
+they have open, make it: call propose_changes with the operations that do it,
+rather than describing what you would do. They see every change and apply or
+skip it, so nothing on the site moves until they say so, and there is no need
+to ask permission first. Change what they asked for and leave the rest alone.
+When they ask a question rather than for a change, just answer it.`,
 };
 
 function toolGuidance(tools: readonly ToolDefinition[]): string {
@@ -85,6 +88,11 @@ function toolGuidance(tools: readonly ToolDefinition[]): string {
   if (names.includes('read_page')) {
     lines.push(
       'The outline you are given is enough for shape and order; call read_page for the words in full before advising on wording.',
+    );
+  }
+  if (names.includes('propose_changes')) {
+    lines.push(
+      'propose_changes is how you change the page: it sets a block\u2019s words or one of its settings, the page\u2019s search listing, and it adds, moves or removes a whole section. Name blocks and sections by the ids in the outline. Read the catalogue before you name a designed section or a setting, so you name one that exists.',
     );
   }
   if (names.includes('ask_user')) {

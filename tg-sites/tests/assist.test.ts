@@ -30,10 +30,11 @@ import {
   trimThread,
   type AssistTurn,
 } from '../lib/assist/client';
-import { applyOperations, parseOperation } from '../lib/assist/operations';
+import { applyOperations, pageSectionPresets, parseOperation } from '../lib/assist/operations';
 import { isToolName, toApiTools, TOOLS, toolsFor, type ToolDefinition } from '../lib/assist/tools';
 import { ALL_CAPABILITIES, PRESETS, type Capability } from '../lib/auth/permissions';
 import { loopCardTemplate } from '../lib/content/loop';
+import { presetById } from '../lib/content/presets';
 import { parsePage } from '../lib/content/schema';
 import { parseSettings } from '../lib/settings/schema';
 import type { ConverseAnswer } from '../lib/ai/anthropic';
@@ -854,6 +855,209 @@ describe('operations', () => {
     expect(parseOperation({ kind: 'set_setting', block: 'b1', setting: 'level', value: { nested: true } })).toBeNull();
     expect(parseOperation({ kind: 'set_page_seo' })).toBeNull();
     expect(parseOperation('set_text')).toBeNull();
+    expect(parseOperation({ kind: 'add_section', preset: 'hero-centred', after: 's1' })).toMatchObject({
+      kind: 'add_section',
+      preset: 'hero-centred',
+      after: 's1',
+    });
+    expect(parseOperation({ kind: 'add_section' })).toBeNull();
+    expect(parseOperation({ kind: 'move_section', section: 's2' })).toMatchObject({ kind: 'move_section' });
+    expect(parseOperation({ kind: 'move_section', section: '  ' })).toBeNull();
+    expect(parseOperation({ kind: 'remove_section', section: 's2', why: 'x' })).toMatchObject({ kind: 'remove_section' });
+    expect(parseOperation({ kind: 'remove_section' })).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slice 2b: the section operations
+// ---------------------------------------------------------------------------
+
+describe('adding, moving and removing a section', () => {
+  const ids = (page: ReturnType<typeof pageFixture>) => page.sections.map((section) => section.id);
+  const blocksOf = (section: ReturnType<typeof pageFixture>['sections'][number]) =>
+    section.rows.flatMap((row) => row.columns.flatMap((column) => column.blocks));
+
+  it('adds a design from the library where it is told, with its own fresh ids', () => {
+    const page = pageFixture();
+    const { page: next, changes, errors } = applyOperations(
+      page,
+      [{ kind: 'add_section', preset: 'hero-centred', after: 's1', why: 'Asked for a hero under the top one' }],
+      ALL,
+    );
+    expect(errors).toEqual([]);
+    expect(next.sections).toHaveLength(3);
+    expect(ids(next)[0]).toBe('s1');
+    expect(ids(next)[2]).toBe('s2');
+    const added = next.sections[1];
+    expect(ids(page)).not.toContain(added.id);
+    expect(changes[0].label).toContain(presetById('hero-centred')!.label);
+    expect(changes[0].after).toContain('After');
+    expect(changes[0].after).toContain('Hero');
+
+    // Twice is two independent sections, never one shared by id.
+    const twice = applyOperations(
+      page,
+      [
+        { kind: 'add_section', preset: 'hero-centred', why: 'x' },
+        { kind: 'add_section', preset: 'hero-centred', why: 'x' },
+      ],
+      ALL,
+    );
+    expect(twice.errors).toEqual([]);
+    const [a, b] = twice.page.sections.slice(2);
+    expect(a.id).not.toBe(b.id);
+    expect(blocksOf(a)[0].id).not.toBe(blocksOf(b)[0].id);
+  });
+
+  it('puts it at the top or the end when told to, and says which in plain words', () => {
+    const page = pageFixture();
+    const top = applyOperations(page, [{ kind: 'add_section', preset: 'hero-centred', after: 'start', why: 'x' }], ALL);
+    expect(top.errors).toEqual([]);
+    expect(top.page.sections[0].id).not.toBe('s1');
+    expect(top.changes[0].after).toContain('At the top of the page');
+
+    const end = applyOperations(page, [{ kind: 'add_section', preset: 'hero-centred', why: 'x' }], ALL);
+    expect(end.page.sections[2].id).not.toBe('s2');
+    expect(end.changes[0].after).toContain('At the end of the page');
+  });
+
+  it('gives the new section the words it was asked for, in the slots the design declares', () => {
+    const page = pageFixture();
+    const { page: next, errors } = applyOperations(
+      page,
+      [{
+        kind: 'add_section',
+        preset: 'hero-centred',
+        heading: 'Small ship cruising in Norway',
+        text: 'Twelve guests, one crew, and the fjords to yourselves.',
+        why: 'The words they asked for',
+      }],
+      ALL,
+    );
+    expect(errors).toEqual([]);
+    const blocks = blocksOf(next.sections[2]);
+    expect(String(blocks[0].props.html)).toBe('Small ship cruising in Norway');
+    expect(String(blocks[1].props.html)).toContain('Twelve guests');
+    // A heading holds inline markup only, so no paragraph gets wrapped round it.
+    expect(String(blocks[0].props.html)).not.toContain('<p>');
+    expect(String(blocks[1].props.html)).toContain('<p>');
+  });
+
+  it('will not add a design that is not a page section, or one that does not exist', () => {
+    const page = pageFixture();
+    const footer = applyOperations(page, [{ kind: 'add_section', preset: 'footer-tinted-four', why: 'x' }], ALL);
+    expect(footer.changes).toEqual([]);
+    expect(footer.errors[0]).toContain('footer-tinted-four');
+    expect(footer.page.sections).toHaveLength(2);
+
+    const invented = applyOperations(page, [{ kind: 'add_section', preset: 'hero-of-my-imagination', why: 'x' }], ALL);
+    expect(invented.changes).toEqual([]);
+    expect(invented.errors[0]).toContain('read_catalogue');
+  });
+
+  it('offers exactly the list it accepts: every design read_catalogue shows can be added', () => {
+    const page = pageFixture();
+    const offered = pageSectionPresets();
+    expect(offered.length).toBeGreaterThan(50);
+    for (const preset of offered) {
+      const { changes, errors } = applyOperations(page, [{ kind: 'add_section', preset: preset.id, why: 'x' }], ALL);
+      expect(errors, `${preset.id} was refused: ${errors.join(' ')}`).toEqual([]);
+      expect(changes, preset.id).toHaveLength(1);
+    }
+  });
+
+  it('moves a section and says where it lands, counting from the list it is moving inside', () => {
+    const page = pageFixture();
+    const up = applyOperations(page, [{ kind: 'move_section', section: 's2', after: 'start', why: 'x' }], ALL);
+    expect(up.errors).toEqual([]);
+    expect(ids(up.page)).toEqual(['s2', 's1']);
+    expect(up.changes[0].before).toBe('2nd of 2');
+    expect(up.changes[0].after).toBe('1st of 2');
+
+    const down = applyOperations(page, [{ kind: 'move_section', section: 's1', after: 's2', why: 'x' }], ALL);
+    expect(ids(down.page)).toEqual(['s2', 's1']);
+    expect(down.changes[0].after).toBe('2nd of 2');
+  });
+
+  it('refuses a move that would change nothing, and a position it cannot find', () => {
+    const page = pageFixture();
+    const nothing = applyOperations(page, [{ kind: 'move_section', section: 's2', after: 's1', why: 'x' }], ALL);
+    expect(nothing.changes).toEqual([]);
+    expect(nothing.errors[0]).toContain('already there');
+
+    const itself = applyOperations(page, [{ kind: 'move_section', section: 's1', after: 's1', why: 'x' }], ALL);
+    expect(itself.errors[0]).toContain('after itself');
+
+    const nowhere = applyOperations(page, [{ kind: 'move_section', section: 's1', after: 's9', why: 'x' }], ALL);
+    expect(nowhere.errors[0]).toContain('s9');
+    expect(nowhere.errors[0]).toContain('start');
+
+    const absent = applyOperations(page, [{ kind: 'remove_section', section: 's9', why: 'x' }], ALL);
+    expect(absent.errors[0]).toContain('no section called s9');
+  });
+
+  it('removes a section, and says what is in it first, collection and all', () => {
+    const page = pageFixture();
+    const { page: next, changes, errors } = applyOperations(
+      page,
+      [{ kind: 'remove_section', section: 's2', why: 'They asked for it to go' }],
+      ALL,
+    );
+    expect(errors).toEqual([]);
+    expect(ids(next)).toEqual(['s1']);
+    expect(changes[0].label).toContain('Voyages');
+    expect(changes[0].before).toContain('2nd of 2');
+    expect(changes[0].before).toContain('filled from a collection');
+
+    const hero = applyOperations(page, [{ kind: 'remove_section', section: 's1', why: 'x' }], ALL);
+    expect(hero.changes[0].before).toContain('Heading');
+    expect(hero.changes[0].before).not.toContain('collection');
+  });
+
+  it('is scoped to the permission the screen already calls "add, remove and move sections"', () => {
+    const page = pageFixture();
+    const structureOnly = new Set<Capability>(['structure']);
+    for (const operation of [
+      { kind: 'add_section' as const, preset: 'hero-centred', why: 'x' },
+      { kind: 'move_section' as const, section: 's2', after: 'start', why: 'x' },
+      { kind: 'remove_section' as const, section: 's2', why: 'x' },
+    ]) {
+      const client = applyOperations(page, [operation], CONTENT_ONLY);
+      expect(client.changes, operation.kind).toEqual([]);
+      expect(client.errors[0], operation.kind).toContain('permission');
+
+      const designer = applyOperations(page, [operation], structureOnly);
+      expect(designer.errors, operation.kind).toEqual([]);
+      expect(designer.changes, operation.kind).toHaveLength(1);
+    }
+
+    /* The words in a new section are content, which is a different permission
+       from the section itself, and the refusal says how to get the section. */
+    const worded = applyOperations(
+      page,
+      [{ kind: 'add_section', preset: 'hero-centred', heading: 'Norway', why: 'x' }],
+      structureOnly,
+    );
+    expect(worded.changes).toEqual([]);
+    expect(worded.errors[0]).toContain('without a heading');
+  });
+
+  it('leaves the page it was given untouched, so Undo is exact', () => {
+    const page = pageFixture();
+    const before = JSON.stringify(page);
+    const { page: next } = applyOperations(
+      page,
+      [
+        { kind: 'add_section', preset: 'hero-centred', after: 'start', heading: 'Norway', why: 'x' },
+        { kind: 'move_section', section: 's2', after: 'start', why: 'x' },
+        { kind: 'remove_section', section: 's1', why: 'x' },
+      ],
+      ALL,
+    );
+    expect(JSON.stringify(page)).toBe(before);
+    expect(next.sections).toHaveLength(2);
+    expect(ids(next)).toContain('s2');
+    expect(ids(next)).not.toContain('s1');
   });
 });
 

@@ -18,6 +18,7 @@
 import 'server-only';
 
 import { BLOCKS, BLOCK_GROUPS } from '../content/blocks';
+import { PRESET_CATEGORIES } from '../content/presets';
 import { listSubmissions } from '../db/forms';
 import { getPage, listPagesForAudit } from '../db/pages';
 import { countRedirects } from '../db/redirects';
@@ -30,6 +31,7 @@ import { AI_ENGINES } from '../visits/classify';
 import { summariseVisits } from '../visits/summary';
 import { outlinePage, renderOutline } from './context';
 import { maskEnquiry } from './mask';
+import { pageSectionPresets } from './operations';
 import { asData, dataBlock, siteBlock, type SiteContext } from './prompt';
 import type { ToolOutcome } from './service';
 import type { ToolName } from './tools';
@@ -87,12 +89,65 @@ async function readSite(ctx: RunnerContext): Promise<ToolOutcome> {
   return ok(siteBlock(ctx.site), { pages: ctx.site.pages.length });
 }
 
+/**
+ * The two catalogues, asked for one at a time.
+ *
+ * SPLIT ON PURPOSE, not for tidiness. The block list alone is nearly 11,000
+ * characters and the designed sections are another 6,000, so one answer
+ * carrying both would be cut off by the cap and the model would be reading a
+ * truncated library without knowing it. Asking which one it wants costs a round
+ * trip and is honest about what it gets.
+ */
 function readCatalogue(input: unknown): ToolOutcome {
+  const asked = String(field(input, 'of') ?? '').trim().toLowerCase();
   const wanted = field(input, 'group');
-  const group = typeof wanted === 'string'
-    ? BLOCK_GROUPS.find((g) => g.toLowerCase() === wanted.trim().toLowerCase()) ?? null
+  const group = typeof wanted === 'string' ? wanted.trim() : '';
+  if (asked === 'sections') return readSections(group);
+  // No answer means the blocks, which is what this tool was before it had two.
+  if (asked === 'blocks' || asked === '') return readBlocks(group);
+  return fail('Ask for "sections" or for "blocks".');
+}
+
+function readSections(group: string): ToolOutcome {
+  const categories = PRESET_CATEGORIES.filter((entry) => entry.scope === 'page');
+  const presets = pageSectionPresets();
+
+  if (group) {
+    const category = categories.find(
+      (entry) => entry.id === group.toLowerCase() || entry.label.toLowerCase() === group.toLowerCase(),
+    );
+    if (!category) {
+      return fail(`No section category called "${group.slice(0, 40)}". They are: ${categories.map((entry) => entry.id).join(', ')}.`);
+    }
+    const lines = presets
+      .filter((preset) => preset.category === category.id)
+      .map((preset) => `${preset.id}: ${preset.label}. ${preset.description}`);
+    return ok(
+      dataBlock(
+        'catalogue',
+        [`Designed sections in "${category.label}". Add one with a propose_changes add_section naming its id.`, '', ...lines].join('\n'),
+      ),
+      { sections: lines.length, category: category.id },
+    );
+  }
+
+  const lines: string[] = [
+    'Designed sections a page can be built from. Add one with a propose_changes add_section naming its id, and ask again with a category for what each one is for.',
+    '',
+  ];
+  for (const category of categories) {
+    const inCategory = presets.filter((preset) => preset.category === category.id);
+    if (inCategory.length === 0) continue;
+    lines.push(`${category.id} (${category.label}): ${inCategory.map((preset) => `${preset.id} (${preset.label})`).join(', ')}`);
+  }
+  return ok(dataBlock('catalogue', lines.join('\n')), { sections: presets.length });
+}
+
+function readBlocks(wanted: string): ToolOutcome {
+  const group = wanted
+    ? BLOCK_GROUPS.find((entry) => entry.toLowerCase() === wanted.toLowerCase()) ?? null
     : null;
-  if (typeof wanted === 'string' && wanted.trim() && !group) {
+  if (wanted && !group) {
     return fail(`No group called "${wanted.slice(0, 40)}". The groups are: ${BLOCK_GROUPS.join(', ')}.`);
   }
   const lines: string[] = [`Blocks a page can be built from${group ? ` in the group "${group}"` : ''}. Groups: ${BLOCK_GROUPS.join(', ')}.`, ''];

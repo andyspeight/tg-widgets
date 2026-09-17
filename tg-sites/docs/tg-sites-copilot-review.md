@@ -403,6 +403,25 @@ the brief's; the additions are marked.
   was not needed: `slotsOf` never reaches inside a container or a loop, so a
   bound value is never offered to that model. The guard lives where writes
   actually happen instead.
+- **Slice 2b, the section operations.** **Built, 17 September 2026.**
+  `add_section`, `move_section` and `remove_section`, all three on the
+  `structure` capability, which is the permission already named "Add, remove
+  and move sections". `add_section` names a design from the same library the
+  Designed panel offers, page-scoped so a header or a footer cannot land in the
+  middle of a page, positioned by `after` (a section id, the word `start`, or
+  absent for the end), and optionally carrying its own heading and body, placed
+  by the preset's DECLARED roles rather than by position. A test adds all 134
+  page designs and expects no refusal, so the list `read_catalogue` shows and
+  the list `add_section` accepts cannot drift apart.
+  **Found and fixed while building it, both mine:** the system prompt still
+  told Build mode that proposing was not switched on, so the model was handed
+  the writer and told not to use it; and `propose_changes` had `content` as its
+  only capability floor, which shut a restructure-only member out of the
+  operations their own permission is named after.
+  **Changed:** `read_catalogue` now asks which catalogue it is being asked for,
+  the designed sections or the blocks. The block list alone is nearly 11,000
+  characters against a 12,000 character cap, so one answer carrying both would
+  have been cut off silently.
 - **Slice 3, bigger asks.** Generate a page from a description, wrapping the
   page builder that exists. Pasted revision notes: Plan turns them into a
   checklist and each item becomes its own proposal to apply or skip. A

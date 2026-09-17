@@ -287,6 +287,49 @@ with applying from the dashboard, which has no editor to apply into. And the
 Build switch only appears where there IS a page and a history, so the dashboard
 drawer stays Plan rather than offering a control that could not work.
 
+**Luna Assist slice 2b, the section operations (17 Sep 2026).** Three more
+operations, so "make the change I asked for" covers the shape of a page and not
+only its words: `add_section` (a design from the library, positioned), 
+`move_section` and `remove_section`. All three need the `structure` capability,
+which the permissions screen already calls "Add, remove and move sections", so
+nothing new had to be granted or explained.
+
+What is worth knowing about them:
+
+- **`add_section` names a design, never markup.** The id comes from the same
+  library the Designed panel offers, filtered to page scope so a footer cannot
+  land halfway down an About page, and `read_catalogue` shows exactly the list
+  `add_section` accepts. A test adds every one of the 134 and expects no
+  refusal, so a renamed preset fails here rather than in front of a client.
+- **It can arrive with its own words.** `heading` and `text` are optional and go
+  into the slots the preset DECLARES (`presetRoles`), not by position, so a
+  section asked for lands saying what was asked for rather than the library's
+  placeholder copy. The words are `content` and the section is `structure`:
+  words without the content capability are refused with a sentence saying to ask
+  for the section on its own.
+- **Position is one field.** `after` is a section id, or the word `start` for
+  the top, or absent for the end. `move_section` does the arithmetic that
+  `moveSection` needs (the section comes out of the list before it goes back in,
+  so a target below it is one index lower), and a move that would change nothing
+  is refused rather than drawn as a change that did nothing.
+- **Removing says what is lost first**, including "It is filled from a
+  collection" when the section holds a loop. That check asks each block with
+  `isBound` rather than walking the section, because `tokensIn` stops eight
+  levels down and a loop's card sits below that from a section.
+
+TWO THINGS FIXED IN THE SAME PASS. The system prompt still told Build mode that
+"proposing changes is not switched on yet", which slice 2 had made untrue: the
+model was handed the writer and told not to use it, so it would have answered
+with a numbered list on Andy's first live turn. And `propose_changes` had
+`content` as its single capability floor, which locked a restructure-only member
+out of the very thing their permission is named after; the floor is now any of
+content, structure or seo, with every operation still checked field by field.
+
+`read_catalogue` now asks WHICH catalogue (`of: "sections"` or `of: "blocks"`).
+Not tidiness: the block list alone is nearly 11,000 characters against a 12,000
+cap, so one answer carrying both would have been silently cut off and the model
+would have been reading a truncated library without knowing it.
+
 **The binding question, settled (17 Sep 2026).** Yesterday's note said the
 existing "rewrite this section" could overwrite a collection binding with plain
 words. It cannot, and the reason is worth keeping: `slotsOf` in
@@ -630,11 +673,15 @@ rested on a number that does not mean what it looks like.
 
 9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
    `docs/tg-sites-copilot-review.md`. Slices 1 and 2 are live: the route, the
-   ledger, the outline, the read tools, the panel in direction A, and Build
-   mode with proposals applied through the editor's own history. Next is
-   slice 2b (add, move and remove a section) and then slice 3, the bigger asks:
-   a page from a description, and a client's pasted notes turned into a
-   checklist.
+   ledger, the outline, the read tools, the panel in direction A, Build mode
+   with proposals applied through the editor's own history, and the section
+   operations (add, move, remove). Next is the canvas preview decision (Andy's
+   brief asks for the draft on the canvas; the recommendation is to rely on
+   Apply plus one-step Undo instead, and he picks), and then slice 3, the bigger
+   asks: a page from a description, and a client's pasted notes turned into a
+   checklist. NOBODY HAS TAKEN A LIVE TURN YET: every part is tested against
+   fixtures and a scripted stream, and no real model answer has been through
+   it.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.

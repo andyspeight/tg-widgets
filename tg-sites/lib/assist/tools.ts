@@ -13,7 +13,8 @@
  *
  * Slice 2 added the first writer, propose_changes. Plan mode drops it, so a
  * Plan request is read-only in code and not merely in the prompt, which is the
- * whole of rule 4.
+ * whole of rule 4. Slice 2b gave it the section operations, which is why its
+ * floor is anyCapability rather than one capability: see ToolDefinition.
  *
  * PURE. The registry is data and the filter is a function of its arguments.
  */
@@ -48,6 +49,19 @@ export interface ToolDefinition {
   writes: boolean;
   /** The capability a member needs before this tool is offered, or null for any member. */
   capability: Capability | null;
+  /**
+   * For a tool whose operations span several permissions: offered when the
+   * member holds ANY of them.
+   *
+   * propose_changes needs this because one tool covers three jobs: the words on
+   * a page (content), its sections and their settings (structure) and the
+   * search listing (seo). A single capability as the floor would lock a
+   * restructure-only member out of moving a section, which is the one thing
+   * their permission is named after. Each operation checks again for itself in
+   * lib/assist/operations.ts, so the floor only decides whether the tool is
+   * worth offering at all.
+   */
+  anyCapability?: readonly Capability[];
 }
 
 export const TOOLS: readonly ToolDefinition[] = [
@@ -75,12 +89,21 @@ export const TOOLS: readonly ToolDefinition[] = [
   {
     name: 'read_catalogue',
     description:
-      'List the sections and blocks a page can be built from, with what each one is for and the settings it has. Use it before suggesting a section or block by name.',
+      'List what a page can be built from: the designed sections you can add, or the blocks and the settings each one has. Read the sections before proposing add_section, and the blocks before naming a setting.',
     input_schema: {
       type: 'object',
       properties: {
-        group: { type: 'string', description: 'Only this group of blocks (for example "Text", "Media", "Cards and lists"). Omit for all.' },
+        of: {
+          type: 'string',
+          enum: ['sections', 'blocks'],
+          description: '"sections" for the designed sections a page can be given, "blocks" for the blocks and their settings.',
+        },
+        group: {
+          type: 'string',
+          description: 'One category of section ("hero", "features", "faq") for what each design in it is for, or one group of blocks ("Text", "Media", "Cards and lists"). Omit for all of them.',
+        },
       },
+      required: ['of'],
     },
     writes: false,
     capability: null,
@@ -122,7 +145,7 @@ export const TOOLS: readonly ToolDefinition[] = [
      */
     name: 'propose_changes',
     description:
-      'Propose changes to the page the person has open. They see each one and apply or skip it; nothing changes until they do. Use it when they have asked for a change rather than for advice. Name blocks by the ids in the page outline.',
+      'Propose changes to the page the person has open: a block\u2019s words, one of its settings, the page\u2019s search listing, and adding, moving or removing a whole section. They see each one and apply or skip it; nothing changes until they do. Use it when they have asked for a change rather than for advice. Name blocks and sections by the ids in the page outline.',
     input_schema: {
       type: 'object',
       properties: {
@@ -134,11 +157,15 @@ export const TOOLS: readonly ToolDefinition[] = [
             properties: {
               kind: {
                 type: 'string',
-                enum: ['set_text', 'set_setting', 'set_page_seo'],
-                description: 'set_text for a block\u2019s words, set_setting for one of its settings, set_page_seo for the page\u2019s search title and description.',
+                enum: ['set_text', 'set_setting', 'set_page_seo', 'add_section', 'move_section', 'remove_section'],
+                description: 'set_text for a block\u2019s words, set_setting for one of its settings, set_page_seo for the page\u2019s search title and description, add_section to add a designed section, move_section and remove_section for one already on the page.',
               },
               block: { type: 'string', description: 'The block id, for set_text and set_setting.' },
-              text: { type: 'string', description: 'The new words, as plain text. For set_text.' },
+              text: { type: 'string', description: 'The new words, as plain text. For set_text, and for the body of a new section.' },
+              section: { type: 'string', description: 'The section id, for move_section and remove_section.' },
+              preset: { type: 'string', description: 'The designed section to add, by the id read_catalogue gives it. For add_section.' },
+              after: { type: 'string', description: 'The id of the section this one should follow, or "start" for the top of the page. Omit for the end. For add_section and move_section.' },
+              heading: { type: 'string', description: 'The heading the new section should carry, as plain text. For add_section.' },
               setting: { type: 'string', description: 'The setting\u2019s key, as read_catalogue lists it. For set_setting.' },
               value: { description: 'The new value: a string, a number or true/false. For set_setting.' },
               title: { type: 'string', description: 'The search title. For set_page_seo.' },
@@ -152,7 +179,8 @@ export const TOOLS: readonly ToolDefinition[] = [
       required: ['changes'],
     },
     writes: true,
-    capability: 'content',
+    capability: null,
+    anyCapability: ['content', 'structure', 'seo'],
   },
   {
     name: 'ask_user',
@@ -190,6 +218,7 @@ export function toolsFor(
   return registry.filter((tool) => {
     if (mode === 'plan' && tool.writes) return false;
     if (tool.capability !== null && !caps.has(tool.capability)) return false;
+    if (tool.anyCapability && !tool.anyCapability.some((capability) => caps.has(capability))) return false;
     return true;
   });
 }
