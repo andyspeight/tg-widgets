@@ -26,6 +26,7 @@
 
 import { blockDefinition } from '../content/blocks';
 import type { Block, Page, Section } from '../content/schema';
+import { containerColumns } from '../content/tree';
 
 /** The same shape lib/content/loop.ts fills: {{name}} or {{field:key}}. */
 const TOKEN = /\{\{\s*[a-z][a-z0-9]*(?::[a-z0-9_-]+)?\s*\}\}/gi;
@@ -33,8 +34,7 @@ const TOKEN = /\{\{\s*[a-z][a-z0-9]*(?::[a-z0-9_-]+)?\s*\}\}/gi;
 /** Where a block keeps its words, most likely first. */
 const TEXT_KEYS = ['html', 'text', 'title', 'heading', 'label', 'caption', 'question', 'name', 'quote', 'body', 'alt'];
 
-/** Settings that hold blocks of their own. */
-const CHILD_KEYS = ['template', 'blocks'];
+
 
 export interface OutlineBlock {
   id: string;
@@ -127,19 +127,29 @@ function blockText(block: Block): string {
 
 export function outlineBlock(block: Block, depth = 0): OutlineBlock {
   const definition = blockDefinition(block.type);
+  /*
+   * A CONTAINER AND A LOOP KEEP THEIR CHILDREN IN props.columns, which is the
+   * one thing this had wrong when it shipped on 16 Sep. It looked for
+   * `props.template` and `props.blocks`, neither of which the product has ever
+   * stored, so the outline was blind inside every container and every loop,
+   * and the [bound] marks that rule 6 rests on could never appear on a real
+   * page: the tokens live in a loop's card, and the card is in those columns.
+   * containerColumns is the accessor the editor's own tree uses, so there is
+   * now one answer to "where are a block's children" rather than two.
+   */
   const children: OutlineBlock[] = [];
   if (depth < 4) {
-    for (const key of CHILD_KEYS) {
-      const raw = block.props[key];
-      if (!Array.isArray(raw)) continue;
-      for (const entry of raw) if (looksLikeBlock(entry)) children.push(outlineBlock(entry, depth + 1));
+    for (const column of containerColumns(block)) {
+      for (const entry of column.blocks ?? []) {
+        if (looksLikeBlock(entry)) children.push(outlineBlock(entry, depth + 1));
+      }
     }
   }
   const items = Array.isArray(block.props.items) ? block.props.items.length : 0;
-  /* The tokens of the block itself, not of its card template: a loop is not
-     bound, the heading inside its card is. */
+  /* The tokens of the block itself, not of its card: a loop is not bound, the
+     heading inside its card is. */
   const own: Record<string, unknown> = { ...block.props };
-  for (const key of CHILD_KEYS) delete own[key];
+  delete own.columns;
   return {
     id: block.id,
     type: block.type,

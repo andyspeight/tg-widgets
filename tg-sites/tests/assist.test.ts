@@ -32,6 +32,7 @@ import {
 } from '../lib/assist/client';
 import { isToolName, toApiTools, TOOLS, toolsFor, type ToolDefinition } from '../lib/assist/tools';
 import { ALL_CAPABILITIES, PRESETS, type Capability } from '../lib/auth/permissions';
+import { loopCardTemplate } from '../lib/content/loop';
 import { parsePage } from '../lib/content/schema';
 import { parseSettings } from '../lib/settings/schema';
 import type { ConverseAnswer } from '../lib/ai/anthropic';
@@ -87,14 +88,28 @@ function pageFixture(headingHtml = '<strong>Norway</strong> fjord cruises') {
                 width: 100,
                 blocks: [
                   {
+                    /*
+                     * A LOOP AS THE PRODUCT REALLY STORES ONE: a container with
+                     * one column, whose blocks are the card it repeats (see
+                     * loopCardTemplate in lib/content/loop.ts). The fixture said
+                     * `props.template` until 17 Sep, which is a shape nothing
+                     * writes, so the outline's blindness inside containers went
+                     * unnoticed for a day.
+                     */
                     id: 'b4',
                     type: 'loop',
                     props: {
                       collection: 'voyages',
-                      template: [
-                        { id: 't1', type: 'heading', props: { html: '{{title}}' } },
-                        { id: 't2', type: 'image', props: { src: '{{image}}', alt: '{{field:alt}}' } },
-                        { id: 't3', type: 'text', props: { html: '<p>Plain words</p>' } },
+                      columns: [
+                        {
+                          id: 'lc1',
+                          width: 100,
+                          blocks: [
+                            { id: 't1', type: 'heading', props: { html: '{{title}}' } },
+                            { id: 't2', type: 'image', props: { src: '{{image}}', alt: '{{field:alt}}' } },
+                            { id: 't3', type: 'text', props: { html: '<p>Plain words</p>' } },
+                          ],
+                        },
                       ],
                     },
                   },
@@ -459,6 +474,25 @@ describe('the page outline', () => {
     expect(text).toContain('[section s1]');
     expect(text).not.toContain('[section s2]');
     expect(text).toContain('1 more sections not shown');
+  });
+
+  it('reads a loop the way the product stores one, so the marks land on real pages', () => {
+    /*
+     * Tied to the product's own accessor rather than to a shape this file
+     * invented. The outline shipped on 16 Sep looking for props.template, which
+     * nothing writes, so it saw no children in any container or loop and marked
+     * nothing bound. A fixture that agrees with loopCardTemplate cannot hide
+     * that a second time.
+     */
+    const page = pageFixture();
+    const loop = page.sections[1].rows[0].columns[0].blocks[0];
+    const card = loopCardTemplate(loop);
+    expect(card.map((block) => block.id)).toEqual(['t1', 't2', 't3']);
+
+    const outline = outlinePage(page, '/norway-fjords');
+    const outlined = outline.sections[1].blocks[0];
+    expect(outlined.children.map((child) => child.id)).toEqual(card.map((block) => block.id));
+    expect(outlined.children.filter((child) => child.tokens.length > 0)).toHaveLength(2);
   });
 
   it('finds tokens anywhere in a block’s settings', () => {

@@ -260,6 +260,25 @@ label: it goes to the route, which checks the page actually has it, and the
 outline the model reads marks it `[selected]` with the system prompt saying
 that a question with no subject is about it.
 
+**The binding question, settled (17 Sep 2026).** Yesterday's note said the
+existing "rewrite this section" could overwrite a collection binding with plain
+words. It cannot, and the reason is worth keeping: `slotsOf` in
+`lib/ai/page-fill.ts` walks sections, rows, columns and their blocks, and stops
+there. A loop keeps its card in `props.columns[0].blocks` (a container with one
+column, see `loopCardTemplate`), so the bound blocks are never collected, never
+offered to the model and never written back. `stripUnfilled` cannot remove a
+loop either: it only strips the four structured types. So there is no live bug
+in the rewrite.
+
+What WAS broken was ours, shipped 16 Sep: `lib/assist/context.ts` looked for a
+block's children in `props.template` and `props.blocks`, neither of which the
+product has ever written. The assistant's outline was therefore blind inside
+every container and every loop, and the `[bound]` marks that rule 6 rests on
+could never appear on a real page. It now uses `containerColumns`, the accessor
+the editor's own tree uses, and the test fixture is pinned to
+`loopCardTemplate` so a fixture cannot agree with a shape the product does not
+store. When slice 2 adds writers, the guard has something true to guard.
+
 Things that will bite here: the answer is rendered as TEXT and must stay that
 way, so no markdown renderer without a sanitiser; `editor.css` sets no global
 box model, so anything with `width: 100%` and padding needs its own
