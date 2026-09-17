@@ -181,7 +181,12 @@ export async function checkTravelifyCredentials() {
       .filter(Boolean);
     // Name the app id and the widget: that is what someone has to take to
     // Travelify, and it saves the next person the log archaeology.
-    const who = rows.map((r) => `app ${r.appId || '?'}${r.widgetId ? ' (' + r.widgetId + ')' : ''}`);
+    // Travelify's own words for the refusal, when it gave any. "401" alone
+    // sent us looking at the key for fifteen hours; the body says whether it
+    // is the key, the app id or the Origin, and that belongs in the alert
+    // rather than in a log somebody has to go and find.
+    const who = rows.map((r) => `app ${r.appId || '?'}${r.widgetId ? ' (' + r.widgetId + ')' : ''}`
+      + (r.reason ? ' — ' + r.reason : ''));
     const label = who.length ? who.join(', ') : found.length + ' client(s)';
     return {
       name: 'travelify-credentials',

@@ -234,7 +234,8 @@
     "test:widget-registry-drift": "node scripts/build-widget-registry.mjs --check",
     "test:travelify-registry": "node test/travelify-widget-registry-smoke.mjs",
     "test:travelify-api": "node test/travelify-platform-api-smoke.mjs",
-    "test:travelify": "node test/travelify-widget-registry-smoke.mjs && node test/travelify-platform-api-smoke.mjs"
+    "test:travelify": "node test/travelify-widget-registry-smoke.mjs && node test/travelify-platform-api-smoke.mjs",
+    "test:retrieve-order-auth-alarm": "node test/retrieve-order-auth-alarm-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

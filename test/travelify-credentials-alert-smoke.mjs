@@ -22,6 +22,12 @@
  *   3. The alert names the app id and the widget, because that is what somebody
  *      has to take to Travelify.
  *
+ * This suite reads the SOURCE, so it can check the shape of the change but not
+ * whether it runs. It passed 23 out of 23 over a version that threw a
+ * ReferenceError on every 401 and never wrote a marker at all. The half that
+ * actually drives the endpoint is test/retrieve-order-auth-alarm-smoke.mjs, and
+ * a change to this behaviour needs both.
+ *
  * Run: node test/travelify-credentials-alert-smoke.mjs
  *      (npm run test:travelify-cred-alert)
  */
