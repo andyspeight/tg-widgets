@@ -1165,6 +1165,70 @@ function notFound(res) {
 
 // ----- HTTP handler -----
 
+/**
+ * Remember that Travelify refused a client's credentials.
+ *
+ * One key per client so a busy widget cannot flood Redis, a 6 hour TTL so a
+ * fixed key clears itself without anyone tidying up, and never throws: an order
+ * lookup must not fail because we could not write a note about it failing.
+ * `api/_lib/monitor/probes.js` reads these and the monitor emails the alert.
+ */
+/**
+ * Travelify's own words for why it said no, trimmed to one line.
+ *
+ * Until 17 Sep 2026 a failed call logged the status and threw the body away,
+ * so fifteen hours of "401" told us the credentials were refused but never
+ * WHICH part it objected to — the key, the app id, or the Origin header the
+ * API also gates on. That answer was in a string we already had in hand.
+ *
+ * The key is scrubbed on the way out. Nothing in the product logs a
+ * credential, and an upstream that echoes one back must not make us the
+ * exception.
+ */
+const REASON_MAX_CHARS = 300;
+function travelifyReason(rawText, apiKey) {
+  let text = String(rawText || '').trim();
+  if (!text) return '';
+  try {
+    const parsed = JSON.parse(text);
+    const msg = parsed && (parsed.message || parsed.error || parsed.detail);
+    if (msg) text = String(msg);
+  } catch {
+    // Not JSON. Travelify answers some failures with plain text or HTML, and
+    // the first line of that is still worth more than the bare status.
+  }
+  if (apiKey) text = text.split(apiKey).join('[key]');
+  text = text.replace(/\s+/g, ' ').trim();
+  return text.length > REASON_MAX_CHARS ? text.slice(0, REASON_MAX_CHARS) + '…' : text;
+}
+
+export const CRED_ALERT_PREFIX = 'travelify:cred-rejected:';
+const CRED_ALERT_TTL_SECONDS = 6 * 60 * 60;
+
+async function noteCredentialRejection(info) {
+  try {
+    const { setNxEx } = await import('./_redis.js');
+    // One key per CLIENT, so a busy widget cannot flood Redis, and NX so the
+    // first rejection in the window is the one kept rather than every retry
+    // rewriting it. The TTL clears a fixed key on its own: nobody has to
+    // remember to tidy up after the credentials are put right, and a problem
+    // that is still live simply re-records once the window lapses.
+    const who = info.clientRecordId || info.clientEmail || info.widgetId || 'unknown';
+    await setNxEx(CRED_ALERT_PREFIX + who, JSON.stringify({
+      widgetId: info.widgetId || '',
+      appId: String(info.appId || ''),
+      status: info.status,
+      reason: info.reason || '',
+      clientEmail: info.clientEmail || '',
+      at: new Date().toISOString(),
+    }), CRED_ALERT_TTL_SECONDS);
+  } catch (e) {
+    // Never throw: an order lookup must not fail because we could not write a
+    // note about it failing.
+    console.warn('[retrieve-order] could not record the credential rejection:', e && e.message);
+  }
+}
+
 export default async function handler(req, res) {
   setCors(res);
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -1227,6 +1291,12 @@ export default async function handler(req, res) {
   try {
     let appId;
     let apiKey;
+    // Declared out here, not inside the `else` below, because the Travelify
+    // failure branch names the client in its alert. They were block-scoped
+    // consts until 17 Sep 2026 and the branch that read them threw a
+    // ReferenceError into the outer catch, so the alert never fired.
+    let ownerRecordId = '';
+    let clientEmail = '';
 
     if (widgetId === DEMO_WIDGET_SENTINEL) {
       // ----- Demo path -----
@@ -1259,8 +1329,8 @@ export default async function handler(req, res) {
         return notFound(res);
       }
 
-      const ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
-      const clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
+      ownerRecordId = (widget.fields?.ClientRecordId || '').trim();
+      clientEmail = (widget.fields?.ClientEmail || '').toLowerCase().trim();
       if (!ownerRecordId && !clientEmail) return notFound(res);
 
       // Resolve the OWNING CLIENT's Travelify credentials.
@@ -1351,7 +1421,22 @@ export default async function handler(req, res) {
       return notFound(res);
     }
     if (!travelifyRes.ok) {
-      console.error(`Travelify returned ${travelifyRes.status} for widget ${widgetId}`);
+      const reason = travelifyReason(rawText, apiKey);
+      console.error(`Travelify returned ${travelifyRes.status} for widget ${widgetId} (app ${appId})`
+        + (reason ? ` — ${reason}` : ''));
+      // A 401/403 is NOT "no such booking" — it is Travelify refusing this
+      // client's credentials, and until 17 Sep 2026 it was indistinguishable
+      // from a mistyped reference: the visitor saw the same calm "we cannot
+      // find that booking" and so did the agency testing it. Better Lifestyle
+      // (app 474) was dead for fifteen hours before anyone thought to read the
+      // logs. Record it so the monitor can say so out loud; the visitor's
+      // answer is deliberately unchanged.
+      if (travelifyRes.status === 401 || travelifyRes.status === 403) {
+        await noteCredentialRejection({
+          widgetId, appId, status: travelifyRes.status, reason,
+          clientRecordId: ownerRecordId || '', clientEmail: clientEmail || '',
+        });
+      }
       return notFound(res);
     }
 

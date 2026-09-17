@@ -137,6 +137,7 @@
     "test:widget-ai": "node test/widget-ai-smoke.mjs",
     "test:ai-prompt-coach": "node test/ai-prompt-coach-smoke.mjs",
     "test:monitor-probes": "node test/monitor-probes-smoke.mjs",
+    "test:travelify-cred-alert": "node test/travelify-credentials-alert-smoke.mjs",
     "test:ai-plan-gate": "node test/ai-plan-gate-smoke.mjs",
     "test:editor-auth-no-bearer": "node test/editor-auth-no-bearer-smoke.mjs",
     "test:form-submit": "node test/form-submit-smoke.mjs",
@@ -233,7 +234,8 @@
     "test:widget-registry-drift": "node scripts/build-widget-registry.mjs --check",
     "test:travelify-registry": "node test/travelify-widget-registry-smoke.mjs",
     "test:travelify-api": "node test/travelify-platform-api-smoke.mjs",
-    "test:travelify": "node test/travelify-widget-registry-smoke.mjs && node test/travelify-platform-api-smoke.mjs"
+    "test:travelify": "node test/travelify-widget-registry-smoke.mjs && node test/travelify-platform-api-smoke.mjs",
+    "test:retrieve-order-auth-alarm": "node test/retrieve-order-auth-alarm-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
