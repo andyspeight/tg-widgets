@@ -148,14 +148,24 @@
     // Is this booking missing from the calendar, and why? A confirmed meeting
     // that never reached a diary used to be invisible: the booking saved, both
     // confirmation emails went out, and nobody was told (17 Sep 2026).
-    // An older booking recorded no status at all, so silence means "unknown",
-    // not "failed", and we say nothing rather than cry wolf.
+    //
+    // An empty status is NOT "unknown". /api/appointment/list already folds the
+    // event id into it (calendarStatus = status || (providerEventId ?
+    // 'created' : '')), and a booking that reached a calendar has ALWAYS
+    // carried a providerEventId, so empty means it definitely never got there.
+    // Treating empty as unknown was my first cut, and it hid every booking
+    // taken before the status was recorded, which was all of the ones that
+    // actually needed fixing: Andy got no banner and no button.
+    //
+    // Only future bookings though. The backfill works forwards from now, and
+    // putting a meeting that already happened into a diary helps nobody.
     function calWarning(b){
       if(b.status==='cancelled') return null;
       if(b.calendarLink) return null;
+      if(Date.parse(b.startISO) <= Date.now()) return null;
       var st = b.calendarStatus||'';
-      if(st==='created'||!st) return null;
-      if(st==='not-connected') return { text:'Not in your calendar', title:'No calendar was connected when this was booked. Connect one, then use "Add missing to calendar".' };
+      if(st==='created') return null;
+      if(st==='not-connected' || !st) return { text:'Not in your calendar', title:'No calendar was connected when this was booked. Connect one, then use "Add missing to calendar".' };
       return { text:'Not in your calendar', title:(b.calendarError||'The calendar write did not succeed.')+' Use "Add missing to calendar" to try again.' };
     }
 

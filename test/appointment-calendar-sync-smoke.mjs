@@ -235,8 +235,13 @@ console.log('The failure is visible now, in all three places it was not');
     /b\.providerEventId \? 'created' : ''/.test(LIST));
   ok('the bookings page marks the ones that are missing',
     /function calWarning\(/.test(PAGE) && /Not in your calendar/.test(PAGE));
-  ok('but says nothing when we never recorded a status, rather than crying wolf',
-    /if\(st==='created'\|\|!st\) return null;/.test(PAGE));
+  // This assertion used to pin the opposite, and pinned the bug with it: an
+  // empty status means no event id and no record, which is precisely a booking
+  // that never reached a diary, not an unknown one.
+  ok('an empty status counts as missing, because that is what it means',
+    /if\(st==='not-connected' \|\| !st\)/.test(PAGE) && !/\|\|!st\) return null/.test(PAGE));
+  ok('and a past booking is left alone, since the backfill only works forwards',
+    /Date\.parse\(b\.startISO\) <= Date\.now\(\)/.test(PAGE));
   ok('and nothing about a cancelled booking',
     /if\(b\.status==='cancelled'\) return null;/.test(PAGE));
   ok('the page offers the button that puts them right',
@@ -361,6 +366,60 @@ console.log('The backfill endpoint, driven as a real request');
 
   res = await call({ method: 'GET' });
   ok('a GET cannot trigger it', res.code === 405);
+}
+
+console.log('The banner agrees with the backfill about what is missing');
+{
+  // The bug this catches, which I shipped and Andy hit within the hour: the
+  // page treated an EMPTY calendarStatus as "unknown, say nothing". But
+  // /api/appointment/list folds the event id into that field, so empty means no
+  // event id AND no recorded status, which is exactly a booking that never
+  // reached a diary. Every booking taken before the status existed looked
+  // empty, so the ones that actually needed fixing were the ones hidden: no
+  // banner, no button, nothing to press.
+  //
+  // The rule that must hold: the page flags a future booking if and only if the
+  // backfill would act on it.
+  const calWarning = new Function('b', `
+    ${PAGE.slice(PAGE.indexOf('function calWarning(b){'), PAGE.indexOf('function applyFilters()')).replace(/^function calWarning\(b\)\{/, '').replace(/\}\s*$/, '')}
+  `);
+  const soon = new Date(Date.now() + 7 * 86400000).toISOString();
+  const past = new Date(Date.now() - 7 * 86400000).toISOString();
+
+  ok('a booking taken before we recorded anything IS flagged',
+    !!calWarning({ status: 'confirmed', startISO: soon, calendarStatus: '', calendarLink: '' }));
+  ok('and it reads as never having been connected',
+    calWarning({ status: 'confirmed', startISO: soon, calendarStatus: '', calendarLink: '' }).text === 'Not in your calendar');
+  ok('one recorded as not-connected is flagged',
+    !!calWarning({ status: 'confirmed', startISO: soon, calendarStatus: 'not-connected', calendarLink: '' }));
+  ok('one that failed is flagged, with the reason',
+    /503/.test(calWarning({ status: 'confirmed', startISO: soon, calendarStatus: 'failed', calendarError: 'Google said 503', calendarLink: '' }).title));
+  ok('one that got there is not flagged',
+    calWarning({ status: 'confirmed', startISO: soon, calendarStatus: 'created', calendarLink: '' }) === null);
+  ok('nor is one with a calendar link on it',
+    calWarning({ status: 'confirmed', startISO: soon, calendarStatus: '', calendarLink: 'https://cal/1' }) === null);
+  ok('a cancelled booking is not flagged',
+    calWarning({ status: 'cancelled', startISO: soon, calendarStatus: '', calendarLink: '' }) === null);
+  ok('and neither is one that already happened, which nothing can fix',
+    calWarning({ status: 'confirmed', startISO: past, calendarStatus: '', calendarLink: '' }) === null);
+
+  // The two rules, side by side, on the same rows.
+  const rows = [
+    { name: 'old booking, no event',      startISO: soon, status: 'confirmed', providerEventId: '',    calendarStatus: '' },
+    { name: 'recorded not-connected',     startISO: soon, status: 'confirmed', providerEventId: '',    calendarStatus: 'not-connected' },
+    { name: 'in the calendar',            startISO: soon, status: 'confirmed', providerEventId: 'e1',  calendarStatus: 'created' },
+    { name: 'cancelled',                  startISO: soon, status: 'cancelled', providerEventId: '',    calendarStatus: '' },
+  ];
+  // What the API would send the page for each.
+  const asSent = (r) => ({ status: r.status, startISO: r.startISO, calendarLink: '',
+    calendarStatus: r.calendarStatus || (r.providerEventId ? 'created' : '') });
+  // What the backfill would act on: not cancelled, and no event id.
+  const backfillTakes = (r) => r.status !== 'cancelled' && !r.providerEventId;
+  for (const r of rows) {
+    ok('page and backfill agree on "' + r.name + '"',
+      !!calWarning(asSent(r)) === backfillTakes(r),
+      'page=' + !!calWarning(asSent(r)) + ' backfill=' + backfillTakes(r));
+  }
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
