@@ -60,7 +60,7 @@ import {
 import { createBlock } from '../lib/content/factory';
 import { sanitiseHtml, safeUrl } from '../lib/content/sanitise';
 import { sanitiseEmbedHtml } from '../lib/content/sanitise-embed';
-import { sanitiseStyle } from '../lib/content/styles';
+import { FONT_SIZES, sanitiseStyle } from '../lib/content/styles';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { resolveVideo } from '../lib/content/video';
 import { SEED_PAGE } from '../lib/content/seed';
@@ -719,9 +719,56 @@ describe('sanitiseStyle', () => {
   });
 
   it('keeps a size from the scale and refuses one off it', () => {
-    expect(sanitiseStyle('font-size: 1.5rem')).toBe('font-size: 1.5rem');
+    expect(sanitiseStyle('font-size: 1.5em')).toBe('font-size: 1.5em');
     expect(sanitiseStyle('font-size: 400vw')).toBe('');
     expect(sanitiseStyle('font-size: 99rem')).toBe('');
+  });
+
+  /*
+   * ANDY, 17 SEP 2026: "when you select large, bigger, giant etc either nothing
+   * happens or the text gets smaller". Measured: the scale was an absolute rem
+   * ladder ending at 2.5rem, which is 40px, and a theme's H1 is 48px. So on a
+   * heading every option in the group was SMALLER than the heading already was,
+   * and the one that matched (H1 from the theme group, on an H1) did nothing.
+   *
+   * In em each label is true wherever it sits. The rule is the test: nothing in
+   * that group may be absolute, because an absolute size cannot be "large"
+   * relative to text it knows nothing about.
+   */
+  it('offers a scale that is relative to the text it is used in', () => {
+    const scale = FONT_SIZES.filter((size) => size.group !== 'From your theme');
+    expect(scale.length).toBeGreaterThan(4);
+    for (const size of scale) {
+      expect(size.value.endsWith('em'), `${size.label} is ${size.value}, which is not relative`).toBe(true);
+      expect(size.value.endsWith('rem'), `${size.label} is ${size.value}, which is relative to the ROOT, not to this text`).toBe(false);
+    }
+    // Normal means no change, and the ladder only goes up from there.
+    const value = (label: string) => Number(scale.find((size) => size.label === label)!.value.replace('em', ''));
+    expect(value('Normal')).toBe(1);
+    expect(value('Tiny')).toBeLessThan(value('Small'));
+    expect(value('Small')).toBeLessThan(value('Normal'));
+    expect(value('Normal')).toBeLessThan(value('Large'));
+    expect(value('Large')).toBeLessThan(value('Bigger'));
+    expect(value('Bigger')).toBeLessThan(value('Huge'));
+    expect(value('Huge')).toBeLessThan(value('Giant'));
+  });
+
+  /*
+   * The old ladder still validates, and that is load-bearing rather than tidy:
+   * a value this sanitiser does not recognise is DROPPED on the next save, so
+   * without this the fix would have silently unsized every phrase anybody had
+   * ever sized, the first time they saved the page.
+   */
+  it('still keeps the rem sizes the old scale wrote, so no saved page loses them', () => {
+    for (const legacy of ['0.75rem', '0.875rem', '1rem', '1.25rem', '1.5rem', '2rem', '2.5rem']) {
+      expect(sanitiseStyle(`font-size: ${legacy}`)).toBe(`font-size: ${legacy}`);
+    }
+  });
+
+  it('keeps the theme sizes, which are the ones that are meant to be absolute', () => {
+    expect(sanitiseStyle('font-size: var(--tgs-h1-size)')).toBe('font-size: var(--tgs-h1-size)');
+    expect(sanitiseStyle('font-size: var(--tgs-p-size)')).toBe('font-size: var(--tgs-p-size)');
+    expect(sanitiseStyle('font-size: var(--tgs-h9-size)')).toBe('');
   });
 
   it('keeps a hand-typed pixel size inside the bound, and normalises it', () => {

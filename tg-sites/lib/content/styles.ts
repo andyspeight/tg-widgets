@@ -84,11 +84,23 @@ const TEXT_STYLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'] as const;
  * below, which is a different set of sizes from the ones the site actually uses,
  * so picking "Large" gave you something that matched nothing.
  *
- * The fixed scale stays underneath for the times a phrase genuinely needs to be
- * a bit bigger than the text around it without being a heading. It is a closed
- * list, and the one thing outside it, a size typed by hand, is bounded to whole
- * pixels in PX_SIZE_MIN..PX_SIZE_MAX by the validator below, so nobody can type
- * `font-size: 400vw` and push the page off the screen.
+ * The second group is RELATIVE TO THE TEXT IT IS IN, in em, and that is a fix
+ * rather than a preference (Andy, 17 Sep 2026: "when you select large, bigger,
+ * giant etc either nothing happens or the text gets smaller"). It used to be an
+ * absolute rem ladder topping out at 2.5rem, which is 40px. A theme's H1 is
+ * 48px. So on any heading worth styling, EVERY option in this group was smaller
+ * than the heading already was: Giant shrank it, and picking H1 from the group
+ * above did nothing at all because it was already H1. The words on the menu
+ * promised bigger and the page got smaller, which reads as broken because it is.
+ *
+ * In em each label is true wherever it is used: Large is larger than the words
+ * around it, on a paragraph and on a hero alike, and Normal is exactly the size
+ * it would have been. The theme group above stays absolute, because "make this
+ * phrase H2-sized" is a different request and a useful one.
+ *
+ * It is a closed list, and the one thing outside it, a size typed by hand, is
+ * bounded to whole pixels in PX_SIZE_MIN..PX_SIZE_MAX by the validator below, so
+ * nobody can type `font-size: 400vw` and push the page off the screen.
  */
 export const FONT_SIZES: ReadonlyArray<{ value: string; label: string; group: string }> = [
   { value: 'var(--tgs-p-size)', label: 'Paragraph', group: 'From your theme' },
@@ -99,17 +111,17 @@ export const FONT_SIZES: ReadonlyArray<{ value: string; label: string; group: st
   { value: 'var(--tgs-h5-size)', label: 'H5', group: 'From your theme' },
   { value: 'var(--tgs-h6-size)', label: 'H6', group: 'From your theme' },
 
-  { value: '0.75rem', label: 'Tiny', group: 'A fixed size' },
-  { value: '0.875rem', label: 'Small', group: 'A fixed size' },
-  { value: '1rem', label: 'Normal', group: 'A fixed size' },
-  { value: '1.25rem', label: 'Large', group: 'A fixed size' },
-  { value: '1.5rem', label: 'Bigger', group: 'A fixed size' },
-  { value: '2rem', label: 'Huge', group: 'A fixed size' },
-  { value: '2.5rem', label: 'Giant', group: 'A fixed size' },
+  { value: '0.75em', label: 'Tiny', group: 'Bigger or smaller' },
+  { value: '0.875em', label: 'Small', group: 'Bigger or smaller' },
+  { value: '1em', label: 'Normal', group: 'Bigger or smaller' },
+  { value: '1.25em', label: 'Large', group: 'Bigger or smaller' },
+  { value: '1.5em', label: 'Bigger', group: 'Bigger or smaller' },
+  { value: '2em', label: 'Huge', group: 'Bigger or smaller' },
+  { value: '2.5em', label: 'Giant', group: 'Bigger or smaller' },
 ];
 
 /** The order the groups appear in, so the theme's own sizes are found first. */
-export const FONT_SIZE_GROUPS = ['From your theme', 'A fixed size'] as const;
+export const FONT_SIZE_GROUPS = ['From your theme', 'Bigger or smaller'] as const;
 
 /**
  * The bounds on a size typed by hand, in whole pixels.
@@ -131,6 +143,29 @@ export const PX_SIZE_MAX = 200;
 const SIZE_VALUES = new Set(
   FONT_SIZES.map((size) => size.value).filter((value) => !value.startsWith('var(')),
 );
+
+/**
+ * The rem ladder the scale above used to be, still accepted and never offered.
+ *
+ * WITHOUT THIS, THE FIX WOULD DELETE WHAT IT WAS FIXING. Every phrase anybody
+ * has ever sized with the old dropdown carries one of these, and a value this
+ * validator does not recognise is DROPPED on the next save. So the day the scale
+ * changed, the first save of an old page would have quietly unsized every one of
+ * them, which is a worse bug than the one being fixed and an invisible one.
+ *
+ * They render exactly as they always have. Nothing rewrites them, because a
+ * client's page is not ours to restyle; the next time somebody picks a size from
+ * the menu, that phrase moves to the em scale and the rest stay as they were.
+ */
+const LEGACY_SIZE_VALUES = new Set([
+  '0.75rem',
+  '0.875rem',
+  '1rem',
+  '1.25rem',
+  '1.5rem',
+  '2rem',
+  '2.5rem',
+]);
 
 /**
  * The colours the toolbar offers, as TOKENS rather than as hexes.
@@ -301,7 +336,7 @@ function fontValue(value: string): string | null {
 }
 
 function sizeValue(value: string): string | null {
-  if (SIZE_VALUES.has(value)) return value;
+  if (SIZE_VALUES.has(value) || LEGACY_SIZE_VALUES.has(value)) return value;
 
   const token = value.match(/^var\(--tgs-([a-z0-9]+)-size\)$/);
   if (token && (TEXT_STYLES as readonly string[]).includes(token[1])) {

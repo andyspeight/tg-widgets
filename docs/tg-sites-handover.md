@@ -733,6 +733,46 @@ is left alone. And the whole photo step is opt-out in the panel, because a page
 somebody has put their own photographs on should not have them swapped for stock
 just because they wanted the words rewritten.
 
+**A SIZE THAT IS NOT RELATIVE TO ANYTHING CANNOT BE CALLED "LARGE"** (Andy,
+17 Sep 2026: "the sizing of the text makes no sense. When you select large,
+bigger, giant etc either nothing happens or the text gets smaller"). He was
+right, and the arithmetic says why. The toolbar's size menu offered an absolute
+rem ladder ending at 2.5rem, which is 40px. A theme's H1 is 48px, an H2 is 36px.
+So on any heading worth styling, every option in that group was SMALLER than the
+heading already was: Giant shrank an H1 by eight pixels, and picking H1 from the
+theme group while already on an H1 did nothing at all, because it was already
+that size. Every field was wired, every value valid, every unit test green: the
+fault was in the arithmetic between two correct things.
+
+The scale is in `em` now, so each label is true wherever it is used: on an H1,
+Large is 60px and Giant is 120px; on a paragraph, Large is 21px. The theme group
+stays absolute, because "make this phrase H2-sized" is a different and useful
+request. THE OLD REM VALUES STILL VALIDATE and always must: a value
+`sanitiseStyle` does not recognise is DROPPED on the next save, so without
+`LEGACY_SIZE_VALUES` the fix would have silently unsized every phrase anybody had
+ever sized, the first time they saved an old page. That would have been a worse
+bug than the one being fixed, and an invisible one.
+
+**THE EDITOR'S PREVIEW IS THE PUBLISHED DOM WITHOUT THE PUBLISHED SCRIPT.** Found
+the same day, from "the effects on the text all work except words near the
+pointer swell". The effect was fine: with the real stylesheet and
+`public/tg-motion.js` it runs exactly as designed. What was missing was the
+script, in the one place somebody would go to try the effect. In preview the
+canvas renders with `editable=false`, so the word spans and `data-hover` are all
+there and the two pointer effects that are pure CSS work; the third is the only
+one that needs to be told where the pointer is, and the editor has never rendered
+that file. `components/editor/Canvas.tsx` now adds it on entering preview and
+calls `window.__TG_MOTION_INIT__` whenever the previewed tree changes, because a
+`<script>` tag runs once and this canvas redraws under it. Editing loads nothing
+and re-runs nothing.
+
+The general lesson, and it is the third time this month: **a control can be
+correctly wired and still do nothing a person can see.** Both of these passed
+every unit test in the suite. `tools/verify-text-controls.mjs` measures the
+result instead, in a browser, with a real pointer: 23 checks, and it fails on the
+old scale with "Giant is 40px inside a 48px heading", which is Andy's report in
+one line.
+
 **A PANEL THAT GROWS WITH THE LIBRARY WILL ONE DAY NOT FIT ON THE SCREEN, AND
 NOTHING YOU CAN ASSERT WILL SAY SO.** Andy, 17 Sep 2026: "adding a page doesnt
 work". It worked. The Add page composer draws one card per designed page, and at

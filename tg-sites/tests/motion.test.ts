@@ -1326,3 +1326,48 @@ describe('the pinned itinerary travels a row of cards', () => {
     expect(css).toContain('translateX(calc(-100% + 100vw))');
   });
 });
+
+/*
+ * ANDY, 17 SEP 2026: "the effects on the text all work except words near the
+ * pointer swell".
+ *
+ * Measured, and it was not the effect. With the real stylesheet and the real
+ * script, on a published page, the swell runs: the script writes --near on each
+ * word and the transform follows. What was missing was the SCRIPT, in the one
+ * place somebody would go to try the effect. The editor's preview renders the
+ * exact published DOM, so the two pointer effects that are pure CSS worked
+ * there, and the third, the only one that needs to be told where the pointer
+ * is, did nothing at all.
+ *
+ * tools/verify-text-controls.mjs drives all three with a real pointer. These are
+ * the cheap half: the hook exists, and the editor uses it in preview only.
+ */
+describe('the pointer effects reach the editor preview', () => {
+  const script = read('public', 'tg-motion.js');
+  const canvas = read('components', 'editor', 'Canvas.tsx');
+
+  it('the script exposes a way to run it again, for a canvas that redraws', () => {
+    expect(script).toContain('window.__TG_MOTION_INIT__ = init;');
+  });
+
+  it('every setUp it re-runs guards against binding the same element twice', () => {
+    // Re-running is only safe because of these; without them a second preview
+    // would bind a second set of listeners to every word.
+    expect(script).toContain("heads[h].getAttribute('data-hover-live') === '1'");
+    expect(script).toContain("data-arrive-fb");
+  });
+
+  it('the canvas loads it in preview, and never while editing', () => {
+    const effect = canvas.slice(canvas.indexOf('THE MOTION SCRIPT, IN PREVIEW ONLY'));
+    const body = effect.slice(0, effect.indexOf('}, [preview,'));
+    expect(body).toContain('if (!preview) return;');
+    expect(body).toContain("tag.src = '/tg-motion.js'");
+    expect(body).toContain('__TG_MOTION_INIT__');
+    // One tag, however many times preview is entered.
+    expect(body).toContain("document.querySelector<HTMLScriptElement>('script[data-tg-motion]')");
+  });
+
+  it('re-runs when the previewed tree changes, so a heading drawn later is bound', () => {
+    expect(canvas).toContain('}, [preview, shown, chromeHeader, chromePage, chromeFooter]);');
+  });
+});

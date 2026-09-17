@@ -283,6 +283,7 @@ export function Canvas({
    */
   const prepared = usePreparedMarkup([page, chromeHeader, chromePage, chromeFooter], preparedSeed);
 
+
   /*
    * THE TREE THE CANVAS DRAWS, which is not the tree it edits.
    *
@@ -294,6 +295,51 @@ export function Canvas({
    * did.
    */
   const shown = useMemo(() => fillListings(page, listings ?? new Map()), [page, listings]);
+
+  /*
+   * THE MOTION SCRIPT, IN PREVIEW ONLY (Andy, 17 Sep 2026: every text effect
+   * worked except the words that swell near the pointer).
+   *
+   * In preview the canvas renders the exact published DOM (editable=false), so
+   * the word spans and data-hover are all there, and the two pointer effects
+   * that are pure CSS work. The third needs something to say where the pointer
+   * is, and the editor has never rendered public/tg-motion.js. So it did
+   * nothing, and only in the one place somebody would go to try it.
+   *
+   * WHY IT IS NOT RENDERED AS A TAG. This canvas is React and its content
+   * changes under the script's feet: a <script> tag executes once, so a heading
+   * previewed after it ran would never be bound. The tag is added once, then the
+   * script's own init is re-run whenever the previewed tree changes. Its setUps
+   * each carry a did-this-one guard, so re-running binds nothing twice.
+   *
+   * EDITING IS LEFT ALONE. Nothing is loaded and nothing is re-run until the
+   * person presses Preview, so the editing canvas stays exactly as script-free
+   * as it was, and so does its performance.
+   */
+  useEffect(() => {
+    if (!preview) return;
+
+    const run = () => {
+      const again = (window as { __TG_MOTION_INIT__?: () => void }).__TG_MOTION_INIT__;
+      if (typeof again === 'function') again();
+    };
+
+    const existing = document.querySelector<HTMLScriptElement>('script[data-tg-motion]');
+    if (existing) {
+      /* Already loaded by an earlier preview: just bind whatever is new. A frame
+         later, so React has finished painting the tree this effect is about. */
+      const frame = window.requestAnimationFrame(run);
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    const tag = document.createElement('script');
+    tag.src = '/tg-motion.js';
+    tag.defer = true;
+    tag.dataset.tgMotion = '';
+    tag.addEventListener('load', run);
+    document.body.appendChild(tag);
+    return undefined;
+  }, [preview, shown, chromeHeader, chromePage, chromeFooter]);
 
   /*
    * PREVIEW AS a chosen visitor: hide the sections that visitor's audience rule

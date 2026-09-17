@@ -604,5 +604,24 @@
     init();
   }
 
+  /*
+   * RUN IT AGAIN, for the editor's preview (Andy, 17 Sep 2026: every text effect
+   * worked except the words that swell near the pointer).
+   *
+   * The published page and the server preview render this script once, on a
+   * document that is already complete, so init() at load is the whole story
+   * there. The EDITOR never rendered it at all, which is why two of the three
+   * pointer effects worked in preview and the third did nothing: a lift and a
+   * frame are pure CSS :hover, and only the swell needs something to say where
+   * the pointer is.
+   *
+   * The editor's canvas is React, so the headings it previews arrive after this
+   * file has run and go again when preview is left. Hence a hook rather than a
+   * second copy of the logic: components/editor/Canvas.tsx calls it whenever the
+   * previewed tree changes. Every setUp below already carries its own
+   * did-this-one guard, so calling it twice binds nothing twice.
+   */
+  window.__TG_MOTION_INIT__ = init;
+
   window.__TG_MOTION_VERSION__ = VERSION;
 })();
