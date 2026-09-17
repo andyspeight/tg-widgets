@@ -138,6 +138,40 @@ console.log('Available means unlimited: no positive count anywhere (Andy, 8 Sep 
     valueDrift.length === 0, valueDrift.join('\n      '));
 }
 
+console.log('Every widget is unlimited on Ignite and Bespoke (Andy, 17 Sep 2026)');
+{
+  // "Please make all widgets (not apps or contracting) available for all Ignite
+  // and Bespoke - and when we add new widgets that be the default way to
+  // introduce them."
+  //
+  // So this is not a snapshot of today's values, it is the rule a NEW widget
+  // has to be introduced under. Adding one locked on the top two tiers fails
+  // here rather than quietly shipping a widget the Travelify directory offers
+  // and our save API then refuses.
+  //
+  // Spark and Boost are deliberately not covered: those tiers still differ per
+  // widget, and that is a commercial decision rather than a default.
+  const TOP = ['Ignite', 'Bespoke'];
+  const live = registry.filter((r) => r.status === 'live');
+  ok('there are live widgets to check (' + live.length + ')', live.length > 30);
+
+  const dashLocked = live
+    .flatMap((r) => TOP.filter((p) => r.access[p] !== -1).map((p) => `${r.type} on ${p}: ${r.access[p]}`));
+  ok('no widget is locked on the top two tiers in the dashboard registry',
+    dashLocked.length === 0, dashLocked.join('\n      '));
+
+  const apiLocked = Object.entries(limits)
+    .flatMap(([t, row]) => TOP.filter((p) => row[p] !== -1).map((p) => `${t} on ${p}: ${row[p]}`));
+  ok('nor in the API plan map', apiLocked.length === 0, apiLocked.join('\n      '));
+
+  // The one that started this: TTI Offers reached Travelify's Widget Directory
+  // through a STALE generated registry that said Ignite -1 while both sources
+  // said 0, so every Ignite client was shown a widget the save API refused.
+  ok('TTI Offers is on Ignite and Bespoke, the case that found this rule',
+    limits['TTI Offers'] && limits['TTI Offers'].Ignite === -1 && limits['TTI Offers'].Bespoke === -1,
+    JSON.stringify(limits['TTI Offers']));
+}
+
 console.log('There is ONE plan map: the copy endpoint reads it rather than carrying its own');
 {
   // The list grew on 16 Sep 2026: the copy endpoint now also reads the shared
