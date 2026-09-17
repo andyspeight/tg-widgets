@@ -20,6 +20,12 @@ Three touchpoints, all keyed on the same `widgetId`:
 2. `GET /api/v1/applications/{applicationId}/my-widgets`
 3. `GET /api/auth/sso?ssotoken=...&widgetId=<slug>`
 
+**Entitlement is two gates, not one** (17 Sep 2026). The plan maps say what a
+tier includes; Control's Package Catalogue says what a package actually grants,
+and the save API reads both. A widget missing from the package is offered by the
+directory and then refused on save. Every live widget is now unlimited on Ignite
+and Bespoke in both, guarded by `test:plan-limits-drift`.
+
 Travelify's backend calls the two read endpoints server to server and renders
 the results itself. It holds no widget data of its own for us, so every field it
 shows comes from these responses.
@@ -133,8 +139,32 @@ block a sign-in.
 only; `next` and `widgetId` are ordinary query parameters outside the signed
 payload.
 
-The deep link starts a **new** widget of that type (Andy, 14 Sep 2026), which is
-what `/editor-<tag>` with no `?id=` does.
+**Where it lands depends on whether they already have any** (Andy, 17 Sep 2026,
+from user feedback — it originally always started a new one, which made a
+"manage" link from My Widgets useless):
+
+| They have | Lands on | Why |
+|---|---|---|
+| none of that type | `/editor-<tag>`, a blank editor | the Widget Directory case: they clicked something they do not have |
+| one or more | `/?open=<widgetId>`, the widget dashboard with that type's picker open | the My Widgets case: "manage" should show them what they are managing |
+
+The picker is the type-detail modal the dashboard already had: every widget of
+that type with an Edit on each, and "Create new" at the bottom, so both
+intentions are one click away.
+
+Travelify sends the **same URL either way** — nothing changed on their side.
+
+The count uses the same scope rule as the My Widgets endpoint, shared in
+`api/_lib/v1/client-widget-counts.js` rather than restated, so the two can never
+disagree about how many a client has. It is best effort: if Airtable cannot be
+read we open a blank editor rather than failing the sign-in, the same principle
+as the plan check.
+
+`/?open=` is read by `openRequestedType()` in `public/index.html` once the
+widget list has loaded. The value is matched against the registry and never used
+as an Airtable type, the picker only opens if they really have some, and the
+parameter is taken back out of the address afterwards so closing the modal and
+refreshing does not reopen it.
 
 Open-redirect safety: `widgetId` is resolved only against the widget registry,
 and the path we redirect to is the registry's own `editorUrl`. Nothing from the

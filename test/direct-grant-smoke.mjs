@@ -86,11 +86,18 @@ console.log('And nothing else is');
   ok('rubbish in does not throw', !grant(null) && !grant([null, {}, { fields: null }]));
 }
 
-console.log('TTI Offers is still sold on no plan, so the grant is the only way in');
+console.log('TTI Offers went on sale on 17 Sep 2026, and the grant still works');
 {
+  // It was on no plan when this suite was written, which is why MT Holidays
+  // needed a direct grant at all. Andy put it on sale on Ignite and Bespoke the
+  // next day. The point of the grant is that it does not care either way: a
+  // granted client is let through whatever the plan map says, so MT Holidays
+  // did not have to be touched when the policy changed.
   const tti = PLAN_WIDGET_LIMITS['TTI Offers'];
-  ok('every tier reads 0', tti && [tti.Spark, tti.Boost, tti.Ignite, tti.Bespoke].every((v) => v === 0),
+  ok('it is unlimited on the top two tiers', tti && tti.Ignite === -1 && tti.Bespoke === -1,
     JSON.stringify(tti));
+  ok('and still not on Spark or Boost, where a grant is the only way in',
+    tti && tti.Spark === 0 && tti.Boost === 0, JSON.stringify(tti));
 }
 
 console.log('The reader answers the real question, against a stubbed Control');

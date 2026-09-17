@@ -270,6 +270,49 @@ for (const hostile of [
 ok(await ssoTest.widgetDeepLink(['faq', 'evil'], ignite) === WIDGETS_BY_ID.faq.editorUrl,
   'a repeated widgetId param takes the first value safely');
 
+// ── Where the deep link lands: new widget, or pick from the ones they have ──
+// Andy, 17 Sep 2026, from user feedback: "if they do it should go to widget
+// dashboard and open the modal to pick which one they want to edit/create new".
+// Travelify sends the same URL either way; we decide by whether they have any.
+{
+  const withId = { id: CLIENT_ID, fields: { [CF_EMAIL]: 'agency@example.com', [CF_PLAN]: 'Ignite' } };
+  const before = state.widgetRows;
+
+  state.widgetRows = [];
+  ok(await ssoTest.widgetDeepLink('faq', withId) === WIDGETS_BY_ID.faq.editorUrl,
+    'no widgets of that type yet: straight into a new one (the Widget Directory case)');
+
+  state.widgetRows = ['FAQ'];
+  ok(await ssoTest.widgetDeepLink('faq', withId) === '/?open=faq',
+    'one already: the dashboard with that type\'s picker open (the My Widgets case)');
+
+  state.widgetRows = ['FAQ', 'FAQ', 'Testimonials'];
+  ok(await ssoTest.widgetDeepLink('faq', withId) === '/?open=faq',
+    'several of that type: still the picker');
+  ok(await ssoTest.widgetDeepLink('testimonials', withId) === '/?open=testimonials',
+    'and it counts the type that was asked for, not the busiest');
+  ok(await ssoTest.widgetDeepLink('weather', withId) === WIDGETS_BY_ID.weather.editorUrl,
+    'a type they have none of still opens a new one, on the same account');
+
+  // Only the registry id reaches the address, so a hostile widgetId cannot get
+  // into the Location header through the new branch either.
+  ok(/^\/\?open=[a-z0-9-]+$/.test(await ssoTest.widgetDeepLink('faq', withId)),
+    'the picker address is built from the registry id alone');
+
+  // The count is best effort: a booking against Airtable must not cost someone
+  // their sign-in, so it falls back to the blank editor.
+  const realFetch = global.fetch;
+  global.fetch = async (url) => {
+    if (String(url).includes('/Widgets?')) throw new Error('Airtable is down');
+    return realFetch(url);
+  };
+  ok(await ssoTest.widgetDeepLink('faq', withId) === WIDGETS_BY_ID.faq.editorUrl,
+    'if the count cannot be read, open a new one rather than failing the sign-in');
+  global.fetch = realFetch;
+
+  state.widgetRows = before;
+}
+
 // safeNext is untouched by the change.
 ok(ssoTest.safeNext(undefined) === '/dashboard.html', 'no next still lands on the dashboard');
 ok(ssoTest.safeNext('https://evil.example.com') === '/dashboard.html', 'next still refuses an absolute URL');

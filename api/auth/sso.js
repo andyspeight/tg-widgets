@@ -69,6 +69,7 @@ import { revokeAllUserSessions } from '../_lib/auth/sessions.js';
 import { normalisePlanValue } from '../_lib/auth/plan.js';
 import { WIDGETS_BY_ID } from '../_lib/widget-registry.js';
 import { isInPlan } from '../_lib/v1/widget-view.js';
+import { countWidgetsByType } from '../_lib/v1/client-widget-counts.js';
 
 // ─── Config ─────────────────────────────────────────────────────────
 const SIGNIN_PATH = '/signin.html';
@@ -81,6 +82,10 @@ const DEFAULT_REDIRECT = '/dashboard.html';
 // these prefixes is ignored and the default is used. Prevents open-redirect.
 // /home.html stays allowed so old links resolve, then Vercel redirects them.
 const SAFE_NEXT_PREFIXES = ['/home.html', '/admin', '/dashboard.html'];
+
+// The Widget Suite dashboard: the page that lists a client's own widgets and
+// owns the per-type picker. Not /dashboard.html, which is the product tiles.
+const WIDGET_DASHBOARD = '/';
 
 // SSO failure codes. These end up in the URL as ?error=<code>, and
 // /public/signin.html maps each code to a friendly user-facing message.
@@ -202,8 +207,21 @@ function safeNext(rawNext) {
  * Open-redirect safety: the path returned is the registry's own editorUrl for
  * a matched widget. Nothing from the query string is ever echoed into it.
  *
- * Andy's call (14 Sep 2026): the deep link starts a NEW widget of that type,
- * which is what /editor-<tag> with no ?id= does.
+ * Where it lands depends on whether they already have any (Andy, 17 Sep 2026,
+ * from user feedback — it originally always started a new one):
+ *
+ *   none yet  -> /editor-<tag> with no ?id=, a blank editor. This is the
+ *                Widget Directory case: they clicked a widget they do not have.
+ *   some       -> the widget dashboard with that type's picker open, which
+ *                lists the ones they have with an Edit on each and a "Create
+ *                new" at the bottom. This is the My Widgets case: "manage"
+ *                should show them what they are managing.
+ *
+ * Travelify sends the same URL either way, so nothing changes on their side.
+ *
+ * The count is best effort: if it cannot be read we fall back to the blank
+ * editor rather than failing the sign-in, which is the same principle as the
+ * plan check above.
  */
 async function widgetDeepLink(rawWidgetId, clientRec) {
   const raw = Array.isArray(rawWidgetId) ? rawWidgetId[0] : rawWidgetId;
@@ -226,6 +244,20 @@ async function widgetDeepLink(rawWidgetId, clientRec) {
     return null;
   }
 
+  // Do they already have some? Only the registry id reaches the URL, so
+  // nothing from the query string is echoed into the Location header.
+  let have = 0;
+  try {
+    const counts = await countWidgetsByType(clientRec, 'sso');
+    have = counts.get(widget.id) || 0;
+  } catch (err) {
+    console.warn('[sso] widget count failed for', id, '—', err && err.message, '— opening a new one');
+    return widget.editorUrl;
+  }
+  if (have > 0) {
+    console.log('[sso] widgetId', id, 'has', have, 'existing — opening the picker');
+    return `${WIDGET_DASHBOARD}?open=${encodeURIComponent(widget.id)}`;
+  }
   return widget.editorUrl;
 }
 

@@ -186,6 +186,17 @@ plan is UNLIMITED there (Andy, 8 Sep 2026): never put a positive count in a
 plan map. `npm run test:plan-limits-drift` enforces this and keeps the API map
 and the dashboard registry in step.
 
+**Every widget is unlimited on Ignite and Bespoke** (Andy, 17 Sep 2026: "make
+all widgets (not apps or contracting) available for all Ignite and Bespoke, and
+when we add new widgets that be the default way to introduce them"). A new
+widget ships `Ignite: -1, Bespoke: -1`; Spark and Boost are still a per-widget
+commercial call. Guarded by `test:plan-limits-drift`. This is only half the
+gate: entitlement is ALSO read from Control's Package Catalogue, so a new
+widget needs an included-by-default row against the Ignite and Bespoke packages
+or the save API 403s even though both plan maps say yes. The day this rule was
+written, TTI Offers had no package rows at all and Bespoke was missing all
+seven Event Tickets widgets.
+
 **Adding a new widget type — update FIVE places** (also documented at the top
 of `api/widget-config.js`):
 1. `ALLOWED_WIDGET_TYPES` in `api/widget-config.js`
@@ -197,7 +208,9 @@ of `api/widget-config.js`):
    `loadMiniPreview` branch: live widgets instantiate the engine and get a
    script tag at the bottom of index.html; static previews write a 700×340
    fake-webpage mockup into `innerHTML` and get NO dashboard script tag)
-5. A record in the Airtable CATALOGUE table
+5. A record in the Airtable CATALOGUE table (category `Widget`), AND an
+   included-by-default row in PACKAGE CATALOGUE against the Ignite and Bespoke
+   packages — the catalogue row alone does not entitle anyone
 
 Plus `vercel.json`: a `/demo-<tag>` and `/editor-<tag>` rewrite and one header
 block per public script file (copy the `/widget-hours.js` block).

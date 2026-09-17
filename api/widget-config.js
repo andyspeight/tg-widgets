@@ -548,13 +548,11 @@ const PLAN_WIDGET_LIMITS = {
   // cache we fill for everyone anyway, every property named on a TTI Offers
   // widget costs its own Travelify search every night, under that client's own
   // application.
-  // NOT SOLD ON ANY PLAN YET (Andy, 14 Sep 2026). Every tier is 0, so the only
-  // way in is a DIRECT GRANT: an enabled Client Entitlements row sourced Add-On
-  // or Manual Override, which the gate above honours and which skips this map
-  // entirely. That is how MTHolidays has it while nobody else does. When it goes
-  // on sale, set the tiers here and add it to the package in Control; the
-  // grant keeps working either way.
-  'TTI Offers':          { Spark: 0, Boost: 0, Ignite: 0, Bespoke: 0 },
+  // ON SALE FROM 17 SEP 2026 (Andy): unlimited on Ignite and Bespoke, and the
+  // Control packages were updated to match on the same day. Existing direct
+  // grants keep working — the gate honours a grant whatever this map says, so
+  // MT Holidays did not need touching.
+  'TTI Offers':            { Spark: 0, Boost: 0, Ignite: -1, Bespoke: -1 },
   'Popup':                 { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Countdown Timer':       { Spark: -1, Boost: -1, Ignite: -1, Bespoke: -1 },
   'Event Calendar':        { Spark: 0, Boost: -1, Ignite: -1, Bespoke: -1 },
