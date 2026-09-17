@@ -34,6 +34,7 @@ import { serveAssist } from '../../../lib/assist/service';
 import { currentCapabilities } from '../../../lib/auth/capabilities';
 import { isSignInRequired } from '../../../lib/auth/session';
 import { claimAssistTurn, logAssist, readAssistAllowance, recordAssistUsage } from '../../../lib/db/assist';
+import type { Page } from '../../../lib/content/schema';
 import { getPage, listPages, listPagesForAudit } from '../../../lib/db/pages';
 import { getSettings } from '../../../lib/db/settings';
 import { getTenant, siteUrl } from '../../../lib/db/tenants';
@@ -139,12 +140,14 @@ export async function POST(request: Request): Promise<Response> {
 
   const site = await loadSite(tenantId);
   let page: PageOutline | null = null;
+  let pageTree: Page | null = null;
   let pageId: string | null = null;
   let sectionId: string | null = null;
   if (body.pageId && site.pages.some((entry) => entry.id === body.pageId)) {
     const found = await getPage(tenantId, body.pageId);
     if (found) {
       pageId = found.id;
+      pageTree = found.content;
       page = outlinePage(found.content, site.pages.find((entry) => entry.id === found.id)?.path ?? '/');
       /* A section the page does not have is dropped rather than refused: the
          person moved on, or deleted it, and neither is worth an error. */
@@ -162,7 +165,7 @@ export async function POST(request: Request): Promise<Response> {
       };
       try {
         const result = await serveAssist(
-          { tenantId, userId, mode: body.mode, model, message: body.message, pageId, sectionId, thread: body.thread, site, page, caps },
+          { tenantId, userId, mode: body.mode, model, message: body.message, pageId, sectionId, thread: body.thread, site, page, pageTree, caps },
           {
             claim: async () => claim,
             converse: (system, messages, opts) => converse(system, messages, opts),
@@ -176,6 +179,24 @@ export async function POST(request: Request): Promise<Response> {
           send({ type: 'answer', text: result.text, pence: result.pence, toolsUsed: result.toolsUsed });
         } else if (result.kind === 'question') {
           send({ type: 'question', text: result.text, question: result.question.question, options: result.question.options, pence: result.pence, toolsUsed: result.toolsUsed });
+        } else if (result.kind === 'proposal') {
+          /*
+           * The operations go to the browser because the EDITOR applies them:
+           * through its own history, as one step, so Undo is the Undo the
+           * person already knows and there is still one path that writes a
+           * page. They are checked again on the way back in (see
+           * app/actions/assist.ts), because anything that has been to a
+           * browser is input again when it returns.
+           */
+          send({
+            type: 'proposal',
+            text: result.text,
+            changes: result.proposal.changes,
+            operations: result.proposal.operations,
+            refused: result.proposal.refused,
+            pence: result.pence,
+            toolsUsed: result.toolsUsed,
+          });
         } else if (result.kind === 'refused') {
           send({ type: 'error', message: result.message });
         } else {

@@ -15,11 +15,12 @@
  * client-side half of the rule the server keeps: a model talked into
  * misbehaving can produce a rude paragraph, it cannot produce a script tag.
  *
- * PLAN MODE ONLY, AND THE PANEL SAYS SO. Slice 1 reads and advises; it cannot
- * change the site, and there is no Build switch here because Build has nothing
- * to do yet that Plan does not (slice 2 brings the proposals). Drawing a
- * switch that changes nothing is the same mistake as drawing a chart with no
- * numbers behind it, which this project has already decided not to make.
+ * TWO MODES, AND THE SWITCH ONLY EXISTS WHERE IT MEANS SOMETHING. Plan reads
+ * and advises. Build may propose changes, which arrive here as a list the
+ * person applies or skips: the model's reach ends at a proposal, and the
+ * editor is what writes (see onApply). On the dashboard there is no page open
+ * and no history to apply into, so there is no switch and no Build, rather
+ * than a control that would not work.
  *
  * The parsing, the thread and the wording of "what it looked at" are in
  * lib/assist/client.ts, which is pure and tested. This file is the frame, the
@@ -33,6 +34,7 @@ import {
   assistRequest,
   describeTools,
   readEvents,
+  type AssistChange,
   type AssistTurn,
 } from '../../lib/assist/client';
 
@@ -81,6 +83,13 @@ export interface AssistPanelProps {
    */
   sectionId?: string | null;
   sectionLabel?: string | null;
+  /**
+   * Applies a proposal, in the editor, through its own history as one step.
+   * Absent on the dashboard, where there is no page open and no history to
+   * apply into: the panel then shows the changes and says where to apply them.
+   * Returns how many changes went in.
+   */
+  onApply?: (operations: readonly unknown[], changes: readonly AssistChange[]) => Promise<number> | number;
   /** The drawer's close button. Absent in the rail, which the rail icon folds. */
   onClose?: () => void;
   /** Overrides the openers, for a test or a harness. */
@@ -94,6 +103,7 @@ export function AssistPanel({
   pageTitle = null,
   sectionId = null,
   sectionLabel = null,
+  onApply,
   onClose,
   prompts,
 }: AssistPanelProps) {
@@ -102,6 +112,11 @@ export function AssistPanel({
   const [busy, setBusy] = useState(false);
   const [usePage, setUsePage] = useState(true);
   const [useSection, setUseSection] = useState(true);
+  /* Build is only on the table where there is a page open and a history to
+     apply into. On the dashboard the switch is not drawn at all. */
+  const canBuild = Boolean(pageId && onApply);
+  const [mode, setMode] = useState<'plan' | 'build'>('plan');
+  const building = canBuild && mode === 'build';
 
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -163,6 +178,7 @@ export function AssistPanel({
               message: text,
               pageId: usePage ? pageId : null,
               sectionId: useSection ? sectionId : null,
+              mode: building ? 'build' : 'plan',
               turns: history,
             }),
           ),
@@ -209,6 +225,17 @@ export function AssistPanel({
                 tools: event.toolsUsed ?? [],
                 question: { question: event.question, options: event.options ?? [] },
               });
+            } else if (event.type === 'proposal') {
+              patch(answerId, {
+                streaming: false,
+                text: event.text || streamed,
+                tools: event.toolsUsed ?? [],
+                proposal: {
+                  changes: event.changes ?? [],
+                  operations: event.operations ?? [],
+                  refused: event.refused ?? [],
+                },
+              });
             } else if (event.type === 'error') {
               patch(answerId, { streaming: false, failed: true, text: event.message });
             }
@@ -241,7 +268,20 @@ export function AssistPanel({
         setBusy(false);
       }
     },
-    [busy, pageId, patch, sectionId, usePage, useSection],
+    [building, busy, pageId, patch, sectionId, usePage, useSection],
+  );
+
+  const settle = useCallback(
+    async (turn: AssistTurn, how: 'applied' | 'skipped') => {
+      if (!turn.proposal || turn.settled) return;
+      if (how === 'skipped' || !onApply) {
+        patch(turn.id, { settled: 'skipped' });
+        return;
+      }
+      const applied = await onApply(turn.proposal.operations, turn.proposal.changes);
+      patch(turn.id, { settled: applied > 0 ? 'applied' : 'skipped' });
+    },
+    [onApply, patch],
   );
 
   const openers = prompts ?? (variant === 'drawer' ? DRAWER_PROMPTS : RAIL_PROMPTS);
@@ -259,7 +299,25 @@ export function AssistPanel({
           </span>
           {ASSISTANT_NAME}
         </span>
-        <span className="ed-assist__mode">Plan</span>
+        {canBuild ? (
+          <span className="ed-assist__modes" role="group" aria-label="What it may do">
+            {(['plan', 'build'] as const).map((option) => (
+              <button
+                key={option}
+                type="button"
+                className="ed-assist__mode-btn"
+                aria-pressed={mode === option}
+                disabled={busy}
+                title={option === 'plan' ? 'Read and advise only' : 'Propose changes you can apply'}
+                onClick={() => setMode(option)}
+              >
+                {option === 'plan' ? 'Plan' : 'Build'}
+              </button>
+            ))}
+          </span>
+        ) : (
+          <span className="ed-assist__mode">Plan</span>
+        )}
         {onClose && (
           <button type="button" className="ed-assist__close" onClick={onClose} aria-label="Close the assistant">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden="true">
@@ -309,7 +367,9 @@ export function AssistPanel({
               words on them, the results board and the enquiries.
             </p>
             <p className="ed-assist__empty-note">
-              It reads and advises. It cannot change anything yet.
+              {canBuild
+                ? 'In Plan it reads and advises. In Build it proposes changes, and nothing changes until you apply them.'
+                : 'It reads and advises. It cannot change anything.'}
             </p>
           </div>
         ) : (
@@ -351,6 +411,61 @@ export function AssistPanel({
                             </button>
                           ))}
                         </div>
+                      </div>
+                    )}
+                    {turn.proposal && (
+                      <div className="ed-assist__proposal">
+                        <p className="ed-assist__proposal-head">
+                          {turn.proposal.changes.length === 1
+                            ? 'One change, yours to apply'
+                            : `${turn.proposal.changes.length} changes, yours to apply`}
+                        </p>
+                        <ol className="ed-assist__changes">
+                          {turn.proposal.changes.map((change, index) => (
+                            <li key={`${turn.id}-${index}`} className="ed-assist__change">
+                              <p className="ed-assist__change-what">{change.label}</p>
+                              {change.before && <p className="ed-assist__change-was">{change.before}</p>}
+                              <p className="ed-assist__change-now">{change.after}</p>
+                              {change.why && <p className="ed-assist__change-why">{change.why}</p>}
+                            </li>
+                          ))}
+                        </ol>
+                        {turn.proposal.refused.length > 0 && (
+                          <p className="ed-assist__refused">
+                            {turn.proposal.refused.length === 1
+                              ? 'One more was refused: '
+                              : `${turn.proposal.refused.length} more were refused: `}
+                            {turn.proposal.refused.join(' ')}
+                          </p>
+                        )}
+                        {turn.settled ? (
+                          <p className="ed-assist__settled">
+                            {turn.settled === 'applied'
+                              ? 'Applied. Undo puts it back, in one step.'
+                              : 'Skipped. Nothing changed.'}
+                          </p>
+                        ) : onApply ? (
+                          <div className="ed-assist__actions">
+                            <button
+                              type="button"
+                              className="ed-assist__apply"
+                              onClick={() => void settle(turn, 'applied')}
+                            >
+                              {turn.proposal.changes.length === 1 ? 'Apply it' : 'Apply all'}
+                            </button>
+                            <button
+                              type="button"
+                              className="ed-assist__skip"
+                              onClick={() => void settle(turn, 'skipped')}
+                            >
+                              Skip
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="ed-assist__settled">
+                            Open this page in the editor to apply these.
+                          </p>
+                        )}
                       </div>
                     )}
                     {!turn.streaming && turn.tools && turn.tools.length > 0 && (

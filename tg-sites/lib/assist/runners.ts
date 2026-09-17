@@ -214,6 +214,10 @@ export async function runTool(name: ToolName, input: unknown, ctx: RunnerContext
     case 'read_enquiries':
       return readEnquiries(input, ctx);
     case 'ask_user':
-      return fail('ask_user ends the turn; it is not run as a tool.');
+    case 'propose_changes':
+      /* Both end the turn rather than running here: one asks the person a
+         question, the other hands them changes to apply. The loop in
+         service.ts intercepts them before this is reached. */
+      return fail(`${name} ends the turn; it is not run as a tool.`);
   }
 }

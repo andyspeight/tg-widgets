@@ -11,9 +11,9 @@
  * than after the model has tried. tests/assist.test.ts proves both by looking
  * at what the filter returns, not at what the prompt says.
  *
- * Slice 1 has readers only. propose_changes and the other writers arrive with
- * slice 2 and will carry `writes: true` and a capability each; the filter is
- * already written for them, which is the point of writing it now.
+ * Slice 2 added the first writer, propose_changes. Plan mode drops it, so a
+ * Plan request is read-only in code and not merely in the prompt, which is the
+ * whole of rule 4.
  *
  * PURE. The registry is data and the filter is a function of its arguments.
  */
@@ -34,7 +34,8 @@ export type ToolName =
   | 'read_catalogue'
   | 'read_results'
   | 'read_enquiries'
-  | 'ask_user';
+  | 'ask_user'
+  | 'propose_changes';
 
 /** A JSON schema, as the API wants it. Kept loose on purpose. */
 export type InputSchema = { type: 'object'; properties: Record<string, unknown>; required?: string[] };
@@ -109,6 +110,49 @@ export const TOOLS: readonly ToolDefinition[] = [
     },
     writes: false,
     capability: null,
+  },
+  {
+    /*
+     * THE ONLY WRITER, and it does not write. It hands back a set of typed
+     * operations which the person applies or skips, so the model's reach ends
+     * at a proposal. Its capability is the floor rather than the whole of the
+     * check: lib/assist/operations.ts asks again, field by field, because
+     * rewording a heading and restyling the section it sits in are different
+     * permissions and one tool covers both.
+     */
+    name: 'propose_changes',
+    description:
+      'Propose changes to the page the person has open. They see each one and apply or skip it; nothing changes until they do. Use it when they have asked for a change rather than for advice. Name blocks by the ids in the page outline.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        changes: {
+          type: 'array',
+          description: 'One to eight changes, each with a one-line reason.',
+          items: {
+            type: 'object',
+            properties: {
+              kind: {
+                type: 'string',
+                enum: ['set_text', 'set_setting', 'set_page_seo'],
+                description: 'set_text for a block\u2019s words, set_setting for one of its settings, set_page_seo for the page\u2019s search title and description.',
+              },
+              block: { type: 'string', description: 'The block id, for set_text and set_setting.' },
+              text: { type: 'string', description: 'The new words, as plain text. For set_text.' },
+              setting: { type: 'string', description: 'The setting\u2019s key, as read_catalogue lists it. For set_setting.' },
+              value: { description: 'The new value: a string, a number or true/false. For set_setting.' },
+              title: { type: 'string', description: 'The search title. For set_page_seo.' },
+              description: { type: 'string', description: 'The search description. For set_page_seo.' },
+              why: { type: 'string', description: 'One line: why this is better.' },
+            },
+            required: ['kind', 'why'],
+          },
+        },
+      },
+      required: ['changes'],
+    },
+    writes: true,
+    capability: 'content',
   },
   {
     name: 'ask_user',

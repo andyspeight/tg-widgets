@@ -22,14 +22,19 @@
 import type { Capability } from '../auth/permissions';
 import type { ConverseAnswer, ConverseMessage, ConverseTool } from '../ai/anthropic';
 import type { AssistClaim, AssistLogEvent } from '../db/assist';
+import type { Page } from '../content/schema';
 import type { PageOutline } from './context';
 import { refusalMessage } from './limits';
 import { addUsage, costPence, noUsage, type TokenUsage } from './pricing';
+import { applyOperations, parseOperation, type Change, type Operation } from './operations';
 import { contextTurn, systemPrompt, threadMessages, type PriorTurn, type SiteContext } from './prompt';
 import { isToolName, toApiTools, toolsFor, type Mode, type ToolDefinition, type ToolName } from './tools';
 
 /** Calls to the model one turn may make. Read a page, read the results, answer: four is plenty. */
 export const MAX_ROUNDS = 5;
+
+/** Changes one proposal may carry. More than this is a plan, not a change. */
+export const MAX_OPERATIONS = 8;
 
 /** How hard the model thinks on a turn. Medium, as the builders found. */
 export const ASSIST_EFFORT = 'medium' as const;
@@ -53,6 +58,12 @@ export interface ServeInput {
   thread: readonly PriorTurn[];
   site: SiteContext;
   page: PageOutline | null;
+  /**
+   * The open page itself, which propose_changes applies to. The outline is what
+   * the model reads; this is what an operation is checked against, and it never
+   * leaves the server.
+   */
+  pageTree: Page | null;
   caps: ReadonlySet<Capability>;
 }
 
@@ -74,9 +85,19 @@ export interface Question {
   options: string[];
 }
 
+export interface Proposal {
+  /** What the person will see and apply, one entry per change. */
+  changes: Change[];
+  /** The operations themselves, which the editor applies if they say yes. */
+  operations: Operation[];
+  /** Anything the model asked for that was refused, so the panel can say so. */
+  refused: string[];
+}
+
 export type ServeResult =
   | { kind: 'answer'; text: string; usage: TokenUsage; pence: number; toolsUsed: string[] }
   | { kind: 'question'; text: string; question: Question; usage: TokenUsage; pence: number; toolsUsed: string[] }
+  | { kind: 'proposal'; text: string; proposal: Proposal; usage: TokenUsage; pence: number; toolsUsed: string[] }
   | { kind: 'refused'; message: string }
   | { kind: 'failed'; message: string; usage: TokenUsage; pence: number };
 
@@ -174,6 +195,73 @@ export async function serveAssist(input: ServeInput, deps: ServeDeps): Promise<S
           await deps.log({ ...base, usageId, kind: 'question', detail: { options: question.options.length, toolsUsed } });
           return { kind: 'question', text: texts.join('\n\n'), question, usage, pence: pence(), toolsUsed };
         }
+      }
+
+      const proposed = uses.find((use) => use.name === 'propose_changes' && allowed.has('propose_changes'));
+      if (proposed) {
+        const raw = (proposed.input as { changes?: unknown })?.changes;
+        const operations = (Array.isArray(raw) ? raw : [])
+          .map(parseOperation)
+          .filter((op): op is Operation => op !== null)
+          .slice(0, MAX_OPERATIONS);
+
+        if (!input.pageTree) {
+          messages.push({ role: 'assistant', content: answer.content });
+          messages.push({
+            role: 'user',
+            content: [{
+              type: 'tool_result',
+              tool_use_id: proposed.id,
+              content: 'No page is open, so there is nothing to change. Say what you would change instead.',
+              is_error: true,
+            }],
+          });
+          continue;
+        }
+
+        const outcome = applyOperations(input.pageTree, operations, input.caps);
+
+        /* Nothing survived: hand the refusals back and let it correct one line
+           rather than start again. That is what "returned to the model as an
+           error to correct" means in the brief. */
+        if (outcome.changes.length === 0) {
+          await deps.log({ ...base, usageId, kind: 'refused', detail: { tool: 'propose_changes', refused: outcome.errors.length } });
+          messages.push({ role: 'assistant', content: answer.content });
+          messages.push({
+            role: 'user',
+            content: [{
+              type: 'tool_result',
+              tool_use_id: proposed.id,
+              content: outcome.errors.length
+                ? `None of those could be made:\n${outcome.errors.join('\n')}`
+                : 'That proposal had no changes in it.',
+              is_error: true,
+            }],
+          });
+          continue;
+        }
+
+        await deps.record(usageId, usage, pence());
+        await deps.log({
+          ...base,
+          usageId,
+          kind: 'proposed',
+          detail: {
+            /* Labels and kinds, never the words themselves: the log says what
+               was proposed, not what the client's page says. */
+            changes: outcome.changes.map((change) => ({ kind: change.kind, label: change.label })),
+            refused: outcome.errors.length,
+            toolsUsed,
+          },
+        });
+        return {
+          kind: 'proposal',
+          text: texts.join('\n\n'),
+          proposal: { changes: outcome.changes, operations, refused: outcome.errors },
+          usage,
+          pence: pence(),
+          toolsUsed,
+        };
       }
 
       messages.push({ role: 'assistant', content: answer.content });

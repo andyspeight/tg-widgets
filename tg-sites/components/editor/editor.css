@@ -6204,3 +6204,137 @@ a.tg-btn { text-decoration: none; }
   0%, 100% { opacity: 1; }
   50% { opacity: .55; }
 }
+
+/* --- Luna Assist: a proposal, and the two modes (17 Sep 2026) ------------- */
+
+/*
+ * The switch only exists where Build can do something, so these two sit
+ * together in the head where the single "Plan" pill sits otherwise.
+ */
+.ed-assist__modes {
+  margin-left: auto;
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-well);
+}
+
+.ed-assist__mode-btn {
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  padding: 3px var(--ed-3);
+  border: 0;
+  border-radius: var(--ed-r-full);
+  background: none;
+  color: var(--ed-ink-2);
+  cursor: pointer;
+}
+
+.ed-assist__mode-btn[aria-pressed='true'] {
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  box-shadow: var(--ed-shadow-sm);
+}
+
+.ed-assist__mode-btn:disabled { cursor: default; opacity: .7; }
+
+.ed-assist__proposal {
+  margin-top: var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  overflow: hidden;
+}
+
+.ed-assist__proposal-head {
+  margin: 0;
+  padding: var(--ed-2) var(--ed-3);
+  background: var(--ed-well);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+.ed-assist__changes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ed-assist__change {
+  padding: var(--ed-2) var(--ed-3);
+  border-top: 1px solid var(--ed-line-soft);
+}
+
+.ed-assist__change-what {
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+/* What it says now, struck through: the person is comparing, so both are here. */
+.ed-assist__change-was {
+  margin: 2px 0 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+  text-decoration: line-through;
+  overflow-wrap: anywhere;
+}
+
+.ed-assist__change-now {
+  margin: 2px 0 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.45;
+  color: var(--ed-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ed-assist__change-why {
+  margin: 2px 0 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__refused,
+.ed-assist__settled {
+  margin: 0;
+  padding: var(--ed-2) var(--ed-3);
+  border-top: 1px solid var(--ed-line-soft);
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__actions {
+  display: flex;
+  gap: var(--ed-2);
+  padding: var(--ed-2) var(--ed-3);
+  border-top: 1px solid var(--ed-line-soft);
+}
+
+.ed-assist__apply,
+.ed-assist__skip {
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  padding: var(--ed-2) var(--ed-3);
+  border-radius: var(--ed-r-sm);
+  cursor: pointer;
+}
+
+.ed-assist__apply {
+  border: 0;
+  background: var(--ed-primary);
+  color: var(--ed-on-brand);
+}
+
+.ed-assist__skip {
+  border: 1px solid var(--ed-line);
+  background: var(--ed-panel);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__skip:hover { color: var(--ed-ink); background: var(--ed-well); }

@@ -15,10 +15,29 @@
  * over: a newer server may send a kind an older tab has never heard of.
  */
 
+/** One change as the panel draws it. Mirrors Change in lib/assist/operations.ts. */
+export interface AssistChange {
+  kind: string;
+  label: string;
+  before: string;
+  after: string;
+  why: string;
+}
+
 export type AssistEvent =
   | { type: 'text'; delta: string }
   | { type: 'answer'; text: string; pence?: number; toolsUsed?: string[] }
   | { type: 'question'; text: string; question: string; options: string[]; pence?: number; toolsUsed?: string[] }
+  | {
+      type: 'proposal';
+      text: string;
+      changes: AssistChange[];
+      /** Opaque here: the editor hands them straight back to the operations module. */
+      operations: unknown[];
+      refused?: string[];
+      pence?: number;
+      toolsUsed?: string[];
+    }
   | { type: 'error'; message: string; pence?: number };
 
 /** One turn as the panel holds it. */
@@ -32,6 +51,10 @@ export interface AssistTurn {
   tools?: string[];
   /** A question the assistant asked, with the options it offered. */
   question?: { question: string; options: string[] } | null;
+  /** Changes it proposed, before anybody has applied them. */
+  proposal?: { changes: AssistChange[]; operations: unknown[]; refused: string[] } | null;
+  /** Set once the person has applied or skipped the proposal. */
+  settled?: 'applied' | 'skipped';
   /** A failure notice rather than an answer. Never sent back as context. */
   failed?: boolean;
 }
@@ -55,6 +78,8 @@ function looksLikeEvent(value: unknown): value is AssistEvent {
       return true;
     case 'question':
       return typeof event.question === 'string';
+    case 'proposal':
+      return Array.isArray((value as { changes?: unknown }).changes);
     case 'error':
       return typeof event.message === 'string';
     default:
@@ -95,6 +120,13 @@ export function trimThread(turns: readonly AssistTurn[], max = MAX_THREAD_TURNS)
     if (turn.failed || turn.streaming) continue;
     const parts = [turn.text.trim()];
     if (turn.question) parts.push(turn.question.question);
+    /* What it proposed, as labels rather than as the words themselves: enough
+       for "do the second one too" to mean something on the next turn, without
+       carrying the whole page back up. */
+    if (turn.proposal) {
+      const listed = turn.proposal.changes.map((change, index) => `${index + 1}. ${change.label}`).join('\n');
+      parts.push(`Proposed:\n${listed}${turn.settled ? `\n(${turn.settled})` : ''}`);
+    }
     const text = parts.filter(Boolean).join('\n\n');
     if (!text) continue;
     out.push({ role: turn.role, text });
@@ -138,18 +170,20 @@ export function assistRequest(input: {
   message: string;
   pageId: string | null;
   sectionId?: string | null;
+  mode?: 'plan' | 'build';
   turns: readonly AssistTurn[];
 }): {
-  mode: 'plan';
+  mode: 'plan' | 'build';
   message: string;
   pageId: string | null;
   sectionId: string | null;
   thread: PriorTurn[];
 } {
   return {
-    // Slice 1 is Plan mode. The switch arrives with slice 2, when Build has
-    // something to do that Plan does not.
-    mode: 'plan',
+    /* Build without a page open is Plan. There is nothing to propose changes
+       to, and offering the model a writer it cannot use only invites it to
+       reach for one. */
+    mode: input.mode === 'build' && input.pageId ? 'build' : 'plan',
     message: input.message.trim(),
     pageId: input.pageId,
     /* A section without its page means nothing: the server looks the section

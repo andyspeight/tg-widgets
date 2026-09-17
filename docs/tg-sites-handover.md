@@ -260,6 +260,33 @@ label: it goes to the route, which checks the page actually has it, and the
 outline the model reads marks it `[selected]` with the system prompt saying
 that a question with no subject is about it.
 
+**Luna Assist slice 2, Build mode (17 Sep 2026).** The assistant can now
+propose changes, and the person applies or skips them. `lib/assist/operations.ts`
+is the whole of what it may change: `set_text` (a block's words), `set_setting`
+(one of its settings) and `set_page_seo`. Structure operations wait for 2b, on
+purpose: the machinery is the risky half and three operations prove it as well
+as eight.
+
+How a change gets made, in order. The model calls `propose_changes`, the only
+writer in the registry and the one Plan mode drops. The server applies the
+operations to a COPY of the page: each one finds its block by id (inside a
+container or a loop too), checks the field against `lib/content/blocks.ts`,
+refuses anything that would drop a `{{token}}`, applies with the editor's own
+tree helpers and parses the result with the page schema. Valid changes become
+the proposal and refusals go back to the model, which is what lets it correct
+one line. Nothing is written. The panel draws each change as what it says now,
+what it would say and why. Apply hands the OPERATIONS to the editor, which runs
+them through one `commit`, so the proposal is a single step on the same history
+as typing and Undo puts all of it back at once. `app/actions/assist.ts` records
+that it happened; it writes no page, so there is still one save path.
+
+Two things left out deliberately. There is no `assist_change_sets` table: with
+apply going through the editor, a row would be a record rather than a
+mechanism, and `assist_log` already carries proposed and applied. It belongs
+with applying from the dashboard, which has no editor to apply into. And the
+Build switch only appears where there IS a page and a history, so the dashboard
+drawer stays Plan rather than offering a control that could not work.
+
 **The binding question, settled (17 Sep 2026).** Yesterday's note said the
 existing "rewrite this section" could overwrite a collection binding with plain
 words. It cannot, and the reason is worth keeping: `slotsOf` in
@@ -602,11 +629,12 @@ rested on a number that does not mean what it looks like.
 8. **Collections fed from an external source.**
 
 9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
-   `docs/tg-sites-copilot-review.md`. Slice 1's foundations are built (the
-   route, the ledger, the outline, the read tools, Plan mode, and the panel in
-   direction A). Slice 1 is done and live. Next is slice 2: Build mode on the
-   page, `propose_changes`, the binding guard in front of the existing section
-   rewrite too, and apply and undo through the editor's own history.
+   `docs/tg-sites-copilot-review.md`. Slices 1 and 2 are live: the route, the
+   ledger, the outline, the read tools, the panel in direction A, and Build
+   mode with proposals applied through the editor's own history. Next is
+   slice 2b (add, move and remove a section) and then slice 3, the bigger asks:
+   a page from a description, and a client's pasted notes turned into a
+   checklist.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.

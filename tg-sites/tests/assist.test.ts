@@ -30,6 +30,7 @@ import {
   trimThread,
   type AssistTurn,
 } from '../lib/assist/client';
+import { applyOperations, parseOperation } from '../lib/assist/operations';
 import { isToolName, toApiTools, TOOLS, toolsFor, type ToolDefinition } from '../lib/assist/tools';
 import { ALL_CAPABILITIES, PRESETS, type Capability } from '../lib/auth/permissions';
 import { loopCardTemplate } from '../lib/content/loop';
@@ -141,6 +142,9 @@ function siteFixture(): SiteContext {
 const ALL = new Set<Capability>(ALL_CAPABILITIES);
 const CONTENT_ONLY = new Set<Capability>(PRESETS['content-only']);
 
+/** Everything that only reads. Plan is exactly this, whoever is asking. */
+const READERS = TOOLS.filter((tool) => !tool.writes).map((tool) => tool.name);
+
 function textAnswer(text: string, usage = { inputTokens: 1000, outputTokens: 200, cacheReadTokens: 8000, cacheWriteTokens: 0 }): ConverseAnswer {
   return { content: [{ type: 'text', text }], stopReason: 'end_turn', usage };
 }
@@ -157,6 +161,7 @@ interface Harness {
   calls: Array<{ system: string; messages: readonly unknown[]; tools: string[] }>;
   ran: Array<{ name: string; input: unknown }>;
   logged: string[];
+  details: Array<Record<string, unknown>>;
   recorded: Array<{ usageId: string; pence: number }>;
   streamed: string[];
 }
@@ -167,6 +172,7 @@ function harness(answers: ConverseAnswer[] | (() => ConverseAnswer), claim: Assi
     calls: [],
     ran: [],
     logged: [],
+    details: [],
     recorded: [],
     streamed: [],
     deps: {
@@ -189,6 +195,7 @@ function harness(answers: ConverseAnswer[] | (() => ConverseAnswer), claim: Assi
       },
       log: async (event) => {
         h.logged.push(event.kind);
+        h.details.push(event.detail);
       },
       onText: (delta) => {
         h.streamed.push(delta);
@@ -210,6 +217,7 @@ function input(overrides: Partial<ServeInput> = {}): ServeInput {
     thread: [],
     site: siteFixture(),
     page: outlinePage(pageFixture(), '/norway-fjords'),
+    pageTree: pageFixture(),
     caps: ALL,
     ...overrides,
   };
@@ -229,25 +237,28 @@ describe('rule 4: Plan mode is read-only in code', () => {
   it('a Plan request carries no writer, whatever the member may do', () => {
     const tools = toolsFor('plan', ALL, withWriters);
     expect(tools.some((tool) => tool.writes)).toBe(false);
-    expect(tools.map((tool) => tool.name)).toEqual(TOOLS.map((tool) => tool.name));
+    expect(tools.map((tool) => tool.name)).toEqual(READERS);
   });
 
   it('a Build request carries the writers the member is allowed', () => {
     const names = toolsFor('build', ALL, withWriters).map((tool) => tool.name);
     expect(names).toContain('propose_changes');
     expect(names).toContain('set_theme_token');
+    // And the real registry's one writer reaches a content-only client.
+    expect(toolsFor('build', CONTENT_ONLY).map((tool) => tool.name)).toContain('propose_changes');
   });
 
   it('the request the model receives is built from that list and nothing else', async () => {
     const h = harness([textAnswer('Tighten the hero.')]);
     await serveAssist(input({ mode: 'plan' }), h.deps);
     expect(h.calls).toHaveLength(1);
-    expect(h.calls[0].tools).toEqual(TOOLS.map((tool) => tool.name));
+    expect(h.calls[0].tools).toEqual(READERS);
     expect(h.calls[0].tools.some((name) => !isToolName(name))).toBe(false);
   });
 
-  it('slice 1 ships readers only, and the API shape carries none of our own fields', () => {
-    expect(TOOLS.every((tool) => tool.writes === false)).toBe(true);
+  it('there is exactly one writer, and the API shape carries none of our own fields', () => {
+    const writers = TOOLS.filter((tool) => tool.writes).map((tool) => tool.name);
+    expect(writers).toEqual(['propose_changes']);
     const api = toApiTools(TOOLS);
     for (const tool of api) {
       expect(Object.keys(tool).sort()).toEqual(['description', 'input_schema', 'name']);
@@ -272,9 +283,11 @@ describe('rule 7: role-scoped tools', () => {
     }
   });
 
-  it('a viewer with no capabilities still has the readers', () => {
-    const names = toolsFor('plan', new Set(), registry).map((tool) => tool.name);
-    expect(names).toEqual(TOOLS.map((tool) => tool.name));
+  it('a viewer with no capabilities still has the readers, and nothing that writes', () => {
+    for (const mode of ['plan', 'build'] as const) {
+      const names = toolsFor(mode, new Set(), registry).map((tool) => tool.name);
+      expect(names, mode).toEqual(READERS);
+    }
   });
 });
 
@@ -703,6 +716,205 @@ describe('the selected section', () => {
     await serveAssist(input({ sectionId: 's1', message: 'Tighten this' }), h.deps);
     const first = h.calls[0].messages as Array<{ role: string; content: string }>;
     expect(first[0].content).toContain('[selected]');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Slice 2: the operations
+// ---------------------------------------------------------------------------
+
+describe('operations', () => {
+  const heading = (page: ReturnType<typeof pageFixture>) =>
+    (page.sections[0].rows[0].columns[0].blocks[0].props as Record<string, unknown>).html;
+
+  it('rewrites a block\u2019s words, through the sanitiser, never as markup', () => {
+    const page = pageFixture();
+    const { page: next, changes, errors } = applyOperations(
+      page,
+      [{ kind: 'set_text', block: 'b1', text: '<script>alert(1)</script>Norway, twelve guests', why: 'Says who it is for' }],
+      ALL,
+    );
+    expect(errors).toEqual([]);
+    expect(changes).toHaveLength(1);
+    expect(changes[0].label).toBe('Heading text');
+    expect(changes[0].before).toBe('Norway fjord cruises');
+    expect(String(heading(next))).not.toContain('<script');
+    expect(String(heading(next))).toContain('Norway, twelve guests');
+  });
+
+  it('refuses to replace a bound value with fixed words, and says what to do instead', () => {
+    const page = pageFixture();
+    const { changes, errors } = applyOperations(
+      page,
+      [{ kind: 'set_text', block: 't1', text: 'Seven nights in Norway', why: 'Nicer' }],
+      ALL,
+    );
+    expect(changes).toEqual([]);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain('{{title}}');
+    expect(errors[0]).toContain('collection');
+  });
+
+  it('keeps a bound value when the words still carry its token', () => {
+    const page = pageFixture();
+    const { changes, errors } = applyOperations(
+      page,
+      [{ kind: 'set_text', block: 't1', text: '{{title}}, seven nights', why: 'Adds the length' }],
+      ALL,
+    );
+    expect(errors).toEqual([]);
+    expect(changes).toHaveLength(1);
+  });
+
+  it('checks a setting against the block\u2019s own field list', () => {
+    const page = pageFixture();
+    const good = applyOperations(page, [{ kind: 'set_setting', block: 'b1', setting: 'level', value: 'h2', why: 'It is not the page title' }], ALL);
+    expect(good.errors).toEqual([]);
+    expect(good.changes[0].after).toBe('h2');
+
+    const wrongValue = applyOperations(page, [{ kind: 'set_setting', block: 'b1', setting: 'level', value: 'h9', why: 'x' }], ALL);
+    expect(wrongValue.changes).toEqual([]);
+    expect(wrongValue.errors[0]).toContain('must be one of');
+    expect(wrongValue.errors[0]).toContain('h2');
+
+    const wrongKey = applyOperations(page, [{ kind: 'set_setting', block: 'b1', setting: 'colour', value: 'red', why: 'x' }], ALL);
+    expect(wrongKey.errors[0]).toContain('no setting called colour');
+    expect(wrongKey.errors[0]).toContain('level');
+  });
+
+  it('scopes a setting by what kind of field it is, not by which tool asked', () => {
+    const page = pageFixture();
+    // 'level' switches a variant, so it is config and wants `structure`.
+    const denied = applyOperations(page, [{ kind: 'set_setting', block: 'b1', setting: 'level', value: 'h2', why: 'x' }], CONTENT_ONLY);
+    expect(denied.changes).toEqual([]);
+    expect(denied.errors[0]).toContain('layout or styling');
+
+    // The same member may still rewrite the words.
+    const allowed = applyOperations(page, [{ kind: 'set_text', block: 'b1', text: 'New words', why: 'x' }], CONTENT_ONLY);
+    expect(allowed.errors).toEqual([]);
+  });
+
+  it('writes the search listing only for a member who may, and caps it', () => {
+    const page = pageFixture();
+    const denied = applyOperations(page, [{ kind: 'set_page_seo', title: 'A title', why: 'x' }], CONTENT_ONLY);
+    expect(denied.errors[0]).toContain('search settings');
+
+    const long = 'x'.repeat(200);
+    const { page: next, changes } = applyOperations(page, [{ kind: 'set_page_seo', title: long, description: long, why: 'x' }], ALL);
+    expect(changes).toHaveLength(1);
+    expect(next.seo?.title?.length).toBeLessThanOrEqual(70);
+    expect(next.seo?.description?.length).toBeLessThanOrEqual(200);
+  });
+
+  it('refuses what it cannot check, and names a block it cannot find', () => {
+    const page = pageFixture();
+    const nowhere = applyOperations(page, [{ kind: 'set_text', block: 'nope', text: 'Hello', why: 'x' }], ALL);
+    expect(nowhere.errors[0]).toContain('no block called nope');
+
+    const unknown = applyOperations(page, [{ kind: 'set_shape' } as never], ALL);
+    expect(unknown.errors[0]).toContain('no operation called set_shape');
+  });
+
+  it('applies the good ones and hands back the bad ones, so one line can be corrected', () => {
+    const page = pageFixture();
+    const { changes, errors } = applyOperations(
+      page,
+      [
+        { kind: 'set_text', block: 'b1', text: 'A better heading', why: 'Clearer' },
+        { kind: 'set_text', block: 'gone', text: 'Nowhere', why: 'x' },
+        { kind: 'set_text', block: 'b2', text: 'A better paragraph', why: 'Clearer' },
+      ],
+      ALL,
+    );
+    expect(changes).toHaveLength(2);
+    expect(errors).toHaveLength(1);
+  });
+
+  it('never touches the page it was given, which is what makes Undo exact', () => {
+    const page = pageFixture();
+    const before = JSON.stringify(page);
+    const { page: next } = applyOperations(
+      page,
+      [
+        { kind: 'set_text', block: 'b1', text: 'Something else entirely', why: 'x' },
+        { kind: 'set_setting', block: 'b1', setting: 'level', value: 'h3', why: 'x' },
+        { kind: 'set_page_seo', title: 'A search title', why: 'x' },
+      ],
+      ALL,
+    );
+    // The editor keeps the previous page in its history, so purity here IS
+    // "apply then undo returns the page byte for byte".
+    expect(JSON.stringify(page)).toBe(before);
+    expect(JSON.stringify(next)).not.toBe(before);
+  });
+
+  it('only takes an operation it can read', () => {
+    expect(parseOperation({ kind: 'set_text', block: 'b1', text: 'x', why: 'y' })).toMatchObject({ kind: 'set_text' });
+    expect(parseOperation({ kind: 'set_text', block: 'b1' })).toBeNull();
+    expect(parseOperation({ kind: 'set_setting', block: 'b1', setting: 'level', value: { nested: true } })).toBeNull();
+    expect(parseOperation({ kind: 'set_page_seo' })).toBeNull();
+    expect(parseOperation('set_text')).toBeNull();
+  });
+});
+
+describe('a proposal is where the model stops', () => {
+  const proposeAnswer = (changes: unknown[]) => toolAnswer('propose_changes', { changes }, 'Two things.');
+
+  it('ends the turn with changes for the person, and writes nothing', async () => {
+    const h = harness([proposeAnswer([{ kind: 'set_text', block: 'b1', text: 'Twelve guests at a time', why: 'Says who it is for' }])]);
+    const result = await serveAssist(input({ mode: 'build' }), h.deps);
+
+    expect(result.kind).toBe('proposal');
+    if (result.kind !== 'proposal') return;
+    expect(result.proposal.changes).toHaveLength(1);
+    expect(result.proposal.operations).toHaveLength(1);
+    expect(h.calls).toHaveLength(1);
+    expect(h.logged).toEqual(['asked', 'proposed']);
+  });
+
+  it('hands a wholly refused proposal back to be corrected rather than showing nothing', async () => {
+    const h = harness([
+      proposeAnswer([{ kind: 'set_text', block: 't1', text: 'Fixed words', why: 'x' }]),
+      textAnswer('That one is filled from your collection, so I have left it.'),
+    ]);
+    const result = await serveAssist(input({ mode: 'build' }), h.deps);
+
+    expect(result.kind).toBe('answer');
+    expect(h.calls).toHaveLength(2);
+    const second = h.calls[1].messages as Array<{ role: string; content: unknown }>;
+    const results = second[second.length - 1].content as Array<Record<string, unknown>>;
+    expect(results[0].is_error).toBe(true);
+    expect(String(results[0].content)).toContain('{{title}}');
+    expect(h.logged).toContain('refused');
+  });
+
+  it('cannot propose against a page that is not open', async () => {
+    const h = harness([
+      proposeAnswer([{ kind: 'set_text', block: 'b1', text: 'Words', why: 'x' }]),
+      textAnswer('Open the page and I will.'),
+    ]);
+    const result = await serveAssist(input({ mode: 'build', pageTree: null, page: null }), h.deps);
+    expect(result.kind).toBe('answer');
+    const second = h.calls[1].messages as Array<{ role: string; content: unknown }>;
+    const results = second[second.length - 1].content as Array<Record<string, unknown>>;
+    expect(String(results[0].content)).toContain('No page is open');
+  });
+
+  it('is not offered at all in Plan mode, so Plan cannot propose', async () => {
+    const h = harness([proposeAnswer([{ kind: 'set_text', block: 'b1', text: 'Words', why: 'x' }]), textAnswer('Here is what I would change.')]);
+    const result = await serveAssist(input({ mode: 'plan' }), h.deps);
+
+    expect(h.calls[0].tools).not.toContain('propose_changes');
+    // Named anyway, it is refused like any tool that was not offered.
+    expect(result.kind).toBe('answer');
+    expect(h.logged).toContain('refused');
+  });
+
+  it('the log records what was proposed, never the words themselves', async () => {
+    const h = harness([proposeAnswer([{ kind: 'set_text', block: 'b1', text: 'A secret client sentence', why: 'x' }])]);
+    await serveAssist(input({ mode: 'build' }), h.deps);
+    expect(JSON.stringify(h.details)).not.toContain('A secret client sentence');
+    expect(JSON.stringify(h.details)).toContain('Heading text');
   });
 });
 

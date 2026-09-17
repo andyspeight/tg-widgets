@@ -71,6 +71,13 @@ import { blockDefinition } from '../../lib/content/blocks';
 import { usePaletteDrop } from './usePaletteDrop';
 import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
+import { recordAssistApplied } from '../../app/actions/assist';
+import type { AssistChange } from '../../lib/assist/client';
+import {
+  applyOperations,
+  parseOperation,
+  type Operation as AssistOperation,
+} from '../../lib/assist/operations';
 import { sectionNameAt } from '../../lib/content/naming';
 import { AssistPanel } from '../assist/AssistPanel';
 import { Rail } from './Rail';
@@ -1345,6 +1352,36 @@ export function EditorShell({
     });
   }, []);
 
+  /*
+   * Applying what Luna Assist proposed: the operations run here, in the editor,
+   * through ONE commit, so the whole proposal is a single step on the same
+   * history as typing and Undo puts all of it back at once. The capability set
+   * is checked again on the way in, because a proposal has been to a browser
+   * and back and is input again by the time it returns.
+   */
+  const applyAssist = useCallback(
+    async (operations: readonly unknown[], changes: readonly AssistChange[]) => {
+      const ops = operations
+        .map(parseOperation)
+        .filter((op): op is AssistOperation => op !== null);
+      if (ops.length === 0) return 0;
+
+      const outcome = applyOperations(history.present, ops, new Set(caps));
+      if (outcome.changes.length === 0) return 0;
+      commit(outcome.page);
+
+      /* Best effort, and after the change rather than before it: a log line
+         that fails to land must not cost the person their edit. */
+      void recordAssistApplied({
+        pageId,
+        mode: 'build',
+        changes: changes.map((change) => ({ kind: change.kind, label: change.label })),
+      });
+      return outcome.changes.length;
+    },
+    [caps, commit, history, pageId],
+  );
+
   /**
    * Run a formatting action against the block being edited on the canvas.
    *
@@ -2549,6 +2586,7 @@ export function EditorShell({
           pageTitle={page.title}
           sectionId={assistSection?.id ?? null}
           sectionLabel={assistSection?.label ?? null}
+          onApply={applyAssist}
         />
       ) : railPanel === 'pages' ? (
         <PagesPanel

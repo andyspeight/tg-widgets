@@ -378,11 +378,31 @@ the brief's; the additions are marked.
   as it is written, with the openers, the context chips, questions with their
   options and a line saying what it went and read. Slice 1 is complete and
   usable; Build mode and the proposals are slice 2.
-- **Slice 2, Build mode on the page.** `propose_changes` for text, block
-  settings and sections from the catalogue on the current page. Preview on
-  the canvas, Apply, Undo, change history in the panel. **Changed:** apply
-  through the editor's history (rule 3 above). **Added:** the binding guard in
-  front of the existing section rewrite.
+- **Slice 2, Build mode on the page.** **Built, 17 September 2026**, with the
+  scope trimmed on purpose: `propose_changes` carries `set_text`,
+  `set_setting` and `set_page_seo`, and structure (add, move and remove a
+  section) waits for 2b. The machinery is the risky half and it is better
+  proven on three operations than on eight; the module is written so three
+  more are three more entries.
+  `lib/assist/operations.ts` is pure: it finds a block by the id the model was
+  given (including inside a container or a loop), checks the field against the
+  block registry the editor's own panels are built from, refuses anything that
+  would drop a `{{token}}`, applies with the editor's own tree helpers and
+  parses the result with the page schema. A refused operation goes back to the
+  model as a sentence naming what was wrong, and a wholly refused proposal is
+  handed back for it to correct.
+  **Changed from the brief:** apply runs in the EDITOR, through one `commit`,
+  so the whole proposal is one step on the history the person already has and
+  Undo is their Undo. The server writes no page, which keeps one save path;
+  `app/actions/assist.ts` only records that it happened.
+  **Changed:** no `assist_change_sets` table yet. With apply going through the
+  editor, a change-set row would be a record rather than a mechanism, and
+  `assist_log` (0035) already carries proposed and applied. The table belongs
+  with applying from the dashboard, where there is no editor to apply into.
+  **Dropped:** the binding guard in front of the existing section rewrite. It
+  was not needed: `slotsOf` never reaches inside a container or a loop, so a
+  bound value is never offered to that model. The guard lives where writes
+  actually happen instead.
 - **Slice 3, bigger asks.** Generate a page from a description, wrapping the
   page builder that exists. Pasted revision notes: Plan turns them into a
   checklist and each item becomes its own proposal to apply or skip. A
