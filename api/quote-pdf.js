@@ -58,6 +58,7 @@ import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClie
 import { renderQuoteEmail, normaliseQuoteEmail, isEmailAddress } from '../public/_quote-email-template.js';
 import { canSendFrom } from './_lib/sendgrid.js';
 import { generateQuotePdf, pdfFilename, fetchAttachmentBuffers } from '../generate-pdf.js';
+import { travelifyAuthHeaders } from './_lib/travelify.js';
 
 const TRAVELIFY_API_BASE = process.env.QUOTE_API_BASE || 'https://api.travelify.io';
 
@@ -335,12 +336,10 @@ async function fetchQuoteDocument(quoteId, key, appId, apiKey) {
 
   const r = await fetch(url, {
     method: 'GET',
-    headers: {
-      'Authorization': `Token ${appId}:${apiKey}`,
-      'Origin': 'https://www.travelgenix.io',
+    headers: travelifyAuthHeaders(appId, apiKey, {
       'Accept': 'application/json',
       'User-Agent': 'Travelgenix-QuotePDF/1.0',
-    },
+    }),
     signal: AbortSignal.timeout(12000),
   });
 

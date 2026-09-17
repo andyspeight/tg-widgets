@@ -36,6 +36,7 @@
 import { setCors } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import {
+  travelifyAuthHeaders,
   rateLimit,
   getClientIp,
   validateWidgetId,
@@ -45,7 +46,6 @@ import {
   resolveWidgetCredentials,
   fetchTravelifyOrderRaw,
   readOrderKey,
-  TRAVELIFY_ORIGIN,
 } from './_lib/travelify.js';
 
 const ADDGENERICITEM_API = 'https://api.travelify.io/addgenericitem';
@@ -319,11 +319,7 @@ export default async function handler(req, res) {
     try {
       apiRes = await fetch(ADDGENERICITEM_API, {
         method: 'POST',
-        headers: {
-          'Authorization': `Token ${creds.appId}:${creds.apiKey}`,
-          'Content-Type': 'application/json',
-          'Origin': TRAVELIFY_ORIGIN,
-        },
+        headers: travelifyAuthHeaders(creds.appId, creds.apiKey),
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(15000),
       });

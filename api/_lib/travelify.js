@@ -39,6 +39,51 @@ export const TRAVELIFY_ORDER_API = 'https://api.travelify.io/account/order';
 // origin we present on every Travelify call.
 export const TRAVELIFY_ORIGIN = 'https://www.travelgenix.io';
 
+// The Referer every server-to-server Travelify call must carry.
+//
+// Travelify lets a client restrict an application to their own domains. That
+// check reads the REFERER, and a server has none unless it sets one, so a
+// locked application refuses us with the same "Missing or invalid application
+// credentials" a wrong key gets. Travelify's own instruction (17 Sep 2026) is
+// to send this value, which their gate treats as the server-side caller and
+// lets past the domain list. It is not a real page and nothing fetches it.
+//
+// This is not a workaround we invented. The offers search has sent exactly
+// this since 14 Sep 2026 (SEARCH_REFERER in _lib/offers/travelify-search.js,
+// on Andy's instruction), which is why offers kept working for a locked
+// application while the whole order family did not.
+//
+// What it costs: a domain lock no longer limits calls that go through US. It
+// never did limit them, because our server is the caller either way and the
+// lock was refusing us rather than any third party. A visitor's own lookup is
+// still gated on three matching secrets — email, departure date and booking
+// reference — which is the control that actually protects a booking.
+//
+// Do not "tidy this away" as a stray localhost URL. Removing it takes every
+// domain-restricted client offline, silently, with a 401 that reads as a bad
+// key. That was Better Lifestyle (app 474), dead from 22:23 on 16 Sep 2026.
+export const TRAVELIFY_REFERER = 'https://localhost/';
+
+/**
+ * The headers for a Travelify call made with a client's Token credentials.
+ *
+ * One builder for the whole order family, because there were nine copies of
+ * these four lines and the Referer landed in none of them. `extra` is for the
+ * odd caller that needs more (quote-pdf sends an Accept and a User-Agent).
+ *
+ * `extra` is merged FIRST, so the four headers that make the call work cannot
+ * be overridden from a call site. A missing Referer is the exact failure this
+ * function exists to prevent, and it should not be reachable by accident.
+ */
+export function travelifyAuthHeaders(appId, apiKey, extra = {}) {
+  return Object.assign({}, extra, {
+    'Authorization': `Token ${String(appId).trim()}:${String(apiKey).trim()}`,
+    'Content-Type': 'application/json',
+    'Origin': TRAVELIFY_ORIGIN,
+    'Referer': TRAVELIFY_REFERER,
+  });
+}
+
 // ----- Demo bypass -----
 // When widgetId === DEMO_WIDGET_SENTINEL, skip the Airtable widget lookup and
 // use the published Travelgenix demo Travelify credentials (App 250). Demo
@@ -294,11 +339,7 @@ export async function fetchTravelifyOrderRaw({ appId, apiKey }, { emailAddress, 
   try {
     res = await fetch(TRAVELIFY_ORDER_API, {
       method: 'POST',
-      headers: {
-        'Authorization': `Token ${appId}:${apiKey}`,
-        'Content-Type': 'application/json',
-        'Origin': TRAVELIFY_ORIGIN,
-      },
+      headers: travelifyAuthHeaders(appId, apiKey),
       body: JSON.stringify({ emailAddress, departDate, orderRef }),
       signal: AbortSignal.timeout(12000),
     });

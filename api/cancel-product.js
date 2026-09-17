@@ -36,6 +36,7 @@
 
 import { setCors } from './_auth.js';
 import {
+  travelifyAuthHeaders,
   rateLimit,
   getClientIp,
   validateWidgetId,
@@ -46,7 +47,6 @@ import {
   resolveWidgetCredentials,
   fetchTravelifyOrderRaw,
   readOrderKey,
-  TRAVELIFY_ORIGIN,
 } from './_lib/travelify.js';
 import { renderCancellationEmail } from './_lib/cancellation-email-template.js';
 import { sendViaSendGrid, buildFromField, isValidEmail } from './_lib/sendgrid.js';
@@ -214,11 +214,7 @@ async function callTravelifyCancel({ appId, apiKey }, { orderId, orderKey, produ
   const url = `${CANCEL_API_BASE}/${encodeURIComponent(orderId)}/${encodeURIComponent(orderKey)}/${encodeURIComponent(productId)}`;
   const opts = {
     method: confirmBody ? 'POST' : 'GET',
-    headers: {
-      'Authorization': `Token ${appId}:${apiKey}`,
-      'Content-Type': 'application/json',
-      'Origin': TRAVELIFY_ORIGIN,
-    },
+    headers: travelifyAuthHeaders(appId, apiKey),
     signal: AbortSignal.timeout(15000),
   };
   if (confirmBody) opts.body = JSON.stringify(confirmBody);

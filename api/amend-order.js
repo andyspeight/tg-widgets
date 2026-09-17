@@ -32,6 +32,7 @@
 
 import { setCors } from './_auth.js';
 import {
+  travelifyAuthHeaders,
   rateLimit,
   getClientIp,
   validateWidgetId,
@@ -41,7 +42,6 @@ import {
   resolveWidgetCredentials,
   fetchTravelifyOrderRaw,
   readOrderKey,
-  TRAVELIFY_ORIGIN,
 } from './_lib/travelify.js';
 
 const AMEND_API_BASE = 'https://api.travelify.io/amend';
@@ -75,11 +75,7 @@ async function callTravelifyAmend({ appId, apiKey }, { orderId, orderKey }, amen
   const url = `${AMEND_API_BASE}/${encodeURIComponent(orderId)}/${encodeURIComponent(orderKey)}`;
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Authorization': `Token ${appId}:${apiKey}`,
-      'Content-Type': 'application/json',
-      'Origin': TRAVELIFY_ORIGIN,
-    },
+    headers: travelifyAuthHeaders(appId, apiKey),
     body: JSON.stringify({ AmendmentDetails: amendmentDetails }),
     signal: AbortSignal.timeout(15000),
   });
