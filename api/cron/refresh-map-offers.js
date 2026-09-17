@@ -53,7 +53,7 @@
 
 import { setJson, getJson, setString, getString, keys, del, configured } from '../_redis.js';
 import { MARKET_AIRPORTS, marketOfAirport } from '../_lib/offers/markets.js';
-import { createPacer, createCircuit, parseRetryAfter } from '../_lib/offers/throttle.js';
+import { createPacer, parseRetryAfter } from '../_lib/offers/throttle.js';
 
 // ── Config ────────────────────────────────────────────────────────────────
 const AIRTABLE_BASE = 'appAYzWZxvK6qlwXK';
@@ -63,29 +63,38 @@ const SELF_ORIGIN = 'https://tg-widgets.vercel.app';
 const DEMO_APP_ID = '250';
 
 const PER_REQUEST_TIMEOUT_MS = 10000;
+// Ceiling on the one retry wait, however long Travelify's Retry-After says.
+// A sweep has a 200s budget; parking a worker for minutes spends it.
+const MAX_RETRY_WAIT_MS = 5000;
 
 // Ceiling on how fast we ask Travelify for anything, across the whole run.
 //
-// A sweep is thousands of live searches; at concurrency six with no ceiling it
-// went out in bursts, and Travelify answered a share of them 429. The monitor's
-// own probe shares the account, so it saw the same 429 and emailed an alert —
-// several times a day since late July. Pacing spreads the same work evenly
-// instead of firing it as fast as responses come back.
+// OFF by default, and it must stay off unless somebody has done the arithmetic
+// below for the biggest country in the table.
 //
-// 60/min is deliberately close to the rate the rotation already averaged, so
-// this removes the bursts without cutting throughput. Travelify have not told
-// us their actual limit; when they do, set OFFERS_MAX_RPM to it. Lower it any
-// time from Vercel env without a deploy.
+// A ceiling of 60/min was added on 14 Sep 2026 to stop Travelify answering our
+// sweep with 429s. It was set "deliberately close to the rate the rotation
+// already averaged", but the rate was never checked against what ONE COUNTRY
+// costs. Spain has 17 gateway airports, and a country is swept per airport,
+// per market/currency, per product — with Flights fanning out again over 30 UK
+// departure airports. That is 734 requests for Spain alone. At 60/min it needs
+// 734 seconds and the function is killed at 300, so Spain could never finish,
+// never stored anything and never advanced the rotation. Only tiny countries
+// (Israel, 1 airport, 46 requests) still completed. The stored offers aged out
+// at the 70-hour mark on 17 Sep and every offers widget went empty.
+//
+// So: before setting OFFERS_MAX_RPM, take the largest AirportCodes count in
+// MapSearches, work out that country's request count, and make sure it fits in
+// SWEEP_TIME_BUDGET_MS at the rate you are about to impose. Guarded by
+// npm run test:map-cron-rotation.
 const MAX_REQUESTS_PER_MIN = (() => {
   const n = parseInt(process.env.OFFERS_MAX_RPM || '', 10);
-  return Number.isFinite(n) && n > 0 ? n : 60;
+  return Number.isFinite(n) && n > 0 ? n : 0;   // 0 = no ceiling, the pre-14-Sep behaviour
 })();
 
-// Module scope, not per-run: a warm instance carrying an open circuit into the
-// next invocation is correct. If Travelify told us to wait two minutes, that
-// instruction outlives the run that received it.
-const pacer = createPacer({ perMinute: MAX_REQUESTS_PER_MIN });
-const circuit = createCircuit({ defaultCooloffMs: 60000 });
+// Null when there is no ceiling, so the sweep runs at concurrency six as fast
+// as responses come back — exactly how it worked for the months before 14 Sep.
+const pacer = MAX_REQUESTS_PER_MIN ? createPacer({ perMinute: MAX_REQUESTS_PER_MIN }) : null;
 
 const REQUEST_CONCURRENCY = 6;     // parallel proxy calls within a country
                                    // (raised from 4 when types × markets grew
@@ -853,15 +862,13 @@ function buildPayload(row, destinationCode, market = MARKETS[0], sweepType = SWE
 }
 export async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retries = 1) {
   let last;
+  let rateLimited = false;
+  // How long to wait before the one retry. Travelify's own Retry-After when it
+  // gave us one, otherwise the flat 500ms this has always used.
+  let retryWaitMs = 500;
   for (let attempt = 0; attempt <= retries; attempt++) {
-    // Already told to back off — do not spend the request. Every job left in
-    // the run returns here immediately, so a throttled sweep ends quickly
-    // instead of grinding on collecting more 429s.
-    if (circuit.open()) {
-      return { ok: false, status: 429, rateLimited: true, skipped: true, error: 'rate limited — backing off' };
-    }
-    if (attempt) await new Promise(r => setTimeout(r, 500));
-    await pacer.take();
+    if (attempt) await new Promise(r => setTimeout(r, retryWaitMs));
+    if (pacer) await pacer.take();
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -884,13 +891,20 @@ export async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_M
       // 429 is the one status a retry cannot help: the supplier has just told
       // us we are asking too often, so asking again in 500ms is the same
       // question. Honour the wait it names, and stop the run.
+      // A 429 fails THIS request and nothing more. It used to trip a breaker
+      // that turned every remaining job in the run into a no-op, which meant a
+      // single 429 early in a run cost the whole rotation that run's progress.
+      // Travelify has answered a share of our sweep 429 for months while the
+      // cache filled perfectly well: it is noise on one request, not a reason
+      // to abandon 63 countries.
       if (res.status === 429) {
+        rateLimited = true;
         const retryAfterMs = parseRetryAfter(res.headers && res.headers.get ? res.headers.get('retry-after') : null);
-        circuit.trip(retryAfterMs);
-        console.warn('[map-cron] Travelify returned 429 — backing off for '
-          + Math.round(circuit.remainingMs() / 1000) + 's'
-          + (retryAfterMs === null ? ' (no Retry-After header)' : ' (Retry-After honoured)'));
-        return { ok: false, status: 429, rateLimited: true, error: 'rate limited by supplier' };
+        // Honour their number when they give one, but never park a worker for
+        // longer than the request budget it is sitting inside.
+        if (retryAfterMs !== null) retryWaitMs = Math.min(retryAfterMs, MAX_RETRY_WAIT_MS);
+        last = { ok: false, status: 429, rateLimited: true, error: 'rate limited by supplier' };
+        continue;
       }
       if (!res.ok) { last = { ok: false, status: res.status }; continue; } // retryable
       const data = await res.json();
@@ -904,7 +918,8 @@ export async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_M
       last = { ok: false, error: e.message }; // timeout/network — retryable
     }
   }
-  return last || { ok: false, error: 'request failed' };
+  return last ? { ...last, ...(rateLimited ? { rateLimited: true } : {}) }
+              : { ok: false, error: 'request failed' };
 }
 
 /** Resolve which destination codes to query for a row. */
@@ -1429,13 +1444,12 @@ export default async function handler(req, res) {
     let skippedFresh = 0;
     let processed = 0;
     let budgetExhausted = false;
+    // Reporting only now. It used to mean "we gave up on this run"; it means
+    // "the supplier refused at least one request", which the Cache tab shows
+    // without it changing what the sweep does.
     let throttled = false;
     for (const row of slice) {
       if (Date.now() - startedAt > SWEEP_TIME_BUDGET_MS) { budgetExhausted = true; break; }
-      // Told to back off. Stop the slice here rather than walking the rest of
-      // it turning every job into a no-op: the cursor does not advance past
-      // what we swept, so the next run picks these countries up.
-      if (circuit.open()) { throttled = true; break; }
       processed++;
       const rowCC = ((row.fields || {}).CountryCode || '').trim().toUpperCase();
       // Interval gate: on a normal (rotating) run, skip any country whose
@@ -1498,6 +1512,7 @@ export default async function handler(req, res) {
     // actually pulled per type and why anything was rejected.
     const sweptCount = perCountry.filter(p => p.ok && !p.skipped).length;
     const sweepStats = aggregateSweepStats(perCountry);
+    throttled = Object.values(sweepStats).some((x) => (x.rateLimited || 0) > 0);
     if (sweptCount) {
       await setJson(SWEEP_STATS_KEY, {
         at: now.toISOString(),
@@ -1511,7 +1526,10 @@ export default async function handler(req, res) {
         // tab reads this: requests per type is the COST side of the
         // fetched/kept numbers beside it, and the only way to see which
         // product is worth what it costs to sweep.
-        throttle: { ...pacer.stats(), ...circuit.stats() },
+        throttle: {
+          ...(pacer ? pacer.stats() : { perMinute: 0, taken: 0, waitedMs: 0 }),
+          rateLimitedRequests: Object.values(sweepStats).reduce((n, x) => n + (x.rateLimited || 0), 0),
+        },
       });
       for (const [t, s] of Object.entries(sweepStats)) {
         console.log(`[map-cron] sweep ${t}: ${s.fetched} fetched → ${s.kept} kept` +
