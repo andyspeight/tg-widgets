@@ -116,6 +116,21 @@ and starving the cache it was supposed to be a safety net for. An empty cache
 answer means the calm empty state, not a live search. Guarded by
 `npm run test:offers-cache-only`.
 
+**Every server-side Travelify call sends a Referer** (17 Sep 2026, Better
+Lifestyle app 474). A client can lock their Travelify application to their own
+domains, and that check reads the REFERER. A server sends none unless it sets
+one, so a locked application refuses us with "Missing or invalid application
+credentials" — the same words a wrong key gets, which is why a perfectly good
+key was investigated for fifteen hours. Travelify's own instruction is to send
+`https://localhost/`, which their gate treats as the server-side caller. Build
+the headers with `travelifyAuthHeaders()` from `api/_lib/travelify.js` and never
+hand-roll `Token ${appId}:${apiKey}` again: there were nine copies of those four
+lines and the Referer had landed in none of them, so offers (which had it since
+14 Sep) worked while orders, PDFs, amendments, cancellations and balance
+payments all died. The one deliberate exception is `api/offers.js`, a browser
+proxy that forwards the VISITOR's real Referer and refuses to fabricate one.
+Guarded by `npm run test:travelify-referer`.
+
 **Embed contract.** Every widget is a container div plus one script:
 `<div data-tg-widget="<tag>" data-tg-id="tgw_...">` +
 `<script src="<origin>/widget-<tag>.js" defer>`. Optional

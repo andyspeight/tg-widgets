@@ -30,6 +30,7 @@ import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClie
 import { renderPdfHtml, renderPdfFooterTemplate, PDF_HEADER_TEMPLATE } from '../public/_pdf-template.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
+import { travelifyAuthHeaders } from './_lib/travelify.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
 
@@ -730,11 +731,7 @@ export default async function handler(req, res) {
     // Travelify requires the Origin header (without it returns a misleading 401).
     const travelifyRes = await fetch(TRAVELIFY_API, {
       method: 'POST',
-      headers: {
-        'Authorization': `Token ${appId}:${apiKey}`,
-        'Content-Type': 'application/json',
-        'Origin': 'https://www.travelgenix.io',
-      },
+      headers: travelifyAuthHeaders(appId, apiKey),
       body: JSON.stringify({ emailAddress, departDate, orderRef }),
       signal: AbortSignal.timeout(12000),
     });

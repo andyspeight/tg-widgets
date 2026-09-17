@@ -29,6 +29,7 @@
  *   calls (widget → endpoint directly) keep the original 5/min cap.
  */
 
+import { travelifyAuthHeaders } from './_lib/travelify.js';
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
@@ -1389,11 +1390,7 @@ export default async function handler(req, res) {
     // the missing Origin. Sending our own product origin satisfies the gate.
     const travelifyRes = await fetch(TRAVELIFY_API, {
       method: 'POST',
-      headers: {
-        'Authorization': `Token ${appId}:${apiKey}`,
-        'Content-Type': 'application/json',
-        'Origin': 'https://www.travelgenix.io',
-      },
+      headers: travelifyAuthHeaders(appId, apiKey),
       body: JSON.stringify({
         emailAddress,
         departDate,

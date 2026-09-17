@@ -44,7 +44,7 @@
 import crypto from 'node:crypto';
 import { sanitiseForFormula, lookupClientCredentialsByAppId } from '../_auth.js';
 import { claimNxEx } from '../_redis.js';
-import { TRAVELIFY_ORIGIN, DEMO_APP_ID, DEMO_PUBLIC_KEY } from './travelify.js';
+import { travelifyAuthHeaders, DEMO_APP_ID, DEMO_PUBLIC_KEY } from './travelify.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 export const REMINDERS_TABLE = 'tblHwa7PI2BSGjXZV';
@@ -295,12 +295,7 @@ export async function fetchOrderByIdKey({ appId, apiKey }, orderId, orderKey) {
   try {
     res = await fetch(url, {
       method: 'GET',
-      headers: {
-        Authorization: `Token ${appId}:${apiKey}`,
-        // Mandatory on server-to-server Travelify calls — without it the API
-        // returns a false 401. Do not remove.
-        Origin: TRAVELIFY_ORIGIN,
-      },
+      headers: travelifyAuthHeaders(appId, apiKey),
       signal: AbortSignal.timeout(12000),
     });
   } catch (err) {

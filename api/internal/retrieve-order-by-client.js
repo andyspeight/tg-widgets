@@ -39,6 +39,7 @@ import crypto from 'node:crypto';
 import { moneyOf, moneyOptsFromEnv } from '../_lib/order-money.js';
 import { lookupClientCredentialsByRecordId } from '../_auth.js';
 import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from '../_lib/travelify-items.js';
+import { travelifyAuthHeaders } from '../_lib/travelify.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const CLIENTS_TABLE = 'tblikekpaTKraMktZ';
@@ -982,11 +983,7 @@ export default async function handler(req, res) {
     try {
       tRes = await fetch(TRAVELIFY_API, {
         method: 'POST',
-        headers: {
-          Authorization: `Token ${creds.appId}:${creds.apiKey}`,
-          'Content-Type': 'application/json',
-          Origin: 'https://www.travelgenix.io',
-        },
+        headers: travelifyAuthHeaders(creds.appId, creds.apiKey),
         body: JSON.stringify({ emailAddress, departDate, orderRef }),
         signal: AbortSignal.timeout(12000),
       });

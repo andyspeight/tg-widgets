@@ -24,6 +24,7 @@ import { requireAuth, requireProductAccess } from '../../_lib/auth/middleware.js
 import { jsonError } from '../../_lib/auth/http.js';
 import { PRODUCTS, PERMISSIONS } from '../../_lib/auth/schema.js';
 import { lookupClientCredentialsByRecordId } from '../../_auth.js';
+import { travelifyAuthHeaders } from '../../_lib/travelify.js';
 
 const REC_ID_RE = /^rec[A-Za-z0-9]{14}$/;
 const TRAVELIFY_API = 'https://api.travelify.io/account/order';
@@ -80,14 +81,7 @@ export default async function handler(req, res) {
   try {
     const tfRes = await fetch(TRAVELIFY_API, {
       method: 'POST',
-      headers: {
-        // Token AppId:Key — same auth the My Booking widget uses.
-        'Authorization': `Token ${creds.appId}:${creds.apiKey}`,
-        'Content-Type': 'application/json',
-        // Travelify rejects server-to-server calls with no Origin as a 401
-        // that looks like bad credentials but isn't. Send our product origin.
-        'Origin': 'https://www.travelgenix.io',
-      },
+      headers: travelifyAuthHeaders(creds.appId, creds.apiKey),
       body: JSON.stringify({
         emailAddress: 'connection-test@travelgenix.io',
         departDate: '2020-01-01',
