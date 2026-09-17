@@ -29,7 +29,13 @@ ok(/tgse\.init\(\{|window\.tgse\.init\(\{/.test(ED), 'boots through tgse.init');
 ok(/widgetType: 'Form'/.test(ED), "widgetType is 'Form' (must match the Airtable option exactly)");
 ok(/widgetTag: 'form'/.test(ED), 'widgetTag is form');
 ok(/scriptFile: 'widget-form\.js'/.test(ED), 'embed code points at widget-form.js');
-ok(/getConfig: function/.test(ED) && /setConfig: function/.test(ED), 'provides getConfig + setConfig');
+// Says what it means rather than pinning the inline form: setConfig is now a
+// named function (applyConfig), because the widget loader added on 17 Sep needs
+// the same merge and the id repair, and two copies of that would drift.
+ok(/getConfig: function/.test(ED) && /setConfig: (function|[A-Za-z_$][\w$]*)/.test(ED),
+  'provides getConfig + setConfig');
+ok(/function applyConfig\(/.test(ED) && /setConfig: applyConfig/.test(ED),
+  'one merge point for a config from outside, shared by the shell and the loader');
 
 // The blank-page race: never call isLoggedIn() synchronously at load.
 ok(/tgse\.onReady\(/.test(ED), 'boots via tgse.onReady (async cookie auth)');

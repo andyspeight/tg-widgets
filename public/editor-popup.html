@@ -2037,73 +2037,22 @@
 
 
   // ============================================================
-  // INIT
+  // (REMOVED 17 Sep 2026) A SECOND tgse.init lived here.
+  //
+  // Commit 5fffe33 on 4 Sep 2026 moved the welcome email into this shared
+  // editor and brought the whole Newsletter INIT block with it, including a
+  // second window.tgse.init({ widgetType: "Newsletter Signup" }). The shell
+  // keeps the LAST init it is given, so that one won: it answered getConfig
+  // with `state.config` and onTabChange with setTab(), and this file declares
+  // neither. The Popup editor therefore threw "state is not defined" the
+  // moment Save read the config, and "setTab is not defined" on every tab
+  // click. It could not be saved at all between 4 and 17 Sep.
+  //
+  // The real Popup init is the one near the top of this script. The newsletter
+  // helpers further down are now unreachable and can be lifted out on a later
+  // pass; deleting them here would be a 700-line change in the same commit as
+  // a fix that needs to be obviously right.
   // ============================================================
-  console.log('[boot] editor-newsletter.html running | shell:', !!window.tgse);
-
-  window.tgse.init({
-    widgetType: 'Newsletter Signup',
-    widgetTag: 'newsletter',
-    scriptFile: 'widget-newsletter.js',
-
-    getConfig: () => state.config,
-    setConfig: (c) => {
-      if (c && typeof c === 'object') {
-        // Deep-ish merge so we don't lose nested theme values when partially loaded
-        state.config = Object.assign(makeDefaultConfig(), c, {
-          theme: Object.assign({}, makeDefaultConfig().theme, (c && c.theme) || {}),
-        });
-      }
-      renderAll();
-      updatePreview();
-    },
-
-    onTabChange: (tab) => setTab(tab),
-    onLoginSuccess: () => init(),
-    onAfterSave: (d) => {
-      state.dirty = false;
-      if (d && d.widgetId) {
-        state.widgetId = d.widgetId;
-      }
-      // The save response returns the Airtable record ID. Routing is keyed on
-      // it, so capture it here — this is what unlocks the routing panel right
-      // after the very first save.
-      if (d && d.recordId) {
-        routingState.recordId = d.recordId;
-        loadRoutingConfigs();
-      }
-    },
-    onThemeToggle: (isDark) => {
-      state.config.theme.mode = isDark ? 'dark' : 'light';
-      markDirty();
-      renderTheme();
-      updatePreview();
-    },
-
-    onDesignMode: (isOn) => {
-      const stage = document.getElementById('preview-stage');
-      const btn = document.getElementById('btn-design-mode');
-      if (!stage) return;
-      stage.classList.toggle('is-dm-active', isOn);
-      if (btn) btn.classList.toggle('is-on', isOn);
-      if (isOn) {
-        wireDesignModeHotspots();
-        if (window.tgse && typeof window.tgse.toast === 'function') {
-          window.tgse.toast('Design mode on — click the widget to jump to its controls', 'ok');
-        }
-      } else {
-        unwireDesignModeHotspots();
-      }
-    },
-
-    // Shell mounts the font picker into this element and calls onFontChange
-    // when the user picks a font. The shell handles the dropdown UI itself.
-    fontPickerEl: '#font-picker-mount',
-    onFontChange: (font) => {
-      state.config.fontFamily = font;
-      updatePreview();
-    },
-  });
 
   // ============================================================
   // INITIAL DATA LOAD
@@ -2119,7 +2068,7 @@
       // triggers routing load once we know the record ID.
       loadWidgetConfig(id);
     }
-    renderAll();
+    nlRenderAll();
     updatePreview();
 
     // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
@@ -2164,7 +2113,7 @@
         loadRoutingConfigs();
       }
 
-      renderAll();
+      nlRenderAll();
       updatePreview();
     } catch (err) {
       console.warn('[newsletter] config load error', err);
@@ -2174,8 +2123,8 @@
   // ============================================================
   // RENDER ALL TABS
   // ============================================================
-  function renderAll() {
-    renderLayoutPicker();
+  function nlRenderAll() {
+    nlRenderLayoutPicker();
     renderTheme();
     renderContentTab();
     renderSettingsTab();
@@ -2183,7 +2132,7 @@
     renderRoutingList();
   }
 
-  function renderLayoutPicker() {
+  function nlRenderLayoutPicker() {
     const cards = document.querySelectorAll('#layout-picker .layout-card');
     cards.forEach(c => {
       const layout = c.dataset.layout;

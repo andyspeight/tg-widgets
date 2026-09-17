@@ -450,6 +450,18 @@
   };
 
   var C = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+  // The ONE place a config from outside is merged into C: the shell's
+  // setConfig (templates, AI) and the loader below both come through here, so
+  // the question-id repair cannot be done in one path and forgotten in the other.
+  function applyConfig(c) {
+    if (c && typeof c === 'object') C = Object.assign(C, c);
+    if (!Array.isArray(C.questions)) C.questions = [];
+    // Older saves may predate stable ids.
+    C.questions.forEach(function (q) { if (!q.id) q.id = uid(); });
+    hydrate();
+    refreshPreview();
+  }
   var openId = null;          // which question card is expanded
   var widget = null;
 
@@ -1073,14 +1085,7 @@
     scriptFile: 'widget-form.js',
 
     getConfig: function () { return C; },
-    setConfig: function (c) {
-      if (c && typeof c === 'object') C = Object.assign(C, c);
-      if (!Array.isArray(C.questions)) C.questions = [];
-      // Older saves may predate stable ids.
-      C.questions.forEach(function (q) { if (!q.id) q.id = uid(); });
-      hydrate();
-      refreshPreview();
-    },
+    setConfig: applyConfig,
 
     canSave: canSave,
 
@@ -1095,12 +1100,47 @@
   });
 
   var leadEmails = null;
+
+  /**
+   * Load the form this editor was opened on (17 Sep 2026).
+   *
+   * It never did. boot() hydrated from the defaults in C every time, so opening
+   * a saved form showed a blank name and the default questions whatever had
+   * been saved, and the next Save wrote those defaults back over the real ones
+   * (the shell posts what getConfig returns, and the name it finds in the box,
+   * which falls back to "Untitled"). Found alongside the same fault in the
+   * Special Offers editor, which is how Andy hit it.
+   *
+   * setConfig already does the merge and the id repair, so the load just hands
+   * it the stored config rather than repeating that here.
+   */
+  function loadFromUrl(done) {
+    var wId = new URLSearchParams(location.search).get('id');
+    if (!wId) { done(); return; }
+    fetch('/api/widget-config?id=' + encodeURIComponent(wId), { credentials: 'include' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (d) {
+          if (d.config && typeof d.config === 'object') applyConfig(d.config);
+          var n = $('name-input');
+          if (n && typeof d.name === 'string') n.value = d.name;
+        }
+        done();
+      })
+      .catch(function () {
+        if (window.tgse && window.tgse.toast) window.tgse.toast('Could not load this form', 'err');
+        done();
+      });
+  }
+
   function boot() {
     buildAddMenu();
     wireQuestionList();
     wireAdd();
     wireSettings();
-    hydrate();
+    // Wire first, then load, then paint: hydrate() reads C, so the fetch has to
+    // land before it or the defaults win and the next save writes them.
+    loadFromUrl(function () { hydrate(); refreshPreview(); });
     mountPreview();
     if (window.TGLeadEmails) {
       leadEmails = window.TGLeadEmails.mount({

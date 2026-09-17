@@ -167,6 +167,23 @@ first mount and on passive re-renders. (The Enquiry / Enquiry Pro bug, 23 Jul
 - Boot ONLY through `tgse.onReady(...)` — never call `tgse.isLoggedIn()`
   synchronously at load (async cookie SSO check; sync calls cause a
   blank-page race).
+- **The editor loads the widget, not the shell.** The shell has a `setConfig`
+  hook but never calls it: every editor needs its own `loadFromUrl()` that
+  fetches `GET /api/widget-config?id=`, merges the config over its defaults and
+  puts `d.name` into `#name-input`. Miss it and the editor boots on its
+  defaults, shows a blank name, and the next Save writes those defaults over
+  the client's real config and the name as "Untitled" — silent config loss, and
+  exactly what Special Offers and Form did until 17 Sep 2026. Order matters:
+  the load must land BEFORE the first paint, or the defaults win the race and
+  get saved. Guarded by `npm run test:editor-loads-widget`, which opens every
+  editor in a real browser (the Event family loads through
+  `editor-events-kit.js`, so grepping the HTML gives false alarms).
+- **One `tgse.init` per editor.** The shell keeps the LAST one it is given. A
+  second init pasted in from another editor silently takes over `getConfig`,
+  `onTabChange` and the rest: `editor-popup.html` carried one from
+  `editor-newsletter.html` and could not be saved at all between 4 and 17 Sep
+  2026. Watch for duplicate top-level `function` names too — declarations hoist,
+  so a pasted copy overrides the editor's own.
 - The shell owns tabs (`.tgse-tabs button[data-tab]` + `aria-selected`,
   panels `.tgse-panel[data-tab]` + `is-active`), accordions
   (`.tgse-section`/`-head`/`-body`/`is-open`), viewport buttons, save
