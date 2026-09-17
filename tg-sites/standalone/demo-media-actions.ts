@@ -193,6 +193,29 @@ export async function recordVariantsAction() {
   return { ok: false as const, error: 'There is no storage behind this preview, so nothing was saved.' };
 }
 
+/**
+ * The Generate tab's action, which has no provider behind it here.
+ *
+ * MISSING UNTIL 17 SEP 2026, and its absence broke the whole of
+ * npm run verify:browser: the picker gained a Generate tab, MediaPicker started
+ * importing generateImageAction, and this module did not have one, so
+ * build-theme-harness died on the settings harness and every browser check
+ * after it never ran. Exactly the drift the note at the top of
+ * tools/build-theme-harness.mjs warns about, found when the Pages panel harness
+ * was added beside it.
+ *
+ * A refusal rather than a drawn placeholder, for the same reason
+ * recordVariantsAction refuses: an offline bundle that appeared to generate a
+ * picture would be a lie about what is behind the button.
+ */
+export async function generateImageAction(input: { prompt: string; orientation?: string }) {
+  void input;
+  return {
+    ok: false as const,
+    error: 'There is no image generator behind this preview, so nothing was made.',
+  };
+}
+
 export async function setMediaAltAction(id: string, alt: string) {
   const found = bank.find((entry) => entry.id === id);
   if (!found) return { ok: true as const, data: null };

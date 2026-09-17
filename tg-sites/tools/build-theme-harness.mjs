@@ -74,6 +74,22 @@ const HARNESSES = [
       [/(^|\/)app\/actions\/activity$/, 'standalone/demo-activity-actions.ts'],
     ],
   },
+  {
+    /*
+     * The Pages panel, for the one thing about it that is a measurement rather
+     * than a claim: whether the Add page composer fits on the screen it is used
+     * on. See standalone/pages-entry.tsx for the bug that earned it.
+     */
+    entry: 'standalone/pages-entry.tsx',
+    name: 'pages-harness',
+    title: 'Pages panel harness',
+    // The panel carries the media picker, for the AI start's optional picture,
+    // and the picker reaches Postgres, Anthropic and the blob store.
+    swap: [
+      [/(^|\/)app\/actions\/media$/, 'standalone/demo-media-actions.ts'],
+      [/(^|\/)app\/actions\/ai$/, 'standalone/demo-ai-actions.ts'],
+    ],
+  },
 ];
 
 for (const harness of HARNESSES) {

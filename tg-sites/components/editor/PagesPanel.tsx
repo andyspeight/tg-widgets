@@ -227,6 +227,9 @@ export function PagesPanel({
     const title = newTitle.trim();
     if (!title) {
       setError('Give the page a name.');
+      // The caret goes where the error points. A submit is a real action, so
+      // this is not a render grabbing the page.
+      nameRef.current?.focus();
       return;
     }
     // The AI start needs something to work from, a brief or a picture; the
@@ -418,16 +421,26 @@ export function PagesPanel({
             </button>
           ))}
 
-        <div className="ed-pages__search">
-          <input
-            className="ed-input"
-            type="search"
-            placeholder="Search pages"
-            value={query}
-            aria-label="Search pages"
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
+        {/*
+          NOT WHILE THE COMPOSER IS OPEN. It sits directly under the Add page
+          button, and a second text box next to the button you are about to
+          press is a box somebody will type into: see the note on
+          .ed-pages__templates in editor.css. Nobody searches the page list
+          while naming a new page, so it goes away and comes back, query and
+          all, when the composer closes.
+        */}
+        {!adding && (
+          <div className="ed-pages__search">
+            <input
+              className="ed-input"
+              type="search"
+              placeholder="Search pages"
+              value={query}
+              aria-label="Search pages"
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </div>
+        )}
       </div>
 
       {moveError && (

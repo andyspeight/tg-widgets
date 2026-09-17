@@ -242,3 +242,28 @@ void _publish;
 void _schedule;
 void _unpublish;
 void _dropItem;
+
+/*
+ * THE TWO THE COLLECTION GRID NEEDS, added 17 Sep 2026 when the standalone
+ * build was found dead. Both arrived with the collection grid and its reorder
+ * arrows and neither reached this double, so esbuild refused the bundle with
+ * "No matching export" and every browser check after it never ran.
+ *
+ * No cards and no reordering rather than a fixture: a review copy has no
+ * collection behind it, and the grid's own empty state is the honest answer.
+ */
+export async function listingCardsAction(
+  props: Record<string, unknown>,
+): Promise<ActionResult<Array<Record<string, unknown>>>> {
+  void props;
+  return { ok: true, data: [] };
+}
+
+export async function reorderItemsAction(
+  collectionKey: string,
+  orderedIds: string[],
+): Promise<ActionResult<boolean>> {
+  void collectionKey;
+  void orderedIds;
+  return { ok: false, error: 'There is no collection behind this preview, so the order was not saved.' };
+}

@@ -698,6 +698,10 @@
   display: flex;
   gap: var(--ed-2);
   justify-content: flex-end;
+  /* A line under the scrolling list, so the buttons belong to the composer
+     rather than to whatever the list happens to be cut off at. */
+  padding-top: var(--ed-2);
+  border-top: 1px solid var(--ed-line-soft);
 }
 .ed-pages__new-actions .ed-btn { min-height: 36px; }
 .ed-pages__error {
@@ -712,6 +716,32 @@
   display: flex;
   flex-direction: column;
   gap: var(--ed-1);
+  /*
+   * THE COMPOSER HAS TO FIT ON THE SCREEN IT IS USED ON (Andy, 17 Sep 2026).
+   * Without a bound this list is 1,750px tall inside a 900px panel, because it
+   * is one card per designed page and there are nineteen. That put the name box
+   * 1,800px ABOVE the Add page button and the search box twelve pixels BELOW
+   * it, so the only text box in sight when you reach the button was the wrong
+   * one. Andy typed the page name into the search box and the composer told him
+   * to give the page a name, which reads as the feature being broken.
+   *
+   * Padding with a matching negative margin, so the focus ring on the first and
+   * last card (outline-offset 2px) is not clipped by the scroll box, and the
+   * cards still line up with everything else in the composer.
+   */
+  max-height: 34vh;
+  overflow-y: auto;
+  /* A visible track, so a card cut off at the bottom edge reads as a list that
+     scrolls rather than as a card that failed to draw. */
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  /* A frame round the list, so a card clipped at the bottom reads as a list
+     continuing inside a box rather than as a card that failed to draw. The
+     padding is what gives the first and last card's focus ring (outline-offset
+     2px) room inside the scroll box. */
+  border: 1px solid var(--ed-line-soft);
+  border-radius: var(--ed-r-md);
+  padding: 4px;
 }
 .ed-pages__template {
   position: relative;

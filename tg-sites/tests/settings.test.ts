@@ -13,7 +13,7 @@
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -954,6 +954,93 @@ describe('the writing prompt', () => {
   });
 });
 
+/*
+ * THE SAME RULE FOR THE STANDALONE EDITOR, AND THE REASON IT IS SEPARATE.
+ *
+ * tools/build-standalone.mjs bundles the whole editor for a static host, and it
+ * had been failing for weeks by 17 Sep 2026: components/ui/PublishSiteDialog
+ * reaches app/actions/publish-site, which reaches the tenant, the member's
+ * capabilities and every page with edits waiting, so Postgres, node:crypto and
+ * node:async_hooks all arrived in a browser bundle and esbuild refused it. Two
+ * more actions had no double either. Nothing but that build reads that build, so
+ * npm run verify:browser simply never ran.
+ *
+ * The check below follows the import graph from the real entry rather than
+ * guessing at a list of directories, because the whole failure was an action
+ * arriving through a component nobody thought of as part of the editor.
+ */
+describe('the standalone editor can still be built', () => {
+  const builder = readFileSync(join(__dirname, '..', 'tools', 'build-standalone.mjs'), 'utf8');
+  const root = join(__dirname, '..');
+
+  /** Every app/actions/<name> reachable from the standalone entry, by relative imports. */
+  function actionsReachedFromEntry(): string[] {
+    const actions = new Set<string>();
+    const seen = new Set<string>();
+
+    const resolveFile = (base: string): string | null => {
+      for (const ending of ['', '.ts', '.tsx', '/index.ts', '/index.tsx']) {
+        const candidate = `${base}${ending}`;
+        try {
+          if (statSync(candidate).isFile()) return candidate;
+        } catch {
+          // Not this one.
+        }
+      }
+      return null;
+    };
+
+    const walk = (file: string) => {
+      if (seen.has(file)) return;
+      seen.add(file);
+      let source: string;
+      try {
+        source = readFileSync(file, 'utf8');
+      } catch {
+        return;
+      }
+      for (const match of source.matchAll(/from\s+'(\.[^']+)'/g)) {
+        const specifier = match[1];
+        const full = join(dirname(file), specifier);
+        /* A type-only import is erased before the bundler sees it, so it cannot
+           drag anything in. Anything else is followed. */
+        const line = source.slice(Math.max(0, match.index! - 120), match.index!);
+        if (/import\s+type\s/.test(line)) continue;
+
+        const actionMatch = /(?:^|\/)app\/actions\/([a-z-]+)$/.exec(full.replace(/\\/g, '/'));
+        if (actionMatch) {
+          actions.add(actionMatch[1]);
+          continue;
+        }
+        const next = resolveFile(full);
+        if (next) walk(next);
+      }
+    };
+
+    walk(join(root, 'standalone', 'entry.tsx'));
+    return [...actions].sort();
+  }
+
+  const reached = actionsReachedFromEntry();
+
+  it('follows the entry far enough to find the actions, so the check below means something', () => {
+    expect(reached.length).toBeGreaterThan(5);
+    expect(reached).toContain('pages');
+    // The one that was actually breaking it, reached through a dialog rather
+    // than through anything anybody would call part of the editor.
+    expect(reached).toContain('publish-site');
+  });
+
+  it.each(reached)('app/actions/%s is swapped for a double in the standalone build', (action) => {
+    expect(
+      builder.includes(`app\\/actions\\/${action}$`),
+      `the standalone editor reaches app/actions/${action} and tools/build-standalone.mjs has `
+      + 'no swap for it, so the bundle will drag the Postgres driver into a browser and npm run '
+      + 'verify:browser will die at its first step',
+    ).toBe(true);
+  });
+});
+
 describe('the settings harness can still be built', () => {
   /*
    * THE BUG THIS EXISTS TO STOP HAPPENING AGAIN.
@@ -1009,6 +1096,71 @@ describe('the settings harness can still be built', () => {
     for (const match of harness.matchAll(/'(standalone\/demo-[a-z-]+\.ts)'/g)) {
       const double = join(__dirname, '..', match[1]);
       expect(statSync(double).isFile(), `${match[1]} is swapped in but does not exist`).toBe(true);
+    }
+  });
+
+  /*
+   * AND THE SAME BUG AGAIN, ONE LEVEL DOWN, ON 17 SEP 2026.
+   *
+   * Having a swap is not enough: the double has to export everything the real
+   * module is imported for. The media picker gained a Generate tab, MediaPicker
+   * started importing generateImageAction, standalone/demo-media-actions.ts did
+   * not have one, and esbuild refused the settings harness with "No matching
+   * export". npm run verify:browser had been dying at that build ever since, and
+   * again nothing noticed, because the only thing that reads it is the build it
+   * was breaking. Found by adding a harness beside it.
+   *
+   * The swap test above passed throughout: app/actions/media HAS a swap. So this
+   * checks the next thing along, and errs on the over-broad side by scanning all
+   * of components/ rather than working out which files each harness reaches. The
+   * cost of being wrong that way is a stub function in a double. The cost of
+   * being wrong the other way is every browser check silently not running.
+   */
+  const NAMED_IMPORT = (action: string) =>
+    new RegExp(`import\\s*\\{([^}]*)\\}\\s*from\\s*'[^']*actions/${action}'`, 'g');
+
+  function importedNames(action: string): string[] {
+    const names = new Set<string>();
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (/\.tsx?$/.test(entry.name)) {
+          const source = readFileSync(full, 'utf8');
+          for (const match of source.matchAll(NAMED_IMPORT(action))) {
+            for (const raw of match[1].split(',')) {
+              const name = raw.trim().split(/\s+as\s+/)[0].trim();
+              if (name && !name.startsWith('type ')) names.add(name);
+            }
+          }
+        }
+      }
+    };
+    walk(join(__dirname, '..', 'components'));
+    return [...names].sort();
+  }
+
+  /** Every action module the harness build swaps out, by name. */
+  const swapped = [...harness.matchAll(/app\\\/actions\\\/([a-z-]+)\$\/, '(standalone\/demo-[a-z-]+\.ts)'/g)]
+    .map((match) => ({ action: match[1], double: match[2] }));
+
+  it('finds the swaps, so the check below is not passing over an empty list', () => {
+    expect(swapped.length).toBeGreaterThan(2);
+    expect(swapped.map((entry) => entry.action)).toContain('media');
+  });
+
+  it.each(swapped)('$double exports everything components import from app/actions/$action', ({ action, double }) => {
+    const source = readFileSync(join(__dirname, '..', double), 'utf8');
+    const exported = new Set(
+      [...source.matchAll(/export\s+(?:async\s+)?(?:function|const)\s+([A-Za-z0-9_]+)/g)].map((m) => m[1]),
+    );
+    for (const name of importedNames(action)) {
+      expect(
+        exported.has(name),
+        `components import ${name} from app/actions/${action} and ${double} does not export it, `
+        + 'so the harness build will fail with "No matching export" and npm run verify:browser '
+        + 'will die before any check downstream of it runs',
+      ).toBe(true);
     }
   });
 });

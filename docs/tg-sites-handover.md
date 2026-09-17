@@ -683,12 +683,55 @@ rested on a number that does not mean what it looks like.
    fixtures and a scripted stream, and no real model answer has been through
    it.
 
+10. **`tools/verify-standalone.mjs` is ten expectations behind the app** (17 Sep
+    2026). The chain it sits in could not run for weeks, so the editor gained a
+    block, a "My sections" tab and more page designs without it noticing. Each
+    failure needs reading rather than bumping: "54 blocks where 53 were expected"
+    is exactly the shape a staff-only block leaking into a client picker would
+    take, and the point of the check is to tell those apart.
+
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.
 
 ## Things that will bite you
 
 Hard-won, none of it obvious from the code.
+
+**A PANEL THAT GROWS WITH THE LIBRARY WILL ONE DAY NOT FIT ON THE SCREEN, AND
+NOTHING YOU CAN ASSERT WILL SAY SO.** Andy, 17 Sep 2026: "adding a page doesnt
+work". It worked. The Add page composer draws one card per designed page, and at
+two dozen designs it stood 1,966px tall inside a 900px panel: the name box at the
+top, the Add page button 1,800px below it, and the search box twelve pixels below
+THAT. By the time you had scrolled to the button, the only text box in sight was
+the wrong one, so the page name went into the search box and the composer
+answered "Give the page a name". Thirty-nine assertions in
+`tests/pages-panel.test.ts` passed throughout, because it is not a claim about a
+function: it is whether the box you are asked to fill in is on the same screen as
+the button you press.
+
+Two rules out of it. A list that grows with a library gets a bound and its own
+scroll, not the panel's. And a second text box must never sit below the button
+somebody is about to press, whatever it is labelled. `tools/verify-pages-panel.mjs`
+measures both and fails on the old CSS.
+
+**NOTHING BUT THE BUILD ITSELF READS THE BUILD, SO A BROKEN ONE STAYS BROKEN.**
+Found the same day, looking for somewhere to put that check:
+`npm run verify:browser` had been dying at its first step for weeks, and it
+turned out to be three separate drifts, each invisible to everything else. A
+server action reaching a component with no swap in `tools/build-standalone.mjs`
+(`app/actions/publish-site`, which drags Postgres, node:crypto and
+node:async_hooks into a browser bundle), a double that had not kept up with its
+real module's exports (`generateImageAction`, `listingCardsAction`,
+`reorderItemsAction`), and two more actions with no double at all. The rule from
+17 Aug 2026 was "add an action, add its swap"; the rule now is "add an action,
+add its swap AND its export", and `tests/settings.test.ts` fails on both in a
+millisecond rather than leaving it to a build nobody runs.
+
+`tools/verify-standalone.mjs` is a separate matter: it runs again, and ten of its
+expectations are now out of date because the app moved on while it was dead (54
+blocks where it expects 53, a "My sections" tab it has never seen, more page
+designs than it counts). Those are stale numbers, not breakage, and they are on
+the queue.
 
 **A RULE THAT READS A TOKEN THE THEME HAS NOT GOT DRAWS NOTHING, NOT THE
 FALLBACK.** This is a hole in the whole stylesheet, found on 25 Aug 2026 in the

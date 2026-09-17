@@ -129,6 +129,34 @@ const result = await esbuild.build({
          * store, neither of which this build has, so the double hands back the
          * image-ready section the real one falls back to anyway.
          */
+        /*
+         * And the whole-site publish plan, which is what was ACTUALLY dragging
+         * the Postgres driver, node:crypto and node:async_hooks into this
+         * bundle when it was found dead on 17 Sep 2026: PublishSiteDialog
+         * reaches app/actions/publish-site, which reaches the tenant, the
+         * member's capabilities and every page with edits waiting.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/publish-site$/ }, () => ({
+          path: resolve(root, 'standalone/demo-publish-site-actions.ts'),
+        }));
+        /*
+         * And Luna Assist's applied-log, added with slice 2 on 17 Sep 2026 and
+         * swapped the same day, an hour later, once this build died on it. The
+         * real one writes a row to assist_log; the review copy applies the
+         * proposal through the editor's own history exactly as the real one
+         * does, so recording nothing changes nothing a reviewer can see.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/assist$/ }, () => ({
+          path: resolve(root, 'standalone/demo-assist-actions.ts'),
+        }));
+        /*
+         * And the saved section library, for the plain Postgres reason. The
+         * double answers with an empty library, so the Designed panel shows its
+         * own empty state rather than a fixture nobody saved.
+         */
+        build.onResolve({ filter: /(^|\/)app\/actions\/section-templates$/ }, () => ({
+          path: resolve(root, 'standalone/demo-section-template-actions.ts'),
+        }));
         build.onResolve({ filter: /(^|\/)app\/actions\/designed$/ }, () => ({
           path: resolve(root, 'standalone/demo-designed-actions.ts'),
         }));

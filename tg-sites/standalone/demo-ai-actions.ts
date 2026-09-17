@@ -283,3 +283,63 @@ export async function createAiPageAction(input: unknown): Promise<real.AiPageRes
 
 const _page = createAiPageAction satisfies typeof real.createAiPageAction;
 void _page;
+
+// ---------------------------------------------------------------------------
+// The site builder's four, which no harness bundles today
+// ---------------------------------------------------------------------------
+
+/*
+ * WHY THEY ARE HERE AT ALL. components/sites/SiteBuilder.tsx imports these from
+ * app/actions/ai, and a double is only a double if it exports what the real
+ * module is imported for. Nothing bundles SiteBuilder yet, so their absence
+ * broke nothing; the same was true of generateImageAction in
+ * standalone/demo-media-actions.ts right up until the media picker reached a
+ * harness, and then it broke every browser check at once and nobody noticed for
+ * weeks. Cheaper as five lines each than as that.
+ *
+ * A refusal rather than a fixture, like recordVariantsAction: an offline bundle
+ * that appeared to plan a whole site would be a lie about what is behind it.
+ */
+const NO_BUILDER = 'There is no site builder behind this preview.' as const;
+
+export async function planSiteAction(input: unknown): Promise<real.SitePlanActionResult> {
+  void input;
+  return { ok: false, error: NO_BUILDER };
+}
+
+export async function describePagesAction(input: unknown): Promise<real.SitePlanActionResult> {
+  void input;
+  return { ok: false, error: NO_BUILDER };
+}
+
+export async function buildPlannedPageAction(input: unknown): Promise<real.AiPageResult> {
+  void input;
+  return { ok: false, error: NO_BUILDER };
+}
+
+export async function syncSiteMenuAction(input: unknown): Promise<{ ok: boolean; error?: string }> {
+  void input;
+  return { ok: false, error: NO_BUILDER };
+}
+
+export async function rewriteSectionAction(input: unknown): Promise<real.SectionEditResult> {
+  void input;
+  return { ok: false, error: NO_BUILDER };
+}
+
+export async function suggestNextSectionAction(input: unknown): Promise<real.SectionEditResult> {
+  void input;
+  return { ok: false, error: NO_BUILDER };
+}
+
+/* Pinned against the real signatures, the same way the doubles above are: a
+   double that has drifted out of shape is worse than one that is missing. */
+const _builder = [
+  planSiteAction satisfies typeof real.planSiteAction,
+  describePagesAction satisfies typeof real.describePagesAction,
+  buildPlannedPageAction satisfies typeof real.buildPlannedPageAction,
+  syncSiteMenuAction satisfies typeof real.syncSiteMenuAction,
+  rewriteSectionAction satisfies typeof real.rewriteSectionAction,
+  suggestNextSectionAction satisfies typeof real.suggestNextSectionAction,
+];
+void _builder;

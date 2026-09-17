@@ -321,3 +321,42 @@ describe('the Add page composer', () => {
     expect(panelSource).toMatch(/\}, \[adding\]\);/);
   });
 });
+
+/*
+ * ANDY, 17 SEP 2026: "adding a page doesnt work". It worked. The composer was
+ * unusable, and every assertion above passed while it was.
+ *
+ * The Start from list draws one card per designed page, two dozen of them, with
+ * no bound on its height, so the composer stood 1,966px tall inside a 900px
+ * panel: the name box at the top, the Add page button 1,800px below it, and the
+ * search box twelve pixels below THAT. By the time you had scrolled to the
+ * button, the only text box in sight was the wrong one. The page name went into
+ * the search box and the composer answered "Give the page a name."
+ *
+ * The real proof is a measurement and lives in tools/verify-pages-panel.mjs,
+ * which fails on the old CSS. These are the cheap version, here so the rule is
+ * stated where somebody editing this panel will read it.
+ */
+describe('the composer fits the screen it is used on', () => {
+  const css = readFileSync(join(__dirname, '..', 'components', 'editor', 'editor.css'), 'utf8');
+
+  it('bounds the list of designs and scrolls it, rather than letting it grow', () => {
+    const rule = css.slice(css.indexOf('.ed-pages__templates {'));
+    const block = rule.slice(0, rule.indexOf('}'));
+    expect(block).toMatch(/max-height:/);
+    expect(block).toMatch(/overflow-y:\s*auto/);
+  });
+
+  it('takes the search box away while the composer is open', () => {
+    // It sits directly under the Add page button. A second text box next to the
+    // button you are about to press is a box somebody will type into.
+    expect(panelSource).toContain('{!adding && (');
+    expect(panelSource).toMatch(/\{!adding && \(\s*<div className="ed-pages__search">/);
+  });
+
+  it('puts the caret back in the name box when it says to name the page', () => {
+    // A submit is a real action, so moving focus here is not a render grabbing
+    // the page. The error points at a box; the caret goes to that box.
+    expect(panelSource).toMatch(/setError\('Give the page a name\.'\);[\s\S]{0,200}nameRef\.current\?\.focus\(\);/);
+  });
+});
