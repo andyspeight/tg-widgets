@@ -85,6 +85,31 @@ console.log('The habit that caused it cannot come back unnoticed');
     renderFinds(PDF) + renderFinds(MAIL) + renderFinds(WIDGET) >= 0);
 }
 
+console.log('Board basis reads the same on the page and in the email');
+{
+  // The email's hotel card calls boardLabel() from the shared module; the
+  // widget cannot import, so it carries fmtBoard and its own BOARD_LABELS.
+  // Two lists means a booking that reads "All inclusive" on the page and
+  // "AllInclusive" in the email, so they are compared here.
+  const grab = (src) => {
+    const i = src.indexOf('BOARD_LABELS = {');
+    if (i < 0) return null;
+    const j = src.indexOf('};', i);
+    if (j < 0) return null;
+    const pairs = src.slice(i, j).match(/'([^']+)':\s*'([^']*)'/g) || [];
+    return pairs.map((p) => p.replace(/\s+/g, ' ')).join('|');
+  };
+  const mod = grab(MOD), widget = grab(WIDGET);
+  ok('the module has the list', !!mod);
+  ok('the widget has its copy', !!widget);
+  ok('the two lists are the same', !!mod && mod === widget,
+    mod === widget ? '' : 'module: ' + mod + '\n      widget: ' + widget);
+  ok('the email asks the module rather than keeping a third list',
+    /boardLabel/.test(MAIL) && !/BOARD_LABELS/.test(MAIL));
+  ok('both refuse to invent a board basis for "Unknown"',
+    /unknown/.test(mod ? MOD : '') && /toLowerCase\(\) === 'unknown'/.test(WIDGET));
+}
+
 console.log('The selector says what it is for');
 {
   ok('it records the booking that caused it', /ET121109/.test(MOD));

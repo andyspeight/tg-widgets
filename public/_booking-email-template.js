@@ -45,7 +45,7 @@
 // BlinkMacSystemFont keeps Chrome on Mac happy, Segoe UI is Windows, Roboto
 // is Android. Each is a clean professional UI font on its native platform.
 import { moneyOf, paymentStatusMessage, voucherLabel, MONEY_STRINGS } from './_order-money.js';
-import { listStays, bookingMoment, stayCheckout } from './_order-stays.js';
+import { listStays, bookingMoment, stayCheckout, boardLabel, roomLabel } from './_order-stays.js';
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
@@ -86,6 +86,18 @@ export const EMAIL_BLOCKS = [
   { type: 'support',    kind: 'data',  label: 'Contact details',       hint: 'Your phone number and reply-to line.' },
   { type: 'signoff',    kind: 'data',  label: 'Sign off',              hint: '"Have a wonderful trip" and your company name.' },
   { type: 'message',    kind: 'data',  label: 'Customer note',         hint: 'The note a customer types when they email the booking to someone. Empty on a confirmation we send.' },
+
+  // Picture-led and destination blocks (17 Sep 2026). Each draws nothing when
+  // its material is missing, so a layout carrying all of them still reads
+  // properly on a booking with no hotel photo and a destination we hold no
+  // content for. The four starter styles below are built from these.
+  { type: 'hero',       kind: 'data',  label: 'Hero picture',          fields: ['url'], hint: 'A full-width picture with the destination and dates beneath it. Uses the hotel photo unless you give it your own.' },
+  { type: 'hotelcard',  kind: 'data',  label: 'Hotel card',            hint: 'The property with its photo, rating, room and board.' },
+  { type: 'itinerary',  kind: 'data',  label: 'Itinerary',             hint: 'Flights, transfers, check-ins and tickets on one timeline, in the order they happen.' },
+  { type: 'destination', kind: 'data', label: 'About the destination', hint: 'The opening of our write-up. Draws nothing for a destination we do not hold.' },
+  { type: 'knowbefore', kind: 'data',  label: 'Before you go',         hint: 'Currency, plugs, time zone, flight time and the average high for the month they travel.' },
+  { type: 'whatson',    kind: 'data',  label: 'What is on',            hint: 'An event happening in the month they travel. Nothing on, nothing shown.' },
+  { type: 'thingstodo', kind: 'data',  label: 'Three things to do',    hint: 'Three highlights from our destination write-up.' },
   { type: 'text',       kind: 'write', label: 'Your own words',        fields: ['text'], hint: 'A paragraph or several. Merge tags are filled in.' },
   { type: 'heading',    kind: 'write', label: 'Heading',               fields: ['text'] },
   { type: 'button',     kind: 'write', label: 'Button',                fields: ['text', 'url'], hint: 'A link the customer can tap, such as your booking page.' },
@@ -107,6 +119,86 @@ export const DEFAULT_EMAIL_LAYOUT = [
   { type: 'pdfnote' },
   { type: 'support' },
   { type: 'signoff' },
+];
+
+/**
+ * Starter styles (17 Sep 2026). Four ways to open the same email, so a client
+ * who does not want to arrange blocks one at a time can pick a shape and then
+ * change it. Picking one REPLACES the layout; it is a starting point, not a
+ * theme that keeps applying.
+ *
+ * Every style ends the same way — the pack note, the contact details and the
+ * sign off — because those are the parts a confirmation cannot do without.
+ * Blocks that need material we may not hold (the hotel photo, the destination
+ * write-up) draw nothing when it is missing, so a style never leaves a hole.
+ */
+export const EMAIL_STYLES = [
+  {
+    id: 'standard',
+    label: 'Standard',
+    hint: 'The plain confirmation. Everything in one summary card, no pictures.',
+    layout: DEFAULT_EMAIL_LAYOUT,
+  },
+  {
+    id: 'postcard',
+    label: 'Postcard',
+    hint: 'Opens on a full-width picture of where they are going, then the details.',
+    layout: [
+      { type: 'hero' },
+      { type: 'greeting' },
+      { type: 'message' },
+      { type: 'summary' },
+      { type: 'documents' },
+      { type: 'payment' },
+      { type: 'pdfnote' },
+      { type: 'support' },
+      { type: 'signoff' },
+    ],
+  },
+  {
+    id: 'magazine',
+    label: 'Magazine',
+    hint: 'The picture, the hotel on its own card, then the destination, what is on and three things to do.',
+    layout: [
+      { type: 'hero' },
+      { type: 'greeting' },
+      { type: 'message' },
+      { type: 'hotelcard' },
+      { type: 'reference' },
+      { type: 'travellers' },
+      { type: 'flights' },
+      { type: 'transfers' },
+      { type: 'payment' },
+      { type: 'divider' },
+      { type: 'destination' },
+      { type: 'thingstodo' },
+      { type: 'whatson' },
+      { type: 'knowbefore' },
+      { type: 'documents' },
+      { type: 'pdfnote' },
+      { type: 'support' },
+      { type: 'signoff' },
+    ],
+  },
+  {
+    id: 'itinerary',
+    label: 'Itinerary',
+    hint: 'Everything on one timeline, in the order it happens, with the practical bits underneath.',
+    layout: [
+      { type: 'greeting' },
+      { type: 'message' },
+      { type: 'reference' },
+      { type: 'itinerary' },
+      { type: 'hotelcard' },
+      { type: 'travellers' },
+      { type: 'payment' },
+      { type: 'knowbefore' },
+      { type: 'documents' },
+      { type: 'pdfnote' },
+      { type: 'support' },
+      { type: 'signoff' },
+    ],
+  },
 ];
 
 const BLOCK_TYPES = new Set(EMAIL_BLOCKS.map(b => b.type));
@@ -356,6 +448,12 @@ export function renderBookingEmail(opts) {
     orderRef,
     baseUrl,
     layout,
+    // The destination pack, in the shape /api/destination-content returns.
+    // Optional and always optional: every block that reads it draws nothing
+    // when it is absent, exactly like a booking with no flights on it. The
+    // renderer is runtime-neutral and cannot fetch, so whoever calls it looks
+    // this up and passes it in.
+    destination,
   } = opts;
 
   const primary = colors.primary || '#1B2B5B';
@@ -1064,6 +1162,51 @@ export function renderBookingEmail(opts) {
   // it was built, so a block never has to guess which rows are its own.
   const rowsIn = (...groups) => summaryRows.filter(r => groups.includes(r.group));
 
+  // ── The destination pack ──────────────────────────────────────────────────
+  const destPack = (destination && typeof destination === 'object') ? destination : null;
+  const destFacts = (destPack && typeof destPack.facts === 'object' && destPack.facts) || {};
+  const destImages = Array.isArray(destPack && destPack.images) ? destPack.images.map(safeHttpsUrl).filter(Boolean) : [];
+
+  // Pictures of the property itself, off the booking. A client's own image
+  // block still wins over both: they know their brand better than we do.
+  const hotelImages = (() => {
+    const out = [];
+    for (const st of stays) {
+      const media = (st.accom && st.accom.media) || [];
+      for (const m of media) {
+        const u = safeHttpsUrl(m && m.url);
+        if (u && !out.includes(u)) out.push(u);
+      }
+    }
+    return out;
+  })();
+
+  /** The best picture we have, in the order a client would expect. */
+  const pictureFor = (own) => safeHttpsUrl(own) || hotelImages[0] || destImages[0] || '';
+
+  // The month they travel, for the weather and what is on while they are there.
+  const travelMonth = checkin ? bookingMoment(checkin).getUTCMonth() : -1;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+
+  /** One number out of a twelve-value climate string, for the month they go. */
+  // The content base stores climate as twelve numbers, January first
+  // (see api/destination-content.js). Coerce: the array is remote data, so a
+  // non-number becomes nothing shown rather than "NaN" in the email.
+  const monthly = (series) => {
+    if (!Array.isArray(series) || series.length !== 12 || travelMonth < 0) return '';
+    const n = Number(series[travelMonth]);
+    return Number.isFinite(n) ? String(Math.round(n)) : '';
+  };
+
+  /** A small label-over-value cell, the shape used by every facts strip. */
+  const factCell = (label, value, width) => (value ? `
+        <td width="${width}" valign="top" style="padding:14px 8px;text-align:center;">
+          <div style="font:700 17px/1.25 ${FONT};color:${escapeHtml(primary)};">${escapeHtml(value)}</div>
+          <div style="font:400 12px/1.4 ${FONT};color:#8a94a6;margin-top:3px;">${escapeHtml(label)}</div>
+        </td>` : '');
+
   // What a client's own words can merge in. Lower-cased keys: the tag itself
   // is case insensitive.
   const mergeVars = {
@@ -1081,8 +1224,283 @@ export function renderBookingEmail(opts) {
     agencyemail: supportEmail || '',
   };
 
+  // ── The picture-led and destination blocks (17 Sep 2026) ─────────────────
+  // Andy liked all four mockup styles, and these are what made them work. Each
+  // draws nothing when its material is missing, so a layout carrying all of
+  // them still reads properly on a booking with no hotel photo and a
+  // destination we hold no content for.
+
+  /** A full-width picture with the destination and dates on a band beneath. */
+  const heroHtml = (own) => {
+    const src = pictureFor(own);
+    if (!src) return '';
+    const dates = (checkin && checkout)
+      ? `${formatShortDate(checkin)} to ${formatShortDate(checkout)}`
+      : (checkin ? formatShortDate(checkin) : '');
+    const nightsBit = nights > 0 ? ` &middot; ${nights} ${nights === 1 ? 'night' : 'nights'}` : '';
+    // "Male" is the airport city the supplier filed the hotel under; "The
+    // Maldives" is what the customer thinks they booked. Prefer our own
+    // destination name when we hold one, and fall back to the supplier's city.
+    const where = (destPack && destPack.name) || destinationCity || '';
+    return `
+        <tr><td style="padding:0;">
+          <img src="${escapeHtml(src)}" width="600" alt="${escapeHtml(where || brandName)}" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;">
+        </td></tr>
+        ${where ? `
+        <tr><td style="background:${escapeHtml(primary)};padding:22px 32px;">
+          <div style="font:600 11px/1.4 ${FONT};color:${escapeHtml(accent)};letter-spacing:.14em;text-transform:uppercase;">You are going to</div>
+          <div style="font:700 32px/1.15 ${FONT};color:#ffffff;letter-spacing:-.01em;margin-top:6px;">${escapeHtml(where)}</div>
+          ${dates ? `<div style="font:400 15px/1.5 ${FONT};color:rgba(255,255,255,.78);margin-top:8px;">${escapeHtml(dates)}${nightsBit}</div>` : ''}
+        </td></tr>` : ''}
+        `;
+  };
+
+  /** The property, given its own card with a picture and the room on it. */
+  const hotelCardHtml = () => {
+    if (!acc && !hotelName) return '';
+    const src = hotelImages[0] || '';
+    // Room, board and rate come from the same places the My Booking page
+    // reads them, through the shared labels, so a booking cannot read one way
+    // on the page and another in the email.
+    const unit = (acc && acc.units && acc.units[0]) || null;
+    const rate = (stays[0] && stays[0].rate) || (unit && unit.rates && unit.rates[0]) || null;
+    const room = roomLabel(unit);
+    const board = boardLabel(rate && rate.board);
+    const stars = (acc && typeof acc.rating === 'number' && acc.rating >= 1)
+      ? '&#9733;'.repeat(Math.min(5, Math.round(acc.rating))) : '';
+    const where = [acc && acc.location && acc.location.city, acc && acc.location && acc.location.country]
+      .filter(Boolean).join(', ');
+    const line = [room, board].filter(Boolean).map(escapeHtml).join(' &middot; ');
+    const when = (checkin && checkout)
+      ? `${formatShortDate(checkin)} to ${formatShortDate(checkout)}` : '';
+    return `
+        <tr><td style="padding:8px 32px 24px 32px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+            ${src ? `<tr><td style="padding:0;">
+              <img src="${escapeHtml(src)}" width="536" alt="${escapeHtml(hotelName)}" style="display:block;width:100%;max-width:536px;height:auto;border:0;outline:none;">
+            </td></tr>` : ''}
+            <tr><td style="padding:18px 22px;">
+              <div style="font:700 19px/1.35 ${FONT};color:#0f172a;">${escapeHtml(hotelName || 'Your accommodation')}</div>
+              ${(stars || where) ? `<div style="font:400 14px/1.6 ${FONT};color:${escapeHtml(accent)};margin-top:4px;">${stars}${stars && where ? ' &nbsp;' : ''}${escapeHtml(where)}</div>` : ''}
+              ${line ? `<div style="font:400 15px/1.6 ${FONT};color:#5b6678;margin-top:8px;">${line}</div>` : ''}
+              ${when ? `<div style="font:400 15px/1.6 ${FONT};color:#5b6678;">${escapeHtml(when)}</div>` : ''}
+            </td></tr>
+          </table>
+        </td></tr>
+        `;
+  };
+
+  /** What happens and when, in the order it happens. */
+  const itineraryHtml = () => {
+    const legs = [];
+    const pushFlight = (route, label) => {
+      const seg = route && route.segments && route.segments[0];
+      const last = route && route.segments && route.segments[route.segments.length - 1];
+      if (!seg) return;
+      const line = buildFlightLine(route);
+      if (!line) return;
+      legs.push({
+        when: seg.depart, time: formatTime(seg.depart), day: formatShortDate(seg.depart),
+        title: label,
+        detail: escapeHtml(line),
+      });
+    };
+    const routes = (flightItem && flightItem.flights && flightItem.flights.routes) || [];
+    const out = routes.find((r) => (r.direction || '').toLowerCase().includes('out')) || routes[0];
+    const back = routes.find((r) => {
+      const d = (r.direction || '').toLowerCase();
+      return (d.includes('return') || d.includes('inbound')) && r !== out;
+    });
+    if (out) pushFlight(out, 'Flight out');
+
+    for (const tItem of (order?.items || []).filter((i) => i.product === 'Transfers')) {
+      const tf = tItem.transfers;
+      if (!tf) continue;
+      if (tf.outPickup && tf.outPickup.dateTime) {
+        legs.push({
+          when: tf.outPickup.dateTime, time: formatTime(tf.outPickup.dateTime),
+          day: formatShortDate(tf.outPickup.dateTime), title: 'Transfer',
+          detail: escapeHtml([tf.outPickup.name, tf.outDropoff && tf.outDropoff.name].filter(Boolean).join(' to ')),
+        });
+      }
+      if (tf.returnPickup && tf.returnPickup.dateTime) {
+        legs.push({
+          when: tf.returnPickup.dateTime, time: formatTime(tf.returnPickup.dateTime),
+          day: formatShortDate(tf.returnPickup.dateTime), title: 'Transfer back',
+          detail: escapeHtml(tf.returnPickup.name || ''),
+        });
+      }
+    }
+
+    for (const st of stays) {
+      if (!st.checkin) continue;
+      legs.push({
+        when: st.checkin, time: '', day: formatShortDate(st.checkin), title: 'Check in',
+        // Escape the parts, THEN join with the separator. Escaping the joined
+        // string turns the &middot; into a literal "&middot;" on the page.
+        detail: [st.name, st.nights ? `${st.nights} ${st.nights === 1 ? 'night' : 'nights'}` : '']
+          .filter(Boolean).map(escapeHtml).join(' &middot; '),
+      });
+    }
+
+    for (const tk of (order?.items || []).filter((i) => i.product === 'TicketsAttractions')) {
+      const t = tk.ticketsAttractions;
+      if (!t) continue;
+      const sched = (t.selectedOption && t.selectedOption.scheduledDateTime) || tk.startDate;
+      if (!sched) continue;
+      legs.push({
+        when: sched, time: formatTime(sched), day: formatShortDate(sched),
+        title: escapeHtml(t.name || 'Ticket'),
+        detail: escapeHtml((t.selectedOption && t.selectedOption.name) || t.ticketType || ''),
+      });
+    }
+
+    if (back) pushFlight(back, 'Flight home');
+    if (!legs.length) return '';
+
+    // Read as calendar moments so the order is the order it happens in, not
+    // the order the supplier listed the items. A leg with no clock on it (a
+    // hotel check-in is a date, not an instant) sorts to the END of its day,
+    // because midnight would put the check-in above the flight that gets you
+    // there — which is what it did on the first run of this block.
+    const sortKey = (leg) => {
+      const m = bookingMoment(leg.when);
+      if (!m) return 0;
+      return m.getTime() + (leg.time ? 0 : (86400000 - 1));
+    };
+    legs.sort((a, b) => sortKey(a) - sortKey(b));
+
+    const rows = legs.map((leg, i) => {
+      const last = i === legs.length - 1;
+      return `
+      <tr><td style="padding:0;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+          <td width="92" valign="top" style="padding:0 0 ${last ? '0' : '20px'} 0;">
+            ${leg.time ? `<div style="font:700 15px/1.3 ${FONT};color:#0f172a;">${escapeHtml(leg.time)}</div>` : ''}
+            <div style="font:400 12px/1.4 ${FONT};color:#94a3b8;${leg.time ? 'margin-top:2px;' : ''}">${escapeHtml(leg.day)}</div>
+          </td>
+          <td width="26" valign="top" style="padding:0;">
+            <div style="width:9px;height:9px;border-radius:50%;background:${escapeHtml(accent)};margin-top:4px;font-size:1px;line-height:1px;">&nbsp;</div>
+          </td>
+          <td valign="top" style="padding:0 0 ${last ? '0' : '20px'} 0;">
+            <div style="font:600 15px/1.45 ${FONT};color:#0f172a;">${leg.title}</div>
+            ${leg.detail ? `<div style="font:400 14px/1.6 ${FONT};color:#64748b;margin-top:3px;">${leg.detail}</div>` : ''}
+          </td>
+        </tr></table>
+      </td></tr>`;
+    }).join('');
+
+    return `
+        <tr><td style="padding:8px 32px 24px 32px;">
+          <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:16px;">Your itinerary</div>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${rows}</table>
+        </td></tr>
+        `;
+  };
+
+  /** The destination write-up, from the content base. */
+  const destinationHtml = () => {
+    if (!destPack) return '';
+    const tagline = typeof destPack.tagline === 'string' ? destPack.tagline.trim() : '';
+    const intro = typeof destPack.heroIntro === 'string' ? destPack.heroIntro.trim() : '';
+    if (!tagline && !intro) return '';
+    // The write-up runs long in the content base; an email wants the opening.
+    const opening = intro.split(/\n{2,}/)[0] || '';
+    return `
+        <tr><td style="padding:8px 32px 24px 32px;">
+          ${tagline ? `<div style="border-left:3px solid ${escapeHtml(accent)};padding:2px 0 2px 18px;">
+            <p style="margin:0;font:400 17px/1.6 ${FONT};color:#334155;font-style:italic;">${escapeHtml(tagline)}</p>
+          </div>` : ''}
+          ${opening ? `<p style="margin:${tagline ? '14px' : '0'} 0 0 0;font:400 15px/1.7 ${FONT};color:#5b6678;">${escapeHtml(opening)}</p>` : ''}
+        </td></tr>
+        `;
+  };
+
+  /** Currency, plugs, time and the weather for the month they actually go. */
+  const knowBeforeHtml = () => {
+    if (!destPack) return '';
+    const temp = monthly(destPack.climate && destPack.climate.temps);
+    const monthName = travelMonth >= 0 ? MONTHS_LONG[travelMonth] : '';
+    const cells = [
+      [monthName ? `Average high in ${monthName}` : 'Average high', temp ? `${temp}\u00B0C` : ''],
+      ['Flight time', destFacts.flightTime || ''],
+      ['Time zone', destFacts.timeZone || ''],
+      ['Plugs', destFacts.voltage || ''],
+      ['Currency', destFacts.currency || ''],
+      ['Language', destFacts.language || ''],
+    ].filter(([, v]) => !!v);
+    if (!cells.length) return '';
+
+    // Three to a row, so it never squeezes to unreadable on a phone.
+    const rows = [];
+    for (let i = 0; i < cells.length; i += 3) {
+      const slice = cells.slice(i, i + 3);
+      const w = Math.floor(100 / slice.length);
+      rows.push(`<tr>${slice.map(([l, v]) => factCell(l, v, `${w}%`)).join('')}</tr>`);
+    }
+    return `
+        <tr><td style="padding:8px 32px 24px 32px;">
+          <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;">Before you go</div>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f8fafc;border-radius:12px;">
+            ${rows.join('')}
+          </table>
+        </td></tr>
+        `;
+  };
+
+  /** Anything on in the month they travel. Nothing on, nothing drawn. */
+  const whatsOnHtml = () => {
+    if (!destPack || travelMonth < 0 || !Array.isArray(destPack.events)) return '';
+    const want = MONTHS[travelMonth].toLowerCase();
+    const hit = destPack.events.find((e) => {
+      const m = e && e.month;
+      return typeof m === 'string' && m.toLowerCase().includes(want);
+    });
+    if (!hit || !hit.name) return '';
+    return `
+        <tr><td style="padding:8px 32px 24px 32px;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${escapeHtml(accent)}14;border-radius:12px;">
+            <tr><td style="padding:18px 22px;">
+              <div style="font:600 11px/1.4 ${FONT};color:${escapeHtml(primary)};letter-spacing:.12em;text-transform:uppercase;">On while you are there</div>
+              <div style="font:700 17px/1.35 ${FONT};color:#0f172a;margin-top:7px;">${escapeHtml(hit.name)}</div>
+              ${hit.description ? `<p style="margin:6px 0 0 0;font:400 15px/1.6 ${FONT};color:#5b6678;">${escapeHtml(String(hit.description).slice(0, 320))}</p>` : ''}
+            </td></tr>
+          </table>
+        </td></tr>
+        `;
+  };
+
+  /** Three things worth doing, from the content base. */
+  const thingsToDoHtml = () => {
+    if (!destPack || !Array.isArray(destPack.highlights)) return '';
+    const picks = destPack.highlights.filter((h) => h && h.title).slice(0, 3);
+    if (!picks.length) return '';
+    const items = picks.map((h, i) => `
+      <tr><td style="padding:${i ? '16px' : '0'} 0 0 0;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+          <td width="34" valign="top" style="font:700 15px/1.5 ${FONT};color:${escapeHtml(accent)};">0${i + 1}</td>
+          <td valign="top">
+            <div style="font:700 16px/1.4 ${FONT};color:#0f172a;">${escapeHtml(h.title)}</div>
+            ${h.description ? `<p style="margin:4px 0 0 0;font:400 14px/1.65 ${FONT};color:#5b6678;">${escapeHtml(String(h.description).slice(0, 260))}</p>` : ''}
+          </td></tr></table>
+      </td></tr>`).join('');
+    return `
+        <tr><td style="padding:8px 32px 24px 32px;">
+          <div style="font:500 12px/1.4 ${FONT};color:#64748b;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px;">While you are there</div>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table>
+        </td></tr>
+        `;
+  };
+
   const dataBlocks = {
     greeting:   () => greetingHtml,
+    hero:       (b) => heroHtml(b && b.url),
+    hotelcard:  () => hotelCardHtml(),
+    itinerary:  () => itineraryHtml(),
+    destination: () => destinationHtml(),
+    knowbefore: () => knowBeforeHtml(),
+    whatson:    () => whatsOnHtml(),
+    thingstodo: () => thingsToDoHtml(),
     message:    () => messageHtml,
     summary:    () => summaryCard(summaryRows, 'Your booking'),
     reference:  () => summaryCard(rowsIn('reference'), 'Your booking'),
@@ -1102,7 +1520,10 @@ export function renderBookingEmail(opts) {
 
   function renderBlock(block) {
     const built = dataBlocks[block.type];
-    if (built) return built();
+    // Data blocks fill themselves from the booking, but a couple take one
+    // optional setting from the client (the hero's own picture), so each is
+    // handed the block it was saved as.
+    if (built) return built(block);
 
     // The client wrote this one.
     const raw = typeof block.text === 'string' ? block.text : '';

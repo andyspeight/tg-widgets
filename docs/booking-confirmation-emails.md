@@ -173,18 +173,75 @@ exist in one and not the other. An empty, missing or unrecognisable layout
 falls back to the built-in one, which is byte-for-byte the email we have always
 sent.
 
+### Starter styles (17 Sep 2026)
+
+Andy, having been shown four mockups: "i liked them all please". So
+`EMAIL_STYLES` carries four layouts a client can start from, and the editor's
+layout builder shows them as a "Start from" row above the list:
+
+| Style | What it is |
+|---|---|
+| Standard | The built-in layout. Everything in one summary card, no pictures. |
+| Postcard | Opens on a full-width picture of the destination, then the details. |
+| Magazine | Picture, the hotel on its own card, then the destination write-up, three things to do, what is on and the facts strip. |
+| Itinerary | Everything on one timeline in the order it happens, practical bits underneath. |
+
+Picking one REPLACES the layout. It is a starting point, not a theme that keeps
+applying, and once there is something to lose the editor asks first (through its
+own modal, via the field's `confirmStyle` hook, not `window.confirm`). Because
+Standard IS `DEFAULT_EMAIL_LAYOUT`, there is no separate "copy ours in" link:
+one list, one way to it.
+
+### The blocks the styles are built from
+
+Seven blocks were added with the styles, and they follow one rule: **a block
+with nothing to say says nothing.** A client can pick Magazine for a hotel with
+no photograph and a destination we hold no content for, and gets a shorter email
+rather than a row of empty boxes. `test:confirmation-blocks` asserts both halves
+of that, block by block.
+
+- `hero` — full-width picture with the destination and dates on a band beneath.
+  Takes an optional `url`; otherwise it uses the hotel photo, then a destination
+  photo. It names the destination our content base knows ("The Maldives") in
+  preference to the airport city the supplier filed the hotel under ("Male").
+- `hotelcard` — the property with its photo, star rating, room and board. Room
+  and board come from `roomLabel()` and `boardLabel()` in
+  `public/_order-stays.js`, the same answers the My Booking page gives, so a
+  booking cannot read one way on the page and another in the email.
+- `itinerary` — flights, transfers, check-ins and tickets on one timeline. Sorted
+  with `bookingMoment`, and a leg with no clock on it (a check-in is a date, not
+  an instant) sorts to the END of its day — at midnight it sorted above the
+  flight that gets you there, which is what it did on the first run.
+- `destination`, `knowbefore`, `whatson`, `thingstodo` — read `opts.destination`,
+  the pack in the shape `/api/destination-content` returns. The renderer is
+  runtime-neutral and cannot look anything up, so the caller passes it in.
+
+**The destination lookup is not wired yet.** Nothing passes `destination` today,
+so those four blocks draw nothing on a real send. The blocks, the styles and the
+tests are done; resolving a booking's city or country to a destination record is
+the next piece, and it needs a decision on the lookup order (resort, then city,
+then country?) because `/api/destination-content` slug mode is scoped to a
+Spotlight widget id and the confirmation email has no widget to scope to.
+
 ## Tests
 
 | Command | What it holds |
 |---|---|
 | `npm run test:booking-webhook` | The published payloads, the signature, the endpoint's answers, and every reason the worker does or does not send. |
-| `npm run test:confirmation-blocks` | The block vocabulary, and that the default layout is the email we have always sent. |
+| `npm run test:confirmation-blocks` | The block vocabulary, the four starter styles, and that every block draws from a booking that has its material and draws nothing from one that does not. |
 | `npm run test:confirmation-layout` | The layout builder in the editor, driven for real. |
 | `npm run test:booking-email-drift` | One renderer for the preview and the send. |
 | `npm run test:payment-reminders` | The pipeline this one reuses. |
+| `npm run test:order-stays-drift` | Among other things, that the board-basis list in the widget and the one in `_order-stays.js` have not drifted apart. |
 
 ## Still to do
 
+- **Wire the destination lookup** so `hero`, `destination`, `knowbefore`,
+  `whatson` and `thingstodo` fill on a real send. Two callers only:
+  `api/booking-email.js` and the editor preview. `fetchRecordBySlug` exists in
+  `api/destination-content.js` but is not exported, and the booking gives us a
+  city name rather than a slug, so this needs a small lookup helper and a
+  decision on the order it tries.
 - The first real test booking, which is what proves the id + key order fetch.
 - Decide whether `order.cancel` should send the cancellation email we already
   have a renderer for. Andy asked for new bookings first; the rows are being

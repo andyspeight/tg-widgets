@@ -123,6 +123,15 @@
   .tgep-add button { border:1px solid #0891B2; background:#0891B2; color:#fff; border-radius:6px;
     padding:7px 14px; font:600 12px/1 inherit; cursor:pointer; flex-shrink:0; }
   .tgep-add button:hover { background:#0E7490; }
+  .tgep-styles { margin:0 0 12px; padding:10px 12px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; }
+  .tgep-styles-label { font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+                       color:#64748B; margin-bottom:7px; }
+  .tgep-styles-row { display:flex; flex-wrap:wrap; gap:6px; }
+  .tgep-style { border:1px solid #CBD5E1; background:#fff; color:#0F172A; border-radius:999px;
+                padding:5px 12px; font:inherit; font-size:12px; font-weight:500; cursor:pointer; }
+  .tgep-style:hover { border-color:#0891B2; color:#0891B2; }
+  .tgep-style:focus-visible { outline:2px solid #0891B2; outline-offset:1px; }
+  .tgep-styles-hint { margin-top:7px; font-size:11px; line-height:1.5; color:#64748B; min-height:2.2em; }
   .tgep-blocks-reset { background:none; border:0; padding:0; margin:8px 0 0; font:inherit; font-size:11px;
     color:#64748B; text-decoration:underline; text-underline-offset:3px; cursor:pointer; align-self:flex-start; }
   .tgep-blocks-reset:hover { color:#0F172A; }
@@ -313,6 +322,60 @@
     function buildBlocks(f, host, values) {
       const palette = Array.isArray(f.palette) ? f.palette : [];
       const meta = (type) => palette.find((b) => b.type === type) || null;
+      // Start from a style. Andy, 17 Sep 2026, having seen the four mockups:
+      // "i liked them all please". A style REPLACES the layout — it is a
+      // starting point, not a theme that keeps applying — so once there is
+      // something to lose we ask first.
+      const styles = Array.isArray(f.styles) ? f.styles : [];
+      let stylesEl = null;
+      if (styles.length) {
+        stylesEl = document.createElement('div');
+        stylesEl.className = 'tgep-styles';
+        const lab = document.createElement('div');
+        lab.className = 'tgep-styles-label';
+        lab.textContent = 'Start from';
+        stylesEl.appendChild(lab);
+        const row = document.createElement('div');
+        row.className = 'tgep-styles-row';
+        styles.forEach((st) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'tgep-style';
+          b.textContent = st.label;
+          if (st.hint) b.title = st.hint;
+          b.addEventListener('click', () => {
+            const apply = () => {
+              blocks = (st.layout || []).map((x) => Object.assign({}, x));
+              commit(); paint();
+            };
+            // Nothing to lose yet, so just do it.
+            if (!blocks.length) { apply(); return; }
+            // The caller has a proper modal; use theirs rather than the
+            // browser's, which looks like a warning from the website.
+            if (typeof f.confirmStyle === 'function') f.confirmStyle(st, apply);
+            else if (window.confirm('Start from ' + st.label
+              + '? This replaces the blocks you have now.')) apply();
+          });
+          row.appendChild(b);
+        });
+        stylesEl.appendChild(row);
+        const hint = document.createElement('div');
+        hint.className = 'tgep-styles-hint';
+        hint.textContent = styles.map((st) => st.hint).filter(Boolean)[0] || '';
+        stylesEl.appendChild(hint);
+        // Say what each one is as the client moves across them, so picking is
+        // not a guess from a one-word name.
+        row.addEventListener('mouseover', (e) => {
+          const i = Array.prototype.indexOf.call(row.children, e.target);
+          if (i >= 0 && styles[i] && styles[i].hint) hint.textContent = styles[i].hint;
+        });
+        row.addEventListener('focusin', (e) => {
+          const i = Array.prototype.indexOf.call(row.children, e.target);
+          if (i >= 0 && styles[i] && styles[i].hint) hint.textContent = styles[i].hint;
+        });
+        host.appendChild(stylesEl);
+      }
+
       const listEl = document.createElement('div');
       listEl.className = 'tgep-blocks';
       host.appendChild(listEl);
@@ -413,7 +476,9 @@
           const p = document.createElement('p');
           p.className = 'tgep-block-note';
           p.style.margin = '10px';
-          p.textContent = 'No blocks yet, so your customers get our standard email. Add one below to build your own.';
+          p.textContent = styles.length
+            ? 'No blocks yet, so your customers get our standard email. Pick a style above to start from, or add a block below.'
+            : 'No blocks yet, so your customers get our standard email. Add one below to build your own.';
           empty.appendChild(p);
           listEl.appendChild(empty);
         }

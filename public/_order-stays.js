@@ -184,7 +184,51 @@ function isMultiStay(order) {
 }
 // <<< order-stays core
 
+// Travelify returns board basis as a machine enum ("BedAndBreakfast",
+// "AllInclusive"). This is the ONE list of readable labels, shared by the
+// email's hotel card and the My Booking page. The widget cannot import, so it
+// carries its own copy in fmtBoard; test:order-stays-drift fails if the two
+// lists ever differ. Anything not on the list falls back to the raw string so
+// we never silently lose information, and "Unknown" means we say nothing
+// rather than invent a board basis.
+const BOARD_LABELS = {
+  'RoomOnly':        'Room only',
+  'SelfCatering':    'Self catering',
+  'BedAndBreakfast': 'Bed & breakfast',
+  'HalfBoard':       'Half board',
+  'HalfBoardPlus':   'Half board plus',
+  'FullBoard':       'Full board',
+  'FullBoardPlus':   'Full board plus',
+  'AllInclusive':    'All inclusive',
+  'AllInclusivePlus':'All inclusive plus',
+  'UltraAllInclusive':'Ultra all inclusive',
+};
+
+/** A readable board basis, or null when the supplier gave us nothing real. */
+function boardLabel(raw) {
+  if (typeof raw !== 'string') return null;
+  const v = raw.trim();
+  if (!v || v.toLowerCase() === 'unknown') return null;
+  if (Object.prototype.hasOwnProperty.call(BOARD_LABELS, v)) return BOARD_LABELS[v];
+  return v;
+}
+
+/**
+ * The room as the traveller should read it. Travelify's units[].name is the
+ * full supplier string ("8 BED MIXED DORM (for 1 people)") and is preferred;
+ * roomType is a category that comes back as the literal "Unknown" when the
+ * supplier has not set one. Never invent a default: no "Standard", no
+ * "Deluxe". Null means show no room at all.
+ */
+function roomLabel(unit) {
+  if (!unit || typeof unit !== 'object') return null;
+  if (typeof unit.name === 'string' && unit.name.trim()) return unit.name.trim();
+  const t = typeof unit.roomType === 'string' ? unit.roomType.trim() : '';
+  if (t && t.toLowerCase() !== 'unknown') return t;
+  return null;
+}
+
 export {
   listStays, primaryStay, isMultiStay, stayNights, stayCheckout, stayDay, bookingMoment,
-  STAY_PRODUCTS, isStayProduct,
+  STAY_PRODUCTS, isStayProduct, BOARD_LABELS, boardLabel, roomLabel,
 };

@@ -25,7 +25,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
-import { renderBookingEmail, EMAIL_BLOCKS, DEFAULT_EMAIL_LAYOUT } from '../public/_booking-email-template.js';
+import { renderBookingEmail, EMAIL_BLOCKS, EMAIL_STYLES, DEFAULT_EMAIL_LAYOUT } from '../public/_booking-email-template.js';
 
 const POPUP = readFileSync(new URL('../public/editor-email-popup.js', import.meta.url), 'utf8');
 const EDITOR = readFileSync(new URL('../public/editor-mybooking.html', import.meta.url), 'utf8');
@@ -52,7 +52,8 @@ const ORDER = {
         units: [{ name: 'Ocean Room', roomType: 'Ocean Room', checkin: '2027-02-03T00:00:00',
           nights: 7, rates: [{ board: 'BedAndBreakfast' }], sleepsAdults: 2, sleepsChildren: 0 }],
         pricing: { price: 1400, currency: 'GBP', isRefundable: true },
-        guests: [{ type: 'Lead', title: 'Ms', firstname: 'Sarah', surname: 'Nolan' }], media: [] } },
+        guests: [{ type: 'Lead', title: 'Ms', firstname: 'Sarah', surname: 'Nolan' }],
+        media: [{ type: 'GenericImage', url: 'https://static.travelify.io/hotels/jumeirah-1.jpg', caption: 'Ocean room' }] } },
     { id: 2, status: 'Confirmed', product: 'Flights', bookingReference: 'EK7781',
       price: 650, currency: 'GBP', startDate: '2027-02-03T00:00:00',
       flights: { routes: [{ direction: 'Outbound', segments: [{
@@ -75,6 +76,7 @@ function page() {
 /** Open the popup on a confirmation email whose layout starts as `layout`. */
 function openBuilder(window, layout = []) {
   const store = { layout: layout.map((b) => ({ ...b })) };
+  const confirmedWith = [];
   let changes = 0;
   const handle = window.TGEmailPopup.open({
     startKey: 'confirmation',
@@ -85,6 +87,10 @@ function openBuilder(window, layout = []) {
       tags: TAGS,
       fields: [{ key: 'layout', type: 'blocks', label: 'What goes in the email, in order',
         palette: EMAIL_BLOCKS,
+        styles: EMAIL_STYLES,
+        // The real editor hands the picker its own modal; here we accept
+        // immediately so the test drives the apply path rather than a dialog.
+        confirmStyle: (style, apply) => { confirmedWith.push(style.id); apply(); },
         reset: { label: 'Copy our standard layout in, so I can change it',
           run: (applied) => { store.layout = DEFAULT_EMAIL_LAYOUT.map((b) => ({ type: b.type })); applied(store.layout); } } }],
       read: () => ({ layout: store.layout }),
@@ -99,7 +105,7 @@ function openBuilder(window, layout = []) {
       },
     }],
   });
-  return { store, handle, changes: () => changes };
+  return { store, handle, changes: () => changes, confirmedWith };
 }
 
 // The chips the My Booking editor really offers, read out of the editor source
@@ -133,9 +139,12 @@ console.log('The editor offers the blocks the renderer can actually draw');
   }).html;
   const unfilled = TAGS.map((t) => t.tag).filter((tag) => html.includes(tag));
   ok('every chip the editor offers is one the renderer fills', unfilled.length === 0, unfilled.join(', '));
-  ok('the editor takes its palette from the renderer, not a list of its own',
-    /import \{ renderBookingEmail, EMAIL_BLOCKS, DEFAULT_EMAIL_LAYOUT \} from '\/_booking-email-template\.js'/.test(EDITOR)
-    && /palette: EMAIL_BLOCKS/.test(EDITOR));
+  ok('the editor takes its palette and its styles from the renderer, not a list of its own',
+    /import \{[^}]*\bEMAIL_BLOCKS\b[^}]*\} from '\/_booking-email-template\.js'/.test(EDITOR)
+    && /import \{[^}]*\bEMAIL_STYLES\b[^}]*\} from '\/_booking-email-template\.js'/.test(EDITOR)
+    && /palette: EMAIL_BLOCKS/.test(EDITOR)
+    && /styles: EMAIL_STYLES/.test(EDITOR)
+    && !/EMAIL_BLOCKS\s*=\s*\[/.test(EDITOR));
   ok('the confirmation sits with the other customer emails',
     /const REM_ORDER = \['confirmation', 'interim', 'final', 'cancellation'\]/.test(EDITOR)
     && /rem-status-confirmation/.test(EDITOR));
@@ -278,6 +287,90 @@ console.log('Starting from our layout gives an editable copy');
     /Hi Sarah,/.test(preview(window)) && /Have a wonderful trip/.test(preview(window)));
   ok('the builder link does not restyle the other emails\' reset link',
     !/\.tgep-reset \{ background:none/.test(readFileSync(new URL('../public/editor-email-popup.js', import.meta.url), 'utf8')));
+}
+
+console.log('Starting from one of the four styles');
+{
+  const window = page();
+  const { store, confirmedWith } = openBuilder(window, []);
+  await sleep(30);
+  const buttons = [...window.document.querySelectorAll('.tgep-style')];
+  ok('all four are offered, by name',
+    buttons.map((b) => b.textContent).join(',') === EMAIL_STYLES.map((s) => s.label).join(','),
+    buttons.map((b) => b.textContent).join(','));
+  ok('the picker sits above the list, not below it',
+    !!window.document.querySelector('.tgep-styles')
+    && window.document.querySelector('.tgep-styles').compareDocumentPosition(
+      window.document.querySelector('.tgep-blocks')) & 4);
+
+  // Nothing to lose yet, so picking just happens.
+  const postcard = buttons[EMAIL_STYLES.findIndex((s) => s.id === 'postcard')];
+  await click(postcard);
+  ok('picking one with an empty list does not stop to ask', confirmedWith.length === 0);
+  ok('the list is now that style',
+    store.layout.map((b) => b.type).join(',')
+      === EMAIL_STYLES.find((s) => s.id === 'postcard').layout.map((b) => b.type).join(','));
+  ok('and it is shown as blocks they can move',
+    rows(window).length === EMAIL_STYLES.find((s) => s.id === 'postcard').layout.length);
+  ok('the email it produces opens on the picture',
+    /You are going to/.test(preview(window)));
+
+  // Now there IS something to lose, so it asks first.
+  const magazine = buttons[EMAIL_STYLES.findIndex((s) => s.id === 'magazine')];
+  await click(magazine);
+  ok('picking another asks before replacing what they have',
+    confirmedWith.join(',') === 'magazine', confirmedWith.join(','));
+  ok('and having been told yes, it replaces it',
+    store.layout.map((b) => b.type).join(',')
+      === EMAIL_STYLES.find((s) => s.id === 'magazine').layout.map((b) => b.type).join(','));
+
+  // A style is a starting point, not a mode: it must stay editable afterwards.
+  const firstRemove = window.document.querySelector('.tgep-block .tgep-bbtn.is-del');
+  ok('the blocks a style put in can be removed like any other', !!firstRemove);
+  if (firstRemove) {
+    const before = store.layout.length;
+    await click(firstRemove);
+    ok('and removing one really removes it', store.layout.length === before - 1);
+  }
+}
+
+console.log('Declining leaves the layout alone');
+{
+  const window = page();
+  const store = { layout: [{ type: 'divider' }] };
+  window.TGEmailPopup.open({
+    startKey: 'confirmation',
+    emails: [{
+      key: 'confirmation', label: 'Booking confirmation', tabLabel: 'Confirmation',
+      from: () => 'Sunrise Travel', to: 'sarah@example.com', tags: TAGS,
+      fields: [{ key: 'layout', type: 'blocks', label: 'What goes in the email, in order',
+        palette: EMAIL_BLOCKS, styles: EMAIL_STYLES,
+        // The client said no.
+        confirmStyle: () => {} }],
+      read: () => ({ layout: store.layout }),
+      write: (key, value) => { if (key === 'layout') store.layout = value; },
+      render: () => ({ subject: '', html: '', note: '' }),
+    }],
+  });
+  await sleep(30);
+  await click(window.document.querySelectorAll('.tgep-style')[1]);
+  ok('a style they did not confirm is not applied',
+    store.layout.map((b) => b.type).join(',') === 'divider');
+}
+
+console.log('The editor page wires the picker to its own modal');
+{
+  ok('it passes the styles through', /styles: EMAIL_STYLES/.test(EDITOR));
+  ok('and confirms with its own dialog rather than the browser\'s',
+    /confirmStyle: \(style, apply\) =>/.test(EDITOR) && /showConfirm\('Start from '/.test(EDITOR));
+  ok('the popup falls back to a plain confirm when a caller offers no modal',
+    /window\.confirm\(/.test(POPUP));
+  ok('picking a style marks the editor dirty, so Save lights up',
+    /confirmStyle:[\s\S]{0,300}remMarkDirty\(\)/.test(EDITOR));
+  // Standard IS the built-in layout, so a second "copy ours in" link beside the
+  // picker would be two ways to the same place.
+  ok('the standard layout is offered once, as the Standard style',
+    !/Copy our standard layout in/.test(EDITOR));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');

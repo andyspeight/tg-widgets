@@ -661,7 +661,7 @@
   <script src="/tour-mybooking.js"></script>
 <script type="module">
 import { renderPdfHtml } from '/_pdf-template.js';
-import { renderBookingEmail, EMAIL_BLOCKS, DEFAULT_EMAIL_LAYOUT } from '/_booking-email-template.js';
+import { renderBookingEmail, EMAIL_BLOCKS, EMAIL_STYLES } from '/_booking-email-template.js';
 import { renderReminderEmail } from '/_reminder-email-template.js';
 import { renderCancellationEmail } from '/_cancellation-email-template.js';
 
@@ -1154,17 +1154,16 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       fields: [
         { key: 'layout', type: 'blocks', label: 'What goes in the email, in order',
           palette: EMAIL_BLOCKS, tagsAfter: true,
-          hint: 'Arrange the email however you like. Blocks marked "From the booking" fill themselves in, and any that has nothing to show on a booking is left out. Leave the list empty to send our standard layout.',
-          reset: {
-            label: 'Copy our standard layout in, so I can change it',
-            run: (applied) => showConfirm('Copy our standard layout in?',
-              'Your current layout will be replaced by a copy of ours, which you can then rearrange.',
-              () => {
-                ceEnsure().layout = DEFAULT_EMAIL_LAYOUT.map((b) => ({ type: b.type }));
-                remMarkDirty();
-                applied(ceEnsure().layout);
-              }),
-          } },
+          // Four shapes to start from, straight off the renderer's own list, so
+          // a client picks a look and then changes it rather than building one
+          // out of twenty-eight blocks from nothing. "Standard" is our built-in
+          // layout, which is why there is no separate "copy ours in" link.
+          styles: EMAIL_STYLES,
+          confirmStyle: (style, apply) => showConfirm('Start from ' + style.label + '?',
+            'The blocks you have now are replaced by the ' + style.label.toLowerCase()
+            + ' layout, which you can then rearrange.',
+            () => { apply(); remMarkDirty(); }),
+          hint: 'Pick a style to start from, then change it however you like. Blocks marked "From the booking" fill themselves in, and any that has nothing to show on a booking is left out. Leave the list empty to send our standard layout.' },
       ],
       read: read,
       write: (key, value) => {

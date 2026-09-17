@@ -22,7 +22,7 @@
  * Run: node test/confirmation-blocks-smoke.mjs  (npm run test:confirmation-blocks)
  */
 import {
-  renderBookingEmail, EMAIL_BLOCKS, DEFAULT_EMAIL_LAYOUT, normaliseLayout,
+  renderBookingEmail, EMAIL_BLOCKS, EMAIL_STYLES, DEFAULT_EMAIL_LAYOUT, normaliseLayout,
 } from '../public/_booking-email-template.js';
 
 let passed = 0, failed = 0;
@@ -50,7 +50,8 @@ const ORDER = {
         units: [{ name: 'Beach Villa', roomType: 'Beach Villa', checkin: '2026-09-26T00:00:00',
           nights: 6, rates: [{ board: 'AllInclusive' }], sleepsAdults: 2, sleepsChildren: 0 }],
         pricing: { price: 2100, currency: 'GBP', isRefundable: false },
-        guests: [{ type: 'Lead', title: 'Mrs', firstname: 'Gemma', surname: 'Whitaker' }], media: [] } },
+        guests: [{ type: 'Lead', title: 'Mrs', firstname: 'Gemma', surname: 'Whitaker' }],
+        media: [{ type: 'GenericImage', url: 'https://static.travelify.io/hotels/kanifushi-1.jpg', caption: 'Beach villa' }] } },
     { id: 2, status: 'Confirmed', product: 'Flights', bookingReference: 'FL9921',
       price: 1600, currency: 'GBP', startDate: '2026-09-26T00:00:00',
       flights: { routes: [
@@ -80,8 +81,31 @@ const ORDER = {
   ],
 };
 
+// The destination pack, exactly the shape /api/destination-content returns.
+// The renderer cannot look anything up, so the caller passes this in; every
+// block that reads it draws nothing when it is absent, which is the pair of
+// assertions below.
+const DESTINATION = {
+  level: 'country',
+  name: 'The Maldives',
+  tagline: 'A thousand islands scattered across the Indian Ocean.',
+  heroIntro: 'Barely two hundred of the twelve hundred coral islands are lived on at all.\n\nA second paragraph the email must not print.',
+  images: ['https://static.travelify.io/dest/maldives-1.jpg'],
+  climate: { temps: [28, 28, 29, 30, 30, 29, 29, 29, 29, 29, 29, 28], rainfall: [], season: [] },
+  facts: { flightTime: '10h 45m direct', timeZone: 'GMT+5', currency: 'Rufiyaa (MVR)', language: 'Dhivehi', voltage: '230V, type D and G' },
+  highlights: [
+    { icon: 'fish', title: 'Snorkel the house reef', description: 'The drop-off is where the turtles are.' },
+    { icon: 'boat', title: 'Take a dhoni at dawn', description: 'The fishing boats go out before six.' },
+    { icon: 'moon', title: 'Look for bioluminescence', description: 'The plankton light the shoreline blue.' },
+  ],
+  events: [
+    { month: 'September', name: 'Whale shark season, South Ari Atoll', description: 'The clearest water of the year.' },
+    { month: 'March', name: 'Ramadan begins', description: 'Observed nationally.' },
+  ],
+};
+
 const OPTS = {
-  order: ORDER, message: 'Booked for you by Jess. Any questions, just shout.',
+  order: ORDER, destination: DESTINATION, message: 'Booked for you by Jess. Any questions, just shout.',
   brand: { name: 'Exclusively Travel', logoUrl: 'https://cdn.example.com/et.png', footerLine: 'ABTA P1234' },
   colors: { primary: '#1B2B5B', accent: '#00B4D8' },
   supportEmail: 'hello@exclusivelytravel.co.uk', supportPhone: '01202 934033',
@@ -226,6 +250,132 @@ console.log('The frame around the blocks is still ours');
     render([{ type: 'divider' }]).subject === 'Your Male booking confirmation (ET121109)');
   ok('a layout cannot exceed forty blocks',
     normaliseLayout(Array.from({ length: 80 }, () => ({ type: 'divider' }))).length === 40);
+}
+
+// ---------------------------------------------------------------------------
+// The picture-led and destination blocks, and the four starter styles
+// (17 Sep 2026). Andy, having seen the mockups: "i liked them all please".
+// ---------------------------------------------------------------------------
+
+console.log('The picture blocks draw from the booking');
+{
+  const hero = render([{ type: 'hero' }]).html;
+  ok('the hero used the hotel photo when given none of its own',
+    at(hero, 'https://static.travelify.io/hotels/kanifushi-1.jpg') > -1);
+  ok('the hero names the destination we hold, not the airport city',
+    at(hero, 'The Maldives') > -1 && at(hero, '>Male<') === -1);
+  ok('the hero carries the dates and the nights',
+    at(hero, '26 Sept 2026 to 2 Oct 2026') > -1 && at(hero, '6 nights') > -1);
+  ok('the client can give the hero its own picture',
+    at(render([{ type: 'hero', url: 'https://static.travelify.io/own.jpg' }]).html,
+      'https://static.travelify.io/own.jpg') > -1);
+  ok('and only an https one',
+    at(render([{ type: 'hero', url: 'http://insecure.example.com/x.jpg' }]).html,
+      'insecure.example.com') === -1);
+
+  const card = render([{ type: 'hotelcard' }]).html;
+  ok('the hotel card names the property', at(card, 'Atmosphere Kanifushi') > -1);
+  ok('it shows the room and the board through the shared labels',
+    at(card, 'Beach Villa') > -1 && at(card, 'All inclusive') > -1);
+  ok('it shows five stars for a five star property', (card.match(/&#9733;/g) || []).length === 5);
+  ok('it shows the dates', at(card, '26 Sept 2026 to 2 Oct 2026') > -1);
+  ok('the separator is a separator, not the word &middot;', at(card, '&amp;middot;') === -1);
+}
+
+console.log('The itinerary runs in the order the trip happens');
+{
+  const html = render([{ type: 'itinerary' }]).html;
+  const order = ['Flight out', 'Check in', 'Transfer', 'Sunset dolphin cruise', 'Transfer back', 'Flight home']
+    .map(t => at(html, t));
+  ok('every leg is on it', order.every(i => i > -1), order.join(','));
+  ok('and they are in trip order', order.every((v, i) => i === 0 || v > order[i - 1]), order.join(','));
+  // The bug this catches: a check-in is a calendar date with no clock on it,
+  // so at midnight it sorted ABOVE the flight that gets you there that day.
+  ok('a dated leg with no clock sits after the timed legs of its own day',
+    at(html, 'Check in') > at(html, 'Flight out'));
+  ok('it prints the times the traveller reads at the gate', at(html, '14:00') > -1);
+  ok('nothing is double escaped', at(html, '&amp;middot;') === -1 && at(html, '&amp;rarr;') === -1);
+}
+
+console.log('The destination blocks read the pack the caller passed in');
+{
+  const d = render([{ type: 'destination' }]).html;
+  ok('the tagline is there', at(d, 'A thousand islands scattered') > -1);
+  ok('the opening paragraph is there', at(d, 'Barely two hundred') > -1);
+  ok('but only the opening, not the whole write-up', at(d, 'must not print') === -1);
+
+  const k = render([{ type: 'knowbefore' }]).html;
+  ok('the facts strip carries the currency and the plugs',
+    at(k, 'Rufiyaa (MVR)') > -1 && at(k, '230V, type D and G') > -1);
+  ok('it gives the average high for the month they actually travel',
+    at(k, '29°C') > -1 && at(k, 'Average high in September') > -1);
+
+  const w = render([{ type: 'whatson' }]).html;
+  ok('what is on picks the event in the travel month', at(w, 'Whale shark season') > -1);
+  ok('and leaves the other months alone', at(w, 'Ramadan') === -1);
+
+  const t = render([{ type: 'thingstodo' }]).html;
+  ok('three things to do lists three', (t.match(/font:700 16px/g) || []).length === 3);
+  ok('with their descriptions', at(t, 'where the turtles are') > -1);
+}
+
+console.log('A block with nothing to say says nothing');
+{
+  // This is the rule the four styles rest on: a client picks Magazine for a
+  // destination we hold no content for, or a hotel with no photograph, and
+  // gets a shorter email rather than a row of empty boxes.
+  const bare = JSON.parse(JSON.stringify(ORDER));
+  bare.items[0].accommodation.media = [];
+  const nothing = (type) => renderBookingEmail({
+    ...OPTS, order: bare, destination: null, layout: [{ type }],
+  }).html;
+  const baseline = norm(renderBookingEmail({ ...OPTS, order: bare, destination: null, layout: [{ type: 'divider' }] }).html).length;
+  for (const type of ['hero', 'destination', 'knowbefore', 'whatson', 'thingstodo']) {
+    ok('no material, nothing drawn: ' + type, norm(nothing(type)).length < baseline);
+  }
+  ok('the hotel card still draws without a photograph, because it has a hotel',
+    at(nothing('hotelcard'), 'Atmosphere Kanifushi') > -1);
+  ok('an event in a month they are not travelling is not "what is on"',
+    at(renderBookingEmail({ ...OPTS, destination: { ...DESTINATION, events: [{ month: 'March', name: 'Ramadan begins' }] },
+      layout: [{ type: 'whatson' }] }).html, 'Ramadan') === -1);
+  ok('a climate series that is not twelve months is ignored rather than guessed',
+    at(renderBookingEmail({ ...OPTS, destination: { ...DESTINATION, climate: { temps: [28, 29] } },
+      layout: [{ type: 'knowbefore' }] }).html, 'Average high') === -1);
+  ok('a destination pack that is not an object is simply absent',
+    norm(renderBookingEmail({ ...OPTS, destination: 'the maldives', layout: [{ type: 'destination' }] }).html).length < baseline);
+}
+
+console.log('The four starter styles are real layouts');
+{
+  const types = EMAIL_BLOCKS.map(b => b.type);
+  ok('there are four', EMAIL_STYLES.length === 4);
+  ok('each has an id, a label and a hint',
+    EMAIL_STYLES.every(s => s.id && s.label && s.hint));
+  ok('every block in every style is one the renderer can draw',
+    EMAIL_STYLES.every(s => s.layout.every(b => types.includes(b.type))));
+  ok('Standard is our built-in layout, so the picker and the fallback agree',
+    JSON.stringify(EMAIL_STYLES.find(s => s.id === 'standard').layout)
+      === JSON.stringify(DEFAULT_EMAIL_LAYOUT));
+  // Whatever a client starts from, a confirmation still has to tell them the
+  // pack is attached, how to reach a human, and who it is from.
+  for (const s of EMAIL_STYLES) {
+    const have = s.layout.map(b => b.type);
+    ok(s.id + ' keeps the pack note, the contact details and the sign off',
+      ['pdfnote', 'support', 'signoff'].every(t => have.includes(t)));
+    const html = render(s.layout).html;
+    ok(s.id + ' renders, branded, with the booking on it',
+      at(html, 'ET121109') > -1 && at(html, 'ABTA P1234') > -1);
+    ok(s.id + ' has no unresolved template left in it',
+      at(html, 'undefined') === -1 && at(html, 'NaN') === -1 && at(html, '[object Object]') === -1);
+  }
+  ok('Postcard opens on the picture, before the greeting',
+    (() => { const h = render(EMAIL_STYLES.find(s => s.id === 'postcard').layout).html;
+      return at(h, 'You are going to') > -1 && at(h, 'You are going to') < at(h, 'Hi Gemma'); })());
+  ok('Magazine carries the destination half',
+    (() => { const have = EMAIL_STYLES.find(s => s.id === 'magazine').layout.map(b => b.type);
+      return ['hero', 'hotelcard', 'destination', 'thingstodo', 'whatson', 'knowbefore'].every(t => have.includes(t)); })());
+  ok('Itinerary is built on the timeline',
+    EMAIL_STYLES.find(s => s.id === 'itinerary').layout.some(b => b.type === 'itinerary'));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
