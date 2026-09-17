@@ -101,6 +101,13 @@ const WIDGET_TYPE = 'Enquiry Form';
 // Enquiry Forms field IDs (never use field names — they drift)
 const EF = {
   formName:            'fldC0MLSyJqg6U1zT',
+  // Standard Enquiry Form or Enquiry Pro. The editor has always SENT this
+  // (state.config.variant, set from the /editor-enquirypro path), but until
+  // 17 Sep 2026 buildEnquiryFormFields had no line for it, so the whitelist
+  // dropped it on every save. A Pro form therefore reopened as a standard one
+  // — with a standard embed snippet — the moment it was opened from the
+  // dashboard rather than the pro URL.
+  variant:             'fldqTsoAEjVG1JzF6',
   sequential:          'fldatpd9Ms5J5JGPy',
   clientName:          'fldrw1eTFYCFIo0pp',
   status:              'fldTR9W1dhMRoT0MK',
@@ -179,6 +186,10 @@ const STATUS_OPTIONS = ['Draft', 'Live', 'Archived'];
 
 // Layout mode options
 const LAYOUT_MODES = ['single-page', 'multi-step'];
+// Enquiry Pro is a VARIANT of the enquiry form, not a separate WidgetType: one
+// editor, one save path, one Airtable table. Blank reads as standard, which is
+// what every form saved before this existed.
+const VARIANTS = ['standard', 'pro'];
 
 // Template options (for analytics only)
 const TEMPLATE_OPTIONS = ['Holiday Enquiry', 'Cruise Enquiry', 'Tour Enquiry', 'Tailor-Made', 'Group Travel', 'Blank'];
@@ -317,6 +328,7 @@ function buildEnquiryFormFields(payload, userEmail, isCreate) {
   if (payload.status !== undefined)            fields[EF.status] = whitelist(payload.status, STATUS_OPTIONS, 'Draft');
   if (payload.template !== undefined)          fields[EF.template] = whitelist(payload.template, TEMPLATE_OPTIONS, 'Blank');
   if (payload.layoutMode !== undefined)        fields[EF.layoutMode] = whitelist(payload.layoutMode, LAYOUT_MODES, 'single-page');
+  if (payload.variant !== undefined)          fields[EF.variant] = whitelist(payload.variant, VARIANTS, 'standard');
   if (payload.fieldsJSON !== undefined) {
     // fieldsJSON is the source of truth for what the widget renders.
     // Always stored as a JSON string; reject anything non-serialisable.
@@ -459,6 +471,9 @@ function readEnquiryFormRecord(record) {
     formId: f[EF.formId] || '',
     name: f[EF.formName] || '',
     clientName: f[EF.clientName] || '',
+    // The editor turns Pro mode on from this when it was not reached through
+    // the /editor-enquirypro path — which is every visit from the dashboard.
+    variant: f[EF.variant] || 'standard',
     status: f[EF.status] || 'Draft',
     template: f[EF.template] || 'Blank',
     layoutMode: f[EF.layoutMode] || 'single-page',
@@ -837,6 +852,9 @@ export default async function handler(req, res) {
         if (pointerRec) {
           const pointerConfig = JSON.stringify({
             formId: efRec.fields[EF.formId] || '',
+            // Read back from the record we just patched, so a form that has
+            // just become Pro is stamped Pro here too.
+            variant: efFields[EF.variant] || efRec.fields[EF.variant] || 'standard',
             status: payload.status || 'Draft',
             submissionCount: efRec.fields[EF.submissionCount] || 0,
           });
@@ -920,8 +938,14 @@ export default async function handler(req, res) {
       const newFormId = newEfRec.fields[EF.formId] || '';
 
       // Now create the pointer record in Widgets
+      // variant is carried here as well as on the form record: the Widgets
+      // table is what the dashboard lists and what the Travelify My Widgets
+      // count reads, and neither should have to open the Enquiry Forms table
+      // to find out whether a row is Pro. The form record stays the source of
+      // truth; this is a copy written in the same request.
       const pointerConfig = JSON.stringify({
         formId: newFormId,
+        variant: efFields[EF.variant] || 'standard',
         status: efFields[EF.status],
         submissionCount: 0,
       });
@@ -1039,7 +1063,7 @@ export default async function handler(req, res) {
 }
 
 // Test surface — pure validation logic, no network.
-export const _test = { cleanTranslations, clampStr };
+export const _test = { cleanTranslations, clampStr, buildEnquiryFormFields, readEnquiryFormRecord, EF, VARIANTS };
 
 // Shared with enquiry-form-copy.js so copies get a real EF-#### badge too.
 export { nextFormSequential };
