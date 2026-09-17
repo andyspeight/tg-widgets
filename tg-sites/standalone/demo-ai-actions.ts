@@ -332,6 +332,18 @@ export async function suggestNextSectionAction(input: unknown): Promise<real.Sec
   return { ok: false, error: NO_BUILDER };
 }
 
+/**
+ * Writing a whole page from a brief, for the review copy.
+ *
+ * A refusal rather than a fixture: this one fetches photographs into the
+ * tenant's own library as well as calling the model, and a static bundle has
+ * neither. The panel shows the sentence, which is the truth about a preview.
+ */
+export async function writePageAction(input: unknown): Promise<real.PageWriteResult> {
+  void input;
+  return { ok: false, error: 'There is no writer behind this preview, so the page was left as it is.' };
+}
+
 /* Pinned against the real signatures, the same way the doubles above are: a
    double that has drifted out of shape is worse than one that is missing. */
 const _builder = [
@@ -341,5 +353,6 @@ const _builder = [
   syncSiteMenuAction satisfies typeof real.syncSiteMenuAction,
   rewriteSectionAction satisfies typeof real.rewriteSectionAction,
   suggestNextSectionAction satisfies typeof real.suggestNextSectionAction,
+  writePageAction satisfies typeof real.writePageAction,
 ];
 void _builder;

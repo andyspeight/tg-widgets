@@ -353,3 +353,111 @@ export function applyPhoto(sections: Section[], target: PhotoTarget, url: string
   items[target.place.item] = { ...item, src: url };
   found.props = { ...found.props, items };
 }
+
+// ---------------------------------------------------------------------------
+// A page that already exists, re-photographed
+// ---------------------------------------------------------------------------
+
+/**
+ * The pictures on a page that is ALREADY BUILT, asked for again about something
+ * else.
+ *
+ * WHY IT CANNOT USE THE PLANNER ABOVE. Everything above starts from a PRESET:
+ * the category decides whether a section photographs without naming a subject,
+ * and the preset's own `backgroundQuery` decides whether a background is even
+ * wanted there. A page in the editor has no preset any more. It was built from
+ * one, then edited, and there is no honest way back to which design it came
+ * from once somebody has moved a row.
+ *
+ * So this plans from the SECTION rather than from the design: every place that
+ * already holds a picture is a place a picture belongs, and it asks for a new
+ * one about the new subject. Nothing empty is filled, and no background is
+ * added to a section that never had one, because both of those are design
+ * decisions that the person made when they chose the page.
+ *
+ * A CARD ASKS ABOUT ITSELF. Same rule the starter planner learned on 26 Aug
+ * 2026: the queries come from the items as they NOW read, so a card the writer
+ * has just rewritten to say Barbados fetches Barbados rather than whatever the
+ * design shipped with.
+ *
+ * BOUND PICTURES ARE LEFT ALONE. A block inside a container or a loop draws its
+ * picture from a collection, so there is nothing here to replace: replacing it
+ * would be the exact "overwrite the binding with a fixed value" failure the
+ * whole assistant is built to refuse.
+ */
+export function refreshPhotoPlan(
+  sections: readonly Section[],
+  subjectFor: (index: number) => string,
+): PhotoTarget[] {
+  const targets: PhotoTarget[] = [];
+
+  sections.forEach((section, index) => {
+    const subject = subjectFor(index).trim();
+    if (!subject) return;
+
+    /*
+     * ONE VARIANT PER PICTURE IN THE SECTION. The fill resolves a query once and
+     * reuses the answer, so two frames asking the same thing would come back as
+     * the same photograph side by side. Counting here keeps them different.
+     */
+    let variant = 0;
+    const next = () => {
+      const value = variant;
+      variant += 1;
+      return value;
+    };
+
+    if (typeof section.backgroundImage === 'string' && section.backgroundImage.trim()) {
+      targets.push({ query: subject, variant: next(), section: index, place: { kind: 'background' } });
+    }
+
+    section.rows.forEach((row, rowIndex) => {
+      row.columns.forEach((column, columnIndex) => {
+        column.blocks.forEach((block, blockIndex) => {
+          const props = (block.props ?? {}) as Record<string, unknown>;
+          const at = { row: rowIndex, column: columnIndex, block: blockIndex };
+
+          if (block.type === 'image') {
+            const src = typeof props.src === 'string' ? props.src : '';
+            if (!src.trim() || hasToken(src)) return;
+            targets.push({ query: subject, variant: next(), section: index, place: { kind: 'image', ...at } });
+            return;
+          }
+
+          if (block.type === 'gallery') {
+            const images = Array.isArray(props.images) ? (props.images as Array<Record<string, unknown>>) : [];
+            images.forEach((image, frame) => {
+              const src = typeof image?.src === 'string' ? image.src : '';
+              if (!src.trim() || hasToken(src)) return;
+              targets.push({ query: subject, variant: next(), section: index, place: { kind: 'gallery', ...at, frame } });
+            });
+            return;
+          }
+
+          if (block.type === 'cards') {
+            const items = Array.isArray(props.items) ? (props.items as Array<Record<string, unknown>>) : [];
+            items.forEach((item, itemIndex) => {
+              const src = typeof item?.src === 'string' ? item.src : '';
+              if (!src.trim() || hasToken(src)) return;
+              const title = typeof item?.title === 'string' ? item.title.trim() : '';
+              targets.push({
+                // The card's own words first, the section's subject behind it.
+                query: title ? `${title} ${subject}`.trim().slice(0, 80) : subject,
+                variant: next(),
+                section: index,
+                place: { kind: 'card', ...at, item: itemIndex },
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+
+  return targets;
+}
+
+/** The collection loop's own marker. See lib/content/loop.ts. */
+function hasToken(value: string): boolean {
+  return /\{\{\s*[a-z]/i.test(value);
+}

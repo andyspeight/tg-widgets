@@ -108,6 +108,7 @@ import { blockTakesTokens } from '../../lib/content/loop';
 import type { ListingCards } from '../../lib/db/listings';
 import { columnWord, sectionNameAt } from '../../lib/content/naming';
 import { rewriteSectionAction, writeSeoAction } from '../../app/actions/ai';
+import { WritePage } from './WritePage';
 import { saveSectionTemplateAction } from '../../app/actions/section-templates';
 import { rebuildImportAction } from '../../app/actions/import';
 import { pageText } from '../../lib/seo/audit';
@@ -376,6 +377,14 @@ export function Properties({
         {selected && (
           <Breadcrumb selected={selected} page={page} region={region} onSelect={onSelect} />
         )}
+
+        {/*
+          THE PAGE'S OWN PANEL, where there was an empty note and nothing else.
+          A page is the one thing in the editor with no settings screen, and
+          "say what this page is about and have it written" is the page-level
+          thing worth having there. See components/editor/WritePage.tsx.
+        */}
+        {!selected && !isItem && !region && <WritePage page={page} onCommit={onCommit} />}
 
         {!selected && (
           <p className="ed-empty-note">

@@ -472,3 +472,46 @@ export function applyFill(sections: Section[], copy: Record<string, string>): Se
     })),
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Writing a page that already exists
+// ---------------------------------------------------------------------------
+
+/**
+ * The extra ask, answered in the SAME object as the copy.
+ *
+ * WHY NOT A SECOND CALL. The words and the pictures on a page are one decision:
+ * the model that has just written "the quiet side of the island" is the one that
+ * knows the photograph should show a quiet cove rather than a marina. A second
+ * call would cost a second request slot and arrive knowing less.
+ *
+ * Safe to append because fillFromModel ignores every key that is not a slot it
+ * offered, so these ride along without touching the copy.
+ *
+ * A PHOTO SUBJECT IS NOT A HEADLINE, and saying so matters: asked without this,
+ * a model hands back the section's own heading, and "Where the west coast goes
+ * quiet" finds a photo library nothing.
+ */
+export function buildPhotoAsk(count: number): string {
+  return `Also include in the same object one key per section, written as "photo:0" through "photo:${Math.max(0, count - 1)}". Each value is two or three plain words naming what a photograph on that section should SHOW: a place, a landscape, a kind of stay. Name the place the page is about wherever you can. These are search terms for a photo library, not headlines, so "Santorini caldera village" and never "Where the west coast goes quiet".`;
+}
+
+/** The photo subjects out of that answer, one per section, blank where absent. */
+export function photoSubjectsFromModel(answer: unknown, count: number): string[] {
+  const subjects = new Array<string>(Math.max(0, count)).fill('');
+  const parsed = typeof answer === 'string' ? extractJson(answer) : answer;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return subjects;
+
+  for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    const match = /^photo:(\d{1,3})$/.exec(key);
+    if (!match) continue;
+    const index = Number(match[1]);
+    if (!Number.isInteger(index) || index < 0 || index >= subjects.length) continue;
+    /* Plain words only. It is going into a search query, so markup, newlines
+       and a model's occasional full sentence are all trimmed to the same shape
+       the starter planner's own subjects have. */
+    subjects[index] = toText(value).replace(/\s+/g, ' ').trim().slice(0, 60);
+  }
+
+  return subjects;
+}

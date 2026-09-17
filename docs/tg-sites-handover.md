@@ -697,6 +697,42 @@ in `components/editor/Canvas.tsx` around line 1041 before touching it.
 
 Hard-won, none of it obvious from the code.
 
+**"WRITE THIS PAGE": THE BRIEF BOX FOR A PAGE THAT ALREADY EXISTS** (Andy,
+17 Sep 2026: "there is nowhere for me to tell the AI what the page is about and
+form it to write the content and source the images"). He was right. The
+whole-page writer only existed at the moment of creation, behind the "Describe
+it with AI" start in the Add page composer. Pick one of the designed pages
+instead, which is the obvious thing to do when the list of them is the first
+thing you see, and you got a real design carrying placeholder copy with nowhere
+afterwards to say what it was for.
+
+It lives in the PROPERTIES PANEL WITH NOTHING SELECTED, which is exactly what
+somebody is looking at the moment they add a page: a panel that until now said
+"select a section and its settings appear here" and nothing else. A page is the
+one thing in the editor with no settings screen of its own.
+
+`writePageAction` (app/actions/ai.ts) FILLS, IT DOES NOT REBUILD. The sections
+that come back are the sections that went in: same designs, same order, same
+settings, new words. Somebody who chose "Destination, picture-led" chose it. It
+also strips nothing, which is the one place it deliberately differs from the page
+builder: that path drops sections the fill never reached, because a page nobody
+has seen carrying a preset's example copy is a page about somebody else's coast.
+Here the person can SEE the page, so a skipped section is theirs to notice, and
+deleting part of the page they are looking at would be the more surprising
+answer.
+
+THE PICTURES COME BACK IN THE SAME ANSWER. `buildPhotoAsk` appends a request for
+one `photo:N` key per section to the same call, and `fillFromModel` ignores every
+key that is not a slot it offered, so the copy is untouched and the page costs
+one request slot rather than two. `refreshPhotoPlan` (lib/content/photo-plan.ts)
+then re-queries every place that ALREADY holds a picture: it plans from the
+section rather than from a preset, because a page in the editor has no preset any
+more. Nothing empty is filled and no background is added to a section that never
+had one, since both are design decisions the person already made. A bound picture
+is left alone. And the whole photo step is opt-out in the panel, because a page
+somebody has put their own photographs on should not have them swapped for stock
+just because they wanted the words rewritten.
+
 **A PANEL THAT GROWS WITH THE LIBRARY WILL ONE DAY NOT FIT ON THE SCREEN, AND
 NOTHING YOU CAN ASSERT WILL SAY SO.** Andy, 17 Sep 2026: "adding a page doesnt
 work". It worked. The Add page composer draws one card per designed page, and at

@@ -76,7 +76,8 @@ import {
 import { claimRequest, DAILY_LIMIT, recordTokens } from '../../lib/db/ai';
 import { describePicture, fetchableByModel } from '../../lib/ai/alt';
 import { getMediaItem } from '../../lib/db/media';
-import { fillPagePhotos } from '../../lib/media/photo-fill';
+import { fillPagePhotos, fillPlannedPhotos } from '../../lib/media/photo-fill';
+import { refreshPhotoPlan } from '../../lib/content/photo-plan';
 import { createPage, getPage, listPageFill, listPages, saveDraft, type PageWithContent } from '../../lib/db/pages';
 import { slugify } from '../../lib/content/slug';
 import { safeSlug } from '../../lib/content/collection';
@@ -124,6 +125,8 @@ import type { SiteSettings } from '../../lib/settings/schema';
 import {
   FILL_MAX_TOKENS,
   applyFill,
+  buildPhotoAsk,
+  photoSubjectsFromModel,
   buildFillSystemPrompt,
   buildFillUserPrompt,
   fillFromModel,
@@ -780,6 +783,146 @@ export async function rewriteSectionAction(input: unknown): Promise<SectionEditR
     if (message.startsWith('This account is not a member')) return { ok: false, error: message };
     console.error('[tg-sites] rewriting a section failed', error);
     return { ok: false, error: 'Something went wrong rewriting that. Try again.' };
+  }
+}
+
+export type PageWriteResult =
+  | {
+      ok: true;
+      sections: Section[];
+      /** How many slots came back written, for the sentence the panel shows. */
+      wrote: number;
+      /** How many pictures were asked for. Best effort, so not all will land. */
+      pictures: number;
+    }
+  | { ok: false; error: string; retryable?: boolean };
+
+/**
+ * Write the words of a page that ALREADY EXISTS, from a brief, and re-photograph
+ * it to match.
+ *
+ * THE GAP THIS CLOSES (Andy, 17 Sep 2026). The whole-page writer only ever
+ * existed at the moment of creation: pick "Describe it with AI" in the Add page
+ * composer and the model plans a page, writes it and fetches its photographs.
+ * Pick one of the designed pages instead and you get a real design carrying
+ * placeholder copy, with nowhere afterwards to say what the page is actually
+ * about. Andy added a page and looked for that box. There wasn't one.
+ *
+ * IT FILLS, IT DOES NOT REBUILD. The sections that come back are the sections
+ * that went in: same designs, same order, same settings, new words. Somebody who
+ * chose "Destination, picture-led" chose it, and a writer that quietly replaced
+ * it with its own plan would be answering a question nobody asked. That also
+ * makes it safe to run twice, and safe to undo, because the shape never moves.
+ *
+ * NOTHING IS STRIPPED EITHER, which is the one place this deliberately differs
+ * from the page builder. That path drops sections the fill never reached,
+ * because a built page carrying a preset's example copy is a page about
+ * somebody else's coast. Here the person can SEE the page, so a section the
+ * writer skipped is theirs to notice and fix, and deleting part of the page
+ * they are looking at would be the more surprising answer by far.
+ *
+ * ONE CALL FOR BOTH JOBS: the copy and the photo subjects come back in the same
+ * object (see buildPhotoAsk), so a page costs one request slot rather than two.
+ *
+ * The editor applies what comes back through its own history, so the whole
+ * thing is one Undo.
+ */
+export async function writePageAction(input: unknown): Promise<PageWriteResult> {
+  try {
+    if (!aiIsConfigured()) {
+      return { ok: false, error: 'The AI writer is not switched on for this site yet.' };
+    }
+    const site = await requireSite();
+    const userId = await currentUserId();
+
+    const fields = (input ?? {}) as Record<string, unknown>;
+    const brief = text(fields.brief, MAX_PAGE_BRIEF);
+    if (!brief) return { ok: false, error: 'Say what the page is about.' };
+    const title = text(fields.title, 120) || 'this page';
+
+    const incoming = Array.isArray(fields.sections) ? fields.sections : null;
+    if (!incoming || incoming.length === 0) {
+      return { ok: false, error: 'That page could not be read.' };
+    }
+    /* Through the real schema and the real sanitiser, the same as every other
+       action that takes content from a browser. Nothing that arrives here is
+       trusted because it looks like a page. */
+    const parsed = parsePage({
+      version: 1,
+      id: 'pg_write',
+      title: 'Writing',
+      slug: '',
+      seo: { noindex: false },
+      sections: incoming,
+    });
+    if (!parsed.ok) return { ok: false, error: 'That page could not be read.' };
+    const sections = sanitisePage(parsed.page).sections;
+
+    const slots = slotsOf(sections);
+    if (slots.length === 0) {
+      return { ok: false, error: 'There are no words on this page to write yet. Add a section first.' };
+    }
+
+    const claim = await claimRequest(site.tenantId, { userId, intent: 'write' });
+    if (!claim.allowed) {
+      return {
+        ok: false,
+        error: `This site has used all ${DAILY_LIMIT} of today's AI requests. It resets through the day, so try again later.`,
+      };
+    }
+
+    const settings = await getSettings(site.tenantId);
+    const system = buildFillSystemPrompt(settings);
+    const wantsPhotos = fields.photos !== false;
+    const user = wantsPhotos
+      ? `${buildFillUserPrompt(title, brief, slots)}\n\n${buildPhotoAsk(sections.length)}`
+      : buildFillUserPrompt(title, brief, slots);
+
+    const answer = await ask(system, user, {
+      model: MODEL_BUILD,
+      maxTokens: FILL_MAX_TOKENS,
+      timeoutMs: BUILD_TIMEOUT_MS,
+      effort: BUILD_EFFORT,
+    });
+    if (claim.id) {
+      await recordTokens(site.tenantId, claim.id, { input: answer.inputTokens, output: answer.outputTokens });
+    }
+
+    const filled = fillFromModel(answer.text, slots);
+    if (!filled.ok) {
+      return { ok: false, error: 'The writing could not be used. Try again.', retryable: true };
+    }
+    const written = applyFill(sections, filled.copy);
+
+    /*
+     * THE PICTURES, BEST EFFORT AND AFTER THE WORDS. After, because a card's
+     * query reads the title the fill has just written (see refreshPhotoPlan).
+     * Best effort, because a page with the right words and its old photographs
+     * is a good outcome, and a photo library that is rate-limited or not
+     * configured must not cost somebody their copy.
+     */
+    let pictures = 0;
+    if (wantsPhotos) {
+      const subjects = photoSubjectsFromModel(answer.text, written.length);
+      const plan = refreshPhotoPlan(written, (index) => subjects[index] ?? '');
+      if (plan.length > 0) {
+        try {
+          await fillPlannedPhotos(site.tenantId, plan, written);
+          pictures = plan.length;
+        } catch (error) {
+          console.error('[tg-sites] re-photographing a written page failed', error);
+        }
+      }
+    }
+
+    return { ok: true, sections: written, wrote: Object.keys(filled.copy).length, pictures };
+  } catch (error) {
+    if (error instanceof AiError) return { ok: false, error: error.message, retryable: error.retryable };
+    if (isSignInRequired(error)) return { ok: false, error: (error as Error).message };
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.startsWith('This account is not a member')) return { ok: false, error: message };
+    console.error('[tg-sites] writing a page failed', error);
+    return { ok: false, error: 'Something went wrong writing that. Try again.' };
   }
 }
 

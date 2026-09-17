@@ -21,7 +21,9 @@ import {
   MAX_SLOTS,
   applyFill,
   buildFillUserPrompt,
+  buildPhotoAsk,
   fillFromModel,
+  photoSubjectsFromModel,
   slotsOf,
   stripUnfilled,
   type Slot,
@@ -584,5 +586,112 @@ describe('an imported id cannot hijack a slot', () => {
     const out = applyFill([odd], { 'blk_x:item:0:title': 'Barbados' });
     const heading = out[0].rows[0].columns[0].blocks[0] as unknown as { props: { html: string } };
     expect(heading.props.html).toBe('Imported oddity');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The photo subjects, asked for in the same answer (17 Sep 2026)
+// ---------------------------------------------------------------------------
+
+describe('the photo subjects that ride along with the copy', () => {
+  it('asks for one per section, and says a subject is not a headline', () => {
+    const ask = buildPhotoAsk(3);
+    expect(ask).toContain('"photo:0"');
+    expect(ask).toContain('"photo:2"');
+    expect(ask).toContain('not headlines');
+  });
+
+  it('reads them out of the same object as the copy, in order', () => {
+    const answer = JSON.stringify({
+      blk_a: 'Where the west coast goes quiet',
+      'photo:0': 'Santorini caldera village',
+      'photo:2': '  whitewashed  church  ',
+    });
+    expect(photoSubjectsFromModel(answer, 3)).toEqual([
+      'Santorini caldera village',
+      '',
+      'whitewashed church',
+    ]);
+  });
+
+  it('ignores an index that is not on the page, and junk that is not an answer', () => {
+    const answer = JSON.stringify({ 'photo:9': 'somewhere else', 'photo:x': 'nonsense', 'photo:-1': 'no' });
+    expect(photoSubjectsFromModel(answer, 2)).toEqual(['', '']);
+    expect(photoSubjectsFromModel('not json at all', 2)).toEqual(['', '']);
+    expect(photoSubjectsFromModel(JSON.stringify(['an', 'array']), 2)).toEqual(['', '']);
+  });
+
+  it('does not disturb the copy: an extra key is not a slot', () => {
+    const slots = [{ id: 'blk_a', kind: 'heading' as const, current: 'Title here' }];
+    const filled = fillFromModel(JSON.stringify({ blk_a: 'Santorini, slowly', 'photo:0': 'caldera' }), slots);
+    expect(filled.ok).toBe(true);
+    if (filled.ok) expect(Object.keys(filled.copy)).toEqual(['blk_a']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Writing a page that already exists
+// ---------------------------------------------------------------------------
+
+describe('writePageAction fills the page it was given', () => {
+  const source = readFileSync(join(__dirname, '..', 'app', 'actions', 'ai.ts'), 'utf8');
+  const action = source.slice(source.indexOf('export async function writePageAction'));
+  const body = action.slice(0, action.indexOf('\nexport '));
+
+  it('exists, and the panel calls it', () => {
+    expect(body.length).toBeGreaterThan(500);
+    const panel = readFileSync(join(__dirname, '..', 'components', 'editor', 'WritePage.tsx'), 'utf8');
+    expect(panel).toContain('writePageAction');
+  });
+
+  it('parses and sanitises what the browser sent before touching it', () => {
+    expect(body).toContain('parsePage(');
+    expect(body).toContain('sanitisePage(');
+  });
+
+  /*
+   * THE DIFFERENCE FROM THE PAGE BUILDER, and the reason it is a test rather
+   * than a comment. The builder strips sections the fill never reached and
+   * re-dresses the page, both right for a page nobody has seen yet. Doing
+   * either here would delete or restyle the page somebody is looking at, which
+   * is not what "write this page" means.
+   */
+  it('strips nothing and re-dresses nothing: the design that went in comes back', () => {
+    expect(body).not.toContain('stripUnfilled');
+    expect(body).not.toContain('dressPage');
+    expect(body).not.toContain('sectionsFromPlan');
+    expect(body).toContain('applyFill(sections, filled.copy)');
+  });
+
+  it('spends one request slot and records what it cost', () => {
+    expect(body).toContain('claimRequest(');
+    expect(body).toContain('recordTokens(');
+  });
+
+  it('asks for the words and the photo subjects in one call', () => {
+    expect(body).toContain('buildFillUserPrompt(');
+    expect(body).toContain('buildPhotoAsk(');
+    expect(body).toContain('photoSubjectsFromModel(');
+  });
+
+  it('treats the pictures as best effort, so a photo library outage costs no copy', () => {
+    const photos = body.slice(body.indexOf('let pictures = 0'));
+    expect(photos).toContain('try {');
+    expect(photos).toContain('catch');
+    // And they are asked for AFTER the words, so a card queries its new title.
+    expect(body.indexOf('applyFill(sections, filled.copy)')).toBeLessThan(body.indexOf('refreshPhotoPlan('));
+  });
+
+  it('can be turned off, and says so in the panel', () => {
+    expect(body).toContain('fields.photos !== false');
+    const panel = readFileSync(join(__dirname, '..', 'components', 'editor', 'WritePage.tsx'), 'utf8');
+    expect(panel).toContain('Find pictures to match');
+    expect(panel).toContain('photos');
+  });
+
+  it('applies through the editor history, so the whole page is one Undo', () => {
+    const panel = readFileSync(join(__dirname, '..', 'components', 'editor', 'WritePage.tsx'), 'utf8');
+    expect(panel).toContain('onCommit(');
+    expect(panel).toContain('Undo puts it back');
   });
 });

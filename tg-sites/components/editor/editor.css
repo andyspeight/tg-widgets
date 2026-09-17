@@ -6368,3 +6368,64 @@ a.tg-btn { text-decoration: none; }
 }
 
 .ed-assist__skip:hover { color: var(--ed-ink); background: var(--ed-well); }
+
+/* ---------------------------------------------------------------------------
+   Write this page: the page's own panel, where Properties had an empty note.
+   --------------------------------------------------------------------------- */
+
+.ed-write {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-2);
+  padding: var(--ed-3);
+  border: 1px solid var(--ed-line-soft);
+  border-radius: var(--ed-r-lg);
+  background: var(--ed-well);
+}
+.ed-write__lead {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.45;
+  color: var(--ed-ink-2);
+}
+.ed-write__label {
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+.ed-write__box {
+  /* editor.css sets no global box model, so the padding has to be inside the
+     width or the box reaches past the panel. The same trip the assistant's
+     composer took on 17 Sep, caught in a screenshot rather than by a check. */
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.45;
+}
+.ed-write__check {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+  cursor: pointer;
+}
+.ed-write__check input { margin: 0; }
+.ed-write__error {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-danger);
+}
+.ed-write__done {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+.ed-write__note {
+  margin: 0;
+  font-size: var(--ed-text-xs);
+  line-height: 1.4;
+  color: var(--ed-ink-3);
+}

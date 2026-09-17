@@ -10,7 +10,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { applyPhoto, pagePhotoPlan, sectionPhotoTargets } from '../lib/content/photo-plan';
+import { applyPhoto, pagePhotoPlan, refreshPhotoPlan, sectionPhotoTargets } from '../lib/content/photo-plan';
 import { buildPresetSection, heroPhotoQuery, presetById } from '../lib/content/presets';
 import { PAGE_PRESETS } from '../lib/content/presets-page';
 import type { Section } from '../lib/content/schema';
@@ -464,5 +464,97 @@ describe('galleries are filled frame by frame', () => {
       (target) => target.place.kind === 'image' || target.place.kind === 'gallery',
     );
     expect(pictures).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A page that already exists, re-photographed (17 Sep 2026)
+// ---------------------------------------------------------------------------
+
+describe('refreshPhotoPlan', () => {
+  const subject = () => 'Santorini caldera village';
+
+  it('asks again for every picture the page already has, and adds none', () => {
+    const sections = [built('hero-page-banner'), built('features-cards-with-pictures')];
+    // The banner has no background until something gives it one, which is the
+    // case this rule is about: a section that has never had a picture is not
+    // given one here.
+    const bare = refreshPhotoPlan(sections, subject);
+    expect(bare.some((target) => target.place.kind === 'background')).toBe(false);
+
+    sections[0].backgroundImage = 'https://example.test/old.jpg';
+    const withBackground = refreshPhotoPlan(sections, subject);
+    const background = withBackground.filter((target) => target.place.kind === 'background');
+    expect(background).toHaveLength(1);
+    expect(background[0].section).toBe(0);
+    expect(background[0].query).toBe('Santorini caldera village');
+  });
+
+  it('a card asks about itself, with the section subject behind it', () => {
+    const sections = [built('features-cards-with-pictures')];
+    const cards = sections[0].rows.flatMap((row) => row.columns.flatMap((column) => column.blocks))
+      .find((block) => block.type === 'cards');
+    expect(cards, 'the preset should still carry a cards block').toBeTruthy();
+
+    // As the writer would leave them: a picture already on each card, and the
+    // titles rewritten to what the page is now about.
+    const items = (cards!.props.items as Array<Record<string, unknown>>).map((item, index) => ({
+      ...item,
+      src: 'https://example.test/card.jpg',
+      title: index === 0 ? 'Oia' : 'Imerovigli',
+    }));
+    cards!.props = { ...cards!.props, items };
+
+    const plan = refreshPhotoPlan(sections, subject);
+    const cardTargets = plan.filter((target) => target.place.kind === 'card');
+    expect(cardTargets.length).toBeGreaterThan(1);
+    expect(cardTargets[0].query.startsWith('Oia')).toBe(true);
+    expect(cardTargets[0].query).toContain('Santorini');
+    expect(cardTargets[1].query.startsWith('Imerovigli')).toBe(true);
+    // Each picture asks for a different result, or a row of cards comes back
+    // as the same photograph four times.
+    expect(new Set(cardTargets.map((target) => target.variant)).size).toBe(cardTargets.length);
+  });
+
+  it('leaves a bound picture alone, because it belongs to a collection', () => {
+    const sections = [built('features-cards-with-pictures')];
+    const cards = sections[0].rows.flatMap((row) => row.columns.flatMap((column) => column.blocks))
+      .find((block) => block.type === 'cards')!;
+    const items = (cards.props.items as Array<Record<string, unknown>>).map((item) => ({
+      ...item,
+      src: '{{image}}',
+    }));
+    cards.props = { ...cards.props, items };
+
+    const plan = refreshPhotoPlan(sections, subject);
+    expect(plan.filter((target) => target.place.kind === 'card')).toEqual([]);
+  });
+
+  it('says nothing about a section it has no subject for', () => {
+    const sections = [built('hero-page-banner')];
+    sections[0].backgroundImage = 'https://example.test/old.jpg';
+    expect(refreshPhotoPlan(sections, () => '   ')).toEqual([]);
+  });
+
+  it('lands where it says: every target still applies to the page it was planned on', () => {
+    const sections = [built('hero-page-banner'), built('features-cards-with-pictures')];
+    sections[0].backgroundImage = 'https://example.test/old.jpg';
+    const cards = sections[1].rows.flatMap((row) => row.columns.flatMap((column) => column.blocks))
+      .find((block) => block.type === 'cards')!;
+    cards.props = {
+      ...cards.props,
+      items: (cards.props.items as Array<Record<string, unknown>>).map((item) => ({ ...item, src: 'https://example.test/card.jpg' })),
+    };
+
+    const plan = refreshPhotoPlan(sections, subject);
+    expect(plan.length).toBeGreaterThan(1);
+    for (const target of plan) applyPhoto(sections, target, 'https://example.test/new.jpg');
+
+    expect(sections[0].backgroundImage).toBe('https://example.test/new.jpg');
+    const after = sections[1].rows.flatMap((row) => row.columns.flatMap((column) => column.blocks))
+      .find((block) => block.type === 'cards')!;
+    for (const item of after.props.items as Array<Record<string, unknown>>) {
+      expect(item.src).toBe('https://example.test/new.jpg');
+    }
   });
 });
