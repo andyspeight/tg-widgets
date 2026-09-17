@@ -140,7 +140,15 @@ async function runOnce() {
     globalThis.fetch = realFetch;
     console.log = realLog; console.warn = realWarn; console.error = realError;
   }
-  return { sent, writeOrder: [...writeOrder], swept: [...new Set(sweptDestinations)], proxyCalls };
+  const countrySet = new Set(COUNTRY_CODES);
+  return {
+    sent,
+    writeOrder: [...writeOrder],
+    // Airport codes are shared across fixture rows; the country code is what
+    // identifies which row was swept.
+    swept: [...new Set(sweptDestinations)].filter((d) => countrySet.has(d)),
+    proxyCalls,
+  };
 }
 
 console.log('The cursor is saved before the bookkeeping that outlives the run');
