@@ -22,6 +22,7 @@ import {
 import { slugify } from '../../lib/content/slug';
 import type { PageSummary } from '../../lib/db/pages';
 import type { Membership } from '../../lib/db/users';
+import { AssistDrawer } from '../assist/AssistDrawer';
 import { AccountBar } from '../auth/AccountBar';
 import { Icon } from '../editor/Icon';
 import { ConfirmDialog, Modal } from '../ui/Modal';
@@ -178,6 +179,15 @@ export function SiteDashboard({
           </div>
 
           <div className="sv-head__actions">
+            {/*
+              Luna Assist, first in the row and the only button here that does
+              not take you anywhere: it opens a drawer down the right and answers
+              about this site, reading the pages, the results board and the
+              enquiries before it says anything. Everything beside it is a room
+              to walk into; this is the one that comes to you.
+            */}
+            <AssistDrawer siteName={siteName} />
+
             {/*
               A plain anchor, not next/link. Leaving for the theme screen should
               be a real navigation: the theme changes what the editor canvas and

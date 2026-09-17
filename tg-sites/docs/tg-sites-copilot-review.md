@@ -373,9 +373,11 @@ the brief's; the additions are marked.
   table, the limits, the enquiry masking, the page outline, the tool registry
   and its filter, the prompt, the runners and the service; migration
   `0035_assist` (applied live) holds the ledger and the log, read through
-  `lib/db/assist.ts`. Build mode behaves as Plan until slice 2. The key is
-  already in Vercel, so the one thing left is the panel, which waits for
-  Andy's direction.
+  `lib/db/assist.ts`. **The panel followed on 17 September**, direction A: the
+  rail column in the editor and a drawer on the dashboard, streaming the answer
+  as it is written, with the openers, the context chips, questions with their
+  options and a line saying what it went and read. Slice 1 is complete and
+  usable; Build mode and the proposals are slice 2.
 - **Slice 2, Build mode on the page.** `propose_changes` for text, block
   settings and sections from the catalogue on the current page. Preview on
   the canvas, Apply, Undo, change history in the panel. **Changed:** apply
@@ -414,8 +416,9 @@ about what to include, not whether it is affordable.
 
 Canvas: https://claude.ai/artifact/JPhHqEGyaVSZ29RD8rSYnR (three artboards, same sample site on each).
 
-Same sample site on each so they compare like for like. Andy picks before any
-panel UI is built.
+Same sample site on each so they compare like for like. **Andy chose A on 17
+September 2026, and it is built** (below). B and C stay here as the record of
+what was weighed.
 
 - **A. The rail panel.** A fourth icon on the slim rail opens the assistant in
   the existing 320px column beside it, where Layers and Pages already live.
@@ -432,6 +435,25 @@ panel UI is built.
   change history on the right. In the editor the rail icon opens the same room
   as a sheet over the canvas. Best for pasted revision notes and Plan mode,
   heaviest to build, and it takes the person away from the page.
+
+**What A turned out to be, built 17 September 2026.** A fourth rail icon opens
+the assistant in the 320px column beside Layers and Pages
+(`components/assist/AssistPanel.tsx`), and the same component opens as a drawer
+from the right on the site dashboard (`AssistDrawer.tsx`). Three things came
+out differently from the mockup, each on purpose:
+
+- **No Plan and Build switch yet.** Build has nothing to do that Plan does not
+  until slice 2, and a switch with nothing to switch to is the same mistake as
+  a chart with no numbers behind it, which this project has already decided not
+  to make. The header says "Plan" instead, and the switch arrives with the
+  proposals.
+- **No money in the panel.** The mockup showed an allowance bar. The allowance
+  is unlimited, so there is nothing true to draw. The ledger still counts every
+  turn in pence, and a staff screen can show it when there is a number to show.
+- **Two context chips, not three.** The site and the page, and the page one can
+  be switched off to ask about the site as a whole. A "selected section" chip
+  waits for slice 2, when what is selected changes what the assistant can do
+  rather than only what it has read.
 
 ---
 

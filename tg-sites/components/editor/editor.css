@@ -5883,3 +5883,324 @@ a.tg-btn { text-decoration: none; }
   line-height: 15px;
   text-align: center;
 }
+
+/* ---------------------------------------------------------------------------
+ * Luna Assist (17 Sep 2026)
+ *
+ * Direction A: the assistant fills the same 320px column the rail opens for
+ * Layers and Pages, and the same component opens as a drawer on the site
+ * dashboard (which loads this file through sites.css). So the styles live here
+ * rather than in a file of their own: one column, two frames.
+ *
+ * The column itself scrolls nothing. `.ed-outline` is an overflow-y: auto
+ * column, and an inner scroller inside a scroller is two scrollbars and a
+ * composer that walks off the bottom of the screen, so the panel takes the
+ * overflow back and gives it to the thread alone. Head, chips and composer
+ * stay put; only the conversation moves.
+ * ------------------------------------------------------------------------- */
+
+.ed-assist {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--ed-panel);
+}
+
+.ed-assist__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ed-2);
+  padding: var(--ed-3) var(--ed-4);
+  border-bottom: 1px solid var(--ed-line);
+}
+
+.ed-assist__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  font-size: var(--ed-text-md);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+.ed-assist__mark {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--ed-r-sm);
+  background: var(--ed-select-wash);
+  color: var(--ed-accent-dark);
+}
+
+.ed-assist__mark--turn {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+/* Says which mode this is, because there is only one until slice 2 brings a
+   second. A switch with nothing to switch to is a promise, not a control. */
+.ed-assist__mode {
+  margin-left: auto;
+  padding: 2px var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  font-size: var(--ed-text-xs);
+  font-weight: 600;
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__close {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ed-r-sm);
+  background: none;
+  color: var(--ed-ink-2);
+  cursor: pointer;
+}
+
+.ed-assist__close:hover { background: var(--ed-well); color: var(--ed-ink); }
+
+.ed-assist__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ed-2);
+  padding: var(--ed-3) var(--ed-4) 0;
+}
+
+.ed-assist__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ed-2);
+  max-width: 100%;
+  padding: 3px var(--ed-2);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-well);
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ed-assist__chip--button { font: inherit; font-size: var(--ed-text-xs); cursor: pointer; }
+.ed-assist__chip--button[aria-pressed='false'] { color: var(--ed-ink-2); background: none; }
+.ed-assist__chip-x { color: var(--ed-ink-2); }
+
+.ed-assist__thread {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--ed-4);
+}
+
+.ed-assist__empty-lead {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+  color: var(--ed-ink);
+}
+
+.ed-assist__empty-note {
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__turns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ed-assist__turn { display: flex; gap: var(--ed-2); }
+.ed-assist__turn--you { justify-content: flex-end; }
+
+.ed-assist__said {
+  max-width: 88%;
+  margin: 0;
+  padding: var(--ed-2) var(--ed-3);
+  border-radius: var(--ed-r-md) var(--ed-r-md) var(--ed-r-sm) var(--ed-r-md);
+  background: var(--ed-primary);
+  color: var(--ed-on-brand);
+  font-size: var(--ed-text-sm);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ed-assist__body { min-width: 0; flex: 1; }
+
+/* The model writes numbered lists and paragraphs. It is TEXT, so the line
+   breaks are kept here rather than by turning anything into markup. */
+.ed-assist__answer {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  line-height: 1.5;
+  color: var(--ed-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ed-assist__answer--failed { color: var(--ed-danger); }
+
+.ed-assist__thinking {
+  margin: 0;
+  font-size: var(--ed-text-sm);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__thinking::after { content: '\2026'; }
+
+.ed-assist__tools {
+  margin: var(--ed-2) 0 0;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__question { margin-top: var(--ed-3); }
+
+.ed-assist__question-text {
+  margin: 0 0 var(--ed-2);
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  color: var(--ed-ink);
+}
+
+.ed-assist__options { display: flex; flex-wrap: wrap; gap: var(--ed-2); }
+
+.ed-assist__option,
+.ed-assist__prompt {
+  font: inherit;
+  font-size: var(--ed-text-xs);
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-full);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ed-assist__prompt { border-style: dashed; color: var(--ed-ink-2); }
+
+.ed-assist__option:hover,
+.ed-assist__prompt:hover { background: var(--ed-well); color: var(--ed-ink); }
+.ed-assist__option:disabled { opacity: .55; cursor: default; }
+
+.ed-assist__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ed-3);
+  padding: var(--ed-3) var(--ed-4) var(--ed-4);
+  border-top: 1px solid var(--ed-line);
+}
+
+.ed-assist__prompts { display: flex; flex-direction: column; gap: var(--ed-2); }
+
+.ed-assist__composer { display: flex; flex-direction: column; gap: var(--ed-2); }
+
+/* The label is for a screen reader; the placeholder carries it on screen. */
+.ed-assist__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ed-assist__input {
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  /* This stylesheet sets no global box model, and a textarea's own is
+     content-box: without this, width:100% plus the padding and the border is
+     wider than the column and the panel quietly clips it. */
+  box-sizing: border-box;
+  width: 100%;
+  padding: var(--ed-2) var(--ed-3);
+  border: 1px solid var(--ed-line);
+  border-radius: var(--ed-r-md);
+  background: var(--ed-panel);
+  color: var(--ed-ink);
+  resize: vertical;
+}
+
+.ed-assist__input:focus-visible {
+  outline: 2px solid var(--ed-select);
+  outline-offset: 1px;
+  border-color: var(--ed-select);
+}
+
+.ed-assist__send-row { display: flex; align-items: center; gap: var(--ed-2); }
+
+.ed-assist__hint {
+  flex: 1;
+  font-size: var(--ed-text-xs);
+  color: var(--ed-ink-2);
+}
+
+.ed-assist__send {
+  font: inherit;
+  font-size: var(--ed-text-sm);
+  font-weight: 600;
+  padding: var(--ed-2) var(--ed-4);
+  border: 0;
+  border-radius: var(--ed-r-md);
+  background: var(--ed-primary);
+  color: var(--ed-on-brand);
+  cursor: pointer;
+}
+
+.ed-assist__send:disabled { opacity: .5; cursor: default; }
+
+/* --- The dashboard drawer ------------------------------------------------- */
+
+.ed-assist-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(15, 23, 42, .35);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ed-assist-dock {
+  width: min(420px, 100%);
+  height: 100%;
+  background: var(--ed-panel);
+  border-left: 1px solid var(--ed-line);
+  box-shadow: var(--ed-shadow-xl);
+  display: flex;
+}
+
+.ed-assist--drawer { flex: 1; min-width: 0; }
+
+/* The narrow screens the editor already folds to one pane at a time. */
+@media (max-width: 560px) {
+  .ed-assist-dock { width: 100%; border-left: 0; }
+  .ed-assist__hint { display: none; }
+}
+
+/* The only movement in the panel: the thinking line breathing while it waits.
+   Everything else arrives in place, as the rest of the editor does. */
+@media (prefers-reduced-motion: no-preference) {
+  .ed-assist__thinking { animation: ed-assist-breathe 1.6s ease-in-out infinite; }
+}
+
+@keyframes ed-assist-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}

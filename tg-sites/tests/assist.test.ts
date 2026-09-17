@@ -23,6 +23,13 @@ import { isPersonalKey, maskEnquiry, redactText } from '../lib/assist/mask';
 import { addUsage, costPence, formatPence, noUsage, PRICES } from '../lib/assist/pricing';
 import { asData, contextTurn, siteBlock, systemPrompt, threadMessages, type SiteContext } from '../lib/assist/prompt';
 import { MAX_ROUNDS, readQuestion, serveAssist, type ServeDeps, type ServeInput } from '../lib/assist/service';
+import {
+  assistRequest,
+  describeTools,
+  readEvents,
+  trimThread,
+  type AssistTurn,
+} from '../lib/assist/client';
 import { isToolName, toApiTools, TOOLS, toolsFor, type ToolDefinition } from '../lib/assist/tools';
 import { ALL_CAPABILITIES, PRESETS, type Capability } from '../lib/auth/permissions';
 import { parsePage } from '../lib/content/schema';
@@ -613,6 +620,94 @@ describe('reading the event stream', () => {
 });
 
 // ---------------------------------------------------------------------------
+// The panel's own half
+// ---------------------------------------------------------------------------
+
+describe('reading the panel\u2019s stream', () => {
+  it('takes whole lines and keeps the part that has not arrived', () => {
+    const first = readEvents('{"type":"text","delta":"Hel"}\n{"type":"text","del');
+    expect(first.events).toEqual([{ type: 'text', delta: 'Hel' }]);
+    expect(first.rest).toBe('{"type":"text","del');
+
+    const second = readEvents(`${first.rest}ta":"lo"}\n`);
+    expect(second.events).toEqual([{ type: 'text', delta: 'lo' }]);
+    expect(second.rest).toBe('');
+  });
+
+  it('drops a line it cannot read rather than losing the ones it can', () => {
+    const { events } = readEvents('not json\n{"type":"answer","text":"fine"}\n{"type":"unheard-of"}\n');
+    expect(events).toEqual([{ type: 'answer', text: 'fine' }]);
+  });
+
+  it('knows the four kinds and refuses a malformed one', () => {
+    const { events } = readEvents(
+      [
+        '{"type":"text"}',
+        '{"type":"question","text":"","question":"Which?","options":["a","b"]}',
+        '{"type":"error","message":"no"}',
+        '{"type":"error"}',
+        '',
+      ].join('\n'),
+    );
+    expect(events.map((event) => event.type)).toEqual(['question', 'error']);
+  });
+});
+
+describe('the thread the panel sends back', () => {
+  const turns: AssistTurn[] = [
+    { id: 'u1', role: 'user', text: 'What would you improve?' },
+    { id: 'a1', role: 'assistant', text: 'Three things.', tools: ['read_page'] },
+    { id: 'u2', role: 'user', text: 'And the home page?' },
+    { id: 'a2', role: 'assistant', text: 'One thing first.', question: { question: 'Which page?', options: ['Home', 'About'] } },
+    { id: 'a3', role: 'assistant', text: 'The assistant is busy right now.', failed: true },
+    { id: 'a4', role: 'assistant', text: 'half an ans', streaming: true },
+  ];
+
+  it('carries the conversation, drops a failure and anything still arriving', () => {
+    expect(trimThread(turns)).toEqual([
+      { role: 'user', text: 'What would you improve?' },
+      { role: 'assistant', text: 'Three things.' },
+      { role: 'user', text: 'And the home page?' },
+      { role: 'assistant', text: 'One thing first.\n\nWhich page?' },
+    ]);
+  });
+
+  it('keeps only the last few turns', () => {
+    const many: AssistTurn[] = Array.from({ length: 30 }, (_, i) => ({
+      id: `t${i}`,
+      role: i % 2 === 0 ? 'user' : 'assistant',
+      text: `turn ${i}`,
+    }));
+    const kept = trimThread(many, 4);
+    expect(kept).toHaveLength(4);
+    expect(kept[3].text).toBe('turn 29');
+  });
+
+  it('builds the request the route takes, in Plan mode until slice 2', () => {
+    const body = assistRequest({ message: '  Tighten the hero  ', pageId: 'pg-1', turns });
+    expect(body.mode).toBe('plan');
+    expect(body.message).toBe('Tighten the hero');
+    expect(body.pageId).toBe('pg-1');
+    expect(body.thread).toHaveLength(4);
+  });
+});
+
+describe('saying what it looked at', () => {
+  it('reads as a sentence, each thing once, no Oxford comma', () => {
+    expect(describeTools(['read_page', 'read_results'])).toBe('Read the page and the results board.');
+    expect(describeTools(['read_page'])).toBe('Read the page.');
+    expect(describeTools(['read_page', 'read_page', 'read_site'])).toBe('Read the page and the site.');
+    expect(describeTools(['read_site', 'read_catalogue', 'read_enquiries']))
+      .toBe('Read the site, what it can build with and the enquiries.');
+  });
+
+  it('says nothing when it looked at nothing, or at something it cannot name', () => {
+    expect(describeTools([])).toBe('');
+    expect(describeTools(['ask_user'])).toBe('');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Pins on the files that are not testable as they run
 // ---------------------------------------------------------------------------
 
@@ -663,7 +758,15 @@ describe('pins', () => {
 
   it('the name is one constant, and nothing else spells it', () => {
     expect(ASSISTANT_NAME).toBe('Luna Assist');
-    for (const file of ['lib/assist/prompt.ts', 'lib/assist/service.ts', 'lib/assist/runners.ts', 'app/api/assist/route.ts']) {
+    for (const file of [
+      'lib/assist/prompt.ts',
+      'lib/assist/service.ts',
+      'lib/assist/runners.ts',
+      'app/api/assist/route.ts',
+      'components/assist/AssistPanel.tsx',
+      'components/assist/AssistDrawer.tsx',
+      'components/editor/Rail.tsx',
+    ]) {
       expect(read(file), file).not.toContain("'Luna Assist'");
     }
   });

@@ -3,12 +3,18 @@
 /**
  * The slim left rail (Andy, 12 Aug 2026).
  *
- * A permanent thin column of icons on the far left of the editor. Two of them
+ * A permanent thin column of icons on the far left of the editor. Four of them
  * open a panel in the one expanding column beside the rail: Layers is the page
- * structure (the outline), and Pages is the list of the site's pages. Add opens
- * the section picker. The rest are the site's other rooms, which live as their
- * own screens today, so for now their icon takes you there; each can become an
- * in-editor panel later without the rail changing shape.
+ * structure (the outline), Pages is the list of the site's pages, Comments is
+ * the review conversation, and Assist is Luna Assist. Add opens the section
+ * picker. The rest are the site's other rooms, which live as their own screens
+ * today, so for now their icon takes you there; each can become an in-editor
+ * panel later without the rail changing shape.
+ *
+ * The assistant sits directly under Add, which is where the eye goes for "do
+ * something new", and it is a panel rather than a link for the reason the whole
+ * direction rests on: it answers about the page you are looking at, so walking
+ * you off that page to ask would undo the point of it.
  *
  * One panel at a time: `active` is whichever of Layers or Pages is open, or null
  * when the column is closed and only the slim rail shows. Clicking the open
@@ -22,7 +28,14 @@
 
 import type { ReactNode } from 'react';
 
-type Panel = 'layers' | 'pages' | 'comments';
+import { ASSISTANT_NAME, ASSISTANT_SHORT } from '../../lib/assist/brand';
+
+/* The rail's label has to fit under a 24px icon, so it wears the short form;
+   the title attribute says the whole name. Both come from the one constant. */
+const assistantName = ASSISTANT_NAME;
+const assistantShort = ASSISTANT_SHORT;
+
+type Panel = 'layers' | 'pages' | 'comments' | 'assist';
 
 /** One item that navigates to an existing screen. */
 const LINKS: ReadonlyArray<{ href: string; label: string; title: string; icon: ReactNode }> = [
@@ -114,6 +127,21 @@ export function Rail({
           <span className="ed-rail__lbl">Add</span>
         </button>
       )}
+
+      <button
+        type="button"
+        className="ed-rail__btn"
+        title={assistantName}
+        aria-pressed={active === 'assist'}
+        onClick={() => onToggle('assist')}
+      >
+        <span className="ed-rail__ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M6.3 17.7l2.8-2.8M14.9 9.1l2.8-2.8" />
+          </svg>
+        </span>
+        <span className="ed-rail__lbl">{assistantShort}</span>
+      </button>
 
       <button
         type="button"

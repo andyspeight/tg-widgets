@@ -71,6 +71,7 @@ import { blockDefinition } from '../../lib/content/blocks';
 import { usePaletteDrop } from './usePaletteDrop';
 import { useSectionDrop } from './useSectionDrop';
 import { Outline } from './Outline';
+import { AssistPanel } from '../assist/AssistPanel';
 import { Rail } from './Rail';
 import { CommentsPanel } from './CommentsPanel';
 import { PagesPanel, type PageLink } from './PagesPanel';
@@ -718,7 +719,7 @@ export function EditorShell({
    */
   // Arriving on a comment (from the whole-site list on another page) opens the
   // Comments panel straight away rather than the outline.
-  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments'>(
+  const [railPanel, setRailPanel] = useState<'layers' | 'pages' | 'comments' | 'assist'>(
     focusComment ? 'comments' : 'layers',
   );
 
@@ -2511,7 +2512,15 @@ export function EditorShell({
         onAdd={() => setInsertAt(page.sections.length)}
       />
 
-      {railPanel === 'pages' ? (
+      {railPanel === 'assist' ? (
+        /*
+         * Luna Assist, in the column rather than over the canvas: it answers
+         * about the page you are looking at, so the page stays in view while it
+         * does. It reads and advises and cannot touch the page, which is why it
+         * needs nothing from the editor here beyond knowing which page is open.
+         */
+        <AssistPanel pageId={pageId} pageTitle={page.title} />
+      ) : railPanel === 'pages' ? (
         <PagesPanel
           pages={pages}
           currentId={pageId}

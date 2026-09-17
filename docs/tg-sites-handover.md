@@ -227,8 +227,36 @@ Things that will bite: prior turns are replayed as plain text only (no tool
 calls or results), so a long conversation does not carry every page it read;
 `ask_user` ends the turn; the per-person hourly count is per site, because the
 table is tenant-scoped; the route's `maxDuration` is 120 seconds for a turn of
-several calls. Not built yet: the panel (Andy picks), and nothing calls the
-route until it exists.
+several calls.
+
+**Luna Assist slice 1, the panel (17 Sep 2026).** Andy picked direction A from
+the canvas, so the assistant lives in the column the rail already opens.
+`components/assist/AssistPanel.tsx` is the conversation and serves both
+surfaces: a fourth rail icon in the editor (`Rail.tsx` gained an `assist`
+panel, `EditorShell.tsx` renders it beside the canvas) and a drawer from the
+right on the site dashboard (`AssistDrawer.tsx`, first button in the row).
+`lib/assist/client.ts` is its pure half: reading newline-delimited JSON out of
+a chunked response, the thread that goes back to the server, and the "Read the
+page and the results board" line. The styles are the `.ed-assist` block at the
+end of `components/editor/editor.css`, which the dashboard already loads
+through `sites.css`.
+
+What it does: openers that fill the box on a click, the site and page as chips
+(the page one switches off to ask about the whole site), the answer streaming
+in as text with its line breaks kept, questions drawn with their options so
+clicking one answers, and a plain sentence when the server refuses. What it
+deliberately does NOT have yet: a Plan and Build switch (Build has nothing to
+do that Plan does not until slice 2), any mention of money (the allowance is
+unlimited, so there is nothing true to show), and a selected-section chip.
+
+Things that will bite here: the answer is rendered as TEXT and must stay that
+way, so no markdown renderer without a sanitiser; `editor.css` sets no global
+box model, so anything with `width: 100%` and padding needs its own
+`box-sizing` (the composer was quietly clipped until it was looked at); and at
+720px and under the shell only shows that column when `data-pane="outline"` is
+set, which the smoke harness has to set too or it tests an invisible panel.
+The browser smoke is `scratchpad/assist-smoke/` (38 checks at 1280 and 390,
+dark, reduced motion, empty, a scripted stream, a question, a refusal).
 
 Next: Andy to look at the five React Bits slices in the live editor (Preview,
 the eye, or the published page; the pointer and word effects and the full-screen
@@ -545,9 +573,10 @@ rested on a number that does not mean what it looks like.
 
 9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
    `docs/tg-sites-copilot-review.md`. Slice 1's foundations are built (the
-   route, the ledger, the outline, the read tools, Plan mode) and the key is
-   already in Vercel, so the panel is the only thing waiting, on Andy's pick
-   from the canvas. Then slice 2, Build mode on the page.
+   route, the ledger, the outline, the read tools, Plan mode, and the panel in
+   direction A). Slice 1 is done and live. Next is slice 2: Build mode on the
+   page, `propose_changes`, the binding guard in front of the existing section
+   rewrite too, and apply and undo through the editor's own history.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.
