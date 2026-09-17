@@ -14,7 +14,7 @@
 import { resolveWidget, pickEvent, bookingRef, manageToken } from '../_lib/calendar/state.js';
 import { isValidSlot, hostDateKey } from '../_lib/calendar/slots.js';
 import { getAccessToken, getZoomAccessToken, saveBooking, placeHold, releaseHold, getDayCount, incDayCount } from '../_lib/calendar/store.js';
-import { getProvider } from '../_lib/calendar/providers.js';
+import { syncBookingToCalendar, applyCalendarResult } from '../_lib/calendar/actions.js';
 import { createMeeting as zoomCreateMeeting } from '../_lib/calendar/zoom.js';
 import { sendNewBooking } from '../_lib/calendar/mail.js';
 import { normaliseAppointmentEmails } from '../../public/_appointment-email-template.js';
@@ -188,48 +188,27 @@ export default async function handler(req, res) {
     }
   }
 
-  // If connected, re-check free/busy then create the event.
-  let providerEventId = '', calendarLink = '', connected = false, providerName = '';
-  try {
-    // Into the calendar of the person the scheduler belongs to (w.clientEmail),
-    // so a colleague connecting theirs can never divert someone else's bookings.
-    const tok = await getAccessToken(w.clientRecordId, w.clientEmail);
-    if (tok) {
-      connected = true;
-      providerName = tok.provider || 'google';
-      const provider = getProvider(tok.provider);
-      // Respect before/after buffers: the slot plus its buffers must be clear.
-      const before = Math.max(0, Number(config.bufferBefore) || 0) * 60000;
-      const after = Math.max(0, Number(config.bufferAfter) || 0) * 60000;
-      const guardMin = new Date(startMs - before).toISOString();
-      const guardMax = new Date(endMs + after).toISOString();
-      const busy = await provider.freeBusy(tok.accessToken, tok.calendarId, guardMin, guardMax);
-      const clash = busy.some(b => Date.parse(b.start) < (endMs + after) && Date.parse(b.end) > (startMs - before));
-      if (clash) { await releaseHold(w.clientRecordId, startISO); return res.status(409).json({ error: 'That time was just booked. Please pick another.' }); }
-
-      const descLines = ['Booked via the website scheduler.', 'Visitor: ' + name + ' <' + email + '>' + (phone ? ', ' + phone : '')];
-      Object.keys(answers).forEach(k => { descLines.push(k + ': ' + answers[k]); });
-      if (meetingUrl) descLines.unshift('Join the meeting: ' + meetingUrl);
-      const created = await provider.insertEvent(tok.accessToken, tok.calendarId, {
-        summary: (ev.label || 'Appointment') + ' with ' + name,
-        description: descLines.join('\n'),
-        start: { dateTime: startISO, timeZone: config.timezone || 'UTC' },
-        end: { dateTime: endISO, timeZone: config.timezone || 'UTC' },
-        location: meetingUrl || config.location || '',
-        attendees: [{ email, displayName: name }],
-        reminders: { useDefault: true },
-        // Video meetings still without a link (no event link, no Zoom) get
-        // one minted by the calendar (Google Meet / Teams).
-        _conference: !meetingUrl && ev.mode === 'video',
-      });
-      providerEventId = created.id || '';
-      calendarLink = created.htmlLink || '';
-      if (!meetingUrl && created.meetingUrl) meetingUrl = created.meetingUrl;
-    }
-  } catch (e) {
-    console.error('[book] calendar create failed:', e.message);
-    // Keep the booking as a request even if the calendar write failed.
+  // The calendar write. Shared with the backfill in _lib/calendar/actions.js so
+  // the two cannot drift, and it reports WHICH of created / not-connected /
+  // clash / failed happened rather than leaving a silent gap (17 Sep 2026).
+  const draft = {
+    clientRecordId: w.clientRecordId, clientEmail: w.clientEmail,
+    eventLabel: ev.label, mode: ev.mode, startISO, endISO,
+    hostTimezone: config.timezone || 'Europe/London',
+    invitee: { name, email, phone, answers },
+    meetingUrl,
+  };
+  const calResult = await syncBookingToCalendar(draft, {
+    checkClash: true,
+    bufferBefore: config.bufferBefore,
+    bufferAfter: config.bufferAfter,
+    location: config.location || '',
+  });
+  if (calResult.status === 'clash') {
+    await releaseHold(w.clientRecordId, startISO);
+    return res.status(409).json({ error: 'That time was just booked. Please pick another.' });
   }
+  if (calResult.meetingUrl) meetingUrl = calResult.meetingUrl;
 
   const booking = {
     ref, manageToken: token, status: 'confirmed',
@@ -238,7 +217,6 @@ export default async function handler(req, res) {
     startISO, endISO, visitorTimezone: clean(body.visitorTimezone) || (config.timezone || 'Europe/London'),
     hostTimezone: config.timezone || 'Europe/London',
     invitee: { name, email, phone, answers },
-    provider: providerName, providerEventId, calendarLink,
     meetingUrl, zoomMeetingId,
     // Branding travels WITH the booking so every lifecycle email (confirm,
     // reminder, reschedule, cancel) renders consistently without re-reading
@@ -258,6 +236,8 @@ export default async function handler(req, res) {
     dayCounted: cap > 0,
     sourceUrl: clean(body.sourceUrl).slice(0, 300), createdAt: new Date().toISOString(),
   };
+  // Why there is (or is not) a calendar event, on the booking itself.
+  applyCalendarResult(booking, calResult);
   const saved = await saveBooking(booking);
   if (saved && cap > 0) await incDayCount(w.clientRecordId, dayKey);
 
@@ -282,5 +262,10 @@ export default async function handler(req, res) {
     console.error('[book] lead routing failed:', e.message);
   }
 
-  return res.status(200).json({ ok: true, ref, manageUrl: manageUrl || undefined, calendarLink, connected, meetingUrl: meetingUrl || undefined });
+  return res.status(200).json({
+    ok: true, ref, manageUrl: manageUrl || undefined,
+    calendarLink: calResult.calendarLink || undefined,
+    connected: calResult.status === 'created',
+    meetingUrl: meetingUrl || undefined,
+  });
 }

@@ -1318,6 +1318,18 @@
     if (s.connected) {
       html += connRow(PROVIDER_LABELS[s.provider] || 'your calendar', s.email, 'disconnect');
     } else {
+      // Say the CONSEQUENCE, not just the option. Without this the panel read
+      // as an optional extra, so a scheduler ran for days taking bookings that
+      // never reached a diary while the confirmation emails went out as normal
+      // (17 Sep 2026). Nobody was told until they looked at their calendar.
+      html += '<div style="display:flex;gap:9px;align-items:flex-start;border:1px solid #FCD34D;background:#FFFBEB;'
+        + 'border-radius:10px;padding:11px 13px;margin-bottom:10px;line-height:1.5">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;flex:0 0 auto;margin-top:1px"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>'
+        + '<div style="font-size:12.5px;color:#78350F">'
+        + '<b style="display:block;margin-bottom:2px">No calendar connected</b>'
+        + 'This scheduler still takes bookings and still emails everyone, but the meetings will NOT appear in your diary, '
+        + 'and times you are already busy will still be offered.'
+        + '</div></div>';
       const provs = (s.providers && s.providers.length) ? s.providers : ['google'];
       const btns = provs.map(function (p) {
         return '<button type="button" class="tgse-btn tgse-btn--sm" data-cal="connect" data-provider="' + esc(p) + '" style="margin:0 8px 8px 0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Connect ' + esc(PROVIDER_LABELS[p] || p) + '</button>';

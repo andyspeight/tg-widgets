@@ -102,3 +102,106 @@ export async function rescheduleBooking(booking, newStart, opts) {
   await sendRescheduled(booking, { manageUrl });
   return { ok: true, booking };
 }
+
+/**
+ * Put a booking into the scheduler owner's calendar.
+ *
+ * Extracted from /api/appointment/book on 17 Sep 2026 so the backfill below and
+ * a live booking cannot drift: both create the same event, with the same
+ * description, the same attendee and the same conference handling.
+ *
+ * Why a backfill was needed at all. Calendars became per-person on 11 Sep 2026,
+ * and a connection made before that carries no recorded owner. Andy's did not
+ * resolve afterwards, so /api/appointment/book took the bookings, sent both
+ * confirmation emails and skipped the calendar write WITHOUT SAYING SO. He
+ * found out by looking at his diary and not seeing the meeting. The lesson is
+ * in the return value: this never throws, and it always says which of the three
+ * things happened, so the caller can record it on the booking.
+ *
+ * Returns { status: 'created' | 'not-connected' | 'clash' | 'failed',
+ *           providerEventId, calendarLink, meetingUrl, provider, error }
+ */
+export async function syncBookingToCalendar(booking, opts) {
+  opts = opts || {};
+  const out = {
+    status: 'failed', providerEventId: '', calendarLink: '',
+    meetingUrl: booking.meetingUrl || '', provider: '', error: '',
+  };
+
+  let tok;
+  try {
+    // The scheduler owner's calendar, never the agency's by default: a
+    // colleague's connection must not swallow this person's bookings.
+    tok = await getAccessToken(booking.clientRecordId, booking.clientEmail);
+  } catch (e) {
+    out.error = e.message || 'token lookup failed';
+    return out;
+  }
+  if (!tok) { out.status = 'not-connected'; return out; }
+  out.provider = tok.provider || 'google';
+
+  const startMs = Date.parse(booking.startISO);
+  const endMs = Date.parse(booking.endISO);
+  const provider = getProvider(tok.provider);
+
+  try {
+    // Respect before/after buffers: the slot plus its buffers must be clear.
+    // Skipped on a backfill, where the booking is already made and a clash is
+    // something to tell the owner about rather than a reason to refuse.
+    if (opts.checkClash) {
+      const before = Math.max(0, Number(opts.bufferBefore) || 0) * 60000;
+      const after = Math.max(0, Number(opts.bufferAfter) || 0) * 60000;
+      const busy = await provider.freeBusy(
+        tok.accessToken, tok.calendarId,
+        new Date(startMs - before).toISOString(), new Date(endMs + after).toISOString(),
+      );
+      const clash = busy.some(b => Date.parse(b.start) < (endMs + after) && Date.parse(b.end) > (startMs - before));
+      if (clash) { out.status = 'clash'; return out; }
+    }
+
+    const v = booking.invitee || {};
+    const answers = v.answers || {};
+    const descLines = [
+      'Booked via the website scheduler.',
+      'Visitor: ' + (v.name || '') + ' <' + (v.email || '') + '>' + (v.phone ? ', ' + v.phone : ''),
+    ];
+    Object.keys(answers).forEach((k) => { descLines.push(k + ': ' + answers[k]); });
+    if (booking.meetingUrl) descLines.unshift('Join the meeting: ' + booking.meetingUrl);
+
+    const created = await provider.insertEvent(tok.accessToken, tok.calendarId, {
+      summary: (booking.eventLabel || 'Appointment') + ' with ' + (v.name || ''),
+      description: descLines.join('\n'),
+      start: { dateTime: booking.startISO, timeZone: booking.hostTimezone || 'UTC' },
+      end: { dateTime: booking.endISO, timeZone: booking.hostTimezone || 'UTC' },
+      location: booking.meetingUrl || opts.location || '',
+      attendees: v.email ? [{ email: v.email, displayName: v.name || '' }] : [],
+      reminders: { useDefault: true },
+      // Video meetings still without a link (no event link, no Zoom) get one
+      // minted by the calendar (Google Meet / Teams).
+      _conference: !booking.meetingUrl && booking.mode === 'video',
+    });
+    out.status = 'created';
+    out.providerEventId = created.id || '';
+    out.calendarLink = created.htmlLink || '';
+    if (!booking.meetingUrl && created.meetingUrl) out.meetingUrl = created.meetingUrl;
+  } catch (e) {
+    out.error = (e && e.message) ? String(e.message).slice(0, 200) : 'calendar write failed';
+    console.error('[actions.sync]', out.error);
+  }
+  return out;
+}
+
+/** Stamp the outcome of a calendar write onto the booking, in one place. */
+export function applyCalendarResult(booking, result) {
+  booking.provider = result.provider || booking.provider || '';
+  booking.providerEventId = result.providerEventId || '';
+  booking.calendarLink = result.calendarLink || '';
+  if (result.meetingUrl) booking.meetingUrl = result.meetingUrl;
+  // Why there is (or is not) an event, recorded on the booking itself so the
+  // next time this goes wrong it is a lookup rather than an investigation.
+  booking.calendarStatus = result.status;
+  booking.calendarCheckedAt = new Date().toISOString();
+  if (result.error) booking.calendarError = result.error;
+  else delete booking.calendarError;
+  return booking;
+}

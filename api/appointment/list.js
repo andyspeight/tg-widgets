@@ -23,6 +23,11 @@ function view(b) {
     name: v.name || '', email: v.email || '', phone: v.phone || '',
     answers: v.answers || {}, calendarLink: b.calendarLink || '', meetingUrl: b.meetingUrl || '', createdAt: b.createdAt,
     sourceUrl: b.sourceUrl || '',
+    // Whether this booking reached a calendar, and why not when it did not.
+    // Recorded since 17 Sep 2026; an older booking has neither field, so an
+    // absent status means "we did not record it" rather than "it failed".
+    calendarStatus: b.calendarStatus || (b.providerEventId ? 'created' : ''),
+    calendarError: b.calendarError || '',
   };
 }
 

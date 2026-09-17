@@ -38,6 +38,15 @@
   .resched-btn{appearance:none;border:1px solid #E2E8F0;background:#fff;color:#475569;font:inherit;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;margin-right:6px}
   .resched-btn:hover{background:#F1F5F9}
   .act-cell{text-align:right;white-space:nowrap}
+  .cal-warn{color:#B45309;font-weight:600}
+  .cal-banner{display:none;align-items:flex-start;gap:10px;margin:0 0 14px;padding:12px 14px;border:1px solid #FCD34D;
+              background:#FFFBEB;border-radius:10px;font-size:13px;line-height:1.55;color:#78350F}
+  .cal-banner.show{display:flex}
+  .cal-banner b{display:block;margin-bottom:2px}
+  .cal-banner button{flex:none;border:0;border-radius:8px;background:#B45309;color:#fff;font:inherit;font-weight:700;
+                     font-size:12px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+  .cal-banner button:hover{background:#92400E}
+  .cal-banner button[disabled]{opacity:.6;cursor:default}
   .modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:50}
   .modal.open{display:flex}
   .modal-panel{background:transparent;width:100%;max-width:900px;position:relative}
@@ -49,6 +58,10 @@
     <h1>Your bookings</h1>
     <p class="sub">Appointments booked through your scheduler widgets.</p>
     <button id="btn-share" style="margin:0 0 14px;border:0;border-radius:9px;background:#0891B2;color:#fff;font:inherit;font-weight:700;font-size:13px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>Send time options</button>
+    <div class="cal-banner" id="cal-banner">
+      <div style="flex:1"><b id="cal-banner-title">Some bookings are not in your calendar</b><span id="cal-banner-text"></span></div>
+      <button type="button" id="btn-sync-cal">Add missing to calendar</button>
+    </div>
     <div class="filters" id="filters">
       <button data-range="upcoming" class="on">Upcoming</button>
       <button data-range="past">Recent past</button>
@@ -98,7 +111,30 @@
       allBookings = bookings || [];
       allBookings.sort(function(a,b){return a.startISO<b.startISO?-1:1;});
       var seen={}; shareWidgets=[]; allBookings.forEach(function(b){ if(b.widgetId && !seen[b.widgetId]){ seen[b.widgetId]=1; shareWidgets.push(b.widgetId); } });
+      refreshCalBanner();
       applyFilters();
+    }
+
+    // ── "Some bookings are not in your calendar" ──────────────────────────
+    // The whole point of this banner is that the old failure was invisible: a
+    // scheduler with no calendar attached took bookings, sent both confirmation
+    // emails and wrote nothing to a diary. Now it is said out loud, with the
+    // button that puts it right.
+    function missingFromCalendar(){
+      return allBookings.filter(function(b){ return !!calWarning(b); });
+    }
+    function refreshCalBanner(){
+      var banner = document.getElementById('cal-banner');
+      if(!banner) return;
+      var missing = missingFromCalendar();
+      if(!missing.length){ banner.classList.remove('show'); return; }
+      var n = missing.length;
+      document.getElementById('cal-banner-title').textContent =
+        n===1 ? 'One booking is not in your calendar' : (n + ' bookings are not in your calendar');
+      document.getElementById('cal-banner-text').textContent =
+        'They were taken while no calendar was connected, so they were never added to a diary. '
+        + 'The visitors have their confirmations. Connect a calendar in the scheduler editor if you have not, then add them here.';
+      banner.classList.add('show');
     }
     function filtered(){
       var q = searchTerm.trim().toLowerCase();
@@ -109,6 +145,20 @@
         return hay.indexOf(q) !== -1;
       });
     }
+    // Is this booking missing from the calendar, and why? A confirmed meeting
+    // that never reached a diary used to be invisible: the booking saved, both
+    // confirmation emails went out, and nobody was told (17 Sep 2026).
+    // An older booking recorded no status at all, so silence means "unknown",
+    // not "failed", and we say nothing rather than cry wolf.
+    function calWarning(b){
+      if(b.status==='cancelled') return null;
+      if(b.calendarLink) return null;
+      var st = b.calendarStatus||'';
+      if(st==='created'||!st) return null;
+      if(st==='not-connected') return { text:'Not in your calendar', title:'No calendar was connected when this was booked. Connect one, then use "Add missing to calendar".' };
+      return { text:'Not in your calendar', title:(b.calendarError||'The calendar write did not succeed.')+' Use "Add missing to calendar" to try again.' };
+    }
+
     function applyFilters(){ render(filtered()); }
 
     function render(bookings){
@@ -124,7 +174,8 @@
           '<td><div class="who">'+esc(whenText(b))+'</div><div class="meta">'+esc(b.eventLabel||'')+' · '+esc(b.durationMins)+' min</div></td>'+
           '<td><div class="who">'+esc(b.name)+'</div><div class="meta">'+esc(b.email)+(b.phone?(' · '+esc(b.phone)):'')+'</div>'+
             (host?('<div class="meta" title="'+esc(b.sourceUrl)+'">via '+esc(host)+'</div>'):'')+'</td>'+
-          '<td class="status-cell"><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span></td>'+
+          '<td class="status-cell"><span class="pill '+(cancelled?'cancel':'ok')+'">'+(cancelled?'Cancelled':'Confirmed')+'</span>'+
+            (calWarning(b)?('<div class="meta cal-warn" title="'+esc(calWarning(b).title)+'">'+esc(calWarning(b).text)+'</div>'):'')+'</td>'+
           '<td class="act-cell">'+acts+'</td>'+
         '</tr>';
       }).join('');
@@ -206,6 +257,33 @@
           else { btn.disabled=false; btn.textContent='Cancel'; alert((d&&d.error)||'Could not cancel.'); }
         })
         .catch(function(){ btn.disabled=false; btn.textContent='Cancel'; alert('Network error.'); });
+    });
+
+    document.getElementById('btn-sync-cal').addEventListener('click', function(){
+      var btn = this;
+      var n = missingFromCalendar().length;
+      if(!confirm('Add '+n+(n===1?' booking':' bookings')+' to your calendar? The visitors already have their confirmations, so they will not be emailed again.')) return;
+      btn.disabled = true; btn.textContent = 'Adding…';
+      fetch('/api/appointment/sync-calendar',{
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ days: 365 })
+      })
+        .then(function(r){ if(r.status===401){ throw 'auth'; } return r.json(); })
+        .then(function(d){
+          btn.disabled = false; btn.textContent = 'Add missing to calendar';
+          if(!d || d.ok!==true){ alert((d&&d.error)||'Could not add them.'); return; }
+          var c = d.counts||{};
+          var msg = c.created ? ('Added '+c.created+(c.created===1?' booking':' bookings')+' to your calendar.') : 'Nothing needed adding.';
+          if(c.failed) msg += ' '+c.failed+' could not be added.';
+          if(c.remaining) msg += ' '+c.remaining+' still to do, press the button again.';
+          alert(msg);
+          load();
+        })
+        .catch(function(e){
+          btn.disabled = false; btn.textContent = 'Add missing to calendar';
+          alert(e==='auth' ? 'Please sign in again.' : 'Network error.');
+        });
     });
 
     function load(){

@@ -152,18 +152,36 @@ console.log('Every endpoint that resolves a calendar names whose it is');
   ok('calendar/disconnect.js drops only the caller\'s own',
     /deleteConnection\(ctx\.clientRecordId,\s*ctx\.email\)/.test(src('api/calendar/disconnect.js')));
 
-  // Availability and booking belong to the SCHEDULER'S OWNER.
-  for (const f of ['api/appointment/availability.js', 'api/appointment/book.js']) {
-    ok(f.split('/').pop() + ' uses the scheduler owner\'s calendar',
-      calls(src(f)).length > 0 && calls(src(f)).every((a) => /w\.clientEmail/.test(a)), calls(src(f)).join(' | '));
+  // Availability belongs to the SCHEDULER'S OWNER, and resolves it directly.
+  ok('availability.js uses the scheduler owner\'s calendar',
+    calls(src('api/appointment/availability.js')).length > 0
+    && calls(src('api/appointment/availability.js')).every((a) => /w\.clientEmail/.test(a)),
+    calls(src('api/appointment/availability.js')).join(' | '));
+
+  // Booking resolves it through the shared write in actions.js (17 Sep 2026),
+  // so what matters is that the owner it hands over is still the scheduler's,
+  // never the signed-in user or the agency. Asserting a call COUNT here just
+  // went red when the call moved, which is not what this guard is for.
+  {
+    const b = src('api/appointment/book.js');
+    ok('book.js hands the shared calendar write the scheduler owner\'s email',
+      /clientRecordId: w\.clientRecordId, clientEmail: w\.clientEmail/.test(b)
+      && /await syncBookingToCalendar\(/.test(b));
+    ok('and does not resolve a calendar behind its back',
+      calls(b).every((a) => /w\.clientEmail/.test(a)), calls(b).join(' | '));
   }
-  ok('actions.js reschedules and cancels in the calendar the booking went into',
-    calls(src('api/_lib/calendar/actions.js')).length === 2
-    && calls(src('api/_lib/calendar/actions.js')).every((a) => /booking\.clientEmail/.test(a)),
-    calls(src('api/_lib/calendar/actions.js')).join(' | '));
+
+  // Every calendar actions.js touches is the one the BOOKING belongs to:
+  // cancel, reschedule and the shared write alike.
+  {
+    const a = calls(src('api/_lib/calendar/actions.js'));
+    ok('actions.js only ever opens the calendar the booking went into',
+      a.length >= 2 && a.every((x) => /booking\.clientEmail/.test(x)), a.join(' | '));
+  }
 
   // Nothing may quietly go back to the client-only form.
-  const all = ['api/appointment/agenda.js', 'api/appointment/availability.js', 'api/appointment/book.js', 'api/_lib/calendar/actions.js']
+  const all = ['api/appointment/agenda.js', 'api/appointment/availability.js', 'api/appointment/book.js',
+    'api/_lib/calendar/actions.js', 'api/appointment/sync-calendar.js']
     .flatMap((f) => calls(src(f)));
   ok('no calendar is resolved without saying whose it is', all.every((a) => a.includes(',')), all.join(' | '));
 
