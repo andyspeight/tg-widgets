@@ -185,7 +185,11 @@ picks before any panel UI is built. Andy answered three of the four questions
 the same afternoon: the allowance is unlimited to start (the ledger counts pence
 anyway), access is for client and staff from slice 1, and the name is **Luna
 Assist** (one constant, `lib/assist/brand.ts`; code paths are `assist`).
-Still pending: `ANTHROPIC_API_KEY` on tg-sites-shell, and the panel direction.
+The key was never a blocker: `ANTHROPIC_API_KEY` has been on tg-sites-shell
+all along (Andy, 17 Sep), and `ai_usage` proves it, with 28 answered requests
+on 27 August whose token counts were written back after Anthropic replied.
+Every AI feature, Luna Assist included, reads that one variable through
+`lib/ai/anthropic.ts`. The only thing still pending is the panel direction.
 
 **Luna Assist slice 1, the foundations (16 Sep 2026, evening).** Everything
 under the panel, built before the panel because it is the same under every
@@ -541,9 +545,9 @@ rested on a number that does not mean what it looks like.
 
 9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
    `docs/tg-sites-copilot-review.md`. Slice 1's foundations are built (the
-   route, the ledger, the outline, the read tools, Plan mode); the panel waits
-   for Andy's pick from the canvas, and `ANTHROPIC_API_KEY` on tg-sites-shell
-   before any of it is used live. Then slice 2, Build mode on the page.
+   route, the ledger, the outline, the read tools, Plan mode) and the key is
+   already in Vercel, so the panel is the only thing waiting, on Andy's pick
+   from the canvas. Then slice 2, Build mode on the page.
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.

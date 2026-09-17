@@ -373,8 +373,9 @@ the brief's; the additions are marked.
   table, the limits, the enquiry masking, the page outline, the tool registry
   and its filter, the prompt, the runners and the service; migration
   `0035_assist` (applied live) holds the ledger and the log, read through
-  `lib/db/assist.ts`. Build mode behaves as Plan until slice 2. The panel
-  waits for Andy's direction; the key waits for Vercel.
+  `lib/db/assist.ts`. Build mode behaves as Plan until slice 2. The key is
+  already in Vercel, so the one thing left is the panel, which waits for
+  Andy's direction.
 - **Slice 2, Build mode on the page.** `propose_changes` for text, block
   settings and sections from the catalogue on the current page. Preview on
   the canvas, Apply, Undo, change history in the panel. **Changed:** apply
@@ -447,9 +448,14 @@ panel UI is built.
    becomes the hardening pass and the tests, not the first access.
 3. **The name.** Andy: **Luna Assist.** One constant in code
    (`lib/assist/brand.ts`), the panel says it, the code paths are `assist`.
-4. **Ops.** Still pending: `ANTHROPIC_API_KEY` on tg-sites-shell in Vercel
-   before slice 1 can be used live, and `OPENAI_API_KEY` (images) and
-   `CRON_SECRET` (the housekeeping cron) from before.
+4. **Ops.** Andy, 17 Sep: `ANTHROPIC_API_KEY` is **already on
+   tg-sites-shell**, which the ledger confirms. Every AI feature in the
+   product reads that one variable through `lib/ai/anthropic.ts`, and
+   `ai_usage` holds 28 requests on 27 August with their token counts filled
+   in, which only happens once Anthropic has answered. Luna Assist reads the
+   same variable through the same module, so it needs no ops step at all.
+   Still pending from before: `OPENAI_API_KEY` (images) and `CRON_SECRET`
+   (the housekeeping cron).
 
 The panel direction (section 8) is still Andy's to pick. Slice 1's
 foundations do not depend on it, so they go first; the panel waits.
