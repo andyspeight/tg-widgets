@@ -1035,6 +1035,33 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
     return state.config.confirmationEmail;
   }
 
+  // A sample destination pack, in the shape /api/destination-content returns,
+  // so the preview shows what the destination blocks DO. On a real send
+  // api/booking-email.js resolves the booking's own destination and passes that
+  // in; a destination we hold no content for simply leaves those blocks out.
+  // Dubai, because that is where the sample booking goes.
+  const MOCK_DESTINATION = {
+    level: 'city',
+    name: 'Dubai',
+    tagline: 'A city built at speed on the edge of the desert, and still building.',
+    heroIntro: 'Dubai rewards the traveller who plans around the heat rather than against it: mornings in the creek and the old souks, afternoons indoors, evenings out on the water.\n\nThe emirate is one of seven, and the smallest distances still take longer than the map suggests.',
+    images: [],
+    climate: { temps: [24, 25, 28, 32, 37, 39, 41, 41, 38, 35, 30, 26], rainfall: [], season: [] },
+    facts: {
+      flightTime: '7h 05m direct', timeZone: 'GMT+4', currency: 'Dirham (AED)',
+      language: 'Arabic, English widely spoken', voltage: '230V, type G',
+    },
+    highlights: [
+      { icon: 'building', title: 'Go up the Burj Khalifa at dusk', description: 'Book the last slot before sunset and you get the city in daylight and lit, on one ticket.' },
+      { icon: 'boat', title: 'Cross the creek by abra', description: 'A one dirham ride between the two old souks, and still the best way to arrive at either.' },
+      { icon: 'sun', title: 'Walk the Al Fahidi quarter early', description: 'Wind towers, coral-block walls and coffee, before the heat makes it hard work.' },
+    ],
+    events: [
+      { month: 'February', name: 'Dubai Jazz Festival', description: 'Three nights at Media City Amphitheatre, usually the third week.' },
+      { month: 'November', name: 'Dubai Design Week', description: 'Installations across d3 and the Design District.' },
+    ],
+  };
+
   function remConfirmationPreview(layout) {
     const a = remAgency();
     const out = renderBookingEmail({
@@ -1045,13 +1072,14 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
       supportPhone: a.supportPhone,
       orderRef: '',
       layout: (layout && layout.length) ? layout : undefined,
+      destination: MOCK_DESTINATION,
       baseUrl: location.origin,
     });
     let note;
     if (!ceEnsure().enabled) {
       note = 'This email is switched off. Turn "Booking confirmation emails" on in Settings for your customers to receive it.';
     } else if (layout && layout.length) {
-      note = 'Preview uses a sample booking. Every block fills itself from the real one when it sends, and a block with nothing to show is left out.';
+      note = 'Preview uses a sample booking to Dubai. Every block fills itself from the real one when it sends, including our write-up of wherever they are going, and a block with nothing to show is left out.';
     } else {
       note = 'You are previewing our standard layout, filled with a sample booking. Add a block below to build your own.';
     }
@@ -1313,6 +1341,7 @@ import { renderCancellationEmail } from '/_cancellation-email-template.js';
         // sample order does, so the preview shows the same ref a real one would.
         orderRef: '',
         layout: state.config.confirmationEmail?.layout,
+        destination: MOCK_DESTINATION,
         baseUrl: location.origin,
       });
       _writeIframe('email-iframe', html);

@@ -216,12 +216,36 @@ of that, block by block.
   the pack in the shape `/api/destination-content` returns. The renderer is
   runtime-neutral and cannot look anything up, so the caller passes it in.
 
-**The destination lookup is not wired yet.** Nothing passes `destination` today,
-so those four blocks draw nothing on a real send. The blocks, the styles and the
-tests are done; resolving a booking's city or country to a destination record is
-the next piece, and it needs a decision on the lookup order (resort, then city,
-then country?) because `/api/destination-content` slug mode is scoped to a
-Spotlight widget id and the confirmation email has no widget to scope to.
+### Where the destination pack comes from
+
+`api/_lib/booking-destination.js` resolves it on the server. A Travelify order
+carries no destination slug, only whatever the supplier filed the products
+under, so it builds a candidate list most specific first — hotel state (usually
+the resort), hotel city, tickets city, transfer dropoff, then the country — and
+tries each through `lookupDestination()` in `api/destination-content.js`. That
+is the same `resolveSlug` walk, the same `shapePayload` and the same memory
+cache the public endpoint uses; the HTTP slug mode is scoped to a Spotlight
+widget's lookup order, and a confirmation email has no widget to scope to, so
+the export takes the order directly and defaults to the same
+`resort -> city -> country`.
+
+Three rules it keeps:
+
+- **A country code is not a name.** Travelify files country as `MV` on one
+  booking and `Maldives` on another. A code is turned into a name, and a code we
+  cannot name is DROPPED rather than guessed at — including `ZZ`, which CLDR
+  answers with the literal "Unknown Region".
+- **Only a layout that uses the pack pays for it.** `layoutWantsDestination()`
+  is checked before any lookup, so every client on the built-in layout (and on
+  Standard) costs nothing at all.
+- **Nothing here can lose a confirmation.** No credentials, no match, an error
+  or a slow Airtable all mean no pack, and the blocks then draw nothing. There
+  is a 2.5 second ceiling on the whole resolution, because the webhook has five
+  seconds to answer and the worker sends inside it.
+
+The editor preview passes a sample Dubai pack (`MOCK_DESTINATION` in
+`editor-mybooking.html`) alongside the sample booking, so a client picking
+Magazine sees what those blocks do.
 
 ## Tests
 
@@ -232,17 +256,15 @@ Spotlight widget id and the confirmation email has no widget to scope to.
 | `npm run test:confirmation-layout` | The layout builder in the editor, driven for real. |
 | `npm run test:booking-email-drift` | One renderer for the preview and the send. |
 | `npm run test:payment-reminders` | The pipeline this one reuses. |
+| `npm run test:booking-destination` | The destination lookup: the candidate order, that only a layout needing it pays for it, and that nothing in it can lose an email. |
 | `npm run test:order-stays-drift` | Among other things, that the board-basis list in the widget and the one in `_order-stays.js` have not drifted apart. |
 
 ## Still to do
 
-- **Wire the destination lookup** so `hero`, `destination`, `knowbefore`,
-  `whatson` and `thingstodo` fill on a real send. Two callers only:
-  `api/booking-email.js` and the editor preview. `fetchRecordBySlug` exists in
-  `api/destination-content.js` but is not exported, and the booking gives us a
-  city name rather than a slug, so this needs a small lookup helper and a
-  decision on the order it tries.
-- The first real test booking, which is what proves the id + key order fetch.
+- The first real test booking, which is what proves the id + key order fetch,
+  and with it the first real destination lookup. The candidate order is a
+  reasonable guess from the fixtures; a real Maldives or Dubai booking will show
+  whether the hotel's `state` really carries the resort.
 - Decide whether `order.cancel` should send the cancellation email we already
   have a renderer for. Andy asked for new bookings first; the rows are being
   recorded either way, so the traffic will be there when we want it.

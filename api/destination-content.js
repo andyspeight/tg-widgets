@@ -626,6 +626,56 @@ async function resolveSlug(slugCanonical, lookupOrder, pat) {
   return null;
 }
 
+/**
+ * Look a destination up by free text, for a SERVER-SIDE caller that has no
+ * widget to scope the lookup to (17 Sep 2026: the booking confirmation email,
+ * whose picture and destination blocks need the pack but which is sent by a
+ * cron worker, not requested by a widget on a page).
+ *
+ * The HTTP slug mode above resolves against a Spotlight widget's own lookup
+ * order. This one takes the order directly, defaulting to the same
+ * resort -> city -> country the widget defaults to, and shares the module's
+ * memory cache so a sweep of confirmations for one destination costs one
+ * Airtable round trip.
+ *
+ * Returns the same shape the endpoint returns, or null for no match. Never
+ * throws: a caller sending an email must not fail because Airtable is slow.
+ */
+export async function lookupDestination(text, lookupOrder) {
+  const slug = normaliseSlug(text);
+  if (!slug) return null;
+  const pat = process.env.AIRTABLE_DESTINATION_CONTENT_PAT;
+  if (!pat) return null;
+
+  const order = (Array.isArray(lookupOrder) ? lookupOrder : DEFAULT_LOOKUP_ORDER)
+    .filter((l) => VALID_LEVELS.has(l))
+    .filter((v, i, a) => a.indexOf(v) === i);
+  if (!order.length) return null;
+
+  const key = `slug:${slug}:${order.join(',')}`;
+  const cached = memGet(key);
+  if (cached) return cached.found === false ? null : cached;
+
+  try {
+    const resolved = await resolveSlug(slug, order, pat);
+    if (!resolved) {
+      memSet(key, { found: false });
+      return null;
+    }
+    const [inherited, paired] = await Promise.all([
+      inheritCountryFacts(resolved.level, resolved.fields, pat)
+        .catch(() => ({ values: {}, sources: {} })),
+      resolvePaired(resolved.level, resolved.fields, pat).catch(() => []),
+    ]);
+    const payload = { found: true, ...shapePayload(resolved.level, resolved.fields, inherited, paired, resolved.recordId) };
+    memSet(key, payload);
+    return payload;
+  } catch (err) {
+    console.error('[destination-content] lookupDestination:', err?.message || err);
+    return null;
+  }
+}
+
 // Read the widget config from the Widgets table to extract destination + autoDetect.
 async function readWidgetConfig(widgetId, key) {
   const formula = encodeURIComponent(`{WidgetID} = '${widgetId}'`);

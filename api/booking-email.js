@@ -36,6 +36,7 @@ import crypto from 'node:crypto';
 import { setCors, sanitiseForFormula } from './_auth.js';
 import { renderBookingEmail } from './_lib/booking-email-template.js';
 import { sendViaSendGrid, buildFromField, isValidEmail } from './_lib/sendgrid.js';
+import { layoutWantsDestination, resolveBookingDestination } from './_lib/booking-destination.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -459,6 +460,18 @@ export default async function handler(req, res) {
       });
     }
 
+    // ----- 4b. The destination pack, only if the layout asks for it -----
+    // The renderer is runtime-neutral and cannot look anything up, so whoever
+    // calls it does. A client whose layout has no destination block (which is
+    // every client on the built-in layout) costs nothing here. Failure and
+    // slowness both mean "no pack", and those blocks then draw nothing, which
+    // is what they do for a destination we hold no content for anyway.
+    const emailLayout = widgetSettings?.confirmationEmail?.layout;
+    let destination = null;
+    if (layoutWantsDestination(emailLayout)) {
+      destination = await resolveBookingDestination(order);
+    }
+
     // ----- 5. Render the email body -----
     // orderRef is passed through so the template can fall back to the
     // customer-typed reference when no Accommodation/Flights/AirportExtras
@@ -475,7 +488,10 @@ export default async function handler(req, res) {
       // The client's own arrangement of the email, built in the My Booking
       // editor. Absent, empty or unrecognisable falls back to the built-in
       // layout inside the renderer, so this email always has a body.
-      layout: widgetSettings?.confirmationEmail?.layout,
+      layout: emailLayout,
+      // Our own write-up of where they are going. Null unless the layout uses
+      // it; every block that reads it draws nothing when it is absent.
+      destination,
       // Origin for wrapping document links through /api/doc-redirect, which
       // launders the referrer so Travelify serves DOC/DOCX (not just PDFs).
       baseUrl: buildInternalUrl(req, ''),
