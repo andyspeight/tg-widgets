@@ -161,10 +161,6 @@ async function processRecord(record) {
   if (Number.isFinite(receivedAt) && Date.now() - receivedAt > MAX_AGE_MS) {
     return suppress('notification is too old to confirm');
   }
-  if (isDemoApp(f.ApplicationId)) {
-    return suppress(`demo application ${f.ApplicationId}`);
-  }
-
   // ── 1. applicationId → the client's Travelify credentials ────────────────
   let application;
   try { application = await resolveApplication(f.ApplicationId); }
@@ -192,7 +188,23 @@ async function processRecord(record) {
     return suppress('confirmation emails are not switched on for this client');
   }
 
-  // ── 4. The global switch ──────────────────────────────────────────────────
+  // ── 4. The demo application, and the global switch ───────────────────────
+  // The demo app check sits HERE rather than at the top (17 Sep 2026). Its job
+  // is "never email a real person from the demo application", which is a
+  // decision about SENDING. Making it the first thing that happens meant a demo
+  // push was marked Skipped before the order was ever fetched, so wiring the
+  // demo application up taught you nothing — and the demo application is the
+  // obvious place to make test bookings without touching a real client's
+  // account. Everything above this line is exactly what a test needs to
+  // exercise: the signature, the client lookup, and the order fetch on the
+  // id + key path that no live call has ever confirmed.
+  if (isDemoApp(f.ApplicationId)) {
+    return stamp(
+      { Status: 'Fetched', Attempts: 0, LastError: `demo application ${f.ApplicationId}: fetched, never emailed`, CustomerEmail: customerEmail },
+      'fetched',
+    );
+  }
+
   const isTestApp = isConfirmationTestApp(f.ApplicationId);
   if (!sendingEnabled() && !isTestApp) {
     return stamp(
