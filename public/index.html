@@ -1352,6 +1352,43 @@ async function renderMyWidgets(opts = {}) {
       </div>
     </div>`;
   }).join('');
+
+  openRequestedType();
+}
+
+/**
+ * Open a type's picker because the address asked for it.
+ *
+ * Travelify's "manage" links SSO through to /?open=<widget id> when the client
+ * already has widgets of that type (Andy, 17 Sep 2026 — it used to drop them
+ * into a blank editor whether they had any or not). Runs after the list has
+ * loaded, because the modal reads myWidgetData.
+ *
+ * The id is matched against the registry, never trusted as a type string, and
+ * the parameter is taken back out of the address afterwards so closing the
+ * modal and refreshing does not reopen it. Only `open` is removed; anything
+ * else on the address is the client's own and is left alone.
+ */
+let openRequestHandled = false;
+function openRequestedType() {
+  if (openRequestHandled) return;
+  let want = null;
+  try { want = new URLSearchParams(location.search).get('open'); } catch (e) { return; }
+  if (!want) return;
+  openRequestHandled = true;
+
+  const reg = WIDGETS.find(w => w.id === want);
+  const type = reg && (reg.airtableType || reg.name);
+  // Only when they actually have some. A stale link, or one for a widget they
+  // have since deleted, leaves them on the dashboard rather than opening an
+  // empty picker.
+  if (type && myWidgetData.some(w => w.type === type)) openTypeModal(type);
+
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('open');
+    history.replaceState(null, '', url.pathname + (url.search || '') + url.hash);
+  } catch (e) { /* the modal is open either way */ }
 }
 
 /* ═══ TYPE DETAIL MODAL ═══ */
