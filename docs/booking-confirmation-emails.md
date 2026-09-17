@@ -80,6 +80,29 @@ While the global switch is off, a real booking still arrives, is fetched and
 parked at **Fetched**. That is the state to watch during the changeover: it
 proves the whole chain works for a client without a single email leaving.
 
+### Testing with the demo application (250)
+
+The demo application is the obvious place to make test bookings without
+touching a real client's account, so a demo push runs the whole chain —
+signature, client lookup, order fetch — and stops at **Fetched**. It never
+emails anyone, with the global switch on or off. Before 17 Sep 2026 it was
+marked Skipped at the door, before the order was fetched, which taught nobody
+anything.
+
+**Two things to know about app 250 before testing with it:**
+
+- It maps to **two** Clients rows, "Travelgenix" (`recRCZl6afFpBFSW6`) and
+  "Travel Demo Tes Ltd" (`recZNjh3ME4gOg9F0`). `lookupClientCredentialsByAppId`
+  takes the first row Airtable returns, so which one you get is not
+  deterministic.
+- Only **Travel Demo Tes Ltd** has a My Booking widget (`My Booking test`,
+  `tgw_1777215362250_tlpgd4`). If the lookup lands on Travelgenix, the row
+  stops at `skipped: client has no My Booking widget` — which is the worker
+  being right, not a fault.
+
+Give the Travelgenix client a My Booking widget too, or test with a real
+client's application id, and the ambiguity stops mattering.
+
 For end-to-end testing before the global flip:
 
 - `BOOKING_CONFIRMATION_TEST_APP_IDS` — comma-separated Travelify App IDs that
