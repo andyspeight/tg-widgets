@@ -263,5 +263,105 @@ console.log('The rule that caused it is still the rule');
     /ownerEmail: ctx\.email/.test(R('api/calendar/connect.js')));
 }
 
+console.log('The backfill endpoint, driven as a real request');
+{
+  // Source greps prove the rules are written down. This drives the handler, so
+  // they are also true. Four bookings on one client record: one of the
+  // caller's missing from the diary, one of the caller's already there, one
+  // belonging to a COLLEAGUE'S scheduler, and one cancelled.
+  const BOOKINGS = [
+    { ref: 'AP-001', status: 'confirmed', clientRecordId: 'recTG', clientEmail: 'andy@x.com', widgetId: 'w1',
+      eventLabel: 'Consultation', mode: 'video', startISO: '2026-09-21T09:00:00.000Z', endISO: '2026-09-21T09:30:00.000Z',
+      hostTimezone: 'Europe/London', invitee: { name: 'Sarah', email: 's@x.com' }, providerEventId: '', calendarStatus: 'not-connected' },
+    { ref: 'AP-002', status: 'confirmed', clientRecordId: 'recTG', clientEmail: 'andy@x.com', widgetId: 'w1',
+      eventLabel: 'Consultation', mode: 'phone', startISO: '2026-09-22T09:00:00.000Z', endISO: '2026-09-22T09:30:00.000Z',
+      hostTimezone: 'Europe/London', invitee: { name: 'Tom', email: 't@x.com' }, providerEventId: 'evt_existing' },
+    { ref: 'AP-003', status: 'confirmed', clientRecordId: 'recTG', clientEmail: 'jess@x.com', widgetId: 'w2',
+      eventLabel: 'Consultation', mode: 'video', startISO: '2026-09-23T09:00:00.000Z', endISO: '2026-09-23T09:30:00.000Z',
+      hostTimezone: 'Europe/London', invitee: { name: 'Ann', email: 'a@x.com' }, providerEventId: '' },
+    { ref: 'AP-004', status: 'cancelled', clientRecordId: 'recTG', clientEmail: 'andy@x.com', widgetId: 'w1',
+      eventLabel: 'Consultation', mode: 'video', startISO: '2026-09-24T09:00:00.000Z', endISO: '2026-09-24T09:30:00.000Z',
+      hostTimezone: 'Europe/London', invitee: { name: 'Zoe', email: 'z@x.com' }, providerEventId: '' },
+  ];
+  let savedRows = [], insertedEvents = [];
+
+  // Late bound on purpose. The handler destructures its imports once at module
+  // evaluation, so a stub swapped in afterwards would never be seen, and the
+  // fail-closed cases below would quietly pass against the wrong caller.
+  globalThis.__STORE = {
+    storageReady: () => true,
+    listBookings: async () => BOOKINGS.map((b) => JSON.parse(JSON.stringify(b))),
+    saveBooking: async (b) => { savedRows.push(b); return true; },
+    getAccessToken: async (_cid, who) => (who === 'andy@x.com' ? { accessToken: 't', calendarId: 'primary', provider: 'google' } : null),
+  };
+  globalThis.__PROVIDERS = { getProvider: () => ({
+    freeBusy: async () => { throw new Error('a backfill must not clash check'); },
+    insertEvent: async (_t, _c, ev) => { insertedEvents.push(ev); return { id: 'evt_new_' + insertedEvents.length, htmlLink: 'https://cal/' + insertedEvents.length }; },
+  }) };
+  globalThis.__AUTH = { requireAuth: async () => ({ clientRecordId: 'recTG', email: 'andy@x.com' }) };
+
+  const actionsSrc = '// endpoint harness\n' + ACTIONS
+    .replace(/import \{ getAccessToken[^}]*\} from '\.\/store\.js';/, 'const getAccessToken = (...a) => globalThis.__STORE.getAccessToken(...a); const saveBooking = (...a) => globalThis.__STORE.saveBooking(...a); const getZoomAccessToken=async()=>null, placeHold=async()=>1, releaseHold=async()=>1, getDayCount=async()=>0, incDayCount=async()=>1, decDayCount=async()=>1;')
+    .replace(/import \{ getProvider \} from '\.\/providers\.js';/, 'const getProvider = (...a) => globalThis.__PROVIDERS.getProvider(...a);')
+    .replace(/import \* as zoom from '\.\/zoom\.js';/, 'const zoom = {};')
+    .replace(/import \{ sendCancelled, sendRescheduled \} from '\.\/mail\.js';/, 'const sendCancelled=async()=>1, sendRescheduled=async()=>1;')
+    .replace(/import \{ resolveWidget, pickEvent \} from '\.\/state\.js';/, 'const resolveWidget=async()=>null, pickEvent=()=>null;')
+    .replace(/import \{ isValidSlot, hostDateKey \} from '\.\/slots\.js';/, 'const isValidSlot=()=>true, hostDateKey=()=>"d";');
+  const actionsUrl = 'data:text/javascript;base64,' + Buffer.from(actionsSrc).toString('base64');
+  const syncSrc = SYNC
+    .replace(/import \{ requireAuth \} from '\.\.\/_lib\/auth\/middleware\.js';/, 'const requireAuth = (...a) => globalThis.__AUTH.requireAuth(...a);')
+    .replace(/import \{ listBookings[^}]*\} from '\.\.\/_lib\/calendar\/store\.js';/, 'const listBookings = (...a) => globalThis.__STORE.listBookings(...a); const saveBooking = (...a) => globalThis.__STORE.saveBooking(...a); const getAccessToken = (...a) => globalThis.__STORE.getAccessToken(...a); const storageReady = () => globalThis.__STORE.storageReady();')
+    .replace(/import \{ syncBookingToCalendar, applyCalendarResult \} from '\.\.\/_lib\/calendar\/actions\.js';/,
+      'const { syncBookingToCalendar, applyCalendarResult } = await import(' + JSON.stringify(actionsUrl) + ');');
+  const endpoint = (await import('data:text/javascript;base64,' + Buffer.from(syncSrc).toString('base64'))).default;
+
+  const mkRes = () => {
+    const r = { code: 0, body: null, headers: {} };
+    r.setHeader = (k, v) => { r.headers[k] = v; };
+    r.status = (c) => { r.code = c; return r; };
+    r.json = (b) => { r.body = b; return r; };
+    return r;
+  };
+  const call = async (req) => { const res = mkRes(); await endpoint(req, res); return res; };
+
+  // A dry run.
+  let res = await call({ method: 'POST', body: { dryRun: true, days: 365 } });
+  ok('a dry run reports what it would do', res.code === 200 && res.body.counts.considered === 2
+    && res.body.results.length === 1 && res.body.results[0].outcome === 'would-create');
+  ok('and writes absolutely nothing', savedRows.length === 0 && insertedEvents.length === 0);
+
+  // The real run.
+  savedRows = []; insertedEvents = [];
+  res = await call({ method: 'POST', body: { days: 365 } });
+  ok('the real run creates the missing event', res.code === 200 && res.body.counts.created === 1);
+  ok('it is the booking that was missing', res.body.results.map((r) => r.ref).join(',') === 'AP-001');
+  ok('the event carries the booking on it', insertedEvents.length === 1 && insertedEvents[0].summary === 'Consultation with Sarah');
+  ok('a colleague\'s booking is never touched', !savedRows.some((b) => b.clientEmail === 'jess@x.com'));
+  ok('a cancelled booking is skipped', !savedRows.some((b) => b.ref === 'AP-004'));
+  ok('one already in the diary is left alone', !savedRows.some((b) => b.ref === 'AP-002')
+    && res.body.counts.alreadyThere === 1);
+  ok('and the booking now records that it got there', savedRows[0] && savedRows[0].calendarStatus === 'created');
+
+  // Running it twice.
+  BOOKINGS[0].providerEventId = 'evt_new_1';
+  savedRows = []; insertedEvents = [];
+  res = await call({ method: 'POST', body: { days: 365 } });
+  ok('running it again creates no duplicate', res.code === 200
+    && res.body.counts.created === 0 && insertedEvents.length === 0);
+
+  // Fail closed.
+  globalThis.__AUTH.requireAuth = async () => ({ clientRecordId: 'recTG', email: '' });
+  res = await call({ method: 'POST', body: {} });
+  ok('a caller we cannot identify is refused, not served', res.code === 403);
+
+  globalThis.__AUTH.requireAuth = async () => ({ clientRecordId: 'recTG', email: 'nobody@x.com' });
+  res = await call({ method: 'POST', body: {} });
+  ok('someone with no calendar is told to connect one first',
+    res.code === 200 && res.body.connected === false && /Connect one/.test(res.body.error));
+
+  res = await call({ method: 'GET' });
+  ok('a GET cannot trigger it', res.code === 405);
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);
