@@ -148,12 +148,60 @@ export async function checkRedis() {
 }
 
 // Run every probe. Network probes run in parallel; config is synchronous.
+/**
+ * Has Travelify refused any client's credentials recently?
+ *
+ * /api/retrieve-order records a marker whenever Travelify answers 401 or 403,
+ * because that is NOT "no such booking" — it is a dead widget, and it used to
+ * look identical to a mistyped reference to everyone, visitor and agency alike.
+ * Better Lifestyle (app 474) was dead for fifteen hours on 16 Sep 2026 before
+ * anyone thought to read the logs. This is the check that makes it a thing we
+ * already knew, which is the whole point of the robot client.
+ *
+ * Redis being unreachable is NOT this probe's failure — checkRedis covers that
+ * — so it reports ok and says so rather than crying wolf about credentials.
+ */
+export async function checkTravelifyCredentials() {
+  const started = Date.now();
+  try {
+    const { keys, getJson, configured } = await import('../../_redis.js');
+    // The prefix comes from the endpoint that WRITES the markers, so the reader
+    // and the writer cannot drift apart. Imported lazily: the monitor is the
+    // only caller, and there is no reason to pull the order endpoint into every
+    // module that happens to load probes.js.
+    const { CRED_ALERT_PREFIX } = await import('../../retrieve-order.js');
+    if (!configured()) {
+      return { name: 'travelify-credentials', ok: true, detail: 'no storage configured — not checked', latencyMs: Date.now() - started };
+    }
+    const found = await keys(CRED_ALERT_PREFIX + '*');
+    if (!found || !found.length) {
+      return { name: 'travelify-credentials', ok: true, detail: 'no client refused', latencyMs: Date.now() - started };
+    }
+    const rows = (await Promise.all(found.slice(0, 20).map((k) => getJson(k).catch(() => null))))
+      .filter(Boolean);
+    // Name the app id and the widget: that is what someone has to take to
+    // Travelify, and it saves the next person the log archaeology.
+    const who = rows.map((r) => `app ${r.appId || '?'}${r.widgetId ? ' (' + r.widgetId + ')' : ''}`);
+    const label = who.length ? who.join(', ') : found.length + ' client(s)';
+    return {
+      name: 'travelify-credentials',
+      ok: false,
+      detail: `Travelify is refusing credentials for ${label}. Order lookups return "not found" for those clients until the key is put right.`,
+      latencyMs: Date.now() - started,
+    };
+  } catch (e) {
+    // Cannot read the markers. Say so, but do not claim credentials are broken.
+    return { name: 'travelify-credentials', ok: true, detail: 'could not be checked: ' + ((e && e.message) || 'unknown'), latencyMs: Date.now() - started };
+  }
+}
+
 export async function runAllProbes({ selfOrigin, secret }) {
-  const [offers, cachedOffers, widgetConfig, redis] = await Promise.all([
+  const [offers, cachedOffers, widgetConfig, redis, travelifyCreds] = await Promise.all([
     checkOffers(selfOrigin, secret),
     checkCachedOffers(selfOrigin, secret),
     checkWidgetConfig(selfOrigin, secret),
     checkRedis(),
+    checkTravelifyCredentials(),
   ]);
-  return [offers, cachedOffers, widgetConfig, redis, checkConfig()];
+  return [offers, cachedOffers, widgetConfig, redis, travelifyCreds, checkConfig()];
 }

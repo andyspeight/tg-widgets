@@ -114,8 +114,17 @@ global.fetch = async (url) => {
   return { ok: false, status: 500, text: async () => '' };
 };
 const all = await runAllProbes({ selfOrigin: SELF, secret: 'sekret' });
-ok(Array.isArray(all) && all.length === 5, 'runAllProbes returns five checks');
-ok(all.map((p) => p.name).sort().join(',') === 'cached-offers,config,offers,redis,widget-config', 'runAllProbes covers offers, cached-offers, widget-config, redis and config');
+// Says WHICH checks must be there rather than how many, so adding one is not a
+// failure while dropping one still is. travelify-credentials joined on
+// 17 Sep 2026, after Travelify started refusing a client's key and the only
+// symptom anyone could see was a widget quietly answering "booking not found".
+const MUST_COVER = ['cached-offers', 'config', 'offers', 'redis', 'travelify-credentials', 'widget-config'];
+const names = all.map((p) => p.name).sort();
+ok(Array.isArray(all) && all.length >= MUST_COVER.length, 'runAllProbes returns every check');
+ok(MUST_COVER.every((n) => names.includes(n)),
+  'runAllProbes covers offers, cached-offers, widget-config, redis, config and travelify credentials — missing: '
+  + MUST_COVER.filter((n) => !names.includes(n)).join(', '));
+ok(new Set(names).size === names.length, 'no check is registered twice');
 ok(all.every((p) => typeof p.ok === 'boolean' && typeof p.name === 'string'), 'every probe returns a { name, ok } shape');
 
 global.fetch = realFetch;
