@@ -236,7 +236,8 @@
     "test:travelify-api": "node test/travelify-platform-api-smoke.mjs",
     "test:travelify": "node test/travelify-widget-registry-smoke.mjs && node test/travelify-platform-api-smoke.mjs",
     "test:retrieve-order-auth-alarm": "node test/retrieve-order-auth-alarm-smoke.mjs",
-    "test:travelify-referer": "node test/travelify-referer-drift-smoke.mjs"
+    "test:travelify-referer": "node test/travelify-referer-drift-smoke.mjs",
+    "test:map-cron-rotation": "node test/map-cron-rotation-smoke.mjs"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",

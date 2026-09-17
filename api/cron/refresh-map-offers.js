@@ -1474,6 +1474,25 @@ export default async function handler(req, res) {
       });
     }
 
+    // ── Advance the cursor past exactly the countries processed ───────────
+    // FIRST, before any bookkeeping. This used to be the LAST write of the
+    // run, after the maintenance purge and the summary rebuild, and the run
+    // never got that far: those two walk every stored country key, the
+    // function ceiling is 300s, and it was killed mid-bookkeeping 287 times.
+    // So the cursor never moved, selectSlice handed back the SAME four
+    // countries every ten minutes, and the other 59 were never swept again.
+    // They aged past the 70-hour expiry and the offer widgets went empty
+    // while the cache still held 26,605 offers, every one of them stale.
+    // (Travelnet's Travel Offers widget, 17 Sep 2026.)
+    //
+    // Advancing here is also simply more correct: the countries HAVE been
+    // swept by this point, so resuming past them is what the next run wants,
+    // whether or not the bookkeeping after it survives.
+    await setJson(CURSOR_KEY, { i: total ? (start + processed) % total : 0 });
+    if (budgetExhausted) {
+      console.log(`[map-cron] time budget reached after ${processed} of ${slice.length} countries — cursor advanced, next run continues from there`);
+    }
+
     // ── Sweep stats: per-type fetched vs kept, with drop reasons ───────────
     // Written every run so the Cache tab can show what the last sweep
     // actually pulled per type and why anything was rejected.
@@ -1519,14 +1538,6 @@ export default async function handler(req, res) {
     // ── Rebuild the widget summary from ALL country keys (full coverage) ───
     // Pass the full rows so region (from MapSearches) travels into the summary.
     const summary = await rebuildSummary(rows);
-
-    // ── Advance the cursor past exactly the countries processed ───────────
-    // Both modes resume from here next run, so a budget-limited full sweep
-    // continues where it stopped instead of restarting.
-    await setJson(CURSOR_KEY, { i: total ? (start + processed) % total : 0 });
-    if (budgetExhausted) {
-      console.log(`[map-cron] time budget reached after ${processed} of ${slice.length} countries — cursor advanced, next run continues from there`);
-    }
 
     return res.status(200).json({
       ok: true,
