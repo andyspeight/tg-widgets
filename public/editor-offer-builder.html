@@ -1387,11 +1387,44 @@
     }
 
     /* ---- Boot ---- */
+    /**
+     * Load the widget this editor was opened on (17 Sep 2026).
+     *
+     * This editor never did. It booted from the hardcoded defaults in `state`
+     * every time, so opening a saved Special Offers widget showed a blank name
+     * and the default design whatever had been saved, and the next Save wrote
+     * those defaults back over the real ones. Reported by Andy on a COPIED
+     * widget, where it is most obvious, but it applied to every one of them.
+     *
+     * Same shape as every other editor in the suite: fetch the config, merge it
+     * over the defaults so a key we have added since the widget was last saved
+     * still has a value, and put the name in the input the shell saves from.
+     */
+    function loadFromUrl() {
+      const wId = new URLSearchParams(location.search).get('id');
+      if (!wId) return Promise.resolve();
+      state.widgetId = wId;
+      return fetch('/api/widget-config?id=' + encodeURIComponent(wId), { credentials: 'include' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (!d) return;
+          if (d.config && typeof d.config === 'object') Object.assign(state.config, d.config);
+          // The name lives on state.name because hydrateUI writes it into the
+          // input, and the shell reads that input on save. Missing it is what
+          // blanked the name and then saved it as "Untitled".
+          if (typeof d.name === 'string') state.name = d.name;
+        })
+        .catch(() => { if (window.tgse && window.tgse.toast) window.tgse.toast('Could not load this widget', 'err'); });
+    }
+
     function boot() {
       $('editor').hidden = false;
       try { const v = localStorage.getItem('tg_offers_view'); if (v === 'cards' || v === 'sheet') state.view = v; } catch (e) { /* noop */ }
       document.querySelectorAll('#viewToggle button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.view === state.view ? 'true' : 'false'); });
-      hydrateUI(); wireInputs(); wireImport(); setTab('design'); renderCardPreview(); loadOffers();
+      // Wire first, then draw: hydrateUI paints from state, so the load has to
+      // land before it or the defaults win the race and the save writes them.
+      wireInputs(); wireImport(); setTab('design');
+      loadFromUrl().then(() => { hydrateUI(); renderCardPreview(); });
       // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
       // launcher stays in the corner for later. Start on the workspace, so point
       // the first steps at the create + import controls (not the form).

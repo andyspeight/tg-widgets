@@ -185,6 +185,8 @@
     "test:offer-cruise-editor": "node test/offer-cruise-editor-smoke.mjs",
     "test:offer-cruise-ship": "node test/offer-cruise-ship-and-keys-smoke.mjs",
     "test:offer-builder-currency-upload": "node test/offer-builder-currency-upload-smoke.mjs",
+    "test:offer-builder-load": "node test/offer-builder-load-smoke.mjs",
+    "test:offers-carousel-loop": "node test/offers-carousel-loop-smoke.mjs",
     "test:offer-photo-direct": "node test/offer-photo-direct-upload-smoke.mjs",
     "test:offer-cruise-more": "node test/offer-cruise-more-deals-smoke.mjs",
     "test:worldmap-hotel-dest": "node test/worldmap-hotel-destination-smoke.mjs",
