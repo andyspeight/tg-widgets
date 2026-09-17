@@ -34,7 +34,8 @@ process.env.UPSTASH_REDIS_REST_TOKEN = 'test-token';
 process.env.AIRTABLE_PAT = 'test-pat';
 process.env.CRON_SECRET = 'test-secret';
 process.env.OFFERS_PROXY_URL = 'https://offers.test.invalid/api/offers';
-process.env.OFFERS_MAX_RPM = '1000000';
+// Deliberately NOT setting OFFERS_MAX_RPM: no ceiling is the default and the
+// only setting a country of this size fits inside the sweep budget under.
 
 let passed = 0, failed = 0;
 const ok = (label, cond, detail) => {
@@ -51,9 +52,19 @@ const SUMMARY_KEY = 'map:offers:v1';
 const COUNTRY_CODES = Array.from({ length: 63 }, (_, i) =>
   String.fromCharCode(65 + Math.floor(i / 26)) + String.fromCharCode(65 + (i % 26)));
 
+// Spain's real gateway list. A country is swept per airport, per market and
+// currency, per product, with Flights fanning out again over 30 UK departure
+// airports — 734 requests for this row alone. At the 60/min ceiling added on
+// 14 Sep 2026 that needed 734 seconds inside a function that is killed at 300,
+// so Spain never finished, never stored and never advanced the rotation. The
+// fixture is this size on purpose: a smaller one would pass either way.
+const SPAIN_AIRPORTS = 'TFS,PMI,ACE,IBZ,LPA,AGP,ALC,FUE,SPC,REU,MAH,MAD,BCN,VLC,BIO,SVQ,TFN';
+
 const store = new Map();
 let writeOrder = [];
 let sweptDestinations = [];
+let proxyCalls = 0;
+let failNextWith = null;
 
 function redisRespond(url, init) {
   // Writes: POST /set/{key} with the value as the body.
@@ -79,6 +90,7 @@ function redisRespond(url, init) {
 async function runOnce() {
   writeOrder = [];
   sweptDestinations = [];
+  proxyCalls = 0;
   const realFetch = globalThis.fetch;
   const realLog = console.log, realWarn = console.warn, realError = console.error;
   console.log = () => {}; console.warn = () => {}; console.error = () => {};
@@ -93,17 +105,23 @@ async function runOnce() {
         return new Response(JSON.stringify({
           records: COUNTRY_CODES.map((cc, i) => ({
             id: 'rec' + String(i).padStart(14, '0'),
-            fields: { CountryCode: cc, Country: 'Country ' + cc, Enabled: true },
+            fields: { CountryCode: cc, Country: 'Country ' + cc, Enabled: true, AirportCodes: SPAIN_AIRPORTS },
           })),
         }), { status: 200 });
       }
       return new Response(JSON.stringify({ records: [] }), { status: 200 });
     }
     if (u.startsWith('https://offers.test.invalid')) {
+      proxyCalls++;
       try {
         const body = JSON.parse(init.body || '{}');
         for (const d of (body.destinations || [])) sweptDestinations.push(d);
       } catch { /* not our business here */ }
+      // A supplier refusal, injected on a chosen call, to prove one 429 does
+      // not cost the rest of the run.
+      if (failNextWith !== null && proxyCalls >= failNextWith) {
+        return new Response('rate limited', { status: 429, headers: { 'retry-after': '1' } });
+      }
       return new Response(JSON.stringify({ success: true, data: [] }), { status: 200 });
     }
     throw new Error('unexpected fetch in test: ' + u);
@@ -122,7 +140,7 @@ async function runOnce() {
     globalThis.fetch = realFetch;
     console.log = realLog; console.warn = realWarn; console.error = realError;
   }
-  return { sent, writeOrder: [...writeOrder], swept: [...new Set(sweptDestinations)] };
+  return { sent, writeOrder: [...writeOrder], swept: [...new Set(sweptDestinations)], proxyCalls };
 }
 
 console.log('The cursor is saved before the bookkeeping that outlives the run');
@@ -175,6 +193,35 @@ console.log('The cursor advances by what was processed, and wraps');
     seen.join(','));
   ok('and got further than one slice into the rotation',
     new Set(seen).size >= 8, String(new Set(seen).size));
+}
+
+console.log('A country the size of the biggest one still finishes');
+{
+  store.clear();
+  failNextWith = null;
+  const r = await runOnce();
+  // 17 airports: Packages 17x3, Hotels 1x3, Flights 17x(30+5+5) = 734 each.
+  ok('the run costs what a real country costs', r.proxyCalls > 2000,
+    'proxy calls: ' + r.proxyCalls);
+  const stored = r.writeOrder.filter(k => /^offers:packages:/.test(k));
+  ok('and every country in the slice was stored, not abandoned mid-sweep',
+    stored.length >= 4, 'stored ' + stored.length + ' country keys');
+  ok('the cursor still moved past them', r.writeOrder.includes(CURSOR_KEY));
+}
+
+console.log('One supplier refusal does not cost the rest of the run');
+{
+  store.clear();
+  // Refuse everything from early in the first country onward. Before this the
+  // first 429 tripped a breaker that turned every remaining job into a no-op
+  // and broke out of the country loop entirely.
+  failNextWith = 50;
+  const r = await runOnce();
+  failNextWith = null;
+  ok('the run still answers ok', r.sent.status === 200 && r.sent.body.ok === true);
+  ok('it kept asking rather than abandoning the rotation', r.proxyCalls > 2000,
+    'proxy calls after the first 429: ' + r.proxyCalls);
+  ok('and the cursor still advanced', r.writeOrder.includes(CURSOR_KEY));
 }
 
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
