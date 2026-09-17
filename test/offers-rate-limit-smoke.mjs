@@ -1,19 +1,34 @@
 /**
- * Offers cache refresh — honouring HTTP 429, and pacing our own fan-out.
+ * Offers cache refresh — handling Travelify's 429s without stalling the sweep.
  *
- * Since late July the monitor has emailed "offers is failing / HTTP 429"
- * several times a day. The client-facing path was never affected (widgets read
- * the cache, never the live proxy), but our own cache fill was being throttled
- * by Travelify — and then made it worse two ways:
+ * HISTORY, because this suite has specified two opposite designs.
  *
- *   1. A 429 was retried after a flat 500ms. That is asking the same question
- *      again while still being told to wait.
- *   2. Nothing bounded the RATE. A country swept at concurrency six as fast as
- *      responses came back, so the average looked survivable and the bursts
- *      were not.
+ * On 14 Sep 2026 a 429 stopped being retried and instead tripped a breaker
+ * that turned every remaining job in the run into a no-op, and a 60/min
+ * ceiling was put on the whole sweep. Both were aimed at a real nuisance: the
+ * monitor had been emailing "offers is failing / HTTP 429" for weeks.
  *
- * This drives the REAL callOffersProxy out of the shipped cron, and the REAL
- * pacer/circuit out of api/_lib/offers/throttle.js.
+ * They broke the cache. A country is swept per gateway airport, per market and
+ * currency, per product, with Flights fanning out again over 30 UK departure
+ * airports. Spain has 17 airports: 734 requests. At 60/min that needs 734
+ * seconds inside a function killed at 300, so Spain never finished, never
+ * stored and never advanced the rotation. Offers aged out at the 70-hour mark
+ * on 17 Sep and every offers widget went empty. Andy: "go back to how it was
+ * when it was working, we need a complete fix, not a change in what we do."
+ *
+ * So the ceiling is off unless OFFERS_MAX_RPM is deliberately set, and a 429
+ * fails one request rather than abandoning 63 countries. What this suite now
+ * holds:
+ *
+ *   1. A 429 is retried, honouring Retry-After but never parking a worker for
+ *      longer than the sweep budget it sits inside.
+ *   2. A refused request is reported as rate limited, so the tally can tell it
+ *      from the feed actually failing.
+ *   3. One refusal never silences the requests after it.
+ *   4. The pacer exists only when a ceiling was asked for.
+ *
+ * It drives the REAL callOffersProxy out of the shipped cron, and the REAL
+ * pacer out of api/_lib/offers/throttle.js.
  *
  * Run: node test/offers-rate-limit-smoke.mjs
  */
@@ -43,7 +58,7 @@ function ex(src, sig) { const at = src.indexOf(sig); if (at < 0) throw new Error
 const cron = readFileSync(new URL('../api/cron/refresh-map-offers.js', import.meta.url), 'utf8');
 const SIG = 'async function callOffersProxy(payload, timeoutMs = PER_REQUEST_TIMEOUT_MS, retries = 1)';
 const makeCall = new Function(
-  'circuit', 'pacer', 'parseRetryAfter', 'OFFERS_PROXY', 'SELF_ORIGIN', 'PER_REQUEST_TIMEOUT_MS', 'fetch',
+  'MAX_RETRY_WAIT_MS', 'pacer', 'parseRetryAfter', 'OFFERS_PROXY', 'SELF_ORIGIN', 'PER_REQUEST_TIMEOUT_MS', 'fetch',
   'return ' + ex(cron, SIG) + ';'
 );
 
@@ -123,70 +138,80 @@ ok(parseRetryAfter('99999') === 300000, 'a huge wait is clamped to 5 minutes');
 
 // ── the real callOffersProxy ───────────────────────────────────────────────
 {
-  // A 429 is not retried, and it trips the circuit.
-  const circuit = createCircuit({ defaultCooloffMs: 60000 });
-  const fetchStub = stubFetch([{ status: 429 }, { status: 200 }]);
-  const call = makeCall(circuit, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  // A 429 fails THIS request and is retried, exactly as it was for the months
+  // the cache worked. It briefly abandoned the whole run instead, which cost
+  // the rotation a run's progress every time Travelify refused one request.
+  const fetchStub = stubFetch([{ status: 429 }, { status: 200, body: { success: true, data: [] } }]);
+  const call = makeCall(20, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
   const r = await call({ appId: '250' });
-  ok(fetchStub.calls.length === 1, 'a 429 is asked once, never retried');
-  ok(r.ok === false && r.rateLimited === true, 'the result says it was rate limited, not that the feed failed');
-  ok(circuit.open() === true, 'the circuit is open after a 429');
+  ok(fetchStub.calls.length === 2, 'a 429 is retried, not abandoned');
+  ok(r.ok === true, 'and a retry that succeeds still returns the offers');
 }
 {
-  // Retry-After is honoured over the default.
-  const circuit = createCircuit({ defaultCooloffMs: 60000 });
-  const fetchStub = stubFetch([{ status: 429, headers: { 'retry-after': '30' } }]);
-  const call = makeCall(circuit, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  // Refused twice: the request fails, and says WHY it failed.
+  const fetchStub = stubFetch([{ status: 429 }, { status: 429 }]);
+  const call = makeCall(20, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  const r = await call({ appId: '250' });
+  ok(r.ok === false, 'a request refused twice fails');
+  ok(r.rateLimited === true, 'the result says it was rate limited, not that the feed failed');
+}
+{
+  // Their Retry-After is honoured, but capped. A sweep has a 200s budget and a
+  // worker parked for the five minutes Retry-After may legally ask for spends
+  // it on nothing.
+  const fetchStub = stubFetch([{ status: 429, headers: { 'retry-after': '300' } }, { status: 200, body: { success: true, data: [] } }]);
+  const call = makeCall(20, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  const t0 = Date.now();
   await call({ appId: '250' });
-  ok(circuit.remainingMs() > 29000 && circuit.remainingMs() <= 30000, "the supplier's own Retry-After is used");
+  const elapsed = Date.now() - t0;
+  ok(fetchStub.calls.length === 2, 'it comes back for the retry');
+  ok(elapsed < 1000, 'a five-minute Retry-After never parks a worker for five minutes');
 }
 {
-  // While open, no further request is spent at all.
-  const circuit = createCircuit({ defaultCooloffMs: 60000 });
-  const fetchStub = stubFetch([{ status: 429 }]);
-  const call = makeCall(circuit, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  // One refusal must not silence the requests after it. This is the exact
+  // behaviour whose absence emptied the cache: every job after the first 429
+  // returned a no-op without spending a request.
+  const fetchStub = stubFetch([{ status: 429 }, { status: 429 }, { status: 200, body: { success: true, data: [] } }]);
+  const call = makeCall(20, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
   await call({ appId: '250' });
   const before = fetchStub.calls.length;
-  const second = await call({ appId: '250' });
-  const third = await call({ appId: '250' });
-  ok(fetchStub.calls.length === before, 'the rest of the run spends no requests while backing off');
-  ok(second.skipped === true && third.skipped === true, 'those jobs report themselves as skipped');
-  ok(second.rateLimited === true, 'and as rate limited, so the tally can tell them from failures');
+  const next = await call({ appId: '250' });
+  ok(fetchStub.calls.length > before, 'the next job still spends its request');
+  ok(next.ok === true, 'and succeeds once the supplier has moved on');
 }
 {
   // A 500 is still retried — this fix must not stop the cron healing a blip.
-  const circuit = createCircuit();
   const fetchStub = stubFetch([{ status: 500 }, { status: 200, body: { success: true, data: [{ id: 1 }] } }]);
-  const call = makeCall(circuit, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  const call = makeCall(20, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
   const r = await call({ appId: '250' });
   ok(fetchStub.calls.length === 2, 'a 500 is still retried once');
   ok(r.ok === true, 'and the retry succeeding still returns the offers');
-  ok(circuit.open() === false, 'a 500 does not trip the back-off — only a 429 does');
+  ok(!r.rateLimited, 'a 500 is a feed failure, not a rate limit');
 }
 {
   // A timeout is still retried too.
-  const circuit = createCircuit();
   const fetchStub = stubFetch([{ throw: 'aborted', name: 'AbortError' }, { status: 200 }]);
-  const call = makeCall(circuit, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  const call = makeCall(20, fastPacer(), parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
   const r = await call({ appId: '250' });
   ok(fetchStub.calls.length === 2 && r.ok === true, 'a network blip still self-heals');
 }
 {
   // Every request goes through the pacer, including the ones that succeed.
-  const circuit = createCircuit();
   const p = createPacer({ perMinute: 6000, burst: 1000, sleep: async () => {} });
   const fetchStub = stubFetch([{ status: 200 }]);
-  const call = makeCall(circuit, p, parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
+  const call = makeCall(20, p, parseRetryAfter, 'https://x/api/offers', 'https://x', 10000, fetchStub);
   await call({ appId: '250' }); await call({ appId: '250' });
   ok(p.stats().taken === 2, 'the pacer sees every outgoing request');
 }
 
 // ── the shipped wiring ─────────────────────────────────────────────────────
 ok(/OFFERS_MAX_RPM/.test(cron), 'the rate ceiling is tunable from the environment');
-ok(/const pacer = createPacer\(\{ perMinute: MAX_REQUESTS_PER_MIN \}\)/.test(cron), 'the cron builds a pacer');
-ok(/if \(circuit\.open\(\)\) \{/.test(cron), 'the cron checks the circuit before spending a request');
+ok(/\? n : 0;\s*\/\/ 0 = no ceiling/.test(cron), 'and is OFF unless somebody deliberately sets it');
+ok(/const pacer = MAX_REQUESTS_PER_MIN \? createPacer/.test(cron), 'the pacer exists only when a ceiling was asked for');
+ok(/if \(pacer\) await pacer\.take\(\)/.test(cron), 'and is consulted only when it exists');
+ok(/734 requests/.test(cron), 'the arithmetic that must be done before setting one is written down beside it');
 ok(!/if \(!res\.ok\) \{ last = \{ ok: false, status: res\.status \}; continue; \}[\s\S]{0,40}$/.test(cron.slice(cron.indexOf('callOffersProxy'))), 'sanity');
-ok(/throttle: \{ \.\.\.pacer\.stats\(\), \.\.\.circuit\.stats\(\) \}/.test(cron), 'the run records what throttling cost it');
+ok(/rateLimitedRequests/.test(cron), 'the run still records how many requests the supplier refused');
 ok(/if \(r\.skipped\)/.test(cron) && /if \(r\.rateLimited\)/.test(cron), 'rate-limited jobs are tallied apart from real failures');
 
 const admin = readFileSync(new URL('../public/admin-worldmap.html', import.meta.url), 'utf8');
