@@ -1139,7 +1139,14 @@
       const shownCount = f ? f.count : stats.count;
       const countTitle = f ? `${f.count.toLocaleString('en-GB')} of ${stats.count.toLocaleString('en-GB')} stored depart from ${Array.from(cacheOriginFilter).join(', ')}` : '';
       const price = f ? money(f.fromPP, c.currency) : money(stats.fromPP != null ? stats.fromPP : c.cheapestPP, c.currency);
-      const summaryFlag = c.inSummary ? '' : ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="Stored in Redis but missing from the map summary — rebuild to include it">not on map</span>';
+      // The map has two modes with a summary each. A country holding hotels
+      // and no packages IS on the map, on the Hotels pins — it is kept out of
+      // the package summary on purpose, because those pins price a package in
+      // GBP and a hotel-only country has no package price to show. Saying
+      // "not on map" for those was wrong about 15 countries on 17 Sep 2026.
+      const summaryFlag = c.inSummary
+        ? (c.onPackagesMap ? '' : ' <span class="region-tag" style="background:#EFF6FF;color:#1D4ED8" title="On the map in Hotels mode. It has no GBP package offers, and the package pins price a package, so it is not on those — switch the map to Hotels to see it.">hotels map</span>')
+        : ' <span class="region-tag" style="background:#FFFBEB;color:#B45309" title="Stored in Redis but on neither map summary — it has no GBP packages and no hotels. Rebuild to include it once the supplier returns some.">not on map</span>';
       const staleFlag = stats.stale
         ? ` <span class="stale-tag" title="${stats.stale} offer${stats.stale === 1 ? '' : 's'} past their travel date or older than 70 hours — deleted on the next cron run, never served to widgets">${stats.stale} stale</span>`
         : '';

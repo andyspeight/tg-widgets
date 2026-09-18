@@ -38,6 +38,13 @@ import { getJson, getString, del, keys, configured } from '../_redis.js';
 
 const COUNTRY_PREFIX = 'offers:packages:';
 const SUMMARY_KEY = 'map:offers:v1';
+// The World Map has TWO modes and a summary for each. Hotels mode
+// (?mode=hotels) reads this one. The Cache tab used to check only the package
+// summary, so a country whose cache holds hotels and no packages was labelled
+// "not on map" while being pinned on the map all along — 15 of them on
+// 17 Sep 2026 (Australia, Ireland, Japan, Kenya, Sri Lanka, Malaysia and the
+// rest). Read both, and only say "not on map" when it is on NEITHER.
+const HOTELS_KEY = 'map:hotels:v1';
 const LASTRUN_KEY = 'map:offers:lastRunAt';
 // Per-type fetched/kept/drop tallies written by the cron's last sweep — the
 // Cache tab shows these so thin types can be diagnosed at a glance.
@@ -395,9 +402,10 @@ export default async function handler(req, res) {
     }
 
     // ── GET: overview of every stored country key ─────────────────────────
-    const [allKeys, summary, lastRunAt, lastSweep, history] = await Promise.all([
+    const [allKeys, summary, hotelSummary, lastRunAt, lastSweep, history] = await Promise.all([
       keys(`${COUNTRY_PREFIX}*`),
       getJson(SUMMARY_KEY),
+      getJson(HOTELS_KEY),
       getString(LASTRUN_KEY),
       getJson(SWEEP_STATS_KEY),
       getJson(HISTORY_KEY),
@@ -413,6 +421,15 @@ export default async function handler(req, res) {
     if (summary && Array.isArray(summary.countries)) {
       for (const c of summary.countries) {
         if (c && c.countryCode) summaryByCC.set(String(c.countryCode).toUpperCase(), c);
+      }
+    }
+    // The same, for the map's Hotels mode. A hotel-only country is on the map,
+    // just not on the package pins — the package summary is GBP packages only,
+    // by design, because its "from £X" pins price a package.
+    const hotelSummaryByCC = new Map();
+    if (hotelSummary && Array.isArray(hotelSummary.countries)) {
+      for (const c of hotelSummary.countries) {
+        if (c && c.countryCode) hotelSummaryByCC.set(String(c.countryCode).toUpperCase(), c);
       }
     }
 
@@ -448,7 +465,12 @@ export default async function handler(req, res) {
         resortCount: resorts && Array.isArray(resorts.resorts) ? resorts.resorts.length : 0,
         cheapestPP: s ? (s.fromPricePP ?? s.fromPrice ?? null) : null,
         currency: s ? (s.currency || 'GBP') : 'GBP',
-        inSummary: !!s,
+        // On the map in EITHER mode. Reported separately too, so the page can
+        // say which pins a country actually appears on rather than implying
+        // the map has forgotten it.
+        inSummary: !!s || hotelSummaryByCC.has(cc),
+        onPackagesMap: !!s,
+        onHotelsMap: hotelSummaryByCC.has(cc),
       };
     });
 

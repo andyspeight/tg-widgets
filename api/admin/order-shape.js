@@ -38,9 +38,10 @@ import { requireAdmin, setAdminCors } from './_guard.js';
 import { applyRateLimit, RATE_LIMITS } from '../_auth.js';
 import {
   validateWidgetId, validateEmail, validateDate, validateOrderRef,
-  resolveWidgetCredentials, fetchTravelifyOrderRaw, DEMO_WIDGET_SENTINEL, DEMO_APP_ID, DEMO_PUBLIC_KEY,
+  resolveWidgetCredentials, fetchTravelifyOrderDetailed, DEMO_WIDGET_SENTINEL, DEMO_APP_ID, DEMO_PUBLIC_KEY,
 } from '../_lib/travelify.js';
 import { moneyOf, moneyOptsFromEnv, maskVoucherCode, extractVouchers } from '../_lib/order-money.js';
+import { describeOrderShape } from '../_lib/travelify-items.js';
 
 function isPlainObject(v) { return v && typeof v === 'object' && !Array.isArray(v); }
 const num = (v) => (typeof v === 'number' && Number.isFinite(v)) ? v : (v == null ? null : String(v).slice(0, 40));
@@ -59,6 +60,41 @@ function pricingFlags(it) {
       }
     }
   }
+  return out;
+}
+
+
+/**
+ * Every money-ish NUMBER anywhere in the order, with the path it sits at.
+ *
+ * TG121758 (18 Sep 2026) came back with payments: [] and a $43 gap between a
+ * $143 car rental and a $100 gift card, while the customer had paid in full.
+ * The order carries `data` and `sources` containers we have never looked
+ * inside, so a payment recorded there is invisible to us and indistinguishable
+ * from one that was never recorded at all. This finds it, or proves it is not
+ * in the order.
+ *
+ * NUMBERS ONLY, and only under money-ish keys. A number is not a name, an
+ * email or an address, so this cannot leak a customer into a support report.
+ */
+const MONEYISH = /(amount|paid|payment|total|price|balance|due|charge|value|net|gross|deposit|credit|refund|fee|tax)/i;
+function moneyTrail(root, maxDepth = 8) {
+  const out = [];
+  const walk = (node, path, depth) => {
+    if (out.length >= 80 || depth > maxDepth || node == null) return;
+    if (Array.isArray(node)) {
+      for (let i = 0; i < node.length && i < 30; i++) walk(node[i], path + '[' + i + ']', depth + 1);
+      return;
+    }
+    if (typeof node !== 'object') return;
+    for (const k of Object.keys(node)) {
+      const v = node[k];
+      const at = path ? path + '.' + k : k;
+      if (typeof v === 'number' && Number.isFinite(v) && MONEYISH.test(k)) out.push({ at, value: v });
+      else if (v && typeof v === 'object') walk(v, at, depth + 1);
+    }
+  };
+  walk(root, '', 0);
   return out;
 }
 
@@ -96,6 +132,12 @@ export function buildOrderShapeReport(raw, opts) {
     })),
     money: moneyOf(r, opts),
     deductNonGift: !!(opts && opts.deductNonGift),
+    // The two containers we have never opened, as TYPES not values, plus every
+    // money-ish number anywhere in the order. Added for TG121758: payments was
+    // empty and $43 was missing, and we could not tell "recorded somewhere we
+    // do not read" from "never recorded at all".
+    shape: describeOrderShape(r),
+    moneyTrail: moneyTrail(r),
   };
 }
 
@@ -143,8 +185,26 @@ export default async function handler(req, res) {
       ? { appId: DEMO_APP_ID, apiKey: DEMO_PUBLIC_KEY }
       : await resolveWidgetCredentials(widgetId, 'My Booking');
     if (!creds) return res.status(404).json({ error: 'That widget id was not found, or its client has no Travelify credentials on file.' });
-    const raw = await fetchTravelifyOrderRaw(creds, { emailAddress, departDate, orderRef });
-    if (!raw) return res.status(404).json({ error: 'Travelify did not return an order for those details with these credentials. Check the widget id belongs to the client who holds the booking.' });
+    const got = await fetchTravelifyOrderDetailed(creds, { emailAddress, departDate, orderRef });
+    if (got.outcome !== 'found') {
+      // One message for four different faults sent staff guessing through 21
+      // clients on 18 Sep 2026. Say which one it was.
+      const why = {
+        'not-found': 'No order with that reference, email and departure date in THIS client\'s Travelify account. Either the details differ (the date must be the real departure) or the booking belongs to another client.',
+        'credentials-refused': 'Travelify refused this client\'s credentials — the lookup never ran, so this says nothing about whether the order exists.',
+        'upstream-error': 'Travelify answered with an error, so the lookup did not complete.',
+        'network-error': 'Could not reach Travelify.',
+        'bad-body': 'Travelify answered with something that was not an order.',
+      }[got.outcome] || 'The lookup did not return an order.';
+      return res.status(got.outcome === 'not-found' ? 404 : 502).json({
+        error: why,
+        outcome: got.outcome,
+        travelifyStatus: got.status,
+        travelifySaid: got.detail || undefined,
+        appId: String(creds.appId || ''),
+      });
+    }
+    const raw = got.order;
     const report = buildOrderShapeReport(raw, moneyOptsFromEnv());
     report.orderRef = orderRef;
     report.widgetId = widgetId === DEMO_WIDGET_SENTINEL ? 'demo' : widgetId;
