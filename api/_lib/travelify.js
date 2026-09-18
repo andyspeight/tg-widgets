@@ -334,7 +334,20 @@ export async function resolveWidgetCredentials(widgetId, expectType = 'My Bookin
 // Returns the parsed raw order object, or null on 404 / error / timeout.
 // The raw object is what carries both the order id and the per-order key that
 // the cancellation API needs — neither is exposed to the browser by callers.
-export async function fetchTravelifyOrderRaw({ appId, apiKey }, { emailAddress, departDate, orderRef }) {
+/**
+ * The order fetch, WITH the reason it did not return an order.
+ *
+ * Everything used to collapse to null: a booking that is not in this account,
+ * a key Travelify refused, a timeout and a garbled body all looked identical.
+ * The order inspector then told staff "check the widget id belongs to the
+ * client", which is only one of those four and sends them guessing through 21
+ * clients. Same conflation that hid Better Lifestyle's dead key for fifteen
+ * hours on 17 Sep 2026.
+ *
+ * outcome: 'found' | 'not-found' | 'credentials-refused' | 'upstream-error'
+ *          | 'network-error' | 'bad-body'
+ */
+export async function fetchTravelifyOrderDetailed({ appId, apiKey }, { emailAddress, departDate, orderRef }) {
   let res;
   try {
     res = await fetch(TRAVELIFY_ORDER_API, {
@@ -344,28 +357,52 @@ export async function fetchTravelifyOrderRaw({ appId, apiKey }, { emailAddress, 
       signal: AbortSignal.timeout(12000),
     });
   } catch (err) {
-    console.error('[travelify] order fetch network error:', err.message);
-    return null;
+    return { outcome: 'network-error', status: 0, order: null, detail: String(err && err.message || 'network error') };
   }
 
-  if (res.status === 404) return null;
-  if (!res.ok) {
-    console.error(`[travelify] order fetch returned ${res.status}`);
-    return null;
+  // Read the body ONCE, as text: it is the only place Travelify says why, and
+  // a refusal needs that string as much as a success needs the JSON.
+  let text = '';
+  try { text = await res.text(); } catch { /* an unreadable body is not fatal */ }
+
+  if (res.status === 401 || res.status === 403) {
+    return { outcome: 'credentials-refused', status: res.status, order: null, detail: travelifyReasonFrom(text, apiKey) };
   }
+  if (res.status === 404) return { outcome: 'not-found', status: 404, order: null };
+  if (!res.ok) return { outcome: 'upstream-error', status: res.status, order: null, detail: travelifyReasonFrom(text, apiKey) };
 
   let raw;
-  try {
-    raw = await res.json();
-  } catch {
-    return null;
-  }
+  try { raw = JSON.parse(text); } catch { return { outcome: 'bad-body', status: res.status, order: null }; }
 
   // Travelify's documented 404 shape is { code: '404', message: ... }
-  if (raw && (raw.code === '404' || raw.code === 404)) return null;
-  if (!raw || typeof raw !== 'object' || raw.id == null) return null;
+  if (raw && (raw.code === '404' || raw.code === 404)) return { outcome: 'not-found', status: res.status, order: null };
+  if (!raw || typeof raw !== 'object' || raw.id == null) return { outcome: 'not-found', status: res.status, order: null };
 
-  return raw;
+  return { outcome: 'found', status: res.status, order: raw };
+}
+
+/** Travelify's own words, trimmed to a line, with the key scrubbed out. */
+function travelifyReasonFrom(text, apiKey) {
+  let out = String(text || '').trim();
+  if (!out) return '';
+  try {
+    const parsed = JSON.parse(out);
+    const msg = parsed && (parsed.message || parsed.error || parsed.detail);
+    if (msg) out = String(msg);
+  } catch { /* plain text or HTML — its first line still beats a bare status */ }
+  if (apiKey) out = out.split(String(apiKey)).join('[key]');
+  out = out.replace(/\s+/g, ' ').trim();
+  return out.length > 240 ? out.slice(0, 240) + '…' : out;
+}
+
+/** The order, or null. The long-standing shape, now one wrapper over the above
+ *  so the two can never disagree about what counts as an order. */
+export async function fetchTravelifyOrderRaw(creds, lookup) {
+  const r = await fetchTravelifyOrderDetailed(creds, lookup);
+  if (r.outcome === 'found') return r.order;
+  if (r.outcome === 'network-error') console.error('[travelify] order fetch network error:', r.detail);
+  else if (r.outcome !== 'not-found') console.error(`[travelify] order fetch returned ${r.status}` + (r.detail ? ` — ${r.detail}` : ''));
+  return null;
 }
 
 // ----- Public: read the per-order security key from a raw order -----
