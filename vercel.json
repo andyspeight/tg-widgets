@@ -183,6 +183,16 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "showcase.travelgenixsites.com"
+        }
+      ],
+      "destination": "/showcase.html"
+    },
+    {
       "source": "/admin",
       "destination": "/admin.html"
     },

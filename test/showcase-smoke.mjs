@@ -101,6 +101,13 @@ check('/showcase rewrite present',
 for (const f of ['/showcase.js', '/showcase-data.js', '/showcase.css']) {
   check(`${f} has headers`, vercel.headers.some(h => h.source === f));
 }
+/* The stand points at the bare subdomain, so its root has to land on the
+   showcase rather than on the widget dashboard. */
+const hostRw = vercel.rewrites.find(
+  r => r.source === '/' && (r.has || []).some(h => h.type === 'host'));
+check('bare showcase subdomain serves the showcase',
+  !!hostRw && hostRw.destination === '/showcase.html');
+check('the host rewrite is evaluated first', vercel.rewrites[0] === hostRw);
 
 /* The walkthrough. It runs unattended, so what matters is that it exists,
    that it can reach every hotspot, and that the whole thing is a length a
