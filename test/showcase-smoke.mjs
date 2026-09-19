@@ -102,5 +102,43 @@ for (const f of ['/showcase.js', '/showcase-data.js', '/showcase.css']) {
   check(`${f} has headers`, vercel.headers.some(h => h.source === f));
 }
 
+/* The walkthrough. It runs unattended, so what matters is that it exists,
+   that it can reach every hotspot, and that the whole thing is a length a
+   person would actually stand through. */
+console.log('showcase: walkthrough');
+for (const fn of ['tourStart', 'tourPause', 'tourResume', 'tourGo', 'tourFinish', 'dwellFor']) {
+  check(`${fn} defined`, new RegExp(`function ${fn}\\b`).test(js));
+}
+check('attract auto-starts the tour', /TOUR_AUTOSTART_MS/.test(js));
+check('a running tour is not swept to attract',
+  /state\.tour\.on && !state\.tour\.paused[\s\S]{0,80}idleTimer = null/.test(js));
+check('a real touch hands control over', /function onUserInput/.test(js));
+check('tour controls opt out of the auto-pause', /data-tour-ctl/.test(js));
+check('tour state is readable from outside', /tourState:/.test(js));
+
+function num(name) {
+  const m = js.match(new RegExp(`var ${name} = (\\d+)`));
+  return m ? Number(m[1]) : NaN;
+}
+const BASE = num('TOUR_BASE_MS'), PER = num('TOUR_PER_WORD_MS');
+const MIN = num('TOUR_MIN_MS'), MAX = num('TOUR_MAX_MS');
+check('dwell constants parse', [BASE, PER, MIN, MAX].every(n => !isNaN(n)));
+check('dwell range is sane', MIN > 3000 && MAX > MIN && MAX <= 20000, `${MIN}..${MAX}`);
+
+let totalMs = 0, steps = 0;
+for (const p of data.products) {
+  for (const s of p.screens) {
+    for (const h of s.hotspots) {
+      const words = `${h.title} ${h.feature} ${h.benefit} ${h.edge || ''}`.split(/\s+/).length;
+      totalMs += Math.max(MIN, Math.min(MAX, BASE + words * PER));
+      steps++;
+    }
+  }
+}
+const mins = totalMs / 60000;
+console.log(`  info the full walkthrough is ${steps} steps, about ${mins.toFixed(1)} minutes`);
+check('walkthrough is a length someone would stand through', mins >= 2 && mins <= 15,
+  `${mins.toFixed(1)} minutes`);
+
 console.log(failures ? `\n${failures} failing check(s)` : '\nshowcase: all checks passed');
 process.exit(failures ? 1 : 0);

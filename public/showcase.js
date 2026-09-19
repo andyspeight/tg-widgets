@@ -17,17 +17,30 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var IDLE_MS = 90000;          /* back to attract after 90s untouched */
   var PHONE_W = 390, PHONE_H = 844;
   var SPOT_MIN_GAP = 58;        /* px between hotspot dots before nudging */
+
+  /* The walkthrough. It plays itself, so the stand is never a still screen,
+     and a visitor can take it over at any point by touching anything. */
+  var TOUR_AUTOSTART_MS = 20000;  /* attract sits this long, then plays */
+  var TOUR_BASE_MS = 2400;        /* time to notice the dot moved */
+  var TOUR_PER_WORD_MS = 58;      /* plus reading time for the panel */
+  var TOUR_MIN_MS = 5200;
+  var TOUR_MAX_MS = 13000;
+  var TOUR_RESUME_MIN_MS = 1500;
 
   var data = window.TG_SHOWCASE;
   if (!data || !data.products || !data.products.length) return;
 
   var els = {};
-  var state = { product: null, screen: 0, open: -1, seen: Object.create(null) };
+  var state = {
+    product: null, screen: 0, open: -1, seen: Object.create(null),
+    tour: { on: false, paused: false, i: 0, list: [], timer: null, dwellMs: 0, startedAt: 0, elapsed: 0 }
+  };
   var idleTimer = null;
+  var attractTimer = null;
 
   /* ---------------------------------------------------------------- *
    * Small helpers
@@ -55,6 +68,8 @@
   }
   var ICON_X = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
   var ICON_HOME = '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';
+  var ICON_PLAY = '<polygon points="7 4 19 12 7 20"/>';
+  var ICON_PAUSE = '<rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/>';
   var ICON_SUN = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>';
 
   /* ---------------------------------------------------------------- *
@@ -63,22 +78,222 @@
 
   function poke() {
     if (idleTimer) clearTimeout(idleTimer);
+    /* A running walkthrough is the screen doing its job, not an idle one,
+       so it must not be swept back to the attract screen mid-sentence. */
+    if (state.tour.on && !state.tour.paused) { idleTimer = null; return; }
     idleTimer = setTimeout(toAttract, IDLE_MS);
   }
   function stopIdle() { if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; } }
+
+  /* A real touch, as opposed to the walkthrough moving itself. Anything the
+     visitor touches hands them control: the tour holds where it is rather
+     than pulling the screen out from under them. */
+  function onUserInput(e) {
+    if (e && e.target && e.target.closest && e.target.closest('[data-tour-ctl]')) {
+      /* The play and pause controls decide for themselves on click. */
+      poke();
+      return;
+    }
+    if (state.tour.on && !state.tour.paused) tourPause();
+    if (!els.attract.hidden) armAttract();
+    poke();
+  }
+
+  /* ---------------------------------------------------------------- *
+   * The walkthrough
+   * ---------------------------------------------------------------- */
+
+  /* One flat playlist across every screen, so the tour walks the product
+     the way someone would explain it: screen by screen, dot by dot. */
+  function buildTourList(p) {
+    var list = [];
+    p.screens.forEach(function (sc, si) {
+      sc.hotspots.forEach(function (h, hi) { list.push({ screen: si, spot: hi, h: h }); });
+    });
+    return list;
+  }
+
+  /* Long panels get longer on screen. A fixed dwell either rushes the
+     detailed ones or leaves the short ones hanging. */
+  function dwellFor(h) {
+    var words = (h.title + ' ' + h.feature + ' ' + h.benefit + ' ' + (h.edge || '')).split(/\s+/).length;
+    return Math.max(TOUR_MIN_MS, Math.min(TOUR_MAX_MS, TOUR_BASE_MS + words * TOUR_PER_WORD_MS));
+  }
+
+  function tourStart(fromStep) {
+    var p = state.product;
+    if (!p) return;
+    var t = state.tour;
+    t.on = true;
+    t.paused = false;
+    t.list = buildTourList(p);
+    stopIdle();
+    tourChrome();
+    tourGo(typeof fromStep === 'number' ? fromStep : 0);
+  }
+
+  function tourStop() {
+    var t = state.tour;
+    if (t.timer) { clearTimeout(t.timer); t.timer = null; }
+    t.on = false; t.paused = false; t.i = 0; t.elapsed = 0;
+    tourChrome();
+  }
+
+  function tourPause() {
+    var t = state.tour;
+    if (!t.on || t.paused) return;
+    if (t.timer) { clearTimeout(t.timer); t.timer = null; }
+    t.elapsed += Date.now() - t.startedAt;
+    t.paused = true;
+    freezeBar();
+    tourChrome();
+    poke();
+  }
+
+  function tourResume() {
+    var t = state.tour;
+    /* Starting the tour after someone has been exploring picks up from the
+       hotspot they are on, rather than yanking them back to screen one. */
+    if (!t.on) { tourStart(tourIndexHere()); return; }
+    if (!t.paused) return;
+    t.paused = false;
+    stopIdle();
+    var remain = Math.max(TOUR_RESUME_MIN_MS, t.dwellMs - t.elapsed);
+    t.startedAt = Date.now();
+    t.timer = setTimeout(function () { tourGo(t.i + 1); }, remain);
+    runBar(remain, true);
+    tourChrome();
+  }
+
+  function tourIndexHere() {
+    var p = state.product;
+    if (!p) return 0;
+    var list = buildTourList(p);
+    var spot = state.open > -1 ? state.open : 0;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].screen === state.screen && list[i].spot === spot) return i;
+    }
+    return 0;
+  }
+
+  function tourToggle() {
+    if (state.tour.on && !state.tour.paused) tourPause();
+    else tourResume();
+  }
+
+  function tourGo(i) {
+    var t = state.tour;
+    var p = state.product;
+    if (!p || !t.on) return;
+    if (i >= t.list.length) { tourFinish(); return; }
+
+    t.i = i;
+    t.elapsed = 0;
+    var item = t.list[i];
+
+    var open = function () {
+      openHotspot(item.spot, false);
+      t.dwellMs = dwellFor(item.h);
+      t.startedAt = Date.now();
+      if (t.timer) clearTimeout(t.timer);
+      t.timer = setTimeout(function () { tourGo(t.i + 1); }, t.dwellMs);
+      runBar(t.dwellMs, false);
+      tourChrome();
+      stopIdle();
+    };
+
+    if (state.screen !== item.screen) {
+      showScreen(item.screen);
+      /* showScreen measures on the next two frames; open on the one after. */
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { requestAnimationFrame(open); });
+      });
+    } else {
+      open();
+    }
+  }
+
+  function tourFinish() {
+    tourStop();
+    toAttract();
+  }
+
+  /* The dwell bar. Transform only, so it stays off the layout path. */
+  function runBar(ms, continuing) {
+    var bar = els.tourBar;
+    if (!bar) return;
+    var from = continuing ? currentBarScale() : 0;
+    bar.style.transition = 'none';
+    bar.style.transform = 'scaleX(' + from + ')';
+    void bar.offsetWidth;
+    bar.style.transition = 'transform ' + ms + 'ms linear';
+    bar.style.transform = 'scaleX(1)';
+  }
+
+  function currentBarScale() {
+    var bar = els.tourBar;
+    if (!bar) return 0;
+    var m = window.getComputedStyle(bar).transform;
+    if (!m || m === 'none') return 0;
+    var parts = m.replace(/^matrix\(|\)$/g, '').split(',');
+    var v = parseFloat(parts[0]);
+    return isNaN(v) ? 0 : Math.max(0, Math.min(1, v));
+  }
+
+  function freezeBar() {
+    var bar = els.tourBar;
+    if (!bar) return;
+    var at = currentBarScale();
+    bar.style.transition = 'none';
+    bar.style.transform = 'scaleX(' + at + ')';
+  }
+
+  /* Keep every tour control saying the same thing. */
+  function tourChrome() {
+    var t = state.tour;
+    var playing = t.on && !t.paused;
+
+    if (els.tourBtn) {
+      els.tourBtn.hidden = !state.product;
+      els.tourBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+      els.tourBtnLabel.textContent = playing ? 'Pause tour' : (t.on ? 'Resume tour' : 'Play tour');
+      els.tourBtnIcon.textContent = '';
+      els.tourBtnIcon.appendChild(icon(playing ? ICON_PAUSE : ICON_PLAY));
+      els.tourBtn.classList.toggle('is-live', playing);
+    }
+    if (els.tourRow) {
+      els.tourRow.hidden = !t.on;
+      els.tourStep.textContent = t.on
+        ? 'Step ' + (t.i + 1) + ' of ' + t.list.length + (t.paused ? ' \u00b7 paused' : '')
+        : '';
+      els.tourPause.textContent = playing ? 'Pause' : 'Resume';
+    }
+    if (els.sheet) els.sheet.classList.toggle('is-touring', t.on);
+  }
 
   /* ---------------------------------------------------------------- *
    * Attract
    * ---------------------------------------------------------------- */
 
+  function armAttract() {
+    if (attractTimer) clearTimeout(attractTimer);
+    attractTimer = setTimeout(function () {
+      if (!els.attract.hidden) { openProduct(data.products[0]); tourStart(0); }
+    }, TOUR_AUTOSTART_MS);
+  }
+  function disarmAttract() { if (attractTimer) { clearTimeout(attractTimer); attractTimer = null; } }
+
   function toAttract() {
     stopIdle();
+    tourStop();
     state.product = null; state.screen = 0; state.open = -1;
     state.seen = Object.create(null);
     els.view.hidden = true;
     els.attract.hidden = false;
     els.crumb.hidden = true;
     els.home.hidden = true;
+    if (els.tourBtn) els.tourBtn.hidden = true;
+    armAttract();
     els.attractCta.focus({ preventScroll: true });
   }
 
@@ -87,19 +302,30 @@
     a.appendChild(el('span', 'tg-attract-badge', 'Travelgenix'));
     a.appendChild(el('h1', null, 'See what your clients would see'));
     a.appendChild(el('p', null,
-      'Tap a product, then tap any numbered dot on the screen to find out what it does ' +
-      'and why it matters. Take as long as you like.'));
+      'Watch the walkthrough, or take the screen and go where you like. Every numbered dot ' +
+      'says what a feature does and why it matters.'));
 
-    var cta = el('button', 'tg-attract-cta');
-    cta.type = 'button';
-    cta.appendChild(document.createTextNode(
-      data.products.length === 1 ? 'Explore ' + data.products[0].name : 'Start exploring'));
-    cta.addEventListener('click', start);
-    a.appendChild(cta);
-    els.attractCta = cta;
+    var ctas = el('div', 'tg-attract-ctas');
 
-    a.appendChild(el('span', 'tg-attract-tick', 'Touch the screen to begin'));
-    a.addEventListener('click', function (e) { if (e.target === a) start(); });
+    var tour = el('button', 'tg-attract-cta');
+    tour.type = 'button';
+    tour.setAttribute('data-tour-ctl', '');
+    tour.appendChild(icon(ICON_PLAY));
+    tour.appendChild(document.createTextNode('Show me round'));
+    tour.addEventListener('click', function () { disarmAttract(); start(); tourStart(0); });
+    ctas.appendChild(tour);
+    els.attractCta = tour;
+
+    var self = el('button', 'tg-attract-cta tg-attract-cta--ghost');
+    self.type = 'button';
+    self.appendChild(document.createTextNode(
+      data.products.length === 1 ? 'Explore it myself' : 'Explore it myself'));
+    self.addEventListener('click', function () { disarmAttract(); start(); });
+    ctas.appendChild(self);
+
+    a.appendChild(ctas);
+    a.appendChild(el('span', 'tg-attract-tick',
+      'The tour plays on its own. Touch anything at any point to take over.'));
     return a;
   }
 
@@ -117,10 +343,12 @@
     state.open = -1;
     state.seen = Object.create(null);
 
+    disarmAttract();
     els.attract.hidden = true;
     els.view.hidden = false;
     els.crumb.hidden = false;
     els.home.hidden = false;
+    if (els.tourBtn) els.tourBtn.hidden = false;
     els.crumbName.textContent = p.name;
     els.crumbMeta.textContent = p.category + ' · ' + p.status + ' ' + p.version;
 
@@ -151,6 +379,7 @@
     }
 
     showScreen(0);
+    tourChrome();
     poke();
   }
 
@@ -428,6 +657,20 @@
     top.appendChild(home);
     els.home = home;
 
+    var tourBtn = el('button', 'tg-iconbtn tg-tourbtn');
+    tourBtn.type = 'button';
+    tourBtn.hidden = true;
+    tourBtn.setAttribute('data-tour-ctl', '');
+    tourBtn.setAttribute('aria-pressed', 'false');
+    var tourIco = el('span', 'tg-tourbtn-ico');
+    tourIco.appendChild(icon(ICON_PLAY));
+    var tourLbl = el('span', null, 'Play tour');
+    tourBtn.appendChild(tourIco);
+    tourBtn.appendChild(tourLbl);
+    tourBtn.addEventListener('click', tourToggle);
+    top.appendChild(tourBtn);
+    els.tourBtn = tourBtn; els.tourBtnIcon = tourIco; els.tourBtnLabel = tourLbl;
+
     var theme = el('button', 'tg-iconbtn');
     theme.type = 'button';
     theme.setAttribute('aria-label', 'Switch between light and dark');
@@ -481,6 +724,23 @@
     sheet.appendChild(sh);
     var sb = el('div', 'tg-sheet-b');
     sheet.appendChild(sb);
+    var tourRow = el('div', 'tg-sheet-tour');
+    tourRow.hidden = true;
+    var tourStep = el('span', 'tg-tour-step', '');
+    var tourPause = el('button', 'tg-tour-pause', 'Pause');
+    tourPause.type = 'button';
+    tourPause.setAttribute('data-tour-ctl', '');
+    tourPause.addEventListener('click', tourToggle);
+    var barWrap = el('span', 'tg-tour-track');
+    var bar = el('span', 'tg-tour-bar');
+    barWrap.appendChild(bar);
+    tourRow.appendChild(tourStep);
+    tourRow.appendChild(tourPause);
+    tourRow.appendChild(barWrap);
+    sheet.appendChild(tourRow);
+    els.tourRow = tourRow; els.tourStep = tourStep;
+    els.tourPause = tourPause; els.tourBar = bar;
+
     var nav = el('div', 'tg-sheet-nav');
     var prev = el('button', null, 'Back');
     prev.type = 'button';
@@ -554,12 +814,19 @@
     window.addEventListener('resize', function () { if (!els.view.hidden) layout(); });
 
     ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (evt) {
-      document.addEventListener(evt, poke, { passive: true });
+      document.addEventListener(evt, onUserInput, { passive: true });
     });
 
     document.addEventListener('keydown', function (e) {
       if (els.view.hidden) return;
-      if (e.key === 'Escape') { closeSheet(); state.open = -1; syncMarks(); }
+      if (e.key === 'Escape') { tourStop(); closeSheet(); state.open = -1; syncMarks(); }
+      else if ((e.key === ' ' || e.key === 'Spacebar') &&
+               !(e.target && e.target.closest && e.target.closest('button'))) {
+        /* Space is the play/pause key, except where it belongs to a focused
+           button, which would otherwise never be pressable by keyboard. */
+        e.preventDefault();
+        tourToggle();
+      }
       else if (e.key === 'ArrowRight' && state.open > -1) step(1);
       else if (e.key === 'ArrowLeft' && state.open > -1) step(-1);
     });
@@ -573,5 +840,15 @@
     init();
   }
 
-  window.TGShowcase = { version: VERSION, open: openProduct, attract: toAttract };
+  window.TGShowcase = {
+    version: VERSION,
+    open: openProduct,
+    attract: toAttract,
+    playTour: tourStart,
+    pauseTour: tourPause,
+    stopTour: tourStop,
+    tourState: function () {
+      return { on: state.tour.on, paused: state.tour.paused, step: state.tour.i, of: state.tour.list.length };
+    }
+  };
 })();
