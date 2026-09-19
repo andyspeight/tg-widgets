@@ -183,6 +183,16 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "showcase.travelgenixsites.com"
+        }
+      ],
+      "destination": "/showcase.html"
+    },
+    {
       "source": "/admin",
       "destination": "/admin.html"
     },
@@ -785,6 +795,10 @@
     {
       "source": "/editor-venueguide",
       "destination": "/editor-venueguide.html"
+    },
+    {
+      "source": "/showcase",
+      "destination": "/showcase.html"
     }
   ],
   "headers": [
@@ -2053,6 +2067,45 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/showcase.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/showcase-data.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/showcase.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "text/css; charset=utf-8"
         }
       ]
     }
