@@ -110,6 +110,19 @@ check('small screens are sized by width, never height',
   /narrow[\s\S]{0,120}availW \/ PHONE_W, 1/.test(js));
 check('stage padding is measured, not assumed', /paddingLeft/.test(js));
 
+/* The whole promise of a hotspot demo is that the words and the thing are
+   visible together. On a phone the panel covers half the screen, so this
+   needs active help: the dot has to be put in the strip left above it, and
+   the rail row must not drag the page away from the mock. */
+console.log('showcase: the words and the thing');
+check('the anchored element is ringed while open', /tg-lit/.test(js));
+check('the ring is styled', /\.tg-lit\s*\{/.test(css));
+check('the dot is scrolled into the visible strip', /function revealSpot/.test(js));
+check('revealSpot measures the panel, not a guess', /getBoundingClientRect\(\)\.top[\s\S]{0,200}band/.test(js));
+check('rail scrollIntoView is gated off phones',
+  /fromRail \|\| window\.innerWidth > NARROW_PX\) row\.scrollIntoView/.test(js));
+check('the phone panel leaves room for the mock', /max-height:\s*50vh/.test(css));
+
 /* Routing: an unrouted page is a 404 on the day. */
 console.log('showcase: routing');
 const vercel = JSON.parse(readFileSync(join(ROOT, 'vercel.json'), 'utf8'));

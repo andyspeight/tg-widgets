@@ -501,6 +501,7 @@
 
     var boxRect = els.fitbox.getBoundingClientRect();
     var placed = [];
+    var targets = els.spotTargets = [];
 
     s.hotspots.forEach(function (h, i) {
       var target = els.phoneScreen.querySelector('[data-hs="' + h.anchor + '"]');
@@ -555,6 +556,7 @@
       if (state.open === i) dot.classList.add('is-open');
       dot.addEventListener('click', function () { toggle(i); });
       els.spots.appendChild(dot);
+      targets[i] = target;
     });
   }
 
@@ -603,10 +605,36 @@
       row.setAttribute('aria-expanded', fromRail ? 'true' : 'false');
       var body = document.getElementById(row.getAttribute('aria-controls'));
       if (body) body.hidden = !fromRail;
-      row.scrollIntoView({ block: 'nearest' });
+      /* On the kiosk the rail is its own scroller, so bringing the row into
+         view moves only the rail. On a phone the rail sits BELOW the mock in
+         the page flow, so the same call scrolls the whole page down to the
+         row and takes the dot clean off the top of the screen. */
+      if (fromRail || window.innerWidth > NARROW_PX) row.scrollIntoView({ block: 'nearest' });
     }
     syncMarks();
+    if (!fromRail) {
+      /* Measure after the panel has been laid out, or its top is stale. */
+      requestAnimationFrame(function () { revealSpot(i); });
+    }
     poke();
+  }
+
+  /* On a phone the panel covers the lower half of the screen, so the dot it
+     describes has to be put in the strip that is still visible. Without this
+     you read an explanation with no idea which part of the screen it is
+     about, which is the whole point of a hotspot demo. */
+  function revealSpot(i) {
+    if (window.innerWidth > NARROW_PX) return;   /* the kiosk panel sits beside the phone */
+    var dot = els.spots.children[i];
+    if (!dot) return;
+    var barH = els.topbar ? els.topbar.getBoundingClientRect().height : 0;
+    var panelTop = els.sheet.hidden ? window.innerHeight : els.sheet.getBoundingClientRect().top;
+    var band = panelTop - barH;
+    if (band < 80) return;                       /* nowhere worth scrolling to */
+    var r = dot.getBoundingClientRect();
+    var delta = (r.top + r.height / 2) - (barH + band / 2);
+    if (Math.abs(delta) < 4) return;
+    window.scrollBy({ top: delta, behavior: 'smooth' });
   }
 
   function closeSheet() {
@@ -619,6 +647,9 @@
   }
 
   function syncMarks() {
+    (els.spotTargets || []).forEach(function (t, i) {
+      if (t) t.classList.toggle('tg-lit', state.open === i);
+    });
     Array.prototype.forEach.call(els.spots.children, function (dot, i) {
       dot.classList.toggle('is-open', state.open === i);
       dot.classList.toggle('is-seen', !!state.seen[seenKey(state.screen, i)]);
@@ -667,8 +698,11 @@
     var home = el('button', 'tg-iconbtn');
     home.type = 'button';
     home.hidden = true;
+    home.setAttribute('aria-label', 'Start over');
     home.appendChild(icon(ICON_HOME));
-    home.appendChild(document.createTextNode('Start over'));
+    /* Wrapped so the phone layout can drop the word and keep the bar to one
+       row; the icon plus aria-label still carries it. */
+    home.appendChild(el('span', 'tg-btn-label', 'Start over'));
     home.addEventListener('click', toAttract);
     top.appendChild(home);
     els.home = home;
@@ -680,7 +714,7 @@
     tourBtn.setAttribute('aria-pressed', 'false');
     var tourIco = el('span', 'tg-tourbtn-ico');
     tourIco.appendChild(icon(ICON_PLAY));
-    var tourLbl = el('span', null, 'Play tour');
+    var tourLbl = el('span', 'tg-tour-label', 'Play tour');
     tourBtn.appendChild(tourIco);
     tourBtn.appendChild(tourLbl);
     tourBtn.addEventListener('click', tourToggle);
@@ -698,6 +732,7 @@
     });
     top.appendChild(theme);
     app.appendChild(top);
+    els.topbar = top;
 
     /* main */
     var main = el('main', 'tg-main');

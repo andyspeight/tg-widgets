@@ -876,6 +876,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     font-size: var(--k-xs); white-space: nowrap;
   }
   .tg-topbar-sp { flex: 1 0 0; }
+  /* Keep the bar to a single row: Start over is unmistakable as an icon,
+     the tour button keeps its label because that label changes state. */
+  .tg-btn-label { display: none; }
   .tg-logo { font-size: var(--k-base); }
 
   .tg-attract { position: fixed; padding: var(--space-6) var(--space-5); }
@@ -892,10 +895,32 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .tg-feats { flex: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
   .tg-qr { flex-wrap: wrap; }
 
+  /* Half the screen at most, so there is a strip left to show the dot the
+     panel is talking about. revealSpot() scrolls it into that strip. */
   .tg-sheet {
     position: fixed; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);
-    max-width: none; margin: 0; max-height: 72vh; overflow-y: auto;
+    max-width: none; margin: 0; max-height: 50vh; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+  .tg-sheet-b p { font-size: var(--k-xs); }
   .tg-phone { border-radius: 44px; }
   .tg-phone-screen { border-radius: 34px; }
+}
+
+/* The element a hotspot points at, ringed while its panel is open. A number
+   in a panel does not tell you which part of the screen it is about. */
+.tg-lit {
+  outline: 3px solid var(--tg-accent);
+  outline-offset: 3px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9px rgba(0,180,216,.16);
+}
+
+/* Very small phones. At 320px the bar still wrapped to two rows, which is a
+   fifth of the screen gone. The tour button keeps its icon and its teal
+   playing state, so the word can go. */
+@media (max-width: 380px) {
+  .tg-tour-label { display: none; }
+  .tg-logo { font-size: var(--k-sm); }
+  .tg-topbar { padding: 8px 10px; }
 }
