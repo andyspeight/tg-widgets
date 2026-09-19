@@ -21,6 +21,7 @@
   var IDLE_MS = 90000;          /* back to attract after 90s untouched */
   var PHONE_W = 390, PHONE_H = 844;
   var SPOT_MIN_GAP = 58;        /* px between hotspot dots before nudging */
+  var NARROW_PX = 700;          /* at or below this, the page scrolls (see showcase.css) */
 
   /* The walkthrough. It plays itself, so the stand is never a still screen,
      and a visitor can take it over at any point by touching anything. */
@@ -452,10 +453,25 @@
 
   function layout() {
     var box = els.stage.getBoundingClientRect();
-    var pad = 24;
-    var availW = Math.max(120, box.width - pad * 2);
-    var availH = Math.max(120, box.height - pad * 2);
-    var scale = Math.min(availW / PHONE_W, availH / PHONE_H);
+    /* Read the real padding rather than assume it: the small-screen rule
+       changes it, and a hardcoded 24 quietly mis-sizes the fit. */
+    var cs = window.getComputedStyle(els.stage);
+    var padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var availW = Math.max(120, box.width - padX);
+    var availH = Math.max(120, box.height - padY);
+
+    /* On a phone the stage is far shorter than the 844px canvas, so fitting
+       by height collapsed the mock to a third of size and put the app's 13px
+       text at about 4 real pixels. Below the breakpoint the page scrolls
+       instead, so the mock is sized by WIDTH only and never magnified past
+       1:1. Fitting by width also keeps this free of the circular dependency
+       the scrolling layout would otherwise create, where the stage height
+       comes from the very box we are measuring to compute. */
+    var narrow = window.innerWidth <= NARROW_PX;
+    var scale = narrow
+      ? Math.min(availW / PHONE_W, 1)
+      : Math.min(availW / PHONE_W, availH / PHONE_H);
 
     els.fitbox.style.width = (PHONE_W * scale) + 'px';
     els.fitbox.style.height = (PHONE_H * scale) + 'px';
@@ -467,7 +483,7 @@
        detail panel sits BESIDE the phone. Covering the screen someone just
        tapped is the one thing a hotspot demo must not do. */
     var sideGap = (box.width - PHONE_W * scale) / 2 - 40;
-    if (sideGap >= 300) {
+    if (!narrow && sideGap >= 300) {
       els.stage.classList.add('is-side');
       els.stage.style.setProperty('--sheet-w', Math.min(460, sideGap) + 'px');
     } else {

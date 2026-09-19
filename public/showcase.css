@@ -847,3 +847,55 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 @media (prefers-reduced-motion: reduce) {
   .tg-tour-bar { transition: none !important; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Phones and small tablets
+ *
+ * The stage holds a fixed 390x844 canvas. The kiosk layout fits it to the
+ * HEIGHT of a split pane, which on a 664px phone collapsed it to a third
+ * of size and rendered the app's 13px text at about 4 real pixels. Below
+ * this width the two-pane kiosk gives way to an ordinary scrolling page:
+ * the mock at its own size, the rail beneath it, the panel pinned to the
+ * viewport so it is reachable wherever you have scrolled to.
+ *
+ * Keep NARROW_PX in showcase.js in step with this breakpoint.
+ * ------------------------------------------------------------------ */
+@media (max-width: 700px) {
+  html, body { height: auto; overflow: visible; }
+  .tg-app { position: static; min-height: 100vh; }
+  .tg-main { flex: none; min-height: 0; }
+
+  .tg-topbar {
+    position: sticky; top: 0; z-index: 30;
+    padding: 10px 12px; gap: var(--space-2);
+    flex-wrap: wrap;   /* wrap whole buttons rather than break their labels */
+  }
+  .tg-crumb { display: none; }   /* the rail heading already names the product */
+  .tg-iconbtn {
+    min-width: 48px; min-height: 48px; padding: 0 var(--space-3);
+    font-size: var(--k-xs); white-space: nowrap;
+  }
+  .tg-topbar-sp { flex: 1 0 0; }
+  .tg-logo { font-size: var(--k-base); }
+
+  .tg-attract { position: fixed; padding: var(--space-6) var(--space-5); }
+  .tg-attract-ctas { width: 100%; flex-direction: column; align-items: stretch; }
+  .tg-attract-cta { justify-content: center; padding: 0 var(--space-6); min-height: 64px; }
+
+  .tg-view { display: block; }
+  /* A little breathing room each side, so the device frame is not flush to
+     the screen edge and the corner dots are not half off it. */
+  .tg-stage { padding: var(--space-4) var(--space-3) var(--space-6); overflow: visible; }
+  .tg-rail { border-left: 0; border-top: 1px solid var(--tg-border); }
+  /* These scroll with the page now, so their own scrollers and the fade
+     that hinted at them would both be wrong. */
+  .tg-feats { flex: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+  .tg-qr { flex-wrap: wrap; }
+
+  .tg-sheet {
+    position: fixed; left: var(--space-3); right: var(--space-3); bottom: var(--space-3);
+    max-width: none; margin: 0; max-height: 72vh; overflow-y: auto;
+  }
+  .tg-phone { border-radius: 44px; }
+  .tg-phone-screen { border-radius: 34px; }
+}

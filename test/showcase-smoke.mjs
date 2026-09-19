@@ -93,6 +93,23 @@ check('no inline handlers in html', !/\son[a-z]+\s*=/i.test(html));
 check('data file loaded before engine',
   html.indexOf('showcase-data.js') < html.indexOf('showcase.js'));
 
+/* Small screens. The stage holds a fixed 390x844 canvas, and fitting it to
+   the HEIGHT of a split pane once rendered the mock at a third of size with
+   4px text on a phone. The breakpoint lives in two files and they have to
+   agree, or the CSS switches to the scrolling layout while the JS carries on
+   fitting by height (or the reverse). */
+console.log('showcase: small screens');
+const css = readFileSync(join(PUB, 'showcase.css'), 'utf8');
+const cssBp = css.match(/@media \(max-width:\s*(\d+)px\)/);
+const jsBp = js.match(/var NARROW_PX = (\d+)/);
+check('css has a small-screen breakpoint', !!cssBp);
+check('js has a matching breakpoint', !!jsBp);
+check('the two breakpoints agree', !!cssBp && !!jsBp && cssBp[1] === jsBp[1],
+  `css ${cssBp?.[1]} vs js ${jsBp?.[1]}`);
+check('small screens are sized by width, never height',
+  /narrow[\s\S]{0,120}availW \/ PHONE_W, 1/.test(js));
+check('stage padding is measured, not assumed', /paddingLeft/.test(js));
+
 /* Routing: an unrouted page is a 404 on the day. */
 console.log('showcase: routing');
 const vercel = JSON.parse(readFileSync(join(ROOT, 'vercel.json'), 'utf8'));
