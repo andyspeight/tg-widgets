@@ -17,6 +17,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { readFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,8 +25,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const file = resolve(here, '../standalone/out/theme-harness.html');
 
-const CHROMIUM = process.env.TG_CHROMIUM
-  ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 const ORIGIN = 'http://theme.harness';
 const html = await readFile(file, 'utf8');

@@ -1,0 +1,118 @@
+# The tg-sites CMS: typecheck, unit tests, and the browser checks.
+#
+# WHY THIS EXISTS (20 Sep 2026). Until today nothing automated ran any of this.
+# test.yml covers the widget suite at the repo root and stops there, so the CMS
+# had its typecheck, its 4,300 unit tests and its twelve browser suites run only
+# when somebody remembered. In the gap, `npm run verify:browser` died at a stale
+# fixture and took four suites down with it silently, six checks sat dead for
+# three weeks, a real bug reached published client sites, and the thing Andy
+# noticed first was a text size doing the opposite of its label.
+#
+# ON PUSH TO MAIN AS WELL AS ON PULL REQUESTS, deliberately. The convention in
+# this repo is to commit straight to main and let Vercel deploy it (see
+# CLAUDE.md), so a pull-request-only workflow would almost never run and would be
+# reassurance rather than a check. The browser job costs about twelve minutes;
+# there are a few pushes a day.
+#
+# PATH FILTERED, so a commit that only touches the widget suite does not pay for
+# any of this.
+name: tg-sites
+
+on:
+  pull_request:
+    paths:
+      - 'tg-sites/**'
+      - 'block-catalogue.json'
+      - '.github/workflows/tg-sites.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tg-sites/**'
+      - 'block-catalogue.json'
+      - '.github/workflows/tg-sites.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: tg-sites-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: tg-sites
+
+jobs:
+  checks:
+    name: typecheck, tests, catalogue
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tg-sites/package-lock.json
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      # The json report is written alongside the readable one so the guard below
+      # can read the count without paying for a second run of the suite.
+      - name: Unit tests
+        run: npx vitest run --reporter=default --reporter=json --outputFile=/tmp/vitest.json
+
+      # A generated file committed to a repo drifts the moment somebody adds a
+      # block and does not rerun the generator. The suite covers this too; it is
+      # named separately here so a drift reads as a drift rather than as a test.
+      - name: Block catalogue is in step with the registry
+        run: npm run catalogue:check
+
+      # A suite that silently stops running is worse than no suite. The same
+      # guard test.yml carries, for the same reason.
+      - name: Check the suite did not silently shrink
+        run: |
+          COUNT=$(node -e "console.log(require('/tmp/vitest.json').numTotalTests ?? 0)")
+          echo "Test count: $COUNT"
+          if [ -z "$COUNT" ] || [ "$COUNT" -lt 4000 ]; then
+            echo "::error::Expected at least 4000 tests, found '${COUNT:-none}'. A test file has probably stopped loading."
+            exit 1
+          fi
+
+  browser:
+    name: browser checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # After the fast job, so an obvious break does not spend twelve minutes
+    # proving itself in a browser as well.
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tg-sites/package-lock.json
+
+      - run: npm ci --no-audit --no-fund
+
+      # No TG_CHROMIUM is set, and that is deliberate: tools/chromium.mjs falls
+      # through to Playwright's own download when this image has no browser of
+      # its own at the sandbox path.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # verify-destination reads the BUILT stylesheet, because the source is not
+      # what a visitor gets. So the build comes first, and a broken build fails
+      # here rather than halfway through a browser suite.
+      - name: Build
+        run: npx next build
+
+      - name: Browser checks
+        run: npm run verify:browser

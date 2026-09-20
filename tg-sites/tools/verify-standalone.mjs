@@ -9,6 +9,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { readdirSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -59,8 +60,7 @@ if (newestSource > built) {
  * does not necessarily match its download revision, so point at the binary
  * that is already here rather than fetching another one.
  */
-const CHROMIUM = process.env.TG_CHROMIUM
-  ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -8293,6 +8293,76 @@ await check('a block line spacing set on Phone tightens phone, not desktop', asy
  * switch to Phone, open the tracking out, and prove the phone letter-spacing widens
  * while the desktop one holds.
  */
+/*
+ * A SIZE OF YOUR OWN ON THE BLOCK, in pixels.
+ *
+ * Shipped in 578cb9e7 and never checked in a browser, which is how it stayed on
+ * the open queue for weeks as a thing still to build (found 20 Sep 2026 while
+ * answering "what is next"). The dropdown's own scale stops at Giant; this is the
+ * entry that opens a box and takes any number from 6 to 200.
+ *
+ * WHAT IS MEASURED IS THE STORED SIZE AND THE DIRECTION, NOT AN EXACT PIXEL ON
+ * THE CANVAS, and the reason is worth writing down before somebody "fixes" it. A
+ * heading arrives with auto-resize on, so its size is fluid: it scales with the
+ * width it is drawn in. The editor canvas is about 680px wide inside its panels,
+ * which is nearer a tablet than the desktop the Desktop button names, so a typed
+ * 96px correctly draws at about 61px there and at 96px on a real desktop. That
+ * gap is the parked canvas-fidelity question (Canvas.tsx, around line 1041), not
+ * a fault in this control. So: the block must STORE exactly what was typed, and
+ * the words must visibly grow.
+ */
+await check('a block text size of your own, in pixels, reaches the words', async () => {
+  await addBlock('Heading');
+  const host = added();
+  if ((await host.count()) !== 1) return `${await host.count()} blocks selected after adding`;
+  const before = await host.evaluate((el) => {
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    return text ? parseFloat(getComputedStyle(text).fontSize) : null;
+  });
+  if (before == null) return 'the heading did not render its text';
+
+  const select = page.locator('.ed-props select[id^="ed-text-size"]').first();
+  if ((await select.count()) === 0) return 'the block pane offers no text size';
+  await select.selectOption('__custom_px__');
+  await page.waitForTimeout(200);
+
+  const box = page.locator('.ed-props input[aria-label="Text size in pixels"]').first();
+  if ((await box.count()) === 0) return 'choosing Custom did not open the box';
+  await box.fill('96');
+  await box.blur();
+  await page.waitForTimeout(350);
+
+  const after = await host.evaluate((el) => {
+    const text = el.matches('.tgs-heading, .tgs-text') ? el : el.querySelector('.tgs-heading, .tgs-text');
+    const style = el.getAttribute('style') || '';
+    const m = style.match(/--tgs-fs:\s*([^;]+)/);
+    return { stored: m ? m[1].trim() : null, px: text ? parseFloat(getComputedStyle(text).fontSize) : null };
+  });
+  if (after.stored !== '96px') return `the block stored ${after.stored}, not 96px`;
+  return after.px > before + 10 ? true : `the words went from ${before}px to ${after.px}px`;
+});
+
+/*
+ * AND THE CLAMP HOLDS, which is the control's half of the split: the box clamps,
+ * so a typed 900 becomes a size you can see and correct rather than a button that
+ * quietly did nothing, and the sanitiser refuses anything outside the range so no
+ * other caller can land one.
+ */
+await check('and a number past the top of the range is pulled back to it', async () => {
+  const box = page.locator('.ed-props input[aria-label="Text size in pixels"]').first();
+  if ((await box.count()) === 0) return 'the box closed after the size was set';
+  await box.fill('900');
+  await box.blur();
+  await page.waitForTimeout(350);
+
+  const stored = await added().evaluate((el) => {
+    const style = el.getAttribute('style') || '';
+    const m = style.match(/--tgs-fs:\s*([^;]+)/);
+    return m ? m[1].trim() : null;
+  });
+  return stored === '200px' ? true : `900 was stored as ${stored}, not 200px`;
+});
+
 await check('a block letter spacing set on Phone widens phone, not desktop', async () => {
   await addBlock('Heading');
   const host = added();

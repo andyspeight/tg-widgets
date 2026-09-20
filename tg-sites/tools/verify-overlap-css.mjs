@@ -18,6 +18,7 @@
  * the probe's worktree. Run: node tools/verify-overlap-css.mjs
  */
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(resolve(here, '../app/globals.css'), 'utf8');
 
-const CHROMIUM = process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 /*
  * The header the way RegionRenderer + PageRenderer emit it: a `.tgs-region` that is

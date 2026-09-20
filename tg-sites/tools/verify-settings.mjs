@@ -25,6 +25,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -72,8 +73,7 @@ if (built === 0 || built < (await newestSource())) {
   process.exit(1);
 }
 
-const CHROMIUM = process.env.TG_CHROMIUM
-  ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 const ORIGIN = 'http://settings.harness';
 const html = await readFile(file, 'utf8');

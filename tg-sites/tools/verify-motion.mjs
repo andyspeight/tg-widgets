@@ -18,8 +18,9 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 
-const CHROMIUM = process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 /*
  * The reveal exactly as globals.css ships it: the animation, its view() timeline and

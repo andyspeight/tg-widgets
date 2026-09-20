@@ -23,6 +23,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import * as esbuild from 'esbuild';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -31,7 +32,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
-const CHROMIUM = process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 /** The size menu itself, as the toolbar offers it. */
 const work = await mkdtemp(join(tmpdir(), 'tg-text-'));

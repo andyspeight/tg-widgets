@@ -20,6 +20,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import * as esbuild from 'esbuild';
 import { createRequire } from 'node:module';
 import { readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
@@ -27,7 +28,7 @@ import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
 /* The same resolution every other browser check here uses. */
-const CHROMIUM = process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 const bundle = resolve(root, '.next/cache/verify-destination.cjs');
 
 /** The biggest built stylesheet is the site's; the smaller ones are the tool's own screens. */

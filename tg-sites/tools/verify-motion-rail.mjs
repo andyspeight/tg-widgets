@@ -22,9 +22,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const CHROMIUM = process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 const css = readFileSync(join(HERE, '..', 'app', 'globals.css'), 'utf8');
 const script = readFileSync(join(HERE, '..', 'public', 'tg-motion.js'), 'utf8');
 

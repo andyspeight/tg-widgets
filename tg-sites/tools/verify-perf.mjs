@@ -25,6 +25,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { createServer } from 'node:http';
 import { readFile, writeFile, stat } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
@@ -102,7 +103,7 @@ const COLLECT = `() => new Promise((done) => {
 
 async function measure(server, profile) {
   const port = server.address().port;
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const browser = await chromium.launch({ executablePath: chromiumPath() });
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 3,

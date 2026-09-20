@@ -12,6 +12,7 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -60,8 +61,7 @@ function slideshowPage({ transition = 'fade', arrows = true, dots = true } = {})
 </body></html>`;
 }
 
-const CHROMIUM =
-  process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 
 const browser = await chromium.launch({ executablePath: CHROMIUM });
 

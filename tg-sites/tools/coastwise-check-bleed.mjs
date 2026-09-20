@@ -1,12 +1,13 @@
 /* Phone-width bleed check: no sideways scroll, no text within 8px of the edge. */
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 import { readdirSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 
 const dir = new URL('./coastwise-preview/', import.meta.url).pathname;
 const files = readdirSync(dir).filter((f) => f.endsWith('.html'));
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+const browser = await chromium.launch({ executablePath: chromiumPath() });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 let bad = 0;
 for (const f of files) {

@@ -636,27 +636,55 @@ cron answers 500 even when the other kinds were written.
 Re-ordered on 25 Aug 2026 after re-measuring. The order the queue had before
 rested on a number that does not mean what it looks like.
 
-1. **Andy decides: is published HTML cached at the edge.** The thing that kept
-   this parked was a worry about colliding with server-side personalisation.
-   There is none: no cookies, no geography, no user agent, no A/B or audience
-   feature anywhere in tg-sites. A published page is a pure function of
-   hostname, path, query and database state. The route currently says
-   `dynamic = 'force-dynamic'` and the response says
-   `private, no-cache, no-store`, which is the strongest refusal there is.
-   Recommended: `revalidate = 60`. One line, reversible in one line, no
-   invalidation matrix. The cost is that Publish means "live within a minute".
-   **Switch Web Analytics on first** — it is off, so there is no real-user TTFB
-   and every number in this doc is a harness floor.
+1. **Published HTML CANNOT be cached at the edge as things stand, and the note
+   that said it could is out of date.** Andy said yes to this on 20 Sep 2026 and
+   it was not done, because the premise had died under it. The old entry read
+   "no cookies, no geography, no user agent, no A/B or audience feature anywhere
+   in tg-sites", which was true when it was written on 25 August. Since then two
+   things shipped on that route:
 
-2. **The CSS work, whose shape item 1 decides.** Cached pages mean inlining
-   each page's own CSS, which removes a render-blocking round trip and is worth
-   more than halving the file. Dynamic pages mean an external core stylesheet
-   plus per-block files. Different builds; do not start before 1 is settled.
+   - **Audience targeting.** `readVisitorSignals` reads the cookie, the Vercel
+     geo header, `accept-language`, the user agent and the referer, and
+     `personaliseSections` drops sections and blocks per visitor. Cached, one
+     visitor's variant is served to everyone for the length of the window.
+   - **Visit counting.** `recordVisit` runs in `after()` on every render, and it
+     is what fills the Results board and the Search and AI visibility screen. A
+     cache HIT never renders, so it never counts. The site would look dead.
 
-3. **Let a block's Text size take a typed pixel value.** It stops at 2.5rem
-   while the toolbar takes 6 to 200px, which is what pushed a 100px hero onto
-   the words and silently disabled auto-resize. `normaliseTextSize` already
-   accepts a typed px on a block, so this is UI only.
+   `revalidate = 60` would therefore break two shipped features quietly, which is
+   the worst way for anything to break. Do not set it without one of these first:
+
+   - **Move visit counting into `middleware.ts`**, which runs on every request
+     whether or not the page was cached. Then cache only pages carrying no
+     audience rules, and leave the rest dynamic.
+   - **Or leave the page dynamic and cache the READS instead.** The round trips
+     are what cost the time, not the render: the page, the regions, the settings,
+     the nav and the fonts are all per tenant and path and change only on publish.
+     This keeps personalisation and counting exactly as they are.
+
+   **MEASURE BEFORE CHOOSING.** Every speed number in this doc is a harness
+   floor. Vercel's own Web Analytics needs a client script on client sites, which
+   costs the no-JavaScript property and raises a consent question on sites that
+   carry our cookie banner, so the cheaper honest answer is to time the render
+   server-side where we already are, next to `recordVisit`.
+
+2. **The CSS work, and its shape is now settled by the entry above.** Cached
+   pages would have meant inlining each page's own CSS. Dynamic pages mean an
+   external core stylesheet plus per-block files, and dynamic is where the route
+   has to stay until visit counting moves. So this one can start: 174KB of
+   stylesheet with 95 per cent of it unused on a simple page is the measurement
+   to beat.
+
+3. ~~**Let a block's Text size take a typed pixel value.**~~ ALREADY DONE, in
+   578cb9e7, and nobody crossed it off, so it sat here for weeks as work still to
+   do. Found on 20 Sep 2026 while answering "what is next". It had no browser
+   check either, which put it in exactly the category that caused the sweep that
+   day: built, believed, unverified. `verify-standalone` now proves the block
+   stores what was typed and that 900 is pulled back to 200. Note while reading
+   that check: a typed 96px draws at about 61px on the canvas because a heading is
+   fluid and the canvas frame is about 680px wide, nearer a tablet than the
+   desktop the Desktop button names. That is the parked canvas-fidelity question,
+   not this control.
 
 4. **Submit travelgenixsites.com to the Public Suffix List.** Free, and it
    matters more now the client subdomains are live: without it a script on one
@@ -675,13 +703,22 @@ rested on a number that does not mean what it looks like.
    `docs/tg-sites-copilot-review.md`. Slices 1 and 2 are live: the route, the
    ledger, the outline, the read tools, the panel in direction A, Build mode
    with proposals applied through the editor's own history, and the section
-   operations (add, move, remove). Next is the canvas preview decision (Andy's
-   brief asks for the draft on the canvas; the recommendation is to rely on
-   Apply plus one-step Undo instead, and he picks), and then slice 3, the bigger
-   asks: a page from a description, and a client's pasted notes turned into a
-   checklist. NOBODY HAS TAKEN A LIVE TURN YET: every part is tested against
-   fixtures and a scripted stream, and no real model answer has been through
-   it.
+   operations (add, move, remove).
+
+   **THE CANVAS PREVIEW IS DECIDED, 20 Sep 2026: Apply plus one-step Undo, and no
+   draft on the canvas.** Andy's brief asked for the draft to be drawn on the page
+   before applying; he took the recommendation instead, so there is nothing to
+   build for it. A proposal already lists what each change says now and what it
+   would say, Apply lands the lot as one commit on the editor's own history, and
+   the panel says "Applied. Undo puts it back, in one step." Drawing a draft on
+   the canvas would have meant a second rendering path for content that is not in
+   the page yet, which is the kind of thing that drifts from the real one and then
+   lies about what you are going to get.
+
+   Next is slice 3, the bigger asks: a page from a description, and a client's
+   pasted notes turned into a checklist. NOBODY HAS TAKEN A LIVE TURN YET: every
+   part is tested against fixtures and a scripted stream, and no real model answer
+   has been through it.
 
 10. ~~**`tools/verify-standalone.mjs` is ten expectations behind the app**~~
     DONE, 20 Sep 2026, and it was nineteen rather than ten. Reading them rather
@@ -778,6 +815,63 @@ new swatch is covered the day it is added.
 so from the day each landed the only thing that ran it was somebody typing its
 name. Both were green when they were added to the runner on 20 Sep 2026, which is
 luck rather than evidence.
+
+**A PUBLISHED PAGE IS FULLY SERVER-RENDERED, AND IT STILL SHIPS NEXT'S OWN
+RUNTIME.** Worth writing down because the test list handed to Andy on 19 Sep 2026
+said "there is no React runtime", and that half of it is not true. Checked in the
+build manifest on 20 Sep: `/site/[host]/[[...path]]/page` carries webpack, the
+framework chunk, main-app and its own route chunk, about 103 KB of first-load
+JavaScript, which is what the App Router ships for any page whether or not it has
+a single client component. What IS true, and is the property the project actually
+depends on, is that every word of the page is in the first response and the page
+reads and works with JavaScript off: no block hydrates to become useful, and the
+four behaviour scripts (motion, slideshow, theme toggle, no-right-click) are
+loaded only by the pages that ask for them.
+
+Removing the runtime is an architecture question, not a fix: it means rendering
+the site route outside the App Router. Not on the queue, and not something to
+start without deciding it is worth it.
+
+**THE PUBLISHED ROUTE IS NOT A PURE FUNCTION OF THE URL ANY MORE, WHATEVER AN
+OLDER NOTE SAYS** (20 Sep 2026). Two things landed on it after the caching note
+was written and neither announced itself as a caching decision. `readVisitorSignals`
+reads the cookie, the geo header, `accept-language`, the user agent and the
+referer, and `personaliseSections` drops sections and blocks per visitor; and
+`recordVisit` runs in `after()` on every render, which is what fills the Results
+board and the visibility screen. So `revalidate` on that route serves one
+visitor's variant to everyone and stops the counting dead, both silently. The
+module comment in `lib/site/visitor-signals.ts` even reasons from force-dynamic
+being permanent.
+
+The lesson generalises past caching: a feature that reads the request quietly
+takes an option off the table somewhere else, and nothing in the code says so.
+Before acting on a note in this file, check the claim still holds. The queue
+entry has the two ways to get the option back.
+
+**IT ALL RUNS IN CI NOW, ON PUSHES TO MAIN AS WELL AS ON PULL REQUESTS** (20 Sep
+2026, Andy: yes to both). Until that afternoon nothing automated ran any of it:
+`.github/workflows/test.yml` covers the widget suite at the repo root and stops
+there, and everything in the entries above rotted in that gap.
+
+`.github/workflows/tg-sites.yml` has two jobs. A fast one: typecheck, the unit
+suite, the block catalogue, and a guard that the suite has not silently shrunk
+below 4,000 tests. Then a browser one that installs Chromium, builds, and runs
+the whole chain. Both are path filtered, so a commit touching only the widget
+suite pays for neither.
+
+ON PUSH AND NOT ONLY ON PULL REQUESTS, deliberately. The convention in this repo
+is to commit straight to main and let Vercel deploy it, so a pull-request-only
+workflow would almost never run and would be reassurance rather than a check. The
+browser job is about twelve minutes and there are a few pushes on a busy day.
+
+`tools/chromium.mjs` came out of the same work. Every verifier carried the same
+hard-coded `/opt/pw-browsers/chromium-1194/...` path, which is this sandbox's and
+nobody else's, and an executablePath that does not exist fails with a message
+about a missing FILE rather than a missing browser, which is a confusing first
+five minutes for whoever meets it. It now prefers `TG_CHROMIUM`, then the sandbox
+copy if it is actually there, and otherwise hands back undefined, which is what
+tells Playwright to use the browser it downloaded itself. Same command, three
+right answers: here, on a laptop, and on a runner.
 
 **A PUBLISHED PAGE IS FULLY SERVER-RENDERED, AND IT STILL SHIPS NEXT'S OWN
 RUNTIME.** Worth writing down because the test list handed to Andy on 19 Sep 2026

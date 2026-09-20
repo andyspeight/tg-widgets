@@ -15,8 +15,9 @@
  */
 
 import { chromium } from 'playwright';
+import { chromiumPath } from './chromium.mjs';
 
-const CHROMIUM = process.env.TG_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const CHROMIUM = chromiumPath();
 const ORIGIN = 'https://tg-motion-probe.test';
 
 /* The two shapes the renderer emits: today's plain src, and A7's gated source. */
