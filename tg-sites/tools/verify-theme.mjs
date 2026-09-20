@@ -348,7 +348,19 @@ await check('a preview face never claims the real family name', async () => {
     document.fonts.forEach((face) => names.push(face.family));
     return names;
   });
-  const bare = families.filter((name) => !name.startsWith('TGP '));
+  /*
+   * QUOTES STRIPPED FIRST, and this cost a red CI run on 20 Sep 2026 to find.
+   * FontFace.family gives back what the @font-face rule said, and whether the
+   * quotes survive depends on the Chromium build: the one in this sandbox hands
+   * back TGP Playfair, a GitHub runner's hands back "TGP Playfair" with the quote
+   * marks in the string, so startsWith('TGP ') was false for every face and the
+   * check reported a list of names that plainly DID carry the prefix. The check
+   * two above this one already learned the same lesson about computed
+   * font-family; this one had not.
+   */
+  const bare = families
+    .map((name) => name.replace(/^["']|["']$/g, ''))
+    .filter((name) => !name.startsWith('TGP '));
   return bare.length === 0 ? true : `these are registered unprefixed: ${JSON.stringify(bare)}`;
 });
 

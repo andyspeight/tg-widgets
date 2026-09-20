@@ -5746,8 +5746,27 @@ await showPanels();
 
 /** Select the first section on the canvas and open a named group in the pane. */
 async function openSectionGroup(title) {
-  await page.locator('.ed-canvas-frame .tgs-section').first().click({ position: { x: 8, y: 8 } });
-  await page.waitForTimeout(400);
+  /*
+   * ONLY CLICK A SECTION THAT IS NOT ALREADY SELECTED (20 Sep 2026, found by the
+   * first CI run rather than by anything here).
+   *
+   * Selecting a section draws its actions toolbar, and on a section at the top of
+   * the page that toolbar FLIPS to sit inside the section's own top-left corner,
+   * which is exactly where this was clicking. Playwright refuses a click the
+   * toolbar would intercept, correctly, and waits thirty seconds before saying
+   * so. It passed here and failed on a runner because the flipped toolbar lands a
+   * few pixels differently when the fonts differ, so x:8 y:8 was just clear of it
+   * in one place and just under it in the other.
+   *
+   * Skipping the click when the section is already selected is also the truer
+   * thing to do: nobody clicks a section they have already selected.
+   */
+  const section = page.locator('.ed-canvas-frame .tgs-section').first();
+  const already = await section.evaluate((el) => el.classList.contains('is-selected')).catch(() => false);
+  if (!already) {
+    await section.click({ position: { x: 8, y: 8 } });
+    await page.waitForTimeout(400);
+  }
   const head = page.locator('.ed-group__head button', { hasText: title });
   if ((await head.count()) && (await head.first().getAttribute('aria-expanded')) === 'false') {
     await head.first().click();
