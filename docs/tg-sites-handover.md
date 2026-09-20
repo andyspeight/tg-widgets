@@ -686,20 +686,29 @@ rested on a number that does not mean what it looks like.
    desktop the Desktop button names. That is the parked canvas-fidelity question,
    not this control.
 
-4. **Submit travelgenixsites.com to the Public Suffix List.** Free, and it
+4. **Check the preset library's photographs still exist.** The first CI run on a
+   runner turned up two 404s from `images.unsplash.com`, which this sandbox never
+   sees because it has no route out and every such request fails at the proxy
+   instead. The editor suite ignores them now, deliberately and with a note, since
+   the harness is an offline fixture. But a 404 means a designed section is
+   carrying a photograph that has been taken down, and a client would see a hole
+   where the picture should be. Wants its own check over the image URLs in the
+   preset library rather than a browser suite: a plain fetch of each, run rarely.
+
+5. **Submit travelgenixsites.com to the Public Suffix List.** Free, and it
    matters more now the client subdomains are live: without it a script on one
    client's subdomain can set a cookie another client's subdomain receives.
 
-5. **Backfill Demo Travel.** 9 images, dimensions also wrong. Coastwise is done.
+6. **Backfill Demo Travel.** 9 images, dimensions also wrong. Coastwise is done.
 
-6. **Per-column `sizes`.** Worth less than it looks: at 390px on a DPR-3 phone
+7. **Per-column `sizes`.** Worth less than it looks: at 390px on a DPR-3 phone
    almost everything wants the 1600 candidate anyway.
 
-7. **Site-wide widgets panel, cookie consent first.** Compliance exposure.
+8. **Site-wide widgets panel, cookie consent first.** Compliance exposure.
 
-8. **Collections fed from an external source.**
+9. **Collections fed from an external source.**
 
-9. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
+10. **Luna Assist (the copilot brief, 16 Sep 2026).** Slices 1 to 6 in
    `docs/tg-sites-copilot-review.md`. Slices 1 and 2 are live: the route, the
    ledger, the outline, the read tools, the panel in direction A, Build mode
    with proposals applied through the editor's own history, and the section
@@ -720,7 +729,7 @@ rested on a number that does not mean what it looks like.
    part is tested against fixtures and a scripted stream, and no real model answer
    has been through it.
 
-10. ~~**`tools/verify-standalone.mjs` is ten expectations behind the app**~~
+11. ~~**`tools/verify-standalone.mjs` is ten expectations behind the app**~~
     DONE, 20 Sep 2026, and it was nineteen rather than ten. Reading them rather
     than bumping them was the right call: one was a real bug on live sites (the
     unnamed collection grid, below), six had been dead since 26 August, and four
