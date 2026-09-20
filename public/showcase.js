@@ -1,730 +1,511 @@
 /**
- * Travelgenix Showcase v1.0.0
- * Self-guided product showcase for a large touch screen.
+ * Travelgenix Showcase v2.0.0
+ * A walk through the product, for a touch screen.
  *
- * Reads window.TG_SHOWCASE (see showcase-data.js) and renders, per product,
- * a device stage with numbered hotspots over the real UI plus a feature rail.
- * Tapping a hotspot or a rail row opens the same detail sheet, so the screen
- * works whether someone pokes the phone or reads down the list.
+ * The first version put a caption, a device, a product summary, a chip row,
+ * a 39-item list and a QR code on screen at once, with ten pulsing markers
+ * on a phone the size of a postcard. It read as a debug overlay. This one
+ * shows the screen, spotlights the one part of it being described, and puts
+ * the words beside it. The list and the QR are one tap away.
  *
- * Built for a stand: no network call after load, no text entry, an attract
- * loop when nobody is touching it, and an idle reset so the next visitor
- * always starts from the top.
+ * Navigation is a single index across the whole product, so "next" always
+ * means the next thing worth seeing and changes screen when it needs to.
  *
- * CSP-clean: no inline handlers, no injected script, no eval. All screen
- * markup is authored in showcase-data.js and never built from input.
+ * Built for a stand: no network call after load, no text entry, it plays
+ * itself when left alone, and any touch hands control over.
+ *
+ * CSP-clean: no inline handlers, no injected script, no eval.
  */
 (function () {
   'use strict';
 
-  var VERSION = '1.1.0';
-  var IDLE_MS = 90000;          /* back to attract after 90s untouched */
+  var VERSION = '2.0.0';
+  var NARROW_PX = 820;        /* keep in step with showcase.css */
   var PHONE_W = 390, PHONE_H = 844;
-  var SPOT_MIN_GAP = 58;        /* px between hotspot dots before nudging */
-  var NARROW_PX = 700;          /* at or below this, the page scrolls (see showcase.css) */
-
-  /* The walkthrough. It plays itself, so the stand is never a still screen,
-     and a visitor can take it over at any point by touching anything. */
-  var TOUR_AUTOSTART_MS = 20000;  /* attract sits this long, then plays */
-  var TOUR_BASE_MS = 2400;        /* time to notice the dot moved */
-  var TOUR_PER_WORD_MS = 58;      /* plus reading time for the panel */
-  var TOUR_MIN_MS = 5200;
-  var TOUR_MAX_MS = 13000;
-  var TOUR_RESUME_MIN_MS = 1500;
+  var PIN_GAP = 42;
+  var IDLE_MS = 90000;
+  var ATTRACT_MS = 20000;
+  var DWELL_BASE = 2400, DWELL_PER_WORD = 58, DWELL_MIN = 5200, DWELL_MAX = 13000;
 
   var data = window.TG_SHOWCASE;
   if (!data || !data.products || !data.products.length) return;
 
-  var els = {};
-  var state = {
-    product: null, screen: 0, open: -1, seen: Object.create(null),
-    tour: { on: false, paused: false, i: 0, list: [], timer: null, dwellMs: 0, startedAt: 0, elapsed: 0 }
+  var el = {};
+  var st = {
+    product: null, list: [], i: -1, screen: -1,
+    seen: Object.create(null),
+    tour: { on: false, paused: false, timer: null, dwell: 0, at: 0, used: 0 }
   };
-  var idleTimer = null;
-  var attractTimer = null;
+  var idleTimer = null, attractTimer = null;
 
   /* ---------------------------------------------------------------- *
-   * Small helpers
+   * helpers
    * ---------------------------------------------------------------- */
 
-  function $(sel) { return document.querySelector(sel); }
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
+  function n(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
   }
-  function icon(paths, size) {
+  function svg(d) {
     var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     s.setAttribute('viewBox', '0 0 24 24');
     s.setAttribute('fill', 'none');
     s.setAttribute('stroke', 'currentColor');
-    s.setAttribute('stroke-width', '2');
+    s.setAttribute('stroke-width', '1.75');
     s.setAttribute('stroke-linecap', 'round');
     s.setAttribute('stroke-linejoin', 'round');
     s.setAttribute('aria-hidden', 'true');
-    if (size) { s.setAttribute('width', size); s.setAttribute('height', size); }
-    s.innerHTML = paths;
+    s.innerHTML = d;
     return s;
   }
-  var ICON_X = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
-  var ICON_HOME = '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>';
-  var ICON_PLAY = '<polygon points="7 4 19 12 7 20"/>';
-  var ICON_PAUSE = '<rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/>';
-  var ICON_SUN = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>';
+  var I = {
+    play:  '<polygon points="7 4 19 12 7 20"/>',
+    pause: '<rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/>',
+    next:  '<polyline points="9 6 15 12 9 18"/>',
+    back:  '<polyline points="15 6 9 12 15 18"/>',
+    list:  '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+    x:     '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    sun:   '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>',
+    home:  '<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>'
+  };
+  function narrow() { return window.innerWidth <= NARROW_PX; }
 
   /* ---------------------------------------------------------------- *
-   * Idle handling
+   * idle and attract
    * ---------------------------------------------------------------- */
 
   function poke() {
     if (idleTimer) clearTimeout(idleTimer);
-    /* A running walkthrough is the screen doing its job, not an idle one,
-       so it must not be swept back to the attract screen mid-sentence. */
-    if (state.tour.on && !state.tour.paused) { idleTimer = null; return; }
+    /* A playing walkthrough is the screen doing its job, not an idle one. */
+    if (st.tour.on && !st.tour.paused) { idleTimer = null; return; }
     idleTimer = setTimeout(toAttract, IDLE_MS);
   }
   function stopIdle() { if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; } }
 
-  /* A real touch, as opposed to the walkthrough moving itself. Anything the
-     visitor touches hands them control: the tour holds where it is rather
-     than pulling the screen out from under them. */
-  function onUserInput(e) {
-    if (e && e.target && e.target.closest && e.target.closest('[data-tour-ctl]')) {
-      /* The play and pause controls decide for themselves on click. */
-      poke();
-      return;
-    }
-    if (state.tour.on && !state.tour.paused) tourPause();
-    if (!els.attract.hidden) armAttract();
+  function onInput(e) {
+    if (e && e.target && e.target.closest && e.target.closest('[data-ctl]')) { poke(); return; }
+    if (st.tour.on && !st.tour.paused) tourPause();
+    if (!el.attract.hidden) armAttract();
     poke();
   }
-
-  /* ---------------------------------------------------------------- *
-   * The walkthrough
-   * ---------------------------------------------------------------- */
-
-  /* One flat playlist across every screen, so the tour walks the product
-     the way someone would explain it: screen by screen, dot by dot. */
-  function buildTourList(p) {
-    var list = [];
-    p.screens.forEach(function (sc, si) {
-      sc.hotspots.forEach(function (h, hi) { list.push({ screen: si, spot: hi, h: h }); });
-    });
-    return list;
-  }
-
-  /* Long panels get longer on screen. A fixed dwell either rushes the
-     detailed ones or leaves the short ones hanging. */
-  function dwellFor(h) {
-    var words = (h.title + ' ' + h.feature + ' ' + h.benefit + ' ' + (h.edge || '')).split(/\s+/).length;
-    return Math.max(TOUR_MIN_MS, Math.min(TOUR_MAX_MS, TOUR_BASE_MS + words * TOUR_PER_WORD_MS));
-  }
-
-  function tourStart(fromStep) {
-    var p = state.product;
-    if (!p) return;
-    var t = state.tour;
-    t.on = true;
-    t.paused = false;
-    t.list = buildTourList(p);
-    stopIdle();
-    tourChrome();
-    tourGo(typeof fromStep === 'number' ? fromStep : 0);
-  }
-
-  function tourStop() {
-    var t = state.tour;
-    if (t.timer) { clearTimeout(t.timer); t.timer = null; }
-    t.on = false; t.paused = false; t.i = 0; t.elapsed = 0;
-    tourChrome();
-  }
-
-  function tourPause() {
-    var t = state.tour;
-    if (!t.on || t.paused) return;
-    if (t.timer) { clearTimeout(t.timer); t.timer = null; }
-    t.elapsed += Date.now() - t.startedAt;
-    t.paused = true;
-    freezeBar();
-    tourChrome();
-    poke();
-  }
-
-  function tourResume() {
-    var t = state.tour;
-    /* Starting the tour after someone has been exploring picks up from the
-       hotspot they are on, rather than yanking them back to screen one. */
-    if (!t.on) { tourStart(tourIndexHere()); return; }
-    if (!t.paused) return;
-    t.paused = false;
-    stopIdle();
-    var remain = Math.max(TOUR_RESUME_MIN_MS, t.dwellMs - t.elapsed);
-    t.startedAt = Date.now();
-    t.timer = setTimeout(function () { tourGo(t.i + 1); }, remain);
-    runBar(remain, true);
-    tourChrome();
-  }
-
-  function tourIndexHere() {
-    var p = state.product;
-    if (!p) return 0;
-    var list = buildTourList(p);
-    var spot = state.open > -1 ? state.open : 0;
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].screen === state.screen && list[i].spot === spot) return i;
-    }
-    return 0;
-  }
-
-  function tourToggle() {
-    if (state.tour.on && !state.tour.paused) tourPause();
-    else tourResume();
-  }
-
-  function tourGo(i) {
-    var t = state.tour;
-    var p = state.product;
-    if (!p || !t.on) return;
-    if (i >= t.list.length) { tourFinish(); return; }
-
-    t.i = i;
-    t.elapsed = 0;
-    var item = t.list[i];
-
-    var open = function () {
-      openHotspot(item.spot, false);
-      t.dwellMs = dwellFor(item.h);
-      t.startedAt = Date.now();
-      if (t.timer) clearTimeout(t.timer);
-      t.timer = setTimeout(function () { tourGo(t.i + 1); }, t.dwellMs);
-      runBar(t.dwellMs, false);
-      tourChrome();
-      stopIdle();
-    };
-
-    if (state.screen !== item.screen) {
-      showScreen(item.screen);
-      /* showScreen measures on the next two frames; open on the one after. */
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () { requestAnimationFrame(open); });
-      });
-    } else {
-      open();
-    }
-  }
-
-  function tourFinish() {
-    tourStop();
-    toAttract();
-  }
-
-  /* The dwell bar. Transform only, so it stays off the layout path. */
-  function runBar(ms, continuing) {
-    var bar = els.tourBar;
-    if (!bar) return;
-    var from = continuing ? currentBarScale() : 0;
-    bar.style.transition = 'none';
-    bar.style.transform = 'scaleX(' + from + ')';
-    void bar.offsetWidth;
-    bar.style.transition = 'transform ' + ms + 'ms linear';
-    bar.style.transform = 'scaleX(1)';
-  }
-
-  function currentBarScale() {
-    var bar = els.tourBar;
-    if (!bar) return 0;
-    var m = window.getComputedStyle(bar).transform;
-    if (!m || m === 'none') return 0;
-    var parts = m.replace(/^matrix\(|\)$/g, '').split(',');
-    var v = parseFloat(parts[0]);
-    return isNaN(v) ? 0 : Math.max(0, Math.min(1, v));
-  }
-
-  function freezeBar() {
-    var bar = els.tourBar;
-    if (!bar) return;
-    var at = currentBarScale();
-    bar.style.transition = 'none';
-    bar.style.transform = 'scaleX(' + at + ')';
-  }
-
-  /* Keep every tour control saying the same thing. */
-  function tourChrome() {
-    var t = state.tour;
-    var playing = t.on && !t.paused;
-
-    if (els.tourBtn) {
-      els.tourBtn.hidden = !state.product;
-      els.tourBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
-      els.tourBtnLabel.textContent = playing ? 'Pause tour' : (t.on ? 'Resume tour' : 'Play tour');
-      els.tourBtnIcon.textContent = '';
-      els.tourBtnIcon.appendChild(icon(playing ? ICON_PAUSE : ICON_PLAY));
-      els.tourBtn.classList.toggle('is-live', playing);
-    }
-    if (els.tourRow) {
-      els.tourRow.hidden = !t.on;
-      els.tourStep.textContent = t.on
-        ? 'Step ' + (t.i + 1) + ' of ' + t.list.length + (t.paused ? ' \u00b7 paused' : '')
-        : '';
-      els.tourPause.textContent = playing ? 'Pause' : 'Resume';
-    }
-    if (els.sheet) els.sheet.classList.toggle('is-touring', t.on);
-  }
-
-  /* ---------------------------------------------------------------- *
-   * Attract
-   * ---------------------------------------------------------------- */
 
   function armAttract() {
     if (attractTimer) clearTimeout(attractTimer);
     attractTimer = setTimeout(function () {
-      if (!els.attract.hidden) { openProduct(data.products[0]); tourStart(0); }
-    }, TOUR_AUTOSTART_MS);
+      if (!el.attract.hidden) { open(data.products[0]); tourStart(0); }
+    }, ATTRACT_MS);
   }
   function disarmAttract() { if (attractTimer) { clearTimeout(attractTimer); attractTimer = null; } }
 
   function toAttract() {
-    stopIdle();
-    tourStop();
-    state.product = null; state.screen = 0; state.open = -1;
-    state.seen = Object.create(null);
-    els.view.hidden = true;
-    els.attract.hidden = false;
-    els.crumb.hidden = true;
-    els.home.hidden = true;
-    if (els.tourBtn) els.tourBtn.hidden = true;
+    stopIdle(); tourStop();
+    st.product = null; st.i = -1; st.screen = -1; st.seen = Object.create(null);
+    el.scene.hidden = true;
+    el.end.hidden = true;
+    el.contents.hidden = true;
+    el.attract.hidden = false;
+    el.crumb.hidden = true;
+    el.contentsBtn.hidden = true;
+    el.restartBtn.hidden = true;
     armAttract();
-    els.attractCta.focus({ preventScroll: true });
-  }
-
-  function buildAttract() {
-    var a = el('div', 'tg-attract');
-    a.appendChild(el('span', 'tg-attract-badge', 'Travelgenix'));
-    a.appendChild(el('h1', null, 'See what your clients would see'));
-    a.appendChild(el('p', null,
-      'Watch the walkthrough, or take the screen and go where you like. Every numbered dot ' +
-      'says what a feature does and why it matters.'));
-
-    var ctas = el('div', 'tg-attract-ctas');
-
-    var tour = el('button', 'tg-attract-cta');
-    tour.type = 'button';
-    tour.setAttribute('data-tour-ctl', '');
-    tour.appendChild(icon(ICON_PLAY));
-    tour.appendChild(document.createTextNode('Show me round'));
-    tour.addEventListener('click', function () { disarmAttract(); start(); tourStart(0); });
-    ctas.appendChild(tour);
-    els.attractCta = tour;
-
-    var self = el('button', 'tg-attract-cta tg-attract-cta--ghost');
-    self.type = 'button';
-    self.appendChild(document.createTextNode(
-      data.products.length === 1 ? 'Explore it myself' : 'Explore it myself'));
-    self.addEventListener('click', function () { disarmAttract(); start(); });
-    ctas.appendChild(self);
-
-    a.appendChild(ctas);
-    a.appendChild(el('span', 'tg-attract-tick',
-      'The tour plays on its own. Touch anything at any point to take over.'));
-    return a;
-  }
-
-  function start() {
-    openProduct(data.products[0]);
+    el.attractCta.focus({ preventScroll: true });
   }
 
   /* ---------------------------------------------------------------- *
-   * Product view
+   * opening a product
    * ---------------------------------------------------------------- */
 
-  function openProduct(p) {
-    state.product = p;
-    state.screen = 0;
-    state.open = -1;
-    state.seen = Object.create(null);
-
-    disarmAttract();
-    els.attract.hidden = true;
-    els.view.hidden = false;
-    els.crumb.hidden = false;
-    els.home.hidden = false;
-    if (els.tourBtn) els.tourBtn.hidden = false;
-    els.crumbName.textContent = p.name;
-    els.crumbMeta.textContent = p.category + ' · ' + p.status + ' ' + p.version;
-
-    els.eyebrow.textContent = p.category;
-    els.title.textContent = p.name;
-    els.lede.textContent = p.summary;
-
-    /* screen chips */
-    els.screens.textContent = '';
-    p.screens.forEach(function (s, i) {
-      var b = el('button', 'tg-screenbtn', s.name);
-      b.type = 'button';
-      b.setAttribute('role', 'tab');
-      b.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
-      b.addEventListener('click', function () { showScreen(i); });
-      els.screens.appendChild(b);
+  /* One flat walk across every screen. "Next" then always means the next
+     thing worth seeing, and changes screen by itself when it runs out. */
+  function flatten(p) {
+    var out = [];
+    p.screens.forEach(function (s, si) {
+      s.hotspots.forEach(function (h, hi) {
+        out.push({ screen: si, spot: hi, h: h, chapter: s.name });
+      });
     });
+    return out;
+  }
 
-    /* QR */
-    if (p.qr) {
-      els.qr.hidden = false;
-      els.qrImg.src = '/showcase/qr/' + p.id + '.svg';
-      els.qrImg.alt = 'QR code linking to ' + p.qr.url;
-      els.qrHead.textContent = p.qr.heading;
-      els.qrNote.textContent = p.qr.note;
+  function open(p) {
+    disarmAttract();
+    st.product = p;
+    st.list = flatten(p);
+    st.i = -1; st.screen = -1;
+    st.seen = Object.create(null);
+
+    el.attract.hidden = true;
+    el.end.hidden = true;
+    el.scene.hidden = false;
+    el.crumb.hidden = false;
+    el.contentsBtn.hidden = false;
+    el.restartBtn.hidden = false;
+    el.crumbName.textContent = p.name;
+    el.crumbMeta.textContent = p.category + ' · ' + p.status + ' ' + p.version;
+
+    goTo(0);
+    poke();
+  }
+
+  function goTo(i) {
+    var p = st.product;
+    if (!p) return;
+    if (i < 0) return;
+    if (i >= st.list.length) { finish(); return; }
+
+    st.i = i;
+    st.seen[i] = true;
+    var item = st.list[i];
+
+    if (st.screen !== item.screen) {
+      st.screen = item.screen;
+      el.screen.className = 'tg-screen lt';
+      el.screen.innerHTML = p.screens[item.screen].html;
+      el.screen.appendChild(el.spot);   /* innerHTML just removed it */
+      caption(item);
+      /* Two frames for the new markup to lay out, then measure it. */
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { layout(); paint(); });
+      });
     } else {
-      els.qr.hidden = true;
+      caption(item);
+      paint();
+    }
+    poke();
+  }
+
+  function caption(item) {
+    var h = item.h;
+    el.capChapter.textContent = item.chapter;
+    el.capCount.textContent = (st.i + 1) + ' of ' + st.list.length;
+    el.capTitle.textContent = h.title;
+
+    el.capBody.textContent = '';
+    var a = n('p');
+    a.appendChild(n('b', null, 'What it does. '));
+    a.appendChild(document.createTextNode(h.feature));
+    el.capBody.appendChild(a);
+    var b = n('p');
+    b.appendChild(n('b', null, 'Why it matters. '));
+    b.appendChild(document.createTextNode(h.benefit));
+    el.capBody.appendChild(b);
+    if (h.edge) {
+      var e = n('div', 'tg-edge');
+      e.appendChild(n('b', null, 'The edge. '));
+      e.appendChild(document.createTextNode(h.edge));
+      el.capBody.appendChild(e);
     }
 
-    showScreen(0);
-    tourChrome();
-    poke();
-  }
-
-  function showScreen(i) {
-    var p = state.product;
-    if (!p) return;
-    state.screen = i;
-    state.open = -1;
-    closeSheet();
-
-    Array.prototype.forEach.call(els.screens.children, function (b, n) {
-      b.setAttribute('aria-selected', n === i ? 'true' : 'false');
-    });
-
-    var s = p.screens[i];
-    els.phoneScreen.className = 'tg-phone-screen lt';
-    els.phoneScreen.innerHTML = s.html;
-
-    buildFeatureList(s);
-    /* Two frames: let the new markup lay out before measuring it. */
-    requestAnimationFrame(function () { requestAnimationFrame(layout); });
-    poke();
-  }
-
-  function seenKey(si, hi) { return si + ':' + hi; }
-
-  function buildFeatureList(s) {
-    els.feats.textContent = '';
-    els.feats.scrollTop = 0;
-
-    var lede = el('p', 'tg-feats-lede',
-      s.blurb + '  ' + s.hotspots.length + ' things to look at on this screen.');
-    els.feats.appendChild(lede);
-
-    s.hotspots.forEach(function (h, i) {
-      var row = el('button', 'tg-feat');
-      row.type = 'button';
-      row.setAttribute('aria-expanded', 'false');
-      var bodyId = 'tg-feat-body-' + i;
-      row.setAttribute('aria-controls', bodyId);
-      row.appendChild(el('span', 'tg-feat-n', String(i + 1)));
-      row.appendChild(el('span', 'tg-feat-t', h.title));
-
-      var body = el('div', 'tg-feat-body');
-      body.id = bodyId;
-      body.hidden = true;
-      body.appendChild(el('h4', null, 'What it does'));
-      body.appendChild(el('p', null, h.feature));
-      body.appendChild(el('h4', null, 'Why it matters'));
-      body.appendChild(el('p', null, h.benefit));
-      if (h.edge) {
-        var edge = el('div', 'tg-feat-edge');
-        edge.appendChild(el('b', null, 'The edge. '));
-        edge.appendChild(document.createTextNode(h.edge));
-        body.appendChild(edge);
-      }
-
-      row.addEventListener('click', function () {
-        toggle(i, true);
-      });
-
-      els.feats.appendChild(row);
-      els.feats.appendChild(body);
-    });
+    el.railFill.style.transform = 'scaleX(' + ((st.i + 1) / st.list.length) + ')';
+    el.back.disabled = st.i === 0;
+    el.nextLabel.textContent = st.i === st.list.length - 1 ? 'Finish' : 'Next';
+    el.capBody.scrollTop = 0;
   }
 
   /* ---------------------------------------------------------------- *
-   * Hotspots
+   * the device
    * ---------------------------------------------------------------- */
 
   function layout() {
-    var box = els.stage.getBoundingClientRect();
-    /* Read the real padding rather than assume it: the small-screen rule
-       changes it, and a hardcoded 24 quietly mis-sizes the fit. */
-    var cs = window.getComputedStyle(els.stage);
-    var padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var box = el.deck.getBoundingClientRect();
+    var avail = el.scene.getBoundingClientRect();
+    var cs = window.getComputedStyle(el.scene);
     var padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-    var availW = Math.max(120, box.width - padX);
-    var availH = Math.max(120, box.height - padY);
 
-    /* On a phone the stage is far shorter than the 844px canvas, so fitting
-       by height collapsed the mock to a third of size and put the app's 13px
-       text at about 4 real pixels. Below the breakpoint the page scrolls
-       instead, so the mock is sized by WIDTH only and never magnified past
-       1:1. Fitting by width also keeps this free of the circular dependency
-       the scrolling layout would otherwise create, where the stage height
-       comes from the very box we are measuring to compute. */
-    var narrow = window.innerWidth <= NARROW_PX;
-    var scale = narrow
-      ? Math.min(availW / PHONE_W, 1)
-      : Math.min(availW / PHONE_W, availH / PHONE_H);
+    var w = box.width || avail.width;
+    var h = avail.height - padY;
+    /* On a phone the page scrolls, so the device is sized by WIDTH only and
+       never magnified past 1:1. Sizing by height there is what shrank it to
+       a third of size in the first build. */
+    var scale = narrow()
+      ? Math.min(w / PHONE_W, 1)
+      /* Capped: a phone drawn 2x life size stops reading as a phone. */
+      : Math.min(w / PHONE_W, Math.max(240, h) / PHONE_H, 1.5);
+    st.scale = scale;
 
-    els.fitbox.style.width = (PHONE_W * scale) + 'px';
-    els.fitbox.style.height = (PHONE_H * scale) + 'px';
-    els.phone.style.transform = 'scale(' + scale + ')';
-    els.spots.style.width = (PHONE_W * scale) + 'px';
-    els.spots.style.height = (PHONE_H * scale) + 'px';
-
-    /* The phone is narrow and the stage is not, so when there is room the
-       detail panel sits BESIDE the phone. Covering the screen someone just
-       tapped is the one thing a hotspot demo must not do. */
-    var sideGap = (box.width - PHONE_W * scale) / 2 - 40;
-    if (!narrow && sideGap >= 300) {
-      els.stage.classList.add('is-side');
-      els.stage.style.setProperty('--sheet-w', Math.min(460, sideGap) + 'px');
-    } else {
-      els.stage.classList.remove('is-side');
-    }
-
-    placeSpots();
+    el.fit.style.width = (PHONE_W * scale) + 'px';
+    el.fit.style.height = (PHONE_H * scale) + 'px';
+    el.phone.style.transform = 'scale(' + scale + ')';
+    el.pins.style.width = (PHONE_W * scale) + 'px';
+    el.pins.style.height = (PHONE_H * scale) + 'px';
   }
 
-  function placeSpots() {
-    var p = state.product;
-    if (!p) return;
-    var s = p.screens[state.screen];
-    els.spots.textContent = '';
+  function anchorPoint(r, at, box) {
+    var x, y;
+    if (at === 'center') { x = r.left + r.width / 2; y = r.top + r.height / 2; }
+    else if (at === 'outside-right') { x = r.right + 26; y = r.top + r.height / 2; }
+    else if (at === 'outside-left') { x = r.left - 26; y = r.top + r.height / 2; }
+    else {
+      x = at.indexOf('left') > -1 ? r.left : r.right;
+      y = at.indexOf('bottom') > -1 ? r.bottom : r.top;
+    }
+    return { x: x - box.left, y: y - box.top };
+  }
 
-    var boxRect = els.fitbox.getBoundingClientRect();
+  /* Draw the markers for this screen and put the spotlight on the live one. */
+  function paint() {
+    var p = st.product;
+    if (!p || st.screen < 0) return;
+    var scr = p.screens[st.screen];
+    var here = st.list[st.i];
+    var box = el.fit.getBoundingClientRect();
+
+    el.pins.textContent = '';
     var placed = [];
-    var targets = els.spotTargets = [];
+    var liveTarget = null;
 
-    s.hotspots.forEach(function (h, i) {
-      var target = els.phoneScreen.querySelector('[data-hs="' + h.anchor + '"]');
-      if (!target) return;           /* anchor gone: the rail still carries it */
-      var r = target.getBoundingClientRect();
+    scr.hotspots.forEach(function (h, hi) {
+      var t = el.screen.querySelector('[data-hs="' + h.anchor + '"]');
+      if (!t) return;
+      var r = t.getBoundingClientRect();
       if (!r.width && !r.height) return;
 
-      /* The dot sits ON a corner of its element, half over and half off,
-         so it clearly belongs to that element without covering it. Per
-         hotspot `at` picks the corner; top-right is the default. */
-      var at = h.at || 'top-right';
-      var x, y;
-      if (at === 'center') {
-        x = r.left + r.width / 2;
-        y = r.top + r.height / 2;
-      } else if (at === 'outside-right' || at === 'outside-left') {
-        /* For a narrow centred element, a corner dot lands on the last
-           word. These put it clear of the box altogether. */
-        x = at === 'outside-left' ? r.left - 30 : r.right + 30;
-        y = r.top + r.height / 2;
-      } else {
-        x = at.indexOf('left') > -1 ? r.left : r.right;
-        y = at.indexOf('bottom') > -1 ? r.bottom : r.top;
-      }
-      x -= boxRect.left;
-      y -= boxRect.top;
+      var live = here && here.screen === st.screen && here.spot === hi;
+      if (live) liveTarget = { el: t, r: r };
 
-      /* Nudge apart anything that would sit on top of another dot. */
-      for (var pass = 0; pass < 12; pass++) {
+      var x, y;
+      if (live) {
+        /* Beside the hole, on whichever side has room. */
+        var cy = r.top + r.height / 2 - box.top;
+        var rightRoom = box.width - (r.right - box.left);
+        var leftRoom = r.left - box.left;
+        if (rightRoom >= 76) x = (r.right - box.left) + 38;
+        else if (leftRoom >= 76) x = (r.left - box.left) - 38;
+        else { x = (r.left + r.width / 2) - box.left; cy = (r.bottom - box.top) + 38; }
+        y = cy;
+      } else {
+        var pt = anchorPoint(r, h.at || 'top-right', box);
+        x = pt.x; y = pt.y;
+      }
+      for (var pass = 0; pass < 10; pass++) {
         var hit = false;
         for (var j = 0; j < placed.length; j++) {
           var dx = x - placed[j].x, dy = y - placed[j].y;
           var d = Math.sqrt(dx * dx + dy * dy);
-          if (d < SPOT_MIN_GAP) {
-            hit = true;
-            if (d < 0.5) { y += SPOT_MIN_GAP; }
-            else { y += (dy >= 0 ? 1 : -1) * (SPOT_MIN_GAP - d); }
-          }
+          if (d < PIN_GAP) { hit = true; y += (dy >= 0 ? 1 : -1) * (PIN_GAP - d) || PIN_GAP; }
         }
         if (!hit) break;
       }
-      x = Math.max(30, Math.min(boxRect.width - 30, x));
-      y = Math.max(30, Math.min(boxRect.height - 30, y));
+      x = Math.max(28, Math.min(box.width - 28, x));
+      y = Math.max(28, Math.min(box.height - 28, y));
       placed.push({ x: x, y: y });
 
-      var dot = el('button', 'tg-spot', String(i + 1));
-      dot.type = 'button';
-      dot.style.left = x + 'px';
-      dot.style.top = y + 'px';
-      dot.setAttribute('aria-label', 'Feature ' + (i + 1) + ': ' + h.title);
-      if (state.seen[seenKey(state.screen, i)]) dot.classList.add('is-seen');
-      if (state.open === i) dot.classList.add('is-open');
-      dot.addEventListener('click', function () { toggle(i); });
-      els.spots.appendChild(dot);
-      targets[i] = target;
+      /* The index in the whole walk, so tapping a marker lands you at the
+         right place in the sequence rather than a parallel numbering. */
+      var gi = globalIndex(st.screen, hi);
+      var pin = n('button', 'tg-pin', String(gi + 1));
+      pin.type = 'button';
+      pin.style.left = x + 'px';
+      pin.style.top = y + 'px';
+      pin.setAttribute('aria-label', h.title);
+      if (live) pin.classList.add('is-live');
+      else if (st.seen[gi]) pin.classList.add('is-done');
+      pin.addEventListener('click', function () { tourPause(); goTo(gi); });
+      el.pins.appendChild(pin);
     });
+
+    spotlight(liveTarget);
+    if (narrow()) requestAnimationFrame(revealLive);
   }
 
-  /* ---------------------------------------------------------------- *
-   * Detail sheet
-   * ---------------------------------------------------------------- */
-
-  function toggle(i, fromRail) {
-    if (state.open === i) { closeSheet(); state.open = -1; syncMarks(); poke(); return; }
-    openHotspot(i, fromRail);
+  function globalIndex(screen, spot) {
+    for (var i = 0; i < st.list.length; i++) {
+      if (st.list[i].screen === screen && st.list[i].spot === spot) return i;
+    }
+    return 0;
   }
 
-  function openHotspot(i, fromRail) {
-    var p = state.product;
-    if (!p) return;
-    var s = p.screens[state.screen];
-    var h = s.hotspots[i];
-    if (!h) return;
-
-    state.open = i;
-    state.seen[seenKey(state.screen, i)] = true;
-
-    els.sheetN.textContent = String(i + 1);
-    els.sheetTitle.textContent = h.title;
-
-    els.sheetBody.textContent = '';
-    els.sheetBody.appendChild(el('h4', null, 'What it does'));
-    els.sheetBody.appendChild(el('p', null, h.feature));
-    els.sheetBody.appendChild(el('h4', null, 'Why it matters'));
-    els.sheetBody.appendChild(el('p', null, h.benefit));
-    if (h.edge) {
-      var edge = el('div', 'tg-feat-edge');
-      edge.appendChild(el('b', null, 'The edge. '));
-      edge.appendChild(document.createTextNode(h.edge));
-      els.sheetBody.appendChild(edge);
-    }
-
-    els.prev.disabled = i === 0;
-    els.next.textContent = i === s.hotspots.length - 1 ? 'Done' : 'Next';
-    /* Tapping the list opens it in the list; tapping a dot opens the panel.
-       Showing the same words in both places at once just reads as a bug. */
-    els.sheet.hidden = !!fromRail;
-
-    var row = els.feats.querySelectorAll('.tg-feat')[i];
-    if (row) {
-      row.setAttribute('aria-expanded', fromRail ? 'true' : 'false');
-      var body = document.getElementById(row.getAttribute('aria-controls'));
-      if (body) body.hidden = !fromRail;
-      /* On the kiosk the rail is its own scroller, so bringing the row into
-         view moves only the rail. On a phone the rail sits BELOW the mock in
-         the page flow, so the same call scrolls the whole page down to the
-         row and takes the dot clean off the top of the screen. */
-      if (fromRail || window.innerWidth > NARROW_PX) row.scrollIntoView({ block: 'nearest' });
-    }
-    syncMarks();
-    if (!fromRail) {
-      /* Measure after the panel has been laid out, or its top is stale. */
-      requestAnimationFrame(function () { revealSpot(i); });
-    }
-    poke();
+  /* A hole in a scrim, sitting exactly on the element being described.
+     It lives inside the screen, which clips it to the rounded device, so its
+     coordinates are device pixels: divide the measured rect by the scale the
+     device is being drawn at. */
+  function spotlight(target) {
+    var s = el.spot;
+    if (!target) { s.classList.remove('is-on'); return; }
+    var sr = el.screen.getBoundingClientRect();
+    var k = st.scale || 1;
+    var pad = 7;
+    s.style.left = ((target.r.left - sr.left) / k - pad) + 'px';
+    s.style.top = ((target.r.top - sr.top) / k - pad) + 'px';
+    s.style.width = (target.r.width / k + pad * 2) + 'px';
+    s.style.height = (target.r.height / k + pad * 2) + 'px';
+    s.classList.add('is-on');
   }
 
-  /* On a phone the panel covers the lower half of the screen, so the dot it
-     describes has to be put in the strip that is still visible. Without this
-     you read an explanation with no idea which part of the screen it is
-     about, which is the whole point of a hotspot demo. */
-  function revealSpot(i) {
-    if (window.innerWidth > NARROW_PX) return;   /* the kiosk panel sits beside the phone */
-    var dot = els.spots.children[i];
-    if (!dot) return;
-    var barH = els.topbar ? els.topbar.getBoundingClientRect().height : 0;
-    var panelTop = els.sheet.hidden ? window.innerHeight : els.sheet.getBoundingClientRect().top;
-    var band = panelTop - barH;
-    if (band < 80) return;                       /* nowhere worth scrolling to */
-    var r = dot.getBoundingClientRect();
+  /* On a phone the caption covers the bottom, so the live marker has to be
+     put in the strip still visible above it. */
+  function revealLive() {
+    var pin = el.pins.querySelector('.tg-pin.is-live');
+    if (!pin) return;
+    var barH = el.topbar.getBoundingClientRect().height;
+    var capTop = el.caption.getBoundingClientRect().top;
+    var band = capTop - barH;
+    if (band < 90) return;
+    var r = pin.getBoundingClientRect();
     var delta = (r.top + r.height / 2) - (barH + band / 2);
-    if (Math.abs(delta) < 4) return;
+    if (Math.abs(delta) < 6) return;
     window.scrollBy({ top: delta, behavior: 'smooth' });
   }
 
-  function closeSheet() {
-    els.sheet.hidden = true;
-    Array.prototype.forEach.call(els.feats.querySelectorAll('.tg-feat'), function (r) {
-      r.setAttribute('aria-expanded', 'false');
-      var b = document.getElementById(r.getAttribute('aria-controls'));
-      if (b) b.hidden = true;
-    });
+  /* ---------------------------------------------------------------- *
+   * stepping and the walkthrough
+   * ---------------------------------------------------------------- */
+
+  function next() { goTo(st.i + 1); }
+  function prev() { if (st.i > 0) goTo(st.i - 1); }
+
+  function dwellFor(h) {
+    var words = (h.title + ' ' + h.feature + ' ' + h.benefit + ' ' + (h.edge || '')).split(/\s+/).length;
+    return Math.max(DWELL_MIN, Math.min(DWELL_MAX, DWELL_BASE + words * DWELL_PER_WORD));
   }
 
-  function syncMarks() {
-    (els.spotTargets || []).forEach(function (t, i) {
-      if (t) t.classList.toggle('tg-lit', state.open === i);
-    });
-    Array.prototype.forEach.call(els.spots.children, function (dot, i) {
-      dot.classList.toggle('is-open', state.open === i);
-      dot.classList.toggle('is-seen', !!state.seen[seenKey(state.screen, i)]);
-    });
-    Array.prototype.forEach.call(els.feats.querySelectorAll('.tg-feat'), function (r, i) {
-      r.classList.toggle('is-seen', !!state.seen[seenKey(state.screen, i)]);
-      r.classList.toggle('is-active', state.open === i);
-    });
+  function tourStart(from) {
+    if (!st.product) return;
+    st.tour.on = true; st.tour.paused = false;
+    stopIdle();
+    if (typeof from === 'number') goTo(from);
+    tourArm();
+    chrome();
+  }
+  function tourStop() {
+    if (st.tour.timer) { clearTimeout(st.tour.timer); st.tour.timer = null; }
+    st.tour.on = false; st.tour.paused = false; st.tour.used = 0;
+    chrome();
+  }
+  function tourPause() {
+    var t = st.tour;
+    if (!t.on || t.paused) return;
+    if (t.timer) { clearTimeout(t.timer); t.timer = null; }
+    t.used += Date.now() - t.at;
+    t.paused = true;
+    chrome(); poke();
+  }
+  function tourResume() {
+    var t = st.tour;
+    if (!t.on) { tourStart(); return; }
+    if (!t.paused) return;
+    t.paused = false; stopIdle();
+    var left = Math.max(1500, t.dwell - t.used);
+    t.at = Date.now();
+    t.timer = setTimeout(function () { tourNext(); }, left);
+    chrome();
+  }
+  function tourToggle() { (st.tour.on && !st.tour.paused) ? tourPause() : tourResume(); }
+
+  function tourArm() {
+    var t = st.tour;
+    var item = st.list[st.i];
+    if (!item) return;
+    t.dwell = dwellFor(item.h);
+    t.used = 0;
+    t.at = Date.now();
+    if (t.timer) clearTimeout(t.timer);
+    t.timer = setTimeout(function () { tourNext(); }, t.dwell);
+    stopIdle();
+  }
+  function tourNext() {
+    if (st.i + 1 >= st.list.length) { finish(); return; }
+    goTo(st.i + 1);
+    if (st.tour.on && !st.tour.paused) tourArm();
   }
 
-  function step(delta) {
-    var s = state.product.screens[state.screen];
-    var n = state.open + delta;
-    if (n < 0) return;
-    if (n >= s.hotspots.length) {
-      closeSheet(); state.open = -1; syncMarks();
-      if (state.screen < state.product.screens.length - 1) showScreen(state.screen + 1);
-      return;
-    }
-    openHotspot(n);
+  function chrome() {
+    var playing = st.tour.on && !st.tour.paused;
+    el.play.classList.toggle('is-live', playing);
+    el.play.setAttribute('aria-pressed', playing ? 'true' : 'false');
+    el.play.setAttribute('aria-label', playing ? 'Pause the walkthrough' : 'Play the walkthrough');
+    el.playIcon.textContent = '';
+    el.playIcon.appendChild(svg(playing ? I.pause : I.play));
   }
 
   /* ---------------------------------------------------------------- *
-   * Build the shell
+   * contents and the ending
+   * ---------------------------------------------------------------- */
+
+  function openContents() {
+    var p = st.product;
+    if (!p) return;
+    tourPause();
+    el.chapters.textContent = '';
+    p.screens.forEach(function (s, si) {
+      var first = globalIndex(si, 0);
+      var row = n('button', 'tg-chapter');
+      row.type = 'button';
+      if (si === st.screen) row.classList.add('is-here');
+      row.appendChild(n('span', 'tg-chapter-n', String(si + 1).padStart(2, '0')));
+      row.appendChild(n('span', 'tg-chapter-t', s.name));
+      row.appendChild(n('span', 'tg-chapter-c', s.hotspots.length + ' points'));
+      row.appendChild(n('span', 'tg-chapter-b', s.blurb));
+      row.addEventListener('click', function () { closeContents(); goTo(first); });
+      el.chapters.appendChild(row);
+    });
+    el.contents.hidden = false;
+    poke();
+  }
+  function closeContents() { el.contents.hidden = true; poke(); }
+
+  function finish() {
+    tourStop();
+    var p = st.product;
+    el.endTitle.textContent = 'That is ' + (p ? p.name : 'the product');
+    el.endBlurb.textContent = p && p.qr ? p.qr.note : '';
+    if (p && p.qr) {
+      el.qrImg.src = '/showcase/qr/' + p.id + '.svg';
+      el.qrImg.alt = 'QR code linking to ' + p.qr.url;
+      el.qrNote.textContent = p.qr.heading;
+      el.qr.hidden = false;
+    } else { el.qr.hidden = true; }
+    el.end.hidden = false;
+    poke();
+  }
+
+  /* ---------------------------------------------------------------- *
+   * shell
    * ---------------------------------------------------------------- */
 
   function build() {
-    var app = el('div', 'tg-app');
+    var app = n('div', 'tg-app');
 
     /* top bar */
-    var top = el('header', 'tg-topbar');
-    var logo = el('div', 'tg-logo');
+    var top = n('header', 'tg-topbar');
+    var brand = n('div', 'tg-brand');
+    var logo = n('div', 'tg-logo');
     logo.appendChild(document.createTextNode('Travel'));
-    logo.appendChild(el('span', null, 'genix'));
-    top.appendChild(logo);
-
-    var crumb = el('div', 'tg-crumb');
+    logo.appendChild(n('span', null, 'genix'));
+    brand.appendChild(logo);
+    var crumb = n('div', 'tg-crumb');
     crumb.hidden = true;
-    var cn = el('b', null, ''), cm = el('span', null, '');
-    crumb.appendChild(cn); crumb.appendChild(cm);
-    top.appendChild(crumb);
-    els.crumb = crumb; els.crumbName = cn; els.crumbMeta = cm;
+    var cn = n('b', null, ''), cm = n('span', null, '');
+    crumb.appendChild(cn); crumb.appendChild(document.createTextNode(' '));
+    crumb.appendChild(cm);
+    brand.appendChild(crumb);
+    top.appendChild(brand);
+    top.appendChild(n('div', 'tg-spacer'));
 
-    top.appendChild(el('div', 'tg-topbar-sp'));
+    var restart = n('button', 'tg-btn');
+    restart.type = 'button';
+    restart.hidden = true;
+    restart.setAttribute('aria-label', 'Start over');
+    restart.appendChild(svg(I.home));
+    restart.appendChild(n('span', 'tg-btn-label', 'Start over'));
+    restart.addEventListener('click', toAttract);
+    top.appendChild(restart);
 
-    var home = el('button', 'tg-iconbtn');
-    home.type = 'button';
-    home.hidden = true;
-    home.setAttribute('aria-label', 'Start over');
-    home.appendChild(icon(ICON_HOME));
-    /* Wrapped so the phone layout can drop the word and keep the bar to one
-       row; the icon plus aria-label still carries it. */
-    home.appendChild(el('span', 'tg-btn-label', 'Start over'));
-    home.addEventListener('click', toAttract);
-    top.appendChild(home);
-    els.home = home;
+    var contentsBtn = n('button', 'tg-btn');
+    contentsBtn.type = 'button';
+    contentsBtn.hidden = true;
+    contentsBtn.setAttribute('aria-label', 'Contents');
+    contentsBtn.appendChild(svg(I.list));
+    contentsBtn.appendChild(n('span', 'tg-btn-label', 'Contents'));
+    contentsBtn.addEventListener('click', openContents);
+    top.appendChild(contentsBtn);
 
-    var tourBtn = el('button', 'tg-iconbtn tg-tourbtn');
-    tourBtn.type = 'button';
-    tourBtn.hidden = true;
-    tourBtn.setAttribute('data-tour-ctl', '');
-    tourBtn.setAttribute('aria-pressed', 'false');
-    var tourIco = el('span', 'tg-tourbtn-ico');
-    tourIco.appendChild(icon(ICON_PLAY));
-    var tourLbl = el('span', 'tg-tour-label', 'Play tour');
-    tourBtn.appendChild(tourIco);
-    tourBtn.appendChild(tourLbl);
-    tourBtn.addEventListener('click', tourToggle);
-    top.appendChild(tourBtn);
-    els.tourBtn = tourBtn; els.tourBtnIcon = tourIco; els.tourBtnLabel = tourLbl;
-
-    var theme = el('button', 'tg-iconbtn');
+    var theme = n('button', 'tg-btn tg-btn--icon');
     theme.type = 'button';
     theme.setAttribute('aria-label', 'Switch between light and dark');
-    theme.appendChild(icon(ICON_SUN));
+    theme.appendChild(svg(I.sun));
     theme.addEventListener('click', function () {
       var dark = document.documentElement.getAttribute('data-theme') === 'dark';
       document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
@@ -732,124 +513,166 @@
     });
     top.appendChild(theme);
     app.appendChild(top);
-    els.topbar = top;
+    el.topbar = top; el.crumb = crumb; el.crumbName = cn; el.crumbMeta = cm;
+    el.contentsBtn = contentsBtn; el.restartBtn = restart;
 
-    /* main */
-    var main = el('main', 'tg-main');
+    /* scene */
+    var scene = n('main', 'tg-scene');
+    scene.hidden = true;
 
-    var attract = buildAttract();
-    main.appendChild(attract);
-    els.attract = attract;
+    var deck = n('div', 'tg-deck');
+    var fit = n('div', 'tg-fit');
+    var phone = n('div', 'tg-phone');
+    var screen = n('div', 'tg-screen lt');
+    phone.appendChild(screen);
+    phone.appendChild(n('div', 'tg-notch'));
+    fit.appendChild(phone);
+    var spot = n('div', 'tg-spotlight');
+    screen.appendChild(spot);
+    var pins = n('div', 'tg-pins');
+    fit.appendChild(pins);
+    deck.appendChild(fit);
+    scene.appendChild(deck);
+    el.deck = deck; el.fit = fit; el.phone = phone; el.screen = screen;
+    el.spot = spot; el.pins = pins;
 
-    var view = el('div', 'tg-view');
-    view.hidden = true;
+    var cap = n('section', 'tg-caption');
+    cap.setAttribute('aria-live', 'polite');
+    var meta = n('div', 'tg-cap-meta');
+    var chap = n('span', 'tg-cap-chapter', '');
+    var count = n('span', 'tg-cap-count', '');
+    meta.appendChild(chap);
+    meta.appendChild(n('i', null, '—'));
+    meta.appendChild(count);
+    cap.appendChild(meta);
+    var title = n('h1', 'tg-cap-title', '');
+    cap.appendChild(title);
+    var body = n('div', 'tg-cap-body');
+    cap.appendChild(body);
 
-    /* stage */
-    var stage = el('section', 'tg-stage');
-    stage.setAttribute('aria-label', 'Product screen with feature hotspots');
-    var fitbox = el('div', 'tg-fitbox');
-    var phone = el('div', 'tg-phone');
-    var notch = el('div', 'tg-phone-notch');
-    var pscreen = el('div', 'tg-phone-screen lt');
-    phone.appendChild(pscreen);
-    phone.appendChild(notch);
-    fitbox.appendChild(phone);
-    var spots = el('div', 'tg-spots');
-    fitbox.appendChild(spots);
-    stage.appendChild(fitbox);
+    var foot = n('div', 'tg-cap-foot');
+    var rail = n('div', 'tg-rail');
+    var fill = n('span', 'tg-rail-fill');
+    rail.appendChild(fill);
+    foot.appendChild(rail);
+    var ctrls = n('div', 'tg-controls');
+    var back = n('button', 'tg-ctl');
+    back.type = 'button';
+    back.setAttribute('aria-label', 'Previous');
+    back.appendChild(svg(I.back));
+    back.addEventListener('click', function () { tourPause(); prev(); });
+    var play = n('button', 'tg-ctl');
+    play.type = 'button';
+    play.setAttribute('data-ctl', '');
+    var playIcon = n('span', 'tg-play-ico');
+    playIcon.appendChild(svg(I.play));
+    play.appendChild(playIcon);
+    play.addEventListener('click', tourToggle);
+    var nextBtn = n('button', 'tg-next');
+    nextBtn.type = 'button';
+    var nextLabel = n('span', null, 'Next');
+    nextBtn.appendChild(nextLabel);
+    nextBtn.appendChild(svg(I.next));
+    nextBtn.addEventListener('click', function () { tourPause(); next(); });
+    ctrls.appendChild(back); ctrls.appendChild(play); ctrls.appendChild(nextBtn);
+    foot.appendChild(ctrls);
+    cap.appendChild(foot);
+    scene.appendChild(cap);
+    app.appendChild(scene);
 
-    /* sheet */
-    var sheet = el('div', 'tg-sheet');
+    el.scene = scene; el.caption = cap; el.capChapter = chap; el.capCount = count;
+    el.capTitle = title; el.capBody = body; el.railFill = fill;
+    el.back = back; el.play = play; el.playIcon = playIcon; el.nextLabel = nextLabel;
+
+    /* attract */
+    var att = n('div', 'tg-attract');
+    var attIn = n('div', 'tg-attract-in');
+    attIn.appendChild(n('span', 'tg-kicker', 'Travelgenix'));
+    attIn.appendChild(n('h1', null, 'See what your clients would see'));
+    attIn.appendChild(n('p', null,
+      'A walk through the app your travellers would carry, one feature at a time.'));
+    var ctas = n('div', 'tg-attract-ctas');
+    var goTour = n('button', 'tg-cta');
+    goTour.type = 'button';
+    goTour.setAttribute('data-ctl', '');
+    goTour.appendChild(svg(I.play));
+    goTour.appendChild(document.createTextNode('Show me round'));
+    goTour.addEventListener('click', function () { disarmAttract(); open(data.products[0]); tourStart(); });
+    var goSelf = n('button', 'tg-cta tg-cta--quiet');
+    goSelf.type = 'button';
+    goSelf.appendChild(document.createTextNode('Explore it myself'));
+    goSelf.addEventListener('click', function () { disarmAttract(); open(data.products[0]); });
+    ctas.appendChild(goTour); ctas.appendChild(goSelf);
+    attIn.appendChild(ctas);
+    attIn.appendChild(n('span', 'tg-attract-note',
+      'It plays on its own. Touch anything to take over.'));
+    att.appendChild(attIn);
+    app.appendChild(att);
+    el.attract = att; el.attractCta = goTour;
+
+    /* contents */
+    var sheet = n('div', 'tg-sheet');
     sheet.hidden = true;
-    sheet.setAttribute('role', 'dialog');
-    sheet.setAttribute('aria-live', 'polite');
-    var sh = el('div', 'tg-sheet-h');
-    var sn = el('span', 'tg-sheet-n', '1');
-    var st = el('h3', null, '');
-    var sx = el('button', 'tg-sheet-x');
-    sx.type = 'button';
-    sx.setAttribute('aria-label', 'Close');
-    sx.appendChild(icon(ICON_X));
-    sx.addEventListener('click', function () { closeSheet(); state.open = -1; syncMarks(); poke(); });
-    sh.appendChild(sn); sh.appendChild(st); sh.appendChild(sx);
-    sheet.appendChild(sh);
-    var sb = el('div', 'tg-sheet-b');
-    sheet.appendChild(sb);
-    var tourRow = el('div', 'tg-sheet-tour');
-    tourRow.hidden = true;
-    var tourStep = el('span', 'tg-tour-step', '');
-    var tourPause = el('button', 'tg-tour-pause', 'Pause');
-    tourPause.type = 'button';
-    tourPause.setAttribute('data-tour-ctl', '');
-    tourPause.addEventListener('click', tourToggle);
-    var barWrap = el('span', 'tg-tour-track');
-    var bar = el('span', 'tg-tour-bar');
-    barWrap.appendChild(bar);
-    tourRow.appendChild(tourStep);
-    tourRow.appendChild(tourPause);
-    tourRow.appendChild(barWrap);
-    sheet.appendChild(tourRow);
-    els.tourRow = tourRow; els.tourStep = tourStep;
-    els.tourPause = tourPause; els.tourBar = bar;
+    var sHead = n('div', 'tg-sheet-head');
+    sHead.appendChild(n('h2', null, 'Contents'));
+    var sClose = n('button', 'tg-btn tg-btn--icon');
+    sClose.type = 'button';
+    sClose.setAttribute('aria-label', 'Close contents');
+    sClose.appendChild(svg(I.x));
+    sClose.addEventListener('click', closeContents);
+    sHead.appendChild(sClose);
+    sheet.appendChild(sHead);
+    var sBody = n('div', 'tg-sheet-body');
+    var chapters = n('div', 'tg-chapters');
+    sBody.appendChild(chapters);
+    sheet.appendChild(sBody);
+    app.appendChild(sheet);
+    el.contents = sheet; el.chapters = chapters;
 
-    var nav = el('div', 'tg-sheet-nav');
-    var prev = el('button', null, 'Back');
-    prev.type = 'button';
-    prev.addEventListener('click', function () { step(-1); });
-    var next = el('button', 'tg-next', 'Next');
-    next.type = 'button';
-    next.addEventListener('click', function () { step(1); });
-    nav.appendChild(prev); nav.appendChild(next);
-    sheet.appendChild(nav);
-    stage.appendChild(sheet);
-
-    view.appendChild(stage);
-    els.stage = stage; els.fitbox = fitbox; els.phone = phone;
-    els.phoneScreen = pscreen; els.spots = spots;
-    els.sheet = sheet; els.sheetN = sn; els.sheetTitle = st; els.sheetBody = sb;
-    els.prev = prev; els.next = next;
-
-    /* rail */
-    var rail = el('aside', 'tg-rail');
-    var head = el('div', 'tg-rail-head');
-    var eyebrow = el('span', 'tg-eyebrow', '');
-    var h2 = el('h2', null, '');
-    var lede = el('p', null, '');
-    head.appendChild(eyebrow); head.appendChild(h2); head.appendChild(lede);
-    rail.appendChild(head);
-
-    var screens = el('div', 'tg-screens');
-    screens.setAttribute('role', 'tablist');
-    screens.setAttribute('aria-label', 'Screens');
-    rail.appendChild(screens);
-
-    var feats = el('div', 'tg-feats');
-    rail.appendChild(feats);
-
-    var qr = el('div', 'tg-qr');
-    var qrImg = el('img');
-    qrImg.width = 124; qrImg.height = 124; qrImg.decoding = 'async';
-    var qrC = el('div', 'tg-qr-c');
-    var qrHead = el('b', null, '');
-    var qrNote = el('p', null, '');
-    qrC.appendChild(qrHead); qrC.appendChild(qrNote);
-    qr.appendChild(qrImg); qr.appendChild(qrC);
-    rail.appendChild(qr);
-
-    view.appendChild(rail);
-    main.appendChild(view);
-    app.appendChild(main);
-
-    els.view = view; els.eyebrow = eyebrow; els.title = h2; els.lede = lede;
-    els.screens = screens; els.feats = feats;
-    els.qr = qr; els.qrImg = qrImg; els.qrHead = qrHead; els.qrNote = qrNote;
+    /* ending */
+    var end = n('div', 'tg-end');
+    end.hidden = true;
+    var endIn = n('div', 'tg-end-in');
+    var endCopy = n('div');
+    var endTitle = n('h2', null, '');
+    var endBlurb = n('p', null, '');
+    endCopy.appendChild(endTitle); endCopy.appendChild(endBlurb);
+    var endCtas = n('div', 'tg-end-ctas');
+    var again = n('button', 'tg-cta');
+    again.type = 'button';
+    again.appendChild(svg(I.play));
+    again.appendChild(document.createTextNode('Watch it again'));
+    again.addEventListener('click', function () { el.end.hidden = true; goTo(0); tourStart(); });
+    var browse = n('button', 'tg-cta tg-cta--quiet');
+    browse.type = 'button';
+    browse.appendChild(document.createTextNode('Back to the start'));
+    browse.addEventListener('click', function () { el.end.hidden = true; goTo(0); });
+    endCtas.appendChild(again); endCtas.appendChild(browse);
+    endCopy.appendChild(endCtas);
+    endIn.appendChild(endCopy);
+    var qr = n('div', 'tg-qr');
+    var qrImg = n('img');
+    qrImg.decoding = 'async';
+    var qrNote = n('span', null, '');
+    qr.appendChild(qrImg); qr.appendChild(qrNote);
+    endIn.appendChild(qr);
+    end.appendChild(endIn);
+    app.appendChild(end);
+    el.end = end; el.endTitle = endTitle; el.endBlurb = endBlurb;
+    el.qr = qr; el.qrImg = qrImg; el.qrNote = qrNote;
 
     document.body.appendChild(app);
   }
 
   /* ---------------------------------------------------------------- *
-   * Boot
+   * boot
    * ---------------------------------------------------------------- */
+
+  function relayout() {
+    if (el.scene.hidden) return;
+    layout();
+    paint();
+  }
 
   function init() {
     if (window.__TG_SHOWCASE_BOOTED__) return;
@@ -857,49 +680,47 @@
 
     build();
     toAttract();
+    chrome();
 
     if (window.ResizeObserver) {
-      new ResizeObserver(function () { if (!els.view.hidden) layout(); }).observe(els.stage);
+      var ro = new ResizeObserver(function () { relayout(); });
+      ro.observe(el.scene);
     }
-    window.addEventListener('orientationchange', function () { setTimeout(layout, 120); });
-    window.addEventListener('resize', function () { if (!els.view.hidden) layout(); });
+    window.addEventListener('resize', relayout);
+    window.addEventListener('orientationchange', function () { setTimeout(relayout, 150); });
 
-    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (evt) {
-      document.addEventListener(evt, onUserInput, { passive: true });
+    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
+      document.addEventListener(ev, onInput, { passive: true });
     });
 
     document.addEventListener('keydown', function (e) {
-      if (els.view.hidden) return;
-      if (e.key === 'Escape') { tourStop(); closeSheet(); state.open = -1; syncMarks(); }
+      if (!el.contents.hidden && e.key === 'Escape') { closeContents(); return; }
+      if (el.scene.hidden) return;
+      if (e.key === 'ArrowRight') { tourPause(); next(); }
+      else if (e.key === 'ArrowLeft') { tourPause(); prev(); }
       else if ((e.key === ' ' || e.key === 'Spacebar') &&
                !(e.target && e.target.closest && e.target.closest('button'))) {
-        /* Space is the play/pause key, except where it belongs to a focused
-           button, which would otherwise never be pressable by keyboard. */
-        e.preventDefault();
-        tourToggle();
+        e.preventDefault(); tourToggle();
       }
-      else if (e.key === 'ArrowRight' && state.open > -1) step(1);
-      else if (e.key === 'ArrowLeft' && state.open > -1) step(-1);
     });
 
     window.__TG_SHOWCASE_VERSION__ = VERSION;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 
   window.TGShowcase = {
     version: VERSION,
-    open: openProduct,
+    open: open,
     attract: toAttract,
+    goTo: goTo,
     playTour: tourStart,
     pauseTour: tourPause,
     stopTour: tourStop,
-    tourState: function () {
-      return { on: state.tour.on, paused: state.tour.paused, step: state.tour.i, of: state.tour.list.length };
+    state: function () {
+      return { i: st.i, of: st.list.length, screen: st.screen,
+               tour: { on: st.tour.on, paused: st.tour.paused } };
     }
   };
 })();
