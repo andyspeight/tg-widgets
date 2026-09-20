@@ -101,23 +101,6 @@ const EXPECTED_CONSOLE = [
   // the URL was right or wrong, so it tells us nothing; a real logic fault is a
   // pageerror or a non-network console message, neither of which matches this.
   'net::ERR_',
-  /*
-   * THE STOCK PHOTOGRAPHS THE SEED AND THE PRESETS CARRY (20 Sep 2026, found by
-   * the first CI run on a GitHub runner).
-   *
-   * This sandbox has no route to the internet, so every one of these fails at the
-   * proxy as net::ERR_ and is ignored by the line above. A runner DOES have a
-   * route, so two of them came back 404 and failed the suite with all 440 checks
-   * green. Whether a picture arrives is not what any check in this file is about:
-   * the harness is an offline fixture and the editor is what is being measured.
-   *
-   * WORTH SAYING WHAT THIS IS NOT COVERING, though, because ignoring it here is
-   * not the same as it being fine. A 404 means a preset or the seed page is
-   * carrying a photograph that no longer exists, which a client would see as a
-   * hole in a designed section. That deserves its own check, over the image URLs
-   * in the preset library rather than over the editor, and it is on the queue.
-   */
-  'images.unsplash.com',
 ];
 
 const errors = [];
@@ -126,6 +109,30 @@ page.on('console', (message) => {
   const where = message.location()?.url ?? '';
   const text = message.text();
   if (EXPECTED_CONSOLE.some((sig) => where.includes(sig) || text.includes(sig))) return;
+
+  /*
+   * ANYTHING FETCHED FROM THE INTERNET, whatever it answers (20 Sep 2026).
+   *
+   * The harness is a single file opened from file:// with no backend and no
+   * fixtures behind any address. The seed page and the designed presets carry
+   * stock photographs, and the widget checks use made-up ids like tgw_verify123
+   * on purpose, so a machine with no route out fails those requests at the proxy
+   * (net::ERR_, ignored above) and a machine WITH a route gets a 404 from a real
+   * server instead. Neither answer says anything about the editor, which is what
+   * every check in this file is about.
+   *
+   * Listing the hosts one at a time was the first attempt and it is a losing
+   * game: unsplash on Monday, the widget API on Tuesday, whatever a new preset
+   * reaches for on Wednesday. So the rule is the category. Our own code runs from
+   * file://, so a fault in it can never wear an http location, and a thrown
+   * exception arrives as pageerror, which is never ignored.
+   *
+   * WHAT THIS DELIBERATELY STOPS COVERING is whether those pictures still exist.
+   * A 404 from a preset's photograph means a designed section has a hole in it
+   * where a client expects a picture. That wants its own check over the preset
+   * library's image URLs, and it is queue item 4 in the handover.
+   */
+  if (/^https?:\/\//.test(where)) return;
   /*
    * THE ADDRESS, NOT ONLY THE MESSAGE. "Failed to load resource: the server
    * responded with a status of 404" names nothing, and that is what the first CI
