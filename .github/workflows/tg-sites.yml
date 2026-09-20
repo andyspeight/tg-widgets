@@ -55,9 +55,20 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: tg-sites/package-lock.json
+          # Keyed on package.json, not the lockfile, because tg-sites/.gitignore
+          # deliberately does not commit one. See the install note below.
+          cache-dependency-path: tg-sites/package.json
 
-      - run: npm ci --no-audit --no-fund
+      # npm install rather than npm ci, and the reason is worth knowing rather
+      # than copying: tg-sites/.gitignore excludes package-lock.json, so there is
+      # no lockfile in the checkout for ci to install from. The same reasoning
+      # test.yml already carries at the repo root.
+      #
+      # The cost is that an install here is not reproducible: a caret range can
+      # pick up a new upstream release and turn this red without a commit having
+      # changed anything. If that starts happening, commit the lockfile rather
+      # than pinning versions by hand. That is Andy's call, not a quiet fix.
+      - run: npm install --no-audit --no-fund
 
       - name: Typecheck
         run: npx tsc --noEmit
@@ -98,9 +109,20 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: tg-sites/package-lock.json
+          # Keyed on package.json, not the lockfile, because tg-sites/.gitignore
+          # deliberately does not commit one. See the install note below.
+          cache-dependency-path: tg-sites/package.json
 
-      - run: npm ci --no-audit --no-fund
+      # npm install rather than npm ci, and the reason is worth knowing rather
+      # than copying: tg-sites/.gitignore excludes package-lock.json, so there is
+      # no lockfile in the checkout for ci to install from. The same reasoning
+      # test.yml already carries at the repo root.
+      #
+      # The cost is that an install here is not reproducible: a caret range can
+      # pick up a new upstream release and turn this red without a commit having
+      # changed anything. If that starts happening, commit the lockfile rather
+      # than pinning versions by hand. That is Andy's call, not a quiet fix.
+      - run: npm install --no-audit --no-fund
 
       # No TG_CHROMIUM is set, and that is deliberate: tools/chromium.mjs falls
       # through to Playwright's own download when this image has no browser of
