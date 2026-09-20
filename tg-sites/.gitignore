@@ -3,3 +3,13 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 standalone/out/
+
+# The lockfile IS committed for this project, against the repo-wide rule in the
+# root .gitignore (20 Sep 2026). Not a preference: npm 10 cannot build this
+# dependency tree from package.json alone. It dies with "Cannot read properties
+# of null (reading 'edgesOut')" partway through vitest's peer set, which is an
+# arborist bug rather than anything wrong here, and it happens on a CI runner and
+# on a laptop alike. So without this file there is no install, and without an
+# install there is no CI. It also makes every install reproducible, which is what
+# a check is supposed to be.
+!package-lock.json
