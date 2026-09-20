@@ -683,12 +683,12 @@ rested on a number that does not mean what it looks like.
    fixtures and a scripted stream, and no real model answer has been through
    it.
 
-10. **`tools/verify-standalone.mjs` is ten expectations behind the app** (17 Sep
-    2026). The chain it sits in could not run for weeks, so the editor gained a
-    block, a "My sections" tab and more page designs without it noticing. Each
-    failure needs reading rather than bumping: "54 blocks where 53 were expected"
-    is exactly the shape a staff-only block leaking into a client picker would
-    take, and the point of the check is to tell those apart.
+10. ~~**`tools/verify-standalone.mjs` is ten expectations behind the app**~~
+    DONE, 20 Sep 2026, and it was nineteen rather than ten. Reading them rather
+    than bumping them was the right call: one was a real bug on live sites (the
+    unnamed collection grid, below), six had been dead since 26 August, and four
+    were mine, from the rem-to-em move the day before. See the sweep in "Things
+    that will bite you".
 
 Also parked: option A on canvas fidelity, a counter-scaled canvas. Read the note
 in `components/editor/Canvas.tsx` around line 1041 before touching it.
@@ -696,6 +696,111 @@ in `components/editor/Canvas.tsx` around line 1041 before touching it.
 ## Things that will bite you
 
 Hard-won, none of it obvious from the code.
+
+**A CHAIN THAT STOPS AT THE FIRST FAILURE HIDES EVERYTHING BEHIND IT** (Andy,
+20 Sep 2026, after the first thing he tested did not work: "pls go through and
+make sure everything works as it should"). `verify:browser` was one shell line
+with twelve commands joined by `&&`. On the morning of the 20th the eighth of
+them, `verify-destination`, was throwing before it opened a browser, so the four
+suites after it had not run in weeks and the one line that was printed looked
+like an ordinary red test rather than a chain that had stopped.
+
+What it was throwing on says something on its own. The destination fixture wrapped
+its facts in a `__ref` key, which is the shape that design used before the facts
+moved out of the item's own `data` and onto their own columns. The fixture was
+never moved with it, so the check went from proving something to proving nothing,
+silently, on a day nobody was looking at it.
+
+`npm run verify:browser` now goes through `tools/verify-all.mjs`, which runs every
+suite whatever the ones before it did, prints each suite's own summary, names any
+suite that died before it could report, and exits non-zero if any of them failed.
+The two builds at the front still stop the run, because a stale bundle makes
+everything after it meaningless.
+
+**WHAT WAS BEHIND IT**, all found on 20 Sep 2026 once the chain ran end to end:
+
+- A card grid switched to "From a collection" but not yet pointed at one went on
+  drawing the cards somebody had typed into it. See the next entry: that one is a
+  real bug and it reached published sites.
+- Six collection checks had been dead since 26 August, looking for a pair of
+  buttons that had become a dropdown the day Andy said "make it a dropdown, as you
+  can't read them as they are all truncated at the moment".
+- The block picker count was 53 against a library of 54: the Loop block landed on
+  10 September and the tripwire fired into a chain nobody was running.
+- The picker's tab list had never seen "My sections"; the Add page composer had
+  never seen the four destination starts; the settings screen had never seen
+  "Floating widgets" or "Forms".
+- Four were mine, from the previous afternoon: the size checks named the scale's
+  VALUES (`2rem`, `1.25rem`, `0.75rem`) and the move to em left them selecting
+  nothing, which Playwright reports as a thirty-second timeout on a locator with
+  no hint that the product is fine.
+
+**SO DRIVE A CONTROL BY ITS LABEL, NOT BY THE VALUE IT WRITES.** What a person
+picks is a label. A check that names the value is a check that breaks the day the
+value changes, and it breaks in the way that looks like the product broke. Where
+the value matters to the assertion, carry back whatever the label turned out to
+select: `const [chosen] = await select.selectOption({ label: 'Huge' })`.
+
+**A GRID FED FROM A COLLECTION NOBODY HAS NAMED MUST NOT DRAW THE OLD CARDS**
+(20 Sep 2026). Switch a Cards block from "Typed in here" to "From a collection"
+and, until you typed a collection name, nothing happened: the three cards that
+were already there stayed exactly where they were. `listingIn` had always said
+what should happen instead, in its own comment, "a client who picked the source
+and has not chosen a collection yet gets the placeholder rather than a silent
+empty grid", and the renderer never did it, because its placeholder branch first
+asked whether there were any cards to draw and there were: the old ones.
+
+The editor half of that is an annoyance. The published half is not. A client who
+moved a grid onto their blog, did not finish, and hit publish had three sample
+cards about Greece, Italy and Portugal on their live site, under a heading that
+promised their latest posts. The guard now comes first and does not ask what is in
+the block, in both the editor and the published page, and the typed-in cards stay
+stored so switching the source back brings them straight out again.
+
+**SAY WHAT LANDED, NOT WHAT WAS PLANNED.** "Write this page" reported the SIZE OF
+THE PHOTO PLAN as the number of pictures it had found. `fillPlannedPhotos` returns
+on its second line when Pexels or the blob store is not configured, so a site
+without them was told "six pictures asked for" and got none. It returns the count
+it actually applied now. Any best-effort step that reports to a person has this
+shape of bug available to it.
+
+**EVERY VALUE A MENU CAN PRODUCE HAS TO SURVIVE THE GATE IT WILL BE SAVED
+THROUGH.** A value `sanitiseStyle` does not recognise is DROPPED on the next save,
+with no error. So a control can apply correctly, show the right thing, and lose it
+the moment somebody saves. `tests/content.test.ts` now walks every size, font,
+colour swatch, highlight, line spacing and letter spacing the menus offer and puts
+each one through the gate it will be saved through, and checks that no two of them
+collapse to the same stored value. It is written over the menus themselves, so a
+new swatch is covered the day it is added.
+
+**TWO CHECKS WERE NEVER IN THE CHAIN AT ALL.** `verify-overlap-css` and
+`verify-slideshow` were written, committed, and never added to `verify:browser`,
+so from the day each landed the only thing that ran it was somebody typing its
+name. Both were green when they were added to the runner on 20 Sep 2026, which is
+luck rather than evidence.
+
+**A PUBLISHED PAGE IS FULLY SERVER-RENDERED, AND IT STILL SHIPS NEXT'S OWN
+RUNTIME.** Worth writing down because the test list handed to Andy on 19 Sep 2026
+said "there is no React runtime", and that half of it is not true. Checked in the
+build manifest on 20 Sep: `/site/[host]/[[...path]]/page` carries webpack, the
+framework chunk, main-app and its own route chunk, about 103 KB of first-load
+JavaScript, which is what the App Router ships for any page whether or not it has
+a single client component. What IS true, and is the property the project actually
+depends on, is that every word of the page is in the first response and the page
+reads and works with JavaScript off: no block hydrates to become useful, and the
+four behaviour scripts (motion, slideshow, theme toggle, no-right-click) are
+loaded only by the pages that ask for them.
+
+Removing the runtime is an architecture question, not a fix: it means rendering
+the site route outside the App Router. Not on the queue, and not something to
+start without deciding it is worth it.
+
+**AND NOTHING AUTOMATED RUNS ANY OF THIS.** `.github/workflows/test.yml` runs
+`node --test test/*.test.mjs`, which is the widget suite at the repo root. tg-sites
+has no CI at all: its typecheck, its 4,300 unit tests and its browser chain run
+when somebody remembers. Everything in this entry rotted in that gap. Worth
+deciding on, since a twelve-minute browser suite on every push is a real cost and
+Andy's call rather than one to make quietly.
 
 **"WRITE THIS PAGE": THE BRIEF BOX FOR A PAGE THAT ALREADY EXISTS** (Andy,
 17 Sep 2026: "there is nowhere for me to tell the AI what the page is about and
@@ -803,11 +908,14 @@ real module's exports (`generateImageAction`, `listingCardsAction`,
 add its swap AND its export", and `tests/settings.test.ts` fails on both in a
 millisecond rather than leaving it to a build nobody runs.
 
-`tools/verify-standalone.mjs` is a separate matter: it runs again, and ten of its
-expectations are now out of date because the app moved on while it was dead (54
-blocks where it expects 53, a "My sections" tab it has never seen, more page
-designs than it counts). Those are stale numbers, not breakage, and they are on
-the queue.
+`tools/verify-standalone.mjs` is a separate matter: it runs again, and on 17 Sep
+2026 ten of its expectations looked out of date because the app had moved on
+while it was dead. THAT READING WAS WRONG ON BOTH COUNTS and it is worth leaving
+the correction here rather than quietly fixing the sentence. There were nineteen,
+not ten; they were not all stale numbers; and they were not all somebody else's.
+One was a real fault that reached published client sites, four were caused by the
+size-scale change made that same afternoon, and six had been dead since August.
+The sweep on 20 Sep 2026, below, has the whole list.
 
 **A RULE THAT READS A TOKEN THE THEME HAS NOT GOT DRAWS NOTHING, NOT THE
 FALLBACK.** This is a hole in the whole stylesheet, found on 25 Aug 2026 in the

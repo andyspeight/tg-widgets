@@ -149,6 +149,28 @@ describe('applyPhoto', () => {
       applyPhoto(sections, { query: 'q', section: 0, place: { kind: 'image', row: 9, column: 0, block: 0 } }, 'https://cdn.test/a.jpg'),
     ).not.toThrow();
   });
+
+  /*
+   * AND SAYS WHICH IT DID, because somebody is told the number. "Write this page"
+   * reports how many pictures came back, and it used to report the size of the
+   * PLAN: a site with no photo library was told six and got none (20 Sep 2026).
+   * The count is only true if a miss is distinguishable from a hit here.
+   */
+  it('says whether the picture landed', () => {
+    const sections = [built('text-intro')];
+    expect(
+      applyPhoto(sections, { query: 'q', section: 0, place: { kind: 'background' } }, 'https://cdn.test/a.jpg'),
+      'a background that landed reported a miss',
+    ).toBe(true);
+    expect(
+      applyPhoto(sections, { query: 'q', section: 4, place: { kind: 'background' } }, 'https://cdn.test/a.jpg'),
+      'a section that does not exist reported a hit',
+    ).toBe(false);
+    expect(
+      applyPhoto(sections, { query: 'q', section: 0, place: { kind: 'image', row: 9, column: 0, block: 0 } }, 'https://cdn.test/a.jpg'),
+      'a block that does not exist reported a hit',
+    ).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

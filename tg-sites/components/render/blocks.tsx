@@ -1775,7 +1775,31 @@ export function CardsBlock({
   const collection = str(props, 'collection').trim();
 
   /*
-   * ONLY WHEN THERE IS GENUINELY NOTHING TO DRAW.
+   * FED FROM A COLLECTION, BUT NOBODY HAS SAID WHICH, and the cards somebody
+   * typed in before they switched the source are not the answer (20 Sep 2026).
+   *
+   * listingIn() returns null for exactly this block, and says why in its own
+   * comment: "a client who picked the source and has not chosen a collection yet
+   * gets the placeholder rather than a silent empty grid". It never got the
+   * placeholder. The branch below is gated on there being no cards to draw, and a
+   * grid that has just been switched over still holds its three typed-in cards,
+   * so the count was three and the switch appeared to do nothing at all. On a
+   * PUBLISHED page it was worse than nothing: a client who moved a grid onto
+   * their blog, did not finish, and published, put three sample cards about
+   * Greece, Italy and Portugal on their live site under a heading that promised
+   * their latest posts.
+   *
+   * So this comes first, asks nothing about what is in the block, and holds in
+   * the editor and on the published page alike. Nothing is thrown away: the
+   * typed-in cards stay stored, and switching the source back brings them
+   * straight out again.
+   */
+  if (fromCollection && !collection) {
+    return <div className="tgs-placeholder">Say which collection these come from.</div>;
+  }
+
+  /*
+   * AND WHILE EDITING, A COLLECTION THAT IS NAMED BUT EMPTY.
    *
    * This used to fire for every collection grid on the canvas, so an agent who
    * published a post and went to look at the page it belonged on was told "the
@@ -1785,17 +1809,15 @@ export function CardsBlock({
    *
    * The canvas now resolves the same cards the published page does and fills a
    * copy of the tree at the point it draws (see components/editor/Canvas.tsx),
-   * so by the time this runs there are real items. What is left here is the
-   * honest empty state: a block nobody has pointed at a collection yet, and a
-   * collection with nothing published in it.
+   * so by the time this runs there are real items. What is left here is the one
+   * honest empty state it cannot resolve: a collection with nothing published in
+   * it yet.
    */
   if (editing && fromCollection && cards.length === 0) {
     const count = clamp(props.count, 1, 60, 6);
     return (
       <div className="tgs-placeholder">
-        {collection
-          ? `Nothing published in "${collection}" yet. The newest ${count} will show here.`
-          : 'Say which collection these come from.'}
+        {`Nothing published in "${collection}" yet. The newest ${count} will show here.`}
       </div>
     );
   }

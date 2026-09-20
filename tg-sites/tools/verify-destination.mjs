@@ -80,22 +80,32 @@ const THEMES = {
   'a real tenant theme (sparse tokens)': ['--tgs-accent:#c8452c', '--tgs-border-strong:#c1c0bc', '--tgs-text:#14202b'].join(';'),
 };
 
-/* A country with all three seasons in its year, so every colour is on the page. */
+/*
+ * A country with all three seasons in its year, so every colour is on the page.
+ *
+ * THE FACTS, FLAT, WHICH IS THE SHAPE referenceFacts TAKES. This fixture used to
+ * wrap them in a `__ref` key, because an early version stored the corpus payload
+ * inside the item's own `data` under that name. That design is gone (the reason
+ * is written at the top of lib/content/reference.ts: `data` is parsed through a
+ * zod object that strips keys it does not know, so the facts would have been
+ * deleted the first time a client fixed a typo in their own copy). The fixture
+ * was never moved with it, so from the day the shape changed this check did not
+ * run at all: it threw "the fixture did not validate" before the browser opened,
+ * and `npm run verify:browser` stopped at that line every time. Found 20 Sep 2026.
+ */
 const GREECE = {
-  __ref: {
-    kind: 'country',
-    sourceId: 'recVerify',
-    flightTime: '3h 45m',
-    timeZone: 'GMT +2',
-    currency: 'Euro (€)',
-    language: 'Greek',
-    voltage: '230V · Type F',
-    bestFor: ['Couples', 'Island hopping'],
-    climate: {
-      temps: [13, 13, 15, 19, 24, 29, 32, 32, 28, 23, 18, 15],
-      rainfall: [62, 50, 44, 26, 15, 6, 4, 6, 13, 52, 68, 78],
-      season: ['off', 'off', 'shoulder', 'shoulder', 'best', 'best', 'best', 'best', 'best', 'shoulder', 'off', 'off'],
-    },
+  kind: 'country',
+  sourceId: 'recVerify',
+  flightTime: '3h 45m',
+  timeZone: 'GMT +2',
+  currency: 'Euro (€)',
+  language: 'Greek',
+  voltage: '230V · Type F',
+  bestFor: ['Couples', 'Island hopping'],
+  climate: {
+    temps: [13, 13, 15, 19, 24, 29, 32, 32, 28, 23, 18, 15],
+    rainfall: [62, 50, 44, 26, 15, 6, 4, 6, 13, 52, 68, 78],
+    season: ['off', 'off', 'shoulder', 'shoulder', 'best', 'best', 'best', 'best', 'best', 'shoulder', 'off', 'off'],
   },
 };
 

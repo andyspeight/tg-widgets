@@ -60,7 +60,17 @@ import {
 import { createBlock } from '../lib/content/factory';
 import { sanitiseHtml, safeUrl } from '../lib/content/sanitise';
 import { sanitiseEmbedHtml } from '../lib/content/sanitise-embed';
-import { FONT_SIZES, sanitiseStyle } from '../lib/content/styles';
+import {
+  COLOUR_SWATCHES,
+  FONT_CHOICES,
+  FONT_SIZES,
+  HIGHLIGHT_SWATCHES,
+  LETTER_SPACINGS,
+  LINE_HEIGHTS,
+  normaliseLetterSpacing,
+  normaliseLineHeight,
+  sanitiseStyle,
+} from '../lib/content/styles';
 import { sanitisePage } from '../lib/content/sanitise-page';
 import { resolveVideo } from '../lib/content/video';
 import { SEED_PAGE } from '../lib/content/seed';
@@ -856,6 +866,93 @@ describe('sanitiseStyle', () => {
     for (const value of [null, undefined, 42, {}, []]) {
       expect(sanitiseStyle(value)).toBe('');
     }
+  });
+});
+
+/*
+ * EVERY VALUE A MENU CAN PRODUCE HAS TO SURVIVE THE GATE IT WILL BE SAVED THROUGH.
+ *
+ * The failure this guards against is the quietest one in the editor: a control
+ * that is correctly wired, applies on the canvas, shows the right thing, and then
+ * loses it on the next save, because the value it writes is one the sanitiser does
+ * not recognise and a value the sanitiser does not recognise is DROPPED. Nothing
+ * errors. The page simply comes back without it.
+ *
+ * It is not hypothetical. The size scale moved from rem to em on 17 Sep 2026, and
+ * had the legacy rem values not been kept in the sanitiser that day, every phrase
+ * anybody had ever sized would have come back unsized the first time they saved.
+ * That was caught by hand. This is the check that would have caught it.
+ *
+ * WRITTEN OVER THE MENUS THEMSELVES rather than over a list of values copied out
+ * of them, so a new swatch, a new size or a new line spacing is covered the day it
+ * is added and nobody has to remember this file exists.
+ */
+describe('every choice the styling menus offer', () => {
+  it('survives the sanitiser, so it is still there after a save', () => {
+    for (const size of FONT_SIZES) {
+      expect(
+        sanitiseStyle(`font-size: ${size.value}`),
+        `the size "${size.label}" (${size.value}) is dropped on save`,
+      ).toBe(`font-size: ${size.value}`);
+    }
+
+    for (const font of FONT_CHOICES) {
+      expect(
+        sanitiseStyle(`font-family: ${font.value}`),
+        `the font "${font.label}" (${font.value}) is dropped on save`,
+      ).toBe(`font-family: ${font.value}`);
+    }
+
+    for (const swatch of COLOUR_SWATCHES) {
+      expect(
+        sanitiseStyle(`color: ${swatch.value}`),
+        `the colour "${swatch.label}" (${swatch.value}) is dropped on save`,
+      ).toBe(`color: ${swatch.value}`);
+    }
+
+    for (const swatch of HIGHLIGHT_SWATCHES) {
+      expect(
+        sanitiseStyle(`background-color: ${swatch.value}`),
+        `the highlight "${swatch.label}" (${swatch.value}) is dropped on save`,
+      ).toBe(`background-color: ${swatch.value}`);
+    }
+  });
+
+  /*
+   * The per-screen pair go through their own validators rather than the style
+   * sanitiser, because they are stored as custom properties on the block. Same
+   * question, one level along: does the value the menu writes come back.
+   */
+  it('and the per-screen spacings come back from their own validators', () => {
+    for (const choice of LINE_HEIGHTS) {
+      expect(
+        normaliseLineHeight(choice.value),
+        `the line spacing "${choice.label}" (${choice.value}) is dropped`,
+      ).toBeTruthy();
+    }
+    for (const choice of LETTER_SPACINGS) {
+      expect(
+        normaliseLetterSpacing(choice.value),
+        `the letter spacing "${choice.label}" (${choice.value}) is dropped`,
+      ).toBeTruthy();
+    }
+  });
+
+  /*
+   * AND NO TWO CHOICES MAY COLLAPSE INTO ONE. Two entries that normalise to the
+   * same stored value are two labels that do the same thing, which reads as one of
+   * them being broken: pick "Tight", get "Very tight", and the control looks wrong
+   * rather than the menu looking wrong.
+   */
+  it('and no two of them mean the same thing once stored', () => {
+    const sizes = new Set(FONT_SIZES.map((size) => size.value));
+    expect(sizes.size).toBe(FONT_SIZES.length);
+
+    const spacings = new Set(LINE_HEIGHTS.map((choice) => normaliseLineHeight(choice.value)));
+    expect(spacings.size).toBe(LINE_HEIGHTS.length);
+
+    const tracking = new Set(LETTER_SPACINGS.map((choice) => normaliseLetterSpacing(choice.value)));
+    expect(tracking.size).toBe(LETTER_SPACINGS.length);
   });
 });
 

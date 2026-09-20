@@ -145,6 +145,13 @@ const CLIENT_TABS = [
   'Analytics',
   'Icons and sharing',
   'Language',
+  // Added after this list was first written, and it went red until 20 Sep 2026
+  // because nothing was running the chain. Naming every tab is still the right
+  // check: it is the only one that notices a tab QUIETLY DISAPPEARING, which a
+  // "contains" check never would. Adding a tab means adding it here, and the
+  // failure says exactly which one in its own message.
+  'Floating widgets',
+  'Forms',
 ];
 
 /*

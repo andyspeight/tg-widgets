@@ -312,30 +312,36 @@ export function pagePhotoPlan(spec: StarterPage, sections: readonly Section[]): 
  * In place, like every starter mutation: the sections were just built and
  * nothing else holds them. Address misses are ignored rather than thrown,
  * because a plan is advisory and a page without one picture is still a page.
+ *
+ * TRUE ONLY IF THE PICTURE LANDED. Every miss below is a place the plan named
+ * and the tree does not have, so the picture went nowhere. The caller that
+ * reports to a person counts these rather than counting the plan (20 Sep 2026:
+ * "Write this page" was telling clients it had found six pictures on sites where
+ * the photo library is not configured and it had found none).
  */
-export function applyPhoto(sections: Section[], target: PhotoTarget, url: string): void {
+export function applyPhoto(sections: Section[], target: PhotoTarget, url: string): boolean {
   const section = sections[target.section];
-  if (!section) return;
+  if (!section) return false;
 
   if (target.place.kind === 'background') {
     section.backgroundImage = url;
     // A scrim, so light hero text stays readable over a bright photograph.
     if ((section.overlay ?? 0) < 30) section.overlay = 45;
-    return;
+    return true;
   }
 
   const { row, column, block } = target.place;
   const found = section.rows[row]?.columns[column]?.blocks[block];
-  if (!found) return;
+  if (!found) return false;
 
   if (target.place.kind === 'image') {
-    if (found.type !== 'image') return;
+    if (found.type !== 'image') return false;
     found.props = { ...found.props, src: url };
-    return;
+    return true;
   }
 
   if (target.place.kind === 'gallery') {
-    if (found.type !== 'gallery') return;
+    if (found.type !== 'gallery') return false;
     const images = Array.isArray(found.props.images)
       ? [...(found.props.images as Array<Record<string, unknown>>)]
       : [];
@@ -343,15 +349,16 @@ export function applyPhoto(sections: Section[], target: PhotoTarget, url: string
     // exactly what the picture was chosen to show.
     images[target.place.frame] = { src: url, alt: target.query };
     found.props = { ...found.props, images };
-    return;
+    return true;
   }
 
-  if (found.type !== 'cards') return;
+  if (found.type !== 'cards') return false;
   const items = Array.isArray(found.props.items) ? [...(found.props.items as Array<Record<string, unknown>>)] : [];
   const item = items[target.place.item];
-  if (!item) return;
+  if (!item) return false;
   items[target.place.item] = { ...item, src: url };
   found.props = { ...found.props, items };
+  return true;
 }
 
 // ---------------------------------------------------------------------------

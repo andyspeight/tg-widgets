@@ -907,8 +907,10 @@ export async function writePageAction(input: unknown): Promise<PageWriteResult> 
       const plan = refreshPhotoPlan(written, (index) => subjects[index] ?? '');
       if (plan.length > 0) {
         try {
-          await fillPlannedPhotos(site.tenantId, plan, written);
-          pictures = plan.length;
+          /* The number that LANDED, not the number that was planned: a site with
+             no photo library configured plans six and fills none, and saying
+             "six pictures" there is a lie the person cannot see through. */
+          pictures = await fillPlannedPhotos(site.tenantId, plan, written);
         } catch (error) {
           console.error('[tg-sites] re-photographing a written page failed', error);
         }

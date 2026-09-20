@@ -385,3 +385,41 @@ describe('the box controls target the card, not the block', () => {
     expect(container).toContain('padding: 0');
   });
 });
+
+/*
+ * A GRID POINTED AT A COLLECTION THAT HAS NOT BEEN NAMED (20 Sep 2026).
+ *
+ * Switching a Cards block to "From a collection" appeared to do nothing: the
+ * three cards somebody had typed into it stayed on the canvas. listingIn() had
+ * always said what should happen instead ("a client who picked the source and has
+ * not chosen a collection yet gets the placeholder rather than a silent empty
+ * grid") and the renderer was not doing it, because its placeholder branch first
+ * asked whether there were any cards to draw, and there were: the old ones.
+ *
+ * The editor half is measured in the browser harness (verify-standalone: "and
+ * until one is named it says so rather than going blank"). This is the PUBLISHED
+ * half, which no browser check covers and which is the one that reaches a
+ * visitor: a client who moved a grid onto their blog, did not finish, and hit
+ * publish had three sample cards about Greece, Italy and Portugal on their live
+ * site. So the test is that the guard does not sit behind `editing`.
+ */
+describe('a card grid fed from a collection nobody has named', () => {
+  const blocks = source('components', 'render', 'blocks.tsx');
+
+  it('draws the placeholder rather than the cards that were typed in', () => {
+    expect(blocks, 'the unnamed-collection guard has gone').toContain(
+      'if (fromCollection && !collection) {',
+    );
+  });
+
+  it('and does so on a published page too, not only while editing', () => {
+    const guard = blocks.indexOf('if (fromCollection && !collection) {');
+    const whileEditing = blocks.indexOf('if (editing && fromCollection && cards.length === 0) {');
+    expect(guard, 'the unnamed-collection guard has gone').toBeGreaterThan(-1);
+    expect(whileEditing, 'the editing-only branch has gone').toBeGreaterThan(-1);
+    expect(
+      guard,
+      'the unnamed-collection guard has fallen behind the editing-only branch, so a published page draws the typed-in cards again',
+    ).toBeLessThan(whileEditing);
+  });
+});

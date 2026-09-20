@@ -88,10 +88,21 @@ async function fill(
   plan: PhotoTarget[],
   sections: Section[],
   cache: PhotoCache,
-): Promise<void> {
+): Promise<number> {
+  /*
+   * HOW MANY PICTURES ACTUALLY LANDED, counted rather than assumed.
+   *
+   * Every caller here is best-effort by design, and one of them (Write this page)
+   * tells somebody what it did. Reporting the size of the PLAN meant telling a
+   * client "six pictures asked for" on a site where Pexels is not configured and
+   * the function returned on its second line, which is the same lie as a control
+   * that does nothing quietly. The number that leaves here is the number of places
+   * a URL was written into.
+   */
+  let applied = 0;
   try {
-    if (plan.length === 0) return;
-    if (!pexelsConfigured() || !blobConfigured()) return;
+    if (plan.length === 0) return 0;
+    if (!pexelsConfigured() || !blobConfigured()) return 0;
 
     const searches = new Map<string, Promise<StockPhoto[]>>();
     const wanted = new Map<string, { query: string; variant: number }>();
@@ -109,11 +120,13 @@ async function fill(
 
     for (const target of plan) {
       const url = urls.get(keyOf(target.query, target.variant ?? 0));
-      if (url) applyPhoto(sections, target, url);
+      if (url && applyPhoto(sections, target, url)) applied += 1;
     }
   } catch {
-    // The fill as a whole is as best-effort as each picture in it.
+    // The fill as a whole is as best-effort as each picture in it. Whatever
+    // landed before it gave up is still on the page, so the count stands.
   }
+  return applied;
 }
 
 /**
@@ -128,8 +141,8 @@ export async function fillPagePhotos(
   spec: StarterPage,
   sections: Section[],
   cache: PhotoCache = new Map(),
-): Promise<void> {
-  await fill(tenantId, pagePhotoPlan(spec, sections), sections, cache);
+): Promise<number> {
+  return fill(tenantId, pagePhotoPlan(spec, sections), sections, cache);
 }
 
 /**
@@ -141,6 +154,6 @@ export async function fillPlannedPhotos(
   plan: PhotoTarget[],
   sections: Section[],
   cache: PhotoCache = new Map(),
-): Promise<void> {
-  await fill(tenantId, plan, sections, cache);
+): Promise<number> {
+  return fill(tenantId, plan, sections, cache);
 }

@@ -70,11 +70,23 @@ export function WritePage({
      * Luna Assist's Apply has, for the same reason.
      */
     onCommit((current) => ({ ...current, sections: result.sections }));
-    setDone(
-      result.pictures > 0
-        ? `Written, and ${result.pictures === 1 ? 'a picture' : `${result.pictures} pictures`} asked for. Undo puts it back.`
-        : 'Written. Undo puts it back.',
-    );
+
+    /*
+     * WHAT LANDED, NOT WHAT WAS ASKED FOR. This used to report the size of the
+     * photo plan, which is the number of places a picture COULD have gone. A site
+     * with no photo library configured was told "six pictures" and got none
+     * (20 Sep 2026). writePageAction returns the count that was actually written
+     * in, so a run that found nothing says so rather than claiming six.
+     */
+    if (result.pictures > 0) {
+      setDone(
+        `Written, and ${result.pictures === 1 ? 'a new picture' : `${result.pictures} new pictures`}. Undo puts it back.`,
+      );
+    } else if (photos) {
+      setDone('Written. No new pictures came back, so the ones on the page are the ones that were there. Undo puts it back.');
+    } else {
+      setDone('Written. Undo puts it back.');
+    }
   }
 
   return (

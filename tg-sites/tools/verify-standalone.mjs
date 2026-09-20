@@ -531,10 +531,16 @@ await check('block picker opens from a section', async () => {
  * a permanently red check stops being read. Checked rather than assumed: 53 cards
  * draw and the registry holds 53 (the block-catalogue test agrees), so the counts
  * match and nothing has quietly stopped rendering.
+ *
+ * 54 on 20 Sep 2026, for the Loop block (503a1aba, the collection loop). Red since
+ * the day it landed, and nobody saw it, because verify-destination was throwing on
+ * a stale fixture four lines earlier in the chain and `npm run verify:browser` never
+ * reached this file at all. A tripwire behind a broken gate is not a tripwire.
+ * Checked rather than assumed: 54 cards draw and the registry holds 54.
  */
 await check('block picker offers the full library', async () => {
   const count = await page.locator('.ed-block-card').count();
-  return count === 53 ? true : `${count} blocks in the picker, expected 53`;
+  return count === 54 ? true : `${count} blocks in the picker, expected 54`;
 });
 
 await check('including both ways to put a widget on a page', async () => {
@@ -578,8 +584,9 @@ await check('an insert point opens the section picker', async () => {
 await check('it offers Layouts, Designed, AI and Import, opening on Layouts', async () => {
   const tabs = (await page.locator('.ed-tab').allInnerTexts()).map((t) => t.trim());
   const selected = await page.locator('.ed-tab[aria-selected="true"]').innerText();
-  // Import joined the three original tabs when the import pipeline landed.
-  return JSON.stringify(tabs) === '["Layouts","Designed","AI","Import"]' && selected === 'Layouts'
+  // Import joined the three original tabs when the import pipeline landed, and
+  // My sections when a client could first save one of their own (20 Sep 2026).
+  return JSON.stringify(tabs) === '["Layouts","Designed","My sections","AI","Import"]' && selected === 'Layouts'
     ? true
     : `${JSON.stringify(tabs)}, on "${selected}"`;
 });
@@ -2314,11 +2321,21 @@ async function selectPartOnCanvas() {
   return host;
 }
 
+/*
+ * BY LABEL, NOT BY VALUE, and that is the lesson of 17 Sep 2026 rather than a
+ * style preference. These two checks named the scale's values ('2rem', '1.25rem')
+ * and the day the scale moved to em they stopped selecting anything at all: a
+ * thirty-second timeout, a red line about a locator, and no hint that the product
+ * was fine. What a person picks is a LABEL, so pick the label and carry whatever
+ * value it turns out to hold into the assertion.
+ */
+let chosenSize = '';
+
 await check('a size applies, and it is a real size rather than an attribute nothing reads', async () => {
   const host = await selectPartOnCanvas();
   if (!host) return 'no editable paragraph';
 
-  await page.locator('select[aria-label="Size"]').selectOption('2rem');
+  [chosenSize] = await page.locator('select[aria-label="Size"]').selectOption({ label: 'Huge' });
   await page.waitForTimeout(350);
 
   // Measured, not read off the attribute. An attribute no rule picks up is the
@@ -2366,7 +2383,7 @@ await check('and the size survives the sanitiser, not just the canvas', async ()
   if (await page.locator('[data-rt-host]').count()) return 'the paragraph is still being edited';
 
   const rendered = await page.locator('.tgs-text').first().innerHTML();
-  return /font-size:\s*2rem/i.test(rendered)
+  return new RegExp(`font-size:\\s*${chosenSize}`, 'i').test(rendered)
     ? true
     : `after rendering: "${rendered.slice(0, 160)}"`;
 });
@@ -2435,7 +2452,7 @@ await check('styling a whole paragraph sets it on the paragraph, not in a span a
   const host = await selectOnCanvas();
   if (!host) return 'no editable paragraph';
 
-  await page.locator('select[aria-label="Size"]').selectOption('1.25rem');
+  await page.locator('select[aria-label="Size"]').selectOption({ label: 'Large' });
   await page.waitForTimeout(350);
 
   const html = await host.innerHTML();
@@ -5091,9 +5108,9 @@ await check('the header offers the same blocks a page does', async () => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(200);
   // The whole library, because a header is sections and rows like anything else.
-  // The same 53 the page picker offers a staff user. See the note on that check for
+  // The same 54 the page picker offers a staff user. See the note on that check for
   // why the number is written down rather than read from the registry.
-  return count === 53 ? true : `${count} blocks in the header picker, expected 53`;
+  return count === 54 ? true : `${count} blocks in the header picker, expected 54`;
 });
 
 await check('a menu in a header saves through the region actions', async () => {
@@ -6285,22 +6302,37 @@ await page.reload();
 await page.waitForSelector('.ed-root');
 await showPanels();
 
+/*
+ * A DROPDOWN, NOT A PAIR OF BUTTONS, and finding that out cost six dead checks.
+ *
+ * A short select renders as a segmented group ONLY while every one of its labels
+ * fits a 56-95px button, which Fields.tsx puts at eleven characters. "From a
+ * collection" is seventeen, so this control has been a dropdown since 26 Aug 2026,
+ * when Andy said of a truncating four-option control "make it a dropdown, as you
+ * can't read them as they are all truncated at the moment". These six checks went
+ * on looking for buttons, found none, and reported `offered []` into a chain
+ * nothing was running. Found 20 Sep 2026.
+ *
+ * Driven by VALUE rather than by the label a person reads, because the value is
+ * the contract the block is written against and the label is not.
+ */
+const cardsSource = () =>
+  page.locator('.ed-props .ed-field').filter({ hasText: 'Where the cards come from' }).locator('select').first();
+
 await check('a card grid can be fed from a collection instead of typed in', async () => {
   await addBlock('Cards');
   await showPanels();
   await page.waitForTimeout(300);
 
-  const group = page.locator('.ed-props [role=group][aria-label="Where the cards come from"]');
-  const labels = await group.locator('button').allInnerTexts();
-  return labels.length === 2 && labels.join('|').includes('From a collection')
+  const values = await cardsSource().locator('option').evaluateAll((nodes) => nodes.map((n) => n.value));
+  const labels = await cardsSource().locator('option').allInnerTexts();
+  return values.join('|') === 'typed|collection' && labels.join('|').includes('From a collection')
     ? true
-    : `offered ${JSON.stringify(labels)}`;
+    : `offered ${JSON.stringify(labels)} (${JSON.stringify(values)})`;
 });
 
 await check('and until one is named it says so rather than going blank', async () => {
-  await page.locator('.ed-props [role=group][aria-label="Where the cards come from"] button')
-    .filter({ hasText: 'From a collection' })
-    .click();
+  await cardsSource().selectOption('collection');
   await page.waitForTimeout(600);
 
   const text = (await added().innerText()).trim();
@@ -6364,9 +6396,7 @@ await check('a count far outside the range is pulled back rather than passed on'
  * knows to press.
  */
 await check('switching back brings the typed-in cards with it', async () => {
-  await page.locator('.ed-props [role=group][aria-label="Where the cards come from"] button')
-    .filter({ hasText: 'Typed in here' })
-    .click();
+  await cardsSource().selectOption('typed');
   await page.waitForTimeout(600);
 
   const cards = await added().locator('.tgs-card').count();
@@ -8169,7 +8199,8 @@ await check('a block text size set on Phone shrinks phone, not desktop', async (
   // control is a section one and not shown here, so this select is unambiguous.
   const select = page.locator('.ed-props .ed-screen-scope select').first();
   if ((await select.count()) === 0) return 'the text size control was not scoped to the screen';
-  await select.selectOption('0.75rem'); // Tiny, far below any heading's own size.
+  // By label, for the reason written over the toolbar's Size check above.
+  const [tiny] = await select.selectOption({ label: 'Tiny' });
   await page.waitForTimeout(200);
 
   const after = await page.evaluate((path) => {
@@ -8179,7 +8210,7 @@ await check('a block text size set on Phone shrinks phone, not desktop', async (
     const m = style.match(/--tgs-fs-phone:\s*([^;]+)/);
     return { phoneVar: m ? m[1].trim() : null, phonePx: parseFloat(getComputedStyle(text).fontSize) };
   }, info.path);
-  if (after.phoneVar !== '0.75rem') return `the phone override was not stored: ${after.phoneVar}`;
+  if (after.phoneVar !== tiny) return `the phone override was not stored: ${after.phoneVar}`;
   if (!(after.phonePx < info.deskPx - 2)) {
     return `phone text did not shrink: phone ${after.phonePx}, desktop ${info.deskPx}`;
   }
@@ -10009,7 +10040,13 @@ await check('the Add page composer offers a ready-made page to start from', asyn
    * concepts were wired in. Nobody saw it for days because the harness build ahead
    * of it in verify:browser was failing first and this check never ran.
    */
-  const expected = ['Describe it with AI', 'Blank page', 'Home', 'About us', 'Services', 'Holidays', 'Reviews', 'Meet the team', 'FAQ', 'Contact'];
+  const expected = [
+    'Describe it with AI', 'Blank page', 'Home', 'About us', 'Services', 'Holidays',
+    'Reviews', 'Meet the team', 'FAQ', 'Contact',
+    // The four destination starts, which landed after this list was written and
+    // sit between the named pages and the designed concepts.
+    'Destination guide', 'Destination, picture-led', 'Destination, at a glance', 'Where to stay',
+  ];
   if (!groupThere) return 'the composer had no template chooser';
   if (radioCount !== expected.length + designed) {
     return `expected ${expected.length} named choices plus ${designed} designed ones, saw ${radioCount}`;
