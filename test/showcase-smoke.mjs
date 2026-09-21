@@ -269,6 +269,28 @@ check('the copy over the photograph is light, not body grey',
 check('the drift honours reduced motion',
   /prefers-reduced-motion[\s\S]*animation-duration:\s*\.001ms/.test(css));
 
+/* And the same shot on the phone. Andy, 21 Sep 2026: "the hero shot should
+   also be on the phone, within the xxx days until you go, welcome message".
+   It was a 168px card underneath a notification banner. */
+console.log('showcase: the phone leads with the picture');
+const home = data.products[0].screens[0].html;
+const iShot = home.indexOf('lt-topshot');
+const iBody = home.indexOf('lt-body');
+check('the home screen opens with the picture, before anything else',
+  iShot > -1 && iBody > -1 && iShot < iBody);
+check('the status bar sits on it', home.indexOf('lt-statusbar') > iShot && home.indexOf('lt-statusbar') < iBody);
+check('the welcome sits on it', home.indexOf('lt-welcome') > iShot && home.indexOf('lt-welcome') < iBody);
+check('the countdown sits on it', home.indexOf('lt-countdown') > iShot && home.indexOf('lt-countdown') < iBody);
+check('it is the same file the stand opens on',
+  /lt-art--hero/.test(home) && /\.lt-art--hero\s*\{[^}]*splash\.webp/.test(css));
+/* The stacking rule is specific enough to beat a bare position:absolute, which
+   dropped the countdown into the column on top of the dates. */
+check('the countdown is pinned out of the flow',
+  /\.lt-topshot > \.lt-countdown\s*\{[^}]*position:\s*absolute/.test(css));
+check('the status bar is light over the photograph',
+  /\.lt-topshot \.lt-statusbar\s*\{[^}]*#fff/.test(css));
+check('the old card is gone', !/lt-hero\b/.test(css) && !/lt-hero\b/.test(dataSrc));
+
 check('the image assets have headers',
   vercel.headers.some(h => /showcase\/img/.test(h.source)));
 

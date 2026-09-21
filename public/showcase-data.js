@@ -85,26 +85,31 @@
     name: 'Home',
     blurb: 'Where the traveller lands, and where the agency reaches them.',
     html:
-      statusBar +
-      '<header class="lt-appbar">' +
-        '<span class="lt-brandmark" data-hs="brand">TD</span>' +
-        '<span class="lt-brandtext"><strong>Travel Demo</strong><small>Your trip, in your pocket</small></span>' +
-        '<span class="lt-bell" data-hs="bell"><span class="lt-bell-dot">2</span></span>' +
-      '</header>' +
-      '<div class="lt-body">' +
+      /* The picture runs from the very top of the screen, with the status bar
+         and the app bar sitting on it and the greeting, the trip and the
+         countdown at its foot. It was a 168px card under a notification,
+         which is not what a traveller opens their holiday app to see. */
+      '<div class="lt-topshot" data-hs="trip-hero">' +
+        '<span class="lt-topshot-art lt-art--hero"></span>' +
+        statusBar +
+        '<header class="lt-appbar lt-appbar--shot">' +
+          '<span class="lt-brandmark" data-hs="brand">TD</span>' +
+          '<span class="lt-brandtext"><strong>Travel Demo</strong><small>Your trip, in your pocket</small></span>' +
+          '<span class="lt-bell" data-hs="bell"><span class="lt-bell-dot">2</span></span>' +
+        '</header>' +
+        '<div class="lt-topshot-copy">' +
+          '<span class="lt-welcome">Good morning, Sarah</span>' +
+          '<strong>Maldives</strong>' +
+          '<small>2 to 17 Oct 2026 · 12 nights · DEMO81297</small>' +
+        '</div>' +
+        '<span class="lt-countdown" data-hs="countdown"><b>13</b><small>days to go</small></span>' +
+      '</div>' +
+      '<div class="lt-body lt-body--shot">' +
         '<div class="lt-banner lt-banner--urgent" data-hs="agent-banner">' +
           '<span class="lt-banner-tag">Urgent</span>' +
           '<p>Your resort transfer now leaves at 14:20, from speedboat jetty 2.</p>' +
           '<span class="lt-banner-act">Mark as read</span>' +
         '</div>' +
-        '<section class="lt-hero" data-hs="trip-hero">' +
-          '<span class="lt-hero-art lt-art--atoll"></span>' +
-          '<span class="lt-hero-copy">' +
-            '<strong>Maldives</strong>' +
-            '<small>2 to 17 Oct 2026 · 12 nights · DEMO81297</small>' +
-          '</span>' +
-          '<span class="lt-countdown" data-hs="countdown"><b>13</b><small>days to go</small></span>' +
-        '</section>' +
         '<div class="lt-row2">' +
           '<div class="lt-tile" data-hs="weather">' +
             '<span class="lt-tile-k">Malé now</span>' +
