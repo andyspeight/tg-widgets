@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirmation Email Preview — Travelgenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2B5B; --teal: #00B4D8;
+    --bg: #F6F8FB; --card: #FFFFFF; --border: #E2E8F0;
+    --text: #0F172A; --muted: #64748B; --muted-2: #94A3B8;
+    --ok: #059669; --ok-bg: #ECFDF5; --warn: #B45309; --warn-bg: #FFFBEB; --err: #DC2626; --err-bg: #FEF2F2;
+    --radius: 14px; --radius-sm: 9px;
+    --ft: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+    --shadow-lg: 0 12px 32px rgba(15,23,42,.14);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--ft); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  .crumb { font-size: 13px; color: var(--muted); text-decoration: none; display: inline-block; margin-bottom: 14px; }
+  .crumb:hover { color: var(--navy); }
+
+  .top { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+  .top-ico {
+    width: 46px; height: 46px; border-radius: 12px; flex: 0 0 auto;
+    background: linear-gradient(135deg, var(--navy), #2C4173);
+    display: grid; place-items: center; color: #fff;
+  }
+  h1 { margin: 0 0 4px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .sub { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 70ch; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+  form.panel { padding: 18px; display: grid; gap: 14px; grid-template-columns: 1.6fr 1fr 1.4fr .9fr auto; align-items: end; }
+  @media (max-width: 900px) { form.panel { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { form.panel { grid-template-columns: 1fr; } }
+  .field { display: grid; gap: 5px; min-width: 0; }
+  label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  input, select {
+    font-family: var(--ft); font-size: 14px; color: var(--text); background: #fff;
+    border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; width: 100%;
+  }
+  input:focus, select:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
+  .btn {
+    font-family: var(--ft); font-size: 14px; font-weight: 600; cursor: pointer;
+    border-radius: var(--radius-sm); padding: 10px 18px; border: 1px solid transparent;
+    background: var(--navy); color: #fff; white-space: nowrap;
+  }
+  .btn:hover { background: #24356b; }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .btn-ghost { background: #fff; color: var(--text); border-color: var(--border); }
+  .btn-ghost:hover { background: #F8FAFC; }
+
+  .note { margin: 12px 0 0; font-size: 12.5px; color: var(--muted); }
+  .msg { margin-top: 16px; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 13.5px; display: none; }
+  .msg.err { display: block; background: var(--err-bg); color: var(--err); border: 1px solid #FECACA; }
+  .msg.info { display: block; background: var(--warn-bg); color: var(--warn); border: 1px solid #FDE68A; }
+
+  #out { display: none; margin-top: 26px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin-bottom: 14px; font-size: 13px; color: var(--muted); }
+  .pill { background: #EEF2F7; color: var(--navy); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .tab {
+    font-family: var(--ft); font-size: 13.5px; font-weight: 600; cursor: pointer;
+    background: #fff; color: var(--muted); border: 1px solid var(--border);
+    border-radius: 999px; padding: 8px 15px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+  .stage { padding: 16px; }
+  .subject { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin-bottom: 4px; }
+  .subject b { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .subject span { font-size: 15px; font-weight: 600; }
+  .hint { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .spacer { flex: 1 1 auto; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+  .seg button {
+    font-family: var(--ft); font-size: 12.5px; font-weight: 600; cursor: pointer;
+    background: #fff; color: var(--muted); border: 0; padding: 7px 14px;
+  }
+  .seg button[aria-pressed="true"] { background: #EEF2F7; color: var(--navy); }
+
+  .frame { margin: 0 auto; transition: max-width .18s ease; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .frame[data-vp="desktop"] { max-width: 100%; }
+  .frame[data-vp="mobile"] { max-width: 400px; }
+  iframe { display: block; width: 100%; height: 1000px; border: 0; background: #fff; }
+
+  .skel { display: grid; place-items: center; height: 240px; color: var(--muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="crumb" href="/">&larr; Tool Hub</a>
+
+  <div class="top">
+    <div class="top-ico" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Confirmation email preview</h1>
+      <p class="sub">Enter a real Travelify booking and see it drawn through every pre-built design. Nothing is sent, queued or stored — this only reads the booking and renders it, so it works before a client's webhook is wired.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form class="panel" id="f">
+      <div class="field">
+        <label for="widgetId">Client</label>
+        <select id="widgetId"><option value="">Loading clients…</option></select>
+      </div>
+      <div class="field">
+        <label for="orderRef">Booking reference</label>
+        <input id="orderRef" placeholder="TG121758" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="email">Customer email</label>
+        <input id="email" type="email" placeholder="name@example.com" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="departDate">Departure</label>
+        <input id="departDate" type="date">
+      </div>
+      <div class="field">
+        <button class="btn" id="go" type="submit">Show designs</button>
+      </div>
+    </form>
+    <div style="padding: 0 18px 18px;">
+      <p class="note">All four are needed: Travelify finds an order by reference, customer email and departure date together, and the client decides which Travelify account is searched.</p>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+  <div id="out">
+    <div class="meta" id="meta"></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="card stage">
+      <div class="subject"><b>Subject</b> <span id="subject"></span></div>
+      <p class="hint" id="hint"></p>
+      <div class="bar">
+        <div class="seg" role="group" aria-label="Preview width">
+          <button type="button" id="vpDesktop" aria-pressed="true">Desktop</button>
+          <button type="button" id="vpMobile" aria-pressed="false">Mobile</button>
+        </div>
+        <div class="spacer"></div>
+        <a class="btn btn-ghost" id="openTab" href="#" target="_blank" rel="noopener">Open full size</a>
+      </div>
+      <div class="frame" id="frame" data-vp="desktop">
+        <div class="skel" id="skel">Pick a booking above.</div>
+        <iframe id="pv" title="Confirmation email preview" style="display:none"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var API = '/api/admin/booking-email-preview';
+  var $ = function (id) { return document.getElementById(id); };
+  var styles = [], active = null, lastQuery = '';
+
+  function say(text, kind) {
+    var m = $('msg');
+    m.className = 'msg' + (text ? ' ' + (kind || 'err') : '');
+    m.textContent = text || '';
+  }
+
+  function qs(extra) {
+    var p = new URLSearchParams(lastQuery);
+    Object.keys(extra || {}).forEach(function (k) { p.set(k, extra[k]); });
+    return API + '?' + p.toString();
+  }
+
+  // ---- Clients -------------------------------------------------------------
+  fetch(API + '?widgets=1', { credentials: 'include' })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status === 401 || r.status === 403 ? 'signin' : 'load'); })
+    .then(function (d) {
+      var sel = $('widgetId');
+      sel.innerHTML = '';
+      var demo = document.createElement('option');
+      demo.value = ''; demo.textContent = 'Travelgenix demo account';
+      sel.appendChild(demo);
+      (d.widgets || []).forEach(function (w) {
+        var o = document.createElement('option');
+        o.value = w.widgetId; o.textContent = w.label;
+        sel.appendChild(o);
+      });
+    })
+    .catch(function (why) {
+      $('widgetId').innerHTML = '<option value="">Could not load clients</option>';
+      say(why === 'signin'
+        ? 'Sign in as staff first, then reload this page.'
+        : 'Could not load the client list. The demo account still works.', 'info');
+    });
+
+  // ---- Look up -------------------------------------------------------------
+  $('f').addEventListener('submit', function (e) {
+    e.preventDefault();
+    say('');
+    var ref = $('orderRef').value.trim();
+    var email = $('email').value.trim();
+    var date = $('departDate').value.trim();
+    if (!ref || !email || !date) { say('Booking reference, customer email and departure date are all needed.'); return; }
+
+    lastQuery = new URLSearchParams({ widgetId: $('widgetId').value, orderRef: ref, email: email, departDate: date }).toString();
+    $('go').disabled = true; $('go').textContent = 'Looking up…';
+
+    fetch(qs({}), { credentials: 'include' })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) {
+        if (!res.ok) { say(res.body && res.body.error ? res.body.error : 'That lookup did not return a booking.'); $('out').style.display = 'none'; return; }
+        styles = res.body.styles || [];
+        if (!styles.length) { say('That booking loaded, but there are no designs to draw.'); return; }
+        renderMeta(res.body);
+        renderTabs();
+        show(styles[0].id);
+        $('out').style.display = 'block';
+      })
+      .catch(function () { say('The lookup could not be completed.'); })
+      .finally(function () { $('go').disabled = false; $('go').textContent = 'Show designs'; });
+  });
+
+  function renderMeta(b) {
+    var m = $('meta');
+    m.innerHTML = '';
+    function pill(text, cls) {
+      var s = document.createElement('span');
+      s.className = 'pill' + (cls ? ' ' + cls : '');
+      s.textContent = text;
+      m.appendChild(s);
+    }
+    pill(b.orderRef);
+    pill('From: ' + b.brandName);
+    if (b.hasLogo) pill('Logo set', 'ok');
+    if (b.destinationResolved) pill('Destination content found', 'ok');
+    var n = document.createElement('span');
+    n.textContent = styles.length + (styles.length === 1 ? ' design' : ' designs');
+    m.appendChild(n);
+  }
+
+  function renderTabs() {
+    var t = $('tabs');
+    t.innerHTML = '';
+    styles.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'tab'; b.type = 'button'; b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', 'false');
+      b.textContent = s.label;
+      b.addEventListener('click', function () { show(s.id); });
+      b.dataset.id = s.id;
+      t.appendChild(b);
+    });
+  }
+
+  function show(id) {
+    var s = styles.filter(function (x) { return x.id === id; })[0];
+    if (!s) return;
+    active = id;
+    Array.prototype.forEach.call($('tabs').children, function (b) {
+      b.setAttribute('aria-selected', String(b.dataset.id === id));
+    });
+    $('subject').textContent = s.subject || '(no subject)';
+    $('hint').textContent = s.hint || '';
+    var url = qs({ style: id, format: 'html' });
+    $('openTab').href = url;
+    $('skel').style.display = 'none';
+    $('pv').style.display = 'block';
+    $('pv').src = url;
+  }
+
+  // ---- Width ---------------------------------------------------------------
+  function vp(which) {
+    $('frame').dataset.vp = which;
+    $('vpDesktop').setAttribute('aria-pressed', String(which === 'desktop'));
+    $('vpMobile').setAttribute('aria-pressed', String(which === 'mobile'));
+  }
+  $('vpDesktop').addEventListener('click', function () { vp('desktop'); });
+  $('vpMobile').addEventListener('click', function () { vp('mobile'); });
+})();
+</script>
+</body>
+</html>

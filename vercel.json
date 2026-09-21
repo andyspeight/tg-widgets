@@ -663,6 +663,10 @@
       "destination": "/admin-worldmap.html"
     },
     {
+      "source": "/admin-email-preview",
+      "destination": "/admin-email-preview.html"
+    },
+    {
       "source": "/screenshot-to-code",
       "destination": "/screenshot-to-code.html"
     },
@@ -1775,7 +1779,7 @@
       ]
     },
     {
-      "source": "/(editor|editor-[a-z0-9-]+|inbox-enquiry|admin-worldmap|screenshot-to-code)(\\.html)?",
+      "source": "/(editor|editor-[a-z0-9-]+|inbox-enquiry|admin-worldmap|admin-email-preview|screenshot-to-code)(\\.html)?",
       "headers": [
         {
           "key": "X-Frame-Options",
