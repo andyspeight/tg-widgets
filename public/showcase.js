@@ -704,10 +704,9 @@
 
     /* splash: which walkthrough */
     var splash = n('div', 'tg-splash');
-    splash.appendChild(n('span', 'tg-splash-bg'));
     var spIn = n('div', 'tg-splash-in');
     spIn.appendChild(n('span', 'tg-kicker', 'Travelgenix'));
-    spIn.appendChild(n('h1', null, 'Pick a walkthrough'));
+    spIn.appendChild(n('h1', null, 'Discover what we build'));
     spIn.appendChild(n('p', null,
       'Each one is the real product, one feature at a time. They play themselves, ' +
       'or you can take one at your own pace.'));

@@ -295,6 +295,16 @@ check('the old card is gone', !/lt-hero\b/.test(css) && !/lt-hero\b/.test(dataSr
    screen so people can see the walkthrough that they are interested in". It is
    the front door now, so the whole path has to survive a refactor. */
 console.log('showcase: the chooser');
+/* Andy, 21 Sep 2026: solid brand colour on the chooser, and the photographs
+   reserved for the products themselves. A picture here competes with the tiles
+   and spends the money shot before anyone has chosen anything. */
+check('the chooser is a solid brand colour',
+  /\.tg-splash\s*\{[^}]*background:\s*var\(--tg-primary\)/.test(css));
+check('no photograph behind it', !/\.tg-splash[^{]*\{[^}]*url\(/.test(css));
+check('the picture is reserved for a product front door',
+  /\.tg-attract-bg\s*\{[^}]*url\(/.test(css));
+check('the headline invites rather than instructs',
+  /'Discover [^']+'/.test(js) && !/Pick a walkthrough/.test(js));
 check('the engine boots on the chooser, not on one product',
   /function toSplash/.test(js) && /\n\s*toSplash\(\);/.test(js));
 check('idling returns to the chooser', /setTimeout\(toSplash, IDLE_MS\)/.test(js));
