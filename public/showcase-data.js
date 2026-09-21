@@ -71,6 +71,8 @@
       'an assistant that answers from the real booking. Every screen wears the agency’s name, ' +
       'not ours.',
     device: 'phone',
+    tile: '/showcase/img/story.webp',    /* the face it wears on the chooser */
+    splash: '/showcase/img/splash.webp',  /* and behind its own front door */
     qr: {
       url: 'https://lunatravel.travelify.io/install',
       heading: 'Try it on your own phone',
@@ -139,6 +141,17 @@
       tabBar('home'),
     hotspots: [
       {
+        anchor: 'trip-hero',
+        at: 'bottom-right',
+        title: 'The booking fills it in',
+        feature:
+          'Reference, dates, flights, hotels and extras all arrive from the booking itself. Nobody ' +
+          'retypes a thing.',
+        benefit:
+          'A branded trip app for a holiday already sold, with no back office work and nothing to ' +
+          'keep in step by hand.'
+      },
+      {
         anchor: 'brand',
         at: 'top-left',
         title: 'Your name on their home screen',
@@ -149,6 +162,16 @@
           'For a fortnight their client is looking at their brand, at the point in the year they are ' +
           'most likely to be telling friends about the holiday.',
         edge: 'Vamoos sells branding as a tier. Here it is simply how the app arrives.'
+      },
+      {
+        anchor: 'countdown',
+        at: 'top-left',
+        title: 'Something to open before they fly',
+        feature:
+          'A live count of the days left, taken from the booking\u2019s own dates.',
+        benefit:
+          'It gives the traveller a reason to come back in the weeks before departure, which is when ' +
+          'lounge passes, transfers and upgrades still sell.'
       },
       {
         anchor: 'agent-banner',
@@ -170,27 +193,6 @@
         benefit:
           'The agency can be confident a message was seen, which is the difference between telling ' +
           'someone and hoping.'
-      },
-      {
-        anchor: 'trip-hero',
-        at: 'bottom-right',
-        title: 'The booking fills it in',
-        feature:
-          'Reference, dates, flights, hotels and extras all arrive from the booking itself. Nobody ' +
-          'retypes a thing.',
-        benefit:
-          'A branded trip app for a holiday already sold, with no back office work and nothing to ' +
-          'keep in step by hand.'
-      },
-      {
-        anchor: 'countdown',
-        at: 'top-left',
-        title: 'Something to open before they fly',
-        feature:
-          'A live count of the days left, taken from the booking\u2019s own dates.',
-        benefit:
-          'It gives the traveller a reason to come back in the weeks before departure, which is when ' +
-          'lounge passes, transfers and upgrades still sell.'
       },
       {
         anchor: 'weather',

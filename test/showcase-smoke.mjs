@@ -291,6 +291,41 @@ check('the status bar is light over the photograph',
   /\.lt-topshot \.lt-statusbar\s*\{[^}]*#fff/.test(css));
 check('the old card is gone', !/lt-hero\b/.test(css) && !/lt-hero\b/.test(dataSrc));
 
+/* The chooser. Andy, 21 Sep 2026: "as we build more of these, we need a splash
+   screen so people can see the walkthrough that they are interested in". It is
+   the front door now, so the whole path has to survive a refactor. */
+console.log('showcase: the chooser');
+check('the engine boots on the chooser, not on one product',
+  /function toSplash/.test(js) && /\n\s*toSplash\(\);/.test(js));
+check('idling returns to the chooser', /setTimeout\(toSplash, IDLE_MS\)/.test(js));
+check('a tile is built for every product', /data\.products\.forEach\(function \(p\) \{ tiles\.appendChild\(tileFor\(p\)\)/.test(js));
+check('picking a tile opens that product, not always the first',
+  /tileFor[\s\S]{0,900}toAttract\(p\)/.test(js));
+check('the front door opens whichever product was picked',
+  !/open\(data\.products\[0\]\); tourStart\(\);/.test(js) && /open\(st\.pick/.test(js));
+check('starting a walk hides the chooser', /el\.splash\.hidden = true;[\s\S]{0,120}el\.scene\.hidden = false/.test(js));
+check('left alone, the chooser plays something',
+  /!el\.splash\.hidden\) \{ open\(data\.products\[0\]\); tourStart\(0\)/.test(js));
+check('the tile length comes from the same dwell model as the walk',
+  /function sizeOf[\s\S]{0,400}dwellFor\(h\)/.test(js));
+/* An unchecked path going into a style is how this kind of thing goes wrong. */
+check('a tile picture is validated before it reaches a style',
+  /function imgUrl[\s\S]{0,260}showcase\\\/img/.test(js) &&
+  /art\.style\.backgroundImage = url/.test(js));
+for (const prod of data.products) {
+  check(`${prod.name} carries a tile picture`, !!prod.tile);
+  check(`${prod.name}'s tile picture is committed`,
+    !!prod.tile && existsSync(join(PUB, prod.tile.replace(/^\//, ''))), prod.tile);
+  check(`${prod.name} carries a front door picture`,
+    !!prod.splash && existsSync(join(PUB, (prod.splash || '').replace(/^\//, ''))), prod.splash);
+  check(`${prod.name} has a line for its tile`, !!prod.tagline);
+}
+
+/* And the walk itself opens on the picture. It used to open on a 38px logo. */
+check('the walkthrough opens on the hero',
+  data.products[0].screens[0].hotspots[0].anchor === 'trip-hero',
+  data.products[0].screens[0].hotspots[0].anchor);
+
 check('the image assets have headers',
   vercel.headers.some(h => /showcase\/img/.test(h.source)));
 

@@ -80,35 +80,67 @@
     if (idleTimer) clearTimeout(idleTimer);
     /* A playing walkthrough is the screen doing its job, not an idle one. */
     if (st.tour.on && !st.tour.paused) { idleTimer = null; return; }
-    idleTimer = setTimeout(toAttract, IDLE_MS);
+    idleTimer = setTimeout(toSplash, IDLE_MS);
   }
   function stopIdle() { if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; } }
 
   function onInput(e) {
     if (e && e.target && e.target.closest && e.target.closest('[data-ctl]')) { poke(); return; }
     if (st.tour.on && !st.tour.paused) tourPause();
-    if (!el.attract.hidden) armAttract();
+    if (!el.attract.hidden || !el.splash.hidden) armAttract();
     poke();
   }
 
+  /* Nobody is standing here. Play something, so the stand is never a still
+     picture waiting to be touched. From the chooser that means the first
+     product; from a product's own front door it means that product. */
   function armAttract() {
     if (attractTimer) clearTimeout(attractTimer);
     attractTimer = setTimeout(function () {
-      if (!el.attract.hidden) { open(data.products[0]); tourStart(0); }
+      if (!el.splash.hidden) { open(data.products[0]); tourStart(0); return; }
+      if (!el.attract.hidden) { open(st.pick || data.products[0]); tourStart(0); }
     }, ATTRACT_MS);
   }
   function disarmAttract() { if (attractTimer) { clearTimeout(attractTimer); attractTimer = null; } }
 
-  function toAttract() {
+  /* Our own paths, checked anyway before one goes near a style. */
+  function imgUrl(path) {
+    return /^\/showcase\/img\/[a-z0-9-]+\.webp$/.test(path || '')
+      ? 'url("' + path + '")' : '';
+  }
+
+  function clearScreens() {
     stopIdle(); tourStop();
     st.product = null; st.i = -1; st.screen = -1; st.seen = Object.create(null);
     el.scene.hidden = true;
     el.end.hidden = true;
     el.contents.hidden = true;
-    el.attract.hidden = false;
     el.crumb.hidden = true;
     el.contentsBtn.hidden = true;
-    el.restartBtn.hidden = true;
+  }
+
+  /* The chooser. One tile per product, which with a single product is the
+     shelf rather than the shop, and that is the point of building it now. */
+  function toSplash() {
+    clearScreens();
+    el.attract.hidden = true;
+    el.splash.hidden = false;
+    el.restartBtn.hidden = true;        /* this IS the start */
+    armAttract();
+  }
+
+  /* A product's own front door: its picture, and the choice of being shown
+     round or poking about. */
+  function toAttract(p) {
+    p = p || st.pick || data.products[0];
+    clearScreens();
+    st.pick = p;
+    el.splash.hidden = true;
+    el.attract.hidden = false;
+    el.restartBtn.hidden = false;       /* a way back to the chooser */
+    el.attractKicker.textContent = 'Travelgenix \u00b7 ' + p.name;
+    var bg = imgUrl(p.splash);
+    if (bg) el.attractBg.style.backgroundImage = bg;
     armAttract();
     el.attractCta.focus({ preventScroll: true });
   }
@@ -136,6 +168,7 @@
     st.i = -1; st.screen = -1;
     st.seen = Object.create(null);
 
+    el.splash.hidden = true;     /* the walk can start straight off the chooser */
     el.attract.hidden = true;
     el.end.hidden = true;
     el.scene.hidden = false;
@@ -486,6 +519,36 @@
     poke();
   }
 
+  /* How long a product takes to watch, from the same dwell model the walk
+     itself uses, so the tile cannot drift away from the truth. */
+  function sizeOf(p) {
+    var spots = 0, ms = 0;
+    p.screens.forEach(function (s) {
+      spots += s.hotspots.length;
+      s.hotspots.forEach(function (h) { ms += dwellFor(h); });
+    });
+    return p.screens.length + ' screens \u00b7 ' + spots + ' points \u00b7 about ' +
+      Math.max(1, Math.round(ms / 60000)) + ' minutes';
+  }
+
+  function tileFor(p) {
+    var b = n('button', 'tg-tile');
+    b.type = 'button';
+    var art = n('span', 'tg-tile-art');
+    var url = imgUrl(p.tile);
+    if (url) art.style.backgroundImage = url;
+    b.appendChild(art);
+    var body = n('span', 'tg-tile-body');
+    body.appendChild(n('span', 'tg-tile-meta',
+      p.category + ' \u00b7 ' + p.status + ' ' + p.version));
+    body.appendChild(n('strong', null, p.name));
+    body.appendChild(n('span', 'tg-tile-line', p.tagline));
+    body.appendChild(n('span', 'tg-tile-foot', sizeOf(p)));
+    b.appendChild(body);
+    b.addEventListener('click', function () { disarmAttract(); toAttract(p); });
+    return b;
+  }
+
   /* ---------------------------------------------------------------- *
    * shell
    * ---------------------------------------------------------------- */
@@ -515,7 +578,7 @@
     restart.setAttribute('aria-label', 'Start over');
     restart.appendChild(svg(I.home));
     restart.appendChild(n('span', 'tg-btn-label', 'Start over'));
-    restart.addEventListener('click', toAttract);
+    restart.addEventListener('click', function () { toSplash(); });
     top.appendChild(restart);
 
     var contentsBtn = n('button', 'tg-btn');
@@ -611,9 +674,11 @@
 
     /* attract */
     var att = n('div', 'tg-attract');
-    att.appendChild(n('span', 'tg-attract-bg'));   /* its own box, so it can drift */
+    var attBg = n('span', 'tg-attract-bg');        /* its own box, so it can drift */
+    att.appendChild(attBg);
     var attIn = n('div', 'tg-attract-in');
-    attIn.appendChild(n('span', 'tg-kicker', 'Travelgenix'));
+    var attKicker = n('span', 'tg-kicker', 'Travelgenix');
+    attIn.appendChild(attKicker);
     attIn.appendChild(n('h1', null, 'See what your clients would see'));
     attIn.appendChild(n('p', null,
       'A walk through the app your travellers would carry, one feature at a time.'));
@@ -623,11 +688,11 @@
     goTour.setAttribute('data-ctl', '');
     goTour.appendChild(svg(I.play));
     goTour.appendChild(document.createTextNode('Show me round'));
-    goTour.addEventListener('click', function () { disarmAttract(); open(data.products[0]); tourStart(); });
+    goTour.addEventListener('click', function () { disarmAttract(); open(st.pick || data.products[0]); tourStart(); });
     var goSelf = n('button', 'tg-cta tg-cta--quiet');
     goSelf.type = 'button';
     goSelf.appendChild(document.createTextNode('Explore it myself'));
-    goSelf.addEventListener('click', function () { disarmAttract(); open(data.products[0]); });
+    goSelf.addEventListener('click', function () { disarmAttract(); open(st.pick || data.products[0]); });
     ctas.appendChild(goTour); ctas.appendChild(goSelf);
     attIn.appendChild(ctas);
     attIn.appendChild(n('span', 'tg-attract-note',
@@ -635,6 +700,24 @@
     att.appendChild(attIn);
     app.appendChild(att);
     el.attract = att; el.attractCta = goTour;
+    el.attractBg = attBg; el.attractKicker = attKicker;
+
+    /* splash: which walkthrough */
+    var splash = n('div', 'tg-splash');
+    splash.appendChild(n('span', 'tg-splash-bg'));
+    var spIn = n('div', 'tg-splash-in');
+    spIn.appendChild(n('span', 'tg-kicker', 'Travelgenix'));
+    spIn.appendChild(n('h1', null, 'Pick a walkthrough'));
+    spIn.appendChild(n('p', null,
+      'Each one is the real product, one feature at a time. They play themselves, ' +
+      'or you can take one at your own pace.'));
+    var tiles = n('div', 'tg-tiles');
+    data.products.forEach(function (p) { tiles.appendChild(tileFor(p)); });
+    spIn.appendChild(tiles);
+    splash.appendChild(spIn);
+    app.appendChild(splash);
+    el.splash = splash;
+
 
     /* contents */
     var sheet = n('div', 'tg-sheet');
@@ -672,7 +755,7 @@
     var browse = n('button', 'tg-cta tg-cta--quiet');
     browse.type = 'button';
     browse.appendChild(document.createTextNode('Back to the start'));
-    browse.addEventListener('click', function () { el.end.hidden = true; goTo(0); });
+    browse.addEventListener('click', function () { toSplash(); });
     endCtas.appendChild(again); endCtas.appendChild(browse);
     endCopy.appendChild(endCtas);
     endIn.appendChild(endCopy);
@@ -705,7 +788,7 @@
     window.__TG_SHOWCASE_BOOTED__ = true;
 
     build();
-    toAttract();
+    toSplash();
     chrome();
 
     if (window.ResizeObserver) {
@@ -739,6 +822,7 @@
   window.TGShowcase = {
     version: VERSION,
     open: open,
+    splash: toSplash,
     attract: toAttract,
     goTo: goTo,
     playTour: tourStart,

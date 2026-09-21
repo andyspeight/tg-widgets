@@ -217,6 +217,79 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tg-attract-note { display: block; margin-top: var(--space-6); font-size: var(--t-sm); color: rgba(255,255,255,.68); }
 
 /* ------------------------------------------------------------------ *
+ * The chooser
+ *
+ * With one product this is a shelf holding one thing, which is the point of
+ * building it now rather than later. It wears the same photographic treatment
+ * as a product's own front door, so walking from here into a walkthrough does
+ * not feel like a different website.
+ * ------------------------------------------------------------------ */
+
+.tg-splash {
+  position: absolute; inset: 0; z-index: 61; overflow: hidden;
+  display: grid; align-items: center; justify-items: start;
+  padding: clamp(28px, 6vw, 110px);
+  background: #0A1626;
+}
+.tg-splash-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: url(/showcase/img/splash.webp) center / cover no-repeat;
+  transform-origin: 64% 46%;
+  animation: tg-drift 30s var(--ease) infinite alternate;
+}
+/* Heavier than the front door's, because tiles sit on this one. */
+.tg-splash::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(100deg, rgba(7,18,32,.95) 0%, rgba(7,18,32,.88) 44%, rgba(7,18,32,.6) 76%, rgba(7,18,32,.3) 100%),
+    linear-gradient(to top, rgba(7,18,32,.6), transparent 46%);
+}
+.tg-splash-in { position: relative; z-index: 2; width: 100%; max-width: 1080px; }
+.tg-splash h1 {
+  font-size: var(--t-2xl); font-weight: 800; letter-spacing: -.035em; line-height: 1.02;
+  color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,.4);
+}
+.tg-splash p {
+  margin-top: var(--space-4);
+  font-size: var(--t-lg); color: rgba(255,255,255,.88); line-height: 1.45; max-width: 44ch;
+}
+
+/* auto-fill, not auto-fit: one product stays a tile rather than stretching
+   into a banner across the screen. */
+.tg-tiles {
+  margin-top: var(--space-8);
+  display: grid; gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(268px, 336px));
+}
+.tg-tile {
+  display: block; text-align: left; overflow: hidden;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.24);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: 0 18px 44px -20px rgba(0,0,0,.7);
+  transition: transform 220ms var(--ease), background 220ms var(--ease),
+              border-color 220ms var(--ease);
+}
+.tg-tile:hover { transform: translateY(-4px); background: rgba(255,255,255,.17); border-color: rgba(255,255,255,.5); }
+.tg-tile:active { transform: translateY(0) scale(.99); }
+.tg-tile-art {
+  display: block; height: 152px;
+  background: var(--tg-primary) center / cover no-repeat;
+}
+.tg-tile-body { display: flex; flex-direction: column; gap: 4px; padding: var(--space-5); }
+.tg-tile-meta {
+  font-size: var(--t-xs); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--tg-accent-light);
+}
+.tg-tile strong { font-size: var(--t-lg); font-weight: 800; letter-spacing: -.02em; color: #fff; }
+.tg-tile-line { font-size: var(--t-sm); color: rgba(255,255,255,.86); line-height: 1.45; }
+.tg-tile-foot {
+  margin-top: var(--space-2); font-size: var(--t-xs); color: rgba(255,255,255,.64);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ *
  * The scene: device on the left, one caption on the right.
  * Asymmetric on purpose. A centred pair reads as a slide, not a stand.
  * ------------------------------------------------------------------ */
@@ -949,6 +1022,21 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .tg-crumb { display: none; }          /* the caption already says where you are */
   .tg-btn { min-height: 46px; min-width: 46px; padding: 0 var(--space-4); }
   .tg-btn-label { display: none; }
+
+  .tg-splash {
+    position: fixed; align-items: start; justify-items: stretch;
+    overflow-y: auto; overscroll-behavior: contain;
+    padding: var(--space-6) var(--space-5) var(--space-10);
+  }
+  /* The chooser scrolls on a phone, so the picture and its scrim are pinned to
+     the viewport rather than to the content that moves over them. */
+  .tg-splash::after {
+    position: fixed; inset: 0;
+    background: linear-gradient(to top, rgba(7,18,32,.95) 0%, rgba(7,18,32,.9) 52%, rgba(7,18,32,.7) 100%);
+  }
+  .tg-splash-bg { position: fixed; }   /* it scrolls under, not with, the tiles */
+  .tg-tiles { grid-template-columns: 1fr; gap: var(--space-4); margin-top: var(--space-6); }
+  .tg-tile-art { height: 128px; }
 
   .tg-attract {
     position: fixed; align-items: end; justify-items: stretch;
