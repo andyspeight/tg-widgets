@@ -191,15 +191,26 @@ menu: 109 seats on that booking's outbound, every bag weight, the sports
 equipment list. The chosen rows are marked with `qtySelected` and nothing else
 tells them apart, so four seats and two hold bags were plain to the agent in
 Travelify and invisible to the customer for as long as the widget has existed.
-Read them with `trimFlightExtras()` from `api/_lib/travelify-items.js`, which
+Read them with `trimFlightSeating()` from `api/_lib/travelify-items.js`, which
 all three order endpoints call: there are three copies of `trimFlights` and a
 fourth copy of this would have been the Referer story again. It drops the
 placeholder rows Travelify also sends ("I do not want to pre-book my seat",
 marked `SEATID: NONE`) and carries NO prices, because a seat's `pricing.price`
 is a per-unit supplier figure that does not reconcile with the item total the
 customer sees (four seats at 18.49 / 18.49 / 18.99 / 18.99 arrive in the
-breakdown as one "Seat Selection Total" of 122.87). Guarded by
-`npm run test:mybooking-seats`.
+breakdown as one "Seat Selection Total" of 122.87).
+
+It also returns the `cabins`, the cabin plan behind the on-page seat map: the
+seat group states `cols` (column letter to block, so the aisle is wherever the
+block changes) and `startRow`/`endRow`. **The map may never show which other
+seats are free**, and nothing may be added that implies it: the extras list is
+only what was still on sale at the moment of booking, a row absent from it may
+be full rather than seatless (row 18 on ET122149), and by the time a customer
+opens their booking that snapshot is weeks stale. Every seat but the
+customer's own is drawn the same and the note under the map says so. The map is
+the page only: the PDF and the email carry the seats as text (Andy, 21 Sep
+2026: "no good for the printed version but the online version could show it as
+a pop up"). All guarded by `npm run test:mybooking-seats`.
 
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or

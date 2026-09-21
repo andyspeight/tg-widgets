@@ -32,7 +32,7 @@
 import { travelifyAuthHeaders } from './_lib/travelify.js';
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightExtras } from './_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
 const WIDGETS_TABLE = 'tblVAThVqAjqtria2';
@@ -494,6 +494,7 @@ function trimFlights(d) {
         surname: safeStr(t.surname, 80),
       }))
     : [];
+  const seating = trimFlightSeating(d, travellers);
   return {
     fareType: safeStr(d.fareType, 40),
     openJaw: !!d.openJaw,
@@ -522,9 +523,10 @@ function trimFlights(d) {
         })).filter(f => f.text)
       : [],
     travellers,
-    // The seats and bags chosen on this flight; see trimFlightExtras in
-    // api/_lib/travelify-items.js.
-    extras: trimFlightExtras(d, travellers),
+    // What was chosen on this flight, and the cabin plan to draw a seat map
+    // on; see trimFlightSeating in api/_lib/travelify-items.js.
+    extras: seating.extras,
+    cabins: seating.cabins,
   };
 }
 

@@ -27,7 +27,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
-import { trimFlightExtras } from '../api/_lib/travelify-items.js';
+import { trimFlightSeating } from '../api/_lib/travelify-items.js';
 import { moneyOf } from '../api/_lib/order-money.js';
 import { renderPdfHtml } from '../public/_pdf-template.js';
 import { renderBookingEmail } from '../public/_booking-email-template.js';
@@ -60,7 +60,8 @@ const EXTRA_GROUPS = [
   },
   {
     gid: '2', type: 'Seat', travellerTypes: ['Adult'], name: 'Seats: LTN-LTN EZY2381',
-    bookingData: { FlightNumber: 'EZY2381', AircraftType: '320B', Currency: 'GBP', Supplier: 'EZJ', DeparturePoint: 'LTN' },
+    bookingData: { FlightNumber: 'EZY2381', AircraftType: '320B', NumberOfBlocks: '2', Currency: 'GBP', Supplier: 'EZJ', DeparturePoint: 'LTN' },
+    cabin: { cols: { A: 1, B: 1, C: 1, D: 2, E: 2, F: 2 }, startRow: 1, endRow: 31 },
     extras: [
       { eid: '0', bookingData: { SEATID: 'NONE' }, type: 'Seat', name: 'I do not want to pre-book my seat for this flight', isPayAtPickup: false, maxQty: 1, qtySelected: 1 },
       { eid: '1', bookingData: { SeatBandID: '1', Num: '1A', BandId: '1', Block: '1', row: '1' }, type: 'Generic', name: 'Window Seat 1A (Extra legroom)', seat: { col: 'A', row: 1 }, maxQty: 1, pricing: { currency: 'GBP', price: 24.99 } },
@@ -70,7 +71,8 @@ const EXTRA_GROUPS = [
   },
   {
     gid: '3', type: 'Seat', travellerTypes: ['Adult'], name: 'Seats: RHO-RHO EZY2382',
-    bookingData: { FlightNumber: 'EZY2382', AircraftType: '320B', Currency: 'GBP', Supplier: 'EZJ', DeparturePoint: 'RHO' },
+    bookingData: { FlightNumber: 'EZY2382', AircraftType: '320B', NumberOfBlocks: '2', Currency: 'GBP', Supplier: 'EZJ', DeparturePoint: 'RHO' },
+    cabin: { cols: { A: 1, B: 1, C: 1, D: 2, E: 2, F: 2 }, startRow: 1, endRow: 31 },
     extras: [
       { eid: '10', bookingData: { SeatBandID: '2', Num: '3B', BandId: '2', Block: '1', row: '3', PaxID: '1' }, type: 'Generic', name: 'Middle Seat 3B (Up Front) Block 1 Row 3', seat: { col: 'B', row: 3 }, isPayAtPickup: false, maxQty: 1, qtySelected: 1, pricing: { currency: 'GBP', price: 18.99 } },
       { eid: '11', bookingData: { SeatBandID: '2', Num: '3C', BandId: '2', Block: '1', row: '3', PaxID: '0' }, type: 'Generic', name: 'Aisle Seat 3C (Up Front) Block 1 Row 3', seat: { col: 'C', row: 3 }, isPayAtPickup: false, maxQty: 1, qtySelected: 1, pricing: { currency: 'GBP', price: 18.99 } },
@@ -83,7 +85,9 @@ const VOUCHER = { id: 979, code: 'SUNSHINE30', name: '30 GBP DISCOUNT ON ACCOMMO
 // ── The trimmed order the browser, the PDF and the email all receive ─────────
 
 const people = TRAVELLERS.map(t => ({ type: t.type, title: t.title, firstname: t.firstname, surname: t.surname }));
-const EXTRAS = trimFlightExtras({ extraGroups: EXTRA_GROUPS }, people);
+const SEATING = trimFlightSeating({ extraGroups: EXTRA_GROUPS }, people);
+const EXTRAS = SEATING.extras;
+const CABINS = SEATING.cabins;
 
 const seg = (from, fromName, to, toName, depart, arrive, flightNo) => ({
   origin: { iataCode: from, name: fromName, country: from === 'RHO' ? 'GR' : 'GB' },
@@ -123,7 +127,7 @@ const ORDER = {
           { legID: 0, direction: 'Outbound', duration: 255, segments: [seg('LTN', 'Luton (LTN)', 'RHO', 'Diagoras (RHO)', '2026-10-02T12:55:00Z', '2026-10-02T19:10:00Z', 'EZY2381')] },
           { legID: 1, direction: 'Inbound', duration: 265, segments: [seg('RHO', 'Diagoras (RHO)', 'LTN', 'Luton (LTN)', '2026-10-16T19:55:00Z', '2026-10-16T22:20:00Z', 'EZY2382')] },
         ],
-        fareInformation: [], travellers: people, extras: EXTRAS,
+        fareInformation: [], travellers: people, extras: EXTRAS, cabins: CABINS,
       },
     },
   ],
@@ -164,17 +168,17 @@ console.log('Only the chosen seats and bags survive the trim');
 
 console.log('The trim holds up against junk');
 {
-  ok('no extraGroups at all', trimFlightExtras({}, people).length === 0);
-  ok('a string where the groups should be', trimFlightExtras({ extraGroups: 'nope' }, people).length === 0);
-  ok('null entries in the list', trimFlightExtras({ extraGroups: [null, undefined] }, people).length === 0);
+  ok('no extraGroups at all', trimFlightSeating({}, people).extras.length === 0);
+  ok('a string where the groups should be', trimFlightSeating({ extraGroups: 'nope' }, people).extras.length === 0);
+  ok('null entries in the list', trimFlightSeating({ extraGroups: [null, undefined] }, people).extras.length === 0);
   ok('no travellers to resolve a PaxID against',
-    trimFlightExtras({ extraGroups: EXTRA_GROUPS }, []).filter(x => x.seat).every(x => x.traveller === null));
+    trimFlightSeating({ extraGroups: EXTRA_GROUPS }, []).extras.filter(x => x.seat).every(x => x.traveller === null));
   ok('a PaxID beyond the party resolves to nobody rather than throwing',
-    trimFlightExtras({ extraGroups: [{ type: 'Seat', extras: [{ bookingData: { Num: '9F', PaxID: '99' }, name: 'Seat 9F', qtySelected: 1 }] }], people }, people)[0].traveller === null);
+    trimFlightSeating({ extraGroups: [{ type: 'Seat', extras: [{ bookingData: { Num: '9F', PaxID: '99' }, name: 'Seat 9F', qtySelected: 1 }] }] }, people).extras[0].traveller === null);
   ok('a seat with no Num falls back to its row and column',
-    trimFlightExtras({ extraGroups: [{ type: 'Seat', extras: [{ bookingData: { SeatBandID: '2' }, seat: { row: 4, col: 'D' }, name: 'Seat', qtySelected: 1 }] }] }, people)[0].seat === '4D');
+    trimFlightSeating({ extraGroups: [{ type: 'Seat', extras: [{ bookingData: { SeatBandID: '2' }, seat: { row: 4, col: 'D' }, name: 'Seat', qtySelected: 1 }] }] }, people).extras[0].seat === '4D');
   ok('qtySelected of 0 is not a selection',
-    trimFlightExtras({ extraGroups: [{ type: 'Luggage', extras: [{ bookingData: { Code: 'LUG' }, name: 'A bag', qtySelected: 0 }] }] }, people).length === 0);
+    trimFlightSeating({ extraGroups: [{ type: 'Luggage', extras: [{ bookingData: { Code: 'LUG' }, name: 'A bag', qtySelected: 0 }] }] }, people).extras.length === 0);
 }
 
 // ══ 2. The page ══════════════════════════════════════════════════════════════
@@ -250,18 +254,108 @@ console.log('The confirmation email says the same');
     /paid in full/i.test(html) && !html.includes('SUNSHINE30') && !text.includes('SUNSHINE30'));
 }
 
+console.log('The cabin plan comes through for the seat map');
+{
+  ok('one cabin per seat group, and none for the luggage group', CABINS.length === 2);
+  const out = CABINS[0];
+  ok('it knows its flight and aircraft', out.flightNo === 'EZY2381' && out.aircraft === '320B' && out.departure === 'LTN');
+  ok('31 rows, as Travelify states them', out.startRow === 1 && out.endRow === 31);
+  ok('six columns, in block then letter order',
+    out.columns.map(c2 => c2.col).join('') === 'ABCDEF', JSON.stringify(out.columns));
+  ok('the aisle is where the block number changes, after C',
+    out.columns.filter(c2 => c2.block === 1).map(c2 => c2.col).join('') === 'ABC'
+    && out.columns.filter(c2 => c2.block === 2).map(c2 => c2.col).join('') === 'DEF');
+  ok('each cabin joins to its own seats by id',
+    EXTRAS.filter(x => x.cabinId === out.id).map(x => x.seat).join(',') === '2C,2B');
+  ok('a seat carries its row, column, position and the supplier band',
+    EXTRAS[0].seatRow === 2 && EXTRAS[0].seatCol === 'C' && EXTRAS[0].position === 'Aisle' && EXTRAS[0].band === 'Up Front',
+    JSON.stringify(EXTRAS[0]));
+  ok('the middle seat reads as Middle', EXTRAS[1].position === 'Middle' && EXTRAS[1].seatCol === 'B');
+}
+
+console.log('A cabin is only drawn when the supplier states one');
+{
+  const noCabin = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', extras: [{ bookingData: { Num: '4A' }, name: 'Seat 4A', qtySelected: 1 }] }] }, people);
+  ok('no cabin block, no cabin', noCabin.cabins.length === 0 && noCabin.extras.length === 1);
+  const halfCabin = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1 } }, extras: [] }] }, people);
+  ok('a cabin with no rows is dropped rather than guessed', halfCabin.cabins.length === 0);
+  const backwards = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1 }, startRow: 9, endRow: 2 }, extras: [] }] }, people);
+  ok('an end row before the start row is dropped', backwards.cabins.length === 0);
+  const huge = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1 }, startRow: 1, endRow: 9999 }, extras: [] }] }, people);
+  ok('an absurd cabin is dropped rather than drawn', huge.cabins.length === 0);
+  const wide = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1, C: 2, D: 2, E: 2, F: 2, G: 3, H: 3 }, startRow: 1, endRow: 40 }, extras: [] }] }, people);
+  ok('a widebody keeps all three blocks, so it gets two aisles',
+    wide.cabins[0].columns.map(c2 => c2.block).join('') === '11222233');
+}
+
+console.log('The seat map opens from the page');
+{
+  ok('each leg with seats offers the map', (page.match(/data-tgm-seatmap="/g) || []).length === 2);
+  ok('the button carries the cabin its seats belong to',
+    page.includes('data-tgm-seatmap="2"') && page.includes('data-tgm-seatmap="3"'));
+  ok('the label is there', /View seat map/.test(page));
+
+  inst._openSeatMap('2');
+  const map = host.shadowRoot.innerHTML;
+  ok('a dialog opened', /data-tgm-seatmap-backdrop/.test(map) && /aria-modal="true"/.test(map));
+  ok('it names the flight and the aircraft', /EZY2381/.test(map) && /320B/.test(map));
+
+  // 31 rows plus the header, six seats a row plus an aisle cell and a number.
+  const rowCount = (map.match(/class="tgm-seat-row"/g) || []).length;
+  ok('the whole cabin is drawn, all 31 rows', rowCount === 31, 'got ' + rowCount);
+  const seatCount = (map.match(/class="tgm-seat"/g) || []).length;
+  ok('186 plain seats, the 2 held ones drawn apart', seatCount === 31 * 6 - 2, 'got ' + seatCount);
+  ok('exactly the two seats on this flight are marked',
+    (map.match(/tgm-seat is-mine/g) || []).length === 2 + 2, 'grid + list, got ' + (map.match(/tgm-seat is-mine/g) || []).length);
+  ok('the initials sit in the seat', />GC</.test(map) && />MC</.test(map));
+  ok('the list names the seat, the traveller and what kind of seat it is',
+    /2C<\/strong> · Gillian Clark/.test(map) && /Aisle · Up Front/.test(map) && /Middle · Up Front/.test(map));
+  ok('the return leg\'s seats are not on the outbound map', !/>3C</.test(map) && !/3C<\/strong>/.test(map));
+  ok('the front of the aircraft is marked', /Front of aircraft/.test(map));
+
+  // The list of seats still for sale is a snapshot from booking time. Nothing
+  // on the map may read as "this one is free".
+  ok('no seat is called available or taken',
+    !/available/i.test(map.replace(/isAvailable/g, '')) && !/\btaken\b/i.test(map) && !/occupied/i.test(map));
+  ok('the note says the map is a plan, not live availability',
+    /does not show which other seats are free/.test(map));
+  ok('a screen reader gets the seats in words',
+    /Seat map for flight EZY2381\. Your seats: 2C Gillian Clark, 2B Michael Clark\./.test(map));
+
+  inst._closeSeatMap();
+  ok('closing clears the dialog', !/data-tgm-seatmap-backdrop/.test(host.shadowRoot.innerHTML));
+
+  inst._openSeatMap('3');
+  const back = host.shadowRoot.innerHTML;
+  ok('the return leg opens its own map, with its own seats',
+    /EZY2382/.test(back) && /3C<\/strong> · Gillian Clark/.test(back) && /3B<\/strong> · Michael Clark/.test(back));
+  ok('and none of the outbound seats on it', !/2C<\/strong>/.test(back) && !/2B<\/strong>/.test(back));
+  inst._closeSeatMap();
+  ok('an unknown cabin id opens nothing rather than throwing',
+    (() => { inst._openSeatMap('nope'); return !/data-tgm-seatmap-backdrop/.test(host.shadowRoot.innerHTML); })());
+}
+
+console.log('The map is an online thing only, as asked');
+{
+  const pdfOnly = renderPdfHtml(WITH_MONEY, { brandName: 'Exclusively Travel' });
+  const mailOnly = renderBookingEmail({ order: WITH_MONEY, orderRef: 'ET122149', brand: { name: 'Exclusively Travel' } }).html;
+  ok('no seat grid in the PDF', !/tgm-seat-grid|Front of aircraft/.test(pdfOnly));
+  ok('no seat grid in the email', !/tgm-seat-grid|Front of aircraft/.test(mailOnly));
+  ok('both still carry the seats in words', /Seat 2C/.test(pdfOnly) && /2C Gillian Clark/.test(mailOnly));
+}
+
 // ══ 4. Drift ═════════════════════════════════════════════════════════════════
 
 console.log('There is ONE trim, and every order endpoint calls it');
 {
   const SHARED = R('api/_lib/travelify-items.js');
-  ok('the trim lives in the shared module', /export function trimFlightExtras\(/.test(SHARED));
+  ok('the trim lives in the shared module', /export function trimFlightSeating\(/.test(SHARED));
   for (const f of ['api/retrieve-order.js', 'api/internal/retrieve-order-by-client.js', 'api/booking-pdf.js']) {
     const src = R(f);
     ok(f + ' imports it and hangs it off the flights item',
-      /trimFlightExtras[^\n]*from '[^']*travelify-items\.js'/.test(src)
-      && /extras: trimFlightExtras\(d, travellers\)/.test(src));
-    ok(f + ' has no second copy of its own', src.split('function trimFlightExtras(').length === 1);
+      /trimFlightSeating[^\n]*from '[^']*travelify-items\.js'/.test(src)
+      && /extras: seating\.extras/.test(src) && /cabins: seating\.cabins/.test(src));
+    ok(f + ' has no second copy of its own', src.split('function trimFlightSeating(').length === 1);
   }
   ok('the page and the PDF split the extras the same way',
     /function splitFlightExtras\(f\)/.test(R('public/widget-mybooking.js'))

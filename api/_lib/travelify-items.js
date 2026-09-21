@@ -326,16 +326,30 @@ function exNum(v) {
   return v;
 }
 
-// The seats and bags the customer actually chose (21 Sep 2026, Exclusively
-// Travel ET122149). Travelify hands back the WHOLE menu for a flight in
-// dataObject.extraGroups: every seat on the aircraft, every bag weight, sports
-// equipment. The chosen ones are marked with qtySelected, and nothing else
-// distinguishes them, which is why none of this reached the customer while the
-// agent could see it plainly in Travelify. We keep only what was selected.
+// The seats and bags the customer actually chose, and the cabin plan they sit
+// in (21 Sep 2026, Exclusively Travel ET122149). Travelify hands back the WHOLE
+// menu for a flight in dataObject.extraGroups: every seat it could still sell
+// (109 on ET122149's outbound), every bag weight, sports equipment. The chosen
+// ones are marked with qtySelected, and nothing else distinguishes them, which
+// is why none of this reached the customer while the agent could see it plainly
+// in Travelify.
 //
-// A real selection always carries bookingData: the "I do not want to pre-book
-// my seat" and "I don't want to add any optional baggage upgrades" rows are
-// placeholders, and the seat one is marked SEATID: NONE. Both are dropped.
+// Returns { extras, cabins }:
+//   extras  what was chosen. A real selection always carries bookingData: the
+//           "I do not want to pre-book my seat" and "I don't want to add any
+//           optional baggage upgrades" rows are placeholders, and the seat one
+//           is marked SEATID: NONE. Both are dropped.
+//   cabins  one per seat group, the grid to draw a seat map on. Travelify
+//           states it outright: cols maps each column letter to the block it
+//           sits in (A B C in block 1, D E F in block 2 on a 320), and
+//           startRow/endRow give the length. The aisle is wherever the block
+//           changes. Each joins to its seats by cabinId.
+//
+// The cabin is the supplier's own plan of the aircraft, so drawing every seat
+// on it is reading their data. What must NEVER be drawn from this is which
+// seats are free: extras lists only what was still on sale at booking, a row
+// missing from it (18, on this booking) may be full rather than seatless, and
+// by the time a customer opens the page that snapshot is weeks stale.
 //
 // Prices are deliberately NOT carried. A seat's pricing.price is the supplier's
 // own per-unit figure and it does not reconcile with the item total the
@@ -344,11 +358,12 @@ function exNum(v) {
 // 122.87, and two hold bags at 105.98 each are charged at 106.48. Printing
 // either number next to a total it does not add up to would invent a
 // discrepancy, so these read as WHAT was booked, never what it cost.
-export function trimFlightExtras(d, travellers) {
+export function trimFlightSeating(d, travellers) {
   const groups = Array.isArray(d && d.extraGroups) ? d.extraGroups : [];
   const people = Array.isArray(travellers) ? travellers : [];
   const seats = [];
   const others = [];
+  const cabins = [];
 
   groups.slice(0, 12).forEach((g, gi) => {
     if (!g || typeof g !== 'object') return;
@@ -357,6 +372,9 @@ export function trimFlightExtras(d, travellers) {
     const groupName = exStr(g.name, 120);
     const flightNo = exStr(bd.FlightNumber, 20);
     const departure = exStr(bd.DeparturePoint, 10);
+    const cabinId = exStr(g.gid != null ? g.gid : gi, 20);
+    const cabin = trimCabin(g.cabin, cabinId, flightNo, departure, exStr(bd.AircraftType, 20));
+    if (cabin) cabins.push(cabin);
     const list = Array.isArray(g.extras) ? g.extras : [];
 
     for (const e of list) {
@@ -393,7 +411,22 @@ export function trimFlightExtras(d, travellers) {
         traveller,
         payAtPickup: !!e.isPayAtPickup,
       };
-      if (seatNum) { row.groupIndex = gi; seats.push(row); } else { others.push(row); }
+      if (seatNum) {
+        row.cabinId = cabinId;
+        row.seatRow = seatRowOf(e, ebd);
+        row.seatCol = seatColOf(e, ebd, seatNum);
+        // Window / Middle / Aisle, from the ftr code (REW, M, RA and the rest
+        // all end in the one that matters), falling back to the name Travelify
+        // writes in front of "Seat".
+        row.position = positionOf(e);
+        // The supplier's own words for the seat band: "Up Front", "Extra
+        // legroom", "Rear Standard". Shown verbatim, never translated.
+        row.band = bandOf(e.name);
+        row.groupIndex = gi;
+        seats.push(row);
+      } else {
+        others.push(row);
+      }
       if (seats.length + others.length >= 60) break;
     }
   });
@@ -402,5 +435,60 @@ export function trimFlightExtras(d, travellers) {
   // page the same way it reads on the ticket.
   seats.sort((a, b) => (a.groupIndex - b.groupIndex) || ((a.paxIndex == null ? 99 : a.paxIndex) - (b.paxIndex == null ? 99 : b.paxIndex)));
   for (const s2 of seats) delete s2.groupIndex;
-  return seats.concat(others);
+  return { extras: seats.concat(others), cabins };
+}
+
+/** The cabin grid for one seat group, or null when the group states none. */
+function trimCabin(cabin, id, flightNo, departure, aircraft) {
+  if (!cabin || typeof cabin !== 'object') return null;
+  const startRow = exNum(cabin.startRow);
+  const endRow = exNum(cabin.endRow);
+  const cols = (cabin.cols && typeof cabin.cols === 'object') ? cabin.cols : null;
+  if (!cols || !Number.isInteger(startRow) || !Number.isInteger(endRow)) return null;
+  if (startRow < 0 || endRow < startRow || endRow - startRow > 120) return null;
+
+  // Column letter -> the block it sits in. Ordered by block, then letter, which
+  // is how Travelify's own letters run left to right, so the aisle falls
+  // wherever the block number changes. Two blocks on a narrowbody, three on a
+  // widebody; the renderer never has to know which.
+  const columns = Object.keys(cols)
+    .slice(0, 16)
+    .map((k) => ({ col: exStr(k, 4), block: exNum(Number(cols[k])) }))
+    .filter((c) => c.col && Number.isInteger(c.block))
+    .sort((a, b) => (a.block - b.block) || (a.col < b.col ? -1 : a.col > b.col ? 1 : 0))
+    .slice(0, 12);
+  if (!columns.length) return null;
+
+  return { id, flightNo, departure, aircraft, startRow, endRow, columns };
+}
+
+function seatRowOf(e, ebd) {
+  const fromSeat = e.seat ? exNum(Number(e.seat.row)) : null;
+  if (Number.isInteger(fromSeat)) return fromSeat;
+  const fromBooking = exNum(Number(ebd.row));
+  return Number.isInteger(fromBooking) ? fromBooking : null;
+}
+
+function seatColOf(e, ebd, seatNum) {
+  const fromSeat = e.seat ? exStr(e.seat.col, 4) : null;
+  if (fromSeat) return fromSeat;
+  const m = /([A-Za-z]+)\s*$/.exec(String(seatNum || ''));
+  return m ? m[1] : null;
+}
+
+const SEAT_POSITIONS = { W: 'Window', M: 'Middle', A: 'Aisle' };
+
+function positionOf(e) {
+  const ftr = e.seat ? String(e.seat.ftr || '') : '';
+  const last = ftr.slice(-1).toUpperCase();
+  if (SEAT_POSITIONS[last]) return SEAT_POSITIONS[last];
+  const m = /^(Window|Middle|Aisle)\s+Seat\b/i.exec(String(e.name || ''));
+  if (!m) return null;
+  return m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
+}
+
+/** "Aisle Seat 2C (Up Front) Block 1 Row 2" -> "Up Front". */
+function bandOf(name) {
+  const m = /\(([^)]{1,40})\)/.exec(String(name || ''));
+  return m ? exStr(m[1].trim(), 40) : null;
 }

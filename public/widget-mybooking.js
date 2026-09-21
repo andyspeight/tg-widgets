@@ -12,8 +12,18 @@
  *     invisible to the customer. Seats sit under the leg they belong to,
  *     matched on flight number, each named for its traveller via PaxID; bags
  *     and anything else sit on the flight card. The same rows are in the PDF
- *     and the confirmation email. No prices: see trimFlightExtras in
+ *     and the confirmation email. No prices: see trimFlightSeating in
  *     api/_lib/travelify-items.js for why.
+ *   - A seat map, on the page only. The seat group also carries the cabin
+ *     plan: cols maps each column letter to its block (A B C in block 1,
+ *     D E F in block 2 on a 320) and startRow/endRow give the length, so the
+ *     aisle falls wherever the block changes and a widebody's two aisles need
+ *     no special case. "View seat map" on a leg opens it in the existing modal
+ *     mount, the party's seats marked and named. It does NOT show which other
+ *     seats are free, and must not be made to: the extras list is only what
+ *     was still on sale at booking, a row missing from it may be full rather
+ *     than seatless, and by the time a customer opens the page that snapshot
+ *     is weeks old. The PDF and the email keep the text and get no grid.
  *   - A discount voucher counts against the balance, like a gift voucher.
  *     ET122149 used SUNSHINE30 (-£30, isGift false) and read as £30 still to
  *     pay against Travelify's zero, because our total is the item prices
@@ -575,6 +585,16 @@
       seat: 'Seat',
       seatsChosen: 'Seats you chose',
       bookedExtras: 'Baggage and extras',
+      seatMapOpen: 'View seat map',
+      seatMapTitle: 'Seat map',
+      seatMapFront: 'Front of aircraft',
+      seatMapYours: 'Your seat',
+      seatMapPlanNote: 'The cabin plan with your seats marked. It does not show which other seats are free.',
+      seatMapRow: 'Row',
+      seatMapAria: 'Seat map for flight {flight}. Your seats: {seats}.',
+      seatWindow: 'Window',
+      seatMiddle: 'Middle',
+      seatAisle: 'Aisle',
       thisProduct: 'this product',
       product: 'product',
       cancelPrefix: 'Cancel',
@@ -834,6 +854,16 @@
       seat: 'Siège',
       seatsChosen: 'Vos sièges',
       bookedExtras: 'Bagages et extras',
+      seatMapOpen: 'Voir le plan de cabine',
+      seatMapTitle: 'Plan de cabine',
+      seatMapFront: 'Avant de l\'appareil',
+      seatMapYours: 'Votre siège',
+      seatMapPlanNote: 'Le plan de cabine avec vos sièges indiqués. Il ne montre pas les sièges encore libres.',
+      seatMapRow: 'Rangée',
+      seatMapAria: 'Plan de cabine du vol {flight}. Vos sièges : {seats}.',
+      seatWindow: 'Hublot',
+      seatMiddle: 'Milieu',
+      seatAisle: 'Couloir',
       thisProduct: 'ce produit',
       product: 'produit',
       cancelPrefix: 'Annuler',
@@ -1093,6 +1123,16 @@
       seat: 'Sitzplatz',
       seatsChosen: 'Ihre Sitzplätze',
       bookedExtras: 'Gepäck und Extras',
+      seatMapOpen: 'Sitzplan ansehen',
+      seatMapTitle: 'Sitzplan',
+      seatMapFront: 'Vorderseite des Flugzeugs',
+      seatMapYours: 'Ihr Sitzplatz',
+      seatMapPlanNote: 'Der Kabinenplan mit Ihren Sitzplätzen. Er zeigt nicht, welche anderen Plätze frei sind.',
+      seatMapRow: 'Reihe',
+      seatMapAria: 'Sitzplan für Flug {flight}. Ihre Sitzplätze: {seats}.',
+      seatWindow: 'Fenster',
+      seatMiddle: 'Mitte',
+      seatAisle: 'Gang',
       thisProduct: 'dieses Produkt',
       product: 'Produkt',
       cancelPrefix: 'Stornieren',
@@ -1352,6 +1392,16 @@
       seat: 'Asiento',
       seatsChosen: 'Tus asientos',
       bookedExtras: 'Equipaje y extras',
+      seatMapOpen: 'Ver mapa de asientos',
+      seatMapTitle: 'Mapa de asientos',
+      seatMapFront: 'Parte delantera del avión',
+      seatMapYours: 'Tu asiento',
+      seatMapPlanNote: 'El plano de la cabina con tus asientos marcados. No muestra qué otros asientos están libres.',
+      seatMapRow: 'Fila',
+      seatMapAria: 'Mapa de asientos del vuelo {flight}. Tus asientos: {seats}.',
+      seatWindow: 'Ventanilla',
+      seatMiddle: 'Centro',
+      seatAisle: 'Pasillo',
       thisProduct: 'este producto',
       product: 'producto',
       cancelPrefix: 'Cancelar',
@@ -1611,6 +1661,16 @@
       seat: 'Posto',
       seatsChosen: 'I tuoi posti',
       bookedExtras: 'Bagagli ed extra',
+      seatMapOpen: 'Vedi la mappa dei posti',
+      seatMapTitle: 'Mappa dei posti',
+      seatMapFront: 'Parte anteriore dell\'aereo',
+      seatMapYours: 'Il tuo posto',
+      seatMapPlanNote: 'La pianta della cabina con i tuoi posti indicati. Non mostra quali altri posti sono liberi.',
+      seatMapRow: 'Fila',
+      seatMapAria: 'Mappa dei posti del volo {flight}. I tuoi posti: {seats}.',
+      seatWindow: 'Finestrino',
+      seatMiddle: 'Centrale',
+      seatAisle: 'Corridoio',
       thisProduct: 'questo prodotto',
       product: 'prodotto',
       cancelPrefix: 'Annulla',
@@ -1870,6 +1930,16 @@
       seat: 'Loc',
       seatsChosen: 'Locurile tale',
       bookedExtras: 'Bagaje și extra',
+      seatMapOpen: 'Vezi harta locurilor',
+      seatMapTitle: 'Harta locurilor',
+      seatMapFront: 'Partea din față a avionului',
+      seatMapYours: 'Locul tău',
+      seatMapPlanNote: 'Planul cabinei cu locurile tale marcate. Nu arată ce alte locuri sunt libere.',
+      seatMapRow: 'Rând',
+      seatMapAria: 'Harta locurilor pentru zborul {flight}. Locurile tale: {seats}.',
+      seatWindow: 'Geam',
+      seatMiddle: 'Mijloc',
+      seatAisle: 'Culoar',
       thisProduct: 'acest produs',
       product: 'produs',
       cancelPrefix: 'Anulează',
@@ -2023,6 +2093,7 @@
     van:     'M3 17h18M3 17V8a1 1 0 0 1 1-1h11l4 5h1a1 1 0 0 1 1 1v4M7 17v2M17 17v2M15 7v5h5',
     ticket:  'M3 7v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zM13 5v14',
     seat:    'M6 5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v7H6zM4 12h16v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM7 19v2M17 19v2',
+    grid:    'M4 3h6v6H4zM14 3h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
   };
   function svg(p, sw, size) {
     sw = sw || 2;
@@ -2800,6 +2871,35 @@
     .tgm-extra-chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .tgm-extra-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 9999px; background: var(--tgm-bg-2); font-size: 13px; color: var(--tgm-text); }
     .tgm-extra-chip svg { color: var(--tgm-text-3); flex-shrink: 0; }
+    .tgm-seatmap-open { margin-top: 10px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 9999px; border: 1px solid var(--tgm-border); background: var(--tgm-bg); color: var(--tgm-text); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: border-color .15s, color .15s; }
+    .tgm-seatmap-open:hover { border-color: var(--tgm-accent); color: var(--tgm-accent-dark); }
+    .tgm-seatmap-open svg { color: var(--tgm-text-3); flex-shrink: 0; }
+    .tgm-seatmap-open:hover svg { color: var(--tgm-accent-dark); }
+
+    /* ===== Seat map (ET122149, 21 Sep 2026) =====
+       Drawn from the cabin plan Travelify states on the seat group. Only the
+       customer's own seats are marked: see renderSeatMap for why nothing here
+       may claim another seat is free. */
+    .tgm-modal--seatmap { max-width: 460px; }
+    .tgm-seatmap { --tgm-seat-size: 30px; --tgm-seat-aisle: 18px; --tgm-seat-gutter: 24px; }
+    .tgm-seat-nose { text-align: center; font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--tgm-text-3); padding-bottom: 10px; border-bottom: 1px dashed var(--tgm-border); margin-bottom: 12px; }
+    .tgm-seat-grid { display: flex; flex-direction: column; gap: 4px; }
+    .tgm-seat-row { display: grid; gap: 4px; justify-content: center; align-items: center; }
+    .tgm-seat-head { margin-bottom: 2px; }
+    .tgm-seat-col { font-size: 10px; font-weight: 600; color: var(--tgm-text-3); text-align: center; }
+    .tgm-seat-rownum { font-size: 10px; color: var(--tgm-text-3); text-align: right; padding-right: 4px; font-variant-numeric: tabular-nums; }
+    .tgm-seat { height: 26px; border-radius: 5px 5px 7px 7px; border: 1px solid var(--tgm-border); background: var(--tgm-bg-2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--tgm-text-3); }
+    .tgm-seat.is-mine { background: var(--tgm-accent); border-color: var(--tgm-accent-dark); color: #fff; box-shadow: 0 0 0 2px var(--tgm-bg), 0 0 0 4px var(--tgm-accent); }
+    .tgm-seat-aisle-cell { display: block; }
+    .tgm-seat-list { list-style: none; margin: 0 0 18px; padding: 0 0 16px; border-bottom: 1px solid var(--tgm-border-light); display: flex; flex-direction: column; gap: 10px; }
+    .tgm-seat-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--tgm-text); }
+    .tgm-seat-list .tgm-seat { width: 34px; flex-shrink: 0; }
+    .tgm-seat-detail { display: block; font-size: 12px; color: var(--tgm-text-3); }
+    .tgm-seat-note { margin: 14px 0 0; font-size: 12px; line-height: 1.6; color: var(--tgm-text-3); }
+    @media (max-width: 400px) {
+      .tgm-seatmap { --tgm-seat-size: 26px; --tgm-seat-aisle: 14px; --tgm-seat-gutter: 20px; }
+      .tgm-seat { height: 23px; }
+    }
 
     .tgm-segs { padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--tgm-border-light); }
     .tgm-seg { display: grid; grid-template-columns: 60px 1fr 60px; gap: 12px; padding: 10px 0; align-items: center; font-size: 13px; }
@@ -3096,6 +3196,94 @@
     return `${qty}${x.name}${who}`;
   }
 
+  /**
+   * The cabin, drawn from the plan Travelify states in the seat group: cols
+   * maps each column letter to its block, startRow and endRow give the length,
+   * and the aisle falls wherever the block number changes.
+   *
+   * What this NEVER shows is which other seats are free. The extras list holds
+   * only what was still on sale at the moment of booking, a row missing from it
+   * may be full rather than seatless, and by the time a customer opens this the
+   * snapshot is weeks old. So every seat but the customer's own is drawn the
+   * same, and the note under the map says as much.
+   */
+  function renderSeatMap(cabin, seats, c) {
+    const t = (k, v) => (c && c.t ? c.t(k, v) : k);
+    if (!cabin || !Array.isArray(cabin.columns) || !cabin.columns.length) return '';
+
+    const startRow = Number(cabin.startRow);
+    const endRow = Number(cabin.endRow);
+    if (!Number.isInteger(startRow) || !Number.isInteger(endRow) || endRow < startRow) return '';
+
+    const mine = {};
+    for (const x of (Array.isArray(seats) ? seats : [])) {
+      if (x && x.seatRow != null && x.seatCol) mine[`${x.seatRow}|${String(x.seatCol).toUpperCase()}`] = x;
+    }
+
+    // Columns in block order with an aisle wherever the block changes.
+    const cells = [];
+    let lastBlock = null;
+    for (const col of cabin.columns) {
+      if (lastBlock != null && col.block !== lastBlock) cells.push({ aisle: true });
+      cells.push({ col: String(col.col).toUpperCase() });
+      lastBlock = col.block;
+    }
+    const track = cells.map(cell => (cell.aisle ? 'var(--tgm-seat-aisle)' : 'var(--tgm-seat-size)')).join(' ');
+
+    const header = cells.map(cell => (cell.aisle
+      ? '<span class="tgm-seat-aisle-cell"></span>'
+      : `<span class="tgm-seat-col">${esc(cell.col)}</span>`)).join('');
+
+    let rows = '';
+    for (let r = startRow; r <= endRow; r++) {
+      const seatsInRow = cells.map((cell) => {
+        if (cell.aisle) return '<span class="tgm-seat-aisle-cell"></span>';
+        const held = mine[`${r}|${cell.col}`];
+        if (!held) return '<span class="tgm-seat"></span>';
+        const initials = held.traveller
+          ? held.traveller.split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase()).slice(0, 2).join('')
+          : '';
+        return `<span class="tgm-seat is-mine">${esc(initials || (held.seat || ''))}</span>`;
+      }).join('');
+      rows += `<div class="tgm-seat-row" style="grid-template-columns:var(--tgm-seat-gutter) ${track}">
+        <span class="tgm-seat-rownum">${r}</span>${seatsInRow}
+      </div>`;
+    }
+
+    const held = Object.keys(mine).map(k => mine[k]);
+    const summary = held.map(x => `${x.seat}${x.traveller ? ' ' + x.traveller : ''}`).join(', ');
+    const flightLabel = cabin.flightNo || '';
+
+    return `
+      <ul class="tgm-seat-list">
+        ${held.map(x => `<li>
+          <span class="tgm-seat is-mine" aria-hidden="true">${esc(x.seat || '')}</span>
+          <span><strong>${esc(x.seat || '')}</strong>${x.traveller ? ' · ' + esc(x.traveller) : ''}${
+            seatDetail(x, c) ? `<span class="tgm-seat-detail">${esc(seatDetail(x, c))}</span>` : ''
+          }</span>
+        </li>`).join('')}
+      </ul>
+      <div class="tgm-seatmap" role="img" aria-label="${esc(t('seatMapAria', { flight: flightLabel, seats: summary }))}">
+        <div class="tgm-seat-nose" aria-hidden="true">${esc(c.labels?.seatMapFront || t('seatMapFront'))}</div>
+        <div class="tgm-seat-grid" aria-hidden="true">
+          <div class="tgm-seat-row tgm-seat-head" style="grid-template-columns:var(--tgm-seat-gutter) ${track}">
+            <span class="tgm-seat-rownum"></span>${header}
+          </div>
+          ${rows}
+        </div>
+      </div>
+      <p class="tgm-seat-note">${esc(c.labels?.seatMapPlanNote || t('seatMapPlanNote'))}</p>
+    `;
+  }
+
+  /** "Aisle · Up Front" — the position we can translate, the band verbatim. */
+  function seatDetail(x, c) {
+    const t = (k, v) => (c && c.t ? c.t(k, v) : k);
+    const KEYS = { Window: 'seatWindow', Middle: 'seatMiddle', Aisle: 'seatAisle' };
+    const pos = (x && KEYS[x.position]) ? t(KEYS[x.position]) : '';
+    return [pos, x && x.band].filter(Boolean).join(' · ');
+  }
+
   function renderFlightCard(item, c) {
     const f = item.flights;
     if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
@@ -3125,6 +3313,11 @@
 
     // Seats and bags, from Travelify's extraGroups (see api/retrieve-order.js).
     const chosen = splitFlightExtras(f);
+    // The cabin plan behind the seat map, keyed by the id its seats carry.
+    const cabinsById = {};
+    for (const cab of (Array.isArray(f.cabins) ? f.cabins : [])) {
+      if (cab && cab.id != null) cabinsById[String(cab.id)] = cab;
+    }
 
     return `
       <div class="tgm-flight-card">
@@ -3133,7 +3326,7 @@
             ? `<span class="tgm-flight-meta">${esc(carrierSummary)}</span>`
             : ''
         }</h3>
-        ${f.routes.map((route, i) => renderFlightLeg(route, c, chosen.perLeg[i])).join('')}
+        ${f.routes.map((route, i) => renderFlightLeg(route, c, chosen.perLeg[i], cabinsById)).join('')}
         ${chosen.shared.length ? `
           <div class="tgm-flight-extras">
             <div class="tgm-flight-extras-head">${esc(c.labels?.bookedExtras || c.t('bookedExtras'))}</div>
@@ -3162,11 +3355,17 @@
     `;
   }
 
-  function renderFlightLeg(route, c, legExtras) {
+  function renderFlightLeg(route, c, legExtras, cabinsById) {
     const t = (k, v) => (c && c.t ? c.t(k, v) : k);
     const segs = route.segments || [];
     if (segs.length === 0) return '';
     const seats = Array.isArray(legExtras) ? legExtras : [];
+    // Every seat on a leg comes from one seat group, so the first one names the
+    // cabin to draw. No cabin, no button: the map is drawn from the supplier's
+    // own plan or not at all.
+    const mapCabin = (cabinsById && seats.length && seats[0].cabinId != null)
+      ? cabinsById[String(seats[0].cabinId)] || null
+      : null;
 
     const first = segs[0];
     const last = segs[segs.length - 1];
@@ -3237,6 +3436,11 @@
             <div class="tgm-extra-chips">
               ${seats.map(x => `<span class="tgm-extra-chip">${svg(IC.seat, 2, 14)}<span>${esc(flightExtraLabel(x, c))}</span></span>`).join('')}
             </div>
+            ${mapCabin ? `
+              <button type="button" class="tgm-seatmap-open" data-tgm-seatmap="${esc(String(mapCabin.id))}">
+                ${svg(IC.grid, 2, 14)}<span>${esc(c.labels?.seatMapOpen || t('seatMapOpen'))}</span>
+              </button>
+            ` : ''}
           </div>
         ` : ''}
         ${stops > 0 ? renderSegmentDetail(segs, c) : ''}
@@ -5393,6 +5597,11 @@
       const printBtn = root.querySelector('[data-tgm-pdf-print]');
       if (printBtn) printBtn.addEventListener('click', () => this._handlePdfPrint(printBtn));
 
+      // Seat map: one button per leg that has seats, carrying its cabin id.
+      root.querySelectorAll('[data-tgm-seatmap]').forEach(btn => {
+        btn.addEventListener('click', () => this._openSeatMap(btn.getAttribute('data-tgm-seatmap')));
+      });
+
       // Per-product cancel buttons. Each opens the policy → confirm modal for
       // that single item id.
       root.querySelectorAll('[data-tgm-cancel-item]').forEach(btn => {
@@ -6596,6 +6805,90 @@
         sendBtn.disabled = false;
         if (sendLabel) sendLabel.textContent = previousLabel;
       }
+    }
+
+    /**
+     * The seat map, in the same mount the email modal uses. Opened from a leg,
+     * so the cabin id on the button picks the right flight out of the order.
+     */
+    _openSeatMap(cabinId) {
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-modal-mount]');
+      if (!mount) return;
+      if (this._emailModalOpen) this._closeEmailModal();
+      if (this._seatMapOpen) this._closeSeatMap();
+
+      const items = (this.state.order && this.state.order.items) || [];
+      let cabin = null;
+      let seats = [];
+      for (const it of items) {
+        const f = it && it.flights;
+        if (!f) continue;
+        const found = (Array.isArray(f.cabins) ? f.cabins : []).find(cb => cb && String(cb.id) === String(cabinId));
+        if (!found) continue;
+        cabin = found;
+        seats = (Array.isArray(f.extras) ? f.extras : [])
+          .filter(x => x && x.seat && String(x.cabinId) === String(cabinId));
+        break;
+      }
+      if (!cabin) return;
+
+      const c = this.c;
+      const body = renderSeatMap(cabin, seats, c);
+      if (!body) return;
+
+      const route = cabin.flightNo || (c.labels?.flights || c.t('flights'));
+      mount.innerHTML = `
+        <div class="tgm-modal-backdrop" data-tgm-seatmap-backdrop role="dialog" aria-modal="true" aria-labelledby="tgm-seatmap-title">
+          <div class="tgm-modal tgm-modal--seatmap" role="document">
+            <div class="tgm-modal-head">
+              <div class="tgm-modal-head-icon">${svg(IC.seat)}</div>
+              <div class="tgm-modal-head-text">
+                <h2 class="tgm-modal-head-title" id="tgm-seatmap-title">${esc(c.labels?.seatMapTitle || c.t('seatMapTitle'))}</h2>
+                <p class="tgm-modal-head-sub">${esc(route)}${cabin.aircraft ? ' · ' + esc(cabin.aircraft) : ''}</p>
+              </div>
+              <button type="button" class="tgm-modal-close" data-tgm-seatmap-close aria-label="${esc(c.t('ariaClose'))}">${svg(IC.x)}</button>
+            </div>
+            <div class="tgm-modal-body">${body}</div>
+          </div>
+        </div>`;
+
+      const backdrop = mount.querySelector('[data-tgm-seatmap-backdrop]');
+      const closeBtn = mount.querySelector('[data-tgm-seatmap-close]');
+      // Click outside to close, but not when the press started inside the
+      // modal and finished on the backdrop (a selection drag must not close).
+      let downOnBackdrop = false;
+      if (backdrop) {
+        backdrop.addEventListener('mousedown', (e) => { downOnBackdrop = e.target === backdrop; });
+        backdrop.addEventListener('mouseup', (e) => {
+          if (downOnBackdrop && e.target === backdrop) this._closeSeatMap();
+          downOnBackdrop = false;
+        });
+      }
+      if (closeBtn) closeBtn.addEventListener('click', () => this._closeSeatMap());
+
+      this._seatMapEscHandler = (e) => { if (e.key === 'Escape') this._closeSeatMap(); };
+      document.addEventListener('keydown', this._seatMapEscHandler);
+
+      // Focus the close button so Escape and Tab have somewhere to start. This
+      // is a real user action (a click), not a render, so moving focus here is
+      // the one case where it is allowed.
+      requestAnimationFrame(() => { if (closeBtn) closeBtn.focus(); });
+
+      this._seatMapOpen = true;
+      this._fireEvent('seatmap-opened', { cabinId: String(cabinId) });
+    }
+
+    _closeSeatMap() {
+      const root = this.shadow.querySelector('.tgm-root');
+      const mount = root?.querySelector('[data-tgm-modal-mount]');
+      if (mount) mount.innerHTML = '';
+      if (this._seatMapEscHandler) {
+        document.removeEventListener('keydown', this._seatMapEscHandler);
+        this._seatMapEscHandler = null;
+      }
+      this._seatMapOpen = false;
+      this._fireEvent('seatmap-closed');
     }
 
     _closeEmailModal() {
