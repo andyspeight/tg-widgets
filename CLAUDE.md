@@ -158,6 +158,21 @@ Shadow DOM with `:host{all:initial}` — the ONE deliberate exception is Smart
 Section, which wraps light-DOM user content. Storage keys are prefixed
 (popup `tgp_`, rule engine `tgsr_`), JSON-encoded, try/catch-safe.
 
+**A leg's duration is the supplier's number, not our subtraction** (21 Sep
+2026, ET122149). Travelify states `duration` in minutes on the route AND on
+each segment. Print the route's. Do not subtract `depart` from `arrive`: those
+are airport-local times dressed as UTC, so on a flight that crosses a zone the
+two clocks are in different places and the difference is meaningless. Luton
+12:55 to Rhodes 19:10 looks like 6h15m and is 255 minutes, exactly the two
+hours Rhodes is ahead. Do not sum the segments either, except as a fallback:
+on a leg with a stop that is flying time only and it hides the layover. The
+"+1" that marks an arrival landing a day later has the same rule and is the
+same family as the check-out bug below: compare the two CALENDAR dates with
+`bookingMoment()` and UTC fields, never `new Date(x).getDate()`, which read
+this booking's same-day outbound as "+1" for anyone as far east as Sydney.
+Guarded by `npm run test:booking-dates-tz`, which re-runs ET122149's legs in
+four timezones.
+
 **A booking date is a calendar date, not an instant** (15 Sep 2026, Exclusively
 Travel ET121109). Travelify writes a check-in as `2026-09-26T00:00:00`: a date
 wearing a time, with no zone on it. `new Date()` parses that in the READER's
@@ -210,7 +225,18 @@ opens their booking that snapshot is weeks stale. Every seat but the
 customer's own is drawn the same and the note under the map says so. The map is
 the page only: the PDF and the email carry the seats as text (Andy, 21 Sep
 2026: "no good for the printed version but the online version could show it as
-a pop up"). All guarded by `npm run test:mybooking-seats`.
+a pop up").
+
+**Nothing here may leave a dead stub** (Andy, 21 Sep 2026: "there will also be
+many airlines that don't provide a seat map or seat booking"). Every piece is
+gated on the data actually arriving: no chosen seats, no "Seats you chose"; no
+bags, no baggage line; no cabin, or a cabin none of the seats can be placed on,
+no map button and no dialog. `trimFlightSeating` drops a cabin nobody is
+sitting in rather than shipping an aircraft nothing can be drawn on. And a
+seat's `PaxID` is often absent, so the seat shows without a name: the cell
+carries its seat number instead of initials, the chip is "Seat 2C" with no
+trailing separator, and the party list still reads. All guarded by
+`npm run test:mybooking-seats`.
 
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or

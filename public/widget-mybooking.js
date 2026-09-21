@@ -24,6 +24,20 @@
  *     was still on sale at booking, a row missing from it may be full rather
  *     than seatless, and by the time a customer opens the page that snapshot
  *     is weeks old. The PDF and the email keep the text and get no grid.
+ *     Every part of this is gated on the data arriving: many airlines offer no
+ *     seat booking at all, so no seats means no heading, no cabin (or one that
+ *     can place none of them) means no button and no dialog, and a seat whose
+ *     PaxID is missing shows its seat number in place of initials rather than
+ *     a blank.
+ *   - A leg prints the duration Travelify states on the route, not our own
+ *     arithmetic. Adding the segments up is flying time only and hides a
+ *     layover; subtracting depart from arrive is worse still, because those
+ *     are airport-local times dressed as UTC (LTN 12:55 to RHO 19:10 looks
+ *     like 6h15m and is the 255 minutes the feed says, Rhodes being two hours
+ *     ahead). The overnight "+1" was reading those same times as instants in
+ *     the VISITOR's timezone, so this booking's same-day outbound wore a "+1"
+ *     for anyone in Sydney; it compares calendar dates now, and the PDF has
+ *     the marker too. Guarded by npm run test:booking-dates-tz.
  *   - A discount voucher counts against the balance, like a gift voucher.
  *     ET122149 used SUNSHINE30 (-£30, isGift false) and read as £30 still to
  *     pay against Travelify's zero, because our total is the item prices
@@ -3197,6 +3211,26 @@
   }
 
   /**
+   * The held seats this cabin can actually place: a row and a column, both
+   * inside the plan. Plenty of airlines return no seat data at all, and some
+   * return a seat number with no geometry, so the button and the map are both
+   * gated on this. An offer that opens on an empty aircraft is a dead stub
+   * (Andy, 21 Sep 2026), and so is one that opens on nothing at all.
+   */
+  function placeableSeats(cabin, seats) {
+    if (!cabin || !Array.isArray(cabin.columns) || !cabin.columns.length) return [];
+    const startRow = Number(cabin.startRow);
+    const endRow = Number(cabin.endRow);
+    if (!Number.isInteger(startRow) || !Number.isInteger(endRow) || endRow < startRow) return [];
+    const cols = {};
+    for (const col of cabin.columns) cols[String(col.col).toUpperCase()] = true;
+    return (Array.isArray(seats) ? seats : []).filter(x => x
+      && Number.isInteger(Number(x.seatRow))
+      && Number(x.seatRow) >= startRow && Number(x.seatRow) <= endRow
+      && x.seatCol && cols[String(x.seatCol).toUpperCase()]);
+  }
+
+  /**
    * The cabin, drawn from the plan Travelify states in the seat group: cols
    * maps each column letter to its block, startRow and endRow give the length,
    * and the aisle falls wherever the block number changes.
@@ -3209,16 +3243,14 @@
    */
   function renderSeatMap(cabin, seats, c) {
     const t = (k, v) => (c && c.t ? c.t(k, v) : k);
-    if (!cabin || !Array.isArray(cabin.columns) || !cabin.columns.length) return '';
+    const placeable = placeableSeats(cabin, seats);
+    if (!placeable.length) return '';
 
     const startRow = Number(cabin.startRow);
     const endRow = Number(cabin.endRow);
-    if (!Number.isInteger(startRow) || !Number.isInteger(endRow) || endRow < startRow) return '';
 
     const mine = {};
-    for (const x of (Array.isArray(seats) ? seats : [])) {
-      if (x && x.seatRow != null && x.seatCol) mine[`${x.seatRow}|${String(x.seatCol).toUpperCase()}`] = x;
-    }
+    for (const x of placeable) mine[`${x.seatRow}|${String(x.seatCol).toUpperCase()}`] = x;
 
     // Columns in block order with an aisle wherever the block changes.
     const cells = [];
@@ -3355,6 +3387,39 @@
     `;
   }
 
+  /**
+   * How long a leg takes. Travelify states it on the route, so we print that
+   * rather than adding the segments up ourselves: on a leg with a stop the sum
+   * is flying time only and understates a journey that includes the layover.
+   * Falls back to the sum when the route carries no duration of its own.
+   */
+  function legDuration(route) {
+    const stated = route && route.duration;
+    if (typeof stated === 'number' && Number.isFinite(stated) && stated > 0) return stated;
+    const segs = (route && route.segments) || [];
+    return segs.reduce((acc, s) => acc + (typeof s.duration === 'number' ? s.duration : 0), 0);
+  }
+
+  /**
+   * The "+1" on an arrival that lands on a later calendar day.
+   *
+   * Read as a wall clock, never as an instant (15 Sep 2026, ET121109). These
+   * are airport-local times dressed as UTC, so new Date().getDate() reads them
+   * in the VISITOR's timezone: ET122149's outbound leaves LTN 12:55 and lands
+   * RHO 19:10 the same day, and read locally in Sydney that is 2 Oct to 3 Oct,
+   * so a same-day flight wore a "+1" for anyone far enough east. bookingMoment
+   * puts the numbers in the string into the UTC fields, so the comparison is
+   * between the two calendar dates the supplier actually wrote.
+   */
+  function legDayOffset(depart, arrive) {
+    const d0 = bookingMoment(depart);
+    const d1 = bookingMoment(arrive);
+    if (!d0 || !d1) return 0;
+    const diff = Math.round((Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate())
+      - Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate())) / 86400000);
+    return diff > 0 ? diff : 0;
+  }
+
   function renderFlightLeg(route, c, legExtras, cabinsById) {
     const t = (k, v) => (c && c.t ? c.t(k, v) : k);
     const segs = route.segments || [];
@@ -3363,9 +3428,10 @@
     // Every seat on a leg comes from one seat group, so the first one names the
     // cabin to draw. No cabin, no button: the map is drawn from the supplier's
     // own plan or not at all.
-    const mapCabin = (cabinsById && seats.length && seats[0].cabinId != null)
+    const legCabin = (cabinsById && seats.length && seats[0].cabinId != null)
       ? cabinsById[String(seats[0].cabinId)] || null
       : null;
+    const mapCabin = placeableSeats(legCabin, seats).length ? legCabin : null;
 
     const first = segs[0];
     const last = segs[segs.length - 1];
@@ -3389,18 +3455,11 @@
     }
     const flightNoLabel = flightNos.join(' · ');
 
-    const flightMins = segs.reduce((acc, s) => acc + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    const flightMins = legDuration(route);
 
     // Leg date + overnight offset (arrival on a later calendar day → "+1").
     const legDate = first.depart ? fmtDate(first.depart) : '';
-    let dayOffset = 0;
-    const d0 = first.depart ? new Date(first.depart) : null;
-    const d1 = last.arrive ? new Date(last.arrive) : null;
-    if (d0 && d1 && !isNaN(d0.getTime()) && !isNaN(d1.getTime())) {
-      const diff = Math.round((Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate())
-        - Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate())) / 86400000);
-      if (diff > 0) dayOffset = diff;
-    }
+    const dayOffset = legDayOffset(first.depart, last.arrive);
 
     return `
       <div class="tgm-leg">

@@ -240,7 +240,21 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
     const first = segs[0];
     const last = segs[segs.length - 1];
     const stops = segs.length - 1;
-    const flightMins = segs.reduce((a, s) => a + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    // Travelify states the leg's duration on the route; print that rather than
+    // adding the segments up, which on a leg with a stop is flying time only.
+    const stated = route && route.duration;
+    const flightMins = (typeof stated === 'number' && Number.isFinite(stated) && stated > 0)
+      ? stated
+      : segs.reduce((a, s) => a + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    // The "+1" the page carries on an arrival that lands a day later. Read as a
+    // wall clock (bookingMoment), never as an instant: see legDayOffset in
+    // public/widget-mybooking.js.
+    const d0 = bookingMoment(first.depart);
+    const d1 = bookingMoment(last.arrive);
+    const dayOffset = (d0 && d1)
+      ? Math.max(0, Math.round((Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate())
+          - Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate())) / 86400000))
+      : 0;
     const baggage = first.baggage?.allowance || first.baggage?.weight || '';
     const cabin = first.cabinClass || '';
     const fareName = first.fareName || '';
@@ -295,7 +309,7 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
               <div style="font-size:10px; color:#94A3B8;">${stops === 0 ? 'Direct' : (stops + ' stop' + (stops === 1 ? '' : 's'))}</div>
             </td>
             <td style="vertical-align:top; width:35%; text-align:right;">
-              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(last.arrive))}</div>
+              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(last.arrive))}${dayOffset > 0 ? `<sup style="font-size:11px; font-weight:600; color:var(--accent);">+${dayOffset}</sup>` : ''}</div>
               <div style="font-size:11px; font-weight:600; color:#475569; margin-top:2px; letter-spacing:.04em;">${escapeHtml(last.destination?.iataCode || '')}${last.destination?.terminal ? ` · T${escapeHtml(last.destination.terminal)}` : ''}</div>
               <div style="font-size:11px; color:#94A3B8; margin-top:2px;">${escapeHtml(last.destination?.name || '')}</div>
             </td>

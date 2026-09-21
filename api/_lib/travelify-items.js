@@ -413,7 +413,7 @@ export function trimFlightSeating(d, travellers) {
       };
       if (seatNum) {
         row.cabinId = cabinId;
-        row.seatRow = seatRowOf(e, ebd);
+        row.seatRow = seatRowOf(e, ebd, seatNum);
         row.seatCol = seatColOf(e, ebd, seatNum);
         // Window / Middle / Aisle, from the ftr code (REW, M, RA and the rest
         // all end in the one that matters), falling back to the name Travelify
@@ -435,7 +435,16 @@ export function trimFlightSeating(d, travellers) {
   // page the same way it reads on the ticket.
   seats.sort((a, b) => (a.groupIndex - b.groupIndex) || ((a.paxIndex == null ? 99 : a.paxIndex) - (b.paxIndex == null ? 99 : b.paxIndex)));
   for (const s2 of seats) delete s2.groupIndex;
-  return { extras: seats.concat(others), cabins };
+
+  // Only the cabins somebody is actually sitting in. Plenty of airlines return
+  // no seat data at all, and one that offers seats the customer did not buy
+  // would otherwise ship a whole aircraft of geometry for a map that can never
+  // be drawn. A cabin nobody can be placed on is dropped for the same reason.
+  const used = {};
+  for (const st of seats) {
+    if (st.cabinId != null && st.seatRow != null && st.seatCol) used[String(st.cabinId)] = true;
+  }
+  return { extras: seats.concat(others), cabins: cabins.filter(cb => used[String(cb.id)]) };
 }
 
 /** The cabin grid for one seat group, or null when the group states none. */
@@ -462,11 +471,13 @@ function trimCabin(cabin, id, flightNo, departure, aircraft) {
   return { id, flightNo, departure, aircraft, startRow, endRow, columns };
 }
 
-function seatRowOf(e, ebd) {
+function seatRowOf(e, ebd, seatNum) {
   const fromSeat = e.seat ? exNum(Number(e.seat.row)) : null;
   if (Number.isInteger(fromSeat)) return fromSeat;
   const fromBooking = exNum(Number(ebd.row));
-  return Number.isInteger(fromBooking) ? fromBooking : null;
+  if (Number.isInteger(fromBooking)) return fromBooking;
+  const m = /^\s*(\d{1,3})/.exec(String(seatNum || ''));   // "2C" -> 2
+  return m ? Number(m[1]) : null;
 }
 
 function seatColOf(e, ebd, seatNum) {

@@ -283,9 +283,22 @@ console.log('A cabin is only drawn when the supplier states one');
   ok('an end row before the start row is dropped', backwards.cabins.length === 0);
   const huge = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1 }, startRow: 1, endRow: 9999 }, extras: [] }] }, people);
   ok('an absurd cabin is dropped rather than drawn', huge.cabins.length === 0);
-  const wide = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1, C: 2, D: 2, E: 2, F: 2, G: 3, H: 3 }, startRow: 1, endRow: 40 }, extras: [] }] }, people);
+  const wide = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1, C: 2, D: 2, E: 2, F: 2, G: 3, H: 3 }, startRow: 1, endRow: 40 },
+    extras: [{ bookingData: { Num: '12D', row: '12', PaxID: '0' }, seat: { col: 'D', row: 12, ftr: 'A' }, name: 'Aisle Seat 12D (Standard)', qtySelected: 1 }] }] }, people);
   ok('a widebody keeps all three blocks, so it gets two aisles',
     wide.cabins[0].columns.map(c2 => c2.block).join('') === '11222233');
+
+  // A cabin nobody is sitting in never reaches the browser: no seats bought,
+  // or a seat with no geometry to place it by.
+  const unused = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1 }, startRow: 1, endRow: 20 }, extras: [] }] }, people);
+  ok('a cabin with no seats bought on it is not sent at all', unused.cabins.length === 0);
+  const noGeom = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1 }, startRow: 1, endRow: 20 },
+    extras: [{ bookingData: { SeatBandID: '1' }, name: 'A seat', qtySelected: 1 }] }] }, people);
+  ok('a selection with no seat number at all is not a seat', noGeom.extras.every(x => x.seat === null) && noGeom.cabins.length === 0);
+  const numOnly = trimFlightSeating({ extraGroups: [{ gid: '9', type: 'Seat', cabin: { cols: { A: 1, B: 1 }, startRow: 1, endRow: 20 },
+    extras: [{ bookingData: { Num: '7B' }, name: 'Middle Seat 7B', qtySelected: 1 }] }] }, people);
+  ok('a bare seat number is enough to place it: the row reads off "7B"',
+    numOnly.extras[0].seatRow === 7 && numOnly.extras[0].seatCol === 'B' && numOnly.cabins.length === 1);
 }
 
 console.log('The seat map opens from the page');
@@ -333,6 +346,128 @@ console.log('The seat map opens from the page');
   inst._closeSeatMap();
   ok('an unknown cabin id opens nothing rather than throwing',
     (() => { inst._openSeatMap('nope'); return !/data-tgm-seatmap-backdrop/.test(host.shadowRoot.innerHTML); })());
+}
+
+console.log('Seats with nobody named against them still show (Andy, 21 Sep 2026)');
+{
+  // PaxID is how a seat learns whose it is, and it is not always there. When
+  // it is missing the seat is still ours and still worth showing: it just has
+  // no name on it. Per seat, not per map, so a party where only one seat lost
+  // its PaxID keeps the other names.
+  const anon = [
+    { gid: '2', type: 'Seat', name: 'Seats: LTN-LTN EZY2381',
+      bookingData: { FlightNumber: 'EZY2381', AircraftType: '320B', DeparturePoint: 'LTN' },
+      cabin: { cols: { A: 1, B: 1, C: 1, D: 2, E: 2, F: 2 }, startRow: 1, endRow: 31 },
+      extras: [
+        { eid: '6', bookingData: { Num: '2B', row: '2' }, type: 'Generic', name: 'Middle Seat 2B (Up Front) Block 1 Row 2', seat: { col: 'B', row: 2, ftr: 'M' }, maxQty: 1, qtySelected: 1 },
+        { eid: '7', bookingData: { Num: '2C', row: '2', PaxID: '0' }, type: 'Generic', name: 'Aisle Seat 2C (Up Front) Block 1 Row 2', seat: { col: 'C', row: 2, ftr: 'A' }, maxQty: 1, qtySelected: 1 },
+      ] },
+  ];
+  const got = trimFlightSeating({ extraGroups: anon }, people);
+  ok('the seat with no PaxID is kept, just with nobody named',
+    got.extras.length === 2 && got.extras.some(x => x.seat === '2B' && x.traveller === null && x.paxIndex === null));
+  ok('the one that does carry a PaxID still gets its name',
+    got.extras.some(x => x.seat === '2C' && x.traveller === 'Gillian Clark'));
+  ok('it keeps everything else about the seat',
+    got.extras.find(x => x.seat === '2B').position === 'Middle' && got.extras.find(x => x.seat === '2B').band === 'Up Front');
+
+  const anonOrder = JSON.parse(JSON.stringify(ORDER));
+  anonOrder.items[1].flights.extras = got.extras;
+  anonOrder.items[1].flights.cabins = got.cabins;
+  anonOrder.items[1].flights.routes = [anonOrder.items[1].flights.routes[0]];
+  inst.state = { stage: 'found', order: anonOrder, error: null };
+  inst._render();
+  const anonPage = host.shadowRoot.innerHTML;
+  ok('the chip is the seat alone, with no trailing separator', /Seat 2B<\/span>/.test(anonPage) && !/Seat 2B ·/.test(anonPage));
+  ok('the named seat still reads with its traveller', /Seat 2C · Gillian Clark/.test(anonPage));
+  ok('the map is still offered', /data-tgm-seatmap="2"/.test(anonPage));
+
+  inst._openSeatMap('2');
+  const anonMap = host.shadowRoot.innerHTML;
+  ok('the unnamed seat is drawn as its seat number, not blank and not initials',
+    /tgm-seat is-mine">2B</.test(anonMap) && !/>undefined</.test(anonMap));
+  ok('the named seat keeps its initials on the map', /tgm-seat is-mine">GC</.test(anonMap));
+  ok('the list shows the unnamed seat with its kind and no dangling dot',
+    /2B<\/strong><span class="tgm-seat-detail">Middle · Up Front/.test(anonMap));
+  ok('the screen reader summary names only who is known',
+    /Your seats: 2C Gillian Clark, 2B\./.test(anonMap), (anonMap.match(/Your seats: [^"]*/) || [''])[0]);
+  inst._closeSeatMap();
+
+  // And a whole party with no PaxID at all: every seat, no names anywhere.
+  const none = trimFlightSeating({ extraGroups: [Object.assign({}, anon[0], {
+    extras: anon[0].extras.map(e => Object.assign({}, e, { bookingData: { Num: e.bookingData.Num, row: e.bookingData.row } })),
+  })] }, people);
+  ok('nobody named at all: both seats still there, neither with a name',
+    none.extras.length === 2 && none.extras.every(x => x.traveller === null));
+  const noneOrder = JSON.parse(JSON.stringify(anonOrder));
+  noneOrder.items[1].flights.extras = none.extras;
+  noneOrder.items[1].flights.cabins = none.cabins;
+  inst.state = { stage: 'found', order: noneOrder, error: null };
+  inst._render();
+  inst._openSeatMap('2');
+  const noneMap = host.shadowRoot.innerHTML;
+  ok('the map draws both as seat numbers',
+    /tgm-seat is-mine">2B</.test(noneMap) && /tgm-seat is-mine">2C</.test(noneMap));
+  ok('and no initials leak in from the party list', !/tgm-seat is-mine">GC</.test(noneMap) && !/tgm-seat is-mine">MC</.test(noneMap));
+  ok('the summary is the seats alone, in the order the supplier listed them',
+    /Your seats: 2B, 2C\./.test(noneMap), (noneMap.match(/Your seats: [^"]*/) || [''])[0]);
+  inst._closeSeatMap();
+
+  // Put the page back the way the rest of the suite left it.
+  inst.state = { stage: 'found', order: ORDER, error: null };
+  inst._render();
+}
+
+console.log('No seat data, no stub (Andy, 21 Sep 2026)');
+{
+  // Plenty of airlines return no seat map and no seat booking. Nothing about
+  // any of this may leave a button, a heading or an empty aircraft behind.
+  const bare = JSON.parse(JSON.stringify(ORDER));
+  bare.items[1].flights.extras = [];
+  bare.items[1].flights.cabins = [];
+  inst.state = { stage: 'found', order: bare, error: null };
+  inst._render();
+  const bareHtml = host.shadowRoot.innerHTML;
+  ok('the flights still render', /EZY2381/.test(bareHtml) && /Diagoras/.test(bareHtml));
+  ok('no seat heading', !/Seats you chose/.test(bareHtml));
+  ok('no baggage heading', !/Baggage and extras/.test(bareHtml));
+  ok('no map button', !/data-tgm-seatmap="/.test(bareHtml));
+
+  // Bags but no seats: the baggage line shows, nothing about seats does.
+  const bagsOnly = JSON.parse(JSON.stringify(ORDER));
+  bagsOnly.items[1].flights.extras = EXTRAS.filter(x => !x.seat);
+  bagsOnly.items[1].flights.cabins = [];
+  inst.state = { stage: 'found', order: bagsOnly, error: null };
+  inst._render();
+  const bagsHtml = host.shadowRoot.innerHTML;
+  ok('bags alone still show', /2 x Each hold bag includes 23kg of weight/.test(bagsHtml));
+  ok('and bring no seat heading or button with them',
+    !/Seats you chose/.test(bagsHtml) && !/data-tgm-seatmap="/.test(bagsHtml));
+
+  // Seats but no cabin: the chips show, the map is not offered.
+  const noCabin = JSON.parse(JSON.stringify(ORDER));
+  noCabin.items[1].flights.cabins = [];
+  inst.state = { stage: 'found', order: noCabin, error: null };
+  inst._render();
+  const noCabinHtml = host.shadowRoot.innerHTML;
+  ok('the seats still read as chips', /Seat 2C · Gillian Clark/.test(noCabinHtml));
+  ok('but no map is offered without a cabin to draw', !/data-tgm-seatmap="/.test(noCabinHtml));
+
+  // A cabin whose seats cannot be placed on it: an offer that would open on an
+  // empty aircraft is a dead stub, so it is not offered.
+  const offGrid = JSON.parse(JSON.stringify(ORDER));
+  offGrid.items[1].flights.extras = offGrid.items[1].flights.extras.map(x => (x.seat ? Object.assign({}, x, { seatRow: 99 }) : x));
+  inst.state = { stage: 'found', order: offGrid, error: null };
+  inst._render();
+  ok('a seat outside the cabin does not earn a map', !/data-tgm-seatmap="/.test(host.shadowRoot.innerHTML));
+  ok('and the seat itself still reads', /Seat 2C · Gillian Clark/.test(host.shadowRoot.innerHTML));
+
+  // Belt and braces: even called directly, the map refuses to draw an empty one.
+  ok('the map itself refuses a cabin it can place nothing on',
+    (() => { inst._openSeatMap('2'); const open = !/data-tgm-seatmap-backdrop/.test(host.shadowRoot.innerHTML); inst._closeSeatMap(); return open; })());
+
+  inst.state = { stage: 'found', order: ORDER, error: null };
+  inst._render();
 }
 
 console.log('The map is an online thing only, as asked');
