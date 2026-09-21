@@ -84,6 +84,16 @@ Owner: Andy Speight, CEO, Travelgenix.
   rationale, including recipes not yet built). Read the skill to decide whether
   something should move, this doc to find what is on the menu.
 
+- **Luna Chat — A DIFFERENT REPO.** The widget, the agent dashboard and the API
+  behind them live in `andyspeight/luna-chat-endpoint`, deployed separately at
+  `chat.travelify.io`. Nothing about it is in this repo except the provisioning
+  call: Client Control creates the Luna Chat client when the entitlement is
+  switched on, through `api/_lib/luna-chat-provision.js`. Attach that repo and
+  read its `HANDOVER.md` before any Luna Chat work. Its Airtable base is
+  `app6Ot3eOb3DangkB`, separate from the widget suite's. The four Luna Chat
+  records in the Projects table are from June and July 2026 and describe things
+  as unbuilt that have been live for months, so trust `HANDOVER.md` over them.
+
 Living project state lives in Airtable: base `appj9tksreHOwkhYg`, table
 `tblpyhPNhiQg3XkkT` (Projects). Read the record at the start of a session that
 resumes a project and update it at the end (Current Focus, Next Steps, Last
