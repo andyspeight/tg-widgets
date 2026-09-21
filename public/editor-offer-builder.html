@@ -1424,6 +1424,18 @@
       // Wire first, then draw: hydrateUI paints from state, so the load has to
       // land before it or the defaults win the race and the save writes them.
       wireInputs(); wireImport(); setTab('design');
+      // The offers themselves. Separate fetch, separate endpoint, nothing to do
+      // with the widget config, so it runs alongside rather than behind it.
+      //
+      // This call was dropped on 17 Sep 2026 when boot() was rewritten to load
+      // the widget before painting. Nothing else fetches the list on load: every
+      // other loadOffers() is a reaction to something the agent does (save,
+      // delete, import, leave the bin, close the form). So the workspace opened
+      // showing the "0" that sits in the static markup and an empty table, while
+      // the offers were safe in storage and still live on the client's website.
+      // It also left state.feedKey empty, so "Get embed code" wrongly told them
+      // their account was missing a client id. Reported by Tullys Travel.
+      loadOffers();
       loadFromUrl().then(() => { hydrateUI(); renderCardPreview(); });
       // Guided setup tour. Auto-opens on first login; a persistent "Show me how"
       // launcher stays in the corner for later. Start on the workspace, so point
