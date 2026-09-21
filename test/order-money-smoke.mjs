@@ -107,15 +107,24 @@ console.log('\nEdge cases');
   ok('amended total: the balance is recomputed from current values (the schedule is capped, never trusted over the balance)', (() => { const m = calc({ total: 300, paid: 100, vouchers: [gift(-50)], schedule: { initialAmount: 100, breakdown: [{ amount: 400, dueDate: '2026-12-01' }] } }); return m.balance === 150 && m.outstanding === 150 && m.nextDue.amount === 150; })());
 }
 
-console.log('\nGift vouchers are credit; discount vouchers wait for evidence');
+console.log('\nDiscount vouchers are credit too, like gift vouchers (ET122149)');
 {
   const disc = calc({ total: 500, paid: 0, vouchers: [gift(-50, { isGift: false, name: 'Spring offer' })] });
-  ok('isGift false: listed under excluded, NOT deducted', disc.vouchers.length === 0 && disc.excluded.length === 1 && disc.excluded[0].name === 'Spring offer' && disc.balance === 500 && disc.voucherCredit === 0);
-  ok('the excluded row still carries a masked code only', disc.excluded[0].code === MASKED && !JSON.stringify(disc).includes(RAW_CODE));
-  const on = calc({ total: 500, paid: 0, vouchers: [gift(-50, { isGift: false })], deductNonGift: true });
-  ok('the switch deducts discount vouchers too (TG_DEDUCT_NON_GIFT_VOUCHERS=1 on the server)', on.vouchers.length === 1 && on.balance === 450);
-  ok('isGift not stated: treated as credit, like the feed before the flag existed', calc({ total: 500, vouchers: [{ id: 1, value: -50 }] }).balance === 450);
-  ok('string flags are understood', calc({ total: 500, vouchers: [{ id: 1, value: -50, isGift: 'false' }] }).balance === 500 && calc({ total: 500, vouchers: [{ id: 1, value: 10, isPercent: 'true', isGift: 'true' }] }).voucherCredit === 50);
+  ok('isGift false: deducted, and shown with its name', disc.vouchers.length === 1 && disc.vouchers[0].name === 'Spring offer' && disc.vouchers[0].isGift === false && disc.balance === 450 && disc.voucherCredit === 50);
+  ok('nothing is held back', disc.excluded.length === 0);
+  ok('the applied row carries a masked code only', disc.vouchers[0].code === MASKED && !JSON.stringify(disc).includes(RAW_CODE));
+  const off = calc({ total: 500, paid: 0, vouchers: [gift(-50, { isGift: false, name: 'Spring offer' })], deductNonGift: false });
+  ok('the kill switch holds them back again (TG_DEDUCT_NON_GIFT_VOUCHERS=0 on the server)', off.vouchers.length === 0 && off.excluded.length === 1 && off.excluded[0].name === 'Spring offer' && off.balance === 500 && off.voucherCredit === 0);
+  ok('a held-back row still carries a masked code only', off.excluded[0].code === MASKED && !JSON.stringify(off).includes(RAW_CODE));
+  ok('isGift not stated: treated as credit, as it always was', calc({ total: 500, vouchers: [{ id: 1, value: -50 }] }).balance === 450);
+  ok('string flags are understood', calc({ total: 500, vouchers: [{ id: 1, value: -50, isGift: 'false' }] }).balance === 450 && calc({ total: 500, vouchers: [{ id: 1, value: 10, isPercent: 'true', isGift: 'true' }] }).voucherCredit === 50);
+  // ET122149, Exclusively Travel, 21 Sep 2026: SUNSHINE30, a 30 GBP discount
+  // on the accommodation. Travelify reads a zero balance; the My Booking page
+  // read 30 GBP still to pay, and the Pay balance button was set to take it.
+  const et = calc({ total: 1200, paid: 1170, vouchers: [{ id: 979, code: 'SUNSHINE30', name: '30 GBP DISCOUNT ON ACCOMMODATION', value: -30.0, isPercent: false, isGift: false }] });
+  ok('ET122149 settles, matching Travelify', et.balance === 0 && et.settled === true && et.payable === 0 && et.voucherCredit === 30);
+  ok('ET122149 shows the discount by name on the payment card', et.vouchers.length === 1 && et.vouchers[0].name === '30 GBP DISCOUNT ON ACCOMMODATION' && et.vouchers[0].credit === 30);
+  ok('ET122149 never leaks the raw code', et.vouchers[0].code === '******NE30' && !JSON.stringify(et).includes('SUNSHINE30'));
 }
 
 console.log('\nThe schedule: payments and voucher credit settle the earliest entries first');

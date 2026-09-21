@@ -200,6 +200,7 @@
     "test:mybooking-room-guests": "node test/mybooking-room-guests-smoke.mjs",
     "test:mybooking-deep-link": "node test/mybooking-deep-link-smoke.mjs",
     "test:mybooking-multi-stay": "node test/mybooking-multi-stay-smoke.mjs",
+    "test:mybooking-seats": "node test/mybooking-seats-luggage-smoke.mjs",
     "test:booking-dates-tz": "node test/booking-dates-timezone-smoke.mjs",
     "test:order-stays-drift": "node test/order-stays-drift-smoke.mjs",
     "test:booking-pdf-page-numbers": "node test/booking-pdf-page-numbers-smoke.mjs",

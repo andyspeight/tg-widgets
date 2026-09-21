@@ -209,5 +209,85 @@ console.log('The paperwork says the same as the screen');
   ok('and the flight time is the one on the ticket', /14:00/.test(pdf) && !/13:00/.test(pdf));
 }
 
+console.log('A leg says the same length and the same day in every timezone');
+{
+  // ET122149, Exclusively Travel, 21 Sep 2026. Travelify dresses airport-local
+  // times as UTC, so the outbound reads 12:55 at LTN to 19:10 at RHO: 6h15m
+  // apart on the face of it, and 255 minutes in the feed, because Rhodes is
+  // two hours ahead. Two things came out of that. The duration must be the one
+  // the supplier states, not our own arithmetic on two clocks in different
+  // places. And the "+1" marker must compare the two CALENDAR dates the
+  // supplier wrote: read as instants in the visitor's zone, this same-day
+  // flight wore a "+1" for anyone in Sydney.
+  const leg = (direction, from, to, depart, arrive, flightNo, duration) => ({
+    legID: 0, direction, duration,
+    segments: [{
+      origin: { iataCode: from, name: from }, destination: { iataCode: to, name: to },
+      depart, arrive, duration, cabinClass: 'Economy', fareName: 'Standard',
+      marketingCarrier: { code: 'U2', name: 'Easyjet' }, flightNo, touchdowns: 0,
+    }],
+  });
+  const ET122149 = {
+    id: 122149, status: 'Confirmed', bookingReference: 'ET122149',
+    customerTitle: 'Mrs', customerFirstname: 'Gillian', customerSurname: 'Clark',
+    customerEmail: 'gill.clark@example.com', currency: 'GBP', created: '2026-09-20T08:25:00Z',
+    summary: { totalPrice: 592, hasFlights: true, travellers: [{ type: 'Adult', title: 'Mrs', firstname: 'Gillian', surname: 'Clark' }] },
+    items: [{
+      id: 111089, status: 'Confirmed', product: 'Flights', price: 592, currency: 'GBP',
+      startDate: '2026-10-02T00:00:00', duration: 14,
+      flights: {
+        fareType: 'LowCost', pricing: { currency: 'GBP', price: 592 },
+        routes: [
+          leg('Outbound', 'LTN', 'RHO', '2026-10-02T12:55:00Z', '2026-10-02T19:10:00Z', 'EZY2381', 255),
+          leg('Inbound', 'RHO', 'LTN', '2026-10-16T19:55:00Z', '2026-10-16T22:20:00Z', 'EZY2382', 265),
+        ],
+        travellers: [{ type: 'Adult', title: 'Mrs', firstname: 'Gillian', surname: 'Clark' }],
+        fareInformation: [],
+      },
+    }],
+  };
+
+  const dom = new JSDOM('<!doctype html><html><body><div id="host"></div></body></html>',
+    { runScripts: 'outside-only', url: 'https://client.test/booking', pretendToBeVisual: true });
+  const { window } = dom;
+  window.requestAnimationFrame = (cb) => window.setTimeout(() => cb(0), 0);
+  if (!window.matchMedia) window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+  window.fetch = async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' });
+  window.eval(readFileSync(new URL('../public/widget-mybooking.js', import.meta.url), 'utf8'));
+  const host = window.document.getElementById('host');
+  const inst = new window.TGMyBookingWidget(host, {});
+  inst.lookup = { email: ET122149.customerEmail, date: '2026-10-02', ref: 'ET122149' };
+  inst.state = { stage: 'found', order: ET122149, error: null };
+  inst._render();
+  const html = host.shadowRoot.innerHTML;
+
+  ok('the outbound reads 4h 15m, the duration Travelify states', /4h 15m/.test(html) && !/6h 15m/.test(html));
+  ok('the return reads 4h 25m', /4h 25m/.test(html) && !/2h 25m/.test(html));
+  ok('the times are the ones on the ticket', /12:55/.test(html) && /19:10/.test(html) && /19:55/.test(html) && /22:20/.test(html));
+  ok('neither same-day leg wears a "+1"', !/tgm-leg-plus">\+/.test(html));
+
+  const pdf = renderPdfHtml(ET122149, { brandName: 'Exclusively Travel' });
+  ok('the PDF prints the same two durations', /4h 15m/.test(pdf) && /4h 25m/.test(pdf) && !/6h 15m/.test(pdf));
+  ok('and no "+1" on it either', !/\+1<\/sup>/.test(pdf));
+
+  // A real overnight must still be marked, in every zone.
+  const red = JSON.parse(JSON.stringify(ET122149));
+  red.items[0].flights.routes = [leg('Outbound', 'LHR', 'SIN', '2026-10-02T21:30:00Z', '2026-10-03T17:05:00Z', 'SQ317', 785)];
+  inst.state = { stage: 'found', order: red, error: null };
+  inst._render();
+  const redHtml = host.shadowRoot.innerHTML;
+  ok('an arrival on the next day is marked "+1"', /tgm-leg-plus">\+1</.test(redHtml));
+  ok('and it reads 13h 5m, as stated', /13h 5m/.test(redHtml));
+  ok('the PDF marks the overnight too', /\+1<\/sup>/.test(renderPdfHtml(red, { brandName: 'Exclusively Travel' })));
+
+  // No duration on the route: fall back to adding the segments up rather than
+  // printing nothing.
+  const noDur = JSON.parse(JSON.stringify(ET122149));
+  noDur.items[0].flights.routes[0].duration = null;
+  inst.state = { stage: 'found', order: noDur, error: null };
+  inst._render();
+  ok('a route with no duration falls back to its segments', /4h 15m/.test(host.shadowRoot.innerHTML));
+}
+
 console.log('\n' + passed + ' passed, ' + failed + ' failed');
 process.exit(failed ? 1 : 0);

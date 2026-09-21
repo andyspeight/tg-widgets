@@ -29,7 +29,7 @@
 import { setCors, sanitiseForFormula, lookupClientCredentialsByEmail, lookupClientCredentialsByRecordId } from './_auth.js';
 import { renderPdfHtml, renderPdfFooterTemplate, PDF_HEADER_TEMPLATE } from '../public/_pdf-template.js';
 import { moneyOf, moneyOptsFromEnv } from './_lib/order-money.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from './_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from './_lib/travelify-items.js';
 import { travelifyAuthHeaders } from './_lib/travelify.js';
 
 // ----- Constants (matched 1:1 with retrieve-order.js) -----
@@ -229,6 +229,12 @@ function trimFlightSegment(s) {
 }
 
 function trimFlights(d) {
+  const travellers = Array.isArray(d.travellers)
+    ? d.travellers.slice(0, 12).map(t => ({
+        type: safeStr(t.type, 30), title: safeStr(t.title, 30),
+        firstname: safeStr(t.firstname, 80), surname: safeStr(t.surname, 80),
+      })) : [];
+  const seating = trimFlightSeating(d, travellers);
   return {
     fareType: safeStr(d.fareType, 40),
     pricing: d.pricing ? { currency: safeStr(d.pricing.currency, 10), price: safeNum(d.pricing.price) } : null,
@@ -241,11 +247,11 @@ function trimFlights(d) {
       ? d.fareInformation.slice(0, 10).map(f => ({
           type: safeStr(f.type, 40), title: safeStr(f.title, 100), text: safeStr(f.text, 1000),
         })).filter(f => f.text) : [],
-    travellers: Array.isArray(d.travellers)
-      ? d.travellers.slice(0, 12).map(t => ({
-          type: safeStr(t.type, 30), title: safeStr(t.title, 30),
-          firstname: safeStr(t.firstname, 80), surname: safeStr(t.surname, 80),
-        })) : [],
+    travellers,
+    // What was chosen on this flight, and the cabin plan to draw a seat map
+    // on; see trimFlightSeating in api/_lib/travelify-items.js.
+    extras: seating.extras,
+    cabins: seating.cabins,
   };
 }
 

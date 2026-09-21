@@ -170,6 +170,56 @@ const fmtDuration = (mins) => {
 // (Outbound / Inbound) becomes a row group: depart info | route arrow |
 // arrive info, then a meta strip with cabin + baggage, then segment
 // detail rows for multi-stop legs. No collapsibles — print is always-on.
+// The seats and bags the customer chose, split into the ones belonging to a
+// particular leg and the ones belonging to the whole flight booking (21 Sep
+// 2026, ET122149). Mirrors splitFlightExtras in public/widget-mybooking.js so
+// the printed copy and the page say the same thing.
+const splitPdfFlightExtras = (f) => {
+  const all = Array.isArray(f && f.extras) ? f.extras : [];
+  const norm = (v) => String(v || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  const routes = Array.isArray(f && f.routes) ? f.routes : [];
+  const keys = routes.map((route) => {
+    const nos = new Set();
+    const iatas = new Set();
+    for (const seg of (route.segments || [])) {
+      const no = norm(seg.flightNo);
+      if (no) {
+        nos.add(no);
+        const code = norm(seg.marketingCarrier && seg.marketingCarrier.code);
+        if (code && !no.startsWith(code)) nos.add(code + no);
+      }
+      const from = norm(seg.origin && seg.origin.iataCode);
+      if (from) iatas.add(from);
+    }
+    return { nos, iatas };
+  });
+  const perLeg = routes.map(() => []);
+  const shared = [];
+  for (const x of all) {
+    if (!x || !x.name) continue;
+    const no = norm(x.flightNo);
+    const dep = norm(x.departure);
+    let at = no ? keys.findIndex((k) => k.nos.has(no)) : -1;
+    if (at < 0 && !no && dep) at = keys.findIndex((k) => k.iatas.has(dep));
+    if (at >= 0 && x.seat) perLeg[at].push(x); else shared.push(x);
+  }
+  return { perLeg, shared };
+};
+
+/** "Seat 2C · Gillian Clark", or "2 x One Large Cabin Bag" for a bag. */
+const pdfExtraLabel = (x) => {
+  const who = x.traveller ? ` · ${x.traveller}` : '';
+  if (x.seat) return `Seat ${x.seat}${who}`;
+  return `${x.qty > 1 ? `${x.qty} x ` : ''}${x.name}${who}`;
+};
+
+/** A row of chosen seats or bags, under a small caption. */
+const pdfExtraRow = (title, rows) => (rows.length ? `
+  <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #E2E8F0;">
+    <div style="font-size:9px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:5px;">${escapeHtml(title)}</div>
+    <div style="font-size:11px; color:#0F172A;">${rows.map((x) => escapeHtml(pdfExtraLabel(x))).join(' &nbsp;·&nbsp; ')}</div>
+  </div>` : '');
+
 const renderPdfFlightItem = (item, showCancellation = true) => {
   const f = item?.flights;
   if (!f || !Array.isArray(f.routes) || f.routes.length === 0) return '';
@@ -182,13 +232,29 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
   }
   const carrier = Array.from(carrierNames).slice(0, 3).join(', ');
 
-  const renderLeg = (route) => {
+  const chosen = splitPdfFlightExtras(f);
+
+  const renderLeg = (route, legIndex) => {
     const segs = route.segments || [];
     if (segs.length === 0) return '';
     const first = segs[0];
     const last = segs[segs.length - 1];
     const stops = segs.length - 1;
-    const flightMins = segs.reduce((a, s) => a + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    // Travelify states the leg's duration on the route; print that rather than
+    // adding the segments up, which on a leg with a stop is flying time only.
+    const stated = route && route.duration;
+    const flightMins = (typeof stated === 'number' && Number.isFinite(stated) && stated > 0)
+      ? stated
+      : segs.reduce((a, s) => a + (typeof s.duration === 'number' ? s.duration : 0), 0);
+    // The "+1" the page carries on an arrival that lands a day later. Read as a
+    // wall clock (bookingMoment), never as an instant: see legDayOffset in
+    // public/widget-mybooking.js.
+    const d0 = bookingMoment(first.depart);
+    const d1 = bookingMoment(last.arrive);
+    const dayOffset = (d0 && d1)
+      ? Math.max(0, Math.round((Date.UTC(d1.getUTCFullYear(), d1.getUTCMonth(), d1.getUTCDate())
+          - Date.UTC(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate())) / 86400000))
+      : 0;
     const baggage = first.baggage?.allowance || first.baggage?.weight || '';
     const cabin = first.cabinClass || '';
     const fareName = first.fareName || '';
@@ -243,7 +309,7 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
               <div style="font-size:10px; color:#94A3B8;">${stops === 0 ? 'Direct' : (stops + ' stop' + (stops === 1 ? '' : 's'))}</div>
             </td>
             <td style="vertical-align:top; width:35%; text-align:right;">
-              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(last.arrive))}</div>
+              <div style="font-size:18px; font-weight:700; color:#0F172A; line-height:1.1;" class="num">${escapeHtml(fmtTimeUtc(last.arrive))}${dayOffset > 0 ? `<sup style="font-size:11px; font-weight:600; color:var(--accent);">+${dayOffset}</sup>` : ''}</div>
               <div style="font-size:11px; font-weight:600; color:#475569; margin-top:2px; letter-spacing:.04em;">${escapeHtml(last.destination?.iataCode || '')}${last.destination?.terminal ? ` · T${escapeHtml(last.destination.terminal)}` : ''}</div>
               <div style="font-size:11px; color:#94A3B8; margin-top:2px;">${escapeHtml(last.destination?.name || '')}</div>
             </td>
@@ -255,6 +321,7 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
           ${cabin && baggage ? ' &nbsp;·&nbsp; ' : ''}
           ${baggage ? `${escapeHtml(baggage)}` : ''}
         </div>` : ''}
+        ${pdfExtraRow('Seats you chose', chosen.perLeg[legIndex] || [])}
         ${segRows ? `
         <table style="width:100%; border-collapse:collapse; margin-top:10px;">
           ${segRows}
@@ -278,7 +345,8 @@ const renderPdfFlightItem = (item, showCancellation = true) => {
         <div style="font-size:14px; font-weight:600; color:#0F172A;">✈ Flights</div>
         ${carrier ? `<div style="font-size:11px; color:#94A3B8;">${escapeHtml(carrier)}</div>` : ''}
       </div>
-      ${f.routes.map(renderLeg).join('')}
+      ${f.routes.map((route, i) => renderLeg(route, i)).join('')}
+      ${pdfExtraRow('Baggage and extras', chosen.shared)}
       ${fareInfo.length > 0 ? `
         <div style="margin-top:12px; padding:12px 14px; background:#F8FAFC; border-radius:8px;">
           <div style="font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#94A3B8; margin-bottom:8px;">Fare conditions</div>

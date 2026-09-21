@@ -158,6 +158,21 @@ Shadow DOM with `:host{all:initial}` — the ONE deliberate exception is Smart
 Section, which wraps light-DOM user content. Storage keys are prefixed
 (popup `tgp_`, rule engine `tgsr_`), JSON-encoded, try/catch-safe.
 
+**A leg's duration is the supplier's number, not our subtraction** (21 Sep
+2026, ET122149). Travelify states `duration` in minutes on the route AND on
+each segment. Print the route's. Do not subtract `depart` from `arrive`: those
+are airport-local times dressed as UTC, so on a flight that crosses a zone the
+two clocks are in different places and the difference is meaningless. Luton
+12:55 to Rhodes 19:10 looks like 6h15m and is 255 minutes, exactly the two
+hours Rhodes is ahead. Do not sum the segments either, except as a fallback:
+on a leg with a stop that is flying time only and it hides the layover. The
+"+1" that marks an arrival landing a day later has the same rule and is the
+same family as the check-out bug below: compare the two CALENDAR dates with
+`bookingMoment()` and UTC fields, never `new Date(x).getDate()`, which read
+this booking's same-day outbound as "+1" for anyone as far east as Sydney.
+Guarded by `npm run test:booking-dates-tz`, which re-runs ET122149's legs in
+four timezones.
+
 **A booking date is a calendar date, not an instant** (15 Sep 2026, Exclusively
 Travel ET121109). Travelify writes a check-in as `2026-09-26T00:00:00`: a date
 wearing a time, with no zone on it. `new Date()` parses that in the READER's
@@ -172,6 +187,56 @@ airport-local times as UTC, so a 14:00 flight printed 13:00 in British Summer
 Time. Guarded by `npm run test:booking-dates-tz`, which re-runs the widget, the
 PDF and the email in four timezones. Fixtures must use the shape the supplier
 really sends: tidy `2026-09-26` strings in the old fixtures are what hid this.
+
+**A discount voucher is money off, not decoration** (21 Sep 2026, Exclusively
+Travel ET122149). Travelify sends `vouchers[]` with an `isGift` flag. Gift
+cards were always credited; discount codes were held back in case the discount
+was already inside the item prices, and ET122149 settled that it is not: a
+booking carrying SUNSHINE30 (-£30, `isGift: false`) reads as a zero balance in
+Travelify and read as £30 still to pay on the customer's page, because our
+total is the item prices summed. Both kinds are credit now. The same sums drive
+the Pay balance button, so this was not only a wrong number on a page, it was
+about to take £30 Travelify does not think it is owed.
+`TG_DEDUCT_NON_GIFT_VOUCHERS=0` is the kill switch. Guarded by
+`npm run test:order-money`.
+
+**What the customer booked is not the same as what the menu offered** (21 Sep
+2026, ET122149). A Travelify flight's `dataObject.extraGroups` is the WHOLE
+menu: 109 seats on that booking's outbound, every bag weight, the sports
+equipment list. The chosen rows are marked with `qtySelected` and nothing else
+tells them apart, so four seats and two hold bags were plain to the agent in
+Travelify and invisible to the customer for as long as the widget has existed.
+Read them with `trimFlightSeating()` from `api/_lib/travelify-items.js`, which
+all three order endpoints call: there are three copies of `trimFlights` and a
+fourth copy of this would have been the Referer story again. It drops the
+placeholder rows Travelify also sends ("I do not want to pre-book my seat",
+marked `SEATID: NONE`) and carries NO prices, because a seat's `pricing.price`
+is a per-unit supplier figure that does not reconcile with the item total the
+customer sees (four seats at 18.49 / 18.49 / 18.99 / 18.99 arrive in the
+breakdown as one "Seat Selection Total" of 122.87).
+
+It also returns the `cabins`, the cabin plan behind the on-page seat map: the
+seat group states `cols` (column letter to block, so the aisle is wherever the
+block changes) and `startRow`/`endRow`. **The map may never show which other
+seats are free**, and nothing may be added that implies it: the extras list is
+only what was still on sale at the moment of booking, a row absent from it may
+be full rather than seatless (row 18 on ET122149), and by the time a customer
+opens their booking that snapshot is weeks stale. Every seat but the
+customer's own is drawn the same and the note under the map says so. The map is
+the page only: the PDF and the email carry the seats as text (Andy, 21 Sep
+2026: "no good for the printed version but the online version could show it as
+a pop up").
+
+**Nothing here may leave a dead stub** (Andy, 21 Sep 2026: "there will also be
+many airlines that don't provide a seat map or seat booking"). Every piece is
+gated on the data actually arriving: no chosen seats, no "Seats you chose"; no
+bags, no baggage line; no cabin, or a cabin none of the seats can be placed on,
+no map button and no dialog. `trimFlightSeating` drops a cabin nobody is
+sitting in rather than shipping an aircraft nothing can be drawn on. And a
+seat's `PaxID` is often absent, so the seat shows without a name: the cell
+carries its seat number instead of initials, the chip is "Seat 2C" with no
+trailing separator, and the party list still reads. All guarded by
+`npm run test:mybooking-seats`.
 
 **Render must not grab the host page.** A widget's render/`update()` path must
 be side-effect-free for the page: never call `.focus()`, `.select()` or

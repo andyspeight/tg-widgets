@@ -26,9 +26,15 @@
 //                   credit can never exceed the total, the surplus is dropped
 //    balance        total - paid - voucherCredit, floored at zero
 //    settled        balance is zero at the currency's minor-unit precision
-//  Discount vouchers (isGift false) are NOT deducted until a real order proves
-//  the discount is not already in the item prices; they are listed under
-//  `excluded` so an output can say so. Flip with { deductNonGift: true }.
+//  Discount vouchers (isGift false) are deducted too (21 Sep 2026, Exclusively
+//  Travel ET122149). They used to be held back in case the discount was
+//  already inside the item prices, and `excluded` exists to say so. ET122149
+//  settled that: a booking carrying SUNSHINE30, a 30 GBP discount on the
+//  accommodation, reads as a zero balance in Travelify and read as 30 GBP
+//  still to pay on the My Booking page, because our total is the item prices
+//  summed and the discount is not in them. Turn the deduction off for one
+//  call with { deductNonGift: false }, or on the server with
+//  TG_DEDUCT_NON_GIFT_VOUCHERS=0.
 //
 //  Every sum is done in whole minor units (pence), never in binary floating
 //  point. Voucher codes leave this module MASKED and only masked.
@@ -154,7 +160,7 @@ function paidFrom(raw) {
  *   vouchers       [{ id, code, name, value, isPercent, isGift }]
  *   schedule       { initialAmount, breakdown: [{ amount, dueDate }] } or null
  *   today          'YYYY-MM-DD' (injectable for tests)
- *   deductNonGift  true to treat discount vouchers as credit too (default false)
+ *   deductNonGift  false to hold discount vouchers back instead (default true)
  *
  * Output carries only masked codes and only rounded, floored figures.
  */
@@ -164,7 +170,7 @@ function computeOrderMoney(input) {
   const digits = minorDigits(currency);
   const totalM = Math.max(0, toMinor(inp.total, digits));
   const paidM = Math.max(0, toMinor(inp.paid, digits));
-  const deductNonGift = inp.deductNonGift === true;
+  const deductNonGift = inp.deductNonGift !== false;
   const today = (typeof inp.today === 'string' && inp.today) ? inp.today : new Date().toISOString().slice(0, 10);
 
   const vouchers = [];
@@ -330,7 +336,7 @@ function moneyOf(order, opts) {
     vouchers,
     schedule: (o.depositOption && typeof o.depositOption === 'object') ? o.depositOption : null,
     today: options.today,
-    deductNonGift: options.deductNonGift === true,
+    deductNonGift: options.deductNonGift !== false,
   });
 }
 

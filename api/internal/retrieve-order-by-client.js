@@ -38,7 +38,7 @@
 import crypto from 'node:crypto';
 import { moneyOf, moneyOptsFromEnv } from '../_lib/order-money.js';
 import { lookupClientCredentialsByRecordId } from '../_auth.js';
-import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape } from '../_lib/travelify-items.js';
+import { classifyItem, describeUnclassifiedItem, aggregateTravellers, describeOrderShape, trimFlightSeating } from '../_lib/travelify-items.js';
 import { travelifyAuthHeaders } from '../_lib/travelify.js';
 
 const AIRTABLE_BASE = process.env.AIRTABLE_BASE_ID || 'appAYzWZxvK6qlwXK';
@@ -319,6 +319,15 @@ function trimFlightSegment(s) {
 }
 
 function trimFlights(d) {
+  const travellers = Array.isArray(d.travellers)
+    ? d.travellers.slice(0, 12).map(t => ({
+        type: safeStr(t.type, 30),
+        title: safeStr(t.title, 30),
+        firstname: safeStr(t.firstname, 80),
+        surname: safeStr(t.surname, 80),
+      }))
+    : [];
+  const seating = trimFlightSeating(d, travellers);
   return {
     fareType: safeStr(d.fareType, 40),
     openJaw: !!d.openJaw,
@@ -346,14 +355,11 @@ function trimFlights(d) {
           text: safeStr(f.text, 1000),
         })).filter(f => f.text)
       : [],
-    travellers: Array.isArray(d.travellers)
-      ? d.travellers.slice(0, 12).map(t => ({
-          type: safeStr(t.type, 30),
-          title: safeStr(t.title, 30),
-          firstname: safeStr(t.firstname, 80),
-          surname: safeStr(t.surname, 80),
-        }))
-      : [],
+    travellers,
+    // What was chosen on this flight, and the cabin plan to draw a seat map
+    // on; see trimFlightSeating in api/_lib/travelify-items.js.
+    extras: seating.extras,
+    cabins: seating.cabins,
   };
 }
 
